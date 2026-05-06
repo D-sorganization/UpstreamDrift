@@ -1,5 +1,7 @@
 # Option 1 — Direct Optimization in MATLAB
 
+> **Read first**: [PROJECT_SPEC.md](../../../PROJECT_SPEC.md), [MATLAB_GOLF_MODEL_GUIDE.md](../../MATLAB_GOLF_MODEL_GUIDE.md), [GRIP_FIT_PLAYBOOK.md](../shared/GRIP_FIT_PLAYBOOK.md).
+
 > **What.** Fit polynomial torque coefficients to a measured club trajectory by repeatedly running the Simscape forward simulator from a MATLAB optimizer (`fmincon`, `surrogateopt`, `MultiStart`, `particleswarm`, `ga`).
 >
 > **Why first.** Per-fit cost is high (minutes), per-fit setup is low (days). This is the option we ship first and the **validation oracle** the other three options must reproduce.

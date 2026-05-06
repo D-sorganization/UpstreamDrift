@@ -172,3 +172,19 @@ result
 ```
 
 This is consumed by the visualization dashboard and by leaderboard comparison across the four options.
+
+## Docs-currency policy
+
+The top-level docs in this tree are the source of truth for scope and architecture. They drift fast if PRs don't keep them in sync.
+
+**Rule:** every PR that meaningfully changes scope or architecture under `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/` must touch at least one of:
+
+- [`PROJECT_SPEC.md`](../../PROJECT_SPEC.md)
+- [`MATLAB_GOLF_MODEL_GUIDE.md`](../../matlab/MATLAB_GOLF_MODEL_GUIDE.md)
+- [`GRIP_FIT_PLAYBOOK.md`](GRIP_FIT_PLAYBOOK.md)
+
+**Opt-out:** if the change genuinely doesn't affect scope or architecture (a typo fix, a test-only change, a refactor with no behavioural delta), include the marker `[no-docs-needed]` in the PR description.
+
+**Enforcement:** `.github/workflows/docs-currency-warning.yml` posts an advisory comment on PRs that touch this tree without touching docs/tests and without the opt-out marker. The check is **advisory only** — it does not block merges. Reviewers may still request docs updates.
+
+"Meaningfully changes scope or architecture" means anything a future contributor would want to read about in the top-level docs: new options, new shared interfaces, changed cost-function semantics, changed dataset schema, new external dependencies, etc. Pure bug fixes, performance tweaks, and test additions do not require a docs touch.

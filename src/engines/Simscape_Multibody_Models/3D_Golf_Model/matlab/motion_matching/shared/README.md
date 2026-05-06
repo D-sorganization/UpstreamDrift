@@ -1,5 +1,7 @@
 # Shared utilities for motion matching
 
+> **Read first**: [PROJECT_SPEC.md](../../../PROJECT_SPEC.md), [MATLAB_GOLF_MODEL_GUIDE.md](../../MATLAB_GOLF_MODEL_GUIDE.md), [GRIP_FIT_PLAYBOOK.md](GRIP_FIT_PLAYBOOK.md).
+
 The four options consume the same contracts. This folder holds the specs (so any agent can implement to them) and will hold the reference implementations once the corresponding issues land.
 
 ## Specs (read these first)

@@ -1,5 +1,7 @@
 # Option 2 — Differentiable NN Forward Surrogate
 
+> **Read first**: [PROJECT_SPEC.md](../../../PROJECT_SPEC.md), [MATLAB_GOLF_MODEL_GUIDE.md](../../MATLAB_GOLF_MODEL_GUIDE.md), [GRIP_FIT_PLAYBOOK.md](../shared/GRIP_FIT_PLAYBOOK.md).
+
 > **What.** Train a neural network `f_θ : coefficients → club_kinematic_trajectory` on the random-sweep parquet dataset, then fit a measured swing by gradient descent on the input coefficients (Adam) with the surrogate weights frozen.
 >
 > **Why.** Per-fit cost drops from minutes (Option 1) to **seconds**. Setup cost is medium-to-high — needs a trained surrogate, which needs the parquet dataset.

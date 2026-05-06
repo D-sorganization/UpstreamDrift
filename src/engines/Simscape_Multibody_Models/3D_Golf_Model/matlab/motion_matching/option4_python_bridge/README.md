@@ -1,5 +1,7 @@
 # Option 4 — Python ↔ Simscape Bridge (`SimscapeAdapter`)
 
+> **Read first**: [PROJECT_SPEC.md](../../../PROJECT_SPEC.md), [MATLAB_GOLF_MODEL_GUIDE.md](../../MATLAB_GOLF_MODEL_GUIDE.md), [GRIP_FIT_PLAYBOOK.md](../shared/GRIP_FIT_PLAYBOOK.md).
+
 > **What.** A Python adapter class `SimscapeAdapter` that satisfies the repo-wide `PhysicsEngineProtocol` and wraps `GolfSwing3D_Kinetic.slx` through the **MATLAB Engine API for Python**. Once this lands, the existing learning stack — `system_identification`, `dataset_generator/core`, `swing_capture_import`, RL envs, retargeter — works against the Simscape model with no further plumbing.
 >
 > **Why.** The other three options each unlock one workflow (fitting, fast inference, surrogate). This one unlocks **the entire learning stack at once** by making Simscape a first-class `PhysicsEngine` to Python.

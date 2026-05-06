@@ -1,5 +1,7 @@
 # Option 3 — Direct Inverse Neural Network (CVAE)
 
+> **Read first**: [PROJECT_SPEC.md](../../../PROJECT_SPEC.md), [MATLAB_GOLF_MODEL_GUIDE.md](../../MATLAB_GOLF_MODEL_GUIDE.md), [GRIP_FIT_PLAYBOOK.md](../shared/GRIP_FIT_PLAYBOOK.md).
+
 > **One-line.** Train `g_φ : club_kinematic_trajectory → torque_coefficients` end-to-end on the random-sweep parquet dataset; one forward pass produces a candidate fit in milliseconds. Because the inverse map is **one-to-many** when only the club is observed, `g_φ` is implemented as a **Conditional Variational Autoencoder (CVAE)** whose latent disambiguates between the multiple coefficient vectors that produce the same club trajectory.
 
 ## Status

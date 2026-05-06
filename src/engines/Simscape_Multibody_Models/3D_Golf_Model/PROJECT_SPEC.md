@@ -32,14 +32,14 @@ is the active research surface.
 
 A swing is "matched" when, on the canonical Wiffle ProV1 test trial:
 
-| Metric | Target | Status (2026-05-06) |
-|---|---|---|
-| Grip-position RMSE across the 0.30 s impact window | **< 5 mm** | starting-position alignment hits 0.0 mm at impact; full-window fit not yet run |
-| Grip-orientation RMSE (geodesic) | **< 1°** | not yet measured |
-| Clubhead-position RMSE | < (model−measured shaft length) + 5 mm | currently ~27 mm at alignment, equal to club-length difference |
-| Total simulated work | within 30 % of physiological estimate (~280 J for a driver swing) | not yet measured |
-| Wall-clock per fit (single-start fmincon) | **< 15 minutes** | predicted ~10 minutes with FastRestart |
-| Wall-clock per fit (NN surrogate inference, Option 2) | **< 5 seconds** | not implemented |
+| Metric                                                | Target                                                            | Status (2026-05-06)                                                            |
+| ----------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Grip-position RMSE across the 0.30 s impact window    | **< 5 mm**                                                        | starting-position alignment hits 0.0 mm at impact; full-window fit not yet run |
+| Grip-orientation RMSE (geodesic)                      | **< 1°**                                                          | not yet measured                                                               |
+| Clubhead-position RMSE                                | < (model−measured shaft length) + 5 mm                            | currently ~27 mm at alignment, equal to club-length difference                 |
+| Total simulated work                                  | within 30 % of physiological estimate (~280 J for a driver swing) | not yet measured                                                               |
+| Wall-clock per fit (single-start fmincon)             | **< 15 minutes**                                                  | predicted ~10 minutes with FastRestart                                         |
+| Wall-clock per fit (NN surrogate inference, Option 2) | **< 5 seconds**                                                   | not implemented                                                                |
 
 Production-grade is reached when:
 
@@ -82,13 +82,13 @@ MODEL          GolfSwing3D_Kinetic.slx                 a documented reason.
 
 ### 3.2 What "production-grade" means per layer
 
-| Layer | Production-grade definition |
-|---|---|
-| Simscape model | All persisted settings stable; structural review documents every workspace parameter; new contributors can `sim()` it in < 5 min after `setup_matlab_environment` |
-| Dataset generator | Reproducible; runs on parpool with checkpointing; produces a versioned parquet schema (DATASET_SCHEMA.md); exercises every joint coefficient |
-| Motion matching | All four options have a working `fit_swing_*` entry point that consumes the canonical `target` struct and produces the canonical `result` struct; cross-option comparison via `leaderboard.m` |
-| Apps | Skeleton + signal plotters consume the same canonical schemas as motion_matching; offset-tuning UI saves to the format motion_matching reads |
-| CI | Every PR runs `runtests motion_matching/shared/tests` + a smoke fit; reproducibility test on a fixed-seed trial |
+| Layer             | Production-grade definition                                                                                                                                                                   |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Simscape model    | All persisted settings stable; structural review documents every workspace parameter; new contributors can `sim()` it in < 5 min after `setup_matlab_environment`                             |
+| Dataset generator | Reproducible; runs on parpool with checkpointing; produces a versioned parquet schema (DATASET_SCHEMA.md); exercises every joint coefficient                                                  |
+| Motion matching   | All four options have a working `fit_swing_*` entry point that consumes the canonical `target` struct and produces the canonical `result` struct; cross-option comparison via `leaderboard.m` |
+| Apps              | Skeleton + signal plotters consume the same canonical schemas as motion_matching; offset-tuning UI saves to the format motion_matching reads                                                  |
+| CI                | Every PR runs `runtests motion_matching/shared/tests` + a smoke fit; reproducibility test on a fixed-seed trial                                                                               |
 
 ## 4. The fitting strategy (canonical workflow)
 
@@ -130,12 +130,12 @@ from the modeled club geometry.
 
 ## 5. Which option to use when
 
-| Situation | Pick | Status |
-|---|---|---|
-| First time fitting a swing; want a baseline you can trust | **Option 1 — fmincon** | ✅ Production |
-| Already have a trained surrogate, want sub-second fits | Option 2 — NN surrogate | 🟡 Needs training run on the 10k parquet |
-| Need real-time inverse "swing in → θ out" | Option 3 — Inverse cVAE | 🟡 Needs training run |
-| Want JAX / scipy.optimize over the MATLAB sim | Option 4 — Python bridge | 🔴 Needs implementation |
+| Situation                                                 | Pick                     | Status                                   |
+| --------------------------------------------------------- | ------------------------ | ---------------------------------------- |
+| First time fitting a swing; want a baseline you can trust | **Option 1 — fmincon**   | ✅ Production                            |
+| Already have a trained surrogate, want sub-second fits    | Option 2 — NN surrogate  | 🟡 Needs training run on the 10k parquet |
+| Need real-time inverse "swing in → θ out"                 | Option 3 — Inverse cVAE  | 🟡 Needs training run                    |
+| Want JAX / scipy.optimize over the MATLAB sim             | Option 4 — Python bridge | 🔴 Needs implementation                  |
 
 Every option must consume the same `target` schema and emit the same
 `result` schema. Mixing options is then a one-line code change (see the
@@ -168,31 +168,37 @@ The roadmap below is the same set of items tracked as GitHub issues; this
 is the **why**, the issues are the **what** and **how**.
 
 ### M1 — Pipeline production readiness (active)
+
 - Stage-1 starting-pose solver (`solve_starting_pose.m`) — the playbook recipe today is on paper only.
 - End-to-end Wiffle ProV1 fit hitting grip RMSE < 5 mm in CI, run on every PR that touches `motion_matching/`.
 - FK chain calibration (`compute_skeleton_fk` currently has 1.4 m wrist residual; it's a debug helper, not a primary path, but the residual obscures genuine model issues when used as a validator).
 
 ### M2 — Performance unblocking
+
 - `MaxStep` loosening experiment (predicted 2–3× extra speedup on top of FastRestart).
 - Hot-path warmer for parpool workers so each batch starts FastRestart-ready.
 - Validate `accelerator` simulation mode and document the trade-off.
 
 ### M3 — NN options online (depends on dataset)
+
 - Land the 10k parquet in-tree.
 - Validate it against `load_sweep_dataset.py`.
 - Train Option 2 surrogate; ship `fit_swing_surrogate.m` analogous to `fit_swing_fmincon.m`.
 - Train Option 3 inverse cVAE; ship `fit_swing_inverse.m`.
 
 ### M4 — Option 4 bridge
+
 - Python-side `SimscapeAdapter` already drafted in #4006 — verify in current code.
 - Wire scipy.optimize.minimize and (optionally) a JAX gradient path.
 
 ### M5 — Robustness / generalisation
+
 - Multiple test trials (currently CI uses one). User-supplied additional swings.
 - Cross-option comparison run across all available trials; populate the leaderboard.
 - Sensitivity study: how much does total-work `λ` move the answer?
 
 ### M6 — Body-marker IK (post-MVP)
+
 - When body mocap data lands, the IK stage in `motion_matching/shared` becomes a real solver, not a stub.
 - Spec extension: `target.body_markers`, `target.joint_angles_meas`.
 - Cost function gains body-tracking terms.
@@ -219,4 +225,4 @@ For everyone (humans, agents) touching this tree:
 
 ---
 
-*Last updated 2026-05-06.*
+_Last updated 2026-05-06._

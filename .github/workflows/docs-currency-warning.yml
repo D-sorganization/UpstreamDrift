@@ -1,0 +1,87 @@
+name: docs-currency-warning
+
+# Advisory check for the motion_matching tree.
+# Posts a warning comment (does NOT fail) when a PR touches motion_matching
+# code without updating one of the top-level docs, adding/changing tests,
+# or opting out via the `[no-docs-needed]` marker in the PR body.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  warn:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for docs / tests / opt-out
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_REPO: ${{ github.repository }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          set -euo pipefail
+
+          MM_PREFIX='src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/'
+
+          # Pull the changed file list.
+          files=$(gh pr view "$PR_NUMBER" --repo "$PR_REPO" --json files --jq '.files[].path')
+
+          touches_mm=false
+          touches_tests=false
+          touches_docs=false
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            case "$f" in
+              "$MM_PREFIX"*) touches_mm=true ;;
+            esac
+            case "$f" in
+              *_test*.m|*tests/*.m|*/tests/*.py|*test_*.py|*_test.py) touches_tests=true ;;
+            esac
+            case "$f" in
+              *_SPEC.md|*_GUIDE.md|*_PLAYBOOK.md) touches_docs=true ;;
+            esac
+          done <<< "$files"
+
+          if [ "$touches_mm" != "true" ]; then
+            echo "PR does not touch motion_matching tree; nothing to do."
+            exit 0
+          fi
+
+          # Opt-out marker check.
+          if printf '%s' "${PR_BODY:-}" | grep -qF '[no-docs-needed]'; then
+            echo "PR body contains [no-docs-needed]; skipping warning."
+            exit 0
+          fi
+
+          if [ "$touches_docs" = "true" ] || [ "$touches_tests" = "true" ]; then
+            echo "PR touches docs and/or tests; no warning needed."
+            exit 0
+          fi
+
+          echo "Posting advisory comment."
+          gh pr comment "$PR_NUMBER" --repo "$PR_REPO" --body "$(cat <<'EOF'
+          :memo: **Docs-currency advisory**
+
+          This PR modifies `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/` but does **not** touch any of:
+
+          - a `*_SPEC.md` / `*_GUIDE.md` / `*_PLAYBOOK.md` (e.g. `PROJECT_SPEC.md`, `MATLAB_GOLF_MODEL_GUIDE.md`, `GRIP_FIT_PLAYBOOK.md`)
+          - a `*_test*.m` or `tests/*.m` file (or Python equivalents)
+
+          Per the [docs-currency policy](https://github.com/${{ github.repository }}/blob/main/src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/CODING_STANDARDS.md#docs-currency-policy), PRs that meaningfully change scope or architecture should keep the top-level docs in sync.
+
+          **This is advisory only — it does not block merging.**
+
+          **To silence this check**, do one of the following:
+
+          1. Update one of the docs above in this PR, **or**
+          2. Add a test that covers your change, **or**
+          3. Add the marker `[no-docs-needed]` anywhere in the PR description if the change genuinely doesn't affect scope or architecture (typo fix, pure refactor, perf tweak, etc.).
+          EOF
+          )"
