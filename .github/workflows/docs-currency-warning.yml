@@ -45,7 +45,7 @@ jobs:
               *_test*.m|*tests/*.m|*/tests/*.py|*test_*.py|*_test.py) touches_tests=true ;;
             esac
             case "$f" in
-              *_SPEC.md|*_GUIDE.md|*_PLAYBOOK.md) touches_docs=true ;;
+              "src/engines/Simscape_Multibody_Models/3D_Golf_Model/PROJECT_SPEC.md"|"src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/MATLAB_GOLF_MODEL_GUIDE.md"|"src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/GRIP_FIT_PLAYBOOK.md") touches_docs=true ;;
             esac
           done <<< "$files"
 
