@@ -15,6 +15,8 @@ FIXTURES_DIR = get_tests_root() / "fixtures"
 
 # Re-export all fixtures from the fixtures library
 # This makes them available to all tests in this directory
+import numpy as np  # noqa: E402
+import pytest  # noqa: E402
 from fixtures_lib import (  # noqa: F401, E402
     TOLERANCE_ACCELERATION_M_S2,
     TOLERANCE_CLOSURE_RAD_S2,
@@ -34,3 +36,22 @@ from fixtures_lib import (  # noqa: F401, E402
     set_identical_state,
     simple_pendulum_path,
 )
+
+
+@pytest.fixture
+def synthetic_demonstration() -> object:
+    """Tiny synthetic :class:`Demonstration` used by sysid integration tests.
+
+    Sized to be cheap (5 frames, 2 dof) — only used to verify code paths,
+    not numerical correctness.
+    """
+    from src.learning.imitation.dataset import Demonstration
+
+    n_frames = 5
+    n_dof = 2
+    return Demonstration(
+        timestamps=np.linspace(0.0, 0.04, n_frames, dtype=np.float64),
+        joint_positions=np.zeros((n_frames, n_dof), dtype=np.float64),
+        joint_velocities=np.zeros((n_frames, n_dof), dtype=np.float64),
+        actions=np.zeros((n_frames, n_dof), dtype=np.float64),
+    )
