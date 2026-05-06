@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+from datetime import UTC
 from pathlib import Path
 from typing import Any
 
@@ -684,8 +685,71 @@ def evaluate(
     summary_path = output_dir / f"{run_label}_matching_summary.md"
     metrics_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
     summary_path.write_text(_summary_markdown(report), encoding="utf-8")
+    # Also emit the canonical Metrics record (METRICS_SCHEMA.md) so the
+    # leaderboard / cross-language consumers can rank this fit alongside
+    # MATLAB-emitted records.  Best-effort: missing fields fall back to
+    # safe defaults rather than failing the diagnostic run.
+    canonical_path = output_dir / f"{run_label}_metrics_canonical.json"
+    try:
+        canonical_path.write_text(
+            _emit_canonical_metrics(report, run_label), encoding="utf-8"
+        )
+    except Exception as exc:  # pragma: no cover - best effort
+        LOGGER.warning("Skipped canonical Metrics emission: %s", exc)
     LOGGER.info("Wrote matching diagnostics to %s", output_dir)
     return report
+
+
+def _emit_canonical_metrics(report: dict, run_label: str) -> str:
+    """Convert a diagnostic report dict to a canonical Metrics JSON string."""
+    import platform
+    import subprocess
+    from datetime import datetime
+
+    from src.shared.python.motion_matching.metrics import (
+        SCHEMA_VERSION,
+        Metrics,
+    )
+
+    matching = report.get("matching") or {}
+    effort = report.get("effort") or {}
+    mech = report.get("mechanical_work") or {}
+
+    try:
+        sha = (
+            subprocess.check_output(
+                ["git", "rev-parse", "HEAD"],
+                cwd=Path(__file__).parent,
+                stderr=subprocess.DEVNULL,
+            )
+            .decode()
+            .strip()
+        )
+    except Exception:
+        sha = "0" * 40
+    if len(sha) != 40 or not all(c in "0123456789abcdef" for c in sha):
+        sha = "0" * 40
+
+    m = Metrics(
+        swing_id=run_label,
+        option=1,
+        solver="evaluate_matching_workflow",
+        n_iterations=0,
+        rmse_clubhead_mm=float(matching.get("rmse_position_mm", 0.0)),
+        rmse_butt_mm=float(matching.get("rmse_butt_mm", 0.0)),
+        rmse_orientation_deg=float(matching.get("rmse_orientation_deg", 0.0)),
+        clubhead_speed_at_impact_mph=float(matching.get("clubhead_speed_sim_mph", 0.0)),
+        clubhead_speed_meas_mph=float(matching.get("clubhead_speed_meas_mph", 0.0)),
+        total_work_J=float(mech.get("total_work_J", 0.0)) if mech else 0.0,
+        peak_power_W=float(effort.get("peak_power_W", 0.0)),
+        wall_clock_s=float(report.get("wall_clock_s", 0.0)),
+        git_commit=sha,
+        matlab_version="",
+        python_version=platform.python_version(),
+        timestamp_iso8601=datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        schema_version=SCHEMA_VERSION,
+    )
+    return m.to_json()
 
 
 def parse_args() -> argparse.Namespace:

@@ -66,12 +66,21 @@ end
 
 | Regularizer | Formula | When useful |
 |---|---|---|
-| Total work (default) | `∫ Σ|τω| dt` | Bias toward physiologically efficient swings |
-| Peak power | `max_t Σ|τω|` | Bias against torque spikes |
-| Squared torque norm | `∫ Σ τ²  dt` | Bias against large torques regardless of motion |
-| Coefficient L2 | `‖θ‖²` | Trivial bias toward the model's nominal |
+| `total_work` (default) | `∫ Σ\|τω\| dt` | Bias toward physiologically efficient swings |
+| `peak_power` | `max_t Σ\|τω\|` | Bias against torque spikes |
+| `torque_l2` | `∫ Σ τ² dt` | Bias against large torques regardless of motion |
+| `coeff_l2` | `‖θ‖²` | Trivial bias toward the model's nominal |
+| `effort_l2` (new) | `mean Σ (τ − τ_ref)² · w_j` | Penalise deviation from a reference torque profile (PR #3966 parity) |
+| `smoothness_l2` (new) | `mean Σ (Δτ)² · w_j` | Penalise jerky control inputs (PR #3966 parity) |
 
-The default is **total work**. Other variants are exposed via `options.regularizer = "total_work" | "peak_power" | "torque_l2" | "coeff_l2"`.
+The default is **total work**. Other variants are exposed via `options.regularizer = "total_work" | "peak_power" | "torque_l2" | "coeff_l2" | "effort_l2" | "smoothness_l2"`.
+
+The `effort_l2` and `smoothness_l2` variants additionally consult two new options fields:
+
+- `opts.tau_reference` (default `[]` / `None`): reference torque profile shaped like `sim_out.tau`; falls back to a zero reference when empty. With a zero reference, `effort_l2` reduces to `mean(τ²)`.
+- `opts.regularizer_weights` (default `[]` / `None`): per-joint weight vector of length `n_joints`; defaults to ones. Lets callers down-weight wrist torques relative to shoulder torques, etc.
+
+These match the discrete cost used by `MachineLearning/optimize_torque_sequence_for_club.py` (PR #3966), where the cost contains `α · MSE(u − u₀) + β · MSE(Δu)`. The scaffold absorbs `α` and `β` into `lambda` — pick one regularizer per run.
 
 ## Defaults
 

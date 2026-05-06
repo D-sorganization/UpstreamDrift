@@ -53,6 +53,8 @@ from src.shared.python.motion_matching.cost import (
     compute_total_work as _shared_total_work,
 )
 
+from src.shared.python.motion_matching.control_names import TORQUE_TO_POLYNOMIAL_BASE
+
 LOGGER = logging.getLogger(__name__)
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_CHECKPOINT = SCRIPT_DIR / "runs" / "club_direct_10_cpu" / "best_model.pt"
