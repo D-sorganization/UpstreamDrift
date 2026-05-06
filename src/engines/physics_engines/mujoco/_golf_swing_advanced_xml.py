@@ -12,7 +12,13 @@ from src.shared.python.core.constants import (
     GRAVITY_M_S2,
 )
 
-# Convert to float for use in f-strings
+# Convert to float for use in f-strings.
+# PhysicalConstant is a float subclass with a custom __repr__/__str__ that
+# renders as ``PhysicalConstant(9.807, unit='m/s^2')``. Interpolating it
+# directly into an f-string emits that repr and breaks MJCF parsing
+# (``mujoco.MjModel.from_xml_string`` rejects the resulting attribute).
+# Cast to plain float once at module load and only interpolate the float.
+_GRAVITY = float(GRAVITY_M_S2)
 _BALL_MASS = float(GOLF_BALL_MASS_KG)
 _BALL_RADIUS = float(GOLF_BALL_RADIUS_M)
 _BALL_RADIUS_INNER = _BALL_RADIUS * 0.998
@@ -20,7 +26,7 @@ _TIME_STEP = float(DEFAULT_TIME_STEP)
 
 ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""
 <mujoco model="advanced_biomechanical_golf_swing">
-  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}"
+  <option timestep="0.001" gravity="0 0 -{_GRAVITY}"
           integrator="RK4" solver="Newton" iterations="50"/>
 
   <compiler angle="radian" coordinate="local"
