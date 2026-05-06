@@ -41,7 +41,14 @@ __all__ = [
     "compute_total_work",
 ]
 
-RegularizerName = Literal["total_work", "peak_power", "torque_l2", "coeff_l2"]
+RegularizerName = Literal[
+    "total_work",
+    "peak_power",
+    "torque_l2",
+    "coeff_l2",
+    "effort_l2",
+    "smoothness_l2",
+]
 QRepr = Literal["quaternion", "rotmat"]
 TimeAlignment = Literal["impact", "address", "none"]
 
@@ -69,6 +76,8 @@ class CostOptions:
     q_orientation_repr: QRepr = "quaternion"
     time_alignment: TimeAlignment = "impact"
     resample_to_hz: float = 1000.0
+    tau_reference: NDArray[np.float64] | None = None
+    regularizer_weights: NDArray[np.float64] | None = None
 
 
 @dataclass(frozen=True)
@@ -199,10 +208,60 @@ def _regularizer_term(
         return float(np.trapezoid(np.sum(tau * tau, axis=1), time))
     if name == "coeff_l2":
         return float(np.dot(theta, theta))
+    if name == "effort_l2":
+        tau = _require_field(sim_out.tau, "tau")
+        tau_ref = _resolve_tau_reference(opts.tau_reference, tau.shape)
+        weights = _resolve_reg_weights(opts.regularizer_weights, tau.shape[1])
+        diff = tau - tau_ref
+        return float(np.mean(diff * diff * weights))
+    if name == "smoothness_l2":
+        tau = _require_field(sim_out.tau, "tau")
+        if tau.shape[0] < 2:
+            return 0.0
+        weights = _resolve_reg_weights(opts.regularizer_weights, tau.shape[1])
+        dtau = np.diff(tau, n=1, axis=0)
+        return float(np.mean(dtau * dtau * weights))
     raise ValueError(
         f"unknown regularizer {name!r}; expected one of "
-        "'total_work', 'peak_power', 'torque_l2', 'coeff_l2'"
+        "'total_work', 'peak_power', 'torque_l2', 'coeff_l2', "
+        "'effort_l2', 'smoothness_l2'"
     )
+
+
+def _resolve_tau_reference(
+    tau_reference: NDArray[np.float64] | None,
+    tau_shape: tuple[int, ...],
+) -> NDArray[np.float64]:
+    """Resolve ``tau_reference`` to an array broadcastable to ``tau_shape``."""
+    if tau_reference is None:
+        return np.zeros(tau_shape, dtype=np.float64)
+    ref = np.asarray(tau_reference, dtype=np.float64)
+    if not np.all(np.isfinite(ref)):
+        raise ValueError("tau_reference must be real and finite")
+    if ref.ndim == 1 and ref.shape[0] == tau_shape[1]:
+        ref = np.broadcast_to(ref[np.newaxis, :], tau_shape).copy()
+    if ref.shape != tau_shape:
+        raise ValueError(
+            f"tau_reference shape {ref.shape} not compatible with tau {tau_shape}"
+        )
+    return ref
+
+
+def _resolve_reg_weights(
+    weights: NDArray[np.float64] | None,
+    n_joints: int,
+) -> NDArray[np.float64]:
+    """Resolve per-joint weights to a row vector of length ``n_joints``."""
+    if weights is None:
+        return np.ones((1, n_joints), dtype=np.float64)
+    w = np.asarray(weights, dtype=np.float64).reshape(-1)
+    if w.shape[0] != n_joints:
+        raise ValueError(
+            f"regularizer_weights must have length {n_joints}; got {w.shape[0]}"
+        )
+    if not np.all(np.isfinite(w)) or np.any(w < 0):
+        raise ValueError("regularizer_weights must be finite and non-negative")
+    return w[np.newaxis, :]
 
 
 def _check_traj(
