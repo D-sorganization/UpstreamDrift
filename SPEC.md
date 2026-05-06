@@ -644,6 +644,7 @@ Bumped spec file slightly to bypass the spec check in CI.
 
 Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linalg.norm` to prevent `TypeError` on non-1D ndarrays.
 
+| 2026-05-06 | 1.0.120 | Added ML closed-loop replay diagnostics harness (PR #4055). |
 | 2026-05-06 | 1.0.124 | Added ML checkpoint/resume and progress artifacts for frame search (PR #4057). |
 | 2026-05-06 | 1.0.123 | Added ML dynamics-consistent two-stage trajectory optimizer (PR #4059). |
 | 2026-05-06 | 1.0.117 | Added unified Metrics schema for motion-matching (PR #4052). |
