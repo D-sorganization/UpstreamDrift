@@ -1,4 +1,12 @@
 <?xml version="1.0"?>
+<!--
+  Scope: Body-only Pinocchio inverse-kinematics golfer model.
+  Use this URDF when the body solves IK against externally tracked club targets
+  and the club should remain outside the articulated model.
+  For forward-simulation workflows that include the welded club in the model,
+  use golfer.urdf instead.
+  Cross-engine parity context: CROSS_ENGINE_PARITY_SPEC.md (tracked in PR #4092).
+-->
 <robot name="golfer">
   <!-- Generated from canonical YAML specification -->
   <link name="pelvis">
