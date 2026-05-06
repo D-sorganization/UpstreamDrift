@@ -336,6 +336,7 @@ markers = [
     "requires_gpu: marks tests that require a GPU (skip with '-m not requires_gpu')",
     "smoke: release-blocking smoke tests for built production artifacts",
     "requires_matlab: tests that require the MATLAB Engine for Python (alias of live_simulation for the Simscape adapter)",
+    "requires_opensim: tests that require the OpenSim Python bindings (skipped when `import opensim` fails)",
     "requires_matlab_engine: tests that require matlab.engine importable (Option 4 bridge)",
 ]
 filterwarnings = [
