@@ -123,7 +123,10 @@ def test_real_dataset_path_skipped_when_absent() -> None:
             )
             break
 
-    real = next((p for p in candidates if p.exists()), None)
+    real = next(
+        (p for p in candidates if p.exists() and (p / "trials.parquet").exists()),
+        None,
+    )
     if real is None:
         pytest.skip(
             "real sweep dataset not present yet; using synthetic only. "
