@@ -1,0 +1,32 @@
+"""SwingSurrogate FiLM-MLP forward surrogate for Option 2.
+
+This package implements the differentiable forward surrogate
+``f_theta : coefficients -> club kinematic trajectory`` per the design
+in ``src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/
+motion_matching/option2_nn_surrogate/APPROACH.md``.
+
+Public API:
+    ClubTrajectory   -- batch-first surrogate output (butt, clubhead, q, joints).
+    SurrogateConfig  -- frozen architectural configuration.
+    SwingSurrogate   -- the ``nn.Module`` itself.
+    NormalizationStats -- per-feature z-score statistics fitted on train split.
+    TrainConfig      -- training hyperparameters and loss weights.
+    TrainedSurrogate -- bundle of (model, stats, curves) returned by training.
+    train_surrogate  -- end-to-end training entry-point.
+"""
+
+from __future__ import annotations
+
+from ._normalize import NormalizationStats
+from .model import ClubTrajectory, SurrogateConfig, SwingSurrogate
+from .train import TrainConfig, TrainedSurrogate, train_surrogate
+
+__all__ = [
+    "ClubTrajectory",
+    "NormalizationStats",
+    "SurrogateConfig",
+    "SwingSurrogate",
+    "TrainConfig",
+    "TrainedSurrogate",
+    "train_surrogate",
+]
