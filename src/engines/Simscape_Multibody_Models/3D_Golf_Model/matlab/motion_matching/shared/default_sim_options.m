@@ -44,11 +44,16 @@ function opts = default_sim_options()
     opts.use_cache         = false;
     opts.stop_on_error     = true;
     opts.joint_names       = string.empty(1, 0);
+    % Per-call overrides on model-workspace variables — used by Stage-1
+    % starting-pose tooling to perturb the initial pose without editing
+    % the source MAT.  Each field is a model-workspace variable name and
+    % the value is the override to apply via setVariable.
+    opts.input_overrides   = struct();
 
     % Postconditions
     required = ["model_name", "simulation_time", "sample_rate", "solver", ...
                 "fast_restart", "parallel_safe", "verbosity", "cache_dir", ...
-                "use_cache", "stop_on_error", "joint_names"];
+                "use_cache", "stop_on_error", "joint_names", "input_overrides"];
     assert(all(isfield(opts, required)), ...
         "default_sim_options:missingField", ...
         "Postcondition: default options missing required fields");

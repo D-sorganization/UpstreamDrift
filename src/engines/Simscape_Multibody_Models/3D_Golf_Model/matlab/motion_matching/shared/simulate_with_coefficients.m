@@ -132,6 +132,17 @@ function sim_out = simulate_with_coefficients(theta, opts)
         simIn = simIn.setVariable(var_names{i}, coeff_struct.(var_names{i}));
     end
 
+    % Per-call starting-pose / input overrides (e.g. from Stage-1
+    % starting-position solver — see GRIP_FIT_PLAYBOOK.md).  These layer
+    % on top of the model-workspace defaults via setVariable, so they do
+    % not modify any MAT file or the persistent .slx.
+    if isfield(opts, "input_overrides") && isstruct(opts.input_overrides)
+        ov_names = fieldnames(opts.input_overrides);
+        for i = 1:numel(ov_names)
+            simIn = simIn.setVariable(ov_names{i}, opts.input_overrides.(ov_names{i}));
+        end
+    end
+
     % ---- 5. Run sim --------------------------------------------------------
     simOut = [];
     err = [];

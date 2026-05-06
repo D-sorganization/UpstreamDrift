@@ -18,4 +18,3 @@ When `sensor_anchored` mode is unavailable (or `force_angle_chain=true`), the fa
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4105#discussion_r3197917606)
 
 ---
-
