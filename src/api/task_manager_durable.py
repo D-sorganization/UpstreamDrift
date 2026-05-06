@@ -760,4 +760,5 @@ class DurableTaskManager:
             self._cleanup_task.cancel()
             with suppress(asyncio.CancelledError):
                 await self._cleanup_task
+
         logger.info("DurableTaskManager shutdown complete")

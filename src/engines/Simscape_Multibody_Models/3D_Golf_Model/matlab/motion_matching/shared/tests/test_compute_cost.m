@@ -48,15 +48,23 @@ classdef test_compute_cost < matlab.unittest.TestCase
         end
 
         function test_impact_anchor_amplifies_impact_frame_error(testCase)
-            % Put a 1 cm clubhead error only at the impact frame.
+            % Put a 1 cm grip error only at the impact frame.  The
+            % anchor term now follows the grip (the rigid body→club
+            % interface) rather than the clubhead, since clubhead
+            % residuals can come from club-length / shaft-flex
+            % differences that we do not want the cost to chase.
             tgt = make_target();
             sim = sim_matches_target(tgt);
             k = tgt.impact_idx;
-            sim.clubhead(k, 1) = sim.clubhead(k, 1) + 0.01;
+            sim.butt(k, 1) = sim.butt(k, 1) + 0.01;     % butt is alias of grip
             opts = default_cost_options();
-            opts.w_position = 0;
-            opts.w_orientation = 0;
-            opts.lambda = 0;
+            opts.w_position           = 0;
+            opts.w_position_grip      = 0;
+            opts.w_position_clubhead  = 0;
+            opts.w_orientation        = 0;
+            opts.w_orientation_grip   = 0;
+            opts.w_orientation_club   = 0;
+            opts.lambda               = 0;
             [~, terms] = compute_cost(zeros(7, 1), tgt, @(~) sim, opts);
             % anchor = w_anchor_impact * ||d||^2 = 10 * (0.01)^2 = 1e-3
             testCase.verifyEqual(terms.impact_anchor, 1e-3, "AbsTol", 1e-12);

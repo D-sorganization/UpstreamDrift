@@ -48,9 +48,24 @@ function aligned = align_to_simulation_grid(raw, opts)
     end
 
     % --- Step 1: impact detection via 5-point central differences ---
-    %     (DRY: shared with synthesize_target_from_coefficients.m)
-    raw_impact_idx = detect_clubhead_impact(t_raw, raw.clubhead);
-    t_impact_raw = t_raw(raw_impact_idx);
+    %     (DRY: shared with synthesize_target_from_coefficients.m).  If
+    %     the caller has supplied a known-good impact time via
+    %     opts.known_impact_s — e.g. read from the row-1 header of a
+    %     Wiffle xlsx file — we use that directly, since the documented
+    %     value is authoritative and the speed-argmax heuristic can
+    %     latch onto the wrong local maximum on noisy traces.
+    if isfield(opts, "known_impact_s") && ~isempty(opts.known_impact_s) && ...
+            isfinite(double(opts.known_impact_s))
+        t_impact_raw = double(opts.known_impact_s);
+        if t_impact_raw < t_raw(1) || t_impact_raw > t_raw(end)
+            error("align_to_simulation_grid:knownImpactOutOfRange", ...
+                  "opts.known_impact_s=%g is outside raw t=[%g, %g]", ...
+                  t_impact_raw, t_raw(1), t_raw(end));
+        end
+    else
+        raw_impact_idx = detect_clubhead_impact(t_raw, raw.clubhead);
+        t_impact_raw = t_raw(raw_impact_idx);
+    end
 
     % --- Step 2: define window in raw time ---
     pre  = opts.pre_impact_s;
@@ -78,13 +93,17 @@ function aligned = align_to_simulation_grid(raw, opts)
     butt_q     = interp1(t_raw, raw.butt,     raw_query, "linear");
     clubhead_q = interp1(t_raw, raw.clubhead, raw_query, "linear");
     quat_q     = local_slerp_resample(t_raw, raw.club_quat, raw_query);
+    if isfield(raw, "grip");      grip_q      = interp1(t_raw, raw.grip, raw_query, "linear"); else; grip_q = butt_q; end
+    if isfield(raw, "grip_quat"); grip_quat_q = local_slerp_resample(t_raw, raw.grip_quat, raw_query); else; grip_quat_q = quat_q; end
 
     % Recompute impact on the simulation grid (should be near sim_t_impact)
     sim_impact_idx = detect_clubhead_impact(sim_time, clubhead_q);
 
     aligned = struct( ...
         "time",       sim_time, ...
-        "butt",       butt_q, ...
+        "grip",       grip_q, ...
+        "grip_quat",  grip_quat_q, ...
+        "butt",       butt_q, ...           % alias of grip for backward compat
         "clubhead",   clubhead_q, ...
         "club_quat",  quat_q, ...
         "impact_idx", uint32(sim_impact_idx));

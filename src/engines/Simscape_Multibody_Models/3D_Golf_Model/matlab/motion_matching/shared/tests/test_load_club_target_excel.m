@@ -2,7 +2,8 @@ classdef test_load_club_target_excel < matlab.unittest.TestCase
 %TEST_LOAD_CLUB_TARGET_EXCEL  Excel loader tests (gated on real file presence).
 
     properties (Constant)
-        XLSX_RELPATH = fullfile("..", "..", "src", "apps", "golf_gui", ...
+        % tests/ → shared/ → motion_matching/ → matlab/ → src/apps/...
+        XLSX_RELPATH = fullfile("..", "..", "..", "src", "apps", "golf_gui", ...
             "Motion Capture Plotter", "Wiffle_ProV1_club_3D_data.xlsx");
     end
 
@@ -20,28 +21,50 @@ classdef test_load_club_target_excel < matlab.unittest.TestCase
             xlsx = locate_xlsx(testCase);
             target = load_club_target_excel(xlsx, "TW_ProV1");
             testCase.verifyTrue(isstruct(target));
-            for f = ["time","butt","clubhead","club_quat","impact_idx","source"]
+            % `grip` and `grip_quat` are the new canonical names for the
+            % mid-hands position + orientation; `butt` and `club_quat`
+            % are kept as backward-compat aliases / clubhead orientation.
+            for f = ["time","grip","grip_quat","butt","clubhead","club_quat","impact_idx","events","source"]
                 testCase.verifyTrue(isfield(target, f), ...
                     sprintf("Missing field: %s", f));
             end
-            testCase.verifyEqual(size(target.butt, 2), 3);
-            testCase.verifyEqual(size(target.clubhead, 2), 3);
+            testCase.verifyEqual(size(target.grip,      2), 3);
+            testCase.verifyEqual(size(target.grip_quat, 2), 4);
+            testCase.verifyEqual(size(target.clubhead,  2), 3);
             testCase.verifyEqual(size(target.club_quat, 2), 4);
+            testCase.verifyEqual(target.butt, target.grip);   % alias is faithful
         end
 
-        function test_inches_converted_to_metres(testCase)
+        function test_position_units_are_plausible(testCase)
+            % Sanity check that the loader's unit conversion lands in metres.
+            % Definitions tab claims inches but values are actually cm —
+            % see the loader header.  Values that are off by a 2.54x
+            % factor would push these well outside the plausible range.
             xlsx = locate_xlsx(testCase);
             target = load_club_target_excel(xlsx, "TW_ProV1");
-            % Sanity: max ||r|| of butt should be < 5 m (postcondition) and
-            % > 0.1 m (so we know we did *some* conversion, not feet, etc).
-            r_butt = vecnorm(target.butt, 2, 2);
-            testCase.verifyGreaterThan(max(r_butt), 0.1);
-            testCase.verifyLessThan(max(r_butt), 5.0);
-            % Shaft-length plausibility: butt-to-clubhead distance roughly
-            % within a typical driver shaft (0.7 - 1.4 m).
-            shaft = vecnorm(target.clubhead - target.butt, 2, 2);
-            testCase.verifyGreaterThan(median(shaft), 0.5);
-            testCase.verifyLessThan(median(shaft), 2.0);
+            r_grip = vecnorm(target.grip, 2, 2);
+            testCase.verifyGreaterThan(max(r_grip), 0.1);
+            testCase.verifyLessThan(max(r_grip), 5.0);
+            % Shaft-length plausibility: mid-hands → clubhead within
+            % a typical iron / fairway-wood / driver length.
+            shaft = vecnorm(target.clubhead - target.grip, 2, 2);
+            testCase.verifyGreaterThan(median(shaft), 0.7);
+            testCase.verifyLessThan(median(shaft), 1.4);
+        end
+
+        function test_event_markers_parsed_from_header(testCase)
+            xlsx = locate_xlsx(testCase);
+            target = load_club_target_excel(xlsx, "TW_ProV1");
+            testCase.verifyTrue(isfield(target, 'events'));
+            ev = target.events;
+            for f = ["A_sample","T_sample","I_sample","F_sample","CHS_mph"]
+                testCase.verifyTrue(isfield(ev, f));
+                testCase.verifyTrue(isfinite(ev.(f)));
+            end
+            % TW_ProV1 sheet documents A=240, T=418, I=525, F=725, CHS=114.5.
+            testCase.verifyEqual(ev.I_sample, 525);
+            testCase.verifyEqual(ev.A_sample, 240);
+            testCase.verifyEqual(ev.CHS_mph,  114.5, "AbsTol", 0.1);
         end
 
         function test_rotation_matrices_become_unit_quaternions_with_q0_nonneg(testCase)
@@ -80,7 +103,7 @@ end
 function xlsx = locate_xlsx(testCase)
     here = fileparts(mfilename("fullpath"));
     candidate = fullfile(here, ...
-        "..", "..", "src", "apps", "golf_gui", ...
+        "..", "..", "..", "src", "apps", "golf_gui", ...
         "Motion Capture Plotter", "Wiffle_ProV1_club_3D_data.xlsx");
     if exist(candidate, "file") ~= 2
         testCase.assumeFail( ...

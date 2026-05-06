@@ -9,13 +9,30 @@ When body markers come online, this same module gains a real IK stage that solve
 ```matlab
 target = struct( ...
     "time",         (N×1) double, simulation timegrid in seconds, monotonic, dt = 1/sample_rate, ...
-    "butt",         (N×3) double, butt position in metres, world frame, ...
+    % --- PRIMARY matching anchors (mid-hands frame on the club shaft) ---
+    "grip",         (N×3) double, grip / mid-hands position in metres, world frame, ...
+    "grip_quat",    (N×4) double, grip / mid-hands orientation as unit quaternion [w x y z], ...
+    % --- SECONDARY signals (clubhead / club orientation; non-rigid via shaft flex,
+    %     and the player's club may differ in length from the modeled club) ---
     "clubhead",     (N×3) double, clubhead position in metres, world frame, ...
     "club_quat",    (N×4) double, club orientation as unit quaternion [w x y z], ...
-    "impact_idx",   scalar uint32, index of impact frame (max clubhead speed), ...
+    "impact_idx",   scalar uint32, index of impact frame (taken from documented event marker when present), ...
+    "events",       struct with A_sample, T_sample, I_sample, F_sample, CHS_mph from row-1 header (Wiffle xlsx), ...
+    % --- Backward-compat alias of `grip` for older callers that read `butt` ---
+    "butt",         (N×3) double, == target.grip (deprecated; will be removed once all callers migrate), ...
     "source",       struct with provenance: filename, format, subject_id, trial_id, sha256 ...
 );
 ```
+
+### Why grip-primary?
+
+The body→club interface is **rigid at the grip** (the player's hands holding the club).
+The clubhead is a non-rigid extension because of (a) shaft flex during the swing and
+(b) the player's actual club length almost never matches the modeled club length to the
+millimetre.  Matching on the grip position + grip orientation gives an exact (sub-mm),
+club-length-independent target for the body kinematics; the modeled club's clubhead is
+then a deterministic rigid extension of that grip pose.  See COST_FUNCTION_SPEC.md
+for the corresponding cost-term reweighting.
 
 Python mirror is a `dataclass`:
 
@@ -23,10 +40,12 @@ Python mirror is a `dataclass`:
 @dataclass(frozen=True)
 class ClubTarget:
     time: np.ndarray            # (N,) float64
-    butt: np.ndarray            # (N,3) float64
-    clubhead: np.ndarray        # (N,3) float64
-    club_quat: np.ndarray       # (N,4) float64, [w,x,y,z]
+    grip: np.ndarray            # (N,3) float64  PRIMARY anchor
+    grip_quat: np.ndarray       # (N,4) float64  PRIMARY anchor [w,x,y,z]
+    clubhead: np.ndarray        # (N,3) float64  secondary
+    club_quat: np.ndarray       # (N,4) float64  secondary  [w,x,y,z]
     impact_idx: int
+    events: dict | None         # A/T/I/F samples, CHS_mph
     source: SourceProvenance
 ```
 
@@ -36,8 +55,9 @@ class ClubTarget:
 
 [Wiffle_ProV1_club_3D_data.xlsx](../../src/apps/golf_gui/Motion%20Capture%20Plotter/) — already parsed by [mocap_data_loader.py](../../src/apps/golf_gui/Motion%20Capture%20Plotter/mocap_data_loader.py).
 
-- **Units in source:** inches, frames at the file's native rate.
-- **Conversion:** inches → metres via `× 0.0254`.
+- **Units in source:** **centimetres** (the Definitions tab claims "inches" but the actual values are cm; mid-hands→clubhead distance is constant 106.93 across every frame, which is 1.07 m in cm and 2.71 m if treated as inches).  Frames at the file's native rate (240 Hz).
+- **Conversion:** cm → metres via `× 0.01`.
+- **Event markers:** row 1 of each sheet is `<trial> | A | <addr#> | T | <top#> | I | <impact#> | F | <finish#> | CHS | <mph>`.  The loader reads these into `target.events` and uses the documented `I_sample` for `impact_idx` (the speed-argmax heuristic is not authoritative — it can latch onto the wrong local maximum).
 - **Orientation:** the file stores 3×3 rotation matrices per frame; convert to unit quaternion with sign normalised so `q[0] >= 0` to suppress the `q ↔ -q` ambiguity at the source.
 - **Sheets:** `TW_wiffle`, `TW_ProV1`, `GW_wiffle`, `GW_ProV11`. Each is one swing.
 

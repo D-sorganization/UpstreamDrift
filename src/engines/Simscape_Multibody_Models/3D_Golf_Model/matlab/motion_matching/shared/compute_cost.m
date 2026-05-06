@@ -3,14 +3,27 @@ function [J, terms] = compute_cost(theta, target, sim_fn, opts)
 %
 %   [J, TERMS] = COMPUTE_COST(THETA, TARGET, SIM_FN, OPTS) evaluates
 %
-%       J(THETA) = w_p * mean_n( ||r_butt_sim - r_butt_meas||^2
-%                              + ||r_ch_sim   - r_ch_meas||^2 )
-%                + w_o * mean_n( d_geo(R_sim, R_meas)^2 )
-%                + w_a * ||r_ch_sim(t_impact) - r_ch_meas(t_impact)||^2
+%       J(THETA) = w_pg * mean_n( ||r_grip_sim - r_grip_meas||^2 )
+%                + w_pc * mean_n( ||r_ch_sim   - r_ch_meas||^2 )      (default 0)
+%                + w_og * mean_n( d_geo(R_grip_sim, R_grip_meas)^2 )
+%                + w_oc * mean_n( d_geo(R_club_sim, R_club_meas)^2 )  (default 0)
+%                + w_a * ||r_grip_sim(t_impact) - r_grip_meas(t_impact)||^2
 %                + lambda * R(theta)
 %
 %   where R(theta) is one of total_work, peak_power, torque_l2, coeff_l2,
 %   effort_l2, smoothness_l2 depending on OPTS.regularizer.
+%
+%   The **grip / mid-hands** position is the primary motion-matching
+%   anchor because it is the rigid contact point between the body
+%   kinematics and the club.  Clubhead and club-orientation terms are
+%   available as low-weight secondary signals (default 0) so the cost
+%   doesn't penalise the player having a different physical club length
+%   or shaft flex than the modeled club — those are NOT what we are
+%   trying to learn.
+%
+%   Backward compatibility: if the new w_position_* / w_orientation_*
+%   fields are absent, the old w_position / w_orientation fields are
+%   used and the cost reverts to the legacy butt+clubhead formulation.
 %
 %   Inputs:
 %     THETA  - real, finite coefficient vector (column or row).
@@ -44,25 +57,39 @@ function [J, terms] = compute_cost(theta, target, sim_fn, opts)
     end
     validators.mustHaveFields(sim_out, ["butt", "clubhead", "club_quat"]);
 
+    % Resolve grip aliases — older callers populate butt; newer ones grip.
+    target  = local_resolve_grip_aliases(target);
+    sim_out = local_resolve_grip_aliases(sim_out);
+
     N = numel(target.time);
-    local_check_traj_shape(target.butt,      N, 3, "target.butt");
+    local_check_traj_shape(target.grip,      N, 3, "target.grip");
     local_check_traj_shape(target.clubhead,  N, 3, "target.clubhead");
     local_check_traj_shape(target.club_quat, N, 4, "target.club_quat");
-    local_check_traj_shape(sim_out.butt,     N, 3, "sim_out.butt");
+    local_check_traj_shape(sim_out.grip,     N, 3, "sim_out.grip");
     local_check_traj_shape(sim_out.clubhead, N, 3, "sim_out.clubhead");
     local_check_traj_shape(sim_out.club_quat, N, 4, "sim_out.club_quat");
 
-    pos_term = local_position_term(sim_out, target);
-    ori_term = local_orientation_term(sim_out, target);
+    [w_pg, w_pc, w_og, w_oc] = local_resolve_weights(opts);
+
+    pos_grip = local_pos_term(sim_out.grip,     target.grip);
+    pos_club = local_pos_term(sim_out.clubhead, target.clubhead);
+    ori_grip = local_orient_term(sim_out, target, "grip");
+    ori_club = local_orient_term(sim_out, target, "club");
     anc_term = local_anchor_term(sim_out, target);
     reg_term = local_regularizer_term(theta, sim_out, opts);
 
     terms = struct();
-    terms.position      = opts.w_position      * pos_term;
-    terms.orientation   = opts.w_orientation   * ori_term;
-    terms.impact_anchor = opts.w_anchor_impact * anc_term;
-    terms.regularizer   = opts.lambda          * reg_term;
-    terms.total         = terms.position + terms.orientation ...
+    terms.position_grip     = w_pg              * pos_grip;
+    terms.position_clubhead = w_pc              * pos_club;
+    terms.orientation_grip  = w_og              * ori_grip;
+    terms.orientation_club  = w_oc              * ori_club;
+    terms.impact_anchor     = opts.w_anchor_impact * anc_term;
+    terms.regularizer       = opts.lambda          * reg_term;
+    % Legacy aggregate names retained for older callers / dashboards.
+    terms.position      = terms.position_grip + terms.position_clubhead;
+    terms.orientation   = terms.orientation_grip + terms.orientation_club;
+    terms.total         = terms.position_grip + terms.position_clubhead ...
+                        + terms.orientation_grip + terms.orientation_club ...
                         + terms.impact_anchor + terms.regularizer;
 
     J = terms.total;
@@ -71,37 +98,100 @@ function [J, terms] = compute_cost(theta, target, sim_fn, opts)
         "Postcondition: J must be a finite, non-negative scalar (got %g)", J);
     assert(abs(terms.total - J) <= eps(max(1, abs(J))) * 8, ...
         "Postcondition: terms.total must equal J within eps");
-    assert(terms.position      >= 0 && terms.orientation >= 0 && ...
-           terms.impact_anchor >= 0 && terms.regularizer >= 0, ...
+    assert(terms.position_grip     >= 0 && terms.position_clubhead >= 0 && ...
+           terms.orientation_grip  >= 0 && terms.orientation_club  >= 0 && ...
+           terms.impact_anchor     >= 0 && terms.regularizer       >= 0, ...
         "Postcondition: every terms field must be non-negative");
 end
 
 % ---------- Term helpers (LOD <= 2; each is a single small operation) ----------
 
-function val = local_position_term(sim_out, target)
-    db = sim_out.butt     - target.butt;
-    dc = sim_out.clubhead - target.clubhead;
-    per_frame = sum(db .^ 2, 2) + sum(dc .^ 2, 2);
-    val = mean(per_frame);
+function val = local_pos_term(sim_pts, target_pts)
+    d = sim_pts - target_pts;
+    val = mean(sum(d .^ 2, 2));
 end
 
-function val = local_orientation_term(sim_out, target)
-    % Geodesic angle via quaternion dot, with abs() to handle q ~ -q.
-    dots = sum(sim_out.club_quat .* target.club_quat, 2);
-    dots = min(1, max(-1, abs(dots)));   % clamp for acos numerical safety
-    angles = 2 * acos(dots);             % radians
+function val = local_orient_term(sim_out, target, which)
+%LOCAL_ORIENT_TERM  Mean squared geodesic angle between sim/target quats.
+%   WHICH = "grip" or "club".  When the requested quaternion field is
+%   missing on either side, the term gracefully returns 0.
+    sim_field    = sprintf('%s_quat', which);
+    target_field = sprintf('%s_quat', which);
+    if ~isfield(sim_out, sim_field) || ~isfield(target, target_field)
+        val = 0; return;
+    end
+    qs = sim_out.(sim_field);
+    qt = target.(target_field);
+    if isempty(qs) || isempty(qt) || size(qs, 1) ~= size(qt, 1)
+        val = 0; return;
+    end
+    dots = sum(qs .* qt, 2);
+    dots = min(1, max(-1, abs(dots)));
+    angles = 2 * acos(dots);
     val = mean(angles .^ 2);
 end
 
 function val = local_anchor_term(sim_out, target)
+%LOCAL_ANCHOR_TERM  Hard impact-frame anchor on the GRIP position.
+%   Anchoring on the grip is the right physics: the body delivers the
+%   grip to the right place at the right time; the clubhead is along
+%   for the rigid-extension ride.  (Legacy callers can still raise
+%   w_position_clubhead to add a clubhead penalty.)
     k = target.impact_idx;
     if ~(isnumeric(k) && isscalar(k) && k == floor(k) && k >= 1 && ...
-         k <= size(target.clubhead, 1))
+         k <= size(target.grip, 1))
         error("compute_cost:badImpactIdx", ...
               "target.impact_idx must be a scalar integer in [1, N].");
     end
-    d = sim_out.clubhead(k, :) - target.clubhead(k, :);
+    d = sim_out.grip(k, :) - target.grip(k, :);
     val = sum(d .^ 2);
+end
+
+function s = local_resolve_grip_aliases(s)
+%LOCAL_RESOLVE_GRIP_ALIASES  Fill in `grip` from `butt` (or vice-versa).
+%   The two are synonyms in this codebase — the historical name was
+%   `butt`, but the physical meaning is mid-hands position on the shaft.
+    if ~isfield(s, 'grip') && isfield(s, 'butt')
+        s.grip = s.butt;
+    elseif ~isfield(s, 'butt') && isfield(s, 'grip')
+        s.butt = s.grip;
+    end
+end
+
+function [w_pg, w_pc, w_og, w_oc] = local_resolve_weights(opts)
+%LOCAL_RESOLVE_WEIGHTS  Map opts to grip/clubhead position+orientation weights.
+%   New callers set w_position_grip / w_position_clubhead /
+%   w_orientation_grip / w_orientation_club.  Legacy callers populate
+%   w_position / w_orientation only — in that case we put the entire
+%   position weight on grip (matching the old behaviour where grip and
+%   clubhead were summed equally) and the orientation weight on the
+%   club (the only orientation we historically tracked).
+    if isfield(opts, 'w_position_grip')
+        w_pg = double(opts.w_position_grip);
+    elseif isfield(opts, 'w_position')
+        w_pg = double(opts.w_position);
+    else
+        w_pg = 1.0;
+    end
+    if isfield(opts, 'w_position_clubhead')
+        w_pc = double(opts.w_position_clubhead);
+    elseif isfield(opts, 'w_position')
+        w_pc = double(opts.w_position);   % legacy: butt+clubhead summed
+    else
+        w_pc = 0.0;
+    end
+    if isfield(opts, 'w_orientation_grip')
+        w_og = double(opts.w_orientation_grip);
+    else
+        w_og = 0.0;
+    end
+    if isfield(opts, 'w_orientation_club')
+        w_oc = double(opts.w_orientation_club);
+    elseif isfield(opts, 'w_orientation')
+        w_oc = double(opts.w_orientation);
+    else
+        w_oc = 0.0;
+    end
 end
 
 function val = local_regularizer_term(theta, sim_out, opts)

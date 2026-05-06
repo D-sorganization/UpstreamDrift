@@ -13,31 +13,42 @@ The cost function is the heart of the inverse problem. All four options consume 
 | `N` | number of timesteps over T |
 
 For Phase 1 (club-only), `q` is a 12-vector per timestep:
-- `r_butt ∈ ℝ³` (butt position, metres)
-- `r_clubhead ∈ ℝ³` (clubhead position, metres)
-- `R_club ∈ SO(3)` (club orientation, expressed as a flattened rotation matrix or a unit quaternion — see `q_orientation_repr` option)
+- `r_grip ∈ ℝ³` (mid-hands / grip position, metres) — **PRIMARY** matching anchor
+- `R_grip ∈ SO(3)` (mid-hands / grip orientation) — **PRIMARY** matching anchor
+- `r_clubhead ∈ ℝ³` (clubhead position, metres) — **SECONDARY** (optional)
+- `R_club ∈ SO(3)` (club orientation) — **SECONDARY** (optional)
+
+The grip is the rigid body→club interface; the clubhead is a non-rigid extension because of (a) shaft flex during the swing and (b) the player's actual club length almost never matches the modeled club length to the millimetre. We therefore weight the **grip terms primary** and treat clubhead+club-orientation as low-weight (default 0) secondary signals that callers can opt into when they want soft clubhead supervision.
 
 ## Primary cost (club-only)
 
 $$
-J(\theta) = w_p\,\underbrace{\frac{1}{N}\sum_{n} \big(\|r^\text{butt}_\text{sim}(t_n) - r^\text{butt}_\text{meas}(t_n)\|^2 + \|r^\text{ch}_\text{sim}(t_n) - r^\text{ch}_\text{meas}(t_n)\|^2\big)}_{\text{position term}} + w_o\,\underbrace{\frac{1}{N}\sum_{n} d_\text{geo}(R_\text{sim}(t_n), R_\text{meas}(t_n))^2}_{\text{orientation term}} + \lambda\,\underbrace{W_\text{total}(\theta)}_{\text{regularizer}}
+J(\theta) = w_{pg}\,\frac{1}{N}\sum_{n} \|r^\text{grip}_\text{sim}(t_n) - r^\text{grip}_\text{meas}(t_n)\|^2
+       \;+\; w_{pc}\,\frac{1}{N}\sum_{n} \|r^\text{ch}_\text{sim}(t_n) - r^\text{ch}_\text{meas}(t_n)\|^2
+       \;+\; w_{og}\,\frac{1}{N}\sum_{n} d_\text{geo}(R^\text{grip}_\text{sim}, R^\text{grip}_\text{meas})^2
+       \;+\; w_{oc}\,\frac{1}{N}\sum_{n} d_\text{geo}(R^\text{club}_\text{sim}, R^\text{club}_\text{meas})^2
+       \;+\; \lambda\,W_\text{total}(\theta)
 $$
 
 Where:
 
 - `d_geo(R1, R2) = ‖log(R1ᵀ R2)‖_F / √2` — the geodesic angle between two rotations (radians). Implementation: convert to quaternions and use `2·acos(|q1·q2|)`.
 - `W_total(θ)` — total mechanical work, defined below.
-- `w_p`, `w_o`, `λ` — weights, defaults in [DEFAULTS](#defaults).
+- `w_pg`, `w_pc`, `w_og`, `w_oc`, `λ` — weights, defaults in [DEFAULTS](#defaults).  By default `w_pc = w_oc = 0` so the cost ignores the clubhead entirely.
 
 ### Endpoint-anchor variant
 
-When the optimizer is starting cold, the position term can dominate the orientation term and produce drift. Add an **anchor** term that is large at impact (the most kinematically constrained instant):
+When the optimizer is starting cold, the position term can dominate the orientation term and produce drift. Add an **anchor** term that is large at impact (the most kinematically constrained instant), pinned to the **grip** (the body→club rigid contact, which the body has to deliver in the right place at the right time):
 
 $$
-J_\text{anchor}(\theta) = J(\theta) + w_a\,\big\|r_\text{ch,sim}(t_\text{impact}) - r_\text{ch,meas}(t_\text{impact})\big\|^2
+J_\text{anchor}(\theta) = J(\theta) + w_a\,\big\|r_\text{grip,sim}(t_\text{impact}) - r_\text{grip,meas}(t_\text{impact})\big\|^2
 $$
 
-`w_a` defaults to `10·w_p`. `t_impact` is detected from the measured swing as the time of maximum clubhead speed.
+`w_a` defaults to `10·w_pg`. `t_impact` is taken from the documented event-marker `I_sample` in the source xlsx when present, falling back to the speed-argmax heuristic on the resampled trace.
+
+### Backward compatibility
+
+Older callers that set only `opts.w_position` and `opts.w_orientation` get the legacy butt+clubhead behaviour (both summed into the position term, club orientation only). New callers should set the explicit `w_position_grip` / `w_position_clubhead` / `w_orientation_grip` / `w_orientation_club` weights.
 
 ## Regularizer: minimum total mechanical work
 
@@ -87,14 +98,21 @@ These match the discrete cost used by `MachineLearning/optimize_torque_sequence_
 ```matlab
 function opts = default_cost_options()
     opts = struct();
-    opts.w_position        = 1.0;       % position weight
-    opts.w_orientation     = 0.1;       % orientation weight (radians^2 vs metres^2)
-    opts.w_anchor_impact   = 10.0;      % impact-anchor multiplier on w_position
-    opts.regularizer       = "total_work";
-    opts.lambda            = 1e-4;      % regularizer strength
-    opts.q_orientation_repr = "quaternion";  % "quaternion" | "rotmat"
-    opts.time_alignment    = "impact";  % "impact" | "address" | "none"
-    opts.resample_to_hz    = 1000;      % match simulation sample_rate
+    % --- New grip-primary weights (recommended) -----------------------------
+    opts.w_position_grip      = 1.0;        % grip position weight (m^-2)
+    opts.w_position_clubhead  = 0.0;        % clubhead position weight (default 0; raise for soft supervision)
+    opts.w_orientation_grip   = 0.5;        % grip orientation weight (rad^-2)
+    opts.w_orientation_club   = 0.0;        % club orientation weight (default 0)
+    opts.w_anchor_impact      = 10.0;       % impact-anchor multiplier on grip position term
+    % --- Common / shared -----------------------------------------------------
+    opts.regularizer        = "total_work";
+    opts.lambda             = 1e-4;
+    opts.q_orientation_repr = "quaternion"; % "quaternion" | "rotmat"
+    opts.time_alignment     = "impact";     % "impact" | "address" | "none"
+    opts.resample_to_hz     = 1000;
+    % --- Backward-compat aliases (older callers) -----------------------------
+    opts.w_position    = 1.0;        % legacy: w_position_grip + w_position_clubhead
+    opts.w_orientation = 0.1;        % legacy: w_orientation_club
 end
 ```
 
