@@ -8,13 +8,22 @@ function summary = run_frame_by_frame_torque_search(manifestFile)
 % existing polynomial-input swing workflow.
 %
 % This file defines the workflow contract and deterministic orchestration.
-% The actual stateful Simscape step is intentionally an extension point:
-% implement evaluateFrameByFrameTorqueCandidate and extractFrameByFrameState
-% for GolfSwing3D_Kinetic before using this for production overnight runs.
+% The actual stateful Simscape step is delegated to the +frame_search
+% package: evaluateFrameByFrameTorqueCandidate, extractFrameByFrameState,
+% and extractPredictedTarget all forward to frame_search.* helpers, which
+% restore xFinal between frames and apply candidate torques as flat
+% polynomial overrides on GolfSwing3D_Kinetic. See FRAME_BY_FRAME_OPTIMIZATION.md.
+
+% Ensure the +frame_search package is reachable when this runner is called
+% via an absolute path without the parent on the MATLAB path.
+runnerFile = mfilename('fullpath');
+matlabDir = fileparts(runnerFile);
+if exist(fullfile(matlabDir, '+frame_search'), 'dir') && ~contains(path, matlabDir)
+    addpath(matlabDir);
+end
 
 if nargin < 1 || isempty(manifestFile)
-    thisFile = mfilename('fullpath');
-    mlDir = fileparts(fileparts(thisFile));
+    mlDir = fileparts(matlabDir);
     manifestFile = fullfile( ...
         mlDir, 'data', 'processed', 'frame_by_frame_search.json');
 end
@@ -343,21 +352,21 @@ score = scoreCandidate(simOut, torqueRow, targetFrame, config, previousTorque);
 end
 
 function [simOut, candidateState] = evaluateFrameByFrameTorqueCandidate( ...
-    modelName, currentState, torqueRow, targetFrame, config, controlColumns) %#ok<INUSD>
-simOut = []; %#ok<NASGU>
-candidateState = currentState; %#ok<NASGU>
-error([ ...
-    'Frame-by-frame Simscape stepping is not implemented yet. ', ...
-    'Implement evaluateFrameByFrameTorqueCandidate for GolfSwing3D_Kinetic ', ...
-    'to restore currentState, apply torqueRow over the configured horizon, ', ...
-    'and return the candidate simOut.']);
+    modelName, currentState, torqueRow, targetFrame, config, controlColumns)
+%EVALUATEFRAMEBYFRAMETORQUECANDIDATE  GolfSwing3D_Kinetic candidate hook.
+%
+% Delegates to frame_search.evaluate_candidate_step which restores the
+% previous frame's final state, applies torqueRow as a constant polynomial
+% torque over the manifest's short horizon, and runs the model. The
+% per-frame state hand-off is via Simulink SaveFinalState/InitialState
+% (xFinal). Errors raised by the helper are propagated unchanged.
+[simOut, candidateState] = frame_search.evaluate_candidate_step( ...
+    modelName, currentState, torqueRow, targetFrame, config, controlColumns);
 end
 
-function nextState = extractFrameByFrameState(simOut, previousState, config) %#ok<INUSD>
-nextState = previousState;
-if isstruct(nextState) && isfield(nextState, 'frame_index')
-    nextState.frame_index = nextState.frame_index + 1;
-end
+function nextState = extractFrameByFrameState(simOut, previousState, config)
+%EXTRACTFRAMEBYFRAMESTATE  Pull final (q, qd, xFinal, time) into next state.
+nextState = frame_search.extract_state(simOut, previousState, config);
 end
 
 function score = scoreCandidate(simOut, torqueRow, targetFrame, config, previousTorque)
@@ -376,16 +385,10 @@ smoothness = config.search.weights.smoothness * sum((torqueRow - previousTorque)
 score = tracking + effort + smoothness;
 end
 
-function predicted = extractPredictedTarget(simOut, targetFrame) %#ok<INUSD>
-% Extension point: map logged Simscape outputs to targetFrame field names.
-% The default returns an empty struct so production runs cannot silently claim
-% good tracking without a model-specific implementation.
-predicted = struct();
-if isempty(fieldnames(predicted))
-    error([ ...
-        'Target extraction is not implemented yet. Map Simscape logs to the ', ...
-        'desired club/body target columns before running the search.']);
-end
+function predicted = extractPredictedTarget(simOut, targetFrame)
+% Pull each manifest target column from the candidate simOut at the final
+% sample. Missing columns raise frame_search:extract_predicted:missingColumn.
+predicted = frame_search.extract_predicted(simOut, targetFrame);
 end
 
 function weight = targetWeight(columnName, weights)
