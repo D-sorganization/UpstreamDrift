@@ -645,5 +645,11 @@ Bumped spec file slightly to bypass the spec check in CI.
 Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linalg.norm` to prevent `TypeError` on non-1D ndarrays.
 
 | 2026-05-06 | 1.0.122 | Added golf-ml replay diagnostics and smoothing/poly export tuning (PR #4058). |
+| 2026-05-06 | 1.0.121 | Added clubface/ClubLogs target adapter for motion-matching (PR #4051). |
+| 2026-05-06 | 1.0.118 | Added ML surrogate validation splits by swing phase (PR #4054). |
+| 2026-05-06 | 1.0.120 | Added ML closed-loop replay diagnostics harness (PR #4055). |
+| 2026-05-06 | 1.0.124 | Added ML checkpoint/resume and progress artifacts for frame search (PR #4057). |
+| 2026-05-06 | 1.0.123 | Added ML dynamics-consistent two-stage trajectory optimizer (PR #4059). |
+| 2026-05-06 | 1.0.117 | Added unified Metrics schema for motion-matching (PR #4052). |
 | 2026-05-06 | 1.0.115 | Added motion-matching support for wiring Optical C3D marker maps to the physics models (PR #4048). |
 | 2026-05-06 | 1.0.116 | Added MachineLearning orientation and work-regularizer cost parity for motion-matching (PR #4053). |

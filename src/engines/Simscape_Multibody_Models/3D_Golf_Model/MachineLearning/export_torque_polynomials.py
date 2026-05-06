@@ -29,46 +29,21 @@ SmoothingConfig = _torque_smoothing_loader.SmoothingConfig
 polynomial_residual_diagnostic = _torque_smoothing_loader.polynomial_residual_diagnostic
 smooth_torque = _torque_smoothing_loader.smooth_torque
 
+from src.shared.python.motion_matching.control_names import (
+    COEFFICIENT_LETTERS as _CANONICAL_COEFFICIENT_LETTERS,
+)
+from src.shared.python.motion_matching.control_names import (
+    TORQUE_TO_POLYNOMIAL_BASE,
+)
+
 LOGGER = logging.getLogger(__name__)
 DEFAULT_RESIDUAL_THRESHOLD = 0.5  # N*m absolute residual warning threshold
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_OUTPUT = SCRIPT_DIR / "data" / "processed" / "ml_torque_polynomial_inputs.mat"
 
-COEFFICIENT_LETTERS = "ABCDEFG"
-
-TORQUE_TO_POLYNOMIAL_BASE = {
-    "LScapLogs_ActuatorTorqueX": "LScapInputX",
-    "LScapLogs_ActuatorTorqueY": "LScapInputY",
-    "RScapLogs_ActuatorTorqueX": "RScapInputX",
-    "RScapLogs_ActuatorTorqueY": "RScapInputY",
-    "LSLogs_ActuatorTorqueX": "LSInputX",
-    "LSLogs_ActuatorTorqueY": "LSInputY",
-    "LSLogs_ActuatorTorqueZ": "LSInputZ",
-    "RSLogs_ActuatorTorqueX": "RSInputX",
-    "RSLogs_ActuatorTorqueY": "RSInputY",
-    "RSLogs_ActuatorTorqueZ": "RSInputZ",
-    "SpineLogs_ActuatorTorqueX": "SpineInputX",
-    "SpineLogs_ActuatorTorqueY": "SpineInputY",
-    "HipLogs_TranslationForceXInput": "TranslationInputX",
-    "HipLogs_TranslationForceYInput": "TranslationInputY",
-    "HipLogs_TranslationForceZInput": "TranslationInputZ",
-    "HipLogs_HipTorqueXInput": "HipInputX",
-    "HipLogs_HipTorqueYInput": "HipInputY",
-    "HipLogs_HipTorqueZInput": "HipInputZ",
-    "LScapTorqueXInput": "LScapInputX",
-    "LScapTorqueYInput": "LScapInputY",
-    "RScapTorqueXInput": "RScapInputX",
-    "RScapTorqueYInput": "RScapInputY",
-    "LSTorqueXInput": "LSInputX",
-    "LSTorqueYInput": "LSInputY",
-    "LSTorqueZInput": "LSInputZ",
-    "RSTorqueXInput": "RSInputX",
-    "RSTorqueYInput": "RSInputY",
-    "RSTorqueZInput": "RSInputZ",
-    "HipTorqueXInput": "HipInputX",
-    "HipTorqueYInput": "HipInputY",
-    "HipTorqueZInput": "HipInputZ",
-}
+# Preserve the legacy string form ("ABCDEFG") expected by ``zip`` consumers
+# below; the canonical tuple lives in ``motion_matching.control_names``.
+COEFFICIENT_LETTERS = "".join(_CANONICAL_COEFFICIENT_LETTERS)
 
 
 def _fit_hex_polynomial(time: np.ndarray, values: np.ndarray) -> np.ndarray:
