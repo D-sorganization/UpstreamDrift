@@ -84,6 +84,7 @@ class TestLoggerUtils:
         logger_utils.setup_logging()
         # Verify root logger has handlers configured
         import logging
+
         assert len(logging.root.handlers) >= 0
 
 

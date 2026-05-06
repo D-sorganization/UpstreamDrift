@@ -176,6 +176,76 @@ club acceleration normalized RMSE: [0.001749, 0.002436, 0.002921]
 
 This path is more controllable than the direct torque-to-club path because it can impose body-motion efficiency terms before solving for torques.
 
+## Matching Objective And Diagnostics
+
+The redundant-control problem should be optimized as a weighted trajectory
+objective, not as a single inverse model lookup. A practical objective is:
+
+```text
+minimize J =
+  || club(q, qdot, qddot) - club_target ||_W^2
+  + lambda_work * integral(sum(max(tau_i * qdot_i, 0)), dt)
+  + lambda_tau * integral(||tau||_2^2, dt)
+  + lambda_smooth * integral(||d tau / dt||_2^2, dt)
+  + lambda_motion * integral(||q - q_reference||_2^2, dt)
+  + lambda_limits * joint_velocity_torque_limit_penalties
+```
+
+The first term is the club-tracking target. The other terms choose among the
+many torque and body-motion solutions that can produce similar club motion.
+Positive mechanical work is the physically meaningful energy term, because net
+work can cancel across accelerating and braking phases. When paired joint
+velocities are not exported with the torque sequence, use squared torque,
+absolute torque impulse, peak control magnitude, and torque-rate smoothness as
+lower-fidelity effort proxies.
+
+`evaluate_matching_workflow.py` is the current non-blocking feedback harness. It
+does not decide whether a run is acceptable. It writes repeatable metrics and
+plots so each optimization attempt can be compared against previous runs:
+
+```powershell
+py -3.12 src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\evaluate_matching_workflow.py `
+  --target-csv src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\data\processed\TW_ProV1_downswing_club_target_calibrated.csv `
+  --sim-csv src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\data\processed\simulated_club_motion.csv `
+  --torque-csv src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\data\processed\optimized_club_torques.csv `
+  --joint-velocity-csv src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\data\processed\simulated_body_state.csv `
+  --scenario downswing `
+  --run-label downswing_trial_001
+```
+
+Use the resulting JSON/Markdown report to compare:
+
+- whole-trajectory normalized RMSE for club position, velocity, and acceleration
+- impact-window RMSE near ball contact
+- positive mechanical work when paired qdot is available
+- L2 torque effort, L1 torque impulse, peak absolute torque, and torque smoothness
+- weighted objective changes as `lambda_work`, `lambda_tau`, and
+  `lambda_smooth` are swept
+
+This gives a practical way to minimize work required to match the club motion:
+run a Pareto sweep over tracking, effort, and smoothness weights, replay the
+best candidates in MATLAB, then select the lowest-effort candidate whose
+impact-window club error is still acceptable.
+
+The Pareto sweep runner automates the first filtering pass:
+
+```powershell
+py -3.12 src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\run_matching_pareto_sweep.py `
+  --checkpoint src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\runs\club_direct_10_cpu\best_model.pt `
+  --desired-club-csv src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\data\processed\TW_ProV1_downswing_club_target_calibrated.csv `
+  --reference-body-csv src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\data\processed\reference_body_state.csv `
+  --output-dir src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\data\processed\pareto_sweep `
+  --effort-weights 1e-8,1e-7,1e-6 `
+  --smoothness-weights 1e-10,1e-9,1e-8 `
+  --steps 500 `
+  --scenario downswing
+```
+
+Replay the sweep's `best_low_error`, `best_low_effort`, and `knee_point`
+candidates first. This is a practical way to manage redundant torques: search
+the regularization surface, then spend MATLAB time only on candidates that are
+clearly distinct in tracking/effort tradeoff.
+
 ## Preparing A Measured Club Target
 
 The workbook target preparation command is:
@@ -196,6 +266,96 @@ columns: sample, time, clubface_x, clubface_y, clubface_z, clubface_vx, clubface
 ```
 
 The workbook coordinates use the documented global coordinate system in the `Definitions` sheet. The current exporter keeps those measured coordinates as-is. Alignment from measured clubface coordinates to Simscape `ClubLogs_CHGlobal*` coordinates should be verified before using the target in closed-loop optimization.
+
+## Starting State Strategy
+
+The first smoke workflow used row 0 from `club_direct_dynamics.parquet` as the
+reference body state for torque optimization and otherwise relied on the model
+input file already loaded by the MATLAB model. That was enough to prove the
+polynomial input bridge, but it did not explicitly choose an address position.
+
+The start-state workflow is now explicit and separate from the polynomial torque
+inputs:
+
+```text
+start-state MAT file -> StartPosition/StartVelocity variables
+polynomial MAT file  -> sixth-order torque coefficient variables
+```
+
+Two scenarios are supported:
+
+- `full-swing`: exports start positions and velocities from `3DModelInputs.mat`.
+  Use this for an address-position workflow. This should be reviewed visually
+  against the measured motion-capture address before trusting the target match.
+- `downswing`: exports start positions and velocities from
+  `3DModelInputs_TopofBackswing.mat`. Use this when the current model start is
+  already a good end-of-backswing pose and the target is sliced to the downswing.
+
+Export a start state:
+
+```matlab
+cd('C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning')
+addpath(fullfile(pwd, 'matlab'))
+export_start_state_from_input_file( ...
+    "downswing", ...
+    fullfile(pwd, 'data', 'processed', 'ml_downswing_start_state.mat'));
+```
+
+Run the model with both the start-state MAT and polynomial MAT:
+
+```matlab
+simOut = run_ml_polynomial_input_swing( ...
+    fullfile(pwd, 'data', 'processed', 'ml_torque_polynomial_inputs.mat'), ...
+    'GolfSwing3D_Kinetic', ...
+    fullfile(pwd, 'data', 'processed', 'ml_downswing_start_state.mat'));
+```
+
+This is deliberately not blended into the polynomial coefficient file. Starting
+pose and actuator forcing are different control surfaces in the Simscape model
+and should remain separately inspectable.
+
+## Coordinate Calibration
+
+The measured workbook club coordinates and the Simscape club-head logs can have
+different origin, scale, and axis orientation. The calibration script fits either
+a similarity transform or a full affine transform from measured clubface
+positions to Simscape `ClubLogs_CHGlobalPosition_*` positions:
+
+```powershell
+py -3.12 src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\calibrate_club_target_to_sim.py `
+  --target-csv src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\data\processed\TW_ProV1_downswing_club_target.csv `
+  --sim-csv src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\data\processed\simulated_club_motion.csv `
+  --output-csv src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\data\processed\TW_ProV1_downswing_club_target_calibrated.csv `
+  --output-json src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\data\processed\club_target_calibration.json
+```
+
+Default `similarity` mode applies:
+
+```text
+club_sim = scale * club_measured * rotation + translation
+```
+
+Velocities and accelerations receive the linear part of the transform without
+the translation. The direct torque optimizer can now consume either workbook
+column names (`clubface_x`, `clubface_vx`, `clubface_ax`) or calibrated
+Simscape target column names (`ClubLogs_CHGlobalPosition_1`, etc.).
+
+Run the calibration validator before using the calibrated target as the
+optimization reference:
+
+```powershell
+py -3.12 src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\validate_club_calibration.py `
+  --measured-target-csv src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\data\processed\TW_ProV1_downswing_club_target.csv `
+  --calibrated-target-csv src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\data\processed\TW_ProV1_downswing_club_target_calibrated.csv `
+  --sim-csv src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\data\processed\simulated_club_motion.csv `
+  --transform-json src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\data\processed\club_target_calibration.json `
+  --output-dir src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning\data\processed\calibration_validation
+```
+
+The JSON/Markdown report and optional plots make frame mistakes visible before
+optimization. Negative determinant, extreme scale, large impact-window
+residuals, and axis-skewed residuals should be treated as model setup issues,
+not tuning problems.
 
 ## One-Model Control Workflow
 
@@ -249,16 +409,66 @@ Risks:
 - Requires careful scaling between measured club coordinates and simulated club coordinates.
 - Needs smoothing across the full trajectory; per-sample optimization can create discontinuous body targets or torques.
 
+## Sequential Frame-By-Frame Fallback
+
+The neural-network path is still the preferred fast iteration loop, but the
+project now also has a deterministic fallback for overnight experiments:
+
+```text
+current Simscape state
+    -> evaluate short-horizon constant-torque candidates
+    -> commit the best candidate for the next target frame
+    -> advance state and repeat
+    -> smooth the piecewise torque profile
+    -> export polynomial inputs
+    -> replay and evaluate target-vs-simulated club motion
+```
+
+This is a sequential optimal-control approximation. It is compute intensive,
+but it gives a concrete way to make progress when the surrogate optimizer is
+not yet faithful enough. The default `coordinate` candidate strategy evaluates
+the current torque plus one-axis perturbations, which scales as:
+
+```text
+1 + control_count * non_zero_candidate_levels
+```
+
+Use full Cartesian candidate sets only for very small control subsets. MATLAB
+candidate evaluation can use `parfor` when Parallel Computing Toolbox is
+available.
+
+The implementation currently includes the manifest builder, GUI tab, MATLAB
+candidate-loop skeleton, smoothing, and polynomial export. The remaining
+model-specific work is to implement the Simscape stepping hooks that restore
+state, apply a constant-torque candidate over the horizon, and extract the next
+state/club target values from `GolfSwing3D_Kinetic`.
+
 ## Next Required Refinements
 
-Before applying optimized torques back into the MATLAB model, add these controls:
+Before relying on optimized torques in production model studies, add these controls:
 
-1. Coordinate alignment between the measured workbook target and Simscape club-head coordinates.
+1. Visual address-pose validation for `3DModelInputs.mat` against the motion-capture address frame.
 2. Bounds for actuator torque/force columns.
-3. Smoothness penalties across adjacent samples.
+3. Joint-specific smoothness and effort penalties across adjacent samples.
 4. A held-out swing split in addition to the current random row split.
-5. Closed-loop replay tests in MATLAB/Simscape.
-6. A sequence-level optimizer that solves the whole club trajectory instead of one timestep at a time.
+5. Model-specific frame-by-frame Simscape stepping hooks for the sequential fallback.
+6. Closed-loop replay tests in MATLAB/Simscape for both full-swing and downswing scenarios.
+7. A sequence-level optimizer that solves the whole club trajectory instead of one timestep at a time.
+
+## MATLAB GUI
+
+`matlab/ml_workflow_gui.m` provides a step-by-step UI for the workflow:
+
+```matlab
+cd('C:\Users\diete\Repositories\UpstreamDrift\src\engines\Simscape_Multibody_Models\3D_Golf_Model\MachineLearning')
+addpath(fullfile(pwd, 'matlab'))
+ml_workflow_gui
+```
+
+The GUI is intentionally thin. It calls the same Python and MATLAB scripts
+documented here so that every button has a reproducible command-line equivalent.
+The tabs separate target/replay, surrogate sweeps, frame-by-frame fallback
+development, and diagnostics.
 
 ## MATLAB Polynomial Input Bridge
 

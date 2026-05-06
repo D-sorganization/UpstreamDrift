@@ -30,16 +30,16 @@
 
 ## 1. Identity
 
-| Field                   | Value                                                                                  |
-| ----------------------- | -------------------------------------------------------------------------------------- |
-| **Repository Name**     | `UpstreamDrift`                                                                        |
-| **GitHub URL**          | `https://github.com/D-sorganization/UpstreamDrift`                                     |
-| **Owner**               | D-sorganization                                                                        |
-| **Primary Language(s)** | Python 3.10+, Rust, TypeScript                                                         |
-| **License**             | MIT                                                                                    |
-| **Current Version**     | 2.1.0                                                                                  |
-| **Spec Version**        | 1.0.111                                                                                |
-| **Last Spec Update**    | 2026-05-05 (Removed misplaced OpenFOAM CFD helper from biomechanical engine inventory) |
+| Field                   | Value                                                     |
+| ----------------------- | --------------------------------------------------------- |
+| **Repository Name**     | `UpstreamDrift`                                           |
+| **GitHub URL**          | `https://github.com/D-sorganization/UpstreamDrift`        |
+| **Owner**               | D-sorganization                                           |
+| **Primary Language(s)** | Python 3.10+, Rust, TypeScript                            |
+| **License**             | MIT                                                       |
+| **Current Version**     | 2.1.0                                                     |
+| **Spec Version**        | 1.0.114                                                   |
+| **Last Spec Update**    | 2026-05-06 (Golf ML matching workflow optimization suite) |
 
 ## 2. Purpose & Mission
 
@@ -146,7 +146,6 @@ UpstreamDrift/
 ├── poetry.lock
 ├── SPEC.md                         # This file
 └── README.md
-```
 
 ### Key Components
 
@@ -299,7 +298,6 @@ engines:
 visualization:
   default_camera: third_person
   background_color: [0.1, 0.1, 0.1, 1.0]
-```
 
 ## 7. Testing Specification
 
@@ -391,6 +389,21 @@ overlapping fixture names in nested conftests.
 Beyond standard tools, CI enforces custom checks:
 
 - **Dependency Direction**: No reverse dependencies (leaf → branch → root)
+- **SAST Delta Scan**: Pull requests run Semgrep against changed supported
+  source/application files and Bandit against changed supported Python
+  source/application files, and Trivy against changed supported
+  dependency/container/config files while non-PR CI retains the full repository
+  scans, keeping new code blocking without letting existing repository baseline
+  findings block unrelated PRs.
+- **Alembic PostgreSQL Round Trip**: PostgreSQL migration round-trip CI has a
+  finite job budget, an explicit SQL readiness probe, isolated pytest plugin
+  loading, and verbose duration output so migration hangs produce actionable
+  diagnostics instead of opaque cancellation or unrelated desktop-display plugin
+  failures.
+- **Core Test Relevance Filter**: Pull requests with no Python source, test,
+  project metadata, or dependency-file changes skip the expensive Python test
+  matrix after checkout so workflow-only and documentation-only CI fixes remain
+  finite on constrained self-hosted runners.
 - **File Size Budget**: No module exceeds 500 lines; classes capped at 200 LOC
 - **Documentation Catalog and Size Budget**: Every top-level `docs/` directory is listed in `docs/index.md`; oversized Markdown/Quarto docs require owned, expiring exceptions.
 - **Import Depth**: Maximum 4 import levels to prevent circular dependencies
@@ -443,7 +456,6 @@ Beyond standard tools, CI enforces custom checks:
 
 | Package    | Version | Purpose                                                                            |
 | ---------- | ------- | ---------------------------------------------------------------------------------- |
-| 2026-04-27 | 1.0.83  | Fixed Bandit B604 false positive alerts in test files by adding nosec annotations. |
 | pytest     | 7.0+    | Testing framework                                                                  |
 | pytest-cov | 4.0+    | Coverage measurement                                                               |
 | hypothesis | 6.0+    | Property-based testing                                                             |
@@ -493,7 +505,6 @@ cd ui && npm install && npm run tauri build
 pytest tests/unit/ -v
 pytest tests/integration/ -v
 pytest tests/ --cov=src --cov-fail-under=55
-```
 
 ### Build Artifacts
 
@@ -542,6 +553,10 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-06 | 1.0.114 | Expanded the golf ML matching workflow with Pareto regularization sweeps, calibration validation reports and plots, positive mechanical-work diagnostics from paired torque/qdot logs, a tabbed MATLAB workflow GUI, and a frame-by-frame sequential torque-search fallback contract with manifest generation, parallel candidate evaluation structure, smoothing, and polynomial export hooks.                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 2026-05-05 | 1.0.112 | Added non-blocking golf ML matching diagnostics for target-vs-Simscape club tracking, impact-window error, torque effort, torque impulse, peak control, and torque-rate smoothness; documented the weighted optimization objective for redundant torque and body-motion selection.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| 2026-05-06 | 1.0.113 | Added a core-test relevance filter to `ci-standard.yml` so pull requests with only workflow, documentation, or other non-Python/non-dependency changes skip the expensive Python test matrix after checkout while source, test, metadata, and dependency changes still run the full matrix.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| 2026-05-05 | 1.0.112 | Made pull-request CI finite in the presence of existing repository-wide blockers: Semgrep SAST, Bandit, and Trivy now scan changed supported files on PRs while retaining full scans for non-PR runs, and the Alembic PostgreSQL round-trip job has a larger finite job budget, an explicit SQL readiness probe, isolated pytest plugin loading, and verbose duration output for diagnostics.                                                                                                                                                                                                                                                                                                                                                                                                               |
 | 2026-05-05 | 1.0.111 | Removed the misplaced experimental OpenFOAM CFD execution helper from UpstreamDrift's biomechanical physics-engine inventory so OpenFOAM execution can live with the Tools_Private glass-model CFD stack where it is used.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | 2026-05-05 | 1.0.110 | Bolt: Optimized clubhead speed computation in swing kinematics by replacing `np.linalg.norm(clubhead_vel, axis=1)` with `np.sqrt(np.einsum("ij,ij->i", clubhead_vel, clubhead_vel))` to avoid temporary array allocations, achieving ~35% performance improvement.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | 2026-05-04 | 1.0.109 | Optimized mean squared error calculation in validation solver by replacing np.mean(residuals\*\*2) with np.vdot(residuals, residuals) / residuals.size.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
@@ -551,6 +566,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-05-04 | 1.0.107 | Replaced six sum-of-squares hot paths in analysis, biomechanics, injury, plotting, data-processing, and validation helpers with `np.vdot`-based accumulators to avoid temporary array allocation while preserving existing R² and load metric behavior.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | 2026-05-03 | 1.0.105 | Realigned the `model_generation.core.contracts` compatibility shim so its invariant alias and helper re-exports stay synchronized with the canonical shared contracts module while remaining Ruff-clean.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | 2026-05-03 | 1.0.103 | Optimized collision detection distance calculations by replacing `np.linalg.norm` with `math.hypot` for 3D collision-distance and gradient normalization paths.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 2026-05-03 | 1.0.98  | Added experimental OpenFOAM CFD execution support to the engine inventory, including `decomposeParDict` generation and MPI command plumbing for parallel OpenFOAM runs.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | 2026-05-03 | 1.0.100 | Repaired issue #3926 CI hygiene by updating CI Standard to the working Trivy action pin, syncing generated dependency artifacts with `pyproject.toml`, exempting vendored trees from doc-size budgeting, and removing obsolete helper/backup files.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | 2026-05-03 | 1.0.99  | Tightened issue #3912 quality ratchets by adding a 2026-08-01 mypy exclusion cap reduction to 44, validating monotonic exclusion schedules, and adding owned production package coverage-ratchet metadata for API routes, data I/O, execution/checkpointing, deployment, optimization, and engine adapters.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | 2026-05-03 | 1.0.101 | Tightened the security/dependency guardrails for issue #3844 by pinning `python-dotenv>=1.2.2`, pruning stale pip-audit waivers, sending stale-waiver diagnostics to stderr so CI fails cleanly before invoking `pip-audit`, and aligning `critical-files-guard.yml` with the repository’s actual root files.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
@@ -582,7 +598,6 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-04-02 | 1.0.11  | Bolt: Optimized `np.linalg.norm(..., axis=1)` to explicit squared distances in `trajectory_funnel_benchmark.py` to avoid expensive reduction and sqrt overhead.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | 2026-04-29 | 1.0.11  | Bolt: Replaced np.linalg.norm with math.hypot in collision shapes for 3D vector distance optimization                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | 2026-04-29 | 1.0.11  | Bolt: Replaced np.linalg.norm with math.hypot in collision shapes for 3D vector distance optimization.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| 2026-04-29 | 1.0.11  | Bolt: Replaced np.linalg.norm with math.hypot in collision shapes for 3D vector distance optimization                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | 2026-04-01 | 1.0.8   | Sentinel: restricted legacy `np.load` callers to `allow_pickle=False` in shared I/O and golf-physics utilities, matching the repository's no-unsafe-deserialization policy.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | 2026-04-01 | 1.0.7   | Bolt: Optimized `np.linalg.norm` to explicit element-wise calculation for camera framing in GUI                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | 2026-03-31 | 1.0.6   | Bolt: Optimized `np.linalg.norm` to explicit element-wise calculation for validation metrics                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
@@ -601,7 +616,6 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 ---
 
-<!--
   SPEC MAINTENANCE RULES:
 
   1. WHEN TO UPDATE: Any PR that adds, removes, or changes functionality
@@ -616,7 +630,6 @@ blocks Python package publication on the built-wheel smoke matrix.
 
   5. VERSION: Bump the Spec Version field when making substantive changes.
      Use semver: major (structure change), minor (new features), patch (corrections).
--->
 
 ## 2026-04-28 Spec Bump
 
@@ -630,3 +643,12 @@ Bumped spec file slightly to bypass the spec check in CI.
 ## 3D Vector Distances Note
 
 Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linalg.norm` to prevent `TypeError` on non-1D ndarrays.
+
+| 2026-05-06 | 1.0.121 | Added clubface/ClubLogs target adapter for motion-matching (PR #4051). |
+| 2026-05-06 | 1.0.118 | Added ML surrogate validation splits by swing phase (PR #4054). |
+| 2026-05-06 | 1.0.120 | Added ML closed-loop replay diagnostics harness (PR #4055). |
+| 2026-05-06 | 1.0.124 | Added ML checkpoint/resume and progress artifacts for frame search (PR #4057). |
+| 2026-05-06 | 1.0.123 | Added ML dynamics-consistent two-stage trajectory optimizer (PR #4059). |
+| 2026-05-06 | 1.0.117 | Added unified Metrics schema for motion-matching (PR #4052). |
+| 2026-05-06 | 1.0.115 | Added motion-matching support for wiring Optical C3D marker maps to the physics models (PR #4048). |
+| 2026-05-06 | 1.0.116 | Added MachineLearning orientation and work-regularizer cost parity for motion-matching (PR #4053). |

@@ -11,45 +11,20 @@ import numpy as np
 import pandas as pd
 from scipy.io import savemat
 
+from src.shared.python.motion_matching.control_names import (
+    COEFFICIENT_LETTERS as _CANONICAL_COEFFICIENT_LETTERS,
+)
+from src.shared.python.motion_matching.control_names import (
+    TORQUE_TO_POLYNOMIAL_BASE,
+)
+
 LOGGER = logging.getLogger(__name__)
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_OUTPUT = SCRIPT_DIR / "data" / "processed" / "ml_torque_polynomial_inputs.mat"
 
-COEFFICIENT_LETTERS = "ABCDEFG"
-
-TORQUE_TO_POLYNOMIAL_BASE = {
-    "LScapLogs_ActuatorTorqueX": "LScapInputX",
-    "LScapLogs_ActuatorTorqueY": "LScapInputY",
-    "RScapLogs_ActuatorTorqueX": "RScapInputX",
-    "RScapLogs_ActuatorTorqueY": "RScapInputY",
-    "LSLogs_ActuatorTorqueX": "LSInputX",
-    "LSLogs_ActuatorTorqueY": "LSInputY",
-    "LSLogs_ActuatorTorqueZ": "LSInputZ",
-    "RSLogs_ActuatorTorqueX": "RSInputX",
-    "RSLogs_ActuatorTorqueY": "RSInputY",
-    "RSLogs_ActuatorTorqueZ": "RSInputZ",
-    "SpineLogs_ActuatorTorqueX": "SpineInputX",
-    "SpineLogs_ActuatorTorqueY": "SpineInputY",
-    "HipLogs_TranslationForceXInput": "TranslationInputX",
-    "HipLogs_TranslationForceYInput": "TranslationInputY",
-    "HipLogs_TranslationForceZInput": "TranslationInputZ",
-    "HipLogs_HipTorqueXInput": "HipInputX",
-    "HipLogs_HipTorqueYInput": "HipInputY",
-    "HipLogs_HipTorqueZInput": "HipInputZ",
-    "LScapTorqueXInput": "LScapInputX",
-    "LScapTorqueYInput": "LScapInputY",
-    "RScapTorqueXInput": "RScapInputX",
-    "RScapTorqueYInput": "RScapInputY",
-    "LSTorqueXInput": "LSInputX",
-    "LSTorqueYInput": "LSInputY",
-    "LSTorqueZInput": "LSInputZ",
-    "RSTorqueXInput": "RSInputX",
-    "RSTorqueYInput": "RSInputY",
-    "RSTorqueZInput": "RSInputZ",
-    "HipTorqueXInput": "HipInputX",
-    "HipTorqueYInput": "HipInputY",
-    "HipTorqueZInput": "HipInputZ",
-}
+# Preserve the legacy string form ("ABCDEFG") expected by ``zip`` consumers
+# below; the canonical tuple lives in ``motion_matching.control_names``.
+COEFFICIENT_LETTERS = "".join(_CANONICAL_COEFFICIENT_LETTERS)
 
 
 def _fit_hex_polynomial(time: np.ndarray, values: np.ndarray) -> np.ndarray:
@@ -89,13 +64,14 @@ def export_polynomial_inputs(
         raise ValueError("No torque columns matched known MATLAB polynomial inputs")
 
     mat_payload: dict[str, np.ndarray] = {}
-    summary = {
+    fit_summaries: dict[str, dict[str, object]] = {}
+    summary: dict[str, object] = {
         "source": str(torque_csv),
         "output_mat": str(output_mat),
         "time_column": time_column,
         "time_min": float(np.nanmin(time)),
         "time_max": float(np.nanmax(time)),
-        "fits": {},
+        "fits": fit_summaries,
     }
 
     for torque_column, matlab_base in mapped_columns.items():
@@ -103,7 +79,7 @@ def export_polynomial_inputs(
         coeffs = _fit_hex_polynomial(time, values)
         for letter, value in zip(COEFFICIENT_LETTERS, coeffs, strict=True):
             mat_payload[f"{matlab_base}{letter}"] = np.asarray([[value]], dtype=float)
-        summary["fits"][torque_column] = {
+        fit_summaries[torque_column] = {
             "matlab_base": matlab_base,
             "coefficients_A_to_G": coeffs.tolist(),
             "rmse": float(np.sqrt(np.mean((np.polyval(coeffs, time) - values) ** 2))),

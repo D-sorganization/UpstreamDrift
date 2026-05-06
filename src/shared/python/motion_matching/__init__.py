@@ -1,4 +1,4 @@
-"""Motion matching: club-target ingestion and trajectory comparison.
+"""Motion matching: club-target ingestion, dataset access, trajectory comparison.
 
 Public API:
     ClubTarget       -- canonical frozen dataclass for a measured swing.
@@ -7,6 +7,10 @@ Public API:
     load_club_target_excel -- Wiffle/ProV1 xlsx loader.
     load_club_target_c3d   -- Optical C3D loader.
     synthesize_target_from_coefficients -- stub; awaiting #014/#018.
+
+The ``dataset`` sub-package is imported on demand; see
+``src.shared.python.motion_matching.dataset`` for the random-sweep parquet
+loader and synthetic generator.
 
 See ``src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/
 shared/CLUB_IK_SPEC.md`` for the canonical schema.

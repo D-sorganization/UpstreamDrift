@@ -27,7 +27,7 @@ def _evaluate_precondition(
     the decorated function's parameters (e.g. ``lambda gender_factor: ...``
     should receive ``gender_factor`` by name, not the first positional arg).
     Falls back to positional call only when the condition accepts all args.
-    
+
     Raises:
         ContractEvaluationError: If the condition cannot be evaluated due to
             signature mismatches, type errors, or other evaluation failures.
@@ -36,7 +36,7 @@ def _evaluate_precondition(
         raise ValueError("condition must be provided")
     if not (condition is not None):
         raise ValueError("condition must be provided")
-    
+
     # Try name-based binding first
     try:
         func_sig = inspect.signature(func)
@@ -118,7 +118,14 @@ def postcondition(
 
             try:
                 check = condition(result)
-            except (TypeError, ValueError, ZeroDivisionError, AttributeError, KeyError, ArithmeticError) as exc:
+            except (
+                TypeError,
+                ValueError,
+                ZeroDivisionError,
+                AttributeError,
+                KeyError,
+                ArithmeticError,
+            ) as exc:
                 raise ContractEvaluationError(
                     f"Failed to evaluate postcondition for {func.__qualname__}: {exc}"
                 ) from exc
