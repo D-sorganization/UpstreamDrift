@@ -45,14 +45,27 @@ summary = run_frame_by_frame_torque_search( ...
     "src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/data/processed/frame_by_frame_search.json");
 ```
 
-The skeleton intentionally does not claim a complete Simscape stepping
-implementation. The runner calls these extension points:
+The runner calls three extension points, all implemented in the
+`+frame_search` package alongside `run_frame_by_frame_torque_search.m`:
 
-- `evaluateFrameByFrameTorqueCandidate(modelName, state, candidate, target, config)`
-- `extractFrameByFrameState(simOut, previousState, config)`
+- `evaluateFrameByFrameTorqueCandidate` →
+  `frame_search.evaluate_candidate_step`. Restores the previous frame's
+  `xFinal` (or a starting-state MAT on the first frame), applies the
+  candidate as a constant polynomial torque (constant term `<base>G`,
+  higher terms zero), and runs the model from `currentState.time` to the
+  next manifest target time with `SaveFinalState='on'`.
+- `extractFrameByFrameState` → `frame_search.extract_state`. Pulls the
+  Simulink final-state struct, the last-sample time, and (when manifest
+  joint columns are present) the joint position/velocity vectors.
+- `extractPredictedTarget` → `frame_search.extract_predicted`. Resolves
+  each manifest target column (e.g. `ClubLogs_CHGlobalPosition_1`) via
+  `CombinedSignalBus` or `logsout` and returns the value at the final
+  sample. Missing columns raise an actionable MATLAB error.
 
-Those hooks must be implemented against the concrete `GolfSwing3D_Kinetic`
-state save/restore mechanics before production runs.
+Pure helpers in the package
+(`parse_target_column`, `control_column_to_polynomial_base`,
+`apply_constant_torque`, `frame_horizon`, `lookup_signal_value`) are
+unit-tested in `matlab/tests/test_frame_by_frame_hooks.m`.
 
 ## Outputs
 
@@ -86,9 +99,10 @@ as:
 candidate_level_count ^ control_count
 ```
 
-## Current Blocker
+## Status
 
-The workflow contract and deterministic planning are in place, but real
-stateful Simscape stepping still requires model-specific hook implementations.
-Until those hooks exist, the MATLAB runner raises a clear error at the candidate
-evaluation extension point.
+Stepping hooks are implemented for `GolfSwing3D_Kinetic` (issue #3977). The
+runner restores the previous frame's `xFinal`, applies the candidate as a
+flat polynomial torque, and resumes — so the `parfor` and serial paths can
+execute real short-horizon trials. Validate end-to-end with a tiny
+downswing slice before scheduling overnight runs.
