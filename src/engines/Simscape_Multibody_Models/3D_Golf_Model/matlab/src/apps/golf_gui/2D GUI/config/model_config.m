@@ -23,9 +23,11 @@ function config = model_config()
     config.sample_time = 0.0001;
     config.interpolation_method = 'spline';
 
-    % File paths
-    config.base_path = matlabdrive;
-    config.model_path = fullfile(config.base_path, '2DModel');
+    % File paths (self-locating: this config lives at
+    % <matlab>/src/apps/golf_gui/2D GUI/config/)
+    config.config_path = fileparts(mfilename('fullpath'));
+    config.model_path = fileparts(fileparts(fileparts(fileparts(fileparts(config.config_path)))));
+    config.base_path = config.model_path;
     config.scripts_path = fullfile(config.model_path, 'Scripts');
     config.tables_path = fullfile(config.model_path, 'Tables');
     config.output_path = fullfile(config.model_path, 'Model Output');

@@ -1,4 +1,9 @@
 function PLOT__Plots()
+% Self-locating: this function lives at <matlab>/src/scripts/plotting/.
+% modelRoot points to the model's matlab/ folder (the repo equivalent of
+% the legacy MATLAB Drive 3D model directory).
+modelRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));
+
 %%% ====== Start of SCRIPT_901_3D_PLOT_Data_AngularWork.m ======
 figure(901);
 hold on;
@@ -17,8 +22,7 @@ legend('Location','southeast');
 title('Angular Work on Distal Segment');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Angular Work');
 pause(PauseTime);
 %Close Figure
@@ -44,8 +48,7 @@ legend('Location','southeast');
 title('Angular Power on Distal Segment');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Angular Power');
 pause(PauseTime);
 %Close Figure
@@ -71,8 +74,7 @@ legend('Location','southeast');
 title('Linear Power on Distal Segment');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Linear Power');
 pause(PauseTime);
 %Close Figure
@@ -98,8 +100,7 @@ legend('Location','southeast');
 title('Linear Work on Distal Segment');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Linear Work on Distal');
 pause(PauseTime);
 %Close Figure
@@ -151,8 +152,7 @@ legend('Location','southeast');
 title('Joint Torque Inputs');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Joint Torque Inputs');
 pause(PauseTime);
 %Close Figure
@@ -178,8 +178,7 @@ legend('Location','southeast');
 title('Total Work on Distal Segment');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Total Work');
 pause(PauseTime);
 %Close Figure
@@ -205,8 +204,7 @@ legend('Location','southeast');
 title('Total Power on Distal Segment');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Total Power');
 pause(PauseTime);
 %Close Figure
@@ -227,8 +225,7 @@ legend('Location','southeast');
 title('Force Along Hand Path');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Plot - Force Along Hand Path');
 pause(PauseTime);
 %Close Figure
@@ -251,8 +248,7 @@ legend('Location','southeast');
 title('Clubhead and Hand Speed');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Plot - CHS and Hand Speed');
 pause(PauseTime);
 %Close Figure
@@ -276,8 +272,7 @@ title('Force Along Hand Path');
 subtitle('Data');
 %subtitle('Left Hand, Right Hand, Total');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Plot - Force Along Hand Path - LH RH Total');
 pause(PauseTime);
 %Close Figure
@@ -298,8 +293,7 @@ legend('Location','southeast');
 title('Linear Impulse');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Plot - Linear Impulse');
 pause(PauseTime);
 %Close Figure
@@ -323,8 +317,7 @@ title('Linear Work');
 subtitle('Data');
 %subtitle('Left Hand, Right Hand, Total');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Plot - Linear Work');
 pause(PauseTime);
 %Close Figure
@@ -348,8 +341,7 @@ title('Linear Impulse');
 subtitle('Data');
 %subtitle('Left Hand, Right Hand, Total');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Plot - Linear Impulse LH,RH,Total');
 pause(PauseTime);
 %Close Figure
@@ -375,8 +367,7 @@ legend('Location','southeast');
 title('Equivalent Couple, Moment of Force, Sum of Moments');
 subtitle('Data - Grip Reference Frame');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Plot - Equivalent Couple and MOF');
 pause(PauseTime);
 %Close Figure
@@ -399,8 +390,7 @@ legend('Location','southeast');
 title('Left Shoulder Work on Distal Segment');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Left Shoulder Work');
 pause(PauseTime);
 %Close Figure
@@ -423,8 +413,7 @@ legend('Location','southeast');
 title('Left Shoulder Power on Distal Segment');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Left Shoulder Power');
 pause(PauseTime);
 %Close Figure
@@ -447,8 +436,7 @@ legend('Location','southeast');
 title('Right Shoulder Work on Distal Segment');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Right Shoulder Work');
 pause(PauseTime);
 %Close Figure
@@ -471,8 +459,7 @@ legend('Location','southeast');
 title('Right Shoulder Power on Distal Segment');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Right Shoulder Power');
 pause(PauseTime);
 %Close Figure
@@ -495,8 +482,7 @@ legend('Location','southeast');
 title('Left Elbow Work on Distal Segment');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Left Elbow Work');
 pause(PauseTime);
 %Close Figure
@@ -519,8 +505,7 @@ legend('Location','southeast');
 title('Left Elbow Power on Distal Segment');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Left Elbow Power');
 pause(PauseTime);
 %Close Figure
@@ -543,8 +528,7 @@ legend('Location','southeast');
 title('Right Elbow Work on Distal Segment');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Right Elbow Work');
 pause(PauseTime);
 %Close Figure
@@ -567,8 +551,7 @@ legend('Location','southeast');
 title('Right Elbow Power on Distal Segment');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Right Elbow Power');
 pause(PauseTime);
 %Close Figure
@@ -591,8 +574,7 @@ legend('Location','southeast');
 title('Left Wrist Work on Distal Segment');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Left Hand Work');
 pause(PauseTime);
 %Close Figure
@@ -615,8 +597,7 @@ legend('Location','southeast');
 title('Left Wrist Power on Distal Segment');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Left Wrist Power');
 pause(PauseTime);
 %Close Figure
@@ -639,8 +620,7 @@ legend('Location','southeast');
 title('Right Wrist Work on Distal Segment');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Right Wrist Work');
 pause(PauseTime);
 %Close Figure
@@ -663,8 +643,7 @@ legend('Location','southeast');
 title('Right Wrist Power on Distal Segment');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Right Wrist Power');
 pause(PauseTime);
 %Close Figure
@@ -690,8 +669,7 @@ legend('Location','southeast');
 title('Local Hand Forces on Club');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-cd '3DModel';
+cd(modelRoot);
 savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Local Hand Forces');
 pause(PauseTime);
 %Close Figure
@@ -762,8 +740,8 @@ legend('Location','southeast');
 title('Joint Torque Inputs');
 subtitle('Data');
 %Save Figure
-cd(matlabdrive);
-savefig('3DModel/Scripts/_Model Data Scripts/Data Charts/Data_Plot - Joint Torque Inputs');
+cd(modelRoot);
+savefig('Scripts/_Model Data Scripts/Data Charts/Data_Plot - Joint Torque Inputs');
 pause(PauseTime);
 %Close Figure
 close(950);

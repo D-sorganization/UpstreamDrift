@@ -6,12 +6,10 @@
 % determined for the time in which the model has the same position and
 % velocity as in the swing but the joint torques are zero.
 
-cd(matlabdrive);
-cd '2DModel';
+cd(fileparts(mfilename('fullpath')));
 GolfSwing
 
-cd(matlabdrive);
-cd '2DModel/Scripts';
+cd(fullfile(fileparts(mfilename('fullpath')), 'Scripts'));
 SCRIPT_mdlWks_Generate;
 
 % Turn on / off dampening in the killswitch
@@ -42,8 +40,7 @@ set_param(GolfSwing,"MaxStep","0.001");
 out=sim(GolfSwing);
 
 % Run Table Generation Script on "out"
-cd(matlabdrive);
-cd '2DModel/Scripts';
+cd(fullfile(fileparts(mfilename('fullpath')), 'Scripts'));
 SCRIPT_TableGeneration;
 
 % Create table called BaseData with the "Data" Table from run with no
@@ -203,42 +200,35 @@ clear ZTCFTime;
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Run the correction program for linear work and linear impulse for ZTCF and
 % DELTA.
-cd(matlabdrive);
-cd '2DModel/Scripts';
+cd(fullfile(fileparts(mfilename('fullpath')), 'Scripts'));
 SCRIPT_UpdateCalcsforImpulseandWork;
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Run the Q spacing program for the plots:
-cd(matlabdrive);
-cd '2DModel/Scripts';
+cd(fullfile(fileparts(mfilename('fullpath')), 'Scripts'));
 SCRIPT_QTableTimeChange;
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Run the Calculation for Total Work and Power at Each Joint
-cd(matlabdrive);
-cd '2DModel/Scripts';
+cd(fullfile(fileparts(mfilename('fullpath')), 'Scripts'));
 SCRIPT_TotalWorkandPowerCalculation;
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Generate Club and Hand Path Vectors in the Tables
-cd(matlabdrive);
-cd '2DModel/Scripts';
+cd(fullfile(fileparts(mfilename('fullpath')), 'Scripts'));
 SCRIPT_CHPandMPPCalculation;
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Run Table of Values Script and Generate Data for Shaft Quivers at Times
 % of interest
-cd(matlabdrive);
-cd '2DModel/Scripts';
+cd(fullfile(fileparts(mfilename('fullpath')), 'Scripts'));
 SCRIPT_TableofValues;
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Save the tables
-cd(matlabdrive)
-cd '2DModel'
+cd(fileparts(mfilename('fullpath')));
 mkdir 'Tables';
-cd(matlabdrive);
-cd '2DModel/Tables/';
+cd(fullfile(fileparts(mfilename('fullpath')), 'Tables'));
 save('BASE.mat',"BASE");
 save('ZTCF.mat',"ZTCF");
 save('DELTA.mat',"DELTA");
@@ -253,30 +243,25 @@ save("SummaryTable.mat","SummaryTable");
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Run the ZVCF Script:
-cd(matlabdrive);
-cd '2DModel/Scripts';
+cd(fullfile(fileparts(mfilename('fullpath')), 'Scripts'));
 SCRIPT_ZVCF_GENERATOR;
 
 % Save the ZVCF Tables
-cd(matlabdrive);
-cd '2DModel';
+cd(fileparts(mfilename('fullpath')));
 mkdir 'Tables';
-cd(matlabdrive);
-cd '2DModel/Tables/';
+cd(fullfile(fileparts(mfilename('fullpath')), 'Tables'));
 save('ZVCFTable.mat',"ZVCFTable");
 save('ZVCFTableQ.mat',"ZVCFTableQ");
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Run the Plotting Script:
-cd(matlabdrive);
-cd '2DModel/Scripts';
+cd(fullfile(fileparts(mfilename('fullpath')), 'Scripts'));
 SCRIPT_AllPlots;
 
 clear ZTCFPercentComplete;
 
-%Retun to 2DModel home page on matlab drive
-cd(matlabdrive);
-cd '2DModel';
+%Retun to 2DModel home page
+cd(fileparts(mfilename('fullpath')));
 
 clear ClubQuiverAlphaReversal;
 clear ClubQuiverMaxCHS;
