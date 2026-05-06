@@ -28,9 +28,12 @@ from src.engines.simscape._errors import (
 )
 from src.engines.simscape._output import SimscapeOutput
 from src.engines.simscape.adapter import SimscapeAdapter
+from src.engines.simscape.pool import PoolConfig, SimscapeAdapterPool
 
 __all__ = [
+    "PoolConfig",
     "SimscapeAdapter",
+    "SimscapeAdapterPool",
     "SimscapeEngineStartupError",
     "SimscapeModelNotFoundError",
     "SimscapeNotInstalledError",
