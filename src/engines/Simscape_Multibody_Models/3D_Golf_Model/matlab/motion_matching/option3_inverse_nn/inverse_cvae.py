@@ -107,9 +107,7 @@ class SwingInverseCVAE(nn.Module):
     # ------------------------------------------------------------------
     # Training-time forward pass
     # ------------------------------------------------------------------
-    def forward(
-        self, x: torch.Tensor, theta: torch.Tensor
-    ) -> dict[str, torch.Tensor]:
+    def forward(self, x: torch.Tensor, theta: torch.Tensor) -> dict[str, torch.Tensor]:
         """Training-time forward pass.
 
         Encodes ``x``, samples ``z`` from ``q(z | x, theta)`` via the
@@ -126,9 +124,7 @@ class SwingInverseCVAE(nn.Module):
     # ------------------------------------------------------------------
     # Inference-time sampling
     # ------------------------------------------------------------------
-    def sample_coefficients(
-        self, x: torch.Tensor, n_samples: int = 32
-    ) -> torch.Tensor:
+    def sample_coefficients(self, x: torch.Tensor, n_samples: int = 32) -> torch.Tensor:
         """Draw ``n_samples`` coefficient vectors from ``p(theta | x)``.
 
         Each sample corresponds to one mode of the posterior — different

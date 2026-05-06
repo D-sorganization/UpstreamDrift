@@ -46,6 +46,7 @@ use pyo3::prelude::*;
 #[cfg(feature = "python")]
 #[pyfunction]
 #[pyo3(signature = (pos0, vel0, spin_axis, omega0, gravity, wind, ball, air, config))]
+#[allow(clippy::too_many_arguments)]
 fn simulate_ball_trajectory_py(
     pos0: [f64; 3],
     vel0: [f64; 3],
