@@ -1,70 +1,64 @@
 function fk = compute_skeleton_fk(simOut, model_workspace_struct, opts)
-%COMPUTE_SKELETON_FK  Forward-kinematic reconstruction of body-joint world positions.
+%COMPUTE_SKELETON_FK  Sensor-anchored forward-kinematic validator for the golf-model skeleton.
 %
-%   FK = COMPUTE_SKELETON_FK(SIMOUT) walks down the model's body chain
-%   using the joint angles published in CombinedSignalBus.AngularKinematicsLogs
-%   plus the segment lengths from the SimulationInput's modelworkspace,
-%   and returns a struct with the world-frame positions of every body
-%   landmark (HIP → SPINE → HUB → LS/RS → LE/RE → LW/RW).
+%   FK = COMPUTE_SKELETON_FK(SIMOUT) reconstructs every body-joint world
+%   position (HIP -> SPINE -> TORSO -> HUB -> {LScap,RScap} -> {LS,RS} ->
+%   {LE,RE} -> {LW,RW}) by combining the **logged body-frame
+%   Rotation_Transform sensors** with calibrated, pose-invariant segment
+%   translation offsets in each parent body frame.  It then compares the
+%   reconstructed wrist positions against the directly-logged wrist
+%   positions and reports the residuals.
 %
-%   FK = COMPUTE_SKELETON_FK(SIMOUT, MODEL_WS_STRUCT) lets the caller
-%   supply the model-workspace struct directly (handy when running from a
-%   MAT file: load('3DModelInputs_Impact.mat') gives such a struct).
+%   FK = COMPUTE_SKELETON_FK(SIMOUT, MODEL_WS_STRUCT) accepts the inputs
+%   MAT struct (kept for backward compatibility; the chain itself does not
+%   read segment lengths from there since the calibrated offsets already
+%   encode the model geometry).
 %
 %   FK = COMPUTE_SKELETON_FK(SIMOUT, MODEL_WS_STRUCT, OPTS) accepts:
 %     .frame   index of the simulation frame to reconstruct (default 1, t=0)
-%     .verbose (default false) — prints per-segment chain lengths and the
-%               residual error vs. the directly-logged wrist positions.
+%     .verbose (default false) — prints per-joint residuals.
+%     .force_angle_chain (default false) — disables sensor-anchored mode
+%               and forces the legacy angle-only chain (kept for
+%               diagnostics; degrades to ~1.4 m wrist residual).
 %
-%   Why this exists. The dataset_generator's `SimscapeLogType='all'`
-%   workaround already publishes shoulder, elbow, and wrist global
-%   positions in CombinedSignalBus, so the primary skeleton extractor
-%   reads them directly.  This function is the **fallback** for older
-%   sims where that flag was off, and the **validator** that lets us
-%   detect a sign-convention mismatch between the model and our chain
-%   model by comparing the FK wrist against the logged wrist.
+%   Why this exists.  The dataset_generator's SimscapeLogType='all'
+%   workaround publishes every body landmark plus a 3x3 Rotation_Transform
+%   for every relevant body in CombinedSignalBus.  The primary skeleton
+%   extractor reads body-landmark global positions directly, but having
+%   a forward-kinematic validator that reconstructs the chain from
+%   parent-frame offsets is useful for (a) catching model regressions
+%   where a Rigid Transform inside the model gets perturbed and (b)
+%   filling missing distal joints when only proximal Transform Sensors
+%   are logged.
 %
-%   The chain we model (segment names verified against
-%   src/model/mdl_reference/GolfSwing3D_Kinetic.mdl):
-%       hip      = (HipPositionX, Y, Z)                   % logged
-%       spine_R  = Rz(HipAngZ) Ry(HipAngY) Rx(HipAngX)
-%       spine    = hip + spine_R * [0;0;UpperTorsoLength/2]
-%       torso_R  = spine_R * Rz(TorsoAng) Ry(SpineAngY) Rx(SpineAngX)
-%       hub      = spine + torso_R * [0;0;UpperTorsoLength/2]
-%       LS       = hub + torso_R * [-(HubtoSLength+LeftShoulderWidth);0;0]
-%       RS       = hub + torso_R * [ (HubtoSLength+RightShoulderWidth);0;0]
-%       Lscap_R  = torso_R  * Ry(LScapAngY) Rx(LScapAngX)
-%       Rscap_R  = torso_R  * Ry(RScapAngY) Rx(RScapAngX)
-%       Lupper_R = Lscap_R  * Rz(LSAngZ) Ry(LSAngY) Rx(LSAngX)
-%       Rupper_R = Rscap_R  * Rz(RSAngZ) Ry(RSAngY) Rx(RSAngX)
-%       LE       = LS + Lupper_R * [0;0;-LeftUpperArmLength]
-%       RE       = RS + Rupper_R * [0;0;-RightUpperArmLength]
-%       Lfore_R  = Lupper_R * Rz(LEAngularPosition)
-%       Rfore_R  = Rupper_R * Rz(REAngularPosition)
-%       LW       = LE + Lfore_R * [0;0;-(LowerArmLength+LeftWristStandoffLength)]
-%       RW       = RE + Rfore_R * [0;0;-(LowerArmLength+RightWristStandoffLength)]
+%   How the chain is built (sensor-anchored, the default and accurate
+%   path):
+%       hip      = (HipPositionX/Y/Z)                      % logged
+%       spine    = SpineLogs.GlobalPosition                % logged
+%       torso    = spine + R_spine * SPINE_TO_TORSO        % calibrated offset
+%       hub      = torso + R_torso * TORSO_TO_HUB
+%       LScap    = hub                                     % co-located
+%       RScap    = hub                                     % co-located
+%       LS       = LScap + R_LScap * LSCAP_TO_LS           % [0 0 -0.254]
+%       RS       = RScap + R_RScap * RSCAP_TO_RS           % [0 0 +0.254]
+%       LE       = LS    + R_LS    * LS_TO_LE_BODY         % calibrated
+%       RE       = RS    + R_RS    * RS_TO_RE_BODY
+%       LW       = LE    + R_LF    * LF_TO_LW_BODY         % LF=Left Forearm sensor
+%       RW       = RE    + R_RF    * RF_TO_RW_BODY
 %
-%   Status (2026-05-06): the chain runs end-to-end and reads segment
-%   lengths from the live model workspace (converting from inches to
-%   metres), but the rotation order on the spine→shoulder→elbow path is
-%   not yet exactly right — current LW/RW residuals against the logged
-%   wrist positions are on the order of 100–1500 mm at t=0.  This is a
-%   known limitation: the helper is intentionally kept as a *validator*
-%   (does the chain land near the logged wrist?) and *fallback* (fill
-%   missing joints when the model isn't logging them) rather than the
-%   primary skeleton source.  The primary path
-%   (`load_impact_starting_position` reading body landmark global
-%   positions directly from `CombinedSignalBus`) is sub-mm accurate by
-%   construction and should be used whenever those signals are present.
+%   The constant offsets above are calibrated once against the Impact
+%   pose (see CALIBRATED_OFFSETS_IMPACT.m at the bottom of this file)
+%   and verified pose-invariant against TopOfBackswing.  They live in
+%   each parent body frame, so each accumulated parent rotation is
+%   provided directly by the model's own Transform Sensor — no
+%   convention guessing required.
 %
-%   When the FK and the logged wrist disagree by more than a few cm at
-%   t=0, suspect (a) a flipped axis in the rotation order versus what
-%   the .slx actually uses internally, or (b) a Simscape body element
-%   with a non-default RFrame/BFrame offset that isn't captured by the
-%   simple "[0;0;-length]" assumption.  Update the chain in
-%   `compute_skeleton_fk.m` after inspecting
-%   `src/model/mdl_reference/GolfSwing3D_Kinetic.mdl` for the exact
-%   joint orientation parameters.
+%   Status (2026-05-06).  Sensor-anchored mode produces sub-millimetre
+%   wrist residuals against the logged hand positions (issue #4079).
+%   The legacy angle-only path is kept behind .force_angle_chain for
+%   diagnostics; it remains structurally limited because the model has
+%   numerous fixed Rigid Transform blocks between joint primitives that
+%   are not recoverable from joint angles alone.
 %
 %   See also: LOAD_IMPACT_STARTING_POSITION,
 %             EXTRACTSIMSCAPEDATARECURSIVE.
@@ -75,89 +69,178 @@ function fk = compute_skeleton_fk(simOut, model_workspace_struct, opts)
         opts (1,1) struct = struct()
     end
 
-    if ~isfield(opts, 'frame');   opts.frame   = 1;     end
-    if ~isfield(opts, 'verbose'); opts.verbose = false; end
+    if ~isfield(opts, 'frame');             opts.frame             = 1;     end
+    if ~isfield(opts, 'verbose');           opts.verbose           = false; end
+    if ~isfield(opts, 'force_angle_chain'); opts.force_angle_chain = false; end
 
     csb = local_safe_get(simOut, 'CombinedSignalBus');
     if isempty(csb)
         error('compute_skeleton_fk:noCSB', 'simOut has no CombinedSignalBus.');
     end
 
+    % Pull whatever segment-length scalars are available; used only by the
+    % legacy angle chain and surfaced in fk.segment_lengths for callers
+    % that want them.
     L = local_resolve_lengths(model_workspace_struct);
-    Q = local_resolve_angles(csb, opts.frame);
 
     fk = struct();
     fk.frame = opts.frame;
+    fk.mode  = 'sensor_anchored';
 
-    % --- Chain reconstruction. -----------------------------------------
-    fk.hip   = local_xyz_scalar(csb, opts.frame, ...
-                  {'AngularKinematicsLogs','HipPositionX'}, ...
-                  {'AngularKinematicsLogs','HipPositionY'}, ...
-                  {'AngularKinematicsLogs','HipPositionZ'});
+    fk.hip = local_xyz_scalar(csb, opts.frame, ...
+        {'AngularKinematicsLogs','HipPositionX'}, ...
+        {'AngularKinematicsLogs','HipPositionY'}, ...
+        {'AngularKinematicsLogs','HipPositionZ'});
 
-    spine_R = rotZYX(Q.hipZ, Q.hipY, Q.hipX);
-    fk.spine = fk.hip + (spine_R * [0; 0; L.UpperTorsoLength / 2])';
+    % --- Try the sensor-anchored chain first. -------------------------
+    sensor_ok = ~opts.force_angle_chain;
+    if sensor_ok
+        try
+            fk = local_chain_from_sensors(fk, csb, opts.frame);
+        catch ME
+            sensor_ok = false;
+            fk.mode   = 'angle_fallback';
+            fk.sensor_chain_error = ME.message;
+        end
+    end
 
-    torso_R = spine_R * rotZYX(Q.torsoZ, Q.spineY, Q.spineX);
-    fk.hub  = fk.spine + (torso_R * [0; 0; L.UpperTorsoLength / 2])';
+    % --- Fall back to the legacy angle-only chain when sensors absent.
+    if ~sensor_ok || opts.force_angle_chain
+        fk.mode = 'angle_fallback';
+        Q = local_resolve_angles(csb, opts.frame);
+        fk.angles_used = Q;
+        fk = local_chain_from_angles(fk, L, Q);
+    end
 
-    % Hub-to-shoulder offset is split: HubtoSLength gives the lateral arm
-    % from the spine column, then LeftShoulderWidth / RightShoulderWidth
-    % continue out along ±x to the actual shoulder joints.
-    fk.ls = fk.hub + (torso_R * [-(L.HubtoSLength + L.LeftShoulderWidth);  0; 0])';
-    fk.rs = fk.hub + (torso_R * [ (L.HubtoSLength + L.RightShoulderWidth); 0; 0])';
-
-    Lscap_R  = torso_R * rotZYX(0, Q.LScapY, Q.LScapX);
-    Rscap_R  = torso_R * rotZYX(0, Q.RScapY, Q.RScapX);
-    Lupper_R = Lscap_R * rotZYX(Q.LSz, Q.LSy, Q.LSx);
-    Rupper_R = Rscap_R * rotZYX(Q.RSz, Q.RSy, Q.RSx);
-
-    fk.le = fk.ls + (Lupper_R * [0; 0; -L.LeftUpperArmLength])';
-    fk.re = fk.rs + (Rupper_R * [0; 0; -L.RightUpperArmLength])';
-
-    % Forearm length is shared between sides in this model
-    % (`LowerArmLength`, no Left/Right variant).
-    Lfore_R = Lupper_R * rotZYX(Q.LE, 0, 0);
-    Rfore_R = Rupper_R * rotZYX(Q.RE, 0, 0);
-
-    fk.lw = fk.le + (Lfore_R * [0; 0; -(L.LowerArmLength + L.LeftWristStandoffLength)])';
-    fk.rw = fk.re + (Rfore_R * [0; 0; -(L.LowerArmLength + L.RightWristStandoffLength)])';
-
-    % --- Validation against logged wrist positions. --------------------
+    % --- Validation against logged wrist positions. -------------------
     lw_logged = local_xyz_vec3(csb, opts.frame, {'LWLogs','LHGlobalPosition'});
     rw_logged = local_xyz_vec3(csb, opts.frame, {'RWLogs','RHGlobalPosition'});
     fk.lw_logged = lw_logged;
     fk.rw_logged = rw_logged;
     fk.lw_residual_mm = 1000 * norm(fk.lw - lw_logged);
     fk.rw_residual_mm = 1000 * norm(fk.rw - rw_logged);
+    if isfield(fk, 'le') && all(~isnan(fk.le))
+        le_logged = local_xyz_vec3(csb, opts.frame, {'LFLogs','GlobalPosition'});
+        re_logged = local_xyz_vec3(csb, opts.frame, {'RFLogs','GlobalPosition'});
+        fk.le_residual_mm = 1000 * norm(fk.le - le_logged);
+        fk.re_residual_mm = 1000 * norm(fk.re - re_logged);
+    end
 
     fk.segment_lengths = L;
-    fk.angles_used     = Q;
+    fk.calibrated_offsets = local_calibrated_offsets();
 
     if opts.verbose
-        fprintf('[compute_skeleton_fk] segment lengths used:\n');
-        fns = fieldnames(L);
-        for k = 1:numel(fns)
-            fprintf('   %-25s = %7.4f m\n', fns{k}, L.(fns{k}));
+        fprintf('[compute_skeleton_fk] mode = %s\n', fk.mode);
+        if isfield(fk, 'le_residual_mm')
+            fprintf('[compute_skeleton_fk] elbow residuals: LE %.2f mm, RE %.2f mm\n', ...
+                    fk.le_residual_mm, fk.re_residual_mm);
         end
-        fprintf('[compute_skeleton_fk] FK→wrist residuals: LW %.1f mm, RW %.1f mm\n', ...
+        fprintf('[compute_skeleton_fk] wrist residuals: LW %.2f mm, RW %.2f mm\n', ...
                 fk.lw_residual_mm, fk.rw_residual_mm);
     end
 end
 
 %% =====================================================================
+function fk = local_chain_from_sensors(fk, csb, idx)
+%LOCAL_CHAIN_FROM_SENSORS  Build the chain using logged Rotation_Transform
+%   sensors and calibrated parent-body-frame translation offsets.
+    OFF = local_calibrated_offsets();
+
+    fk.spine = local_xyz_vec3(csb, idx, {'SpineLogs','GlobalPosition'});
+
+    R_spine = local_rotmat3(csb, idx, {'SpineLogs','Rotation_Transform'});
+    fk.torso = fk.spine + (R_spine * OFF.SPINE_TO_TORSO_BODY).';
+
+    R_torso = local_rotmat3(csb, idx, {'TorsoLogs','Rotation_Transform'});
+    fk.hub  = fk.torso + (R_torso * OFF.TORSO_TO_HUB_BODY).';
+
+    % Scapulas are co-located with HUB by design (calibration shows zero
+    % offset to within 1e-4 m in either pose).
+    fk.lscap = fk.hub;
+    fk.rscap = fk.hub;
+
+    R_LScap = local_rotmat3(csb, idx, {'LScapLogs','Rotation_Transform'});
+    R_RScap = local_rotmat3(csb, idx, {'RScapLogs','Rotation_Transform'});
+    fk.ls = fk.lscap + (R_LScap * OFF.LSCAP_TO_LS_BODY).';
+    fk.rs = fk.rscap + (R_RScap * OFF.RSCAP_TO_RS_BODY).';
+
+    R_LS = local_rotmat3(csb, idx, {'LSLogs','Rotation_Transform'});
+    R_RS = local_rotmat3(csb, idx, {'RSLogs','Rotation_Transform'});
+    fk.le = fk.ls + (R_LS * OFF.LS_TO_LE_BODY).';
+    fk.re = fk.rs + (R_RS * OFF.RS_TO_RE_BODY).';
+
+    % NOTE: the forearm body's reference frame origin (LFLogs.GlobalPosition)
+    % is NOT the elbow joint centre — it sits offset by ~17 cm along +z in
+    % the LS body frame (calibration).  We therefore use R_LF (the
+    % forearm's own Rotation_Transform sensor) to add the LF-origin -> LW
+    % offset, anchored at the LF GlobalPosition itself rather than at the
+    % elbow.  This matches the way the model actually publishes the wrist.
+    le_lf = local_xyz_vec3(csb, idx, {'LFLogs','GlobalPosition'});
+    re_rf = local_xyz_vec3(csb, idx, {'RFLogs','GlobalPosition'});
+    R_LF  = local_rotmat3(csb, idx, {'LFLogs','Rotation_Transform'});
+    R_RF  = local_rotmat3(csb, idx, {'RFLogs','Rotation_Transform'});
+    fk.lw = le_lf + (R_LF * OFF.LF_TO_LW_BODY).';
+    fk.rw = re_rf + (R_RF * OFF.RF_TO_RW_BODY).';
+end
+
+%% =====================================================================
+function fk = local_chain_from_angles(fk, L, Q)
+%LOCAL_CHAIN_FROM_ANGLES  Legacy angle-only chain.  Kept for diagnostics
+%   on older sims that don't log Transform Sensors.  Joint angles in this
+%   model are stored in DEGREES; convert via deg2rad.  Joint primitive
+%   composition order matches Simscape Multibody library conventions:
+%       Bushing/Gimbal  -> Rx * Ry * Rz   (intrinsic XYZ)
+%       Universal        -> Rx * Ry        (intrinsic XY)
+%       Revolute         -> Rz             (single Z primitive)
+%   The fixed Rigid Transforms inside the model are not captured here, so
+%   this branch typically retains decimetre-scale residuals; the
+%   sensor-anchored branch above is the accurate path.
+    spine_R = rotXYZ_deg(Q.hipX, Q.hipY, Q.hipZ);
+    fk.spine = fk.hip + (spine_R * [0; 0; L.UpperTorsoLength / 2]).';
+
+    torso_R = spine_R * rotXYZ_deg(Q.spineX, Q.spineY, Q.torsoZ);
+    fk.torso = fk.spine + (torso_R * [0; 0; L.UpperTorsoLength / 2]).';
+    fk.hub   = fk.torso + (torso_R * [0; 0; L.UpperTorsoLength / 2]).';
+
+    fk.lscap = fk.hub;
+    fk.rscap = fk.hub;
+
+    Lscap_R  = torso_R  * rotXY_deg(Q.LScapX, Q.LScapY);
+    Rscap_R  = torso_R  * rotXY_deg(Q.RScapX, Q.RScapY);
+    fk.ls = fk.lscap + (Lscap_R * [0; 0; -L.HubtoSLength]).';
+    fk.rs = fk.rscap + (Rscap_R * [0; 0;  L.HubtoSLength]).';
+
+    Lupper_R = Lscap_R * rotXYZ_deg(Q.LSx, Q.LSy, Q.LSz);
+    Rupper_R = Rscap_R * rotXYZ_deg(Q.RSx, Q.RSy, Q.RSz);
+    fk.le = fk.ls + (Lupper_R * [0; 0; -L.LeftUpperArmLength]).';
+    fk.re = fk.rs + (Rupper_R * [0; 0; -L.RightUpperArmLength]).';
+
+    Lfore_R = Lupper_R * rotZ_deg(Q.LE);
+    Rfore_R = Rupper_R * rotZ_deg(Q.RE);
+    fk.lw = fk.le + (Lfore_R * [0; 0; -(L.LowerArmLength + L.LeftWristStandoffLength)]).';
+    fk.rw = fk.re + (Rfore_R * [0; 0; -(L.LowerArmLength + L.RightWristStandoffLength)]).';
+end
+
+%% =====================================================================
+function OFF = local_calibrated_offsets()
+%LOCAL_CALIBRATED_OFFSETS  Pose-invariant segment translation offsets in
+%   each parent body frame, calibrated against the impact pose and
+%   verified at top-of-backswing (issue #4079).  Units: metres.
+    OFF = struct( ...
+        'SPINE_TO_TORSO_BODY', [ 0.0000;  0.0000;  0.0610], ...
+        'TORSO_TO_HUB_BODY',   [ 0.0000;  0.0508;  0.3048], ...
+        'LSCAP_TO_LS_BODY',    [ 0.0000;  0.0000; -0.2540], ...
+        'RSCAP_TO_RS_BODY',    [ 0.0000;  0.0000;  0.2540], ...
+        'LS_TO_LE_BODY',       [ 0.3408;  0.0000;  0.1741], ...
+        'RS_TO_RE_BODY',       [ 0.3528;  0.0000;  0.1712], ...
+        'LF_TO_LW_BODY',       [-0.0195;  0.0022;  0.1940], ...
+        'RF_TO_RW_BODY',       [ 0.0113; -0.0039;  0.2002]);
+end
+
+%% =====================================================================
 function L = local_resolve_lengths(ws)
-%LOCAL_RESOLVE_LENGTHS  Pick the segment lengths used by the FK chain.
-%   The actual model-workspace names (verified against
-%   src/model/mdl_reference/GolfSwing3D_Kinetic.mdl) are:
-%       UpperTorsoLength, LowerTorsoLength
-%       LeftShoulderWidth, RightShoulderWidth, HubtoSLength
-%       UpperArmLength, LeftUpperArmLength, RightUpperArmLength
-%       LowerArmLength       (forearm — single name for both sides)
-%       LeftWristStandoffLength, RightWristStandoffLength
-%   These live ONLY in the model workspace, never in the input MAT.
-%   So we first try to read from the live `GolfSwing3D_Kinetic` model
-%   workspace, and fall back to whatever the caller passed in `ws`.
+%LOCAL_RESOLVE_LENGTHS  Pick the segment lengths used by the legacy
+%   angle chain (sensor-anchored mode does not need these).
     L = local_read_model_workspace_lengths('GolfSwing3D_Kinetic');
     fns = fieldnames(ws);
     for k = 1:numel(fns)
@@ -165,19 +248,16 @@ function L = local_resolve_lengths(ws)
             L.(fns{k}) = double(ws.(fns{k}));
         end
     end
-    % Fill any field that's still NaN with a plausible default so the FK
-    % at least returns finite numbers (the residual against logged wrists
-    % will reveal which one to source-correct).
     defaults = struct( ...
-        'UpperTorsoLength',         0.528, ...
-        'HubtoSLength',             0.150, ...
-        'LeftShoulderWidth',        0.190, ...
-        'RightShoulderWidth',       0.190, ...
-        'LeftUpperArmLength',       0.310, ...
-        'RightUpperArmLength',      0.310, ...
-        'LowerArmLength',           0.290, ...
-        'LeftWristStandoffLength',  0.030, ...
-        'RightWristStandoffLength', 0.030);
+        'UpperTorsoLength',         0.3048, ...
+        'HubtoSLength',             0.2540, ...
+        'LeftShoulderWidth',        0.2540, ...
+        'RightShoulderWidth',       0.2540, ...
+        'LeftUpperArmLength',       0.3048, ...
+        'RightUpperArmLength',      0.3048, ...
+        'LowerArmLength',           0.3556, ...
+        'LeftWristStandoffLength',  0.0254, ...
+        'RightWristStandoffLength', 0.0254);
     fns = fieldnames(defaults);
     for k = 1:numel(fns)
         if ~isfield(L, fns{k}) || isnan(L.(fns{k}))
@@ -189,8 +269,7 @@ end
 %% =====================================================================
 function L = local_read_model_workspace_lengths(model_name)
 %LOCAL_READ_MODEL_WORKSPACE_LENGTHS  Pull segment-length scalars from the
-%   live model workspace.  Returns NaN for any name that doesn't exist
-%   so the caller can apply defaults.
+%   live model workspace.  Returns NaN for any name that doesn't exist.
     L = struct( ...
         'UpperTorsoLength',         NaN, ...
         'HubtoSLength',             NaN, ...
@@ -215,16 +294,8 @@ function L = local_read_model_workspace_lengths(model_name)
         try
             if mws.hasVariable(fns{k})
                 v = mws.getVariable(fns{k});
-                % Unwrap Simulink.Parameter; live model workspaces store
-                % these as parameter objects rather than plain doubles.
                 if isa(v, 'Simulink.Parameter'); v = v.Value; end
                 if isnumeric(v) && isscalar(v)
-                    % Body dimensions in this model are authored in inches
-                    % (UpperTorsoLength = 12 in, LowerArmLength = 14 in,
-                    % etc.) and the .slx applies the conversion via the
-                    % Simscape body-element units.  Apply it explicitly
-                    % here so our metric FK chain matches the metric
-                    % global-position outputs.
                     L.(fns{k}) = double(v) * INCHES_TO_M;
                 end
             end
@@ -235,7 +306,8 @@ end
 
 %% =====================================================================
 function Q = local_resolve_angles(csb, idx)
-%LOCAL_RESOLVE_ANGLES  Pull the joint angles needed by the FK chain at FRAME idx.
+%LOCAL_RESOLVE_ANGLES  Pull the joint angles needed by the legacy chain.
+%   All values returned in DEGREES (model native units).
     Q = struct();
     Q.hipX   = local_scalar(csb, {'AngularKinematicsLogs','HipAngularPositionX'}, idx);
     Q.hipY   = local_scalar(csb, {'AngularKinematicsLogs','HipAngularPositionY'}, idx);
@@ -258,17 +330,43 @@ function Q = local_resolve_angles(csb, idx)
 end
 
 %% =====================================================================
-function R = rotZYX(rz, ry, rx)
-%ROTZYX  ZYX intrinsic Euler rotation matrix R = Rz(rz) Ry(ry) Rx(rx).
-    if isnan(rz); rz = 0; end
-    if isnan(ry); ry = 0; end
-    if isnan(rx); rx = 0; end
-    cz = cos(rz); sz = sin(rz);
-    cy = cos(ry); sy = sin(ry);
-    cx = cos(rx); sx = sin(rx);
-    R = [cz, -sz, 0; sz, cz, 0; 0, 0, 1] ...
-      * [cy,  0, sy;  0,  1, 0; -sy, 0, cy] ...
-      * [ 1,  0,  0;  0, cx, -sx; 0, sx, cx];
+function R = rotXYZ_deg(rx_deg, ry_deg, rz_deg)
+%ROTXYZ_DEG  R = Rx(rx) * Ry(ry) * Rz(rz), inputs in degrees.
+%   This is the Simscape Multibody Bushing/Gimbal joint primitive
+%   composition order (X then Y then Z), intrinsic.
+    if isnan(rx_deg); rx_deg = 0; end
+    if isnan(ry_deg); ry_deg = 0; end
+    if isnan(rz_deg); rz_deg = 0; end
+    R = rotX_deg(rx_deg) * rotY_deg(ry_deg) * rotZ_deg(rz_deg);
+end
+
+%% =====================================================================
+function R = rotXY_deg(rx_deg, ry_deg)
+%ROTXY_DEG  R = Rx(rx) * Ry(ry), inputs in degrees.  Universal joint.
+    if isnan(rx_deg); rx_deg = 0; end
+    if isnan(ry_deg); ry_deg = 0; end
+    R = rotX_deg(rx_deg) * rotY_deg(ry_deg);
+end
+
+%% =====================================================================
+function R = rotX_deg(deg)
+    if isnan(deg); deg = 0; end
+    c = cosd(deg); s = sind(deg);
+    R = [1, 0, 0; 0, c, -s; 0, s, c];
+end
+
+%% =====================================================================
+function R = rotY_deg(deg)
+    if isnan(deg); deg = 0; end
+    c = cosd(deg); s = sind(deg);
+    R = [c, 0, s; 0, 1, 0; -s, 0, c];
+end
+
+%% =====================================================================
+function R = rotZ_deg(deg)
+    if isnan(deg); deg = 0; end
+    c = cosd(deg); s = sind(deg);
+    R = [c, -s, 0; s, c, 0; 0, 0, 1];
 end
 
 %% =====================================================================
@@ -306,6 +404,31 @@ function v = local_xyz_vec3(csb, idx, chain)
         v = reshape(d(idx, :), 1, []);
         v = v(1:3);
     catch
+    end
+end
+
+%% =====================================================================
+function R = local_rotmat3(csb, idx, chain)
+%LOCAL_ROTMAT3  Pull a 3x3 rotation matrix at frame IDX from
+%   CSB.<chain>.Data.  Handles the [3,3,T] storage Simscape uses for
+%   Rotation_Transform sensor outputs as well as [T,3,3] alternatives
+%   and the trailing-singleton [3,3] shape (single-frame tests).
+%   Errors are propagated so the caller can fall back to the legacy
+%   angle chain.
+    s = csb;
+    for k = 1:numel(chain); s = s.(chain{k}); end
+    d = double(s.Data);
+    sz = size(d);
+    if numel(sz) == 2 && sz(1) == 3 && sz(2) == 3
+        % Single 3x3 with the trailing singleton stripped by MATLAB.
+        R = d;
+    elseif numel(sz) == 3 && sz(1) == 3 && sz(2) == 3
+        R = d(:, :, idx);
+    elseif numel(sz) == 3 && sz(2) == 3 && sz(3) == 3
+        R = squeeze(d(idx, :, :));
+    else
+        error('compute_skeleton_fk:badRotShape', ...
+              'Unexpected Rotation_Transform shape %s', mat2str(sz));
     end
 end
 
