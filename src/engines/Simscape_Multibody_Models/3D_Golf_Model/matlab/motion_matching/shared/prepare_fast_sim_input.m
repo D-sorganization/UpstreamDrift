@@ -23,6 +23,22 @@ function in = prepare_fast_sim_input(theta_or_struct, opts)
 %                           the Impact MAT).  Each field is the workspace
 %                           variable name; value is the override.
 %     .joint_names          string array; auto-resolved if empty.
+%     .high_precision       logical, default false. When true the solver's
+%                           MaxStep is tightened to 0.0001 (10x smaller
+%                           than the persistent model default of 0.001),
+%                           giving a more accurate but ~1.1x slower sim.
+%                           Use this for ground-truth accuracy runs (e.g.
+%                           the reference run in perf sweeps, evaluation
+%                           against measured swings). Leave false for
+%                           fitting / inner-loop calls — the per-call
+%                           speedup is real and the ~540 mm grip-position
+%                           difference vs. ground truth is uniform across
+%                           all loose settings (the solver is naturally
+%                           bounded by RelTol/AbsTol, not MaxStep, at
+%                           MaxStep >= 0.001). See
+%                           motion_matching/shared/scripts/perf_maxstep_sweep.m
+%                           and the most recent
+%                           output/maxstep_sweep_*/MAX_STEP_REPORT.md.
 %
 %   Performance notes
 %   -----------------
@@ -47,6 +63,7 @@ function in = prepare_fast_sim_input(theta_or_struct, opts)
     if ~isfield(opts, 'simscape_log');  opts.simscape_log  = 'all';                 end
     if ~isfield(opts, 'input_overrides'); opts.input_overrides = struct();          end
     if ~isfield(opts, 'joint_names');   opts.joint_names   = string([]);            end
+    if ~isfield(opts, 'high_precision'); opts.high_precision = false;               end
 
     if ~bdIsLoaded(opts.model_name)
         load_system(opts.model_name);
@@ -64,6 +81,9 @@ function in = prepare_fast_sim_input(theta_or_struct, opts)
     in = in.setModelParameter('ReturnWorkspaceOutputs', 'on');
     in = in.setModelParameter('SimscapeLogType',   char(opts.simscape_log));
     in = in.setModelParameter('SignalLogging',     'on');
+    if logical(opts.high_precision)
+        in = in.setModelParameter('MaxStep', '0.0001');
+    end
 
     % Apply theta if a coefficient vector was provided.
     if isnumeric(theta_or_struct) && ~isempty(theta_or_struct)
