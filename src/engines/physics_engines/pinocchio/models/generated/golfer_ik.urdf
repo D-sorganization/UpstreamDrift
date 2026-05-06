@@ -1,11 +1,31 @@
 <?xml version="1.0"?>
 <!--
-  Scope: Body-only Pinocchio inverse-kinematics golfer model.
-  Use this URDF when the body solves IK against externally tracked club targets
-  and the club should remain outside the articulated model.
-  For forward-simulation workflows that include the welded club in the model,
-  use golfer.urdf instead.
-  Cross-engine parity context: CROSS_ENGINE_PARITY_SPEC.md (tracked in PR #4092).
+  ============================================================================
+  golfer_ik.urdf - Pinocchio golf humanoid for IK only (no club)
+  ============================================================================
+  Scope: dual-hand inverse kinematics against an externally-tracked grip
+  frame. The club is intentionally omitted so the IK solver can pose both
+  hands against a measured mid-hands target without club-introduced
+  constraints. Massless hand_left_tip and hand_right_tip frames are added
+  as IK end-effector targets (offset 0.10 m below each hand link).
+
+  Use this URDF only for inverse-kinematics seed solves. For forward
+  simulation (with the welded club) use golfer.urdf.
+
+  DOF: 43 revolute joints + 6 floating-base = 49 generalized coordinates
+       (gimbal joints are decomposed into per-axis revolutes; the floating
+       base is added at load time, not in this URDF).
+  Links: 46 (body links + two IK tip frames; no club).
+
+  Byte-level parity with golfer.urdf is preserved everywhere except the
+  right-hand subtree: this file omits club_shaft and club_head and adds the
+  hand_left_tip and hand_right_tip IK targets.
+
+  See:
+    - golfer.urdf                               (forward-sim variant w/ club)
+    - src/engines/physics_engines/pinocchio/models/spec/golfer_model_specification.md
+    - src/engines/CROSS_ENGINE_PARITY_SPEC.md   (canonical contract; PR #4092)
+    - PINOCCHIO_PARITY_SPEC.md                  (engine spec; PR #4103)
 -->
 <robot name="golfer">
   <!-- Generated from canonical YAML specification -->

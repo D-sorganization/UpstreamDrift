@@ -1,11 +1,27 @@
 <?xml version="1.0"?>
 <!--
-  Scope: Forward-simulation Pinocchio golfer model.
-  Use this URDF when the full-body golfer and welded club should be solved as a
-  single articulated system for forward simulation and parity comparisons.
-  For body-only inverse-kinematics workflows that track the club externally,
-  use golfer_ik.urdf instead.
-  Cross-engine parity context: CROSS_ENGINE_PARITY_SPEC.md (tracked in PR #4092).
+  ============================================================================
+  golfer.urdf - Pinocchio golf humanoid with rigid-club attachment
+  ============================================================================
+  Scope: forward simulation of full body + club. The club (shaft + head) is
+  welded to hand_left only via fixed joints - URDF cannot express the
+  closed-loop both-hands grip. This is a known compromise; cross-engine
+  parity (issue #4093 PARITY-DIMENSIONS / PR #4092) documents it.
+
+  DOF: 43 revolute joints + 6 floating-base = 49 generalized coordinates
+       (gimbal joints are decomposed into per-axis revolutes; the floating
+       base is added at load time, not in this URDF).
+  Links: 46 (including welded club_shaft + club_head).
+
+  See:
+    - src/engines/physics_engines/pinocchio/models/spec/golfer_model_specification.md
+    - src/engines/physics_engines/pinocchio/models/spec/golfer_canonical.yaml
+    - src/engines/CROSS_ENGINE_PARITY_SPEC.md   (canonical contract; PR #4092)
+    - PINOCCHIO_PARITY_SPEC.md                  (engine spec; PR #4103)
+    - golfer_ik.urdf                            (no-club variant for IK)
+
+  Source YAML: src/engines/physics_engines/pinocchio/models/spec/golfer_canonical.yaml
+  See also: PARITY-MODEL-BUILD #4094 for regeneration provenance.
 -->
 <robot name="golfer">
   <!-- Generated from canonical YAML specification -->
