@@ -9,8 +9,8 @@ function [J, terms] = compute_cost(theta, target, sim_fn, opts)
 %                + w_a * ||r_ch_sim(t_impact) - r_ch_meas(t_impact)||^2
 %                + lambda * R(theta)
 %
-%   where R(theta) is one of total_work, peak_power, torque_l2, coeff_l2
-%   depending on OPTS.regularizer.
+%   where R(theta) is one of total_work, peak_power, torque_l2, coeff_l2,
+%   effort_l2, smoothness_l2 depending on OPTS.regularizer.
 %
 %   Inputs:
 %     THETA  - real, finite coefficient vector (column or row).
@@ -116,14 +116,69 @@ function val = local_regularizer_term(theta, sim_out, opts)
             val = trapz(sim_out.time, sum(sim_out.tau .^ 2, 2));
         case "coeff_l2"
             val = sum(theta .^ 2);
+        case "effort_l2"
+            validators.mustHaveFields(sim_out, "tau");
+            tau = sim_out.tau;
+            tau_ref = local_resolve_tau_reference(opts, size(tau));
+            w = local_resolve_reg_weights(opts, size(tau, 2));
+            val = mean((tau - tau_ref) .^ 2 .* w, 'all');
+        case "smoothness_l2"
+            validators.mustHaveFields(sim_out, "tau");
+            tau = sim_out.tau;
+            if size(tau, 1) < 2
+                val = 0;
+            else
+                w = local_resolve_reg_weights(opts, size(tau, 2));
+                dtau = diff(tau, 1, 1);
+                val = mean(dtau .^ 2 .* w, 'all');
+            end
         otherwise
             error("compute_cost:badRegularizer", ...
                   "Unknown regularizer '%s'. Expected one of: " + ...
-                  "total_work, peak_power, torque_l2, coeff_l2.", ...
+                  "total_work, peak_power, torque_l2, coeff_l2, " + ...
+                  "effort_l2, smoothness_l2.", ...
                   string(opts.regularizer));
     end
     assert(isscalar(val) && isfinite(val) && val >= 0, ...
         "Postcondition: regularizer term must be finite and non-negative");
+end
+
+function tau_ref = local_resolve_tau_reference(opts, tau_size)
+    if ~isfield(opts, "tau_reference") || isempty(opts.tau_reference)
+        tau_ref = zeros(tau_size);
+        return;
+    end
+    tau_ref = opts.tau_reference;
+    if ~isnumeric(tau_ref) || ~isreal(tau_ref) || any(~isfinite(tau_ref(:)))
+        error("compute_cost:badTauReference", ...
+              "opts.tau_reference must be a real, finite numeric array.");
+    end
+    if isvector(tau_ref) && numel(tau_ref) == tau_size(2)
+        tau_ref = repmat(tau_ref(:).', tau_size(1), 1);
+    end
+    if ~isequal(size(tau_ref), tau_size)
+        error("compute_cost:badTauReferenceShape", ...
+              "opts.tau_reference must broadcast to size [%d %d]; got [%s].", ...
+              tau_size(1), tau_size(2), num2str(size(tau_ref)));
+    end
+end
+
+function w = local_resolve_reg_weights(opts, n_joints)
+    if ~isfield(opts, "regularizer_weights") || isempty(opts.regularizer_weights)
+        w = ones(1, n_joints);
+        return;
+    end
+    w = opts.regularizer_weights;
+    if ~isnumeric(w) || ~isreal(w) || any(~isfinite(w(:))) || any(w(:) < 0)
+        error("compute_cost:badRegWeights", ...
+              "opts.regularizer_weights must be real, finite, non-negative.");
+    end
+    if numel(w) ~= n_joints
+        error("compute_cost:badRegWeightsLen", ...
+              "opts.regularizer_weights must have length %d; got %d.", ...
+              n_joints, numel(w));
+    end
+    w = reshape(w, 1, n_joints);
 end
 
 function local_check_traj_shape(A, nrows, ncols, name)

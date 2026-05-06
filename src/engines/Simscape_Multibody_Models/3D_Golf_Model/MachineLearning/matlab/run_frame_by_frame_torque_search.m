@@ -32,8 +32,10 @@ if ~isfile(manifestFile)
     error('Frame-by-frame search manifest not found: %s', manifestFile);
 end
 
-config = jsondecode(fileread(manifestFile));
+manifestBytes = fileread(manifestFile);
+config = jsondecode(manifestBytes);
 validateManifest(config);
+manifestSha = computeManifestSha256(manifestFile);
 
 targetTable = readtable(config.inputs.desired_target_csv);
 time = targetTable.(config.columns.time);
@@ -46,16 +48,49 @@ candidateOffsets = buildCandidateOffsets( ...
 
 useParallel = shouldUseParallel(config.search.use_parallel);
 modelName = char(config.simulation.model_name);
+runDir = char(config.outputs.run_dir);
+progressCsv = char(config.outputs.progress_csv);
+checkpointInterval = checkpointIntervalFrames(config);
+expectedFrameSeconds = expectedFrameWallClock(config);
+staleMultiplier = staleLockMultiplier(config);
+
+if ~exist(runDir, 'dir')
+    mkdir(runDir);
+end
+
+[resumeState, resumed] = frame_search.resume( ...
+    runDir, manifestSha, expectedFrameSeconds, staleMultiplier);
+
 currentState = initializeSearchState(config);
 previousTorque = zeros(1, numel(controlColumns));
 committedTorques = zeros(height(targetTable), numel(controlColumns));
 frameScores = zeros(height(targetTable), 1);
+wallClockPerFrame = zeros(height(targetTable), 1);
+startFrame = 1;
+
+if resumed
+    startFrame = resumeState.last_frame_idx + 1;
+    nKeep = min(resumeState.last_frame_idx, height(targetTable));
+    committedTorques(1:nKeep, :) = resumeState.committed_torques(1:nKeep, :);
+    frameScores(1:nKeep) = resumeState.frame_scores(1:nKeep);
+    if isfield(resumeState, 'wall_clock_per_frame')
+        nWc = min(numel(resumeState.wall_clock_per_frame), height(targetTable));
+        wallClockPerFrame(1:nWc) = resumeState.wall_clock_per_frame(1:nWc);
+    end
+    previousTorque = resumeState.previous_torque;
+    currentState = resumeState.current_state;
+    fprintf('Resumed frame-search at frame %d/%d\n', ...
+        startFrame, height(targetTable));
+else
+    initializeProgressCsv(progressCsv);
+end
 
 if ~bdIsLoaded(modelName)
     load_system(modelName);
 end
 
-for frameIdx = 1:height(targetTable)
+for frameIdx = startFrame:height(targetTable)
+    frameTic = tic;
     targetFrame = table2struct(targetTable(frameIdx, targetColumns));
     candidateTorques = previousTorque + ...
         candidateOffsets .* config.search.candidate_step;
@@ -82,6 +117,22 @@ for frameIdx = 1:height(targetTable)
     previousTorque = candidateTorques(bestIdx, :);
     committedTorques(frameIdx, :) = previousTorque;
     currentState = candidateStates{bestIdx};
+    wallClockPerFrame(frameIdx) = toc(frameTic);
+
+    appendProgressRow(progressCsv, frameIdx, bestIdx, ...
+        frameScores(frameIdx), wallClockPerFrame(frameIdx));
+
+    if mod(frameIdx, checkpointInterval) == 0 || frameIdx == height(targetTable)
+        chkState = struct( ...
+            'manifest_sha256', manifestSha, ...
+            'last_frame_idx', frameIdx, ...
+            'previous_torque', previousTorque, ...
+            'current_state', currentState, ...
+            'committed_torques', committedTorques, ...
+            'frame_scores', frameScores, ...
+            'wall_clock_per_frame', wallClockPerFrame);
+        frame_search.checkpoint(runDir, chkState);
+    end
 end
 
 rawTorqueTable = array2table(committedTorques, 'VariableNames', controlColumns);
@@ -95,6 +146,7 @@ writeTorqueOutputs(rawTorqueTable, smoothedTorqueTable, config);
 
 summary = struct();
 summary.manifestFile = manifestFile;
+summary.manifestSha256 = manifestSha;
 summary.frames = height(targetTable);
 summary.candidatesPerFrame = size(candidateOffsets, 1);
 summary.usedParallel = useParallel;
@@ -102,6 +154,91 @@ summary.bestFrameScores = frameScores;
 summary.rawTorqueCsv = config.outputs.torque_csv;
 summary.smoothedTorqueCsv = smoothedTorqueCsvPath(config.outputs.torque_csv);
 summary.polynomialMat = config.outputs.polynomial_mat;
+summary.runDir = runDir;
+summary.progressCsv = progressCsv;
+summary.checkpointMat = char(config.outputs.checkpoint_mat);
+summary.totalWallClockSeconds = sum(wallClockPerFrame);
+summary.resumed = resumed;
+
+writeRunSummary(config, summary);
+end
+
+function sha = computeManifestSha256(manifestFile)
+md = java.security.MessageDigest.getInstance('SHA-256');
+fid = fopen(manifestFile, 'r');
+cleanup = onCleanup(@() fclose(fid));
+bytes = fread(fid, Inf, '*uint8');
+digest = md.digest(bytes);
+hexParts = cell(1, numel(digest));
+for idx = 1:numel(digest)
+    hexParts{idx} = sprintf('%02x', typecast(digest(idx), 'uint8'));
+end
+sha = strjoin(hexParts, '');
+end
+
+function interval = checkpointIntervalFrames(config)
+interval = 10;
+if isfield(config, 'checkpoint') && isfield(config.checkpoint, 'interval_frames')
+    interval = double(config.checkpoint.interval_frames);
+end
+if interval < 1
+    interval = 1;
+end
+end
+
+function multiplier = staleLockMultiplier(config)
+multiplier = 2.0;
+if isfield(config, 'checkpoint') && isfield(config.checkpoint, 'stale_lock_multiplier')
+    multiplier = double(config.checkpoint.stale_lock_multiplier);
+end
+end
+
+function seconds = expectedFrameWallClock(config)
+seconds = 0;
+if isfield(config, 'validation') && isfield(config.validation, 'median_step_seconds')
+    seconds = double(config.validation.median_step_seconds);
+end
+end
+
+function initializeProgressCsv(progressCsv)
+folder = fileparts(progressCsv);
+if ~isempty(folder) && ~exist(folder, 'dir')
+    mkdir(folder);
+end
+fid = fopen(progressCsv, 'w');
+cleanup = onCleanup(@() fclose(fid));
+fprintf(fid, 'frame_idx,selected_candidate,score,wall_clock_s,timestamp\n');
+end
+
+function appendProgressRow(progressCsv, frameIdx, candidateIdx, score, wallClock)
+fid = fopen(progressCsv, 'a');
+cleanup = onCleanup(@() fclose(fid));
+ts = datestr(now, 'yyyy-mm-ddTHH:MM:SS'); %#ok<TNOW1,DATST>
+fprintf(fid, '%d,%d,%.10g,%.6f,%s\n', ...
+    frameIdx, candidateIdx, score, wallClock, ts);
+end
+
+function writeRunSummary(config, summary)
+summaryPath = char(config.outputs.summary_json);
+folder = fileparts(summaryPath);
+if ~isempty(folder) && ~exist(folder, 'dir')
+    mkdir(folder);
+end
+payload = struct( ...
+    'manifest_sha256', summary.manifestSha256, ...
+    'total_frames', summary.frames, ...
+    'candidate_evaluations', summary.frames * summary.candidatesPerFrame, ...
+    'total_wall_clock_seconds', summary.totalWallClockSeconds, ...
+    'used_parallel', summary.usedParallel, ...
+    'resumed', summary.resumed, ...
+    'progress_csv', summary.progressCsv, ...
+    'checkpoint_mat', summary.checkpointMat, ...
+    'raw_torque_csv', summary.rawTorqueCsv, ...
+    'smoothed_torque_csv', summary.smoothedTorqueCsv, ...
+    'polynomial_mat', summary.polynomialMat);
+fid = fopen(summaryPath, 'w');
+cleanup = onCleanup(@() fclose(fid));
+fprintf(fid, '%s', jsonencode(payload, PrettyPrint=true));
 end
 
 function values = jsonStringList(rawValues)
