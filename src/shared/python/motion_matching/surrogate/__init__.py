@@ -21,6 +21,7 @@ from ._normalize import NormalizationStats
 from .invert import FitResult, InvertOptions, fit_swing_via_surrogate
 from .model import ClubTrajectory, SurrogateConfig, SwingSurrogate
 from .train import TrainConfig, TrainedSurrogate, train_surrogate
+from .validate import ValidationReport, validate_against_simscape
 
 __all__ = [
     "ClubTrajectory",
@@ -31,6 +32,8 @@ __all__ = [
     "SwingSurrogate",
     "TrainConfig",
     "TrainedSurrogate",
+    "ValidationReport",
     "fit_swing_via_surrogate",
     "train_surrogate",
+    "validate_against_simscape",
 ]

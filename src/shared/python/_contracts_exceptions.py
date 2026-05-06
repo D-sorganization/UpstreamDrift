@@ -67,7 +67,7 @@ class InvariantError(ContractViolationError):
 
 class ContractEvaluationError(ContractViolationError):
     """Raised when a contract condition cannot be evaluated.
-    
+
     This error is raised when a precondition or postcondition lambda/function
     cannot be evaluated due to signature mismatches, type errors, or other
     evaluation failures. This ensures contracts fail closed rather than silently

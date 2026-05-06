@@ -8,8 +8,6 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-import sys
-
 if sys.version_info >= (3, 11):
     import tomllib
 else:

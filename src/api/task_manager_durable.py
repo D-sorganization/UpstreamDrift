@@ -25,11 +25,11 @@ import sqlite3
 import threading
 import time
 import uuid
-from contextlib import contextmanager
+from collections.abc import Generator
+from contextlib import contextmanager, suppress
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Generator, Protocol
+from typing import Any, Protocol
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -311,7 +311,8 @@ class SQLiteBackend:
     def create_task(self, record: TaskRecord) -> None:
         """Create a new task record."""
         with self._lock, self._transaction() as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT INTO tasks (
                     task_id, run_id, status, task_type, input_data,
                     config_hash, code_version, progress, result, error,
@@ -319,15 +320,15 @@ class SQLiteBackend:
                     worker_id, retry_count, max_retries, ttl_seconds,
                     retention_seconds, priority
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, self._record_to_values(record))
+            """,
+                self._record_to_values(record),
+            )
 
     def get_task(self, task_id: str) -> TaskRecord | None:
         """Retrieve a task by ID."""
         with self._lock:
             conn = self._get_conn()
-            cursor = conn.execute(
-                "SELECT * FROM tasks WHERE task_id = ?", (task_id,)
-            )
+            cursor = conn.execute("SELECT * FROM tasks WHERE task_id = ?", (task_id,))
             row = cursor.fetchone()
             return self._row_to_record(row) if row else None
 
@@ -335,7 +336,8 @@ class SQLiteBackend:
         """Update an existing task record."""
         record.updated_at = time.time()
         with self._lock, self._transaction() as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 UPDATE tasks SET
                     run_id = ?, status = ?, task_type = ?, input_data = ?,
                     config_hash = ?, code_version = ?, progress = ?,
@@ -344,23 +346,21 @@ class SQLiteBackend:
                     retry_count = ?, max_retries = ?, ttl_seconds = ?,
                     retention_seconds = ?, priority = ?
                 WHERE task_id = ?
-            """, (*self._record_to_values(record)[1:], record.task_id))
+            """,
+                (*self._record_to_values(record)[1:], record.task_id),
+            )
 
     def delete_task(self, task_id: str) -> bool:
         """Delete a task record."""
         with self._lock, self._transaction() as conn:
-            cursor = conn.execute(
-                "DELETE FROM tasks WHERE task_id = ?", (task_id,)
-            )
+            cursor = conn.execute("DELETE FROM tasks WHERE task_id = ?", (task_id,))
             return cursor.rowcount > 0
 
     def find_by_run_id(self, run_id: str) -> TaskRecord | None:
         """Find task by run_id for idempotency."""
         with self._lock:
             conn = self._get_conn()
-            cursor = conn.execute(
-                "SELECT * FROM tasks WHERE run_id = ?", (run_id,)
-            )
+            cursor = conn.execute("SELECT * FROM tasks WHERE run_id = ?", (run_id,))
             row = cursor.fetchone()
             return self._row_to_record(row) if row else None
 
@@ -368,11 +368,14 @@ class SQLiteBackend:
         """Find tasks that have stalled (heartbeat timeout)."""
         with self._lock:
             conn = self._get_conn()
-            cursor = conn.execute("""
+            cursor = conn.execute(
+                """
                 SELECT * FROM tasks 
                 WHERE status = 'running' 
                 AND heartbeat_at < ?
-            """, (time.time() - heartbeat_timeout,))
+            """,
+                (time.time() - heartbeat_timeout,),
+            )
             return [self._row_to_record(row) for row in cursor.fetchall()]
 
     def find_expired_tasks(self) -> list[TaskRecord]:
@@ -381,19 +384,25 @@ class SQLiteBackend:
         with self._lock:
             conn = self._get_conn()
             # Expired by TTL (not yet started or pending)
-            cursor = conn.execute("""
+            cursor = conn.execute(
+                """
                 SELECT * FROM tasks 
                 WHERE status IN ('pending', 'running')
                 AND created_at + ttl_seconds < ?
-            """, (now,))
+            """,
+                (now,),
+            )
             expired = [self._row_to_record(row) for row in cursor.fetchall()]
 
             # Expired by retention (completed/failed/cancelled)
-            cursor = conn.execute("""
+            cursor = conn.execute(
+                """
                 SELECT * FROM tasks 
                 WHERE status IN ('completed', 'failed', 'cancelled')
                 AND completed_at + retention_seconds < ?
-            """, (now,))
+            """,
+                (now,),
+            )
             expired.extend(self._row_to_record(row) for row in cursor.fetchall())
 
             return expired
@@ -401,30 +410,37 @@ class SQLiteBackend:
     def cancel_task(self, task_id: str) -> bool:
         """Mark a task as cancelled."""
         with self._lock, self._transaction() as conn:
-            cursor = conn.execute("""
+            cursor = conn.execute(
+                """
                 UPDATE tasks SET
                     status = 'cancelled',
                     updated_at = ?,
                     completed_at = ?
                 WHERE task_id = ? AND status IN ('pending', 'running')
-            """, (time.time(), time.time(), task_id))
+            """,
+                (time.time(), time.time(), task_id),
+            )
             return cursor.rowcount > 0
 
     def acquire_task(self, worker_id: str) -> TaskRecord | None:
         """Acquire a pending task for processing (claim ownership)."""
         with self._lock, self._transaction() as conn:
             # Get highest priority pending task
-            cursor = conn.execute("""
+            cursor = conn.execute(
+                """
                 SELECT * FROM tasks 
                 WHERE status = 'pending' 
                 AND (worker_id IS NULL OR worker_id = ?)
                 ORDER BY priority DESC, created_at ASC
                 LIMIT 1
-            """, (worker_id,))
+            """,
+                (worker_id,),
+            )
             row = cursor.fetchone()
             if row:
                 task_id = row["task_id"]
-                conn.execute("""
+                conn.execute(
+                    """
                     UPDATE tasks SET
                         status = 'running',
                         worker_id = ?,
@@ -432,7 +448,9 @@ class SQLiteBackend:
                         heartbeat_at = ?,
                         updated_at = ?
                     WHERE task_id = ?
-                """, (worker_id, time.time(), time.time(), time.time(), task_id))
+                """,
+                    (worker_id, time.time(), time.time(), time.time(), task_id),
+                )
                 return self._row_to_record(
                     conn.execute(
                         "SELECT * FROM tasks WHERE task_id = ?", (task_id,)
@@ -443,7 +461,8 @@ class SQLiteBackend:
     def release_task(self, task_id: str) -> None:
         """Release a task back to pending (for retry)."""
         with self._lock, self._transaction() as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 UPDATE tasks SET
                     status = 'pending',
                     worker_id = NULL,
@@ -451,7 +470,9 @@ class SQLiteBackend:
                     heartbeat_at = ?,
                     updated_at = ?
                 WHERE task_id = ?
-            """, (time.time(), time.time(), task_id))
+            """,
+                (time.time(), time.time(), task_id),
+            )
 
     def cleanup(self) -> int:
         """Clean up expired tasks, return count deleted."""
@@ -524,7 +545,7 @@ class DurableTaskManager:
                 count = self.backend.cleanup()
                 if count > 0:
                     logger.info("Cleaned up %d expired tasks", count)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("Cleanup error: %s", e)
 
     def create_task(
@@ -561,7 +582,9 @@ class DurableTaskManager:
         if run_id:
             existing = self.backend.find_by_run_id(run_id)
             if existing:
-                logger.debug("Found existing task for run_id %s: %s", run_id, existing.task_id)
+                logger.debug(
+                    "Found existing task for run_id %s: %s", run_id, existing.task_id
+                )
                 return existing.task_id
 
         # Generate task ID and config hash
@@ -584,7 +607,9 @@ class DurableTaskManager:
         )
 
         self.backend.create_task(record)
-        logger.info("Created task %s (type=%s, priority=%d)", task_id, task_type, priority)
+        logger.info(
+            "Created task %s (type=%s, priority=%d)", task_id, task_type, priority
+        )
         return task_id
 
     def get_task(self, task_id: str) -> TaskRecord | None:
@@ -716,8 +741,12 @@ class DurableTaskManager:
             return False
 
         self.backend.release_task(task_id)
-        logger.info("Released task %s for retry (attempt %d/%d)", 
-                   task_id, record.retry_count + 1, record.max_retries)
+        logger.info(
+            "Released task %s for retry (attempt %d/%d)",
+            task_id,
+            record.retry_count + 1,
+            record.max_retries,
+        )
         return True
 
     def find_stalled_tasks(self) -> list[TaskRecord]:
@@ -729,8 +758,6 @@ class DurableTaskManager:
         self._closed = True
         if self._cleanup_task:
             self._cleanup_task.cancel()
-            try:
+            with suppress(asyncio.CancelledError):
                 await self._cleanup_task
-            except asyncio.CancelledError:
-                pass
         logger.info("DurableTaskManager shutdown complete")
