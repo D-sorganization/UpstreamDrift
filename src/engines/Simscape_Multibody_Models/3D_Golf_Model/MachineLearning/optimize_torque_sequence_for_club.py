@@ -77,12 +77,14 @@ def _interpolate_reference(
 def _desired_club_targets(
     desired: pd.DataFrame,
     target_columns: list[str],
-) -> tuple[np.ndarray, list[str]]:
-    available = {
-        model_column: source_column
-        for source_column, model_column in TARGET_COLUMN_MAP.items()
-        if source_column in desired.columns and model_column in target_columns
-    }
+) -> tuple[np.ndarray, list[int]]:
+    available: dict[str, str] = {}
+    for model_column in target_columns:
+        if model_column in desired.columns:
+            available[model_column] = model_column
+    for source_column, model_column in TARGET_COLUMN_MAP.items():
+        if source_column in desired.columns and model_column in target_columns:
+            available.setdefault(model_column, source_column)
     if not available:
         raise ValueError("Desired club CSV has no recognizable club target columns")
     ordered_model_columns = list(available.keys())

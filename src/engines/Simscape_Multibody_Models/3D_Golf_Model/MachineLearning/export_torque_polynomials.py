@@ -89,13 +89,14 @@ def export_polynomial_inputs(
         raise ValueError("No torque columns matched known MATLAB polynomial inputs")
 
     mat_payload: dict[str, np.ndarray] = {}
-    summary = {
+    fit_summaries: dict[str, dict[str, object]] = {}
+    summary: dict[str, object] = {
         "source": str(torque_csv),
         "output_mat": str(output_mat),
         "time_column": time_column,
         "time_min": float(np.nanmin(time)),
         "time_max": float(np.nanmax(time)),
-        "fits": {},
+        "fits": fit_summaries,
     }
 
     for torque_column, matlab_base in mapped_columns.items():
@@ -103,7 +104,7 @@ def export_polynomial_inputs(
         coeffs = _fit_hex_polynomial(time, values)
         for letter, value in zip(COEFFICIENT_LETTERS, coeffs, strict=True):
             mat_payload[f"{matlab_base}{letter}"] = np.asarray([[value]], dtype=float)
-        summary["fits"][torque_column] = {
+        fit_summaries[torque_column] = {
             "matlab_base": matlab_base,
             "coefficients_A_to_G": coeffs.tolist(),
             "rmse": float(np.sqrt(np.mean((np.polyval(coeffs, time) - values) ** 2))),
