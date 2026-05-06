@@ -99,10 +99,48 @@ as:
 candidate_level_count ^ control_count
 ```
 
-## Status
+## Implementation Status
 
-Stepping hooks are implemented for `GolfSwing3D_Kinetic` (issue #3977). The
-runner restores the previous frame's `xFinal`, applies the candidate as a
-flat polynomial torque, and resumes — so the `parfor` and serial paths can
-execute real short-horizon trials. Validate end-to-end with a tiny
-downswing slice before scheduling overnight runs.
+### Complete (Epic #3976)
+
+**#3977 — Simscape Stepping Hooks**
+- `+frame_search/evaluate_candidate_step.m`: Restores previous-frame `xFinal` or
+  starting-state MAT, applies candidate as a flat polynomial torque (constant term
+  G = torque, A..F = 0), runs the model from current time to target time.
+- `+frame_search/extract_state.m`: Harvests final-state struct and (q, qd) vectors
+  from the simulation output.
+- `+frame_search/extract_predicted.m`: Resolves target columns (e.g.
+  `ClubLogs_CHGlobalPosition_1`) via `CombinedSignalBus` or `logsout`.
+- Pure helpers (`parse_target_column`, `control_column_to_polynomial_base`,
+  `apply_constant_torque`, `frame_horizon`, `lookup_signal_value`) are unit-tested
+  in `matlab/tests/test_frame_by_frame_hooks.m`.
+
+**#3978 — Checkpoint/Resume + Progress Artifacts**
+- `frame_search.checkpoint()`: Atomically writes the run state to
+  `<run_dir>/checkpoint.mat` with manifest SHA-256 validation.
+- `frame_search.resume()`: Reads the checkpoint, validates manifest hash, and detects
+  stale locks (progress CSV not updated for >2x expected frame time).
+- `frame_search_artifacts.py`: Python reader for progress CSV and run status.
+  Exposes `ProgressRow`, `RunStatus`, and helpers for the GUI and analysis tools.
+- `run_frame_by_frame_torque_search.m` increments progress.csv after each frame,
+  snapshots checkpoint.mat every K frames, and resumes from the last committed frame
+  when manifest hash matches.
+
+**#3979-#3980 — Replay Diagnostics + Torque Smoothing**
+- `torque_smoothing.py`: Moving-average, Savitzky-Golay, Butterworth lowpass, and
+  spline smoothing methods. Polynomial residual diagnostic flags fits exceeding a
+  configurable threshold.
+- `frame_search_replay_diagnostics.py`: Drives polynomial replay (via
+  `replay_matching_workflow.py`), computes trajectory residuals including impact-window
+  analysis, torque effort, and emits a canonical Metrics record (or JSON fallback).
+- `export_torque_polynomials.py`: Accepts smoothing configuration, optionally writes
+  smoothed CSV, and flags polynomial fits with excessive residual.
+
+### Test Coverage
+
+- **Python**: 19 unit tests covering artifacts I/O, checkpoint manifest validation,
+  stale-lock detection, replay subprocess mocking, smoothing methods, and metrics
+  module discovery.
+- **MATLAB**: 6 unit tests in `test_frame_search_checkpoint.m` for checkpoint/resume
+  atomicity, manifest validation, and stale-lock warnings.
+- All tests passing. Ready for overnight runs with trajectory slices.
