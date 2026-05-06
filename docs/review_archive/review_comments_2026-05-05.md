@@ -1,38 +1,40 @@
 # Review Comments Archive - 2026-05-05
 
-Generated: 2026-05-05T12:33:21.616149
+Generated: 2026-05-05T21:37:25.007337
 
 ## Reviewer (chatgpt-codex-connector[bot]) (2 comments)
 
-### PR #3965: src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/extract_dynamics_dataset.py:24
+### PR #4016: src/shared/python/motion_matching/club_target.py:124
 
 Actionable: No
 Has Suggestion: No
 
 ```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Keep default dataset filenames consistent across pipeline**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Reject non-finite quaternion rows during ClubTarget validation**
 
-The extraction script writes to `golf_dynamics_slim.parquet` by default, but `train_dynamics_surrogate.py` reads `golf_inverse_ready.parquet` by default. Running both scripts with defaults (as a typical first pass) makes training fail with a missing-file error unless users manually override one side. Aligning these defaults avoids a broken out-of-th...
-```
-
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3965#discussion_r3191027575)
-
----
-
-### PR #3965: src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/README.md:232
-
-Actionable: No
-Has Suggestion: No
-
-```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Invoke MATLAB helper directly instead of `matlab.` namespace**
-
-The documented call uses `matlab.run_ml_polynomial_input_swing(...)`, but this function is stored in a normal `matlab/` folder, not a `+matlab` package. In MATLAB this namespace call does not resolve and users following the documented workflow will hit an undefined function/package error before simulation starts.
+The quaternion validation only checks `np.abs(qnorms - 1.0) > QUAT_NORM_TOL`, which does not catch `NaN` norms (`NaN > tol` is false). As a result, rows containing `NaN` values can pass validation and produce a `ClubTarget` that silently carries invalid orientation data into downstream cost/optimization code.
 
 Useful? React with 👍 / 👎.
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3965#discussion_r3191027578)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4016#discussion_r3192995007)
+
+---
+
+### PR #4016: src/shared/python/motion_matching/loaders/_align.py:90
+
+Actionable: Yes
+Has Suggestion: No
+
+```
+**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Derive impact index from data when not impact-aligning**
+
+`resample_target` always sets `impact_idx_out` to the sample nearest `impact_target_t_s`, even when `time_alignment` is `"address"` or `"none"`. In those modes the detected impact time is not anchored to `impact_target_t_s`, so the returned `impact_idx` can point to the wrong frame and mislead any downstream logic that uses impact-phase indexing.
+
+Usef...
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4016#discussion_r3192995010)
 
 ---
 
