@@ -110,6 +110,8 @@ dev = [
     "python-multipart>=0.0.26",
     # Required for video/image processing tests
     "opencv-python-headless>=4.13.0.92",
+    # Required for C3D motion-capture tests (load_club_target_c3d Optical suite)
+    "ezc3d>=1.5.0",
     # Required for property-based testing
     "hypothesis>=6.0.0",
     # Required for database migration tooling (issue #2078)
