@@ -10,9 +10,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import torch
-from export_torque_polynomials import TORQUE_TO_POLYNOMIAL_BASE
 from torch import nn
 from train_dynamics_surrogate import DynamicsMLP
+
+from src.shared.python.motion_matching.control_names import TORQUE_TO_POLYNOMIAL_BASE
 
 LOGGER = logging.getLogger(__name__)
 SCRIPT_DIR = Path(__file__).resolve().parent
