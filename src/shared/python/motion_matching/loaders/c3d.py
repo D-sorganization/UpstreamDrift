@@ -21,6 +21,8 @@ from src.shared.python.core.contracts import postcondition, precondition
 
 from ..club_target import AlignOptions, ClubTarget, SourceProvenance
 from ._align import detect_impact_index, resample_target
+from ._optical import extract_optical_pose, is_optical_schema
+from ._quaternion import rotmat_to_quat
 
 logger = logging.getLogger(__name__)
 
@@ -127,20 +129,24 @@ def load_club_target_c3d(path: Path | str, opts: AlignOptions) -> ClubTarget:
     metadata = reader.get_metadata()
     df = reader.points_dataframe(include_time=True, target_units="m")
     labels = list(metadata.marker_labels)
-    butt_label = _pick_marker(labels, BUTT_CANDIDATES)
-    head_label = _pick_marker(labels, HEAD_CANDIDATES)
-    if butt_label is None or head_label is None:
-        raise ValueError(
-            "Could not identify club butt or clubhead markers in C3D file. "
-            f"Available labels: {labels}"
-        )
 
-    t_butt, butt_raw = _marker_xyz(df, butt_label)
-    t_head, head_raw = _marker_xyz(df, head_label)
-    if t_butt.shape != t_head.shape:
-        raise ValueError("Butt and clubhead marker time vectors disagree on length")
-    raw_time = t_butt - float(t_butt[0])
-    raw_quat = _shaft_quaternions(butt_raw, head_raw)
+    if is_optical_schema(path.name, labels):
+        logger.info("Detected Optical C3D schema in %s; using cluster pose", path.name)
+        raw_time, butt_raw, head_raw, raw_quat = _optical_pose_from_dataframe(df, labels)
+    else:
+        butt_label = _pick_marker(labels, BUTT_CANDIDATES)
+        head_label = _pick_marker(labels, HEAD_CANDIDATES)
+        if butt_label is None or head_label is None:
+            raise ValueError(
+                "Could not identify club butt or clubhead markers in C3D file. "
+                f"Available labels: {labels}"
+            )
+        t_butt, butt_raw = _marker_xyz(df, butt_label)
+        t_head, head_raw = _marker_xyz(df, head_label)
+        if t_butt.shape != t_head.shape:
+            raise ValueError("Butt and clubhead marker time vectors disagree on length")
+        raw_time = t_butt - float(t_butt[0])
+        raw_quat = _shaft_quaternions(butt_raw, head_raw)
 
     impact_raw = detect_impact_index(raw_time, head_raw)
     sim_time, butt, clubhead, quat, impact_idx = resample_target(
@@ -168,6 +174,89 @@ def load_club_target_c3d(path: Path | str, opts: AlignOptions) -> ClubTarget:
         impact_idx=int(impact_idx),
         source=source,
     )
+
+
+def _optical_pose_from_dataframe(
+    df: pd.DataFrame, labels: list[str]
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Pivot a tidy points DataFrame into per-marker arrays then run Optical pose.
+
+    Returns ``(time, butt_xyz, clubhead_xyz, club_quat)`` with the
+    Y-up -> Z-up swap applied and rigid-body rotation derived from the
+    clubhead cluster.
+    """
+    by_marker = {m: g.sort_values("frame") for m, g in df.groupby("marker")}
+    if "time" in df.columns:
+        any_marker = next(iter(by_marker.values()))
+        time = any_marker["time"].to_numpy(dtype=np.float64)
+    else:
+        n = len(next(iter(by_marker.values())))
+        time = np.arange(n, dtype=np.float64)
+    time = time - float(time[0])
+
+    points: dict[str, np.ndarray] = {}
+    n = time.shape[0]
+    for label in labels:
+        sub = by_marker.get(label)
+        if sub is None:
+            continue
+        xyz = np.full((n, 3), np.nan, dtype=np.float64)
+        frames = sub["frame"].to_numpy(dtype=np.int64)
+        # Frames may be 0- or 1-indexed depending on the source.
+        if frames.min() == 1:
+            frames = frames - 1
+        valid = (frames >= 0) & (frames < n)
+        xyz[frames[valid], 0] = sub["x"].to_numpy(dtype=np.float64)[valid]
+        xyz[frames[valid], 1] = sub["y"].to_numpy(dtype=np.float64)[valid]
+        xyz[frames[valid], 2] = sub["z"].to_numpy(dtype=np.float64)[valid]
+        points[label] = xyz
+
+    # Pick the first all-finite frame across both clusters as the address ref.
+    address = _first_clean_frame(points)
+    pose = extract_optical_pose(points, address_frame=address, convert_to_z_up=True)
+    keep = (
+        np.all(np.isfinite(pose.clubhead), axis=1)
+        & np.all(np.isfinite(pose.butt), axis=1)
+        & np.all(np.isfinite(pose.rotation.reshape(pose.rotation.shape[0], -1)), axis=1)
+    )
+    if keep.sum() < 5:
+        raise ValueError(
+            f"Only {int(keep.sum())} valid frames after Optical cluster pose"
+        )
+    time = time[keep]
+    time = time - float(time[0])
+    quat = rotmat_to_quat(pose.rotation[keep])
+    return time, pose.butt[keep], pose.clubhead[keep], quat
+
+
+def _first_clean_frame(points: dict[str, np.ndarray]) -> int:
+    """Return the lowest frame index where every required cluster marker is finite."""
+    from ._optical import CLUBHEAD_CLUSTER, GRIP_CLUSTER
+
+    required = [points[m] for m in (*CLUBHEAD_CLUSTER, *GRIP_CLUSTER)]
+    n = required[0].shape[0]
+    for i in range(n):
+        if all(np.all(np.isfinite(arr[i])) for arr in required):
+            return i
+    raise ValueError(
+        "No frame where all Optical cluster markers are simultaneously finite"
+    )
+
+
+def _fill_rotation_nans(rot: np.ndarray) -> np.ndarray:
+    """Replace NaN-rows in a (N,3,3) rotation stack with the previous valid one."""
+    out = rot.copy()
+    last_good = np.eye(3, dtype=np.float64)
+    seen = False
+    for i in range(out.shape[0]):
+        if np.all(np.isfinite(out[i])):
+            last_good = out[i]
+            seen = True
+        elif seen:
+            out[i] = last_good
+        else:
+            out[i] = np.eye(3, dtype=np.float64)
+    return out
 
 
 def _shaft_quaternions(butt: np.ndarray, head: np.ndarray) -> np.ndarray:
