@@ -143,8 +143,7 @@ BASEQ.DELTAQLWFractionalPower=DELTAQ.TotalLWPower./BASEQ.TotalLWPower;
 BASEQ.DELTAQRWFractionalPower=DELTAQ.TotalRWPower./BASEQ.TotalRWPower;
 
 %Resave the Files to The Tables Folder in Model Output
-cd(matlabdrive)
-cd '2DModel';
+cd(fileparts(fileparts(mfilename('fullpath'))));
 mkdir 'Tables';
 cd 'Tables/';
 save('BASE.mat',"BASE");

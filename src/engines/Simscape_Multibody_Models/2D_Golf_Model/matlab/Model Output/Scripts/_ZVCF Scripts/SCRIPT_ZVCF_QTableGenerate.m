@@ -45,8 +45,7 @@ ZVCFTableQ.Time=ZVCFTableQTime;
 
 clear ZVCFTableQTime;
 
-cd(matlabdrive);
-cd '2DModel';
+cd(fileparts(fileparts(fileparts(mfilename('fullpath')))));
 mkdir 'Tables';
 cd 'Tables/';
 save('ZVCFTableQ.mat',"ZVCFTableQ");

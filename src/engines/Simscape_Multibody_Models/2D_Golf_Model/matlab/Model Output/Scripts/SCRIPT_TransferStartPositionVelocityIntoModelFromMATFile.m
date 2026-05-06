@@ -2,7 +2,7 @@
 % Read from model workspace the value in the starting position / velocity
 % from the impact optimized model
 
-cd(matlabdrive);
+cd(fileparts(mfilename('fullpath')));
 GolfSwing3D
 mdlWks=get_param('GolfSwing3D','ModelWorkspace');
 

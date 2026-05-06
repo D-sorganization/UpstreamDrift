@@ -82,7 +82,7 @@ clear BASEQTime;
 clear DELTAQTime;
 clear ZTCFQTime;
 
-cd(matlabdrive);
+cd(fileparts(fileparts(fileparts(mfilename('fullpath')))));
 mkdir 'Tables';
 cd 'Tables/';
 save('BASEQ.mat',"BASEQ");

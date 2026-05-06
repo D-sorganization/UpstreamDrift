@@ -1,5 +1,5 @@
-cd(matlabdrive);
-cd '2DModel/Scripts/_BaseData Scripts';
+scriptDir = fileparts(mfilename('fullpath'));
+cd(scriptDir);
 
 % PauseTime=0;
 

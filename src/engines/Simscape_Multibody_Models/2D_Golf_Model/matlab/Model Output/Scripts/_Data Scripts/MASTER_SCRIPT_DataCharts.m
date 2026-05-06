@@ -1,5 +1,5 @@
-cd(matlabdrive);
-cd '2DModel/Scripts/_Data Scripts';
+scriptDir = fileparts(mfilename('fullpath'));
+cd(scriptDir);
 PauseTime=0;
 
 SCRIPT_TableGeneration;
