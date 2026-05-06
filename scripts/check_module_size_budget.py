@@ -31,15 +31,19 @@ DEFAULT_EXCLUDE_PARTS = {
     ".pytest_cache",
 }
 
+
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[1]
+
 
 def count_lines(path: Path) -> int:
     with path.open("r", encoding="utf-8", errors="ignore") as handle:
         return sum(1 for _ in handle)
 
+
 def should_skip(path: Path, exclude_parts: set[str]) -> bool:
     return any(part in exclude_parts for part in path.parts)
+
 
 def iter_python_files(
     include_roots: tuple[str, ...], exclude_parts: set[str], repo_root: Path
@@ -53,11 +57,12 @@ def iter_python_files(
                 continue
             yield candidate
 
+
 def _get_owner(path: str, repo_root: Path) -> str:
     codeowners_path = repo_root / ".github" / "CODEOWNERS"
     if not codeowners_path.exists():
         return "Unknown"
-    
+
     owner = "Unknown"
     for line in codeowners_path.read_text(encoding="utf-8").splitlines():
         line = line.strip()
@@ -70,11 +75,13 @@ def _get_owner(path: str, repo_root: Path) -> str:
                 owner = " ".join(parts[1:])
     return owner
 
+
 def _exception_is_active(exc: dict) -> bool:
     expires_on = exc.get("expires_on")
     if not expires_on:
         return True
     return date.today() <= date.fromisoformat(expires_on)
+
 
 def _collect_active_exceptions(config: dict) -> tuple[dict[str, dict], list[str]]:
     active_exceptions: dict[str, dict] = {}
@@ -87,8 +94,15 @@ def _collect_active_exceptions(config: dict) -> tuple[dict[str, dict], list[str]
         if not path or not owner or not reason:
             invalid_exceptions.append(f"Invalid exception entry: {exc}")
             continue
-        if "issue" not in reason.lower() and "#" not in reason and "decomposition" not in reason.lower() and "legacy" not in reason.lower():
-            invalid_exceptions.append(f"Exception missing linked issue in reason: {path}")
+        if (
+            "issue" not in reason.lower()
+            and "#" not in reason
+            and "decomposition" not in reason.lower()
+            and "legacy" not in reason.lower()
+        ):
+            invalid_exceptions.append(
+                f"Exception missing linked issue in reason: {path}"
+            )
             continue
         try:
             if _exception_is_active(exc):
@@ -104,10 +118,12 @@ def _collect_active_exceptions(config: dict) -> tuple[dict[str, dict], list[str]
 
     return active_exceptions, invalid_exceptions
 
+
 def load_baseline(path: Path) -> dict:
     if not path.exists():
         return {}
     return json.loads(path.read_text(encoding="utf-8"))
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()
@@ -125,12 +141,16 @@ def main() -> int:
 
     # 6 is the current maximum exceptions for module sizes
     if len(config.get("exceptions", [])) > 6:
-        invalid_exceptions.append(f"Too many exceptions: {len(config.get('exceptions', []))} (max 6)")
+        invalid_exceptions.append(
+            f"Too many exceptions: {len(config.get('exceptions', []))} (max 6)"
+        )
 
     violations = list(invalid_exceptions)
     watchlist: list[str] = []
 
-    for py_file in iter_python_files(tuple(args.include), DEFAULT_EXCLUDE_PARTS, repo_root):
+    for py_file in iter_python_files(
+        tuple(args.include), DEFAULT_EXCLUDE_PARTS, repo_root
+    ):
         rel = str(py_file.relative_to(repo_root)).replace("\\", "/")
         if rel in active_exceptions:
             continue
@@ -158,6 +178,7 @@ def main() -> int:
 
     logger.info("OK: All modules are within line-count budget.")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

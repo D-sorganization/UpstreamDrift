@@ -146,7 +146,6 @@ UpstreamDrift/
 ├── poetry.lock
 ├── SPEC.md                         # This file
 └── README.md
-```
 
 ### Key Components
 
@@ -299,7 +298,6 @@ engines:
 visualization:
   default_camera: third_person
   background_color: [0.1, 0.1, 0.1, 1.0]
-```
 
 ## 7. Testing Specification
 
@@ -458,7 +456,6 @@ Beyond standard tools, CI enforces custom checks:
 
 | Package    | Version | Purpose                                                                            |
 | ---------- | ------- | ---------------------------------------------------------------------------------- |
-| 2026-04-27 | 1.0.83  | Fixed Bandit B604 false positive alerts in test files by adding nosec annotations. |
 | pytest     | 7.0+    | Testing framework                                                                  |
 | pytest-cov | 4.0+    | Coverage measurement                                                               |
 | hypothesis | 6.0+    | Property-based testing                                                             |
@@ -508,7 +505,6 @@ cd ui && npm install && npm run tauri build
 pytest tests/unit/ -v
 pytest tests/integration/ -v
 pytest tests/ --cov=src --cov-fail-under=55
-```
 
 ### Build Artifacts
 
@@ -602,7 +598,6 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-04-02 | 1.0.11  | Bolt: Optimized `np.linalg.norm(..., axis=1)` to explicit squared distances in `trajectory_funnel_benchmark.py` to avoid expensive reduction and sqrt overhead.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | 2026-04-29 | 1.0.11  | Bolt: Replaced np.linalg.norm with math.hypot in collision shapes for 3D vector distance optimization                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | 2026-04-29 | 1.0.11  | Bolt: Replaced np.linalg.norm with math.hypot in collision shapes for 3D vector distance optimization.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| 2026-04-29 | 1.0.11  | Bolt: Replaced np.linalg.norm with math.hypot in collision shapes for 3D vector distance optimization                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | 2026-04-01 | 1.0.8   | Sentinel: restricted legacy `np.load` callers to `allow_pickle=False` in shared I/O and golf-physics utilities, matching the repository's no-unsafe-deserialization policy.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | 2026-04-01 | 1.0.7   | Bolt: Optimized `np.linalg.norm` to explicit element-wise calculation for camera framing in GUI                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | 2026-03-31 | 1.0.6   | Bolt: Optimized `np.linalg.norm` to explicit element-wise calculation for validation metrics                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
@@ -621,7 +616,6 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 ---
 
-<!--
   SPEC MAINTENANCE RULES:
 
   1. WHEN TO UPDATE: Any PR that adds, removes, or changes functionality
@@ -636,7 +630,6 @@ blocks Python package publication on the built-wheel smoke matrix.
 
   5. VERSION: Bump the Spec Version field when making substantive changes.
      Use semver: major (structure change), minor (new features), patch (corrections).
--->
 
 ## 2026-04-28 Spec Bump
 
@@ -652,3 +645,5 @@ Bumped spec file slightly to bypass the spec check in CI.
 Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linalg.norm` to prevent `TypeError` on non-1D ndarrays.
 
 | 2026-05-06 | 1.0.119 | Added Simscape candidate stepping hooks for frame-by-frame torque search (PR #4056). |
+| 2026-05-06 | 1.0.115 | Added motion-matching support for wiring Optical C3D marker maps to the physics models (PR #4048). |
+| 2026-05-06 | 1.0.116 | Added MachineLearning orientation and work-regularizer cost parity for motion-matching (PR #4053). |

@@ -1,21 +1,36 @@
 # Review Comments Archive - 2026-05-06
 
-Generated: 2026-05-06T00:17:08.295603
+Generated: 2026-05-06T00:13:01.360025
 
-## Reviewer (chatgpt-codex-connector[bot]) (1 comments)
+## Reviewer (chatgpt-codex-connector[bot]) (2 comments)
 
-### PR #4056: src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/matlab/+frame_search/lookup_signal_value.m:79
+### PR #4053: src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/optimize_torque_sequence_for_club.py:426
 
-Actionable: Yes
+Actionable: No
 Has Suggestion: No
 
 ```
-**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Remove shape-based transpose before selecting signal component**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Compute non-zero orientation loss when orientation mode is used**
 
-Transposing `raw` whenever `size(raw,1) < size(raw,2)` corrupts component lookup for short horizons, because Simulink/timeseries data is commonly `time x components` even when time has fewer samples than component count (for example 2x3). In that case this code flips the matrix to 3x2, clips `_3` to column 2, and then reads the wrong value from...
+In `optimize_sequence`, the orientation branch and its `else` both set `orientation_loss` to zero, so `--cost-mode position_orientation` (and `full` when quaternions are present) never contributes any gradient. This makes `--orientation-weight` ineffective and silently prevents the optimizer from reducing orientation error even when quaternion...
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4056#discussion_r3193659079)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4053#discussion_r3193618120)
+
+---
+
+### PR #4053: src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/optimize_torque_sequence_for_club.py:53
+
+Actionable: No
+Has Suggestion: No
+
+```
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Keep direct script execution compatible with default workflow**
+
+These new top-level imports require `src` to be importable as a package, but this script is run directly in the documented workflow (`py .../optimize_torque_sequence_for_club.py`). In that mode, Python resolves imports relative to the script directory, so `src.shared...` is not found unless users preconfigure `PYTHONPATH`/install the repo packag...
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4053#discussion_r3193618127)
 
 ---
 
