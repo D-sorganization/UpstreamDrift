@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -100,6 +100,7 @@ def build_prescribed_polynomial_controller(
 
 def _coerce_coeffs(theta: npt.ArrayLike) -> npt.NDArray[np.float64]:
     theta_arr = np.asarray(theta, dtype=np.float64)
+    coeffs: npt.NDArray[np.float64]
     if theta_arr.ndim == 1:
         if theta_arr.size == 0:
             msg = "theta must contain at least one actuator coefficient row"
@@ -107,7 +108,7 @@ def _coerce_coeffs(theta: npt.ArrayLike) -> npt.NDArray[np.float64]:
         if theta_arr.size % COEFFS_PER_JOINT != 0:
             msg = f"flat theta length must be divisible by {COEFFS_PER_JOINT}"
             raise ValueError(msg)
-        coeffs = theta_arr.reshape(-1, COEFFS_PER_JOINT)
+        coeffs = cast(npt.NDArray[np.float64], theta_arr.reshape(-1, COEFFS_PER_JOINT))
     elif theta_arr.ndim == 2:
         if theta_arr.shape[0] == 0:
             msg = "theta must contain at least one actuator coefficient row"
@@ -115,7 +116,7 @@ def _coerce_coeffs(theta: npt.ArrayLike) -> npt.NDArray[np.float64]:
         if theta_arr.shape[1] != COEFFS_PER_JOINT:
             msg = f"theta coefficient matrix must have {COEFFS_PER_JOINT} coefficients"
             raise ValueError(msg)
-        coeffs = theta_arr
+        coeffs = cast(npt.NDArray[np.float64], theta_arr)
     else:
         msg = f"theta must be 1-D or 2-D; got ndim={theta_arr.ndim}"
         raise ValueError(msg)
