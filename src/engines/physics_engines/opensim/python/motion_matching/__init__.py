@@ -14,10 +14,25 @@ Public surface (lazily imported to keep ``import opensim`` optional):
 * ``fit_swing_opensim``: scipy.optimize.minimize(SLSQP) driver that fits
   polynomial torque coefficients to a measured ClubTarget (issue #4128).
 * ``synthesize_target_from_coefficients``: TDD oracle (issue #4124).
+* ``coord_map``: pure-Python OpenSim<->Simscape coordinate mapping helpers
+  (no SWIG ``opensim`` import required).
 """
 
 from __future__ import annotations
 
+from src.engines.physics_engines.opensim.python.motion_matching.coord_map import (
+    OPENSIM_COORD_ORDER,
+    OPENSIM_NEUTRAL_POSE,
+    OPENSIM_SIGN_CONVENTION,
+    OPENSIM_TO_SIMSCAPE,
+    SIMSCAPE_COORD_ORDER,
+    frame_y_up_to_z_up,
+    frame_z_up_to_y_up,
+    from_simscape,
+    quat_canonical_to_eigen,
+    quat_eigen_to_canonical,
+    to_simscape,
+)
 from src.engines.physics_engines.opensim.python.motion_matching.fit_swing import (
     FitOptions,
     FitResult,
@@ -45,7 +60,12 @@ __all__ = [
     "COEFFS_PER_JOINT",
     "FitOptions",
     "FitResult",
+    "OPENSIM_COORD_ORDER",
+    "OPENSIM_NEUTRAL_POSE",
+    "OPENSIM_SIGN_CONVENTION",
+    "OPENSIM_TO_SIMSCAPE",
     "POLY_DEGREE",
+    "SIMSCAPE_COORD_ORDER",
     "SimOptions",
     "SimOut",
     "SynthOptions",
@@ -54,7 +74,13 @@ __all__ = [
     "extract_full_pose",
     "extract_grip_pose",
     "fit_swing_opensim",
+    "frame_y_up_to_z_up",
+    "frame_z_up_to_y_up",
+    "from_simscape",
+    "quat_canonical_to_eigen",
+    "quat_eigen_to_canonical",
     "simulate_with_coefficients",
     "synthesize_target_from_coefficients",
+    "to_simscape",
     "viz",
 ]
