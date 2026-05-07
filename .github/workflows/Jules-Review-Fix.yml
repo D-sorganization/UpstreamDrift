@@ -3,6 +3,10 @@ on:
   pull_request_review:
     types: [submitted]
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   # ── Dispatcher: route to self-hosted if available ──────────────────────────
   pick-runner:
@@ -28,7 +32,7 @@ jobs:
           fi
   jules-address-feedback:
     needs: pick-runner
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     permissions:
       pull-requests: read
       contents: write

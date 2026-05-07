@@ -7,6 +7,8 @@ from dataclasses import dataclass
 import mujoco
 import numpy as np
 
+from .gravity_interpolation import interpolate_gravity_vector
+
 
 @dataclass
 class StoredPose:
@@ -15,6 +17,7 @@ class StoredPose:
     qvel: np.ndarray | None = None
     timestamp: float = 0.0
     description: str = ""
+    gravity: np.ndarray | None = None  # Optional: gravity vector at this pose
 
 
 class PoseLibraryMixin:
@@ -65,6 +68,23 @@ class PoseLibraryMixin:
         pose_name_b: str,
         alpha: float,
     ) -> bool:
+        """
+        Interpolate between two poses with proper gravity handling.
+
+        Linearly interpolates joint configuration (qpos) and uses SLERP to
+        interpolate gravity direction if gravity vectors are specified.
+
+        Issue #4106: Handles non-linear paths through config space with
+        changing gravity directions.
+
+        Args:
+            pose_name_a: Name of start pose
+            pose_name_b: Name of end pose
+            alpha: Interpolation parameter [0, 1]
+
+        Returns:
+            True if successful, False if poses not found
+        """
         if not (pose_name_a is not None):
             raise ValueError("pose_name_a must be provided")
         if pose_name_a not in self.pose_library or pose_name_b not in self.pose_library:
@@ -74,7 +94,16 @@ class PoseLibraryMixin:
         pose_b = self.pose_library[pose_name_b]
 
         alpha = np.clip(alpha, 0.0, 1.0)
+
+        # Interpolate joint configuration linearly
         interpolated_qpos = (1 - alpha) * pose_a.qpos + alpha * pose_b.qpos
+
+        # Interpolate gravity if both poses have gravity vectors
+        if pose_a.gravity is not None and pose_b.gravity is not None:
+            interpolated_gravity = interpolate_gravity_vector(
+                pose_a.gravity, pose_b.gravity, alpha
+            )
+            self.model.opt.gravity[:] = interpolated_gravity
 
         self.data.qpos[:] = interpolated_qpos
         self.data.qvel[:] = 0.0
@@ -92,6 +121,7 @@ class PoseLibraryMixin:
                 "qvel": pose.qvel.tolist() if pose.qvel is not None else None,
                 "timestamp": pose.timestamp,
                 "description": pose.description,
+                "gravity": pose.gravity.tolist() if pose.gravity is not None else None,
             }
 
         with open(filepath, "w") as f:
@@ -110,6 +140,9 @@ class PoseLibraryMixin:
                     qvel=np.array(pose_data["qvel"]) if pose_data.get("qvel") else None,
                     timestamp=pose_data.get("timestamp", 0.0),
                     description=pose_data.get("description", ""),
+                    gravity=np.array(pose_data["gravity"])
+                    if pose_data.get("gravity")
+                    else None,
                 )
                 self.pose_library[name] = pose
                 count += 1
