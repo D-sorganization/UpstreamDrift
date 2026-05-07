@@ -34,7 +34,7 @@ from src.shared.python.motion_matching.club_target import (
     ClubTarget,
     SourceProvenance,
 )
-from src.shared.python.motion_matching.cost import CostOptions
+from src.shared.python.motion_matching.final_cost import CostOptions
 
 pytestmark = [pytest.mark.requires_mujoco, pytest.mark.unit]
 
@@ -121,9 +121,7 @@ def synth_pair_upper(sim_opts_short: SimOptions):
 # --- TDD oracle recovery ----------------------------------------------------
 
 
-def test_synth_then_fit_recovers_trajectory(
-    synth_pair_upper, sim_opts_short
-) -> None:
+def test_synth_then_fit_recovers_trajectory(synth_pair_upper, sim_opts_short) -> None:
     """Recover the synthesized trajectory to low RMSE.
 
     The TDD oracle is: synth target -> fit -> recover. Coefficient-level
@@ -170,19 +168,19 @@ def test_synth_then_fit_recovers_trajectory(
     # is a small fraction of the bound — guards against a runaway
     # optimizer parking at the bounds.
     bound_inf = 1000.0  # max(|A|) — tightest entry of the bound vector
-    coef_inf = float(np.max(np.abs(result.coefficients)))
+    coef_inf = float(np.max(np.abs(result.theta_optimal)))
     assert coef_inf < 0.5 * bound_inf, (
         f"||theta_fit||_inf = {coef_inf:.3e} is more than half the bound "
         f"box; the optimizer ran away to the corner"
     )
     # Non-flaky reference to theta_truth: the recovered solution should
     # at minimum be no further from truth than the bound radius itself.
-    err = float(np.linalg.norm(result.coefficients - theta_truth, ord=np.inf))
+    err = float(np.linalg.norm(result.theta_optimal - theta_truth, ord=np.inf))
     assert err < bound_inf, (
         f"||theta_fit - theta_truth||_inf = {err:.3e} exceeds the bound "
         f"radius {bound_inf}; the optimizer diverged"
     )
-    assert result.coefficients.shape == (n_joints * 7,)
+    assert result.theta_optimal.shape == (n_joints * 7,)
 
     # Performance smoke test: very lenient on CI; the spec target is
     # < 0.5 s on developer hardware. We assert < 60 s here as a generous
@@ -209,7 +207,7 @@ def test_fit_is_deterministic(synth_pair_upper, sim_opts_short) -> None:
     a = fit_swing_mujoco(target, options)
     b = fit_swing_mujoco(target, options)
 
-    np.testing.assert_array_equal(a.coefficients, b.coefficients)
+    np.testing.assert_array_equal(a.theta_optimal, b.theta_optimal)
     assert a.final_rmse_m == b.final_rmse_m
     assert a.final_total_work_J == b.final_total_work_J
     assert a.history == b.history
@@ -263,11 +261,11 @@ def test_fit_result_provenance_schema(synth_pair_upper, sim_opts_short) -> None:
     result = fit_swing_mujoco(target, options)
 
     assert isinstance(result, FitResult)
-    assert result.coefficients.shape == (_n_joints(sim_opts_short.variant) * 7,)
-    assert np.isfinite(result.coefficients).all()
+    assert result.theta_optimal.shape == (_n_joints(sim_opts_short.variant) * 7,)
+    assert np.isfinite(result.theta_optimal).all()
     assert result.final_rmse_m >= 0.0 and np.isfinite(result.final_rmse_m)
     assert result.final_total_work_J >= 0.0
-    assert isinstance(result.solver, str) and result.solver == "SLSQP"
+    assert isinstance(result.method, str) and result.method == "SLSQP"
     assert isinstance(result.solver_options, dict)
     assert "maxiter" in result.solver_options
     # 64 hex chars = SHA-256.
@@ -275,7 +273,7 @@ def test_fit_result_provenance_schema(synth_pair_upper, sim_opts_short) -> None:
     assert all(c in "0123456789abcdef" for c in result.target_hash)
     assert isinstance(result.git_commit, str) and result.git_commit
     assert isinstance(result.mujoco_version, str) and result.mujoco_version
-    assert result.duration_s > 0.0
+    assert result.wall_clock_s > 0.0
     # ISO-8601 timestamp must round-trip.
     from datetime import datetime
 

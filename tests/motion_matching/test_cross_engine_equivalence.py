@@ -55,9 +55,7 @@ def _create_zero_polynomial_theta(n_joints: int = 19) -> np.ndarray:
     return np.zeros(n_joints * 7, dtype=np.float64)
 
 
-def _compute_grip_rmse(
-    simulated_grip: np.ndarray, reference_grip: np.ndarray
-) -> float:
+def _compute_grip_rmse(simulated_grip: np.ndarray, reference_grip: np.ndarray) -> float:
     """Compute grip position RMSE in millimeters.
 
     Args:
@@ -92,7 +90,7 @@ def test_mujoco_address_equivalence() -> None:
     except ImportError:
         pytest.skip("MuJoCo or dependencies not available")
 
-    poses = _load_test_poses()
+    _load_test_poses()
     theta = _create_zero_polynomial_theta()
     align_opts = AlignOptions(simulation_time_s=0.5, sample_rate_hz=500.0)
 
@@ -120,7 +118,7 @@ def test_mujoco_top_of_backswing_equivalence() -> None:
     except ImportError:
         pytest.skip("MuJoCo or dependencies not available")
 
-    poses = _load_test_poses()
+    _load_test_poses()
     theta = _create_zero_polynomial_theta()
     align_opts = AlignOptions(simulation_time_s=0.5, sample_rate_hz=500.0)
 
@@ -145,7 +143,7 @@ def test_mujoco_impact_equivalence() -> None:
     except ImportError:
         pytest.skip("MuJoCo or dependencies not available")
 
-    poses = _load_test_poses()
+    _load_test_poses()
     theta = _create_zero_polynomial_theta()
     align_opts = AlignOptions(simulation_time_s=0.5, sample_rate_hz=500.0)
 

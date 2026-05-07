@@ -17,8 +17,6 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
-from src.shared.python.core.contracts.decorators import precondition
-
 logger = logging.getLogger(__name__)
 
 # Try to import OpenSim; skip if unavailable
@@ -95,9 +93,7 @@ class PolynomialTorqueController(_ControllerBase):  # type: ignore[misc,valid-ty
         if theta is not None:
             self._theta = np.asarray(theta, dtype=np.float64).copy()
             if self._theta.ndim != 1:
-                raise ValueError(
-                    f"theta must be 1-D, got shape {self._theta.shape}"
-                )
+                raise ValueError(f"theta must be 1-D, got shape {self._theta.shape}")
             if len(self._theta) % 7 != 0:
                 raise ValueError(
                     f"theta length must be divisible by 7, got {len(self._theta)}"
@@ -161,7 +157,9 @@ class PolynomialTorqueController(_ControllerBase):  # type: ignore[misc,valid-ty
         return evaluate_torque_polynomial(t, coeffs)
 
     def computeControls(
-        self, s: Any, controls: Any  # type: ignore[no-untyped-def]
+        self,
+        s: Any,
+        controls: Any,  # type: ignore[no-untyped-def]
     ) -> None:
         """Compute and set controls for each coordinate actuator.
 

@@ -169,7 +169,7 @@ def test_teleop_demonstration_recording(
     assert not interface.is_recording
 
     assert len(demo.joint_positions) == 2
-    assert demo.success is True
+    assert demo.solver_status == "success"
     assert demo.source == "teleoperation"
 
 

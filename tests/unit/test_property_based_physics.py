@@ -651,7 +651,7 @@ class TestRRTPlannerProperties:
 
         result = planner.plan(q_start, q_goal)
 
-        if result.success:
+        if result.solver_status == "success":
             assert len(result.path) >= 2, "Successful path should have >= 2 points"
             np.testing.assert_allclose(
                 result.path[0],
@@ -693,7 +693,7 @@ class TestRRTPlannerProperties:
 
         result = planner.plan(q_start, q_goal)
 
-        if result.success:
+        if result.solver_status == "success":
             end_dist = float(np.linalg.norm(result.path[-1] - q_goal))
             assert end_dist <= goal_tol + 1e-10, (
                 f"Path end distance to goal {end_dist} exceeds tolerance {goal_tol}"
@@ -732,7 +732,7 @@ class TestRRTPlannerProperties:
 
         result = planner.plan(q_start, q_goal)
 
-        if result.success and len(result.path) >= 2:
+        if result.solver_status == "success" and len(result.path) >= 2:
             for i in range(len(result.path) - 1):
                 dist = float(np.linalg.norm(result.path[i + 1] - result.path[i]))
                 # Allow a small tolerance above step_size for the goal connection

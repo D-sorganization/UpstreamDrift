@@ -161,8 +161,8 @@ def test_inversion_respects_bounds() -> None:
     opts = InvertOptions(n_starts=3, n_iters_per_start=20, lr=0.5, seed=0)
 
     result = fit_swing_via_surrogate(target, surrogate, opts, bounds=(low, high))
-    assert np.all(result.coefficients >= low - 1.0e-6)
-    assert np.all(result.coefficients <= high + 1.0e-6)
+    assert np.all(result.theta_optimal >= low - 1.0e-6)
+    assert np.all(result.theta_optimal <= high + 1.0e-6)
 
 
 @pytest.mark.unit

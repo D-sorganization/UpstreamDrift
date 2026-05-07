@@ -68,7 +68,7 @@ class TestOptimizationResult:
             final_club_position=np.array([1.0, 0.0, 0.0]),
         )
 
-        assert result.success is True
+        assert result.solver_status == "success"
         assert result.objective_value == 1.5
         assert result.num_iterations == 100
 

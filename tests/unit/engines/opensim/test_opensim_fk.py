@@ -47,7 +47,9 @@ class TestFKModule:
 
         sig = inspect.signature(compute_grip)
         params = list(sig.parameters.keys())
-        assert params == ["model", "state"], f"Expected ['model', 'state'], got {params}"
+        assert params == ["model", "state"], (
+            f"Expected ['model', 'state'], got {params}"
+        )
 
     def test_compute_clubhead_signature(self) -> None:
         """Verify compute_clubhead has the correct signature."""
@@ -59,9 +61,9 @@ class TestFKModule:
 
         sig = inspect.signature(compute_clubhead)
         params = list(sig.parameters.keys())
-        assert (
-            params == ["model", "state"]
-        ), f"Expected ['model', 'state'], got {params}"
+        assert params == ["model", "state"], (
+            f"Expected ['model', 'state'], got {params}"
+        )
 
     def test_compute_skeleton_fk_signature(self) -> None:
         """Verify compute_skeleton_fk has the correct signature."""
@@ -73,14 +75,13 @@ class TestFKModule:
 
         sig = inspect.signature(compute_skeleton_fk)
         params = list(sig.parameters.keys())
-        assert (
-            params == ["model", "states"]
-        ), f"Expected ['model', 'states'], got {params}"
+        assert params == ["model", "states"], (
+            f"Expected ['model', 'states'], got {params}"
+        )
 
     def test_rotmat_to_quat_utility(self) -> None:
         """Verify the rotation-matrix-to-quaternion utility works."""
         import numpy as np
-
         from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
             _rotmat_to_quat,
         )
@@ -100,7 +101,6 @@ class TestFKModule:
     def test_average_quaternions_utility(self) -> None:
         """Verify the quaternion averaging utility preserves unit norm."""
         import numpy as np
-
         from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
             _average_quaternions,
         )
@@ -120,7 +120,6 @@ class TestFKErrorHandling:
     def test_compute_skeleton_fk_rejects_empty_states(self) -> None:
         """Empty state sequence should raise ValueError."""
         import opensim as osim
-
         from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
             compute_skeleton_fk,
         )
@@ -132,7 +131,6 @@ class TestFKErrorHandling:
     def test_compute_skeleton_fk_rejects_wrong_type(self) -> None:
         """Non-list/array states should raise TypeError."""
         import opensim as osim
-
         from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
             compute_skeleton_fk,
         )
@@ -145,14 +143,11 @@ class TestFKErrorHandling:
         """Array-based state trajectories raise NotImplementedError pending #4110, #4114."""
         import numpy as np
         import opensim as osim
-
         from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
             compute_skeleton_fk,
         )
 
         model = osim.Model()
         trajectory = np.zeros((10, 23))  # Dummy trajectory
-        with pytest.raises(
-            NotImplementedError, match="Array-based.*not yet supported"
-        ):
+        with pytest.raises(NotImplementedError, match="Array-based.*not yet supported"):
             compute_skeleton_fk(model, trajectory)

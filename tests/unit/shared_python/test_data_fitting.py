@@ -43,35 +43,35 @@ class TestInverseKinematicsSolver:
         """Set up solver for testing."""
         self.segment_lengths = {"link1": 0.3, "link2": 0.4}
         self.joint_names = ["link1_joint", "link2_joint"]
-        self.solver = InverseKinematicsSolver(self.segment_lengths, self.joint_names)
+        self.method = InverseKinematicsSolver(self.segment_lengths, self.joint_names)
 
     def test_solve_analytical_2d(self) -> None:
         """Test analytical 2-link IK."""
         # Arm fully extended
-        t1, t2 = self.solver.solve_analytical_2d(np.array([0.7, 0.0]), 0.3, 0.4)
+        t1, t2 = self.method.solve_analytical_2d(np.array([0.7, 0.0]), 0.3, 0.4)
         assert np.isclose(t1, 0.0, atol=1e-5)
         assert np.isclose(t2, 0.0, atol=1e-5)
 
         # Target unreachable
         with pytest.raises(ValueError, match="unreachable"):
-            self.solver.solve_analytical_2d(np.array([10.0, 0.0]), 0.3, 0.4)
+            self.method.solve_analytical_2d(np.array([10.0, 0.0]), 0.3, 0.4)
 
         # Target too close
         with pytest.raises(ValueError, match="too close"):
-            self.solver.solve_analytical_2d(np.array([0.01, 0.0]), 0.3, 0.4)
+            self.method.solve_analytical_2d(np.array([0.01, 0.0]), 0.3, 0.4)
 
     def test_solve_numerical(self) -> None:
         """Test numerical IK fitting."""
         target = np.array([[0.3, 0.0, 0.0], [0.7, 0.0, 0.0]])
-        result = self.solver.solve_numerical(target)
+        result = self.method.solve_numerical(target)
 
-        assert result.success is True
+        assert result.solver_status == "success"
         assert "link1_joint" in result.parameters
         assert "link2_joint" in result.parameters
 
         # Test no initial angles
-        result2 = self.solver.solve_numerical(target, initial_angles=None)
-        assert result2.success is True
+        result2 = self.method.solve_numerical(target, initial_angles=None)
+        assert result2.solver_status == "success"
 
 
 class TestParameterEstimator:
@@ -111,7 +111,7 @@ class TestParameterEstimator:
             states, ["upper_arm", "forearm"], 70.0, {"upper_arm": 0.3}
         )
 
-        assert result.success is True
+        assert result.solver_status == "success"
         assert "upper_arm_length" in result.parameters
         assert result.parameters["upper_arm_length"] == 0.3
 
@@ -119,7 +119,7 @@ class TestParameterEstimator:
         result_empty = self.estimator.fit_parameters_to_kinematics(
             [], ["upper_arm", "forearm"], 70.0
         )
-        assert result_empty.success is False
+        assert result_empty.solver_status != "success"
 
     def test_fit_parameters_to_kinematics_with_markers(self) -> None:
         """Test fitting with markers."""
@@ -138,7 +138,7 @@ class TestParameterEstimator:
             states, ["upper_arm", "forearm"], 70.0, known_lengths={"upper_arm": 1.0}
         )
 
-        assert result.success is True
+        assert result.solver_status == "success"
         assert "upper_arm_length" in result.parameters
         assert np.isclose(result.parameters["upper_arm_length"], 1.0)
 

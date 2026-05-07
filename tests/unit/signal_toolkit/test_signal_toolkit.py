@@ -233,7 +233,7 @@ class TestFunctionFitting:
         fitter = LinearFitter()
         result = fitter.fit(signal)
 
-        assert result.success
+        assert result.solver_status == "success"
         assert result.r_squared > 0.99
         assert result.parameters["slope"] == pytest.approx(2.0, rel=0.1)
         assert result.parameters["intercept"] == pytest.approx(5.0, rel=0.1)
@@ -247,7 +247,7 @@ class TestFunctionFitting:
         fitter = PolynomialFitter(order=2)
         result = fitter.fit(signal)
 
-        assert result.success
+        assert result.solver_status == "success"
         assert result.r_squared > 0.999
         assert result.parameters["c0"] == pytest.approx(1.0, rel=0.1)
         assert result.parameters["c1"] == pytest.approx(2.0, rel=0.1)
@@ -262,7 +262,7 @@ class TestFunctionFitting:
         fitter = SinusoidFitter()
         result = fitter.fit(signal)
 
-        assert result.success
+        assert result.solver_status == "success"
         assert result.r_squared > 0.99
         assert result.parameters["amplitude"] == pytest.approx(3.0, rel=0.1)
         assert result.parameters["frequency"] == pytest.approx(2.0, rel=0.1)
@@ -276,7 +276,7 @@ class TestFunctionFitting:
         fitter = ExponentialFitter()
         result = fitter.fit_decay(signal)
 
-        assert result.success
+        assert result.solver_status == "success"
         assert result.r_squared > 0.99
         assert result.parameters["amplitude"] == pytest.approx(10.0, rel=0.2)
         assert result.parameters["decay_rate"] == pytest.approx(0.5, rel=0.2)

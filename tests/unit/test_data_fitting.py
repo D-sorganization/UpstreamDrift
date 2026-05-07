@@ -145,7 +145,7 @@ class TestParameterEstimator:
         estimator = ParameterEstimator(anthropometric_model="dempster")
 
         assert estimator.anthropometric_model == "dempster"
-        assert "upper_arm" in estimator.coefficients
+        assert "upper_arm" in estimator.theta_optimal
 
     def test_init_winter(self) -> None:
         """Test initialization with Winter model."""
@@ -198,7 +198,7 @@ class TestParameterEstimator:
             total_body_mass=75.0,
         )
 
-        assert result.success is False
+        assert result.solver_status != "success"
 
     def test_fit_parameters_with_data(self) -> None:
         """Test fitting with kinematic data."""
@@ -219,7 +219,7 @@ class TestParameterEstimator:
             total_body_mass=75.0,
         )
 
-        assert result.success is True
+        assert result.solver_status == "success"
         assert "upper_arm_length" in result.parameters
         assert "forearm_length" in result.parameters
 

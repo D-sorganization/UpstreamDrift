@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from src.shared.python.motion_matching.cost import (
+from src.shared.python.motion_matching.final_cost import (
     SimOutput,
     compute_total_work,
 )

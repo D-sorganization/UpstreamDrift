@@ -118,12 +118,12 @@ def test_hybrid_returns_combined_result() -> None:
     result = fit_swing_hybrid(target, surrogate, options=opts, polish_fn=polish_fn)
 
     assert isinstance(result, HybridFitResult)
-    assert result.solver == "surrogate+fmincon"
+    assert result.method == "surrogate+fmincon"
     assert result.surrogate_phase is not None
     assert result.polish_phase is not None
     assert result.polish_phase["solver"] == "fmincon"
     assert result.final_loss == pytest.approx(1.0e-3)
-    assert result.coefficients.shape == (surrogate.cfg.coeff_dim,)
+    assert result.theta_optimal.shape == (surrogate.cfg.coeff_dim,)
 
 
 @pytest.mark.unit
@@ -145,7 +145,7 @@ def test_hybrid_calls_polish_after_surrogate_inversion() -> None:
     assert "theta_warm" in captured
     np.testing.assert_allclose(
         captured["theta_warm"],
-        np.asarray(result.surrogate_phase.coefficients, dtype=np.float64),
+        np.asarray(result.surrogate_phase.theta_optimal, dtype=np.float64),
         atol=1e-12,
     )
 
@@ -169,7 +169,7 @@ def test_hybrid_skips_polish_when_under_tolerance() -> None:
     result = fit_swing_hybrid(target, surrogate, options=opts, polish_fn=polish_fn)
 
     assert polish_called["n"] == 0
-    assert result.solver == "surrogate"
+    assert result.method == "surrogate"
     assert result.polish_phase is None
 
 
@@ -180,11 +180,11 @@ def test_hybrid_polish_solver_none_returns_warm_start() -> None:
     target = _target_for_surrogate(surrogate)
     opts = HybridOptions(invert=_fast_invert_opts(), polish_solver="none")
     result = fit_swing_hybrid(target, surrogate, options=opts, polish_fn=None)
-    assert result.solver == "surrogate"
+    assert result.method == "surrogate"
     assert result.polish_phase is None
     np.testing.assert_allclose(
-        result.coefficients,
-        np.asarray(result.surrogate_phase.coefficients, dtype=np.float64),
+        result.theta_optimal,
+        np.asarray(result.surrogate_phase.theta_optimal, dtype=np.float64),
         atol=1e-12,
     )
 

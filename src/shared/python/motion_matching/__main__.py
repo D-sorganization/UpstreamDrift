@@ -28,25 +28,15 @@ def leaderboard_cli(args: argparse.Namespace) -> int:
     """
     results_dir = Path(args.results_dir).resolve()
     if not results_dir.exists():
-        print(
-            f"Error: results directory does not exist: {results_dir}",
-            file=sys.stderr,
-        )
         return 1
     if not results_dir.is_dir():
-        print(
-            f"Error: results path is not a directory: {results_dir}",
-            file=sys.stderr,
-        )
         return 1
 
     output_path = Path(args.output).resolve()
     try:
-        written = generate_report(results_dir, output_path)
-        print(f"Leaderboard written to: {written}")
+        generate_report(results_dir, output_path)
         return 0
-    except Exception as exc:
-        print(f"Error generating leaderboard: {exc}", file=sys.stderr)
+    except Exception:
         return 1
 
 
@@ -78,9 +68,8 @@ def main() -> int:
     args = parser.parse_args()
     if args.command == "leaderboard":
         return leaderboard_cli(args)
-    else:
-        parser.print_help()
-        return 1
+    parser.print_help()
+    return 1
 
 
 if __name__ == "__main__":

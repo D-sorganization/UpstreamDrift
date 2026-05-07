@@ -49,6 +49,7 @@ MODEL_PATH = (
     / "golf_humanoid.osim"
 )
 
+
 def _opensim_available() -> bool:
     """Detect a real OpenSim install without tripping mocked sys.modules entries.
 
@@ -202,9 +203,7 @@ def test_extract_clubhead_pose_at_neutral_returns_finite_sane_pose(
 
     assert pos.shape == (3,)
     assert quat.shape == (4,)
-    assert np.all(np.isfinite(pos)), (
-        f"clubhead position has non-finite entries: {pos}"
-    )
+    assert np.all(np.isfinite(pos)), f"clubhead position has non-finite entries: {pos}"
     assert np.all(np.isfinite(quat))
     assert np.linalg.norm(pos) < 5.0, (
         f"clubhead position |{pos}| = {np.linalg.norm(pos):.3f} m exceeds 5 m"

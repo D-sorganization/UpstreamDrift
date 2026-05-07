@@ -162,7 +162,7 @@ class TestSMPLXAvailability:
         ):
             gen = SMPLXMeshGenerator()
             result = gen.generate(_default_params(), Path("/tmp/out"))
-            assert result.success is False
+            assert result.solver_status != "success"
             assert "smplx" in result.error_message.lower()
 
     def test_returns_error_when_trimesh_missing(self) -> None:
@@ -178,7 +178,7 @@ class TestSMPLXAvailability:
         ):
             gen = SMPLXMeshGenerator(model_dir="/nonexistent")
             result = gen.generate(_default_params(), Path("/tmp/out"))
-            assert result.success is False
+            assert result.solver_status != "success"
             assert "trimesh" in result.error_message.lower()
 
 
@@ -268,7 +268,7 @@ class TestSMPLXGenerate:
 
         result = gen.generate(params, output_dir)
 
-        assert result.success is True
+        assert result.solver_status == "success"
         assert result.metadata["backend"] == "smplx"
         assert len(result.mesh_paths) > 0
         assert len(result.collision_paths) > 0
@@ -291,7 +291,7 @@ class TestSMPLXGenerate:
             mock_smplx.create.side_effect = RuntimeError("Model load failed")
             result = gen.generate(_default_params(), tmp_path / "out")
 
-        assert result.success is False
+        assert result.solver_status != "success"
         assert "error" in result.error_message.lower()
 
 
@@ -382,7 +382,7 @@ class TestMakeHumanAvailability:
     def test_returns_error_when_unavailable(self, tmp_path: Path) -> None:
         gen = MakeHumanMeshGenerator(makehuman_path="/nonexistent")
         result = gen.generate(_default_params(), tmp_path / "out")
-        assert result.success is False
+        assert result.solver_status != "success"
         assert "not found" in result.error_message.lower()
 
 
@@ -518,7 +518,7 @@ class TestMakeHumanGenerate:
         with patch.object(gen, "_run_makehuman_script", side_effect=mock_run):
             result = gen.generate(_default_params(), tmp_path / "output")
 
-        assert result.success is True
+        assert result.solver_status == "success"
         assert result.metadata["backend"] == "makehuman"
 
     def test_generate_fails_when_script_fails(self, tmp_path: Path) -> None:
@@ -532,7 +532,7 @@ class TestMakeHumanGenerate:
         with patch.object(gen, "_run_makehuman_script", return_value=False):
             result = gen.generate(_default_params(), tmp_path / "output")
 
-        assert result.success is False
+        assert result.solver_status != "success"
         assert "failed" in result.error_message.lower()
 
 
@@ -613,7 +613,7 @@ class TestGeneratedMeshResult:
             success=True,
             mesh_paths={"head": Path("head.stl")},
         )
-        assert result.success is True
+        assert result.solver_status == "success"
         assert result.error_message is None
 
     def test_failed_result(self) -> None:
@@ -621,7 +621,7 @@ class TestGeneratedMeshResult:
             success=False,
             error_message="Something went wrong",
         )
-        assert result.success is False
+        assert result.solver_status != "success"
         assert result.error_message == "Something went wrong"
 
     def test_defaults(self) -> None:

@@ -1,7 +1,7 @@
 """Cross-language parity tests for the shared motion-matching package.
 
 Issue #4095. The MATLAB ``compute_cost.m`` is the reference implementation;
-the Python mirror in ``shared.python.motion_matching.cost`` must agree
+the Python mirror in ``shared.python.motion_matching.final_cost`` must agree
 numerically to within 1e-6 RMSE on a fixed fixture.
 
 We do not call MATLAB at test time (it isn't reliably present on CI). The
@@ -21,7 +21,6 @@ import numpy as np
 import pytest
 from src.shared.python.motion_matching import (
     ClubTarget,
-    CostBreakdown,
     CostOptions,
     SimOut,
     SimOutput,

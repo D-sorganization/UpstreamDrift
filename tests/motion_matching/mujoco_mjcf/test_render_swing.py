@@ -195,9 +195,9 @@ def test_fitresult_from_simout_duck_type():
             self.club_quat = np.tile([1.0, 0.0, 0.0, 0.0], (8, 1))
             self.tau = np.zeros((8, 3))
             self.solver_status = "ok"
-            self.duration_s = 0.123
+            self.wall_clock_s = 0.123
 
     fr = FitResult.from_simout(_FakeSimOut(), swing_id="duck")
     assert fr.metadata["swing_id"] == "duck"
     assert fr.tau is not None and fr.tau.shape == (8, 3)
-    assert fr.duration_s == pytest.approx(0.123)
+    assert fr.wall_clock_s == pytest.approx(0.123)

@@ -49,7 +49,7 @@ from src.shared.python.motion_matching.club_target import (
     ClubTarget,
     SourceProvenance,
 )
-from src.shared.python.motion_matching.cost import (
+from src.shared.python.motion_matching.final_cost import (
     CostOptions,
     SimOutput,
     compute_cost,

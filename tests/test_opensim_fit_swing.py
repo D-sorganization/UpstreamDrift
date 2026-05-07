@@ -43,7 +43,7 @@ from src.shared.python.motion_matching.club_target import (
     ClubTarget,
     SourceProvenance,
 )
-from src.shared.python.motion_matching.cost import SimOutput
+from src.shared.python.motion_matching.final_cost import SimOutput
 
 pytestmark = pytest.mark.requires_opensim
 
@@ -199,7 +199,7 @@ def test_recovery_within_10_percent(
 
     assert isinstance(result, FitResult)
     assert result.solver_status == "success", result.message
-    assert result.success is True
+    assert result.solver_status == "success"
     # The mock is rank-3 (A has 3 orthonormal columns), so theta is only
     # identifiable up to its (d-3)-dim null space. The cost-relevant
     # recovery contract is therefore in observation space: replay the
@@ -217,8 +217,8 @@ def test_recovery_within_10_percent(
     # Final cost contract: the cost-monotone-decrease test below covers
     # the per-iteration trace; the *final* cost must reflect a well-fit
     # trajectory (cross-engine spec final-cost criterion: < 1e-3).
-    assert result.cost < 1e-3, (
-        f"final cost {result.cost:.3e} > 1e-3 (target trivially recoverable)"
+    assert result.final_cost < 1e-3, (
+        f"final cost {result.final_cost:.3e} > 1e-3 (target trivially recoverable)"
     )
 
 
@@ -243,8 +243,8 @@ def test_determinism(
     a = run()
     b = run()
     np.testing.assert_array_equal(a.theta, b.theta)
-    assert a.cost == b.cost
-    assert a.n_eval == b.n_eval
+    assert a.final_cost == b.final_cost
+    assert a.n_evaluations == b.n_evaluations
     assert a.message == b.message
 
 

@@ -37,7 +37,7 @@ class TestSciPyContracts:
 
         sol = solve_ivp(pendulum, [0, 2.0], [0.3, 0.0], max_step=0.01)
 
-        assert sol.success
+        assert sol.solver_status == "success"
         assert sol.t[-1] >= 1.99
         assert not np.any(np.isnan(sol.y))
 
@@ -50,7 +50,7 @@ class TestSciPyContracts:
             return float((1 - x[0]) ** 2 + 100 * (x[1] - x[0] ** 2) ** 2)
 
         result = minimize(rosenbrock, [0.0, 0.0], method="L-BFGS-B")
-        assert result.success or result.fun < 1e-4
+        assert result.solver_status == "success" or result.fun < 1e-4
         np.testing.assert_allclose(result.x, [1.0, 1.0], atol=0.1)
 
     def test_scipy_linalg_eigh(self) -> None:

@@ -150,7 +150,7 @@ class TestSimulationResponsePostconditions:
             frames=100,
             data={"states": [[0, 0, 0]]},
         )
-        assert resp.success is True
+        assert resp.solver_status == "success"
 
     def test_success_with_empty_data_rejected(self) -> None:
         """Successful response with empty data is rejected."""
@@ -170,7 +170,7 @@ class TestSimulationResponsePostconditions:
             frames=0,
             data={},
         )
-        assert resp.success is False
+        assert resp.solver_status != "success"
 
     def test_negative_duration_rejected(self) -> None:
         """Negative duration is rejected."""
@@ -206,7 +206,7 @@ class TestAnalysisResponsePostconditions:
             success=True,
             results={"joint_angles": [0.1, 0.2, 0.3]},
         )
-        assert resp.success is True
+        assert resp.solver_status == "success"
 
     def test_success_with_empty_results_rejected(self) -> None:
         """Successful analysis with empty results is rejected."""
@@ -224,7 +224,7 @@ class TestAnalysisResponsePostconditions:
             success=False,
             results={},
         )
-        assert resp.success is False
+        assert resp.solver_status != "success"
 
 
 # ──────────────────────────────────────────────────────────────

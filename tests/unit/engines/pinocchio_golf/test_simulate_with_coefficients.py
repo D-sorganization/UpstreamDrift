@@ -5,10 +5,8 @@ Articulated Body Algorithm (ABA).
 """
 
 import unittest
-from pathlib import Path
 
 import numpy as np
-
 from src.engines.physics_engines.pinocchio.python.pinocchio_golf.simulate_with_coefficients import (
     SimOptions,
     simulate_with_coefficients,
@@ -28,7 +26,6 @@ class TestSimulateWithCoefficientsBasics(unittest.TestCase):
     def setUp(self) -> None:
         """Load the Pinocchio golfer model once for the test suite."""
         # Model is loaded and cached at module import time
-        pass
 
     def test_simulate_returns_complete_simout(self) -> None:
         """Verify SimOut has all documented fields."""

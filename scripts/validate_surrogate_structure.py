@@ -12,9 +12,8 @@ def check_file_exists(path: str | Path, description: str) -> bool:
     if p.exists():
         print(f"✓ {description}: {p}")
         return True
-    else:
-        print(f"✗ {description} missing: {p}")
-        return False
+    print(f"✗ {description} missing: {p}")
+    return False
 
 
 def check_directory_exists(path: str | Path, description: str) -> bool:
@@ -23,9 +22,8 @@ def check_directory_exists(path: str | Path, description: str) -> bool:
     if p.is_dir():
         print(f"✓ {description}: {p}")
         return True
-    else:
-        print(f"✗ {description} missing: {p}")
-        return False
+    print(f"✗ {description} missing: {p}")
+    return False
 
 
 def check_json_valid(path: str | Path) -> bool:
@@ -128,9 +126,8 @@ def main() -> int:
     if passed == total:
         print("\n✓ All structure checks passed!")
         return 0
-    else:
-        print(f"\n✗ {total - passed} checks failed")
-        return 1
+    print(f"\n✗ {total - passed} checks failed")
+    return 1
 
 
 if __name__ == "__main__":

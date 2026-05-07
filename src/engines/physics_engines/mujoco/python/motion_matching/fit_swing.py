@@ -42,7 +42,7 @@ import subprocess
 import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Any, Literal
+from typing import Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -53,12 +53,12 @@ from src.shared.python.core.contracts.decorators import (
 )
 from src.shared.python.motion_matching.club_target import ClubTarget
 from src.shared.python.motion_matching.cost import (
-    CostBreakdown,
     CostOptions,
     SimOutput,
     compute_cost,
     compute_total_work,
 )
+from src.shared.python.motion_matching.fit_result import CanonicalFitResult as FitResult
 
 from .jacobians import JacobianCache, compute_cost_gradient_analytical
 from .simulate import SimOptions, SimOut, simulate_with_coefficients
@@ -130,56 +130,6 @@ class FitOptions:
     @property
     def ftol(self) -> float:
         return self.minimizer.ftol
-
-
-# --- Result ------------------------------------------------------------------
-
-
-@dataclass(frozen=True)
-class FitResult:
-    """Result of one ``fit_swing_mujoco`` run.
-
-    Mirrors §1 of CODING_STANDARDS.md provenance block. Every field is
-    populated unconditionally so downstream tooling can rely on the schema.
-
-    Attributes:
-        coefficients:        ``(n_joints * 7,)`` recovered ``θ`` (flat).
-        final_rmse_m:        sqrt of position term over (butt + clubhead).
-        final_total_work_J:  ``compute_total_work`` over the recovered rollout.
-        cost_breakdown:      :class:`CostBreakdown` at the optimum.
-        n_iter:              scipy ``nit``.
-        n_eval:              objective evaluations counted in this driver.
-        success:             scipy ``success`` flag.
-        message:             scipy termination message.
-        history:             per-evaluation cost; monotonic-by-iteration is
-                             checked downstream (SLSQP can have transient
-                             non-monotone steps inside an iteration).
-        solver:              method name (e.g. ``"SLSQP"``).
-        solver_options:      flat dict of the minimizer options actually
-                             passed to scipy.
-        target_hash:         SHA-256 of the canonical ``ClubTarget`` bytes.
-        git_commit:          short SHA of the working repo, or ``"unknown"``.
-        mujoco_version:      ``mujoco.__version__`` at runtime.
-        duration_s:          wall-clock seconds for the full fit.
-        timestamp_utc:       ISO-8601 UTC start time of the fit.
-    """
-
-    coefficients: NDArray[np.float64]
-    final_rmse_m: float
-    final_total_work_J: float
-    cost_breakdown: CostBreakdown
-    n_iter: int
-    n_eval: int
-    success: bool
-    message: str
-    history: tuple[float, ...]
-    solver: str
-    solver_options: dict[str, Any]
-    target_hash: str
-    git_commit: str
-    mujoco_version: str
-    duration_s: float
-    timestamp_utc: str
 
 
 # --- Provenance helpers ------------------------------------------------------
@@ -441,22 +391,27 @@ def fit_swing_mujoco(target: ClubTarget, options: FitOptions) -> FitResult:
     }
 
     return FitResult(
-        coefficients=theta_star,
+        theta_optimal=theta_star,
+        final_cost=final_cost,
         final_rmse_m=rmse_m,
-        final_total_work_J=work_J,
-        cost_breakdown=breakdown,
-        n_iter=int(getattr(res, "nit", 0)),
-        n_eval=n_eval,
-        success=bool(res.success),
+        solver_status=(
+            "success"
+            if bool(res.success)
+            else ("warning" if "iteration" in str(res.message).lower() else "failed")
+        ),
+        iterations=int(getattr(res, "nit", 0)),
+        n_evaluations=n_eval,
+        wall_clock_s=duration_s,
         message=str(res.message),
         history=tuple(history),
-        solver=options.method,
-        solver_options=solver_options,
-        target_hash=_hash_target(target),
+        method=options.method,
         git_commit=_git_commit_short(),
-        mujoco_version=_mujoco_version(),
-        duration_s=duration_s,
+        engine_version=_mujoco_version(),
+        target_hash=_hash_target(target),
         timestamp_utc=timestamp_utc,
+        cost_breakdown=breakdown,
+        final_total_work_J=work_J,
+        solver_options=solver_options,
     )
 
 

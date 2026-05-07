@@ -268,7 +268,7 @@ class TestOptimizationConfig:
         cfg = OptimizationConfig()
         assert cfg.max_iterations > 0
         assert cfg.tolerance > 0
-        assert cfg.solver == "SLSQP"
+        assert cfg.method == "SLSQP"
 
     def test_custom_config(self) -> None:
         cfg = OptimizationConfig(
@@ -338,13 +338,13 @@ class TestOptimizationResult:
             predicted_clubhead_speed=50.0,
             predicted_ball_speed=75.0,
         )
-        assert r.success is True
+        assert r.solver_status == "success"
         assert r.predicted_clubhead_speed == 50.0
         assert r.predicted_ball_speed == 75.0
 
     def test_failure_result(self) -> None:
         r = OptimizationResult(success=False, message="Did not converge")
-        assert r.success is False
+        assert r.solver_status != "success"
         assert r.trajectory is None
 
     @pytest.mark.parametrize(
@@ -580,7 +580,7 @@ class TestSwingOptimizerOptimize:
         opt = SwingOptimizer(GolferModel(), ClubModel(), config=cfg)
         result = opt.optimize()
         assert isinstance(result, OptimizationResult)
-        assert isinstance(result.success, bool)
+        assert isinstance(result.solver_status == "success", bool)
         assert result.computation_time >= 0
 
     def test_optimize_with_callback(self) -> None:

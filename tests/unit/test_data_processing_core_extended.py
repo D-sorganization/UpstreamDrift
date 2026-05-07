@@ -230,7 +230,7 @@ class TestProcessingResult:
         )
 
         r = ProcessingResult(success=True, message="ok")
-        assert r.success is True
+        assert r.solver_status == "success"
         assert r.message == "ok"
 
     def test_default_data_and_stats(self) -> None:
@@ -388,19 +388,19 @@ class TestFilterData:
     def test_filter_gt_returns_filtered_rows(self, loaded_engine) -> None:
         """filter_data('a', '>', 2.0) returns rows where a > 2."""
         result = loaded_engine.filter_data("a", ">", 2.0)
-        assert result.success is True
+        assert result.solver_status == "success"
         assert len(result.data) == 3  # rows with a=3,4,5
 
     def test_filter_eq_returns_matching_rows(self, loaded_engine) -> None:
         """filter_data('a', '==', 1.0) returns row where a == 1."""
         result = loaded_engine.filter_data("a", "==", 1.0)
-        assert result.success is True
+        assert result.solver_status == "success"
         assert len(result.data) == 1
 
     def test_filter_lt_returns_filtered_rows(self, loaded_engine) -> None:
         """filter_data('a', '<', 3.0) returns rows where a < 3."""
         result = loaded_engine.filter_data("a", "<", 3.0)
-        assert result.success is True
+        assert result.solver_status == "success"
         assert len(result.data) == 2
 
     def test_filter_no_data_raises(self, engine) -> None:
@@ -437,7 +437,7 @@ class TestAggregate:
         )
 
         result = loaded_engine.aggregate(None, "a", AggregationType.MEAN)
-        assert result.success is True
+        assert result.solver_status == "success"
 
     def test_aggregate_sum_all_rows(self, loaded_engine) -> None:
         """aggregate(None, 'a', SUM) returns sum of column a."""
@@ -446,7 +446,7 @@ class TestAggregate:
         )
 
         result = loaded_engine.aggregate(None, "a", AggregationType.SUM)
-        assert result.success is True
+        assert result.solver_status == "success"
 
     def test_aggregate_by_group(self, engine) -> None:
         """aggregate('grp', 'a', SUM) groups by grp and sums a."""
@@ -456,7 +456,7 @@ class TestAggregate:
 
         engine.load_dataframe(_make_df_with_group())
         result = engine.aggregate("grp", "a", AggregationType.SUM)
-        assert result.success is True
+        assert result.solver_status == "success"
         assert result.data is not None
 
 
@@ -471,7 +471,7 @@ class TestQuery:
     def test_query_expression_filters(self, loaded_engine) -> None:
         """query('a > 2') returns rows where a > 2."""
         result = loaded_engine.query("a > 2")
-        assert result.success is True
+        assert result.solver_status == "success"
         assert len(result.data) == 3
 
     def test_query_no_data_raises(self, engine) -> None:
@@ -495,7 +495,7 @@ class TestRenameAndDrop:
     def test_rename_column_succeeds(self, loaded_engine) -> None:
         """rename_column changes the column name."""
         result = loaded_engine.rename_column("a", "alpha")
-        assert result.success is True
+        assert result.solver_status == "success"
         assert "alpha" in loaded_engine.get_column_names()
         assert "a" not in loaded_engine.get_column_names()
 
@@ -511,7 +511,7 @@ class TestRenameAndDrop:
     def test_drop_columns_removes_them(self, loaded_engine) -> None:
         """drop_columns removes specified columns."""
         result = loaded_engine.drop_columns(["b"])
-        assert result.success is True
+        assert result.solver_status == "success"
         assert "b" not in loaded_engine.get_column_names()
 
     def test_drop_missing_column_raises(self, loaded_engine) -> None:
@@ -535,13 +535,13 @@ class TestCalculatedAndTransform:
     def test_add_calculated_column_creates_new_column(self, loaded_engine) -> None:
         """add_calculated_column creates a new column from an expression."""
         result = loaded_engine.add_calculated_column("c", "a * 2")
-        assert result.success is True
+        assert result.solver_status == "success"
         assert "c" in loaded_engine.get_column_names()
 
     def test_transform_column_log(self, loaded_engine) -> None:
         """transform_column 'log' applies natural log to column values."""
         result = loaded_engine.transform_column("a", "log")
-        assert result.success is True
+        assert result.solver_status == "success"
 
     def test_transform_column_missing_column_raises(self, loaded_engine) -> None:
         """transform_column raises ColumnNotFoundError for unknown column."""
@@ -573,8 +573,8 @@ class TestFitCurve:
         from src.shared.python.upstream_drift_tools.data_processing.core import FitType
 
         fr = loaded_engine.fit_curve("a", "b", FitType.LINEAR)
-        assert fr.coefficients is not None
-        assert len(fr.coefficients) > 0
+        assert fr.theta_optimal is not None
+        assert len(fr.theta_optimal) > 0
 
     def test_polynomial_fit(self, loaded_engine) -> None:
         """Polynomial fit returns a FitResult with r_squared."""
@@ -620,13 +620,13 @@ class TestSmoothColumn:
         """smooth_column with 'moving_average' returns success."""
         e = self._long_engine()
         result = e.smooth_column("a", "moving_average", window=5)
-        assert result.success is True
+        assert result.solver_status == "success"
 
     def test_median_smooth_succeeds(self) -> None:
         """smooth_column with 'median' returns success."""
         e = self._long_engine()
         result = e.smooth_column("a", "median", kernel=5)
-        assert result.success is True
+        assert result.solver_status == "success"
 
     def test_unknown_method_raises(self) -> None:
         """smooth_column with unknown method raises UnsupportedOperationError."""
@@ -661,7 +661,7 @@ class TestResetAndUndo:
         loaded_engine.drop_columns(["b"])
         result = loaded_engine.reset()
         # reset restores from original — data is present again
-        assert result.success is True
+        assert result.solver_status == "success"
         assert loaded_engine.has_data() is True
 
     def test_undo_reverses_rename(self, loaded_engine) -> None:

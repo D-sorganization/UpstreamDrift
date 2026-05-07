@@ -83,7 +83,7 @@ class TestColumnStats:
 class TestProcessingResult:
     def test_success(self) -> None:
         result = ProcessingResult(success=True, message="ok")
-        assert result.success is True
+        assert result.solver_status == "success"
         assert result.message == "ok"
 
     def test_default_stats_empty(self) -> None:
@@ -125,7 +125,7 @@ class TestDataProcessorEngineLoad:
         engine = DataProcessorEngine()
         result = engine.load_dataframe(self._make_df())
         assert isinstance(result, ProcessingResult)
-        assert result.success is True
+        assert result.solver_status == "success"
 
     def test_load_sets_original_data(self) -> None:
         engine = DataProcessorEngine()
@@ -201,7 +201,7 @@ class TestDataProcessorEngineAddCalculatedColumn:
     def test_safe_expression_adds_column(self) -> None:
         engine = self._loaded_engine()
         result = engine.add_calculated_column("z", "x + y")
-        assert result.success is True
+        assert result.solver_status == "success"
         assert engine.data is not None
         assert "z" in engine.data.columns
         assert list(engine.data["z"]) == [11.0, 22.0, 33.0]

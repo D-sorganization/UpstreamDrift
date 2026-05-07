@@ -114,8 +114,8 @@ def test_full_pipeline_synthetic_target(
 
     # Shape contract: flat coefficient vector matching surrogate dim.
     expected_dim = trained_surrogate.config.coeff_dim
-    assert result.coefficients.shape == (expected_dim,)
-    assert np.all(np.isfinite(result.coefficients))
+    assert result.theta_optimal.shape == (expected_dim,)
+    assert np.all(np.isfinite(result.theta_optimal))
     # Loss is finite, non-negative, and below a deliberately loose smoke threshold.
     assert np.isfinite(result.final_loss)
     assert result.final_loss >= 0.0

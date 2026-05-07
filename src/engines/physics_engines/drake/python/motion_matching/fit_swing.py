@@ -39,6 +39,7 @@ from numpy.typing import NDArray
 
 from src.shared.python.motion_matching.club_target import ClubTarget
 from src.shared.python.motion_matching.cost import CostOptions
+from src.shared.python.motion_matching.fit_result import CanonicalFitResult as FitResult
 
 from .compute_cost_drake import compute_cost_drake
 from .simulate import COEFFS_PER_JOINT, SimOptions, SimOut, simulate_with_coefficients
@@ -132,38 +133,6 @@ class FitOptions:
     sim_options: SimOptions = field(default_factory=SimOptions)
     cost_options: CostOptions = field(default_factory=CostOptions)
     verbose: bool = False
-
-
-@dataclass(frozen=True)
-class FitResult:
-    """Canonical cross-engine fit result (cross-engine §2.4).
-
-    Attributes:
-        theta_optimal: Recovered coefficient vector (length
-            ``n_joints * 7``).
-        final_cost: Final objective value (the shared scalar ``J``).
-        final_rmse_m: Square-root of the unweighted position term, in
-            metres. Reported alongside ``final_cost`` so callers can
-            check the < 5 mm acceptance gate without re-running cost.
-        solver_status: ``"success"`` / ``"warning"`` / ``"failed"``.
-        iterations: Optimizer iteration count (``scipy.OptimizeResult.nit``).
-        n_evaluations: Number of objective evaluations (== sim calls).
-        wall_clock_s: Wall-clock duration of the fit.
-        message: Human-readable solver status string.
-        history: Per-evaluation cost history (length ``n_evaluations``).
-        method: Optimizer method actually used.
-    """
-
-    theta_optimal: NDArray[np.float64]
-    final_cost: float
-    final_rmse_m: float
-    solver_status: str
-    iterations: int
-    n_evaluations: int
-    wall_clock_s: float
-    message: str
-    history: list[float] = field(default_factory=list)
-    method: str = "SLSQP"
 
 
 # ---------------------------------------------------------------------------
@@ -260,7 +229,7 @@ def fit_swing_drake(
             )
             raise ValueError(msg)
         # Clip to the bound box defensively so SLSQP starts feasible.
-        theta0 = np.clip(theta0, lb, ub)
+        theta0 = np.clip(theta0, lb, ub).astype(np.float64)
     else:
         theta0 = np.zeros(n_dim, dtype=np.float64)
 
@@ -309,6 +278,10 @@ def fit_swing_drake(
         n_evaluations=n_eval,
         wall_clock_s=wall_clock_s,
         message=str(res.message),
-        history=history,
+        history=tuple(history),
         method=opts.method,
+        git_commit="unknown",
+        engine_version="unknown",
+        target_hash="unknown",
+        timestamp_utc="unknown",
     )

@@ -129,7 +129,7 @@ class TestSimulationService:
 
         # Should return failure response, not raise exception
         assert result is not None
-        assert result.success is False
+        assert result.solver_status != "success"
 
     def test_extract_simulation_data(self, service: SimulationService) -> None:
         """Test data extraction from recorder."""

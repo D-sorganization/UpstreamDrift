@@ -41,7 +41,7 @@ def mock_casadi():
     opti.bounded.return_value = MagicMock()
     opti.subject_to.return_value = MagicMock()
     opti.minimize.return_value = MagicMock()
-    opti.solver.return_value = MagicMock()
+    opti.method.return_value = MagicMock()
 
     # Mock solve
     sol = MagicMock()
@@ -107,7 +107,7 @@ def test_main_execution(mock_casadi, mock_pinocchio):
         main()
 
         # Verify solver called
-        mock_casadi.solver.assert_called_with(
+        mock_casadi.method.assert_called_with(
             "ipopt", {"expand": True}, {"max_iter": 1000, "print_level": 5}
         )
         mock_casadi.solve.assert_called()

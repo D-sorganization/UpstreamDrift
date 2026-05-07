@@ -25,14 +25,12 @@ pytest.importorskip(
 )
 
 import numpy as np
-
 from src.engines.physics_engines.opensim.python.opensim_golf.controller import (
     PolynomialTorqueController,
     evaluate_torque_polynomial,
 )
 from src.engines.physics_engines.opensim.python.opensim_golf.simulate_with_coefficients import (
     SimOptions,
-    SimOut,
     simulate_with_coefficients,
     synthesize_target_from_coefficients,
 )
@@ -279,9 +277,9 @@ class TestSimulateWithCoefficientsSmoke:
             for j in range(n_joints_expected):
                 expected_tau = controller.tau_at(t, j)
                 # Allow some numerical tolerance due to integration errors
-                assert np.isclose(
-                    result.tau[i, j], expected_tau, atol=1e-4
-                ), f"tau mismatch at t={t}, joint={j}"
+                assert np.isclose(result.tau[i, j], expected_tau, atol=1e-4), (
+                    f"tau mismatch at t={t}, joint={j}"
+                )
 
     def test_solver_status_success(self) -> None:
         """Solver status is 'success' for nominal inputs."""
@@ -301,7 +299,7 @@ class TestSimulateWithCoefficientsSmoke:
         opts = SimOptions(t_final=0.1, dt=0.01)
         result = simulate_with_coefficients(theta, opts)
 
-        assert result.duration_s > 0.0
+        assert result.wall_clock_s > 0.0
 
 
 class TestSynthesizeTargetFromCoefficients:
@@ -338,7 +336,6 @@ class TestSynthesizeTargetFromCoefficients:
         """Synthesizer raises ValueError if simulation fails."""
         # This is hard to trigger in a unit test without mocking.
         # For now, we rely on the happy path test above.
-        pass
 
 
 class TestSimulateWithCoefficientsInvalidInputs:

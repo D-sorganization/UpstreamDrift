@@ -52,6 +52,7 @@ from src.shared.python.motion_matching.cost import (
     SimOutput,
     compute_cost,
 )
+from src.shared.python.motion_matching.fit_result import CanonicalFitResult as FitResult
 
 logger = logging.getLogger(__name__)
 
@@ -129,28 +130,6 @@ class FitOptions:
         default_factory=lambda: CostOptions(regularizer="coeff_l2", lambda_=1e-6)
     )
     verbose: bool = False
-
-
-@dataclass
-class FitResult:
-    """Canonical fit result schema.
-
-    Attributes match the cross-engine spec § 2.4 and the Simscape
-    ``fit_swing_python.py`` reference. ``solver_status`` follows the
-    canonical ``"success" | "warning" | "failed"`` vocabulary so the
-    leaderboard helper can aggregate across engines.
-    """
-
-    theta: NDArray[np.float64]
-    cost: float
-    n_iter: int
-    n_eval: int
-    success: bool
-    solver_status: str
-    message: str
-    elapsed_s: float
-    history: list[float]
-    method: str
 
 
 # --------------------------------------------------------------------------- #
@@ -330,23 +309,27 @@ def fit_swing_opensim(
         status = "failed"
 
     result = FitResult(
-        theta=np.asarray(res.x, dtype=np.float64).copy(),
-        cost=float(res.fun),
-        n_iter=int(getattr(res, "nit", 0)),
-        n_eval=int(n_eval["count"]),
-        success=success,
+        theta_optimal=np.asarray(res.x, dtype=np.float64).copy(),
+        final_cost=float(res.fun),
+        final_rmse_m=float("nan"),
         solver_status=status,
+        iterations=int(getattr(res, "nit", 0)),
+        n_evaluations=int(n_eval["count"]),
+        wall_clock_s=float(elapsed),
         message=str(res.message),
-        elapsed_s=float(elapsed),
-        history=list(history),
+        history=tuple(history),
         method=str(options.method),
+        git_commit="unknown",
+        engine_version="unknown",
+        target_hash="unknown",
+        timestamp_utc="unknown",
     )
 
     # Postcondition: history should be non-empty and end at the reported cost
     # within floating-point tolerance.
     assert result.history, "FitResult.history must not be empty"
-    assert np.isfinite(result.cost), "FitResult.cost must be finite"
-    assert result.theta.shape == (d,), (
-        f"FitResult.theta shape {result.theta.shape} != ({d},)"
+    assert np.isfinite(result.final_cost), "FitResult.cost must be finite"
+    assert result.theta_optimal.shape == (d,), (
+        f"FitResult.theta shape {result.theta_optimal.shape} != ({d},)"
     )
     return result

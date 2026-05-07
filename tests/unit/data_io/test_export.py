@@ -201,7 +201,7 @@ class TestProvenanceBackedAtomicExports:
         expected_checksum = hashlib.sha256(b"matlab-payload").hexdigest()
         sidecar_path = tmp_path / "recording.mat.provenance.json"
         sidecar = json.loads(sidecar_path.read_text())
-        assert outcome.success is True
+        assert outcome.solver_status == "success"
         assert outcome.path == output_path
         assert outcome.checksum_sha256 == expected_checksum
         assert outcome.provenance_path == sidecar_path
@@ -269,7 +269,7 @@ class TestProvenanceBackedAtomicExports:
         expected_checksum = hashlib.sha256(b"hdf5-payload").hexdigest()
         sidecar_path = tmp_path / "recording.h5.provenance.json"
         sidecar = json.loads(sidecar_path.read_text())
-        assert outcome.success is True
+        assert outcome.solver_status == "success"
         assert outcome.path == output_path
         assert outcome.checksum_sha256 == expected_checksum
         assert outcome.provenance_path == sidecar_path

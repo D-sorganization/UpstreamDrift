@@ -37,7 +37,7 @@ from src.shared.python.motion_matching.club_target import (
     ClubTarget,
     SourceProvenance,
 )
-from src.shared.python.motion_matching.cost import CostOptions
+from src.shared.python.motion_matching.final_cost import CostOptions
 
 pytestmark = [pytest.mark.requires_mujoco, pytest.mark.unit]
 
@@ -282,7 +282,7 @@ def test_analytical_recovers_lower_rmse_than_fd() -> None:
     # Soft (documented) bar: the strict ‖θ - θ_truth‖∞ < 1e-2 spec target
     # is gated on closing the integrator mismatch; we still want the
     # analytical fit to be at least within an order of magnitude.
-    err_inf = float(np.max(np.abs(res_an.coefficients - theta_truth)))
+    err_inf = float(np.max(np.abs(res_an.theta_optimal - theta_truth)))
     assert err_inf < 1.0, (
         f"||theta_fit - theta_truth||_inf = {err_inf:.3e} is far above "
         f"the integrator-mismatch ceiling of 0.1; the optimizer made "

@@ -15,6 +15,7 @@ from .fit_swing_autodiff import (
     default_theta_bounds,
     fit_swing_drake_autodiff,
 )
+
 # Note: ``fit_swing.FitOptions`` / ``FitResult`` shadow the autodiff variants
 # above when imported directly from ``.fit_swing``; the top-level package
 # re-exports the autodiff dataclasses for backwards compatibility.

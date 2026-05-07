@@ -17,9 +17,7 @@ from pathlib import Path
 import pytest
 
 
-def _write_fit_result(
-    trial_dir: Path, engine: str, data: dict | None = None
-) -> Path:
+def _write_fit_result(trial_dir: Path, engine: str, data: dict | None = None) -> Path:
     """Write a FitResult JSON to a trial directory."""
     if data is None:
         data = {

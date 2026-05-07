@@ -152,15 +152,15 @@ class TestRecovery:
         )
         result = fit_mod.fit_swing_pinocchio(target, opts)
 
-        assert result.success or result.cost < 1e-6, (
-            f"LM failed to converge: cost={result.cost:.3e}, msg={result.message!r}"
+        assert result.solver_status == "success" or result.final_cost < 1e-6, (
+            f"LM failed to converge: cost={result.final_cost:.3e}, msg={result.message!r}"
         )
         # Relative recovery on the truth.
         denom = max(float(np.linalg.norm(theta_truth)), 1e-12)
         rel_err = float(np.linalg.norm(result.theta - theta_truth) / denom)
         assert rel_err < 0.05, (
             f"||theta - theta_truth|| / ||theta_truth|| = {rel_err:.4f} > 0.05; "
-            f"final cost={result.cost:.3e}"
+            f"final cost={result.final_cost:.3e}"
         )
 
     def test_convergence_under_20_iterations(self, fit_mod, sim_mod, n_joints) -> None:
@@ -204,7 +204,7 @@ class TestDeterminism:
         r1 = fit_mod.fit_swing_pinocchio(target, opts)
         r2 = fit_mod.fit_swing_pinocchio(target, opts)
         np.testing.assert_array_equal(r1.theta, r2.theta)
-        assert r1.cost == r2.cost
+        assert r1.final_cost == r2.final_cost
         assert r1.n_jac_eval == r2.n_jac_eval
 
 
@@ -240,7 +240,7 @@ class TestWallClock:
         assert elapsed < 10.0, (
             f"fit_swing_pinocchio took {elapsed:.2f}s; spec < 5 s, "
             f"CI ceiling < 10 s. n_jac_eval={result.n_jac_eval}, "
-            f"final cost={result.cost:.3e}."
+            f"final cost={result.final_cost:.3e}."
         )
 
 
@@ -265,8 +265,8 @@ class TestAnalyticalVsFiniteDifference:
         # Both should hit a small final cost. Analytical may be slightly
         # higher due to Euler-sensitivity Jacobian inaccuracy, but should
         # be within 2x of the FD result on a well-conditioned recovery.
-        assert r_a.cost < 1e-4, f"analytical cost too large: {r_a.cost}"
-        assert r_f.cost < 1e-4, f"finite-diff cost too large: {r_f.cost}"
+        assert r_a.final_cost < 1e-4, f"analytical cost too large: {r_a.final_cost}"
+        assert r_f.final_cost < 1e-4, f"finite-diff cost too large: {r_f.final_cost}"
 
     def test_analytical_does_fewer_sim_evals(self, fit_mod, sim_mod, n_joints) -> None:
         """The killer-feature claim: analytical mode burns far fewer sims.
@@ -291,7 +291,7 @@ class TestAnalyticalVsFiniteDifference:
 
         # FD does at minimum (nx + 1) residual evals per Jacobian. The
         # analytical path does exactly one residual eval per LM step.
-        assert r_a.n_eval < r_f.n_eval, (
-            f"analytical n_eval={r_a.n_eval} should be << "
-            f"finite-diff n_eval={r_f.n_eval}"
+        assert r_a.n_evaluations < r_f.n_evaluations, (
+            f"analytical n_eval={r_a.n_evaluations} should be << "
+            f"finite-diff n_eval={r_f.n_evaluations}"
         )

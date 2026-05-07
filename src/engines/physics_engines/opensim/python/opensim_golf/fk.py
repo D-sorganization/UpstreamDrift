@@ -232,9 +232,7 @@ def extract_clubhead_pose(
     return _frame_pose_in_ground(model, state, CLUBHEAD_FRAME_PATH)
 
 
-def extract_full_pose(
-    state: Any, model: Any
-) -> dict[str, NDArray[np.float64]]:
+def extract_full_pose(state: Any, model: Any) -> dict[str, NDArray[np.float64]]:
     """Extract every canonical landmark in one realisation pass.
 
     Returns a dict shaped to match the cross-engine ``SimOut`` per-step

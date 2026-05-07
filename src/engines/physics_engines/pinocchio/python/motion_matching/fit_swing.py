@@ -97,11 +97,11 @@ from numpy.typing import NDArray
 from src.shared.python.motion_matching._geodesic import quaternion_geodesic_angles
 from src.shared.python.motion_matching.club_target import ClubTarget
 from src.shared.python.motion_matching.cost import (
-    CostBreakdown,
     CostOptions,
     SimOutput,
     compute_cost,
 )
+from src.shared.python.motion_matching.fit_result import CanonicalFitResult as FitResult
 
 from .simulate import (
     COEFFS_PER_JOINT,
@@ -175,43 +175,6 @@ class FitOptions:
     sensitivity_subsample: int | None = None
     rng_seed: int = 42
     verbose: bool = False
-
-
-@dataclass(frozen=True)
-class FitResult:
-    """Canonical fit result, mirroring the cross-engine spec.
-
-    Attributes:
-        theta: Recovered coefficient vector, shape ``(n_joints * 7,)``.
-        cost: Final canonical ``compute_cost(theta)`` total ``J``.
-        cost_breakdown: Per-term breakdown summing to ``cost``.
-        n_iter: Outer LM iterations.
-        n_eval: Forward-sim evaluations.
-        n_jac_eval: Number of analytical Jacobian evaluations
-            (== ``n_iter`` for ``"analytical"``;
-            == ``0`` for ``"finite_difference"``).
-        success: scipy success flag.
-        message: scipy termination message.
-        elapsed_s: Wall-clock seconds.
-        method: Optimiser identifier (``"lm-analytical"`` or
-            ``"lm-fd"``).
-        history: Cost trajectory, one entry per residual evaluation.
-        meta: Free-form diagnostics (Jacobian shapes, sub-sample stride,
-            scipy result fields).
-    """
-
-    theta: NDArray[np.float64]
-    cost: float
-    cost_breakdown: CostBreakdown
-    n_iter: int
-    n_eval: int
-    n_jac_eval: int
-    success: bool
-    message: str
-    elapsed_s: float
-    method: str
-    history: list[float] = field(default_factory=list)
-    meta: dict[str, Any] = field(default_factory=dict)
 
 
 # --------------------------------------------------------------------------- #
@@ -603,8 +566,8 @@ def _analytical_jacobian(
 
         dp_butt = J_grip_pos @ S_q_v  # (3, nx)
         dp_ch = J_ch_pos @ S_q_v  # (3, nx)
-        J_butt[3 * i : 3 * i + 3, :] = w_pos * dp_butt
-        J_ch[3 * i : 3 * i + 3, :] = w_pos * dp_ch
+        J_butt[3 * i : 3 * i + 3, :] = w_pos * dp_butt  # type: ignore[assignment]
+        J_ch[3 * i : 3 * i + 3, :] = w_pos * dp_ch  # type: ignore[assignment]
 
         # Orientation residual: theta = 2 * arccos(|<q_sim, q_meas>|).
         # d theta / d S_q = (sign(dot) / sqrt(1 - dot^2)) *
@@ -622,10 +585,10 @@ def _analytical_jacobian(
         # axis-angle gradient: dangle / dq ~ projection along axis.
         # Use ang_jac directly weighted by 1.0 (small-angle limit).
         J_ori_row = sgn * (J_ch_ori.sum(axis=0)) @ S_q_v  # (nx,)
-        J_ori[i, :] = w_ori * J_ori_row
+        J_ori[i, :] = w_ori * J_ori_row  # type: ignore[assignment]
 
         if i == impact_k:
-            J_anc[:, :] = w_anc * dp_ch
+            J_anc[:, :] = w_anc * dp_ch  # type: ignore[assignment]
 
         if i == n - 1:
             break
@@ -809,17 +772,22 @@ def fit_swing_pinocchio(
     )
 
     return FitResult(
-        theta=theta_opt,
-        cost=float(cost_total),
-        cost_breakdown=cost_breakdown,
-        n_iter=int(getattr(result, "nfev", len(history))),
-        n_eval=int(getattr(result, "nfev", len(history))),
-        n_jac_eval=int(n_jac_eval_counter[0]),
-        success=bool(result.success),
+        theta_optimal=theta_opt,
+        final_cost=float(cost_total),
+        final_rmse_m=float("nan"),
+        solver_status="success" if bool(result.success) else "failed",
+        iterations=int(getattr(result, "nfev", len(history))),
+        n_evaluations=int(getattr(result, "nfev", len(history))),
+        wall_clock_s=float(elapsed),
         message=str(result.message),
-        elapsed_s=float(elapsed),
+        history=tuple(history),
         method=method_label,
-        history=history,
+        git_commit="unknown",
+        engine_version="unknown",
+        target_hash="unknown",
+        timestamp_utc="unknown",
+        cost_breakdown=cost_breakdown,
+        n_jac_eval=int(n_jac_eval_counter[0]),
         meta={
             "n_joints": n_joints,
             "nx": nx,

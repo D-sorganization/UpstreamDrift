@@ -70,7 +70,7 @@ class TestMarkerMapping:
 
         result = mapper.fit_segment_pose("torso", marker_pos)
 
-        assert result.success
+        assert result.solver_status == "success"
         assert result.rms_error < 1e-6
 
     def test_outlier_detection(self, simple_model: mujoco.MjModel) -> None:
@@ -95,7 +95,7 @@ class TestMarkerMapping:
 
         result = mapper.fit_segment_pose("torso", marker_pos)
 
-        assert result.success
+        assert result.solver_status == "success"
         assert len(result.outlier_indices) > 0
         assert 3 in result.outlier_indices
 

@@ -17,7 +17,7 @@ import logging
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal, cast
+from typing import Any, Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -64,9 +64,7 @@ def _get_golfer_osim_path() -> str:
         FileNotFoundError: If golf_humanoid.osim not found
     """
     # golf_humanoid.osim lives in src/engines/physics_engines/opensim/models/
-    osim_path = (
-        Path(__file__).parent.parent / "models" / "golf_humanoid.osim"
-    )
+    osim_path = Path(__file__).parent.parent / "models" / "golf_humanoid.osim"
     if not osim_path.exists():
         raise FileNotFoundError(
             f"golf_humanoid.osim not found at {osim_path}. "
@@ -198,7 +196,9 @@ def _validate_theta(theta: NDArray[np.float64], n_joints: int) -> NDArray[np.flo
 
 def _extract_frames(
     model: Any, state: Any
-) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
+) -> tuple[
+    NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]
+]:
     """Extract mid-hands (grip) and club-head frames from OpenSim state.
 
     Args:
@@ -239,17 +239,23 @@ def _extract_frames(
         raise RuntimeError("Could not find club body") from e
 
     # Extract positions (translation)
-    grip_pos = np.array([
-        grip_transform.p().get(0),
-        grip_transform.p().get(1),
-        grip_transform.p().get(2),
-    ], dtype=np.float64)
+    grip_pos = np.array(
+        [
+            grip_transform.p().get(0),
+            grip_transform.p().get(1),
+            grip_transform.p().get(2),
+        ],
+        dtype=np.float64,
+    )
 
-    clubhead_pos = np.array([
-        club_transform.p().get(0),
-        club_transform.p().get(1),
-        club_transform.p().get(2),
-    ], dtype=np.float64)
+    clubhead_pos = np.array(
+        [
+            club_transform.p().get(0),
+            club_transform.p().get(1),
+            club_transform.p().get(2),
+        ],
+        dtype=np.float64,
+    )
 
     # Convert rotation matrices to quaternions [w, x, y, z]
     # OpenSim uses [x, y, z, w] (Eigen convention); we convert to [w, x, y, z]
@@ -272,11 +278,14 @@ def _rotation_matrix_to_quaternion(rot: Any) -> NDArray[np.float64]:
         (4,) quaternion [w, x, y, z]
     """
     # Extract rotation matrix elements
-    mat = np.array([
-        [rot.get(0, 0), rot.get(0, 1), rot.get(0, 2)],
-        [rot.get(1, 0), rot.get(1, 1), rot.get(1, 2)],
-        [rot.get(2, 0), rot.get(2, 1), rot.get(2, 2)],
-    ], dtype=np.float64)
+    mat = np.array(
+        [
+            [rot.get(0, 0), rot.get(0, 1), rot.get(0, 2)],
+            [rot.get(1, 0), rot.get(1, 1), rot.get(1, 2)],
+            [rot.get(2, 0), rot.get(2, 1), rot.get(2, 2)],
+        ],
+        dtype=np.float64,
+    )
 
     # Convert rotation matrix to quaternion using Shepperd's method
     trace = np.trace(mat)
@@ -377,8 +386,12 @@ def simulate_with_coefficients(
 
     # Initialize state with provided or default initial conditions
     if initial_pose is not None:
-        q_init = np.asarray(initial_pose.get("q", np.zeros(model.getNumCoordinates())), dtype=np.float64)
-        qd_init = np.asarray(initial_pose.get("qd", np.zeros(n_joints)), dtype=np.float64)
+        q_init = np.asarray(
+            initial_pose.get("q", np.zeros(model.getNumCoordinates())), dtype=np.float64
+        )
+        qd_init = np.asarray(
+            initial_pose.get("qd", np.zeros(n_joints)), dtype=np.float64
+        )
 
         # Set state
         q_vec = state.getQ()
@@ -401,9 +414,7 @@ def simulate_with_coefficients(
 
     # Set up integrator
     integrator_name = (
-        "RungeKuttaMerson"
-        if options.integrator == "rk4"
-        else "SemiExplicitEuler2"
+        "RungeKuttaMerson" if options.integrator == "rk4" else "SemiExplicitEuler2"
     )
     integrator = getattr(opensim, integrator_name)(model)
     integrator.setAccuracy(options.tolerance)
@@ -488,9 +499,12 @@ def simulate_with_coefficients(
                 tau_out[i + 1, j] = controller.tau_at(t_next, j)
 
             # Extract grip and clubhead frames
-            grip_out[i + 1], grip_quat_out[i + 1], clubhead_out[i + 1], club_quat_out[
-                i + 1
-            ] = _extract_frames(model, state)
+            (
+                grip_out[i + 1],
+                grip_quat_out[i + 1],
+                clubhead_out[i + 1],
+                club_quat_out[i + 1],
+            ) = _extract_frames(model, state)
 
     except Exception as e:
         logger.error(f"Integration failed: {e}")

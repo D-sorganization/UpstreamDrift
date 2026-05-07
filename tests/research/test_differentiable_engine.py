@@ -84,5 +84,5 @@ class TestOptimizationResult:
             iterations=10,
             gradient_norm=1e-7,
         )
-        assert result.success is True
+        assert result.solver_status == "success"
         assert result.iterations == 10

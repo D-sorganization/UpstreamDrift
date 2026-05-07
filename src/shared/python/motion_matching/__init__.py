@@ -55,6 +55,7 @@ from .cost import (
     SimOutput,
     compute_cost,
 )
+from .fit_result import CanonicalFitResult
 from .load_club_target import (
     ALLOWED_SHEETS,
     load_club_target,
@@ -93,6 +94,7 @@ __all__ = [
     "ALLOWED_SHEETS",
     "AlignOptions",
     "AlignedTrajectory",
+    "CanonicalFitResult",
     "ClubTarget",
     "CostBreakdown",
     "CostOptions",

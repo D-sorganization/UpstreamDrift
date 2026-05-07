@@ -95,7 +95,7 @@ def test_simulate_exports_synthesize_recovery_oracle() -> None:
 
     assert np.isfinite(result.final_rmse_m)
     assert result.final_rmse_m < 1e-8
-    np.testing.assert_allclose(result.coefficients, theta_truth, atol=1e-10)
+    np.testing.assert_allclose(result.theta_optimal, theta_truth, atol=1e-10)
 
 
 def test_zero_torque_falls_under_gravity_full() -> None:
@@ -243,7 +243,7 @@ def test_output_shapes_match_canonical_grid() -> None:
     assert out.clubhead.shape == (n_expected, 3)
     assert out.club_quat.shape == (n_expected, 4)
     assert out.solver_status == "ok"
-    assert out.duration_s > 0.0
+    assert out.wall_clock_s > 0.0
 
 
 def test_output_unit_quaternions() -> None:

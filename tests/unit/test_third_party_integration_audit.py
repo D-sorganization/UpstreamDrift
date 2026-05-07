@@ -374,7 +374,7 @@ class TestPinkIKSolverAudit:
         )
 
         settings = SolverSettings()
-        assert settings.solver == "quadprog"
+        assert settings.method == "quadprog"
         assert settings.damping == pytest.approx(1e-6)
 
 

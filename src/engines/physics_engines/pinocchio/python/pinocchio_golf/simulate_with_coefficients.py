@@ -201,7 +201,9 @@ def _validate_theta(theta: NDArray[np.float64], n_joints: int) -> NDArray[np.flo
 
 def _extract_frames(
     model: pin.Model, data: pin.Data
-) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
+) -> tuple[
+    NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]
+]:
     """Extract mid-hands (grip) and club-head frames from Pinocchio data.
 
     Args:
@@ -323,8 +325,8 @@ def simulate_with_coefficients(
     # Forward kinematics at t=0
     pin.forwardKinematics(model, data, q, qd, np.zeros(model.nv))
     pin.updateFramePlacements(model, data)
-    grip_out[0], grip_quat_out[0], clubhead_out[0], club_quat_out[0] = (
-        _extract_frames(model, data)
+    grip_out[0], grip_quat_out[0], clubhead_out[0], club_quat_out[0] = _extract_frames(
+        model, data
     )
 
     # Initial acceleration
@@ -361,9 +363,12 @@ def simulate_with_coefficients(
         # Forward kinematics for grip and clubhead
         pin.forwardKinematics(model, data, q, qd, qdd_next)
         pin.updateFramePlacements(model, data)
-        grip_out[i_next], grip_quat_out[i_next], clubhead_out[i_next], club_quat_out[
-            i_next
-        ] = _extract_frames(model, data)
+        (
+            grip_out[i_next],
+            grip_quat_out[i_next],
+            clubhead_out[i_next],
+            club_quat_out[i_next],
+        ) = _extract_frames(model, data)
 
     # Pack result
     return SimOut(

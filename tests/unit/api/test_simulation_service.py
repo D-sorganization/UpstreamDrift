@@ -177,7 +177,7 @@ class TestRunSimulation:
 
             result = await service.run_simulation(request)
 
-            assert result.success is True
+            assert result.solver_status == "success"
             assert result.duration == 0.01
             assert result.frames == 10  # 0.01 / 0.001
 
@@ -272,7 +272,7 @@ class TestRunSimulation:
 
             result = await service.run_simulation(request)
 
-            assert result.success is False
+            assert result.solver_status != "success"
             assert result.frames == 0
 
     async def test_simulation_with_control_inputs(self, mock_engine_manager) -> None:

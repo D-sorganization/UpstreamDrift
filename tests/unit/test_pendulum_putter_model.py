@@ -41,7 +41,9 @@ class TestPendulumPutterModelConstruction:
         builder = PendulumPutterModelBuilder()
         result = builder.build()
 
-        assert result.success, f"Build failed: {result.error_message}"
+        assert result.solver_status == "success", (
+            f"Build failed: {result.error_message}"
+        )
         assert result.urdf_xml is not None
 
     def test_model_has_correct_link_count(self) -> None:
@@ -185,8 +187,8 @@ class TestPendulumPutterModelConfiguration:
         short_result = short_builder.build()
         long_result = long_builder.build()
 
-        assert short_result.success
-        assert long_result.success
+        assert short_result.solver_status == "success"
+        assert long_result.solver_status == "success"
 
         # Verify different configurations
         short_arm = short_result.get_link("pendulum_arm")
@@ -204,7 +206,7 @@ class TestPendulumPutterModelConfiguration:
         builder = PendulumPutterModelBuilder(shoulder_height_m=1.0)
         result = builder.build()
 
-        assert result.success
+        assert result.solver_status == "success"
 
     def test_can_set_pendulum_damping(self) -> None:
         """Should be able to configure pendulum damping."""
@@ -252,7 +254,7 @@ class TestInterchangeableClub:
         builder = PendulumPutterModelBuilder(include_club=False)
         result = builder.build()
 
-        assert result.success
+        assert result.solver_status == "success"
 
         # Should end with club_mount
         club_mount = result.get_link("club_mount")
@@ -274,7 +276,7 @@ class TestInterchangeableClub:
         builder = PendulumPutterModelBuilder(club_config=custom_club)
         result = builder.build()
 
-        assert result.success
+        assert result.solver_status == "success"
 
 
 class TestURDFGeneration:

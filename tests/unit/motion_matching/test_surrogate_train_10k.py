@@ -4,15 +4,13 @@ from __future__ import annotations
 
 import pytest
 import torch
-import numpy as np
-
 from src.shared.python.motion_matching.dataset import (
-    make_synthetic_sweep,
     load_sweep_dataset,
+    make_synthetic_sweep,
 )
 from src.shared.python.motion_matching.surrogate import (
-    SwingSurrogate,
     SurrogateConfig,
+    SwingSurrogate,
     TrainConfig,
     train_surrogate,
 )
@@ -55,6 +53,7 @@ class TestTraining:
     def synthetic_dataset(self):
         """Create a small synthetic dataset for testing."""
         import tempfile
+
         with tempfile.TemporaryDirectory() as tmpdir:
             make_synthetic_sweep(tmpdir, n_trials=30, n_joints=14, n_timesteps=300)
             return load_sweep_dataset(tmpdir, lazy=False)
