@@ -46,7 +46,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, Literal
 
 import numpy as np
 import torch
@@ -77,24 +77,50 @@ COEFFICIENT_LETTER_BOUNDS: tuple[float, ...] = (
 
 def build_coefficient_bound_vector(
     n_joints: int = DEFAULT_N_JOINTS,
+    *,
+    scale_factor: float = 1.0,
 ) -> Tensor:
     """Return the symmetric upper bound for each of ``n_joints * 7`` coefficients.
 
     Layout matches the dataset's flat 189-vec ordering:
     ``(joint_index * 7) + letter_index`` so element ``i`` of the returned
     tensor is the bound for ``coefficients[i]``.
+
+    Args:
+        n_joints: Number of joints (must be positive).
+        scale_factor: Multiplicative factor on the per-letter bounds. The
+            empirical compact dataset has letter-G coefficients reaching
+            roughly ±1000 N·m — the spec's ±25 N·m bound clamps a healthy
+            chunk of the real distribution. Pass ``scale_factor > 1`` (e.g.
+            40) to widen the symmetric range while keeping the per-letter
+            ratio. ``1.0`` keeps the spec's nominal bounds.
+
+    Raises:
+        ValueError: If ``n_joints <= 0`` or ``scale_factor <= 0``.
     """
     if n_joints <= 0:
         raise ValueError(f"n_joints must be positive, got {n_joints}")
+    if scale_factor <= 0:
+        raise ValueError(f"scale_factor must be positive, got {scale_factor}")
     bounds = torch.tensor(COEFFICIENT_LETTER_BOUNDS, dtype=torch.float32).repeat(
         n_joints
     )
-    return bounds
+    return bounds * float(scale_factor)
 
 
 # ---------------------------------------------------------------------------
 # Configs and lightweight result dataclasses
 # ---------------------------------------------------------------------------
+
+
+_BoundStrategy = Literal["spec", "empirical"]
+
+#: Empirical scale factor matching the deterministic regressor's
+#: ``coefficient_scale_factor=50`` default. The compact dataset's
+#: letter-G coefficients reach roughly 40-50× the spec's nominal ±25 N·m
+#: bound, so ``"spec"`` clamps a real fraction of the training
+#: distribution; ``"empirical"`` widens the bounds symmetrically by 50×.
+EMPIRICAL_BOUND_SCALE: float = 50.0
 
 
 @dataclass(frozen=True)
@@ -105,6 +131,21 @@ class CVAEConfig:
     so the prior can express coefficient multi-modality without dwarfing
     the 189-dim output space (z covers about 17% of theta's dim, a common
     rule of thumb for Gaussian cVAEs).
+
+    The decoder applies ``tanh(raw) * coefficient_bounds`` so every output
+    is clamped to a symmetric range. Two strategies are available:
+
+    * ``"spec"`` — use PROJECT_SPEC.md §4 bounds verbatim
+      (``|A,B|<=1000``, ``|C,D|<=500``, ``|E,F|<=100``, ``|G|<=25``).
+    * ``"empirical"`` — multiply the per-letter bounds by
+      ``EMPIRICAL_BOUND_SCALE`` (default 50.0), matching the deterministic
+      regressor's ``coefficient_scale_factor`` default. This is the right
+      choice when training on the real compact dataset where letter G
+      coefficients reach ~±1000 N·m and the ``"spec"`` clamp truncates
+      a healthy slice of the distribution.
+
+    ``"spec"`` is preserved as default for back-compat with already-trained
+    research checkpoints.
     """
 
     n_joints: int = DEFAULT_N_JOINTS
@@ -117,10 +158,23 @@ class CVAEConfig:
     decoder_hidden: int = 1024
     coeff_proj_dim: int = 128
     dropout: float = 0.1
+    coefficient_bound_strategy: _BoundStrategy = "spec"
 
     @property
     def coefficient_dim(self) -> int:
         return self.n_joints * self.coefficients_per_joint
+
+    @property
+    def coefficient_bound_scale(self) -> float:
+        """Multiplier applied to the per-letter spec bounds in the decoder."""
+        if self.coefficient_bound_strategy == "spec":
+            return 1.0
+        if self.coefficient_bound_strategy == "empirical":
+            return EMPIRICAL_BOUND_SCALE
+        raise ValueError(
+            "coefficient_bound_strategy must be 'spec' or 'empirical'; "
+            f"got {self.coefficient_bound_strategy!r}"
+        )
 
 
 @dataclass(frozen=True)
@@ -288,9 +342,13 @@ class SwingInverseCVAE(nn.Module):
         )
 
         # Stored as a non-trainable buffer so it moves with .to(device).
+        # The strategy multiplier widens the symmetric range when the
+        # config requests empirical bounds (see ``CVAEConfig`` docstring).
         self.register_buffer(
             "coefficient_bounds",
-            build_coefficient_bound_vector(cfg.n_joints),
+            build_coefficient_bound_vector(
+                cfg.n_joints, scale_factor=cfg.coefficient_bound_scale
+            ),
             persistent=False,
         )
 
@@ -472,10 +530,19 @@ def _config_to_dict(cfg: CVAEConfig) -> dict:
         "decoder_hidden": cfg.decoder_hidden,
         "coeff_proj_dim": cfg.coeff_proj_dim,
         "dropout": cfg.dropout,
+        "coefficient_bound_strategy": cfg.coefficient_bound_strategy,
     }
 
 
 def _config_from_dict(d: dict) -> CVAEConfig:
+    # ``coefficient_bound_strategy`` was added after the initial release; old
+    # checkpoints don't carry it. Default to ``"spec"`` so they keep loading.
+    raw_strategy = str(d.get("coefficient_bound_strategy", "spec"))
+    if raw_strategy not in ("spec", "empirical"):
+        raise ValueError(
+            "checkpoint coefficient_bound_strategy must be 'spec' or 'empirical'; "
+            f"got {raw_strategy!r}"
+        )
     return CVAEConfig(
         n_joints=int(d["n_joints"]),
         coefficients_per_joint=int(d["coefficients_per_joint"]),
@@ -487,6 +554,7 @@ def _config_from_dict(d: dict) -> CVAEConfig:
         decoder_hidden=int(d["decoder_hidden"]),
         coeff_proj_dim=int(d["coeff_proj_dim"]),
         dropout=float(d["dropout"]),
+        coefficient_bound_strategy=raw_strategy,  # type: ignore[arg-type]
     )
 
 

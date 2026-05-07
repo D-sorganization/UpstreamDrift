@@ -246,3 +246,34 @@ def test_swing_surrogate_modules_register_parameters() -> None:
     assert any("input_proj" in n for n in names)
     assert any("blocks" in n for n in names)
     assert any("decoder" in n for n in names)
+
+
+@pytest.mark.unit
+@pytest.mark.requires_torch
+@pytest.mark.slow
+def test_train_surrogate_best_checkpoint_tracks_val_loss(
+    synthetic_dataset: Path, small_config: SurrogateConfig, tmp_path: Path
+) -> None:
+    """Best checkpoint is the lowest-val-loss epoch (not lowest grip-RMSE).
+
+    Regression lock for the audit-pass fix. Earlier revisions watched
+    ``val_grip_rmse_mm`` only and could pick a "best" epoch that was
+    pre-clubhead-speed convergence — saving the surrogate before the
+    multi-channel objective had finished decreasing.
+    """
+    out_dir = tmp_path / "best_tracks_val_loss"
+    result = train_surrogate(
+        synthetic_dataset,
+        epochs=3,
+        batch_size=4,
+        lr=1e-3,
+        seed=0,
+        config=small_config,
+        output_dir=out_dir,
+        early_stopping_patience=10,
+    )
+    val_losses = result.history["val_loss"]
+    best_loss = min(val_losses)
+    assert result.best_val_loss == pytest.approx(best_loss, rel=1e-6)
+    # Best epoch index is 1-based and should match the argmin of val_loss.
+    assert result.best_epoch == int(np.argmin(val_losses)) + 1

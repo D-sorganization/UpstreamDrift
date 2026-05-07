@@ -27,8 +27,9 @@ from .model import (
 
 _LOGGER = logging.getLogger(__name__)
 
-_M_PER_MM = 1e-3
-_MS_PER_MPH = 1.0 / 2.2369362920544  # 1 mph -> m/s
+# Conversion factor reading as "<numerator> per <denominator>": multiply
+# a value in mph by ``_MPS_PER_MPH`` to get metres-per-second.
+_MPS_PER_MPH: float = 1.0 / 2.2369362920544
 
 
 # --------------------------------------------------------------------------- #
@@ -204,4 +205,4 @@ def predict_clubhead_speed_ms(
     that prefer metres.
     """
     out = predict_trajectory(model, theta)
-    return out["clubhead_speed"] * _MS_PER_MPH
+    return out["clubhead_speed"] * _MPS_PER_MPH

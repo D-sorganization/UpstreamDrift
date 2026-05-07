@@ -191,6 +191,17 @@ function predictor = local_make_python_predictor(checkpoint_path, opts)
         end
     end
 
+    % Make sure the repo root is on sys.path so the import below resolves
+    % regardless of MATLAB's cwd. The shim is 7 levels under the repo
+    % root (src/engines/.../matlab/motion_matching/shared).
+    here = fileparts(mfilename('fullpath'));
+    repo_root = fullfile(here, '..', '..', '..', '..', '..', '..', '..');
+    repo_root_str = char(string(py.os.path.abspath(repo_root)));
+    sys_path = py.sys.path;
+    if ~any(cellfun(@(p) strcmp(char(p), repo_root_str), cell(sys_path)))
+        insert(sys_path, int32(0), repo_root_str);
+    end
+
     % We use ``pyrun`` with persistent state so the surrogate stays in
     % memory between fmincon iterations.
     pyrun_setup = sprintf([ ...

@@ -25,7 +25,12 @@ Checkpointing:
     user-supplied directory).
 
 Early stopping:
-    Patience of 10 epochs on validation grip-RMSE (in mm).
+    Patience of 10 epochs on the standardised total ``val_loss`` (the same
+    quantity the optimiser minimises). Earlier revisions stopped on
+    ``val_grip_rmse_mm`` alone, which let "best" land on a checkpoint that
+    had only learned the position channels — the clubhead-speed channel
+    was still mid-convergence. Tracking the multi-channel objective avoids
+    that asymmetry.
 """
 
 from __future__ import annotations
@@ -55,9 +60,10 @@ from .model import (
 
 _LOGGER = logging.getLogger(__name__)
 
-# Conversion factors (dataset units -> training-loss units).
-_M_PER_MM = 1e-3
-_MPH_PER_MS = 2.2369362920544  # 1 m/s in mph
+# Conversion factor: name reads as "<numerator> per <denominator>", so
+# ``metres * _MM_PER_M = millimetres``. (Inversion-free naming — the
+# previous ``_M_PER_MM = 1e-3`` was easy to misread as the inverse.)
+_MM_PER_M: float = 1.0e3
 
 
 # --------------------------------------------------------------------------- #
@@ -71,11 +77,14 @@ class TrainingResult:
 
     Attributes:
         output_dir: Directory containing checkpoints + ``metrics.json``.
-        best_checkpoint: Path to the best-val-grip-RMSE checkpoint.
+        best_checkpoint: Path to the best-``val_loss`` checkpoint (the
+            standardised multi-channel objective; see
+            :func:`_channel_standardised_mse`).
         last_checkpoint: Path to the final-epoch checkpoint.
-        best_epoch: 1-indexed epoch at which best val grip-RMSE was hit.
+        best_epoch: 1-indexed epoch at which best ``val_loss`` was hit.
         best_val_loss: Lowest val loss observed.
-        best_val_grip_rmse_mm: Lowest val grip-RMSE observed (mm).
+        best_val_grip_rmse_mm: Val grip-RMSE recorded at ``best_epoch`` (mm).
+            (Bookkeeping only — not the early-stop criterion.)
         history: Per-epoch metrics dict (lists of floats, plus epoch index).
         config: Surrogate config that was trained.
         total_seconds: Wall-clock duration of the run.
@@ -307,7 +316,7 @@ def _grip_rmse_mm(pred: torch.Tensor, target: torch.Tensor) -> float:
     lo, hi = CHANNEL_SLICES["r_grip"]
     diff = pred[..., lo:hi] - target[..., lo:hi]
     rmse_m = torch.sqrt(torch.mean(diff**2)).item()
-    return rmse_m / _M_PER_MM  # m -> mm
+    return rmse_m * _MM_PER_M  # m -> mm
 
 
 def _clubhead_speed_mae_mph(pred: torch.Tensor, target: torch.Tensor) -> float:
@@ -401,7 +410,7 @@ def _run_epoch(
         "loss": total_loss / n,
         "mse": total_mse / n,
         "impact_mse": total_impact / n,
-        "grip_rmse_mm": grip_rmse_m / _M_PER_MM,
+        "grip_rmse_mm": grip_rmse_m * _MM_PER_M,
         "clubhead_speed_mae_mph": chs_abs_sum / max(chs_count, 1),
     }
 
@@ -463,8 +472,14 @@ def train_surrogate(
         config: Surrogate config; defaults to :class:`SurrogateConfig()`.
         impact_weight: Multiplier on the impact-speed loss term.
         val_fraction: Fraction of trial_ids reserved for validation.
-        early_stopping_patience: Epochs without val grip-RMSE improvement
-            before training stops early.
+        early_stopping_patience: Epochs without ``val_loss`` improvement
+            before training stops early. ``val_loss`` is the same
+            standardised multi-channel objective that the optimiser
+            minimises, so the saved "best" checkpoint reflects progress
+            on every output channel — not just grip position. (Earlier
+            revisions tracked ``val_grip_rmse_mm`` only and could pick a
+            "best" checkpoint where the speed channel was still mid-
+            convergence.)
         output_dir: Where to write checkpoints. Defaults to
             ``output/surrogate/<timestamp>``.
         resume_from: Optional path to a checkpoint produced by a previous
@@ -574,8 +589,12 @@ def _train_loop(
         "val_grip_rmse_mm": [],
         "val_clubhead_speed_mae_mph": [],
     }
-    best_val_grip_rmse = float("inf")
+    # Early stopping watches the standardised multi-channel ``val_loss`` —
+    # the same quantity the optimiser minimises — so "best" reflects
+    # progress on every output channel rather than only the grip-position
+    # channel. ``best_val_grip_rmse`` is bookkept alongside for reporting.
     best_val_loss = float("inf")
+    best_val_grip_rmse = float("inf")
     best_epoch = 0
     last_ckpt: Path | None = None
     best_ckpt: Path | None = None
@@ -632,9 +651,9 @@ def _train_loop(
         )
         if progress_cb is not None:
             progress_cb(epoch_human, val_metrics)
-        if val_metrics["grip_rmse_mm"] < best_val_grip_rmse - 1e-6:
-            best_val_grip_rmse = val_metrics["grip_rmse_mm"]
+        if val_metrics["loss"] < best_val_loss - 1e-6:
             best_val_loss = val_metrics["loss"]
+            best_val_grip_rmse = val_metrics["grip_rmse_mm"]
             best_epoch = epoch_human
             best_ckpt = out_path / "checkpoint_best.pt"
             _save_checkpoint(
@@ -652,7 +671,7 @@ def _train_loop(
             no_improve += 1
             if no_improve >= early_stopping_patience:
                 _LOGGER.info(
-                    "early stopping after %d epochs without improvement",
+                    "early stopping after %d epochs without val_loss improvement",
                     early_stopping_patience,
                 )
                 break

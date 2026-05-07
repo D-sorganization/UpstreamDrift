@@ -30,7 +30,6 @@ from .cvae import (
     CVAEConfig,
     EncoderOutput,
     SwingInverseCVAE,
-    build_coefficient_bound_vector,
     kl_divergence_per_dim,
     parameter_count,
 )
@@ -244,8 +243,10 @@ def train_inverse_cvae(
     opt = AdamW(model.parameters(), lr=lr, weight_decay=1e-5)
     # Per-coefficient symmetric bound vector — used to standardise the
     # 189-dim recon target into [-1, 1] so reconstruction MSE is O(1)
-    # and comparable in scale to the KL term. (Bug-2 fix.)
-    coeff_bounds = build_coefficient_bound_vector(cfg.n_joints).to(selected_device)
+    # and comparable in scale to the KL term. (Bug-2 fix.) Reusing the
+    # model's buffer here means the standardiser tracks
+    # ``coefficient_bound_strategy`` (spec vs empirical) automatically.
+    coeff_bounds = model.coefficient_bounds.to(selected_device)
 
     train_loader = DataLoader(
         _TrialTensorDataset(train_samples),

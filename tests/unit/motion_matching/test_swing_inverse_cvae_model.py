@@ -202,3 +202,63 @@ def test_invalid_config_rejected() -> None:
         SwingInverseCVAE(CVAEConfig(trajectory_channels=0))
     with pytest.raises(ValueError, match="n_joints"):
         SwingInverseCVAE(CVAEConfig(n_joints=0))
+
+
+# ---- coefficient_bound_strategy toggle ------------------------------------
+
+
+def test_default_bound_strategy_matches_spec() -> None:
+    """Default ``"spec"`` keeps the PROJECT_SPEC.md §4 nominal bounds."""
+    cfg = CVAEConfig()
+    assert cfg.coefficient_bound_strategy == "spec"
+    assert cfg.coefficient_bound_scale == pytest.approx(1.0)
+    model = SwingInverseCVAE(cfg)
+    expected = torch.tensor(COEFFICIENT_LETTER_BOUNDS, dtype=torch.float32)
+    torch.testing.assert_close(model.coefficient_bounds[:7], expected)
+
+
+def test_empirical_bound_strategy_widens_bounds() -> None:
+    """``"empirical"`` widens every per-letter bound by 50× (matches regressor)."""
+    from src.shared.python.motion_matching.inverse.cvae import EMPIRICAL_BOUND_SCALE
+
+    cfg = CVAEConfig(coefficient_bound_strategy="empirical")
+    assert cfg.coefficient_bound_scale == pytest.approx(EMPIRICAL_BOUND_SCALE)
+    model = SwingInverseCVAE(cfg)
+    expected = (
+        torch.tensor(COEFFICIENT_LETTER_BOUNDS, dtype=torch.float32)
+        * EMPIRICAL_BOUND_SCALE
+    )
+    torch.testing.assert_close(model.coefficient_bounds[:7], expected)
+    # Letter G (index 6 mod 7) under empirical bounds reaches at least 1000 N·m,
+    # the user-reported actual coefficient magnitude on the compact dataset.
+    assert float(model.coefficient_bounds[6]) >= 1000.0
+
+
+def test_invalid_bound_strategy_rejected() -> None:
+    cfg = CVAEConfig(coefficient_bound_strategy="bogus")  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="coefficient_bound_strategy"):
+        _ = cfg.coefficient_bound_scale
+
+
+def test_bound_strategy_round_trips_in_checkpoint(tmp_path) -> None:
+    """A checkpoint preserves ``coefficient_bound_strategy`` across reload."""
+    cfg = CVAEConfig(coefficient_bound_strategy="empirical")
+    model = SwingInverseCVAE(cfg)
+    ckpt = tmp_path / "ckpt.pt"
+    torch.save(model.state_payload(), ckpt)
+    loaded = SwingInverseCVAE.from_checkpoint(ckpt)
+    assert loaded.cfg.coefficient_bound_strategy == "empirical"
+    torch.testing.assert_close(loaded.coefficient_bounds, model.coefficient_bounds)
+
+
+def test_legacy_checkpoint_without_strategy_defaults_to_spec(tmp_path) -> None:
+    """Old checkpoints without the new field load as ``"spec"`` for back-compat."""
+    cfg = CVAEConfig()
+    model = SwingInverseCVAE(cfg)
+    payload = model.state_payload()
+    # Simulate a pre-strategy checkpoint by stripping the new field.
+    payload["config"].pop("coefficient_bound_strategy", None)
+    ckpt = tmp_path / "legacy.pt"
+    torch.save(payload, ckpt)
+    loaded = SwingInverseCVAE.from_checkpoint(ckpt)
+    assert loaded.cfg.coefficient_bound_strategy == "spec"
