@@ -277,7 +277,13 @@ function [r_grip_pos, r_grip_R] = local_run_inner_sim(x, vars, base_input_mat, o
         % the optimizer can move freely from there.  We therefore ADD x to
         % the base value so x=0 means "no change".
         if isfield(base_overrides, vars{k})
-            base_overrides.(vars{k}) = base_overrides.(vars{k}) + x(k);
+            cur = base_overrides.(vars{k});
+            % Fields loaded from the MAT are Simulink.Parameter objects;
+            % extract the numeric .Value before arithmetic.
+            if isa(cur, 'Simulink.Parameter')
+                cur = cur.Value;
+            end
+            base_overrides.(vars{k}) = cur + x(k);
         else
             % Variable not present in MAT: set as scalar perturbation.
             base_overrides.(vars{k}) = x(k);
