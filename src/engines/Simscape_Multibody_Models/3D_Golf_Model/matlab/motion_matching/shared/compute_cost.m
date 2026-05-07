@@ -62,19 +62,38 @@ function [J, terms] = compute_cost(theta, target, sim_fn, opts)
     sim_out = local_resolve_grip_aliases(sim_out);
 
     N = numel(target.time);
+
+    % Resolve weights BEFORE shape checks so we can skip the finite-value
+    % check on club_quat when its weight is zero.  The Simscape model's
+    % CombinedSignalBus does not log a quaternion signal, so sim_out.club_quat
+    % is intentionally all-NaN.  As long as w_oc==0 (the default), that is
+    % fine — we short-circuit both the check and the orient computation.
+    [w_pg, w_pc, w_og, w_oc] = local_resolve_weights(opts);
+
     local_check_traj_shape(target.grip,      N, 3, "target.grip");
     local_check_traj_shape(target.clubhead,  N, 3, "target.clubhead");
     local_check_traj_shape(target.club_quat, N, 4, "target.club_quat");
     local_check_traj_shape(sim_out.grip,     N, 3, "sim_out.grip");
     local_check_traj_shape(sim_out.clubhead, N, 3, "sim_out.clubhead");
-    local_check_traj_shape(sim_out.club_quat, N, 4, "sim_out.club_quat");
-
-    [w_pg, w_pc, w_og, w_oc] = local_resolve_weights(opts);
+    % sim_out.club_quat is all-NaN when the model doesn't log a quaternion
+    % signal (the Simscape CombinedSignalBus has no ClubQuat field).
+    % That is only a problem when w_oc>0 (default is 0).  Skip the finite
+    % check otherwise.  sim_out.grip_quat may also be absent; the orient
+    % term returns 0 gracefully for missing fields, so no check needed.
+    if w_oc > 0
+        local_check_traj_shape(sim_out.club_quat, N, 4, "sim_out.club_quat");
+    end
 
     pos_grip = local_pos_term(sim_out.grip,     target.grip);
     pos_club = local_pos_term(sim_out.clubhead, target.clubhead);
+    % local_orient_term returns 0 gracefully when grip_quat fields are absent.
     ori_grip = local_orient_term(sim_out, target, "grip");
-    ori_club = local_orient_term(sim_out, target, "club");
+    % Short-circuit club orient to avoid 0*NaN when w_oc==0 and club_quat all-NaN.
+    if w_oc > 0
+        ori_club = local_orient_term(sim_out, target, "club");
+    else
+        ori_club = 0;
+    end
     anc_term = local_anchor_term(sim_out, target);
     reg_term = local_regularizer_term(theta, sim_out, opts);
 
@@ -195,9 +214,19 @@ function [w_pg, w_pc, w_og, w_oc] = local_resolve_weights(opts)
 end
 
 function val = local_regularizer_term(theta, sim_out, opts)
+    % When tau/omega are all-NaN (joint signals not logged by the model),
+    % torque-based regularizers degenerate to NaN.  Fall back to coeff_l2
+    % so the optimizer still has a smooth, finite regularisation signal.
+    tau_available = isfield(sim_out, 'tau') && ...
+                    ~isempty(sim_out.tau) && ...
+                    any(isfinite(sim_out.tau(:)));
     switch lower(string(opts.regularizer))
         case "total_work"
-            val = compute_total_work(sim_out);
+            if tau_available
+                val = compute_total_work(sim_out);
+            else
+                val = sum(theta .^ 2);   % coeff_l2 fallback
+            end
         case "peak_power"
             validators.mustHaveFields(sim_out, ["tau", "omega"]);
             val = max(sum(abs(sim_out.tau .* sim_out.omega), 2));
