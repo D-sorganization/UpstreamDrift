@@ -146,6 +146,11 @@ When adding engine-specific code:
 - Follow the existing adapter pattern
 - Implement the PhysicsEngine protocol
 - Add corresponding tests
+- **Use the canonical target loader.** Engine-specific target loaders are
+  forbidden by `src/engines/CROSS_ENGINE_PARITY_SPEC.md` §2.1. Every engine
+  imports `load_club_target` from
+  `src.shared.python.motion_matching.load_club_target`; this is enforced by
+  `scripts/ci/check_no_engine_loader.py` and is a CI gate (issue #4254).
 
 ## 🧪 Testing
 

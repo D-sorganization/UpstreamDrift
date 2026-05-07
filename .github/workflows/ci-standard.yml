@@ -194,6 +194,9 @@ jobs:
       - name: Engine Tier Metadata Check
         run: python3 scripts/check_engine_tiers.py
 
+      - name: Enforce canonical target loader
+        run: python3 scripts/ci/check_no_engine_loader.py
+
       - name: Changed-File Size Budget Check
         run: python3 scripts/ci/check_file_size_budget.py
 
