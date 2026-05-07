@@ -84,6 +84,8 @@ guardrails until the active workflow count reaches the 25-workflow target:
 | Jules-Test-Generator.yml | workflow_dispatch/issues | @agents | contents/pull-requests: write | KEEP: test-generation automation. | n/a |
 | Maintenance-Global-Control.yml | workflow_dispatch | @infra | actions: write | KEEP: global workflow control plane. | n/a |
 | Manual-Run-All.yml | workflow_dispatch | @infra | actions: write | KEEP: manual dispatch aggregator. | n/a |
+| cross-engine-equivalence.yml | pull_request/push/workflow_dispatch | @physics | contents: read | KEEP: PARITY-EQUIVALENCE forward-sim gate (issue #4096, spec §2.2). | n/a |
+| docs-currency-warning.yml | pull_request | @docs | contents: read / pull-requests: write | KEEP: advisory motion_matching docs-currency PR comment. | n/a |
 | nightly-cross-engine.yml | schedule/workflow_dispatch | @physics | contents: read | KEEP: nightly cross-engine validation. | n/a |
 | Nightly-Doc-Organizer.yml | schedule/workflow_dispatch | @docs | contents/pull-requests: write | MERGE: nightly docs cleanup. | docs-ci.yml |
 | pdf-size-guard.yml | pull_request | @docs | contents: read | KEEP: PDF size guard. | n/a |

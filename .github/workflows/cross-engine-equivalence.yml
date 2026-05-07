@@ -1,0 +1,125 @@
+# Cross-Engine Forward-Sim Equivalence (PARITY-EQUIVALENCE, issue #4096)
+#
+# CI gate enforcing src/engines/CROSS_ENGINE_PARITY_SPEC.md §2.2:
+# every engine's `simulate_with_coefficients(theta_truth, pose)` must agree
+# with the reference engine to within 5 mm grip-position RMSE / 1° grip-
+# orientation RMSE / (5 mm + max club-length difference) clubhead RMSE at
+# three canonical poses (impact, top-of-backswing, address).
+#
+# Triggered on every PR (and main push) that touches src/engines/. Engines
+# whose Python deps fail to install are gracefully skipped by the test
+# itself via `requires_<engine>` markers + dynamic availability probing.
+
+name: Cross-Engine Equivalence
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/engines/**"
+      - "shared/models/**"
+      - "tests/test_cross_engine_equivalence.py"
+      - ".github/workflows/cross-engine-equivalence.yml"
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "src/engines/**"
+      - "shared/models/**"
+      - "tests/test_cross_engine_equivalence.py"
+      - ".github/workflows/cross-engine-equivalence.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  pick-runner:
+    runs-on: d-sorg-fleet
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: |
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=d-sorg-fleet" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet"
+
+  equivalence:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install equivalence-test dependencies
+        # Per spec §2.2, the gate is meaningful only when at least two engines
+        # can simulate. We install every Python-installable engine and let the
+        # test skip per-engine if any individual dep fails to load. Simscape
+        # is intentionally out of scope here — it requires MATLAB, which is
+        # licensed and lives behind the matlab.engine bridge tested by the
+        # nightly workflow.
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          # Always install the dev/test stack and the default mujoco engine.
+          pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
+          # Optional engines: best-effort. The test self-skips when any of
+          # these is missing rather than failing the gate.
+          pip install "mujoco>=3.6.0,<4.0.0" || echo "::warning::mujoco install failed"
+          pip install "drake>=1.22.0" || echo "::warning::drake install failed (Linux+macOS only)"
+          pip install "pinocchio>=2.6.0" || echo "::warning::pinocchio install failed"
+          pip install "opensim>=4.4.0" || echo "::warning::opensim install failed"
+
+      - name: Run cross-engine forward-sim equivalence test
+        env:
+          UPSTREAM_DRIFT_OUTPUT_ROOT: ${{ github.workspace }}/output
+        shell: bash
+        run: |
+          mkdir -p "$UPSTREAM_DRIFT_OUTPUT_ROOT/cross_engine_equivalence"
+          # We deliberately run with `-p no:cacheprovider` to avoid caching
+          # across reruns and `-rs` so skips show up clearly in the log.
+          python3 -m pytest \
+            tests/test_cross_engine_equivalence.py \
+            -v -rs --tb=short \
+            --junitxml=test-results/cross-engine-equivalence-junit.xml
+
+      - name: Upload equivalence report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: cross-engine-equivalence-report
+          path: |
+            output/cross_engine_equivalence/**
+            test-results/cross-engine-equivalence-junit.xml
+          if-no-files-found: warn
+
+      - name: Summarize results
+        if: always()
+        shell: bash
+        run: |
+          echo "## Cross-Engine Equivalence Summary" >> "$GITHUB_STEP_SUMMARY"
+          report=$(find output/cross_engine_equivalence -name 'report.md' -print -quit 2>/dev/null || true)
+          if [ -n "$report" ] && [ -f "$report" ]; then
+            cat "$report" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No equivalence report generated (test was skipped or crashed before emission)." >> "$GITHUB_STEP_SUMMARY"
+          fi
