@@ -18,14 +18,16 @@ on:
     paths:
       - "src/engines/**"
       - "shared/models/**"
-      - "tests/test_cross_engine_equivalence.py"
+      - "tests/motion_matching/test_cross_engine_equivalence.py"
+      - "tests/fixtures/test_poses.json"
       - ".github/workflows/cross-engine-equivalence.yml"
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "src/engines/**"
       - "shared/models/**"
-      - "tests/test_cross_engine_equivalence.py"
+      - "tests/motion_matching/test_cross_engine_equivalence.py"
+      - "tests/fixtures/test_poses.json"
       - ".github/workflows/cross-engine-equivalence.yml"
   workflow_dispatch:
 
@@ -98,7 +100,7 @@ jobs:
           # We deliberately run with `-p no:cacheprovider` to avoid caching
           # across reruns and `-rs` so skips show up clearly in the log.
           python3 -m pytest \
-            tests/test_cross_engine_equivalence.py \
+            tests/motion_matching/test_cross_engine_equivalence.py \
             -v -rs --tb=short \
             --junitxml=test-results/cross-engine-equivalence-junit.xml
 
