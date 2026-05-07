@@ -412,9 +412,15 @@ def _resolve_device(device: str | torch.device) -> torch.device:
 
 def _make_output_dir(root: Path) -> Path:
     stamp = time.strftime("%Y%m%d_%H%M%S")
-    out = root / stamp
-    out.mkdir(parents=True, exist_ok=True)
-    return out
+    suffix = 0
+    while True:
+        name = stamp if suffix == 0 else f"{stamp}_{suffix:03d}"
+        out = root / name
+        try:
+            out.mkdir(parents=True, exist_ok=False)
+            return out
+        except FileExistsError:
+            suffix += 1
 
 
 def _split_trial_ids(

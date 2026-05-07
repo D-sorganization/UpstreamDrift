@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.134                                            |
-| **Last Spec Update**    | 2026-05-07 (root report layout hygiene)            |
+| **Spec Version**        | 1.0.135                                            |
+| **Last Spec Update**    | 2026-05-07 (timestep training artifact collisions) |
 
 ## 2. Purpose & Mission
 
@@ -553,6 +553,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-07 | 1.0.135 | Hardened timestep inverse-dynamics training artifact creation so same-second runs allocate unique output directories instead of silently reusing the same checkpoint/metrics folder. |
 | 2026-05-07 | 1.0.134 | Moved production-readiness and testing-contract documentation out of the repository root into `reports/` and `docs/testing/`, and added a focused CI regression test for the root-clutter policy so future non-allowlisted top-level files fail under pytest before they block the shared `quality-gate`. |
 | 2026-05-06 | 1.0.125 | Added scope header comments to the generated Pinocchio `golfer.urdf` and `golfer_ik.urdf` files so forward-simulation and body-only IK workflows clearly document when the welded-club model versus the external-club-tracking model should be used. |
 | 2026-05-06 | 1.0.114 | Expanded the golf ML matching workflow with Pareto regularization sweeps, calibration validation reports and plots, positive mechanical-work diagnostics from paired torque/qdot logs, a tabbed MATLAB workflow GUI, and a frame-by-frame sequential torque-search fallback contract with manifest generation, parallel candidate evaluation structure, smoothing, and polynomial export hooks.                                                                                                                                                                                                                                                                                                                                                                                                             |
@@ -662,4 +663,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-07 | 1.0.131 | Added cross-engine fit determinism regression coverage requiring repeated runs with the same target, warm start, and `rng_seed` to reproduce identical results across seeds 42, 1337, and 999 for MuJoCo, Drake, Pinocchio, and OpenSim. |
 | 2026-05-07 | 1.0.132 | Hardened CI behavior so PR-scoped core tests treat an all-skipped selection as a no-op and cross-engine equivalence bootstraps `pip` with recordless-safe install flags on self-hosted runners. |
 | 2026-05-07 | 1.0.133 | Added FitResult field contract coverage requiring motion-matching fit drivers to export the shared `CanonicalFitResult` and canonical engine tests to use `theta_optimal` instead of deprecated `.theta` access. |
+| 2026-05-07 | 1.0.134 | Hardened timestep inverse-dynamics training artifact creation so same-second runs allocate unique output directories instead of silently reusing the same checkpoint/metrics folder. |
 ````

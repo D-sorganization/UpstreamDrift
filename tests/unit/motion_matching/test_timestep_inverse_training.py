@@ -22,6 +22,9 @@ from src.shared.python.motion_matching.inverse_timestep import (  # noqa: E402
     TimestepInverseDynamics,
     train_timestep_inverse,
 )
+from src.shared.python.motion_matching.inverse_timestep.training import (  # noqa: E402
+    _make_output_dir,
+)
 
 pytestmark = [pytest.mark.unit, pytest.mark.requires_torch]
 
@@ -161,6 +164,23 @@ def test_checkpoint_round_trip(tmp_path: Path) -> None:
         out_a = restored(state)
         out_b = restored(state)
     torch.testing.assert_close(out_a, out_b)
+
+
+def test_make_output_dir_avoids_same_second_collision(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        "src.shared.python.motion_matching.inverse_timestep.training.time.strftime",
+        lambda _fmt: "20260507_123456",
+    )
+    first = _make_output_dir(tmp_path)
+    second = _make_output_dir(tmp_path)
+
+    assert first.name == "20260507_123456"
+    assert second.name == "20260507_123456_001"
+    assert first.is_dir()
+    assert second.is_dir()
+    assert second != first
 
 
 def test_invalid_epochs_rejected(tmp_path: Path) -> None:
