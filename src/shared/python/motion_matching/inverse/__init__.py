@@ -29,6 +29,11 @@ from .diagnostics import (
 )
 from .predict import InverseFitResult, predict_coefficients
 from .train import TrainedInverseCVAE, TrainInverseConfig, train_inverse_cvae
+from .train_option3_cvae import (
+    Option3TrainConfig,
+    Option3TrainingResult,
+    train_option3_inverse_cvae,
+)
 
 __all__ = [
     "CVAEConfig",
@@ -38,6 +43,8 @@ __all__ = [
     "EncoderOutput",
     "InverseFitResult",
     "LatentProjection",
+    "Option3TrainConfig",
+    "Option3TrainingResult",
     "SwingInverseCVAE",
     "TrainInverseConfig",
     "TrainedInverseCVAE",
@@ -48,4 +55,5 @@ __all__ = [
     "round_trip_validate",
     "sample_diversity",
     "train_inverse_cvae",
+    "train_option3_inverse_cvae",
 ]

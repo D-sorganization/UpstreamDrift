@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                            |
 | **License**             | MIT                                                       |
 | **Current Version**     | 2.1.0                                                     |
-| **Spec Version**        | 1.0.125                                                   |
-| **Last Spec Update**    | 2026-05-06 (Pinocchio URDF scope headers)                 |
+| **Spec Version**        | 1.0.127                                                   |
+| **Last Spec Update**    | 2026-05-07 (Motion-matching surrogate and inverse training)                 |
 
 ## 2. Purpose & Mission
 
@@ -655,3 +655,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-06 | 1.0.117 | Added unified Metrics schema for motion-matching (PR #4052). |
 | 2026-05-06 | 1.0.115 | Added motion-matching support for wiring Optical C3D marker maps to the physics models (PR #4048). |
 | 2026-05-06 | 1.0.116 | Added MachineLearning orientation and work-regularizer cost parity for motion-matching (PR #4053). |
+| 2026-05-07 | 1.0.127 | Added cross-option leaderboard run + report (PR #4226), Option-2 NN surrogate training on 10k dataset (PR #4227), and Option-3 cVAE inverse model training (PR #4228). |

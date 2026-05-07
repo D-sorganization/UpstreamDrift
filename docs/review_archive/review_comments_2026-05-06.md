@@ -1,57 +1,57 @@
 # Review Comments Archive - 2026-05-06
 
-Generated: 2026-05-06T19:08:52.014866
+Generated: 2026-05-06T19:08:11.283000
 
 ## Reviewer (chatgpt-codex-connector[bot]) (3 comments)
 
-### PR #4226: tests/unit/motion_matching/test_cross_option_leaderboard.py:95
-
-Actionable: Yes
-Has Suggestion: No
-
-```
-**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Remove machine-specific cwd from subprocess tests**
-
-The test invokes the CLI with a hard-coded working directory (`/home/dieterolson/Repositories-WSL/UpstreamDrift`), which does not exist in CI or other developer environments, causing `FileNotFoundError` before the script even runs. This makes the new unit tests fail outside the original author’s machine and blocks the test suite.
-
-Useful? React with 👍 / 👎.
-```
-
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4226#discussion_r3198554317)
-
----
-
-### PR #4226: scripts/run_cross_option_leaderboard.py:473
+### PR #4227: src/shared/python/motion_matching/inverse/train_option3_cvae.py:251
 
 Actionable: No
 Has Suggestion: No
 
 ```
-**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Load existing results when --skip-fits is requested**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Call dataset_coverage_map with its real parameters**
 
-The `--skip-fits` path returns immediately with an empty `LeaderboardSummary`, so the generated report and metrics claim zero attempted/successful fits even when result JSON files already exist. This contradicts the CLI contract (“regenerate reports from existing JSONs”) and produces misleading output for report-only runs.
+This call uses `kinematics=` and `forward_fn=`, but `dataset_coverage_map` expects `trials` and `sim_fn` (see `inverse/diagnostics.py`). That mismatch raises a `TypeError` immediately, so `train_option3_inverse_cvae` fails during evaluation before it can produce metrics/artifacts on any dataset.
 
 Useful? React with 👍 / 👎.
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4226#discussion_r3198554319)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4227#discussion_r3198553514)
 
 ---
 
-### PR #4226: scripts/run_cross_option_leaderboard.py:817
+### PR #4227: src/shared/python/motion_matching/inverse/train_option3_cvae.py:269
 
-Actionable: Yes
+Actionable: No
 Has Suggestion: No
 
 ```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Avoid serializing Infinity in metrics JSON**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Pass a single trajectory into sample_diversity**
 
-When no fit succeeds, `best_grip_rmse_mm` remains `float('inf')` and is written directly into `metrics_dict`; `json.dumps` emits this as `Infinity`, which is non-standard JSON and breaks strict JSON parsers used by many downstream tools. The metrics output should normalize this sentinel to a finite value or `null` before serialization.
+`sample_diversity` only accepts one conditioning trajectory (`(T,F)` or `(1,T,F)`), but this slice passes up to 5 test trajectories at once. For typical test splits (`len(test_idx) > 1`) this triggers a `ValueError`, and since the code only catches `RuntimeError`, evaluation aborts and training cannot complete.
 
 Useful? React with 👍 / 👎.
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4226#discussion_r3198554322)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4227#discussion_r3198553518)
+
+---
+
+### PR #4227: tests/unit/motion_matching/test_train_option3_cvae.py:113
+
+Actionable: No
+Has Suggestion: No
+
+```
+**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Use the dataset directory path in end-to-end test**
+
+Here `dataset_path=str(dataset)` stringifies a `SweepDataset` object instead of passing the parquet folder path. `train_option3_inverse_cvae` then calls `load_sweep_dataset` on that non-path string, causing `FileNotFoundError` and preventing this end-to-end test from exercising the training pipeline.
+
+Useful? React with 👍 / 👎.
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4227#discussion_r3198553520)
 
 ---
 

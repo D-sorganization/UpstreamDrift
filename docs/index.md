@@ -37,6 +37,7 @@ navigation should start with the rendered documentation URL.
 | `installation/` | @developer-experience | stable | Installation instructions and environment setup guidance. |
 | `issues/` | @maintainers | archived | Issue-derived notes and local tracking artifacts retained under docs. |
 | `legal/` | @maintainers | stable | License, compliance, and legal reference material. |
+| `motion_matching/` | @research-team | stable | Motion-matching system documentation including surrogate training and cross-option leaderboards. |
 | `motion_training/` | @research-team | draft | Motion training research notes and prototype workflow documentation. |
 | `operations/` | @platform-team | stable | Operational runbooks, observability notes, and production maintenance guidance. |
 | `physics/` | @physics-team | stable | Physics assumptions, validation sources, and biomechanical modeling references. |
