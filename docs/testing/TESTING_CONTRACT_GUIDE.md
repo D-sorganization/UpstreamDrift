@@ -3,7 +3,7 @@
 **Document Version:** 1.0  
 **Date:** 2026-05-06  
 **Scope:** Design-by-Contract testing framework for cross-engine motion-matching validation  
-**Audience:** Test engineers, physics engine maintainers, CI automation developers  
+**Audience:** Test engineers, physics engine maintainers, CI automation developers
 
 ---
 
@@ -24,7 +24,7 @@
 
 This guide documents the cross-engine motion-matching testing strategy for the UpstreamDrift production hardening campaign. The approach combines three validation patterns:
 
-1. **Contract Tests** — Validate shared interface contracts (simulate_with_coefficients, fit_swing_*)
+1. **Contract Tests** — Validate shared interface contracts (simulate*with_coefficients, fit_swing*\*)
 2. **Determinism Oracle** — Prove zero-variance repeatability across engines
 3. **Equivalence Testing** — Verify ≤5mm RMSE between engine pairs
 
@@ -49,6 +49,7 @@ tests/fixtures/contract_test_cases.py
 ```
 
 Each contract specifies:
+
 - **Preconditions:** Valid input ranges and types
 - **Postconditions:** Expected output properties
 - **Invariants:** Properties that must always hold
@@ -60,6 +61,7 @@ Each contract specifies:
 Validates that all engines correctly simulate swing motion given control coefficients.
 
 **Preconditions:**
+
 ```python
 # Input validation
 assert isinstance(coefficients, (list, tuple, np.ndarray)), "Must be array-like"
@@ -70,6 +72,7 @@ assert isinstance(time_span, (list, tuple)), "Time span must be [t_start, t_end]
 ```
 
 **Postconditions:**
+
 ```python
 # Output validation
 assert hasattr(result, 'trajectory'), "Result has trajectory attribute"
@@ -83,6 +86,7 @@ assert np.isfinite(result.angular_velocity).all(),
 ```
 
 **Invariants:**
+
 ```python
 # Physical constraints
 assert np.allclose(result.energy_balance, 0, atol=1e-6),
@@ -98,6 +102,7 @@ assert all(
 Validates that fitting a swing to a target produces reproducible results.
 
 **Preconditions:**
+
 ```python
 assert isinstance(target_trajectory, np.ndarray), "Target is ndarray"
 assert target_trajectory.shape[0] > 10, "Target has sufficient time steps"
@@ -106,6 +111,7 @@ assert all(b['min'] < b['max'] for b in bounds.values()), "Bounds are valid"
 ```
 
 **Postconditions:**
+
 ```python
 assert hasattr(fit_result, 'coefficients'), "Result has coefficients"
 assert len(fit_result.coefficients) == expected_dim, "Coefficient count correct"
@@ -115,6 +121,7 @@ assert fit_result.iterations > 0, "Solver ran at least one iteration"
 ```
 
 **Invariants:**
+
 ```python
 # Reproducibility (determinism oracle)
 fit_result_2 = engine.fit_swing_deterministic(
@@ -176,7 +183,7 @@ def test_simulate_with_coefficients_returns_fit_result():
         initial_pose=STANDARD_POSE,
         time_span=TIME_SPAN,
     )
-    
+
     # Postcondition: result is FitResult with required attributes
     assert isinstance(result, FitResult)
     assert hasattr(result, 'trajectory')
@@ -193,7 +200,7 @@ def test_simulate_with_coefficients_trajectory_is_continuous():
         initial_pose=STANDARD_POSE,
         time_span=TIME_SPAN,
     )
-    
+
     # Invariant: consecutive poses are close (continuous trajectory)
     for i in range(1, len(result.trajectory)):
         distance = np.linalg.norm(
@@ -209,7 +216,7 @@ def test_simulate_with_coefficients_energy_conservation():
         initial_pose=STANDARD_POSE,
         time_span=TIME_SPAN,
     )
-    
+
     # Invariant: total mechanical energy is approximately conserved
     energy_balance = (
         result.kinetic_energy + result.potential_energy
@@ -276,53 +283,53 @@ pytestmark = [pytest.mark.unit, pytest.mark.requires_drake]
 
 def test_fit_swing_deterministic_is_deterministic():
     """Determinism oracle: repeated fits are identical."""
-    
+
     # Run 1: Fit to reference trajectory
     fit_result_1 = fit_swing_deterministic(
         target=REFERENCE_TARGET_TRAJECTORY,
         bounds=OPTIMIZATION_BOUNDS,
         initial_guess=INITIAL_GUESS,
     )
-    
+
     # Run 2: Identical input, must produce identical output
     fit_result_2 = fit_swing_deterministic(
         target=REFERENCE_TARGET_TRAJECTORY,
         bounds=OPTIMIZATION_BOUNDS,
         initial_guess=INITIAL_GUESS,
     )
-    
+
     # Determinism invariant: byte-identical results
     assert np.array_equal(
         fit_result_1.coefficients,
         fit_result_2.coefficients,
     ), "Coefficients differ across runs (non-deterministic!)"
-    
+
     assert np.array_equal(
         fit_result_1.trajectory,
         fit_result_2.trajectory,
     ), "Trajectories differ across runs"
-    
+
     assert fit_result_1.residual == fit_result_2.residual, \
         "Residuals differ (numerical inconsistency)"
 
 
 def test_recovery_oracle_cross_engine():
     """Recovery oracle: Drake fits match MuJoCo reference."""
-    
+
     # MuJoCo fit (reference oracle)
     mujoco_result = mujoco_fit_swing_deterministic(
         target=REFERENCE_TARGET_TRAJECTORY,
         bounds=OPTIMIZATION_BOUNDS,
         initial_guess=INITIAL_GUESS,
     )
-    
+
     # Drake fit (test candidate)
     drake_result = fit_swing_deterministic(
         target=REFERENCE_TARGET_TRAJECTORY,
         bounds=OPTIMIZATION_BOUNDS,
         initial_guess=INITIAL_GUESS,
     )
-    
+
     # Recovery oracle invariant: ≤5mm RMSE between engines
     rmse = np.sqrt(np.mean(
         (mujoco_result.trajectory - drake_result.trajectory) ** 2
@@ -333,11 +340,11 @@ def test_recovery_oracle_cross_engine():
 
 ### Determinism Metrics
 
-| Metric | Target | Measured By |
-|--------|--------|------------|
+| Metric               | Target              | Measured By                                     |
+| -------------------- | ------------------- | ----------------------------------------------- |
 | Coefficient variance | 0 (1e-15 tolerance) | `test_fit_swing_deterministic_is_deterministic` |
-| Trajectory variance | 0 (1e-15 tolerance) | `test_fit_swing_deterministic_is_deterministic` |
-| Recovery oracle RMSE | ≤5mm | `test_recovery_oracle_cross_engine` |
+| Trajectory variance  | 0 (1e-15 tolerance) | `test_fit_swing_deterministic_is_deterministic` |
+| Recovery oracle RMSE | ≤5mm                | `test_recovery_oracle_cross_engine`             |
 
 ---
 
@@ -388,20 +395,20 @@ EQUIVALENCE_THRESHOLD_MM = 5.0  # 5mm per spec
 ])
 def test_cross_engine_equivalence(engine1_name, engine2_name):
     """Equivalence gate: engines are ≤5mm RMSE apart."""
-    
+
     engine1_fit = ENGINES[engine1_name]
     engine2_fit = ENGINES[engine2_name]
-    
+
     # Fit same trajectory with both engines
     result1 = engine1_fit(target=REFERENCE_TRAJECTORY, ...)
     result2 = engine2_fit(target=REFERENCE_TRAJECTORY, ...)
-    
+
     # Calculate RMSE
     rmse = np.sqrt(np.mean(
         (result1.trajectory - result2.trajectory) ** 2
     ))
     rmse_mm = rmse * 1000  # convert to mm
-    
+
     assert rmse_mm <= EQUIVALENCE_THRESHOLD_MM, \
         f"{engine1_name} vs {engine2_name}: {rmse_mm:.2f}mm > {EQUIVALENCE_THRESHOLD_MM}mm"
 
@@ -415,10 +422,10 @@ def test_cross_engine_equivalence(engine1_name, engine2_name):
 def test_engine_self_equivalence(engine_name):
     """Sanity check: each engine is equivalent to itself."""
     engine_fit = ENGINES[engine_name]
-    
+
     result1 = engine_fit(target=REFERENCE_TRAJECTORY, ...)
     result2 = engine_fit(target=REFERENCE_TRAJECTORY, ...)
-    
+
     # Must be identical (determinism)
     assert np.array_equal(result1.trajectory, result2.trajectory), \
         f"{engine_name} self-equivalence failed (non-deterministic)"
@@ -433,10 +440,12 @@ def test_engine_self_equivalence(engine_name):
 **Location:** `tests/unit/motion_matching/drake/`
 
 **Files:**
+
 - `test_drake_simulate_contract.py` — 50+ simulate_with_coefficients tests
 - `test_drake_fit_swing_determinism.py` — 25+ determinism tests
 
 **Setup:**
+
 ```python
 import pytest
 from src.engines.physics_engines.drake.python.motion_matching import (
@@ -448,6 +457,7 @@ pytestmark = [pytest.mark.unit, pytest.mark.requires_drake]
 ```
 
 **Key Tests:**
+
 - Contract: Input validation (valid/invalid coefficient ranges)
 - Contract: Output shape validation
 - Contract: Energy conservation invariants
@@ -459,10 +469,12 @@ pytestmark = [pytest.mark.unit, pytest.mark.requires_drake]
 **Location:** `tests/unit/motion_matching/mujoco/`
 
 **Files:**
+
 - `test_mujoco_simulate_contract.py` — 50+ simulate_with_coefficients tests
 - `test_mujoco_fit_swing_determinism.py` — 25+ determinism tests
 
 **Special Considerations:**
+
 - MuJoCo serves as reference oracle for recovery pattern
 - Test both analytical and numerical Jacobians
 - Verify public API exports (issue #4247)
@@ -472,10 +484,12 @@ pytestmark = [pytest.mark.unit, pytest.mark.requires_drake]
 **Location:** `tests/unit/motion_matching/opensim/`
 
 **Files:**
+
 - `test_opensim_simulate_contract.py` — 50+ simulate_with_coefficients tests
 - `test_opensim_fit_swing_determinism.py` — 25+ determinism tests
 
 **Engine-Specific Tests:**
+
 - FK regression validation (against MATLAB reference)
 - Muscle activation dynamics (if applicable)
 
@@ -484,10 +498,12 @@ pytestmark = [pytest.mark.unit, pytest.mark.requires_drake]
 **Location:** `tests/unit/motion_matching/pinocchio/`
 
 **Files:**
+
 - `test_pinocchio_simulate_contract.py` — 50+ simulate_with_coefficients tests
 - `test_pinocchio_fit_swing_determinism.py` — 25+ determinism tests
 
 **Engine-Specific Tests:**
+
 - RK4 integrator validation
 - ABA solver accuracy
 - Energy conservation in musculoskeletal models
@@ -525,7 +541,7 @@ def test_simulate_with_new_scenario(coefficients, name):
         initial_pose=STANDARD_POSE,
         time_span=TIME_SPAN,
     )
-    
+
     # Postcondition: valid result
     assert isinstance(result, FitResult)
     assert len(result.trajectory) > 0
@@ -539,20 +555,20 @@ def test_simulate_with_new_scenario(coefficients, name):
 @pytest.mark.parametrize("engine_name", ["Drake", "MuJoCo", "OpenSim", "Pinocchio"])
 def test_recovery_oracle_new_scenario(engine_name):
     """Recovery oracle: new scenario produces ≤5mm RMSE."""
-    
+
     mujoco_result = mujoco_fit_swing_deterministic(
         target=REFERENCE_TRAJECTORY,
         bounds=NEW_SWING_BOUNDS,
         initial_guess=NEW_SWING_COEFFICIENTS,
     )
-    
+
     engine_fit = ENGINES[engine_name]
     engine_result = engine_fit(
         target=REFERENCE_TRAJECTORY,
         bounds=NEW_SWING_BOUNDS,
         initial_guess=NEW_SWING_COEFFICIENTS,
     )
-    
+
     rmse = np.sqrt(np.mean(
         (mujoco_result.trajectory - engine_result.trajectory) ** 2
     ))
@@ -583,12 +599,14 @@ python3 -m pytest tests/motion_matching/test_cross_engine_equivalence.py -v
 **Triggers:** Every PR touching `src/engines/` or `src/shared/python/motion_matching/`
 
 **Steps:**
+
 1. Install all engine dependencies (Drake, MuJoCo, OpenSim, Pinocchio)
 2. Run `tests/motion_matching/test_cross_engine_equivalence.py`
 3. Parse results; fail if any engine pair RMSE > 5mm
 4. Report metrics to GitHub Check
 
 **Example Output:**
+
 ```
 Cross-Engine Equivalence Results:
 Drake    ↔ MuJoCo    : 0.004mm RMSE ✅ PASS
@@ -610,6 +628,7 @@ Gate Status: ✅ PASS (all ≤5mm)
 **Purpose:** Detect broken imports and canonical loader drift
 
 **Check:**
+
 ```bash
 python3 scripts/check_engine_loaders.py --verify-imports
 ```
@@ -621,6 +640,7 @@ python3 scripts/check_engine_loaders.py --verify-imports
 **Threshold:** 1200 lines per file
 
 **CI Integration:**
+
 ```yaml
 - name: Check file size budget
   run: python3 scripts/ci/check_file_size_budget.py
@@ -633,6 +653,7 @@ python3 scripts/check_engine_loaders.py --verify-imports
 ### Issue: Cross-Engine Equivalence Test Fails (RMSE > 5mm)
 
 **Cause 1: Numerical precision difference**
+
 ```python
 # Check if difference is due to numerical precision (< 1mm)
 if rmse <= 0.001:  # 1mm tolerance
@@ -641,6 +662,7 @@ if rmse <= 0.001:  # 1mm tolerance
 ```
 
 **Cause 2: Engine-specific bug**
+
 ```python
 # Run isolated engine test to isolate issue
 python3 -m pytest tests/unit/motion_matching/mujoco/test_mujoco_simulate_contract.py -v
@@ -648,6 +670,7 @@ python3 -m pytest tests/unit/motion_matching/mujoco/test_mujoco_simulate_contrac
 ```
 
 **Cause 3: Bounds or initial guess mismatch**
+
 ```python
 # Verify bounds are engine-specific
 DRAKE_BOUNDS = {'min': [-1.0]*7, 'max': [1.0]*7}
@@ -656,6 +679,7 @@ MUJOCO_BOUNDS = {'min': [-1.0]*7, 'max': [1.0]*7}  # May differ!
 ```
 
 **Resolution:**
+
 1. Check engine-specific tests pass
 2. Verify bounds and initial guess are correct
 3. Run recovery oracle test in isolation
@@ -664,6 +688,7 @@ MUJOCO_BOUNDS = {'min': [-1.0]*7, 'max': [1.0]*7}  # May differ!
 ### Issue: Determinism Test Fails (Repeated Runs Differ)
 
 **Cause 1: Non-deterministic random seed**
+
 ```python
 # Ensure random seed is fixed before fitting
 np.random.seed(42)
@@ -674,6 +699,7 @@ assert np.array_equal(result1.coefficients, result2.coefficients)
 ```
 
 **Cause 2: Floating-point rounding errors**
+
 ```python
 # Use allclose with tight tolerance for determinism checks
 assert np.allclose(
@@ -684,6 +710,7 @@ assert np.allclose(
 ```
 
 **Cause 3: Engine library version mismatch**
+
 ```bash
 # Check library versions match CI
 python3 -c "import mujoco; print(mujoco.__version__)"
@@ -692,6 +719,7 @@ python3 -c "from pydrake import __version__; print(__version__)"
 ```
 
 **Resolution:**
+
 1. Verify random seeds are fixed
 2. Use 1e-15 tolerance for determinism checks
 3. Update engine dependencies if needed
@@ -700,6 +728,7 @@ python3 -c "from pydrake import __version__; print(__version__)"
 ### Issue: Contract Test Fails on Input Validation
 
 **Cause 1: Invalid coefficient range**
+
 ```python
 # Coefficients must be in [-1, 1]
 coefficients = np.array([1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])  # Invalid!
@@ -708,6 +737,7 @@ coefficients = coefficients / np.max(np.abs(coefficients))
 ```
 
 **Cause 2: Wrong coefficient dimension**
+
 ```python
 # Drake expects 7 coefficients, MuJoCo expects different count
 # Check engine spec:
@@ -717,6 +747,7 @@ coefficients = np.zeros(engine.expected_coefficient_count())
 ```
 
 **Resolution:**
+
 1. Verify coefficient ranges per engine spec
 2. Check coefficient count matches engine requirements
 3. Use `STANDARD_COEFFICIENTS` from fixture as reference
@@ -727,20 +758,20 @@ coefficients = np.zeros(engine.expected_coefficient_count())
 
 ### Per-Engine Test Count
 
-| Engine | Simulate Contract | Determinism | Engine-Specific | Total |
-|--------|------------------|------------|-----------------|-------|
-| Drake | 50+ | 25+ | 10 | 85+ |
-| MuJoCo | 50+ | 25+ | 15 | 90+ |
-| OpenSim | 50+ | 25+ | 12 | 87+ |
-| Pinocchio | 50+ | 25+ | 8 | 83+ |
-| **Cross-Engine** | — | — | 41 | 41 |
-| **TOTAL** | 200+ | 100+ | 86 | **441+** |
+| Engine           | Simulate Contract | Determinism | Engine-Specific | Total    |
+| ---------------- | ----------------- | ----------- | --------------- | -------- |
+| Drake            | 50+               | 25+         | 10              | 85+      |
+| MuJoCo           | 50+               | 25+         | 15              | 90+      |
+| OpenSim          | 50+               | 25+         | 12              | 87+      |
+| Pinocchio        | 50+               | 25+         | 8               | 83+      |
+| **Cross-Engine** | —                 | —           | 41              | 41       |
+| **TOTAL**        | 200+              | 100+        | 86              | **441+** |
 
 ### Code Coverage
 
 - **tests/unit/motion_matching/**: 95%+ coverage
 - **src/shared/python/motion_matching/**: 95%+ coverage
-- **src/engines/physics_engines/*/python/motion_matching/**: 90%+ coverage
+- **src/engines/physics_engines/\*/python/motion_matching/**: 90%+ coverage
 
 ### Execution Time
 
@@ -755,7 +786,7 @@ coefficients = np.zeros(engine.expected_coefficient_count())
 
 - **SPEC.md** — Repository specification and quality gates
 - **CROSS_ENGINE_PARITY_SPEC.md** — Cross-engine parity requirements
-- **PRODUCTION_READINESS_REPORT.md** — Production hardening sign-off
+- **reports/PRODUCTION_READINESS_REPORT.md** — Production hardening sign-off
 - **CLAUDE.md** — Code style and CI requirements
 - **docs/development/design_by_contract.md** — DbC framework documentation
 
