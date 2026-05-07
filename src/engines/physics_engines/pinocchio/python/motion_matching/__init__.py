@@ -16,6 +16,13 @@ Public API:
     load_robneal_target        -- ClubTarget adapter for Rob Neal *.mat (issue #4127).
     write_leaderboard_entry    -- leaderboard JSON writer (issue #4133).
     ClubTargetLike             -- protocol-style record for leaderboard inputs.
+    synthesize_target_from_coefficients -- SimOut -> ClubTarget oracle (issue #4121).
+    SynthesizeOptions          -- options for the synthesize oracle.
+    run_recovery_sweep         -- K random-theta recovery harness.
+    RecoveryHarnessOptions     -- knobs for the recovery sweep.
+    RecoverySummary            -- aggregate recovery statistics.
+    RecoveryTrial              -- per-sample recovery diagnostics.
+    sample_random_theta        -- helper to draw a random theta vector.
 
 Engine-local Rob Neal adapter is intentionally here until issue #4095
 (PARITY-LOADERS) lands a shared ``shared/python/motion_matching/loaders/``
@@ -36,6 +43,13 @@ from .fit_swing import (
     rotmat_to_quat_wxyz,
 )
 from .leaderboard_writer import write_leaderboard_entry
+from .recovery_harness import (
+    RecoveryHarnessOptions,
+    RecoverySummary,
+    RecoveryTrial,
+    run_recovery_sweep,
+    sample_random_theta,
+)
 from .simulate import (
     COEFFS_PER_JOINT,
     POLY_DEGREE,
@@ -44,6 +58,10 @@ from .simulate import (
     evaluate_polynomial_torque,
     simulate_with_coefficients,
 )
+from .synthesize import (
+    SynthesizeOptions,
+    synthesize_target_from_coefficients,
+)
 
 __all__ = [
     "COEFFS_PER_JOINT",
@@ -51,14 +69,21 @@ __all__ = [
     "FitOptions",
     "FitResult",
     "POLY_DEGREE",
+    "RecoveryHarnessOptions",
+    "RecoverySummary",
+    "RecoveryTrial",
     "SimOptions",
     "SimOut",
+    "SynthesizeOptions",
     "evaluate_polynomial_torque",
     "fit_swing_pinocchio",
     "load_robneal_target",
     "polynomial_basis",
     "polynomial_torque_chain_rule",
     "rotmat_to_quat_wxyz",
+    "run_recovery_sweep",
+    "sample_random_theta",
     "simulate_with_coefficients",
+    "synthesize_target_from_coefficients",
     "write_leaderboard_entry",
 ]
