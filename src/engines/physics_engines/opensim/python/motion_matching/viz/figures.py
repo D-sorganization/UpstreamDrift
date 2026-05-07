@@ -18,7 +18,7 @@ sharing, missing optional series) is gated.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 import matplotlib
 
@@ -33,7 +33,7 @@ if matplotlib.get_backend().lower() == "agg" or "pytest" in matplotlib.rcParams.
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 from matplotlib.figure import Figure  # noqa: E402
-from mpl_toolkits.mplot3d import Axes3D  # noqa: F401, E402  # registers 3-D projection
+from mpl_toolkits.mplot3d import Axes3D  # noqa: E402  # registers 3-D projection
 
 from . import _adapters
 from ._adapters import (
@@ -44,6 +44,7 @@ from ._adapters import (
     TITLE_FONTSIZE,
     quat_geodesic_deg,
 )
+from .native import render_with_opensim_visualizer
 
 __all__ = [
     "plot_trajectory_overlay",
@@ -114,8 +115,8 @@ def _plot_trajectory_overlay_matplotlib(
     t_sim = _adapters.normalise(sim_out)
 
     fig = plt.figure(figsize=(11.0, 5.0))
-    ax_meas = fig.add_subplot(1, 2, 1, projection="3d")
-    ax_sim = fig.add_subplot(1, 2, 2, projection="3d")
+    ax_meas = cast(Axes3D, fig.add_subplot(1, 2, 1, projection="3d"))
+    ax_sim = cast(Axes3D, fig.add_subplot(1, 2, 2, projection="3d"))
 
     _draw_club_path(ax_meas, t_meas, color=COLOR_MEASURED, label="measured")
     _draw_club_path(ax_sim, t_sim, color=COLOR_SIMULATED, label="simulated")
@@ -517,82 +518,3 @@ def _attr_str(obj: Any, name: str) -> str | None:
     if val is None:
         return None
     return str(val)
-
-
-# ---------------------------------------------------------------------------
-# Optional: thin wrapper over the OpenSim native Visualizer.
-# ---------------------------------------------------------------------------
-
-
-def render_with_opensim_visualizer(
-    *,
-    model: Any,
-    sim_out: Any,
-    realtime_factor: float = 1.0,
-) -> None:
-    """Drive ``opensim.Visualizer`` over a sim-output state trajectory.
-
-    This is a thin, optional wrapper for interactive local use. It is
-    skipped unconditionally when the OpenSim Python bindings are not
-    importable.
-
-    Args:
-        model: An ``opensim.Model`` instance (already initialised).
-        sim_out: Anything exposing ``time`` and ``states`` (per
-            ``SimulationResult`` in ``opensim_golf/core.py``).
-        realtime_factor: Playback speed multiplier; ``1.0`` is real-time.
-
-    Raises:
-        RuntimeError: If the OpenSim bindings are not installed.
-    """
-    try:
-        import opensim as osim  # noqa: F401
-    except ImportError as exc:  # pragma: no cover - environment-dependent
-        raise RuntimeError(
-            "opensim Python bindings not available — "
-            "install via `pip install opensim` (Linux/Windows) or "
-            "`conda install -c opensim-org opensim` (macOS)."
-        ) from exc
-
-    if model is None:
-        raise ValueError(
-            "render_with_opensim_visualizer requires an opensim.Model instance"
-        )
-
-    time = _adapters._as_float_array(_adapters._attr(sim_out, "time"))
-    states = _adapters._attr(sim_out, "states")
-    if time is None or states is None:
-        raise ValueError(
-            "sim_out must expose 'time' and 'states' to drive the Visualizer"
-        )
-
-    # Lazily turn on the visualizer; subsequent calls reuse the same window.
-    model.setUseVisualizer(True)
-    state = model.initSystem()
-    visualizer = model.updVisualizer().updSimbodyVisualizer()
-    visualizer.setShowSimTime(True)
-
-    # Replay the states by setting Y() at each sample. We use realtime_factor
-    # to throttle the wall-clock pacing.
-    import time as _time
-
-    states_arr = np.asarray(states, dtype=float)
-    if states_arr.ndim != 2 or states_arr.shape[0] != time.size:
-        raise ValueError(
-            "sim_out.states must be a 2-D array with one row per time sample"
-        )
-
-    prev = float(time[0])
-    for i, t_now in enumerate(time):
-        state.setTime(float(t_now))
-        # ``Y`` is the full state vector; this matches OpenSim's
-        # state ordering as exported by SimulationResult.
-        y = state.getY()
-        for j in range(states_arr.shape[1]):
-            y.set(j, float(states_arr[i, j]))
-        model.realizePosition(state)
-        model.getVisualizer().show(state)
-        dt = max(0.0, (float(t_now) - prev) / max(realtime_factor, 1e-6))
-        if dt > 0:
-            _time.sleep(dt)
-        prev = float(t_now)

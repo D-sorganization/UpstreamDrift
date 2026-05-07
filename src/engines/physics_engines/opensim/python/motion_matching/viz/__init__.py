@@ -32,16 +32,29 @@ safe (Agg-compatible) and emit no warnings under pytest. The
 
 from __future__ import annotations
 
-from .figures import (
-    plot_error_timecourse,
-    plot_fit_quality_card,
-    plot_trajectory_overlay,
-    render_with_opensim_visualizer,
-)
-
 __all__ = [
+    "OpenSimVisualizerUnavailableError",
     "plot_error_timecourse",
     "plot_fit_quality_card",
     "plot_trajectory_overlay",
     "render_with_opensim_visualizer",
 ]
+
+
+def __getattr__(name: str):
+    if name in {
+        "plot_error_timecourse",
+        "plot_fit_quality_card",
+        "plot_trajectory_overlay",
+    }:
+        from . import figures
+
+        return getattr(figures, name)
+    if name in {
+        "OpenSimVisualizerUnavailableError",
+        "render_with_opensim_visualizer",
+    }:
+        from . import native
+
+        return getattr(native, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
