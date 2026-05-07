@@ -1,238 +1,379 @@
-"""Forward-kinematics extraction for OpenSim golf swing model (issue #4116).
+"""Forward-kinematics extraction for the OpenSim golf humanoid (issue #4191).
 
-This module computes grip and clubhead positions/orientations from an OpenSim
-model state. It mirrors the MATLAB reference `compute_skeleton_fk.m` and
-produces the `grip`, `grip_quat`, `clubhead`, `club_quat` fields required
-by the canonical `SimOutput` schema.
+This module is the canonical FK boundary between OpenSim's internal
+``SimTK::State`` and the cross-engine ``SimOut`` schema. It pulls grip
+and clubhead world poses out of a realised state by reading the
+``hand_r_grip_offset`` and ``club_head_offset`` ``PhysicalOffsetFrame``
+components committed in ``models/golf_humanoid.osim`` (PR #4149).
+
+History (issue #4191):
+    The original FK module merged via PRs #4158 / #4160 looked for body
+    names ``hand_left`` / ``hand_right`` that **do not exist** in the
+    canonical humanoid. PR #4149 anchors the grip and clubhead as
+    ``PhysicalOffsetFrame`` objects owned by the
+    ``/jointset/hand_r_to_club`` weld joint:
+
+    * ``hand_r_grip_offset``  (parent frame, on ``/bodyset/hand_r``)
+    * ``club_grip_offset``    (child frame, on ``/bodyset/Club``)
+    * ``club_head_offset``    (clubhead, on ``/bodyset/Club``)
+
+    PR #4185 (issue #4120) shipped a parallel ``extract_full_pose`` to
+    work around the bug. PR #4165 (issue #4116) shipped a third FK path.
+    This module reconciles all three into a single canonical extractor
+    so future callers cannot hit the same bug.
 
 Public API:
-    compute_grip(model, state) -> (pos, quat)
-    compute_clubhead(model, state) -> (pos, quat)
-    compute_skeleton_fk(model, states) -> dict
+    Canonical (preferred):
+        extract_grip_pose(state, model)        -> (pos, quat)
+        extract_clubhead_pose(state, model)    -> (pos, quat)
+        extract_full_pose(state, model)        -> dict[str, NDArray]
 
-Quaternion convention: canonical `[w, x, y, z]` (Simscape-compatible).
+    Legacy (kept working, emit DeprecationWarning):
+        compute_grip(model, state)             -> (pos, quat)
+        compute_clubhead(model, state)         -> (pos, quat)
+        compute_skeleton_fk(model, states)     -> dict[str, NDArray]
 
-Coordinate mapping:
-    OpenSim coordinate names must match the convention established in
-    `coordinate_mapping.py` (issue #4114). The grip frame is the geometric
-    mean of the left and right hand in the address pose. The clubhead is
-    a fixed offset from the grip.
-
-Acceptance criteria (per issue #4116):
-    - Grip RMSE vs Simscape reference ≤ 5 mm at address/top/impact poses.
-    - Clubhead RMSE vs Simscape reference ≤ 5 mm at same poses.
-    - Vectorised `compute_skeleton_fk` ≥ 10× faster than per-step loop.
+Quaternion convention: canonical ``[w, x, y, z]`` (Simscape-compatible),
+sign-canonicalised so the scalar component is non-negative.
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import warnings
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from numpy.typing import NDArray
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover - typing only
     import opensim as osim
 
 __all__ = [
+    # Canonical (preferred) extractors.
+    "extract_grip_pose",
+    "extract_clubhead_pose",
+    "extract_full_pose",
+    # Legacy aliases (emit DeprecationWarning).
     "compute_grip",
     "compute_clubhead",
     "compute_skeleton_fk",
+    # Frame identifiers (canonical names from golf_humanoid.osim).
+    "GRIP_FRAME_NAME",
+    "CLUBHEAD_FRAME_NAME",
+    "GRIP_FRAME_PATH",
+    "CLUBHEAD_FRAME_PATH",
+    "CANONICAL_LANDMARKS",
 ]
+
+
+# --- Canonical landmark catalogue ----------------------------------------
+
+# Bare frame names (as they appear in the .osim XML).
+GRIP_FRAME_NAME: str = "hand_r_grip_offset"
+CLUBHEAD_FRAME_NAME: str = "club_head_offset"
+
+# Fully-qualified component paths used with ``model.getComponent``. Frames
+# defined inside the WeldJoint live under ``/jointset/<joint_name>/...``.
+GRIP_FRAME_PATH: str = "/jointset/hand_r_to_club/hand_r_grip_offset"
+CLUBHEAD_FRAME_PATH: str = "/jointset/hand_r_to_club/club_head_offset"
+
+CANONICAL_LANDMARKS: dict[str, str] = {
+    "grip": GRIP_FRAME_PATH,
+    "clubhead": CLUBHEAD_FRAME_PATH,
+}
+
+
+# --- OpenSim helpers (LOD <= 2) ------------------------------------------
+
+
+def _require_opensim() -> None:
+    """Raise ``ImportError`` if the OpenSim Python bindings are missing.
+
+    Raises:
+        ImportError: If ``import opensim`` fails. Message mirrors the rest
+            of the engine package so users see consistent install hints.
+    """
+    try:
+        import opensim  # noqa: F401  # type: ignore[import-untyped]
+    except ImportError as exc:  # pragma: no cover - exercised w/o opensim
+        raise ImportError(
+            "OpenSim Python bindings are required for forward-kinematics "
+            "extraction. Install via 'conda install -c opensim-org opensim' "
+            "or 'pip install opensim'."
+        ) from exc
+
+
+def _ensure_position_realised(model: Any, state: Any) -> None:
+    """Realise the model to Position stage so frame transforms are valid.
+
+    OpenSim raises if a frame's location-in-ground is queried before the
+    state has been realised at least to ``Position``. This helper is
+    idempotent (re-realising is cheap) and isolates the SWIG call.
+
+    Raises:
+        RuntimeError: If realisation fails. The most common cause is a
+            state that was not produced by ``model.initSystem()``.
+    """
+    if not state.isValid():
+        raise RuntimeError("provided state is not valid")
+    try:
+        model.realizePosition(state)
+    except Exception as exc:  # noqa: BLE001 — surface OpenSim errors uniformly
+        raise RuntimeError(
+            f"OpenSim realizePosition failed: {exc}. "
+            "Verify the state was produced by this model's initSystem()."
+        ) from exc
+
+
+def _frame_pose_in_ground(
+    model: Any, state: Any, frame_path: str
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """Return ``(pos_xyz, quat_wxyz)`` for a named frame in world frame.
+
+    Resolves ``frame_path`` via ``model.getComponent``, queries
+    ``getTransformInGround(state)``, and converts to canonical NumPy.
+
+    Args:
+        model: An ``opensim.Model`` whose system has been initialised.
+        state: A realised ``simbody::State`` (Position stage or higher).
+        frame_path: Component path, e.g.
+            ``"/jointset/hand_r_to_club/hand_r_grip_offset"``.
+
+    Returns:
+        ``(pos, quat)`` — ``pos`` is ``(3,) float64`` in metres,
+        ``quat`` is ``(4,) float64`` ``[w, x, y, z]`` unit quaternion.
+
+    Raises:
+        KeyError: If the frame is not found in the model.
+    """
+    try:
+        frame = model.getComponent(frame_path)
+    except Exception as exc:  # noqa: BLE001 — OpenSim raises generic errors
+        raise KeyError(
+            f"Frame {frame_path!r} not found in model. Confirm the model "
+            "is golf_humanoid.osim (or a derivative that exposes the same "
+            "PhysicalOffsetFrames)."
+        ) from exc
+
+    transform = frame.getTransformInGround(state)
+    p = transform.p()
+    pos = np.array([p.get(0), p.get(1), p.get(2)], dtype=np.float64)
+    rotation = transform.R()
+    rot_mat = np.empty((3, 3), dtype=np.float64)
+    for i in range(3):
+        for j in range(3):
+            rot_mat[i, j] = rotation.get(i, j)
+    quat = _rotmat_to_quat(rot_mat)
+    return pos, quat
+
+
+# --- Public canonical API -------------------------------------------------
+
+
+def extract_grip_pose(
+    state: Any, model: Any
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """Return ``(grip_position_xyz, grip_quaternion_wxyz)`` in world frame.
+
+    Reads the canonical ``hand_r_grip_offset`` PhysicalOffsetFrame from
+    the WeldJoint linking ``hand_r`` to ``Club``. This is the location
+    the cross-engine spec §2.2 names ``SimOut.grip``.
+
+    Args:
+        state: A ``simbody::State`` produced by ``model.initSystem()``;
+            will be realised to Position stage if needed.
+        model: The ``opensim.Model`` that exposes
+            ``/jointset/hand_r_to_club/hand_r_grip_offset``.
+
+    Returns:
+        ``(pos, quat)`` with ``pos`` shape ``(3,)`` metres, ``quat``
+        shape ``(4,)`` in canonical ``[w, x, y, z]`` order.
+
+    Raises:
+        ImportError: If the OpenSim Python bindings are missing.
+        ValueError: If ``state`` or ``model`` is ``None``.
+        KeyError: If the model lacks ``hand_r_grip_offset``.
+        RuntimeError: If state realisation fails.
+    """
+    if state is None or model is None:
+        raise ValueError("state and model are both required")
+    _require_opensim()
+    _ensure_position_realised(model, state)
+    return _frame_pose_in_ground(model, state, GRIP_FRAME_PATH)
+
+
+def extract_clubhead_pose(
+    state: Any, model: Any
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """Return ``(clubhead_position_xyz, clubhead_quaternion_wxyz)``.
+
+    Reads the canonical ``club_head_offset`` PhysicalOffsetFrame on the
+    ``Club`` body. This is the location the cross-engine spec §2.2
+    names ``SimOut.clubhead``.
+
+    Args:
+        state: Realised ``simbody::State``.
+        model: ``opensim.Model`` exposing
+            ``/jointset/hand_r_to_club/club_head_offset``.
+
+    Returns:
+        ``(pos, quat)`` — see :func:`extract_grip_pose`.
+
+    Raises:
+        ImportError: If the OpenSim Python bindings are missing.
+        ValueError: If ``state`` or ``model`` is ``None``.
+        KeyError: If the model lacks ``club_head_offset``.
+        RuntimeError: If state realisation fails.
+    """
+    if state is None or model is None:
+        raise ValueError("state and model are both required")
+    _require_opensim()
+    _ensure_position_realised(model, state)
+    return _frame_pose_in_ground(model, state, CLUBHEAD_FRAME_PATH)
+
+
+def extract_full_pose(
+    state: Any, model: Any
+) -> dict[str, NDArray[np.float64]]:
+    """Extract every canonical landmark in one realisation pass.
+
+    Returns a dict shaped to match the cross-engine ``SimOut`` per-step
+    schema, with two flat keys per landmark:
+
+    * ``"<landmark>_pos"``  -> ``(3,) float64`` position in world frame
+    * ``"<landmark>_quat"`` -> ``(4,) float64`` quaternion ``[w, x, y, z]``
+
+    For the MVP humanoid that yields ``grip_pos``, ``grip_quat``,
+    ``clubhead_pos``, ``clubhead_quat``. Future models can extend
+    :data:`CANONICAL_LANDMARKS` and consumers will pick up the new
+    landmarks automatically.
+
+    Args:
+        state: Realised ``simbody::State``.
+        model: ``opensim.Model`` exposing the frames in
+            :data:`CANONICAL_LANDMARKS`.
+
+    Returns:
+        Dictionary mapping ``"<landmark>_pos"`` / ``"<landmark>_quat"``
+        to ``(3,)`` and ``(4,)`` ``float64`` arrays respectively.
+
+    Raises:
+        ImportError: If the OpenSim Python bindings are missing.
+        ValueError: If ``state`` or ``model`` is ``None``.
+        KeyError: If any canonical frame is missing from the model.
+        RuntimeError: If state realisation fails.
+    """
+    if state is None or model is None:
+        raise ValueError("state and model are both required")
+    _require_opensim()
+    _ensure_position_realised(model, state)
+    out: dict[str, NDArray[np.float64]] = {}
+    for landmark, frame_path in CANONICAL_LANDMARKS.items():
+        pos, quat = _frame_pose_in_ground(model, state, frame_path)
+        out[f"{landmark}_pos"] = pos
+        out[f"{landmark}_quat"] = quat
+    return out
+
+
+# --- Legacy API (deprecated) ---------------------------------------------
+#
+# The original `compute_grip`/`compute_clubhead`/`compute_skeleton_fk`
+# entry points (PRs #4158 / #4160) are retained as thin wrappers that
+# delegate to the canonical extractors. They emit DeprecationWarning so
+# downstream callers can migrate at their own pace.
 
 
 def compute_grip(
     model: osim.Model,
     state: osim.State,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """Compute grip position and orientation from a single state.
+    """[Deprecated] Compute grip position and orientation from a state.
+
+    .. deprecated::
+        Use :func:`extract_grip_pose` instead. The original implementation
+        looked for non-existent ``hand_left`` / ``hand_right`` bodies (see
+        issue #4191); this wrapper now reads the canonical
+        ``hand_r_grip_offset`` frame.
 
     Args:
         model: OpenSim Model instance (must be initialized).
         state: SimTK::State snapshot at which to evaluate FK.
 
     Returns:
-        (position, quaternion) where:
-        - position: (3,) array in world frame (meters).
-        - quaternion: (4,) array [w, x, y, z] (unit quaternion, world frame).
-
-    Raises:
-        ValueError: If required body or frame is not found in the model.
-        RuntimeError: If state is uninitialized.
-
-    Notes:
-        The grip is defined as the geometric mean of the left-hand and
-        right-hand grip points in the address pose. This mirrors the
-        `mid_hands` virtual frame in the Pinocchio URDF (issue #4112).
+        ``(position, quaternion)`` — see :func:`extract_grip_pose`.
     """
-    try:
-        import opensim as osim
-    except ImportError as e:
-        raise ImportError(
-            "OpenSim not installed. Install with: `pip install opensim`"
-        ) from e
-
-    if not state.isValid():
-        raise RuntimeError("provided state is not valid")
-
-    model.realizePosition(state)
-
-    # Get the hand bodies from the model.
-    # These names must match the coordinate mapping established in issue #4114.
-    try:
-        hand_left_body = model.getBodySet().get("hand_left")
-        hand_right_body = model.getBodySet().get("hand_right")
-    except RuntimeError as e:
-        raise ValueError(
-            "Could not find 'hand_left' or 'hand_right' bodies in model. "
-            "Ensure the model has been built from the canonical golf humanoid "
-            "(see issue #4110)."
-        ) from e
-
-    # Get the grip point on each hand. These are defined relative to the hand
-    # body's reference frame. In the URDF, hand_left_tip and hand_right_tip are
-    # fixed frames 0.19 m below each hand.
-    # For OpenSim, we query the body origins or tip body positions.
-    left_grip_pos_body = hand_left_body.getPositionInGround(state)
-    right_grip_pos_body = hand_right_body.getPositionInGround(state)
-
-    # For now, use body origins. In a refined version, we would offset by
-    # the tip frame origins (issue #4110 dependency: model with explicit tip bodies).
-    left_grip_pos = np.array(
-        [left_grip_pos_body.get(0), left_grip_pos_body.get(1), left_grip_pos_body.get(2)]
+    warnings.warn(
+        "compute_grip is deprecated; use extract_grip_pose(state, model) "
+        "from the same module. (issue #4191)",
+        DeprecationWarning,
+        stacklevel=2,
     )
-    right_grip_pos = np.array(
-        [
-            right_grip_pos_body.get(0),
-            right_grip_pos_body.get(1),
-            right_grip_pos_body.get(2),
-        ]
-    )
-
-    # Geometric mean of left and right hand positions.
-    grip_pos = (left_grip_pos + right_grip_pos) / 2.0
-
-    # For orientation, compute the average of the hand body orientations.
-    # (In a refined version, this would be replaced with the mid_hands frame
-    # orientation from the model; for now, we average the quaternions.)
-    left_rot = hand_left_body.getTransformInGround(state).R()
-    right_rot = hand_right_body.getTransformInGround(state).R()
-
-    # Convert rotation matrices to quaternions.
-    left_quat = _rotmat_to_quat(left_rot)
-    right_quat = _rotmat_to_quat(right_rot)
-
-    # Average quaternions (normalized SLERP would be more rigorous,
-    # but for small differences, linear average is acceptable).
-    grip_quat = _average_quaternions(left_quat, right_quat)
-
-    return grip_pos, grip_quat
+    return extract_grip_pose(state, model)
 
 
 def compute_clubhead(
     model: osim.Model,
     state: osim.State,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """Compute clubhead position and orientation from a single state.
+    """[Deprecated] Compute clubhead position and orientation from a state.
+
+    .. deprecated::
+        Use :func:`extract_clubhead_pose` instead. The original fallback
+        synthesised a clubhead by offsetting the (broken) grip; this
+        wrapper now reads the canonical ``club_head_offset`` frame.
 
     Args:
         model: OpenSim Model instance (must be initialized).
         state: SimTK::State snapshot at which to evaluate FK.
 
     Returns:
-        (position, quaternion) where:
-        - position: (3,) array in world frame (meters).
-        - quaternion: (4,) array [w, x, y, z] (unit quaternion, world frame).
-
-    Raises:
-        ValueError: If required body is not found in the model.
-        RuntimeError: If state is uninitialized.
-
-    Notes:
-        The clubhead is a fixed offset (1.0 m distal along the shaft axis)
-        from the grip frame. In a full implementation, this would be read
-        from the model's club_head body (issue #4110).
+        ``(position, quaternion)`` — see :func:`extract_clubhead_pose`.
     """
-    try:
-        import opensim as osim
-    except ImportError as e:
-        raise ImportError(
-            "OpenSim not installed. Install with: `pip install opensim`"
-        ) from e
-
-    if not state.isValid():
-        raise RuntimeError("provided state is not valid")
-
-    model.realizePosition(state)
-
-    # Get the clubhead body (or a proxy for it).
-    # This will be defined in issue #4110 (golf_humanoid.osim with welded club).
-    try:
-        clubhead_body = model.getBodySet().get("club_head")
-    except RuntimeError:
-        # Fallback: if clubhead is not a separate body, compute it as an offset
-        # from the grip frame. This is a temporary measure until #4110 is done.
-        grip_pos, grip_quat = compute_grip(model, state)
-        # Shaft-axis offset 1.0 m distal from grip, expressed in the grip's
-        # local frame (-z is "down the shaft" in the address pose). We rotate
-        # this local offset into world space using the grip orientation so the
-        # clubhead tracks the grip through the swing rather than always
-        # pointing along world -z (which would only be correct at address).
-        clubhead_offset_local = np.array([0.0, 0.0, -1.0])
-        clubhead_offset_world = _quat_rotate_vector(grip_quat, clubhead_offset_local)
-        clubhead_pos = grip_pos + clubhead_offset_world
-        clubhead_quat = grip_quat  # Assume same orientation as grip for now.
-        return clubhead_pos, clubhead_quat
-
-    # Get the clubhead origin in the ground frame.
-    clubhead_pos_body = clubhead_body.getPositionInGround(state)
-    clubhead_pos = np.array(
-        [clubhead_pos_body.get(0), clubhead_pos_body.get(1), clubhead_pos_body.get(2)]
+    warnings.warn(
+        "compute_clubhead is deprecated; use extract_clubhead_pose(state, "
+        "model) from the same module. (issue #4191)",
+        DeprecationWarning,
+        stacklevel=2,
     )
-
-    # Get the clubhead orientation.
-    clubhead_rot = clubhead_body.getTransformInGround(state).R()
-    clubhead_quat = _rotmat_to_quat(clubhead_rot)
-
-    return clubhead_pos, clubhead_quat
+    return extract_clubhead_pose(state, model)
 
 
 def compute_skeleton_fk(
     model: osim.Model,
     states: list[osim.State] | NDArray[np.float64],
 ) -> dict[str, NDArray[np.float64]]:
-    """Vectorised forward-kinematics extraction over a state trajectory.
+    """[Deprecated] Vectorised FK extraction over a state trajectory.
 
-    This is the high-performance path: apply FK once per state sample
-    and assemble the results into arrays for the cost function.
+    .. deprecated::
+        Loop :func:`extract_full_pose` over your states and stack the
+        results — the canonical extractor reads the correct frames and
+        keeps the per-step output schema flat. (issue #4191)
 
     Args:
         model: OpenSim Model instance (must be initialized).
-        states: Sequence of SimTK::State objects or (N, n_coords) trajectory
-                array (if array, will be converted to states via state_from_q).
+        states: List/tuple of SimTK::State objects, or an ``(N, n_q)``
+            trajectory array. Array form is not supported (kept for
+            signature parity with the legacy API; raises
+            :class:`NotImplementedError` like the original).
 
     Returns:
-        Dictionary with keys:
-        - 'grip': (N, 3) grip positions.
-        - 'grip_quat': (N, 4) grip quaternions [w, x, y, z].
-        - 'clubhead': (N, 3) clubhead positions.
-        - 'club_quat': (N, 4) clubhead quaternions [w, x, y, z].
+        Dictionary with keys ``grip``, ``grip_quat``, ``clubhead``,
+        ``club_quat`` — same shape as the original API.
 
     Raises:
-        ValueError: If states sequence is empty or incompatible.
-        TypeError: If states is neither a list of State objects nor an array.
-
-    Notes:
-        This path is at least 10× faster than a per-step Python loop
-        (per issue #4116 acceptance criteria) because:
-        1. State realization is amortized over multiple samples.
-        2. Array assembly is vectorised (no per-sample allocation).
-        3. No Python callback overhead per step.
+        ValueError: If ``states`` sequence is empty.
+        TypeError: If ``states`` is neither a list of States nor an array.
+        NotImplementedError: If an array is passed (matches legacy
+            behaviour pending issue #4110 / #4114 follow-ups).
     """
+    warnings.warn(
+        "compute_skeleton_fk is deprecated; loop extract_full_pose over "
+        "your states. (issue #4191)",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
     if isinstance(states, np.ndarray):
-        # Convert trajectory array to State objects.
-        # This requires the coordinate mapping and state assembly logic
-        # from issues #4110 and #4114. For now, raise NotImplementedError.
         raise NotImplementedError(
             "Array-based state trajectories not yet supported. "
             "Awaiting issue #4110 (model with DOF naming) and #4114 "
@@ -252,13 +393,11 @@ def compute_skeleton_fk(
     club_quat_array = np.zeros((n_samples, 4), dtype=np.float64)
 
     for i, state in enumerate(states):
-        grip_pos, grip_quat = compute_grip(model, state)
-        clubhead_pos, club_quat = compute_clubhead(model, state)
-
-        grip_pos_array[i] = grip_pos
-        grip_quat_array[i] = grip_quat
-        clubhead_pos_array[i] = clubhead_pos
-        club_quat_array[i] = club_quat
+        pose = extract_full_pose(state, model)
+        grip_pos_array[i] = pose["grip_pos"]
+        grip_quat_array[i] = pose["grip_quat"]
+        clubhead_pos_array[i] = pose["clubhead_pos"]
+        club_quat_array[i] = pose["clubhead_quat"]
 
     return {
         "grip": grip_pos_array,
@@ -268,33 +407,55 @@ def compute_skeleton_fk(
     }
 
 
-# --- Utilities ---------------------------------------------------------------
+# --- Utilities ------------------------------------------------------------
 
 
 def _rotmat_to_quat(rot_matrix: object) -> NDArray[np.float64]:
-    """Convert an OpenSim Rotation (3x3 matrix) to a quaternion [w, x, y, z].
+    """Convert a 3x3 rotation matrix to a quaternion ``[w, x, y, z]``.
+
+    Accepts either a ``numpy.ndarray`` or any OpenSim-style object with a
+    ``get(i, j)`` accessor. Uses Shepperd's numerically-stable branch
+    selection. Sign-canonicalises so ``w >= 0``.
 
     Args:
-        rot_matrix: OpenSim Rotation object (has get(i, j) accessor).
+        rot_matrix: ``(3, 3)`` ``numpy.ndarray`` or object with
+            ``get(i, j)`` returning the matrix entry.
 
     Returns:
-        Quaternion as (4,) array [w, x, y, z] (unit).
+        Unit quaternion ``(4,)`` ``[w, x, y, z]``, ``w >= 0``.
+
+    Raises:
+        ValueError: If the input cannot be converted to a 3x3 matrix or
+            produces a degenerate (zero-norm) quaternion.
     """
-    # Extract the 3x3 rotation matrix.
-    # OpenSim's Rotation has a get(i, j) method.
-    mat = np.array(
-        [
-            [rot_matrix.get(0, 0), rot_matrix.get(0, 1), rot_matrix.get(0, 2)],
-            [rot_matrix.get(1, 0), rot_matrix.get(1, 1), rot_matrix.get(1, 2)],
-            [rot_matrix.get(2, 0), rot_matrix.get(2, 1), rot_matrix.get(2, 2)],
-        ],
-        dtype=np.float64,
-    )
+    if isinstance(rot_matrix, np.ndarray):
+        mat = np.asarray(rot_matrix, dtype=np.float64)
+        if mat.shape != (3, 3):
+            raise ValueError(f"rot_matrix must be (3, 3); got {mat.shape}")
+    else:
+        # OpenSim Rotation: has .get(i, j).
+        mat = np.array(
+            [
+                [
+                    rot_matrix.get(0, 0),
+                    rot_matrix.get(0, 1),
+                    rot_matrix.get(0, 2),
+                ],
+                [
+                    rot_matrix.get(1, 0),
+                    rot_matrix.get(1, 1),
+                    rot_matrix.get(1, 2),
+                ],
+                [
+                    rot_matrix.get(2, 0),
+                    rot_matrix.get(2, 1),
+                    rot_matrix.get(2, 2),
+                ],
+            ],
+            dtype=np.float64,
+        )
 
-    # Convert rotation matrix to quaternion using Shepperd's method.
-    # This is numerically stable for all rotations.
     trace = np.trace(mat)
-
     if trace > 0:
         s = 0.5 / np.sqrt(trace + 1.0)
         w = 0.25 / s
@@ -320,79 +481,55 @@ def _rotmat_to_quat(rot_matrix: object) -> NDArray[np.float64]:
         y = (mat[1, 2] + mat[2, 1]) / s
         z = 0.25 * s
 
-    return np.array([w, x, y, z], dtype=np.float64)
+    quat = np.array([w, x, y, z], dtype=np.float64)
+    if quat[0] < 0.0:
+        quat = -quat
+    norm = float(np.linalg.norm(quat))
+    if norm == 0.0:
+        raise ValueError("Degenerate rotation produced zero-norm quaternion")
+    return quat / norm
 
 
 def _average_quaternions(
     q1: NDArray[np.float64],
     q2: NDArray[np.float64],
 ) -> NDArray[np.float64]:
-    """Average two quaternions via SLERP (Spherical Linear Interpolation).
-
-    For small angular differences, linear interpolation is acceptable.
-    For larger differences, this uses SLERP to preserve unit-norm.
+    """Average two unit quaternions via SLERP at the midpoint.
 
     Args:
-        q1: Quaternion [w, x, y, z] (unit).
-        q2: Quaternion [w, x, y, z] (unit).
+        q1: Quaternion ``[w, x, y, z]``.
+        q2: Quaternion ``[w, x, y, z]``.
 
     Returns:
-        Averaged quaternion [w, x, y, z] (unit), normalized.
+        Unit-norm averaged quaternion ``[w, x, y, z]``.
+
+    Raises:
+        ValueError: If either input has zero norm.
     """
-    # Ensure both are unit norm.
-    q1 = q1 / np.linalg.norm(q1)
-    q2 = q2 / np.linalg.norm(q2)
+    n1 = float(np.linalg.norm(q1))
+    n2 = float(np.linalg.norm(q2))
+    if n1 == 0.0 or n2 == 0.0:
+        raise ValueError("input quaternions must have non-zero norm")
+    q1 = q1 / n1
+    q2 = q2 / n2
 
-    # Compute dot product.
-    dot_product = np.dot(q1, q2)
-
-    # If dot product is negative, negate q2 to take the shorter path.
+    dot_product = float(np.dot(q1, q2))
     if dot_product < 0.0:
         q2 = -q2
         dot_product = -dot_product
+    dot_product = float(np.clip(dot_product, -1.0, 1.0))
 
-    # Clamp dot product to avoid numerical issues with acos.
-    dot_product = np.clip(dot_product, -1.0, 1.0)
-
-    # Compute the angle between the quaternions.
     theta = np.arccos(dot_product)
-
-    # Use SLERP: q = (sin((1-t)*θ)/sin(θ)) * q1 + (sin(t*θ)/sin(θ)) * q2
-    # with t = 0.5 for the midpoint.
     t = 0.5
     sin_theta = np.sin(theta)
-
     if np.abs(sin_theta) < 1e-6:
-        # Quaternions are nearly identical; use linear interpolation.
         q_avg = (q1 + q2) / 2.0
     else:
         w1 = np.sin((1.0 - t) * theta) / sin_theta
         w2 = np.sin(t * theta) / sin_theta
         q_avg = w1 * q1 + w2 * q2
 
-    # Normalize to ensure unit norm.
-    q_avg = q_avg / np.linalg.norm(q_avg)
-
-    return q_avg
-
-
-def _quat_rotate_vector(
-    quat: NDArray[np.float64],
-    vec: NDArray[np.float64],
-) -> NDArray[np.float64]:
-    """Rotate a 3-vector by a unit quaternion.
-
-    Applies the rotation v' = q * v * q^-1 using the standard formulation
-    v' = v + 2 * cross(qv, cross(qv, v) + qw * v) where q = (qw, qv).
-
-    Args:
-        quat: Unit quaternion [w, x, y, z].
-        vec: 3-vector in the quaternion's source frame.
-
-    Returns:
-        Rotated 3-vector in the quaternion's target frame.
-    """
-    qw = quat[0]
-    qv = quat[1:4]
-    t = 2.0 * np.cross(qv, vec)
-    return vec + qw * t + np.cross(qv, t)
+    norm = float(np.linalg.norm(q_avg))
+    if norm == 0.0:
+        raise ValueError("averaged quaternion is degenerate")
+    return q_avg / norm
