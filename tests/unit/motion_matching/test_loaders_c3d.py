@@ -33,8 +33,10 @@ def test_c3d_rejects_missing_file() -> None:
 
     with pytest.raises((FileNotFoundError, ValueError, PreconditionError)):
         load_club_target_c3d("does/not/exist.c3d", AlignOptions())
-    # Synthetic stub raises NotImplementedError
-    with pytest.raises(NotImplementedError):
+    # Synthetic dispatcher requires an explicit engine name and raises
+    # ValueError when none is provided (replaced the original
+    # NotImplementedError stub once #4122 / #4166 landed engine backends).
+    with pytest.raises(ValueError, match="no engine specified"):
         synthesize_target_from_coefficients(np.zeros(3), AlignOptions())
 
 
