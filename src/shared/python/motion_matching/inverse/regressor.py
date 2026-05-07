@@ -155,20 +155,17 @@ class RegressorConfig:
             )
         # ``_ConvStem`` uses ``padding = kernel // 2`` for SAME padding,
         # which only preserves the time-axis length when the kernel is
-        # odd. With ``flatten`` / ``flatten_raw`` aggregations,
-        # ``input_proj`` is sized for ``seq_len * embed_dim`` and would
-        # crash at the first forward pass if the conv produced ``T+1``
-        # samples. Reject even kernels for these aggregations up-front
-        # rather than letting a seemingly valid config blow up at
-        # runtime.
-        if self.temporal_aggregation in ("flatten", "flatten_raw") and (
-            self.conv_kernel % 2 == 0
-        ):
+        # odd. The ``flatten`` aggregation routes through ``_ConvStem``
+        # and then sizes ``input_proj`` for ``seq_len * embed_dim``, so
+        # an even kernel would crash at the first forward pass. Reject
+        # even kernels for ``flatten`` up-front. ``flatten_raw`` skips
+        # the conv stem entirely (see issue #4294 — codex review on PR
+        # #4292) so kernel parity has no effect there.
+        if self.temporal_aggregation == "flatten" and (self.conv_kernel % 2 == 0):
             raise ValueError(
                 "conv_kernel must be odd when temporal_aggregation is "
-                f"{self.temporal_aggregation!r} (SAME padding requires an "
-                f"odd kernel to preserve seq_len); got conv_kernel="
-                f"{self.conv_kernel}"
+                "'flatten' (SAME padding requires an odd kernel to "
+                f"preserve seq_len); got conv_kernel={self.conv_kernel}"
             )
 
 
