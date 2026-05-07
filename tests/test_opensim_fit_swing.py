@@ -222,8 +222,9 @@ def test_recovery_within_10_percent(
     )
 
 
+@pytest.mark.parametrize("rng_seed", [42, 1337, 999])
 def test_determinism(
-    n_joints: int, time_grid: np.ndarray, truth_theta: np.ndarray, oracle
+    n_joints: int, time_grid: np.ndarray, truth_theta: np.ndarray, oracle, rng_seed: int
 ) -> None:
     """Same options + same target -> identical FitResult.theta."""
     simulate_fn, theta_to_target = oracle
@@ -236,15 +237,17 @@ def test_determinism(
                 n_joints=n_joints,
                 simulate_fn=simulate_fn,
                 max_iter=30,
-                rng_seed=123,
+                rng_seed=rng_seed,
             ),
         )
 
     a = run()
     b = run()
     np.testing.assert_array_equal(a.theta, b.theta)
-    assert a.final_cost == b.final_cost
-    assert a.n_evaluations == b.n_evaluations
+    assert a.cost == b.cost
+    assert getattr(a, "history", None) == getattr(b, "history", None)
+    assert a.n_eval == b.n_eval
+    assert getattr(a, "n_iter", None) == getattr(b, "n_iter", None)
     assert a.message == b.message
 
 

@@ -188,8 +188,11 @@ class TestRecovery:
 class TestDeterminism:
     """Acceptance: same theta0 + same target -> identical theta_opt."""
 
-    def test_two_runs_identical(self, fit_mod, sim_mod, n_joints) -> None:
-        rng = np.random.default_rng(seed=7)
+    @pytest.mark.parametrize("rng_seed", [42, 1337, 999])
+    def test_two_runs_identical(
+        self, fit_mod, sim_mod, n_joints, rng_seed: int
+    ) -> None:
+        rng = np.random.default_rng(seed=rng_seed)
         theta_truth = 1e-3 * rng.standard_normal(n_joints * sim_mod.COEFFS_PER_JOINT)
         target = _synthesize_target(
             theta_truth, sim_mod=sim_mod, fit_mod=fit_mod, t_final=0.03, dt=1e-3
@@ -206,6 +209,9 @@ class TestDeterminism:
         np.testing.assert_array_equal(r1.theta, r2.theta)
         assert r1.final_cost == r2.final_cost
         assert r1.n_jac_eval == r2.n_jac_eval
+        assert getattr(r1, "history", None) == getattr(r2, "history", None)
+        assert r1.n_eval == r2.n_eval
+        assert r1.success == r2.success
 
 
 class TestWallClock:

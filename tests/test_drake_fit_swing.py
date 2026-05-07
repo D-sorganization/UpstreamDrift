@@ -228,6 +228,42 @@ class TestFitSwingWiring:
         # Final RMSE should be tiny (< 5 mm) — the spec gate.
         assert result.final_rmse_m < 5e-3
 
+    @pytest.mark.parametrize("rng_seed", [42, 1337, 999])
+    def test_same_rng_seed_repeats_exact_fit_result(self, rng_seed: int) -> None:
+        """Same target, warm start, and rng_seed reproduce optimizer outputs."""
+        target = _make_target()
+        rng = np.random.default_rng(rng_seed)
+        theta0 = np.zeros(1 * COEFFS_PER_JOINT)
+        theta0[:3] = rng.uniform(-0.2, 0.2, size=3)
+        opts = FitOptions(
+            n_joints=1,
+            theta0=theta0,
+            rng_seed=rng_seed,
+            max_iterations=50,
+            tolerance=1e-10,
+        )
+
+        first = fit_swing_drake(
+            target,
+            options=opts,
+            simulate_fn=lambda th: _stub_simulate(th, target),
+        )
+        second = fit_swing_drake(
+            target,
+            options=opts,
+            simulate_fn=lambda th: _stub_simulate(th, target),
+        )
+
+        np.testing.assert_allclose(
+            first.theta_optimal, second.theta_optimal, rtol=0.0, atol=1e-15
+        )
+        assert first.history == second.history
+        assert first.final_cost == second.final_cost
+        assert first.final_rmse_m == second.final_rmse_m
+        assert first.iterations == second.iterations
+        assert first.n_evaluations == second.n_evaluations
+        assert first.solver_status == second.solver_status
+
 
 class TestFitSwingValidation:
     """Argument validation."""

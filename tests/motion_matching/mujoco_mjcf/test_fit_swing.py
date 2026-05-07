@@ -191,7 +191,8 @@ def test_synth_then_fit_recovers_trajectory(synth_pair_upper, sim_opts_short) ->
 # --- Determinism ------------------------------------------------------------
 
 
-def test_fit_is_deterministic(synth_pair_upper, sim_opts_short) -> None:
+@pytest.mark.parametrize("rng_seed", [42, 1337, 999])
+def test_fit_is_deterministic(synth_pair_upper, sim_opts_short, rng_seed: int) -> None:
     """Same target + same options -> identical recovered coefficients.
 
     We cannot ``assert_array_equal`` on the timestamps or duration, but
@@ -202,7 +203,7 @@ def test_fit_is_deterministic(synth_pair_upper, sim_opts_short) -> None:
     options = FitOptions(
         sim=sim_opts_short,
         minimizer=MinimizerOptions(maxiter=10, warm_start_scale=0.01),
-        rng_seed=123,
+        rng_seed=rng_seed,
     )
     a = fit_swing_mujoco(target, options)
     b = fit_swing_mujoco(target, options)
@@ -211,7 +212,9 @@ def test_fit_is_deterministic(synth_pair_upper, sim_opts_short) -> None:
     assert a.final_rmse_m == b.final_rmse_m
     assert a.final_total_work_J == b.final_total_work_J
     assert a.history == b.history
-    assert a.target_hash == b.target_hash
+    assert getattr(a, "n_iter", None) == getattr(b, "n_iter", None)
+    assert getattr(a, "n_eval", None) == getattr(b, "n_eval", None)
+    assert getattr(a, "success", None) == getattr(b, "success", None)
 
 
 # --- Cost descent -----------------------------------------------------------

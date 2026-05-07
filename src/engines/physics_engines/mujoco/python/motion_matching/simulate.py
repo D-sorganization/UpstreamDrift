@@ -240,14 +240,15 @@ def _output_grid(T_s: float, output_rate_hz: float) -> NDArray[np.float64]:
 
 
 @precondition(
-    lambda theta, **kwargs: bool(theta.size % 7 == 0),
+    lambda theta, *args, **kwargs: bool(theta.size % 7 == 0),
     "theta length must be a multiple of 7",
 )
 @precondition(
-    lambda theta, **kwargs: bool(np.all(np.isfinite(theta))), "theta must be finite"
+    lambda theta, *args, **kwargs: bool(np.all(np.isfinite(theta))),
+    "theta must be finite",
 )
 @precondition(
-    lambda theta, options=None, initial_pose=None: initial_pose is None
+    lambda theta, options=None, initial_pose=None, *args, **kwargs: initial_pose is None
     or isinstance(initial_pose, (dict, np.ndarray, list)),
     "initial_pose type must be valid",
 )
