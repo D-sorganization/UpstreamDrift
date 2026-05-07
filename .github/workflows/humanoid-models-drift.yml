@@ -1,0 +1,193 @@
+# humanoid-models-drift.yml — Cross-engine humanoid model drift check
+#
+# PURPOSE
+# -------
+# Closes the parity gap described in CROSS_ENGINE_PARITY_SPEC.md §2.6 (and
+# tracked under issue #4094 PARITY-MODEL-BUILD): every engine's body model
+# file (URDF for Drake & Pinocchio, MJCF strings for MuJoCo, .osim for
+# OpenSim) must stay in lockstep with the shared anthropometric YAML at
+# `shared/models/golf_humanoid_*.yaml`. This workflow runs the orchestrator
+# in `--check` mode so any drift between the YAML and the on-disk artifacts
+# is surfaced before merge.
+#
+# POLICY
+# ------
+# Drift is **advisory-warn only** for now: this workflow does NOT fail the
+# PR. We'll harden it to a required check once every engine has a real
+# generator (Drake and OpenSim already do; Pinocchio + MuJoCo are
+# verify-only — see PINOCCHIO-MODEL-BUILD / MUJOCO-MODEL-BUILD follow-ups).
+# Until then a posted comment is enough — the goal here is visibility, not
+# enforcement.
+#
+# TRIGGERS
+# --------
+# PRs touching the shared YAMLs or any of the on-disk engine model files.
+# Pure docs / unrelated source changes are skipped.
+
+name: Humanoid Models Drift
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "shared/models/golf_humanoid_*.yaml"
+      - "src/engines/physics_engines/drake/models/generated/golfer.urdf"
+      - "src/engines/physics_engines/pinocchio/models/generated/golfer.urdf"
+      - "src/engines/physics_engines/opensim/models/golf_humanoid.osim"
+      - "src/engines/physics_engines/mujoco/_golf_swing_*_xml.py"
+      - "scripts/build_humanoid_models.py"
+      - "scripts/build_humanoid_osim.py"
+      - ".github/workflows/humanoid-models-drift.yml"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  pick-runner:
+    runs-on: d-sorg-fleet
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: |
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=d-sorg-fleet" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet"
+
+  drift-check:
+    needs: pick-runner
+    name: Verify humanoid models match shared YAML
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 10
+
+    steps:
+      - name: Enable long Git paths
+        run: git config --global core.longpaths true
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 1
+          submodules: false
+
+      - name: Set up Python
+        uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55
+        with:
+          python-version: "3.11"
+
+      - name: Install minimal deps
+        shell: bash
+        run: |
+          python3 -m pip install --upgrade pip
+          # The orchestrator only needs PyYAML for argument parsing of
+          # the shared YAML and stdlib for everything else; per-engine
+          # builders import lazily, so missing engine deps just degrade
+          # gracefully (drake → fail, opensim → warn-skip).
+          python3 -m pip install pyyaml
+
+      - name: Run drift check (advisory)
+        id: drift
+        shell: bash
+        # Advisory: never fail the job on drift. The orchestrator already
+        # writes per-engine FAIL/WARN/OK lines to stderr/stdout; we capture
+        # that for the comment step below.
+        run: |
+          set +e
+          python3 scripts/build_humanoid_models.py --engine all --check \
+            > drift.stdout 2> drift.stderr
+          rc=$?
+          set -e
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          {
+            echo "----- stdout -----"
+            cat drift.stdout
+            echo "----- stderr -----"
+            cat drift.stderr
+          }
+          # Persist for the comment step.
+          {
+            echo "----- stdout -----"
+            cat drift.stdout
+            echo
+            echo "----- stderr -----"
+            cat drift.stderr
+          } > drift.combined
+          if [ "$rc" = "0" ]; then
+            echo "drift_detected=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "drift_detected=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post advisory comment when drift detected
+        if: steps.drift.outputs.drift_detected == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        with:
+          script: |
+            const fs = require('fs');
+            const output = fs.readFileSync('drift.combined', 'utf8');
+            const truncated = output.length > 6000
+              ? output.slice(0, 6000) + '\n...(truncated)...'
+              : output;
+            const body = [
+              '## Humanoid model drift detected (advisory)',
+              '',
+              'One or more engine model files appear to be out of sync with',
+              '`shared/models/golf_humanoid_*.yaml`. This is **advisory**:',
+              'the workflow does not block merge.',
+              '',
+              'Regenerate locally with:',
+              '',
+              '```bash',
+              'python3 scripts/build_humanoid_models.py --engine all',
+              '```',
+              '',
+              'and commit the resulting changes.',
+              '',
+              '<details><summary>Orchestrator output</summary>',
+              '',
+              '```',
+              truncated,
+              '```',
+              '',
+              '</details>',
+              '',
+              '_Tracked by issue #4094 — PARITY-MODEL-BUILD._',
+            ].join('\n');
+
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.data.find(c =>
+              c.body.includes('Humanoid model drift detected (advisory)') &&
+              c.user.type === 'Bot'
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body,
+              });
+            }
+
+      - name: Summary
+        if: always()
+        shell: bash
+        run: |
+          if [ "${{ steps.drift.outputs.drift_detected }}" = "true" ]; then
+            echo "::warning::Humanoid model drift detected (advisory). See PR comment."
+          else
+            echo "Humanoid models are in sync with shared YAML."
+          fi
