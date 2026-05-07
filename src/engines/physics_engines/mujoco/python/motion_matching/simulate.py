@@ -27,6 +27,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.core.contracts.decorators import postcondition, precondition
+from src.shared.python.motion_matching.validate_theta import validate_theta
 
 from .torque_driver import PolynomialTorqueDriver
 
@@ -317,6 +318,12 @@ def simulate_with_coefficients(  # noqa: C901
         if options.dt <= 0:
             raise ValueError(f"dt must be > 0; got {options.dt}")
         model.opt.timestep = float(options.dt)
+
+    # Spec §2.2: enforce length + finiteness against the compiled model's
+    # actuator count (``nu``). Bounds are enforced separately by the
+    # ``PolynomialTorqueDriver`` clip path; the validator focuses on the
+    # two checks that prevent silent failures / numerical divergence.
+    theta = validate_theta(theta, n_joints=int(model.nu))
 
     data = mujoco.MjData(model)
     _apply_initial_pose(data, initial_pose, model.nq)

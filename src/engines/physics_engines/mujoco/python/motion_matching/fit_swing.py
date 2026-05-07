@@ -59,6 +59,7 @@ from src.shared.python.motion_matching.cost import (
     compute_total_work,
 )
 from src.shared.python.motion_matching.fit_result import CanonicalFitResult as FitResult
+from src.shared.python.motion_matching.validate_theta import validate_theta
 
 from .jacobians import JacobianCache, compute_cost_gradient_analytical
 from .simulate import SimOptions, SimOut, simulate_with_coefficients
@@ -373,7 +374,15 @@ def fit_swing_mujoco(target: ClubTarget, options: FitOptions) -> FitResult:
         )
 
     # --- 4. Re-evaluate the optimum to get a clean SimOutput -------------
-    theta_star = np.asarray(res.x, dtype=np.float64)
+    # Spec §2.2: post-fit ``theta_optimal`` must satisfy length+finiteness
+    # before we hand it to the next forward-sim. SLSQP can return
+    # ``inf`` / ``nan`` on a hard solver failure; surfacing that here as
+    # a ``ValueError`` is preferable to a silent NaN trajectory.
+    theta_star = validate_theta(
+        np.asarray(res.x, dtype=np.float64),
+        n_joints=n_joints,
+        name="theta_optimal",
+    )
     final_sim_out = _sim_fn(theta_star)
     final_cost, breakdown = compute_cost(
         theta_star, target, lambda _t: final_sim_out, options.cost

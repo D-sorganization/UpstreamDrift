@@ -41,6 +41,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.core.contracts.decorators import postcondition, precondition
+from src.shared.python.motion_matching.validate_theta import validate_theta
 
 from .humanoid_urdf import CANONICAL_URDF, load_humanoid_into_plant
 
@@ -399,6 +400,9 @@ def simulate_with_coefficients(  # noqa: C901
           ``"failed"``.
     """
     # ---- 0. Argument normalization -------------------------------------
+    # Spec §2.2: finiteness + multiple-of-7 length is independent of the
+    # plant. Exact n_joints alignment is enforced after plant.Finalize()
+    # below, where ``n_actuators`` is known.
     theta = np.ascontiguousarray(theta, dtype=np.float64)
     if theta.ndim != 1:
         msg = f"theta must be 1-D; got shape {theta.shape}"
@@ -406,9 +410,9 @@ def simulate_with_coefficients(  # noqa: C901
     if not np.all(np.isfinite(theta)):
         msg = "theta must contain only finite values"
         raise ValueError(msg)
-    if theta.shape[0] % COEFFS_PER_JOINT != 0:
+    if theta.shape[0] % COEFFS_PER_JOINT != 0 or theta.shape[0] == 0:
         msg = (
-            f"theta length must be divisible by {COEFFS_PER_JOINT} "
+            f"theta length must be a positive multiple of {COEFFS_PER_JOINT} "
             f"(7 coefficients per joint); got {theta.shape[0]}"
         )
         raise ValueError(msg)
@@ -449,6 +453,12 @@ def simulate_with_coefficients(  # noqa: C901
         # space rather than actuator-space) and fall back to the theta-derived
         # joint count. The polynomial source runs in its own dimension.
         n_actuators = theta.shape[0] // COEFFS_PER_JOINT
+
+    # Spec §2.2: validate exact length+finiteness against the actuator
+    # count we just resolved. The bounds check is engine-local (Drake
+    # bounds live in ``fit_swing.py`` for the optimizer), so we omit it
+    # here.
+    theta = validate_theta(theta, n_joints=n_actuators)
 
     torque_source = _build_polynomial_torque_system(theta, n_actuators)
     builder.AddSystem(torque_source)

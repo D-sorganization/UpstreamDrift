@@ -300,7 +300,9 @@ class TestSimulateWithCoefficients:
             simulate_with_coefficients,
         )
 
-        with pytest.raises(ValueError, match="theta has shape"):
+        # Message format updated by issue #4252 to use the shared
+        # ``validate_theta`` validator (CROSS_ENGINE_PARITY_SPEC §2.2).
+        with pytest.raises(ValueError, match=r"(theta length|theta has shape)"):
             simulate_with_coefficients(
                 np.zeros(7),  # too short
                 SimOptions(t_final=0.02, dt=5e-3),

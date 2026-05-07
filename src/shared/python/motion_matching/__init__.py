@@ -81,6 +81,11 @@ from .target import (
     ClubTarget,
     SourceProvenance,
 )
+from .validate_theta import (
+    COEFFS_PER_JOINT,
+    DEFAULT_THETA_BOUND_TABLE,
+    validate_theta,
+)
 from .validators import (
     REGULARIZER_KINDS,
     must_be_finite_vector,
@@ -94,10 +99,12 @@ __all__ = [
     "ALLOWED_SHEETS",
     "AlignOptions",
     "AlignedTrajectory",
+    "COEFFS_PER_JOINT",
     "CanonicalFitResult",
     "ClubTarget",
     "CostBreakdown",
     "CostOptions",
+    "DEFAULT_THETA_BOUND_TABLE",
     "EngineSimulator",
     "FitQualityScalars",
     "FitResult",
@@ -124,4 +131,5 @@ __all__ = [
     "plot_fit_quality_card",
     "plot_trajectory_overlay",
     "synthesize_target_from_coefficients",
+    "validate_theta",
 ]

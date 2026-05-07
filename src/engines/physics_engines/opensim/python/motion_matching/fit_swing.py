@@ -53,6 +53,7 @@ from src.shared.python.motion_matching.cost import (
     compute_cost,
 )
 from src.shared.python.motion_matching.fit_result import CanonicalFitResult as FitResult
+from src.shared.python.motion_matching.validate_theta import validate_theta
 
 logger = logging.getLogger(__name__)
 
@@ -308,8 +309,22 @@ def fit_swing_opensim(
     else:
         status = "failed"
 
+    # Spec §2.2: post-fit ``theta_optimal`` must satisfy length+finiteness
+    # before downstream code consumes it. The optimizer's box bounds are
+    # symmetric ``[-coeff_bound, +coeff_bound]`` per letter, so we pass
+    # the same bounds to surface any infeasible solver step.
+    bound_table = {
+        chr(ord("A") + col): (-bound, bound) for col in range(POLY_ORDER_PER_JOINT)
+    }
+    theta_opt = validate_theta(
+        np.asarray(res.x, dtype=np.float64),
+        n_joints=n_joints,
+        bounds=bound_table,
+        name="theta_optimal",
+    )
+
     result = FitResult(
-        theta_optimal=np.asarray(res.x, dtype=np.float64).copy(),
+        theta_optimal=theta_opt.copy(),
         final_cost=float(res.fun),
         final_rmse_m=float("nan"),
         solver_status=status,

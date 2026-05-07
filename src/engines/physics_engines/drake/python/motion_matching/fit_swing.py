@@ -40,6 +40,7 @@ from numpy.typing import NDArray
 from src.shared.python.motion_matching.club_target import ClubTarget
 from src.shared.python.motion_matching.cost import CostOptions
 from src.shared.python.motion_matching.fit_result import CanonicalFitResult as FitResult
+from src.shared.python.motion_matching.validate_theta import validate_theta
 
 from .compute_cost_drake import compute_cost_drake
 from .simulate import COEFFS_PER_JOINT, SimOptions, SimOut, simulate_with_coefficients
@@ -263,7 +264,20 @@ def fit_swing_drake(
     )
     wall_clock_s = time.perf_counter() - t_start
 
-    theta_opt = np.ascontiguousarray(res.x, dtype=np.float64)
+    # Spec §2.2: validate the recovered ``theta_optimal`` before we
+    # advertise it as a fit. Out-of-bounds is the bigger risk for SLSQP
+    # (it can step outside the feasible region on a hard failure), so we
+    # also enforce the per-letter bounds the optimizer was told to use.
+    bound_table = {
+        chr(ord("A") + col): (-_PER_COEFF_ABS_BOUND[col], _PER_COEFF_ABS_BOUND[col])
+        for col in range(COEFFS_PER_JOINT)
+    }
+    theta_opt = validate_theta(
+        np.ascontiguousarray(res.x, dtype=np.float64),
+        n_joints=opts.n_joints,
+        bounds=bound_table,
+        name="theta_optimal",
+    )
     try:
         rmse_m = _final_rmse_m(theta_opt, target, sim_fn)
     except Exception:  # pragma: no cover - defensive  # noqa: BLE001

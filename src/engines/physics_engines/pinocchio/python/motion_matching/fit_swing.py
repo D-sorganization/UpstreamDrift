@@ -102,6 +102,7 @@ from src.shared.python.motion_matching.cost import (
     compute_cost,
 )
 from src.shared.python.motion_matching.fit_result import CanonicalFitResult as FitResult
+from src.shared.python.motion_matching.validate_theta import validate_theta
 
 from .simulate import (
     COEFFS_PER_JOINT,
@@ -748,7 +749,13 @@ def fit_swing_pinocchio(  # noqa: C901
     )
     elapsed = _time.perf_counter() - t_start
 
-    theta_opt = np.asarray(result.x, dtype=np.float64)
+    # Spec §2.2: ``theta_optimal`` post-fit must satisfy length+finiteness
+    # before the canonical-cost forward sim consumes it.
+    theta_opt = validate_theta(
+        np.asarray(result.x, dtype=np.float64),
+        n_joints=n_joints,
+        name="theta_optimal",
+    )
 
     # ---- Canonical cost via the shared compute_cost ---------------- #
     def _shared_cost_sim_fn(theta_flat: NDArray[np.float64]) -> SimOutput:

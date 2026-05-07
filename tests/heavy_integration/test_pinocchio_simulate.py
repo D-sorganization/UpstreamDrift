@@ -239,7 +239,9 @@ class TestPreconditions:
 
     def test_wrong_theta_length(self, sim_mod, n_joints) -> None:
         bad = np.zeros(7)  # only one joint's worth
-        with pytest.raises(ValueError, match="theta has shape"):
+        # Message format updated by issue #4252 to use the shared
+        # ``validate_theta`` validator (CROSS_ENGINE_PARITY_SPEC §2.2).
+        with pytest.raises(ValueError, match=r"(theta length|theta has shape)"):
             sim_mod.simulate_with_coefficients(bad, sim_mod.SimOptions())
 
     def test_nonfinite_theta(self, sim_mod, n_joints) -> None:

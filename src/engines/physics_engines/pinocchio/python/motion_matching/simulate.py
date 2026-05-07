@@ -45,6 +45,8 @@ from typing import Any, Literal
 import numpy as np
 import numpy.typing as npt
 
+from src.shared.python.motion_matching.validate_theta import validate_theta
+
 # Canonical polynomial form: tau_j(t) = sum_{k=0}^{6} a_{jk} * t^k.
 POLY_DEGREE: int = 6
 COEFFS_PER_JOINT: int = POLY_DEGREE + 1
@@ -381,20 +383,10 @@ def simulate_with_coefficients(  # noqa: C901
 
     data = model.createData()
 
-    # ----- Validate theta shape ---------------------------------------- #
+    # ----- Validate theta shape (CROSS_ENGINE_PARITY_SPEC.md §2.2) ----- #
     n_joints = int(model.nv)
-    theta_arr = np.asarray(theta, dtype=np.float64)
-    expected = n_joints * COEFFS_PER_JOINT
-    if theta_arr.shape != (expected,):
-        msg = (
-            f"theta has shape {theta_arr.shape}; expected "
-            f"({expected},) = (n_joints={n_joints}) * "
-            f"(coeffs_per_joint={COEFFS_PER_JOINT})"
-        )
-        raise ValueError(msg)
+    theta_arr = validate_theta(theta, n_joints=n_joints)
     coeffs = theta_arr.reshape(n_joints, COEFFS_PER_JOINT)
-    if not np.all(np.isfinite(coeffs)):
-        raise ValueError("theta contains non-finite entries")
 
     # ----- Initial state ----------------------------------------------- #
     if initial_pose is None:
