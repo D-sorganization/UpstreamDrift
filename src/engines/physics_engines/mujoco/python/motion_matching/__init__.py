@@ -8,6 +8,12 @@ Houses the forward simulator (``simulate.py``), polynomial-torque driver
 
 from __future__ import annotations
 
+from .fit_swing import (
+    FitOptions,
+    FitResult,
+    MinimizerOptions,
+    fit_swing_mujoco,
+)
 from .simulate import (
     SimOptions,
     SimOut,
@@ -21,9 +27,13 @@ from .torque_driver import (
 
 __all__: list[str] = [
     "POLY_BOUNDS",
+    "FitOptions",
+    "FitResult",
+    "MinimizerOptions",
     "PolynomialTorqueDriver",
     "SimOptions",
     "SimOut",
+    "fit_swing_mujoco",
     "polynomial_torque_bounds",
     "simulate_with_coefficients",
 ]
