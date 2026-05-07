@@ -242,6 +242,29 @@ def test_aggregates_derived_from_canonical_yamls() -> None:
 
 
 @pytest.mark.unit
+def test_loader_returns_independent_segment_graph_each_call() -> None:
+    """Mutating one load's segments must not poison subsequent loads (#4217).
+
+    Regression: the previous implementation returned the module-level
+    ``_CANONICAL_SEGMENTS`` directly, so any caller mutating a segment
+    (test setup, custom post-processing) leaked into all later loads in
+    the same process.
+    """
+    dims_a = load_humanoid_dimensions()
+    dims_b = load_humanoid_dimensions()
+    # Different segment-list objects.
+    assert dims_a.segments is not dims_b.segments
+    # Different segment instances (and any nested mutables).
+    for seg_a, seg_b in zip(dims_a.segments, dims_b.segments, strict=True):
+        assert seg_a is not seg_b
+    # Mutating one must not affect the other.
+    original_name = dims_a.segments[0].name
+    object.__setattr__(dims_a.segments[0], "name", "MUTATED")
+    dims_c = load_humanoid_dimensions()
+    assert dims_c.segments[0].name == original_name
+
+
+@pytest.mark.unit
 def test_loader_raises_when_dimensions_yaml_empty(tmp_path: Path) -> None:
     """Empty dimensions YAML is a hard error with a descriptive message."""
     bad = tmp_path / "empty.yaml"

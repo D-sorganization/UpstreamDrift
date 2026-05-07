@@ -28,6 +28,7 @@ environments where ``pydrake`` is unavailable. Only the loader
 
 from __future__ import annotations
 
+import copy
 import xml.etree.ElementTree as ET  # noqa: N817
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -655,7 +656,7 @@ def load_humanoid_dimensions(
         hand_spacing_m=hand_spacing_m,
         total_mass_kg=total_mass_kg,
         total_height_m=total_height_m,
-        segments=_CANONICAL_SEGMENTS,
+        segments=copy.deepcopy(_CANONICAL_SEGMENTS),
         dimensions=dimensions,
         inertia=inertia_raw,
         topology=topo_raw,
