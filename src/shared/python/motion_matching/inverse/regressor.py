@@ -153,6 +153,23 @@ class RegressorConfig:
                 "coefficient_scale_factor must be positive, "
                 f"got {self.coefficient_scale_factor}"
             )
+        # ``_ConvStem`` uses ``padding = kernel // 2`` for SAME padding,
+        # which only preserves the time-axis length when the kernel is
+        # odd. With ``flatten`` / ``flatten_raw`` aggregations,
+        # ``input_proj`` is sized for ``seq_len * embed_dim`` and would
+        # crash at the first forward pass if the conv produced ``T+1``
+        # samples. Reject even kernels for these aggregations up-front
+        # rather than letting a seemingly valid config blow up at
+        # runtime.
+        if self.temporal_aggregation in ("flatten", "flatten_raw") and (
+            self.conv_kernel % 2 == 0
+        ):
+            raise ValueError(
+                "conv_kernel must be odd when temporal_aggregation is "
+                f"{self.temporal_aggregation!r} (SAME padding requires an "
+                f"odd kernel to preserve seq_len); got conv_kernel="
+                f"{self.conv_kernel}"
+            )
 
 
 # ---------------------------------------------------------------------------

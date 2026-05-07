@@ -394,3 +394,29 @@ def test_invalid_options_raise() -> None:
         )
     with pytest.raises(ValueError):
         simulate_with_coefficients(theta, SimOptions(variant="upper", dt=0.0))
+
+
+def test_list_theta_accepted_by_dbc_precondition() -> None:
+    """Plain Python list ``theta`` must not crash the DbC precondition.
+
+    Regression for issue #4271 / #4272: the precondition added in PR
+    #4268 dereferenced ``theta.size`` directly, which raised
+    ``AttributeError`` for list-shaped coefficient vectors before the
+    function could normalise inputs via ``np.asarray``. The
+    historically-supported list contract must still work.
+    """
+    import mujoco
+    from src.engines.physics_engines.mujoco._golf_swing_upper_body_xml import (
+        UPPER_BODY_GOLF_SWING_XML,
+    )
+
+    nu = mujoco.MjModel.from_xml_string(UPPER_BODY_GOLF_SWING_XML).nu
+    theta_list = [0.0] * (nu * 7)
+    # Should not raise AttributeError; rollout completes without
+    # touching the simulator beyond the basic shape checks.
+    out = simulate_with_coefficients(
+        theta_list,
+        SimOptions(variant="upper", T_s=0.05, output_rate_hz=200.0),
+    )
+    assert isinstance(out, SimOut)
+    assert out.q.shape[0] > 0

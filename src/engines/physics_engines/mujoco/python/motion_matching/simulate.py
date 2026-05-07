@@ -241,11 +241,17 @@ def _output_grid(T_s: float, output_rate_hz: float) -> NDArray[np.float64]:
 
 
 @precondition(
-    lambda theta, *args, **kwargs: bool(theta.size % 7 == 0),
+    # Coerce list-like inputs so the precondition matches the function's
+    # historical contract: ``simulate_with_coefficients`` accepts any
+    # array-like (list, tuple, ndarray) and normalises via ``np.asarray``
+    # internally. Without coercion here, a Python list would raise
+    # ``AttributeError`` on ``.size`` inside the decorator before the
+    # function's own validation runs, regressing public behaviour.
+    lambda theta, *args, **kwargs: bool(np.asarray(theta).size % 7 == 0),
     "theta length must be a multiple of 7",
 )
 @precondition(
-    lambda theta, *args, **kwargs: bool(np.all(np.isfinite(theta))),
+    lambda theta, *args, **kwargs: bool(np.all(np.isfinite(np.asarray(theta)))),
     "theta must be finite",
 )
 @precondition(

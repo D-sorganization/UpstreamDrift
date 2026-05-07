@@ -227,3 +227,23 @@ def test_invalid_config_rejected() -> None:
         InverseRegressor(RegressorConfig(n_blocks=0))
     with pytest.raises(ValueError, match="dropout"):
         InverseRegressor(RegressorConfig(dropout=1.5))
+
+
+def test_even_conv_kernel_rejected_for_flatten() -> None:
+    """Even ``conv_kernel`` blows up the flatten path (issue #4269).
+
+    With ``padding = kernel // 2`` SAME padding only preserves
+    sequence length for odd kernels; an even kernel under
+    ``flatten`` aggregation would silently produce a ``T+1`` conv
+    output and crash the linear projection at the first forward pass.
+    Validation must reject this up-front.
+    """
+    with pytest.raises(ValueError, match="conv_kernel must be odd"):
+        InverseRegressor(RegressorConfig(temporal_aggregation="flatten", conv_kernel=4))
+    with pytest.raises(ValueError, match="conv_kernel must be odd"):
+        InverseRegressor(
+            RegressorConfig(temporal_aggregation="flatten_raw", conv_kernel=2)
+        )
+    # ``meanmax`` is unaffected because aggregation collapses the time
+    # axis before the linear projection, so an even kernel is still OK.
+    InverseRegressor(RegressorConfig(temporal_aggregation="meanmax", conv_kernel=4))

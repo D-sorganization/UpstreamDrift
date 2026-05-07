@@ -51,6 +51,40 @@ class CanonicalFitResult:
         return self.theta_optimal
 
     @property
+    def theta(self) -> NDArray[np.float64]:
+        """Legacy alias for ``theta_optimal``.
+
+        Pinocchio, OpenSim, and Drake call sites historically read
+        ``result.theta``. The canonical schema renamed the field to
+        ``theta_optimal``; this shim preserves backward compatibility
+        until those call sites are migrated. Emits a ``DeprecationWarning``
+        on access.
+        """
+        warnings.warn(
+            "theta is deprecated; use theta_optimal",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.theta_optimal
+
+    @property
+    def mujoco_version(self) -> str:
+        """Legacy alias for ``engine_version`` on MuJoCo provenance.
+
+        The previous engine-specific MuJoCo result exposed
+        ``mujoco_version``. The canonical schema unified that field as
+        ``engine_version``; this shim preserves backward compatibility
+        for existing MuJoCo provenance contracts and integration tests.
+        Emits a ``DeprecationWarning`` on access.
+        """
+        warnings.warn(
+            "mujoco_version is deprecated; use engine_version",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.engine_version
+
+    @property
     def cost(self) -> float:
         warnings.warn(
             "FitResult.cost is deprecated; use final_cost "

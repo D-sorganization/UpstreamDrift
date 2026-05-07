@@ -541,9 +541,28 @@ def train_surrogate(
     )
     start_epoch = 0
     if resume_from is not None:
-        start_epoch = _load_resume_state(
+        start_epoch, restored_target_normalizer = _load_resume_state(
             Path(resume_from), model=model, optimizer=optimizer
         )
+        if restored_target_normalizer is not None:
+            # Reuse the original training run's target stats so the loss
+            # definition is preserved across the resume boundary. The
+            # optimizer moments carried in the checkpoint were computed
+            # against this normaliser; recomputing fresh stats from a
+            # different seed/split would silently change the loss.
+            target_normalizer = restored_target_normalizer
+            _LOGGER.info(
+                "restored target_normalizer from checkpoint: mean=%s std=%s",
+                target_normalizer.mean.tolist(),
+                target_normalizer.std.tolist(),
+            )
+        else:
+            _LOGGER.warning(
+                "checkpoint %s does not embed target_normalizer; "
+                "falling back to fresh stats from the current train split. "
+                "Resume metrics may be non-comparable to the original run.",
+                resume_from,
+            )
         _LOGGER.info("resumed from %s at epoch %d", resume_from, start_epoch)
 
     return _train_loop(
@@ -733,14 +752,36 @@ def _load_resume_state(
     *,
     model: nn.Module,
     optimizer: torch.optim.Optimizer,
-) -> int:
-    """Load model + optimizer state from a previous checkpoint and return epoch."""
+) -> tuple[int, TargetNormalizer | None]:
+    """Load model + optimizer state from a previous checkpoint.
+
+    Returns:
+        ``(epoch, target_normalizer)`` where ``target_normalizer`` is the
+        per-channel target stats stored alongside the model weights, or
+        ``None`` for legacy checkpoints (pre-1.1 schema) that do not
+        embed it. Callers should fall back to recomputing stats from the
+        current split when ``None`` is returned, but should warn the user
+        because the loss definition may then drift across the resume
+        boundary.
+    """
     if not path.exists():
         raise FileNotFoundError(f"resume_from checkpoint missing: {path}")
     payload = torch.load(path, map_location="cpu", weights_only=False)
     model.load_state_dict(payload["model_state_dict"])
     optimizer.load_state_dict(payload["optimizer_state_dict"])
-    return int(payload.get("epoch", 0))
+    target_normalizer: TargetNormalizer | None = None
+    target_state = payload.get("target_normalizer")
+    if isinstance(target_state, dict):
+        try:
+            target_normalizer = TargetNormalizer.from_state_dict(target_state)
+        except (ValueError, KeyError) as exc:
+            _LOGGER.warning(
+                "checkpoint target_normalizer payload is invalid (%s); "
+                "ignoring and falling back to fresh stats",
+                exc,
+            )
+            target_normalizer = None
+    return int(payload.get("epoch", 0)), target_normalizer
 
 
 def _write_metrics_json(out_path: Path, history: dict[str, Sequence[float]]) -> None:

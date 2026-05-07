@@ -1,24 +1,50 @@
 """Tests for the route registry."""
 
+from __future__ import annotations
+
 import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-sys.modules["src.api.database"] = MagicMock()
-sys.modules["src.api.database.get_db"] = MagicMock()
 
-from fastapi import APIRouter, FastAPI  # noqa: E402
-from src.api.route_registry import (  # noqa: E402
-    _dependencies_for_route,
-    discover_routes,
-    register_routes,
-)
+@pytest.fixture
+def route_registry():
+    """Import ``src.api.route_registry`` with ``src.api.database`` mocked.
+
+    Uses ``patch.dict`` to scope the mocked ``src.api.database`` to the test;
+    once the fixture exits, the original module entries (if any) are restored
+    so other tests in the same pytest worker resolve real imports. Without
+    this scoping, a module-level ``sys.modules["src.api.database"] = ...``
+    permanently swaps the database module out for ``MagicMock`` for the rest
+    of the worker, causing order-dependent failures in unrelated route tests.
+    """
+    db_mock = MagicMock()
+    # Drop any cached import of route_registry so it re-imports against
+    # the mocked database module each time.
+    cached = sys.modules.pop("src.api.route_registry", None)
+    with patch.dict(
+        sys.modules,
+        {
+            "src.api.database": db_mock,
+            "src.api.database.get_db": MagicMock(),
+        },
+    ):
+        from src.api import route_registry as module
+
+        yield module
+    # Restore prior cached module, if any, so subsequent tests see a
+    # fresh import that resolves the real database module.
+    sys.modules.pop("src.api.route_registry", None)
+    if cached is not None:
+        sys.modules["src.api.route_registry"] = cached
 
 
-def test_discover_routes_success():
+def test_discover_routes_success(route_registry):
     """Test discovering routes."""
-    routes = discover_routes("tests.api.dummy_routes")
+    from fastapi import APIRouter
+
+    routes = route_registry.discover_routes("tests.api.dummy_routes")
 
     # We expect auth and core to be found, and in that order (based on _REGISTRATION_ORDER)
     assert len(routes) == 2
@@ -28,14 +54,16 @@ def test_discover_routes_success():
     assert isinstance(routes[1][1], APIRouter)
 
 
-def test_discover_routes_not_a_package():
+def test_discover_routes_not_a_package(route_registry):
     """Test discover_routes raises an error if path is not a package."""
     with pytest.raises(ImportError, match="is not a package"):
-        discover_routes("tests.api.test_route_registry")
+        route_registry.discover_routes("tests.api.test_route_registry")
 
 
-def test_register_routes():
+def test_register_routes(route_registry):
     """Test registering routes to a FastAPI app."""
+    from fastapi import APIRouter, FastAPI
+
     app = MagicMock(spec=FastAPI)
 
     # We will patch discover_routes to return some mock routes
@@ -47,8 +75,8 @@ def test_register_routes():
         ("simulation", router2),
     ]
 
-    with patch("src.api.route_registry.discover_routes", return_value=routes):
-        count = register_routes(app, prefix="/api")
+    with patch.object(route_registry, "discover_routes", return_value=routes):
+        count = route_registry.register_routes(app, prefix="/api")
 
         assert count == 2
         assert app.include_router.call_count == 2
@@ -60,10 +88,25 @@ def test_register_routes():
         assert len(calls[1][1]["dependencies"]) == 1
 
 
-def test_dependencies_for_route():
+def test_dependencies_for_route(route_registry):
     """Test getting dependencies for a route module."""
-    deps = _dependencies_for_route("simulation")
+    deps = route_registry._dependencies_for_route("simulation")
     assert len(deps) == 1
 
-    deps = _dependencies_for_route("core")
+    deps = route_registry._dependencies_for_route("core")
     assert len(deps) == 0
+
+
+def test_database_module_not_leaked_after_tests():
+    """Regression: importing this test module must not leak ``MagicMock``
+    into ``sys.modules['src.api.database']``.
+
+    If the scoped patch in the fixture works correctly, there should be no
+    leftover MagicMock in ``sys.modules`` once the fixture has torn down.
+    """
+    db_mod = sys.modules.get("src.api.database")
+    if db_mod is not None:
+        assert not isinstance(db_mod, MagicMock), (
+            "src.api.database leaked as MagicMock into sys.modules; "
+            "scope the patch with patch.dict instead of assigning to sys.modules"
+        )
