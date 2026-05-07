@@ -43,7 +43,8 @@ class CanonicalFitResult:
     @property
     def coefficients(self) -> NDArray[np.float64]:
         warnings.warn(
-            "coefficients is deprecated; use theta_optimal",
+            "FitResult.coefficients is deprecated; use theta_optimal "
+            "(see issue #4250 for the cross-engine FitResult standardisation).",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -52,35 +53,48 @@ class CanonicalFitResult:
     @property
     def cost(self) -> float:
         warnings.warn(
-            "cost is deprecated; use final_cost", DeprecationWarning, stacklevel=2
+            "FitResult.cost is deprecated; use final_cost "
+            "(see issue #4250 for the cross-engine FitResult standardisation).",
+            DeprecationWarning,
+            stacklevel=2,
         )
         return self.final_cost
 
     @property
     def n_iter(self) -> int:
         warnings.warn(
-            "n_iter is deprecated; use iterations", DeprecationWarning, stacklevel=2
+            "FitResult.n_iter is deprecated; use iterations "
+            "(see issue #4250 for the cross-engine FitResult standardisation).",
+            DeprecationWarning,
+            stacklevel=2,
         )
         return self.iterations
 
     @property
     def n_eval(self) -> int:
         warnings.warn(
-            "n_eval is deprecated; use n_evaluations", DeprecationWarning, stacklevel=2
+            "FitResult.n_eval is deprecated; use n_evaluations "
+            "(see issue #4250 for the cross-engine FitResult standardisation).",
+            DeprecationWarning,
+            stacklevel=2,
         )
         return self.n_evaluations
 
     @property
     def n_evals(self) -> int:
         warnings.warn(
-            "n_evals is deprecated; use n_evaluations", DeprecationWarning, stacklevel=2
+            "FitResult.n_evals is deprecated; use n_evaluations "
+            "(see issue #4250 for the cross-engine FitResult standardisation).",
+            DeprecationWarning,
+            stacklevel=2,
         )
         return self.n_evaluations
 
     @property
     def success(self) -> bool:
         warnings.warn(
-            "success is deprecated; use solver_status == 'success'",
+            "FitResult.success is deprecated; use solver_status == 'success' "
+            "(see issue #4250 for the cross-engine FitResult standardisation).",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -89,7 +103,8 @@ class CanonicalFitResult:
     @property
     def duration_s(self) -> float:
         warnings.warn(
-            "duration_s is deprecated; use wall_clock_s",
+            "FitResult.duration_s is deprecated; use wall_clock_s "
+            "(see issue #4250 for the cross-engine FitResult standardisation).",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -98,7 +113,8 @@ class CanonicalFitResult:
     @property
     def elapsed_s(self) -> float:
         warnings.warn(
-            "elapsed_s is deprecated; use wall_clock_s",
+            "FitResult.elapsed_s is deprecated; use wall_clock_s "
+            "(see issue #4250 for the cross-engine FitResult standardisation).",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -107,6 +123,9 @@ class CanonicalFitResult:
     @property
     def solver(self) -> str:
         warnings.warn(
-            "solver is deprecated; use method", DeprecationWarning, stacklevel=2
+            "FitResult.solver is deprecated; use method "
+            "(see issue #4250 for the cross-engine FitResult standardisation).",
+            DeprecationWarning,
+            stacklevel=2,
         )
         return self.method
