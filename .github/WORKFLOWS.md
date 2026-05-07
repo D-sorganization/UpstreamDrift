@@ -3,7 +3,7 @@
 This inventory is the ownership ledger for active GitHub Actions workflows.
 Archived workflows under `.github/workflows/archived/` are intentionally excluded.
 
-The current durable guardrail is a no-growth cap at 59 active workflows. The
+The current durable guardrail is a no-growth cap at 70 active workflows. The
 consolidation target for issue #3835 remains 25 active workflows or fewer after
 owners validate low-risk removals.
 
@@ -51,6 +51,7 @@ guardrails until the active workflow count reaches the 25-workflow target:
 | docs-ci.yml | pull_request/workflow_dispatch | @docs | contents: read | KEEP: documentation validation. | n/a |
 | docs-governance.yml | pull_request/workflow_dispatch | @docs | contents: read | KEEP: docs governance checks. | n/a |
 | heavy-tests-opt-in.yml | pull_request/workflow_dispatch | @core | contents: read | KEEP: manually opted heavy tests. | n/a |
+| humanoid-models-drift.yml | pull_request | @physics | contents/pull-requests: read/write | KEEP: PARITY-MODEL-BUILD drift gate (issue #4094, spec §2.6). | n/a |
 | Jules-Archivist.yml | workflow_dispatch/schedule | @agents | contents/issues: write | DISABLE: archive stale automation artifacts after owner review. | stale-cleanup.yml |
 | Jules-Assessment-AutoFix.yml | workflow_dispatch/issues | @agents | contents/pull-requests: write | MERGE: assessment-driven autofix; overlaps quality fixer. | Jules-Code-Quality-Fixer.yml |
 | Jules-Assessment-Generator.yml | workflow_dispatch/schedule | @agents | contents/issues: write | MERGE: generate assessment reports. | Jules-Comprehensive-Assessment.yml |
@@ -86,6 +87,7 @@ guardrails until the active workflow count reaches the 25-workflow target:
 | Maintenance-Global-Control.yml | workflow_dispatch | @infra | actions: write | KEEP: global workflow control plane. | n/a |
 | Manual-Run-All.yml | workflow_dispatch | @infra | actions: write | KEEP: manual dispatch aggregator. | n/a |
 | cross-engine-equivalence.yml | pull_request/push/workflow_dispatch | @physics | contents: read | KEEP: PARITY-EQUIVALENCE forward-sim gate (issue #4096, spec §2.2). | n/a |
+| cross-engine-leaderboard.yml | pull_request/workflow_dispatch | @physics | contents/pull-requests: write | KEEP: PARITY-LEADERBOARD result report (issue #4097). | n/a |
 | docs-currency-warning.yml | pull_request | @docs | contents: read / pull-requests: write | KEEP: advisory motion_matching docs-currency PR comment. | n/a |
 | nightly-cross-engine.yml | schedule/workflow_dispatch | @physics | contents: read | KEEP: nightly cross-engine validation. | n/a |
 | Nightly-Doc-Organizer.yml | schedule/workflow_dispatch | @docs | contents/pull-requests: write | MERGE: nightly docs cleanup. | docs-ci.yml |
