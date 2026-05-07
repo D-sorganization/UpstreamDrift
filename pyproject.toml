@@ -341,8 +341,6 @@ markers = [
     "requires_mujoco: tests that require the mujoco Python bindings (skipped when `import mujoco` fails)",
     "requires_opensim: tests that require the OpenSim Python bindings (skipped when `import opensim` fails)",
     "requires_matlab_engine: tests that require matlab.engine importable (Option 4 bridge)",
-    "requires_mujoco: tests that require the mujoco Python bindings (skipped when `import mujoco` fails)",
-    "requires_pinocchio: tests that require the pinocchio Python bindings (skipped when `import pinocchio` fails)",
 ]
 filterwarnings = [
     # Suppress hppfcl→coal rename noise (third-party, not actionable in this repo)
