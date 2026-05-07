@@ -109,6 +109,9 @@ def _coerce_coeffs(theta: npt.ArrayLike) -> npt.NDArray[np.float64]:
             raise ValueError(msg)
         coeffs = theta_arr.reshape(-1, COEFFS_PER_JOINT)
     elif theta_arr.ndim == 2:
+        if theta_arr.shape[0] == 0:
+            msg = "theta must contain at least one actuator coefficient row"
+            raise ValueError(msg)
         if theta_arr.shape[1] != COEFFS_PER_JOINT:
             msg = f"theta coefficient matrix must have {COEFFS_PER_JOINT} coefficients"
             raise ValueError(msg)

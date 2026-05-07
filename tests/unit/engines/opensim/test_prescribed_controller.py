@@ -70,6 +70,12 @@ def test_plan_rejects_invalid_time_grid(time_grid: np.ndarray, match: str) -> No
             np.array([0.0, np.inf] + [0.0] * 12, dtype=np.float64),
             "theta must be finite",
         ),
+        # Empty 2-D theta must be rejected for parity with the 1-D branch
+        # (issue #4322 — codex review on PR #4320 caught this asymmetry).
+        (
+            np.zeros((0, COEFFS_PER_JOINT), dtype=np.float64),
+            "at least one actuator coefficient row",
+        ),
     ],
 )
 def test_plan_rejects_invalid_theta_shape_or_values(
