@@ -26,6 +26,8 @@ from typing import Any, Literal
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.core.contracts.decorators import postcondition, precondition
+
 from .torque_driver import PolynomialTorqueDriver
 
 ModelVariant = Literal["upper", "full", "advanced"]
@@ -109,8 +111,8 @@ class SimOut:
         grip_quat: ``(N, 4)`` grip orientation, ``[w, x, y, z]``.
         clubhead:  ``(N, 3)`` clubhead position (m), world frame.
         club_quat: ``(N, 4)`` clubhead orientation, ``[w, x, y, z]``.
-        solver_status: ``"ok"`` if the rollout completed without divergence,
-            ``"diverged"`` if any frame produced a non-finite state.
+        solver_status: ``"success"`` if the rollout completed without divergence,
+            ``"failed"`` if any frame produced a non-finite state.
         duration_s: wall-clock seconds spent in the rollout (excluding
             model compile).
     """
@@ -124,7 +126,7 @@ class SimOut:
     grip_quat: NDArray[np.float64]
     clubhead: NDArray[np.float64]
     club_quat: NDArray[np.float64]
-    solver_status: str = "ok"
+    solver_status: str = "success"
     duration_s: float = 0.0
 
     # ------------------------------------------------------------------ DRY
@@ -237,6 +239,42 @@ def _output_grid(T_s: float, output_rate_hz: float) -> NDArray[np.float64]:
 # --- Entry point ------------------------------------------------------------
 
 
+@precondition(
+    lambda theta, **kwargs: bool(theta.size % 7 == 0),
+    "theta length must be a multiple of 7",
+)
+@precondition(
+    lambda theta, **kwargs: bool(np.all(np.isfinite(theta))), "theta must be finite"
+)
+@precondition(
+    lambda theta, options=None, initial_pose=None: initial_pose is None
+    or isinstance(initial_pose, (dict, np.ndarray, list)),
+    "initial_pose type must be valid",
+)
+@postcondition(
+    lambda result: bool(
+        result.time.shape[0] == result.q.shape[0] == result.qd.shape[0]
+    ),
+    "time, q, qd shape mismatch",
+)
+@postcondition(
+    lambda result: bool(
+        np.all(np.isfinite(result.q)) and np.all(np.isfinite(result.qd))
+    ),
+    "non-finite q or qd",
+)
+@postcondition(
+    lambda result: bool(
+        result.time.size > 0
+        and result.time[0] == 0.0
+        and np.all(np.diff(result.time) > 0)
+    ),
+    "time not monotonic or does not start at 0",
+)
+@postcondition(
+    lambda result: bool(result.solver_status in ("success", "warning", "failed")),
+    "invalid solver_status",
+)
 def simulate_with_coefficients(
     theta: NDArray[np.float64],
     options: SimOptions | None = None,
@@ -337,7 +375,7 @@ def simulate_with_coefficients(
             out=out_tau[0],
         )
 
-    solver_status = "ok"
+    solver_status = "success"
     t_start = time.perf_counter()
     try:
         with driver:
@@ -354,9 +392,9 @@ def simulate_with_coefficients(
                     if not np.all(np.isfinite(data.qpos)) or not np.all(
                         np.isfinite(data.qvel)
                     ):
-                        solver_status = "diverged"
+                        solver_status = "failed"
                         break
-                if solver_status != "ok":
+                if solver_status != "success":
                     break
                 out_q[i] = data.qpos
                 out_qd[i] = data.qvel

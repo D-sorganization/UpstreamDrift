@@ -40,6 +40,8 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.core.contracts.decorators import postcondition, precondition
+
 from .humanoid_urdf import CANONICAL_URDF, load_humanoid_into_plant
 
 if TYPE_CHECKING:  # pragma: no cover - import-time only
@@ -324,6 +326,43 @@ def _resolve_n_actuators(plant: MultibodyPlant) -> int:
 # ---------------------------------------------------------------------------
 
 
+@precondition(
+    lambda theta, **kwargs: bool(theta.size % 7 == 0),
+    "theta length must be a multiple of 7",
+)
+@precondition(
+    lambda theta, **kwargs: bool(np.all(np.isfinite(theta))), "theta must be finite"
+)
+@precondition(
+    lambda theta, options=None, initial_pose=None: initial_pose is None
+    or isinstance(initial_pose, dict),
+    "initial_pose type must be a dict",
+)
+@postcondition(
+    lambda result: bool(
+        result.time.shape[0] == result.q.shape[0] == result.qd.shape[0]
+    ),
+    "time, q, qd shape mismatch",
+)
+@postcondition(
+    lambda result: bool(
+        result.solver_status != "success"
+        or (np.all(np.isfinite(result.q)) and np.all(np.isfinite(result.qd)))
+    ),
+    "non-finite q or qd on success",
+)
+@postcondition(
+    lambda result: bool(
+        result.time.size > 0
+        and result.time[0] == 0.0
+        and np.all(np.diff(result.time) > 0)
+    ),
+    "time not monotonic or does not start at 0",
+)
+@postcondition(
+    lambda result: bool(result.solver_status in ("success", "warning", "failed")),
+    "invalid solver_status",
+)
 def simulate_with_coefficients(
     theta: NDArray[np.float64],
     options: SimOptions | None = None,
