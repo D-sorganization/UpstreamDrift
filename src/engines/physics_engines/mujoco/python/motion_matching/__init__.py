@@ -22,6 +22,12 @@ from .fit_swing import (
     MinimizerOptions,
     fit_swing_mujoco,
 )
+from .jacobians import (
+    JacobianCache,
+    compute_cost_gradient_analytical,
+    compute_qpos_jacobian,
+    polynomial_du_dtheta,
+)
 from .simulate import (
     SimOptions,
     SimOut,
@@ -38,14 +44,18 @@ __all__: list[str] = [
     "CompiledModel",
     "FitOptions",
     "FitResult",
+    "JacobianCache",
     "MinimizerOptions",
     "PolynomialTorqueDriver",
     "SimOptions",
     "SimOut",
     "build_model",
     "clear_cache",
+    "compute_cost_gradient_analytical",
+    "compute_qpos_jacobian",
     "fit_swing_mujoco",
     "load_model",
+    "polynomial_du_dtheta",
     "polynomial_torque_bounds",
     "simulate_with_coefficients",
 ]

@@ -60,6 +60,7 @@ from src.shared.python.motion_matching.cost import (
     compute_total_work,
 )
 
+from .jacobians import JacobianCache, compute_cost_gradient_analytical
 from .simulate import SimOptions, SimOut, simulate_with_coefficients
 from .torque_driver import polynomial_torque_bounds
 
@@ -71,6 +72,7 @@ __all__ = [
 ]
 
 SolverName = Literal["SLSQP", "L-BFGS-B"]
+JacMode = Literal["finite_difference", "analytical"]
 
 
 # --- Options -----------------------------------------------------------------
@@ -99,6 +101,7 @@ class MinimizerOptions:
     ftol: float = 1e-6
     theta0: NDArray[np.float64] | None = None
     warm_start_scale: float = 0.05
+    jac_mode: JacMode = "finite_difference"
 
 
 @dataclass(frozen=True)
@@ -387,13 +390,37 @@ def fit_swing_mujoco(target: ClubTarget, options: FitOptions) -> FitResult:
     from scipy.optimize import minimize  # heavy import; deferred until call
 
     scipy_options = {"maxiter": options.maxiter, "ftol": options.ftol}
-    res = minimize(
-        J,
-        theta0,
-        method=options.method,
-        bounds=bounds,
-        options=scipy_options,
-    )
+    jac_mode = options.minimizer.jac_mode
+    if jac_mode == "analytical":
+        # Cache MJCF compile + scratch buffers across the whole fit.
+        jac_cache = JacobianCache()
+
+        def grad_J(theta_in: NDArray[np.float64]) -> NDArray[np.float64]:
+            return compute_cost_gradient_analytical(
+                theta_in, target, sim_opts, options.cost, cache=jac_cache
+            )
+
+        res = minimize(
+            J,
+            theta0,
+            method=options.method,
+            jac=grad_J,
+            bounds=bounds,
+            options=scipy_options,
+        )
+    elif jac_mode == "finite_difference":
+        res = minimize(
+            J,
+            theta0,
+            method=options.method,
+            bounds=bounds,
+            options=scipy_options,
+        )
+    else:
+        raise ValueError(
+            f"unknown jac_mode {jac_mode!r}; expected "
+            "'finite_difference' or 'analytical'"
+        )
 
     # --- 4. Re-evaluate the optimum to get a clean SimOutput -------------
     theta_star = np.asarray(res.x, dtype=np.float64)
@@ -409,6 +436,7 @@ def fit_swing_mujoco(target: ClubTarget, options: FitOptions) -> FitResult:
         **scipy_options,
         "warm_start_scale": options.minimizer.warm_start_scale,
         "rng_seed": options.rng_seed,
+        "jac_mode": jac_mode,
         "platform": platform.platform(),
     }
 
