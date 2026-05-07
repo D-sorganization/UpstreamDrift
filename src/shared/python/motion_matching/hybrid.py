@@ -115,6 +115,16 @@ class HybridFitResult:
     polish_phase: dict[str, Any] | None
     duration_s: float
 
+    @property
+    def method(self) -> str:
+        """Alias for ``solver`` matching the canonical FitResult schema."""
+        return self.solver
+
+    @property
+    def theta_optimal(self) -> np.ndarray:
+        """Alias for ``coefficients`` matching the canonical FitResult schema."""
+        return self.coefficients
+
 
 # ---------------------------------------------------------------------------
 # Internal helpers
