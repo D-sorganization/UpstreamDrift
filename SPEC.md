@@ -74,7 +74,7 @@ UpstreamDrift sits at the center of a biomechanical simulation ecosystem. It dep
 
 ### Module Map
 
-```
+````
 UpstreamDrift/
 ├── src/
 │   ├── engines/
@@ -657,3 +657,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-06 | 1.0.116 | Added MachineLearning orientation and work-regularizer cost parity for motion-matching (PR #4053). |
 | 2026-05-07 | 1.0.127 | Added cross-option leaderboard run + report (PR #4226), Option-2 NN surrogate training on 10k dataset (PR #4227), and Option-3 cVAE inverse model training (PR #4228). |
 | 2026-05-07 | 1.0.128 | Hardened cross-option leaderboard follow-up behavior so tests run from the repo root on any machine and metrics JSON normalizes non-finite RMSE sentinels before serialization. |
+| 2026-05-07 | 1.0.130 | Exported the MuJoCo motion-matching synthetic recovery oracle from `simulate.py` and added a synthesize-fit-recover regression test for the public API. |
+````

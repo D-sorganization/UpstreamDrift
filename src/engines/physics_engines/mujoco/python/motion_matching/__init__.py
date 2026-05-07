@@ -33,6 +33,7 @@ from .simulate import (
     SimOut,
     simulate_with_coefficients,
 )
+from .synthesize import synthesize_target_from_coefficients
 from .torque_driver import (
     POLY_BOUNDS,
     PolynomialTorqueDriver,
@@ -58,4 +59,5 @@ __all__: list[str] = [
     "polynomial_du_dtheta",
     "polynomial_torque_bounds",
     "simulate_with_coefficients",
+    "synthesize_target_from_coefficients",
 ]

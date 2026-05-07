@@ -17,10 +17,19 @@ import time
 
 import numpy as np
 import pytest
+from src.engines.physics_engines.mujoco.python.motion_matching import (
+    simulate as simulate_module,
+)
+from src.engines.physics_engines.mujoco.python.motion_matching.fit_swing import (
+    FitOptions,
+    MinimizerOptions,
+    fit_swing_mujoco,
+)
 from src.engines.physics_engines.mujoco.python.motion_matching.simulate import (
     SimOptions,
     SimOut,
     simulate_with_coefficients,
+    synthesize_target_from_coefficients,
 )
 from src.engines.physics_engines.mujoco.python.motion_matching.torque_driver import (
     POLY_BOUNDS,
@@ -38,7 +47,55 @@ def _expected_n(opts: SimOptions) -> int:
     return int(round(opts.T_s * opts.output_rate_hz)) + 1
 
 
+def _upper_body_nu() -> int:
+    import mujoco
+    from src.engines.physics_engines.mujoco._golf_swing_upper_body_xml import (
+        UPPER_BODY_GOLF_SWING_XML,
+    )
+
+    return int(mujoco.MjModel.from_xml_string(UPPER_BODY_GOLF_SWING_XML).nu)
+
+
 # --- Recovery / sanity ------------------------------------------------------
+
+
+def test_simulate_exports_synthesize_recovery_oracle() -> None:
+    """The simulate module exports the synthesize -> fit -> recover oracle."""
+    from src.engines.physics_engines.mujoco.python.motion_matching import (
+        synthesize as mj_synthesize,
+    )
+
+    assert "synthesize_target_from_coefficients" in simulate_module.__all__
+    assert (
+        synthesize_target_from_coefficients
+        is mj_synthesize.synthesize_target_from_coefficients
+    )
+
+    opts = SimOptions(
+        variant="upper",
+        T_s=0.05,
+        output_rate_hz=100.0,
+        clip_torque_to_ctrlrange=False,
+    )
+    theta_truth = np.zeros(_upper_body_nu() * 7, dtype=np.float64)
+    target = synthesize_target_from_coefficients(theta_truth, sim_options=opts)
+
+    result = fit_swing_mujoco(
+        target,
+        FitOptions(
+            sim=opts,
+            minimizer=MinimizerOptions(
+                maxiter=1,
+                theta0=theta_truth,
+                warm_start_scale=0.01,
+            ),
+            rng_seed=42,
+        ),
+    )
+
+    assert np.isfinite(result.final_rmse_m)
+    assert result.final_rmse_m < 1e-8
+    np.testing.assert_allclose(result.coefficients, theta_truth, atol=1e-10)
 
 
 def test_zero_torque_falls_under_gravity_full() -> None:

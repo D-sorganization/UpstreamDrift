@@ -34,6 +34,7 @@ __all__ = [
     "SimOptions",
     "SimOut",
     "simulate_with_coefficients",
+    "synthesize_target_from_coefficients",
 ]
 
 
@@ -386,3 +387,6 @@ def simulate_with_coefficients(
         solver_status=solver_status,
         duration_s=duration_s,
     )
+
+
+from .synthesize import synthesize_target_from_coefficients  # noqa: E402
