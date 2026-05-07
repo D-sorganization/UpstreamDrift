@@ -22,6 +22,9 @@ from src.engines.physics_engines.drake.python.motion_matching.humanoid_urdf impo
     EXPECTED_NUM_REVOLUTE_DOF,
     EXPECTED_NUM_VELOCITIES,
     SHARED_DIMENSIONS_YAML,
+    SHARED_INERTIA_YAML,
+    SHARED_TOPOLOGY_YAML,
+    DimensionEntry,
     build_humanoid_urdf,
     load_humanoid_dimensions,
     render_urdf_string,
@@ -165,6 +168,94 @@ def test_canonical_urdf_path_is_under_drake_engine() -> None:
     assert "drake" in parts
     assert parts[-1] == "golfer.urdf"
     assert "generated" in parts
+
+
+# ---------------------------------------------------------------------------
+# Canonical schema reconciliation (issue #4177)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_inertia_and_topology_yamls_present() -> None:
+    """All three shared YAMLs (per PR #4150) ship on main and load."""
+    assert SHARED_DIMENSIONS_YAML.exists()
+    assert SHARED_INERTIA_YAML.exists()
+    assert SHARED_TOPOLOGY_YAML.exists()
+    dims = load_humanoid_dimensions()
+    # The flat dimensions YAML decodes into the dimensions map.
+    assert dims.dimensions, "expected at least one parsed dimension entry"
+    # Both auxiliary YAMLs are surfaced via the parsed object.
+    assert "golfer" in dims.inertia
+    assert "joints" in dims.topology
+    assert dims.topology.get("total_dof") == 25
+
+
+@pytest.mark.unit
+def test_dimension_entry_canonical_fields_round_trip() -> None:
+    """The loader populates value/units/raw_value/raw_units/source/notes."""
+    dims = load_humanoid_dimensions()
+    entry = dims.dimensions["UpperTorsoLength"]
+    assert isinstance(entry, DimensionEntry)
+    assert entry.name == "UpperTorsoLength"
+    assert entry.units == "m"
+    assert entry.raw_units == "in"
+    # 12 inches -> 0.3048 m exactly (0.0254 conversion factor).
+    assert entry.raw_value == pytest.approx(12.0)
+    assert entry.value == pytest.approx(entry.raw_value * 0.0254, abs=1e-9)
+    assert entry.source is not None and "Simscape" in entry.source
+    # Notes is multi-line in the YAML; the loader strips trailing whitespace.
+    assert entry.notes is not None and len(entry.notes) > 0
+
+
+@pytest.mark.unit
+def test_dimension_entry_handles_metric_native_field() -> None:
+    """ShaftLength is authored in metres in the model — no inch conversion."""
+    dims = load_humanoid_dimensions()
+    shaft = dims.dimensions["ShaftLength"]
+    assert shaft.units == "m"
+    assert shaft.raw_units == "m"
+    assert shaft.value == pytest.approx(shaft.raw_value)
+    assert shaft.value == pytest.approx(1.0)
+
+
+@pytest.mark.unit
+def test_loader_skips_non_dimension_top_level_keys() -> None:
+    """``schema_version`` / ``derived`` / metadata don't become entries."""
+    dims = load_humanoid_dimensions()
+    # Scalar metadata keys are not DimensionEntry records.
+    assert "schema_version" not in dims.dimensions
+    # The trailing 'derived' aggregation block is also not a dimension.
+    assert "derived" not in dims.dimensions
+
+
+@pytest.mark.unit
+def test_aggregates_derived_from_canonical_yamls() -> None:
+    """Anthropometry scalars come from the canonical flat YAML, not constants."""
+    dims = load_humanoid_dimensions()
+    # pelvis_to_shoulders = UpperTorsoLength + LowerTorsoLength = 0.3048 + 0.3048
+    assert dims.pelvis_to_shoulders_m == pytest.approx(0.6096, abs=1e-9)
+    # hand_spacing = LeftWristStandoffLength + RightWristStandoffLength
+    assert dims.hand_spacing_m == pytest.approx(0.0508, abs=1e-9)
+    # total_mass comes from inertia YAML's golfer.total_mass_kg
+    assert dims.total_mass_kg == pytest.approx(77.6058178357468, abs=1e-9)
+    assert dims.schema_version >= 1
+
+
+@pytest.mark.unit
+def test_loader_raises_when_dimensions_yaml_empty(tmp_path: Path) -> None:
+    """Empty dimensions YAML is a hard error with a descriptive message."""
+    bad = tmp_path / "empty.yaml"
+    bad.write_text("schema_version: 1\nunits_system: SI\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="no dimension entries"):
+        load_humanoid_dimensions(yaml_path=bad)
+
+
+@pytest.mark.unit
+def test_loader_raises_when_inertia_yaml_missing(tmp_path: Path) -> None:
+    """Missing inertia YAML surfaces a path-bearing FileNotFoundError."""
+    fake_inertia = tmp_path / "does_not_exist.yaml"
+    with pytest.raises(FileNotFoundError, match="Shared humanoid inertia"):
+        load_humanoid_dimensions(inertia_path=fake_inertia)
 
 
 # ---------------------------------------------------------------------------

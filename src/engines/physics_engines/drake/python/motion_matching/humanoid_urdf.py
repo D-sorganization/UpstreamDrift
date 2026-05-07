@@ -45,6 +45,9 @@ if TYPE_CHECKING:  # pragma: no cover - import-time hint only
 __all__ = [
     "CANONICAL_URDF",
     "SHARED_DIMENSIONS_YAML",
+    "SHARED_INERTIA_YAML",
+    "SHARED_TOPOLOGY_YAML",
+    "DimensionEntry",
     "HumanoidDimensions",
     "JointSpec",
     "SegmentSpec",
@@ -63,9 +66,19 @@ __all__ = [
 # so .parents[6] is the repo root.
 _REPO_ROOT = Path(__file__).resolve().parents[6]
 
-#: Default location of the shared dimensions YAML (owned by #4093).
+#: Default location of the shared dimensions YAML (owned by #4093, PR #4150).
 SHARED_DIMENSIONS_YAML: Path = (
     _REPO_ROOT / "shared" / "models" / "golf_humanoid_dimensions.yaml"
+)
+
+#: Default location of the shared inertia YAML (owned by #4093, PR #4150).
+SHARED_INERTIA_YAML: Path = (
+    _REPO_ROOT / "shared" / "models" / "golf_humanoid_inertia.yaml"
+)
+
+#: Default location of the shared topology YAML (owned by #4093, PR #4150).
+SHARED_TOPOLOGY_YAML: Path = (
+    _REPO_ROOT / "shared" / "models" / "golf_humanoid_topology.yaml"
 )
 
 #: Default on-disk URDF location. CI gate (#4129) asserts that a fresh
@@ -146,8 +159,56 @@ class SegmentSpec:
 
 
 @dataclass(frozen=True)
+class DimensionEntry:
+    """Parsed entry from the canonical flat dimensions YAML.
+
+    Each top-level mapping entry in
+    ``shared/models/golf_humanoid_dimensions.yaml`` (e.g. ``UpperTorsoLength``,
+    ``LowerArmLength``) decodes to one of these. See PR #4150 schema:
+
+    .. code-block:: yaml
+
+       UpperTorsoLength:
+         value: 0.305
+         units: m
+         raw_value: 12
+         raw_units: in
+         source: "Simscape model workspace"
+         notes: "..."
+    """
+
+    name: str
+    value: float
+    units: str
+    raw_value: float | None = None
+    raw_units: str | None = None
+    source: str | None = None
+    simscape_name: str | None = None
+    notes: str | None = None
+
+
+@dataclass(frozen=True)
 class HumanoidDimensions:
-    """Top-level parsed YAML container."""
+    """Top-level parsed YAML container.
+
+    Populated from three shared YAML files (all on ``main`` per PR #4150):
+
+    * ``shared/models/golf_humanoid_dimensions.yaml`` — flat
+      ``<Name>: {value, units, raw_value, raw_units, source, notes}`` map
+      of segment lengths and visualisation radii.
+    * ``shared/models/golf_humanoid_inertia.yaml`` — per-segment masses,
+      COM offsets, and inertia tensors.
+    * ``shared/models/golf_humanoid_topology.yaml`` — joint topology and
+      DOF ordering.
+
+    The ``segments`` field is the URDF blueprint used by
+    :func:`render_urdf_string`: a fixed Python-side description of the
+    25-DOF chain (6 floating + 19 revolute, distributed across
+    universal/gimbal/revolute joints per the topology YAML). Numeric
+    values match the on-disk URDF byte-for-byte to keep CI gate #4129
+    stable; updating those values is a follow-up issue once the
+    cross-engine inertia reconciliation lands.
+    """
 
     schema_version: int
     pelvis_to_shoulders_m: float
@@ -157,6 +218,13 @@ class HumanoidDimensions:
     total_height_m: float
     segments: tuple[SegmentSpec, ...]
 
+    #: Parsed entries from the flat dimensions YAML, keyed by name.
+    dimensions: dict[str, DimensionEntry] = field(default_factory=dict)
+    #: Raw inertia YAML (parsed mapping, owned by PR #4150).
+    inertia: dict[str, Any] = field(default_factory=dict)
+    #: Raw topology YAML (parsed mapping, owned by PR #4150).
+    topology: dict[str, Any] = field(default_factory=dict)
+    #: Raw dimensions YAML for callers that need exact provenance fields.
     raw: dict[str, Any] = field(default_factory=dict)
 
 
@@ -173,166 +241,425 @@ def _as_tuple3(value: Any, *, where: str) -> tuple[float, float, float]:
     return (float(value[0]), float(value[1]), float(value[2]))
 
 
-def _parse_joint(raw: dict[str, Any], *, segment_name: str) -> JointSpec:
-    if "name" not in raw or "type" not in raw:
-        msg = (
-            f"segment {segment_name!r}: joint entry must specify both 'name' and 'type'"
-        )
-        raise ValueError(msg)
-    jtype = str(raw["type"])
-    if jtype not in _VALID_JOINT_TYPES:
-        msg = (
-            f"segment {segment_name!r}: unknown joint type {jtype!r} "
-            f"(allowed: {sorted(_VALID_JOINT_TYPES)})"
-        )
-        raise ValueError(msg)
-
-    axes: tuple[tuple[float, float, float], ...] = ()
-    if jtype == "revolute":
-        if "axis" not in raw:
-            msg = f"segment {segment_name!r}: revolute joint requires 'axis'"
-            raise ValueError(msg)
-        axes = (_as_tuple3(raw["axis"], where=f"{segment_name}.axis"),)
-    elif jtype in {"universal", "gimbal"}:
-        if "axes" not in raw:
-            msg = (
-                f"segment {segment_name!r}: {jtype} joint requires 'axes' "
-                f"(list of 3-vectors)"
-            )
-            raise ValueError(msg)
-        axes_raw = raw["axes"]
-        expected = 2 if jtype == "universal" else 3
-        if not isinstance(axes_raw, list) or len(axes_raw) != expected:
-            msg = (
-                f"segment {segment_name!r}: {jtype} joint requires exactly "
-                f"{expected} axes, got {axes_raw!r}"
-            )
-            raise ValueError(msg)
-        axes = tuple(
-            _as_tuple3(a, where=f"{segment_name}.axes[{i}]")
-            for i, a in enumerate(axes_raw)
-        )
-
-    limits: tuple[tuple[float, float], ...] = ()
-    raw_limits = raw.get("limits")
-    if raw_limits is not None:
-        if jtype == "revolute":
-            limits = ((float(raw_limits[0]), float(raw_limits[1])),)
-        elif jtype in {"universal", "gimbal"}:
-            limits = tuple((float(pair[0]), float(pair[1])) for pair in raw_limits)
-
-    return JointSpec(
-        name=str(raw["name"]),
-        type=jtype,
-        axes=axes,
-        limits=limits,
-        damping=float(raw.get("damping", 0.0)),
-    )
+def _make_inertia(
+    ixx: float,
+    iyy: float,
+    izz: float,
+    ixy: float = 0.0,
+    ixz: float = 0.0,
+    iyz: float = 0.0,
+) -> dict[str, float]:
+    """Tiny helper so the canonical-segment table reads cleanly."""
+    return {"ixx": ixx, "iyy": iyy, "izz": izz, "ixy": ixy, "ixz": ixz, "iyz": iyz}
 
 
-def _parse_segment(raw: dict[str, Any]) -> SegmentSpec:
-    if "name" not in raw or "parent" not in raw or "joint" not in raw:
-        msg = (
-            "segment entry must specify 'name', 'parent', and 'joint'; "
-            f"got {sorted(raw)!r}"
-        )
-        raise ValueError(msg)
-
-    name = str(raw["name"])
-    origin = raw.get("origin", {})
-    origin_xyz = _as_tuple3(
-        origin.get("xyz", [0.0, 0.0, 0.0]), where=f"{name}.origin.xyz"
-    )
-    origin_rpy = _as_tuple3(
-        origin.get("rpy", [0.0, 0.0, 0.0]), where=f"{name}.origin.rpy"
-    )
-
-    geometry = raw.get("geometry", {})
-    if not isinstance(geometry, dict):
-        msg = f"segment {name!r}: geometry must be a mapping"
-        raise ValueError(msg)
-
-    mass = float(raw.get("mass", 0.0))
-    if mass <= 0.0:
-        msg = f"segment {name!r}: mass must be > 0, got {mass!r}"
-        raise ValueError(msg)
-
-    inertia = raw.get("inertia", {})
-    if not isinstance(inertia, dict):
-        msg = f"segment {name!r}: inertia must be a mapping"
-        raise ValueError(msg)
-    needed = {"ixx", "iyy", "izz", "ixy", "ixz", "iyz"}
-    missing = needed - set(inertia)
-    if missing:
-        msg = f"segment {name!r}: inertia is missing keys {sorted(missing)}"
-        raise ValueError(msg)
-
+def _seg(
+    name: str,
+    parent: str,
+    joint: JointSpec,
+    *,
+    origin_xyz: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    origin_rpy: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    geometry: dict[str, Any] | None = None,
+    mass: float,
+    inertia: dict[str, float],
+) -> SegmentSpec:
     return SegmentSpec(
         name=name,
-        parent=str(raw["parent"]),
-        joint=_parse_joint(raw["joint"], segment_name=name),
+        parent=parent,
+        joint=joint,
         origin_xyz=origin_xyz,
         origin_rpy=origin_rpy,
-        geometry=geometry,
+        geometry=geometry or {},
         mass=mass,
-        inertia={k: float(v) for k, v in inertia.items()},
+        inertia=inertia,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Canonical URDF segment topology.
+#
+# This is the Python-side blueprint that drives :func:`render_urdf_string`.
+# The numeric values here match the on-disk
+# ``src/engines/physics_engines/drake/models/generated/golfer.urdf``
+# byte-for-byte; CI gate #4129 (and the orchestrator from #4176) check this.
+#
+# Why hard-coded rather than YAML-driven?
+#   The shared dimensions YAML (PR #4150) was redesigned around a flat
+#   ``<Name>: {value, units, raw_value, raw_units, source}`` schema for the
+#   Simscape ↔ MuJoCo ↔ Drake ↔ Pinocchio ↔ OpenSim provenance trail. It does
+#   *not* describe the URDF body chain; that lives in
+#   ``shared/models/golf_humanoid_topology.yaml`` (joint graph, no link
+#   geometry) and ``shared/models/golf_humanoid_inertia.yaml`` (per-segment
+#   inertia, no joint info or visualisation radii). Until the per-engine
+#   generators in #4094 land an end-to-end mapping from the canonical
+#   inertia + topology YAMLs onto each engine's link/joint format, the
+#   Drake URDF blueprint is materialised here so the on-disk URDF stays
+#   byte-stable. Updating these numbers to track the canonical inertia YAML
+#   is the follow-up tracked by issue #4093.
+# ---------------------------------------------------------------------------
+
+_BOX = lambda *size: {"type": "box", "size": list(size)}  # noqa: E731
+_CYL = lambda r, ln: {"type": "cylinder", "radius": r, "length": ln}  # noqa: E731
+
+_CANONICAL_SEGMENTS: tuple[SegmentSpec, ...] = (
+    # --- Root --------------------------------------------------------------
+    _seg(
+        "pelvis",
+        "world",
+        JointSpec(name="pelvis_floating", type="floating"),
+        origin_xyz=(0.0, 0.0, 1.0),
+        geometry=_BOX(0.30, 0.20, 0.20),
+        mass=12.0,
+        inertia=_make_inertia(0.090, 0.130, 0.130),
+    ),
+    # --- Spine chain -------------------------------------------------------
+    _seg(
+        "lower_spine",
+        "pelvis",
+        JointSpec(
+            name="spine_universal",
+            type="universal",
+            axes=((1.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
+            limits=((-0.6, 0.6), (-0.6, 0.6)),
+            damping=0.5,
+        ),
+        origin_xyz=(0.0, 0.0, 0.10),
+        geometry=_BOX(0.20, 0.20, 0.25),
+        mass=7.5,
+        inertia=_make_inertia(0.060, 0.060, 0.050),
+    ),
+    _seg(
+        "upper_spine",
+        "lower_spine",
+        JointSpec(
+            name="spine_twist",
+            type="revolute",
+            axes=((0.0, 0.0, 1.0),),
+            limits=((-1.0, 1.0),),
+            damping=0.5,
+        ),
+        origin_xyz=(0.0, 0.0, 0.25),
+        geometry=_BOX(0.20, 0.20, 0.25),
+        mass=7.5,
+        inertia=_make_inertia(0.060, 0.060, 0.050),
+    ),
+    _seg(
+        "upper_torso_hub",
+        "upper_spine",
+        JointSpec(name="torso_weld", type="fixed"),
+        origin_xyz=(0.0, 0.0, 0.25),
+        geometry=_BOX(0.30, 0.30, 0.20),
+        mass=5.0,
+        inertia=_make_inertia(0.060, 0.060, 0.075),
+    ),
+    # --- Right arm chain ---------------------------------------------------
+    _seg(
+        "right_scapula_rod",
+        "upper_torso_hub",
+        JointSpec(
+            name="right_scapula_universal",
+            type="universal",
+            axes=((1.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
+            limits=((-0.5, 0.5), (-0.5, 0.5)),
+            damping=0.3,
+        ),
+        origin_xyz=(0.0, -0.18, 0.10),
+        geometry=_CYL(0.03, 0.12),
+        mass=1.0,
+        inertia=_make_inertia(0.0014, 0.0014, 0.00045),
+    ),
+    _seg(
+        "right_upper_arm",
+        "right_scapula_rod",
+        JointSpec(
+            name="right_shoulder_gimbal",
+            type="gimbal",
+            axes=((0.0, 0.0, 1.0), (0.0, 1.0, 0.0), (1.0, 0.0, 0.0)),
+            limits=((-3.14, 3.14), (-1.5, 1.5), (-1.5, 1.5)),
+            damping=0.3,
+        ),
+        origin_xyz=(0.0, 0.0, 0.12),
+        geometry=_CYL(0.04, 0.30),
+        mass=2.0,
+        inertia=_make_inertia(0.018, 0.018, 0.0024),
+    ),
+    _seg(
+        "right_forearm",
+        "right_upper_arm",
+        JointSpec(
+            name="right_elbow",
+            type="revolute",
+            axes=((0.0, 1.0, 0.0),),
+            limits=((-2.5, 0.0),),
+            damping=0.3,
+        ),
+        origin_xyz=(0.0, 0.0, -0.30),
+        geometry=_CYL(0.035, 0.27),
+        mass=1.5,
+        inertia=_make_inertia(0.012, 0.012, 0.0014),
+    ),
+    _seg(
+        "right_hand",
+        "right_forearm",
+        JointSpec(
+            name="right_wrist_universal",
+            type="universal",
+            axes=((1.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
+            limits=((-1.0, 1.0), (-1.0, 1.0)),
+            damping=0.2,
+        ),
+        origin_xyz=(0.0, 0.0, -0.27),
+        geometry=_CYL(0.03, 0.10),
+        mass=0.5,
+        inertia=_make_inertia(0.00057, 0.00057, 0.000225),
+    ),
+    # --- Left arm chain (mirrored y) --------------------------------------
+    _seg(
+        "left_scapula_rod",
+        "upper_torso_hub",
+        JointSpec(
+            name="left_scapula_universal",
+            type="universal",
+            axes=((1.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
+            limits=((-0.5, 0.5), (-0.5, 0.5)),
+            damping=0.3,
+        ),
+        origin_xyz=(0.0, 0.18, 0.10),
+        geometry=_CYL(0.03, 0.12),
+        mass=1.0,
+        inertia=_make_inertia(0.0014, 0.0014, 0.00045),
+    ),
+    _seg(
+        "left_upper_arm",
+        "left_scapula_rod",
+        JointSpec(
+            name="left_shoulder_gimbal",
+            type="gimbal",
+            axes=((0.0, 0.0, 1.0), (0.0, 1.0, 0.0), (1.0, 0.0, 0.0)),
+            limits=((-3.14, 3.14), (-1.5, 1.5), (-1.5, 1.5)),
+            damping=0.3,
+        ),
+        origin_xyz=(0.0, 0.0, 0.12),
+        geometry=_CYL(0.04, 0.30),
+        mass=2.0,
+        inertia=_make_inertia(0.018, 0.018, 0.0024),
+    ),
+    _seg(
+        "left_forearm",
+        "left_upper_arm",
+        JointSpec(
+            name="left_elbow",
+            type="revolute",
+            axes=((0.0, 1.0, 0.0),),
+            limits=((-2.5, 0.0),),
+            damping=0.3,
+        ),
+        origin_xyz=(0.0, 0.0, -0.30),
+        geometry=_CYL(0.035, 0.27),
+        mass=1.5,
+        inertia=_make_inertia(0.012, 0.012, 0.0014),
+    ),
+    _seg(
+        "left_hand",
+        "left_forearm",
+        JointSpec(
+            name="left_wrist_universal",
+            type="universal",
+            axes=((1.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
+            limits=((-1.0, 1.0), (-1.0, 1.0)),
+            damping=0.2,
+        ),
+        origin_xyz=(0.0, 0.0, -0.27),
+        geometry=_CYL(0.03, 0.10),
+        mass=0.5,
+        inertia=_make_inertia(0.00057, 0.00057, 0.000225),
+    ),
+    # --- Club. URDF cannot express a closed-loop "both hands grip the club"
+    # constraint, so we weld the club to the right hand only and rely on the
+    # cost function (or AddBallConstraint at finalize-time) to keep the left
+    # hand on the grip. See DRAKE_PARITY_SPEC §7 risk #3.
+    _seg(
+        "club_shaft",
+        "right_hand",
+        JointSpec(name="grip_lead", type="fixed"),
+        origin_xyz=(0.0, 0.0, -0.10),
+        geometry=_CYL(0.012, 1.05),
+        mass=0.40,
+        inertia=_make_inertia(0.037, 0.037, 0.0000288),
+    ),
+)
+
+
+def _parse_dimension_entry(name: str, raw: Any) -> DimensionEntry | None:
+    """Decode one flat-schema entry from the dimensions YAML.
+
+    Returns ``None`` for entries that aren't dimension records (e.g. the
+    ``derived`` block at the bottom of the file, or scalar metadata like
+    ``schema_version``).
+    """
+    if not isinstance(raw, dict) or "value" not in raw:
+        return None
+    return DimensionEntry(
+        name=name,
+        value=float(raw["value"]),
+        units=str(raw.get("units", "")),
+        raw_value=(
+            float(raw["raw_value"]) if raw.get("raw_value") is not None else None
+        ),
+        raw_units=(str(raw["raw_units"]) if raw.get("raw_units") is not None else None),
+        source=str(raw["source"]) if raw.get("source") is not None else None,
+        simscape_name=(
+            str(raw["simscape_name"]) if raw.get("simscape_name") is not None else None
+        ),
+        notes=str(raw["notes"]).strip() if raw.get("notes") is not None else None,
+    )
+
+
+def _read_yaml(path: Path, *, what: str) -> dict[str, Any]:
+    if not path.exists():
+        msg = (
+            f"{what} YAML not found at {path}. "
+            "This file is owned by issue #4093 (PARITY-DIMENSIONS) and "
+            "shipped on main via PR #4150; see DRAKE_PARITY_SPEC.md §3.3."
+        )
+        raise FileNotFoundError(msg)
+    with path.open("r", encoding="utf-8") as fh:
+        data = yaml.safe_load(fh)
+    if not isinstance(data, dict):
+        msg = f"{what} YAML root must be a mapping, got {type(data).__name__}"
+        raise ValueError(msg)
+    return data
+
+
+def _derive_dimension_aggregates(
+    dims: dict[str, DimensionEntry],
+    inertia: dict[str, Any],
+) -> tuple[float, float, float, float, float]:
+    """Compute the legacy anthropometry scalars from canonical YAMLs.
+
+    Returns ``(pelvis_to_shoulders_m, shoulder_width_m, hand_spacing_m,
+    total_mass_kg, total_height_m)``. Missing entries fall back to 0.0
+    so downstream callers can detect "field not present" without raising.
+    """
+
+    def _val(key: str) -> float:
+        entry = dims.get(key)
+        return float(entry.value) if entry is not None else 0.0
+
+    upper_torso = _val("UpperTorsoLength")
+    lower_torso = _val("LowerTorsoLength")
+    pelvis_to_shoulders = upper_torso + lower_torso
+
+    hub_to_s = _val("HubtoSLength")
+    left_shoulder = _val("LeftShoulderWidth")
+    right_shoulder = _val("RightShoulderWidth")
+    shoulder_width = 2.0 * hub_to_s + left_shoulder + right_shoulder
+
+    left_wrist = _val("LeftWristStandoffLength")
+    right_wrist = _val("RightWristStandoffLength")
+    hand_spacing = left_wrist + right_wrist
+
+    golfer = inertia.get("golfer") if isinstance(inertia, dict) else None
+    total_mass = (
+        float(golfer.get("total_mass_kg", 0.0)) if isinstance(golfer, dict) else 0.0
+    )
+
+    upper_arm = _val("LeftUpperArmLength") or _val("UpperArmLength")
+    lower_arm = _val("LowerArmLength")
+    neck = _val("NeckLength")
+    head_radius = _val("HeadRadius")
+    total_height = (
+        lower_torso + upper_torso + neck + 2.0 * head_radius + upper_arm + lower_arm
+    )
+
+    return (
+        pelvis_to_shoulders,
+        shoulder_width,
+        hand_spacing,
+        total_mass,
+        total_height,
     )
 
 
 def load_humanoid_dimensions(
     yaml_path: Path | str | None = None,
+    *,
+    inertia_path: Path | str | None = None,
+    topology_path: Path | str | None = None,
 ) -> HumanoidDimensions:
-    """Parse the shared humanoid dimensions YAML into structured form.
+    """Parse the canonical shared humanoid YAMLs into structured form.
+
+    The canonical schema (PR #4150, on ``main``) splits the humanoid model
+    across three files:
+
+    * ``shared/models/golf_humanoid_dimensions.yaml`` — flat
+      ``<Name>: {value, units, raw_value, raw_units, source, notes}`` map.
+    * ``shared/models/golf_humanoid_inertia.yaml`` — per-segment masses,
+      COMs, and inertia tensors.
+    * ``shared/models/golf_humanoid_topology.yaml`` — joint graph + DOF
+      ordering.
+
+    All three are read and exposed on the returned object; the URDF
+    blueprint itself comes from :data:`_CANONICAL_SEGMENTS` (the values
+    that produce the byte-stable on-disk URDF).
 
     Args:
-        yaml_path: Path to the YAML. ``None`` resolves to
-            :data:`SHARED_DIMENSIONS_YAML`.
+        yaml_path: Dimensions YAML. ``None`` -> :data:`SHARED_DIMENSIONS_YAML`.
+        inertia_path: Inertia YAML. ``None`` -> :data:`SHARED_INERTIA_YAML`.
+        topology_path: Topology YAML. ``None`` -> :data:`SHARED_TOPOLOGY_YAML`.
 
     Returns:
         Parsed :class:`HumanoidDimensions`.
 
     Raises:
-        FileNotFoundError: if the YAML is missing.
-        ValueError: if a required field is absent or malformed.
+        FileNotFoundError: if any of the three YAMLs is missing.
+        ValueError: if a YAML root isn't a mapping or schema_version is
+            absent / not an int.
     """
-    path = Path(yaml_path) if yaml_path is not None else SHARED_DIMENSIONS_YAML
-    if not path.exists():
+    dim_path = Path(yaml_path) if yaml_path is not None else SHARED_DIMENSIONS_YAML
+    inertia_p = Path(inertia_path) if inertia_path is not None else SHARED_INERTIA_YAML
+    topo_p = Path(topology_path) if topology_path is not None else SHARED_TOPOLOGY_YAML
+
+    dim_raw = _read_yaml(dim_path, what="Shared humanoid dimensions")
+    inertia_raw = _read_yaml(inertia_p, what="Shared humanoid inertia")
+    topo_raw = _read_yaml(topo_p, what="Shared humanoid topology")
+
+    schema_version = int(dim_raw.get("schema_version", 0))
+
+    dimensions: dict[str, DimensionEntry] = {}
+    for key, entry in dim_raw.items():
+        parsed = _parse_dimension_entry(key, entry)
+        if parsed is not None:
+            dimensions[key] = parsed
+
+    if not dimensions:
         msg = (
-            f"Shared humanoid dimensions YAML not found at {path}. "
-            "This file is owned by issue #4093 (PARITY-DIMENSIONS); "
-            "see DRAKE_PARITY_SPEC.md §3.3."
+            f"{dim_path} contains no dimension entries; "
+            "expected flat <Name>: {value, units, ...} mappings per PR #4150."
         )
-        raise FileNotFoundError(msg)
-
-    with path.open("r", encoding="utf-8") as fh:
-        raw = yaml.safe_load(fh)
-
-    if not isinstance(raw, dict):
-        msg = f"YAML root must be a mapping, got {type(raw).__name__}"
         raise ValueError(msg)
 
-    schema_version = int(raw.get("schema_version", 0))
-    anthro = raw.get("anthropometry", {})
-    if not isinstance(anthro, dict):
-        msg = "YAML must define an 'anthropometry' mapping"
-        raise ValueError(msg)
-
-    segments_raw = raw.get("segments", [])
-    if not isinstance(segments_raw, list) or not segments_raw:
-        msg = "YAML must define a non-empty 'segments' list"
-        raise ValueError(msg)
-
-    segments = tuple(_parse_segment(s) for s in segments_raw)
+    (
+        pelvis_to_shoulders_m,
+        shoulder_width_m,
+        hand_spacing_m,
+        total_mass_kg,
+        total_height_m,
+    ) = _derive_dimension_aggregates(dimensions, inertia_raw)
 
     return HumanoidDimensions(
         schema_version=schema_version,
-        pelvis_to_shoulders_m=float(anthro.get("pelvis_to_shoulders_m", 0.0)),
-        shoulder_width_m=float(anthro.get("shoulder_width_m", 0.0)),
-        hand_spacing_m=float(anthro.get("hand_spacing_m", 0.0)),
-        total_mass_kg=float(anthro.get("total_mass_kg", 0.0)),
-        total_height_m=float(anthro.get("total_height_m", 0.0)),
-        segments=segments,
-        raw=raw,
+        pelvis_to_shoulders_m=pelvis_to_shoulders_m,
+        shoulder_width_m=shoulder_width_m,
+        hand_spacing_m=hand_spacing_m,
+        total_mass_kg=total_mass_kg,
+        total_height_m=total_height_m,
+        segments=_CANONICAL_SEGMENTS,
+        dimensions=dimensions,
+        inertia=inertia_raw,
+        topology=topo_raw,
+        raw=dim_raw,
     )
 
 
