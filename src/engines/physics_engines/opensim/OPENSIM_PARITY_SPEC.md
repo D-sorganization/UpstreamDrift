@@ -300,9 +300,10 @@ guard against `OPENSIM_AVAILABLE is False` and raise
 
 ### 3.1 Decision: start from `Rajagopal2015.osim`
 
-The Cross-Engine Parity Spec §2.6 calls for a 23-DOF skeleton matching
-the Simscape model. OpenSim has two candidate base models in its
-submodule:
+The Cross-Engine Parity Spec §2.6 calls for a **25-DOF skeleton (6
+floating-base + 19 actuated rotational)** matching the Simscape model;
+the canonical totals live in `shared/models/golf_humanoid_topology.yaml`
+(PR #4150). OpenSim has two candidate base models in its submodule:
 
 | Candidate | Pros | Cons |
 |---|---|---|
@@ -342,7 +343,11 @@ The `.osim` file we ship is **generated**, not hand-edited. The
    `right_hand` → child `Club`). The grip frame is the connection point;
    the clubhead frame is a `PhysicalOffsetFrame` on the `Club` body.
 7. Validates by calling `model.initSystem()` and checks that the DOF count
-   matches the Simscape reference (23).
+   matches the Simscape reference (**25 generalized velocities = 6
+   floating-base + 19 actuated rotational**, per
+   `shared/models/golf_humanoid_topology.yaml`). Note: OpenSim flattens
+   floating-base orientation to 3 Euler coordinates, so `nq == nv == 25`
+   in OpenSim's representation (no quaternion offset).
 8. Writes `models/golf_humanoid.osim` and `models/golf_humanoid_actuators.xml`
    with a deterministic output (no timestamps in XML).
 
@@ -398,14 +403,16 @@ issue depends on it.
 - `models/golf_humanoid.osim` (committed, generated artifact).
 - `models/golf_humanoid_actuators.xml` (separate actuator-set XML).
 - `models/README.md` documenting provenance, regeneration, license.
-- Initial `tests/test_model_loads.py`: model loads, has 23 DOF, has the
-  expected coordinate names, has a `Club` body and a clubhead frame.
+- Initial `tests/test_model_loads.py`: model loads, has 25 DOF (6
+  floating-base + 19 actuated rotational), has the expected coordinate
+  names, has a `Club` body and a clubhead frame.
 
 **Acceptance criteria:**
 - `python scripts/build_humanoid_osim.py` is deterministic — running it
   twice produces byte-identical `.osim` output.
 - `osim.Model("models/golf_humanoid.osim").initSystem()` succeeds.
-- DOF count == 23.
+- DOF count == 25 (6 floating-base + 19 actuated rotational), matching
+  `shared/models/golf_humanoid_topology.yaml`.
 - Every `Coordinate` has exactly one `CoordinateActuator`.
 - Test runtime < 5 s.
 
@@ -688,7 +695,7 @@ We have no measurements yet (greenfield). Reference points:
 - **Simscape Multibody** (cold, JIT-warm): ~30 s for a 1.0 s sim.
   ~7 s warm.
 - **OpenSim** (anecdotal from forward-dynamics benchmarks):
-  ~5–15 s for a 1.0 s sim of a 23-DOF human at 1 kHz integration
+  ~5–15 s for a 1.0 s sim of a 25-DOF human at 1 kHz integration
   step. **Same order of magnitude as Simscape.**
 
 ### 6.2 MVP target

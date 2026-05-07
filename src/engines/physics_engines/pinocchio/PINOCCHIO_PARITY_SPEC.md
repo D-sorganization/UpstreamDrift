@@ -68,7 +68,11 @@ host the lower-level forward-dynamics primitives we'll wrap.
 
 ### 1.2 `golfer.urdf` vs `golfer_ik.urdf` — the difference
 
-Both files have **identical 23-DOF body chains** rooted at `pelvis`.
+Both files have **identical 23-DOF internal body chains** rooted at `pelvis`
+(Pinocchio-URDF count; this is +4 over the canonical 19-actuated Simscape
+chain because the existing URDF carries decorative `hand→fingers` joints
+and a 2-DOF elbow/forearm split — see §3.1 and §3.2 below, and the
+canonical totals in `shared/models/golf_humanoid_topology.yaml`).
 The diff is exclusively in the right-hand subtree at line ~585:
 
 | URDF | Right after `hand_left` link |
@@ -224,11 +228,17 @@ Required changes to `golfer.urdf`:
 3. The 6-DOF lock is realised as URDF `<joint type="fixed">`; Pinocchio
    loads this as a frame, not a joint, which is the correct semantic.
 4. Add a `floating_base` (`<joint type="floating">`) at the pelvis so the
-   model has 6 base DOFs + 23 internal = 29 generalised coordinates,
-   matching the Simscape free-floating pelvis convention.
+   model has 6 base v-DOFs + 23 internal = **29 generalised velocities
+   (`nv`)** and **30 configuration coordinates (`nq`)** — Pinocchio's
+   floating base contributes 7 q (3 position + 4 quaternion) and 6 v
+   (3 linear + 3 angular). The canonical Simscape chain per
+   `shared/models/golf_humanoid_topology.yaml` is 6 + 19 = 25 v; the +4
+   extra here are decorative finger joints and the elbow/forearm split
+   noted in §3.1.
 
-Acceptance: `pinocchio.buildModelFromUrdf` returns `model.nq == 29` and
-`pin.getFrameId('mid_hands')` is valid.
+Acceptance: `pinocchio.buildModelFromUrdf` returns `model.nq == 30`
+(equivalently `model.nv == 29`) and `pin.getFrameId('mid_hands')` is
+valid.
 
 **Decision on `golfer_ik.urdf`:** retain unchanged for now. It serves the
 post-MVP body-marker IK pipeline (§3.4 below).
@@ -397,19 +407,24 @@ Six tests, written **before** the implementation in the same PR:
 
 ### 3.1 Recommendation: **retain the existing URDFs**, regenerate only when shared YAML lands
 
-The 23-DOF chain in `golfer.urdf` already matches the Simscape kinematic
-breakdown: Hip(6) + Spine via lumbar1/2/3 (each 2 DOF intermediate +
-revolute = 6) + Torso/thorax1-3 (3) + Scapula (2 each) + Shoulder-gimbal
-(3 each) + Elbow (1 each) + Wrist intermediate+revolute (2 each) +
-fingers (1 each, decorative). Total 23 internal revolute DOFs + 6 base =
-29. Numbers match.
+The 23-DOF internal chain in `golfer.urdf` is a **superset** of the
+canonical 19-actuated Simscape kinematic breakdown: Hip(6) + Spine via
+lumbar1/2/3 (each 2 DOF intermediate + revolute = 6) + Torso/thorax1-3 (3)
++ Scapula (2 each) + Shoulder-gimbal (3 each) + Elbow (1 each) + Wrist
+intermediate+revolute (2 each) + fingers (1 each, decorative). Total 23
+internal revolute DOFs + 6 base = **29 v-velocities** (and 30 q-positions
+because the floating base contributes 7 q vs 6 v). The +4 over the
+canonical 25 v-velocity Simscape count come from the two decorative
+finger joints and the elbow/forearm 2-DOF split (vs Simscape's lumped
+1 DOF). The canonical count lives in
+`shared/models/golf_humanoid_topology.yaml` (PR #4150).
 
 When `shared/models/golf_humanoid_dimensions.yaml` lands (issue
 PARITY-DIMENSIONS), wire `scripts/build_humanoid_models.py` to regenerate
 both URDFs from that YAML. Until then, the existing files are
 authoritative for Pinocchio.
 
-### 3.2 Joint mapping to the Simscape 23-DOF chain
+### 3.2 Joint mapping to the Simscape 25-DOF (6 floating + 19 actuated) chain
 
 | Simscape joint name | Pinocchio joint(s) | Notes |
 |---|---|---|
@@ -476,7 +491,7 @@ The body of issue #4 makes this explicit:
 > derivatives of articulated-body dynamics (the other is Drake). MuJoCo and
 > Simscape rely on finite differences inside `fmincon`, costing one extra
 > forward simulation per parameter per iteration. With ~7 coefficients ×
-> ~23 joints = ~160 parameters, that's 160 sims per gradient evaluation in
+> ~19 actuated joints (canonical) ≈ ~140 parameters, that's >100 sims per gradient evaluation in
 > Simscape — vs 1 sim + 1 derivative pass (≈ 3× one sim) in Pinocchio.
 >
 > The acceptance criterion that exercises this is the **5-second wall-clock

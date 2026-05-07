@@ -140,9 +140,21 @@ Every engine has **a single canonical full-body humanoid model** with the
 club rigidly attached at the grip via a 6-DOF locked joint (or the
 engine-native equivalent). Anatomical conventions:
 
-- Skeleton parity with the Simscape model: 25 DOF distributed across the
+- Skeleton parity with the Simscape model: **25 generalized velocities
+  (6 floating-base + 19 actuated rotational DOFs)** distributed across the
   Hip(6) → Spine(2) → Torso(1) → Scapula(2)+(2) → Shoulder(3)+(3) →
   Elbow(1)+(1) → Wrist(2)+(2) → Hand(rigid) + Club(rigid) chain.
+  - **q vs v note:** for floating-base systems the configuration vector `q`
+    has **7 elements per floating base** (3 position + 4 quaternion) while
+    the velocity vector `v` has **6** (3 linear + 3 angular). Therefore the
+    canonical totals are **26 q-positions and 25 v-velocities**
+    (= 7 + 19 vs 6 + 19). Engines that flatten the quaternion to a 3-DOF
+    Euler triple (e.g. Drake's `RollPitchYawFloatingJoint`) report 25 for
+    both `q` and `v`.
+  - **Source of truth:** `shared/models/golf_humanoid_topology.yaml`
+    (PR #4150 — PARITY-DIMENSIONS). All five engine spec docs derive their
+    DOF counts from this file; any discrepancy is a bug in the engine
+    spec, not in the topology YAML.
 - Segment lengths come from the **same model-workspace constants** the
   Simscape model uses, exposed via a shared YAML at
   `shared/models/golf_humanoid_dimensions.yaml` (issue #PARITY-DIMENSIONS).

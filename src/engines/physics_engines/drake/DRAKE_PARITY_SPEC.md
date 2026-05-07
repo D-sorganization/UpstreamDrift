@@ -146,7 +146,8 @@ def build_humanoid_urdf(yaml_path: Path | None = None,
         - Pre: yaml_path exists and is a valid `golf_humanoid_dimensions.yaml`.
         - Pre: every segment listed has finite mass + inertia entries.
         - Post: the file at out_path parses cleanly via pydrake `Parser`
-                and the resulting plant has exactly 23 generalized velocities.
+                and the resulting plant has exactly 25 generalized velocities
+                (6 floating-base + 19 actuated rotational DOFs).
     """
     ...
 
@@ -335,7 +336,7 @@ PR. The test plan is:
 
 | Test | Asserts |
 |---|---|
-| `test_humanoid_urdf.py::test_parses` | Generated URDF parses via pydrake `Parser` and yields 23 generalized velocities. |
+| `test_humanoid_urdf.py::test_parses` | Generated URDF parses via pydrake `Parser` and yields 25 generalized velocities (6 floating-base + 19 actuated rotational). |
 | `test_humanoid_urdf.py::test_segment_lengths` | Distance from pelvis frame to shoulder frame matches the YAML to 1 mm. |
 | `test_simulate_with_coefficients.py::test_canonical_simout_shape` | Returns a `SimOut` with N rows on the requested grid; no NaNs. |
 | `test_simulate_with_coefficients.py::test_zero_torque_falls_under_gravity` | With `theta = 0`, the grip falls in the −z direction (sanity for gravity sign). |
@@ -360,7 +361,13 @@ at module level (CLAUDE.md).
 
 ## 3. Body model — concrete URDF authoring plan
 
-### 3.1 Skeleton (23 generalized velocities)
+### 3.1 Skeleton (25 generalized velocities)
+
+> **Source of truth:** `shared/models/golf_humanoid_topology.yaml`
+> (PR #4150 — PARITY-DIMENSIONS). Total = 6 floating-base + 19 actuated
+> rotational DOFs = **25 v-velocities**. Note that `q` carries 26 elements
+> (7 per floating base = 3 position + 4 quaternion, plus 19 actuated)
+> while `v` carries 25 (6 + 19).
 
 Mirror the Simscape skeleton joint-by-joint. Drake natively supports
 `revolute`, `prismatic`, `floating`, and (via composition with massless
@@ -383,7 +390,10 @@ emits it; SDF migration is a future option.
 | R_hand + L_hand → club_grip | 6 (welded loop) | 0 | `<joint type="fixed">` from R_hand to club. The L_hand → club connection becomes a closed-loop constraint, which URDF cannot express. **Resolution:** weld the club to R_hand only and rely on the IK / cost function to keep both hands on the grip. (Same compromise the Pinocchio URDF makes — see `pinocchio/models/generated/golfer.urdf`.) |
 | club_grip → clubhead | 0 (welded) | 0 | `<joint type="fixed">` shaft length from YAML. |
 
-**Total DOF: 6 (floating root) + 2 + 1 + 0 + 2 + 3 + 1 + 2 + 0 + 8 (mirror) + 0 + 0 = 23.** ✅
+**Total v-DOF: 6 (floating root) + 2 + 1 + 0 + 2 + 3 + 1 + 2 + 0 + 8 (mirror) + 0 + 0 = 25.** ✅
+(The previous spec quoted "23" — an arithmetic error caught by issue #4155.
+The component breakdown above already sums to 25; only the displayed total
+was wrong. Cross-reference: `shared/models/golf_humanoid_topology.yaml`.)
 
 ### 3.2 Composition rules
 
@@ -474,7 +484,7 @@ the existing `drake_golf_model.GolfURDFGenerator` to consume
 **Acceptance:**
 1. `pytest tests/motion_matching/test_humanoid_urdf.py` green.
 2. The on-disk URDF parses via `pydrake.multibody.parsing.Parser` with
-   exactly 23 generalized velocities.
+   exactly 25 generalized velocities (6 floating-base + 19 actuated).
 3. `GolfModelParams` hard-coded defaults are deleted; YAML is the
    single source of truth.
 
@@ -672,7 +682,7 @@ rather than spinning up its own diagram.
 
 | Quantity | Value | Source |
 |---|---|---|
-| Single forward sim, 0.3 s @ 1 ms timestep, 23-DOF humanoid | ~1.5 s wall-clock | extrapolated from `compute_mass_matrix` micro-benchmarks in `drake_physics_engine.py` (~0.5 ms per call × 300 steps × overhead). |
+| Single forward sim, 0.3 s @ 1 ms timestep, 25-DOF humanoid | ~1.5 s wall-clock | extrapolated from `compute_mass_matrix` micro-benchmarks in `drake_physics_engine.py` (~0.5 ms per call × 300 steps × overhead). |
 | `simulate_with_coefficients` (one full call) | 1.5–3 s | adds polynomial-torque LeafSystem + state recording. |
 | `fit_swing_drake` (scipy L-BFGS-B, finite diff) | ~150 sim calls × 2 s = **5 min** | matches Simscape `fmincon` baseline. |
 | `fit_swing_drake_autodiff` (Ipopt + analytic gradients) | ~30 sim calls × 3 s = **90 s** | autodiff overhead × fewer iters. |
