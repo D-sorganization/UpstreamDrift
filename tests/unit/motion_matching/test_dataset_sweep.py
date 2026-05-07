@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import numpy as np
@@ -135,3 +136,79 @@ def test_real_dataset_path_skipped_when_absent() -> None:
         )
     ds = load_sweep_dataset(real, lazy=False)
     assert ds.n_trials() > 0
+
+
+@pytest.mark.unit
+def test_real_10k_dataset_matches_schema_contract() -> None:
+    """Issue #4074 acceptance guard for the real random-sweep dataset.
+
+    This stays skipped until the 10k dataset is copied into a repo or
+    env-configured location. Once present, it enforces the full contract
+    needed before downstream Option-2/3/leaderboard training issues can run.
+    """
+    real = _find_real_sweep_dataset()
+    if real is None:
+        pytest.skip(
+            "real 10k sweep dataset not present. Set "
+            "UPSTREAMDRIFT_SWEEP_DATASET_PATH or place trials.parquet and "
+            "timesteps.parquet under a documented motion_matching data folder."
+        )
+
+    ds = load_sweep_dataset(real, lazy=False)
+    timesteps = ds.timesteps
+
+    assert ds.schema_version == SCHEMA_VERSION
+    assert ds.n_trials() == 10_000
+    assert isinstance(timesteps, pd.DataFrame)
+    assert set(timesteps["trial_id"]).issubset(set(ds.trials["trial_id"]))
+
+    required_trials = {
+        "trial_id",
+        "coefficients",
+        "joint_names",
+        "simulation_time_s",
+        "sample_rate_hz",
+        "solver_status",
+    }
+    required_timesteps = {"trial_id", "t", "q", "qd", "qdd", "tau"}
+    assert required_trials.issubset(ds.trials.columns)
+    assert required_timesteps.issubset(timesteps.columns)
+
+    successful_ids = set(
+        ds.trials.loc[ds.trials["solver_status"] == "success", "trial_id"]
+    )
+    successful_timesteps = timesteps[timesteps["trial_id"].isin(successful_ids)]
+    for column in ("q", "qd", "qdd", "tau"):
+        values = np.asarray(successful_timesteps[column].tolist(), dtype=float)
+        assert values.shape[1] == ds.n_joints()
+        assert np.isfinite(values).all()
+
+
+def _find_real_sweep_dataset() -> Path | None:
+    configured = os.environ.get("UPSTREAMDRIFT_SWEEP_DATASET_PATH")
+    candidates: list[Path] = []
+    if configured:
+        candidates.append(Path(configured))
+
+    repo_root = _repo_root()
+    candidates.extend(
+        [
+            repo_root / "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/"
+            "motion_matching/data",
+            repo_root / "motion_matching/data",
+            repo_root / "data/motion_matching",
+        ]
+    )
+    return next((path for path in candidates if _is_sweep_dataset_dir(path)), None)
+
+
+def _repo_root() -> Path:
+    here = Path(__file__).resolve()
+    for parent in here.parents:
+        if (parent / ".git").exists() or (parent / "pyproject.toml").exists():
+            return parent
+    raise RuntimeError("could not locate repository root")
+
+
+def _is_sweep_dataset_dir(path: Path) -> bool:
+    return (path / "trials.parquet").exists() and (path / "timesteps.parquet").exists()
