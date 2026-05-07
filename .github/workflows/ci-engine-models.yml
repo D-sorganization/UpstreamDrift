@@ -54,10 +54,11 @@ jobs:
         shell: bash
         run: |
           python -m pip install --upgrade pip
-          # The Drake URDF generator is pure-Python and only needs PyYAML
-          # plus numpy at parse time. Avoid pulling in pydrake / heavy
-          # extras so the gate stays under the 30 s budget (#4129 AC).
-          python -m pip install pyyaml numpy
+          # The Drake URDF generator is pure-Python and only needs PyYAML,
+          # numpy, and defusedxml (used by humanoid_urdf.py) at parse time.
+          # Avoid pulling in pydrake / heavy extras so the gate stays under
+          # the 30 s budget (#4129 AC).
+          python -m pip install pyyaml numpy defusedxml
 
       - name: Regenerate drake URDF and assert no drift
         shell: bash
