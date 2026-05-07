@@ -13,6 +13,7 @@ Usage:
     self.my_combo_box.installEventFilter(filter)
 """
 
+import weakref
 from PyQt6.QtCore import QObject, QEvent
 from PyQt6.QtGui import QWheelEvent
 
@@ -48,15 +49,17 @@ class WheelEventFilter(QObject):
         return False
 
 
-# Module-level cache to keep filter instances alive and prevent GC
-_filter_cache: dict[int, WheelEventFilter] = {}
+# Module-level cache using weak references to prevent unbounded growth.
+# Uses WeakValueDictionary so entries are automatically removed when widgets are destroyed.
+_filter_cache: weakref.WeakValueDictionary = weakref.WeakValueDictionary()
 
 
 def suppress_wheel_on_widget(widget) -> None:
     """Convenience function to install wheel event filter on a widget.
     
-    The filter instance is stored in a module-level cache keyed by widget ID
-    to prevent garbage collection while the widget is still in use.
+    The filter instance is stored in a module-level weak reference cache keyed by widget ID.
+    When the widget is destroyed, the filter is automatically removed from the cache,
+    preventing unbounded memory growth in long-running applications.
     
     Args:
         widget: The widget to suppress wheel events on.
@@ -69,8 +72,9 @@ def suppress_wheel_on_widget(widget) -> None:
 def suppress_wheel_on_widgets(*widgets) -> None:
     """Convenience function to install wheel event filter on multiple widgets.
     
-    Each filter instance is stored in a module-level cache keyed by widget ID
-    to prevent garbage collection while the widget is still in use.
+    Each filter instance is stored in a module-level weak reference cache keyed by widget ID.
+    When widgets are destroyed, their filters are automatically removed from the cache,
+    preventing unbounded memory growth in long-running applications.
     
     Args:
         widgets: Variable number of widgets to suppress wheel events on.
