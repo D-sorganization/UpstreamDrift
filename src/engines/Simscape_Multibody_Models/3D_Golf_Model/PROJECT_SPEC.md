@@ -128,18 +128,65 @@ of the player's actual club length and robust to shaft flex (neither of
 which the model simulates). Clubhead alignment then follows deterministically
 from the modeled club geometry.
 
+### 4.1 Coefficient bounds — spec vs. dataset reality
+
+The torque polynomial is `τ_j(t; θ) = A_j·t^6 + B_j·t^5 + … + G_j` and the
+**nominal** per-letter bounds are `|A,B|≤1000, |C,D|≤500, |E,F|≤100, |G|≤25`
+(see [COMPACT_DATASET_SCHEMA.md](matlab/motion_matching/shared/COMPACT_DATASET_SCHEMA.md)).
+
+**These bounds are nominal targets, not what the existing 10k-trial parquet
+contains.** The random-sweep generator that produced the current dataset drove
+all seven letters across a uniform `±1000` range — every `G` coefficient in
+the dataset reaches `±1000`, not `±25`. Future generator runs may tighten to
+the per-letter limits, but **motion-matching code (loaders, decoders,
+clamping layers) must accept the current dataset as-is**. Decoders that hard-
+clamp to the nominal per-letter bounds will silently truncate real targets
+(e.g. PR #4240's cVAE clipped letter-G targets to 1/40 of their true
+magnitude); use a uniform scale (e.g. `coefficient_scale_factor=50` per
+PR #4267) when consuming this parquet.
+
 ## 5. Which option to use when
 
-| Situation                                                 | Pick                     | Status                                   |
-| --------------------------------------------------------- | ------------------------ | ---------------------------------------- |
-| First time fitting a swing; want a baseline you can trust | **Option 1 — fmincon**   | ✅ Production                            |
-| Already have a trained surrogate, want sub-second fits    | Option 2 — NN surrogate  | 🟡 Needs training run on the 10k parquet |
-| Need real-time inverse "swing in → θ out"                 | Option 3 — Inverse cVAE  | 🟡 Needs training run                    |
-| Want JAX / scipy.optimize over the MATLAB sim             | Option 4 — Python bridge | 🔴 Needs implementation                  |
+| Situation                                                 | Pick                                  | Status                                                          |
+| --------------------------------------------------------- | ------------------------------------- | --------------------------------------------------------------- |
+| First time fitting a swing; want a baseline you can trust | **Option 1 — fmincon**                | ✅ Production                                                    |
+| Already have a trained surrogate, want sub-second fits    | Option 2 — NN surrogate               | ✅ Shipped (see Option 2 notes below)                            |
+| Full-trial inverse `(trajectory → 189 coefficients)`      | Option 3a — full-trial inverse        | 🟡 Shipped but data-limited (see Option 3 notes below)          |
+| Per-timestep inverse-dynamics on filtered realistic data  | Option 3b — per-timestep inverse      | 🟢 New production inverse path (`feat/timestep-inverse-model`)  |
+| Want JAX / scipy.optimize over the MATLAB sim             | Option 4 — Python bridge              | 🔴 Needs implementation                                         |
 
 Every option must consume the same `target` schema and emit the same
 `result` schema. Mixing options is then a one-line code change (see the
 leaderboard helper).
+
+### 5.1 Option 2 — forward NN surrogate (shipped)
+
+- Production checkpoint: `data/training/surrogate_v4/checkpoint_production.pt`
+  (~541 k parameters; clubhead-speed MAE 0.04 mph; grip RMSE ~43 mm).
+- **Always load `checkpoint_production.pt`, not `checkpoint_best.pt`.** The
+  current early-stop criterion is single-objective on grip RMSE and selects
+  an unconverged epoch (e.g. epoch 2) before the model has learned to predict
+  clubhead speed; `checkpoint_production.pt` is the last-epoch checkpoint and
+  is the only one that ships a balanced model. A multi-objective stop
+  criterion is on the backlog; until it lands, treat `checkpoint_best.pt` as
+  diagnostic only.
+
+### 5.2 Option 3 — inverse pathways
+
+- **Option 3a — full-trial inverse (data-limited, not architecture-limited).**
+  Both the cVAE (PR #4240) and the deterministic regressor (PR #4267) plateau
+  at ~5 % below the mean-prediction baseline regardless of aggregation
+  strategy. This is consistent with the `(31 × 12)`-dim hand-path trajectory
+  not uniquely identifying the 189-dim coefficient vector on the random-sweep
+  dataset (multiple coefficient vectors produce nearly-identical hand paths).
+  A future generator run constrained to physical-swing distributions would
+  likely fix this; meanwhile the full-trial inverse is best used as a
+  warm-start for Option 1/4 rather than a standalone fitter.
+- **Option 3b — per-timestep inverse-dynamics (new production path,
+  incoming PR `feat/timestep-inverse-model`).** Reformulates the inverse as
+  a per-timestep `(q, q̇, q̈) → τ` regression on the realistic-speed slice
+  of the dataset (the user's "each timestep is an independent sample"
+  framing). Avoids the global-coefficient under-determination of Option 3a.
 
 ## 6. Data assets
 
@@ -154,6 +201,32 @@ trials from a separate machine. Once landed:
 - Loader: [load_sweep_dataset.py](matlab/motion_matching/shared/load_sweep_dataset.py).
 - This is the substrate for Options 2 and 3 (NN surrogate + inverse).
   Option 1 doesn't need it; Option 4 may use it for warm-starts.
+
+### 6.1.1 Random-sweep dataset characterisation
+
+Empirical observations from the existing 10k-trial parquet (relevant for
+anyone training Option 2 / Option 3 models on it):
+
+- **Shape.** 10 000 trials × 31 timesteps spanning a 0.30 s impact window at
+  100 Hz.
+- **Coefficient distribution.** Uniform `±1000` for all seven letters A–G
+  (see §4.1). Inputs were random — do not over-interpret marginal coefficient
+  histograms as physical priors.
+- **Speed saturation.** Every trial saturates at the Simscape integration
+  ceiling (clubhead speed peak ≈ 1334 m/s ≈ 2984 mph) because the random
+  bounds are aggressive relative to physical swing torques. The single
+  global max-speed mode is a generator artefact, not a model property.
+- **Realistic-speed slice.** Roughly 29 % of timesteps fall in the realistic
+  50–150 mph clubhead-speed range. **Production training pipelines (Option 3b
+  per-timestep inverse-dynamics) should filter to this slice**; full-trial
+  pipelines (Options 2/3a) currently ingest all timesteps but inherit the
+  unphysical-tail caveat.
+- **Inverse identifiability.** The full-trial inverse mapping
+  `(trajectory → 189 coefficients)` is **under-determined on this dataset** —
+  both PR #4240's cVAE and PR #4267's deterministic regressor plateau at
+  ~5 % below mean-prediction baseline. This is a data property, not an
+  architecture bug; a generator run with physical-swing-distribution
+  coefficient priors would likely resolve it.
 
 ### 6.2 Canonical test target
 
@@ -179,12 +252,18 @@ is the **why**, the issues are the **what** and **how**.
 - Hot-path warmer for parpool workers so each batch starts FastRestart-ready.
 - Validate `accelerator` simulation mode and document the trade-off.
 
-### M3 — NN options online (depends on dataset)
+### M3 — NN options online (largely landed)
 
-- Land the 10k parquet in-tree.
-- Validate it against `load_sweep_dataset.py`.
-- Train Option 2 surrogate; ship `fit_swing_surrogate.m` analogous to `fit_swing_fmincon.m`.
-- Train Option 3 inverse cVAE; ship `fit_swing_inverse.m`.
+- ✅ Compact dataset format derived from the 10k parquet
+  (`COMPACT_DATASET_SCHEMA.md`), validated by the loader.
+- ✅ Option 2 surrogate trained and shipped
+  (`data/training/surrogate_v4/checkpoint_production.pt`); MATLAB-side
+  `fit_swing_surrogate.m` wrapper still TODO.
+- 🟡 Option 3a full-trial inverse (cVAE PR #4240, regressor PR #4267) shipped
+  but data-limited; see §5.2.
+- 🟢 Option 3b per-timestep inverse-dynamics is the new production inverse
+  path (`feat/timestep-inverse-model`); ship `fit_swing_inverse.m` against
+  it once the model lands.
 
 ### M4 — Option 4 bridge
 
