@@ -36,8 +36,8 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import sys
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -72,28 +72,50 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-# Schema version for session JSON
-_SESSION_SCHEMA_VERSION = 1
-
-# Phase window options.  Maps display label -> (event_start, event_end) where
-# either side may be None for manual / full-data.
-_PHASE_WINDOWS: dict[str, tuple[str | None, str | None]] = {
-    "None":                  (None, None),
-    "Backswing (A → T)":     ("A", "T"),
-    "Downswing (T → I)":     ("T", "I"),
-    "Follow-through (I → F)":("I", "F"),
-    "Full swing (A → F)":    ("A", "F"),
-    "Manual range":          ("manual", "manual"),
-}
-_DEFAULT_PHASE = "Full swing (A → F)"
+# Pure-data + math core.  Split out of this file so it can be unit-tested
+# in environments where the Qt stack isn't fully working.
+try:
+    from .starting_pose_core import (
+        CM_TO_M,
+        DEFAULT_EVENT_PRESET as _DEFAULT_EVENT_PRESET,
+        DEFAULT_PHASE as _DEFAULT_PHASE,
+        EVENT_KEYS as _EVENT_KEYS,
+        EVENT_LABEL_PRESETS as _EVENT_LABEL_PRESETS,
+        MocapEvents,
+        PHASE_WINDOWS as _PHASE_WINDOWS,
+        PoseSlot,
+        RigidTransform,
+        SESSION_SCHEMA_VERSION as _SESSION_SCHEMA_VERSION,
+        Skeleton,
+        load_mocap_xlsx,
+        load_skeleton,
+        read_event_header,
+        solve_shaft_rz_deg,
+    )
+except ImportError:
+    # Running as a script (python -m starting_pose_matcher) — relative
+    # imports don't work, fall back to absolute.
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from starting_pose_core import (  # type: ignore[no-redef]
+        CM_TO_M,
+        DEFAULT_EVENT_PRESET as _DEFAULT_EVENT_PRESET,
+        DEFAULT_PHASE as _DEFAULT_PHASE,
+        EVENT_KEYS as _EVENT_KEYS,
+        EVENT_LABEL_PRESETS as _EVENT_LABEL_PRESETS,
+        MocapEvents,
+        PHASE_WINDOWS as _PHASE_WINDOWS,
+        PoseSlot,
+        RigidTransform,
+        SESSION_SCHEMA_VERSION as _SESSION_SCHEMA_VERSION,
+        Skeleton,
+        load_mocap_xlsx,
+        load_skeleton,
+        read_event_header,
+        solve_shaft_rz_deg,
+    )
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(message)s")
-
-# ----------------------------------------------------------------------------
-# Units: Wiffle xlsx positions are in CM.  See MATLAB_GOLF_MODEL_GUIDE.md.
-# ----------------------------------------------------------------------------
-CM_TO_M = 0.01
 
 # Default camera presets (elev, azim) for matplotlib's 3D view_init.
 _CAMERA_PRESETS: dict[str, tuple[float, float]] = {
@@ -225,195 +247,6 @@ QScrollArea { border: 0; }
 
 
 # --------------------------------------------------------------------------- #
-# Data model                                                                  #
-# --------------------------------------------------------------------------- #
-
-
-@dataclass
-class MocapEvents:
-    """Sample numbers (1-based) for A/T/I/F + CHS_mph (NaN if missing)."""
-
-    A_sample: float = float("nan")
-    T_sample: float = float("nan")
-    I_sample: float = float("nan")
-    F_sample: float = float("nan")
-    CHS_mph: float = float("nan")
-
-    def frame_for(self, label: str) -> int | None:
-        """Return 0-based frame index for label A/T/I/F, or None if NaN."""
-        v = getattr(self, f"{label}_sample", float("nan"))
-        if v != v:
-            return None
-        return max(0, int(v) - 1)
-
-
-@dataclass
-class Skeleton:
-    """Joint world positions (metres) at one model pose."""
-
-    name: str = "default"
-    joints: dict[str, np.ndarray] = field(default_factory=dict)
-    segments: list[tuple[str, str]] = field(default_factory=list)
-
-
-@dataclass
-class RigidTransform:
-    """7-DOF transform: Tx/Ty/Tz (m), Rx/Ry/Rz (deg), Scale.
-
-    P' = scale * R * (P - pivot) + pivot + t   where R = Rz @ Ry @ Rx.
-    """
-
-    tx: float = 0.0
-    ty: float = 0.0
-    tz: float = 0.0
-    rx: float = 0.0
-    ry: float = 0.0
-    rz: float = 0.0
-    scale: float = 1.0
-    pivot: tuple[float, float, float] = (0.0, 0.0, 0.0)
-
-    def matrix(self) -> tuple[np.ndarray, np.ndarray]:
-        cx, cy, cz = (np.cos(np.deg2rad(a)) for a in (self.rx, self.ry, self.rz))
-        sx, sy, sz = (np.sin(np.deg2rad(a)) for a in (self.rx, self.ry, self.rz))
-        Rx = np.array([[1, 0, 0], [0, cx, -sx], [0, sx, cx]])
-        Ry = np.array([[cy, 0, sy], [0, 1, 0], [-sy, 0, cy]])
-        Rz = np.array([[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]])
-        return (Rz @ Ry @ Rx) * float(self.scale), np.array([self.tx, self.ty, self.tz])
-
-    def apply(self, points: np.ndarray) -> np.ndarray:
-        R, t = self.matrix()
-        pivot = np.array(self.pivot)
-        return (points - pivot) @ R.T + pivot + t
-
-
-# --------------------------------------------------------------------------- #
-# xlsx loader (CORRECT units — bypasses buggy legacy mocap_data_loader)       #
-# --------------------------------------------------------------------------- #
-
-
-def load_mocap_xlsx(xlsx_path: str | Path, sheet_name: str) -> pd.DataFrame:
-    """Load Wiffle xlsx -> DataFrame in METRES."""
-    df = pd.read_excel(xlsx_path, sheet_name=sheet_name, header=None)
-    if len(df) <= 3:
-        raise ValueError(f"Sheet '{sheet_name}' has no data rows")
-    rows: list[dict[str, float]] = []
-    for i in range(3, len(df)):
-        row = df.iloc[i]
-        if len(row) < 17:
-            continue
-        try:
-            time = float(row[1]) if not pd.isna(row[1]) else float(i - 3)
-            rec = {
-                "time":   time,
-                "mid_X":  _safe(row, 2)  * CM_TO_M,
-                "mid_Y":  _safe(row, 3)  * CM_TO_M,
-                "mid_Z":  _safe(row, 4)  * CM_TO_M,
-                "club_X": _safe(row, 14) * CM_TO_M,
-                "club_Y": _safe(row, 15) * CM_TO_M,
-                "club_Z": _safe(row, 16) * CM_TO_M,
-            }
-        except (ValueError, TypeError):
-            continue
-        rows.append(rec)
-    return pd.DataFrame(rows)
-
-
-def _safe(row: pd.Series, idx: int, default: float = 0.0) -> float:
-    try:
-        v = row[idx]
-    except (IndexError, KeyError):
-        return default
-    if pd.isna(v):
-        return default
-    try:
-        return float(v)
-    except (ValueError, TypeError):
-        return default
-
-
-def read_event_header(xlsx_path: str | Path, sheet_name: str) -> MocapEvents:
-    """Parse the row-1 event-marker band: A=<n> T=<n> I=<n> F=<n> CHS=<mph>."""
-    ev = MocapEvents()
-    try:
-        row1 = pd.read_excel(xlsx_path, sheet_name=sheet_name, header=None, nrows=1)
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("Could not read event header: %s", exc)
-        return ev
-    label_to_field = {"A": "A_sample", "T": "T_sample", "I": "I_sample",
-                      "F": "F_sample", "CHS": "CHS_mph"}
-    for c in range(row1.shape[1] - 1):
-        cell = row1.iat[0, c]
-        if pd.isna(cell):
-            continue
-        label = str(cell).strip()
-        if label not in label_to_field:
-            continue
-        val = row1.iat[0, c + 1]
-        if pd.isna(val):
-            continue
-        try:
-            setattr(ev, label_to_field[label], float(val))
-        except (ValueError, TypeError):
-            continue
-    return ev
-
-
-# --------------------------------------------------------------------------- #
-# Skeleton loader                                                             #
-# --------------------------------------------------------------------------- #
-
-
-_FALLBACK_IMPACT: dict[str, list[float]] = {
-    "hip":   [0.00, -0.30, 0.95], "spine": [0.00, -0.30, 1.20],
-    "hub":   [0.00, -0.30, 1.40], "ls":    [-0.20, -0.30, 1.40],
-    "rs":    [0.20, -0.30, 1.40], "le":    [-0.10, -0.20, 1.10],
-    "re":    [0.10, -0.20, 1.10], "lw":    [-0.05, -0.10, 0.80],
-    "rw":    [0.05, -0.10, 0.80], "mp":    [0.00, -0.10, 0.80],
-    "ch":    [0.00, 0.10, 0.10],
-}
-_FALLBACK_TOB: dict[str, list[float]] = {
-    "hip":   [0.00, -0.30, 0.95], "spine": [0.00, -0.30, 1.20],
-    "hub":   [0.00, -0.30, 1.40], "ls":    [-0.20, -0.30, 1.40],
-    "rs":    [0.20, -0.30, 1.40], "le":    [-0.05, -0.10, 1.55],
-    "re":    [0.30, -0.10, 1.50], "lw":    [0.10,  0.10, 1.85],
-    "rw":    [0.20,  0.10, 1.80], "mp":    [0.15,  0.10, 1.82],
-    "ch":    [-0.40, 0.40, 1.60],
-}
-_FALLBACK_SEGMENTS: list[tuple[str, str]] = [
-    ("hip", "spine"), ("spine", "hub"), ("hub", "ls"), ("hub", "rs"),
-    ("ls", "le"), ("rs", "re"), ("le", "lw"), ("re", "rw"),
-    ("lw", "mp"), ("rw", "mp"), ("mp", "ch"),
-]
-
-
-def load_skeleton(json_path: str | Path, fallback_pose: str = "Impact") -> Skeleton:
-    json_path = Path(json_path)
-    if json_path.exists():
-        with open(json_path) as f:
-            data = json.load(f)
-        joints = {k: np.array(v, dtype=float) for k, v in data["joints"].items()}
-        raw_segments = data.get("segments", [])
-        segments: list[tuple[str, str]] = []
-        for s in raw_segments:
-            if isinstance(s, list) and len(s) == 2:
-                segments.append((str(s[0]), str(s[1])))
-        return Skeleton(name=data.get("pose", fallback_pose),
-                        joints=joints,
-                        segments=segments or list(_FALLBACK_SEGMENTS))
-    logger.warning(
-        "%s not found — using fallback %s pose. Run "
-        "export_default_skeleton('%s') in MATLAB for real joints.",
-        json_path, fallback_pose, fallback_pose,
-    )
-    pose = _FALLBACK_TOB if fallback_pose.lower().startswith("top") else _FALLBACK_IMPACT
-    return Skeleton(
-        name=fallback_pose,
-        joints={k: np.array(v, dtype=float) for k, v in pose.items()},
-        segments=list(_FALLBACK_SEGMENTS),
-    )
-
-
-# --------------------------------------------------------------------------- #
 # UI helpers                                                                  #
 # --------------------------------------------------------------------------- #
 
@@ -489,21 +322,6 @@ class LabelledControl(QWidget):
 
 
 # --------------------------------------------------------------------------- #
-# Pose slot                                                                   #
-# --------------------------------------------------------------------------- #
-
-
-@dataclass
-class PoseSlot:
-    name: str
-    skeleton: Skeleton
-    color: str
-    mocap_color: str
-    target_event: str
-    visible: bool = True
-
-
-# --------------------------------------------------------------------------- #
 # Main window                                                                 #
 # --------------------------------------------------------------------------- #
 
@@ -561,6 +379,13 @@ class StartingPoseMatcher(QMainWindow):
         self.manual_window_start: int = 0
         self.manual_window_end: int = 0
 
+        # Event labels (Address / Top of Backswing / Impact / Finish, or
+        # author-specific conventions).  Mutated via the Event-Labels
+        # group; persisted to session JSON.
+        self.event_label_preset: str = _DEFAULT_EVENT_PRESET
+        self.event_labels: dict[str, str] = dict(
+            _EVENT_LABEL_PRESETS[_DEFAULT_EVENT_PRESET])
+
         self._build_ui()
         self._apply_camera_preset(_DEFAULT_CAMERA)
 
@@ -598,6 +423,7 @@ class StartingPoseMatcher(QMainWindow):
         col.addWidget(title)
 
         col.addWidget(self._build_file_box())
+        col.addWidget(self._build_event_labels_box())
         col.addWidget(self._build_pose_box())
         col.addWidget(self._build_playback_box())
         col.addWidget(self._build_view_box())
@@ -652,6 +478,83 @@ class StartingPoseMatcher(QMainWindow):
         gl.addWidget(self.lbl_event_info, 3, 0, 1, 2)
         return box
 
+    def _build_event_labels_box(self) -> QGroupBox:
+        box = QGroupBox("Event Labels")
+        gl = QGridLayout(box)
+        gl.setVerticalSpacing(4)
+
+        gl.addWidget(QLabel("Convention:"), 0, 0)
+        self.event_preset_combo = QComboBox()
+        for preset in _EVENT_LABEL_PRESETS:
+            self.event_preset_combo.addItem(preset)
+        self.event_preset_combo.addItem("Custom…")
+        self.event_preset_combo.setCurrentText(self.event_label_preset)
+        self.event_preset_combo.currentTextChanged.connect(self._on_event_preset_changed)
+        gl.addWidget(self.event_preset_combo, 0, 1, 1, 3)
+
+        # Editable entries for each event key
+        from PyQt6.QtWidgets import QLineEdit
+        self._event_label_edits: dict[str, QLineEdit] = {}
+        for r, k in enumerate(_EVENT_KEYS, start=1):
+            gl.addWidget(QLabel(f"{k}:"), r, 0)
+            le = QLineEdit(self.event_labels[k])
+            le.setMinimumWidth(160)
+            le.editingFinished.connect(lambda key=k: self._on_event_label_edited(key))
+            self._event_label_edits[k] = le
+            gl.addWidget(le, r, 1, 1, 3)
+
+        hint = QLabel("Custom labels are saved with the session and shown in the legend / "
+                      "current-frame indicator.")
+        hint.setObjectName("status")
+        hint.setWordWrap(True)
+        gl.addWidget(hint, len(_EVENT_KEYS) + 1, 0, 1, 4)
+        return box
+
+    def _on_event_preset_changed(self, preset: str) -> None:
+        if preset in _EVENT_LABEL_PRESETS:
+            self.event_label_preset = preset
+            self.event_labels = dict(_EVENT_LABEL_PRESETS[preset])
+            for k, le in self._event_label_edits.items():
+                with QSignalBlocker(le):
+                    le.setText(self.event_labels[k])
+        else:
+            self.event_label_preset = "Custom"
+        self._refresh_event_label_dependents()
+
+    def _on_event_label_edited(self, key: str) -> None:
+        text = self._event_label_edits[key].text().strip() or key
+        self.event_labels[key] = text
+        # Switch preset to Custom unless the new map matches a preset exactly.
+        for preset, mapping in _EVENT_LABEL_PRESETS.items():
+            if mapping == self.event_labels:
+                self.event_label_preset = preset
+                with QSignalBlocker(self.event_preset_combo):
+                    self.event_preset_combo.setCurrentText(preset)
+                break
+        else:
+            self.event_label_preset = "Custom"
+            with QSignalBlocker(self.event_preset_combo):
+                self.event_preset_combo.setCurrentText("Custom…")
+        self._refresh_event_label_dependents()
+
+    def _refresh_event_label_dependents(self) -> None:
+        """Re-render anything that displays event labels."""
+        # Pose-slot 'Event' combos: we keep the underlying key (A/T/I/F)
+        # but show the display label.  Done via combo items.
+        for combo in getattr(self, "_pose_event_combos", {}).values():
+            current = combo.currentText().split()[0]   # original key
+            with QSignalBlocker(combo):
+                combo.clear()
+                for k in _EVENT_KEYS:
+                    combo.addItem(f"{k} - {self.event_labels[k]}")
+                # restore selection
+                idx = next((i for i in range(combo.count())
+                            if combo.itemText(i).startswith(current + " ")), 0)
+                combo.setCurrentIndex(idx)
+        # Refresh events summary line
+        self.lbl_event_info.setText(self._events_summary())
+        self._redraw()
+
     def _build_pose_box(self) -> QGroupBox:
         box = QGroupBox("Pose Slots")
         gl = QGridLayout(box)
@@ -672,8 +575,13 @@ class StartingPoseMatcher(QMainWindow):
             tag = QLabel(f'<span style="color:{color};">●</span>  {key}')
             gl.addWidget(tag, r, 1)
             ec = QComboBox()
-            ec.addItems(["A", "T", "I", "F"])
-            ec.setCurrentText(slot.target_event)
+            for k in _EVENT_KEYS:
+                ec.addItem(f"{k} - {self.event_labels[k]}")
+            # Pick the item whose first token matches the slot's key
+            for i in range(ec.count()):
+                if ec.itemText(i).startswith(slot.target_event + " "):
+                    ec.setCurrentIndex(i)
+                    break
             ec.currentTextChanged.connect(self._on_pose_event_changed)
             self._pose_event_combos[key] = ec
             gl.addWidget(ec, r, 2)
@@ -818,7 +726,8 @@ class StartingPoseMatcher(QMainWindow):
         ev_row = QHBoxLayout()
         ev_row.addWidget(QLabel("Mark current frame as event:"))
         self.combo_set_event = QComboBox()
-        self.combo_set_event.addItems(["A", "T", "I", "F"])
+        for k in _EVENT_KEYS:
+            self.combo_set_event.addItem(f"{k} - {self.event_labels[k]}")
         ev_row.addWidget(self.combo_set_event)
         b_set = QPushButton("Set")
         b_set.setObjectName("preset")
@@ -1023,7 +932,9 @@ class StartingPoseMatcher(QMainWindow):
 
     def _on_pose_event_changed(self, _: str) -> None:
         for key, combo in self._pose_event_combos.items():
-            self.poses[key].target_event = combo.currentText()
+            txt = combo.currentText().strip()
+            # Combo items are now "K - Label"; extract the key.
+            self.poses[key].target_event = txt.split(" ", 1)[0] if txt else "T"
         self._redraw()
 
     def _on_traces_toggled(self, _: int) -> None:
@@ -1106,7 +1017,8 @@ class StartingPoseMatcher(QMainWindow):
     def _set_event_to_current_frame(self) -> None:
         if self.df is None:
             return
-        ev = self.combo_set_event.currentText()
+        # Combo text is "K - Label"; key is first token.
+        ev = self.combo_set_event.currentText().split(" ", 1)[0] or "T"
         # Store as "absolute sample number" (1-based) so it round-trips with
         # MocapEvents; current_frame is 0-based in the loaded data.
         self.event_overrides[ev] = self.current_frame + 1
@@ -1234,20 +1146,14 @@ class StartingPoseMatcher(QMainWindow):
 
         scale = max(1e-3, self.s_scale.value())
 
-        # Solve Rz from XY-plane shaft directions.
-        shaft_t_xy = (ch_target - mp_target)[:2]
-        shaft_m_xy = (ch_skel - mp_skel)[:2]
-        nt = float(np.linalg.norm(shaft_t_xy))
-        nm = float(np.linalg.norm(shaft_m_xy))
+        # Solve Rz from XY-plane shaft directions (delegated to core).
+        nt = float(np.linalg.norm((ch_target - mp_target)[:2]))
+        nm = float(np.linalg.norm((ch_skel - mp_skel)[:2]))
         if nt < 1e-6 or nm < 1e-6:
             self._notify("Shaft projection onto XY plane is degenerate (vertical "
                          "shaft) — Rz cannot be solved.  Adjust manually.")
             return
-        a_t = float(np.arctan2(shaft_t_xy[1], shaft_t_xy[0]))
-        a_m = float(np.arctan2(shaft_m_xy[1], shaft_m_xy[0]))
-        rz_deg = float(np.degrees(a_t - a_m))
-        # Wrap to [-180, 180]
-        rz_deg = ((rz_deg + 180.0) % 360.0) - 180.0
+        rz_deg = solve_shaft_rz_deg(mp_target, ch_target, mp_skel, ch_skel)
 
         # Lock Rx/Ry to 0 for this snap (Z-up).
         if not self.lock_xy_rotation:
@@ -1315,9 +1221,11 @@ class StartingPoseMatcher(QMainWindow):
     def _events_summary(self) -> str:
         e = self.events
         parts = []
-        for label in ("A", "T", "I", "F"):
-            v = getattr(e, f"{label}_sample")
-            parts.append(f"{label}={'?' if v != v else int(v)}")
+        for k in _EVENT_KEYS:
+            v = getattr(e, f"{k}_sample")
+            label = self.event_labels.get(k, k)
+            sval = '?' if v != v else int(v)
+            parts.append(f"{label} ({k})={sval}")
         if e.CHS_mph == e.CHS_mph:
             parts.append(f"CHS={e.CHS_mph:.1f}mph")
         return "Events:  " + "  ".join(parts)
@@ -1396,6 +1304,10 @@ class StartingPoseMatcher(QMainWindow):
                 "fps": int(self.spin_speed.value()),
             },
             "event_overrides": dict(self.event_overrides),
+            "event_labels": {
+                "preset": self.event_label_preset,
+                "labels": dict(self.event_labels),
+            },
         }
 
     def _on_save_session_clicked(self) -> None:
@@ -1547,6 +1459,26 @@ class StartingPoseMatcher(QMainWindow):
         if "fps" in pb:
             with QSignalBlocker(self.spin_speed):
                 self.spin_speed.setValue(int(pb["fps"]))
+
+        # 9. Event labels.
+        el = d.get("event_labels") or {}
+        if "labels" in el and isinstance(el["labels"], dict):
+            for k in _EVENT_KEYS:
+                if k in el["labels"]:
+                    self.event_labels[k] = str(el["labels"][k])
+                    if hasattr(self, "_event_label_edits"):
+                        with QSignalBlocker(self._event_label_edits[k]):
+                            self._event_label_edits[k].setText(self.event_labels[k])
+        if "preset" in el:
+            self.event_label_preset = str(el["preset"])
+            if hasattr(self, "event_preset_combo"):
+                idx = self.event_preset_combo.findText(self.event_label_preset)
+                if idx < 0:
+                    idx = self.event_preset_combo.findText("Custom…")
+                if idx >= 0:
+                    with QSignalBlocker(self.event_preset_combo):
+                        self.event_preset_combo.setCurrentIndex(idx)
+        self._refresh_event_label_dependents()
 
         self._redraw()
 
@@ -1730,6 +1662,43 @@ class StartingPoseMatcher(QMainWindow):
             if not slot.visible:
                 continue
             self._draw_one_pose(slot)
+        # Live "current-frame mocap club" — always drawn so playback is
+        # visible without needing to toggle traces on or set the override.
+        # When the override is active OR the slider differs from every
+        # visible pose's event frame, draw it as a yellow accent line.
+        self._draw_current_frame_club()
+
+    def _draw_current_frame_club(self) -> None:
+        """Draw a yellow "live" mocap club at the current frame.
+
+        This is what makes playback visible — the skeleton is static per pose
+        slot, so without this draw the only thing that would change as the
+        playback timer fires is the spinbox value.  We always show it; when
+        the slider matches a visible pose's event frame it lands on top of
+        the bold red/orange mocap club anyway.
+        """
+        if self.df is None or len(self.df) == 0:
+            return
+        f = max(0, min(self.current_frame, len(self.df) - 1))
+        row = self.df.iloc[f]
+        mp = np.array([-row["mid_X"], row["mid_Y"], row["mid_Z"]])
+        ch = np.array([-row["club_X"], row["club_Y"], row["club_Z"]])
+        # Draw thin yellow club so it doesn't obscure the bold pose-targets.
+        self.ax.plot([mp[0], ch[0]], [mp[1], ch[1]], [mp[2], ch[2]],
+                     color="#fde047", linewidth=2.0, alpha=0.95,
+                     label=f"current frame ({self._event_label_for_frame(f)})")
+        self.ax.scatter(*mp, color="#fde047", s=60, marker="o",
+                        edgecolor="black", linewidth=0.6)
+        self.ax.scatter(*ch, color="#fde047", s=110, marker="s",
+                        edgecolor="black", linewidth=0.6)
+
+    def _event_label_for_frame(self, f: int) -> str:
+        """Return 'A', 'T', 'I', 'F' if frame matches an event, else 'frame N'."""
+        for label in ("A", "T", "I", "F"):
+            ef = self._frame_for(label)
+            if ef is not None and ef == f:
+                return self.event_labels.get(label, label)
+        return f"frame {f}"
 
     def _draw_one_pose(self, slot: PoseSlot) -> None:
         if not slot.skeleton.joints:
