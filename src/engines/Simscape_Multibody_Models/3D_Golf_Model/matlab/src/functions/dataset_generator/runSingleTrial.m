@@ -26,6 +26,19 @@ function result = runSingleTrial(trial_num, config, trial_coefficients, capture_
         warning_state5 = warning('off', 'Simulink:Blocks:UnconnectedOutputPort');
         warning_state6 = warning('off', 'Simulink:Blocks:UnconnectedInputPort');
 
+        % Defensively re-pin Simscape full-block logging just before sim().
+        % Redundant with setModelParameters above, but cheap insurance: if
+        % any future caller swaps in a SimulationInput built without that
+        % helper, this still guarantees simlog is populated.
+        % See setModelParameters.m for the home-license workaround rationale.
+        try
+            simIn = simIn.setModelParameter('SimscapeLogType', 'all');
+            simIn = simIn.setModelParameter('SimulationMode', 'normal');
+            simIn = simIn.setModelParameter('SaveOutput', 'on');
+        catch ME
+            fprintf('Warning: Could not pin Simscape logging params: %s\n', ME.message);
+        end
+
         % Run simulation with progress indicator and visualization suppression
         fprintf('Running trial %d simulation...', trial_num);
 

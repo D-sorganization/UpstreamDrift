@@ -48,8 +48,25 @@ function simIn = setModelParameters(simIn, config)
             fprintf('Warning: Could not set LimitDataPoints\n');
         end
 
-        % MINIMAL SIMSCAPE LOGGING CONFIGURATION (Essential Only)
-        % Only set the essential parameter that actually works
+        % SIMSCAPE FULL-BLOCK LOGGING (home-license workaround)
+        %
+        % Pin SimscapeLogType='all' so the simulation surfaces every Simscape
+        % block's state (angles, rates, accels, constraint forces, internal
+        % moments, ...) in the `simlog` tree without spending Simscape
+        % "virtual signal" markers (which the home license caps aggressively).
+        %
+        % This mirrors the persistent setting baked into
+        % GolfSwing3D_Kinetic.slx at MDL line 4256 (see
+        %   src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/model/mdl_reference/README.md
+        % and the project spec at
+        %   src/engines/Simscape_Multibody_Models/3D_Golf_Model/PROJECT_SPEC.md
+        % ), but we re-pin it on every SimulationInput so that swept runs
+        % (parsim with overridden parameters) cannot inadvertently drop it.
+        %
+        % If this is NOT set, downstream extractSimscapeDataRecursive() finds
+        % an empty simlog and the per-trial parquet falls back to bus-only
+        % features (~1956 cols, no per-block constraint state) -- which is
+        % exactly the regression we are fixing.
         try
             simIn = simIn.setModelParameter('SimscapeLogType', 'all');
         catch ME

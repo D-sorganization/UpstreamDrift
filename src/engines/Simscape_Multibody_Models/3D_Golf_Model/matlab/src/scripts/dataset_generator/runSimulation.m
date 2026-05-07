@@ -376,6 +376,19 @@ for batch_idx = start_batch:num_batches
         logMessage(config, 'Verbose', 'Prepared %d simulation inputs for batch %d', ...
             length(batch_simInputs), batch_idx);
 
+        % Defensively re-pin Simscape full-block logging on every SimulationInput
+        % just before parsim. This is redundant with setModelParameters (called
+        % inside prepareSimulationInputsForBatch), but guards against any future
+        % code path that builds a SimulationInput without going through that
+        % helper -- without these settings, the simlog tree comes back empty
+        % and the per-trial parquet loses every per-block joint state.
+        % See setModelParameters.m for the full rationale.
+        for k = 1:numel(batch_simInputs)
+            batch_simInputs(k) = batch_simInputs(k).setModelParameter('SimscapeLogType', 'all');
+            batch_simInputs(k) = batch_simInputs(k).setModelParameter('SimulationMode', 'normal');
+            batch_simInputs(k) = batch_simInputs(k).setModelParameter('SaveOutput', 'on');
+        end
+
     catch ME
         logMessage(config, 'Normal', 'Error preparing batch %d inputs: %s', batch_idx, ME.message);
         continue;

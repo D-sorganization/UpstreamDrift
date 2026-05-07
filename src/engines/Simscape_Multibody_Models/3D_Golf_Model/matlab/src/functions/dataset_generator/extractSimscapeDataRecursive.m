@@ -1,4 +1,20 @@
 % ENHANCED: Extract from Simscape with detailed diagnostics
+%
+% Returns a table whose non-time columns are all prefixed with "simlog_"
+% so that downstream consumers (parquet writers, the master_dataset.csv
+% compactor, ML feature pipelines) can trivially distinguish per-block
+% Simscape log state from CombinedSignalBus / logsout signals. The prefix
+% is the on-disk contract for the dataset schema and must NOT be removed
+% without coordinating with the Python compactor in
+%   tools/dataset_compactor/  (search: "simlog_").
+%
+% Preconditions:
+%   - simlog is either empty (returns empty table) or a simscape.logging.Node.
+%
+% Postconditions:
+%   - All returned VariableNames except "time" begin with "simlog_".
+%   - height(simscape_data) equals the length of the time vector
+%     reported by traverseSimlogNode (or the table is empty).
 function simscape_data = extractSimscapeDataRecursive(simlog)
 simscape_data = table();  % Empty table if no data
 
@@ -95,11 +111,19 @@ try
         num_elements = numel(signal_data);
 
         if length(signal_data) == expected_length
-            % Standard time series data
+            % Standard time series data.
+            % Prefix every per-block signal with "simlog_" (idempotent --
+            % only added if not already present) so consumers can
+            % distinguish them from bus/logsout columns. See header
+            % docstring for the schema contract.
+            prefixed_name = signal.name;
+            if ~startsWith(prefixed_name, 'simlog_')
+                prefixed_name = matlab.lang.makeValidName(['simlog_' prefixed_name]);
+            end
             cell_idx = cell_idx + 1;
             data_cells{cell_idx} = signal_data(:);
-            var_names{cell_idx} = signal.name;
-            fprintf('Debug: Added Simscape signal: %s (length: %d)\n', signal.name, expected_length);
+            var_names{cell_idx} = prefixed_name;
+            fprintf('Debug: Added Simscape signal: %s (length: %d)\n', prefixed_name, expected_length);
         else
             fprintf('Debug: Skipped %s (size [%s] not supported - need time series, [3 1 N], or [3 3 N])\n', ...
                 signal.name, num2str(data_size));
