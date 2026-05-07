@@ -1,15 +1,30 @@
 name: docs-currency-warning
 
-# Advisory check for the motion_matching tree.
-# Posts a warning comment (does NOT fail) when a PR touches motion_matching
-# code without updating one of the top-level docs, adding/changing tests,
-# or opting out via the `[no-docs-needed]` marker in the PR body.
+# Advisory check across every engine subtree.
+# Posts a warning comment (does NOT fail) when a PR touches one of the
+# watched engine trees without updating the relevant `*_SPEC.md` /
+# `*_GUIDE.md` / `*_PLAYBOOK.md` / `*_PARITY_SPEC.md`, without adding
+# or changing tests, and without the `[no-docs-needed]` marker in the
+# PR body.
+#
+# Watched subtrees:
+#   - src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/
+#   - src/engines/physics_engines/mujoco/
+#   - src/engines/physics_engines/drake/
+#   - src/engines/physics_engines/pinocchio/
+#   - src/engines/physics_engines/opensim/
+#   - shared/python/motion_matching/    (soft-watch; lands with #4095)
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
       - 'src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/**'
+      - 'src/engines/physics_engines/mujoco/**'
+      - 'src/engines/physics_engines/drake/**'
+      - 'src/engines/physics_engines/pinocchio/**'
+      - 'src/engines/physics_engines/opensim/**'
+      - 'shared/python/motion_matching/**'
 
 permissions:
   contents: read
@@ -28,29 +43,60 @@ jobs:
         run: |
           set -euo pipefail
 
-          MM_PREFIX='src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/'
+          # Watched engine subtrees. A PR touching any path beneath one of
+          # these prefixes triggers the docs-currency check.
+          WATCHED_PREFIXES=(
+            'src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/'
+            'src/engines/physics_engines/mujoco/'
+            'src/engines/physics_engines/drake/'
+            'src/engines/physics_engines/pinocchio/'
+            'src/engines/physics_engines/opensim/'
+            'shared/python/motion_matching/'
+          )
 
           # Pull the changed file list.
           files=$(gh pr view "$PR_NUMBER" --repo "$PR_REPO" --json files --jq '.files[].path')
 
-          touches_mm=false
+          touches_watched=false
           touches_tests=false
           touches_docs=false
+          touched_engines=()
+
           while IFS= read -r f; do
             [ -z "$f" ] && continue
-            case "$f" in
-              "$MM_PREFIX"*) touches_mm=true ;;
-            esac
+
+            # Did this file land inside one of the watched prefixes?
+            for prefix in "${WATCHED_PREFIXES[@]}"; do
+              case "$f" in
+                "$prefix"*)
+                  touches_watched=true
+                  # Track which engine for the comment body.
+                  case "$prefix" in
+                    *motion_matching/) touched_engines+=("motion_matching") ;;
+                    *mujoco/)          touched_engines+=("mujoco") ;;
+                    *drake/)           touched_engines+=("drake") ;;
+                    *pinocchio/)       touched_engines+=("pinocchio") ;;
+                    *opensim/)         touched_engines+=("opensim") ;;
+                    *python/motion_matching/) touched_engines+=("shared/python/motion_matching") ;;
+                  esac
+                  ;;
+              esac
+            done
+
+            # Test file heuristics (MATLAB + Python).
             case "$f" in
               *_test*.m|*tests/*.m|*/tests/*.py|*test_*.py|*_test.py) touches_tests=true ;;
             esac
+
+            # Docs heuristics: any *_SPEC.md / *_GUIDE.md / *_PLAYBOOK.md
+            # / *_PARITY_SPEC.md anywhere in the tree counts.
             case "$f" in
-              "src/engines/Simscape_Multibody_Models/3D_Golf_Model/PROJECT_SPEC.md"|"src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/MATLAB_GOLF_MODEL_GUIDE.md"|"src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/GRIP_FIT_PLAYBOOK.md") touches_docs=true ;;
+              *_PARITY_SPEC.md|*_SPEC.md|*_GUIDE.md|*_PLAYBOOK.md) touches_docs=true ;;
             esac
           done <<< "$files"
 
-          if [ "$touches_mm" != "true" ]; then
-            echo "PR does not touch motion_matching tree; nothing to do."
+          if [ "$touches_watched" != "true" ]; then
+            echo "PR does not touch any watched engine tree; nothing to do."
             exit 0
           fi
 
@@ -65,23 +111,26 @@ jobs:
             exit 0
           fi
 
-          echo "Posting advisory comment."
-          gh pr comment "$PR_NUMBER" --repo "$PR_REPO" --body "$(cat <<'EOF'
+          # Dedup the engine list for display.
+          engines_csv=$(printf '%s\n' "${touched_engines[@]}" | sort -u | paste -sd ', ' -)
+
+          echo "Posting advisory comment. Touched engines: $engines_csv"
+          gh pr comment "$PR_NUMBER" --repo "$PR_REPO" --body "$(cat <<EOF
           :memo: **Docs-currency advisory**
 
-          This PR modifies `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/` but does **not** touch any of:
+          This PR modifies one or more watched engine subtrees (\`${engines_csv}\`) but does **not** touch any of:
 
-          - a `*_SPEC.md` / `*_GUIDE.md` / `*_PLAYBOOK.md` (e.g. `PROJECT_SPEC.md`, `MATLAB_GOLF_MODEL_GUIDE.md`, `GRIP_FIT_PLAYBOOK.md`)
-          - a `*_test*.m` or `tests/*.m` file (or Python equivalents)
+          - a \`*_PARITY_SPEC.md\` / \`*_SPEC.md\` / \`*_GUIDE.md\` / \`*_PLAYBOOK.md\` (e.g. \`MUJOCO_PARITY_SPEC.md\`, \`DRAKE_PARITY_SPEC.md\`, \`PINOCCHIO_PARITY_SPEC.md\`, \`OPENSIM_PARITY_SPEC.md\`, \`PROJECT_SPEC.md\`, \`MATLAB_GOLF_MODEL_GUIDE.md\`, \`GRIP_FIT_PLAYBOOK.md\`)
+          - a \`*_test*.m\` or \`tests/*.m\` file (or Python equivalents \`test_*.py\`, \`*_test.py\`, \`tests/*.py\`)
 
-          Per the [docs-currency policy](https://github.com/${{ github.repository }}/blob/main/src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/CODING_STANDARDS.md#docs-currency-policy), PRs that meaningfully change scope or architecture should keep the top-level docs in sync.
+          Per the [docs-currency policy](https://github.com/${{ github.repository }}/blob/main/src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/CODING_STANDARDS.md#docs-currency-policy) — enforced across **every engine subtree** — PRs that meaningfully change scope or architecture should keep the relevant \`*_PARITY_SPEC.md\` (or top-level guide / playbook) in sync.
 
           **This is advisory only — it does not block merging.**
 
           **To silence this check**, do one of the following:
 
-          1. Update one of the docs above in this PR, **or**
+          1. Update the relevant \`*_PARITY_SPEC.md\` / \`*_SPEC.md\` / \`*_GUIDE.md\` / \`*_PLAYBOOK.md\` in this PR, **or**
           2. Add a test that covers your change, **or**
-          3. Add the marker `[no-docs-needed]` anywhere in the PR description if the change genuinely doesn't affect scope or architecture (typo fix, pure refactor, perf tweak, etc.).
+          3. Add the marker \`[no-docs-needed]\` anywhere in the PR description if the change genuinely doesn't affect scope or architecture (typo fix, pure refactor, perf tweak, etc.).
           EOF
           )"

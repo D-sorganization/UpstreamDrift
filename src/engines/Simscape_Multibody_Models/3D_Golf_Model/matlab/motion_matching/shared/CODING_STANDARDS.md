@@ -177,14 +177,21 @@ This is consumed by the visualization dashboard and by leaderboard comparison ac
 
 The top-level docs in this tree are the source of truth for scope and architecture. They drift fast if PRs don't keep them in sync.
 
-**Rule:** every PR that meaningfully changes scope or architecture under `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/` must touch at least one of:
+**Rule:** every PR that meaningfully changes scope or architecture under one of the watched engine subtrees must touch at least one of the relevant top-level docs.
 
-- [`PROJECT_SPEC.md`](../../PROJECT_SPEC.md)
-- [`MATLAB_GOLF_MODEL_GUIDE.md`](../../matlab/MATLAB_GOLF_MODEL_GUIDE.md)
-- [`GRIP_FIT_PLAYBOOK.md`](GRIP_FIT_PLAYBOOK.md)
+**Watched subtrees and their docs:**
+
+- `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/` — [`PROJECT_SPEC.md`](../../PROJECT_SPEC.md), [`MATLAB_GOLF_MODEL_GUIDE.md`](../../matlab/MATLAB_GOLF_MODEL_GUIDE.md), [`GRIP_FIT_PLAYBOOK.md`](GRIP_FIT_PLAYBOOK.md)
+- `src/engines/physics_engines/mujoco/` — `MUJOCO_PARITY_SPEC.md`
+- `src/engines/physics_engines/drake/` — `DRAKE_PARITY_SPEC.md`
+- `src/engines/physics_engines/pinocchio/` — `PINOCCHIO_PARITY_SPEC.md`
+- `src/engines/physics_engines/opensim/` — `OPENSIM_PARITY_SPEC.md`
+- `shared/python/motion_matching/` — relevant cross-engine spec / playbook
+
+Any `*_PARITY_SPEC.md`, `*_SPEC.md`, `*_GUIDE.md`, or `*_PLAYBOOK.md` touched in the same PR satisfies the check, as does any test file (`*_test*.m`, `tests/*.m`, `test_*.py`, `*_test.py`).
 
 **Opt-out:** if the change genuinely doesn't affect scope or architecture (a typo fix, a test-only change, a refactor with no behavioural delta), include the marker `[no-docs-needed]` in the PR description.
 
-**Enforcement:** `.github/workflows/docs-currency-warning.yml` posts an advisory comment on PRs that touch this tree without touching docs/tests and without the opt-out marker. The check is **advisory only** — it does not block merges. Reviewers may still request docs updates.
+**Enforcement:** `.github/workflows/docs-currency-warning.yml` posts an advisory comment on PRs that touch any watched engine subtree without touching docs/tests and without the opt-out marker. **The policy is enforced across every engine subtree (motion_matching, mujoco, drake, pinocchio, opensim, and the shared `motion_matching/` Python package).** The check is **advisory only** — it does not block merges. Reviewers may still request docs updates.
 
 "Meaningfully changes scope or architecture" means anything a future contributor would want to read about in the top-level docs: new options, new shared interfaces, changed cost-function semantics, changed dataset schema, new external dependencies, etc. Pure bug fixes, performance tweaks, and test additions do not require a docs touch.
