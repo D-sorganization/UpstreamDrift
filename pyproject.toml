@@ -338,6 +338,7 @@ markers = [
     "requires_matlab: tests that require the MATLAB Engine for Python (alias of live_simulation for the Simscape adapter)",
     "requires_pinocchio: tests that require the optional pinocchio engine extra (skip with '-m \"not requires_pinocchio\"')",
     "requires_drake: tests that require pydrake (skipped unless the heavy Drake stack is installed)",
+    "requires_mujoco: tests that require the mujoco Python bindings (skipped when `import mujoco` fails)",
     "requires_opensim: tests that require the OpenSim Python bindings (skipped when `import opensim` fails)",
     "requires_matlab_engine: tests that require matlab.engine importable (Option 4 bridge)",
     "requires_mujoco: tests that require the mujoco Python bindings (skipped when `import mujoco` fails)",
