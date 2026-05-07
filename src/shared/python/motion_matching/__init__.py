@@ -1,31 +1,125 @@
-"""Motion matching: club-target ingestion, dataset access, trajectory comparison.
+"""Motion matching: shared loaders, oracle, cost, and visualisation.
+
+Issue #4095 promotes this package from buried-under-Simscape to the
+canonical Python entry point every engine imports from. The top-level
+surface mirrors the MATLAB ``motion_matching/shared/`` layout one-to-one.
 
 Public API:
-    ClubTarget       -- canonical frozen dataclass for a measured swing.
-    SourceProvenance -- file/format/sha256 metadata.
-    AlignOptions     -- resampling and impact-alignment options.
-    load_club_target_excel -- Wiffle/ProV1 xlsx loader.
-    load_club_target_c3d   -- Optical C3D loader.
-    synthesize_target_from_coefficients -- stub; awaiting #014/#018.
+    Data structures:
+        ClubTarget, AlignOptions, SourceProvenance  (target.py / club_target.py)
+        SimOut, FitResult                            (sim_out.py)
+
+    Loaders / oracle:
+        load_club_target           -- format-dispatched loader.
+        load_club_target_excel     -- xlsx loader (cm units, event-marker header).
+        load_club_target_c3d       -- Optical C3D loader.
+        synthesize_target_from_coefficients -- engine-agnostic TDD oracle.
+        EngineSimulator, SynthOptions
+
+    Resampling:
+        align_to_simulation_grid, AlignedTrajectory, detect_impact_index
+
+    Cost / regularizer:
+        compute_cost, compute_total_work, CostOptions, CostBreakdown, SimOutput
+
+    Validators:
+        must_have_fields, must_be_finite_vector, must_be_monotonic_time,
+        must_be_unit_quaternion_rows, must_be_regularizer_kind,
+        REGULARIZER_KINDS
+
+    Leaderboard:
+        See :mod:`motion_matching.leaderboard` for ``FitResult`` (JSON row),
+        ``load_results``, ``render_markdown``, and ``generate_report``.
+
+    Visualisation (matplotlib-backed):
+        plot_trajectory_overlay, plot_error_timecourse, plot_fit_quality_card,
+        fit_quality_summary, FitQualityScalars
 
 The ``dataset`` sub-package is imported on demand; see
-``src.shared.python.motion_matching.dataset`` for the random-sweep parquet
-loader and synthetic generator.
+``motion_matching.dataset`` for the random-sweep parquet loader and
+synthetic generator.
 
 See ``src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/
 shared/CLUB_IK_SPEC.md`` for the canonical schema.
 """
 
-from .club_target import AlignOptions, ClubTarget, SourceProvenance
-from .loaders.c3d import load_club_target_c3d
-from .loaders.excel import load_club_target_excel
-from .loaders.synthetic import synthesize_target_from_coefficients
+from .align_to_simulation_grid import (
+    AlignedTrajectory,
+    align_to_simulation_grid,
+    detect_impact_index,
+)
+from .compute_total_work import compute_total_work
+from .cost import (
+    CostBreakdown,
+    CostOptions,
+    SimOutput,
+    compute_cost,
+)
+from .load_club_target import (
+    ALLOWED_SHEETS,
+    load_club_target,
+    load_club_target_c3d,
+    load_club_target_excel,
+)
+from .plot_error_timecourse import plot_error_timecourse
+from .plot_fit_quality_card import (
+    FitQualityScalars,
+    fit_quality_summary,
+    plot_fit_quality_card,
+)
+from .plot_trajectory_overlay import plot_trajectory_overlay
+from .sim_out import FitResult, SimOut
+from .synthesize_target_from_coefficients import (
+    THETA_BOUNDS,
+    EngineSimulator,
+    SynthOptions,
+    synthesize_target_from_coefficients,
+)
+from .target import (
+    AlignOptions,
+    ClubTarget,
+    SourceProvenance,
+)
+from .validators import (
+    REGULARIZER_KINDS,
+    must_be_finite_vector,
+    must_be_monotonic_time,
+    must_be_regularizer_kind,
+    must_be_unit_quaternion_rows,
+    must_have_fields,
+)
 
 __all__ = [
+    "ALLOWED_SHEETS",
     "AlignOptions",
+    "AlignedTrajectory",
     "ClubTarget",
+    "CostBreakdown",
+    "CostOptions",
+    "EngineSimulator",
+    "FitQualityScalars",
+    "FitResult",
+    "REGULARIZER_KINDS",
+    "SimOut",
+    "SimOutput",
     "SourceProvenance",
+    "SynthOptions",
+    "THETA_BOUNDS",
+    "align_to_simulation_grid",
+    "compute_cost",
+    "compute_total_work",
+    "detect_impact_index",
+    "fit_quality_summary",
+    "load_club_target",
     "load_club_target_c3d",
     "load_club_target_excel",
+    "must_be_finite_vector",
+    "must_be_monotonic_time",
+    "must_be_regularizer_kind",
+    "must_be_unit_quaternion_rows",
+    "must_have_fields",
+    "plot_error_timecourse",
+    "plot_fit_quality_card",
+    "plot_trajectory_overlay",
     "synthesize_target_from_coefficients",
 ]
