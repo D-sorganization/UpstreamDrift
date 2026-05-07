@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                      |
 | **License**             | MIT                                                 |
 | **Current Version**     | 2.1.0                                               |
-| **Spec Version**        | 1.0.140                                             |
-| **Last Spec Update**    | 2026-05-07 (OpenSim prescribed controller boundary) |
+| **Spec Version**        | 1.0.141                                             |
+| **Last Spec Update**    | 2026-05-07 (OpenSim deterministic multistart fit)   |
 
 ## 2. Purpose & Mission
 
@@ -664,4 +664,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-07 | 1.0.132 | Hardened CI behavior so PR-scoped core tests treat an all-skipped selection as a no-op and cross-engine equivalence bootstraps `pip` with recordless-safe install flags on self-hosted runners. |
 | 2026-05-07 | 1.0.133 | Added FitResult field contract coverage requiring motion-matching fit drivers to export the shared `CanonicalFitResult` and canonical engine tests to use `theta_optimal` instead of deprecated `.theta` access. |
 | 2026-05-07 | 1.0.138 | Added an opt-in OpenSim compliant club attachment builder path with typed `CompliantClubAttachmentConfig`, deterministic `BushingForce` XML emission, default rigid-weld regression coverage, and validation for unsupported units or missing model bodies. |
+| 2026-05-07 | 1.0.141 | Added deterministic OpenSim multistart fit orchestration with seed-list reproducibility, per-start fresh simulator factories, best-success result selection, and typed all-starts-failed diagnostics. |
 ````
