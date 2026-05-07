@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.136                                            |
-| **Last Spec Update**    | 2026-05-07 (OpenSim native visualizer wrapper)     |
+| **Spec Version**        | 1.0.138                                            |
+| **Last Spec Update**    | 2026-05-07 (OpenSim compliant club attachment)     |
 
 ## 2. Purpose & Mission
 
@@ -663,5 +663,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-07 | 1.0.131 | Added cross-engine fit determinism regression coverage requiring repeated runs with the same target, warm start, and `rng_seed` to reproduce identical results across seeds 42, 1337, and 999 for MuJoCo, Drake, Pinocchio, and OpenSim. |
 | 2026-05-07 | 1.0.132 | Hardened CI behavior so PR-scoped core tests treat an all-skipped selection as a no-op and cross-engine equivalence bootstraps `pip` with recordless-safe install flags on self-hosted runners. |
 | 2026-05-07 | 1.0.133 | Added FitResult field contract coverage requiring motion-matching fit drivers to export the shared `CanonicalFitResult` and canonical engine tests to use `theta_optimal` instead of deprecated `.theta` access. |
-| 2026-05-07 | 1.0.136 | Added an import-safe OpenSim native Visualizer wrapper with typed unavailable errors and fake-model unit coverage for opt-in local playback. |
+| 2026-05-07 | 1.0.138 | Added an opt-in OpenSim compliant club attachment builder path with typed `CompliantClubAttachmentConfig`, deterministic `BushingForce` XML emission, default rigid-weld regression coverage, and validation for unsupported units or missing model bodies. |
 ````

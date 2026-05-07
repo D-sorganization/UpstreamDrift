@@ -56,7 +56,9 @@ Notes
 
 from __future__ import annotations
 
+import math
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
@@ -104,6 +106,62 @@ CLUB_MASS_CENTER_M = (0.0, -CLUB_LENGTH_M / 2.0, 0.0)
 # placeholder; the canonical value is set by ``coordinate_map`` once that
 # issue lands.
 HAND_R_GRIP_OFFSET = (0.0, -0.06, 0.0)
+
+SUPPORTED_TRANSLATIONAL_UNITS = "N_per_m"
+SUPPORTED_ROTATIONAL_UNITS = "N_m_per_rad"
+
+
+@dataclass(frozen=True)
+class CompliantClubAttachmentConfig:
+    """Typed opt-in config for research compliant hand-to-club attachment.
+
+    Stiffness and damping tuples are ordered about/along the OpenSim frame
+    x/y/z axes. Translational values are N/m and N*s/m. Rotational values are
+    N*m/rad and N*m*s/rad. The model remains rigid by default; this config is
+    only used when explicitly passed to ``build(...)``.
+    """
+
+    parent_body: str = "hand_r"
+    child_body: str = "Club"
+    translational_stiffness: tuple[float, float, float] = (1000.0, 1000.0, 1000.0)
+    rotational_stiffness: tuple[float, float, float] = (10.0, 10.0, 10.0)
+    translational_damping: tuple[float, float, float] = (50.0, 50.0, 50.0)
+    rotational_damping: tuple[float, float, float] = (1.0, 1.0, 1.0)
+    translational_units: str = SUPPORTED_TRANSLATIONAL_UNITS
+    rotational_units: str = SUPPORTED_ROTATIONAL_UNITS
+
+    def __post_init__(self) -> None:
+        _validate_body_name("parent_body", self.parent_body)
+        _validate_body_name("child_body", self.child_body)
+        _validate_vector("translational_stiffness", self.translational_stiffness)
+        _validate_vector("rotational_stiffness", self.rotational_stiffness)
+        _validate_vector("translational_damping", self.translational_damping)
+        _validate_vector("rotational_damping", self.rotational_damping)
+        if self.translational_units != SUPPORTED_TRANSLATIONAL_UNITS:
+            raise ValueError(
+                "Unsupported translational_units "
+                f"{self.translational_units!r}; expected {SUPPORTED_TRANSLATIONAL_UNITS!r}."
+            )
+        if self.rotational_units != SUPPORTED_ROTATIONAL_UNITS:
+            raise ValueError(
+                "Unsupported rotational_units "
+                f"{self.rotational_units!r}; expected {SUPPORTED_ROTATIONAL_UNITS!r}."
+            )
+
+
+def _validate_body_name(field_name: str, value: str) -> None:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field_name} must be a non-empty body name.")
+
+
+def _validate_vector(field_name: str, values: tuple[float, float, float]) -> None:
+    if len(values) != 3:
+        raise ValueError(f"{field_name} must contain exactly three values.")
+    for value in values:
+        if not isinstance(value, int | float) or not math.isfinite(value):
+            raise ValueError(f"{field_name} values must be finite numbers.")
+        if value < 0.0:
+            raise ValueError(f"{field_name} values must be non-negative.")
 
 
 def _parse(path: Path) -> ET.ElementTree:
@@ -216,6 +274,33 @@ def _make_club_weld_joint() -> ET.Element:
     return joint
 
 
+def _format_vector(values: tuple[float, float, float]) -> str:
+    return " ".join(repr(float(value)) for value in values)
+
+
+def _make_club_bushing_force(config: CompliantClubAttachmentConfig) -> ET.Element:
+    """Build a compliant grip <BushingForce> for opt-in research models."""
+    force = ET.Element("BushingForce", attrib={"name": "hand_r_to_club_bushing"})
+    ET.SubElement(force, "appliesForce").text = "true"
+    ET.SubElement(force, "socket_frame1").text = "hand_r_grip_offset"
+    ET.SubElement(force, "socket_frame2").text = "club_grip_offset"
+    ET.SubElement(force, "translational_stiffness").text = _format_vector(
+        config.translational_stiffness
+    )
+    ET.SubElement(force, "rotational_stiffness").text = _format_vector(
+        config.rotational_stiffness
+    )
+    ET.SubElement(force, "translational_damping").text = _format_vector(
+        config.translational_damping
+    )
+    ET.SubElement(force, "rotational_damping").text = _format_vector(
+        config.rotational_damping
+    )
+    ET.SubElement(force, "translational_units").text = config.translational_units
+    ET.SubElement(force, "rotational_units").text = config.rotational_units
+    return force
+
+
 def _make_coordinate_actuator(coord_name: str) -> ET.Element:
     """Build a <CoordinateActuator> for a single coordinate."""
     act = ET.Element("CoordinateActuator", attrib={"name": f"tau_{coord_name}"})
@@ -244,6 +329,31 @@ def _collect_coordinate_names(model: ET.Element) -> list[str]:
     return names
 
 
+def _body_names(body_objects: ET.Element) -> set[str]:
+    names: set[str] = set()
+    for body in body_objects.findall("Body"):
+        name = body.get("name")
+        if name:
+            names.add(name)
+    return names
+
+
+def _validate_attachment_bodies(
+    config: CompliantClubAttachmentConfig, body_objects: ET.Element
+) -> None:
+    names = _body_names(body_objects)
+    missing = [
+        body_name
+        for body_name in (config.parent_body, config.child_body)
+        if body_name not in names
+    ]
+    if missing:
+        raise ValueError(
+            "Compliant club attachment references missing body names: "
+            f"{', '.join(missing)}."
+        )
+
+
 def _indent(elem: ET.Element, level: int = 0, *, tab: str = "\t") -> None:
     """Pretty-print indenter that matches the Rajagopal source style (tabs)."""
     pad = "\n" + tab * level
@@ -264,7 +374,11 @@ def _indent(elem: ET.Element, level: int = 0, *, tab: str = "\t") -> None:
             elem.tail = pad
 
 
-def build() -> Path:
+def build(
+    *,
+    output_path: Path = OUTPUT_OSIM,
+    club_attachment: CompliantClubAttachmentConfig | None = None,
+) -> Path:
     """Build the golf_humanoid.osim file. Returns the output path."""
     tree = _parse(BASE_OSIM)
     root = tree.getroot()
@@ -280,22 +394,31 @@ def build() -> Path:
     bodyset = _find_one(model, "BodySet")
     body_objects = _find_one(bodyset, "objects")
     body_objects.append(_make_club_body())
+    if club_attachment is not None:
+        _validate_attachment_bodies(club_attachment, body_objects)
 
     # ------------------------------------------------------------------
-    # 2. Append the WeldJoint linking hand_r → Club.
+    # 2. Append the hand-to-club attachment.
     # ------------------------------------------------------------------
     jointset = _find_one(model, "JointSet")
     joint_objects = _find_one(jointset, "objects")
-    joint_objects.append(_make_club_weld_joint())
+    if club_attachment is None:
+        joint_objects.append(_make_club_weld_joint())
 
     # ------------------------------------------------------------------
-    # 3. Add a CoordinateActuator for every coordinate in the model.
+    # 3. Add compliant grip force when the research option is requested.
+    # ------------------------------------------------------------------
+    forceset = _find_one(model, "ForceSet")
+    force_objects = _find_one(forceset, "objects")
+    if club_attachment is not None:
+        force_objects.append(_make_club_bushing_force(club_attachment))
+
+    # ------------------------------------------------------------------
+    # 4. Add a CoordinateActuator for every coordinate in the model.
     # ------------------------------------------------------------------
     coord_names = _collect_coordinate_names(model)
     if not coord_names:
         raise ValueError("No coordinates found in the base model — aborting.")
-    forceset = _find_one(model, "ForceSet")
-    force_objects = _find_one(forceset, "objects")
     for cname in coord_names:
         force_objects.append(_make_coordinate_actuator(cname))
 
@@ -303,12 +426,12 @@ def build() -> Path:
     _indent(root)
 
     # Emit with the same XML declaration the upstream uses.
-    OUTPUT_OSIM.parent.mkdir(parents=True, exist_ok=True)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     xml_bytes = ET.tostring(root, encoding="utf-8", xml_declaration=False)
     declaration = b'<?xml version="1.0" encoding="UTF-8" ?>\n'
-    OUTPUT_OSIM.write_bytes(declaration + xml_bytes + b"\n")
+    output_path.write_bytes(declaration + xml_bytes + b"\n")
 
-    return OUTPUT_OSIM
+    return output_path
 
 
 def _summary(coord_names: list[str], output: Path) -> str:
