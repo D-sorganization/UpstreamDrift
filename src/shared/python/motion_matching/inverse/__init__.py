@@ -26,6 +26,7 @@ from .cvae import (
     SwingInverseCVAE,
     build_coefficient_bound_vector,
     kl_divergence,
+    kl_divergence_per_dim,
     parameter_count,
 )
 from .predict import (
@@ -56,6 +57,7 @@ __all__ = [
     "TrainingResult",
     "build_coefficient_bound_vector",
     "kl_divergence",
+    "kl_divergence_per_dim",
     "load_inverse_cvae",
     "parameter_count",
     "predict_coefficients",

@@ -104,21 +104,25 @@ def _loader_factory():
 
 def test_three_epoch_run_reduces_val_loss(tmp_path: Path) -> None:
     cfg = CVAEConfig(encoder_channels=(32, 64), decoder_hidden=64, dropout=0.0)
+    # Recon is now computed in standardised [-1, 1] coefficient space (bug-2
+    # fix), so the loss surface is much flatter in absolute terms. Use a few
+    # extra epochs so the toy-fixture optimisation has time to descend.
     result = train_inverse_cvae(
         tmp_path,
-        epochs=3,
+        epochs=8,
         batch_size=4,
         lr=5e-3,
         seed=42,
         kl_anneal_epochs=2,
         max_beta=0.01,  # keep KL weak so MSE dominates the toy fit
+        free_bits=0.0,  # disable free-bits on the toy test for clean signal
         device="cpu",
         output_root=tmp_path / "out",
         cvae_config=cfg,
         dataset_loader=_loader_factory(),
     )
 
-    assert len(result.history) == 3
+    assert len(result.history) == 8
     assert result.history[0].val_recon > result.history[-1].val_recon, (
         f"val_recon did not improve: {result.history[0].val_recon} -> "
         f"{result.history[-1].val_recon}"

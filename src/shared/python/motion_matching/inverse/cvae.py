@@ -211,11 +211,23 @@ def kl_divergence(
     callers reduce as they see fit). Output is non-negative by construction
     (subject to floating-point round-off near zero).
     """
+    elementwise = kl_divergence_per_dim(mu_q, logvar_q, mu_p, logvar_p)
+    return elementwise.sum(dim=-1)
+
+
+def kl_divergence_per_dim(
+    mu_q: Tensor, logvar_q: Tensor, mu_p: Tensor, logvar_p: Tensor
+) -> Tensor:
+    """Element-wise KL between two diagonal Gaussians ``(B, latent_dim)``.
+
+    Returned with the latent axis intact so callers can apply free-bits
+    (per-dim KL clamping) before summing — see :mod:`.training` for the
+    standard usage. Non-negative up to floating-point round-off.
+    """
     var_q = torch.exp(logvar_q)
     var_p = torch.exp(logvar_p)
     diff = mu_q - mu_p
-    elementwise = 0.5 * ((var_q + diff * diff) / var_p - 1.0 + (logvar_p - logvar_q))
-    return elementwise.sum(dim=-1)
+    return 0.5 * ((var_q + diff * diff) / var_p - 1.0 + (logvar_p - logvar_q))
 
 
 class SwingInverseCVAE(nn.Module):

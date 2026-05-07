@@ -415,3 +415,149 @@ def az_pol_to_shaft_axis(az_pol: torch.Tensor) -> torch.Tensor:
     y = sin_p * torch.sin(azimuth)
     z = torch.cos(polar)
     return torch.stack([x, y, z], dim=-1)
+
+
+# --------------------------------------------------------------------------- #
+# Target (per-channel) normalisation                                          #
+# --------------------------------------------------------------------------- #
+
+
+class TargetNormalizer:
+    """Per-channel zero-mean / unit-std normaliser for the 12-dim trajectory.
+
+    The 12 output channels are heterogeneous in scale (clubhead-speed in
+    mph has magnitude ~100 while position channels in metres have
+    magnitude ~1). A naive MSE on raw channels lets the optimiser drive
+    the speed channel to near-zero error while ignoring positions.
+    Standardising each channel before computing MSE makes the per-channel
+    contributions comparable, so the optimiser allocates capacity to all
+    channels.
+
+    The class stores ``mean`` and ``std`` vectors of shape ``(C,)`` (with
+    ``C == 12`` by default). ``standardize`` and ``destandardize`` are
+    inverses to float64 precision.
+
+    Notes:
+        * ``std`` is floored at ``eps`` (default ``1e-6``) to keep
+          standardisation safe even for degenerate fixtures with a
+          near-constant channel.
+        * The class is intentionally not an ``nn.Module``; the stats are
+          fixed (computed once from the training split) and shouldn't
+          appear as learnable parameters.
+    """
+
+    def __init__(
+        self, mean: torch.Tensor, std: torch.Tensor, *, eps: float = 1e-6
+    ) -> None:
+        if mean.ndim != 1 or std.ndim != 1:
+            raise ValueError(
+                f"mean and std must be 1-D; got mean.shape={tuple(mean.shape)}, "
+                f"std.shape={tuple(std.shape)}"
+            )
+        if mean.shape != std.shape:
+            raise ValueError(
+                f"mean.shape ({tuple(mean.shape)}) must equal std.shape "
+                f"({tuple(std.shape)})"
+            )
+        if eps <= 0:
+            raise ValueError(f"eps must be strictly positive, got {eps}")
+        self._mean = mean.detach().to(dtype=torch.float32).clone()
+        self._std = std.detach().to(dtype=torch.float32).clone().clamp_min(eps)
+        self._eps = float(eps)
+
+    @classmethod
+    def from_targets(
+        cls, targets: torch.Tensor, *, eps: float = 1e-6
+    ) -> TargetNormalizer:
+        """Compute per-channel stats from a ``(N, T, C)`` (or ``(B*T, C)``) tensor.
+
+        Args:
+            targets: Float tensor with at least 2 dims; the trailing dim
+                is the channel axis.
+            eps: Floor applied to ``std`` to avoid division by zero on
+                degenerate channels.
+
+        Returns:
+            A populated :class:`TargetNormalizer`.
+
+        Raises:
+            ValueError: If ``targets`` has fewer than 2 dims or the
+                trailing dim is empty.
+        """
+        if targets.ndim < 2:
+            raise ValueError(
+                f"targets must have at least 2 dims (..., C); got ndim={targets.ndim}"
+            )
+        if targets.shape[-1] == 0:
+            raise ValueError("targets trailing dim is empty")
+        flat = targets.reshape(-1, targets.shape[-1]).to(dtype=torch.float32)
+        mean = flat.mean(dim=0)
+        std = flat.std(dim=0, unbiased=False)
+        return cls(mean=mean, std=std, eps=eps)
+
+    @property
+    def mean(self) -> torch.Tensor:
+        """Per-channel mean vector ``(C,)``."""
+        return self._mean
+
+    @property
+    def std(self) -> torch.Tensor:
+        """Per-channel std vector ``(C,)`` (already eps-floored)."""
+        return self._std
+
+    @property
+    def num_channels(self) -> int:
+        """Number of channels stored."""
+        return int(self._mean.shape[0])
+
+    def standardize(self, x: torch.Tensor) -> torch.Tensor:
+        """Subtract mean and divide by std along the channel axis.
+
+        Args:
+            x: ``(..., C)`` tensor in physical units.
+
+        Returns:
+            Same-shape tensor with each channel zero-mean / unit-std under
+            the stats stored in this object.
+        """
+        self._check_channels(x)
+        mean = self._mean.to(device=x.device, dtype=x.dtype)
+        std = self._std.to(device=x.device, dtype=x.dtype)
+        return (x - mean) / std
+
+    def destandardize(self, x_norm: torch.Tensor) -> torch.Tensor:
+        """Inverse of :meth:`standardize`."""
+        self._check_channels(x_norm)
+        mean = self._mean.to(device=x_norm.device, dtype=x_norm.dtype)
+        std = self._std.to(device=x_norm.device, dtype=x_norm.dtype)
+        return x_norm * std + mean
+
+    def _check_channels(self, x: torch.Tensor) -> None:
+        if x.ndim < 1 or x.shape[-1] != self.num_channels:
+            raise ValueError(
+                f"trailing dim {x.shape[-1] if x.ndim >= 1 else None} != "
+                f"num_channels ({self.num_channels})"
+            )
+
+    # (de)serialisation helpers used by training/predict ------------------
+
+    def to_state_dict(self) -> dict[str, list[float]]:
+        """Return a JSON-friendly dict suitable for checkpointing."""
+        return {
+            "mean": self._mean.detach().cpu().tolist(),
+            "std": self._std.detach().cpu().tolist(),
+            "eps": [float(self._eps)],
+        }
+
+    @classmethod
+    def from_state_dict(cls, state: dict[str, Sequence[float]]) -> TargetNormalizer:
+        """Inverse of :meth:`to_state_dict`."""
+        if "mean" not in state or "std" not in state:
+            raise ValueError(
+                f"target-normalizer state must contain 'mean' and 'std'; got keys={list(state)}"
+            )
+        eps_list = state.get("eps", [1e-6])
+        eps = float(eps_list[0]) if isinstance(eps_list, Sequence) else float(eps_list)
+        mean = torch.tensor(list(state["mean"]), dtype=torch.float32)
+        std = torch.tensor(list(state["std"]), dtype=torch.float32)
+        return cls(mean=mean, std=std, eps=eps)

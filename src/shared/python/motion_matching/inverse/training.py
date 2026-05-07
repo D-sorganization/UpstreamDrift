@@ -30,7 +30,8 @@ from .cvae import (
     CVAEConfig,
     EncoderOutput,
     SwingInverseCVAE,
-    kl_divergence,
+    build_coefficient_bound_vector,
+    kl_divergence_per_dim,
     parameter_count,
 )
 
@@ -149,14 +150,28 @@ def _stack_trajectory_channels(
 
 @dataclass(frozen=True)
 class TrainingConfig:
-    """Hyperparameters for :func:`train_inverse_cvae`."""
+    """Hyperparameters for :func:`train_inverse_cvae`.
+
+    Defaults updated to fix the bug-2 posterior collapse:
+
+    * ``max_beta=0.1`` (was 1.0). With recon now computed in
+      [-1, 1] coefficient space (O(1) magnitude) a max-β of 1.0 is
+      far too aggressive — KL would dominate and crush the posterior.
+    * ``kl_anneal_epochs=30`` (was 10). Slow anneal gives the encoder
+      time to learn a useful posterior before KL pressure ramps in.
+    * ``free_bits=0.5`` per latent dim. Standard cVAE technique: KL
+      below this floor is not penalised, preventing the optimiser from
+      collapsing the posterior to the prior when the encoder hasn't
+      yet learned a useful latent code.
+    """
 
     epochs: int = 30
     batch_size: int = 16
     lr: float = 1e-3
     weight_decay: float = 1e-5
-    kl_anneal_epochs: int = 10
-    max_beta: float = 1.0
+    kl_anneal_epochs: int = 30
+    max_beta: float = 0.1
+    free_bits: float = 0.5
     patience: int = DEFAULT_PATIENCE
     val_fraction: float = 0.1
     seed: int = 0xC0FFEE
@@ -175,6 +190,7 @@ def train_inverse_cvae(
     seed: int = TrainingConfig.seed,
     kl_anneal_epochs: int = TrainingConfig.kl_anneal_epochs,
     max_beta: float = TrainingConfig.max_beta,
+    free_bits: float = TrainingConfig.free_bits,
     patience: int = DEFAULT_PATIENCE,
     output_root: str | Path = DEFAULT_OUTPUT_ROOT,
     val_fraction: float = TrainingConfig.val_fraction,
@@ -209,6 +225,8 @@ def train_inverse_cvae(
         raise ValueError(f"epochs must be positive, got {epochs}")
     if not 0.0 < val_fraction < 1.0:
         raise ValueError(f"val_fraction must be in (0, 1), got {val_fraction}")
+    if free_bits < 0:
+        raise ValueError(f"free_bits must be >= 0, got {free_bits}")
 
     loader_fn = dataset_loader or _default_compact_loader
     dataset = loader_fn(Path(dataset_path))
@@ -224,6 +242,10 @@ def train_inverse_cvae(
     cfg = cvae_config or CVAEConfig()
     model = SwingInverseCVAE(cfg).to(selected_device)
     opt = AdamW(model.parameters(), lr=lr, weight_decay=1e-5)
+    # Per-coefficient symmetric bound vector — used to standardise the
+    # 189-dim recon target into [-1, 1] so reconstruction MSE is O(1)
+    # and comparable in scale to the KL term. (Bug-2 fix.)
+    coeff_bounds = build_coefficient_bound_vector(cfg.n_joints).to(selected_device)
 
     train_loader = DataLoader(
         _TrialTensorDataset(train_samples),
@@ -250,10 +272,24 @@ def train_inverse_cvae(
         beta = _beta_for_epoch(epoch, kl_anneal_epochs, max_beta)
         t0 = time.time()
         train_recon, train_kl = _run_epoch(
-            model, train_loader, beta, selected_device, opt, train=True
+            model,
+            train_loader,
+            beta,
+            selected_device,
+            opt,
+            train=True,
+            coeff_bounds=coeff_bounds,
+            free_bits=free_bits,
         )
         val_recon, val_kl = _run_epoch(
-            model, val_loader, beta, selected_device, opt, train=False
+            model,
+            val_loader,
+            beta,
+            selected_device,
+            opt,
+            train=False,
+            coeff_bounds=coeff_bounds,
+            free_bits=free_bits,
         )
         duration = time.time() - t0
 
@@ -362,21 +398,34 @@ def _run_epoch(
     opt: AdamW,
     *,
     train: bool,
+    coeff_bounds: torch.Tensor,
+    free_bits: float,
 ) -> tuple[float, float]:
+    """One pass over ``loader``. ``train=True`` flips the optimizer step on.
+
+    The recon loss is computed on coefficients standardised to ``[-1, 1]``
+    via ``coeff_bounds`` (the bug-2 fix). KL is the per-dim closed form,
+    free-bits-clamped before summing so individual latent dims with
+    near-zero KL don't drag the loss to a posterior collapse.
+    """
     if train:
         model.train()
     else:
         model.eval()
     recon_total = 0.0
     kl_total = 0.0
+    kl_uncapped_total = 0.0
     n_batches = 0
     with torch.set_grad_enabled(train):
         for batch in loader:
             traj = batch["trajectory"].to(device, non_blocking=True)
             coeffs = batch["coeffs"].to(device, non_blocking=True)
             coeff_pred, enc_out = model(traj, coeffs, sample=train)
-            recon = torch.mean((coeff_pred - coeffs) ** 2)
-            kl = _mean_kl(enc_out)
+            # Recon MSE on standardised coefficients: target in [-1, 1].
+            pred_std = coeff_pred / coeff_bounds
+            target_std = coeffs / coeff_bounds
+            recon = torch.mean((pred_std - target_std) ** 2)
+            kl, kl_uncapped = _kl_for_loss(enc_out, free_bits)
             loss = recon + beta * kl
             if train:
                 opt.zero_grad(set_to_none=True)
@@ -385,15 +434,37 @@ def _run_epoch(
                 opt.step()
             recon_total += float(recon.detach().cpu())
             kl_total += float(kl.detach().cpu())
+            kl_uncapped_total += float(kl_uncapped.detach().cpu())
             n_batches += 1
     if n_batches == 0:
         return 0.0, 0.0
-    return recon_total / n_batches, kl_total / n_batches
+    # Report the *uncapped* KL so plateau / collapse diagnostics aren't
+    # masked by the free-bits floor.
+    return recon_total / n_batches, kl_uncapped_total / n_batches
 
 
-def _mean_kl(enc_out: EncoderOutput) -> torch.Tensor:
-    kl = kl_divergence(enc_out.mu_q, enc_out.logvar_q, enc_out.mu_p, enc_out.logvar_p)
-    return kl.mean()
+def _kl_for_loss(
+    enc_out: EncoderOutput, free_bits: float
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Return ``(kl_for_loss, kl_uncapped)``.
+
+    ``kl_for_loss`` applies free-bits: per-latent-dim KL is clamped to a
+    minimum of ``free_bits`` nats *before* the sum across the latent
+    axis, then averaged across the batch. This is the standard
+    Kingma-Welling free-bits trick — without it, low-information latent
+    dims collapse the posterior to the prior and the encoder stops
+    learning.
+
+    ``kl_uncapped`` is the raw mean of the per-batch KLs (sum-over-dim,
+    mean-over-batch) and is reported in the metrics for diagnostics.
+    """
+    per_dim = kl_divergence_per_dim(
+        enc_out.mu_q, enc_out.logvar_q, enc_out.mu_p, enc_out.logvar_p
+    )  # (B, latent_dim)
+    capped = torch.clamp(per_dim, min=free_bits) if free_bits > 0 else per_dim
+    kl_for_loss = capped.sum(dim=-1).mean()
+    kl_uncapped = per_dim.sum(dim=-1).mean()
+    return kl_for_loss, kl_uncapped
 
 
 def _materialise_samples(dataset) -> list[_PreparedSample]:

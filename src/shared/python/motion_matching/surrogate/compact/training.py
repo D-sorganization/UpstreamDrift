@@ -50,6 +50,7 @@ from .model import (
     CoeffNormalizer,
     SurrogateConfig,
     SwingSurrogate,
+    TargetNormalizer,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -258,25 +259,47 @@ def _load_compact_dataset(
 # --------------------------------------------------------------------------- #
 
 
-def _channel_weighted_mse(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-    """Vanilla MSE on the full ``(B, T, 12)`` tensor."""
-    return torch.mean((pred - target) ** 2)
+def _channel_standardised_mse(
+    pred: torch.Tensor,
+    target: torch.Tensor,
+    target_normalizer: TargetNormalizer,
+) -> torch.Tensor:
+    """MSE computed on the per-channel-standardised ``(B, T, 12)`` tensor.
+
+    Standardising each output channel to mean 0 / std 1 before the MSE is
+    what stops the mph-scale clubhead-speed channel from dominating the
+    metre-scale position channels (root-cause of the 17 mm grip-RMSE
+    floor seen in the smoke run).
+    """
+    pred_n = target_normalizer.standardize(pred)
+    target_n = target_normalizer.standardize(target)
+    return torch.mean((pred_n - target_n) ** 2)
 
 
-def _impact_speed_loss(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-    """Weighted MSE on the impact-time clubhead speed channel.
+def _impact_speed_loss(
+    pred: torch.Tensor,
+    target: torch.Tensor,
+    target_normalizer: TargetNormalizer,
+) -> torch.Tensor:
+    """Standardised MSE on the impact-time clubhead-speed channel.
 
     Impact is approximated as the timestep where ``target`` clubhead speed
-    is maximal. (For the documented 31-step compact dataset that's
-    typically the last few samples of the 0.30 s window.)
+    is maximal. The per-channel standardisation keeps the impact term on
+    the same numerical scale as the trajectory MSE so the
+    ``impact_weight`` hyper-parameter retains its semantics after the
+    bug-1 fix.
     """
     chs_lo, chs_hi = CHANNEL_SLICES["clubhead_speed"]
+    chs_mean = target_normalizer.mean[chs_lo].to(device=pred.device, dtype=pred.dtype)
+    chs_std = target_normalizer.std[chs_lo].to(device=pred.device, dtype=pred.dtype)
     target_chs = target[..., chs_lo:chs_hi].squeeze(-1)
     impact_idx = torch.argmax(target_chs, dim=-1)
     batch_idx = torch.arange(target.shape[0], device=target.device)
     pred_at_impact = pred[batch_idx, impact_idx, chs_lo:chs_hi].squeeze(-1)
     target_at_impact = target_chs[batch_idx, impact_idx]
-    return torch.mean((pred_at_impact - target_at_impact) ** 2)
+    pred_n = (pred_at_impact - chs_mean) / chs_std
+    target_n = (target_at_impact - chs_mean) / chs_std
+    return torch.mean((pred_n - target_n) ** 2)
 
 
 def _grip_rmse_mm(pred: torch.Tensor, target: torch.Tensor) -> float:
@@ -324,6 +347,7 @@ def _run_epoch(
     device: torch.device,
     impact_weight: float,
     normalizer: CoeffNormalizer,
+    target_normalizer: TargetNormalizer,
 ) -> dict[str, float]:
     """Run one pass over ``loader``. ``optimizer is None`` means eval mode."""
     is_train = optimizer is not None
@@ -343,8 +367,8 @@ def _run_epoch(
             optimizer.zero_grad(set_to_none=True)
         with torch.set_grad_enabled(is_train):
             pred = model(coeffs)
-            mse = _channel_weighted_mse(pred, target)
-            impact = _impact_speed_loss(pred, target)
+            mse = _channel_standardised_mse(pred, target, target_normalizer)
+            impact = _impact_speed_loss(pred, target, target_normalizer)
             loss = mse + impact_weight * impact
         if is_train:
             assert optimizer is not None  # narrow type
@@ -391,10 +415,11 @@ def _save_checkpoint(
     metrics: dict[str, Any],
     config: SurrogateConfig,
     normalizer: CoeffNormalizer,
+    target_normalizer: TargetNormalizer,
 ) -> None:
     """Persist a resumable checkpoint to ``path``."""
     payload = {
-        "schema_version": "swing-surrogate-1.0",
+        "schema_version": "swing-surrogate-1.1",
         "model_state_dict": model.state_dict(),
         "optimizer_state_dict": optimizer.state_dict(),
         "epoch": int(epoch),
@@ -404,6 +429,7 @@ def _save_checkpoint(
             "n_joints": config.n_joints,
             "coeff_bounds": list(config.coeff_bounds),
         },
+        "target_normalizer": target_normalizer.to_state_dict(),
     }
     path.parent.mkdir(parents=True, exist_ok=True)
     torch.save(payload, path)
@@ -488,6 +514,16 @@ def train_surrogate(
     model = SwingSurrogate(cfg).to(dev)
     optimizer: torch.optim.Optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     normalizer = CoeffNormalizer(n_joints=cfg.n_joints, coeff_bounds=cfg.coeff_bounds)
+    # Per-channel target stats (mean / std over the train split). This is the
+    # core of the bug-1 fix: the loss is computed in standardised channel
+    # space so every output channel contributes comparable gradient signal.
+    train_targets_t = torch.as_tensor(targets_np[train_idx], dtype=torch.float32)
+    target_normalizer = TargetNormalizer.from_targets(train_targets_t)
+    _LOGGER.info(
+        "target normalizer (train split): mean=%s std=%s",
+        target_normalizer.mean.tolist(),
+        target_normalizer.std.tolist(),
+    )
     start_epoch = 0
     if resume_from is not None:
         start_epoch = _load_resume_state(
@@ -502,6 +538,7 @@ def train_surrogate(
         val_loader=val_loader,
         cfg=cfg,
         normalizer=normalizer,
+        target_normalizer=target_normalizer,
         device=dev,
         epochs=epochs,
         start_epoch=start_epoch,
@@ -520,6 +557,7 @@ def _train_loop(
     val_loader: DataLoader,
     cfg: SurrogateConfig,
     normalizer: CoeffNormalizer,
+    target_normalizer: TargetNormalizer,
     device: torch.device,
     epochs: int,
     start_epoch: int,
@@ -552,6 +590,7 @@ def _train_loop(
             device=device,
             impact_weight=impact_weight,
             normalizer=normalizer,
+            target_normalizer=target_normalizer,
         )
         val_metrics = _run_epoch(
             model,
@@ -560,6 +599,7 @@ def _train_loop(
             device=device,
             impact_weight=impact_weight,
             normalizer=normalizer,
+            target_normalizer=target_normalizer,
         )
         history["epoch"].append(float(epoch_human))
         history["train_loss"].append(train_metrics["loss"])
@@ -577,6 +617,7 @@ def _train_loop(
             metrics={"train": train_metrics, "val": val_metrics},
             config=cfg,
             normalizer=normalizer,
+            target_normalizer=target_normalizer,
         )
         last_ckpt = ckpt_path
         _write_metrics_json(out_path, history)
@@ -604,6 +645,7 @@ def _train_loop(
                 metrics={"train": train_metrics, "val": val_metrics},
                 config=cfg,
                 normalizer=normalizer,
+                target_normalizer=target_normalizer,
             )
             no_improve = 0
         else:

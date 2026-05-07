@@ -24,7 +24,7 @@ Sibling implementation:
 
 from __future__ import annotations
 
-from .model import CoeffNormalizer, SurrogateConfig, SwingSurrogate
+from .model import CoeffNormalizer, SurrogateConfig, SwingSurrogate, TargetNormalizer
 from .predict import predict_trajectory
 from .training import TrainingResult, train_surrogate
 
@@ -32,6 +32,7 @@ __all__ = [
     "CoeffNormalizer",
     "SurrogateConfig",
     "SwingSurrogate",
+    "TargetNormalizer",
     "TrainingResult",
     "predict_trajectory",
     "train_surrogate",
