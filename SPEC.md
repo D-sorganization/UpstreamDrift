@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                      |
 | **License**             | MIT                                                 |
 | **Current Version**     | 2.1.0                                               |
-| **Spec Version**        | 1.0.132                                             |
-| **Last Spec Update**    | 2026-05-07 (CI bootstrap and scoped-test hardening) |
+| **Spec Version**        | 1.0.133                                             |
+| **Last Spec Update**    | 2026-05-07 (FitResult field contract coverage)      |
 
 ## 2. Purpose & Mission
 
@@ -660,4 +660,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-07 | 1.0.130 | Exported the MuJoCo motion-matching synthetic recovery oracle from `simulate.py` and added a synthesize-fit-recover regression test for the public API. |
 | 2026-05-07 | 1.0.131 | Added cross-engine fit determinism regression coverage requiring repeated runs with the same target, warm start, and `rng_seed` to reproduce identical results across seeds 42, 1337, and 999 for MuJoCo, Drake, Pinocchio, and OpenSim. |
 | 2026-05-07 | 1.0.132 | Hardened CI behavior so PR-scoped core tests treat an all-skipped selection as a no-op and cross-engine equivalence bootstraps `pip` with recordless-safe install flags on self-hosted runners. |
+| 2026-05-07 | 1.0.133 | Added FitResult field contract coverage requiring motion-matching fit drivers to export the shared `CanonicalFitResult` and canonical engine tests to use `theta_optimal` instead of deprecated `.theta` access. |
 ````

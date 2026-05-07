@@ -157,7 +157,7 @@ class TestRecovery:
         )
         # Relative recovery on the truth.
         denom = max(float(np.linalg.norm(theta_truth)), 1e-12)
-        rel_err = float(np.linalg.norm(result.theta - theta_truth) / denom)
+        rel_err = float(np.linalg.norm(result.theta_optimal - theta_truth) / denom)
         assert rel_err < 0.05, (
             f"||theta - theta_truth|| / ||theta_truth|| = {rel_err:.4f} > 0.05; "
             f"final cost={result.final_cost:.3e}"
@@ -206,7 +206,7 @@ class TestDeterminism:
         )
         r1 = fit_mod.fit_swing_pinocchio(target, opts)
         r2 = fit_mod.fit_swing_pinocchio(target, opts)
-        np.testing.assert_array_equal(r1.theta, r2.theta)
+        np.testing.assert_array_equal(r1.theta_optimal, r2.theta_optimal)
         assert r1.final_cost == r2.final_cost
         assert r1.n_jac_eval == r2.n_jac_eval
         assert getattr(r1, "history", None) == getattr(r2, "history", None)

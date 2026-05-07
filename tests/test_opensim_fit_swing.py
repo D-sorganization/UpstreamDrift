@@ -8,8 +8,8 @@ Test strategy (TDD per ``CROSS_ENGINE_PARITY_SPEC.md`` § 2.7):
   ``theta_truth`` → run :func:`fit_swing_opensim` → assert the recovered
   ``theta`` lies within 10 % (atol on the bound-normalised vector) of
   the truth and that ``solver_status == "success"`` (cost monotone-min).
-* **Determinism** — same seed, same target, same simulator → byte-identical
-  ``FitResult.theta``.
+* **Determinism** — same seed, same target, same simulator -> byte-identical
+  ``FitResult.theta_optimal``.
 * **Cost monotone-decrease** — the *minimum running* cost over the
   history must be non-increasing (SLSQP line searches can transiently
   raise the per-eval cost; the running min is the contracted invariant).
@@ -206,7 +206,7 @@ def test_recovery_within_10_percent(
     # recovered theta through the simulator and compare clubhead and butt
     # trajectories to the target. RMSE within 10 % of the target's
     # peak-to-peak amplitude is the canonical check.
-    sim_fit = simulate_fn(result.theta)
+    sim_fit = simulate_fn(result.theta_optimal)
     pp = float(np.ptp(target.clubhead))  # peak-to-peak of target trajectory
     rmse_clubhead = float(np.sqrt(np.mean((sim_fit.clubhead - target.clubhead) ** 2)))
     rmse_butt = float(np.sqrt(np.mean((sim_fit.butt - target.butt) ** 2)))
@@ -226,7 +226,7 @@ def test_recovery_within_10_percent(
 def test_determinism(
     n_joints: int, time_grid: np.ndarray, truth_theta: np.ndarray, oracle, rng_seed: int
 ) -> None:
-    """Same options + same target -> identical FitResult.theta."""
+    """Same options + same target -> identical FitResult.theta_optimal."""
     simulate_fn, theta_to_target = oracle
     target = theta_to_target(truth_theta)
 
@@ -243,7 +243,7 @@ def test_determinism(
 
     a = run()
     b = run()
-    np.testing.assert_array_equal(a.theta, b.theta)
+    np.testing.assert_array_equal(a.theta_optimal, b.theta_optimal)
     assert a.cost == b.cost
     assert getattr(a, "history", None) == getattr(b, "history", None)
     assert a.n_eval == b.n_eval
