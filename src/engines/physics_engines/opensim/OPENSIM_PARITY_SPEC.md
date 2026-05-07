@@ -9,7 +9,7 @@
 >
 > **Scope:** the Minimum-Viable-Product (MVP) is a **joint-torque-actuated**
 > humanoid that consumes the canonical `ClubTarget` schema, produces the
-> canonical `SimOut`, and returns a `FitResult` that the cross-engine
+> canonical `SimOutput`, and returns a `FitResult` that the cross-engine
 > leaderboard can compare. **Muscle-level forward dynamics is explicitly
 > post-MVP** — see §8.
 >
@@ -74,7 +74,7 @@ The 796-LOC `OpenSimPhysicsEngine` class is **load-and-introspect only**:
 | `step`, `set_state`, `get_state` | thin SimTK wrappers | **Not enough** — there is no torque-controller wiring or forward-sim loop |
 
 There is **no `simulate_with_coefficients`**, **no controller class that
-applies a polynomial torque profile**, **no `SimOut`-shaped return**, and
+applies a polynomial torque profile**, **no `SimOutput`-shaped return**, and
 **no integration with `shared/python/motion_matching/`**.
 
 ### 1.3 What `opensim_golf/core.py` is
@@ -86,7 +86,7 @@ applies a polynomial torque profile**, **no `SimOut`-shaped return**, and
   `FileNotFoundError`.
 - A `SimulationResult` dataclass with `(time, states, muscle_forces,
   control_signals, joint_torques, marker_positions)` — close in spirit to
-  the canonical `SimOut` but **missing** `grip`, `grip_quat`, `clubhead`,
+  the canonical `SimOutput` but **missing** `grip`, `grip_quat`, `clubhead`,
   `club_quat`, `solver_status`, `duration_s`.
 - No actual simulation method. Imports `constants` but does not run
   anything.
@@ -151,7 +151,7 @@ src/engines/physics_engines/opensim/
 ├── python/
 │   ├── opensim_physics_engine.py           (existing — minor edits)
 │   ├── opensim_golf/
-│   │   ├── core.py                         (existing — refactor to canonical SimOut)
+│   │   ├── core.py                         (existing — refactor to canonical SimOutput)
 │   │   ├── simulate_with_coefficients.py   (NEW — forward-sim wrapper)
 │   │   ├── controller.py                   (NEW — torque polynomial controller)
 │   │   ├── fk.py                           (NEW — grip + clubhead extraction)
@@ -182,7 +182,7 @@ def simulate_with_coefficients(
     theta: np.ndarray,                  # (n_joints * 7,) torque polynomial coefficients
     options: SimOptions = ...,
     initial_pose: dict | None = None,   # StartPosition / StartVelocity overrides
-) -> SimOut:
+) -> SimOutput:
     ...
 ```
 
@@ -201,7 +201,7 @@ Implementation strategy:
    `StatesTrajectoryReporter` or do per-step state caching).
 5. After integration, call `fk.compute_grip_clubhead(model, states)` to
    produce `grip`, `grip_quat`, `clubhead`, `club_quat` per sample.
-6. Pack into the canonical `SimOut`. Set `solver_status = "success"` if
+6. Pack into the canonical `SimOutput`. Set `solver_status = "success"` if
    the integrator returned without error, `"warning"` for tolerance
    misses, `"failed"` if it threw.
 
@@ -361,7 +361,7 @@ Simscape's:
   `to_simscape(q_opensim)` and `from_simscape(q_simscape)` lookup
   helpers.
 - **Quaternion convention:** OpenSim uses `[x, y, z, w]` (Eigen); the
-  canonical `SimOut` uses `[w, x, y, z]`. Convert at the SimOut
+  canonical `SimOutput` uses `[w, x, y, z]`. Convert at the SimOutput
   boundary.
 
 This mapping work is its own issue (`OPENSIM-COORD-MAP`) and ships
@@ -475,19 +475,19 @@ issue depends on it.
   (subclass of `osim.Controller`) with `set_theta`, `get_theta`,
   `tau_at(t, j)`.
 - `python/opensim_golf/simulate_with_coefficients.py` — top-level
-  wrapper returning canonical `SimOut`.
+  wrapper returning canonical `SimOutput`.
 - `python/opensim_golf/default_options.py` — `SimOptions`,
   `SynthOptions`, `FitOptions` dataclasses mirroring the Simscape
   defaults.
 - Refactor `opensim_golf/core.py` `SimulationResult` → import canonical
-  `SimOut` from `shared/python/motion_matching/types.py`.
+  `SimOutput` from `shared/python/motion_matching/cost.py`.
 - Tests: zero-coefficient input → joint angles stay at initial pose;
   unit step → expected linear ramp in joint velocity.
 
 **Acceptance criteria:**
 - `simulate_with_coefficients(theta_zeros, default_options)` returns a
-  `SimOut` with `np.allclose(out.q, q_initial)` over the entire grid.
-- Canonical `SimOut` produced (correct field names, dtypes, shapes).
+  `SimOutput` with `np.allclose(out.q, q_initial)` over the entire grid.
+- Canonical `SimOutput` produced (correct field names, dtypes, shapes).
 - Wall-clock for a 1.0 s sim ≤ 10 s on a developer laptop.
 - `solver_status == "success"` for nominal inputs.
 
@@ -509,13 +509,25 @@ issue depends on it.
 **Acceptance criteria:**
 - Output is a valid `ClubTarget` (time, grip, grip_quat, clubhead,
   club_quat, impact_idx, source).
-- `source.engine == "opensim"`, `source.theta_truth == theta`.
+- `source.format == "synthetic"` and `source.subject_id == "opensim"`
+  (the existing `SourceProvenance` fields already encode engine
+  identity — no schema change required).
+- `theta_truth` is persisted alongside the returned `ClubTarget` (e.g.
+  via the synthesizer also returning the truth vector, or by hashing
+  it into `source.sha256`); recovery tests pass `theta_truth`
+  explicitly to the fitter rather than reading it back off `source`.
 - Reproducible: same `theta` → byte-identical `ClubTarget` (within
   floating-point rounding) on two runs.
 
 **Estimated size:** 300 LOC.
 
 **Dependencies:** Issue 4.
+
+> **Note:** the canonical `SourceProvenance`
+> (`src/shared/python/motion_matching/club_target.py`) currently exposes
+> `filename`, `format`, `subject_id`, `trial_id`, `sha256`. Adding
+> `engine` / `theta_truth` would be a cross-engine schema migration and
+> is intentionally out of scope for this MVP issue.
 
 ---
 

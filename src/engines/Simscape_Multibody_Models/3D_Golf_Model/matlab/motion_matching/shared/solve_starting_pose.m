@@ -9,8 +9,12 @@ function overrides = solve_starting_pose(target, base_input_mat, opts)
 %   candidate in a 5 ms FastRestart Simulink call, and returns the
 %   perturbations that minimise
 %
-%     J(x) = w_pos * ||grip_model(0) - target.grip(A_sample, :)||^2
+%     J(x) = w_pos * ||grip_model(0) - target.grip(addr_idx, :)||^2
 %          + w_ori * geodesic_angle(R_model_grip, R_meas_grip)^2
+%
+%   where ``addr_idx`` is the aligned-grid index of the address frame. The
+%   raw-sheet ``target.events.A_sample`` is NOT a valid index into the
+%   resampled/aligned ``target.grip`` — see "ADDRESS-FRAME INDEXING" below.
 %
 %   The output OVERRIDES is a struct keyed by model-workspace variable
 %   name → numeric value, suitable for `prepare_fast_sim_input`'s
@@ -142,10 +146,10 @@ function overrides = solve_starting_pose(target, base_input_mat, opts)
 
     assert(all(isfinite(grip_target_xyz)), ...
         "solve_starting_pose:nonFiniteTarget", ...
-        "Precondition: target.grip(A_sample,:) must be finite");
+        "Precondition: target.grip(addr_idx,:) must be finite");
     assert(all(isfinite(R_meas_grip(:))), ...
         "solve_starting_pose:nonFiniteTargetQuat", ...
-        "Precondition: target.grip_quat(A_sample,:) must be finite");
+        "Precondition: target.grip_quat(addr_idx,:) must be finite");
 
     % ---- 3. Determinism --------------------------------------------------
     rng_state_before = rng();

@@ -3,7 +3,7 @@
 This module computes grip and clubhead positions/orientations from an OpenSim
 model state. It mirrors the MATLAB reference `compute_skeleton_fk.m` and
 produces the `grip`, `grip_quat`, `clubhead`, `club_quat` fields required
-by the canonical `SimOut` schema.
+by the canonical `SimOutput` schema.
 
 Public API:
     compute_grip(model, state) -> (pos, quat)

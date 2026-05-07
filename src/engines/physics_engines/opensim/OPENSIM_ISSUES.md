@@ -133,7 +133,7 @@ Every cross-engine simulator must produce `grip` and `clubhead`
 trajectories in the canonical world frame. Per
 [OPENSIM_PARITY_SPEC.md §2.2](OPENSIM_PARITY_SPEC.md#22-forward-sim-wrapper-simulate_with_coefficientspy)
 this is the boundary between OpenSim's internal state and the canonical
-`SimOut`.
+`SimOutput`.
 
 ### Deliverable
 
@@ -171,9 +171,9 @@ Issues 1 + 2.
 
 The contractual heart of the engine. Per the cross-engine spec §2.2,
 every engine ships `simulate_with_coefficients(theta, options,
-initial_pose) -> SimOut`. For OpenSim this means: a polynomial-torque
+initial_pose) -> SimOutput`. For OpenSim this means: a polynomial-torque
 controller subclassing `osim.Controller`, an integrator wrapper around
-`osim.Manager`, and packaging into the canonical `SimOut`.
+`osim.Manager`, and packaging into the canonical `SimOutput`.
 
 ### Deliverable
 
@@ -183,15 +183,15 @@ controller subclassing `osim.Controller`, an integrator wrapper around
   wrapper.
 - `python/opensim_golf/default_options.py` — `SimOptions`,
   `SynthOptions`, `FitOptions` dataclasses.
-- Refactor `opensim_golf/core.py` to import canonical `SimOut` instead
+- Refactor `opensim_golf/core.py` to import canonical `SimOutput` instead
   of its bespoke `SimulationResult`.
 - `python/tests/test_simulate_with_coefficients.py`.
 
 ### Acceptance criteria
 
 - `simulate_with_coefficients(theta_zeros, default_options)` returns a
-  `SimOut` with `np.allclose(out.q, q_initial)` over the entire grid.
-- `out` is a canonical `SimOut` (correct fields + dtypes + shapes).
+  `SimOutput` with `np.allclose(out.q, q_initial)` over the entire grid.
+- `out` is a canonical `SimOutput` (correct fields + dtypes + shapes).
 - Wall-clock for a 1.0 s sim ≤ 10 s on a developer laptop (warm).
 - `solver_status == "success"` for nominal inputs.
 - Unit-step torque on a single joint produces the analytically
@@ -228,7 +228,16 @@ should recover it.
 ### Acceptance criteria
 
 - Output is a valid `ClubTarget` with all schema fields populated.
-- `source.engine == "opensim"`, `source.theta_truth == theta`.
+- `source.format == "synthetic"` and `source.subject_id == "opensim"`
+  (encoding engine identity via the existing `SourceProvenance` fields
+  in `src/shared/python/motion_matching/club_target.py` — no schema
+  change required).
+- `theta_truth` is persisted by the synthesizer (e.g. returned
+  alongside the `ClubTarget`, or hashed into `source.sha256`); recovery
+  tests pass it explicitly to the fitter rather than reading it back
+  off `source`. Adding a dedicated `theta_truth` field to
+  `SourceProvenance` is a cross-engine schema migration and is out of
+  scope for this MVP issue.
 - Reproducible: same `theta` → byte-identical `ClubTarget` (within
   floating-point rounding) on two consecutive runs.
 
