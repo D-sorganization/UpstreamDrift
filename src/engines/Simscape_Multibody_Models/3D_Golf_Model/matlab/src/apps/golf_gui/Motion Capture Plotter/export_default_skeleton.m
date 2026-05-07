@@ -1,48 +1,58 @@
-function export_default_skeleton(out_path)
-%EXPORT_DEFAULT_SKELETON  Run a 5 ms sim and dump default joint positions to JSON.
+function export_default_skeleton(pose_name, out_path)
+%EXPORT_DEFAULT_SKELETON  Run a 5 ms sim and dump joint positions to JSON.
 %
-%   EXPORT_DEFAULT_SKELETON() saves to simscape_default_skeleton.json next
-%   to this script.
-%   EXPORT_DEFAULT_SKELETON(OUT_PATH) saves to the specified path.
+%   EXPORT_DEFAULT_SKELETON()              -> writes Impact skeleton
+%   EXPORT_DEFAULT_SKELETON('Impact')      -> writes Impact skeleton
+%   EXPORT_DEFAULT_SKELETON('TopofBackswing')
+%                                          -> writes TopofBackswing skeleton
+%   EXPORT_DEFAULT_SKELETON(POSE, OUT_PATH) -> custom output path
 %
-%   The output JSON has joint world-frame positions (metres) at t=0 of the
-%   GolfSwing3D_Kinetic model with the standard Impact MAT inputs:
+%   POSE_NAME selects which model-input MAT to load.  The corresponding
+%   files are expected at:
+%       matlab/src/model/inputs/3DModelInputs_<POSE>.mat
 %
-%       {
-%         "joints": {"hip":[x,y,z], "spine":[x,y,z], "hub":[x,y,z],
-%                    "ls":[x,y,z], "rs":[x,y,z], "le":[x,y,z], "re":[x,y,z],
-%                    "lw":[x,y,z], "rw":[x,y,z], "mp":[x,y,z], "ch":[x,y,z]},
-%         "segments": [["hip","spine"], ["spine","hub"], ...],
-%         "model_name": "GolfSwing3D_Kinetic",
-%         "input_file": "...",
-%         "exported_at": "2026-05-07T..."
-%       }
+%   The output JSON contains joint world-frame positions (metres) at t=0:
+%       hip, spine, hub, ls/rs (shoulders), le/re (elbows),
+%       lw/rw (wrists), mp (mid-hands), butt, ch (clubhead)
 %
-%   Run this ONCE; the starting_pose_matcher.py reads the JSON.
+%   The starting_pose_matcher.py tool reads the JSON.  Run this script
+%   once per pose; the JSON files are committed if you want them in CI.
 
-    if nargin < 1
-        here = fileparts(mfilename('fullpath'));
-        out_path = fullfile(here, 'simscape_default_skeleton.json');
+    if nargin < 1 || isempty(pose_name)
+        pose_name = 'Impact';
+    end
+    pose_name = char(pose_name);
+
+    here = fileparts(mfilename('fullpath'));
+    if nargin < 2 || isempty(out_path)
+        out_path = fullfile(here, sprintf('simscape_skeleton_%s.json', pose_name));
     end
 
-    fprintf('=== export_default_skeleton ===\n');
-    fprintf('Loading default starting position (this runs a tiny 5ms sim)...\n');
+    fprintf('=== export_default_skeleton(%s) ===\n', pose_name);
+    fprintf('Loading starting position (this runs a tiny 5ms sim)...\n');
 
-    % Make sure path is set up
-    here = fileparts(mfilename('fullpath'));
+    % Path setup -------------------------------------------------------------
     matlab_root = fileparts(fileparts(fileparts(fileparts(here))));   % .../matlab/
     src_dir = fullfile(matlab_root, 'src');
-    if exist(src_dir, 'dir')
-        addpath(genpath(src_dir));
-    end
+    if exist(src_dir, 'dir');  addpath(genpath(src_dir));  end
     mm_shared = fullfile(matlab_root, 'motion_matching', 'shared');
-    if exist(mm_shared, 'dir')
-        addpath(mm_shared);
+    if exist(mm_shared, 'dir'); addpath(mm_shared); end
+
+    % Resolve input MAT file -------------------------------------------------
+    input_file = fullfile(matlab_root, 'src', 'model', 'inputs', ...
+                          sprintf('3DModelInputs_%s.mat', pose_name));
+    if ~isfile(input_file)
+        error('export_default_skeleton:noInputMat', ...
+              'Input MAT not found: %s', input_file);
     end
+    fprintf('input_file: %s\n', input_file);
 
-    skel = load_impact_starting_position(struct('verbose', true));
+    % Run the sim -----------------------------------------------------------
+    skel = load_impact_starting_position(struct( ...
+        'input_file', input_file, ...
+        'verbose', true));
 
-    % Build the connectivity list for plotting (parent -> child segments).
+    % Build connectivity ----------------------------------------------------
     segments = { ...
         {'hip',   'spine'}, ...
         {'spine', 'hub'  }, ...
@@ -57,8 +67,10 @@ function export_default_skeleton(out_path)
         {'mp',    'ch'   } };
 
     out = struct();
+    out.pose       = string(pose_name);
     out.joints     = struct();
-    joint_fields = {'hip','spine','hub','ls','rs','le','re','lw','rw','mp','ch','butt'};
+    joint_fields = {'hip','spine','hub','ls','rs','le','re', ...
+                    'lw','rw','mp','ch','butt'};
     for k = 1:numel(joint_fields)
         f = joint_fields{k};
         if isfield(skel, f) && numel(skel.(f)) == 3
@@ -70,7 +82,7 @@ function export_default_skeleton(out_path)
     out.input_file  = char(skel.input_file);
     out.exported_at = char(datetime('now','Format','yyyy-MM-dd''T''HH:mm:ss'));
 
-    % Write JSON.
+    % Write JSON -----------------------------------------------------------
     txt = jsonencode(out, 'PrettyPrint', true);
     fid = fopen(out_path, 'w');
     if fid < 0
