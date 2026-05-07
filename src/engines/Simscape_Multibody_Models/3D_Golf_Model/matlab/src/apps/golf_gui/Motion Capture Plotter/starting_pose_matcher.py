@@ -48,7 +48,7 @@ from matplotlib.backends.backend_qtagg import (
     NavigationToolbar2QT as NavigationToolbar,
 )
 from matplotlib.figure import Figure
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import QSignalBlocker, Qt, QTimer
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
     QApplication,
@@ -66,10 +66,26 @@ from PyQt6.QtWidgets import (
     QScrollArea,
     QSizePolicy,
     QSlider,
+    QSpinBox,
     QStyleFactory,
     QVBoxLayout,
     QWidget,
 )
+
+# Schema version for session JSON
+_SESSION_SCHEMA_VERSION = 1
+
+# Phase window options.  Maps display label -> (event_start, event_end) where
+# either side may be None for manual / full-data.
+_PHASE_WINDOWS: dict[str, tuple[str | None, str | None]] = {
+    "None":                  (None, None),
+    "Backswing (A → T)":     ("A", "T"),
+    "Downswing (T → I)":     ("T", "I"),
+    "Follow-through (I → F)":("I", "F"),
+    "Full swing (A → F)":    ("A", "F"),
+    "Manual range":          ("manual", "manual"),
+}
+_DEFAULT_PHASE = "Full swing (A → F)"
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -528,8 +544,22 @@ class StartingPoseMatcher(QMainWindow):
 
         self.show_clubhead_trace = False
         self.show_midhands_trace = False
-        self.show_full_swing_window = True
         self.lock_xy_rotation = True   # Rx/Ry locked by default
+
+        # Playback state
+        self.current_frame: int = 0
+        self.frame_override_active: bool = False  # use slider frame for mocap target?
+        self.is_playing: bool = False
+        self.loop_playback: bool = True
+        self.event_overrides: dict[str, int] = {}  # user-set A/T/I/F sample numbers
+
+        self._timer = QTimer(self)
+        self._timer.timeout.connect(self._advance_frame)
+
+        # Phase window state
+        self.phase_window: str = _DEFAULT_PHASE
+        self.manual_window_start: int = 0
+        self.manual_window_end: int = 0
 
         self._build_ui()
         self._apply_camera_preset(_DEFAULT_CAMERA)
@@ -569,6 +599,7 @@ class StartingPoseMatcher(QMainWindow):
 
         col.addWidget(self._build_file_box())
         col.addWidget(self._build_pose_box())
+        col.addWidget(self._build_playback_box())
         col.addWidget(self._build_view_box())
         col.addWidget(self._build_align_box())
         col.addWidget(self._build_transform_box())
@@ -678,10 +709,126 @@ class StartingPoseMatcher(QMainWindow):
         self.cb_midhands_trace = QCheckBox("Show mocap mid-hands path")
         self.cb_midhands_trace.stateChanged.connect(self._on_traces_toggled)
         v.addWidget(self.cb_midhands_trace)
-        self.cb_swing_window = QCheckBox("Limit traces to swing window (A→F)")
-        self.cb_swing_window.setChecked(True)
-        self.cb_swing_window.stateChanged.connect(self._on_traces_toggled)
-        v.addWidget(self.cb_swing_window)
+
+        # Phase window combo (replaces the old simple "swing window" checkbox)
+        ph_row = QHBoxLayout()
+        ph_row.addWidget(QLabel("Phase:"))
+        self.phase_combo = QComboBox()
+        for label in _PHASE_WINDOWS:
+            self.phase_combo.addItem(label)
+        self.phase_combo.setCurrentText(_DEFAULT_PHASE)
+        self.phase_combo.currentTextChanged.connect(self._on_phase_changed)
+        ph_row.addWidget(self.phase_combo, stretch=1)
+        v.addLayout(ph_row)
+
+        # Manual range (hidden until "Manual range" selected)
+        self.manual_range_widget = QWidget()
+        mr = QHBoxLayout(self.manual_range_widget)
+        mr.setContentsMargins(0, 0, 0, 0)
+        mr.addWidget(QLabel("From:"))
+        self.spin_phase_start = QSpinBox()
+        self.spin_phase_start.setRange(0, 0)
+        self.spin_phase_start.valueChanged.connect(self._on_manual_range_changed)
+        mr.addWidget(self.spin_phase_start)
+        mr.addWidget(QLabel("To:"))
+        self.spin_phase_end = QSpinBox()
+        self.spin_phase_end.setRange(0, 0)
+        self.spin_phase_end.valueChanged.connect(self._on_manual_range_changed)
+        mr.addWidget(self.spin_phase_end)
+        self.manual_range_widget.setVisible(False)
+        v.addWidget(self.manual_range_widget)
+
+        # Show current-frame marker on traces
+        self.cb_frame_marker = QCheckBox("Show current-frame marker on traces")
+        self.cb_frame_marker.setChecked(True)
+        self.cb_frame_marker.stateChanged.connect(lambda _: self._redraw())
+        v.addWidget(self.cb_frame_marker)
+        return box
+
+    def _build_playback_box(self) -> QGroupBox:
+        box = QGroupBox("Playback")
+        v = QVBoxLayout(box)
+        v.setSpacing(6)
+
+        # Frame slider + spinbox row
+        row1 = QHBoxLayout()
+        row1.addWidget(QLabel("Frame:"))
+        self.spin_frame = QSpinBox()
+        self.spin_frame.setRange(0, 0)
+        self.spin_frame.setMinimumWidth(80)
+        self.spin_frame.setKeyboardTracking(False)
+        self.spin_frame.valueChanged.connect(self._on_frame_changed_spin)
+        row1.addWidget(self.spin_frame)
+        self.lbl_time = QLabel("t = — s")
+        self.lbl_time.setObjectName("status")
+        self.lbl_time.setMinimumWidth(110)
+        row1.addWidget(self.lbl_time)
+        v.addLayout(row1)
+
+        self.frame_slider = QSlider(Qt.Orientation.Horizontal)
+        self.frame_slider.setRange(0, 0)
+        self.frame_slider.valueChanged.connect(self._on_frame_changed_slider)
+        v.addWidget(self.frame_slider)
+
+        # Step buttons
+        step_row = QHBoxLayout()
+        step_row.setSpacing(2)
+        for label, delta, tip in [
+            ("⏮", -10**9, "First frame"),
+            ("⏪", -10, "−10 frames"),
+            ("◀", -1, "−1 frame"),
+            ("▶", +1, "+1 frame"),
+            ("⏩", +10, "+10 frames"),
+            ("⏭", +10**9, "Last frame"),
+        ]:
+            b = QPushButton(label)
+            b.setObjectName("preset")
+            b.setToolTip(tip)
+            b.setMaximumWidth(46)
+            b.clicked.connect(lambda _checked, d=delta: self._step_frame(d))
+            step_row.addWidget(b)
+        v.addLayout(step_row)
+
+        # Play/pause + speed
+        play_row = QHBoxLayout()
+        self.btn_play = QPushButton("▶ Play")
+        self.btn_play.setObjectName("primary")
+        self.btn_play.clicked.connect(self._toggle_play)
+        play_row.addWidget(self.btn_play)
+        play_row.addWidget(QLabel("Speed:"))
+        self.spin_speed = QSpinBox()
+        self.spin_speed.setRange(1, 240)
+        self.spin_speed.setValue(30)
+        self.spin_speed.setSuffix(" fps")
+        play_row.addWidget(self.spin_speed)
+        self.cb_loop = QCheckBox("Loop")
+        self.cb_loop.setChecked(True)
+        self.cb_loop.stateChanged.connect(
+            lambda _: setattr(self, "loop_playback", self.cb_loop.isChecked()))
+        play_row.addWidget(self.cb_loop)
+        v.addLayout(play_row)
+
+        # Use-current-frame override
+        self.cb_use_current_frame = QCheckBox(
+            "Use current frame for mocap target (override pose-slot events)")
+        self.cb_use_current_frame.stateChanged.connect(self._on_frame_override_toggled)
+        v.addWidget(self.cb_use_current_frame)
+
+        # "Set as event" row
+        ev_row = QHBoxLayout()
+        ev_row.addWidget(QLabel("Mark current frame as event:"))
+        self.combo_set_event = QComboBox()
+        self.combo_set_event.addItems(["A", "T", "I", "F"])
+        ev_row.addWidget(self.combo_set_event)
+        b_set = QPushButton("Set")
+        b_set.setObjectName("preset")
+        b_set.clicked.connect(self._set_event_to_current_frame)
+        ev_row.addWidget(b_set)
+        b_clear = QPushButton("Clear overrides")
+        b_clear.setObjectName("preset")
+        b_clear.clicked.connect(self._clear_event_overrides)
+        ev_row.addWidget(b_clear)
+        v.addLayout(ev_row)
         return box
 
     def _build_align_box(self) -> QGroupBox:
@@ -806,10 +953,21 @@ class StartingPoseMatcher(QMainWindow):
         box = QGroupBox("Output")
         v = QVBoxLayout(box)
         v.setSpacing(6)
+
         self.btn_save = QPushButton("Save offsets to JSON…")
         self.btn_save.setObjectName("accent")
         self.btn_save.clicked.connect(self._on_save_clicked)
         v.addWidget(self.btn_save)
+
+        ses_row = QHBoxLayout()
+        self.btn_save_session = QPushButton("Save session…")
+        self.btn_save_session.clicked.connect(self._on_save_session_clicked)
+        ses_row.addWidget(self.btn_save_session)
+        self.btn_load_session = QPushButton("Load session…")
+        self.btn_load_session.clicked.connect(self._on_load_session_clicked)
+        ses_row.addWidget(self.btn_load_session)
+        v.addLayout(ses_row)
+
         self.lbl_residual = QLabel("Residuals: (no data)")
         self.lbl_residual.setObjectName("residual")
         self.lbl_residual.setWordWrap(True)
@@ -871,8 +1029,109 @@ class StartingPoseMatcher(QMainWindow):
     def _on_traces_toggled(self, _: int) -> None:
         self.show_clubhead_trace = self.cb_clubhead_trace.isChecked()
         self.show_midhands_trace = self.cb_midhands_trace.isChecked()
-        self.show_full_swing_window = self.cb_swing_window.isChecked()
         self._redraw()
+
+    def _on_phase_changed(self, label: str) -> None:
+        self.phase_window = label
+        is_manual = (label == "Manual range")
+        self.manual_range_widget.setVisible(is_manual)
+        self._redraw()
+
+    def _on_manual_range_changed(self, _: int) -> None:
+        self.manual_window_start = int(self.spin_phase_start.value())
+        self.manual_window_end = int(self.spin_phase_end.value())
+        if self.manual_window_end < self.manual_window_start:
+            self.manual_window_end = self.manual_window_start
+            with QSignalBlocker(self.spin_phase_end):
+                self.spin_phase_end.setValue(self.manual_window_end)
+        self._redraw()
+
+    # ---- playback handlers ----
+    def _on_frame_changed_slider(self, frame: int) -> None:
+        with QSignalBlocker(self.spin_frame):
+            self.spin_frame.setValue(int(frame))
+        self.current_frame = int(frame)
+        self._update_time_label()
+        self._redraw()
+
+    def _on_frame_changed_spin(self, frame: int) -> None:
+        with QSignalBlocker(self.frame_slider):
+            self.frame_slider.setValue(int(frame))
+        self.current_frame = int(frame)
+        self._update_time_label()
+        self._redraw()
+
+    def _step_frame(self, delta: int) -> None:
+        if self.df is None:
+            return
+        n = len(self.df)
+        if delta <= -10**8:
+            self.spin_frame.setValue(0)
+        elif delta >= 10**8:
+            self.spin_frame.setValue(n - 1)
+        else:
+            new = max(0, min(n - 1, self.current_frame + delta))
+            self.spin_frame.setValue(new)
+
+    def _toggle_play(self) -> None:
+        if self.is_playing:
+            self._timer.stop()
+            self.is_playing = False
+            self.btn_play.setText("▶ Play")
+        else:
+            if self.df is None or len(self.df) == 0:
+                return
+            fps = max(1, int(self.spin_speed.value()))
+            self._timer.start(int(round(1000.0 / fps)))
+            self.is_playing = True
+            self.btn_play.setText("⏸ Pause")
+
+    def _advance_frame(self) -> None:
+        if self.df is None:
+            return
+        n = len(self.df)
+        nxt = self.current_frame + 1
+        if nxt >= n:
+            if self.loop_playback:
+                nxt = 0
+            else:
+                self._toggle_play()
+                return
+        self.spin_frame.setValue(nxt)
+
+    def _on_frame_override_toggled(self, _state: int) -> None:
+        self.frame_override_active = self.cb_use_current_frame.isChecked()
+        self._redraw()
+
+    def _set_event_to_current_frame(self) -> None:
+        if self.df is None:
+            return
+        ev = self.combo_set_event.currentText()
+        # Store as "absolute sample number" (1-based) so it round-trips with
+        # MocapEvents; current_frame is 0-based in the loaded data.
+        self.event_overrides[ev] = self.current_frame + 1
+        # Reflect in events struct for in-session use
+        setattr(self.events, f"{ev}_sample", float(self.current_frame + 1))
+        self.lbl_event_info.setText(self._events_summary() + "  (overrides active)")
+        self._redraw()
+
+    def _clear_event_overrides(self) -> None:
+        if not self.event_overrides:
+            return
+        # Re-read events from the xlsx to undo overrides
+        if self._xlsx_path:
+            self.events = read_event_header(self._xlsx_path,
+                                            self.sheet_combo.currentText())
+        self.event_overrides = {}
+        self.lbl_event_info.setText(self._events_summary())
+        self._redraw()
+
+    def _update_time_label(self) -> None:
+        if self.df is None or self.current_frame >= len(self.df):
+            self.lbl_time.setText("t = — s")
+            return
+        t = float(self.df.iloc[self.current_frame]["time"])
+        self.lbl_time.setText(f"t = {t:+.3f} s   (frame {self.current_frame})")
 
     def _on_lock_xy_toggled(self, _state: int) -> None:
         self.lock_xy_rotation = not self.cb_lock_xy.isChecked()
@@ -1025,9 +1284,32 @@ class StartingPoseMatcher(QMainWindow):
         self.df = df
         self._xlsx_path = path
         self.events = read_event_header(path, sheet)
+        # Re-apply any event-override that survived from the previous load
+        for ev, sample in list(self.event_overrides.items()):
+            setattr(self.events, f"{ev}_sample", float(sample))
         n = len(df)
         self.lbl_file.setText(f"{Path(path).name}\nsheet={sheet}  frames={n}")
         self.lbl_event_info.setText(self._events_summary())
+        # Configure playback widgets to the new range
+        with QSignalBlocker(self.spin_frame):
+            self.spin_frame.setRange(0, n - 1)
+        with QSignalBlocker(self.frame_slider):
+            self.frame_slider.setRange(0, n - 1)
+        with QSignalBlocker(self.spin_phase_start):
+            self.spin_phase_start.setRange(0, n - 1)
+        with QSignalBlocker(self.spin_phase_end):
+            self.spin_phase_end.setRange(0, n - 1)
+            self.spin_phase_end.setValue(n - 1)
+        self.manual_window_end = n - 1
+        # Default initial frame to T (top of backswing) if available
+        t_frame = self._frame_for("T")
+        if t_frame is not None:
+            with QSignalBlocker(self.spin_frame):
+                self.spin_frame.setValue(t_frame)
+            with QSignalBlocker(self.frame_slider):
+                self.frame_slider.setValue(t_frame)
+            self.current_frame = t_frame
+        self._update_time_label()
         self._redraw()
 
     def _events_summary(self) -> str:
@@ -1075,6 +1357,199 @@ class StartingPoseMatcher(QMainWindow):
         self._notify(f"Saved: {Path(path).name}")
         logger.info("Wrote %s", path)
 
+    # ---------- session save / load --------------------------------------- #
+
+    def _serialize_session(self) -> dict[str, Any]:
+        """Snapshot the entire UI state to a JSON-serialisable dict."""
+        return {
+            "schema_version": _SESSION_SCHEMA_VERSION,
+            "saved_at": pd.Timestamp.now().isoformat(),
+            "xlsx_path": self._xlsx_path,
+            "sheet": self.sheet_combo.currentText(),
+            "transform": {
+                "tx": self.transform.tx, "ty": self.transform.ty,
+                "tz": self.transform.tz, "rx": self.transform.rx,
+                "ry": self.transform.ry, "rz": self.transform.rz,
+                "scale": self.transform.scale,
+                "pivot": list(self.transform.pivot),
+            },
+            "lock_xy_rotation": self.lock_xy_rotation,
+            "poses": {key: {"visible": slot.visible,
+                            "event": slot.target_event,
+                            "skeleton_path":
+                                str(Path(__file__).parent /
+                                    f"simscape_skeleton_{key}.json")}
+                      for key, slot in self.poses.items()},
+            "view": {"elev": float(self.ax.elev), "azim": float(self.ax.azim)},
+            "traces": {
+                "clubhead": self.show_clubhead_trace,
+                "midhands": self.show_midhands_trace,
+                "phase": self.phase_window,
+                "manual_start": self.manual_window_start,
+                "manual_end": self.manual_window_end,
+                "frame_marker": self.cb_frame_marker.isChecked(),
+            },
+            "playback": {
+                "current_frame": self.current_frame,
+                "frame_override_active": self.frame_override_active,
+                "loop": self.loop_playback,
+                "fps": int(self.spin_speed.value()),
+            },
+            "event_overrides": dict(self.event_overrides),
+        }
+
+    def _on_save_session_clicked(self) -> None:
+        ses_dir = Path(__file__).parent / "sessions"
+        ses_dir.mkdir(exist_ok=True)
+        sheet = self.sheet_combo.currentText() or "session"
+        ts = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Save session", str(ses_dir / f"{sheet}_{ts}.session.json"),
+            "JSON (*.json)")
+        if not path:
+            return
+        with open(path, "w") as f:
+            json.dump(self._serialize_session(), f, indent=2, default=float)
+        self._notify(f"Saved session: {Path(path).name}")
+        logger.info("Wrote session %s", path)
+
+    def _on_load_session_clicked(self) -> None:
+        ses_dir = Path(__file__).parent / "sessions"
+        start = str(ses_dir) if ses_dir.exists() else str(Path(__file__).parent)
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Load session", start, "JSON (*.json)")
+        if not path:
+            return
+        try:
+            with open(path) as f:
+                d = json.load(f)
+        except Exception as exc:  # noqa: BLE001
+            self._notify(f"Load failed: {exc}")
+            return
+        self._apply_session(d)
+        self._notify(f"Loaded session: {Path(path).name}")
+
+    def _apply_session(self, d: dict[str, Any]) -> None:
+        """Restore UI state from a session dict.  Forward-compatible: missing
+        keys keep current values, unknown keys are ignored.
+        """
+        ver = d.get("schema_version", 1)
+        if ver > _SESSION_SCHEMA_VERSION:
+            logger.warning("Session schema_version=%s newer than supported %s "
+                           "— ignoring unknown keys.", ver, _SESSION_SCHEMA_VERSION)
+
+        # 1. Re-load xlsx + sheet (this resets a lot of widgets, so do it first).
+        xlsx = d.get("xlsx_path")
+        sheet = d.get("sheet")
+        if sheet:
+            with QSignalBlocker(self.sheet_combo):
+                self.sheet_combo.setCurrentText(sheet)
+        if xlsx and Path(xlsx).exists():
+            self._load_xlsx(xlsx)
+        elif xlsx:
+            logger.warning("Saved xlsx not found: %s", xlsx)
+
+        # 2. Event overrides (applied on top of the freshly-loaded events).
+        evo = d.get("event_overrides") or {}
+        for ev, sample in evo.items():
+            self.event_overrides[ev] = int(sample)
+            setattr(self.events, f"{ev}_sample", float(sample))
+        if evo:
+            self.lbl_event_info.setText(self._events_summary() + "  (overrides active)")
+
+        # 3. Pose visibility + events.
+        for key, slot_d in (d.get("poses") or {}).items():
+            if key not in self.poses:
+                continue
+            cb = self._pose_visible_checks.get(key)
+            ec = self._pose_event_combos.get(key)
+            if cb is not None:
+                with QSignalBlocker(cb):
+                    cb.setChecked(bool(slot_d.get("visible", True)))
+                self.poses[key].visible = cb.isChecked()
+            if ec is not None and slot_d.get("event") in ("A", "T", "I", "F"):
+                with QSignalBlocker(ec):
+                    ec.setCurrentText(slot_d["event"])
+                self.poses[key].target_event = slot_d["event"]
+
+        # 4. Transform sliders.
+        tf = d.get("transform") or {}
+        for attr, widget in [("tx", self.s_tx), ("ty", self.s_ty), ("tz", self.s_tz),
+                             ("rx", self.s_rx), ("ry", self.s_ry), ("rz", self.s_rz),
+                             ("scale", self.s_scale)]:
+            if attr in tf:
+                with QSignalBlocker(widget.spin):
+                    widget.set_value(float(tf[attr]))
+                with QSignalBlocker(widget.slider):
+                    widget.slider.setValue(int(round(float(tf[attr]) / widget._scale)))
+                setattr(self.transform, attr, float(tf[attr]))
+        if "pivot" in tf:
+            self.transform.pivot = tuple(tf["pivot"])
+
+        # 5. Lock-XY rotation.
+        if "lock_xy_rotation" in d:
+            allow_xy = not bool(d["lock_xy_rotation"])
+            with QSignalBlocker(self.cb_lock_xy):
+                self.cb_lock_xy.setChecked(allow_xy)
+            self.lock_xy_rotation = not allow_xy
+            self.s_rx.setEnabled(allow_xy)
+            self.s_ry.setEnabled(allow_xy)
+
+        # 6. Camera.
+        view = d.get("view") or {}
+        if "elev" in view and "azim" in view:
+            self.ax.view_init(elev=float(view["elev"]), azim=float(view["azim"]))
+
+        # 7. Traces / phase.
+        tr = d.get("traces") or {}
+        if "clubhead" in tr:
+            with QSignalBlocker(self.cb_clubhead_trace):
+                self.cb_clubhead_trace.setChecked(bool(tr["clubhead"]))
+            self.show_clubhead_trace = bool(tr["clubhead"])
+        if "midhands" in tr:
+            with QSignalBlocker(self.cb_midhands_trace):
+                self.cb_midhands_trace.setChecked(bool(tr["midhands"]))
+            self.show_midhands_trace = bool(tr["midhands"])
+        if tr.get("phase") in _PHASE_WINDOWS:
+            with QSignalBlocker(self.phase_combo):
+                self.phase_combo.setCurrentText(tr["phase"])
+            self.phase_window = tr["phase"]
+            self.manual_range_widget.setVisible(self.phase_window == "Manual range")
+        if "manual_start" in tr:
+            with QSignalBlocker(self.spin_phase_start):
+                self.spin_phase_start.setValue(int(tr["manual_start"]))
+            self.manual_window_start = int(tr["manual_start"])
+        if "manual_end" in tr:
+            with QSignalBlocker(self.spin_phase_end):
+                self.spin_phase_end.setValue(int(tr["manual_end"]))
+            self.manual_window_end = int(tr["manual_end"])
+        if "frame_marker" in tr:
+            with QSignalBlocker(self.cb_frame_marker):
+                self.cb_frame_marker.setChecked(bool(tr["frame_marker"]))
+
+        # 8. Playback.
+        pb = d.get("playback") or {}
+        if "current_frame" in pb:
+            with QSignalBlocker(self.spin_frame):
+                self.spin_frame.setValue(int(pb["current_frame"]))
+            with QSignalBlocker(self.frame_slider):
+                self.frame_slider.setValue(int(pb["current_frame"]))
+            self.current_frame = int(pb["current_frame"])
+            self._update_time_label()
+        if "frame_override_active" in pb:
+            with QSignalBlocker(self.cb_use_current_frame):
+                self.cb_use_current_frame.setChecked(bool(pb["frame_override_active"]))
+            self.frame_override_active = bool(pb["frame_override_active"])
+        if "loop" in pb:
+            with QSignalBlocker(self.cb_loop):
+                self.cb_loop.setChecked(bool(pb["loop"]))
+            self.loop_playback = bool(pb["loop"])
+        if "fps" in pb:
+            with QSignalBlocker(self.spin_speed):
+                self.spin_speed.setValue(int(pb["fps"]))
+
+        self._redraw()
+
     # ---------- helpers --------------------------------------------------- #
 
     def _frame_for(self, label: str) -> int | None:
@@ -1092,9 +1567,13 @@ class StartingPoseMatcher(QMainWindow):
     def _mocap_pos_for(self, slot: PoseSlot, kind: str) -> np.ndarray | None:
         if self.df is None:
             return None
-        f = self._frame_for(slot.target_event)
+        if self.frame_override_active:
+            f: int | None = self.current_frame
+        else:
+            f = self._frame_for(slot.target_event)
         if f is None:
             return None
+        f = max(0, min(int(f), len(self.df) - 1))
         row = self.df.iloc[f]
         if kind == "mid":
             return np.array([-row["mid_X"], row["mid_Y"], row["mid_Z"]])
@@ -1175,34 +1654,76 @@ class StartingPoseMatcher(QMainWindow):
                         label="ball")
 
     def _trace_window(self) -> tuple[int, int]:
+        """Return [start, end) frame indices for trace drawing per phase setting."""
         if self.df is None:
             return (0, 0)
         n = len(self.df)
-        if not self.show_full_swing_window:
+        bounds = _PHASE_WINDOWS.get(self.phase_window, (None, None))
+        # "None" -> draw across full data
+        if bounds == (None, None):
             return (0, n)
-        a = self._frame_for("A") or 0
-        f = self._frame_for("F") or (n - 1)
-        if f < a:
-            a, f = 0, n - 1
-        return (a, f + 1)
+        # "Manual range"
+        if bounds == ("manual", "manual"):
+            i0 = max(0, min(self.manual_window_start, n - 1))
+            i1 = max(0, min(self.manual_window_end + 1, n))
+            if i1 <= i0:
+                i1 = i0 + 1
+            return (i0, i1)
+        # Event-bounded
+        a_label, b_label = bounds
+        a = self._frame_for(str(a_label)) if a_label is not None else 0
+        b = self._frame_for(str(b_label)) if b_label is not None else (n - 1)
+        if a is None:
+            a = 0
+        if b is None:
+            b = n - 1
+        if b < a:
+            a, b = 0, n - 1
+        return (a, b + 1)
 
     def _draw_traces(self) -> None:
         if self.df is None:
             return
-        if not (self.show_clubhead_trace or self.show_midhands_trace):
-            return
         i0, i1 = self._trace_window()
         sub = self.df.iloc[i0:i1]
-        if self.show_midhands_trace:
+        if self.show_midhands_trace and len(sub) > 1:
             self.ax.plot(-sub["mid_X"].values, sub["mid_Y"].values,
                          sub["mid_Z"].values, color="#7dd3fc", linestyle="--",
-                         linewidth=1.2, alpha=0.8,
+                         linewidth=1.2, alpha=0.85,
                          label="mocap mid-hands trace")
-        if self.show_clubhead_trace:
+        if self.show_clubhead_trace and len(sub) > 1:
             self.ax.plot(-sub["club_X"].values, sub["club_Y"].values,
                          sub["club_Z"].values, color="#fb7185", linestyle="--",
-                         linewidth=1.2, alpha=0.8,
+                         linewidth=1.2, alpha=0.85,
                          label="mocap clubhead trace")
+        # Phase boundary markers (start / end of selected window)
+        if (self.show_midhands_trace or self.show_clubhead_trace) and len(sub) > 0:
+            for idx, marker_label, color in [
+                (i0, "start", "#22c55e"),
+                (min(i1 - 1, len(self.df) - 1), "end", "#a855f7"),
+            ]:
+                row = self.df.iloc[idx]
+                if self.show_midhands_trace:
+                    self.ax.scatter(-row["mid_X"], row["mid_Y"], row["mid_Z"],
+                                    color=color, s=40, marker="^",
+                                    edgecolor="black", linewidth=0.5)
+                if self.show_clubhead_trace:
+                    self.ax.scatter(-row["club_X"], row["club_Y"], row["club_Z"],
+                                    color=color, s=40, marker="^",
+                                    edgecolor="black", linewidth=0.5)
+        # Current-frame marker (cross)
+        if (getattr(self, "cb_frame_marker", None) is not None and
+                self.cb_frame_marker.isChecked() and
+                self.df is not None and 0 <= self.current_frame < len(self.df)):
+            row = self.df.iloc[self.current_frame]
+            if self.show_midhands_trace:
+                self.ax.scatter(-row["mid_X"], row["mid_Y"], row["mid_Z"],
+                                color="#fde047", s=120, marker="x", linewidth=2,
+                                label="current frame (mid)")
+            if self.show_clubhead_trace:
+                self.ax.scatter(-row["club_X"], row["club_Y"], row["club_Z"],
+                                color="#fde047", s=140, marker="x", linewidth=2,
+                                label="current frame (clubhead)")
 
     def _draw_visible_poses(self) -> None:
         for slot in self.poses.values():
