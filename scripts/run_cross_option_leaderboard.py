@@ -41,6 +41,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import math
 import os
 import subprocess
 import sys
@@ -264,6 +265,11 @@ def _git_commit() -> str:
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _json_safe_float(value: float) -> float | None:
+    """Return a strict-JSON-safe float, or None for non-finite sentinels."""
+    return value if math.isfinite(value) else None
 
 
 def _load_target(trial: str) -> Any:
@@ -753,7 +759,7 @@ def _generate_visualizations(results_dir: Path, viz_dir: Path) -> None:
         options = sorted({r["option"] for r in all_results})
         colors = plt.cm.Set1(np.linspace(0, 1, len(options)))
 
-        for option, color in zip(options, colors):
+        for option, color in zip(options, colors, strict=True):
             option_results = [r for r in all_results if r["option"] == option]
             ax.scatter(
                 [r["wall_clock_s"] for r in option_results],
@@ -811,16 +817,18 @@ def main(argv: list[str] | None = None) -> int:
         "successful_fits": summary.successful_fits,
         "skipped_fits": summary.skipped_fits,
         "failed_fits": summary.failed_fits,
-        "total_wall_time_s": summary.total_wall_time_s,
-        "avg_wall_time_s": summary.avg_wall_time_s,
-        "avg_grip_rmse_mm": summary.avg_grip_rmse_mm,
-        "best_grip_rmse_mm": summary.best_grip_rmse_mm,
-        "worst_grip_rmse_mm": summary.worst_grip_rmse_mm,
+        "total_wall_time_s": _json_safe_float(summary.total_wall_time_s),
+        "avg_wall_time_s": _json_safe_float(summary.avg_wall_time_s),
+        "avg_grip_rmse_mm": _json_safe_float(summary.avg_grip_rmse_mm),
+        "best_grip_rmse_mm": _json_safe_float(summary.best_grip_rmse_mm),
+        "worst_grip_rmse_mm": _json_safe_float(summary.worst_grip_rmse_mm),
         "timestamp": _now_iso(),
         "commit": _git_commit(),
     }
     args.metrics_path.parent.mkdir(parents=True, exist_ok=True)
-    args.metrics_path.write_text(json.dumps(metrics_dict, indent=2) + "\n")
+    args.metrics_path.write_text(
+        json.dumps(metrics_dict, indent=2, allow_nan=False) + "\n"
+    )
     LOGGER.info("metrics written: %s", args.metrics_path)
 
     # Generate visualizations

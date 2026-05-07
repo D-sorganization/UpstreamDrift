@@ -12,18 +12,26 @@ from pathlib import Path
 
 import pytest
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
 
-def test_cross_option_leaderboard_cli_help():
-    """Verify the CLI script loads and provides help."""
+
+def _run_leaderboard_cli(*args: str, timeout: int = 30):
+    """Run the leaderboard CLI from the repository root."""
     import subprocess
     import sys
 
-    result = subprocess.run(
-        [sys.executable, "scripts/run_cross_option_leaderboard.py", "--help"],
+    return subprocess.run(
+        [sys.executable, "scripts/run_cross_option_leaderboard.py", *args],
         capture_output=True,
         text=True,
-        timeout=10,
+        timeout=timeout,
+        cwd=REPO_ROOT,
     )
+
+
+def test_cross_option_leaderboard_cli_help():
+    """Verify the CLI script loads and provides help."""
+    result = _run_leaderboard_cli("--help", timeout=10)
     assert result.returncode == 0
     assert "cross-option" in result.stdout.lower()
     assert "--skip-fits" in result.stdout
@@ -71,28 +79,16 @@ def test_cross_option_leaderboard_report_generation():
         for option, data in options_data.items():
             (trial_dir / f"{option}.json").write_text(json.dumps(data, indent=2) + "\n")
 
-        # Run report generation
-        import subprocess
-        import sys
-
-        result = subprocess.run(
-            [
-                sys.executable,
-                "scripts/run_cross_option_leaderboard.py",
-                "--results-dir",
-                str(results_dir),
-                "--leaderboard-path",
-                str(leaderboard_path),
-                "--report-path",
-                str(report_path),
-                "--metrics-path",
-                str(metrics_path),
-                "--skip-fits",
-            ],
-            capture_output=True,
-            text=True,
-            timeout=30,
-            cwd="/home/dieterolson/Repositories-WSL/UpstreamDrift",
+        result = _run_leaderboard_cli(
+            "--results-dir",
+            str(results_dir),
+            "--leaderboard-path",
+            str(leaderboard_path),
+            "--report-path",
+            str(report_path),
+            "--metrics-path",
+            str(metrics_path),
+            "--skip-fits",
         )
 
         assert result.returncode == 0, f"CLI failed: {result.stderr}"
@@ -115,7 +111,9 @@ def test_cross_option_leaderboard_report_generation():
 
         # Verify metrics JSON
         assert metrics_path.exists()
-        metrics = json.loads(metrics_path.read_text())
+        metrics_text = metrics_path.read_text()
+        assert "Infinity" not in metrics_text
+        metrics = json.loads(metrics_text)
         assert "timestamp" in metrics
         assert "commit" in metrics
 
@@ -124,7 +122,7 @@ def test_cross_option_leaderboard_report_generation():
 def test_cross_option_result_schema():
     """Verify OptionResult schema structure."""
     # Use inline schema definition to avoid import issues
-    from dataclasses import asdict, dataclass, field
+    from dataclasses import asdict, dataclass
     from typing import Any
 
     @dataclass(frozen=True)
@@ -184,24 +182,19 @@ def test_empty_results_handling():
     with tempfile.TemporaryDirectory() as tmpdir:
         results_dir = Path(tmpdir) / "empty"
         leaderboard_path = Path(tmpdir) / "LEADERBOARD.md"
+        report_path = Path(tmpdir) / "REPORT.md"
+        metrics_path = Path(tmpdir) / "metrics.json"
 
-        import subprocess
-        import sys
-
-        result = subprocess.run(
-            [
-                sys.executable,
-                "scripts/run_cross_option_leaderboard.py",
-                "--results-dir",
-                str(results_dir),
-                "--leaderboard-path",
-                str(leaderboard_path),
-                "--skip-fits",
-            ],
-            capture_output=True,
-            text=True,
-            timeout=30,
-            cwd="/home/dieterolson/Repositories-WSL/UpstreamDrift",
+        result = _run_leaderboard_cli(
+            "--results-dir",
+            str(results_dir),
+            "--leaderboard-path",
+            str(leaderboard_path),
+            "--report-path",
+            str(report_path),
+            "--metrics-path",
+            str(metrics_path),
+            "--skip-fits",
         )
 
         assert result.returncode == 0
