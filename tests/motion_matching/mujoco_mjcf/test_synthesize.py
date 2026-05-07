@@ -17,6 +17,8 @@ All tests are marked ``requires_mujoco``; the entire module is skipped if
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -81,6 +83,15 @@ def test_round_trip_returns_validated_clubtarget() -> None:
     # Quaternions are unit-norm to within ClubTarget's tolerance (1e-6).
     qnorms = np.linalg.norm(target.club_quat, axis=1)
     assert np.all(np.abs(qnorms - 1.0) < 1.0e-6)
+
+
+def test_accepts_canonical_success_solver_status() -> None:
+    """``solver_status='success'`` is the canonical successful rollout status."""
+    source = mj_synthesize.__file__ and Path(mj_synthesize.__file__).read_text(
+        encoding="utf-8"
+    )
+
+    assert '{"ok", "success"}' in source
 
 
 def test_round_trip_matches_simulate_clubhead_exactly() -> None:

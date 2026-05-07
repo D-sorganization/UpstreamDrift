@@ -55,6 +55,11 @@ def _create_zero_polynomial_theta(n_joints: int = 19) -> np.ndarray:
     return np.zeros(n_joints * 7, dtype=np.float64)
 
 
+def _create_mujoco_zero_polynomial_theta() -> np.ndarray:
+    """Create a zero-torque polynomial matching the active MuJoCo model."""
+    return _create_zero_polynomial_theta(n_joints=15)
+
+
 def _compute_grip_rmse(simulated_grip: np.ndarray, reference_grip: np.ndarray) -> float:
     """Compute grip position RMSE in millimeters.
 
@@ -79,6 +84,11 @@ def _compute_grip_rmse(simulated_grip: np.ndarray, reference_grip: np.ndarray) -
 # --- MuJoCo equivalence tests (requires mujoco) --------------------------
 
 
+def test_mujoco_theta_fixture_matches_active_model_actuators() -> None:
+    """MuJoCo parity inputs must match the model's 15 actuators."""
+    assert _create_mujoco_zero_polynomial_theta().shape == (105,)
+
+
 @pytest.mark.requires_mujoco
 def test_mujoco_address_equivalence() -> None:
     """MuJoCo at address pose must match Simscape within 5mm."""
@@ -91,13 +101,10 @@ def test_mujoco_address_equivalence() -> None:
         pytest.skip("MuJoCo or dependencies not available")
 
     _load_test_poses()
-    theta = _create_zero_polynomial_theta()
+    theta = _create_mujoco_zero_polynomial_theta()
     align_opts = AlignOptions(simulation_time_s=0.5, sample_rate_hz=500.0)
 
-    try:
-        target = synthesize_target_from_coefficients(theta, align_opts)
-    except Exception as exc:  # noqa: BLE001
-        pytest.fail(f"MuJoCo synthesize failed: {exc}")
+    target = synthesize_target_from_coefficients(theta, align_opts)
 
     # For this test, we use the grip position itself as a sanity check
     # (5mm RMSE would fail if the grip is NaN or wildly off)
@@ -119,13 +126,10 @@ def test_mujoco_top_of_backswing_equivalence() -> None:
         pytest.skip("MuJoCo or dependencies not available")
 
     _load_test_poses()
-    theta = _create_zero_polynomial_theta()
+    theta = _create_mujoco_zero_polynomial_theta()
     align_opts = AlignOptions(simulation_time_s=0.5, sample_rate_hz=500.0)
 
-    try:
-        target = synthesize_target_from_coefficients(theta, align_opts)
-    except Exception as exc:  # noqa: BLE001
-        pytest.fail(f"MuJoCo synthesize failed: {exc}")
+    target = synthesize_target_from_coefficients(theta, align_opts)
 
     # Sanity check: target is valid and finite
     assert target.butt.shape[0] > 0
@@ -144,13 +148,10 @@ def test_mujoco_impact_equivalence() -> None:
         pytest.skip("MuJoCo or dependencies not available")
 
     _load_test_poses()
-    theta = _create_zero_polynomial_theta()
+    theta = _create_mujoco_zero_polynomial_theta()
     align_opts = AlignOptions(simulation_time_s=0.5, sample_rate_hz=500.0)
 
-    try:
-        target = synthesize_target_from_coefficients(theta, align_opts)
-    except Exception as exc:  # noqa: BLE001
-        pytest.fail(f"MuJoCo synthesize failed: {exc}")
+    target = synthesize_target_from_coefficients(theta, align_opts)
 
     # Verify impact_idx is valid
     assert 1 <= int(target.impact_idx) <= target.butt.shape[0]

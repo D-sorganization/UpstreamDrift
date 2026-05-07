@@ -225,7 +225,7 @@ def synthesize_target_from_coefficients(
 
     sim_out: SimOut = simulate_with_coefficients(theta_arr, merged_sim_opts)
 
-    if sim_out.solver_status != "ok":
+    if sim_out.solver_status not in {"ok", "success"}:
         raise RuntimeError(
             f"MuJoCo rollout did not converge: solver_status={sim_out.solver_status!r}"
         )
