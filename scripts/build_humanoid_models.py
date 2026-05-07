@@ -85,17 +85,39 @@ def _build_drake(yaml_path: Path, *, check: bool) -> int:
         with tempfile.TemporaryDirectory() as tmp:
             tmp_out = Path(tmp) / "golfer.urdf"
             build_humanoid_urdf(yaml_path=yaml_path, out_path=tmp_out)
+            try:
+                rel_canonical = CANONICAL_URDF.relative_to(REPO_ROOT).as_posix()
+            except ValueError:
+                rel_canonical = str(CANONICAL_URDF)
             if not CANONICAL_URDF.exists():
-                sys.stderr.write(f"FAIL: canonical URDF missing at {CANONICAL_URDF}\n")
+                sys.stderr.write(
+                    "FAIL: drake URDF drift gate (#4129)\n"
+                    f"  Canonical URDF missing: {rel_canonical}\n"
+                    "  Fix locally:\n"
+                    "    python3 scripts/build_humanoid_models.py --engine drake\n"
+                    "    git add "
+                    f"{rel_canonical}\n"
+                    "    git commit -m 'regen drake URDF'\n"
+                )
                 return 1
             if not filecmp.cmp(tmp_out, CANONICAL_URDF, shallow=False):
                 sys.stderr.write(
-                    "FAIL: regenerated drake URDF differs from on-disk file. "
-                    "Run `python3 scripts/build_humanoid_models.py "
-                    "--engine drake` and commit the result.\n"
+                    "FAIL: drake URDF drift gate (#4129)\n"
+                    f"  Drift detected in: {rel_canonical}\n"
+                    "  The on-disk URDF does not match a fresh regeneration\n"
+                    "  from the shared YAML. Hand-edits to engine model files\n"
+                    "  are forbidden by CROSS_ENGINE_PARITY_SPEC.md §6.\n"
+                    "\n"
+                    "  Fix locally:\n"
+                    "    python3 scripts/build_humanoid_models.py --engine drake\n"
+                    "    git add "
+                    f"{rel_canonical}\n"
+                    "    git commit -m 'regen drake URDF'\n"
                 )
                 return 1
-            sys.stdout.write("OK: drake URDF matches regeneration.\n")
+            sys.stdout.write(
+                f"OK: drake URDF matches regeneration ({rel_canonical}).\n"
+            )
             return 0
 
     out = build_humanoid_urdf(yaml_path=yaml_path)

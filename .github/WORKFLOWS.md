@@ -39,6 +39,7 @@ guardrails until the active workflow count reaches the 25-workflow target:
 | agent-metrics-dashboard.yml | workflow_dispatch/schedule | @infra | contents: read | KEEP: publish agent metrics dashboard data. | n/a |
 | auto-update-prs.yml | workflow_dispatch/schedule | @infra | contents/pull-requests: write | MERGE: keep PRs updated with base branch. | Manual-Run-All.yml |
 | Bot-CI-Trigger.yml | issue_comment/workflow_dispatch | @infra | contents/actions: write | MERGE: comment-driven CI trigger for bot workflows. | PR-Comment-Responder.yml |
+| ci-engine-models.yml | pull_request/push/workflow_dispatch | @core | contents: read | KEEP: drake URDF regeneration drift gate (#4129). | n/a |
 | ci-failure-digest.yml | workflow_run/workflow_dispatch | @infra | contents/issues: write | KEEP: summarize CI failures for maintainers. | n/a |
 | ci-optional-stack.yml | pull_request/workflow_dispatch | @core | contents: read | KEEP: optional dependency stack checks. | n/a |
 | ci-standard.yml | push/pull_request/workflow_dispatch/schedule | @core | contents: read | KEEP: authoritative lint, format, unit, and budget checks. | n/a |

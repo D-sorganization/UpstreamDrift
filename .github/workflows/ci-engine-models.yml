@@ -1,0 +1,65 @@
+# ci-engine-models.yml — Engine model regeneration drift gate
+#
+# Asserts that committed per-engine model files (URDF, MJCF, etc.) are
+# byte-identical to a fresh regeneration from the shared anthropometric
+# YAML in `shared/models/`. Hand-edits to generated engine model files
+# are forbidden by CROSS_ENGINE_PARITY_SPEC.md §6 — this gate enforces
+# that contract on every PR.
+#
+# Currently covers: drake (issue #4129; depends on #4108 / PR #4153).
+# Other engines wire up their own jobs as their DRAKE-1 equivalents land.
+#
+# Triggers only when a relevant input or output file changes, so the gate
+# stays fast and out of the way of unrelated PRs.
+
+name: CI Engine Models
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "shared/models/golf_humanoid_*.yaml"
+      - "src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py"
+      - "src/engines/physics_engines/drake/models/generated/golfer.urdf"
+      - "scripts/build_humanoid_models.py"
+      - ".github/workflows/ci-engine-models.yml"
+  push:
+    branches: [main]
+    paths:
+      - "shared/models/golf_humanoid_*.yaml"
+      - "src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py"
+      - "src/engines/physics_engines/drake/models/generated/golfer.urdf"
+      - "scripts/build_humanoid_models.py"
+      - ".github/workflows/ci-engine-models.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  drake-urdf-drift:
+    name: drake URDF regeneration drift gate
+    runs-on: d-sorg-fleet
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with: { python-version: "3.11" }
+
+      - name: Install minimal deps for URDF build
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          # The Drake URDF generator is pure-Python and only needs PyYAML
+          # plus numpy at parse time. Avoid pulling in pydrake / heavy
+          # extras so the gate stays under the 30 s budget (#4129 AC).
+          python -m pip install pyyaml numpy
+
+      - name: Regenerate drake URDF and assert no drift
+        shell: bash
+        run: |
+          python3 scripts/build_humanoid_models.py --engine drake --check
