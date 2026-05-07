@@ -62,12 +62,16 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QMainWindow,
+    QMessageBox,
     QPushButton,
     QScrollArea,
     QSizePolicy,
     QSlider,
     QSpinBox,
+    QSplitter,
+    QStyle,
     QStyleFactory,
+    QToolButton,
     QVBoxLayout,
     QWidget,
 )
@@ -82,13 +86,18 @@ try:
         EVENT_KEYS as _EVENT_KEYS,
         EVENT_LABEL_PRESETS as _EVENT_LABEL_PRESETS,
         MocapEvents,
-        PHASE_WINDOWS as _PHASE_WINDOWS,
+        PHASE_BOUNDS as _PHASE_BOUNDS,
+        PHASE_KEYS as _PHASE_KEYS,
         PoseSlot,
         RigidTransform,
         SESSION_SCHEMA_VERSION as _SESSION_SCHEMA_VERSION,
         Skeleton,
+        SkeletonTrajectory,
         load_mocap_xlsx,
+        load_simscape_trajectory_csv,
         load_skeleton,
+        phase_display_label as _phase_display_label,
+        phase_key_from_label as _phase_key_from_label,
         read_event_header,
         solve_shaft_rz_deg,
     )
@@ -103,13 +112,18 @@ except ImportError:
         EVENT_KEYS as _EVENT_KEYS,
         EVENT_LABEL_PRESETS as _EVENT_LABEL_PRESETS,
         MocapEvents,
-        PHASE_WINDOWS as _PHASE_WINDOWS,
+        PHASE_BOUNDS as _PHASE_BOUNDS,
+        PHASE_KEYS as _PHASE_KEYS,
         PoseSlot,
         RigidTransform,
         SESSION_SCHEMA_VERSION as _SESSION_SCHEMA_VERSION,
         Skeleton,
+        SkeletonTrajectory,
         load_mocap_xlsx,
+        load_simscape_trajectory_csv,
         load_skeleton,
+        phase_display_label as _phase_display_label,
+        phase_key_from_label as _phase_key_from_label,
         read_event_header,
         solve_shaft_rz_deg,
     )
@@ -242,6 +256,17 @@ QFrame#sep {
     background: #404652;
     max-height: 1px; min-height: 1px;
 }
+QToolButton#help {
+    background: #475261;
+    border: 1px solid #5d6677;
+    border-radius: 10px;
+    color: #f0c674;
+    font-weight: bold;
+    padding: 0;
+}
+QToolButton#help:hover { background: #5a657a; }
+QSplitter::handle:horizontal { background: #404652; width: 4px; }
+QSplitter::handle:vertical   { background: #404652; height: 4px; }
 QScrollArea { border: 0; }
 """
 
@@ -264,6 +289,131 @@ def _hsep() -> QFrame:
     f.setObjectName("sep")
     f.setFrameShape(QFrame.Shape.HLine)
     return f
+
+
+# ----------------------------------------------------------------------------
+# Help-button helper                                                          #
+# ----------------------------------------------------------------------------
+# The help-text registry: keyed by section name, value is a multi-line
+# explanation shown in a QMessageBox when the user clicks the "?" button.
+_HELP_TEXT: dict[str, str] = {
+    "Mocap Source": (
+        "Loads a Wiffle-style xlsx motion-capture file.\n\n"
+        "• xlsx positions are in CENTIMETRES (we convert to metres on load).\n"
+        "• Sheet selects which trial in the workbook to read.\n"
+        "• Row 1 of the sheet defines event sample numbers (A/T/I/F + CHS).\n"
+        "  These appear here and feed the per-pose event combos."
+    ),
+    "Event Labels": (
+        "Pick the naming convention for the four swing events:\n\n"
+        "  Wiffle (A/T/I/F)        — Address, Top of Backswing, Impact, Finish\n"
+        "  Trackman P-system       — P1, P4, P7, P10\n"
+        "  Plain English           — Setup / Backswing top / Strike / End\n"
+        "  Sequence numbers        — Phase 1..4\n\n"
+        "Edit any of the four text boxes to write your own labels.  The\n"
+        "preset combo flips to 'Custom' automatically when you do.\n"
+        "Labels propagate to phase windows, pose-slot combos, and the\n"
+        "current-frame readout.  They are saved with the session."
+    ),
+    "Pose Slots": (
+        "The two model poses overlaid on the mocap target.\n\n"
+        "• 'Show' toggles the skeleton overlay for that pose.\n"
+        "• 'Event' picks which mocap frame the pose-target lines up against.\n"
+        "• Reload (⟳) re-reads the corresponding\n"
+        "  simscape_skeleton_<Pose>.json (regenerate via\n"
+        "  export_default_skeleton.m in MATLAB).\n"
+        "• 'Trajectory…' loads a Simscape forward-dynamics CSV so the\n"
+        "  skeleton can play back through its motion (instead of being\n"
+        "  static).  Use the Playback group's target combo to choose."
+    ),
+    "Playback": (
+        "Animate the mocap (always available), the skeleton (when a\n"
+        "trajectory CSV is loaded for a visible pose), or both.\n\n"
+        "• Frame slider scrubs through the mocap timeline.\n"
+        "• Step buttons jump first / -10 / -1 / +1 / +10 / last.\n"
+        "• Play/Pause runs the timer at the chosen FPS; Loop wraps when\n"
+        "  the end is reached.\n"
+        "• 'Playback target' chooses what plays back:\n"
+        "    Mocap     — animate the mocap target (default).\n"
+        "    Skeleton  — animate the skeleton through its trajectory.\n"
+        "    Both      — animate both, time-aligned by impact.\n"
+        "• 'Use current frame for mocap target' overrides the per-pose\n"
+        "  events and pins the mocap target to the slider.\n"
+        "• 'Mark current frame as event' records an in-session override\n"
+        "  without modifying the xlsx."
+    ),
+    "View / Mocap Traces": (
+        "Camera presets jump the 3D view to a known angle (Reset returns\n"
+        "to the default).  Use the Matplotlib toolbar above the plot for\n"
+        "free pan / zoom / rotate.\n\n"
+        "Trace toggles draw the mocap clubhead and / or mid-hands path\n"
+        "across the chosen swing phase.  Phase boundaries are marked by\n"
+        "green / purple triangles; the current frame is marked with a\n"
+        "yellow ✕ when traces are visible."
+    ),
+    "Auto-Align": (
+        "Solve a transform automatically.\n\n"
+        "• Snap … (shaft-aligned): finds the Rz that aligns the model\n"
+        "  shaft (mid-hands → clubhead) with the mocap shaft at the\n"
+        "  pose's event frame, then sets Tx/Ty/Tz so the model mid-hands\n"
+        "  lands on the mocap mid-hands.  Rx/Ry are forced to 0 (Z-up).\n"
+        "• 'Also fit scale' additionally sets scale =\n"
+        "  |shaft_target| / |shaft_model| so the shaft length matches.\n"
+        "• Snap mid-hands only: just translates the first visible pose's\n"
+        "  mid-hands onto the mocap mid-hands without changing rotation."
+    ),
+    "Rigid Transform + Scale": (
+        "Manual 7-DOF transform.\n\n"
+        "Rx/Ry are LOCKED by default because both the mocap data and the\n"
+        "Simscape model use Z-up — only the heading (Rz) and translation\n"
+        "are physically meaningful for global alignment.  Tick 'Allow\n"
+        "Rx/Ry rotations' if you really need them.\n\n"
+        "Rotations pivot around the first pose's hub joint so they feel\n"
+        "like body rotations.  Scale is isotropic about the same pivot."
+    ),
+    "Output": (
+        "• Save offsets to JSON: writes only the transform + residuals.\n"
+        "  This is what fit_swing_full_pipeline reads as input_overrides.\n"
+        "• Save / Load session: full UI snapshot — every slider, label,\n"
+        "  pose visibility, camera angle, trace toggles, current frame,\n"
+        "  fps, etc.  Re-opens to the exact state you saved."
+    ),
+}
+
+
+def _help_button(section_title: str, parent: QWidget | None = None) -> QToolButton:
+    """Make a small ``?`` button that pops up the help text for a section."""
+    btn = QToolButton(parent)
+    btn.setText("?")
+    btn.setToolTip(f"Help: {section_title}")
+    btn.setObjectName("help")
+    btn.setAutoRaise(True)
+    btn.setCursor(Qt.CursorShape.WhatsThisCursor)
+    btn.setFixedSize(20, 20)
+
+    def _show() -> None:
+        text = _HELP_TEXT.get(section_title, "(no help text registered)")
+        QMessageBox.information(parent, f"Help — {section_title}", text)
+    btn.clicked.connect(_show)
+    return btn
+
+
+def _group_with_help(title: str, content: QWidget) -> QGroupBox:
+    """Wrap a content widget in a QGroupBox with a help button in the title row."""
+    box = QGroupBox()
+    box.setTitle("")
+    outer = QVBoxLayout(box)
+    outer.setContentsMargins(8, 8, 8, 8)
+    outer.setSpacing(4)
+    head = QHBoxLayout()
+    lbl = QLabel(title)
+    lbl.setObjectName("groupTitle")
+    head.addWidget(lbl)
+    head.addStretch()
+    head.addWidget(_help_button(title, box))
+    outer.addLayout(head)
+    outer.addWidget(content)
+    return box
 
 
 class LabelledControl(QWidget):
@@ -374,10 +524,17 @@ class StartingPoseMatcher(QMainWindow):
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._advance_frame)
 
-        # Phase window state
+        # Phase window state — stored as logical KEY ("backswing", etc.).
+        # The combo shows fully spelled-out display labels.
         self.phase_window: str = _DEFAULT_PHASE
         self.manual_window_start: int = 0
         self.manual_window_end: int = 0
+
+        # Playback target — what advances when the timer fires:
+        #   "Mocap"     animate the mocap target only (skeleton stays static)
+        #   "Skeleton"  animate the skeleton through its trajectory CSV
+        #   "Both"      animate both, time-aligned at the impact frame
+        self.playback_target: str = "Mocap"
 
         # Event labels (Address / Top of Backswing / Impact / Finish, or
         # author-specific conventions).  Mutated via the Event-Labels
@@ -398,41 +555,56 @@ class StartingPoseMatcher(QMainWindow):
     # ===================================================================== #
 
     def _build_ui(self) -> None:
+        """Build the main window with QSplitters so the user can resize the
+        control panel vs. the plot AND each section independently."""
         central = QWidget()
         self.setCentralWidget(central)
-        root = QHBoxLayout(central)
-        root.setContentsMargins(8, 8, 8, 8)
-        root.setSpacing(8)
+        outer = QHBoxLayout(central)
+        outer.setContentsMargins(6, 6, 6, 6)
+        outer.setSpacing(0)
 
-        # ---------- LEFT: scrollable control column ---------------------- #
+        # Outer horizontal splitter: control panel | plot
+        self.h_splitter = QSplitter(Qt.Orientation.Horizontal)
+        outer.addWidget(self.h_splitter)
+
+        # ---------- LEFT: scrollable column with vertical splitter ------- #
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setMaximumWidth(490)
-        scroll.setMinimumWidth(420)
+        scroll.setMinimumWidth(360)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
-        left = QWidget()
-        scroll.setWidget(left)
-        col = QVBoxLayout(left)
-        col.setContentsMargins(6, 6, 6, 6)
-        col.setSpacing(8)
+        left_widget = QWidget()
+        scroll.setWidget(left_widget)
+        left_col = QVBoxLayout(left_widget)
+        left_col.setContentsMargins(4, 4, 4, 4)
+        left_col.setSpacing(4)
 
         title = QLabel("Starting-Pose Matcher")
         title.setObjectName("title")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        col.addWidget(title)
+        left_col.addWidget(title)
 
-        col.addWidget(self._build_file_box())
-        col.addWidget(self._build_event_labels_box())
-        col.addWidget(self._build_pose_box())
-        col.addWidget(self._build_playback_box())
-        col.addWidget(self._build_view_box())
-        col.addWidget(self._build_align_box())
-        col.addWidget(self._build_transform_box())
-        col.addWidget(self._build_save_box())
-        col.addStretch()
+        # Vertical splitter: every group can be resized.  Sections in order.
+        self.v_splitter = QSplitter(Qt.Orientation.Vertical)
+        self.v_splitter.setChildrenCollapsible(True)
+        self._sections: dict[str, QGroupBox] = {
+            "Mocap Source":           self._build_file_box(),
+            "Event Labels":           self._build_event_labels_box(),
+            "Pose Slots":             self._build_pose_box(),
+            "Playback":               self._build_playback_box(),
+            "View / Mocap Traces":    self._build_view_box(),
+            "Auto-Align":             self._build_align_box(),
+            "Rigid Transform + Scale": self._build_transform_box(),
+            "Output":                 self._build_save_box(),
+        }
+        for name, box in self._sections.items():
+            self._attach_help_button(box, name)
+            self.v_splitter.addWidget(box)
+        # Reasonable starting heights (px) so big sections aren't squished.
+        self.v_splitter.setSizes([90, 160, 180, 220, 200, 180, 280, 140])
+        left_col.addWidget(self.v_splitter, stretch=1)
 
-        root.addWidget(scroll)
+        self.h_splitter.addWidget(scroll)
 
         # ---------- RIGHT: plot column ----------------------------------- #
         plot_widget = QWidget()
@@ -450,9 +622,35 @@ class StartingPoseMatcher(QMainWindow):
         plot_layout.addWidget(self.toolbar)
         plot_layout.addWidget(self.canvas)
 
-        root.addWidget(plot_widget, stretch=1)
+        self.h_splitter.addWidget(plot_widget)
+        self.h_splitter.setSizes([440, 1200])
+        self.h_splitter.setStretchFactor(0, 0)
+        self.h_splitter.setStretchFactor(1, 1)
 
         self._setup_axes()
+
+    def _attach_help_button(self, box: QGroupBox, section: str) -> None:
+        """Place a small '?' help button at the top-right corner of a QGroupBox.
+
+        Repositions itself on resize so it always tracks the corner.
+        """
+        btn = _help_button(section, box)
+        btn.setParent(box)
+        btn.show()
+        btn.raise_()
+
+        def _reposition() -> None:
+            btn.move(max(0, box.width() - 30), 4)
+
+        _reposition()
+        # Chain into the existing resizeEvent without losing it
+        original = box.resizeEvent
+
+        def _on_resize(event):  # noqa: ANN001
+            _reposition()
+            original(event)
+
+        box.resizeEvent = _on_resize  # type: ignore[method-assign]
 
     # ---------- builders --------------------------------------------------- #
 
@@ -551,6 +749,29 @@ class StartingPoseMatcher(QMainWindow):
                 idx = next((i for i in range(combo.count())
                             if combo.itemText(i).startswith(current + " ")), 0)
                 combo.setCurrentIndex(idx)
+        # "Mark current frame as event" combo
+        if hasattr(self, "combo_set_event"):
+            current = self.combo_set_event.currentText().split(" ", 1)[0] or "T"
+            with QSignalBlocker(self.combo_set_event):
+                self.combo_set_event.clear()
+                for k in _EVENT_KEYS:
+                    self.combo_set_event.addItem(f"{k} - {self.event_labels[k]}")
+                for i in range(self.combo_set_event.count()):
+                    if self.combo_set_event.itemText(i).startswith(current + " "):
+                        self.combo_set_event.setCurrentIndex(i)
+                        break
+        # Phase combo — re-render display labels (preserve selected key).
+        if hasattr(self, "phase_combo"):
+            current_key = self.phase_combo.currentData() or self.phase_window
+            with QSignalBlocker(self.phase_combo):
+                self.phase_combo.clear()
+                for k in _PHASE_KEYS:
+                    self.phase_combo.addItem(
+                        _phase_display_label(k, self.event_labels), k)
+                for i in range(self.phase_combo.count()):
+                    if self.phase_combo.itemData(i) == current_key:
+                        self.phase_combo.setCurrentIndex(i)
+                        break
         # Refresh events summary line
         self.lbl_event_info.setText(self._events_summary())
         self._redraw()
@@ -559,12 +780,14 @@ class StartingPoseMatcher(QMainWindow):
         box = QGroupBox("Pose Slots")
         gl = QGridLayout(box)
         gl.setVerticalSpacing(4)
-        gl.addWidget(QLabel("Show"), 0, 0)
-        gl.addWidget(QLabel("Pose"),  0, 1)
-        gl.addWidget(QLabel("Event"), 0, 2)
-        gl.addWidget(QLabel("Reload"), 0, 3)
+        gl.addWidget(QLabel("Show"),       0, 0)
+        gl.addWidget(QLabel("Pose"),       0, 1)
+        gl.addWidget(QLabel("Event"),      0, 2)
+        gl.addWidget(QLabel("Reload"),     0, 3)
+        gl.addWidget(QLabel("Trajectory"), 0, 4)
         self._pose_visible_checks: dict[str, QCheckBox] = {}
         self._pose_event_combos: dict[str, QComboBox] = {}
+        self._pose_trajectory_buttons: dict[str, QPushButton] = {}
         for r, (key, slot) in enumerate(self.poses.items(), start=1):
             cb = QCheckBox()
             cb.setChecked(slot.visible)
@@ -585,12 +808,20 @@ class StartingPoseMatcher(QMainWindow):
             ec.currentTextChanged.connect(self._on_pose_event_changed)
             self._pose_event_combos[key] = ec
             gl.addWidget(ec, r, 2)
-            btn = QPushButton("⟳")
-            btn.setObjectName("preset")
-            btn.setMaximumWidth(40)
-            btn.setToolTip(f"Reload simscape_skeleton_{key}.json")
-            btn.clicked.connect(lambda _checked, k=key: self._reload_pose(k))
-            gl.addWidget(btn, r, 3)
+            rbtn = QPushButton("⟳")
+            rbtn.setObjectName("preset")
+            rbtn.setMaximumWidth(40)
+            rbtn.setToolTip(f"Reload simscape_skeleton_{key}.json")
+            rbtn.clicked.connect(lambda _checked, k=key: self._reload_pose(k))
+            gl.addWidget(rbtn, r, 3)
+            tbtn = QPushButton("Load…")
+            tbtn.setObjectName("preset")
+            tbtn.setMaximumWidth(80)
+            tbtn.setToolTip("Load a Simscape forward-dynamics CSV so the\n"
+                            "skeleton can play back through its motion.")
+            tbtn.clicked.connect(lambda _checked, k=key: self._load_trajectory(k))
+            self._pose_trajectory_buttons[key] = tbtn
+            gl.addWidget(tbtn, r, 4)
         return box
 
     def _build_view_box(self) -> QGroupBox:
@@ -622,10 +853,14 @@ class StartingPoseMatcher(QMainWindow):
         ph_row = QHBoxLayout()
         ph_row.addWidget(QLabel("Phase:"))
         self.phase_combo = QComboBox()
-        for label in _PHASE_WINDOWS:
-            self.phase_combo.addItem(label)
-        self.phase_combo.setCurrentText(_DEFAULT_PHASE)
-        self.phase_combo.currentTextChanged.connect(self._on_phase_changed)
+        for key in _PHASE_KEYS:
+            self.phase_combo.addItem(_phase_display_label(key, self.event_labels), key)
+        # Select the default by KEY (currentData() lookup)
+        for i in range(self.phase_combo.count()):
+            if self.phase_combo.itemData(i) == _DEFAULT_PHASE:
+                self.phase_combo.setCurrentIndex(i)
+                break
+        self.phase_combo.currentIndexChanged.connect(self._on_phase_changed)
         ph_row.addWidget(self.phase_combo, stretch=1)
         v.addLayout(ph_row)
 
@@ -715,6 +950,22 @@ class StartingPoseMatcher(QMainWindow):
             lambda _: setattr(self, "loop_playback", self.cb_loop.isChecked()))
         play_row.addWidget(self.cb_loop)
         v.addLayout(play_row)
+
+        # Playback target selector — what advances when Play is pressed.
+        target_row = QHBoxLayout()
+        target_row.addWidget(QLabel("Playback target:"))
+        self.combo_playback_target = QComboBox()
+        self.combo_playback_target.addItems(["Mocap", "Skeleton", "Both"])
+        self.combo_playback_target.setCurrentText(self.playback_target)
+        self.combo_playback_target.currentTextChanged.connect(
+            self._on_playback_target_changed)
+        self.combo_playback_target.setToolTip(
+            "Mocap: animate the mocap target.\n"
+            "Skeleton: animate the model skeleton through its loaded\n"
+            "  trajectory CSV (Pose Slot → Trajectory…).\n"
+            "Both: animate both, time-aligned at impact.")
+        target_row.addWidget(self.combo_playback_target, stretch=1)
+        v.addLayout(target_row)
 
         # Use-current-frame override
         self.cb_use_current_frame = QCheckBox(
@@ -942,10 +1193,53 @@ class StartingPoseMatcher(QMainWindow):
         self.show_midhands_trace = self.cb_midhands_trace.isChecked()
         self._redraw()
 
-    def _on_phase_changed(self, label: str) -> None:
-        self.phase_window = label
-        is_manual = (label == "Manual range")
-        self.manual_range_widget.setVisible(is_manual)
+    def _on_playback_target_changed(self, target: str) -> None:
+        if target not in ("Mocap", "Skeleton", "Both"):
+            target = "Mocap"
+        self.playback_target = target
+        self._redraw()
+
+    def _load_trajectory(self, slot_key: str) -> None:
+        """Load a Simscape CSV trajectory for the given pose slot."""
+        slot = self.poses.get(slot_key)
+        if slot is None:
+            return
+        path, _ = QFileDialog.getOpenFileName(
+            self, f"Load Simscape trajectory CSV for {slot_key}",
+            str(Path(__file__).parent),
+            "CSV files (*.csv);;All files (*.*)")
+        if not path:
+            return
+        try:
+            traj = load_simscape_trajectory_csv(path)
+        except Exception as exc:  # noqa: BLE001
+            QMessageBox.warning(
+                self, "Trajectory load failed",
+                f"Could not load {Path(path).name}:\n\n{exc}")
+            return
+        if len(traj) == 0:
+            QMessageBox.warning(self, "Empty trajectory",
+                                f"{Path(path).name} loaded but has no usable frames.")
+            return
+        slot.trajectory = traj
+        slot.trajectory_frame_index = 0
+        # Update the button label so the user can see a trajectory is loaded.
+        btn = self._pose_trajectory_buttons.get(slot_key)
+        if btn is not None:
+            btn.setText(f"✓ {len(traj)}f")
+            btn.setToolTip(
+                f"Loaded {len(traj)} frames from {Path(path).name}.\n"
+                f"Time range: {traj.times[0]:.3f}s … {traj.times[-1]:.3f}s.\n"
+                "Click to load a different file.")
+        self._notify(f"Loaded {len(traj)}-frame trajectory for {slot_key} "
+                     f"from {Path(path).name}")
+
+    def _on_phase_changed(self, _index: int) -> None:
+        key = self.phase_combo.currentData()
+        if not key:
+            key = _phase_key_from_label(self.phase_combo.currentText()) or _DEFAULT_PHASE
+        self.phase_window = key
+        self.manual_range_widget.setVisible(key == "manual")
         self._redraw()
 
     def _on_manual_range_changed(self, _: int) -> None:
@@ -998,17 +1292,117 @@ class StartingPoseMatcher(QMainWindow):
             self.btn_play.setText("⏸ Pause")
 
     def _advance_frame(self) -> None:
-        if self.df is None:
-            return
-        n = len(self.df)
-        nxt = self.current_frame + 1
-        if nxt >= n:
-            if self.loop_playback:
-                nxt = 0
-            else:
+        """Advance one playback step.
+
+        Behaviour depends on `self.playback_target`:
+            Mocap     - advance current_frame only
+            Skeleton  - advance each visible pose's trajectory_frame_index
+            Both      - advance both, time-aligned at impact
+        """
+        target = self.playback_target
+
+        # 1. Mocap frame ----------------------------------------------------
+        n = len(self.df) if self.df is not None else 0
+        if target in ("Mocap", "Both") and n > 0:
+            nxt = self.current_frame + 1
+            if nxt >= n:
+                if self.loop_playback:
+                    nxt = 0
+                else:
+                    self._toggle_play()
+                    return
+            self.spin_frame.setValue(nxt)
+        elif target == "Skeleton":
+            # Without mocap advance, still consider stop condition based on
+            # the longest visible trajectory.
+            longest = max(
+                (len(s.trajectory) for s in self.poses.values()
+                 if s.visible and s.trajectory is not None),
+                default=0)
+            if longest == 0:
                 self._toggle_play()
                 return
-        self.spin_frame.setValue(nxt)
+
+        # 2. Skeleton trajectory frame -------------------------------------
+        if target in ("Skeleton", "Both"):
+            # In "Both" mode, time-align by mapping mocap_time -> sim_time
+            # via the impact-frame offset.
+            if target == "Both" and self.df is not None:
+                self._sync_trajectory_indices_from_mocap()
+            else:
+                # Pure Skeleton: advance each visible trajectory by one frame.
+                for slot in self.poses.values():
+                    if not slot.visible or slot.trajectory is None:
+                        continue
+                    nxt = slot.trajectory_frame_index + 1
+                    if nxt >= len(slot.trajectory):
+                        nxt = 0 if self.loop_playback else (len(slot.trajectory) - 1)
+                    slot.trajectory_frame_index = nxt
+                self._redraw()  # redraw needed when only the skeleton moved
+
+    def _sync_trajectory_indices_from_mocap(self) -> None:
+        """In 'Both' mode, set each visible trajectory's frame index from the
+        current mocap frame's time, aligned so the trajectory's first frame
+        corresponds to the mocap address (A) frame and shafts hit at impact.
+
+        Falls back to a linear stretch when impact times can't be resolved.
+        """
+        if self.df is None:
+            return
+        mocap_t = float(self.df.iloc[self.current_frame]["time"])
+        a_idx = self._frame_for("A")
+        i_idx = self._frame_for("I")
+        if a_idx is None or i_idx is None or i_idx <= a_idx:
+            # No valid window — pure linear stretch over [0, n_mocap-1].
+            n_mocap = len(self.df)
+            for slot in self.poses.values():
+                if not slot.visible or slot.trajectory is None:
+                    continue
+                frac = self.current_frame / max(1, n_mocap - 1)
+                slot.trajectory_frame_index = int(np.clip(
+                    frac * (len(slot.trajectory) - 1),
+                    0, len(slot.trajectory) - 1))
+            return
+        mocap_t_a = float(self.df.iloc[a_idx]["time"])
+        mocap_t_i = float(self.df.iloc[i_idx]["time"])
+        # Map mocap_t into [0, 1] across A..I, then onto trajectory's time axis.
+        for slot in self.poses.values():
+            if not slot.visible or slot.trajectory is None:
+                continue
+            traj = slot.trajectory
+            if len(traj.times) < 2:
+                continue
+            sim_t_a = float(traj.times[0])
+            # Best impact estimate in trajectory: largest clubhead speed.
+            sim_t_i = self._estimate_trajectory_impact_time(traj)
+            if sim_t_i <= sim_t_a:
+                # Fallback: align endpoints linearly.
+                frac = ((mocap_t - mocap_t_a)
+                        / max(1e-9, mocap_t_i - mocap_t_a))
+                sim_t = (sim_t_a
+                         + frac * (float(traj.times[-1]) - sim_t_a))
+            else:
+                # Linear map mocap_t -> sim_t through (A, I) anchor pair.
+                slope = (sim_t_i - sim_t_a) / (mocap_t_i - mocap_t_a)
+                sim_t = sim_t_a + slope * (mocap_t - mocap_t_a)
+            slot.trajectory_frame_index = traj.frame_at_time(sim_t)
+
+    def _estimate_trajectory_impact_time(self, traj: SkeletonTrajectory) -> float:
+        """Return the time of peak |dCH/dt|^2 in the trajectory, or t[0] if
+        clubhead positions aren't available.
+        """
+        if not traj.frames or "ch" not in traj.frames[0].joints:
+            return float(traj.times[0]) if len(traj.times) else 0.0
+        ch = np.array([f.joints["ch"] for f in traj.frames if "ch" in f.joints])
+        if len(ch) < 3:
+            return float(traj.times[0])
+        # Forward-difference speed
+        dt = np.diff(traj.times[:len(ch)])
+        dt = np.where(dt == 0, 1e-6, dt)
+        v = np.diff(ch, axis=0) / dt[:, None]
+        speed = np.linalg.norm(v, axis=1)
+        i = int(np.argmax(speed))
+        return float(traj.times[i])
 
     def _on_frame_override_toggled(self, _state: int) -> None:
         self.frame_override_active = self.cb_use_current_frame.isChecked()
@@ -1286,7 +1680,11 @@ class StartingPoseMatcher(QMainWindow):
                             "event": slot.target_event,
                             "skeleton_path":
                                 str(Path(__file__).parent /
-                                    f"simscape_skeleton_{key}.json")}
+                                    f"simscape_skeleton_{key}.json"),
+                            "trajectory_path":
+                                (slot.trajectory.source_path
+                                 if slot.trajectory is not None else None),
+                            "trajectory_frame_index": slot.trajectory_frame_index}
                       for key, slot in self.poses.items()},
             "view": {"elev": float(self.ax.elev), "azim": float(self.ax.azim)},
             "traces": {
@@ -1302,6 +1700,7 @@ class StartingPoseMatcher(QMainWindow):
                 "frame_override_active": self.frame_override_active,
                 "loop": self.loop_playback,
                 "fps": int(self.spin_speed.value()),
+                "target": self.playback_target,
             },
             "event_overrides": dict(self.event_overrides),
             "event_labels": {
@@ -1369,7 +1768,7 @@ class StartingPoseMatcher(QMainWindow):
         if evo:
             self.lbl_event_info.setText(self._events_summary() + "  (overrides active)")
 
-        # 3. Pose visibility + events.
+        # 3. Pose visibility + events + trajectory.
         for key, slot_d in (d.get("poses") or {}).items():
             if key not in self.poses:
                 continue
@@ -1381,8 +1780,26 @@ class StartingPoseMatcher(QMainWindow):
                 self.poses[key].visible = cb.isChecked()
             if ec is not None and slot_d.get("event") in ("A", "T", "I", "F"):
                 with QSignalBlocker(ec):
-                    ec.setCurrentText(slot_d["event"])
+                    for i in range(ec.count()):
+                        if ec.itemText(i).startswith(slot_d["event"] + " "):
+                            ec.setCurrentIndex(i)
+                            break
                 self.poses[key].target_event = slot_d["event"]
+            # Trajectory CSV (optional)
+            traj_path = slot_d.get("trajectory_path")
+            if traj_path:
+                p = Path(traj_path)
+                if p.exists():
+                    try:
+                        self.poses[key].trajectory = load_simscape_trajectory_csv(p)
+                        self.poses[key].trajectory_frame_index = int(
+                            slot_d.get("trajectory_frame_index", 0))
+                        btn = self._pose_trajectory_buttons.get(key)
+                        if btn is not None:
+                            btn.setText(f"✓ {len(self.poses[key].trajectory)}f")
+                    except Exception as exc:  # noqa: BLE001
+                        logger.warning("Could not reload trajectory %s: %s",
+                                       p, exc)
 
         # 4. Transform sliders.
         tf = d.get("transform") or {}
@@ -1422,11 +1839,21 @@ class StartingPoseMatcher(QMainWindow):
             with QSignalBlocker(self.cb_midhands_trace):
                 self.cb_midhands_trace.setChecked(bool(tr["midhands"]))
             self.show_midhands_trace = bool(tr["midhands"])
-        if tr.get("phase") in _PHASE_WINDOWS:
-            with QSignalBlocker(self.phase_combo):
-                self.phase_combo.setCurrentText(tr["phase"])
-            self.phase_window = tr["phase"]
-            self.manual_range_widget.setVisible(self.phase_window == "Manual range")
+        phase_in = tr.get("phase")
+        if phase_in is not None:
+            # Support both v1 (legacy display strings like "Backswing (A → T)")
+            # and v2 (logical keys like "backswing").
+            key = _phase_key_from_label(str(phase_in)) if phase_in else None
+            if key is None and phase_in in _PHASE_KEYS:
+                key = phase_in
+            if key in _PHASE_KEYS:
+                with QSignalBlocker(self.phase_combo):
+                    for i in range(self.phase_combo.count()):
+                        if self.phase_combo.itemData(i) == key:
+                            self.phase_combo.setCurrentIndex(i)
+                            break
+                self.phase_window = key
+                self.manual_range_widget.setVisible(key == "manual")
         if "manual_start" in tr:
             with QSignalBlocker(self.spin_phase_start):
                 self.spin_phase_start.setValue(int(tr["manual_start"]))
@@ -1459,6 +1886,10 @@ class StartingPoseMatcher(QMainWindow):
         if "fps" in pb:
             with QSignalBlocker(self.spin_speed):
                 self.spin_speed.setValue(int(pb["fps"]))
+        if "target" in pb and pb["target"] in ("Mocap", "Skeleton", "Both"):
+            with QSignalBlocker(self.combo_playback_target):
+                self.combo_playback_target.setCurrentText(pb["target"])
+            self.playback_target = pb["target"]
 
         # 9. Event labels.
         el = d.get("event_labels") or {}
@@ -1590,7 +2021,7 @@ class StartingPoseMatcher(QMainWindow):
         if self.df is None:
             return (0, 0)
         n = len(self.df)
-        bounds = _PHASE_WINDOWS.get(self.phase_window, (None, None))
+        bounds = _PHASE_BOUNDS.get(self.phase_window, (None, None))
         # "None" -> draw across full data
         if bounds == (None, None):
             return (0, n)
@@ -1701,7 +2132,10 @@ class StartingPoseMatcher(QMainWindow):
         return f"frame {f}"
 
     def _draw_one_pose(self, slot: PoseSlot) -> None:
-        if not slot.skeleton.joints:
+        # Pick which skeleton to draw: trajectory frame when active, else
+        # the slot's static pose.
+        skel = self._effective_skeleton(slot)
+        if not skel.joints:
             return
 
         mp = self._mocap_pos_for(slot, "mid")
@@ -1716,26 +2150,46 @@ class StartingPoseMatcher(QMainWindow):
             self.ax.scatter(*ch, color=slot.mocap_color, s=130, marker="s",
                             edgecolor="black", linewidth=0.6)
 
-        names = list(slot.skeleton.joints.keys())
-        pts = np.array([slot.skeleton.joints[n] for n in names])
+        names = list(skel.joints.keys())
+        pts = np.array([skel.joints[n] for n in names])
         moved = self.transform.apply(pts)
         pos = {n: moved[i] for i, n in enumerate(names)}
 
-        for parent, child in slot.skeleton.segments:
+        for parent, child in skel.segments:
             if parent in pos and child in pos:
                 a, b = pos[parent], pos[child]
                 width = 4.5 if (parent, child) == ("mp", "ch") else 2.6
                 self.ax.plot([a[0], b[0]], [a[1], b[1]], [a[2], b[2]],
                              color=slot.color, linewidth=width)
+        # Indicate that this is a trajectory frame (not the static pose)
+        # by appending the frame index to the legend label.
+        legend = f"sim {slot.name}"
+        if (slot.trajectory is not None
+                and self.playback_target in ("Skeleton", "Both")):
+            legend = (f"sim {slot.name} (trajectory frame "
+                      f"{slot.trajectory_frame_index}/{len(slot.trajectory) - 1})")
         self.ax.scatter(moved[:, 0], moved[:, 1], moved[:, 2],
-                        color=slot.color, s=24,
-                        label=f"sim {slot.name}")
+                        color=slot.color, s=24, label=legend)
         if "mp" in pos:
             self.ax.scatter(*pos["mp"], color=slot.color, s=70, marker="o",
                             edgecolor="black", linewidth=0.6)
         if "ch" in pos:
             self.ax.scatter(*pos["ch"], color=slot.color, s=130, marker="s",
                             edgecolor="black", linewidth=0.6)
+
+    def _effective_skeleton(self, slot: PoseSlot) -> Skeleton:
+        """Return the skeleton to draw for this slot.
+
+        When playback target is Skeleton or Both AND the slot has a
+        trajectory loaded, returns the trajectory's current frame.
+        Otherwise returns the slot's static skeleton.
+        """
+        if (slot.trajectory is not None and len(slot.trajectory) > 0
+                and self.playback_target in ("Skeleton", "Both")):
+            i = max(0, min(slot.trajectory_frame_index,
+                           len(slot.trajectory) - 1))
+            return slot.trajectory.frames[i]
+        return slot.skeleton
 
 
 # --------------------------------------------------------------------------- #
