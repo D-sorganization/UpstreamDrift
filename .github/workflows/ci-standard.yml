@@ -259,12 +259,13 @@ jobs:
       - name: Prevent Net-New print() Calls
         run: python3 scripts/check_no_print_calls.py
 
-      # TODO detection now BLOCKING - Jules Auto-Repair will fix
+      # Placeholder detection is blocking unless the line cites a tracked issue.
       - name: Verify No Placeholders
         run: |
           violations=$(
             find . \( -path "./.git" -o -path "./.mypy_cache" -o -path "./.ruff_cache" -o -path "./__pycache__" -o -path "./archive" -o -path "./check_code_quality" -o -path "./scripts" -o -path "./tests/tools" -o -path "./vendor" \) -prune -o -type f -name "*.py" -print0 \
-              | xargs -0 grep -nE "TODO|FIXME" || true
+              | xargs -0 grep -nE "TODO|FIXME" \
+              | grep -vE "(TODO|FIXME).+#[0-9]+" || true
           )
           if [ -n "$violations" ]; then
             echo "$violations"
@@ -613,8 +614,13 @@ jobs:
 
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            base_sha="$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)"
+            if [ -z "$base_sha" ]; then
+              echo "No merge-base with origin/${{ github.base_ref }}; skipping PR-scoped core tests."
+              exit 0
+            fi
             mapfile -t changed_tests < <(
-              git diff --name-only --diff-filter=ACMRT "origin/${{ github.base_ref }}" HEAD -- 'tests/**/*.py'
+              git diff --name-only --diff-filter=ACMRT "$base_sha" HEAD -- 'tests/**/*.py'
             )
 
             if [ "${#changed_tests[@]}" -eq 0 ]; then
@@ -753,7 +759,7 @@ jobs:
         run: mkdir -p ui/dist
       - name: Install migration test dependencies
         run: |
-          python -m pip install --upgrade pip
+          python -m pip install --ignore-installed --no-deps pip
           python -m pip install -e ".[dev]"
           python -m pip install "psycopg[binary]>=3.1"
       - name: Run Alembic PostgreSQL round-trip

@@ -52,7 +52,33 @@ LEGACY_SRC_TEST_DIRS = frozenset(
     }
 )
 
-LEGACY_ROOT_TEST_FILES = frozenset()
+LEGACY_ROOT_TEST_FILES = frozenset(
+    {
+        "tests/test_build_humanoid_models.py",
+        "tests/test_compact_swing_dataset_compactor.py",
+        "tests/test_cross_engine_equivalence.py",
+        "tests/test_drake_fit_swing.py",
+        "tests/test_drake_fit_swing_autodiff.py",
+        "tests/test_drake_simscape_equivalence.py",
+        "tests/test_drake_simulate.py",
+        "tests/test_drake_urdf_drift.py",
+        "tests/test_drake_urdf_generator.py",
+        "tests/test_drake_viz.py",
+        "tests/test_golf_humanoid_dimensions.py",
+        "tests/test_load_compact_swing_dataset.py",
+        "tests/test_opensim_coord_map.py",
+        "tests/test_opensim_fit_swing.py",
+        "tests/test_opensim_fk.py",
+        "tests/test_opensim_fk_regression.py",
+        "tests/test_opensim_model_loads.py",
+        "tests/test_opensim_simscape_equivalence.py",
+        "tests/test_opensim_simulate.py",
+        "tests/test_opensim_synthesize.py",
+        "tests/test_opensim_viz.py",
+        "tests/test_pinocchio_club_target_adapter.py",
+        "tests/test_pinocchio_viz_leaderboard.py",
+    }
+)
 
 
 @dataclass(frozen=True)

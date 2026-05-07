@@ -50,6 +50,7 @@ dependencies:
       - sympy>=1.12
       - python-multipart>=0.0.26
       - opencv-python-headless>=4.13.0.92
+      - ezc3d>=1.5.0
       - hypothesis>=6.0.0
       - alembic>=1.13.0
       - types-PyYAML>=6.0
