@@ -185,6 +185,7 @@ class SQLiteBackend:
                 timeout=30.0,
                 isolation_level=None,  # Autocommit mode
             )
+            self._local.conn.row_factory = sqlite3.Row
             self._local.conn.execute("PRAGMA journal_mode=WAL")
             self._local.conn.execute("PRAGMA busy_timeout=30000")
         return cast(sqlite3.Connection, getattr(self._local, "conn", None))
@@ -347,7 +348,28 @@ class SQLiteBackend:
                     retention_seconds = ?, priority = ?
                 WHERE task_id = ?
             """,
-                (*self._record_to_values(record)[1:], record.task_id),
+                (
+                    record.run_id,
+                    record.status,
+                    record.task_type,
+                    json.dumps(record.input_data),
+                    record.config_hash,
+                    record.code_version,
+                    record.progress,
+                    json.dumps(record.result) if record.result else None,
+                    record.error,
+                    record.updated_at,
+                    record.heartbeat_at,
+                    record.started_at,
+                    record.completed_at,
+                    record.worker_id,
+                    record.retry_count,
+                    record.max_retries,
+                    record.ttl_seconds,
+                    record.retention_seconds,
+                    record.priority,
+                    record.task_id,
+                ),
             )
 
     def delete_task(self, task_id: str) -> bool:
@@ -599,9 +621,11 @@ class DurableTaskManager:
             task_type=task_type,
             input_data=input_data or {},
             config_hash=config_hash,
-            code_version=code_version
-            if code_version is not None
-            else str(os.environ.get("APP_VERSION", "unknown")),
+            code_version=(
+                code_version
+                if code_version is not None
+                else str(os.environ.get("APP_VERSION", "unknown"))
+            ),
             ttl_seconds=ttl_seconds,
             retention_seconds=retention_seconds,
             priority=priority,
