@@ -39,7 +39,7 @@ class WheelEventFilter(QObject):
         Returns:
             True if the event should be filtered (blocked), False otherwise.
         """
-        if event.type() == QEvent.Type.WheelEvent:
+        if event.type() == QEvent.Type.Wheel:
             wheel_event = event
             if isinstance(wheel_event, QWheelEvent):
                 # Accept the event to prevent it from propagating
@@ -48,21 +48,34 @@ class WheelEventFilter(QObject):
         return False
 
 
+# Module-level cache to keep filter instances alive and prevent GC
+_filter_cache: dict[int, WheelEventFilter] = {}
+
+
 def suppress_wheel_on_widget(widget) -> None:
     """Convenience function to install wheel event filter on a widget.
+    
+    The filter instance is stored in a module-level cache keyed by widget ID
+    to prevent garbage collection while the widget is still in use.
     
     Args:
         widget: The widget to suppress wheel events on.
     """
-    widget.installEventFilter(WheelEventFilter())
+    filter_instance = WheelEventFilter()
+    _filter_cache[id(widget)] = filter_instance
+    widget.installEventFilter(filter_instance)
 
 
 def suppress_wheel_on_widgets(*widgets) -> None:
     """Convenience function to install wheel event filter on multiple widgets.
     
+    Each filter instance is stored in a module-level cache keyed by widget ID
+    to prevent garbage collection while the widget is still in use.
+    
     Args:
         widgets: Variable number of widgets to suppress wheel events on.
     """
-    filter_instance = WheelEventFilter()
     for widget in widgets:
+        filter_instance = WheelEventFilter()
+        _filter_cache[id(widget)] = filter_instance
         widget.installEventFilter(filter_instance)
