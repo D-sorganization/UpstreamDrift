@@ -56,8 +56,24 @@ def _create_zero_polynomial_theta(n_joints: int = 19) -> np.ndarray:
 
 
 def _create_mujoco_zero_polynomial_theta() -> np.ndarray:
-    """Create a zero-torque polynomial matching the active MuJoCo model."""
-    return _create_zero_polynomial_theta(n_joints=15)
+    """Create a zero-torque polynomial matching the active MuJoCo model.
+
+    Per codex review feedback (issue #4305) we derive ``nu`` from the
+    actual MJCF model so a future actuator-count drift fails fast at the
+    fixture site instead of silently passing on a hardcoded ``15``.
+    Falls back to ``15`` only if MuJoCo isn't available, in which case
+    the equivalence tests are gated by ``requires_mujoco`` anyway.
+    """
+    try:
+        import mujoco
+        from src.engines.physics_engines.mujoco._golf_swing_full_body_xml import (
+            FULL_BODY_GOLF_SWING_XML,
+        )
+
+        nu = int(mujoco.MjModel.from_xml_string(FULL_BODY_GOLF_SWING_XML).nu)
+    except Exception:  # noqa: BLE001 - keep contract test runnable headless
+        nu = 15
+    return _create_zero_polynomial_theta(n_joints=nu)
 
 
 def _compute_grip_rmse(simulated_grip: np.ndarray, reference_grip: np.ndarray) -> float:
@@ -85,8 +101,27 @@ def _compute_grip_rmse(simulated_grip: np.ndarray, reference_grip: np.ndarray) -
 
 
 def test_mujoco_theta_fixture_matches_active_model_actuators() -> None:
-    """MuJoCo parity inputs must match the model's 15 actuators."""
-    assert _create_mujoco_zero_polynomial_theta().shape == (105,)
+    """MuJoCo parity fixture length must equal ``nu * 7`` for the live model.
+
+    Codex review feedback (issue #4305): the prior assertion only checked
+    the literal ``(105,)`` shape, which made it tautological with the
+    hardcoded ``n_joints=15`` helper. Drive both ends from
+    ``MjModel.nu`` so an actuator-count drift fails this test loudly.
+    """
+    try:
+        import mujoco
+        from src.engines.physics_engines.mujoco._golf_swing_full_body_xml import (
+            FULL_BODY_GOLF_SWING_XML,
+        )
+    except ImportError:
+        pytest.skip("MuJoCo not installed; cannot validate fixture against model.")
+
+    nu = int(mujoco.MjModel.from_xml_string(FULL_BODY_GOLF_SWING_XML).nu)
+    theta = _create_mujoco_zero_polynomial_theta()
+    assert theta.shape == (nu * 7,), (
+        f"Fixture length {theta.shape[0]} != nu*7 ({nu * 7}); "
+        "MuJoCo actuator count drifted from helper."
+    )
 
 
 @pytest.mark.requires_mujoco

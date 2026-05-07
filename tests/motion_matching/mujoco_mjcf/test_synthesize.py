@@ -17,7 +17,7 @@ All tests are marked ``requires_mujoco``; the entire module is skipped if
 
 from __future__ import annotations
 
-from pathlib import Path
+from dataclasses import replace
 
 import numpy as np
 import pytest
@@ -99,13 +99,66 @@ def test_round_trip_returns_validated_clubtarget() -> None:
     assert np.all(np.abs(qnorms - 1.0) < 1.0e-6)
 
 
-def test_accepts_canonical_success_solver_status() -> None:
-    """``solver_status='success'`` is the canonical successful rollout status."""
-    source = mj_synthesize.__file__ and Path(mj_synthesize.__file__).read_text(
-        encoding="utf-8"
+def test_accepts_canonical_success_solver_status(monkeypatch) -> None:
+    """``solver_status='success'`` must NOT raise from the synthesizer.
+
+    Behavioural guard for codex review feedback (issue #4304): the previous
+    revision only string-searched the source for ``{"ok", "success"}``, which
+    would stay green if the runtime check regressed (e.g. an inverted
+    condition with the literal in dead code). Stub
+    ``simulate_with_coefficients`` so we can deterministically assert the
+    function tolerates the canonical ``"success"`` status without hitting
+    real MuJoCo time.
+    """
+    theta, sim_opts = _theta_zero_full()
+    align = AlignOptions(
+        simulation_time_s=sim_opts.T_s, sample_rate_hz=sim_opts.output_rate_hz
     )
 
-    assert '{"ok", "success"}' in source
+    real_sim_out = simulate_with_coefficients(theta, sim_opts)
+    success_sim_out = replace(real_sim_out, solver_status="success")
+
+    captured: dict[str, object] = {}
+
+    def _stub(theta_arr, opts):
+        captured["called"] = True
+        return success_sim_out
+
+    monkeypatch.setattr(mj_synthesize, "simulate_with_coefficients", _stub)
+
+    target = mj_synthesize.synthesize_target_from_coefficients(
+        theta, align, sim_options=sim_opts
+    )
+
+    assert captured.get("called") is True
+    assert isinstance(target, ClubTarget)
+
+
+def test_rejects_failed_solver_status(monkeypatch) -> None:
+    """A non-canonical ``solver_status`` must raise ``RuntimeError``.
+
+    Pairs with the ``success``-acceptance test above: validates that the
+    runtime gate still rejects divergent rollouts. Without this companion
+    test, an inverted condition could let everything through.
+    """
+    theta, sim_opts = _theta_zero_full()
+    align = AlignOptions(
+        simulation_time_s=sim_opts.T_s, sample_rate_hz=sim_opts.output_rate_hz
+    )
+
+    real_sim_out = simulate_with_coefficients(theta, sim_opts)
+    failed_sim_out = replace(real_sim_out, solver_status="failed")
+
+    monkeypatch.setattr(
+        mj_synthesize,
+        "simulate_with_coefficients",
+        lambda theta_arr, opts: failed_sim_out,
+    )
+
+    with pytest.raises(RuntimeError, match="solver_status"):
+        mj_synthesize.synthesize_target_from_coefficients(
+            theta, align, sim_options=sim_opts
+        )
 
 
 def test_round_trip_matches_simulate_clubhead_exactly() -> None:

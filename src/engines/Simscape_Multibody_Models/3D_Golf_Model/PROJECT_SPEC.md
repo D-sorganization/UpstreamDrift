@@ -163,6 +163,17 @@ leaderboard helper).
 
 - Production checkpoint: `data/training/surrogate_v4/checkpoint_production.pt`
   (~541 k parameters; clubhead-speed MAE 0.04 mph; grip RMSE ~43 mm).
+  > **Note (codex review feedback, issue #4312):** the
+  > `data/training/surrogate_v4/` directory is **not committed to this
+  > repository** — checkpoints are produced by a local training run and live
+  > outside version control. The shipped MATLAB entry point
+  > (`matlab/motion_matching/shared/fit_swing_surrogate.m`,
+  > `local_resolve_checkpoint`) currently defaults to
+  > `<repo_root>/output/surrogate/checkpoint_best.pt`; pass
+  > `opts.surrogate_checkpoint` (or stage your trained
+  > `checkpoint_production.pt` at that path) to consume the production
+  > artifact described below. A future PR will align the MATLAB default
+  > with this guidance and provide a download/cache helper.
 - **Always load `checkpoint_production.pt`, not `checkpoint_best.pt`.** The
   current early-stop criterion is single-objective on grip RMSE and selects
   an unconverged epoch (e.g. epoch 2) before the model has learned to predict
