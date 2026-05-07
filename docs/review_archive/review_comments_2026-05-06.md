@@ -1,51 +1,57 @@
 # Review Comments Archive - 2026-05-06
 
-Generated: 2026-05-06T15:32:19.385100
+Generated: 2026-05-06T19:08:52.014866
 
 ## Reviewer (chatgpt-codex-connector[bot]) (3 comments)
 
-### PR #4090: src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/option4_python_bridge/tests/conftest.py:21
-
+### PR #4226: tests/unit/motion_matching/test_cross_option_leaderboard.py:95
 
 Actionable: Yes
 Has Suggestion: No
 
 ```
-**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Handle missing matlab package when checking marker availability**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Remove machine-specific cwd from subprocess tests**
 
-`pytest_collection_modifyitems` calls `importlib.util.find_spec("matlab.engine")`, but on Python 3.10+ this raises `ModuleNotFoundError` when the parent `matlab` package is absent instead of returning `None`. On machines without MATLAB (the common CI/dev case this hook is meant to support), collection aborts with an INTERNALERROR before any sk...
+The test invokes the CLI with a hard-coded working directory (`/home/dieterolson/Repositories-WSL/UpstreamDrift`), which does not exist in CI or other developer environments, causing `FileNotFoundError` before the script even runs. This makes the new unit tests fail outside the original author’s machine and blocks the test suite.
+
+Useful? React with 👍 / 👎.
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4090#discussion_r3197765779)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4226#discussion_r3198554317)
 
 ---
 
-### PR #4090: src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/option4_python_bridge/fit_swing_python.py:104
+### PR #4226: scripts/run_cross_option_leaderboard.py:473
 
 Actionable: No
 Has Suggestion: No
 
 ```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Validate theta0 before starting MATLAB engine**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Load existing results when --skip-fits is requested**
 
-`fit_swing_scipy` starts the MATLAB engine before checking whether `options.theta0` has the correct length. That means a simple user-input error can trigger an unnecessary (and expensive) engine startup, and on hosts without MATLAB it will raise an engine startup failure instead of the intended `ValueError` for bad `theta0`, making argument validation unusable ...
+The `--skip-fits` path returns immediately with an empty `LeaderboardSummary`, so the generated report and metrics claim zero attempted/successful fits even when result JSON files already exist. This contradicts the CLI contract (“regenerate reports from existing JSONs”) and produces misleading output for report-only runs.
+
+Useful? React with 👍 / 👎.
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4090#discussion_r3197765789)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4226#discussion_r3198554319)
 
 ---
 
-### PR #4105: src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/compute_skeleton_fk.m:203
+### PR #4226: scripts/run_cross_option_leaderboard.py:817
 
 Actionable: Yes
 Has Suggestion: No
 
 ```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Remove extra torso-length step in angle fallback chain**
+**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Avoid serializing Infinity in metrics JSON**
 
-When `sensor_anchored` mode is unavailable (or `force_angle_chain=true`), the fallback now advances the torso axis three times by `UpperTorsoLength/2` (`hip->spine`, `spine->torso`, and `torso->hub`). This adds an extra `UpperTorsoLength/2` translation compared to the prior legacy geometry and systematically biases every downstream joint in fallback mo...
+When no fit succeeds, `best_grip_rmse_mm` remains `float('inf')` and is written directly into `metrics_dict`; `json.dumps` emits this as `Infinity`, which is non-standard JSON and breaks strict JSON parsers used by many downstream tools. The metrics output should normalize this sentinel to a finite value or `null` before serialization.
+
+Useful? React with 👍 / 👎.
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4105#discussion_r3197917606)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4226#discussion_r3198554322)
 
 ---
+
