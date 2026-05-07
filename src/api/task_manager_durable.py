@@ -29,7 +29,7 @@ from collections.abc import Generator
 from contextlib import contextmanager, suppress
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Protocol, cast
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -187,7 +187,7 @@ class SQLiteBackend:
             )
             self._local.conn.execute("PRAGMA journal_mode=WAL")
             self._local.conn.execute("PRAGMA busy_timeout=30000")
-        return self._local.conn
+        return cast(sqlite3.Connection, getattr(self._local, "conn", None))
 
     @contextmanager
     def _transaction(self) -> Generator[sqlite3.Connection, None, None]:
@@ -599,7 +599,9 @@ class DurableTaskManager:
             task_type=task_type,
             input_data=input_data or {},
             config_hash=config_hash,
-            code_version=code_version or os.environ.get("APP_VERSION", "unknown"),
+            code_version=code_version
+            if code_version is not None
+            else str(os.environ.get("APP_VERSION", "unknown")),
             ttl_seconds=ttl_seconds,
             retention_seconds=retention_seconds,
             priority=priority,
@@ -718,7 +720,9 @@ class DurableTaskManager:
             TaskRecord if a task was acquired, None otherwise
         """
         if worker_id is None:
-            worker_id = f"{os.uname().nodename}-{os.getpid()}"
+            import socket
+
+            worker_id = f"{socket.gethostname()}-{os.getpid()}"
         return self.backend.acquire_task(worker_id)
 
     def release_task(self, task_id: str) -> bool:
@@ -760,5 +764,4 @@ class DurableTaskManager:
             self._cleanup_task.cancel()
             with suppress(asyncio.CancelledError):
                 await self._cleanup_task
-
         logger.info("DurableTaskManager shutdown complete")
