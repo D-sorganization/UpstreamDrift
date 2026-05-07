@@ -39,7 +39,7 @@ class WheelEventFilter(QObject):
         Returns:
             True if the event should be filtered (blocked), False otherwise.
         """
-        if event.type() == QEvent.Type.WheelEvent:
+        if event.type() == QEvent.Type.Wheel:
             wheel_event = event
             if isinstance(wheel_event, QWheelEvent):
                 # Accept the event to prevent it from propagating
