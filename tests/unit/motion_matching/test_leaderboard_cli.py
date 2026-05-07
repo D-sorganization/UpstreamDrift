@@ -11,10 +11,18 @@ Issue #4248: Cross-engine leaderboard infrastructure
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 from pathlib import Path
 
 import pytest
+
+# Root of the UpstreamDrift repository (two levels above tests/unit/).
+_REPO_ROOT = str(Path(__file__).resolve().parents[3])
+
+# Subprocess environment with PYTHONPATH set so src.shared is importable
+# regardless of the working directory used by each test.
+_SUBPROCESS_ENV = {**os.environ, "PYTHONPATH": _REPO_ROOT}
 
 
 def _write_fit_result(trial_dir: Path, engine: str, data: dict | None = None) -> Path:
@@ -86,7 +94,7 @@ def test_leaderboard_cli_generates_report(tmp_path: Path) -> None:
         "--output",
         str(output_file),
     ]
-    result = subprocess.run(cmd, cwd="/home/dieterolson/Repositories-WSL/UpstreamDrift")
+    result = subprocess.run(cmd, cwd=_REPO_ROOT, env=_SUBPROCESS_ENV)
 
     # Verify success
     assert result.returncode == 0
@@ -101,8 +109,8 @@ def test_leaderboard_cli_generates_report(tmp_path: Path) -> None:
     assert "drake" in content
     # Results should be sorted by grip_rmse_mm ascending
     lines = content.split("\n")
-    pinocchio_line = next((l for l in lines if "pinocchio" in l), None)
-    mujoco_line = next((l for l in lines if "mujoco" in l), None)
+    pinocchio_line = next((ln for ln in lines if "pinocchio" in ln), None)
+    mujoco_line = next((ln for ln in lines if "mujoco" in ln), None)
     if pinocchio_line and mujoco_line:
         # pinocchio should come first (lower rmse = 1.5 vs 2.5)
         assert lines.index(pinocchio_line) < lines.index(mujoco_line)
@@ -129,6 +137,7 @@ def test_leaderboard_cli_default_output_path(tmp_path: Path) -> None:
     result = subprocess.run(
         cmd,
         cwd=str(tmp_path),
+        env=_SUBPROCESS_ENV,
     )
 
     # Default should create LEADERBOARD.md in cwd
@@ -152,7 +161,7 @@ def test_leaderboard_cli_nonexistent_dir_fails(tmp_path: Path) -> None:
         "--output",
         str(tmp_path / "output.md"),
     ]
-    result = subprocess.run(cmd, cwd="/home/dieterolson/Repositories-WSL/UpstreamDrift")
+    result = subprocess.run(cmd, cwd=_REPO_ROOT, env=_SUBPROCESS_ENV)
 
     # Should fail with exit code 1
     assert result.returncode == 1

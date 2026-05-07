@@ -114,6 +114,11 @@ class FitResult:
     all_starts: list[np.ndarray]
     surrogate_pred: ClubTrajectory = field(repr=False)
 
+    @property
+    def theta_optimal(self) -> np.ndarray:
+        """Alias for ``coefficients`` matching the canonical FitResult schema."""
+        return self.coefficients
+
 
 # ---------------------------------------------------------------------------
 # Internal helpers
