@@ -6,6 +6,7 @@ from PyQt6 import QtWidgets
 from ...core.models import C3DDataModel
 from ...services.analysis import compute_marker_statistics
 from ..widgets.mpl_canvas import MplCanvas
+from src.shared.python.qt_utils.wheel_event_filter import suppress_wheel_on_widgets
 
 
 class AnalysisTab(QtWidgets.QWidget):
@@ -24,6 +25,9 @@ class AnalysisTab(QtWidgets.QWidget):
         self.combo_marker_analysis.currentIndexChanged.connect(self.update_panel)
         top_layout.addWidget(QtWidgets.QLabel("Marker:"))
         top_layout.addWidget(self.combo_marker_analysis)
+
+        # Suppress wheel events on combo box to prevent unintended value changes
+        suppress_wheel_on_widgets(self.combo_marker_analysis)
 
         self.button_recompute_stats = QtWidgets.QPushButton("Recompute stats")
         self.button_recompute_stats.setToolTip(
