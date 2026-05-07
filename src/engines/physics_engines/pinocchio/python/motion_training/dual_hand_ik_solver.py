@@ -88,6 +88,12 @@ class TrajectoryIKResult:
         """Return NxQ array of joint configurations."""
         return np.array(self.configurations)
 
+    @property
+    def q_dim(self) -> int:
+        """Return the per-frame joint-configuration dimension (Q)."""
+        traj = self.q_trajectory
+        return int(traj.shape[1]) if traj.ndim == 2 else 0
+
 
 class DualHandIKSolver:
     """Inverse kinematics solver for dual-hand golf swing tracking.
@@ -152,6 +158,16 @@ class DualHandIKSolver:
 
         # Reference configuration (neutral pose)
         self.q_ref = pin.neutral(self.model)
+
+    @property
+    def nq(self) -> int:
+        """Configuration-space dimension of the underlying Pinocchio model."""
+        return int(self.model.nq)
+
+    @property
+    def nv(self) -> int:
+        """Tangent-space (velocity) dimension of the underlying model."""
+        return int(self.model.nv)
 
     def _setup_tasks(self) -> None:
         """Setup Pink IK tasks."""

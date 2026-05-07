@@ -171,11 +171,11 @@ class TrajectoryExporter:
                 "grip_positions": self.trajectory.grip_positions.tolist(),
                 "club_face_positions": self.trajectory.club_face_positions.tolist(),
                 "events": {
-                    "address": self.trajectory.events.address,
-                    "top": self.trajectory.events.top,
-                    "impact": self.trajectory.events.impact,
-                    "finish": self.trajectory.events.finish,
-                    "club_head_speed_mph": self.trajectory.events.club_head_speed,
+                    "address": self.trajectory.address_frame,
+                    "top": self.trajectory.top_frame,
+                    "impact": self.trajectory.impact_frame,
+                    "finish": self.trajectory.finish_frame,
+                    "club_head_speed_mph": self.trajectory.club_head_speed_mph,
                 },
             }
 

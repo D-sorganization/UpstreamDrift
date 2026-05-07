@@ -90,6 +90,7 @@ guardrails until the active workflow count reaches the 25-workflow target:
 | Nightly-Doc-Organizer.yml | schedule/workflow_dispatch | @docs | contents/pull-requests: write | MERGE: nightly docs cleanup. | docs-ci.yml |
 | pdf-size-guard.yml | pull_request | @docs | contents: read | KEEP: PDF size guard. | n/a |
 | pr-auto-labeler.yml | pull_request | @triage | pull-requests: write | KEEP: PR labeling. | n/a |
+| quality-gate.yml | pull_request/workflow_dispatch | @core | contents: read | KEEP: advisory engine-specific quality lints (e.g. pinocchio LOD). | n/a |
 | PR-Comment-Responder.yml | issue_comment/workflow_dispatch | @triage | issues/pull-requests: write | KEEP: canonical PR comment responder. | n/a |
 | release.yml | push/workflow_dispatch | @release | contents: write | KEEP: build and publish releases. | n/a |
 | security-osv-monitor.yml | schedule/workflow_dispatch | @security | contents/issues/security-events: write | KEEP: scheduled OSV vulnerability triage SLA monitor. | n/a |

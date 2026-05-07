@@ -334,10 +334,10 @@ class PinocchioPoseEditor(BasePoseEditor):
 
         try:
             if enabled:
-                self._model.gravity.linear = self._original_gravity
+                self._set_model_gravity(self._original_gravity)
                 logger.info("Gravity enabled: %s", self._original_gravity)
             else:
-                self._model.gravity.linear = np.zeros(3)
+                self._set_model_gravity(np.zeros(3))
                 logger.info("Gravity disabled")
 
             self._state.gravity_enabled = enabled
@@ -350,11 +350,25 @@ class PinocchioPoseEditor(BasePoseEditor):
         """Check if gravity is enabled."""
         return self._state.gravity_enabled
 
+    def _get_model_gravity(self) -> np.ndarray:
+        """Read the linear-gravity vector from the underlying Pinocchio model.
+
+        Encapsulates ``pin.Model.gravity.linear`` so call sites don't reach
+        through the third-party object graph (LOD).
+        """
+        gravity = self._model.gravity
+        return gravity.linear
+
+    def _set_model_gravity(self, vec: np.ndarray) -> None:
+        """Write the linear-gravity vector on the underlying Pinocchio model."""
+        gravity = self._model.gravity
+        gravity.linear = vec
+
     def _get_gravity_magnitude(self) -> float:
         """Get current gravity magnitude."""
         if self._model is None:
             return GRAVITY
-        return float(np.linalg.norm(self._model.gravity.linear))
+        return float(np.linalg.norm(self._get_model_gravity()))
 
     def update_visualization(self) -> None:
         """Update visualization to reflect current pose."""

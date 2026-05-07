@@ -123,10 +123,10 @@ class MotionTrainingPipeline:
         logger.debug(f"      Loaded {self.trajectory.num_frames} frames")
         logger.info(f"      Duration: {self.trajectory.duration:.3f} seconds")
         logger.info(
-            f"      Events: A={self.trajectory.events.address}, "
-            f"T={self.trajectory.events.top}, "
-            f"I={self.trajectory.events.impact}, "
-            f"F={self.trajectory.events.finish}"
+            f"      Events: A={self.trajectory.address_frame}, "
+            f"T={self.trajectory.top_frame}, "
+            f"I={self.trajectory.impact_frame}, "
+            f"F={self.trajectory.finish_frame}"
         )
 
         # Step 2: Initialize IK solver
@@ -135,7 +135,7 @@ class MotionTrainingPipeline:
         logger.info(f"      Model: {self.config.golfer_urdf}")
         if not (self.ik_solver is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
-        logger.info(f"      DOF: {self.ik_solver.model.nq}")
+        logger.info(f"      DOF: {self.ik_solver.nq}")
 
         # Step 3: Solve IK
         logger.info("\n[3/4] Solving inverse kinematics...")
@@ -232,9 +232,7 @@ class MotionTrainingPipeline:
 
         with open(output_dir / "joint_trajectory.csv", "w", newline="") as f:
             writer = csv.writer(f)
-            header = ["time"] + [
-                f"q{i}" for i in range(self.ik_result.q_trajectory.shape[1])
-            ]  # noqa: E501
+            header = ["time"] + [f"q{i}" for i in range(self.ik_result.q_dim)]  # noqa: E501
             writer.writerow(header)
             for i, t in enumerate(self.ik_result.times):
                 row = [t] + list(self.ik_result.q_trajectory[i])

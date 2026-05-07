@@ -92,6 +92,34 @@ class ClubTrajectory:
         """Return Nx3 array of club face positions."""
         return np.array([f.club_face_position for f in self.frames])
 
+    # --- Delegating accessors for SwingEventMarkers (LOD: keep callers from
+    # reaching through ``self.events`` for routine logging / export). ---
+
+    @property
+    def address_frame(self) -> int:
+        """Frame index of the address (setup) event."""
+        return self.events.address
+
+    @property
+    def top_frame(self) -> int:
+        """Frame index of the top-of-backswing event."""
+        return self.events.top
+
+    @property
+    def impact_frame(self) -> int:
+        """Frame index of the ball-impact event."""
+        return self.events.impact
+
+    @property
+    def finish_frame(self) -> int:
+        """Frame index of the finish (end of follow-through) event."""
+        return self.events.finish
+
+    @property
+    def club_head_speed_mph(self) -> float:
+        """Club-head speed at impact, in miles per hour."""
+        return self.events.club_head_speed
+
     def get_frame_at_time(self, t: float) -> ClubFrame:
         """Interpolate to get frame at specific time."""
         if not (t is not None):

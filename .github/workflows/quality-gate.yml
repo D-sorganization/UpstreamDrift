@@ -1,0 +1,47 @@
+name: Quality Gate
+
+# Advisory quality checks for engine-specific coding standards.
+# Currently runs the LOD (Law of Demeter) lint over the pinocchio Python
+# package; the check is **advisory** (it prints warnings and never fails the
+# build) until issue #4139 is fully landed and we want to start blocking
+# regressions.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "src/engines/physics_engines/pinocchio/python/**"
+      - "scripts/ci/check_lod.py"
+      - ".github/workflows/quality-gate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lod-pinocchio:
+    name: LOD lint (pinocchio python) — advisory
+    runs-on: d-sorg-fleet
+    timeout-minutes: 5
+    steps:
+      - name: Enable long Git paths
+        run: git config --global core.longpaths true
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: "3.11"
+
+      - name: Run LOD lint (advisory)
+        shell: bash
+        run: |
+          python3 scripts/ci/check_lod.py \
+            src/engines/physics_engines/pinocchio/python \
+            --advisory
