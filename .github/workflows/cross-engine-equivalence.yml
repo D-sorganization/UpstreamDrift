@@ -81,7 +81,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m pip install --upgrade pip
+          python -m pip install --ignore-installed --no-deps pip
           # Always install the dev/test stack and the default mujoco engine.
           pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
           # Optional engines: best-effort. The test self-skips when any of
@@ -98,10 +98,11 @@ jobs:
         run: |
           mkdir -p "$UPSTREAM_DRIFT_OUTPUT_ROOT/cross_engine_equivalence"
           # We deliberately run with `-p no:cacheprovider` to avoid caching
-          # across reruns and `-rs` so skips show up clearly in the log.
+          # across reruns, `-p no:xvfb` because this is a non-GUI parity gate,
+          # and `-rs` so skips show up clearly in the log.
           python3 -m pytest \
             tests/motion_matching/test_cross_engine_equivalence.py \
-            -v -rs --tb=short \
+            -v -rs --tb=short -p no:xvfb \
             --junitxml=test-results/cross-engine-equivalence-junit.xml
 
       - name: Upload equivalence report

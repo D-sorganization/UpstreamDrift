@@ -155,8 +155,21 @@ jobs:
             echo "No PRs need CI triggering"
           fi
 
-      - name: Trigger CI for PRs
+      - name: Validate bot trigger token
+        id: token-check
         if: steps.loop-check.outputs.skip != 'true' && steps.find-prs.outputs.prs != ''
+        env:
+          GH_TOKEN: ${{ env.BOT_TRIGGER_TOKEN }}
+        run: |
+          if gh auth status >/dev/null 2>&1; then
+            echo "can_trigger=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "can_trigger=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Bot trigger token is unavailable or invalid; skipping authenticated CI trigger."
+          fi
+
+      - name: Trigger CI for PRs
+        if: steps.loop-check.outputs.skip != 'true' && steps.find-prs.outputs.prs != '' && steps.token-check.outputs.can_trigger == 'true'
         env:
           GH_TOKEN: ${{ env.BOT_TRIGGER_TOKEN }}
         run: |
@@ -196,8 +209,6 @@ jobs:
 
       - name: Summary
         if: always()
-        env:
-          CAN_TRIGGER: ${{ secrets.BOT_PAT != '' || secrets.RUNNER_CHECK_TOKEN != '' }}
         run: |
           echo "## Bot CI Trigger Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -206,8 +217,8 @@ jobs:
             echo "**Skipped**: Loop prevention triggered" >> $GITHUB_STEP_SUMMARY
           elif [ -z "${{ steps.find-prs.outputs.prs }}" ]; then
             echo "**No action needed**: All bot PRs have CI checks" >> $GITHUB_STEP_SUMMARY
-          elif [ "$CAN_TRIGGER" != "true" ]; then
-            echo "**Detected PRs**: ${{ steps.find-prs.outputs.prs }} (CI trigger skipped: no bot token available)" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.token-check.outputs.can_trigger }}" != "true" ]; then
+            echo "**Detected PRs**: ${{ steps.find-prs.outputs.prs }} (CI trigger skipped: bot token unavailable or invalid)" >> $GITHUB_STEP_SUMMARY
           else
             echo "**Triggered CI for PRs**: ${{ steps.find-prs.outputs.prs }}" >> $GITHUB_STEP_SUMMARY
           fi

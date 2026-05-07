@@ -214,6 +214,45 @@ class TestCIEnvironmentCompatibility:
         # This should not raise in CI with xvfb
         os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
+    def test_pr_scoped_core_tests_treat_all_skipped_selection_as_noop(self) -> None:
+        """PR-scoped pytest must not fail when every selected test self-skips."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8",
+        )
+
+        assert "pytest_status=$?" in workflow
+        assert 'if [ "$pytest_status" -eq 5 ]; then' in workflow
+        assert "All selected PR-scoped tests were skipped" in workflow
+
+    def test_cross_engine_equivalence_uses_recordless_pip_bootstrap(self) -> None:
+        """The equivalence workflow must tolerate broken runner pip metadata."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "cross-engine-equivalence.yml"
+        ).read_text(encoding="utf-8")
+
+        assert "python -m pip install --ignore-installed --no-deps pip" in workflow
+        assert "python -m pip install --upgrade pip" not in workflow
+
+    def test_cross_engine_equivalence_disables_xvfb_plugin(self) -> None:
+        """The non-GUI equivalence job must not start pytest-xvfb."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "cross-engine-equivalence.yml"
+        ).read_text(encoding="utf-8")
+
+        assert "-p no:xvfb" in workflow
+
+    def test_bot_ci_trigger_validates_token_before_authenticated_trigger(
+        self,
+    ) -> None:
+        """The bot trigger job must skip gracefully when its token is invalid."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "Bot-CI-Trigger.yml"
+        ).read_text(encoding="utf-8")
+
+        assert "id: token-check" in workflow
+        assert "gh auth status" in workflow
+        assert "steps.token-check.outputs.can_trigger == 'true'" in workflow
+
 
 class TestPyprojectTomlConsistency:
     """Test that pyproject.toml is properly configured."""

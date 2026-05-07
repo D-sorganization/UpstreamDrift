@@ -630,6 +630,7 @@ jobs:
 
             echo "Running PR-scoped core tests:"
             printf '  %s\n' "${changed_tests[@]}"
+            set +e
             xvfb-run --auto-servernum python -m pytest "${changed_tests[@]}" \
               -p no:xvfb \
               -n 0 \
@@ -639,7 +640,13 @@ jobs:
               --no-cov \
               --tb=short \
               -v
-            exit 0
+            pytest_status=$?
+            set -e
+            if [ "$pytest_status" -eq 5 ]; then
+              echo "All selected PR-scoped tests were skipped; treating as no-op."
+              exit 0
+            fi
+            exit "$pytest_status"
           fi
 
           # Run the default, dependency-light CI lane:
