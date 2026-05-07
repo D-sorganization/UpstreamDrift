@@ -30,16 +30,16 @@
 
 ## 1. Identity
 
-| Field                   | Value                                               |
-| ----------------------- | --------------------------------------------------- |
-| **Repository Name**     | `UpstreamDrift`                                     |
-| **GitHub URL**          | `https://github.com/D-sorganization/UpstreamDrift`  |
-| **Owner**               | D-sorganization                                     |
-| **Primary Language(s)** | Python 3.10+, Rust, TypeScript                      |
-| **License**             | MIT                                                 |
-| **Current Version**     | 2.1.0                                               |
-| **Spec Version**        | 1.0.141                                             |
-| **Last Spec Update**    | 2026-05-07 (OpenSim deterministic multistart fit)   |
+| Field                   | Value                                              |
+| ----------------------- | -------------------------------------------------- |
+| **Repository Name**     | `UpstreamDrift`                                    |
+| **GitHub URL**          | `https://github.com/D-sorganization/UpstreamDrift` |
+| **Owner**               | D-sorganization                                    |
+| **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
+| **License**             | MIT                                                |
+| **Current Version**     | 2.1.0                                              |
+| **Spec Version**        | 1.0.142                                            |
+| **Last Spec Update**    | 2026-05-07 (MuJoCo pose-conditioned synth targets) |
 
 ## 2. Purpose & Mission
 
@@ -183,7 +183,7 @@ Engine tier metadata is declared in each in-scope engine package with
 
 | #   | Feature                            | Status | Description                                                                                         |
 | --- | ---------------------------------- | ------ | --------------------------------------------------------------------------------------------------- |
-| F1  | MuJoCo engine integration          | ✅     | Full support for MuJoCo 3.3.0+ with contact dynamics, muscle actuators, and sensor simulation       |
+| F1  | MuJoCo engine integration          | ✅     | Full support for MuJoCo 3.3.0+ with contact dynamics, muscle actuators, sensor simulation, and pose-conditioned motion-matching target synthesis |
 | F2  | Drake engine integration           | ✅     | Extended Drake support for trajectory optimization, manipulation, and planning problems             |
 | F3  | Pinocchio engine integration       | ✅     | Extended Pinocchio support for efficient rigid-body dynamics and jacobian computation               |
 | F4  | OpenSim engine integration         | 🔄     | Experimental OpenSim integration for clinical biomechanics and musculoskeletal analysis             |
@@ -665,4 +665,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-07 | 1.0.133 | Added FitResult field contract coverage requiring motion-matching fit drivers to export the shared `CanonicalFitResult` and canonical engine tests to use `theta_optimal` instead of deprecated `.theta` access. |
 | 2026-05-07 | 1.0.138 | Added an opt-in OpenSim compliant club attachment builder path with typed `CompliantClubAttachmentConfig`, deterministic `BushingForce` XML emission, default rigid-weld regression coverage, and validation for unsupported units or missing model bodies. |
 | 2026-05-07 | 1.0.141 | Added deterministic OpenSim multistart fit orchestration with seed-list reproducibility, per-start fresh simulator factories, best-success result selection, and typed all-starts-failed diagnostics. |
+| 2026-05-07 | 1.0.142 | Added MuJoCo pose-conditioned `synthesize_target_from_coefficients(..., initial_pose=...)` behavior and equivalence-test coverage requiring address, top-of-backswing, and impact fixtures to be passed into MuJoCo rollouts. |
 ````

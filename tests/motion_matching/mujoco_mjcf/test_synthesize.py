@@ -59,6 +59,20 @@ def _theta_zero_full() -> tuple[np.ndarray, SimOptions]:
     return theta, sim_opts
 
 
+def _non_default_initial_pose() -> np.ndarray:
+    """Return a valid full-body qpos with one joint perturbed."""
+    import mujoco
+    from src.engines.physics_engines.mujoco._golf_swing_full_body_xml import (
+        FULL_BODY_GOLF_SWING_XML,
+    )
+
+    model = mujoco.MjModel.from_xml_string(FULL_BODY_GOLF_SWING_XML)
+    data = mujoco.MjData(model)
+    pose = np.asarray(data.qpos, dtype=np.float64).copy()
+    pose[8] += 0.25
+    return pose
+
+
 # --- Round-trip identity ----------------------------------------------------
 
 
@@ -114,6 +128,28 @@ def test_round_trip_matches_simulate_clubhead_exactly() -> None:
 
     np.testing.assert_array_equal(target.clubhead, sim_out.clubhead)
     np.testing.assert_array_equal(target.time, sim_out.time)
+
+
+def test_initial_pose_changes_synthesized_butt_trajectory() -> None:
+    """``initial_pose`` must pass through to the MuJoCo rollout."""
+    theta, sim_opts = _theta_zero_full()
+    align = AlignOptions(
+        simulation_time_s=sim_opts.T_s, sample_rate_hz=sim_opts.output_rate_hz
+    )
+    initial_pose = _non_default_initial_pose()
+
+    default_target = mj_synthesize.synthesize_target_from_coefficients(
+        theta, align, sim_options=sim_opts
+    )
+    posed_target = mj_synthesize.synthesize_target_from_coefficients(
+        theta,
+        align,
+        sim_options=sim_opts,
+        initial_pose=initial_pose,
+    )
+
+    displacement = np.linalg.norm(posed_target.butt - default_target.butt, axis=1)
+    assert float(np.max(displacement)) > 1.0e-5
 
 
 # --- Cross-engine mapping correctness ---------------------------------------

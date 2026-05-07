@@ -100,11 +100,13 @@ def test_mujoco_address_equivalence() -> None:
     except ImportError:
         pytest.skip("MuJoCo or dependencies not available")
 
-    _load_test_poses()
+    initial_pose = _load_test_poses()["address"]
     theta = _create_mujoco_zero_polynomial_theta()
     align_opts = AlignOptions(simulation_time_s=0.5, sample_rate_hz=500.0)
 
-    target = synthesize_target_from_coefficients(theta, align_opts)
+    target = synthesize_target_from_coefficients(
+        theta, align_opts, initial_pose=initial_pose
+    )
 
     # For this test, we use the grip position itself as a sanity check
     # (5mm RMSE would fail if the grip is NaN or wildly off)
@@ -125,11 +127,13 @@ def test_mujoco_top_of_backswing_equivalence() -> None:
     except ImportError:
         pytest.skip("MuJoCo or dependencies not available")
 
-    _load_test_poses()
+    initial_pose = _load_test_poses()["top_of_backswing"]
     theta = _create_mujoco_zero_polynomial_theta()
     align_opts = AlignOptions(simulation_time_s=0.5, sample_rate_hz=500.0)
 
-    target = synthesize_target_from_coefficients(theta, align_opts)
+    target = synthesize_target_from_coefficients(
+        theta, align_opts, initial_pose=initial_pose
+    )
 
     # Sanity check: target is valid and finite
     assert target.butt.shape[0] > 0
@@ -147,11 +151,13 @@ def test_mujoco_impact_equivalence() -> None:
     except ImportError:
         pytest.skip("MuJoCo or dependencies not available")
 
-    _load_test_poses()
+    initial_pose = _load_test_poses()["impact"]
     theta = _create_mujoco_zero_polynomial_theta()
     align_opts = AlignOptions(simulation_time_s=0.5, sample_rate_hz=500.0)
 
-    target = synthesize_target_from_coefficients(theta, align_opts)
+    target = synthesize_target_from_coefficients(
+        theta, align_opts, initial_pose=initial_pose
+    )
 
     # Verify impact_idx is valid
     assert 1 <= int(target.impact_idx) <= target.butt.shape[0]

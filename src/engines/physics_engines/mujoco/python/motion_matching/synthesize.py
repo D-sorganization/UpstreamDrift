@@ -159,6 +159,7 @@ def synthesize_target_from_coefficients(
     opts: AlignOptions | None = None,
     *,
     sim_options: SimOptions | None = None,
+    initial_pose: NDArray[np.float64] | None = None,
 ) -> ClubTarget:
     """Run the MuJoCo forward model with ``theta`` and return a ``ClubTarget``.
 
@@ -178,6 +179,9 @@ def synthesize_target_from_coefficients(
             precedence over the values derived from ``opts``. Useful for
             picking the MJCF variant (``upper`` / ``full`` / ``advanced``)
             without leaking that knob into the cross-engine signature.
+        initial_pose: Optional MuJoCo initial generalized coordinates passed
+            through to :func:`simulate_with_coefficients`. ``None`` uses the
+            MJCF default pose.
 
     Returns:
         Validated :class:`ClubTarget` whose trajectory rows mirror the
@@ -223,7 +227,11 @@ def synthesize_target_from_coefficients(
         merged_sim_opts.output_rate_hz,
     )
 
-    sim_out: SimOut = simulate_with_coefficients(theta_arr, merged_sim_opts)
+    sim_out: SimOut = simulate_with_coefficients(
+        theta_arr,
+        merged_sim_opts,
+        initial_pose=initial_pose,
+    )
 
     if sim_out.solver_status not in {"ok", "success"}:
         raise RuntimeError(

@@ -94,6 +94,11 @@ Equivalence test: every engine must round-trip a fixed `theta` to within
 (impact, top-of-backswing, address). Tracked by issue
 #PARITY-EQUIVALENCE-TEST.
 
+Engine-specific target-synthesis adapters that wrap `simulate_with_coefficients`
+must preserve this pose control. MuJoCo exposes `initial_pose` as a keyword-only
+argument on `synthesize_target_from_coefficients` and passes it through unchanged
+to the forward-sim wrapper.
+
 ### 2.3 Cost function (already shared)
 
 The Python cost function at `shared/python/motion_matching/cost.py` mirrors
