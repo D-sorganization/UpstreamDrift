@@ -1,6 +1,6 @@
 # SPEC.md — Repository Specification Document
 
-Last-Updated: 2026-04-25T00:00:00-07:00
+Last-Updated: 2026-05-06T00:00:00-07:00
 
 <!--
   TEMPLATE VERSION: 1.0.0
@@ -148,7 +148,7 @@ UpstreamDrift/
 
 | Component                      | Location                                                   | Purpose                                                                                                                                                                    |
 | ------------------------------ | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MuJoCo Engine Adapter          | `src/engines/physics_engines/mujoco/python/`             | Primary physics engine integration with full support for contact dynamics, world-contact force sign normalization, and muscle models                                       |
+| MuJoCo Engine Adapter          | `src/engines/physics_engines/mujoco/python/`             | Primary physics engine integration with full support for contact dynamics, world-contact force sign normalization, muscle models, and stored-pose gravity-vector interpolation |
 | Drake Engine Adapter           | `src/engines/physics_engines/drake/python/`              | Extended Drake support for trajectory optimization and manipulation tasks                                                                                                  |
 | Pinocchio Engine Adapter       | `src/engines/physics_engines/pinocchio/python/`          | Extended Pinocchio support for efficient rigid-body dynamics computation; step integration accepts only `rk4` and `semi_implicit` modes                                    |
 | OpenSim Engine Adapter         | `src/engines/physics_engines/opensim/python/`            | Experimental OpenSim integration for clinical biomechanics workflows                                                                                                       |
@@ -174,7 +174,7 @@ UpstreamDrift/
 
 | #   | Feature                            | Status | Description                                                                                                                                                                                                                     |
 | --- | ---------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| F1  | MuJoCo engine integration          | ✅     | Full support for MuJoCo 3.3.0+ with contact dynamics, world-contact ground-reaction force sign handling, muscle actuators, and sensor simulation                                                                                |
+| F1  | MuJoCo engine integration          | ✅     | Full support for MuJoCo 3.3.0+ with contact dynamics, world-contact ground-reaction force sign handling, muscle actuators, sensor simulation, and smooth gravity-vector interpolation across stored poses                         |
 | F2  | Drake engine integration           | ✅     | Extended Drake support for trajectory optimization, manipulation, and planning problems                                                                                                                                         |
 | F3  | Pinocchio engine integration       | ✅     | Extended Pinocchio support for efficient rigid-body dynamics and jacobian computation, including induced-acceleration handling that treats empty external-force contributions and zero-sized mass matrices as zero acceleration |
 | F4  | OpenSim engine integration         | 🔄     | Experimental OpenSim integration for clinical biomechanics and musculoskeletal analysis                                                                                                                                         |
@@ -337,6 +337,7 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 
 - [ ] Unit creation with valid URDF returns expected topology (chain, mass distribution)
 - [ ] MuJoCo engine simulation produces reasonable trajectories with gravity effects
+- [x] Unit: MuJoCo stored-pose interpolation preserves and smoothly interpolates gravity vectors across non-collinear directions, differing magnitudes, antipodal vectors, and pose-library export/import round trips
 - [ ] Cross-engine validation identifies discrepancies >5% between engines
 - [ ] IK solver converges within 10 iterations for standard human poses
 - [ ] ID computation returns physically plausible torques (within 2-sigma of analytical)
