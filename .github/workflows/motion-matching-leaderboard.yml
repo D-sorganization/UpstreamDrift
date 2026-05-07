@@ -1,0 +1,93 @@
+# Motion-matching leaderboard regeneration check (issue #4080).
+#
+# MATLAB + Simulink are not available on hosted GitHub runners, so this
+# workflow cannot actually re-execute `run_leaderboard.m`. Instead it
+# enforces the *contract* that every PR touching `motion_matching/`
+# either commits a refreshed `LEADERBOARD.md` or explicitly opts out.
+#
+# What this workflow does on a PR:
+#   1. Verifies `motion_matching/results/LEADERBOARD.md` exists.
+#   2. Verifies the LEADERBOARD.md header points at #4080 and lists the
+#      canonical column schema.
+#   3. Surfaces a "manual regeneration required" reminder in the PR's
+#      job summary so reviewers see it.
+#
+# How a contributor regenerates the leaderboard locally (the only path
+# that can actually run the optimizers):
+#
+#   cd src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab
+#   matlab -batch "addpath(genpath('motion_matching')); run_leaderboard"
+#
+# That command writes both the per-pair `.mat` files and the refreshed
+# `motion_matching/results/LEADERBOARD.md` which should then be staged
+# in the PR.
+
+name: motion-matching-leaderboard
+
+on:
+  pull_request:
+    paths:
+      - "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/**"
+      - ".github/workflows/motion-matching-leaderboard.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: motion-matching-leaderboard-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-leaderboard:
+    name: check LEADERBOARD.md is committed
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Verify LEADERBOARD.md exists
+        run: |
+          set -euo pipefail
+          MD="src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/results/LEADERBOARD.md"
+          if [ ! -f "$MD" ]; then
+            echo "::error::Missing $MD. Regenerate by running run_leaderboard.m locally and committing the output."
+            exit 1
+          fi
+          echo "Found $MD"
+
+      - name: Verify schema header
+        run: |
+          set -euo pipefail
+          MD="src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/results/LEADERBOARD.md"
+          for col in swing_id option solver rmse_mm work_J wall_s commit timestamp; do
+            if ! grep -q "$col" "$MD"; then
+              echo "::error::LEADERBOARD.md missing canonical column: $col"
+              exit 1
+            fi
+          done
+          if ! grep -q "#4080" "$MD"; then
+            echo "::error::LEADERBOARD.md must reference #4080 in its header."
+            exit 1
+          fi
+          echo "Schema header looks good."
+
+      - name: Manual regeneration reminder
+        if: always()
+        run: |
+          {
+            echo "## Motion-matching leaderboard"
+            echo ""
+            echo "MATLAB / Simulink are not available on hosted runners, so the"
+            echo "leaderboard cannot be regenerated here. If your PR changed any"
+            echo "optimizer or fit-quality code, please rerun locally:"
+            echo ""
+            echo '```bash'
+            echo "cd src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab"
+            echo "matlab -batch \"addpath(genpath('motion_matching')); run_leaderboard\""
+            echo '```'
+            echo ""
+            echo "and commit the refreshed \`motion_matching/results/LEADERBOARD.md\`."
+          } >> "$GITHUB_STEP_SUMMARY"
