@@ -552,7 +552,7 @@ class URDFBuilder:
         """
         return [seg["name"] for seg in self.segments]
 
-    def validate_urdf(self) -> list[str]:
+    def validate_urdf(self) -> list[str]:  # noqa: C901
         """Validate the URDF structure.
 
         Returns:

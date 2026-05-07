@@ -271,7 +271,7 @@ def compute_fit_quality(
     }
 
 
-def validate_pipeline_output(
+def validate_pipeline_output(  # noqa: C901
     joint_angles_series: dict[str, np.ndarray] | None = None,
     reference_angles: dict[str, np.ndarray] | None = None,
     predicted_markers: np.ndarray | None = None,

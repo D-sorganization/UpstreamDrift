@@ -99,7 +99,7 @@ class LibraryHandlersMixin:
             }
         )
 
-    def calculate_inertia(self, request: APIRequest) -> APIResponse:
+    def calculate_inertia(self, request: APIRequest) -> APIResponse:  # noqa: C901
         """Calculate inertia for primitive shape."""
         from .rest_api import APIResponse
 
@@ -367,7 +367,7 @@ class LibraryHandlersMixin:
 
         return APIResponse.file(urdf_string, f"{model.name}.urdf")
 
-    def compose_models(self, request: APIRequest) -> APIResponse:
+    def compose_models(self, request: APIRequest) -> APIResponse:  # noqa: C901
         """Compose model from multiple sources."""
         from .rest_api import APIResponse
 

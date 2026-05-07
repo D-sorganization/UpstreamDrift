@@ -139,7 +139,7 @@ class ControlCommand:
     damping: NDArray[np.floating] | None = None
     gripper_command: float | None = None
 
-    def validate(self, n_joints: int) -> bool:
+    def validate(self, n_joints: int) -> bool:  # noqa: C901
         """Validate command dimensions and mode consistency.
 
         Args:

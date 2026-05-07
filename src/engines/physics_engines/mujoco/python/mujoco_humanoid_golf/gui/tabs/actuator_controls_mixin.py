@@ -96,7 +96,7 @@ class _ActuatorControlsMixin:
 
         self.actuator_layout.addStretch(1)
 
-    def _group_actuators(self, names: list[str]) -> dict[str, list[str]]:
+    def _group_actuators(self, names: list[str]) -> dict[str, list[str]]:  # noqa: C901
         if not (names is not None):
             raise ValueError("names must be provided")
         groups: dict[str, list[str]] = {}

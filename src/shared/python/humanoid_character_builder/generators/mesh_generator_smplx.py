@@ -470,7 +470,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         21: "right_hand",
     }
 
-    def _segment_smplx_mesh(
+    def _segment_smplx_mesh(  # noqa: C901
         self,
         mesh: Any,
         model: Any,

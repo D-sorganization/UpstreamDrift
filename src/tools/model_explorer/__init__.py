@@ -49,7 +49,7 @@ __all__ = [
 ]
 
 
-def __getattr__(name: str) -> type:
+def __getattr__(name: str) -> type:  # noqa: C901
     """Lazy import for GUI components that require PyQt6."""
     if name == "URDFGeneratorWindow":
         from .main_window import URDFGeneratorWindow

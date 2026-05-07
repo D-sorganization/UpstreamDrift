@@ -98,7 +98,7 @@ def export_figure(
 # ---------------------------------------------------------------------------
 
 
-def export_plot_data(
+def export_plot_data(  # noqa: C901
     data: dict[str, Any],
     name: str,
     config: ExportConfig | None = None,

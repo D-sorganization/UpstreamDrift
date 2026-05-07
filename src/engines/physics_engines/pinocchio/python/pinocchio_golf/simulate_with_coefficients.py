@@ -216,13 +216,13 @@ def _extract_frames(
     # Get frame IDs
     try:
         grip_frame_id = model.getFrameId("mid_hands")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.warning(f"mid_hands frame not found: {e}, trying hand_left")
         grip_frame_id = model.getFrameId("hand_left")
 
     try:
         clubhead_frame_id = model.getFrameId("club_head")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.warning(f"club_head frame not found: {e}, trying club_shaft")
         clubhead_frame_id = model.getFrameId("club_shaft")
 

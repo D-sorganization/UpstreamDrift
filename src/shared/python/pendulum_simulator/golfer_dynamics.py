@@ -15,7 +15,7 @@ from .golfer_kinematics import forward_kinematics
 from .physics_golfer import N_DOF, GolferParams, State
 
 
-def _mass_point_positions(
+def _mass_point_positions(  # noqa: C901
     q: np.ndarray, p: GolferParams
 ) -> list[tuple[float, Callable]]:
     """Return list of (mass, position_function) for all point masses."""

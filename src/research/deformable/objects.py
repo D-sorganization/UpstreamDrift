@@ -542,7 +542,7 @@ class Cloth(DeformableObject):
         """Grid height."""
         return self._height
 
-    def _build_springs(self) -> list[tuple[int, int, float, str]]:
+    def _build_springs(self) -> list[tuple[int, int, float, str]]:  # noqa: C901
         """Build spring connectivity.
 
         Returns:

@@ -694,7 +694,7 @@ def evaluate(
         canonical_path.write_text(
             _emit_canonical_metrics(report, run_label), encoding="utf-8"
         )
-    except Exception as exc:  # pragma: no cover - best effort
+    except Exception as exc:  # pragma: no cover - best effort  # noqa: BLE001
         LOGGER.warning("Skipped canonical Metrics emission: %s", exc)
     LOGGER.info("Wrote matching diagnostics to %s", output_dir)
     return report
@@ -725,7 +725,7 @@ def _emit_canonical_metrics(report: dict, run_label: str) -> str:
             .decode()
             .strip()
         )
-    except Exception:
+    except Exception:  # noqa: BLE001
         sha = "0" * 40
     if len(sha) != 40 or not all(c in "0123456789abcdef" for c in sha):
         sha = "0" * 40

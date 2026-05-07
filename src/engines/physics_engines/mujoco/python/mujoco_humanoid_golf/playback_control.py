@@ -164,7 +164,7 @@ class PlaybackController:
         """
         self.loop = loop
 
-    def update(self, dt: float) -> bool:
+    def update(self, dt: float) -> bool:  # noqa: C901
         """Update playback state.
 
         Call this at regular intervals (e.g., 60 Hz).

@@ -51,7 +51,7 @@ class TorquePreviewWidget(QWidget):
         self._clamp_limits = list(clamp_limits) if clamp_limits else []
         self.update()
 
-    def paintEvent(self, event: object) -> None:
+    def paintEvent(self, event: object) -> None:  # noqa: C901
         if not (event is not None):
             raise ValueError("event must be provided")
         painter = QPainter(self)

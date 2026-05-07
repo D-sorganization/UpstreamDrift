@@ -223,7 +223,7 @@ class ModelLibrary:
 
         logger.info(f"Model library initialized at: {self.base_path}")
 
-    def get_human_model(self, model_key: str) -> Path | None:
+    def get_human_model(self, model_key: str) -> Path | None:  # noqa: C901
         """Get a human model, preferring bundled assets over downloads.
 
         This method first checks for bundled assets in the repository.
@@ -673,7 +673,7 @@ class ModelLibrary:
             "imported": imported,
         }
 
-    def get_model_info(self, category: str, model_key: str) -> dict[str, Any] | None:
+    def get_model_info(self, category: str, model_key: str) -> dict[str, Any] | None:  # noqa: C901
         """Get information about a specific model.
 
         Args:

@@ -191,7 +191,7 @@ def _compute_pure_viscosities(
     return pure_viscosities
 
 
-def _wilke_mixing_rule(
+def _wilke_mixing_rule(  # noqa: C901
     composition: dict[str, float],
     pure_viscosities: dict[str, float],
 ) -> float:

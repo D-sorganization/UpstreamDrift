@@ -364,7 +364,7 @@ def _resolve_n_actuators(plant: MultibodyPlant) -> int:
     lambda result: bool(result.solver_status in ("success", "warning", "failed")),
     "invalid solver_status",
 )
-def simulate_with_coefficients(
+def simulate_with_coefficients(  # noqa: C901
     theta: NDArray[np.float64],
     options: SimOptions | None = None,
     initial_pose: dict[str, Any] | None = None,
@@ -522,7 +522,7 @@ def simulate_with_coefficients(
             if t_target > 0.0:
                 try:
                     simulator.AdvanceTo(float(t_target))
-                except Exception as exc:  # pragma: no cover - solver-driven
+                except Exception as exc:  # noqa: BLE001
                     solver_status = "failed"
                     sim_error = exc
                     break
@@ -542,7 +542,7 @@ def simulate_with_coefficients(
             club_pose = _resolve_world_pose(plant, plant_ctx, opts.clubhead_body_name)
             if club_pose is not None:
                 clubhead_log[idx, :], club_quat_log[idx, :] = club_pose
-    except Exception as exc:  # pragma: no cover - defensive
+    except Exception as exc:  # pragma: no cover - defensive  # noqa: BLE001
         solver_status = "failed"
         sim_error = exc
 

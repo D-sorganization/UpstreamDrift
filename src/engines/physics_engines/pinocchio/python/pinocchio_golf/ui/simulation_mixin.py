@@ -41,7 +41,7 @@ class SimulationMixin:
         except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to scan URDF models: {e}")
 
-    def load_urdf(self: PinocchioGUI, fname: str | None = None) -> None:
+    def load_urdf(self: PinocchioGUI, fname: str | None = None) -> None:  # noqa: C901
         """Load a URDF model and initialize the viewer."""
         from . import MESHCAT_AVAILABLE, MeshcatVisualizer
 

@@ -137,7 +137,7 @@ class MethodRegistry:
         return namespaces
 
 
-async def dispatch(
+async def dispatch(  # noqa: C901
     registry: MethodRegistry,
     request: dict[str, Any],
     context: dict[str, Any] | None = None,

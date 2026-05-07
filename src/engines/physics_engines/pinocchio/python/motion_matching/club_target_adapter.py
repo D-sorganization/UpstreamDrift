@@ -98,7 +98,7 @@ except ImportError:  # pragma: no cover - fallback for stripped-down checkouts
 # ---------------------------------------------------------------------------
 
 
-def _validate_stub_target(t: ClubTarget) -> None:
+def _validate_stub_target(t: ClubTarget) -> None:  # noqa: C901
     """Replicate the canonical validation rules for the local stub."""
     time = np.asarray(t.time)
     if time.ndim != 1:
@@ -299,7 +299,7 @@ def _rotmat_to_quat_local(rotmats: np.ndarray) -> np.ndarray:
 # ---------------------------------------------------------------------------
 
 
-def load_robneal_target(path: Path | str) -> ClubTarget:
+def load_robneal_target(path: Path | str) -> ClubTarget:  # noqa: C901
     """Load a Rob Neal mocap pair into a canonical :class:`ClubTarget`.
 
     Args:

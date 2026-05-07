@@ -898,7 +898,7 @@ class AIAssistantPanel(QWidget):
         }
         self._expertise_label.setText(f"Level: {level_names[level]}")
 
-    def apply_settings(self, settings: AISettings) -> None:
+    def apply_settings(self, settings: AISettings) -> None:  # noqa: C901
         """Apply settings from dialog.
 
         Args:

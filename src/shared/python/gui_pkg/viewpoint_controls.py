@@ -136,7 +136,7 @@ def spherical_to_cartesian(
     return np.asarray(center + np.array([x, y, z]))
 
 
-def get_preset_camera_params(
+def get_preset_camera_params(  # noqa: C901
     preset: CameraPreset,
     golfer_position: np.ndarray | None = None,
     target_direction: np.ndarray | None = None,

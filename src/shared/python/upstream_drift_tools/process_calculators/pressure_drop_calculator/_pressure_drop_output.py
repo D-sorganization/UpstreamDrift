@@ -200,7 +200,7 @@ def _print_safety_section(results: dict[str, Any]) -> None:
     logger.info("└" + "─" * 38 + "┴" + "─" * 39 + "┘")
 
 
-def _print_warnings_and_recommendations(
+def _print_warnings_and_recommendations(  # noqa: C901
     results: dict[str, Any], show_recommendations: bool
 ) -> None:
     """Log warnings and engineering recommendations."""

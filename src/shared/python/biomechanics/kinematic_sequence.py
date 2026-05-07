@@ -208,7 +208,7 @@ class SegmentTimingAnalyzer:
 
         return peaks
 
-    def _compute_extended_metrics(
+    def _compute_extended_metrics(  # noqa: C901
         self,
         peaks: list[SegmentPeak],
         segment_velocities: dict[str, np.ndarray],

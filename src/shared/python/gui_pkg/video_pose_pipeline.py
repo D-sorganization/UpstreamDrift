@@ -395,7 +395,7 @@ class VideoPosePipeline:
 
         return filtered_results
 
-    def _is_outlier(
+    def _is_outlier(  # noqa: C901
         self, result: PoseEstimationResult, all_results: list[PoseEstimationResult]
     ) -> bool:
         """Check if a pose result is an outlier."""
@@ -459,7 +459,7 @@ class VideoPosePipeline:
 
         return metrics
 
-    def _convert_poses_to_markers(
+    def _convert_poses_to_markers(  # noqa: C901
         self, pose_results: list[PoseEstimationResult]
     ) -> tuple[np.ndarray, list[str], np.ndarray]:
         """Convert pose keypoints to marker format for model fitting.

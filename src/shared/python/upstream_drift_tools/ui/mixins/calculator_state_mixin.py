@@ -209,7 +209,7 @@ class CalculatorStateMixin:
                 lambda pos, w=widget_info: self.show_widget_context_menu(pos, w),
             )
 
-    def auto_register_widgets(self) -> None:
+    def auto_register_widgets(self) -> None:  # noqa: C901
         """Automatically register input widgets and splitters found in the UI."""
         if not isinstance(self, QWidget):
             return
@@ -344,7 +344,7 @@ class CalculatorStateMixin:
                 states[name] = value
         return states
 
-    def restore_input_states(self, states: dict[str, Any]) -> None:
+    def restore_input_states(self, states: dict[str, Any]) -> None:  # noqa: C901
         """Restore input widget states"""
         if not (states is not None):
             raise ValueError("states must be provided")

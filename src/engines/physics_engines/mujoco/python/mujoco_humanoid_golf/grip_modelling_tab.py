@@ -302,7 +302,7 @@ class GripModellingTab(QtWidgets.QWidget):
             logger.exception("Failed to process hand file %s", filename)
             return ""  # Return empty only on catastrophic failure
 
-    def _inline_hand_includes(
+    def _inline_hand_includes(  # noqa: C901
         self,
         xml_content: str,
         scene_path: Path,

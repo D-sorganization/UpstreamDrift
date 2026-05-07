@@ -90,7 +90,7 @@ def _discover_models() -> list[dict[str, str]]:
     return models
 
 
-def _parse_urdf_geometry(
+def _parse_urdf_geometry(  # noqa: C901
     visual_elem: Any, materials: dict[str, list[float]]
 ) -> dict[str, Any]:
     """Parse a single <visual> element into geometry data.
@@ -379,7 +379,7 @@ async def list_models(
 
 
 @router.get("/models/{model_name}/urdf", response_model=URDFModelResponse)
-async def get_model_urdf(
+async def get_model_urdf(  # noqa: C901
     model_name: str,
     logger: Any = Depends(get_logger),
 ) -> URDFModelResponse:

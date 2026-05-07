@@ -132,7 +132,7 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
                 error_message=f"MakeHuman generation failed: {e}",
             )
 
-    def _generate_via_api(
+    def _generate_via_api(  # noqa: C901
         self,
         params: BodyParameters,
         modifiers: dict[str, float],

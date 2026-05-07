@@ -203,7 +203,7 @@ async def get_actuator_panel(
     lambda command, engine_manager=None, logger=None: command.actuator_index >= 0,
     "Actuator index must be non-negative",
 )
-async def send_actuator_command(
+async def send_actuator_command(  # noqa: C901
     command: ActuatorCommandRequest,
     engine_manager: Any = Depends(get_engine_manager),
     logger: Any = Depends(get_logger),

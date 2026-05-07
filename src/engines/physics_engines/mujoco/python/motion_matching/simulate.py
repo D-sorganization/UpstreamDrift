@@ -276,7 +276,7 @@ def _output_grid(T_s: float, output_rate_hz: float) -> NDArray[np.float64]:
     lambda result: bool(result.solver_status in ("success", "warning", "failed")),
     "invalid solver_status",
 )
-def simulate_with_coefficients(
+def simulate_with_coefficients(  # noqa: C901
     theta: NDArray[np.float64],
     options: SimOptions | None = None,
     initial_pose: NDArray[np.float64] | None = None,

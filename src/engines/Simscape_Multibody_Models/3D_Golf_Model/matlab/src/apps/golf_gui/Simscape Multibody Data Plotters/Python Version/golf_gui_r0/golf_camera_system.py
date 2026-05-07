@@ -702,7 +702,7 @@ class CameraController(QObject):
 
         logger.info("📷 Started cinematic playback: %ss", self.cinematic_duration)
 
-    def update_cinematic_camera(self, time_delta: float) -> None:
+    def update_cinematic_camera(self, time_delta: float) -> None:  # noqa: C901
         """Update camera position during cinematic playback"""
         if not (time_delta is not None):
             raise ValueError("time_delta must be provided")

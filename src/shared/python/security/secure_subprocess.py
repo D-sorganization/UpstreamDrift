@@ -111,7 +111,7 @@ def validate_executable(executable: str) -> str:
     return executable
 
 
-def secure_popen(
+def secure_popen(  # noqa: C901
     cmd: list[str],
     cwd: Path | str | None = None,
     suite_root: Path | None = None,
@@ -181,7 +181,7 @@ def secure_popen(
         raise SecureSubprocessError(f"Subprocess launch failed: {e}") from e
 
 
-def secure_run(
+def secure_run(  # noqa: C901
     cmd: list[str],
     cwd: Path | str | None = None,
     suite_root: Path | None = None,

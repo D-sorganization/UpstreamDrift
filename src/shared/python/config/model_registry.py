@@ -176,7 +176,7 @@ class ModelRegistry(ContractChecker):
             ),
         ]
 
-    def _load_registry(self) -> None:
+    def _load_registry(self) -> None:  # noqa: C901
         """Load models from YAML configuration file.
 
         Raises:

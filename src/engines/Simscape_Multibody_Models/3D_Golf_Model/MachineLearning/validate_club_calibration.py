@@ -257,7 +257,7 @@ def _transform_summary(transform_json: Path | None) -> dict[str, Any] | None:
     }
 
 
-def _warning_flags(
+def _warning_flags(  # noqa: C901
     before: dict[str, Any],
     after: dict[str, Any],
     transform: dict[str, Any] | None,

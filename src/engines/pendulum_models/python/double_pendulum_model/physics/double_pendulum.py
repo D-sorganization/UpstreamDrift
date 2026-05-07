@@ -123,7 +123,7 @@ class ExpressionFunction:
         self._evaluator.functions = self._ALLOWED_FUNCTIONS.copy()
         self._evaluator.names = self._ALLOWED_NAMES.copy()
 
-    def _validate_ast(self, expression: str) -> None:
+    def _validate_ast(self, expression: str) -> None:  # noqa: C901
         """Walk the AST and raise ValueError for any disallowed constructs."""
         if not (expression is not None):
             raise ValueError("expression must be provided")

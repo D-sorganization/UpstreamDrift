@@ -231,7 +231,7 @@ class PinocchioVisualizationMixin:
                     0x0000FF,
                 )
 
-    def _draw_induced_vectors(self: Any) -> None:
+    def _draw_induced_vectors(self: Any) -> None:  # noqa: C901
         """Draw induced acceleration vectors."""
         if (
             self.model is None

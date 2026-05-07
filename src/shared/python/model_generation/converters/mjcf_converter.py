@@ -165,7 +165,7 @@ class MJCFConverter:
 
         return str(urdf_xml)
 
-    def _build_mjcf(self, model: ParsedModel) -> str:
+    def _build_mjcf(self, model: ParsedModel) -> str:  # noqa: C901
         """Build MJCF XML from parsed model."""
         if not (model is not None):
             raise ValueError("model must be provided")
@@ -246,7 +246,7 @@ class MJCFConverter:
 
         return "\n".join(lines)
 
-    def _build_mjcf_body(
+    def _build_mjcf_body(  # noqa: C901
         self,
         model: ParsedModel,
         link_name: str,

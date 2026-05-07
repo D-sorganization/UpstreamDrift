@@ -327,7 +327,7 @@ class ReportingMixin:
         lambda self, joint_idx: joint_idx >= 0,
         "Joint index must be non-negative",
     )
-    def compute_jerk_metrics(self, joint_idx: int) -> JerkMetrics | None:
+    def compute_jerk_metrics(self, joint_idx: int) -> JerkMetrics | None:  # noqa: C901
         """Compute jerk metrics for a joint.
 
         Args:

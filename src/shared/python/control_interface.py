@@ -348,7 +348,7 @@ class ControlInterface:
         """
         self._state.target_velocities = np.asarray(velocities, dtype=np.float64)
 
-    def compute_control(self, dt: float = 0.002) -> np.ndarray:
+    def compute_control(self, dt: float = 0.002) -> np.ndarray:  # noqa: C901
         """Compute control torques based on current strategy and state.
 
         Args:

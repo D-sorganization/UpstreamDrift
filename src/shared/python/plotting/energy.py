@@ -48,7 +48,7 @@ def _retrieve_power_data(
         return None
 
 
-def plot_energy_overview(
+def plot_energy_overview(  # noqa: C901
     recorder: RecorderInterface,
     ax: Axes | None = None,
     config: PlotConfig | None = None,

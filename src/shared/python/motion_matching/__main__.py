@@ -36,7 +36,7 @@ def leaderboard_cli(args: argparse.Namespace) -> int:
     try:
         generate_report(results_dir, output_path)
         return 0
-    except Exception:
+    except Exception:  # noqa: BLE001
         return 1
 
 

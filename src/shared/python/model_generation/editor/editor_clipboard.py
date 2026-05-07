@@ -106,7 +106,7 @@ class ClipboardMixin:
         lambda root_link: _is_non_empty_str(root_link),
         "root_link must be a non-empty string",
     )
-    def copy_subtree(
+    def copy_subtree(  # noqa: C901
         self,
         model_id: str,
         root_link: str,

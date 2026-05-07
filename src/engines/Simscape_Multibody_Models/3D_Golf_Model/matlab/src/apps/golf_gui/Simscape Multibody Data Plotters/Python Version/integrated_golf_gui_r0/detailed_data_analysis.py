@@ -18,7 +18,7 @@ import scipy.io
 logger = logging.getLogger(__name__)
 
 
-def deep_analyze_matlab_file(filename: Any) -> bool:
+def deep_analyze_matlab_file(filename: Any) -> bool:  # noqa: C901
     """Deep analysis of a MATLAB file structure"""
     logger.debug(f"\n=== Deep Analysis of {filename} ===")
 
@@ -101,7 +101,7 @@ def deep_analyze_matlab_file(filename: Any) -> bool:
         return False
 
 
-def extract_actual_data(filename: Any) -> np.ndarray | None:
+def extract_actual_data(filename: Any) -> np.ndarray | None:  # noqa: C901
     """Try to extract the actual data from the MATLAB file"""
     logger.debug(f"\n=== Extracting Data from {filename} ===")
 

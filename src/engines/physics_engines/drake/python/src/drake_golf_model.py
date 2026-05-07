@@ -259,7 +259,7 @@ class GolfURDFGenerator:
 
         return inertial
 
-    def add_link(  # noqa: PLR0913
+    def add_link(  # noqa: C901, PLR0913
         self,
         name: str,
         mass: float,

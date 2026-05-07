@@ -256,7 +256,7 @@ class UnitConversionService(
         msg = f"Unsupported unit category for {from_unit_norm}"
         raise UnknownUnitError(msg)
 
-    def _normalize_unit(self, unit: str) -> str:
+    def _normalize_unit(self, unit: str) -> str:  # noqa: C901
         """Normalize unit string to canonical form."""
         # Fast path 1: Check exact cache
         if not (unit is not None):

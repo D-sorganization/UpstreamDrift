@@ -238,7 +238,7 @@ def _init_sphere_geom(
 # ---------------------------------------------------------------------------
 
 
-def add_visualization_overlays(
+def add_visualization_overlays(  # noqa: C901
     viewer: Any,
     physics: Any,
     config: dict,

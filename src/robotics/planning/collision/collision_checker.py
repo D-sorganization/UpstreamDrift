@@ -179,7 +179,7 @@ class CollisionChecker:
         """Remove all environment primitives."""
         self._environment_primitives.clear()
 
-    def check_collision(
+    def check_collision(  # noqa: C901
         self,
         q: np.ndarray,
         query: CollisionQuery | None = None,
@@ -336,7 +336,7 @@ class CollisionChecker:
         # Check overlap
         return bool(np.all(max_a >= min_b) and np.all(max_b >= min_a))
 
-    def compute_distance(
+    def compute_distance(  # noqa: C901
         self,
         q: np.ndarray,
         query: CollisionQuery | None = None,

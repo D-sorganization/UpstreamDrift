@@ -25,7 +25,7 @@ _ERR_CONDITION_REQUIRED = "condition must be provided"
 _ERR_STATE_CHECK_REQUIRED = "state_check must be provided"
 
 
-def precondition(
+def precondition(  # noqa: C901
     condition: Callable[..., bool],
     message: str = "Precondition failed",
     enabled: bool = True,
@@ -60,7 +60,7 @@ def precondition(
         raise ValueError(_ERR_CONDITION_REQUIRED)
     from .level import get_contract_level  # read live state via function
 
-    def decorator(func: F) -> F:
+    def decorator(func: F) -> F:  # noqa: C901
         """Wrap the function with precondition checking logic."""
         if inspect.iscoroutinefunction(func):
 
@@ -131,7 +131,7 @@ def precondition(
     return decorator
 
 
-def postcondition(
+def postcondition(  # noqa: C901
     condition: Callable[[Any], bool],
     message: str = "Postcondition failed",
     enabled: bool = True,

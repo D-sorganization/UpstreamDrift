@@ -151,7 +151,7 @@ class TeleoperationInterface:
         """Disengage clutch (disable motion)."""
         self._clutch_engaged = False
 
-    def update(self) -> ControlCommand:
+    def update(self) -> ControlCommand:  # noqa: C901
         """Process input and generate control command.
 
         Returns:

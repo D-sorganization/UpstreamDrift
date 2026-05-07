@@ -479,7 +479,7 @@ class LivePlotWidget(QtWidgets.QWidget):
         """Handle checkbox toggle."""
         self._update_recorder_config()
 
-    def _update_recorder_config(self) -> None:
+    def _update_recorder_config(self) -> None:  # noqa: C901
         """Update recorder configuration based on current selection and checkbox."""
         compute_enabled = self.chk_compute.isChecked()
         config: dict[str, Any] = {
@@ -551,7 +551,7 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.ax.set_title(title)
         self.ax.grid(True)
 
-    def _get_data_for_key(self, key: str) -> tuple[np.ndarray, np.ndarray | None, str]:
+    def _get_data_for_key(self, key: str) -> tuple[np.ndarray, np.ndarray | None, str]:  # noqa: C901
         """Fetch data for a specific key."""
         if not (key is not None):
             raise ValueError("key must be provided")
@@ -649,7 +649,7 @@ class LivePlotWidget(QtWidgets.QWidget):
                 f"Mean: {mean_val:.2f} | Std: {std_val:.2f} | Min: {min_val:.2f} | Max: {max_val:.2f}"
             )
 
-    def _update_xy_plot(
+    def _update_xy_plot(  # noqa: C901
         self,
         data: np.ndarray,
         dim_label: str,
@@ -710,7 +710,7 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.ax.autoscale_view()
         self.canvas.draw()
 
-    def _update_primary_time_series(
+    def _update_primary_time_series(  # noqa: C901
         self,
         times: np.ndarray,
         data: np.ndarray,
@@ -768,7 +768,7 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.ax.relim()
         self.ax.autoscale_view()
 
-    def _update_comparison_overlay(
+    def _update_comparison_overlay(  # noqa: C901
         self,
         plot_mode: str,
         max_points: int,

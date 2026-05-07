@@ -281,7 +281,7 @@ def parse_date(value: str, default: datetime | None = None) -> datetime | None:
 # ============================================================================
 
 
-def format_duration(
+def format_duration(  # noqa: C901
     seconds: float,
     *,
     precision: int = 1,

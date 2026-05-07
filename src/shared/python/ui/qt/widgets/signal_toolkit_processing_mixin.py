@@ -247,7 +247,7 @@ class SignalToolkitProcessingMixin:
     # Fitting
     # ------------------------------------------------------------------
 
-    def _fit_function(self: Any) -> None:
+    def _fit_function(self: Any) -> None:  # noqa: C901
         """Fit a function to the current signal."""
         if self.current_signal is None:
             return
@@ -441,7 +441,7 @@ class SignalToolkitProcessingMixin:
     # Filters
     # ------------------------------------------------------------------
 
-    def _apply_filter(self: Any) -> None:  # noqa: PLR0912
+    def _apply_filter(self: Any) -> None:  # noqa: C901, PLR0912
         """Apply filter to the signal."""
         if self.current_signal is None:
             return

@@ -141,7 +141,7 @@ class GolferParams:
     b_rscap: float = 0.0  # right upper body damping
     b_lscap: float = 0.0  # left upper body damping
 
-    def __post_init__(self) -> None:
+    def __post_init__(self) -> None:  # noqa: C901
         for name, val in [
             ("m_hub", self.m_hub),
             ("m_r_upper", self.m_r_upper),

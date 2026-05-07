@@ -493,7 +493,7 @@ def _grip_log_from_target(
     raise TypeError(msg)
 
 
-def _autodiff_simulate_and_cost(
+def _autodiff_simulate_and_cost(  # noqa: C901
     theta: Any,
     plant_ad: Any,
     integrator_kind: str,
@@ -582,7 +582,7 @@ def _autodiff_simulate_and_cost(
         if t_target_f > prev_t:
             try:
                 simulator.AdvanceTo(t_target_f)
-            except Exception:  # pragma: no cover - solver-driven
+            except Exception:  # pragma: no cover - solver-driven  # noqa: BLE001
                 # Convert solver failures into a finite (but huge) cost so
                 # the optimizer can recover rather than crashing.
                 penalty = AutoDiffXd(1.0e6, np.zeros(theta.shape[0]))
@@ -655,7 +655,7 @@ def _abs_ad(x: Any) -> Any:
     # to value-only abs so the optimizer still gets a finite cost.
     try:
         return val**0.5
-    except Exception:  # pragma: no cover - pydrake-version dependent
+    except Exception:  # pragma: no cover - pydrake-version dependent  # noqa: BLE001
         return val  # already non-negative; preserves gradient sign info
 
 
@@ -664,7 +664,7 @@ def _abs_ad(x: Any) -> Any:
 # ---------------------------------------------------------------------------
 
 
-def fit_swing_drake_autodiff(
+def fit_swing_drake_autodiff(  # noqa: C901
     target: Any,
     options: FitOptions | None = None,
     *,
@@ -840,7 +840,7 @@ def fit_swing_drake_autodiff(
             mp_result = solver.Solve(prog, initial_theta)
         else:
             mp_result = Solve(prog, initial_theta)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         # Solver-blow-up fallback: return the initial guess with a
         # "failed" status so the caller can compare to scipy.
         wall_clock_s = _time.perf_counter() - t_wall
@@ -930,7 +930,7 @@ def _safe_get_solver_detail(mp_result: Any, key: str) -> int | None:
     try:
         details = mp_result.get_solver_details()
         return int(getattr(details, key))
-    except Exception:  # pragma: no cover - solver-dependent
+    except Exception:  # pragma: no cover - solver-dependent  # noqa: BLE001
         return None
 
 
@@ -962,7 +962,7 @@ def _final_rmse_float_plant(
         if t > 0.0:
             try:
                 sim.AdvanceTo(t)
-            except Exception:  # pragma: no cover - solver-driven
+            except Exception:  # pragma: no cover - solver-driven  # noqa: BLE001
                 return float("nan")
         X_WG = plant_float.EvalBodyPoseInWorld(context, grip_body)
         d = X_WG.translation() - target_grip[idx]

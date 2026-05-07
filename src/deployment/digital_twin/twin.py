@@ -145,7 +145,7 @@ class DigitalTwin:
 
         return self._sync_error
 
-    def predict(
+    def predict(  # noqa: C901
         self,
         horizon: float,
         control_sequence: NDArray[np.floating],

@@ -188,7 +188,7 @@ def _golfer_preset_coeffs(preset: Mapping[str, object] | None) -> list[list[floa
     return [_parse_coefficients(preset.get(k, "0")) for k in keys]
 
 
-def build_double_panel(main_window: Any) -> SimulationPanel:
+def build_double_panel(main_window: Any) -> SimulationPanel:  # noqa: C901
     """Build and return the double pendulum simulation panel.
 
     Parameters

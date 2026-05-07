@@ -440,7 +440,7 @@ class URDFCodeEditor(QPlainTextEdit):
             self.validation_result.emit(False, errors)
             return False, errors
 
-    def validate_urdf(self) -> tuple[bool, list[str]]:
+    def validate_urdf(self) -> tuple[bool, list[str]]:  # noqa: C901
         """Validate URDF-specific structure.
 
         Returns:

@@ -360,7 +360,7 @@ class LauncherDialogsMixin:
         if hasattr(self, "btn_launch"):
             self.update_launch_button()
 
-    def _on_wsl_mode_changed(self, state: int) -> None:
+    def _on_wsl_mode_changed(self, state: int) -> None:  # noqa: C901
         """Handle WSL mode toggle change.
 
         Args:

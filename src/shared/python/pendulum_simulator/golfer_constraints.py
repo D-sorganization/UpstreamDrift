@@ -191,7 +191,7 @@ def analytical_constraint_jacobian(q: np.ndarray, p: GolferParams) -> np.ndarray
     return Phi_q
 
 
-def linear_accelerations(
+def linear_accelerations(  # noqa: C901
     q: np.ndarray, qdot: np.ndarray, qddot: np.ndarray, p: GolferParams
 ) -> dict:
     """Compute linear accelerations at all joints via numerical Jacobian.

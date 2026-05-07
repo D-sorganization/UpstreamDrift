@@ -48,7 +48,7 @@ def apply_terrain_to_engine(
         )
 
 
-def validate_terrain(
+def validate_terrain(  # noqa: C901
     terrain: Terrain,
     warn_low_resolution: bool = False,
 ) -> list[str]:

@@ -76,7 +76,7 @@ def _validate_2d(tensor: torch.Tensor, name: str) -> None:
         )
 
 
-def stage_a_optimize_kinematics(
+def stage_a_optimize_kinematics(  # noqa: C901
     forward_kinematics: ForwardKinematics,
     clubface_target: torch.Tensor,
     q_rest: torch.Tensor,
@@ -164,7 +164,7 @@ def stage_a_optimize_kinematics(
     return StageAResult(q=best_q, final_loss=best_loss, history=history)
 
 
-def stage_b_optimize_torques(
+def stage_b_optimize_torques(  # noqa: C901
     surrogate: DynamicsSurrogate,
     q: torch.Tensor,
     q_dot: torch.Tensor,

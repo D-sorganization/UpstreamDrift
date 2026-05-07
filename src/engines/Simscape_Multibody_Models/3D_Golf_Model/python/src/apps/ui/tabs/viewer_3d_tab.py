@@ -76,7 +76,7 @@ class Viewer3DTab(QtWidgets.QWidget):
         if model.marker_names():
             self.list_markers_3d.setCurrentRow(0)
 
-    def update_view(self) -> None:
+    def update_view(self) -> None:  # noqa: C901
         """Update the 3D view based on selected Markers and frame."""
         if self.model is None:
             return

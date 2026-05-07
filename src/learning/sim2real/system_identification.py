@@ -99,7 +99,7 @@ class SystemIdentifier:
 
         return params
 
-    def _apply_params(self, param_vector: NDArray[np.floating]) -> None:
+    def _apply_params(self, param_vector: NDArray[np.floating]) -> None:  # noqa: C901
         """Apply parameter vector to model.
 
         Args:

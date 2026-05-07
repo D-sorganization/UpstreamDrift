@@ -72,7 +72,7 @@ class AdvancedGuiMethodsMixin:
         if "colors" in config_data:
             self._apply_config_colors(config_data["colors"])
 
-    def _apply_config_colors(self, colors: dict) -> None:
+    def _apply_config_colors(self, colors: dict) -> None:  # noqa: C901
         """Apply colors from config to the model."""
         if not (colors is not None):
             raise ValueError("colors must be provided")
@@ -370,7 +370,7 @@ class AdvancedGuiMethodsMixin:
             ax.text(0.5, 0.5, "No Power Data", ha="center", va="center")
         return widget
 
-    def _create_kinematic_sequence_tab(
+    def _create_kinematic_sequence_tab(  # noqa: C901
         self, plotter: Any, recorder: Any, fig_cls: type[Any], canvas_cls: type[Any]
     ) -> QWidget:
         """Create the Kinematic Sequence tab widget."""

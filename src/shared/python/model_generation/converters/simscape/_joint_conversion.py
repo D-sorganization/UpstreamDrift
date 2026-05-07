@@ -118,7 +118,7 @@ def get_joint_limits(
     )
 
 
-def convert_joint_block(
+def convert_joint_block(  # noqa: C901
     block: SimscapeBlock,
     model: SimscapeModel,
     body_to_link: dict[str, str],

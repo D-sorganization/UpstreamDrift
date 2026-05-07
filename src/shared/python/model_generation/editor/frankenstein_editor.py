@@ -417,7 +417,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
                 new_mat.name = new_mat_name
                 model.materials[new_mat_name] = new_mat
 
-    def _paste_links_and_joints(
+    def _paste_links_and_joints(  # noqa: C901
         self,
         model: ParsedModel,
         links: list[Link],

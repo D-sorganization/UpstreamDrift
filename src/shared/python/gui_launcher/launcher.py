@@ -478,7 +478,7 @@ def launch_from_gui_info(gui_info: dict[str, Any]) -> int:
     return launch_pyqt6_app(config)
 
 
-def launch_web_app(
+def launch_web_app(  # noqa: C901
     tool_name: str,
     web_dir: Path,
     port: int = 5173,

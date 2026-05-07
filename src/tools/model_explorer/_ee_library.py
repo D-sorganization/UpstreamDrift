@@ -156,7 +156,7 @@ class EndEffectorLibrary:
             }
         return None
 
-    def extract_from_urdf(
+    def extract_from_urdf(  # noqa: C901
         self,
         urdf_content: str,
         end_effector_link: str,

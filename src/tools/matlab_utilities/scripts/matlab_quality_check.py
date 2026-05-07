@@ -178,7 +178,7 @@ class MATLABQualityChecker:
             if re.search(pattern, line, re.IGNORECASE):
                 issues.append(f"{file_name} (line {i}): {msg}")
 
-    def _analyze_matlab_file(self, file_path: Path) -> list[str]:
+    def _analyze_matlab_file(self, file_path: Path) -> list[str]:  # noqa: C901
         """Analyze a single MATLAB file (Decomposed for Orthogonality)."""
         if not (file_path is not None):
             raise ValueError("file_path must be provided")

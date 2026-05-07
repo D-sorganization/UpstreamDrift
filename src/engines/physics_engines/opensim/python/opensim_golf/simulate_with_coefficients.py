@@ -221,7 +221,7 @@ def _extract_frames(
         # Try to get grip frame from right hand
         right_hand = body_set.get("right_hand")
         grip_transform = right_hand.getTransformInGround(state)
-    except Exception:
+    except Exception:  # noqa: BLE001
         logger.warning("right_hand frame not found, using alternate grip location")
         try:
             grip_body = body_set.get("hand_r")
@@ -339,7 +339,7 @@ def _rotation_matrix_to_quaternion(rot: Any) -> NDArray[np.float64]:
     lambda result: len(result.time) == result.q.shape[0],
     "time and q must have matching row counts",
 )
-def simulate_with_coefficients(
+def simulate_with_coefficients(  # noqa: C901
     theta: NDArray[np.float64],
     options: SimOptions | None = None,
     initial_pose: dict[str, NDArray[np.float64]] | None = None,
@@ -506,7 +506,7 @@ def simulate_with_coefficients(
                 club_quat_out[i + 1],
             ) = _extract_frames(model, state)
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"Integration failed: {e}")
         solver_status = "failed"
 

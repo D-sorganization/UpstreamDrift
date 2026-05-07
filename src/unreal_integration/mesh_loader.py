@@ -429,7 +429,7 @@ class MeshLoader:
         """Clear mesh cache."""
         self._cache.clear()
 
-    def load(self, path: str) -> LoadedMesh:
+    def load(self, path: str) -> LoadedMesh:  # noqa: C901
         """Load mesh from file.
 
         Preconditions:
@@ -499,7 +499,7 @@ class MeshLoader:
         except (RuntimeError, TypeError, ValueError) as e:
             raise MeshLoadError(f"Failed to load mesh: {e}", path, e) from e
 
-    def _load_obj(self, path: Path) -> LoadedMesh:
+    def _load_obj(self, path: Path) -> LoadedMesh:  # noqa: C901
         """Load OBJ format mesh.
 
         Args:

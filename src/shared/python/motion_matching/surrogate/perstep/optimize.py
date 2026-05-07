@@ -287,10 +287,11 @@ def _desired_club_targets(
     desired: pd.DataFrame,
     target_columns: list[str],
 ) -> tuple[np.ndarray, list[int]]:
-    available: dict[str, str] = {}
-    for model_column in target_columns:
-        if model_column in desired.columns:
-            available[model_column] = model_column
+    available: dict[str, str] = {
+        model_column: model_column
+        for model_column in target_columns
+        if model_column in desired.columns
+    }
     for source_column, model_column in TARGET_COLUMN_MAP.items():
         if source_column in desired.columns and model_column in target_columns:
             available.setdefault(model_column, source_column)
@@ -310,7 +311,7 @@ def _desired_quaternions(desired: pd.DataFrame) -> np.ndarray | None:
     return desired[list(cols)].to_numpy(dtype=np.float32)
 
 
-def optimize_sequence(
+def optimize_sequence(  # noqa: C901
     checkpoint_path: Path,
     desired_club_csv: Path,
     reference_body_csv: Path,

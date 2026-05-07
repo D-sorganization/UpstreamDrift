@@ -229,7 +229,7 @@ class SimscapeAdapter:
     def __del__(self) -> None:  # pragma: no cover - best-effort
         try:
             self.close()
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
 
     # ------------------------------------------------------------------ #
@@ -393,7 +393,7 @@ class SimscapeAdapter:
             raise _wrap_matlab_error(e, "getPolynomialParameterInfo") from e
         try:
             total = int(info["total_params"])
-        except Exception:
+        except Exception:  # noqa: BLE001
             joint_names = info["joint_names"]
             total = len(joint_names) * 7
         return total // 7

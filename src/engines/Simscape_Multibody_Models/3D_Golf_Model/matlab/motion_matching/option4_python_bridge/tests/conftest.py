@@ -78,5 +78,5 @@ def has_simscape_multibody(adapter) -> bool:
     try:
         result = adapter.engine.eval("license('test', 'Simscape_Multibody')", nargout=1)
         return bool(result)
-    except Exception:
+    except Exception:  # noqa: BLE001
         return False

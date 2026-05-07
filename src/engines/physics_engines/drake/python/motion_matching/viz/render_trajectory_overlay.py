@@ -368,7 +368,7 @@ def _try_render_meshcat_html(
         # Explicit imports per CLAUDE.md.
         from pydrake.geometry import Meshcat, Rgba, Sphere
         from pydrake.math import RigidTransform
-    except Exception:
+    except Exception:  # noqa: BLE001
         return None
 
     try:  # pragma: no cover - same gating
@@ -423,7 +423,7 @@ def _try_render_meshcat_html(
             encoding="utf-8",
         )
         return html_path
-    except Exception:
+    except Exception:  # noqa: BLE001
         return None
 
 

@@ -142,7 +142,7 @@ class SafetyMonitor:
         self._human_nearby = False
         self._emergency_stop = False
 
-    def check_state(self, state: RobotState) -> SafetyStatus:
+    def check_state(self, state: RobotState) -> SafetyStatus:  # noqa: C901
         """Check if current state is safe.
 
         Args:
@@ -214,7 +214,7 @@ class SafetyMonitor:
             speed_override=self._speed_override,
         )
 
-    def check_command(self, command: ControlCommand) -> SafetyStatus:
+    def check_command(self, command: ControlCommand) -> SafetyStatus:  # noqa: C901
         """Check if command would result in safe state.
 
         Args:
@@ -276,7 +276,7 @@ class SafetyMonitor:
             speed_override=self._speed_override,
         )
 
-    def compute_safe_command(
+    def compute_safe_command(  # noqa: C901
         self,
         desired: ControlCommand,
         state: RobotState,

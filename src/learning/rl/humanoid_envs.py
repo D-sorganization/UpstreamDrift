@@ -95,7 +95,7 @@ class HumanoidWalkEnv(RoboticsGymEnv):
         if hasattr(self.engine, "step"):
             self.engine.step()
 
-    def _get_observation(self) -> NDArray[np.floating]:
+    def _get_observation(self) -> NDArray[np.floating]:  # noqa: C901
         """Get observation for walking task."""
         obs_parts = []
 

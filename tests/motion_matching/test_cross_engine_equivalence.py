@@ -96,7 +96,7 @@ def test_mujoco_address_equivalence() -> None:
 
     try:
         target = synthesize_target_from_coefficients(theta, align_opts)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         pytest.fail(f"MuJoCo synthesize failed: {exc}")
 
     # For this test, we use the grip position itself as a sanity check
@@ -124,7 +124,7 @@ def test_mujoco_top_of_backswing_equivalence() -> None:
 
     try:
         target = synthesize_target_from_coefficients(theta, align_opts)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         pytest.fail(f"MuJoCo synthesize failed: {exc}")
 
     # Sanity check: target is valid and finite
@@ -149,7 +149,7 @@ def test_mujoco_impact_equivalence() -> None:
 
     try:
         target = synthesize_target_from_coefficients(theta, align_opts)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         pytest.fail(f"MuJoCo synthesize failed: {exc}")
 
     # Verify impact_idx is valid

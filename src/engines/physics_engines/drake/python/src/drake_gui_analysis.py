@@ -84,7 +84,7 @@ class AnalysisMixin:
                 self.recorder.counterfactuals[k] = []  # type: ignore[attr-defined]
             self.recorder.counterfactuals[k].append(val)  # type: ignore[attr-defined]
 
-    def _compute_specific_sources(
+    def _compute_specific_sources(  # noqa: C901
         self,
         analyzer: DrakeInducedAccelerationAnalyzer,
         res: dict[str, np.ndarray],
@@ -141,7 +141,7 @@ class AnalysisMixin:
             except (ValueError, TypeError, RuntimeError):
                 pass
 
-    def _show_induced_acceleration_plot(self) -> None:
+    def _show_induced_acceleration_plot(self) -> None:  # noqa: C901
         """Calculate and plot induced accelerations."""
         if not HAS_MATPLOTLIB:
             QtWidgets.QMessageBox.warning(self, "Error", "Matplotlib not found.")  # type: ignore[arg-type]

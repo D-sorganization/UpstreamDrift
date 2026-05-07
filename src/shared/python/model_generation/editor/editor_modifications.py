@@ -93,7 +93,7 @@ class ModificationMixin:
         lambda link_name: _is_non_empty_str(link_name),
         "link_name must be a non-empty string",
     )
-    def delete_link(
+    def delete_link(  # noqa: C901
         self,
         model_id: str,
         link_name: str,
@@ -235,7 +235,7 @@ class ModificationMixin:
         lambda new_name: _is_non_empty_str(new_name),
         "new_name must be a non-empty string",
     )
-    def rename_link(
+    def rename_link(  # noqa: C901
         self,
         model_id: str,
         old_name: str,
@@ -356,7 +356,7 @@ class ModificationMixin:
         lambda joint_name: _is_non_empty_str(joint_name),
         "joint_name must be a non-empty string",
     )
-    def modify_joint(
+    def modify_joint(  # noqa: C901
         self,
         model_id: str,
         joint_name: str,
@@ -561,7 +561,7 @@ class ModificationMixin:
         lambda prefix: _is_non_empty_str(prefix),
         "prefix must be a non-empty string",
     )
-    def apply_prefix(
+    def apply_prefix(  # noqa: C901
         self,
         model_id: str,
         prefix: str,

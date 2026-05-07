@@ -76,7 +76,7 @@ class AnalysisMixin:
 
         self.main_tabs.addTab(analysis_page, "Post-Hoc Analysis")
 
-    def _generate_plot(self: PinocchioGUI) -> None:
+    def _generate_plot(self: PinocchioGUI) -> None:  # noqa: C901
         """Generate the selected plot."""
         if self.canvas is None:
             return
@@ -177,7 +177,7 @@ class AnalysisMixin:
 
             self.analyzer = InducedAccelerationAnalyzer(self.model, self.data)
 
-    def _plot_induced_accelerations(self: PinocchioGUI) -> None:
+    def _plot_induced_accelerations(self: PinocchioGUI) -> None:  # noqa: C901
         """Calculate and plot induced accelerations for selected joint."""
         if not self.recorder.frames:
             return

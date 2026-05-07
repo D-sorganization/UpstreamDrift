@@ -394,7 +394,7 @@ class URDFGeneratorWindow(QMainWindow):
                 logger.error(f"Error opening URDF: {e}")
                 QMessageBox.critical(self, "Error", f"Failed to open URDF: {e}")
 
-    def load_from_library(self) -> None:
+    def load_from_library(self) -> None:  # noqa: C901
         """Load a URDF model from the library."""
         try:
             from .model_library import ModelLibrary

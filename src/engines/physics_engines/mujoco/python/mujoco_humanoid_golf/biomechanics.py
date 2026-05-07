@@ -617,7 +617,7 @@ class SwingRecorder:
                 export_data[f"{field_name}_y"] = values[:, 1].tolist()
                 export_data[f"{field_name}_z"] = values[:, 2].tolist()
 
-    def _export_induced_accelerations(self, export_data: dict) -> None:
+    def _export_induced_accelerations(self, export_data: dict) -> None:  # noqa: C901
         """Export induced and club-induced acceleration series."""
         if not (export_data is not None):
             raise ValueError("export_data must be provided")

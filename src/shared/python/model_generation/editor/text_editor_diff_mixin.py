@@ -68,7 +68,7 @@ class TextEditorDiffMixin:
         """
         return self._compute_diff(self._content, other_content)  # type: ignore[attr-defined]
 
-    def _compute_diff(self, original: str, modified: str) -> DiffResult:
+    def _compute_diff(self, original: str, modified: str) -> DiffResult:  # noqa: C901
         """Compute diff between two strings."""
         if original is None:
             raise ValueError("original must be provided")

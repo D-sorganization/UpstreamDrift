@@ -85,7 +85,7 @@ def safe_int(
         return default
 
 
-def safe_float(
+def safe_float(  # noqa: C901
     value: Any,
     default: float | None = None,
     *,

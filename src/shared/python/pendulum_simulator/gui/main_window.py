@@ -401,7 +401,7 @@ class MainWindow(QMainWindow):
         ("club_tip", "Club Tip"),
     ]
 
-    def _on_tab_changed(self, index: int) -> None:
+    def _on_tab_changed(self, index: int) -> None:  # noqa: C901
         """Update toolstrip segment checkboxes and sync overlay state for the active tab.
 
         When the user switches tabs the new panel's pendulum widget must

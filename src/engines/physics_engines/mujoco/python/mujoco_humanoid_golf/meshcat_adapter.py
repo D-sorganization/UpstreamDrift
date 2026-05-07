@@ -66,7 +66,7 @@ class MuJoCoMeshcatAdapter:
         if self.vis is not None:
             webbrowser.open(self.vis.url())
 
-    def load_model_geometry(self) -> None:
+    def load_model_geometry(self) -> None:  # noqa: C901
         """
         Parses MuJoCo model geoms and creates corresponding Meshcat objects.
         """
@@ -171,7 +171,7 @@ class MuJoCoMeshcatAdapter:
 
             self.vis["visuals"][name].set_transform(T)
 
-    def draw_vectors(
+    def draw_vectors(  # noqa: C901
         self,
         data: mujoco.MjData,
         show_force: bool,
@@ -223,7 +223,7 @@ class MuJoCoMeshcatAdapter:
                     f"overlays/torques/{body_name}", pos, t * torque_scale, 0x0000FF
                 )  # noqa: E501
 
-    def draw_induced_vectors(
+    def draw_induced_vectors(  # noqa: C901
         self,
         data: mujoco.MjData,
         bio_data: BiomechanicalData | None,

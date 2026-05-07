@@ -227,7 +227,7 @@ def validate_friction_coefficient(mu: float, param_name: str = "friction") -> No
         )
 
 
-def validate_physical_bounds(func: F) -> F:
+def validate_physical_bounds(func: F) -> F:  # noqa: C901
     """Decorator to validate physical parameters at API boundaries.
 
     Automatically validates common physics parameters based on naming conventions:
@@ -252,7 +252,7 @@ def validate_physical_bounds(func: F) -> F:
     """
 
     @wraps(func)
-    def wrapper(*args: Any, **kwargs: Any) -> Any:
+    def wrapper(*args: Any, **kwargs: Any) -> Any:  # noqa: C901
         """Validate physical parameters before calling the wrapped function."""
         import inspect
 

@@ -266,7 +266,7 @@ def fit_swing_drake(
     theta_opt = np.ascontiguousarray(res.x, dtype=np.float64)
     try:
         rmse_m = _final_rmse_m(theta_opt, target, sim_fn)
-    except Exception:  # pragma: no cover - defensive
+    except Exception:  # pragma: no cover - defensive  # noqa: BLE001
         rmse_m = float("nan")
 
     return FitResult(

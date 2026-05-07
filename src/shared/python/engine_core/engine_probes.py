@@ -110,7 +110,7 @@ class MuJoCoProbe(EngineProbe):
             raise ValueError("suite_root must be provided")
         super().__init__("MuJoCo", suite_root)
 
-    def probe(self) -> EngineProbeResult:
+    def probe(self) -> EngineProbeResult:  # noqa: C901
         """Check MuJoCo readiness."""
         missing = []
 

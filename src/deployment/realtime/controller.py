@@ -397,7 +397,7 @@ class RealTimeController:
             "Wire the appropriate hardware SDK calls here before deploying."
         )
 
-    def _send_command(self, command: ControlCommand) -> None:
+    def _send_command(self, command: ControlCommand) -> None:  # noqa: C901
         """Send control command to robot.
 
         Args:

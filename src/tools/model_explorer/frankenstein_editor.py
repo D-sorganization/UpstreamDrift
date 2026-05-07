@@ -186,7 +186,7 @@ class FrankensteinEditor(QWidget):
             f"Copied chain starting from '{link_name}': {copied_count} components"
         )
 
-    def _copy_link_chain(
+    def _copy_link_chain(  # noqa: C901
         self,
         source_model: URDFModel,
         link_name: str,
@@ -420,7 +420,7 @@ class FrankensteinEditor(QWidget):
         )
         logger.info(f"Replaced subtree {target_link_name} -> {source_link_name}")
 
-    def _remove_subtree(self, model: URDFModel, link_name: str) -> int:
+    def _remove_subtree(self, model: URDFModel, link_name: str) -> int:  # noqa: C901
         """Recursively remove a link and all its children.
 
         Args:

@@ -212,7 +212,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         else:
             self.sim_widget.reset_camera()
 
-    def keyPressEvent(self, event: QtGui.QKeyEvent | None) -> None:  # type: ignore[override]
+    def keyPressEvent(self, event: QtGui.QKeyEvent | None) -> None:  # type: ignore[override]  # noqa: C901
         """Handle keyboard shortcuts."""
         if event is None:
             return

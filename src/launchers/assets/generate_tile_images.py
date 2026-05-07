@@ -87,7 +87,7 @@ def create_png(
     return signature + ihdr + idat + iend
 
 
-def draw_rounded_rect_with_text(
+def draw_rounded_rect_with_text(  # noqa: C901
     width: int, height: int, bg_color: tuple[int, int, int], text: str, radius: int = 20
 ) -> list[tuple[int, int, int, int]]:
     """Create a rounded rectangle with centered text."""

@@ -114,7 +114,7 @@ def enhance_icon_source(
     return img
 
 
-def create_optimized_icon(
+def create_optimized_icon(  # noqa: C901
     img: Image.Image, size: int, mode: str = "standard"
 ) -> Image.Image:
     """Create a sharp icon at the specified size with adaptive sharpening.

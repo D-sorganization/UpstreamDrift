@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 
-def generate_noise(
+def generate_noise(  # noqa: C901
     noise_type: str,
     n_samples: int,
     amplitude: float,

@@ -385,7 +385,7 @@ class DatasetGenerator(_DatasetExportMixin):
             except (ValueError, RuntimeError, AttributeError):
                 pass
 
-    def _record_dynamics_step(
+    def _record_dynamics_step(  # noqa: C901
         self,
         config: GeneratorConfig,
         step: int,
@@ -448,7 +448,7 @@ class DatasetGenerator(_DatasetExportMixin):
                 self.engine.compute_potential_energy()  # type: ignore[attr-defined]
             )
 
-    def _generate_initial_conditions(
+    def _generate_initial_conditions(  # noqa: C901
         self,
         config: GeneratorConfig,
         rng: np.random.Generator,

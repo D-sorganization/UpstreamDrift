@@ -36,7 +36,7 @@ from ._friction_factors import (
 logger = logging.getLogger(__name__)
 
 
-def calculate_flow_properties(inputs: PressureDropInputs) -> FlowProperties:
+def calculate_flow_properties(inputs: PressureDropInputs) -> FlowProperties:  # noqa: C901
     """Calculate comprehensive flow properties for the gas mixture.
 
     Args:

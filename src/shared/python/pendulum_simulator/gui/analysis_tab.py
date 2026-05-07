@@ -557,7 +557,7 @@ class AnalysisTab:
 
     # ── Golfer model evaluators ─────────────────────────────────────
 
-    def _evaluator_golfer(self, z_key: str) -> Any:
+    def _evaluator_golfer(self, z_key: str) -> Any:  # noqa: C901
         """Return surface evaluator for the golfer upper-body model."""
         if not (z_key is not None):
             raise ValueError("z_key must be provided")

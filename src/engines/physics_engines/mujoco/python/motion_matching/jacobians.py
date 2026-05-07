@@ -187,7 +187,7 @@ def _apply_ctrl_clip(
     return np.clip(ctrl, lo, hi)
 
 
-def compute_qpos_jacobian(
+def compute_qpos_jacobian(  # noqa: C901
     theta: NDArray[np.float64],
     sim_opts: SimOptions,
     initial_pose: NDArray[np.float64] | None = None,

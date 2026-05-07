@@ -119,7 +119,7 @@ class AnalysisService:
                 export_path="",
             )
 
-    async def _analyze_kinematics(
+    async def _analyze_kinematics(  # noqa: C901
         self, request: AnalysisRequest, engine: Any
     ) -> dict[str, Any]:
         """Perform kinematic analysis (positions, velocities, accelerations).
@@ -190,7 +190,7 @@ class AnalysisService:
 
         return result
 
-    async def _analyze_kinetics(
+    async def _analyze_kinetics(  # noqa: C901
         self, request: AnalysisRequest, engine: Any
     ) -> dict[str, Any]:
         """Perform kinetic analysis (forces, torques, moments).
@@ -250,7 +250,7 @@ class AnalysisService:
 
         return result
 
-    async def _analyze_energetics(
+    async def _analyze_energetics(  # noqa: C901
         self, request: AnalysisRequest, engine: Any
     ) -> dict[str, Any]:
         """Perform energetic analysis (energy, power, work).
@@ -314,7 +314,7 @@ class AnalysisService:
 
         return result
 
-    async def _analyze_swing_sequence(
+    async def _analyze_swing_sequence(  # noqa: C901
         self, request: AnalysisRequest, engine: Any
     ) -> dict[str, Any]:
         """Perform swing sequence analysis (phase detection, timing).

@@ -357,7 +357,7 @@ class NonlinearDynamicsMixin:
         slope, _ = np.polyfit(log_r[start:end], log_c[start:end], 1)
         return float(slope)
 
-    def estimate_lyapunov_exponent(
+    def estimate_lyapunov_exponent(  # noqa: C901
         self,
         data: np.ndarray,
         tau: int = 1,

@@ -270,7 +270,7 @@ class DraggableTabWidget(QTabWidget):
 
     # ── Context menu ────────────────────────────────────────────────
 
-    def _show_tab_context_menu(self, position: QPoint) -> None:
+    def _show_tab_context_menu(self, position: QPoint) -> None:  # noqa: C901
         """Show right-click menu for a tab."""
         if not (position is not None):
             raise ValueError("position must be provided")

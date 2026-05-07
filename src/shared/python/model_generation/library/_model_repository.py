@@ -115,7 +115,7 @@ def _fetch_repository_models(
     return models
 
 
-def _fetch_github_models(
+def _fetch_github_models(  # noqa: C901
     repo_name: str,
     config: dict[str, Any],
 ) -> list[ModelEntry]:

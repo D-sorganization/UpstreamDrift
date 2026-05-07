@@ -575,7 +575,7 @@ class PendulumWidget(BasePendulumWidget):
                 f"Ï„={tau:.1f}",
             )
 
-    def _draw_moment_of_force(self, painter: QPainter) -> None:
+    def _draw_moment_of_force(self, painter: QPainter) -> None:  # noqa: C901
         """Draw moment-of-force and/or sum of moments at each joint.
 
         Uses the joint_moments module for proper proximal-on-distal computation.

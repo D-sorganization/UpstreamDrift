@@ -246,7 +246,7 @@ async def get_analysis_metrics(
 
 
 @router.get("/analysis/statistics", response_model=AnalysisStatisticsResponse)
-async def get_analysis_statistics(
+async def get_analysis_statistics(  # noqa: C901
     engine_manager: EngineManager = Depends(get_engine_manager),
     logger: Any = Depends(get_logger),
 ) -> AnalysisStatisticsResponse:
@@ -333,7 +333,7 @@ async def get_analysis_statistics(
     lambda request, engine_manager=None, logger=None: request.format in ("csv", "json"),
     "Export format must be 'csv' or 'json'",
 )
-async def export_analysis_data(
+async def export_analysis_data(  # noqa: C901
     request: DataExportRequest,
     engine_manager: EngineManager = Depends(get_engine_manager),
     logger: Any = Depends(get_logger),

@@ -189,7 +189,7 @@ def _closest_points_segments(
     return a0 + s * d1, b0 + t * d2
 
 
-def _gjk_distance(
+def _gjk_distance(  # noqa: C901
     prim_a: GeometricPrimitive,
     prim_b: GeometricPrimitive,
     max_iterations: int = 32,

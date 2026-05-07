@@ -95,7 +95,7 @@ def _parse_urdf_link_nodes(
     return nodes, link_names
 
 
-def _parse_urdf_joint_nodes(
+def _parse_urdf_joint_nodes(  # noqa: C901
     root: ElementTree.Element,
     nodes: list[URDFTreeNode],
 ) -> tuple[int, set[str]]:

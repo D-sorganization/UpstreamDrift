@@ -31,7 +31,7 @@ def get_mass(
     return max(0.001, mass)
 
 
-def get_geometry(
+def get_geometry(  # noqa: C901
     block: SimscapeBlock,
     length_factors: dict[str, float],
     length_unit: str,

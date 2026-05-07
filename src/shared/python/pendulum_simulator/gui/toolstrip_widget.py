@@ -985,7 +985,7 @@ class ToolStrip(QWidget):
         else:
             self.segment_visibility_changed.emit(checked)
 
-    def set_segment_names(self, names: list[tuple[str, str]]) -> None:
+    def set_segment_names(self, names: list[tuple[str, str]]) -> None:  # noqa: C901
         """Update segment sub-checkboxes for the active model tab.
 
         Called by MainWindow when the tab index changes.

@@ -143,7 +143,7 @@ class DomainRandomizer:
 
         return params
 
-    def randomize(self, seed: int | None = None) -> dict[str, Any]:
+    def randomize(self, seed: int | None = None) -> dict[str, Any]:  # noqa: C901
         """Randomize simulation parameters.
 
         Args:

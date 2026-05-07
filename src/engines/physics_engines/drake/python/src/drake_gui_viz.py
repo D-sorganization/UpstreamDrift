@@ -274,7 +274,7 @@ class VisualizationMixin:
             points = np.vstack([start_pos, end_pos]).T
             self.meshcat.SetLineSegments(path, points, 2.0, color)  # type: ignore[attr-defined, arg-type]
 
-    def _update_ellipsoids(self) -> None:
+    def _update_ellipsoids(self) -> None:  # noqa: C901
         """Compute and draw ellipsoids."""
         if not (self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked()):  # type: ignore[attr-defined]
             return

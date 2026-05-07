@@ -698,7 +698,7 @@ class LauncherDiagnostics:
         self.results.append(result)
         return result
 
-    def _generate_recommendations(self) -> list[str]:
+    def _generate_recommendations(self) -> list[str]:  # noqa: C901
         """Generate recommendations based on diagnostic results."""
         recommendations = []
 

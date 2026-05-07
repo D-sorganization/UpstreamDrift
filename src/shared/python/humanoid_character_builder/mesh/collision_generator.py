@@ -98,7 +98,7 @@ class CollisionGeometryGenerator:
         logger.warning("VHACD not available - using fallback decomposition")
         return False
 
-    def generate(
+    def generate(  # noqa: C901
         self,
         visual_mesh: Any,
         method: str | SimplificationMethod = "auto",

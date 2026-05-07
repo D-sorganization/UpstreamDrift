@@ -452,7 +452,7 @@ class TestCrossEngineValidationIntegration:
                         f"{name1} vs {name2}: {result.message}"
                     )
 
-    def test_grf_cross_engine_validation(
+    def test_grf_cross_engine_validation(  # noqa: C901
         self,
         mujoco_pendulum: Any,
         drake_pendulum: Any,

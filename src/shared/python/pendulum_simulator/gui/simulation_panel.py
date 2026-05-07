@@ -244,7 +244,7 @@ class SimulationPanel(QWidget):
         settings = QSettings("D-sorganization", "PendulumSimulator")
         settings.setValue(self._settings_key, self._splitter.saveState())
 
-    def _connect_signals(self) -> None:
+    def _connect_signals(self) -> None:  # noqa: C901
         self.controls.run_requested.connect(self._on_run)
         self.controls.reset_requested.connect(self._on_reset)
         self.controls.play_toggled.connect(self._on_play_toggle)

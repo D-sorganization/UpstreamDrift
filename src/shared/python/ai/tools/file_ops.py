@@ -5,7 +5,7 @@ from pathlib import Path
 from src.shared.python.ai.tool_registry import ToolCategory, ToolRegistry
 
 
-def register_file_tools(registry: ToolRegistry) -> None:
+def register_file_tools(registry: ToolRegistry) -> None:  # noqa: C901
     """Register file system tools."""
 
     @registry.register(

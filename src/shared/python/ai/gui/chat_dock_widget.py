@@ -257,7 +257,7 @@ class ChatDockWidget(QDockWidget):
         # Auto-reconnect
         self._reconnect_timer.start(3000)
 
-    def _on_message(self, raw: str) -> None:
+    def _on_message(self, raw: str) -> None:  # noqa: C901
         """Handle incoming WebSocket message."""
         if not (raw is not None):
             raise ValueError("raw must be provided")

@@ -282,7 +282,7 @@ class UnrealStreamingServer:
         if self._on_client_disconnect:
             self._on_client_disconnect(client)
 
-    async def _handle_control(self, message: ControlMessage) -> None:
+    async def _handle_control(self, message: ControlMessage) -> None:  # noqa: C901
         """Handle control message from client.
 
         Args:

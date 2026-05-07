@@ -241,7 +241,7 @@ def assert_physics_state(
             )
 
 
-def assert_jacobian_symmetry(
+def assert_jacobian_symmetry(  # noqa: C901
     J: Sequence[Sequence[Number]],
     rtol: float = 1e-6,
 ) -> None:

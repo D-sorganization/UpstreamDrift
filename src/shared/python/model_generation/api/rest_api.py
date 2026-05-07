@@ -398,7 +398,7 @@ class ModelGenerationAPI(
             "max-age=31536000; includeSubDomains"
         )
 
-    def handle_request(self, request: APIRequest) -> APIResponse:
+    def handle_request(self, request: APIRequest) -> APIResponse:  # noqa: C901
         """Handle an API request."""
         # Security pre-flight checks
         if request is None:

@@ -610,7 +610,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         timestamp = self.data.time
         self.swing_plane_visualizer.record_trajectory_point(position, timestamp)
 
-    def _update_swing_plane_overlays(self) -> None:  # noqa: PLR0912
+    def _update_swing_plane_overlays(self) -> None:  # noqa: C901, PLR0912
         """Push swing plane and trajectory data to meshcat."""
         if self.meshcat_adapter is None:
             return
@@ -883,7 +883,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
             return 0
         return max(0, nu)
 
-    def _on_timer(self) -> None:  # noqa: PLR0912, PLR0915
+    def _on_timer(self) -> None:  # noqa: C901, PLR0912, PLR0915
         """Handle timer event for simulation stepping."""
         if self.model is None or self.data is None:
             return

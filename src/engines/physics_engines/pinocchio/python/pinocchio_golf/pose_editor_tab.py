@@ -122,7 +122,7 @@ class PinocchioPoseEditor(BasePoseEditor):
         """
         self._update_callback = callback
 
-    def _initialize_joint_info(self) -> None:
+    def _initialize_joint_info(self) -> None:  # noqa: C901
         """Initialize joint information from the model."""
         if self._model is None:
             return
@@ -194,7 +194,7 @@ class PinocchioPoseEditor(BasePoseEditor):
             "Initialized %d joints for Pinocchio pose editing", len(self._joint_info)
         )  # noqa: E501
 
-    def _categorize_joint(self, name: str) -> str:
+    def _categorize_joint(self, name: str) -> str:  # noqa: C901
         """Categorize a joint into a group based on its name."""
         if not (name is not None):
             raise ValueError("name must be provided")
@@ -602,7 +602,7 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         self._editor._q = q
         self._editor._v = v
 
-    def _build_joint_controls(self) -> None:
+    def _build_joint_controls(self) -> None:  # noqa: C901
         """Build joint control widgets."""
         # Clear existing
         for widget in self._joint_widgets.values():

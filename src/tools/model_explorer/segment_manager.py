@@ -211,7 +211,7 @@ class SegmentManager:
         lambda result: result is not None and isinstance(result, list),
         "Validation result must be a list of error strings",
     )
-    def validate_hierarchy(self) -> list[str]:
+    def validate_hierarchy(self) -> list[str]:  # noqa: C901
         """Validate the segment hierarchy.
 
         Returns:

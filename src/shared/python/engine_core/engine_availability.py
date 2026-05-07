@@ -51,7 +51,7 @@ _engine_status_cache: dict[str, EngineStatus] = {}
 _engine_error_cache: dict[str, Exception] = {}
 
 
-def _probe_engine(
+def _probe_engine(  # noqa: C901
     engine_name: str,
     import_name: str | None = None,
     is_broken_check: Callable[[Exception], bool] | None = None,

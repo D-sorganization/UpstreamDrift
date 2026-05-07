@@ -25,7 +25,7 @@ from src.shared.python.data_io.export import (  # noqa: F401
 )
 
 
-def export_recording_all_formats(
+def export_recording_all_formats(  # noqa: C901
     base_path: str,
     data_dict: dict[str, Any],
     formats: list | None = None,

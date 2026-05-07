@@ -349,7 +349,7 @@ class PrimitiveInertiaCalculator:
         raise ValueError(f"Unknown shape: {shape}")
 
     @staticmethod
-    def _tuple_to_dict(
+    def _tuple_to_dict(  # noqa: C901
         shape: PrimitiveShape, dims: tuple[float, ...]
     ) -> dict[str, float]:
         """Convert dimension tuple to dictionary."""

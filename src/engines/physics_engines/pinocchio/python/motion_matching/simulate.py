@@ -326,7 +326,7 @@ def _rk4_step(
 # --------------------------------------------------------------------------- #
 
 
-def simulate_with_coefficients(
+def simulate_with_coefficients(  # noqa: C901
     theta: npt.NDArray[np.float64],
     options: SimOptions | None = None,
     initial_pose: dict[str, Any] | None = None,

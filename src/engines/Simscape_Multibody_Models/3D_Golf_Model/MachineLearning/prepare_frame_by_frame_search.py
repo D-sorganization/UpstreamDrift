@@ -126,7 +126,7 @@ def _candidate_count(
     return int((1 if has_zero else 0) + control_count * non_zero)
 
 
-def build_search_manifest(
+def build_search_manifest(  # noqa: C901
     desired_target_csv: Path,
     column_manifest: Path = DEFAULT_COLUMN_MANIFEST,
     output_json: Path = DEFAULT_OUTPUT,

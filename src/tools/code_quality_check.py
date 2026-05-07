@@ -67,7 +67,7 @@ MAGIC_NUMBERS = [
 ]
 
 
-def is_legitimate_pass_context(lines: list[str], line_num: int) -> bool:
+def is_legitimate_pass_context(lines: list[str], line_num: int) -> bool:  # noqa: C901
     """Check if a pass statement is in a legitimate context."""
     if not (lines is not None):
         raise ValueError("lines must be provided")

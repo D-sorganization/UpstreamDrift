@@ -467,7 +467,7 @@ class DualArmManipulationEnv(RoboticsGymEnv):
 
         return np.concatenate(obs_parts).astype(np.float32)
 
-    def _compute_reward(self, action: NDArray[np.floating]) -> float:
+    def _compute_reward(self, action: NDArray[np.floating]) -> float:  # noqa: C901
         """Compute reward for coordinated manipulation."""
         if not (action is not None):
             raise ValueError("action must be provided")

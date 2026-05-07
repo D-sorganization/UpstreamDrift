@@ -83,7 +83,7 @@ class ProcessWorker(QThread):
         self._is_running = True
         self._stop_event = threading.Event()
 
-    def run(self) -> None:
+    def run(self) -> None:  # noqa: C901
         """Execute the command and stream output."""
         try:
             self.log_signal.emit(f"Running command: {' '.join(self.cmd)}")

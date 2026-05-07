@@ -104,7 +104,7 @@ class PhysicsValidator:
         self.gravity = gravity if gravity is not None else np.array([0.0, 0.0, -9.81])
         self._validator = Validator()
 
-    def validate_inertia_tensor(
+    def validate_inertia_tensor(  # noqa: C901
         self,
         inertia: Inertia,
         component: str | None = None,
@@ -427,7 +427,7 @@ class PhysicsValidator:
 
         return result
 
-    def validate_physics(
+    def validate_physics(  # noqa: C901
         self,
         links: list[Link],
         joints: list[Joint] | None = None,

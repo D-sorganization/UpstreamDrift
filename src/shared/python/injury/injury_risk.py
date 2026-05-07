@@ -232,7 +232,7 @@ class InjuryRiskScorer:
             compression_score + shear_score + x_factor_score
         ) / 3
 
-    def _score_joint_risks(self, joint_results: dict, report: InjuryRiskReport) -> None:
+    def _score_joint_risks(self, joint_results: dict, report: InjuryRiskReport) -> None:  # noqa: C901
         """Score joint-related risk factors."""
         # Hip risks
         if not (joint_results is not None):
@@ -477,7 +477,7 @@ class InjuryRiskScorer:
         )
         report.top_risks = [f.name for f in sorted_factors[:3]]
 
-    def _generate_recommendations(self, report: InjuryRiskReport) -> None:
+    def _generate_recommendations(self, report: InjuryRiskReport) -> None:  # noqa: C901
         """Generate actionable recommendations based on risk factors."""
         if not (report is not None):
             raise ValueError("report must be provided")

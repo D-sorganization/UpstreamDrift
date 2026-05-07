@@ -223,7 +223,7 @@ class QtWorker(BackgroundWorker):
     Signals are emitted on the main thread for safe UI updates.
     """
 
-    def __init__(
+    def __init__(  # noqa: C901
         self,
         target: Callable[..., Any],
         args: tuple[Any, ...] = (),

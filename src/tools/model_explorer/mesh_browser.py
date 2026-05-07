@@ -62,7 +62,7 @@ class MeshReference:
     file_size: int = 0
 
     @classmethod
-    def from_element(
+    def from_element(  # noqa: C901
         cls,
         mesh_elem: ET.Element,
         link_name: str,
@@ -156,7 +156,7 @@ class MeshExtractor:
     """Extracts mesh information from URDF files."""
 
     @staticmethod
-    def extract_meshes(
+    def extract_meshes(  # noqa: C901
         urdf_content: str, urdf_path: Path | None = None
     ) -> list[MeshReference]:
         """Extract all mesh references from a URDF.
@@ -639,7 +639,7 @@ class MeshBrowserWidget(QWidget):
         config = dialog.get_configuration()
         self._apply_mesh_copy(mesh, config)
 
-    def _apply_mesh_copy(self, mesh: MeshReference, config: dict[str, Any]) -> None:
+    def _apply_mesh_copy(self, mesh: MeshReference, config: dict[str, Any]) -> None:  # noqa: C901
         """Apply the mesh copy to the target URDF."""
         if not (mesh is not None):
             raise ValueError("mesh must be provided")

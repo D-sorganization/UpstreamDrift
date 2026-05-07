@@ -44,7 +44,7 @@ def _quat_geodesic_deg(q_sim: np.ndarray, q_meas: np.ndarray) -> np.ndarray:
     return np.degrees(2.0 * np.arccos(dot))
 
 
-def plot_error_timecourse(
+def plot_error_timecourse(  # noqa: C901
     target: ClubTargetLike,
     result: FitResult,
     *,

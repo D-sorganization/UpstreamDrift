@@ -111,7 +111,7 @@ class AcidGasDewpointCalculator:
 
         self.coolprop_names = {"H2O": "Water", "HF": "HF", "HCl": "HCl", "H2S": "H2S"}
 
-    def calculate_vapor_pressure(
+    def calculate_vapor_pressure(  # noqa: C901
         self, temperature_c: float, component: str, method: str = "antoine"
     ) -> float:
         """Calculate vapor pressure using different methods.

@@ -70,7 +70,7 @@ class SwingOptimizationConfig:
     control_cost_weight: float = 0.01
     terminal_cost_weight: float = 100.0
 
-    def __post_init__(self) -> None:
+    def __post_init__(self) -> None:  # noqa: C901
         """Validate configuration fields (DbC invariants)."""
         if not isinstance(self.n_joints, int):
             raise TypeError(f"n_joints must be int, got {type(self.n_joints).__name__}")

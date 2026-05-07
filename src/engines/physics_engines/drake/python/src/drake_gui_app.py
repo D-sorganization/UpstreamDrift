@@ -205,7 +205,7 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
         except (FileNotFoundError, OSError) as e:
             LOGGER.error(f"Failed to scan URDF models: {e}")
 
-    def _init_simulation(self) -> None:
+    def _init_simulation(self) -> None:  # noqa: C901
         """Initialize Drake simulation and Meshcat."""
         if self.meshcat is None:
             try:

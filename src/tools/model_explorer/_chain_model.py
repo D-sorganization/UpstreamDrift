@@ -77,7 +77,7 @@ class KinematicTree:
         ),
         "URDF content must be a non-empty string",
     )
-    def build_from_urdf(self, urdf_content: str) -> None:
+    def build_from_urdf(self, urdf_content: str) -> None:  # noqa: C901
         """Build the tree from URDF XML content."""
         if not (urdf_content is not None):
             raise ValueError("urdf_content must be provided")
@@ -163,7 +163,7 @@ class KinematicTree:
         ),
         "Target link name must be a non-empty string",
     )
-    def get_chain(self, from_link: str, to_link: str) -> list[ChainNode]:
+    def get_chain(self, from_link: str, to_link: str) -> list[ChainNode]:  # noqa: C901
         """Get the chain between two links.
 
         Args:

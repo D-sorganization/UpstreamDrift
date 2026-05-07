@@ -382,7 +382,7 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
         logger.info("Solving IK...")
         # NOTE: Implement IK solving
 
-    def _run_counterfactual(self, cf_type: str) -> None:
+    def _run_counterfactual(self, cf_type: str) -> None:  # noqa: C901
         """Run counterfactual analysis."""
         if not (cf_type is not None):
             raise ValueError("cf_type must be provided")

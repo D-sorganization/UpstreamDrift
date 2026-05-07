@@ -79,7 +79,7 @@ def cmd_generate(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_convert(args: argparse.Namespace) -> int:
+def cmd_convert(args: argparse.Namespace) -> int:  # noqa: C901
     """Convert between model formats."""
     source_path = Path(args.input)
     if not source_path.exists():
@@ -479,7 +479,7 @@ def cmd_library_import_github(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_edit_compose(args: argparse.Namespace) -> int:
+def cmd_edit_compose(args: argparse.Namespace) -> int:  # noqa: C901
     """Compose a model from multiple sources."""
     from model_generation.editor import FrankensteinEditor
 

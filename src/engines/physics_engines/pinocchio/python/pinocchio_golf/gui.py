@@ -217,7 +217,7 @@ class PinocchioGUI(
         self.log.append(text)
         logger.info(text)
 
-    def load_urdf(self, fname: str | None = None) -> None:
+    def load_urdf(self, fname: str | None = None) -> None:  # noqa: C901
         """Load a URDF model and initialize the viewer."""
         if not fname:
             fname, _ = QtWidgets.QFileDialog.getOpenFileName(

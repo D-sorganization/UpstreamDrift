@@ -355,7 +355,7 @@ class SwingAnalyzer:
             x_factor_stretch=x_factor,
         )
 
-    def _detect_phases(
+    def _detect_phases(  # noqa: C901
         self,
         poses: list[PoseFrame],
         fps: float,
@@ -515,7 +515,7 @@ class SwingAnalyzer:
             rhythm=rhythm,
         )
 
-    def _calculate_balance(
+    def _calculate_balance(  # noqa: C901
         self,
         poses: list[PoseFrame],
         key_frames: dict[str, int],

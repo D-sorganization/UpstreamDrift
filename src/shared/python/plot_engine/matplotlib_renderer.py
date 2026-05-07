@@ -214,7 +214,7 @@ class MatplotlibRenderer:
         fig.tight_layout()
         return fig
 
-    def render_heatmap(
+    def render_heatmap(  # noqa: C901
         self,
         spec: HeatmapSpec,
         fig: Figure | None = None,

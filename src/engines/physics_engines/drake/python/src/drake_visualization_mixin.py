@@ -284,7 +284,7 @@ class DrakeVisualizationMixin:
             points = np.vstack([start_pos, end_pos]).T
             self.meshcat.SetLineSegments(path, points, 2.0, color)
 
-    def _update_ellipsoids(self: Any) -> None:
+    def _update_ellipsoids(self: Any) -> None:  # noqa: C901
         """Compute and draw ellipsoids."""
         if not (self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked()):
             return
@@ -477,7 +477,7 @@ class DrakeVisualizationMixin:
     # Analysis plot methods
     # ------------------------------------------------------------------
 
-    def _show_induced_acceleration_plot(self: Any) -> None:
+    def _show_induced_acceleration_plot(self: Any) -> None:  # noqa: C901
         """Calculate and plot induced accelerations."""
         if not HAS_MATPLOTLIB:
             QtWidgets.QMessageBox.warning(self, "Error", "Matplotlib not found.")

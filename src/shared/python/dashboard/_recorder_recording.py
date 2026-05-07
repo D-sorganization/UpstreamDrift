@@ -57,7 +57,7 @@ class _RecordingMixin:
                 logger.warning("Failed to compute kinetic energy: %s", e)
         return 0.0
 
-    def _record_realtime_analysis(
+    def _record_realtime_analysis(  # noqa: C901
         self,
         idx: int,
         q: np.ndarray,
@@ -104,7 +104,7 @@ class _RecordingMixin:
 
         self._record_induced_accelerations(idx, tau, M)
 
-    def _record_induced_accelerations(
+    def _record_induced_accelerations(  # noqa: C901
         self, idx: int, tau: np.ndarray, M: np.ndarray | None
     ) -> None:
         if not (idx is not None):

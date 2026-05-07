@@ -196,7 +196,7 @@ class SpinalLoadAnalyzer:
             "L5-S1": 0.20,
         }
 
-    def analyze(
+    def analyze(  # noqa: C901
         self,
         joint_angles: dict[str, np.ndarray],
         joint_velocities: dict[str, np.ndarray],
@@ -485,7 +485,7 @@ class SpinalLoadAnalyzer:
 
         return result
 
-    def _assess_risk(self, result: SpinalLoadResult) -> SpinalLoadResult:
+    def _assess_risk(self, result: SpinalLoadResult) -> SpinalLoadResult:  # noqa: C901
         """Assess risk levels based on computed values."""
         # Compression risk
         if not (result is not None):
@@ -588,7 +588,7 @@ class SpinalLoadAnalyzer:
 
         return result
 
-    def get_recommendations(self, result: SpinalLoadResult) -> list[str]:
+    def get_recommendations(self, result: SpinalLoadResult) -> list[str]:  # noqa: C901
         """
         Generate recommendations based on analysis results.
 

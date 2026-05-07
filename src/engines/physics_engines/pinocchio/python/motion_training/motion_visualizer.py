@@ -377,7 +377,7 @@ class MotionVisualizer:
         if self.pin_viz is not None:
             self.pin_viz.display(q)
 
-    def play_motion(
+    def play_motion(  # noqa: C901
         self,
         trajectory: ClubTrajectory,
         ik_result: TrajectoryIKResult | None = None,

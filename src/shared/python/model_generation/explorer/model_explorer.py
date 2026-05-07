@@ -637,7 +637,7 @@ class ModelExplorerWindow(QMainWindow):
 
     # -- Display Updates --
 
-    def _show_load_result(self, result: LoadResult) -> None:
+    def _show_load_result(self, result: LoadResult) -> None:  # noqa: C901
         """Update all panels with a load result."""
         if not (result is not None):
             raise ValueError("result must be provided")

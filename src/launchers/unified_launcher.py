@@ -156,7 +156,7 @@ class UnifiedLauncher:
                 if engine_dir.is_dir() and not engine_dir.name.startswith("."):
                     logger.info("Engine dir: %s", engine_dir.name)
 
-    def get_version(self) -> str:
+    def get_version(self) -> str:  # noqa: C901
         """Get suite version from package metadata.
 
         Returns:

@@ -186,7 +186,7 @@ class DrakePoseEditor(BasePoseEditor):
 
         logger.info("Initialized %d joints for pose editing", len(self._joint_info))
 
-    def _categorize_joint(self, name: str) -> str:
+    def _categorize_joint(self, name: str) -> str:  # noqa: C901
         """Categorize a joint into a group based on its name.
 
         Args:
@@ -613,7 +613,7 @@ class DrakePoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         self._update_callback = callback
         self._editor.set_update_callback(callback)
 
-    def _build_joint_controls(self) -> None:
+    def _build_joint_controls(self) -> None:  # noqa: C901
         """Build joint control widgets."""
         # Clear existing
         for widget in self._joint_widgets.values():

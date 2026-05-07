@@ -632,7 +632,7 @@ def _analytical_jacobian(
 # --------------------------------------------------------------------------- #
 
 
-def fit_swing_pinocchio(
+def fit_swing_pinocchio(  # noqa: C901
     target: ClubTarget,
     options: FitOptions | None = None,
 ) -> FitResult:

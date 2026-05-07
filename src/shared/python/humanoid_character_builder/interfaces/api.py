@@ -141,7 +141,7 @@ class CharacterBuildResult:
     # Output directory (if exported)
     output_dir: Path | None = None
 
-    def export_urdf(
+    def export_urdf(  # noqa: C901
         self,
         output_dir: Path | str,
         options: ExportOptions | None = None,

@@ -17,7 +17,7 @@ from ._mesh_types import (
 logger = logging.getLogger(__name__)
 
 
-def load_obj(path: Path) -> LoadedMesh:
+def load_obj(path: Path) -> LoadedMesh:  # noqa: C901
     if not (path is not None):
         raise ValueError("path must be provided")
     vertices: list[MeshVertex] = []

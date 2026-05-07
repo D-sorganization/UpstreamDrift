@@ -240,7 +240,7 @@ class DockerMixin:
 
         return cmd
 
-    def _stream_process_output(self) -> None:
+    def _stream_process_output(self) -> None:  # noqa: C901
         """Read subprocess stdout via a queue and log lines to the GUI."""
         host = cast("DockerProtocol", self)
         q: queue.Queue[str | None] = queue.Queue()

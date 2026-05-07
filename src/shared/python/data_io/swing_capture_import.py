@@ -446,7 +446,7 @@ class SwingCaptureImporter:
             return float(np.arccos(cos_angle))
         return 0.0
 
-    def _convert_markers_to_joints(
+    def _convert_markers_to_joints(  # noqa: C901
         self, marker_data: MarkerData, source_file: str
     ) -> JointTrajectory:
         """Convert marker positions to joint angles.

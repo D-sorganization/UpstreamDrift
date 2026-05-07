@@ -670,7 +670,7 @@ class OpenGLRenderer:
             ),
         ]
 
-    def _render_body_segments(
+    def _render_body_segments(  # noqa: C901
         self,
         frame_data: Any,
         render_config: Any,

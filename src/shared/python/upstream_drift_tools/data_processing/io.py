@@ -30,7 +30,7 @@ class DataReader:
     """Class for reading data files in various formats."""
 
     @staticmethod
-    def read_file(
+    def read_file(  # noqa: C901
         file_path: str | Path, format_type: str | None = None, **kwargs: Any
     ) -> pd.DataFrame:
         """Read a data file based on its format.
@@ -87,7 +87,7 @@ class DataWriter:
     """Class for writing data files in various formats."""
 
     @staticmethod
-    def write_file(
+    def write_file(  # noqa: C901
         df: pd.DataFrame,
         file_path: str | Path,
         format_type: str | None = None,

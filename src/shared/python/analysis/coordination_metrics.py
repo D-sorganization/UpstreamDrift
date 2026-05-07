@@ -368,7 +368,7 @@ class CoordinationMetricsMixin:
 
         return window_times, correlations
 
-    def compute_lag_matrix(
+    def compute_lag_matrix(  # noqa: C901
         self,
         data_type: str = "velocity",
         max_lag: float = 0.5,

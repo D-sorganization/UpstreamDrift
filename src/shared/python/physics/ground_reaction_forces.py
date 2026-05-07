@@ -492,7 +492,7 @@ class GRFAnalyzer:
         )
 
 
-def extract_grf_from_contacts(
+def extract_grf_from_contacts(  # noqa: C901
     engine: PhysicsEngine,
     contact_body_names: list[str],
     ground_height: float = 0.0,

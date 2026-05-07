@@ -114,7 +114,7 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
                 error_message=f"MakeHuman generation failed: {e}",
             )
 
-    def _generate_via_api(
+    def _generate_via_api(  # noqa: C901
         self,
         params: BodyParameters,
         modifiers: dict[str, float],
@@ -657,7 +657,8 @@ def generate_human():
         try:
             h.setDetail(key, value)
         except Exception as exc:  # noqa: BLE001
-            print(f'Warning: modifier {{key}}={{value}}: {{exc}}')
+            import sys
+            sys.stdout.write(f'Warning: modifier {{key}}={{value}}: {{exc}}\\n')
 
     exportOBJ(h, '{obj_path_str}')
 

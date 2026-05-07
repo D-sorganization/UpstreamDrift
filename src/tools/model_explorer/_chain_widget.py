@@ -203,7 +203,7 @@ class ChainManipulationWidget(QWidget):
             config = dialog.get_configuration()
             self._insert_segment(config)
 
-    def _insert_segment(self, config: dict[str, Any]) -> None:
+    def _insert_segment(self, config: dict[str, Any]) -> None:  # noqa: C901
         """Insert a new segment into the URDF."""
         if not (config is not None):
             raise ValueError("config must be provided")

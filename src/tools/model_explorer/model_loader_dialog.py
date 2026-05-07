@@ -774,7 +774,7 @@ class ModelLoaderDialog(QDialog):
 
         return group
 
-    def _on_model_selected(self, category: str) -> None:
+    def _on_model_selected(self, category: str) -> None:  # noqa: C901
         """Handle model selection change.
 
 
