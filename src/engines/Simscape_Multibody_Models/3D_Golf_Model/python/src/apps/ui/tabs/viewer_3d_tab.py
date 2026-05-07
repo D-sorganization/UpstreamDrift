@@ -7,6 +7,7 @@ from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
 
 from ...core.models import C3DDataModel
+from src.shared.python.qt_utils.wheel_event_filter import suppress_wheel_on_widgets
 from ..widgets.mpl_canvas import MplCanvas
 
 
@@ -38,6 +39,9 @@ class Viewer3DTab(QtWidgets.QWidget):
         self.slider_frame.valueChanged.connect(self.update_view)
         left_panel.addWidget(QtWidgets.QLabel("Frame index:"))
         left_panel.addWidget(self.slider_frame)
+
+        # Suppress wheel events on slider to prevent unintended value changes
+        suppress_wheel_on_widgets(self.slider_frame)
 
         self.label_frame_info = QtWidgets.QLabel("Frame: - / Time: -")
         left_panel.addWidget(self.label_frame_info)
