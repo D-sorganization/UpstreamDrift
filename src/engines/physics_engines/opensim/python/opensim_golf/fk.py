@@ -173,9 +173,14 @@ def compute_clubhead(
         # Fallback: if clubhead is not a separate body, compute it as an offset
         # from the grip frame. This is a temporary measure until #4110 is done.
         grip_pos, grip_quat = compute_grip(model, state)
-        # Offset 1.0 m distally from grip (along grip z-axis in address pose).
-        clubhead_offset = np.array([0.0, 0.0, -1.0])
-        clubhead_pos = grip_pos + clubhead_offset
+        # Shaft-axis offset 1.0 m distal from grip, expressed in the grip's
+        # local frame (-z is "down the shaft" in the address pose). We rotate
+        # this local offset into world space using the grip orientation so the
+        # clubhead tracks the grip through the swing rather than always
+        # pointing along world -z (which would only be correct at address).
+        clubhead_offset_local = np.array([0.0, 0.0, -1.0])
+        clubhead_offset_world = _quat_rotate_vector(grip_quat, clubhead_offset_local)
+        clubhead_pos = grip_pos + clubhead_offset_world
         clubhead_quat = grip_quat  # Assume same orientation as grip for now.
         return clubhead_pos, clubhead_quat
 
@@ -369,3 +374,25 @@ def _average_quaternions(
     q_avg = q_avg / np.linalg.norm(q_avg)
 
     return q_avg
+
+
+def _quat_rotate_vector(
+    quat: NDArray[np.float64],
+    vec: NDArray[np.float64],
+) -> NDArray[np.float64]:
+    """Rotate a 3-vector by a unit quaternion.
+
+    Applies the rotation v' = q * v * q^-1 using the standard formulation
+    v' = v + 2 * cross(qv, cross(qv, v) + qw * v) where q = (qw, qv).
+
+    Args:
+        quat: Unit quaternion [w, x, y, z].
+        vec: 3-vector in the quaternion's source frame.
+
+    Returns:
+        Rotated 3-vector in the quaternion's target frame.
+    """
+    qw = quat[0]
+    qv = quat[1:4]
+    t = 2.0 * np.cross(qv, vec)
+    return vec + qw * t + np.cross(qv, t)

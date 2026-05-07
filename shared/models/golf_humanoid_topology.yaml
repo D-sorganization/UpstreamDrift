@@ -42,8 +42,26 @@ schema_version: 1
 total_dof: 25
 
 # ---------------------------------------------------------------------------
-# Bodies (rigid links). Each body's parent_joint references one of the joints
-# defined below; each joint maps a parent body to a child body.
+# Bodies (rigid links).
+#
+#   parent_joint  Either the name of a joint defined below (the standard case
+#                 — the body is the joint's `child`) OR `null` for bodies that
+#                 are rigidly fused to another body in the same kinematic
+#                 frame (e.g. an upper-arm inertia segment that shares the
+#                 shoulder pivot frame, or a hand inertia segment that shares
+#                 the wrist frame). When `parent_joint` is `null`, the
+#                 `attach_to` field MUST name the body whose frame is
+#                 inherited; the attachment is implicitly a 0-DOF weld with
+#                 zero offset. This keeps the topology fully reconstructible
+#                 from YAML alone (no hard-coded heuristics required).
+#
+#   attach_to     Required iff `parent_joint: null`. Names the host body
+#                 whose frame this body is welded into.
+#
+#   inertia_ref   Optional; references an entry in the inertia YAML.
+#
+# Each joint maps a parent body to a child body via its own `parent`/`child`
+# fields (see the joints section).
 # ---------------------------------------------------------------------------
 
 bodies:
@@ -78,6 +96,7 @@ bodies:
 
   - name: LUpperArm
     parent_joint: null               # rigidly attached to LShoulder pivot frame
+    attach_to: LShoulder
     inertia_ref: LeftUpperArm
 
   - name: LElbow
@@ -92,6 +111,7 @@ bodies:
 
   - name: LHand
     parent_joint: null               # rigid extension from the wrist frame
+    attach_to: LWrist
     inertia_ref: LeftHand
 
   - name: RScap
@@ -103,7 +123,8 @@ bodies:
     inertia_ref: null
 
   - name: RUpperArm
-    parent_joint: null
+    parent_joint: null               # rigidly attached to RShoulder pivot frame
+    attach_to: RShoulder
     inertia_ref: RightUpperArm
 
   - name: RElbow
@@ -115,7 +136,8 @@ bodies:
     inertia_ref: RightForearmLower
 
   - name: RHand
-    parent_joint: null
+    parent_joint: null               # rigid extension from the wrist frame
+    attach_to: RWrist
     inertia_ref: RightHand
 
   - name: Club
