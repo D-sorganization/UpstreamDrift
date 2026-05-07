@@ -1,0 +1,93 @@
+# Cross-engine leaderboard regenerator (issue #4097, PARITY-LEADERBOARD).
+#
+# Runs `scripts/run_cross_engine_leaderboard.py` whenever a PR touches
+# `src/engines/` or one of the leaderboard scripts itself, so reviewers
+# can see at a glance how each engine's grip/clubhead RMSE / wall-clock
+# changes. Engines whose deps aren't installed are honestly skipped by
+# the orchestrator (NotImplementedError / ImportError -> "skip" cell);
+# the leaderboard still renders for the engines that did run.
+#
+# This workflow runs the **report-only** flow on hosted runners (no MATLAB,
+# no proprietary engine deps), since the canonical fits are produced on
+# the self-hosted fleet and committed under `motion_matching/results/`.
+# That way every PR sees the most-recent committed fits even when the
+# triggering change can't actually rerun them.
+
+name: cross-engine-leaderboard
+
+on:
+  pull_request:
+    paths:
+      - "src/engines/**"
+      - "scripts/run_cross_engine_leaderboard.py"
+      - "src/shared/python/motion_matching/leaderboard.py"
+      - "tests/unit/motion_matching/test_leaderboard.py"
+      - ".github/workflows/cross-engine-leaderboard.yml"
+  workflow_dispatch:
+    inputs:
+      strict:
+        description: "Fail the job if any engine raises (default false = honest-skip)"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: cross-engine-leaderboard-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regenerate:
+    name: regenerate cross-engine leaderboard
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: "3.11"
+
+      - name: Install minimal deps
+        # Only what the leaderboard report code itself needs - we skip the
+        # heavy engine extras intentionally so this job stays fast and
+        # green even when drake / pinocchio / opensim aren't installed.
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run leaderboard tests (table-generation logic only)
+        run: |
+          pytest tests/unit/motion_matching/test_leaderboard.py -v --timeout=60
+
+      - name: Regenerate leaderboard from existing committed FitResults
+        env:
+          GIT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python3 scripts/run_cross_engine_leaderboard.py --skip-fits
+
+      - name: Show diff against committed leaderboard
+        if: always()
+        run: |
+          if git diff --quiet -- motion_matching/results/CROSS_ENGINE_LEADERBOARD.md; then
+            echo "No changes to CROSS_ENGINE_LEADERBOARD.md"
+          else
+            echo "## Cross-engine leaderboard diff" >> "$GITHUB_STEP_SUMMARY"
+            echo '```diff' >> "$GITHUB_STEP_SUMMARY"
+            git diff -- motion_matching/results/CROSS_ENGINE_LEADERBOARD.md >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload leaderboard artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: cross-engine-leaderboard
+          path: motion_matching/results/CROSS_ENGINE_LEADERBOARD.md
