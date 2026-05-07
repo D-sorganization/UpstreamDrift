@@ -1,16 +1,21 @@
-# Motion-matching leaderboard regeneration check (issue #4080).
+# Motion-matching leaderboard regeneration check (issue #4080, #4237).
 #
 # MATLAB + Simulink are not available on hosted GitHub runners, so this
 # workflow cannot actually re-execute `run_leaderboard.m`. Instead it
 # enforces the *contract* that every PR touching `motion_matching/`
-# either commits a refreshed `LEADERBOARD.md` or explicitly opts out.
+# commits a refreshed `LEADERBOARD.md` (and its sidecar
+# `.leaderboard_meta.json`).
 #
 # What this workflow does on a PR:
 #   1. Verifies `motion_matching/results/LEADERBOARD.md` exists.
 #   2. Verifies the LEADERBOARD.md header points at #4080 and lists the
 #      canonical column schema.
-#   3. Surfaces a "manual regeneration required" reminder in the PR's
-#      job summary so reviewers see it.
+#   3. Reads `motion_matching/results/.leaderboard_meta.json` and
+#      enforces freshness: `git_head` must be an ancestor of HEAD AND
+#      no file under `motion_matching/` may have been modified between
+#      `git_head` and HEAD. If either check fails, the PR is told to
+#      rerun `run_leaderboard.m` and recommit the result.
+#   4. Surfaces a manual-regeneration reminder in the PR's job summary.
 #
 # How a contributor regenerates the leaderboard locally (the only path
 # that can actually run the optimizers):
@@ -18,9 +23,10 @@
 #   cd src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab
 #   matlab -batch "addpath(genpath('motion_matching')); run_leaderboard"
 #
-# That command writes both the per-pair `.mat` files and the refreshed
-# `motion_matching/results/LEADERBOARD.md` which should then be staged
-# in the PR.
+# That command writes the per-pair `.mat` files, the refreshed
+# `motion_matching/results/LEADERBOARD.md`, and the freshness sidecar
+# `motion_matching/results/.leaderboard_meta.json` which must all be
+# staged in the PR.
 
 name: motion-matching-leaderboard
 
@@ -47,6 +53,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          # Need full history so `git merge-base --is-ancestor` and
+          # `git log <git_head>..HEAD -- <path>` resolve correctly.
+          fetch-depth: 0
 
       - name: Verify LEADERBOARD.md exists
         run: |
@@ -74,6 +84,69 @@ jobs:
           fi
           echo "Schema header looks good."
 
+      - name: Verify leaderboard freshness (issue #4237)
+        env:
+          MM_PATH: src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching
+        run: |
+          set -euo pipefail
+
+          META="${MM_PATH}/results/.leaderboard_meta.json"
+          if [ ! -f "$META" ]; then
+            echo "::error::Missing $META."
+            echo "Run run_leaderboard.m locally; it now emits this freshness sidecar."
+            exit 1
+          fi
+
+          # Pull git_head out of the meta file with python (avoids a jq dep).
+          GIT_HEAD="$(python3 -c '
+          import json, sys
+          with open(sys.argv[1]) as f:
+              meta = json.load(f)
+          sha = (meta.get("git_head") or "").strip()
+          if not sha:
+              sys.exit("git_head missing or empty in meta file")
+          print(sha)
+          ' "$META")"
+          echo "Leaderboard pinned to git_head=$GIT_HEAD"
+
+          # PR HEAD is the merge commit GitHub builds; its first parent is
+          # the actual PR tip. Use HEAD here — `git merge-base --is-ancestor`
+          # and the `..HEAD` log work either way.
+          if ! git cat-file -e "${GIT_HEAD}^{commit}" 2>/dev/null; then
+            echo "::error::git_head ${GIT_HEAD} is not a known commit in this repo."
+            echo "Re-run scripts/run_leaderboard.m and commit the refreshed sidecar."
+            exit 1
+          fi
+
+          if ! git merge-base --is-ancestor "$GIT_HEAD" HEAD; then
+            echo "::error::Leaderboard git_head ${GIT_HEAD} is not an ancestor of HEAD."
+            echo "Re-run scripts/run_leaderboard.m and commit the refreshed result."
+            exit 1
+          fi
+
+          # Any motion_matching/ change after git_head means the leaderboard
+          # is stale relative to the optimizer code on this branch.
+          STALE_FILES="$(git log --name-only --pretty=format: \
+              "${GIT_HEAD}..HEAD" -- "${MM_PATH}/" \
+              | sort -u | sed '/^$/d' || true)"
+
+          # The leaderboard's own outputs do not invalidate the leaderboard.
+          STALE_FILES="$(printf "%s\n" "$STALE_FILES" \
+              | grep -v -E "^${MM_PATH}/results/(LEADERBOARD\.md|\.leaderboard_meta\.json|.*\.mat)$" \
+              || true)"
+
+          if [ -n "$STALE_FILES" ]; then
+            echo "::error::motion_matching/ has been modified since the leaderboard was last regenerated (git_head=${GIT_HEAD})."
+            echo "Files changed since regeneration:"
+            printf '  - %s\n' $STALE_FILES
+            echo ""
+            echo "Re-run the leaderboard locally and commit the refreshed outputs:"
+            echo "  cd src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab"
+            echo "  matlab -batch \"addpath(genpath('motion_matching')); run_leaderboard\""
+            exit 1
+          fi
+          echo "Leaderboard is fresh: no motion_matching/ changes since ${GIT_HEAD}."
+
       - name: Manual regeneration reminder
         if: always()
         run: |
@@ -89,5 +162,7 @@ jobs:
             echo "matlab -batch \"addpath(genpath('motion_matching')); run_leaderboard\""
             echo '```'
             echo ""
-            echo "and commit the refreshed \`motion_matching/results/LEADERBOARD.md\`."
+            echo "and commit the refreshed \`motion_matching/results/LEADERBOARD.md\`"
+            echo "and \`motion_matching/results/.leaderboard_meta.json\` (the"
+            echo "freshness gate enforces both)."
           } >> "$GITHUB_STEP_SUMMARY"

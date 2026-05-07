@@ -102,16 +102,29 @@ function summary = run_leaderboard(varargin)
     md_path = fullfile(results_dir, "LEADERBOARD.md");
     local_write_markdown(md_path, rows, trials, options);
 
+    % Emit a freshness sidecar consumed by the leaderboard CI workflow
+    % (see .github/workflows/motion-matching-leaderboard.yml). The CI
+    % runner has no MATLAB and cannot regenerate the table, so we pin
+    % the leaderboard to the commit it was built from. The workflow
+    % then verifies no motion_matching/ files have been changed since
+    % `git_head`.
+    meta_path = fullfile(results_dir, ".leaderboard_meta.json");
+    local_write_meta(meta_path, git_commit);
+
     summary = struct();
-    summary.results_dir    = string(results_dir);
-    summary.leaderboard_md = string(md_path);
-    summary.rows           = rows;
-    summary.skipped        = skipped;
+    summary.results_dir       = string(results_dir);
+    summary.leaderboard_md    = string(md_path);
+    summary.leaderboard_meta  = string(meta_path);
+    summary.rows              = rows;
+    summary.skipped           = skipped;
 
     % Postconditions ----------------------------------------------------
     assert(isfile(char(md_path)), ...
         "run_leaderboard:postMd", ...
         "Postcondition: LEADERBOARD.md must exist at %s", md_path);
+    assert(isfile(char(meta_path)), ...
+        "run_leaderboard:postMeta", ...
+        "Postcondition: .leaderboard_meta.json must exist at %s", meta_path);
 end
 
 
@@ -470,4 +483,51 @@ function s = local_or_dash(v)
     if strlength(s) == 0
         s = "-";
     end
+end
+
+
+%% =====================================================================
+function local_write_meta(meta_path, git_commit)
+%LOCAL_WRITE_META  Emit results/.leaderboard_meta.json for the CI freshness gate.
+%
+%   The motion-matching leaderboard CI workflow cannot regenerate the
+%   table (no MATLAB on the runner). It instead reads this file and
+%   verifies `git_head` is an ancestor of HEAD with no intervening
+%   motion_matching/ changes. Schema:
+%       {
+%         "git_head": "<sha or ''>",
+%         "regenerated_at": "<ISO 8601 UTC>",
+%         "schema_version": 1
+%       }
+
+    sha = string(git_commit);
+    if strlength(sha) == 0
+        % Best-effort: re-resolve via git so the meta is non-empty when
+        % run_leaderboard was invoked without an explicit GitCommit and
+        % the earlier `git rev-parse` failed silently.
+        try
+            [status, out] = system("git rev-parse HEAD");
+            if status == 0
+                sha = strtrim(string(out));
+            end
+        catch
+            % swallow; sha stays ""
+        end
+    end
+
+    iso = string(datetime("now", "TimeZone", "UTC", ...
+                          "Format", "yyyy-MM-dd'T'HH:mm:ss'Z'"));
+
+    fid = fopen(char(meta_path), "w");
+    if fid < 0
+        error("run_leaderboard:metaOpen", ...
+              "Could not open %s for writing", meta_path);
+    end
+    closer = onCleanup(@() fclose(fid)); %#ok<NASGU>
+
+    fprintf(fid, "{\n");
+    fprintf(fid, "  \"schema_version\": 1,\n");
+    fprintf(fid, "  \"git_head\": \"%s\",\n", sha);
+    fprintf(fid, "  \"regenerated_at\": \"%s\"\n", iso);
+    fprintf(fid, "}\n");
 end
