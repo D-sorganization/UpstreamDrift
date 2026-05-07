@@ -1,0 +1,213 @@
+"""Polynomial-torque driver for MuJoCo.
+
+Implements the Stateflow analogue from ``MUJOCO_PARITY_SPEC.md`` §2.3.
+
+The torque law is the canonical 6th-order polynomial::
+
+    tau_j(t; theta) = A_j*t^6 + B_j*t^5 + C_j*t^4 + D_j*t^3
+                    + E_j*t^2 + F_j*t + G_j
+
+with parameter bounds (mirrored from the Simscape reference):
+
+    |A_j|, |B_j| <= 1000
+    |C_j|, |D_j| <=  500
+    |E_j|, |F_j| <=  100
+    |G_j|        <=   25
+
+`mjcb_control` is a *process-global* callback in MuJoCo. The
+:class:`PolynomialTorqueDriver` therefore exposes :meth:`install` /
+:meth:`uninstall` so callers can scope ownership and use it as a context
+manager. Parallel fits MUST use ``multiprocessing`` rather than threading.
+"""
+
+from __future__ import annotations
+
+from contextlib import AbstractContextManager
+from types import TracebackType
+from typing import Any
+
+import numpy as np
+from numpy.typing import NDArray
+
+# --- Coefficient bounds (mirrored from Simscape build_coefficient_bounds) ---
+
+# Order: A (t^6), B (t^5), C (t^4), D (t^3), E (t^2), F (t^1), G (t^0)
+POLY_BOUNDS: tuple[float, float, float, float, float, float, float] = (
+    1000.0,  # |A|
+    1000.0,  # |B|
+    500.0,  # |C|
+    500.0,  # |D|
+    100.0,  # |E|
+    100.0,  # |F|
+    25.0,  # |G|
+)
+
+
+def polynomial_torque_bounds(
+    n_joints: int,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """Return ``(lb, ub)`` element-wise bounds for the flattened theta vector.
+
+    The flattened layout is row-major over joints, i.e.
+    ``theta.reshape(n_joints, 7)[j, k]`` is the coefficient of ``t^(6-k)``
+    for joint ``j`` (so column 0 holds A, ..., column 6 holds G). This
+    matches the contract in :class:`PolynomialTorqueDriver`.
+    """
+    if n_joints <= 0:
+        raise ValueError(f"n_joints must be > 0; got {n_joints}")
+    per_joint = np.asarray(POLY_BOUNDS, dtype=np.float64)
+    ub = np.tile(per_joint, n_joints)
+    return -ub.copy(), ub.copy()
+
+
+def _evaluate_polynomial(
+    theta: NDArray[np.float64],
+    t: float,
+) -> NDArray[np.float64]:
+    """Evaluate per-joint polynomial torques at scalar time ``t``.
+
+    Args:
+        theta: ``(n_joints, 7)`` coefficient matrix. Column ``k`` is the
+            coefficient of ``t^(6-k)`` (i.e. ``theta[:, 0]`` is A).
+        t: time in seconds (relative to ``t0``).
+
+    Returns:
+        ``(n_joints,)`` torque vector.
+    """
+    # Horner's method on shape (7,) descending powers.
+    out = np.zeros(theta.shape[0], dtype=np.float64)
+    for k in range(7):
+        out = out * t + theta[:, k]
+    return out
+
+
+class PolynomialTorqueDriver(AbstractContextManager["PolynomialTorqueDriver"]):
+    """Per-joint 6th-order polynomial torque, applied via ``mjcb_control``.
+
+    Args:
+        model: a compiled ``mujoco.MjModel``.
+        theta: ``(n_joints, 7)`` coefficient matrix or a flat
+            ``(n_joints*7,)`` vector. ``n_joints`` must equal
+            ``model.nu``. Layout: column 0 = A (t^6), ..., column 6 = G
+            (t^0).
+        t0: reference time in seconds; the polynomial is evaluated at
+            ``data.time - t0``.
+        clip_to_ctrlrange: if ``True`` and the model declares
+            ``ctrlrange`` on its actuators, clip the torque to that range
+            before writing ``data.ctrl``. Default ``True``.
+
+    Use as a context manager to scope the global callback safely::
+
+        with PolynomialTorqueDriver(m, theta) as drv:
+            drv.install()
+            for _ in range(n_steps):
+                mujoco.mj_step(m, d)
+    """
+
+    def __init__(
+        self,
+        model: Any,
+        theta: NDArray[np.float64],
+        t0: float = 0.0,
+        clip_to_ctrlrange: bool = True,
+    ) -> None:
+        nu = int(model.nu)
+        if nu <= 0:
+            raise ValueError("model has no actuators (nu == 0)")
+        arr = np.asarray(theta, dtype=np.float64)
+        if arr.ndim == 1:
+            if arr.shape[0] != nu * 7:
+                raise ValueError(
+                    f"flat theta must have length nu*7 = {nu * 7}; got {arr.shape[0]}"
+                )
+            arr = arr.reshape(nu, 7)
+        elif arr.shape != (nu, 7):
+            raise ValueError(f"theta must have shape ({nu}, 7); got {arr.shape}")
+        if not np.all(np.isfinite(arr)):
+            raise ValueError("theta must be finite (no NaN/inf)")
+        self._theta: NDArray[np.float64] = arr.copy()
+        self._t0 = float(t0)
+        self._installed = False
+        self._clip = bool(clip_to_ctrlrange)
+        # Snapshot ctrlrange so we don't reach into model from the callback.
+        if (
+            self._clip
+            and hasattr(model, "actuator_ctrllimited")
+            and hasattr(model, "actuator_ctrlrange")
+        ):
+            limited = np.asarray(model.actuator_ctrllimited).astype(bool)
+            ranges = np.asarray(model.actuator_ctrlrange, dtype=np.float64)
+            self._ctrl_lo = np.where(limited, ranges[:, 0], -np.inf)
+            self._ctrl_hi = np.where(limited, ranges[:, 1], np.inf)
+        else:
+            self._ctrl_lo = np.full(nu, -np.inf, dtype=np.float64)
+            self._ctrl_hi = np.full(nu, np.inf, dtype=np.float64)
+
+    # ------------------------------------------------------------------ API
+
+    @property
+    def theta(self) -> NDArray[np.float64]:
+        """Return a copy of the current ``(n_joints, 7)`` coefficient matrix."""
+        return self._theta.copy()
+
+    def evaluate(self, t: float) -> NDArray[np.float64]:
+        """Pure-Python evaluation of the polynomial at time ``t``.
+
+        Useful for tests / debugging without installing the global callback.
+        """
+        return _evaluate_polynomial(self._theta, t - self._t0)
+
+    def install(self) -> None:
+        """Register ``self`` as the process-global ``mjcb_control`` callback."""
+        import mujoco  # local import — keeps top-level import-free for tests
+
+        if self._installed:
+            return
+        theta = self._theta
+        t0 = self._t0
+        lo = self._ctrl_lo
+        hi = self._ctrl_hi
+
+        def _cb(_m: Any, d: Any) -> None:
+            t = d.time - t0
+            # Horner's method on a fixed (7,) shape — no allocations beyond
+            # the temporary scalar product. This is the inner-loop hot path.
+            ctrl = theta[:, 0] * t
+            ctrl += theta[:, 1]
+            ctrl *= t
+            ctrl += theta[:, 2]
+            ctrl *= t
+            ctrl += theta[:, 3]
+            ctrl *= t
+            ctrl += theta[:, 4]
+            ctrl *= t
+            ctrl += theta[:, 5]
+            ctrl *= t
+            ctrl += theta[:, 6]
+            np.clip(ctrl, lo, hi, out=ctrl)
+            d.ctrl[:] = ctrl
+
+        mujoco.set_mjcb_control(_cb)
+        self._installed = True
+
+    def uninstall(self) -> None:
+        """Clear the global ``mjcb_control`` callback if this driver set it."""
+        import mujoco
+
+        if self._installed:
+            mujoco.set_mjcb_control(None)
+            self._installed = False
+
+    # ----------------------------------------------------- context-manager
+
+    def __enter__(self) -> PolynomialTorqueDriver:
+        self.install()
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        self.uninstall()
