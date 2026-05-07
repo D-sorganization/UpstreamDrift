@@ -1,313 +1,488 @@
-"""SwingInverseCVAE: conditional VAE for the inverse swing problem.
+"""SwingInverseCVAE: conditional VAE mapping hand-path trajectories to
+polynomial-coefficient posteriors (Option 3, GH issue #4076).
 
-This module owns just the PyTorch class and its config. Training (#033) and
-inference with rejection sampling (#034) live in sibling modules.
+This module defines the *model* only. Training is in ``training.py`` and
+inference is in ``predict.py``.
 
-Architecture (per APPROACH.md §Architecture):
+Architecture
+------------
+* **Conditioning input ``c``**: ``(batch, T, 12)`` float32 trajectory with
+  the same per-channel layout the forward surrogate consumes
+  (butt(3) + clubhead(3) + grip-quat(4) + 2 reserved). The cVAE sees the
+  trajectory as the conditioning signal, never as the reconstruction target.
+* **Encoder** ``f_enc(c)``: 1-D causal convolutional stack over the time
+  axis (kernel 5, stride 2, three blocks) followed by global average
+  pooling. Output is a ``(batch, encoder_dim)`` summary used by both the
+  posterior head and the decoder. ~250 K params at the default 12->128
+  channel widths.
+* **Posterior** ``q(z|x, c)``: MLP head over ``concat(summary, x_proj)``
+  emitting ``(mu_q, logvar_q)``. ``x_proj`` is a small linear projection
+  of the *true* coefficient vector during training. At inference time the
+  prior head is used instead.
+* **Prior** ``p(z|c)``: parallel MLP head over ``summary`` only emitting
+  ``(mu_p, logvar_p)``. Sampling-time only.
+* **Decoder** ``p(theta|z, c)``: MLP on ``concat(z, summary)`` emitting a
+  ``(batch, 189)`` raw coefficient vector. Output passes through a
+  ``tanh``-and-scale step that respects the per-letter physical bounds:
+  ``|A,B|<=1000``, ``|C,D|<=500``, ``|E,F|<=100``, ``|G|<=25``
+  (PROJECT_SPEC.md §4).
+* **Latent dim** ``z``: 32 by default, sized to give the posterior enough
+  capacity to express bimodality across the 27-joint x 7-letter (= 189)
+  coefficient space without over-fitting an 8-trial smoke fixture.
+* **Total parameter count** at defaults: ~1.0 M (well within the 1-4 M
+  budget called out in the issue).
 
-* Encoder: 1D-Transformer over the kinematic sequence -> per-timestep hidden
-  states. Mean-pooled to produce a context vector ``h_x``. A small MLP head
-  on ``h_x`` emits the diagonal-Gaussian posterior parameters
-  ``(mu, log_var)``.
-* Reparameterization: ``z = mu + exp(0.5 * log_var) * eps`` with
-  ``eps ~ N(0, I)`` at train time; ``z = mu`` when ``sample=False``.
-* Decoder: MLP on ``concat(z, h_x)`` emitting a flat ``(B, n_joints * 7)``
-  coefficient vector. Output is pass-through; quaternion / bound clamping is
-  layered in the post-processing stages of #033 / #034.
+DbC
+---
+``forward`` validates trajectory dtype/shape and the optional ``coeffs``
+argument; both paths raise ``TypeError``/``ValueError`` with descriptive
+messages. The 189 coefficient output is post-clamped to the physical bounds
+so downstream consumers never see out-of-range values, even on an untrained
+model. The KL terms are non-negative by construction (see
+``kl_divergence`` for the closed-form expression).
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
+from typing import ClassVar
 
+import numpy as np
 import torch
-from torch import nn
+from torch import Tensor, nn
 
-from src.shared.python.core.contracts import postcondition, precondition
+# ---------------------------------------------------------------------------
+# Constants from PROJECT_SPEC.md §4 / COMPACT_DATASET_SCHEMA.md
+# ---------------------------------------------------------------------------
 
-from ._transformer import TransformerSequenceEncoder
+DEFAULT_N_JOINTS: int = 27
+COEFFICIENTS_PER_JOINT: int = 7
+DEFAULT_COEFFICIENT_DIM: int = DEFAULT_N_JOINTS * COEFFICIENTS_PER_JOINT  # 189
+DEFAULT_TRAJECTORY_CHANNELS: int = 12
+DEFAULT_LATENT_DIM: int = 32
 
-# Number of coefficients per joint (A..G; see shared/README.md).
-COEFFICIENTS_PER_JOINT = 7
+# Per-letter symmetric bounds in physical units (Newton-metres for torque
+# coefficients of polynomial in t).
+COEFFICIENT_LETTER_BOUNDS: tuple[float, ...] = (
+    1000.0,  # A
+    1000.0,  # B
+    500.0,  # C
+    500.0,  # D
+    100.0,  # E
+    100.0,  # F
+    25.0,  # G
+)
+
+
+def build_coefficient_bound_vector(
+    n_joints: int = DEFAULT_N_JOINTS,
+) -> Tensor:
+    """Return the symmetric upper bound for each of ``n_joints * 7`` coefficients.
+
+    Layout matches the dataset's flat 189-vec ordering:
+    ``(joint_index * 7) + letter_index`` so element ``i`` of the returned
+    tensor is the bound for ``coefficients[i]``.
+    """
+    if n_joints <= 0:
+        raise ValueError(f"n_joints must be positive, got {n_joints}")
+    bounds = torch.tensor(COEFFICIENT_LETTER_BOUNDS, dtype=torch.float32).repeat(
+        n_joints
+    )
+    return bounds
+
+
+# ---------------------------------------------------------------------------
+# Configs and lightweight result dataclasses
+# ---------------------------------------------------------------------------
 
 
 @dataclass(frozen=True)
 class CVAEConfig:
-    """Hyperparameters for :class:`SwingInverseCVAE`.
+    """Architectural hyperparameters for :class:`SwingInverseCVAE`.
 
-    Defaults track the values listed in the issue body for #032; deviations
-    here must also update INTERFACES.md.
+    Defaults yield ~1.0 M parameters. Latent dim 32 was chosen empirically
+    so the prior can express coefficient multi-modality without dwarfing
+    the 189-dim output space (z covers about 17% of theta's dim, a common
+    rule of thumb for Gaussian cVAEs).
     """
 
-    n_joints: int
-    n_timesteps: int = 300
-    n_kinematic_channels: int = 12  # butt(3) + clubhead(3) + quat(4) + 2 reserved
-    latent_dim: int = 16
-    encoder_layers: int = 4
-    encoder_heads: int = 4
-    encoder_dim: int = 128
-    decoder_hidden: int = 256
+    n_joints: int = DEFAULT_N_JOINTS
+    coefficients_per_joint: int = COEFFICIENTS_PER_JOINT
+    trajectory_channels: int = DEFAULT_TRAJECTORY_CHANNELS
+    latent_dim: int = DEFAULT_LATENT_DIM
+    encoder_channels: tuple[int, ...] = (64, 128, 256)
+    encoder_kernel: int = 5
+    encoder_stride: int = 2
+    decoder_hidden: int = 1024
+    coeff_proj_dim: int = 128
     dropout: float = 0.1
+
+    @property
+    def coefficient_dim(self) -> int:
+        return self.n_joints * self.coefficients_per_joint
 
 
 @dataclass(frozen=True)
 class EncoderOutput:
-    """Posterior parameters and the (re)sampled latent.
+    """Posterior + prior parameters produced by a forward pass.
 
-    All tensors share batch dim B and have feature dim ``CVAEConfig.latent_dim``.
-    ``z`` equals ``mu`` when sampling is disabled (eval-time deterministic
-    pass).
+    All tensors share the leading batch dim. ``z`` is the (re)parameterised
+    latent drawn from the posterior at training time, or from the prior
+    when no ``coeffs`` were supplied.
     """
 
-    mu: torch.Tensor
-    log_var: torch.Tensor
-    z: torch.Tensor
+    mu_q: Tensor
+    logvar_q: Tensor
+    mu_p: Tensor
+    logvar_p: Tensor
+    z: Tensor
 
 
-def _validate_config(cfg: CVAEConfig) -> None:
-    """Eager DbC-style precondition check on ``CVAEConfig`` values."""
-    if cfg.n_joints <= 0:
-        raise ValueError(f"n_joints must be positive; got {cfg.n_joints}")
-    if cfg.n_timesteps <= 0:
-        raise ValueError(f"n_timesteps must be positive; got {cfg.n_timesteps}")
-    if cfg.n_kinematic_channels <= 0:
-        raise ValueError(
-            f"n_kinematic_channels must be positive; got {cfg.n_kinematic_channels}"
-        )
-    if cfg.latent_dim <= 0:
-        raise ValueError(f"latent_dim must be positive; got {cfg.latent_dim}")
-    if cfg.encoder_dim % cfg.encoder_heads != 0:
-        raise ValueError(
-            f"encoder_dim ({cfg.encoder_dim}) must be divisible by "
-            f"encoder_heads ({cfg.encoder_heads})"
-        )
+# ---------------------------------------------------------------------------
+# Model
+# ---------------------------------------------------------------------------
+
+
+class _Conv1dEncoder(nn.Module):
+    """Causal-style 1-D conv stack consuming ``(B, T, C)`` -> ``(B, D)``."""
+
+    def __init__(
+        self,
+        in_channels: int,
+        widths: tuple[int, ...],
+        kernel: int,
+        stride: int,
+        dropout: float,
+    ) -> None:
+        super().__init__()
+        layers: list[nn.Module] = []
+        prev = in_channels
+        padding = kernel // 2
+        for width in widths:
+            layers.append(
+                nn.Conv1d(
+                    prev, width, kernel_size=kernel, stride=stride, padding=padding
+                )
+            )
+            layers.append(nn.GELU())
+            layers.append(nn.Dropout(dropout))
+            prev = width
+        self.body = nn.Sequential(*layers)
+        self.out_dim = prev
+
+    def forward(self, traj: Tensor) -> Tensor:
+        # traj: (B, T, C) -> (B, C, T)
+        h = traj.transpose(1, 2)
+        h = self.body(h)
+        return h.mean(dim=-1)  # (B, D)
+
+
+def _gaussian_head(in_features: int, hidden: int, latent_dim: int) -> nn.Module:
+    return nn.Sequential(
+        nn.Linear(in_features, hidden),
+        nn.GELU(),
+        nn.Linear(hidden, 2 * latent_dim),
+    )
+
+
+def _split_gaussian(params: Tensor) -> tuple[Tensor, Tensor]:
+    mu, logvar = torch.chunk(params, 2, dim=-1)
+    logvar = torch.clamp(logvar, min=-10.0, max=10.0)
+    return mu, logvar
+
+
+def _reparameterise(mu: Tensor, logvar: Tensor, *, sample: bool) -> Tensor:
+    if not sample:
+        return mu
+    std = torch.exp(0.5 * logvar)
+    return mu + std * torch.randn_like(std)
+
+
+def kl_divergence(
+    mu_q: Tensor, logvar_q: Tensor, mu_p: Tensor, logvar_p: Tensor
+) -> Tensor:
+    """Batched closed-form KL between two diagonal Gaussians.
+
+    KL(q || p) = 0.5 * sum_i [ (var_q + (mu_q - mu_p)^2) / var_p
+                                - 1 + (logvar_p - logvar_q) ]
+
+    Returns a 1-D tensor of length B (mean over latent dims is *not* taken;
+    callers reduce as they see fit). Output is non-negative by construction
+    (subject to floating-point round-off near zero).
+    """
+    var_q = torch.exp(logvar_q)
+    var_p = torch.exp(logvar_p)
+    diff = mu_q - mu_p
+    elementwise = 0.5 * ((var_q + diff * diff) / var_p - 1.0 + (logvar_p - logvar_q))
+    return elementwise.sum(dim=-1)
 
 
 class SwingInverseCVAE(nn.Module):
-    """Conditional VAE: ``kinematics -> torque coefficients``.
+    """Conditional VAE: trajectory -> coefficient posterior.
 
-    Inputs are ``(B, T, n_kinematic_channels)`` kinematic sequences; outputs
-    are ``(B, n_joints * 7)`` flat coefficient vectors. The model owns the
-    encoder, decoder, and reparameterization trick; the loss, training loop,
-    and rejection-sampling inference live in their own issues (#033, #034).
+    See module-level docstring for the architecture. The class exposes the
+    public surface required by :mod:`training` and :mod:`predict`:
 
-    See APPROACH.md for the architecture rationale.
+    * ``forward(trajectory, coeffs=None)`` — returns ``(coeff_pred, EncoderOutput)``.
+    * ``sample(trajectory, n_samples)`` — draws from the prior conditioned
+      on a single trajectory; used at inference time.
+    * ``from_checkpoint(path)`` — load a saved state dict + config.
     """
 
-    def __init__(self, cfg: CVAEConfig) -> None:
+    SCHEMA_VERSION: ClassVar[str] = "1.0"
+
+    def __init__(self, cfg: CVAEConfig | None = None) -> None:
         super().__init__()
-        _validate_config(cfg)
+        cfg = cfg or CVAEConfig()
+        if cfg.n_joints <= 0:
+            raise ValueError(f"n_joints must be positive, got {cfg.n_joints}")
+        if cfg.latent_dim <= 0:
+            raise ValueError(f"latent_dim must be positive, got {cfg.latent_dim}")
+        if cfg.trajectory_channels <= 0:
+            raise ValueError(
+                f"trajectory_channels must be positive, got {cfg.trajectory_channels}"
+            )
         self.cfg = cfg
-        self._output_dim = cfg.n_joints * COEFFICIENTS_PER_JOINT
 
-        self.encoder = TransformerSequenceEncoder(
-            in_features=cfg.n_kinematic_channels,
-            d_model=cfg.encoder_dim,
-            n_heads=cfg.encoder_heads,
-            n_layers=cfg.encoder_layers,
+        self.encoder = _Conv1dEncoder(
+            in_channels=cfg.trajectory_channels,
+            widths=cfg.encoder_channels,
+            kernel=cfg.encoder_kernel,
+            stride=cfg.encoder_stride,
             dropout=cfg.dropout,
-            max_seq_len=max(cfg.n_timesteps, 16),
         )
+        encoded_dim = self.encoder.out_dim
 
-        # Posterior MLP: h_x -> (mu, log_var). 2*latent_dim head is the standard
-        # split-output trick.
-        self.posterior_head = nn.Sequential(
-            nn.Linear(cfg.encoder_dim, cfg.encoder_dim),
+        self.coeff_projector = nn.Sequential(
+            nn.Linear(cfg.coefficient_dim, cfg.coeff_proj_dim),
             nn.GELU(),
-            nn.Linear(cfg.encoder_dim, 2 * cfg.latent_dim),
         )
 
-        # Decoder MLP: concat(z, h_x) -> coefficients.
-        decoder_in = cfg.latent_dim + cfg.encoder_dim
-        self.decoder_net = nn.Sequential(
-            nn.Linear(decoder_in, cfg.decoder_hidden),
+        self.posterior_head = _gaussian_head(
+            encoded_dim + cfg.coeff_proj_dim, cfg.decoder_hidden, cfg.latent_dim
+        )
+        self.prior_head = _gaussian_head(
+            encoded_dim, cfg.decoder_hidden, cfg.latent_dim
+        )
+
+        self.decoder = nn.Sequential(
+            nn.Linear(cfg.latent_dim + encoded_dim, cfg.decoder_hidden),
             nn.GELU(),
             nn.Dropout(cfg.dropout),
             nn.Linear(cfg.decoder_hidden, cfg.decoder_hidden),
             nn.GELU(),
-            nn.Linear(cfg.decoder_hidden, self._output_dim),
+            nn.Linear(cfg.decoder_hidden, cfg.coefficient_dim),
         )
 
-    # ------------------------------------------------------------------
-    # Helpers (kept method-level to satisfy LOD <= 2 in callers)
-    # ------------------------------------------------------------------
-    def _summarize(self, kinematics: torch.Tensor) -> torch.Tensor:
-        """Encode a kinematic sequence and mean-pool to a context vector.
+        # Stored as a non-trainable buffer so it moves with .to(device).
+        self.register_buffer(
+            "coefficient_bounds",
+            build_coefficient_bound_vector(cfg.n_joints),
+            persistent=False,
+        )
 
-        Returns ``(B, encoder_dim)`` summary used by both the posterior head
-        and the decoder.
-        """
-        hidden = self.encoder(kinematics)
-        return hidden.mean(dim=1)
+    # ---------------- internal helpers (LOD-friendly) ----------------
 
-    def _split_posterior(self, h_x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        """Run the posterior head and split into ``(mu, log_var)``."""
-        params = self.posterior_head(h_x)
-        mu, log_var = torch.chunk(params, 2, dim=-1)
-        # Numerical-stability clamp on log_var. Matches typical VAE practice
-        # (DKingma 2014 §2.3) and prevents NaNs from a runaway std.
-        log_var = torch.clamp(log_var, min=-10.0, max=10.0)
-        return mu, log_var
+    def _encode_context(self, trajectory: Tensor) -> Tensor:
+        return self.encoder(trajectory)
 
-    @staticmethod
-    def _reparameterize(
-        mu: torch.Tensor, log_var: torch.Tensor, *, sample: bool
-    ) -> torch.Tensor:
-        """Standard Gaussian reparameterization trick."""
-        if not sample:
-            return mu
-        std = torch.exp(0.5 * log_var)
-        eps = torch.randn_like(std)
-        return mu + std * eps
+    def _posterior(self, context: Tensor, coeffs: Tensor) -> tuple[Tensor, Tensor]:
+        proj = self.coeff_projector(coeffs)
+        joined = torch.cat([context, proj], dim=-1)
+        return _split_gaussian(self.posterior_head(joined))
 
-    # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
-    @precondition(
-        lambda self, kinematics, *, sample=True: kinematics.dim() == 3,
-        "kinematics must be 3D (B, T, n_kinematic_channels)",
-    )
-    @precondition(
-        lambda self, kinematics, *, sample=True: (
-            kinematics.shape[-1] == self.cfg.n_kinematic_channels
-        ),
-        "kinematics last-dim must equal cfg.n_kinematic_channels",
-    )
-    def encode(
-        self,
-        kinematics: torch.Tensor,
-        *,
-        sample: bool = True,
-    ) -> EncoderOutput:
-        """Encode kinematics into the posterior ``q(z | kinematics)``.
+    def _prior(self, context: Tensor) -> tuple[Tensor, Tensor]:
+        return _split_gaussian(self.prior_head(context))
 
-        Parameters
-        ----------
-        kinematics
-            ``(B, T, n_kinematic_channels)`` float tensor.
-        sample
-            If ``True`` (default), draws ``z`` via the reparameterization
-            trick. If ``False``, returns ``z = mu`` for deterministic
-            decoding.
+    def _decode(self, z: Tensor, context: Tensor) -> Tensor:
+        raw = self.decoder(torch.cat([z, context], dim=-1))
+        # Bound-aware activation: tanh -> scale by per-letter symmetric bound.
+        return torch.tanh(raw) * self.coefficient_bounds
 
-        Returns
-        -------
-        EncoderOutput
-            ``mu``, ``log_var``, and the (re)sampled ``z``, each of shape
-            ``(B, latent_dim)``.
-        """
-        h_x = self._summarize(kinematics)
-        mu, log_var = self._split_posterior(h_x)
-        z = self._reparameterize(mu, log_var, sample=sample)
-        return EncoderOutput(mu=mu, log_var=log_var, z=z)
+    # ---------------- input validation ----------------
 
-    @precondition(
-        lambda self, z, kinematics=None, *, context=None: z.dim() == 2,
-        "z must be 2D (B, latent_dim)",
-    )
-    @postcondition(
-        lambda result: result.dim() == 2,
-        "decode output must be 2D (B, n_joints*7)",
-    )
-    def decode(
-        self,
-        z: torch.Tensor,
-        kinematics: torch.Tensor | None = None,
-        *,
-        context: torch.Tensor | None = None,
-    ) -> torch.Tensor:
-        """Decode ``z`` (and a kinematics summary) into a coefficient vector.
-
-        Either ``kinematics`` or a precomputed ``context`` (``(B, encoder_dim)``)
-        must be supplied; if both are given, ``context`` wins to avoid a
-        redundant transformer pass during sampling.
-
-        Returns
-        -------
-        torch.Tensor
-            ``(B, n_joints * 7)`` raw coefficient vector. Bound enforcement
-            (scaled tanh) and quaternion normalization are post-processing
-            steps owned by the inference module (#034).
-        """
-        if context is None:
-            if kinematics is None:
-                raise ValueError("decode requires either `kinematics` or `context`")
-            context = self._summarize(kinematics)
-        if context.shape[0] != z.shape[0]:
-            raise ValueError(
-                f"batch mismatch: z={z.shape[0]} vs context={context.shape[0]}"
+    def _validate_trajectory(self, trajectory: Tensor) -> None:
+        if not isinstance(trajectory, Tensor):
+            raise TypeError(
+                f"trajectory must be torch.Tensor, got {type(trajectory).__name__}"
             )
-        return self.decoder_net(torch.cat([z, context], dim=-1))
+        if trajectory.dim() != 3:
+            raise ValueError(
+                f"trajectory must be 3-D (B, T, C); got shape {tuple(trajectory.shape)}"
+            )
+        if trajectory.shape[-1] != self.cfg.trajectory_channels:
+            raise ValueError(
+                f"trajectory last-dim must be {self.cfg.trajectory_channels} "
+                f"(matching surrogate); got {trajectory.shape[-1]}"
+            )
+        if trajectory.dtype != torch.float32:
+            raise TypeError(f"trajectory must be float32; got {trajectory.dtype}")
+
+    def _validate_coeffs(self, coeffs: Tensor, batch: int) -> None:
+        if not isinstance(coeffs, Tensor):
+            raise TypeError(f"coeffs must be torch.Tensor, got {type(coeffs).__name__}")
+        if coeffs.dim() != 2:
+            raise ValueError(
+                "coeffs must be 2-D (B, coefficient_dim); "
+                f"got shape {tuple(coeffs.shape)}"
+            )
+        if coeffs.shape[0] != batch:
+            raise ValueError(
+                f"coeffs batch {coeffs.shape[0]} != trajectory batch {batch}"
+            )
+        if coeffs.shape[-1] != self.cfg.coefficient_dim:
+            raise ValueError(
+                f"coeffs last-dim must equal coefficient_dim={self.cfg.coefficient_dim}; "
+                f"got {coeffs.shape[-1]}"
+            )
+
+    # ---------------- public API ----------------
 
     def forward(
         self,
-        kinematics: torch.Tensor,
+        trajectory: Tensor,
+        coeffs: Tensor | None = None,
         *,
-        sample: bool = True,
-    ) -> tuple[torch.Tensor, EncoderOutput]:
-        """Encoder -> reparameterize -> decoder.
+        sample: bool | None = None,
+    ) -> tuple[Tensor, EncoderOutput]:
+        """Encode trajectory + (optional) coefficients, sample z, decode.
 
-        Returns ``(coeffs, encoder_out)`` where ``coeffs`` has shape
-        ``(B, n_joints * 7)`` and ``encoder_out`` carries the posterior for
-        the loss in #033.
+        When ``coeffs`` is given (training): z is drawn from the posterior
+        ``q(z|x, c)``. When ``coeffs`` is None (inference): z is drawn from
+        the prior ``p(z|c)`` and the posterior parameters are duplicated
+        from the prior so downstream KL evaluation degenerates to zero.
+
+        ``sample`` defaults to ``self.training`` so calls under ``model.eval()``
+        return deterministic decodes (z = mu); explicitly pass ``sample=True``
+        to override.
         """
-        if kinematics.dim() != 3:
-            raise ValueError(
-                f"kinematics must be 3D (B, T, F); got {tuple(kinematics.shape)}"
-            )
-        if kinematics.shape[-1] != self.cfg.n_kinematic_channels:
-            raise ValueError(
-                f"kinematics last-dim must be {self.cfg.n_kinematic_channels}; "
-                f"got {kinematics.shape[-1]}"
-            )
-        context = self._summarize(kinematics)
-        mu, log_var = self._split_posterior(context)
-        z = self._reparameterize(mu, log_var, sample=sample)
-        coeffs = self.decode(z, context=context)
-        return coeffs, EncoderOutput(mu=mu, log_var=log_var, z=z)
+        if sample is None:
+            sample = self.training
+        self._validate_trajectory(trajectory)
+        context = self._encode_context(trajectory)
+        mu_p, logvar_p = self._prior(context)
 
-    @precondition(
-        lambda self, kinematics, *, n_samples=1: n_samples >= 1,
-        "n_samples must be at least 1",
-    )
-    @postcondition(
-        lambda result: result.dim() == 3,
-        "sample_coefficients output must be 3D (B, n_samples, n_joints*7)",
-    )
-    def sample_coefficients(
+        if coeffs is None:
+            mu_q, logvar_q = mu_p, logvar_p
+        else:
+            self._validate_coeffs(coeffs, trajectory.shape[0])
+            mu_q, logvar_q = self._posterior(context, coeffs)
+
+        z = _reparameterise(mu_q, logvar_q, sample=sample)
+        coeff_pred = self._decode(z, context)
+        return coeff_pred, EncoderOutput(
+            mu_q=mu_q, logvar_q=logvar_q, mu_p=mu_p, logvar_p=logvar_p, z=z
+        )
+
+    @torch.no_grad()
+    def sample(
         self,
-        kinematics: torch.Tensor,
+        trajectory: Tensor,
+        n_samples: int = 8,
         *,
-        n_samples: int = 1,
-    ) -> torch.Tensor:
-        """Draw ``n_samples`` candidate coefficient vectors per input.
+        deterministic_mean: bool = False,
+    ) -> Tensor:
+        """Draw ``n_samples`` coefficient vectors from the prior conditioned on c.
 
-        Each draw uses an independent ``z ~ q(z | kinematics)``. The
-        kinematic summary is computed once per input and reused for every
-        sample.
-
-        Returns
-        -------
-        torch.Tensor
-            Shape ``(B, n_samples, n_joints * 7)``.
+        Returns a ``(B, n_samples, coefficient_dim)`` float32 tensor in
+        physical units (already bounded by ``COEFFICIENT_LETTER_BOUNDS``).
+        Set ``deterministic_mean=True`` to skip the eps draw and return the
+        prior mean decoded; useful for unit tests / regression locks.
         """
-        if kinematics.dim() != 3:
-            raise ValueError(f"kinematics must be 3D; got {tuple(kinematics.shape)}")
-        batch_size = kinematics.shape[0]
-        context = self._summarize(kinematics)
-        mu, log_var = self._split_posterior(context)
-        std = torch.exp(0.5 * log_var)
+        if n_samples < 1:
+            raise ValueError(f"n_samples must be >= 1, got {n_samples}")
+        self._validate_trajectory(trajectory)
+        context = self._encode_context(trajectory)
+        mu_p, logvar_p = self._prior(context)
+        std = torch.exp(0.5 * logvar_p)
 
-        # Tile once across the sample dim so we issue a single decoder call
-        # rather than a Python loop. Shapes: (B, S, latent_dim) and
-        # (B, S, encoder_dim).
-        mu_e = mu.unsqueeze(1).expand(batch_size, n_samples, mu.shape[-1])
+        batch = trajectory.shape[0]
+        latent_dim = mu_p.shape[-1]
+        mu_e = mu_p.unsqueeze(1).expand(batch, n_samples, latent_dim)
         std_e = std.unsqueeze(1).expand_as(mu_e)
-        eps = torch.randn_like(mu_e)
-        z = mu_e + std_e * eps
-        ctx_e = context.unsqueeze(1).expand(batch_size, n_samples, context.shape[-1])
+        z = mu_e if deterministic_mean else mu_e + std_e * torch.randn_like(mu_e)
 
-        flat_z = z.reshape(batch_size * n_samples, -1)
-        flat_ctx = ctx_e.reshape(batch_size * n_samples, -1)
-        flat_out = self.decoder_net(torch.cat([flat_z, flat_ctx], dim=-1))
-        return flat_out.reshape(batch_size, n_samples, self._output_dim)
+        ctx_e = context.unsqueeze(1).expand(batch, n_samples, context.shape[-1])
+        flat_z = z.reshape(batch * n_samples, latent_dim)
+        flat_ctx = ctx_e.reshape(batch * n_samples, context.shape[-1])
+        decoded = self._decode(flat_z, flat_ctx)
+        return decoded.reshape(batch, n_samples, self.cfg.coefficient_dim)
+
+    # ---------------- (de)serialisation ----------------
+
+    def state_payload(self) -> dict:
+        """Return a checkpoint-ready dict bundling weights and config."""
+        return {
+            "schema_version": self.SCHEMA_VERSION,
+            "config": _config_to_dict(self.cfg),
+            "state_dict": self.state_dict(),
+        }
+
+    @classmethod
+    def from_checkpoint(
+        cls, path: str | Path, *, map_location: str | torch.device | None = None
+    ) -> SwingInverseCVAE:
+        """Re-instantiate a model from a payload produced by ``state_payload``.
+
+        Raises:
+            FileNotFoundError: if ``path`` does not exist.
+            ValueError: if the payload is missing keys or has an
+                incompatible schema version.
+        """
+        ckpt_path = Path(path)
+        if not ckpt_path.exists():
+            raise FileNotFoundError(f"checkpoint not found: {ckpt_path}")
+        # Trust-flag is required on torch>=2.6 default; checkpoints are local.
+        payload = torch.load(ckpt_path, map_location=map_location, weights_only=False)
+        if not isinstance(payload, dict) or "state_dict" not in payload:
+            raise ValueError(
+                f"checkpoint at {ckpt_path} is not a SwingInverseCVAE payload"
+            )
+        cfg_dict = payload.get("config")
+        if cfg_dict is None:
+            raise ValueError("checkpoint missing 'config' entry")
+        cfg = _config_from_dict(cfg_dict)
+        model = cls(cfg)
+        model.load_state_dict(payload["state_dict"])
+        return model
+
+
+def _config_to_dict(cfg: CVAEConfig) -> dict:
+    return {
+        "n_joints": cfg.n_joints,
+        "coefficients_per_joint": cfg.coefficients_per_joint,
+        "trajectory_channels": cfg.trajectory_channels,
+        "latent_dim": cfg.latent_dim,
+        "encoder_channels": list(cfg.encoder_channels),
+        "encoder_kernel": cfg.encoder_kernel,
+        "encoder_stride": cfg.encoder_stride,
+        "decoder_hidden": cfg.decoder_hidden,
+        "coeff_proj_dim": cfg.coeff_proj_dim,
+        "dropout": cfg.dropout,
+    }
+
+
+def _config_from_dict(d: dict) -> CVAEConfig:
+    return CVAEConfig(
+        n_joints=int(d["n_joints"]),
+        coefficients_per_joint=int(d["coefficients_per_joint"]),
+        trajectory_channels=int(d["trajectory_channels"]),
+        latent_dim=int(d["latent_dim"]),
+        encoder_channels=tuple(int(x) for x in d["encoder_channels"]),
+        encoder_kernel=int(d["encoder_kernel"]),
+        encoder_stride=int(d["encoder_stride"]),
+        decoder_hidden=int(d["decoder_hidden"]),
+        coeff_proj_dim=int(d["coeff_proj_dim"]),
+        dropout=float(d["dropout"]),
+    )
+
+
+def parameter_count(model: nn.Module) -> int:
+    """Sum of trainable parameter counts. Convenience for tests / reports."""
+    return int(sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+
+def to_numpy(t: Tensor) -> np.ndarray:
+    """Detach + CPU + numpy. Helper used by the predict surface."""
+    return t.detach().cpu().numpy()

@@ -1,59 +1,64 @@
-"""Option-3 inverse CVAE: kinematics -> torque coefficients.
+"""Option-3 inverse cVAE: trajectory -> torque-coefficient posterior.
 
-Public API:
-    CVAEConfig          -- frozen dataclass of architectural hyperparameters.
-    EncoderOutput       -- frozen dataclass holding posterior (mu, log_var, z).
-    SwingInverseCVAE    -- the model class (encoder + decoder + reparam).
-    TrainInverseConfig  -- training-loop hyperparameters (#033).
-    TrainedInverseCVAE  -- canonical handle returned by :func:`train_inverse_cvae`.
-    train_inverse_cvae  -- ELBO + work-regularised training loop with KL anneal.
-    InverseFitResult    -- result of a rejection-sampling inference call.
-    ValidationReport    -- single-sample round-trip validation summary.
-    predict_coefficients -- sample-and-validate inference (#034).
-    round_trip_validate  -- helper for round-trip RMSE checks.
-
-See ``src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/
-option3_inverse_nn/INTERFACES.md`` for the full design contract.
+Public API (per GH issue #4076):
+    SwingInverseCVAE          -- model class (1D-conv encoder + Gaussian heads).
+    CVAEConfig                -- frozen architectural config dataclass.
+    EncoderOutput             -- posterior + prior parameter bundle.
+    kl_divergence             -- closed-form KL between diagonal Gaussians.
+    train_inverse_cvae        -- training loop, returns TrainingResult.
+    TrainingConfig            -- training hyperparameter dataclass.
+    TrainingResult            -- frozen outcome dataclass.
+    EpochMetrics              -- per-epoch loss summary.
+    predict_coefficients      -- sample N coefficient vectors for one target.
+    predict_coefficients_from_checkpoint -- load + sample one-shot.
+    load_inverse_cvae         -- restore a SwingInverseCVAE from a checkpoint.
+    CoefficientPredictions    -- frozen predict result.
 """
 
-from ._validate import ValidationReport, round_trip_validate
-from .cvae import CVAEConfig, EncoderOutput, SwingInverseCVAE
-from .diagnostics import (
-    CoverageMap,
-    CoverageTrial,
-    DiversityReport,
-    LatentProjection,
-    dataset_coverage_map,
-    latent_projection,
-    sample_diversity,
+from .cvae import (
+    COEFFICIENT_LETTER_BOUNDS,
+    DEFAULT_COEFFICIENT_DIM,
+    DEFAULT_LATENT_DIM,
+    DEFAULT_N_JOINTS,
+    DEFAULT_TRAJECTORY_CHANNELS,
+    CVAEConfig,
+    EncoderOutput,
+    SwingInverseCVAE,
+    build_coefficient_bound_vector,
+    kl_divergence,
+    parameter_count,
 )
-from .predict import InverseFitResult, predict_coefficients
-from .train import TrainedInverseCVAE, TrainInverseConfig, train_inverse_cvae
-from .train_option3_cvae import (
-    Option3TrainConfig,
-    Option3TrainingResult,
-    train_option3_inverse_cvae,
+from .predict import (
+    CoefficientPredictions,
+    load_inverse_cvae,
+    predict_coefficients,
+    predict_coefficients_from_checkpoint,
+)
+from .training import (
+    EpochMetrics,
+    TrainingConfig,
+    TrainingResult,
+    train_inverse_cvae,
 )
 
 __all__ = [
+    "COEFFICIENT_LETTER_BOUNDS",
     "CVAEConfig",
-    "CoverageMap",
-    "CoverageTrial",
-    "DiversityReport",
+    "CoefficientPredictions",
+    "DEFAULT_COEFFICIENT_DIM",
+    "DEFAULT_LATENT_DIM",
+    "DEFAULT_N_JOINTS",
+    "DEFAULT_TRAJECTORY_CHANNELS",
     "EncoderOutput",
-    "InverseFitResult",
-    "LatentProjection",
-    "Option3TrainConfig",
-    "Option3TrainingResult",
+    "EpochMetrics",
     "SwingInverseCVAE",
-    "TrainInverseConfig",
-    "TrainedInverseCVAE",
-    "ValidationReport",
-    "dataset_coverage_map",
-    "latent_projection",
+    "TrainingConfig",
+    "TrainingResult",
+    "build_coefficient_bound_vector",
+    "kl_divergence",
+    "load_inverse_cvae",
+    "parameter_count",
     "predict_coefficients",
-    "round_trip_validate",
-    "sample_diversity",
+    "predict_coefficients_from_checkpoint",
     "train_inverse_cvae",
-    "train_option3_inverse_cvae",
 ]
