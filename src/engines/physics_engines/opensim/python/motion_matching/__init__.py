@@ -22,6 +22,8 @@ Public surface (lazily imported to keep ``import opensim`` optional):
 
 from __future__ import annotations
 
+import logging
+
 from src.engines.physics_engines.opensim.python.motion_matching.coord_map import (
     OPENSIM_COORD_ORDER,
     OPENSIM_NEUTRAL_POSE,
@@ -59,6 +61,9 @@ from src.engines.physics_engines.opensim.python.motion_matching.simulate import 
     evaluate_polynomial_torque,
     simulate_with_coefficients,
 )
+from src.engines.physics_engines.opensim.python.motion_matching.provider import (
+    OpenSimFitSwingProvider,
+)
 from src.engines.physics_engines.opensim.python.motion_matching.synthesize import (
     SynthOptions,
     synthesize_target_from_coefficients,
@@ -76,6 +81,7 @@ __all__ = [
     "OPENSIM_TO_SIMSCAPE",
     "POLY_DEGREE",
     "SIMSCAPE_COORD_ORDER",
+    "OpenSimFitSwingProvider",
     "SimOptions",
     "SimOut",
     "SynthOptions",
@@ -96,3 +102,43 @@ __all__ = [
     "to_simscape",
     "viz",
 ]
+
+
+# ---------------------------------------------------------------------------
+# Auto-register the OpenSim provider at import time (issue #4708).
+# ---------------------------------------------------------------------------
+# The cross-engine matcher (issue #4513) discovers engines by importing
+# ``src.engines.physics_engines.<engine>.python.motion_matching`` and
+# expecting the module to have called ``register_provider`` as a side
+# effect. We register against both the canonical Protocol-based registry
+# (``provider``) and the engine-agnostic surface (``provider_registry``)
+# so that downstream code using either lookup path sees the OpenSim
+# entry. Each call is idempotent on repeat imports.
+#
+# The try/except blocks ensure that callers without an OpenSim wheel
+# (or with partial-rollout shared modules) can still ``import`` this
+# package without crashing -- the registration silently no-ops if the
+# canonical registry surface is unavailable.
+try:
+    from src.shared.python.motion_matching.provider import (
+        register_provider as _register_canonical,
+    )
+except ImportError:  # pragma: no cover - defensive
+    pass
+else:
+    try:
+        _register_canonical(OpenSimFitSwingProvider())
+    except Exception:  # pragma: no cover - defensive idempotency
+        logging.getLogger(__name__).debug(
+            "OpenSimFitSwingProvider canonical registration skipped",
+            exc_info=True,
+        )
+
+try:
+    from src.shared.python.motion_matching.provider_registry import (
+        register_provider as _register_legacy,
+    )
+except ImportError:  # pragma: no cover - defensive
+    pass
+else:
+    _register_legacy(OpenSimFitSwingProvider())
