@@ -23,8 +23,6 @@ def load_model(
 ) -> ParsedModel | None:
     if not (model_id is not None):
         raise ValueError("model_id must be provided")
-    if not (model_id is not None):
-        raise ValueError("model_id must be provided")
     entry = entries.get(model_id)
     if not entry:
         logger.warning(f"Model not found: {model_id}")
@@ -51,8 +49,6 @@ def load_model(
 def _load_mjcf(path: Path, read_only: bool = False) -> ParsedModel:
     if not (path is not None):
         raise ValueError("path must be provided")
-    if not (path is not None):
-        raise ValueError("path must be provided")
     import defusedxml.ElementTree as DefusedET
     from model_generation.converters.mjcf_converter import MJCFConverter
 
@@ -71,8 +67,6 @@ def download_model(
     config: LibraryConfig,
     entries: dict[str, ModelEntry],
 ) -> bool:
-    if not (entry is not None):
-        raise ValueError("entry must be provided")
     if not (entry is not None):
         raise ValueError("entry must be provided")
     if not entry.source_url:

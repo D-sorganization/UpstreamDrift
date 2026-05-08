@@ -231,9 +231,12 @@ class TestSMPLXGenerate:
     def test_generate_produces_stl_files(
         self, mock_trimesh, mock_smplx, tmp_path: Path
     ) -> None:
-        """Verify that generate produces per-segment STL files."""
-        import torch  # noqa: F401
+        """Verify that generate produces per-segment STL files.
 
+        Does NOT require torch — the production code in _mesh_smplx.py has
+        a numpy fallback when torch is unavailable, and this test exercises
+        that path. See issue #4543.
+        """
         mock_model = self._mock_smplx_output()
         mock_smplx.create.return_value = mock_model
 

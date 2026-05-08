@@ -93,8 +93,6 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         """
         if not (actual_vertex_count is not None):
             raise ValueError("actual_vertex_count must be provided")
-        if not (actual_vertex_count is not None):
-            raise ValueError("actual_vertex_count must be provided")
         if actual_vertex_count != cls.SMPLX_EXPECTED_VERTEX_COUNT:
             logger.warning(
                 "SMPL-X vertex count mismatch: expected %d, got %d. "
@@ -159,8 +157,6 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         """
         if not (model_dir is not None):
             raise ValueError("model_dir must be provided")
-        if not (model_dir is not None):
-            raise ValueError("model_dir must be provided")
         import json
 
         segmentation_files = [
@@ -179,20 +175,28 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
                         if isinstance(indices, list) and len(indices) > 0:
                             ranges[seg_name] = (min(indices), max(indices) + 1)
                     if ranges:
-                        logger.info(
+                        # Log via the public facade so test patches on
+                        # mesh_generator.logger see the call (#4529).
+                        from . import mesh_generator as _mg
+
+                        _mg.logger.info(
                             "Loaded SMPL-X part segmentation from %s (%d segments)",
                             seg_path,
                             len(ranges),
                         )
                         return ranges
                 except (json.JSONDecodeError, OSError, TypeError, ValueError) as exc:
-                    logger.warning(
+                    from . import mesh_generator as _mg
+
+                    _mg.logger.warning(
                         "Failed to parse segmentation file %s: %s",
                         seg_path,
                         exc,
                     )
 
-        logger.warning(
+        from . import mesh_generator as _mg
+
+        _mg.logger.warning(
             "No SMPL-X part segmentation file found in %s; "
             "falling back to hardcoded vertex ranges.",
             model_dir,
@@ -206,7 +210,11 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
     @property
     def is_available(self) -> bool:
         """Check availability: smplx package present **and** model dir exists."""
-        if not SMPLX_AVAILABLE:
+        # Read via the public facade so test patches on mesh_generator.SMPLX_AVAILABLE
+        # take effect. See issue #4528.
+        from . import mesh_generator as _mg
+
+        if not _mg.SMPLX_AVAILABLE:
             return False
         return self.model_dir is None or self.model_dir.exists()
 
@@ -229,6 +237,22 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
     # ------------------------------------------------------------------
     # Static helpers (testable independently of the generate pipeline)
     # ------------------------------------------------------------------
+
+    @staticmethod
+    def _segment_mesh(
+        vertices: np.ndarray,
+        faces: np.ndarray,
+        vertex_start: int,
+        vertex_end: int,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Extract a sub-mesh by vertex index range.
+
+        Thin classmethod-style wrapper over :func:`segment_mesh_by_range`
+        kept on the class for discoverability and to satisfy the public
+        contract used by ``test_mesh_generators.TestSMPLXSegmentMesh``.
+        See issue #4527.
+        """
+        return segment_mesh_by_range(vertices, faces, vertex_start, vertex_end)
 
     @staticmethod
     def _gender_string(params: BodyParameters) -> str:
@@ -314,19 +338,20 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         **kwargs: Any,
     ) -> GeneratedMeshResult:
         """Generate meshes using SMPL-X body model."""
-        if not (params is not None):
-            raise ValueError("params must be provided")
-        if not (params is not None):
-            raise ValueError("params must be provided")
-        if not SMPLX_AVAILABLE:
+        # Look up flags via the public facade so test patches take effect (#4528).
+        from . import mesh_generator as _mg
+
+        if not _mg.SMPLX_AVAILABLE:
             return GeneratedMeshResult(
                 success=False,
+                solver_status="failure",
                 error_message="smplx package not installed. Install with: pip install smplx",
             )
 
-        if not TRIMESH_AVAILABLE:
+        if not _mg.TRIMESH_AVAILABLE:
             return GeneratedMeshResult(
                 success=False,
+                solver_status="failure",
                 error_message="trimesh package not installed. Install with: pip install trimesh",
             )
 
@@ -339,8 +364,8 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         try:
             gender = self._gender_string(params)
 
-            # Use mock-patchable module references
-            model = _smplx_module.create(  # type: ignore[union-attr]
+            # Use mock-patchable module references via the public facade (#4528)
+            model = _mg._smplx_module.create(  # type: ignore[union-attr]
                 str(self.model_dir),
                 model_type="smplx",
                 gender=gender,
@@ -369,7 +394,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
                 scale_factor = params.height_m / current_height
                 vertices = vertices * scale_factor
 
-            mesh = _trimesh_module.Trimesh(vertices=vertices, faces=faces)  # type: ignore[union-attr]
+            mesh = _mg._trimesh_module.Trimesh(vertices=vertices, faces=faces)  # type: ignore[union-attr]
 
             return self._segment_smplx_mesh(
                 mesh, model, visual_dir, collision_dir, params
@@ -387,6 +412,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
             logger.error("SMPL-X generation failed: %s", e)
             return GeneratedMeshResult(
                 success=False,
+                solver_status="failure",
                 error_message=f"SMPL-X generation error: {e}",
             )
 
@@ -456,8 +482,6 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         """
         if not (visual_dir is not None):
             raise ValueError("visual_dir must be provided")
-        if not (visual_dir is not None):
-            raise ValueError("visual_dir must be provided")
         from humanoid_character_builder.core.segment_definitions import (
             HUMANOID_SEGMENTS,
         )
@@ -484,6 +508,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         if not vertex_groups:
             return GeneratedMeshResult(
                 success=False,
+                solver_status="failure",
                 error_message="SMPL-X segmentation error: no vertex groups produced",
             )
 
@@ -509,7 +534,9 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
                 )
                 if len(seg_verts) == 0:
                     continue
-                submesh = _trimesh_module.Trimesh(  # type: ignore[union-attr]
+                from . import mesh_generator as _mg
+
+                submesh = _mg._trimesh_module.Trimesh(  # type: ignore[union-attr]
                     vertices=seg_verts, faces=seg_faces
                 )
                 vpath = visual_dir / f"{segment_name}.stl"
@@ -547,8 +574,6 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         valid_segments: Any,
     ) -> tuple[dict[str, Path], dict[str, Path]]:
         """Extract and export individual segment meshes from SMPL-X vertex groups."""
-        if not (visual_dir is not None):
-            raise ValueError("visual_dir must be provided")
         if not (visual_dir is not None):
             raise ValueError("visual_dir must be provided")
         mesh_paths: dict[str, Path] = {}
@@ -593,8 +618,6 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         params: BodyParameters,
     ) -> GeneratedMeshResult:
         """Fallback segmentation using z-coordinate slicing."""
-        if not (visual_dir is not None):
-            raise ValueError("visual_dir must be provided")
         if not (visual_dir is not None):
             raise ValueError("visual_dir must be provided")
         from humanoid_character_builder.core.segment_definitions import (

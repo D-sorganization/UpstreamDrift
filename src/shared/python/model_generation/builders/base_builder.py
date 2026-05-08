@@ -25,6 +25,12 @@ class BuildResult:
     # Whether build was successful
     success: bool
 
+    # Canonical status string ("success", "failure", "partial").
+    # Mirrors motion_matching.fit_result.CanonicalFitResult.solver_status
+    # so the URDF subsystem speaks the same vocabulary as the rest of
+    # the platform. See issue #4522.
+    solver_status: str = "success"
+
     # Generated URDF XML string
     urdf_xml: str | None = None
 
@@ -46,10 +52,13 @@ class BuildResult:
     # Additional metadata
     metadata: dict[str, Any] = field(default_factory=dict)
 
+    def __post_init__(self) -> None:
+        # Derive solver_status from success if caller did not set it.
+        if not self.success and self.solver_status == "success":
+            self.solver_status = "failure"
+
     def get_link(self, name: str) -> Link | None:
         """Get a link by name."""
-        if not (name is not None):
-            raise ValueError("name must be provided")
         if not (name is not None):
             raise ValueError("name must be provided")
         for link in self.links:
@@ -59,8 +68,6 @@ class BuildResult:
 
     def get_joint(self, name: str) -> Joint | None:
         """Get a joint by name."""
-        if not (name is not None):
-            raise ValueError("name must be provided")
         if not (name is not None):
             raise ValueError("name must be provided")
         for joint in self.joints:
@@ -92,6 +99,7 @@ class BuildResult:
         """Convert to dictionary representation."""
         return {
             "success": self.success,
+            "solver_status": self.solver_status,
             "link_count": len(self.links),
             "joint_count": len(self.joints),
             "total_mass": self.get_total_mass(),
@@ -116,8 +124,6 @@ class BaseURDFBuilder(ABC):
         Args:
             robot_name: Name for the robot element
         """
-        if not (robot_name is not None):
-            raise ValueError("robot_name must be provided")
         if not (robot_name is not None):
             raise ValueError("robot_name must be provided")
         self._robot_name = robot_name
@@ -275,8 +281,6 @@ class BaseURDFBuilder(ABC):
         """
         if not (pretty_print is not None):
             raise ValueError("pretty_print must be provided")
-        if not (pretty_print is not None):
-            raise ValueError("pretty_print must be provided")
         from model_generation.builders.urdf_writer import URDFWriter
 
         writer = URDFWriter(pretty_print=pretty_print)
@@ -295,8 +299,6 @@ class BaseURDFBuilder(ABC):
         Returns:
             Path to saved file
         """
-        if not (path is not None):
-            raise ValueError("path must be provided")
         if not (path is not None):
             raise ValueError("path must be provided")
         path = Path(path)

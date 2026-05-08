@@ -13,8 +13,6 @@ logger = logging.getLogger(__name__)
 def primitives_would_fit(mesh: Any, max_primitives: int) -> bool:
     if not (max_primitives is not None):
         raise ValueError("max_primitives must be provided")
-    if not (max_primitives is not None):
-        raise ValueError("max_primitives must be provided")
     try:
         extents = mesh.extents
         aspect_ratios = extents / extents.min()
@@ -153,8 +151,6 @@ def fit_cylinder(mesh: Any) -> PrimitiveFit:
 def primitive_to_mesh(fit: PrimitiveFit) -> Any:
     if not (fit is not None):
         raise ValueError("fit must be provided")
-    if not (fit is not None):
-        raise ValueError("fit must be provided")
     import trimesh
 
     if fit.primitive_type == "box":
@@ -181,8 +177,6 @@ def primitive_to_mesh(fit: PrimitiveFit) -> Any:
 
 
 def generate_primitives(mesh: Any, max_primitives: int) -> CollisionGeometryResult:
-    if not (max_primitives is not None):
-        raise ValueError("max_primitives must be provided")
     if not (max_primitives is not None):
         raise ValueError("max_primitives must be provided")
     primitives = []

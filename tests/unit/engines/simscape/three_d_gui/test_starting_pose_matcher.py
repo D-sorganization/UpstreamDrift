@@ -627,11 +627,13 @@ class TestUISmoke:
         assert matcher.event_label_preset == "Custom"
 
     def test_phase_window_switch(self, matcher):
-        matcher._on_phase_changed("Backswing (A → T)")
-        assert matcher.phase_window == "Backswing (A → T)"
-        assert matcher.manual_range_widget.isVisible() is False
-        matcher._on_phase_changed("Manual range")
-        assert matcher.manual_range_widget.isVisible() is True
+        matcher.phase_combo.setCurrentIndex(matcher.phase_combo.findData("backswing"))
+        matcher._on_phase_changed(matcher.phase_combo.currentIndex())
+        assert matcher.phase_window == "backswing"
+        assert matcher.manual_range_widget.isHidden() is True
+        matcher.phase_combo.setCurrentIndex(matcher.phase_combo.findData("manual"))
+        matcher._on_phase_changed(matcher.phase_combo.currentIndex())
+        assert matcher.manual_range_widget.isHidden() is False
 
     def test_lock_xy_default(self, matcher):
         assert matcher.lock_xy_rotation is True
@@ -661,7 +663,8 @@ class TestUISmoke:
         matcher.s_tx.set_value(0.123)
         matcher.s_rz.set_value(-45.5)
         matcher.s_scale.set_value(1.10)
-        matcher._on_phase_changed("Downswing (T → I)")
+        matcher.phase_combo.setCurrentIndex(matcher.phase_combo.findData("downswing"))
+        matcher._on_phase_changed(matcher.phase_combo.currentIndex())
         matcher._event_label_edits["A"].setText("MySetup")
         matcher._on_event_label_edited("A")
 
@@ -675,7 +678,7 @@ class TestUISmoke:
             assert abs(win2.s_tx.value() - 0.123) < 1e-3
             assert abs(win2.s_rz.value() - (-45.5)) < 1e-3
             assert abs(win2.s_scale.value() - 1.10) < 1e-3
-            assert win2.phase_window == "Downswing (T → I)"
+            assert win2.phase_window == "downswing"
             assert win2.event_labels["A"] == "MySetup"
         finally:
             win2.close()
@@ -684,6 +687,7 @@ class TestUISmoke:
         if not _WIFFLE_XLSX.exists():
             pytest.skip("xlsx fixture unavailable")
         matcher._load_xlsx(str(_WIFFLE_XLSX))
+        matcher.spin_frame.setValue(100)  # Start away from edges
         before = matcher.current_frame
         matcher._step_frame(+5)
         assert matcher.current_frame == before + 5

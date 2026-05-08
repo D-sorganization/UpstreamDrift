@@ -180,8 +180,6 @@ def urdf_to_spatial_inertia(
     """
     if not (mass is not None):
         raise ValueError("mass must be provided")
-    if not (mass is not None):
-        raise ValueError("mass must be provided")
     I_com = np.array(
         [
             [ixx, ixy, ixz],

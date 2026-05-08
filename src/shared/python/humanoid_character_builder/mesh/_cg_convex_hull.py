@@ -41,8 +41,6 @@ def generate_convex_hull(mesh: Any) -> CollisionGeometryResult:
 def _vhacd_pybullet(mesh: Any, params: VHACDParameters) -> list[Any]:
     if not (params is not None):
         raise ValueError("params must be provided")
-    if not (params is not None):
-        raise ValueError("params must be provided")
     import pybullet as p
     import trimesh
 
@@ -72,8 +70,6 @@ def generate_vhacd(
     max_hulls: int,
     vhacd_params: VHACDParameters | None,
 ) -> CollisionGeometryResult:
-    if not (max_hulls is not None):
-        raise ValueError("max_hulls must be provided")
     if not (max_hulls is not None):
         raise ValueError("max_hulls must be provided")
     import trimesh

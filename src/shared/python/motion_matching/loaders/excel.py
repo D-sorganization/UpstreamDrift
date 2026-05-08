@@ -68,9 +68,9 @@ def _import_mocap_loader():
     """
     if "mocap_data_loader" in sys.modules:
         return sys.modules["mocap_data_loader"]
-    cwd = Path.cwd()
-    candidates = [cwd / _MOCAP_LOADER_RELATIVE]
-    for parent in cwd.parents:
+    here = Path(__file__).resolve().parent
+    candidates = [here / _MOCAP_LOADER_RELATIVE]
+    for parent in here.parents:
         candidates.append(parent / _MOCAP_LOADER_RELATIVE)
     for candidate in candidates:
         if candidate.is_file():
@@ -84,7 +84,7 @@ def _import_mocap_loader():
             spec.loader.exec_module(module)
             return module
     raise ImportError(
-        f"Could not locate mocap_data_loader.py (searched relative to {cwd})"
+        f"Could not locate mocap_data_loader.py (searched relative to {here})"
     )
 
 
@@ -224,8 +224,13 @@ def load_club_target_excel(
 
     raw_time_native = raw["time"].to_numpy(dtype=np.float64)
     raw_time = raw_time_native - float(raw_time_native[0])
-    raw_butt = raw[["mid_X", "mid_Y", "mid_Z"]].to_numpy(dtype=np.float64)
-    raw_clubhead = raw[["club_X", "club_Y", "club_Z"]].to_numpy(dtype=np.float64)
+    # mocap_data_loader incorrectly assumes inches (0.0254), but Wiffle data is in cm.
+    # We undo the inches conversion and apply the correct cm -> m conversion (0.01).
+    correction = 0.01 / 0.0254
+    raw_butt = raw[["mid_X", "mid_Y", "mid_Z"]].to_numpy(dtype=np.float64) * correction
+    raw_clubhead = (
+        raw[["club_X", "club_Y", "club_Z"]].to_numpy(dtype=np.float64) * correction
+    )
     rotmats = np.empty((raw.shape[0], 3, 3), dtype=np.float64)
     for i in range(raw.shape[0]):
         rotmats[i] = _frame_to_quat(raw.iloc[i])

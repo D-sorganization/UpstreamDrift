@@ -1,0 +1,77 @@
+[
+  {
+    "number": 4539,
+    "title": "[tests] Inertia validation: mass conservation + positive-definite tensors",
+    "labels": ["tests", "urdf", "physics", "priority:high"]
+  },
+  {
+    "number": 4540,
+    "title": "[tests] Joint limit anatomical sanity tests",
+    "labels": ["tests", "urdf", "humanoid", "priority:medium"]
+  },
+  {
+    "number": 4541,
+    "title": "[tests] Self-collision pair generation for produced URDFs",
+    "labels": ["tests", "urdf", "humanoid", "priority:low"]
+  },
+  {
+    "number": 4542,
+    "title": "[tests] Cross-engine FK equivalence (5 mm RMSE) for character builder URDFs",
+    "labels": ["tests", "urdf", "cross-engine", "parity", "priority:high"]
+  },
+  {
+    "number": 4543,
+    "title": "[tests] Mesh inertia tests blocked by torch DLL \u2014 torch-free fallback",
+    "labels": ["tests", "character-builder", "mesh", "priority:low"]
+  },
+  {
+    "number": 4544,
+    "title": "[audit] Frankenstein editor (text_editor) \u2014 feature inventory + test coverage",
+    "labels": ["audit", "model-generation", "tests", "priority:medium"]
+  },
+  {
+    "number": 4545,
+    "title": "[audit] Simscape converter \u2014 feature inventory + integration test",
+    "labels": ["audit", "model-generation", "tests", "priority:medium"]
+  },
+  {
+    "number": 4546,
+    "title": "[audit] Character preset library \u2014 expand presets, document",
+    "labels": ["audit", "character-builder", "documentation", "priority:low"]
+  },
+  {
+    "number": 4547,
+    "title": "[audit] Model explorer GUI (src/tools/model_explorer) \u2014 manual + automated smoke test",
+    "labels": ["audit", "gui", "tests", "priority:medium"]
+  },
+  {
+    "number": 4548,
+    "title": "[audit] model_generation CLI \u2014 smoke test all subcommands",
+    "labels": ["audit", "cli", "model-generation", "tests", "priority:medium"]
+  },
+  {
+    "number": 4549,
+    "title": "[audit] model_generation REST API \u2014 smoke test endpoints",
+    "labels": ["audit", "api", "model-generation", "tests", "priority:medium"]
+  },
+  {
+    "number": 4550,
+    "title": "[audit] MakeHuman + SMPLX mesh backends \u2014 end-to-end with real assets",
+    "labels": ["audit", "character-builder", "mesh", "priority:medium"]
+  },
+  {
+    "number": 4551,
+    "title": "[docs] URDF subsystem readiness report (replace omnibus PRODUCTION_READINESS_REPORT for URDF)",
+    "labels": ["documentation", "urdf", "process", "priority:medium"]
+  },
+  {
+    "number": 4552,
+    "title": "[docs] URDF user guide / quickstart",
+    "labels": ["documentation", "urdf", "character-builder", "priority:medium"]
+  },
+  {
+    "number": 4553,
+    "title": "[ci] Subsystem-status matrix \u2014 fail CI if production subsystems have failing tests",
+    "labels": ["ci", "governance", "process", "priority:medium"]
+  }
+]

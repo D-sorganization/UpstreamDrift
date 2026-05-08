@@ -81,8 +81,6 @@ class ModelEntry:
     def from_dict(cls, data: dict[str, Any]) -> ModelEntry:
         if not (data is not None):
             raise ValueError("data must be provided")
-        if not (data is not None):
-            raise ValueError("data must be provided")
         fmt_str = data.get("model_format", "urdf")
         try:
             model_format = ModelFormat(fmt_str)

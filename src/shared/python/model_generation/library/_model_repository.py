@@ -75,8 +75,6 @@ def refresh_repository(
 ) -> list[ModelEntry]:
     if not (repo_name is not None):
         raise ValueError("repo_name must be provided")
-    if not (repo_name is not None):
-        raise ValueError("repo_name must be provided")
     if repo_name in KNOWN_REPOSITORIES:
         repo_config = KNOWN_REPOSITORIES[repo_name]
     elif repo_name in repositories:
@@ -101,8 +99,6 @@ def _fetch_repository_models(
 ) -> list[ModelEntry]:
     if not (repo_name is not None):
         raise ValueError("repo_name must be provided")
-    if not (repo_name is not None):
-        raise ValueError("repo_name must be provided")
     models = []
 
     repo_type = config.get("type", "github")
@@ -119,8 +115,6 @@ def _fetch_github_models(  # noqa: C901
     repo_name: str,
     config: dict[str, Any],
 ) -> list[ModelEntry]:
-    if not (repo_name is not None):
-        raise ValueError("repo_name must be provided")
     if not (repo_name is not None):
         raise ValueError("repo_name must be provided")
     models: list[ModelEntry] = []
@@ -204,8 +198,6 @@ def _fetch_url_models(
     repo_name: str,
     config: dict[str, Any],
 ) -> list[ModelEntry]:
-    if not (repo_name is not None):
-        raise ValueError("repo_name must be provided")
     if not (repo_name is not None):
         raise ValueError("repo_name must be provided")
     models = []

@@ -136,8 +136,6 @@ class HumanoidURDFGenerator:
         """
         if not (params is not None):
             raise ValueError("params must be provided")
-        if not (params is not None):
-            raise ValueError("params must be provided")
         errors = params.validate()
         if errors:
             logger.warning(f"Parameter validation warnings: {errors}")
@@ -207,8 +205,6 @@ class HumanoidURDFGenerator:
         Returns:
             URDF XML string
         """
-        if not (params is not None):
-            raise ValueError("params must be provided")
         if not (params is not None):
             raise ValueError("params must be provided")
         self.build_model(params, mesh_dir)
@@ -458,8 +454,6 @@ def generate_humanoid_urdf(
     Returns:
         URDF XML string
     """
-    if not (params is not None):
-        raise ValueError("params must be provided")
     if not (params is not None):
         raise ValueError("params must be provided")
     generator = HumanoidURDFGenerator(config)

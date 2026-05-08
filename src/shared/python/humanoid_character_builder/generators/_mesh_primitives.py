@@ -44,11 +44,10 @@ class PrimitiveMeshGenerator(MeshGeneratorInterface):
         """Generate primitive meshes for body segments."""
         if not (params is not None):
             raise ValueError("params must be provided")
-        if not (params is not None):
-            raise ValueError("params must be provided")
         if not self.is_available:
             return GeneratedMeshResult(
                 success=False,
+                solver_status="failure",
                 error_message="trimesh not available for primitive mesh generation",
             )
 

@@ -271,3 +271,39 @@ class ModelLibrary:
 
     def __len__(self) -> int:
         return len(self._entries)
+
+    def _download_model(self, entry: ModelEntry) -> Path:
+        """Download a URL-sourced model into the cache.
+
+        Validates the source URL scheme before downloading so that
+        ``file://`` and other non-HTTPS schemes cannot be used to read
+        local files or bypass network controls (SSRF prevention).
+        See issue #4529.
+
+        Args:
+            entry: Model entry whose ``source_url`` should be downloaded.
+
+        Returns:
+            Path to the downloaded file in the cache directory.
+
+        Raises:
+            ValueError: If ``entry.source_url`` is missing or its scheme
+                is not in the allowed set (``https`` only).
+        """
+        import urllib.request
+
+        from src.shared.python.security.security_utils import validate_url_scheme
+
+        if not entry.source_url:
+            raise ValueError(f"ModelEntry {entry.id!r} has no source_url to download")
+
+        # Allow only https. Tests in test_security_fixes.py assert that
+        # file://, http://, ftp:// etc. raise before urlretrieve is called.
+        validate_url_scheme(entry.source_url, allowed_schemes=("https",))
+
+        cache_dir = self.config.cache_dir / entry.id
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        dest = cache_dir / Path(entry.source_url).name
+
+        urllib.request.urlretrieve(entry.source_url, dest)  # nosec B310 - scheme validated
+        return dest

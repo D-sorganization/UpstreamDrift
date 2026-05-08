@@ -77,6 +77,7 @@ class PrimitiveMeshGenerator(MeshGeneratorInterface):
         if not self.is_available:
             return GeneratedMeshResult(
                 success=False,
+                solver_status="failure",
                 error_message="trimesh not available for primitive mesh generation",
             )
 

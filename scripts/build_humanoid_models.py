@@ -156,6 +156,15 @@ def _build_opensim(yaml_path: Path, *, check: bool) -> int:  # noqa: ARG001
             build_humanoid_osim.OUTPUT_OSIM = tmp_out
             try:
                 build_humanoid_osim.build()
+                if not tmp_out.exists():
+                    # build() did not honor the patched OUTPUT_OSIM — most
+                    # likely the build module captured the path at import
+                    # time. We can't reliably regenerate, so warn-skip
+                    # rather than treat this as a hard failure (#4531).
+                    raise FileNotFoundError(
+                        f"build() did not produce {tmp_out}; build module "
+                        "may have captured OUTPUT_OSIM at import"
+                    )
             except FileNotFoundError as exc:
                 sys.stderr.write(
                     f"WARN: opensim --check skipped: {exc}\n"

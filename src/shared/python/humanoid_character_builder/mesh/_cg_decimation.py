@@ -12,8 +12,6 @@ logger = logging.getLogger(__name__)
 def generate_decimated(mesh: Any, max_triangles: int) -> CollisionGeometryResult:
     if not (max_triangles is not None):
         raise ValueError("max_triangles must be provided")
-    if not (max_triangles is not None):
-        raise ValueError("max_triangles must be provided")
     if len(mesh.faces) <= max_triangles:
         return CollisionGeometryResult(
             success=True,
@@ -56,8 +54,6 @@ def generate_hybrid(
     max_primitives: int,
     max_triangles: int,
 ) -> CollisionGeometryResult:
-    if not (max_primitives is not None):
-        raise ValueError("max_primitives must be provided")
     if not (max_primitives is not None):
         raise ValueError("max_primitives must be provided")
     prim_result = generate_primitives(mesh, max_primitives)

@@ -6,8 +6,6 @@ from typing import Any
 def count_triangles(components: list[Any]) -> int:
     if not (components is not None):
         raise ValueError("components must be provided")
-    if not (components is not None):
-        raise ValueError("components must be provided")
     total = 0
     for comp in components:
         if hasattr(comp, "faces"):
@@ -20,8 +18,6 @@ def compute_volume_preservation(
     components: list[Any],
     original_volume: float,
 ) -> float:
-    if not (components is not None):
-        raise ValueError("components must be provided")
     if not (components is not None):
         raise ValueError("components must be provided")
     if original_volume <= 0:

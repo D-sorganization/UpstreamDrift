@@ -87,6 +87,9 @@ class ConversionResult:
     """Result of SimScape to URDF conversion."""
 
     success: bool
+    # Canonical status string ("success", "failure", "partial").
+    # See issue #4522 for the unified BuildResult contract.
+    solver_status: str = "success"
     links: list[Link] = field(default_factory=list)
     joints: list[Joint] = field(default_factory=list)
     materials: dict[str, Material] = field(default_factory=dict)
@@ -95,6 +98,11 @@ class ConversionResult:
     warnings: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
     source_model: SimscapeModel | None = None
+
+    def __post_init__(self) -> None:
+        # Derive solver_status from success if caller did not set it.
+        if not self.success and self.solver_status == "success":
+            self.solver_status = "failure"
 
 
 class SimscapeToURDFConverter:

@@ -24,11 +24,12 @@ _TORCH_OK = _torch_available()
 
 #: Test names (node id substrings) that require a working torch install.
 #: We use node id matching since @patch wrappers obscure the inner co_names.
-_TORCH_DEPENDENT_TESTS: frozenset[str] = frozenset(
-    [
-        "test_generate_produces_stl_files",
-    ]
-)
+#:
+#: Empty as of issue #4543 — `test_generate_produces_stl_files` was migrated
+#: to exercise the numpy fallback path in `_mesh_smplx.py`, which removes
+#: the torch dependency. The bytecode-inspection check below catches any
+#: regression that re-introduces a `torch` reference.
+_TORCH_DEPENDENT_TESTS: frozenset[str] = frozenset()
 
 
 @pytest.fixture(autouse=True)

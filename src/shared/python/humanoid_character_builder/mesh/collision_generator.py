@@ -110,8 +110,6 @@ class CollisionGeometryGenerator:
     ) -> CollisionGeometryResult:
         if not (method is not None):
             raise ValueError("method must be provided")
-        if not (method is not None):
-            raise ValueError("method must be provided")
         if isinstance(method, str):
             method = SimplificationMethod[method.upper()]
         if isinstance(target_complexity, str):
@@ -211,8 +209,6 @@ class CollisionGeometryGenerator:
         max_primitives: int,
         max_triangles: int,
     ) -> SimplificationMethod:
-        if not (max_primitives is not None):
-            raise ValueError("max_primitives must be provided")
         if not (max_primitives is not None):
             raise ValueError("max_primitives must be provided")
         n_faces = len(mesh.faces) if hasattr(mesh, "faces") else 0

@@ -95,8 +95,6 @@ def create_editable_copy(
 ) -> ModelEntry | None:
     if not (model_id is not None):
         raise ValueError("model_id must be provided")
-    if not (model_id is not None):
-        raise ValueError("model_id must be provided")
     source_entry = entries.get(model_id)
     if not source_entry:
         return None
@@ -160,8 +158,6 @@ def remove_model(
     model_id: str,
     delete_files: bool = False,
 ) -> bool:
-    if not (model_id is not None):
-        raise ValueError("model_id must be provided")
     if not (model_id is not None):
         raise ValueError("model_id must be provided")
     entry = entries.get(model_id)

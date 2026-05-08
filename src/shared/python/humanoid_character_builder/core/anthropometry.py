@@ -75,8 +75,6 @@ class AnthropometryData:
         """
         if not (segment_name is not None):
             raise ValueError("segment_name must be provided")
-        if not (segment_name is not None):
-            raise ValueError("segment_name must be provided")
         male_data = self.male.get(segment_name)
         female_data = self.female.get(segment_name)
 
@@ -459,8 +457,6 @@ def get_segment_mass_ratio(segment_name: str, gender_factor: float = 0.5) -> flo
     """
     if not (segment_name is not None):
         raise ValueError("segment_name must be provided")
-    if not (segment_name is not None):
-        raise ValueError("segment_name must be provided")
     key = get_anthropometry_key(segment_name)
     data = DE_LEVA_DATA.get_segment_data(key, gender_factor)
     return data.mass_ratio
@@ -477,8 +473,6 @@ def get_segment_length_ratio(segment_name: str, gender_factor: float = 0.5) -> f
     Returns:
         Length ratio (0.0 - 1.0)
     """
-    if not (segment_name is not None):
-        raise ValueError("segment_name must be provided")
     if not (segment_name is not None):
         raise ValueError("segment_name must be provided")
     key = get_anthropometry_key(segment_name)
@@ -504,8 +498,6 @@ def estimate_segment_masses(
     Returns:
         Dict mapping segment name to mass in kg
     """
-    if not (total_mass_kg is not None):
-        raise ValueError("total_mass_kg must be provided")
     if not (total_mass_kg is not None):
         raise ValueError("total_mass_kg must be provided")
     masses = {}
@@ -545,8 +537,6 @@ def estimate_segment_dimensions(
         Dict mapping segment name to dimensions dict with
         'length', 'width', 'depth' keys
     """
-    if not (total_height_m is not None):
-        raise ValueError("total_height_m must be provided")
     if not (total_height_m is not None):
         raise ValueError("total_height_m must be provided")
     dimensions = {}
@@ -592,8 +582,6 @@ def estimate_segment_inertia_from_gyration(
     """
     if not (segment_name is not None):
         raise ValueError("segment_name must be provided")
-    if not (segment_name is not None):
-        raise ValueError("segment_name must be provided")
     key = get_anthropometry_key(segment_name)
     data = DE_LEVA_DATA.get_segment_data(key, gender_factor)
 
@@ -630,8 +618,6 @@ def get_com_location(
     Returns:
         (x, y, z) COM position in meters
     """
-    if not (segment_name is not None):
-        raise ValueError("segment_name must be provided")
     if not (segment_name is not None):
         raise ValueError("segment_name must be provided")
     key = get_anthropometry_key(segment_name)

@@ -31,6 +31,10 @@ class GeneratedMeshResult:
     # Whether generation was successful
     success: bool
 
+    # Canonical status string ("success", "failure", "partial").
+    # See issue #4522 for the unified BuildResult contract.
+    solver_status: str = "success"
+
     # Path to generated mesh files (segment name -> path)
     mesh_paths: dict[str, Path] = field(default_factory=dict)
 
@@ -48,6 +52,13 @@ class GeneratedMeshResult:
 
     # Additional metadata
     metadata: dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        # If caller passed success=False but didn't override solver_status,
+        # derive solver_status from success. Keeps backward compatibility
+        # with code that only sets success.
+        if not self.success and self.solver_status == "success":
+            self.solver_status = "failure"
 
 
 class MeshGeneratorInterface(ABC):

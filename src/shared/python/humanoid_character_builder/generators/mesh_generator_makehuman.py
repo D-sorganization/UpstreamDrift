@@ -103,6 +103,7 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
         if not self.is_available:
             return GeneratedMeshResult(
                 success=False,
+                solver_status="failure",
                 error_message="MakeHuman not found. Please install MakeHuman or provide path.",
             )
 
@@ -129,6 +130,7 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
             logger.warning("MakeHuman API generation failed: %s", e)
             return GeneratedMeshResult(
                 success=False,
+                solver_status="failure",
                 error_message=f"MakeHuman generation failed: {e}",
             )
 

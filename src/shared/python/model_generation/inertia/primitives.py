@@ -34,8 +34,6 @@ def box_inertia(
     """
     if not (mass is not None):
         raise ValueError("mass must be provided")
-    if not (mass is not None):
-        raise ValueError("mass must be provided")
     ixx = (mass / 12.0) * (size_y**2 + size_z**2)
     iyy = (mass / 12.0) * (size_x**2 + size_z**2)
     izz = (mass / 12.0) * (size_x**2 + size_y**2)
@@ -72,8 +70,6 @@ def cylinder_inertia(
         Dict with ixx, iyy, izz, ixy, ixz, iyz
     """
     # Moment of inertia about the cylinder axis
-    if not (mass is not None):
-        raise ValueError("mass must be provided")
     if not (mass is not None):
         raise ValueError("mass must be provided")
     i_axial = 0.5 * mass * radius**2
@@ -126,8 +122,6 @@ def sphere_inertia(mass: float, radius: float) -> dict[str, float]:
     """
     if not (mass is not None):
         raise ValueError("mass must be provided")
-    if not (mass is not None):
-        raise ValueError("mass must be provided")
     i = (2.0 / 5.0) * mass * radius**2
 
     return {
@@ -163,8 +157,6 @@ def capsule_inertia(
         Dict with ixx, iyy, izz, ixy, ixz, iyz
     """
     # Volume calculations
-    if not (mass is not None):
-        raise ValueError("mass must be provided")
     if not (mass is not None):
         raise ValueError("mass must be provided")
     v_cyl = math.pi * radius**2 * length
@@ -251,8 +243,6 @@ def ellipsoid_inertia(
     """
     if not (mass is not None):
         raise ValueError("mass must be provided")
-    if not (mass is not None):
-        raise ValueError("mass must be provided")
     ixx = (mass / 5.0) * (b**2 + c**2)
     iyy = (mass / 5.0) * (a**2 + c**2)
     izz = (mass / 5.0) * (a**2 + b**2)
@@ -288,8 +278,6 @@ def hollow_cylinder_inertia(
     Returns:
         Dict with ixx, iyy, izz, ixy, ixz, iyz
     """
-    if not (mass is not None):
-        raise ValueError("mass must be provided")
     if not (mass is not None):
         raise ValueError("mass must be provided")
     r1_sq = inner_radius**2
@@ -351,8 +339,6 @@ def cone_inertia(
     # Inertia about apex
     if not (mass is not None):
         raise ValueError("mass must be provided")
-    if not (mass is not None):
-        raise ValueError("mass must be provided")
     i_axial = (3.0 / 10.0) * mass * radius**2
     i_perp = mass * ((3.0 / 20.0) * radius**2 + (3.0 / 5.0) * height**2)
 
@@ -401,8 +387,6 @@ def parallel_axis(
     Returns:
         Inertia about new point
     """
-    if not (inertia is not None):
-        raise ValueError("inertia must be provided")
     if not (inertia is not None):
         raise ValueError("inertia must be provided")
     dx, dy, dz = offset

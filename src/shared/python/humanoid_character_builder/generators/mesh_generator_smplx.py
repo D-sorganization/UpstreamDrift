@@ -352,12 +352,14 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         if not SMPLX_AVAILABLE:
             return GeneratedMeshResult(
                 success=False,
+                solver_status="failure",
                 error_message="smplx package not installed. Install with: pip install smplx",
             )
 
         if not TRIMESH_AVAILABLE:
             return GeneratedMeshResult(
                 success=False,
+                solver_status="failure",
                 error_message="trimesh package not installed. Install with: pip install trimesh",
             )
 
@@ -418,6 +420,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
             logger.error("SMPL-X generation failed: %s", e)
             return GeneratedMeshResult(
                 success=False,
+                solver_status="failure",
                 error_message=f"SMPL-X generation error: {e}",
             )
 
@@ -513,6 +516,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         if not vertex_groups:
             return GeneratedMeshResult(
                 success=False,
+                solver_status="failure",
                 error_message="SMPL-X segmentation error: no vertex groups produced",
             )
 

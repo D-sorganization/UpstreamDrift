@@ -74,8 +74,6 @@ class ManualBuilder(BaseURDFBuilder):
         """
         if not (robot_name is not None):
             raise ValueError("robot_name must be provided")
-        if not (robot_name is not None):
-            raise ValueError("robot_name must be provided")
         super().__init__(robot_name)
         self._links: list[Link] = self._links
         self._joints: list[Joint] = self._joints
@@ -164,8 +162,6 @@ class ManualBuilder(BaseURDFBuilder):
         """
         if not (segment_data is not None):
             raise ValueError("segment_data must be provided")
-        if not (segment_data is not None):
-            raise ValueError("segment_data must be provided")
         link = self._link_from_dict(segment_data)
         self.add_link(link)
 
@@ -234,8 +230,6 @@ class ManualBuilder(BaseURDFBuilder):
         """
         if not (name is not None):
             raise ValueError("name must be provided")
-        if not (name is not None):
-            raise ValueError("name must be provided")
         self._joints = [j for j in self._joints if j.name != name]
         return self
 
@@ -290,8 +284,6 @@ class ManualBuilder(BaseURDFBuilder):
         Returns:
             Self for method chaining
         """
-        if not (axis is not None):
-            raise ValueError("axis must be provided")
         if not (axis is not None):
             raise ValueError("axis must be provided")
         axis_idx = {"x": 0, "y": 1, "z": 2}[axis.lower()]
@@ -357,8 +349,6 @@ class ManualBuilder(BaseURDFBuilder):
         # Create copy
         if not (axis is not None):
             raise ValueError("axis must be provided")
-        if not (axis is not None):
-            raise ValueError("axis must be provided")
         new_builder = ManualBuilder(
             robot_name=self._robot_name,
             handedness=self._handedness,
@@ -398,6 +388,7 @@ class ManualBuilder(BaseURDFBuilder):
         if not validation.is_valid:
             return BuildResult(
                 success=False,
+                solver_status="failure",
                 validation=validation,
                 error_message="; ".join(validation.get_error_messages()),
                 links=self._links.copy(),
@@ -423,8 +414,6 @@ class ManualBuilder(BaseURDFBuilder):
         """Get all descendant link names."""
         if not (link_name is not None):
             raise ValueError("link_name must be provided")
-        if not (link_name is not None):
-            raise ValueError("link_name must be provided")
         descendants: set[str] = set()
         queue: deque[str] = deque([link_name])
 
@@ -439,8 +428,6 @@ class ManualBuilder(BaseURDFBuilder):
 
     def _link_from_dict(self, data: dict[str, Any]) -> Link:
         """Create Link from dictionary data."""
-        if not (data is not None):
-            raise ValueError("data must be provided")
         if not (data is not None):
             raise ValueError("data must be provided")
         name = data["name"]
@@ -509,8 +496,6 @@ class ManualBuilder(BaseURDFBuilder):
         """Create Joint from dictionary data."""
         if not (data is not None):
             raise ValueError("data must be provided")
-        if not (data is not None):
-            raise ValueError("data must be provided")
         name = f"{data['parent']}_to_{data['name']}"
         joint_data = data.get("joint", {})
         geom_data = data.get("geometry", {})
@@ -558,8 +543,6 @@ class ManualBuilder(BaseURDFBuilder):
 
     def _geometry_from_dict(self, data: dict[str, Any]) -> Geometry:
         """Create Geometry from dictionary data."""
-        if not (data is not None):
-            raise ValueError("data must be provided")
         if not (data is not None):
             raise ValueError("data must be provided")
         shape = data.get("shape", "box").lower()
