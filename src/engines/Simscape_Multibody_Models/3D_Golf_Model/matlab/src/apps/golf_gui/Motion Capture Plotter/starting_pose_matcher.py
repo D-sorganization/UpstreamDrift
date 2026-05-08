@@ -435,20 +435,20 @@ _HELP_TEXT: dict[str, str] = {
 
 
 def _help_button(section_title: str, parent: QWidget | None = None) -> QToolButton:
-    """Make a small ``?`` button that pops up the help text for a section."""
-    btn = QToolButton(parent)
-    btn.setText("?")
-    btn.setToolTip(f"Help: {section_title}")
-    btn.setObjectName("help")
-    btn.setAutoRaise(True)
-    btn.setCursor(Qt.CursorShape.WhatsThisCursor)
-    btn.setFixedSize(20, 20)
+    """Make a small info-icon button that pops up the help text for a section."""
+    from src.shared.python.ui.info_button import make_info_button
 
     def _show() -> None:
         text = _HELP_TEXT.get(section_title, "(no help text registered)")
         QMessageBox.information(parent, f"Help — {section_title}", text)
 
-    btn.clicked.connect(_show)
+    btn = make_info_button(
+        parent,
+        tooltip=f"Help: {section_title}",
+        accessible_name=f"Help: {section_title}",
+        on_click=_show,
+    )
+    btn.setObjectName("help")
     return btn
 
 

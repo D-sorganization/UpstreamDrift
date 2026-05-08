@@ -96,16 +96,14 @@ def make_runtime_mode_help_button(parent: QWidget | None = None) -> QToolButton:
     Returns:
         Configured QToolButton; click it to show :func:`show_runtime_mode_help`.
     """
-    btn = QToolButton(parent)
-    btn.setText("?")
-    btn.setAutoRaise(True)
-    btn.setCursor(Qt.CursorShape.WhatsThisCursor)
-    btn.setAccessibleName("Engine runtime help")
-    btn.setToolTip("What's the difference between Native, Docker, and WSL2 runtimes?")
-    # Keep it compact — fixed width so it doesn't expand in the top bar.
-    btn.setFixedWidth(22)
-    btn.clicked.connect(lambda: show_runtime_mode_help(parent))
-    return btn
+    from src.shared.python.ui.info_button import make_info_button
+
+    return make_info_button(
+        parent,
+        tooltip=("What's the difference between Native, Docker, and WSL2 runtimes?"),
+        accessible_name="Engine runtime help",
+        on_click=lambda: show_runtime_mode_help(parent),
+    )
 
 
 __all__ = [

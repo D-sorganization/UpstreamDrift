@@ -1,0 +1,64 @@
+"""Compact, flat info-icon button for inline help affordances.
+
+Uses the platform's standard ``SP_MessageBoxInformation`` icon so the
+button looks native on Windows / macOS / Linux instead of rendering as
+a literal "?" text glyph.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from typing import TYPE_CHECKING
+
+from PyQt6.QtCore import QSize, Qt
+from PyQt6.QtWidgets import QStyle, QToolButton
+
+if TYPE_CHECKING:
+    from PyQt6.QtWidgets import QWidget
+
+
+def make_info_button(
+    parent: QWidget | None = None,
+    *,
+    tooltip: str = "More information",
+    accessible_name: str = "More information",
+    on_click: Callable[[], None] | None = None,
+    icon_size_px: int = 16,
+) -> QToolButton:
+    """Build a small, flat info button using the platform's info icon.
+
+    The button uses :attr:`QStyle.StandardPixmap.SP_MessageBoxInformation`
+    so it picks up the host platform's native "circle-i" glyph rather
+    than rendering a literal ``?`` text character.
+
+    Args:
+        parent: Optional parent widget; the button is added to its
+            layout by the caller.
+        tooltip: Tooltip displayed on hover. Should describe what
+            the click reveals (e.g. "What's the difference between X
+            and Y?") rather than a generic phrase.
+        accessible_name: Name exposed to assistive technology / screen
+            readers.
+        on_click: Optional zero-argument callable connected to the
+            ``clicked`` signal.
+        icon_size_px: Edge length, in pixels, of the rendered icon.
+            Defaults to 16 — small enough to sit flush with a label.
+
+    Returns:
+        A configured :class:`QToolButton` ready to be inserted into a
+        layout.
+    """
+    btn = QToolButton(parent)
+    style = btn.style()
+    btn.setIcon(style.standardIcon(QStyle.StandardPixmap.SP_MessageBoxInformation))
+    btn.setIconSize(QSize(icon_size_px, icon_size_px))
+    btn.setAutoRaise(True)
+    btn.setCursor(Qt.CursorShape.WhatsThisCursor)
+    btn.setToolTip(tooltip)
+    btn.setAccessibleName(accessible_name)
+    if on_click is not None:
+        btn.clicked.connect(on_click)
+    return btn
+
+
+__all__ = ["make_info_button"]
