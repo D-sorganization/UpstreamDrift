@@ -115,6 +115,7 @@ from src.tools.starting_pose_matcher.skeleton_provider import (
 from src.shared.python.motion_matching.diagnostics._skeleton_render import (
     equalize_3d_axes as _shared_equalize_3d_axes,
 )
+from src.tools.starting_pose_matcher.live_view_controller import LiveViewController
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -650,6 +651,12 @@ class StartingPoseMatcher(QMainWindow):
 
         self._setup_axes()
 
+        # Live multi-source view controller (issue #4512). Owns the layer
+        # stack that renders BodyTarget / ClubTarget / BallImpact data on
+        # the same axes the static-pose path uses.
+        self._live_view = LiveViewController(self.ax, self.canvas)
+        self._live_body_target: Any | None = None
+
     def _attach_help_button(self, box: QGroupBox, section: str) -> None:
         """Place a small '?' help button at the top-right corner of a QGroupBox.
 
@@ -698,6 +705,39 @@ class StartingPoseMatcher(QMainWindow):
         self.lbl_event_info.setObjectName("status")
         self.lbl_event_info.setWordWrap(True)
         gl.addWidget(self.lbl_event_info, 3, 0, 1, 2)
+        # Live C3D body source row (issue #4512). Loads a BodyTarget and
+        # routes per-frame marker positions to the matcher's existing 3D
+        # axes via the LiveViewController.
+        self.btn_load_c3d_body = QPushButton("Browse C3D Body…")
+        self.btn_load_c3d_body.setToolTip(
+            "Load a .c3d body-marker file and render its markers live on the 3D axes."
+        )
+        self.btn_load_c3d_body.setStatusTip(
+            "Loads a C3D body target and wires it to the timeline slider."
+        )
+        self.btn_load_c3d_body.clicked.connect(self._on_load_c3d_body_clicked)
+        gl.addWidget(self.btn_load_c3d_body, 4, 0, 1, 2)
+        self.lbl_c3d_body = QLabel("Live body: (none)")
+        self.lbl_c3d_body.setObjectName("status")
+        self.lbl_c3d_body.setWordWrap(True)
+        gl.addWidget(self.lbl_c3d_body, 5, 0, 1, 2)
+        # Layer toggles for the live view.
+        self.cb_show_body_markers = QCheckBox("Show body markers")
+        self.cb_show_body_markers.setChecked(True)
+        self.cb_show_body_markers.toggled.connect(
+            lambda on: self._live_view.set_layer_visible("body_markers", bool(on))
+            if getattr(self, "_live_view", None) is not None
+            else None
+        )
+        gl.addWidget(self.cb_show_body_markers, 6, 0, 1, 1)
+        self.cb_show_body_skeleton = QCheckBox("Show body skeleton")
+        self.cb_show_body_skeleton.setChecked(True)
+        self.cb_show_body_skeleton.toggled.connect(
+            lambda on: self._live_view.set_layer_visible("body_skeleton", bool(on))
+            if getattr(self, "_live_view", None) is not None
+            else None
+        )
+        gl.addWidget(self.cb_show_body_skeleton, 6, 1, 1, 1)
         return box
 
     def _build_event_labels_box(self) -> QGroupBox:
@@ -1409,6 +1449,51 @@ class StartingPoseMatcher(QMainWindow):
         if path:
             self._load_xlsx(path)
 
+    def _on_load_c3d_body_clicked(self) -> None:
+        """Browse for a ``.c3d`` file and route it to the live view.
+
+        Issue #4512: this is the user-facing entry point for the live
+        body marker rendering — picking a file here causes 27 markers to
+        appear on the existing 3D axes and start scrubbing with the
+        timeline slider.
+        """
+        default_dir = str(Path(__file__).resolve().parents[3] / "data")
+        path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Open C3D body file",
+            default_dir,
+            "C3D files (*.c3d)",
+        )
+        if not path:
+            return
+        try:
+            from src.shared.python.motion_matching.load_body_target import (
+                load_body_target,
+            )
+
+            body = load_body_target(path)
+        except Exception as exc:  # noqa: BLE001 - surface loader errors
+            logger.exception("failed to load C3D body file %s", path)
+            QMessageBox.warning(self, "Load failed", f"Could not load C3D body:\n{exc}")
+            return
+
+        self._live_body_target = body
+        n = int(body.marker_xyz.shape[0])
+        m = int(body.marker_xyz.shape[1])
+        self.lbl_c3d_body.setText(
+            f"Live body: {Path(path).name}  ({m} markers, {n} samples)"
+        )
+        # Drive the existing slider/spin to the impact frame so the user
+        # sees a recognisable pose immediately.
+        self._live_view.set_target(body=body, club=None, ball=None)
+        with QSignalBlocker(self.frame_slider), QSignalBlocker(self.spin_frame):
+            self.frame_slider.setRange(0, max(0, n - 1))
+            self.spin_frame.setRange(0, max(0, n - 1))
+            self.frame_slider.setValue(0)
+            self.spin_frame.setValue(0)
+        self._live_view.set_frame(0)
+        self.canvas.draw_idle()
+
     def _on_sheet_changed(self, _: str) -> None:
         if self._xlsx_path:
             self._load_xlsx(self._xlsx_path)
@@ -1562,6 +1647,8 @@ class StartingPoseMatcher(QMainWindow):
         self._update_time_label()
         self._update_frame_counter()
         self._redraw()
+        if getattr(self, "_live_view", None) is not None:
+            self._live_view.set_frame(int(frame))
 
     def _on_frame_changed_spin(self, frame: int) -> None:
         with QSignalBlocker(self.frame_slider):
@@ -1570,6 +1657,8 @@ class StartingPoseMatcher(QMainWindow):
         self._update_time_label()
         self._update_frame_counter()
         self._redraw()
+        if getattr(self, "_live_view", None) is not None:
+            self._live_view.set_frame(int(frame))
 
     def _update_frame_counter(self) -> None:
         """Refresh the ``12 / 301`` frame-counter label."""
@@ -2409,6 +2498,16 @@ class StartingPoseMatcher(QMainWindow):
         # target as the user scrubs through frames or loads a trajectory.
         if getattr(self, "auto_fit_axes", True):
             self._autoscale_axes_to_data()
+
+        # Re-attach the live-view layer artists after the axes were
+        # cleared by ``ax.clear()`` in this method. The controller keeps
+        # its target data, so re-binding is just rebuilding artists.
+        if (
+            getattr(self, "_live_view", None) is not None
+            and getattr(self, "_live_body_target", None) is not None
+        ):
+            self._live_view.set_target(body=self._live_body_target)
+            self._live_view.set_frame(int(self.current_frame))
 
         self.lbl_residual.setText(self._residual_text())
 
