@@ -3,7 +3,7 @@
 import sys
 from unittest.mock import patch
 
-from humanoid_character_builder.interfaces.api import BodyParameters, CharacterBuilder
+from humanoid_character_builder.interfaces import BodyParameters, CharacterBuilder
 
 
 def test_simulation_missing_mujoco() -> None:

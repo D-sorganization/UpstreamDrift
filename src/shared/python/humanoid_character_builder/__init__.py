@@ -69,9 +69,13 @@ from humanoid_character_builder.generators.urdf_generator import (
 )
 
 # Main API
-from humanoid_character_builder.interfaces.api import (
+from humanoid_character_builder.interfaces import (
     CharacterBuilder,
     CharacterBuildResult,
+    ExportOptions,
+    SegmentMeshInfo,
+    quick_build,
+    quick_urdf,
 )
 
 # Inertia calculation
