@@ -103,6 +103,7 @@ class ModelConfig:
     provenance: ProvenanceMetadata | None = None
     launcher: LauncherPresentationMetadata | None = None
     order: int = 99
+    hidden: bool = False
 
 
 class ModelRegistry(ContractChecker):
@@ -341,6 +342,7 @@ class ModelRegistry(ContractChecker):
             provenance=entry.provenance,
             launcher=entry.launcher,
             order=entry.order,
+            hidden=entry.hidden,
         )
 
     def _load_legacy_models(

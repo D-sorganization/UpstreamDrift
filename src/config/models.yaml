@@ -59,13 +59,29 @@ models:
       logo: "assets/c3d_viewer_modern.png"
       status: "ready"
 
-  - id: "starting_pose_matcher"
-    name: "Starting-Pose Matcher"
-    description: "Align physics-engine model start poses to motion-capture target frames (Address / Top of Backswing / Impact / Finish). Requires the gui-tools extra."
+  - id: "motion_target_preview"
+    name: "Motion-Match Preview"
+    description: "Preview multi-source motion-capture targets (C3D, .mat, body markers, club/ball) on a shared timegrid before driving a physics-engine model. Requires the gui-tools extra."
     type: "special_app"
     path: "src/tools/starting_pose_matcher/__main__.py"
+    tags: ["c3d", "mocap", "club", "body", "preview"]
     launcher:
       category: "tool"
+      logo: "motion_target_preview.svg"
+      status: "ready"
+
+  # Legacy alias for `motion_target_preview` — kept hidden for one release so
+  # saved layouts referencing the old id keep resolving. Remove after the next
+  # cut.
+  - id: "starting_pose_matcher"
+    name: "Starting-Pose Matcher (legacy)"
+    description: "Legacy alias for motion_target_preview. Hidden by default."
+    type: "special_app"
+    path: "src/tools/starting_pose_matcher/__main__.py"
+    hidden: true
+    launcher:
+      category: "tool"
+      logo: "motion_target_preview.svg"
       status: "ready"
 
   - id: "openpose_analysis"

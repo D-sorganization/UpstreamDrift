@@ -155,6 +155,50 @@
             "order": 8
         },
         {
+            "id": "motion_target_preview",
+            "name": "Motion-Match Preview",
+            "description": "Preview multi-source motion-capture targets (C3D, .mat, body markers, club/ball) on a shared timegrid before driving a physics-engine model.",
+            "category": "tool",
+            "type": "special_app",
+            "path": "src.tools.starting_pose_matcher.__main__",
+            "logo": "motion_target_preview.svg",
+            "status": "utility",
+            "capabilities": [
+                "c3d",
+                "mocap",
+                "club",
+                "body",
+                "preview"
+            ],
+            "tags": [
+                "c3d",
+                "mocap",
+                "club",
+                "body",
+                "preview"
+            ],
+            "order": 9
+        },
+        {
+            "id": "starting_pose_matcher",
+            "name": "Starting-Pose Matcher (legacy)",
+            "description": "Legacy alias for the motion-target preview tile. Hidden by default; kept for one release so saved layouts continue to resolve.",
+            "category": "tool",
+            "type": "special_app",
+            "path": "src.tools.starting_pose_matcher.__main__",
+            "logo": "motion_target_preview.svg",
+            "status": "utility",
+            "hidden": true,
+            "capabilities": [
+                "c3d",
+                "mocap",
+                "club",
+                "body",
+                "preview"
+            ],
+            "order": 99
+        },
+        {
             "id": "motion_capture",
             "name": "Motion Capture",
             "description": "C3D Viewer, OpenPose, and MediaPipe Analysis",
@@ -170,7 +214,7 @@
                 "mediapipe",
                 "pose_estimation"
             ],
-            "order": 9
+            "order": 10
         },
         {
             "id": "video_analyzer",
@@ -188,7 +232,7 @@
                 "motion_tracking",
                 "frame_analysis"
             ],
-            "order": 10
+            "order": 11
         },
         {
             "id": "data_explorer",
@@ -206,7 +250,7 @@
                 "visualization",
                 "export"
             ],
-            "order": 11
+            "order": 12
         },
         {
             "id": "project_map",
@@ -222,7 +266,7 @@
                 "feature_discovery",
                 "project_overview"
             ],
-            "order": 12
+            "order": 13
         }
     ]
 }

@@ -307,6 +307,7 @@ class ModelPackEntry:
     provenance: ProvenanceMetadata | None = None
     launcher: LauncherPresentationMetadata | None = None
     order: int = 99
+    hidden: bool = False
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> ModelPackEntry:
@@ -361,6 +362,13 @@ class ModelPackEntry:
         require(isinstance(order, int), "order must be an integer", order)
         require(order >= 0, "order must be non-negative", order)
 
+        hidden_raw = data.get("hidden", False)
+        require(
+            isinstance(hidden_raw, bool),
+            "hidden must be a boolean when provided",
+            hidden_raw,
+        )
+
         identity_raw = data.get("identity")
         identity = (
             CrossEngineIdentity.from_dict(identity_raw)
@@ -409,6 +417,7 @@ class ModelPackEntry:
             provenance=provenance,
             launcher=launcher,
             order=order,
+            hidden=bool(hidden_raw),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -443,6 +452,8 @@ class ModelPackEntry:
             data["provenance"] = self.provenance.to_dict()
         if self.launcher:
             data["launcher"] = self.launcher.to_dict()
+        if self.hidden:
+            data["hidden"] = True
         return data
 
 

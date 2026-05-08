@@ -97,6 +97,7 @@ def _build_provider_tile(model: ModelConfig) -> LauncherTile:
         provider=model.provider,
         source_root=model.source_root,
         web_route=metadata.web_route,
+        hidden=model.hidden,
     )
 
 
@@ -128,11 +129,13 @@ class LauncherTile:
     logo: str
     status: str
     capabilities: tuple[str, ...] = ()
+    tags: tuple[str, ...] = ()
     order: int = 99
     engine_type: str | None = None
     provider: str | None = None
     source_root: str | None = None
     web_route: str | None = None
+    hidden: bool = False
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> LauncherTile:
@@ -162,9 +165,11 @@ class LauncherTile:
             logo=data["logo"],
             status=data.get("status", "unknown"),
             capabilities=tuple(data.get("capabilities", [])),
+            tags=tuple(data.get("tags", [])),
             order=data.get("order", 99),
             engine_type=data.get("engine_type"),
             web_route=data.get("web_route"),
+            hidden=bool(data.get("hidden", False)),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -189,6 +194,10 @@ class LauncherTile:
             result["engine_type"] = self.engine_type
         if self.web_route:
             result["web_route"] = self.web_route
+        if self.tags:
+            result["tags"] = list(self.tags)
+        if self.hidden:
+            result["hidden"] = True
         return result
 
     @property
@@ -340,25 +349,39 @@ class LauncherManifest:
                 return tile
         return None
 
-    def get_tiles_by_category(self, category: str) -> list[LauncherTile]:
+    def get_tiles_by_category(
+        self, category: str, *, include_hidden: bool = False
+    ) -> list[LauncherTile]:
         """Get all tiles in a category.
 
         Args:
             category: Category to filter by (physics_engine, tool, external)
+            include_hidden: When False (default), tiles flagged ``hidden`` are
+                excluded so legacy aliases do not appear as duplicate launcher
+                cards.
 
         Returns:
             List of matching tiles, ordered by their order field
         """
-        return [t for t in self.tiles if t.category == category]
+        return [
+            t
+            for t in self.tiles
+            if t.category == category and (include_hidden or not t.hidden)
+        ]
+
+    @property
+    def visible_tiles(self) -> list[LauncherTile]:
+        """Tiles excluding entries flagged ``hidden`` (legacy aliases)."""
+        return [t for t in self.tiles if not t.hidden]
 
     @property
     def physics_engines(self) -> list[LauncherTile]:
-        """Get all physics engine tiles."""
+        """Get all physics engine tiles (excluding hidden aliases)."""
         return self.get_tiles_by_category("physics_engine")
 
     @property
     def tools(self) -> list[LauncherTile]:
-        """Get all tool tiles."""
+        """Get all tool tiles (excluding hidden aliases)."""
         return self.get_tiles_by_category("tool")
 
     @property

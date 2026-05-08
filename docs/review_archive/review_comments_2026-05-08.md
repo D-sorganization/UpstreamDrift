@@ -19,6 +19,21 @@ Even in the `impact_source is not None` branch, the loader still calls `_detect_
 
 ---
 
+### PR #4500: src/config/launcher_manifest.json:163
+
+Actionable: Yes
+Has Suggestion: No
+
+```
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Use filesystem path for motion_target_preview tile**
+
+The new tile path is a Python module string (`src.tools.starting_pose_matcher.__main__`) but launcher execution resolves `tile.path` as a filesystem artifact. In `SpecialAppHandler.launch`, `resolve_model_artifact_path` is called and then existence is checked (`src/launchers/launcher_model_handlers.py`), so this resolves to `/workspace/UpstreamDrift/src.to...
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4500#discussion_r3210224501)
+
+---
+
 ### PR #4496: tests/unit/motion_matching/test_body_skeleton.py:7
 
 Actionable: Yes
@@ -46,6 +61,21 @@ When `time` does not span `0`, `_stamped_impact_index` falls back to `params.Imp
 ```
 
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4490#discussion_r3210149886)
+
+---
+
+### PR #4500: src/config/launcher_manifest.json:191
+
+Actionable: Yes
+Has Suggestion: No
+
+```
+**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Filter hidden legacy alias from dashboard manifest output**
+
+Marking this alias as hidden is not sufficient to prevent duplicate cards in the web launcher because `/api/launcher/manifest` returns `manifest.to_dict()` (all tiles), and the dashboard renders `tiles` directly by category without filtering `hidden` (`ui/src/pages/Dashboard.tsx` and `ui/src/components/simulation/LauncherDashboard.tsx`). Adding this...
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4500#discussion_r3210224508)
 
 ---
 
