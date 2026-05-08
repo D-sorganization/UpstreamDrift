@@ -30,11 +30,7 @@ try:
     from dm_control import viewer
 
     HAS_VIEWER = True
-except ImportError as e:
-    logger.error("%s", f"DEBUG: Failed to import dm_control.viewer: {e}")
-    import traceback
-
-    traceback.print_exc()
+except ImportError:
     HAS_VIEWER = False
 
 
@@ -71,9 +67,7 @@ def np_encoder(object: typing.Any) -> int | float | list:
 class BaseController:
     def get_action(self, physics: typing.Any) -> np.ndarray:
         """Get the control action."""
-        if not (physics is not None):
-            raise ValueError("physics must be provided")
-        if not (physics is not None):
+        if physics is None:
             raise ValueError("physics must be provided")
         return np.zeros(physics.model.nu)
 
@@ -87,9 +81,7 @@ class PDController(BaseController):
         kd: float = 6.0,
     ) -> None:
         """Initialize PD Controller."""
-        if not (actuators is not None):
-            raise ValueError("actuators must be provided")
-        if not (actuators is not None):
+        if actuators is None:
             raise ValueError("actuators must be provided")
         self.actuators = actuators
         self.target_pose = target_pose
@@ -733,8 +725,6 @@ def run_simulation(
     )  # noqa: E501
 
     # 6. Run Loop
-    logger.debug("DEBUG: use_viewer=%s, HAS_VIEWER=%s", use_viewer, HAS_VIEWER)
-
     if use_viewer and HAS_VIEWER:
         _run_viewer_loop(physics, controller, initialize_episode, save_path)
     else:
