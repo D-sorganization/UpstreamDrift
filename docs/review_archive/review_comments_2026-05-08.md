@@ -1,36 +1,38 @@
 # Review Comments Archive - 2026-05-08
 
-Generated: 2026-05-08T14:31:49.295929
+Generated: 2026-05-08T15:49:50.717750
 
 ## Reviewer (chatgpt-codex-connector[bot]) (2 comments)
 
-### PR #4641: tests/integration/test_urdf_cross_engine_fk.py:146
+### PR #4620: tests/unit/motion_pipeline/_fixtures.py:450
 
 Actionable: Yes
 Has Suggestion: No
 
 ```
-**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Read Pinocchio body poses from frame placements**
+**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Preserve passed rig when building matching-result trajectory**
 
-`model.getBodyId()` returns a body/frame index, but this code uses that value to index `data.oMi`, which stores joint placements. When Pinocchio is available and a requested body exists, this can return the wrong transform (or raise on larger models), making the MuJoCo/Drake vs Pinocchio RMSE check invalid. Use the frame placement (`data.oMf[bid]` after `upda...
+`make_motion_matching_result` accepts a `rig` but constructs `matched_trajectory` via `make_motion_trajectory(...)`, which creates a fresh default rig instead of reusing the caller’s rig. If a caller passes a non-default rig (different joint IDs/prefixes or rig ID), `metadata['residual_report']`/`torque_trajectory` are keyed to the input rig whil...
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4641#discussion_r3211471648)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4620#discussion_r3211158550)
 
 ---
 
-### PR #4641: .github/workflows/urdf-cross-engine-equivalence.yml:85
+### PR #4620: tests/unit/motion_pipeline/test_lod.py:76
 
 Actionable: Yes
 Has Suggestion: No
 
 ```
-**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Enforce at least two engines before running equivalence gate**
+**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Record imported submodule names in LoD import scan**
 
-This workflow suppresses install failures for every optional engine (`|| echo ...`), while the tests themselves skip missing backends via `importorskip`; as a result, the job can succeed with all equivalence tests skipped and no cross-engine comparison actually executed. Since this is intended as a parity gate, add a hard precheck that at least t...
+For `ImportFrom`, `_collect_imports` only records `node.module`, so statements like `from src import engines` are recorded as `src` and never match `FORBIDDEN_EXACT`/`FORBIDDEN_PREFIXES`. That creates a bypass where forbidden roots can be imported without detection, weakening the architectural guard this test is meant to enforce.
+
+Useful? React with 👍 / 👎.
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4641#discussion_r3211471651)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4620#discussion_r3211158553)
 
 ---
 

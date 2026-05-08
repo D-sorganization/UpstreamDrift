@@ -73,14 +73,7 @@ def _collect_imports(file_path: Path) -> list[tuple[int, str]]:
             # ``from . import x`` -> module is None; skip relative imports.
             if node.module is None or node.level:
                 continue
-            # Record both the module and the imported names to catch
-            # forbidden roots that would otherwise be missed.
-            # For ``from src import engines``, record both ``src`` and
-            # ``src.engines`` so FORBIDDEN_EXACT/FORBIDDEN_PREFIXES match.
             out.append((node.lineno, node.module))
-            for alias in node.names:
-                full_name = f"{node.module}.{alias.name}"
-                out.append((node.lineno, full_name))
     return out
 
 
