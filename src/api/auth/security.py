@@ -100,7 +100,7 @@ class SecurityManager:
         Args:
             secret_key: JWT signing secret key
         """
-        if not (secret_key is not None):
+        if secret_key is None:
             raise ValueError("secret_key must be provided")
         self.secret_key = secret_key
         self.algorithm = ALGORITHM
@@ -119,7 +119,7 @@ class SecurityManager:
         Returns:
             Hashed password
         """
-        if not (password is not None):
+        if password is None:
             raise ValueError("password must be provided")
         salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
         hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
@@ -170,7 +170,7 @@ class SecurityManager:
         Returns:
             Encoded JWT token
         """
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         to_encode = data.copy()
 
@@ -192,7 +192,7 @@ class SecurityManager:
         Returns:
             Encoded JWT refresh token
         """
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         to_encode = data.copy()
         # SECURITY FIX: Use timezone-aware datetime instead of deprecated utcnow()
@@ -271,7 +271,7 @@ class SecurityManager:
             SECURITY: Uses bcrypt instead of SHA256 for brute-force resistance.
             SHA256 is fast and unsuitable for key storage; bcrypt is slow by design.
         """
-        if not (api_key is not None):
+        if api_key is None:
             raise ValueError("api_key must be provided")
         salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
         hashed = bcrypt.hashpw(api_key.encode("utf-8"), salt)
@@ -302,7 +302,7 @@ class RoleChecker:
         Args:
             required_role: Minimum required role
         """
-        if not (required_role is not None):
+        if required_role is None:
             raise ValueError("required_role must be provided")
         self.required_role = required_role
         self.role_hierarchy = {
@@ -321,7 +321,7 @@ class RoleChecker:
         Returns:
             True if user has sufficient role
         """
-        if not (user is not None):
+        if user is None:
             raise ValueError("user must be provided")
         user_role_level = self.role_hierarchy.get(UserRole(user.role), 0)
         required_role_level = self.role_hierarchy.get(self.required_role, 0)
@@ -351,7 +351,7 @@ class UsageTracker:
         Returns:
             True if user has quota remaining
         """
-        if not (user is not None):
+        if user is None:
             raise ValueError("user must be provided")
         from .models import SUBSCRIPTION_QUOTAS
 
@@ -390,7 +390,7 @@ class UsageTracker:
         Returns:
             Usage summary dictionary
         """
-        if not (user is not None):
+        if user is None:
             raise ValueError("user must be provided")
         from .models import SUBSCRIPTION_QUOTAS
 
@@ -437,8 +437,6 @@ class AuthCache:
     TTL_SECONDS = 300  # 5 minutes cache
 
     def __init__(self) -> None:
-        if not (self is not None):
-            raise ValueError("self must be provided")
         import threading
         import time
 
@@ -450,7 +448,7 @@ class AuthCache:
         """Get cached user_id for API key."""
         # Generate a fast lookup token for the cache
         # (We don't store the key, just a derived token for lookup)
-        if not (api_key is not None):
+        if api_key is None:
             raise ValueError("api_key must be provided")
         cache_key = self._cache_lookup_token(api_key)
 
@@ -464,7 +462,7 @@ class AuthCache:
 
     def set(self, api_key: str, result: Any) -> None:
         """Cache auth result."""
-        if not (api_key is not None):
+        if api_key is None:
             raise ValueError("api_key must be provided")
         cache_key = self._cache_lookup_token(api_key)
         with self._lock:
@@ -493,7 +491,7 @@ class AuthCache:
         2. bcrypt verification on cache miss
         3. The token_value itself is never stored, only this derived lookup key
         """
-        if not (token_value is not None):
+        if token_value is None:
             raise ValueError("token_value must be provided")
         import hashlib
 
