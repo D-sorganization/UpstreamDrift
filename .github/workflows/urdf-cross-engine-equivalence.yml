@@ -1,0 +1,146 @@
+# URDF Cross-Engine Forward-Sim Equivalence (Issue #4542)
+#
+# CI gate enforcing that generated URDFs load properly and produce
+# equivalent forward kinematics across MuJoCo, Drake, Pinocchio, and OpenSim.
+#
+# Triggered on every PR (and main push) that touches humanoid_character_builder.
+
+name: URDF Cross-Engine Equivalence
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/shared/python/humanoid_character_builder/**"
+      - "tests/integration/test_urdf_engine_loadability.py"
+      - "tests/integration/test_urdf_cross_engine_fk.py"
+      - ".github/workflows/urdf-cross-engine-equivalence.yml"
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "src/shared/python/humanoid_character_builder/**"
+      - "tests/integration/test_urdf_engine_loadability.py"
+      - "tests/integration/test_urdf_cross_engine_fk.py"
+      - ".github/workflows/urdf-cross-engine-equivalence.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  pick-runner:
+    runs-on: d-sorg-fleet
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: |
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=d-sorg-fleet" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet"
+
+  equivalence:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install equivalence-test dependencies
+        # Per spec §2.2, the gate is meaningful only when at least two engines
+        # can simulate. We install every Python-installable engine and let the
+        # test skip per-engine if any individual dep fails to load. Simscape
+        # is intentionally out of scope here — it requires MATLAB, which is
+        # licensed and lives behind the matlab.engine bridge tested by the
+        # nightly workflow.
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --ignore-installed --no-deps pip
+          # Always install the dev/test stack and the default mujoco engine.
+          pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
+          # Optional engines: best-effort. The test self-skips when any of
+          # these is missing rather than failing the gate.
+          pip install "mujoco>=3.6.0,<4.0.0" || echo "::warning::mujoco install failed"
+          pip install "drake>=1.22.0" || echo "::warning::drake install failed (Linux+macOS only)"
+          pip install "pinocchio>=2.6.0" || echo "::warning::pinocchio install failed"
+          pip install "opensim>=4.4.0" || echo "::warning::opensim install failed"
+
+      - name: Precheck — verify at least 2 engines are importable
+        # This gate enforces cross-engine parity, so it must fail if fewer than
+        # 2 engines can be imported. Without this check, the job could succeed
+        # with all equivalence tests skipped (via pytest.importorskip) and no
+        # actual comparison performed.
+        shell: bash
+        run: |
+          set -euo pipefail
+          count=0
+          for engine in mujoco pydrake pinocchio opensim; do
+            if python3 -c "import $engine" 2>/dev/null; then
+              count=$((count + 1))
+              echo "✓ $engine importable"
+            else
+              echo "✗ $engine not importable"
+            fi
+          done
+          echo "Importable engines: $count / 4"
+          if [ "$count" -lt 2 ]; then
+            echo "::error::Cross-engine equivalence gate requires ≥2 importable engines; only $count available. Failing."
+            exit 1
+          fi
+
+      - name: Run URDF cross-engine forward-sim equivalence test
+        env:
+          UPSTREAM_DRIFT_OUTPUT_ROOT: ${{ github.workspace }}/output
+        shell: bash
+        run: |
+          mkdir -p "$UPSTREAM_DRIFT_OUTPUT_ROOT/urdf_cross_engine_equivalence"
+          # We deliberately run with `-p no:cacheprovider` to avoid caching
+          # across reruns, `-p no:xvfb` because this is a non-GUI parity gate,
+          # and `-rs` so skips show up clearly in the log.
+          python3 -m pytest \
+            tests/integration/test_urdf_engine_loadability.py \
+            tests/integration/test_urdf_cross_engine_fk.py \
+            -v -rs --tb=short -p no:xvfb \
+            --junitxml=test-results/urdf-cross-engine-equivalence-junit.xml
+
+      - name: Upload equivalence report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: urdf-cross-engine-equivalence-report
+          path: |
+            reports/urdf_cross_engine.json
+            test-results/urdf-cross-engine-equivalence-junit.xml
+          if-no-files-found: warn
+
+      - name: Summarize results
+        if: always()
+        shell: bash
+        run: |
+          echo "## URDF Cross-Engine Equivalence Summary" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f "reports/urdf_cross_engine.json" ]; then
+            echo "\`\`\`json" >> "$GITHUB_STEP_SUMMARY"
+            cat "reports/urdf_cross_engine.json" >> "$GITHUB_STEP_SUMMARY"
+            echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No equivalence report generated (test was skipped or crashed before emission)." >> "$GITHUB_STEP_SUMMARY"
+          fi

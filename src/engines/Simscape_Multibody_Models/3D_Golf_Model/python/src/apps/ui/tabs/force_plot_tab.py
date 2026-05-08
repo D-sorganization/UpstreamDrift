@@ -94,9 +94,18 @@ class ForcePlotTab(QtWidgets.QWidget):
             self.status_label.setText("")
             return
 
+        # Empty analog -> graceful no-data branch.
+        if not model.analog:
+            self.time_series_canvas.clear_axes()
+            self.cop_canvas.clear_axes()
+            self.status_label.setText("No force-plate data in this file")
+            return
+
         # Try to extract force plate data from analog channels
         if not self._load_force_plate_data():
-            self.status_label.setText("No force plate channels detected")
+            self.time_series_canvas.clear_axes()
+            self.cop_canvas.clear_axes()
+            self.status_label.setText("No force-plate data in this file")
             return
 
         # Populate plate selector

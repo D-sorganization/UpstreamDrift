@@ -6,6 +6,14 @@ import numpy as np
 import numpy.typing as npt
 
 
+@dataclass(frozen=True)
+class C3DEvent:
+    """A named C3D event with its timestamp in seconds."""
+
+    label: str
+    time: float
+
+
 @dataclass
 class MarkerData:
     """Represents a single optical marker trajectory."""
@@ -36,6 +44,7 @@ class C3DDataModel:
     point_time: npt.NDArray[np.float64] | None = None
     analog_time: npt.NDArray[np.float64] | None = None
     metadata: dict[str, str] = field(default_factory=dict)
+    events: list[C3DEvent] = field(default_factory=list)
 
     def marker_names(self) -> list[str]:
         """Return list of marker names."""

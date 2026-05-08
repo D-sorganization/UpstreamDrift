@@ -1,36 +1,36 @@
 # Review Comments Archive - 2026-05-08
 
-Generated: 2026-05-08T13:07:49.135685
+Generated: 2026-05-08T14:31:49.295929
 
 ## Reviewer (chatgpt-codex-connector[bot]) (2 comments)
 
-### PR #4611: .github/workflows/Jules-Redundant-Issue-Closer.yml:40
+### PR #4641: tests/integration/test_urdf_cross_engine_fk.py:146
 
-Actionable: No
+Actionable: Yes
 Has Suggestion: No
 
 ```
-**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Read dry-run from workflow inputs instead of action inputs**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Read Pinocchio body poses from frame placements**
 
-The dry-run gate is effectively always enabled, so this workflow never closes duplicate issues. `core.getInput('dry_run')` reads inputs passed to `actions/github-script` itself, but this step does not pass a `dry_run` input; on issue events it resolves to an empty string, making `core.getInput(...) !== 'false'` true and forcing the `if (dryRun) ret...
+`model.getBodyId()` returns a body/frame index, but this code uses that value to index `data.oMi`, which stores joint placements. When Pinocchio is available and a requested body exists, this can return the wrong transform (or raise on larger models), making the MuJoCo/Drake vs Pinocchio RMSE check invalid. Use the frame placement (`data.oMf[bid]` after `upda...
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4611#discussion_r3211008247)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4641#discussion_r3211471648)
 
 ---
 
-### PR #4611: .github/workflows/Jules-Redundant-Issue-Closer.yml:48
+### PR #4641: .github/workflows/urdf-cross-engine-equivalence.yml:85
 
-Actionable: No
+Actionable: Yes
 Has Suggestion: No
 
 ```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Implement scheduled backstop scan instead of returning early**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Enforce at least two engines before running equivalence gate**
 
-The scheduled/manual backstop path is a no-op because runs without an `issues` payload hit this early return before any repository scan occurs. That means duplicates are only evaluated when the duplicate issue itself fires an event, so stale duplicates can persist indefinitely (for example, when the older canonical issue is edited/reopened but ne...
+This workflow suppresses install failures for every optional engine (`|| echo ...`), while the tests themselves skip missing backends via `importorskip`; as a result, the job can succeed with all equivalence tests skipped and no cross-engine comparison actually executed. Since this is intended as a parity gate, add a hard precheck that at least t...
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4611#discussion_r3211008252)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4641#discussion_r3211471651)
 
 ---
 
