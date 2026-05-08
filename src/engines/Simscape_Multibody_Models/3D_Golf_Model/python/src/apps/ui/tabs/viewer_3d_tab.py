@@ -1,48 +1,223 @@
-"""Three-dimensional scene viewer tab for the 3-D Golf Model GUI."""
+"""Three-dimensional scene viewer tab for the 3-D Golf Model GUI.
 
+Provides interactive playback (play/pause/speed/loop), keyboard
+shortcuts, an optional skeleton overlay built from the canonical
+anatomical-subset segment table, marker-selection helpers, view-angle
+presets, event-frame quick-jump, marker-label toggling, CSV export,
+and an incremental-update render path that preallocates artists once
+per selection and only mutates them per frame for smooth scrubbing.
+"""
+
+from __future__ import annotations
+
+import csv
+import re
 from typing import Any
 
+import matplotlib.pyplot as plt
 import numpy as np
-from PyQt6 import QtWidgets
-from PyQt6.QtCore import Qt
+from matplotlib import colors as mcolors
+from mpl_toolkits.mplot3d.art3d import Line3DCollection
+from PyQt6 import QtGui, QtWidgets
+from PyQt6.QtCore import Qt, QTimer
 
 from src.shared.python.qt_utils.wheel_event_filter import suppress_wheel_on_widgets
 
 from ...core.models import C3DDataModel
 from ..widgets.mpl_canvas import MplCanvas
 
+try:
+    from src.shared.python.motion_matching.body_skeleton import (
+        default_body_segments,
+    )
+except ImportError:  # pragma: no cover - exercised via fallback path only
+    # Fallback: when running inside the engine's pivoted sys.modules layout
+    # the canonical wrapper exposes the symbol via the bare-rooted path.
+    from shared.python.motion_matching.body_skeleton import (  # type: ignore
+        default_body_segments,
+    )
+
+
+# View-angle presets: (elev, azim) tuned to match issue spec.
+_VIEW_PRESETS: dict[str, tuple[float, float]] = {
+    "Front": (0.0, 90.0),
+    "Side": (0.0, 0.0),
+    "Top": (90.0, -90.0),
+    "Iso": (30.0, -60.0),
+}
+
+_PLAYBACK_SPEEDS: tuple[float, ...] = (0.1, 0.25, 0.5, 1.0, 2.0, 4.0)
+_DEFAULT_SPEED_INDEX = 3  # 1.0×
+
+# Cluster/club marker name patterns — generic, not vendor-specific.
+_CLUB_MARKER_RE = re.compile(r"^Marker_\d+:\d+:", re.IGNORECASE)
+
+
+def _is_club_marker(name: str) -> bool:
+    """Return True when ``name`` looks like a club / cluster marker."""
+    return bool(_CLUB_MARKER_RE.match(name))
+
+
+def _validate_speed(speed: float) -> float:
+    """Validate a playback speed multiplier.
+
+    Raises:
+        TypeError: if ``speed`` is not a real number.
+        ValueError: if ``speed`` is non-positive or non-finite.
+    """
+    if isinstance(speed, bool) or not isinstance(speed, (int, float)):
+        raise TypeError(f"speed must be a real number, got {type(speed).__name__}")
+    if not np.isfinite(speed) or speed <= 0.0:
+        raise ValueError(f"speed must be positive and finite, got {speed!r}")
+    return float(speed)
+
+
+def _validate_frame(frame: int, n_frames: int) -> int:
+    """Validate a frame index against ``n_frames``.
+
+    Raises:
+        TypeError: if ``frame`` is not an int.
+        ValueError: if ``frame`` is out of [0, n_frames).
+    """
+    if isinstance(frame, bool) or not isinstance(frame, int):
+        raise TypeError(f"frame must be int, got {type(frame).__name__}")
+    if n_frames <= 0:
+        raise ValueError("no frames loaded")
+    if not 0 <= frame < n_frames:
+        raise ValueError(f"frame {frame} out of range [0, {n_frames})")
+    return frame
+
 
 class Viewer3DTab(QtWidgets.QWidget):
-    """3D marker trajectory viewer tab."""
+    """3D marker trajectory viewer tab with playback and skeleton overlay."""
 
     def __init__(self) -> None:
         super().__init__()
         self.model: C3DDataModel | None = None
+        self._n_frames: int = 0
+        self._selected_names: list[str] = []
+        # Cached arrays for fast frame updates.
+        self._selected_positions: np.ndarray = np.empty((0, 0, 3))
+        self._marker_colors: list[tuple[float, float, float, float]] = []
+
+        # Matplotlib artists pre-allocated per selection.
+        self._ax: Any = None
+        self._trail_lines: list[Any] = []
+        self._point_artist: Any = None
+        self._label_texts: list[Any] = []
+        self._skeleton_collection: Line3DCollection | None = None
+        self._skeleton_segments: tuple[tuple[str, str], ...] = ()
+        self._event_buttons: list[QtWidgets.QToolButton] = []
+
+        # Playback timer.
+        self._timer = QTimer(self)
+        self._timer.timeout.connect(self._on_timer_tick)
+        self._is_playing = False
+
         self._init_ui()
+        self._install_shortcuts()
+
+    # ------------------------------------------------------------------ UI
 
     def _init_ui(self) -> None:
         layout = QtWidgets.QHBoxLayout(self)
 
         left_panel = QtWidgets.QVBoxLayout()
+
+        # Selection helpers.
+        sel_row = QtWidgets.QHBoxLayout()
+        self.btn_select_all = QtWidgets.QPushButton("Select all")
+        self.btn_select_body = QtWidgets.QPushButton("Body")
+        self.btn_select_club = QtWidgets.QPushButton("Club")
+        self.btn_clear_selection = QtWidgets.QPushButton("Clear")
+        self.btn_select_all.clicked.connect(self.select_all_markers)
+        self.btn_select_body.clicked.connect(self.select_body_markers)
+        self.btn_select_club.clicked.connect(self.select_club_markers)
+        self.btn_clear_selection.clicked.connect(self.clear_marker_selection)
+        for btn in (
+            self.btn_select_all,
+            self.btn_select_body,
+            self.btn_select_club,
+            self.btn_clear_selection,
+        ):
+            sel_row.addWidget(btn)
+        left_panel.addLayout(sel_row)
+
+        left_panel.addWidget(QtWidgets.QLabel("Markers to display in 3D:"))
         self.list_markers_3d = QtWidgets.QListWidget()
         self.list_markers_3d.setSelectionMode(
             QtWidgets.QAbstractItemView.SelectionMode.MultiSelection
         )
-        self.list_markers_3d.itemSelectionChanged.connect(self.update_view)
-        left_panel.addWidget(QtWidgets.QLabel("Markers to display in 3D:"))
+        self.list_markers_3d.itemSelectionChanged.connect(self._on_selection_changed)
         left_panel.addWidget(self.list_markers_3d)
 
-        # Frame slider
+        # Playback controls.
+        playback_row = QtWidgets.QHBoxLayout()
+        self.btn_play = QtWidgets.QToolButton()
+        self.btn_play.setToolTip("Play / Pause (Space)")
+        self._update_play_icon()
+        self.btn_play.clicked.connect(self.toggle_play)
+        playback_row.addWidget(self.btn_play)
+
+        playback_row.addWidget(QtWidgets.QLabel("Speed:"))
+        self.combo_speed = QtWidgets.QComboBox()
+        for s in _PLAYBACK_SPEEDS:
+            self.combo_speed.addItem(f"{s:g}×", s)
+        self.combo_speed.setCurrentIndex(_DEFAULT_SPEED_INDEX)
+        self.combo_speed.currentIndexChanged.connect(self._on_speed_changed)
+        playback_row.addWidget(self.combo_speed)
+
+        self.check_loop = QtWidgets.QCheckBox("Loop")
+        self.check_loop.setChecked(True)
+        playback_row.addWidget(self.check_loop)
+
+        playback_row.addStretch()
+        left_panel.addLayout(playback_row)
+
+        # View / overlay toggles.
+        toggles_row = QtWidgets.QHBoxLayout()
+        self.check_skeleton = QtWidgets.QCheckBox("Show skeleton")
+        self.check_skeleton.setChecked(True)
+        self.check_skeleton.toggled.connect(self._on_skeleton_toggled)
+        toggles_row.addWidget(self.check_skeleton)
+
+        self.check_labels = QtWidgets.QCheckBox("Show labels")
+        self.check_labels.setChecked(False)
+        self.check_labels.toggled.connect(self._on_labels_toggled)
+        toggles_row.addWidget(self.check_labels)
+        toggles_row.addStretch()
+        left_panel.addLayout(toggles_row)
+
+        # View-angle presets.
+        view_row = QtWidgets.QHBoxLayout()
+        view_row.addWidget(QtWidgets.QLabel("View:"))
+        self._view_buttons: dict[str, QtWidgets.QToolButton] = {}
+        for name in _VIEW_PRESETS:
+            b = QtWidgets.QToolButton()
+            b.setText(name)
+            b.clicked.connect(lambda _checked=False, n=name: self.set_view_preset(n))
+            self._view_buttons[name] = b
+            view_row.addWidget(b)
+        view_row.addStretch()
+        left_panel.addLayout(view_row)
+
+        # Frame slider with event-quick-jump strip.
+        slider_row = QtWidgets.QHBoxLayout()
         self.slider_frame = QtWidgets.QSlider(Qt.Orientation.Horizontal)
         self.slider_frame.setMinimum(0)
         self.slider_frame.setMaximum(0)
         self.slider_frame.setValue(0)
-        self.slider_frame.valueChanged.connect(self.update_view)
-        left_panel.addWidget(QtWidgets.QLabel("Frame index:"))
-        left_panel.addWidget(self.slider_frame)
+        self.slider_frame.valueChanged.connect(self._on_frame_changed)
+        suppress_wheel_on_widgets(self.slider_frame, self.combo_speed)
+        slider_row.addWidget(self.slider_frame)
+        left_panel.addLayout(slider_row)
 
-        # Suppress wheel events on slider to prevent unintended value changes
-        suppress_wheel_on_widgets(self.slider_frame)
+        # Event-jump button row (populated when events present).
+        self._event_row = QtWidgets.QHBoxLayout()
+        self._event_container = QtWidgets.QWidget()
+        self._event_container.setLayout(self._event_row)
+        left_panel.addWidget(self._event_container)
+        self._event_container.setVisible(False)
 
         self.label_frame_info = QtWidgets.QLabel("Frame: - / Time: -")
         left_panel.addWidget(self.label_frame_info)
@@ -52,101 +227,523 @@ class Viewer3DTab(QtWidgets.QWidget):
         right_panel = QtWidgets.QVBoxLayout()
         self.canvas_3d = MplCanvas(self, width=5, height=4, dpi=100)
         right_panel.addWidget(self.canvas_3d)
-
         layout.addLayout(right_panel, 3)
+
+    # ---------------------------------------------------------- Shortcuts
+
+    def _install_shortcuts(self) -> None:
+        """Register keyboard shortcuts on this tab."""
+
+        def _mk(seq: str, slot: Any) -> QtGui.QShortcut:
+            sc = QtGui.QShortcut(QtGui.QKeySequence(seq), self)
+            sc.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
+            sc.activated.connect(slot)
+            return sc
+
+        self._shortcut_play = _mk("Space", self.toggle_play)
+        self._shortcut_left = _mk("Left", lambda: self.step_frame(-1))
+        self._shortcut_right = _mk("Right", lambda: self.step_frame(1))
+        self._shortcut_shift_left = _mk("Shift+Left", lambda: self.step_frame(-10))
+        self._shortcut_shift_right = _mk("Shift+Right", lambda: self.step_frame(10))
+        self._shortcut_home = _mk("Home", lambda: self.set_frame(0))
+        self._shortcut_end = _mk(
+            "End", lambda: self.set_frame(max(0, self._n_frames - 1))
+        )
+
+    # ------------------------------------------------------------- Model
 
     def update_from_model(self, model: C3DDataModel | None) -> None:
         """Update UI with data from the model."""
+        self.pause()
         self.model = model
         self.list_markers_3d.clear()
+        self._clear_event_buttons()
 
         if model is None:
+            self._n_frames = 0
             self.slider_frame.setMaximum(0)
+            self._teardown_artists()
             self.canvas_3d.clear_axes()
             return
 
         for name in model.marker_names():
             self.list_markers_3d.addItem(name)
 
-        # Frame slider for 3D
         if model.point_time is not None:
-            n_frames = len(model.point_time)
+            self._n_frames = len(model.point_time)
             self.slider_frame.setMinimum(0)
-            self.slider_frame.setMaximum(n_frames - 1)
+            self.slider_frame.setMaximum(max(0, self._n_frames - 1))
             self.slider_frame.setValue(0)
         else:
+            self._n_frames = 0
             self.slider_frame.setMaximum(0)
             self.slider_frame.setValue(0)
 
-        if model.marker_names():
+        self._populate_event_buttons()
+
+        # Default selection: pick the body markers if any are present, else
+        # fall back to the first marker (preserves prior behaviour when the
+        # file has no anatomical markers).
+        marker_names = model.marker_names()
+        body_segments_present = default_body_segments(marker_names)
+        if body_segments_present:
+            self.select_body_markers()
+        elif marker_names:
             self.list_markers_3d.setCurrentRow(0)
 
-    def update_view(self) -> None:  # noqa: C901
-        """Update the 3D view based on selected Markers and frame."""
+    # ------------------------------------------------------- Selection
+
+    def select_all_markers(self) -> None:
+        """Select every marker in the list."""
+        self.list_markers_3d.selectAll()
+
+    def select_body_markers(self) -> None:
+        """Select the canonical anatomical-subset body markers."""
         if self.model is None:
             return
+        body_names = {
+            n
+            for s in default_body_segments(self.model.marker_names())
+            for n in (s.a, s.b)
+        }
+        self._set_selection(lambda n: n in body_names)
 
-        # Get selected markers
-        selected_items = self.list_markers_3d.selectedItems()
-        marker_names = [item.text() for item in selected_items]
-        if not marker_names:
-            self.canvas_3d.clear_axes()
+    def select_club_markers(self) -> None:
+        """Select markers that match the generic club/cluster pattern."""
+        self._set_selection(_is_club_marker)
+
+    def clear_marker_selection(self) -> None:
+        """Clear all marker selections."""
+        self.list_markers_3d.clearSelection()
+
+    def _set_selection(self, predicate: Any) -> None:
+        self.list_markers_3d.blockSignals(True)
+        try:
+            for i in range(self.list_markers_3d.count()):
+                item = self.list_markers_3d.item(i)
+                if item is None:
+                    continue
+                item.setSelected(bool(predicate(item.text())))
+        finally:
+            self.list_markers_3d.blockSignals(False)
+        self._on_selection_changed()
+
+    # --------------------------------------------------------- Playback
+
+    @property
+    def is_playing(self) -> bool:
+        """Whether playback is currently running."""
+        return self._is_playing
+
+    def toggle_play(self) -> None:
+        """Toggle play/pause state."""
+        if self._is_playing:
+            self.pause()
+        else:
+            self.play()
+
+    def play(self) -> None:
+        """Start playback at the current speed."""
+        if self._n_frames <= 1:
+            return
+        speed = float(self.combo_speed.currentData() or 1.0)
+        rate = self.model.point_rate if self.model is not None else 0.0
+        if rate <= 0.0:
+            rate = 60.0  # fallback display rate
+        interval_ms = max(1, int(round(1000.0 / (rate * speed))))
+        self._timer.start(interval_ms)
+        self._is_playing = True
+        self._update_play_icon()
+
+    def pause(self) -> None:
+        """Pause playback."""
+        if self._timer.isActive():
+            self._timer.stop()
+        self._is_playing = False
+        self._update_play_icon()
+
+    def set_speed(self, speed: float) -> None:
+        """Programmatically set the playback speed multiplier."""
+        speed = _validate_speed(speed)
+        # Snap to the closest preset for the combo box display.
+        idx = int(np.argmin([abs(s - speed) for s in _PLAYBACK_SPEEDS]))
+        self.combo_speed.setCurrentIndex(idx)
+        if self._is_playing:
+            self.pause()
+            self.play()
+
+    def _on_speed_changed(self, _idx: int) -> None:
+        if self._is_playing:
+            self.pause()
+            self.play()
+
+    def _on_timer_tick(self) -> None:
+        if self._n_frames <= 0:
+            self.pause()
+            return
+        nxt = self.slider_frame.value() + 1
+        if nxt >= self._n_frames:
+            if self.check_loop.isChecked():
+                nxt = 0
+            else:
+                self.pause()
+                return
+        self.slider_frame.setValue(nxt)
+
+    def _update_play_icon(self) -> None:
+        style = self.style()
+        if style is None:
+            self.btn_play.setText("Pause" if self._is_playing else "Play")
+            return
+        icon = (
+            QtWidgets.QStyle.StandardPixmap.SP_MediaPause
+            if self._is_playing
+            else QtWidgets.QStyle.StandardPixmap.SP_MediaPlay
+        )
+        self.btn_play.setIcon(style.standardIcon(icon))
+        self.btn_play.setText("Pause" if self._is_playing else "Play")
+
+    # ------------------------------------------------- Frame navigation
+
+    def set_frame(self, frame: int) -> None:
+        """Jump to ``frame``. Validates inputs (DbC)."""
+        frame = _validate_frame(frame, self._n_frames)
+        self.slider_frame.setValue(frame)
+
+    def step_frame(self, delta: int) -> None:
+        """Advance the slider by ``delta`` frames, clamped to bounds."""
+        if self._n_frames <= 0:
+            return
+        nxt = max(0, min(self._n_frames - 1, self.slider_frame.value() + int(delta)))
+        self.slider_frame.setValue(nxt)
+
+    def _on_frame_changed(self, _value: int) -> None:
+        self._render_current_frame()
+
+    # --------------------------------------------------- Event quick-jump
+
+    def _populate_event_buttons(self) -> None:
+        self._clear_event_buttons()
+        if self.model is None or not self.model.events:
+            self._event_container.setVisible(False)
+            return
+        self._event_container.setVisible(True)
+        for ev in self.model.events:
+            btn = QtWidgets.QToolButton()
+            btn.setText(ev.label)
+            btn.setToolTip(f"Jump to event {ev.label} @ {ev.time:.3f}s")
+            btn.clicked.connect(lambda _c=False, t=ev.time: self.jump_to_time(t))
+            self._event_row.addWidget(btn)
+            self._event_buttons.append(btn)
+
+    def _clear_event_buttons(self) -> None:
+        for btn in self._event_buttons:
+            self._event_row.removeWidget(btn)
+            btn.setParent(None)
+            btn.deleteLater()
+        self._event_buttons = []
+
+    def jump_to_time(self, time_s: float) -> None:
+        """Jump to the frame nearest ``time_s`` seconds."""
+        if self.model is None or self.model.point_time is None:
+            return
+        if not np.isfinite(time_s):
+            raise ValueError(f"time_s must be finite, got {time_s!r}")
+        frame = int(np.argmin(np.abs(self.model.point_time - float(time_s))))
+        self.set_frame(frame)
+
+    # -------------------------------------------------------- View presets
+
+    def set_view_preset(self, name: str) -> None:
+        """Snap the 3D axes to a named view preset."""
+        if name not in _VIEW_PRESETS:
+            raise ValueError(
+                f"unknown view preset {name!r}, expected one of {sorted(_VIEW_PRESETS)}"
+            )
+        if self._ax is None:
+            return
+        elev, azim = _VIEW_PRESETS[name]
+        self._ax.view_init(elev=elev, azim=azim)
+        self.canvas_3d.draw_idle()
+
+    # ---------------------------------------------------- Skeleton state
+
+    def _on_skeleton_toggled(self, _on: bool) -> None:
+        if self._skeleton_collection is not None:
+            self._skeleton_collection.set_visible(self.check_skeleton.isChecked())
+            self._update_skeleton_segments()
+            self.canvas_3d.draw_idle()
+
+    def _on_labels_toggled(self, _on: bool) -> None:
+        for txt in self._label_texts:
+            txt.set_visible(self.check_labels.isChecked())
+        self.canvas_3d.draw_idle()
+
+    @property
+    def skeleton_segment_count(self) -> int:
+        """Number of skeleton segments currently rendered."""
+        return len(self._skeleton_segments)
+
+    # --------------------------------------------------- Selection plumbing
+
+    def _on_selection_changed(self) -> None:
+        self._rebuild_scene()
+
+    def _rebuild_scene(self) -> None:
+        """Tear down and recreate artists when the selection changes."""
+        if self.model is None:
+            return
+        selected = [item.text() for item in self.list_markers_3d.selectedItems()]
+        self._selected_names = selected
+
+        self._teardown_artists()
+        if not selected:
+            self.canvas_3d.fig.clear()
+            self.canvas_3d.draw_idle()
             self.label_frame_info.setText("Frame: - / Time: -")
             return
 
-        frame_index = self.slider_frame.value()
-        if self.model.point_time is None:
-            time_str = "-"
-        else:
-            if 0 <= frame_index < len(self.model.point_time):
-                time_str = f"{self.model.point_time[frame_index]:.4f} s"
-            else:
-                time_str = "-"
+        # Cache positions: shape (M, N, 3); pad missing with NaN.
+        if self._n_frames <= 0:
+            return
+        positions = np.full((len(selected), self._n_frames, 3), np.nan, dtype=float)
+        for i, name in enumerate(selected):
+            m = self.model.markers.get(name)
+            if m is None or m.position.size == 0:
+                continue
+            n = min(m.position.shape[0], self._n_frames)
+            positions[i, :n, :] = m.position[:n, :]
+        self._selected_positions = positions
 
-        self.label_frame_info.setText(f"Frame: {frame_index} / Time: {time_str}")
+        # Build colors from a perceptually-distinct map.
+        cmap = plt.get_cmap("tab20" if len(selected) <= 20 else "Spectral")
+        denom = max(1, len(selected) - 1)
+        self._marker_colors = [
+            mcolors.to_rgba(cmap(i / denom)) for i in range(len(selected))
+        ]
 
         self.canvas_3d.fig.clear()
-        ax: Any = self.canvas_3d.add_subplot(111, projection="3d")
+        ax = self.canvas_3d.add_subplot(111, projection="3d")
+        self._ax = ax
 
-        # Plot full trajectories (faint) and current point (bold)
-        for name in marker_names:
-            marker = self.model.markers.get(name)
-            if marker is None:
-                continue
-            pos = marker.position  # (N,3)
-            if pos.shape[0] == 0:
-                continue
+        self._trail_lines = []
+        for i, name in enumerate(selected):
+            pos = positions[i]
+            (ln,) = ax.plot(
+                pos[:, 0],
+                pos[:, 1],
+                pos[:, 2],
+                alpha=0.35,
+                color=self._marker_colors[i],
+                linewidth=1.0,
+                label=name,
+            )
+            self._trail_lines.append(ln)
 
-            ax.plot(pos[:, 0], pos[:, 1], pos[:, 2], alpha=0.3, label=name)
-            if 0 <= frame_index < pos.shape[0]:
-                x, y, z = pos[frame_index]
-                ax.scatter([x], [y], [z], s=40)
+        # Current-frame point — high-contrast, larger.
+        self._point_artist = ax.scatter(
+            [],
+            [],
+            [],
+            s=80,
+            c="red",
+            edgecolors="black",
+            linewidths=0.6,
+            depthshade=False,
+        )
+
+        # Labels (hidden by default).
+        self._label_texts = []
+        for name in selected:
+            txt = ax.text(0.0, 0.0, 0.0, name, fontsize=8, color="black")
+            txt.set_visible(self.check_labels.isChecked())
+            self._label_texts.append(txt)
+
+        # Skeleton overlay.
+        segs = default_body_segments(selected)
+        self._skeleton_segments = tuple((s.a, s.b) for s in segs)
+        # Seed with a degenerate origin segment because ``add_collection3d``
+        # requires non-empty data to compute initial autoscale; we clear it
+        # immediately afterwards.
+        self._skeleton_collection = Line3DCollection(
+            [[(0.0, 0.0, 0.0), (0.0, 0.0, 0.0)]],
+            colors="black",
+            linewidths=2.0,
+            alpha=0.85,
+        )
+        ax.add_collection3d(self._skeleton_collection)
+        self._skeleton_collection.set_segments([])
+        self._skeleton_collection.set_visible(
+            self.check_skeleton.isChecked() and bool(self._skeleton_segments)
+        )
 
         ax.set_xlabel("X")
         ax.set_ylabel("Y")
         ax.set_zlabel("Z")
         ax.set_title("3D Marker Trajectories")
 
-        # Try to set equal aspect ratio
-        all_pts = []
-        for name in marker_names:
-            m = self.model.markers.get(name)
-            if m is not None and m.position.size > 0:
-                all_pts.append(m.position)
-        if all_pts:
-            pts = np.vstack(all_pts)
-            x_min, y_min, z_min = pts.min(axis=0)
-            x_max, y_max, z_max = pts.max(axis=0)
-            max_range = max(x_max - x_min, y_max - y_min, z_max - z_min)
-            if max_range > 0:
-                mid_x = 0.5 * (x_max + x_min)
-                mid_y = 0.5 * (y_max + y_min)
-                mid_z = 0.5 * (z_max + z_min)
+        # Equal aspect.
+        finite = positions[np.isfinite(positions).all(axis=2)]
+        if finite.size > 0:
+            mn = finite.min(axis=0)
+            mx = finite.max(axis=0)
+            max_range = float(np.max(mx - mn))
+            if max_range > 0.0:
+                mid = 0.5 * (mx + mn)
                 half = max_range / 2.0
-                ax.set_xlim(mid_x - half, mid_x + half)
-                ax.set_ylim(mid_y - half, mid_y + half)
-                ax.set_zlim(mid_z - half, mid_z + half)
+                ax.set_xlim(mid[0] - half, mid[0] + half)
+                ax.set_ylim(mid[1] - half, mid[1] + half)
+                ax.set_zlim(mid[2] - half, mid[2] + half)
 
-        ax.legend()
+        if len(selected) <= 12:
+            ax.legend(loc="upper right", fontsize=8)
+
         self.canvas_3d.fig.tight_layout()
-        self.canvas_3d.draw()  # type: ignore
+        self._render_current_frame()
+
+    def _teardown_artists(self) -> None:
+        self._trail_lines = []
+        self._point_artist = None
+        self._label_texts = []
+        self._skeleton_collection = None
+        self._skeleton_segments = ()
+        self._ax = None
+
+    # -------------------------------------------------- Per-frame render
+
+    def _render_current_frame(self) -> None:
+        if self.model is None or self._ax is None:
+            if self.model is not None:
+                # Update label even when nothing is selected.
+                self._update_frame_label()
+            return
+        frame = self.slider_frame.value()
+        self._update_frame_label()
+        if self._selected_positions.size == 0:
+            return
+
+        pts = self._selected_positions[:, frame, :]  # (M,3)
+        finite_mask = np.isfinite(pts).all(axis=1)
+
+        # Update current-frame scatter.
+        if self._point_artist is not None:
+            valid = pts[finite_mask]
+            if valid.size > 0:
+                self._point_artist._offsets3d = (
+                    valid[:, 0],
+                    valid[:, 1],
+                    valid[:, 2],
+                )
+            else:
+                self._point_artist._offsets3d = ([], [], [])
+
+        # Update labels at the current point.
+        for i, txt in enumerate(self._label_texts):
+            if finite_mask[i]:
+                p = pts[i]
+                txt.set_position((float(p[0]), float(p[1])))
+                # set_3d_properties for the z-coord on text3d.
+                if hasattr(txt, "set_3d_properties"):
+                    txt.set_3d_properties(float(p[2]))
+
+        # Update skeleton segments.
+        self._update_skeleton_segments()
+
+        self.canvas_3d.draw_idle()
+
+    def _update_skeleton_segments(self) -> None:
+        if (
+            self._skeleton_collection is None
+            or not self._skeleton_segments
+            or not self._selected_names
+        ):
+            return
+        if not self.check_skeleton.isChecked():
+            self._skeleton_collection.set_segments([])
+            return
+        frame = self.slider_frame.value()
+        idx = {n: i for i, n in enumerate(self._selected_names)}
+        segs: list[list[tuple[float, float, float]]] = []
+        for a, b in self._skeleton_segments:
+            ia = idx.get(a)
+            ib = idx.get(b)
+            if ia is None or ib is None:
+                continue
+            pa = self._selected_positions[ia, frame, :]
+            pb = self._selected_positions[ib, frame, :]
+            if not (np.isfinite(pa).all() and np.isfinite(pb).all()):
+                continue
+            segs.append(
+                [
+                    (float(pa[0]), float(pa[1]), float(pa[2])),
+                    (float(pb[0]), float(pb[1]), float(pb[2])),
+                ]
+            )
+        self._skeleton_collection.set_segments(segs)
+
+    def _update_frame_label(self) -> None:
+        frame = self.slider_frame.value()
+        if (
+            self.model is not None
+            and self.model.point_time is not None
+            and 0 <= frame < len(self.model.point_time)
+        ):
+            t = float(self.model.point_time[frame])
+            time_str = f"{t:.4f} s"
+        else:
+            time_str = "-"
+        self.label_frame_info.setText(
+            f"Frame: {frame} / {max(0, self._n_frames - 1)}  Time: {time_str}"
+        )
+
+    # Backwards-compatible name used by existing tests / code paths.
+    def update_view(self) -> None:
+        """Compatibility shim: rebuild the scene from scratch."""
+        self._rebuild_scene()
+
+    # ----------------------------------------------------------- CSV
+
+    def export_selected_markers_csv(self, path: str) -> None:
+        """Write the currently selected markers' trajectories to CSV.
+
+        Columns: frame, time_s, <marker>_x, <marker>_y, <marker>_z, …
+        """
+        if not isinstance(path, str) or not path:
+            raise ValueError("path must be a non-empty string")
+        if self.model is None:
+            raise ValueError("no model loaded")
+        names = self._selected_names or self.model.marker_names()
+        if not names:
+            raise ValueError("no markers selected to export")
+
+        header = ["frame", "time_s"]
+        for name in names:
+            header += [f"{name}_x", f"{name}_y", f"{name}_z"]
+
+        n = self._n_frames
+        time_arr = (
+            self.model.point_time
+            if self.model.point_time is not None
+            else np.full(n, np.nan)
+        )
+
+        with open(path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(header)
+            for fr in range(n):
+                row: list[Any] = [fr, float(time_arr[fr]) if fr < len(time_arr) else ""]
+                for name in names:
+                    m = self.model.markers.get(name)
+                    if m is None or m.position.size == 0 or fr >= m.position.shape[0]:
+                        row += ["", "", ""]
+                    else:
+                        x, y, z = m.position[fr]
+                        row += [float(x), float(y), float(z)]
+                writer.writerow(row)
+
+    # -------------------------------------------------- Show/Hide events
+
+    def hideEvent(self, event: QtGui.QHideEvent) -> None:  # noqa: N802 (Qt)
+        """Pause playback when the tab is hidden."""
+        self.pause()
+        super().hideEvent(event)

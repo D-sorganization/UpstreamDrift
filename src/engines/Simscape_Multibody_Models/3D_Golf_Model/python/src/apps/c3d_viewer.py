@@ -22,6 +22,7 @@ from .core.models import C3DDataModel
 from .services.loader_thread import C3DLoaderThread
 from .ui.tabs.analog_plot_tab import AnalogPlotTab
 from .ui.tabs.analysis_tab import AnalysisTab
+from .ui.tabs.force_plot_tab import ForcePlotTab
 from .ui.tabs.marker_plot_tab import MarkerPlotTab
 from .ui.tabs.overview_tab import OverviewTab
 from .ui.tabs.viewer_3d_tab import Viewer3DTab
@@ -62,6 +63,13 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         self.action_open.setStatusTip("Open a C3D file for analysis")
         self.action_open.triggered.connect(self.open_c3d_file)
 
+        self.action_export_csv = QtGui.QAction("Export markers to &CSV…", self)
+        self.action_export_csv.setStatusTip(
+            "Export selected 3D markers' trajectories to CSV"
+        )
+        self.action_export_csv.triggered.connect(self._export_markers_csv)
+        self.action_export_csv.setEnabled(False)
+
         self.action_exit = QtGui.QAction("E&xit", self)
         self.action_exit.setShortcut("Ctrl+Q")
         self.action_exit.triggered.connect(self.close)
@@ -78,6 +86,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         file_menu = menubar.addMenu("&File")
         if file_menu is not None:
             file_menu.addAction(self.action_open)
+            file_menu.addAction(self.action_export_csv)
             file_menu.addSeparator()
             file_menu.addAction(self.action_exit)
 
@@ -94,6 +103,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         self.analog_plot_tab = AnalogPlotTab()
         self.viewer3d_tab = Viewer3DTab()
         self.analysis_tab = AnalysisTab()
+        self.force_plot_tab = ForcePlotTab()
 
         self.tabs.addTab(self.overview_tab, "Overview")
         self.tabs.setTabToolTip(0, "Metadata and file information")
@@ -105,6 +115,8 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         self.tabs.setTabToolTip(3, "3D interactive view of markers")
         self.tabs.addTab(self.analysis_tab, "Analysis")
         self.tabs.setTabToolTip(4, "Kinematic analysis and calculations")
+        self.tabs.addTab(self.force_plot_tab, "Force Plates")
+        self.tabs.setTabToolTip(5, "Force plate GRF and COP visualization")
 
         self.setCentralWidget(self.tabs)
 
@@ -254,6 +266,28 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         self.analog_plot_tab.update_from_model(self.model)
         self.viewer3d_tab.update_from_model(self.model)
         self.analysis_tab.update_from_model(self.model)
+        self.force_plot_tab.update_from_model(self.model)
+        self.action_export_csv.setEnabled(True)
+
+    def _export_markers_csv(self) -> None:
+        """Export the 3D viewer's selected markers to CSV."""
+        if self.model is None:
+            QtWidgets.QMessageBox.information(self, "Export markers", "No file loaded.")
+            return
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Export markers to CSV", "", "CSV files (*.csv)"
+        )
+        if not path:
+            return
+        try:
+            self.viewer3d_tab.export_selected_markers_csv(path)
+        except (OSError, ValueError) as e:
+            QtWidgets.QMessageBox.warning(
+                self, "Export failed", f"Could not write CSV:\n{e}"
+            )
+            return
+        if (sb := self.statusBar()) is not None:
+            sb.showMessage(f"Exported markers to {os.path.basename(path)}")
 
 
 def main() -> None:

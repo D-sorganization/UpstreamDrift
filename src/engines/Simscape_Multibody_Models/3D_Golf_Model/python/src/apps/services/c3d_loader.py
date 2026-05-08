@@ -7,7 +7,7 @@ import numpy as np
 
 from ...c3d_reader import C3DDataReader  # type: ignore
 from ...logger_utils import log_execution_time
-from ..core.models import AnalogData, C3DDataModel, MarkerData
+from ..core.models import AnalogData, C3DDataModel, C3DEvent, MarkerData
 
 
 def _build_markers(df_points: Any, marker_names: list[str]) -> dict[str, MarkerData]:
@@ -137,6 +137,14 @@ def load_c3d_file(filepath: str) -> C3DDataModel:
         first_analog = next(iter(analog.values()))
         analog_time = np.arange(len(first_analog.values)) / metadata_obj.analog_rate
 
+    events: list[C3DEvent] = []
+    if getattr(metadata_obj, "events", None):
+        for ev in metadata_obj.events:
+            try:
+                events.append(C3DEvent(label=str(ev.label), time=float(ev.time)))
+            except (AttributeError, TypeError, ValueError):
+                continue
+
     return C3DDataModel(
         filepath=filepath,
         markers=markers,
@@ -146,4 +154,5 @@ def load_c3d_file(filepath: str) -> C3DDataModel:
         point_time=frame_time,
         analog_time=analog_time,
         metadata=_build_metadata_ui(filepath, metadata_obj),
+        events=events,
     )
