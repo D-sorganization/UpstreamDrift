@@ -27,7 +27,23 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from pydantic.functional_validators import AfterValidator
 from typing import Annotated
 
-from src.shared.python.contracts import invariant
+# Local invariant decorator factory.
+#
+# NOTE: this used to import ``invariant`` from ``src.shared.python.contracts``
+# but that symbol is a runtime ``invariant(condition, message)`` checker,
+# not a decorator factory. Using it as ``@invariant("name")`` raises
+# ``TypeError: missing 'message'`` at class-definition time and prevented
+# the entire ``motion_pipeline`` package from importing. We provide a
+# minimal local decorator that records the invariant name and returns the
+# bound method unchanged so contract checks remain Pydantic-driven.
+def invariant(name: str):  # type: ignore[no-redef]
+    """Tag a method as a class invariant. The check is informational only."""
+
+    def decorator(func):
+        func.__invariant_name__ = name
+        return func
+
+    return decorator
 
 
 # =============================================================================
