@@ -88,7 +88,7 @@ function sim_out = extract_sim_out(simOut, joint_names, opts)
     sim_out.omega = sim_out.qd;  % alias for clarity
 
     % --- 5. Populate club kinematics ---------------------------------------
-    sim_out.r_butt     = local_pull_named(simOut, ["MidpointPosition","ButtPosition","HandPosition","r_butt"], time, 3);
+    sim_out.r_butt     = local_pull_named(simOut, ["MPGlobalPosition","MidpointPosition","ButtPosition","HandPosition","r_butt"], time, 3);
     sim_out.r_clubhead = local_pull_named(simOut, ["CHGlobalPosition","ClubheadPosition","ClubheadPos","r_clubhead"], time, 3);
     sim_out.q_club     = local_pull_named(simOut, ["ClubQuat","ClubOrientation","q_club"], time, 4);
     sim_out.v_clubhead = local_pull_named(simOut, ["CHGlobalVelocity","ClubheadVelocity","v_clubhead"], time, 3);
@@ -117,13 +117,20 @@ end
 function [status, message] = local_resolve_status(simOut)
     status = "success";
     message = "";
+    % Simulink StopEvent values indicating normal (non-error) completion.
+    % "ReachedStopTime" is the standard value when the model runs to its
+    % configured stop time.  "CompletedNormally" appears in some older
+    % SimulationMetadata schemas.  "SimulationStopped" is produced by a
+    % Simulink Stop block — still a controlled, successful exit.
+    success_events = ["ReachedStopTime", "CompletedNormally", ...
+                      "SimulationStopped", "ExternalInputStopped"];
     try
         if isprop(simOut, 'SimulationMetadata') || isfield(simOut, 'SimulationMetadata')
             md = simOut.SimulationMetadata;
             if isfield(md, 'ExecutionInfo') || isprop(md, 'ExecutionInfo')
                 ex = md.ExecutionInfo;
                 if isfield(ex, 'StopEvent') || isprop(ex, 'StopEvent')
-                    if string(ex.StopEvent) ~= "CompletedNormally"
+                    if ~any(string(ex.StopEvent) == success_events)
                         status = "failed";
                         if isfield(ex, 'ErrorDiagnostic') && ~isempty(ex.ErrorDiagnostic)
                             message = string(ex.ErrorDiagnostic.message);
@@ -144,8 +151,31 @@ function [status, message] = local_resolve_status(simOut)
 end
 
 %% ----------------------------------------------------------------------
-function t = local_resolve_time(simOut, opts) %#ok<INUSD>
+function t = local_resolve_time(simOut, opts)
+%LOCAL_RESOLVE_TIME  Return the canonical sample-rate grid.
+%   Primary:  build the analytic grid from opts.sample_rate + opts.simulation_time.
+%             This guarantees exactly N = floor(T*fs)+1 rows that match the
+%             target frame count — the adaptive solver tout is intentionally
+%             NOT used as the output grid (it has variable step count).
+%   Fallback: raw tout / logsout time when opts lacks sample_rate or
+%             simulation_time (should not normally happen).
     t = [];
+
+    % --- Primary: analytic grid from opts (canonical, preferred) --------
+    try
+        if isfield(opts, 'sample_rate') && isfield(opts, 'simulation_time')
+            sr = double(opts.sample_rate);
+            st = double(opts.simulation_time);
+            if sr > 0 && st > 0
+                dt = 1.0 / sr;
+                t = (0 : dt : st)';
+                return;
+            end
+        end
+    catch
+    end
+
+    % --- Fallback: raw tout / time property on simOut -------------------
     candidates = {'tout', 'time'};
     for k = 1:numel(candidates)
         try
@@ -159,7 +189,8 @@ function t = local_resolve_time(simOut, opts) %#ok<INUSD>
         catch
         end
     end
-    % Try logsout first signal
+
+    % --- Last resort: first logsout element time axis -------------------
     try
         if isprop(simOut, 'logsout') && ~isempty(simOut.logsout)
             ls = simOut.logsout;
