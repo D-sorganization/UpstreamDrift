@@ -1,11 +1,16 @@
-"""Test URDF schema validation for humanoid character builder."""
+"""Test URDF schema validation for humanoid character builder.
+
+lxml is optional; skip the whole module when missing. Core schema
+contracts are also covered in test_urdf_quality.py.
+"""
 
 import pytest
-from lxml import etree
 
-from humanoid_character_builder import CharacterBuilder
-from humanoid_character_builder.core.body_parameters import BodyParameters
-from humanoid_character_builder.presets.loader import list_available_presets
+etree = pytest.importorskip("lxml.etree")
+
+from humanoid_character_builder import CharacterBuilder  # noqa: E402
+from humanoid_character_builder.core.body_parameters import BodyParameters  # noqa: E402
+from humanoid_character_builder.presets.loader import list_available_presets  # noqa: E402
 
 
 # URDF XML namespace and root element validation

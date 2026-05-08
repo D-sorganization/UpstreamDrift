@@ -11,6 +11,7 @@ from ._mesh_smplx import (
     SMPLXMeshGenerator,
     SMPLX_AVAILABLE,
     TRIMESH_AVAILABLE,
+    _smplx_module,  # type: ignore[attr-defined]
     _trimesh_module,  # type: ignore[attr-defined]
 )
 from ._mesh_types import (
@@ -29,6 +30,7 @@ __all__ = [
     "SMPLXMeshGenerator",
     "SMPLX_AVAILABLE",
     "TRIMESH_AVAILABLE",
+    "_smplx_module",
     "_trimesh_module",
 ]
 
