@@ -24,6 +24,9 @@ Preferred imports (direct from package, since src/shared/python is on sys.path):
 
 import importlib
 from pathlib import Path
+from pkgutil import extend_path
+
+__path__ = extend_path(__path__, __name__)
 
 # Suite root — the repository root (3 levels up from src/shared/python)
 SUITE_ROOT: Path = Path(__file__).parent.parent.parent.parent
