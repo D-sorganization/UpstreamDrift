@@ -10,9 +10,7 @@ Validates:
 from __future__ import annotations
 
 import pytest
-import numpy as np
 from src.shared.python.motion_matching.performance_baseline import (
-    REGRESSION_TOLERANCE,
     BenchmarkResult,
     PerformanceBaseline,
     PerformanceGate,

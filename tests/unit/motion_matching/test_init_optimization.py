@@ -11,6 +11,7 @@ Validates:
 from __future__ import annotations
 
 import time
+
 import pytest
 from src.shared.python.motion_matching.engine_init_profiler import (
     CacheEntry,

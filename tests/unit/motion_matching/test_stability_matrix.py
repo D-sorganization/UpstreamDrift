@@ -9,10 +9,9 @@ Validates:
 
 from __future__ import annotations
 
-import pytest
 import numpy as np
+import pytest
 from src.shared.python.motion_matching.stability_matrix import (
-    TOLERANCE_MAP,
     CanonicalTestCase,
     InitialPose,
     StabilityBoundary,

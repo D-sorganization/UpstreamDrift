@@ -7,9 +7,8 @@ across physics engines (Drake, OpenSim, MuJoCo, Pinocchio) with shared utilities
 Run with: python3 -m pytest tests/integration/test_wave2_cross_repo.py -v
 """
 
-import sys
-import os
 import importlib.util
+import sys
 from pathlib import Path
 
 import pytest
@@ -22,14 +21,14 @@ class TestToolsSymlinkIntegration:
         """Symlink vendor/ud-tools/ should exist."""
         vendor_path = Path(__file__).parent.parent.parent / "vendor" / "ud-tools"
         assert vendor_path.exists(), f"vendor/ud-tools not found at {vendor_path}"
-        assert vendor_path.is_dir(), f"vendor/ud-tools is not a directory"
+        assert vendor_path.is_dir(), "vendor/ud-tools is not a directory"
 
     def test_tools_contracts_import(self):
         """Should be able to import Tools contracts module."""
         try:
             from src.shared.python.contracts import (
-                precondition_check,
                 postcondition_check,
+                precondition_check,
             )
 
             assert callable(precondition_check)
@@ -73,10 +72,10 @@ class TestGasificationModelIntegration:
         """Verify Tools API hasn't changed in breaking ways."""
         # Check for expected function signatures
         try:
-            from src.shared.python.contracts import precondition_check
-
             # Verify signature: precondition_check(condition, message)
             import inspect
+
+            from src.shared.python.contracts import precondition_check
 
             sig = inspect.signature(precondition_check)
             params = list(sig.parameters.keys())
@@ -225,7 +224,6 @@ class TestSymlinkPerformance:
 
     def test_import_reproducible(self):
         """Multiple imports via symlink should be consistent."""
-        from src.shared.python.contracts import precondition_check
 
         # Second import should use cache, be instant
         import time
