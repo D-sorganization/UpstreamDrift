@@ -28,6 +28,7 @@ from .jacobians import (
     compute_qpos_jacobian,
     polynomial_du_dtheta,
 )
+from .provider import MujocoFitSwingProvider
 from .simulate import (
     SimOptions,
     SimOut,
@@ -47,6 +48,7 @@ __all__: list[str] = [
     "FitResult",
     "JacobianCache",
     "MinimizerOptions",
+    "MujocoFitSwingProvider",
     "PolynomialTorqueDriver",
     "SimOptions",
     "SimOut",
