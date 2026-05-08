@@ -3,10 +3,11 @@
 import numpy as np
 from PyQt6 import QtWidgets
 
+from src.shared.python.qt_utils.wheel_event_filter import suppress_wheel_on_widgets
+
 from ...core.models import C3DDataModel
 from ...services.analysis import compute_marker_statistics
 from ..widgets.mpl_canvas import MplCanvas
-from src.shared.python.qt_utils.wheel_event_filter import suppress_wheel_on_widgets
 
 
 class AnalysisTab(QtWidgets.QWidget):

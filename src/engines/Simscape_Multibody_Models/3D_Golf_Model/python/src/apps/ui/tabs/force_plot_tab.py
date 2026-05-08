@@ -6,8 +6,9 @@ Provides GRF time-series plots and COP trajectory visualization.
 
 from PyQt6 import QtWidgets
 
-from ...core.models import C3DDataModel
 from src.shared.python.qt_utils.wheel_event_filter import suppress_wheel_on_widgets
+
+from ...core.models import C3DDataModel
 from ..widgets.mpl_canvas import MplCanvas
 
 
