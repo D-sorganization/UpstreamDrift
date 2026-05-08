@@ -10,6 +10,7 @@ from __future__ import annotations
 import contextlib
 import logging
 import os
+import shutil
 import subprocess
 import tempfile
 import threading
@@ -67,6 +68,14 @@ class DockerMixin:
     """
 
     @staticmethod
+    def _get_docker_cmd() -> list[str]:
+        if shutil.which("docker"):
+            return ["docker"]
+        if os.name == "nt" and shutil.which("wsl"):
+            return ["wsl", "docker"]
+        return ["docker"]
+
+    @staticmethod
     def _generate_update_dockerfile() -> str:
         """Generate a minimal Dockerfile to add missing dependencies."""
         return (
@@ -102,8 +111,7 @@ class DockerMixin:
     def _verify_docker_update(self) -> None:
         """Run a quick container test to verify defusedxml is available."""
         host = cast("DockerProtocol", self)
-        test_cmd = [
-            "docker",
+        test_cmd = self._get_docker_cmd() + [
             "run",
             "--rm",
             "upstream-drift:engine",
@@ -146,7 +154,7 @@ class DockerMixin:
                     with open(dockerfile_path, "w") as f:
                         f.write(dockerfile_content)
 
-                    cmd = ["docker", "build", "-t", "upstream-drift:engine", "."]
+                    cmd = self._get_docker_cmd() + ["build", "-t", "upstream-drift:engine", "."]
                     host.root.after(0, host.log, f"Running: {' '.join(cmd)}")
                     host.root.after(
                         0, host.log, "Adding defusedxml to upstream-drift..."

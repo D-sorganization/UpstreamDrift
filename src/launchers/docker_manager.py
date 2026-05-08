@@ -7,8 +7,17 @@ orthogonality of the main launcher application.
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 from pathlib import Path
+
+def get_docker_cmd() -> list[str]:
+    """Get the base docker command, using WSL fallback on Windows if needed."""
+    if shutil.which("docker"):
+        return ["docker"]
+    if os.name == "nt" and shutil.which("wsl"):
+        return ["wsl", "docker"]
+    return ["docker"]
 
 from PyQt6.QtCore import QThread, pyqtSignal
 
@@ -36,7 +45,7 @@ class DockerCheckThread(QThread):
         """Run docker check."""
         try:
             secure_run(
-                ["docker", "--version"],
+                get_docker_cmd() + ["--version"],
                 timeout=5.0,
                 check=True,
                 stdout=subprocess.DEVNULL,
@@ -77,8 +86,7 @@ class DockerBuildThread(QThread):
             )
             return
 
-        cmd = [
-            "docker",
+        cmd = get_docker_cmd() + [
             "build",
             "-t",
             self.image_name,
@@ -177,7 +185,7 @@ class DockerLauncher:
         """
         try:
             result = subprocess.run(
-                ["docker", "image", "inspect", self.image_name],
+                get_docker_cmd() + ["image", "inspect", self.image_name],
                 capture_output=True,
                 timeout=10,
             )
@@ -186,7 +194,7 @@ class DockerLauncher:
 
             for legacy_image in LEGACY_DOCKER_IMAGE_ALIASES:
                 legacy_result = subprocess.run(
-                    ["docker", "image", "inspect", legacy_image],
+                    get_docker_cmd() + ["image", "inspect", legacy_image],
                     capture_output=True,
                     timeout=10,
                 )
@@ -223,8 +231,7 @@ class DockerLauncher:
             raise ValueError("model_type must be provided")
         if not (model_type is not None):
             raise ValueError("model_type must be provided")
-        cmd = [
-            "docker",
+        cmd = get_docker_cmd() + [
             "run",
             "--rm",
             "-v",
