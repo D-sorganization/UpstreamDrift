@@ -15,7 +15,10 @@ pytest.importorskip("PyQt6")
 
 @pytest.fixture(scope="module")
 def qt_app():
-    from PyQt6.QtWidgets import QApplication
+    try:
+        from PyQt6.QtWidgets import QApplication
+    except (ImportError, OSError) as e:  # noqa: F841
+        pytest.skip(f"PyQt6 runtime unavailable (import/runtime error): {e}")
 
     app = QApplication.instance() or QApplication(sys.argv[:1])
     yield app
