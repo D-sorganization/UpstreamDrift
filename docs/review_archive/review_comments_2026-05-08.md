@@ -34,6 +34,21 @@ The new tile path is a Python module string (`src.tools.starting_pose_matcher.__
 
 ---
 
+### PR #4505: src/tools/starting_pose_matcher/gui_source_panel.py:389
+
+Actionable: Yes
+Has Suggestion: No
+
+```
+**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Pass selected marker set into body-target loader**
+
+The marker-set chooser never affects loaded data: `_load_body()` calls `_safe_load_body_target()` with only `path`, `opts`, and `impact_source`, so `combo_marker_set.currentText()` is ignored. In practice, switching between "Anatomical 28" / "All markers" loads the same body target, which makes this UI control a no-op and can mislead users into thinking they...
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4505#discussion_r3210242653)
+
+---
+
 ### PR #4496: tests/unit/motion_matching/test_body_skeleton.py:7
 
 Actionable: Yes
@@ -76,6 +91,21 @@ Marking this alias as hidden is not sufficient to prevent duplicate cards in the
 ```
 
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4500#discussion_r3210224508)
+
+---
+
+### PR #4505: src/tools/starting_pose_matcher/gui_source_panel.py:304
+
+Actionable: Yes
+Has Suggestion: No
+
+```
+**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Clear cached targets when restoring session source paths**
+
+`restore()` updates checkbox/path UI state but does not reset `_club_target` / `_body_target`, so previously loaded in-memory targets can remain active after loading a different session. If a user restores a session with new paths (or no files), the panel can still emit old targets while displaying the new filenames/flags, producing stale-data behavi...
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4505#discussion_r3210242660)
 
 ---
 

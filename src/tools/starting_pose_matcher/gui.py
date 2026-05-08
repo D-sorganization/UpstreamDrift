@@ -108,6 +108,12 @@ from src.tools.starting_pose_matcher.skeleton_provider import (
     JsonSkeletonProvider,
     SkeletonProvider,
 )
+from src.tools.starting_pose_matcher.gui_source_panel import DataSourcesPanel
+from src.tools.starting_pose_matcher.session_schema import (
+    DataSourcesBlock,
+    parse_data_sources,
+    serialize_data_sources,
+)
 
 # Shared 3D-rendering helpers (per #4376 — DRY with the rest of the
 # motion-matching diagnostics).  Used by ``_setup_axes`` to fit the view
@@ -608,8 +614,15 @@ class StartingPoseMatcher(QMainWindow):
         # Vertical splitter: every group can be resized.  Sections in order.
         self.v_splitter = QSplitter(Qt.Orientation.Vertical)
         self.v_splitter.setChildrenCollapsible(True)
+        # Multi-source toggle panel (issue #4480).  Lives alongside the
+        # legacy Mocap-Source group; either may be used to drive the view.
+        self.source_panel = DataSourcesPanel()
+        self.source_panel.targets_changed.connect(self._on_multi_source_changed)
+        self._latest_multi_source: object | None = None
+
         self._sections: dict[str, QGroupBox] = {
             "Mocap Source": self._build_file_box(),
+            "Data sources": self.source_panel,
             "Event Labels": self._build_event_labels_box(),
             "Pose Slots": self._build_pose_box(),
             "Playback": self._build_playback_box(),
@@ -622,7 +635,7 @@ class StartingPoseMatcher(QMainWindow):
             self._attach_help_button(box, name)
             self.v_splitter.addWidget(box)
         # Reasonable starting heights (px) so big sections aren't squished.
-        self.v_splitter.setSizes([90, 160, 180, 220, 200, 180, 280, 140])
+        self.v_splitter.setSizes([90, 200, 160, 180, 220, 200, 180, 280, 140])
         left_col.addWidget(self.v_splitter, stretch=1)
 
         self.h_splitter.addWidget(scroll)
@@ -2146,6 +2159,10 @@ class StartingPoseMatcher(QMainWindow):
                 "preset": self.event_label_preset,
                 "labels": dict(self.event_labels),
             },
+            # Issue #4480: multi-source toggle state.  Older sessions will
+            # not have this block; ``_apply_session`` treats absence as the
+            # empty default.
+            "data_sources": self._serialize_data_sources(),
         }
 
     def _on_save_session_clicked(self) -> None:
@@ -2402,6 +2419,9 @@ class StartingPoseMatcher(QMainWindow):
                     with QSignalBlocker(self.event_preset_combo):
                         self.event_preset_combo.setCurrentIndex(idx)
         self._refresh_event_label_dependents()
+
+        # Issue #4480: data-sources panel.  Missing block → empty default.
+        self._apply_data_sources(d.get("data_sources"))
 
         self._redraw()
 
@@ -2874,6 +2894,36 @@ class StartingPoseMatcher(QMainWindow):
             i = max(0, min(slot.trajectory_frame_index, len(slot.trajectory) - 1))
             return slot.trajectory.frames[i]
         return slot.skeleton
+
+    # --------------------------------------------------------------------- #
+    # Multi-source target panel hook (issue #4480)                          #
+    # --------------------------------------------------------------------- #
+
+    def _on_multi_source_changed(self, target: object) -> None:
+        """Cache the latest ``MultiSourceTarget`` from the data-sources panel.
+
+        Downstream consumers (cost/animation, landed in later issues) can
+        read ``self._latest_multi_source`` to dispatch on whichever subset
+        of targets the user toggled on.
+        """
+        self._latest_multi_source = target
+        if target is None:
+            logger.info("Data-sources panel cleared.")
+        else:
+            logger.info(
+                "Data-sources panel: club=%s body=%s",
+                getattr(target, "has_club", lambda: False)(),
+                getattr(target, "has_body", lambda: False)(),
+            )
+
+    def _serialize_data_sources(self) -> dict[str, Any]:
+        """Snapshot the data-sources panel for the session JSON."""
+        return serialize_data_sources(self.source_panel.snapshot())
+
+    def _apply_data_sources(self, block: dict[str, Any] | None) -> None:
+        """Restore the data-sources panel from a (possibly missing) block."""
+        parsed: DataSourcesBlock = parse_data_sources(block)
+        self.source_panel.restore(parsed)
 
 
 # --------------------------------------------------------------------------- #

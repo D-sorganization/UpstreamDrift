@@ -65,7 +65,11 @@ from src.shared.python.motion_matching.loaders.excel import (
     read_excel_event_markers,
 )
 from src.shared.python.motion_matching.load_club_target import load_club_target
+from src.shared.python.motion_matching.multi_source_target import MultiSourceTarget
 from src.shared.python.motion_matching.target import AlignOptions, ClubTarget
+from src.tools.starting_pose_matcher.session_schema import (
+    SESSION_SCHEMA_VERSION as SESSION_SCHEMA_VERSION,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -75,8 +79,8 @@ logger = logging.getLogger(__name__)
 # ----------------------------------------------------------------------------
 CM_TO_M = 0.01
 
-# Schema version for session JSON
-SESSION_SCHEMA_VERSION = 3  # bump: fallbacks now FK-derived (#4376)
+# Schema version for session JSON: re-exported from ``session_schema`` at
+# the top of this file.  v4 added the ``data_sources`` block (issue #4480).
 
 # Event-label conventions.
 EVENT_KEYS: tuple[str, ...] = ("A", "T", "I", "F")
@@ -709,3 +713,48 @@ def solve_shaft_rz_deg(
     a_m = float(np.arctan2(shaft_m_xy[1], shaft_m_xy[0]))
     rz = float(np.degrees(a_t - a_m))
     return ((rz + 180.0) % 360.0) - 180.0
+
+
+# ---------------------------------------------------------------------------
+# Multi-source target dispatch (issue #4480)
+# ---------------------------------------------------------------------------
+
+
+def clubtarget_from_multi(target: MultiSourceTarget) -> ClubTarget | None:
+    """Return a plain ``ClubTarget`` view of the club slot, if any.
+
+    The matcher's existing rendering path takes a ``ClubTarget``-style
+    object (.butt / .clubhead / .club_quat / .time / .impact_idx).  A
+    ``ClubBallTarget`` exposes the same shape via composition (it has
+    a ``club: ClubTarget`` attribute when the dependency lands).  When
+    the dependency hasn't landed, the duck-typed slot itself satisfies
+    the read-only contract, so we return it as-is.
+
+    Returns ``None`` when the multi-source target has no club slot.
+    """
+    if not target.has_club():
+        return None
+    club_slot = target.club
+    # ClubBallTarget composes a ClubTarget under .club; prefer that when present.
+    inner = getattr(club_slot, "club", None)
+    if isinstance(inner, ClubTarget):
+        return inner
+    return club_slot if isinstance(club_slot, ClubTarget) else club_slot
+
+
+def dispatch_cost_inputs(target: MultiSourceTarget) -> dict[str, object]:
+    """Adapter that exposes a per-source dict for cost-function callers.
+
+    Cost terms today consume a single ``ClubTarget``.  As the body /
+    ball-aware cost terms come online (issues #4476, #4479) they will
+    select on ``has_body()`` / ``is_club_ball()``.  This helper centralises
+    the dispatch so callers don't sprinkle ``hasattr`` checks across
+    the codebase.
+    """
+    out: dict[str, object] = {"time": target.shared_time()}
+    if target.has_club():
+        out["club"] = clubtarget_from_multi(target)
+        out["has_ball"] = target.is_club_ball()
+    if target.has_body():
+        out["body"] = target.body
+    return out

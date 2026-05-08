@@ -78,6 +78,7 @@ from .load_club_target import (
     load_club_target_excel,
     load_club_target_mat,
 )
+from .multi_source_target import MultiSourceTarget
 from .plot_error_timecourse import plot_error_timecourse
 from .plot_fit_quality_card import (
     FitQualityScalars,
@@ -135,6 +136,7 @@ __all__ = [
     "FitQualityScalars",
     "FitResult",
     "MAX_BODY_POSITION_NORM_M",
+    "MultiSourceTarget",
     "REGULARIZER_KINDS",
     "SimOut",
     "SimOutput",
