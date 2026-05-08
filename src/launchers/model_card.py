@@ -172,7 +172,13 @@ class DraggableModelCard(QFrame):
         scale_factor = 1.0 + (value / 4.0) * 0.03
         if hasattr(self, "lbl_img") and hasattr(self, "base_pixmap"):  # noqa: SIM102
             if self.base_pixmap and not self.base_pixmap.isNull():
-                base_px = scaled_image_px(self.tile_scale)
+                # In list mode, icon is fixed at 60x60 regardless of tile_scale.
+                # Hover animation must use the same fixed base size to avoid
+                # clipping/jitter when zoom is adjusted.
+                if self._list_mode:
+                    base_px = 60  # Fixed icon size in list mode
+                else:
+                    base_px = scaled_image_px(self.tile_scale)
                 new_size = max(1, int(base_px * 0.9 * scale_factor))
                 scaled = self.base_pixmap.scaled(
                     new_size,
