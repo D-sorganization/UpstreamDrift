@@ -181,7 +181,7 @@ class PreferencesDialog(QDialog):
         try:
             from src.shared.python.theme import ThemeManager
 
-            fleet = ThemeManager.instance().get_available_fleet_themes()
+            fleet = ThemeManager.instance().get_available_themes()
             for name in fleet:
                 if name not in theme_items:
                     theme_items.append(name)
