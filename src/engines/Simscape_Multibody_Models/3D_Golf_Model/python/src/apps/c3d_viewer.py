@@ -20,11 +20,13 @@ from PyQt6.QtCore import Qt
 
 from .core.models import C3DDataModel
 from .services.loader_thread import C3DLoaderThread
+from .services.marker_export import export_markers
 from .ui.tabs.analog_plot_tab import AnalogPlotTab
 from .ui.tabs.analysis_tab import AnalysisTab
 from .ui.tabs.force_plot_tab import ForcePlotTab
 from .ui.tabs.marker_plot_tab import MarkerPlotTab
 from .ui.tabs.overview_tab import OverviewTab
+from .ui.tabs.segments_tab import SegmentsTab
 from .ui.tabs.viewer_3d_tab import Viewer3DTab
 
 # ---------------------------------------------------------------------------
@@ -63,12 +65,14 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         self.action_open.setStatusTip("Open a C3D file for analysis")
         self.action_open.triggered.connect(self.open_c3d_file)
 
-        self.action_export_csv = QtGui.QAction("Export markers to &CSV…", self)
-        self.action_export_csv.setStatusTip(
-            "Export selected 3D markers' trajectories to CSV"
+        self.action_export_markers = QtGui.QAction("&Export markers…", self)
+        self.action_export_markers.setStatusTip(
+            "Export selected markers, components, and frame range to CSV/JSON/NPZ"
         )
-        self.action_export_csv.triggered.connect(self._export_markers_csv)
-        self.action_export_csv.setEnabled(False)
+        self.action_export_markers.triggered.connect(self._export_markers_dialog)
+        self.action_export_markers.setEnabled(False)
+        # Backwards-compatible alias for any existing test references.
+        self.action_export_csv = self.action_export_markers
 
         self.action_exit = QtGui.QAction("E&xit", self)
         self.action_exit.setShortcut("Ctrl+Q")
@@ -86,7 +90,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         file_menu = menubar.addMenu("&File")
         if file_menu is not None:
             file_menu.addAction(self.action_open)
-            file_menu.addAction(self.action_export_csv)
+            file_menu.addAction(self.action_export_markers)
             file_menu.addSeparator()
             file_menu.addAction(self.action_exit)
 
@@ -102,8 +106,11 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         self.marker_plot_tab = MarkerPlotTab()
         self.analog_plot_tab = AnalogPlotTab()
         self.viewer3d_tab = Viewer3DTab()
+        self.segments_tab = SegmentsTab()
         self.analysis_tab = AnalysisTab()
         self.force_plot_tab = ForcePlotTab()
+        # Plumb segment edits straight into the 3D viewer.
+        self.segments_tab.segments_changed.connect(self.viewer3d_tab.set_user_segments)
 
         self.tabs.addTab(self.overview_tab, "Overview")
         self.tabs.setTabToolTip(0, "Metadata and file information")
@@ -113,10 +120,12 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         self.tabs.setTabToolTip(2, "Analog data visualization")
         self.tabs.addTab(self.viewer3d_tab, "3D Viewer")
         self.tabs.setTabToolTip(3, "3D interactive view of markers")
+        self.tabs.addTab(self.segments_tab, "Segments")
+        self.tabs.setTabToolTip(4, "User-defined marker-pair segments")
         self.tabs.addTab(self.analysis_tab, "Analysis")
-        self.tabs.setTabToolTip(4, "Kinematic analysis and calculations")
+        self.tabs.setTabToolTip(5, "Kinematic analysis and calculations")
         self.tabs.addTab(self.force_plot_tab, "Force Plates")
-        self.tabs.setTabToolTip(5, "Force plate GRF and COP visualization")
+        self.tabs.setTabToolTip(6, "Force plate GRF and COP visualization")
 
         self.setCentralWidget(self.tabs)
 
@@ -265,29 +274,42 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         self.marker_plot_tab.update_from_model(self.model)
         self.analog_plot_tab.update_from_model(self.model)
         self.viewer3d_tab.update_from_model(self.model)
+        self.segments_tab.update_from_model(self.model)
         self.analysis_tab.update_from_model(self.model)
         self.force_plot_tab.update_from_model(self.model)
-        self.action_export_csv.setEnabled(True)
+        self.action_export_markers.setEnabled(True)
 
-    def _export_markers_csv(self) -> None:
-        """Export the 3D viewer's selected markers to CSV."""
+    def _export_markers_dialog(self) -> None:
+        """Open the selective marker-export dialog."""
         if self.model is None:
             QtWidgets.QMessageBox.information(self, "Export markers", "No file loaded.")
             return
-        path, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, "Export markers to CSV", "", "CSV files (*.csv)"
-        )
-        if not path:
+        from .ui.dialogs.export_markers_dialog import ExportMarkersDialog
+
+        dlg = ExportMarkersDialog(self.model, self)
+        if dlg.exec() != QtWidgets.QDialog.DialogCode.Accepted:
+            return
+        params = dlg.export_params()
+        if params is None:
             return
         try:
-            self.viewer3d_tab.export_selected_markers_csv(path)
+            written = export_markers(
+                self.model,
+                params["marker_names"],
+                params["components"],
+                params["frame_range"],
+                params["fmt"],
+                params["path"],
+                include_time=params["include_time"],
+                include_residual=params["include_residual"],
+            )
         except (OSError, ValueError) as e:
             QtWidgets.QMessageBox.warning(
-                self, "Export failed", f"Could not write CSV:\n{e}"
+                self, "Export failed", f"Could not export markers:\n{e}"
             )
             return
         if (sb := self.statusBar()) is not None:
-            sb.showMessage(f"Exported markers to {os.path.basename(path)}")
+            sb.showMessage(f"Exported markers to {os.path.basename(str(written))}")
 
 
 def main() -> None:
