@@ -424,3 +424,23 @@ class CharacterBuilder:
             "is_end_effector": segment.is_end_effector,
             "vertex_group": segment.vertex_group,
         }
+
+
+# =============================================================================
+# Backward-compatibility re-exports
+# =============================================================================
+# These names were historically exported from this module. To maintain
+# backward compatibility for existing callers, we re-export them here.
+# New code should import directly from the source modules.
+
+from humanoid_character_builder.interfaces.options import ExportOptions
+from humanoid_character_builder.interfaces.quick import quick_build, quick_urdf
+
+__all__ = [
+    # Main classes
+    "CharacterBuilder",
+    # Re-exports for backward compatibility
+    "ExportOptions",
+    "quick_build",
+    "quick_urdf",
+]
