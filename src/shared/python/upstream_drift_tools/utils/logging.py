@@ -1,15 +1,15 @@
-"""Logging utilities for upstream_drift_tools.
-
-Uses shared logging configuration from utils.logging_utils.
-"""
+"""Logging utilities for upstream_drift_tools."""
 
 from __future__ import annotations
 
 import logging
 import sys
 
-# Import shared logging configuration
-from utils.logging_utils import DEFAULT_FORMAT
+# Default log format. Previously imported from a top-level ``utils.logging_utils``
+# module that does not exist in this repo, which raised ``ModuleNotFoundError``
+# in CI contexts where ``utils`` was not on ``sys.path``. Inlined here to make
+# the module self-contained.
+DEFAULT_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 
 def get_logger(
