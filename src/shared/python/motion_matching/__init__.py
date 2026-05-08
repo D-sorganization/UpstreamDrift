@@ -76,6 +76,7 @@ from .load_club_target import (
     load_club_target,
     load_club_target_c3d,
     load_club_target_excel,
+    load_club_target_mat,
 )
 from .plot_error_timecourse import plot_error_timecourse
 from .plot_fit_quality_card import (
@@ -152,6 +153,7 @@ __all__ = [
     "load_club_target",
     "load_club_target_c3d",
     "load_club_target_excel",
+    "load_club_target_mat",
     "must_be_finite_vector",
     "must_be_monotonic_time",
     "must_be_regularizer_kind",

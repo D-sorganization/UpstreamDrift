@@ -34,3 +34,18 @@ Importing `matplotlib` at module scope makes this test file fail during collecti
 
 ---
 
+### PR #4490: src/shared/python/motion_matching/loaders/matlab_dataset.py:150
+
+Actionable: Yes
+Has Suggestion: No
+
+```
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Replace params.Impact fallback for non-zero-centered time**
+
+When `time` does not span `0`, `_stamped_impact_index` falls back to `params.Impact` as if it were a full-trajectory row index, but this commit’s own documented dataset behavior says `params.Impact` is swing-segment-relative (not a global row). That means any valid `.mat` export with a shifted timestamp baseline (all-positive/all-negative `time`) wi...
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4490#discussion_r3210149886)
+
+---
+
