@@ -1,0 +1,100 @@
+# Subsystem Status Registry
+# This file declares the maturity status of each subsystem and its associated test paths.
+# CI will use this to enforce that production subsystems have passing tests.
+#
+# Status levels:
+#   - production: Tests must pass; CI will fail if tests are red
+#   - beta: Tests should pass; CI will report but not fail
+#   - alpha: Tests are experimental; failures are allowed
+#   - deprecated: Subsystem is being phased out
+
+subsystems:
+  - name: motion_matching
+    status: production
+    description: Motion matching system for character animation
+    test_paths:
+      - tests/motion_matching/
+      - tests/unit/motion_matching/
+    owner: motion-team
+    last_reviewed: 2026-05-01
+
+  - name: urdf
+    status: alpha
+    description: URDF / Character Builder system
+    test_paths:
+      - tests/unit/tools/humanoid_character_builder/
+      - tests/unit/tools/model_generation/
+    owner: tools-team
+    last_reviewed: 2026-04-15
+
+  - name: drake_engine
+    status: production
+    description: Drake physics engine integration
+    test_paths:
+      - tests/engines/drake/
+      - tests/unit/engines/drake/
+    owner: engine-team
+    last_reviewed: 2026-05-01
+
+  - name: opensim_engine
+    status: production
+    description: OpenSim physics engine integration
+    test_paths:
+      - tests/engines/opensim/
+      - tests/unit/engines/opensim/
+    owner: engine-team
+    last_reviewed: 2026-05-01
+
+  - name: pinocchio_engine
+    status: beta
+    description: Pinocchio kinematics engine
+    test_paths:
+      - tests/engines/pinocchio/
+      - tests/unit/engines/pinocchio/
+    owner: engine-team
+    last_reviewed: 2026-04-20
+
+  - name: simscape_engine
+    status: production
+    description: Simscape Multibody engine (MATLAB)
+    test_paths:
+      - tests/engines/simscape/
+      - tests/unit/engines/simscape/
+    owner: engine-team
+    last_reviewed: 2026-05-01
+
+  - name: api
+    status: production
+    description: REST API and web interface
+    test_paths:
+      - tests/api/
+      - tests/unit/api/
+    owner: platform-team
+    last_reviewed: 2026-05-01
+
+  - name: tools
+    status: beta
+    description: Utility tools and scripts
+    test_paths:
+      - tests/tools/
+      - tests/unit/tools/
+    owner: tools-team
+    last_reviewed: 2026-04-25
+
+  - name: config
+    status: production
+    description: Configuration management
+    test_paths:
+      - tests/config/
+      - tests/unit/config/
+    owner: platform-team
+    last_reviewed: 2026-05-01
+
+  - name: deployment
+    status: beta
+    description: Docker and deployment scripts
+    test_paths:
+      - tests/deployment/
+      - tests/docker/
+    owner: platform-team
+    last_reviewed: 2026-04-28
