@@ -125,8 +125,10 @@ except ImportError:
     # when running from the legacy directory path.
     here_dir = Path(__file__).parent
     sys.path.insert(0, str(here_dir))
-    # Add repo root (6 levels up from Motion Capture Plotter) for src.* imports
-    repo_root = here_dir.parents[6]
+    # Add repo root (8 levels up from Motion Capture Plotter) for src.* imports
+    # Path: Motion Capture Plotter -> golf_gui -> apps -> src -> matlab ->
+    #       3D_Golf_Model -> Simscape_Multibody_Models -> engines -> src -> repo root
+    repo_root = here_dir.parents[8]
     if str(repo_root) not in sys.path:
         sys.path.insert(0, str(repo_root))
     from starting_pose_core import (
