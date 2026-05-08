@@ -35,7 +35,6 @@ Or, from the GolfLauncher tile (registered in ``src/config/models.yaml``).
 """
 
 from __future__ import annotations
-from src.tools.starting_pose_matcher.utils import load_skeleton
 
 from contextlib import suppress
 import json
@@ -99,6 +98,7 @@ from src.tools.starting_pose_matcher.core import (
     SkeletonTrajectory,
     load_mocap_xlsx,
     load_simscape_trajectory_csv,
+    load_skeleton,
     phase_display_label as _phase_display_label,
     phase_key_from_label as _phase_key_from_label,
     read_event_header,
