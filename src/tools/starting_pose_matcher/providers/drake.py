@@ -106,11 +106,27 @@ class DrakeSkeletonProvider:
         # Load model
         if model_xml is not None:
             from pydrake.multibody.parser import Parser
+            import xml.etree.ElementTree as ET
             parser = Parser(self.plant)
-            parser.AddModelFromString(model_xml)
+            # Detect SDF vs URDF by parsing the XML root tag
+            # This is more robust than regex which can match comments or miss
+            # the root tag if it appears after a long prolog
+            try:
+                root = ET.fromstring(model_xml.strip())
+                is_sdf = root.tag == "sdf"
+            except ET.ParseError:
+                # If XML parsing fails, fall back to URDF (Drake's default)
+                is_sdf = False
+            if is_sdf:
+                parser.SetPackageMapAutoMerge(True)
+                parser.AddModelFromString(model_xml, "sdf")
+            else:
+                parser.SetPackageMapAutoMerge(True)
+                parser.AddModelFromString(model_xml, "urdf")
         else:
             from pydrake.multibody.parser import Parser
             parser = Parser(self.plant)
+            parser.SetPackageMapAutoMerge(True)
             parser.AddModelFromFile(model_path)
 
         # Finalize the plant
