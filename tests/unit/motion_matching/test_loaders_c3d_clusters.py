@@ -219,7 +219,7 @@ def test_sentinel_and_occluded_markers_excluded() -> None:
     p = _c3d(DRIVER_FILE)
     if p is None:
         pytest.skip(f"Missing {DRIVER_FILE}")
-    reader = c3d_loader._import_c3d_reader().C3DDataReader(p)
+    reader = c3d_loader.C3DDataReader(p)
     df = reader.points_dataframe(include_time=True, target_units="m")
     labels = list(reader.get_metadata().marker_labels)
     # Confirm presence of the bad markers in the raw labels and that the

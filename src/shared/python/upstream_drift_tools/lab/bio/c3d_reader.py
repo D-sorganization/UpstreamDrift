@@ -55,10 +55,6 @@ class C3DDataReader:
 
     def __init__(self, file_path: Path | str) -> None:
         """Initialize the C3D data reader with a file path."""
-        if not (file_path is not None):
-            raise ValueError("file_path must be provided")
-        if not (file_path is not None):
-            raise ValueError("file_path must be provided")
         self.file_path = Path(file_path)
         self._c3d_data: C3DMapping | None = None
         self._metadata: C3DMetadata | None = None
@@ -95,10 +91,6 @@ class C3DDataReader:
             ``residual`` (EzC3D stores residuals in the fourth point channel), and
             an optional ``time`` column in seconds.
         """
-        if not (include_time is not None):
-            raise ValueError("include_time must be provided")
-        if not (include_time is not None):
-            raise ValueError("include_time must be provided")
         c3d_data = self._load()
         metadata = self.get_metadata()
         scale = unit_scale(metadata.units, target_units)
@@ -119,10 +111,6 @@ class C3DDataReader:
         Rows are ordered by sample index and channel name so downstream GUI
         components can easily plot synchronized sensor traces.
         """
-        if not (include_time is not None):
-            raise ValueError("include_time must be provided")
-        if not (include_time is not None):
-            raise ValueError("include_time must be provided")
         return build_analog_dataframe(self._load(), self.get_metadata(), include_time)
 
     def export_points(
@@ -152,10 +140,6 @@ class C3DDataReader:
         Note:
             CSV output is automatically sanitized to prevent Excel Formula Injection.
         """
-        if not (output_path is not None):
-            raise ValueError("output_path must be provided")
-        if not (output_path is not None):
-            raise ValueError("output_path must be provided")
         dataframe = self.points_dataframe(
             include_time=include_time,
             markers=markers,
@@ -192,10 +176,6 @@ class C3DDataReader:
         Note:
             CSV output is automatically sanitized to prevent Excel Formula Injection.
         """
-        if not (output_path is not None):
-            raise ValueError("output_path must be provided")
-        if not (output_path is not None):
-            raise ValueError("output_path must be provided")
         dataframe = self.analog_dataframe(include_time=include_time)
         return export_dataframe(
             dataframe,
@@ -247,10 +227,6 @@ class C3DDataReader:
             - mx, my, mz: Moment components [N·m]
             - cop_x, cop_y, cop_z: COP position [m] (if compute_cop=True)
         """
-        if not (include_time is not None):
-            raise ValueError("include_time must be provided")
-        if not (include_time is not None):
-            raise ValueError("include_time must be provided")
         plate_channels = self.get_force_plate_channels()
         analog_df = self.analog_dataframe(include_time=False)
         metadata = self.get_metadata()

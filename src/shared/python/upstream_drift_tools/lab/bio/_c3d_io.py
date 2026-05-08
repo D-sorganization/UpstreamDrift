@@ -244,10 +244,6 @@ def export_dataframe(
     sanitize: bool = True,
 ) -> Path:
     """Export a DataFrame to CSV, JSON, or NPZ format."""
-    if not (dataframe is not None):
-        raise ValueError("dataframe must be provided")
-    if not (dataframe is not None):
-        raise ValueError("dataframe must be provided")
     path = Path(output_path).resolve()
 
     validate_export_path(path)

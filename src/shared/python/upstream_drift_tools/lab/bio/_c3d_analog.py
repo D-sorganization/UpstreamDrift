@@ -91,10 +91,6 @@ def detect_force_plate_channels(labels: list[str]) -> dict[int, dict[str, str]]:
 
 def force_plate_columns(include_time: bool, compute_cop: bool) -> list[str]:
     """Return column names for an empty force plate DataFrame."""
-    if not (include_time is not None):
-        raise ValueError("include_time must be provided")
-    if not (include_time is not None):
-        raise ValueError("include_time must be provided")
     columns = ["sample", "plate", "fx", "fy", "fz", "mx", "my", "mz"]
     if include_time:
         columns.insert(1, "time")
@@ -112,10 +108,6 @@ def build_plate_dataframe(
     ground_height: float,
 ) -> pd.DataFrame | None:
     """Build a DataFrame for a single force plate, or None if channels missing."""
-    if not (plate_num is not None):
-        raise ValueError("plate_num must be provided")
-    if not (plate_num is not None):
-        raise ValueError("plate_num must be provided")
     missing_keys = required_keys - set(channels.keys())
     if missing_keys:
         logger.warning(

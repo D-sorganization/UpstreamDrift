@@ -1,7 +1,7 @@
 """C3D loader for cluster-marker mocap files.
 
-Reuses the existing ``C3DDataReader`` from
-``src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/c3d_reader.py``.
+Reuses the canonical ``C3DDataReader`` from
+``src/shared/python/upstream_drift_tools/lab/bio/c3d_reader.py``.
 Marker-name discovery is heuristic because the cluster-marker set is not
 documented in this repo (issue #013 is the verification pass).
 """
@@ -9,15 +9,14 @@ documented in this repo (issue #013 is the verification pass).
 from __future__ import annotations
 
 import hashlib
-import importlib.util
 import logging
-import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 from src.shared.python.core.contracts import postcondition, precondition
+from src.shared.python.upstream_drift_tools.lab.bio.c3d_reader import C3DDataReader
 
 from ..club_target import AlignOptions, ClubTarget, SourceProvenance
 from ._align import detect_impact_index, resample_target
@@ -26,9 +25,6 @@ from ._quaternion import rotmat_to_quat
 
 logger = logging.getLogger(__name__)
 
-_C3D_READER_RELATIVE = Path(
-    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src"
-)
 BUTT_CANDIDATES: tuple[str, ...] = (
     "BUTT",
     "GRIP",
@@ -47,31 +43,6 @@ HEAD_CANDIDATES: tuple[str, ...] = (
     "ClubFace",
     "CLUB_HEAD",
 )
-
-
-def _import_c3d_reader():
-    """Side-load the legacy ``c3d_reader`` package by file path."""
-    if "_c3d_reader_compat" in sys.modules:
-        return sys.modules["_c3d_reader_compat"]
-    cwd = Path.cwd()
-    candidates = [cwd / _C3D_READER_RELATIVE]
-    for parent in cwd.parents:
-        candidates.append(parent / _C3D_READER_RELATIVE)
-    for base in candidates:
-        target = base / "c3d_reader.py"
-        if target.is_file():
-            if str(base) not in sys.path:
-                sys.path.insert(0, str(base))
-            spec = importlib.util.spec_from_file_location(
-                "_c3d_reader_compat", str(target)
-            )
-            if spec is None or spec.loader is None:
-                continue
-            module = importlib.util.module_from_spec(spec)
-            sys.modules["_c3d_reader_compat"] = module
-            spec.loader.exec_module(module)
-            return module
-    raise ImportError(f"Could not locate c3d_reader.py (searched relative to {cwd})")
 
 
 def _sha256_of(path: Path) -> str:
@@ -124,8 +95,7 @@ def load_club_target_c3d(path: Path | str, opts: AlignOptions) -> ClubTarget:
     cluster-marker convention is fully documented.
     """
     path = Path(path)
-    reader_mod = _import_c3d_reader()
-    reader = reader_mod.C3DDataReader(path)
+    reader = C3DDataReader(path)
     metadata = reader.get_metadata()
     df = reader.points_dataframe(include_time=True, target_units="m")
     labels = list(metadata.marker_labels)
