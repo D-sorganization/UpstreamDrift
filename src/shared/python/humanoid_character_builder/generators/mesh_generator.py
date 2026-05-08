@@ -7,7 +7,12 @@ from typing import Any
 
 from ._mesh_makehuman import MakeHumanMeshGenerator
 from ._mesh_primitives import PrimitiveMeshGenerator
-from ._mesh_smplx import SMPLXMeshGenerator
+from ._mesh_smplx import (
+    SMPLXMeshGenerator,
+    SMPLX_AVAILABLE,
+    TRIMESH_AVAILABLE,
+    _trimesh_module,  # type: ignore[attr-defined]
+)
 from ._mesh_types import (
     GeneratedMeshResult,
     MeshGeneratorBackend,
@@ -22,6 +27,9 @@ __all__ = [
     "MeshGeneratorInterface",
     "PrimitiveMeshGenerator",
     "SMPLXMeshGenerator",
+    "SMPLX_AVAILABLE",
+    "TRIMESH_AVAILABLE",
+    "_trimesh_module",
 ]
 
 logger = logging.getLogger(__name__)

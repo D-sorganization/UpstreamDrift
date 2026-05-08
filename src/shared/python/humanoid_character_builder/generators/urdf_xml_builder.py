@@ -15,6 +15,36 @@ from humanoid_character_builder.core.model import GeneratedJoint, GeneratedLink
 from humanoid_character_builder.generators.urdf_geometry import add_geometry_element
 
 
+def _compute_collision_exclusions(
+    links: dict[str, GeneratedLink],
+    joints: list[GeneratedJoint],
+) -> list[tuple[str, str]]:
+    """Compute collision exclusion pairs for adjacent segments.
+
+    Builds a parent-child map from joints and excludes collisions between
+    direct parent-child pairs (connected by joints).
+
+    Args:
+        links: Mapping of link-name -> GeneratedLink.
+        joints: Ordered list of GeneratedJoint instances.
+
+    Returns:
+        List of (link1, link2) tuples representing excluded collision pairs.
+    """
+    if links is None:
+        raise ValueError("links must be provided")
+    if joints is None:
+        raise ValueError("joints must be provided")
+    exclusions: set[tuple[str, str]] = set()
+
+    # Build parent-child relationships and exclude direct parent-child pairs
+    for joint in joints:
+        pair = tuple(sorted((joint.parent, joint.child)))
+        exclusions.add(pair)
+
+    return list(exclusions)
+
+
 def build_urdf_xml(
     robot_name: str,
     links: dict[str, GeneratedLink],
@@ -22,6 +52,7 @@ def build_urdf_xml(
     materials: dict[str, tuple[float, float, float, float]],
     pretty_print: bool = True,
     indent: str = "  ",
+    add_collision_exclusions: bool = True,
 ) -> str:
     """Build the complete URDF XML string.
 
@@ -32,6 +63,7 @@ def build_urdf_xml(
         materials: Mapping of material-name -> RGBA tuple.
         pretty_print: If True, apply ET.indent for human-readable output.
         indent: Indentation string used when pretty_print is True.
+        add_collision_exclusions: If True, add <gazebo> disable_collisions for adjacent links.
 
     Returns:
         URDF XML as a unicode string (no XML declaration header).
@@ -56,6 +88,15 @@ def build_urdf_xml(
     # Add joints
     for joint_data in joints:
         _add_joint_element(root, joint_data)
+
+    # Add collision exclusions (disable_collisions for adjacent segments)
+    if add_collision_exclusions:
+        exclusions = _compute_collision_exclusions(links, joints)
+        for link1, link2 in exclusions:
+            gazebo = ET.SubElement(root, "gazebo")
+            disable = ET.SubElement(gazebo, "disable_collisions")
+            disable.set("link1", link1)
+            disable.set("link2", link2)
 
     if pretty_print:
         ET.indent(root, space=indent)
