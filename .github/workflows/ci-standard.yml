@@ -58,6 +58,15 @@ jobs:
         shell: bash
         run: python3 scripts/check_workflow_inventory.py
 
+  urdf-layering:
+    name: Enforce URDF subsystem layering (ADR 0007)
+    runs-on: d-sorg-fleet
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - name: Run URDF layering guard
+        shell: bash
+        run: python3 scripts/ci/check_urdf_layering.py
+
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
     runs-on: d-sorg-fleet
