@@ -325,13 +325,17 @@ def test_rebuild_grid_multiple_columns(layout_manager, available_models) -> None
 
     grid_layout = MagicMock()
     grid_layout.count.return_value = 0
+    # Force COMFORTABLE (4 cols) so that 5 cards wrap to a second row.
+    from src.launchers.launcher_constants import ViewMode
+
+    layout_manager.set_view_mode(ViewMode.COMFORTABLE)
     layout_manager.model_order = ["model_1", "model_2", "model_3", "model_4", "model_5"]
     layout_manager.rebuild_grid(grid_layout)
 
     # Check that it wrapped around
     # 5 widgets + 1 header = 6 calls
     assert grid_layout.addWidget.call_count == 6
-    # The last call should be row=2, col=0 because GRID_COLUMNS=4 and row 0 is header
+    # The last call should be row=2, col=0 because columns=4 and row 0 is header
     last_call = grid_layout.addWidget.call_args_list[-1]
     assert last_call[0][1] == 2  # row
     assert last_call[0][2] == 0  # col
