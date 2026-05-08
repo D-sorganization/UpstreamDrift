@@ -1,111 +1,36 @@
 # Review Comments Archive - 2026-05-08
 
-Generated: 2026-05-08T10:29:35.487192
+Generated: 2026-05-08T14:31:49.295929
 
 ## Reviewer (chatgpt-codex-connector[bot]) (2 comments)
 
-### PR #4504: src/shared/python/motion_matching/loaders/c3d_body.py:393
+### PR #4641: tests/integration/test_urdf_cross_engine_fk.py:146
 
 Actionable: Yes
 Has Suggestion: No
 
 ```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Bypass wrist impact detection when impact_source is given**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Read Pinocchio body poses from frame placements**
 
-Even in the `impact_source is not None` branch, the loader still calls `_detect_impact_via_wrist`, so any explicit `marker_set` that omits `RWristTop`/`LWristTop` fails with `ValueError` before loading. This contradicts the documented behavior that `impact_source` provides the shared `time`/`impact_idx`, and it blocks valid custom marker subsets tha...
+`model.getBodyId()` returns a body/frame index, but this code uses that value to index `data.oMi`, which stores joint placements. When Pinocchio is available and a requested body exists, this can return the wrong transform (or raise on larger models), making the MuJoCo/Drake vs Pinocchio RMSE check invalid. Use the frame placement (`data.oMf[bid]` after `upda...
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4504#discussion_r3210255790)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4641#discussion_r3211471648)
 
 ---
 
-### PR #4500: src/config/launcher_manifest.json:163
+### PR #4641: .github/workflows/urdf-cross-engine-equivalence.yml:85
 
 Actionable: Yes
 Has Suggestion: No
 
 ```
-**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Use filesystem path for motion_target_preview tile**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Enforce at least two engines before running equivalence gate**
 
-The new tile path is a Python module string (`src.tools.starting_pose_matcher.__main__`) but launcher execution resolves `tile.path` as a filesystem artifact. In `SpecialAppHandler.launch`, `resolve_model_artifact_path` is called and then existence is checked (`src/launchers/launcher_model_handlers.py`), so this resolves to `/workspace/UpstreamDrift/src.to...
+This workflow suppresses install failures for every optional engine (`|| echo ...`), while the tests themselves skip missing backends via `importorskip`; as a result, the job can succeed with all equivalence tests skipped and no cross-engine comparison actually executed. Since this is intended as a parity gate, add a hard precheck that at least t...
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4500#discussion_r3210224501)
-
----
-
-### PR #4505: src/tools/starting_pose_matcher/gui_source_panel.py:389
-
-Actionable: Yes
-Has Suggestion: No
-
-```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Pass selected marker set into body-target loader**
-
-The marker-set chooser never affects loaded data: `_load_body()` calls `_safe_load_body_target()` with only `path`, `opts`, and `impact_source`, so `combo_marker_set.currentText()` is ignored. In practice, switching between "Anatomical 28" / "All markers" loads the same body target, which makes this UI control a no-op and can mislead users into thinking they...
-```
-
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4505#discussion_r3210242653)
-
----
-
-### PR #4496: tests/unit/motion_matching/test_body_skeleton.py:7
-
-Actionable: Yes
-Has Suggestion: No
-
-```
-**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Guard optional matplotlib import in unit test**
-
-Importing `matplotlib` at module scope makes this test file fail during collection when the optional GUI dependency is not installed (e.g., minimal CI/dev environments), so the suite errors out instead of skipping cleanly. The repo’s root `AGENTS.md` explicitly requires matplotlib/PyQt-dependent tests to wrap imports and call `pytest.skip(...)` on `ImportError`...
-```
-
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4496#discussion_r3210197994)
-
----
-
-### PR #4490: src/shared/python/motion_matching/loaders/matlab_dataset.py:150
-
-Actionable: Yes
-Has Suggestion: No
-
-```
-**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Replace params.Impact fallback for non-zero-centered time**
-
-When `time` does not span `0`, `_stamped_impact_index` falls back to `params.Impact` as if it were a full-trajectory row index, but this commit’s own documented dataset behavior says `params.Impact` is swing-segment-relative (not a global row). That means any valid `.mat` export with a shifted timestamp baseline (all-positive/all-negative `time`) wi...
-```
-
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4490#discussion_r3210149886)
-
----
-
-### PR #4500: src/config/launcher_manifest.json:191
-
-Actionable: Yes
-Has Suggestion: No
-
-```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Filter hidden legacy alias from dashboard manifest output**
-
-Marking this alias as hidden is not sufficient to prevent duplicate cards in the web launcher because `/api/launcher/manifest` returns `manifest.to_dict()` (all tiles), and the dashboard renders `tiles` directly by category without filtering `hidden` (`ui/src/pages/Dashboard.tsx` and `ui/src/components/simulation/LauncherDashboard.tsx`). Adding this...
-```
-
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4500#discussion_r3210224508)
-
----
-
-### PR #4505: src/tools/starting_pose_matcher/gui_source_panel.py:304
-
-Actionable: Yes
-Has Suggestion: No
-
-```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Clear cached targets when restoring session source paths**
-
-`restore()` updates checkbox/path UI state but does not reset `_club_target` / `_body_target`, so previously loaded in-memory targets can remain active after loading a different session. If a user restores a session with new paths (or no files), the panel can still emit old targets while displaying the new filenames/flags, producing stale-data behavi...
-```
-
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4505#discussion_r3210242660)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4641#discussion_r3211471651)
 
 ---
 
