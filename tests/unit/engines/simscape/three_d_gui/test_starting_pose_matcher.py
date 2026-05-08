@@ -395,6 +395,83 @@ class TestSkeletonTrajectory:
         with pytest.raises(ValueError, match="recognised joint"):
             core.load_simscape_trajectory_csv(path)
 
+    def test_torso_synthesised_when_missing(self, core, tmp_path):
+        """When the CSV has spine + hub but no torso column, the loader
+        synthesises torso at 20% of the way from spine to hub (matching
+        the UpperTorsoBase = 0.2 * UpperTorsoLength split in the .mdl)."""
+        import pandas as pd
+        df = pd.DataFrame({
+            "time": [0.0, 0.01],
+            "spine_X": [0.0, 0.0], "spine_Y": [-0.30, -0.30], "spine_Z": [1.20, 1.20],
+            "hub_X":   [0.0, 0.0], "hub_Y":   [-0.30, -0.30], "hub_Z":   [1.45, 1.45],
+            "left_hand_X": [-0.05, -0.05], "left_hand_Y": [-0.10, -0.10],
+            "left_hand_Z": [0.85, 0.85],
+            "right_hand_X": [0.05, 0.05], "right_hand_Y": [-0.10, -0.10],
+            "right_hand_Z": [0.85, 0.85],
+        })
+        path = tmp_path / "no_torso.csv"
+        df.to_csv(path, index=False)
+        traj = core.load_simscape_trajectory_csv(path)
+        f0 = traj.frames[0]
+        assert "torso" in f0.joints, "loader should synthesise torso"
+        # 20% from spine -> hub: (1.20 + 0.2 * (1.45 - 1.20)) = 1.25
+        np.testing.assert_allclose(f0.joints["torso"], [0.0, -0.30, 1.25],
+                                   atol=1e-9)
+
+
+class TestSkeletonModelling:
+    """Verify the fallback skeletons reflect the actual model geometry."""
+
+    def test_torso_present_in_both_fallbacks(self, core, tmp_path):
+        impact = core.load_skeleton(tmp_path / "x.json", "Impact")
+        top    = core.load_skeleton(tmp_path / "x.json", "TopofBackswing")
+        assert "torso" in impact.joints, "Impact pose missing torso joint"
+        assert "torso" in top.joints,    "TopofBackswing pose missing torso joint"
+
+    def test_torso_between_spine_and_hub(self, core, tmp_path):
+        """Torso must lie on the line between spine and hub (along the
+        body's central column)."""
+        for pose in ("Impact", "TopofBackswing"):
+            s = core.load_skeleton(tmp_path / "x.json", pose)
+            spine = s.joints["spine"]; torso = s.joints["torso"]; hub = s.joints["hub"]
+            # Z-coordinate strictly between spine and hub
+            assert spine[2] < torso[2] < hub[2], (
+                f"{pose}: torso Z {torso[2]} not between spine {spine[2]} "
+                f"and hub {hub[2]}")
+
+    def test_segments_include_full_torso_chain(self, core, tmp_path):
+        s = core.load_skeleton(tmp_path / "x.json", "Impact")
+        seg = s.segments
+        assert ("hip", "spine") in seg
+        assert ("spine", "torso") in seg, "missing spine→torso segment"
+        assert ("torso", "hub") in seg, "missing torso→hub segment"
+        # The old hip→hub-direct shortcut MUST be gone.
+        assert ("spine", "hub") not in seg
+        assert ("hip", "hub") not in seg
+
+    def test_top_of_backswing_shows_torso_twist(self, core, tmp_path):
+        """The two fallback poses must have visibly different shoulder lines
+        — that's how the torso revolute (twist) is shown to the user.
+        At Impact: shoulders aligned with X axis (target line).
+        At Top of Backswing: shoulders rotated ~90° about body Z so the
+        line lies more along Y (ball direction) than X.
+        """
+        impact = core.load_skeleton(tmp_path / "x.json", "Impact")
+        top    = core.load_skeleton(tmp_path / "x.json", "TopofBackswing")
+
+        sl_imp = impact.joints["rs"] - impact.joints["ls"]
+        sl_top = top.joints["rs"]    - top.joints["ls"]
+        # Project to XY (the twist plane).  Compute angle of each.
+        ang_imp = float(np.arctan2(sl_imp[1], sl_imp[0]))
+        ang_top = float(np.arctan2(sl_top[1], sl_top[0]))
+        # The two shoulder-line angles should differ by at least 60°
+        # (90° expected; allow generous tolerance for our hand-tuned values).
+        diff_deg = abs(np.degrees(ang_top - ang_imp))
+        diff_deg = min(diff_deg, 360.0 - diff_deg)
+        assert diff_deg > 60.0, (
+            f"shoulder line should rotate visibly between poses; "
+            f"got only {diff_deg:.1f}° change")
+
 
 # --------------------------------------------------------------------------- #
 # 2. xlsx loaders (require the Wiffle fixture)                                #

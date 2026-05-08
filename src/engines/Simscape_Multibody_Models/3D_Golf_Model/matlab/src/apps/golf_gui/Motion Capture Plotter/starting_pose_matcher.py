@@ -349,7 +349,17 @@ _HELP_TEXT: dict[str, str] = {
         "Trace toggles draw the mocap clubhead and / or mid-hands path\n"
         "across the chosen swing phase.  Phase boundaries are marked by\n"
         "green / purple triangles; the current frame is marked with a\n"
-        "yellow ✕ when traces are visible."
+        "yellow ✕ when traces are visible.\n\n"
+        "Scene toggles:\n"
+        "  • Show golf ball — white ball at the world origin.\n"
+        "  • Show ground plane — green semi-transparent floor at Z=0.\n"
+        "  • Torso-twist indicator — small disc at the model's torso\n"
+        "    revolute joint (between spine and hub).  The disc plane is\n"
+        "    perpendicular to the spine direction; an arrow points along\n"
+        "    the LS-RS shoulder line so you can see the body coil at a\n"
+        "    glance.  This matches the rotating-disk geometry in\n"
+        "    GolfSwing3D_Kinetic.mdl ('Torso Kinetically Driven' block\n"
+        "    between UpperTorsoBase and UpperTorsoTop)."
     ),
     "Auto-Align": (
         "Solve a transform automatically.\n\n"
@@ -512,6 +522,9 @@ class StartingPoseMatcher(QMainWindow):
 
         self.show_clubhead_trace = False
         self.show_midhands_trace = False
+        self.show_ball = True
+        self.show_ground = True
+        self.show_torso_disk = True   # disc indicator at torso joint
         self.lock_xy_rotation = True   # Rx/Ry locked by default
 
         # Playback state
@@ -886,7 +899,36 @@ class StartingPoseMatcher(QMainWindow):
         self.cb_frame_marker.setChecked(True)
         self.cb_frame_marker.stateChanged.connect(lambda _: self._redraw())
         v.addWidget(self.cb_frame_marker)
+
+        v.addWidget(_hsep())
+
+        # Scene element toggles
+        self.cb_show_ball = QCheckBox("Show golf ball")
+        self.cb_show_ball.setChecked(self.show_ball)
+        self.cb_show_ball.stateChanged.connect(self._on_scene_toggled)
+        v.addWidget(self.cb_show_ball)
+
+        self.cb_show_ground = QCheckBox("Show ground plane")
+        self.cb_show_ground.setChecked(self.show_ground)
+        self.cb_show_ground.stateChanged.connect(self._on_scene_toggled)
+        v.addWidget(self.cb_show_ground)
+
+        self.cb_show_torso_disk = QCheckBox("Show torso-twist indicator (disk at torso joint)")
+        self.cb_show_torso_disk.setChecked(self.show_torso_disk)
+        self.cb_show_torso_disk.setToolTip(
+            "Draws a small disc at the torso revolute joint between the\n"
+            "spine and the hub.  The disc orientation reflects the body\n"
+            "twist (LS-RS line direction) so the rotating-disk action of\n"
+            "the model is visually obvious.")
+        self.cb_show_torso_disk.stateChanged.connect(self._on_scene_toggled)
+        v.addWidget(self.cb_show_torso_disk)
         return box
+
+    def _on_scene_toggled(self, _: int) -> None:
+        self.show_ball = self.cb_show_ball.isChecked()
+        self.show_ground = self.cb_show_ground.isChecked()
+        self.show_torso_disk = self.cb_show_torso_disk.isChecked()
+        self._redraw()
 
     def _build_playback_box(self) -> QGroupBox:
         box = QGroupBox("Playback")
@@ -1231,8 +1273,49 @@ class StartingPoseMatcher(QMainWindow):
                 f"Loaded {len(traj)} frames from {Path(path).name}.\n"
                 f"Time range: {traj.times[0]:.3f}s … {traj.times[-1]:.3f}s.\n"
                 "Click to load a different file.")
+        # First trajectory load auto-switches to 'Both' mode so the user
+        # can immediately see the skeleton animate without having to find
+        # the Playback target combo.
+        if self.playback_target == "Mocap":
+            with QSignalBlocker(self.combo_playback_target):
+                self.combo_playback_target.setCurrentText("Both")
+            self.playback_target = "Both"
         self._notify(f"Loaded {len(traj)}-frame trajectory for {slot_key} "
-                     f"from {Path(path).name}")
+                     f"from {Path(path).name}.  Playback target → Both.")
+        self._redraw()
+
+    def _toggle_play(self) -> None:
+        """Override the parent toggle to surface a helpful message when the
+        user presses Play in a target mode that won't visibly do anything.
+        """
+        if self.is_playing:
+            self._timer.stop()
+            self.is_playing = False
+            self.btn_play.setText("▶ Play")
+            return
+        # About to start — sanity-check the chosen target.
+        if self.playback_target == "Skeleton":
+            visible_with_traj = [s for s in self.poses.values()
+                                 if s.visible and s.trajectory is not None]
+            if not visible_with_traj:
+                QMessageBox.information(
+                    self, "No skeleton trajectory loaded",
+                    "Playback target is 'Skeleton' but no visible pose has\n"
+                    "a trajectory CSV loaded yet.\n\n"
+                    "Either:\n"
+                    "  • Pose Slots → Trajectory Load… for one of the visible poses, or\n"
+                    "  • Switch the Playback target back to 'Mocap'.")
+                return
+        if self.df is None and self.playback_target in ("Mocap", "Both"):
+            QMessageBox.information(
+                self, "No mocap loaded",
+                "Playback target is 'Mocap' or 'Both' but no xlsx file has\n"
+                "been loaded yet.  Use Mocap Source → Load xlsx… first.")
+            return
+        fps = max(1, int(self.spin_speed.value()))
+        self._timer.start(int(round(1000.0 / fps)))
+        self.is_playing = True
+        self.btn_play.setText("⏸ Pause")
 
     def _on_phase_changed(self, _index: int) -> None:
         key = self.phase_combo.currentData()
@@ -1277,19 +1360,6 @@ class StartingPoseMatcher(QMainWindow):
         else:
             new = max(0, min(n - 1, self.current_frame + delta))
             self.spin_frame.setValue(new)
-
-    def _toggle_play(self) -> None:
-        if self.is_playing:
-            self._timer.stop()
-            self.is_playing = False
-            self.btn_play.setText("▶ Play")
-        else:
-            if self.df is None or len(self.df) == 0:
-                return
-            fps = max(1, int(self.spin_speed.value()))
-            self._timer.start(int(round(1000.0 / fps)))
-            self.is_playing = True
-            self.btn_play.setText("⏸ Pause")
 
     def _advance_frame(self) -> None:
         """Advance one playback step.
@@ -1695,6 +1765,11 @@ class StartingPoseMatcher(QMainWindow):
                 "manual_end": self.manual_window_end,
                 "frame_marker": self.cb_frame_marker.isChecked(),
             },
+            "scene": {
+                "ball": self.show_ball,
+                "ground": self.show_ground,
+                "torso_disk": self.show_torso_disk,
+            },
             "playback": {
                 "current_frame": self.current_frame,
                 "frame_override_active": self.frame_override_active,
@@ -1866,6 +1941,19 @@ class StartingPoseMatcher(QMainWindow):
             with QSignalBlocker(self.cb_frame_marker):
                 self.cb_frame_marker.setChecked(bool(tr["frame_marker"]))
 
+        # Scene toggles
+        scene = d.get("scene") or {}
+        for attr, cb_name in (("ball", "cb_show_ball"),
+                              ("ground", "cb_show_ground"),
+                              ("torso_disk", "cb_show_torso_disk")):
+            if attr in scene:
+                val = bool(scene[attr])
+                setattr(self, f"show_{attr}", val)
+                cb = getattr(self, cb_name, None)
+                if cb is not None:
+                    with QSignalBlocker(cb):
+                        cb.setChecked(val)
+
         # 8. Playback.
         pb = d.get("playback") or {}
         if "current_frame" in pb:
@@ -2008,13 +2096,15 @@ class StartingPoseMatcher(QMainWindow):
         self.canvas.draw()
 
     def _draw_floor_and_ball(self) -> None:
-        x = np.linspace(-1.5, 1.5, 5)
-        y = np.linspace(-1.5, 1.5, 5)
-        X, Y = np.meshgrid(x, y)
-        Z = np.zeros_like(X)
-        self.ax.plot_surface(X, Y, Z, alpha=0.10, color="#22c55e")
-        self.ax.scatter([0], [0], [0.021], c="white", edgecolor="black", s=40,
-                        label="ball")
+        if self.show_ground:
+            x = np.linspace(-1.5, 1.5, 5)
+            y = np.linspace(-1.5, 1.5, 5)
+            X, Y = np.meshgrid(x, y)
+            Z = np.zeros_like(X)
+            self.ax.plot_surface(X, Y, Z, alpha=0.10, color="#22c55e")
+        if self.show_ball:
+            self.ax.scatter([0], [0], [0.021], c="white",
+                            edgecolor="black", s=40, label="ball")
 
     def _trace_window(self) -> tuple[int, int]:
         """Return [start, end) frame indices for trace drawing per phase setting."""
@@ -2161,6 +2251,15 @@ class StartingPoseMatcher(QMainWindow):
                 width = 4.5 if (parent, child) == ("mp", "ch") else 2.6
                 self.ax.plot([a[0], b[0]], [a[1], b[1]], [a[2], b[2]],
                              color=slot.color, linewidth=width)
+
+        # Torso-twist indicator: draw a small disk at the torso joint
+        # whose plane normal matches the spine-to-hub direction and whose
+        # in-plane "+X" axis is aligned with the LS-RS line.  Makes the
+        # body coil visible at a glance.
+        if self.show_torso_disk and "torso" in pos and "ls" in pos and "rs" in pos:
+            self._draw_torso_disk(pos["torso"], pos["ls"], pos["rs"],
+                                   pos.get("hub"), pos.get("spine"),
+                                   slot.color)
         # Indicate that this is a trajectory frame (not the static pose)
         # by appending the frame index to the legend label.
         legend = f"sim {slot.name}"
@@ -2176,6 +2275,59 @@ class StartingPoseMatcher(QMainWindow):
         if "ch" in pos:
             self.ax.scatter(*pos["ch"], color=slot.color, s=130, marker="s",
                             edgecolor="black", linewidth=0.6)
+
+    def _draw_torso_disk(self, torso: np.ndarray, ls: np.ndarray, rs: np.ndarray,
+                          hub: np.ndarray | None, spine: np.ndarray | None,
+                          color: str, radius: float = 0.18) -> None:
+        """Draw a small disc at the torso joint to visualise the twist.
+
+        The disc's normal is the spine→hub direction (or world +Z if those
+        are missing); the disc is oriented so a marker arrow points in the
+        LS direction along the disc plane.  This makes it instantly obvious
+        which way the body has coiled.
+        """
+        # Build an orthonormal frame at the torso joint.
+        if hub is not None and spine is not None:
+            n = hub - spine
+        elif hub is not None:
+            n = hub - torso
+        else:
+            n = np.array([0.0, 0.0, 1.0])
+        nn = float(np.linalg.norm(n))
+        if nn < 1e-6:
+            n = np.array([0.0, 0.0, 1.0])
+        else:
+            n = n / nn
+
+        # In-plane axis: project (rs - ls) onto the plane orthogonal to n.
+        rs_dir = rs - ls
+        rs_dir = rs_dir - np.dot(rs_dir, n) * n
+        rd = float(np.linalg.norm(rs_dir))
+        if rd < 1e-6:
+            # Pick any perpendicular if shoulders are degenerate.
+            rs_dir = np.array([1.0, 0.0, 0.0])
+            rs_dir = rs_dir - np.dot(rs_dir, n) * n
+            rd = float(np.linalg.norm(rs_dir))
+            if rd < 1e-6:
+                rs_dir = np.array([0.0, 1.0, 0.0])
+                rs_dir = rs_dir - np.dot(rs_dir, n) * n
+                rd = float(np.linalg.norm(rs_dir))
+                if rd < 1e-6:
+                    return
+        rs_dir = rs_dir / rd
+        n_perp = np.cross(n, rs_dir)
+        # Disc points
+        thetas = np.linspace(0.0, 2.0 * np.pi, 24)
+        disc = torso + radius * (np.cos(thetas)[:, None] * rs_dir
+                                  + np.sin(thetas)[:, None] * n_perp)
+        self.ax.plot(disc[:, 0], disc[:, 1], disc[:, 2],
+                     color=color, linewidth=1.5, alpha=0.9)
+        # Twist-indicator arrow from torso center toward right shoulder.
+        tip = torso + (radius * 1.05) * rs_dir
+        self.ax.plot([torso[0], tip[0]], [torso[1], tip[1]], [torso[2], tip[2]],
+                     color=color, linewidth=2.6, alpha=0.95)
+        self.ax.scatter(*tip, color=color, s=24, marker=">",
+                        edgecolor="black", linewidth=0.4)
 
     def _effective_skeleton(self, slot: PoseSlot) -> Skeleton:
         """Return the skeleton to draw for this slot.

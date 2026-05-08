@@ -240,26 +240,72 @@ class PoseSlot:
 # ----------------------------------------------------------------------------
 
 
+# The Simscape model body chain, per GolfSwing3D_Kinetic.mdl:
+#
+#   hip  --[gimbal X/Y/Z]-->  spine  --[universal X/Y tilt]-->  torso
+#                                      --[revolute Z twist]-->  hub
+#                                      --[universal X/Y]----->  lscap, rscap
+#                                                            -->  ls, rs
+#                                                            -->  le, re
+#                                                            -->  lw, rw
+#
+# Geometric segment lengths from the model parameters:
+#   UpperTorsoLength ≈ 0.305 m (12 in), split as 0.2/0.8 by UpperTorsoBase /
+#   UpperTorsoTop cylinders.  We model the chain at three torso landmarks:
+#     spine = hip + UpperTorsoLength/2 along (rotated) +Z   (lower back)
+#     torso = spine + 0.2 * UpperTorsoLength * +Z           (between disks)
+#     hub   = torso + 0.8 * UpperTorsoLength * +Z           (chest level)
+#   HubtoSLength ≈ 0.254 m (10 in) shoulder offset.
+#
+# At Impact: shoulders roughly square to ball; at Top of Backswing: torso
+# coiled ~90° clockwise (right-handed swing) so right shoulder is BEHIND
+# the body and left shoulder is in FRONT.
 FALLBACK_IMPACT: dict[str, list[float]] = {
-    "hip":   [0.00, -0.30, 0.95], "spine": [0.00, -0.30, 1.20],
-    "hub":   [0.00, -0.30, 1.40], "ls":    [-0.20, -0.30, 1.40],
-    "rs":    [0.20, -0.30, 1.40], "le":    [-0.10, -0.20, 1.10],
-    "re":    [0.10, -0.20, 1.10], "lw":    [-0.05, -0.10, 0.80],
-    "rw":    [0.05, -0.10, 0.80], "mp":    [0.00, -0.10, 0.80],
-    "ch":    [0.00, 0.10, 0.10],
+    "hip":   [0.00, -0.30, 0.95],
+    "spine": [0.00, -0.30, 1.20],
+    "torso": [0.00, -0.30, 1.27],   # ~20% up the upper torso (twist joint)
+    "hub":   [0.00, -0.30, 1.45],
+    "ls":    [-0.25, -0.30, 1.42],   # left shoulder -X (target side)
+    "rs":    [0.25, -0.30, 1.42],    # right shoulder +X
+    "le":    [-0.20, -0.20, 1.15],
+    "re":    [0.10, -0.20, 1.10],
+    "lw":    [-0.05, -0.10, 0.85],
+    "rw":    [0.05, -0.10, 0.85],
+    "mp":    [0.00, -0.10, 0.85],
+    "ch":    [0.10, 0.10, 0.05],     # clubhead near ball
 }
+# Top of Backswing: hip nearly square, but shoulders rotated ~90° about
+# the body Z axis (torso disk twist).  Right shoulder pulled BACK (-Y),
+# left shoulder pushed FORWARD (+Y).  Hands lifted high & behind.
 FALLBACK_TOB: dict[str, list[float]] = {
-    "hip":   [0.00, -0.30, 0.95], "spine": [0.00, -0.30, 1.20],
-    "hub":   [0.00, -0.30, 1.40], "ls":    [-0.20, -0.30, 1.40],
-    "rs":    [0.20, -0.30, 1.40], "le":    [-0.05, -0.10, 1.55],
-    "re":    [0.30, -0.10, 1.50], "lw":    [0.10,  0.10, 1.85],
-    "rw":    [0.20,  0.10, 1.80], "mp":    [0.15,  0.10, 1.82],
-    "ch":    [-0.40, 0.40, 1.60],
+    "hip":   [0.00, -0.30, 0.95],
+    "spine": [0.00, -0.30, 1.20],
+    "torso": [0.00, -0.30, 1.27],
+    "hub":   [0.00, -0.30, 1.45],
+    "ls":    [0.00, -0.05, 1.42],    # rotated +X shoulder line about Z by ~90°:
+    "rs":    [0.00, -0.55, 1.42],    #   left now FORWARD, right now BACK
+    "le":    [0.10, +0.05, 1.55],
+    "re":    [-0.05, -0.55, 1.30],
+    "lw":    [0.20,  0.10, 1.85],
+    "rw":    [0.18,  0.05, 1.82],
+    "mp":    [0.19,  0.08, 1.83],
+    "ch":    [-0.30, 0.40, 1.65],
 }
+# Skeleton segments — connect joints into a body chain for plotting.
+# Note that "torso" sits between spine and hub on the central column.
 FALLBACK_SEGMENTS: list[tuple[str, str]] = [
-    ("hip", "spine"), ("spine", "hub"), ("hub", "ls"), ("hub", "rs"),
-    ("ls", "le"), ("rs", "re"), ("le", "lw"), ("re", "rw"),
-    ("lw", "mp"), ("rw", "mp"), ("mp", "ch"),
+    ("hip",   "spine"),
+    ("spine", "torso"),
+    ("torso", "hub"),
+    ("hub",   "ls"),
+    ("hub",   "rs"),
+    ("ls",    "le"),
+    ("rs",    "re"),
+    ("le",    "lw"),
+    ("re",    "rw"),
+    ("lw",    "mp"),
+    ("rw",    "mp"),
+    ("mp",    "ch"),
 ]
 
 
@@ -388,6 +434,7 @@ _TRAJECTORY_COLUMN_MAP: dict[str, list[str]] = {
     "le":    ["left_elbow_X",     "left_elbow_x"],
     "re":    ["right_elbow_X",    "right_elbow_x"],
     "hub":   ["hub_X",            "hub_x"],
+    "torso": ["torso_X",          "torso_x"],   # may be missing — synthesized
     "spine": ["spine_X",          "spine_x"],
     "hip":   ["hip_X",            "hip_x"],
 }
@@ -402,6 +449,7 @@ _TRAJECTORY_LONG_FORM: dict[str, str] = {
     "le":    "LELogs_LArmonLForearmFGlobal_1",
     "re":    "RELogs_RArmonLForearmFGlobal_1",
     "hub":   "HipLogs_HUBGlobalPosition_1",
+    "torso": "TorsoLogs_GlobalPosition_1",
     "spine": "SpineLogs_GlobalPosition_1",
     "hip":   "HipLogs_HipGlobalPosition_dim1",
 }
@@ -482,6 +530,12 @@ def load_simscape_trajectory_csv(path: str | Path) -> SkeletonTrajectory:
         if "lw" in joints and "rw" in joints:
             joints["mp"] = (joints["lw"] + joints["rw"]) / 2.0
             joints["butt"] = joints["mp"].copy()
+        # Synthesize torso between spine and hub if missing — places the
+        # twist-disk landmark roughly 20% up the upper torso (matching
+        # UpperTorsoBase = 0.2 * UpperTorsoLength in the .mdl).
+        if "torso" not in joints and "spine" in joints and "hub" in joints:
+            joints["torso"] = joints["spine"] + 0.2 * (joints["hub"]
+                                                       - joints["spine"])
         frames.append(Skeleton(name=f"trajectory[{i}]", joints=joints,
                                segments=list(FALLBACK_SEGMENTS)))
 
