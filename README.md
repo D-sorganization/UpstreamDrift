@@ -221,6 +221,7 @@ python3 src/engines/physics_engines/drake/python/src/golf_gui.py
 ## Documentation
 
 - **[User Guide](docs/user_guide/README.md)**: Installation, running simulations, and using the GUI
+- **[Character Builder Quickstart](docs/user_guide/character_builder_quickstart.md)**: Generate humanoid URDFs in 5 minutes
 - **[Engines](docs/engines/README.md)**: Detailed engine documentation and comparison
 - **[Supported Engine Tiers](docs/engines/support_tiers.md)**: Install profiles and CI coverage expectations
 - **[Development](docs/development/README.md)**: Contributing, architecture, and testing
