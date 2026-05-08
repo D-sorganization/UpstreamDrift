@@ -1620,8 +1620,7 @@ class StartingPoseMatcher(QMainWindow):
         rz_deg = solve_shaft_rz_deg(mp_target, ch_target, mp_skel, ch_skel)
 
         # Lock Rx/Ry to 0 for this snap (Z-up).
-        if not self.lock_xy_rotation:
-            self.cb_lock_xy.setChecked(False)  # leave as-is for user; we just zero
+        # Do not change the lock checkbox state - preserve user's setting
         self.s_rx.set_value(0.0)
         self.s_ry.set_value(0.0)
         self.s_rz.set_value(rz_deg)
