@@ -19,6 +19,7 @@ from PyQt6.QtGui import (
 )
 from PyQt6.QtWidgets import (
     QCheckBox,
+    QComboBox,
     QDockWidget,
     QFrame,
     QGridLayout,
@@ -28,11 +29,18 @@ from PyQt6.QtWidgets import (
     QPlainTextEdit,
     QPushButton,
     QScrollArea,
+    QSlider,
     QSplitter,
     QStyle,
     QToolButton,
     QVBoxLayout,
     QWidget,
+)
+
+from src.launchers.launcher_constants import (
+    TILE_SCALE_MAX,
+    TILE_SCALE_MIN,
+    ViewMode,
 )
 
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -566,11 +574,116 @@ class LauncherUISetupMixin:
             "engine_selection",
         )
 
+    # ---- View-mode + zoom controls --------------------------------------
+
+    _ZOOM_SLIDER_STEPS = 100  # slider integer range -> [MIN, MAX] tile_scale
+
+    def _slider_to_scale(self, value: int) -> float:
+        """Map a slider integer ``value`` to a tile_scale float."""
+        v = max(0, min(self._ZOOM_SLIDER_STEPS, int(value)))
+        frac = v / float(self._ZOOM_SLIDER_STEPS)
+        return TILE_SCALE_MIN + (TILE_SCALE_MAX - TILE_SCALE_MIN) * frac
+
+    def _scale_to_slider(self, scale: float) -> int:
+        """Map a tile_scale float back to slider integer steps."""
+        s = max(TILE_SCALE_MIN, min(TILE_SCALE_MAX, float(scale)))
+        frac = (s - TILE_SCALE_MIN) / (TILE_SCALE_MAX - TILE_SCALE_MIN)
+        return int(round(frac * self._ZOOM_SLIDER_STEPS))
+
+    def _setup_view_mode_and_zoom(self, top_bar: QHBoxLayout) -> None:
+        """Add view-mode combobox, zoom slider, and percent label to top bar."""
+        if top_bar is None:
+            raise ValueError("top_bar must be provided")
+
+        self.view_mode_combo = QComboBox()
+        self.view_mode_combo.addItem("Comfortable", ViewMode.COMFORTABLE)
+        self.view_mode_combo.addItem("Compact", ViewMode.COMPACT)
+        self.view_mode_combo.addItem("Dense", ViewMode.DENSE)
+        self.view_mode_combo.addItem("List", ViewMode.LIST)
+        self.view_mode_combo.setCurrentIndex(1)  # Compact default
+        self.view_mode_combo.setToolTip("Choose how the model tiles are arranged")
+        self.view_mode_combo.setAccessibleName("View mode")
+        self.view_mode_combo.currentIndexChanged.connect(self._on_view_mode_changed)
+        top_bar.addWidget(self.view_mode_combo)
+
+        self.zoom_slider = QSlider(Qt.Orientation.Horizontal)
+        self.zoom_slider.setRange(0, self._ZOOM_SLIDER_STEPS)
+        self.zoom_slider.setFixedWidth(140)
+        self.zoom_slider.setToolTip("Adjust the size of the model tiles")
+        self.zoom_slider.setAccessibleName("Tile zoom")
+
+        # Initial position from layout_manager if available, else compact 0.5.
+        from src.launchers.launcher_constants import TILE_SCALE_DEFAULT
+
+        initial_scale = TILE_SCALE_DEFAULT
+        lm = getattr(self, "layout_manager", None)
+        if lm is not None and hasattr(lm, "tile_scale"):
+            initial_scale = float(lm.tile_scale)
+        self.zoom_slider.setValue(self._scale_to_slider(initial_scale))
+        self.zoom_slider.valueChanged.connect(self._on_zoom_slider_changed)
+        top_bar.addWidget(self.zoom_slider)
+
+        self.lbl_zoom_pct = QLabel(f"{int(round(initial_scale * 100))}%")
+        self.lbl_zoom_pct.setToolTip("Current tile size as a percentage of base")
+        top_bar.addWidget(self.lbl_zoom_pct)
+
+        # Ctrl+= / Ctrl+- shortcuts adjust zoom by one step (~1.75% scale).
+        sc_in = QShortcut(QKeySequence("Ctrl+="), self)
+        sc_in.activated.connect(lambda: self._nudge_zoom(+5))
+        sc_in_alt = QShortcut(QKeySequence("Ctrl++"), self)
+        sc_in_alt.activated.connect(lambda: self._nudge_zoom(+5))
+        sc_out = QShortcut(QKeySequence("Ctrl+-"), self)
+        sc_out.activated.connect(lambda: self._nudge_zoom(-5))
+
+    def _nudge_zoom(self, delta_steps: int) -> None:
+        """Adjust the zoom slider by ``delta_steps`` integer ticks."""
+        slider = getattr(self, "zoom_slider", None)
+        if slider is None:
+            return
+        slider.setValue(slider.value() + delta_steps)
+
+    def _on_view_mode_changed(self, index: int) -> None:
+        """Apply the selected view mode to the layout manager + grid."""
+        combo = getattr(self, "view_mode_combo", None)
+        if combo is None:
+            return
+        mode = combo.itemData(index)
+        if not isinstance(mode, ViewMode):
+            return
+        lm = getattr(self, "layout_manager", None)
+        if lm is None:
+            return
+        lm.set_view_mode(mode)
+        # Update zoom slider/label to reflect the mode's default scale.
+        if hasattr(self, "zoom_slider"):
+            self.zoom_slider.blockSignals(True)
+            self.zoom_slider.setValue(self._scale_to_slider(lm.tile_scale))
+            self.zoom_slider.blockSignals(False)
+        if hasattr(self, "lbl_zoom_pct"):
+            self.lbl_zoom_pct.setText(f"{int(round(lm.tile_scale * 100))}%")
+        if hasattr(self, "grid_layout"):
+            lm.rebuild_grid(self.grid_layout)
+        if hasattr(self, "_save_layout"):
+            self._save_layout()
+
+    def _on_zoom_slider_changed(self, value: int) -> None:
+        """Live-resize all model cards to match the new slider position."""
+        lm = getattr(self, "layout_manager", None)
+        scale = self._slider_to_scale(value)
+        if hasattr(self, "lbl_zoom_pct"):
+            self.lbl_zoom_pct.setText(f"{int(round(scale * 100))}%")
+        if lm is None:
+            return
+        lm.set_tile_scale(scale)
+        if hasattr(self, "_save_layout"):
+            self._save_layout()
+
     def _setup_top_bar(self) -> QHBoxLayout:
         """Set up the top tool bar."""
         top_bar = QHBoxLayout()
 
         self._setup_top_bar_status_and_search(top_bar)
+        self._setup_view_mode_and_zoom(top_bar)
         self._setup_top_bar_config_checkboxes()
         self._setup_top_bar_action_buttons(top_bar)
 

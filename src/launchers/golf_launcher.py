@@ -258,7 +258,9 @@ class GolfLauncher(
             config_file=LAYOUT_CONFIG_FILE,
             available_models=self.available_models,
             get_model_func=self._get_model,
-            create_card_func=lambda model: DraggableModelCard(model, self),
+            create_card_func=lambda model, **kwargs: DraggableModelCard(
+                model, self, **kwargs
+            ),
             create_header_func=self._create_category_header,
         )
         self.model_cards = self.layout_manager.model_cards

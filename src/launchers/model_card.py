@@ -40,6 +40,13 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.theme.style_constants import Styles
 from src.shared.python.theme.typography import Weights, get_display_font, get_qfont
 
+from .launcher_constants import (
+    TILE_SCALE_DEFAULT,
+    scaled_font_pt,
+    scaled_image_px,
+    scaled_padding_px,
+    validate_tile_scale,
+)
 from .startup import ASSETS_DIR, _get_theme_colors
 
 if TYPE_CHECKING:
@@ -94,10 +101,21 @@ MODEL_IMAGES = {
 class DraggableModelCard(QFrame):
     """Draggable model card widget with reordering support."""
 
-    def __init__(self, model: Any, parent_launcher: Any) -> None:
+    def __init__(
+        self,
+        model: Any,
+        parent_launcher: Any,
+        tile_scale: float = TILE_SCALE_DEFAULT,
+        *,
+        show_description: bool = True,
+        list_mode: bool = False,
+    ) -> None:
         super().__init__(None)
         self.model = model
         self.parent_launcher = parent_launcher
+        self.tile_scale: float = validate_tile_scale(tile_scale)
+        self._show_description: bool = bool(show_description)
+        self._list_mode: bool = bool(list_mode)
 
         # Match initial drag-and-drop state to the parent's mode
         self.setAcceptDrops(bool(getattr(parent_launcher, "layout_edit_mode", False)))
@@ -154,7 +172,8 @@ class DraggableModelCard(QFrame):
         scale_factor = 1.0 + (value / 4.0) * 0.03
         if hasattr(self, "lbl_img") and hasattr(self, "base_pixmap"):  # noqa: SIM102
             if self.base_pixmap and not self.base_pixmap.isNull():
-                new_size = int(180 * scale_factor)
+                base_px = scaled_image_px(self.tile_scale)
+                new_size = max(1, int(base_px * 0.9 * scale_factor))
                 scaled = self.base_pixmap.scaled(
                     new_size,
                     new_size,
@@ -234,28 +253,31 @@ class DraggableModelCard(QFrame):
             return img_path
         return None
 
-    def _create_image_widget(self, layout: QVBoxLayout) -> None:
+    def _create_image_widget(self, layout: QVBoxLayout | QHBoxLayout) -> None:
         """Create and add the model image label to the layout."""
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        if not (layout is not None):
+        if layout is None:
             raise ValueError("layout must be provided")
         img_name = self._resolve_image_name()
         img_path = self._find_image_path(img_name)
 
+        # In LIST mode the image is forced to a small (60x60) horizontal-row
+        # icon regardless of tile_scale. In other modes it scales from the
+        # 200px reference by ``tile_scale``.
+        img_size = 60 if self._list_mode else scaled_image_px(self.tile_scale)
+        pixmap_target = max(1, int(img_size * 0.9))
+
         self.lbl_img = QLabel()
         self.lbl_img.setObjectName("CardImage")
-        self.lbl_img.setFixedSize(200, 200)
+        self.lbl_img.setFixedSize(img_size, img_size)
         self.lbl_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.setAlignment(self.lbl_img, Qt.AlignmentFlag.AlignCenter)
         self.lbl_img.setStyleSheet(Styles.LABEL_TRANSPARENT)
         self.base_pixmap = None
 
         if img_path and img_path.exists():
             self.base_pixmap = QPixmap(str(img_path))
             pixmap = self.base_pixmap.scaled(
-                180,
-                180,
+                pixmap_target,
+                pixmap_target,
                 Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation,
             )
@@ -265,6 +287,12 @@ class DraggableModelCard(QFrame):
             self.lbl_img.setText("No Image")
             self.lbl_img.setStyleSheet(Styles.no_image_label(c.text_quaternary))
 
+        if self._list_mode:
+            # In list mode the icon sits to the left without centering frames.
+            layout.addWidget(self.lbl_img)
+            return
+
+        layout.setAlignment(self.lbl_img, Qt.AlignmentFlag.AlignCenter)
         img_container = QWidget()
         img_layout = QHBoxLayout(img_container)
         img_layout.setContentsMargins(0, 0, 0, 0)
@@ -273,19 +301,29 @@ class DraggableModelCard(QFrame):
         img_layout.addStretch()
         layout.addWidget(img_container)
 
-    def _create_status_chip(self, layout: QVBoxLayout) -> None:
-        """Create and add the status chip to the layout."""
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        if not (layout is not None):
+    def _create_status_chip(
+        self, layout: QVBoxLayout | QHBoxLayout, *, embed_in_row: bool = False
+    ) -> None:
+        """Create and add the status chip to the layout.
+
+        When ``embed_in_row`` is True (LIST mode) the chip is added directly
+        to the supplied horizontal layout, on the right; otherwise it is
+        centred in its own horizontal sub-layout (grid modes).
+        """
+        if layout is None:
             raise ValueError("layout must be provided")
         status_text, status_color, text_color = self._get_status_info()
         lbl_status = QLabel(status_text)
         lbl_status.setObjectName("StatusChip")
-        lbl_status.setFont(get_qfont(size=8, weight=Weights.BOLD))
+        chip_pt = max(8, scaled_font_pt(self.tile_scale, base_pt=8))
+        lbl_status.setFont(get_qfont(size=chip_pt, weight=Weights.BOLD))
         lbl_status.setStyleSheet(Styles.status_chip(status_color, text_color))
         lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lbl_status.setMinimumWidth(80)
+
+        if embed_in_row:
+            layout.addWidget(lbl_status)
+            return
 
         chip_layout = QHBoxLayout()
         chip_layout.addStretch()
@@ -295,25 +333,12 @@ class DraggableModelCard(QFrame):
 
     def setup_ui(self) -> None:
         """Build the model card widget layout with image, labels, and status chip."""
-        layout = QVBoxLayout(self)
-        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        if self._list_mode:
+            self._setup_list_ui()
+        else:
+            self._setup_grid_ui()
 
-        self._create_image_widget(layout)
-
-        lbl_name = QLabel(self.model.name)
-        lbl_name.setFont(get_display_font(size=11, weight=Weights.BOLD))
-        lbl_name.setWordWrap(True)
-        lbl_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(lbl_name)
-
-        lbl_desc = QLabel(self.model.description)
-        lbl_desc.setFont(get_qfont(size=9))
-        lbl_desc.setObjectName("CardDescription")
-        lbl_desc.setWordWrap(True)
-        lbl_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(lbl_desc)
-
-        self._create_status_chip(layout)
+        self._apply_card_padding()
 
         # Tile-level help text.  Tooltip is a one-line preview; What's-this
         # shows the description and a usage hint.
@@ -329,6 +354,138 @@ class DraggableModelCard(QFrame):
             "Recommended when you want to inspect the tile's status chip "
             "before opening the simulator."
         )
+
+    def _setup_grid_ui(self) -> None:
+        """Build the vertical grid-mode layout (Comfortable/Compact/Dense)."""
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self._create_image_widget(layout)
+
+        name_pt = scaled_font_pt(self.tile_scale)
+        self.lbl_name = QLabel(self.model.name)
+        self.lbl_name.setObjectName("CardName")
+        self.lbl_name.setFont(get_display_font(size=name_pt, weight=Weights.BOLD))
+        self.lbl_name.setWordWrap(True)
+        self.lbl_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.lbl_name)
+
+        desc_pt = max(scaled_font_pt(self.tile_scale, base_pt=9), 9)
+        self.lbl_desc = QLabel(self.model.description)
+        self.lbl_desc.setFont(get_qfont(size=desc_pt))
+        self.lbl_desc.setObjectName("CardDescription")
+        self.lbl_desc.setWordWrap(True)
+        self.lbl_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.lbl_desc.setVisible(self._show_description)
+        layout.addWidget(self.lbl_desc)
+
+        self._create_status_chip(layout)
+
+    def _setup_list_ui(self) -> None:
+        """Build the horizontal LIST-mode layout (icon | name+desc | status)."""
+        outer = QHBoxLayout(self)
+        outer.setSpacing(12)
+
+        self._create_image_widget(outer)
+
+        text_box = QVBoxLayout()
+        text_box.setSpacing(2)
+        name_pt = max(scaled_font_pt(self.tile_scale, base_pt=12), 10)
+        self.lbl_name = QLabel(self.model.name)
+        self.lbl_name.setObjectName("CardName")
+        self.lbl_name.setFont(get_display_font(size=name_pt, weight=Weights.BOLD))
+        text_box.addWidget(self.lbl_name)
+
+        self.lbl_desc = QLabel(self.model.description)
+        self.lbl_desc.setObjectName("CardDescription")
+        self.lbl_desc.setFont(get_qfont(size=9))
+        self.lbl_desc.setVisible(self._show_description)
+        text_box.addWidget(self.lbl_desc)
+
+        outer.addLayout(text_box, 1)
+        self._create_status_chip(outer, embed_in_row=True)
+
+        # Force a row-strip footprint roughly matching the issue spec (~60 px).
+        self.setMinimumHeight(60)
+
+    def _apply_card_padding(self) -> None:
+        """Set contents margins on the active layout based on tile_scale."""
+        pad = scaled_padding_px(self.tile_scale)
+        active = self.layout()
+        if active is not None:
+            active.setContentsMargins(pad, pad, pad, pad)
+
+    def set_tile_scale(
+        self,
+        scale: float,
+        *,
+        show_description: bool | None = None,
+        list_mode: bool | None = None,
+    ) -> None:
+        """Resize this card in place using the supplied tile scale.
+
+        Existing labels/pixmap are reused — no disk reload — but the layout
+        is rebuilt when ``list_mode`` changes (vertical vs. horizontal).
+        """
+        scale = validate_tile_scale(scale)
+        if show_description is not None:
+            self._show_description = bool(show_description)
+        new_list_mode = self._list_mode if list_mode is None else bool(list_mode)
+        full_rebuild = new_list_mode != self._list_mode
+        self.tile_scale = scale
+        self._list_mode = new_list_mode
+
+        if full_rebuild:
+            # Clear children + layout, then rebuild from scratch.
+            old_layout = self.layout()
+            if old_layout is not None:
+                while old_layout.count():
+                    item = old_layout.takeAt(0)
+                    w = item.widget() if item else None
+                    if w is not None:
+                        w.setParent(None)
+                        w.deleteLater()
+                # PyQt6: detach the old layout by reparenting to a temp QWidget.
+                QWidget().setLayout(old_layout)
+            self.setup_ui()
+            return
+
+        # In-place update: image, fonts, padding, description visibility.
+        new_img = 60 if self._list_mode else scaled_image_px(self.tile_scale)
+        if hasattr(self, "lbl_img"):
+            self.lbl_img.setFixedSize(new_img, new_img)
+            if self.base_pixmap and not self.base_pixmap.isNull():
+                target = max(1, int(new_img * 0.9))
+                self.lbl_img.setPixmap(
+                    self.base_pixmap.scaled(
+                        target,
+                        target,
+                        Qt.AspectRatioMode.KeepAspectRatio,
+                        Qt.TransformationMode.SmoothTransformation,
+                    )
+                )
+        if hasattr(self, "lbl_name"):
+            base_pt = 12 if self._list_mode else 11
+            self.lbl_name.setFont(
+                get_display_font(
+                    size=scaled_font_pt(self.tile_scale, base_pt=base_pt),
+                    weight=Weights.BOLD,
+                )
+            )
+        if hasattr(self, "lbl_desc"):
+            self.lbl_desc.setVisible(self._show_description)
+            self.lbl_desc.setFont(
+                get_qfont(size=max(scaled_font_pt(self.tile_scale, base_pt=9), 9))
+            )
+        chip = self.findChild(QLabel, "StatusChip")
+        if chip is not None:
+            chip.setFont(
+                get_qfont(
+                    size=max(8, scaled_font_pt(self.tile_scale, base_pt=8)),
+                    weight=Weights.BOLD,
+                )
+            )
+        self._apply_card_padding()
 
     def _get_status_info(self) -> tuple[str, str, str]:
         c = _get_theme_colors()
