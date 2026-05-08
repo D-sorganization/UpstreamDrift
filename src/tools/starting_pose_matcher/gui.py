@@ -533,6 +533,11 @@ class StartingPoseMatcher(QMainWindow):
         self.is_playing: bool = False
         self.loop_playback: bool = True
         self.event_overrides: dict[str, int] = {}  # user-set A/T/I/F sample numbers
+        # Playback speed multiplier and marker-trail length for the animated
+        # full-trajectory preview (issue #4482).
+        self.playback_speed: float = 1.0
+        self.trail_frames: int = 30
+        self.show_trail: bool = True
 
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._advance_frame)
@@ -1028,6 +1033,48 @@ class StartingPoseMatcher(QMainWindow):
         play_row.addWidget(self.cb_loop)
         v.addLayout(play_row)
 
+        # Speed multiplier combo + frame counter (issue #4482).
+        scale_row = QHBoxLayout()
+        scale_row.addWidget(QLabel("× Speed:"))
+        self.combo_speed = QComboBox()
+        from .session_schema import ALLOWED_SPEEDS as _ALLOWED_SPEEDS
+
+        for s in _ALLOWED_SPEEDS:
+            self.combo_speed.addItem(f"{s}×", float(s))
+        self.combo_speed.setCurrentText("1.0×")
+        self.combo_speed.currentIndexChanged.connect(
+            lambda _i: setattr(
+                self,
+                "playback_speed",
+                float(self.combo_speed.currentData() or 1.0),
+            )
+        )
+        scale_row.addWidget(self.combo_speed)
+        scale_row.addStretch(1)
+        self.lbl_frame_counter = QLabel("0 / 0")
+        self.lbl_frame_counter.setObjectName("status")
+        scale_row.addWidget(self.lbl_frame_counter)
+        v.addLayout(scale_row)
+
+        # Show-trail toggle (default on, fading polylines for last N frames).
+        trail_row = QHBoxLayout()
+        self.cb_show_trail = QCheckBox("Show trail")
+        self.cb_show_trail.setChecked(True)
+        self.cb_show_trail.stateChanged.connect(
+            lambda _: setattr(self, "show_trail", self.cb_show_trail.isChecked())
+        )
+        trail_row.addWidget(self.cb_show_trail)
+        trail_row.addWidget(QLabel("frames:"))
+        self.spin_trail = QSpinBox()
+        self.spin_trail.setRange(0, 600)
+        self.spin_trail.setValue(int(self.trail_frames))
+        self.spin_trail.valueChanged.connect(
+            lambda v: setattr(self, "trail_frames", int(v))
+        )
+        trail_row.addWidget(self.spin_trail)
+        trail_row.addStretch(1)
+        v.addLayout(trail_row)
+
         # Playback target selector — what advances when Play is pressed.
         target_row = QHBoxLayout()
         target_row.addWidget(QLabel("Playback target:"))
@@ -1460,6 +1507,7 @@ class StartingPoseMatcher(QMainWindow):
             self.spin_frame.setValue(int(frame))
         self.current_frame = int(frame)
         self._update_time_label()
+        self._update_frame_counter()
         self._redraw()
 
     def _on_frame_changed_spin(self, frame: int) -> None:
@@ -1467,7 +1515,16 @@ class StartingPoseMatcher(QMainWindow):
             self.frame_slider.setValue(int(frame))
         self.current_frame = int(frame)
         self._update_time_label()
+        self._update_frame_counter()
         self._redraw()
+
+    def _update_frame_counter(self) -> None:
+        """Refresh the ``12 / 301`` frame-counter label."""
+        n = len(self.df) if self.df is not None else 0
+        if hasattr(self, "lbl_frame_counter"):
+            self.lbl_frame_counter.setText(
+                f"{int(self.current_frame)} / {max(0, n - 1)}"
+            )
 
     def _step_frame(self, delta: int) -> None:
         if self.df is None:
@@ -1937,6 +1994,9 @@ class StartingPoseMatcher(QMainWindow):
                 "frame_override_active": self.frame_override_active,
                 "loop": self.loop_playback,
                 "fps": int(self.spin_speed.value()),
+                "speed": float(self.playback_speed),
+                "trail_frames": int(self.trail_frames),
+                "show_trail": bool(self.show_trail),
                 "target": self.playback_target,
             },
             "event_overrides": dict(self.event_overrides),
@@ -2152,6 +2212,30 @@ class StartingPoseMatcher(QMainWindow):
         if "fps" in pb:
             with QSignalBlocker(self.spin_speed):
                 self.spin_speed.setValue(int(pb["fps"]))
+        if "speed" in pb:
+            with suppress(TypeError, ValueError):
+                self.playback_speed = float(pb["speed"])
+            if hasattr(self, "combo_speed"):
+                # Snap to closest allowed speed.
+                from .session_schema import ALLOWED_SPEEDS as _ALLOWED_SPEEDS
+
+                snap = min(_ALLOWED_SPEEDS, key=lambda s: abs(s - self.playback_speed))
+                idx = self.combo_speed.findText(f"{snap}×")
+                if idx >= 0:
+                    with QSignalBlocker(self.combo_speed):
+                        self.combo_speed.setCurrentIndex(idx)
+                self.playback_speed = float(snap)
+        if "trail_frames" in pb:
+            with suppress(TypeError, ValueError):
+                self.trail_frames = int(pb["trail_frames"])
+            if hasattr(self, "spin_trail"):
+                with QSignalBlocker(self.spin_trail):
+                    self.spin_trail.setValue(int(self.trail_frames))
+        if "show_trail" in pb:
+            self.show_trail = bool(pb["show_trail"])
+            if hasattr(self, "cb_show_trail"):
+                with QSignalBlocker(self.cb_show_trail):
+                    self.cb_show_trail.setChecked(self.show_trail)
         if "target" in pb and pb["target"] in ("Mocap", "Skeleton", "Both"):
             with QSignalBlocker(self.combo_playback_target):
                 self.combo_playback_target.setCurrentText(pb["target"])
