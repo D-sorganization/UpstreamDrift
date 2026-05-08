@@ -13,6 +13,12 @@ Public API:
 
 from __future__ import annotations
 
+from .body_target import (
+    BODY_TARGET_SCHEMA_VERSION,
+    MAX_BODY_POSITION_NORM_M,
+    BodyEvent,
+    BodyTarget,
+)
 from .club_target import (
     QUAT_NORM_TOL,
     TIME_EPS,
@@ -24,7 +30,11 @@ from .club_target import (
 
 __all__ = [
     "AlignOptions",
+    "BODY_TARGET_SCHEMA_VERSION",
+    "BodyEvent",
+    "BodyTarget",
     "ClubTarget",
+    "MAX_BODY_POSITION_NORM_M",
     "QUAT_NORM_TOL",
     "SourceProvenance",
     "TIME_EPS",

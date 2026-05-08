@@ -1,21 +1,21 @@
 # Review Comments Archive - 2026-05-08
 
-Generated: 2026-05-08T05:31:38.799024
+Generated: 2026-05-08T10:29:35.487192
 
 ## Reviewer (chatgpt-codex-connector[bot]) (1 comments)
 
-### PR #4462: src/tools/starting_pose_matcher/providers/drake.py:121
+### PR #4504: src/shared/python/motion_matching/loaders/c3d_body.py:393
 
-Actionable: No
+Actionable: Yes
 Has Suggestion: No
 
 ```
-**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Drop unsupported `Parser.SetPackageMapAutoMerge` calls**
+**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Bypass wrist impact detection when impact_source is given**
 
-`Parser` in the supported Drake range (`drake>=1.22.0` in `pyproject.toml`) does not expose `SetPackageMapAutoMerge`, so this line raises `AttributeError` as soon as a `DrakeSkeletonProvider` is created. Because the same call is now in both the `model_xml` and `model_path` branches, all Drake provider initialization paths fail at runtime before any mod...
+Even in the `impact_source is not None` branch, the loader still calls `_detect_impact_via_wrist`, so any explicit `marker_set` that omits `RWristTop`/`LWristTop` fails with `ValueError` before loading. This contradicts the documented behavior that `impact_source` provides the shared `time`/`impact_idx`, and it blocks valid custom marker subsets tha...
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4462#discussion_r3208650036)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4504#discussion_r3210255790)
 
 ---
 

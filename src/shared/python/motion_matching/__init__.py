@@ -56,6 +56,16 @@ from .cost import (
     compute_cost,
 )
 from .fit_result import CanonicalFitResult
+from .body_target import (
+    BODY_TARGET_SCHEMA_VERSION,
+    MAX_BODY_POSITION_NORM_M,
+    BodyEvent,
+    BodyTarget,
+)
+from .load_body_target import (
+    load_body_target,
+    load_body_target_c3d,
+)
 from .load_club_target import (
     ALLOWED_SHEETS,
     load_club_target,
@@ -99,6 +109,9 @@ __all__ = [
     "ALLOWED_SHEETS",
     "AlignOptions",
     "AlignedTrajectory",
+    "BODY_TARGET_SCHEMA_VERSION",
+    "BodyEvent",
+    "BodyTarget",
     "COEFFS_PER_JOINT",
     "CanonicalFitResult",
     "ClubTarget",
@@ -108,6 +121,7 @@ __all__ = [
     "EngineSimulator",
     "FitQualityScalars",
     "FitResult",
+    "MAX_BODY_POSITION_NORM_M",
     "REGULARIZER_KINDS",
     "SimOut",
     "SimOutput",
@@ -119,6 +133,8 @@ __all__ = [
     "compute_total_work",
     "detect_impact_index",
     "fit_quality_summary",
+    "load_body_target",
+    "load_body_target_c3d",
     "load_club_target",
     "load_club_target_c3d",
     "load_club_target_excel",
