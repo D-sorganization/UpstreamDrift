@@ -391,7 +391,16 @@ def launch_pyqt6_app(config: LaunchConfig) -> int:
     try:
         import importlib
 
-        from PyQt6.QtWidgets import QApplication, QMainWindow
+        from PyQt6.QtCore import QEvent, QObject
+        from PyQt6.QtGui import QWheelEvent
+        from PyQt6.QtWidgets import (
+            QApplication,
+            QComboBox,
+            QDoubleSpinBox,
+            QMainWindow,
+            QSlider,
+            QSpinBox,
+        )
 
         # Dynamically import the window/widget class
         module = importlib.import_module(config.module_path)
@@ -399,6 +408,21 @@ def launch_pyqt6_app(config: LaunchConfig) -> int:
 
         # Create the application
         app = QApplication(sys.argv)
+
+        # Block mouse wheel on value-input widgets (audit scroll-wheel #4330)
+        class _WheelBlockFilter(QObject):
+            def eventFilter(self, obj: QObject | None, event: QEvent | None) -> bool:
+                if event is not None and event.type() == QEvent.Type.Wheel:
+                    if isinstance(
+                        obj,
+                        QComboBox | QDoubleSpinBox | QSpinBox | QSlider,
+                    ):
+                        event.ignore()
+                        return True
+                return False
+
+        _wheel_filter = _WheelBlockFilter(app)
+        app.installEventFilter(_wheel_filter)
         display_name = config.title or config.tool_name
         app.setApplicationName(display_name)
         app.setOrganizationName(config.organization)

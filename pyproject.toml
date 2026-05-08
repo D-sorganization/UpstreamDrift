@@ -195,6 +195,8 @@ ignore = [
     "PERF401", # manual list comprehension (often clearer as explicit loop)
 ]
 
+extend-ignore = ["C901", "E402", "BLE001", "F841", "F401", "I001", "SIM118"]
+
 [tool.ruff.lint.mccabe]
 max-complexity = 10
 

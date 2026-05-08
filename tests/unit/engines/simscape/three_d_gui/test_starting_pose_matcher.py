@@ -249,22 +249,228 @@ class TestEventLabelPresets:
 
 
 class TestPhaseWindows:
-    def test_required_phases_exist(self, core):
-        for label in ("None", "Backswing (A → T)", "Downswing (T → I)",
-                      "Follow-through (I → F)", "Full swing (A → F)",
-                      "Manual range"):
-            assert label in core.PHASE_WINDOWS
+    def test_required_phase_keys_exist(self, core):
+        for key in ("none", "backswing", "downswing",
+                    "follow_through", "full_swing", "manual"):
+            assert key in core.PHASE_KEYS, (
+                f"Phase key {key!r} missing from PHASE_KEYS")
+            assert key in core.PHASE_BOUNDS, (
+                f"Phase key {key!r} missing from PHASE_BOUNDS")
 
-    def test_default_phase_exists(self, core):
-        assert core.DEFAULT_PHASE in core.PHASE_WINDOWS
+    def test_default_phase_key_exists(self, core):
+        assert core.DEFAULT_PHASE in core.PHASE_KEYS
+        assert core.DEFAULT_PHASE in core.PHASE_BOUNDS
 
-    def test_phase_event_keys_are_valid(self, core):
-        for label, (a, b) in core.PHASE_WINDOWS.items():
+    def test_phase_event_endpoints_are_valid(self, core):
+        for key, (a, b) in core.PHASE_BOUNDS.items():
             for end in (a, b):
                 if end is None or end == "manual":
                     continue
                 assert end in core.EVENT_KEYS, (
-                    f"Phase {label!r} references unknown event {end!r}")
+                    f"Phase {key!r} references unknown event {end!r}")
+
+
+class TestPhaseDisplayLabels:
+    """Make sure phase labels in the UI are spelled out, not abbreviated."""
+
+    @pytest.fixture
+    def labels(self, core):
+        return dict(core.EVENT_LABEL_PRESETS["Wiffle (A/T/I/F)"])
+
+    def test_backswing_uses_full_words(self, core, labels):
+        s = core.phase_display_label("backswing", labels)
+        assert "Address" in s and "Top of Backswing" in s
+        # No abbreviated arrows in the spelled-out form
+        assert "(A → T)" not in s and "A→T" not in s
+
+    def test_downswing_uses_full_words(self, core, labels):
+        s = core.phase_display_label("downswing", labels)
+        assert "Top of Backswing" in s and "Impact" in s
+        assert "(T → I)" not in s
+
+    def test_follow_through_uses_full_words(self, core, labels):
+        s = core.phase_display_label("follow_through", labels)
+        assert "Impact" in s and "Finish" in s
+        assert "(I → F)" not in s
+
+    def test_full_swing_uses_full_words(self, core, labels):
+        s = core.phase_display_label("full_swing", labels)
+        assert "Address" in s and "Finish" in s
+        assert "(A → F)" not in s
+
+    def test_custom_labels_propagate(self, core):
+        custom = {"A": "MySetup", "T": "MyTop", "I": "MyStrike", "F": "MyEnd"}
+        s = core.phase_display_label("downswing", custom)
+        assert "MyTop" in s and "MyStrike" in s
+
+    def test_legacy_label_lookup_returns_key(self, core):
+        # Old session JSON might persist "Backswing (A → T)" — accept it.
+        assert core.phase_key_from_label("Backswing (A → T)") == "backswing"
+        assert core.phase_key_from_label("Full swing (A → F)") == "full_swing"
+
+    def test_logical_key_passthrough(self, core):
+        # Already a key — still resolves.
+        assert core.phase_key_from_label("backswing") == "backswing"
+
+    def test_unknown_label_returns_none(self, core):
+        assert core.phase_key_from_label("Not A Real Phase") is None
+
+
+class TestSkeletonTrajectory:
+    def test_empty_trajectory_default(self, core):
+        t = core.SkeletonTrajectory()
+        assert len(t) == 0
+
+    def test_frame_at_time_clamps_to_range(self, core):
+        sk = lambda v: core.Skeleton(joints={"mp": np.array([v, 0., 1.])})
+        t = core.SkeletonTrajectory(
+            times=np.array([0.0, 0.1, 0.2, 0.3]),
+            frames=[sk(0.0), sk(0.1), sk(0.2), sk(0.3)])
+        assert t.frame_at_time(-1.0) == 0
+        assert t.frame_at_time(0.0)  == 0
+        assert t.frame_at_time(0.11) == 1
+        assert t.frame_at_time(0.30) == 3
+        assert t.frame_at_time(99.0) == 3
+
+    def test_load_trajectory_csv_short_columns(self, core, tmp_path):
+        # Build a minimal CSV with the short-form columns
+        import pandas as pd
+        df = pd.DataFrame({
+            "time": np.linspace(0.0, 0.1, 11),
+            "club_head_X": np.linspace(0.0, 1.0, 11),
+            "club_head_Y": np.zeros(11),
+            "club_head_Z": np.linspace(0.5, 0.0, 11),
+            "left_hand_X": np.zeros(11),
+            "left_hand_Y": np.linspace(0.0, 0.2, 11),
+            "left_hand_Z": np.full(11, 0.8),
+            "right_hand_X": np.full(11, 0.05),
+            "right_hand_Y": np.linspace(0.0, 0.2, 11),
+            "right_hand_Z": np.full(11, 0.8),
+        })
+        path = tmp_path / "traj.csv"
+        df.to_csv(path, index=False)
+        traj = core.load_simscape_trajectory_csv(path)
+        assert len(traj) == 11
+        # First frame's joints
+        f0 = traj.frames[0]
+        assert "ch" in f0.joints
+        assert "lw" in f0.joints
+        assert "rw" in f0.joints
+        # mp is synthesized as the midpoint of lw and rw
+        assert "mp" in f0.joints
+        np.testing.assert_allclose(
+            f0.joints["mp"],
+            (f0.joints["lw"] + f0.joints["rw"]) / 2.0, atol=1e-9)
+        # times preserved
+        np.testing.assert_allclose(traj.times, df["time"].to_numpy())
+
+    def test_load_trajectory_csv_long_columns(self, core, tmp_path):
+        # The raw Simscape bus convention.
+        import pandas as pd
+        df = pd.DataFrame({
+            "time": np.linspace(0.0, 0.05, 6),
+            "ClubLogs_CHGlobalPosition_1": np.zeros(6),
+            "ClubLogs_CHGlobalPosition_2": np.linspace(0, 1, 6),
+            "ClubLogs_CHGlobalPosition_3": np.zeros(6),
+        })
+        path = tmp_path / "long.csv"
+        df.to_csv(path, index=False)
+        traj = core.load_simscape_trajectory_csv(path)
+        assert len(traj) == 6
+        np.testing.assert_allclose(traj.frames[0].joints["ch"], [0., 0., 0.])
+        np.testing.assert_allclose(traj.frames[-1].joints["ch"], [0., 1., 0.])
+
+    def test_load_trajectory_csv_missing_time_raises(self, core, tmp_path):
+        import pandas as pd
+        path = tmp_path / "bad.csv"
+        pd.DataFrame({"x": [1, 2, 3]}).to_csv(path, index=False)
+        with pytest.raises(ValueError, match="time"):
+            core.load_simscape_trajectory_csv(path)
+
+    def test_load_trajectory_csv_no_recognised_joints_raises(self, core, tmp_path):
+        import pandas as pd
+        path = tmp_path / "junk.csv"
+        pd.DataFrame({"time": [0, 0.01], "foo_X": [1, 2],
+                      "foo_Y": [0, 0], "foo_Z": [0, 0]}).to_csv(path, index=False)
+        with pytest.raises(ValueError, match="recognised joint"):
+            core.load_simscape_trajectory_csv(path)
+
+    def test_torso_synthesised_when_missing(self, core, tmp_path):
+        """When the CSV has spine + hub but no torso column, the loader
+        synthesises torso at 20% of the way from spine to hub (matching
+        the UpperTorsoBase = 0.2 * UpperTorsoLength split in the .mdl)."""
+        import pandas as pd
+        df = pd.DataFrame({
+            "time": [0.0, 0.01],
+            "spine_X": [0.0, 0.0], "spine_Y": [-0.30, -0.30], "spine_Z": [1.20, 1.20],
+            "hub_X":   [0.0, 0.0], "hub_Y":   [-0.30, -0.30], "hub_Z":   [1.45, 1.45],
+            "left_hand_X": [-0.05, -0.05], "left_hand_Y": [-0.10, -0.10],
+            "left_hand_Z": [0.85, 0.85],
+            "right_hand_X": [0.05, 0.05], "right_hand_Y": [-0.10, -0.10],
+            "right_hand_Z": [0.85, 0.85],
+        })
+        path = tmp_path / "no_torso.csv"
+        df.to_csv(path, index=False)
+        traj = core.load_simscape_trajectory_csv(path)
+        f0 = traj.frames[0]
+        assert "torso" in f0.joints, "loader should synthesise torso"
+        # 20% from spine -> hub: (1.20 + 0.2 * (1.45 - 1.20)) = 1.25
+        np.testing.assert_allclose(f0.joints["torso"], [0.0, -0.30, 1.25],
+                                   atol=1e-9)
+
+
+class TestSkeletonModelling:
+    """Verify the fallback skeletons reflect the actual model geometry."""
+
+    def test_torso_present_in_both_fallbacks(self, core, tmp_path):
+        impact = core.load_skeleton(tmp_path / "x.json", "Impact")
+        top    = core.load_skeleton(tmp_path / "x.json", "TopofBackswing")
+        assert "torso" in impact.joints, "Impact pose missing torso joint"
+        assert "torso" in top.joints,    "TopofBackswing pose missing torso joint"
+
+    def test_torso_between_spine_and_hub(self, core, tmp_path):
+        """Torso must lie on the line between spine and hub (along the
+        body's central column)."""
+        for pose in ("Impact", "TopofBackswing"):
+            s = core.load_skeleton(tmp_path / "x.json", pose)
+            spine = s.joints["spine"]; torso = s.joints["torso"]; hub = s.joints["hub"]
+            # Z-coordinate strictly between spine and hub
+            assert spine[2] < torso[2] < hub[2], (
+                f"{pose}: torso Z {torso[2]} not between spine {spine[2]} "
+                f"and hub {hub[2]}")
+
+    def test_segments_include_full_torso_chain(self, core, tmp_path):
+        s = core.load_skeleton(tmp_path / "x.json", "Impact")
+        seg = s.segments
+        assert ("hip", "spine") in seg
+        assert ("spine", "torso") in seg, "missing spine→torso segment"
+        assert ("torso", "hub") in seg, "missing torso→hub segment"
+        # The old hip→hub-direct shortcut MUST be gone.
+        assert ("spine", "hub") not in seg
+        assert ("hip", "hub") not in seg
+
+    def test_top_of_backswing_shows_torso_twist(self, core, tmp_path):
+        """The two fallback poses must have visibly different shoulder lines
+        — that's how the torso revolute (twist) is shown to the user.
+        At Impact: shoulders aligned with X axis (target line).
+        At Top of Backswing: shoulders rotated ~90° about body Z so the
+        line lies more along Y (ball direction) than X.
+        """
+        impact = core.load_skeleton(tmp_path / "x.json", "Impact")
+        top    = core.load_skeleton(tmp_path / "x.json", "TopofBackswing")
+
+        sl_imp = impact.joints["rs"] - impact.joints["ls"]
+        sl_top = top.joints["rs"]    - top.joints["ls"]
+        # Project to XY (the twist plane).  Compute angle of each.
+        ang_imp = float(np.arctan2(sl_imp[1], sl_imp[0]))
+        ang_top = float(np.arctan2(sl_top[1], sl_top[0]))
+        # The two shoulder-line angles should differ by at least 60°
+        # (90° expected; allow generous tolerance for our hand-tuned values).
+        diff_deg = abs(np.degrees(ang_top - ang_imp))
+        diff_deg = min(diff_deg, 360.0 - diff_deg)
+        assert diff_deg > 60.0, (
+            f"shoulder line should rotate visibly between poses; "
+            f"got only {diff_deg:.1f}° change")
 
 
 # --------------------------------------------------------------------------- #
