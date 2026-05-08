@@ -315,6 +315,21 @@ class DraggableModelCard(QFrame):
 
         self._create_status_chip(layout)
 
+        # Tile-level help text.  Tooltip is a one-line preview; What's-this
+        # shows the description and a usage hint.
+        name = getattr(self.model, "name", "this model")
+        desc = getattr(self.model, "description", "") or ""
+        self.setToolTip(f"Double-click to launch {name}")
+        self.setStatusTip(f"Selects {name}")
+        self.setWhatsThis(
+            f"<b>{name}</b><br>"
+            f"{desc}<br><br>"
+            "Double-click the tile to launch this model. "
+            "Single-click selects it without launching. "
+            "Recommended when you want to inspect the tile's status chip "
+            "before opening the simulator."
+        )
+
     def _get_status_info(self) -> tuple[str, str, str]:
         c = _get_theme_colors()
         t = getattr(self.model, "type", "").lower()

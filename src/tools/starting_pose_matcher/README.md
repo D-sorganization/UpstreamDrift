@@ -77,6 +77,36 @@ skeleton modelling, xlsx unit handling, phase windowing, session
 round-trip, FK-derived fallback (this iteration).  UI smoke tests skip
 cleanly when PyQt6 fails to import in the test environment.
 
+## Help text
+
+Every interactive control in the matcher exposes a non-empty Qt
+``toolTip()``. A coverage test (`tests/ui/test_help_coverage.py`) walks
+the widget tree under ``QT_QPA_PLATFORM=offscreen`` and asserts that a
+curated whitelist of widgets all have hover-text. See issue #4492 for
+the full sweep scope.
+
+A "?" help button at the top-right of every section opens a topic
+panel describing what the section does and what the controls mean.
+
+## Coming soon
+
+The following panels are referenced by the issue tracker but may not
+have landed in this branch yet. The matcher is intended to grow them in
+sequence:
+
+- **Source-toggle panel** (#4482) — switches between motion-target
+  sources (xlsx, parquet, live-streamed mocap) without reloading the
+  whole tool. The current build assumes xlsx via the **Mocap Source**
+  group.
+- **Animated preview** (#4481) — refines the playback panel with
+  better speed / loop / trail controls and a more compact timeline.
+  Today's playback box already supports frame, slider, play/pause,
+  speed, loop, target switching, and event marking.
+- **Skeleton-provider combo** (#4367) — extends the fixed JSON-based
+  Simscape provider so users can pick Drake / MuJoCo / Pinocchio /
+  OpenSim / Simscape / MediaPipe / OpenPose at runtime. Until that
+  lands, the provider is fixed and is configured in code.
+
 ## Related issues
 
 - #4363 frame scrubber + playback ✅ closed
@@ -87,3 +117,7 @@ cleanly when PyQt6 fails to import in the test environment.
   `skeleton_provider.SkeletonProvider`
 - #4376 relocate + adopt shared FK + declare deps (this PR)
 - #4377 AGENTS.md — shared-infra directory + workflow
+- #4481 animated preview / timeline polish (open)
+- #4482 source-toggle panel (open)
+- #4486 layer-visibility refinements (open)
+- #4492 in-app help-text sweep (this PR)

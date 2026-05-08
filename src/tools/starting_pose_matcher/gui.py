@@ -679,11 +679,14 @@ class StartingPoseMatcher(QMainWindow):
         gl = QGridLayout(box)
         gl.setVerticalSpacing(6)
         self.btn_load = QPushButton("Load xlsx…")
+        self.btn_load.setToolTip("Load a motion-capture xlsx target file")
+        self.btn_load.setStatusTip("Loads motion-capture xlsx")
         self.btn_load.clicked.connect(self._on_load_clicked)
         gl.addWidget(self.btn_load, 0, 0, 1, 2)
         gl.addWidget(QLabel("Sheet:"), 1, 0)
         self.sheet_combo = QComboBox()
         self.sheet_combo.addItems(["TW_ProV1", "TW_wiffle", "GW_wiffle", "GW_ProV11"])
+        self.sheet_combo.setToolTip("Select which sheet of the xlsx to load")
         self.sheet_combo.currentTextChanged.connect(self._on_sheet_changed)
         gl.addWidget(self.sheet_combo, 1, 1)
         self.lbl_file = QLabel("(no file loaded)")
@@ -707,6 +710,9 @@ class StartingPoseMatcher(QMainWindow):
             self.event_preset_combo.addItem(preset)
         self.event_preset_combo.addItem("Custom…")
         self.event_preset_combo.setCurrentText(self.event_label_preset)
+        self.event_preset_combo.setToolTip(
+            "Event-label naming convention used in the legend and pose-event combos"
+        )
         self.event_preset_combo.currentTextChanged.connect(
             self._on_event_preset_changed
         )
@@ -823,6 +829,9 @@ class StartingPoseMatcher(QMainWindow):
         for r, (key, slot) in enumerate(self.poses.items(), start=1):
             cb = QCheckBox()
             cb.setChecked(slot.visible)
+            cb.setToolTip(
+                f"Show or hide the {key} skeleton overlay (color {slot.color})"
+            )
             cb.stateChanged.connect(self._on_pose_toggled)
             self._pose_visible_checks[key] = cb
             gl.addWidget(cb, r, 0)
@@ -830,6 +839,7 @@ class StartingPoseMatcher(QMainWindow):
             tag = QLabel(f'<span style="color:{color};">●</span>  {key}')
             gl.addWidget(tag, r, 1)
             ec = QComboBox()
+            ec.setToolTip(f"Mocap event the {key} pose snaps to when Auto-Align is run")
             for k in _EVENT_KEYS:
                 ec.addItem(f"{k} - {self.event_labels[k]}")
             # Pick the item whose first token matches the slot's key
@@ -877,9 +887,15 @@ class StartingPoseMatcher(QMainWindow):
 
         # Trace toggles
         self.cb_clubhead_trace = QCheckBox("Show mocap clubhead path")
+        self.cb_clubhead_trace.setToolTip(
+            "Overlay the clubhead path from the mocap file"
+        )
         self.cb_clubhead_trace.stateChanged.connect(self._on_traces_toggled)
         v.addWidget(self.cb_clubhead_trace)
         self.cb_midhands_trace = QCheckBox("Show mocap mid-hands path")
+        self.cb_midhands_trace.setToolTip(
+            "Overlay the mid-hands path from the mocap file"
+        )
         self.cb_midhands_trace.stateChanged.connect(self._on_traces_toggled)
         v.addWidget(self.cb_midhands_trace)
 
@@ -887,6 +903,9 @@ class StartingPoseMatcher(QMainWindow):
         ph_row = QHBoxLayout()
         ph_row.addWidget(QLabel("Phase:"))
         self.phase_combo = QComboBox()
+        self.phase_combo.setToolTip(
+            "Phase window for trace overlays; choose Manual range to set frames"
+        )
         for key in _PHASE_KEYS:
             self.phase_combo.addItem(_phase_display_label(key, self.event_labels), key)
         # Select the default by KEY (currentData() lookup)
@@ -905,11 +924,13 @@ class StartingPoseMatcher(QMainWindow):
         mr.addWidget(QLabel("From:"))
         self.spin_phase_start = QSpinBox()
         self.spin_phase_start.setRange(0, 0)
+        self.spin_phase_start.setToolTip("First frame index of the manual phase window")
         self.spin_phase_start.valueChanged.connect(self._on_manual_range_changed)
         mr.addWidget(self.spin_phase_start)
         mr.addWidget(QLabel("To:"))
         self.spin_phase_end = QSpinBox()
         self.spin_phase_end.setRange(0, 0)
+        self.spin_phase_end.setToolTip("Last frame index of the manual phase window")
         self.spin_phase_end.valueChanged.connect(self._on_manual_range_changed)
         mr.addWidget(self.spin_phase_end)
         self.manual_range_widget.setVisible(False)
@@ -918,6 +939,9 @@ class StartingPoseMatcher(QMainWindow):
         # Show current-frame marker on traces
         self.cb_frame_marker = QCheckBox("Show current-frame marker on traces")
         self.cb_frame_marker.setChecked(True)
+        self.cb_frame_marker.setToolTip(
+            "Render a marker at the current playback frame on each trace"
+        )
         self.cb_frame_marker.stateChanged.connect(lambda _: self._redraw())
         v.addWidget(self.cb_frame_marker)
 
@@ -926,11 +950,13 @@ class StartingPoseMatcher(QMainWindow):
         # Scene element toggles
         self.cb_show_ball = QCheckBox("Show golf ball")
         self.cb_show_ball.setChecked(self.show_ball)
+        self.cb_show_ball.setToolTip("Render the ball glyph at the address position")
         self.cb_show_ball.stateChanged.connect(self._on_scene_toggled)
         v.addWidget(self.cb_show_ball)
 
         self.cb_show_ground = QCheckBox("Show ground plane")
         self.cb_show_ground.setChecked(self.show_ground)
+        self.cb_show_ground.setToolTip("Render a translucent ground plane at z=0")
         self.cb_show_ground.stateChanged.connect(self._on_scene_toggled)
         v.addWidget(self.cb_show_ground)
 
@@ -981,6 +1007,7 @@ class StartingPoseMatcher(QMainWindow):
         self.spin_frame.setRange(0, 0)
         self.spin_frame.setMinimumWidth(80)
         self.spin_frame.setKeyboardTracking(False)
+        self.spin_frame.setToolTip("Current playback frame index")
         self.spin_frame.valueChanged.connect(self._on_frame_changed_spin)
         row1.addWidget(self.spin_frame)
         self.lbl_time = QLabel("t = — s")
@@ -991,6 +1018,7 @@ class StartingPoseMatcher(QMainWindow):
 
         self.frame_slider = QSlider(Qt.Orientation.Horizontal)
         self.frame_slider.setRange(0, 0)
+        self.frame_slider.setToolTip("Scrub through the loaded mocap or trajectory")
         self.frame_slider.valueChanged.connect(self._on_frame_changed_slider)
         v.addWidget(self.frame_slider)
 
@@ -1017,6 +1045,8 @@ class StartingPoseMatcher(QMainWindow):
         play_row = QHBoxLayout()
         self.btn_play = QPushButton("▶ Play")
         self.btn_play.setObjectName("primary")
+        self.btn_play.setToolTip("Start or stop animated playback (Space)")
+        self.btn_play.setStatusTip("Toggles playback")
         self.btn_play.clicked.connect(self._toggle_play)
         play_row.addWidget(self.btn_play)
         play_row.addWidget(QLabel("Speed:"))
@@ -1024,9 +1054,11 @@ class StartingPoseMatcher(QMainWindow):
         self.spin_speed.setRange(1, 240)
         self.spin_speed.setValue(30)
         self.spin_speed.setSuffix(" fps")
+        self.spin_speed.setToolTip("Playback speed in frames per second (1-240)")
         play_row.addWidget(self.spin_speed)
         self.cb_loop = QCheckBox("Loop")
         self.cb_loop.setChecked(True)
+        self.cb_loop.setToolTip("Restart playback from the first frame on overflow")
         self.cb_loop.stateChanged.connect(
             lambda _: setattr(self, "loop_playback", self.cb_loop.isChecked())
         )
@@ -1097,6 +1129,9 @@ class StartingPoseMatcher(QMainWindow):
         self.cb_use_current_frame = QCheckBox(
             "Use current frame for mocap target (override pose-slot events)"
         )
+        self.cb_use_current_frame.setToolTip(
+            "Use the slider's current frame as the mocap target rather than event keys"
+        )
         self.cb_use_current_frame.stateChanged.connect(self._on_frame_override_toggled)
         v.addWidget(self.cb_use_current_frame)
 
@@ -1104,15 +1139,20 @@ class StartingPoseMatcher(QMainWindow):
         ev_row = QHBoxLayout()
         ev_row.addWidget(QLabel("Mark current frame as event:"))
         self.combo_set_event = QComboBox()
+        self.combo_set_event.setToolTip(
+            "Event key to assign to the current frame when Set is pressed"
+        )
         for k in _EVENT_KEYS:
             self.combo_set_event.addItem(f"{k} - {self.event_labels[k]}")
         ev_row.addWidget(self.combo_set_event)
         b_set = QPushButton("Set")
         b_set.setObjectName("preset")
+        b_set.setToolTip("Mark the current frame as the selected event")
         b_set.clicked.connect(self._set_event_to_current_frame)
         ev_row.addWidget(b_set)
         b_clear = QPushButton("Clear overrides")
         b_clear.setObjectName("preset")
+        b_clear.setToolTip("Drop all user-assigned event-frame overrides")
         b_clear.clicked.connect(self._clear_event_overrides)
         ev_row.addWidget(b_clear)
         v.addLayout(ev_row)
@@ -1132,6 +1172,9 @@ class StartingPoseMatcher(QMainWindow):
         v.addWidget(hint)
 
         self.cb_fit_scale = QCheckBox("Also fit scale (|shaft_target| / |shaft_model|)")
+        self.cb_fit_scale.setToolTip(
+            "Also solve a uniform scale so the model shaft length matches the target"
+        )
         v.addWidget(self.cb_fit_scale)
 
         # One snap button per pose-slot
@@ -1251,12 +1294,15 @@ class StartingPoseMatcher(QMainWindow):
         # Reset row
         reset_row = QHBoxLayout()
         self.btn_reset_t = QPushButton("Reset translations")
+        self.btn_reset_t.setToolTip("Set Tx, Ty, Tz back to zero")
         self.btn_reset_t.clicked.connect(self._reset_translations)
         reset_row.addWidget(self.btn_reset_t)
         self.btn_reset_r = QPushButton("Reset rotations")
+        self.btn_reset_r.setToolTip("Set Rx, Ry, Rz back to zero")
         self.btn_reset_r.clicked.connect(self._reset_rotations)
         reset_row.addWidget(self.btn_reset_r)
         self.btn_reset_all = QPushButton("Reset all")
+        self.btn_reset_all.setToolTip("Reset all translations, rotations, and scale")
         self.btn_reset_all.clicked.connect(self._reset_all)
         reset_row.addWidget(self.btn_reset_all)
         v.addLayout(reset_row)
@@ -1269,14 +1315,20 @@ class StartingPoseMatcher(QMainWindow):
 
         self.btn_save = QPushButton("Save offsets to JSON…")
         self.btn_save.setObjectName("accent")
+        self.btn_save.setToolTip("Write the current rigid transform offsets to JSON")
+        self.btn_save.setStatusTip("Saves offsets to JSON")
         self.btn_save.clicked.connect(self._on_save_clicked)
         v.addWidget(self.btn_save)
 
         ses_row = QHBoxLayout()
         self.btn_save_session = QPushButton("Save session…")
+        self.btn_save_session.setToolTip(
+            "Save the full session (transform, events, view state) to JSON"
+        )
         self.btn_save_session.clicked.connect(self._on_save_session_clicked)
         ses_row.addWidget(self.btn_save_session)
         self.btn_load_session = QPushButton("Load session…")
+        self.btn_load_session.setToolTip("Load a previously-saved session JSON")
         self.btn_load_session.clicked.connect(self._on_load_session_clicked)
         ses_row.addWidget(self.btn_load_session)
         v.addLayout(ses_row)

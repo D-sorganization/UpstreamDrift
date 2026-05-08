@@ -198,6 +198,9 @@ class PreferencesDialog(QDialog):
 
         # Live preview on change
         self.theme_combo.currentTextChanged.connect(self._preview_theme)
+        self.theme_combo.setToolTip(
+            "Color theme; previewed live, applied when you press OK or Apply"
+        )
         theme_layout.addRow("Color theme:", self.theme_combo)
 
         layout.addWidget(theme_group)
@@ -210,6 +213,7 @@ class PreferencesDialog(QDialog):
         self.font_size_spin.setRange(8, 16)
         self.font_size_spin.setValue(self.prefs.font_size)
         self.font_size_spin.setSuffix(" pt")
+        self.font_size_spin.setToolTip("Base UI font size in points (8-16)")
         font_layout.addRow("Base font size:", self.font_size_spin)
 
         layout.addWidget(font_group)
@@ -220,10 +224,12 @@ class PreferencesDialog(QDialog):
 
         self.tooltips_check = QCheckBox("Show tooltips")
         self.tooltips_check.setChecked(self.prefs.show_tooltips)
+        self.tooltips_check.setToolTip("Show hover tooltips on widgets and menu items")
         ui_layout.addWidget(self.tooltips_check)
 
         self.compact_check = QCheckBox("Compact mode (smaller spacing)")
         self.compact_check.setChecked(self.prefs.compact_mode)
+        self.compact_check.setToolTip("Use tighter padding throughout the UI")
         ui_layout.addWidget(self.compact_check)
 
         layout.addWidget(ui_group)
@@ -243,18 +249,26 @@ class PreferencesDialog(QDialog):
 
         self.splash_check = QCheckBox("Show splash screen on startup")
         self.splash_check.setChecked(self.prefs.show_splash_screen)
+        self.splash_check.setToolTip("Show the splash screen while the launcher loads")
         startup_layout.addWidget(self.splash_check)
 
         self.restore_session_check = QCheckBox("Restore last session on startup")
         self.restore_session_check.setChecked(self.prefs.restore_last_session)
+        self.restore_session_check.setToolTip(
+            "Reopen the model and tabs you had open last time"
+        )
         startup_layout.addWidget(self.restore_session_check)
 
         self.updates_check = QCheckBox("Check for updates on startup")
         self.updates_check.setChecked(self.prefs.check_updates_on_startup)
+        self.updates_check.setToolTip("Check the release feed when the launcher starts")
         startup_layout.addWidget(self.updates_check)
 
         self.auto_detect_check = QCheckBox("Auto-detect physics engines")
         self.auto_detect_check.setChecked(self.prefs.auto_detect_engines)
+        self.auto_detect_check.setToolTip(
+            "Probe the environment for installed physics engines at launch"
+        )
         startup_layout.addWidget(self.auto_detect_check)
 
         layout.addWidget(startup_group)
@@ -274,20 +288,25 @@ class PreferencesDialog(QDialog):
 
         self.notif_check = QCheckBox("Show notifications")
         self.notif_check.setChecked(self.prefs.show_notifications)
+        self.notif_check.setToolTip("Show transient toast notifications")
         notif_layout.addWidget(self.notif_check)
 
         duration_layout = QHBoxLayout()
-        duration_layout.addWidget(QLabel("Display duration:"))
+        lbl_duration = QLabel("Display duration:")
+        lbl_duration.setToolTip("How long each toast stays visible, in seconds")
+        duration_layout.addWidget(lbl_duration)
         self.duration_spin = QSpinBox()
         self.duration_spin.setRange(1, 10)
         self.duration_spin.setValue(self.prefs.notification_duration)
         self.duration_spin.setSuffix(" seconds")
+        self.duration_spin.setToolTip("Toast display duration in seconds (1-10)")
         duration_layout.addWidget(self.duration_spin)
         duration_layout.addStretch()
         notif_layout.addLayout(duration_layout)
 
         self.sounds_check = QCheckBox("Play notification sounds")
         self.sounds_check.setChecked(self.prefs.play_sounds)
+        self.sounds_check.setToolTip("Play a system sound with each notification")
         notif_layout.addWidget(self.sounds_check)
 
         layout.addWidget(notif_group)
@@ -307,10 +326,16 @@ class PreferencesDialog(QDialog):
 
         self.gpu_check = QCheckBox("Enable GPU acceleration (requires restart)")
         self.gpu_check.setChecked(self.prefs.enable_gpu_acceleration)
+        self.gpu_check.setToolTip(
+            "Use GPU rendering for the 3D viewport when available"
+        )
         hw_layout.addWidget(self.gpu_check)
 
         self.preload_check = QCheckBox("Preload physics engines at startup")
         self.preload_check.setChecked(self.prefs.preload_engines)
+        self.preload_check.setToolTip(
+            "Import all engines eagerly at launch (slower start, faster first run)"
+        )
         hw_layout.addWidget(self.preload_check)
 
         layout.addWidget(hw_group)
@@ -320,16 +345,22 @@ class PreferencesDialog(QDialog):
         cache_layout = QVBoxLayout(cache_group)
 
         recent_layout = QHBoxLayout()
-        recent_layout.addWidget(QLabel("Maximum recent models:"))
+        lbl_recent = QLabel("Maximum recent models:")
+        lbl_recent.setToolTip("Most-recently-used count tracked by the launcher")
+        recent_layout.addWidget(lbl_recent)
         self.recent_spin = QSpinBox()
         self.recent_spin.setRange(5, 50)
         self.recent_spin.setValue(self.prefs.max_recent_models)
+        self.recent_spin.setToolTip("Number of recent models to remember (5-50)")
         recent_layout.addWidget(self.recent_spin)
         recent_layout.addStretch()
         cache_layout.addLayout(recent_layout)
 
         self.cache_previews_check = QCheckBox("Cache model preview images")
         self.cache_previews_check.setChecked(self.prefs.cache_model_previews)
+        self.cache_previews_check.setToolTip(
+            "Cache rendered tile previews on disk to speed up subsequent launches"
+        )
         cache_layout.addWidget(self.cache_previews_check)
 
         layout.addWidget(cache_group)

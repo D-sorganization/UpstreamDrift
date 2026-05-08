@@ -231,6 +231,8 @@ class LauncherUISetupMixin:
 
         action_preferences = QAction("&Preferences...", self)
         action_preferences.setShortcut("Ctrl+,")
+        action_preferences.setToolTip("Edit application preferences and theme")
+        action_preferences.setStatusTip("Opens preferences")
         action_preferences.triggered.connect(self._show_preferences)
         file_menu.addAction(action_preferences)
 
@@ -238,6 +240,8 @@ class LauncherUISetupMixin:
 
         action_exit = QAction("E&xit", self)
         action_exit.setShortcut("Ctrl+Q")
+        action_exit.setToolTip("Close the launcher")
+        action_exit.setStatusTip("Quits the application")
         action_exit.triggered.connect(self.close)
         file_menu.addAction(action_exit)
 
@@ -250,6 +254,8 @@ class LauncherUISetupMixin:
 
         action_layout_mode = QAction("&Edit Layout Mode", self)
         action_layout_mode.setCheckable(True)
+        action_layout_mode.setToolTip("Toggle drag-and-drop reordering of model tiles")
+        action_layout_mode.setStatusTip("Toggles layout-edit mode")
         action_layout_mode.triggered.connect(self._toggle_layout_mode_from_menu)
         view_menu.addAction(action_layout_mode)
         self._action_layout_mode = action_layout_mode
@@ -258,6 +264,8 @@ class LauncherUISetupMixin:
 
         action_context_help = QAction("Context &Help Panel", self)
         action_context_help.setCheckable(True)
+        action_context_help.setToolTip("Show or hide the side help panel")
+        action_context_help.setStatusTip("Toggles context-help panel")
         action_context_help.triggered.connect(self._toggle_context_help)
         view_menu.addAction(action_context_help)
         self._action_context_help = action_context_help
@@ -266,6 +274,8 @@ class LauncherUISetupMixin:
         action_console.setCheckable(True)
         action_console.setChecked(False)
         action_console.setShortcut("Ctrl+`")
+        action_console.setToolTip("Show or hide the launched-process output console")
+        action_console.setStatusTip("Toggles process-output console")
         action_console.triggered.connect(
             lambda checked: self._console_dock.setVisible(checked)
         )
@@ -284,10 +294,14 @@ class LauncherUISetupMixin:
         tools_menu = menubar.addMenu("&Tools")
 
         action_env = QAction("&Environment Manager...", self)
+        action_env.setToolTip("Inspect Python environments and engine availability")
+        action_env.setStatusTip("Opens environment manager")
         action_env.triggered.connect(lambda: self._open_settings(tab=1))
         tools_menu.addAction(action_env)
 
         action_diag = QAction("&Diagnostics...", self)
+        action_diag.setToolTip("Run a diagnostic sweep of the install")
+        action_diag.setStatusTip("Opens diagnostics")
         action_diag.triggered.connect(lambda: self._open_settings(tab=2))
         tools_menu.addAction(action_diag)
 
@@ -298,25 +312,81 @@ class LauncherUISetupMixin:
             raise ValueError("menubar must be provided")
         help_menu = menubar.addMenu("&Help")
 
+        # User Manual + topic-help actions live under the legacy in-app help
+        # dialog.  The new structured Help submenu (User Guide, Loaders,
+        # Keyboard Shortcuts, Report a Bug, About) is appended after it via
+        # build_help_menu_into so the entries gain consistent tooltips and
+        # status tips.
+        from src.launchers.about_dialog import (
+            open_issues_page,
+            open_motion_match_loaders_doc,
+            open_user_guide,
+            show_about_dialog,
+        )
+        from src.launchers.help_menu import show_keyboard_shortcuts_modal
+
         action_manual = QAction("&User Manual", self)
         action_manual.setShortcut("F1")
+        action_manual.setToolTip("Open the in-app help dialog")
+        action_manual.setStatusTip("Opens user manual")
         action_manual.triggered.connect(lambda: self._show_help_dialog())
         help_menu.addAction(action_manual)
 
+        action_user_guide = QAction("User &Guide (online)", self)
+        action_user_guide.setToolTip(
+            "Open the bundled user guide in the system browser"
+        )
+        action_user_guide.setStatusTip("Opens user guide")
+        action_user_guide.triggered.connect(lambda: open_user_guide())
+        help_menu.addAction(action_user_guide)
+
+        action_loaders = QAction("&Motion-Match Loaders", self)
+        action_loaders.setToolTip("Reference for loading motion-target files")
+        action_loaders.setStatusTip("Opens motion-match loader reference")
+        action_loaders.triggered.connect(lambda: open_motion_match_loaders_doc())
+        help_menu.addAction(action_loaders)
+
         action_project_map = QAction("&Project Map", self)
+        action_project_map.setToolTip("Open the project-map document")
+        action_project_map.setStatusTip("Opens project map")
         action_project_map.triggered.connect(self._open_project_map)
         help_menu.addAction(action_project_map)
 
         help_menu.addSeparator()
 
+        topic_tips: dict[str, tuple[str, str]] = {
+            "engine_selection": (
+                "How to choose between the bundled physics engines",
+                "Opens engine-selection help",
+            ),
+            "simulation_controls": (
+                "Reference for simulation playback and stepping controls",
+                "Opens simulation-controls help",
+            ),
+            "motion_capture": (
+                "Loading and aligning motion-capture targets",
+                "Opens motion-capture help",
+            ),
+            "visualization": (
+                "Camera, traces, and scene-element controls",
+                "Opens visualization help",
+            ),
+            "analysis_tools": (
+                "Built-in analysis and post-processing tools",
+                "Opens analysis-tools help",
+            ),
+        }
         for label, topic in [
             ("Engine &Selection Guide", "engine_selection"),
             ("Simulation &Controls", "simulation_controls"),
-            ("&Motion Capture", "motion_capture"),
+            ("Motion &Capture", "motion_capture"),
             ("&Visualization", "visualization"),
             ("&Analysis Tools", "analysis_tools"),
         ]:
             action = QAction(label, self)
+            tip, status = topic_tips[topic]
+            action.setToolTip(tip)
+            action.setStatusTip(status)
             action.triggered.connect(lambda checked, t=topic: self._show_help_dialog(t))
             help_menu.addAction(action)
 
@@ -324,13 +394,41 @@ class LauncherUISetupMixin:
 
         action_shortcuts = QAction("&Keyboard Shortcuts...", self)
         action_shortcuts.setShortcut("Ctrl+?")
-        action_shortcuts.triggered.connect(self._show_shortcuts_overlay)
+        action_shortcuts.setToolTip("Show every registered keyboard shortcut")
+        action_shortcuts.setStatusTip("Opens keyboard-shortcuts table")
+
+        # Prefer the structured modal that scrapes live actions; fall
+        # back to the legacy overlay if the modal raises.
+        def _open_shortcuts() -> None:
+            try:
+                show_keyboard_shortcuts_modal(self)
+            except Exception:  # noqa: BLE001
+                self._show_shortcuts_overlay()
+
+        action_shortcuts.triggered.connect(_open_shortcuts)
         help_menu.addAction(action_shortcuts)
+
+        action_report_bug = QAction("&Report a Bug...", self)
+        action_report_bug.setToolTip("Open the public issue tracker in your browser")
+        action_report_bug.setStatusTip("Opens issue tracker")
+        action_report_bug.triggered.connect(lambda: open_issues_page())
+        help_menu.addAction(action_report_bug)
 
         help_menu.addSeparator()
 
         action_about = QAction("&About UpstreamDrift", self)
-        action_about.triggered.connect(self._show_about_dialog)
+        action_about.setToolTip("Show version and runtime information")
+        action_about.setStatusTip("Opens About dialog")
+
+        # Prefer the new dialog with live versions; fall back to legacy
+        # if anything fails (keeps menu working in trimmed environments).
+        def _open_about() -> None:
+            try:
+                show_about_dialog(self)
+            except Exception:  # noqa: BLE001
+                self._show_about_dialog()
+
+        action_about.triggered.connect(_open_about)
         help_menu.addAction(action_about)
 
     def _setup_top_bar_status_and_search(self, top_bar: QHBoxLayout) -> None:
