@@ -27,25 +27,6 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from pydantic.functional_validators import AfterValidator
 from typing import Annotated
 
-# Local invariant decorator factory.
-#
-# NOTE: this used to import ``invariant`` from ``src.shared.python.contracts``
-# but that symbol is a runtime ``invariant(condition, message)`` checker,
-# not a decorator factory. Using it as ``@invariant("name")`` raises
-# ``TypeError: missing 'message'`` at class-definition time and prevented
-# the entire ``motion_pipeline`` package from importing. We provide a
-# minimal local decorator that records the invariant name and returns the
-# bound method unchanged so contract checks remain Pydantic-driven.
-def invariant(name: str):  # type: ignore[no-redef]
-    """Tag a method as a class invariant. The check is informational only."""
-
-    def decorator(func):
-        func.__invariant_name__ = name
-        return func
-
-    return decorator
-
-
 # =============================================================================
 # Type Aliases
 # =============================================================================
@@ -193,11 +174,15 @@ class KeypointFrame(BaseModel):
             raise ValueError("Timestamp must be finite")
         return v
 
-    @invariant("keypoints_have_consistent_depth")
-    def check_keypoint_depth_consistency(self) -> bool:
-        """All keypoints should be either 2D or 3D."""
+    @model_validator(mode="after")
+    def _invariant_keypoints_have_consistent_depth(self) -> KeypointFrame:
+        """All keypoints should be either all 2D or all 3D (no mix)."""
         has_z = [kp.z is not None for kp in self.keypoints]
-        return all(has_z) or not any(has_z)
+        if not (all(has_z) or not any(has_z)):
+            raise ValueError(
+                "keypoints_have_consistent_depth: all keypoints must be either 2D or 3D"
+            )
+        return self
 
 
 class KeypointSequence(BaseModel):
@@ -412,12 +397,14 @@ class JointDef(BaseModel):
             raise ValueError("T-pose offset must be length 3")
         return v
 
-    @invariant("axes_match_limits")
-    def check_axes_limits_consistency(self) -> bool:
+    @model_validator(mode="after")
+    def _invariant_axes_match_limits(self) -> JointDef:
         """Number of axes should match number of limits (if limits provided)."""
-        if self.limits:
-            return len(self.axes) == len(self.limits)
-        return True
+        if self.limits and len(self.axes) != len(self.limits):
+            raise ValueError(
+                "axes_match_limits: number of axes must equal number of limits"
+            )
+        return self
 
 
 class SkeletonRig(BaseModel):
@@ -508,15 +495,19 @@ class JointStateFrame(BaseModel):
                 raise ValueError("All values must be finite")
         return v
 
-    @invariant("matching_dimensions")
-    def check_dimensions(self) -> bool:
+    @model_validator(mode="after")
+    def _invariant_matching_dimensions(self) -> JointStateFrame:
         """q, qdot, qddot should have same length if all present."""
         lengths = [len(self.q)]
         if self.qdot is not None:
             lengths.append(len(self.qdot))
         if self.qddot is not None:
             lengths.append(len(self.qddot))
-        return len(set(lengths)) == 1
+        if len(set(lengths)) != 1:
+            raise ValueError(
+                "matching_dimensions: q, qdot, qddot must have identical length"
+            )
+        return self
 
     @property
     def num_dofs(self) -> int:
