@@ -371,12 +371,14 @@ class JointDef(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    name: str = Field(..., description="Joint name")
+    name: str = Field(..., description="Joint name", min_length=1)
     parent: str | None = Field(default=None, description="Parent joint name")
     children: list[str] = Field(default_factory=list, description="Child joint names")
     tpose_offset: list[float] = Field(
         default_factory=lambda: [0.0, 0.0, 0.0],
         description="T-pose offset from parent (meters)",
+        min_length=3,
+        max_length=3,
     )
     axes: list[Axis] = Field(
         default_factory=lambda: ["X", "Y", "Z"],

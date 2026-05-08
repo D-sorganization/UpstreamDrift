@@ -17,7 +17,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, File, HTTPException, UploadFile, status
+from fastapi import FastAPI, File, HTTPException, UploadFile, status, Form
 from pydantic import BaseModel, Field
 
 from .contracts import MotionMatchingResult
@@ -191,9 +191,9 @@ Returns MotionMatchingResult with matched trajectory and error metrics.
     )
     async def run_pipeline(
         file: UploadFile = File(..., description="Motion capture file"),
-        source_format: str = Field(..., description="Source format"),
-        ik_backend: str = Field(default="mujoco", description="IK backend"),
-        matching_backend: str = Field(default="mujoco", description="Matching backend"),
+        source_format: str = Form(..., description="Source format"),
+        ik_backend: str = Form(default="mujoco", description="IK backend"),
+        matching_backend: str = Form(default="mujoco", description="Matching backend"),
     ) -> PipelineResponse:
         """
         Run motion pipeline on uploaded file.
@@ -277,14 +277,14 @@ Accepts JSON config body plus file upload.
     )
     async def run_pipeline_with_config(
         file: UploadFile = File(..., description="Motion capture file"),
-        config: PipelineRequest = Field(..., description="Pipeline configuration"),
+        config: str = Form(..., description="Pipeline configuration (JSON string)"),
     ) -> PipelineResponse:
         """
         Run motion pipeline with full configuration.
         
         Args:
             file: Uploaded motion capture file
-            config: Pipeline configuration
+            config: Pipeline configuration JSON string
         
         Returns:
             PipelineResponse with results or error
@@ -295,6 +295,9 @@ Accepts JSON config body plus file upload.
         logger.info(f"Received pipeline request {request_id} with config")
         
         try:
+            # Parse config from JSON string
+            parsed_config = PipelineRequest.model_validate_json(config)
+            
             # Save uploaded file temporarily
             with tempfile.NamedTemporaryFile(
                 delete=False,
@@ -305,7 +308,7 @@ Accepts JSON config body plus file upload.
                 tmp_path = Path(tmp.name)
             
             # Convert config and run pipeline
-            pipeline_config = config.to_pipeline_config()
+            pipeline_config = parsed_config.to_pipeline_config()
             pipeline = MotionPipeline(pipeline_config)
             
             result = pipeline.run(tmp_path)
