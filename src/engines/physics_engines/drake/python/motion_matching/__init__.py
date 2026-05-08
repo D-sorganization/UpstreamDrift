@@ -15,10 +15,6 @@ from .fit_swing_autodiff import (
     default_theta_bounds,
     fit_swing_drake_autodiff,
 )
-
-# Note: ``fit_swing.FitOptions`` / ``FitResult`` shadow the autodiff variants
-# above when imported directly from ``.fit_swing``; the top-level package
-# re-exports the autodiff dataclasses for backwards compatibility.
 from .humanoid_urdf import (
     CANONICAL_URDF,
     SHARED_DIMENSIONS_YAML,
@@ -26,6 +22,11 @@ from .humanoid_urdf import (
     load_humanoid_dimensions,
     load_humanoid_into_plant,
 )
+
+# Note: ``fit_swing.FitOptions`` / ``FitResult`` shadow the autodiff variants
+# above when imported directly from ``.fit_swing``; the top-level package
+# re-exports the autodiff dataclasses for backwards compatibility.
+from .provider import DrakeFitSwingProvider
 from .simulate import (
     COEFFS_PER_JOINT,
     SimOptions,
@@ -38,6 +39,7 @@ __all__ = [
     "CANONICAL_URDF",
     "COEFFS_PER_JOINT",
     "DEFAULT_COEFFICIENT_BOUNDS",
+    "DrakeFitSwingProvider",
     "FitOptions",
     "FitResult",
     "SHARED_DIMENSIONS_YAML",
@@ -55,3 +57,24 @@ __all__ = [
     "polynomial_parameter_bounds",
     "simulate_with_coefficients",
 ]
+
+
+# ---------------------------------------------------------------------------
+# Auto-register the Drake provider at import time (issue #4516).
+# ---------------------------------------------------------------------------
+# The cross-engine matcher (issue #4513) discovers engines by importing
+# ``src.engines.physics_engines.<engine>.python.motion_matching`` and
+# expecting the module to have called ``register_provider`` as a side
+# effect. We do that here. The registry call is idempotent so repeat
+# imports are safe.
+try:
+    from src.shared.python.motion_matching.provider_registry import (
+        register_provider as _register_provider,
+    )
+except ImportError:  # pragma: no cover - defensive
+    # Registry module is optional during partial-rollout periods (the
+    # canonical surface is part of #4514). If it is absent we still
+    # expose ``DrakeFitSwingProvider`` for direct construction.
+    pass
+else:
+    _register_provider(DrakeFitSwingProvider())
