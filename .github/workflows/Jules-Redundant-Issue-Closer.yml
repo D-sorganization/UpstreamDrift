@@ -1,0 +1,114 @@
+name: Agent Redundant Issue Closer
+
+# Detects duplicate agent-created issues without blocking normal issue intake.
+# Event-triggered runs close only the current issue when its title duplicates an
+# older open issue. Scheduled runs are dry-run backstops by default.
+
+on:
+  issues:
+    types: [opened, reopened, edited]
+  schedule:
+    - cron: "30 */6 * * *" # every 6 hours
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Detect only, do not close duplicate issues"
+        required: false
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: jules-redundant-issue-closer-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  close-redundant:
+    runs-on: d-sorg-fleet
+    timeout-minutes: 10
+    steps:
+      - name: Close duplicate issue when safe
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dryRun =
+              context.eventName === 'schedule' ||
+              core.getInput('dry_run', { required: false }) !== 'false';
+
+            const normalize = (title) =>
+              title.toLowerCase().replace(/\s+/g, ' ').trim();
+
+            const issue = context.payload.issue;
+            if (!issue || issue.pull_request) {
+              core.info('No standalone issue payload; scheduled/manual run remains detect-only.');
+              return;
+            }
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const currentTitle = normalize(issue.title);
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100,
+            });
+
+            const duplicates = openIssues
+              .filter((candidate) => !candidate.pull_request)
+              .filter((candidate) => normalize(candidate.title) === currentTitle)
+              .sort((left, right) => left.number - right.number);
+
+            if (duplicates.length < 2) {
+              core.info('No duplicate open issue titles found for this issue.');
+              return;
+            }
+
+            const canonical = duplicates[0];
+            if (canonical.number === issue.number) {
+              core.info(`Issue #${issue.number} is the canonical duplicate target.`);
+              return;
+            }
+
+            const body = [
+              '<!-- agent-redundant-issue-closer -->',
+              '',
+              `Closing as redundant: issue #${canonical.number} is the older open issue with the same normalized title.`,
+              '',
+              'If this issue carries distinct scope, reopen it with a more specific title and context.',
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: issue.number,
+              body,
+            });
+
+            if (dryRun) {
+              core.warning(`Dry run: would close duplicate issue #${issue.number} in favor of #${canonical.number}.`);
+              return;
+            }
+
+            await github.rest.issues.update({
+              owner,
+              repo,
+              issue_number: issue.number,
+              state: 'closed',
+              state_reason: 'not_planned',
+            });
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Agent Redundant Issue Closer"
+            echo ""
+            echo "- **Repo:** ${{ github.repository }}"
+            echo "- **Trigger:** ${{ github.event_name }}"
+            echo "- **Dry run input:** ${{ inputs.dry_run || 'true' }}"
+          } >> "$GITHUB_STEP_SUMMARY"
