@@ -44,6 +44,7 @@ from .fit_swing import (
     rotmat_to_quat_wxyz,
 )
 from .leaderboard_writer import write_leaderboard_entry
+from .provider import PROVIDER_REGISTRY, PinocchioFitSwingProvider
 from .recovery_harness import (
     RecoveryHarnessOptions,
     RecoverySummary,
@@ -70,6 +71,8 @@ __all__ = [
     "FitOptions",
     "FitResult",
     "POLY_DEGREE",
+    "PROVIDER_REGISTRY",
+    "PinocchioFitSwingProvider",
     "RecoveryHarnessOptions",
     "RecoverySummary",
     "RecoveryTrial",
