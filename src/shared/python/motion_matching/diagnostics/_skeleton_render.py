@@ -8,9 +8,29 @@ each diagnostic doesn't reinvent the same matplotlib boilerplate.
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
+from typing import Protocol
 
 import numpy as np
 from matplotlib.axes import Axes
+
+from ..body_skeleton import BodySegment, default_body_segments
+
+_DEFAULT_BODY_COLOR_MAP: dict[str, str] = {
+    "torso": "#444444",
+    "head": "#666666",
+    "left_arm": "#1f77b4",
+    "right_arm": "#ff7f0e",
+    "left_leg": "#2ca02c",
+    "right_leg": "#d62728",
+    "pelvis": "#9467bd",
+}
+
+
+class _BodyTargetLike(Protocol):
+    """Structural protocol for the subset of ``BodyTarget`` the renderer needs."""
+
+    marker_xyz: np.ndarray  # (N, M, 3)
+    marker_names: tuple[str, ...]
 
 
 def draw_segments(
@@ -94,3 +114,82 @@ def equalize_3d_axes(ax: Axes, points: np.ndarray) -> None:
     ax.set_xlim(centers[0] - half, centers[0] + half)
     ax.set_ylim(centers[1] - half, centers[1] + half)
     ax.set_zlim(centers[2] - half, centers[2] + half)  # type: ignore[attr-defined]
+
+
+def draw_body_target_frame(
+    ax: Axes,
+    target: _BodyTargetLike,
+    frame_idx: int,
+    *,
+    segment_groups: Sequence[str] | None = None,
+    color_map: dict[str, str] | None = None,
+    linewidth: float = 1.5,
+) -> None:
+    """Render one frame of a full-body marker target as a stick figure.
+
+    Draws each segment from :func:`default_body_segments` (filtered to
+    markers present on ``target``) as a coloured line on ``ax``. Segments
+    whose endpoints contain any NaN coordinate at this frame are silently
+    skipped, so missing/occluded markers degrade gracefully.
+
+    Parameters
+    ----------
+    ax
+        A matplotlib 3D axis (``projection='3d'``).
+    target
+        Anything exposing ``marker_xyz`` (shape ``(N, M, 3)``, metres) and
+        ``marker_names`` (length-``M`` tuple of strings) — typically a
+        ``BodyTarget`` instance.
+    frame_idx
+        Frame index into ``target.marker_xyz``.
+    segment_groups
+        Optional iterable of group names; only segments in these groups
+        are drawn. ``None`` (default) draws every group.
+    color_map
+        Optional override mapping ``group -> matplotlib colour``. Missing
+        keys fall back to the default colour map.
+    linewidth
+        Stroke width for every drawn segment.
+    """
+    xyz = np.asarray(target.marker_xyz)
+    names = tuple(target.marker_names)
+    if xyz.ndim != 3 or xyz.shape[2] != 3:
+        raise ValueError(
+            f"target.marker_xyz must have shape (N, M, 3); got {xyz.shape!r}"
+        )
+    if xyz.shape[1] != len(names):
+        raise ValueError(
+            "target.marker_names length must equal marker_xyz.shape[1]; "
+            f"got {len(names)} vs {xyz.shape[1]}"
+        )
+    n_frames = xyz.shape[0]
+    if not (0 <= frame_idx < n_frames):
+        raise ValueError(f"frame_idx {frame_idx} out of range [0, {n_frames})")
+
+    groups_filter: frozenset[str] | None = (
+        frozenset(segment_groups) if segment_groups is not None else None
+    )
+    colours = dict(_DEFAULT_BODY_COLOR_MAP)
+    if color_map is not None:
+        colours.update(color_map)
+
+    name_to_idx = {n: i for i, n in enumerate(names)}
+    segments: tuple[BodySegment, ...] = default_body_segments(names)
+    frame = xyz[frame_idx]
+
+    for seg in segments:
+        if groups_filter is not None and seg.group not in groups_filter:
+            continue
+        ia = name_to_idx[seg.a]
+        ib = name_to_idx[seg.b]
+        pa = frame[ia]
+        pb = frame[ib]
+        if not (np.all(np.isfinite(pa)) and np.all(np.isfinite(pb))):
+            continue
+        ax.plot(
+            [pa[0], pb[0]],
+            [pa[1], pb[1]],
+            [pa[2], pb[2]],
+            color=colours.get(seg.group, "#888888"),
+            linewidth=linewidth,
+        )

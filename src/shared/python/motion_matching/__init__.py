@@ -48,6 +48,11 @@ from .align_to_simulation_grid import (
     align_to_simulation_grid,
     detect_impact_index,
 )
+from .body_skeleton import (
+    BodySegment,
+    BodySegmentGroup,
+    default_body_segments,
+)
 from .compute_total_work import compute_total_work
 from .cost import (
     CostBreakdown,
@@ -111,6 +116,8 @@ __all__ = [
     "AlignedTrajectory",
     "BODY_TARGET_SCHEMA_VERSION",
     "BodyEvent",
+    "BodySegment",
+    "BodySegmentGroup",
     "BodyTarget",
     "COEFFS_PER_JOINT",
     "CanonicalFitResult",
@@ -131,6 +138,7 @@ __all__ = [
     "align_to_simulation_grid",
     "compute_cost",
     "compute_total_work",
+    "default_body_segments",
     "detect_impact_index",
     "fit_quality_summary",
     "load_body_target",

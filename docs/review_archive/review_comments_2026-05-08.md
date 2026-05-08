@@ -2,7 +2,7 @@
 
 Generated: 2026-05-08T10:29:35.487192
 
-## Reviewer (chatgpt-codex-connector[bot]) (1 comments)
+## Reviewer (chatgpt-codex-connector[bot]) (2 comments)
 
 ### PR #4504: src/shared/python/motion_matching/loaders/c3d_body.py:393
 
@@ -16,6 +16,21 @@ Even in the `impact_source is not None` branch, the loader still calls `_detect_
 ```
 
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4504#discussion_r3210255790)
+
+---
+
+### PR #4496: tests/unit/motion_matching/test_body_skeleton.py:7
+
+Actionable: Yes
+Has Suggestion: No
+
+```
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Guard optional matplotlib import in unit test**
+
+Importing `matplotlib` at module scope makes this test file fail during collection when the optional GUI dependency is not installed (e.g., minimal CI/dev environments), so the suite errors out instead of skipping cleanly. The repo’s root `AGENTS.md` explicitly requires matplotlib/PyQt-dependent tests to wrap imports and call `pytest.skip(...)` on `ImportError`...
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4496#discussion_r3210197994)
 
 ---
 
