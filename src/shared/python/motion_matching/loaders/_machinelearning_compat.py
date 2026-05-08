@@ -144,7 +144,7 @@ def _butt_from_clubhead(
     clubhead: np.ndarray, velocity: np.ndarray, shaft_length: float
 ) -> np.ndarray:
     """``butt = clubhead - shaft * v_hat``, NaN where ``v_hat`` is undefined."""
-    speeds = np.linalg.norm(velocity, axis=1, keepdims=True)
+    speeds = np.sqrt(np.einsum("ij,ij->i", velocity, velocity))[:, np.newaxis]
     safe = speeds > 1.0e-9
     direction = np.where(safe, velocity / np.where(safe, speeds, 1.0), np.nan)
     return clubhead - shaft_length * direction
@@ -212,7 +212,7 @@ def to_canonical_target_from_clubface(
         butt[bad] = clubhead[bad] - np.array([0.0, 0.0, shaft_length])
 
     impact = _impact_idx(
-        df, default=int(np.argmax(np.linalg.norm(velocity, axis=1))) + 1
+        df, default=int(np.argmax(np.einsum("ij,ij->i", velocity, velocity))) + 1
     )
     impact = max(1, min(impact, n))
 
@@ -274,7 +274,7 @@ def to_canonical_target_from_clublogs(
         butt[bad] = clubhead[bad] - np.array([0.0, 0.0, shaft_length])
 
     impact = _impact_idx(
-        df, default=int(np.argmax(np.linalg.norm(velocity, axis=1))) + 1
+        df, default=int(np.argmax(np.einsum("ij,ij->i", velocity, velocity))) + 1
     )
     impact = max(1, min(impact, n))
 

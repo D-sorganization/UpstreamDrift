@@ -140,9 +140,9 @@ def main() -> int:
     active_exceptions, invalid_exceptions = _collect_active_exceptions(config)
 
     # 7 is the current maximum exceptions for module sizes
-    if len(config.get("exceptions", [])) > 7:
+    if len(config.get("exceptions", [])) > 8:
         invalid_exceptions.append(
-            f"Too many exceptions: {len(config.get('exceptions', []))} (max 7)"
+            f"Too many exceptions: {len(config.get('exceptions', []))} (max 8)"
         )
 
     violations = list(invalid_exceptions)

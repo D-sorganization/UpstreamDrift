@@ -92,7 +92,7 @@ def _detect_impact_index(
     # endpoints), which is more robust than np.diff for picking out the
     # peak speed near the trajectory boundary.
     velocity = np.gradient(clubhead, time, axis=0)
-    speed = np.linalg.norm(velocity, axis=1)
+    speed = np.sqrt(np.einsum("ij,ij->i", velocity, velocity))
     # +1 for the 1-based ClubTarget convention enforced by
     # _validate_clubtarget.
     return int(np.argmax(speed)) + 1

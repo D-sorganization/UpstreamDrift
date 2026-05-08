@@ -120,7 +120,7 @@ def test_accepts_canonical_success_solver_status(monkeypatch) -> None:
 
     captured: dict[str, object] = {}
 
-    def _stub(theta_arr, opts):
+    def _stub(theta_arr, opts, initial_pose=None):
         captured["called"] = True
         return success_sim_out
 
@@ -152,7 +152,7 @@ def test_rejects_failed_solver_status(monkeypatch) -> None:
     monkeypatch.setattr(
         mj_synthesize,
         "simulate_with_coefficients",
-        lambda theta_arr, opts: failed_sim_out,
+        lambda theta_arr, opts, initial_pose=None: failed_sim_out,
     )
 
     with pytest.raises(RuntimeError, match="solver_status"):

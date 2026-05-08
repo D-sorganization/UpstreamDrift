@@ -41,7 +41,7 @@ import platform
 import subprocess
 import time
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Literal
 
 import numpy as np
@@ -302,7 +302,7 @@ def fit_swing_mujoco(target: ClubTarget, options: FitOptions) -> FitResult:
     hit the spec target is ~10×.
     """
     t_wall_start = time.perf_counter()
-    timestamp_utc = datetime.now(UTC).isoformat()
+    timestamp_utc = datetime.now(timezone.utc).isoformat()
 
     # --- 1. Compile the model once to discover ``n_joints``. ---------------
     # We can't compute bounds without ``model.nu``; the obvious way is to

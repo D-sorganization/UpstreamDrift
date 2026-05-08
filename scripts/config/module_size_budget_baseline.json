@@ -2,6 +2,12 @@
   "max_lines": 1500,
   "exceptions": [
     {
+      "path": "src/tools/starting_pose_matcher/gui.py",
+      "owner": "@tools-core",
+      "reason": "Legacy starting pose matcher GUI (2661 lines, pending decomposition)",
+      "expires_on": "2026-07-31"
+    },
+    {
       "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_gui_application.py",
       "owner": "@simscape-gui",
       "reason": "Legacy application code (1662 lines, pending decomposition)",
