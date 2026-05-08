@@ -1,0 +1,456 @@
+"""Unit tests for the Simscape Starting-Pose Matcher.
+
+Two layers:
+
+1. **Pure-data tests** (`starting_pose_core`) — RigidTransform math,
+   shaft-snap solver, xlsx loaders, skeleton loader, MocapEvents.  These
+   have no Qt dependency and run in any environment with numpy + pandas.
+2. **UI smoke tests** (`starting_pose_matcher`) — instantiate the Qt
+   window with offscreen platform.  Skipped if PyQt6 fails to load.
+
+The module files live under a directory with spaces (``Motion Capture
+Plotter``), so we load them by absolute path with importlib.
+"""
+
+from __future__ import annotations
+
+import importlib.util
+import json
+import os
+import sys
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+# --------------------------------------------------------------------------- #
+# Locate the matcher modules                                                  #
+# --------------------------------------------------------------------------- #
+
+_REPO = Path(__file__).resolve().parents[5]
+_MATCHER_DIR = (
+    _REPO
+    / "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui"
+    / "Motion Capture Plotter"
+)
+_CORE_PY = _MATCHER_DIR / "starting_pose_core.py"
+_MATCHER_PY = _MATCHER_DIR / "starting_pose_matcher.py"
+_WIFFLE_XLSX = _MATCHER_DIR / "Wiffle_ProV1_club_3D_data.xlsx"
+
+
+def _load_module_by_path(name: str, path: Path):
+    spec = importlib.util.spec_from_file_location(name, str(path))
+    if spec is None or spec.loader is None:
+        pytest.skip(f"could not build module spec for {path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _load_core():
+    if not _CORE_PY.exists():
+        pytest.skip(f"core module not found: {_CORE_PY}")
+    if str(_MATCHER_DIR) not in sys.path:
+        sys.path.insert(0, str(_MATCHER_DIR))
+    return _load_module_by_path("starting_pose_core", _CORE_PY)
+
+
+def _load_matcher():
+    """Load the Qt UI module; skip if Qt cannot import in this env."""
+    try:
+        import PyQt6.QtCore  # noqa: F401
+        import matplotlib    # noqa: F401
+    except (ImportError, OSError) as exc:
+        pytest.skip(f"PyQt6/matplotlib not loadable in this env: {exc}")
+    if not _MATCHER_PY.exists():
+        pytest.skip(f"matcher not found: {_MATCHER_PY}")
+    if str(_MATCHER_DIR) not in sys.path:
+        sys.path.insert(0, str(_MATCHER_DIR))
+    try:
+        return _load_module_by_path("starting_pose_matcher", _MATCHER_PY)
+    except (ImportError, OSError) as exc:
+        pytest.skip(f"matcher module failed to load: {exc}")
+
+
+@pytest.fixture(scope="module")
+def core():
+    return _load_core()
+
+
+# --------------------------------------------------------------------------- #
+# 1. Pure-data tests (no Qt)                                                  #
+# --------------------------------------------------------------------------- #
+
+
+class TestRigidTransform:
+    def test_identity_leaves_points_unchanged(self, core):
+        T = core.RigidTransform()
+        pts = np.array([[1.0, 2.0, 3.0], [-0.5, 0.0, 0.7]])
+        np.testing.assert_allclose(T.apply(pts), pts, atol=1e-12)
+
+    def test_translation_only(self, core):
+        T = core.RigidTransform(tx=0.1, ty=-0.2, tz=0.3)
+        pts = np.array([[0.0, 0.0, 0.0]])
+        np.testing.assert_allclose(T.apply(pts), [[0.1, -0.2, 0.3]], atol=1e-12)
+
+    def test_rz_90_about_origin(self, core):
+        # +X axis rotates to +Y under Rz(90°)
+        T = core.RigidTransform(rz=90.0)
+        out = T.apply(np.array([[1.0, 0.0, 0.0]]))
+        np.testing.assert_allclose(out, [[0.0, 1.0, 0.0]], atol=1e-9)
+
+    def test_rz_about_pivot_keeps_pivot_fixed(self, core):
+        pivot = (0.5, 0.5, 1.0)
+        T = core.RigidTransform(rz=37.5, pivot=pivot)
+        out = T.apply(np.array([list(pivot)]))
+        np.testing.assert_allclose(out[0], list(pivot), atol=1e-12)
+
+    def test_scale_isotropic(self, core):
+        T = core.RigidTransform(scale=2.0, pivot=(0.0, 0.0, 0.0))
+        pts = np.array([[1.0, -2.0, 3.0]])
+        np.testing.assert_allclose(T.apply(pts), 2.0 * pts, atol=1e-12)
+
+    def test_translation_after_rotation(self, core):
+        # Rotate +X 90° about origin, then translate by (1, 0, 0).
+        T = core.RigidTransform(tx=1.0, rz=90.0)
+        out = T.apply(np.array([[1.0, 0.0, 0.0]]))
+        np.testing.assert_allclose(out, [[1.0, 1.0, 0.0]], atol=1e-9)
+
+    def test_inverse_under_negation(self, core):
+        # Translation+rotation around origin should be undone by the
+        # inverse transform applied in reverse order.
+        Tf = core.RigidTransform(tx=0.3, ty=-0.1, rz=37.5)
+        pts = np.array([[1.0, 0.0, 0.0]])
+        forward = Tf.apply(pts)
+        # Reverse: subtract translation, then rotate by -rz around origin.
+        reverse_translation = forward - np.array([0.3, -0.1, 0.0])
+        Tinv = core.RigidTransform(rz=-37.5)
+        recovered = Tinv.apply(reverse_translation)
+        np.testing.assert_allclose(recovered, pts, atol=1e-9)
+
+
+class TestShaftSnap:
+    def test_aligned_shafts_return_zero(self, core):
+        rz = core.solve_shaft_rz_deg(
+            np.array([0.0, 0.0, 1.0]),
+            np.array([2.0, 0.0, 0.0]),
+            np.array([0.0, 0.0, 1.0]),
+            np.array([1.0, 0.0, 0.0]),
+        )
+        assert abs(rz) < 1e-6
+
+    def test_perpendicular_shafts_return_90(self, core):
+        rz = core.solve_shaft_rz_deg(
+            np.array([0.0, 0.0, 1.0]),
+            np.array([0.0, 1.0, 0.0]),
+            np.array([0.0, 0.0, 1.0]),
+            np.array([1.0, 0.0, 0.0]),
+        )
+        assert abs(rz - 90.0) < 1e-6
+
+    def test_apply_solved_rz_aligns_xy_shaft(self, core):
+        mp_skel = np.array([0.0, 0.0, 1.0])
+        ch_skel = np.array([1.0, 0.0, 0.5])
+        mp_target = np.array([0.5, -0.2, 1.3])
+        ch_target = np.array([0.5, 0.8, 0.7])
+
+        rz = core.solve_shaft_rz_deg(mp_target, ch_target, mp_skel, ch_skel)
+        T = core.RigidTransform(rz=rz, pivot=tuple(mp_skel))
+        rotated_mp = T.apply(mp_skel[None, :])[0]
+        T = core.RigidTransform(
+            tx=mp_target[0] - rotated_mp[0],
+            ty=mp_target[1] - rotated_mp[1],
+            tz=mp_target[2] - rotated_mp[2],
+            rz=rz, pivot=tuple(mp_skel),
+        )
+        np.testing.assert_allclose(T.apply(mp_skel[None, :])[0], mp_target,
+                                   atol=1e-9)
+        out_dir = (T.apply(ch_skel[None, :])[0] - mp_target)[:2]
+        out_dir /= np.linalg.norm(out_dir)
+        tgt_dir = (ch_target - mp_target)[:2]
+        tgt_dir /= np.linalg.norm(tgt_dir)
+        np.testing.assert_allclose(out_dir, tgt_dir, atol=1e-9)
+
+    def test_degenerate_vertical_shaft_returns_zero(self, core):
+        # When the XY projection has no length, Rz is undefined; the
+        # solver returns 0.0 rather than raising.
+        rz = core.solve_shaft_rz_deg(
+            np.array([0.0, 0.0, 1.0]),
+            np.array([0.0, 0.0, 0.0]),  # vertical -> XY projection = 0
+            np.array([0.0, 0.0, 1.0]),
+            np.array([1.0, 0.0, 0.0]),
+        )
+        assert rz == 0.0
+
+
+class TestSkeleton:
+    def test_load_skeleton_returns_fallback(self, core, tmp_path):
+        s = core.load_skeleton(tmp_path / "missing.json", "Impact")
+        assert isinstance(s, core.Skeleton)
+        assert "mp" in s.joints and "ch" in s.joints
+        assert len(s.segments) > 0
+        assert all(s.joints[k].shape == (3,) for k in s.joints)
+
+    def test_fallback_top_pose_higher_than_impact(self, core, tmp_path):
+        impact = core.load_skeleton(tmp_path / "x.json", "Impact")
+        top = core.load_skeleton(tmp_path / "x.json", "TopofBackswing")
+        # At top of backswing, mid-hands must be higher than at impact.
+        assert top.joints["mp"][2] > impact.joints["mp"][2]
+
+    def test_load_skeleton_from_json(self, core, tmp_path):
+        path = tmp_path / "skel.json"
+        path.write_text(json.dumps({
+            "pose": "Test",
+            "joints": {"mp": [0.0, 0.0, 1.0], "ch": [1.0, 0.0, 0.0]},
+            "segments": [["mp", "ch"]],
+        }))
+        s = core.load_skeleton(path, "Test")
+        assert s.name == "Test"
+        np.testing.assert_allclose(s.joints["mp"], [0, 0, 1])
+        np.testing.assert_allclose(s.joints["ch"], [1, 0, 0])
+        assert s.segments == [("mp", "ch")]
+
+
+class TestMocapEvents:
+    def test_default_events_all_nan(self, core):
+        e = core.MocapEvents()
+        for k in ("A", "T", "I", "F"):
+            assert getattr(e, f"{k}_sample") != getattr(e, f"{k}_sample")
+
+    def test_frame_for_nan_returns_none(self, core):
+        e = core.MocapEvents()
+        for k in ("A", "T", "I", "F"):
+            assert e.frame_for(k) is None
+
+    def test_frame_for_subtracts_one(self, core):
+        e = core.MocapEvents(A_sample=240, T_sample=418, I_sample=525, F_sample=725)
+        assert e.frame_for("A") == 239
+        assert e.frame_for("T") == 417
+        assert e.frame_for("I") == 524
+        assert e.frame_for("F") == 724
+
+
+class TestEventLabelPresets:
+    def test_wiffle_default_labels_are_canonical(self, core):
+        labels = core.EVENT_LABEL_PRESETS["Wiffle (A/T/I/F)"]
+        assert labels["A"] == "Address"
+        assert labels["T"] == "Top of Backswing"
+        assert labels["I"] == "Impact"
+        assert labels["F"] == "Finish"
+
+    def test_all_presets_cover_all_keys(self, core):
+        for name, mapping in core.EVENT_LABEL_PRESETS.items():
+            assert set(mapping.keys()) == set(core.EVENT_KEYS), (
+                f"Preset {name!r} missing keys; got {sorted(mapping)}")
+
+    def test_default_preset_exists(self, core):
+        assert core.DEFAULT_EVENT_PRESET in core.EVENT_LABEL_PRESETS
+
+
+class TestPhaseWindows:
+    def test_required_phases_exist(self, core):
+        for label in ("None", "Backswing (A → T)", "Downswing (T → I)",
+                      "Follow-through (I → F)", "Full swing (A → F)",
+                      "Manual range"):
+            assert label in core.PHASE_WINDOWS
+
+    def test_default_phase_exists(self, core):
+        assert core.DEFAULT_PHASE in core.PHASE_WINDOWS
+
+    def test_phase_event_keys_are_valid(self, core):
+        for label, (a, b) in core.PHASE_WINDOWS.items():
+            for end in (a, b):
+                if end is None or end == "manual":
+                    continue
+                assert end in core.EVENT_KEYS, (
+                    f"Phase {label!r} references unknown event {end!r}")
+
+
+# --------------------------------------------------------------------------- #
+# 2. xlsx loaders (require the Wiffle fixture)                                #
+# --------------------------------------------------------------------------- #
+
+
+def _require_xlsx() -> None:
+    if not _WIFFLE_XLSX.exists():
+        pytest.skip(f"Wiffle xlsx fixture not available: {_WIFFLE_XLSX}")
+
+
+class TestXlsxLoaders:
+    def test_load_mocap_xlsx_columns(self, core):
+        _require_xlsx()
+        df = core.load_mocap_xlsx(str(_WIFFLE_XLSX), "TW_ProV1")
+        assert len(df) > 100
+        assert {"time", "mid_X", "mid_Y", "mid_Z",
+                "club_X", "club_Y", "club_Z"}.issubset(df.columns)
+
+    def test_load_mocap_xlsx_units_are_metres(self, core):
+        """Sanity-check: median shaft length is plausible (0.7-1.4 m).
+        Catches the cm/inches mix-up bug."""
+        _require_xlsx()
+        df = core.load_mocap_xlsx(str(_WIFFLE_XLSX), "TW_ProV1")
+        shaft = np.linalg.norm(
+            df[["club_X", "club_Y", "club_Z"]].values
+            - df[["mid_X", "mid_Y", "mid_Z"]].values, axis=1)
+        finite = np.isfinite(shaft) & (shaft > 1e-3)
+        median_shaft = float(np.median(shaft[finite]))
+        assert 0.7 < median_shaft < 1.4, (
+            f"Median shaft length {median_shaft:.3f} m suggests wrong units "
+            "(expected cm->m factor 0.01).")
+
+    def test_event_header_for_prov1(self, core):
+        _require_xlsx()
+        ev = core.read_event_header(str(_WIFFLE_XLSX), "TW_ProV1")
+        for k in ("A", "T", "I", "F"):
+            v = getattr(ev, f"{k}_sample")
+            assert v == v and v > 0, f"Missing {k}_sample"
+        assert 60.0 < ev.CHS_mph < 200.0
+
+
+# --------------------------------------------------------------------------- #
+# 3. UI smoke tests                                                           #
+# --------------------------------------------------------------------------- #
+
+
+@pytest.fixture(scope="module")
+def spm():
+    """Loaded matcher module; skipped if Qt unavailable."""
+    return _load_matcher()
+
+
+@pytest.fixture(scope="module")
+def qapp(spm):
+    """QApplication using offscreen platform for headless tests."""
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    from PyQt6.QtWidgets import QApplication
+    app = QApplication.instance() or QApplication([])
+    yield app
+
+
+@pytest.fixture
+def matcher(qapp, spm, tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    win = spm.StartingPoseMatcher()
+    yield win
+    win.close()
+
+
+class TestUISmoke:
+    def test_constructor_runs_without_data(self, matcher):
+        assert matcher.windowTitle() == "Starting-Pose Matcher"
+        assert set(matcher.poses.keys()) == {"TopofBackswing", "Impact"}
+        assert matcher.transform.scale == 1.0
+
+    def test_default_event_labels_are_wiffle(self, matcher):
+        assert matcher.event_labels["A"] == "Address"
+        assert matcher.event_labels["T"] == "Top of Backswing"
+        assert matcher.event_labels["I"] == "Impact"
+        assert matcher.event_labels["F"] == "Finish"
+
+    def test_event_label_preset_switch(self, matcher):
+        matcher._on_event_preset_changed("Trackman P-system")
+        assert matcher.event_labels["A"].startswith("P1")
+        assert matcher.event_labels["T"].startswith("P4")
+        for combo in matcher._pose_event_combos.values():
+            assert any("P1" in combo.itemText(i) for i in range(combo.count()))
+
+    def test_custom_event_label_marks_preset_custom(self, matcher):
+        matcher._event_label_edits["A"].setText("My Setup")
+        matcher._on_event_label_edited("A")
+        assert matcher.event_labels["A"] == "My Setup"
+        assert matcher.event_label_preset == "Custom"
+
+    def test_phase_window_switch(self, matcher):
+        matcher._on_phase_changed("Backswing (A → T)")
+        assert matcher.phase_window == "Backswing (A → T)"
+        assert matcher.manual_range_widget.isVisible() is False
+        matcher._on_phase_changed("Manual range")
+        assert matcher.manual_range_widget.isVisible() is True
+
+    def test_lock_xy_default(self, matcher):
+        assert matcher.lock_xy_rotation is True
+        assert matcher.s_rx.spin.isEnabled() is False
+        assert matcher.s_ry.spin.isEnabled() is False
+
+    def test_unlock_xy_enables_rxy(self, matcher):
+        matcher.cb_lock_xy.setChecked(True)
+        matcher._on_lock_xy_toggled(2)
+        assert matcher.lock_xy_rotation is False
+        assert matcher.s_rx.spin.isEnabled() is True
+
+    def test_reset_all_zeros_and_unit_scale(self, matcher):
+        matcher.s_tx.set_value(0.5)
+        matcher.s_rz.set_value(45.0)
+        matcher.s_scale.set_value(1.5)
+        matcher._reset_all()
+        assert matcher.s_tx.value() == 0.0
+        assert matcher.s_rz.value() == 0.0
+        assert matcher.s_scale.value() == 1.0
+
+    def test_camera_preset_top_down(self, matcher):
+        matcher._apply_camera_preset("Top-Down")
+        assert abs(matcher.ax.elev - 89.0) < 0.01
+
+    def test_session_round_trip(self, matcher, tmp_path, spm):
+        matcher.s_tx.set_value(0.123)
+        matcher.s_rz.set_value(-45.5)
+        matcher.s_scale.set_value(1.10)
+        matcher._on_phase_changed("Downswing (T → I)")
+        matcher._event_label_edits["A"].setText("MySetup")
+        matcher._on_event_label_edited("A")
+
+        snap = matcher._serialize_session()
+        path = tmp_path / "s.json"
+        path.write_text(json.dumps(snap))
+
+        win2 = spm.StartingPoseMatcher()
+        try:
+            win2._apply_session(json.loads(path.read_text()))
+            assert abs(win2.s_tx.value() - 0.123) < 1e-3
+            assert abs(win2.s_rz.value() - (-45.5)) < 1e-3
+            assert abs(win2.s_scale.value() - 1.10) < 1e-3
+            assert win2.phase_window == "Downswing (T → I)"
+            assert win2.event_labels["A"] == "MySetup"
+        finally:
+            win2.close()
+
+    def test_playback_step_frame(self, matcher):
+        if not _WIFFLE_XLSX.exists():
+            pytest.skip("xlsx fixture unavailable")
+        matcher._load_xlsx(str(_WIFFLE_XLSX))
+        before = matcher.current_frame
+        matcher._step_frame(+5)
+        assert matcher.current_frame == before + 5
+        matcher._step_frame(-100)
+        assert matcher.current_frame == max(0, before + 5 - 100)
+        matcher._step_frame(10**9)
+        assert matcher.current_frame == len(matcher.df) - 1
+
+    def test_playback_advance_loop(self, matcher):
+        if not _WIFFLE_XLSX.exists():
+            pytest.skip("xlsx fixture unavailable")
+        matcher._load_xlsx(str(_WIFFLE_XLSX))
+        matcher.spin_frame.setValue(len(matcher.df) - 1)
+        matcher.loop_playback = True
+        matcher._advance_frame()
+        assert matcher.current_frame == 0
+
+    def test_set_event_to_current_frame(self, matcher):
+        if not _WIFFLE_XLSX.exists():
+            pytest.skip("xlsx fixture unavailable")
+        matcher._load_xlsx(str(_WIFFLE_XLSX))
+        matcher.spin_frame.setValue(123)
+        matcher.combo_set_event.setCurrentIndex(0)  # A
+        matcher._set_event_to_current_frame()
+        assert matcher.event_overrides.get("A") == 124
+        assert int(matcher.events.A_sample) == 124
+
+    def test_snap_shaft_for_visible_pose(self, matcher):
+        if not _WIFFLE_XLSX.exists():
+            pytest.skip("xlsx fixture unavailable")
+        matcher._load_xlsx(str(_WIFFLE_XLSX))
+        matcher._pose_visible_checks["Impact"].setChecked(True)
+        matcher._snap_shaft("Impact")
+        residuals = matcher._compute_residuals_mm()
+        assert residuals["Impact"]["norm_mm"] < 1.0
