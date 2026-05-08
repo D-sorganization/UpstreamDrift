@@ -1,0 +1,7 @@
+[run]
+source = src
+branch = True
+
+[report]
+precision = 2
+fail_under = 25

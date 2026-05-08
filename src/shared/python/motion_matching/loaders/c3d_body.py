@@ -393,8 +393,15 @@ def load_body_target_c3d(
             if 0 <= impact_idx_out < sim_time.size
             else float(opts.impact_target_t_s)
         )
-        impact_raw = _detect_impact_via_wrist(raw_time, z_up)
-        time_offset = float(raw_time[impact_raw]) - impact_target_t_s
+        _wrist_markers_present = any(
+            m in chosen for m in ("RWristTop", "LWristTop")
+        )
+        if _wrist_markers_present:
+            impact_raw = _detect_impact_via_wrist(raw_time, z_up)
+            time_offset = float(raw_time[impact_raw]) - impact_target_t_s
+        else:
+            impact_raw = 0
+            time_offset = 0.0
     else:
         sim_time = _build_sim_grid(opts)
         impact_raw = _detect_impact_via_wrist(raw_time, z_up)
