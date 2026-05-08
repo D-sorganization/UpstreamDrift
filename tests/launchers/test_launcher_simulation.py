@@ -389,6 +389,68 @@ def test_launch_c3d_viewer(launcher) -> None:
         launcher.show_toast.assert_called_with("C3D Viewer script not found.", "error")
 
 
+def test_launch_c3d_viewer_all_candidates_missing_logs_full_search_list(
+    launcher, caplog
+) -> None:
+    """Pins #4595: when no candidate exists, log the full search list and toast.
+
+    The function must report ``C3D Viewer script not found`` AND log every
+    path it searched, not just the first miss.
+    """
+    import logging as _logging
+
+    with patch("src.launchers.launcher_simulation.Path.exists", return_value=False):
+        launcher.running_processes.pop("c3d_viewer", None)
+        with caplog.at_level(
+            _logging.ERROR, logger="src.launchers.launcher_simulation"
+        ):
+            launcher._launch_c3d_viewer()
+    launcher.show_toast.assert_called_with("C3D Viewer script not found.", "error")
+    not_found = [
+        r for r in caplog.records if "C3D Viewer script not found" in r.getMessage()
+    ]
+    assert not_found, "expected an ERROR-level log entry"
+    msg = not_found[0].getMessage()
+    assert "run_c3d_viewer.py" in msg
+    assert "launch_pyqt6.py" in msg
+    assert "c3d_viewer.py" in msg
+
+
+def test_launch_c3d_viewer_falls_back_to_legacy_when_only_legacy_exists(
+    launcher,
+) -> None:
+    """Pins #4595: ``tools/c3d_viewer/c3d_viewer.py`` is a valid fallback."""
+    launcher.running_processes.pop("c3d_viewer", None)
+
+    def only_legacy_exists(self_path: Path) -> bool:
+        return str(self_path).endswith(str(Path("tools/c3d_viewer/c3d_viewer.py")))
+
+    launcher.process_manager.launch_script.return_value = MagicMock()
+    with patch(
+        "src.launchers.launcher_simulation.Path.exists",
+        autospec=True,
+        side_effect=only_legacy_exists,
+    ):
+        launcher._launch_c3d_viewer()
+
+    launcher.process_manager.launch_script.assert_called_once()
+    selected = launcher.process_manager.launch_script.call_args.args[1]
+    assert str(selected).endswith(str(Path("tools/c3d_viewer/c3d_viewer.py")))
+
+
+def test_launch_c3d_viewer_prefers_in_repo_wrapper_when_present(launcher) -> None:
+    """Pins #4595: ``run_c3d_viewer.py`` wrapper wins over vendor and legacy."""
+    launcher.running_processes.pop("c3d_viewer", None)
+    launcher.process_manager.launch_script.return_value = MagicMock()
+    # Every candidate exists; the wrapper is first in the search list.
+    with patch("src.launchers.launcher_simulation.Path.exists", return_value=True):
+        launcher._launch_c3d_viewer()
+
+    launcher.process_manager.launch_script.assert_called_once()
+    selected = launcher.process_manager.launch_script.call_args.args[1]
+    assert str(selected).endswith("run_c3d_viewer.py")
+
+
 def test_launch_shot_tracer(launcher) -> None:
     with patch("src.launchers.launcher_simulation.Path.exists", return_value=True):
         launcher.process_manager.launch_script.return_value = MagicMock()

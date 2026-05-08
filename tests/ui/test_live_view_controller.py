@@ -132,6 +132,45 @@ def test_controller_layer_visibility_toggle(loaded_body, axes_canvas) -> None:
     assert art.get_visible() is True
 
 
+def test_body_skeleton_segments_are_int_pairs_into_marker_names(
+    loaded_body, axes_canvas
+) -> None:
+    """Pins #4582 default_body_segments fix.
+
+    The body-skeleton layer must receive ``(int, int)`` index pairs, and
+    every endpoint must be a valid index into ``marker_names`` — i.e. the
+    name->index remap survives into the segment list rather than leaking
+    raw ``BodySegment`` dataclasses.
+    """
+    from src.shared.python.motion_matching.body_skeleton import (
+        default_body_segments,
+    )
+    from src.tools.starting_pose_matcher.live_view_controller import (
+        _default_body_segments_safe,
+    )
+
+    pairs = _default_body_segments_safe(tuple(loaded_body.marker_names))
+    assert pairs, "expected at least one body-skeleton segment"
+    m = len(loaded_body.marker_names)
+    for pair in pairs:
+        assert isinstance(pair, tuple) and len(pair) == 2
+        ia, ib = pair
+        assert isinstance(ia, int) and not isinstance(ia, bool)
+        assert isinstance(ib, int) and not isinstance(ib, bool)
+        assert 0 <= ia < m, f"segment endpoint {ia} out of range"
+        assert 0 <= ib < m, f"segment endpoint {ib} out of range"
+    # Sanity: helper returned at least as many pairs as the upstream segment
+    # list could resolve given this marker set (defensive against silent
+    # name-miss fallthroughs).
+    name_set = set(loaded_body.marker_names)
+    resolvable = [
+        s
+        for s in default_body_segments(tuple(loaded_body.marker_names))
+        if getattr(s, "a", None) in name_set and getattr(s, "b", None) in name_set
+    ]
+    assert len(pairs) >= len(resolvable)
+
+
 def test_controller_handles_missing_club_and_ball(loaded_body, axes_canvas) -> None:
     """Body-only targets must not raise when club/ball slots are absent."""
     from src.tools.starting_pose_matcher.live_view_controller import (
