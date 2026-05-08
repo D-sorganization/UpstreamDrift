@@ -75,7 +75,7 @@ class TestInertiaResult:
             izz=3.0,
             mass=5.0,
             volume=0.001,
-            mode=InertiaMode.PRIMITIVE_APPROXIMATION,
+            mode=InertiaMode.PRIMITIVE,
         )
         data = result.as_dict()
 

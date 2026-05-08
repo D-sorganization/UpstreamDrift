@@ -100,7 +100,7 @@ class ExportOptions:
     mesh_backend: MeshGeneratorBackend = MeshGeneratorBackend.PRIMITIVE
 
     # Inertia options
-    inertia_mode: InertiaMode = InertiaMode.PRIMITIVE_APPROXIMATION
+    inertia_mode: InertiaMode = InertiaMode.PRIMITIVE
     density_kg_m3: float = 1050.0
 
     # Output structure
@@ -488,7 +488,7 @@ class CharacterBuilder:
         mass: float | None = None,
         dimensions: dict[str, float] | None = None,
         mesh_path: Path | str | None = None,
-        mode: InertiaMode = InertiaMode.PRIMITIVE_APPROXIMATION,
+        mode: InertiaMode = InertiaMode.PRIMITIVE,
         density: float = 1050.0,
     ) -> InertiaResult:
         """
@@ -546,7 +546,7 @@ class CharacterBuilder:
     def compute_all_inertias(
         self,
         params: BodyParameters,
-        mode: InertiaMode = InertiaMode.PRIMITIVE_APPROXIMATION,
+        mode: InertiaMode = InertiaMode.PRIMITIVE,
         mesh_dir: Path | str | None = None,
     ) -> dict[str, InertiaResult]:
         """
