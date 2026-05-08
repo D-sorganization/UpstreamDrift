@@ -13,7 +13,7 @@ Usage:
     self.my_combo_box.installEventFilter(filter)
 """
 
-from PyQt6.QtCore import QObject, QEvent
+from PyQt6.QtCore import QEvent, QObject
 from PyQt6.QtGui import QWheelEvent
 
 

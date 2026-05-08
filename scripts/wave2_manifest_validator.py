@@ -10,13 +10,11 @@ Usage:
     python3 scripts/wave2_manifest_validator.py --check-only
 """
 
-import sys
-import os
-import re
-from pathlib import Path
-from typing import Dict, List, Set
-import json
 import argparse
+import json
+import re
+import sys
+from pathlib import Path
 
 
 class ManifestValidator:
@@ -26,10 +24,10 @@ class ManifestValidator:
         self.repo_root = repo_root
         self.src_path = repo_root / "src"
         self.manifest_path = repo_root / "MANIFEST.md"
-        self.modules_on_disk: Dict[str, List[str]] = {}
-        self.modules_in_manifest: Dict[str, List[str]] = {}
+        self.modules_on_disk: dict[str, list[str]] = {}
+        self.modules_in_manifest: dict[str, list[str]] = {}
 
-    def scan_engines(self) -> Dict[str, List[str]]:
+    def scan_engines(self) -> dict[str, list[str]]:
         """Scan src/engines/* for Python modules."""
         engines_path = self.src_path / "engines"
         if not engines_path.exists():
@@ -53,7 +51,7 @@ class ManifestValidator:
 
         return modules
 
-    def scan_shared(self) -> Dict[str, List[str]]:
+    def scan_shared(self) -> dict[str, list[str]]:
         """Scan src/shared/python/* for modules."""
         shared_path = self.src_path / "shared" / "python"
         if not shared_path.exists():
@@ -80,7 +78,7 @@ class ManifestValidator:
 
         return modules
 
-    def scan_all_modules(self) -> Dict[str, List[str]]:
+    def scan_all_modules(self) -> dict[str, list[str]]:
         """Scan all module directories."""
         all_modules = {}
         all_modules.update(self.scan_engines())
@@ -88,7 +86,7 @@ class ManifestValidator:
         self.modules_on_disk = all_modules
         return all_modules
 
-    def parse_manifest(self) -> Dict[str, List[str]]:
+    def parse_manifest(self) -> dict[str, list[str]]:
         """Parse MANIFEST.md to extract documented modules."""
         if not self.manifest_path.exists():
             print(f"Warning: {self.manifest_path} not found")
@@ -119,7 +117,7 @@ class ManifestValidator:
         self.modules_in_manifest = modules
         return modules
 
-    def validate(self) -> tuple[bool, List[str], List[str]]:
+    def validate(self) -> tuple[bool, list[str], list[str]]:
         """Validate manifest against actual modules.
 
         Returns:
