@@ -43,5 +43,5 @@ The suite runs within a unified `upstream-drift:engine` Docker container to ensu
 ## Troubleshooting
 
 - **"Docker not found":** Ensure Docker Desktop is running.
-- **"ImportError: libEGL":** The Docker image needs to be rebuilt to include graphics libraries. Click "Rebuild Environment".
+- **"ImportError: libEGL":** The Docker image needs to be rebuilt to include graphics libraries. Open Settings → Configuration → Docker Image and click "Build Image".
 - **Display Issues:** Check that VcXsrv is running with "Disable access control" checked.

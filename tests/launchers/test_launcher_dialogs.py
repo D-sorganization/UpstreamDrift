@@ -375,18 +375,25 @@ def test_on_wsl_mode_changed_disable(launcher) -> None:
 
 
 def test_update_execution_status(launcher) -> None:
+    # Strings updated to match the launcher's new "Runtime: ..." vocabulary
+    # — see runtime_mode_help.RUNTIME_MODE_HELP_HTML for the source-of-truth
+    # explanation that all three labels are derived from.
     launcher.chk_wsl.isChecked.return_value = True
     launcher.update_execution_status()
-    launcher.lbl_execution_mode.setText.assert_called_with("Mode: WSL (Ubuntu)")
+    launcher.lbl_execution_mode.setText.assert_called_with(
+        "Runtime: WSL2 (Ubuntu Linux)"
+    )
 
     launcher.chk_wsl.isChecked.return_value = False
     launcher.chk_docker.isChecked.return_value = True
     launcher.update_execution_status()
-    launcher.lbl_execution_mode.setText.assert_called_with("Mode: Docker Container")
+    launcher.lbl_execution_mode.setText.assert_called_with(
+        "Runtime: Docker (Linux container)"
+    )
 
     launcher.chk_docker.isChecked.return_value = False
     launcher.update_execution_status()
-    launcher.lbl_execution_mode.setText.assert_called_with("Mode: Local (Windows)")
+    launcher.lbl_execution_mode.setText.assert_called_with("Runtime: Native Windows")
 
 
 def test_update_execution_status_no_label(launcher) -> None:

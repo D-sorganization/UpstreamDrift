@@ -65,7 +65,9 @@ class EnvironmentDialog(QDialog):
         build_layout.addWidget(self.combo_stage)
 
         btn_row = QHBoxLayout()
-        self.btn_build = QPushButton("Build Environment")
+        # Match the Settings → Configuration → Docker Image button label
+        # so users see the same vocabulary in both build entry points.
+        self.btn_build = QPushButton("Build Image")
         self.btn_build.clicked.connect(self.start_build)
         btn_row.addWidget(self.btn_build)
 

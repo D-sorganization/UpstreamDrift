@@ -11,7 +11,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -146,63 +146,146 @@ class SettingsDialog(QDialog):
     # ── Configuration tab ───────────────────────────────────────────
 
     def _create_configuration_tab(self) -> QWidget:
-        """Configuration tab: execution env + simulation opts + Docker rebuild."""
+        """Configuration tab: engine runtime + simulation opts + Docker image build.
+
+        The three groups answer three different user questions:
+
+        * **Engine Runtime** — *where do physics engines actually run?*
+          (Native Windows / Docker container / WSL2). Inline ``?`` button
+          opens the shared help dialog with full pros/cons.
+        * **Simulation Options** — per-run knobs (live viz, GPU).
+        * **Docker Image** — *build* the container image used by the
+          Docker runtime. This group is always visible regardless of
+          the active runtime; it's the only place an image build makes
+          sense, and the runtime selection is independent.
+        """
+        from src.launchers.runtime_mode_help import (
+            make_runtime_mode_help_button,
+            show_runtime_mode_help,
+        )
+
         tab = QWidget()
         tab_layout = QVBoxLayout(tab)
 
-        # --- Execution environment ---
-        env_group = QGroupBox("Execution Environment")
+        # --- Engine Runtime ---------------------------------------------
+        # Renamed from "Execution Environment" — "Engine Runtime" makes
+        # explicit that this controls where *engines* run, separate from
+        # where the launcher itself runs (always Windows).
+        env_group = QGroupBox("Engine Runtime")
         env_inner = QVBoxLayout(env_group)
 
-        self.chk_docker = QCheckBox("Docker mode")
+        # Header row: short summary + inline ``?`` help button so users
+        # can read the full explanation without leaving the dialog.
+        env_header = QHBoxLayout()
+        env_header.addWidget(
+            QLabel(
+                "Where physics engines execute. "
+                "Default is Native Windows (no boxes ticked)."
+            )
+        )
+        env_header.addStretch()
+        env_header.addWidget(make_runtime_mode_help_button(self))
+        env_inner.addLayout(env_header)
+
+        self.chk_docker = QCheckBox("Docker container (Linux, sandboxed)")
         self.chk_docker.setToolTip(
-            "Run physics engines in Docker containers (requires Docker Desktop)"
+            "Run engines inside the upstream-drift:engine Linux container. "
+            "Full Drake/Pinocchio support; requires Docker installed and the "
+            "image built (see Docker Image section below)."
         )
         env_inner.addWidget(self.chk_docker)
 
-        self.chk_wsl = QCheckBox("WSL mode")
+        self.chk_wsl = QCheckBox("WSL2 Ubuntu (Linux, native filesystem)")
         self.chk_wsl.setToolTip(
-            "Run in WSL2 Ubuntu environment (full Pinocchio/Drake/Crocoddyl support)"
+            "Run engines in your WSL2 Ubuntu user environment. Same Linux "
+            "wheels as Docker mode but no container layer — faster file I/O "
+            "and easier interactive debugging from a WSL shell."
         )
         env_inner.addWidget(self.chk_wsl)
 
+        # Inline footer reminds users what unticked-both means.
+        env_footer = QLabel(
+            "<i>Untick both to fall back to Native Windows (default).</i>"
+        )
+        env_footer.setTextFormat(Qt.TextFormat.RichText)
+        env_inner.addWidget(env_footer)
+
         tab_layout.addWidget(env_group)
 
-        # --- Simulation options ---
+        # --- Simulation options -----------------------------------------
         sim_group = QGroupBox("Simulation Options")
         sim_inner = QVBoxLayout(sim_group)
 
-        self.chk_live_viz = QCheckBox("Live Visualization")
+        self.chk_live_viz = QCheckBox("Live visualization")
         self.chk_live_viz.setToolTip(
-            "Enable real-time 3D visualization during simulation"
+            "Stream the 3D scene in real time during simulation. Disable "
+            "for headless batch runs to save GPU/CPU."
         )
         sim_inner.addWidget(self.chk_live_viz)
 
-        self.chk_gpu = QCheckBox("GPU Acceleration")
+        self.chk_gpu = QCheckBox("GPU acceleration (where available)")
         self.chk_gpu.setToolTip(
-            "Use GPU for physics computation (requires supported hardware)"
+            "Use the GPU for physics where the engine supports it (MuJoCo "
+            "MJX, JAX backends). Falls back to CPU if no compatible GPU is "
+            "detected — safe to leave on."
         )
         sim_inner.addWidget(self.chk_gpu)
 
         tab_layout.addWidget(sim_group)
 
-        # --- Rebuild Environment (Docker build) ---
-        build_group = QGroupBox("Rebuild Environment")
+        # --- Docker Image build -----------------------------------------
+        # Renamed from "Rebuild Environment" — that label conflated the
+        # runtime selection with the image build, which are independent.
+        # Building the image just puts upstream-drift:engine into your
+        # local image store; *using* it requires ticking Docker above.
+        build_group = QGroupBox("Docker Image")
         build_inner = QVBoxLayout(build_group)
 
+        build_header = QHBoxLayout()
+        build_header.addWidget(
+            QLabel(
+                "Build or rebuild the <b>upstream-drift:engine</b> image. "
+                "Independent of the runtime selection above."
+            )
+        )
+        build_header.addStretch()
+        build_help = make_runtime_mode_help_button(self)
+        build_help.setToolTip(
+            "What does the Docker image contain? Click for full details."
+        )
+        # The same shared help dialog covers building too — the help
+        # text explains how runtime selection and image build relate.
+        build_help.clicked.disconnect()
+        build_help.clicked.connect(lambda: show_runtime_mode_help(self))
+        build_header.addWidget(build_help)
+        build_inner.addLayout(build_header)
+
         stage_row = QHBoxLayout()
-        stage_row.addWidget(QLabel("Target Stage:"))
+        stage_label = QLabel("Target stage:")
+        stage_label.setToolTip(
+            "Which Dockerfile target to build. 'all' includes every engine "
+            "(largest image, longest build, most compatible). The other "
+            "stages build only that engine's deps for faster, leaner images."
+        )
+        stage_row.addWidget(stage_label)
         self.combo_stage = QComboBox()
         self.combo_stage.addItems(list(DOCKER_STAGES))
+        self.combo_stage.setToolTip(stage_label.toolTip())
         stage_row.addWidget(self.combo_stage)
+        stage_row.addStretch()
         build_inner.addLayout(stage_row)
 
         btn_row = QHBoxLayout()
-        self._btn_build = QPushButton("Build Environment")
+        self._btn_build = QPushButton("Build Image")
+        self._btn_build.setToolTip(
+            f"Build the {DOCKER_IMAGE_NAME} image now using the selected "
+            "target stage. Streams build output below."
+        )
         self._btn_build.clicked.connect(self._start_build)
         btn_row.addWidget(self._btn_build)
 
         self._btn_cancel_build = QPushButton("Cancel")
+        self._btn_cancel_build.setToolTip("Abort the running build.")
         self._btn_cancel_build.setEnabled(False)
         self._btn_cancel_build.clicked.connect(self._cancel_build)
         btn_row.addWidget(self._btn_cancel_build)

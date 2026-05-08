@@ -215,10 +215,13 @@ class LauncherDialogsMixin:
         QDesktopServices.openUrl(QUrl(mailto_url))
 
     def _open_settings(self, tab: int = 0) -> None:
-        """Open the settings dialog with Diagnostics and Rebuild Environment tabs.
+        """Open the Settings dialog (Layout / Configuration / Diagnostics).
 
         Args:
-            tab: Initial tab index (0=Diagnostics, 1=Rebuild Environment).
+            tab: Initial tab index. See ``settings_dialog.SettingsDialog``
+                tab constants (``TAB_LAYOUT`` / ``TAB_CONFIG`` /
+                ``TAB_DIAGNOSTICS``); the Configuration tab is where
+                Engine Runtime selection and Docker Image build live.
         """
         if not (tab is not None):
             raise ValueError("tab must be provided")
@@ -423,16 +426,23 @@ class LauncherDialogsMixin:
             self.update_launch_button()
 
     def update_execution_status(self) -> None:
-        """Update the execution mode label based on current settings."""
+        """Update the runtime indicator label based on current selection.
+
+        The label name uses ``Runtime:`` (not ``Mode:``) because that's
+        the term the matching Settings group and the help dialog use,
+        and it makes the answer to "where do my engines actually run?"
+        unambiguous at a glance. WSL takes precedence over Docker if
+        both are somehow checked (only one is meaningful at a time).
+        """
         if not hasattr(self, "lbl_execution_mode"):
             return
 
         if hasattr(self, "chk_wsl") and self.chk_wsl.isChecked():
-            self.lbl_execution_mode.setText("Mode: WSL (Ubuntu)")
+            self.lbl_execution_mode.setText("Runtime: WSL2 (Ubuntu Linux)")
             self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_DOCKER)
         elif hasattr(self, "chk_docker") and self.chk_docker.isChecked():
-            self.lbl_execution_mode.setText("Mode: Docker Container")
+            self.lbl_execution_mode.setText("Runtime: Docker (Linux container)")
             self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_DOCKER)
         else:
-            self.lbl_execution_mode.setText("Mode: Local (Windows)")
+            self.lbl_execution_mode.setText("Runtime: Native Windows")
             self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_WARNING)
