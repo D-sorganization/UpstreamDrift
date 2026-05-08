@@ -38,6 +38,13 @@ def launcher(mock_pyqt) -> Generator[MagicMock, None, None]:
         yield inst
 
 
+@pytest.mark.skip(
+    reason=(
+        "Reloading src.launchers.golf_suite_launcher under coverage produces "
+        "a Windows STATUS_STACK_BUFFER_OVERRUN — see issue #4676. Replaced by "
+        "test_golf_suite_launcher_extended.test_init_raises_without_pyqt."
+    )
+)
 def test_init_raises_without_pyqt() -> None:
     with patch("src.launchers.golf_suite_launcher.PYQT6_AVAILABLE", False):
         import src.launchers.golf_suite_launcher as gsl
@@ -118,9 +125,13 @@ def test_launch_script_success(launcher) -> None:
 
         launcher._launch_script("Test Engine", fake_path, fake_cwd)
 
-        mock_popen.assert_called_once_with(
-            [sys.executable, str(fake_path)], cwd=str(fake_cwd)
-        )
+        # The implementation forwards an environment dictionary containing
+        # the ``PYTHONPATH`` of the parent process; only the positional
+        # args and ``cwd`` are part of the contract.
+        assert mock_popen.call_count == 1
+        call = mock_popen.call_args
+        assert call.args[0] == [sys.executable, str(fake_path)]
+        assert call.kwargs["cwd"] == str(fake_cwd)
         launcher.status.setText.assert_called_with("Test Engine Launched")
 
 
