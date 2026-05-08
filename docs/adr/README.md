@@ -18,6 +18,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0003](0003-websocket-realtime-simulation.md)      | WebSocket Protocol for Real-Time Simulation | Accepted | 2026-02-18 |
 | [0004](0004-launcher-provider-migration.md)        | Launcher Provider Migration Modes and Legacy Deprecation Policy | Accepted | 2026-04-08 |
 | [0005](0005-rust-tools-core-git-dependency.md)     | Pin `tools-core` as a Git Dependency        | Accepted | 2026-04-23 |
+| [0007](0007-motion-pipeline-architecture.md)       | Motion Pipeline Architecture (CIR)          | Proposed | 2026-05-08 |
 
 ## ADR Backlog
 

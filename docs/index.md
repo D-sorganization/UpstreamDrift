@@ -22,6 +22,7 @@ navigation should start with the rendered documentation URL.
 | `architecture/` | @architecture-team | stable | System architecture diagrams, dependency boundaries, and design overviews. |
 | `assessments/` | @quality-team | archived | Generated repository health assessments retained for historical comparison. |
 | `audit_reports/` | @quality-team | archived | Audit outputs and review evidence from repository-wide inspections. |
+| `audits/` | @quality-team | archived | Legacy audit notes preserved alongside `audit_reports/` for historical reference. |
 | `code-quality/` | @quality-team | stable | Coding standards, quality gates, and maintainability guidance. |
 | `competitive_analysis/` | @product-team | draft | Market and ecosystem comparisons used for planning context. |
 | `deployment/` | @platform-team | stable | Deployment procedures, packaging notes, and release environment guidance. |
@@ -37,7 +38,9 @@ navigation should start with the rendered documentation URL.
 | `installation/` | @developer-experience | stable | Installation instructions and environment setup guidance. |
 | `issues/` | @maintainers | archived | Issue-derived notes and local tracking artifacts retained under docs. |
 | `legal/` | @maintainers | stable | License, compliance, and legal reference material. |
+| `motion_capture/` | @research-team | draft | Motion capture intake notes and source-format reference material. |
 | `motion_matching/` | @research-team | stable | Motion-matching system documentation including surrogate training and cross-option leaderboards. |
+| `motion_pipeline/` | @research-team | stable | User-facing motion pipeline workflow guide, format matrix, troubleshooting, and backend compatibility tables. |
 | `motion_training/` | @research-team | draft | Motion training research notes and prototype workflow documentation. |
 | `operations/` | @platform-team | stable | Operational runbooks, observability notes, and production maintenance guidance. |
 | `physics/` | @physics-team | stable | Physics assumptions, validation sources, and biomechanical modeling references. |
@@ -49,6 +52,7 @@ navigation should start with the rendered documentation URL.
 | `reviews/` | @quality-team | stable | Current review records, remediation notes, and quality findings. |
 | `specs/` | @architecture-team | stable | Specifications that expand or support the root `SPEC.md` contract. |
 | `sphinx/` | @docs-team | stable | Sphinx source and generated artifacts for the rendered documentation site. |
+| `status/` | @maintainers | draft | Repository status snapshots and rolling state-of-the-fleet notes. |
 | `status_quo_analysis/` | @product-team | archived | Status quo analysis snapshots preserved for planning history. |
 | `strategic/` | @product-team | draft | Strategic planning notes that should eventually consolidate into `plans/`. |
 | `technical/` | @engineering-team | stable | Technical reference pages for implementation details and subsystem behavior. |

@@ -9,7 +9,7 @@ This guide walks you through processing a golf swing video into a fully tracked 
 ### Step 1: Extract Frames from Video
 
 ```bash
-python3 -m src.engines.motion_pipeline.extract_frames \
+python3 -m src.shared.python.motion_pipeline.extract_frames \
     --input swing_video.mp4 \
     --output frames/ \
     --fps 60
@@ -19,13 +19,13 @@ python3 -m src.engines.motion_pipeline.extract_frames \
 
 ```bash
 # Option A: OpenPose (higher accuracy, requires GPU)
-python3 -m src.engines.motion_pipeline.pose_estimation \
+python3 -m src.shared.python.motion_pipeline.pose_estimation \
     --input frames/ \
     --output pose_2d.json \
     --engine openpose
 
 # Option B: MediaPipe (CPU-friendly, faster)
-python3 -m src.engines.motion_pipeline.pose_estimation \
+python3 -m src.shared.python.motion_pipeline.pose_estimation \
     --input frames/ \
     --output pose_2d.json \
     --engine mediapipe
@@ -34,7 +34,7 @@ python3 -m src.engines.motion_pipeline.pose_estimation \
 ### Step 3: Lift 2D to 3D (Optional — Use Existing Mocap)
 
 ```bash
-python3 -m src.engines.motion_pipeline.lift_3d \
+python3 -m src.shared.python.motion_pipeline.lift_3d \
     --input pose_2d.json \
     --output motion_3d.json \
     --method triangulation  # or 'learned' for ML-based lifting
@@ -43,7 +43,7 @@ python3 -m src.engines.motion_pipeline.lift_3d \
 ### Step 4: Retarget to Humanoid Model
 
 ```bash
-python3 -m src.engines.motion_pipeline.retarget \
+python3 -m src.shared.python.motion_pipeline.retarget \
     --input motion_3d.json \
     --output retargeted_motion.json \
     --model preset:golfer_standard
@@ -52,7 +52,7 @@ python3 -m src.engines.motion_pipeline.retarget \
 ### Step 5: Run Inverse Kinematics and Export
 
 ```bash
-python3 -m src.engines.motion_pipeline.inverse_kinematics \
+python3 -m src.shared.python.motion_pipeline.inverse_kinematics \
     --input retargeted_motion.json \
     --output final_motion.mocap \
     --engine mujoco  # or drake, pinocchio

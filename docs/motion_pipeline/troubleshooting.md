@@ -17,7 +17,7 @@ Your mocap data is in millimeters but the pipeline expects meters.
 
 ### Fix
 ```python
-from src.engines.motion_pipeline.converters import UnitConverter
+from src.shared.python.motion_pipeline.converters import UnitConverter
 
 converter = UnitConverter()
 motion = converter.load("your_data.trc")
@@ -52,7 +52,7 @@ Markers were occluded during capture (e.g., club passing in front of body).
 
 **Option 1: Interpolate missing markers**
 ```python
-from src.engines.motion_pipeline.cleaning import interpolate_gaps
+from src.shared.python.motion_pipeline.cleaning import interpolate_gaps
 
 motion = load_mocap("data.json")
 motion = interpolate_gaps(motion, max_gap=10)  # Interpolate up to 10 frames
@@ -60,7 +60,7 @@ motion = interpolate_gaps(motion, max_gap=10)  # Interpolate up to 10 frames
 
 **Option 2: Use virtual markers**
 ```python
-from src.engines.motion_pipeline.cleaning import create_virtual_markers
+from src.shared.python.motion_pipeline.cleaning import create_virtual_markers
 
 # Create virtual markers from existing ones
 motion = create_virtual_markers(motion, 
@@ -94,7 +94,7 @@ The solver cannot find a pose that satisfies all constraints.
 
 **Option 1: Adjust cost weights**
 ```python
-from src.engines.motion_pipeline import IKConfig
+from src.shared.python.motion_pipeline import IKConfig
 
 config = IKConfig(
     position_weight=1.0,
@@ -148,7 +148,7 @@ Reduction: 95.3%
 **If residuals remain high:**
 
 ```python
-from src.engines.motion_pipeline import RRAConfig
+from src.shared.python.motion_pipeline import RRAConfig
 
 rra_config = RRAConfig(
     mass_adjustment=True,  # Allow mass scaling
