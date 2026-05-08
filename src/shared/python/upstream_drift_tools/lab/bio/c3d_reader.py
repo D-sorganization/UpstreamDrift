@@ -18,6 +18,7 @@ from ...utils.logging import get_logger
 from ._c3d_analog import (
     build_analog_dataframe,
     build_force_plate_dataframe,
+    build_force_plate_dataframe_from_calibration,
     detect_force_plate_channels,
     force_plate_columns,
 )
@@ -35,6 +36,7 @@ from ._c3d_models import (
     SCHEMA_VERSION,
     C3DEvent,
     C3DMetadata,
+    ForcePlateCalibration,
 )
 
 logger = get_logger(__name__)
@@ -44,6 +46,7 @@ __all__ = [
     "C3DEvent",
     "C3DMapping",
     "C3DMetadata",
+    "ForcePlateCalibration",
     "BIOMECHANICAL_MARKER_MAX_M",
     "BIOMECHANICAL_MARKER_MIN_M",
     "SCHEMA_VERSION",
@@ -227,9 +230,21 @@ class C3DDataReader:
             - mx, my, mz: Moment components [N·m]
             - cop_x, cop_y, cop_z: COP position [m] (if compute_cop=True)
         """
+        metadata = self.get_metadata()
+        if metadata.force_plates:
+            c3d_data = self._load()
+            return build_force_plate_dataframe_from_calibration(
+                c3d_data["data"]["analogs"],
+                metadata.force_plates,
+                metadata.analog_rate,
+                self.file_path.name,
+                plate_number,
+                include_time,
+                compute_cop,
+                ground_height,
+            )
         plate_channels = self.get_force_plate_channels()
         analog_df = self.analog_dataframe(include_time=False)
-        metadata = self.get_metadata()
         return build_force_plate_dataframe(
             plate_channels,
             analog_df,
@@ -242,7 +257,14 @@ class C3DDataReader:
         )
 
     def get_force_plate_count(self) -> int:
-        """Return the number of detected force plates."""
+        """Return the number of detected force plates.
+
+        Prefers ``FORCE_PLATFORM.USED`` from the C3D parameter group when
+        available; falls back to analog-channel-name regex detection otherwise.
+        """
+        metadata = self.get_metadata()
+        if metadata.force_plates:
+            return len(metadata.force_plates)
         return len(self.get_force_plate_channels())
 
     def _load(self) -> C3DMapping:

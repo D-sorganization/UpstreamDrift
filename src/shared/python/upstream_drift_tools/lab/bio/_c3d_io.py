@@ -15,7 +15,12 @@ import numpy as np
 import pandas as pd
 
 from ...utils.logging import get_logger, log_execution_time
-from ._c3d_models import SCHEMA_VERSION, C3DEvent, C3DMetadata
+from ._c3d_models import (
+    SCHEMA_VERSION,
+    C3DEvent,
+    C3DMetadata,
+    ForcePlateCalibration,
+)
 
 logger = get_logger(__name__)
 
@@ -109,6 +114,211 @@ def get_events(c3d_data: C3DMapping) -> list[C3DEvent]:
     return events
 
 
+def _as_array(value: Any) -> np.ndarray:
+    """Coerce an ezc3d parameter value into a numpy array."""
+    return np.asarray(value)
+
+
+def _scalar_int(value: Any, default: int = 0) -> int:
+    """Read the first scalar from an ezc3d parameter value as int."""
+    arr = _as_array(value).ravel()
+    if arr.size == 0:
+        return default
+    return int(arr[0])
+
+
+def get_force_platforms(
+    c3d_data: C3DMapping, analog_label_count: int
+) -> tuple[ForcePlateCalibration, ...]:
+    """Build a tuple of ForcePlateCalibration from the FORCE_PLATFORM group.
+
+    Returns an empty tuple when the group is absent, USED is zero, or any of
+    the required CORNERS/ORIGIN/TYPE entries are missing.
+    """
+    fp_params = c3d_data["parameters"].get("FORCE_PLATFORM")
+    if fp_params is None:
+        return ()
+
+    used_value = fp_params.get("USED", {}).get("value")
+    if used_value is None:
+        return ()
+    n_used = _scalar_int(used_value)
+    if n_used <= 0:
+        return ()
+
+    type_value = fp_params.get("TYPE", {}).get("value")
+    corners_value = fp_params.get("CORNERS", {}).get("value")
+    origin_value = fp_params.get("ORIGIN", {}).get("value")
+    if type_value is None or corners_value is None or origin_value is None:
+        logger.warning(
+            "FORCE_PLATFORM group present but missing TYPE/CORNERS/ORIGIN; "
+            "skipping force-plate metadata."
+        )
+        return ()
+
+    types_arr = _as_array(type_value).ravel().astype(int)
+    corners_arr = _as_array(corners_value).astype(float)
+    origin_arr = _as_array(origin_value).astype(float)
+    cal_matrix_value = fp_params.get("CAL_MATRIX", {}).get("value")
+    cal_matrix_arr = (
+        _as_array(cal_matrix_value).astype(float)
+        if cal_matrix_value is not None
+        else None
+    )
+    channel_value = fp_params.get("CHANNEL", {}).get("value")
+    channel_arr = (
+        _as_array(channel_value).astype(int) if channel_value is not None else None
+    )
+
+    plates: list[ForcePlateCalibration] = []
+    fallback_cursor = 0
+    for plate_idx in range(n_used):
+        plate_type = int(types_arr[plate_idx]) if plate_idx < types_arr.size else 1
+
+        corners_plate = _extract_plate_corners(corners_arr, plate_idx, n_used)
+        if corners_plate is None:
+            logger.warning(
+                "FORCE_PLATFORM CORNERS for plate %d has unexpected shape %s; "
+                "skipping plate.",
+                plate_idx + 1,
+                corners_arr.shape,
+            )
+            continue
+        # ezc3d reports CORNERS in millimetres per the C3D spec.
+        corners_plate = corners_plate * 0.001
+
+        origin_plate = _extract_plate_origin(origin_arr, plate_idx, n_used)
+        if origin_plate is None:
+            logger.warning(
+                "FORCE_PLATFORM ORIGIN for plate %d has unexpected shape %s; "
+                "skipping plate.",
+                plate_idx + 1,
+                origin_arr.shape,
+            )
+            continue
+        origin_plate = origin_plate * 0.001
+
+        cal_matrix_plate = _extract_plate_cal_matrix(
+            cal_matrix_arr, plate_idx, n_used, plate_type
+        )
+
+        start, end = _extract_plate_channels(
+            channel_arr,
+            plate_idx,
+            n_used,
+            plate_type,
+            fallback_cursor,
+            analog_label_count,
+        )
+        fallback_cursor = end
+
+        if plate_type not in (1, 2, 3, 4):
+            logger.warning(
+                "FORCE_PLATFORM plate %d has unsupported type %d; "
+                "treating as type 1 (pre-calibrated).",
+                plate_idx + 1,
+                plate_type,
+            )
+            plate_type = 1
+
+        plates.append(
+            ForcePlateCalibration(
+                corners=corners_plate,
+                origin=origin_plate,
+                cal_matrix=cal_matrix_plate,
+                plate_type=plate_type,
+                channel_indices=(start, end),
+            )
+        )
+
+    return tuple(plates)
+
+
+def _extract_plate_corners(
+    corners_arr: np.ndarray, plate_idx: int, n_plates: int
+) -> np.ndarray | None:
+    """Slice a single plate's corners (returns 4x3 array) from a flexible layout."""
+    # ezc3d typically returns (3, 4, n_plates).
+    if corners_arr.ndim == 3 and corners_arr.shape[:2] == (3, 4):
+        if plate_idx >= corners_arr.shape[2]:
+            return None
+        return corners_arr[:, :, plate_idx].T.copy()
+    if corners_arr.ndim == 3 and corners_arr.shape[:2] == (4, 3):
+        if plate_idx >= corners_arr.shape[2]:
+            return None
+        return corners_arr[:, :, plate_idx].copy()
+    if corners_arr.ndim == 2 and n_plates == 1 and corners_arr.shape == (3, 4):
+        return corners_arr.T.copy()
+    if corners_arr.ndim == 2 and n_plates == 1 and corners_arr.shape == (4, 3):
+        return corners_arr.copy()
+    if corners_arr.size == 12 * n_plates:
+        reshaped = corners_arr.reshape(3, 4, n_plates)
+        return reshaped[:, :, plate_idx].T.copy()
+    return None
+
+
+def _extract_plate_origin(
+    origin_arr: np.ndarray, plate_idx: int, n_plates: int
+) -> np.ndarray | None:
+    """Slice a single plate's origin (returns shape (3,))."""
+    if origin_arr.ndim == 2 and origin_arr.shape[0] == 3:
+        if plate_idx >= origin_arr.shape[1]:
+            return None
+        return origin_arr[:, plate_idx].copy()
+    if origin_arr.ndim == 1 and n_plates == 1 and origin_arr.size == 3:
+        return origin_arr.copy()
+    if origin_arr.size == 3 * n_plates:
+        return origin_arr.reshape(3, n_plates)[:, plate_idx].copy()
+    return None
+
+
+def _extract_plate_cal_matrix(
+    cal_matrix_arr: np.ndarray | None,
+    plate_idx: int,
+    n_plates: int,
+    plate_type: int,
+) -> np.ndarray | None:
+    """Slice a single plate's calibration matrix, or None when not applicable."""
+    if cal_matrix_arr is None or cal_matrix_arr.size == 0 or plate_type == 1:
+        return None
+    if cal_matrix_arr.ndim == 3:
+        if plate_idx >= cal_matrix_arr.shape[-1]:
+            return None
+        return cal_matrix_arr[..., plate_idx].copy()
+    if cal_matrix_arr.ndim == 2 and n_plates == 1:
+        return cal_matrix_arr.copy()
+    return None
+
+
+def _extract_plate_channels(
+    channel_arr: np.ndarray | None,
+    plate_idx: int,
+    n_plates: int,
+    plate_type: int,
+    fallback_cursor: int,
+    analog_label_count: int,
+) -> tuple[int, int]:
+    """Return ``(start, end)`` analog indices for the plate (zero-based, end-exclusive)."""
+    expected = 6 if plate_type in (1, 2, 3) else 8 if plate_type == 4 else 6
+    if channel_arr is not None and channel_arr.size:
+        # CHANNEL is typically (n_channels, n_plates) of 1-based indices.
+        if channel_arr.ndim == 2:
+            if plate_idx < channel_arr.shape[1]:
+                col = channel_arr[:, plate_idx]
+                col = col[col > 0]
+                if col.size:
+                    start = int(col.min()) - 1
+                    end = int(col.max())
+                    return start, end
+        elif channel_arr.ndim == 1 and n_plates == 1:
+            col = channel_arr[channel_arr > 0]
+            if col.size:
+                return int(col.min()) - 1, int(col.max())
+
+    end = min(fallback_cursor + expected, analog_label_count)
+    return fallback_cursor, end
+
+
 def build_metadata(c3d_data: C3DMapping, file_path: Path) -> C3DMetadata:
     """Build a C3DMetadata object from loaded C3D data."""
     point_parameters = get_point_parameters(c3d_data, file_path)
@@ -118,6 +328,7 @@ def build_metadata(c3d_data: C3DMapping, file_path: Path) -> C3DMetadata:
     units = str(point_parameters["UNITS"]["value"][0])
     analog_labels, analog_rate, analog_units = get_analog_details(c3d_data)
     events = get_events(c3d_data)
+    force_plates = get_force_platforms(c3d_data, len(analog_labels))
     return C3DMetadata(
         marker_labels=marker_labels,
         frame_count=frame_count,
@@ -127,6 +338,7 @@ def build_metadata(c3d_data: C3DMapping, file_path: Path) -> C3DMetadata:
         analog_units=analog_units,
         analog_rate=analog_rate,
         events=events,
+        force_plates=force_plates,
     )
 
 

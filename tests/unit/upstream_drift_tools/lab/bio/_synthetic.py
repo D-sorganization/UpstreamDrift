@@ -30,6 +30,7 @@ def _synthetic_c3d_dict(
     analog_subframes: int = 10,
     point_data: np.ndarray | None = None,
     analog_data: np.ndarray | None = None,
+    force_platform: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build a dict shaped like the result of ``ezc3d.c3d(path)``.
 
@@ -114,6 +115,12 @@ def _synthetic_c3d_dict(
             else:
                 event_group["TIMES"] = {"value": np.asarray(times)}
         parameters["EVENT"] = event_group
+
+    if force_platform is not None:
+        fp_group: dict[str, Any] = {}
+        for key, value in force_platform.items():
+            fp_group[key] = {"value": value}
+        parameters["FORCE_PLATFORM"] = fp_group
 
     return {
         "header": {},
