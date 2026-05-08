@@ -126,14 +126,14 @@ jobs:
             ruff format --check .
           fi
 
-      - run: pip install mypy==1.20.1 types-PyYAML types-requests
+      - run: python -m pip install --ignore-installed "mypy==1.20.1" types-PyYAML types-requests
       - name: Create stub ui/dist for editable install (quality checks only)
         run: mkdir -p ui/dist
       - run: pip install -e .[dev]
 
       - name: Pin Type Toolchain
         run: |
-          python -m pip install --force-reinstall --no-cache-dir "mypy==1.20.1" "numpy==2.2.6"
+          python -m pip install --ignore-installed --no-cache-dir "mypy==1.20.1" "numpy==2.2.6"
           mypy --version
           python - << 'PY'
           from importlib import metadata
@@ -259,12 +259,14 @@ jobs:
       - name: Prevent Net-New print() Calls
         run: python3 scripts/check_no_print_calls.py
 
-      # TODO detection now BLOCKING - Jules Auto-Repair will fix
+      # Placeholder detection is blocking. Issue-linked TODO markers are allowed
+      # because they already have a tracked owner and follow-up path.
       - name: Verify No Placeholders
         run: |
           violations=$(
             find . \( -path "./.git" -o -path "./.mypy_cache" -o -path "./.ruff_cache" -o -path "./__pycache__" -o -path "./archive" -o -path "./check_code_quality" -o -path "./scripts" -o -path "./tests/tools" -o -path "./vendor" \) -prune -o -type f -name "*.py" -print0 \
-              | xargs -0 grep -nE "TODO|FIXME" || true
+              | xargs -0 grep -nE "TODO|FIXME" \
+              | grep -vE "TODO(\(#?[0-9]+|:.*#[0-9]+)" || true
           )
           if [ -n "$violations" ]; then
             echo "$violations"

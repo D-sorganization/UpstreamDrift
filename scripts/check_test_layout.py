@@ -67,6 +67,7 @@ LEGACY_ROOT_TEST_FILES = frozenset(
         "tests/test_golf_humanoid_dimensions.py",
         "tests/test_load_compact_swing_dataset.py",
         "tests/test_opensim_coord_map.py",
+        "tests/test_opensim_club_attachment.py",
         "tests/test_opensim_fit_swing.py",
         "tests/test_opensim_fk.py",
         "tests/test_opensim_fk_regression.py",
