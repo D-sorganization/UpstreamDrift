@@ -54,6 +54,14 @@ for _modname in list(sys.modules):
 
 sys.path.insert(0, str(_PYTHON_DIR))
 
+# Step 3: also add ``<repo>/src/`` so bare top-level imports done by the
+# viewer code (``from shared.python.security...``) resolve. The engine's
+# local ``src/`` does not contain a ``shared/`` subpackage, so adding the
+# repo's ``src/`` directory does not conflict with the engine package.
+_REPO_SRC = _REPO_ROOT / "src"
+if _REPO_SRC.is_dir():
+    sys.path.insert(0, str(_REPO_SRC))
+
 from src.apps.c3d_viewer import main  # noqa: E402  (post-sys.path pivot)
 
 
