@@ -10,6 +10,54 @@
 > shared infrastructure (FK, reference poses, mocap loaders, theme,
 > rendering helpers) you should reuse instead of reinventing.
 
+## ⚠️ Multi-agent coordination — read before opening any PR
+
+This repo is part of the D-sorganization fleet. Multiple agents
+(`claude`, `codex`, `jules`, `local`, `gaai`, `maxwell-daemon`) and the
+repo owner all touch this codebase. **Coordination is mandatory** to
+avoid the kind of duplicate-work collisions that have happened in the
+past.
+
+The full protocol lives in
+[`Repository_Management/docs/agent-lease-protocol.md`](https://github.com/D-sorganization/Repository_Management/blob/main/docs/agent-lease-protocol.md)
+and
+[`Repository_Management/docs/agent-coordination-strategy.md`](https://github.com/D-sorganization/Repository_Management/blob/main/docs/agent-coordination-strategy.md).
+Short version:
+
+1. **Before starting work on an issue**, run from a clone of `Repository_Management`:
+
+   ```bash
+   python -m scripts.check_agent_claim --repo UpstreamDrift --issue <N>
+   ```
+
+   If the result is `{"held": true, ...}` and the agent is not you, **pick a different issue.**
+
+2. **If the issue is free**, post a lease before creating a branch:
+
+   ```bash
+   python -m scripts.post_agent_lease \
+       --agent claude \
+       --session <session-id> \
+       --repo UpstreamDrift \
+       --issue <N>
+   ```
+
+   This adds a `claim:claude` label and posts a `<!-- agent-lease v1 -->`
+   comment. Default TTL is 2 h; an open `Fixes #N` PR implicitly extends
+   it to 24 h.
+
+3. **Do not modify or delete lease comments left by other agents.**
+
+4. **Priority order** (see `Repository_Management/shared_scripts/agent_identity.py`):
+   `user > maxwell-daemon > claude > codex > jules > local > gaai`. The
+   `Jules-Redundant-PR-Closer` workflow in this repo enforces this — when
+   two agents file PRs against the same issue, the lower-priority PR is
+   auto-closed with a deferral comment.
+
+5. **The `Agent-Lease-Reaper` runs every 30 minutes from `Repository_Management`** and sweeps stale claims fleet-wide. Manual release via a `<!-- agent-lease v1 release -->` comment is welcome but not required.
+
+6. **Fail-open** — if the claim/lease scripts error, proceed but accept the risk of duplication. Coordination is best-effort, not a hard gate.
+
 ## What This Is
 
 A unified platform for golf swing analysis across multiple physics engines and
