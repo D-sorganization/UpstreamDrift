@@ -1,11 +1,11 @@
-"""Tests for the Pinocchio Rob Neal -> ``ClubTarget`` adapter.
+"""Tests for the Pinocchio club-swing-dataset -> ``ClubTarget`` adapter.
 
 Covers:
 
 * schema validation through ``ClubTarget.__post_init__``,
 * round-trip on a synthetic fixture (always runnable),
-* round-trip on each real Rob Neal trial under
-  ``src/engines/physics_engines/pinocchio/data/rob_neal/`` when present
+* round-trip on each real swing-dataset trial under
+  ``src/engines/physics_engines/pinocchio/data/club_swing_dataset/`` when present
   (skipped otherwise so this file is portable),
 * edge cases: NaN frames, missing partner file, unknown path.
 """
@@ -45,8 +45,9 @@ def _write_synthetic_pair(
 ) -> Path:
     """Write a synthetic raw + resampled .mat pair under ``tmp_path``.
 
-    Returns the *raw* file path. The structure mirrors the Rob Neal layout
-    observed at ``src/engines/physics_engines/pinocchio/data/rob_neal/`` (see
+    Returns the *raw* file path. The structure mirrors the club-swing-dataset
+    layout observed at
+    ``src/engines/physics_engines/pinocchio/data/club_swing_dataset/`` (see
     issue #4127):
 
     * raw file: ``data.{time, midhands_xyz, midhands_dircos, clubface_xyz,
@@ -120,7 +121,7 @@ def test_load_synthetic_round_trip(tmp_path: Path) -> None:
 
     assert isinstance(target, ClubTarget)
     assert isinstance(target.source, SourceProvenance)
-    assert target.source.format == "rob_neal_mat"
+    assert target.source.format == "club_swing_mat"
     assert target.source.filename == raw.name
     assert target.source.subject_id == "SYN"
     assert target.time.shape == (100,)
@@ -301,25 +302,25 @@ def _repo_root_from_here() -> Path:
     raise RuntimeError("could not locate repo root from test file")
 
 
-_ROB_NEAL_DIR = (
+_SWING_DATASET_DIR = (
     _repo_root_from_here()
     / "src"
     / "engines"
     / "physics_engines"
     / "pinocchio"
     / "data"
-    / "rob_neal"
+    / "club_swing_dataset"
 )
 _REAL_TRIALS = ("TW_ProV1", "TW_wiffle", "GW_ProV1", "GW_wiffle")
 
 
 @pytest.mark.parametrize("trial", _REAL_TRIALS)
 def test_real_robneal_trials_load(trial: str) -> None:
-    """Each shipped Rob Neal trial loads into a valid ``ClubTarget``."""
-    raw = _ROB_NEAL_DIR / f"{trial}.mat"
-    resampled = _ROB_NEAL_DIR / f"{trial}_targetKinematics.mat"
+    """Each shipped swing-dataset trial loads into a valid ``ClubTarget``."""
+    raw = _SWING_DATASET_DIR / f"{trial}.mat"
+    resampled = _SWING_DATASET_DIR / f"{trial}_targetKinematics.mat"
     if not raw.is_file() or not resampled.is_file():
-        pytest.skip(f"Rob Neal fixture not available: {raw}")
+        pytest.skip(f"Swing-dataset fixture not available: {raw}")
 
     target = load_robneal_target(raw)
     assert isinstance(target, ClubTarget)

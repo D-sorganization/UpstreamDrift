@@ -13,6 +13,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   release runbook, production-readiness contract, SBOM generation, and release
   artifact attestations for issue #3842.
 
+### Refactor
+
+- Renamed source-revealing identifiers and directories in motion-matching code
+  to generic names (#4480). Affected files include
+  `motion_matching/loaders/_optical.py` -> `_marker_clusters.py`
+  (with `OpticalClubPose` -> `ClusterClubPose`,
+  `is_optical_schema` -> `has_marker_clusters`,
+  `extract_optical_pose` -> `extract_cluster_club_pose`),
+  `pinocchio/python/dtack/utils/optical_parser.py` -> `mat_dataset_parser.py`
+  (with `OpticalParser` -> `MatDatasetParser`),
+  `pinocchio/python/dtack/viz/rob_neal_viewer.py` -> `swing_dataset_viewer.py`
+  (with `RobNealDataViewer` -> `SwingDatasetViewer`), MATLAB
+  `optical_marker_map.m` -> `cluster_marker_map.m`, data dirs
+  `pinocchio/data/rob_neal/` -> `club_swing_dataset/`,
+  `pinocchio/data/optical_tour_average/` -> `tour_average_mocap/`, and
+  `Simscape .../Data/Optical C3D Files/` -> `Mocap C3D Files/`. Backwards-compat
+  shims live at the old Python module paths and emit `DeprecationWarning`;
+  they will be removed in a future release. Filenames of `.c3d`/`.mat`/`.xlsx`
+  data files are preserved as-is.
+
 ### April 2026
 
 #### Added

@@ -21,7 +21,7 @@
 3. **Data Integration**
 
    - Rob Neal data files (already copied)
-   - Optical Tour Average data (already copied)
+   - tour-average mocap data (already copied)
    - MATLAB Simulink model (already copied)
 
 4. **Code Quality**
@@ -107,8 +107,8 @@ The MATLAB `ClubDataGUI_v2.m` provides:
 
 **Recommendation**:
 
-- ✅ Data files already copied to `data/rob_neal/`
+- ✅ Data files already copied to `data/club_swing_dataset/`
 - ✅ MATLAB GUI available as reference
-- ✅ Python wrapper stub created (`python/dtack/viz/rob_neal_viewer.py`)
+- ✅ Python wrapper stub created (`python/dtack/viz/swing_dataset_viewer.py`)
 - Use as reference for implementing similar features in unified GUI
 - Can be integrated into Model Viewer tab for data playback

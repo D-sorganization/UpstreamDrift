@@ -12,7 +12,7 @@ Public API:
     Loaders / oracle:
         load_club_target           -- format-dispatched loader.
         load_club_target_excel     -- xlsx loader (cm units, event-marker header).
-        load_club_target_c3d       -- Optical C3D loader.
+        load_club_target_c3d       -- cluster-marker C3D loader.
         synthesize_target_from_coefficients -- engine-agnostic TDD oracle.
         EngineSimulator, SynthOptions
 

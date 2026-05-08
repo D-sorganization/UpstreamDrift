@@ -5,7 +5,7 @@
 Implement the two MATLAB loaders that turn measured swings into the canonical
 `target` struct consumed by every motion-matching option: a Wiffle/ProV1 Excel
 loader and a C3D loader. As part of this issue, validate the one untested C3D file
-in `Data/Optical C3D Files/` so we know whether it parses cleanly and which
+in `Data/Mocap C3D Files/` so we know whether it parses cleanly and which
 markers map to butt/clubhead.
 
 ## Motivation
@@ -92,7 +92,7 @@ Postconditions (assertions, per `CLUB_IK_SPEC.md` §"Validation rules"):
 
 - [ ] Both loaders implemented and exported under `motion_matching/shared/`.
 - [ ] `runtests('motion_matching/shared/tests')` passes for all listed tests.
-- [ ] C3D file in `Data/Optical C3D Files/` either parses cleanly **or** the test xfails with a documented reason and a follow-up issue link.
+- [ ] C3D file in `Data/Mocap C3D Files/` either parses cleanly **or** the test xfails with a documented reason and a follow-up issue link.
 - [ ] `C3D_VALIDATION_NOTES.md` documents the marker mapping (or the parse failure).
 - [ ] `arguments` blocks present on every public function (DbC preconditions).
 - [ ] `assert(...)` postconditions present per `CLUB_IK_SPEC.md` §"Validation rules".

@@ -39,7 +39,7 @@ src/engines/physics_engines/pinocchio/python/dtack/viz/geppetto_viewer.py
 | -------- | ------------------------------ | -------------------------- |
 | Meshcat  | `dtack/viz/meshcat_viewer.py`  | Primary, fully integrated  |
 | Geppetto | `dtack/viz/geppetto_viewer.py` | Exists, not exposed in GUI |
-| Rob Neal | `dtack/viz/rob_neal_viewer.py` | Specialized data viewer    |
+| swing-dataset | `dtack/viz/swing_dataset_viewer.py` | Specialized data viewer    |
 
 The main Pinocchio GUI (`pinocchio_golf/gui.py`) currently only uses Meshcat. Geppetto-Viewer exists but is not selectable as an option.
 

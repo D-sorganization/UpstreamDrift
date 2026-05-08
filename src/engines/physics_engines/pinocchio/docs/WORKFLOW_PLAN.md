@@ -44,7 +44,7 @@ Counterfactual Analysis (ZVCF, ZTCF)
 
 **Implementation**:
 
-- Module: `dtack.data.rob_neal_processor`
+- Module: `dtack.data.swing_dataset_processor`
 - Class: `RobNealKinematicsExtractor`
 
 ---

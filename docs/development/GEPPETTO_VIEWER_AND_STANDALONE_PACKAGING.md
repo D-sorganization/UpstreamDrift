@@ -321,4 +321,4 @@ specs:
 | ------------- | ------------------------------ | -------------------------- |
 | MeshCat       | `dtack/viz/meshcat_viewer.py`  | Fully functional           |
 | Geppetto      | `dtack/viz/geppetto_viewer.py` | Needs fixes                |
-| Rob Neal Data | `dtack/viz/rob_neal_viewer.py` | Specialized for .mat files |
+| Swing Dataset | `dtack/viz/swing_dataset_viewer.py` | Specialized for .mat files |

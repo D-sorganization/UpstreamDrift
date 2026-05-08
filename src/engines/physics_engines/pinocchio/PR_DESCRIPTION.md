@@ -40,7 +40,7 @@ This PR integrates three existing projects (MuJoCo Golf Model, Pinocchio Golf Mo
 
 ### Files Added
 
-- **Data**: Copied from Golf_Model (Rob Neal data, Optical Tour Average)
+- **Data**: Copied from Golf_Model (swing dataset, tour-average mocap)
 - **Models**: MATLAB Simulink model copied to `models/matlab/`
 - **MuJoCo Code**: Migrated to `python/mujoco_golf_pendulum/`
 - **Pinocchio Code**: Reorganized to `python/pinocchio_golf/`

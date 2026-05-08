@@ -1,25 +1,25 @@
 """Tests for Pinocchio utility modules.
 
-Tests for OpticalParser and URDFExporter classes.
+Tests for MatDatasetParser and URDFExporter classes.
 Issue #1741: Populate Pinocchio test directories.
 """
 
 from pathlib import Path
 
 import pytest
-from src.engines.physics_engines.pinocchio.python.dtack.utils.optical_parser import (
-    OpticalParser,
+from src.engines.physics_engines.pinocchio.python.dtack.utils.mat_dataset_parser import (
+    MatDatasetParser,
 )
 
 
-class TestGearsParser:
-    """Tests for the Optical .rawcap parser stub."""
+class TestMatDatasetParser:
+    """Tests for the proprietary .rawcap parser stub."""
 
     def test_load_file_not_found(self, tmp_path: Path) -> None:
         """Test that FileNotFoundError is raised for missing files."""
         missing_file = tmp_path / "nonexistent.rawcap"
         with pytest.raises(FileNotFoundError, match="File not found"):
-            OpticalParser.load(missing_file)
+            MatDatasetParser.load(missing_file)
 
     def test_load_stub_raises_runtime_error(self, tmp_path: Path) -> None:
         """Test that the stub raises RuntimeError with guidance message."""
@@ -27,7 +27,7 @@ class TestGearsParser:
         rawcap_file.write_bytes(b"\x00\x01\x02")
 
         with pytest.raises(RuntimeError, match="not yet implemented"):
-            OpticalParser.load(rawcap_file)
+            MatDatasetParser.load(rawcap_file)
 
     def test_load_accepts_string_path(self, tmp_path: Path) -> None:
         """Test that string paths are accepted."""
@@ -35,7 +35,7 @@ class TestGearsParser:
         rawcap_file.write_bytes(b"\x00")
 
         with pytest.raises(RuntimeError):
-            OpticalParser.load(str(rawcap_file))
+            MatDatasetParser.load(str(rawcap_file))
 
 
 class TestURDFExporter:

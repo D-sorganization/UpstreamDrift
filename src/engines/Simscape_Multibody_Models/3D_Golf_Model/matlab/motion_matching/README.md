@@ -44,7 +44,7 @@ motion_matching/
 1. **Forward simulator.** [GolfSwing3D_Kinetic.slx](../src/model/GolfSwing3D_Kinetic.slx). Treat the model as fixed for now; do not modify the .slx in this work.
 2. **Decision variables.** Polynomial coefficients per joint, **7 per joint** named A (t^6) through G (t^0). The full set is loaded from [PolynomialInputValues.mat](../src/model/inputs/PolynomialInputValues.mat) by [getPolynomialParameterInfo.m](../src/functions/dataset_generator/getPolynomialParameterInfo.m). Total dim = `n_joints × 7`.
 3. **Bounds.** From [generateRandomCoefficients.m](../src/functions/dataset_generator/generateRandomCoefficients.m): A,B ∈ ±1000; C,D ∈ ±500; E,F ∈ ±100; G ∈ ±25. Treat these as outer bounds; the optimizer is free to converge inside them.
-4. **Observation set (Phase 1).** Club only — butt position (3D), clubhead position (3D), and club orientation (3×3 rotation or quaternion) over time. Sampled from [Wiffle_ProV1_club_3D_data.xlsx](../src/apps/golf_gui/Motion%20Capture%20Plotter/) for the first round; one C3D file is available in [Data/Optical C3D Files/](../Data/Optical%20C3D%20Files/) but is **untested and may not parse cleanly** — Issue #013 covers reading it.
+4. **Observation set (Phase 1).** Club only — butt position (3D), clubhead position (3D), and club orientation (3×3 rotation or quaternion) over time. Sampled from [Wiffle_ProV1_club_3D_data.xlsx](../src/apps/golf_gui/Motion%20Capture%20Plotter/) for the first round; one C3D file is available in [Data/Mocap C3D Files/](../Data/Mocap%20C3D%20Files/) but is **untested and may not parse cleanly** — Issue #013 covers reading it.
 5. **Simulation duration.** ~0.3 s. Time-align the measured swing to the simulation timegrid (re-sample to the simulation `sample_rate`, default 1000 Hz; trim to the same window).
 6. **Under-determined fit.** With club-only observation, the joint torques are not unique. We disambiguate by adding a regularizer: **minimize total mechanical work** (or peak power) of the swing. This biases the solver toward physiologically reasonable solutions.
 
@@ -73,5 +73,5 @@ Issues are filed on the repo and also stored as numbered markdown under [docs/is
 ## Open questions for the user
 
 - The parquet dataset isn't in the repo yet. The proposed schema is in [shared/DATASET_SCHEMA.md](shared/DATASET_SCHEMA.md) — please confirm or correct after you copy the file in.
-- The C3D capture in `Data/Optical C3D Files/` has not been read end-to-end. Issue #013 will validate it; please confirm which file is the canonical one.
+- The C3D capture in `Data/Mocap C3D Files/` has not been read end-to-end. Issue #013 will validate it; please confirm which file is the canonical one.
 - Confirm coordinate convention: the model uses meters and radians; the Excel mocap is in inches per [mocap_data_loader.py](../src/apps/golf_gui/Motion%20Capture%20Plotter/mocap_data_loader.py). The shared loader will convert; please flag if there's a different ground-truth source.

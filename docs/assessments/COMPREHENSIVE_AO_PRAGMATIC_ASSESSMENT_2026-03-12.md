@@ -100,7 +100,7 @@ See A section. Developers following the documented API will get confusing `Attri
 Every call to `BallFlightSimulator.simulate_trajectory()` invokes `mark_legacy("_solve_rk4_loop", "ball_flight_physics")` which emits a `DeprecationWarning`. This pollutes console output in production simulations and confuses users: "Why is the software warning me to migrate from code it's currently using?"
 
 **MAJOR — Pinocchio viewer placeholder comment: "This is a placeholder for camera control"**
-`src/engines/physics_engines/pinocchio/python/dtack/viz/rob_neal_viewer.py:186` — camera control in the 3D viewer is a placeholder.
+`src/engines/physics_engines/pinocchio/python/dtack/viz/swing_dataset_viewer.py:186` — camera control in the 3D viewer is a placeholder.
 
 **Score: D (5/10)**
 
@@ -239,7 +239,7 @@ With Numba available, `forceobj=True` is used (Python-mode Numba). Without Numba
 
 ## N — Visualization & Export
 
-**MINOR — Rob Neal viewer camera placeholder** (see D section).
+**MINOR — swing-dataset viewer camera placeholder** (see D section).
 
 **Score: C+ (6/10)**
 

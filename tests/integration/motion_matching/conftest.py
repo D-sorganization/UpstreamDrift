@@ -15,7 +15,7 @@ import pytest
 
 # Default location of the optional real C3D file. Resolved against the repo
 # root via ``pytest.rootpath`` to keep the fixture usable from any CWD.
-_C3D_RELATIVE = Path("Data") / "Optical C3D Files" / "CaptureExport Tour average.c3d"
+_C3D_RELATIVE = Path("Data") / "Mocap C3D Files" / "CaptureExport Tour average.c3d"
 
 # Synthetic-dataset shape constants (kept here so the smoke test reads cleanly).
 SMOKE_N_TRIALS = 10
@@ -71,7 +71,7 @@ def trained_surrogate(loaded_dataset):
 
 @pytest.fixture(scope="session")
 def real_c3d_path(pytestconfig: pytest.Config) -> Path | None:
-    """Return the real Optical C3D path if it exists, else ``None``."""
+    """Return the real cluster-marker C3D path if it exists, else ``None``."""
     candidate = pytestconfig.rootpath / _C3D_RELATIVE
     return candidate if candidate.exists() else None
 

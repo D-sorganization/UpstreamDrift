@@ -11,7 +11,7 @@ function out = y_to_z_up(points)
 %     - 3x3 double      (rotation matrix)        -> 3x3 (R_swap * R)
 %     - 3x3xN double    (stack of rotations)     -> 3x3xN
 %
-%   Used to bring Vicon Y-up Optical mocap into the Simscape Z-up world
+%   Used to bring Vicon Y-up cluster-marker mocap into the Simscape Z-up world
 %   frame.  Sign convention chosen (rather than (x,z,-y)) so that ground-
 %   plane Y heights become positive Z heights, matching the simulation
 %   convention where Z is "up off the tee".

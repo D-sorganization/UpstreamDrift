@@ -44,7 +44,7 @@ Has Suggestion: No
 ```
 **<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Select Optical address frame after short-gap interpolation**
 
-This computes the address frame from raw marker arrays before `extract_optical_pose` runs its short-gap interpolation, so traces with staggered short NaN gaps (each marker recoverable, but no raw frame where all six markers are simultaneously finite) will fail early with `No frame where all Optical cluster markers are simultaneously finite`. That contrad...
+This computes the address frame from raw marker arrays before `extract_cluster_club_pose` runs its short-gap interpolation, so traces with staggered short NaN gaps (each marker recoverable, but no raw frame where all six markers are simultaneously finite) will fail early with `No frame where all Optical cluster markers are simultaneously finite`. That contrad...
 ```
 
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4048#discussion_r3193373616)

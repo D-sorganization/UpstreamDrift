@@ -281,10 +281,10 @@ We need an adapter and a Rob Neal `*.mat` reader.
 1. Add `ClubTrajectory.to_club_target() -> ClubTarget`. Quaternion
    conversion via `scipy.spatial.transform.Rotation.from_matrix(...).as_quat(scalar_first=True)`.
 2. Add a Rob Neal loader. Two-pass implementation:
-   - Pass A: `scripts/inspect_rob_neal_mat.py` (one-shot tool) to dump
+   - Pass A: `scripts/inspect_swing_dataset_mat.py` (one-shot tool) to dump
      the field schema of `*.mat` and `*_targetKinematics.mat` and
-     commit the output as `tests/fixtures/rob_neal_schema.json`.
-   - Pass B: `motion_training/rob_neal_loader.py` reading
+     commit the output as `tests/fixtures/swing_dataset_schema.json`.
+   - Pass B: `motion_training/swing_dataset_loader.py` reading
      `_targetKinematics.mat` directly into `ClubTarget`.
 3. Add tests `tests/unit/test_load_club_target.py` covering both Excel
    and Rob Neal paths.
@@ -294,7 +294,7 @@ We need an adapter and a Rob Neal `*.mat` reader.
 Once `shared/python/motion_matching/loaders/` exists (issue
 PARITY-LOADERS-ROBNEAL), **promote** the Rob Neal loader from this
 location to the shared package and replace this engine's import with
-`from shared.python.motion_matching.loaders.rob_neal import load`.
+`from shared.python.motion_matching.loaders.club_swing_dataset import load`.
 
 ### Acceptance criteria
 
@@ -302,7 +302,7 @@ location to the shared package and replace this engine's import with
   with byte-identical (within float tolerance) output to a hand-checked
   fixture.
 - [ ] Rob Neal loader handles all 8 trial files in
-  `data/rob_neal/{TW,GW}_{ProV1,wiffle}*.mat`.
+  `data/club_swing_dataset/{TW,GW}_{ProV1,wiffle}*.mat`.
 - [ ] Tests pass.
 
 ### Size

@@ -50,7 +50,7 @@ def load_club_target(
     """Load a :class:`ClubTarget` from any supported source file format.
 
     Args:
-        path:  Path to a Wiffle-style xlsx workbook or a Optical-style C3D file.
+        path:  Path to a Wiffle-style xlsx workbook or a cluster-marker C3D file.
         sheet: Required for xlsx inputs. One of :data:`ALLOWED_SHEETS`.
         opts:  Resampling / impact-alignment options. Defaults to
                :class:`AlignOptions` defaults (1 kHz, 0.3 s, impact-aligned).

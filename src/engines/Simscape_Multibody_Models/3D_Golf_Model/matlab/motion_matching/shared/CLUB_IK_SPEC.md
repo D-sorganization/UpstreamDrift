@@ -65,7 +65,7 @@ class ClubTarget:
 
 ### 2. C3D (priority for Phase 1, validation)
 
-[Data/Optical C3D Files/](../../Data/Optical%20C3D%20Files/). One file is known to exist; **it has not been verified to parse.** Issue #013 is the validation pass.
+[Data/Mocap C3D Files/](../../Data/Mocap%20C3D%20Files/). One file is known to exist; **it has not been verified to parse.** Issue #013 is the validation pass.
 
 - Use the existing Python reader at [c3d_reader.py](../../python/src/c3d_reader.py) via the MATLAB `pyrunfile` interface, or use BTK if installed.
 - Marker names will need to be mapped to butt/clubhead — the convention in the file is unknown; #013 will document it.

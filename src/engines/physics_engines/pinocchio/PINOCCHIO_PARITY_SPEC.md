@@ -28,7 +28,7 @@ src/engines/physics_engines/pinocchio/
 ├── models/generated/
 │   ├── golfer.urdf            (1038 lines, body + club, fixed joint at hand_left)
 │   └── golfer_ik.urdf         (1031 lines, body only — no club)
-├── data/rob_neal/
+├── data/club_swing_dataset/
 │   ├── GW_ProV1.mat / GW_ProV1_targetKinematics.mat
 │   ├── GW_wiffle.mat / GW_wiffle_targetKinematics.mat
 │   ├── TW_ProV1.mat / TW_ProV1_targetKinematics.mat
@@ -54,7 +54,7 @@ src/engines/physics_engines/pinocchio/
 │   │   ├── backends/{pinocchio,mujoco,pink}_backend.py
 │   │   ├── ik/pink_solver.py
 │   │   ├── sim/dynamics.py
-│   │   ├── viz/{meshcat,geppetto,rob_neal}_viewer.py
+│   │   ├── viz/{meshcat,geppetto,swing_dataset}_viewer.py
 │   │   └── utils/{matlab_importer,urdf_exporter,mjcf_exporter}.py
 │   ├── pinocchio_physics_engine.py
 │   ├── pinocchio_screw_kinematics.py
@@ -151,7 +151,7 @@ optimiser. Renaming tracked under PIN-RENAME-TORQUE-UTIL.
 
 ### 1.5 Rob Neal `*.mat` files — relation to `ClubTarget`
 
-The `data/rob_neal/` directory has **paired files**:
+The `data/club_swing_dataset/` directory has **paired files**:
 
 | Pair | Contents (inferred from filename + ClubDataGUI_v2.m) |
 |---|---|
@@ -172,7 +172,7 @@ Generic Walker (GW), balls ProV1 / wiffle. Four trials per category.
 | `club_quat` | club-face rotation → quaternion |
 | `impact_idx` | `events.impact` from `SwingEventMarkers` (parser extracts from sheet metadata) |
 | `events` | `{address, top, impact, finish, club_head_speed}` from event markers |
-| `source` | new: `SourceProvenance(loader='rob_neal', file=<name>.mat, sheet=<name>)` |
+| `source` | new: `SourceProvenance(loader='club_swing', file=<name>.mat, sheet=<name>)` |
 
 **Coverage gap:** the canonical Python loader at
 `shared/python/motion_matching/load_club_target.py` (issue PARITY-LOADERS)
@@ -182,7 +182,7 @@ Generic Walker (GW), balls ProV1 / wiffle. Four trials per category.
    adapter; add a `to_club_target()` method that emits the canonical
    schema. (Issue PIN-LOADER-ADAPTER.)
 2. **Promotion:** lift the parser into
-   `shared/python/motion_matching/loaders/rob_neal.py` so MuJoCo, Drake,
+   `shared/python/motion_matching/loaders/club_swing_dataset.py` so MuJoCo, Drake,
    and OpenSim get the loader for free. (Issue PARITY-LOADERS-ROBNEAL,
    filed against the cross-engine tracker.)
 
@@ -548,7 +548,7 @@ disabled with `python -O` for production deployments where appropriate.
 | `ClubTarget`, `SimOut`, `FitResult` dataclasses | nowhere — to be authored | `shared/python/motion_matching/types.py` (issue PARITY-LOADERS) |
 | `compute_cost(sim_out, target, opts)` | `compute_cost.m` MATLAB only | `shared/python/motion_matching/cost.py` (issue PARITY-LOADERS) |
 | Polynomial torque evaluation `tau(t; theta)` | inline in §2.2 plan | `shared/python/motion_matching/poly_torque.py` |
-| Rob Neal `*.mat` reader | `motion_training/club_trajectory_parser.py` | `shared/python/motion_matching/loaders/rob_neal.py` (issue PARITY-LOADERS-ROBNEAL) |
+| Rob Neal `*.mat` reader | `motion_training/club_trajectory_parser.py` | `shared/python/motion_matching/loaders/club_swing_dataset.py` (issue PARITY-LOADERS-ROBNEAL) |
 | Error timecourse / fit quality plots | `motion_training/motion_visualizer.py` (partial) | `shared/python/motion_matching/plot_*.py` |
 
 The Pinocchio engine then **imports** all of the above; engine-bespoke
@@ -645,13 +645,13 @@ Open question: what's the right shared loader API? Options:
 2. **Polymorphic `load_club_target(path) -> ClubTarget`** that sniffs the
    format. Tidiest caller; harder to evolve.
 
-Recommendation: (1), starting with `loaders/rob_neal.py`,
+Recommendation: (1), starting with `loaders/club_swing_dataset.py`,
 `loaders/excel.py`, `loaders/c3d.py`, with a top-level `load_club_target`
 that delegates by extension. Track under PARITY-LOADERS-ROBNEAL.
 
 The risk is that the `_targetKinematics.mat` schema is undocumented
 outside `ClubDataGUI_v2.m`. Mitigation: write a one-shot
-`scripts/inspect_rob_neal_mat.py` that loads each `*.mat` and prints
+`scripts/inspect_swing_dataset_mat.py` that loads each `*.mat` and prints
 field names + shapes; commit the output as a fixture.
 
 ### 7.3 Forearm DOF mismatch (PIN-DOF-AUDIT)

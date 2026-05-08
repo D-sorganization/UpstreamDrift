@@ -1,8 +1,8 @@
-"""C3D loader for Optical-style mocap files.
+"""C3D loader for cluster-marker mocap files.
 
 Reuses the existing ``C3DDataReader`` from
 ``src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/c3d_reader.py``.
-Marker-name discovery is heuristic because the Optical marker set is not
+Marker-name discovery is heuristic because the cluster-marker set is not
 documented in this repo (issue #013 is the verification pass).
 """
 
@@ -21,7 +21,7 @@ from src.shared.python.core.contracts import postcondition, precondition
 
 from ..club_target import AlignOptions, ClubTarget, SourceProvenance
 from ._align import detect_impact_index, resample_target
-from ._optical import extract_optical_pose, is_optical_schema
+from ._marker_clusters import extract_cluster_club_pose, has_marker_clusters
 from ._quaternion import rotmat_to_quat
 
 logger = logging.getLogger(__name__)
@@ -115,13 +115,13 @@ def _marker_xyz(df: pd.DataFrame, marker: str) -> tuple[np.ndarray, np.ndarray]:
     "load_club_target_c3d must return a ClubTarget",
 )
 def load_club_target_c3d(path: Path | str, opts: AlignOptions) -> ClubTarget:
-    """Load a Optical-style C3D file into a canonical ``ClubTarget``.
+    """Load a cluster-marker C3D file into a canonical ``ClubTarget``.
 
     Orientation is reconstructed from the (butt, clubhead) shaft direction
     alone — the C3D file does not carry the 3x3 rotation matrices that the
     Excel sheets do, so the quaternion encodes the swing of an axis-aligned
-    shaft (no roll information). Issue #013 will refine this once the Optical
-    marker convention is documented.
+    shaft (no roll information). Issue #013 will refine this once the
+    cluster-marker convention is fully documented.
     """
     path = Path(path)
     reader_mod = _import_c3d_reader()
@@ -130,9 +130,14 @@ def load_club_target_c3d(path: Path | str, opts: AlignOptions) -> ClubTarget:
     df = reader.points_dataframe(include_time=True, target_units="m")
     labels = list(metadata.marker_labels)
 
-    if is_optical_schema(path.name, labels):
-        logger.info("Detected Optical C3D schema in %s; using cluster pose", path.name)
-        raw_time, butt_raw, head_raw, raw_quat = _optical_pose_from_dataframe(df, labels)
+    if has_marker_clusters(path.name, labels):
+        logger.info(
+            "Detected cluster-marker C3D schema in %s; using cluster pose",
+            path.name,
+        )
+        raw_time, butt_raw, head_raw, raw_quat = _cluster_pose_from_dataframe(
+            df, labels
+        )
     else:
         butt_label = _pick_marker(labels, BUTT_CANDIDATES)
         head_label = _pick_marker(labels, HEAD_CANDIDATES)
@@ -176,10 +181,10 @@ def load_club_target_c3d(path: Path | str, opts: AlignOptions) -> ClubTarget:
     )
 
 
-def _optical_pose_from_dataframe(
+def _cluster_pose_from_dataframe(
     df: pd.DataFrame, labels: list[str]
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """Pivot a tidy points DataFrame into per-marker arrays then run Optical pose.
+    """Pivot a tidy points DataFrame into per-marker arrays then run cluster pose.
 
     Returns ``(time, butt_xyz, clubhead_xyz, club_quat)`` with the
     Y-up -> Z-up swap applied and rigid-body rotation derived from the
@@ -213,7 +218,9 @@ def _optical_pose_from_dataframe(
 
     # Pick the first all-finite frame across both clusters as the address ref.
     address = _first_clean_frame(points)
-    pose = extract_optical_pose(points, address_frame=address, convert_to_z_up=True)
+    pose = extract_cluster_club_pose(
+        points, address_frame=address, convert_to_z_up=True
+    )
     keep = (
         np.all(np.isfinite(pose.clubhead), axis=1)
         & np.all(np.isfinite(pose.butt), axis=1)
@@ -221,7 +228,7 @@ def _optical_pose_from_dataframe(
     )
     if keep.sum() < 5:
         raise ValueError(
-            f"Only {int(keep.sum())} valid frames after Optical cluster pose"
+            f"Only {int(keep.sum())} valid frames after cluster pose extraction"
         )
     time = time[keep]
     time = time - float(time[0])
@@ -231,7 +238,7 @@ def _optical_pose_from_dataframe(
 
 def _first_clean_frame(points: dict[str, np.ndarray]) -> int:
     """Return the lowest frame index where every required cluster marker is finite."""
-    from ._optical import CLUBHEAD_CLUSTER, GRIP_CLUSTER
+    from ._marker_clusters import CLUBHEAD_CLUSTER, GRIP_CLUSTER
 
     required = [points[m] for m in (*CLUBHEAD_CLUSTER, *GRIP_CLUSTER)]
     n = required[0].shape[0]
@@ -239,7 +246,7 @@ def _first_clean_frame(points: dict[str, np.ndarray]) -> int:
         if all(np.all(np.isfinite(arr[i])) for arr in required):
             return i
     raise ValueError(
-        "No frame where all Optical cluster markers are simultaneously finite"
+        "No frame where all required cluster markers are simultaneously finite"
     )
 
 
@@ -262,8 +269,8 @@ def _fill_rotation_nans(rot: np.ndarray) -> np.ndarray:
 def _shaft_quaternions(butt: np.ndarray, head: np.ndarray) -> np.ndarray:
     """Quaternion that rotates ``+z`` onto each shaft direction.
 
-    This is a stand-in until issue #013 documents the Optical marker convention
-    for full 3-DOF club orientation.
+    This is a stand-in until issue #013 documents the cluster-marker
+    convention for full 3-DOF club orientation.
     """
     n = butt.shape[0]
     out = np.empty((n, 4), dtype=np.float64)

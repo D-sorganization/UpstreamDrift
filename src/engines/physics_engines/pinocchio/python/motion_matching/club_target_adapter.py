@@ -1,6 +1,6 @@
-"""Rob Neal ``*.mat`` -> canonical :class:`ClubTarget` adapter.
+"""Club-swing-dataset ``*.mat`` -> canonical :class:`ClubTarget` adapter.
 
-The Rob Neal mocap dataset ships as paired MATLAB files:
+The club-swing mocap dataset ships as paired MATLAB files:
 
 * ``<name>.mat``                  -- raw fields (``data.time``, ``data.midhands_xyz``,
   ``data.midhands_dircos``, ``data.clubface_xyz``, ``data.clubface_dircos``) plus
@@ -19,7 +19,7 @@ The output is the canonical ``ClubTarget`` from
 ``__post_init__`` validator). If that module is unavailable for any reason a
 local stub is used and a warning is logged. See issue #4095 (PARITY-LOADERS)
 for the planned promotion of this loader to
-``shared/python/motion_matching/loaders/rob_neal.py``.
+``shared/python/motion_matching/loaders/club_swing_dataset.py``.
 """
 
 from __future__ import annotations
@@ -300,7 +300,7 @@ def _rotmat_to_quat_local(rotmats: np.ndarray) -> np.ndarray:
 
 
 def load_robneal_target(path: Path | str) -> ClubTarget:  # noqa: C901
-    """Load a Rob Neal mocap pair into a canonical :class:`ClubTarget`.
+    """Load a club-swing-dataset mocap pair into a canonical :class:`ClubTarget`.
 
     Args:
         path: Either the raw ``<name>.mat`` or the resampled
@@ -309,7 +309,7 @@ def load_robneal_target(path: Path | str) -> ClubTarget:  # noqa: C901
 
     Returns:
         A validated :class:`ClubTarget` whose ``source.format`` is
-        ``"rob_neal_mat"`` and whose ``source.filename`` is the *raw* file's
+        ``"club_swing_mat"`` and whose ``source.filename`` is the *raw* file's
         basename (the resampled partner is recorded in ``trial_id``).
 
     Raises:
@@ -466,7 +466,7 @@ def load_robneal_target(path: Path | str) -> ClubTarget:  # noqa: C901
     subject_id = raw_path.stem.split("_")[0] or "unknown"
     source = SourceProvenance(
         filename=raw_path.name,
-        format="rob_neal_mat",
+        format="club_swing_mat",
         subject_id=subject_id,
         trial_id=raw_path.stem,
         sha256=_sha256_of(raw_path),

@@ -201,10 +201,10 @@ def test_full_pipeline_optional_leaderboard(
     not (
         Path(__file__).resolve().parents[3]
         / "Data"
-        / "Optical C3D Files"
+        / "Mocap C3D Files"
         / "CaptureExport Tour average.c3d"
     ).exists(),
-    reason="real Optical C3D file not present in workspace",
+    reason="real cluster-marker C3D file not present in workspace",
 )
 def test_full_pipeline_real_target(trained_surrogate, real_c3d_path):
     """Same smoke flow but with the real C3D file as the target (when present)."""

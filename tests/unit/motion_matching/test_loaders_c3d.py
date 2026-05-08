@@ -1,4 +1,4 @@
-"""C3D loader tests; integration tests rely on the Optical C3D files."""
+"""C3D loader tests; integration tests rely on the cluster-marker C3D files."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from src.shared.python.motion_matching.loaders.synthetic import (
 from ._fixtures import repo_root
 
 C3D_DIR_RELATIVE = (
-    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Optical C3D Files"
+    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files"
 )
 
 
@@ -41,10 +41,10 @@ def test_c3d_rejects_missing_file() -> None:
 
 
 @pytest.mark.integration
-def test_load_c3d_succeeds_on_optical_file() -> None:
+def test_load_c3d_succeeds_on_cluster_file() -> None:
     p = _first_c3d()
     if p is None:
-        pytest.skip("No Optical C3D files present")
+        pytest.skip("No cluster-marker C3D files present")
     try:
         target = load_club_target_c3d(p, AlignOptions())
     except (ValueError, ImportError) as exc:

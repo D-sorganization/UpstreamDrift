@@ -1,5 +1,5 @@
-classdef test_load_club_target_c3d_optical < matlab.unittest.TestCase
-%TEST_LOAD_CLUB_TARGET_C3D_OPTICAL  Validated Optical C3D marker-map regression.
+classdef test_load_club_target_c3d_clusters < matlab.unittest.TestCase
+%TEST_LOAD_CLUB_TARGET_C3D_CLUSTERS  Validated cluster-marker C3D regression.
 %
 %   These tests assert against the externally-validated targets recorded in
 %   PR #3982 (ezc3d 1.7.0):
@@ -30,14 +30,14 @@ classdef test_load_club_target_c3d_optical < matlab.unittest.TestCase
     end
 
     methods (Test)
-        function test_loads_optical_driver_returns_canonical_target(testCase)
+        function test_loads_cluster_driver_returns_canonical_target(testCase)
             c3d = locate_c3d(testCase, testCase.DriverFile);
             opts = default_align_options();
             target = load_club_target_c3d(c3d, opts);
             verify_canonical_target(testCase, target);
         end
 
-        function test_loads_optical_iron_returns_canonical_target(testCase)
+        function test_loads_cluster_iron_returns_canonical_target(testCase)
             c3d = locate_c3d(testCase, testCase.IronFile);
             opts = default_align_options();
             target = load_club_target_c3d(c3d, opts);
@@ -126,7 +126,7 @@ classdef test_load_club_target_c3d_optical < matlab.unittest.TestCase
         function test_sentinel_and_occluded_markers_excluded(testCase)
             here = fileparts(mfilename("fullpath"));
             addpath(fullfile(here, "..", "private"));
-            map = optical_marker_map();
+            map = cluster_marker_map();
             testCase.verifyTrue(any(map.excluded_markers == "Marker_0:0:0"));
             testCase.verifyTrue(any(map.excluded_markers == "RShoulderTop"));
 
@@ -145,7 +145,7 @@ end
 
 function c3d = locate_c3d(testCase, filename)
     here = fileparts(mfilename("fullpath"));
-    base = fullfile(here, "..", "..", "..", "Data", "Optical C3D Files");
+    base = fullfile(here, "..", "..", "..", "Data", "Mocap C3D Files");
     c3d_path = fullfile(base, filename);
     testCase.assumeTrue(exist(c3d_path, "file") == 2, ...
         sprintf("C3D file not present: %s", c3d_path));

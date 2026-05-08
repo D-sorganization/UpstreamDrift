@@ -1,57 +1,24 @@
-"""Parser for Optical Motion Capture files (.rawcap)."""
+"""Deprecated alias for :mod:`.mat_dataset_parser` (issue #4480).
+
+This shim preserves the old import path for one release.  New code must
+import from :mod:`dtack.utils.mat_dataset_parser`.
+"""
 
 from __future__ import annotations
 
-import typing
-from pathlib import Path
+import warnings
 
-from src.shared.python.logging_pkg.logging_config import get_logger
+from .mat_dataset_parser import MatDatasetParser
 
-if typing.TYPE_CHECKING:
-    import numpy as np
-    import numpy.typing as npt
+warnings.warn(
+    "dtack.utils.optical_parser is deprecated; "
+    "import from dtack.utils.mat_dataset_parser instead. "
+    "The old module name will be removed in a future release.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-logger = get_logger(__name__)
+# Backwards-compat alias for the renamed class.
+OpticalParser = MatDatasetParser
 
-
-class OpticalParser:
-    """Parser for proprietary Optical .rawcap binary files."""
-
-    @staticmethod
-    def load(file_path: Path | str) -> dict[str, npt.NDArray[np.float64]]:
-        """Load .rawcap file.
-
-        Analysis of file format (from probe):
-        - Binary format with mixed ASCII/Wide-char strings.
-        - Contains 'Skeleton' header.
-        - Contains marker names like 'WaistLeft', 'WaistRight', 'HeadTop'.
-        - Data appears to be float32 or float64 streams interleaved or following.
-
-        Currently this parser is a STUB. Full reverse engineering of the binary
-        layout is required, or a vendor DLL.
-
-        Args:
-            file_path: Path to .rawcap file
-
-        Returns:
-            Dictionary with 'markers' (Dict[str, array]).
-
-        Raises:
-            RuntimeError: Always raised until implementation is complete.
-        """
-        file_path = Path(file_path)
-        if not file_path.exists():
-            msg = f"File not found: {file_path}"
-            raise FileNotFoundError(msg)
-
-        logger.warning("OpticalParser is experimental/stub.")
-
-        # NOTE: (Future Feature) Implement binary parsing based on offsets found.
-        # Structure seems to be: [Len][String: MarkerName] ... [Data]
-
-        msg = (
-            "Optical .rawcap parser not yet implemented. "
-            "File format requires reverse engineering. "
-            "Please convert to C3D or MAT using Optical software."
-        )
-        raise RuntimeError(msg)
+__all__ = ["OpticalParser", "MatDatasetParser"]
