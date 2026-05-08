@@ -33,15 +33,15 @@ class MarkerMap:
         segment_pairs: List of (proximal, distal) marker pairs for segment length
     """
     
-    marker_to_segment: Dict[str, str] = field(default_factory=dict)
-    segment_pairs: List[tuple[str, str]] = field(default_factory=list)
+    marker_to_segment: dict[str, str] = field(default_factory=dict)
+    segment_pairs: list[tuple[str, str]] = field(default_factory=list)
 
 
 def _compute_segment_length(
     markers: MarkerFrame,
     proximal_marker: str,
     distal_marker: str,
-) -> Optional[float]:
+) -> float | None:
     """
     Compute the distance between two markers.
     
@@ -68,8 +68,8 @@ def _compute_segment_length(
 
 def _compute_average_segment_lengths(
     trajectory: MarkerTrajectory,
-    segment_pairs: List[tuple[str, str]],
-) -> Dict[str, float]:
+    segment_pairs: list[tuple[str, str]],
+) -> dict[str, float]:
     """
     Compute average segment lengths across all frames.
     
@@ -80,7 +80,7 @@ def _compute_average_segment_lengths(
     Returns:
         Dict mapping pair name to average length
     """
-    lengths: Dict[str, list[float]] = {f"{p}-{d}": [] for p, d in segment_pairs}
+    lengths: dict[str, list[float]] = {f"{p}-{d}": [] for p, d in segment_pairs}
     
     for frame in trajectory.frames:
         for proximal, distal in segment_pairs:
@@ -102,7 +102,7 @@ def _compute_average_segment_lengths(
 def _get_reference_segment_lengths(
     rig: SkeletonRig,
     marker_map: MarkerMap,
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """
     Get reference segment lengths from the generic skeleton rig.
     
@@ -171,8 +171,8 @@ def _get_reference_segment_lengths(
 def scale_skeleton(
     rig: SkeletonRig,
     calibration_markers: MarkerFrame | MarkerTrajectory,
-    marker_to_segment: Optional[Dict[str, str]] = None,
-    segment_pairs: Optional[List[tuple[str, str]]] = None,
+    marker_to_segment: dict[str, str] | None = None,
+    segment_pairs: list[tuple[str, str]] | None = None,
 ) -> SkeletonRig:
     """
     Scale a skeleton rig to match subject-specific marker data.
@@ -231,7 +231,7 @@ def scale_skeleton(
     reference_lengths = _get_reference_segment_lengths(rig, marker_map)
     
     # Compute scale factors
-    scale_factors: Dict[str, float] = {}
+    scale_factors: dict[str, float] = {}
     for pair_name, ref_length in reference_lengths.items():
         measured = measured_lengths.get(pair_name, 0.0)
         if measured > 0 and ref_length > 0:
@@ -250,7 +250,7 @@ def scale_skeleton(
         logger.warning(f"Unusual scale factor: {global_scale:.2f}")
     
     # Scale the skeleton
-    scaled_joints: Dict[str, JointDef] = {}
+    scaled_joints: dict[str, JointDef] = {}
     for joint_name, joint in rig.joints.items():
         # Scale T-pose offset
         scaled_offset = [v * global_scale for v in joint.tpose_offset]

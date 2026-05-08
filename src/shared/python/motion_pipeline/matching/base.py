@@ -73,8 +73,8 @@ class MotionMatchingRequest:
     id: str
     reference: JointTrajectory
     rig: SkeletonRig
-    cost_weights: Optional[CostWeights] = None
-    time_horizon: Optional[float] = None
+    cost_weights: CostWeights | None = None
+    time_horizon: float | None = None
     integrator_step: float = field(default=0.01)
     max_iterations: int = field(default=100)
     use_residuals: bool = field(default=True)
@@ -104,12 +104,12 @@ class MotionMatchingResult:
     
     request_id: str
     success: bool
-    tracked_trajectory: Optional[JointTrajectory] = None
-    torque_trajectory: Optional[JointTrajectory] = None
-    residual_report: Optional[dict] = None
-    fit_metrics: Optional[dict] = None
-    solve_time: Optional[float] = None
-    message: Optional[str] = None
+    tracked_trajectory: JointTrajectory | None = None
+    torque_trajectory: JointTrajectory | None = None
+    residual_report: dict | None = None
+    fit_metrics: dict | None = None
+    solve_time: float | None = None
+    message: str | None = None
     metadata: dict = field(default_factory=dict)
     
     def to_contract(self) -> ContractMotionMatchingResult:
@@ -136,7 +136,7 @@ class MotionMatchingSolver(Protocol):
         self,
         reference: JointTrajectory,
         rig: SkeletonRig,
-        request: Optional[MotionMatchingRequest] = None,
+        request: MotionMatchingRequest | None = None,
     ) -> MotionMatchingResult:
         """
         Solve motion matching for a reference trajectory.
@@ -164,7 +164,7 @@ class BaseMotionMatchingSolver(ABC):
     residual reporting, and validation.
     """
     
-    def __init__(self, cost_weights: Optional[CostWeights] = None):
+    def __init__(self, cost_weights: CostWeights | None = None):
         """
         Initialize motion matching solver.
         
@@ -178,10 +178,9 @@ class BaseMotionMatchingSolver(ABC):
         self,
         reference: JointTrajectory,
         rig: SkeletonRig,
-        request: Optional[MotionMatchingRequest] = None,
+        request: MotionMatchingRequest | None = None,
     ) -> MotionMatchingResult:
         """Solve motion matching for a reference trajectory."""
-        pass
     
     def _compute_rmse(
         self,
@@ -254,7 +253,7 @@ class BaseMotionMatchingSolver(ABC):
 
 def make_matching_solver(
     backend: MatchingBackendType | str,
-    cost_weights: Optional[CostWeights] = None,
+    cost_weights: CostWeights | None = None,
 ) -> MotionMatchingSolver:
     """
     Factory function to create a motion matching solver for the specified backend.
@@ -277,21 +276,20 @@ def make_matching_solver(
         from .cmc import CMCMatchingSolver
         return CMCMatchingSolver(cost_weights)
     
-    elif backend == MatchingBackendType.RRA:
+    if backend == MatchingBackendType.RRA:
         from .rra import RRAMatchingSolver
         return RRAMatchingSolver(cost_weights)
     
-    elif backend == MatchingBackendType.TRAJOPT_DRAKE:
+    if backend == MatchingBackendType.TRAJOPT_DRAKE:
         from .trajopt_drake import DrakeTrajoptMatchingSolver
         return DrakeTrajoptMatchingSolver(cost_weights)
     
-    elif backend == MatchingBackendType.TORQUE_MUJOCO:
+    if backend == MatchingBackendType.TORQUE_MUJOCO:
         from .torque_mujoco import MuJoCoTorqueMatchingSolver
         return MuJoCoTorqueMatchingSolver(cost_weights)
     
-    elif backend == MatchingBackendType.INVERSE_DYN_PINOCCHIO:
+    if backend == MatchingBackendType.INVERSE_DYN_PINOCCHIO:
         from .inverse_dyn_pinocchio import PinocchioInverseDynMatchingSolver
         return PinocchioInverseDynMatchingSolver(cost_weights)
     
-    else:
-        raise ValueError(f"Unknown motion matching backend: {backend}")
+    raise ValueError(f"Unknown motion matching backend: {backend}")

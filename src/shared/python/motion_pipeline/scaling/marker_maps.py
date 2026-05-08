@@ -24,9 +24,9 @@ class MarkerSet:
     """
     
     name: str
-    markers: List[str]
-    marker_to_segment: Dict[str, str]
-    segment_pairs: List[tuple[str, str]]  # (proximal_marker, distal_marker)
+    markers: list[str]
+    marker_to_segment: dict[str, str]
+    segment_pairs: list[tuple[str, str]]  # (proximal_marker, distal_marker)
 
 
 # Plug-in-Gait (Vicon) marker set
@@ -508,7 +508,7 @@ VICON_FULL_BODY = MarkerSet(
 )
 
 # Registry of all marker sets
-MARKER_SETS: Dict[str, MarkerSet] = {
+MARKER_SETS: dict[str, MarkerSet] = {
     "plug-in-gait": PLUG_IN_GAIT,
     "plugingait": PLUG_IN_GAIT,
     "pig": PLUG_IN_GAIT,

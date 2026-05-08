@@ -28,7 +28,7 @@ class DrakeTrajoptMatchingSolver(BaseMotionMatchingSolver):
     trajectory optimization for dynamically consistent motion.
     """
     
-    def __init__(self, cost_weights: Optional[CostWeights] = None):
+    def __init__(self, cost_weights: CostWeights | None = None):
         """
         Initialize Drake trajectory optimization solver.
         
@@ -41,7 +41,7 @@ class DrakeTrajoptMatchingSolver(BaseMotionMatchingSolver):
         self,
         reference: JointTrajectory,
         rig: SkeletonRig,
-        request: Optional[MotionMatchingRequest] = None,
+        request: MotionMatchingRequest | None = None,
     ) -> MotionMatchingResult:
         """
         Solve motion matching using Drake trajectory optimization.

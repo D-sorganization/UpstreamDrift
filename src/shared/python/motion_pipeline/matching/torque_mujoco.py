@@ -28,7 +28,7 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
     with residual force logging.
     """
     
-    def __init__(self, cost_weights: Optional[CostWeights] = None):
+    def __init__(self, cost_weights: CostWeights | None = None):
         """
         Initialize MuJoCo torque tracking solver.
         
@@ -41,7 +41,7 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
         self,
         reference: JointTrajectory,
         rig: SkeletonRig,
-        request: Optional[MotionMatchingRequest] = None,
+        request: MotionMatchingRequest | None = None,
     ) -> MotionMatchingResult:
         """
         Solve motion matching using MuJoCo torque tracking.
