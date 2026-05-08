@@ -127,6 +127,21 @@ gui-test = [
     "pytest-qt>=4.2.0",
 ]
 
+# Desktop GUI tools (model_explorer, video_analyzer, data_explorer,
+# starting_pose_matcher, motion_capture_plotter).  Install with::
+#
+#     pip install upstream-drift[gui-tools]
+#
+# These are the runtime deps the desktop tile-launcher needs to actually
+# launch any tile.  Kept separate from `gui-test` so unit-only CI runs
+# don't pull pytest-qt.
+gui-tools = [
+    "PyQt6>=6.5.0",
+    "matplotlib>=3.10.8",
+    "pandas>=2.0.0",
+    "openpyxl>=3.1.0",   # required by pandas.read_excel for .xlsx
+]
+
 # Everything
 all = ["upstream-drift[rust,all-engines,analysis,pose,biomechanics,rl,urdf,dev]"]
 

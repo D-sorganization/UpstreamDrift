@@ -412,13 +412,16 @@ def launch_pyqt6_app(config: LaunchConfig) -> int:
         # Block mouse wheel on value-input widgets (audit scroll-wheel #4330)
         class _WheelBlockFilter(QObject):
             def eventFilter(self, obj: QObject | None, event: QEvent | None) -> bool:
-                if event is not None and event.type() == QEvent.Type.Wheel:
-                    if isinstance(
+                if (
+                    event is not None
+                    and event.type() == QEvent.Type.Wheel
+                    and isinstance(
                         obj,
                         QComboBox | QDoubleSpinBox | QSpinBox | QSlider,
-                    ):
-                        event.ignore()
-                        return True
+                    )
+                ):
+                    event.ignore()
+                    return True
                 return False
 
         _wheel_filter = _WheelBlockFilter(app)

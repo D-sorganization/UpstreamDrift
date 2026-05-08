@@ -20,6 +20,8 @@
 
 UpstreamDrift (formerly Golf Modeling Suite) consolidates multiple golf swing modeling implementations into a single, cohesive platform. This repository provides comprehensive biomechanical analysis capabilities through:
 
+> **For AI agents and contributors:** Before writing new code, read [`AGENTS.md`](AGENTS.md) for a directory of shared infrastructure and a discovery workflow to avoid duplicating existing work.
+
 - **Tiered Engine Support**: MuJoCo as the supported default, Drake/Pinocchio for extended cross-engine work, OpenSim/MyoSuite as experimental integrations
 - **Multiple Model Complexities**: From 2-DOF educational pendulums to 290-muscle musculoskeletal models
 - **Advanced Biomechanics**: Muscle dynamics, inverse kinematics/dynamics, motion capture integration

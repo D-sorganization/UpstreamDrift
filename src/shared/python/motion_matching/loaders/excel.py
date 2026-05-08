@@ -10,6 +10,7 @@ import hashlib
 import importlib.util
 import logging
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -31,6 +32,32 @@ _MOCAP_LOADER_RELATIVE = Path(
     "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/"
     "golf_gui/Motion Capture Plotter/mocap_data_loader.py"
 )
+
+
+@dataclass
+class ExcelEventMarkers:
+    """Event markers extracted from row-1 of Wiffle Excel sheets.
+
+    Attributes:
+        A_sample: Sample number (1-based) for Address event
+        T_sample: Sample number (1-based) for Top of Backswing event
+        I_sample: Sample number (1-based) for Impact event
+        F_sample: Sample number (1-based) for Finish event
+        CHS_mph: Clubhead speed in mph (NaN if missing)
+    """
+
+    A_sample: float = float("nan")
+    T_sample: float = float("nan")
+    I_sample: float = float("nan")
+    F_sample: float = float("nan")
+    CHS_mph: float = float("nan")
+
+    def frame_for(self, label: str) -> int | None:
+        """Convert 1-based sample number to 0-based frame index."""
+        v = getattr(self, f"{label}_sample", float("nan"))
+        if v != v:  # NaN check
+            return None
+        return max(0, int(v) - 1)
 
 
 def _import_mocap_loader():
@@ -80,6 +107,93 @@ def _frame_to_quat(df_row: pd.Series) -> np.ndarray:
         ],
         dtype=np.float64,
     )
+
+
+def _extract_event_markers(df: pd.DataFrame) -> ExcelEventMarkers:
+    """Extract event markers from row-1 of the Excel sheet.
+
+    The Wiffle/ProV1 format uses row-1 to store event markers in the pattern:
+    A=<n> T=<n> I=<n> F=<n> CHS=<mph>
+
+    Args:
+        df: DataFrame from process_excel_sheet (includes row-0 as header)
+
+    Returns:
+        ExcelEventMarkers with parsed sample numbers and CHS
+    """
+    ev = ExcelEventMarkers()
+    # Row 0 is the event marker row (before the column headers in row 1)
+    # The DataFrame from process_excel_sheet has the event row as index -1
+    # or we need to read it separately
+    label_to_field = {
+        "A": "A_sample",
+        "T": "T_sample",
+        "I": "I_sample",
+        "F": "F_sample",
+        "CHS": "CHS_mph",
+    }
+    # Check if we have event data in the first row
+    for c in range(len(df.columns) - 1):
+        cell = df.iloc[0, c] if len(df) > 0 else float("nan")
+        if pd.isna(cell):
+            continue
+        label = str(cell).strip()
+        if label not in label_to_field:
+            continue
+        val = df.iloc[0, c + 1] if len(df) > 0 else float("nan")
+        if pd.isna(val):
+            continue
+        try:
+            setattr(ev, label_to_field[label], float(val))
+        except (ValueError, TypeError):
+            continue
+    return ev
+
+
+def read_excel_event_markers(path: Path | str, sheet: str) -> ExcelEventMarkers:
+    """Read only the event markers from row-1 of a Wiffle Excel sheet.
+
+    This is a lightweight function for tools that need event markers
+    without loading the full trajectory data.
+
+    Args:
+        path: Path to Excel file
+        sheet: Sheet name
+
+    Returns:
+        ExcelEventMarkers with parsed event data
+    """
+    path = Path(path)
+    # Read just the first row to get event markers
+    try:
+        row1 = pd.read_excel(path, sheet_name=sheet, header=None, nrows=1)
+    except Exception as exc:
+        logger.warning("Could not read event header: %s", exc)
+        return ExcelEventMarkers()
+
+    ev = ExcelEventMarkers()
+    label_to_field = {
+        "A": "A_sample",
+        "T": "T_sample",
+        "I": "I_sample",
+        "F": "F_sample",
+        "CHS": "CHS_mph",
+    }
+    for c in range(row1.shape[1] - 1):
+        cell = row1.iat[0, c]
+        if pd.isna(cell):
+            continue
+        label = str(cell).strip()
+        if label not in label_to_field:
+            continue
+        val = row1.iat[0, c + 1]
+        if pd.isna(val):
+            continue
+        try:
+            setattr(ev, label_to_field[label], float(val))
+        except (ValueError, TypeError):
+            continue
+    return ev
 
 
 @precondition(

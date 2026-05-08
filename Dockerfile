@@ -49,7 +49,7 @@ RUN pip install \
 # Pinned versions for reproducible builds
 RUN pip install \
     pin==3.3.1 \
-    pin-pink==1.4.0 \
+    pin-pink==2.0.0 \
     qpsolvers==4.7.0 \
     osqp==1.0.5 \
     meshcat==0.3.2 \

@@ -55,10 +55,7 @@ def evaluate_torque_polynomial(t: float, coeffs: NDArray[np.float64]) -> float:
 
 
 # Define base class conditionally based on OpenSim availability
-if OPENSIM_AVAILABLE:
-    _ControllerBase = opensim.Controller  # type: ignore[misc]
-else:
-    _ControllerBase = object
+_ControllerBase = opensim.Controller if OPENSIM_AVAILABLE else object  # type: ignore[misc]
 
 
 class PolynomialTorqueController(_ControllerBase):  # type: ignore[misc,valid-type]

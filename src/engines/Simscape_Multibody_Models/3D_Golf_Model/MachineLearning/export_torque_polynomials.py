@@ -13,6 +13,13 @@ import numpy as np
 import pandas as pd
 from scipy.io import savemat
 
+from src.shared.python.motion_matching.control_names import (
+    COEFFICIENT_LETTERS as _CANONICAL_COEFFICIENT_LETTERS,
+)
+from src.shared.python.motion_matching.control_names import (
+    TORQUE_TO_POLYNOMIAL_BASE,
+)
+
 _SMOOTHING_PATH = Path(__file__).resolve().parent / "torque_smoothing.py"
 if "_torque_smoothing_loader" not in globals():
     _spec = _importlib_util.spec_from_file_location(
@@ -28,13 +35,6 @@ VALID_METHODS = _torque_smoothing_loader.VALID_METHODS
 SmoothingConfig = _torque_smoothing_loader.SmoothingConfig
 polynomial_residual_diagnostic = _torque_smoothing_loader.polynomial_residual_diagnostic
 smooth_torque = _torque_smoothing_loader.smooth_torque
-
-from src.shared.python.motion_matching.control_names import (
-    COEFFICIENT_LETTERS as _CANONICAL_COEFFICIENT_LETTERS,
-)
-from src.shared.python.motion_matching.control_names import (
-    TORQUE_TO_POLYNOMIAL_BASE,
-)
 
 LOGGER = logging.getLogger(__name__)
 DEFAULT_RESIDUAL_THRESHOLD = 0.5  # N*m absolute residual warning threshold

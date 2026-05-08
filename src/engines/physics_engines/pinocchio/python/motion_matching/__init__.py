@@ -1,4 +1,5 @@
-"""Pinocchio motion-matching forward simulation, LM fit, target adapters, and leaderboard.
+"""Pinocchio motion-matching forward simulation, LM fit, target adapters, and
+leaderboard.
 
 Public API:
     simulate_with_coefficients -- RK4 + ABA forward simulator (issue #4118).

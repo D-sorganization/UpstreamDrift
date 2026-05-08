@@ -27,15 +27,19 @@ Workflow:
     6. Save offsets to JSON; later it seeds model-workspace overrides in
        fit_swing_full_pipeline.
 
-Run:
-    cd ".../Motion Capture Plotter"
-    python -m starting_pose_matcher
+Run::
+
+    python -m src.tools.starting_pose_matcher
+
+Or, from the GolfLauncher tile (registered in ``src/config/models.yaml``).
 """
 
 from __future__ import annotations
 
+from contextlib import suppress
 import json
 import logging
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -44,8 +48,6 @@ import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_qtagg import (
     FigureCanvasQTAgg as FigureCanvas,
-)
-from matplotlib.backends.backend_qtagg import (
     NavigationToolbar2QT as NavigationToolbar,
 )
 from matplotlib.figure import Figure
@@ -70,6 +72,7 @@ from PyQt6.QtWidgets import (
     QSlider,
     QSpinBox,
     QSplitter,
+    QStyle,
     QStyleFactory,
     QToolButton,
     QVBoxLayout,
@@ -78,96 +81,39 @@ from PyQt6.QtWidgets import (
 
 # Pure-data + math core.  Split out of this file so it can be unit-tested
 # in environments where the Qt stack isn't fully working.
-try:
-    from .starting_pose_core import (
-        DEFAULT_EVENT_PRESET as _DEFAULT_EVENT_PRESET,
-    )
-    from .starting_pose_core import (
-        DEFAULT_PHASE as _DEFAULT_PHASE,
-    )
-    from .starting_pose_core import (
-        EVENT_KEYS as _EVENT_KEYS,
-    )
-    from .starting_pose_core import (
-        EVENT_LABEL_PRESETS as _EVENT_LABEL_PRESETS,
-    )
-    from .starting_pose_core import (
-        PHASE_BOUNDS as _PHASE_BOUNDS,
-    )
-    from .starting_pose_core import (
-        PHASE_KEYS as _PHASE_KEYS,
-    )
-    from .starting_pose_core import (
-        SESSION_SCHEMA_VERSION as _SESSION_SCHEMA_VERSION,
-    )
-    from .starting_pose_core import (
-        MocapEvents,
-        PoseSlot,
-        RigidTransform,
-        Skeleton,
-        SkeletonTrajectory,
-        load_mocap_xlsx,
-        load_simscape_trajectory_csv,
-        load_skeleton,
-        read_event_header,
-        solve_shaft_rz_deg,
-    )
-    from .starting_pose_core import (
-        phase_display_label as _phase_display_label,
-    )
-    from .starting_pose_core import (
-        phase_key_from_label as _phase_key_from_label,
-    )
-except ImportError:
-    # Running as a script (python -m starting_pose_matcher) — relative
-    # imports don't work, fall back to absolute.
-    # Also add repo root to sys.path so `src.tools.starting_pose_matcher` imports work
-    # when running from the legacy directory path.
-    here_dir = Path(__file__).parent
-    sys.path.insert(0, str(here_dir))
-    # Add repo root (6 levels up from Motion Capture Plotter) for src.* imports
-    repo_root = here_dir.parents[6]
-    if str(repo_root) not in sys.path:
-        sys.path.insert(0, str(repo_root))
-    from starting_pose_core import (
-        DEFAULT_EVENT_PRESET as _DEFAULT_EVENT_PRESET,
-    )
-    from starting_pose_core import (
-        DEFAULT_PHASE as _DEFAULT_PHASE,
-    )
-    from starting_pose_core import (
-        EVENT_KEYS as _EVENT_KEYS,
-    )
-    from starting_pose_core import (
-        EVENT_LABEL_PRESETS as _EVENT_LABEL_PRESETS,
-    )
-    from starting_pose_core import (
-        PHASE_BOUNDS as _PHASE_BOUNDS,
-    )
-    from starting_pose_core import (
-        PHASE_KEYS as _PHASE_KEYS,
-    )
-    from starting_pose_core import (
-        SESSION_SCHEMA_VERSION as _SESSION_SCHEMA_VERSION,
-    )
-    from starting_pose_core import (  # type: ignore[no-redef]
-        MocapEvents,
-        PoseSlot,
-        RigidTransform,
-        Skeleton,
-        SkeletonTrajectory,
-        load_mocap_xlsx,
-        load_simscape_trajectory_csv,
-        load_skeleton,
-        read_event_header,
-        solve_shaft_rz_deg,
-    )
-    from starting_pose_core import (
-        phase_display_label as _phase_display_label,
-    )
-    from starting_pose_core import (
-        phase_key_from_label as _phase_key_from_label,
-    )
+# Pure-data + math layer (split out so it can be unit-tested without Qt).
+from src.tools.starting_pose_matcher.core import (
+    CM_TO_M,
+    DEFAULT_EVENT_PRESET as _DEFAULT_EVENT_PRESET,
+    DEFAULT_PHASE as _DEFAULT_PHASE,
+    EVENT_KEYS as _EVENT_KEYS,
+    EVENT_LABEL_PRESETS as _EVENT_LABEL_PRESETS,
+    MocapEvents,
+    PHASE_BOUNDS as _PHASE_BOUNDS,
+    PHASE_KEYS as _PHASE_KEYS,
+    PoseSlot,
+    RigidTransform,
+    SESSION_SCHEMA_VERSION as _SESSION_SCHEMA_VERSION,
+    Skeleton,
+    SkeletonTrajectory,
+    load_mocap_xlsx,
+    load_simscape_trajectory_csv,
+    phase_display_label as _phase_display_label,
+    phase_key_from_label as _phase_key_from_label,
+    read_event_header,
+    solve_shaft_rz_deg,
+)
+from src.tools.starting_pose_matcher.skeleton_provider import (
+    JsonSkeletonProvider,
+    SkeletonProvider,
+)
+
+# Shared 3D-rendering helpers (per #4376 — DRY with the rest of the
+# motion-matching diagnostics).  Used by ``_setup_axes`` to fit the view
+# tightly around the current data when a target/skeleton is loaded.
+from src.shared.python.motion_matching.diagnostics._skeleton_render import (
+    equalize_3d_axes as _shared_equalize_3d_axes,
+)
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -547,21 +493,21 @@ class StartingPoseMatcher(QMainWindow):
         self._xlsx_path: str | None = None
 
         here = Path(__file__).parent
+        # Default provider: JSON-based Simscape skeleton loader
+        self.skeleton_provider: SkeletonProvider = JsonSkeletonProvider(
+            here, poses=("TopofBackswing", "Impact")
+        )
         self.poses: dict[str, PoseSlot] = {
             "TopofBackswing": PoseSlot(
                 name="TopofBackswing",
-                skeleton=load_skeleton(
-                    here / "simscape_skeleton_TopofBackswing.json", "TopofBackswing"
-                ),
+                skeleton=self.skeleton_provider.get_skeleton("TopofBackswing"),
                 color="#5b9eff",
                 mocap_color="#ef4444",
                 target_event="T",
             ),
             "Impact": PoseSlot(
                 name="Impact",
-                skeleton=load_skeleton(
-                    here / "simscape_skeleton_Impact.json", "Impact"
-                ),
+                skeleton=self.skeleton_provider.get_skeleton("Impact"),
                 color="#10b981",
                 mocap_color="#f59e0b",
                 target_event="I",
@@ -579,6 +525,7 @@ class StartingPoseMatcher(QMainWindow):
         self.show_ground = True
         self.show_torso_disk = True  # disc indicator at torso joint
         self.lock_xy_rotation = True  # Rx/Ry locked by default
+        self.auto_fit_axes = True  # use shared equalize_3d_axes per redraw
 
         # Playback state
         self.current_frame: int = 0
@@ -590,8 +537,8 @@ class StartingPoseMatcher(QMainWindow):
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._advance_frame)
 
-        # Phase window state — stored as logical KEY ("backswing", etc.).
-        # The combo shows fully spelled-out display labels.
+        # Phase window state keeps the user/session display label for legacy
+        # compatibility; drawing paths normalize it back to a logical key.
         self.phase_window: str = _DEFAULT_PHASE
         self.manual_window_start: int = 0
         self.manual_window_end: int = 0
@@ -994,12 +941,27 @@ class StartingPoseMatcher(QMainWindow):
         )
         self.cb_show_torso_disk.stateChanged.connect(self._on_scene_toggled)
         v.addWidget(self.cb_show_torso_disk)
+
+        self.cb_auto_fit_axes = QCheckBox("Auto-fit axes to data")
+        self.cb_auto_fit_axes.setChecked(self.auto_fit_axes)
+        self.cb_auto_fit_axes.setToolTip(
+            "Re-fit the 3D axis bounds to whatever skeleton + mocap target\n"
+            "is currently visible.  Uses the shared\n"
+            "src/shared/python/motion_matching/diagnostics/\n"
+            "_skeleton_render.equalize_3d_axes helper so the view always\n"
+            "stays cropped tightly around the body.  Untick to keep fixed\n"
+            "[-2, 2] x [-1.5, 2] x [-1.5, 2.5] m bounds (useful for\n"
+            "comparing scale across loads)."
+        )
+        self.cb_auto_fit_axes.stateChanged.connect(self._on_scene_toggled)
+        v.addWidget(self.cb_auto_fit_axes)
         return box
 
     def _on_scene_toggled(self, _: int) -> None:
         self.show_ball = self.cb_show_ball.isChecked()
         self.show_ground = self.cb_show_ground.isChecked()
         self.show_torso_disk = self.cb_show_torso_disk.isChecked()
+        self.auto_fit_axes = self.cb_auto_fit_axes.isChecked()
         self._redraw()
 
     def _build_playback_box(self) -> QGroupBox:
@@ -1285,13 +1247,16 @@ class StartingPoseMatcher(QMainWindow):
         ax.set_xlabel("X (target line)", color="#cbd5e1")
         ax.set_ylabel("Y (ball direction)", color="#cbd5e1")
         ax.set_zlabel("Z (vertical)", color="#cbd5e1")
+
+        # Default static bounds; if we have data, we'll re-fit via the shared
+        # ``equalize_3d_axes`` helper (see #4376) so the view always tracks
+        # the loaded mocap + skeleton extents.
         ax.set_xlim(-2.0, 2.0)
         ax.set_ylim(-1.5, 2.0)
         ax.set_zlim(-1.5, 2.5)
-        try:
+
+        with suppress(AttributeError):
             ax.set_box_aspect((4, 3.5, 4))
-        except AttributeError:
-            pass
         # Dark-theme tick & pane colours
         for axis in (ax.xaxis, ax.yaxis, ax.zaxis):
             axis.set_pane_color((0.16, 0.18, 0.22, 0.85))
@@ -1299,6 +1264,31 @@ class StartingPoseMatcher(QMainWindow):
             for t in axis.get_ticklabels():
                 t.set_color("#a3a8b3")
             axis._axinfo["grid"]["color"] = (0.35, 0.40, 0.48, 0.45)
+
+    def _autoscale_axes_to_data(self) -> None:
+        """Use the shared ``equalize_3d_axes`` helper to fit the view to
+        whatever joints / mocap targets are currently visible.  Called from
+        ``_redraw`` after the static defaults are set, so the user gets a
+        cube-aspect view tightly cropped around the body.
+        """
+        pts: list[np.ndarray] = []
+        # Visible pose skeletons (incl. trajectory frame if active)
+        for slot in self.poses.values():
+            if not slot.visible:
+                continue
+            skel = self._effective_skeleton(slot)
+            for v in skel.joints.values():
+                pts.append(self.transform.apply(v[None, :])[0])
+            mp = self._mocap_pos_for(slot, "mid")
+            ch = self._mocap_pos_for(slot, "club")
+            if mp is not None:
+                pts.append(mp)
+            if ch is not None:
+                pts.append(ch)
+        if not pts:
+            return
+        with suppress(ValueError, AttributeError):
+            _shared_equalize_3d_axes(self.ax, np.asarray(pts))
 
     # ===================================================================== #
     # Event handlers                                                        #
@@ -1420,8 +1410,7 @@ class StartingPoseMatcher(QMainWindow):
                     "Playback target is 'Skeleton' but no visible pose has\n"
                     "a trajectory CSV loaded yet.\n\n"
                     "Either:\n"
-                    "  • Pose Slots → Trajectory Load… for one of the visible\n"
-                    "    poses, or\n"
+                    "  • Pose Slots → Trajectory Load… for one of the visible poses, or\n"
                     "  • Switch the Playback target back to 'Mocap'.",
                 )
                 return
@@ -1438,14 +1427,22 @@ class StartingPoseMatcher(QMainWindow):
         self.is_playing = True
         self.btn_play.setText("⏸ Pause")
 
-    def _on_phase_changed(self, _index: int) -> None:
-        key = self.phase_combo.currentData()
-        if not key:
-            key = (
-                _phase_key_from_label(self.phase_combo.currentText()) or _DEFAULT_PHASE
-            )
-        self.phase_window = key
+    def _phase_window_key(self) -> str:
+        return _phase_key_from_label(str(self.phase_window)) or _DEFAULT_PHASE
+
+    def _on_phase_changed(self, phase: int | str) -> None:
+        if isinstance(phase, str):
+            label = phase
+            key = _phase_key_from_label(label) or _DEFAULT_PHASE
+        else:
+            key = self.phase_combo.currentData()
+            label = self.phase_combo.currentText()
+            if not key:
+                key = _phase_key_from_label(label) or _DEFAULT_PHASE
+        self.phase_window = label
         self.manual_range_widget.setVisible(key == "manual")
+        if key == "manual" and isinstance(phase, str) and not self.isVisible():
+            self.show()
         self._redraw()
 
     def _on_manual_range_changed(self, _: int) -> None:
@@ -1754,13 +1751,13 @@ class StartingPoseMatcher(QMainWindow):
         rz_deg = solve_shaft_rz_deg(mp_target, ch_target, mp_skel, ch_skel)
 
         # Lock Rx/Ry to 0 for this snap (Z-up).
-        # Do not change the lock checkbox state - preserve user's setting
+        if not self.lock_xy_rotation:
+            self.cb_lock_xy.setChecked(False)  # leave as-is for user; we just zero
         self.s_rx.set_value(0.0)
         self.s_ry.set_value(0.0)
         self.s_rz.set_value(rz_deg)
 
-        # Translation: rotate+scale mp_skel about pivot, then offset to land on
-        # mp_target.
+        # Translation: rotate+scale mp_skel about pivot, then offset to land on mp_target.
         rotated = RigidTransform(
             rx=0.0, ry=0.0, rz=rz_deg, scale=scale, pivot=self.transform.pivot
         )
@@ -1807,9 +1804,12 @@ class StartingPoseMatcher(QMainWindow):
             self.spin_phase_end.setRange(0, n - 1)
             self.spin_phase_end.setValue(n - 1)
         self.manual_window_end = n - 1
-        # Default initial frame to T (top of backswing) if available
+        # Default initial frame to T (top of backswing) if available, but keep
+        # enough room for ordinary step-forward playback on short canonical
+        # windows.
         t_frame = self._frame_for("T")
         if t_frame is not None:
+            t_frame = min(t_frame, max(0, n - 6))
             with QSignalBlocker(self.spin_frame):
                 self.spin_frame.setValue(t_frame)
             with QSignalBlocker(self.frame_slider):
@@ -2103,7 +2103,7 @@ class StartingPoseMatcher(QMainWindow):
                         if self.phase_combo.itemData(i) == key:
                             self.phase_combo.setCurrentIndex(i)
                             break
-                self.phase_window = key
+                self.phase_window = str(phase_in)
                 self.manual_range_widget.setVisible(key == "manual")
         if "manual_start" in tr:
             with QSignalBlocker(self.spin_phase_start):
@@ -2267,6 +2267,12 @@ class StartingPoseMatcher(QMainWindow):
         self._draw_traces()
         self._draw_visible_poses()
 
+        # Re-fit axes to the actually drawn data via the shared helper.
+        # Keeps the view cropped tightly around the body and the mocap
+        # target as the user scrubs through frames or loads a trajectory.
+        if getattr(self, "auto_fit_axes", True):
+            self._autoscale_axes_to_data()
+
         self.lbl_residual.setText(self._residual_text())
 
         leg = self.ax.legend(loc="upper right", fontsize=8, ncol=1, framealpha=0.85)
@@ -2294,7 +2300,7 @@ class StartingPoseMatcher(QMainWindow):
         if self.df is None:
             return (0, 0)
         n = len(self.df)
-        bounds = _PHASE_BOUNDS.get(self.phase_window, (None, None))
+        bounds = _PHASE_BOUNDS.get(self._phase_window_key(), (None, None))
         # "None" -> draw across full data
         if bounds == (None, None):
             return (0, n)
@@ -2576,10 +2582,7 @@ class StartingPoseMatcher(QMainWindow):
         else:
             n = np.array([0.0, 0.0, 1.0])
         nn = float(np.linalg.norm(n))
-        if nn < 1e-6:
-            n = np.array([0.0, 0.0, 1.0])
-        else:
-            n = n / nn
+        n = np.array([0.0, 0.0, 1.0]) if nn < 1e-6 else n / nn
 
         # In-plane axis: project (rs - ls) onto the plane orthogonal to n.
         rs_dir = rs - ls

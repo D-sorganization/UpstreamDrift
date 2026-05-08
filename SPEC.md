@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.142                                            |
-| **Last Spec Update**    | 2026-05-07 (MuJoCo pose-conditioned synth targets) |
+| **Spec Version**        | 1.0.143                                            |
+| **Last Spec Update**    | 2026-05-07 (fix/lint-errors-for-ci-standard - ruff fixes in golf model tabs, export_torque_polynomials.py, starting_pose_matcher.py) |
 
 ## 2. Purpose & Mission
 

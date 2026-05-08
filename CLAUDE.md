@@ -5,6 +5,10 @@
 > **GAAI Fleet Member.** GAAI framework installed in `.gaai/`. Read `.gaai/core/GAAI.md` for full governance spec.
 > Rules: `@.gaai/core/contexts/rules/base.rules.md` and `@.gaai/project/contexts/rules/project.rules.md`
 > PRs target `main`. Use focused topic branches such as `fix/...`, `feat/...`, `chore/...`, or `claude/...`.
+>
+> **Before writing new code, read [`AGENTS.md`](AGENTS.md)** — it lists the
+> shared infrastructure (FK, reference poses, mocap loaders, theme,
+> rendering helpers) you should reuse instead of reinventing.
 
 ## What This Is
 
