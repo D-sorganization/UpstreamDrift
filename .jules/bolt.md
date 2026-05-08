@@ -24,3 +24,6 @@
 ## 2026-05-01 - Optimize clubhead speed computation using einsum
 **Learning:** `np.linalg.norm(..., axis=1)` on multi-dimensional arrays evaluates element-wise square roots and allocates intermediate temporary arrays, making it relatively slow.
 **Action:** Replace `np.linalg.norm(x, axis=1)` with `np.sqrt(np.einsum("ij,ij->i", x, x))` to calculate magnitudes. This avoids temporary array allocations and is ~35% faster.
+## 2026-05-18 - Optimize norm calculation combined with argmax
+**Learning:** `np.linalg.norm(..., axis=1)` creates intermediate memory allocations and has overhead when used with `np.argmax`. Since `argmax` is invariant to monotonic transformations like `sqrt`, the `sqrt` can be completely omitted.
+**Action:** Replace `np.argmax(np.linalg.norm(x, axis=1))` with `np.argmax(np.einsum('ij,ij->i', x, x))` to find the index of the maximum magnitude vector without calculating the full norm. This yields significant speedup by avoiding both intermediate allocations and square root computation.
