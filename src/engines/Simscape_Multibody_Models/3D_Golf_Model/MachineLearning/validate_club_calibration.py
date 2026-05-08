@@ -137,13 +137,13 @@ def _vector_metrics(
 
     residual = simulated_values - target_values
     rmse_axis = np.sqrt(np.mean(residual**2, axis=0))
-    # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) avoids temporary allocations and is ~35% faster than np.linalg.norm(..., axis=1)
+    # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) fast norm
     vector_error = np.sqrt(np.einsum("ij,ij->i", residual, residual))
     target_span = np.ptp(target_values, axis=0)
     normalizer = float(np.linalg.norm(target_span))
     if normalizer < EPSILON:
         normalizer = float(
-            # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) avoids temporary allocations and is ~35% faster than np.linalg.norm(..., axis=1)
+            # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) fast norm
             np.mean(np.sqrt(np.einsum("ij,ij->i", target_values, target_values)))
         )
     if normalizer < EPSILON:
@@ -441,7 +441,7 @@ def _plot_speed_acceleration(
         if not all(column in simulated.columns for column in columns):
             continue
         val = _interpolate(simulated, columns, query_time)
-        # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) avoids temporary allocations and is ~35% faster than np.linalg.norm(..., axis=1)
+        # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) fast norm
         sim_norm = np.sqrt(np.einsum("ij,ij->i", val, val))
         axis.plot(raw_time, sim_norm, "--", label="sim")
         for frame, frame_label in (
@@ -450,7 +450,7 @@ def _plot_speed_acceleration(
         ):
             if all(column in frame.columns for column in columns):
                 arr = frame[columns].to_numpy(dtype=float)
-                # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) avoids temporary allocations and is ~35% faster than np.linalg.norm(..., axis=1)
+                # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) fast norm
                 values = np.sqrt(np.einsum("ij,ij->i", arr, arr))
                 axis.plot(raw_time, values, label=frame_label)
                 plotted = True

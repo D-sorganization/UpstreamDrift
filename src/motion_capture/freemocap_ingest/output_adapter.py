@@ -21,25 +21,48 @@ logger = logging.getLogger(__name__)
 MEDIAPIPE_LANDMARKS = [
     # Body (33 landmarks, 0-32)
     "nose",
-    "left_eye_inner", "left_eye", "left_eye_outer",
-    "right_eye_inner", "right_eye", "right_eye_outer",
-    "left_ear", "right_ear",
-    "mouth_left", "mouth_right",
-    "left_shoulder", "right_shoulder",
-    "left_elbow", "right_elbow",
-    "left_wrist", "right_wrist",
-    "left_pinky", "right_pinky",
-    "left_index", "right_index",
-    "left_thumb", "right_thumb",
-    "left_hip", "right_hip",
-    "left_knee", "right_knee",
-    "left_ankle", "right_ankle",
-    "left_heel", "right_heel",
-    "left_foot_index", "right_foot_index",
+    "left_eye_inner",
+    "left_eye",
+    "left_eye_outer",
+    "right_eye_inner",
+    "right_eye",
+    "right_eye_outer",
+    "left_ear",
+    "right_ear",
+    "mouth_left",
+    "mouth_right",
+    "left_shoulder",
+    "right_shoulder",
+    "left_elbow",
+    "right_elbow",
+    "left_wrist",
+    "right_wrist",
+    "left_pinky",
+    "right_pinky",
+    "left_index",
+    "right_index",
+    "left_thumb",
+    "right_thumb",
+    "left_hip",
+    "right_hip",
+    "left_knee",
+    "right_knee",
+    "left_ankle",
+    "right_ankle",
+    "left_heel",
+    "right_heel",
+    "left_foot_index",
+    "right_foot_index",
     # Hands (42 landmarks each, 33-74 left, 75-116 right)
     # Simplified: just track key hand points
-    "left_wrist_mp", "left_thumb_cmc", "left_index_mcp", "left_pinky_mcp",
-    "right_wrist_mp", "right_thumb_cmc", "right_index_mcp", "right_pinky_mcp",
+    "left_wrist_mp",
+    "left_thumb_cmc",
+    "left_index_mcp",
+    "left_pinky_mcp",
+    "right_wrist_mp",
+    "right_thumb_cmc",
+    "right_index_mcp",
+    "right_pinky_mcp",
     # Face simplified (just key points)
     "face_center",
 ]
@@ -65,7 +88,7 @@ class LandmarkFrame:
     timestamp: float
     points: list[LandmarkPoint] = field(default_factory=list)
 
-    def get_point(self, name: str) -> Optional[LandmarkPoint]:
+    def get_point(self, name: str) -> LandmarkPoint | None:
         """Get a landmark point by name."""
         for p in self.points:
             if p.name == name:
@@ -90,7 +113,7 @@ class LandmarkSession:
 
     session_id: str
     frames: list[LandmarkFrame] = field(default_factory=list)
-    calibration: Optional[dict] = None
+    calibration: dict | None = None
     metadata: dict = field(default_factory=dict)
 
     def to_array(self) -> np.ndarray:
@@ -132,13 +155,13 @@ class FreeMoCapOutputAdapter:
             output_dir: Directory containing FreeMoCap output files.
         """
         self.output_dir = Path(output_dir).expanduser().resolve()
-        self._session: Optional[LandmarkSession] = None
+        self._session: LandmarkSession | None = None
 
     def _find_landmarks_csv(self) -> list[Path]:
         """Find landmark CSV files in output directory."""
         return list(self.output_dir.glob(self.LANDMARKS_CSV_PATTERN))
 
-    def _load_calibration(self) -> Optional[dict]:
+    def _load_calibration(self) -> dict | None:
         """Load camera calibration data."""
         calib_file = self.output_dir / self.CALIBRATION_FILE
         if calib_file.exists():
@@ -203,24 +226,28 @@ class FreeMoCapOutputAdapter:
                     except (ValueError, IndexError):
                         continue
 
-                    points.append(LandmarkPoint(
-                        name=name,
-                        x=x,
-                        y=y,
-                        z=z,
-                        confidence=conf,
-                        visible=visible,
-                    ))
+                    points.append(
+                        LandmarkPoint(
+                            name=name,
+                            x=x,
+                            y=y,
+                            z=z,
+                            confidence=conf,
+                            visible=visible,
+                        )
+                    )
 
-                frames.append(LandmarkFrame(
-                    frame_number=frame_num,
-                    timestamp=timestamp,
-                    points=points,
-                ))
+                frames.append(
+                    LandmarkFrame(
+                        frame_number=frame_num,
+                        timestamp=timestamp,
+                        points=points,
+                    )
+                )
 
         return frames
 
-    def parse(self, session_id: Optional[str] = None) -> LandmarkSession:
+    def parse(self, session_id: str | None = None) -> LandmarkSession:
         """
         Parse all output files and return a complete session.
 
@@ -239,9 +266,7 @@ class FreeMoCapOutputAdapter:
         # Find landmark files
         landmark_files = self._find_landmarks_csv()
         if not landmark_files:
-            raise FileNotFoundError(
-                f"No landmark CSV files found in {self.output_dir}"
-            )
+            raise FileNotFoundError(f"No landmark CSV files found in {self.output_dir}")
 
         # Use first landmark file (typically the main body tracking)
         main_file = landmark_files[0]
@@ -268,7 +293,7 @@ class FreeMoCapOutputAdapter:
         self._session = session
         return session
 
-    def get_session(self) -> Optional[LandmarkSession]:
+    def get_session(self) -> LandmarkSession | None:
         """Get the most recently parsed session."""
         return self._session
 
@@ -306,7 +331,9 @@ class FreeMoCapOutputAdapter:
             header = ["frame_number", "timestamp"]
             if self._session.frames:
                 for p in self._session.frames[0].points:
-                    header.extend([f"{p.name}_x", f"{p.name}_y", f"{p.name}_z", f"{p.name}_conf"])
+                    header.extend(
+                        [f"{p.name}_x", f"{p.name}_y", f"{p.name}_z", f"{p.name}_conf"]
+                    )
             writer.writerow(header)
 
             # Write data
@@ -321,9 +348,7 @@ def main():
     """CLI entrypoint for output adapter."""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Parse FreeMoCap output files"
-    )
+    parser = argparse.ArgumentParser(description="Parse FreeMoCap output files")
     parser.add_argument(
         "output_dir",
         type=Path,
@@ -340,7 +365,8 @@ def main():
         help="Export to CSV file",
     )
     parser.add_argument(
-        "-v", "--verbose",
+        "-v",
+        "--verbose",
         action="store_true",
         help="Verbose output",
     )
@@ -355,18 +381,14 @@ def main():
     adapter = FreeMoCapOutputAdapter(args.output_dir)
     session = adapter.parse()
 
-    print(f"Session: {session.session_id}")
-    print(f"Frames: {len(session.frames)}")
     if session.frames:
-        print(f"Landmarks per frame: {len(session.frames[0].points)}")
+        pass
 
     if args.export_npy:
         adapter.export_to_numpy(args.export_npy)
-        print(f"Exported to numpy: {args.export_npy}")
 
     if args.export_csv:
         adapter.export_to_csv(args.export_csv)
-        print(f"Exported to CSV: {args.export_csv}")
 
 
 if __name__ == "__main__":

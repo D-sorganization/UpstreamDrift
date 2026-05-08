@@ -9,7 +9,7 @@ Required vocabulary:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import numpy as np
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 # Body/frame/marker name mapping from OpenSim to matcher vocabulary
 # These are the standard names expected by the starting-pose matcher
-OPENSIM_TO_MATCHER_VOCAB: Dict[str, str] = {
+OPENSIM_TO_MATCHER_VOCAB: dict[str, str] = {
     # Lower body
     "hip": "hip",
     "pelvis": "hip",
@@ -42,19 +42,15 @@ OPENSIM_TO_MATCHER_VOCAB: Dict[str, str] = {
 }
 
 # Reverse mapping for lookup
-MATCHER_TO_OPENSIM: Dict[str, str] = {v: k for k, v in OPENSIM_TO_MATCHER_VOCAB.items()}
+MATCHER_TO_OPENSIM: dict[str, str] = {v: k for k, v in OPENSIM_TO_MATCHER_VOCAB.items()}
 
 
 class OpenSimNotAvailableError(Exception):
     """Raised when OpenSim is not installed but an OpenSim provider is requested."""
 
-    pass
-
 
 class OpenSimProviderError(Exception):
     """Raised when there's an error with the OpenSim provider configuration."""
-
-    pass
 
 
 class OpenSimSkeletonProvider:
@@ -71,8 +67,8 @@ class OpenSimSkeletonProvider:
 
     def __init__(
         self,
-        model_path: Optional[str] = None,
-        model_xml: Optional[str] = None,
+        model_path: str | None = None,
+        model_xml: str | None = None,
     ):
         """Initialize the OpenSim skeleton provider.
 
@@ -102,11 +98,15 @@ class OpenSimSkeletonProvider:
         if model_xml is not None:
             # Write XML to temp file and load
             import tempfile
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.osim', delete=False) as f:
+
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".osim", delete=False
+            ) as f:
                 f.write(model_xml)
                 temp_path = f.name
             self.model = self._osim.Model(temp_path)
             import os
+
             os.unlink(temp_path)
         else:
             self.model = self._osim.Model(model_path)
@@ -116,13 +116,13 @@ class OpenSimSkeletonProvider:
         self.state = self.model.getState()
 
         # Build body name mapping
-        self._body_name_to_index: Dict[str, int] = {}
+        self._body_name_to_index: dict[str, int] = {}
         for i in range(self.model.getBodySet().getSize()):
             body = self.model.getBodySet().get(i)
             self._body_name_to_index[body.getName()] = i
 
         # Build marker name mapping
-        self._marker_name_to_index: Dict[str, int] = {}
+        self._marker_name_to_index: dict[str, int] = {}
         for i in range(self.model.getMarkerSet().getSize()):
             marker = self.model.getMarkerSet().get(i)
             self._marker_name_to_index[marker.getName()] = i
@@ -136,8 +136,8 @@ class OpenSimSkeletonProvider:
         for matcher_name, opensim_name in MATCHER_TO_OPENSIM.items():
             # Check both bodies and markers
             found = (
-                opensim_name in self._body_name_to_index or
-                opensim_name in self._marker_name_to_index
+                opensim_name in self._body_name_to_index
+                or opensim_name in self._marker_name_to_index
             )
             if not found:
                 missing.append(f"{matcher_name} (mapped from '{opensim_name}')")
@@ -147,9 +147,7 @@ class OpenSimSkeletonProvider:
                 f"Missing required body/marker mappings in OpenSim model: {', '.join(missing)}"
             )
 
-    def _get_body_position(
-        self, body_index: int
-    ) -> Tuple[float, float, float]:
+    def _get_body_position(self, body_index: int) -> tuple[float, float, float]:
         """Get the position of a body in ground coordinates.
 
         Args:
@@ -163,9 +161,7 @@ class OpenSimSkeletonProvider:
         position = transform.p
         return (float(position[0]), float(position[1]), float(position[2]))
 
-    def _get_marker_position(
-        self, marker_index: int
-    ) -> Tuple[float, float, float]:
+    def _get_marker_position(self, marker_index: int) -> tuple[float, float, float]:
         """Get the position of a marker in ground coordinates.
 
         Args:
@@ -179,8 +175,8 @@ class OpenSimSkeletonProvider:
         return (float(position[0]), float(position[1]), float(position[2]))
 
     def get_skeleton(
-        self, coordinates: Optional[Dict[str, float]] = None
-    ) -> Dict[str, "NDArray[np.float64]"]:
+        self, coordinates: dict[str, float] | None = None
+    ) -> dict[str, NDArray[np.float64]]:
         """Get skeleton joint positions from OpenSim model.
 
         Args:
@@ -201,11 +197,11 @@ class OpenSimSkeletonProvider:
                 except (RuntimeError, KeyError):
                     # Coordinate not found, skip it
                     pass
-            
+
             # Realize to position stage
             self.model.realizePosition(self.state)
 
-        skeleton: Dict[str, "NDArray[np.float64]"] = {}
+        skeleton: dict[str, NDArray[np.float64]] = {}
 
         for matcher_name, opensim_name in MATCHER_TO_OPENSIM.items():
             # Try body first, then marker
@@ -230,8 +226,8 @@ class OpenSimSkeletonProvider:
 
 
 def create_provider(
-    model_path: Optional[str] = None,
-    model_xml: Optional[str] = None,
+    model_path: str | None = None,
+    model_xml: str | None = None,
 ) -> OpenSimSkeletonProvider:
     """Create an OpenSim skeleton provider.
 

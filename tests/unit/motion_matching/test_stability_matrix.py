@@ -210,6 +210,7 @@ class TestStabilityMatrix:
         """Test retrieving invalid test raises."""
         matrix = StabilityMatrix()
         from src.shared.python._contracts_exceptions import PreconditionError
+
         with pytest.raises(PreconditionError):
             matrix.get_canonical_test("nonexistent_test")
 

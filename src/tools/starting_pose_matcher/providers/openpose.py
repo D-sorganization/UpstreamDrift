@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import numpy as np
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 # OpenPose COCO format body part indices
 # https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md
-OPENPOSE_COCO_INDICES: Dict[str, int] = {
+OPENPOSE_COCO_INDICES: dict[str, int] = {
     "nose": 0,
     "neck": 1,
     "right_shoulder": 2,
@@ -49,7 +49,7 @@ OPENPOSE_COCO_INDICES: Dict[str, int] = {
 
 # Mapping from OpenPose keypoints to matcher vocabulary
 # OpenPose provides observed landmarks, not physics bodies
-OPENPOSE_TO_MATCHER_VOCAB: Dict[str, Optional[str]] = {
+OPENPOSE_TO_MATCHER_VOCAB: dict[str, str | None] = {
     # Shoulders map directly
     "left_shoulder": "ls",
     "right_shoulder": "rs",
@@ -72,7 +72,7 @@ OPENPOSE_TO_MATCHER_VOCAB: Dict[str, Optional[str]] = {
 }
 
 # Reverse mapping
-MATCHER_TO_OPENPOSE: Dict[str, List[str]] = {}
+MATCHER_TO_OPENPOSE: dict[str, list[str]] = {}
 for openpose_name, matcher_name in OPENPOSE_TO_MATCHER_VOCAB.items():
     if matcher_name is not None:
         if matcher_name not in MATCHER_TO_OPENPOSE:
@@ -85,7 +85,7 @@ class KeypointObservation:
     """Represents an observed keypoint with confidence."""
 
     name: str
-    position: Optional[Tuple[float, float, float]] = None
+    position: tuple[float, float, float] | None = None
     confidence: float = 0.0
     is_observed: bool = False
     source: str = "openpose"
@@ -96,14 +96,12 @@ class OpenPoseFrame:
     """Represents a single frame of OpenPose observations."""
 
     frame_index: int
-    keypoints: Dict[str, KeypointObservation] = field(default_factory=dict)
-    camera_metadata: Optional[Dict[str, Any]] = None
+    keypoints: dict[str, KeypointObservation] = field(default_factory=dict)
+    camera_metadata: dict[str, Any] | None = None
 
 
 class OpenPoseProviderError(Exception):
     """Raised when there's an error with the OpenPose provider."""
-
-    pass
 
 
 class OpenPoseProvider:
@@ -119,8 +117,8 @@ class OpenPoseProvider:
 
     def __init__(
         self,
-        json_path: Optional[str] = None,
-        json_data: Optional[Dict] = None,
+        json_path: str | None = None,
+        json_data: dict | None = None,
         confidence_threshold: float = 0.3,
     ):
         """Initialize the OpenPose provider.
@@ -139,16 +137,16 @@ class OpenPoseProvider:
             )
 
         self.confidence_threshold = confidence_threshold
-        self.frames: List[OpenPoseFrame] = []
+        self.frames: list[OpenPoseFrame] = []
 
         if json_data is not None:
             self._parse_json_data(json_data)
         else:
-            with open(json_path, 'r') as f:
+            with open(json_path) as f:
                 data = json.load(f)
             self._parse_json_data(data)
 
-    def _parse_json_data(self, data: Dict) -> None:
+    def _parse_json_data(self, data: dict) -> None:
         """Parse OpenPose JSON data into frames.
 
         Args:
@@ -198,7 +196,7 @@ class OpenPoseProvider:
         self,
         frame_index: int = 0,
         person_index: int = 0,
-    ) -> Dict[str, "NDArray[np.float64]"]:
+    ) -> dict[str, NDArray[np.float64]]:
         """Get skeleton keypoints from OpenPose observations.
 
         Args:
@@ -213,11 +211,11 @@ class OpenPoseProvider:
 
         if frame_index >= len(self.frames):
             raise OpenPoseProviderError(
-                f"Frame index {frame_index} out of range (0-{len(self.frames)-1})"
+                f"Frame index {frame_index} out of range (0-{len(self.frames) - 1})"
             )
 
         frame = self.frames[frame_index]
-        skeleton: Dict[str, "NDArray[np.float64]"] = {}
+        skeleton: dict[str, NDArray[np.float64]] = {}
 
         # Map observed keypoints to matcher vocabulary
         for kp_name, kp_obs in frame.keypoints.items():
@@ -232,7 +230,10 @@ class OpenPoseProvider:
             if matcher_name == "hip":
                 if kp_name == "left_hip":
                     # Check if right_hip is also available
-                    if "right_hip" in frame.keypoints and frame.keypoints["right_hip"].is_observed:
+                    if (
+                        "right_hip" in frame.keypoints
+                        and frame.keypoints["right_hip"].is_observed
+                    ):
                         # Average will be done when processing right_hip
                         continue
                     pos = kp_obs.position
@@ -272,7 +273,7 @@ class OpenPoseProvider:
     def get_confidence_map(
         self,
         frame_index: int = 0,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Get confidence values for all matcher vocabulary keypoints.
 
         Args:
@@ -283,11 +284,11 @@ class OpenPoseProvider:
         """
         if frame_index >= len(self.frames):
             raise OpenPoseProviderError(
-                f"Frame index {frame_index} out of range (0-{len(self.frames)-1})"
+                f"Frame index {frame_index} out of range (0-{len(self.frames) - 1})"
             )
 
         frame = self.frames[frame_index]
-        confidence_map: Dict[str, float] = {}
+        confidence_map: dict[str, float] = {}
 
         for kp_name, kp_obs in frame.keypoints.items():
             matcher_name = OPENPOSE_TO_MATCHER_VOCAB.get(kp_name)
@@ -307,7 +308,7 @@ class OpenPoseProvider:
     def get_missing_keypoints(
         self,
         frame_index: int = 0,
-    ) -> List[str]:
+    ) -> list[str]:
         """Get list of missing or low-confidence keypoints.
 
         Args:
@@ -317,14 +318,31 @@ class OpenPoseProvider:
             List of matcher vocabulary names that are missing or low-confidence.
         """
         confidence_map = self.get_confidence_map(frame_index)
-        required = ["hip", "spine", "torso", "hub", "ls", "rs", "le", "re", "lw", "rw", "mp", "ch"]
-        return [name for name in required if name not in confidence_map or
-                confidence_map[name] < self.confidence_threshold]
+        required = [
+            "hip",
+            "spine",
+            "torso",
+            "hub",
+            "ls",
+            "rs",
+            "le",
+            "re",
+            "lw",
+            "rw",
+            "mp",
+            "ch",
+        ]
+        return [
+            name
+            for name in required
+            if name not in confidence_map
+            or confidence_map[name] < self.confidence_threshold
+        ]
 
 
 def create_provider(
-    json_path: Optional[str] = None,
-    json_data: Optional[Dict] = None,
+    json_path: str | None = None,
+    json_data: dict | None = None,
     confidence_threshold: float = 0.3,
 ) -> OpenPoseProvider:
     """Create an OpenPose observed-input provider.

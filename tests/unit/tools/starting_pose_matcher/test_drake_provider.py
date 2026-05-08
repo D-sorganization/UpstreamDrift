@@ -2,18 +2,19 @@
 
 import pytest
 
+
 # Test that the provider can be imported even without Drake installed
 def test_import_without_drake():
     """Test that importing the module doesn't break without Drake."""
     from src.tools.starting_pose_matcher.providers import drake
-    
+
     # These should be importable without Drake
-    assert hasattr(drake, 'DrakeNotAvailableError')
-    assert hasattr(drake, 'DrakeProviderError')
-    assert hasattr(drake, 'DrakeSkeletonProvider')
-    assert hasattr(drake, 'create_provider')
-    assert hasattr(drake, 'DRAKE_TO_MATCHER_VOCAB')
-    assert hasattr(drake, 'MATCHER_TO_DRAKE')
+    assert hasattr(drake, "DrakeNotAvailableError")
+    assert hasattr(drake, "DrakeProviderError")
+    assert hasattr(drake, "DrakeSkeletonProvider")
+    assert hasattr(drake, "create_provider")
+    assert hasattr(drake, "DRAKE_TO_MATCHER_VOCAB")
+    assert hasattr(drake, "MATCHER_TO_DRAKE")
 
 
 def test_vocabulary_mapping():
@@ -22,16 +23,29 @@ def test_vocabulary_mapping():
         DRAKE_TO_MATCHER_VOCAB,
         MATCHER_TO_DRAKE,
     )
-    
+
     # Required vocabulary
-    required_names = ["hip", "spine", "torso", "hub", "ls", "rs", "le", "re", "lw", "rw", "mp", "ch"]
-    
+    required_names = [
+        "hip",
+        "spine",
+        "torso",
+        "hub",
+        "ls",
+        "rs",
+        "le",
+        "re",
+        "lw",
+        "rw",
+        "mp",
+        "ch",
+    ]
+
     # Check all required names are in the reverse mapping
     for name in required_names:
         assert name in MATCHER_TO_DRAKE, f"Missing vocabulary mapping for {name}"
-    
+
     # Check reverse mapping is consistent
-    for matcher_name, drake_name in MATCHER_TO_DRAKE.items():
+    for matcher_name in MATCHER_TO_DRAKE.keys():
         assert matcher_name in required_names, f"Unexpected vocabulary: {matcher_name}"
 
 
@@ -39,25 +53,28 @@ def test_drake_not_available_error():
     """Test that DrakeNotAvailableError is raised when Drake is not installed."""
     from src.tools.starting_pose_matcher.providers.drake import (
         DrakeNotAvailableError,
+        DrakeProviderError,
         DrakeSkeletonProvider,
     )
-    
+
     # Try to create provider without a valid model path
     # This should raise an error (either DrakeNotAvailableError or DrakeProviderError)
-    with pytest.raises((DrakeNotAvailableError, DrakeProviderError)):
+    with pytest.raises((DrakeNotAvailableError,
+        DrakeProviderError, DrakeProviderError)):
         DrakeSkeletonProvider(model_path=None, model_xml=None)
 
 
 def test_create_provider_function():
     """Test that create_provider function exists and has correct signature."""
     from src.tools.starting_pose_matcher.providers.drake import create_provider
-    
+
     # Check function signature
     import inspect
+
     sig = inspect.signature(create_provider)
     params = list(sig.parameters.keys())
-    assert 'model_path' in params
-    assert 'model_xml' in params
+    assert "model_path" in params
+    assert "model_xml" in params
 
 
 # Test with a minimal URDF model
@@ -200,23 +217,37 @@ def test_provider_with_minimal_model():
         from pydrake.multibody.plant import MultibodyPlant  # noqa: F401
     except ImportError:
         pytest.skip("Drake not installed")
-    
+
     from src.tools.starting_pose_matcher.providers.drake import (
         DrakeSkeletonProvider,
         DrakeProviderError,
     )
-    
+
     provider = DrakeSkeletonProvider(model_xml=MINIMAL_URDF)
     skeleton = provider.get_skeleton()
-    
+
     # Check all required vocabulary is present
-    required_names = ["hip", "spine", "torso", "hub", "ls", "rs", "le", "re", "lw", "rw", "mp", "ch"]
+    required_names = [
+        "hip",
+        "spine",
+        "torso",
+        "hub",
+        "ls",
+        "rs",
+        "le",
+        "re",
+        "lw",
+        "rw",
+        "mp",
+        "ch",
+    ]
     for name in required_names:
         assert name in skeleton, f"Missing skeleton joint: {name}"
-    
+
     # Check positions are numpy arrays with correct shape
     import numpy as np
-    for name, pos in skeleton.items():
+
+    for name, pos in skeleton.keys():
         assert isinstance(pos, np.ndarray), f"Position for {name} should be numpy array"
         assert pos.shape == (3,), f"Position for {name} should have shape (3,)"
 
@@ -227,21 +258,21 @@ def test_provider_with_positions():
         from pydrake.multibody.plant import MultibodyPlant  # noqa: F401
     except ImportError:
         pytest.skip("Drake not installed")
-    
+
     import numpy as np
     from src.tools.starting_pose_matcher.providers.drake import DrakeSkeletonProvider
-    
+
     provider = DrakeSkeletonProvider(model_xml=MINIMAL_URDF)
-    
+
     # Get default skeleton
     skeleton1 = provider.get_skeleton()
-    
+
     # Create a positions vector
     positions = np.zeros(provider.plant.num_positions())
     positions[0] = 0.1  # Small translation in x
-    
+
     skeleton2 = provider.get_skeleton(positions=positions)
-    
+
     # Positions should be different after applying new positions
     assert not np.allclose(skeleton1["hip"], skeleton2["hip"])
 
@@ -252,16 +283,27 @@ def test_get_available_bodies():
         from pydrake.multibody.plant import MultibodyPlant  # noqa: F401
     except ImportError:
         pytest.skip("Drake not installed")
-    
+
     from src.tools.starting_pose_matcher.providers.drake import DrakeSkeletonProvider
-    
+
     provider = DrakeSkeletonProvider(model_xml=MINIMAL_URDF)
     bodies = provider.get_available_bodies()
-    
+
     # Check that we have the expected bodies
-    expected_bodies = ["hip", "spine", "torso", "hub", "left_shoulder", "right_shoulder",
-                       "left_elbow", "right_elbow", "left_wrist", "right_wrist", 
-                       "midpoint", "clubhead"]
+    expected_bodies = [
+        "hip",
+        "spine",
+        "torso",
+        "hub",
+        "left_shoulder",
+        "right_shoulder",
+        "left_elbow",
+        "right_elbow",
+        "left_wrist",
+        "right_wrist",
+        "midpoint",
+        "clubhead",
+    ]
     for body in expected_bodies:
         assert body in bodies, f"Missing body: {body}"
 
@@ -272,12 +314,12 @@ def test_missing_vocabulary_error():
         from pydrake.multibody.plant import MultibodyPlant  # noqa: F401
     except ImportError:
         pytest.skip("Drake not installed")
-    
+
     from src.tools.starting_pose_matcher.providers.drake import (
         DrakeSkeletonProvider,
         DrakeProviderError,
     )
-    
+
     # Create a minimal model that's missing required bodies
     incomplete_urdf = """<?xml version="1.0" encoding="utf-8"?>
 <robot name="incomplete">
@@ -288,6 +330,6 @@ def test_missing_vocabulary_error():
   </link>
 </robot>
 """
-    
+
     with pytest.raises(DrakeProviderError, match="Missing required body mappings"):
         DrakeSkeletonProvider(model_xml=incomplete_urdf)

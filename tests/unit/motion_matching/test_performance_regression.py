@@ -299,6 +299,7 @@ class TestMeasureExecutionTime:
 
     def test_measure_single_iteration(self) -> None:
         """Test measuring single function call."""
+
         def dummy_func() -> int:
             return 42
 
@@ -320,6 +321,7 @@ class TestMeasureExecutionTime:
 
     def test_measure_zero_iterations_raises(self) -> None:
         """Test zero iterations raises."""
+
         def dummy_func() -> int:
             return 42
 

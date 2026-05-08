@@ -64,7 +64,9 @@ class TestGasificationModelIntegration:
                 import gasification_equilibrium  # noqa: F401
 
             except ImportError as e:
-                pytest.skip(f"Gasification_Model not available in test environment: {e}")
+                pytest.skip(
+                    f"Gasification_Model not available in test environment: {e}"
+                )
             finally:
                 sys.path.pop(0)
 
@@ -169,7 +171,9 @@ class TestManifestValidation:
         """MANIFEST.md should exist."""
         manifest_path = Path(__file__).parent.parent.parent / "MANIFEST.md"
         if not manifest_path.exists():
-            pytest.skip("MANIFEST.md not found - Wave 2 manifest validation not enabled")
+            pytest.skip(
+                "MANIFEST.md not found - Wave 2 manifest validation not enabled"
+            )
 
     def test_manifest_modules_on_disk(self):
         """All modules in MANIFEST should exist on disk."""
@@ -188,9 +192,7 @@ class TestManifestValidation:
 
     def test_shared_python_modules_listed(self):
         """shared/python modules should be documented."""
-        shared_path = (
-            Path(__file__).parent.parent.parent / "src" / "shared" / "python"
-        )
+        shared_path = Path(__file__).parent.parent.parent / "src" / "shared" / "python"
         manifest_path = Path(__file__).parent.parent.parent / "MANIFEST.md"
 
         if not shared_path.exists():
@@ -203,9 +205,9 @@ class TestManifestValidation:
         expected_modules = ["contracts", "validators"]
         for module in expected_modules:
             if (shared_path / module).exists():
-                assert (
-                    module in manifest_content
-                ), f"Module {module} not documented in MANIFEST.md"
+                assert module in manifest_content, (
+                    f"Module {module} not documented in MANIFEST.md"
+                )
 
 
 @pytest.mark.integration

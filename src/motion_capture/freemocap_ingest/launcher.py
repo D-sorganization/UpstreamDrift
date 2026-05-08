@@ -22,12 +22,12 @@ class LaunchConfig:
     """Configuration for launching FreeMoCap."""
 
     session_dir: Path
-    freemocap_env: Optional[Path] = None
+    freemocap_env: Path | None = None
     timeout_seconds: int = 3600
-    video_dir: Optional[Path] = None
-    output_dir: Optional[Path] = None
+    video_dir: Path | None = None
+    output_dir: Path | None = None
     headless: bool = True
-    extra_args: Optional[list[str]] = None
+    extra_args: list[str] | None = None
 
 
 @dataclass
@@ -36,9 +36,9 @@ class LaunchResult:
 
     success: bool
     return_code: int
-    output_dir: Optional[Path]
-    log_file: Optional[Path]
-    error_message: Optional[str] = None
+    output_dir: Path | None
+    log_file: Path | None
+    error_message: str | None = None
 
 
 class FreeMoCapLauncher:
@@ -67,7 +67,7 @@ class FreeMoCapLauncher:
         """
         self.log_level = log_level
 
-    def _find_freemocap_python(self, env_path: Optional[Path]) -> Optional[str]:
+    def _find_freemocap_python(self, env_path: Path | None) -> str | None:
         """
         Find the Python interpreter in the FreeMoCap environment.
 
@@ -88,7 +88,9 @@ class FreeMoCapLauncher:
                 return str(conda_python)
 
         # Search for conda env
-        conda_env = Path.home() / "miniconda3" / "envs" / self.DEFAULT_FREENOCAP_ENV_NAME
+        conda_env = (
+            Path.home() / "miniconda3" / "envs" / self.DEFAULT_FREENOCAP_ENV_NAME
+        )
         if conda_env.exists():
             python_path = conda_env / "bin" / "python"
             if python_path.exists():
@@ -108,9 +110,7 @@ class FreeMoCapLauncher:
 
         return None
 
-    def _build_command(
-        self, config: LaunchConfig, python_exe: str
-    ) -> list[str]:
+    def _build_command(self, config: LaunchConfig, python_exe: str) -> list[str]:
         """
         Build the command to launch FreeMoCap.
 
@@ -239,7 +239,7 @@ class FreeMoCapLauncher:
                     output_dir = config.output_dir or (
                         session_dir / self.DEFAULT_OUTPUT_SUBDIR
                     )
-                    logger.info(f"FreeMoCap completed successfully")
+                    logger.info("FreeMoCap completed successfully")
                     logger.info(f"Output directory: {output_dir}")
 
                     return LaunchResult(
@@ -248,14 +248,13 @@ class FreeMoCapLauncher:
                         output_dir=output_dir,
                         log_file=log_file,
                     )
-                else:
-                    return LaunchResult(
-                        success=False,
-                        return_code=return_code,
-                        output_dir=None,
-                        log_file=log_file,
-                        error_message=f"FreeMoCap exited with code {return_code}",
-                    )
+                return LaunchResult(
+                    success=False,
+                    return_code=return_code,
+                    output_dir=None,
+                    log_file=log_file,
+                    error_message=f"FreeMoCap exited with code {return_code}",
+                )
 
         except Exception as e:
             logger.exception("Error launching FreeMoCap")
@@ -307,7 +306,8 @@ def main():
         help="Timeout in seconds (default: 3600)",
     )
     parser.add_argument(
-        "-v", "--verbose",
+        "-v",
+        "--verbose",
         action="store_true",
         help="Verbose output",
     )
@@ -332,12 +332,10 @@ def main():
     result = launcher.launch(config)
 
     if result.success:
-        print(f"Success! Output: {result.output_dir}")
         sys.exit(0)
     else:
-        print(f"Failed: {result.error_message}")
         if result.log_file:
-            print(f"Log file: {result.log_file}")
+            pass
         sys.exit(1)
 
 

@@ -17,7 +17,7 @@ or low-confidence landmarks are tracked explicitly.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import numpy as np
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 # MediaPipe Pose landmarks indices
 # https://google.github.io/mediapipe/solutions/pose.html
-MEDIAPIPE_POSE_LANDMARKS: Dict[str, int] = {
+MEDIAPIPE_POSE_LANDMARKS: dict[str, int] = {
     "nose": 0,
     "left_eye_inner": 1,
     "left_eye": 2,
@@ -62,7 +62,7 @@ MEDIAPIPE_POSE_LANDMARKS: Dict[str, int] = {
 }
 
 # Mapping from MediaPipe landmarks to matcher vocabulary
-MEDIAPIPE_TO_MATCHER_VOCAB: Dict[str, Optional[str]] = {
+MEDIAPIPE_TO_MATCHER_VOCAB: dict[str, str | None] = {
     # Shoulders map directly
     "left_shoulder": "ls",
     "right_shoulder": "rs",
@@ -84,7 +84,7 @@ MEDIAPIPE_TO_MATCHER_VOCAB: Dict[str, Optional[str]] = {
 }
 
 # Reverse mapping
-MATCHER_TO_MEDIAPIPE: Dict[str, List[str]] = {}
+MATCHER_TO_MEDIAPIPE: dict[str, list[str]] = {}
 for mp_name, matcher_name in MEDIAPIPE_TO_MATCHER_VOCAB.items():
     if matcher_name is not None:
         if matcher_name not in MATCHER_TO_MEDIAPIPE:
@@ -97,7 +97,7 @@ class LandmarkObservation:
     """Represents an observed landmark with visibility and presence."""
 
     name: str
-    position: Optional[Tuple[float, float, float]] = None
+    position: tuple[float, float, float] | None = None
     visibility: float = 0.0
     presence: float = 0.0
     is_observed: bool = False
@@ -109,14 +109,12 @@ class MediaPipeFrame:
     """Represents a single frame of MediaPipe observations."""
 
     frame_index: int
-    landmarks: Dict[str, LandmarkObservation] = field(default_factory=dict)
-    camera_metadata: Optional[Dict[str, Any]] = None
+    landmarks: dict[str, LandmarkObservation] = field(default_factory=dict)
+    camera_metadata: dict[str, Any] | None = None
 
 
 class MediaPipeProviderError(Exception):
     """Raised when there's an error with the MediaPipe provider."""
-
-    pass
 
 
 class MediaPipeProvider:
@@ -132,7 +130,7 @@ class MediaPipeProvider:
 
     def __init__(
         self,
-        landmarks_data: Optional[List] = None,
+        landmarks_data: list | None = None,
         visibility_threshold: float = 0.5,
         presence_threshold: float = 0.5,
     ):
@@ -152,11 +150,11 @@ class MediaPipeProvider:
 
         self.visibility_threshold = visibility_threshold
         self.presence_threshold = presence_threshold
-        self.frames: List[MediaPipeFrame] = []
+        self.frames: list[MediaPipeFrame] = []
 
         self._parse_landmarks_data(landmarks_data)
 
-    def _parse_landmarks_data(self, landmarks_data: List) -> None:
+    def _parse_landmarks_data(self, landmarks_data: list) -> None:
         """Parse MediaPipe landmarks data into frames.
 
         Args:
@@ -178,14 +176,16 @@ class MediaPipeProvider:
 
                 # Extract landmark data
                 # MediaPipe landmarks have: x, y, z, visibility, presence
-                x = getattr(landmark, 'x', 0.0)
-                y = getattr(landmark, 'y', 0.0)
-                z = getattr(landmark, 'z', 0.0)
-                visibility = getattr(landmark, 'visibility', 0.0)
-                presence = getattr(landmark, 'presence', 0.0)
+                x = getattr(landmark, "x", 0.0)
+                y = getattr(landmark, "y", 0.0)
+                z = getattr(landmark, "z", 0.0)
+                visibility = getattr(landmark, "visibility", 0.0)
+                presence = getattr(landmark, "presence", 0.0)
 
-                is_observed = (visibility >= self.visibility_threshold and
-                              presence >= self.presence_threshold)
+                is_observed = (
+                    visibility >= self.visibility_threshold
+                    and presence >= self.presence_threshold
+                )
                 position = (float(x), float(y), float(z)) if is_observed else None
 
                 frame.landmarks[lm_name] = LandmarkObservation(
@@ -201,7 +201,7 @@ class MediaPipeProvider:
     def get_skeleton(
         self,
         frame_index: int = 0,
-    ) -> Dict[str, "NDArray[np.float64]"]:
+    ) -> dict[str, NDArray[np.float64]]:
         """Get skeleton landmarks from MediaPipe observations.
 
         Args:
@@ -215,11 +215,11 @@ class MediaPipeProvider:
 
         if frame_index >= len(self.frames):
             raise MediaPipeProviderError(
-                f"Frame index {frame_index} out of range (0-{len(self.frames)-1})"
+                f"Frame index {frame_index} out of range (0-{len(self.frames) - 1})"
             )
 
         frame = self.frames[frame_index]
-        skeleton: Dict[str, "NDArray[np.float64]"] = {}
+        skeleton: dict[str, NDArray[np.float64]] = {}
 
         # Map observed landmarks to matcher vocabulary
         for lm_name, lm_obs in frame.landmarks.items():
@@ -234,8 +234,10 @@ class MediaPipeProvider:
             if matcher_name == "hip":
                 if lm_name == "left_hip":
                     # Check if right_hip is also available
-                    if ("right_hip" in frame.landmarks and 
-                        frame.landmarks["right_hip"].is_observed):
+                    if (
+                        "right_hip" in frame.landmarks
+                        and frame.landmarks["right_hip"].is_observed
+                    ):
                         # Average will be done when processing right_hip
                         continue
                     pos = lm_obs.position
@@ -282,7 +284,7 @@ class MediaPipeProvider:
     def get_visibility_map(
         self,
         frame_index: int = 0,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Get visibility values for all matcher vocabulary landmarks.
 
         Args:
@@ -293,11 +295,11 @@ class MediaPipeProvider:
         """
         if frame_index >= len(self.frames):
             raise MediaPipeProviderError(
-                f"Frame index {frame_index} out of range (0-{len(self.frames)-1})"
+                f"Frame index {frame_index} out of range (0-{len(self.frames) - 1})"
             )
 
         frame = self.frames[frame_index]
-        visibility_map: Dict[str, float] = {}
+        visibility_map: dict[str, float] = {}
 
         for lm_name, lm_obs in frame.landmarks.items():
             matcher_name = MEDIAPIPE_TO_MATCHER_VOCAB.get(lm_name)
@@ -317,7 +319,7 @@ class MediaPipeProvider:
     def get_missing_landmarks(
         self,
         frame_index: int = 0,
-    ) -> List[str]:
+    ) -> list[str]:
         """Get list of missing or low-visibility landmarks.
 
         Args:
@@ -327,13 +329,30 @@ class MediaPipeProvider:
             List of matcher vocabulary names that are missing or low-visibility.
         """
         visibility_map = self.get_visibility_map(frame_index)
-        required = ["hip", "spine", "torso", "hub", "ls", "rs", "le", "re", "lw", "rw", "mp", "ch"]
-        return [name for name in required if name not in visibility_map or
-                visibility_map[name] < self.visibility_threshold]
+        required = [
+            "hip",
+            "spine",
+            "torso",
+            "hub",
+            "ls",
+            "rs",
+            "le",
+            "re",
+            "lw",
+            "rw",
+            "mp",
+            "ch",
+        ]
+        return [
+            name
+            for name in required
+            if name not in visibility_map
+            or visibility_map[name] < self.visibility_threshold
+        ]
 
 
 def create_provider(
-    landmarks_data: Optional[List] = None,
+    landmarks_data: list | None = None,
     visibility_threshold: float = 0.5,
     presence_threshold: float = 0.5,
 ) -> MediaPipeProvider:

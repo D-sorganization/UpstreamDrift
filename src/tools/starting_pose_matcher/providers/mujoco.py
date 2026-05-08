@@ -9,7 +9,7 @@ Required vocabulary:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import numpy as np
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 # Body/site name mapping from MuJoCo to matcher vocabulary
 # These are the standard names expected by the starting-pose matcher
-MUJOCO_TO_MATCHER_VOCAB: Dict[str, str] = {
+MUJOCO_TO_MATCHER_VOCAB: dict[str, str] = {
     # Lower body
     "hip": "hip",
     "pelvis": "hip",
@@ -42,19 +42,15 @@ MUJOCO_TO_MATCHER_VOCAB: Dict[str, str] = {
 }
 
 # Reverse mapping for lookup
-MATCHER_TO_MUJOCO: Dict[str, str] = {v: k for k, v in MUJOCO_TO_MATCHER_VOCAB.items()}
+MATCHER_TO_MUJOCO: dict[str, str] = {v: k for k, v in MUJOCO_TO_MATCHER_VOCAB.items()}
 
 
 class MuJoCoNotAvailableError(Exception):
     """Raised when MuJoCo is not installed but a MuJoCo provider is requested."""
 
-    pass
-
 
 class MuJoCoProviderError(Exception):
     """Raised when there's an error with the MuJoCo provider configuration."""
-
-    pass
 
 
 class MuJoCoSkeletonProvider:
@@ -71,8 +67,8 @@ class MuJoCoSkeletonProvider:
 
     def __init__(
         self,
-        model_path: Optional[str] = None,
-        model_xml: Optional[str] = None,
+        model_path: str | None = None,
+        model_xml: str | None = None,
     ):
         """Initialize the MuJoCo skeleton provider.
 
@@ -94,9 +90,7 @@ class MuJoCoSkeletonProvider:
         self._mujoco = mujoco
 
         if model_path is None and model_xml is None:
-            raise MuJoCoProviderError(
-                "Either model_path or model_xml must be provided"
-            )
+            raise MuJoCoProviderError("Either model_path or model_xml must be provided")
 
         if model_xml is not None:
             self.model = self._mujoco.MjModel.from_xml_string(model_xml)
@@ -106,7 +100,7 @@ class MuJoCoSkeletonProvider:
         self.data = self._mujoco.MjData(self.model)
 
         # Build body name to ID mapping
-        self._body_name_to_id: Dict[str, int] = {
+        self._body_name_to_id: dict[str, int] = {
             self._mujoco.mj_id2name(self.model, self._mujoco.mjtObj.mjOBJ_BODY, i): i
             for i in range(self.model.nbody)
         }
@@ -126,9 +120,7 @@ class MuJoCoSkeletonProvider:
                 f"Missing required body mappings in MuJoCo model: {', '.join(missing)}"
             )
 
-    def _get_body_position(
-        self, name: str
-    ) -> Tuple[float, float, float]:
+    def _get_body_position(self, name: str) -> tuple[float, float, float]:
         """Get the position of a body in world coordinates.
 
         Args:
@@ -145,7 +137,9 @@ class MuJoCoSkeletonProvider:
         pos = self.data.xipos[body_id]
         return (float(pos[0]), float(pos[1]), float(pos[2]))
 
-    def get_skeleton(self, qpos: Optional["NDArray[np.float64]"] = None) -> Dict[str, "NDArray[np.float64]"]:
+    def get_skeleton(
+        self, qpos: NDArray[np.float64] | None = None
+    ) -> dict[str, NDArray[np.float64]]:
         """Get skeleton joint positions from MuJoCo model.
 
         Args:
@@ -161,7 +155,7 @@ class MuJoCoSkeletonProvider:
             self.data.qpos[:] = qpos
             self._mujoco.mj_forward(self.model, self.data)
 
-        skeleton: Dict[str, "NDArray[np.float64]"] = {}
+        skeleton: dict[str, NDArray[np.float64]] = {}
 
         for matcher_name, mujoco_name in MATCHER_TO_MUJOCO.items():
             if mujoco_name in self._body_name_to_id:
@@ -176,8 +170,8 @@ class MuJoCoSkeletonProvider:
 
 
 def create_provider(
-    model_path: Optional[str] = None,
-    model_xml: Optional[str] = None,
+    model_path: str | None = None,
+    model_xml: str | None = None,
 ) -> MuJoCoSkeletonProvider:
     """Create a MuJoCo skeleton provider.
 

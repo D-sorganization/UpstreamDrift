@@ -9,7 +9,7 @@ Required vocabulary:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import numpy as np
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 # Body/frame name mapping from Drake to matcher vocabulary
 # These are the standard names expected by the starting-pose matcher
-DRAKE_TO_MATCHER_VOCAB: Dict[str, str] = {
+DRAKE_TO_MATCHER_VOCAB: dict[str, str] = {
     # Lower body
     "hip": "hip",
     "pelvis": "hip",
@@ -42,19 +42,15 @@ DRAKE_TO_MATCHER_VOCAB: Dict[str, str] = {
 }
 
 # Reverse mapping for lookup
-MATCHER_TO_DRAKE: Dict[str, str] = {v: k for k, v in DRAKE_TO_MATCHER_VOCAB.items()}
+MATCHER_TO_DRAKE: dict[str, str] = {v: k for k, v in DRAKE_TO_MATCHER_VOCAB.items()}
 
 
 class DrakeNotAvailableError(Exception):
     """Raised when Drake is not installed but a Drake provider is requested."""
 
-    pass
-
 
 class DrakeProviderError(Exception):
     """Raised when there's an error with the Drake provider configuration."""
-
-    pass
 
 
 class DrakeSkeletonProvider:
@@ -71,8 +67,8 @@ class DrakeSkeletonProvider:
 
     def __init__(
         self,
-        model_path: Optional[str] = None,
-        model_xml: Optional[str] = None,
+        model_path: str | None = None,
+        model_xml: str | None = None,
     ):
         """Initialize the Drake skeleton provider.
 
@@ -96,9 +92,7 @@ class DrakeSkeletonProvider:
         self._DiagramBuilder = DiagramBuilder
 
         if model_path is None and model_xml is None:
-            raise DrakeProviderError(
-                "Either model_path or model_xml must be provided"
-            )
+            raise DrakeProviderError("Either model_path or model_xml must be provided")
 
         # Create plant with default time step
         self.plant = MultibodyPlant(0.0)
@@ -107,6 +101,7 @@ class DrakeSkeletonProvider:
         if model_xml is not None:
             from pydrake.multibody.parser import Parser
             import xml.etree.ElementTree as ET
+
             parser = Parser(self.plant)
             # Detect SDF vs URDF by parsing the XML root tag
             # This is more robust than regex which can match comments or miss
@@ -125,6 +120,7 @@ class DrakeSkeletonProvider:
                 parser.AddModelFromString(model_xml, "urdf")
         else:
             from pydrake.multibody.parser import Parser
+
             parser = Parser(self.plant)
             parser.SetPackageMapAutoMerge(True)
             parser.AddModelFromFile(model_path)
@@ -133,7 +129,7 @@ class DrakeSkeletonProvider:
         self.plant.Finalize()
 
         # Build body name to index mapping
-        self._body_name_to_index: Dict[str, int] = {}
+        self._body_name_to_index: dict[str, int] = {}
         for i in range(self.plant.num_bodies()):
             body = self.plant.get_body(i)
             self._body_name_to_index[body.name()] = i
@@ -155,7 +151,7 @@ class DrakeSkeletonProvider:
 
     def _get_body_position(
         self, body_index: int, context
-    ) -> Tuple[float, float, float]:
+    ) -> tuple[float, float, float]:
         """Get the position of a body in world coordinates.
 
         Args:
@@ -171,8 +167,8 @@ class DrakeSkeletonProvider:
         return (float(position[0]), float(position[1]), float(position[2]))
 
     def get_skeleton(
-        self, positions: Optional["NDArray[np.float64]"] = None
-    ) -> Dict[str, "NDArray[np.float64]"]:
+        self, positions: NDArray[np.float64] | None = None
+    ) -> dict[str, NDArray[np.float64]]:
         """Get skeleton joint positions from Drake model.
 
         Args:
@@ -191,7 +187,7 @@ class DrakeSkeletonProvider:
             # Set plant positions
             self.plant.SetPositions(context, positions)
 
-        skeleton: Dict[str, "NDArray[np.float64]"] = {}
+        skeleton: dict[str, NDArray[np.float64]] = {}
 
         for matcher_name, drake_name in MATCHER_TO_DRAKE.items():
             if drake_name in self._body_name_to_index:
@@ -207,8 +203,8 @@ class DrakeSkeletonProvider:
 
 
 def create_provider(
-    model_path: Optional[str] = None,
-    model_xml: Optional[str] = None,
+    model_path: str | None = None,
+    model_xml: str | None = None,
 ) -> DrakeSkeletonProvider:
     """Create a Drake skeleton provider.
 

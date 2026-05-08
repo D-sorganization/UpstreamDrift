@@ -197,7 +197,9 @@ class ManifestValidator:
         sections = []
         sections.append("# UpstreamDrift Module Manifest")
         sections.append("")
-        sections.append("**Auto-generated from source scan. Last updated: see git log.**")
+        sections.append(
+            "**Auto-generated from source scan. Last updated: see git log.**"
+        )
         sections.append("")
         sections.append("## Engine Wrappers")
         sections.append("")
@@ -242,7 +244,9 @@ def main():
         help="Update MANIFEST.md (requires --force for safety)",
     )
     parser.add_argument(
-        "--force", action="store_true", help="Force manifest update without confirmation"
+        "--force",
+        action="store_true",
+        help="Force manifest update without confirmation",
     )
     parser.add_argument(
         "--check-only",

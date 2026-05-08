@@ -2,18 +2,19 @@
 
 import pytest
 
+
 # Test that the provider can be imported even without OpenSim installed
 def test_import_without_opensim():
     """Test that importing the module doesn't break without OpenSim."""
     from src.tools.starting_pose_matcher.providers import opensim
-    
+
     # These should be importable without OpenSim
-    assert hasattr(opensim, 'OpenSimNotAvailableError')
-    assert hasattr(opensim, 'OpenSimProviderError')
-    assert hasattr(opensim, 'OpenSimSkeletonProvider')
-    assert hasattr(opensim, 'create_provider')
-    assert hasattr(opensim, 'OPENSIM_TO_MATCHER_VOCAB')
-    assert hasattr(opensim, 'MATCHER_TO_OPENSIM')
+    assert hasattr(opensim, "OpenSimNotAvailableError")
+    assert hasattr(opensim, "OpenSimProviderError")
+    assert hasattr(opensim, "OpenSimSkeletonProvider")
+    assert hasattr(opensim, "create_provider")
+    assert hasattr(opensim, "OPENSIM_TO_MATCHER_VOCAB")
+    assert hasattr(opensim, "MATCHER_TO_OPENSIM")
 
 
 def test_vocabulary_mapping():
@@ -22,16 +23,29 @@ def test_vocabulary_mapping():
         OPENSIM_TO_MATCHER_VOCAB,
         MATCHER_TO_OPENSIM,
     )
-    
+
     # Required vocabulary
-    required_names = ["hip", "spine", "torso", "hub", "ls", "rs", "le", "re", "lw", "rw", "mp", "ch"]
-    
+    required_names = [
+        "hip",
+        "spine",
+        "torso",
+        "hub",
+        "ls",
+        "rs",
+        "le",
+        "re",
+        "lw",
+        "rw",
+        "mp",
+        "ch",
+    ]
+
     # Check all required names are in the reverse mapping
     for name in required_names:
         assert name in MATCHER_TO_OPENSIM, f"Missing vocabulary mapping for {name}"
-    
+
     # Check reverse mapping is consistent
-    for matcher_name, opensim_name in MATCHER_TO_OPENSIM.items():
+    for matcher_name in MATCHER_TO_OPENSIM.keys():
         assert matcher_name in required_names, f"Unexpected vocabulary: {matcher_name}"
 
 
@@ -39,25 +53,28 @@ def test_opensim_not_available_error():
     """Test that OpenSimNotAvailableError is raised when OpenSim is not installed."""
     from src.tools.starting_pose_matcher.providers.opensim import (
         OpenSimNotAvailableError,
+        OpenSimProviderError,
         OpenSimSkeletonProvider,
     )
-    
+
     # Try to create provider without a valid model path
     # This should raise an error (either OpenSimNotAvailableError or OpenSimProviderError)
-    with pytest.raises((OpenSimNotAvailableError, OpenSimProviderError)):
+    with pytest.raises((OpenSimNotAvailableError,
+        OpenSimProviderError, OpenSimProviderError)):
         OpenSimSkeletonProvider(model_path=None, model_xml=None)
 
 
 def test_create_provider_function():
     """Test that create_provider function exists and has correct signature."""
     from src.tools.starting_pose_matcher.providers.opensim import create_provider
-    
+
     # Check function signature
     import inspect
+
     sig = inspect.signature(create_provider)
     params = list(sig.parameters.keys())
-    assert 'model_path' in params
-    assert 'model_xml' in params
+    assert "model_path" in params
+    assert "model_xml" in params
 
 
 # Minimal OpenSim model XML for testing
@@ -191,34 +208,51 @@ def test_provider_with_minimal_model():
         import opensim as osim  # noqa: F401
     except ImportError:
         pytest.skip("OpenSim not installed")
-    
+
     import tempfile
     from src.tools.starting_pose_matcher.providers.opensim import (
         OpenSimSkeletonProvider,
         OpenSimProviderError,
     )
-    
+
     # Write OSIM to temp file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.osim', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".osim", delete=False) as f:
         f.write(MINIMAL_OSIM)
         model_path = f.name
-    
+
     try:
         provider = OpenSimSkeletonProvider(model_path=model_path)
         skeleton = provider.get_skeleton()
-        
+
         # Check all required vocabulary is present
-        required_names = ["hip", "spine", "torso", "hub", "ls", "rs", "le", "re", "lw", "rw", "mp", "ch"]
+        required_names = [
+            "hip",
+            "spine",
+            "torso",
+            "hub",
+            "ls",
+            "rs",
+            "le",
+            "re",
+            "lw",
+            "rw",
+            "mp",
+            "ch",
+        ]
         for name in required_names:
             assert name in skeleton, f"Missing skeleton joint: {name}"
-        
+
         # Check positions are numpy arrays with correct shape
         import numpy as np
-        for name, pos in skeleton.items():
-            assert isinstance(pos, np.ndarray), f"Position for {name} should be numpy array"
+
+        for name, pos in skeleton.keys():
+            assert isinstance(pos, np.ndarray), (
+                f"Position for {name} should be numpy array"
+            )
             assert pos.shape == (3,), f"Position for {name} should have shape (3,)"
     finally:
         import os
+
         os.unlink(model_path)
 
 
@@ -228,31 +262,34 @@ def test_provider_with_coordinates():
         import opensim as osim  # noqa: F401
     except ImportError:
         pytest.skip("OpenSim not installed")
-    
+
     import tempfile
-    from src.tools.starting_pose_matcher.providers.opensim import OpenSimSkeletonProvider
-    
+    from src.tools.starting_pose_matcher.providers.opensim import (
+        OpenSimSkeletonProvider,
+    )
+
     # Write OSIM to temp file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.osim', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".osim", delete=False) as f:
         f.write(MINIMAL_OSIM)
         model_path = f.name
-    
+
     try:
         provider = OpenSimSkeletonProvider(model_path=model_path)
-        
+
         # Get default skeleton
         skeleton1 = provider.get_skeleton()
-        
+
         # Apply some coordinate values
         coordinates = {"hip_spine_coord": 0.1}
         skeleton2 = provider.get_skeleton(coordinates=coordinates)
-        
+
         # Note: With fixed joints, positions may not change significantly
         # This test mainly verifies the coordinate application mechanism works
         assert isinstance(skeleton1, dict)
         assert isinstance(skeleton2, dict)
     finally:
         import os
+
         os.unlink(model_path)
 
 
@@ -262,27 +299,41 @@ def test_get_available_bodies():
         import opensim as osim  # noqa: F401
     except ImportError:
         pytest.skip("OpenSim not installed")
-    
+
     import tempfile
-    from src.tools.starting_pose_matcher.providers.opensim import OpenSimSkeletonProvider
-    
+    from src.tools.starting_pose_matcher.providers.opensim import (
+        OpenSimSkeletonProvider,
+    )
+
     # Write OSIM to temp file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.osim', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".osim", delete=False) as f:
         f.write(MINIMAL_OSIM)
         model_path = f.name
-    
+
     try:
         provider = OpenSimSkeletonProvider(model_path=model_path)
         bodies = provider.get_available_bodies()
-        
+
         # Check that we have the expected bodies
-        expected_bodies = ["hip", "spine", "torso", "hub", "left_shoulder", "right_shoulder",
-                           "left_elbow", "right_elbow", "left_wrist", "right_wrist", 
-                           "midpoint", "clubhead"]
+        expected_bodies = [
+            "hip",
+            "spine",
+            "torso",
+            "hub",
+            "left_shoulder",
+            "right_shoulder",
+            "left_elbow",
+            "right_elbow",
+            "left_wrist",
+            "right_wrist",
+            "midpoint",
+            "clubhead",
+        ]
         for body in expected_bodies:
             assert body in bodies, f"Missing body: {body}"
     finally:
         import os
+
         os.unlink(model_path)
 
 
@@ -292,27 +343,41 @@ def test_get_available_markers():
         import opensim as osim  # noqa: F401
     except ImportError:
         pytest.skip("OpenSim not installed")
-    
+
     import tempfile
-    from src.tools.starting_pose_matcher.providers.opensim import OpenSimSkeletonProvider
-    
+    from src.tools.starting_pose_matcher.providers.opensim import (
+        OpenSimSkeletonProvider,
+    )
+
     # Write OSIM to temp file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.osim', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".osim", delete=False) as f:
         f.write(MINIMAL_OSIM)
         model_path = f.name
-    
+
     try:
         provider = OpenSimSkeletonProvider(model_path=model_path)
         markers = provider.get_available_markers()
-        
+
         # Check that we have the expected markers
-        expected_markers = ["hip", "spine", "torso", "hub", "left_shoulder", "right_shoulder",
-                            "left_elbow", "right_elbow", "left_wrist", "right_wrist", 
-                            "midpoint", "clubhead"]
+        expected_markers = [
+            "hip",
+            "spine",
+            "torso",
+            "hub",
+            "left_shoulder",
+            "right_shoulder",
+            "left_elbow",
+            "right_elbow",
+            "left_wrist",
+            "right_wrist",
+            "midpoint",
+            "clubhead",
+        ]
         for marker in expected_markers:
             assert marker in markers, f"Missing marker: {marker}"
     finally:
         import os
+
         os.unlink(model_path)
 
 
@@ -322,13 +387,13 @@ def test_missing_vocabulary_error():
         import opensim as osim  # noqa: F401
     except ImportError:
         pytest.skip("OpenSim not installed")
-    
+
     import tempfile
     from src.tools.starting_pose_matcher.providers.opensim import (
         OpenSimSkeletonProvider,
         OpenSimProviderError,
     )
-    
+
     # Create a minimal model that's missing required bodies
     incomplete_osim = """<?xml version="1.0" encoding="UTF-8"?>
 <OpenSimDocument Version="40000">
@@ -341,15 +406,16 @@ def test_missing_vocabulary_error():
   </Model>
 </OpenSimDocument>
 """
-    
+
     # Write OSIM to temp file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.osim', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".osim", delete=False) as f:
         f.write(incomplete_osim)
         model_path = f.name
-    
+
     try:
         with pytest.raises(OpenSimProviderError, match="Missing required"):
             OpenSimSkeletonProvider(model_path=model_path)
     finally:
         import os
+
         os.unlink(model_path)

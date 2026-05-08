@@ -171,7 +171,7 @@ class FitResult:
             )
         if float(self.metadata["time_s"]) < 0:
             raise ValueError(
-                f"metadata['time_s'] must be >= 0, " f"got {self.metadata['time_s']}"
+                f"metadata['time_s'] must be >= 0, got {self.metadata['time_s']}"
             )
 
 
@@ -201,8 +201,7 @@ class ThetaContractValidator:
         """
         if engine not in ENGINE_DOF_MAP:
             raise ValueError(
-                f"engine must be one of {list(ENGINE_DOF_MAP.keys())}, "
-                f"got {engine!r}"
+                f"engine must be one of {list(ENGINE_DOF_MAP.keys())}, got {engine!r}"
             )
         self.engine = engine
         self.n_dof_canonical = ENGINE_DOF_MAP[engine]
@@ -235,10 +234,7 @@ class ThetaContractValidator:
             return f"theta must be 1-D, got shape {theta.shape}"
 
         if theta.shape[0] != self.n_dof:
-            return (
-                f"theta length mismatch: expected {self.n_dof}, "
-                f"got {theta.shape[0]}"
-            )
+            return f"theta length mismatch: expected {self.n_dof}, got {theta.shape[0]}"
 
         if not np.all(np.isfinite(theta)):
             bad_mask = ~np.isfinite(theta)
@@ -296,8 +292,7 @@ class InitialPoseValidator:
         """
         if engine not in ENGINE_DOF_MAP:
             raise ValueError(
-                f"engine must be one of {list(ENGINE_DOF_MAP.keys())}, "
-                f"got {engine!r}"
+                f"engine must be one of {list(ENGINE_DOF_MAP.keys())}, got {engine!r}"
             )
         self.engine = engine
         self.n_dof_total = n_dof or ENGINE_DOF_MAP[engine]
@@ -341,8 +336,7 @@ class InitialPoseValidator:
         if not np.all(np.isfinite(pose.joint_angles)):
             bad_idx = np.where(~np.isfinite(pose.joint_angles))[0]
             return (
-                f"joint_angles: contains NaN/Inf at indices "
-                f"{bad_idx[:3].tolist()}..."
+                f"joint_angles: contains NaN/Inf at indices {bad_idx[:3].tolist()}..."
             )
 
         return None

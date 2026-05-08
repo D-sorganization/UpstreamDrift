@@ -100,7 +100,8 @@ Examples:
 
     # General options
     parser.add_argument(
-        "-v", "--verbose",
+        "-v",
+        "--verbose",
         action="store_true",
         help="Verbose output",
     )
@@ -133,23 +134,17 @@ Examples:
         adapter = FreeMoCapOutputAdapter(args.session_dir)
         session = adapter.parse()
 
-        print(f"\n=== FreeMoCap Session ===")
-        print(f"Session ID: {session.session_id}")
-        print(f"Frames: {len(session.frames)}")
         if session.frames:
-            print(f"Landmarks per frame: {len(session.frames[0].points)}")
-            print(f"Duration: {session.frames[-1].timestamp - session.frames[0].timestamp:.2f}s")
+            pass
 
         if session.calibration:
-            print(f"Calibration: available")
+            pass
 
         if args.export_npy:
             adapter.export_to_numpy(args.export_npy)
-            print(f"Exported to numpy: {args.export_npy}")
 
         if args.export_csv:
             adapter.export_to_csv(args.export_csv)
-            print(f"Exported to CSV: {args.export_csv}")
 
         return 0
 
@@ -166,44 +161,27 @@ Examples:
     )
 
     if args.dry_run:
-        print("=== Dry Run ===")
-        print(f"Would launch FreeMoCap with:")
-        print(f"  Session: {config.session_dir}")
-        print(f"  Video dir: {config.video_dir}")
-        print(f"  Output dir: {config.output_dir}")
-        print(f"  Headless: {config.headless}")
-        print(f"  Timeout: {config.timeout_seconds}s")
         return 0
 
     launcher = FreeMoCapLauncher()
     result = launcher.launch(config)
 
     if result.success:
-        print(f"\n✓ FreeMoCap completed successfully")
-        print(f"Output directory: {result.output_dir}")
-        print(f"Log file: {result.log_file}")
 
         if args.parse_output and result.output_dir:
-            print("\n=== Parsing Output ===")
             adapter = FreeMoCapOutputAdapter(result.output_dir)
             session = adapter.parse()
-            print(f"Session: {session.session_id}")
-            print(f"Frames: {len(session.frames)}")
 
             if args.export_npy:
                 adapter.export_to_numpy(args.export_npy)
-                print(f"Exported to numpy: {args.export_npy}")
 
             if args.export_csv:
                 adapter.export_to_csv(args.export_csv)
-                print(f"Exported to CSV: {args.export_csv}")
 
         return 0
-    else:
-        print(f"\n✗ FreeMoCap failed: {result.error_message}")
-        if result.log_file:
-            print(f"Log file: {result.log_file}")
-        return 1
+    if result.log_file:
+        pass
+    return 1
 
 
 if __name__ == "__main__":

@@ -35,6 +35,7 @@ Or, from the GolfLauncher tile (registered in ``src/config/models.yaml``).
 """
 
 from __future__ import annotations
+from src.tools.starting_pose_matcher.utils import load_skeleton
 
 from contextlib import suppress
 import json

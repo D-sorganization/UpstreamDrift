@@ -17,7 +17,7 @@ def _speed(frame: pd.DataFrame) -> np.ndarray:
     velocity_columns = ["clubface_vx", "clubface_vy", "clubface_vz"]
     if all(column in frame.columns for column in velocity_columns):
         values = frame[velocity_columns].to_numpy(dtype=float)
-        # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) avoids temporary allocations and is ~35% faster than np.linalg.norm(..., axis=1)
+        # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) fast norm
         return np.sqrt(np.einsum("ij,ij->i", values, values))
     position_columns = ["clubface_x", "clubface_y", "clubface_z"]
     if "time" not in frame.columns or not all(
@@ -30,7 +30,7 @@ def _speed(frame: pd.DataFrame) -> np.ndarray:
     position = frame[position_columns].to_numpy(dtype=float)
     time = frame["time"].to_numpy(dtype=float)
     velocity = np.gradient(position, time, axis=0)
-    # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) avoids temporary allocations and is ~35% faster than np.linalg.norm(..., axis=1)
+    # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) fast norm
     return np.sqrt(np.einsum("ij,ij->i", velocity, velocity))
 
 

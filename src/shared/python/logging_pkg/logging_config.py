@@ -321,7 +321,9 @@ def _attach_redaction_filters(root_logger: logging.Logger) -> None:
     """
     redaction_filter = SensitiveDataFilter()
     for existing_handler in root_logger.handlers:
-        if not any(isinstance(f, SensitiveDataFilter) for f in existing_handler.filters):
+        if not any(
+            isinstance(f, SensitiveDataFilter) for f in existing_handler.filters
+        ):
             existing_handler.addFilter(redaction_filter)
 
 
@@ -614,5 +616,3 @@ def add_file_handler(
     logger.addHandler(handler)
 
     return handler
-
-
