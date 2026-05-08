@@ -391,6 +391,7 @@ class DataSourcesPanel(QGroupBox):
                 path,
                 opts=self.align_options(),
                 impact_source=self._club_target,
+                marker_set=self.combo_marker_set.currentText(),
             )
         except Exception as exc:  # noqa: BLE001
             QMessageBox.warning(
