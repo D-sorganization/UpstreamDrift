@@ -45,6 +45,7 @@ For a focused reviewer walkthrough, start with the
 ### Advanced Analysis
 
 - **Motion Capture**: Load and retarget mocap data (CSV, JSON, C3D) using OpenPose or MediaPipe.
+  - **[Motion Pipeline Guide](docs/motion_pipeline/README.md)** — From video to tracked motion in 5 commands
 - **Model Explorer**: Interactive browser for Humanoid, Pendulum, and Robotic models.
 - **Inverse Kinematics**: Professional IK solver with nullspace optimization
 - **Inverse Dynamics**: Complete torque computation with force decomposition
