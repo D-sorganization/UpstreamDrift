@@ -84,6 +84,29 @@ jobs:
           pip install "pinocchio>=2.6.0" || echo "::warning::pinocchio install failed"
           pip install "opensim>=4.4.0" || echo "::warning::opensim install failed"
 
+      - name: Precheck — verify at least 2 engines are importable
+        # This gate enforces cross-engine parity, so it must fail if fewer than
+        # 2 engines can be imported. Without this check, the job could succeed
+        # with all equivalence tests skipped (via pytest.importorskip) and no
+        # actual comparison performed.
+        shell: bash
+        run: |
+          set -euo pipefail
+          count=0
+          for engine in mujoco pydrake pinocchio opensim; do
+            if python3 -c "import $engine" 2>/dev/null; then
+              count=$((count + 1))
+              echo "✓ $engine importable"
+            else
+              echo "✗ $engine not importable"
+            fi
+          done
+          echo "Importable engines: $count / 4"
+          if [ "$count" -lt 2 ]; then
+            echo "::error::Cross-engine equivalence gate requires ≥2 importable engines; only $count available. Failing."
+            exit 1
+          fi
+
       - name: Run URDF cross-engine forward-sim equivalence test
         env:
           UPSTREAM_DRIFT_OUTPUT_ROOT: ${{ github.workspace }}/output
