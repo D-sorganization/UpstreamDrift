@@ -9,10 +9,24 @@ Extracted from urdf_generator.py to isolate XML-serialisation concerns.
 
 from __future__ import annotations
 
+from typing import Any
 import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
 
 from humanoid_character_builder.core.model import GeneratedJoint, GeneratedLink
 from humanoid_character_builder.generators.urdf_geometry import add_geometry_element
+
+from model_generation.builders.urdf_writer import URDFWriter
+from model_generation.core.types import (
+    Geometry,
+    Inertia,
+    Joint,
+    JointDynamics,
+    JointLimits,
+    JointType,
+    Link,
+    Material,
+    Origin,
+)
 
 
 def _compute_collision_exclusions(
@@ -45,6 +59,22 @@ def _compute_collision_exclusions(
     return list(exclusions)
 
 
+def _convert_geometry(geom: dict[str, Any]) -> Geometry:
+    gtype = geom.get("type")
+    if gtype == "box":
+        return Geometry.box(*geom["size"])
+    if gtype == "cylinder":
+        return Geometry.cylinder(geom["radius"], geom["length"])
+    if gtype == "sphere":
+        return Geometry.sphere(geom["radius"])
+    if gtype == "capsule":
+        return Geometry.capsule(geom["radius"], geom["length"])
+    if gtype == "mesh":
+        scale = geom.get("scale", (1.0, 1.0, 1.0))
+        return Geometry.mesh(geom["filename"], scale)
+    return Geometry.box(0.1, 0.1, 0.1)
+
+
 def build_urdf_xml(
     robot_name: str,
     links: dict[str, GeneratedLink],
@@ -68,39 +98,86 @@ def build_urdf_xml(
     Returns:
         URDF XML as a unicode string (no XML declaration header).
     """
-    if robot_name is None:
-        raise ValueError("robot_name must be provided")
-    root = ET.Element("robot", name=robot_name)
-
-    # Add materials
-    for mat_name, rgba in materials.items():
-        material = ET.SubElement(root, "material", name=mat_name)
-        ET.SubElement(
-            material,
-            "color",
-            rgba=f"{rgba[0]:.4f} {rgba[1]:.4f} {rgba[2]:.4f} {rgba[3]:.4f}",
-        )
-
-    # Add links
+    # Convert GeneratedLink to model_generation Link
+    canonical_links = []
     for link_data in links.values():
-        _add_link_element(root, link_data)
+        canonical_link = Link(
+            name=link_data.name,
+            inertia=Inertia(
+                ixx=link_data.inertia.ixx,
+                iyy=link_data.inertia.iyy,
+                izz=link_data.inertia.izz,
+                ixy=link_data.inertia.ixy,
+                ixz=link_data.inertia.ixz,
+                iyz=link_data.inertia.iyz,
+                mass=link_data.mass,
+                center_of_mass=link_data.origin_xyz,
+            ),
+        )
+        if link_data.visual_geometry:
+            canonical_link.visual_geometry = _convert_geometry(
+                link_data.visual_geometry
+            )
+            canonical_link.visual_material = Material(name="skin")
+        if link_data.collision_geometry:
+            canonical_link.collision_geometry = _convert_geometry(
+                link_data.collision_geometry
+            )
+        canonical_links.append(canonical_link)
 
-    # Add joints
+    # Convert GeneratedJoint to model_generation Joint
+    canonical_joints = []
     for joint_data in joints:
-        _add_joint_element(root, joint_data)
+        try:
+            jtype = JointType(joint_data.joint_type)
+        except ValueError:
+            jtype = JointType.FIXED
 
-    # Add collision exclusions (disable_collisions for adjacent segments)
-    if add_collision_exclusions:
-        exclusions = _compute_collision_exclusions(links, joints)
-        for link1, link2 in exclusions:
-            gazebo = ET.SubElement(root, "gazebo")
-            disable = ET.SubElement(gazebo, "disable_collisions")
-            disable.set("link1", link1)
-            disable.set("link2", link2)
+        canonical_joint = Joint(
+            name=joint_data.name,
+            joint_type=jtype,
+            parent=joint_data.parent,
+            child=joint_data.child,
+            origin=Origin(xyz=joint_data.origin_xyz, rpy=joint_data.origin_rpy),
+            axis=joint_data.axis,
+        )
+        if joint_data.limits and joint_data.joint_type in ("revolute", "prismatic"):
+            canonical_joint.limits = JointLimits(
+                lower=joint_data.limits["lower"],
+                upper=joint_data.limits["upper"],
+                effort=joint_data.limits["effort"],
+                velocity=joint_data.limits["velocity"],
+            )
+        if joint_data.dynamics:
+            canonical_joint.dynamics = JointDynamics(
+                damping=joint_data.dynamics.get("damping", 0.0),
+                friction=joint_data.dynamics.get("friction", 0.0),
+            )
+        canonical_joints.append(canonical_joint)
 
-    if pretty_print:
-        ET.indent(root, space=indent)
-    return ET.tostring(root, encoding="unicode")
+    # Convert materials
+    canonical_materials = {
+        name: Material(name=name, color=rgba) for name, rgba in materials.items()
+    }
+
+    writer = URDFWriter(
+        pretty_print=pretty_print,
+        indent=indent,
+        add_collision_exclusions=add_collision_exclusions,
+    )
+
+    xml_str = writer.write(
+        robot_name=robot_name,
+        links=canonical_links,
+        joints=canonical_joints,
+        materials=canonical_materials,
+    )
+
+    # Strip XML declaration if present to match backward compatibility
+    if xml_str.startswith("<?xml"):
+        xml_str = xml_str.split("?>", 1)[1].strip()
+
+    return xml_str
 
 
 def _add_link_element(root: ET.Element, link: GeneratedLink) -> None:

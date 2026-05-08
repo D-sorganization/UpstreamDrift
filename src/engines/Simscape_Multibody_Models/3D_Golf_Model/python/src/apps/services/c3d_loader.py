@@ -120,6 +120,12 @@ def load_c3d_file(filepath: str) -> C3DDataModel:
         reader = C3DDataReader(filepath)
         metadata_obj = reader.get_metadata()
         df_points = reader.points_dataframe(include_time=False)
+        raw_params: dict | None = None
+        try:
+            c3d_data = reader._load()  # noqa: SLF001 — controlled internal use
+            raw_params = dict(c3d_data.get("parameters") or {})
+        except (KeyError, AttributeError, TypeError):
+            raw_params = None
 
     markers = _build_markers(df_points, metadata_obj.marker_labels)
 
@@ -155,4 +161,5 @@ def load_c3d_file(filepath: str) -> C3DDataModel:
         analog_time=analog_time,
         metadata=_build_metadata_ui(filepath, metadata_obj),
         events=events,
+        raw_parameters=raw_params,
     )

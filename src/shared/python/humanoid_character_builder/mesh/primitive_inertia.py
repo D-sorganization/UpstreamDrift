@@ -94,6 +94,11 @@ class PrimitiveInertiaCalculator:
     ) -> InertiaResult:
         if not (mass is not None):
             raise ValueError("mass must be provided")
+        # Degenerate geometry (zero radius/length) collapses to a point;
+        # fall back to the legacy small-positive default so downstream
+        # physics engines don't crash. See #4600.
+        if radius <= 0.0 or length <= 0.0:
+            return InertiaResult.create_default(mass)
         i_dict = capsule_inertia(mass, radius, length, axis)
         v_cyl = math.pi * radius**2 * length
         v_sphere = (4.0 / 3.0) * math.pi * radius**3

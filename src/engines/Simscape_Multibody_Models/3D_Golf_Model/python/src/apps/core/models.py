@@ -45,6 +45,7 @@ class C3DDataModel:
     analog_time: npt.NDArray[np.float64] | None = None
     metadata: dict[str, str] = field(default_factory=dict)
     events: list[C3DEvent] = field(default_factory=list)
+    raw_parameters: dict | None = None
 
     def marker_names(self) -> list[str]:
         """Return list of marker names."""

@@ -279,8 +279,9 @@ def load_body_preset(
         if hasattr(BodyParameters, key):
             preset_data[key] = value
 
-    # Remove description (not a BodyParameters field)
+    # Remove description / citation (not BodyParameters fields; metadata only)
     preset_data.pop("description", None)
+    preset_data.pop("citation", None)
 
     # Set name
     preset_data["name"] = f"{preset_name_lower}_humanoid"

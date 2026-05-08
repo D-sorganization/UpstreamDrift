@@ -1,7 +1,3 @@
-# ARCHITECTURE_DEBT:
-# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
-# It requires domain-aware structural extraction to isolate its internal classes appropriately.
-
 """
 Public API for humanoid character builder.
 
@@ -31,11 +27,7 @@ Example:
 
 from __future__ import annotations
 
-import json
 import logging
-import shutil
-from dataclasses import dataclass, field
-from enum import Enum
 from pathlib import Path
 from typing import Any, cast
 
@@ -71,261 +63,13 @@ from humanoid_character_builder.mesh.primitive_inertia import (
     estimate_segment_primitive,
 )
 
+from humanoid_character_builder.interfaces.results import (
+    BuildErrorCategory,
+    CharacterBuildResult,
+    SegmentMeshInfo,
+)
+
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class SegmentMeshInfo:
-    """Information about a generated segment mesh."""
-
-    segment_name: str
-    visual_mesh_path: Path | None
-    collision_mesh_path: Path | None
-    mass_kg: float
-    inertia: InertiaResult
-    dimensions: dict[str, float]
-
-
-@dataclass
-class ExportOptions:
-    """Options for exporting character models."""
-
-    # URDF options
-    urdf_filename: str = "humanoid.urdf"
-    include_collision: bool = True
-
-    # Mesh options
-    generate_meshes: bool = True
-    mesh_format: str = "stl"  # stl, obj, dae
-    mesh_backend: MeshGeneratorBackend = MeshGeneratorBackend.PRIMITIVE
-
-    # Inertia options
-    inertia_mode: InertiaMode = InertiaMode.PRIMITIVE
-    density_kg_m3: float = 1050.0
-
-    # Output structure
-    create_package_structure: bool = True
-    mesh_subdirectory: str = "meshes"
-    config_subdirectory: str = "config"
-
-    # Include additional files
-    save_config: bool = True
-    config_format: str = "yaml"  # yaml or json
-
-
-class BuildErrorCategory(Enum):
-    """Category of build error for proper error handling."""
-
-    NONE = "none"
-    VALIDATION = "validation"  # Bad parameters
-    IO = "io"  # Filesystem/permission errors
-    MISSING_BACKEND = "missing_backend"  # Optional dependency missing
-    MESH_GENERATION = "mesh_generation"  # Mesh generation failure
-    RUNTIME = "runtime"  # Other runtime errors
-
-
-@dataclass
-class CharacterBuildResult:
-    """
-    Result of character building operation.
-
-    Contains all generated data and provides export methods.
-    """
-
-    # Whether build was successful
-    success: bool
-
-    # Body parameters used
-    params: BodyParameters
-
-    # Generated URDF string
-    urdf_xml: str | None = None
-
-    # Segment information
-    segments: dict[str, SegmentMeshInfo] = field(default_factory=dict)
-
-    # Mesh generation result
-    mesh_result: GeneratedMeshResult | None = None
-
-    # Error message if failed
-    error_message: str | None = None
-
-    # Error category for classification
-    error_category: BuildErrorCategory = BuildErrorCategory.NONE
-
-    # Output directory (if exported)
-    output_dir: Path | None = None
-
-    def export_urdf(  # noqa: C901
-        self,
-        output_dir: Path | str,
-        options: ExportOptions | None = None,
-    ) -> Path:
-        """
-        Export the character as a URDF package.
-
-        Args:
-            output_dir: Directory to write output files
-            options: Export options
-
-        Returns:
-            Path to the generated URDF file
-        """
-        if output_dir is None:
-            raise ValueError("output_dir must be provided")
-        options = options or ExportOptions()
-        output_dir = Path(output_dir)
-        output_dir.mkdir(parents=True, exist_ok=True)
-
-        # Create package structure
-        if options.create_package_structure:
-            mesh_dir = output_dir / options.mesh_subdirectory
-            mesh_dir.mkdir(exist_ok=True)
-            (mesh_dir / "visual").mkdir(exist_ok=True)
-            (mesh_dir / "collision").mkdir(exist_ok=True)
-
-            config_dir = output_dir / options.config_subdirectory
-            config_dir.mkdir(exist_ok=True)
-
-        # Write URDF
-        urdf_path = output_dir / options.urdf_filename
-        if self.urdf_xml:
-            urdf_path.write_text(self.urdf_xml)
-            logger.info(f"URDF written to {urdf_path}")
-
-        # Copy mesh files if they exist
-        if self.mesh_result and options.generate_meshes:
-            mesh_dir = output_dir / options.mesh_subdirectory
-
-            for src_path in self.mesh_result.mesh_paths.values():
-                if src_path and src_path.exists():
-                    dst_path = mesh_dir / "visual" / src_path.name
-                    shutil.copy2(src_path, dst_path)
-
-            for src_path in self.mesh_result.collision_paths.values():
-                if src_path and src_path.exists():
-                    dst_path = mesh_dir / "collision" / src_path.name
-                    shutil.copy2(src_path, dst_path)
-
-        # Save configuration
-        if options.save_config:
-            config_dir = output_dir / options.config_subdirectory
-            config_path = config_dir / f"body_params.{options.config_format}"
-
-            config_data = self.params.to_dict()
-            if options.config_format == "yaml":
-                config_path.write_text(yaml.dump(config_data, default_flow_style=False))
-            else:
-                config_path.write_text(json.dumps(config_data, indent=2))
-
-        self.output_dir = output_dir
-        return urdf_path
-
-    def get_segment(self, segment_name: str) -> SegmentMeshInfo | None:
-        """Get information about a specific segment."""
-        return self.segments.get(segment_name)
-
-    def get_all_segments(self) -> list[str]:
-        """Get list of all segment names."""
-        return list(self.segments.keys())
-
-    def get_total_mass(self) -> float:
-        """Get total mass of all segments."""
-        return sum(seg.mass_kg for seg in self.segments.values())
-
-    def to_dict(self) -> dict[str, Any]:
-        """Convert result to dictionary."""
-        return {
-            "success": self.success,
-            "params": self.params.to_dict(),
-            "segment_count": len(self.segments),
-            "total_mass": self.get_total_mass(),
-            "error_message": self.error_message,
-        }
-
-    def simulate(self, duration: float = 1.0) -> bool:
-        """
-        Run a short simulation to verify physics stability.
-
-        Args:
-            duration: Simulation duration in seconds
-
-        Returns:
-            True if stable, False otherwise.
-        """
-        if duration is None:
-            raise ValueError("duration must be provided")
-        if not self.urdf_xml:
-            logger.error("No URDF generated to simulate.")
-            return False
-
-        try:
-            import mujoco
-        except ImportError:
-            logger.warning("MuJoCo not installed. Simulation skipped.")
-            return False
-
-        try:
-            model = mujoco.MjModel.from_xml_string(self.urdf_xml)
-            data = mujoco.MjData(model)
-
-            steps = int(duration / model.opt.timestep)
-            for _ in range(steps):
-                mujoco.mj_step(model, data)
-                if np.isnan(data.qpos).any() or np.isnan(data.qvel).any():
-                    logger.error("Simulation instability detected (NaN values).")
-                    return False
-            return True
-
-        except (RuntimeError, ValueError, OSError) as e:
-            logger.error(f"Simulation failed: {e}")
-            return False
-
-    def preview(self, animate: bool = False) -> None:
-        """
-        Open visual preview of the character.
-
-        Args:
-            animate: If True, applies control signals to joints.
-        """
-        if animate is None:
-            raise ValueError("animate must be provided")
-        if not self.urdf_xml:
-            logger.error("No URDF generated to preview.")
-            return
-
-        try:
-            import mujoco
-            import mujoco.viewer
-        except ImportError:
-            logger.warning("MuJoCo viewer not available.")
-            return
-
-        try:
-            model = mujoco.MjModel.from_xml_string(self.urdf_xml)
-            data = mujoco.MjData(model)
-
-            with mujoco.viewer.launch_passive(model, data) as viewer:
-                import time
-
-                start = time.time()
-                while viewer.is_running():
-                    step_start = time.time()
-
-                    if animate and model.nu > 0:
-                        t = time.time() - start
-                        data.ctrl[:] = 0.5 * np.sin(t * 2.0)
-
-                    mujoco.mj_step(model, data)
-                    viewer.sync()
-
-                    dt = model.opt.timestep
-                    elapsed = time.time() - step_start
-                    if elapsed < dt:
-                        time.sleep(dt - elapsed)
-
-        except (RuntimeError, ValueError, OSError) as e:
-            logger.error(f"Preview failed: {e}")
 
 
 class CharacterBuilder:
@@ -682,65 +426,21 @@ class CharacterBuilder:
         }
 
 
-# Convenience functions for quick access
-def quick_build(
-    height_m: float = 1.75,
-    mass_kg: float = 75.0,
-    preset: str | None = None,
-    output_dir: Path | str | None = None,
-) -> CharacterBuildResult:
-    """
-    Quick function to build a character with minimal configuration.
+# =============================================================================
+# Backward-compatibility re-exports
+# =============================================================================
+# These names were historically exported from this module. To maintain
+# backward compatibility for existing callers, we re-export them here.
+# New code should import directly from the source modules.
 
-    Args:
-        height_m: Character height in meters
-        mass_kg: Character mass in kg
-        preset: Optional preset name (overrides height/mass defaults)
-        output_dir: Optional output directory for export
+from humanoid_character_builder.interfaces.options import ExportOptions
+from humanoid_character_builder.interfaces.quick import quick_build, quick_urdf
 
-    Returns:
-        CharacterBuildResult
-    """
-    if height_m is None:
-        raise ValueError("height_m must be provided")
-    builder = CharacterBuilder()
-
-    if preset:
-        params = builder.create_from_preset(preset, height_m=height_m, mass_kg=mass_kg)
-    else:
-        params = BodyParameters(height_m=height_m, mass_kg=mass_kg)
-
-    result = builder.build(params)
-
-    if output_dir and result.success:
-        result.export_urdf(output_dir)
-
-    return result
-
-
-def quick_urdf(
-    height_m: float = 1.75,
-    mass_kg: float = 75.0,
-    preset: str | None = None,
-) -> str:
-    """
-    Quick function to generate URDF XML.
-
-    Args:
-        height_m: Character height in meters
-        mass_kg: Character mass in kg
-        preset: Optional preset name
-
-    Returns:
-        URDF XML string
-    """
-    if height_m is None:
-        raise ValueError("height_m must be provided")
-    builder = CharacterBuilder()
-
-    if preset:
-        params = builder.create_from_preset(preset, height_m=height_m, mass_kg=mass_kg)
-    else:
-        params = BodyParameters(height_m=height_m, mass_kg=mass_kg)
-
-    return builder.generate_urdf(params)
+__all__ = [
+    # Main classes
+    "CharacterBuilder",
+    # Re-exports for backward compatibility
+    "ExportOptions",
+    "quick_build",
+    "quick_urdf",
+]

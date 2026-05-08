@@ -26,7 +26,7 @@ We will implement a **canonical CIR (Canonical Intermediate Representation)** mo
 ### Module Structure
 
 ```
-src/engines/motion_pipeline/
+src/shared/python/motion_pipeline/
 ├── sources/           # Mocap format loaders (Theia, OpenPose, etc.)
 ├── converters/        # Unit conversion, axis reorientation
 ├── cleaning/          # Gap filling, filtering, virtual markers

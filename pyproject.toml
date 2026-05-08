@@ -361,6 +361,9 @@ markers = [
     "requires_torch: tests that require PyTorch importable (skipped via importorskip when missing)",
     "requires_real_dataset: tests that require the 9 GB raw Simscape parquet on disk (skipped if absent)",
     "requires_mocap_fixtures: tests that require body-marker mocap fixtures (Rajagopal2015 muscle CMC, post-MVP per #4296; loud-fail or skip when absent)",
+    "motion_pipeline: tests for the motion capture pipeline (sources, IK, matching, orchestrator)",
+    "makehuman: tests that exercise the MakeHuman mesh backend (skip without MakeHuman installed)",
+    "smplx: tests that exercise the SMPL-X mesh backend (skip without SMPL-X model files)",
 ]
 filterwarnings = [
     # Suppress hppfcl→coal rename noise (third-party, not actionable in this repo)

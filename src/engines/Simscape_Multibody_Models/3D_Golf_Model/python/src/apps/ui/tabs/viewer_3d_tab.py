@@ -17,14 +17,75 @@ from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import colors as mcolors
-from mpl_toolkits.mplot3d.art3d import Line3DCollection
+from mpl_toolkits.mplot3d.art3d import Line3DCollection, Poly3DCollection
 from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import Qt, QTimer
 
 from src.shared.python.qt_utils.wheel_event_filter import suppress_wheel_on_widgets
 
 from ...core.models import C3DDataModel
+from ...services.segment_set_io import SegmentSpec
 from ..widgets.mpl_canvas import MplCanvas
+
+# Anatomical-region colour map (generic, source-agnostic).
+_GROUP_COLORS: dict[str, tuple[float, float, float, float]] = {
+    "pelvis": (0.20, 0.55, 0.85, 1.0),
+    "torso": (0.45, 0.30, 0.75, 1.0),
+    "head": (0.85, 0.60, 0.20, 1.0),
+    "left_arm": (0.30, 0.75, 0.40, 1.0),
+    "right_arm": (0.20, 0.50, 0.30, 1.0),
+    "left_leg": (0.85, 0.30, 0.30, 1.0),
+    "right_leg": (0.65, 0.20, 0.20, 1.0),
+    "auto": (0.30, 0.30, 0.30, 1.0),
+}
+
+
+def _color_for_group(group: str) -> tuple[float, float, float, float]:
+    return _GROUP_COLORS.get(group, _GROUP_COLORS["auto"])
+
+
+def _build_cylinder_verts(
+    pa: np.ndarray,
+    pb: np.ndarray,
+    radius: float,
+    n_facets: int,
+) -> list[list[tuple[float, float, float]]]:
+    """Return Poly3DCollection vertex lists for a closed cylinder.
+
+    Yields ``n_facets`` side quads plus two end-cap polygons. Endpoints with
+    zero length collapse to a single degenerate facet so the artist update is
+    side-effect free even at frames where markers coincide or are missing.
+    """
+    direction = pb - pa
+    length = float(np.linalg.norm(direction))
+    if not np.isfinite(length) or length <= 1e-9:
+        return [[(0.0, 0.0, 0.0), (0.0, 0.0, 0.0), (0.0, 0.0, 0.0)]]
+    axis = direction / length
+    # Build orthonormal basis.
+    helper = np.array([1.0, 0.0, 0.0])
+    if abs(float(axis @ helper)) > 0.95:
+        helper = np.array([0.0, 1.0, 0.0])
+    u = np.cross(axis, helper)
+    u /= max(np.linalg.norm(u), 1e-12)
+    v = np.cross(axis, u)
+    angles = np.linspace(0.0, 2.0 * np.pi, n_facets, endpoint=False)
+    ring_a = np.array([pa + radius * (np.cos(a) * u + np.sin(a) * v) for a in angles])
+    ring_b = np.array([pb + radius * (np.cos(a) * u + np.sin(a) * v) for a in angles])
+    polys: list[list[tuple[float, float, float]]] = []
+    for i in range(n_facets):
+        j = (i + 1) % n_facets
+        polys.append(
+            [
+                (float(ring_a[i, 0]), float(ring_a[i, 1]), float(ring_a[i, 2])),
+                (float(ring_a[j, 0]), float(ring_a[j, 1]), float(ring_a[j, 2])),
+                (float(ring_b[j, 0]), float(ring_b[j, 1]), float(ring_b[j, 2])),
+                (float(ring_b[i, 0]), float(ring_b[i, 1]), float(ring_b[i, 2])),
+            ]
+        )
+    polys.append([(float(p[0]), float(p[1]), float(p[2])) for p in ring_a])
+    polys.append([(float(p[0]), float(p[1]), float(p[2])) for p in ring_b])
+    return polys
+
 
 try:
     from src.shared.python.motion_matching.body_skeleton import (
@@ -108,6 +169,13 @@ class Viewer3DTab(QtWidgets.QWidget):
         self._skeleton_collection: Line3DCollection | None = None
         self._skeleton_segments: tuple[tuple[str, str], ...] = ()
         self._event_buttons: list[QtWidgets.QToolButton] = []
+
+        # User-defined segments (Segments tab -> here).
+        self._user_segments: tuple[SegmentSpec, ...] = ()
+        self._user_line_collection: Line3DCollection | None = None
+        self._user_cylinder_artists: list[Poly3DCollection] = []
+        self._cylinder_facets: int = 8
+        self._user_line_render_count: int = 0
 
         # Playback timer.
         self._timer = QTimer(self)
@@ -598,6 +666,8 @@ class Viewer3DTab(QtWidgets.QWidget):
         if len(selected) <= 12:
             ax.legend(loc="upper right", fontsize=8)
 
+        self._rebuild_user_segment_artists()
+
         self.canvas_3d.fig.tight_layout()
         self._render_current_frame()
 
@@ -607,7 +677,148 @@ class Viewer3DTab(QtWidgets.QWidget):
         self._label_texts = []
         self._skeleton_collection = None
         self._skeleton_segments = ()
+        self._user_line_collection = None
+        self._user_cylinder_artists = []
         self._ax = None
+
+    # ---------------------------------------------------- User segments API
+
+    def set_user_segments(self, segments: tuple[SegmentSpec, ...]) -> None:
+        """Receive a new user-defined segment set from the Segments tab."""
+        if segments is None:
+            raise ValueError("segments must be provided (use () for an empty set)")
+        self._user_segments = tuple(segments)
+        if self._ax is not None:
+            self._rebuild_user_segment_artists()
+            self._render_current_frame()
+
+    @property
+    def user_cylinder_count(self) -> int:
+        """Number of cylinder artists currently allocated (test helper)."""
+        return len(self._user_cylinder_artists)
+
+    @property
+    def user_line_segment_count(self) -> int:
+        """Number of line-geometry user segments currently rendered."""
+        return self._user_line_render_count
+
+    def _rebuild_user_segment_artists(self) -> None:
+        ax = self._ax
+        if ax is None:
+            return
+        # Drop old artists.
+        if self._user_line_collection is not None:
+            try:
+                self._user_line_collection.remove()
+            except (ValueError, AttributeError):
+                pass
+            self._user_line_collection = None
+        for art in self._user_cylinder_artists:
+            try:
+                art.remove()
+            except (ValueError, AttributeError):
+                pass
+        self._user_cylinder_artists = []
+
+        line_specs = [s for s in self._user_segments if s.geometry == "line"]
+        cyl_specs = [s for s in self._user_segments if s.geometry == "cylinder"]
+
+        if line_specs:
+            self._user_line_collection = Line3DCollection(
+                [[(0.0, 0.0, 0.0), (0.0, 0.0, 0.0)]],
+                colors=[_color_for_group(s.group) for s in line_specs],
+                linewidths=2.0,
+                alpha=0.9,
+            )
+            ax.add_collection3d(self._user_line_collection)
+            self._user_line_collection.set_segments([])
+
+        for spec in cyl_specs:
+            poly = Poly3DCollection(
+                [[(0.0, 0.0, 0.0), (0.0, 0.0, 0.0), (0.0, 0.0, 0.0)]],
+                facecolors=[_color_for_group(spec.group)],
+                edgecolors=[_color_for_group(spec.group)],
+                alpha=0.85,
+            )
+            ax.add_collection3d(poly)
+            self._user_cylinder_artists.append(poly)
+
+    def _update_user_segment_artists(self) -> None:
+        if (
+            self._ax is None
+            or not self._user_segments
+            or self.model is None
+            or self._n_frames <= 0
+        ):
+            if self._user_line_collection is not None:
+                self._user_line_collection.set_segments([])
+            for art in self._user_cylinder_artists:
+                art.set_verts([])
+            self._user_line_render_count = 0
+            return
+        frame = self.slider_frame.value()
+        markers = self.model.markers
+        line_specs = [s for s in self._user_segments if s.geometry == "line"]
+        cyl_specs = [s for s in self._user_segments if s.geometry == "cylinder"]
+
+        line_segments: list[list[tuple[float, float, float]]] = []
+        for spec in line_specs:
+            if not spec.visible:
+                continue
+            ma = markers.get(spec.a)
+            mb = markers.get(spec.b)
+            if (
+                ma is None
+                or mb is None
+                or ma.position.size == 0
+                or mb.position.size == 0
+            ):
+                continue
+            if frame >= ma.position.shape[0] or frame >= mb.position.shape[0]:
+                continue
+            pa = ma.position[frame]
+            pb = mb.position[frame]
+            if not (np.isfinite(pa).all() and np.isfinite(pb).all()):
+                continue
+            line_segments.append(
+                [
+                    (float(pa[0]), float(pa[1]), float(pa[2])),
+                    (float(pb[0]), float(pb[1]), float(pb[2])),
+                ]
+            )
+        if self._user_line_collection is not None:
+            self._user_line_collection.set_segments(line_segments)
+        self._user_line_render_count = len(line_segments)
+
+        for art, spec in zip(self._user_cylinder_artists, cyl_specs, strict=False):
+            if not spec.visible:
+                art.set_verts([])
+                continue
+            ma = markers.get(spec.a)
+            mb = markers.get(spec.b)
+            if (
+                ma is None
+                or mb is None
+                or ma.position.size == 0
+                or mb.position.size == 0
+            ):
+                art.set_verts([])
+                continue
+            if frame >= ma.position.shape[0] or frame >= mb.position.shape[0]:
+                art.set_verts([])
+                continue
+            pa = ma.position[frame]
+            pb = mb.position[frame]
+            if not (np.isfinite(pa).all() and np.isfinite(pb).all()):
+                art.set_verts([])
+                continue
+            verts = _build_cylinder_verts(
+                np.asarray(pa, dtype=float),
+                np.asarray(pb, dtype=float),
+                float(spec.radius),
+                self._cylinder_facets,
+            )
+            art.set_verts(verts)
 
     # -------------------------------------------------- Per-frame render
 
@@ -648,6 +859,9 @@ class Viewer3DTab(QtWidgets.QWidget):
 
         # Update skeleton segments.
         self._update_skeleton_segments()
+
+        # Update user-defined segments / cylinders.
+        self._update_user_segment_artists()
 
         self.canvas_3d.draw_idle()
 

@@ -6,12 +6,26 @@ consistent, torque-driven trajectories that forward-dynamics models track.
 """
 
 from .base import (
-    MotionMatchingSolver,
+    CostWeights,
+    MatchingBackendType,
     MotionMatchingRequest,
     MotionMatchingResult,
-    CostWeights,
+    MotionMatchingSolver,
     make_matching_solver,
-    MatchingBackendType,
+)
+from .contact import (
+    ContactModel,
+    FlatGroundContact,
+    NoContactModel,
+    infer_contact_phases,
+)
+from .costs import (
+    composite_cost,
+    effort_cost,
+    joint_tracking_cost,
+    marker_tracking_cost,
+    residual_cost,
+    smoothness_cost,
 )
 
 __all__ = [
@@ -21,4 +35,16 @@ __all__ = [
     "CostWeights",
     "make_matching_solver",
     "MatchingBackendType",
+    # costs
+    "joint_tracking_cost",
+    "marker_tracking_cost",
+    "smoothness_cost",
+    "effort_cost",
+    "residual_cost",
+    "composite_cost",
+    # contact
+    "ContactModel",
+    "FlatGroundContact",
+    "NoContactModel",
+    "infer_contact_phases",
 ]

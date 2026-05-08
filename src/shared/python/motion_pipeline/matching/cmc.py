@@ -28,7 +28,7 @@ class CMCMatchingSolver(BaseMotionMatchingSolver):
     that track a reference joint trajectory.
     """
     
-    def __init__(self, cost_weights: Optional[CostWeights] = None):
+    def __init__(self, cost_weights: CostWeights | None = None):
         """
         Initialize CMC solver.
         
@@ -41,7 +41,7 @@ class CMCMatchingSolver(BaseMotionMatchingSolver):
         self,
         reference: JointTrajectory,
         rig: SkeletonRig,
-        request: Optional[MotionMatchingRequest] = None,
+        request: MotionMatchingRequest | None = None,
     ) -> MotionMatchingResult:
         """
         Solve motion matching using Computed Muscle Control.

@@ -47,6 +47,7 @@ class URDFWriter:
     indent: str = URDF_INDENT
     expand_composite_joints: bool = True
     include_comments: bool = False
+    add_collision_exclusions: bool = False
 
     def write(
         self,
@@ -109,6 +110,17 @@ class URDFWriter:
         # Write joints
         for joint in expanded_joints:
             lines.extend(self._write_joint(joint, 1))
+
+        # Add collision exclusions (disable_collisions for adjacent segments)
+        if self.add_collision_exclusions:
+            exclusions = self._compute_collision_exclusions(expanded_joints)
+            for link1, link2 in exclusions:
+                lines.append(f"{self.indent}<gazebo>")
+                lines.append(
+                    f'{self.indent * 2}<disable_collisions link1="{self._escape(link1)}" '
+                    f'link2="{self._escape(link2)}"/>'
+                )
+                lines.append(f"{self.indent}</gazebo>")
 
         lines.append("</robot>")
 
@@ -321,6 +333,19 @@ class URDFWriter:
                     materials[name] = Material.from_dict(mat_data)
 
         return materials
+
+    def _compute_collision_exclusions(
+        self, joints: list[Joint]
+    ) -> list[tuple[str, str]]:
+        """Compute collision exclusion pairs for adjacent segments."""
+        if not joints:
+            return []
+        exclusions: set[tuple[str, str]] = set()
+        for joint in joints:
+            pair = tuple(sorted((joint.parent, joint.child)))
+            exclusions.add(pair)
+        # Sort for determinism
+        return sorted(exclusions)
 
     def _sort_links_by_hierarchy(
         self, links: list[Link], joints: list[Joint]
