@@ -95,8 +95,9 @@ class ManifestValidator:
         content = self.manifest_path.read_text()
         modules = {}
 
-        # Look for sections like "## shared/python/contracts"
-        section_pattern = r"^## ([a-z0-9/_-]+)"
+        # Look for sections like "### shared/python/contracts"
+        # Note: generate_manifest_sections() uses ### for module sections
+        section_pattern = r"^### ([a-z0-9/_-]+)"
         current_section = None
 
         for line in content.split("\n"):
