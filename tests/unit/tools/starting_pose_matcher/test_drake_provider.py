@@ -59,8 +59,9 @@ def test_drake_not_available_error():
 
     # Try to create provider without a valid model path
     # This should raise an error (either DrakeNotAvailableError or DrakeProviderError)
-    with pytest.raises((DrakeNotAvailableError,
-        DrakeProviderError, DrakeProviderError)):
+    with pytest.raises(
+        (DrakeNotAvailableError, DrakeProviderError, DrakeProviderError)
+    ):
         DrakeSkeletonProvider(model_path=None, model_xml=None)
 
 

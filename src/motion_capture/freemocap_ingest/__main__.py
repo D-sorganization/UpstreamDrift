@@ -167,7 +167,6 @@ Examples:
     result = launcher.launch(config)
 
     if result.success:
-
         if args.parse_output and result.output_dir:
             adapter = FreeMoCapOutputAdapter(result.output_dir)
             session = adapter.parse()

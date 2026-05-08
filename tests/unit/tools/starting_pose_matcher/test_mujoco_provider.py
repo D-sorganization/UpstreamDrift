@@ -59,8 +59,9 @@ def test_mujoco_not_available_error():
 
     # Try to create provider without a valid model path
     # This should raise an error (either MuJoCoNotAvailableError or MuJoCoProviderError)
-    with pytest.raises((MuJoCoNotAvailableError,
-        MuJoCoProviderError, MuJoCoProviderError)):
+    with pytest.raises(
+        (MuJoCoNotAvailableError, MuJoCoProviderError, MuJoCoProviderError)
+    ):
         MuJoCoSkeletonProvider(model_path=None, model_xml=None)
 
 

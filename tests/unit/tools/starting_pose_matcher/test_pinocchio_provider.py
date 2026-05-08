@@ -59,8 +59,9 @@ def test_pinocchio_not_available_error():
 
     # Try to create provider without a urdf_path
     # This should raise an error (either PinocchioNotAvailableError or PinocchioProviderError)
-    with pytest.raises((PinocchioNotAvailableError,
-        PinocchioProviderError, PinocchioProviderError)):
+    with pytest.raises(
+        (PinocchioNotAvailableError, PinocchioProviderError, PinocchioProviderError)
+    ):
         PinocchioSkeletonProvider(urdf_path=None)
 
 
