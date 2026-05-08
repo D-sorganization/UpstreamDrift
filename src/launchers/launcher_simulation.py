@@ -539,13 +539,43 @@ except (RuntimeError, TypeError, AttributeError) as e:
             self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
 
     def _launch_c3d_viewer(self) -> None:
-        """Launch the C3D motion viewer application."""
-        c3d_script = REPOS_ROOT / "tools" / "c3d_viewer" / "c3d_viewer.py"
+        """Launch the C3D motion viewer application.
 
-        if not c3d_script.exists():
-            c3d_script = REPOS_ROOT / "tools" / "c3d_viewer_app.py"
+        Searches for a C3D viewer entry-point script in (in order):
+        1. The in-repo Simscape 3D viewer wrapper
+           (``src/engines/.../python/src/apps/run_c3d_viewer.py``).
+        2. The fleet-shared vendor viewer
+           (``vendor/ud-tools/src/c3d_viewer/launch_pyqt6.py``).
+        3. Legacy locations under a sibling ``tools/`` directory, kept for
+           backwards-compatibility with installations that pre-date the
+           in-repo viewers.
+        """
+        candidates = [
+            REPOS_ROOT
+            / "src"
+            / "engines"
+            / "Simscape_Multibody_Models"
+            / "3D_Golf_Model"
+            / "python"
+            / "src"
+            / "apps"
+            / "run_c3d_viewer.py",
+            REPOS_ROOT
+            / "vendor"
+            / "ud-tools"
+            / "src"
+            / "c3d_viewer"
+            / "launch_pyqt6.py",
+            REPOS_ROOT / "tools" / "c3d_viewer" / "c3d_viewer.py",
+            REPOS_ROOT / "tools" / "c3d_viewer_app.py",
+        ]
+        c3d_script = next((p for p in candidates if p.exists()), None)
 
-        if not c3d_script.exists():
+        if c3d_script is None:
+            logger.error(
+                "C3D Viewer script not found. Searched: %s",
+                ", ".join(str(p) for p in candidates),
+            )
             self.show_toast("C3D Viewer script not found.", "error")
             return
 
