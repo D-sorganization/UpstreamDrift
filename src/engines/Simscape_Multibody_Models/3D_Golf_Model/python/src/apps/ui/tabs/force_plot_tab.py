@@ -6,6 +6,8 @@ Provides GRF time-series plots and COP trajectory visualization.
 
 from PyQt6 import QtWidgets
 
+from src.shared.python.qt_utils.wheel_event_filter import suppress_wheel_on_widgets
+
 from ...core.models import C3DDataModel
 from ..widgets.mpl_canvas import MplCanvas
 
@@ -45,6 +47,9 @@ class ForcePlotTab(QtWidgets.QWidget):
         )
         self.component_combo.currentIndexChanged.connect(self._update_plots)
         control_row.addWidget(self.component_combo)
+
+        # Suppress wheel events on combo boxes to prevent unintended value changes
+        suppress_wheel_on_widgets(self.plate_combo, self.component_combo)
 
         self.show_cop_checkbox = QtWidgets.QCheckBox("Show COP Trajectory")
         self.show_cop_checkbox.setChecked(True)

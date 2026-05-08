@@ -12,7 +12,7 @@ class JsonFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         log_entry: dict[str, Any] = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.fromtimestamp(record.created, timezone.utc).isoformat(),
             "level": record.levelname,
             "logger": record.name,
             "message": record.getMessage(),
@@ -45,6 +45,11 @@ def setup_logging(level: int = logging.INFO, json_output: bool = False) -> None:
 
     root = logging.getLogger()
     root.setLevel(level)
+    # Close existing handlers before clearing to prevent descriptor leaks
+    # Use a copy of the list and different loop variable name to avoid
+    # overwriting the newly created handler
+    for existing_handler in list(root.handlers):
+        existing_handler.close()
     root.handlers.clear()
     root.addHandler(handler)
 

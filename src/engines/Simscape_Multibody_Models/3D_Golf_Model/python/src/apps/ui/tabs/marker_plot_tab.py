@@ -3,6 +3,8 @@
 import numpy as np
 from PyQt6 import QtWidgets
 
+from src.shared.python.qt_utils.wheel_event_filter import suppress_wheel_on_widgets
+
 from ...core.models import C3DDataModel
 from ..widgets.mpl_canvas import MplCanvas
 
@@ -33,6 +35,9 @@ class MarkerPlotTab(QtWidgets.QWidget):
         self.combo_component.currentIndexChanged.connect(self.update_plot)
         left_panel.addWidget(QtWidgets.QLabel("Component:"))
         left_panel.addWidget(self.combo_component)
+
+        # Suppress wheel events on combo box to prevent unintended value changes
+        suppress_wheel_on_widgets(self.combo_component)
 
         layout.addLayout(left_panel, 1)
 

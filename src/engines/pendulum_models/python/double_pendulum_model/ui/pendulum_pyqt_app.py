@@ -32,6 +32,7 @@ from PyQt6 import QtCore, QtWidgets
 # Security: Use simpleeval for safe expression evaluation
 from simpleeval import SimpleEval
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.qt_utils.wheel_event_filter import suppress_wheel_on_widgets
 
 logger = get_logger(__name__)
 
@@ -216,6 +217,9 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         self.mode_selector.addItems(
             ["Forward dynamics (torques)", "Inverse dynamics (velocity polynomials)"]
         )
+
+        # Suppress wheel events on combo boxes to prevent unintended value changes
+        suppress_wheel_on_widgets(self.model_selector, self.mode_selector)
 
         self._add_torque_inputs(form_layout)
         self._add_velocity_inputs(form_layout)
