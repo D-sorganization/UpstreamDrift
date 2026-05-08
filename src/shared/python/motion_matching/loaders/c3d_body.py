@@ -382,16 +382,19 @@ def load_body_target_c3d(
     # --- Determine impact + grid ------------------------------------------
     if impact_source is not None:
         sim_time = np.asarray(impact_source.time, dtype=np.float64).copy()
-        # Use the same impact target time as the club target lands on; this
-        # keeps the two clocks identical without re-running impact detection.
+        # Reuse the club's resampled-grid impact index directly so the two
+        # clocks land on the same sample. ``impact_idx`` is 0-based on the
+        # resampled grid (see ClubTarget contract). Re-deriving it via argmin
+        # would introduce a 1-sample drift when the chosen impact_target_t_s
+        # falls between grid samples.
+        impact_idx_out = int(impact_source.impact_idx)
         impact_target_t_s = (
-            float(sim_time[int(impact_source.impact_idx) - 1])
-            if 1 <= int(impact_source.impact_idx) <= sim_time.size
+            float(sim_time[impact_idx_out])
+            if 0 <= impact_idx_out < sim_time.size
             else float(opts.impact_target_t_s)
         )
         impact_raw = _detect_impact_via_wrist(raw_time, z_up)
         time_offset = float(raw_time[impact_raw]) - impact_target_t_s
-        impact_idx_out = int(np.argmin(np.abs(sim_time - impact_target_t_s)))
     else:
         sim_time = _build_sim_grid(opts)
         impact_raw = _detect_impact_via_wrist(raw_time, z_up)

@@ -40,14 +40,20 @@ def validate_marker_positions(
         )
         return
 
-    if min_pos < BIOMECHANICAL_MARKER_MIN_M:
+    # Heuristic: only flag suspiciously small positive coordinates. Negative
+    # values up to ~2 m are normal for swing data when the world origin is
+    # placed at the target (clubs and body sweep behind the player on the
+    # backswing). Filtering on |min_pos| < 1mm AND min_pos >= 0 avoids the
+    # false positive seen on Tour-average driver/iron files where
+    # min_pos ~= -1.97 m.
+    if 0.0 <= min_pos < BIOMECHANICAL_MARKER_MIN_M:
         logger.warning(
-            "\u26a0\ufe0f Suspiciously small marker positions detected (< 1mm). "
-            f"Min position: {min_pos:.6f}m. "
-            f"Source units: {source_units}, target: "
-            f"{target_units or 'unchanged'}. "
-            "Guideline P1: Verify unit conversion is correct to "
-            "avoid 1000x errors."
+            "Suspiciously small marker positions detected (< 1mm). "
+            "Min position: %.6f m. Source units: %s, target: %s. "
+            "Guideline P1: Verify unit conversion is correct to avoid 1000x errors.",
+            min_pos,
+            source_units,
+            target_units or "unchanged",
         )
 
     if max_pos > BIOMECHANICAL_MARKER_MAX_M:

@@ -53,20 +53,32 @@ def _default_body_segments_safe(marker_names: tuple[str, ...]) -> list[tuple[int
     """Return body-skeleton segment index pairs.
 
     Tries to import ``default_body_segments`` from the body-skeleton
-    module first (PR #4496). Falls back to a minimal heuristic — pairs
-    of consecutive markers — if the module is not yet on this branch.
-    The fallback keeps the live view working even if the upstream PR
-    has not merged yet; the test does not depend on the exact pairing.
+    module first. That helper returns ``BodySegment`` dataclasses keyed
+    on marker NAMES — we map back to integer indices into
+    ``marker_names`` here so :func:`precompute_segments_from_pairs`
+    receives the ``(int, int)`` pairs it expects. Falls back to a minimal
+    heuristic (pairs of consecutive markers) when the helper is absent
+    or any segment endpoint is missing from ``marker_names``.
     """
     try:
-        from motion_matching.body_skeleton import (  # type: ignore[import-not-found]
+        from src.shared.python.motion_matching.body_skeleton import (
             default_body_segments,
         )
 
-        return list(default_body_segments(marker_names))
+        name_to_idx = {n: i for i, n in enumerate(marker_names)}
+        pairs: list[tuple[int, int]] = []
+        for seg in default_body_segments(marker_names):
+            ia = name_to_idx.get(getattr(seg, "a", None))
+            ib = name_to_idx.get(getattr(seg, "b", None))
+            if ia is not None and ib is not None:
+                pairs.append((ia, ib))
+        if pairs:
+            return pairs
+        # Empty result -> fall through to consecutive-pairs fallback
     except Exception:  # pragma: no cover - branch-dependent import
-        m = len(marker_names)
-        return [(i, i + 1) for i in range(m - 1)]
+        pass
+    m = len(marker_names)
+    return [(i, i + 1) for i in range(m - 1)]
 
 
 class LiveViewController:
@@ -222,7 +234,7 @@ class LiveViewController:
         # load lands a properly framed view (acceptance criterion).
         if fit_points and not self._auto_fit_done:
             try:
-                from motion_matching.diagnostics._skeleton_render import (
+                from src.shared.python.motion_matching.diagnostics._skeleton_render import (  # noqa: E501
                     equalize_3d_axes,
                 )
 
