@@ -15,6 +15,19 @@ from ._mesh_smplx import (
     _trimesh_module,  # type: ignore[attr-defined]
 )
 from ._mesh_types import (
+# Re-export capability flags for test compatibility (#4528)
+try:
+    from humanoid_character_builder.generators._mesh_smplx import SMPLX_AVAILABLE
+except ImportError:
+    SMPLX_AVAILABLE = False
+try:
+    from humanoid_character_builder.generators._mesh_smplx import TRIMESH_AVAILABLE
+except ImportError:
+    TRIMESH_AVAILABLE = False
+try:
+    from humanoid_character_builder.generators._mesh_smplx import _trimesh_module
+except ImportError:
+    _trimesh_module = None
     GeneratedMeshResult,
     MeshGeneratorBackend,
     MeshGeneratorInterface,
