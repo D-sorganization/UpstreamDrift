@@ -64,8 +64,12 @@ class TestMakeHumanBackendE2E:
             if result.mesh_result:
                 for mesh_path in result.mesh_result.mesh_paths.values():
                     if mesh_path and mesh_path.exists():
-                        assert mesh_path.stat().st_size > 0, f"Empty mesh file: {mesh_path}"
-                        assert mesh_path.suffix.lower() in [".stl", ".obj"], f"Unexpected mesh format: {mesh_path}"
+                        assert mesh_path.stat().st_size > 0, (
+                            f"Empty mesh file: {mesh_path}"
+                        )
+                        assert mesh_path.suffix.lower() in [".stl", ".obj"], (
+                            f"Unexpected mesh format: {mesh_path}"
+                        )
 
             # Export and verify
             result.export_urdf(output_dir)
@@ -127,8 +131,12 @@ class TestSMPLXBackendE2E:
             if result.mesh_result:
                 for mesh_path in result.mesh_result.mesh_paths.values():
                     if mesh_path and mesh_path.exists():
-                        assert mesh_path.stat().st_size > 0, f"Empty mesh file: {mesh_path}"
-                        assert mesh_path.suffix.lower() in [".stl", ".obj"], f"Unexpected mesh format: {mesh_path}"
+                        assert mesh_path.stat().st_size > 0, (
+                            f"Empty mesh file: {mesh_path}"
+                        )
+                        assert mesh_path.suffix.lower() in [".stl", ".obj"], (
+                            f"Unexpected mesh format: {mesh_path}"
+                        )
 
             # Export and verify
             result.export_urdf(output_dir)
@@ -159,8 +167,12 @@ class TestEndToEndPipeline:
 
             # Test with various body parameters
             test_params = [
-                BodyParameters(height_m=1.60, mass_kg=55.0, gender_factor=0.0),  # Female
-                BodyParameters(height_m=1.75, mass_kg=75.0, gender_factor=0.5),  # Neutral
+                BodyParameters(
+                    height_m=1.60, mass_kg=55.0, gender_factor=0.0
+                ),  # Female
+                BodyParameters(
+                    height_m=1.75, mass_kg=75.0, gender_factor=0.5
+                ),  # Neutral
                 BodyParameters(height_m=1.90, mass_kg=95.0, gender_factor=1.0),  # Male
             ]
 
@@ -168,7 +180,9 @@ class TestEndToEndPipeline:
                 result = builder.build(params, generate_meshes=True)
 
                 # Verify build
-                assert result.success, f"Build failed for {params}: {result.error_message}"
+                assert result.success, (
+                    f"Build failed for {params}: {result.error_message}"
+                )
                 assert result.urdf_xml is not None
                 assert len(result.urdf_xml) > 0
 
@@ -208,8 +222,13 @@ class TestEndToEndPipeline:
 
                     # Check for NaN/Inf values
                     import numpy as np
-                    assert not np.isnan(mesh.vertices).any(), f"NaN vertices in {mesh_path}"
-                    assert not np.isinf(mesh.vertices).any(), f"Inf vertices in {mesh_path}"
+
+                    assert not np.isnan(mesh.vertices).any(), (
+                        f"NaN vertices in {mesh_path}"
+                    )
+                    assert not np.isinf(mesh.vertices).any(), (
+                        f"Inf vertices in {mesh_path}"
+                    )
 
 
 if __name__ == "__main__":

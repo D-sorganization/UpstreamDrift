@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Literal, Optional, Union
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from pydantic.functional_validators import AfterValidator
-from typing_extensions import Annotated
+from typing import Annotated
 
 from src.shared.python.contracts import invariant
 
@@ -34,7 +34,7 @@ from src.shared.python.contracts import invariant
 # Type Aliases
 # =============================================================================
 
-ArrayLike = Union[List[float], np.ndarray]
+ArrayLike = Union[list[float], np.ndarray]
 SchemaName = Literal["BODY_25", "MediaPipe_33", "COCO_17", "OpenPose_25", "custom"]
 Axis = Literal["X", "Y", "Z", "+X", "-X", "+Y", "-Y", "+Z", "-Z"]
 UpAxis = Literal["+Y", "+Z", "+X", "-Y", "-Z", "-X"]
@@ -72,25 +72,25 @@ class CameraExtrinsics(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    rotation: List[List[float]] = Field(
+    rotation: list[list[float]] = Field(
         default_factory=lambda: [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
         description="3x3 rotation matrix (world-to-camera)",
     )
-    translation: List[float] = Field(
+    translation: list[float] = Field(
         default_factory=lambda: [0.0, 0.0, 0.0],
         description="Translation vector (world-to-camera, meters)",
     )
 
     @field_validator("rotation")
     @classmethod
-    def check_rotation_shape(cls, v: List[List[float]]) -> List[List[float]]:
+    def check_rotation_shape(cls, v: list[list[float]]) -> list[list[float]]:
         if len(v) != 3 or any(len(row) != 3 for row in v):
             raise ValueError("Rotation must be 3x3 matrix")
         return v
 
     @field_validator("translation")
     @classmethod
-    def check_translation_shape(cls, v: List[float]) -> List[float]:
+    def check_translation_shape(cls, v: list[float]) -> list[float]:
         if len(v) != 3:
             raise ValueError("Translation must be length 3")
         return v
@@ -102,7 +102,7 @@ class Calibration(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     id: str = Field(..., description="Unique calibration identifier")
-    cameras: Dict[str, Dict[str, Any]] = Field(
+    cameras: dict[str, dict[str, Any]] = Field(
         default_factory=dict,
         description="Camera ID -> {intrinsics, extrinsics}",
     )
@@ -125,7 +125,7 @@ class Calibration(BaseModel):
         return v
 
     @model_validator(mode="after")
-    def check_cameras_have_intrinsics(self) -> "Calibration":
+    def check_cameras_have_intrinsics(self) -> Calibration:
         for cam_id, cam_data in self.cameras.items():
             if "intrinsics" not in cam_data:
                 raise ValueError(f"Camera {cam_id} missing intrinsics")
@@ -144,15 +144,15 @@ class Keypoint(BaseModel):
 
     x: float = Field(..., description="X coordinate (pixels or normalized)")
     y: float = Field(..., description="Y coordinate (pixels or normalized)")
-    z: Optional[float] = Field(default=None, description="Z coordinate (if 3D)")
+    z: float | None = Field(default=None, description="Z coordinate (if 3D)")
     confidence: float = Field(
         default=1.0, description="Confidence score [0, 1]", ge=0, le=1
     )
-    name: Optional[str] = Field(default=None, description="Keypoint name (e.g., 'nose')")
+    name: str | None = Field(default=None, description="Keypoint name (e.g., 'nose')")
 
     @field_validator("x", "y", "z")
     @classmethod
-    def check_finite(cls, v: Optional[float]) -> Optional[float]:
+    def check_finite(cls, v: float | None) -> float | None:
         if v is not None and not np.isfinite(v):
             raise ValueError("Coordinate must be finite")
         return v
@@ -164,11 +164,11 @@ class KeypointFrame(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     timestamp: float = Field(..., description="Frame timestamp (seconds)", ge=0)
-    keypoints: List[Keypoint] = Field(
+    keypoints: list[Keypoint] = Field(
         ..., description="List of keypoints", min_length=1
     )
     schema_name: SchemaName = Field(..., description="Keypoint schema used")
-    frame_index: Optional[int] = Field(default=None, description="Frame index in sequence")
+    frame_index: int | None = Field(default=None, description="Frame index in sequence")
 
     @field_validator("timestamp")
     @classmethod
@@ -190,23 +190,25 @@ class KeypointSequence(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     id: str = Field(..., description="Unique sequence identifier")
-    frames: List[KeypointFrame] = Field(
+    frames: list[KeypointFrame] = Field(
         ..., description="Sequence of keypoint frames", min_length=1
     )
-    calibration: Optional[Calibration] = Field(
+    calibration: Calibration | None = Field(
         default=None, description="Associated calibration data"
     )
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
 
     @model_validator(mode="after")
-    def check_monotonic_timestamps(self) -> "KeypointSequence":
+    def check_monotonic_timestamps(self) -> KeypointSequence:
         timestamps = [f.timestamp for f in self.frames]
         if timestamps != sorted(timestamps):
             raise ValueError("Timestamps must be monotonically increasing")
         return self
 
     @model_validator(mode="after")
-    def check_consistent_schema(self) -> "KeypointSequence":
+    def check_consistent_schema(self) -> KeypointSequence:
         schemas = {f.schema_name for f in self.frames}
         if len(schemas) > 1:
             raise ValueError(f"Inconsistent schemas: {schemas}")
@@ -241,14 +243,14 @@ class Marker(BaseModel):
     x: float = Field(..., description="X position (meters)")
     y: float = Field(..., description="Y position (meters)")
     z: float = Field(..., description="Z position (meters)")
-    residual: Optional[float] = Field(
+    residual: float | None = Field(
         default=None, description="Residual error (mm)", ge=0
     )
     occluded: bool = Field(default=False, description="Marker is occluded")
 
     @field_validator("x", "y", "z", "residual")
     @classmethod
-    def check_finite(cls, v: Optional[float]) -> Optional[float]:
+    def check_finite(cls, v: float | None) -> float | None:
         if v is not None and not np.isfinite(v):
             raise ValueError("Value must be finite")
         return v
@@ -260,10 +262,10 @@ class MarkerFrame(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     timestamp: float = Field(..., description="Frame timestamp (seconds)", ge=0)
-    markers: Dict[str, Marker] = Field(
+    markers: dict[str, Marker] = Field(
         default_factory=dict, description="Marker name -> Marker data"
     )
-    frame_index: Optional[int] = Field(default=None, description="Frame index in sequence")
+    frame_index: int | None = Field(default=None, description="Frame index in sequence")
 
     @field_validator("timestamp")
     @classmethod
@@ -273,7 +275,7 @@ class MarkerFrame(BaseModel):
         return v
 
     @property
-    def marker_names(self) -> List[str]:
+    def marker_names(self) -> list[str]:
         return list(self.markers.keys())
 
     @property
@@ -287,24 +289,26 @@ class MarkerTrajectory(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     id: str = Field(..., description="Unique trajectory identifier")
-    frames: List[MarkerFrame] = Field(
+    frames: list[MarkerFrame] = Field(
         ..., description="Sequence of marker frames", min_length=1
     )
-    calibration: Optional[Calibration] = Field(
+    calibration: Calibration | None = Field(
         default=None, description="Associated calibration data"
     )
-    subject_id: Optional[str] = Field(default=None, description="Subject identifier")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    subject_id: str | None = Field(default=None, description="Subject identifier")
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
 
     @model_validator(mode="after")
-    def check_monotonic_timestamps(self) -> "MarkerTrajectory":
+    def check_monotonic_timestamps(self) -> MarkerTrajectory:
         timestamps = [f.timestamp for f in self.frames]
         if timestamps != sorted(timestamps):
             raise ValueError("Timestamps must be monotonically increasing")
         return self
 
     @model_validator(mode="after")
-    def check_consistent_markers(self) -> "MarkerTrajectory":
+    def check_consistent_markers(self) -> MarkerTrajectory:
         """All frames should have the same marker set."""
         if len(self.frames) < 2:
             return self
@@ -321,7 +325,7 @@ class MarkerTrajectory(BaseModel):
         return len(self.frames)
 
     @property
-    def marker_names(self) -> List[str]:
+    def marker_names(self) -> list[str]:
         return self.frames[0].marker_names if self.frames else []
 
     @property
@@ -341,20 +345,20 @@ class JointLimit(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    lower: Optional[float] = Field(default=None, description="Lower limit (radians)")
-    upper: Optional[float] = Field(default=None, description="Upper limit (radians)")
-    soft_lower: Optional[float] = Field(default=None, description="Soft lower limit")
-    soft_upper: Optional[float] = Field(default=None, description="Soft upper limit")
+    lower: float | None = Field(default=None, description="Lower limit (radians)")
+    upper: float | None = Field(default=None, description="Upper limit (radians)")
+    soft_lower: float | None = Field(default=None, description="Soft lower limit")
+    soft_upper: float | None = Field(default=None, description="Soft upper limit")
 
     @field_validator("lower", "upper", "soft_lower", "soft_upper")
     @classmethod
-    def check_finite(cls, v: Optional[float]) -> Optional[float]:
+    def check_finite(cls, v: float | None) -> float | None:
         if v is not None and not np.isfinite(v):
             raise ValueError("Limit must be finite")
         return v
 
     @model_validator(mode="after")
-    def check_limit_order(self) -> "JointLimit":
+    def check_limit_order(self) -> JointLimit:
         if self.lower is not None and self.upper is not None:
             if self.lower > self.upper:
                 raise ValueError("Lower limit must be <= upper limit")
@@ -367,29 +371,27 @@ class JointDef(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     name: str = Field(..., description="Joint name")
-    parent: Optional[str] = Field(default=None, description="Parent joint name")
-    children: List[str] = Field(
-        default_factory=list, description="Child joint names"
-    )
-    tpose_offset: List[float] = Field(
+    parent: str | None = Field(default=None, description="Parent joint name")
+    children: list[str] = Field(default_factory=list, description="Child joint names")
+    tpose_offset: list[float] = Field(
         default_factory=lambda: [0.0, 0.0, 0.0],
         description="T-pose offset from parent (meters)",
     )
-    axes: List[Axis] = Field(
+    axes: list[Axis] = Field(
         default_factory=lambda: ["X", "Y", "Z"],
         description="Joint rotation axes",
     )
-    limits: List[JointLimit] = Field(
+    limits: list[JointLimit] = Field(
         default_factory=list,
         description="Joint limits (one per DOF)",
     )
-    semantic_label: Optional[str] = Field(
+    semantic_label: str | None = Field(
         default=None, description="Semantic label (e.g., 'right_knee')"
     )
 
     @field_validator("tpose_offset")
     @classmethod
-    def check_offset_shape(cls, v: List[float]) -> List[float]:
+    def check_offset_shape(cls, v: list[float]) -> list[float]:
         if len(v) != 3:
             raise ValueError("T-pose offset must be length 3")
         return v
@@ -408,22 +410,24 @@ class SkeletonRig(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     id: str = Field(..., description="Unique rig identifier")
-    joints: Dict[str, JointDef] = Field(
+    joints: dict[str, JointDef] = Field(
         ..., description="Joint name -> Joint definition", min_length=1
     )
     root_joint: str = Field(..., description="Root joint name")
     up_axis: UpAxis = Field(default="+Y", description="Skeleton up axis")
     scale: float = Field(default=1.0, description="Global scale factor", gt=0)
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
 
     @model_validator(mode="after")
-    def check_root_exists(self) -> "SkeletonRig":
+    def check_root_exists(self) -> SkeletonRig:
         if self.root_joint not in self.joints:
             raise ValueError(f"Root joint '{self.root_joint}' not found in joints")
         return self
 
     @model_validator(mode="after")
-    def check_parent_child_consistency(self) -> "SkeletonRig":
+    def check_parent_child_consistency(self) -> SkeletonRig:
         """Verify parent-child relationships are consistent."""
         for joint_name, joint in self.joints.items():
             # Check children reference valid joints
@@ -432,7 +436,9 @@ class SkeletonRig(BaseModel):
                     raise ValueError(f"Joint {joint_name} has invalid child {child}")
             # Check parent references valid joint
             if joint.parent is not None and joint.parent not in self.joints:
-                raise ValueError(f"Joint {joint_name} has invalid parent {joint.parent}")
+                raise ValueError(
+                    f"Joint {joint_name} has invalid parent {joint.parent}"
+                )
         return self
 
     @property
@@ -443,7 +449,7 @@ class SkeletonRig(BaseModel):
     def num_dofs(self) -> int:
         return sum(len(j.axes) for j in self.joints.values())
 
-    def get_joint_chain(self, joint_name: str) -> List[str]:
+    def get_joint_chain(self, joint_name: str) -> list[str]:
         """Get the chain of joints from root to specified joint."""
         if joint_name not in self.joints:
             raise ValueError(f"Joint {joint_name} not found")
@@ -466,14 +472,10 @@ class JointStateFrame(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     timestamp: float = Field(..., description="Frame timestamp (seconds)", ge=0)
-    q: List[float] = Field(..., description="Joint positions", min_length=1)
-    qdot: Optional[List[float]] = Field(
-        default=None, description="Joint velocities"
-    )
-    qddot: Optional[List[float]] = Field(
-        default=None, description="Joint accelerations"
-    )
-    frame_index: Optional[int] = Field(default=None, description="Frame index")
+    q: list[float] = Field(..., description="Joint positions", min_length=1)
+    qdot: list[float] | None = Field(default=None, description="Joint velocities")
+    qddot: list[float] | None = Field(default=None, description="Joint accelerations")
+    frame_index: int | None = Field(default=None, description="Frame index")
 
     @field_validator("timestamp")
     @classmethod
@@ -484,7 +486,7 @@ class JointStateFrame(BaseModel):
 
     @field_validator("q", "qdot", "qddot")
     @classmethod
-    def check_finite_values(cls, v: Optional[List[float]]) -> Optional[List[float]]:
+    def check_finite_values(cls, v: list[float] | None) -> list[float] | None:
         if v is not None:
             if not all(np.isfinite(x) for x in v):
                 raise ValueError("All values must be finite")
@@ -512,20 +514,22 @@ class JointTrajectory(BaseModel):
 
     id: str = Field(..., description="Unique trajectory identifier")
     skeleton: SkeletonRig = Field(..., description="Associated skeleton rig")
-    frames: List[JointStateFrame] = Field(
+    frames: list[JointStateFrame] = Field(
         ..., description="Sequence of joint states", min_length=1
     )
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
 
     @model_validator(mode="after")
-    def check_monotonic_timestamps(self) -> "JointTrajectory":
+    def check_monotonic_timestamps(self) -> JointTrajectory:
         timestamps = [f.timestamp for f in self.frames]
         if timestamps != sorted(timestamps):
             raise ValueError("Timestamps must be monotonically increasing")
         return self
 
     @model_validator(mode="after")
-    def check_dof_consistency(self) -> "JointTrajectory":
+    def check_dof_consistency(self) -> JointTrajectory:
         """All frames should have same DOF count as skeleton."""
         expected_dofs = self.skeleton.num_dofs
         for frame in self.frames:
@@ -559,26 +563,28 @@ class MotionTrajectory(BaseModel):
     id: str = Field(..., description="Unique motion identifier")
     skeleton: SkeletonRig = Field(..., description="Skeleton rig")
     trajectory: JointTrajectory = Field(..., description="Joint trajectory")
-    marker_reference: Optional[MarkerTrajectory] = Field(
+    marker_reference: MarkerTrajectory | None = Field(
         default=None, description="Optional reference marker trajectory"
     )
-    subject: Optional[Dict[str, Any]] = Field(
+    subject: dict[str, Any] | None = Field(
         default=None,
         description="Subject metadata (height, mass, age, etc.)",
     )
-    sport: Optional[str] = Field(default=None, description="Sport type (e.g., 'golf')")
-    club: Optional[str] = Field(default=None, description="Club/equipment used")
-    source_provenance: Dict[str, Any] = Field(
+    sport: str | None = Field(default=None, description="Sport type (e.g., 'golf')")
+    club: str | None = Field(default=None, description="Club/equipment used")
+    source_provenance: dict[str, Any] = Field(
         default_factory=dict,
         description="Source data provenance (file paths, capture system, etc.)",
     )
     created_at: datetime = Field(
         default_factory=datetime.now, description="Creation timestamp"
     )
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
 
     @model_validator(mode="after")
-    def check_trajectory_skeleton_match(self) -> "MotionTrajectory":
+    def check_trajectory_skeleton_match(self) -> MotionTrajectory:
         """Trajectory skeleton should match main skeleton."""
         if self.trajectory.skeleton.id != self.skeleton.id:
             raise ValueError("Trajectory skeleton does not match main skeleton")
@@ -604,27 +610,27 @@ class MotionMatchingRequest(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     id: str = Field(..., description="Unique request identifier")
-    target_trajectory: Optional[MotionTrajectory] = Field(
+    target_trajectory: MotionTrajectory | None = Field(
         default=None, description="Target trajectory to match"
     )
-    target_markers: Optional[MarkerTrajectory] = Field(
+    target_markers: MarkerTrajectory | None = Field(
         default=None, description="Target marker trajectory"
     )
-    target_keypoints: Optional[KeypointSequence] = Field(
+    target_keypoints: KeypointSequence | None = Field(
         default=None, description="Target keypoint sequence"
     )
     skeleton: SkeletonRig = Field(..., description="Skeleton to use for matching")
-    constraints: Dict[str, Any] = Field(
+    constraints: dict[str, Any] = Field(
         default_factory=dict,
         description="Matching constraints (weights, tolerances, etc.)",
     )
-    solver_config: Dict[str, Any] = Field(
+    solver_config: dict[str, Any] = Field(
         default_factory=dict,
         description="Solver-specific configuration",
     )
 
     @model_validator(mode="after")
-    def check_has_target(self) -> "MotionMatchingRequest":
+    def check_has_target(self) -> MotionMatchingRequest:
         """Must have at least one target specification."""
         has_target = (
             self.target_trajectory is not None
@@ -632,7 +638,9 @@ class MotionMatchingRequest(BaseModel):
             or self.target_keypoints is not None
         )
         if not has_target:
-            raise ValueError("Must specify at least one target (trajectory, markers, or keypoints)")
+            raise ValueError(
+                "Must specify at least one target (trajectory, markers, or keypoints)"
+            )
         return self
 
 
@@ -643,23 +651,25 @@ class MotionMatchingResult(BaseModel):
 
     request_id: str = Field(..., description="Associated request identifier")
     success: bool = Field(..., description="Whether matching succeeded")
-    matched_trajectory: Optional[MotionTrajectory] = Field(
+    matched_trajectory: MotionTrajectory | None = Field(
         default=None, description="Matched joint trajectory"
     )
-    error_metrics: Dict[str, float] = Field(
+    error_metrics: dict[str, float] = Field(
         default_factory=dict,
         description="Error metrics (RMSE, max error, etc.)",
     )
-    iterations: Optional[int] = Field(default=None, description="Solver iterations")
-    solve_time: Optional[float] = Field(
+    iterations: int | None = Field(default=None, description="Solver iterations")
+    solve_time: float | None = Field(
         default=None, description="Solve time (seconds)", ge=0
     )
-    message: Optional[str] = Field(default=None, description="Status message")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    message: str | None = Field(default=None, description="Status message")
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
 
     @field_validator("solve_time")
     @classmethod
-    def check_solve_time_finite(cls, v: Optional[float]) -> Optional[float]:
+    def check_solve_time_finite(cls, v: float | None) -> float | None:
         if v is not None and not np.isfinite(v):
             raise ValueError("Solve time must be finite")
         return v
@@ -680,7 +690,7 @@ def deserialize_model(json_str: str, model_class: type) -> BaseModel:
     return model_class.model_validate_json(json_str)
 
 
-def save_model(model: BaseModel, path: Union[str, Path]) -> None:
+def save_model(model: BaseModel, path: str | Path) -> None:
     """Save a Pydantic model to a JSON file."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -688,9 +698,9 @@ def save_model(model: BaseModel, path: Union[str, Path]) -> None:
         f.write(serialize_model(model))
 
 
-def load_model(json_path: Union[str, Path], model_class: type) -> BaseModel:
+def load_model(json_path: str | Path, model_class: type) -> BaseModel:
     """Load a Pydantic model from a JSON file."""
-    with open(json_path, "r") as f:
+    with open(json_path) as f:
         return deserialize_model(f.read(), model_class)
 
 

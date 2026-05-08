@@ -32,7 +32,7 @@ def load_subsystem_registry(registry_path: str) -> list[dict[str, Any]]:
         print(f"ERROR: Subsystem registry not found at {registry_path}")
         sys.exit(2)
 
-    with open(path, "r") as f:
+    with open(path) as f:
         data = yaml.safe_load(f)
 
     return data.get("subsystems", [])
@@ -49,11 +49,14 @@ def run_tests_for_path(test_path: str, verbose: bool = False) -> tuple[bool, str
         return True, f"SKIP: Test path {test_path} does not exist"
 
     cmd = [
-        sys.executable, "-m", "pytest",
+        sys.executable,
+        "-m",
+        "pytest",
         test_path,
         "-q",
         "--tb=no",
-        "-W", "ignore::DeprecationWarning",
+        "-W",
+        "ignore::DeprecationWarning",
     ]
 
     try:
@@ -161,7 +164,8 @@ def main() -> int:
         description="Check that production subsystems have passing tests"
     )
     parser.add_argument(
-        "--verbose", "-v",
+        "--verbose",
+        "-v",
         action="store_true",
         help="Print detailed test output",
     )

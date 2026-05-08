@@ -70,7 +70,10 @@ def sample_calibration() -> Calibration:
         cameras={
             "cam_0": {
                 "intrinsics": {"fx": 800.0, "fy": 800.0, "cx": 640.0, "cy": 480.0},
-                "extrinsics": {"rotation": [[1, 0, 0], [0, 1, 0], [0, 0, 1]], "translation": [0, 0, 0]},
+                "extrinsics": {
+                    "rotation": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+                    "translation": [0, 0, 0],
+                },
             }
         },
         unit_system="meters",
@@ -99,9 +102,18 @@ def sample_skeleton() -> SkeletonRig:
     return SkeletonRig(
         id="skeleton_001",
         joints={
-            "pelvis": JointDef(name="pelvis", parent=None, children=["spine"], tpose_offset=[0, 0, 0]),
-            "spine": JointDef(name="spine", parent="pelvis", children=["neck"], tpose_offset=[0, 0.1, 0]),
-            "neck": JointDef(name="neck", parent="spine", children=[], tpose_offset=[0, 0.15, 0]),
+            "pelvis": JointDef(
+                name="pelvis", parent=None, children=["spine"], tpose_offset=[0, 0, 0]
+            ),
+            "spine": JointDef(
+                name="spine",
+                parent="pelvis",
+                children=["neck"],
+                tpose_offset=[0, 0.1, 0],
+            ),
+            "neck": JointDef(
+                name="neck", parent="spine", children=[], tpose_offset=[0, 0.15, 0]
+            ),
         },
         root_joint="pelvis",
         up_axis="+Y",
@@ -112,15 +124,23 @@ def sample_skeleton() -> SkeletonRig:
 def sample_joint_trajectory(sample_skeleton: SkeletonRig) -> JointTrajectory:
     """Create a sample joint trajectory."""
     frames = [
-        JointStateFrame(timestamp=0.0, q=[0.0] * sample_skeleton.num_dofs, frame_index=0),
-        JointStateFrame(timestamp=0.033, q=[0.1] * sample_skeleton.num_dofs, frame_index=1),
-        JointStateFrame(timestamp=0.066, q=[0.2] * sample_skeleton.num_dofs, frame_index=2),
+        JointStateFrame(
+            timestamp=0.0, q=[0.0] * sample_skeleton.num_dofs, frame_index=0
+        ),
+        JointStateFrame(
+            timestamp=0.033, q=[0.1] * sample_skeleton.num_dofs, frame_index=1
+        ),
+        JointStateFrame(
+            timestamp=0.066, q=[0.2] * sample_skeleton.num_dofs, frame_index=2
+        ),
     ]
     return JointTrajectory(id="traj_001", skeleton=sample_skeleton, frames=frames)
 
 
 @pytest.fixture
-def sample_motion_trajectory(sample_skeleton: SkeletonRig, sample_joint_trajectory: JointTrajectory) -> MotionTrajectory:
+def sample_motion_trajectory(
+    sample_skeleton: SkeletonRig, sample_joint_trajectory: JointTrajectory
+) -> MotionTrajectory:
     """Create a sample motion trajectory."""
     return MotionTrajectory(
         id="motion_001",
@@ -202,7 +222,9 @@ class TestCameraExtrinsics:
     def test_invalid_translation_shape(self):
         """Test that invalid translation shape raises error."""
         with pytest.raises(ValueError, match="length 3"):
-            CameraExtrinsics(rotation=[[1, 0, 0], [0, 1, 0], [0, 0, 1]], translation=[0, 0])
+            CameraExtrinsics(
+                rotation=[[1, 0, 0], [0, 1, 0], [0, 0, 1]], translation=[0, 0]
+            )
 
 
 class TestCalibration:
@@ -220,7 +242,16 @@ class TestCalibration:
         with pytest.raises(ValueError, match="greater than 0"):
             Calibration(
                 id="calib_001",
-                cameras={"cam_0": {"intrinsics": {"fx": 800.0, "fy": 800.0, "cx": 640.0, "cy": 480.0}}},
+                cameras={
+                    "cam_0": {
+                        "intrinsics": {
+                            "fx": 800.0,
+                            "fy": 800.0,
+                            "cx": 640.0,
+                            "cy": 480.0,
+                        }
+                    }
+                },
                 source_fps=0.0,
             )
 
@@ -229,7 +260,14 @@ class TestCalibration:
         with pytest.raises(ValueError, match="missing intrinsics"):
             Calibration(
                 id="calib_001",
-                cameras={"cam_0": {"extrinsics": {"rotation": [[1, 0, 0], [0, 1, 0], [0, 0, 1]], "translation": [0, 0, 0]}}},
+                cameras={
+                    "cam_0": {
+                        "extrinsics": {
+                            "rotation": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+                            "translation": [0, 0, 0],
+                        }
+                    }
+                },
                 source_fps=30.0,
             )
 
@@ -238,7 +276,16 @@ class TestCalibration:
         with pytest.raises(ValueError):
             Calibration(
                 id="calib_001",
-                cameras={"cam_0": {"intrinsics": {"fx": 800.0, "fy": 800.0, "cx": 640.0, "cy": 480.0}}},
+                cameras={
+                    "cam_0": {
+                        "intrinsics": {
+                            "fx": 800.0,
+                            "fy": 800.0,
+                            "cx": 640.0,
+                            "cy": 480.0,
+                        }
+                    }
+                },
                 unit_system="invalid",  # type: ignore
                 source_fps=30.0,
             )
@@ -248,7 +295,16 @@ class TestCalibration:
         with pytest.raises(ValueError):
             Calibration(
                 id="calib_001",
-                cameras={"cam_0": {"intrinsics": {"fx": 800.0, "fy": 800.0, "cx": 640.0, "cy": 480.0}}},
+                cameras={
+                    "cam_0": {
+                        "intrinsics": {
+                            "fx": 800.0,
+                            "fy": 800.0,
+                            "cx": 640.0,
+                            "cy": 480.0,
+                        }
+                    }
+                },
                 source_fps=30.0,
                 world_up_axis="invalid",  # type: ignore
             )
@@ -563,7 +619,9 @@ class TestJointTrajectory:
         """Test DOF consistency validation."""
         frames = [
             JointStateFrame(timestamp=0.0, q=[0.0] * sample_skeleton.num_dofs),
-            JointStateFrame(timestamp=0.033, q=[0.0] * (sample_skeleton.num_dofs + 1)),  # Wrong DOF
+            JointStateFrame(
+                timestamp=0.033, q=[0.0] * (sample_skeleton.num_dofs + 1)
+            ),  # Wrong DOF
         ]
         with pytest.raises(ValueError, match="DOFs"):
             JointTrajectory(id="traj_001", skeleton=sample_skeleton, frames=frames)
@@ -583,7 +641,9 @@ class TestMotionTrajectory:
         assert sample_motion_trajectory.sport == "golf"
         assert sample_motion_trajectory.club == "driver"
 
-    def test_skeleton_mismatch(self, sample_skeleton: SkeletonRig, sample_joint_trajectory: JointTrajectory):
+    def test_skeleton_mismatch(
+        self, sample_skeleton: SkeletonRig, sample_joint_trajectory: JointTrajectory
+    ):
         """Test that skeleton mismatch raises error."""
         other_skeleton = SkeletonRig(
             id="other_skeleton",
@@ -649,7 +709,9 @@ class TestMotionMatchingResult:
     def test_negative_solve_time(self):
         """Test that negative solve time raises error."""
         with pytest.raises(ValueError, match="greater than or equal to 0"):
-            MotionMatchingResult(request_id="request_001", success=True, solve_time=-1.0)
+            MotionMatchingResult(
+                request_id="request_001", success=True, solve_time=-1.0
+            )
 
 
 # =============================================================================
@@ -745,8 +807,14 @@ class TestMarkerTrajectory:
     def test_valid_trajectory(self):
         """Test valid marker trajectory creation."""
         frames = [
-            MarkerFrame(timestamp=0.0, markers={"LASI": Marker(name="LASI", x=0.1, y=0.2, z=0.3)}),
-            MarkerFrame(timestamp=0.033, markers={"LASI": Marker(name="LASI", x=0.11, y=0.21, z=0.31)}),
+            MarkerFrame(
+                timestamp=0.0,
+                markers={"LASI": Marker(name="LASI", x=0.1, y=0.2, z=0.3)},
+            ),
+            MarkerFrame(
+                timestamp=0.033,
+                markers={"LASI": Marker(name="LASI", x=0.11, y=0.21, z=0.31)},
+            ),
         ]
         traj = MarkerTrajectory(id="traj_001", frames=frames)
         assert traj.num_frames == 2
