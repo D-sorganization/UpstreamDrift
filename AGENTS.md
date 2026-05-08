@@ -63,6 +63,18 @@ the modules most often missed.
 `src/shared/python/motion_matching/`
 - `target.py`, `club_target.py`, `load_club_target.py`,
   `loaders/` — mocap target structures and loaders (xlsx / C3D / JSON).
+- `BodyTarget`, `ClubBallTarget`, `MultiSourceTarget` —
+  `src/shared/python/motion_matching/`.  Frozen dataclasses + an
+  aggregator covering club, ball-aware, and full-body capture
+  targets.  Cost-function code dispatches on `has_club()`,
+  `has_ball()`, `has_body()`.  See
+  [ADR 0006](docs/adr/0006-multi-source-motion-targets.md).
+- `load_body_target`, `load_club_target` — format-agnostic dispatcher
+  loaders in `src/shared/python/motion_matching/`.  Route on file
+  extension to the per-format loader under `loaders/`.
+- `default_body_segments` — helper returning the canonical full-body
+  segment label set; use it instead of hard-coding segment names in
+  cost terms or visualisations.
 - `align_to_simulation_grid.py` — re-time mocap onto a sim grid.
 - `cost.py`, `final_cost.py` — cost terms and aggregators.
 - `validators.py`, `validate_theta.py` — DbC checks for inputs.
