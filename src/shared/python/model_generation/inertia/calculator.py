@@ -96,8 +96,45 @@ class InertiaResult:
             center_of_mass=self.center_of_mass,
         )
 
+    def as_matrix(self) -> np.ndarray:
+        """Return inertia as 3x3 matrix."""
+        return np.array(
+            [
+                [self.ixx, self.ixy, self.ixz],
+                [self.ixy, self.iyy, self.iyz],
+                [self.ixz, self.iyz, self.izz],
+            ]
+        )
+
+    def as_urdf_dict(self) -> dict[str, float]:
+        """Return inertia values for URDF format."""
+        return {
+            "ixx": self.ixx,
+            "ixy": self.ixy,
+            "ixz": self.ixz,
+            "iyy": self.iyy,
+            "iyz": self.iyz,
+            "izz": self.izz,
+        }
+
+    def as_dict(self) -> dict[str, Any]:
+        """Convert to dictionary (humanoid builder format)."""
+        return {
+            "ixx": self.ixx,
+            "iyy": self.iyy,
+            "izz": self.izz,
+            "ixy": self.ixy,
+            "ixz": self.ixz,
+            "iyz": self.iyz,
+            "center_of_mass": list(self.center_of_mass),
+            "volume": self.volume,
+            "mass": self.mass,
+            "was_watertight": self.is_watertight,
+            "mode": self.mode.value,
+        }
+
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
+        """Convert to dictionary (core format)."""
         return {
             "ixx": self.ixx,
             "iyy": self.iyy,
@@ -115,7 +152,22 @@ class InertiaResult:
 
     def is_valid(self) -> bool:
         """Check if inertia values are physically valid."""
-        return self.to_inertia().is_positive_definite()
+        if self.ixx <= 0 or self.iyy <= 0 or self.izz <= 0:
+            return False
+        # Triangle inequality
+        if not (abs(self.ixx - self.iyy) <= self.izz <= self.ixx + self.iyy):
+            return False
+        if not (abs(self.iyy - self.izz) <= self.ixx <= self.iyy + self.izz):
+            return False
+        return abs(self.ixx - self.izz) <= self.iyy <= self.ixx + self.izz
+
+    def validate_positive_definite(self) -> bool:
+        """Check if inertia matrix is positive definite."""
+        try:
+            np.linalg.cholesky(self.as_matrix())
+            return True
+        except np.linalg.LinAlgError:
+            return False
 
     @precondition(lambda new_mass: new_mass > 0, "New mass must be positive")
     def scale_to_mass(self, new_mass: float) -> InertiaResult:
@@ -136,6 +188,24 @@ class InertiaResult:
             mode=self.mode,
             is_watertight=self.is_watertight,
             source=self.source,
+        )
+
+    @classmethod
+    def create_default(cls, mass: float = 1.0) -> InertiaResult:
+        """Create default inertia (small sphere approximation)."""
+        if not (mass is not None):
+            raise ValueError("mass must be provided")
+        import math
+
+        i_default = 0.1 * mass
+        _min_volume = (4.0 / 3.0) * math.pi * (0.01**3)
+        return cls(
+            ixx=i_default,
+            iyy=i_default,
+            izz=i_default,
+            volume=_min_volume,
+            mass=mass,
+            mode=InertiaMode.PRIMITIVE,
         )
 
 
