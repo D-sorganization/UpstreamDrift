@@ -48,34 +48,36 @@ class WheelEventFilter(QObject):
         return False
 
 
-# Module-level cache to keep filter instances alive and prevent GC
-_filter_cache: dict[int, WheelEventFilter] = {}
+# Attribute name for storing filter reference on widget
+_WHEEL_FILTER_ATTR = "_wheel_event_filter"
 
 
 def suppress_wheel_on_widget(widget) -> None:
     """Convenience function to install wheel event filter on a widget.
     
-    The filter instance is stored in a module-level cache keyed by widget ID
-    to prevent garbage collection while the widget is still in use.
+    The filter instance is stored as an attribute on the widget itself,
+    ensuring it remains alive for the lifetime of the widget. When the
+    widget is destroyed, the filter is automatically garbage collected.
     
     Args:
         widget: The widget to suppress wheel events on.
     """
     filter_instance = WheelEventFilter()
-    _filter_cache[id(widget)] = filter_instance
+    setattr(widget, _WHEEL_FILTER_ATTR, filter_instance)
     widget.installEventFilter(filter_instance)
 
 
 def suppress_wheel_on_widgets(*widgets) -> None:
     """Convenience function to install wheel event filter on multiple widgets.
     
-    Each filter instance is stored in a module-level cache keyed by widget ID
-    to prevent garbage collection while the widget is still in use.
+    Each filter instance is stored as an attribute on its respective widget,
+    ensuring it remains alive for the lifetime of the widget. When widgets
+    are destroyed, their filters are automatically garbage collected.
     
     Args:
         widgets: Variable number of widgets to suppress wheel events on.
     """
     for widget in widgets:
         filter_instance = WheelEventFilter()
-        _filter_cache[id(widget)] = filter_instance
+        setattr(widget, _WHEEL_FILTER_ATTR, filter_instance)
         widget.installEventFilter(filter_instance)
