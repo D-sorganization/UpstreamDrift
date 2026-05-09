@@ -67,6 +67,8 @@ Optional Rust extensions built via Maturin for performance-critical paths.
 ## Key Directories
 
 - `src/` — core library: physics wrappers, URDF loaders, simulation runner
+- `src/shared/python/pose_interchange/` — engine-agnostic canonical pose + per-engine adapters / services
+- `src/tools/pose_studio/` — interactive cross-engine pose editor (launcher tile: `pose_studio`)
 - `tests/` — pytest suite (unit, integration, live simulation)
 - `scripts/` — CI helpers including `check_file_size_budget.py`
 - `scripts/config/file_size_budget.json` — per-file size exceptions
