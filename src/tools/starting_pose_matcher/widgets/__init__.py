@@ -17,12 +17,15 @@ from .joint_slider_panel import (
     PoseState,
     JointSliderPanel,
 )
+from .run_fit_button import FitWorker, RunFitButton
 
 __all__ = [
     "CalibrationDialog",
     "CalibrationResult",
     "DEFAULT_JOINT_COORDS",
+    "FitWorker",
     "JointSliderPanel",
     "PoseState",
+    "RunFitButton",
     "build_subject_record",
 ]

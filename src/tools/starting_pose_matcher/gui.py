@@ -1282,22 +1282,34 @@ class StartingPoseMatcher(QMainWindow):
         v.addWidget(self.cb_fit_scale)
 
         # Engine selector — populated live from the canonical fit_swing
-        # provider registry (#4707 slice 1/3). The Run-fit QThread (slice 2)
-        # and Save-fit serialization (slice 3) are intentionally NOT wired
-        # here; this combo only exposes the user's engine choice.
-        # TODO(#4707 slice 2/3): wire `selected_engine` into a Run-fit
-        # QThread that calls provider_registry.get_provider(...).fit_swing
-        # and then into the save-fit JSON payload.
+        # provider registry (#4707 slice 1/3). The Run-fit QThread is
+        # wired below (slice 2/3). Save-fit JSON serialization is the
+        # remaining follow-up (slice 3/3).
+        # TODO(#4707 slice 3/3): persist `RunFitButton.last_result` into
+        # the save-fit JSON payload.
         engine_row = QHBoxLayout()
         engine_row.addWidget(QLabel("Fit engine:"))
         self.combo_fit_engine = QComboBox()
         self.combo_fit_engine.setToolTip(
-            "Physics engine used by the (upcoming) Run-fit action. "
+            "Physics engine used by the Run-fit action. "
             "Populated live from motion_matching.provider_registry."
         )
         self._populate_engine_combo()
+        self.combo_fit_engine.currentTextChanged.connect(self._on_fit_engine_changed)
         engine_row.addWidget(self.combo_fit_engine, stretch=1)
         v.addLayout(engine_row)
+
+        # Run-fit QThread widget — slice 2/3 of #4707.
+        from src.tools.starting_pose_matcher.widgets.run_fit_button import (
+            RunFitButton,
+        )
+
+        self.run_fit_button = RunFitButton(self)
+        self.run_fit_button.set_inputs(
+            target=self._live_body_target,
+            engine_name=self.combo_fit_engine.currentText(),
+        )
+        v.addWidget(self.run_fit_button)
 
         # One snap button per pose-slot
         for key, slot in self.poses.items():
@@ -1340,6 +1352,14 @@ class StartingPoseMatcher(QMainWindow):
                 combo.setCurrentText(default)
         finally:
             combo.blockSignals(False)
+
+    def _on_fit_engine_changed(self, engine_name: str) -> None:
+        """Forward combo selection to the run-fit widget (#4707 slice 2)."""
+        if hasattr(self, "run_fit_button"):
+            self.run_fit_button.set_inputs(
+                target=self._live_body_target,
+                engine_name=engine_name,
+            )
 
     @property
     def selected_engine(self) -> str:
@@ -1610,6 +1630,11 @@ class StartingPoseMatcher(QMainWindow):
             return
 
         self._live_body_target = body
+        if hasattr(self, "run_fit_button"):
+            self.run_fit_button.set_inputs(
+                target=body,
+                engine_name=self.combo_fit_engine.currentText(),
+            )
         n = int(body.marker_xyz.shape[0])
         m = int(body.marker_xyz.shape[1])
         self.lbl_c3d_body.setText(
