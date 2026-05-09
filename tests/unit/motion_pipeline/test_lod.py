@@ -62,7 +62,12 @@ EXEMPT_RELATIVE_PATHS = frozenset(
 
 
 def _collect_imports(file_path: Path) -> list[tuple[int, str]]:
-    """Return ``[(lineno, module_name), ...]`` for every Import/ImportFrom."""
+    """Return ``[(lineno, module_name), ...]`` for every Import/ImportFrom.
+
+    For ``ImportFrom`` nodes, both the module name and each imported symbol
+    are recorded. This catches patterns like ``from src import engines`` where
+    the forbidden root appears as an imported name rather than in the module.
+    """
     tree = ast.parse(file_path.read_text(encoding="utf-8"), filename=str(file_path))
     out: list[tuple[int, str]] = []
     for node in ast.walk(tree):
@@ -73,7 +78,11 @@ def _collect_imports(file_path: Path) -> list[tuple[int, str]]:
             # ``from . import x`` -> module is None; skip relative imports.
             if node.module is None or node.level:
                 continue
+            # Record the module itself
             out.append((node.lineno, node.module))
+            # Also record imported names to catch ``from src import engines``
+            for alias in node.names:
+                out.append((node.lineno, alias.name))
     return out
 
 
