@@ -99,6 +99,32 @@ the modules most often missed.
     plot_cartesian_delta_summary, summarize_for_pr_comment}` —
     input-MAT requested-vs-resolved diagnostics.
 
+### Body-part visualisation toolkit
+`src/shared/python/body_part_viz/`
+- `body_part_viz` package with shapes / fitters / renderers / asset
+  library — the **canonical shape stack** for any tool that draws body
+  segments.  See [ADR 0008](docs/adr/0008-body-part-viz-toolkit.md).
+- `BodyPartShape`, `ShapeFitter`, `ShapeRenderer` — runtime-checkable
+  Protocols.  Implementations live under `shapes/`, `fitters/`,
+  `renderers/`.
+- `MatplotlibRenderer` — **canonical 3D renderer for any new tool that
+  needs marker / mesh rendering.**  A `PyQtGLRenderer` ships alongside
+  for tools that need GPU-rate redraws; both implement the same
+  `ShapeRenderer` Protocol.
+- `default_body_segments` (in `motion_matching/`) — canonical full-body
+  segment label set; pair with this toolkit to drive segment lists in
+  the C3D Viewer, the matcher, and the URDF generator.
+- `SegmentVizSet` / `SegmentVizSpec` — JSON v2 persistence with
+  auto-migration from the legacy v1 `SegmentSet`.
+- `ShapeLibrary` — bundled mesh resolver under
+  `assets/body_part_shapes/default/`; named shapes (head, torso,
+  upper_arm, …) are available from a fresh install.
+- `urdf_bridge.shape_to_urdf_visual` — re-use the same shape vocabulary
+  as URDF visual elements; a custom mesh imported in the C3D Viewer is
+  re-usable as a URDF visual link without re-modelling.
+- See `docs/user_guide/body_part_viz/` for end-user workflow guides
+  and `docs/api/body_part_viz.md` for the full API surface.
+
 ### Pose editor (interactive joint-angle UI)
 `src/shared/python/pose_editor/`
 - `core.{JointType, JointInfo, PoseEditorState}` — joint metadata
