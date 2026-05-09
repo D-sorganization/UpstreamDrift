@@ -33,10 +33,39 @@ WRAPPER = (
 )
 
 
+def _check_viewer_deps_available() -> bool:
+    """Check if optional C3D viewer dependencies are available.
+
+    The C3D viewer requires pandas and GUI stack. Skip the test if these
+    optional dependencies are not installed rather than hard-failing.
+    """
+    try:
+        import pandas  # noqa: F401
+    except ImportError:
+        return False
+    try:
+        from PyQt5 import QtWidgets  # noqa: F401
+    except ImportError:
+        try:
+            from PyQt6 import QtWidgets  # noqa: F401
+        except ImportError:
+            return False
+    return True
+
+
 def test_run_c3d_viewer_imports_cleanly() -> None:
-    """Spawning the wrapper must not produce an ``ImportError`` traceback."""
+    """Spawning the wrapper must not produce an ``ImportError`` traceback.
+
+    Skipped when optional C3D viewer dependencies (pandas, PyQt) are unavailable.
+    """
     if not WRAPPER.exists():
         pytest.skip(f"wrapper missing: {WRAPPER}")
+
+    if not _check_viewer_deps_available():
+        pytest.skip(
+            "C3D viewer optional dependencies (pandas, PyQt) not available. "
+            "Install with: pip install pandas PyQt5"
+        )
 
     env = os.environ.copy()
     env["QT_QPA_PLATFORM"] = "offscreen"
