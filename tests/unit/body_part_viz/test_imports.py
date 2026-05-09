@@ -33,4 +33,12 @@ def test_subpackages_importable() -> None:
 
     for pkg in (shapes, fitters, renderers):
         assert hasattr(pkg, "__all__")
-        assert pkg.__all__ == []
+    # ``shapes`` is populated as concrete shapes land (issue #4759).
+    assert "LineShape" in shapes.__all__
+    assert "CylinderShape" in shapes.__all__
+    assert "EllipsoidShape" in shapes.__all__
+    assert "CapsuleShape" in shapes.__all__
+    assert "CompositeShape" in shapes.__all__
+    # ``fitters`` and ``renderers`` are still empty in this wave.
+    assert fitters.__all__ == []
+    assert renderers.__all__ == []
