@@ -392,7 +392,7 @@ def launch_pyqt6_app(config: LaunchConfig) -> int:
         import importlib
 
         from PyQt6.QtCore import QEvent, QObject
-                from PyQt6.QtWidgets import (
+        from PyQt6.QtWidgets import (
             QApplication,
             QComboBox,
             QDoubleSpinBox,
