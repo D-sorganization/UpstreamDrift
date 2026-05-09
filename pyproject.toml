@@ -119,6 +119,8 @@ dev = [
     # Type stubs for untyped third-party packages (GH2034)
     "types-PyYAML>=6.0",
     "scipy-stubs>=1.13.0",
+    # Required for URDF schema validation tests (issue #4597)
+    "lxml>=5.0.0",
 ]
 
 # GUI testing (requires PyQt6)
