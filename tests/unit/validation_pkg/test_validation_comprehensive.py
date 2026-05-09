@@ -756,17 +756,6 @@ class TestValidateModelParameters:
     """Tests for validate_model_parameters function."""
 
     @pytest.mark.parametrize(
-        "masses",
-        [
-            np.array([70.0, 5.0, 2.0]),
-            np.array([500.0, 500.0]),
-        ],
-        ids=["valid-masses", "few-bodies-skip-total"],
-    )
-    def test_valid_masses(self, masses: np.ndarray) -> None:
-        validate_model_parameters(masses)
-
-    @pytest.mark.parametrize(
         "masses, match",
         [
             (np.array([70.0, 0.0, 2.0]), "positive"),

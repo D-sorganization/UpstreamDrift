@@ -88,9 +88,13 @@ class TestUnifiedLaunchConditions:
             spin_rate_rpm=2500.0,
         )
         # 100 mph ≈ 44.704 m/s
-        assert abs(launch.ball_speed - 44.704) < 0.01
+        assert abs(launch.ball_speed - 44.704) < 0.01, (
+            "Assertion failed: abs(launch.ball_speed - 44.704) < 0.01"
+        )
         # 15° in radians
-        assert abs(launch.launch_angle - math.radians(15.0)) < 0.001
+        assert abs(launch.launch_angle - math.radians(15.0)) < 0.001, (
+            "Assertion failed: abs(launch.launch_angle - math.radians(15.0)) < 0.001"
+        )
 
     def test_initial_velocity_vector(
         self, driver_launch: UnifiedLaunchConditions
@@ -98,13 +102,15 @@ class TestUnifiedLaunchConditions:
         """Test initial velocity vector computation."""
         velocity = driver_launch.get_initial_velocity()
 
-        assert velocity.shape == (3,)
+        assert velocity.shape == (3,), "Assertion failed: velocity.shape == (3,)"
         # Speed should match ball_speed
         speed = np.linalg.norm(velocity)
-        assert abs(speed - driver_launch.ball_speed) < 0.1
+        assert abs(speed - driver_launch.ball_speed) < 0.1, (
+            "Assertion failed: abs(speed - driver_launch.ball_speed) < 0.1"
+        )
 
         # Z component should be positive (upward launch)
-        assert velocity[2] > 0
+        assert velocity[2] > 0, "Assertion failed: velocity[2] > 0"
 
     def test_spin_vector_backspin(self) -> None:
         """Test spin vector for pure backspin."""
@@ -116,11 +122,15 @@ class TestUnifiedLaunchConditions:
         )
         spin = launch.get_spin_vector()
 
-        assert spin.shape == (3,)
+        assert spin.shape == (3,), "Assertion failed: spin.shape == (3,)"
         # Pure backspin: axis pointing left (-Y)
-        assert spin[1] < 0
-        assert abs(spin[0]) < 1e-10  # No X component
-        assert abs(spin[2]) < 1e-10  # No Z component
+        assert spin[1] < 0, "Assertion failed: spin[1] < 0"
+        assert (
+            abs(spin[0]) < 1e-10
+        )  # No X component, "Assertion failed: abs(spin[0]) < 1e-10  # No X component"
+        assert (
+            abs(spin[2]) < 1e-10
+        )  # No Z component, "Assertion failed: abs(spin[2]) < 1e-10  # No Z component"
 
     def test_wind_vector_headwind(self) -> None:
         """Test wind vector for headwind."""
@@ -133,11 +143,15 @@ class TestUnifiedLaunchConditions:
         )
         wind = launch.get_wind_vector()
 
-        assert wind.shape == (3,)
+        assert wind.shape == (3,), "Assertion failed: wind.shape == (3,)"
         # Headwind: negative X direction
-        assert wind[0] < 0
-        assert abs(wind[1]) < 1e-10  # No Y component
-        assert wind[2] == 0.0  # No vertical wind
+        assert wind[0] < 0, "Assertion failed: wind[0] < 0"
+        assert (
+            abs(wind[1]) < 1e-10
+        )  # No Y component, "Assertion failed: abs(wind[1]) < 1e-10  # No Y component"
+        assert (
+            wind[2] == 0.0
+        )  # No vertical wind, "Assertion failed: wind[2] == 0.0  # No vertical wind"
 
     def test_wind_vector_crosswind(self) -> None:
         """Test wind vector for crosswind."""
@@ -151,8 +165,10 @@ class TestUnifiedLaunchConditions:
         wind = launch.get_wind_vector()
 
         # Crosswind: negative Y direction
-        assert abs(wind[0]) < 0.1  # Small X component due to float precision
-        assert wind[1] < 0  # Negative Y
+        assert (
+            abs(wind[0]) < 0.1
+        )  # Small X component due to float precision, "Assertion failed: abs(wind[0]) < 0.1  # Small X component due to float precision"
+        assert wind[1] < 0  # Negative Y, "Assertion failed: wind[1] < 0  # Negative Y"
 
     def test_no_wind(self) -> None:
         """Test wind vector when no wind."""
@@ -164,7 +180,9 @@ class TestUnifiedLaunchConditions:
         )
         wind = launch.get_wind_vector()
 
-        assert np.allclose(wind, np.zeros(3))
+        assert np.allclose(wind, np.zeros(3)), (
+            "Assertion failed: np.allclose(wind, np.zeros(3))"
+        )
 
 
 # =============================================================================
@@ -180,20 +198,40 @@ class TestWaterlooPennerModel:
         model = WaterlooPennerModel()
         result = model.simulate(driver_launch)
 
-        assert isinstance(result, FlightResult)
-        assert result.model_name == "Waterloo/Penner"
-        assert len(result.trajectory) > 10
-        assert result.carry_distance > 100  # At least 100m
-        assert result.carry_distance < 350  # Less than 350m (realistic)
-        assert result.max_height > 5  # At least 5m apex
-        assert result.flight_time > 2.0  # At least 2 seconds
+        assert isinstance(result, FlightResult), (
+            "Assertion failed: isinstance(result, FlightResult)"
+        )
+        assert result.model_name == "Waterloo/Penner", (
+            "Assertion failed: result.model_name == Waterloo/Penner"
+        )
+        assert len(result.trajectory) > 10, (
+            "Assertion failed: len(result.trajectory) > 10"
+        )
+        assert (
+            result.carry_distance > 100
+        )  # At least 100m, "Assertion failed: result.carry_distance > 100  # At least 100m"
+        assert (
+            result.carry_distance < 350
+        )  # Less than 350m (realistic), "Assertion failed: result.carry_distance < 350  # Less than 350m (realistic)"
+        assert (
+            result.max_height > 5
+        )  # At least 5m apex, "Assertion failed: result.max_height > 5  # At least 5m apex"
+        assert (
+            result.flight_time > 2.0
+        )  # At least 2 seconds, "Assertion failed: result.flight_time > 2.0  # At least 2 seconds"
 
     def test_model_properties(self) -> None:
         """Test model property accessors."""
         model = WaterlooPennerModel()
-        assert model.name == "Waterloo/Penner"
-        assert "Waterloo" in model.description
-        assert "McPhee" in model.reference
+        assert model.name == "Waterloo/Penner", (
+            "Assertion failed: model.name == Waterloo/Penner"
+        )
+        assert "Waterloo" in model.description, (
+            "Assertion failed: Waterloo in model.description"
+        )
+        assert "McPhee" in model.reference, (
+            "Assertion failed: McPhee in model.reference"
+        )
 
 
 class TestMacDonaldHanzelyModel:
@@ -204,11 +242,21 @@ class TestMacDonaldHanzelyModel:
         model = MacDonaldHanzelyModel()
         result = model.simulate(driver_launch)
 
-        assert isinstance(result, FlightResult)
-        assert result.model_name == "MacDonald-Hanzely"
-        assert len(result.trajectory) > 10
-        assert result.carry_distance > 100
-        assert result.carry_distance < 350
+        assert isinstance(result, FlightResult), (
+            "Assertion failed: isinstance(result, FlightResult)"
+        )
+        assert result.model_name == "MacDonald-Hanzely", (
+            "Assertion failed: result.model_name == MacDonald-Hanzely"
+        )
+        assert len(result.trajectory) > 10, (
+            "Assertion failed: len(result.trajectory) > 10"
+        )
+        assert result.carry_distance > 100, (
+            "Assertion failed: result.carry_distance > 100"
+        )
+        assert result.carry_distance < 350, (
+            "Assertion failed: result.carry_distance < 350"
+        )
 
     def test_spin_decay(self, driver_launch: UnifiedLaunchConditions) -> None:
         """Test that spin decay affects trajectory."""
@@ -219,7 +267,9 @@ class TestMacDonaldHanzelyModel:
         result_slow = model_slow_decay.simulate(driver_launch)
 
         # Faster spin decay should result in less carry (less Magnus lift)
-        assert result_fast.carry_distance < result_slow.carry_distance
+        assert result_fast.carry_distance < result_slow.carry_distance, (
+            "Assertion failed: result_fast.carry_distance < result_slow.carry_distance"
+        )
 
 
 # =============================================================================
@@ -234,16 +284,24 @@ class TestFlightModelRegistry:
         """Test getting all models."""
         models = FlightModelRegistry.get_all_models()
 
-        assert len(models) == 7  # All 7 models
-        assert all(isinstance(m, BallFlightModel) for m in models)
+        assert (
+            len(models) == 7
+        )  # All 7 models, "Assertion failed: len(models) == 7  # All 7 models"
+        assert all(isinstance(m, BallFlightModel) for m in models), (
+            "Assertion failed: all(isinstance(m, BallFlightModel) for m in models)"
+        )
 
     def test_get_model_by_type(self) -> None:
         """Test getting model by type."""
         model = FlightModelRegistry.get_model(FlightModelType.WATERLOO_PENNER)
-        assert isinstance(model, WaterlooPennerModel)
+        assert isinstance(model, WaterlooPennerModel), (
+            "Assertion failed: isinstance(model, WaterlooPennerModel)"
+        )
 
         model = FlightModelRegistry.get_model(FlightModelType.NATHAN)
-        assert isinstance(model, ConstantCoefficientModel)
+        assert isinstance(model, ConstantCoefficientModel), (
+            "Assertion failed: isinstance(model, ConstantCoefficientModel)"
+        )
 
 
 # =============================================================================
@@ -258,8 +316,10 @@ class TestModelComparison:
         """Test comparing all models."""
         results = compare_models(driver_launch, FlightModelRegistry.get_all_models())
 
-        assert len(results) == 7
-        assert all(isinstance(r, FlightResult) for r in results.values())
+        assert len(results) == 7, "Assertion failed: len(results) == 7"
+        assert all(isinstance(r, FlightResult) for r in results.values()), (
+            "Assertion failed: all(isinstance(r, FlightResult) for r in results.values())"
+        )
 
     def test_models_agree_on_direction(
         self, driver_launch: UnifiedLaunchConditions
@@ -283,7 +343,9 @@ class TestModelComparison:
         carries = [r.carry_distance for r in results.values()]
 
         # All carries should be within 2x of each other (reasonable tolerance)
-        assert max(carries) / min(carries) < 2.0
+        assert max(carries) / min(carries) < 2.0, (
+            "Assertion failed: max(carries) / min(carries) < 2.0"
+        )
 
 
 # =============================================================================
@@ -313,7 +375,9 @@ class TestPhysicalPlausibility:
         high_result = model.simulate(high_spin)
 
         # Higher spin should produce more carry on a wedge (more lift)
-        assert high_result.carry_distance > low_result.carry_distance
+        assert high_result.carry_distance > low_result.carry_distance, (
+            "Assertion failed: high_result.carry_distance > low_result.carry_distance"
+        )
 
     def test_trajectory_lands_at_ground_level(
         self, driver_launch: UnifiedLaunchConditions
@@ -338,7 +402,9 @@ class TestPhysicalPlausibility:
                 f"{model.name} landing: {result.landing_angle}"
             )
             # Should be less than 90°
-            assert result.landing_angle < 90
+            assert result.landing_angle < 90, (
+                "Assertion failed: result.landing_angle < 90"
+            )
 
 
 # =============================================================================
@@ -357,13 +423,23 @@ class TestTrajectoryStructure:
         result = model.simulate(driver_launch)
 
         for point in result.trajectory:
-            assert isinstance(point, TrajectoryPoint)
-            assert isinstance(point.time, float)
-            assert point.position.shape == (3,)
-            assert point.velocity.shape == (3,)
+            assert isinstance(point, TrajectoryPoint), (
+                "Assertion failed: isinstance(point, TrajectoryPoint)"
+            )
+            assert isinstance(point.time, float), (
+                "Assertion failed: isinstance(point.time, float)"
+            )
+            assert point.position.shape == (3,), (
+                "Assertion failed: point.position.shape == (3,)"
+            )
+            assert point.velocity.shape == (3,), (
+                "Assertion failed: point.velocity.shape == (3,)"
+            )
             speed = np.linalg.norm(point.velocity)
-            assert speed >= 0
-            assert point.position[2] >= 0  # Height check
+            assert speed >= 0, "Assertion failed: speed >= 0"
+            assert (
+                point.position[2] >= 0
+            )  # Height check, "Assertion failed: point.position[2] >= 0  # Height check"
 
     def test_trajectory_time_monotonic(
         self, driver_launch: UnifiedLaunchConditions
@@ -382,7 +458,9 @@ class TestTrajectoryStructure:
         result = model.simulate(driver_launch)
 
         positions = result.to_position_array()
-        assert positions.shape == (len(result.trajectory), 3)
+        assert positions.shape == (len(result.trajectory), 3), (
+            "Assertion failed: positions.shape == (len(result.trajectory), 3)"
+        )
 
 
 if __name__ == "__main__":

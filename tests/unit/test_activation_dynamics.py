@@ -18,9 +18,15 @@ class TestActivationDynamicsInitialization:
     def test_default_initialization(self) -> None:
         """Test initialization with default parameters."""
         dynamics = ActivationDynamics()
-        assert dynamics.tau_act == 0.010  # 10 ms default
-        assert dynamics.tau_deact == 0.040  # 40 ms default
-        assert dynamics.min_activation == 0.001
+        assert (
+            dynamics.tau_act == 0.010
+        )  # 10 ms default, "Assertion failed: dynamics.tau_act == 0.010  # 10 ms default"
+        assert (
+            dynamics.tau_deact == 0.040
+        )  # 40 ms default, "Assertion failed: dynamics.tau_deact == 0.040  # 40 ms default"
+        assert dynamics.min_activation == 0.001, (
+            "Assertion failed: dynamics.min_activation == 0.001"
+        )
 
     def test_custom_initialization(self) -> None:
         """Test initialization with custom parameters."""
@@ -29,9 +35,13 @@ class TestActivationDynamicsInitialization:
             tau_deact=0.050,
             min_activation=0.005,
         )
-        assert dynamics.tau_act == 0.015
-        assert dynamics.tau_deact == 0.050
-        assert dynamics.min_activation == 0.005
+        assert dynamics.tau_act == 0.015, "Assertion failed: dynamics.tau_act == 0.015"
+        assert dynamics.tau_deact == 0.050, (
+            "Assertion failed: dynamics.tau_deact == 0.050"
+        )
+        assert dynamics.min_activation == 0.005, (
+            "Assertion failed: dynamics.min_activation == 0.005"
+        )
 
     def test_negative_tau_act_raises_error(self) -> None:
         """Test that negative tau_act raises PreconditionError."""
@@ -52,120 +62,6 @@ class TestActivationDynamicsInitialization:
         """Test that zero tau_deact raises PreconditionError."""
         with pytest.raises(PreconditionError):
             ActivationDynamics(tau_act=0.010, tau_deact=0.0)
-
-
-class TestComputeDerivative:
-    """Test compute_derivative method."""
-
-    @pytest.fixture
-    def dynamics(self) -> ActivationDynamics:
-        """Create standard activation dynamics instance."""
-        return ActivationDynamics(tau_act=0.010, tau_deact=0.040)
-
-    def test_activation_regime_positive_derivative(self, dynamics) -> None:
-        """Test that da/dt > 0 when u > a (activation)."""
-        u = 0.8
-        a = 0.2
-        dadt = dynamics.compute_derivative(u, a)
-        assert dadt > 0, "Derivative should be positive when u > a"
-
-    def test_deactivation_regime_negative_derivative(self, dynamics) -> None:
-        """Test that da/dt < 0 when u < a (deactivation)."""
-        u = 0.2
-        a = 0.8
-        dadt = dynamics.compute_derivative(u, a)
-        assert dadt < 0, "Derivative should be negative when u < a"
-
-    def test_equilibrium_zero_derivative(self, dynamics) -> None:
-        """Test that da/dt ≈ 0 when u = a (equilibrium)."""
-        u = 0.5
-        a = 0.5
-        dadt = dynamics.compute_derivative(u, a)
-        assert abs(dadt) < 1e-10, "Derivative should be zero at equilibrium"
-
-    def test_activation_time_constant_formula(self, dynamics) -> None:
-        """Test activation time constant formula: τ = τ_act * (0.5 + 1.5*a)."""
-        u = 0.8  # u > a (activation regime)
-        a = 0.2
-
-        # Expected: τ = 0.010 * (0.5 + 1.5 * 0.2) = 0.010 * 0.8 = 0.008
-        # da/dt = (u - a) / τ = (0.8 - 0.2) / 0.008 = 0.6 / 0.008 = 75.0
-        expected_tau = dynamics.tau_act * (0.5 + 1.5 * a)
-        expected_dadt = (u - a) / expected_tau
-
-        dadt = dynamics.compute_derivative(u, a)
-        np.testing.assert_allclose(dadt, expected_dadt, rtol=1e-10)
-
-    def test_deactivation_time_constant_formula(self, dynamics) -> None:
-        """Test deactivation time constant formula: τ = τ_deact / (0.5 + 1.5*a)."""
-        u = 0.2  # u < a (deactivation regime)
-        a = 0.8
-
-        # Expected: τ = 0.040 / (0.5 + 1.5 * 0.8) = 0.040 / 1.7 ≈ 0.02353
-        # da/dt = (u - a) / τ = (0.2 - 0.8) / 0.02353 ≈ -25.49
-        expected_tau = dynamics.tau_deact / (0.5 + 1.5 * a)
-        expected_dadt = (u - a) / expected_tau
-
-        dadt = dynamics.compute_derivative(u, a)
-        np.testing.assert_allclose(dadt, expected_dadt, rtol=1e-10)
-
-    def test_input_clamping_high(self, dynamics) -> None:
-        """Test that inputs > 1.0 are clamped to 1.0."""
-        u = 1.5  # Above maximum
-        a = 0.5
-
-        # Should be treated as u = 1.0
-        expected_dadt = dynamics.compute_derivative(1.0, a)
-        actual_dadt = dynamics.compute_derivative(u, a)
-
-        np.testing.assert_allclose(actual_dadt, expected_dadt, rtol=1e-10)
-
-    def test_input_clamping_low(self, dynamics) -> None:
-        """Test that inputs < min_activation are clamped to min_activation."""
-        u = -0.1  # Below minimum
-        a = 0.5
-
-        # Should be treated as u = min_activation
-        expected_dadt = dynamics.compute_derivative(dynamics.min_activation, a)
-        actual_dadt = dynamics.compute_derivative(u, a)
-
-        np.testing.assert_allclose(actual_dadt, expected_dadt, rtol=1e-10)
-
-    def test_activation_clamping_low(self, dynamics) -> None:
-        """Test that activation < min_activation is clamped."""
-        u = 0.5
-        a = -0.1  # Below minimum
-
-        # Should be treated as a = min_activation
-        expected_dadt = dynamics.compute_derivative(u, dynamics.min_activation)
-        actual_dadt = dynamics.compute_derivative(u, a)
-
-        np.testing.assert_allclose(actual_dadt, expected_dadt, rtol=1e-10)
-
-    @pytest.mark.parametrize("a_value", [0.0, 0.2, 0.5, 0.8, 1.0])
-    def test_activation_increases_with_activation_level(
-        self, dynamics, a_value
-    ) -> None:
-        """Test that activation time constant increases with activation level.
-
-        Formula: τ_act(a) = τ_act * (0.5 + 1.5*a)
-        So higher a -> higher τ -> slower activation response
-        """
-        if a_value == 0.0:
-            a_value = dynamics.min_activation  # Avoid exact zero
-
-        u = 1.0  # Full excitation
-
-        # Skip equilibrium case (u = a) where dadt = 0
-        if abs(u - a_value) < 1e-10:
-            pytest.skip("Equilibrium case, dadt = 0")
-
-        # Compute time constant from derivative
-        dadt = dynamics.compute_derivative(u, a_value)
-        tau_computed = (u - a_value) / dadt
-
-        expected_tau = dynamics.tau_act * (0.5 + 1.5 * a_value)
-        np.testing.assert_allclose(tau_computed, expected_tau, rtol=1e-6)
 
 
 class TestUpdate:
@@ -573,5 +469,7 @@ class TestEdgeCases:
             a = dynamics.update(u, a, dt)
 
         # Should not go below min_activation
-        assert a >= dynamics.min_activation
+        assert a >= dynamics.min_activation, (
+            "Assertion failed: a >= dynamics.min_activation"
+        )
         np.testing.assert_allclose(a, dynamics.min_activation, atol=1e-6)

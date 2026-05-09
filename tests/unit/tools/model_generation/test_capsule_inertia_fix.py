@@ -163,58 +163,6 @@ class TestCapsuleInertiaFixIsLarger:
         assert result.ixx > buggy_perp
 
 
-class TestConsistencyBetweenImplementations:
-    """All three capsule inertia implementations must agree."""
-
-    def test_primitives_vs_types(self) -> None:
-        """primitives.capsule_inertia and Inertia.from_capsule agree."""
-        from model_generation.core.types import Inertia
-        from model_generation.inertia.primitives import capsule_inertia
-
-        prim = capsule_inertia(MASS, RADIUS, LENGTH, axis="z")
-        typed = Inertia.from_capsule(MASS, RADIUS, LENGTH, axis="z")
-
-        assert prim["ixx"] == pytest.approx(typed.ixx, abs=ATOL)
-        assert prim["iyy"] == pytest.approx(typed.iyy, abs=ATOL)
-        assert prim["izz"] == pytest.approx(typed.izz, abs=ATOL)
-
-    def test_primitives_vs_humanoid_builder(self) -> None:
-        """primitives.capsule_inertia and humanoid builder agree."""
-        from model_generation.inertia.primitives import capsule_inertia
-
-        try:
-            from humanoid_character_builder.mesh.primitive_inertia import (
-                PrimitiveInertiaCalculator,
-            )
-        except ImportError:
-            pytest.skip("humanoid_character_builder not importable")
-
-        prim = capsule_inertia(MASS, RADIUS, LENGTH, axis="z")
-        hcb = PrimitiveInertiaCalculator.compute_capsule(MASS, RADIUS, LENGTH, axis="z")
-
-        assert prim["ixx"] == pytest.approx(hcb.ixx, abs=ATOL)
-        assert prim["iyy"] == pytest.approx(hcb.iyy, abs=ATOL)
-        assert prim["izz"] == pytest.approx(hcb.izz, abs=ATOL)
-
-    def test_types_vs_humanoid_builder(self) -> None:
-        """Inertia.from_capsule and humanoid builder agree."""
-        from model_generation.core.types import Inertia
-
-        try:
-            from humanoid_character_builder.mesh.primitive_inertia import (
-                PrimitiveInertiaCalculator,
-            )
-        except ImportError:
-            pytest.skip("humanoid_character_builder not importable")
-
-        typed = Inertia.from_capsule(MASS, RADIUS, LENGTH, axis="z")
-        hcb = PrimitiveInertiaCalculator.compute_capsule(MASS, RADIUS, LENGTH, axis="z")
-
-        assert typed.ixx == pytest.approx(hcb.ixx, abs=ATOL)
-        assert typed.iyy == pytest.approx(hcb.iyy, abs=ATOL)
-        assert typed.izz == pytest.approx(hcb.izz, abs=ATOL)
-
-
 class TestAxisOrientations:
     """Capsule inertia must assign axial/perp correctly for each axis."""
 

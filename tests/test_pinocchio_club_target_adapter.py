@@ -312,24 +312,3 @@ _SWING_DATASET_DIR = (
     / "club_swing_dataset"
 )
 _REAL_TRIALS = ("TW_ProV1", "TW_wiffle", "GW_ProV1", "GW_wiffle")
-
-
-@pytest.mark.parametrize("trial", _REAL_TRIALS)
-def test_real_robneal_trials_load(trial: str) -> None:
-    """Each shipped swing-dataset trial loads into a valid ``ClubTarget``."""
-    raw = _SWING_DATASET_DIR / f"{trial}.mat"
-    resampled = _SWING_DATASET_DIR / f"{trial}_targetKinematics.mat"
-    if not raw.is_file() or not resampled.is_file():
-        pytest.skip(f"Swing-dataset fixture not available: {raw}")
-
-    target = load_robneal_target(raw)
-    assert isinstance(target, ClubTarget)
-    assert target.source.filename == raw.name
-    assert target.source.subject_id == trial.split("_")[0]
-    assert target.time.shape[0] >= 2
-    assert target.butt.shape == (target.time.shape[0], 3)
-    assert target.clubhead.shape == (target.time.shape[0], 3)
-    assert target.club_quat.shape == (target.time.shape[0], 4)
-    assert 1 <= target.impact_idx <= target.time.shape[0]
-    qnorms = np.linalg.norm(target.club_quat, axis=1)
-    np.testing.assert_allclose(qnorms, 1.0, atol=1.0e-6)

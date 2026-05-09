@@ -284,24 +284,3 @@ class TestManipulability:
 @pytest.mark.integration
 class TestScrewKinematicsPhysics:
     """Integration tests for screw kinematics physics."""
-
-    @pytest.mark.xfail(
-        strict=False, reason="Requires helical motion model - not yet implemented"
-    )
-    def test_pitch_matches_analytical_helix(
-        self, simple_pendulum: mujoco.MjModel
-    ) -> None:
-        """Test pitch calculation matches analytical helix motion."""
-        # Verify computed pitch matches known pitch
-        raise NotImplementedError("Requires helical motion model")
-
-    @pytest.mark.xfail(
-        strict=False,
-        reason="Requires precise geometric validation - not yet implemented",
-    )
-    def test_screw_axis_lies_on_rotation_axis(
-        self, simple_pendulum: mujoco.MjModel
-    ) -> None:
-        """Test screw axis for pure rotation lies on rotation axis."""
-        # through the joint axis
-        raise NotImplementedError("Requires precise geometric validation")

@@ -191,21 +191,6 @@ def test_render_trajectory_overlay_rejects_mismatched_grids(tmp_path: Path) -> N
         render_trajectory_overlay(fit, target, tmp_path)
 
 
-@pytest.mark.unit
-@pytest.mark.requires_drake
-def test_overlay_html_rendered_when_pydrake_available(tmp_path: Path) -> None:
-    """If ``pydrake`` is on the path, the HTML scene is also produced."""
-    if importlib.util.find_spec("pydrake") is None:
-        pytest.skip("pydrake not installed on this runner")
-    target = _synthetic_target()
-    fit = _synthetic_fit(target)
-    artefacts = render_trajectory_overlay(fit, target, tmp_path)
-    # Drake's Meshcat occasionally fails to bind a port in CI; treat the
-    # HTML as best-effort even when pydrake imports.
-    if artefacts.html_path is not None:
-        assert artefacts.html_path.suffix == ".html"
-
-
 # ---------------------------------------------------------------------------
 # View 2 -- error timecourse
 # ---------------------------------------------------------------------------

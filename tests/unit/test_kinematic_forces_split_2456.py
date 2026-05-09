@@ -46,32 +46,3 @@ class TestKinematicForcesFileSizes:
         assert loc <= LOC_BUDGET_DATA, (
             f"_kinematic_force_data.py has {loc} LOC; budget {LOC_BUDGET_DATA}"
         )
-
-
-@pytest.mark.skipif(not _mujoco_available, reason="mujoco not installed")
-class TestKinematicForcesPublicAPI:
-    """Public API must remain importable from kinematic_forces (backward compat)."""
-
-    @pytest.mark.unit
-    def test_import_mj_data_context(self) -> None:
-        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.kinematic_forces import (
-            MjDataContext,
-        )
-
-        assert MjDataContext is not None
-
-    @pytest.mark.unit
-    def test_import_kinematic_force_data(self) -> None:
-        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.kinematic_forces import (
-            KinematicForceData,
-        )
-
-        assert KinematicForceData is not None
-
-    @pytest.mark.unit
-    def test_import_kinematic_force_analyzer(self) -> None:
-        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.kinematic_forces import (
-            KinematicForceAnalyzer,
-        )
-
-        assert KinematicForceAnalyzer is not None

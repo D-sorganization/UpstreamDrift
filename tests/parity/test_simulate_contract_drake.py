@@ -306,28 +306,3 @@ def test_q_width_matches_plant_dof(mocked_pydrake: dict[str, MagicMock]) -> None
 
 
 _PYDRAKE_AVAILABLE = importlib.util.find_spec("pydrake") is not None
-
-
-@pytest.mark.requires_drake
-@pytest.mark.skipif(not _PYDRAKE_AVAILABLE, reason="pydrake not installed")
-def test_live_drake_zero_theta_finite() -> None:
-    """Live Drake forward sim with theta=0 yields finite q/qd."""
-    from pydrake.multibody.parsing import Parser
-    from pydrake.multibody.plant import MultibodyPlant
-    from src.engines.physics_engines.drake.python.motion_matching.humanoid_urdf import (
-        CANONICAL_URDF,
-    )
-
-    plant = MultibodyPlant(0.001)
-    Parser(plant).AddModels(str(CANONICAL_URDF))
-    plant.Finalize()
-    n_act = max(plant.num_actuators(), plant.num_velocities() - 6)
-    theta = np.zeros(n_act * COEFFS_PER_JOINT)
-
-    out = simulate_with_coefficients(
-        theta, options=SimOptions(simulation_time_s=0.01, sample_rate_hz=1000.0)
-    )
-    assert out.solver_status in {"success", "warning"}
-    assert np.all(np.isfinite(out.q))
-    assert out.time[0] == 0.0
-    assert np.all(np.diff(out.time) > 0)

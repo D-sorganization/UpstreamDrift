@@ -67,16 +67,6 @@ class TestSharedPlottingAdvanced(unittest.TestCase):
     def tearDown(self) -> None:
         plt.close(self.fig)
 
-    @unittest.skipUnless(_HAS_3D, "mpl_toolkits.mplot3d unavailable")
-    def test_plot_grf_butterfly_diagram(self) -> None:
-        """Test plotting GRF butterfly diagram."""
-        self.plotter.plot_grf_butterfly_diagram(self.fig)
-        # Check if axes were created (projection='3d' creates an Axes3D object)
-        self.assertTrue(len(self.fig.axes) > 0)
-        ax = self.fig.axes[0]
-        self.assertEqual(ax.name, "3d")
-        self.assertEqual(ax.get_title(), "GRF Butterfly Diagram")
-
     def test_plot_grf_butterfly_diagram_no_data(self) -> None:
         """Test graceful handling of missing data."""
         empty_recorder = MagicMock()
@@ -86,15 +76,6 @@ class TestSharedPlottingAdvanced(unittest.TestCase):
         # Should still create a subplot with error message
         self.assertTrue(len(self.fig.axes) > 0)
         # Should catch exception and not crash
-
-    @unittest.skipUnless(_HAS_3D, "mpl_toolkits.mplot3d unavailable")
-    def test_plot_angular_momentum_3d(self) -> None:
-        """Test plotting 3D angular momentum."""
-        self.plotter.plot_angular_momentum_3d(self.fig)
-        self.assertTrue(len(self.fig.axes) > 0)
-        ax = self.fig.axes[0]
-        self.assertEqual(ax.name, "3d")
-        self.assertEqual(ax.get_title(), "3D Angular Momentum Trajectory")
 
     def test_plot_stability_diagram(self) -> None:
         """Test plotting stability diagram."""

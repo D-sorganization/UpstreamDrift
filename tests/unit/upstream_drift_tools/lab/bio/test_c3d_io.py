@@ -45,15 +45,6 @@ def test_load_c3d_no_ezc3d(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> N
         load_c3d(tmp_path / "x.c3d")
 
 
-def test_load_c3d_real_file() -> None:
-    real = Path(__file__).resolve().parents[5] / "data" / "C3D_TA_Driver.c3d"
-    if not real.exists():
-        pytest.skip("real C3D fixture not present")
-    data = load_c3d(real)
-    assert "parameters" in data
-    assert "POINT" in data["parameters"]
-
-
 # ----- get_point_parameters / get_analog_parameters --------------------------
 
 

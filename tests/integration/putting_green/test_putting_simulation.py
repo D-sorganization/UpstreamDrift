@@ -83,7 +83,9 @@ class TestEndToEndPutting:
         distance_from_hole = np.linalg.norm(
             result.final_position - np.array([15.0, 10.0])
         )
-        assert distance_from_hole < 1.0  # Within 1 meter is reasonable
+        assert (
+            distance_from_hole < 1.0
+        )  # Within 1 meter is reasonable, "Assertion failed: distance_from_hole < 1.0  # Within 1 meter is reasonable"
 
     def test_putt_with_break(self, sloped_simulator: PuttingGreenSimulator) -> None:
         """Test a putt on a sloped green has break."""
@@ -100,7 +102,9 @@ class TestEndToEndPutting:
         result = sloped_simulator.simulate_putt(stroke)
 
         # Ball should have curved due to slope (y position changed)
-        assert result.final_position[1] != 10.0
+        assert result.final_position[1] != 10.0, (
+            "Assertion failed: result.final_position[1] != 10.0"
+        )
 
     def test_ball_stops_eventually(
         self, tournament_simulator: PuttingGreenSimulator
@@ -119,10 +123,10 @@ class TestEndToEndPutting:
 
         # Ball should have stopped (zero final velocity)
         final_speed = np.linalg.norm(result.velocities[-1])
-        assert final_speed < 0.01
+        assert final_speed < 0.01, "Assertion failed: final_speed < 0.01"
 
         # Simulation should not have hit time limit
-        assert result.duration < 20.0
+        assert result.duration < 20.0, "Assertion failed: result.duration < 20.0"
 
     def test_holed_putt_detection(
         self, tournament_simulator: PuttingGreenSimulator
@@ -141,7 +145,7 @@ class TestEndToEndPutting:
         result = tournament_simulator.simulate_putt(stroke)
 
         # Should detect as holed
-        assert result.holed
+        assert result.holed, "Assertion failed: result.holed"
 
     def test_miss_putt_not_holed(
         self, tournament_simulator: PuttingGreenSimulator
@@ -159,7 +163,7 @@ class TestEndToEndPutting:
 
         result = tournament_simulator.simulate_putt(stroke)
 
-        assert not result.holed
+        assert not result.holed, "Assertion failed: not result.holed"
 
 
 class TestPhysicsAccuracy:
@@ -266,7 +270,9 @@ class TestPhysicsAccuracy:
 
         # High backspin should travel less distance initially
         # (ball checks due to sliding friction converting spin)
-        assert high_result["positions"][-1][0] < low_result["positions"][-1][0]
+        assert high_result["positions"][-1][0] < low_result["positions"][-1][0], (
+            "Assertion failed: high_result[positions][-1][0] < low_result[positions][-1][0]"
+        )
 
     def test_energy_conservation_approximate(self) -> None:
         """Energy should decrease monotonically due to friction."""
@@ -291,7 +297,9 @@ class TestPhysicsAccuracy:
         # Energy should generally decrease (allow numerical fluctuation from integrator;
         # Euler integration can produce transient energy spikes of ~2% per step)
         for i in range(1, len(energies)):
-            assert energies[i] <= energies[i - 1] + 0.02
+            assert energies[i] <= energies[i - 1] + 0.02, (
+                "Assertion failed: energies[i] <= energies[i - 1] + 0.02"
+            )
 
 
 class TestTopographyLoading:
@@ -317,7 +325,7 @@ class TestTopographyLoading:
         center_elev = sim.green.get_elevation_at(np.array([10.0, 10.0]))
         edge_elev = sim.green.get_elevation_at(np.array([1.0, 1.0]))
 
-        assert center_elev > edge_elev
+        assert center_elev > edge_elev, "Assertion failed: center_elev > edge_elev"
 
     def test_load_csv_contours(self) -> None:
         """Test loading elevation from CSV."""
@@ -336,7 +344,7 @@ class TestTopographyLoading:
 
         # Check that interpolation gives reasonable values
         elev = sim.green.get_elevation_at(np.array([10.0, 10.0]))
-        assert 0 < elev < 0.05
+        assert 0 < elev < 0.05, "Assertion failed: 0 < elev < 0.05"
 
     def test_load_json_config(self) -> None:
         """Test loading green config from JSON."""
@@ -368,9 +376,11 @@ class TestTopographyLoading:
 
             sim.load_from_path(f.name)
 
-        assert sim.green.width == 25.0
-        assert sim.green.height == 30.0
-        assert np.allclose(sim.green.hole_position, [20.0, 15.0])
+        assert sim.green.width == 25.0, "Assertion failed: sim.green.width == 25.0"
+        assert sim.green.height == 30.0, "Assertion failed: sim.green.height == 30.0"
+        assert np.allclose(sim.green.hole_position, [20.0, 15.0]), (
+            "Assertion failed: np.allclose(sim.green.hole_position, [20.0, 15.0])"
+        )
 
 
 class TestScatterAnalysis:
@@ -404,8 +414,10 @@ class TestScatterAnalysis:
         std_y = np.std(final_positions[:, 1])
 
         # Should have some spread
-        assert std_x > 0.1
-        assert std_y > 0.01  # Less spread in y for straight putt
+        assert std_x > 0.1, "Assertion failed: std_x > 0.1"
+        assert (
+            std_y > 0.01
+        )  # Less spread in y for straight putt, "Assertion failed: std_y > 0.01  # Less spread in y for straight putt"
 
 
 class TestGreenReading:
@@ -430,8 +442,10 @@ class TestGreenReading:
         aim_info = sim.compute_aim_line(np.array([5.0, 10.0]))
 
         # Aim point should be to the left of the hole to compensate for break
-        assert "aim_point" in aim_info
-        assert aim_info["break"] > 0  # Should have detected break
+        assert "aim_point" in aim_info, "Assertion failed: aim_point in aim_info"
+        assert (
+            aim_info["break"] > 0
+        )  # Should have detected break, "Assertion failed: aim_info[break] > 0  # Should have detected break"
 
     def test_putt_line_reading(self) -> None:
         """Test reading putt line for elevations and slopes."""
@@ -451,10 +465,12 @@ class TestGreenReading:
 
         reading = sim.read_green(np.array([5.0, 10.0]), np.array([15.0, 10.0]))
 
-        assert "positions" in reading
-        assert "slopes" in reading
-        assert "recommended_speed" in reading
-        assert reading["distance"] > 0
+        assert "positions" in reading, "Assertion failed: positions in reading"
+        assert "slopes" in reading, "Assertion failed: slopes in reading"
+        assert "recommended_speed" in reading, (
+            "Assertion failed: recommended_speed in reading"
+        )
+        assert reading["distance"] > 0, "Assertion failed: reading[distance] > 0"
 
 
 class TestCheckpointReplay:
@@ -474,14 +490,16 @@ class TestCheckpointReplay:
 
         # Position should have changed
         pos_after = sim.get_ball_position()
-        assert pos_after[0] > 5.0
+        assert pos_after[0] > 5.0, "Assertion failed: pos_after[0] > 5.0"
 
         # Restore checkpoint
         sim.restore_checkpoint(checkpoint)
 
         # Position should be back to original
         pos_restored = sim.get_ball_position()
-        assert np.isclose(pos_restored[0], 5.0, atol=0.01)
+        assert np.isclose(pos_restored[0], 5.0, atol=0.01), (
+            "Assertion failed: np.isclose(pos_restored[0], 5.0, atol=0.01)"
+        )
 
     def test_deterministic_replay(self) -> None:
         """Test that simulation is deterministic (same inputs = same outputs)."""
@@ -506,8 +524,12 @@ class TestCheckpointReplay:
         result2 = sim2.simulate_putt(stroke)
 
         # Results should be identical
-        assert np.allclose(result1.final_position, result2.final_position)
-        assert np.allclose(result1.positions, result2.positions)
+        assert np.allclose(result1.final_position, result2.final_position), (
+            "Assertion failed: np.allclose(result1.final_position, result2.final_position)"
+        )
+        assert np.allclose(result1.positions, result2.positions), (
+            "Assertion failed: np.allclose(result1.positions, result2.positions)"
+        )
 
 
 class TestPutterInteraction:
@@ -531,7 +553,9 @@ class TestPutterInteraction:
         mallet_state = mallet.execute_stroke(np.array([0.0, 0.0]), off_center_params)
 
         # Mallet should lose less speed on off-center hit (higher MOI)
-        assert mallet_state.speed >= blade_state.speed - 0.1
+        assert mallet_state.speed >= blade_state.speed - 0.1, (
+            "Assertion failed: mallet_state.speed >= blade_state.speed - 0.1"
+        )
 
     def test_face_angle_affects_direction(self) -> None:
         """Open/closed face should affect ball direction."""
@@ -558,4 +582,6 @@ class TestPutterInteraction:
         square_dir = square_state.velocity / np.linalg.norm(square_state.velocity)
         open_dir = open_state.velocity / np.linalg.norm(open_state.velocity)
 
-        assert open_dir[1] > square_dir[1]
+        assert open_dir[1] > square_dir[1], (
+            "Assertion failed: open_dir[1] > square_dir[1]"
+        )

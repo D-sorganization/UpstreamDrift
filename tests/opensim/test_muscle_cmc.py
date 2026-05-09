@@ -83,26 +83,6 @@ def test_rajagopal_fixture_present_for_active_runs() -> None:
         )
 
 
-@pytest.mark.requires_mocap_fixtures
-def test_typed_error_when_fixtures_absent() -> None:
-    """When the fixture is absent, the loader raises the typed error.
-
-    This exercises the *negative* contract: when the user opts into the
-    mocap-gated tests but the asset is still missing, we want the typed
-    ``MuscleFixturesUnavailableError`` to fire with the absolute path
-    embedded so the gap is visible in CI logs.
-    """
-    if _have_mocap_fixtures():
-        pytest.skip(
-            "fixtures are present; this test exercises the missing-fixture branch only"
-        )
-    osim_path = _osim_path()
-    with pytest.raises(MuscleFixturesUnavailableError) as exc_info:
-        build_rajagopal2015_muscle_model(osim_path)
-    assert exc_info.value.missing_path == osim_path
-    assert str(osim_path) in str(exc_info.value)
-
-
 # --------------------------------------------------------------------------- #
 # Trajectory schema validation (no external deps required)
 # --------------------------------------------------------------------------- #

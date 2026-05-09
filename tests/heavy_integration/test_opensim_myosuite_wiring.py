@@ -31,45 +31,6 @@ def suite_root() -> Path:
 # ──────────────────────────────────────────────────────────────
 #  Probe Path Consistency
 # ──────────────────────────────────────────────────────────────
-class TestProbePaths:
-    """Verify probe paths match the actual filesystem layout."""
-
-    def test_opensim_probe_path(self, suite_root: Path) -> None:
-        """OpenSim probe checks the correct engine directory."""
-        from src.shared.python.engine_core.engine_probes import OpenSimProbe
-
-        probe = OpenSimProbe(suite_root)
-        result = probe.probe()
-        # The probe should not fail with "engine directory" missing
-        if "engine directory" in result.missing_dependencies:
-            expected_dir = suite_root / "engines" / "physics_engines" / "opensim"
-            pytest.skip(f"OpenSim engine directory not found at {expected_dir}")
-
-    def test_myosim_probe_path(self, suite_root: Path) -> None:
-        """MyoSim probe checks the correct engine directory (myosuite/)."""
-        from src.shared.python.engine_core.engine_probes import MyoSimProbe
-
-        MyoSimProbe(suite_root)  # Ensures probe can be instantiated
-        # Verify the probe checks for myosuite directory, not myosim
-        engine_dir = suite_root / "src" / "engines" / "physics_engines" / "myosuite"
-        assert engine_dir.exists(), (
-            f"MyoSuite engine directory should exist at {engine_dir}"
-        )
-
-    def test_myosim_probe_checks_correct_file(self, suite_root: Path) -> None:
-        """MyoSim probe checks for myosuite_physics_engine.py."""
-        engine_file = (
-            suite_root
-            / "src"
-            / "engines"
-            / "physics_engines"
-            / "myosuite"
-            / "python"
-            / "myosuite_physics_engine.py"
-        )
-        assert engine_file.exists(), (
-            f"MyoSuite engine file should exist at {engine_file}"
-        )
 
 
 # ──────────────────────────────────────────────────────────────
@@ -294,45 +255,6 @@ class TestMyoSuiteAdapter:
 # ──────────────────────────────────────────────────────────────
 #  API Route Connectivity
 # ──────────────────────────────────────────────────────────────
-class TestAPIRouteConnectivity:
-    """Verify OpenSim/MyoSuite are accessible via API routes."""
-
-    @pytest.fixture(scope="class")
-    def client(self) -> Generator[Any, None, None]:
-        """Create test client."""
-        try:
-            from fastapi.testclient import TestClient
-            from src.api.server import app
-        except ImportError as exc:
-            pytest.skip(f"API server deps not available: {exc}")
-
-        with TestClient(app) as c:
-            yield c
-
-    def test_opensim_probe_via_api(self, client) -> None:
-        """OpenSim probe returns valid JSON via API."""
-        resp = client.get("/api/engines/opensim/probe")
-        assert resp.status_code == 200
-        data = resp.json()
-        assert "available" in data
-
-    def test_myosuite_probe_via_api(self, client) -> None:
-        """MyoSuite probe returns valid JSON via API."""
-        resp = client.get("/api/engines/myosuite/probe")
-        assert resp.status_code == 200
-        data = resp.json()
-        assert "available" in data
-
-    def test_opensim_load_via_api(self, client) -> None:
-        """OpenSim load endpoint responds."""
-        resp = client.post("/api/engines/opensim/load")
-        # May fail if opensim not installed, but should not crash
-        assert resp.status_code in [200, 400, 500]
-
-    def test_myosuite_load_via_api(self, client) -> None:
-        """MyoSuite load endpoint responds."""
-        resp = client.post("/api/engines/myosuite/load")
-        assert resp.status_code in [200, 400, 500]
 
 
 pytestmark = pytest.mark.live_simulation

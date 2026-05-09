@@ -74,7 +74,9 @@ class TestTerrainConsistency:
         ]
 
         # All should be identical
-        assert all(h == heights[0] for h in heights)
+        assert all(h == heights[0] for h in heights), (
+            "Assertion failed: all(h == heights[0] for h in heights)"
+        )
 
     def test_normal_is_unit_vector(self, sloped_terrain: Terrain) -> None:
         """Normal vectors should always be unit vectors."""
@@ -109,25 +111,39 @@ class TestTerrainConsistency:
         numerical_grad_y = (h_y - h_center) / dx
 
         # Should be close
-        assert abs(grad_x - numerical_grad_x) < 0.1
-        assert abs(grad_y - numerical_grad_y) < 0.1
+        assert abs(grad_x - numerical_grad_x) < 0.1, (
+            "Assertion failed: abs(grad_x - numerical_grad_x) < 0.1"
+        )
+        assert abs(grad_y - numerical_grad_y) < 0.1, (
+            "Assertion failed: abs(grad_y - numerical_grad_y) < 0.1"
+        )
 
     def test_terrain_type_zones(self, mixed_terrain: Terrain) -> None:
         """Terrain type queries should respect zone boundaries."""
         # Tee box
-        assert mixed_terrain.get_terrain_type(10.0, 50.0) == TerrainType.TEE
+        assert mixed_terrain.get_terrain_type(10.0, 50.0) == TerrainType.TEE, (
+            "Assertion failed: mixed_terrain.get_terrain_type(10.0, 50.0) == TerrainType.TEE"
+        )
 
         # Fairway
-        assert mixed_terrain.get_terrain_type(50.0, 50.0) == TerrainType.FAIRWAY
+        assert mixed_terrain.get_terrain_type(50.0, 50.0) == TerrainType.FAIRWAY, (
+            "Assertion failed: mixed_terrain.get_terrain_type(50.0, 50.0) == TerrainType.FAIRWAY"
+        )
 
         # Bunker
-        assert mixed_terrain.get_terrain_type(65.0, 50.0) == TerrainType.BUNKER
+        assert mixed_terrain.get_terrain_type(65.0, 50.0) == TerrainType.BUNKER, (
+            "Assertion failed: mixed_terrain.get_terrain_type(65.0, 50.0) == TerrainType.BUNKER"
+        )
 
         # Green
-        assert mixed_terrain.get_terrain_type(90.0, 50.0) == TerrainType.GREEN
+        assert mixed_terrain.get_terrain_type(90.0, 50.0) == TerrainType.GREEN, (
+            "Assertion failed: mixed_terrain.get_terrain_type(90.0, 50.0) == TerrainType.GREEN"
+        )
 
         # Rough (default)
-        assert mixed_terrain.get_terrain_type(5.0, 5.0) == TerrainType.ROUGH
+        assert mixed_terrain.get_terrain_type(5.0, 5.0) == TerrainType.ROUGH, (
+            "Assertion failed: mixed_terrain.get_terrain_type(5.0, 5.0) == TerrainType.ROUGH"
+        )
 
     def test_contact_parameters_vary_by_terrain(self, mixed_terrain: Terrain) -> None:
         """Contact parameters should vary by terrain type."""
@@ -137,10 +153,14 @@ class TestTerrainConsistency:
         green_params = mixed_terrain.get_contact_params(90.0, 50.0)
 
         # Bunker should have highest friction
-        assert bunker_params["friction"] > fairway_params["friction"]
+        assert bunker_params["friction"] > fairway_params["friction"], (
+            "Assertion failed: bunker_params[friction] > fairway_params[friction]"
+        )
 
         # Green should have highest restitution
-        assert green_params["restitution"] > bunker_params["restitution"]
+        assert green_params["restitution"] > bunker_params["restitution"], (
+            "Assertion failed: green_params[restitution] > bunker_params[restitution]"
+        )
 
 
 class TestTerrainContactPhysics:
@@ -188,7 +208,9 @@ class TestTerrainContactPhysics:
 
         # Friction magnitude should be <= mu * N
         F_friction = np.linalg.norm(friction)
-        assert F_friction <= mu * N * 1.01  # Small tolerance
+        assert (
+            F_friction <= mu * N * 1.01
+        )  # Small tolerance, "Assertion failed: F_friction <= mu * N * 1.01  # Small tolerance"
 
     def test_energy_conservation_approximation(self) -> None:
         """Energy absorbed + remaining should equal initial (approximately)."""
@@ -200,7 +222,9 @@ class TestTerrainContactPhysics:
 
         # Energy should be conserved (absorbed + remaining = initial)
         total = energy["absorbed_energy"] + energy["remaining_energy"]
-        assert abs(total - energy["kinetic_energy"]) < 1e-6
+        assert abs(total - energy["kinetic_energy"]) < 1e-6, (
+            "Assertion failed: abs(total - energy[kinetic_energy]) < 1e-6"
+        )
 
 
 class TestTerrainGeometryGeneration:
@@ -222,16 +246,22 @@ class TestTerrainGeometryGeneration:
         # Check vertex count
         n_rows, n_cols = terrain.elevation.data.shape
         expected_vertices = n_rows * n_cols
-        assert len(vertices) == expected_vertices
+        assert len(vertices) == expected_vertices, (
+            "Assertion failed: len(vertices) == expected_vertices"
+        )
 
         # Check triangle count (2 triangles per cell)
         expected_triangles = 2 * (n_rows - 1) * (n_cols - 1)
-        assert len(triangles) == expected_triangles
+        assert len(triangles) == expected_triangles, (
+            "Assertion failed: len(triangles) == expected_triangles"
+        )
 
         # Check all triangles reference valid vertices
         for tri in triangles:
             for idx in tri:
-                assert 0 <= idx < len(vertices)
+                assert 0 <= idx < len(vertices), (
+                    "Assertion failed: 0 <= idx < len(vertices)"
+                )
 
     def test_mesh_normals_face_up(self) -> None:
         """Mesh triangles should face upward (positive Z normal)."""
@@ -250,7 +280,9 @@ class TestTerrainGeometryGeneration:
             normal = np.cross(edge1, edge2)
 
             # Normal should point up (positive Z)
-            assert normal[2] >= 0 or abs(normal[2]) < 1e-6
+            assert normal[2] >= 0 or abs(normal[2]) < 1e-6, (
+                "Assertion failed: normal[2] >= 0 or abs(normal[2]) < 1e-6"
+            )
 
     def test_mujoco_hfield_normalized(self) -> None:
         """MuJoCo heightfield should be normalized to [0, 1]."""
@@ -266,8 +298,8 @@ class TestTerrainGeometryGeneration:
         hfield_data, hfield_size = generator.generate_mujoco_hfield()
 
         # Values should be in [0, 1]
-        assert hfield_data.min() >= 0.0
-        assert hfield_data.max() <= 1.0
+        assert hfield_data.min() >= 0.0, "Assertion failed: hfield_data.min() >= 0.0"
+        assert hfield_data.max() <= 1.0, "Assertion failed: hfield_data.max() <= 1.0"
 
 
 class TestCompressibleTurfPhysics:
@@ -285,9 +317,13 @@ class TestCompressibleTurfPhysics:
 
         # More compression = higher stiffness
         if state1["compression_ratio"] < state2["compression_ratio"]:
-            assert state2["effective_stiffness"] >= state1["effective_stiffness"]
+            assert state2["effective_stiffness"] >= state1["effective_stiffness"], (
+                "Assertion failed: state2[effective_stiffness] >= state1[effective_stiffness]"
+            )
         if state2["compression_ratio"] < state3["compression_ratio"]:
-            assert state3["effective_stiffness"] >= state2["effective_stiffness"]
+            assert state3["effective_stiffness"] >= state2["effective_stiffness"], (
+                "Assertion failed: state3[effective_stiffness] >= state2[effective_stiffness]"
+            )
 
     def test_bunker_absorbs_more_energy(self) -> None:
         """Bunker (sand) should absorb more energy than green."""
@@ -323,11 +359,17 @@ class TestCompressibleTurfPhysics:
         rough_lie = rough_turf.compute_lie_quality(50.0, 50.0)
 
         # Both should have valid playability factors
-        assert 0 < fairway_lie["playability_factor"] <= 1.0
-        assert 0 < rough_lie["playability_factor"] <= 1.0
+        assert 0 < fairway_lie["playability_factor"] <= 1.0, (
+            "Assertion failed: 0 < fairway_lie[playability_factor] <= 1.0"
+        )
+        assert 0 < rough_lie["playability_factor"] <= 1.0, (
+            "Assertion failed: 0 < rough_lie[playability_factor] <= 1.0"
+        )
 
         # Rough has taller grass
-        assert rough_lie["grass_height"] > fairway_lie["grass_height"]
+        assert rough_lie["grass_height"] > fairway_lie["grass_height"], (
+            "Assertion failed: rough_lie[grass_height] > fairway_lie[grass_height]"
+        )
 
 
 class TestTerrainAwareEngineWrapper:
@@ -338,8 +380,12 @@ class TestTerrainAwareEngineWrapper:
         terrain = create_flat_terrain("Test", 100.0, 100.0)
         engine = TerrainAwareEngine(terrain)
 
-        assert engine.terrain is not None
-        assert engine.terrain.name == "Test"
+        assert engine.terrain is not None, (
+            "Assertion failed: engine.terrain is not None"
+        )
+        assert engine.terrain.name == "Test", (
+            "Assertion failed: engine.terrain.name == Test"
+        )
 
     def test_terrain_engine_height_query(self) -> None:
         """Engine should provide terrain height queries."""
@@ -356,7 +402,7 @@ class TestTerrainAwareEngineWrapper:
         h2 = engine.get_ground_height(100.0, 50.0)
 
         # Height should increase with X
-        assert h2 > h1
+        assert h2 > h1, "Assertion failed: h2 > h1"
 
     def test_terrain_engine_properties_query(self) -> None:
         """Engine should provide comprehensive terrain properties."""
@@ -370,12 +416,14 @@ class TestTerrainAwareEngineWrapper:
 
         props = engine.get_terrain_properties(75.0, 50.0)
 
-        assert "elevation" in props
-        assert "normal" in props
-        assert "terrain_type" in props
-        assert "friction" in props
-        assert "restitution" in props
-        assert props["terrain_type"] == TerrainType.GREEN
+        assert "elevation" in props, "Assertion failed: elevation in props"
+        assert "normal" in props, "Assertion failed: normal in props"
+        assert "terrain_type" in props, "Assertion failed: terrain_type in props"
+        assert "friction" in props, "Assertion failed: friction in props"
+        assert "restitution" in props, "Assertion failed: restitution in props"
+        assert props["terrain_type"] == TerrainType.GREEN, (
+            "Assertion failed: props[terrain_type] == TerrainType.GREEN"
+        )
 
 
 class TestTerrainEdgeCases:
@@ -386,9 +434,11 @@ class TestTerrainEdgeCases:
         terrain = create_flat_terrain("Flat", 100.0, 100.0)
         normal = terrain.elevation.get_normal(50.0, 50.0)
 
-        assert abs(normal[0]) < 1e-6
-        assert abs(normal[1]) < 1e-6
-        assert abs(normal[2] - 1.0) < 1e-6
+        assert abs(normal[0]) < 1e-6, "Assertion failed: abs(normal[0]) < 1e-6"
+        assert abs(normal[1]) < 1e-6, "Assertion failed: abs(normal[1]) < 1e-6"
+        assert abs(normal[2] - 1.0) < 1e-6, (
+            "Assertion failed: abs(normal[2] - 1.0) < 1e-6"
+        )
 
     def test_steep_slope_stability(self) -> None:
         """Steep slopes should still produce valid results."""
@@ -403,10 +453,12 @@ class TestTerrainEdgeCases:
         normal = terrain.elevation.get_normal(50.0, 50.0)
 
         # Should still be unit vector
-        assert abs(np.linalg.norm(normal) - 1.0) < 1e-6
+        assert abs(np.linalg.norm(normal) - 1.0) < 1e-6, (
+            "Assertion failed: abs(np.linalg.norm(normal) - 1.0) < 1e-6"
+        )
 
         # Should point mostly up
-        assert normal[2] > 0.5
+        assert normal[2] > 0.5, "Assertion failed: normal[2] > 0.5"
 
     def test_terrain_boundary_queries(self) -> None:
         """Queries at terrain boundaries should work."""
@@ -432,4 +484,6 @@ class TestTerrainEdgeCases:
         force_large = contact.compute_contact_force(50.0, 50.0, z=-0.001, radius=0.02)
 
         # Larger penetration = larger force
-        assert np.linalg.norm(force_large) > np.linalg.norm(force_small)
+        assert np.linalg.norm(force_large) > np.linalg.norm(force_small), (
+            "Assertion failed: np.linalg.norm(force_large) > np.linalg.norm(force_small)"
+        )

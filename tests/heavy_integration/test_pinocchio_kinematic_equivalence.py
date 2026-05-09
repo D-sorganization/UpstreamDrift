@@ -155,22 +155,3 @@ def test_club_head_agrees_with_numpy_fk(loaded_model, cfg) -> None:
         f"{np.rad2deg(ori_err):.4f} deg >= tolerance "
         f"{np.rad2deg(GRIP_ORIENTATION_TOL_RAD):.2f} deg"
     )
-
-
-def test_simscape_address_row_loads_or_skips() -> None:
-    """Smoke check: the Simscape ground-truth CSV is parseable.
-
-    This guards the rest of the audit from silently passing because the
-    upstream Simscape dataset has been moved or renamed.
-    """
-    from tests.unit.engines.pinocchio._kinematic_equivalence_data import (
-        load_simscape_address_row,
-    )
-
-    row = load_simscape_address_row()
-    if not row:
-        pytest.skip("Simscape dataset CSV unavailable on this host")
-    # The dataset row 0 is the address pose; HipAngularPositionZ should be
-    # roughly -45 deg for a right-handed setup (this trial).
-    assert "HipLogs_HipAngularPositionZ" in row
-    assert "ClubLogs_CHGlobalPosition_1" in row

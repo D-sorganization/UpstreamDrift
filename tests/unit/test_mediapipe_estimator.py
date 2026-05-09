@@ -102,39 +102,6 @@ class TestMediaPipeEstimator:
             assert "nose" in result.raw_keypoints
             assert result.raw_keypoints["nose"][0] == 0.5
 
-    @pytest.mark.xfail(
-        reason="cv2 module-level import is None when OpenCV unavailable; "
-        "nested mock patches conflict with fixture-level cv2 mock",
-        strict=False,
-    )
-    def test_estimate_from_video(
-        self, estimator_instance: mediapipe_estimator.MediaPipeEstimator
-    ) -> None:
-        """Test estimation from video."""
-        estimator_instance.load_model()
-
-        # Mock cv2.VideoCapture via the module import
-        with patch(
-            "src.shared.python.pose_estimation.mediapipe_estimator.cv2"
-        ) as mock_cv2:
-            mock_cap = MagicMock()
-            mock_cv2.VideoCapture.return_value = mock_cap
-            mock_cap.isOpened.return_value = True
-            mock_cap.get.side_effect = [30.0, 10.0]  # fps, frame_count
-
-            # Mock reading 2 frames then stop
-            frame = np.zeros((100, 100, 3), dtype=np.uint8)
-            mock_cap.read.side_effect = [(True, frame), (True, frame), (False, None)]
-
-            # We also need to mock cvtColor
-            mock_cv2.cvtColor.return_value = frame
-
-            results = estimator_instance.estimate_from_video(Path("test.mp4"))
-
-            assert len(results) == 2
-            assert results[0].timestamp == 0.0
-            assert results[1].timestamp == 1 / 30.0
-
     def test_temporal_smoothing(
         self, estimator_instance: mediapipe_estimator.MediaPipeEstimator
     ) -> None:

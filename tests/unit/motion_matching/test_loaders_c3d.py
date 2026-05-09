@@ -38,17 +38,3 @@ def test_c3d_rejects_missing_file() -> None:
     # NotImplementedError stub once #4122 / #4166 landed engine backends).
     with pytest.raises(ValueError, match="no engine specified"):
         synthesize_target_from_coefficients(np.zeros(3), AlignOptions())
-
-
-@pytest.mark.integration
-def test_load_c3d_succeeds_on_cluster_file() -> None:
-    p = _first_c3d()
-    if p is None:
-        pytest.skip("No cluster-marker C3D files present")
-    try:
-        target = load_club_target_c3d(p, AlignOptions())
-    except (ValueError, ImportError) as exc:
-        pytest.skip(f"C3D parser could not produce a ClubTarget for {p.name}: {exc}")
-    assert isinstance(target, ClubTarget)
-    assert target.time.shape[0] == target.butt.shape[0]
-    assert target.source.format == "c3d"

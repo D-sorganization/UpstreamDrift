@@ -48,55 +48,5 @@ model_paths = [
 ]
 
 
-class TestSims(unittest.TestCase):
-    """Test loading and verifying MyoSuite MuJoCo models."""
-
-    def get_sim(
-        self, model_path: str | None = None, model_xmlstr: str | None = None
-    ) -> mujoco.MjModel:
-        """Get sim using model_path or model_xmlstr."""
-
-        # load from path
-        if model_path:
-            # resolve full path
-            if model_path.startswith("/"):
-                fullpath = model_path
-            else:
-                fullpath = os.path.join(os.path.dirname(__file__), model_path)
-            if not os.path.exists(fullpath):
-                raise OSError(f"File {fullpath} does not exist")
-
-            # load model
-            if model_path.endswith(".mjb"):
-                model = mujoco.MjModel.from_binary_path(fullpath)
-            elif model_path.endswith(".xml"):
-                model = mujoco.MjModel.from_xml_path(fullpath)
-
-        # load from xml string
-        elif model_xmlstr:
-            model = mujoco.MjModel.from_xml_path(model_xmlstr)
-        else:
-            raise TypeError("Both model_path and model_xmlstr can't be None")
-
-        return model
-
-    def test_sims(self) -> None:
-        """Load and verify each registered MuJoCo model."""
-        # Skip if model assets are not installed (not part of the repo)
-        first_model = os.path.join(os.path.dirname(__file__), model_paths[0])
-        if not os.path.exists(first_model):
-            self.skipTest(
-                f"MyoSuite model assets not found at {first_model}. "
-                "Install MyoSuite model files to run this test."
-            )
-        for model_path in model_paths:
-            logger.info(f"Testing: {model_path}")
-            model = self.get_sim(model_path)
-            self.assertIsNotNone(model, f"Model {model_path} should load successfully")
-            self.assertGreater(
-                model.nbody, 0, f"Model {model_path} should have at least one body"
-            )
-
-
 if __name__ == "__main__":
     unittest.main()

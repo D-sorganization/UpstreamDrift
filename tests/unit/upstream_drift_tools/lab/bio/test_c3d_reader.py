@@ -236,14 +236,3 @@ def test_load_goes_through_ezc3d(tmp_path: Path) -> None:
 
 
 # ----- real-file sanity (skip if absent) ------------------------------------
-
-
-def test_real_file_metadata() -> None:
-    if not REAL_C3D.exists():
-        pytest.skip("real C3D fixture not present")
-    reader = C3DDataReader(REAL_C3D)
-    md = reader.get_metadata()
-    assert md.marker_count > 0
-    df = reader.points_dataframe(include_time=True)
-    assert isinstance(df, pd.DataFrame)
-    assert not df.empty

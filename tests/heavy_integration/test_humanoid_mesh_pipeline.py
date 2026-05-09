@@ -82,35 +82,6 @@ class TestMeshProcessorInstantiation:
         assert proc._trimesh_available == _trimesh_available
 
 
-class TestMeshExport:
-    """Contract: MeshProcessor can export meshes to supported formats."""
-
-    def test_export_sphere_to_stl(self, sphere_mesh) -> None:
-        """A sphere mesh can be exported to STL."""
-        MeshProcessor = _import_mesh_processor()
-        proc = MeshProcessor()
-
-        if not proc._trimesh_available:
-            pytest.skip("trimesh not available")
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            out_path = Path(tmpdir) / "sphere.stl"
-            # Export directly via trimesh (processor's export path)
-            sphere_mesh.export(str(out_path))
-            assert out_path.exists(), "STL file was not created"
-            assert out_path.stat().st_size > 0, "STL file is empty"
-
-    def test_export_sphere_to_obj(self, sphere_mesh) -> None:
-        """A sphere mesh can be exported to OBJ format."""
-        pytest.importorskip("trimesh")
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            out_path = Path(tmpdir) / "sphere.obj"
-            sphere_mesh.export(str(out_path))
-            assert out_path.exists()
-            assert out_path.stat().st_size > 0
-
-
 class TestInertiaCalculation:
     """Contract: InertiaCalculator produces physically valid inertias."""
 

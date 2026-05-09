@@ -200,17 +200,6 @@ class TestDriftControlDecomposer:
 class TestDriftControlPhysics:
     """Integration tests for drift-control physics validation."""
 
-    @pytest.mark.xfail(
-        strict=False,
-        reason="Requires energy calculation utilities - not yet implemented",
-    )
-    def test_passive_pendulum_drift_matches_energy_conservation(
-        self, simple_pendulum_model
-    ) -> None:
-        """Test drift component matches energy-conserving motion."""
-        # (modulo damping losses if present)
-        raise NotImplementedError("Requires energy calculation utilities")
-
     def test_control_enables_upward_swing(self, simple_pendulum_model) -> None:
         """Test that control can drive pendulum upward against gravity."""
         decomposer = DriftControlDecomposer(simple_pendulum_model)

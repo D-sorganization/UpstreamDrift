@@ -60,11 +60,13 @@ class TestEngineProbeHTTP:
     ) -> None:
         """Each engine probe returns parseable JSON with standard fields."""
         resp = client.get(f"/api/engines/{engine_name}/probe")
-        assert resp.status_code == 200
+        assert resp.status_code == 200, "Assertion failed: resp.status_code == 200"
 
         data = resp.json()
-        assert "available" in data
-        assert isinstance(data["available"], bool)
+        assert "available" in data, "Assertion failed: available in data"
+        assert isinstance(data["available"], bool), (
+            "Assertion failed: isinstance(data[available], bool)"
+        )
 
     @pytest.mark.parametrize("engine_name", ALL_ENGINES)
     def test_probe_includes_diagnostic(
@@ -73,7 +75,9 @@ class TestEngineProbeHTTP:
         """Each engine probe includes diagnostic information."""
         resp = client.get(f"/api/engines/{engine_name}/probe")
         data = resp.json()
-        assert len(data) > 1  # More than just "available"
+        assert (
+            len(data) > 1
+        )  # More than just "available", "Assertion failed: len(data) > 1  # More than just available"
 
 
 # ──────────────────────────────────────────────────────────────
@@ -85,14 +89,18 @@ class TestEngineLoadHTTP:
     def test_load_putting_green(self, client: TestClient) -> None:
         """Putting Green is pure Python and should always load."""
         resp = client.post("/api/engines/putting_green/load")
-        assert resp.status_code == 200
+        assert resp.status_code == 200, "Assertion failed: resp.status_code == 200"
         data = resp.json()
-        assert data.get("loaded") is True or data.get("status") == "loaded"
+        assert data.get("loaded") is True or data.get("status") == "loaded", (
+            "Assertion failed: data.get(loaded) is True or data.get(status) == loaded"
+        )
 
     def test_load_nonexistent_engine(self, client: TestClient) -> None:
         """Loading a non-existent engine returns appropriate error."""
         resp = client.post("/api/engines/completely_fake/load")
-        assert resp.status_code in [400, 404, 500]
+        assert resp.status_code in [400, 404, 500], (
+            "Assertion failed: resp.status_code in [400, 404, 500]"
+        )
 
 
 # ──────────────────────────────────────────────────────────────
@@ -124,8 +132,12 @@ class TestEngineRegistryConsistency:
     def test_engine_type_enum_values_are_strings(self) -> None:
         """EngineType enum values are strings (used in API routes)."""
         for engine_type in EngineType:
-            assert isinstance(engine_type.value, str)
-            assert len(engine_type.value) > 0
+            assert isinstance(engine_type.value, str), (
+                "Assertion failed: isinstance(engine_type.value, str)"
+            )
+            assert len(engine_type.value) > 0, (
+                "Assertion failed: len(engine_type.value) > 0"
+            )
 
 
 # ──────────────────────────────────────────────────────────────
@@ -140,7 +152,7 @@ class TestCrossEngineConsistency:
 
         for engine in engines:
             resp = client.get(f"/api/engines/{engine}/probe")
-            assert resp.status_code == 200
+            assert resp.status_code == 200, "Assertion failed: resp.status_code == 200"
             data = resp.json()
             assert "available" in data, f"{engine} probe missing 'available'"
 
@@ -159,7 +171,7 @@ class TestEnginePerformanceBenchmarks:
             start = time.time()
             resp = client.get(f"/api/engines/{engine}/probe")
             elapsed = time.time() - start
-            assert resp.status_code == 200
+            assert resp.status_code == 200, "Assertion failed: resp.status_code == 200"
             assert elapsed < 2.0, f"{engine} probe took {elapsed:.2f}s (>2s)"
 
     def test_engine_list_latency(self, client: TestClient) -> None:
@@ -167,5 +179,5 @@ class TestEnginePerformanceBenchmarks:
         start = time.time()
         resp = client.get("/engines")
         elapsed = time.time() - start
-        assert resp.status_code == 200
-        assert elapsed < 3.0
+        assert resp.status_code == 200, "Assertion failed: resp.status_code == 200"
+        assert elapsed < 3.0, "Assertion failed: elapsed < 3.0"

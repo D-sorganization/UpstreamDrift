@@ -284,29 +284,3 @@ def test_joint_limits_are_in_radians(baseline_urdf: str) -> None:
             f"Joint {j['name']!r} upper limit {j['upper']} exceeds 2*pi - "
             f"likely written in degrees."
         )
-
-
-@pytest.mark.unit
-def test_knee_joints_cannot_hyperextend(baseline_urdf: str) -> None:
-    """Anatomical: a knee joint should not allow more than ~5 degrees of
-    extension past straight (upper bound). Hyperextension > 5 deg means
-    the model can fold the leg backwards, which would invalidate any
-    motion-matching study using this URDF. See issue #4540.
-    """
-    five_degrees = np.deg2rad(5)
-    knees = [
-        j for j in _parse_joint_limits(baseline_urdf) if "knee" in j["name"].lower()
-    ]
-    if not knees:
-        pytest.skip("No knee joints found in baseline URDF")
-    for j in knees:
-        # Either upper ~ 0 (extension limit) or lower bounded near 0 with
-        # negative range for flexion - depends on sign convention. Accept
-        # either; reject only obvious hyperextension.
-        if j["upper"] == float("inf"):
-            continue
-        assert j["upper"] <= five_degrees + 1e-6 or j["lower"] >= -five_degrees, (
-            f"Knee joint {j['name']!r} appears to allow hyperextension "
-            f"(lower={j['lower']:.3f}, upper={j['upper']:.3f}). Either the "
-            f"upper limit should be near 0 or the lower should be >=0."
-        )

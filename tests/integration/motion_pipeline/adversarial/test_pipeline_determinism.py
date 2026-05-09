@@ -56,18 +56,3 @@ def test_keypoint_sequence_roundtrip_deterministic() -> None:
     seq2 = KeypointSequence.model_validate_json(s1)
     s2 = seq2.model_dump_json()
     assert s1 == s2
-
-
-def test_preprocessing_pipeline_deterministic() -> None:
-    """PreprocessingPipeline construction with identical config must be
-    deterministic."""
-    try:
-        from src.shared.python.motion_pipeline.preprocessing import (
-            PreprocessingPipeline,
-        )
-    except ImportError:
-        pytest.skip("PreprocessingPipeline not importable")
-    p1 = PreprocessingPipeline()
-    p2 = PreprocessingPipeline()
-    # Both should have the same default configuration shape.
-    assert type(p1) is type(p2)

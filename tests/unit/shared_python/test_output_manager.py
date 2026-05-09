@@ -81,30 +81,6 @@ def test_save_load_json(temp_output_dir) -> None:
     assert loaded2 == data_struct
 
 
-def test_save_load_parquet(temp_output_dir) -> None:
-    """Test saving and loading Parquet."""
-    try:
-        import pyarrow  # noqa: F401
-    except ImportError:
-        pytest.skip("pyarrow not installed")
-
-    df = pd.DataFrame({"a": [1, 2], "b": ["x", "y"]})
-    try:
-        path = temp_output_dir.save_simulation_results(
-            df, "test_pq", OutputFormat.PARQUET, engine="mujoco"
-        )
-    except ImportError:
-        pytest.skip("Parquet support missing")
-
-    assert path.exists()
-    assert path.suffix == ".parquet"
-
-    loaded = temp_output_dir.load_simulation_results(
-        "test_pq", OutputFormat.PARQUET, engine="mujoco"
-    )
-    pd.testing.assert_frame_equal(df, loaded)
-
-
 def test_save_pickle_disabled(temp_output_dir) -> None:
     """Test that pickle is disabled for security."""
     data = [1, 2, 3]

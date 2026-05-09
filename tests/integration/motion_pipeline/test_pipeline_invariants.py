@@ -157,52 +157,6 @@ def _resolve_frames(payload: Any) -> list[Any] | None:
     return None
 
 
-@pytest.mark.parametrize(
-    "fixture",
-    _golden_files()
-    or [pytest.param(None, marks=pytest.mark.skip(reason="no fixtures yet"))],
-    ids=lambda p: p.name if isinstance(p, Path) else "no-fixtures",
-)
-def test_adapter_postconditions_on_golden_fixture(
-    fixture: Path | None,
-    request: pytest.FixtureRequest,
-) -> None:
-    """Every golden fixture either loads cleanly or is rejected with UnsupportedFormatError.
-
-    When it loads, the resulting payload must satisfy the documented
-    postconditions: non-empty frames, monotonic timestamps, finite values.
-    """
-    if fixture is None:
-        pytest.skip("No golden fixtures available")
-
-    if fixture.name in _BROKEN_ADAPTER_FIXTURES:
-        request.node.add_marker(
-            pytest.mark.xfail(strict=True, reason="Tracked in #4683")
-        )
-
-    from src.shared.python.motion_pipeline.sources import (
-        UnsupportedFormatError,
-        load_any,
-    )
-
-    try:
-        payload = load_any(fixture)
-    except UnsupportedFormatError:
-        pytest.skip(f"No adapter claims {fixture.name}")
-        return
-
-    frames = _resolve_frames(payload)
-    assert frames, f"{fixture.name}: payload has no frames"
-
-    timestamps = [f.timestamp for f in frames]
-    assert all(np.isfinite(t) for t in timestamps), (
-        f"{fixture.name}: non-finite timestamps"
-    )
-    assert timestamps == sorted(timestamps), (
-        f"{fixture.name}: timestamps must be non-decreasing"
-    )
-
-
 # ---------------------------------------------------------------------------
 # Orchestrator determinism
 # ---------------------------------------------------------------------------

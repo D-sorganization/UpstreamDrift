@@ -46,32 +46,3 @@ class TestGripModellingFileSizes:
         assert loc <= LOC_BUDGET_WIDGETS, (
             f"_grip_modelling_widgets.py has {loc} LOC; budget {LOC_BUDGET_WIDGETS}"
         )
-
-
-@pytest.mark.skipif(not _mujoco_available, reason="mujoco not installed")
-class TestGripModellingPublicAPI:
-    """Public API must remain importable from grip_modelling_tab (backward compat)."""
-
-    @pytest.mark.unit
-    def test_import_pressure_visualization_widget(self) -> None:
-        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.grip_modelling_tab import (
-            PressureVisualizationWidget,
-        )
-
-        assert PressureVisualizationWidget is not None
-
-    @pytest.mark.unit
-    def test_import_contact_metrics_widget(self) -> None:
-        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.grip_modelling_tab import (
-            ContactMetricsWidget,
-        )
-
-        assert ContactMetricsWidget is not None
-
-    @pytest.mark.unit
-    def test_import_grip_modelling_tab(self) -> None:
-        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.grip_modelling_tab import (
-            GripModellingTab,
-        )
-
-        assert GripModellingTab is not None

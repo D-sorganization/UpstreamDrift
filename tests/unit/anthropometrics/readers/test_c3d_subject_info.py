@@ -229,21 +229,6 @@ def test_missing_file_raises_file_not_found(tmp_path: Path) -> None:
         read_c3d_subject_metadata(bogus)
 
 
-def test_real_c3d_file_returns_all_none_fields() -> None:
-    """``data/C3D_TA_Driver.c3d`` lacks PROCESSING / SUBJECTS groups."""
-    path = Path(__file__).resolve().parents[3].parent / "data" / "C3D_TA_Driver.c3d"
-    if not path.exists():  # pragma: no cover - data file always shipped
-        pytest.skip("Real C3D fixture not present")
-    metadata = read_c3d_subject_metadata(path)
-    assert metadata.subject_id is None
-    assert metadata.height_m is None
-    assert metadata.mass_kg is None
-    assert metadata.age_years is None
-    assert metadata.sex is Sex.UNSPECIFIED
-    assert metadata.leg_length_m is None
-    assert metadata.arm_length_m is None
-
-
 def test_read_uses_ezc3d_and_returns_metadata(tmp_path: Path) -> None:
     """End-to-end through ``read_c3d_subject_metadata`` with ezc3d mocked."""
     path = tmp_path / "fake.c3d"

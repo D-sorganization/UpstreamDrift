@@ -70,17 +70,3 @@ def test_launcher_checks_support_matrix_before_routing(
     launch_golf_suite.main()
 
     assert calls == ["checked"]
-
-
-def test_current_interpreter_is_in_matrix() -> None:
-    """The active test interpreter should be represented when supported."""
-    from src.api._version import is_supported_python_platform
-
-    current_version = (sys.version_info.major, sys.version_info.minor)
-    if current_version < (3, 10) or current_version > (3, 13):
-        pytest.skip("Current interpreter is intentionally outside release matrix")
-
-    assert is_supported_python_platform(
-        system_name="Windows",
-        python_version=current_version,
-    )

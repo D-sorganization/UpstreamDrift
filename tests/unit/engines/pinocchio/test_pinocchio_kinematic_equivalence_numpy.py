@@ -132,22 +132,6 @@ def test_tolerances_are_strict_enough_to_be_meaningful() -> None:
     assert geodesic_angle(R_id, R_near) < GRIP_ORIENTATION_TOL_RAD
 
 
-def test_simscape_address_row_loader_skips_or_loads() -> None:
-    """Loader returns either an empty dict (CSV missing / pandas
-    unavailable) or a dict that has the expected ground-truth columns."""
-    row = load_simscape_address_row()
-    if not row:
-        pytest.skip("Simscape dataset CSV or pandas unavailable")
-    for col in (
-        "HipLogs_HipAngularPositionZ",
-        "ClubLogs_CHGlobalPosition_1",
-        "ClubLogs_CHGlobalPosition_2",
-        "ClubLogs_CHGlobalPosition_3",
-        "MidpointCalcsLogs_MPGlobalPosition_1",
-    ):
-        assert col in row, f"expected ground-truth column '{col}' missing"
-
-
 def test_numpy_chain_is_self_consistent_under_pure_translation() -> None:
     """If we set every spine joint to zero, mid_hands lies directly above
     pelvis (x = 0, y = 0) at the cumulative chain z-offset."""

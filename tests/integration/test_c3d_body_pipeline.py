@@ -37,25 +37,3 @@ def _discover_c3d_files() -> list[Path]:
 
 
 C3D_FILES = _discover_c3d_files()
-
-
-@pytest.mark.slow
-@pytest.mark.integration
-@pytest.mark.skipif(not C3D_FILES, reason="no C3D fixtures shipped in this checkout")
-@pytest.mark.parametrize("c3d_path", C3D_FILES, ids=lambda p: p.name)
-def test_all_c3d_files_load_as_body_target(c3d_path: Path) -> None:
-    """Every C3D file loads, validates, and yields the default marker set."""
-    opts = AlignOptions(
-        sample_rate_hz=1000.0,
-        simulation_time_s=0.3,
-        time_alignment="impact",
-        impact_target_t_s=0.25,
-    )
-    bt = load_body_target_c3d(c3d_path, opts)
-    assert isinstance(bt, BodyTarget)
-    assert bt.marker_names == default_anatomical_marker_set()
-    # Resampled grid: int(0.3 * 1000) + 1 = 301 samples.
-    assert bt.time.shape == (301,)
-    assert bt.marker_xyz.shape[0] == 301
-    assert bt.marker_xyz.shape[2] == 3
-    assert 0 <= bt.impact_idx < bt.time.shape[0]

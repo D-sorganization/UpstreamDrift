@@ -33,10 +33,10 @@ class TestPhysicalConstantXMLSafety:
 
         # Verify parseable as floats
         g_components = gravity_attr.split()
-        assert len(g_components) == 3
+        assert len(g_components) == 3, "Assertion failed: len(g_components) == 3"
         gx, gy, gz = map(float, g_components)
-        assert gx == 0.0
-        assert gy == 0.0
+        assert gx == 0.0, "Assertion failed: gx == 0.0"
+        assert gy == 0.0, "Assertion failed: gy == 0.0"
         assert 9.0 < abs(gz) < 10.0, f"Gravity value {gz} out of expected range"
 
     def test_physical_constant_without_float_fails(self) -> None:
@@ -57,7 +57,9 @@ class TestPhysicalConstantXMLSafety:
         assert gravity_attr is not None, "gravity attribute not found"
 
         # The string will contain "PhysicalConstant(...)"
-        assert "PhysicalConstant" in gravity_attr
+        assert "PhysicalConstant" in gravity_attr, (
+            "Assertion failed: PhysicalConstant in gravity_attr"
+        )
 
     def test_all_gravity_usages_in_codebase_pattern(self) -> None:
         """Verify the float() pattern works for various use cases."""
@@ -77,7 +79,7 @@ class TestPhysicalConstantXMLSafety:
 
         # Extract numerical value
         gz = float(gravity.split()[-1])
-        assert 9.0 < abs(gz) < 10.0
+        assert 9.0 < abs(gz) < 10.0, "Assertion failed: 9.0 < abs(gz) < 10.0"
 
     def test_multiple_physical_constants_in_xml(self) -> None:
         """Multiple PhysicalConstants can be used in same XML."""
@@ -112,9 +114,13 @@ class TestPhysicalConstantXMLSafety:
         mass = float(mass_val)
         density = float(density_val)
 
-        assert 9.0 < gravity < 10.0
-        assert 0.04 < mass < 0.05  # ~45g
-        assert 1.0 < density < 1.5  # ~1.225 kg/m³
+        assert 9.0 < gravity < 10.0, "Assertion failed: 9.0 < gravity < 10.0"
+        assert (
+            0.04 < mass < 0.05
+        )  # ~45g, "Assertion failed: 0.04 < mass < 0.05  # ~45g"
+        assert (
+            1.0 < density < 1.5
+        )  # ~1.225 kg/m³, "Assertion failed: 1.0 < density < 1.5  # ~1.225 kg/m³"
 
     def test_physical_constant_arithmetic_in_xml(self) -> None:
         """PhysicalConstants work in arithmetic expressions."""
@@ -128,29 +134,43 @@ class TestPhysicalConstantXMLSafety:
         force_val = root.get("value")
         assert force_val is not None, "value attribute not found"
         force = float(force_val)
-        assert abs(force - (9.80665 * 0.5)) < 0.01
+        assert abs(force - (9.80665 * 0.5)) < 0.01, (
+            "Assertion failed: abs(force - (9.80665 * 0.5)) < 0.01"
+        )
 
     def test_physical_constant_behaves_as_float(self) -> None:
         """PhysicalConstants should work in all float contexts."""
         g = GRAVITY_M_S2
 
         # Arithmetic
-        assert isinstance(g * 2.0, int | float)
-        assert isinstance(g + 1.0, int | float)
-        assert isinstance(g / 2.0, int | float)
+        assert isinstance(g * 2.0, int | float), (
+            "Assertion failed: isinstance(g * 2.0, int | float)"
+        )
+        assert isinstance(g + 1.0, int | float), (
+            "Assertion failed: isinstance(g + 1.0, int | float)"
+        )
+        assert isinstance(g / 2.0, int | float), (
+            "Assertion failed: isinstance(g / 2.0, int | float)"
+        )
 
         # Comparisons
-        assert g > 9.0
-        assert g < 10.0
-        assert g == pytest.approx(9.80665)
+        assert g > 9.0, "Assertion failed: g > 9.0"
+        assert g < 10.0, "Assertion failed: g < 10.0"
+        assert g == pytest.approx(9.80665), (
+            "Assertion failed: g == pytest.approx(9.80665)"
+        )
 
         # Formatting
         formatted = f"{g:.3f}"
-        assert formatted == "9.807"
+        assert formatted == "9.807", "Assertion failed: formatted == 9.807"
 
         # Explicit float conversion
-        assert isinstance(float(g), float)
-        assert float(g) == pytest.approx(9.80665)
+        assert isinstance(float(g), float), (
+            "Assertion failed: isinstance(float(g), float)"
+        )
+        assert float(g) == pytest.approx(9.80665), (
+            "Assertion failed: float(g) == pytest.approx(9.80665)"
+        )
 
     def test_custom_physical_constant_in_xml(self) -> None:
         """User-defined PhysicalConstants work the same way."""
@@ -164,7 +184,9 @@ class TestPhysicalConstantXMLSafety:
         mars_g_val = root.get("gravity")
         assert mars_g_val is not None, "gravity attribute not found"
         mars_g = float(mars_g_val)
-        assert mars_g == pytest.approx(3.71)
+        assert mars_g == pytest.approx(3.71), (
+            "Assertion failed: mars_g == pytest.approx(3.71)"
+        )
 
     def test_prevent_accidental_string_concat(self) -> None:
         """Ensure float() prevents string concatenation issues."""
@@ -177,7 +199,9 @@ class TestPhysicalConstantXMLSafety:
         root = ET.fromstring(good_xml)
         assert root.text is not None, "element text not found"
         val = float(root.text)
-        assert val == pytest.approx(9.80665)
+        assert val == pytest.approx(9.80665), (
+            "Assertion failed: val == pytest.approx(9.80665)"
+        )
 
 
 class TestPhysicalConstantEdgeCases:
@@ -194,7 +218,7 @@ class TestPhysicalConstantEdgeCases:
 
         assert root.text is not None, "element text not found"
         tol = float(root.text)
-        assert tol == 1e-15
+        assert tol == 1e-15, "Assertion failed: tol == 1e-15"
 
     def test_very_large_physical_constant(self) -> None:
         """Large constants (e.g., speed of light) format correctly."""
@@ -205,7 +229,7 @@ class TestPhysicalConstantEdgeCases:
 
         assert root.text is not None, "element text not found"
         speed = float(root.text)
-        assert speed == 299792458.0
+        assert speed == 299792458.0, "Assertion failed: speed == 299792458.0"
 
     def test_negative_physical_constant(self) -> None:
         """Negative values (e.g., downward gravity) work."""
@@ -217,8 +241,10 @@ class TestPhysicalConstantEdgeCases:
 
         assert root.text is not None, "element text not found"
         val = float(root.text)
-        assert val < 0
-        assert val == pytest.approx(-9.80665)
+        assert val < 0, "Assertion failed: val < 0"
+        assert val == pytest.approx(-9.80665), (
+            "Assertion failed: val == pytest.approx(-9.80665)"
+        )
 
     def test_physical_constant_in_attribute_vs_text(self) -> None:
         """PhysicalConstants work as both attributes and text content."""
@@ -230,12 +256,18 @@ class TestPhysicalConstantEdgeCases:
 
         root = ET.fromstring(xml)
         attr_val_str = root.get("gravity_attr")
-        assert attr_val_str is not None and root.text is not None
+        assert attr_val_str is not None and root.text is not None, (
+            "Assertion failed: attr_val_str is not None and root.text is not None"
+        )
         attr_val = float(attr_val_str)
         text_val = float(root.text.strip())
 
-        assert attr_val == pytest.approx(9.80665)
-        assert text_val == pytest.approx(9.80665)
+        assert attr_val == pytest.approx(9.80665), (
+            "Assertion failed: attr_val == pytest.approx(9.80665)"
+        )
+        assert text_val == pytest.approx(9.80665), (
+            "Assertion failed: text_val == pytest.approx(9.80665)"
+        )
 
 
 def test_regression_pr303_gravity_xml_bug() -> None:
@@ -259,4 +291,6 @@ def test_regression_pr303_gravity_xml_bug() -> None:
     root = ET.fromstring(fixed_template)
     assert root.text is not None, "element text not found"
     val = float(root.text)
-    assert val == pytest.approx(9.80665)
+    assert val == pytest.approx(9.80665), (
+        "Assertion failed: val == pytest.approx(9.80665)"
+    )

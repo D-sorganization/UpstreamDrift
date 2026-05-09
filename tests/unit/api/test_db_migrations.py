@@ -52,40 +52,6 @@ def _import_migration_module() -> ModuleType:
 # ---------------------------------------------------------------------------
 
 
-class TestAlembicAvailability:
-    """Verify Alembic is installed and importable."""
-
-    def test_alembic_importable(self):
-        """Alembic must be importable (dev dependency, issue #2078)."""
-        import alembic  # noqa: F401
-
-        assert alembic.__version__, "alembic.__version__ should be non-empty"
-
-    def test_alembic_config_importable(self):
-        """alembic.config.Config must be importable."""
-        from alembic.config import Config
-
-        assert Config is not None
-
-    def test_alembic_command_importable(self):
-        """alembic.command module must be importable."""
-        import alembic.command  # noqa: F401
-
-    def test_alembic_version_meets_minimum(self):
-        """Alembic version must be >= 1.13.0 (pyproject.toml requirement)."""
-        import alembic
-        from packaging.version import Version
-
-        try:
-            current = Version(alembic.__version__)
-            assert current >= Version("1.13.0"), (
-                f"Alembic {alembic.__version__} is older than the required 1.13.0"
-            )
-        except ImportError:
-            # packaging not installed — skip version comparison
-            pytest.skip("packaging not installed, skipping version check")
-
-
 # ---------------------------------------------------------------------------
 # alembic.ini existence and syntax
 # ---------------------------------------------------------------------------

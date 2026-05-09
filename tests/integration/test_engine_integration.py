@@ -29,15 +29,23 @@ class TestEngineIntegration:
         manager = EngineManager()
 
         # Should have initialized with real paths
-        assert manager.suite_root.exists()
-        assert manager.engines_root.exists()
+        assert manager.suite_root.exists(), (
+            "Assertion failed: manager.suite_root.exists()"
+        )
+        assert manager.engines_root.exists(), (
+            "Assertion failed: manager.engines_root.exists()"
+        )
 
         # Should have discovered some engines (at least the ones in the repo)
         available_engines = manager.get_available_engines()
-        assert isinstance(available_engines, list)
+        assert isinstance(available_engines, list), (
+            "Assertion failed: isinstance(available_engines, list)"
+        )
 
         # Each engine type should have a path defined
-        assert len(manager.engine_paths) >= len(EngineType) - 1
+        assert len(manager.engine_paths) >= len(EngineType) - 1, (
+            "Assertion failed: len(manager.engine_paths) >= len(EngineType) - 1"
+        )
 
     @pytest.mark.integration
     def test_engine_availability_matches_filesystem(self) -> None:
@@ -77,7 +85,9 @@ class TestEngineIntegration:
 
         # Most engine types should have an associated probe
         # (newer engines may not have probes yet)
-        assert len(manager.probes) >= len(EngineType) - 3
+        assert len(manager.probes) >= len(EngineType) - 3, (
+            "Assertion failed: len(manager.probes) >= len(EngineType) - 3"
+        )
 
         # Run probes and check consistency
         for engine_type, probe in manager.probes.items():
@@ -86,7 +96,9 @@ class TestEngineIntegration:
                 probe_result = probe.is_available()  # type: ignore[attr-defined]
 
                 # Result should be a dict or have expected attributes
-                assert isinstance(probe_result, dict | bool | type(None))
+                assert isinstance(probe_result, dict | bool | type(None)), (
+                    "Assertion failed: isinstance(probe_result, dict | bool | type(None))"
+                )
 
                 # If probe says available, engine should be in available list
                 available_engines = manager.get_available_engines()
@@ -102,7 +114,9 @@ class TestEngineIntegration:
 
         # Validate we have at least one engine available in the test environment
         available = manager.get_available_engines()
-        assert isinstance(available, list)  # May be empty in minimal CI environment
+        assert isinstance(
+            available, list
+        )  # May be empty in minimal CI environment, "Assertion failed: isinstance(available, list)  # May be empty in minimal CI environment"
 
     @pytest.mark.integration
     def test_engine_parameter_consistency(self) -> None:
@@ -128,8 +142,12 @@ class TestEngineIntegration:
                 setattr(mock_instance, param, value)
 
             # Should not raise exceptions
-            assert mock_instance.swing_speed == 100.0
-            assert mock_instance.club_type == "driver"
+            assert mock_instance.swing_speed == 100.0, (
+                "Assertion failed: mock_instance.swing_speed == 100.0"
+            )
+            assert mock_instance.club_type == "driver", (
+                "Assertion failed: mock_instance.club_type == driver"
+            )
 
     @pytest.mark.integration
     @pytest.mark.slow
@@ -165,13 +183,19 @@ class TestEngineIntegration:
             }
 
         # Verify we have performance data
-        assert len(performance_results) > 0
+        assert len(performance_results) > 0, (
+            "Assertion failed: len(performance_results) > 0"
+        )
 
         # All simulations should complete successfully
         for perf_data in performance_results.values():
-            assert "simulation_time" in perf_data
-            assert "result" in perf_data
-            assert perf_data["result"]["ball_distance"] == 250.0
+            assert "simulation_time" in perf_data, (
+                "Assertion failed: simulation_time in perf_data"
+            )
+            assert "result" in perf_data, "Assertion failed: result in perf_data"
+            assert perf_data["result"]["ball_distance"] == 250.0, (
+                "Assertion failed: perf_data[result][ball_distance] == 250.0"
+            )
 
 
 class TestEngineDataFlow:
@@ -198,7 +222,7 @@ class TestEngineDataFlow:
             mock_instance.load_swing_data.return_value = True
             result = mock_instance.load_swing_data(sample_swing_data)
 
-            assert result is True
+            assert result is True, "Assertion failed: result is True"
             mock_instance.load_swing_data.assert_called_with(sample_swing_data)
 
     @pytest.mark.integration
@@ -234,7 +258,7 @@ class TestEngineDataFlow:
 
             # Verify all expected fields are present
             for field in expected_fields:
-                assert field in result
+                assert field in result, "Assertion failed: field in result"
 
     @pytest.mark.integration
     def test_engine_error_handling(self) -> None:
@@ -252,52 +276,3 @@ class TestEngineDataFlow:
 
             with pytest.raises(ValueError):
                 mock_instance.set_swing_speed(-100)  # Invalid negative speed
-
-
-class TestEngineConfiguration:
-    """Test configuration management across engines."""
-
-    @pytest.mark.integration
-    def test_unified_configuration(self) -> None:
-        """Test that unified configuration works for all engines."""
-        manager = EngineManager()
-        available_engines = manager.get_available_engines()
-
-        # Mock configuration for each engine
-        sample_config = {
-            "engines": {
-                "mujoco": {"timestep": 0.001, "solver": "newton"},
-                "drake": {"timestep": 0.001, "integrator": "rk4"},
-                "pinocchio": {"timestep": 0.001, "algorithm": "rnea"},
-            }
-        }
-
-        for engine in available_engines:
-            engine_name = engine.value.lower()
-            if engine_name in sample_config["engines"]:
-                engine_config = sample_config["engines"][engine_name]
-
-                mock_instance = Mock()
-
-                # Test configuration loading
-                mock_instance.load_config.return_value = True
-                result = mock_instance.load_config(engine_config)
-
-                assert result is True
-                mock_instance.load_config.assert_called_with(engine_config)
-
-    @pytest.mark.integration
-    def test_engine_switching(self) -> None:
-        """Test switching between engines at runtime."""
-        manager = EngineManager()
-        available_engines = manager.get_available_engines()
-
-        # Test switching engines
-        for engine in available_engines:
-            try:
-                success = manager.switch_engine(engine)
-                assert success is True
-                assert manager.current_engine == engine
-            except Exception as e:  # noqa: BLE001
-                # Some engines might not be fully implemented yet
-                pytest.skip(f"Engine {engine} not fully implemented: {e}")

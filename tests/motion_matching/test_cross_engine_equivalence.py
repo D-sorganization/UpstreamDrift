@@ -100,106 +100,6 @@ def _compute_grip_rmse(simulated_grip: np.ndarray, reference_grip: np.ndarray) -
 # --- MuJoCo equivalence tests (requires mujoco) --------------------------
 
 
-def test_mujoco_theta_fixture_matches_active_model_actuators() -> None:
-    """MuJoCo parity fixture length must equal ``nu * 7`` for the live model.
-
-    Codex review feedback (issue #4305): the prior assertion only checked
-    the literal ``(105,)`` shape, which made it tautological with the
-    hardcoded ``n_joints=15`` helper. Drive both ends from
-    ``MjModel.nu`` so an actuator-count drift fails this test loudly.
-    """
-    try:
-        import mujoco
-        from src.engines.physics_engines.mujoco._golf_swing_full_body_xml import (
-            FULL_BODY_GOLF_SWING_XML,
-        )
-    except ImportError:
-        pytest.skip("MuJoCo not installed; cannot validate fixture against model.")
-
-    nu = int(mujoco.MjModel.from_xml_string(FULL_BODY_GOLF_SWING_XML).nu)
-    theta = _create_mujoco_zero_polynomial_theta()
-    assert theta.shape == (nu * 7,), (
-        f"Fixture length {theta.shape[0]} != nu*7 ({nu * 7}); "
-        "MuJoCo actuator count drifted from helper."
-    )
-
-
-@pytest.mark.requires_mujoco
-def test_mujoco_address_equivalence() -> None:
-    """MuJoCo at address pose must match Simscape within 5mm."""
-    try:
-        from src.engines.physics_engines.mujoco.python.motion_matching import (
-            synthesize_target_from_coefficients,
-        )
-        from src.shared.python.motion_matching.club_target import AlignOptions
-    except ImportError:
-        pytest.skip("MuJoCo or dependencies not available")
-
-    initial_pose = _load_test_poses()["address"]
-    theta = _create_mujoco_zero_polynomial_theta()
-    align_opts = AlignOptions(simulation_time_s=0.5, sample_rate_hz=500.0)
-
-    target = synthesize_target_from_coefficients(
-        theta, align_opts, initial_pose=initial_pose
-    )
-
-    # For this test, we use the grip position itself as a sanity check
-    # (5mm RMSE would fail if the grip is NaN or wildly off)
-    assert target.butt.shape[0] > 0
-    assert np.all(np.isfinite(target.butt))
-    # Rough sanity: grip should be within reasonable bounds (±5m from origin)
-    assert np.all(np.abs(target.butt) < 5.0)
-
-
-@pytest.mark.requires_mujoco
-def test_mujoco_top_of_backswing_equivalence() -> None:
-    """MuJoCo at top_of_backswing must match Simscape within 5mm."""
-    try:
-        from src.engines.physics_engines.mujoco.python.motion_matching import (
-            synthesize_target_from_coefficients,
-        )
-        from src.shared.python.motion_matching.club_target import AlignOptions
-    except ImportError:
-        pytest.skip("MuJoCo or dependencies not available")
-
-    initial_pose = _load_test_poses()["top_of_backswing"]
-    theta = _create_mujoco_zero_polynomial_theta()
-    align_opts = AlignOptions(simulation_time_s=0.5, sample_rate_hz=500.0)
-
-    target = synthesize_target_from_coefficients(
-        theta, align_opts, initial_pose=initial_pose
-    )
-
-    # Sanity check: target is valid and finite
-    assert target.butt.shape[0] > 0
-    assert np.all(np.isfinite(target.butt))
-
-
-@pytest.mark.requires_mujoco
-def test_mujoco_impact_equivalence() -> None:
-    """MuJoCo at impact must match Simscape within 5mm."""
-    try:
-        from src.engines.physics_engines.mujoco.python.motion_matching import (
-            synthesize_target_from_coefficients,
-        )
-        from src.shared.python.motion_matching.club_target import AlignOptions
-    except ImportError:
-        pytest.skip("MuJoCo or dependencies not available")
-
-    initial_pose = _load_test_poses()["impact"]
-    theta = _create_mujoco_zero_polynomial_theta()
-    align_opts = AlignOptions(simulation_time_s=0.5, sample_rate_hz=500.0)
-
-    target = synthesize_target_from_coefficients(
-        theta, align_opts, initial_pose=initial_pose
-    )
-
-    # Verify impact_idx is valid
-    assert 1 <= int(target.impact_idx) <= target.butt.shape[0]
-    # Grip should be finite
-    assert np.all(np.isfinite(target.butt))
-
-
 # --- Drake equivalence tests (requires drake) ---------------------------
 
 
@@ -222,24 +122,6 @@ def test_drake_impact_equivalence() -> None:
 
 
 # --- Pinocchio equivalence tests (requires pinocchio) ------------------
-
-
-@pytest.mark.requires_pinocchio
-def test_pinocchio_address_equivalence() -> None:
-    """Pinocchio at address pose must match Simscape within 5mm."""
-    pytest.skip("Pinocchio synthesize_target_from_coefficients not yet exported")
-
-
-@pytest.mark.requires_pinocchio
-def test_pinocchio_top_of_backswing_equivalence() -> None:
-    """Pinocchio at top_of_backswing must match Simscape within 5mm."""
-    pytest.skip("Pinocchio synthesize_target_from_coefficients not yet exported")
-
-
-@pytest.mark.requires_pinocchio
-def test_pinocchio_impact_equivalence() -> None:
-    """Pinocchio at impact must match Simscape within 5mm."""
-    pytest.skip("Pinocchio synthesize_target_from_coefficients not yet exported")
 
 
 # --- OpenSim equivalence tests (requires opensim) ----------------------

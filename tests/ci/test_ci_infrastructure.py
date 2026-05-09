@@ -203,17 +203,6 @@ class TestCIEnvironmentCompatibility:
         assert pytest is not None
         assert pytest.__version__ is not None
 
-    @pytest.mark.skipif(
-        sys.platform != "linux",
-        reason="CI runs on Linux",
-    )
-    def test_xvfb_compatible_qt_platform(self) -> None:
-        """Test that QT_QPA_PLATFORM can be set to offscreen."""
-        import os
-
-        # This should not raise in CI with xvfb
-        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-
     def test_pr_scoped_core_tests_treat_all_skipped_selection_as_noop(self) -> None:
         """PR-scoped pytest must not fail when every selected test self-skips."""
         workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(

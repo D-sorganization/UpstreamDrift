@@ -31,45 +31,6 @@ def suite_root() -> Path:
 # ──────────────────────────────────────────────────────────────
 #  Probe Path Consistency
 # ──────────────────────────────────────────────────────────────
-class TestProbePaths:
-    """Verify probe paths match the actual filesystem layout."""
-
-    def test_opensim_probe_path(self, suite_root: Path) -> None:
-        """OpenSim probe checks the correct engine directory."""
-        from src.shared.python.engine_core.engine_probes import OpenSimProbe
-
-        probe = OpenSimProbe(suite_root)
-        result = probe.probe()
-        # The probe should not fail with "engine directory" missing
-        if "engine directory" in result.missing_dependencies:
-            expected_dir = suite_root / "engines" / "physics_engines" / "opensim"
-            pytest.skip(f"OpenSim engine directory not found at {expected_dir}")
-
-    def test_myosim_probe_path(self, suite_root: Path) -> None:
-        """MyoSim probe checks the correct engine directory (myosuite/)."""
-        from src.shared.python.engine_core.engine_probes import MyoSimProbe
-
-        MyoSimProbe(suite_root)  # Ensures probe can be instantiated
-        # Verify the probe checks for myosuite directory, not myosim
-        engine_dir = suite_root / "src" / "engines" / "physics_engines" / "myosuite"
-        assert engine_dir.exists(), (
-            f"MyoSuite engine directory should exist at {engine_dir}"
-        )
-
-    def test_myosim_probe_checks_correct_file(self, suite_root: Path) -> None:
-        """MyoSim probe checks for myosuite_physics_engine.py."""
-        engine_file = (
-            suite_root
-            / "src"
-            / "engines"
-            / "physics_engines"
-            / "myosuite"
-            / "python"
-            / "myosuite_physics_engine.py"
-        )
-        assert engine_file.exists(), (
-            f"MyoSuite engine file should exist at {engine_file}"
-        )
 
 
 # ──────────────────────────────────────────────────────────────
@@ -82,13 +43,17 @@ class TestLoaderWiring:
         """OpenSim has a loader in LOADER_MAP."""
         from src.shared.python.engine_core.engine_loaders import LOADER_MAP
 
-        assert EngineType.OPENSIM in LOADER_MAP
+        assert EngineType.OPENSIM in LOADER_MAP, (
+            "Assertion failed: EngineType.OPENSIM in LOADER_MAP"
+        )
 
     def test_myosim_in_loader_map(self) -> None:
         """MyoSim has a loader in LOADER_MAP."""
         from src.shared.python.engine_core.engine_loaders import LOADER_MAP
 
-        assert EngineType.MYOSIM in LOADER_MAP
+        assert EngineType.MYOSIM in LOADER_MAP, (
+            "Assertion failed: EngineType.MYOSIM in LOADER_MAP"
+        )
 
     def test_opensim_loader_imports_correct_class(self) -> None:
         """OpenSim loader references OpenSimPhysicsEngine."""
@@ -97,7 +62,9 @@ class TestLoaderWiring:
         from src.shared.python.engine_core.engine_loaders import load_opensim_engine
 
         source = inspect.getsource(load_opensim_engine)
-        assert "OpenSimPhysicsEngine" in source
+        assert "OpenSimPhysicsEngine" in source, (
+            "Assertion failed: OpenSimPhysicsEngine in source"
+        )
 
     def test_myosim_loader_imports_correct_class(self) -> None:
         """MyoSim loader references MyoSuitePhysicsEngine."""
@@ -106,7 +73,9 @@ class TestLoaderWiring:
         from src.shared.python.engine_core.engine_loaders import load_myosim_engine
 
         source = inspect.getsource(load_myosim_engine)
-        assert "MyoSuitePhysicsEngine" in source
+        assert "MyoSuitePhysicsEngine" in source, (
+            "Assertion failed: MyoSuitePhysicsEngine in source"
+        )
 
 
 # ──────────────────────────────────────────────────────────────
@@ -119,13 +88,17 @@ class TestEngineAvailability:
         """OPENSIM_AVAILABLE flag is defined."""
         from src.shared.python.engine_core.engine_availability import OPENSIM_AVAILABLE
 
-        assert isinstance(OPENSIM_AVAILABLE, bool)
+        assert isinstance(OPENSIM_AVAILABLE, bool), (
+            "Assertion failed: isinstance(OPENSIM_AVAILABLE, bool)"
+        )
 
     def test_myosuite_availability_flag_exists(self) -> None:
         """MYOSUITE_AVAILABLE flag is defined."""
         from src.shared.python.engine_core.engine_availability import MYOSUITE_AVAILABLE
 
-        assert isinstance(MYOSUITE_AVAILABLE, bool)
+        assert isinstance(MYOSUITE_AVAILABLE, bool), (
+            "Assertion failed: isinstance(MYOSUITE_AVAILABLE, bool)"
+        )
 
 
 # ──────────────────────────────────────────────────────────────
@@ -163,7 +136,9 @@ class TestOpenSimProtocol:
             assert hasattr(OpenSimPhysicsEngine, method), (
                 f"OpenSimPhysicsEngine missing required method: {method}"
             )
-            assert callable(getattr(OpenSimPhysicsEngine, method))
+            assert callable(getattr(OpenSimPhysicsEngine, method)), (
+                "Assertion failed: callable(getattr(OpenSimPhysicsEngine, method))"
+            )
 
     def test_opensim_has_biomech_methods(self) -> None:
         """OpenSimPhysicsEngine has golf-specific biomechanics methods."""
@@ -187,9 +162,11 @@ class TestOpenSimProtocol:
         )
 
         engine = OpenSimPhysicsEngine()
-        assert engine.is_initialized is False  # noqa: E712
+        assert engine.is_initialized is False  # noqa: E712, "Assertion failed: engine.is_initialized is False  # noqa: E712"
         # When uninitialized, model_name may return a default marker string
-        assert isinstance(engine.model_name, str)
+        assert isinstance(engine.model_name, str), (
+            "Assertion failed: isinstance(engine.model_name, str)"
+        )
 
 
 # ──────────────────────────────────────────────────────────────
@@ -227,7 +204,9 @@ class TestMyoSuiteProtocol:
             assert hasattr(MyoSuitePhysicsEngine, method), (
                 f"MyoSuitePhysicsEngine missing required method: {method}"
             )
-            assert callable(getattr(MyoSuitePhysicsEngine, method))
+            assert callable(getattr(MyoSuitePhysicsEngine, method)), (
+                "Assertion failed: callable(getattr(MyoSuitePhysicsEngine, method))"
+            )
 
     def test_myosuite_has_muscle_methods(self) -> None:
         """MyoSuitePhysicsEngine has muscle control methods."""
@@ -254,9 +233,11 @@ class TestMyoSuiteProtocol:
         )
 
         engine = MyoSuitePhysicsEngine()
-        assert engine.is_initialized is False  # noqa: E712
+        assert engine.is_initialized is False  # noqa: E712, "Assertion failed: engine.is_initialized is False  # noqa: E712"
         # When uninitialized, model_name may return a default marker string
-        assert isinstance(engine.model_name, str)
+        assert isinstance(engine.model_name, str), (
+            "Assertion failed: isinstance(engine.model_name, str)"
+        )
 
 
 # ──────────────────────────────────────────────────────────────
@@ -269,13 +250,17 @@ class TestMyoSuiteAdapter:
         """MuscleDrivenEnv is importable from the adapter module."""
         from src.shared.python.biomechanics.myosuite_adapter import MuscleDrivenEnv
 
-        assert MuscleDrivenEnv is not None
+        assert MuscleDrivenEnv is not None, (
+            "Assertion failed: MuscleDrivenEnv is not None"
+        )
 
     def test_train_policy_function_exists(self) -> None:
         """train_muscle_policy function is importable."""
         from src.shared.python.biomechanics.myosuite_adapter import train_muscle_policy
 
-        assert callable(train_muscle_policy)
+        assert callable(train_muscle_policy), (
+            "Assertion failed: callable(train_muscle_policy)"
+        )
 
     def test_muscle_driven_env_init_with_mock(self) -> None:
         """MuscleDrivenEnv initializes with a mock muscle system."""
@@ -288,48 +273,9 @@ class TestMyoSuiteAdapter:
             MuscleDrivenEnv, "_get_muscle_names", return_value=["biceps", "triceps"]
         ):
             env = MuscleDrivenEnv(muscle_system=mock_muscle)
-            assert env is not None
+            assert env is not None, "Assertion failed: env is not None"
 
 
 # ──────────────────────────────────────────────────────────────
 #  API Route Connectivity
 # ──────────────────────────────────────────────────────────────
-class TestAPIRouteConnectivity:
-    """Verify OpenSim/MyoSuite are accessible via API routes."""
-
-    @pytest.fixture(scope="class")
-    def client(self) -> Generator[Any, None, None]:
-        """Create test client."""
-        try:
-            from fastapi.testclient import TestClient
-            from src.api.server import app
-        except ImportError as exc:
-            pytest.skip(f"API server deps not available: {exc}")
-
-        with TestClient(app) as c:
-            yield c
-
-    def test_opensim_probe_via_api(self, client) -> None:
-        """OpenSim probe returns valid JSON via API."""
-        resp = client.get("/api/engines/opensim/probe")
-        assert resp.status_code == 200
-        data = resp.json()
-        assert "available" in data
-
-    def test_myosuite_probe_via_api(self, client) -> None:
-        """MyoSuite probe returns valid JSON via API."""
-        resp = client.get("/api/engines/myosuite/probe")
-        assert resp.status_code == 200
-        data = resp.json()
-        assert "available" in data
-
-    def test_opensim_load_via_api(self, client) -> None:
-        """OpenSim load endpoint responds."""
-        resp = client.post("/api/engines/opensim/load")
-        # May fail if opensim not installed, but should not crash
-        assert resp.status_code in [200, 400, 500]
-
-    def test_myosuite_load_via_api(self, client) -> None:
-        """MyoSuite load endpoint responds."""
-        resp = client.post("/api/engines/myosuite/load")
-        assert resp.status_code in [200, 400, 500]

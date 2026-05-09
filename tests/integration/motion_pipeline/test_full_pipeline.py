@@ -220,30 +220,6 @@ IK_BACKENDS = ("mujoco", "drake", "pinocchio", "opensim")
 MATCHING_BACKENDS = ("mujoco", "drake", "pinocchio")
 
 
-@pytest.mark.parametrize("backend", IK_BACKENDS)
-def test_ik_backend_module_imports_or_skips(backend: str) -> None:
-    """Each IK backend module imports cleanly OR raises a clean ImportError.
-
-    The orchestrator switches on backend name and we want to be certain that
-    the underlying module is structured so the import error is recoverable.
-    """
-    mod_path = f"src.shared.python.motion_pipeline.ik.{backend}_backend"
-    try:
-        __import__(mod_path)
-    except ImportError as exc:
-        pytest.skip(f"{backend} backend unavailable: {exc}")
-
-
-@pytest.mark.parametrize("backend", MATCHING_BACKENDS)
-def test_matching_backend_module_imports_or_skips(backend: str) -> None:
-    """Each matching backend module imports cleanly OR raises ImportError."""
-    mod_path = f"src.shared.python.motion_pipeline.matching.{backend}_backend"
-    try:
-        __import__(mod_path)
-    except ImportError as exc:
-        pytest.skip(f"{backend} matching backend unavailable: {exc}")
-
-
 # ---------------------------------------------------------------------------
 # End-to-end orchestrator smoke
 # ---------------------------------------------------------------------------

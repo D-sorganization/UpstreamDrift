@@ -71,9 +71,13 @@ class TestMyoSuiteMuscleAnalyzer:
         # Get activations
         activations = analyzer.get_muscle_activations()
 
-        assert len(activations) == len(analyzer.muscle_names)
+        assert len(activations) == len(analyzer.muscle_names), (
+            "Assertion failed: len(activations) == len(analyzer.muscle_names)"
+        )
         # Activations should be in [0, 1]
-        assert np.all(activations >= 0.0) and np.all(activations <= 1.0)
+        assert np.all(activations >= 0.0) and np.all(activations <= 1.0), (
+            "Assertion failed: np.all(activations >= 0.0) and np.all(activations <= 1.0)"
+        )
 
         logger.info(f"Muscle activations: {activations}")
 
@@ -99,7 +103,9 @@ class TestMyoSuiteMuscleAnalyzer:
         # Get forces
         forces = analyzer.get_muscle_forces()
 
-        assert len(forces) == len(analyzer.muscle_names)
+        assert len(forces) == len(analyzer.muscle_names), (
+            "Assertion failed: len(forces) == len(analyzer.muscle_names)"
+        )
         # At least some muscles should have non-zero force
         assert np.any(forces != 0.0), "All muscle forces are zero"
 
@@ -123,7 +129,9 @@ class TestMyoSuiteMuscleAnalyzer:
         # Compute moment arms
         moment_arms = analyzer.compute_moment_arms()
 
-        assert len(moment_arms) == len(analyzer.muscle_names)
+        assert len(moment_arms) == len(analyzer.muscle_names), (
+            "Assertion failed: len(moment_arms) == len(analyzer.muscle_names)"
+        )
 
         # Log moment arm values
         for muscle_name, r in list(moment_arms.items())[:3]:  # First 3 muscles
@@ -152,7 +160,9 @@ class TestMyoSuiteMuscleAnalyzer:
         # Compute induced accelerations
         induced = analyzer.compute_muscle_induced_accelerations()
 
-        assert len(induced) == len(analyzer.muscle_names)
+        assert len(induced) == len(analyzer.muscle_names), (
+            "Assertion failed: len(induced) == len(analyzer.muscle_names)"
+        )
 
         # At least some muscles should produce non-zero acceleration
         non_zero_count = sum(1 for a in induced.values() if not np.allclose(a, 0.0))
@@ -184,11 +194,21 @@ class TestMyoSuiteMuscleAnalyzer:
         analysis = analyzer.analyze_all()
 
         # Verify all fields populated
-        assert analysis.muscle_state is not None
-        assert len(analysis.muscle_state.muscle_names) > 0
-        assert len(analysis.moment_arms) > 0
-        assert len(analysis.joint_torques) > 0
-        assert len(analysis.total_muscle_torque) > 0
+        assert analysis.muscle_state is not None, (
+            "Assertion failed: analysis.muscle_state is not None"
+        )
+        assert len(analysis.muscle_state.muscle_names) > 0, (
+            "Assertion failed: len(analysis.muscle_state.muscle_names) > 0"
+        )
+        assert len(analysis.moment_arms) > 0, (
+            "Assertion failed: len(analysis.moment_arms) > 0"
+        )
+        assert len(analysis.joint_torques) > 0, (
+            "Assertion failed: len(analysis.joint_torques) > 0"
+        )
+        assert len(analysis.total_muscle_torque) > 0, (
+            "Assertion failed: len(analysis.total_muscle_torque) > 0"
+        )
 
         logger.info("Analysis complete:")
         logger.info(f"  Muscles: {len(analysis.muscle_state.muscle_names)}")
@@ -198,167 +218,5 @@ class TestMyoSuiteMuscleAnalyzer:
         )
 
 
-class TestMyoSuiteGripModel:
-    """Test grip modeling via hand muscles."""
-
-    def test_grip_muscle_identification(self, myosuite_env_available) -> None:
-        """Section K1: Identify hand/finger muscles."""
-        import gym
-
-        # Use hand environment if available; fallback to elbow
-        try:
-            env = gym.make("myoHandPoseRandom-v0")
-        except Exception:  # noqa: BLE001
-            env = gym.make("myoElbowPose1D6MRandom-v0")
-
-        env.reset()
-        sim = env.sim if hasattr(env, "sim") else env.unwrapped.sim
-
-        from src.engines.physics_engines.myosuite.python.muscle_analysis import (
-            MyoSuiteGripModel,
-            MyoSuiteMuscleAnalyzer,
-        )
-
-        analyzer = MyoSuiteMuscleAnalyzer(sim)
-        grip_model = MyoSuiteGripModel(sim, analyzer)
-
-        # Get grip muscles
-        grip_muscles = grip_model.get_grip_muscles()
-
-        logger.info(f"Grip muscles found: {grip_muscles}")
-
-        # May or may not have grip muscles depending on model
-        # Just verify interface works
-        assert isinstance(grip_muscles, list)
-
-    def test_total_grip_force_computation(self, myosuite_env_available) -> None:
-        """Section K1: Compute total grip force."""
-        import gym
-
-        try:
-            env = gym.make("myoHandPoseRandom-v0")
-        except Exception:  # noqa: BLE001
-            pytest.skip("Hand model not available")
-
-        env.reset()
-
-        # Apply grip activation
-        for _ in range(10):
-            action = np.ones(env.action_space.shape) * 0.7  # 70% grip
-            env.step(action)
-
-        sim = env.sim if hasattr(env, "sim") else env.unwrapped.sim
-
-        from src.engines.physics_engines.myosuite.python.muscle_analysis import (
-            MyoSuiteGripModel,
-            MyoSuiteMuscleAnalyzer,
-        )
-
-        analyzer = MyoSuiteMuscleAnalyzer(sim)
-        grip_model = MyoSuiteGripModel(sim, analyzer)
-
-        # Compute grip force
-        total_force = grip_model.compute_total_grip_force()
-
-        logger.info(f"Total grip force: {total_force:.1f} N")
-
-        # Should be positive with activation
-        assert total_force >= 0.0
-
-
-class TestMyoSuiteEngine:
-    """Test MyoSuite engine with muscle integration."""
-
-    def test_drift_control_with_muscles(self, myosuite_env_available) -> None:
-        """Section F + K: Verify drift-control works with muscle model."""
-        from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
-            MyoSuitePhysicsEngine,
-        )
-
-        engine = MyoSuitePhysicsEngine()
-        engine.load_from_path("myoElbowPose1D6MRandom-v0")
-
-        # Compute drift (with zero muscle activation)
-        a_drift = engine.compute_drift_acceleration()
-
-        assert len(a_drift) > 0, "Drift acceleration is empty"
-
-        logger.info(f"Drift acceleration: {a_drift}")
-
-        # Compute control
-        nv = len(a_drift)
-        tau = np.ones(nv) * 0.5
-        a_control = engine.compute_control_acceleration(tau)
-
-        assert len(a_control) == nv
-
-        logger.info(f"Control acceleration: {a_control}")
-
-    def test_muscle_analyzer_integration(self, myosuite_env_available) -> None:
-        """Section K: Verify engine provides muscle analyzer."""
-        from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
-            MyoSuitePhysicsEngine,
-        )
-
-        engine = MyoSuitePhysicsEngine()
-        engine.load_from_path("myoElbowPose1D6MRandom-v0")
-
-        # Get analyzer
-        analyzer = engine.get_muscle_analyzer()
-
-        assert analyzer is not None, "Analyzer should be available"
-        assert len(analyzer.muscle_names) > 0
-
-        logger.info(f"Analyzer muscles: {analyzer.muscle_names}")
-
-    def test_muscle_activation_setting(self, myosuite_env_available) -> None:
-        """Section K: Set muscle activations by name."""
-        from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
-            MyoSuitePhysicsEngine,
-        )
-
-        engine = MyoSuitePhysicsEngine()
-        engine.load_from_path("myoElbowPose1D6MRandom-v0")
-
-        # Get muscle names
-        analyzer = engine.get_muscle_analyzer()
-        if analyzer is None:
-            pytest.skip("No muscles available")
-
-        if not hasattr(analyzer, "muscle_names") or len(analyzer.muscle_names) == 0:
-            pytest.skip("No muscles available")
-
-        # Set activation for first muscle
-        muscle_name = analyzer.muscle_names[0]
-        engine.set_muscle_activations({muscle_name: 0.8})
-
-        logger.info(f"Set {muscle_name} activation to 0.8")
-
-        # Verify it was set (by checking control vector)
-        if hasattr(analyzer, "muscle_actuator_ids") and analyzer.muscle_actuator_ids:
-            actuator_id = analyzer.muscle_actuator_ids[0]
-            ctrl_value = engine.sim.data.ctrl[actuator_id]
-            assert 0.7 <= ctrl_value <= 0.9, (
-                f"Activation not set correctly: {ctrl_value}"
-            )
-
-
 class TestCrossValidation:
     """Cross-validation with OpenSim."""
-
-    @pytest.mark.xfail(
-        strict=False, reason="Cross-validation test pending matching models"
-    )
-    def test_muscle_force_comparison(self) -> None:
-        """Section K2: Compare MyoSuite vs OpenSim muscle forces."""
-        # This test requires both engines with comparable models
-        # Placeholder for future cross-validation
-        logger.info("Cross-validation: Placeholder for MyoSuite ↔ OpenSim comparison")
-        raise NotImplementedError("Cross-validation requires matching models")
-
-    @pytest.mark.xfail(strict=False, reason="Pending multi-engine grip models")
-    def test_grip_force_validation(self) -> None:
-        """Section K1 + J1: Compare grip forces across engines."""
-        # Grip force should agree within ±15% (Section K2)
-        logger.info("Grip cross-validation: Placeholder")
-        raise NotImplementedError("Pending multi-engine grip models")

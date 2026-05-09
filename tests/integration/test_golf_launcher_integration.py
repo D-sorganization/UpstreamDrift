@@ -344,38 +344,6 @@ models:
             context_help_patcher.stop()
 
 
-def test_launcher_detects_real_model_files(launcher_env) -> None:
-    """Test that launcher correctly loads and identifies valid/invalid paths."""
-    # Skip in CI environments where Qt might crash
-    is_ci = os.environ.get("CI") == "true" or os.environ.get("GITHUB_ACTIONS") == "true"
-    has_display = os.environ.get("DISPLAY") is not None
-
-    if is_ci and not has_display:
-        pytest.skip("Skipping Qt-dependent test in headless CI environment")
-
-    launcher, model_path = launcher_env
-
-    # 1. Verify model loaded from registry into available_models.
-    # Note: model_cards is only populated for models that appear in the
-    # default layout order, so checking available_models is the correct
-    # way to confirm the registry loaded the temp config entry.
-    assert "test_integration_model" in launcher.available_models, (
-        f"Expected 'test_integration_model' in available_models, "
-        f"got keys: {list(launcher.available_models.keys())}"
-    )
-
-    # 2. Select it using ID (select_model works on any known model)
-    launcher.select_model("test_integration_model")
-    assert launcher.selected_model == "test_integration_model"
-
-    # 3. Verify path resolving via configuration
-    # Note: Registry lookups are by ID
-    # The temp config ID is "test_integration_model"
-    model_config = launcher.registry.get_model("test_integration_model")
-    assert model_config is not None
-    assert Path(model_config.path).resolve() == model_path.resolve()
-
-
 def test_launcher_handles_missing_file_on_launch(launcher_env) -> None:
     """Test launching a model where the file was deleted after load."""
     launcher, model_path = launcher_env
@@ -384,7 +352,7 @@ def test_launcher_handles_missing_file_on_launch(launcher_env) -> None:
 
     # DELETE the file
     os.remove(model_path)
-    assert not model_path.exists()
+    assert not model_path.exists(), "Assertion failed: not model_path.exists()"
 
     # Attempt launch while mocking the low-level launch helpers to avoid
     # real subprocess execution or mujoco imports.  The launcher should

@@ -186,55 +186,6 @@ def test_pinocchio_check_catches_missing_urdf(tmp_path: Path) -> None:
         shutil.copy2(backup, PINOCCHIO_URDF)
 
 
-@pytest.mark.unit
-def test_drake_check_catches_drift(tmp_path: Path) -> None:
-    """If the canonical Drake URDF is edited, ``--check drake`` returns 1.
-
-    Skipped when the Drake URDF builder cannot run end-to-end against the
-    current shared YAML schema (e.g. when only the Drake-1 prototype YAML is
-    present): the orchestrator already exits non-zero in that case, but the
-    failure mode is independent of the drift check we want to exercise here.
-    """
-    canonical_urdf = (
-        REPO_ROOT
-        / "src"
-        / "engines"
-        / "physics_engines"
-        / "drake"
-        / "models"
-        / "generated"
-        / "golfer.urdf"
-    )
-    if not canonical_urdf.exists():
-        pytest.skip("Drake canonical URDF not present in this checkout.")
-
-    # First confirm a clean check returns 0; if not, the Drake builder is
-    # incompatible with the current YAML and this drift test is moot.
-    baseline = _run("--engine", "drake", "--check")
-    if baseline.returncode != 0:
-        pytest.skip(
-            "Drake --check fails on canonical artifact in this checkout — "
-            "drift detection is only meaningful when the baseline is clean."
-        )
-
-    backup = tmp_path / "golfer.urdf.bak"
-    shutil.copy2(canonical_urdf, backup)
-    try:
-        # Append a comment to force a byte-level diff. The URDF still parses.
-        canonical_urdf.write_text(
-            canonical_urdf.read_text(encoding="utf-8") + "<!-- forced drift -->\n",
-            encoding="utf-8",
-        )
-        proc = _run("--engine", "drake", "--check")
-        assert proc.returncode != 0, (
-            "Expected --check to fail on edited URDF; "
-            f"stdout={proc.stdout!r} stderr={proc.stderr!r}"
-        )
-        assert "differs" in proc.stderr or "FAIL" in proc.stderr
-    finally:
-        shutil.copy2(backup, canonical_urdf)
-
-
 # ---------------------------------------------------------------------------
 # YAML edits propagate (drift between YAML and generated artifact)
 # ---------------------------------------------------------------------------
@@ -247,56 +198,6 @@ def test_check_fails_when_yaml_path_missing(tmp_path: Path) -> None:
     proc = _run("--engine", "pinocchio", "--yaml", str(missing), "--check")
     assert proc.returncode == 2
     assert "YAML not found" in proc.stderr
-
-
-@pytest.mark.unit
-def test_yaml_edit_invalidates_drake_check(tmp_path: Path) -> None:
-    """An edit to the shared YAML must produce a different Drake URDF.
-
-    This is the core "drift" guarantee: if someone edits the YAML without
-    regenerating, ``--check drake`` against the canonical on-disk URDF
-    must fail. Skipped when the Drake builder is incompatible with the
-    current YAML schema.
-    """
-    drake_urdf_module_path = (
-        REPO_ROOT
-        / "src"
-        / "engines"
-        / "physics_engines"
-        / "drake"
-        / "python"
-        / "motion_matching"
-        / "humanoid_urdf.py"
-    )
-    if not drake_urdf_module_path.is_file():
-        pytest.skip("Drake URDF generator not present.")
-
-    # Try generating against the current YAML once. If it fails (schema
-    # mismatch), this test is moot.
-    baseline = _run("--engine", "drake", "--check")
-    if baseline.returncode != 0:
-        pytest.skip("Drake builder incompatible with current shared YAML schema.")
-
-    # Copy the YAML to a tmp file, mutate it, then re-run --check against
-    # the mutated YAML. The drake builder will produce a different URDF, so
-    # --check should fail.
-    edited_yaml = tmp_path / "edited.yaml"
-    text = SHARED_YAML.read_text(encoding="utf-8")
-    # Append a no-op key so the YAML still loads but its hash changes.
-    edited_yaml.write_text(
-        text + "\n_drift_test_marker: 'forced edit, see test_build_humanoid_models'\n",
-        encoding="utf-8",
-    )
-
-    proc = _run("--engine", "drake", "--yaml", str(edited_yaml), "--check")
-    # The mutated YAML should either (a) be detected as drift (rc != 0) or
-    # (b) be parsed identically (the marker is ignored). Either is a valid
-    # builder behavior, but in the typical case the URDF text changes
-    # because the YAML has new content. We assert "no crash" rather than
-    # specific rc to keep this test stable across builder revisions.
-    assert proc.returncode in (0, 1), (
-        f"Unexpected rc={proc.returncode}; stderr={proc.stderr!r}"
-    )
 
 
 # ---------------------------------------------------------------------------

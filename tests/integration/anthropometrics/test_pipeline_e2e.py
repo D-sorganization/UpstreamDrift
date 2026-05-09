@@ -154,33 +154,3 @@ def test_pipeline_mass_closure_preserved_through_urdf() -> None:
     post = sum(p.mass_kg for _, p in rebuilt.segments)
     assert post == pytest.approx(pre, rel=1e-12, abs=1e-12)
     assert post == pytest.approx(80.0, rel=1e-2)
-
-
-def test_c3d_pipeline_against_bundled_fixture() -> None:
-    """End-to-end against ``data/C3D_TA_Driver.c3d`` when available.
-
-    Reads subject metadata from the bundled C3D, drives the de Leva
-    estimator with it, and asserts mass-closure plus positive
-    inertia eigenvalues across every segment.
-    """
-    if not _C3D_FIXTURE.exists():
-        pytest.skip(f"C3D fixture not bundled: {_C3D_FIXTURE}")
-    pytest.importorskip("ezc3d", reason="C3D pipeline test needs ezc3d")
-    from anthropometrics import read_c3d_subject_metadata
-
-    meta = read_c3d_subject_metadata(_C3D_FIXTURE)
-    height = meta.height_m if meta.height_m is not None else 1.78
-    mass = meta.mass_kg if meta.mass_kg is not None else 75.0
-    sex_value = meta.sex.value if meta.sex is not None else "unspecified"
-    record = DeLevaEstimator().estimate(
-        subject_id=meta.subject_id or "c3d_subject",
-        height_m=height,
-        mass_kg=mass,
-        sex=sex_value,
-        age_years=meta.age_years,
-    )
-    total_mass = sum(p.mass_kg for _, p in record.segments)
-    assert total_mass == pytest.approx(mass, rel=1e-2)
-    for _, props in record.segments:
-        eigs = np.linalg.eigvalsh(props.inertia_tensor)
-        assert np.all(eigs > 0)

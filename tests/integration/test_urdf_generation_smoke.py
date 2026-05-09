@@ -177,25 +177,6 @@ class TestURDFConfigVariants:
 
 
 @pytest.mark.integration
-class TestURDFMuJoCoLoad:
-    """Smoke test: load the generated URDF through MuJoCo."""
-
-    def test_mujoco_load_urdf(self, default_urdf_path: Path) -> None:
-        mujoco = pytest.importorskip(
-            "mujoco",
-            reason="mujoco not installed -- skipping MuJoCo URDF load smoke test",
-        )
-        try:
-            model = mujoco.MjModel.from_xml_path(str(default_urdf_path))
-            assert model is not None
-            assert model.nbody >= 1
-        except AttributeError:
-            pytest.skip("mujoco.MjModel.from_xml_path not available in this version")
-        except Exception as exc:  # noqa: BLE001
-            pytest.fail(f"MuJoCo failed to load generated URDF: {exc}")
-
-
-@pytest.mark.integration
 class TestURDFDrakeLoad:
     """Smoke test: load the generated URDF through Drake."""
 
@@ -219,29 +200,3 @@ class TestURDFDrakeLoad:
             assert plant.num_bodies() >= 1
         except Exception as exc:  # noqa: BLE001
             pytest.fail(f"Drake failed to load generated URDF: {exc}")
-
-
-@pytest.mark.integration
-class TestURDFPinocchioLoad:
-    """Smoke test: load the generated URDF through Pinocchio."""
-
-    def test_pinocchio_load_urdf(self, default_urdf_path: Path) -> None:
-        pin = pytest.importorskip(
-            "pinocchio",
-            reason="pinocchio not installed -- skipping Pinocchio URDF load smoke test",
-        )
-        # Verify pinocchio is a real module, not a mock
-        if not hasattr(pin, "__version__"):
-            pytest.skip(
-                "pinocchio appears to be a stub/mock -- skipping Pinocchio URDF load smoke test"
-            )
-        if not hasattr(pin, "buildModelFromUrdf"):
-            pytest.skip("pinocchio buildModelFromUrdf not available in this build")
-        try:
-            model = pin.buildModelFromUrdf(str(default_urdf_path))
-            assert model is not None
-            # nq is an int in real pinocchio; skip nq check if it's not comparable
-            if isinstance(model.nq, int):
-                assert model.nq >= 0
-        except Exception as exc:  # noqa: BLE001
-            pytest.fail(f"Pinocchio failed to load generated URDF: {exc}")

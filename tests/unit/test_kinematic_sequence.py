@@ -43,15 +43,32 @@ def test_kinematic_sequence_ideal() -> None:
     )
     result = analyzer.analyze(data, times)
 
-    assert result.is_valid_sequence
-    assert result.sequence_consistency == 1.0
-    assert result.sequence_order == ["proximal", "mid_proximal", "mid_distal", "distal"]
+    assert result.is_valid_sequence, "Assertion failed: result.is_valid_sequence"
+    assert result.sequence_consistency == 1.0, (
+        "Assertion failed: result.sequence_consistency == 1.0"
+    )
+    assert result.sequence_order == [
+        "proximal",
+        "mid_proximal",
+        "mid_distal",
+        "distal",
+    ], (
+        "Assertion failed: result.sequence_order == [proximal, mid_proximal, mid_distal, distal]"
+    )
 
-    assert len(result.peaks) == 4
-    assert result.peaks[0].name == "proximal"
-    assert np.isclose(result.peaks[0].time, 0.2, atol=0.02)
-    assert result.peaks[3].name == "distal"
-    assert np.isclose(result.peaks[3].time, 0.5, atol=0.02)
+    assert len(result.peaks) == 4, "Assertion failed: len(result.peaks) == 4"
+    assert result.peaks[0].name == "proximal", (
+        "Assertion failed: result.peaks[0].name == proximal"
+    )
+    assert np.isclose(result.peaks[0].time, 0.2, atol=0.02), (
+        "Assertion failed: np.isclose(result.peaks[0].time, 0.2, atol=0.02)"
+    )
+    assert result.peaks[3].name == "distal", (
+        "Assertion failed: result.peaks[3].name == distal"
+    )
+    assert np.isclose(result.peaks[3].time, 0.5, atol=0.02), (
+        "Assertion failed: np.isclose(result.peaks[3].time, 0.5, atol=0.02)"
+    )
 
 
 def test_kinematic_sequence_out_of_order() -> None:
@@ -75,9 +92,15 @@ def test_kinematic_sequence_out_of_order() -> None:
     )
     result = analyzer.analyze(data, times)
 
-    assert not result.is_valid_sequence
-    assert result.sequence_consistency < 1.0
-    assert np.isclose(result.sequence_consistency, 4 / 6, atol=0.01)
+    assert not result.is_valid_sequence, (
+        "Assertion failed: not result.is_valid_sequence"
+    )
+    assert result.sequence_consistency < 1.0, (
+        "Assertion failed: result.sequence_consistency < 1.0"
+    )
+    assert np.isclose(result.sequence_consistency, 4 / 6, atol=0.01), (
+        "Assertion failed: np.isclose(result.sequence_consistency, 4 / 6, atol=0.01)"
+    )
     assert result.sequence_order == [
         "proximal",
         "distal",
@@ -97,11 +120,17 @@ def test_extract_velocities() -> None:
     analyzer = KinematicSequenceAnalyzer()
     data, t_out = analyzer.extract_velocities_from_recorder(recorder, indices)
 
-    assert np.array_equal(t_out, times)
-    assert "JointA" in data
-    assert np.array_equal(data["JointA"], np.array([1, 2, 3]))
-    assert "JointB" in data
-    assert np.array_equal(data["JointB"], np.array([10, 20, 30]))
+    assert np.array_equal(t_out, times), (
+        "Assertion failed: np.array_equal(t_out, times)"
+    )
+    assert "JointA" in data, "Assertion failed: JointA in data"
+    assert np.array_equal(data["JointA"], np.array([1, 2, 3])), (
+        "Assertion failed: np.array_equal(data[JointA], np.array([1, 2, 3]))"
+    )
+    assert "JointB" in data, "Assertion failed: JointB in data"
+    assert np.array_equal(data["JointB"], np.array([10, 20, 30])), (
+        "Assertion failed: np.array_equal(data[JointB], np.array([10, 20, 30]))"
+    )
 
 
 def test_empty_data() -> None:
@@ -113,7 +142,9 @@ def test_empty_data() -> None:
 
 def test_backward_compat_alias() -> None:
     """KinematicSequenceAnalyzer should be an alias for SegmentTimingAnalyzer."""
-    assert KinematicSequenceAnalyzer is SegmentTimingAnalyzer
+    assert KinematicSequenceAnalyzer is SegmentTimingAnalyzer, (
+        "Assertion failed: KinematicSequenceAnalyzer is SegmentTimingAnalyzer"
+    )
 
 
 def test_no_expected_order_peaks_only() -> None:
@@ -126,15 +157,21 @@ def test_no_expected_order_peaks_only() -> None:
     analyzer = SegmentTimingAnalyzer(expected_order=None)
     result = analyzer.analyze(data, times)
 
-    assert len(result.peaks) == 2
-    assert result.sequence_consistency == 0.0
-    assert result.expected_order is None
+    assert len(result.peaks) == 2, "Assertion failed: len(result.peaks) == 2"
+    assert result.sequence_consistency == 0.0, (
+        "Assertion failed: result.sequence_consistency == 0.0"
+    )
+    assert result.expected_order is None, (
+        "Assertion failed: result.expected_order is None"
+    )
 
     for peak in result.peaks:
-        assert peak.speed_gain is None
+        assert peak.speed_gain is None, "Assertion failed: peak.speed_gain is None"
 
     for peak in result.peaks:
-        assert peak.deceleration_rate is not None
+        assert peak.deceleration_rate is not None, (
+            "Assertion failed: peak.deceleration_rate is not None"
+        )
 
 
 class TestSpeedGain:
@@ -161,18 +198,30 @@ class TestSpeedGain:
 
         peak_map = {p.name: p for p in result.peaks}
 
-        assert peak_map["proximal"].speed_gain is None
+        assert peak_map["proximal"].speed_gain is None, (
+            "Assertion failed: peak_map[proximal].speed_gain is None"
+        )
 
-        assert peak_map["mid_proximal"].speed_gain is not None
+        assert peak_map["mid_proximal"].speed_gain is not None, (
+            "Assertion failed: peak_map[mid_proximal].speed_gain is not None"
+        )
         assert peak_map["mid_proximal"].speed_gain == np.testing.assert_approx_equal(
             peak_map["mid_proximal"].speed_gain, 1.5, significant=2
         ) or np.isclose(peak_map["mid_proximal"].speed_gain, 1.5, rtol=0.05)
 
-        assert peak_map["mid_distal"].speed_gain is not None
-        assert np.isclose(peak_map["mid_distal"].speed_gain, 20 / 15, rtol=0.05)
+        assert peak_map["mid_distal"].speed_gain is not None, (
+            "Assertion failed: peak_map[mid_distal].speed_gain is not None"
+        )
+        assert np.isclose(peak_map["mid_distal"].speed_gain, 20 / 15, rtol=0.05), (
+            "Assertion failed: np.isclose(peak_map[mid_distal].speed_gain, 20 / 15, rtol=0.05)"
+        )
 
-        assert peak_map["distal"].speed_gain is not None
-        assert np.isclose(peak_map["distal"].speed_gain, 30 / 20, rtol=0.05)
+        assert peak_map["distal"].speed_gain is not None, (
+            "Assertion failed: peak_map[distal].speed_gain is not None"
+        )
+        assert np.isclose(peak_map["distal"].speed_gain, 30 / 20, rtol=0.05), (
+            "Assertion failed: np.isclose(peak_map[distal].speed_gain, 30 / 20, rtol=0.05)"
+        )
 
     def test_speed_gain_increases_distally(self) -> None:
         """In a good sequence, speed gain should be > 1 for distal segments."""
@@ -196,7 +245,9 @@ class TestSpeedGain:
         peak_map = {p.name: p for p in result.peaks}
 
         for name in ["mid_proximal", "mid_distal", "distal"]:
-            assert peak_map[name].speed_gain is not None
+            assert peak_map[name].speed_gain is not None, (
+                "Assertion failed: peak_map[name].speed_gain is not None"
+            )
             assert peak_map[name].speed_gain > 1.0, (
                 f"{name} speed gain should be > 1.0, got {peak_map[name].speed_gain}"
             )
@@ -214,7 +265,9 @@ class TestSpeedGain:
         result = analyzer.analyze(data, times)
 
         peak_map = {p.name: p for p in result.peaks}
-        assert peak_map["distal"].speed_gain is None
+        assert peak_map["distal"].speed_gain is None, (
+            "Assertion failed: peak_map[distal].speed_gain is None"
+        )
 
 
 class TestDecelerationRate:
@@ -271,8 +324,12 @@ class TestDecelerationRate:
 
         peak_map = {p.name: p for p in result.peaks}
 
-        assert peak_map["proximal"].deceleration_rate is not None
-        assert peak_map["distal"].deceleration_rate is not None
+        assert peak_map["proximal"].deceleration_rate is not None, (
+            "Assertion failed: peak_map[proximal].deceleration_rate is not None"
+        )
+        assert peak_map["distal"].deceleration_rate is not None, (
+            "Assertion failed: peak_map[distal].deceleration_rate is not None"
+        )
         assert (
             peak_map["proximal"].deceleration_rate
             > peak_map["distal"].deceleration_rate
@@ -288,5 +345,9 @@ class TestDecelerationRate:
         result = analyzer.analyze(data, times)
 
         peak = result.peaks[0]
-        assert peak.deceleration_rate is not None
-        assert 0 < peak.deceleration_rate < 1e6
+        assert peak.deceleration_rate is not None, (
+            "Assertion failed: peak.deceleration_rate is not None"
+        )
+        assert 0 < peak.deceleration_rate < 1e6, (
+            "Assertion failed: 0 < peak.deceleration_rate < 1e6"
+        )

@@ -38,13 +38,17 @@ class TestLauncherManifestEndpoints:
     def test_get_manifest(self, client: TestClient) -> None:
         """GET /api/launcher/manifest returns full manifest."""
         response = client.get("/api/launcher/manifest")
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
 
         data = response.json()
-        assert "version" in data
-        assert "tiles" in data
-        assert isinstance(data["tiles"], list)
-        assert len(data["tiles"]) > 0
+        assert "version" in data, "Assertion failed: version in data"
+        assert "tiles" in data, "Assertion failed: tiles in data"
+        assert isinstance(data["tiles"], list), (
+            "Assertion failed: isinstance(data[tiles], list)"
+        )
+        assert len(data["tiles"]) > 0, "Assertion failed: len(data[tiles]) > 0"
 
     def test_manifest_tiles_have_required_fields(self, client: TestClient) -> None:
         """All tiles in the manifest have required fields."""
@@ -69,60 +73,80 @@ class TestLauncherManifestEndpoints:
         response = client.get("/api/launcher/manifest")
         tiles = response.json()["tiles"]
         orders = [t["order"] for t in tiles]
-        assert orders == sorted(orders)
+        assert orders == sorted(orders), "Assertion failed: orders == sorted(orders)"
 
     def test_model_explorer_is_first(self, client: TestClient) -> None:
         """Model Explorer must be the first tile."""
         response = client.get("/api/launcher/manifest")
         tiles = response.json()["tiles"]
-        assert tiles[0]["id"] == "model_explorer"
+        assert tiles[0]["id"] == "model_explorer", (
+            "Assertion failed: tiles[0][id] == model_explorer"
+        )
 
     def test_get_tiles(self, client: TestClient) -> None:
         """GET /api/launcher/tiles returns all tiles."""
         response = client.get("/api/launcher/tiles")
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
 
         tiles = response.json()
-        assert isinstance(tiles, list)
-        assert len(tiles) > 0
+        assert isinstance(tiles, list), "Assertion failed: isinstance(tiles, list)"
+        assert len(tiles) > 0, "Assertion failed: len(tiles) > 0"
 
     def test_get_tile_by_id(self, client: TestClient) -> None:
         """GET /api/launcher/tiles/{id} returns specific tile."""
         response = client.get("/api/launcher/tiles/mujoco_unified")
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
 
         tile = response.json()
-        assert tile["id"] == "mujoco_unified"
-        assert tile["name"] == "MuJoCo"
-        assert tile["category"] == "physics_engine"
+        assert tile["id"] == "mujoco_unified", (
+            "Assertion failed: tile[id] == mujoco_unified"
+        )
+        assert tile["name"] == "MuJoCo", "Assertion failed: tile[name] == MuJoCo"
+        assert tile["category"] == "physics_engine", (
+            "Assertion failed: tile[category] == physics_engine"
+        )
 
     def test_get_tile_not_found(self, client: TestClient) -> None:
         """GET /api/launcher/tiles/{id} returns 404 for unknown tile."""
         response = client.get("/api/launcher/tiles/nonexistent")
-        assert response.status_code == 404
+        assert response.status_code == 404, (
+            "Assertion failed: response.status_code == 404"
+        )
 
     def test_get_engines(self, client: TestClient) -> None:
         """GET /api/launcher/engines returns only physics engine tiles."""
         response = client.get("/api/launcher/engines")
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
 
         engines = response.json()
-        assert isinstance(engines, list)
-        assert len(engines) > 0
+        assert isinstance(engines, list), "Assertion failed: isinstance(engines, list)"
+        assert len(engines) > 0, "Assertion failed: len(engines) > 0"
         for eng in engines:
-            assert eng["category"] == "physics_engine"
-            assert "engine_type" in eng
+            assert eng["category"] == "physics_engine", (
+                "Assertion failed: eng[category] == physics_engine"
+            )
+            assert "engine_type" in eng, "Assertion failed: engine_type in eng"
 
     def test_get_tools(self, client: TestClient) -> None:
         """GET /api/launcher/tools returns only tool tiles."""
         response = client.get("/api/launcher/tools")
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
 
         tools = response.json()
-        assert isinstance(tools, list)
-        assert len(tools) > 0
+        assert isinstance(tools, list), "Assertion failed: isinstance(tools, list)"
+        assert len(tools) > 0, "Assertion failed: len(tools) > 0"
         for tool in tools:
-            assert tool["category"] == "tool"
+            assert tool["category"] == "tool", (
+                "Assertion failed: tool[category] == tool"
+            )
 
 
 class TestLauncherParityRequirements:
@@ -164,9 +188,13 @@ class TestLauncherParityRequirements:
     def test_putting_green_has_valid_status(self, client: TestClient) -> None:
         """Putting Green tile has a valid (non-unknown) status chip."""
         response = client.get("/api/launcher/tiles/putting_green")
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
         tile = response.json()
-        assert tile["status"] == "simulator"
+        assert tile["status"] == "simulator", (
+            "Assertion failed: tile[status] == simulator"
+        )
 
     def test_special_app_tiles_have_valid_status(self, client: TestClient) -> None:
         """All special_app tiles have valid (non-unknown) status chips."""
@@ -181,11 +209,13 @@ class TestLauncherParityRequirements:
     def test_motion_capture_has_all_capabilities(self, client: TestClient) -> None:
         """Motion Capture tile declares C3D, OpenPose, and MediaPipe capabilities."""
         response = client.get("/api/launcher/tiles/motion_capture")
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
         caps = response.json()["capabilities"]
-        assert "c3d_viewer" in caps
-        assert "openpose" in caps
-        assert "mediapipe" in caps
+        assert "c3d_viewer" in caps, "Assertion failed: c3d_viewer in caps"
+        assert "openpose" in caps, "Assertion failed: openpose in caps"
+        assert "mediapipe" in caps, "Assertion failed: mediapipe in caps"
 
 
 class TestLogoEndpoints:
@@ -194,23 +224,35 @@ class TestLogoEndpoints:
     def test_get_logo_svg(self, client: TestClient) -> None:
         """GET /api/launcher/logos/{file} returns SVG logo."""
         response = client.get("/api/launcher/logos/mujoco_humanoid.svg")
-        assert response.status_code == 200
-        assert "image/svg+xml" in response.headers["content-type"]
-        assert b"<svg" in response.content
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
+        assert "image/svg+xml" in response.headers["content-type"], (
+            "Assertion failed: image/svg+xml in response.headers[content-type]"
+        )
+        assert b"<svg" in response.content, (
+            "Assertion failed: b<svg in response.content"
+        )
 
     def test_get_logo_not_found(self, client: TestClient) -> None:
         """GET /api/launcher/logos/{file} returns 404 for missing logo."""
         response = client.get("/api/launcher/logos/nonexistent.svg")
-        assert response.status_code == 404
+        assert response.status_code == 404, (
+            "Assertion failed: response.status_code == 404"
+        )
 
     def test_get_logo_path_traversal_blocked(self, client: TestClient) -> None:
         """Path traversal attempts are rejected (400 or 404, never 200)."""
         # Test with dot-dot in filename
         response = client.get("/api/launcher/logos/..%2Fetc%2Fpasswd")
-        assert response.status_code in {400, 404}
+        assert response.status_code in {400, 404}, (
+            "Assertion failed: response.status_code in {400, 404}"
+        )
         # Direct dot-dot attempt
         response2 = client.get("/api/launcher/logos/..secret.svg")
-        assert response2.status_code in {400, 404}
+        assert response2.status_code in {400, 404}, (
+            "Assertion failed: response2.status_code in {400, 404}"
+        )
 
     def test_all_manifest_logos_servable(self, client: TestClient) -> None:
         """Every logo referenced in the manifest is served by the API."""
@@ -225,11 +267,15 @@ class TestLogoEndpoints:
     def test_validate_logos_all_present(self, client: TestClient) -> None:
         """Logo validation reports all logos present (Phase 3 complete)."""
         response = client.get("/api/launcher/logos/validate")
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
         data = response.json()
-        assert data["all_valid"] is True
-        assert data["missing_count"] == 0
-        assert data["present"] == data["total"]
+        assert data["all_valid"] is True, "Assertion failed: data[all_valid] is True"
+        assert data["missing_count"] == 0, "Assertion failed: data[missing_count] == 0"
+        assert data["present"] == data["total"], (
+            "Assertion failed: data[present] == data[total]"
+        )
 
     def test_logo_filenames_are_svg(self, client: TestClient) -> None:
         """All logos should now use SVG format."""
@@ -246,48 +292,68 @@ class TestNewTiles:
     def test_video_analyzer_tile_exists(self, client: TestClient) -> None:
         """Video Analyzer tile is present (closes #1167)."""
         response = client.get("/api/launcher/tiles/video_analyzer")
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
         tile = response.json()
-        assert tile["name"] == "Video Analyzer"
-        assert tile["category"] == "tool"
-        assert tile["status"] == "utility"
+        assert tile["name"] == "Video Analyzer", (
+            "Assertion failed: tile[name] == Video Analyzer"
+        )
+        assert tile["category"] == "tool", "Assertion failed: tile[category] == tool"
+        assert tile["status"] == "utility", "Assertion failed: tile[status] == utility"
 
     def test_video_analyzer_has_capabilities(self, client: TestClient) -> None:
         """Video Analyzer declares video/pose capabilities."""
         response = client.get("/api/launcher/tiles/video_analyzer")
         caps = response.json()["capabilities"]
-        assert "video_processing" in caps
-        assert "pose_estimation" in caps
+        assert "video_processing" in caps, "Assertion failed: video_processing in caps"
+        assert "pose_estimation" in caps, "Assertion failed: pose_estimation in caps"
 
     def test_video_analyzer_has_logo(self, client: TestClient) -> None:
         """Video Analyzer logo is servable."""
         response = client.get("/api/launcher/logos/video_analyzer.svg")
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
 
     def test_data_explorer_tile_exists(self, client: TestClient) -> None:
         """Data Explorer tile is present (closes #1177, #1178)."""
         response = client.get("/api/launcher/tiles/data_explorer")
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
         tile = response.json()
-        assert tile["name"] == "Data Explorer"
-        assert tile["category"] == "tool"
-        assert "data_import" in tile["capabilities"]
+        assert tile["name"] == "Data Explorer", (
+            "Assertion failed: tile[name] == Data Explorer"
+        )
+        assert tile["category"] == "tool", "Assertion failed: tile[category] == tool"
+        assert "data_import" in tile["capabilities"], (
+            "Assertion failed: data_import in tile[capabilities]"
+        )
 
     def test_total_tile_count(self, client: TestClient) -> None:
         """Manifest now has 12 tiles (10 original + video_analyzer + project_map)."""
         response = client.get("/api/launcher/tiles")
         tiles = response.json()
-        assert len(tiles) == 12
+        assert len(tiles) == 12, "Assertion failed: len(tiles) == 12"
 
     def test_tool_tiles_count(self, client: TestClient) -> None:
         """There should be 4 tool tiles now."""
         response = client.get("/api/launcher/tools")
         tools = response.json()
         tool_ids = {t["id"] for t in tools}
-        assert "model_explorer" in tool_ids
-        assert "motion_capture" in tool_ids
-        assert "video_analyzer" in tool_ids
-        assert "data_explorer" in tool_ids
+        assert "model_explorer" in tool_ids, (
+            "Assertion failed: model_explorer in tool_ids"
+        )
+        assert "motion_capture" in tool_ids, (
+            "Assertion failed: motion_capture in tool_ids"
+        )
+        assert "video_analyzer" in tool_ids, (
+            "Assertion failed: video_analyzer in tool_ids"
+        )
+        assert "data_explorer" in tool_ids, (
+            "Assertion failed: data_explorer in tool_ids"
+        )
 
 
 class TestEngineCapabilitiesAPI:
@@ -296,7 +362,9 @@ class TestEngineCapabilitiesAPI:
     def test_all_engine_capabilities(self, client: TestClient) -> None:
         """GET /engines/capabilities should return all engine profiles."""
         response = client.get("/api/launcher/engines/capabilities")
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
         data = response.json()
         # Must include all known engines
         expected_engines = {
@@ -308,33 +376,57 @@ class TestEngineCapabilitiesAPI:
             "pendulum",
             "putting_green",
         }
-        assert expected_engines.issubset(set(data.keys()))
+        assert expected_engines.issubset(set(data.keys())), (
+            "Assertion failed: expected_engines.issubset(set(data.keys()))"
+        )
 
     def test_mujoco_capabilities(self, client: TestClient) -> None:
         """MuJoCo should have FULL support for all capabilities."""
         response = client.get("/api/launcher/engines/mujoco/capabilities")
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
         data = response.json()
-        assert data["engine_name"] == "MuJoCo"
-        assert data["mass_matrix"] == "full"
-        assert data["jacobian"] == "full"
-        assert data["video_export"] == "full"
-        assert data["dataset_export"] == "full"
-        assert data["force_visualization"] == "full"
+        assert data["engine_name"] == "MuJoCo", (
+            "Assertion failed: data[engine_name] == MuJoCo"
+        )
+        assert data["mass_matrix"] == "full", (
+            "Assertion failed: data[mass_matrix] == full"
+        )
+        assert data["jacobian"] == "full", "Assertion failed: data[jacobian] == full"
+        assert data["video_export"] == "full", (
+            "Assertion failed: data[video_export] == full"
+        )
+        assert data["dataset_export"] == "full", (
+            "Assertion failed: data[dataset_export] == full"
+        )
+        assert data["force_visualization"] == "full", (
+            "Assertion failed: data[force_visualization] == full"
+        )
 
     def test_drake_capabilities(self, client: TestClient) -> None:
         """Drake should have PARTIAL contact forces."""
         response = client.get("/api/launcher/engines/drake/capabilities")
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
         data = response.json()
-        assert data["engine_name"] == "Drake"
-        assert data["contact_forces"] == "partial"
-        assert data["mass_matrix"] == "full"
+        assert data["engine_name"] == "Drake", (
+            "Assertion failed: data[engine_name] == Drake"
+        )
+        assert data["contact_forces"] == "partial", (
+            "Assertion failed: data[contact_forces] == partial"
+        )
+        assert data["mass_matrix"] == "full", (
+            "Assertion failed: data[mass_matrix] == full"
+        )
 
     def test_unknown_engine_404(self, client: TestClient) -> None:
         """Unknown engine should return 404."""
         response = client.get("/api/launcher/engines/nonexistent/capabilities")
-        assert response.status_code == 404
+        assert response.status_code == 404, (
+            "Assertion failed: response.status_code == 404"
+        )
 
     def test_capabilities_have_all_fields(self, client: TestClient) -> None:
         """Every capability profile must have all required fields."""

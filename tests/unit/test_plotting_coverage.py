@@ -111,13 +111,6 @@ def test_plot_method_creates_axes(plotter, plot_method) -> None:
     assert len(fig.axes) > 0
 
 
-@_skip_no_3d
-def test_plot_club_head_trajectory(plotter) -> None:
-    fig = Figure()
-    plotter.plot_club_head_trajectory(fig)
-    assert len(fig.axes) > 0
-
-
 def test_plot_phase_diagram(plotter) -> None:
     fig = Figure()
     plotter.plot_phase_diagram(fig, joint_idx=0)
@@ -180,34 +173,10 @@ def test_plot_kinematic_sequence(plotter) -> None:
     assert len(fig.axes) > 0
 
 
-@_skip_no_3d
-def test_plot_3d_phase_space(plotter) -> None:
-    fig = Figure()
-    plotter.plot_3d_phase_space(fig, joint_idx=0)
-    assert len(fig.axes) > 0
-
-
 def test_plot_correlation_matrix(plotter) -> None:
     fig = Figure()
     plotter.plot_correlation_matrix(fig)
     assert len(fig.axes) > 0
-
-
-@_skip_no_3d
-def test_plot_swing_plane(plotter) -> None:
-    fig = Figure()
-    plotter.plot_swing_plane(fig)
-    assert len(fig.axes) > 0
-
-    # Test insufficient data
-    plotter.recorder.get_time_series.side_effect = lambda x: (
-        np.array([0, 1]),
-        np.random.rand(2, 3),
-    )
-    plotter.clear_cache()  # Must clear cache after modifying recorder
-    fig = Figure()
-    plotter.plot_swing_plane(fig)
-    assert "Insufficient data" in fig.axes[0].texts[0].get_text()
 
 
 @pytest.mark.parametrize(

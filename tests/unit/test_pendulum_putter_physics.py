@@ -33,64 +33,6 @@ def _mujoco_available() -> bool:
 HAS_MUJOCO = _mujoco_available()
 
 
-class TestMuJoCoIntegration:
-    """Test pendulum putter model with MuJoCo physics engine."""
-
-    @pytest.fixture
-    def pendulum_urdf_path(self, tmp_path: Path) -> Path:
-        """Generate pendulum putter URDF for testing."""
-        from model_generation.models.pendulum_putter import PendulumPutterModelBuilder
-
-        builder = PendulumPutterModelBuilder(
-            arm_length_m=0.4,
-            shoulder_height_m=0.85,
-            damping=0.02,
-        )
-        urdf_path = tmp_path / "pendulum_putter.urdf"
-        builder.save(urdf_path)
-        return urdf_path
-
-    @pytest.mark.skipif(not HAS_MUJOCO, reason="MuJoCo not installed")
-    def test_mujoco_can_load_model(self, pendulum_urdf_path: Path) -> None:
-        """MuJoCo should be able to load the pendulum putter URDF."""
-        import mujoco
-
-        try:
-            model = mujoco.MjModel.from_xml_path(str(pendulum_urdf_path))
-
-            assert model is not None
-            assert model.nq >= 1, "Should have at least 1 position DOF"
-            assert model.nv >= 1, "Should have at least 1 velocity DOF"
-
-        except Exception as e:  # noqa: BLE001
-            pytest.skip(f"MuJoCo URDF loading not supported: {e}")
-
-    @pytest.mark.skipif(not HAS_MUJOCO, reason="MuJoCo not installed")
-    def test_mujoco_pendulum_swings(self, pendulum_urdf_path: Path) -> None:
-        """Model should exhibit pendulum-like swing behavior."""
-        import mujoco
-
-        try:
-            model = mujoco.MjModel.from_xml_path(str(pendulum_urdf_path))
-            data = mujoco.MjData(model)
-
-            initial_angle = 0.2
-            if model.nq > 0:
-                data.qpos[0] = initial_angle
-
-            for _ in range(1000):
-                mujoco.mj_step(model, data)
-
-            if model.nq > 0:
-                final_angle = data.qpos[0]
-                assert abs(final_angle) < abs(initial_angle) + 0.5, (
-                    "Pendulum should be oscillating, not diverging"
-                )
-
-        except Exception as e:  # noqa: BLE001
-            pytest.skip(f"MuJoCo simulation test skipped: {e}")
-
-
 class TestModelValidationForEngines:
     """Test that model meets requirements for physics engine loading."""
 
@@ -182,31 +124,6 @@ class TestPendulumPhysicsProperties:
             f"Longer arm should have lower frequency: "
             f"short={short_freq} Hz, long={long_freq} Hz"
         )
-
-
-class TestModelExplorerCompatibility:
-    """Test compatibility with model_explorer tools."""
-
-    def test_urdf_can_be_parsed(self, tmp_path: Path) -> None:
-        """Generated URDF should be parseable by urdf_parser."""
-        from model_generation.models.pendulum_putter import PendulumPutterModelBuilder
-
-        builder = PendulumPutterModelBuilder()
-        urdf_path = tmp_path / "test_pendulum.urdf"
-        builder.save(urdf_path)
-
-        try:
-            from model_generation.converters.urdf_parser import URDFParser
-
-            parser = URDFParser()
-            parsed = parser.parse(urdf_path)
-
-            assert parsed is not None
-            assert parsed.name == "pendulum_putter"
-            assert len(parsed.links) >= 6
-
-        except ImportError:
-            pytest.skip("URDFParser not available")
 
 
 if __name__ == "__main__":

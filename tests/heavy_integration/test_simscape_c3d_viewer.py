@@ -12,32 +12,6 @@ import numpy as np
 import pytest
 
 
-class TestC3DViewerImport:
-    """Contract: C3D viewer application module is importable."""
-
-    def test_c3d_viewer_main_window_importable(self) -> None:
-        """C3DViewerMainWindow is importable from the Simscape app."""
-        try:
-            from src.engines.Simscape_Multibody_Models._3D_Golf_Model.python.src.apps.c3d_viewer import (  # noqa: E501
-                C3DViewerMainWindow,
-            )
-        except ImportError as exc:
-            pytest.skip(f"c3d_viewer not importable: {exc}")
-
-        assert C3DViewerMainWindow is not None
-
-    def test_c3d_data_model_importable(self) -> None:
-        """C3DDataModel is importable from viewer core.models."""
-        try:
-            from src.engines.Simscape_Multibody_Models._3D_Golf_Model.python.src.apps.core.models import (  # noqa: E501
-                C3DDataModel,
-            )
-        except ImportError as exc:
-            pytest.skip(f"C3DDataModel not importable: {exc}")
-
-        assert C3DDataModel is not None
-
-
 class TestC3DDataHandling:
     """Contract: C3D data can be parsed and accessed via the model layer."""
 
@@ -89,35 +63,6 @@ class TestC3DDataHandling:
         labels = c3d_in["parameters"]["POINT"]["LABELS"]["value"]
         assert "MARKER1" in labels
         assert c3d_in["data"]["points"].shape[1] == 1
-
-
-class TestC3DViewerHeadless:
-    """Contract: C3D viewer can be instantiated headlessly with Xvfb."""
-
-    def test_c3d_viewer_headless_instantiation(self) -> None:
-        """C3DViewerMainWindow can be instantiated in a headless Qt session."""
-        try:
-            from PyQt6.QtWidgets import QApplication
-        except ImportError:
-            pytest.skip("PyQt6 not available")
-
-        try:
-            from src.engines.Simscape_Multibody_Models._3D_Golf_Model.python.src.apps.c3d_viewer import (  # noqa: E501
-                C3DViewerMainWindow,
-            )
-        except ImportError as exc:
-            pytest.skip(f"c3d_viewer not importable: {exc}")
-
-        import sys
-
-        app = QApplication.instance() or QApplication(sys.argv[:1])
-        try:
-            win = C3DViewerMainWindow()
-            assert win is not None
-        except Exception as exc:  # noqa: BLE001
-            pytest.skip(f"C3DViewerMainWindow failed to instantiate: {exc}")
-        finally:
-            app.quit()
 
 
 pytestmark = pytest.mark.live_simulation

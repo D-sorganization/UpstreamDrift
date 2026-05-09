@@ -183,18 +183,3 @@ class TestDockerThreads:
         thread.run()
 
         thread.result.emit.assert_called_with(False)
-
-    @pytest.mark.xfail(
-        reason="HelpDialog Qt construction crashes worker in CI", strict=False
-    )
-    @patch("pathlib.Path.read_text", return_value="# Help")
-    @patch("pathlib.Path.exists", return_value=True)
-    def test_help_dialog(self, mock_exists, mock_read, mocked_launcher_module) -> None:
-        """Test HelpDialog initialization and content loading."""
-        dialog = mocked_launcher_module.HelpDialog()
-        assert dialog is not None
-        # Verify text was loaded (mock read_text called at least once)
-        # HelpDialog may read multiple files (help topics)
-        assert mock_read.call_count >= 1
-        # Verify title
-        assert "Help" in dialog.windowTitle()

@@ -73,37 +73,3 @@ def _is_shallow_repo() -> bool:
     except FileNotFoundError:
         return False
     return result.returncode == 0 and result.stdout.strip().lower() == "true"
-
-
-@pytest.mark.unit
-def test_leaderboard_meta_git_head_resolves():
-    """git_head must point at a commit that actually exists in the repo.
-
-    Skipped when the test runs outside a git checkout (e.g. tarball install)
-    or in a shallow clone where the recorded sha may have been pruned. CI
-    that wants to enforce this check should run with `actions/checkout`
-    `fetch-depth: 0` (the leaderboard workflow already does so).
-    """
-    meta = json.loads(META_PATH.read_text(encoding="utf-8"))
-    sha = meta["git_head"]
-    try:
-        result = subprocess.run(
-            ["git", "cat-file", "-e", f"{sha}^{{commit}}"],
-            cwd=REPO_ROOT,
-            capture_output=True,
-            timeout=10,
-        )
-    except FileNotFoundError:
-        pytest.skip("git binary not available")
-    if result.returncode != 0:
-        if not (REPO_ROOT / ".git").exists():
-            pytest.skip("not a git checkout")
-        if _is_shallow_repo():
-            pytest.skip(
-                "shallow git clone — recorded git_head may have been pruned; "
-                "re-run with fetch-depth: 0 to enforce this check"
-            )
-    assert result.returncode == 0, (
-        f"git_head {sha} in {META_PATH} does not resolve to a real commit. "
-        "Re-run scripts/run_leaderboard.m and commit the refreshed sidecar."
-    )

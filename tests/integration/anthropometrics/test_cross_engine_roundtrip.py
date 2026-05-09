@@ -153,20 +153,6 @@ def _try_import_mjcf_pair():
     return write, read
 
 
-def test_mjcf_round_trip_when_adapter_available(
-    reference_subject: SubjectAnthropometrics,
-) -> None:
-    """If an MJCF adapter ships, exercise the same round-trip contract."""
-    pair = _try_import_mjcf_pair()
-    if pair is None:
-        pytest.skip("MJCF adapter not present on this branch")
-    write, read = pair
-    for _name, props in reference_subject.segments:
-        elem = write(props)
-        recovered = read(elem)
-        _assert_segments_close(props, recovered)
-
-
 def test_urdf_rejects_missing_mass(reference_subject: SubjectAnthropometrics) -> None:
     """A URDF ``<inertial>`` missing ``<mass>`` raises ``ValueError``."""
     _, props = reference_subject.segments[0]

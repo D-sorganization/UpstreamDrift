@@ -81,21 +81,6 @@ def test_default_model_path_resolves_to_GolfSwing3D_Kinetic_slx() -> None:
     assert "3D_Golf_Model" in parts
 
 
-def test_default_model_present_in_repo_loads_successfully() -> None:
-    """When the default model is on disk, the loader loads it metadata-only."""
-    suite_root = _suite_root()
-    model_path = suite_root / DEFAULT_MATLAB_3D_SLX_RELPATH
-    if not model_path.exists():
-        pytest.skip(f"Default model not on disk at {model_path}")
-
-    engine = load_matlab_3d_engine(suite_root)
-    assert isinstance(engine, SimscapeAdapter)
-    # In skeleton mode (no MATLAB) load_from_path completes via metadata
-    # sidecar and the model_loaded flag flips to True.
-    assert engine.model_loaded is True
-    assert engine.model_name == "GolfSwing3D_Kinetic"
-
-
 # ---------------------------------------------------------------------------
 # Error paths
 # ---------------------------------------------------------------------------
@@ -105,25 +90,6 @@ def test_invalid_model_path_raises_clear_error(tmp_path: Path) -> None:
     """A non-Path ``suite_root`` raises :class:`TypeError`."""
     with pytest.raises(TypeError, match="suite_root must be a Path"):
         load_matlab_3d_engine("not-a-path")  # type: ignore[arg-type]
-
-
-def test_load_engine_matlab_3d_skipped_when_matlab_engine_missing() -> None:
-    """When ``matlab.engine`` is missing, the loader must still succeed.
-
-    The bridge is *available* even without MATLAB (skeleton mode); only
-    methods that need MATLAB raise ``SimscapeNotInstalledError``. This
-    test mirrors the issue's required test name and asserts the
-    fall-through behaviour: no MATLAB ⇒ adapter is returned, but the
-    engine_availability probe for ``matlab`` reports unavailable.
-    """
-    from src.shared.python.engine_core import engine_availability
-
-    if engine_availability.is_engine_available("matlab"):
-        pytest.skip("matlab.engine is installed on this host; skip negative test")
-
-    # Loader still hands back an adapter — Option 4's headline guarantee.
-    engine = load_matlab_3d_engine(_suite_root())
-    assert isinstance(engine, SimscapeAdapter)
 
 
 # ---------------------------------------------------------------------------

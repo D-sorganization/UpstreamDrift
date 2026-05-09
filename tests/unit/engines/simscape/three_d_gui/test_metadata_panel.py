@@ -73,22 +73,3 @@ def test_no_provenance_placeholder(qt_app) -> None:
     tab = OverviewTab()
     tab.update_from_model(model)
     assert tab.tree_group_count >= 1
-
-
-def test_real_capture_file_when_available(qt_app) -> None:
-    """Smoke against the canonical sample C3D when present."""
-    here = Path(__file__).resolve()
-    repo_root = here.parents[5]
-    sample = repo_root / "data" / "C3D_TA_Driver.c3d"
-    if not sample.is_file():
-        pytest.skip("sample C3D not present in this checkout")
-    from src.apps.services.c3d_loader import load_c3d_file  # type: ignore
-    from src.apps.ui.tabs.overview_tab import OverviewTab  # type: ignore
-
-    model = load_c3d_file(str(sample))
-    tab = OverviewTab()
-    tab.update_from_model(model)
-    # ezc3d guarantees POINT and ANALOG groups; real captures include several
-    # vendor-specific groups too.
-    assert tab.tree_group_count >= 5
-    assert tab.tree_node_count > 50

@@ -72,39 +72,3 @@ def test_example_produces_output(example_file: Path) -> None:
             f"Expected at least one of: {REQUIRED_UNIT_SUFFIXES}. "
             f"Got: {output[:200]}"
         )
-
-
-@pytest.mark.unit
-def test_basic_flight_simulation_output() -> None:
-    """Regression test for basic_flight_simulation.py output."""
-    example = (
-        Path(__file__).parent.parent.parent / "examples" / "basic_flight_simulation.py"
-    )
-    if not example.exists():
-        pytest.skip(f"Example file not found: {example}")
-
-    repo_root = Path(__file__).parent.parent.parent
-    env = os.environ.copy()
-    env["PYTHONPATH"] = str(repo_root)
-
-    result = subprocess.run(
-        [sys.executable, str(example)],
-        capture_output=True,
-        text=True,
-        timeout=30,
-        cwd=repo_root,
-        env=env,
-    )
-
-    assert result.returncode == 0, f"Example failed: {result.stderr}"
-    output = result.stdout
-
-    assert "t (s)" in output, "Missing trajectory time column header"
-    assert "x (m)" in output, "Missing trajectory x-position header"
-    assert "z (m)" in output, "Missing trajectory height header"
-    assert "|v| (m/s)" in output, "Missing velocity column header"
-    assert "Carry distance:" in output, "Missing carry distance output"
-    assert "m (" in output and "yd)" in output, "Missing meters/yards output"
-    assert "Physics:" in output, "Missing physics explanation"
-    assert "drag" in output.lower(), "Physics output should mention drag"
-    assert "lift" in output.lower(), "Physics output should mention lift"

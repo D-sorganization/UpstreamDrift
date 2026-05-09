@@ -316,17 +316,3 @@ def test_canonical_constants_are_consistent() -> None:
     # TAU map has every canonical joint represented.
     for joint in CANONICAL_JOINTS:
         assert joint in TAU_RAW_MAP
-
-
-@pytest.mark.slow
-@pytest.mark.requires_real_dataset
-def test_compactor_against_real_dataset_smoke(tmp_path: Path) -> None:
-    """Optional smoke test against the real 9 GB raw dump."""
-    real = Path(r"C:/Users/diete/Repositories/data/TenThousandFiles.parquet")
-    if not real.exists():
-        pytest.skip("real raw dataset not present")
-
-    out = tmp_path / "compact"
-    result = compact_swing_dataset(real, out, limit_trials=2, validate=True)
-    assert result["trials_rows"] == 2
-    assert result["timesteps_rows"] == 2 * N_TIMESTEPS

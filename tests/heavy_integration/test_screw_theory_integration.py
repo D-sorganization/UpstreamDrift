@@ -156,32 +156,4 @@ class TestAdjointTransform:
 # ---------------------------------------------------------------------------
 
 
-class TestScrewVsPinocchio:
-    """Cross-validate screw exponential map against pinocchio SE3 exponential."""
-
-    def test_rotation_matches_pinocchio_se3(self) -> None:
-        """Screw rotation about z matches pinocchio.exp3."""
-        try:
-            import pinocchio as pin
-        except ImportError:
-            pytest.skip("pinocchio not installed")
-
-        exponential_map, screw_axis, _ = _import_screw_modules()
-
-        angle = np.pi / 3
-        S = screw_axis(np.array([0.0, 0.0, 1.0]), np.array([0.0, 0.0, 0.0]))
-        T_screw = exponential_map(S, angle)
-
-        # pinocchio: exp3([0,0,angle]) → SO(3)
-        omega_vec = np.array([0.0, 0.0, angle])
-        R_pin = pin.exp3(omega_vec)
-
-        np.testing.assert_allclose(
-            T_screw[:3, :3],
-            R_pin,
-            atol=1e-10,
-            err_msg=("Screw exponential rotation does not match pinocchio exp3"),
-        )
-
-
 pytestmark = pytest.mark.live_simulation

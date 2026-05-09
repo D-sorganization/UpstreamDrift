@@ -104,7 +104,7 @@ class TestPendulumEngineDirectly:
     def test_engine_mass_matrix_positive_definite(self, pendulum_engine) -> None:
         """Mass matrix should be symmetric positive definite."""
         M = pendulum_engine.compute_mass_matrix()
-        assert M.shape == (2, 2)
+        assert M.shape == (2, 2), "Assertion failed: M.shape == (2, 2)"
         eigenvalues = np.linalg.eigvalsh(M)
         assert all(eigenvalues > 0), f"Mass matrix not PD: eigenvalues={eigenvalues}"
 
@@ -179,11 +179,13 @@ class TestPendulumSimulationAPI:
                 },
             },
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
         data = response.json()
-        assert data["success"] is True
-        assert data["frames"] == 10
-        assert data["duration"] == 0.1
+        assert data["success"] is True, "Assertion failed: data[success] is True"
+        assert data["frames"] == 10, "Assertion failed: data[frames] == 10"
+        assert data["duration"] == 0.1, "Assertion failed: data[duration] == 0.1"
 
     def test_api_simulate_returns_data_fields(self, client) -> None:
         """API response should contain expected data fields."""
@@ -195,12 +197,16 @@ class TestPendulumSimulationAPI:
                 "timestep": 0.01,
             },
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
         data = response.json()
-        assert "data" in data
+        assert "data" in data, "Assertion failed: data in data"
         # Data fields depend on recorder implementation
         # At minimum we expect the response to have the standard shape
-        assert isinstance(data["data"], dict)
+        assert isinstance(data["data"], dict), (
+            "Assertion failed: isinstance(data[data], dict)"
+        )
 
     def test_api_rejects_invalid_engine(self, client) -> None:
         """API should reject requests for non-existent engines."""
@@ -214,7 +220,7 @@ class TestPendulumSimulationAPI:
         # Should return error (either 400, 500, or success=False)
         data = response.json()
         if response.status_code == 200:
-            assert data["success"] is False
+            assert data["success"] is False, "Assertion failed: data[success] is False"
 
     def test_api_rejects_zero_duration(self, client) -> None:
         """API should reject zero or negative duration."""
@@ -225,7 +231,9 @@ class TestPendulumSimulationAPI:
                 "duration": 0.0,
             },
         )
-        assert response.status_code == 422  # Pydantic validation error
+        assert (
+            response.status_code == 422
+        )  # Pydantic validation error, "Assertion failed: response.status_code == 422  # Pydantic validation error"
 
     @pytest.mark.parametrize("vector", PENDULUM_TEST_VECTORS, ids=lambda v: v["name"])
     def test_api_matches_vector(self, client, vector) -> None:
@@ -239,11 +247,17 @@ class TestPendulumSimulationAPI:
                 "initial_state": vector["initial_state"],
             },
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
         data = response.json()
         expected = vector["expected"]
-        assert data["success"] is expected["success"]
-        assert data["frames"] == expected["frames"]
+        assert data["success"] is expected["success"], (
+            "Assertion failed: data[success] is expected[success]"
+        )
+        assert data["frames"] == expected["frames"], (
+            "Assertion failed: data[frames] == expected[frames]"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -278,9 +292,13 @@ class TestPendulumEngineAPIConsistency:
                 },
             },
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
         data = response.json()
-        assert data["frames"] == expected_frames
+        assert data["frames"] == expected_frames, (
+            "Assertion failed: data[frames] == expected_frames"
+        )
 
     def test_equilibrium_consistency(self, client, pendulum_engine) -> None:
         """Both paths should agree on equilibrium behavior."""
@@ -303,9 +321,11 @@ class TestPendulumEngineAPIConsistency:
                 },
             },
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
         data = response.json()
-        assert data["success"] is True
+        assert data["success"] is True, "Assertion failed: data[success] is True"
 
         # Both should report near-zero state
-        assert abs(q_engine[0]) < 1e-6
+        assert abs(q_engine[0]) < 1e-6, "Assertion failed: abs(q_engine[0]) < 1e-6"

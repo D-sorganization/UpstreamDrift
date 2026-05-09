@@ -78,16 +78,6 @@ def test_aerodynamics_demo_runs() -> None:
     mod.main()
 
 
-@pytest.mark.skipif(
-    not is_rust_available(),
-    reason="upstream-physics Rust kernel not available — basic_flight_simulation requires it",
-)
-def test_basic_flight_simulation_runs() -> None:
-    """Test basic_flight_simulation.py runs without error (requires Rust kernel)."""
-    mod = load_module("basic_flight_simulation", flight_path)
-    mod.main()
-
-
 def test_topography_demo_runs() -> None:
     """Test topography_demo.py runs without error."""
     mod = load_module("topography_demo", topography_path)

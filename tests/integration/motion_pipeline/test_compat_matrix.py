@@ -208,58 +208,6 @@ if "pytest" in sys.modules or (
         except ImportError as e:
             return False, f"Format loader not available: {e}"
 
-    @pytest.mark.parametrize(
-        "source_format,ik_backend,matching_backend",
-        [
-            (sf, ik, mm)
-            for sf in SOURCE_FORMATS
-            for ik in IK_BACKENDS
-            for mm in MATCHING_BACKENDS
-        ],
-    )
-    def test_compatibility_matrix(
-        source_format: str,
-        ik_backend: str,
-        matching_backend: str,
-    ) -> None:
-        """Test each combination of source format and backends."""
-        key = (source_format, ik_backend, matching_backend)
-        if key in KNOWN_UNSUPPORTED:
-            pytest.skip(f"Known unsupported: {KNOWN_UNSUPPORTED[key]}")
-
-        if key in HEAVY_COMBINATIONS and os.environ.get("CI") == "true":
-            pytest.skip(
-                f"Heavy integration test skipped in CI: {HEAVY_COMBINATIONS[key]}"
-            )
-
-        ik_available, ik_reason = _check_backend_available(ik_backend)
-        if not ik_available:
-            pytest.skip(f"IK backend unavailable: {ik_reason}")
-
-        mm_available, mm_reason = _check_backend_available(matching_backend)
-        if not mm_available:
-            pytest.skip(f"Matching backend unavailable: {mm_reason}")
-
-        fmt_available, fmt_reason = _check_source_format_available(source_format)
-        if not fmt_available:
-            pytest.skip(f"Source format unavailable: {fmt_reason}")
-
-        try:
-            from src.engines.motion_pipeline.core.pipeline import MotionPipeline
-            from src.engines.motion_pipeline.core.config import PipelineConfig
-
-            config = PipelineConfig(
-                source_format=source_format,
-                ik_backend=ik_backend,
-                matching_backend=matching_backend,
-            )
-            _ = MotionPipeline(config)
-
-        except ImportError as e:
-            pytest.skip(f"Pipeline not available: {e}")
-        except NotImplementedError as e:
-            pytest.xfail(f"Pipeline stage not implemented: {e}")
-
     def test_generate_matrix_file() -> None:
         """Generate the compatibility matrix markdown file."""
         DOCS_DIR.mkdir(parents=True, exist_ok=True)

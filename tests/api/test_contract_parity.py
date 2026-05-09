@@ -35,13 +35,17 @@ class TestSimulationRequestPreconditions:
     def test_valid_request(self) -> None:
         """Standard valid request passes all validators."""
         req = SimulationRequest(engine_type="mujoco")
-        assert req.engine_type == "mujoco"
-        assert req.duration == 1.0
+        assert req.engine_type == "mujoco", (
+            "Assertion failed: req.engine_type == mujoco"
+        )
+        assert req.duration == 1.0, "Assertion failed: req.duration == 1.0"
 
     def test_engine_type_normalized(self) -> None:
         """Engine type is lowercased and stripped."""
         req = SimulationRequest(engine_type="  MuJoCo  ")
-        assert req.engine_type == "mujoco"
+        assert req.engine_type == "mujoco", (
+            "Assertion failed: req.engine_type == mujoco"
+        )
 
     def test_invalid_engine_type_rejected(self) -> None:
         """Unknown engine type raises ValidationError."""
@@ -52,7 +56,9 @@ class TestSimulationRequestPreconditions:
         """Every VALID_ENGINE_TYPES entry is accepted."""
         for engine in VALID_ENGINE_TYPES:
             req = SimulationRequest(engine_type=engine)
-            assert req.engine_type == engine
+            assert req.engine_type == engine, (
+                "Assertion failed: req.engine_type == engine"
+            )
 
     def test_zero_duration_rejected(self) -> None:
         """Duration of 0 is rejected (gt=0 constraint)."""
@@ -72,7 +78,7 @@ class TestSimulationRequestPreconditions:
     def test_valid_timestep(self) -> None:
         """Valid timestep is accepted."""
         req = SimulationRequest(engine_type="mujoco", timestep=0.01)
-        assert req.timestep == 0.01
+        assert req.timestep == 0.01, "Assertion failed: req.timestep == 0.01"
 
     def test_excessive_timestep_rejected(self) -> None:
         """Timestep exceeding MAX_TIMESTEP is rejected."""
@@ -87,7 +93,7 @@ class TestSimulationRequestPreconditions:
     def test_none_timestep_allowed(self) -> None:
         """None timestep (default) is allowed."""
         req = SimulationRequest(engine_type="mujoco")
-        assert req.timestep is None
+        assert req.timestep is None, "Assertion failed: req.timestep is None"
 
 
 # ──────────────────────────────────────────────────────────────
@@ -99,13 +105,19 @@ class TestAnalysisRequestPreconditions:
     def test_valid_request(self) -> None:
         """Standard valid request passes."""
         req = AnalysisRequest(analysis_type="kinematics", data_source="simulation")
-        assert req.analysis_type == "kinematics"
-        assert req.export_format == "json"
+        assert req.analysis_type == "kinematics", (
+            "Assertion failed: req.analysis_type == kinematics"
+        )
+        assert req.export_format == "json", (
+            "Assertion failed: req.export_format == json"
+        )
 
     def test_analysis_type_normalized(self) -> None:
         """Analysis type is lowercased and stripped."""
         req = AnalysisRequest(analysis_type="  Kinematics  ", data_source="sim")
-        assert req.analysis_type == "kinematics"
+        assert req.analysis_type == "kinematics", (
+            "Assertion failed: req.analysis_type == kinematics"
+        )
 
     def test_invalid_analysis_type_rejected(self) -> None:
         """Unknown analysis type raises ValidationError."""
@@ -116,7 +128,9 @@ class TestAnalysisRequestPreconditions:
         """Every VALID_ANALYSIS_TYPES entry is accepted."""
         for atype in VALID_ANALYSIS_TYPES:
             req = AnalysisRequest(analysis_type=atype, data_source="sim")
-            assert req.analysis_type == atype
+            assert req.analysis_type == atype, (
+                "Assertion failed: req.analysis_type == atype"
+            )
 
     def test_valid_export_format(self) -> None:
         """All valid export formats are accepted."""
@@ -124,7 +138,9 @@ class TestAnalysisRequestPreconditions:
             req = AnalysisRequest(
                 analysis_type="kinematics", data_source="sim", export_format=fmt
             )
-            assert req.export_format == fmt
+            assert req.export_format == fmt, (
+                "Assertion failed: req.export_format == fmt"
+            )
 
     def test_invalid_export_format_rejected(self) -> None:
         """Unknown export format raises ValidationError."""
@@ -150,7 +166,9 @@ class TestSimulationResponsePostconditions:
             frames=100,
             data={"states": [[0, 0, 0]]},
         )
-        assert resp.solver_status == "success"
+        assert resp.solver_status == "success", (
+            "Assertion failed: resp.solver_status == success"
+        )
 
     def test_success_with_empty_data_rejected(self) -> None:
         """Successful response with empty data is rejected."""
@@ -170,7 +188,9 @@ class TestSimulationResponsePostconditions:
             frames=0,
             data={},
         )
-        assert resp.solver_status != "success"
+        assert resp.solver_status != "success", (
+            "Assertion failed: resp.solver_status != success"
+        )
 
     def test_negative_duration_rejected(self) -> None:
         """Negative duration is rejected."""
@@ -206,7 +226,9 @@ class TestAnalysisResponsePostconditions:
             success=True,
             results={"joint_angles": [0.1, 0.2, 0.3]},
         )
-        assert resp.solver_status == "success"
+        assert resp.solver_status == "success", (
+            "Assertion failed: resp.solver_status == success"
+        )
 
     def test_success_with_empty_results_rejected(self) -> None:
         """Successful analysis with empty results is rejected."""
@@ -224,7 +246,9 @@ class TestAnalysisResponsePostconditions:
             success=False,
             results={},
         )
-        assert resp.solver_status != "success"
+        assert resp.solver_status != "success", (
+            "Assertion failed: resp.solver_status != success"
+        )
 
 
 # ──────────────────────────────────────────────────────────────

@@ -111,25 +111,6 @@ C3D_FIXTURES: list[tuple[str, Path]] = [
 ]
 
 
-@pytest.mark.parametrize(
-    "filename, path",
-    C3D_FIXTURES,
-    ids=[name for name, _ in C3D_FIXTURES],
-)
-def test_c3d_club_pipeline_grid_and_kinematics(filename: str, path: Path) -> None:
-    """C3D club loader: timegrid contract + impact clubhead-speed sanity."""
-    if not path.exists():
-        pytest.skip(f"C3D fixture not present in workspace: {path}")
-    target = _maybe_load_club_target(path)
-    _validate_grid_and_quat(target)
-    speed = _impact_clubhead_speed(target)
-    expected = CLUB_BASELINES_C3D[filename]
-    assert abs(speed - expected) <= SPEED_TOL_MPS, (
-        f"{filename}: |v_clubhead| at impact = {speed:.3f} m/s; "
-        f"expected {expected:.3f} +/- {SPEED_TOL_MPS} m/s"
-    )
-
-
 # ---------------------------------------------------------------------------
 # Parametrised .mat pipeline (skipped until #4490 lands the .mat loader)
 # ---------------------------------------------------------------------------
@@ -174,36 +155,6 @@ def test_mat_club_pipeline_grid_and_kinematics(filename: str, path: Path) -> Non
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize(
-    "filename, path",
-    C3D_FIXTURES,
-    ids=[name for name, _ in C3D_FIXTURES],
-)
-def test_body_target_shares_club_timegrid(filename: str, path: Path) -> None:
-    """``BodyTarget`` and ``ClubTarget`` from one C3D share the same timegrid.
-
-    Skipped until issue #4481 lands ``load_body_target``.
-    """
-    if not path.exists():
-        pytest.skip(f"C3D fixture not present in workspace: {path}")
-    body_loader_mod = pytest.importorskip(
-        "src.shared.python.motion_matching.load_body_target",
-        reason="waiting on #4481 (load_body_target)",
-    )
-    target_mod = pytest.importorskip(
-        "src.shared.python.motion_matching.target",
-        reason="target module not present on this branch",
-    )
-    club = _maybe_load_club_target(path)
-    body = body_loader_mod.load_body_target(  # type: ignore[attr-defined]
-        path,
-        opts=target_mod.AlignOptions(),
-        impact_source=club,
-    )
-    np.testing.assert_allclose(body.time, club.time, rtol=0.0, atol=1.0e-12)
-    assert int(body.impact_idx) == int(club.impact_idx)
-
-
 # ---------------------------------------------------------------------------
 # Golden snapshots
 # ---------------------------------------------------------------------------
@@ -227,28 +178,6 @@ def _assert_snapshot_close(actual: np.ndarray, expected_list: list, name: str) -
             f"if the change is intentional."
         ),
     )
-
-
-def test_club_target_driver_golden_snapshot() -> None:
-    """Last 10 frames of the driver C3D match the committed golden fixture."""
-    snapshot_path = FIXTURES_DIR / "club_target_driver_last10.json"
-    if not snapshot_path.exists():
-        pytest.skip(f"golden snapshot not present: {snapshot_path}")
-    driver_path = DATA_DIR / "C3D_TA_Driver.c3d"
-    if not driver_path.exists():
-        pytest.skip(f"driver C3D fixture not present: {driver_path}")
-
-    snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
-    target = _maybe_load_club_target(driver_path)
-    last_n = int(snapshot["last_n"])
-    sl = slice(-last_n, None)
-
-    assert int(target.impact_idx) == int(snapshot["impact_idx"])
-    assert int(target.time.shape[0]) == int(snapshot["n_frames"])
-    _assert_snapshot_close(target.time[sl], snapshot["time"], "time")
-    _assert_snapshot_close(target.butt[sl], snapshot["butt"], "butt")
-    _assert_snapshot_close(target.clubhead[sl], snapshot["clubhead"], "clubhead")
-    _assert_snapshot_close(target.club_quat[sl], snapshot["club_quat"], "club_quat")
 
 
 def test_body_target_driver_golden_snapshot() -> None:

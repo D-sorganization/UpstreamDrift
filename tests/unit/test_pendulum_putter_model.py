@@ -44,7 +44,9 @@ class TestPendulumPutterModelConstruction:
         assert result.solver_status == "success", (
             f"Build failed: {result.error_message}"
         )
-        assert result.urdf_xml is not None
+        assert result.urdf_xml is not None, (
+            "Assertion failed: result.urdf_xml is not None"
+        )
 
     def test_model_has_correct_link_count(self) -> None:
         """Model should have expected number of links."""
@@ -117,7 +119,7 @@ class TestPendulumPutterModelPhysics:
         result = builder.build()
 
         base_link = result.get_link("base_link")
-        assert base_link is not None
+        assert base_link is not None, "Assertion failed: base_link is not None"
 
         # Base should be at least 30% of total mass for stability
         base_mass = base_link.inertia.mass
@@ -149,8 +151,8 @@ class TestPendulumPutterModelPhysics:
         result = builder.build()
 
         joint = result.get_joint("pendulum_joint")
-        assert joint is not None
-        assert joint.limits is not None
+        assert joint is not None, "Assertion failed: joint is not None"
+        assert joint.limits is not None, "Assertion failed: joint.limits is not None"
 
         # Putting stroke: typically ±30-45 degrees max
         assert joint.limits.lower >= -math.pi / 2, "Lower limit too extreme"
@@ -166,7 +168,7 @@ class TestPendulumPutterModelPhysics:
         result = builder.build()
 
         joint = result.get_joint("pendulum_joint")
-        assert joint is not None
+        assert joint is not None, "Assertion failed: joint is not None"
 
         # Low damping for pendulum behavior
         assert joint.dynamics.damping < 0.5, "Damping too high for pendulum"
@@ -187,15 +189,19 @@ class TestPendulumPutterModelConfiguration:
         short_result = short_builder.build()
         long_result = long_builder.build()
 
-        assert short_result.solver_status == "success"
-        assert long_result.solver_status == "success"
+        assert short_result.solver_status == "success", (
+            "Assertion failed: short_result.solver_status == success"
+        )
+        assert long_result.solver_status == "success", (
+            "Assertion failed: long_result.solver_status == success"
+        )
 
         # Verify different configurations
         short_arm = short_result.get_link("pendulum_arm")
         long_arm = long_result.get_link("pendulum_arm")
 
-        assert short_arm is not None
-        assert long_arm is not None
+        assert short_arm is not None, "Assertion failed: short_arm is not None"
+        assert long_arm is not None, "Assertion failed: long_arm is not None"
 
     def test_can_set_shoulder_height(self) -> None:
         """Should be able to configure shoulder height."""
@@ -206,7 +212,9 @@ class TestPendulumPutterModelConfiguration:
         builder = PendulumPutterModelBuilder(shoulder_height_m=1.0)
         result = builder.build()
 
-        assert result.solver_status == "success"
+        assert result.solver_status == "success", (
+            "Assertion failed: result.solver_status == success"
+        )
 
     def test_can_set_pendulum_damping(self) -> None:
         """Should be able to configure pendulum damping."""
@@ -218,7 +226,9 @@ class TestPendulumPutterModelConfiguration:
         result = builder.build()
 
         joint = result.get_joint("pendulum_joint")
-        assert joint.dynamics.damping == pytest.approx(0.1)
+        assert joint.dynamics.damping == pytest.approx(0.1), (
+            "Assertion failed: joint.dynamics.damping == pytest.approx(0.1)"
+        )
 
 
 class TestInterchangeableClub:
@@ -254,11 +264,13 @@ class TestInterchangeableClub:
         builder = PendulumPutterModelBuilder(include_club=False)
         result = builder.build()
 
-        assert result.solver_status == "success"
+        assert result.solver_status == "success", (
+            "Assertion failed: result.solver_status == success"
+        )
 
         # Should end with club_mount
         club_mount = result.get_link("club_mount")
-        assert club_mount is not None
+        assert club_mount is not None, "Assertion failed: club_mount is not None"
 
     def test_can_attach_custom_club(self) -> None:
         """Should be able to attach a custom club configuration."""
@@ -276,7 +288,9 @@ class TestInterchangeableClub:
         builder = PendulumPutterModelBuilder(club_config=custom_club)
         result = builder.build()
 
-        assert result.solver_status == "success"
+        assert result.solver_status == "success", (
+            "Assertion failed: result.solver_status == success"
+        )
 
 
 class TestURDFGeneration:
@@ -294,8 +308,10 @@ class TestURDFGeneration:
 
         # Should parse as valid XML
         root = ET.fromstring(result.urdf_xml)
-        assert root.tag == "robot"
-        assert root.attrib["name"] == "pendulum_putter"
+        assert root.tag == "robot", "Assertion failed: root.tag == robot"
+        assert root.attrib["name"] == "pendulum_putter", (
+            "Assertion failed: root.attrib[name] == pendulum_putter"
+        )
 
     def test_urdf_has_all_required_elements(self) -> None:
         """URDF should have all required elements for physics engines."""
@@ -311,11 +327,11 @@ class TestURDFGeneration:
 
         # Check for links
         links = root.findall("link")
-        assert len(links) >= 6
+        assert len(links) >= 6, "Assertion failed: len(links) >= 6"
 
         # Check for joints
         joints = root.findall("joint")
-        assert len(joints) >= 5
+        assert len(joints) >= 5, "Assertion failed: len(joints) >= 5"
 
         # Check each link has required elements
         for link in links:
@@ -337,10 +353,12 @@ class TestURDFGeneration:
 
         builder.save(output_path)
 
-        assert output_path.exists()
+        assert output_path.exists(), "Assertion failed: output_path.exists()"
         content = output_path.read_text()
-        assert "<robot" in content
-        assert "pendulum_putter" in content
+        assert "<robot" in content, "Assertion failed: <robot in content"
+        assert "pendulum_putter" in content, (
+            "Assertion failed: pendulum_putter in content"
+        )
 
 
 class TestModelPortability:
@@ -356,8 +374,8 @@ class TestModelPortability:
         result = builder.build()
 
         root = result.get_root_link()
-        assert root is not None
-        assert root.name == "world"
+        assert root is not None, "Assertion failed: root is not None"
+        assert root.name == "world", "Assertion failed: root.name == world"
 
     def test_base_attached_to_world_via_fixed_joint(self) -> None:
         """Base should be attached to world via fixed joint for positioning."""
@@ -370,10 +388,16 @@ class TestModelPortability:
 
         # Find joint connecting world to base
         world_to_base = result.get_joint("world_to_base")
-        assert world_to_base is not None
-        assert world_to_base.joint_type.value == "fixed"
-        assert world_to_base.parent == "world"
-        assert world_to_base.child == "base_link"
+        assert world_to_base is not None, "Assertion failed: world_to_base is not None"
+        assert world_to_base.joint_type.value == "fixed", (
+            "Assertion failed: world_to_base.joint_type.value == fixed"
+        )
+        assert world_to_base.parent == "world", (
+            "Assertion failed: world_to_base.parent == world"
+        )
+        assert world_to_base.child == "base_link", (
+            "Assertion failed: world_to_base.child == base_link"
+        )
 
 
 class TestPendulumPhysicsAnalytical:
@@ -394,10 +418,12 @@ class TestPendulumPhysicsAnalytical:
         # where d = distance from pivot to COM, I = moment of inertia about pivot
 
         pendulum_arm = result.get_link("pendulum_arm")
-        assert pendulum_arm is not None
+        assert pendulum_arm is not None, "Assertion failed: pendulum_arm is not None"
 
         # Basic sanity check - mass should allow pendulum motion
-        assert pendulum_arm.inertia.mass > 0
+        assert pendulum_arm.inertia.mass > 0, (
+            "Assertion failed: pendulum_arm.inertia.mass > 0"
+        )
 
 
 class TestValidation:
@@ -412,7 +438,9 @@ class TestValidation:
         builder = PendulumPutterModelBuilder()
         result = builder.build()
 
-        assert result.validation is not None
+        assert result.validation is not None, (
+            "Assertion failed: result.validation is not None"
+        )
         assert result.validation.is_valid, (
             f"Validation failed: {result.validation.get_error_messages()}"
         )
@@ -444,8 +472,12 @@ class TestMetadata:
         builder = PendulumPutterModelBuilder()
         result = builder.build()
 
-        assert "robot_name" in result.metadata
-        assert result.metadata["robot_name"] == "pendulum_putter"
+        assert "robot_name" in result.metadata, (
+            "Assertion failed: robot_name in result.metadata"
+        )
+        assert result.metadata["robot_name"] == "pendulum_putter", (
+            "Assertion failed: result.metadata[robot_name] == pendulum_putter"
+        )
 
     def test_metadata_includes_configuration(self) -> None:
         """Metadata should include configuration parameters."""
@@ -459,8 +491,12 @@ class TestMetadata:
         )
         result = builder.build()
 
-        assert "arm_length_m" in result.metadata
-        assert "shoulder_height_m" in result.metadata
+        assert "arm_length_m" in result.metadata, (
+            "Assertion failed: arm_length_m in result.metadata"
+        )
+        assert "shoulder_height_m" in result.metadata, (
+            "Assertion failed: shoulder_height_m in result.metadata"
+        )
 
 
 if __name__ == "__main__":

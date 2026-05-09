@@ -165,32 +165,6 @@ class TestMuscleSynergyPreconditions(unittest.TestCase):
             analyzer.extract_synergies(n_synergies=5)
 
 
-class TestMuscleSynergyPostconditions(unittest.TestCase):
-    """Test ensure() for VAF in [0, 1]."""
-
-    def test_vaf_in_range(self) -> None:
-        try:
-            from src.shared.python.biomechanics.muscle_analysis import (
-                MuscleSynergyAnalyzer,
-            )
-        except ImportError:
-            self.skipTest("sklearn not available")
-
-        # Create structured data with clear synergies
-        np.random.seed(42)
-        W = np.random.rand(4, 2)
-        H = np.random.rand(2, 100)
-        data = np.abs(W @ H).T  # Shape: (100, 4), non-negative
-        analyzer = MuscleSynergyAnalyzer(data)
-
-        try:
-            result = analyzer.extract_synergies(n_synergies=2)
-            self.assertGreaterEqual(result.vaf, 0.0)
-            self.assertLessEqual(result.vaf, 1.0 + 1e-6)
-        except ImportError:
-            self.skipTest("sklearn not available")
-
-
 # ── SwingComparator contracts ──────────────────────────────────────
 
 

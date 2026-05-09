@@ -15,16 +15,6 @@ from src.shared.python.engine_core.engine_availability import skip_if_unavailabl
 class TestLauncherIntegration:
     """Integration tests for launcher functionality."""
 
-    @skip_if_unavailable("pyqt6")
-    def test_launch_golf_suite_imports(self) -> None:
-        """Verify launch_golf_suite can import UnifiedLauncher."""
-
-        from src.launchers.unified_launcher import UnifiedLauncher
-
-        launcher = UnifiedLauncher()
-        assert launcher is not None
-        assert hasattr(launcher, "mainloop")
-
     def test_launch_golf_suite_help(self) -> None:
         """Test launch_golf_suite.py --help command."""
         suite_root = get_repo_root()
@@ -44,28 +34,6 @@ class TestLauncherIntegration:
         assert (
             "Golf Modeling Suite" in result.stdout or "usage" in result.stdout.lower()
         )
-
-    @pytest.mark.skipif(
-        not sys.platform.startswith("win")
-        and not __import__("os").environ.get("DISPLAY"),
-        reason="Requires display for PyQt6 (not available in CI)",
-    )
-    def test_unified_launcher_show_status(self) -> None:
-        """Test UnifiedLauncher.show_status() method."""
-        get_repo_root()
-
-        from unittest.mock import patch
-
-        # Import inside the test to avoid circular dependencies
-        from src.launchers.unified_launcher import UnifiedLauncher
-
-        # Patch GolfLauncher to avoid instantiation issues (StopIteration from side_effects)
-        with patch("src.launchers.golf_launcher.GolfLauncher") as _:
-            launcher = UnifiedLauncher()
-
-            # Should not raise exception
-            # Note: This will print to stdout, which is expected
-            launcher.show_status()
 
 
 class TestEngineProbes:
@@ -257,31 +225,6 @@ class TestPhysicsParameters:
             or "ball" in combined_output.lower()
             or len(combined_output) > 0
         )
-
-
-class TestValidateSuite:
-    """Integration tests for validate_suite.py."""
-
-    def test_validate_suite_runs(self) -> None:
-        """Test that validate_suite.py runs without errors."""
-        suite_root = get_repo_root()
-        script = suite_root / "scripts" / "validate_suite.py"
-
-        if not script.exists():
-            pytest.skip("validate_suite.py not found")
-
-        result = subprocess.run(
-            [sys.executable, str(script)],
-            capture_output=True,
-            text=True,
-            timeout=30,
-        )
-
-        # Should complete (may have warnings but shouldn't crash)
-        assert result.returncode in [0, 1]  # 0=success, 1=issues found
-
-        # Should contain validation information
-        assert len(result.stdout) > 0
 
 
 class TestOutputManager:

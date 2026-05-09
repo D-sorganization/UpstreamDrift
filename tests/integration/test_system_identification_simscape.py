@@ -88,43 +88,6 @@ def test_system_identifier_runs_one_iteration_against_simscape(
     assert result.iterations >= 1
 
 
-def test_pool_dispatches_concurrent_system_id_evaluations(
-    synthetic_demonstration: object,
-) -> None:
-    """A 4-engine pool runs 8 candidates with no state leak across workers."""
-    suite = _suite_root()
-    model = (
-        suite
-        / "src"
-        / "engines"
-        / "Simscape_Multibody_Models"
-        / "3D_Golf_Model"
-        / "matlab"
-        / "src"
-        / "model"
-        / "GolfSwing3D_Kinetic.slx"
-    )
-    if not model.exists():
-        pytest.skip(f"model not found at {model}")
-
-    cfg = PoolConfig(pool_size=4)
-    candidates: list[float] = [0.95, 1.0, 1.05, 0.9, 1.1, 0.85, 1.15, 1.0]
-
-    def _eval(adapter: SimscapeAdapter, scale: float) -> float:
-        identifier = SystemIdentifier(wrap_for_system_identification(adapter))
-        result = identifier.identify_from_trajectories(
-            [synthetic_demonstration],  # type: ignore[list-item]
-            params_to_identify=["mass_scale"],
-            max_iterations=1,
-            tolerance=1.0,
-        )
-        return float(result.identified_params["mass_scale"]) * scale
-
-    with SimscapeAdapterPool(str(model), cfg) as pool:
-        results = pool.map(_eval, candidates)
-    assert len(results) == len(candidates)
-
-
 def test_protocol_method_coverage_against_actual_simscape(
     simscape_engine: SimscapeAdapter,
 ) -> None:

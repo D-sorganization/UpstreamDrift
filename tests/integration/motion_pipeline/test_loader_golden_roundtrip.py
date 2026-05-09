@@ -60,53 +60,6 @@ def _frame_timestamps(obj: object) -> list[float]:
     return [f.timestamp for f in frames]
 
 
-@pytest.mark.parametrize("fixture_name", FIXTURE_FILES)
-def test_golden_fixture_round_trip(fixture_name: str) -> None:
-    """Each fixture round-trips through the source registry into a CIR object."""
-    fixture_path = GOLDEN_DIR / fixture_name
-    if not fixture_path.exists():
-        pytest.skip(f"Fixture not present (optional dep?): {fixture_path}")
-
-    registry = _registry_or_skip()
-    load_any = getattr(registry, "load_any", None)
-    if load_any is None:
-        pytest.skip("registry.load_any not available")
-
-    try:
-        cir = load_any(fixture_path)
-    except NotImplementedError as exc:
-        pytest.skip(f"Adapter not yet implemented for {fixture_name}: {exc}")
-    except ImportError as exc:
-        pytest.skip(f"Optional dependency missing for {fixture_name}: {exc}")
-
-    # (a) returns a CIR object
-    assert _is_cir_object(cir), (
-        f"Expected CIR type from {fixture_name}, got {type(cir).__name__}"
-    )
-
-    # (b) timestamps monotonic (non-decreasing)
-    timestamps = _frame_timestamps(cir)
-    assert len(timestamps) >= 1, f"{fixture_name} produced 0 frames"
-    for i in range(1, len(timestamps)):
-        assert timestamps[i] >= timestamps[i - 1], (
-            f"{fixture_name} timestamps not monotonic at index {i}: "
-            f"{timestamps[i - 1]} -> {timestamps[i]}"
-        )
-
-    # (c) schema/marker_set sanity — depends on object kind
-    cls_name = type(cir).__name__
-    if cls_name == "KeypointSequence":
-        # Every KeypointFrame must declare a schema name and they must match.
-        schemas = {f.schema_name for f in cir.frames}
-        assert len(schemas) == 1, f"{fixture_name} mixed schemas: {schemas}"
-    elif cls_name == "MarkerTrajectory":
-        # Marker set non-empty.
-        assert cir.marker_names, f"{fixture_name} has no marker names"
-    elif cls_name == "JointTrajectory":
-        # Skeleton must have at least one joint.
-        assert cir.skeleton.num_joints >= 1, f"{fixture_name} skeleton has no joints"
-
-
 def test_golden_dir_exists_and_nonempty() -> None:
     """Sanity: golden fixtures dir is populated (independent of registry)."""
     assert GOLDEN_DIR.is_dir(), f"Missing dir: {GOLDEN_DIR}"

@@ -48,15 +48,25 @@ class TestEquilibriumSolverInitialization:
     def test_initialization(self, standard_muscle) -> None:
         """Test basic initialization."""
         solver = EquilibriumSolver(standard_muscle)
-        assert solver.muscle is standard_muscle
-        assert isinstance(solver.muscle, HillMuscleModel)
+        assert solver.muscle is standard_muscle, (
+            "Assertion failed: solver.muscle is standard_muscle"
+        )
+        assert isinstance(solver.muscle, HillMuscleModel), (
+            "Assertion failed: isinstance(solver.muscle, HillMuscleModel)"
+        )
 
     def test_solver_retains_muscle_parameters(self, standard_muscle) -> None:
         """Test that solver retains access to muscle parameters."""
         solver = EquilibriumSolver(standard_muscle)
-        assert solver.muscle.params.F_max == 1000.0
-        assert solver.muscle.params.l_opt == 0.12
-        assert solver.muscle.params.l_slack == 0.25
+        assert solver.muscle.params.F_max == 1000.0, (
+            "Assertion failed: solver.muscle.params.F_max == 1000.0"
+        )
+        assert solver.muscle.params.l_opt == 0.12, (
+            "Assertion failed: solver.muscle.params.l_opt == 0.12"
+        )
+        assert solver.muscle.params.l_slack == 0.25, (
+            "Assertion failed: solver.muscle.params.l_slack == 0.25"
+        )
 
 
 class TestEquilibriumResidual:
@@ -252,7 +262,7 @@ class TestSolveFiberLength:
         try:
             l_CE = solver.solve_fiber_length(l_MT, activation)
             # If it succeeds, that's also okay
-            assert np.isfinite(l_CE)
+            assert np.isfinite(l_CE), "Assertion failed: np.isfinite(l_CE)"
         except (RuntimeError, PostconditionError):
             # Convergence failure or postcondition violation are acceptable
             pass

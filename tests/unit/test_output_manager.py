@@ -205,47 +205,6 @@ class TestOutputManager:
 
         # Rely on the raised ValueError as sufficient verification that no file is written.
 
-    @pytest.mark.skipif(
-        not _has_parquet_support(),
-        reason="Parquet support not available (missing pyarrow/fastparquet)",
-    )
-    def test_save_load_parquet(self, output_manager, sample_data) -> None:
-        """Test saving and loading Parquet files."""
-        filename = "test_sim"
-
-        # Save
-        path = output_manager.save_simulation_results(
-            sample_data, filename, OutputFormat.PARQUET, engine="mujoco"
-        )
-        assert path.exists()
-        assert path.suffix == ".parquet"
-
-        # Load
-        loaded_df = output_manager.load_simulation_results(
-            filename, OutputFormat.PARQUET, engine="mujoco"
-        )
-        pd.testing.assert_frame_equal(sample_data, loaded_df)
-
-    @pytest.mark.skipif(
-        not _has_hdf5_support(), reason="HDF5 support not available (missing pytables)"
-    )
-    def test_save_load_hdf5(self, output_manager, sample_data) -> None:
-        """Test saving and loading HDF5 files."""
-        filename = "test_sim"
-
-        # Save
-        path = output_manager.save_simulation_results(
-            sample_data, filename, OutputFormat.HDF5, engine="mujoco"
-        )
-        assert path.exists()
-        assert path.suffix == ".hdf5"
-
-        # Load
-        loaded_df = output_manager.load_simulation_results(
-            filename, OutputFormat.HDF5, engine="mujoco"
-        )
-        pd.testing.assert_frame_equal(sample_data, loaded_df)
-
     def test_save_dict_as_csv(self, output_manager) -> None:
         """Test saving dictionary as CSV."""
         data = {"col1": [1, 2], "col2": [3, 4]}

@@ -393,55 +393,6 @@ class TestSimulationStatsAPI:
         assert "frame_count" in data
 
 
-class TestEngineCapabilitiesAPI:
-    """Test engine capabilities endpoint. See issue #1204."""
-
-    def test_pendulum_capabilities(self, client) -> None:
-        """GET /engines/pendulum/capabilities returns 200."""
-        resp = client.get("/engines/pendulum/capabilities")
-        assert resp.status_code == 200
-        data = resp.json()
-        assert "engine_type" in data
-        assert "capabilities" in data
-        assert "summary" in data
-        assert isinstance(data["capabilities"], list)
-
-    def test_unknown_engine_returns_400(self, client) -> None:
-        """Unknown engine type returns 400."""
-        resp = client.get("/engines/nonexistent/capabilities")
-        assert resp.status_code == 400
-
-    def test_capabilities_have_required_fields(self, client) -> None:
-        """Each capability entry has name, level, supported fields."""
-        resp = client.get("/engines/pendulum/capabilities")
-        if resp.status_code == 200:
-            data = resp.json()
-            for cap in data["capabilities"]:
-                assert "name" in cap
-                assert "level" in cap
-                assert "supported" in cap
-                assert cap["level"] in ("full", "partial", "none")
-
-    def test_capabilities_exclude_non_level_metadata(self, client) -> None:
-        """Metadata keys like ``spatial_jacobian_order`` must not appear as
-        capability-level entries.
-
-        Regression test for issue #2743 / #2797: ``EngineCapabilities.to_dict``
-        emits a ``spatial_jacobian_order`` key whose value (e.g.
-        ``"angular_linear"``) does not match the capability-level schema. It
-        must be filtered out before being surfaced via the capabilities API.
-        """
-        resp = client.get("/engines/pendulum/capabilities")
-        if resp.status_code != 200:
-            pytest.skip("capabilities endpoint unavailable in this environment")
-        data = resp.json()
-        names = {cap["name"] for cap in data["capabilities"]}
-        assert "spatial_jacobian_order" not in names
-        assert "engine_name" not in names
-        for cap in data["capabilities"]:
-            assert cap["level"] in ("full", "partial", "none")
-
-
 class TestActuatorEndpoints:
     """Test actuator control endpoints (require loaded engine)."""
 

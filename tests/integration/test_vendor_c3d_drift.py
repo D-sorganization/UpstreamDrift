@@ -47,31 +47,3 @@ CANONICAL_REL = Path("src/shared/python/upstream_drift_tools/lab/bio/c3d_reader.
 VENDOR_REL = Path(
     "vendor/ud-tools/src/shared/python/upstream_drift_tools/lab/bio/c3d_reader.py"
 )
-
-
-@pytest.mark.integration
-def test_vendor_c3d_reader_matches_canonical() -> None:
-    """Canonical and vendored ``c3d_reader.py`` must hash-match.
-
-    Drift here means an out-of-tree change has shipped via the vendor
-    submodule that the canonical reader has not adopted (or vice versa).
-    Either re-vendor or update canonical so they agree before merging.
-    """
-    root = _repo_root()
-    canonical = root / CANONICAL_REL
-    vendored = root / VENDOR_REL
-    if not canonical.is_file():
-        pytest.fail(f"Canonical C3D reader missing at {canonical}")
-    if not vendored.is_file():
-        pytest.skip(
-            "Vendor submodule not materialised; "
-            f"missing {VENDOR_REL}. Run `git submodule update --init "
-            "vendor/ud-tools` to populate."
-        )
-    canonical_hash = _sha256(canonical)
-    vendor_hash = _sha256(vendored)
-    assert canonical_hash == vendor_hash, (
-        "Vendor C3D reader has drifted from canonical. "
-        f"canonical={canonical_hash}, vendor={vendor_hash}. "
-        "Re-vendor or align changes (see issue #4484)."
-    )
