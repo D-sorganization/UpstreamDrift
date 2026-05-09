@@ -25,8 +25,9 @@ from .persistence import (
     load_subject,
     save_subject,
 )
-from .readers import C3DSubjectMetadata, read_c3d_subject_metadata
+from .readers import C3DSubjectMetadata, read_c3d_subject_metadata, read_mjcf_body
 from .segment_properties import SegmentProperties
+from .writers import write_mjcf_body
 
 # Optional Qt UI surface — only re-exported when PyQt6 is installed.
 # Resolved as a UNION: importing the package never fails even on
@@ -53,5 +54,7 @@ __all__ = [
     "default_subjects_dir",
     "load_subject",
     "read_c3d_subject_metadata",
+    "read_mjcf_body",
     "save_subject",
+    "write_mjcf_body",
 ]

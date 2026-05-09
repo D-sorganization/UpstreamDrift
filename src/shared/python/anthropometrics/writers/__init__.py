@@ -11,7 +11,8 @@ corresponding reader in :mod:`anthropometrics.readers` so that
 
 from __future__ import annotations
 
+from .mjcf_body import write_mjcf_body
 from .osim_body import write_osim_body
 from .urdf_inertial import write_urdf_inertial
 
-__all__ = ["write_osim_body", "write_urdf_inertial"]
+__all__ = ["write_mjcf_body", "write_osim_body", "write_urdf_inertial"]
