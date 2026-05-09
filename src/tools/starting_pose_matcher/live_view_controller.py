@@ -32,9 +32,14 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from src.shared.python.plot_style import (
+    MarkerStyle,
+    MatplotlibMarkerRenderer,
+    PresetLibrary,
+)
+
 from .gui_playback import (
     BallImpactLayer,
-    BodyMarkerLayer,
     BodySkeletonLayer,
     ClubfaceTriadLayer,
     ClubTraceLayer,
@@ -48,6 +53,133 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 logger = logging.getLogger(__name__)
+
+
+# --------------------------------------------------------------------------- #
+# Default plot-style resolution                                               #
+# --------------------------------------------------------------------------- #
+
+# Names of the preset entries used as the live-view default for each
+# marker group. Pulled from the ``default`` :class:`PlotStyleSet` shipped
+# with :mod:`plot_style.preset_library`. Both are static-fill entries so
+# they render without an attached :class:`DataChannel`.
+_BODY_DEFAULT_ENTRY = "left_hand"
+_CLUB_DEFAULT_ENTRY = "club_head"
+
+
+def _default_marker_style(entry_name: str) -> MarkerStyle:
+    """Return the ``MarkerStyle`` of ``entry_name`` in the default preset.
+
+    Falls back to a vanilla :class:`MarkerStyle` if the entry is missing
+    so that an exotic build of the preset library cannot break the live
+    view at construction time.
+    """
+    try:
+        preset = PresetLibrary.default()["default"]
+        for entry in preset.entries:
+            if entry.name == entry_name:
+                return entry.style
+    except Exception:  # pragma: no cover - defensive
+        logger.exception("PresetLibrary.default()[%r] lookup failed", entry_name)
+    return MarkerStyle()
+
+
+def default_body_marker_style() -> MarkerStyle:
+    """Return the matcher's default body :class:`MarkerStyle`."""
+    return _default_marker_style(_BODY_DEFAULT_ENTRY)
+
+
+def default_club_marker_style() -> MarkerStyle:
+    """Return the matcher's default club :class:`MarkerStyle`."""
+    return _default_marker_style(_CLUB_DEFAULT_ENTRY)
+
+
+# --------------------------------------------------------------------------- #
+# Styled marker layer                                                         #
+# --------------------------------------------------------------------------- #
+
+
+@dataclass
+class StyledMarkerLayer(_LayerBase):
+    """Marker layer driven by a :class:`MarkerStyle` + ``MatplotlibMarkerRenderer``.
+
+    Replaces the legacy :class:`BodyMarkerLayer` / per-frame ``ax.plot``
+    blue-dot rendering with the shared plot-style stack from
+    :mod:`src.shared.python.plot_style`. The layer holds a
+    :class:`MatplotlibMarkerRenderer` plus a single handle issued by it,
+    and forwards build / update / set_visible / style swaps to the
+    renderer.
+
+    Two shapes are accepted on ``positions``:
+
+    * ``(T, M, 3)`` — per-frame multi-marker (used for body markers).
+    * ``(T, 3)``    — a single marker per frame (used for the club head).
+    """
+
+    positions: np.ndarray | None = None  # (T, M, 3) or (T, 3)
+    style: MarkerStyle = field(default_factory=MarkerStyle)
+    _renderer: MatplotlibMarkerRenderer | None = field(default=None, repr=False)
+    _handle: str | None = field(default=None, repr=False)
+
+    def build(self, ax: Axes3D) -> None:
+        """Add markers to ``ax`` and cache the renderer + handle."""
+        if self.positions is None or self.positions.size == 0:
+            return
+        renderer = MatplotlibMarkerRenderer(ax)
+        try:
+            handle = renderer.add_markers(self.positions, self.style, label=self.key)
+        except Exception:  # pragma: no cover - defensive
+            logger.exception(
+                "StyledMarkerLayer build failed (key=%r); falling back to no markers",
+                self.key,
+            )
+            return
+        self._renderer = renderer
+        self._handle = handle
+        # Mirror artists into _LayerBase so visibility toggles + tear-down
+        # honour the new layer like every other layer.
+        record = renderer._handles[handle]  # noqa: SLF001 - intentional
+        self._artists = list(record.artists)
+        for art in self._artists:
+            art.set_visible(self._visible)
+
+    def update(self, frame: int) -> None:
+        """Forward to the renderer's ``update_frame`` for ``frame``."""
+        if self._renderer is None or self._handle is None:
+            return
+        if self.positions is None:
+            return
+        n_frames = self.positions.shape[0]
+        if n_frames == 0:
+            return
+        t = int(np.clip(frame, 0, n_frames - 1))
+        try:
+            self._renderer.update_frame(self._handle, t)
+        except Exception:  # pragma: no cover - defensive
+            logger.exception("StyledMarkerLayer update failed (key=%r)", self.key)
+
+    def apply_style(self, style: MarkerStyle) -> None:
+        """Swap the active :class:`MarkerStyle` in-place.
+
+        When the layer has not yet been built (no axes attached) this
+        only updates the cached style so the next :meth:`build` picks
+        the new value up.
+        """
+        self.style = style
+        if self._renderer is None or self._handle is None:
+            return
+        try:
+            self._renderer.update_style(self._handle, style)
+        except Exception:  # pragma: no cover - defensive
+            logger.exception("StyledMarkerLayer apply_style failed (key=%r)", self.key)
+            return
+        # Refresh artist references — update_style replaces the underlying
+        # artists, so the cached _artists list is stale.
+        record = self._renderer._handles[self._handle]  # noqa: SLF001
+        self._artists = list(record.artists)
+        for art in self._artists:
+            art.set_visible(self._visible)
+
 
 # Body skeleton renderer style. Mirrors
 # :data:`session_schema.BODY_SKELETON_STYLES`. Re-declared here as a
@@ -240,11 +372,27 @@ class LiveViewController:
         ax: Axes3D,
         canvas: FigureCanvasBase,
         body_skeleton_style: BodySkeletonStyle = DEFAULT_BODY_SKELETON_STYLE,
+        body_marker_style: MarkerStyle | None = None,
+        club_marker_style: MarkerStyle | None = None,
     ) -> None:
         if body_skeleton_style not in BODY_SKELETON_STYLES:
             raise ValueError(
                 "body_skeleton_style must be one of "
                 f"{BODY_SKELETON_STYLES!r}; got {body_skeleton_style!r}"
+            )
+        if body_marker_style is not None and not isinstance(
+            body_marker_style, MarkerStyle
+        ):
+            raise TypeError(
+                "body_marker_style must be MarkerStyle or None; "
+                f"got {type(body_marker_style).__name__}"
+            )
+        if club_marker_style is not None and not isinstance(
+            club_marker_style, MarkerStyle
+        ):
+            raise TypeError(
+                "club_marker_style must be MarkerStyle or None; "
+                f"got {type(club_marker_style).__name__}"
             )
         self._ax = ax
         self._canvas = canvas
@@ -259,6 +407,20 @@ class LiveViewController:
         # via :meth:`set_body_skeleton_style` is non-destructive — the
         # cached body data is preserved so only the rendering swaps.
         self._body_skeleton_style: BodySkeletonStyle = body_skeleton_style
+        # Per-group marker styles (issue #4808). These drive every
+        # ``StyledMarkerLayer`` rebuilt inside :meth:`set_target`. They
+        # default to entries pulled from the built-in plot_style
+        # ``default`` preset.
+        self._body_marker_style: MarkerStyle = (
+            body_marker_style
+            if body_marker_style is not None
+            else default_body_marker_style()
+        )
+        self._club_marker_style: MarkerStyle = (
+            club_marker_style
+            if club_marker_style is not None
+            else default_club_marker_style()
+        )
         self._cached_body: Any | None = None
         self._cached_club: Any | None = None
         self._cached_ball: Any | None = None
@@ -355,8 +517,10 @@ class LiveViewController:
                     f"body.marker_xyz must have shape (T, M, 3), got {marker_xyz.shape}"
                 )
             n_frames = max(n_frames, int(marker_xyz.shape[0]))
-            layers["body_markers"] = BodyMarkerLayer(
-                key="body_markers", marker_xyz=marker_xyz
+            layers["body_markers"] = StyledMarkerLayer(
+                key="body_markers",
+                positions=marker_xyz,
+                style=self._body_marker_style,
             )
             marker_names = tuple(body.marker_names)
             if self._body_skeleton_style == "library_shapes":
@@ -397,6 +561,19 @@ class LiveViewController:
                     key="clubface_trace",
                     positions=clubhead,
                     color="tab:purple",
+                )
+                # Club marker layer: a single styled marker that follows
+                # the clubhead each frame. Driven by ``club_marker_style``
+                # so the user-picked plot style applies here too. Reshape
+                # ``(T, 3)`` into the renderer's expected ``(T, M, 3)``
+                # with one marker per frame.
+                clubhead_3d = np.asarray(clubhead, dtype=float).reshape(
+                    int(clubhead.shape[0]), 1, 3
+                )
+                layers["club_markers"] = StyledMarkerLayer(
+                    key="club_markers",
+                    positions=clubhead_3d,
+                    style=self._club_marker_style,
                 )
                 n_frames = max(n_frames, int(clubhead.shape[0]))
                 fit_points.append(_finite_rows(clubhead))
@@ -501,6 +678,49 @@ class LiveViewController:
         if self._n_frames:
             self.set_frame(prev_frame)
 
+    # -- plot styles (issue #4808) ---------------------------------------- #
+
+    @property
+    def body_marker_style(self) -> MarkerStyle:
+        """Return the :class:`MarkerStyle` currently driving body markers."""
+        return self._body_marker_style
+
+    @property
+    def club_marker_style(self) -> MarkerStyle:
+        """Return the :class:`MarkerStyle` currently driving club markers."""
+        return self._club_marker_style
+
+    def set_body_style(self, style: MarkerStyle) -> None:
+        """Apply ``style`` to the body marker layer immediately.
+
+        The style is also cached on the controller so subsequent
+        :meth:`set_target` / :meth:`set_body_skeleton_style` rebuilds use
+        the new style. Raises :class:`TypeError` if ``style`` is not a
+        :class:`MarkerStyle`.
+        """
+        if not isinstance(style, MarkerStyle):
+            raise TypeError(f"style must be MarkerStyle; got {type(style).__name__}")
+        self._body_marker_style = style
+        layer = self._layers.get("body_markers")
+        if isinstance(layer, StyledMarkerLayer):
+            layer.apply_style(style)
+            self._request_redraw()
+
+    def set_club_style(self, style: MarkerStyle) -> None:
+        """Apply ``style`` to the club marker layer immediately.
+
+        See :meth:`set_body_style` for the contract — the controller
+        caches the style for subsequent rebuilds even when no club
+        target is currently loaded.
+        """
+        if not isinstance(style, MarkerStyle):
+            raise TypeError(f"style must be MarkerStyle; got {type(style).__name__}")
+        self._club_marker_style = style
+        layer = self._layers.get("club_markers")
+        if isinstance(layer, StyledMarkerLayer):
+            layer.apply_style(style)
+            self._request_redraw()
+
     # -- frame / visibility ------------------------------------------------ #
 
     def set_frame(self, frame: int) -> None:
@@ -586,4 +806,7 @@ __all__ = [
     "BodyLibraryShapesLayer",
     "BodySkeletonStyle",
     "LiveViewController",
+    "StyledMarkerLayer",
+    "default_body_marker_style",
+    "default_club_marker_style",
 ]
