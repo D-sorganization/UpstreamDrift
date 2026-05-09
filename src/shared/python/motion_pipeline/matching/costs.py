@@ -17,6 +17,7 @@ from ..contracts import (
     JointTrajectory,
     MarkerFrame,
     MarkerTrajectory,
+    TorqueTrajectory,
 )
 from .base import CostWeights
 
@@ -24,13 +25,11 @@ logger = logging.getLogger(__name__)
 
 
 # -----------------------------------------------------------------------------
-# Lightweight typing aliases — full Pydantic counterparts may not exist yet.
+# Lightweight typing aliases for non-CIR shapes.
 # -----------------------------------------------------------------------------
 
-# A torque trajectory is structurally identical to a JointTrajectory whose
-# `q` slot carries generalized forces. We keep the alias for readability; the
-# spec text refers to ``TorqueTrajectory`` and ``ResidualReport``.
-TorqueTrajectory = JointTrajectory
+# ``TorqueTrajectory`` is now a distinct Pydantic model imported from
+# ``contracts``; it is no longer aliased to ``JointTrajectory``. See #4667.
 ResidualReport = Mapping[str, Any]
 
 
@@ -221,14 +220,14 @@ def effort_cost(torques: TorqueTrajectory) -> float:
     Integral of squared torque (rectangle rule).
 
     Args:
-        torques: Torque trajectory (uses ``q`` slot for tau).
+        torques: Torque trajectory whose frames carry per-DOF ``tau``.
 
     Returns:
         Non-negative finite scalar.
     """
     if torques is None or not torques.frames:
         raise ValueError("Torque trajectory must have at least one frame")
-    tau = _q_matrix(torques)
+    tau = np.asarray([list(f.tau) for f in torques.frames], dtype=float)
     times = np.asarray([f.timestamp for f in torques.frames], dtype=float)
 
     if len(times) == 1:

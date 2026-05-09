@@ -23,20 +23,20 @@ logger = logging.getLogger(__name__)
 class CMCMatchingSolver(BaseMotionMatchingSolver):
     """
     Computed Muscle Control (CMC) motion matching solver.
-    
+
     Uses OpenSim's CMC algorithm to compute muscle activations
     that track a reference joint trajectory.
     """
-    
+
     def __init__(self, cost_weights: CostWeights | None = None):
         """
         Initialize CMC solver.
-        
+
         Args:
             cost_weights: Cost function weights
         """
         super().__init__(cost_weights)
-    
+
     def match(
         self,
         reference: JointTrajectory,
@@ -45,12 +45,12 @@ class CMCMatchingSolver(BaseMotionMatchingSolver):
     ) -> MotionMatchingResult:
         """
         Solve motion matching using Computed Muscle Control.
-        
+
         Args:
             reference: Reference joint trajectory to track
             rig: Scaled skeleton rig
             request: Optional matching request with configuration
-        
+
         Returns:
             MotionMatchingResult with tracked trajectory and muscle activations
         """
@@ -59,13 +59,13 @@ class CMCMatchingSolver(BaseMotionMatchingSolver):
         # 1. Write OpenSim setup files (TRC, MOT, XML)
         # 2. Run CMC tool
         # 3. Parse output muscle activations and states
-        
+
         request_id = request.id if request else f"cmc-{reference.id}"
-        
+
         # Return placeholder result
         return MotionMatchingResult(
             request_id=request_id,
             success=False,
             message="CMC solver not yet implemented - OpenSim integration pending",
-            metadata={"backend": "cmc", "status": "placeholder"}
+            metadata={"backend": "cmc", "status": "placeholder"},
         )

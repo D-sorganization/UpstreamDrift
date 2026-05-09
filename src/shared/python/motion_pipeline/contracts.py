@@ -20,18 +20,17 @@ from __future__ import annotations
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Annotated, Any, Literal, Optional, Union
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from pydantic.functional_validators import AfterValidator
-from typing import Annotated
 
 # =============================================================================
 # Type Aliases
 # =============================================================================
 
-ArrayLike = Union[list[float], np.ndarray]
+ArrayLike = list[float] | np.ndarray
 SchemaName = Literal["BODY_25", "MediaPipe_33", "COCO_17", "OpenPose_25", "custom"]
 Axis = Literal["X", "Y", "Z", "+X", "-X", "+Y", "-Y", "+Z", "-Z"]
 UpAxis = Literal["+Y", "+Z", "+X", "-Y", "-Z", "-X"]
@@ -314,7 +313,7 @@ class MarkerTrajectory(BaseModel):
         if len(self.frames) < 2:
             return self
         reference_markers = set(self.frames[0].marker_names)
-        for i, frame in enumerate(self.frames[1:], 1):
+        for _i, frame in enumerate(self.frames[1:], 1):
             frame_markers = set(frame.marker_names)
             if frame_markers != reference_markers:
                 # Allow for occlusions, but names should be consistent
@@ -360,9 +359,12 @@ class JointLimit(BaseModel):
 
     @model_validator(mode="after")
     def check_limit_order(self) -> JointLimit:
-        if self.lower is not None and self.upper is not None:
-            if self.lower > self.upper:
-                raise ValueError("Lower limit must be <= upper limit")
+        if (
+            self.lower is not None
+            and self.upper is not None
+            and self.lower > self.upper
+        ):
+            raise ValueError("Lower limit must be <= upper limit")
         return self
 
 
@@ -492,9 +494,8 @@ class JointStateFrame(BaseModel):
     @field_validator("q", "qdot", "qddot")
     @classmethod
     def check_finite_values(cls, v: list[float] | None) -> list[float] | None:
-        if v is not None:
-            if not all(np.isfinite(x) for x in v):
-                raise ValueError("All values must be finite")
+        if v is not None and not all(np.isfinite(x) for x in v):
+            raise ValueError("All values must be finite")
         return v
 
     @model_validator(mode="after")
@@ -653,6 +654,142 @@ class MotionMatchingRequest(BaseModel):
         return self
 
 
+class TorqueFrame(BaseModel):
+    """Single frame of generalized joint torques."""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True, frozen=True)
+
+    timestamp: float = Field(..., description="Frame timestamp (seconds)")
+    tau: list[float] = Field(..., description="Generalized joint torques (N*m)")
+
+    @field_validator("timestamp")
+    @classmethod
+    def _timestamp_finite(cls, v: float) -> float:
+        if not np.isfinite(v):
+            raise ValueError("timestamp must be finite")
+        return v
+
+    @field_validator("tau")
+    @classmethod
+    def _tau_finite(cls, v: list[float]) -> list[float]:
+        if not all(np.isfinite(x) for x in v):
+            raise ValueError("tau values must be finite")
+        return v
+
+
+class TorqueTrajectory(BaseModel):
+    """Time series of generalized joint torques.
+
+    Distinct from :class:`JointTrajectory`: torques have different
+    invariants (any sign, no q/qdot/qddot semantics) and align with
+    a rig's joint name list rather than its DOF list.
+    """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True, frozen=True)
+
+    frames: list[TorqueFrame] = Field(..., description="Per-frame torques")
+    rig_joint_names: list[str] = Field(
+        ..., description="Joint names corresponding to tau entries"
+    )
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
+
+    @model_validator(mode="after")
+    def _invariant_consistent(self) -> TorqueTrajectory:
+        if not self.frames:
+            raise ValueError("TorqueTrajectory must have at least one frame")
+        n = len(self.rig_joint_names)
+        for i, f in enumerate(self.frames):
+            if len(f.tau) != n:
+                raise ValueError(
+                    f"frame {i} tau length {len(f.tau)} != rig_joint_names length {n}"
+                )
+        ts = [f.timestamp for f in self.frames]
+        if any(b <= a for a, b in zip(ts, ts[1:], strict=False)):
+            raise ValueError("timestamps must be strictly monotonic")
+        return self
+
+    @property
+    def num_frames(self) -> int:
+        return len(self.frames)
+
+    @property
+    def duration(self) -> float:
+        if len(self.frames) < 2:
+            return 0.0
+        return self.frames[-1].timestamp - self.frames[0].timestamp
+
+
+class MuscleActivationFrame(BaseModel):
+    """Single frame of muscle activations in [0, 1]."""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True, frozen=True)
+
+    timestamp: float = Field(..., description="Frame timestamp (seconds)")
+    activations: list[float] = Field(..., description="Muscle activations [0, 1]")
+
+    @field_validator("timestamp")
+    @classmethod
+    def _timestamp_finite(cls, v: float) -> float:
+        if not np.isfinite(v):
+            raise ValueError("timestamp must be finite")
+        return v
+
+    @field_validator("activations")
+    @classmethod
+    def _activations_in_unit_interval(cls, v: list[float]) -> list[float]:
+        if not all(np.isfinite(a) and 0.0 <= a <= 1.0 for a in v):
+            raise ValueError("activations must lie in [0, 1] and be finite")
+        return v
+
+
+class MuscleActivationTrajectory(BaseModel):
+    """Time series of muscle activations.
+
+    Distinct from :class:`JointTrajectory`: activation values are bounded
+    to [0, 1] and align with muscle names, not DOFs.
+    """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True, frozen=True)
+
+    frames: list[MuscleActivationFrame] = Field(
+        ..., description="Per-frame activations"
+    )
+    muscle_names: list[str] = Field(
+        ..., description="Muscle names corresponding to activation entries"
+    )
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
+
+    @model_validator(mode="after")
+    def _invariant_consistent(self) -> MuscleActivationTrajectory:
+        if not self.frames:
+            raise ValueError("MuscleActivationTrajectory must have at least one frame")
+        n = len(self.muscle_names)
+        for i, f in enumerate(self.frames):
+            if len(f.activations) != n:
+                raise ValueError(
+                    f"frame {i} activation length {len(f.activations)} != "
+                    f"muscle_names length {n}"
+                )
+        ts = [f.timestamp for f in self.frames]
+        if any(b <= a for a, b in zip(ts, ts[1:], strict=False)):
+            raise ValueError("timestamps must be strictly monotonic")
+        return self
+
+    @property
+    def num_frames(self) -> int:
+        return len(self.frames)
+
+    @property
+    def duration(self) -> float:
+        if len(self.frames) < 2:
+            return 0.0
+        return self.frames[-1].timestamp - self.frames[0].timestamp
+
+
 class MotionMatchingResult(BaseModel):
     """Motion matching solver result."""
 
@@ -662,6 +799,14 @@ class MotionMatchingResult(BaseModel):
     success: bool = Field(..., description="Whether matching succeeded")
     matched_trajectory: MotionTrajectory | None = Field(
         default=None, description="Matched joint trajectory"
+    )
+    torques: TorqueTrajectory | None = Field(
+        default=None,
+        description="Generalized joint torques (distinct from JointTrajectory)",
+    )
+    activations: MuscleActivationTrajectory | None = Field(
+        default=None,
+        description="Muscle activations in [0, 1] (distinct from JointTrajectory)",
     )
     error_metrics: dict[str, float] = Field(
         default_factory=dict,
@@ -682,6 +827,28 @@ class MotionMatchingResult(BaseModel):
         if v is not None and not np.isfinite(v):
             raise ValueError("Solve time must be finite")
         return v
+
+    @model_validator(mode="after")
+    def _invariant_has_payload_when_successful(self) -> MotionMatchingResult:
+        """Successful results must carry at least one payload.
+
+        A successful match must produce at least one of: matched
+        trajectory, torques, or muscle activations. Failed results may
+        carry only a message. Either ``torques`` or ``activations`` is
+        sufficient — the two are not interchangeable.
+        """
+        if self.success:
+            has_payload = (
+                self.matched_trajectory is not None
+                or self.torques is not None
+                or self.activations is not None
+            )
+            if not has_payload:
+                raise ValueError(
+                    "Successful MotionMatchingResult must include at least one "
+                    "of: matched_trajectory, torques, activations"
+                )
+        return self
 
 
 # =============================================================================
@@ -740,6 +907,11 @@ __all__ = [
     # Joint state types
     "JointStateFrame",
     "JointTrajectory",
+    # Torque + muscle-activation types
+    "TorqueFrame",
+    "TorqueTrajectory",
+    "MuscleActivationFrame",
+    "MuscleActivationTrajectory",
     # High-level types
     "MotionTrajectory",
     "MotionMatchingRequest",

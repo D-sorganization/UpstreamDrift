@@ -686,15 +686,29 @@ class TestMotionMatchingResult:
 
     def test_successful_result(self):
         """Test successful result creation."""
+        from src.shared.python.motion_pipeline.contracts import (
+            TorqueFrame,
+            TorqueTrajectory,
+        )
+
+        torques = TorqueTrajectory(
+            frames=[
+                TorqueFrame(timestamp=0.0, tau=[0.0]),
+                TorqueFrame(timestamp=0.01, tau=[0.1]),
+            ],
+            rig_joint_names=["j0"],
+        )
         result = MotionMatchingResult(
             request_id="request_001",
             success=True,
+            torques=torques,
             error_metrics={"rmse": 0.05, "max_error": 0.1},
             iterations=10,
             solve_time=0.5,
         )
         assert result.success
         assert result.iterations == 10
+        assert result.torques is torques
 
     def test_failed_result(self):
         """Test failed result creation."""
@@ -707,10 +721,29 @@ class TestMotionMatchingResult:
         assert "not converge" in result.message
 
     def test_negative_solve_time(self):
-        """Test that negative solve time raises error."""
+        """Test that negative solve time raises error.
+
+        Provides torques to satisfy the success-payload invariant so that
+        the solve_time validator is the one that triggers.
+        """
+        from src.shared.python.motion_pipeline.contracts import (
+            TorqueFrame,
+            TorqueTrajectory,
+        )
+
+        torques = TorqueTrajectory(
+            frames=[
+                TorqueFrame(timestamp=0.0, tau=[0.0]),
+                TorqueFrame(timestamp=0.01, tau=[0.1]),
+            ],
+            rig_joint_names=["j0"],
+        )
         with pytest.raises(ValueError, match="greater than or equal to 0"):
             MotionMatchingResult(
-                request_id="request_001", success=True, solve_time=-1.0
+                request_id="request_001",
+                success=True,
+                torques=torques,
+                solve_time=-1.0,
             )
 
 

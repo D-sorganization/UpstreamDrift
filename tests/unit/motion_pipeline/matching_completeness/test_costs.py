@@ -13,6 +13,8 @@ from src.shared.python.motion_pipeline.contracts import (
     MarkerFrame,
     MarkerTrajectory,
     SkeletonRig,
+    TorqueFrame,
+    TorqueTrajectory,
 )
 from src.shared.python.motion_pipeline.matching.base import CostWeights
 from src.shared.python.motion_pipeline.matching.costs import (
@@ -120,16 +122,19 @@ def test_smoothness_cost_positive_for_jerky():
     assert smoothness_cost(traj) > 0.0
 
 
+def _make_torque_traj(taus: list[list[float]], dt: float = 0.01) -> TorqueTrajectory:
+    frames = [TorqueFrame(timestamp=i * dt, tau=tau) for i, tau in enumerate(taus)]
+    return TorqueTrajectory(frames=frames, rig_joint_names=["root", "seg"])
+
+
 def test_effort_cost_zero_for_zero_torque():
-    rig = _make_rig()
-    traj = _make_traj(rig, [[0.0, 0.0], [0.0, 0.0]])
+    traj = _make_torque_traj([[0.0, 0.0], [0.0, 0.0]])
     assert effort_cost(traj) == pytest.approx(0.0)
 
 
 def test_effort_cost_scales_with_torque():
-    rig = _make_rig()
-    small = _make_traj(rig, [[1.0, 0.0], [1.0, 0.0]])
-    big = _make_traj(rig, [[10.0, 0.0], [10.0, 0.0]])
+    small = _make_torque_traj([[1.0, 0.0], [1.0, 0.0]])
+    big = _make_torque_traj([[10.0, 0.0], [10.0, 0.0]])
     assert effort_cost(big) > effort_cost(small)
 
 

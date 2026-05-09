@@ -24,7 +24,11 @@ from src.shared.python.motion_pipeline.contracts import (
     MotionMatchingRequest,
     MotionMatchingResult,
     MotionTrajectory,
+    MuscleActivationFrame,
+    MuscleActivationTrajectory,
     SkeletonRig,
+    TorqueFrame,
+    TorqueTrajectory,
 )
 
 __all__ = [
@@ -44,5 +48,9 @@ __all__ = [
     "MotionMatchingRequest",
     "MotionMatchingResult",
     "MotionTrajectory",
+    "MuscleActivationFrame",
+    "MuscleActivationTrajectory",
     "SkeletonRig",
+    "TorqueFrame",
+    "TorqueTrajectory",
 ]

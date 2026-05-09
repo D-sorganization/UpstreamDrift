@@ -59,7 +59,7 @@ def test_match_returns_finite_torques_for_static_pose():
     assert result.torque_trajectory is not None
     assert result.torque_trajectory.num_frames == traj.num_frames
     for f in result.torque_trajectory.frames:
-        assert all(np.isfinite(v) for v in f.q)
+        assert all(np.isfinite(v) for v in f.tau)
 
 
 def test_match_postconditions():

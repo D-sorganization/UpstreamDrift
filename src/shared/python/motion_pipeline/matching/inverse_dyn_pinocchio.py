@@ -20,6 +20,8 @@ from ..contracts import (
     JointStateFrame,
     JointTrajectory,
     SkeletonRig,
+    TorqueFrame,
+    TorqueTrajectory,
 )
 from .base import (
     BaseMotionMatchingSolver,
@@ -198,7 +200,7 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
                 f"trajectory DOFs={n_dof_traj}"
             )
 
-        torque_frames: list[JointStateFrame] = []
+        torque_frames: list[TorqueFrame] = []
         for i, t in enumerate(times):
             q = q_all[i]
             v = qdot_all[i]
@@ -208,18 +210,23 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
             if not np.all(np.isfinite(tau_arr)):
                 raise RuntimeError(f"RNEA produced non-finite torques at frame {i}")
             torque_frames.append(
-                JointStateFrame(
+                TorqueFrame(
                     timestamp=float(t),
-                    q=tau_arr.tolist(),
-                    frame_index=i,
+                    tau=tau_arr.tolist(),
                 )
             )
 
-        torque_traj = JointTrajectory(
-            id=f"{reference.id}-torques",
-            skeleton=rig,
+        # Build per-DOF joint-name list (one entry per axis) so the torque
+        # trajectory's invariant matches the per-frame tau length.
+        rig_joint_names: list[str] = []
+        for jname, jdef in rig.joints.items():
+            for _ in jdef.axes:
+                rig_joint_names.append(jname)
+
+        torque_traj = TorqueTrajectory(
             frames=torque_frames,
-            metadata={"semantics": "torques"},
+            rig_joint_names=rig_joint_names,
+            metadata={"semantics": "torques", "source_id": f"{reference.id}-torques"},
         )
 
         residual_report = self._compute_residual_report(reference, reference)
