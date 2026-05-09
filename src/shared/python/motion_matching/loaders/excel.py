@@ -144,7 +144,9 @@ def _extract_event_markers(df: pd.DataFrame) -> ExcelEventMarkers:
         if pd.isna(val):
             continue
         try:
-            setattr(ev, label_to_field[label], float(val))
+            # pandas cell value has a wide union type; coercion is
+            # guarded by the surrounding try/except.
+            setattr(ev, label_to_field[label], float(val))  # type: ignore[arg-type]
         except (ValueError, TypeError):
             continue
     return ev

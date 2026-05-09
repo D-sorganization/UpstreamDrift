@@ -319,7 +319,7 @@ def plot_cartesian_delta_summary(report: InitialStateDiffReport) -> Figure:
     for label, s, a in pairs:
         ax.scatter(s[0], s[1], s[2], color="tab:blue", marker="o", s=60)  # type: ignore[misc]
         ax.scatter(a[0], a[1], a[2], color="tab:orange", marker="^", s=60)  # type: ignore[misc]
-        ax.text(s[0], s[1], s[2], f"{label} (spec)", fontsize=8)  # type: ignore[call-arg]
+        ax.text(s[0], s[1], s[2], f"{label} (spec)", fontsize=8)  # type: ignore[arg-type, call-arg]
         delta = a - s
         ax.quiver(
             s[0],

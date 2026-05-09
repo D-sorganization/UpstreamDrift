@@ -24,6 +24,7 @@ import hashlib
 import logging
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timezone
 from functools import lru_cache
 from typing import Any, Final, NamedTuple
 
@@ -137,7 +138,7 @@ class InitCache:
         }
 
     @precondition(
-        lambda self, key: isinstance(key, str) and key,
+        lambda self, key: isinstance(key, str) and bool(key),
         "key must be non-empty string",
     )
     @postcondition(
@@ -168,7 +169,7 @@ class InitCache:
         return entry
 
     @precondition(
-        lambda self, key: isinstance(key, str) and key,
+        lambda self, key: isinstance(key, str) and bool(key),
         "key must be non-empty string",
     )
     def put(
@@ -277,7 +278,7 @@ class ProfiledInitializer:
         self.baseline_time_s: float | None = None
 
     @precondition(
-        lambda self, phase_name, duration_s: (
+        lambda self, phase_name, duration_s: bool(
             isinstance(phase_name, str)
             and phase_name
             and isinstance(duration_s, (int, float))
@@ -300,7 +301,7 @@ class ProfiledInitializer:
             duration_s=duration_s,
             memory_delta_mb=0.0,  # Placeholder
             cache_hit=cache_hit,
-            timestamp=time.time(),
+            timestamp=datetime.now(timezone.utc).isoformat(),
         )
         self.profiles.append(profile)
         logger.debug(
@@ -397,7 +398,7 @@ def _hash_parameters(params: dict[str, Any]) -> str:
         Hex hash string.
     """
     param_str = str(sorted(params.items()))
-    return hashlib.md5(param_str.encode()).hexdigest()
+    return hashlib.md5(param_str.encode(), usedforsecurity=False).hexdigest()
 
 
 def profile_initialization(

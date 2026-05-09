@@ -359,7 +359,7 @@ def _short_commit(commit: str | None) -> str:
         return "0000000"
     s = str(commit).strip().lower()
     if not re.match(r"^[0-9a-f]{7,40}$", s):
-        return hashlib.sha1(s.encode("utf-8")).hexdigest()[:12]
+        return hashlib.sha1(s.encode("utf-8"), usedforsecurity=False).hexdigest()[:12]
     return s
 
 

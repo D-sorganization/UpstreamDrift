@@ -110,9 +110,14 @@ def get_events(c3d_data: C3DMapping) -> list[C3DEvent]:
     if not event_parameters:
         return []
 
-    labels_raw: Iterable[str] = event_parameters.get("LABELS", {}).get("value", [])
+    labels_raw: list[str] = list(
+        event_parameters.get("LABELS", {}).get("value", []) or []
+    )
     times = event_parameters.get("TIMES", {}).get("value")
-    contexts_raw: Iterable[str] = event_parameters.get("CONTEXTS", {}).get("value", [])
+    contexts_raw: list[str] = list(
+        event_parameters.get("CONTEXTS", {}).get("value", []) or []
+    )
+    del contexts_raw  # currently unused; preserved for future C3DEvent.context
 
     if times is None:
         return []
@@ -125,7 +130,7 @@ def get_events(c3d_data: C3DMapping) -> list[C3DEvent]:
     used_param = event_parameters.get("USED")
     if used_param is None:
         # Missing USED: infer from LABELS / TIMES length.
-        labels_len = len(labels_raw) if hasattr(labels_raw, "__len__") else 0
+        labels_len = len(labels_raw)
         times_len = int(np.asarray(times).shape[-1])
         num_events = max(labels_len, times_len)
         if num_events == 0:
@@ -483,8 +488,13 @@ def write_export(
             json.dump(output, f, indent=2)
 
     elif fmt == "npz":
-        arrays = {column: dataframe[column].to_numpy() for column in dataframe}
-        np.savez(path, _metadata=json.dumps(metadata), **arrays)
+        arrays: dict[str, np.ndarray] = {
+            str(column): dataframe[column].to_numpy() for column in dataframe
+        }
+        arrays["_metadata"] = np.asarray(json.dumps(metadata))
+        # numpy savez stubs declare *args as ArrayLike but **kwargs are
+        # not modelled cleanly; the call is correct at runtime.
+        np.savez(path, **arrays)  # type: ignore[arg-type]
 
     else:
         raise ValueError(

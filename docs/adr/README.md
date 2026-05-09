@@ -11,14 +11,15 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 
 ## Index
 
-| ADR                                                | Title                                       | Status   | Date       |
-| -------------------------------------------------- | ------------------------------------------- | -------- | ---------- |
-| [0001](0001-fastapi-local-first-api.md)            | FastAPI for Local-First API Design          | Accepted | 2026-02-18 |
-| [0002](0002-physics-engine-plugin-architecture.md) | Physics Engine Plugin Architecture          | Accepted | 2026-02-18 |
-| [0003](0003-websocket-realtime-simulation.md)      | WebSocket Protocol for Real-Time Simulation | Accepted | 2026-02-18 |
+| ADR                                                | Title                                                           | Status   | Date       |
+| -------------------------------------------------- | --------------------------------------------------------------- | -------- | ---------- |
+| [0001](0001-fastapi-local-first-api.md)            | FastAPI for Local-First API Design                              | Accepted | 2026-02-18 |
+| [0002](0002-physics-engine-plugin-architecture.md) | Physics Engine Plugin Architecture                              | Accepted | 2026-02-18 |
+| [0003](0003-websocket-realtime-simulation.md)      | WebSocket Protocol for Real-Time Simulation                     | Accepted | 2026-02-18 |
 | [0004](0004-launcher-provider-migration.md)        | Launcher Provider Migration Modes and Legacy Deprecation Policy | Accepted | 2026-04-08 |
-| [0005](0005-rust-tools-core-git-dependency.md)     | Pin `tools-core` as a Git Dependency        | Accepted | 2026-04-23 |
-| [0007](0007-motion-pipeline-architecture.md)       | Motion Pipeline Architecture (CIR)          | Proposed | 2026-05-08 |
+| [0005](0005-rust-tools-core-git-dependency.md)     | Pin `tools-core` as a Git Dependency                            | Accepted | 2026-04-23 |
+| [0007](0007-motion-pipeline-architecture.md)       | Motion Pipeline Architecture (CIR)                              | Proposed | 2026-05-08 |
+| [0012](0012-canonical-pose-interchange.md)         | Canonical Pose Interchange                                      | Accepted | 2026-05-09 |
 
 ## ADR Backlog
 
