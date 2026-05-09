@@ -236,6 +236,51 @@ def _detect_impact_via_wrist(
     return int(finite_indices[idx_ok])
 
 
+def _event_raw_index(
+    events: Sequence,
+    raw_time: np.ndarray,
+    event_label: str | None,
+    file_label: str,
+) -> int | None:
+    """Map a C3D ``EVENT`` label to its raw-frame index.
+
+    Returns ``None`` when no label was requested. Raises :class:`ValueError`
+    when a label is requested but the file has no events or the label is
+    absent. Logs at INFO level when no events are present and the heuristic
+    will be used.
+    """
+    if event_label is None:
+        if not events:
+            logger.info(
+                "No EVENT annotations in %s; falling back to wrist-speed "
+                "kinematic-peak heuristic for impact alignment",
+                file_label,
+            )
+        return None
+    if not events:
+        raise ValueError(
+            f"event_label_for_alignment={event_label!r} requested but "
+            f"{file_label} has no EVENT annotations"
+        )
+    for ev in events:
+        if ev.label == event_label:
+            target_t = float(ev.time)
+            idx = int(np.argmin(np.abs(raw_time - target_t)))
+            logger.info(
+                "Using EVENT %r at t=%.4fs (frame %d) for impact alignment in %s",
+                event_label,
+                target_t,
+                idx,
+                file_label,
+            )
+            return idx
+    available = [ev.label for ev in events]
+    raise ValueError(
+        f"event_label_for_alignment={event_label!r} not found in "
+        f"{file_label}; available event labels: {available}"
+    )
+
+
 def _events_from_metadata(
     metadata, sim_time: np.ndarray, time_offset_s: float
 ) -> tuple[BodyEvent, ...]:
@@ -311,6 +356,7 @@ def load_body_target_c3d(
     *,
     marker_set: Sequence[str] | None = None,
     impact_source: ClubTarget | None = None,
+    event_label_for_alignment: str | None = None,
 ) -> BodyTarget:
     """Load a C3D file's anatomical body markers into a validated ``BodyTarget``.
 
@@ -341,6 +387,15 @@ def load_body_target_c3d(
                         ``impact_idx`` will be reused so that the body target
                         shares a clock with the club target. When provided,
                         ``opts`` is ignored for grid construction.
+        event_label_for_alignment:
+                        Optional label of a C3D ``EVENT`` group entry (e.g.
+                        ``"Impact"``) to use as the alignment frame in place
+                        of the wrist-speed kinematic-peak heuristic. When
+                        the label is supplied but absent from the file's
+                        events, ``ValueError`` is raised listing the
+                        available labels. When ``None``, the heuristic is
+                        used and a fallback INFO log is emitted for files
+                        with no EVENT annotations.
 
     Returns:
         Validated :class:`BodyTarget` on the simulation timegrid.
@@ -380,6 +435,10 @@ def load_body_target_c3d(
     z_up = {name: y_up_to_z_up(arr) for name, arr in filled.items()}
 
     # --- Determine impact + grid ------------------------------------------
+    metadata_events = list(getattr(metadata, "events", []) or [])
+    event_raw_idx = _event_raw_index(
+        metadata_events, raw_time, event_label_for_alignment, p.name
+    )
     if impact_source is not None:
         sim_time = np.asarray(impact_source.time, dtype=np.float64).copy()
         # Reuse the club's resampled-grid impact index directly so the two
@@ -393,10 +452,11 @@ def load_body_target_c3d(
             if 0 <= impact_idx_out < sim_time.size
             else float(opts.impact_target_t_s)
         )
-        _wrist_markers_present = any(
-            m in chosen for m in ("RWristTop", "LWristTop")
-        )
-        if _wrist_markers_present:
+        _wrist_markers_present = any(m in chosen for m in ("RWristTop", "LWristTop"))
+        if event_raw_idx is not None:
+            impact_raw = event_raw_idx
+            time_offset = float(raw_time[impact_raw]) - impact_target_t_s
+        elif _wrist_markers_present:
             impact_raw = _detect_impact_via_wrist(raw_time, z_up)
             time_offset = float(raw_time[impact_raw]) - impact_target_t_s
         else:
@@ -404,7 +464,10 @@ def load_body_target_c3d(
             time_offset = 0.0
     else:
         sim_time = _build_sim_grid(opts)
-        impact_raw = _detect_impact_via_wrist(raw_time, z_up)
+        if event_raw_idx is not None:
+            impact_raw = event_raw_idx
+        else:
+            impact_raw = _detect_impact_via_wrist(raw_time, z_up)
         if opts.time_alignment == "impact":
             time_offset = float(raw_time[impact_raw]) - float(opts.impact_target_t_s)
             impact_idx_out = int(np.argmin(np.abs(sim_time - opts.impact_target_t_s)))

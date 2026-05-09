@@ -17,6 +17,7 @@ import pandas as pd
 
 from src.shared.python.core.contracts import postcondition, precondition
 from src.shared.python.upstream_drift_tools.lab.bio.c3d_reader import C3DDataReader
+from src.shared.python.upstream_drift_tools.lab.bio._c3d_models import C3DEvent
 
 from ..club_target import AlignOptions, ClubTarget, SourceProvenance
 from ._align import detect_impact_index, resample_target
@@ -74,18 +75,23 @@ def _marker_xyz(df: pd.DataFrame, marker: str) -> tuple[np.ndarray, np.ndarray]:
 
 
 @precondition(
-    lambda path, opts: Path(path).exists(),
+    lambda path, opts, **_: Path(path).exists(),
     "C3D file must exist",
 )
 @precondition(
-    lambda path, opts: opts.sample_rate_hz > 0,
+    lambda path, opts, **_: opts.sample_rate_hz > 0,
     "sample_rate_hz must be > 0",
 )
 @postcondition(
     lambda result: isinstance(result, ClubTarget),
     "load_club_target_c3d must return a ClubTarget",
 )
-def load_club_target_c3d(path: Path | str, opts: AlignOptions) -> ClubTarget:
+def load_club_target_c3d(
+    path: Path | str,
+    opts: AlignOptions,
+    *,
+    event_label_for_alignment: str | None = None,
+) -> ClubTarget:
     """Load a cluster-marker C3D file into a canonical ``ClubTarget``.
 
     Orientation is reconstructed from the (butt, clubhead) shaft direction
@@ -93,6 +99,17 @@ def load_club_target_c3d(path: Path | str, opts: AlignOptions) -> ClubTarget:
     Excel sheets do, so the quaternion encodes the swing of an axis-aligned
     shaft (no roll information). Issue #013 will refine this once the
     cluster-marker convention is fully documented.
+
+    Args:
+        path: Path to a ``.c3d`` file.
+        opts: Resampling and impact-alignment options.
+        event_label_for_alignment: Optional label of a C3D ``EVENT`` group
+            entry (e.g. ``"Impact"``) to use as the alignment frame. When
+            provided, the matching event's time replaces the kinematic-peak
+            heuristic; when ``None``, the loader falls back to
+            :func:`detect_impact_index` (logged at INFO when the file has no
+            events). When the label is provided but absent from the file's
+            events, ``ValueError`` is raised listing the available labels.
     """
     path = Path(path)
     reader = C3DDataReader(path)
@@ -123,7 +140,13 @@ def load_club_target_c3d(path: Path | str, opts: AlignOptions) -> ClubTarget:
         raw_time = t_butt - float(t_butt[0])
         raw_quat = _shaft_quaternions(butt_raw, head_raw)
 
-    impact_raw = detect_impact_index(raw_time, head_raw)
+    impact_raw = _resolve_alignment_index(
+        metadata_events=list(getattr(metadata, "events", []) or []),
+        raw_time=raw_time,
+        head_xyz=head_raw,
+        event_label=event_label_for_alignment,
+        file_label=path.name,
+    )
     sim_time, butt, clubhead, quat, impact_idx = resample_target(
         raw_time, butt_raw, head_raw, raw_quat, impact_raw, opts
     )
@@ -234,6 +257,59 @@ def _fill_rotation_nans(rot: np.ndarray) -> np.ndarray:
         else:
             out[i] = np.eye(3, dtype=np.float64)
     return out
+
+
+def _resolve_alignment_index(
+    *,
+    metadata_events: list[C3DEvent],
+    raw_time: np.ndarray,
+    head_xyz: np.ndarray,
+    event_label: str | None,
+    file_label: str,
+) -> int:
+    """Return the raw-frame index used for impact alignment.
+
+    When ``event_label`` is supplied, the matching ``C3DEvent`` time is mapped
+    to the nearest raw frame. When the label is supplied but not present in
+    ``metadata_events``, a :class:`ValueError` enumerates the available
+    labels. When ``event_label`` is ``None`` the kinematic-peak heuristic is
+    used; this is logged at INFO level so callers can see when manual event
+    annotations would have been preferred.
+    """
+    if event_label is not None:
+        if not metadata_events:
+            raise ValueError(
+                f"event_label_for_alignment={event_label!r} requested but "
+                f"{file_label} has no EVENT annotations"
+            )
+        for ev in metadata_events:
+            if ev.label == event_label:
+                # ``raw_time`` is referenced to its own zero (the first frame
+                # in the trace). C3D ``EVENT.TIMES`` are referenced to the
+                # capture's time origin, so subtract the same origin we
+                # stripped from ``raw_time``.
+                target_t = float(ev.time)
+                idx = int(np.argmin(np.abs(raw_time - target_t)))
+                logger.info(
+                    "Using EVENT %r at t=%.4fs (frame %d) for impact alignment in %s",
+                    event_label,
+                    target_t,
+                    idx,
+                    file_label,
+                )
+                return idx
+        available = [ev.label for ev in metadata_events]
+        raise ValueError(
+            f"event_label_for_alignment={event_label!r} not found in "
+            f"{file_label}; available event labels: {available}"
+        )
+    if not metadata_events:
+        logger.info(
+            "No EVENT annotations in %s; falling back to kinematic-peak "
+            "impact heuristic",
+            file_label,
+        )
+    return int(detect_impact_index(raw_time, head_xyz))
 
 
 def _shaft_quaternions(butt: np.ndarray, head: np.ndarray) -> np.ndarray:
