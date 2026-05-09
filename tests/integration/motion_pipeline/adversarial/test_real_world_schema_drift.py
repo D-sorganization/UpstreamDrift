@@ -39,7 +39,11 @@ def test_mediapipe_landmarks_key_variant(tmp_path: Path) -> None:
     try:
         load_any(p)
     except Exception as e:
-        assert "mediapipe" in str(e).lower() or "landmark" in str(e).lower() or True
+        msg = str(e).lower()
+        assert "mediapipe" in msg or "landmark" in msg, (
+            f"Unexpected adapter error message (not a clean mediapipe/landmark "
+            f"failure): {type(e).__name__}: {e}"
+        )
 
 
 def test_mediapipe_pose_landmarks_key_variant(tmp_path: Path) -> None:
