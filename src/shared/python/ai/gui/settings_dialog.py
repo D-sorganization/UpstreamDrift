@@ -52,7 +52,7 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 # Settings keys
-SETTINGS_ORG = "GolfModelingSuite"
+SETTINGS_ORG = "UpstreamDrift"
 SETTINGS_APP = "AIAssistant"
 KEY_PROVIDER = "ai/provider"
 KEY_MODEL = "ai/model"
@@ -92,7 +92,7 @@ PROVIDER_INFO: dict[AIProvider, dict[str, str | bool | list[str]]] = {
         "name": "OpenAI (GPT-4o)",
         "description": "Cloud-based GPT-4o. Requires OpenAI API key.",
         "requires_key": True,
-        "key_service": "golf_suite_openai_key",
+        "key_service": "upstream_drift_openai_key",
         "default_model": "gpt-4o",
         "models": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"],
     },
@@ -100,7 +100,7 @@ PROVIDER_INFO: dict[AIProvider, dict[str, str | bool | list[str]]] = {
         "name": "Anthropic (Claude 3.5)",
         "description": "Cloud-based Claude 3.5 Sonnet. Requires Anthropic API key.",
         "requires_key": True,
-        "key_service": "golf_suite_anthropic_key",
+        "key_service": "upstream_drift_anthropic_key",
         "default_model": "claude-3-5-sonnet-20240620",
         "models": [
             "claude-3-5-sonnet-20240620",
@@ -113,7 +113,7 @@ PROVIDER_INFO: dict[AIProvider, dict[str, str | bool | list[str]]] = {
         "name": "Google Gemini (1.5)",
         "description": "Cloud-based Gemini 1.5. Requires Google API key.",
         "requires_key": True,
-        "key_service": "golf_suite_gemini_key",
+        "key_service": "upstream_drift_gemini_key",
         "default_model": "gemini-1.5-pro",
         "models": ["gemini-1.5-pro", "gemini-1.5-flash", "gemini-1.0-pro"],
     },

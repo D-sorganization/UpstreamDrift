@@ -32,7 +32,7 @@ Don't have MyoSuite? The Golf Modeling Suite supports multiple engines:
 
 ### Step 1: Launch MyoSuite GUI
 
-From the main Golf Suite Launcher:
+From the main UpstreamDrift Launcher:
 
 1. Click on the "MyoSim Suite" tile
 2. The GUI will launch with available MyoSuite environments

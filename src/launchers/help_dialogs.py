@@ -34,7 +34,7 @@ class HelpDialog(QDialog):
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self.setWindowTitle("Golf Suite - Help")
+        self.setWindowTitle("UpstreamDrift - Help")
         self.resize(800, 600)
         layout = QVBoxLayout(self)
         self.text_area = QTextEdit()

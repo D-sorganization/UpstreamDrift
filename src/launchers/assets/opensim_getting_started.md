@@ -34,7 +34,7 @@ Don't have OpenSim? The Golf Modeling Suite supports multiple engines:
 
 ### Step 1: Launch OpenSim GUI
 
-From the main Golf Suite Launcher:
+From the main UpstreamDrift Launcher:
 
 1. Click on the "OpenSim Golf" tile
 2. The GUI will launch in **Getting Started** mode

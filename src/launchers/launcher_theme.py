@@ -221,7 +221,7 @@ class LauncherThemeMixin:
         group = QActionGroup(self)
         group.setExclusive(True)
 
-        settings = QSettings("UpstreamDrift", "GolfModelingSuite")
+        settings = QSettings("UpstreamDrift", "Launcher")
         current_plot = settings.value("plot_theme", "follow_ui")
 
         # "Follow UI Theme" option
@@ -260,7 +260,7 @@ class LauncherThemeMixin:
             raise ValueError("theme_name must be provided")
         from PyQt6.QtCore import QSettings
 
-        settings = QSettings("UpstreamDrift", "GolfModelingSuite")
+        settings = QSettings("UpstreamDrift", "Launcher")
         settings.setValue("plot_theme", theme_name)
         logger.info("Plot theme set to: %s", theme_name)
 

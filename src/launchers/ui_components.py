@@ -4,7 +4,7 @@ This module re-exports all public symbols from the decomposed sub-modules
 for backward compatibility.  New code should import directly from:
 
 - ``src.launchers.startup``        – ASSETS_DIR, REPOS_ROOT, StartupResults,
-                                     GolfSplashScreen, AsyncStartupWorker,
+                                     SplashScreen, AsyncStartupWorker,
                                      _get_theme_colors
 - ``src.launchers.model_card``     – MODEL_IMAGES, DraggableModelCard
 - ``src.launchers.docker_dialog``  – DockerCheckThread, EnvironmentDialog
@@ -42,7 +42,7 @@ from src.launchers.startup import (
     ASSETS_DIR,
     REPOS_ROOT,
     AsyncStartupWorker,
-    GolfSplashScreen,
+    SplashScreen,
     StartupResults,
     _get_theme_colors,
 )
@@ -53,7 +53,7 @@ __all__ = [
     "MODEL_IMAGES",
     "_get_theme_colors",
     "StartupResults",
-    "GolfSplashScreen",
+    "SplashScreen",
     "AsyncStartupWorker",
     "DraggableModelCard",
     "DockerCheckThread",

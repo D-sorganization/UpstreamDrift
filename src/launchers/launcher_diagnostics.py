@@ -3,7 +3,7 @@
 # It requires domain-aware structural extraction to isolate its internal classes appropriately.
 
 """
-Diagnostic utilities for Golf Modeling Suite GUI Launcher.
+Diagnostic utilities for UpstreamDrift GUI Launcher.
 
 This module provides comprehensive diagnostic tools for troubleshooting
 launcher issues including:
@@ -60,7 +60,7 @@ class DiagnosticResult:
 
 
 class LauncherDiagnostics:
-    """Diagnostic utilities for the Golf Modeling Suite Launcher."""
+    """Diagnostic utilities for the UpstreamDrift Launcher."""
 
     # Expected tile model IDs
     EXPECTED_TILE_IDS = [
@@ -762,7 +762,7 @@ def reset_layout_config() -> bool:
 def run_cli_diagnostics() -> None:
     """Run diagnostics and print results to console."""
     logger.info("=" * 60)
-    logger.info("Golf Modeling Suite - Launcher Diagnostics")
+    logger.info("UpstreamDrift - Launcher Diagnostics")
     logger.info("=" * 60)
     logger.debug("")
 

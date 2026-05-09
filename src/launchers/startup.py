@@ -105,7 +105,7 @@ class StartupResults:
         return results
 
 
-class GolfSplashScreen(QSplashScreen):
+class SplashScreen(QSplashScreen):
     """Custom splash screen for UpstreamDrift."""
 
     SPLASH_WIDTH = 520
@@ -237,10 +237,16 @@ class GolfSplashScreen(QSplashScreen):
         )
         painter.setFont(version_font)
         painter.setPen(QColor(text_quaternary))
+        try:
+            from src.launchers.about_dialog import _resolve_app_version
+
+            version_str = f"v{_resolve_app_version()}"
+        except ImportError:
+            version_str = "v1.0.0-beta"
         painter.drawText(
             self.rect().adjusted(20, 0, -16, -12),
             Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight,
-            "v1.0.0-beta",
+            version_str,
         )
         painter.drawText(
             self.rect().adjusted(16, 0, -20, -12),

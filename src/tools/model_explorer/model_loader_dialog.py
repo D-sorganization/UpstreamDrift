@@ -1032,7 +1032,7 @@ class ModelLoaderDialog(QDialog):
             ):
                 from PyQt6.QtCore import QSettings
 
-                settings = QSettings("GolfModelingSuite", "URDFGenerator")
+                settings = QSettings("UpstreamDrift", "URDFGenerator")
 
                 settings.setValue("default_human_model", model_key)
 

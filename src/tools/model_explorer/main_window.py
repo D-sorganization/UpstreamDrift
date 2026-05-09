@@ -73,7 +73,7 @@ class URDFGeneratorWindow(QMainWindow):
 
             from .model_library import ModelLibrary
 
-            settings = QSettings("GolfModelingSuite", "URDFGenerator")
+            settings = QSettings("UpstreamDrift", "URDFGenerator")
             default_model = settings.value("default_human_model")
 
             if not default_model:
@@ -97,7 +97,7 @@ class URDFGeneratorWindow(QMainWindow):
 
     def _setup_ui(self) -> None:
         """Set up the user interface."""
-        self.setWindowTitle("Model Explorer - Golf Modeling Suite")
+        self.setWindowTitle("Model Explorer - UpstreamDrift")
         self.setMinimumSize(1200, 800)
 
         # Enable advanced docking features
@@ -633,7 +633,7 @@ class URDFGeneratorWindow(QMainWindow):
             self,
             "About URDF Generator",
             "Interactive URDF Generator v2.0\n"
-            "Part of the Golf Modeling Suite\n\n"
+            "Part of UpstreamDrift\n\n"
             "Create and edit URDF files with support for\n"
             "parallel kinematic configurations.\n\n"
             "New features in v2.0:\n"
