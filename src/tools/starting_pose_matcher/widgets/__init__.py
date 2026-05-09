@@ -7,6 +7,11 @@ full matcher window.
 
 from __future__ import annotations
 
+from .calibration_dialog import (
+    CalibrationDialog,
+    CalibrationResult,
+    build_subject_record,
+)
 from .joint_slider_panel import (
     DEFAULT_JOINT_COORDS,
     PoseState,
@@ -14,7 +19,10 @@ from .joint_slider_panel import (
 )
 
 __all__ = [
+    "CalibrationDialog",
+    "CalibrationResult",
     "DEFAULT_JOINT_COORDS",
     "JointSliderPanel",
     "PoseState",
+    "build_subject_record",
 ]

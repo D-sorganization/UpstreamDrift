@@ -57,6 +57,7 @@ from PyQt6.QtWidgets import (
     QApplication,
     QCheckBox,
     QComboBox,
+    QDialog,
     QDoubleSpinBox,
     QFileDialog,
     QFrame,
@@ -1489,6 +1490,22 @@ class StartingPoseMatcher(QMainWindow):
         ses_row.addWidget(self.btn_load_session)
         v.addLayout(ses_row)
 
+        # Subject-anthropometrics calibration (issue #4820).
+        self.btn_calibrate_subject = QPushButton("Calibrate subject…")
+        self.btn_calibrate_subject.setToolTip(
+            "Build a SubjectAnthropometrics record from height/mass/age/sex "
+            "and persist it to ~/.golf_modeling_suite/subjects/<id>.json."
+        )
+        self.btn_calibrate_subject.setStatusTip(
+            "Open the subject-anthropometrics calibration dialog."
+        )
+        self.btn_calibrate_subject.clicked.connect(self._on_calibrate_subject_clicked)
+        v.addWidget(self.btn_calibrate_subject)
+        self.lbl_subject = QLabel("Subject: (not calibrated)")
+        self.lbl_subject.setObjectName("status")
+        self.lbl_subject.setWordWrap(True)
+        v.addWidget(self.lbl_subject)
+
         self.lbl_residual = QLabel("Residuals: (no data)")
         self.lbl_residual.setObjectName("residual")
         self.lbl_residual.setWordWrap(True)
@@ -2162,6 +2179,18 @@ class StartingPoseMatcher(QMainWindow):
         return "Events:  " + "  ".join(parts)
 
     # ---------- save ------------------------------------------------------ #
+
+    def _on_calibrate_subject_clicked(self) -> None:
+        """Open the subject-anthropometrics calibration dialog (issue #4820)."""
+        from .widgets.calibration_dialog import CalibrationDialog
+
+        dlg = CalibrationDialog(self)
+        if dlg.exec() == QDialog.DialogCode.Accepted:
+            res = dlg.result_record
+            if res is not None:
+                self.lbl_subject.setText(
+                    f"Subject: {res.record.subject_id} → {res.saved_path}"
+                )
 
     def _on_save_clicked(self) -> None:
         path, _ = QFileDialog.getSaveFileName(
