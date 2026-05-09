@@ -96,7 +96,7 @@ assert isinstance(result.urdf_string, str | type(None))
 2. **No fixtures for non-trivial models.** All current tests use
    inline MDL strings. Real Simscape exports are larger and exercise
    block-ordering and graph-traversal edge cases.
-4. **MATLAB expression evaluation** is silently elided. A model that uses
+3. **MATLAB expression evaluation** is silently elided. A model that uses
    `2*pi/3` as a joint limit will produce a URDF with the literal string
    instead of a number. Should at minimum log a warning per occurrence.
 
@@ -125,5 +125,9 @@ production Simscape input.
 - [x] Gaps identified and filed for follow-up
 - [x] Production-readiness verdict recorded
 
-This audit is complete. The MuJoCo round-trip integration test, `.slx`
-support, and non-trivial fixtures are tracked as follow-ups.
+This audit is complete. The MuJoCo round-trip integration test and
+non-trivial fixtures are tracked as follow-ups.
+
+Note: `.slx` support is already implemented via `MDLParser.parse` which
+dispatches `.slx` files to `_parse_slx` (see
+`src/shared/python/model_generation/converters/simscape/mdl_parser.py:291-297`).
