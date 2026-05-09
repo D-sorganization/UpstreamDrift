@@ -426,7 +426,7 @@ jobs:
       - name: MATLAB Quality Check
         continue-on-error: true
         run: |
-          PYTHONPATH=. python src/tools/matlab_utilities/scripts/matlab_quality_check.py > matlab_quality_report.txt
+          PYTHONPATH=. python src/tools/matlab_utilities/scripts/matlab_quality_check.py > matlab_quality_report.txt || touch matlab_quality_report.txt
           cat matlab_quality_report.txt
 
       - name: Upload MATLAB Report

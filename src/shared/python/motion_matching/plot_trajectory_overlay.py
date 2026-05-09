@@ -96,10 +96,10 @@ def plot_trajectory_overlay(
         fig.suptitle(title)
     fig.tight_layout()
 
-    rmse_butt = float(np.sqrt(np.mean(np.sum((target.butt - sim.butt) ** 2, axis=1))))
-    rmse_ch = float(
-        np.sqrt(np.mean(np.sum((target.clubhead - sim.clubhead) ** 2, axis=1)))
-    )
+    diff_butt = target.butt - sim.butt
+    rmse_butt = float(np.sqrt(np.vdot(diff_butt, diff_butt) / diff_butt.shape[0]))
+    diff_ch = target.clubhead - sim.clubhead
+    rmse_ch = float(np.sqrt(np.vdot(diff_ch, diff_ch) / diff_ch.shape[0]))
     logger.debug(
         "trajectory_overlay: butt RMSE %.4g m, clubhead RMSE %.4g m", rmse_butt, rmse_ch
     )

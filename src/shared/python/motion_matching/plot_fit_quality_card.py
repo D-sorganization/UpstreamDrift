@@ -60,10 +60,10 @@ def fit_quality_summary(
     if sim.club_quat.shape != (n, 4):
         raise ValueError("sim.club_quat must have shape (N, 4) matching target.time")
 
-    rmse_butt = float(np.sqrt(np.mean(np.sum((target.butt - sim.butt) ** 2, axis=1))))
-    rmse_ch = float(
-        np.sqrt(np.mean(np.sum((target.clubhead - sim.clubhead) ** 2, axis=1)))
-    )
+    diff_butt = target.butt - sim.butt
+    rmse_butt = float(np.sqrt(np.vdot(diff_butt, diff_butt) / diff_butt.shape[0]))
+    diff_ch = target.clubhead - sim.clubhead
+    rmse_ch = float(np.sqrt(np.vdot(diff_ch, diff_ch) / diff_ch.shape[0]))
     angles = quaternion_geodesic_angles(target.club_quat, sim.club_quat)
     rmse_ang_deg = float(np.degrees(np.sqrt(np.mean(angles**2))))
 

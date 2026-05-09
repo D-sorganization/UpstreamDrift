@@ -552,13 +552,13 @@ def _summary_text(result: FitResult, target: Any) -> str:
     sn = np.linalg.norm(sim_quat, axis=1, keepdims=True)
     sim_quat = sim_quat / np.maximum(sn, 1e-12)
 
-    rmse_butt = float(
-        np.sqrt(np.mean(np.sum((np.asarray(result.grip) - meas_butt) ** 2, axis=1)))
-        * 1000.0
+    diff_butt = np.asarray(result.grip) - meas_butt
+    rmse_butt = (
+        float(np.sqrt(np.vdot(diff_butt, diff_butt) / diff_butt.shape[0])) * 1000.0
     )
-    rmse_head = float(
-        np.sqrt(np.mean(np.sum((np.asarray(result.clubhead) - meas_head) ** 2, axis=1)))
-        * 1000.0
+    diff_head = np.asarray(result.clubhead) - meas_head
+    rmse_head = (
+        float(np.sqrt(np.vdot(diff_head, diff_head) / diff_head.shape[0])) * 1000.0
     )
     ori_err = float(np.mean(_quat_geodesic_deg(sim_quat, meas_quat)))
 
