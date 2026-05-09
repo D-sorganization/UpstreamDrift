@@ -108,10 +108,17 @@ def load_golden_fixture(fixture_name: str, fmt: str) -> dict[str, Any]:
     
     Returns:
         Dictionary containing the golden data
+    
+    Raises:
+        FileNotFoundError: If the fixture file does not exist
     """
     fixture_path = DATA_DIR / f"{fixture_name}.{fmt}"
     if not fixture_path.exists():
-        pytest.skip(f"Golden fixture not present: {fixture_path}")
+        raise FileNotFoundError(
+            f"Required golden fixture not present: {fixture_path}. "
+            "These fixtures are required for regression testing. "
+            "See tests/data/motion_pipeline/golden/ for the fixture directory."
+        )
     
     if fmt == "json":
         return json.loads(fixture_path.read_text(encoding="utf-8"))
