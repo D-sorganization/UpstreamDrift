@@ -49,10 +49,12 @@ from .middleware.upload_limits import validate_upload_size
 from .rate_limit import limiter
 from .route_registry import register_routes
 from .services.analysis_service import AnalysisService
+from .services.chat_service import ChatService
 from .services.simulation_service import SimulationService
 from .task_manager import TaskManager
 from .utils.tracing import RequestTracer
 from .versioning import get_app_version
+from .routes import chat_ws, simulation_ws
 
 setup_logging()
 logger = get_logger(__name__)
@@ -141,6 +143,9 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
         # Initialize video pipeline with default config
         video_pipeline = _init_video_pipeline()
         fastapi_app.state.video_pipeline = video_pipeline
+
+        # Initialize chat service
+        fastapi_app.state.chat_service = ChatService()
 
         # All routes now use FastAPI Depends() for dependency injection.
         # No legacy configure() calls needed.
@@ -270,6 +275,12 @@ logger.info("Registered %d route modules under /api", _legacy_api_count)
 # Register all routes under /api/v1/ prefix (versioned API)
 _versioned_count = register_routes(app, prefix=API_PREFIX)
 logger.info("Registered %d route modules under %s", _versioned_count, API_PREFIX)
+
+# Register explicitly excluded WebSocket routes
+app.include_router(chat_ws.router, prefix=API_PREFIX)
+app.include_router(simulation_ws.router, prefix=API_PREFIX)
+app.include_router(chat_ws.router, prefix="")
+app.include_router(simulation_ws.router, prefix="")
 
 
 if __name__ == "__main__":

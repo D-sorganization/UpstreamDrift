@@ -40,6 +40,7 @@ class FakeUploadFile:
         self.content_type = content_type
         self._chunks = list(chunks)
         self.read_sizes: list[int] = []
+        self.size = None
 
     async def read(self, size: int = -1) -> bytes:
         self.read_sizes.append(size)

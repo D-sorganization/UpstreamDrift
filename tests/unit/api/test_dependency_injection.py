@@ -137,8 +137,11 @@ class TestDependencyOverride:
     @pytest.fixture
     def mock_task_manager(self) -> MagicMock:
         """Create a mock task manager."""
-        mgr = MagicMock(spec=["__contains__", "__getitem__", "get", "keys"])
+        from unittest.mock import AsyncMock
+
+        mgr = MagicMock(spec=["__contains__", "__getitem__", "get", "keys", "exists"])
         mgr.__contains__ = MagicMock(return_value=False)
+        mgr.exists = AsyncMock(return_value=False)
         return mgr
 
     @pytest.fixture
@@ -200,7 +203,7 @@ class TestDependencyOverride:
 
         # 404 because the mock task manager says the task doesn't exist
         assert response.status_code == 404
-        mock_task_manager.__contains__.assert_called()
+        mock_task_manager.exists.assert_called()
 
 
 class TestDependencyProviders:
