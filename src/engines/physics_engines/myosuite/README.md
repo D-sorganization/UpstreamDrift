@@ -243,6 +243,28 @@ MyoSuite models **require MuJoCo** and are not compatible with Drake or Pinocchi
 - Use MuJoCo for muscle-level biomechanics
 - Use Drake/Pinocchio for rigid-body dynamics only
 
+### Why no fit_swing?
+
+MyoSuite does **not** implement the `fit_swing` motion-matching interface. This is a deliberate design decision based on the fundamental differences between muscle-driven and joint-space control:
+
+**Technical Reasons:**
+
+1. **Control Paradigm**: MyoSuite uses muscle activations as inputs, not joint positions/velocities. The fit_swing interface assumes direct joint-space control.
+
+2. **Optimization Problem**: Motion matching in joint space optimizes joint trajectories directly. In MyoSuite, the optimization must solve for muscle activations that produce desired motions—a fundamentally different and more complex problem.
+
+3. **Physiological Constraints**: Muscle force generation depends on force-length-velocity relationships, activation dynamics, and recruitment patterns that don't map cleanly to joint-space tracking objectives.
+
+**Recommended Workflow:**
+
+For biomechanical analysis requiring motion matching:
+
+1. Use **MuJoCo's fit_swing** to optimize joint trajectories from motion capture data
+2. Apply the resulting motion to **MyoSuite** for muscle-level analysis
+3. Use **induced acceleration analysis** to understand individual muscle contributions to the motion
+
+This separation of concerns allows each engine to excel at its intended purpose: MuJoCo for trajectory optimization, MyoSuite for muscle dynamics.
+
 ### Model Complexity
 
 Full body model (290 muscles) requires:
