@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING
 from PyQt6.QtCore import QUrl
 from PyQt6.QtGui import QDesktopServices, QKeySequence, QShortcut
 from PyQt6.QtWidgets import (
-    QMessageBox,
+    QMessageBox, QDialog
 )
 
 from src.launchers.launcher_constants import (
@@ -446,3 +446,75 @@ class LauncherDialogsMixin:
         else:
             self.lbl_execution_mode.setText("Runtime: Native Windows")
             self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_WARNING)
+
+
+class ThemedModalDialog(QDialog):
+    """Custom themed frameless modal dialog."""
+
+    def __init__(self, parent=None, title="Dialog", message=""):
+        super().__init__(parent)
+        from PyQt6.QtCore import Qt
+        from PyQt6.QtGui import QColor
+        from PyQt6.QtWidgets import (
+            QVBoxLayout,
+            QLabel,
+            QHBoxLayout,
+            QPushButton,
+            QGraphicsDropShadowEffect,
+            QFrame,
+        )
+
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Dialog)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+        self.setProperty("class", "themed-modal")
+        self.style().polish(self)
+
+        layout = QVBoxLayout(self)
+
+        self.frame = QFrame(self)
+        self.frame.setStyleSheet(
+            "QFrame { background-color: #24272e; border: 1px solid #3a3f4a; border-radius: 8px; }"
+        )
+
+        shadow = QGraphicsDropShadowEffect()
+        shadow.setBlurRadius(20)
+        shadow.setColor(QColor(0, 0, 0, 150))
+        shadow.setOffset(0, 4)
+        self.frame.setGraphicsEffect(shadow)
+
+        frame_layout = QVBoxLayout(self.frame)
+        frame_layout.setContentsMargins(20, 20, 20, 20)
+        frame_layout.setSpacing(15)
+
+        lbl_title = QLabel(title)
+        lbl_title.setStyleSheet(
+            "color: white; font-weight: bold; font-size: 16px; border: none; background: transparent;"
+        )
+        frame_layout.addWidget(lbl_title)
+
+        lbl_msg = QLabel(message)
+        lbl_msg.setStyleSheet(
+            "color: #d4d4d4; font-size: 13px; border: none; background: transparent;"
+        )
+        lbl_msg.setWordWrap(True)
+        frame_layout.addWidget(lbl_msg)
+
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+
+        self.btn_yes = QPushButton("Yes")
+        self.btn_yes.setProperty("class", "primary")
+        self.btn_yes.style().polish(self.btn_yes)
+        self.btn_yes.clicked.connect(self.accept)
+
+        self.btn_no = QPushButton("No")
+        self.btn_no.setProperty("class", "secondary")
+        self.btn_no.style().polish(self.btn_no)
+        self.btn_no.clicked.connect(self.reject)
+
+        btn_layout.addWidget(self.btn_no)
+        btn_layout.addWidget(self.btn_yes)
+
+        frame_layout.addLayout(btn_layout)
+        layout.addWidget(self.frame)

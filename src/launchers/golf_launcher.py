@@ -110,7 +110,9 @@ class GolfLauncher(
     simulation launching, and dialog/settings management.
     """
 
-    def __init__(self, startup_results: StartupResults | None = None) -> None:
+    def __init__(
+        self, startup_results: StartupResults | None = None, loading: bool = False
+    ) -> None:
         """Initialize the main window.
 
         Args:
@@ -118,7 +120,11 @@ class GolfLauncher(
                             If provided, skips redundant loading of registry and engines.
         """
         super().__init__()
+        from PyQt6.QtCore import Qt
+        self.loading = loading
         self.setWindowTitle("UpstreamDrift")
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         # Size to 80% of screen, capped at 1400x900
         screen = QApplication.primaryScreen()
         if screen:
@@ -139,14 +145,20 @@ class GolfLauncher(
         self._init_managers()
         self._init_registry(startup_results)
         self._init_engine_manager(startup_results)
-        self._build_available_models()
+        if not self.loading:
+            self._build_available_models()
+
         self._init_layout_manager()
-        self._initialize_model_order()
+
+        if not self.loading:
+            self._initialize_model_order()
 
         self.init_ui()
         self._apply_theme_system()
 
-        if startup_results:
+        if self.loading:
+            pass  # Wait for update_startup_results
+        elif startup_results:
             self._apply_docker_status(startup_results.docker_available)
         else:
             self.check_docker()
@@ -375,7 +387,37 @@ class GolfLauncher(
 
     def _rebuild_grid(self) -> None:
         """Rebuild the grid layout based on current model order."""
+        if getattr(self, "loading", False):
+            while self.grid_layout.count():
+                item = self.grid_layout.takeAt(0)
+                if item.widget():
+                    item.widget().deleteLater()
+
+            try:
+                from src.launchers.model_card import SkeletonCard
+            except ImportError:
+                SkeletonCard = None
+
+            if SkeletonCard:
+                for i in range(8):
+                    self.grid_layout.addWidget(
+                        SkeletonCard(self), i // GRID_COLUMNS, i % GRID_COLUMNS
+                    )
+            return
+
         self.layout_manager.rebuild_grid(self.grid_layout)
+
+    def update_startup_results(self, results: StartupResults) -> None:
+        """Transition from loading skeleton to full application."""
+        self.loading = False
+        self._startup_time_ms = results.startup_time_ms
+        self._init_registry(results)
+        self._init_engine_manager(results)
+        self._build_available_models()
+        self.layout_manager.available_models = self.available_models
+        self._initialize_model_order()
+        self._apply_docker_status(results.docker_available)
+        self._load_layout()
 
     def create_model_card(self, model: Any) -> None:
         """Creates a clickable card widget (placeholder)."""
@@ -710,17 +752,26 @@ class GolfLauncher(
         if running_count > 0:
             word_is = "is" if running_count == 1 else "are"
             word_es = "es" if running_count > 1 else ""
-            reply = QMessageBox.question(
+
+            from src.launchers.launcher_dialogs import ThemedModalDialog
+            from PyQt6.QtWidgets import QWidget, QDialog
+
+            overlay = QWidget(self)
+            overlay.setStyleSheet("background-color: rgba(0, 0, 0, 150);")
+            overlay.setGeometry(self.rect())
+            overlay.show()
+
+            dialog = ThemedModalDialog(
                 self,
                 "Confirm Exit",
-                f"There {word_is} {running_count} "
-                f"running process{word_es}.\n\n"
-                "Closing will terminate all running simulations.\n"
-                "Are you sure you want to exit?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                QMessageBox.StandardButton.No,
+                f"There {word_is} {running_count} running process{word_es}.\n\nClosing will terminate all running simulations.\nAre you sure you want to exit?",
             )
-            if reply == QMessageBox.StandardButton.No:
+
+            reply = dialog.exec()
+            overlay.hide()
+            overlay.deleteLater()
+
+            if reply == QDialog.DialogCode.Rejected:
                 if event:
                     event.ignore()
                 return
@@ -780,6 +831,14 @@ def main() -> None:
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
 
+    qss_path = ASSETS_DIR / "theme" / "dark_modern.qss"
+    if qss_path.exists():
+        try:
+            with open(qss_path) as f:
+                app.setStyleSheet(f.read())
+        except Exception as e:
+            logger.warning(f"Could not load QSS: {e}")
+
     try:
         from shared.python.plot_theme import apply_plot_theme
 
@@ -787,37 +846,31 @@ def main() -> None:
     except ImportError:
         logger.debug("Plot theme module not available")
 
-    splash = GolfSplashScreen()
-    splash.show()
-
     worker = AsyncStartupWorker(REPOS_ROOT)
 
-    main_window = None
+    main_window = GolfLauncher(loading=True)
+    main_window.show()
 
     def on_startup_finished(results: StartupResults) -> None:
         """Create and display the main window after startup completes."""
         nonlocal main_window
         try:
-            main_window = GolfLauncher(results)
-            main_window.show()
-            splash.finish(main_window)
+            main_window.update_startup_results(results)
         except Exception as e:  # noqa: BLE001
             import traceback
 
             traceback.print_exc()
-            logger.error(f"Failed to initialize GolfLauncher: {e}")
+            logger.error(f"Failed to update GolfLauncher: {e}")
             QApplication.quit()
         worker.wait(1000)
 
     def on_startup_progress(msg: str, percent: int) -> None:
-        """Forward startup progress to the splash screen."""
-        splash.show_message(msg, percent)
+        """Forward startup progress."""
+        logger.info(f"Startup progress: {percent}% - {msg}")
 
     def on_startup_error(error_msg: str) -> None:
         """Handle startup failure."""
         logger.error(f"Startup failed: {error_msg}")
-        splash.hide()
-        from PyQt6.QtWidgets import QMessageBox
 
         QMessageBox.critical(
             None, "Startup Error", f"Failed to initialize UpstreamDrift:\n\n{error_msg}"

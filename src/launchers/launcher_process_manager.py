@@ -76,9 +76,9 @@ if sys.platform == "win32":
             _job,
             win32job.JobObjectExtendedLimitInformation,
         )
-        _info["BasicLimitInformation"]["LimitFlags"] = (
-            win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
-        )
+        _info["BasicLimitInformation"][
+            "LimitFlags"
+        ] = win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
         win32job.SetInformationJobObject(
             _job,
             win32job.JobObjectExtendedLimitInformation,
@@ -95,6 +95,7 @@ if sys.platform == "win32":
                 win32job.AssignProcessToJobObject(_job, handle)
             except (OSError, RuntimeError, TypeError) as exc:
                 logger.debug("Failed to assign process to job object: %s", exc)
+
     except ImportError:
         logger.debug("win32job not available, orphaned processes may leak on crash")
 else:
@@ -106,6 +107,7 @@ else:
 
         def _preexec_fn() -> None:
             libc.prctl(1, signal.SIGTERM)
+
     except (AttributeError, OSError):
         _preexec_fn = None
 

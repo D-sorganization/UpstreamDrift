@@ -82,9 +82,8 @@ class EnvironmentDialog(QDialog):
 
         self.console = QTextEdit()
         self.console.setReadOnly(True)
-        self.console.setStyleSheet(
-            "background-color: #1e1e1e; color: #00ff00; font-family: Consolas;"
-        )
+        self.console.setProperty("class", "console-dark")
+        self.console.style().polish(self.console)
         build_layout.addWidget(self.console)
         tabs.addTab(tab_build, "Build Docker")
 

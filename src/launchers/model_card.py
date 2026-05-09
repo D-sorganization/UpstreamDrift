@@ -98,6 +98,33 @@ MODEL_IMAGES = {
 }
 
 
+class SkeletonCard(QFrame):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName("SkeletonCard")
+        self.setMinimumSize(180, 240)
+        self.setStyleSheet("""
+            #SkeletonCard {
+                background-color: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 16px;
+            }
+        """)
+
+        # Simple pulsing animation using opacity
+        self.effect = QGraphicsDropShadowEffect(self)
+        self.effect.setBlurRadius(20)
+        self.effect.setColor(QColor(0, 0, 0, 80))
+        self.setGraphicsEffect(self.effect)
+
+        self._anim = QPropertyAnimation(self, b"windowOpacity")
+        self._anim.setDuration(1000)
+        self._anim.setStartValue(0.5)
+        self._anim.setEndValue(1.0)
+        self._anim.setLoopCount(-1)
+        self._anim.start()
+
+
 class DraggableModelCard(QFrame):
     """Draggable model card widget with reordering support."""
 
@@ -315,12 +342,13 @@ class DraggableModelCard(QFrame):
         """
         if layout is None:
             raise ValueError("layout must be provided")
-        status_text, status_color, text_color = self._get_status_info()
+        status_text, status_class = self._get_status_info()
         lbl_status = QLabel(status_text)
         lbl_status.setObjectName("StatusChip")
         chip_pt = max(8, scaled_font_pt(self.tile_scale, base_pt=8))
         lbl_status.setFont(get_qfont(size=chip_pt, weight=Weights.BOLD))
-        lbl_status.setStyleSheet(Styles.status_chip(status_color, text_color))
+        lbl_status.setProperty("status_chip", status_class)
+        lbl_status.style().polish(lbl_status)
         lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lbl_status.setMinimumWidth(80)
 
@@ -490,8 +518,7 @@ class DraggableModelCard(QFrame):
             )
         self._apply_card_padding()
 
-    def _get_status_info(self) -> tuple[str, str, str]:
-        c = _get_theme_colors()
+    def _get_status_info(self) -> tuple[str, str]:
         t = getattr(self.model, "type", "").lower()
         if t in [
             "custom_humanoid",
@@ -500,19 +527,19 @@ class DraggableModelCard(QFrame):
             "pinocchio",
             "openpose",
         ]:
-            return "GUI Ready", c.success, "#000000"
+            return "GUI Ready", "success"
 
         path_str = str(getattr(self.model, "path", ""))
         if t == "mjcf" or path_str.endswith(".xml"):
-            return "Viewer", c.chart_cyan, "#000000"
+            return "Viewer", "info"
         if t in ["opensim", "myosim"]:
-            return "Engine Ready", c.success, "#000000"
+            return "Engine Ready", "success"
         if t in ["matlab", "matlab_app"]:
-            return "External", c.chart_purple, "#ffffff"
+            return "External", "external"
         if t in ["urdf_generator", "c3d_viewer"]:
-            return "Utility", c.text_tertiary, "#ffffff"
+            return "Utility", "utility"
 
-        return "Unknown", c.text_tertiary, "#ffffff"
+        return "Unknown", "unknown"
 
     def refresh_theme(self) -> None:
         """Refresh inline styles to match the current theme."""
@@ -522,10 +549,11 @@ class DraggableModelCard(QFrame):
         if desc:
             desc.setStyleSheet(f"color: {c.text_secondary};")
         # Update status chip
-        status_text, status_color, text_color = self._get_status_info()
+        status_text, status_class = self._get_status_info()
         chip = self.findChild(QLabel, "StatusChip")
         if chip:
-            chip.setStyleSheet(Styles.status_chip(status_color, text_color))
+            chip.setProperty("status_chip", status_class)
+            chip.style().polish(chip)
         # Update no-image fallback
         img = self.findChild(QLabel, "CardImage")
         if img and not img.pixmap():
