@@ -125,6 +125,34 @@ the modules most often missed.
 - See `docs/user_guide/body_part_viz/` for end-user workflow guides
   and `docs/api/body_part_viz.md` for the full API surface.
 
+### Anthropometrics
+`src/shared/python/anthropometrics/`
+- `SegmentProperties`, `SubjectAnthropometrics` — frozen, DbC-validated
+  canonical records (mass, length, CoM, 3 × 3 inertia in SI units).
+- `Estimator`, `Reader`, `Writer`, `EngineAdapter` —
+  `@runtime_checkable` Protocols in `contracts.py`.
+- `estimators.from_de_leva.DeLevaEstimator` (default),
+  `from_dempster.DempsterEstimator`, `from_zatsiorsky.ZatsiorskyEstimator`
+  — three regression estimators implementing the `Estimator` Protocol.
+- `pipeline.run_pipeline()` — single public entry point: C3D →
+  `SubjectAnthropometrics` → URDF / MJCF / `.osim` exports +
+  `subject.json` + deterministic `report.html`.
+- `engine_adapters.ADAPTER_REGISTRY` — map of `engine_name` to the
+  paired export/import adapter (`drake`, `pinocchio`, `myosuite`,
+  `opensim`, `simscape`).
+- `ui.calibration_dialog.SubjectCalibrationDialog` and
+  `ui.segment_properties_panel.SegmentPropertiesPanel` — Qt UI
+  surface; thin wrappers over `run_pipeline()`.
+- See [ADR 0009](docs/adr/0009-anthropometrics-pipeline.md) (canonical
+  record + Protocols) and
+  [ADR 0010](docs/adr/0010-anthropometrics-pipeline.md) (pipeline
+  orchestrator + cross-engine bridge).
+- User guides:
+  [`docs/user_guide/anthropometrics/quickstart.md`](docs/user_guide/anthropometrics/quickstart.md),
+  [`docs/user_guide/anthropometrics/cross_engine.md`](docs/user_guide/anthropometrics/cross_engine.md),
+  and the consolidated
+  [`docs/user_guide/anthropometrics.md`](docs/user_guide/anthropometrics.md).
+
 ### Pose editor (interactive joint-angle UI)
 `src/shared/python/pose_editor/`
 - `core.{JointType, JointInfo, PoseEditorState}` — joint metadata
