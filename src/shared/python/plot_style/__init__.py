@@ -35,6 +35,7 @@ from .registry import (
     register_custom_colormap,
     unregister_custom_colormap,
 )
+from .renderers import MatplotlibMarkerRenderer
 
 __all__ = [
     "SCHEMA_VERSION",
@@ -50,6 +51,7 @@ __all__ = [
     "MarkerShape",
     "MarkerShapeRenderer",
     "MarkerStyle",
+    "MatplotlibMarkerRenderer",
     "PaletteColor",
     "PlotStyleSet",
     "PlotStyleSpec",

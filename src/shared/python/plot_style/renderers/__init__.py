@@ -1,10 +1,13 @@
 """Renderer implementations sub-package.
 
 Concrete :class:`~src.shared.python.plot_style.contracts.MarkerRenderer`
-backends (matplotlib, pyqtgraph, plotly, ...) land in follow-up issues
-of EPIC #4796.
+backends. Currently bundled:
+
+* :class:`MatplotlibMarkerRenderer` — 2D ``Axes`` and 3D ``Axes3D``.
 """
 
 from __future__ import annotations
 
-__all__: list[str] = []
+from .matplotlib import MatplotlibMarkerRenderer
+
+__all__ = ["MatplotlibMarkerRenderer"]
