@@ -58,11 +58,22 @@ class MarkerBinding:
         if not isinstance(self.kind, BindingKind):
             raise TypeError(f"kind must be BindingKind, got {type(self.kind).__name__}")
 
+        # Reject plain strings explicitly: a bare string is iterable and would
+        # otherwise be silently treated as a sequence of single-character
+        # marker names (e.g. "ab" -> ("a", "b")). See issue #4775.
+        if isinstance(self.marker_names, str):
+            raise TypeError("marker_names must be a tuple of strings, not a single str")
+        # Normalize sequence-like inputs (e.g. list) to an immutable tuple so
+        # callers cannot mutate the original after construction.
         if not isinstance(self.marker_names, tuple):
-            raise TypeError(
-                "marker_names must be a tuple of strings, "
-                f"got {type(self.marker_names).__name__}"
-            )
+            try:
+                normalized = tuple(self.marker_names)
+            except TypeError as exc:
+                raise TypeError(
+                    "marker_names must be a tuple of strings, "
+                    f"got {type(self.marker_names).__name__}"
+                ) from exc
+            object.__setattr__(self, "marker_names", normalized)
 
         for name in self.marker_names:
             if not isinstance(name, str) or not name:

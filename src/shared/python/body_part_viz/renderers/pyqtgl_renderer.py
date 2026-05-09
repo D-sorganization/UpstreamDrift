@@ -66,7 +66,7 @@ def _hex_or_name_to_rgba(
 class _ShapeEntry:
     """Internal bookkeeping for one shape registered with the renderer."""
 
-    __slots__ = ("shape", "fitted", "theme", "item", "is_line")
+    __slots__ = ("shape", "fitted", "theme", "item", "is_line", "user_visible")
 
     def __init__(
         self,
@@ -81,6 +81,10 @@ class _ShapeEntry:
         self.theme = theme
         self.item = item
         self.is_line = is_line
+        # User-controlled visibility — preserved across update_frame() calls so
+        # an explicit set_visible(handle, False) is not overridden by the next
+        # valid frame. See issue #4784.
+        self.user_visible = True
 
 
 class PyQtGLRenderer:
@@ -191,7 +195,11 @@ class PyQtGLRenderer:
         if not np.all(np.isfinite(verts)):
             entry.item.setVisible(False)
             return
-        entry.item.setVisible(True)
+        # Respect user-controlled visibility: if set_visible(handle, False)
+        # was called, do not silently re-show on the next valid frame.
+        entry.item.setVisible(entry.user_visible)
+        if not entry.user_visible:
+            return
 
         if entry.is_line:
             entry.item.setData(pos=verts)
@@ -205,6 +213,7 @@ class PyQtGLRenderer:
             raise KeyError(f"Unknown handle: {handle!r}")
         if not isinstance(visible, bool):
             raise TypeError(f"visible must be bool; got {type(visible).__name__}")
+        entry.user_visible = visible
         entry.item.setVisible(visible)
 
     def remove(self, handle: str) -> None:

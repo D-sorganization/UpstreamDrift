@@ -64,6 +64,15 @@ class FittedShape:
                     f"{name} must be a numpy.ndarray; got {type(arr).__name__}"
                 )
 
+        # Floating-dtype enforcement for numeric fields. The contract and type
+        # hints require floating arrays; integer/object dtypes silently
+        # propagate into geometry math and cause precision/backend bugs.
+        # See issue #4776.
+        for name in ("centroid", "rotation_matrix", "scale"):
+            arr = getattr(self, name)
+            if arr.dtype.kind != "f":
+                raise TypeError(f"{name} must have a floating dtype; got {arr.dtype}")
+
         if self.centroid.ndim != 2 or self.centroid.shape[1] != 3:
             raise ValueError(
                 f"centroid must have shape (T, 3); got {self.centroid.shape}"

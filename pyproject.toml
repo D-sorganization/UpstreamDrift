@@ -150,6 +150,7 @@ gui-tools = [
 body-part-viz-gl = [
     "pyqtgraph>=0.13",
     "PyOpenGL>=3.1",
+    "matplotlib>=3.10.8",  # required by _hex_or_name_to_rgba in PyQtGLRenderer
 ]
 
 # Everything

@@ -115,9 +115,27 @@ def test_marker_binding_kind_wrong_type_raises() -> None:
         MarkerBinding(kind="between_two", marker_names=("a", "b"))  # type: ignore[arg-type]
 
 
-def test_marker_binding_marker_names_not_tuple_raises() -> None:
+def test_marker_binding_marker_names_list_normalized_to_tuple() -> None:
+    # Lists are accepted but normalized to an immutable tuple so the caller
+    # cannot mutate the binding after construction (issue #4775).
+    src = ["a", "b"]
+    binding = MarkerBinding(kind=BindingKind.BETWEEN_TWO, marker_names=src)  # type: ignore[arg-type]
+    assert isinstance(binding.marker_names, tuple)
+    assert binding.marker_names == ("a", "b")
+    src.append("c")
+    assert binding.marker_names == ("a", "b")
+
+
+def test_marker_binding_marker_names_str_raises() -> None:
+    # A bare string would otherwise be silently treated as a sequence of
+    # single-character marker names (issue #4775).
     with pytest.raises(TypeError, match="marker_names"):
-        MarkerBinding(kind=BindingKind.BETWEEN_TWO, marker_names=["a", "b"])  # type: ignore[arg-type]
+        MarkerBinding(kind=BindingKind.BETWEEN_TWO, marker_names="ab")  # type: ignore[arg-type]
+
+
+def test_marker_binding_marker_names_non_iterable_raises() -> None:
+    with pytest.raises(TypeError, match="marker_names"):
+        MarkerBinding(kind=BindingKind.BETWEEN_TWO, marker_names=42)  # type: ignore[arg-type]
 
 
 def test_marker_binding_empty_marker_name_raises() -> None:
