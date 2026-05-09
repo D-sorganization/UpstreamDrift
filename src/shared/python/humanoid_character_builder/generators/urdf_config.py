@@ -7,8 +7,12 @@ Extracted from urdf_generator.py to isolate configuration concerns.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from humanoid_character_builder.mesh.inertia_calculator import InertiaMode
+
+if TYPE_CHECKING:
+    from src.shared.python.body_part_viz.asset_library import ShapeLibrary
 
 
 @dataclass
@@ -48,3 +52,8 @@ class URDFGeneratorConfig:
 
     # Include comments in URDF
     include_comments: bool = True
+
+    # Optional body_part_viz ShapeLibrary supplying per-link visuals.
+    # Issue #4765: when provided, named links draw their <visual> from the
+    # library instead of the legacy SegmentDefinition-derived primitives.
+    shape_library: ShapeLibrary | None = None

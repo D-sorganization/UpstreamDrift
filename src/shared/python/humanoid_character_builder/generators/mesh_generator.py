@@ -15,7 +15,15 @@ from ._mesh_smplx import (
     _trimesh_module,  # type: ignore[attr-defined]
 )
 from ._mesh_types import (
-# Re-export capability flags for test compatibility (#4528)
+    GeneratedMeshResult,
+    MeshGeneratorBackend,
+    MeshGeneratorInterface,
+)
+
+# Re-export capability flags for test compatibility (#4528). The imports
+# above already pulled SMPLX_AVAILABLE / TRIMESH_AVAILABLE / _trimesh_module
+# from `_mesh_smplx`, so these blocks only matter when that import path
+# itself fails — e.g. on a partial install. Keep them as defensive fallbacks.
 try:
     from humanoid_character_builder.generators._mesh_smplx import SMPLX_AVAILABLE
 except ImportError:
@@ -28,10 +36,6 @@ try:
     from humanoid_character_builder.generators._mesh_smplx import _trimesh_module
 except ImportError:
     _trimesh_module = None
-    GeneratedMeshResult,
-    MeshGeneratorBackend,
-    MeshGeneratorInterface,
-)
 
 __all__ = [
     "GeneratedMeshResult",

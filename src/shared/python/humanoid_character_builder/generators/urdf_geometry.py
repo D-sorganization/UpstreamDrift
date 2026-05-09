@@ -4,7 +4,11 @@ URDF geometry helpers.
 Handles creation of geometry specification dicts from segment definitions
 and rendering of those dicts as XML elements.
 
-Extracted from urdf_generator.py to isolate geometry concerns.
+Extracted from urdf_generator.py to isolate geometry concerns. With Wave 4
+of EPIC #4755, this module is wired to the
+:mod:`body_part_viz.urdf_bridge` so a per-link
+:class:`~body_part_viz.contracts.BodyPartShape` can drive the visual
+payload alongside the legacy :class:`SegmentDefinition` path.
 """
 
 from __future__ import annotations
@@ -16,12 +20,65 @@ from humanoid_character_builder.core.segment_definitions import (
     GeometryType,
     SegmentDefinition,
 )
+from src.shared.python.body_part_viz.contracts import BodyPartShape
+from src.shared.python.body_part_viz.shapes import (
+    CompositeShape,
+    CylinderShape,
+)
+from src.shared.python.body_part_viz.urdf_bridge import shape_to_urdf_visual
+
+
+def shape_to_geometry_dict(shape: BodyPartShape) -> dict[str, Any]:
+    """Translate a :class:`BodyPartShape` into the dict form used by
+    :func:`add_geometry_element`.
+
+    This is the "thin wrapper" path mandated by issue #4765: the heavy
+    lifting (URDF schema, package:// URIs, mesh-encoded ellipsoids) lives
+    in :func:`shape_to_urdf_visual`; we just project the resulting
+    ``<geometry>`` child back to the legacy dict shape so the existing
+    XML emitter keeps working unchanged.
+    """
+    if shape is None:
+        raise ValueError("shape must be provided")
+    if isinstance(shape, CompositeShape):
+        # Composite shapes can't reduce to a single geometry dict; the
+        # XML builder must take the multi-visual path explicitly.
+        raise ValueError(
+            "CompositeShape cannot be expressed as a single geometry dict; "
+            "use shape_to_urdf_visual() and emit one <visual> per child"
+        )
+    visual = shape_to_urdf_visual(shape)
+    if isinstance(visual, list):  # pragma: no cover — guarded above
+        raise ValueError("CompositeShape produced multiple visuals")
+    geometry = visual.find("geometry")
+    if geometry is None or len(list(geometry)) != 1:  # pragma: no cover
+        raise ValueError("shape_to_urdf_visual produced an unexpected payload")
+    geom = list(geometry)[0]
+    if geom.tag == "cylinder":
+        return {
+            "type": "cylinder",
+            "radius": float(geom.attrib["radius"]),
+            "length": float(geom.attrib["length"]),
+        }
+    if geom.tag == "mesh":
+        scale_attr = geom.attrib.get("scale", "1 1 1").split()
+        scale = (float(scale_attr[0]), float(scale_attr[1]), float(scale_attr[2]))
+        return {
+            "type": "mesh",
+            "filename": geom.attrib["filename"],
+            "scale": scale,
+        }
+    raise ValueError(  # pragma: no cover — defensive
+        f"Unsupported geometry tag from bridge: {geom.tag!r}"
+    )
 
 
 def create_geometry_dict(
     segment_def: SegmentDefinition,
     dimensions: dict[str, float],
     is_collision: bool,
+    *,
+    shape: BodyPartShape | None = None,
 ) -> dict[str, Any]:
     """Create geometry specification dictionary.
 
@@ -29,10 +86,16 @@ def create_geometry_dict(
         segment_def: Segment definition containing visual/collision geometry specs.
         dimensions: Scaled segment dimensions (length, width, depth).
         is_collision: If True, use collision geometry spec; otherwise use visual.
+        shape: Optional :class:`BodyPartShape` (e.g. from the
+            :class:`~body_part_viz.asset_library.ShapeLibrary`). When
+            provided, the function delegates to :func:`shape_to_geometry_dict`
+            and the segment-definition geometry type is ignored.
 
     Returns:
         Dict describing the geometry (type + size parameters).
     """
+    if shape is not None:
+        return shape_to_geometry_dict(shape)
     if segment_def is None:
         raise ValueError("segment_def must be provided")
     geom_spec = (
@@ -45,18 +108,18 @@ def create_geometry_dict(
     width = dimensions.get("width", 0.05)
     depth = dimensions.get("depth", 0.05)
 
+    # Where possible, route through the body_part_viz bridge so the
+    # legacy segment-definition path produces the same XML schema as
+    # shape-library-driven links.
     if geom_spec.geometry_type == GeometryType.BOX:
+        # No body_part_viz BoxShape; keep the dict-only legacy path.
         return {
             "type": "box",
             "size": (width, depth, length),
         }
     if geom_spec.geometry_type == GeometryType.CYLINDER:
         radius = (width + depth) / 4
-        return {
-            "type": "cylinder",
-            "radius": radius,
-            "length": length,
-        }
+        return shape_to_geometry_dict(CylinderShape(length=length, radius=radius))
     if geom_spec.geometry_type == GeometryType.SPHERE:
         radius = length / 2
         return {
@@ -65,11 +128,9 @@ def create_geometry_dict(
         }
     if geom_spec.geometry_type == GeometryType.CAPSULE:
         radius = (width + depth) / 4
-        return {
-            "type": "cylinder",  # URDF doesn't have capsule, use cylinder
-            "radius": radius,
-            "length": max(0.01, length - 2 * radius),
-        }
+        return shape_to_geometry_dict(
+            CylinderShape(length=max(0.01, length - 2 * radius), radius=radius)
+        )
     if geom_spec.geometry_type == GeometryType.MESH:
         return {
             "type": "mesh",

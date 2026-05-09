@@ -16,6 +16,7 @@ from humanoid_character_builder.mesh.inertia_calculator import (
     MeshInertiaCalculator,
 )
 from humanoid_character_builder.mesh.primitive_inertia import PrimitiveInertiaCalculator
+from src.shared.python.body_part_viz.contracts import BodyPartShape
 
 
 def apply_proportion_factors(
@@ -81,6 +82,7 @@ def generate_link(
     mesh_inertia_calc: MeshInertiaCalculator,
     primitive_inertia_calc: PrimitiveInertiaCalculator,
     generate_collision: bool,
+    visual_shape: BodyPartShape | None = None,
 ) -> GeneratedLink:
     seg_params = params.get_segment_params(segment_name)
 
@@ -97,9 +99,14 @@ def generate_link(
         mesh_dir,
     )
 
-    visual_geom = create_geometry_dict(segment_def, dimensions, is_collision=False)
+    visual_geom = create_geometry_dict(
+        segment_def, dimensions, is_collision=False, shape=visual_shape
+    )
     collision_geom: dict[str, Any] | None = None
     if generate_collision:
+        # Collision geometry stays on the legacy path: URDF collision
+        # checkers strongly prefer fast primitives, and reusing the
+        # visual mesh would explode collision-pair workload.
         collision_geom = create_geometry_dict(
             segment_def, dimensions, is_collision=True
         )

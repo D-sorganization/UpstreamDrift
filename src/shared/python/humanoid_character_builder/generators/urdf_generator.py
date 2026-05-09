@@ -76,6 +76,7 @@ from humanoid_character_builder.mesh.primitive_inertia import (
     PrimitiveInertiaCalculator,
     estimate_segment_primitive,
 )
+from src.shared.python.body_part_viz.contracts import BodyPartShape
 
 logger = logging.getLogger(__name__)
 
@@ -153,6 +154,7 @@ class HumanoidURDFGenerator:
         self._materials = generate_materials(params)
 
         for segment_name, segment_def in HUMANOID_SEGMENTS.items():
+            visual_shape = self._lookup_library_shape(segment_name)
             self._links[segment_name] = generate_link(
                 segment_name,
                 segment_def,
@@ -167,6 +169,7 @@ class HumanoidURDFGenerator:
                 self.mesh_inertia_calc,
                 self.primitive_inertia_calc,
                 self.config.generate_collision,
+                visual_shape=visual_shape,
             )
 
         for joint_name, joint_def in HUMANOID_JOINTS.items():
@@ -180,6 +183,25 @@ class HumanoidURDFGenerator:
             self._joints.extend(joints)
 
         return HumanoidModel(self._links, self._joints)
+
+    def _lookup_library_shape(self, segment_name: str) -> BodyPartShape | None:
+        """Resolve a per-segment :class:`BodyPartShape` from the configured
+        :class:`ShapeLibrary`, if any. Strips left/right side prefixes so
+        the bundled default library (which has one ``upper_arm`` entry,
+        not two) covers both sides.
+        """
+        library = getattr(self.config, "shape_library", None)
+        if library is None:
+            return None
+        candidates = (segment_name,)
+        for prefix in ("left_", "right_"):
+            if segment_name.startswith(prefix):
+                candidates = (segment_name, segment_name[len(prefix) :])
+                break
+        for name in candidates:
+            if name in library.names():
+                return library.get(name)
+        return None
 
     @precondition(lambda params: params is not None, "params must not be None")
     @precondition(lambda params: params.height_m > 0, "Height must be positive")
