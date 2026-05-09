@@ -359,6 +359,7 @@ markers = [
     "slow_numba: Tests that require numba JIT or are heavy",
     "asyncio: marks tests as async tests",
     "benchmark: marks tests as performance benchmarks",
+    "perf: marks fast microbenchmarks (e.g. >= 60 fps targets); excluded from default CI run",
     "serial: marks tests that must not run in parallel (sys.modules manipulation)",
     "requires_network: marks tests that require network access (skip with '-m not requires_network')",
     "requires_gpu: marks tests that require a GPU (skip with '-m not requires_gpu')",

@@ -39,6 +39,7 @@ from .registry import (
     unregister_custom_colormap,
 )
 from .renderers import MatplotlibMarkerRenderer
+from .resolvers import RESOLVER_REGISTRY
 
 # Qt widgets are an optional surface — we expose their names in
 # ``__all__`` (UNION resolution per #4807) but only import them when
@@ -66,6 +67,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
 __all__ = [
     "BUILTIN_PRESET_NAMES",
+    "RESOLVER_REGISTRY",
     "SCHEMA_VERSION",
     "SEMANTIC_COLORMAP_ALIASES",
     "ColorResolver",
