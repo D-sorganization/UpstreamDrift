@@ -33,6 +33,7 @@ DRY
 from __future__ import annotations
 
 import argparse
+import contextlib
 import logging
 import sys
 from typing import TYPE_CHECKING
@@ -42,10 +43,20 @@ import numpy as np
 from src.shared.python.pendulum_simulator.cross_engine_perturbation import (
     CrossEnginePerturbationRunner,
     CrossEngineSimConfig,
+    CrossEngineRunResult,
+)
+from src.shared.python.plot_style import (
+    MarkerShape,
+    MarkerStyle,
+    MatplotlibMarkerRenderer,
+    PaletteColor,
+    PlotStyleSet,
+    PlotStyleSpec,
+    PresetLibrary,
 )
 
 if TYPE_CHECKING:
-    pass
+    from matplotlib.axes import Axes
 
 logger = logging.getLogger(__name__)
 
@@ -132,6 +143,223 @@ class _StubEngine:
 
 _ENGINE_NAMES = ("mujoco", "drake", "pinocchio", "pendulum_stub")
 
+# ---------------------------------------------------------------------------
+# Plot-style integration (issue #4810)
+# ---------------------------------------------------------------------------
+#
+# Curated palette indices for trajectory overlays.  ``tab10`` is the
+# colour-blind-friendly default; engines listed here get a deterministic
+# entry, anything outside the table falls back to a hash-stable index so
+# the overlay still renders.
+#
+# Five core engines are mapped explicitly per the issue acceptance
+# criteria; ``pendulum_stub`` is included so the default GUI selection
+# (which checks ``pendulum_stub``) also gets a deterministic colour.
+_TRAJECTORY_PALETTE_NAME: str = "tab10"
+
+_ENGINE_PALETTE_INDICES: dict[str, int] = {
+    "drake": 0,
+    "mujoco": 1,
+    "pinocchio": 2,
+    "opensim": 3,
+    "simscape": 4,
+    "pendulum_stub": 7,
+}
+
+# Distinct shapes per engine so colour-blind users can still discriminate
+# overlapping traces.  Sphere is the default fallback.
+_ENGINE_SHAPES: dict[str, MarkerShape] = {
+    "drake": MarkerShape.SPHERE,
+    "mujoco": MarkerShape.CUBE,
+    "pinocchio": MarkerShape.DIAMOND,
+    "opensim": MarkerShape.STAR,
+    "simscape": MarkerShape.PLUS,
+    "pendulum_stub": MarkerShape.POINT,
+}
+
+
+def _engine_palette_index(name: str) -> int:
+    """Return the ``tab10`` palette index for ``name`` (deterministic)."""
+    if name in _ENGINE_PALETTE_INDICES:
+        return _ENGINE_PALETTE_INDICES[name]
+    # Stable fallback — wraps modulo 10 for any unknown engine.
+    return abs(hash(name)) % 10
+
+
+def _default_marker_style_template() -> MarkerStyle | None:
+    """Return the first style from the ``"default"`` preset, if available.
+
+    The packaged preset is loaded lazily and missing-preset / load-error
+    conditions degrade gracefully to ``None`` so the dashboard never
+    breaks when run in a stripped environment.
+    """
+    try:
+        library = PresetLibrary.default()
+    except Exception:  # pragma: no cover - missing presets package
+        logger.debug("PresetLibrary.default() unavailable; using fallback style")
+        return None
+    if "default" not in library:
+        return None
+    preset = library["default"]
+    if not preset.entries:
+        return None
+    return preset.entries[0].style
+
+
+def _build_engine_marker_style(
+    name: str,
+    *,
+    shape_per_engine: bool = True,
+    template: MarkerStyle | None = None,
+) -> MarkerStyle:
+    """Construct a per-engine :class:`MarkerStyle` for trajectory overlays.
+
+    Parameters
+    ----------
+    name:
+        Engine identifier.
+    shape_per_engine:
+        When ``True`` each engine uses its distinct :class:`MarkerShape`
+        (colour-blind aid). When ``False`` every engine uses
+        :data:`MarkerShape.SPHERE`.
+    template:
+        Optional template style (typically loaded from
+        ``PresetLibrary.default()["default"]``); its size / edge / opacity
+        attributes are reused so the overlay matches the global theme.
+        ``None`` falls back to hard-coded sane defaults.
+
+    Returns
+    -------
+    MarkerStyle
+        A new frozen :class:`MarkerStyle` with a :class:`PaletteColor`
+        fill keyed off ``tab10``.
+    """
+    if not isinstance(name, str) or not name:
+        raise ValueError(f"name must be a non-empty string; got {name!r}")
+    fill = PaletteColor(
+        palette_name=_TRAJECTORY_PALETTE_NAME,
+        palette_index=_engine_palette_index(name),
+    )
+    shape = (
+        _ENGINE_SHAPES.get(name, MarkerShape.SPHERE)
+        if shape_per_engine
+        else (MarkerShape.SPHERE)
+    )
+    if template is None:
+        return MarkerStyle(
+            shape=shape,
+            size_px=6.0,
+            edge_color="#101020",
+            edge_width=0.5,
+            fill_color=fill,
+            opacity=1.0,
+        )
+    return MarkerStyle(
+        shape=shape,
+        size_px=float(template.size_px),
+        edge_color=str(template.edge_color),
+        edge_width=float(template.edge_width),
+        fill_color=fill,
+        opacity=float(template.opacity),
+    )
+
+
+def _render_trajectory_overlay(
+    ax: Axes,
+    trajectories: dict[str, np.ndarray],
+    renderer: MatplotlibMarkerRenderer,
+    *,
+    shape_per_engine: bool = True,
+    template: MarkerStyle | None = None,
+) -> dict[str, str]:
+    """Plot one trajectory per engine on ``ax`` using ``renderer``.
+
+    A single :class:`MatplotlibMarkerRenderer` is reused across every
+    engine series (DRY — see issue #4810) by binding it to ``ax`` and
+    calling :meth:`MatplotlibMarkerRenderer.add_markers` per engine.
+
+    Parameters
+    ----------
+    ax:
+        Matplotlib 2D ``Axes`` already attached to a figure.
+    trajectories:
+        Mapping ``engine_name -> (T, D) ndarray`` of trajectories where
+        ``D`` is at least 2.  The first two columns are plotted.
+    renderer:
+        :class:`MatplotlibMarkerRenderer` instance bound to ``ax``.  The
+        same instance must be reused — ``RuntimeError`` if its default
+        axes don't match.
+    shape_per_engine:
+        Forwarded to :func:`_build_engine_marker_style`.
+    template:
+        Forwarded to :func:`_build_engine_marker_style`.
+
+    Returns
+    -------
+    dict[str, str]
+        Mapping engine_name -> renderer handle (useful for later
+        :meth:`MatplotlibMarkerRenderer.remove`).
+
+    Design by Contract
+    ------------------
+    Pre:  trajectories is non-empty and every value has shape (T, D >= 2)
+    Pre:  renderer's default axes is ``ax`` (DRY enforcement)
+    Post: returns one handle per engine
+    """
+    if not trajectories:
+        raise ValueError("trajectories must be non-empty")
+    if getattr(renderer, "_default_ax", None) is not ax:
+        raise RuntimeError(
+            "MatplotlibMarkerRenderer must be bound to the supplied ax "
+            "(DRY: a single renderer instance is required across overlays)"
+        )
+    handles: dict[str, str] = {}
+    for engine_name, traj in trajectories.items():
+        arr = np.asarray(traj, dtype=float)
+        if arr.ndim != 2 or arr.shape[1] < 2:
+            raise ValueError(
+                f"trajectory for {engine_name!r} must have shape (T, D>=2); "
+                f"got {arr.shape}"
+            )
+        # Plot first two DOF as 2D scatter overlay.
+        positions = arr[:, :2]
+        style = _build_engine_marker_style(
+            engine_name,
+            shape_per_engine=shape_per_engine,
+            template=template,
+        )
+        handle = renderer.add_markers(positions, style, label=engine_name)
+        handles[engine_name] = handle
+    return handles
+
+
+def build_dashboard_style_set(
+    engine_names: list[str] | tuple[str, ...] = _ENGINE_NAMES,
+    *,
+    shape_per_engine: bool = True,
+) -> PlotStyleSet:
+    """Return a :class:`PlotStyleSet` describing the dashboard overlay styles.
+
+    Useful for persisting the styled session (issue #4810 — round-trip
+    test). Each engine becomes a :class:`PlotStyleSpec` with target
+    ``"trace:<engine>"`` so callers can save / load the configuration via
+    :meth:`PlotStyleSet.save` / :meth:`PlotStyleSet.load`.
+    """
+    template = _default_marker_style_template()
+    entries = tuple(
+        PlotStyleSpec(
+            name=name,
+            target=f"trace:{name}",
+            style=_build_engine_marker_style(
+                name,
+                shape_per_engine=shape_per_engine,
+                template=template,
+            ),
+        )
+        for name in engine_names
+    )
+    return PlotStyleSet(entries=entries)
+
 
 def _try_build_real_engine(name: str) -> object | None:
     """Attempt to instantiate a real physics engine by name.
@@ -198,6 +426,28 @@ def _build_engine(name: str) -> object:
 # ---------------------------------------------------------------------------
 
 
+def _run_with_results(
+    engine_names: list[str],
+    config: CrossEngineSimConfig,
+) -> tuple[dict[str, CrossEngineRunResult], dict[str, float]]:
+    """Execute the comparison and return both per-engine results and CV summary.
+
+    DRY helper used by both the GUI worker (which needs trajectories for
+    overlay rendering) and :func:`_run_headless` (which only logs the
+    summary).
+    """
+    if not engine_names:
+        raise ValueError("At least one engine name must be provided")
+    runner = CrossEnginePerturbationRunner(config)
+    for name in engine_names:
+        runner.register_engine(name, _build_engine(name))
+    n_steps = round(config.t_end / config.dt)
+    base_profile = np.zeros(n_steps)
+    results = runner.run_comparison(base_profile)
+    cv_summary = runner.compute_cv_summary(results)
+    return results, cv_summary
+
+
 def _run_headless(
     engine_names: list[str],
     config: CrossEngineSimConfig,
@@ -222,18 +472,7 @@ def _run_headless(
     Pre:  config is a valid CrossEngineSimConfig
     Post: returns a dict with the three CV keys
     """
-    if not engine_names:
-        raise ValueError("At least one engine name must be provided")
-
-    runner = CrossEnginePerturbationRunner(config)
-    for name in engine_names:
-        engine = _build_engine(name)
-        runner.register_engine(name, engine)
-
-    n_steps = round(config.t_end / config.dt)
-    base_profile = np.zeros(n_steps)
-    results = runner.run_comparison(base_profile)
-    cv_summary = runner.compute_cv_summary(results)
+    results, cv_summary = _run_with_results(engine_names, config)
 
     logger.info("=== Cross-Engine Perturbation Comparison Results ===")
     for eng_name, result in results.items():
@@ -328,7 +567,8 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
     class ComparisonWorkerSignals(QObject):
         """Signals for the ComparisonWorker."""
 
-        finished = pyqtSignal(list, dict)
+        # Payload: (engine_names, cv_summary, trajectories_per_engine)
+        finished = pyqtSignal(list, dict, dict)
         error = pyqtSignal(str)
 
     class ComparisonWorker(QRunnable):
@@ -349,8 +589,18 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
         def run(self) -> None:
             """Execute comparison and emit results."""
             try:
-                cv_summary = _run_headless(self.engine_names, self.config)
-                self.signals.finished.emit(self.engine_names, cv_summary)
+                results, cv_summary = _run_with_results(self.engine_names, self.config)
+                # Extract trial-0 position trajectory per engine for the overlay
+                trajectories: dict[str, np.ndarray] = {}
+                for name, run_result in results.items():
+                    if run_result.metrics_per_trial:
+                        traj = np.asarray(
+                            run_result.metrics_per_trial[0].trajectory_q,
+                            dtype=float,
+                        )
+                        if traj.ndim == 2 and traj.shape[1] >= 2:
+                            trajectories[name] = traj
+                self.signals.finished.emit(self.engine_names, cv_summary, trajectories)
             # Worker thread must survive any error to emit a signal back to the
             # GUI thread rather than crashing silently.
             except Exception as e:  # noqa: BLE001
@@ -359,11 +609,23 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
     class _Window(QMainWindow):
         """Cross-Engine Perturbation Comparison Dashboard main window."""
 
-        def __init__(self, parent: QWidget | None = None) -> None:
+        def __init__(
+            self,
+            parent: QWidget | None = None,
+            *,
+            shape_per_engine: bool = True,
+        ) -> None:
             super().__init__(parent)
             self.setWindowTitle("Cross-Engine Perturbation Comparison Dashboard")
             self.setMinimumSize(900, 620)
             self.setStyleSheet(_STYLE)
+
+            self._shape_per_engine = bool(shape_per_engine)
+            # Single MatplotlibMarkerRenderer reused across overlays — DRY
+            # enforced by _render_trajectory_overlay (#4810).
+            self._traj_renderer: MatplotlibMarkerRenderer | None = None
+            self._traj_handles: dict[str, str] = {}
+            self._style_template: MarkerStyle | None = _default_marker_style_template()
 
             central = QWidget()
             central.setObjectName("central")
@@ -501,6 +763,21 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
             cv_lay.addWidget(self._canvas_cv)
             layout.addWidget(cv_grp)
 
+            # Trajectory overlay (issue #4810)
+            tr_grp = QGroupBox("Trajectory Overlay (per-engine, plot_style)")
+            tr_lay = QVBoxLayout(tr_grp)
+            fig_tr = Figure(figsize=(5, 2.5), facecolor="#12121e")
+            self._canvas_tr = FigureCanvasQTAgg(fig_tr)
+            self._ax_tr = fig_tr.add_subplot(111)
+            self._ax_tr.set_facecolor("#1a1a2e")
+            self._style_ax(self._ax_tr)
+            tr_lay.addWidget(self._canvas_tr)
+            layout.addWidget(tr_grp)
+
+            # Bind a single renderer to the overlay axes — reused across
+            # every comparison run.  DRY (#4810).
+            self._traj_renderer = MatplotlibMarkerRenderer(self._ax_tr)
+
             return panel
 
         @staticmethod
@@ -547,10 +824,14 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
             self._thread_pool.start(worker)
 
         def _on_comparison_finished(
-            self, engine_names: list[str], cv_summary: dict[str, float]
+            self,
+            engine_names: list[str],
+            cv_summary: dict[str, float],
+            trajectories: dict[str, np.ndarray],
         ) -> None:
             """Handle successful comparison completion."""
             self._update_charts(engine_names, cv_summary)
+            self._update_trajectory_overlay(trajectories)
             self._status_label.setText("Done")
             self._run_btn.setEnabled(True)
 
@@ -667,7 +948,50 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
 
             self._canvas_cv.draw()
 
-    return _Window()
+        def _update_trajectory_overlay(
+            self,
+            trajectories: dict[str, np.ndarray],
+        ) -> None:
+            """Render per-engine trajectory overlays via plot_style (#4810).
+
+            One :class:`PaletteColor` per engine, recognisable shape per
+            engine (when ``shape_per_engine`` is enabled), all routed
+            through the single :class:`MatplotlibMarkerRenderer`.
+            """
+            if not _has_mpl or self._traj_renderer is None:
+                return
+            ax = self._ax_tr
+            # Remove any prior handles to avoid stacking artists across runs.
+            for handle in list(self._traj_handles.values()):
+                with contextlib.suppress(KeyError):  # pragma: no cover - defensive
+                    self._traj_renderer.remove(handle)
+            self._traj_handles.clear()
+            ax.clear()
+            ax.set_facecolor("#1a1a2e")
+            self._style_ax(ax)
+            if not trajectories:
+                self._canvas_tr.draw()
+                return
+            self._traj_handles = _render_trajectory_overlay(
+                ax,
+                trajectories,
+                self._traj_renderer,
+                shape_per_engine=self._shape_per_engine,
+                template=self._style_template,
+            )
+            ax.set_xlabel("q[0]", fontsize=9)
+            ax.set_ylabel("q[1]", fontsize=9)
+            ax.legend(
+                list(self._traj_handles.keys()),
+                fontsize=8,
+                loc="best",
+                facecolor="#1a1a2e",
+                edgecolor="#303050",
+                labelcolor="#d0d0f0",
+            )
+            self._canvas_tr.draw()
+
+    return _Window
 
 
 # ---------------------------------------------------------------------------
@@ -675,14 +999,17 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
 # ---------------------------------------------------------------------------
 
 
-def _build_qt_window() -> object:
-    """Build and return the QMainWindow instance (deferred Qt import)."""
-    return _create_dashboard_window_class()()
+def _build_qt_window(*, shape_per_engine: bool = True) -> object:
+    """Build and return the QMainWindow instance (deferred Qt import).
 
-
-def _build_qt_window() -> object:
-    """Build and return the QMainWindow instance (deferred Qt import)."""
-    return _create_dashboard_window_class()()
+    Parameters
+    ----------
+    shape_per_engine:
+        Forwarded to the window constructor — when ``True`` each engine
+        trajectory uses a distinct :class:`MarkerShape` (issue #4810).
+    """
+    cls = _create_dashboard_window_class()
+    return cls(shape_per_engine=shape_per_engine)
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:
@@ -726,6 +1053,20 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         type=float,
         default=0.01,
         help="Integration timestep in seconds",
+    )
+    parser.add_argument(
+        "--shape-per-engine",
+        dest="shape_per_engine",
+        action="store_true",
+        default=True,
+        help="Use a distinct MarkerShape per engine in trajectory overlays "
+        "(colour-blind aid; issue #4810)",
+    )
+    parser.add_argument(
+        "--no-shape-per-engine",
+        dest="shape_per_engine",
+        action="store_false",
+        help="Force every engine to share MarkerShape.SPHERE",
     )
     return parser
 
@@ -777,7 +1118,7 @@ def main(argv: list[str] | None = None) -> None:
         return
 
     app = QApplication.instance() or QApplication(sys.argv)
-    window = _build_qt_window()
+    window = _build_qt_window(shape_per_engine=args.shape_per_engine)
     window.show()
     sys.exit(app.exec())
 
