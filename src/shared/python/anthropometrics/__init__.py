@@ -19,9 +19,11 @@ from __future__ import annotations
 from ._subject_anthropometrics import SubjectAnthropometrics
 from ._types import Sex
 from .contracts import EngineAdapter, Estimator, Reader, Writer
+from .readers import C3DSubjectMetadata, read_c3d_subject_metadata
 from .segment_properties import SegmentProperties
 
 __all__ = [
+    "C3DSubjectMetadata",
     "EngineAdapter",
     "Estimator",
     "Reader",
@@ -29,4 +31,5 @@ __all__ = [
     "Sex",
     "SubjectAnthropometrics",
     "Writer",
+    "read_c3d_subject_metadata",
 ]
