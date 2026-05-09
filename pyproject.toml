@@ -144,6 +144,14 @@ gui-tools = [
     "openpyxl>=3.1.0",   # required by pandas.read_excel for .xlsx
 ]
 
+# Body-part visualisation: optional GPU-accelerated renderer (pyqtgraph.opengl).
+# Install when the matplotlib backend's per-frame budget is exceeded
+# (typically: > 30 segments × > 1000 vertices each).
+body-part-viz-gl = [
+    "pyqtgraph>=0.13",
+    "PyOpenGL>=3.1",
+]
+
 # Everything
 all = ["upstream-drift[rust,all-engines,analysis,pose,biomechanics,rl,urdf,dev]"]
 
