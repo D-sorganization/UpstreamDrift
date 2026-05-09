@@ -1,29 +1,33 @@
-"""Pluggable source of model skeleton joint positions.
+"""Pluggable skeleton extractor for model joint positions.
 
 This is the seam that issue #4367 will exploit to make the matcher work
 with all four physics engines (MuJoCo / Drake / Pinocchio / OpenSim) and
-not just Simscape.  The matcher's GUI talks to a ``SkeletonProvider`` —
-each provider knows how to enumerate the model's poses and return their
+not just Simscape.  The matcher's GUI talks to a ``SkeletonExtractor`` —
+each extractor knows how to enumerate the model's poses and return their
 joint positions in the matcher's vocabulary (``hip``, ``spine``,
 ``torso``, ``hub``, ``ls``, ``rs``, ``le``, ``re``, ``lw``, ``rw``,
 ``mp``, ``ch``).
 
-Today only the JSON provider is wired in (it consumes the
+Today only the JSON extractor is wired in (it consumes the
 ``simscape_skeleton_<pose>.json`` files produced by
 ``export_default_skeleton.m`` next to the legacy MATLAB tree).  Future
-providers will dispatch to engine-native FK:
+extractors will dispatch to engine-native FK:
 
-    Engine      | Source              | Implementation hint
+     Engine      | Source              | Implementation hint
     -----------:|:--------------------|:---------------------
-    Simscape    | JSON file          | this module (``JsonSkeletonProvider``)
-    MuJoCo      | MJCF + qpos        | ``mujoco.MjData``; read ``xpos``
-    Drake       | URDF/SDF + plant   | ``MultibodyPlant.SetPositions`` then ``EvalBodyPoseInWorld``
-    Pinocchio   | URDF + q           | ``pin.forwardKinematics``; ``data.oMi[id].translation``
-    OpenSim     | OSIM + state       | ``Model.realizePosition`` then ``Body.getPositionInGround``
+     Simscape    | JSON file          | this module (``JsonSkeletonExtractor``)
+     MuJoCo      | MJCF + qpos        | ``mujoco.MjData``; read ``xpos``
+     Drake       | URDF/SDF + plant   | ``MultibodyPlant.SetPositions`` then ``EvalBodyPoseInWorld``
+     Pinocchio   | URDF + q           | ``pin.forwardKinematics``; ``data.oMi[id].translation``
+     OpenSim     | OSIM + state       | ``Model.realizePosition`` then ``Body.getPositionInGround``
 
 See #4367 for the full plan; this module currently exposes the abstract
-base class + the JSON provider so the matcher's GUI is already engine-
+base class + the JSON extractor so the matcher's GUI is already engine-
 agnostic at the call sites.
+
+Note: This module is named ``skeleton_extractor`` (not ``skeleton_provider``)
+to disambiguate from ``FitSwingProvider`` in the motion_matching package.
+The naming distinction is documented in docs/adr/XXXX-skeleton-vs-fit-swing-naming.md.
 """
 
 from __future__ import annotations
@@ -38,19 +42,19 @@ from src.tools.starting_pose_matcher.core import (
 )
 
 
-class SkeletonProvider(ABC):
+class SkeletonExtractor(ABC):
     """Abstract interface for sources of model skeleton poses."""
 
     @abstractmethod
     def list_poses(self) -> list[str]:
-        """Return the names of the poses this provider can produce."""
+        """Return the names of the poses this extractor can produce."""
 
     @abstractmethod
     def get_skeleton(self, pose_name: str) -> Skeleton:
         """Return the :class:`Skeleton` for the named pose."""
 
 
-class JsonSkeletonProvider(SkeletonProvider):
+class JsonSkeletonExtractor(SkeletonExtractor):
     """Reads ``simscape_skeleton_<pose>.json`` files from a directory.
 
     These files are produced by ``export_default_skeleton.m`` (MATLAB-side
@@ -76,4 +80,4 @@ class JsonSkeletonProvider(SkeletonProvider):
         return load_skeleton(path, fallback_pose=pose_name)
 
 
-__all__ = ["SkeletonProvider", "JsonSkeletonProvider", "fallback_skeleton"]
+__all__ = ["SkeletonExtractor", "JsonSkeletonExtractor", "fallback_skeleton"]

@@ -104,9 +104,9 @@ from src.tools.starting_pose_matcher.core import (
     read_event_header,
     solve_shaft_rz_deg,
 )
-from src.tools.starting_pose_matcher.skeleton_provider import (
-    JsonSkeletonProvider,
-    SkeletonProvider,
+from src.tools.starting_pose_matcher.skeleton_extractor import (
+    JsonSkeletonExtractor,
+    SkeletonExtractor,
 )
 from src.tools.starting_pose_matcher.gui_source_panel import DataSourcesPanel
 from src.tools.starting_pose_matcher.session_schema import (
@@ -501,21 +501,21 @@ class StartingPoseMatcher(QMainWindow):
         self._xlsx_path: str | None = None
 
         here = Path(__file__).parent
-        # Default provider: JSON-based Simscape skeleton loader
-        self.skeleton_provider: SkeletonProvider = JsonSkeletonProvider(
+        # Default extractor: JSON-based Simscape skeleton loader
+        self.skeleton_extractor: SkeletonExtractor = JsonSkeletonExtractor(
             here, poses=("TopofBackswing", "Impact")
         )
         self.poses: dict[str, PoseSlot] = {
             "TopofBackswing": PoseSlot(
                 name="TopofBackswing",
-                skeleton=self.skeleton_provider.get_skeleton("TopofBackswing"),
+                skeleton=self.skeleton_extractor.get_skeleton("TopofBackswing"),
                 color="#5b9eff",
                 mocap_color="#ef4444",
                 target_event="T",
             ),
             "Impact": PoseSlot(
                 name="Impact",
-                skeleton=self.skeleton_provider.get_skeleton("Impact"),
+                skeleton=self.skeleton_extractor.get_skeleton("Impact"),
                 color="#10b981",
                 mocap_color="#f59e0b",
                 target_event="I",
