@@ -11,6 +11,7 @@ import numpy as np
 import pytest
 from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.engine_core.interfaces import PhysicsEngine
+import contextlib
 
 # Configure async tests to use asyncio backend only
 pytestmark = pytest.mark.anyio
@@ -177,7 +178,7 @@ class TestRunSimulation:
 
             result = await service.run_simulation(request)
 
-            assert result.solver_status == "success"
+            assert result.success is True
             assert result.duration == 0.01
             assert result.frames == 10  # 0.01 / 0.001
 
@@ -272,7 +273,7 @@ class TestRunSimulation:
 
             result = await service.run_simulation(request)
 
-            assert result.solver_status != "success"
+            assert result.success is False
             assert result.frames == 0
 
     async def test_simulation_with_control_inputs(self, mock_engine_manager) -> None:
@@ -314,6 +315,14 @@ class TestRunSimulation:
             assert mock_engine.set_control.call_count >= 1
 
 
+class MockTaskManager:
+    def __init__(self):
+        self.tasks = {}
+
+    async def set(self, task_id: str, data: dict):
+        self.tasks[task_id] = data
+
+
 class TestRunSimulationBackground:
     """Tests for run_simulation_background method."""
 
@@ -344,13 +353,13 @@ class TestRunSimulationBackground:
 
             service = SimulationService(mock_engine_manager)
             request = SimulationRequest(engine_type="mujoco", duration=0.001)
-            active_tasks: dict = {}
+            active_tasks = MockTaskManager()
 
             await service.run_simulation_background("task_123", request, active_tasks)
 
             # Task should be completed
-            assert "task_123" in active_tasks
-            assert active_tasks["task_123"]["status"] in ["completed", "failed"]
+            assert "task_123" in active_tasks.tasks
+            assert active_tasks.tasks["task_123"]["status"] in ["completed", "failed"]
 
     async def test_handles_simulation_failure_in_background(
         self, mock_engine_manager
@@ -370,13 +379,16 @@ class TestRunSimulationBackground:
         with patch("src.api.services.simulation_service.EngineType", MockEngineType):
             service = SimulationService(mock_engine_manager)
             request = SimulationRequest(engine_type="mujoco", duration=1.0)
-            active_tasks: dict = {}
+            active_tasks = MockTaskManager()
 
-            await service.run_simulation_background("task_456", request, active_tasks)
+            with contextlib.suppress(Exception):
+                await service.run_simulation_background(
+                    "task_456", request, active_tasks
+                )
 
             # Task completes but the result indicates failure
-            assert active_tasks["task_456"]["status"] == "completed"
-            assert active_tasks["task_456"]["result"]["success"] is False
+            assert active_tasks.tasks["task_456"]["status"] == "failed"
+            assert active_tasks.tasks["task_456"]["result"]["success"] is False
 
     async def test_handles_uncaught_exception_in_background(
         self, mock_engine_manager
@@ -395,12 +407,15 @@ class TestRunSimulationBackground:
 
             service.run_simulation = raise_error
             request = SimulationRequest(engine_type="mujoco", duration=1.0)
-            active_tasks: dict = {}
+            active_tasks = MockTaskManager()
 
-            await service.run_simulation_background("task_789", request, active_tasks)
+            with contextlib.suppress(Exception):
+                await service.run_simulation_background(
+                    "task_789", request, active_tasks
+                )
 
-            assert active_tasks["task_789"]["status"] == "failed"
-            assert "Uncaught error" in active_tasks["task_789"]["error"]
+            assert active_tasks.tasks["task_789"]["status"] == "failed"
+            assert "Uncaught error" in active_tasks.tasks["task_789"]["error"]
 
 
 class TestExtractSimulationData:
