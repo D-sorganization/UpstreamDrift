@@ -151,6 +151,54 @@ def test_get_events_missing_times() -> None:
     assert get_events(data) == []
 
 
+def test_get_events_missing_used_infers_from_labels() -> None:
+    """Regression for #4753: missing EVENT:USED must not silently drop events.
+
+    Real-world c3d files routinely omit USED while still containing valid
+    LABELS/TIMES arrays. We must infer USED from the available metadata
+    rather than defaulting to 0.
+    """
+    data = _synthetic_c3d_dict(
+        with_events=True,
+        event_labels=["FootStrike", "Toe-off"],
+        event_times=[0.5, 1.0],
+        event_used_omit=True,  # explicitly omit USED
+    )
+    events = get_events(data)
+    assert events == [C3DEvent("FootStrike", 0.5), C3DEvent("Toe-off", 1.0)]
+
+
+def test_get_events_explicit_used_parity() -> None:
+    """Regression for #4753: explicit USED=N yields same result as inferred."""
+    data = _synthetic_c3d_dict(
+        with_events=True,
+        event_labels=["A", "B"],
+        event_times=[0.1, 0.5],
+        event_used_omit=False,
+        event_used=2,
+    )
+    events = get_events(data)
+    assert events == [C3DEvent("A", 0.1), C3DEvent("B", 0.5)]
+
+
+def test_get_events_explicit_used_zero_honored() -> None:
+    """Regression for #4753: explicit USED=0 still yields no events."""
+    data = _synthetic_c3d_dict(
+        with_events=True,
+        event_labels=["A", "B"],
+        event_times=[0.1, 0.5],
+        event_used_omit=False,
+        event_used=0,
+    )
+    assert get_events(data) == []
+
+
+def test_get_events_no_event_group_returns_empty() -> None:
+    """Regression for #4753: no EVENT group at all yields [] without error."""
+    data = _synthetic_c3d_dict()  # no EVENT group
+    assert get_events(data) == []
+
+
 def test_get_events_skips_non_finite_time() -> None:
     data = _synthetic_c3d_dict(
         with_events=True,

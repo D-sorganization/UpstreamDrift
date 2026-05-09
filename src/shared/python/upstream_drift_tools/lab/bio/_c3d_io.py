@@ -110,18 +110,31 @@ def get_events(c3d_data: C3DMapping) -> list[C3DEvent]:
     if not event_parameters:
         return []
 
-    # EVENT:USED tells us how many events are actually defined
-    used = event_parameters.get("USED", {}).get("value", [0])
-    if not used or used[0] == 0:
-        return []
-    num_events = int(used[0])
-
     labels_raw: Iterable[str] = event_parameters.get("LABELS", {}).get("value", [])
     times = event_parameters.get("TIMES", {}).get("value")
     contexts_raw: Iterable[str] = event_parameters.get("CONTEXTS", {}).get("value", [])
 
     if times is None:
         return []
+
+    # EVENT:USED tells us how many events are actually defined.
+    # Real-world c3d files routinely omit USED while still containing valid
+    # LABELS/TIMES arrays. When USED is absent, infer the count from the
+    # available metadata rather than silently dropping all events.
+    # An explicit USED=0 is honored (caller deliberately marked the group empty).
+    used_param = event_parameters.get("USED")
+    if used_param is None:
+        # Missing USED: infer from LABELS / TIMES length.
+        labels_len = len(labels_raw) if hasattr(labels_raw, "__len__") else 0
+        times_len = int(np.asarray(times).shape[-1])
+        num_events = max(labels_len, times_len)
+        if num_events == 0:
+            return []
+    else:
+        used = used_param.get("value", [0])
+        if not used or used[0] == 0:
+            return []
+        num_events = int(used[0])
 
     times_array = np.asarray(times)
     if times_array.ndim == 2:
@@ -132,7 +145,11 @@ def get_events(c3d_data: C3DMapping) -> list[C3DEvent]:
     for idx in range(min(num_events, len(labels_raw))):
         time_value = float(times_array[idx]) if idx < len(times_array) else np.nan
         if np.isfinite(time_value):
-            label = str(labels_raw[idx]).strip() if idx < len(labels_raw) else f"Event_{idx}"
+            label = (
+                str(labels_raw[idx]).strip()
+                if idx < len(labels_raw)
+                else f"Event_{idx}"
+            )
             # Context is available but C3DEvent only has label/time for now
             # Could extend C3DEvent to include context if needed
             events.append(C3DEvent(label=label, time=time_value))

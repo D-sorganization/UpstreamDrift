@@ -26,6 +26,8 @@ def _synthetic_c3d_dict(
     event_times: list[float] | None = None,
     event_times_2d: bool = False,
     event_times_missing: bool = False,
+    event_used: int | None = None,
+    event_used_omit: bool = True,
     omit_analog_group: bool = False,
     analog_subframes: int = 10,
     point_data: np.ndarray | None = None,
@@ -114,6 +116,9 @@ def _synthetic_c3d_dict(
                 event_group["TIMES"] = {"value": arr}
             else:
                 event_group["TIMES"] = {"value": np.asarray(times)}
+        if not event_used_omit:
+            count = event_used if event_used is not None else len(labels)
+            event_group["USED"] = {"value": np.array([count])}
         parameters["EVENT"] = event_group
 
     if force_platform is not None:
