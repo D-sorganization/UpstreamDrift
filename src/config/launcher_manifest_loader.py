@@ -394,16 +394,23 @@ class LauncherManifest:
         """Get tile IDs in display order (alias for tile_ids)."""
         return self.tile_ids
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, *, include_hidden: bool = False) -> dict[str, Any]:
         """Serialize manifest for API responses.
+
+        Args:
+            include_hidden: When False (default), tiles flagged ``hidden`` are
+                excluded so legacy aliases do not appear as duplicate launcher
+                cards. The web dashboard renders tiles by category without
+                filtering ``hidden``, so the API must exclude them.
 
         Returns:
             Dictionary representation suitable for JSON serialization
         """
+        tiles = self.tiles if include_hidden else self.visible_tiles
         return {
             "version": self.version,
             "description": self.description,
-            "tiles": [t.to_dict() for t in self.tiles],
+            "tiles": [t.to_dict() for t in tiles],
         }
 
     def validate_logos(self) -> list[str]:
