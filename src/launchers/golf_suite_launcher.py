@@ -15,7 +15,15 @@ It does NOT use Docker. For Docker support, use `golf_launcher.py`.
 import os
 import subprocess
 import sys
+import warnings
 from pathlib import Path
+
+warnings.warn(
+    "golf_suite_launcher.py is deprecated and will be removed in a future release. "
+    "Please use UpstreamDrift's unified launcher (golf_launcher.py) instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import (
@@ -45,8 +53,17 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         if not PYQT6_AVAILABLE:
             raise ImportError("PyQt6 is required to run this launcher.")
         super().__init__()
-        self.setWindowTitle("Golf Modeling Suite - Local Launcher")
+        self.setWindowTitle("Golf Modeling Suite - Local Launcher (DEPRECATED)")
         self.resize(400, 300)
+
+        # Show deprecation warning dialog
+        QtWidgets.QMessageBox.warning(
+            self,
+            "Deprecation Warning",
+            "This legacy launcher is deprecated and will be removed in a future release.\n\n"
+            "Please use the new Unified UpstreamDrift Launcher which supports Docker, WSL, "
+            "and all physics engines in a single modern interface."
+        )
 
         # Paths - UPDATED FOR GOLF_MODELING_SUITE
         # Script location: UpstreamDrift/launchers/golf_suite_launcher.py
