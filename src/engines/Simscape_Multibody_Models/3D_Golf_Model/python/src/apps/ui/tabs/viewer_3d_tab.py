@@ -6,26 +6,54 @@ anatomical-subset segment table, marker-selection helpers, view-angle
 presets, event-frame quick-jump, marker-label toggling, CSV export,
 and an incremental-update render path that preallocates artists once
 per selection and only mutates them per frame for smooth scrubbing.
+
+User-defined segments are rendered through the canonical
+:class:`body_part_viz.renderers.MatplotlibRenderer`. Each segment's
+shape is built from its v2 :class:`SegmentVizSpec`, fitted via the
+appropriate :class:`ShapeFitter`, and added to the renderer once. The
+per-frame path issues a single ``update_frame`` call per shape — no
+artist rebuilds, no scene clears.
 """
 
 from __future__ import annotations
 
 import csv
+import logging
 import re
 from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import colors as mcolors
-from mpl_toolkits.mplot3d.art3d import Line3DCollection, Poly3DCollection
+from mpl_toolkits.mplot3d.art3d import Line3DCollection
 from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import Qt, QTimer
 
+from src.shared.python.body_part_viz import (
+    SegmentVizSpec,
+    ShapeTheme,
+)
+from src.shared.python.body_part_viz.asset_library import ShapeLibrary
+from src.shared.python.body_part_viz.fitters import (
+    BetweenTwoMarkersFitter,
+    ClusterKabschFitter,
+    ProcrustesAnisotropicFitter,
+)
+from src.shared.python.body_part_viz.renderers import MatplotlibRenderer
+from src.shared.python.body_part_viz.shapes import (
+    CapsuleShape,
+    CylinderShape,
+    EllipsoidShape,
+    LineShape,
+    MeshShape,
+)
 from src.shared.python.qt_utils.wheel_event_filter import suppress_wheel_on_widgets
 
 from ...core.models import C3DDataModel
-from ...services.segment_set_io import SegmentSpec
+from ...services.segment_set_io import SegmentSpec, spec_v1_to_v2
 from ..widgets.mpl_canvas import MplCanvas
+
+_LOGGER = logging.getLogger(__name__)
 
 # Anatomical-region colour map (generic, source-agnostic).
 _GROUP_COLORS: dict[str, tuple[float, float, float, float]] = {
@@ -37,6 +65,7 @@ _GROUP_COLORS: dict[str, tuple[float, float, float, float]] = {
     "left_leg": (0.85, 0.30, 0.30, 1.0),
     "right_leg": (0.65, 0.20, 0.20, 1.0),
     "auto": (0.30, 0.30, 0.30, 1.0),
+    "default": (0.30, 0.30, 0.30, 1.0),
 }
 
 
@@ -44,47 +73,12 @@ def _color_for_group(group: str) -> tuple[float, float, float, float]:
     return _GROUP_COLORS.get(group, _GROUP_COLORS["auto"])
 
 
-def _build_cylinder_verts(
-    pa: np.ndarray,
-    pb: np.ndarray,
-    radius: float,
-    n_facets: int,
-) -> list[list[tuple[float, float, float]]]:
-    """Return Poly3DCollection vertex lists for a closed cylinder.
-
-    Yields ``n_facets`` side quads plus two end-cap polygons. Endpoints with
-    zero length collapse to a single degenerate facet so the artist update is
-    side-effect free even at frames where markers coincide or are missing.
-    """
-    direction = pb - pa
-    length = float(np.linalg.norm(direction))
-    if not np.isfinite(length) or length <= 1e-9:
-        return [[(0.0, 0.0, 0.0), (0.0, 0.0, 0.0), (0.0, 0.0, 0.0)]]
-    axis = direction / length
-    # Build orthonormal basis.
-    helper = np.array([1.0, 0.0, 0.0])
-    if abs(float(axis @ helper)) > 0.95:
-        helper = np.array([0.0, 1.0, 0.0])
-    u = np.cross(axis, helper)
-    u /= max(np.linalg.norm(u), 1e-12)
-    v = np.cross(axis, u)
-    angles = np.linspace(0.0, 2.0 * np.pi, n_facets, endpoint=False)
-    ring_a = np.array([pa + radius * (np.cos(a) * u + np.sin(a) * v) for a in angles])
-    ring_b = np.array([pb + radius * (np.cos(a) * u + np.sin(a) * v) for a in angles])
-    polys: list[list[tuple[float, float, float]]] = []
-    for i in range(n_facets):
-        j = (i + 1) % n_facets
-        polys.append(
-            [
-                (float(ring_a[i, 0]), float(ring_a[i, 1]), float(ring_a[i, 2])),
-                (float(ring_a[j, 0]), float(ring_a[j, 1]), float(ring_a[j, 2])),
-                (float(ring_b[j, 0]), float(ring_b[j, 1]), float(ring_b[j, 2])),
-                (float(ring_b[i, 0]), float(ring_b[i, 1]), float(ring_b[i, 2])),
-            ]
-        )
-    polys.append([(float(p[0]), float(p[1]), float(p[2])) for p in ring_a])
-    polys.append([(float(p[0]), float(p[1]), float(p[2])) for p in ring_b])
-    return polys
+def _rgba_to_hex(rgba: tuple[float, float, float, float]) -> str:
+    r, g, b, _a = rgba
+    rh = int(round(r * 255))
+    gh = int(round(g * 255))
+    bh = int(round(b * 255))
+    return f"#{rh:02x}{gh:02x}{bh:02x}"
 
 
 try:
@@ -120,12 +114,7 @@ def _is_club_marker(name: str) -> bool:
 
 
 def _validate_speed(speed: float) -> float:
-    """Validate a playback speed multiplier.
-
-    Raises:
-        TypeError: if ``speed`` is not a real number.
-        ValueError: if ``speed`` is non-positive or non-finite.
-    """
+    """Validate a playback speed multiplier."""
     if isinstance(speed, bool) or not isinstance(speed, (int, float)):
         raise TypeError(f"speed must be a real number, got {type(speed).__name__}")
     if not np.isfinite(speed) or speed <= 0.0:
@@ -134,12 +123,7 @@ def _validate_speed(speed: float) -> float:
 
 
 def _validate_frame(frame: int, n_frames: int) -> int:
-    """Validate a frame index against ``n_frames``.
-
-    Raises:
-        TypeError: if ``frame`` is not an int.
-        ValueError: if ``frame`` is out of [0, n_frames).
-    """
+    """Validate a frame index against ``n_frames``."""
     if isinstance(frame, bool) or not isinstance(frame, int):
         raise TypeError(f"frame must be int, got {type(frame).__name__}")
     if n_frames <= 0:
@@ -147,6 +131,76 @@ def _validate_frame(frame: int, n_frames: int) -> int:
     if not 0 <= frame < n_frames:
         raise ValueError(f"frame {frame} out of range [0, {n_frames})")
     return frame
+
+
+def _build_shape_from_spec(
+    spec: SegmentVizSpec,
+    *,
+    library: ShapeLibrary | None,
+) -> Any:
+    """Construct a :class:`BodyPartShape` from a v2 spec.
+
+    Returns ``None`` when the shape cannot be constructed (e.g. mesh file
+    missing, unknown library entry). The viewer then skips that segment
+    rather than crashing the whole frame.
+    """
+    kind = spec.shape_kind
+    params = spec.shape_params
+    if kind == "line":
+        length = float(params.get("length", 1.0))
+        return LineShape(length=length)
+    if kind == "cylinder":
+        return CylinderShape(
+            length=float(params.get("length", 1.0)),
+            radius=float(params.get("radius", 0.015)),
+            n_facets=int(params.get("n_facets", 16)),
+        )
+    if kind == "ellipsoid":
+        return EllipsoidShape(
+            a=float(params["a"]),
+            b=float(params["b"]),
+            c=float(params["c"]),
+            n_lon=int(params.get("n_lon", 16)),
+            n_lat=int(params.get("n_lat", 8)),
+        )
+    if kind == "capsule":
+        return CapsuleShape(
+            length=float(params.get("length", 1.0)),
+            radius=float(params.get("radius", 0.015)),
+            n_facets=int(params.get("n_facets", 16)),
+            n_lat=int(params.get("n_lat", 8)),
+        )
+    if kind == "mesh_file":
+        try:
+            return MeshShape.load(
+                str(params["path"]),
+                max_vertices=int(params.get("max_vertices", 5000)),
+            )
+        except (FileNotFoundError, ValueError, OSError) as exc:
+            _LOGGER.warning("could not load mesh %s: %s", params.get("path"), exc)
+            return None
+    if kind == "library_shape":
+        if library is None:
+            return None
+        try:
+            return library.get(str(params["shape_id"]))
+        except (KeyError, FileNotFoundError, ValueError) as exc:
+            _LOGGER.warning(
+                "library shape %s not available: %s", params.get("shape_id"), exc
+            )
+            return None
+    # Composite is out-of-scope for the C3D viewer integration.
+    return None
+
+
+def _fitter_for_kind(kind: str) -> Any:
+    if kind == "between_two":
+        return BetweenTwoMarkersFitter()
+    if kind == "cluster_kabsch":
+        return ClusterKabschFitter()
+    if kind == "procrustes_anisotropic":
+        return ProcrustesAnisotropicFitter()
+    raise ValueError(f"unknown fitter_kind {kind!r}")
 
 
 class Viewer3DTab(QtWidgets.QWidget):
@@ -170,12 +224,15 @@ class Viewer3DTab(QtWidgets.QWidget):
         self._skeleton_segments: tuple[tuple[str, str], ...] = ()
         self._event_buttons: list[QtWidgets.QToolButton] = []
 
-        # User-defined segments (Segments tab -> here).
-        self._user_segments: tuple[SegmentSpec, ...] = ()
-        self._user_line_collection: Line3DCollection | None = None
-        self._user_cylinder_artists: list[Poly3DCollection] = []
-        self._cylinder_facets: int = 8
-        self._user_line_render_count: int = 0
+        # User-defined segments (Segments tab -> here). v2 store.
+        self._user_viz_segments: tuple[SegmentVizSpec, ...] = ()
+        # MatplotlibRenderer + per-segment handles. Each entry is
+        # (handle_or_None, shape_kind). A None handle means the segment
+        # could not be built (e.g. missing markers, missing mesh file)
+        # and should be skipped on frame updates.
+        self._renderer: MatplotlibRenderer | None = None
+        self._render_entries: list[tuple[str | None, str]] = []
+        self._shape_library: ShapeLibrary | None = None
 
         # Playback timer.
         self._timer = QTimer(self)
@@ -677,148 +734,195 @@ class Viewer3DTab(QtWidgets.QWidget):
         self._label_texts = []
         self._skeleton_collection = None
         self._skeleton_segments = ()
-        self._user_line_collection = None
-        self._user_cylinder_artists = []
+        if self._renderer is not None:
+            self._renderer.clear()
+        self._renderer = None
+        self._render_entries = []
         self._ax = None
 
     # ---------------------------------------------------- User segments API
 
-    def set_user_segments(self, segments: tuple[SegmentSpec, ...]) -> None:
-        """Receive a new user-defined segment set from the Segments tab."""
+    def set_user_segments(
+        self, segments: tuple[SegmentSpec | SegmentVizSpec, ...]
+    ) -> None:
+        """Receive a new user-defined segment set from the Segments tab.
+
+        Accepts both the legacy v1 :class:`SegmentSpec` tuple and the v2
+        :class:`SegmentVizSpec` tuple. v1 entries are converted to v2 in
+        place; the underlying renderer always operates on v2.
+        """
         if segments is None:
             raise ValueError("segments must be provided (use () for an empty set)")
-        self._user_segments = tuple(segments)
+        viz_specs: list[SegmentVizSpec] = []
+        for spec in segments:
+            if isinstance(spec, SegmentVizSpec):
+                viz_specs.append(spec)
+            elif isinstance(spec, SegmentSpec):
+                viz_specs.append(spec_v1_to_v2(spec))
+            else:
+                raise TypeError(
+                    "segments entries must be SegmentSpec or SegmentVizSpec; "
+                    f"got {type(spec).__name__}"
+                )
+        self._user_viz_segments = tuple(viz_specs)
         if self._ax is not None:
             self._rebuild_user_segment_artists()
             self._render_current_frame()
 
     @property
     def user_cylinder_count(self) -> int:
-        """Number of cylinder artists currently allocated (test helper)."""
-        return len(self._user_cylinder_artists)
+        """Number of mesh-bearing user-segment artists currently allocated.
+
+        Includes cylinders, ellipsoids, capsules, meshes, and library
+        shapes. Excludes line shapes (which use ``Line3DCollection``).
+        """
+        return sum(
+            1
+            for handle, kind in self._render_entries
+            if handle is not None and kind != "line"
+        )
 
     @property
     def user_line_segment_count(self) -> int:
-        """Number of line-geometry user segments currently rendered."""
-        return self._user_line_render_count
+        """Number of line-shape user segments currently rendered."""
+        return sum(
+            1
+            for handle, kind in self._render_entries
+            if handle is not None and kind == "line"
+        )
+
+    def _resolve_library(self) -> ShapeLibrary | None:
+        if self._shape_library is None:
+            try:
+                self._shape_library = ShapeLibrary.default()
+            except (FileNotFoundError, ValueError) as exc:
+                _LOGGER.warning("default shape library unavailable: %s", exc)
+                return None
+        return self._shape_library
+
+    def _markers_xyz(self, names: tuple[str, ...]) -> dict[str, np.ndarray] | None:
+        """Build a ``{name: (T, 3)}`` mapping for the segment's markers.
+
+        Returns ``None`` when any required marker is missing or empty so
+        the caller can skip the segment cleanly.
+        """
+        if self.model is None or self._n_frames <= 0:
+            return None
+        out: dict[str, np.ndarray] = {}
+        for name in names:
+            md = self.model.markers.get(name)
+            if md is None or md.position.size == 0:
+                return None
+            arr = np.asarray(md.position, dtype=float)
+            if arr.shape[0] < self._n_frames:
+                padded = np.full((self._n_frames, 3), np.nan, dtype=float)
+                padded[: arr.shape[0]] = arr
+                arr = padded
+            elif arr.shape[0] > self._n_frames:
+                arr = arr[: self._n_frames]
+            out[name] = arr
+        return out
+
+    def _theme_for_spec(self, spec: SegmentVizSpec) -> ShapeTheme:
+        """Prefer the spec's theme; fall back to anatomical-group color."""
+        rgba = _color_for_group(spec.theme.group)
+        # If the theme color is the v2 default (#1f77b4) and we have a
+        # group-specific color, override it for visual continuity with the
+        # legacy viewer.
+        if spec.theme.color == "#1f77b4" and spec.theme.group in _GROUP_COLORS:
+            return ShapeTheme(
+                color=_rgba_to_hex(rgba),
+                opacity=spec.theme.opacity,
+                edge_color=_rgba_to_hex(rgba),
+                edge_width=spec.theme.edge_width,
+                flat_shaded=spec.theme.flat_shaded,
+                group=spec.theme.group,
+            )
+        return spec.theme
 
     def _rebuild_user_segment_artists(self) -> None:
         ax = self._ax
         if ax is None:
             return
-        # Drop old artists.
-        if self._user_line_collection is not None:
+        # Drop the previous renderer (if any) and start fresh.
+        if self._renderer is not None:
+            self._renderer.clear()
+        self._renderer = MatplotlibRenderer(ax)
+        self._render_entries = []
+
+        if not self._user_viz_segments or self._n_frames <= 0:
+            return
+
+        library = self._resolve_library()
+
+        for spec in self._user_viz_segments:
+            shape = _build_shape_from_spec(spec, library=library)
+            if shape is None:
+                self._render_entries.append((None, spec.shape_kind))
+                continue
+            markers_xyz = self._markers_xyz(spec.binding.marker_names)
+            if markers_xyz is None:
+                self._render_entries.append((None, spec.shape_kind))
+                continue
             try:
-                self._user_line_collection.remove()
-            except (ValueError, AttributeError):
-                pass
-            self._user_line_collection = None
-        for art in self._user_cylinder_artists:
+                fitter = _fitter_for_kind(spec.fitter_kind)
+            except ValueError:
+                self._render_entries.append((None, spec.shape_kind))
+                continue
             try:
-                art.remove()
-            except (ValueError, AttributeError):
-                pass
-        self._user_cylinder_artists = []
-
-        line_specs = [s for s in self._user_segments if s.geometry == "line"]
-        cyl_specs = [s for s in self._user_segments if s.geometry == "cylinder"]
-
-        if line_specs:
-            self._user_line_collection = Line3DCollection(
-                [[(0.0, 0.0, 0.0), (0.0, 0.0, 0.0)]],
-                colors=[_color_for_group(s.group) for s in line_specs],
-                linewidths=2.0,
-                alpha=0.9,
-            )
-            ax.add_collection3d(self._user_line_collection)
-            self._user_line_collection.set_segments([])
-
-        for spec in cyl_specs:
-            poly = Poly3DCollection(
-                [[(0.0, 0.0, 0.0), (0.0, 0.0, 0.0), (0.0, 0.0, 0.0)]],
-                facecolors=[_color_for_group(spec.group)],
-                edgecolors=[_color_for_group(spec.group)],
-                alpha=0.85,
-            )
-            ax.add_collection3d(poly)
-            self._user_cylinder_artists.append(poly)
+                # Library-shape mesh has its own shape_id; rebind the binding
+                # to the shape for the fitter to find a rest-length.
+                effective_binding = spec.binding
+                if not effective_binding.rest_dimensions and shape.rest_dimensions:
+                    # Fitter expects a rest length on the binding for
+                    # between_two; sourcing it from the shape's first axis
+                    # is the canonical pattern.
+                    effective_binding = type(spec.binding)(
+                        kind=spec.binding.kind,
+                        marker_names=spec.binding.marker_names,
+                        rest_dimensions=(float(shape.rest_dimensions[0]),),
+                        rest_orientation_quat=spec.binding.rest_orientation_quat,
+                    )
+                fitted = fitter.fit(shape, effective_binding, markers_xyz)
+            except (KeyError, TypeError, ValueError) as exc:
+                _LOGGER.warning(
+                    "fit failed for segment %s: %s",
+                    spec.binding.marker_names,
+                    exc,
+                )
+                self._render_entries.append((None, spec.shape_kind))
+                continue
+            theme = self._theme_for_spec(spec)
+            try:
+                handle = self._renderer.add_shape(shape, fitted, theme)
+            except (TypeError, ValueError) as exc:
+                _LOGGER.warning(
+                    "renderer.add_shape failed for %s: %s", spec.shape_kind, exc
+                )
+                self._render_entries.append((None, spec.shape_kind))
+                continue
+            if not spec.visible:
+                self._renderer.set_visible(handle, False)
+            self._render_entries.append((handle, spec.shape_kind))
 
     def _update_user_segment_artists(self) -> None:
-        if (
-            self._ax is None
-            or not self._user_segments
-            or self.model is None
-            or self._n_frames <= 0
-        ):
-            if self._user_line_collection is not None:
-                self._user_line_collection.set_segments([])
-            for art in self._user_cylinder_artists:
-                art.set_verts([])
-            self._user_line_render_count = 0
+        if self._renderer is None or not self._user_viz_segments or self._n_frames <= 0:
             return
-        frame = self.slider_frame.value()
-        markers = self.model.markers
-        line_specs = [s for s in self._user_segments if s.geometry == "line"]
-        cyl_specs = [s for s in self._user_segments if s.geometry == "cylinder"]
-
-        line_segments: list[list[tuple[float, float, float]]] = []
-        for spec in line_specs:
-            if not spec.visible:
+        frame = int(self.slider_frame.value())
+        if not 0 <= frame < self._n_frames:
+            return
+        for entry, spec in zip(
+            self._render_entries, self._user_viz_segments, strict=False
+        ):
+            handle, _kind = entry
+            if handle is None:
                 continue
-            ma = markers.get(spec.a)
-            mb = markers.get(spec.b)
-            if (
-                ma is None
-                or mb is None
-                or ma.position.size == 0
-                or mb.position.size == 0
-            ):
-                continue
-            if frame >= ma.position.shape[0] or frame >= mb.position.shape[0]:
-                continue
-            pa = ma.position[frame]
-            pb = mb.position[frame]
-            if not (np.isfinite(pa).all() and np.isfinite(pb).all()):
-                continue
-            line_segments.append(
-                [
-                    (float(pa[0]), float(pa[1]), float(pa[2])),
-                    (float(pb[0]), float(pb[1]), float(pb[2])),
-                ]
-            )
-        if self._user_line_collection is not None:
-            self._user_line_collection.set_segments(line_segments)
-        self._user_line_render_count = len(line_segments)
-
-        for art, spec in zip(self._user_cylinder_artists, cyl_specs, strict=False):
-            if not spec.visible:
-                art.set_verts([])
-                continue
-            ma = markers.get(spec.a)
-            mb = markers.get(spec.b)
-            if (
-                ma is None
-                or mb is None
-                or ma.position.size == 0
-                or mb.position.size == 0
-            ):
-                art.set_verts([])
-                continue
-            if frame >= ma.position.shape[0] or frame >= mb.position.shape[0]:
-                art.set_verts([])
-                continue
-            pa = ma.position[frame]
-            pb = mb.position[frame]
-            if not (np.isfinite(pa).all() and np.isfinite(pb).all()):
-                art.set_verts([])
-                continue
-            verts = _build_cylinder_verts(
-                np.asarray(pa, dtype=float),
-                np.asarray(pb, dtype=float),
-                float(spec.radius),
-                self._cylinder_facets,
-            )
-            art.set_verts(verts)
+            try:
+                self._renderer.set_visible(handle, bool(spec.visible))
+                if spec.visible:
+                    self._renderer.update_frame(handle, frame)
+            except (KeyError, IndexError, TypeError) as exc:
+                _LOGGER.warning("renderer.update_frame failed: %s", exc)
 
     # -------------------------------------------------- Per-frame render
 
@@ -860,7 +964,7 @@ class Viewer3DTab(QtWidgets.QWidget):
         # Update skeleton segments.
         self._update_skeleton_segments()
 
-        # Update user-defined segments / cylinders.
+        # Update user-defined segments via the body_part_viz renderer.
         self._update_user_segment_artists()
 
         self.canvas_3d.draw_idle()

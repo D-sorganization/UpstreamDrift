@@ -109,8 +109,12 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         self.segments_tab = SegmentsTab()
         self.analysis_tab = AnalysisTab()
         self.force_plot_tab = ForcePlotTab()
-        # Plumb segment edits straight into the 3D viewer.
-        self.segments_tab.segments_changed.connect(self.viewer3d_tab.set_user_segments)
+        # Plumb segment edits straight into the 3D viewer. Use the v2
+        # signal so library / mesh / ellipsoid / capsule shapes survive
+        # the trip — the legacy ``segments_changed`` signal drops them.
+        self.segments_tab.viz_segments_changed.connect(
+            self.viewer3d_tab.set_user_segments
+        )
 
         self.tabs.addTab(self.overview_tab, "Overview")
         self.tabs.setTabToolTip(0, "Metadata and file information")

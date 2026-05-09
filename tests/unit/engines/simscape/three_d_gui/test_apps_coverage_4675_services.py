@@ -411,7 +411,9 @@ def test_segment_set_round_trip(tmp_path):
     assert reloaded.segments == segset.segments
 
     payload = to_dict(segset)
-    assert payload["schema_version"] == 1
+    # v1 SegmentSpec is now a deprecation shim over the v2 SegmentVizSet,
+    # so to_dict serialises in schema v2.
+    assert payload["schema_version"] == 2
     assert from_dict(payload).segments == segset.segments
 
     p = default_segment_set_path()
