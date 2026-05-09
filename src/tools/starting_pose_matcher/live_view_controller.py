@@ -27,7 +27,8 @@ from __future__ import annotations
 
 import contextlib
 import logging
-from typing import TYPE_CHECKING, Any
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -47,6 +48,145 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 logger = logging.getLogger(__name__)
+
+# Body skeleton renderer style. Mirrors
+# :data:`session_schema.BODY_SKELETON_STYLES`. Re-declared here as a
+# module constant so the controller does not import the schema module.
+BodySkeletonStyle = Literal["lines", "library_shapes"]
+BODY_SKELETON_STYLES: tuple[BodySkeletonStyle, ...] = ("lines", "library_shapes")
+DEFAULT_BODY_SKELETON_STYLE: BodySkeletonStyle = "lines"
+
+
+@dataclass
+class BodyLibraryShapesLayer(_LayerBase):
+    """Body skeleton rendered with :mod:`body_part_viz` library shapes.
+
+    Wraps a :class:`body_part_viz.renderers.MatplotlibRenderer` and a list
+    of fitted shapes resolved from
+    :class:`body_part_viz.asset_library.ShapeLibrary.default`. Per-frame
+    updates delegate to ``update_frame(handle)`` on the renderer; the
+    axes are never cleared.
+
+    Bindings whose required markers are absent from ``markers_xyz`` are
+    silently skipped — the layer renders whichever subset of canonical
+    body parts is present in the loaded data.
+    """
+
+    marker_xyz: np.ndarray | None = None  # (T, M, 3) — kept for label parity
+    marker_names: tuple[str, ...] = ()
+    _shape_names: tuple[str, ...] = ()
+    _handles: list[str] = field(default_factory=list, repr=False)
+    _renderer: Any | None = None  # body_part_viz MatplotlibRenderer
+    _ax: Any | None = field(default=None, repr=False)
+
+    def build(self, ax: Axes3D) -> None:
+        """Resolve library shapes for the loaded markers and add them.
+
+        Imports body_part_viz lazily so importing this controller does
+        not pull matplotlib internals on test paths that do not need it.
+        """
+        if self.marker_xyz is None or self.marker_xyz.size == 0:
+            return
+        if not self.marker_names:
+            return
+
+        # Lazy imports: keep the rest of the controller usable when
+        # body_part_viz is not on the path (legacy tests, pruned envs).
+        try:
+            from src.shared.python.body_part_viz.asset_library import ShapeLibrary
+            from src.shared.python.body_part_viz.fitters.between_two import (
+                BetweenTwoMarkersFitter,
+            )
+            from src.shared.python.body_part_viz.renderers.matplotlib_renderer import (
+                MatplotlibRenderer,
+            )
+            from src.shared.python.body_part_viz.theme import ShapeTheme
+        except Exception:  # pragma: no cover - optional dependency
+            logger.exception("body_part_viz import failed; library shapes unavailable")
+            return
+
+        try:
+            library = ShapeLibrary.default()
+        except Exception:  # pragma: no cover - missing asset bundle
+            logger.exception("ShapeLibrary.default() failed")
+            return
+
+        # Build a marker-name -> (T, 3) trajectory dict from the (T, M, 3)
+        # tensor. The fitter only reads the names it needs.
+        markers_xyz: dict[str, np.ndarray] = {
+            name: np.asarray(self.marker_xyz[:, idx, :], dtype=float)
+            for idx, name in enumerate(self.marker_names)
+        }
+
+        renderer = MatplotlibRenderer(ax)
+        fitter = BetweenTwoMarkersFitter()
+        # Iterate library names; default theme palette per group keeps
+        # the figure visually consistent across body parts.
+        theme = ShapeTheme(color="#7dd3fc", opacity=0.55, edge_color="#0c4a6e")
+
+        handles: list[str] = []
+        used: list[str] = []
+        for name in library.names():
+            try:
+                binding = library.binding_template(name)
+            except Exception:
+                logger.debug("library binding for %r unavailable", name, exc_info=True)
+                continue
+            # Only between-two bindings work without a cluster fitter
+            # implementation here. cluster/on-marker shapes are skipped
+            # for this integration; #4767 explicitly limits the canonical
+            # body parts to between-two segments.
+            if binding.kind.value != "between_two":
+                continue
+            if any(m not in markers_xyz for m in binding.marker_names):
+                continue
+            try:
+                shape = library.get(name)
+                fitted = fitter.fit(shape, binding, markers_xyz)
+                handle = renderer.add_shape(shape, fitted, theme)
+            except Exception:
+                logger.debug(
+                    "library shape %r could not be fitted/added", name, exc_info=True
+                )
+                continue
+            handles.append(handle)
+            used.append(name)
+
+        self._renderer = renderer
+        self._handles = handles
+        self._shape_names = tuple(used)
+        self._ax = ax
+        # Expose underlying matplotlib artists so the controller's
+        # tear-down + ``set_visible`` paths see them like any other
+        # layer's artists.
+        self._artists = [
+            entry.artist
+            for entry in renderer._entries.values()  # noqa: SLF001
+        ]
+        for art in self._artists:
+            art.set_visible(self._visible)
+
+    def update(self, frame: int) -> None:
+        if self._renderer is None or not self._handles:
+            return
+        if self.marker_xyz is None:
+            return
+        t = int(np.clip(frame, 0, self.marker_xyz.shape[0] - 1))
+        for handle in self._handles:
+            try:
+                self._renderer.update_frame(handle, t)
+            except Exception:  # pragma: no cover - defensive
+                logger.exception("library-shape update_frame failed")
+
+    @property
+    def shape_count(self) -> int:
+        """Return the number of library shapes currently rendered."""
+        return len(self._handles)
+
+    @property
+    def shape_names(self) -> tuple[str, ...]:
+        """Return the resolved library shape names in render order."""
+        return self._shape_names
 
 
 def _default_body_segments_safe(marker_names: tuple[str, ...]) -> list[tuple[int, int]]:
@@ -99,7 +239,13 @@ class LiveViewController:
         self,
         ax: Axes3D,
         canvas: FigureCanvasBase,
+        body_skeleton_style: BodySkeletonStyle = DEFAULT_BODY_SKELETON_STYLE,
     ) -> None:
+        if body_skeleton_style not in BODY_SKELETON_STYLES:
+            raise ValueError(
+                "body_skeleton_style must be one of "
+                f"{BODY_SKELETON_STYLES!r}; got {body_skeleton_style!r}"
+            )
         self._ax = ax
         self._canvas = canvas
         self._layers: dict[str, _LayerBase] = {}
@@ -109,6 +255,13 @@ class LiveViewController:
         # Cached marker positions so :meth:`equalize_3d_axes` can be
         # called once per target without re-loading.
         self._all_xyz_for_fit: np.ndarray | None = None
+        # Currently active body-skeleton renderer style. Switching styles
+        # via :meth:`set_body_skeleton_style` is non-destructive — the
+        # cached body data is preserved so only the rendering swaps.
+        self._body_skeleton_style: BodySkeletonStyle = body_skeleton_style
+        self._cached_body: Any | None = None
+        self._cached_club: Any | None = None
+        self._cached_ball: Any | None = None
 
     # -- accessors --------------------------------------------------------- #
 
@@ -169,11 +322,19 @@ class LiveViewController:
             layers["body_markers"] = BodyMarkerLayer(
                 key="body_markers", marker_xyz=marker_xyz
             )
-            pairs = _default_body_segments_safe(tuple(body.marker_names))
-            segments = precompute_segments_from_pairs(marker_xyz, pairs)
-            layers["body_skeleton"] = BodySkeletonLayer(
-                key="body_skeleton", segments=segments
-            )
+            marker_names = tuple(body.marker_names)
+            if self._body_skeleton_style == "library_shapes":
+                layers["body_skeleton"] = BodyLibraryShapesLayer(
+                    key="body_skeleton",
+                    marker_xyz=marker_xyz,
+                    marker_names=marker_names,
+                )
+            else:
+                pairs = _default_body_segments_safe(marker_names)
+                segments = precompute_segments_from_pairs(marker_xyz, pairs)
+                layers["body_skeleton"] = BodySkeletonLayer(
+                    key="body_skeleton", segments=segments
+                )
             layers["body_trail"] = TrailLayer(
                 key="body_markers",  # share visibility key with markers
                 marker_xyz=marker_xyz,
@@ -229,6 +390,11 @@ class LiveViewController:
         self._layers = layers
         self._n_frames = n_frames
         self._current_frame = 0
+        # Cache the inputs so a non-destructive style swap can rebuild
+        # without the caller reloading the C3D / CSV.
+        self._cached_body = body
+        self._cached_club = club
+        self._cached_ball = ball
 
         # Auto-fit the first time we see any data, so the user's first
         # load lands a properly framed view (acceptance criterion).
@@ -253,7 +419,51 @@ class LiveViewController:
         self._teardown_layers()
         self._n_frames = 0
         self._current_frame = 0
+        self._cached_body = None
+        self._cached_club = None
+        self._cached_ball = None
         self._request_redraw()
+
+    @property
+    def body_skeleton_style(self) -> BodySkeletonStyle:
+        """Return the active body-skeleton renderer style."""
+        return self._body_skeleton_style
+
+    def set_body_skeleton_style(self, style: BodySkeletonStyle) -> None:
+        """Swap the body-skeleton renderer non-destructively.
+
+        Rebuilds only the body-skeleton layer (keeps the loaded body
+        target, the body-marker layer, and the trail layer untouched
+        from the caller's perspective). The current frame is preserved.
+
+        ``style`` must be one of :data:`BODY_SKELETON_STYLES`. A no-op
+        is performed when ``style`` already matches the active mode.
+        """
+        if style not in BODY_SKELETON_STYLES:
+            raise ValueError(
+                f"style must be one of {BODY_SKELETON_STYLES!r}; got {style!r}"
+            )
+        if style == self._body_skeleton_style:
+            return
+        self._body_skeleton_style = style
+        # If no body has been loaded yet just record the choice; the
+        # next ``set_target`` call will pick it up.
+        if self._cached_body is None:
+            return
+
+        # Non-destructive swap: keep the cached body / club / ball, the
+        # current frame, and re-bind a fresh layer stack so the new
+        # body_skeleton picks up the new style. Reuses ``set_target``
+        # to avoid duplicating the layer-build path.
+        prev_frame = self._current_frame
+        # ``set_target`` resets ``_current_frame`` to 0; restore it.
+        self.set_target(
+            body=self._cached_body,
+            club=self._cached_club,
+            ball=self._cached_ball,
+        )
+        if self._n_frames:
+            self.set_frame(prev_frame)
 
     # -- frame / visibility ------------------------------------------------ #
 
@@ -334,4 +544,10 @@ def _finite_rows(positions: np.ndarray) -> np.ndarray:
     return positions[mask]
 
 
-__all__ = ["LiveViewController"]
+__all__ = [
+    "BODY_SKELETON_STYLES",
+    "DEFAULT_BODY_SKELETON_STYLE",
+    "BodyLibraryShapesLayer",
+    "BodySkeletonStyle",
+    "LiveViewController",
+]

@@ -110,10 +110,26 @@ from src.tools.starting_pose_matcher.skeleton_extractor import (
 )
 from src.tools.starting_pose_matcher.gui_source_panel import DataSourcesPanel
 from src.tools.starting_pose_matcher.session_schema import (
+    BODY_SKELETON_STYLES as _BODY_SKELETON_STYLES,
+    BodySkeletonBlock,
+    BodySkeletonStyleLiteral,
+    DEFAULT_BODY_SKELETON_STYLE as _DEFAULT_BODY_SKELETON_STYLE,
     DataSourcesBlock,
+    parse_body_skeleton,
     parse_data_sources,
+    serialize_body_skeleton,
     serialize_data_sources,
 )
+
+# Display labels shown in the body-skeleton style combo. Mapping is
+# bidirectional: combo currentText() -> schema literal -> combo text.
+_BODY_SKELETON_STYLE_LABELS: dict[str, BodySkeletonStyleLiteral] = {
+    "Lines (default)": "lines",
+    "Library shapes": "library_shapes",
+}
+_BODY_SKELETON_STYLE_LABEL_BY_KEY: dict[BodySkeletonStyleLiteral, str] = {
+    v: k for k, v in _BODY_SKELETON_STYLE_LABELS.items()
+}
 
 # Shared 3D-rendering helpers (per #4376 — DRY with the rest of the
 # motion-matching diagnostics).  Used by ``_setup_axes`` to fit the view
@@ -562,6 +578,11 @@ class StartingPoseMatcher(QMainWindow):
         #   "Both"      animate both, time-aligned at the impact frame
         self.playback_target: str = "Mocap"
 
+        # Body-skeleton renderer style — "lines" | "library_shapes" (issue #4767).
+        self.body_skeleton_style: BodySkeletonStyleLiteral = (
+            _DEFAULT_BODY_SKELETON_STYLE
+        )
+
         # Event labels (Address / Top of Backswing / Impact / Finish, or
         # author-specific conventions).  Mutated via the Event-Labels
         # group; persisted to session JSON.
@@ -667,7 +688,11 @@ class StartingPoseMatcher(QMainWindow):
         # Live multi-source view controller (issue #4512). Owns the layer
         # stack that renders BodyTarget / ClubTarget / BallImpact data on
         # the same axes the static-pose path uses.
-        self._live_view = LiveViewController(self.ax, self.canvas)
+        self._live_view = LiveViewController(
+            self.ax,
+            self.canvas,
+            body_skeleton_style=self.body_skeleton_style,
+        )
         self._live_body_target: Any | None = None
 
     def _attach_help_button(self, box: QGroupBox, section: str) -> None:
@@ -751,6 +776,29 @@ class StartingPoseMatcher(QMainWindow):
             else None
         )
         gl.addWidget(self.cb_show_body_skeleton, 6, 1, 1, 1)
+        # Body skeleton style combo — switches between line segments
+        # (legacy / fast) and body_part_viz library shapes (richer
+        # figure). Issue #4767. Default tracks ``body_skeleton_style``
+        # so a session-restored choice survives this build.
+        gl.addWidget(QLabel("Body skeleton style:"), 7, 0)
+        self.combo_body_skeleton_style = QComboBox()
+        for label in _BODY_SKELETON_STYLE_LABELS:
+            self.combo_body_skeleton_style.addItem(label)
+        current_label = _BODY_SKELETON_STYLE_LABEL_BY_KEY.get(
+            self.body_skeleton_style,
+            _BODY_SKELETON_STYLE_LABEL_BY_KEY[_DEFAULT_BODY_SKELETON_STYLE],
+        )
+        self.combo_body_skeleton_style.setCurrentText(current_label)
+        self.combo_body_skeleton_style.setToolTip(
+            "Choose how the body skeleton is rendered. "
+            "Lines (default) draws plain segments between marker pairs; "
+            "Library shapes uses body_part_viz meshes (head, torso, "
+            "upper_arm, ...) bound to canonical Plug-in-Gait markers."
+        )
+        self.combo_body_skeleton_style.currentTextChanged.connect(
+            self._on_body_skeleton_style_changed
+        )
+        gl.addWidget(self.combo_body_skeleton_style, 7, 1, 1, 1)
         return box
 
     def _build_event_labels_box(self) -> QGroupBox:
@@ -1534,6 +1582,23 @@ class StartingPoseMatcher(QMainWindow):
         self.playback_target = target
         self._redraw()
 
+    def _on_body_skeleton_style_changed(self, label: str) -> None:
+        """Swap the body-skeleton renderer when the user picks a style.
+
+        The swap is non-destructive: the loaded body target stays and
+        the controller rebuilds the skeleton layer in place, preserving
+        the current frame.
+        """
+        style = _BODY_SKELETON_STYLE_LABELS.get(label, _DEFAULT_BODY_SKELETON_STYLE)
+        if style == self.body_skeleton_style:
+            return
+        self.body_skeleton_style = style
+        live_view = getattr(self, "_live_view", None)
+        if live_view is None:
+            return
+        live_view.set_body_skeleton_style(style)
+        self.canvas.draw_idle()
+
     def _load_trajectory(self, slot_key: str) -> None:
         """Load a Simscape CSV trajectory for the given pose slot."""
         slot = self.poses.get(slot_key)
@@ -2163,6 +2228,11 @@ class StartingPoseMatcher(QMainWindow):
             # not have this block; ``_apply_session`` treats absence as the
             # empty default.
             "data_sources": self._serialize_data_sources(),
+            # Issue #4767: body_part_viz renderer style.  Pre-v5 sessions
+            # do not carry this block; loaders fall back to "lines".
+            "body_skeleton": serialize_body_skeleton(
+                BodySkeletonBlock(style=self.body_skeleton_style)
+            ),
         }
 
     def _on_save_session_clicked(self) -> None:
@@ -2422,6 +2492,10 @@ class StartingPoseMatcher(QMainWindow):
 
         # Issue #4480: data-sources panel.  Missing block → empty default.
         self._apply_data_sources(d.get("data_sources"))
+
+        # Issue #4767: body-skeleton renderer style.  Missing block on
+        # pre-v5 sessions falls back to the default ("lines").
+        self._apply_body_skeleton_block(d.get("body_skeleton"))
 
         self._redraw()
 
@@ -2924,6 +2998,26 @@ class StartingPoseMatcher(QMainWindow):
         """Restore the data-sources panel from a (possibly missing) block."""
         parsed: DataSourcesBlock = parse_data_sources(block)
         self.source_panel.restore(parsed)
+
+    def _apply_body_skeleton_block(self, block: dict[str, Any] | None) -> None:
+        """Restore the body-skeleton renderer style from session JSON.
+
+        Missing or unrecognised blocks fall back to the default style.
+        Updates the combo widget without firing the change signal so a
+        load does not double-trigger a rebuild.
+        """
+        parsed: BodySkeletonBlock = parse_body_skeleton(block)
+        if parsed.style not in _BODY_SKELETON_STYLES:
+            return
+        self.body_skeleton_style = parsed.style
+        if hasattr(self, "combo_body_skeleton_style"):
+            label = _BODY_SKELETON_STYLE_LABEL_BY_KEY.get(parsed.style)
+            if label is not None:
+                with QSignalBlocker(self.combo_body_skeleton_style):
+                    self.combo_body_skeleton_style.setCurrentText(label)
+        live_view = getattr(self, "_live_view", None)
+        if live_view is not None:
+            live_view.set_body_skeleton_style(parsed.style)
 
 
 # --------------------------------------------------------------------------- #
