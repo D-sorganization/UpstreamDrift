@@ -12,6 +12,8 @@ issues of EPIC #4796.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any
+
 from ._types import RGBATuple
 from .channels import (
     DataChannel,
@@ -59,6 +61,9 @@ try:
 except Exception:  # pragma: no cover - optional GUI dependency (PyQt6)
     _WIDGET_NAMES = ()
 
+if TYPE_CHECKING:  # pragma: no cover - typing only
+    from .renderers.pyqtgl import PyQtGLMarkerRenderer
+
 __all__ = [
     "BUILTIN_PRESET_NAMES",
     "SCHEMA_VERSION",
@@ -79,6 +84,7 @@ __all__ = [
     "PlotStyleSet",
     "PlotStyleSpec",
     "PresetLibrary",
+    "PyQtGLMarkerRenderer",
     "RGBATuple",
     "StaticColor",
     "derivative_channel",
@@ -94,3 +100,14 @@ __all__ = [
 # optional PyQt6 import succeeded above.
 __all__.extend(_WIDGET_NAMES)
 __all__.sort()
+
+
+def __getattr__(name: str) -> Any:
+    """Lazy attribute access for optional / heavy renderers."""
+    if name == "PyQtGLMarkerRenderer":
+        from .renderers.pyqtgl import (  # noqa: PLC0415 - intentional lazy import
+            PyQtGLMarkerRenderer,
+        )
+
+        return PyQtGLMarkerRenderer
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
