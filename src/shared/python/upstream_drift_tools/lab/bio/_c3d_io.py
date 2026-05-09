@@ -92,25 +92,50 @@ def get_analog_details(
 
 
 def get_events(c3d_data: C3DMapping) -> list[C3DEvent]:
-    """Extract event markers from loaded C3D data."""
+    """Extract event markers from loaded C3D data.
+
+    Reads the EVENT parameter group including:
+    - EVENT:LABELS - event names
+    - EVENT:TIMES - event times in seconds
+    - EVENT:USED - number of active events
+    - EVENT:CONTEXTS - event context (e.g., 'General', 'FootStrike')
+
+    Args:
+        c3d_data: Loaded C3D data from ezc3d.
+
+    Returns:
+        List of C3DEvent objects with label and time.
+    """
     event_parameters = c3d_data["parameters"].get("EVENT")
     if not event_parameters:
         return []
 
+    # EVENT:USED tells us how many events are actually defined
+    used = event_parameters.get("USED", {}).get("value", [0])
+    if not used or used[0] == 0:
+        return []
+    num_events = int(used[0])
+
     labels_raw: Iterable[str] = event_parameters.get("LABELS", {}).get("value", [])
     times = event_parameters.get("TIMES", {}).get("value")
+    contexts_raw: Iterable[str] = event_parameters.get("CONTEXTS", {}).get("value", [])
+
     if times is None:
         return []
 
     times_array = np.asarray(times)
     if times_array.ndim == 2:
+        # ezc3d returns (2, N) for times: [cycle_display, actual_times]
         times_array = times_array[1, :]
 
     events: list[C3DEvent] = []
-    for idx, label in enumerate(labels_raw):
+    for idx in range(min(num_events, len(labels_raw))):
         time_value = float(times_array[idx]) if idx < len(times_array) else np.nan
         if np.isfinite(time_value):
-            events.append(C3DEvent(label=str(label).strip(), time=time_value))
+            label = str(labels_raw[idx]).strip() if idx < len(labels_raw) else f"Event_{idx}"
+            # Context is available but C3DEvent only has label/time for now
+            # Could extend C3DEvent to include context if needed
+            events.append(C3DEvent(label=label, time=time_value))
 
     return events
 
