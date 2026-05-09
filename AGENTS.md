@@ -153,6 +153,44 @@ the modules most often missed.
   and the consolidated
   [`docs/user_guide/anthropometrics.md`](docs/user_guide/anthropometrics.md).
 
+### Plot Style Toolkit
+`src/shared/python/plot_style/`
+- Canonical marker-styling stack for every tool that draws markers
+  (C3D Viewer, starting-pose matcher, cross-engine dashboard).  See
+  [ADR 0011](docs/adr/0011-plot-style-toolkit.md).
+- `MarkerStyle`, `MarkerShape`, `CustomMeshSpec` — frozen dataclasses
+  describing every visual property of a marker except its position.
+- `StaticColor`, `PaletteColor`, `DataDrivenColor` — three
+  `ColorScale` variants. `MarkerStyle.fill_color` accepts any of them;
+  data-driven colouring (by clubhead speed, force magnitude, per-frame
+  error, ...) is a first-class feature.
+- `MarkerRenderer`, `MarkerShapeRenderer`, `ColorResolver` — three
+  runtime-checkable Protocols.  Implementations live under
+  `renderers/`, `shapes/`, `resolvers/`.
+- `MatplotlibMarkerRenderer` — **canonical 2D / 3D marker renderer for
+  any new tool that needs marker rendering.**  A `PyQtGLMarkerRenderer`
+  ships alongside for tools that need GPU-rate redraws; both implement
+  the same `MarkerRenderer` Protocol.
+- `COLORMAP_REGISTRY` (via `get_colormap` / `register_custom_colormap`),
+  `SHAPE_REGISTRY`, `RESOLVER_REGISTRY` — dispatch tables that go from
+  enum / dataclass to renderer-ready object without isinstance ladders.
+- `PresetLibrary.default()` — four curated themes (`default`,
+  `scientific_violet`, `monochrome`, `high_contrast`) in
+  `BUILTIN_PRESET_NAMES`.  JSON v1 round-trip via `PlotStyleSet.save` /
+  `PlotStyleSet.load`.
+- `MarkerStylePicker`, `ColorPicker`, `ColormapPicker`,
+  `DataChannelEditor` — PyQt6 widget surface (lazy import — headless
+  consumers can still `import plot_style`).
+- See `docs/user_guide/plot_style/` for end-user workflow guides:
+  - [`quickstart.md`](docs/user_guide/plot_style/quickstart.md) —
+    pick a marker shape + color, load a preset, apply to a renderer.
+  - [`data_driven_coloring.md`](docs/user_guide/plot_style/data_driven_coloring.md) —
+    color markers by clubhead speed / force / error; bulk path for
+    animation playback.
+  - [`colormap_author_guide.md`](docs/user_guide/plot_style/colormap_author_guide.md) —
+    register custom colormaps and palettes, naming conventions,
+    perceptually-uniform recommendations.
+
 ### Pose editor (interactive joint-angle UI)
 `src/shared/python/pose_editor/`
 - `core.{JointType, JointInfo, PoseEditorState}` — joint metadata
