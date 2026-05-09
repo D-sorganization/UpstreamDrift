@@ -22,7 +22,7 @@ import numpy as np
 from .colors import ColorScale
 from .markers import MarkerStyle
 
-__all__ = ["ColorResolver", "MarkerRenderer"]
+__all__ = ["ColorResolver", "MarkerRenderer", "MarkerShapeRenderer"]
 
 
 @runtime_checkable
@@ -75,6 +75,39 @@ class MarkerRenderer(Protocol):
 
     def remove(self, handle: str) -> None:
         """Remove the markers identified by ``handle`` from the scene."""
+        ...
+
+
+@runtime_checkable
+class MarkerShapeRenderer(Protocol):
+    """Backend-agnostic marker-shape primitive.
+
+    A shape renderer turns a :class:`MarkerStyle` into a triangle mesh
+    expressed in the marker's local frame. The mesh is centred on the
+    origin and scaled so its bounding sphere has radius
+    ``style.size_px / 2`` (i.e. the diameter equals ``size_px``). Higher
+    layers translate the mesh to per-marker world positions and apply
+    per-pixel sizing if the backend works in screen coordinates.
+    """
+
+    shape_id: str
+
+    def mesh(self, style: MarkerStyle) -> tuple[np.ndarray, np.ndarray]:
+        """Return ``(vertices, faces)`` for ``style``.
+
+        Parameters
+        ----------
+        style:
+            Marker style. ``style.size_px`` controls the linear scale.
+
+        Returns
+        -------
+        vertices:
+            ``(V, 3)`` ``float64`` ndarray of vertex positions in the
+            marker-local frame, scaled by ``size_px / 2``.
+        faces:
+            ``(F, 3)`` ``int64`` ndarray of triangle indices.
+        """
         ...
 
 

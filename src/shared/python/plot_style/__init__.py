@@ -26,7 +26,7 @@ from .colormaps import (
     resolve_colormap_alias,
 )
 from .colors import ColorScale, DataDrivenColor, PaletteColor, StaticColor
-from .contracts import ColorResolver, MarkerRenderer
+from .contracts import ColorResolver, MarkerRenderer, MarkerShapeRenderer
 from .markers import CustomMeshSpec, MarkerShape, MarkerStyle
 from .persistence import SCHEMA_VERSION, PlotStyleSet, PlotStyleSpec
 from .registry import (
@@ -48,6 +48,7 @@ __all__ = [
     "DataDrivenColor",
     "MarkerRenderer",
     "MarkerShape",
+    "MarkerShapeRenderer",
     "MarkerStyle",
     "PaletteColor",
     "PlotStyleSet",
