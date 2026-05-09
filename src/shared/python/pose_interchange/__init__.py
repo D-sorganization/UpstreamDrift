@@ -29,6 +29,11 @@ from src.shared.python.pose_interchange.canonical import (
     canonical_from_reference_setup,
     canonical_zero_pose,
 )
+from src.shared.python.pose_interchange.live_kinematics import (
+    CapabilityError,
+    LiveKinematicsService,
+    ServiceCapabilities,
+)
 from src.shared.python.pose_interchange.protocol import (
     JointSlot,
     PoseConventionAdapter,
@@ -43,8 +48,11 @@ from src.shared.python.pose_interchange.se3 import (
 __all__ = [
     "CONVENTION_TAG",
     "CanonicalPose",
+    "CapabilityError",
     "JointSlot",
+    "LiveKinematicsService",
     "PoseConventionAdapter",
+    "ServiceCapabilities",
     "canonical_from_reference_setup",
     "canonical_zero_pose",
     "compose_se3",
