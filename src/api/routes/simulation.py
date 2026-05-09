@@ -30,20 +30,20 @@ router = APIRouter()
 @router.post("/simulate", response_model=SimulationResponse)
 @limiter.limit(get_limit("API_LIMIT_SIMULATE", "5/minute"))
 @precondition(
-    lambda http_request, request, service=None, logger=None: request is not None,
+    lambda request, payload, service=None, logger=None: payload is not None,
     "Simulation request must not be None",
 )
 async def run_simulation(
-    http_request: Request,
-    request: SimulationRequest,
+    request: Request,
+    payload: SimulationRequest,
     service: SimulationService = Depends(get_simulation_service),
     logger: Any = Depends(get_logger),
 ) -> SimulationResponse:
     """Run a physics simulation.
 
     Args:
-        http_request: FastAPI request object (used by the rate limiter).
-        request: Simulation parameters.
+        request: FastAPI request object (used by the rate limiter).
+        payload: Simulation parameters.
         service: Injected simulation service.
         logger: Injected logger.
 
@@ -54,7 +54,7 @@ async def run_simulation(
         HTTPException: On simulation failure.
     """
     try:
-        result = await service.run_simulation(request)
+        result = await service.run_simulation(payload)
         return result
     except TimeoutError as exc:
         if logger:
@@ -83,8 +83,8 @@ async def run_simulation(
 @router.post("/simulate/async")
 @limiter.limit(get_limit("API_LIMIT_SIMULATE_ASYNC", "10/minute"))
 async def run_simulation_async(
-    http_request: Request,
-    request: SimulationRequest,
+    request: Request,
+    payload: SimulationRequest,
     background_tasks: BackgroundTasks,
     service: SimulationService = Depends(get_simulation_service),
     task_manager: Any = Depends(get_task_manager),
@@ -92,8 +92,8 @@ async def run_simulation_async(
     """Start an asynchronous simulation.
 
     Args:
-        http_request: FastAPI request object (used by the rate limiter).
-        request: Simulation parameters.
+        request: FastAPI request object (used by the rate limiter).
+        payload: Simulation parameters.
         background_tasks: FastAPI background task manager.
         service: Injected simulation service.
         task_manager: Injected task manager for tracking.
@@ -101,8 +101,8 @@ async def run_simulation_async(
     Returns:
         Task ID and initial status.
     """
-    if not (request is not None):
-        raise ValueError("request must be provided")
+    if not (payload is not None):
+        raise ValueError("payload must be provided")
     task_id = str(uuid.uuid4())
 
     await task_manager.set(
@@ -116,7 +116,7 @@ async def run_simulation_async(
     background_tasks.add_task(
         service.run_simulation_background,
         task_id,
-        request,
+        payload,
         task_manager,
     )
 

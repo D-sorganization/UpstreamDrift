@@ -123,13 +123,12 @@ class GreenContourResponse(BaseModel):
 @router.post("/simulate", response_model=PuttSimulationResponse)
 @limiter.limit(get_limit("API_LIMIT_PUTT_SIMULATE", "10/minute"))
 @precondition(
-    lambda http_request, request: request.direction_x != 0.0
-    or request.direction_y != 0.0,
+    lambda request, payload: payload.direction_x != 0.0 or payload.direction_y != 0.0,
     "Putt direction vector must not be zero",
 )
 @handle_api_errors
 async def simulate_putt(
-    http_request: Request, request: PuttSimulationRequest
+    request: Request, payload: PuttSimulationRequest
 ) -> PuttSimulationResponse:
     """Simulate a single putt with given parameters.
 
@@ -149,31 +148,31 @@ async def simulate_putt(
         TurfProperties,
     )
 
-    turf = TurfProperties(stimp_rating=request.stimp_rating)
+    turf = TurfProperties(stimp_rating=payload.stimp_rating)
     green = GreenSurface(
-        width=request.green_width,
-        height=request.green_height,
+        width=payload.green_width,
+        height=payload.green_height,
         turf=turf,
     )
-    green.set_hole_position(np.array([request.hole_x, request.hole_y]))
+    green.set_hole_position(np.array([payload.hole_x, payload.hole_y]))
 
     config = SimulationConfig(record_trajectory=True)
     sim = PuttingGreenSimulator(green=green, config=config)
 
-    if request.wind_speed > 0:
+    if payload.wind_speed > 0:
         sim.set_wind(
-            request.wind_speed,
-            np.array([request.wind_direction_x, request.wind_direction_y]),
+            payload.wind_speed,
+            np.array([payload.wind_direction_x, payload.wind_direction_y]),
         )
 
-    direction = np.array([request.direction_x, request.direction_y])
+    direction = np.array([payload.direction_x, payload.direction_y])
     norm = np.linalg.norm(direction)
     if norm > 0:
         direction = direction / norm
 
-    stroke = StrokeParameters(speed=request.speed, direction=direction)
+    stroke = StrokeParameters(speed=payload.speed, direction=direction)
     result = sim.simulate_putt(
-        stroke, ball_position=np.array([request.ball_x, request.ball_y])
+        stroke, ball_position=np.array([payload.ball_x, payload.ball_y])
     )
 
     return PuttSimulationResponse(
@@ -334,7 +333,9 @@ async def get_green_contours(
 
     for i in range(resolution):
         for j in range(resolution):
-            elevations[i, j] = green.get_elevation(grid_x[i, j], grid_y[i, j])  # type: ignore[attr-defined]
+            elevations[i, j] = green.get_elevation_at(
+                np.array([grid_x[i, j], grid_y[i, j]])
+            )  # type: ignore[attr-defined]
 
     return GreenContourResponse(
         width=width,
