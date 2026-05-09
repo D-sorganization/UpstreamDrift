@@ -4,6 +4,8 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from ._c3d_marker_set import MarkerSet, MarkerSetMismatchError  # noqa: F401
+
 SCHEMA_VERSION = "1.0"
 
 BIOMECHANICAL_MARKER_MIN_M = 0.001
@@ -80,6 +82,7 @@ class C3DMetadata:
     analog_rate: float | None
     events: list[C3DEvent]
     force_plates: tuple[ForcePlateCalibration, ...] = field(default_factory=tuple)
+    marker_set: MarkerSet = MarkerSet.UNKNOWN
 
     def __post_init__(self) -> None:
         """Validate metadata fields."""

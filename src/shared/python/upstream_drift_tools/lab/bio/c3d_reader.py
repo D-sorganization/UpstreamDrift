@@ -29,6 +29,11 @@ from ._c3d_io import (
     load_c3d,
     unit_scale,
 )
+from ._c3d_marker_set import (
+    MarkerSet,
+    MarkerSetMismatchError,
+    detect_marker_set,
+)
 from ._c3d_markers import build_points_dataframe
 from ._c3d_models import (
     BIOMECHANICAL_MARKER_MAX_M,
@@ -47,6 +52,9 @@ __all__ = [
     "C3DMapping",
     "C3DMetadata",
     "ForcePlateCalibration",
+    "MarkerSet",
+    "MarkerSetMismatchError",
+    "detect_marker_set",
     "BIOMECHANICAL_MARKER_MAX_M",
     "BIOMECHANICAL_MARKER_MIN_M",
     "SCHEMA_VERSION",

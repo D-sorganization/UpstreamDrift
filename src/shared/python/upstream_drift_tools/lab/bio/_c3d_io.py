@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 
 from ...utils.logging import get_logger, log_execution_time
+from ._c3d_marker_set import detect_marker_set
 from ._c3d_models import (
     SCHEMA_VERSION,
     C3DEvent,
@@ -329,6 +330,7 @@ def build_metadata(c3d_data: C3DMapping, file_path: Path) -> C3DMetadata:
     analog_labels, analog_rate, analog_units = get_analog_details(c3d_data)
     events = get_events(c3d_data)
     force_plates = get_force_platforms(c3d_data, len(analog_labels))
+    marker_set = detect_marker_set(marker_labels, c3d_data.get("parameters"))
     return C3DMetadata(
         marker_labels=marker_labels,
         frame_count=frame_count,
@@ -339,6 +341,7 @@ def build_metadata(c3d_data: C3DMapping, file_path: Path) -> C3DMetadata:
         analog_rate=analog_rate,
         events=events,
         force_plates=force_plates,
+        marker_set=marker_set,
     )
 
 

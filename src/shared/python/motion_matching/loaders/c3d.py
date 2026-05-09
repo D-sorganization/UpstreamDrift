@@ -17,6 +17,10 @@ import pandas as pd
 
 from src.shared.python.core.contracts import postcondition, precondition
 from src.shared.python.upstream_drift_tools.lab.bio.c3d_reader import C3DDataReader
+from src.shared.python.upstream_drift_tools.lab.bio._c3d_marker_set import (
+    MarkerSet,
+    MarkerSetMismatchError,
+)
 from src.shared.python.upstream_drift_tools.lab.bio._c3d_models import C3DEvent
 
 from ..club_target import AlignOptions, ClubTarget, SourceProvenance
@@ -91,6 +95,7 @@ def load_club_target_c3d(
     opts: AlignOptions,
     *,
     event_label_for_alignment: str | None = None,
+    marker_set_override: MarkerSet | None = None,
 ) -> ClubTarget:
     """Load a cluster-marker C3D file into a canonical ``ClubTarget``.
 
@@ -116,6 +121,32 @@ def load_club_target_c3d(
     metadata = reader.get_metadata()
     df = reader.points_dataframe(include_time=True, target_units="m")
     labels = list(metadata.marker_labels)
+
+    detected = getattr(metadata, "marker_set", MarkerSet.UNKNOWN)
+    # Per issue #4710: don't return a target with NaN club poses for files
+    # whose marker set we can't classify. Only raise when no fallback
+    # cluster/butt/head label is available either, to preserve behaviour
+    # for legacy files predating the marker-set registry.
+    if (
+        detected is MarkerSet.UNKNOWN
+        and marker_set_override is None
+        and not has_marker_clusters(path.name, labels)
+        and (
+            _pick_marker(labels, BUTT_CANDIDATES) is None
+            or _pick_marker(labels, HEAD_CANDIDATES) is None
+        )
+    ):
+        raise MarkerSetMismatchError(
+            (
+                f"C3D file {path.name} has an unrecognised marker set "
+                "and no club butt/head markers; pass "
+                "marker_set_override=MarkerSet.GOLF_CLUSTER to force "
+                "cluster-marker handling, or supply a file with a "
+                "registered marker set."
+            ),
+            detected=detected,
+            labels=labels,
+        )
 
     if has_marker_clusters(path.name, labels):
         logger.info(
