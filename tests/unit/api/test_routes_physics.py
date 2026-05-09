@@ -81,8 +81,8 @@ def app(mock_engine_manager, mock_simulation_service) -> FastAPI:
     test_app = FastAPI()
     test_app.include_router(router)
     test_app.dependency_overrides[get_engine_manager] = lambda: mock_engine_manager
-    test_app.dependency_overrides[get_simulation_service] = (
-        lambda: mock_simulation_service
+    test_app.dependency_overrides[get_simulation_service] = lambda: (
+        mock_simulation_service
     )
     clear_physics_caches()
     return test_app

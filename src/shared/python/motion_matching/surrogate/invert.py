@@ -222,8 +222,8 @@ def _make_lr_schedule(opts: InvertOptions) -> callable[[int], float]:
     if opts.schedule == "constant":
         return lambda _it: base
     # Cosine annealing from base to 0 over n iterations.
-    return (
-        lambda it: 0.5 * base * (1.0 + np.cos(np.pi * min(it, n - 1) / max(n - 1, 1)))
+    return lambda it: (
+        0.5 * base * (1.0 + np.cos(np.pi * min(it, n - 1) / max(n - 1, 1)))
     )
 
 

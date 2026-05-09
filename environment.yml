@@ -55,6 +55,7 @@ dependencies:
       - alembic>=1.13.0
       - types-PyYAML>=6.0
       - scipy-stubs>=1.13.0
+      - lxml>=5.0.0
       - PyQt6>=6.5.0
       - pytest-qt>=4.2.0
       - -e .

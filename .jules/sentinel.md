@@ -84,3 +84,7 @@
 **Vulnerability:** Direct use of `subprocess.Popen` without command validation in `ProcessWorker`.
 **Learning:** Raw subprocess calls can allow arbitrary command injection if unsanitized inputs are provided as command arguments.
 **Prevention:** Always use the custom `secure_popen` wrapper from `src.shared.python.security.secure_subprocess` which provides validation against allowed commands and prevents dangerous arguments like `shell=True`.
+## 2024-05-09 - [Insecure Deserialization in Imitation Learning Models]
+**Vulnerability:** Arbitrary Code Execution via `np.load(..., allow_pickle=True)`
+**Learning:** Legacy ML saving routines (`_bc.py`, `_gail.py`) directly dumped nested dictionaries (neural net layers, training config) into `.npz` files, which mandated `allow_pickle=True` to reload. This creates a critical insecure deserialization vulnerability.
+**Prevention:** Always flatten complex objects before saving. Serialize dictionaries or configurations into JSON strings, and extract individual layer weights (`W`, `b`) into separate numpy arrays with a primitive naming schema (`layer_0_W`, `layer_0_b`). This pattern completely eliminates the need for Python pickling during deserialization.

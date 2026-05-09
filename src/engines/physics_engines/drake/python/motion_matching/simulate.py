@@ -336,8 +336,9 @@ def _resolve_n_actuators(plant: MultibodyPlant) -> int:
     "theta must be finite",
 )
 @precondition(
-    lambda theta, options=None, initial_pose=None, *args, **kwargs: initial_pose is None
-    or isinstance(initial_pose, dict),
+    lambda theta, options=None, initial_pose=None, *args, **kwargs: (
+        initial_pose is None or isinstance(initial_pose, dict)
+    ),
     "initial_pose type must be a dict",
 )
 @postcondition(

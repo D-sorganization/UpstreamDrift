@@ -157,10 +157,12 @@ class PerformanceBaseline:
         "engine must be known",
     )
     @postcondition(
-        lambda result: isinstance(result, dict)
-        and all(
-            isinstance(k, str) and isinstance(v, (int, float))
-            for k, v in result.items()
+        lambda result: (
+            isinstance(result, dict)
+            and all(
+                isinstance(k, str) and isinstance(v, (int, float))
+                for k, v in result.items()
+            )
         ),
         "result must be dict of str->float",
     )
@@ -176,8 +178,9 @@ class PerformanceBaseline:
         return self.baselines[engine].copy()
 
     @precondition(
-        lambda self, engine, metric_name: engine in ENGINE_DOF_MAP
-        and isinstance(metric_name, str),
+        lambda self, engine, metric_name: (
+            engine in ENGINE_DOF_MAP and isinstance(metric_name, str)
+        ),
         "engine and metric_name must be valid",
     )
     @postcondition(

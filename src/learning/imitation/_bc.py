@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import json
 import numpy as np
 
 if TYPE_CHECKING:
@@ -272,22 +273,27 @@ class BehaviorCloning(ImitationLearner):
         if not (path is not None):
             raise ValueError("path must be provided")
         path = Path(path)
-        data = {
-            "observation_dim": self.observation_dim,
-            "action_dim": self.action_dim,
-            "config": {
-                "epochs": self.config.epochs,
-                "batch_size": self.config.batch_size,
-                "learning_rate": self.config.learning_rate,
-                "weight_decay": self.config.weight_decay,
-                "hidden_sizes": self.config.hidden_sizes,
-            },
-            "layers": [
-                {"W": layer["W"].tolist(), "b": layer["b"].tolist()}
-                for layer in self._policy
-            ],
+
+        save_data = {
+            "observation_dim": np.array(self.observation_dim),
+            "action_dim": np.array(self.action_dim),
+            "num_layers": np.array(len(self._policy)),
         }
-        np.savez(path, **{k: np.array(v, dtype=object) for k, v in data.items()})  # type: ignore[arg-type]
+
+        config_dict = {
+            "epochs": self.config.epochs,
+            "batch_size": self.config.batch_size,
+            "learning_rate": self.config.learning_rate,
+            "weight_decay": self.config.weight_decay,
+            "hidden_sizes": self.config.hidden_sizes,
+        }
+        save_data["config_json"] = np.array(json.dumps(config_dict))
+
+        for i, layer in enumerate(self._policy):
+            save_data[f"layer_{i}_W"] = layer["W"]
+            save_data[f"layer_{i}_b"] = layer["b"]
+
+        np.savez(path, **save_data)
 
     def load(self, path: str | Path) -> None:
         """Load policy from disk.
@@ -300,13 +306,20 @@ class BehaviorCloning(ImitationLearner):
         if not (path is not None):
             raise ValueError("path must be provided")
         path = Path(path)
-        data = np.load(path, allow_pickle=True)
+
+        # Security: allow_pickle=False prevents arbitrary code execution
+        data = np.load(path, allow_pickle=False)
 
         self.observation_dim = int(data["observation_dim"])
         self.action_dim = int(data["action_dim"])
 
-        layers_data = data["layers"].tolist()
-        self._policy = [
-            {"W": np.array(layer["W"]), "b": np.array(layer["b"])}
-            for layer in layers_data
-        ]
+        if "num_layers" in data:
+            num_layers = int(data["num_layers"])
+            self._policy = [
+                {"W": data[f"layer_{i}_W"], "b": data[f"layer_{i}_b"]}
+                for i in range(num_layers)
+            ]
+        else:
+            raise ValueError(
+                "Legacy format requiring allow_pickle=True is no longer supported for security reasons."
+            )

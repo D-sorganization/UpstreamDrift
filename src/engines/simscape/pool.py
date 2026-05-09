@@ -112,10 +112,9 @@ class SimscapeAdapterPool:
     """
 
     @precondition(
-        lambda self, model_path, cfg=None, adapter_factory=None: isinstance(
-            model_path, (str, Path)
-        )
-        and str(model_path) != "",
+        lambda self, model_path, cfg=None, adapter_factory=None: (
+            isinstance(model_path, (str, Path)) and str(model_path) != ""
+        ),
         "model_path must be a non-empty path-like",
     )
     def __init__(

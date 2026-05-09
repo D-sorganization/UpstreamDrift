@@ -84,8 +84,9 @@ class SwingSurrogate(nn.Module):
         "coeffs must be (B, D)",
     )
     @precondition(
-        lambda self, coeffs: coeffs.shape[1]
-        == self.cfg.n_joints * self.cfg.coeffs_per_joint,
+        lambda self, coeffs: (
+            coeffs.shape[1] == self.cfg.n_joints * self.cfg.coeffs_per_joint
+        ),
         "coeffs second dim must equal n_joints * coeffs_per_joint",
     )
     @postcondition(

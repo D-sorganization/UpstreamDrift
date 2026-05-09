@@ -765,17 +765,21 @@ class StartingPoseMatcher(QMainWindow):
         self.cb_show_body_markers = QCheckBox("Show body markers")
         self.cb_show_body_markers.setChecked(True)
         self.cb_show_body_markers.toggled.connect(
-            lambda on: self._live_view.set_layer_visible("body_markers", bool(on))
-            if getattr(self, "_live_view", None) is not None
-            else None
+            lambda on: (
+                self._live_view.set_layer_visible("body_markers", bool(on))
+                if getattr(self, "_live_view", None) is not None
+                else None
+            )
         )
         gl.addWidget(self.cb_show_body_markers, 6, 0, 1, 1)
         self.cb_show_body_skeleton = QCheckBox("Show body skeleton")
         self.cb_show_body_skeleton.setChecked(True)
         self.cb_show_body_skeleton.toggled.connect(
-            lambda on: self._live_view.set_layer_visible("body_skeleton", bool(on))
-            if getattr(self, "_live_view", None) is not None
-            else None
+            lambda on: (
+                self._live_view.set_layer_visible("body_skeleton", bool(on))
+                if getattr(self, "_live_view", None) is not None
+                else None
+            )
         )
         gl.addWidget(self.cb_show_body_skeleton, 6, 1, 1, 1)
         # Body skeleton style combo — switches between line segments

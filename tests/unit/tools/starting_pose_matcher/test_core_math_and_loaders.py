@@ -493,7 +493,7 @@ def _make_multi_target(*, club=None, body=None, ball=None, time=None):
     obj.has_club = lambda: club is not None
     obj.has_body = lambda: body is not None
     obj.is_club_ball = lambda: ball is not None
-    obj.shared_time = lambda: (time if time is not None else np.array([]))
+    obj.shared_time = lambda: time if time is not None else np.array([])
     return obj
 
 

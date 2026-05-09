@@ -245,19 +245,23 @@ class GAIL(ImitationLearner):
         if not (path is not None):
             raise ValueError("path must be provided")
         path = Path(path)
-        data = {
-            "observation_dim": self.observation_dim,
-            "action_dim": self.action_dim,
-            "policy": [
-                {"W": layer["W"].tolist(), "b": layer["b"].tolist()}
-                for layer in self._policy
-            ],
-            "discriminator": [
-                {"W": layer["W"].tolist(), "b": layer["b"].tolist()}
-                for layer in self._discriminator
-            ],
+
+        save_data = {
+            "observation_dim": np.array(self.observation_dim),
+            "action_dim": np.array(self.action_dim),
+            "num_policy_layers": np.array(len(self._policy)),
+            "num_disc_layers": np.array(len(self._discriminator)),
         }
-        np.savez(path, **{k: np.array(v, dtype=object) for k, v in data.items()})  # type: ignore[arg-type]
+
+        for i, layer in enumerate(self._policy):
+            save_data[f"policy_{i}_W"] = layer["W"]
+            save_data[f"policy_{i}_b"] = layer["b"]
+
+        for i, layer in enumerate(self._discriminator):
+            save_data[f"disc_{i}_W"] = layer["W"]
+            save_data[f"disc_{i}_b"] = layer["b"]
+
+        np.savez(path, **save_data)
 
     def load(self, path: str | Path) -> None:
         """Load GAIL networks."""
@@ -266,19 +270,26 @@ class GAIL(ImitationLearner):
         if not (path is not None):
             raise ValueError("path must be provided")
         path = Path(path)
-        data = np.load(path, allow_pickle=True)
+
+        # Security: allow_pickle=False prevents arbitrary code execution
+        data = np.load(path, allow_pickle=False)
 
         self.observation_dim = int(data["observation_dim"])
         self.action_dim = int(data["action_dim"])
 
-        policy_data = data["policy"].tolist()
-        self._policy = [
-            {"W": np.array(layer["W"]), "b": np.array(layer["b"])}
-            for layer in policy_data
-        ]
+        if "num_policy_layers" in data:
+            num_policy_layers = int(data["num_policy_layers"])
+            self._policy = [
+                {"W": data[f"policy_{i}_W"], "b": data[f"policy_{i}_b"]}
+                for i in range(num_policy_layers)
+            ]
 
-        disc_data = data["discriminator"].tolist()
-        self._discriminator = [
-            {"W": np.array(layer["W"]), "b": np.array(layer["b"])}
-            for layer in disc_data
-        ]
+            num_disc_layers = int(data["num_disc_layers"])
+            self._discriminator = [
+                {"W": data[f"disc_{i}_W"], "b": data[f"disc_{i}_b"]}
+                for i in range(num_disc_layers)
+            ]
+        else:
+            raise ValueError(
+                "Legacy format requiring allow_pickle=True is no longer supported for security reasons."
+            )

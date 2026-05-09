@@ -109,8 +109,10 @@ class ToleranceFramework:
         return self.tolerances[engine]
 
     @precondition(
-        lambda self, expected, actual: isinstance(expected, (float, int, np.ndarray))
-        and isinstance(actual, (float, int, np.ndarray)),
+        lambda self, expected, actual: (
+            isinstance(expected, (float, int, np.ndarray))
+            and isinstance(actual, (float, int, np.ndarray))
+        ),
         "expected and actual must be numeric",
     )
     @postcondition(
@@ -148,8 +150,9 @@ class ToleranceFramework:
         return float(np.max(rel_error))
 
     @precondition(
-        lambda self, engine, rel_error: engine in ENGINE_DOF_MAP
-        and isinstance(rel_error, (float, int)),
+        lambda self, engine, rel_error: (
+            engine in ENGINE_DOF_MAP and isinstance(rel_error, (float, int))
+        ),
         "engine must be known and rel_error must be numeric",
     )
     @postcondition(
@@ -393,8 +396,9 @@ class StabilityMatrix:
         return self.canonical_tests[test_name]
 
     @precondition(
-        lambda self, engine, test_name: engine in ENGINE_DOF_MAP
-        and test_name in self.canonical_tests,
+        lambda self, engine, test_name: (
+            engine in ENGINE_DOF_MAP and test_name in self.canonical_tests
+        ),
         "engine and test_name must be valid",
     )
     def record_test_result(

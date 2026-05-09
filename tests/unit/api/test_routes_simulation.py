@@ -48,8 +48,8 @@ def app(mock_simulation_service, mock_task_manager) -> FastAPI:
     test_app = FastAPI()
     test_app.state.limiter = limiter
     test_app.include_router(router)
-    test_app.dependency_overrides[get_simulation_service] = (
-        lambda: mock_simulation_service
+    test_app.dependency_overrides[get_simulation_service] = lambda: (
+        mock_simulation_service
     )
     test_app.dependency_overrides[get_task_manager] = lambda: mock_task_manager
     return test_app

@@ -255,8 +255,9 @@ def _output_grid(T_s: float, output_rate_hz: float) -> NDArray[np.float64]:
     "theta must be finite",
 )
 @precondition(
-    lambda theta, options=None, initial_pose=None, *args, **kwargs: initial_pose is None
-    or isinstance(initial_pose, (dict, np.ndarray, list)),
+    lambda theta, options=None, initial_pose=None, *args, **kwargs: (
+        initial_pose is None or isinstance(initial_pose, (dict, np.ndarray, list))
+    ),
     "initial_pose type must be valid",
 )
 @postcondition(

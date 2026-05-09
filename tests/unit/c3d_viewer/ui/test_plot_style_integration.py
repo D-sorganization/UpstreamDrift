@@ -459,9 +459,7 @@ def test_marker_style_dialog_cancel_no_apply(
     assert tab._persistence.get("m0") is None
 
 
-def test_marker_plot_tab_changes_marker_then_apply(
-    qt_app, isolated_persist
-) -> None:
+def test_marker_plot_tab_changes_marker_then_apply(qt_app, isolated_persist) -> None:
     """Selecting a different marker rewires the renderer handle correctly."""
     from src.apps.ui.tabs.marker_plot_tab import MarkerPlotTab  # type: ignore
     from src.shared.python.plot_style import (  # type: ignore
@@ -486,9 +484,7 @@ def test_marker_plot_tab_changes_marker_then_apply(
     assert record.style == style
 
 
-def test_persistence_request_save_is_debounced(
-    qt_app, isolated_persist
-) -> None:
+def test_persistence_request_save_is_debounced(qt_app, isolated_persist) -> None:
     """Two rapid request_save calls coalesce into a single deferred save."""
     from src.apps.ui.tabs._plot_style_helpers import StylePersistence  # type: ignore
     from src.shared.python.plot_style import (  # type: ignore
