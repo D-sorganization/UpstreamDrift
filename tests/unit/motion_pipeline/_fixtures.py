@@ -344,9 +344,16 @@ def make_motion_trajectory(
     with_markers: bool = False,
     motion_id: str = "motion-synthetic",
     sport: str = "golf",
+    rig: SkeletonRig | None = None,
 ) -> MotionTrajectory:
-    """Build a top-level :class:`MotionTrajectory` (rig + traj + provenance)."""
-    rig = make_skeleton_rig(n_joints=n_joints)
+    """Build a top-level :class:`MotionTrajectory` (rig + traj + provenance).
+
+    If ``rig`` is provided, it is used instead of creating a new synthetic rig.
+    This ensures consistency when the caller has a specific rig (e.g., with
+    custom joint IDs or rig ID) that should be preserved throughout the fixture.
+    """
+    if rig is None:
+        rig = make_skeleton_rig(n_joints=n_joints)
     traj = make_joint_trajectory(rig, n_frames=n_frames, fps=fps)
     markers = (
         make_marker_trajectory(n_frames=n_frames, fps=fps) if with_markers else None
@@ -446,8 +453,15 @@ def make_motion_matching_result(
 
     ``kind="torque"`` attaches a :func:`make_torque_trajectory` payload to
     metadata; ``kind="kinematic"`` omits it.
+
+    The passed ``rig`` is preserved throughout the fixture by passing it to
+    ``make_motion_trajectory``, ensuring that ``metadata['residual_report']``,
+    ``metadata['torque_trajectory']``, and ``matched_trajectory.skeleton`` all
+    reference the same rig.
     """
-    motion = make_motion_trajectory(n_frames=n_frames, n_joints=rig.num_joints)
+    motion = make_motion_trajectory(
+        n_frames=n_frames, n_joints=rig.num_joints, rig=rig
+    )
     metadata: dict[str, Any] = {
         "residual_report": make_residual_report(rig),
         "kind": kind,
