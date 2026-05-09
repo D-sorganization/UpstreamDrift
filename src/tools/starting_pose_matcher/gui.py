@@ -82,6 +82,7 @@ from PyQt6.QtWidgets import (
 # Pure-data + math core.  Split out of this file so it can be unit-tested
 # in environments where the Qt stack isn't fully working.
 # Pure-data + math layer (split out so it can be unit-tested without Qt).
+from src.shared.python.motion_matching import provider_registry
 from src.tools.starting_pose_matcher.core import (
     CM_TO_M,
     DEFAULT_EVENT_PRESET as _DEFAULT_EVENT_PRESET,
@@ -1279,6 +1280,24 @@ class StartingPoseMatcher(QMainWindow):
         )
         v.addWidget(self.cb_fit_scale)
 
+        # Engine selector — populated live from the canonical fit_swing
+        # provider registry (#4707 slice 1/3). The Run-fit QThread (slice 2)
+        # and Save-fit serialization (slice 3) are intentionally NOT wired
+        # here; this combo only exposes the user's engine choice.
+        # TODO(#4707 slice 2/3): wire `selected_engine` into a Run-fit
+        # QThread that calls provider_registry.get_provider(...).fit_swing
+        # and then into the save-fit JSON payload.
+        engine_row = QHBoxLayout()
+        engine_row.addWidget(QLabel("Fit engine:"))
+        self.combo_fit_engine = QComboBox()
+        self.combo_fit_engine.setToolTip(
+            "Physics engine used by the (upcoming) Run-fit action. "
+            "Populated live from motion_matching.provider_registry."
+        )
+        self._populate_engine_combo()
+        engine_row.addWidget(self.combo_fit_engine, stretch=1)
+        v.addLayout(engine_row)
+
         # One snap button per pose-slot
         for key, slot in self.poses.items():
             btn = QPushButton(
@@ -1299,6 +1318,41 @@ class StartingPoseMatcher(QMainWindow):
         self.btn_snap_mid.clicked.connect(self._snap_mid_first_visible)
         v.addWidget(self.btn_snap_mid)
         return box
+
+    def _populate_engine_combo(self) -> None:
+        """Refresh the engine combo from the canonical provider registry.
+
+        Reads :func:`provider_registry.available_engines` live every call so
+        late-registering providers (or test fixtures that mutate the
+        registry) are reflected. Default selection is ``"mujoco"`` when
+        present, otherwise the first registered engine; an empty registry
+        leaves the combo empty.
+        """
+        engines = provider_registry.available_engines()
+        combo = self.combo_fit_engine
+        combo.blockSignals(True)
+        try:
+            combo.clear()
+            combo.addItems(engines)
+            if engines:
+                default = "mujoco" if "mujoco" in engines else engines[0]
+                combo.setCurrentText(default)
+        finally:
+            combo.blockSignals(False)
+
+    @property
+    def selected_engine(self) -> str:
+        """Return the engine name currently chosen in the combo.
+
+        Raises:
+            RuntimeError: If the combo is empty (no providers registered).
+        """
+        text = self.combo_fit_engine.currentText()
+        if not text:
+            raise RuntimeError(
+                "no fit_swing engine selected; provider registry is empty"
+            )
+        return text
 
     def _build_transform_box(self) -> QGroupBox:
         box = QGroupBox("Rigid Transform + Scale")
