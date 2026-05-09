@@ -94,7 +94,12 @@ class DrakeFitSwingProvider:
                 :class:`ClubTarget` shape.
         """
         club_target = _extract_club_target(target)
-        return fit_swing_drake(club_target, opts)
+        result = fit_swing_drake(club_target, opts)
+        # Issue #4713: opt-in CI publication of the cross-engine leaderboard.
+        from src.shared.python.motion_matching.leaderboard import maybe_append_row
+
+        maybe_append_row(self.engine_name, result, self.engine_version())
+        return result
 
     def supports_body_target(self) -> bool:
         """Drake body-target cost terms are out-of-scope for #4516."""

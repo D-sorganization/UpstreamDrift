@@ -1,0 +1,131 @@
+# Cross-engine leaderboard JSON publication (issue #4713).
+#
+# Sister workflow to `cross-engine-leaderboard.yml` (which renders the
+# Markdown table for human review). This one publishes the
+# machine-readable `reports/cross_engine_leaderboard.json` produced by
+# `src.shared.python.motion_matching.leaderboard.append_row`. The
+# orchestrator script `scripts/run_cross_engine_leaderboard.py` is the
+# canonical entry point; provider wiring (#4713 acceptance criterion 2)
+# means the JSON accumulates automatically when each engine's
+# `fit_swing` runs with `UD_LEADERBOARD_PUBLISH=1`.
+#
+# Trigger / publication policy:
+#   * pull_request -> regenerate JSON, upload as artifact (no commit).
+#   * push to main -> regenerate JSON, commit back with `[skip ci]`.
+#   * workflow_dispatch -> manual artifact-only run.
+
+name: cross-engine-leaderboard-publish
+
+on:
+  pull_request:
+    paths:
+      - "src/engines/**"
+      - "scripts/run_cross_engine_leaderboard.py"
+      - "src/shared/python/motion_matching/leaderboard.py"
+      - "tests/cross_engine/test_leaderboard_writer.py"
+      - "tests/unit/motion_matching/test_leaderboard.py"
+      - ".github/workflows/cross-engine-leaderboard-publish.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "src/engines/**"
+      - "scripts/run_cross_engine_leaderboard.py"
+      - "src/shared/python/motion_matching/leaderboard.py"
+      - ".github/workflows/cross-engine-leaderboard-publish.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: cross-engine-leaderboard-publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: publish cross-engine leaderboard JSON
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      UD_LEADERBOARD_PUBLISH: "1"
+      UD_LEADERBOARD_JSON_PATH: ${{ github.workspace }}/reports/cross_engine_leaderboard.json
+      GIT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: "3.11"
+
+      - name: Install minimal deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Validate workflow YAML
+        run: |
+          python -c "import yaml; \
+            yaml.safe_load(open('.github/workflows/cross-engine-leaderboard-publish.yml'))"
+
+      - name: Run leaderboard writer tests
+        run: |
+          pytest tests/cross_engine/test_leaderboard_writer.py \
+                 tests/unit/motion_matching/test_leaderboard.py \
+                 -v --timeout=60
+
+      - name: Regenerate leaderboard JSON
+        # Honest-skip mode: engines whose deps aren't installed don't
+        # synthesise rows. The JSON still emits whatever the available
+        # engines produced -- and is at least an empty list.
+        run: |
+          python3 scripts/run_cross_engine_leaderboard.py --skip-fits || true
+          mkdir -p reports
+          if [ ! -f reports/cross_engine_leaderboard.json ]; then
+            echo "[]" > reports/cross_engine_leaderboard.json
+          fi
+          python -c "import json; \
+            data = json.load(open('reports/cross_engine_leaderboard.json')); \
+            assert isinstance(data, list), 'leaderboard JSON must be a list'; \
+            print(f'leaderboard rows: {len(data)}')"
+
+      - name: Show diff against committed leaderboard
+        if: always()
+        run: |
+          if git diff --quiet -- reports/cross_engine_leaderboard.json; then
+            echo "No changes to reports/cross_engine_leaderboard.json"
+          else
+            echo "## Cross-engine leaderboard JSON diff" >> "$GITHUB_STEP_SUMMARY"
+            echo '```diff' >> "$GITHUB_STEP_SUMMARY"
+            git diff -- reports/cross_engine_leaderboard.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload leaderboard JSON artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: cross-engine-leaderboard-json
+          path: reports/cross_engine_leaderboard.json
+          if-no-files-found: error
+
+      - name: Commit JSON back (main only, protected)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          if git diff --quiet -- reports/cross_engine_leaderboard.json; then
+            echo "no leaderboard changes; nothing to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/cross_engine_leaderboard.json
+          git commit -m "chore(motion-matching): refresh cross_engine_leaderboard.json [skip ci]"
+          git push origin HEAD:main

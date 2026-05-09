@@ -90,7 +90,17 @@ class PinocchioFitSwingProvider:
             ValueError: If ``target`` shapes are inconsistent.
             ImportError: If the ``pinocchio`` bindings are unavailable.
         """
-        return fit_swing_pinocchio(target, opts)
+        result = fit_swing_pinocchio(target, opts)
+        # Issue #4713: opt-in CI publication of the cross-engine leaderboard.
+        from src.shared.python.motion_matching.leaderboard import maybe_append_row
+
+        maybe_append_row(
+            ENGINE_NAME,
+            result,
+            self.engine_version(),
+            target_id=getattr(result, "trial_id", None),
+        )
+        return result
 
     def supports_body_target(self) -> bool:
         """Return ``False`` -- Pinocchio MM is club-target only."""

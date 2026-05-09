@@ -41,11 +41,14 @@ Public API
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 import re
 from dataclasses import dataclass, fields
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 __all__ = [
     "FitResult",
@@ -53,6 +56,10 @@ __all__ = [
     "load_results",
     "render_markdown",
     "generate_report",
+    "append_row",
+    "maybe_append_row",
+    "JSON_LEADERBOARD_COLUMNS",
+    "default_json_path",
 ]
 
 # --- Schema ------------------------------------------------------------------
@@ -320,6 +327,221 @@ def generate_report(results_dir: Path, output_path: Path) -> Path:
         text + ("" if text.endswith("\n") else "\n"), encoding="utf-8"
     )
     return output_path.resolve()
+
+
+# --- JSON leaderboard writer (issue #4713) -----------------------------------
+
+JSON_LEADERBOARD_COLUMNS: tuple[str, ...] = (
+    "engine",
+    "engine_version",
+    "target_id",
+    "theta",
+    "residual_rms",
+    "wallclock",
+    "commit_sha",
+)
+
+
+def default_json_path() -> Path:
+    """Return the canonical path for ``cross_engine_leaderboard.json``."""
+    env = os.environ.get("UD_LEADERBOARD_JSON_PATH", "").strip()
+    if env:
+        return Path(env)
+    here = Path(__file__).resolve()
+    for parent in here.parents:
+        if (parent / "pyproject.toml").is_file():
+            return parent / "reports" / "cross_engine_leaderboard.json"
+    return Path("reports") / "cross_engine_leaderboard.json"
+
+
+def _short_commit(commit: str | None) -> str:
+    if not commit:
+        return "0000000"
+    s = str(commit).strip().lower()
+    if not re.match(r"^[0-9a-f]{7,40}$", s):
+        return hashlib.sha1(s.encode("utf-8")).hexdigest()[:12]
+    return s
+
+
+def _coerce_theta(value: Any) -> list[float]:
+    """Normalise a theta vector into a JSON-serialisable list of floats."""
+    if value is None:
+        return []
+    if hasattr(value, "tolist"):
+        value = value.tolist()
+    if not isinstance(value, (list, tuple)):
+        raise LeaderboardError(
+            f"theta must be a vector, got {type(value).__name__}"
+        )
+    out: list[float] = []
+    for i, x in enumerate(value):
+        try:
+            f = float(x)
+        except (TypeError, ValueError) as exc:
+            raise LeaderboardError(f"theta[{i}] not numeric: {x!r}") from exc
+        if f != f:
+            raise LeaderboardError(f"theta[{i}] is NaN")
+        out.append(f)
+    return out
+
+
+def _row_from_fit_result(
+    engine: str,
+    fit_result: Any,
+    engine_version: str,
+    target_id: str | None,
+) -> dict[str, Any]:
+    if not isinstance(engine, str) or not engine:
+        raise LeaderboardError(
+            f"engine must be a non-empty string, got {engine!r}"
+        )
+    if engine not in _VALID_ENGINES:
+        raise LeaderboardError(
+            f"engine must be one of {sorted(_VALID_ENGINES)}, got {engine!r}"
+        )
+    if not isinstance(engine_version, str) or not engine_version:
+        engine_version = "unknown"
+
+    def _attr(*names: str, default: Any = None) -> Any:
+        if isinstance(fit_result, dict):
+            for n in names:
+                if n in fit_result:
+                    return fit_result[n]
+            return default
+        for n in names:
+            if hasattr(fit_result, n):
+                return getattr(fit_result, n)
+        return default
+
+    theta = _coerce_theta(_attr("theta_optimal", "theta", "coefficients"))
+    residual_rms = _attr("final_rmse_m", "residual_rms", "grip_rmse_mm")
+    if residual_rms is None:
+        raise LeaderboardError(
+            "fit_result must expose final_rmse_m / residual_rms / grip_rmse_mm"
+        )
+    residual_rms = float(residual_rms)
+    if residual_rms < 0 or residual_rms != residual_rms:
+        raise LeaderboardError(
+            f"residual_rms must be a finite non-negative float, got {residual_rms!r}"
+        )
+
+    wallclock = _attr("wall_clock_s", "wallclock", default=0.0)
+    wallclock = float(wallclock)
+    if wallclock < 0 or wallclock != wallclock:
+        raise LeaderboardError(
+            f"wallclock must be a finite non-negative float, got {wallclock!r}"
+        )
+
+    commit = _attr("git_commit", "commit_sha", "commit", default=None)
+    target = (
+        target_id
+        if target_id is not None
+        else _attr("target_id", "target_hash", "trial", "trial_id", default="unknown")
+    )
+    target = str(target).strip() or "unknown"
+
+    run_at = _attr(
+        "timestamp_utc",
+        "run_at",
+        default=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    )
+    solver = _attr("method", "solver", default="unknown")
+    iterations = _attr("iterations", "n_iterations", default=0)
+
+    return {
+        "engine": engine,
+        "engine_version": str(engine_version),
+        "target_id": target,
+        "theta": theta,
+        "residual_rms": residual_rms,
+        "wallclock": wallclock,
+        "commit_sha": _short_commit(commit),
+        "run_at": str(run_at),
+        "solver": str(solver),
+        "iterations": int(iterations) if iterations is not None else 0,
+    }
+
+
+def append_row(
+    engine: str,
+    fit_result: Any,
+    engine_version: str,
+    *,
+    json_path: Path | None = None,
+    target_id: str | None = None,
+) -> Path:
+    """Append one fit-result row to ``cross_engine_leaderboard.json``.
+
+    Required schema (issue #4713 acceptance criteria):
+        engine, engine_version, target_id, theta, residual_rms,
+        wallclock, commit_sha
+
+    Optional diagnostic columns ``run_at``, ``solver``, ``iterations``
+    are also stamped when available.
+    """
+    path = json_path if json_path is not None else default_json_path()
+    if not isinstance(path, Path):
+        raise TypeError(f"json_path must be a Path, got {type(path).__name__}")
+
+    row = _row_from_fit_result(engine, fit_result, engine_version, target_id)
+
+    if path.exists():
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            raise LeaderboardError(
+                f"existing leaderboard JSON at {path} is not valid JSON: {exc}"
+            ) from exc
+        if not isinstance(data, list):
+            raise LeaderboardError(
+                f"existing leaderboard JSON at {path} must be a list, "
+                f"got {type(data).__name__}"
+            )
+        existing = data
+    else:
+        existing = []
+
+    existing.append(row)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(existing, indent=2, sort_keys=False) + "\n",
+        encoding="utf-8",
+    )
+    return path.resolve()
+
+
+def maybe_append_row(
+    engine: str,
+    fit_result: Any,
+    engine_version: str,
+    *,
+    json_path: Path | None = None,
+    target_id: str | None = None,
+) -> Path | None:
+    """Call :func:`append_row` only when ``UD_LEADERBOARD_PUBLISH=1``.
+
+    Providers wire this into canonical ``fit_swing`` paths so CI runs
+    accumulate ``reports/cross_engine_leaderboard.json`` for free, while
+    every other consumer stays unaffected. Failures are demoted to
+    warnings so a leaderboard hiccup never breaks a fit.
+    """
+    if os.environ.get("UD_LEADERBOARD_PUBLISH", "").strip() != "1":
+        return None
+    try:
+        return append_row(
+            engine,
+            fit_result,
+            engine_version,
+            json_path=json_path,
+            target_id=target_id,
+        )
+    except Exception as exc:  # noqa: BLE001 - never break the fit
+        import logging as _logging
+
+        _logging.getLogger(__name__).warning(
+            "leaderboard.append_row failed (engine=%s): %s", engine, exc
+        )
+        return None
 
 
 # --- Module-level metadata ---------------------------------------------------

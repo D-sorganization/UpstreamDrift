@@ -93,7 +93,17 @@ class OpenSimFitSwingProvider:
         """
         club = self._extract_club(target)
         native = self._build_native_options(opts)
-        return fit_swing_opensim(club, native)
+        result = fit_swing_opensim(club, native)
+        # Issue #4713: opt-in CI publication of the cross-engine leaderboard.
+        from src.shared.python.motion_matching.leaderboard import maybe_append_row
+
+        version = (
+            self.engine_version()
+            if hasattr(self, "engine_version")
+            else getattr(result, "engine_version", "unknown")
+        )
+        maybe_append_row(self.engine_name, result, version)
+        return result
 
     def supports_body_target(self) -> bool:
         """OpenSim's swing fitter consumes only the club trajectory."""
