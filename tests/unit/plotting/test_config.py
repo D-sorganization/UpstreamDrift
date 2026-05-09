@@ -29,7 +29,7 @@ class TestColors:
 
 
 class TestColorPalette:
-    def test_default_construction(self) -> None:
+    def test_config_default_construction(self) -> None:
         palette = ColorPalette()
         assert palette.primary == COLORS["primary"]
 
@@ -46,7 +46,7 @@ class TestColorPalette:
         n = len(palette.cycle)
         assert palette.get_color(n) == palette.cycle[0]
 
-    def test_frozen(self) -> None:
+    def test_config_frozen(self) -> None:
         palette = ColorPalette()
         with pytest.raises((AttributeError, TypeError)):
             palette.primary = "#000000"  # type: ignore[misc]

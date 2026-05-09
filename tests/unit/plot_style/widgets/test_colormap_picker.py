@@ -7,7 +7,7 @@ from src.shared.python.plot_style.colormaps import ColormapId
 from src.shared.python.plot_style.widgets.colormap_picker import ColormapPicker
 
 
-def test_default_initial_value() -> None:
+def test_colormap_picker_default_initial_value() -> None:
     widget = ColormapPicker()
     assert widget.value() == ColormapId.VIRIDIS
 
@@ -51,7 +51,7 @@ def test_set_value_string_form(qtbot) -> None:  # type: ignore[no-untyped-def]
     assert blocker.args == [ColormapId.MAGMA]
 
 
-def test_set_value_no_emit_when_unchanged(qtbot) -> None:  # type: ignore[no-untyped-def]
+def test_colormap_picker_set_value_no_emit_when_unchanged(qtbot) -> None:  # type: ignore[no-untyped-def]
     widget = ColormapPicker(ColormapId.PLASMA)
     qtbot.addWidget(widget)
     received: list[object] = []

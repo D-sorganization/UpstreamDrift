@@ -23,7 +23,7 @@ def channels() -> list[DataChannel]:
     ]
 
 
-def test_default_initial_value(channels: list[DataChannel]) -> None:
+def test_data_channel_editor_default_initial_value(channels: list[DataChannel]) -> None:
     widget = DataChannelEditor(channels)
     assert widget.value() is channels[0]
     vmin, vmax = widget.range_value()
@@ -63,7 +63,7 @@ def test_set_value_emits_channel_changed(  # type: ignore[no-untyped-def]
     assert widget.value() is channels[1]
 
 
-def test_set_value_no_emit_when_unchanged(  # type: ignore[no-untyped-def]
+def test_data_channel_editor_set_value_no_emit_when_unchanged(  # type: ignore[no-untyped-def]
     channels, qtbot
 ) -> None:
     widget = DataChannelEditor(channels)

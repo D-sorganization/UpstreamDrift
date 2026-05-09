@@ -32,26 +32,26 @@ def sample_data() -> StatisticalAnalyzer:
     )
 
 
-def test_initialization(sample_data) -> None:
+def test_shared_statistical_analysis_initialization(sample_data) -> None:
     assert sample_data.dt > 0
     assert sample_data.duration == 1.0
 
 
-def test_compute_summary_stats(sample_data) -> None:
+def test_shared_statistical_analysis_compute_summary_stats(sample_data) -> None:
     stats = sample_data.compute_summary_stats(sample_data.joint_positions[:, 0])
     assert stats.min == pytest.approx(-1.0, abs=0.01)
     assert stats.max == pytest.approx(1.0, abs=0.01)
     assert stats.range == pytest.approx(2.0, abs=0.02)
 
 
-def test_find_peaks_in_data(sample_data) -> None:
+def test_shared_statistical_analysis_find_peaks_in_data(sample_data) -> None:
     data = sample_data.joint_positions[:, 0]
     peaks = sample_data.find_peaks_in_data(data, height=0.5)
     assert len(peaks) > 0
     assert peaks[0].value > 0.5
 
 
-def test_find_club_head_speed_peak(sample_data) -> None:
+def test_shared_statistical_analysis_find_club_head_speed_peak(sample_data) -> None:
     peak = sample_data.find_club_head_speed_peak()
     assert peak is not None
     assert peak.time == pytest.approx(0.5, abs=0.02)
@@ -153,7 +153,7 @@ def test_compute_energy_metrics(sample_data) -> None:
     assert metrics_no_chs["energy_efficiency"] == 0.0
 
 
-def test_detect_swing_phases(sample_data) -> None:
+def test_shared_statistical_analysis_detect_swing_phases(sample_data) -> None:
     phases = sample_data.detect_swing_phases()
     assert len(phases) > 0
     assert isinstance(phases[0], SwingPhase)

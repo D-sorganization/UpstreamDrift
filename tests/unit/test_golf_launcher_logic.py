@@ -17,7 +17,7 @@ class TestGolfLauncherLogic:
             yield mock_pm
 
     @patch("src.launchers.golf_launcher.DockerCheckThread")
-    def test_initialization(self, mock_thread, qtbot):
+    def test_golf_launcher_logic_initialization(self, mock_thread, qtbot):
         from src.launchers.golf_launcher import GolfLauncher
 
         thread_instance = mock_thread.return_value

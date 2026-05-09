@@ -102,7 +102,9 @@ def _loader_factory():
 # ---------------------------------------------------------------------------
 
 
-def test_three_epoch_run_reduces_val_loss(tmp_path: Path) -> None:
+def test_swing_inverse_cvae_training_three_epoch_run_reduces_val_loss(
+    tmp_path: Path,
+) -> None:
     cfg = CVAEConfig(encoder_channels=(32, 64), decoder_hidden=64, dropout=0.0)
     # Recon is now computed in standardised [-1, 1] coefficient space (bug-2
     # fix), so the loss surface is much flatter in absolute terms. Use a few
@@ -135,7 +137,7 @@ def test_three_epoch_run_reduces_val_loss(tmp_path: Path) -> None:
     assert result.n_val_trials >= 1
 
 
-def test_checkpoint_round_trip(tmp_path: Path) -> None:
+def test_swing_inverse_cvae_training_checkpoint_round_trip(tmp_path: Path) -> None:
     cfg = CVAEConfig(encoder_channels=(32,), decoder_hidden=64)
     result = train_inverse_cvae(
         tmp_path,
@@ -163,7 +165,7 @@ def test_checkpoint_round_trip(tmp_path: Path) -> None:
     torch.testing.assert_close(coeff_a, coeff_b)
 
 
-def test_invalid_epochs_rejected(tmp_path: Path) -> None:
+def test_swing_inverse_cvae_training_invalid_epochs_rejected(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="epochs"):
         train_inverse_cvae(
             tmp_path,
@@ -174,7 +176,9 @@ def test_invalid_epochs_rejected(tmp_path: Path) -> None:
         )
 
 
-def test_invalid_val_fraction_rejected(tmp_path: Path) -> None:
+def test_swing_inverse_cvae_training_invalid_val_fraction_rejected(
+    tmp_path: Path,
+) -> None:
     with pytest.raises(ValueError, match="val_fraction"):
         train_inverse_cvae(
             tmp_path,

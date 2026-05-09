@@ -24,7 +24,7 @@ class TestIsValidHexColor:
     def test_valid_lowercase(self) -> None:
         assert is_valid_hex_color("#aabbcc") is True
 
-    def test_returns_bool(self) -> None:
+    def test_colors_returns_bool(self) -> None:
         assert isinstance(is_valid_hex_color("#FF0000"), bool)
 
 
@@ -76,11 +76,11 @@ class TestThemeColorKeys:
     def test_contains_text(self) -> None:
         assert "text" in THEME_COLOR_KEYS
 
-    def test_nonempty(self) -> None:
+    def test_colors_nonempty(self) -> None:
         assert len(THEME_COLOR_KEYS) > 0
 
 
 class TestIsDarkTheme:
-    def test_returns_bool(self) -> None:
+    def test_colors_returns_bool(self) -> None:
         result = is_dark_theme("dark")
         assert isinstance(result, bool)

@@ -64,7 +64,7 @@ class TestDrakeStrict:
     def teardown_method(self) -> None:
         self.patcher.stop()
 
-    def test_jacobian_standardization_mocked(self) -> None:
+    def test_drake_strict_jacobian_standardization_mocked(self) -> None:
         engine = self.DrakePhysicsEngine()
         # Mock internals set by AddMultibodyPlantSceneGraph
         engine.plant = MagicMock()

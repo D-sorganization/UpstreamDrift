@@ -270,7 +270,7 @@ class TestPhysicalProperties:
         result = Inertia.from_capsule(MASS, RADIUS, LENGTH, axis="z")
         assert result.satisfies_triangle_inequality()
 
-    def test_positive_definite(self) -> None:
+    def test_capsule_inertia_fix_positive_definite(self) -> None:
         """The inertia matrix must be positive definite."""
         from model_generation.core.types import Inertia
 

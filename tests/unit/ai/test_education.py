@@ -49,7 +49,7 @@ class TestGlossaryEntry:
 class TestEducationSystem:
     """Tests for EducationSystem."""
 
-    def test_initialization(self) -> None:
+    def test_education_initialization(self) -> None:
         """Test education system initializes with glossary."""
         edu = EducationSystem()
         assert len(edu) > 0

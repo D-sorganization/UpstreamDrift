@@ -20,11 +20,11 @@ class TestODESolverRequest:
         defaults.update(kwargs)
         return ODESolverRequest(**defaults)
 
-    def test_valid_construction(self) -> None:
+    def test_contracts_ode_solver_valid_construction(self) -> None:
         req = self._valid_request()
         assert isinstance(req, ODESolverRequest)
 
-    def test_default_parameters_empty(self) -> None:
+    def test_contracts_ode_solver_default_parameters_empty(self) -> None:
         req = self._valid_request()
         assert req.parameters == {}
 
@@ -36,7 +36,7 @@ class TestODESolverRequest:
         req = self._valid_request()
         assert req.t_end == pytest.approx(20.0)
 
-    def test_default_num_points(self) -> None:
+    def test_contracts_ode_solver_default_num_points(self) -> None:
         req = self._valid_request()
         assert req.num_points == 100
 
@@ -67,7 +67,7 @@ class TestODESolverRequest:
 
 
 class TestODEVariableSummary:
-    def test_construction(self) -> None:
+    def test_contracts_ode_solver_construction(self) -> None:
         summary = ODEVariableSummary(
             name="y",
             initial_value=100.0,
@@ -77,7 +77,7 @@ class TestODEVariableSummary:
         )
         assert isinstance(summary, ODEVariableSummary)
 
-    def test_name_stored(self) -> None:
+    def test_contracts_ode_solver_name_stored(self) -> None:
         summary = ODEVariableSummary(
             name="temperature",
             initial_value=300.0,
@@ -115,7 +115,7 @@ class TestODESolverResponse:
             ],
         )
 
-    def test_construction(self) -> None:
+    def test_contracts_ode_solver_construction(self) -> None:
         resp = self._make_response()
         assert isinstance(resp, ODESolverResponse)
 

@@ -21,7 +21,7 @@ class TestComputeEnergyMetrics:
         self.ke = 0.5 * np.sin(np.linspace(0, np.pi, n)) ** 2 + 0.1
         self.pe = np.cos(np.linspace(0, np.pi / 2, n)) ** 2 + 0.1
 
-    def test_returns_dict(self) -> None:
+    def test_energy_metrics_returns_dict(self) -> None:
         result = self.obj.compute_energy_metrics(self.ke, self.pe)
         assert isinstance(result, dict)
 
@@ -61,7 +61,7 @@ class TestComputeEnergyMetrics:
         result = self.obj.compute_energy_metrics(self.ke, self.pe)
         assert result["energy_efficiency"] >= 0.0
 
-    def test_all_values_finite(self) -> None:
+    def test_energy_metrics_all_values_finite(self) -> None:
         result = self.obj.compute_energy_metrics(self.ke, self.pe)
         for key, val in result.items():
             assert np.isfinite(val), f"'{key}' is not finite"

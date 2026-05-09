@@ -28,7 +28,7 @@ from pydantic import ValidationError
 
 
 class TestSeriesStyle:
-    def test_defaults(self) -> None:
+    def test_specs_defaults(self) -> None:
         s = SeriesStyle()
         assert s.color is None
         assert s.line_style == "solid"
@@ -38,7 +38,7 @@ class TestSeriesStyle:
         assert s.opacity == 1.0
         assert s.display_mode == "line"
 
-    def test_roundtrip(self) -> None:
+    def test_specs_roundtrip(self) -> None:
         s = SeriesStyle(
             color="#ff0000",
             line_style="dashed",
@@ -78,14 +78,14 @@ class TestSeriesStyle:
 
 
 class TestTrendlineSpec:
-    def test_defaults(self) -> None:
+    def test_specs_defaults(self) -> None:
         t = TrendlineSpec(type="linear")
         assert t.degree == 2
         assert t.show_equation is True
         assert t.show_r_squared is True
         assert t.line_style == "dashed"
 
-    def test_roundtrip(self) -> None:
+    def test_specs_roundtrip(self) -> None:
         t = TrendlineSpec(type="polynomial", degree=4, show_equation=False)
         t2 = TrendlineSpec(**t.model_dump())
         assert t == t2
@@ -106,7 +106,7 @@ class TestTrendlineSpec:
 
 
 class TestAxisSpec:
-    def test_defaults(self) -> None:
+    def test_specs_defaults(self) -> None:
         a = AxisSpec()
         assert a.label == ""
         assert a.min is None
@@ -114,7 +114,7 @@ class TestAxisSpec:
         assert a.log_scale is False
         assert a.grid is True
 
-    def test_roundtrip(self) -> None:
+    def test_specs_roundtrip(self) -> None:
         a = AxisSpec(label="Time (s)", min=0.0, max=10.0, log_scale=True)
         a2 = AxisSpec(**a.model_dump())
         assert a == a2
@@ -124,7 +124,7 @@ class TestAxisSpec:
 
 
 class TestLegendSpec:
-    def test_defaults(self) -> None:
+    def test_specs_defaults(self) -> None:
         lg = LegendSpec()
         assert lg.visible is True
         assert lg.position == "right"
@@ -134,7 +134,7 @@ class TestLegendSpec:
         lg = LegendSpec(labels={"signal_a": "Temperature", "signal_b": "Pressure"})
         assert lg.labels["signal_a"] == "Temperature"
 
-    def test_roundtrip(self) -> None:
+    def test_specs_roundtrip(self) -> None:
         lg = LegendSpec(visible=False, position="bottom", labels={"a": "A"})
         lg2 = LegendSpec(**lg.model_dump())
         assert lg == lg2
@@ -144,7 +144,7 @@ class TestLegendSpec:
 
 
 class TestSeriesData:
-    def test_basic(self) -> None:
+    def test_specs_basic(self) -> None:
         sd = SeriesData(name="test", x=[1.0, 2.0, 3.0], y=[4.0, 5.0, 6.0])
         assert sd.name == "test"
         assert len(sd.x) == 3
@@ -161,7 +161,7 @@ class TestSeriesData:
         assert sd.style.color == "#abcdef"
         assert sd.trendline.type == "linear"
 
-    def test_roundtrip(self) -> None:
+    def test_specs_roundtrip(self) -> None:
         sd = SeriesData(
             name="data",
             x=[0.0, 1.0, 2.0],
@@ -176,7 +176,7 @@ class TestSeriesData:
 
 
 class TestPlotSpec:
-    def test_defaults(self) -> None:
+    def test_specs_defaults(self) -> None:
         p = PlotSpec()
         assert p.title == ""
         assert p.series == []
@@ -231,7 +231,7 @@ class TestSurfacePlotSpec:
         assert sp.opacity == 0.8
         assert sp.show_wireframe is False
 
-    def test_roundtrip(self) -> None:
+    def test_specs_roundtrip(self) -> None:
         sp = SurfacePlotSpec(
             title="Surface",
             z_data=[[1.0, 2.0], [3.0, 4.0]],
@@ -254,7 +254,7 @@ class TestSurfacePlotSpec:
 
 
 class TestContourPlotSpec:
-    def test_defaults(self) -> None:
+    def test_specs_defaults(self) -> None:
         cp = ContourPlotSpec(
             z_data=[[1.0, 2.0], [3.0, 4.0]],
             x_grid=[0.0, 1.0],
@@ -269,7 +269,7 @@ class TestContourPlotSpec:
         with pytest.raises(ValidationError):
             ContourPlotSpec(z_data=[[1.0]], x_grid=[0.0], y_grid=[0.0], levels=1)
 
-    def test_roundtrip(self) -> None:
+    def test_specs_roundtrip(self) -> None:
         cp = ContourPlotSpec(
             z_data=[[1.0, 2.0], [3.0, 4.0]],
             x_grid=[0.0, 1.0],
@@ -286,7 +286,7 @@ class TestContourPlotSpec:
 
 
 class TestHeatmapSpec:
-    def test_defaults(self) -> None:
+    def test_specs_defaults(self) -> None:
         hm = HeatmapSpec(z_data=[[1.0, 2.0], [3.0, 4.0]])
         assert hm.colormap == "YlGnBu"
         assert hm.annotate is False
@@ -302,7 +302,7 @@ class TestHeatmapSpec:
         )
         assert hm.x_labels == ["A", "B"]
 
-    def test_roundtrip(self) -> None:
+    def test_specs_roundtrip(self) -> None:
         hm = HeatmapSpec(z_data=[[0.5]])
         hm2 = HeatmapSpec(**hm.model_dump())
         assert hm == hm2
@@ -312,7 +312,7 @@ class TestHeatmapSpec:
 
 
 class TestHistogramSpec:
-    def test_defaults(self) -> None:
+    def test_specs_defaults(self) -> None:
         h = HistogramSpec()
         assert h.bins == 30
         assert h.density is False
@@ -323,7 +323,7 @@ class TestHistogramSpec:
         with pytest.raises(ValidationError):
             HistogramSpec(bins=0)
 
-    def test_roundtrip(self) -> None:
+    def test_specs_roundtrip(self) -> None:
         h = HistogramSpec(bins=50, density=True, cumulative=True)
         h2 = HistogramSpec(**h.model_dump())
         assert h == h2
@@ -333,7 +333,7 @@ class TestHistogramSpec:
 
 
 class TestFilterComparisonSpec:
-    def test_defaults(self) -> None:
+    def test_specs_defaults(self) -> None:
         fc = FilterComparisonSpec()
         assert fc.original_series == []
         assert fc.filtered_series == []

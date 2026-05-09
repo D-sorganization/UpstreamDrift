@@ -12,7 +12,7 @@ from src.shared.python.calc_backend.contracts.financial import (
 
 
 class TestFinancialRequest:
-    def test_default_construction(self) -> None:
+    def test_contracts_financial_default_construction(self) -> None:
         req = FinancialRequest()
         assert isinstance(req, FinancialRequest)
 
@@ -28,7 +28,7 @@ class TestFinancialRequest:
         req = FinancialRequest()
         assert req.capacity_utilization == pytest.approx(0.85)
 
-    def test_custom_values(self) -> None:
+    def test_contracts_financial_custom_values(self) -> None:
         req = FinancialRequest(plant_capacity_tpd=200.0, operating_days_per_year=300)
         assert req.plant_capacity_tpd == 200.0
         assert req.operating_days_per_year == 300
@@ -86,7 +86,7 @@ class TestFinancialResultsOut:
         defaults.update(kwargs)
         return FinancialResultsOut(**defaults)
 
-    def test_construction(self) -> None:
+    def test_contracts_financial_construction(self) -> None:
         result = self._make_results()
         assert isinstance(result, FinancialResultsOut)
 

@@ -44,7 +44,7 @@ def _build_cluster(rest_points: np.ndarray, rotations: list[np.ndarray]) -> dict
     return markers
 
 
-def test_implements_shape_fitter_protocol() -> None:
+def test_cluster_kabsch_implements_shape_fitter_protocol() -> None:
     assert isinstance(ClusterKabschFitter(), ShapeFitter)
 
 
@@ -150,7 +150,7 @@ def test_leading_nan_frames_use_first_valid_as_rest() -> None:
     assert np.allclose(fitted.rotation_matrix[2], rot, atol=1e-9)
 
 
-def test_wrong_binding_kind_raises_type_error() -> None:
+def test_cluster_kabsch_wrong_binding_kind_raises_type_error() -> None:
     binding = MarkerBinding(kind=BindingKind.BETWEEN_TWO, marker_names=("a", "b"))
     with pytest.raises(TypeError, match="CLUSTER"):
         ClusterKabschFitter().fit(

@@ -24,7 +24,7 @@ class TestGenerateNoiseShape:
         result = generate_noise("brown", 50, 1.0)
         assert result.shape == (50,)
 
-    def test_returns_ndarray(self) -> None:
+    def test_noise_returns_ndarray(self) -> None:
         result = generate_noise("white", 10, 1.0)
         assert isinstance(result, np.ndarray)
 
@@ -57,7 +57,7 @@ class TestGenerateNoiseAmplitude:
         b = generate_noise("pink", 32, 1.0, seed=7)
         np.testing.assert_array_equal(a, b)
 
-    def test_different_seeds_differ(self) -> None:
+    def test_noise_different_seeds_differ(self) -> None:
         a = generate_noise("white", 20, 1.0, seed=1)
         b = generate_noise("white", 20, 1.0, seed=2)
         assert not np.allclose(a, b)
@@ -82,7 +82,7 @@ class TestGenerateNoiseContracts:
         with pytest.raises((ValueError, AssertionError)):
             generate_noise("white", -5, 1.0)
 
-    def test_negative_amplitude_raises(self) -> None:
+    def test_noise_negative_amplitude_raises(self) -> None:
         with pytest.raises((ValueError, AssertionError)):
             generate_noise("white", 10, -1.0)
 

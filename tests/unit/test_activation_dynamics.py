@@ -15,7 +15,7 @@ from src.shared.python.core.contracts import PreconditionError
 class TestActivationDynamicsInitialization:
     """Test ActivationDynamics initialization."""
 
-    def test_default_initialization(self) -> None:
+    def test_activation_dynamics_default_initialization(self) -> None:
         """Test initialization with default parameters."""
         dynamics = ActivationDynamics()
         assert (
@@ -183,7 +183,9 @@ class TestStepResponse:
         # After 200ms (5x tau_deact), should be very close to min_activation
         assert a < 0.05, f"After 200ms, activation should be < 0.05, got {a:.4f}"
 
-    def test_activation_faster_than_deactivation(self, dynamics) -> None:
+    def test_activation_dynamics_activation_faster_than_deactivation(
+        self, dynamics
+    ) -> None:
         """Test that activation is faster than deactivation."""
         dt = 0.0001
 

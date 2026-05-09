@@ -37,7 +37,7 @@ class TestGetRoughness:
 
 
 class TestCalculatePressureDrop:
-    def test_returns_dict(self) -> None:
+    def test_pressure_drop_interface_returns_dict(self) -> None:
         result = calculate_pressure_drop(
             pipe_diameter=0.05,
             pipe_length=10.0,

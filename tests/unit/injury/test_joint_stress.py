@@ -56,7 +56,7 @@ class TestStressTypeEnum:
 
 
 class TestJointStressAnalyzerInit:
-    def test_instantiates(self) -> None:
+    def test_joint_stress_instantiates(self) -> None:
         a = _make_analyzer()
         assert a is not None
 
@@ -86,7 +86,7 @@ class TestJointStressAnalyzerInit:
 
 
 class TestAnalyzeAllJoints:
-    def test_returns_dict(self) -> None:
+    def test_joint_stress_returns_dict(self) -> None:
         a = _make_analyzer()
         results = a.analyze_all_joints(_ANGLES, _VELS, _TORQUES, _T)
         assert isinstance(results, dict)
@@ -104,7 +104,7 @@ class TestAnalyzeAllJoints:
 
 
 class TestGetSummary:
-    def test_returns_dict(self) -> None:
+    def test_joint_stress_returns_dict(self) -> None:
         a = _make_analyzer()
         results = a.analyze_all_joints(_ANGLES, _VELS, _TORQUES, _T)
         summary = a.get_summary(results)

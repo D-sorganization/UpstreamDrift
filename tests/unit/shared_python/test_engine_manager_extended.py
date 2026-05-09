@@ -89,7 +89,9 @@ def engine_manager(
 # --- Tests ---
 
 
-def test_initialization(engine_manager, mock_suite_root) -> None:
+def test_engine_manager_extended_initialization(
+    engine_manager, mock_suite_root
+) -> None:
     """Test EngineManager initializes with correct root and empty engine."""
     assert engine_manager.suite_root == mock_suite_root
     assert engine_manager.current_engine is None
@@ -127,13 +129,13 @@ def test_switch_engine_unknown(engine_manager) -> None:
     assert engine_manager.switch_engine("unknown_engine") is False
 
 
-def test_switch_engine_unavailable(engine_manager) -> None:
+def test_engine_manager_extended_switch_engine_unavailable(engine_manager) -> None:
     """Test switching to an unavailable engine returns False."""
     engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.UNAVAILABLE
     assert engine_manager.switch_engine(EngineType.MUJOCO) is False
 
 
-def test_switch_engine_success(engine_manager) -> None:
+def test_engine_manager_extended_switch_engine_success(engine_manager) -> None:
     """Test successful engine switch."""
     with patch.object(engine_manager, "_load_engine") as mock_load:
         result = engine_manager.switch_engine(EngineType.MUJOCO)
@@ -142,7 +144,7 @@ def test_switch_engine_success(engine_manager) -> None:
         assert engine_manager.current_engine == EngineType.MUJOCO
 
 
-def test_switch_engine_failure(engine_manager) -> None:
+def test_engine_manager_extended_switch_engine_failure(engine_manager) -> None:
     """Test engine switch failure sets error status."""
     with patch.object(
         engine_manager, "_load_engine", side_effect=GolfModelingError("Load failed")
@@ -281,14 +283,14 @@ def test_cleanup(engine_manager) -> None:
     assert engine_manager.current_engine is None
 
 
-def test_get_engine_info(engine_manager) -> None:
+def test_engine_manager_extended_get_engine_info(engine_manager) -> None:
     """Test engine info retrieval."""
     info = engine_manager.get_engine_info()
     assert "available_engines" in info
     assert "engine_status" in info
 
 
-def test_validate_engine_configuration(engine_manager) -> None:
+def test_engine_manager_extended_validate_engine_configuration(engine_manager) -> None:
     """Test engine configuration validation."""
     assert engine_manager.validate_engine_configuration(EngineType.MUJOCO) is False
     (engine_manager.engine_paths[EngineType.MUJOCO] / "python").mkdir()

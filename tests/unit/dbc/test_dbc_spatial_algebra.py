@@ -41,7 +41,7 @@ class TestSkewPreconditions(unittest.TestCase):
         with self.assertRaises(_CONTRACT_EXC):
             skew(np.eye(3))
 
-    def test_empty_raises(self) -> None:
+    def test_dbc_spatial_algebra_empty_raises(self) -> None:
         from src.shared.python.spatial_algebra.spatial_vectors import skew
 
         with self.assertRaises(_CONTRACT_EXC):
@@ -89,7 +89,7 @@ class TestCrmPreconditions(unittest.TestCase):
         with self.assertRaises(_CONTRACT_EXC):
             crm(np.array([1.0, 2.0, 3.0]))
 
-    def test_empty_raises(self) -> None:
+    def test_dbc_spatial_algebra_empty_raises(self) -> None:
         from src.shared.python.spatial_algebra.spatial_vectors import crm
 
         with self.assertRaises(_CONTRACT_EXC):
@@ -105,7 +105,7 @@ class TestCrmPreconditions(unittest.TestCase):
 class TestCrmPostconditions(unittest.TestCase):
     """crm() must return a 6x6 matrix."""
 
-    def test_crm_shape(self) -> None:
+    def test_dbc_spatial_algebra_crm_shape(self) -> None:
         from src.shared.python.spatial_algebra.spatial_vectors import crm
 
         result = crm(np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]))
@@ -157,7 +157,7 @@ class TestCrossMotionPreconditions(unittest.TestCase):
 class TestCrossMotionPostconditions(unittest.TestCase):
     """cross_motion must return 6-element vector, consistent with crm()."""
 
-    def test_output_shape(self) -> None:
+    def test_dbc_spatial_algebra_output_shape(self) -> None:
         from src.shared.python.spatial_algebra.spatial_vectors import cross_motion
 
         result = cross_motion(np.ones(6), np.ones(6))
@@ -183,7 +183,7 @@ class TestCrossMotionPostconditions(unittest.TestCase):
 class TestCrossForcePreconditions(unittest.TestCase):
     """cross_force must receive two 6-element vectors."""
 
-    def test_wrong_shape_raises(self) -> None:
+    def test_dbc_spatial_algebra_wrong_shape_raises(self) -> None:
         from src.shared.python.spatial_algebra.spatial_vectors import cross_force
 
         with self.assertRaises(_CONTRACT_EXC):
@@ -207,7 +207,7 @@ class TestCrossForcePostconditions(unittest.TestCase):
 class TestSpatialCrossPreconditions(unittest.TestCase):
     """spatial_cross must accept valid cross_type."""
 
-    def test_invalid_type_raises(self) -> None:
+    def test_dbc_spatial_algebra_invalid_type_raises(self) -> None:
         from src.shared.python.spatial_algebra.spatial_vectors import spatial_cross
 
         with self.assertRaises(_CONTRACT_EXC):
@@ -220,7 +220,7 @@ class TestSpatialCrossPreconditions(unittest.TestCase):
 class TestXrotPreconditions(unittest.TestCase):
     """xrot() requires a valid 3x3 rotation matrix."""
 
-    def test_wrong_shape_raises(self) -> None:
+    def test_dbc_spatial_algebra_wrong_shape_raises(self) -> None:
         from src.shared.python.spatial_algebra.transforms import xrot
 
         with self.assertRaises(_CONTRACT_EXC):
@@ -248,7 +248,7 @@ class TestXrotPostconditions(unittest.TestCase):
         result = xrot(np.eye(3))
         np.testing.assert_array_almost_equal(result, np.eye(6))
 
-    def test_output_shape(self) -> None:
+    def test_dbc_spatial_algebra_output_shape(self) -> None:
         from src.shared.python.spatial_algebra.transforms import xrot
 
         result = xrot(np.eye(3))
@@ -300,7 +300,7 @@ class TestXtransPreconditions(unittest.TestCase):
 class TestXtransPostconditions(unittest.TestCase):
     """xtrans with identity rotation and zero translation gives I6."""
 
-    def test_identity_transform(self) -> None:
+    def test_dbc_spatial_algebra_identity_transform(self) -> None:
         from src.shared.python.spatial_algebra.transforms import xtrans
 
         result = xtrans(np.eye(3), np.zeros(3))
@@ -336,13 +336,13 @@ class TestTransformInverse(unittest.TestCase):
 class TestMcIPreconditions(unittest.TestCase):
     """mcI() requires positive mass, 3-vector COM, 3x3 inertia."""
 
-    def test_negative_mass_raises(self) -> None:
+    def test_dbc_spatial_algebra_negative_mass_raises(self) -> None:
         from src.shared.python.spatial_algebra.inertia import mcI
 
         with self.assertRaises(_CONTRACT_EXC):
             mcI(-1.0, np.zeros(3), np.eye(3))
 
-    def test_zero_mass_raises(self) -> None:
+    def test_dbc_spatial_algebra_zero_mass_raises(self) -> None:
         from src.shared.python.spatial_algebra.inertia import mcI
 
         with self.assertRaises(_CONTRACT_EXC):
@@ -370,7 +370,7 @@ class TestMcIPreconditions(unittest.TestCase):
 class TestMcIPostconditions(unittest.TestCase):
     """mcI() output must be 6x6, symmetric, and positive semi-definite (for physical inertias)."""
 
-    def test_output_shape(self) -> None:
+    def test_dbc_spatial_algebra_output_shape(self) -> None:
         from src.shared.python.spatial_algebra.inertia import mcI
 
         result = mcI(2.0, np.zeros(3), np.eye(3))

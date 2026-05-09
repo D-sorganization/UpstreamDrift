@@ -61,7 +61,7 @@ class TestCreateButterworthFilter:
 
 
 class TestApplyMovingAverage:
-    def test_returns_signal(self) -> None:
+    def test_filters_returns_signal(self) -> None:
         sig = _make_signal()
         result = apply_moving_average(sig, window_size=5)
         assert isinstance(result, Signal)
@@ -78,19 +78,19 @@ class TestApplyMovingAverage:
         # Moving average has edge effects; mean should still be close to 3.0
         assert np.mean(result.values) == pytest.approx(3.0, rel=0.1)
 
-    def test_all_values_finite(self) -> None:
+    def test_filters_all_values_finite(self) -> None:
         sig = _make_signal()
         result = apply_moving_average(sig, window_size=7)
         assert np.all(np.isfinite(result.values))
 
-    def test_name_updated(self) -> None:
+    def test_filters_name_updated(self) -> None:
         sig = _make_signal()
         result = apply_moving_average(sig, window_size=5)
         assert "ma5" in result.name
 
 
 class TestApplySavgol:
-    def test_returns_signal(self) -> None:
+    def test_filters_returns_signal(self) -> None:
         sig = _make_signal(n=100)
         result = apply_savgol(sig, window_length=11, polyorder=3)
         assert isinstance(result, Signal)
@@ -106,19 +106,19 @@ class TestApplySavgol:
         result = apply_savgol(sig, window_length=11)
         assert len(result.values) == 5
 
-    def test_name_updated(self) -> None:
+    def test_filters_name_updated(self) -> None:
         sig = _make_signal(n=100)
         result = apply_savgol(sig, window_length=11)
         assert "savgol" in result.name
 
-    def test_all_values_finite(self) -> None:
+    def test_filters_all_values_finite(self) -> None:
         sig = _make_signal(n=100)
         result = apply_savgol(sig, window_length=11, polyorder=3)
         assert np.all(np.isfinite(result.values))
 
 
 class TestApplyMedianFilter:
-    def test_returns_signal(self) -> None:
+    def test_filters_returns_signal(self) -> None:
         sig = _make_signal(n=100)
         result = apply_median_filter(sig, kernel_size=5)
         assert isinstance(result, Signal)
@@ -136,14 +136,14 @@ class TestApplyMedianFilter:
         result = apply_median_filter(sig, kernel_size=5)
         assert abs(result.values[50]) < 1.0  # spike removed
 
-    def test_all_values_finite(self) -> None:
+    def test_filters_all_values_finite(self) -> None:
         sig = _make_signal(n=100)
         result = apply_median_filter(sig, kernel_size=5)
         assert np.all(np.isfinite(result.values))
 
 
 class TestApplyExponentialSmoothing:
-    def test_returns_signal(self) -> None:
+    def test_filters_returns_signal(self) -> None:
         sig = _make_signal(n=100)
         result = apply_exponential_smoothing(sig, alpha=0.3)
         assert isinstance(result, Signal)
@@ -162,7 +162,7 @@ class TestApplyExponentialSmoothing:
 
 
 class TestApplyGaussianSmoothing:
-    def test_returns_signal(self) -> None:
+    def test_filters_returns_signal(self) -> None:
         sig = _make_signal(n=100)
         result = apply_gaussian_smoothing(sig, sigma=1.0)
         assert isinstance(result, Signal)
@@ -172,7 +172,7 @@ class TestApplyGaussianSmoothing:
         result = apply_gaussian_smoothing(sig, sigma=1.0)
         assert len(result.values) == 100
 
-    def test_all_values_finite(self) -> None:
+    def test_filters_all_values_finite(self) -> None:
         sig = _make_signal(n=100)
         result = apply_gaussian_smoothing(sig, sigma=2.0)
         assert np.all(np.isfinite(result.values))

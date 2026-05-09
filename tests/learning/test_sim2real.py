@@ -71,7 +71,7 @@ class MockEngine:
 class TestDomainRandomization:
     """Tests for domain randomization."""
 
-    def test_config_defaults(self) -> None:
+    def test_sim2real_config_defaults(self) -> None:
         """Test default configuration values."""
         from src.learning.sim2real import DomainRandomizationConfig
 

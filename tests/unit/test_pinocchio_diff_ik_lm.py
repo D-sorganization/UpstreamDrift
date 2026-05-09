@@ -78,7 +78,7 @@ class TestLMStep:
         with pytest.raises(ValueError, match="non-negative"):
             lm_step(np.eye(3), np.zeros(3), damping=-1.0)
 
-    def test_shape_mismatch_raises(self) -> None:
+    def test_pinocchio_diff_ik_lm_shape_mismatch_raises(self) -> None:
         with pytest.raises(ValueError, match="incompatible"):
             lm_step(np.eye(3), np.zeros(4), damping=1e-3)
 

@@ -79,14 +79,18 @@ def nonzero_state() -> DoublePendulumState:
 class TestMassMatrix:
     """Mass matrix algebraic properties."""
 
-    def test_symmetric(self, default_dynamics: DoublePendulumDynamics) -> None:
+    def test_double_pendulum_dynamics_symmetric(
+        self, default_dynamics: DoublePendulumDynamics
+    ) -> None:
         for theta2 in [0.0, math.pi / 4, -math.pi / 3, math.pi / 2]:
             M = default_dynamics.mass_matrix(theta2)
             assert M[0][1] == pytest.approx(M[1][0], rel=1e-12), (
                 f"M not symmetric at theta2={theta2}"
             )
 
-    def test_positive_definite(self, default_dynamics: DoublePendulumDynamics) -> None:
+    def test_double_pendulum_dynamics_positive_definite(
+        self, default_dynamics: DoublePendulumDynamics
+    ) -> None:
         for theta2 in np.linspace(-math.pi, math.pi, 20):
             M = np.array(default_dynamics.mass_matrix(theta2))
             eigenvalues = np.linalg.eigvalsh(M)
@@ -204,7 +208,9 @@ class TestDampingVector:
 
 
 class TestDerivatives:
-    def test_output_shape(self, default_dynamics: DoublePendulumDynamics) -> None:
+    def test_double_pendulum_dynamics_output_shape(
+        self, default_dynamics: DoublePendulumDynamics
+    ) -> None:
         state = DoublePendulumState(0.1, -0.2, 0.5, -0.3)
         derivs = default_dynamics.derivatives(0.0, state)
         assert len(derivs) == 4

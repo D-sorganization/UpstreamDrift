@@ -50,13 +50,13 @@ class TestMockPhysicsEngineModel:
         assert engine._is_loaded
         assert engine.model_name == "/path/to/model.urdf"
 
-    def test_load_from_path(self) -> None:
+    def test_mock_engine_load_from_path(self) -> None:
         """Test backward-compatible load_from_path."""
         engine = MockPhysicsEngine()
         engine.load_from_path("test.xml")
         assert engine._is_loaded
 
-    def test_load_from_string(self) -> None:
+    def test_mock_engine_load_from_string(self) -> None:
         """Test loading from string content."""
         engine = MockPhysicsEngine()
         engine.load_from_string("<robot/>", extension=".urdf")
@@ -67,7 +67,7 @@ class TestMockPhysicsEngineModel:
 class TestMockPhysicsEngineSimulation:
     """Tests for simulation stepping."""
 
-    def test_step_advances_time(self) -> None:
+    def test_mock_engine_step_advances_time(self) -> None:
         """Test that step() advances simulation time."""
         engine = MockPhysicsEngine()
         engine.step()
@@ -91,7 +91,7 @@ class TestMockPhysicsEngineSimulation:
         assert engine._velocities[0] == pytest.approx(0.1)
         assert engine._positions[0] == pytest.approx(0.001)
 
-    def test_reset(self) -> None:
+    def test_mock_engine_reset(self) -> None:
         """Test resetting to initial state."""
         engine = MockPhysicsEngine()
         engine._torques = np.ones(7)
@@ -126,7 +126,7 @@ class TestMockPhysicsEngineState:
         assert "torques" in state
         assert "is_loaded" in state
 
-    def test_set_state(self) -> None:
+    def test_mock_engine_set_state(self) -> None:
         """Test setting full state."""
         engine = MockPhysicsEngine(num_joints=3)
         pos = np.array([1.0, 2.0, 3.0])
@@ -181,7 +181,7 @@ class TestMockPhysicsEngineControl:
 class TestMockPhysicsEngineBiomechanics:
     """Tests for biomechanics methods."""
 
-    def test_compute_mass_matrix(self) -> None:
+    def test_mock_engine_compute_mass_matrix(self) -> None:
         """Test mass matrix is identity."""
         engine = MockPhysicsEngine(num_joints=3)
         M = engine.compute_mass_matrix()
@@ -193,7 +193,7 @@ class TestMockPhysicsEngineBiomechanics:
         bias = engine.compute_bias_forces()
         np.testing.assert_array_equal(bias, np.zeros(3))
 
-    def test_compute_gravity_forces(self) -> None:
+    def test_mock_engine_compute_gravity_forces(self) -> None:
         """Test gravity forces affect first joint."""
         engine = MockPhysicsEngine(num_joints=3)
         g = engine.compute_gravity_forces()
@@ -201,7 +201,7 @@ class TestMockPhysicsEngineBiomechanics:
         assert g[1] == 0.0
         assert g[2] == 0.0
 
-    def test_compute_inverse_dynamics(self) -> None:
+    def test_mock_engine_compute_inverse_dynamics(self) -> None:
         """Test inverse dynamics: tau = M*qacc + bias."""
         engine = MockPhysicsEngine(num_joints=3)
         qacc = np.array([1.0, 2.0, 3.0])
@@ -216,7 +216,7 @@ class TestMockPhysicsEngineBiomechanics:
         assert len(forces) == 3
         np.testing.assert_array_equal(forces, np.zeros(3))
 
-    def test_compute_jacobian(self) -> None:
+    def test_mock_engine_compute_jacobian(self) -> None:
         """Test Jacobian returns correct shapes."""
         engine = MockPhysicsEngine(num_joints=5)
         jac = engine.compute_jacobian("test_body")

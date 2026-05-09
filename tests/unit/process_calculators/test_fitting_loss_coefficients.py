@@ -36,7 +36,7 @@ class TestFittingKFactorsDict:
 
 
 class TestGetFittingKFactor:
-    def test_returns_float(self) -> None:
+    def test_fitting_loss_coefficients_returns_float(self) -> None:
         result = get_fitting_k_factor("90_elbow_std")
         assert isinstance(result, float)
 
@@ -81,7 +81,7 @@ class TestGetMultipleFittingsK:
 
 
 class TestKToEquivalentLength:
-    def test_basic_conversion(self) -> None:
+    def test_fitting_loss_coefficients_basic_conversion(self) -> None:
         result = k_to_equivalent_length(1.0, 0.02)
         assert result == pytest.approx(50.0)
 
@@ -100,7 +100,7 @@ class TestKToEquivalentLength:
 
 
 class TestEquivalentLengthToK:
-    def test_basic_conversion(self) -> None:
+    def test_fitting_loss_coefficients_basic_conversion(self) -> None:
         result = equivalent_length_to_k(50.0, 0.02)
         assert result == pytest.approx(1.0)
 
@@ -108,7 +108,7 @@ class TestEquivalentLengthToK:
         with pytest.raises(ValueError):
             equivalent_length_to_k(30.0, 0.0)
 
-    def test_roundtrip(self) -> None:
+    def test_fitting_loss_coefficients_roundtrip(self) -> None:
         k_original = 0.75
         f = 0.02
         l_d = k_to_equivalent_length(k_original, f)
@@ -117,11 +117,11 @@ class TestEquivalentLengthToK:
 
 
 class TestListAvailableFittings:
-    def test_returns_dict(self) -> None:
+    def test_fitting_loss_coefficients_returns_dict(self) -> None:
         result = list_available_fittings()
         assert isinstance(result, dict)
 
-    def test_nonempty(self) -> None:
+    def test_fitting_loss_coefficients_nonempty(self) -> None:
         assert len(list_available_fittings()) > 0
 
     def test_matches_fitting_k_factors(self) -> None:

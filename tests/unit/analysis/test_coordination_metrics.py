@@ -31,7 +31,7 @@ def _make_instance(n_samples: int = 50, n_joints: int = 3) -> CoordinationMetric
 
 
 class TestComputeCouplingAngles:
-    def test_returns_array(self) -> None:
+    def test_coordination_metrics_returns_array(self) -> None:
         obj = _make_instance()
         result = obj.compute_coupling_angles(0, 1)
         assert isinstance(result, np.ndarray)
@@ -83,38 +83,38 @@ class TestComputeCoordinationMetrics:
         assert result is not None
         assert result.coordination_variability >= 0.0
 
-    def test_out_of_range_returns_none(self) -> None:
+    def test_coordination_metrics_out_of_range_returns_none(self) -> None:
         obj = _make_instance(n_joints=2)
         result = obj.compute_coordination_metrics(0, 5)
         assert result is None
 
 
 class TestComputePhaseAngle:
-    def test_returns_array(self) -> None:
+    def test_coordination_metrics_returns_array(self) -> None:
         obj = _make_instance()
         result = obj.compute_phase_angle(0)
         assert isinstance(result, np.ndarray)
 
-    def test_out_of_range_returns_empty(self) -> None:
+    def test_coordination_metrics_out_of_range_returns_empty(self) -> None:
         obj = _make_instance(n_joints=2)
         result = obj.compute_phase_angle(5)
         assert len(result) == 0
 
 
 class TestComputeContinuousRelativePhase:
-    def test_returns_array(self) -> None:
+    def test_coordination_metrics_returns_array(self) -> None:
         obj = _make_instance()
         result = obj.compute_continuous_relative_phase(0, 1)
         assert isinstance(result, np.ndarray)
 
-    def test_out_of_range_returns_empty(self) -> None:
+    def test_coordination_metrics_out_of_range_returns_empty(self) -> None:
         obj = _make_instance(n_joints=2)
         result = obj.compute_continuous_relative_phase(0, 5)
         assert len(result) == 0
 
 
 class TestComputeCorrelations:
-    def test_returns_tuple(self) -> None:
+    def test_coordination_metrics_returns_tuple(self) -> None:
         obj = _make_instance()
         matrix, labels = obj.compute_correlations("velocity")
         assert isinstance(matrix, np.ndarray)
@@ -147,7 +147,7 @@ class TestComputeCorrelations:
 
 
 class TestComputeRollingCorrelation:
-    def test_returns_tuple(self) -> None:
+    def test_coordination_metrics_returns_tuple(self) -> None:
         obj = _make_instance(n_samples=100)
         times, corrs = obj.compute_rolling_correlation(0, 1, window_size=10)
         assert isinstance(times, np.ndarray)

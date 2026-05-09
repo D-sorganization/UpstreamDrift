@@ -91,7 +91,7 @@ def mock_imageio() -> Any:
 class TestVideoExporter:
     """Tests for the VideoExporter class."""
 
-    def test_init(self, mock_mujoco: tuple[MagicMock, MagicMock]) -> None:
+    def test_video_export_init(self, mock_mujoco: tuple[MagicMock, MagicMock]) -> None:
         """Test VideoExporter initialization."""
         model, data = mock_mujoco
         mock_mj = _make_mock_mj()

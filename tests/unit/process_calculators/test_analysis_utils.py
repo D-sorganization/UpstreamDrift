@@ -35,7 +35,7 @@ class _NonDictEngine:
 
 
 class TestEvaluateOutput:
-    def test_returns_tuple_of_three(self) -> None:
+    def test_analysis_utils_returns_tuple_of_three(self) -> None:
         result = evaluate_output(_StubEngine(), {}, 0.0, "efficiency")
         assert isinstance(result, tuple)
         assert len(result) == 3

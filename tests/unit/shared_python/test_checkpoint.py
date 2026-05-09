@@ -164,7 +164,7 @@ class TestBasePhysicsEngineCheckpoint(unittest.TestCase):
         np.testing.assert_array_equal(cp.engine_state["v"], np.array([0.1, 0.2]))
         self.assertEqual(cp.engine_state["t"], 1.5)
 
-    def test_restore_checkpoint(self) -> None:
+    def test_checkpoint_restore_checkpoint(self) -> None:
         cp = StateCheckpoint(
             id="restore_test",
             timestamp=2.0,

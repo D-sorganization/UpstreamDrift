@@ -13,7 +13,7 @@ from src.shared.python.upstream_drift_tools.process_calculators.psa_package.psa_
 
 
 class TestPSAModelConstruction:
-    def test_default_construction(self) -> None:
+    def test_psa_model_default_construction(self) -> None:
         model = PSAModel()
         assert model.total_feed_scfm == pytest.approx(1100.0)
 

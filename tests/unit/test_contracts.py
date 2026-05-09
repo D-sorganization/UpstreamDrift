@@ -75,7 +75,7 @@ class TestContractLevel:
         assert hasattr(level, "value")
         assert level.value in ("enforce", "warn", "off")
 
-    def test_set_and_get(self) -> None:
+    def test_contracts_set_and_get(self) -> None:
         original = get_contract_level()
         set_contract_level(ContractLevel.ENFORCE)
         assert get_contract_level() == ContractLevel.ENFORCE

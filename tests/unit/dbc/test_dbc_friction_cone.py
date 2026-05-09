@@ -41,7 +41,7 @@ class TestFrictionConePreconditions(unittest.TestCase):
         with self.assertRaises(ValueError):
             FrictionCone(mu=0.5, normal=np.array([0.0, 0.0, 1.0]), num_sides=2)
 
-    def test_valid_construction(self) -> None:
+    def test_dbc_friction_cone_valid_construction(self) -> None:
         from src.robotics.contact.friction_cone import FrictionCone
 
         cone = FrictionCone(mu=0.6, normal=np.array([0.0, 0.0, 1.0]))

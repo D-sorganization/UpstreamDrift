@@ -89,7 +89,7 @@ def test_published_values_round_trip_through_estimator() -> None:
 # --------------------------------------------------------------------------- #
 # Smoke: full subject build + mass closure within 1%.                         #
 # --------------------------------------------------------------------------- #
-def test_smoke_full_subject_returns_subject_anthropometrics() -> None:
+def test_de_leva_smoke_full_subject_returns_subject_anthropometrics() -> None:
     """1.83 m / 82 kg male produces a non-empty SubjectAnthropometrics."""
     est = DeLevaEstimator()
     subject = est.estimate(
@@ -103,7 +103,7 @@ def test_smoke_full_subject_returns_subject_anthropometrics() -> None:
     assert len(subject.segments) >= 11
 
 
-def test_smoke_mass_closes_within_one_percent() -> None:
+def test_de_leva_smoke_mass_closes_within_one_percent() -> None:
     """Sum of segment masses equals total subject mass within 1%."""
     est = DeLevaEstimator()
     mass_kg = 82.0
@@ -129,7 +129,7 @@ def test_smoke_female_subject_uses_female_table() -> None:
     assert male_thigh.mass_kg != pytest.approx(female_thigh.mass_kg, rel=1e-4)
 
 
-def test_estimator_protocol_isinstance_check() -> None:
+def test_de_leva_estimator_protocol_isinstance_check() -> None:
     """The wrapper must satisfy the runtime-checkable Estimator Protocol."""
     assert isinstance(DeLevaEstimator(), Estimator)
 
@@ -138,7 +138,7 @@ def test_estimator_protocol_isinstance_check() -> None:
 # Design by Contract — subject-input validation.                              #
 # --------------------------------------------------------------------------- #
 @pytest.mark.parametrize("bad_height", [0.0, -1.0, float("nan"), float("inf")])
-def test_invalid_height_raises_value_error(bad_height: float) -> None:
+def test_de_leva_invalid_height_raises_value_error(bad_height: float) -> None:
     """``height_m`` must be a positive finite number."""
     est = DeLevaEstimator()
     with pytest.raises(ValueError, match="height_m"):
@@ -146,14 +146,14 @@ def test_invalid_height_raises_value_error(bad_height: float) -> None:
 
 
 @pytest.mark.parametrize("bad_mass", [0.0, -50.0, float("nan"), float("inf")])
-def test_invalid_mass_raises_value_error(bad_mass: float) -> None:
+def test_de_leva_invalid_mass_raises_value_error(bad_mass: float) -> None:
     """``mass_kg`` must be a positive finite number."""
     est = DeLevaEstimator()
     with pytest.raises(ValueError, match="mass_kg"):
         est.estimate(subject_id="x", height_m=1.80, mass_kg=bad_mass)
 
 
-def test_invalid_subject_id_raises_value_error() -> None:
+def test_de_leva_invalid_subject_id_raises_value_error() -> None:
     """``subject_id`` must be a non-empty string."""
     est = DeLevaEstimator()
     with pytest.raises(ValueError, match="subject_id"):

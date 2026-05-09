@@ -57,7 +57,7 @@ class TestBuildOverrideMapping:
 
 
 class TestOptimizationHistoryEntry:
-    def test_construction(self) -> None:
+    def test_optimization_construction(self) -> None:
         entry = OptimizationHistoryEntry(
             iteration=1, objective=0.75, parameters={"Temperature": 800.0}
         )
@@ -83,7 +83,7 @@ class TestRunAdamOptimization:
         )
         assert isinstance(result, dict)
 
-    def test_has_expected_keys(self) -> None:
+    def test_optimization_has_expected_keys(self) -> None:
         result = run_adam_optimization(
             _StubEngine(),
             _BASE_ANALYSIS_PARAMS,
@@ -191,7 +191,7 @@ class TestFindOptimalOnSurface:
         result = find_optimal_on_surface(x, y, Z, method="Differential Evolution")
         assert isinstance(result, dict)
 
-    def test_unknown_method_raises(self) -> None:
+    def test_optimization_unknown_method_raises(self) -> None:
         x, y, Z = self._make_grid()
         with pytest.raises(ValueError):
             find_optimal_on_surface(x, y, Z, method="Unknown Method")

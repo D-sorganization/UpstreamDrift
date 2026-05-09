@@ -127,7 +127,7 @@ class TestComputeSpectrogram:
         assert isinstance(sxx, np.ndarray)
         assert sxx.shape == (len(f), len(t))
 
-    def test_custom_parameters(self) -> None:
+    def test_signal_processing_custom_parameters(self) -> None:
         data = _sine_signal(fs=500.0)
         f, t, sxx = compute_spectrogram(data, fs=500.0, nperseg=128, noverlap=64)
         assert len(f) > 0
@@ -179,7 +179,7 @@ class TestComputeSpectralArcLength:
         # Constant signal - SAL depends on DC component handling
         assert isinstance(result, float)
 
-    def test_returns_float(self) -> None:
+    def test_signal_processing_returns_float(self) -> None:
         data = _sine_signal(freq=5.0, fs=100.0)
         result = compute_spectral_arc_length(data, fs=100.0)
         assert isinstance(result, float)
@@ -319,7 +319,7 @@ class TestComputeDTWDistance:
         assert dist > 0
         assert dist < 1.0  # Similar sequences
 
-    def test_symmetric(self) -> None:
+    def test_signal_processing_symmetric(self) -> None:
         rng = np.random.default_rng(42)
         x = rng.standard_normal(20)
         y = rng.standard_normal(20)

@@ -53,7 +53,7 @@ class TestAngularMomentumMetrics:
         result = self.obj.compute_angular_momentum_metrics()
         assert result.peak_magnitude >= result.mean_magnitude
 
-    def test_variability_non_negative(self) -> None:
+    def test_angular_momentum_variability_non_negative(self) -> None:
         self._set_data()
         result = self.obj.compute_angular_momentum_metrics()
         assert result.variability >= 0.0

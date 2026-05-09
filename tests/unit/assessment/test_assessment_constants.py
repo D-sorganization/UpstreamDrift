@@ -15,10 +15,10 @@ from src.shared.python.assessment.constants import (
 
 
 class TestCategories:
-    def test_is_dict(self) -> None:
+    def test_assessment_constants_is_dict(self) -> None:
         assert isinstance(CATEGORIES, dict)
 
-    def test_non_empty(self) -> None:
+    def test_assessment_constants_non_empty(self) -> None:
         assert len(CATEGORIES) > 0
 
     def test_keys_are_uppercase_letters(self) -> None:
@@ -26,7 +26,7 @@ class TestCategories:
             isinstance(k, str) and len(k) == 1 and k.isupper() for k in CATEGORIES
         )
 
-    def test_values_are_strings(self) -> None:
+    def test_assessment_constants_values_are_strings(self) -> None:
         assert all(isinstance(v, str) for v in CATEGORIES.values())
 
     def test_security_category_exists(self) -> None:
@@ -43,7 +43,7 @@ class TestCategories:
 
 
 class TestGroupWeights:
-    def test_is_dict(self) -> None:
+    def test_assessment_constants_is_dict(self) -> None:
         assert isinstance(GROUP_WEIGHTS, dict)
 
     def test_weights_sum_to_one(self) -> None:
@@ -63,7 +63,7 @@ class TestGroupWeights:
 
 
 class TestGroupMapping:
-    def test_is_dict(self) -> None:
+    def test_assessment_constants_is_dict(self) -> None:
         assert isinstance(GROUP_MAPPING, dict)
 
     def test_all_category_keys_mapped(self) -> None:
@@ -82,10 +82,10 @@ class TestGroupMapping:
 
 
 class TestPragmaticPrinciples:
-    def test_is_dict(self) -> None:
+    def test_assessment_constants_is_dict(self) -> None:
         assert isinstance(PRAGMATIC_PRINCIPLES, dict)
 
-    def test_non_empty(self) -> None:
+    def test_assessment_constants_non_empty(self) -> None:
         assert len(PRAGMATIC_PRINCIPLES) > 0
 
     def test_each_principle_has_name(self) -> None:

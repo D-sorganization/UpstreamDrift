@@ -110,7 +110,7 @@ class TestEngineCapabilitiesToDict:
 
 
 class TestEngineCapabilitiesFromDict:
-    def test_roundtrip(self) -> None:
+    def test_capabilities_roundtrip(self) -> None:
         original = EngineCapabilities(
             engine_name="RoundTrip",
             mass_matrix=CapabilityLevel.FULL,

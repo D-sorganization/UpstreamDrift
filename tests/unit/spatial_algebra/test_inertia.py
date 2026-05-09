@@ -34,11 +34,11 @@ class TestMcI:
         np.testing.assert_allclose(result[:3, 3:], 0.0, atol=1e-12)
         np.testing.assert_allclose(result[3:, :3], 0.0, atol=1e-12)
 
-    def test_negative_mass_raises(self) -> None:
+    def test_inertia_negative_mass_raises(self) -> None:
         with pytest.raises(ValueError):
             mcI(-1.0, np.zeros(3), np.eye(3))
 
-    def test_zero_mass_raises(self) -> None:
+    def test_inertia_zero_mass_raises(self) -> None:
         with pytest.raises(ValueError):
             mcI(0.0, np.zeros(3), np.eye(3))
 

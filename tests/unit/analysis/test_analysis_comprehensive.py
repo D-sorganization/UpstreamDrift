@@ -120,7 +120,9 @@ class TestBasicStatsMixin:
         speed = np.sin(2 * np.pi * times) * 50 + 50
         return BasicStatsHost(times=times, club_head_speed=speed)
 
-    def test_compute_summary_stats(self, host: BasicStatsHost) -> None:
+    def test_analysis_comprehensive_compute_summary_stats(
+        self, host: BasicStatsHost
+    ) -> None:
         data = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
         host_small = BasicStatsHost(times=np.arange(5, dtype=float))
         stats = host_small.compute_summary_stats(data)
@@ -139,7 +141,9 @@ class TestBasicStatsMixin:
         assert stats.mean == 42.0
         assert stats.range == 0.0
 
-    def test_find_peaks_in_data(self, host: BasicStatsHost) -> None:
+    def test_analysis_comprehensive_find_peaks_in_data(
+        self, host: BasicStatsHost
+    ) -> None:
         data = np.sin(2 * np.pi * host.times * 3)  # 3 full cycles
         peaks = host.find_peaks_in_data(data, height=0.5)
         assert len(peaks) > 0
@@ -154,7 +158,9 @@ class TestBasicStatsMixin:
             assert peak.prominence is not None
             assert peak.prominence >= 0.5
 
-    def test_find_club_head_speed_peak(self, host: BasicStatsHost) -> None:
+    def test_analysis_comprehensive_find_club_head_speed_peak(
+        self, host: BasicStatsHost
+    ) -> None:
         peak = host.find_club_head_speed_peak()
         assert peak is not None
         assert isinstance(peak, PeakInfo)
@@ -488,7 +494,7 @@ class TestDataclasses:
         assert peak.prominence == 1.5
         assert peak.width == 0.02
 
-    def test_summary_statistics(self) -> None:
+    def test_analysis_comprehensive_summary_statistics(self) -> None:
         stats = SummaryStatistics(
             mean=5.0,
             median=5.0,

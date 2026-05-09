@@ -69,7 +69,7 @@ class TestPathValidation:
         assert exc_info.value.status_code == 400
         assert "absolute" in exc_info.value.detail.lower()
 
-    def test_rejects_parent_traversal(self) -> None:
+    def test_api_extended_rejects_parent_traversal(self) -> None:
         """Test that parent directory traversal is rejected."""
         from fastapi import HTTPException
 

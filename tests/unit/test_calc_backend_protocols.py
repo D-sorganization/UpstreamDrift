@@ -78,7 +78,7 @@ class TestCalculationEngineProtocol:
 class TestFlowRateContracts:
     """Tests for flow rate Pydantic contracts."""
 
-    def test_valid_request(self) -> None:
+    def test_calc_backend_protocols_valid_request(self) -> None:
         """Valid flow rate request should parse correctly."""
 
         req = FlowRateConvertRequest(value=10.0, from_unit="kg/s", to_unit="lb/h")
@@ -197,7 +197,7 @@ class TestCalcBackendPackageVersion:
         assert isinstance(calc_backend.__version__, str)
         assert len(calc_backend.__version__) > 0
 
-    def test_all_exports_importable(self) -> None:
+    def test_calc_backend_protocols_all_exports_importable(self) -> None:
         """All items in __all__ should be importable."""
 
         for name in calc_backend.__all__:

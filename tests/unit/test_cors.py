@@ -12,10 +12,10 @@ class TestDefaultOrigins:
     def test_contains_localhost(self) -> None:
         assert any("localhost" in o for o in DEFAULT_ORIGINS)
 
-    def test_all_are_strings(self) -> None:
+    def test_cors_all_are_strings(self) -> None:
         assert all(isinstance(o, str) for o in DEFAULT_ORIGINS)
 
-    def test_non_empty(self) -> None:
+    def test_cors_non_empty(self) -> None:
         assert len(DEFAULT_ORIGINS) > 0
 
 

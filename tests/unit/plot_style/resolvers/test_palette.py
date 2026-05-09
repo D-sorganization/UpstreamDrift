@@ -16,7 +16,7 @@ from src.shared.python.plot_style.resolvers import RESOLVER_REGISTRY
 from src.shared.python.plot_style.resolvers.palette import PaletteColor
 
 
-def test_protocol_compliance() -> None:
+def test_palette_protocol_compliance() -> None:
     resolver = PaletteColor("tab10", 0)
     assert isinstance(resolver, ColorResolver)
 
@@ -102,7 +102,7 @@ def test_resolve_array_per_marker() -> None:
     assert np.allclose(arr[0, 0], expected)
 
 
-def test_resolve_array_rejects_negative_frames() -> None:
+def test_palette_resolve_array_rejects_negative_frames() -> None:
     resolver = PaletteColor("tab10", 0)
     with pytest.raises(ValueError, match="non-negative"):
         resolver.resolve_array(
@@ -110,7 +110,7 @@ def test_resolve_array_rejects_negative_frames() -> None:
         )
 
 
-def test_resolve_array_rejects_negative_markers() -> None:
+def test_palette_resolve_array_rejects_negative_markers() -> None:
     resolver = PaletteColor("tab10", 0)
     with pytest.raises(ValueError, match="non-negative"):
         resolver.resolve_array(
@@ -146,5 +146,5 @@ def test_custom_colormap_lookup() -> None:
         unregister_custom_colormap("ud_test_palette_resolver")
 
 
-def test_registry_dispatch() -> None:
+def test_palette_registry_dispatch() -> None:
     assert RESOLVER_REGISTRY[PaletteColorScale] is PaletteColor

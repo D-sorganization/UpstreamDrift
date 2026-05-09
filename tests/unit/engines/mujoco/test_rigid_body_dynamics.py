@@ -73,7 +73,7 @@ class TestCRBA:
 
         np.testing.assert_allclose(H, H.T, atol=1e-10)
 
-    def test_mass_matrix_positive_definite(self) -> None:
+    def test_rigid_body_dynamics_mass_matrix_positive_definite(self) -> None:
         """Test mass matrix is positive definite."""
         model = create_2link_model()
         q = np.array([0, 0])

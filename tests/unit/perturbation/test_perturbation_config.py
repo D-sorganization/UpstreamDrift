@@ -10,7 +10,7 @@ from src.shared.python.perturbation.config import (
 
 
 class TestPerturbationConfig:
-    def test_default_construction(self) -> None:
+    def test_perturbation_config_default_construction(self) -> None:
         cfg = PerturbationConfig()
         assert cfg.n_trials == 100
         assert cfg.noise_type == "white"
@@ -102,14 +102,14 @@ class TestPerturbationSummary:
         defaults.update(kwargs)
         return PerturbationSummary(**defaults)
 
-    def test_construction(self) -> None:
+    def test_perturbation_config_construction(self) -> None:
         s = self._make_summary()
         assert s.engine_name == "test_engine"
         assert s.robustness_score == pytest.approx(0.85)
         assert s.success_rate == pytest.approx(0.95)
         assert s.execution_time_sec == pytest.approx(3.14)
 
-    def test_to_dict_returns_dict(self) -> None:
+    def test_perturbation_config_to_dict_returns_dict(self) -> None:
         s = self._make_summary()
         d = s.to_dict()
         assert isinstance(d, dict)

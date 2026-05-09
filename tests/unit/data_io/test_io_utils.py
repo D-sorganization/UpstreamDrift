@@ -80,7 +80,7 @@ class TestSaveJson:
         assert result == f
         assert load_json(f) == data
 
-    def test_creates_parent_dirs(self, tmp_path: Path) -> None:
+    def test_io_utils_creates_parent_dirs(self, tmp_path: Path) -> None:
         f = tmp_path / "deep" / "nested" / "file.json"
         save_json(f, {"a": 1})
         assert f.exists()
@@ -104,7 +104,7 @@ class TestSaveJson:
 
 
 class TestReadWriteText:
-    def test_roundtrip(self, tmp_path: Path) -> None:
+    def test_io_utils_roundtrip(self, tmp_path: Path) -> None:
         f = tmp_path / "test.txt"
         content = "hello\nworld"
         write_text(f, content)
@@ -151,6 +151,6 @@ class TestGetFileSize:
         f.write_bytes(content.encode())
         assert get_file_size(f) == len(content)
 
-    def test_missing_file_raises(self) -> None:
+    def test_io_utils_missing_file_raises(self) -> None:
         with pytest.raises(FileNotFoundIOError):
             get_file_size("/nonexistent/path.txt")

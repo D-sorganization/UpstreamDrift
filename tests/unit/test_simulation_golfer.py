@@ -37,7 +37,7 @@ def _zero_torque(t) -> tuple[float, ...]:  # noqa: ARG001
 
 
 class TestGolferParams:
-    def test_construction(self) -> None:
+    def test_simulation_golfer_construction(self) -> None:
         p = _make_params()
         assert p.m_r_upper == pytest.approx(2.0)
 
@@ -68,7 +68,7 @@ class TestRunSimulationGolfer:
         result = run_simulation(params, y0, 0.05, _zero_torque, dt=0.02)
         assert result.states.shape[1] == 2 * N_DOF
 
-    def test_invalid_t_end_raises(self) -> None:
+    def test_simulation_golfer_invalid_t_end_raises(self) -> None:
         params = _make_params()
         y0 = np.zeros(2 * N_DOF)
         with pytest.raises((AssertionError, ValueError)):

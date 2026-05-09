@@ -43,7 +43,7 @@ from src.api.models.responses import (
 class TestForceOverlayRequestContract:
     """Validate ForceOverlayRequest model."""
 
-    def test_default_values(self) -> None:
+    def test_phase4_api_default_values(self) -> None:
         """Defaults should be sensible."""
         req = ForceOverlayRequest()
         assert req.enabled is True

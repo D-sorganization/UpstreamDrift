@@ -228,7 +228,7 @@ class TestEnergyConstants:
 class TestIntegrationFailureError:
     """Tests for IntegrationFailureError exception."""
 
-    def test_is_exception(self) -> None:
+    def test_physics_comprehensive_is_exception(self) -> None:
         err = IntegrationFailureError("Energy blew up")
         assert isinstance(err, Exception)
         assert "Energy blew up" in str(err)

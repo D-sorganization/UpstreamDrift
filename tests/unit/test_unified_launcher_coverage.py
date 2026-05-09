@@ -19,7 +19,7 @@ def launcher():
     return UnifiedLauncher()
 
 
-def test_initialization(launcher):
+def test_unified_launcher_coverage_initialization(launcher):
     """Test UnifiedLauncher initialization succeeds."""
     # UnifiedLauncher now uses lazy initialization - no app/launcher attributes at init
     assert launcher is not None

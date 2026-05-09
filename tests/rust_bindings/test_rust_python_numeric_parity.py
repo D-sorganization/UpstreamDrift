@@ -104,14 +104,14 @@ class TestLerpParity:
 class TestVector3Parity:
     """Verify tools_core::Vector3 operations match numpy."""
 
-    def test_magnitude(self) -> None:
+    def test_rust_python_numeric_parity_magnitude(self) -> None:
         """Vector3.magnitude() must match math.sqrt(x²+y²+z²)."""
         v = upstream_physics.Vector3(3.0, 4.0, 0.0)
         rust_mag = v.magnitude()
         py_mag = math.sqrt(3.0**2 + 4.0**2 + 0.0**2)
         assert abs(rust_mag - py_mag) < 1e-12
 
-    def test_dot_product(self) -> None:
+    def test_rust_python_numeric_parity_dot_product(self) -> None:
         """Vector3.dot() must match manual computation."""
         a = upstream_physics.Vector3(1.0, 2.0, 3.0)
         b = upstream_physics.Vector3(4.0, 5.0, 6.0)
@@ -119,7 +119,7 @@ class TestVector3Parity:
         py_dot = 1.0 * 4.0 + 2.0 * 5.0 + 3.0 * 6.0
         assert abs(rust_dot - py_dot) < 1e-12
 
-    def test_cross_product(self) -> None:
+    def test_rust_python_numeric_parity_cross_product(self) -> None:
         """Vector3.cross() must match manual computation."""
         a = upstream_physics.Vector3(1.0, 0.0, 0.0)
         b = upstream_physics.Vector3(0.0, 1.0, 0.0)
@@ -129,7 +129,7 @@ class TestVector3Parity:
         assert abs(c.y) < 1e-12
         assert abs(c.z - 1.0) < 1e-12
 
-    def test_normalized(self) -> None:
+    def test_rust_python_numeric_parity_normalized(self) -> None:
         """Normalized vector must have magnitude 1."""
         v = upstream_physics.Vector3(3.0, 4.0, 0.0)
         n = v.normalized()

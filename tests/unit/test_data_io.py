@@ -109,7 +109,7 @@ class TestReadData:
         df = read_data(path)
         pd.testing.assert_frame_equal(df, sample_df)
 
-    def test_missing_file_raises(self, tmp_path) -> None:
+    def test_data_io_missing_file_raises(self, tmp_path) -> None:
         path = tmp_path / "nonexistent.csv"
         with pytest.raises((FileNotFoundError, OSError)):
             read_data(path)

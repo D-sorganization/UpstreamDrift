@@ -52,11 +52,11 @@ class _MockDoubleResult:
 
 
 class TestListAvailableSeries:
-    def test_returns_list(self) -> None:
+    def test_data_extractor_returns_list(self) -> None:
         result = list_available_series()
         assert isinstance(result, list)
 
-    def test_non_empty(self) -> None:
+    def test_data_extractor_non_empty(self) -> None:
         result = list_available_series()
         assert len(result) > 0
 

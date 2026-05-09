@@ -25,7 +25,7 @@ class TestPhaseDetectionMixin:
     def setup_method(self) -> None:
         self.obj = _Concrete(n=100)
 
-    def test_returns_list(self) -> None:
+    def test_phase_detection_returns_list(self) -> None:
         phases = self.obj.detect_swing_phases()
         assert isinstance(phases, list)
 

@@ -22,11 +22,11 @@ def _zero_torque(t) -> tuple[float, float]:
 
 
 class TestPendulumParams:
-    def test_construction(self) -> None:
+    def test_pendulum_simulation_construction(self) -> None:
         p = _make_params()
         assert p.m1 == pytest.approx(5.0)
 
-    def test_negative_mass_raises(self) -> None:
+    def test_pendulum_simulation_negative_mass_raises(self) -> None:
         with pytest.raises((AssertionError, ValueError)):
             _make_params(m1=-1.0)
 
@@ -65,7 +65,7 @@ class TestRunSimulation:
         # Small perturbation, gravity-driven → stays reasonably small
         assert np.all(np.abs(result.states[:, :2]) < np.pi * 2)
 
-    def test_invalid_t_end_raises(self) -> None:
+    def test_pendulum_simulation_invalid_t_end_raises(self) -> None:
         params = _make_params()
         y0 = np.array([0.0, 0.0, 0.0, 0.0])
         with pytest.raises((AssertionError, ValueError)):

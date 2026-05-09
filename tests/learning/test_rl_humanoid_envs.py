@@ -34,17 +34,17 @@ def mock_engine() -> MagicMock:
 class TestHumanoidWalkEnv:
     """Smoke tests for the walking environment."""
 
-    def test_construction(self, mock_engine: MagicMock) -> None:
+    def test_rl_humanoid_envs_construction(self, mock_engine: MagicMock) -> None:
         env = HumanoidWalkEnv(engine=mock_engine, target_velocity=1.5)
         assert env.task_config.target_velocity[0] == pytest.approx(1.5)
 
-    def test_reset(self, mock_engine: MagicMock) -> None:
+    def test_rl_humanoid_envs_reset(self, mock_engine: MagicMock) -> None:
         env = HumanoidWalkEnv(engine=mock_engine)
         obs, info = env.reset(seed=42)
         assert obs is not None
         assert "step_count" in info
 
-    def test_step(self, mock_engine: MagicMock) -> None:
+    def test_rl_humanoid_envs_step(self, mock_engine: MagicMock) -> None:
         env = HumanoidWalkEnv(engine=mock_engine)
         env.reset(seed=42)
         action = np.zeros(7, dtype=np.float32)
@@ -62,16 +62,16 @@ class TestHumanoidWalkEnv:
 class TestHumanoidStandEnv:
     """Smoke tests for the standing/balance environment."""
 
-    def test_construction(self, mock_engine: MagicMock) -> None:
+    def test_rl_humanoid_envs_construction(self, mock_engine: MagicMock) -> None:
         env = HumanoidStandEnv(engine=mock_engine, perturbation_force=10.0)
         assert env._perturbation_force == 10.0
 
-    def test_reset(self, mock_engine: MagicMock) -> None:
+    def test_rl_humanoid_envs_reset(self, mock_engine: MagicMock) -> None:
         env = HumanoidStandEnv(engine=mock_engine)
         obs, info = env.reset(seed=42)
         assert obs is not None
 
-    def test_step(self, mock_engine: MagicMock) -> None:
+    def test_rl_humanoid_envs_step(self, mock_engine: MagicMock) -> None:
         env = HumanoidStandEnv(engine=mock_engine)
         env.reset(seed=42)
         action = np.zeros(7, dtype=np.float32)

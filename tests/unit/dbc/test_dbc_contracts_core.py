@@ -120,7 +120,7 @@ class TestPreconditionDecorator(unittest.TestCase):
         with self.assertRaises(ContractViolationError):
             divide(1.0, -2.0)
 
-    def test_preserves_function_name(self) -> None:
+    def test_dbc_contracts_core_preserves_function_name(self) -> None:
         from src.shared.python.core.contracts import precondition
 
         @precondition(lambda x: True, "always passes")
@@ -329,7 +329,7 @@ class TestCheckHelpers(unittest.TestCase):
 class TestContractLevelSwitching(unittest.TestCase):
     """Contract level can be switched at runtime."""
 
-    def test_set_and_get(self) -> None:
+    def test_dbc_contracts_core_set_and_get(self) -> None:
         from src.shared.python.core.contracts import (
             ContractLevel,
             get_contract_level,

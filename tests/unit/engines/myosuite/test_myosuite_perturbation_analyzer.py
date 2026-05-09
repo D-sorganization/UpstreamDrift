@@ -70,10 +70,10 @@ _ZERO_PROFILE: dict = {"coeffs": [[0.0, 0.0], [0.0, 0.0]]}
 
 
 class TestMandatoryMetrics:
-    def test_non_empty(self) -> None:
+    def test_myosuite_perturbation_analyzer_non_empty(self) -> None:
         assert len(MANDATORY_METRICS) >= 10
 
-    def test_contains_required_names(self) -> None:
+    def test_myosuite_perturbation_analyzer_contains_required_names(self) -> None:
         required = {
             "end_effector_position_final",
             "end_effector_velocity_final",
@@ -88,12 +88,14 @@ class TestMandatoryMetrics:
         }
         assert required.issubset(set(MANDATORY_METRICS))
 
-    def test_no_duplicates(self) -> None:
+    def test_myosuite_perturbation_analyzer_no_duplicates(self) -> None:
         assert len(MANDATORY_METRICS) == len(set(MANDATORY_METRICS))
 
 
 class TestPerturbCoeffsByMode:
-    def test_additive_zero_amplitude_no_change(self) -> None:
+    def test_myosuite_perturbation_analyzer_additive_zero_amplitude_no_change(
+        self,
+    ) -> None:
         coeffs = [[1.0, 2.0], [3.0, 4.0]]
         config = PerturbationConfig(
             n_trials=1, noise_amplitude=0.0, noise_type="white", perturb_mode="additive"
@@ -109,7 +111,7 @@ class TestPerturbCoeffsByMode:
         flat_res = [c for j in result for c in j]
         assert all(abs(a - b) < 1e-12 for a, b in zip(flat_orig, flat_res, strict=True))
 
-    def test_multiplicative_same_shape(self) -> None:
+    def test_myosuite_perturbation_analyzer_multiplicative_same_shape(self) -> None:
         coeffs = [[1.0, 2.0], [3.0, 4.0]]
         config = PerturbationConfig(
             n_trials=1,
@@ -128,7 +130,7 @@ class TestPerturbCoeffsByMode:
         for orig, res in zip(coeffs, result, strict=True):
             assert len(res) == len(orig)
 
-    def test_both_mode_same_shape(self) -> None:
+    def test_myosuite_perturbation_analyzer_both_mode_same_shape(self) -> None:
         coeffs = [[1.0, 2.0], [3.0, 4.0]]
         config = PerturbationConfig(
             n_trials=1, noise_amplitude=0.1, noise_type="white", perturb_mode="both"
@@ -142,7 +144,7 @@ class TestPerturbCoeffsByMode:
         )
         assert len(result) == len(coeffs)
 
-    def test_reproducible_with_seed(self) -> None:
+    def test_myosuite_perturbation_analyzer_reproducible_with_seed(self) -> None:
         coeffs = [[1.0, 2.0], [3.0, 4.0]]
         config = PerturbationConfig(
             n_trials=1, noise_amplitude=0.3, noise_type="white", perturb_mode="additive"
@@ -183,18 +185,18 @@ class TestMyoSuiteSimResult:
             potential_energy_traj=pe,
         )
 
-    def test_n_steps(self) -> None:
+    def test_myosuite_perturbation_analyzer_n_steps(self) -> None:
         r = self._make(n=10)
         assert r.n_steps == 10
 
-    def test_trajectory_shapes(self) -> None:
+    def test_myosuite_perturbation_analyzer_trajectory_shapes(self) -> None:
         r = self._make(n=5, nq=2, nv=2)
         assert r.qpos_traj.shape == (5, 2)
         assert r.qvel_traj.shape == (5, 2)
 
 
 class TestComparisonReport:
-    def test_default_fields(self) -> None:
+    def test_myosuite_perturbation_analyzer_default_fields(self) -> None:
         report = ComparisonReport(winner="A", confidence=0.9)
         assert report.winner == "A"
         assert report.confidence == 0.9

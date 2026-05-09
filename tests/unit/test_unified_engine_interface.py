@@ -22,7 +22,7 @@ class TestEngineType:
 
 
 class TestEngineManager:
-    def test_construction(self) -> None:
+    def test_unified_engine_interface_construction(self) -> None:
         em = EngineManager()
         assert em is not None
 
@@ -45,7 +45,7 @@ class TestCreateUnifiedInterface:
         ui = create_unified_interface()
         assert ui.current_engine is None
 
-    def test_has_engine_manager(self) -> None:
+    def test_unified_engine_interface_has_engine_manager(self) -> None:
         ui = create_unified_interface()
         assert ui.engine_manager is not None
 

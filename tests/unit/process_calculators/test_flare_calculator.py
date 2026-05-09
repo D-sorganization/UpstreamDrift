@@ -19,7 +19,7 @@ class TestGasProperties:
     def test_has_carbon_monoxide(self) -> None:
         assert "CO" in GAS_PROPERTIES
 
-    def test_has_required_fields(self) -> None:
+    def test_flare_calculator_has_required_fields(self) -> None:
         for gas, props in GAS_PROPERTIES.items():
             assert "mw" in props, f"{gas} missing 'mw'"
             assert "hv" in props, f"{gas} missing 'hv'"
@@ -31,7 +31,7 @@ class TestGasProperties:
 
 
 class TestFlareDesign:
-    def test_construction(self) -> None:
+    def test_flare_calculator_construction(self) -> None:
         design = FlareDesign(
             height=10.0,
             diameter=0.5,
@@ -44,7 +44,7 @@ class TestFlareDesign:
 
 
 class TestFlareCalculator:
-    def test_construction(self) -> None:
+    def test_flare_calculator_construction(self) -> None:
         calc = FlareCalculator()
         assert calc is not None
 

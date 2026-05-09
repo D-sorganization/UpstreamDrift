@@ -77,7 +77,7 @@ def client(app: FastAPI) -> TestClient:
     return TestClient(app)
 
 
-def test_get_engines(client: TestClient) -> None:
+def test_routes_engines_get_engines(client: TestClient) -> None:
     """Test getting all engines."""
     response = client.get("/engines")
     assert response.status_code == 200

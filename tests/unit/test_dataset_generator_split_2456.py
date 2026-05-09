@@ -34,14 +34,14 @@ class TestDatasetGeneratorFileSizes:
     """Each file must be under 600 LOC after split."""
 
     @pytest.mark.unit
-    def test_coordinator_loc(self) -> None:
+    def test_dataset_generator_split_2456_coordinator_loc(self) -> None:
         loc = _count_lines(DATA_IO_DIR / "dataset_generator/core.py")
         assert loc <= LOC_BUDGET, (
             f"dataset_generator.py has {loc} LOC; budget {LOC_BUDGET}"
         )
 
     @pytest.mark.unit
-    def test_models_loc(self) -> None:
+    def test_dataset_generator_split_2456_models_loc(self) -> None:
         loc = _count_lines(DATA_IO_DIR / "_dataset_models.py")
         assert loc <= LOC_BUDGET, (
             f"_dataset_models.py has {loc} LOC; budget {LOC_BUDGET}"

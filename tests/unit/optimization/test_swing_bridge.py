@@ -346,7 +346,9 @@ class TestInitialStateValidation:
         with pytest.raises(TypeError, match="initial_state must be np.ndarray"):
             small_bridge.optimize_swing([0.0] * 4)  # type: ignore[arg-type]
 
-    def test_wrong_length_raises(self, small_bridge: SwingOptimizationBridge) -> None:
+    def test_swing_bridge_wrong_length_raises(
+        self, small_bridge: SwingOptimizationBridge
+    ) -> None:
         x0 = np.zeros(10)  # config has n_joints=2 -> expects 4
         with pytest.raises(ValueError, match="initial_state length must be 4"):
             small_bridge.optimize_swing(x0)

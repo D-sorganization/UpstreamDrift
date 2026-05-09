@@ -72,7 +72,7 @@ def _has_canonical_theta_validator() -> bool:
 # --------------------------------------------------------------------------- #
 
 
-def test_happy_path_returns_canonical_simout() -> None:
+def test_simulate_contract_opensim_happy_path_returns_canonical_simout() -> None:
     """Valid theta -> canonical SimOut with aligned, finite arrays."""
     n_act = _coordinate_actuator_count()
     theta = np.zeros(n_act * COEFFS_PER_JOINT)
@@ -119,7 +119,7 @@ def test_zero_theta_runs_without_error() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_out_of_bounds_theta_rejected_or_handled() -> None:
+def test_simulate_contract_opensim_out_of_bounds_theta_rejected_or_handled() -> None:
     n_act = _coordinate_actuator_count()
     theta = np.zeros(n_act * COEFFS_PER_JOINT)
     theta[0] = 1.0e9
@@ -142,7 +142,7 @@ def test_out_of_bounds_theta_rejected_or_handled() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_wrong_length_theta_raises() -> None:
+def test_simulate_contract_opensim_wrong_length_theta_raises() -> None:
     """A theta with the wrong joint count raises ValueError."""
     n_act = _coordinate_actuator_count()
     bad = np.zeros((n_act + 1) * COEFFS_PER_JOINT)
@@ -162,7 +162,7 @@ def test_non_multiple_of_seven_theta_raises() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_nan_theta_raises() -> None:
+def test_simulate_contract_opensim_nan_theta_raises() -> None:
     n_act = _coordinate_actuator_count()
     bad = np.zeros(n_act * COEFFS_PER_JOINT)
     bad[2] = np.nan
@@ -170,7 +170,7 @@ def test_nan_theta_raises() -> None:
         simulate_with_coefficients(bad, options=_short_opts())
 
 
-def test_inf_theta_raises() -> None:
+def test_simulate_contract_opensim_inf_theta_raises() -> None:
     n_act = _coordinate_actuator_count()
     bad = np.zeros(n_act * COEFFS_PER_JOINT)
     bad[4] = np.inf
@@ -183,7 +183,7 @@ def test_inf_theta_raises() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_time_monotonic_starts_at_zero() -> None:
+def test_simulate_contract_opensim_time_monotonic_starts_at_zero() -> None:
     n_act = _coordinate_actuator_count()
     theta = np.zeros(n_act * COEFFS_PER_JOINT)
     out = simulate_with_coefficients(theta, options=_short_opts())

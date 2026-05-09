@@ -57,7 +57,7 @@ def test_route_launch_default(mock_server_main) -> None:
 
 @patch("launch_golf_suite.parse_arguments")
 @patch("launch_golf_suite.route_launch")
-def test_main(mock_route, mock_parse) -> None:
+def test_launch_golf_suite_main(mock_route, mock_parse) -> None:
     mock_args = argparse.Namespace()
     mock_parse.return_value = mock_args
     launch_golf_suite.main()

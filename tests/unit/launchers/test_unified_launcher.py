@@ -42,7 +42,7 @@ def mock_golf_launcher(mock_golf_launcher_module: MagicMock) -> MagicMock:
     return mock_instance
 
 
-def test_init(mock_qapp, mock_golf_launcher) -> None:
+def test_unified_launcher_init(mock_qapp, mock_golf_launcher) -> None:
     launcher = UnifiedLauncher()
     assert launcher is not None
 

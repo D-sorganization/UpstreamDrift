@@ -117,13 +117,13 @@ def initialized_engine(engine) -> Any:
     return engine
 
 
-def test_initialization(engine) -> None:
+def test_drake_physics_engine_initialization(engine) -> None:
     assert engine.plant is not None
     assert engine.builder is not None
     assert not engine._is_finalized
 
 
-def test_load_from_path(engine) -> None:
+def test_drake_physics_engine_load_from_path(engine) -> None:
     from pathlib import Path as StdPath
 
     with patch(
@@ -143,7 +143,7 @@ def test_load_from_path(engine) -> None:
         engine.builder.Build.assert_called_once()
 
 
-def test_load_from_string(engine) -> None:
+def test_drake_physics_engine_load_from_string(engine) -> None:
     with patch(
         "engines.physics_engines.drake.python.drake_physics_engine.Parser"
     ) as mock_parser_cls:
@@ -157,7 +157,7 @@ def test_load_from_string(engine) -> None:
         assert engine.model_name == "StringLoadedModel"
 
 
-def test_step(initialized_engine) -> None:
+def test_drake_physics_engine_step(initialized_engine) -> None:
     """Test step method on an initialized engine (DBC: requires is_initialized)."""
     engine = initialized_engine
 
@@ -169,7 +169,7 @@ def test_step(initialized_engine) -> None:
     engine.simulator.AdvanceTo.assert_called_once_with(0.01)
 
 
-def test_get_state(initialized_engine) -> None:
+def test_drake_physics_engine_get_state(initialized_engine) -> None:
     """Test get_state on an initialized engine."""
     engine = initialized_engine
 
@@ -183,7 +183,7 @@ def test_get_state(initialized_engine) -> None:
     engine.plant.GetPositions.assert_called_once()
 
 
-def test_compute_mass_matrix(initialized_engine) -> None:
+def test_drake_physics_engine_compute_mass_matrix(initialized_engine) -> None:
     """Test compute_mass_matrix on an initialized engine (DBC: requires is_initialized)."""
     engine = initialized_engine
 
@@ -196,7 +196,7 @@ def test_compute_mass_matrix(initialized_engine) -> None:
     engine.plant.CalcMassMatrixViaInverseDynamics.assert_called_once()
 
 
-def test_compute_inverse_dynamics(initialized_engine) -> None:
+def test_drake_physics_engine_compute_inverse_dynamics(initialized_engine) -> None:
     """Test compute_inverse_dynamics on an initialized engine (DBC: requires is_initialized)."""
     engine = initialized_engine
 

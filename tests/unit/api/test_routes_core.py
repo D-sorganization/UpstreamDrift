@@ -43,7 +43,7 @@ def test_root(client: TestClient) -> None:
     assert data["status"] == "running"
 
 
-def test_health_check(client: TestClient) -> None:
+def test_routes_core_health_check(client: TestClient) -> None:
     """Test the health check endpoint."""
     response = client.get("/health")
     assert response.status_code == 200

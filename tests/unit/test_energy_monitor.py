@@ -27,7 +27,7 @@ from src.shared.python.tests.mock_physics_engine import (
 class TestEnergySnapshot:
     """Test EnergySnapshot dataclass."""
 
-    def test_initialization(self) -> None:
+    def test_energy_monitor_initialization(self) -> None:
         """Test basic initialization."""
         snapshot = EnergySnapshot(time=1.0, kinetic=5.0, potential=10.0)
         assert snapshot.time == 1.0

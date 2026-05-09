@@ -191,7 +191,7 @@ class TestGenericPhysicsRecorder:
         """Create a GenericPhysicsRecorder instance."""
         return GenericPhysicsRecorder(engine, max_samples=100)
 
-    def test_initialization(self, recorder) -> None:
+    def test_dashboard_recorder_initialization(self, recorder) -> None:
         """Test recorder initializes with correct defaults."""
         assert recorder.current_idx == 0
         assert not recorder.is_recording

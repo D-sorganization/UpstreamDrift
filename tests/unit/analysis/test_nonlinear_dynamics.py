@@ -43,7 +43,7 @@ class TestRecurrenceMatrix:
         # Diagonal should be all recurrent (same point)
         np.testing.assert_array_equal(np.diag(R), 1)
 
-    def test_symmetric_matrix(self) -> None:
+    def test_nonlinear_dynamics_symmetric_matrix(self) -> None:
         R = self.obj.compute_recurrence_matrix()
         np.testing.assert_array_equal(R, R.T)
 
@@ -59,7 +59,7 @@ class TestPermutationEntropy:
     def setup_method(self) -> None:
         self.obj = _Concrete(n=200, n_joints=3)
 
-    def test_returns_float(self) -> None:
+    def test_nonlinear_dynamics_returns_float(self) -> None:
         data = self.obj.joint_positions[:, 0]
         H = self.obj.compute_permutation_entropy(data=data, order=3)
         assert isinstance(H, float)
@@ -87,7 +87,7 @@ class TestLocalDivergenceRate:
     def setup_method(self) -> None:
         self.obj = _Concrete(n=100, n_joints=3)
 
-    def test_returns_tuple(self) -> None:
+    def test_nonlinear_dynamics_returns_tuple(self) -> None:
         result = self.obj.compute_local_divergence_rate(joint_idx=0)
         assert isinstance(result, tuple)
         assert len(result) == 2

@@ -88,7 +88,7 @@ class TestSegmentTimingAnalyzer:
         with pytest.raises((ValueError, TypeError, AssertionError)):
             analyzer.analyze({}, np.array([]))
 
-    def test_single_segment(self) -> None:
+    def test_kinematic_sequence_single_segment(self) -> None:
         times = np.linspace(0.0, 1.0, 50)
         velocities = {"hip": np.sin(np.pi * times)}
         analyzer = SegmentTimingAnalyzer()
@@ -97,7 +97,7 @@ class TestSegmentTimingAnalyzer:
 
 
 class TestSegmentPeak:
-    def test_construction(self) -> None:
+    def test_kinematic_sequence_construction(self) -> None:
         peak = SegmentPeak(name="hip", peak_velocity=3.5, time=0.3, index=30)
         assert peak.name == "hip"
         assert peak.peak_velocity == pytest.approx(3.5)

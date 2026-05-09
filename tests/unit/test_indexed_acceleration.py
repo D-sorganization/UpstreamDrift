@@ -14,7 +14,7 @@ from src.shared.python.spatial_algebra.indexed_acceleration import IndexedAccele
 class TestIndexedAccelerationDataclass:
     """Test IndexedAcceleration dataclass."""
 
-    def test_initialization(self) -> None:
+    def test_indexed_acceleration_initialization(self) -> None:
         """Test basic initialization with required components."""
         gravity = np.array([1.0, 2.0, 3.0])
         coriolis = np.array([0.1, 0.2, 0.3])

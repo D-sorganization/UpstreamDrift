@@ -111,7 +111,9 @@ def test_default_model_real_input_shape() -> None:
 
 @pytest.mark.unit
 @pytest.mark.requires_torch
-def test_forward_rejects_wrong_dtype(small_model: SwingSurrogate) -> None:
+def test_swing_surrogate_model_forward_rejects_wrong_dtype(
+    small_model: SwingSurrogate,
+) -> None:
     """Float64 input must raise TypeError per the documented contract."""
     coeffs = torch.zeros(1, small_model.cfg.coeff_dim, dtype=torch.float64)
     with pytest.raises(TypeError, match="float32"):

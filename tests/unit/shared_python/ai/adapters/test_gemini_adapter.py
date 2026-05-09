@@ -57,7 +57,7 @@ def test_init_success(mock_model_cls, mock_configure) -> None:
     assert adapter._model_name == "gemini-test-model"
 
 
-def test_capabilities() -> None:
+def test_gemini_adapter_capabilities() -> None:
     """Test capabilities properly define vision and streaming."""
     sys.modules["google.generativeai"].configure.reset_mock()
     adapter = GeminiAdapter("sk-gemini")  # nosec B106 - test fixture
@@ -70,7 +70,7 @@ def test_capabilities() -> None:
     assert ProviderCapability.FUNCTION_CALLING not in caps.supported
 
 
-def test_validate_connection_success() -> None:
+def test_gemini_adapter_validate_connection_success() -> None:
     """Test a successful connection validation."""
 
     # The generative model is returned by the class constructor mock
@@ -127,7 +127,7 @@ def test_build_chat_session() -> None:
     assert history_arg[2] == {"role": "model", "parts": ["msg 3"]}
 
 
-def test_send_message_success() -> None:
+def test_gemini_adapter_send_message_success() -> None:
     """Test robust send_message path."""
     sys.modules["google.generativeai"].configure.reset_mock()
     adapter = GeminiAdapter("sk")
@@ -162,7 +162,7 @@ def test_send_message_error() -> None:
     assert "Error: Connection refused" in resp.content
 
 
-def test_stream_response() -> None:
+def test_gemini_adapter_stream_response() -> None:
     """Test streaming chunk iterator."""
     sys.modules["google.generativeai"].configure.reset_mock()
     adapter = GeminiAdapter("sk")

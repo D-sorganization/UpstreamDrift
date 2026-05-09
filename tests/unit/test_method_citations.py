@@ -17,7 +17,7 @@ from src.shared.python.analysis.dataclasses import (
 class TestMethodCitation:
     """MethodCitation dataclass tests."""
 
-    def test_frozen(self) -> None:
+    def test_method_citations_frozen(self) -> None:
         """Citations should be immutable."""
         c = MethodCitation(name="test", authors="A", year=2000, title="T")
         try:

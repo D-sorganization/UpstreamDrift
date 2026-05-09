@@ -5,7 +5,7 @@ from src.reinforcement_learning.trajectory_funnel_benchmark import (
 )
 
 
-def test_initialization() -> None:
+def test_trajectory_funnel_benchmark_initialization() -> None:
     bench = TrajectoryFunnelBenchmark("transverse")
     assert bench.mode == "transverse"
 

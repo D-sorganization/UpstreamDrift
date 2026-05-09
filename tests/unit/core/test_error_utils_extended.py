@@ -41,7 +41,7 @@ from src.shared.python.core.error_utils import (
 class TestFormatValidationError:
     """Tests for format_validation_error factory."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_extended_basic(self) -> None:
         msg = format_validation_error("time_step", -0.1, "must be positive")
         assert "time_step" in msg
         assert "-0.1" in msg
@@ -146,7 +146,7 @@ class TestHandleImportErrorFunction:
 class TestEngineNotAvailableError:
     """Tests for EngineNotAvailableError exception."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_extended_basic(self) -> None:
         err = EngineNotAvailableError("mujoco")
         assert "mujoco" in str(err)
         assert err.engine_name == "mujoco"
@@ -173,7 +173,7 @@ class TestEngineNotAvailableError:
 class TestModelError:
     """Tests for ModelError exception."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_extended_basic(self) -> None:
         err = ModelError("humanoid", "loading")
         assert "humanoid" in str(err)
         assert "loading" in str(err)
@@ -194,7 +194,7 @@ class TestModelError:
 class TestSimulationError:
     """Tests for SimulationError exception."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_extended_basic(self) -> None:
         err = SimulationError("divergence")
         assert "divergence" in str(err)
 
@@ -217,7 +217,7 @@ class TestSimulationError:
 class TestFileOperationError:
     """Tests for FileOperationError exception."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_extended_basic(self) -> None:
         err = FileOperationError("test.xml", "write")
         assert "test.xml" in str(err)
         assert "write" in str(err)
@@ -237,7 +237,7 @@ class TestFileOperationError:
 class TestEnvironmentError:
     """Tests for EnvironmentError exception."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_extended_basic(self) -> None:
         err = EnvironmentError("API_KEY")
         assert "API_KEY" in str(err)
         assert err.var_name == "API_KEY"
@@ -273,7 +273,7 @@ class TestEnvironmentError:
 class TestIOError:
     """Tests for IOError base exception."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_extended_basic(self) -> None:
         err = IOError("Read failed")
         assert "Read failed" in str(err)
 
@@ -293,7 +293,7 @@ class TestIOError:
 class TestFileNotFoundIOError:
     """Tests for FileNotFoundIOError."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_extended_basic(self) -> None:
         err = FileNotFoundIOError("/data/model.xml")
         assert "not found" in str(err).lower()
         assert str(Path("/data/model.xml")) in str(err)
@@ -314,7 +314,7 @@ class TestFileNotFoundIOError:
 class TestFileParseError:
     """Tests for FileParseError."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_extended_basic(self) -> None:
         err = FileParseError("/data/config.json", "JSON")
         assert "JSON" in str(err)
         assert str(Path("/data/config.json")) in str(err)
@@ -338,7 +338,7 @@ class TestFileParseError:
 class TestPhysicalValidationError:
     """Tests for PhysicalValidationError."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_extended_basic(self) -> None:
         err = PhysicalValidationError("mass", value=-5.0)
         assert "mass" in str(err)
 
@@ -368,7 +368,7 @@ class TestPhysicalValidationError:
 class TestDataFormatError:
     """Tests for DataFormatError."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_extended_basic(self) -> None:
         err = DataFormatError("Invalid data structure")
         assert "Invalid data structure" in str(err)
 
@@ -396,7 +396,7 @@ class TestDataFormatError:
 class TestTimeoutError:
     """Tests for TimeoutError."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_extended_basic(self) -> None:
         err = TimeoutError("simulation", 30.0)
         assert "simulation" in str(err)
         assert "30" in str(err)
@@ -417,7 +417,7 @@ class TestTimeoutError:
 class TestResourceError:
     """Tests for ResourceError."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_extended_basic(self) -> None:
         err = ResourceError("GPU")
         assert "GPU" in str(err)
         assert err.resource_type == "GPU"

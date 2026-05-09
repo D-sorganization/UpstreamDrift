@@ -72,10 +72,10 @@ class TestMetadata:
 
 
 class TestFeatures:
-    def test_is_dict(self) -> None:
+    def test_version_is_dict(self) -> None:
         assert isinstance(FEATURES, dict)
 
-    def test_non_empty(self) -> None:
+    def test_version_non_empty(self) -> None:
         assert len(FEATURES) > 0
 
     def test_all_values_are_bool(self) -> None:
@@ -94,7 +94,7 @@ class TestSupportedEngines:
     def test_is_list(self) -> None:
         assert isinstance(SUPPORTED_ENGINES, list)
 
-    def test_non_empty(self) -> None:
+    def test_version_non_empty(self) -> None:
         assert len(SUPPORTED_ENGINES) > 0
 
     def test_mujoco_supported(self) -> None:
@@ -113,7 +113,7 @@ class TestProfessionalFeatures:
     def test_is_list(self) -> None:
         assert isinstance(PROFESSIONAL_FEATURES, list)
 
-    def test_non_empty(self) -> None:
+    def test_version_non_empty(self) -> None:
         assert len(PROFESSIONAL_FEATURES) > 0
 
     def test_all_strings(self) -> None:

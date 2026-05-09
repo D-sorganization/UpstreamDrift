@@ -41,7 +41,7 @@ class TestFileFormatDetector:
         result = FileFormatDetector.detect_format(Path("data.xyz"))
         assert result is None
 
-    def test_case_insensitive(self) -> None:
+    def test_data_io_case_insensitive(self) -> None:
         assert FileFormatDetector.detect_format(Path("data.CSV")) == "csv"
 
     def test_get_supported_extensions_nonempty(self) -> None:
@@ -98,7 +98,7 @@ class TestDataReaderCSV:
         ):
             DataReader.read_file(p)
 
-    def test_unsupported_format_raises(self, tmp_path: Path) -> None:
+    def test_data_io_unsupported_format_raises(self, tmp_path: Path) -> None:
         p = tmp_path / "data.xyz"
         p.write_text("nothing")
         with pytest.raises(ValueError):
@@ -144,7 +144,7 @@ class TestDataWriterCSV:
         DataWriter.write_file(pd.DataFrame({"v": [1]}), p)
         assert p.exists()
 
-    def test_unsupported_format_raises(self, tmp_path: Path) -> None:
+    def test_data_io_unsupported_format_raises(self, tmp_path: Path) -> None:
         p = tmp_path / "data.xyz"
         with pytest.raises(ValueError):
             DataWriter.write_file(pd.DataFrame({"v": [1]}), p)

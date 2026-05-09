@@ -106,7 +106,7 @@ def test_visualization_widget_reset_view(qtbot) -> None:
 class TestVisualizationFlags:
     """Tests for VisualizationFlags dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_urdf_visualization_default_values(self) -> None:
         """Test default visualization flags."""
         flags = VisualizationFlags()
 
@@ -116,7 +116,7 @@ class TestVisualizationFlags:
         assert flags.show_contacts is False
         assert flags.show_com is False
 
-    def test_to_dict(self) -> None:
+    def test_urdf_visualization_to_dict(self) -> None:
         """Test serialization to dictionary."""
         flags = VisualizationFlags(
             show_collision=True,
@@ -335,7 +335,7 @@ class TestMuJoCoViewerWidget:
             or "failed" in status.lower()
         )
 
-    def test_clear(self, qtbot) -> None:
+    def test_urdf_visualization_clear(self, qtbot) -> None:
         """Test clearing the viewer."""
         widget = MuJoCoViewerWidget()
         qtbot.addWidget(widget)

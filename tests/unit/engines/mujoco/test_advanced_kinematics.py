@@ -14,7 +14,7 @@ from mujoco_humanoid_golf.models import DOUBLE_PENDULUM_XML
 class TestManipulabilityMetrics:
     """Tests for ManipulabilityMetrics dataclass."""
 
-    def test_initialization(self) -> None:
+    def test_advanced_kinematics_initialization(self) -> None:
         """Test metrics initialization."""
         metrics = ManipulabilityMetrics(
             manipulability_index=1.5,
@@ -34,7 +34,7 @@ class TestManipulabilityMetrics:
 class TestConstraintJacobianData:
     """Tests for ConstraintJacobianData dataclass."""
 
-    def test_initialization(self) -> None:
+    def test_advanced_kinematics_initialization(self) -> None:
         """Test constraint data initialization."""
         jac = np.eye(3)
         nullspace = np.zeros((3, 0))

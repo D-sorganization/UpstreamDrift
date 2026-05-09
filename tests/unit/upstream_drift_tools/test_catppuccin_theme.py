@@ -23,7 +23,7 @@ class TestCatppuccinColors:
 
 
 class TestGetStylesheet:
-    def test_returns_string(self) -> None:
+    def test_catppuccin_theme_returns_string(self) -> None:
         ss = get_stylesheet()
         assert isinstance(ss, str)
 

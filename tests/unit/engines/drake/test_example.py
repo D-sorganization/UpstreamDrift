@@ -17,7 +17,7 @@ from src.shared.python.core import constants
 class TestConstants:
     """Test physical and mathematical constants."""
 
-    def test_mathematical_constants(self) -> None:
+    def test_example_mathematical_constants(self) -> None:
         """Test mathematical constants have correct values."""
         assert pytest.approx(math.pi, rel=1e-15) == constants.PI
         assert pytest.approx(2.718281828459045, rel=1e-15) == constants.E

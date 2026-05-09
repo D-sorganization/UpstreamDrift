@@ -150,7 +150,7 @@ class TestSignalProcessing:
         )  # imaginary part should be close to 0
         assert np.all(np.real(xwt) >= -1e-10)
 
-    def test_compute_jerk(self) -> None:
+    def test_shared_signal_processing_compute_jerk(self) -> None:
         """Test jerk computation."""
         # Jerk of sin(t) is -cos(t)
         t = np.linspace(0, 2 * np.pi, 1000)
@@ -164,7 +164,7 @@ class TestSignalProcessing:
         short_jerk = compute_jerk(np.array([1, 2, 3]), fs=1.0)
         assert len(short_jerk) == 3
 
-    def test_compute_time_shift(self) -> None:
+    def test_shared_signal_processing_compute_time_shift(self) -> None:
         """Test time shift calculation."""
         # Create a simpler, clean signal for time shift testing
         # A simple Gaussian pulse
@@ -184,7 +184,7 @@ class TestSignalProcessing:
         calc_shift = compute_time_shift(x, y, fs)
         assert np.isclose(calc_shift, shift, atol=0.01)
 
-    def test_compute_dtw_distance(self) -> None:
+    def test_shared_signal_processing_compute_dtw_distance(self) -> None:
         """Test DTW distance."""
         s1 = np.array([0, 1, 2, 3, 2, 1, 0])
         s2 = np.array([0, 0, 1, 2, 3, 2, 1, 0])  # s1 shifted + stutters

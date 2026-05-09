@@ -18,7 +18,7 @@ from humanoid_character_builder.core.body_parameters import (
 class TestVector3:
     """Tests for Vector3 class."""
 
-    def test_default_values(self) -> None:
+    def test_body_parameters_default_values(self) -> None:
         v = Vector3()
         assert v.x == 1.0
         assert v.y == 1.0
@@ -44,7 +44,7 @@ class TestVector3:
 class TestRGBA:
     """Tests for RGBA class."""
 
-    def test_default_values(self) -> None:
+    def test_body_parameters_default_values(self) -> None:
         c = RGBA()
         assert c.r == 0.8
         assert c.a == 1.0
@@ -61,13 +61,13 @@ class TestRGBA:
 class TestBodyParameters:
     """Tests for BodyParameters class."""
 
-    def test_default_values(self) -> None:
+    def test_body_parameters_default_values(self) -> None:
         params = BodyParameters()
         assert params.height_m == 1.75
         assert params.mass_kg == 75.0
         assert params.build_type == BuildType.AVERAGE
 
-    def test_custom_values(self) -> None:
+    def test_body_parameters_custom_values(self) -> None:
         params = BodyParameters(
             height_m=1.80,
             mass_kg=80.0,
@@ -111,7 +111,7 @@ class TestBodyParameters:
         assert retrieved.mass_kg == 5.0
         assert retrieved.has_mass_override()
 
-    def test_to_dict(self) -> None:
+    def test_body_parameters_to_dict(self) -> None:
         params = BodyParameters(height_m=1.80, name="test_model")
         data = params.to_dict()
 
@@ -119,7 +119,7 @@ class TestBodyParameters:
         assert data["name"] == "test_model"
         assert "build_type" in data
 
-    def test_from_dict(self) -> None:
+    def test_body_parameters_from_dict(self) -> None:
         data = {
             "height_m": 1.85,
             "mass_kg": 85.0,
@@ -162,7 +162,7 @@ class TestFactoryFunctions:
 class TestSegmentParameters:
     """Tests for SegmentParameters class."""
 
-    def test_default_values(self) -> None:
+    def test_body_parameters_default_values(self) -> None:
         seg = SegmentParameters()
         assert seg.mass_kg is None
         assert seg.inertia_override is None

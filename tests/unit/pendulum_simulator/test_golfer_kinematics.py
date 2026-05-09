@@ -36,7 +36,7 @@ _ZERO_Q = np.zeros(8)
 
 
 class TestForwardKinematicsReturnKeys:
-    def test_returns_dict(self) -> None:
+    def test_golfer_kinematics_returns_dict(self) -> None:
         result = forward_kinematics(_ZERO_Q, _DEFAULT_P)
         assert isinstance(result, dict)
 

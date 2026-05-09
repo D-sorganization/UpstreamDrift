@@ -33,7 +33,7 @@ def _make_analysis_params(
 
 
 class TestRunMultiParameterAnalysis:
-    def test_returns_dict(self) -> None:
+    def test_multi_param_analysis_returns_dict(self) -> None:
         p1 = np.array([1.0, 2.0])
         p2 = np.array([10.0, 20.0])
         result = run_multi_parameter_analysis(

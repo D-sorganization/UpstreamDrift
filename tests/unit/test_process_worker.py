@@ -56,7 +56,7 @@ def worker(worker_cls) -> Any:
     return worker_cls(["echo", "hello"])
 
 
-def test_initialization(worker) -> None:
+def test_process_worker_initialization(worker) -> None:
     assert worker.cmd == ["echo", "hello"]
     assert worker._is_running is True
 

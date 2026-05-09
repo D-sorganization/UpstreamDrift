@@ -46,7 +46,7 @@ class TestSimulationService:
         """Create a simulation service with mocked dependencies."""
         return SimulationService(mock_engine_manager)
 
-    def test_init(self, mock_engine_manager: MagicMock) -> None:
+    def test_api_services_init(self, mock_engine_manager: MagicMock) -> None:
         """Test service initialization."""
         service = SimulationService(mock_engine_manager)
         assert service.engine_manager is mock_engine_manager
@@ -226,7 +226,7 @@ class TestAnalysisService:
         """Create an analysis service with mocked dependencies."""
         return AnalysisService(mock_engine_manager)
 
-    def test_init(self, mock_engine_manager: MagicMock) -> None:
+    def test_api_services_init(self, mock_engine_manager: MagicMock) -> None:
         """Test service initialization."""
         service = AnalysisService(mock_engine_manager)
         assert service.engine_manager is mock_engine_manager

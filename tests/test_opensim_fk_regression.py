@@ -155,3 +155,114 @@ def loaded_model_and_state():
     model = osim.Model(str(MODEL_PATH))
     state = model.initSystem()
     return model, state
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.skipif(
+    not _OPENSIM_AVAILABLE,
+    reason="OpenSim Python bindings not installed; install via "
+    "`pip install opensim` or `conda install -c opensim-org opensim`.",
+)
+def test_extract_grip_pose_at_neutral_returns_finite_sane_pose(
+    loaded_model_and_state,
+) -> None:
+    """Grip frame must resolve and produce a finite, sane-magnitude pose."""
+    from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
+        extract_grip_pose,
+    )
+
+    model, state = loaded_model_and_state
+    pos, quat = extract_grip_pose(state, model)
+
+    assert pos.shape == (3,)
+    assert quat.shape == (4,)
+    assert np.all(np.isfinite(pos)), f"grip position has non-finite entries: {pos}"
+    assert np.all(np.isfinite(quat))
+    assert np.linalg.norm(pos) < 5.0, (
+        f"grip position |{pos}| = {np.linalg.norm(pos):.3f} m exceeds 5 m"
+    )
+    # Unit quaternion check.
+    assert abs(float(np.linalg.norm(quat)) - 1.0) < 1e-6
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.skipif(
+    not _OPENSIM_AVAILABLE,
+    reason="OpenSim Python bindings not installed.",
+)
+def test_extract_clubhead_pose_at_neutral_returns_finite_sane_pose(
+    loaded_model_and_state,
+) -> None:
+    """Clubhead frame must resolve and produce a finite, sane-magnitude pose."""
+    from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
+        extract_clubhead_pose,
+    )
+
+    model, state = loaded_model_and_state
+    pos, quat = extract_clubhead_pose(state, model)
+
+    assert pos.shape == (3,)
+    assert quat.shape == (4,)
+    assert np.all(np.isfinite(pos)), f"clubhead position has non-finite entries: {pos}"
+    assert np.all(np.isfinite(quat))
+    assert np.linalg.norm(pos) < 5.0, (
+        f"clubhead position |{pos}| = {np.linalg.norm(pos):.3f} m exceeds 5 m"
+    )
+    assert abs(float(np.linalg.norm(quat)) - 1.0) < 1e-6
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.skipif(
+    not _OPENSIM_AVAILABLE,
+    reason="OpenSim Python bindings not installed.",
+)
+def test_extract_full_pose_returns_canonical_landmark_keys(
+    loaded_model_and_state,
+) -> None:
+    """``extract_full_pose`` must return both grip and clubhead in one pass."""
+    from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
+        extract_full_pose,
+    )
+
+    model, state = loaded_model_and_state
+    pose = extract_full_pose(state, model)
+
+    expected_keys = {"grip_pos", "grip_quat", "clubhead_pos", "clubhead_quat"}
+    assert set(pose) == expected_keys, (
+        f"unexpected pose keys: {set(pose)} != {expected_keys}"
+    )
+    assert pose["grip_pos"].shape == (3,)
+    assert pose["grip_quat"].shape == (4,)
+    assert pose["clubhead_pos"].shape == (3,)
+    assert pose["clubhead_quat"].shape == (4,)
+    for key, arr in pose.items():
+        assert np.all(np.isfinite(arr)), f"{key} contains non-finite entries"
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.skipif(
+    not _OPENSIM_AVAILABLE,
+    reason="OpenSim Python bindings not installed.",
+)
+def test_grip_and_clubhead_separated_by_club_length(loaded_model_and_state) -> None:
+    """Sanity: clubhead lives roughly one club-length from the grip.
+
+    The build script sets the clubhead frame at ``(0, -CLUB_LENGTH, 0)``
+    in the Club body frame (``CLUB_LENGTH`` is around 1.1 m). Without
+    enforcing the exact value, a ``0.5–2.0 m`` window catches gross
+    regressions where the two frames collapse to the same point.
+    """
+    from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
+        extract_clubhead_pose,
+        extract_grip_pose,
+    )
+
+    model, state = loaded_model_and_state
+    grip_pos, _ = extract_grip_pose(state, model)
+    clubhead_pos, _ = extract_clubhead_pose(state, model)
+
+    separation = float(np.linalg.norm(clubhead_pos - grip_pos))
+    assert 0.5 < separation < 2.0, (
+        f"grip→clubhead separation {separation:.3f} m outside [0.5, 2.0] m; "
+        "frames may have collapsed or been wired incorrectly."
+    )

@@ -48,7 +48,7 @@ from src.api.routes.putting_green import (
 class TestPuttSimulationRequestContract:
     """Validate PuttSimulationRequest model."""
 
-    def test_default_values(self) -> None:
+    def test_phase5_api_default_values(self) -> None:
         """Defaults should be sensible."""
         req = PuttSimulationRequest()
         assert req.ball_x == 5.0

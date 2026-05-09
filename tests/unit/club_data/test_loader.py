@@ -14,11 +14,11 @@ from src.shared.python.club_data.loader import (
 
 
 class TestClubSpecification:
-    def test_basic_construction(self) -> None:
+    def test_loader_basic_construction(self) -> None:
         club = ClubSpecification(name="Driver", club_type="Driver")
         assert isinstance(club, ClubSpecification)
 
-    def test_name_stored(self) -> None:
+    def test_loader_name_stored(self) -> None:
         club = ClubSpecification(name="7-Iron", club_type="Iron")
         assert club.name == "7-Iron"
 
@@ -61,7 +61,7 @@ class TestClubSpecification:
         )
         assert club.total_mass_kg == pytest.approx(0.315)
 
-    def test_to_dict_returns_dict(self) -> None:
+    def test_loader_to_dict_returns_dict(self) -> None:
         club = ClubSpecification(name="Driver", club_type="Driver")
         result = club.to_dict()
         assert isinstance(result, dict)
@@ -85,7 +85,7 @@ class TestClubSpecification:
 
 
 class TestClubDataLoader:
-    def test_construction(self) -> None:
+    def test_loader_construction(self) -> None:
         loader = ClubDataLoader()
         assert isinstance(loader, ClubDataLoader)
 

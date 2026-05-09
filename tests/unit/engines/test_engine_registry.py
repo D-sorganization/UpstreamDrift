@@ -29,7 +29,7 @@ class TestEngineType:
     def test_drake_exists(self) -> None:
         assert EngineType.DRAKE
 
-    def test_values_are_strings(self) -> None:
+    def test_engine_registry_values_are_strings(self) -> None:
         for member in EngineType:
             assert isinstance(member.value, str)
 

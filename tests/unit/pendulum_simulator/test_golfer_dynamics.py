@@ -52,7 +52,7 @@ class TestAnalyticalMassMatrix:
         M = analytical_mass_matrix(_Q, _P)
         assert M.shape == (N_DOF, N_DOF)
 
-    def test_is_symmetric(self) -> None:
+    def test_golfer_dynamics_is_symmetric(self) -> None:
         M = analytical_mass_matrix(_Q, _P)
         np.testing.assert_allclose(M, M.T, atol=1e-10)
 
@@ -61,7 +61,7 @@ class TestAnalyticalMassMatrix:
         eigenvalues = np.linalg.eigvalsh(M)
         assert np.all(eigenvalues >= -1e-10)
 
-    def test_finite_values(self) -> None:
+    def test_golfer_dynamics_finite_values(self) -> None:
         M = analytical_mass_matrix(_Q, _P)
         assert np.all(np.isfinite(M))
 
@@ -77,7 +77,7 @@ class TestAnalyticalMassMatrix:
         with pytest.raises(TypeError):
             analytical_mass_matrix([0.0] * N_DOF, _P)  # type: ignore[arg-type]
 
-    def test_wrong_shape_raises(self) -> None:
+    def test_golfer_dynamics_wrong_shape_raises(self) -> None:
         with pytest.raises(ValueError):
             analytical_mass_matrix(np.zeros(3), _P)
 
@@ -87,7 +87,7 @@ class TestAnalyticalGravityVector:
         G = analytical_gravity_vector(_Q, _P)
         assert G.shape == (N_DOF,)
 
-    def test_finite_values(self) -> None:
+    def test_golfer_dynamics_finite_values(self) -> None:
         G = analytical_gravity_vector(_Q, _P)
         assert np.all(np.isfinite(G))
 
@@ -124,11 +124,11 @@ class TestAnalyticalCoriolis:
         C = analytical_coriolis(_Q, _QDOT, _P)
         assert C.shape == (N_DOF,)
 
-    def test_finite_values(self) -> None:
+    def test_golfer_dynamics_finite_values(self) -> None:
         C = analytical_coriolis(_Q, _QDOT, _P)
         assert np.all(np.isfinite(C))
 
-    def test_zero_velocities_zero_coriolis(self) -> None:
+    def test_golfer_dynamics_zero_velocities_zero_coriolis(self) -> None:
         C = analytical_coriolis(_Q, _QDOT, _P)
         np.testing.assert_allclose(C, np.zeros(N_DOF), atol=1e-10)
 
@@ -140,11 +140,11 @@ class TestAnalyticalCoriolis:
 class TestAnalyticalFkJacobians:
     _EXPECTED_KEYS = {"rh", "lh", "club_tip", "re", "le", "hub", "club_com", "rs", "ls"}
 
-    def test_returns_dict(self) -> None:
+    def test_golfer_dynamics_returns_dict(self) -> None:
         result = analytical_fk_jacobians(_Q, _P)
         assert isinstance(result, dict)
 
-    def test_has_expected_keys(self) -> None:
+    def test_golfer_dynamics_has_expected_keys(self) -> None:
         result = analytical_fk_jacobians(_Q, _P)
         # Verify all standard keys present
         for key in {"rh", "lh", "club_tip", "re", "le", "hub"}:
@@ -158,7 +158,7 @@ class TestAnalyticalFkJacobians:
                 N_DOF,
             ), f"Key {key}: expected (2, {N_DOF}), got {J.shape}"
 
-    def test_finite_values(self) -> None:
+    def test_golfer_dynamics_finite_values(self) -> None:
         result = analytical_fk_jacobians(_Q, _P)
         for key, J in result.items():
             assert np.all(np.isfinite(J)), f"Non-finite in Jacobian for {key}"
@@ -193,11 +193,11 @@ class TestPotentialEnergyFromQ:
         pe = potential_energy_from_q(_Q, _P)
         assert np.isfinite(pe)
 
-    def test_returns_float(self) -> None:
+    def test_golfer_dynamics_returns_float(self) -> None:
         pe = potential_energy_from_q(_Q, _P)
         assert isinstance(pe, float)
 
-    def test_angle_dependence(self) -> None:
+    def test_golfer_dynamics_angle_dependence(self) -> None:
         q2 = np.zeros(N_DOF)
         q2[0] = 1.0
         pe1 = potential_energy_from_q(_Q, _P)
@@ -208,7 +208,7 @@ class TestPotentialEnergyFromQ:
         with pytest.raises(TypeError):
             potential_energy_from_q("bad", _P)  # type: ignore[arg-type]
 
-    def test_wrong_shape_raises(self) -> None:
+    def test_golfer_dynamics_wrong_shape_raises(self) -> None:
         with pytest.raises(ValueError):
             potential_energy_from_q(np.zeros(2), _P)
 

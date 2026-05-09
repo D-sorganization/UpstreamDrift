@@ -66,7 +66,7 @@ def fig() -> Figure:
     return Figure()
 
 
-def test_init(mock_recorder) -> None:
+def test_plotting_init(mock_recorder) -> None:
     """Test GolfSwingPlotter initialization."""
     plotter = GolfSwingPlotter(mock_recorder)
     assert plotter.recorder == mock_recorder
@@ -76,7 +76,7 @@ def test_init(mock_recorder) -> None:
     assert plotter_named.joint_names == ["J1"]
 
 
-def test_get_joint_name(plotter) -> None:
+def test_plotting_get_joint_name(plotter) -> None:
     """Test joint name lookup by index."""
     assert plotter.get_joint_name(0) == "Joint1"
     assert plotter.get_joint_name(1) == "Joint2"
@@ -96,7 +96,7 @@ def test_get_aligned_label(plotter) -> None:
     assert plotter._get_aligned_label(0, 7) == "DoF 0"
 
 
-def test_plot_joint_angles(plotter, fig) -> None:
+def test_plotting_plot_joint_angles(plotter, fig) -> None:
     """Test joint angles plotting."""
     plotter.plot_joint_angles(fig)
     assert len(fig.axes) > 0
@@ -138,14 +138,14 @@ def test_plot_club_head_speed(plotter, fig) -> None:
     assert len(fig.axes) > 0
 
 
-def test_plot_club_head_trajectory(plotter, fig) -> None:
+def test_plotting_plot_club_head_trajectory(plotter, fig) -> None:
     """Test 3D club head trajectory plotting."""
     plotter.plot_club_head_trajectory(fig)
     assert len(fig.axes) > 0
     assert fig.axes[0].name == "3d"
 
 
-def test_plot_phase_diagram(plotter, fig) -> None:
+def test_plotting_plot_phase_diagram(plotter, fig) -> None:
     """Test phase diagram plotting."""
     plotter.plot_phase_diagram(fig, joint_idx=0)
     assert len(fig.axes) > 0
@@ -157,7 +157,7 @@ def test_plot_torque_comparison(plotter, fig) -> None:
     assert len(fig.axes) > 0
 
 
-def test_plot_frequency_analysis(plotter, fig) -> None:
+def test_plotting_plot_frequency_analysis(plotter, fig) -> None:
     """Test frequency analysis plotting."""
     with patch("scipy.signal.welch", return_value=(np.array([1, 2]), np.array([1, 2]))):
         plotter.plot_frequency_analysis(fig, joint_idx=0)
@@ -174,34 +174,34 @@ def test_plot_spectrogram(plotter, fig) -> None:
         assert len(fig.axes) > 0
 
 
-def test_plot_summary_dashboard(plotter, fig) -> None:
+def test_plotting_plot_summary_dashboard(plotter, fig) -> None:
     """Test summary dashboard multi-panel plotting."""
     plotter.plot_summary_dashboard(fig)
     # Should have multiple axes
     assert len(fig.axes) >= 6
 
 
-def test_plot_kinematic_sequence(plotter, fig) -> None:
+def test_plotting_plot_kinematic_sequence(plotter, fig) -> None:
     """Test kinematic sequence plotting."""
     segments = {"Seg1": 0, "Seg2": 1}
     plotter.plot_kinematic_sequence(fig, segments)
     assert len(fig.axes) > 0
 
 
-def test_plot_3d_phase_space(plotter, fig) -> None:
+def test_plotting_plot_3d_phase_space(plotter, fig) -> None:
     """Test 3D phase space plotting."""
     plotter.plot_3d_phase_space(fig, joint_idx=0)
     assert len(fig.axes) > 0
     assert fig.axes[0].name == "3d"
 
 
-def test_plot_correlation_matrix(plotter, fig) -> None:
+def test_plotting_plot_correlation_matrix(plotter, fig) -> None:
     """Test correlation matrix plotting."""
     plotter.plot_correlation_matrix(fig)
     assert len(fig.axes) > 0
 
 
-def test_plot_swing_plane(plotter, fig) -> None:
+def test_plotting_plot_swing_plane(plotter, fig) -> None:
     """Test swing plane fitting and plotting."""
     # Need enough points for fit
     N = 10
@@ -233,7 +233,7 @@ def test_plot_cop_vector_field(plotter, fig) -> None:
     assert len(fig.axes) > 0
 
 
-def test_plot_radar_chart(plotter, fig) -> None:
+def test_plotting_plot_radar_chart(plotter, fig) -> None:
     """Test radar chart plotting."""
     metrics = {"A": 0.5, "B": 0.8, "C": 0.2}
     plotter.plot_radar_chart(fig, metrics)

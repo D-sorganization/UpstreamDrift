@@ -40,7 +40,7 @@ class TestOutputManager(unittest.TestCase):
         self.assertTrue((self.test_dir / "analysis" / "biomechanics").exists())
         self.assertTrue((self.test_dir / "reports").exists())
 
-    def test_save_load_csv(self) -> None:
+    def test_shared_output_manager_save_load_csv(self) -> None:
         """Test saving and loading CSV files."""
         data = {"col1": [1, 2, 3], "col2": [4, 5, 6]}
         df = pd.DataFrame(data)
@@ -56,7 +56,7 @@ class TestOutputManager(unittest.TestCase):
         assert isinstance(loaded_df, pd.DataFrame)
         pd.testing.assert_frame_equal(df, loaded_df)
 
-    def test_save_load_json(self) -> None:
+    def test_shared_output_manager_save_load_json(self) -> None:
         """Test saving and loading JSON files."""
         data = {"key": "value", "list": [1, 2, 3], "nested": {"a": 1}}
 
@@ -128,7 +128,7 @@ class TestOutputManager(unittest.TestCase):
             self.assertIn("test", content)
             self.assertIn("123", content)
 
-    def test_cleanup_old_files(self) -> None:
+    def test_shared_output_manager_cleanup_old_files(self) -> None:
         """Test cleaning up old files."""
 
         self.manager.create_output_structure()

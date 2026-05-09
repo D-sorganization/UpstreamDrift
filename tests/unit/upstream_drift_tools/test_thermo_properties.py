@@ -59,7 +59,7 @@ class TestThermoResult:
             gamma=1.4,
         )
 
-    def test_construct(self) -> None:
+    def test_thermo_properties_construct(self) -> None:
         r = self._make()
         assert r.temperature_k == 373.15
 
@@ -98,7 +98,7 @@ class TestCalculate:
         result = self._CALC.calculate(25.0, 101.325, self._AIR)
         assert result.density_kg_m3 > 0.0
 
-    def test_higher_pressure_higher_density(self) -> None:
+    def test_thermo_properties_higher_pressure_higher_density(self) -> None:
         low = self._CALC.calculate(25.0, 101.325, self._AIR)
         high = self._CALC.calculate(25.0, 202.65, self._AIR)
         assert high.density_kg_m3 > low.density_kg_m3

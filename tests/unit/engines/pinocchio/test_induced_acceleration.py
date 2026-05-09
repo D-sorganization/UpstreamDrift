@@ -54,7 +54,9 @@ class TestPinocchioInducedAcceleration:
         """Create analyzer instance."""
         return InducedAccelerationAnalyzer(mock_model, mock_data)
 
-    def test_initialization(self, analyzer, mock_model, mock_data) -> None:
+    def test_induced_acceleration_initialization(
+        self, analyzer, mock_model, mock_data
+    ) -> None:
         """Test initialization."""
         assert analyzer.model == mock_model
         assert analyzer.data == mock_data

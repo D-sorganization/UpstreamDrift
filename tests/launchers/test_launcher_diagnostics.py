@@ -12,7 +12,7 @@ from src.launchers.launcher_diagnostics import (  # noqa: E402
 )
 
 
-def test_diagnostic_result_to_dict() -> None:
+def test_launcher_diagnostics_diagnostic_result_to_dict() -> None:
     result = DiagnosticResult(
         name="test", status="pass", message="ok", details={"a": 1}, duration_ms=10.123
     )
@@ -58,7 +58,7 @@ def test_run_all_checks(
     assert "recommendations" in report
 
 
-def test_check_python_environment() -> None:
+def test_launcher_diagnostics_check_python_environment() -> None:
     diag = LauncherDiagnostics()
     res = diag.check_python_environment()
     assert res.name == "python_environment"

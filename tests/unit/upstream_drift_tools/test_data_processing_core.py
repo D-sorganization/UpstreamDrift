@@ -52,7 +52,7 @@ class TestFitType:
 
 
 class TestColumnStats:
-    def test_construct(self) -> None:
+    def test_data_processing_core_construct(self) -> None:
         stats = ColumnStats(
             name="x",
             dtype="float64",
@@ -184,7 +184,7 @@ class TestValidateDataframeExpression:
         with pytest.raises(ValueError, match="forbidden name"):
             _validate_dataframe_expression("open('/etc/shadow')")
 
-    def test_syntax_error_raises_value_error(self) -> None:
+    def test_data_processing_core_syntax_error_raises_value_error(self) -> None:
         with pytest.raises(ValueError, match="Syntax error"):
             _validate_dataframe_expression("=== bad")
 

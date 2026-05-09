@@ -51,7 +51,7 @@ class TestSafeWriteJson:
         result = safe_read_json(p)
         assert result == data
 
-    def test_creates_parent_dirs(self, tmp_path: Path) -> None:
+    def test_state_manager_creates_parent_dirs(self, tmp_path: Path) -> None:
         p = tmp_path / "a" / "b" / "c.json"
         assert safe_write_json(p, {"x": 1}) is True
         assert p.exists()

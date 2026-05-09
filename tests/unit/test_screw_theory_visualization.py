@@ -24,7 +24,7 @@ def _make_screw(
 
 
 class TestScrewAxis:
-    def test_construction(self) -> None:
+    def test_screw_theory_visualization_construction(self) -> None:
         sa = _make_screw()
         assert sa is not None
 
@@ -38,7 +38,7 @@ class TestScrewAxis:
 
 
 class TestComputeScrewEndpoints:
-    def test_returns_two_arrays(self) -> None:
+    def test_screw_theory_visualization_returns_two_arrays(self) -> None:
         sa = _make_screw()
         start, end = compute_screw_endpoints(sa, length=1.0)
         assert isinstance(start, np.ndarray)

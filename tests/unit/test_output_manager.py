@@ -83,7 +83,7 @@ def sample_dict_data() -> dict[str, Any]:
 class TestOutputManager:
     """Test suite for OutputManager class."""
 
-    def test_initialization(self, temp_output_dir) -> None:
+    def test_output_manager_initialization(self, temp_output_dir) -> None:
         """Test initialization and directory creation."""
         manager = OutputManager(base_path=temp_output_dir)
         manager.create_output_structure()
@@ -156,7 +156,7 @@ class TestOutputManager:
             manager = OutputManager()
             assert manager.base_path is not None
 
-    def test_save_load_csv(self, output_manager, sample_data) -> None:
+    def test_output_manager_save_load_csv(self, output_manager, sample_data) -> None:
         """Test saving and loading CSV files."""
         filename = "test_sim"
 
@@ -173,7 +173,9 @@ class TestOutputManager:
         )
         pd.testing.assert_frame_equal(sample_data, loaded_df)
 
-    def test_save_load_json(self, output_manager, sample_dict_data) -> None:
+    def test_output_manager_save_load_json(
+        self, output_manager, sample_dict_data
+    ) -> None:
         """Test saving and loading JSON files."""
         filename = "test_sim"
 
@@ -204,6 +206,47 @@ class TestOutputManager:
             )
 
         # Rely on the raised ValueError as sufficient verification that no file is written.
+
+    @pytest.mark.skipif(
+        not _has_parquet_support(),
+        reason="Parquet support not available (missing pyarrow/fastparquet)",
+    )
+    def test_save_load_parquet(self, output_manager, sample_data) -> None:
+        """Test saving and loading Parquet files."""
+        filename = "test_sim"
+
+        # Save
+        path = output_manager.save_simulation_results(
+            sample_data, filename, OutputFormat.PARQUET, engine="mujoco"
+        )
+        assert path.exists()
+        assert path.suffix == ".parquet"
+
+        # Load
+        loaded_df = output_manager.load_simulation_results(
+            filename, OutputFormat.PARQUET, engine="mujoco"
+        )
+        pd.testing.assert_frame_equal(sample_data, loaded_df)
+
+    @pytest.mark.skipif(
+        not _has_hdf5_support(), reason="HDF5 support not available (missing pytables)"
+    )
+    def test_save_load_hdf5(self, output_manager, sample_data) -> None:
+        """Test saving and loading HDF5 files."""
+        filename = "test_sim"
+
+        # Save
+        path = output_manager.save_simulation_results(
+            sample_data, filename, OutputFormat.HDF5, engine="mujoco"
+        )
+        assert path.exists()
+        assert path.suffix == ".hdf5"
+
+        # Load
+        loaded_df = output_manager.load_simulation_results(
+            filename, OutputFormat.HDF5, engine="mujoco"
+        )
+        pd.testing.assert_frame_equal(sample_data, loaded_df)
 
     def test_save_dict_as_csv(self, output_manager) -> None:
         """Test saving dictionary as CSV."""
@@ -258,7 +301,9 @@ class TestOutputManager:
             assert "metric" in content
             assert "0.95" in content
 
-    def test_cleanup_old_files(self, output_manager, sample_data) -> None:
+    def test_output_manager_cleanup_old_files(
+        self, output_manager, sample_data
+    ) -> None:
         """Test cleaning up old files."""
         # Create a file
         filename = "old_sim"
@@ -290,7 +335,9 @@ class TestOutputManager:
         )
         assert archive_path.exists()
 
-    def test_convenience_functions(self, temp_output_dir, sample_data) -> None:
+    def test_output_manager_convenience_functions(
+        self, temp_output_dir, sample_data
+    ) -> None:
         """Test global convenience functions."""
         # We need to patch OutputManager to use our temp dir
         with patch(

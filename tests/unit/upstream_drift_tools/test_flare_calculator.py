@@ -75,7 +75,7 @@ class TestCalculateFlareSize:
         with pytest.raises(AssertionError):
             self._CALC.calculate_flare_size(-100.0, _SYNGAS, 400.0, 1.0)
 
-    def test_negative_temperature_raises(self) -> None:
+    def test_flare_calculator_negative_temperature_raises(self) -> None:
         with pytest.raises(AssertionError):
             self._CALC.calculate_flare_size(1000.0, _SYNGAS, -10.0, 1.0)
 

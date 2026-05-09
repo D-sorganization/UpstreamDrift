@@ -12,7 +12,7 @@ from src.shared.python.notes.storage import NotesStorage
 
 
 class TestRecycledNoteItem:
-    def test_construction(self) -> None:
+    def test_notes_storage_construction(self) -> None:
         item = RecycledNoteItem(
             item_id="id1",
             reason="test",
@@ -43,7 +43,7 @@ class TestRecycledNoteItem:
 
 
 class TestNotesStorageConstruction:
-    def test_valid_construction(self, tmp_path: Path) -> None:
+    def test_notes_storage_valid_construction(self, tmp_path: Path) -> None:
         storage = NotesStorage(tmp_path)
         assert storage.project_dir == tmp_path
 

@@ -42,7 +42,7 @@ def test_set_value_emits_style_changed(qtbot) -> None:  # type: ignore[no-untype
     assert widget.value() == new_style
 
 
-def test_set_value_no_emit_when_unchanged(qtbot) -> None:  # type: ignore[no-untyped-def]
+def test_marker_style_picker_set_value_no_emit_when_unchanged(qtbot) -> None:  # type: ignore[no-untyped-def]
     widget = MarkerStylePicker()
     qtbot.addWidget(widget)
     received: list[MarkerStyle] = []

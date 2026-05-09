@@ -116,7 +116,7 @@ class TestMessageHandling:
         history = chat_service.get_session_history("nonexistent")
         assert history == []
 
-    def test_list_sessions(self, chat_service) -> None:
+    def test_chat_service_list_sessions(self, chat_service) -> None:
         """Listing sessions returns summary info."""
         ctx = chat_service.get_or_create_session(None)
         chat_service.add_user_message(ctx.session_id, "Hello")

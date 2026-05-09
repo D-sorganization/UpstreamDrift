@@ -23,7 +23,7 @@ def anyio_backend() -> str:
 class TestGenerateRequestIdContract:
     """Design by Contract tests for generate_request_id function."""
 
-    def test_returns_string(self) -> None:
+    def test_tracing_returns_string(self) -> None:
         """Postcondition: Returns a string."""
         from src.api.utils.tracing import generate_request_id
 
@@ -67,7 +67,7 @@ class TestGenerateRequestId:
 class TestGenerateCorrelationIdContract:
     """Design by Contract tests for generate_correlation_id function."""
 
-    def test_returns_string(self) -> None:
+    def test_tracing_returns_string(self) -> None:
         """Postcondition: Returns a string."""
         from src.api.utils.tracing import generate_correlation_id
 
@@ -177,7 +177,7 @@ class TestRequestIdContext:
 class TestTraceContextContract:
     """Design by Contract tests for TraceContext dataclass."""
 
-    def test_to_dict_returns_dict(self) -> None:
+    def test_tracing_to_dict_returns_dict(self) -> None:
         """Postcondition: to_dict returns a dictionary."""
         from src.api.utils.tracing import TraceContext
 
@@ -207,7 +207,7 @@ class TestTraceContextContract:
 class TestTraceContext:
     """Functional tests for TraceContext dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_tracing_default_values(self) -> None:
         """Test default values for optional fields."""
         from src.api.utils.tracing import TraceContext
 
@@ -292,7 +292,7 @@ class TestTraceContextManagement:
 class TestRequestTracerContract:
     """Design by Contract tests for RequestTracer middleware."""
 
-    def test_instantiates(self) -> None:
+    def test_tracing_instantiates(self) -> None:
         """Postcondition: RequestTracer can be instantiated."""
         from src.api.utils.tracing import RequestTracer
 
@@ -483,7 +483,7 @@ class TestTracedLog:
 class TestAllExports:
     """Tests for module __all__ exports."""
 
-    def test_all_exports_importable(self) -> None:
+    def test_tracing_all_exports_importable(self) -> None:
         """Test that all __all__ exports are importable."""
         import src.api.utils.tracing as tracing
         from src.api.utils.tracing import __all__

@@ -100,7 +100,7 @@ class TestCheckNonNegative:
 
 
 class TestCheckSymmetric:
-    def test_symmetric_matrix(self) -> None:
+    def test_contract_validators_symmetric_matrix(self) -> None:
         M = np.array([[1.0, 2.0], [2.0, 3.0]])
         assert check_symmetric(M) is True
 

@@ -23,7 +23,7 @@ def _binding(rest: tuple[float, ...] = (1.0,)) -> MarkerBinding:
     )
 
 
-def test_implements_shape_fitter_protocol() -> None:
+def test_between_two_implements_shape_fitter_protocol() -> None:
     assert isinstance(BetweenTwoMarkersFitter(), ShapeFitter)
 
 
@@ -115,7 +115,7 @@ def test_missing_rest_length_raises() -> None:
         )
 
 
-def test_wrong_binding_kind_raises_type_error() -> None:
+def test_between_two_wrong_binding_kind_raises_type_error() -> None:
     binding = MarkerBinding(kind=BindingKind.CLUSTER, marker_names=("a", "b", "c"))
     with pytest.raises(TypeError, match="BETWEEN_TWO"):
         BetweenTwoMarkersFitter().fit(

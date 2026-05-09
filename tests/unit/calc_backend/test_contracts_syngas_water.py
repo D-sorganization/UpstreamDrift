@@ -13,15 +13,15 @@ from src.shared.python.calc_backend.contracts.syngas_water import (
 
 
 class TestSyngasWaterRequest:
-    def test_valid_construction(self) -> None:
+    def test_contracts_syngas_water_valid_construction(self) -> None:
         req = SyngasWaterRequest(temperature_c=25.0, pressure_bar=1.0)
         assert isinstance(req, SyngasWaterRequest)
 
-    def test_temperature_stored(self) -> None:
+    def test_contracts_syngas_water_temperature_stored(self) -> None:
         req = SyngasWaterRequest(temperature_c=100.0, pressure_bar=5.0)
         assert req.temperature_c == pytest.approx(100.0)
 
-    def test_pressure_stored(self) -> None:
+    def test_contracts_syngas_water_pressure_stored(self) -> None:
         req = SyngasWaterRequest(temperature_c=50.0, pressure_bar=2.5)
         assert req.pressure_bar == pytest.approx(2.5)
 
@@ -41,7 +41,7 @@ class TestSyngasWaterRequest:
         with pytest.raises(ValidationError):
             SyngasWaterRequest(temperature_c=500.0, pressure_bar=1.0)
 
-    def test_zero_pressure_rejected(self) -> None:
+    def test_contracts_syngas_water_zero_pressure_rejected(self) -> None:
         with pytest.raises(ValidationError):
             SyngasWaterRequest(temperature_c=25.0, pressure_bar=0.0)
 
@@ -66,7 +66,7 @@ class TestWaterContentOut:
             dew_point_c=25.0,
         )
 
-    def test_construction(self) -> None:
+    def test_contracts_syngas_water_construction(self) -> None:
         wc = self._make_water_content()
         assert isinstance(wc, WaterContentOut)
 
@@ -80,7 +80,7 @@ class TestWaterContentOut:
 
 
 class TestCondensationRiskOut:
-    def test_construction(self) -> None:
+    def test_contracts_syngas_water_construction(self) -> None:
         risk = CondensationRiskOut(
             temperature_margin_c=20.0,
             condensation_risk="Low",
@@ -98,7 +98,7 @@ class TestCondensationRiskOut:
 
 
 class TestSyngasWaterResponse:
-    def test_construction(self) -> None:
+    def test_contracts_syngas_water_construction(self) -> None:
         resp = SyngasWaterResponse(
             water_content=WaterContentOut(
                 mole_fraction_water=0.03,

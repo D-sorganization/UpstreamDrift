@@ -147,7 +147,7 @@ class TestProvenanceInfoHashFile:
 
 
 class TestProvenanceInfoHeaderLines:
-    def test_returns_list(self) -> None:
+    def test_provenance_returns_list(self) -> None:
         pi = ProvenanceInfo.capture()
         lines = pi.to_header_lines()
         assert isinstance(lines, list)

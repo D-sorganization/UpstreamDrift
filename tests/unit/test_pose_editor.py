@@ -22,13 +22,13 @@ class TestJointType:
 
 
 class TestPoseEditorState:
-    def test_construction(self) -> None:
+    def test_pose_editor_construction(self) -> None:
         state = PoseEditorState()
         assert state is not None
 
 
 class TestJointInfo:
-    def test_construction(self) -> None:
+    def test_pose_editor_construction(self) -> None:
         ji = JointInfo(
             name="shoulder",
             index=0,
@@ -54,11 +54,11 @@ class TestJointInfo:
 
 
 class TestListPresetPoses:
-    def test_returns_list(self) -> None:
+    def test_pose_editor_returns_list(self) -> None:
         poses = list_preset_poses()
         assert isinstance(poses, list)
 
-    def test_non_empty(self) -> None:
+    def test_pose_editor_non_empty(self) -> None:
         poses = list_preset_poses()
         assert len(poses) > 0
 
@@ -78,13 +78,13 @@ class TestGetPresetPose:
 
 
 class TestListPresetPosesByCategory:
-    def test_returns_list(self) -> None:
+    def test_pose_editor_returns_list(self) -> None:
         poses = list_preset_poses_by_category("golf")
         assert isinstance(poses, list)
 
 
 class TestPoseLibrary:
-    def test_construction(self) -> None:
+    def test_pose_editor_construction(self) -> None:
         lib = PoseLibrary()
         assert lib is not None
 
@@ -100,7 +100,7 @@ class TestPoseLibrary:
 
 
 class TestStoredPose:
-    def test_construction(self) -> None:
+    def test_pose_editor_construction(self) -> None:
         pose = StoredPose(
             name="test_pose",
             joint_positions=np.zeros(5),

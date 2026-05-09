@@ -39,7 +39,7 @@ class TestSpinalLoadAnalysis:
             },
         }
 
-    def test_initialization(self, analyzer) -> None:
+    def test_spinal_load_analysis_initialization(self, analyzer) -> None:
         """Test analyzer initialization parameters."""
         assert analyzer.body_weight == 80.0
         assert analyzer.height == 1.80

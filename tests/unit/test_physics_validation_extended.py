@@ -42,7 +42,7 @@ def validator():
 class TestPhysicsValidatorInit:
     """Tests for PhysicsValidator initialization."""
 
-    def test_default_gravity(self, validator) -> None:
+    def test_physics_validation_extended_default_gravity(self, validator) -> None:
         """Default gravity vector is [0, 0, -9.81]."""
 
         assert abs(validator.gravity[2] - (-9.81)) < 1e-6
@@ -103,7 +103,7 @@ class TestInertiaValidationResultDataclass:
 class TestStabilityResultDataclass:
     """Tests for StabilityResult dataclass."""
 
-    def test_instantiation(self) -> None:
+    def test_physics_validation_extended_instantiation(self) -> None:
         """StabilityResult instantiates with is_stable and center_of_mass."""
         from src.shared.python.model_generation.core.physics_validation import (
             StabilityResult,
@@ -120,7 +120,7 @@ class TestStabilityResultDataclass:
 class TestPhysicsValidationResultDataclass:
     """Tests for PhysicsValidationResult dataclass."""
 
-    def test_instantiation(self) -> None:
+    def test_physics_validation_extended_instantiation(self) -> None:
         """PhysicsValidationResult instantiates with required fields."""
         from src.shared.python.model_generation.core.physics_validation import (
             PhysicsValidationResult,
@@ -258,7 +258,7 @@ class TestValidateInertiaTensorInvalid:
 class TestCollisionCheckResult:
     """Tests for CollisionCheckResult dataclass."""
 
-    def test_instantiation(self) -> None:
+    def test_physics_validation_extended_instantiation(self) -> None:
         """CollisionCheckResult instantiates with has_self_intersection."""
         from src.shared.python.model_generation.core.physics_validation import (
             CollisionCheckResult,

@@ -323,7 +323,9 @@ class TestGripContactExporter:
         assert timestep.num_contacts == 2
         assert timestep.total_normal_force > 0
 
-    def test_export_to_dict(self, model_with_data: GripContactModel) -> None:
+    def test_grip_contact_model_export_to_dict(
+        self, model_with_data: GripContactModel
+    ) -> None:
         """Should export all captured timesteps as dict."""
         exporter = GripContactExporter(model_with_data)
 
@@ -350,7 +352,9 @@ class TestGripContactExporter:
         assert "cop_y" in csv_data[0]
         assert "cop_z" in csv_data[0]
 
-    def test_summary_statistics(self, model_with_data: GripContactModel) -> None:
+    def test_grip_contact_model_summary_statistics(
+        self, model_with_data: GripContactModel
+    ) -> None:
         """Should compute summary statistics."""
         exporter = GripContactExporter(model_with_data)
 

@@ -65,7 +65,7 @@ def _has_canonical_theta_validator() -> bool:
 # --------------------------------------------------------------------------- #
 
 
-def test_happy_path_returns_canonical_simout() -> None:
+def test_simulate_contract_mujoco_happy_path_returns_canonical_simout() -> None:
     """Valid theta -> canonical SimOut with aligned, finite arrays."""
     nu = _upper_body_nu()
     theta = np.zeros(nu * COEFFS_PER_JOINT)
@@ -122,7 +122,7 @@ def test_zero_theta_runs_and_is_nontrivial() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_out_of_bounds_theta_rejected_or_handled() -> None:
+def test_simulate_contract_mujoco_out_of_bounds_theta_rejected_or_handled() -> None:
     """A 1e9 coefficient is either rejected (ValueError) or clamped/handled."""
     nu = _upper_body_nu()
     theta = np.zeros(nu * COEFFS_PER_JOINT)
@@ -146,7 +146,7 @@ def test_out_of_bounds_theta_rejected_or_handled() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_wrong_length_theta_raises() -> None:
+def test_simulate_contract_mujoco_wrong_length_theta_raises() -> None:
     """A theta with size not a multiple of 7 raises ValueError."""
     bad = np.zeros(13)  # 13 % 7 != 0
     with pytest.raises(ValueError):
@@ -167,7 +167,7 @@ def test_mismatched_n_joints_theta_raises() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_nan_theta_raises() -> None:
+def test_simulate_contract_mujoco_nan_theta_raises() -> None:
     nu = _upper_body_nu()
     bad = np.zeros(nu * COEFFS_PER_JOINT)
     bad[2] = np.nan
@@ -175,7 +175,7 @@ def test_nan_theta_raises() -> None:
         simulate_with_coefficients(bad, options=_short_opts())
 
 
-def test_inf_theta_raises() -> None:
+def test_simulate_contract_mujoco_inf_theta_raises() -> None:
     nu = _upper_body_nu()
     bad = np.zeros(nu * COEFFS_PER_JOINT)
     bad[5] = np.inf
@@ -188,7 +188,7 @@ def test_inf_theta_raises() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_time_monotonic_starts_at_zero() -> None:
+def test_simulate_contract_mujoco_time_monotonic_starts_at_zero() -> None:
     nu = _upper_body_nu()
     theta = np.zeros(nu * COEFFS_PER_JOINT)
     out = simulate_with_coefficients(theta, options=_short_opts())

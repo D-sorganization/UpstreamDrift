@@ -47,7 +47,7 @@ def _make_results(**kwargs) -> ScrubberResults:
 
 
 class TestScrubberInputs:
-    def test_construction(self) -> None:
+    def test_scrubber_models_construction(self) -> None:
         inputs = _make_inputs()
         assert inputs.gas_flow_kg_hr == pytest.approx(1000.0)
 
@@ -78,7 +78,7 @@ class TestScrubberInputs:
 
 
 class TestScrubberResults:
-    def test_construction(self) -> None:
+    def test_scrubber_models_construction(self) -> None:
         results = _make_results()
         assert results.column_diameter_m == pytest.approx(1.2)
 
@@ -87,7 +87,7 @@ class TestScrubberResults:
         with pytest.raises((AttributeError, TypeError)):
             results.column_diameter_m = 2.0  # type: ignore[misc]
 
-    def test_default_warnings_empty(self) -> None:
+    def test_scrubber_models_default_warnings_empty(self) -> None:
         results = _make_results()
         assert results.warnings == []
 

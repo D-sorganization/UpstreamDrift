@@ -17,7 +17,7 @@ class TestPhysicsParameters:
         """Create a new registry for each test."""
         return PhysicsParameterRegistry()
 
-    def test_parameter_validation(self) -> None:
+    def test_physics_parameters_parameter_validation(self) -> None:
         """Test parameter validation logic."""
         param = PhysicsParameter(
             name="TEST_PARAM",
@@ -89,7 +89,7 @@ class TestPhysicsParameters:
         assert not success
         assert "not found" in msg
 
-    def test_get_by_category(self, registry) -> None:
+    def test_physics_parameters_get_by_category(self, registry) -> None:
         """Test filtering by category."""
         ball_params = registry.get_by_category(ParameterCategory.BALL)
         assert len(ball_params) > 0
@@ -99,7 +99,7 @@ class TestPhysicsParameters:
         env_params = registry.get_by_category(ParameterCategory.ENVIRONMENT)
         assert len(env_params) > 0
 
-    def test_export_import_json(self, registry, tmp_path) -> None:
+    def test_physics_parameters_export_import_json(self, registry, tmp_path) -> None:
         """Test JSON export and import."""
         # Export
         json_path = tmp_path / "params.json"
@@ -121,14 +121,14 @@ class TestPhysicsParameters:
         assert count > 0
         assert registry.get("CLUB_LENGTH").value == 1.0
 
-    def test_get_summary(self, registry) -> None:
+    def test_physics_parameters_get_summary(self, registry) -> None:
         """Test summary string generation."""
         summary = registry.get_summary()
         assert "Physics Parameter Registry" in summary
         assert "GRAVITY" in summary
         assert "BALL_MASS" in summary
 
-    def test_global_registry(self) -> None:
+    def test_physics_parameters_global_registry(self) -> None:
         """Test singleton accessor."""
         reg1 = get_registry()
         reg2 = get_registry()

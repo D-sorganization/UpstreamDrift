@@ -15,7 +15,7 @@ EXPECTED_VERTS = 8
 EXPECTED_FACES = 12
 
 
-def test_default_counts() -> None:
+def test_cube_marker_default_counts() -> None:
     m = CubeMarker()
     v, f = m.mesh(MarkerStyle(size_px=2.0))
     assert v.shape == (EXPECTED_VERTS, 3)
@@ -34,18 +34,18 @@ def test_unit_radius_bounding_sphere() -> None:
     np.testing.assert_allclose(extent_half, [1.0 / math.sqrt(3.0)] * 3, atol=1e-9)
 
 
-def test_scale_linearity() -> None:
+def test_cube_marker_scale_linearity() -> None:
     m = CubeMarker()
     v1, _ = m.mesh(MarkerStyle(size_px=2.0))
     v2, _ = m.mesh(MarkerStyle(size_px=4.0))
     np.testing.assert_allclose(v2, 2.0 * v1, atol=1e-12)
 
 
-def test_protocol_runtime_check() -> None:
+def test_cube_marker_protocol_runtime_check() -> None:
     assert isinstance(CubeMarker(), MarkerShapeRenderer)
 
 
-def test_shape_id() -> None:
+def test_cube_marker_shape_id() -> None:
     assert CubeMarker.shape_id == MarkerShape.CUBE.value
 
 
@@ -56,7 +56,7 @@ def test_face_indices_in_range() -> None:
     assert int(f.max()) == EXPECTED_VERTS - 1
 
 
-def test_mesh_rejects_non_style() -> None:
+def test_cube_marker_mesh_rejects_non_style() -> None:
     m = CubeMarker()
     with pytest.raises(TypeError):
         m.mesh(123)  # type: ignore[arg-type]

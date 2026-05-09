@@ -118,7 +118,7 @@ class TestCommonUtilsHardening(unittest.TestCase):
 
     @patch("matplotlib.pyplot.figure")
     @patch("matplotlib.pyplot.subplots")
-    def test_plot_joint_trajectories(
+    def test_common_utils_plot_joint_trajectories(
         self, mock_subplots: MagicMock, mock_figure: MagicMock
     ) -> None:
         """Test plotting joint trajectories."""
@@ -148,7 +148,7 @@ class TestCommonUtilsHardening(unittest.TestCase):
             plot_joint_trajectories(data, save_path=Path("test.png"))
             mock_savefig.assert_called_once()
 
-    def test_get_shared_urdf_path(self) -> None:
+    def test_common_utils_get_shared_urdf_path(self) -> None:
         """Test locating shared URDF path."""
         # Test case: Standard structure traversal
         # We patch __file__ indirectly by mocking how path resolution works inside the function

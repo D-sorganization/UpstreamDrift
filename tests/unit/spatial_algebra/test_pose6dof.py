@@ -25,7 +25,7 @@ from src.shared.python.spatial_algebra.pose6dof import (
 class TestEulerToRotationMatrix:
     """Tests for euler_to_rotation_matrix function."""
 
-    def test_identity(self) -> None:
+    def test_pose6dof_identity(self) -> None:
         R = euler_to_rotation_matrix([0, 0, 0])
         np.testing.assert_allclose(R, np.eye(3), atol=1e-15)
 

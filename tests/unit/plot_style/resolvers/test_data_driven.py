@@ -46,7 +46,7 @@ def _make_scale(channel: DataChannel, **kwargs: object) -> DataDrivenColorScale:
 # ---------- protocol & construction ------------------------------------
 
 
-def test_protocol_compliance() -> None:
+def test_data_driven_protocol_compliance() -> None:
     scale = _make_scale(_make_per_frame_channel())
     resolver = DataDrivenColor(scale)
     assert isinstance(resolver, ColorResolver)
@@ -184,14 +184,14 @@ def test_resolve_array_pads_with_nan_when_overshooting() -> None:
     np.testing.assert_allclose(arr[5], nan_rgba)
 
 
-def test_resolve_array_rejects_negative_frames() -> None:
+def test_data_driven_resolve_array_rejects_negative_frames() -> None:
     resolver = DataDrivenColor(_make_scale(_make_per_frame_channel()))
     scale = _make_scale(_make_per_frame_channel(), vmin=0.0, vmax=10.0)
     with pytest.raises(ValueError, match="non-negative"):
         resolver.resolve_array(scale, n_frames=-1)
 
 
-def test_resolve_array_rejects_negative_markers() -> None:
+def test_data_driven_resolve_array_rejects_negative_markers() -> None:
     resolver = DataDrivenColor(_make_scale(_make_per_marker_channel()))
     scale = _make_scale(_make_per_marker_channel(), vmin=0.0, vmax=5.0)
     with pytest.raises(ValueError, match="non-negative"):
@@ -225,7 +225,7 @@ def test_per_frame_against_2d_channel_uses_marker_mean() -> None:
 # ---------- registry dispatch ------------------------------------------
 
 
-def test_registry_dispatch() -> None:
+def test_data_driven_registry_dispatch() -> None:
     assert RESOLVER_REGISTRY[DataDrivenColorScale] is DataDrivenColor
 
 

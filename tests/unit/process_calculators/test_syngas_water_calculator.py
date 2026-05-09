@@ -30,7 +30,7 @@ class TestSyngasComposition:
         normalized = c.normalize()
         assert isinstance(normalized, SyngasComposition)
 
-    def test_normalize_sums_to_one(self) -> None:
+    def test_syngas_water_calculator_normalize_sums_to_one(self) -> None:
         c = SyngasComposition(h2=30.0, co=30.0, co2=15.0, n2=25.0)
         n = c.normalize()
         assert n.total == pytest.approx(1.0, abs=1e-6)
@@ -77,7 +77,7 @@ class TestSyngasWaterCalculatorVaporPressure:
     def setup_method(self) -> None:
         self.calc = SyngasWaterCalculator()
 
-    def test_returns_tuple(self) -> None:
+    def test_syngas_water_calculator_returns_tuple(self) -> None:
         result = self.calc.calculate_vapor_pressure(25.0)
         assert isinstance(result, tuple)
         assert len(result) == 2
@@ -124,7 +124,7 @@ class TestWaterVaporPressureCalculator:
     def setup_method(self) -> None:
         self.calc = WaterVaporPressureCalculator()
 
-    def test_returns_float(self) -> None:
+    def test_syngas_water_calculator_returns_float(self) -> None:
         result = self.calc.calculate_vapor_pressure(25.0)
         assert isinstance(result, float)
 
@@ -132,7 +132,7 @@ class TestWaterVaporPressureCalculator:
         result = self.calc.calculate_vapor_pressure(25.0)
         assert result > 0.0
 
-    def test_increases_with_temperature(self) -> None:
+    def test_syngas_water_calculator_increases_with_temperature(self) -> None:
         p_low = self.calc.calculate_vapor_pressure(10.0)
         p_high = self.calc.calculate_vapor_pressure(60.0)
         assert p_high > p_low

@@ -61,7 +61,7 @@ class TestSaveJsonConfig:
         assert p.exists()
         assert json.loads(p.read_text())["a"] == 1
 
-    def test_creates_parent_dirs(self, tmp_path: Path) -> None:
+    def test_config_utils_creates_parent_dirs(self, tmp_path: Path) -> None:
         p = tmp_path / "sub" / "dir" / "cfg.json"
         save_json_config(p, {"b": 2})
         assert p.exists()
@@ -71,7 +71,7 @@ class TestSaveJsonConfig:
         result = save_json_config(p, {})
         assert result is True
 
-    def test_roundtrip(self, tmp_path: Path) -> None:
+    def test_config_utils_roundtrip(self, tmp_path: Path) -> None:
         p = tmp_path / "cfg.json"
         data = {"key": "value", "num": 3.14}
         save_json_config(p, data)
@@ -103,7 +103,7 @@ class TestSaveYamlConfig:
         save_yaml_config(p, {"x": 5})
         assert p.exists()
 
-    def test_roundtrip(self, tmp_path: Path) -> None:
+    def test_config_utils_roundtrip(self, tmp_path: Path) -> None:
         p = tmp_path / "cfg.yaml"
         data = {"key": "value", "nested": {"a": 1}}
         save_yaml_config(p, data)
@@ -176,7 +176,7 @@ class TestConfigLoader:
         loader.set("b", 2)
         assert loader.get("b") == 2
 
-    def test_unsupported_format_raises(self, tmp_path: Path) -> None:
+    def test_config_utils_unsupported_format_raises(self, tmp_path: Path) -> None:
         loader = ConfigLoader(tmp_path / "cfg.toml", format="toml")
         with pytest.raises(ValueError, match="Unsupported format"):
             loader.load()

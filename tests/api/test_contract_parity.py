@@ -32,7 +32,7 @@ from src.shared.python.engine_core.engine_registry import EngineType
 class TestSimulationRequestPreconditions:
     """SimulationRequest validators enforce input contracts."""
 
-    def test_valid_request(self) -> None:
+    def test_contract_parity_valid_request(self) -> None:
         """Standard valid request passes all validators."""
         req = SimulationRequest(engine_type="mujoco")
         assert req.engine_type == "mujoco", (
@@ -102,7 +102,7 @@ class TestSimulationRequestPreconditions:
 class TestAnalysisRequestPreconditions:
     """AnalysisRequest validators enforce input contracts."""
 
-    def test_valid_request(self) -> None:
+    def test_contract_parity_valid_request(self) -> None:
         """Standard valid request passes."""
         req = AnalysisRequest(analysis_type="kinematics", data_source="simulation")
         assert req.analysis_type == "kinematics", (

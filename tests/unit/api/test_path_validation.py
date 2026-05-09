@@ -24,7 +24,7 @@ class TestValidateModelPathContract:
     - Raises HTTPException with 404 for non-existent files
     """
 
-    def test_returns_string(self, tmp_path) -> None:
+    def test_path_validation_returns_string(self, tmp_path) -> None:
         """Postcondition: Returns a string when path is valid."""
         import src.api.utils.path_validation as pv
         from src.api.utils.path_validation import validate_model_path

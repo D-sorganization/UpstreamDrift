@@ -12,7 +12,7 @@ from src.shared.python.theme import ThemePreset, apply_golf_suite_style
 class TestThemePresetCompat:
     """Verify ThemePreset enum shim works correctly."""
 
-    def test_importable(self) -> None:
+    def test_theme_compat_importable(self) -> None:
         assert ThemePreset is not None
 
     def test_has_dark(self) -> None:
@@ -35,7 +35,7 @@ class TestThemePresetCompat:
 class TestApplyGolfSuiteStyle:
     """Verify apply_golf_suite_style() backward-compat shim."""
 
-    def test_importable(self) -> None:
+    def test_theme_compat_importable(self) -> None:
         assert callable(apply_golf_suite_style)
 
     def test_callable_without_error(self) -> None:

@@ -6,11 +6,11 @@ from src.shared.python.ai.glossary_data_extended import get_extended_entries
 
 
 class TestGetExtendedEntries:
-    def test_returns_list(self) -> None:
+    def test_glossary_data_extended_returns_list(self) -> None:
         entries = get_extended_entries()
         assert isinstance(entries, list)
 
-    def test_nonempty(self) -> None:
+    def test_glossary_data_extended_nonempty(self) -> None:
         entries = get_extended_entries()
         assert len(entries) > 0
 

@@ -37,13 +37,13 @@ def _zero_torque(t) -> tuple[float, ...]:  # noqa: ARG001
 
 
 class TestConstrainedAccelerations:
-    def test_returns_ndarray(self) -> None:
+    def test_constraint_solver_returns_ndarray(self) -> None:
         params = _make_params()
         state = np.zeros(2 * N_DOF)
         acc = constrained_accelerations(state, 0.0, params, _zero_torque)
         assert isinstance(acc, np.ndarray)
 
-    def test_output_shape(self) -> None:
+    def test_constraint_solver_output_shape(self) -> None:
         params = _make_params()
         state = np.zeros(2 * N_DOF)
         acc = constrained_accelerations(state, 0.0, params, _zero_torque)

@@ -37,7 +37,7 @@ def adapter() -> OpenAIAdapter:
     return OpenAIAdapter(api_key="sk-test", model="gpt-4-test", timeout=30.0)
 
 
-def test_init(adapter) -> None:
+def test_openai_adapter_init(adapter) -> None:
     """Test initialization."""
     assert adapter._api_key == "sk-test"
     assert adapter._model == "gpt-4-test"
@@ -45,7 +45,7 @@ def test_init(adapter) -> None:
     assert adapter._client is None
 
 
-def test_get_client(adapter) -> None:
+def test_openai_adapter_get_client(adapter) -> None:
     sys.modules["openai"].OpenAI.reset_mock()
     """Test client lazy loading."""
     client = adapter._get_client()
@@ -61,7 +61,7 @@ def test_get_client(adapter) -> None:
     assert client2 == client
 
 
-def test_get_client_import_error() -> None:
+def test_openai_adapter_get_client_import_error() -> None:
     """Test missing openai package."""
     adapter = OpenAIAdapter("sk-test")
     # Force ImportError when importing OpenAI
@@ -79,7 +79,7 @@ def test_get_client_import_error() -> None:
         adapter._get_client()
 
 
-def test_capabilities(adapter) -> None:
+def test_openai_adapter_capabilities(adapter) -> None:
     """Test capabilities declaration."""
     caps = adapter.capabilities
     assert caps.provider_name == "openai"
@@ -89,7 +89,7 @@ def test_capabilities(adapter) -> None:
 
 
 @patch("src.shared.python.ai.adapters.openai_adapter.OpenAIAdapter._get_client")
-def test_validate_connection_success(mock_get_client, adapter) -> None:
+def test_openai_adapter_validate_connection_success(mock_get_client, adapter) -> None:
     """Test validate_connection success."""
     mock_client = MagicMock()
     mock_model = MagicMock()
@@ -117,7 +117,7 @@ def test_validate_connection_model_not_found(mock_get_client, adapter) -> None:
 
 
 @patch("src.shared.python.ai.adapters.openai_adapter.OpenAIAdapter._get_client")
-def test_validate_connection_errors(mock_get_client, adapter) -> None:
+def test_openai_adapter_validate_connection_errors(mock_get_client, adapter) -> None:
     """Test validate_connection error handling."""
     mock_client = MagicMock()
     mock_get_client.return_value = mock_client
@@ -147,7 +147,7 @@ def test_validate_connection_errors(mock_get_client, adapter) -> None:
     assert "openai package not installed" in msg
 
 
-def test_format_messages(adapter) -> None:
+def test_openai_adapter_format_messages(adapter) -> None:
     """Test formatting messages for OpenAI."""
     ctx = ConversationContext()
     ctx.user_expertise = ExpertiseLevel.EXPERT
@@ -189,7 +189,7 @@ def test_format_messages(adapter) -> None:
 
 
 @patch("src.shared.python.ai.adapters.openai_adapter.OpenAIAdapter._get_client")
-def test_send_message_success(mock_get_client, adapter) -> None:
+def test_openai_adapter_send_message_success(mock_get_client, adapter) -> None:
     """Test send_message success path."""
     mock_client = MagicMock()
     mock_response = MagicMock()
@@ -298,7 +298,7 @@ def test_send_message_error_handling(mock_get_client, adapter) -> None:
 
 
 @patch("src.shared.python.ai.adapters.openai_adapter.OpenAIAdapter._get_client")
-def test_stream_response(mock_get_client, adapter) -> None:
+def test_openai_adapter_stream_response(mock_get_client, adapter) -> None:
     """Test streaming response."""
     mock_client = MagicMock()
 

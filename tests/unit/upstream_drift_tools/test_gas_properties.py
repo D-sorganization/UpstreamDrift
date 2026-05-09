@@ -44,7 +44,7 @@ class TestCalculateIdealGasDensity:
         density = calculate_ideal_gas_density(28.0, 273.15, 101325.0)
         assert abs(density - 1.25) < 0.05
 
-    def test_higher_pressure_higher_density(self) -> None:
+    def test_gas_properties_higher_pressure_higher_density(self) -> None:
         low = calculate_ideal_gas_density(28.0, 300.0, 101325.0)
         high = calculate_ideal_gas_density(28.0, 300.0, 500000.0)
         assert high > low

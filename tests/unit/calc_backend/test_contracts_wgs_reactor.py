@@ -23,11 +23,11 @@ def _valid_request(**kwargs) -> WGSReactorRequest:
 
 
 class TestWGSReactorRequest:
-    def test_valid_construction(self) -> None:
+    def test_contracts_wgs_reactor_valid_construction(self) -> None:
         req = _valid_request()
         assert isinstance(req, WGSReactorRequest)
 
-    def test_temperature_stored(self) -> None:
+    def test_contracts_wgs_reactor_temperature_stored(self) -> None:
         req = _valid_request(temperature_k=700.0)
         assert req.temperature_k == pytest.approx(700.0)
 
@@ -43,11 +43,11 @@ class TestWGSReactorRequest:
         req = _valid_request()
         assert req.feed_rate_kmol_hr == 0.0
 
-    def test_zero_temperature_rejected(self) -> None:
+    def test_contracts_wgs_reactor_zero_temperature_rejected(self) -> None:
         with pytest.raises(ValidationError):
             _valid_request(temperature_k=0.0)
 
-    def test_zero_pressure_rejected(self) -> None:
+    def test_contracts_wgs_reactor_zero_pressure_rejected(self) -> None:
         with pytest.raises(ValidationError):
             _valid_request(pressure_bar=0.0)
 
@@ -74,7 +74,7 @@ class TestWGSEquilibriumOut:
             heat_released_kj=-41.2,
         )
 
-    def test_construction(self) -> None:
+    def test_contracts_wgs_reactor_construction(self) -> None:
         eq = self._make_equilibrium()
         assert isinstance(eq, WGSEquilibriumOut)
 

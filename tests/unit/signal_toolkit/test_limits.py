@@ -20,7 +20,7 @@ def _make_signal(amp: float = 2.0, n: int = 100) -> Signal:
 
 
 class TestApplySaturation:
-    def test_returns_signal(self) -> None:
+    def test_limits_returns_signal(self) -> None:
         sig = _make_signal()
         result = apply_saturation(sig, lower=-1.0, upper=1.0)
         assert isinstance(result, Signal)
@@ -59,7 +59,7 @@ class TestApplySaturation:
         with pytest.raises((ValueError, TypeError, AssertionError)):
             apply_saturation(sig, lower=0.0, upper=0.0)
 
-    def test_name_updated(self) -> None:
+    def test_limits_name_updated(self) -> None:
         sig = _make_signal()
         result = apply_saturation(sig, lower=-1.0, upper=1.0)
         assert "saturated" in result.name
@@ -78,7 +78,7 @@ class TestApplySaturation:
 
 
 class TestApplyRateLimiter:
-    def test_returns_signal(self) -> None:
+    def test_limits_returns_signal(self) -> None:
         sig = _make_signal()
         result = apply_rate_limiter(sig, max_rate=10.0)
         assert isinstance(result, Signal)
@@ -118,14 +118,14 @@ class TestApplyRateLimiter:
         result = apply_rate_limiter(sig, max_rate=5.0)
         assert result.values[0] == pytest.approx(7.0)
 
-    def test_name_updated(self) -> None:
+    def test_limits_name_updated(self) -> None:
         sig = _make_signal()
         result = apply_rate_limiter(sig, max_rate=10.0)
         assert "rate_limited" in result.name
 
 
 class TestApplyDeadband:
-    def test_returns_signal(self) -> None:
+    def test_limits_returns_signal(self) -> None:
         sig = _make_signal()
         result = apply_deadband(sig, threshold=0.5)
         assert isinstance(result, Signal)
@@ -142,7 +142,7 @@ class TestApplyDeadband:
         result = apply_deadband(sig, threshold=0.1, center=0.0, smooth=False)
         np.testing.assert_allclose(result.values, 0.0, atol=1e-12)
 
-    def test_all_values_finite(self) -> None:
+    def test_limits_all_values_finite(self) -> None:
         sig = _make_signal(amp=3.0)
         result = apply_deadband(sig, threshold=0.5)
         assert np.all(np.isfinite(result.values))

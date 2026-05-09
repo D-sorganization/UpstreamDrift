@@ -130,7 +130,7 @@ class TestMuJoCoStrict:
             setattr(self.mod, "mujoco", self.original_mujoco)  # noqa: B010
         self.patcher.stop()
 
-    def test_jacobian_standardization_mocked(self) -> None:
+    def test_physics_engines_strict_jacobian_standardization_mocked(self) -> None:
         """Verify compute_jacobian returns standard suite format [Angular; Linear] for spatial."""
         # Use the class from the patched module
         engine = self.MuJoCoPhysicsEngine()

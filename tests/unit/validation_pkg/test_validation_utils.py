@@ -29,7 +29,7 @@ class TestValidateArrayShape:
         arr = np.zeros((3, 3))
         validate_array_shape(arr, (3, 3))  # no exception
 
-    def test_wrong_shape_raises(self) -> None:
+    def test_validation_utils_wrong_shape_raises(self) -> None:
         arr = np.zeros((2, 3))
         with pytest.raises(ValueError, match="shape mismatch"):
             validate_array_shape(arr, (3, 3), "rotation")
@@ -74,7 +74,7 @@ class TestValidateArrayLength:
         arr = np.zeros(5)
         validate_array_length(arr, 5)
 
-    def test_wrong_length_raises(self) -> None:
+    def test_validation_utils_wrong_length_raises(self) -> None:
         arr = np.zeros(3)
         with pytest.raises(ValueError, match="length mismatch"):
             validate_array_length(arr, 5, "q")
@@ -158,7 +158,7 @@ class TestValidateFileExists:
             assert isinstance(result, Path)
             assert result == Path(f.name)
 
-    def test_missing_file_raises(self) -> None:
+    def test_validation_utils_missing_file_raises(self) -> None:
         with pytest.raises(FileNotFoundError, match="not found"):
             validate_file_exists("/nonexistent/path/file.xml")
 
@@ -206,7 +206,7 @@ class TestValidateExtension:
         with pytest.raises(ValueError, match="invalid extension"):
             validate_extension("model.txt", [".urdf", ".xml"])
 
-    def test_case_insensitive(self) -> None:
+    def test_validation_utils_case_insensitive(self) -> None:
         validate_extension("model.URDF", [".urdf"])
 
     def test_name_in_error(self) -> None:

@@ -258,7 +258,9 @@ class TestMacDonaldHanzelyModel:
             "Assertion failed: result.carry_distance < 350"
         )
 
-    def test_spin_decay(self, driver_launch: UnifiedLaunchConditions) -> None:
+    def test_flight_models_spin_decay(
+        self, driver_launch: UnifiedLaunchConditions
+    ) -> None:
         """Test that spin decay affects trajectory."""
         model_fast_decay = MacDonaldHanzelyModel(decay=0.2)
         model_slow_decay = MacDonaldHanzelyModel(decay=0.01)

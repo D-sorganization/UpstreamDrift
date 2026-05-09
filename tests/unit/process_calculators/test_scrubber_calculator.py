@@ -12,7 +12,7 @@ from src.shared.python.upstream_drift_tools.process_calculators.scrubber_calcula
 
 
 class TestPackingDatabase:
-    def test_nonempty(self) -> None:
+    def test_scrubber_calculator_nonempty(self) -> None:
         assert len(PACKING_DATABASE) > 0
 
     def test_pall_ring_exists(self) -> None:
@@ -62,7 +62,7 @@ class TestCalculateGasViscosity:
         result = calculate_gas_viscosity(300.0, 28.0)
         assert result > 0.0
 
-    def test_increases_with_temperature(self) -> None:
+    def test_scrubber_calculator_increases_with_temperature(self) -> None:
         mu_low = calculate_gas_viscosity(300.0, 28.0)
         mu_high = calculate_gas_viscosity(600.0, 28.0)
         # Gas viscosity increases with temperature (Sutherland)

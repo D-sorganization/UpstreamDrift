@@ -42,7 +42,7 @@ class TestCalculateEquilibriumConstant:
 class TestSizeWgsReactor:
     _ENGINE = WGSReactorEngine()
 
-    def test_returns_dict(self) -> None:
+    def test_wgs_reactor_calculator_returns_dict(self) -> None:
         result = self._ENGINE.size_wgs_reactor(100.0, 80.0, 600.0, "Fe")
         assert isinstance(result, dict)
 

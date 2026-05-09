@@ -24,10 +24,10 @@ from src.shared.python.data_io.common_utils import (
 
 
 class TestConversionFactors:
-    def test_is_dict(self) -> None:
+    def test_common_utils_units_is_dict(self) -> None:
         assert isinstance(CONVERSION_FACTORS, dict)
 
-    def test_non_empty(self) -> None:
+    def test_common_utils_units_non_empty(self) -> None:
         assert len(CONVERSION_FACTORS) > 0
 
     def test_keys_are_tuples(self) -> None:
@@ -94,7 +94,7 @@ class TestConvertUnits:
 
 
 class TestNormalizeZScore:
-    def test_returns_ndarray(self) -> None:
+    def test_common_utils_units_returns_ndarray(self) -> None:
         result = normalize_z_score(np.array([1.0, 2.0, 3.0]))
         assert isinstance(result, np.ndarray)
 
@@ -186,7 +186,7 @@ class TestLoadSaveGolfData:
         finally:
             Path(path).unlink(missing_ok=True)
 
-    def test_unsupported_format_raises(self) -> None:
+    def test_common_utils_units_unsupported_format_raises(self) -> None:
         with pytest.raises(ValueError, match="Unsupported"):
             load_golf_data("/tmp/data.xyz")
 

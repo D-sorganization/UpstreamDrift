@@ -291,7 +291,7 @@ class TestGeometry:
 class TestOrigin:
     """Test Origin creation and serialization."""
 
-    def test_defaults(self) -> None:
+    def test_core_types_defaults(self) -> None:
         origin = Origin()
         assert origin.xyz == (0.0, 0.0, 0.0)
         assert origin.rpy == (0.0, 0.0, 0.0)

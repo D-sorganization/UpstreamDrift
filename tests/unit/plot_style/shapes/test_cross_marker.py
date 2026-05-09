@@ -13,14 +13,14 @@ EXPECTED_VERTS = 24
 EXPECTED_FACES = 36
 
 
-def test_default_counts() -> None:
+def test_cross_marker_default_counts() -> None:
     m = CrossMarker()
     v, f = m.mesh(MarkerStyle(size_px=2.0))
     assert v.shape == (EXPECTED_VERTS, 3)
     assert f.shape == (EXPECTED_FACES, 3)
 
 
-def test_unit_radius_bbox() -> None:
+def test_cross_marker_unit_radius_bbox() -> None:
     m = CrossMarker()
     v, _ = m.mesh(MarkerStyle(size_px=2.0))
     extent = v.max(axis=0) - v.min(axis=0)
@@ -28,18 +28,18 @@ def test_unit_radius_bbox() -> None:
     np.testing.assert_allclose(extent, [2.0, 2.0, 2.0], atol=1e-9)
 
 
-def test_scale_linearity() -> None:
+def test_cross_marker_scale_linearity() -> None:
     m = CrossMarker()
     v1, _ = m.mesh(MarkerStyle(size_px=2.0))
     v2, _ = m.mesh(MarkerStyle(size_px=4.0))
     np.testing.assert_allclose(v2, 2.0 * v1, atol=1e-12)
 
 
-def test_protocol_runtime_check() -> None:
+def test_cross_marker_protocol_runtime_check() -> None:
     assert isinstance(CrossMarker(), MarkerShapeRenderer)
 
 
-def test_shape_id() -> None:
+def test_cross_marker_shape_id() -> None:
     assert CrossMarker.shape_id == MarkerShape.CROSS.value
 
 
@@ -76,7 +76,7 @@ def test_custom_thickness() -> None:
     assert np.isclose(v.min(), -1.0)
 
 
-def test_mesh_rejects_non_style() -> None:
+def test_cross_marker_mesh_rejects_non_style() -> None:
     m = CrossMarker()
     with pytest.raises(TypeError):
         m.mesh(object())  # type: ignore[arg-type]

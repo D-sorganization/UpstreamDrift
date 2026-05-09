@@ -108,7 +108,7 @@ def fig() -> Figure:
     return Figure()
 
 
-def test_init(plotter, mock_analyzer) -> None:
+def test_comparative_plotting_init(plotter, mock_analyzer) -> None:
     """Test ComparativePlotter initialization."""
     assert plotter.analyzer == mock_analyzer
 

@@ -22,7 +22,7 @@ def anyio_backend() -> str:
 class TestSecurityManagerContract:
     """Design by Contract tests for SecurityManager class."""
 
-    def test_instantiates(self) -> None:
+    def test_security_instantiates(self) -> None:
         """Postcondition: SecurityManager can be instantiated."""
         with patch.dict(
             os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
@@ -53,7 +53,7 @@ class TestSecurityManagerContract:
 class TestSecurityManagerHashPassword:
     """Tests for SecurityManager.hash_password."""
 
-    def test_returns_string(self) -> None:
+    def test_security_returns_string(self) -> None:
         """Test that hash_password returns a string."""
         with patch.dict(
             os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
@@ -318,7 +318,7 @@ class TestSecurityManagerApiKey:
 class TestRoleCheckerContract:
     """Design by Contract tests for RoleChecker class."""
 
-    def test_instantiates(self) -> None:
+    def test_security_instantiates(self) -> None:
         """Postcondition: RoleChecker can be instantiated."""
         with patch.dict(
             os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
@@ -418,7 +418,7 @@ class TestRoleChecker:
 class TestUsageTrackerContract:
     """Design by Contract tests for UsageTracker class."""
 
-    def test_instantiates(self) -> None:
+    def test_security_instantiates(self) -> None:
         """Postcondition: UsageTracker can be instantiated."""
         with patch.dict(
             os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
@@ -503,7 +503,7 @@ class TestUsageTracker:
 class TestAuthCacheContract:
     """Design by Contract tests for AuthCache class."""
 
-    def test_instantiates(self) -> None:
+    def test_security_instantiates(self) -> None:
         """Postcondition: AuthCache can be instantiated."""
         with patch.dict(
             os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
@@ -561,7 +561,7 @@ class TestAuthCache:
 class TestComputePrefixHash:
     """Tests for compute_prefix_hash function."""
 
-    def test_returns_string(self) -> None:
+    def test_security_returns_string(self) -> None:
         """Test that compute_prefix_hash returns a string."""
         with patch.dict(
             os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}

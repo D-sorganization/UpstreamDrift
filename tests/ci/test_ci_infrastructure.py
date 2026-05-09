@@ -21,7 +21,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 class TestCoreDependencies:
     """Test that core dependencies are installed and importable."""
 
-    def test_numpy_available(self) -> None:
+    def test_ci_infrastructure_numpy_available(self) -> None:
         """Test that numpy is available (always required)."""
         import numpy as np
 
@@ -202,6 +202,17 @@ class TestCIEnvironmentCompatibility:
         """Test that pytest is importable (test runner itself)."""
         assert pytest is not None
         assert pytest.__version__ is not None
+
+    @pytest.mark.skipif(
+        sys.platform != "linux",
+        reason="CI runs on Linux",
+    )
+    def test_xvfb_compatible_qt_platform(self) -> None:
+        """Test that QT_QPA_PLATFORM can be set to offscreen."""
+        import os
+
+        # This should not raise in CI with xvfb
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
     def test_pr_scoped_core_tests_treat_all_skipped_selection_as_noop(self) -> None:
         """PR-scoped pytest must not fail when every selected test self-skips."""

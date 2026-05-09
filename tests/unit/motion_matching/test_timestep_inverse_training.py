@@ -104,7 +104,9 @@ def _loader_factory():
 # ---------------------------------------------------------------------------
 
 
-def test_three_epoch_run_reduces_val_loss(tmp_path: Path) -> None:
+def test_timestep_inverse_training_three_epoch_run_reduces_val_loss(
+    tmp_path: Path,
+) -> None:
     cfg = TimestepInverseConfig(hidden=64, n_blocks=2, dropout=0.0)
     result = train_timestep_inverse(
         tmp_path,
@@ -138,7 +140,7 @@ def test_three_epoch_run_reduces_val_loss(tmp_path: Path) -> None:
     assert all(m.val_tau_mae_nm >= 0 for m in result.history)
 
 
-def test_checkpoint_round_trip(tmp_path: Path) -> None:
+def test_timestep_inverse_training_checkpoint_round_trip(tmp_path: Path) -> None:
     cfg = TimestepInverseConfig(hidden=32, n_blocks=2, dropout=0.0)
     result = train_timestep_inverse(
         tmp_path,
@@ -183,7 +185,7 @@ def test_make_output_dir_avoids_same_second_collision(
     assert second != first
 
 
-def test_invalid_epochs_rejected(tmp_path: Path) -> None:
+def test_timestep_inverse_training_invalid_epochs_rejected(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="epochs"):
         train_timestep_inverse(
             tmp_path,
@@ -194,7 +196,9 @@ def test_invalid_epochs_rejected(tmp_path: Path) -> None:
         )
 
 
-def test_invalid_val_fraction_rejected(tmp_path: Path) -> None:
+def test_timestep_inverse_training_invalid_val_fraction_rejected(
+    tmp_path: Path,
+) -> None:
     with pytest.raises(ValueError, match="val_fraction"):
         train_timestep_inverse(
             tmp_path,

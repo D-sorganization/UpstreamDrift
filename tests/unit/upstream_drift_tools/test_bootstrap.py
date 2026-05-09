@@ -9,7 +9,7 @@ from src.shared.python.upstream_drift_tools.bootstrap import ensure_paths
 
 
 class TestEnsurePaths:
-    def test_returns_path(self) -> None:
+    def test_bootstrap_returns_path(self) -> None:
         result = ensure_paths()
         assert isinstance(result, Path)
 

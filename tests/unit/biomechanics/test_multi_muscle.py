@@ -24,14 +24,14 @@ def _make_group(name: str = "Flexors") -> MuscleGroup:
 
 
 class TestMuscleAttachment:
-    def test_construction(self) -> None:
+    def test_multi_muscle_construction(self) -> None:
         att = MuscleAttachment("biceps", 0.05)
         assert att.muscle_name == "biceps"
         assert att.moment_arm == pytest.approx(0.05)
 
 
 class TestMuscleGroup:
-    def test_construction(self) -> None:
+    def test_multi_muscle_construction(self) -> None:
         group = MuscleGroup("Flexors")
         assert group.name == "Flexors"
 
@@ -91,7 +91,7 @@ class TestMuscleGroup:
 
 
 class TestAntagonistPair:
-    def test_construction(self) -> None:
+    def test_multi_muscle_construction(self) -> None:
         agonist = _make_group("Flexors")
         antagonist = MuscleGroup("Extensors")
         antagonist.add_muscle("triceps", _make_muscle(), moment_arm=-0.04)

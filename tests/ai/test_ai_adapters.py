@@ -38,7 +38,7 @@ def context() -> ConversationContext:
 
 
 class TestOpenAIAdapter:
-    def test_initialization(self, mock_openai_adapter) -> None:
+    def test_ai_adapters_initialization(self, mock_openai_adapter) -> None:
         assert mock_openai_adapter._api_key == "test-key"
         assert mock_openai_adapter._client is None
 
@@ -47,7 +47,7 @@ class TestOpenAIAdapter:
         assert client is not None
         mock_openai_module.OpenAI.assert_called_once()
 
-    def test_validate_connection_success(self, mock_openai_adapter) -> None:
+    def test_ai_adapters_validate_connection_success(self, mock_openai_adapter) -> None:
         client_mock = mock_openai_adapter._get_client()
         # Mock models list
         model_mock = Mock()
@@ -74,10 +74,12 @@ class TestOpenAIAdapter:
 
 
 class TestAnthropicAdapter:
-    def test_initialization(self, mock_anthropic_adapter) -> None:
+    def test_ai_adapters_initialization(self, mock_anthropic_adapter) -> None:
         assert mock_anthropic_adapter._api_key == "test-key"
 
-    def test_validate_connection_success(self, mock_anthropic_adapter) -> None:
+    def test_ai_adapters_validate_connection_success(
+        self, mock_anthropic_adapter
+    ) -> None:
         client_mock = mock_anthropic_adapter._get_client()
         # Mock message create response
         mock_response = Mock()
@@ -104,7 +106,7 @@ class TestAnthropicAdapter:
         assert "msg1" in msgs[0]["content"]
         assert "msg2" in msgs[0]["content"]
 
-    def test_capabilities(self, mock_anthropic_adapter) -> None:
+    def test_ai_adapters_capabilities(self, mock_anthropic_adapter) -> None:
         caps = mock_anthropic_adapter.capabilities
         assert caps.provider_name == "anthropic"
         assert caps.max_tokens == 200000

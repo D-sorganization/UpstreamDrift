@@ -31,7 +31,7 @@ def create_limited_club_model() -> SimpleNamespace:
 class TestKinematicForceData:
     """Tests for KinematicForceData dataclass."""
 
-    def test_initialization(self) -> None:
+    def test_kinematic_forces_initialization(self) -> None:
         """Test force data initialization."""
         coriolis = np.array([1.0, -0.5])
         gravity = np.array([0.5, -0.3])
@@ -59,7 +59,7 @@ class TestKinematicForceAnalyzer:
         mujoco.mj_forward(model, data)
         return model, data
 
-    def test_initialization(self, model_and_data) -> None:
+    def test_kinematic_forces_initialization(self, model_and_data) -> None:
         """Test analyzer initialization."""
         model, data = model_and_data
         analyzer = KinematicForceAnalyzer(model, data)
@@ -67,7 +67,7 @@ class TestKinematicForceAnalyzer:
         assert analyzer.model == model
         assert analyzer.data == data
 
-    def test_find_body_id(self, model_and_data) -> None:
+    def test_kinematic_forces_find_body_id(self, model_and_data) -> None:
         """Test finding body ID."""
         model, data = model_and_data
         analyzer = KinematicForceAnalyzer(model, data)
@@ -109,7 +109,7 @@ class TestKinematicForceAnalyzer:
         # May have small numerical errors
         assert np.all(np.abs(coriolis) < 1e-3)
 
-    def test_compute_gravity_forces(self, model_and_data) -> None:
+    def test_kinematic_forces_compute_gravity_forces(self, model_and_data) -> None:
         """Test computing gravity forces."""
         model, data = model_and_data
         analyzer = KinematicForceAnalyzer(model, data)
@@ -136,7 +136,7 @@ class TestKinematicForceAnalyzer:
         assert np.all(np.isfinite(centrifugal))
         assert np.all(np.isfinite(coupling))
 
-    def test_compute_mass_matrix(self, model_and_data) -> None:
+    def test_kinematic_forces_compute_mass_matrix(self, model_and_data) -> None:
         """Test computing mass matrix."""
         model, data = model_and_data
         analyzer = KinematicForceAnalyzer(model, data)

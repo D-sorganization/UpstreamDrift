@@ -39,7 +39,7 @@ class TestDrakeInducedAcceleration:
         """Create analyzer instance."""
         return DrakeInducedAccelerationAnalyzer(mock_plant)
 
-    def test_initialization(self, analyzer, mock_plant) -> None:
+    def test_induced_acceleration_initialization(self, analyzer, mock_plant) -> None:
         """Test initialization."""
         assert analyzer.plant == mock_plant
 

@@ -263,7 +263,7 @@ class MockRecorderNew(RecorderInterface):
 class TestAdvancedSignalProcessing:
     """Tests for advanced signal processing functions."""
 
-    def test_compute_jerk(self) -> None:
+    def test_advanced_features_compute_jerk(self) -> None:
         """Test jerk computation using cubic polynomial."""
         t = np.linspace(0, 1, 100)
         # Position x(t) = t^3
@@ -280,7 +280,7 @@ class TestAdvancedSignalProcessing:
         valid_jerk = jerk[10:-10]
         np.testing.assert_allclose(valid_jerk, 6.0, rtol=0.05)
 
-    def test_compute_time_shift(self) -> None:
+    def test_advanced_features_compute_time_shift(self) -> None:
         """Test time shift detection."""
         fs = 100.0
         t = np.linspace(0, 2, 200)

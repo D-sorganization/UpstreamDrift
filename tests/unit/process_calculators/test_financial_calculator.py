@@ -41,18 +41,18 @@ def _make_params(**kwargs) -> FinancialParameters:
 
 
 class TestFinancialParameters:
-    def test_default_construction(self) -> None:
+    def test_financial_calculator_default_construction(self) -> None:
         p = FinancialParameters()
         assert p.plant_capacity_tpd == 0.0
 
-    def test_custom_values(self) -> None:
+    def test_financial_calculator_custom_values(self) -> None:
         p = _make_params()
         assert p.plant_capacity_tpd == 100.0
         assert p.operating_days_per_year == 300
 
 
 class TestFinancialResults:
-    def test_default_construction(self) -> None:
+    def test_financial_calculator_default_construction(self) -> None:
         r = FinancialResults()
         assert r.total_revenue == 0.0
         assert r.net_income == 0.0

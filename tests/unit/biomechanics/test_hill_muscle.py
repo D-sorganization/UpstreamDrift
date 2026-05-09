@@ -23,7 +23,7 @@ def _default_params() -> MuscleParameters:
 
 
 class TestMuscleParameters:
-    def test_construction(self) -> None:
+    def test_hill_muscle_construction(self) -> None:
         p = _default_params()
         assert p.F_max == pytest.approx(1000.0)
         assert p.l_opt == pytest.approx(0.10)
@@ -51,7 +51,7 @@ class TestHillMuscleModel:
         self.params = _default_params()
         self.model = HillMuscleModel(self.params)
 
-    def test_construction(self) -> None:
+    def test_hill_muscle_construction(self) -> None:
         assert self.model is not None
 
     def test_zero_activation_produces_passive_force_only(self) -> None:
@@ -128,7 +128,7 @@ class TestHillMuscleModel:
 
 
 class TestActivationDynamics:
-    def test_construction(self) -> None:
+    def test_hill_muscle_construction(self) -> None:
         from src.shared.python.biomechanics.activation_dynamics import (
             ActivationDynamics,
         )

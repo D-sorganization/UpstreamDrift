@@ -339,7 +339,7 @@ class TestGetExampleModels:
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
-    def test_returns_dict(self, mock_check) -> None:
+    def test_myoconverter_integration_returns_dict(self, mock_check) -> None:
         """Test that method returns a dictionary."""
         converter = MyoConverter()
         models = converter.get_example_models()
@@ -426,7 +426,7 @@ class TestValidateConversion:
 class TestInstallMyoconverterInstructions:
     """Test install_myoconverter_instructions function."""
 
-    def test_returns_string(self) -> None:
+    def test_myoconverter_integration_returns_string(self) -> None:
         """Test that function returns a string."""
         instructions = install_myoconverter_instructions()
         assert isinstance(instructions, str)

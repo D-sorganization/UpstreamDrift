@@ -52,7 +52,7 @@ class TestMakePolynomialTorque:
         tf = make_polynomial_torque([0.0])
         assert tf(5.0)[0] == pytest.approx(0.0)
 
-    def test_returns_tuple(self) -> None:
+    def test_torque_utils_returns_tuple(self) -> None:
         tf = make_polynomial_torque([1.0])
         assert isinstance(tf(0.0), tuple)
 

@@ -55,25 +55,25 @@ class TestNoiseGenerator:
         result = self.gen.generate(self.t, NoiseType.WHITE, amplitude=0.0)
         np.testing.assert_allclose(result.values, 0.0, atol=1e-12)
 
-    def test_negative_amplitude_raises(self) -> None:
+    def test_noise_negative_amplitude_raises(self) -> None:
         with pytest.raises((ValueError, TypeError, AssertionError)):
             self.gen.generate(self.t, NoiseType.WHITE, amplitude=-1.0)
 
-    def test_reproducible_with_seed(self) -> None:
+    def test_noise_reproducible_with_seed(self) -> None:
         gen1 = NoiseGenerator(seed=99)
         gen2 = NoiseGenerator(seed=99)
         r1 = gen1.generate(self.t, NoiseType.WHITE, amplitude=1.0)
         r2 = gen2.generate(self.t, NoiseType.WHITE, amplitude=1.0)
         np.testing.assert_array_equal(r1.values, r2.values)
 
-    def test_different_seeds_differ(self) -> None:
+    def test_noise_different_seeds_differ(self) -> None:
         gen1 = NoiseGenerator(seed=1)
         gen2 = NoiseGenerator(seed=2)
         r1 = gen1.generate(self.t, NoiseType.WHITE, amplitude=1.0)
         r2 = gen2.generate(self.t, NoiseType.WHITE, amplitude=1.0)
         assert not np.allclose(r1.values, r2.values)
 
-    def test_all_values_finite(self) -> None:
+    def test_noise_all_values_finite(self) -> None:
         for noise_type in [NoiseType.WHITE, NoiseType.PINK, NoiseType.BROWN]:
             result = self.gen.generate(self.t, noise_type, amplitude=0.5)
             assert np.all(np.isfinite(result.values)), f"Non-finite in {noise_type}"
@@ -83,7 +83,7 @@ class TestAddNoiseToSignal:
     def setup_method(self) -> None:
         self.sig = _make_signal(n=200)
 
-    def test_returns_signal(self) -> None:
+    def test_noise_returns_signal(self) -> None:
         result = add_noise_to_signal(self.sig, amplitude=0.1, seed=0)
         assert isinstance(result, Signal)
 
@@ -95,7 +95,7 @@ class TestAddNoiseToSignal:
         result = add_noise_to_signal(self.sig, amplitude=0.5, seed=7)
         assert not np.allclose(result.values, self.sig.values)
 
-    def test_name_updated(self) -> None:
+    def test_noise_name_updated(self) -> None:
         result = add_noise_to_signal(self.sig, amplitude=0.1)
         assert "noisy" in result.name
 

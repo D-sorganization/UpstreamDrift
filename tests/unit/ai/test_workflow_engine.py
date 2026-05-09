@@ -46,7 +46,7 @@ class TestWorkflow:
         assert workflow.id == "test_workflow"
         assert len(workflow.steps) == 0
 
-    def test_add_step(self) -> None:
+    def test_workflow_engine_add_step(self) -> None:
         """Test adding steps to workflow."""
         workflow = Workflow(id="test", name="Test", description="Test")
         workflow.add_step(WorkflowStep(id="step1", name="Step 1", description="First"))

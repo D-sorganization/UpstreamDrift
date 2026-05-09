@@ -6,7 +6,7 @@ import pytest
 from src.shared.python.plot_style.widgets.color_picker import ColorPicker
 
 
-def test_default_initial_value() -> None:
+def test_color_picker_default_initial_value() -> None:
     widget = ColorPicker()
     assert widget.value() == "#1f77b4"
 
@@ -30,7 +30,7 @@ def test_set_value_emits_color_changed(qtbot) -> None:  # type: ignore[no-untype
     assert widget.value() == "#abcdef"
 
 
-def test_set_value_no_emit_when_unchanged(qtbot) -> None:  # type: ignore[no-untyped-def]
+def test_color_picker_set_value_no_emit_when_unchanged(qtbot) -> None:  # type: ignore[no-untyped-def]
     widget = ColorPicker("#abcdef")
     qtbot.addWidget(widget)
     received: list[str] = []

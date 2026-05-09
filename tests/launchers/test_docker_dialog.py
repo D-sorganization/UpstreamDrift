@@ -16,7 +16,7 @@ def dialog(qapp) -> EnvironmentDialog:
     return EnvironmentDialog()
 
 
-def test_init(dialog) -> None:
+def test_docker_dialog_init(dialog) -> None:
     """Test dialog initialization."""
     assert dialog.windowTitle() == "Manage Environment"
     assert dialog.build_thread is None

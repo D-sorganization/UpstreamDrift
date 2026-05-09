@@ -11,7 +11,7 @@ from src.shared.python.config.configuration_manager import (
 from src.shared.python.data_io.common_utils import GolfModelingError
 
 
-def test_default_config() -> None:
+def test_configuration_manager_default_config() -> None:
     """Test that default configuration is valid."""
     config = SimulationConfig()
     config.validate()  # Should not raise
@@ -28,7 +28,7 @@ def test_default_config() -> None:
     ],
     ids=["negative_height", "invalid_control_mode"],
 )
-def test_config_validation(kwargs) -> None:
+def test_configuration_manager_config_validation(kwargs) -> None:
     """Test validation logic rejects invalid configurations."""
     with pytest.raises(GolfModelingError):
         SimulationConfig(**kwargs).validate()

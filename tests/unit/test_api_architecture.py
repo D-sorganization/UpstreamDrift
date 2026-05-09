@@ -178,7 +178,7 @@ class TestRouteRegistry:
 class TestTaskManager:
     """Tests for the extracted TaskManager with TTL and concurrency (#1485, #1488)."""
 
-    def test_set_and_get(self) -> None:
+    def test_api_architecture_set_and_get(self) -> None:
         """Basic set/get operations work."""
         from src.api.task_manager import TaskManager
 

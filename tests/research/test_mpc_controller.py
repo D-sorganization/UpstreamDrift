@@ -65,7 +65,7 @@ class TestConstraint:
 class TestModelPredictiveController:
     """Smoke tests for MPC controller."""
 
-    def test_construction(self, mock_engine: MagicMock) -> None:
+    def test_mpc_controller_construction(self, mock_engine: MagicMock) -> None:
         mpc = ModelPredictiveController(mock_engine, horizon=5, dt=0.01)
         assert mpc.n_states == 6
         assert mpc.n_controls == 3

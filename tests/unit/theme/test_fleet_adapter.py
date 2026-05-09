@@ -14,13 +14,13 @@ from src.shared.python.theme.fleet_adapter import (
 
 
 class TestIsFleetAvailable:
-    def test_returns_bool(self) -> None:
+    def test_fleet_adapter_returns_bool(self) -> None:
         result = is_fleet_available()
         assert isinstance(result, bool)
 
 
 class TestGetFleetThemeNames:
-    def test_returns_list(self) -> None:
+    def test_fleet_adapter_returns_list(self) -> None:
         names = get_fleet_theme_names()
         assert isinstance(names, list)
 

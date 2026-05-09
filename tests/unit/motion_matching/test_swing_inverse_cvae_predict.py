@@ -141,6 +141,8 @@ def test_predict_from_checkpoint_roundtrip(tmp_path: Path) -> None:
     assert pred.samples.shape == (2, DEFAULT_COEFFICIENT_DIM)
 
 
-def test_from_checkpoint_missing_file_raises(tmp_path: Path) -> None:
+def test_swing_inverse_cvae_predict_from_checkpoint_missing_file_raises(
+    tmp_path: Path,
+) -> None:
     with pytest.raises(FileNotFoundError):
         load_inverse_cvae(tmp_path / "does_not_exist.pt")

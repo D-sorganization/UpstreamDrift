@@ -35,11 +35,46 @@ from src.shared.python.engine_core.engine_availability import (
 class TestDrakeSpecificVerification:
     """Deep verification of Drake integration correctness."""
 
+    @skip_if_unavailable("drake")
+    def test_drake_engine_load_from_string_sdf(self) -> None:
+        """DrakePhysicsEngine must accept SDF string."""
+        from src.engines.physics_engines.drake.python.drake_physics_engine import (
+            DrakePhysicsEngine,
+        )
+
+        engine = DrakePhysicsEngine()
+        # load_from_string should exist and be callable
+        assert callable(engine.load_from_string)
+
     def test_drake_engine_importable_without_pydrake(self) -> None:
         """drake_physics_engine module must be importable even without pydrake."""
         from src.engines.physics_engines.drake.python import drake_physics_engine
 
         assert drake_physics_engine is not None
+
+    @skip_if_unavailable("drake")
+    def test_drake_engine_get_state_returns_tuple(self) -> None:
+        """get_state must return a (qpos, qvel) tuple."""
+        from src.engines.physics_engines.drake.python.drake_physics_engine import (
+            DrakePhysicsEngine,
+        )
+
+        engine = DrakePhysicsEngine()
+        state = engine.get_state()
+        assert isinstance(state, tuple)
+        assert len(state) == 2  # noqa: PLR2004
+
+    @skip_if_unavailable("drake")
+    def test_drake_engine_get_time_returns_float(self) -> None:
+        """get_time must return a float."""
+        from src.engines.physics_engines.drake.python.drake_physics_engine import (
+            DrakePhysicsEngine,
+        )
+
+        engine = DrakePhysicsEngine()
+        time_val = engine.get_time()
+        assert isinstance(time_val, float)
+        assert time_val >= 0.0
 
     def test_drake_engine_has_contact_forces(self) -> None:
         """Drake must implement compute_contact_forces."""
@@ -82,6 +117,29 @@ class TestOpenSimSpecificVerification:
 
         engine = OpenSimPhysicsEngine()
         assert callable(engine.load_from_string)
+
+    @skip_if_unavailable("opensim")
+    def test_opensim_engine_get_state_returns_tuple(self) -> None:
+        """get_state must return a (qpos, qvel) tuple with correct types."""
+        from src.engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E501
+            OpenSimPhysicsEngine,
+        )
+
+        engine = OpenSimPhysicsEngine()
+        state = engine.get_state()
+        assert isinstance(state, tuple)
+        assert len(state) == 2  # noqa: PLR2004
+
+    @skip_if_unavailable("opensim")
+    def test_opensim_engine_get_time_returns_float(self) -> None:
+        """get_time must return a float."""
+        from src.engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E501
+            OpenSimPhysicsEngine,
+        )
+
+        engine = OpenSimPhysicsEngine()
+        time_val = engine.get_time()
+        assert isinstance(time_val, float)
 
     def test_opensim_engine_has_drift_acceleration(self) -> None:
         """OpenSim must implement compute_drift_acceleration."""
@@ -193,7 +251,7 @@ class TestVideoPosePipelineAudit:
 
         assert VideoProcessingResult is not None
 
-    def test_config_defaults(self) -> None:
+    def test_third_party_integration_batch2_config_defaults(self) -> None:
         """VideoProcessingConfig must have sane defaults."""
         from src.shared.python.gui_pkg.video_pose_pipeline import (
             VideoProcessingConfig,
@@ -237,6 +295,63 @@ class TestVideoPosePipelineAudit:
         assert config.min_confidence == pytest.approx(0.7)
         assert config.output_format == "csv"
         assert config.enable_temporal_smoothing is False
+
+    @skip_if_unavailable("mediapipe")
+    def test_pipeline_process_video_rejects_missing_file(self) -> None:
+        """process_video must raise for missing video file."""
+        from src.shared.python.gui_pkg.video_pose_pipeline import (
+            VideoPosePipeline,
+        )
+
+        pipeline = VideoPosePipeline()
+        with pytest.raises((FileNotFoundError, Exception)):
+            pipeline.process_video(Path("/tmp/nonexistent_video.mp4"))
+
+    @skip_if_unavailable("mediapipe")
+    def test_pipeline_process_batch_rejects_empty_list(self) -> None:
+        """process_batch must handle empty video list gracefully."""
+        from src.shared.python.gui_pkg.video_pose_pipeline import (
+            VideoPosePipeline,
+        )
+
+        pipeline = VideoPosePipeline()
+        results = pipeline.process_batch([], Path("/tmp"))
+        assert isinstance(results, list)
+        assert len(results) == 0
+
+    @skip_if_unavailable("mediapipe")
+    def test_pipeline_has_fit_to_model(self) -> None:
+        """VideoPosePipeline must have fit_to_model method."""
+        from src.shared.python.gui_pkg.video_pose_pipeline import (
+            VideoPosePipeline,
+        )
+
+        pipeline = VideoPosePipeline()
+        assert hasattr(pipeline, "fit_to_model")
+        assert callable(pipeline.fit_to_model)
+
+    @skip_if_unavailable("mediapipe")
+    def test_pipeline_filter_quality_callable(self) -> None:
+        """_filter_by_quality must be callable."""
+        from src.shared.python.gui_pkg.video_pose_pipeline import (
+            VideoPosePipeline,
+        )
+
+        pipeline = VideoPosePipeline()
+        assert hasattr(pipeline, "_filter_by_quality")
+        assert callable(pipeline._filter_by_quality)
+
+    @skip_if_unavailable("mediapipe")
+    def test_pipeline_filter_quality_empty_input(self) -> None:
+        """_filter_by_quality must handle empty list."""
+        from src.shared.python.gui_pkg.video_pose_pipeline import (
+            VideoPosePipeline,
+        )
+
+        pipeline = VideoPosePipeline()
+        result = pipeline._filter_by_quality([])
+        assert isinstance(result, list)
+        assert len(result) == 0
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

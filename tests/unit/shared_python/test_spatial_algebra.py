@@ -66,7 +66,7 @@ class TestSkew:
 class TestCrm:
     """Tests for crm: spatial cross product for motion vectors."""
 
-    def test_crm_shape(self) -> None:
+    def test_spatial_algebra_crm_shape(self) -> None:
         v = np.zeros(6)
         assert crm(v).shape == (6, 6)
 
@@ -193,21 +193,21 @@ class TestFastCrossProducts:
 class TestSpatialCross:
     """Tests for the spatial_cross dispatcher."""
 
-    def test_motion_type(self) -> None:
+    def test_spatial_algebra_motion_type(self) -> None:
         v = np.array([1.0, 2.0, 3.0, 0.0, 0.0, 0.0])
         m = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
         result = spatial_cross(v, m, cross_type="motion")
         expected = cross_motion(v, m)
         assert np.allclose(result, expected)
 
-    def test_force_type(self) -> None:
+    def test_spatial_algebra_force_type(self) -> None:
         v = np.array([1.0, 2.0, 3.0, 0.0, 0.0, 0.0])
         f = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
         result = spatial_cross(v, f, cross_type="force")
         expected = cross_force(v, f)
         assert np.allclose(result, expected)
 
-    def test_invalid_type_raises(self) -> None:
+    def test_spatial_algebra_invalid_type_raises(self) -> None:
         v = np.zeros(6)
         u = np.zeros(6)
         with pytest.raises(ValueError):
@@ -279,7 +279,7 @@ class TestMcI:
 class TestTransformSpatialInertia:
     """Tests for transform_spatial_inertia."""
 
-    def test_identity_transform(self) -> None:
+    def test_spatial_algebra_identity_transform(self) -> None:
         mass = 1.0
         I_mat = mcI(mass, np.zeros(3), np.eye(3))
         X = np.eye(6)

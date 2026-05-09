@@ -123,7 +123,7 @@ class TestStateCheckpointVerifyChecksum:
 
 
 class TestStateCheckpointToDict:
-    def test_returns_dict(self) -> None:
+    def test_checkpoint_returns_dict(self) -> None:
         cp = StateCheckpoint.create("mujoco", {}, np.ones(2), np.zeros(2), 0.0)
         assert isinstance(cp.to_dict(), dict)
 

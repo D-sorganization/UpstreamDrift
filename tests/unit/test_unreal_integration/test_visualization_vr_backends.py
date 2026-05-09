@@ -50,7 +50,7 @@ from src.unreal_integration.vr_interaction import (
 class TestVisualizationConfig:
     """Tests for VisualizationConfig."""
 
-    def test_default_config(self) -> None:
+    def test_visualization_vr_backends_default_config(self) -> None:
         """Test default configuration values."""
         config = VisualizationConfig.default()
         assert config.force_scale > 0
@@ -409,7 +409,7 @@ class TestVRInteractionManager:
         assert manager.locomotion_mode == VRLocomotionMode.SMOOTH
         assert len(events) == 1
 
-    def test_get_state(self) -> None:
+    def test_visualization_vr_backends_get_state(self) -> None:
         """Test getting complete VR state."""
         manager = VRInteractionManager()
         state = manager.get_state()
@@ -425,7 +425,7 @@ class TestVRInteractionManager:
 class TestViewerConfig:
     """Tests for ViewerConfig."""
 
-    def test_default_config(self) -> None:
+    def test_visualization_vr_backends_default_config(self) -> None:
         """Test default configuration."""
         config = ViewerConfig()
         assert config.width == 1280
@@ -504,7 +504,7 @@ class TestMockBackend:
         assert backend.remove_object(name)
         assert backend.object_count == 0
 
-    def test_clear(self) -> None:
+    def test_visualization_vr_backends_clear(self) -> None:
         """Test clearing mock backend."""
         backend = MockBackend()
         backend.initialize()

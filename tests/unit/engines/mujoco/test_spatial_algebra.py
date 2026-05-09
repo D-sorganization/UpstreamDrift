@@ -23,7 +23,7 @@ from mujoco_humanoid_golf.spatial_algebra import (
 class TestSpatialCrossProducts:
     """Tests for spatial cross product operators."""
 
-    def test_crm_shape(self) -> None:
+    def test_spatial_algebra_crm_shape(self) -> None:
         """Test CRM returns correct shape."""
         v = np.array([1, 0, 0, 0, 1, 0])
         X = crm(v)

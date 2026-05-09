@@ -21,7 +21,7 @@ class TestValidateModelPath:
             validate_model_path("C:\\Windows\\System32")
         assert exc_info.value.status_code == 400
 
-    def test_rejects_parent_traversal(self) -> None:
+    def test_path_validation_rejects_parent_traversal(self) -> None:
         with pytest.raises(HTTPException) as exc_info:
             validate_model_path("../../../etc/passwd")
         assert exc_info.value.status_code == 400

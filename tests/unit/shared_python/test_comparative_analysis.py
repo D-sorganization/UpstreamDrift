@@ -128,7 +128,7 @@ def test_missing_data_report() -> None:
     assert len(report["metrics"]) == 0
 
 
-def test_compute_dtw_distance(sample_data) -> None:
+def test_comparative_analysis_compute_dtw_distance(sample_data) -> None:
     """Test DTW distance computation between two signals."""
     data_a, data_b = sample_data
     rec_a = MockRecorder(data_a)

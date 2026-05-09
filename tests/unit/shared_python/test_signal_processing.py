@@ -141,7 +141,7 @@ class TestSignalProcessing:
 
     # --- New Tests ---
 
-    def test_compute_jerk(self) -> None:
+    def test_signal_processing_compute_jerk(self) -> None:
         """Test jerk computation."""
         fs = 100.0
         t = np.linspace(0, 2, 200)
@@ -161,7 +161,7 @@ class TestSignalProcessing:
         error = np.abs(jerk[10:-10] - expected[10:-10])
         assert np.mean(error) < 1.0  # Loose tolerance for discrete derivative
 
-    def test_compute_time_shift(self) -> None:
+    def test_signal_processing_compute_time_shift(self) -> None:
         """Test time shift calculation."""
         fs = 100.0
         t = np.linspace(0, 2, 200)
@@ -180,7 +180,7 @@ class TestSignalProcessing:
         expected_lag = shift_samples / fs
         assert np.isclose(tau, expected_lag, atol=0.02)
 
-    def test_compute_dtw_distance(self) -> None:
+    def test_signal_processing_compute_dtw_distance(self) -> None:
         """Test DTW distance."""
         s1 = np.array([0, 1, 2, 3, 2, 1, 0])
         s2 = np.array([0, 0, 1, 2, 3, 2, 1, 0])  # s1 stretched/shifted

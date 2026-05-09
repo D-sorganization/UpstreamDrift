@@ -22,11 +22,11 @@ def _zero_torque(t) -> tuple[float, float, float]:
 
 
 class TestTriplePendulumParams:
-    def test_construction(self) -> None:
+    def test_simulation_triple_construction(self) -> None:
         p = _make_params()
         assert p.m1 == pytest.approx(5.0)
 
-    def test_negative_mass_raises(self) -> None:
+    def test_simulation_triple_negative_mass_raises(self) -> None:
         with pytest.raises((AssertionError, ValueError)):
             _make_params(m1=-1.0)
 
@@ -50,7 +50,7 @@ class TestRunSimulationTriple:
         result = run_simulation(params, y0, 0.2, _zero_torque, dt=0.01)
         assert np.all(np.isfinite(result.states))
 
-    def test_invalid_t_end_raises(self) -> None:
+    def test_simulation_triple_invalid_t_end_raises(self) -> None:
         params = _make_params()
         y0 = np.zeros(6)
         with pytest.raises((AssertionError, ValueError)):

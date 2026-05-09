@@ -17,7 +17,7 @@ class TestScatterToGrid:
         z = x**2 + y**2
         return x, y, z
 
-    def test_returns_tuple_of_three(self) -> None:
+    def test_plot_engine_extras_returns_tuple_of_three(self) -> None:
         x, y, z = self._scatter_paraboloid()
         result = scatter_to_grid(x, y, z)
         assert len(result) == 3
@@ -42,7 +42,7 @@ class TestScatterToGrid:
 
 
 class TestCorrelationMatrix:
-    def test_returns_tuple(self) -> None:
+    def test_plot_engine_extras_returns_tuple(self) -> None:
         data = np.random.default_rng(42).normal(0, 1, (20, 3))
         corr, labels = correlation_matrix(data)
         assert isinstance(corr, np.ndarray)

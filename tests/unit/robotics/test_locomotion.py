@@ -72,7 +72,7 @@ class TestGaitParameters:
         assert params.step_duration == 0.5
         assert 0 <= params.double_support_ratio <= 1
 
-    def test_custom_parameters(self) -> None:
+    def test_locomotion_custom_parameters(self) -> None:
         """Test custom parameter values."""
         params = GaitParameters(
             step_length=0.4,
@@ -84,7 +84,7 @@ class TestGaitParameters:
         assert params.step_duration == 0.6
         assert params.com_height == 1.0
 
-    def test_parameter_validation(self) -> None:
+    def test_locomotion_parameter_validation(self) -> None:
         """Test parameter validation."""
         with pytest.raises(ValueError, match="non-negative"):
             GaitParameters(step_length=-0.1)

@@ -41,7 +41,7 @@ class TestPhysicsFunctionBenchmarks:
         assert g_par > 0
         assert g_perp > 0
 
-    def test_spin_decay(self, benchmark: pytest.fixture) -> None:
+    def test_physics_benchmarks_spin_decay(self, benchmark: pytest.fixture) -> None:
         """Benchmark spin decay computation."""
         from src.shared.python.physics.flight_model_options import compute_spin_decay
 

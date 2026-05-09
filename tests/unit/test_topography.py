@@ -37,7 +37,7 @@ from src.shared.python.physics.topography import (
 class TestTopographyBounds:
     """Tests for TopographyBounds dataclass."""
 
-    def test_defaults(self) -> None:
+    def test_topography_defaults(self) -> None:
         b = TopographyBounds()
         assert b.min_x == 0.0
         assert b.max_x == 100.0
@@ -326,7 +326,7 @@ class TestFileIO:
         z = loaded.get_elevation_at(np.array([5.0, 5.0]))
         assert math.isfinite(z)
 
-    def test_unsupported_format_raises(self, tmp_path: Path) -> None:
+    def test_topography_unsupported_format_raises(self, tmp_path: Path) -> None:
         topo = create_flat_terrain()
         with pytest.raises(ValueError, match="Unsupported"):
             topo.save_to_file(tmp_path / "terrain.xyz")

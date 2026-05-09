@@ -83,7 +83,7 @@ class MockCollisionChecker:
 class TestPlannerConfig:
     """Tests for PlannerConfig."""
 
-    def test_default_config(self) -> None:
+    def test_planning_motion_default_config(self) -> None:
         """Test default configuration values."""
         config = PlannerConfig()
         assert config.max_iterations == 10000
@@ -92,7 +92,7 @@ class TestPlannerConfig:
         assert config.step_size == 0.1
         assert config.goal_tolerance == 0.01
 
-    def test_custom_config(self) -> None:
+    def test_planning_motion_custom_config(self) -> None:
         """Test custom configuration."""
         config = PlannerConfig(
             max_iterations=5000,
@@ -436,7 +436,7 @@ class TestRRTStarPlanner:
 class TestRRTStarConfig:
     """Tests for RRTStarConfig."""
 
-    def test_default_config(self) -> None:
+    def test_planning_motion_default_config(self) -> None:
         """Test default configuration."""
         config = RRTStarConfig()
         assert config.rewire_radius is None

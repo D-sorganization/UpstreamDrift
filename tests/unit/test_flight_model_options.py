@@ -14,7 +14,7 @@ from src.shared.python.physics.flight_model_options import (
 class TestFlightModelOptions:
     """Tests for FlightModelOptions dataclass."""
 
-    def test_defaults(self) -> None:
+    def test_flight_model_options_defaults(self) -> None:
         """Test default values."""
         options = FlightModelOptions()
         assert options.enable_wind is False
@@ -23,7 +23,7 @@ class TestFlightModelOptions:
         assert options.enable_altitude_correction is False
         assert options.altitude_m == 0.0
 
-    def test_custom_values(self) -> None:
+    def test_flight_model_options_custom_values(self) -> None:
         """Test custom initialization."""
         options = FlightModelOptions(
             enable_wind=True,

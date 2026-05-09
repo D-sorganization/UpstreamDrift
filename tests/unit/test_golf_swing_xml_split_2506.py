@@ -38,7 +38,7 @@ class TestGolfSwingXmlFileSizes:
     """golf_swing_models_xml.py coordinator and split files must be <= 500 LOC."""
 
     @pytest.mark.unit
-    def test_coordinator_loc(self) -> None:
+    def test_golf_swing_xml_split_2506_coordinator_loc(self) -> None:
         loc = _count_lines(XML_DIR / "golf_swing_models_xml.py")
         assert loc <= LOC_BUDGET, (
             f"golf_swing_models_xml.py has {loc} LOC; budget {LOC_BUDGET}"

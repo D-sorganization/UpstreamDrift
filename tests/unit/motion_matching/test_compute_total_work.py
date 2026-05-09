@@ -49,7 +49,7 @@ def test_eccentric_and_concentric_count_equally() -> None:
     assert abs(w_pos - w_neg) < 1e-12
 
 
-def test_missing_field_raises() -> None:
+def test_compute_total_work_missing_field_raises() -> None:
     time = np.linspace(0.0, 1.0, 11)
     sim = SimOutput(
         butt=np.zeros((11, 3)),
@@ -63,7 +63,7 @@ def test_missing_field_raises() -> None:
         compute_total_work(sim)
 
 
-def test_shape_mismatch_raises() -> None:
+def test_compute_total_work_shape_mismatch_raises() -> None:
     time = np.linspace(0.0, 1.0, 11)
     tau = np.zeros((10, 2))
     omega = np.zeros((11, 2))

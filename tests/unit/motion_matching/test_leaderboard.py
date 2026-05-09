@@ -96,7 +96,7 @@ class TestFitResultSchema:
         with pytest.raises(LeaderboardError, match="trial"):
             FitResult(**_good_payload(trial=""))
 
-    def test_frozen(self) -> None:
+    def test_leaderboard_frozen(self) -> None:
         import dataclasses
 
         r = FitResult(**_good_payload())

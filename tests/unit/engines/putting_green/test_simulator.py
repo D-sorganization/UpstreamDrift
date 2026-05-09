@@ -31,14 +31,14 @@ from src.engines.physics_engines.putting_green.python.turf_properties import (
 class TestSimulationConfig:
     """Tests for SimulationConfig dataclass."""
 
-    def test_default_config(self) -> None:
+    def test_simulator_default_config(self) -> None:
         """Default config should have sensible values."""
         config = SimulationConfig()
         assert config.timestep > 0
         assert config.max_simulation_time > 0
         assert config.stopping_velocity_threshold > 0
 
-    def test_config_validation(self) -> None:
+    def test_simulator_config_validation(self) -> None:
         """Should validate configuration parameters."""
         with pytest.raises(ValueError):
             SimulationConfig(timestep=-0.01)
@@ -127,7 +127,9 @@ class TestPuttingGreenSimulator:
         """Should return model name."""
         assert simulator.model_name == "putting_green"
 
-    def test_reset_clears_state(self, simulator: PuttingGreenSimulator) -> None:
+    def test_simulator_reset_clears_state(
+        self, simulator: PuttingGreenSimulator
+    ) -> None:
         """Reset should clear simulation state."""
         # Set some state
         simulator.set_ball_position(np.array([5.0, 5.0]))
@@ -136,7 +138,7 @@ class TestPuttingGreenSimulator:
         # Time should be 0
         assert simulator.get_time() == 0.0
 
-    def test_step_advances_time(
+    def test_simulator_step_advances_time(
         self, configured_simulator: PuttingGreenSimulator
     ) -> None:
         """Step should advance simulation time."""
@@ -190,7 +192,9 @@ class TestPuttingGreenSimulator:
         assert q.shape == (2,)  # 2D position
         assert v.shape == (2,)  # 2D velocity
 
-    def test_set_state(self, configured_simulator: PuttingGreenSimulator) -> None:
+    def test_simulator_set_state(
+        self, configured_simulator: PuttingGreenSimulator
+    ) -> None:
         """set_state should update position and velocity."""
         q = np.array([8.0, 12.0])
         v = np.array([1.5, 0.5])
@@ -309,7 +313,9 @@ class TestPuttingGreenSimulatorCheckpoints:
         assert checkpoint is not None
         assert "position" in checkpoint or hasattr(checkpoint, "q")
 
-    def test_restore_checkpoint(self, simulator: PuttingGreenSimulator) -> None:
+    def test_simulator_restore_checkpoint(
+        self, simulator: PuttingGreenSimulator
+    ) -> None:
         """Should restore state from checkpoint."""
         # Set initial state
         simulator.set_ball_position(np.array([5.0, 5.0]))
@@ -336,7 +342,9 @@ class TestPuttingGreenSimulatorPhysicsInterface:
     def simulator(self) -> PuttingGreenSimulator:
         return PuttingGreenSimulator()
 
-    def test_compute_mass_matrix(self, simulator: PuttingGreenSimulator) -> None:
+    def test_simulator_compute_mass_matrix(
+        self, simulator: PuttingGreenSimulator
+    ) -> None:
         """Should return mass matrix (single ball = scalar mass)."""
         M = simulator.compute_mass_matrix()
         assert M.shape == (2, 2) or isinstance(M, int | float)
@@ -351,7 +359,9 @@ class TestPuttingGreenSimulatorPhysicsInterface:
         assert bias.shape == (2,)
         assert np.all(np.isfinite(bias))
 
-    def test_compute_gravity_forces(self, simulator: PuttingGreenSimulator) -> None:
+    def test_simulator_compute_gravity_forces(
+        self, simulator: PuttingGreenSimulator
+    ) -> None:
         """Should compute gravity on slope."""
         # Add slope to green
         simulator.green.add_slope_region(
@@ -400,7 +410,7 @@ class TestPuttingGreenSimulatorIO:
     def simulator(self) -> PuttingGreenSimulator:
         return PuttingGreenSimulator()
 
-    def test_load_from_path(self, simulator: PuttingGreenSimulator) -> None:
+    def test_simulator_load_from_path(self, simulator: PuttingGreenSimulator) -> None:
         """Should load green configuration from file."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             config = {
@@ -422,7 +432,7 @@ class TestPuttingGreenSimulatorIO:
             assert simulator.green.width == 25.0
             assert np.allclose(simulator.green.hole_position, [15.0, 12.0])
 
-    def test_load_from_string(self, simulator: PuttingGreenSimulator) -> None:
+    def test_simulator_load_from_string(self, simulator: PuttingGreenSimulator) -> None:
         """Should load from JSON string."""
         config_str = json.dumps(
             {

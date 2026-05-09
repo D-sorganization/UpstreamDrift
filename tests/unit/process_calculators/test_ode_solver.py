@@ -10,7 +10,7 @@ from src.shared.python.upstream_drift_tools.process_calculators.ode_solver impor
 
 
 class TestODESolverConstruction:
-    def test_construction(self) -> None:
+    def test_ode_solver_construction(self) -> None:
         solver = ODESolver({"T": "k*(T_env - T)"}, {"k": 0.3, "T_env": 350.0})
         assert solver is not None
 

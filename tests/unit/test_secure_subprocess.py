@@ -132,7 +132,7 @@ class TestSecureSubprocess(unittest.TestCase):
         with self.assertRaises(SecureSubprocessError):
             secure_run(["rm", "-rf", "/"], suite_root=self.suite_root)
 
-    def test_working_directory_validation(self) -> None:
+    def test_secure_subprocess_working_directory_validation(self) -> None:
         """Test that working directory is validated."""
         outside_dir = Path(self.temp_dir) / ".." / "outside"
         outside_dir.mkdir(exist_ok=True)

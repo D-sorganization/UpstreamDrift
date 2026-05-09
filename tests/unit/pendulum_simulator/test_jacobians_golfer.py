@@ -38,11 +38,11 @@ _EXPECTED_KEYS = {"rh", "lh", "club_tip", "re", "le", "hub"}
 
 
 class TestJacobianGolfer:
-    def test_returns_dict(self) -> None:
+    def test_jacobians_golfer_returns_dict(self) -> None:
         result = jacobian_golfer(_Q, _P)
         assert isinstance(result, dict)
 
-    def test_has_expected_keys(self) -> None:
+    def test_jacobians_golfer_has_expected_keys(self) -> None:
         result = jacobian_golfer(_Q, _P)
         assert set(result.keys()) == _EXPECTED_KEYS
 
@@ -54,7 +54,7 @@ class TestJacobianGolfer:
                 N_DOF,
             ), f"Key {key}: expected (2, {N_DOF}), got {J.shape}"
 
-    def test_finite_values(self) -> None:
+    def test_jacobians_golfer_finite_values(self) -> None:
         result = jacobian_golfer(_Q, _P)
         for key, J in result.items():
             assert np.all(np.isfinite(J)), f"Non-finite values in Jacobian for {key}"
@@ -75,11 +75,11 @@ class TestJacobianGolfer:
 
 
 class TestEllipsoidsGolfer:
-    def test_returns_dict(self) -> None:
+    def test_jacobians_golfer_returns_dict(self) -> None:
         result = ellipsoids_golfer(_Q, _P)
         assert isinstance(result, dict)
 
-    def test_has_expected_keys(self) -> None:
+    def test_jacobians_golfer_has_expected_keys(self) -> None:
         result = ellipsoids_golfer(_Q, _P)
         assert set(result.keys()) == _EXPECTED_KEYS
 

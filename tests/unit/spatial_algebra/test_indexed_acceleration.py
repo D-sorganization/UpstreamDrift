@@ -75,12 +75,12 @@ class TestAssertClosure:
 
 
 class TestGetContributionPercentages:
-    def test_returns_dict(self) -> None:
+    def test_indexed_acceleration_returns_dict(self) -> None:
         ia = _make_accel(gravity=1.0, coriolis=0.5, applied_torque=0.3)
         result = ia.get_contribution_percentages()
         assert isinstance(result, dict)
 
-    def test_has_expected_keys(self) -> None:
+    def test_indexed_acceleration_has_expected_keys(self) -> None:
         ia = _make_accel(gravity=1.0)
         result = ia.get_contribution_percentages()
         for key in ["gravity", "coriolis", "applied_torque", "constraint", "external"]:
@@ -105,7 +105,7 @@ class TestGetContributionPercentages:
 
 
 class TestAccelerationClosureError:
-    def test_is_exception(self) -> None:
+    def test_indexed_acceleration_is_exception(self) -> None:
         assert issubclass(AccelerationClosureError, Exception)
 
     def test_can_raise_and_catch(self) -> None:

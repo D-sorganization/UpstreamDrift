@@ -45,7 +45,7 @@ class TestGasComposition:
         # empty sum is 0, not in [0.99, 1.01]
         assert gc.validate() is False
 
-    def test_normalize_sums_to_one(self) -> None:
+    def test_pressure_drop_models_normalize_sums_to_one(self) -> None:
         gc = GasComposition({"H2": 30.0, "CO": 70.0})
         gc.normalize()
         total = sum(gc.components.values())
@@ -58,7 +58,7 @@ class TestGasComposition:
 
 
 class TestPipeFitting:
-    def test_construction(self) -> None:
+    def test_pressure_drop_models_construction(self) -> None:
         f = PipeFitting(fitting_type="elbow_90")
         assert f.fitting_type == "elbow_90"
 
@@ -80,7 +80,7 @@ class TestPipeFitting:
 
 
 class TestPressureDropInputs:
-    def test_valid_construction(self) -> None:
+    def test_pressure_drop_models_valid_construction(self) -> None:
         inputs = _make_inputs()
         assert inputs.pipe_diameter == pytest.approx(0.1)
 

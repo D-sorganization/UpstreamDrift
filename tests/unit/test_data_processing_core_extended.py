@@ -191,7 +191,7 @@ class TestExceptions:
 class TestColumnStats:
     """Tests for the ColumnStats dataclass."""
 
-    def test_instantiation(self) -> None:
+    def test_data_processing_core_extended_instantiation(self) -> None:
         """ColumnStats can be instantiated with all fields."""
         from src.shared.python.upstream_drift_tools.data_processing.core import (
             ColumnStats,
@@ -253,7 +253,7 @@ class TestProcessingResult:
 class TestFitResult:
     """Tests for FitResult dataclass."""
 
-    def test_instantiation(self) -> None:
+    def test_data_processing_core_extended_instantiation(self) -> None:
         """FitResult can be constructed with required fields."""
         from src.shared.python.upstream_drift_tools.data_processing.core import (
             FitResult,
@@ -628,7 +628,7 @@ class TestSmoothColumn:
         result = e.smooth_column("a", "median", kernel=5)
         assert result.solver_status == "success"
 
-    def test_unknown_method_raises(self) -> None:
+    def test_data_processing_core_extended_unknown_method_raises(self) -> None:
         """smooth_column with unknown method raises UnsupportedOperationError."""
         from src.shared.python.upstream_drift_tools.data_processing.core import (
             UnsupportedOperationError,

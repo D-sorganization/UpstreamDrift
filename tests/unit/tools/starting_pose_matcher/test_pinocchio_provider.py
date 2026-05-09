@@ -17,7 +17,7 @@ def test_import_without_pinocchio():
     assert hasattr(pinocchio, "MATCHER_TO_PINOCCHIO")
 
 
-def test_vocabulary_mapping():
+def test_pinocchio_provider_vocabulary_mapping():
     """Test that the vocabulary mapping is correct."""
     from src.tools.starting_pose_matcher.providers.pinocchio import (
         PINOCCHIO_TO_MATCHER_VOCAB,
@@ -65,7 +65,7 @@ def test_pinocchio_not_available_error():
         PinocchioSkeletonProvider(urdf_path=None)
 
 
-def test_create_provider_function():
+def test_pinocchio_provider_create_provider_function():
     """Test that create_provider function exists and has correct signature."""
     from src.tools.starting_pose_matcher.providers.pinocchio import create_provider
 

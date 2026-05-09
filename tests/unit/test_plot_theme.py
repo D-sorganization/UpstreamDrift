@@ -45,7 +45,7 @@ class TestPlotTheme:
 
 
 class TestPlotThemeManager:
-    def test_construction(self) -> None:
+    def test_plot_theme_construction(self) -> None:
         manager = PlotThemeManager()
         assert manager is not None
 

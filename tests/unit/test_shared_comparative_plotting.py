@@ -45,7 +45,7 @@ class TestComparativePlotter:
 
         return fig
 
-    def test_init(self, plotter, mock_analyzer) -> None:
+    def test_shared_comparative_plotting_init(self, plotter, mock_analyzer) -> None:
         """Test initialization."""
         assert plotter.analyzer == mock_analyzer
         assert "a" in plotter.colors

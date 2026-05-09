@@ -102,29 +102,37 @@ def test_reader_ingestion(mock_c3d_file, mock_ezc3d, tmp_path) -> None:
             {"frame_count": meta.frame_count, "rate": meta.frame_rate},
         )
 
-        assert meta.frame_count == 10
-        assert meta.frame_rate == 100.0
-        assert meta.marker_labels == ["Marker1", "Marker2"]
-        assert meta.analog_units == ["V"]
-        assert meta.events[0].label == "Heel Strike"
+        assert meta.frame_count == 10, "Assertion failed: meta.frame_count == 10"
+        assert meta.frame_rate == 100.0, "Assertion failed: meta.frame_rate == 100.0"
+        assert meta.marker_labels == ["Marker1", "Marker2"], (
+            "Assertion failed: meta.marker_labels == [Marker1, Marker2]"
+        )
+        assert meta.analog_units == ["V"], "Assertion failed: meta.analog_units == [V]"
+        assert meta.events[0].label == "Heel Strike", (
+            "Assertion failed: meta.events[0].label == Heel Strike"
+        )
 
         ctx.record_state("metadata_assertions_passed", True)
 
         df = reader.points_dataframe(include_time=True)
         ctx.record_state("dataframe", df.head(5).to_dict())
 
-        assert len(df) == 20  # 2 markers * 10 frames
-        assert "time" in df.columns
-        assert "residual" in df.columns
+        assert (
+            len(df) == 20
+        )  # 2 markers * 10 frames, "Assertion failed: len(df) == 20  # 2 markers * 10 frames"
+        assert "time" in df.columns, "Assertion failed: time in df.columns"
+        assert "residual" in df.columns, "Assertion failed: residual in df.columns"
 
         # Check values
         m1 = df[df["marker"] == "Marker1"]
-        assert m1.iloc[1]["x"] == 1.0  # Frame 1 is 1.0
+        assert (
+            m1.iloc[1]["x"] == 1.0
+        )  # Frame 1 is 1.0, "Assertion failed: m1.iloc[1][x] == 1.0  # Frame 1 is 1.0"
 
         ctx.record_state("test_complete", True)
 
 
-def test_unit_conversion(mock_c3d_file, mock_ezc3d) -> None:
+def test_c3d_workflow_unit_conversion(mock_c3d_file, mock_ezc3d) -> None:
     """Test unit scaling logic (mm -> m)."""
     reader = C3DDataReader(mock_c3d_file)
 
@@ -141,12 +149,12 @@ def test_export_workflow(mock_c3d_file, mock_ezc3d, tmp_path) -> None:
     out_csv = tmp_path / "output.csv"
 
     reader.export_points(out_csv, target_units="m")
-    assert out_csv.exists()
+    assert out_csv.exists(), "Assertion failed: out_csv.exists()"
 
     # Read back
     df = pd.read_csv(out_csv)
-    assert len(df) == 20
-    assert "x" in df.columns
+    assert len(df) == 20, "Assertion failed: len(df) == 20"
+    assert "x" in df.columns, "Assertion failed: x in df.columns"
 
 
 @pytest.fixture(scope="session")

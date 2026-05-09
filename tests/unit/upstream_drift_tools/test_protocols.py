@@ -20,7 +20,7 @@ from src.shared.python.upstream_drift_tools.protocols import (
 
 
 class TestCalculationResult:
-    def test_defaults(self) -> None:
+    def test_protocols_defaults(self) -> None:
         result = CalculationResult()
         assert result.values == {}
         assert result.units == {}

@@ -50,14 +50,14 @@ def client(app: FastAPI) -> TestClient:
     return TestClient(app)
 
 
-def test_list_sessions(client: TestClient) -> None:
+def test_routes_chat_ws_list_sessions(client: TestClient) -> None:
     """Test listing chat sessions."""
     response = client.get("/chat/sessions")
     assert response.status_code == 200
     assert len(response.json()) == 1
 
 
-def test_get_history(client: TestClient) -> None:
+def test_routes_chat_ws_get_history(client: TestClient) -> None:
     """Test getting chat history."""
     response = client.get("/chat/sessions/session_1/history")
     assert response.status_code == 200

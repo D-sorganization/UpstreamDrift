@@ -28,7 +28,7 @@ from src.shared.python.data_io.path_utils import (
 class TestGetRepoRoot:
     """Tests for get_repo_root function."""
 
-    def test_returns_path(self) -> None:
+    def test_path_utils_returns_path(self) -> None:
         """Test that get_repo_root returns a Path object."""
         result = get_repo_root()
         assert isinstance(result, Path)
@@ -47,7 +47,7 @@ class TestGetRepoRoot:
 class TestGetSrcRoot:
     """Tests for get_src_root function."""
 
-    def test_returns_path(self) -> None:
+    def test_path_utils_returns_path(self) -> None:
         """Test that get_src_root returns a Path object."""
         result = get_src_root()
         assert isinstance(result, Path)
@@ -62,7 +62,7 @@ class TestGetSrcRoot:
 class TestGetTestsRoot:
     """Tests for get_tests_root function."""
 
-    def test_returns_path(self) -> None:
+    def test_path_utils_returns_path(self) -> None:
         """Test that get_tests_root returns a Path object."""
         result = get_tests_root()
         assert isinstance(result, Path)
@@ -76,7 +76,7 @@ class TestGetTestsRoot:
 class TestGetDataDir:
     """Tests for get_data_dir function."""
 
-    def test_returns_path(self) -> None:
+    def test_path_utils_returns_path(self) -> None:
         """Test that get_data_dir returns a Path object."""
         result = get_data_dir()
         assert isinstance(result, Path)
@@ -90,7 +90,7 @@ class TestGetDataDir:
 class TestGetOutputDir:
     """Tests for get_output_dir function."""
 
-    def test_returns_path(self) -> None:
+    def test_path_utils_returns_path(self) -> None:
         """Test that get_output_dir returns a Path object."""
         result = get_output_dir()
         assert isinstance(result, Path)
@@ -120,7 +120,7 @@ class TestGetOutputDir:
 class TestGetDocsDir:
     """Tests for get_docs_dir function."""
 
-    def test_returns_path(self) -> None:
+    def test_path_utils_returns_path(self) -> None:
         """Test that get_docs_dir returns a Path object."""
         result = get_docs_dir()
         assert isinstance(result, Path)
@@ -134,7 +134,7 @@ class TestGetDocsDir:
 class TestGetEnginesDir:
     """Tests for get_engines_dir function."""
 
-    def test_returns_path(self) -> None:
+    def test_path_utils_returns_path(self) -> None:
         """Test that get_engines_dir returns a Path object."""
         result = get_engines_dir()
         assert isinstance(result, Path)
@@ -148,7 +148,7 @@ class TestGetEnginesDir:
 class TestGetSharedDir:
     """Tests for get_shared_dir function."""
 
-    def test_returns_path(self) -> None:
+    def test_path_utils_returns_path(self) -> None:
         """Test that get_shared_dir returns a Path object."""
         result = get_shared_dir()
         assert isinstance(result, Path)
@@ -265,7 +265,7 @@ class TestFindFileInParents:
 class TestGetSharedPythonRoot:
     """Tests for get_shared_python_root function."""
 
-    def test_returns_path(self) -> None:
+    def test_path_utils_returns_path(self) -> None:
         """Test that returns a Path object."""
         result = get_shared_python_root()
         assert isinstance(result, Path)

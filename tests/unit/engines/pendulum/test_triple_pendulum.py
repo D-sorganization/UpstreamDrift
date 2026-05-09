@@ -7,7 +7,7 @@ from double_pendulum_model.physics.triple_pendulum import (
 )
 
 
-def test_mass_matrix_positive_definite() -> None:
+def test_triple_pendulum_mass_matrix_positive_definite() -> None:
     dynamics = TriplePendulumDynamics()
     state = TriplePendulumState(
         theta1=0.1, theta2=-0.2, theta3=0.3, omega1=0.0, omega2=0.0, omega3=0.0

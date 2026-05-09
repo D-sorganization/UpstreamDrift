@@ -9,7 +9,7 @@ from src.shared.python.upstream_drift_tools.process_calculators.electrode_advanc
 
 
 class TestElectrodeAdvancementCalculator:
-    def test_construction(self) -> None:
+    def test_electrode_advancement_calculator_construction(self) -> None:
         calc = ElectrodeAdvancementCalculator()
         assert calc is not None
 

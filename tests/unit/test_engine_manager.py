@@ -85,7 +85,7 @@ class TestEngineManager:
                     manager.get_engine_status(engine_type) == EngineStatus.UNAVAILABLE
                 )
 
-    def test_switch_engine_unavailable(self) -> None:
+    def test_engine_manager_switch_engine_unavailable(self) -> None:
         """Test switching to unavailable engine."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -134,7 +134,7 @@ class TestEngineManager:
         status = manager.get_engine_status(EngineType.MUJOCO)
         assert status == EngineStatus.UNAVAILABLE
 
-    def test_get_engine_info(self) -> None:
+    def test_engine_manager_get_engine_info(self) -> None:
         """Test getting engine information."""
         manager = EngineManager()
 

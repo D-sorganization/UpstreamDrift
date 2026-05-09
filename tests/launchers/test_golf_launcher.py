@@ -380,7 +380,7 @@ def test_close_event(mock_kill, mock_question, qapp) -> None:
 @patch("src.launchers.golf_launcher.QApplication")
 @patch("src.launchers.golf_launcher.AsyncStartupWorker")
 @patch("src.launchers.golf_launcher.sys.exit")
-def test_main(mock_exit, mock_worker, mock_app) -> None:
+def test_golf_launcher_main(mock_exit, mock_worker, mock_app) -> None:
     with patch("src.launchers.golf_launcher.GolfSplashScreen"):
         main()
         mock_app.assert_called()

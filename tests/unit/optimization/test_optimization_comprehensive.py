@@ -107,7 +107,9 @@ class TestGolferModel:
             "flexibility-factor",
         ],
     )
-    def test_default_values(self, attr: str, expected: float) -> None:
+    def test_optimization_comprehensive_default_values(
+        self, attr: str, expected: float
+    ) -> None:
         g = GolferModel()
         assert getattr(g, attr) == expected
 
@@ -159,7 +161,7 @@ class TestGolferModel:
         g = GolferModel()
         assert getattr(g, larger) > getattr(g, smaller)
 
-    def test_custom_values(self) -> None:
+    def test_optimization_comprehensive_custom_values(self) -> None:
         g = GolferModel(height=1.90, mass=90.0, arm_length=0.70)
         assert g.height == 1.90
         assert g.mass == 90.0
@@ -195,7 +197,9 @@ class TestClubModel:
             "loft-angle",
         ],
     )
-    def test_default_values(self, attr: str, expected: float) -> None:
+    def test_optimization_comprehensive_default_values(
+        self, attr: str, expected: float
+    ) -> None:
         c = ClubModel()
         assert getattr(c, attr) == expected
 
@@ -270,7 +274,7 @@ class TestOptimizationConfig:
         assert cfg.tolerance > 0
         assert cfg.method == "SLSQP"
 
-    def test_custom_config(self) -> None:
+    def test_optimization_comprehensive_custom_config(self) -> None:
         cfg = OptimizationConfig(
             objectives={OptimizationObjective.ACCURACY: 2.0},
             n_nodes=100,
@@ -383,12 +387,14 @@ class TestSwingOptimizerInit:
     def optimizer(self) -> SwingOptimizer:
         return SwingOptimizer(GolferModel(), ClubModel())
 
-    def test_default_creation(self, optimizer: SwingOptimizer) -> None:
+    def test_optimization_comprehensive_default_creation(
+        self, optimizer: SwingOptimizer
+    ) -> None:
         assert optimizer.golfer.mass == 75.0
         assert optimizer.club.total_length == 1.15
         assert optimizer.config.n_nodes == 50
 
-    def test_custom_config(self) -> None:
+    def test_optimization_comprehensive_custom_config(self) -> None:
         cfg = OptimizationConfig(n_nodes=20, swing_duration=1.0)
         opt = SwingOptimizer(GolferModel(), ClubModel(), config=cfg)
         assert opt.config.n_nodes == 20

@@ -91,7 +91,7 @@ class TestHermiteSmoothstep:
 
 
 class TestPotentialEnergyChain:
-    def test_returns_float(self) -> None:
+    def test_physics_base_returns_float(self) -> None:
         lengths = np.array([1.0, 1.0])
         masses = np.array([1.0, 1.0])
         q = np.array([0.0, 0.0])  # hanging straight down

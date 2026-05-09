@@ -130,7 +130,7 @@ def test_empty_segment_definitions_raises() -> None:
         estimate_segment_lengths_from_markers({"PROX": np.zeros((1, 3))}, [])
 
 
-def test_wrong_shape_raises() -> None:
+def test_from_mocap_wrong_shape_raises() -> None:
     markers = {
         "PROX": np.zeros((10, 2)),  # not (T, 3)
         "DIST": np.zeros((10, 3)),
@@ -157,7 +157,7 @@ def test_zero_frames_raises() -> None:
         estimate_segment_lengths_from_markers(markers, _seg())
 
 
-def test_unknown_method_raises() -> None:
+def test_from_mocap_unknown_method_raises() -> None:
     with pytest.raises(ValueError, match="Unknown method"):
         estimate_segment_lengths_from_markers(
             _trajectory(),

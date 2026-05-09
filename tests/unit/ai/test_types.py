@@ -191,7 +191,7 @@ class TestConversationContext:
         ctx.clear_history()
         assert len(ctx.messages) == 0
 
-    def test_to_dict(self) -> None:
+    def test_types_to_dict(self) -> None:
         """Test context serialization."""
         ctx = ConversationContext()
         ctx.add_user_message("Hello")

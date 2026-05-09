@@ -59,7 +59,7 @@ def test_forward_returns_expected_shapes() -> None:
         assert t.shape == (4, DEFAULT_LATENT_DIM)
 
 
-def test_forward_rejects_wrong_dtype() -> None:
+def test_swing_inverse_cvae_model_forward_rejects_wrong_dtype() -> None:
     model = SwingInverseCVAE()
     bad = torch.zeros(2, 16, DEFAULT_TRAJECTORY_CHANNELS, dtype=torch.float64)
     with pytest.raises(TypeError, match="float32"):
@@ -73,7 +73,7 @@ def test_forward_rejects_wrong_channel_count() -> None:
         model(bad)
 
 
-def test_forward_rejects_wrong_rank() -> None:
+def test_swing_inverse_cvae_model_forward_rejects_wrong_rank() -> None:
     model = SwingInverseCVAE()
     bad = torch.zeros(16, DEFAULT_TRAJECTORY_CHANNELS, dtype=torch.float32)
     with pytest.raises(ValueError, match="3-D"):

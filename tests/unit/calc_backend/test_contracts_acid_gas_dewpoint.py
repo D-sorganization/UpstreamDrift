@@ -12,11 +12,11 @@ from src.shared.python.calc_backend.contracts.acid_gas_dewpoint import (
 
 
 class TestAcidGasDewpointRequest:
-    def test_valid_construction(self) -> None:
+    def test_contracts_acid_gas_dewpoint_valid_construction(self) -> None:
         req = AcidGasDewpointRequest(temperature_c=150.0, pressure_bar=1.0)
         assert isinstance(req, AcidGasDewpointRequest)
 
-    def test_temperature_stored(self) -> None:
+    def test_contracts_acid_gas_dewpoint_temperature_stored(self) -> None:
         req = AcidGasDewpointRequest(temperature_c=200.0, pressure_bar=2.0)
         assert req.temperature_c == pytest.approx(200.0)
 
@@ -31,7 +31,7 @@ class TestAcidGasDewpointRequest:
         req = AcidGasDewpointRequest(temperature_c=100.0, pressure_bar=1.0)
         assert req.method == "antoine"
 
-    def test_zero_pressure_rejected(self) -> None:
+    def test_contracts_acid_gas_dewpoint_zero_pressure_rejected(self) -> None:
         with pytest.raises(ValidationError):
             AcidGasDewpointRequest(temperature_c=100.0, pressure_bar=0.0)
 
@@ -101,7 +101,7 @@ class TestAcidGasDewpointResponse:
             calculation_method="antoine",
         )
 
-    def test_construction(self) -> None:
+    def test_contracts_acid_gas_dewpoint_construction(self) -> None:
         resp = self._make_response()
         assert isinstance(resp, AcidGasDewpointResponse)
 
@@ -113,7 +113,7 @@ class TestAcidGasDewpointResponse:
         resp = self._make_response()
         assert resp.condensation_risk == "Low"
 
-    def test_default_warnings_empty(self) -> None:
+    def test_contracts_acid_gas_dewpoint_default_warnings_empty(self) -> None:
         resp = self._make_response()
         assert resp.warnings == []
 

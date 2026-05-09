@@ -37,7 +37,7 @@ class TestEngineManagerCoverage:
             }
             return manager
 
-    def test_switch_engine_success(self, mock_manager) -> None:
+    def test_engine_manager_coverage_switch_engine_success(self, mock_manager) -> None:
         """Test successful engine switching."""
         # Mock status as AVAILABLE
         mock_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
@@ -60,7 +60,9 @@ class TestEngineManagerCoverage:
             assert mock_manager.current_engine == EngineType.MUJOCO
             assert mock_manager.engine_status[EngineType.MUJOCO] == EngineStatus.LOADED
 
-    def test_switch_engine_unavailable(self, mock_manager) -> None:
+    def test_engine_manager_coverage_switch_engine_unavailable(
+        self, mock_manager
+    ) -> None:
         """Test switching to an unavailable engine."""
         mock_manager.engine_status[EngineType.MUJOCO] = EngineStatus.UNAVAILABLE
 
@@ -74,7 +76,7 @@ class TestEngineManagerCoverage:
         result = mock_manager.switch_engine("INVALID_ENGINE")
         assert result is False
 
-    def test_switch_engine_failure(self, mock_manager) -> None:
+    def test_engine_manager_coverage_switch_engine_failure(self, mock_manager) -> None:
         """Test failure during engine loading."""
         mock_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
@@ -96,7 +98,9 @@ class TestEngineManagerCoverage:
             assert result is False
             assert mock_manager.engine_status[EngineType.MUJOCO] == EngineStatus.ERROR
 
-    def test_validate_engine_configuration(self, mock_manager) -> None:
+    def test_engine_manager_coverage_validate_engine_configuration(
+        self, mock_manager
+    ) -> None:
         """Test engine configuration validation."""
         # Mock path existence
         with patch.object(Path, "exists", return_value=True):
@@ -129,7 +133,7 @@ class TestEngineManagerCoverage:
         assert "MUJOCO" in report
         assert "✅" in report
 
-    def test_get_engine_info(self, mock_manager) -> None:
+    def test_engine_manager_coverage_get_engine_info(self, mock_manager) -> None:
         """Test getting engine info."""
         mock_manager.current_engine = EngineType.MUJOCO
         mock_manager.engine_status = {EngineType.MUJOCO: EngineStatus.LOADED}

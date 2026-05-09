@@ -180,7 +180,7 @@ class TestAssessLoggingContent:
 
 
 class TestGetDetailedFunctionMetrics:
-    def test_returns_list(self) -> None:
+    def test_assessment_analysis_returns_list(self) -> None:
         result = get_detailed_function_metrics(SIMPLE_PYTHON)
         assert isinstance(result, list)
 

@@ -249,7 +249,7 @@ class TestComputeManipulabilityEllipsoid:
         # SVD returns singular values in descending order
         assert np.all(radii[:-1] >= radii[1:])
 
-    def test_returns_tuple(self) -> None:
+    def test_manipulability_returns_tuple(self) -> None:
         """Test that function returns a tuple of two arrays."""
         J = np.random.rand(3, 3)
 

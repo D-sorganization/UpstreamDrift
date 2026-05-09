@@ -13,7 +13,7 @@ _SYNGAS = {"CO": 30.0, "H2": 25.0, "CO2": 10.0, "H2O": 5.0}
 
 
 class TestWGSReactorEngineConstruction:
-    def test_construction(self) -> None:
+    def test_wgs_reactor_calculator_construction(self) -> None:
         engine = WGSReactorEngine()
         assert engine is not None
 
@@ -43,7 +43,7 @@ class TestEquilibriumConstant:
 
 
 class TestEquilibriumComposition:
-    def test_returns_dict(self) -> None:
+    def test_wgs_reactor_calculator_returns_dict(self) -> None:
         engine = WGSReactorEngine()
         result = engine.calculate_equilibrium_composition(
             _SYNGAS, temperature=500.0, pressure=1.0

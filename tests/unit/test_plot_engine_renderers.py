@@ -8,7 +8,7 @@ from src.shared.python.plot_engine.specs import PlotSpec, SeriesData
 
 
 class TestMatplotlibRenderer:
-    def test_construction(self) -> None:
+    def test_plot_engine_renderers_construction(self) -> None:
         renderer = MatplotlibRenderer()
         assert renderer is not None
 
@@ -35,7 +35,7 @@ class TestMatplotlibRenderer:
 
 
 class TestPlotlyConverter:
-    def test_construction(self) -> None:
+    def test_plot_engine_renderers_construction(self) -> None:
         converter = PlotlyConverter()
         assert converter is not None
 

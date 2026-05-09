@@ -43,7 +43,7 @@ def gui(qapp, qtbot) -> OpenPoseGUI:
     return window
 
 
-def test_initial_state(gui) -> None:
+def test_openpose_gui_coverage_initial_state(gui) -> None:
     """Test OpenPoseGUI initial widget state."""
     assert gui.lbl_file.text() == "No file selected."
     assert not gui.btn_run.isEnabled()

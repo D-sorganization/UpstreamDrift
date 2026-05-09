@@ -77,7 +77,7 @@ class TestVariabilitySummary:
             for _ in range(n)
         ]
 
-    def test_returns_dict(self) -> None:
+    def test_perturbation_analysis_returns_dict(self) -> None:
         result = variability_summary(self._make_results())
         assert isinstance(result, dict)
 

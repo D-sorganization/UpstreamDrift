@@ -42,7 +42,7 @@ class TestThresholdConstants:
 
 
 class TestCheckJacobianConditioning:
-    def test_returns_float(self) -> None:
+    def test_manipulability_returns_float(self) -> None:
         kappa = check_jacobian_conditioning(_identity_jacobian(), "test_body")
         assert isinstance(kappa, float)
 
@@ -112,7 +112,7 @@ class TestComputeManipulabilityEllipsoid:
 
 
 class TestComputeManipulabilityIndex:
-    def test_returns_float(self) -> None:
+    def test_manipulability_returns_float(self) -> None:
         mu = compute_manipulability_index(_identity_jacobian(3, 3))
         assert isinstance(mu, float)
 

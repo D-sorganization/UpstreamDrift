@@ -57,7 +57,7 @@ def test_unit_radius_after_normalisation() -> None:
     np.testing.assert_allclose(radii.max(), 1.0, atol=1e-9)
 
 
-def test_scale_linearity() -> None:
+def test_custom_mesh_marker_scale_linearity() -> None:
     spec = _tetra_spec()
     m = CustomMeshMarker(spec)
     v1, _ = m.mesh(
@@ -69,11 +69,11 @@ def test_scale_linearity() -> None:
     np.testing.assert_allclose(v2, 2.0 * v1, atol=1e-12)
 
 
-def test_protocol_runtime_check() -> None:
+def test_custom_mesh_marker_protocol_runtime_check() -> None:
     assert isinstance(CustomMeshMarker(_tetra_spec()), MarkerShapeRenderer)
 
 
-def test_shape_id() -> None:
+def test_custom_mesh_marker_shape_id() -> None:
     assert CustomMeshMarker.shape_id == MarkerShape.CUSTOM_MESH.value
 
 
@@ -92,7 +92,7 @@ def test_zero_extent_mesh_rejected() -> None:
         CustomMeshMarker(degenerate)
 
 
-def test_mesh_rejects_non_style() -> None:
+def test_custom_mesh_marker_mesh_rejects_non_style() -> None:
     m = CustomMeshMarker(_tetra_spec())
     with pytest.raises(TypeError):
         m.mesh("style")  # type: ignore[arg-type]

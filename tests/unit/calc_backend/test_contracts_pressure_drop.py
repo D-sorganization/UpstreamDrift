@@ -24,7 +24,7 @@ def _valid_request(**kwargs) -> PressureDropRequest:
 
 
 class TestPressureDropRequest:
-    def test_valid_construction(self) -> None:
+    def test_contracts_pressure_drop_valid_construction(self) -> None:
         req = _valid_request()
         assert isinstance(req, PressureDropRequest)
 
@@ -52,11 +52,11 @@ class TestPressureDropRequest:
         with pytest.raises(ValidationError):
             _valid_request(flow_rate_kg_s=0.0)
 
-    def test_zero_temperature_rejected(self) -> None:
+    def test_contracts_pressure_drop_zero_temperature_rejected(self) -> None:
         with pytest.raises(ValidationError):
             _valid_request(temperature_k=0.0)
 
-    def test_zero_pressure_rejected(self) -> None:
+    def test_contracts_pressure_drop_zero_pressure_rejected(self) -> None:
         with pytest.raises(ValidationError):
             _valid_request(pressure_pa=0.0)
 
@@ -81,7 +81,7 @@ class TestPressureDropResponse:
             viscosity_pa_s=1.8e-5,
         )
 
-    def test_construction(self) -> None:
+    def test_contracts_pressure_drop_construction(self) -> None:
         resp = self._make_response()
         assert isinstance(resp, PressureDropResponse)
 

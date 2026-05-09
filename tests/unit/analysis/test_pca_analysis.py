@@ -68,7 +68,7 @@ class TestPCAAnalysisMixin:
         result = self.obj.compute_principal_component_analysis(data_type="velocity")
         assert result is not None
 
-    def test_all_values_finite(self) -> None:
+    def test_pca_analysis_all_values_finite(self) -> None:
         result = self.obj.compute_principal_component_analysis()
         assert np.all(np.isfinite(result.components))
         assert np.all(np.isfinite(result.explained_variance))

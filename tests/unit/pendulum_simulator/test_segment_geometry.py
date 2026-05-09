@@ -110,7 +110,7 @@ class TestProject3dTo2d:
         result = project_3d_to_2d(pt)
         np.testing.assert_allclose(result, [0.0, 0.0], atol=1e-10)
 
-    def test_returns_shape_2(self) -> None:
+    def test_segment_geometry_returns_shape_2(self) -> None:
         result = project_3d_to_2d(np.array([1.0, 2.0, 3.0]))
         assert result.shape == (2,)
 
@@ -136,7 +136,7 @@ class TestDepthSortSegments:
     def test_empty_list(self) -> None:
         assert depth_sort_segments([]) == []
 
-    def test_single_segment(self) -> None:
+    def test_segment_geometry_single_segment(self) -> None:
         segs = [{"depth": 5.0}]
         result = depth_sort_segments(segs)
         assert len(result) == 1
@@ -147,7 +147,7 @@ class TestAutoRadiusFromMass:
         r = auto_radius_from_mass(10.0, 1.0)
         assert r > 0.0
 
-    def test_returns_float(self) -> None:
+    def test_segment_geometry_returns_float(self) -> None:
         r = auto_radius_from_mass(5.0, 2.0)
         assert isinstance(r, float)
 

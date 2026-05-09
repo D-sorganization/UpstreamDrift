@@ -134,7 +134,7 @@ class TestSignalGenerator:
         t_shifted = t100 - t100[0]
         assert np.allclose(sig.values, t_shifted**2, atol=1e-8)
 
-    def test_step(self, t100: np.ndarray) -> None:
+    def test_signal_toolkit_core_step(self, t100: np.ndarray) -> None:
         sig = SignalGenerator.step(t100, step_time=0.5)
         # Before step_time=0.5: value=0; after: value=1
         assert sig.values[0] == 0.0

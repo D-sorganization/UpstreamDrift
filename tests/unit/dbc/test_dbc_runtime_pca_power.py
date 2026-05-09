@@ -140,7 +140,7 @@ class TestKinematicSequencePostconditions(unittest.TestCase):
         self.assertEqual(score, 0.0)
         self.assertEqual(len(sequence), 0)
 
-    def test_single_segment(self) -> None:
+    def test_dbc_runtime_pca_power_single_segment(self) -> None:
         obj = _make_pca_mixin()
         sequence, score = obj.analyze_kinematic_sequence({"hip": 0})
         self.assertGreaterEqual(score, 0.0)
@@ -196,7 +196,7 @@ class TestJointPowerMetricsPostconditions(unittest.TestCase):
         result = obj.compute_joint_power_metrics(0)
         self.assertLessEqual(result.peak_absorption, 0)
 
-    def test_durations_non_negative(self) -> None:
+    def test_dbc_runtime_pca_power_durations_non_negative(self) -> None:
         obj = _make_power_mixin()
         result = obj.compute_joint_power_metrics(0)
         self.assertGreaterEqual(result.generation_duration, 0)

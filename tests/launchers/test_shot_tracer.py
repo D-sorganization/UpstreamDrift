@@ -189,7 +189,7 @@ def test_update_results_table_no_header(tracer_widget) -> None:
 @patch("src.launchers.shot_tracer.QApplication")
 @patch("src.launchers.shot_tracer.MultiModelShotTracerWindow")
 @patch("src.launchers.shot_tracer.sys.exit")
-def test_main(mock_exit, mock_window, mock_app) -> None:
+def test_shot_tracer_main(mock_exit, mock_window, mock_app) -> None:
     from src.launchers.shot_tracer import main
 
     mock_app_instance = MagicMock()

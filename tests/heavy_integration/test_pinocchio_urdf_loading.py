@@ -104,7 +104,9 @@ class TestPinocchioInverseDynamics:
         assert tau.shape == (model.nv,)
         assert np.all(np.isfinite(tau))
 
-    def test_mass_matrix_positive_definite(self, golfer_model) -> None:
+    def test_pinocchio_urdf_loading_mass_matrix_positive_definite(
+        self, golfer_model
+    ) -> None:
         """Mass matrix at neutral config is symmetric positive-definite."""
         pin = _pin()
         model, data = golfer_model

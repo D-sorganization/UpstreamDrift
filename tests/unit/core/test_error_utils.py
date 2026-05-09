@@ -20,11 +20,11 @@ from src.shared.python.core.error_utils import (
 class TestGolfSuiteError:
     """Tests for GolfSuiteError base exception."""
 
-    def test_is_exception(self) -> None:
+    def test_error_utils_is_exception(self) -> None:
         err = GolfSuiteError("test")
         assert isinstance(err, Exception)
 
-    def test_message(self) -> None:
+    def test_error_utils_message(self) -> None:
         err = GolfSuiteError("something went wrong")
         assert "something went wrong" in str(err)
 
@@ -32,7 +32,7 @@ class TestGolfSuiteError:
 class TestEngineNotAvailableError:
     """Tests for EngineNotAvailableError."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_basic(self) -> None:
         err = EngineNotAvailableError("mujoco")
         assert "mujoco" in str(err).lower()
 
@@ -53,7 +53,7 @@ class TestEngineNotAvailableError:
 class TestConfigurationError:
     """Tests for ConfigurationError."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_basic(self) -> None:
         err = ConfigurationError("api_key")
         assert "api_key" in str(err)
 
@@ -70,7 +70,7 @@ class TestConfigurationError:
 class TestValidationError:
     """Tests for ValidationError."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_basic(self) -> None:
         err = ValidationError("age")
         assert "age" in str(err)
 
@@ -90,7 +90,7 @@ class TestValidationError:
 class TestModelError:
     """Tests for ModelError."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_basic(self) -> None:
         err = ModelError("golfer", "load")
         assert "golfer" in str(err)
         assert "load" in str(err)
@@ -109,7 +109,7 @@ class TestModelError:
 class TestSimulationError:
     """Tests for SimulationError."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_basic(self) -> None:
         err = SimulationError("diverged")
         assert "diverged" in str(err)
 
@@ -127,7 +127,7 @@ class TestSimulationError:
 class TestFileOperationError:
     """Tests for FileOperationError."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_basic(self) -> None:
         err = FileOperationError("/tmp/test.csv", "read")
         assert "read" in str(err)
 
@@ -143,7 +143,7 @@ class TestFileOperationError:
 class TestFormatImportError:
     """Tests for format_import_error factory."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_basic(self) -> None:
         msg = format_import_error("mujoco")
         assert "mujoco" in msg
 
@@ -159,7 +159,7 @@ class TestFormatImportError:
 class TestFormatFileError:
     """Tests for format_file_error factory."""
 
-    def test_basic(self) -> None:
+    def test_error_utils_basic(self) -> None:
         msg = format_file_error("test.csv", "read")
         assert "test.csv" in msg
         assert "read" in msg

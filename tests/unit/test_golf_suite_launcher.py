@@ -230,7 +230,7 @@ def launcher_app() -> Any:
 class TestGolfSuiteLauncher:
     """Test suite for GolfLauncher."""
 
-    def test_initialization(self, launcher_app) -> None:
+    def test_golf_suite_launcher_initialization(self, launcher_app) -> None:
         """Test UI initialization."""
         # Verify launcher instance was created with essential attributes
         assert launcher_app is not None, "Launcher should be instantiated"

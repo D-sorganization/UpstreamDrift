@@ -10,7 +10,7 @@ from src.shared.python.pose_estimation.interface import (
 
 
 class TestPoseEstimationResult:
-    def test_construction(self) -> None:
+    def test_pose_estimation_construction(self) -> None:
         result = PoseEstimationResult(
             joint_angles={"hip": 0.1, "knee": 0.2},
             confidence=0.95,
@@ -50,5 +50,5 @@ class TestPoseEstimatorProtocol:
 
         assert inspect.isabstract(PoseEstimator)
 
-    def test_importable(self) -> None:
+    def test_pose_estimation_importable(self) -> None:
         assert PoseEstimator is not None

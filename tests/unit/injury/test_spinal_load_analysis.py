@@ -33,7 +33,7 @@ def _make_inputs(n: int = 100) -> dict:
 
 
 class TestSpinalLoadAnalyzer:
-    def test_construction(self) -> None:
+    def test_spinal_load_analysis_construction(self) -> None:
         analyzer = _make_analyzer()
         assert analyzer.body_weight == pytest.approx(80.0)
 

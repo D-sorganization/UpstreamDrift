@@ -93,7 +93,9 @@ def test_mandatory_metrics_no_duplicates() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_engine_name(analyzer: PendulumPerturbationAnalyzer) -> None:
+def test_pendulum_perturbation_analyzer_engine_name(
+    analyzer: PendulumPerturbationAnalyzer,
+) -> None:
     assert analyzer.ENGINE_NAME == "pendulum_double"
 
 

@@ -23,7 +23,7 @@ def _valid_request(**kwargs) -> ScrubberRequest:
 
 
 class TestScrubberRequest:
-    def test_valid_construction(self) -> None:
+    def test_contracts_scrubber_valid_construction(self) -> None:
         req = _valid_request()
         assert isinstance(req, ScrubberRequest)
 
@@ -55,7 +55,7 @@ class TestScrubberRequest:
         with pytest.raises(ValidationError):
             _valid_request(liquid_flow_kg_hr=0.0)
 
-    def test_zero_temperature_rejected(self) -> None:
+    def test_contracts_scrubber_zero_temperature_rejected(self) -> None:
         with pytest.raises(ValidationError):
             _valid_request(gas_temperature_k=0.0)
 
@@ -84,7 +84,7 @@ class TestScrubberResponse:
             caustic_requirement={"NaOH": 10.0, "H2O": 90.0},
         )
 
-    def test_construction(self) -> None:
+    def test_contracts_scrubber_construction(self) -> None:
         resp = self._make_response()
         assert isinstance(resp, ScrubberResponse)
 

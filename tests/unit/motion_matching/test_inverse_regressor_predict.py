@@ -132,6 +132,8 @@ def test_predict_from_checkpoint_roundtrip(tmp_path: Path) -> None:
     assert out.shape == (1, DEFAULT_COEFFICIENT_DIM)
 
 
-def test_from_checkpoint_missing_file_raises(tmp_path: Path) -> None:
+def test_inverse_regressor_predict_from_checkpoint_missing_file_raises(
+    tmp_path: Path,
+) -> None:
     with pytest.raises(FileNotFoundError):
         load_inverse_regressor(tmp_path / "does_not_exist.pt")

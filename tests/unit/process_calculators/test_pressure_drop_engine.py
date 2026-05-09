@@ -77,7 +77,7 @@ class TestClassifyFlowRegime:
         regime = classify_flow_regime(100000.0)
         assert "turbulent" in regime.lower()
 
-    def test_returns_string(self) -> None:
+    def test_pressure_drop_engine_returns_string(self) -> None:
         regime = classify_flow_regime(2300.0)
         assert isinstance(regime, str)
 
@@ -102,7 +102,7 @@ class TestCalculateErosionalVelocity:
         v = calculate_erosional_velocity(density=1.2)
         assert v > 0.0
 
-    def test_returns_float(self) -> None:
+    def test_pressure_drop_engine_returns_float(self) -> None:
         v = calculate_erosional_velocity(density=10.0)
         assert isinstance(v, float)
 

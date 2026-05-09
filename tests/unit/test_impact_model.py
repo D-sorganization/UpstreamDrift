@@ -30,7 +30,7 @@ from src.shared.python.physics.impact_model import (
 class TestPreImpactState:
     """Tests for pre-impact state creation."""
 
-    def test_default_values(self) -> None:
+    def test_impact_model_default_values(self) -> None:
         """Should have sensible default values."""
         state = PreImpactState(
             clubhead_velocity=np.array([45.0, 0.0, 0.0]),  # 45 m/s ~100 mph
@@ -363,7 +363,7 @@ class TestImpactRecorder:
         assert event1.impact_id == 0
         assert event2.impact_id == 1
 
-    def test_export_to_dict(self, pre_state: PreImpactState) -> None:
+    def test_impact_model_export_to_dict(self, pre_state: PreImpactState) -> None:
         """Should export events as dictionary."""
         recorder = ImpactRecorder()
         model = RigidBodyImpactModel()
@@ -379,7 +379,7 @@ class TestImpactRecorder:
         assert "summary" in data
         assert data["num_impacts"] == 1
 
-    def test_get_summary(self, pre_state: PreImpactState) -> None:
+    def test_impact_model_get_summary(self, pre_state: PreImpactState) -> None:
         """Should compute summary statistics."""
         recorder = ImpactRecorder()
         model = RigidBodyImpactModel()
@@ -520,7 +520,7 @@ class TestImpactSolverAPI:
 
             assert post.ball_velocity[0] > 0
 
-    def test_reset_clears_state(self) -> None:
+    def test_impact_model_reset_clears_state(self) -> None:
         """Reset should clear recorder."""
         solver = ImpactSolverAPI()
 

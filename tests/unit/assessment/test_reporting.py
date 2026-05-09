@@ -22,7 +22,7 @@ class TestGenerateMarkdownReport:
         )
         assert p.exists()
 
-    def test_returns_path(self, tmp_path: Path) -> None:
+    def test_reporting_returns_path(self, tmp_path: Path) -> None:
         p = generate_markdown_report(
             category_id="CAT1",
             category_name="Test Category",
@@ -69,7 +69,7 @@ class TestGenerateMarkdownReport:
         assert "Do this" in content
         assert "Do that" in content
 
-    def test_creates_parent_dirs(self, tmp_path: Path) -> None:
+    def test_reporting_creates_parent_dirs(self, tmp_path: Path) -> None:
         nested = tmp_path / "a" / "b"
         generate_markdown_report(
             category_id="X1",

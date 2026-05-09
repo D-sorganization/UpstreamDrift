@@ -68,7 +68,7 @@ def test_estimator_exposes_citation() -> None:
 # --------------------------------------------------------------------------- #
 # Smoke: full subject build + mass closure within 1%.                         #
 # --------------------------------------------------------------------------- #
-def test_smoke_full_subject_returns_subject_anthropometrics() -> None:
+def test_dempster_smoke_full_subject_returns_subject_anthropometrics() -> None:
     """1.83 m / 82 kg subject produces a valid SubjectAnthropometrics."""
     est = DempsterEstimator()
     subject = est.estimate(
@@ -81,7 +81,7 @@ def test_smoke_full_subject_returns_subject_anthropometrics() -> None:
     assert len(subject.segments) >= 8
 
 
-def test_smoke_mass_closes_within_one_percent() -> None:
+def test_dempster_smoke_mass_closes_within_one_percent() -> None:
     """Sum of segment masses equals total subject mass within 1%."""
     est = DempsterEstimator()
     mass_kg = 82.0
@@ -94,7 +94,7 @@ def test_smoke_mass_closes_within_one_percent() -> None:
     assert abs(total - mass_kg) / mass_kg <= 0.01
 
 
-def test_estimator_protocol_isinstance_check() -> None:
+def test_dempster_estimator_protocol_isinstance_check() -> None:
     """The estimator must satisfy the runtime-checkable Estimator Protocol."""
     assert isinstance(DempsterEstimator(), Estimator)
 
@@ -126,7 +126,7 @@ def test_inertia_tensors_are_diagonal_and_valid() -> None:
 # Design by Contract.                                                         #
 # --------------------------------------------------------------------------- #
 @pytest.mark.parametrize("bad_height", [0.0, -1.0, float("nan"), float("inf")])
-def test_invalid_height_raises_value_error(bad_height: float) -> None:
+def test_dempster_invalid_height_raises_value_error(bad_height: float) -> None:
     """``height_m`` must be a positive finite number."""
     est = DempsterEstimator()
     with pytest.raises(ValueError, match="height_m"):
@@ -134,14 +134,14 @@ def test_invalid_height_raises_value_error(bad_height: float) -> None:
 
 
 @pytest.mark.parametrize("bad_mass", [0.0, -50.0, float("nan"), float("inf")])
-def test_invalid_mass_raises_value_error(bad_mass: float) -> None:
+def test_dempster_invalid_mass_raises_value_error(bad_mass: float) -> None:
     """``mass_kg`` must be a positive finite number."""
     est = DempsterEstimator()
     with pytest.raises(ValueError, match="mass_kg"):
         est.estimate(subject_id="x", height_m=1.80, mass_kg=bad_mass)
 
 
-def test_invalid_subject_id_raises_value_error() -> None:
+def test_dempster_invalid_subject_id_raises_value_error() -> None:
     """``subject_id`` must be a non-empty string."""
     est = DempsterEstimator()
     with pytest.raises(ValueError, match="subject_id"):

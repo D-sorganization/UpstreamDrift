@@ -45,7 +45,7 @@ class TestIsEngineAvailable:
         # yaml alias
         assert is_engine_available("pyyaml") == is_engine_available("yaml")
 
-    def test_case_insensitive(self) -> None:
+    def test_engine_availability_extended_case_insensitive(self) -> None:
         """is_engine_available should handle any-case input."""
         from src.shared.python.engine_core.engine_availability import (
             is_engine_available,
@@ -56,7 +56,7 @@ class TestIsEngineAvailable:
         result_upper = is_engine_available("NUMPY")
         assert result_lower == result_upper
 
-    def test_returns_bool(self) -> None:
+    def test_engine_availability_extended_returns_bool(self) -> None:
         """is_engine_available should always return a plain bool."""
         from src.shared.python.engine_core.engine_availability import (
             is_engine_available,

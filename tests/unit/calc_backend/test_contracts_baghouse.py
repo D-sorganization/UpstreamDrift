@@ -22,7 +22,7 @@ def _valid_request(**kwargs) -> BaghouseRequest:
 
 
 class TestBaghouseRequest:
-    def test_valid_construction(self) -> None:
+    def test_contracts_baghouse_valid_construction(self) -> None:
         req = _valid_request()
         assert isinstance(req, BaghouseRequest)
 
@@ -54,11 +54,11 @@ class TestBaghouseRequest:
         with pytest.raises(ValidationError):
             _valid_request(gas_flow_kg_s=0.0)
 
-    def test_zero_temperature_rejected(self) -> None:
+    def test_contracts_baghouse_zero_temperature_rejected(self) -> None:
         with pytest.raises(ValidationError):
             _valid_request(inlet_temp_k=0.0)
 
-    def test_zero_pressure_rejected(self) -> None:
+    def test_contracts_baghouse_zero_pressure_rejected(self) -> None:
         with pytest.raises(ValidationError):
             _valid_request(pressure_pa=0.0)
 
@@ -95,7 +95,7 @@ class TestBaghouseResponse:
             removal_efficiency={"carbon": 0.99, "ash": 0.999},
         )
 
-    def test_construction(self) -> None:
+    def test_contracts_baghouse_construction(self) -> None:
         resp = self._make_response()
         assert isinstance(resp, BaghouseResponse)
 

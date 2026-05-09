@@ -46,7 +46,7 @@ class _BadReturnEngine:
 class TestEvaluateOutput:
     _BASE = {"flow": 100.0, "temperature": 400.0}
 
-    def test_returns_tuple_of_three(self) -> None:
+    def test_analysis_utils_returns_tuple_of_three(self) -> None:
         engine = _FixedEngine({"efficiency": 0.85})
         result = evaluate_output(engine, self._BASE, 0.0, "efficiency")
         assert isinstance(result, tuple)

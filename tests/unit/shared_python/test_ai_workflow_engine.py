@@ -81,7 +81,7 @@ class TestValidationResult:
 
 
 class TestWorkflowStep:
-    def test_defaults(self) -> None:
+    def test_ai_workflow_engine_defaults(self) -> None:
         s = WorkflowStep(id="s1", name="Step 1", description="Desc")
         assert s.tool_name is None
         assert s.on_failure == RecoveryStrategy.ASK_USER
@@ -95,7 +95,7 @@ class TestWorkflowStep:
 
 
 class TestWorkflow:
-    def test_add_step(self) -> None:
+    def test_ai_workflow_engine_add_step(self) -> None:
         wf = Workflow(id="wf", name="WF", description="D")
         wf.add_step(WorkflowStep(id="s1", name="S", description="D"))
         assert len(wf.steps) == 1

@@ -17,7 +17,7 @@ from src.shared.python.body_part_viz.theme import ShapeTheme
 
 
 @pytest.mark.unit
-def test_defaults() -> None:
+def test_theme_defaults() -> None:
     t = ShapeTheme()
     assert t.color == "#1f77b4"
     assert t.opacity == 0.8

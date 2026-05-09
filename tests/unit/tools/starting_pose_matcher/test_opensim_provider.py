@@ -17,7 +17,7 @@ def test_import_without_opensim():
     assert hasattr(opensim, "MATCHER_TO_OPENSIM")
 
 
-def test_vocabulary_mapping():
+def test_opensim_provider_vocabulary_mapping():
     """Test that the vocabulary mapping is correct."""
     from src.tools.starting_pose_matcher.providers.opensim import (
         OPENSIM_TO_MATCHER_VOCAB,
@@ -65,7 +65,7 @@ def test_opensim_not_available_error():
         OpenSimSkeletonProvider(model_path=None, model_xml=None)
 
 
-def test_create_provider_function():
+def test_opensim_provider_create_provider_function():
     """Test that create_provider function exists and has correct signature."""
     from src.tools.starting_pose_matcher.providers.opensim import create_provider
 

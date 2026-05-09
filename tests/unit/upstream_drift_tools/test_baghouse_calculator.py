@@ -63,7 +63,7 @@ class TestBaghouseCalculator:
         with pytest.raises(AssertionError):
             self._CALC.calculate(**kwargs)
 
-    def test_negative_temperature_raises(self) -> None:
+    def test_baghouse_calculator_negative_temperature_raises(self) -> None:
         kwargs = {**_BASE_KWARGS, "inlet_temp_k": -100.0}
         with pytest.raises(AssertionError):
             self._CALC.calculate(**kwargs)

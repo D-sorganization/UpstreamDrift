@@ -31,7 +31,7 @@ class _StubRecorder:
 
 
 class TestDataManagerConstruction:
-    def test_valid_construction(self) -> None:
+    def test_transforms_valid_construction(self) -> None:
         dm = DataManager(_StubRecorder())
         assert dm is not None
 
@@ -62,7 +62,7 @@ class TestDataManagerGetSeries:
     def setup_method(self) -> None:
         self.dm = DataManager(_StubRecorder(), enable_cache=False)
 
-    def test_returns_tuple(self) -> None:
+    def test_transforms_returns_tuple(self) -> None:
         result = self.dm.get_series("joint_positions")
         assert isinstance(result, tuple)
         assert len(result) == 2
@@ -75,7 +75,7 @@ class TestDataManagerGetSeries:
         _, values = self.dm.get_series("joint_velocities")
         assert isinstance(values, np.ndarray)
 
-    def test_missing_field_raises(self) -> None:
+    def test_transforms_missing_field_raises(self) -> None:
         with pytest.raises((KeyError, Exception)):
             self.dm.get_series("nonexistent_field")
 

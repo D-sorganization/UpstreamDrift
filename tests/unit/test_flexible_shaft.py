@@ -214,7 +214,9 @@ class TestModalShaftModel:
         np.testing.assert_allclose(state.deflections, 0.0)
         np.testing.assert_allclose(state.velocities, 0.0)
 
-    def test_step_advances_time(self, modal_model: ModalShaftModel) -> None:
+    def test_flexible_shaft_step_advances_time(
+        self, modal_model: ModalShaftModel
+    ) -> None:
         """Step should advance simulation time."""
         initial_time = modal_model.time
 
@@ -323,7 +325,7 @@ class TestFiniteElementShaftModel:
         eigenvalues = np.linalg.eigvalsh(fe_model.K)
         assert np.all(eigenvalues > 0)
 
-    def test_mass_matrix_positive_definite(
+    def test_flexible_shaft_mass_matrix_positive_definite(
         self, fe_model: FiniteElementShaftModel
     ) -> None:
         """Mass matrix should be positive definite."""
@@ -349,7 +351,9 @@ class TestFiniteElementShaftModel:
         assert state.deflections[0] == pytest.approx(0.0, abs=1e-15)
         assert state.rotations[0] == pytest.approx(0.0, abs=1e-15)
 
-    def test_step_advances_time(self, fe_model: FiniteElementShaftModel) -> None:
+    def test_flexible_shaft_step_advances_time(
+        self, fe_model: FiniteElementShaftModel
+    ) -> None:
         """Step should advance simulation time."""
         initial_time = fe_model.time
 

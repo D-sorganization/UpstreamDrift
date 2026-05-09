@@ -82,7 +82,7 @@ class TestURDFLinkGeometryContract:
         assert link.geometry_type == "mesh"
         assert link.mesh_path == "meshes/hand.stl"
 
-    def test_defaults(self) -> None:
+    def test_phase3_api_defaults(self) -> None:
         """Defaults are applied when not specified."""
         link = URDFLinkGeometry(
             link_name="test",
@@ -127,7 +127,7 @@ class TestURDFJointDescriptorContract:
         assert joint.joint_type == "fixed"
         assert joint.lower_limit is None
 
-    def test_defaults(self) -> None:
+    def test_phase3_api_defaults(self) -> None:
         """Defaults are applied."""
         joint = URDFJointDescriptor(
             name="test",
@@ -238,7 +238,7 @@ class TestDataExportRequestContract:
         with pytest.raises(ValidationError):
             DataExportRequest(format="hdf5")
 
-    def test_case_insensitive(self) -> None:
+    def test_phase3_api_case_insensitive(self) -> None:
         """Format is normalized to lowercase."""
         req = DataExportRequest(format="CSV")
         assert req.format == "csv"
@@ -248,7 +248,7 @@ class TestDataExportRequestContract:
         req = DataExportRequest(format="csv", time_range=[0.0, 1.5])
         assert req.time_range == [0.0, 1.5]
 
-    def test_defaults(self) -> None:
+    def test_phase3_api_defaults(self) -> None:
         """Default values are applied."""
         req = DataExportRequest(format="csv")
         assert req.include_metrics is True
@@ -369,7 +369,7 @@ class TestBodyPositionUpdateRequestContract:
 class TestMeasurementRequestContract:
     """Validate MeasurementRequest model."""
 
-    def test_valid_request(self) -> None:
+    def test_phase3_api_valid_request(self) -> None:
         """Valid measurement request."""
         req = MeasurementRequest(body_a="torso", body_b="head")
         assert req.body_a == "torso"
@@ -422,7 +422,7 @@ class TestJointAngleDisplayContract:
         assert display.joint_name == "shoulder"
         assert display.angle_deg == 90.0
 
-    def test_defaults(self) -> None:
+    def test_phase3_api_defaults(self) -> None:
         """Defaults for velocity and torque."""
         display = JointAngleDisplay(
             joint_name="elbow",

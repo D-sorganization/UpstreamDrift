@@ -11,7 +11,7 @@ from src.shared.python.calc_backend.contracts.flow_rate import (
 
 
 class TestFlowRateConvertRequest:
-    def test_basic_construction(self) -> None:
+    def test_contracts_flow_rate_basic_construction(self) -> None:
         req = FlowRateConvertRequest(value=1.0, from_unit="kg/s", to_unit="lb/h")
         assert req.value == pytest.approx(1.0)
         assert req.from_unit == "kg/s"
@@ -56,7 +56,7 @@ class TestFlowRateConvertRequest:
 
 
 class TestFlowRateConvertResponse:
-    def test_basic_construction(self) -> None:
+    def test_contracts_flow_rate_basic_construction(self) -> None:
         resp = FlowRateConvertResponse(
             result=2.2046, from_unit="kg/s", to_unit="lb/s", category="mass"
         )

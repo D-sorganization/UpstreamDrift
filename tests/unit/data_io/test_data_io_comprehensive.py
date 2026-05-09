@@ -68,13 +68,13 @@ class TestConvertUnits:
             "ft-to-m",
         ],
     )
-    def test_unit_conversion(
+    def test_data_io_comprehensive_unit_conversion(
         self, value: float, from_u: str, to_u: str, expected: float
     ) -> None:
         """Unit conversions should produce the expected result."""
         assert convert_units(value, from_u, to_u) == pytest.approx(expected, rel=0.01)
 
-    def test_roundtrip(self) -> None:
+    def test_data_io_comprehensive_roundtrip(self) -> None:
         """Converting A→B→A should recover original value."""
         original = 100.0
         intermediate = convert_units(original, "m/s", "mph")
@@ -142,7 +142,7 @@ class TestNormalizeZScore:
 class TestStandardizeJointAngles:
     """Tests for joint angle standardization."""
 
-    def test_basic(self) -> None:
+    def test_data_io_comprehensive_basic(self) -> None:
         angles = np.random.default_rng(42).random((10, 3))
         df = standardize_joint_angles(angles)
         assert isinstance(df, pd.DataFrame)

@@ -61,7 +61,9 @@ class TestTurfProperties:
         """Create fast bent grass green."""
         return TurfProperties.create_preset("tournament_fast")
 
-    def test_default_initialization(self, default_turf: TurfProperties) -> None:
+    def test_turf_properties_default_initialization(
+        self, default_turf: TurfProperties
+    ) -> None:
         """Default turf should have sensible values."""
         assert default_turf.stimp_rating > 0
         assert default_turf.stimp_rating <= 15  # Reasonable upper bound

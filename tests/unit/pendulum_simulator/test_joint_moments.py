@@ -34,12 +34,12 @@ class TestCross2d:
         f = np.array([0.0, 0.0])
         assert cross_2d(r, f) == pytest.approx(0.0)
 
-    def test_returns_float(self) -> None:
+    def test_joint_moments_returns_float(self) -> None:
         r = np.array([1.0, 0.0])
         f = np.array([0.0, 1.0])
         assert isinstance(cross_2d(r, f), float)
 
-    def test_wrong_shape_raises(self) -> None:
+    def test_joint_moments_wrong_shape_raises(self) -> None:
         r = np.array([1.0, 0.0, 0.0])  # shape (3,)
         f = np.array([0.0, 1.0, 0.0])
         with pytest.raises(AssertionError):
@@ -104,7 +104,7 @@ class TestDoublePendulumMoments:
             "wrist": np.array([0.5, 0.0]),
         }
 
-    def test_returns_dict(self) -> None:
+    def test_joint_moments_returns_dict(self) -> None:
         result = double_pendulum_moments(
             self._make_positions(), self._make_forces(), (10.0, 5.0), None
         )
@@ -147,7 +147,7 @@ class TestTriplePendulumMoments:
             "wrist": np.array([0.2, 0.0]),
         }
 
-    def test_returns_dict(self) -> None:
+    def test_joint_moments_returns_dict(self) -> None:
         result = triple_pendulum_moments(
             self._make_positions(), self._make_forces(), (5.0, 3.0, 2.0), None
         )

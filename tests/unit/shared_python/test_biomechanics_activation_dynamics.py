@@ -8,13 +8,13 @@ from src.shared.python.biomechanics.activation_dynamics import ActivationDynamic
 
 
 class TestActivationDynamicsInit:
-    def test_default_params(self) -> None:
+    def test_biomechanics_activation_dynamics_default_params(self) -> None:
         d = ActivationDynamics()
         assert d.tau_act == pytest.approx(0.010)
         assert d.tau_deact == pytest.approx(0.040)
         assert d.min_activation == pytest.approx(0.001)
 
-    def test_custom_params(self) -> None:
+    def test_biomechanics_activation_dynamics_custom_params(self) -> None:
         d = ActivationDynamics(tau_act=0.005, tau_deact=0.060, min_activation=0.01)
         assert d.tau_act == pytest.approx(0.005)
         assert d.tau_deact == pytest.approx(0.060)
@@ -123,15 +123,21 @@ class TestUpdate:
             a = dyn.update(u=1.0, a=a, dt=0.001)
         assert a <= 1.0
 
-    def test_zero_dt_raises(self, dyn: ActivationDynamics) -> None:
+    def test_biomechanics_activation_dynamics_zero_dt_raises(
+        self, dyn: ActivationDynamics
+    ) -> None:
         with pytest.raises((ValueError, AssertionError, Exception)):
             dyn.update(u=0.5, a=0.5, dt=0.0)
 
-    def test_negative_dt_raises(self, dyn: ActivationDynamics) -> None:
+    def test_biomechanics_activation_dynamics_negative_dt_raises(
+        self, dyn: ActivationDynamics
+    ) -> None:
         with pytest.raises((ValueError, AssertionError, Exception)):
             dyn.update(u=0.5, a=0.5, dt=-0.001)
 
-    def test_returns_float(self, dyn: ActivationDynamics) -> None:
+    def test_biomechanics_activation_dynamics_returns_float(
+        self, dyn: ActivationDynamics
+    ) -> None:
         result = dyn.update(u=0.5, a=0.5, dt=0.01)
         assert isinstance(result, float)
 

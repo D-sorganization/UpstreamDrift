@@ -18,13 +18,13 @@ from humanoid_character_builder.mesh.inertia_calculator import InertiaMode
 class TestURDFGeneratorConfig:
     """Tests for URDFGeneratorConfig."""
 
-    def test_default_values(self) -> None:
+    def test_urdf_generator_default_values(self) -> None:
         config = URDFGeneratorConfig()
         assert config.inertia_mode == InertiaMode.PRIMITIVE_APPROXIMATION
         assert config.generate_collision is True
         assert config.expand_composite_joints is True
 
-    def test_custom_values(self) -> None:
+    def test_urdf_generator_custom_values(self) -> None:
         config = URDFGeneratorConfig(
             inertia_mode=InertiaMode.MESH_UNIFORM_DENSITY,
             default_density=1100.0,

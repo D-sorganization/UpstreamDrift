@@ -40,7 +40,7 @@ class TestCalculateMixtureCp:
         cp = calculate_mixture_cp(_SYNGAS, temperature=300.0)
         assert cp > 0.0
 
-    def test_returns_float(self) -> None:
+    def test_gas_properties_returns_float(self) -> None:
         cp = calculate_mixture_cp(_SYNGAS, temperature=500.0)
         assert isinstance(cp, float)
 
@@ -60,7 +60,7 @@ class TestCalculateSpeedOfSound:
         c = calculate_speed_of_sound(_SYNGAS, temperature=300.0)
         assert c > 0.0
 
-    def test_returns_float(self) -> None:
+    def test_gas_properties_returns_float(self) -> None:
         c = calculate_speed_of_sound(_SYNGAS, temperature=300.0)
         assert isinstance(c, float)
 
@@ -75,7 +75,7 @@ class TestCalculateMixtureMolecularWeight:
         mw = calculate_mixture_molecular_weight(_SYNGAS)
         assert mw > 0.0
 
-    def test_returns_float(self) -> None:
+    def test_gas_properties_returns_float(self) -> None:
         mw = calculate_mixture_molecular_weight(_SYNGAS)
         assert isinstance(mw, float)
 
@@ -89,7 +89,7 @@ class TestCalculateIdealGasDensity:
         rho = calculate_ideal_gas_density(28.0, 300.0, 101325.0)
         assert rho > 0.0
 
-    def test_higher_pressure_higher_density(self) -> None:
+    def test_gas_properties_higher_pressure_higher_density(self) -> None:
         rho_low = calculate_ideal_gas_density(28.0, 300.0, 101325.0)
         rho_high = calculate_ideal_gas_density(28.0, 300.0, 200000.0)
         assert rho_high > rho_low
@@ -116,7 +116,7 @@ class TestCalculateRealGasDensity:
         rho = calculate_real_gas_density(28.0, 300.0, 101325.0, 1.0)
         assert rho > 0.0
 
-    def test_returns_float(self) -> None:
+    def test_gas_properties_returns_float(self) -> None:
         rho = calculate_real_gas_density(28.0, 300.0, 101325.0, 1.0)
         assert isinstance(rho, float)
 

@@ -11,7 +11,7 @@ from src.shared.python.data_io.dataset_generator import (
 
 
 class TestParameterRange:
-    def test_construction(self) -> None:
+    def test_dataset_generator_construction(self) -> None:
         pr = ParameterRange(name="mass", min_val=0.5, max_val=2.0)
         assert pr.name == "mass"
         assert pr.min_val == pytest.approx(0.5)
@@ -21,7 +21,7 @@ class TestParameterRange:
         pr = ParameterRange(name="x", min_val=0.0, max_val=1.0)
         assert pr.distribution == "uniform"
 
-    def test_default_num_points(self) -> None:
+    def test_dataset_generator_default_num_points(self) -> None:
         pr = ParameterRange(name="x", min_val=0.0, max_val=1.0)
         assert pr.num_points == 10
 
@@ -78,7 +78,7 @@ class TestParameterRange:
 
 
 class TestControlProfile:
-    def test_construction(self) -> None:
+    def test_dataset_generator_construction(self) -> None:
         cp = ControlProfile(name="zero_torque")
         assert cp.name == "zero_torque"
 
@@ -90,11 +90,11 @@ class TestControlProfile:
         cp = ControlProfile(name="sin_profile", profile_type="sinusoidal")
         assert cp.profile_type == "sinusoidal"
 
-    def test_default_parameters_empty(self) -> None:
+    def test_dataset_generator_default_parameters_empty(self) -> None:
         cp = ControlProfile(name="my_profile")
         assert cp.parameters == {}
 
-    def test_custom_parameters(self) -> None:
+    def test_dataset_generator_custom_parameters(self) -> None:
         cp = ControlProfile(
             name="step_profile",
             profile_type="step",

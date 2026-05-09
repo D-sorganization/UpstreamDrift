@@ -31,13 +31,13 @@ class TestNormaliseHexColor:
         result = normalise_hex_color("#FF0000")
         assert result == result.lower() or len(result) == 7
 
-    def test_returns_string(self) -> None:
+    def test_theme_manager_returns_string(self) -> None:
         result = normalise_hex_color("#aabbcc")
         assert isinstance(result, str)
 
 
 class TestGenerateStylesheet:
-    def test_returns_string(self) -> None:
+    def test_theme_manager_returns_string(self) -> None:
         ss = generate_stylesheet(BUILTIN_THEMES["Dark"])
         assert isinstance(ss, str)
 
@@ -55,7 +55,7 @@ class TestGetThemeManager:
         tm = get_theme_manager()
         assert isinstance(tm, ThemeManager)
 
-    def test_singleton(self) -> None:
+    def test_theme_manager_singleton(self) -> None:
         tm1 = get_theme_manager()
         tm2 = get_theme_manager()
         assert tm1 is tm2

@@ -60,7 +60,7 @@ def _make() -> _Concrete:
 
 
 class TestGenerateComprehensiveReport:
-    def test_returns_dict(self) -> None:
+    def test_reporting_returns_dict(self) -> None:
         result = _make().generate_comprehensive_report()
         assert isinstance(result, dict)
 

@@ -50,12 +50,12 @@ class TestVector3:
         assert arr.shape == (3,)
         np.testing.assert_array_equal(arr, [1.0, 2.0, 3.0])
 
-    def test_magnitude(self) -> None:
+    def test_data_models_magnitude(self) -> None:
         """Test Vector3 magnitude calculation."""
         v = Vector3(x=3.0, y=4.0, z=0.0)
         assert v.magnitude == pytest.approx(5.0)
 
-    def test_normalized(self) -> None:
+    def test_data_models_normalized(self) -> None:
         """Test Vector3 normalization."""
         v = Vector3(x=3.0, y=4.0, z=0.0)
         n = v.normalized()
@@ -63,13 +63,13 @@ class TestVector3:
         assert n.x == pytest.approx(0.6)
         assert n.y == pytest.approx(0.8)
 
-    def test_to_dict(self) -> None:
+    def test_data_models_to_dict(self) -> None:
         """Test Vector3 serialization to dict."""
         v = Vector3(x=1.0, y=2.0, z=3.0)
         d = v.to_dict()
         assert d == {"x": 1.0, "y": 2.0, "z": 3.0}
 
-    def test_from_dict(self) -> None:
+    def test_data_models_from_dict(self) -> None:
         """Test Vector3 deserialization from dict."""
         d = {"x": 1.0, "y": 2.0, "z": 3.0}
         v = Vector3.from_dict(d)
@@ -102,13 +102,13 @@ class TestVector3:
         assert result.y == 4.0
         assert result.z == 6.0
 
-    def test_dot_product(self) -> None:
+    def test_data_models_dot_product(self) -> None:
         """Test Vector3 dot product."""
         v1 = Vector3(x=1.0, y=2.0, z=3.0)
         v2 = Vector3(x=4.0, y=5.0, z=6.0)
         assert v1.dot(v2) == pytest.approx(32.0)
 
-    def test_cross_product(self) -> None:
+    def test_data_models_cross_product(self) -> None:
         """Test Vector3 cross product."""
         v1 = Vector3(x=1.0, y=0.0, z=0.0)
         v2 = Vector3(x=0.0, y=1.0, z=0.0)
@@ -164,12 +164,12 @@ class TestQuaternion:
         assert p == pytest.approx(pitch, abs=1e-6)
         assert y == pytest.approx(yaw, abs=1e-6)
 
-    def test_magnitude(self) -> None:
+    def test_data_models_magnitude(self) -> None:
         """Test Quaternion magnitude calculation."""
         q = Quaternion.identity()
         assert q.magnitude == pytest.approx(1.0)
 
-    def test_normalized(self) -> None:
+    def test_data_models_normalized(self) -> None:
         """Test Quaternion normalization."""
         q = Quaternion(w=2.0, x=0.0, y=0.0, z=0.0)
         n = q.normalized()
@@ -185,7 +185,7 @@ class TestQuaternion:
         assert c.y == -3.0
         assert c.z == -4.0
 
-    def test_to_dict(self) -> None:
+    def test_data_models_to_dict(self) -> None:
         """Test Quaternion serialization to dict."""
         q = Quaternion(w=1.0, x=0.0, y=0.0, z=0.0)
         d = q.to_dict()

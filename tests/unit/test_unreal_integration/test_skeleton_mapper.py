@@ -173,7 +173,7 @@ class TestPoseTransform:
         )
         assert transform.position[1] == 1.0
 
-    def test_identity_transform(self) -> None:
+    def test_skeleton_mapper_identity_transform(self) -> None:
         """Test identity transform creation."""
         transform = PoseTransform.identity()
         assert np.allclose(transform.position, [0, 0, 0])

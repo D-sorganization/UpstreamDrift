@@ -18,7 +18,7 @@ from src.shared.python.core import physics_constants as pc
     ],
     ids=["PI", "E", "PI_HALF", "PI_QUARTER"],
 )
-def test_mathematical_constants(constant, expected) -> None:
+def test_physics_constants_coverage_mathematical_constants(constant, expected) -> None:
     """Verify basic mathematical constants."""
     assert constant == expected
 

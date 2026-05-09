@@ -116,7 +116,7 @@ class TestCompositeAliases:
 class TestIsEngineAvailable:
     """is_engine_available returns a plain bool."""
 
-    def test_returns_bool(self) -> None:
+    def test_engine_availability_returns_bool(self) -> None:
         """Return type is bool, not EngineStatus."""
         result = is_engine_available("numpy")
         assert isinstance(result, bool)

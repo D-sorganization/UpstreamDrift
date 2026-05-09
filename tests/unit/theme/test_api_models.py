@@ -32,11 +32,11 @@ _COLORS = {
 
 
 class TestThemeColors:
-    def test_valid_construction(self) -> None:
+    def test_api_models_valid_construction(self) -> None:
         tc = ThemeColors(**_COLORS)
         assert tc.bg == _COLORS["bg"]
 
-    def test_missing_field_raises(self) -> None:
+    def test_api_models_missing_field_raises(self) -> None:
         incomplete = {k: v for k, v in _COLORS.items() if k != "bg"}
         with pytest.raises((ValueError, TypeError, AssertionError)):
             ThemeColors(**incomplete)
@@ -73,7 +73,7 @@ class TestThemeListResponse:
 
 
 class TestActiveThemeResponse:
-    def test_construction(self) -> None:
+    def test_api_models_construction(self) -> None:
         resp = ActiveThemeResponse(name="Dark", is_builtin=True, colors=_COLORS)
         assert resp.name == "Dark"
         assert resp.is_builtin is True
@@ -84,7 +84,7 @@ class TestActiveThemeResponse:
 
 
 class TestSetActiveThemeRequest:
-    def test_name_stored(self) -> None:
+    def test_api_models_name_stored(self) -> None:
         req = SetActiveThemeRequest(name="Monokai")
         assert req.name == "Monokai"
 

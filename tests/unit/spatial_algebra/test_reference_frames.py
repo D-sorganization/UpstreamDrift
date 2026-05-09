@@ -110,7 +110,7 @@ class TestFitInstantaneousSwingPlane:
         )
         assert isinstance(result, SwingPlaneFrame)
 
-    def test_normal_is_unit_vector(self) -> None:
+    def test_reference_frames_normal_is_unit_vector(self) -> None:
         result = fit_instantaneous_swing_plane(
             clubhead_velocity=np.array([10.0, 0.0, 5.0]),
             grip_position=np.array([0.0, 0.0, 0.0]),
@@ -154,7 +154,7 @@ class TestFitFunctionalSwingPlane:
         result = fit_functional_swing_plane(traj, t, impact_time=0.5)
         assert isinstance(result, SwingPlaneFrame)
 
-    def test_normal_is_unit_vector(self) -> None:
+    def test_reference_frames_normal_is_unit_vector(self) -> None:
         traj, t = self._circular_traj()
         result = fit_functional_swing_plane(traj, t, impact_time=0.5)
         assert np.linalg.norm(result.normal) == pytest.approx(1.0, abs=1e-9)
@@ -187,7 +187,7 @@ class TestDecomposeWrenchInSwingPlane:
             grip_axis=np.array([1.0, 0.0, 0.0]),
         )
 
-    def test_returns_dict(self) -> None:
+    def test_reference_frames_returns_dict(self) -> None:
         w = _identity_wrench()
         result = decompose_wrench_in_swing_plane(w, self._make_xy_plane())
         assert isinstance(result, dict)

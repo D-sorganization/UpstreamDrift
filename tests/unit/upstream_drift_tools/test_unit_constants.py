@@ -97,10 +97,10 @@ class TestMolecularWeights:
 
 
 class TestUnitAliases:
-    def test_is_dict(self) -> None:
+    def test_unit_constants_is_dict(self) -> None:
         assert isinstance(UNIT_ALIASES, dict)
 
-    def test_nonempty(self) -> None:
+    def test_unit_constants_nonempty(self) -> None:
         assert len(UNIT_ALIASES) > 0
 
     def test_meter_key_exists(self) -> None:

@@ -77,7 +77,7 @@ def _has_canonical_theta_validator() -> bool:
 # --------------------------------------------------------------------------- #
 
 
-def test_happy_path_returns_canonical_simout() -> None:
+def test_simulate_contract_pinocchio_happy_path_returns_canonical_simout() -> None:
     """Valid theta -> canonical SimOut with aligned, finite arrays.
 
     Pinocchio's SimOut uses ``t``, ``q``, ``qd``, ``tau``,
@@ -129,7 +129,7 @@ def test_zero_theta_runs_and_is_nontrivial() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_out_of_bounds_theta_rejected_or_handled() -> None:
+def test_simulate_contract_pinocchio_out_of_bounds_theta_rejected_or_handled() -> None:
     nv = _model_nv()
     theta = np.zeros(nv * COEFFS_PER_JOINT)
     theta[0] = 1.0e9
@@ -152,7 +152,7 @@ def test_out_of_bounds_theta_rejected_or_handled() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_wrong_length_theta_raises() -> None:
+def test_simulate_contract_pinocchio_wrong_length_theta_raises() -> None:
     """Wrong joint-count theta -> ValueError."""
     nv = _model_nv()
     # Off by one joint => length not n_joints*7 for the loaded model.
@@ -173,7 +173,7 @@ def test_non_multiple_of_seven_theta_raises() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_nan_theta_raises() -> None:
+def test_simulate_contract_pinocchio_nan_theta_raises() -> None:
     nv = _model_nv()
     bad = np.zeros(nv * COEFFS_PER_JOINT)
     bad[1] = np.nan
@@ -181,7 +181,7 @@ def test_nan_theta_raises() -> None:
         simulate_with_coefficients(bad, options=_short_opts())
 
 
-def test_inf_theta_raises() -> None:
+def test_simulate_contract_pinocchio_inf_theta_raises() -> None:
     nv = _model_nv()
     bad = np.zeros(nv * COEFFS_PER_JOINT)
     bad[6] = np.inf
@@ -194,7 +194,7 @@ def test_inf_theta_raises() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_time_monotonic_starts_at_zero() -> None:
+def test_simulate_contract_pinocchio_time_monotonic_starts_at_zero() -> None:
     nv = _model_nv()
     theta = np.zeros(nv * COEFFS_PER_JOINT)
     out = simulate_with_coefficients(theta, options=_short_opts())

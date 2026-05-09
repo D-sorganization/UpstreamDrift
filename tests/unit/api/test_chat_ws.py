@@ -172,7 +172,7 @@ class TestWebSocket:
 class TestRESTEndpoints:
     """Tests for the REST fallback endpoints."""
 
-    def test_list_sessions(self, client, mock_chat_service) -> None:
+    def test_chat_ws_list_sessions(self, client, mock_chat_service) -> None:
         """GET /chat/sessions returns session list."""
         response = client.get("/api/chat/sessions")
         assert response.status_code == 200
@@ -181,7 +181,7 @@ class TestRESTEndpoints:
         assert data[0]["session_id"] == "test-session-123"
         assert data[0]["engine_contexts"] == ["mujoco"]
 
-    def test_get_history(self, client, mock_chat_service) -> None:
+    def test_chat_ws_get_history(self, client, mock_chat_service) -> None:
         """GET /chat/sessions/{id}/history returns messages."""
         response = client.get("/api/chat/sessions/test-session-123/history")
         assert response.status_code == 200

@@ -32,7 +32,7 @@ def _run(**kwargs) -> BaghouseResult:
 
 
 class TestBaghouseCalculator:
-    def test_construction(self) -> None:
+    def test_baghouse_calculator_construction(self) -> None:
         calc = BaghouseCalculator()
         assert calc is not None
 

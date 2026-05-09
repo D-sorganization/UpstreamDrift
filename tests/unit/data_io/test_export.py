@@ -17,7 +17,7 @@ from src.shared.python.data_io.export import (
 
 
 class TestGetAvailableExportFormats:
-    def test_returns_dict(self) -> None:
+    def test_export_returns_dict(self) -> None:
         formats = get_available_export_formats()
         assert isinstance(formats, dict)
 
@@ -75,7 +75,7 @@ class TestGetAvailableExportFormats:
 
 
 class TestCaptureExportData:
-    def test_construction(self) -> None:
+    def test_export_construction(self) -> None:
         n = 50
         data = CaptureExportData(
             times=np.linspace(0, 1, n),

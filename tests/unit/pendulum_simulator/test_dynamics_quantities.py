@@ -59,7 +59,7 @@ class TestAngularPowerSeries:
         result = angular_power_series(torques, omegas)
         np.testing.assert_allclose(result, 0.0)
 
-    def test_returns_ndarray(self) -> None:
+    def test_dynamics_quantities_returns_ndarray(self) -> None:
         result = angular_power_series(np.ones(3), np.ones(3))
         assert isinstance(result, np.ndarray)
 
@@ -96,7 +96,7 @@ class TestAngularImpulseSeries:
 
 
 class TestLinearPowerSeries:
-    def test_returns_ndarray(self) -> None:
+    def test_dynamics_quantities_returns_ndarray(self) -> None:
         forces = np.zeros((5, 2))
         forces[:, 0] = 1.0
         vels = np.zeros((5, 2))

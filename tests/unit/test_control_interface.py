@@ -39,7 +39,7 @@ def ctrl(mock_engine: MockPhysicsEngine) -> ControlInterface:
 class TestControlInterfaceBasic:
     """Tests for basic ControlInterface functionality."""
 
-    def test_initialization(self, ctrl: ControlInterface) -> None:
+    def test_control_interface_initialization(self, ctrl: ControlInterface) -> None:
         """Test interface initializes correctly."""
         assert ctrl.n_joints == 4
         assert len(ctrl.joint_names) == 4
@@ -56,7 +56,7 @@ class TestControlInterfaceBasic:
         torques = ctrl.current_torques
         np.testing.assert_array_equal(torques, np.zeros(4))
 
-    def test_get_state(self, ctrl: ControlInterface) -> None:
+    def test_control_interface_get_state(self, ctrl: ControlInterface) -> None:
         """Test get_state returns complete state dict."""
         state = ctrl.get_state()
 
@@ -270,7 +270,7 @@ class TestControlComputation:
 class TestControlReset:
     """Tests for control interface reset."""
 
-    def test_reset(self, ctrl: ControlInterface) -> None:
+    def test_control_interface_reset(self, ctrl: ControlInterface) -> None:
         """Test reset clears all state."""
         ctrl.set_strategy("pd")
         ctrl.set_torques([1.0, 2.0, 3.0, 4.0])

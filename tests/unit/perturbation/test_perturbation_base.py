@@ -153,7 +153,9 @@ class TestMandatoryMetrics:
 
 @pytest.mark.unit
 class TestSetBaseTorqueProfile:
-    def test_accepts_valid_profile(self, analyzer: StubAnalyzer) -> None:
+    def test_perturbation_base_accepts_valid_profile(
+        self, analyzer: StubAnalyzer
+    ) -> None:
         analyzer.set_base_torque_profile({"coeffs": [[1.0, 0.0]]})
         assert analyzer._base_coeffs == [[1.0, 0.0]]
 
@@ -190,7 +192,7 @@ class TestPerturbTorque:
         with pytest.raises(ValueError, match="set_base_torque_profile"):
             analyzer.perturb_torque(cfg, seed=0)
 
-    def test_returns_dict_with_coeffs(
+    def test_perturbation_base_returns_dict_with_coeffs(
         self, configured_analyzer: StubAnalyzer, small_config: PerturbationConfig
     ) -> None:
         result = configured_analyzer.perturb_torque(small_config, seed=0)
@@ -204,7 +206,7 @@ class TestPerturbTorque:
         r2 = configured_analyzer.perturb_torque(small_config, seed=7)
         assert r1["coeffs"] == r2["coeffs"]
 
-    def test_different_seeds_differ(
+    def test_perturbation_base_different_seeds_differ(
         self, configured_analyzer: StubAnalyzer, small_config: PerturbationConfig
     ) -> None:
         r1 = configured_analyzer.perturb_torque(small_config, seed=1)
@@ -287,7 +289,7 @@ class TestRunBatch:
         with pytest.raises(ValueError, match="set_base_torque_profile"):
             analyzer.run_batch(small_config)
 
-    def test_returns_perturbation_summary(
+    def test_perturbation_base_returns_perturbation_summary(
         self,
         configured_analyzer: StubAnalyzer,
         small_config: PerturbationConfig,
@@ -426,7 +428,7 @@ class TestCompareProfiles:
 
 @pytest.mark.unit
 class TestComparisonReport:
-    def test_default_fields(self) -> None:
+    def test_perturbation_base_default_fields(self) -> None:
         report = ComparisonReport(winner="A", confidence=0.9)
         assert report.metric_comparisons == {}
         assert report.pvalues == {}

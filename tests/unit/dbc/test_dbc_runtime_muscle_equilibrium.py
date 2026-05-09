@@ -116,7 +116,7 @@ class TestSolveFiberVelocityPreconditions(unittest.TestCase):
         )
         self.assertTrue(np.isfinite(v_CE))
 
-    def test_zero_dt_raises(self) -> None:
+    def test_dbc_runtime_muscle_equilibrium_zero_dt_raises(self) -> None:
         from src.shared.python.biomechanics.muscle_equilibrium import (
             EquilibriumSolver,
         )
@@ -128,7 +128,7 @@ class TestSolveFiberVelocityPreconditions(unittest.TestCase):
                 l_MT=0.37, v_MT=0.01, activation=0.5, l_CE=0.1, dt=0.0
             )
 
-    def test_negative_dt_raises(self) -> None:
+    def test_dbc_runtime_muscle_equilibrium_negative_dt_raises(self) -> None:
         from src.shared.python.biomechanics.muscle_equilibrium import (
             EquilibriumSolver,
         )

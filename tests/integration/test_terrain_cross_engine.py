@@ -78,7 +78,9 @@ class TestTerrainConsistency:
             "Assertion failed: all(h == heights[0] for h in heights)"
         )
 
-    def test_normal_is_unit_vector(self, sloped_terrain: Terrain) -> None:
+    def test_terrain_cross_engine_normal_is_unit_vector(
+        self, sloped_terrain: Terrain
+    ) -> None:
         """Normal vectors should always be unit vectors."""
         test_points = [
             (10.0, 10.0),

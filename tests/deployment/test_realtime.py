@@ -239,7 +239,7 @@ class TestRealTimeController:
 class TestRobotConfig:
     """Tests for RobotConfig."""
 
-    def test_config_defaults(self) -> None:
+    def test_realtime_config_defaults(self) -> None:
         """Test default configuration."""
         from src.deployment.realtime import RobotConfig
 

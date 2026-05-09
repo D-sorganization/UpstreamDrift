@@ -190,7 +190,7 @@ def test_missing_partner_raises(tmp_path: Path) -> None:
         load_robneal_target(raw)
 
 
-def test_missing_file_raises(tmp_path: Path) -> None:
+def test_pinocchio_club_target_adapter_missing_file_raises(tmp_path: Path) -> None:
     """A non-existent path is rejected up front."""
     with pytest.raises(FileNotFoundError):
         load_robneal_target(tmp_path / "does_not_exist.mat")

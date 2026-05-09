@@ -45,7 +45,7 @@ def pennated_muscle() -> HillMuscleModel:
 class TestEquilibriumSolverInitialization:
     """Test EquilibriumSolver initialization."""
 
-    def test_initialization(self, standard_muscle) -> None:
+    def test_muscle_equilibrium_initialization(self, standard_muscle) -> None:
         """Test basic initialization."""
         solver = EquilibriumSolver(standard_muscle)
         assert solver.muscle is standard_muscle, (
@@ -422,7 +422,7 @@ class TestComputeEquilibriumState:
         # Should converge to same solution
         assert 0.05 < l_CE < 0.20, f"l_CE out of range: {l_CE:.4f}m"
 
-    def test_returns_tuple(self, standard_muscle) -> None:
+    def test_muscle_equilibrium_returns_tuple(self, standard_muscle) -> None:
         """Test that function returns a tuple of two values."""
         l_MT = 0.37
         v_MT = 0.0

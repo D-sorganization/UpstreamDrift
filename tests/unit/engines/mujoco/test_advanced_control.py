@@ -29,7 +29,7 @@ class TestControlMode:
 class TestImpedanceParameters:
     """Tests for ImpedanceParameters dataclass."""
 
-    def test_initialization(self) -> None:
+    def test_advanced_control_initialization(self) -> None:
         """Test initialization with vector parameters."""
         stiffness = np.array([100.0, 50.0])
         damping = np.array([20.0, 10.0])
@@ -96,7 +96,7 @@ class TestImpedanceParameters:
 class TestHybridControlMask:
     """Tests for HybridControlMask dataclass."""
 
-    def test_initialization(self) -> None:
+    def test_advanced_control_initialization(self) -> None:
         """Test mask initialization."""
         force_mask = np.array([True, False, True])
         mask = HybridControlMask(force_mask=force_mask)

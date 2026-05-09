@@ -10,11 +10,11 @@ from src.shared.python.ai.glossary_data_core import get_core_entries
 
 
 class TestGetCoreEntries:
-    def test_returns_list(self) -> None:
+    def test_glossary_data_returns_list(self) -> None:
         entries = get_core_entries()
         assert isinstance(entries, list)
 
-    def test_non_empty(self) -> None:
+    def test_glossary_data_non_empty(self) -> None:
         entries = get_core_entries()
         assert len(entries) > 0
 

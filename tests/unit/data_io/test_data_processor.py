@@ -16,7 +16,7 @@ from src.shared.python.data_processing.processor import (
 
 
 class TestDatasetInfo:
-    def test_defaults(self) -> None:
+    def test_data_processor_defaults(self) -> None:
         info = DatasetInfo()
         assert info.name == ""
         assert info.num_rows == 0
@@ -209,7 +209,7 @@ class TestValidateDataframeExpression:
         with pytest.raises(ValueError, match="forbidden name"):
             _validate_dataframe_expression("open('/etc/passwd').read()")
 
-    def test_syntax_error_raises_value_error(self) -> None:
+    def test_data_processor_syntax_error_raises_value_error(self) -> None:
         with pytest.raises(ValueError, match="Syntax error"):
             _validate_dataframe_expression("a +* b")
 

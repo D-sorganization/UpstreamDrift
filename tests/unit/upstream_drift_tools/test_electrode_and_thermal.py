@@ -54,7 +54,7 @@ def _const_power(t: float) -> float:
 
 
 class TestPredictTemperatureProfile:
-    def test_returns_two_arrays(self) -> None:
+    def test_electrode_and_thermal_returns_two_arrays(self) -> None:
         t_eval = np.linspace(0, 60, 10)
         times, temps = predict_temperature_profile(
             t_span=(0.0, 60.0),

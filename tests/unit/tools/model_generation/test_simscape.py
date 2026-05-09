@@ -195,7 +195,7 @@ class TestSimscapeConverter:
         assert isinstance(result.links, list)
         assert isinstance(result.joints, list)
 
-    def test_unit_conversion(self) -> None:
+    def test_simscape_unit_conversion(self) -> None:
         """Test unit conversion factors."""
         from model_generation.converters.simscape import (
             ConversionConfig,
@@ -216,7 +216,7 @@ class TestSimscapeConverter:
 class TestConversionConfig:
     """Tests for ConversionConfig class."""
 
-    def test_default_config(self) -> None:
+    def test_simscape_default_config(self) -> None:
         """Test default configuration values."""
         from model_generation.converters.simscape import ConversionConfig
 
@@ -228,7 +228,7 @@ class TestConversionConfig:
         assert config.include_visual is True
         assert config.include_collision is True
 
-    def test_custom_config(self) -> None:
+    def test_simscape_custom_config(self) -> None:
         """Test custom configuration."""
         from model_generation.converters.simscape import ConversionConfig
 

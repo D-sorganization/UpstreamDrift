@@ -18,7 +18,7 @@ def _harmonic(t, y) -> np.ndarray:
 
 
 class TestIntegrateOde:
-    def test_returns_tuple(self) -> None:
+    def test_simulation_core_returns_tuple(self) -> None:
         t, states = integrate_ode(_linear_decay, np.array([1.0]), 1.0, dt=0.01)
         assert isinstance(t, np.ndarray)
         assert isinstance(states, np.ndarray)
@@ -50,7 +50,7 @@ class TestIntegrateOde:
         # x(t) ≈ cos(t)
         np.testing.assert_allclose(states[:, 0], np.cos(t), atol=0.02)
 
-    def test_invalid_t_end_raises(self) -> None:
+    def test_simulation_core_invalid_t_end_raises(self) -> None:
         with pytest.raises((AssertionError, ValueError)):
             integrate_ode(_linear_decay, np.array([1.0]), -1.0, dt=0.01)
 

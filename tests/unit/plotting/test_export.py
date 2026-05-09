@@ -15,7 +15,7 @@ from src.shared.python.plotting.export import (
 
 
 class TestExportConfig:
-    def test_default_construction(self) -> None:
+    def test_export_default_construction(self) -> None:
         cfg = ExportConfig()
         assert cfg.image_format == "png"
 
@@ -141,7 +141,7 @@ class TestExportPlotData:
             loaded = json.load(f)
         assert loaded["values"] == [1.5, 2.5, 3.5]
 
-    def test_unsupported_format_raises(self, tmp_path: Path) -> None:
+    def test_export_unsupported_format_raises(self, tmp_path: Path) -> None:
         config = ExportConfig(output_dir=str(tmp_path))
         with pytest.raises(ValueError):
             export_plot_data({}, "test", config=config, fmt="xml")

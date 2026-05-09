@@ -27,7 +27,7 @@ class TestEngineLifecycleState:
 class TestSimulationState:
     """Tests for SimulationState dataclass."""
 
-    def test_default_construction(self) -> None:
+    def test_state_default_construction(self) -> None:
         state = SimulationState(
             q=np.zeros(3),
             v=np.zeros(3),
@@ -64,7 +64,7 @@ class TestSimulationState:
 class TestStateManager:
     """Tests for StateManager class."""
 
-    def test_construction(self) -> None:
+    def test_state_construction(self) -> None:
         sm = StateManager(nq=3, nv=3)
         assert sm is not None
         assert sm.lifecycle == EngineLifecycleState.UNINITIALIZED
@@ -82,7 +82,7 @@ class TestStateManager:
         np.testing.assert_array_equal(q, q0)
         np.testing.assert_array_equal(v, np.zeros(3))
 
-    def test_set_state(self) -> None:
+    def test_state_set_state(self) -> None:
         sm = StateManager(nq=2, nv=2)
         sm.initialize()
         sm.set_state(np.array([5.0, 6.0]), np.array([7.0, 8.0]))
@@ -104,7 +104,7 @@ class TestStateManager:
         sm.advance_time(0.01)
         assert sm.state.time == pytest.approx(0.02)
 
-    def test_reset(self) -> None:
+    def test_state_reset(self) -> None:
         sm = StateManager(nq=2, nv=2)
         sm.initialize(q0=np.array([1.0, 2.0]))
         sm.advance_time(1.0)

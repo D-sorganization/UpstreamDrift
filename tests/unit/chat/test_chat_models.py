@@ -17,7 +17,7 @@ from src.shared.python.chat.models import (
 
 
 class TestChatMessageRequest:
-    def test_basic_construction(self) -> None:
+    def test_chat_models_basic_construction(self) -> None:
         req = ChatMessageRequest(message="hello")
         assert req.message == "hello"
 
@@ -52,7 +52,7 @@ class TestChatMessageRequest:
 
 
 class TestChatChunkResponse:
-    def test_basic_construction(self) -> None:
+    def test_chat_models_basic_construction(self) -> None:
         chunk = ChatChunkResponse(content="hello")
         assert chunk.content == "hello"
 
@@ -79,7 +79,7 @@ class TestChatChunkResponse:
 
 
 class TestChatSessionInfo:
-    def test_basic_construction(self) -> None:
+    def test_chat_models_basic_construction(self) -> None:
         info = ChatSessionInfo(
             session_id="abc",
             message_count=5,
@@ -105,7 +105,7 @@ class TestChatSessionInfo:
 
 
 class TestChatHistoryResponse:
-    def test_basic_construction(self) -> None:
+    def test_chat_models_basic_construction(self) -> None:
         resp = ChatHistoryResponse(
             session_id="s1", messages=[{"role": "user", "content": "hi"}]
         )

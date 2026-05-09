@@ -53,7 +53,7 @@ def test_forward_returns_expected_shape_and_dtype() -> None:
     assert out.dtype == torch.float32
 
 
-def test_forward_rejects_wrong_dtype() -> None:
+def test_inverse_regressor_model_forward_rejects_wrong_dtype() -> None:
     model = InverseRegressor()
     bad = torch.zeros(
         2, model.cfg.seq_len, DEFAULT_TRAJECTORY_CHANNELS, dtype=torch.float64
@@ -69,7 +69,7 @@ def test_forward_rejects_wrong_channel_count() -> None:
         model(bad)
 
 
-def test_forward_rejects_wrong_rank() -> None:
+def test_inverse_regressor_model_forward_rejects_wrong_rank() -> None:
     model = InverseRegressor()
     bad = torch.zeros(
         model.cfg.seq_len, DEFAULT_TRAJECTORY_CHANNELS, dtype=torch.float32

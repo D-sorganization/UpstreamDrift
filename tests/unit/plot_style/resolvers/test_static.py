@@ -11,7 +11,7 @@ from src.shared.python.plot_style.resolvers import RESOLVER_REGISTRY
 from src.shared.python.plot_style.resolvers.static import StaticColor
 
 
-def test_protocol_compliance() -> None:
+def test_static_protocol_compliance() -> None:
     resolver = StaticColor("#ff0000")
     assert isinstance(resolver, ColorResolver)
 
@@ -73,13 +73,13 @@ def test_resolve_array_zero_frames() -> None:
     assert arr.shape == (0, 4)
 
 
-def test_resolve_array_rejects_negative_frames() -> None:
+def test_static_resolve_array_rejects_negative_frames() -> None:
     resolver = StaticColor("red")
     with pytest.raises(ValueError, match="non-negative"):
         resolver.resolve_array(StaticColorScale("red"), n_frames=-1)
 
 
-def test_resolve_array_rejects_negative_markers() -> None:
+def test_static_resolve_array_rejects_negative_markers() -> None:
     resolver = StaticColor("red")
     with pytest.raises(ValueError, match="non-negative"):
         resolver.resolve_array(StaticColorScale("red"), n_frames=5, n_markers=-1)
@@ -96,7 +96,7 @@ def test_from_scale_rejects_wrong_type() -> None:
         StaticColor.from_scale("blue")  # type: ignore[arg-type]
 
 
-def test_registry_dispatch() -> None:
+def test_static_registry_dispatch() -> None:
     assert RESOLVER_REGISTRY[StaticColorScale] is StaticColor
 
 

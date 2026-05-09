@@ -77,15 +77,15 @@ class TestMakeMasslessHubParams:
 
 
 class TestComputeSystemCom:
-    def test_returns_shape_2(self) -> None:
+    def test_hub_options_returns_shape_2(self) -> None:
         result = compute_system_com(_Q0, _P)
         assert result.shape == (2,)
 
-    def test_values_are_finite(self) -> None:
+    def test_hub_options_values_are_finite(self) -> None:
         result = compute_system_com(_Q0, _P)
         assert np.all(np.isfinite(result))
 
-    def test_returns_ndarray(self) -> None:
+    def test_hub_options_returns_ndarray(self) -> None:
         result = compute_system_com(_Q0, _P)
         assert isinstance(result, np.ndarray)
 
@@ -101,7 +101,7 @@ class TestComputeSystemCom:
 
 
 class TestHubOffsetForCom:
-    def test_returns_tuple(self) -> None:
+    def test_hub_options_returns_tuple(self) -> None:
         result = hub_offset_for_com(_Q0, _P)
         assert isinstance(result, tuple)
         assert len(result) == 2
@@ -111,6 +111,6 @@ class TestHubOffsetForCom:
         assert isinstance(dx, float)
         assert isinstance(dy, float)
 
-    def test_values_are_finite(self) -> None:
+    def test_hub_options_values_are_finite(self) -> None:
         dx, dy = hub_offset_for_com(_Q0, _P)
         assert np.isfinite(dx) and np.isfinite(dy)

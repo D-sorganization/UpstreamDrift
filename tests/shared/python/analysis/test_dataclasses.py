@@ -128,7 +128,7 @@ class TestDataclassConstruction:
         assert p.prominence == 0.5
         assert p.width == 2.0
 
-    def test_summary_statistics(self) -> None:
+    def test_dataclasses_summary_statistics(self) -> None:
         s = SummaryStatistics(
             mean=1.0,
             median=1.0,

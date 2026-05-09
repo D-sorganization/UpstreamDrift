@@ -10,7 +10,7 @@ from src.shared.python.upstream_drift_tools.launcher_factory import (
 
 
 class TestLauncherConfig:
-    def test_construction(self) -> None:
+    def test_launcher_factory_construction(self) -> None:
         cfg = LauncherConfig(app_module="my.app", window_title="Test")
         assert cfg.app_module == "my.app"
 
@@ -45,10 +45,10 @@ class TestCreateLauncherConfig:
 
 
 class TestLauncherError:
-    def test_is_exception(self) -> None:
+    def test_launcher_factory_is_exception(self) -> None:
         err = LauncherError("test error")
         assert isinstance(err, Exception)
 
-    def test_message(self) -> None:
+    def test_launcher_factory_message(self) -> None:
         err = LauncherError("something failed")
         assert "something failed" in str(err)

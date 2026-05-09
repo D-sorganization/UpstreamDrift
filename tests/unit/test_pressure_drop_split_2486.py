@@ -47,7 +47,7 @@ class TestPressureDropFileSizes:
     """Each file must be within LOC budget after split."""
 
     @pytest.mark.unit
-    def test_coordinator_loc(self) -> None:
+    def test_pressure_drop_split_2486_coordinator_loc(self) -> None:
         loc = _count_lines(CALC_DIR / "pressure_drop_interface.py")
         assert loc <= LOC_BUDGET_COORDINATOR, (
             f"pressure_drop_interface.py has {loc} LOC; budget {LOC_BUDGET_COORDINATOR}"
@@ -73,3 +73,48 @@ class TestPressureDropFileSizes:
         assert loc <= LOC_BUDGET_OUTPUT, (
             f"_pressure_drop_output.py has {loc} LOC; budget {LOC_BUDGET_OUTPUT}"
         )
+
+
+@pytest.mark.skipif(not _upstream_tools_available, reason="sympy not installed")
+class TestPressureDropPublicAPI:
+    """Public API must remain importable from pressure_drop_interface."""
+
+    @pytest.mark.unit
+    def test_import_calculate_pressure_drop(self) -> None:
+        from upstream_drift_tools.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
+            calculate_pressure_drop,
+        )
+
+        assert calculate_pressure_drop is not None
+
+    @pytest.mark.unit
+    def test_import_show_help(self) -> None:
+        from upstream_drift_tools.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
+            show_help,
+        )
+
+        assert show_help is not None
+
+    @pytest.mark.unit
+    def test_import_validate_inputs(self) -> None:
+        from upstream_drift_tools.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
+            validate_inputs,
+        )
+
+        assert validate_inputs is not None
+
+    @pytest.mark.unit
+    def test_import_print_results(self) -> None:
+        from upstream_drift_tools.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
+            print_results,
+        )
+
+        assert print_results is not None
+
+    @pytest.mark.unit
+    def test_import_list_gas_components(self) -> None:
+        from upstream_drift_tools.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
+            list_gas_components,
+        )
+
+        assert list_gas_components is not None

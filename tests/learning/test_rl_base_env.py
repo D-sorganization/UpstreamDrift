@@ -50,7 +50,7 @@ class ConcreteEnv(RoboticsGymEnv):
 class TestRoboticsGymEnvConstruction:
     """Test that the base environment can be constructed."""
 
-    def test_basic_construction(self, mock_engine: MagicMock) -> None:
+    def test_rl_base_env_basic_construction(self, mock_engine: MagicMock) -> None:
         env = ConcreteEnv(engine=mock_engine)
         assert env.observation_space is not None
         assert env.action_space is not None

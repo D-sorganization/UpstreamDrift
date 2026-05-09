@@ -171,7 +171,9 @@ class TestFeatureExecution:
 class TestFeatureSummary:
     """Tests for feature summary and categories."""
 
-    def test_get_summary(self, registry: ControlFeaturesRegistry) -> None:
+    def test_control_features_registry_get_summary(
+        self, registry: ControlFeaturesRegistry
+    ) -> None:
         """Test getting feature summary."""
         summary = registry.get_summary()
         assert "engine" in summary

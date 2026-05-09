@@ -82,7 +82,9 @@ class TestDrakeVisualizer:
         """Create visualizer instance."""
         return DrakeVisualizer(mock_meshcat, mock_plant)
 
-    def test_initialization(self, visualizer, mock_meshcat, mock_plant) -> None:
+    def test_drake_visualizer_initialization(
+        self, visualizer, mock_meshcat, mock_plant
+    ) -> None:
         """Test initialization."""
         assert visualizer.meshcat == mock_meshcat
         assert visualizer.plant == mock_plant

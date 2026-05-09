@@ -15,7 +15,7 @@ from src.shared.python.plot_engine.trendline import TrendlineResult, compute_tre
 
 
 class TestSeriesStyle:
-    def test_default_construction(self) -> None:
+    def test_plot_engine_specs_default_construction(self) -> None:
         s = SeriesStyle()
         assert s is not None
 
@@ -35,23 +35,23 @@ class TestTrendlineSpec:
 
 
 class TestPlotSpec:
-    def test_construction(self) -> None:
+    def test_plot_engine_specs_construction(self) -> None:
         spec = PlotSpec(title="Test Plot")
         assert spec.title == "Test Plot"
 
-    def test_defaults(self) -> None:
+    def test_plot_engine_specs_defaults(self) -> None:
         spec = PlotSpec()
         assert spec is not None
 
 
 class TestSeriesData:
-    def test_construction(self) -> None:
+    def test_plot_engine_specs_construction(self) -> None:
         s = SeriesData(name="series1", x=[1.0, 2.0], y=[3.0, 4.0])
         assert s.name == "series1"
 
 
 class TestSurfacePlotSpec:
-    def test_construction(self) -> None:
+    def test_plot_engine_specs_construction(self) -> None:
         spec = SurfacePlotSpec(
             title="Surface",
             z_data=[[1.0, 2.0], [3.0, 4.0]],
@@ -62,7 +62,7 @@ class TestSurfacePlotSpec:
 
 
 class TestHistogramSpec:
-    def test_construction(self) -> None:
+    def test_plot_engine_specs_construction(self) -> None:
         spec = HistogramSpec(title="Histogram")
         assert spec is not None
 

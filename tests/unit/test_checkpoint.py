@@ -162,7 +162,7 @@ class TestCheckpointManager:
         assert manager.count == 1
         assert checkpoint_id in [cp["id"] for cp in manager.list_checkpoints()]
 
-    def test_restore_checkpoint(
+    def test_checkpoint_restore_checkpoint(
         self, manager: CheckpointManager, engine: MockEngine
     ) -> None:
         """Test restoring a checkpoint."""

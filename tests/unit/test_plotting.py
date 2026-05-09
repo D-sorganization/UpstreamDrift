@@ -85,13 +85,13 @@ def mock_figure() -> MagicMock:
 class TestGolfSwingPlotter:
     """Test suite for GolfSwingPlotter."""
 
-    def test_initialization(self, plotter) -> None:
+    def test_plotting_initialization(self, plotter) -> None:
         """Test plotter initialization."""
         assert plotter.recorder is not None
         assert plotter.joint_names == ["Joint1", "Joint2"]
         assert "primary" in plotter.colors
 
-    def test_get_joint_name(self, plotter) -> None:
+    def test_plotting_get_joint_name(self, plotter) -> None:
         """Test joint name retrieval."""
         assert plotter.get_joint_name(0) == "Joint1"
         assert plotter.get_joint_name(1) == "Joint2"
@@ -110,7 +110,7 @@ class TestGolfSwingPlotter:
         assert plotter._get_aligned_label(0, 9) == "DoF 0"
         assert plotter._get_aligned_label(7, 9) == "Joint1"
 
-    def test_plot_joint_angles(self, plotter, mock_figure) -> None:
+    def test_plotting_plot_joint_angles(self, plotter, mock_figure) -> None:
         """Test plotting joint angles."""
         plotter.plot_joint_angles(mock_figure)
         mock_figure.add_subplot.assert_called()
@@ -148,14 +148,14 @@ class TestGolfSwingPlotter:
         ax.plot.assert_called()
         # Should check for mph conversion logic implicitly by success
 
-    def test_plot_club_head_trajectory(self, plotter, mock_figure) -> None:
+    def test_plotting_plot_club_head_trajectory(self, plotter, mock_figure) -> None:
         """Test 3D trajectory plotting."""
         plotter.plot_club_head_trajectory(mock_figure)
         mock_figure.add_subplot.assert_called_with(111, projection="3d")
         ax = mock_figure.add_subplot.return_value
         ax.scatter.assert_called()
 
-    def test_plot_phase_diagram(self, plotter, mock_figure) -> None:
+    def test_plotting_plot_phase_diagram(self, plotter, mock_figure) -> None:
         """Test phase diagram plotting."""
         plotter.plot_phase_diagram(mock_figure, joint_idx=0)
         ax = mock_figure.add_subplot.return_value
@@ -167,7 +167,7 @@ class TestGolfSwingPlotter:
         ax = mock_figure.add_subplot.return_value
         assert ax.stackplot.call_count == 2  # Positive and negative
 
-    def test_plot_frequency_analysis(self, plotter, mock_figure) -> None:
+    def test_plotting_plot_frequency_analysis(self, plotter, mock_figure) -> None:
         """Test frequency analysis plotting."""
         # This calls scipy or shared signal processing
         with patch(
@@ -187,14 +187,14 @@ class TestGolfSwingPlotter:
             ax = mock_figure.add_subplot.return_value
             ax.pcolormesh.assert_called()
 
-    def test_plot_summary_dashboard(self, plotter, mock_figure) -> None:
+    def test_plotting_plot_summary_dashboard(self, plotter, mock_figure) -> None:
         """Test dashboard plotting."""
         plotter.plot_summary_dashboard(mock_figure)
         assert mock_figure.add_gridspec.called
         # Should create 6 subplots (2x3 grid)
         assert mock_figure.add_subplot.call_count == 6
 
-    def test_plot_kinematic_sequence(self, plotter, mock_figure) -> None:
+    def test_plotting_plot_kinematic_sequence(self, plotter, mock_figure) -> None:
         """Test kinematic sequence plotting."""
         segments = {"Pelvis": 0, "Torso": 1}
         plotter.plot_kinematic_sequence(mock_figure, segments)
@@ -202,18 +202,18 @@ class TestGolfSwingPlotter:
         # 2 lines + 2 peak markers = 4 plot calls
         assert ax.plot.call_count == 4
 
-    def test_plot_3d_phase_space(self, plotter, mock_figure) -> None:
+    def test_plotting_plot_3d_phase_space(self, plotter, mock_figure) -> None:
         """Test 3D phase space plotting."""
         plotter.plot_3d_phase_space(mock_figure, joint_idx=0)
         mock_figure.add_subplot.assert_called_with(111, projection="3d")
 
-    def test_plot_correlation_matrix(self, plotter, mock_figure) -> None:
+    def test_plotting_plot_correlation_matrix(self, plotter, mock_figure) -> None:
         """Test correlation matrix plotting."""
         plotter.plot_correlation_matrix(mock_figure)
         ax = mock_figure.add_subplot.return_value
         ax.imshow.assert_called()
 
-    def test_plot_swing_plane(self, plotter, mock_figure) -> None:
+    def test_plotting_plot_swing_plane(self, plotter, mock_figure) -> None:
         """Test swing plane plotting."""
         # Need to mock SwingPlaneAnalyzer or ensure data is valid for it
         # The default mocked data is a spiral, which should fit something.
@@ -269,7 +269,7 @@ class TestGolfSwingPlotter:
         assert ax.scatter.call_count >= 1
         assert ax.plot.call_count >= 1
 
-    def test_plot_radar_chart(self, plotter, mock_figure) -> None:
+    def test_plotting_plot_radar_chart(self, plotter, mock_figure) -> None:
         """Test radar chart plotting."""
         metrics = {"A": 0.5, "B": 0.8, "C": 0.2}
         plotter.plot_radar_chart(mock_figure, metrics)

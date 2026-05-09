@@ -39,7 +39,7 @@ class TestPinocchioStrict:
     def teardown_method(self) -> None:
         self.patcher.stop()
 
-    def test_jacobian_standardization_mocked(self) -> None:
+    def test_pinocchio_strict_jacobian_standardization_mocked(self) -> None:
         engine = self.PinocchioPhysicsEngine()
         engine.model = MagicMock()
         engine.data = MagicMock()

@@ -7,7 +7,7 @@ from src.shared.python.pose_estimation.openpose_estimator import OpenPoseEstimat
 
 
 class TestOpenPoseEstimatorImportable:
-    def test_importable(self) -> None:
+    def test_openpose_output_shims_importable(self) -> None:
         assert OpenPoseEstimator is not None
 
     def test_has_keypoint_map(self) -> None:

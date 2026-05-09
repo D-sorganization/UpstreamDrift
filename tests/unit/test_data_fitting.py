@@ -25,7 +25,7 @@ from src.shared.python.validation_pkg.data_fitting import (
 class TestBodySegmentParams:
     """Tests for BodySegmentParams dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_data_fitting_default_values(self) -> None:
         """Test default parameter values."""
         params = BodySegmentParams(
             name="upper_arm",
@@ -39,7 +39,7 @@ class TestBodySegmentParams:
         assert params.com_position == 0.5  # Default
         assert params.radius_gyration == 0.3  # Default
 
-    def test_to_dict(self) -> None:
+    def test_data_fitting_to_dict(self) -> None:
         """Test serialization to dictionary."""
         params = BodySegmentParams(
             name="forearm",
@@ -57,7 +57,7 @@ class TestBodySegmentParams:
         assert d["com_position"] == 0.43
         assert d["inertia"] == [0.01, 0.01, 0.001]
 
-    def test_from_dict(self) -> None:
+    def test_data_fitting_from_dict(self) -> None:
         """Test deserialization from dictionary."""
         d = {
             "name": "hand",
@@ -77,7 +77,7 @@ class TestBodySegmentParams:
 class TestInverseKinematicsSolver:
     """Tests for inverse kinematics solver."""
 
-    def test_init(self) -> None:
+    def test_data_fitting_init(self) -> None:
         """Test solver initialization."""
         solver = InverseKinematicsSolver(
             segment_lengths={"upper_arm": 0.3, "forearm": 0.25},
@@ -227,7 +227,7 @@ class TestParameterEstimator:
 class TestSensitivityAnalyzer:
     """Tests for sensitivity analysis."""
 
-    def test_init(self) -> None:
+    def test_data_fitting_init(self) -> None:
         """Test analyzer initialization."""
         analyzer = SensitivityAnalyzer(perturbation_size=0.01)
 
@@ -286,7 +286,7 @@ class TestSensitivityAnalyzer:
 class TestConvertPosesToMarkers:
     """Tests for pose-to-marker conversion."""
 
-    def test_basic_conversion(self) -> None:
+    def test_data_fitting_basic_conversion(self) -> None:
         """Test basic pose to marker conversion."""
         keypoints = np.array(
             [
@@ -335,7 +335,7 @@ class TestConvertPosesToMarkers:
 class TestA3FittingPipeline:
     """Tests for the complete A3 pipeline."""
 
-    def test_init(self) -> None:
+    def test_data_fitting_init(self) -> None:
         """Test pipeline initialization."""
         pipeline = A3FittingPipeline()
 

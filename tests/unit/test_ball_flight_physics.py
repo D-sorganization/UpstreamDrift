@@ -91,7 +91,9 @@ def iron_7_launch() -> LaunchConditions:
 class TestBallProperties:
     """Tests for BallProperties dataclass."""
 
-    def test_default_values(self, default_ball: BallProperties) -> None:
+    def test_ball_flight_physics_default_values(
+        self, default_ball: BallProperties
+    ) -> None:
         """Test default regulation golf ball values."""
         # Regulation golf ball: mass <= 45.93g, diameter >= 42.67mm
         assert default_ball.mass == pytest.approx(0.0459, rel=0.01)
@@ -162,7 +164,9 @@ class TestLaunchConditions:
 class TestEnvironmentalConditions:
     """Tests for EnvironmentalConditions dataclass."""
 
-    def test_default_values(self, default_environment: EnvironmentalConditions) -> None:
+    def test_ball_flight_physics_default_values(
+        self, default_environment: EnvironmentalConditions
+    ) -> None:
         """Test default sea-level conditions."""
         assert default_environment.air_density == pytest.approx(1.225)
         assert default_environment.gravity == pytest.approx(9.81, abs=0.01)
@@ -193,7 +197,7 @@ class TestEnvironmentalConditions:
 class TestSimulatorInitialization:
     """Tests for BallFlightSimulator initialization."""
 
-    def test_default_initialization(self) -> None:
+    def test_ball_flight_physics_default_initialization(self) -> None:
         """Test simulator initializes with default components."""
         sim = BallFlightSimulator()
         assert sim.ball is not None

@@ -16,7 +16,7 @@ from src.shared.python.upstream_drift_tools.process_calculators.syngas_compressi
 class TestCalculateWaterDropout:
     _ENGINE = SyngasCompressionEngine()
 
-    def test_returns_dict(self) -> None:
+    def test_syngas_compression_returns_dict(self) -> None:
         result = self._ENGINE.calculate_water_dropout(350.0, 5.0, 2.0)
         assert isinstance(result, dict)
 
@@ -35,11 +35,11 @@ class TestCalculateWaterDropout:
         result = self._ENGINE.calculate_water_dropout(400.0, 1.0, 0.1)
         assert result["water_dropout"] == 0.0
 
-    def test_zero_pressure_raises(self) -> None:
+    def test_syngas_compression_zero_pressure_raises(self) -> None:
         with pytest.raises(ValueError):
             self._ENGINE.calculate_water_dropout(350.0, 0.0, 2.0)
 
-    def test_vapor_pressure_positive(self) -> None:
+    def test_syngas_compression_vapor_pressure_positive(self) -> None:
         result = self._ENGINE.calculate_water_dropout(350.0, 5.0, 2.0)
         assert result["water_vapor_pressure"] > 0.0
 
@@ -72,7 +72,7 @@ class TestCalculateCompressionWork:
             compression_type="isentropic",
         )
 
-    def test_returns_dict(self) -> None:
+    def test_syngas_compression_returns_dict(self) -> None:
         result = self._ENGINE.calculate_compression_work(
             self._make_stage(), 1000.0, _MIX_PROPS
         )

@@ -20,7 +20,7 @@ from src.shared.python.data_io.path_utils import (
 class TestGetRepoRoot:
     """Tests for get_repo_root function."""
 
-    def test_returns_path(self) -> None:
+    def test_path_utils_returns_path(self) -> None:
         root = get_repo_root()
         assert isinstance(root, Path)
 
@@ -37,7 +37,7 @@ class TestGetRepoRoot:
 class TestGetSrcRoot:
     """Tests for get_src_root function."""
 
-    def test_returns_path(self) -> None:
+    def test_path_utils_returns_path(self) -> None:
         src = get_src_root()
         assert isinstance(src, Path)
 

@@ -85,14 +85,14 @@ _SMALL_CONFIG = PerturbationConfig(
 
 
 class TestSupportedEngines:
-    def test_non_empty(self) -> None:
+    def test_cross_engine_perturbation_runner_non_empty(self) -> None:
         assert len(SUPPORTED_ENGINES) >= 6
 
     def test_contains_all_six(self) -> None:
         expected = {"pendulum", "pinocchio", "drake", "mujoco", "opensim", "myosuite"}
         assert expected.issubset(set(SUPPORTED_ENGINES))
 
-    def test_no_duplicates(self) -> None:
+    def test_cross_engine_perturbation_runner_no_duplicates(self) -> None:
         assert len(SUPPORTED_ENGINES) == len(set(SUPPORTED_ENGINES))
 
 
@@ -102,7 +102,7 @@ class TestSupportedEngines:
 
 
 class TestEngineRankEntry:
-    def test_defaults(self) -> None:
+    def test_cross_engine_perturbation_runner_defaults(self) -> None:
         entry = EngineRankEntry(
             engine_name="mujoco",
             robustness_score=0.85,
@@ -158,7 +158,7 @@ class TestCrossEngineReport:
             consistency={},
         )
 
-    def test_to_dict_keys(self) -> None:
+    def test_cross_engine_perturbation_runner_to_dict_keys(self) -> None:
         report = self._make_report()
         d = report.to_dict()
         assert "config" in d
@@ -320,7 +320,7 @@ class TestFormatReport:
             consistency=consistency,
         )
 
-    def test_returns_string(self) -> None:
+    def test_cross_engine_perturbation_runner_returns_string(self) -> None:
         report = self._make_report()
         text = format_report(report)
         assert isinstance(text, str)

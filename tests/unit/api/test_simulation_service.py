@@ -72,14 +72,14 @@ def simulation_service(mock_engine_manager: MagicMock) -> Any:
 class TestSimulationServiceContract:
     """Design by Contract tests for SimulationService class."""
 
-    def test_instantiates(self, mock_engine_manager) -> None:
+    def test_simulation_service_instantiates(self, mock_engine_manager) -> None:
         """Postcondition: SimulationService can be instantiated."""
         from src.api.services.simulation_service import SimulationService
 
         service = SimulationService(mock_engine_manager)
         assert service is not None
 
-    def test_has_engine_manager(self, simulation_service) -> None:
+    def test_simulation_service_has_engine_manager(self, simulation_service) -> None:
         """Postcondition: SimulationService has engine_manager attribute."""
         assert hasattr(simulation_service, "engine_manager")
 

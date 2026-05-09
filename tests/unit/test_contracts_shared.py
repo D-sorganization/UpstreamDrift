@@ -55,7 +55,7 @@ class TestContractLevel:
         c = _get_contracts()
         assert c.ContractLevel.ENFORCE
 
-    def test_three_levels(self) -> None:
+    def test_contracts_shared_three_levels(self) -> None:
         c = _get_contracts()
         assert len(c.ContractLevel) == 3
 
@@ -156,7 +156,7 @@ class TestPreconditionDecorator:
         with pytest.raises(c.ContractViolationError):
             compute(-1.0)
 
-    def test_preserves_function_name(self) -> None:
+    def test_contracts_shared_preserves_function_name(self) -> None:
         c = _get_contracts()
         c.set_contract_level(c.ContractLevel.ENFORCE)
 

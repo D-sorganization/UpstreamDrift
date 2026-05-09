@@ -18,7 +18,7 @@ from src.shared.python.screw_theory.kinematics import (
 
 
 class TestTwist:
-    def test_construct(self) -> None:
+    def test_screw_kinematics_construct(self) -> None:
         t = Twist(
             angular=np.array([0.0, 0.0, 1.0]),
             linear=np.array([0.0, 0.0, 0.0]),
@@ -42,7 +42,7 @@ class TestTwist:
 
 
 class TestScrewAxis:
-    def test_construct(self) -> None:
+    def test_screw_kinematics_construct(self) -> None:
         sa = ScrewAxis(
             axis_direction=np.array([0.0, 0.0, 1.0]),
             axis_point=np.array([0.0, 0.0, 0.0]),
@@ -153,7 +153,7 @@ class TestComputeScrewEndpoints:
             is_singular=singular,
         )
 
-    def test_returns_two_arrays(self) -> None:
+    def test_screw_kinematics_returns_two_arrays(self) -> None:
         start, end = compute_screw_endpoints(self._simple_screw())
         assert start.shape == (3,)
         assert end.shape == (3,)

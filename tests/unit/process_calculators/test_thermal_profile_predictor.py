@@ -19,7 +19,7 @@ def _zero_power(t: float) -> float:
 
 
 class TestPredictTemperatureProfile:
-    def test_returns_two_arrays(self) -> None:
+    def test_thermal_profile_predictor_returns_two_arrays(self) -> None:
         t_eval = np.linspace(0, 100, 11)
         times, temps = predict_temperature_profile(
             t_span=(0.0, 100.0),

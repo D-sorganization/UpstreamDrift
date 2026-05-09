@@ -175,3 +175,135 @@ def _n_actuators_from_model() -> int:
     model = osim.Model(str(_DEFAULT_OSIM))
     model.initSystem()
     return len(_coordinate_actuator_names(model))
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.skipif(
+    not OPENSIM_AVAILABLE,
+    reason="OpenSim Python bindings not installed",
+)
+class TestSimulateWithCoefficients:
+    """Live integration tests that exercise the OpenSim binding."""
+
+    @pytest.fixture(scope="class")
+    def n_actuators(self) -> int:
+        return _n_actuators_from_model()
+
+    def test_zero_theta_returns_canonical_simout(
+        self,
+        n_actuators: int,
+    ) -> None:
+        """Postcondition shape + schema check for nominal inputs."""
+        from src.engines.physics_engines.opensim.python.motion_matching.simulate import (  # noqa: E501
+            simulate_with_coefficients,
+        )
+
+        opts = SimOptions(t_final=0.05, dt=5e-3)
+        theta = _zero_theta(n_actuators)
+        out = simulate_with_coefficients(theta, opts)
+
+        n_steps = int(round(opts.t_final / opts.dt))
+        n_samples = n_steps + 1
+
+        # Shape checks per the canonical SimOut contract.
+        assert out.time.shape == (n_samples,)
+        assert out.q.ndim == 2 and out.q.shape[0] == n_samples
+        assert out.qd.shape == out.q.shape
+        assert out.qdd.shape == out.q.shape
+        assert out.tau.shape == (n_samples, n_actuators)
+        assert out.grip.shape == (n_samples, 3)
+        assert out.grip_quat.shape == (n_samples, 4)
+        assert out.clubhead.shape == (n_samples, 3)
+        assert out.club_quat.shape == (n_samples, 4)
+        assert isinstance(out.solver_status, str)
+        assert out.wall_clock_s >= 0.0
+
+    def test_solver_status_success_for_nominal_inputs(
+        self,
+        n_actuators: int,
+    ) -> None:
+        from src.engines.physics_engines.opensim.python.motion_matching.simulate import (  # noqa: E501
+            simulate_with_coefficients,
+        )
+
+        out = simulate_with_coefficients(
+            _zero_theta(n_actuators),
+            SimOptions(t_final=0.05, dt=5e-3),
+        )
+        assert out.solver_status == "success"
+
+    def test_recovery_known_theta_grip_pattern(
+        self,
+        n_actuators: int,
+    ) -> None:
+        """Recovery: a known theta produces a grip trajectory whose path
+        length grows monotonically (a basic behavioural invariant).
+
+        Falling under gravity from rest, the grip must descend, so the
+        cumulative arc length of the grip path must be strictly
+        positive after the first step.
+        """
+        from src.engines.physics_engines.opensim.python.motion_matching.simulate import (  # noqa: E501
+            simulate_with_coefficients,
+        )
+
+        theta = _zero_theta(n_actuators)
+        out = simulate_with_coefficients(theta, SimOptions(t_final=0.05, dt=5e-3))
+        # Grip starts at well-defined initial position.
+        assert np.all(np.isfinite(out.grip))
+        # Path length is strictly positive (grip moves under gravity).
+        diffs = np.linalg.norm(np.diff(out.grip, axis=0), axis=1)
+        assert np.all(diffs >= 0.0)
+        # No spurious resets to origin.
+        assert np.linalg.norm(out.grip[0]) > 0.0
+
+    def test_determinism_same_theta_identical_simout(
+        self,
+        n_actuators: int,
+    ) -> None:
+        """Determinism: same theta + options -> identical numerical output."""
+        from src.engines.physics_engines.opensim.python.motion_matching.simulate import (  # noqa: E501
+            simulate_with_coefficients,
+        )
+
+        theta = _zero_theta(n_actuators)
+        opts = SimOptions(t_final=0.05, dt=5e-3)
+        out_a = simulate_with_coefficients(theta, opts)
+        out_b = simulate_with_coefficients(theta, opts)
+
+        np.testing.assert_array_equal(out_a.time, out_b.time)
+        np.testing.assert_allclose(out_a.q, out_b.q, atol=1e-12, rtol=0.0)
+        np.testing.assert_allclose(out_a.qd, out_b.qd, atol=1e-12, rtol=0.0)
+        np.testing.assert_allclose(out_a.grip, out_b.grip, atol=1e-12, rtol=0.0)
+        np.testing.assert_allclose(out_a.clubhead, out_b.clubhead, atol=1e-12, rtol=0.0)
+
+    def test_zero_theta_zero_torque_recorded(
+        self,
+        n_actuators: int,
+    ) -> None:
+        """Sanity: with all-zero theta the recorded torques must be zero."""
+        from src.engines.physics_engines.opensim.python.motion_matching.simulate import (  # noqa: E501
+            simulate_with_coefficients,
+        )
+
+        out = simulate_with_coefficients(
+            _zero_theta(n_actuators),
+            SimOptions(t_final=0.02, dt=5e-3),
+        )
+        np.testing.assert_allclose(out.tau, 0.0, atol=1e-12)
+
+    def test_rejects_wrong_theta_shape(
+        self,
+        n_actuators: int,
+    ) -> None:
+        from src.engines.physics_engines.opensim.python.motion_matching.simulate import (  # noqa: E501
+            simulate_with_coefficients,
+        )
+
+        # Message format updated by issue #4252 to use the shared
+        # ``validate_theta`` validator (CROSS_ENGINE_PARITY_SPEC §2.2).
+        with pytest.raises(ValueError, match=r"(theta length|theta has shape)"):
+            simulate_with_coefficients(
+                np.zeros(7),  # too short
+                SimOptions(t_final=0.02, dt=5e-3),
+            )

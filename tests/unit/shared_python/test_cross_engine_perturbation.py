@@ -62,7 +62,7 @@ class TestCrossEngineSimConfig:
     """Validate CrossEngineSimConfig defaults and constraints."""
 
     @pytest.mark.unit
-    def test_defaults(self) -> None:
+    def test_cross_engine_perturbation_defaults(self) -> None:
         """Default config should have expected values from GH2021 diagnostics."""
         cfg = CrossEngineSimConfig()
         assert cfg.t_end == pytest.approx(1.5)
@@ -72,7 +72,7 @@ class TestCrossEngineSimConfig:
         assert cfg.seed == 42
 
     @pytest.mark.unit
-    def test_custom_config(self) -> None:
+    def test_cross_engine_perturbation_custom_config(self) -> None:
         """Custom values should be accepted."""
         cfg = CrossEngineSimConfig(
             t_end=2.0, dt=0.005, noise_amplitude=0.5, n_trials=5, seed=7
@@ -410,7 +410,7 @@ class TestPerturbTorqueProfile:
             perturb_torque_profile(np.ones(10), noise_amplitude=0.1, noise_type="pink")
 
     @pytest.mark.unit
-    def test_negative_amplitude_raises(self) -> None:
+    def test_cross_engine_perturbation_negative_amplitude_raises(self) -> None:
         """Negative amplitude must raise ValueError."""
         with pytest.raises(ValueError, match="non-negative"):
             perturb_torque_profile(np.ones(10), noise_amplitude=-1.0)

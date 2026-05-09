@@ -20,11 +20,11 @@ def _make_trajectory(n: int = 10) -> TargetTrajectory:
 
 
 class TestTargetTrajectory:
-    def test_construction(self) -> None:
+    def test_targets_construction(self) -> None:
         traj = _make_trajectory()
         assert isinstance(traj, TargetTrajectory)
 
-    def test_name_stored(self) -> None:
+    def test_targets_name_stored(self) -> None:
         traj = _make_trajectory()
         assert traj.name == "test"
 

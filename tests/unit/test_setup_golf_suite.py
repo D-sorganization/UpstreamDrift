@@ -66,7 +66,7 @@ def test_find_source_image(tmp_path) -> None:
 @patch("setup_golf_suite.git_sync_repository")
 @patch("setup_golf_suite.check_python_dependencies")
 @patch("setup_golf_suite.create_optimized_icon")
-def test_main(
+def test_setup_golf_suite_main(
     mock_create_icon, mock_chk_deps, mock_sync, tmp_path, monkeypatch
 ) -> None:
     monkeypatch.setattr("setup_golf_suite.get_repo_root", lambda: tmp_path)

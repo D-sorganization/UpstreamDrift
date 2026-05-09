@@ -51,7 +51,7 @@ class TestCapabilityLevel:
 class TestEngineCapabilities:
     """Tests for EngineCapabilities dataclass."""
 
-    def test_default_creation(self) -> None:
+    def test_engine_capabilities_default_creation(self) -> None:
         """Default capabilities should be NONE for everything."""
         caps = EngineCapabilities()
         assert caps.engine_name == ""
@@ -98,7 +98,7 @@ class TestEngineCapabilities:
         assert caps.has_video_export
         assert caps.has_contact_forces
 
-    def test_to_dict(self) -> None:
+    def test_engine_capabilities_to_dict(self) -> None:
         """Serialization to dict for API responses."""
         caps = EngineCapabilities(
             engine_name="MuJoCo",
@@ -313,7 +313,7 @@ class TestSimulationController:
     def ctrl(self) -> _MockController:
         return _MockController()
 
-    def test_initial_state(self, ctrl: _MockController) -> None:
+    def test_engine_capabilities_initial_state(self, ctrl: _MockController) -> None:
         """Controller starts in IDLE mode."""
         assert ctrl.mode == SimulationMode.IDLE
         assert not ctrl.is_running
@@ -433,7 +433,7 @@ class TestSerialization:
 class TestVideoConfig:
     """Tests for VideoConfig dataclass."""
 
-    def test_defaults(self) -> None:
+    def test_engine_capabilities_defaults(self) -> None:
         """Default config should use HD 1080p."""
         config = VideoConfig()
         assert config.width == 1920

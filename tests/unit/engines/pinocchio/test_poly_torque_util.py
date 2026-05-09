@@ -45,7 +45,7 @@ class TestTorqueFitting:
         with pytest.raises(ValueError, match="t and tau must have same shape"):
             fit_torque_poly(t, tau)
 
-    def test_main(self) -> None:
+    def test_poly_torque_util_main(self) -> None:
         """Test main function via mocking."""
         # Create a dummy CSV file content
         # csv_content = "t,tau\n0,1\n1,6\n2,15\n"  # y = 2x^2 + 3x + 1

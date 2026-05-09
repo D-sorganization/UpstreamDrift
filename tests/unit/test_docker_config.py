@@ -67,10 +67,10 @@ class TestLegacyDockerAliases:
     def test_is_tuple(self) -> None:
         assert isinstance(LEGACY_DOCKER_ALIASES, tuple)
 
-    def test_non_empty(self) -> None:
+    def test_docker_config_non_empty(self) -> None:
         assert len(LEGACY_DOCKER_ALIASES) > 0
 
-    def test_all_are_strings(self) -> None:
+    def test_docker_config_all_are_strings(self) -> None:
         assert all(isinstance(a, str) for a in LEGACY_DOCKER_ALIASES)
 
     def test_all_have_tag(self) -> None:
@@ -83,7 +83,7 @@ class TestLegacyDockerAliases:
 
 
 class TestDetectGpuSupportNoGpu:
-    def test_returns_dict(self) -> None:
+    def test_docker_config_returns_dict(self) -> None:
         with patch("shutil.which", return_value=None):
             result = detect_gpu_support()
         assert isinstance(result, dict)

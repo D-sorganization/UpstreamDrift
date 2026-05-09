@@ -20,7 +20,7 @@ class TestThermalProfileRequest:
         defaults.update(kwargs)
         return ThermalProfileRequest(**defaults)
 
-    def test_valid_construction(self) -> None:
+    def test_contracts_thermal_profile_valid_construction(self) -> None:
         req = self._valid_request()
         assert isinstance(req, ThermalProfileRequest)
 
@@ -44,7 +44,7 @@ class TestThermalProfileRequest:
         req = self._valid_request()
         assert req.t_end_s == pytest.approx(3600.0)
 
-    def test_default_num_points(self) -> None:
+    def test_contracts_thermal_profile_default_num_points(self) -> None:
         req = self._valid_request()
         assert req.num_points == 100
 
@@ -74,7 +74,7 @@ class TestThermalProfileRequest:
 
 
 class TestThermalProfileDataPoint:
-    def test_construction(self) -> None:
+    def test_contracts_thermal_profile_construction(self) -> None:
         dp = ThermalProfileDataPoint(
             time_s=0.0, temperature_c=25.0, power_w=5000.0, heat_loss_w=0.0
         )
@@ -108,7 +108,7 @@ class TestThermalProfileResponse:
             temp_change_c=4.0,
         )
 
-    def test_construction(self) -> None:
+    def test_contracts_thermal_profile_construction(self) -> None:
         resp = self._make_response()
         assert isinstance(resp, ThermalProfileResponse)
 

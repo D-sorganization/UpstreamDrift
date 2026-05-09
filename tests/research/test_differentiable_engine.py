@@ -39,7 +39,7 @@ class TestAutodiffBackend:
 class TestDifferentiableEngine:
     """Smoke tests for DifferentiableEngine."""
 
-    def test_construction(self, mock_engine: MagicMock) -> None:
+    def test_differentiable_engine_construction(self, mock_engine: MagicMock) -> None:
         de = DifferentiableEngine(mock_engine, backend="numpy")
         assert de._n_q == 3
         assert de._n_v == 3
@@ -52,7 +52,9 @@ class TestDifferentiableEngine:
         traj = de.simulate_trajectory(initial, controls, dt=0.01)
         assert traj.shape == (6, 6)
 
-    def test_compute_jacobian(self, mock_engine: MagicMock) -> None:
+    def test_differentiable_engine_compute_jacobian(
+        self, mock_engine: MagicMock
+    ) -> None:
         de = DifferentiableEngine(mock_engine, backend="numpy")
         state = np.zeros(6)
         control = np.zeros(3)
@@ -64,7 +66,7 @@ class TestDifferentiableEngine:
 class TestContactDifferentiableEngine:
     """Smoke tests for ContactDifferentiableEngine."""
 
-    def test_construction(self, mock_engine: MagicMock) -> None:
+    def test_differentiable_engine_construction(self, mock_engine: MagicMock) -> None:
         cde = ContactDifferentiableEngine(
             mock_engine, contact_method="smoothed", smoothing_factor=0.01
         )
@@ -75,7 +77,7 @@ class TestContactDifferentiableEngine:
 class TestOptimizationResult:
     """Smoke tests for OptimizationResult dataclass."""
 
-    def test_construction(self) -> None:
+    def test_differentiable_engine_construction(self) -> None:
         result = OptimizationResult(
             success=True,
             optimal_states=np.zeros((5, 6)),

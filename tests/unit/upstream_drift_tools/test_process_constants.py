@@ -49,7 +49,7 @@ class TestCelsiusToKelvin:
 
 
 class TestKelvinToCelsius:
-    def test_roundtrip(self) -> None:
+    def test_process_constants_roundtrip(self) -> None:
         original = 25.0
         assert abs(kelvin_to_celsius(celsius_to_kelvin(original)) - original) < 1e-6
 
@@ -66,7 +66,7 @@ class TestFahrenheitToKelvin:
 
 
 class TestKelvinToFahrenheit:
-    def test_roundtrip(self) -> None:
+    def test_process_constants_roundtrip(self) -> None:
         original = 350.0
         assert (
             abs(fahrenheit_to_kelvin(kelvin_to_fahrenheit(original)) - original) < 1e-6
@@ -91,7 +91,7 @@ class TestGetMolecularWeight:
         assert mw > 0
         assert mw < 0.01  # H2 is light: ~0.002 kg/mol
 
-    def test_case_insensitive(self) -> None:
+    def test_process_constants_case_insensitive(self) -> None:
         mw_upper = get_molecular_weight("CO2")
         mw_lower = get_molecular_weight("co2")
         assert abs(mw_upper - mw_lower) < 1e-10

@@ -111,7 +111,9 @@ def _loader_factory():
 # ---------------------------------------------------------------------------
 
 
-def test_three_epoch_run_reduces_val_loss(tmp_path: Path) -> None:
+def test_inverse_regressor_training_three_epoch_run_reduces_val_loss(
+    tmp_path: Path,
+) -> None:
     cfg = RegressorConfig(embed_dim=32, mlp_hidden=64, n_blocks=2, dropout=0.0)
     result = train_inverse_regressor(
         tmp_path,
@@ -142,7 +144,7 @@ def test_three_epoch_run_reduces_val_loss(tmp_path: Path) -> None:
     assert all(m.val_mse_physical >= 0 for m in result.history)
 
 
-def test_checkpoint_round_trip(tmp_path: Path) -> None:
+def test_inverse_regressor_training_checkpoint_round_trip(tmp_path: Path) -> None:
     cfg = RegressorConfig(embed_dim=32, mlp_hidden=64, n_blocks=2)
     result = train_inverse_regressor(
         tmp_path,
@@ -169,7 +171,7 @@ def test_checkpoint_round_trip(tmp_path: Path) -> None:
     torch.testing.assert_close(out_a, out_b)
 
 
-def test_invalid_epochs_rejected(tmp_path: Path) -> None:
+def test_inverse_regressor_training_invalid_epochs_rejected(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="epochs"):
         train_inverse_regressor(
             tmp_path,
@@ -180,7 +182,9 @@ def test_invalid_epochs_rejected(tmp_path: Path) -> None:
         )
 
 
-def test_invalid_val_fraction_rejected(tmp_path: Path) -> None:
+def test_inverse_regressor_training_invalid_val_fraction_rejected(
+    tmp_path: Path,
+) -> None:
     with pytest.raises(ValueError, match="val_fraction"):
         train_inverse_regressor(
             tmp_path,

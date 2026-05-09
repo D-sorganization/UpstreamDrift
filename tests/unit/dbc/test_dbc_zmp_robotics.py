@@ -237,7 +237,7 @@ class TestStabilityMargin(unittest.TestCase):
 class TestGroundHeightProperty(unittest.TestCase):
     """ground_height property setter/getter."""
 
-    def test_set_and_get(self) -> None:
+    def test_dbc_zmp_robotics_set_and_get(self) -> None:
         from src.robotics.locomotion.zmp_computer import ZMPComputer
 
         computer = ZMPComputer(_make_mock_engine())

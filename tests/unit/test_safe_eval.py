@@ -21,7 +21,7 @@ class TestValidateExpression:
         tree = validate_expression("1 + 2")
         assert tree is not None
 
-    def test_empty_raises(self) -> None:
+    def test_safe_eval_empty_raises(self) -> None:
         with pytest.raises(ValueError, match="empty"):
             validate_expression("")
 
@@ -50,7 +50,7 @@ class TestValidateExpression:
         with pytest.raises(ValueError, match="Unknown variable"):
             validate_expression("secret_var", allowed_names={"x"})
 
-    def test_syntax_error_raises_value_error(self) -> None:
+    def test_safe_eval_syntax_error_raises_value_error(self) -> None:
         with pytest.raises(ValueError, match="Invalid syntax"):
             validate_expression("1 +* 2")
 

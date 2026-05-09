@@ -27,7 +27,7 @@ class TestActivationDynamicsConstructorContracts(unittest.TestCase):
 
         return ActivationDynamics(tau_act, tau_deact, min_act)
 
-    def test_valid_construction(self) -> None:
+    def test_dbc_runtime_activation_valid_construction(self) -> None:
         dyn = self._make()
         self.assertIsNotNone(dyn)
 
@@ -74,12 +74,12 @@ class TestActivationDynamicsUpdateContracts(unittest.TestCase):
 
         return ActivationDynamics(tau_act=0.01, tau_deact=0.04)
 
-    def test_zero_dt_raises(self) -> None:
+    def test_dbc_runtime_activation_zero_dt_raises(self) -> None:
         dyn = self._make()
         with self.assertRaises((ValueError, Exception)):
             dyn.update(u=0.5, a=0.5, dt=0.0)  # type: ignore[attr-defined]
 
-    def test_negative_dt_raises(self) -> None:
+    def test_dbc_runtime_activation_negative_dt_raises(self) -> None:
         dyn = self._make()
         with self.assertRaises((ValueError, Exception)):
             dyn.update(u=0.5, a=0.5, dt=-0.001)  # type: ignore[attr-defined]
@@ -148,7 +148,7 @@ class TestActivationDynamicsPhysiologicalBehavior(unittest.TestCase):
 
         return ActivationDynamics(tau_act=0.01, tau_deact=0.04)
 
-    def test_activation_faster_than_deactivation(self) -> None:
+    def test_dbc_runtime_activation_activation_faster_than_deactivation(self) -> None:
         """Activation should reach 90% faster than deactivation reaches 10%."""
         dyn = self._make()
         dt = 0.001

@@ -48,7 +48,7 @@ class TestRootEndpoints:
         assert "version" in data
         assert data["status"] == "running"
 
-    def test_health_check(self, client: TestClient) -> None:
+    def test_api_server_health_check(self, client: TestClient) -> None:
         """Test GET /health returns health status."""
         response = client.get("/health")
         assert response.status_code == 200
@@ -59,7 +59,7 @@ class TestRootEndpoints:
 class TestEngineEndpoints:
     """Tests for physics engine management endpoints."""
 
-    def test_get_engines(self, client: TestClient) -> None:
+    def test_api_server_get_engines(self, client: TestClient) -> None:
         """Test GET /engines returns engine list."""
         response = client.get("/engines")
         assert response.status_code == 200

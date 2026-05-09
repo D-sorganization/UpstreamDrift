@@ -174,3 +174,38 @@ def test_known_simscape_chain_coordinates_present(model_xml: ET.Element) -> None
 
 
 _OPENSIM_AVAILABLE = importlib.util.find_spec("opensim") is not None
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.skipif(
+    not _OPENSIM_AVAILABLE,
+    reason=(
+        "OpenSim Python bindings not installed; "
+        "install via `pip install opensim` (Linux/Windows) or "
+        "`conda install -c opensim-org opensim` (macOS)."
+    ),
+)
+def test_model_loads_and_initsystem() -> None:
+    """Issue #4110 acceptance: model must load and initialize without error."""
+    import opensim as osim  # gated import; module-level import would fail when opensim is absent
+
+    model = osim.Model(str(MODEL_PATH))
+    state = model.initSystem()  # raises on any structural problem
+    assert state is not None
+
+    # Joint count: 22 articulated joints + 1 WeldJoint (hand_r_to_club) = 23.
+    assert model.getJointSet().getSize() == 23
+
+    # Coordinate count + actuator count parity.
+    n_coords = model.getCoordinateSet().getSize()
+    actuator_set = model.getActuators()
+    assert actuator_set.getSize() == n_coords, (
+        f"Expected one actuator per coordinate (n_coords={n_coords}), "
+        f"got {actuator_set.getSize()} actuators."
+    )
+
+    # Club body is present.
+    body_names = {
+        model.getBodySet().get(i).getName() for i in range(model.getBodySet().getSize())
+    }
+    assert "Club" in body_names

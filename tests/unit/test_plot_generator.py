@@ -61,14 +61,14 @@ def generator() -> PlotGenerator:
 class TestPlotConfig:
     """Tests for PlotConfig."""
 
-    def test_default_config(self) -> None:
+    def test_plot_generator_default_config(self) -> None:
         """Test default configuration values."""
         config = PlotConfig()
         assert config.output_format == "png"
         assert config.dpi == 150
         assert config.show_grid is True
 
-    def test_custom_config(self) -> None:
+    def test_plot_generator_custom_config(self) -> None:
         """Test custom configuration."""
         config = PlotConfig(
             output_format="svg",
@@ -110,6 +110,107 @@ class TestPlotTypes:
 
 
 # ---- Plot Generation Tests ----
+
+
+@pytest.mark.skipif(
+    not True,  # matplotlib is always importable in this env
+    reason="matplotlib not available",
+)
+class TestPlotGeneration:
+    """Tests for actual plot generation."""
+
+    def test_generate_single_plot(
+        self, generator: PlotGenerator, sample_data: SimulationData
+    ) -> None:
+        """Test generating a single plot."""
+        fig = generator.generate_single_plot(sample_data, PlotType.JOINT_POSITIONS)
+        assert fig is not None
+
+    def test_generate_single_plot_with_save(
+        self, generator: PlotGenerator, sample_data: SimulationData
+    ) -> None:
+        """Test generating and saving a single plot."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "test_plot.png"
+            generator.generate_single_plot(
+                sample_data, PlotType.JOINT_POSITIONS, output_path
+            )
+            assert output_path.exists()
+
+    def test_generate_all_standard_plots(
+        self, generator: PlotGenerator, sample_data: SimulationData
+    ) -> None:
+        """Test generating all standard plots."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated = generator.generate_standard_plots(sample_data, tmpdir)
+            assert len(generated) > 0
+            for path in generated:
+                assert path.exists()
+
+    def test_generate_joint_positions(
+        self, generator: PlotGenerator, sample_data: SimulationData
+    ) -> None:
+        """Test joint positions plot."""
+        fig = generator.generate_single_plot(sample_data, PlotType.JOINT_POSITIONS)
+        assert fig is not None
+
+    def test_generate_joint_velocities(
+        self, generator: PlotGenerator, sample_data: SimulationData
+    ) -> None:
+        """Test joint velocities plot."""
+        fig = generator.generate_single_plot(sample_data, PlotType.JOINT_VELOCITIES)
+        assert fig is not None
+
+    def test_generate_energy_plot(
+        self, generator: PlotGenerator, sample_data: SimulationData
+    ) -> None:
+        """Test energy plot."""
+        fig = generator.generate_single_plot(sample_data, PlotType.ENERGY)
+        assert fig is not None
+
+    def test_generate_phase_portrait(
+        self, generator: PlotGenerator, sample_data: SimulationData
+    ) -> None:
+        """Test phase portrait plot."""
+        fig = generator.generate_single_plot(sample_data, PlotType.PHASE_PORTRAIT)
+        assert fig is not None
+
+    def test_generate_contact_forces(
+        self, generator: PlotGenerator, sample_data: SimulationData
+    ) -> None:
+        """Test contact forces plot."""
+        fig = generator.generate_single_plot(sample_data, PlotType.CONTACT_FORCES)
+        assert fig is not None
+
+    def test_generate_drift_vs_control(
+        self, generator: PlotGenerator, sample_data: SimulationData
+    ) -> None:
+        """Test drift vs control decomposition plot."""
+        fig = generator.generate_single_plot(sample_data, PlotType.DRIFT_VS_CONTROL)
+        assert fig is not None
+
+    def test_generate_power_plot(
+        self, generator: PlotGenerator, sample_data: SimulationData
+    ) -> None:
+        """Test power plot."""
+        fig = generator.generate_single_plot(sample_data, PlotType.POWER)
+        assert fig is not None
+
+    def test_generate_mass_matrix_condition(
+        self, generator: PlotGenerator, sample_data: SimulationData
+    ) -> None:
+        """Test mass matrix condition number plot."""
+        fig = generator.generate_single_plot(
+            sample_data, PlotType.MASS_MATRIX_CONDITION
+        )
+        assert fig is not None
+
+    def test_unknown_plot_type(
+        self, generator: PlotGenerator, sample_data: SimulationData
+    ) -> None:
+        """Test unknown plot type returns None."""
+        fig = generator.generate_single_plot(sample_data, "unknown_type")
+        assert fig is None
 
 
 # ---- Missing Data Tests ----

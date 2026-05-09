@@ -34,7 +34,7 @@ class TestFrankensteinEditorFileSizes:
     """Each file must be under 700 LOC after split."""
 
     @pytest.mark.unit
-    def test_coordinator_loc(self) -> None:
+    def test_frankenstein_editor_split_2456_coordinator_loc(self) -> None:
         loc = _count_lines(EDITOR_DIR / "frankenstein_editor.py")
         assert loc <= LOC_BUDGET, (
             f"frankenstein_editor.py has {loc} LOC; budget {LOC_BUDGET}"

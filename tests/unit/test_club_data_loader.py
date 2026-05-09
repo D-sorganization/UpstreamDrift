@@ -170,7 +170,7 @@ class TestSwingMetrics:
         m = SwingMetrics(club_head_speed_mph=100.0, ball_speed_mph=150.0)
         assert abs(m.smash_factor - 1.5) < 1e-9
 
-    def test_to_dict_returns_dict(self) -> None:
+    def test_club_data_loader_to_dict_returns_dict(self) -> None:
         """to_dict returns a dict with all expected keys."""
         from src.shared.python.club_data.loader import SwingMetrics
 
@@ -231,7 +231,7 @@ class TestProPlayerData:
 class TestClubDataLoader:
     """Tests for ClubDataLoader class."""
 
-    def test_instantiation(self) -> None:
+    def test_club_data_loader_instantiation(self) -> None:
         """ClubDataLoader instantiates without error."""
         from src.shared.python.club_data.loader import ClubDataLoader
 
@@ -354,7 +354,7 @@ class TestLoadClubData:
         assert len(clubs) == 1
         assert clubs[0].name == "Driver"
 
-    def test_unsupported_format_raises(self, tmp_path: Path) -> None:
+    def test_club_data_loader_unsupported_format_raises(self, tmp_path: Path) -> None:
         """load_club_data raises ValueError for unsupported file extension."""
         from src.shared.python.club_data.loader import load_club_data
 

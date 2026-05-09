@@ -44,7 +44,7 @@ pytestmark = pytest.mark.unit
 class TestCrossEngineSimConfig:
     """Tests for CrossEngineSimConfig construction and validation."""
 
-    def test_defaults(self) -> None:
+    def test_cross_engine_dashboard_defaults(self) -> None:
         """Default configuration must have sensible values."""
         cfg = CrossEngineSimConfig()
         assert cfg.t_end == pytest.approx(1.5)
@@ -53,7 +53,7 @@ class TestCrossEngineSimConfig:
         assert cfg.n_trials == 10
         assert cfg.seed == 42
 
-    def test_custom_values(self) -> None:
+    def test_cross_engine_dashboard_custom_values(self) -> None:
         """Custom values must be stored correctly."""
         cfg = CrossEngineSimConfig(
             t_end=2.0, dt=0.005, noise_amplitude=0.5, n_trials=5, seed=7
@@ -103,7 +103,7 @@ class TestCrossEngineSimConfig:
 class TestStubEngine:
     """Tests for the _StubEngine stub implementation."""
 
-    def test_instantiation(self) -> None:
+    def test_cross_engine_dashboard_instantiation(self) -> None:
         """_StubEngine can be created with a non-empty name."""
         eng = _StubEngine("test_engine")
         assert eng is not None
@@ -138,7 +138,7 @@ class TestStubEngine:
         _, v = eng.get_state()
         assert np.any(v != 0.0)
 
-    def test_protocol_compliance(self) -> None:
+    def test_cross_engine_dashboard_protocol_compliance(self) -> None:
         """_StubEngine must satisfy the SteppableEngine protocol."""
         from src.shared.python.pendulum_simulator.cross_engine_perturbation import (
             SteppableEngine,
@@ -196,7 +196,7 @@ class TestRunHeadless:
 class TestArgParser:
     """Tests for the CLI argument parser."""
 
-    def test_defaults(self) -> None:
+    def test_cross_engine_dashboard_defaults(self) -> None:
         """Parser defaults must match CrossEngineSimConfig defaults."""
         parser = _build_arg_parser()
         args = parser.parse_args([])

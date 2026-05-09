@@ -22,7 +22,7 @@ _P = _make_params()
 
 
 class TestTriplePendulumParams:
-    def test_construction(self) -> None:
+    def test_physics_triple_construction(self) -> None:
         p = _make_params()
         assert isinstance(p, TriplePendulumParams)
 
@@ -38,7 +38,7 @@ class TestTriplePendulumParams:
         assert pytest.approx(0.5) == p.L2
         assert pytest.approx(0.4) == p.L3
 
-    def test_default_gravity(self) -> None:
+    def test_physics_triple_default_gravity(self) -> None:
         p = _make_params()
         assert p.g == pytest.approx(9.81)
 
@@ -48,7 +48,7 @@ class TestMassMatrix:
         M = mass_matrix(0.0, 0.0, _P)
         assert M.shape == (3, 3)
 
-    def test_is_symmetric(self) -> None:
+    def test_physics_triple_is_symmetric(self) -> None:
         M = mass_matrix(0.1, -0.2, _P)
         np.testing.assert_allclose(M, M.T, atol=1e-10)
 
@@ -57,11 +57,11 @@ class TestMassMatrix:
         eigenvalues = np.linalg.eigvalsh(M)
         assert np.all(eigenvalues > 0)
 
-    def test_finite_values(self) -> None:
+    def test_physics_triple_finite_values(self) -> None:
         M = mass_matrix(0.5, -0.3, _P)
         assert np.all(np.isfinite(M))
 
-    def test_angle_dependence(self) -> None:
+    def test_physics_triple_angle_dependence(self) -> None:
         M1 = mass_matrix(0.0, 0.0, _P)
         M2 = mass_matrix(0.5, 0.5, _P)
         assert not np.allclose(M1, M2)
@@ -72,7 +72,7 @@ class TestGravityVector:
         G = gravity_vector(0.0, 0.0, 0.0, _P)
         assert G.shape == (3,)
 
-    def test_finite_values(self) -> None:
+    def test_physics_triple_finite_values(self) -> None:
         G = gravity_vector(0.3, -0.2, 0.1, _P)
         assert np.all(np.isfinite(G))
 
@@ -89,21 +89,21 @@ class TestCoriolisVector:
         C = coriolis_vector(0.0, 0.0, 0.0, 0.0, 0.0, _P)
         assert C.shape == (3,)
 
-    def test_finite_values(self) -> None:
+    def test_physics_triple_finite_values(self) -> None:
         C = coriolis_vector(0.1, 0.2, 0.5, -0.3, 0.2, _P)
         assert np.all(np.isfinite(C))
 
-    def test_zero_velocities_zero_coriolis(self) -> None:
+    def test_physics_triple_zero_velocities_zero_coriolis(self) -> None:
         C = coriolis_vector(0.0, 0.0, 0.0, 0.0, 0.0, _P)
         np.testing.assert_allclose(C, [0.0, 0.0, 0.0], atol=1e-12)
 
 
 class TestForwardKinematics:
-    def test_returns_dict(self) -> None:
+    def test_physics_triple_returns_dict(self) -> None:
         result = forward_kinematics(0.0, 0.0, 0.0, _P)
         assert isinstance(result, dict)
 
-    def test_has_expected_keys(self) -> None:
+    def test_physics_triple_has_expected_keys(self) -> None:
         result = forward_kinematics(0.0, 0.0, 0.0, _P)
         assert "hub" in result
         assert "shoulder" in result
@@ -111,7 +111,7 @@ class TestForwardKinematics:
         assert "wrist2" in result
         assert "tip" in result
 
-    def test_finite_values(self) -> None:
+    def test_physics_triple_finite_values(self) -> None:
         result = forward_kinematics(0.3, -0.2, 0.1, _P)
         for val in result.values():
             assert np.isfinite(val[0]) and np.isfinite(val[1])

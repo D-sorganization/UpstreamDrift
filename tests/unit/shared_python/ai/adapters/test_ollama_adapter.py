@@ -67,7 +67,7 @@ def test_init_defaults() -> None:
     assert adapter._timeout == 120.0
 
 
-def test_get_client_import_error() -> None:
+def test_ollama_adapter_get_client_import_error() -> None:
     """Test missing httpx package."""
     adapter = OllamaAdapter()
 
@@ -85,7 +85,7 @@ def test_get_client_import_error() -> None:
         adapter._get_client()
 
 
-def test_get_client(adapter) -> None:
+def test_ollama_adapter_get_client(adapter) -> None:
     sys.modules["httpx"].Client.reset_mock()
     """Test client lazy loading."""
     client = adapter._get_client()
@@ -93,7 +93,7 @@ def test_get_client(adapter) -> None:
     assert adapter._client == client
 
 
-def test_capabilities(adapter) -> None:
+def test_ollama_adapter_capabilities(adapter) -> None:
     """Test capabilities declaration handling dynamic models."""
     caps = adapter.capabilities
     assert caps.provider_name == "ollama"
@@ -109,7 +109,7 @@ def test_capabilities(adapter) -> None:
 
 
 @patch("src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter._get_client")
-def test_validate_connection_success(mock_get_client, adapter) -> None:
+def test_ollama_adapter_validate_connection_success(mock_get_client, adapter) -> None:
     """Test successful connection validation."""
     mock_client = MagicMock()
     mock_response = MagicMock()
@@ -141,7 +141,7 @@ def test_validate_connection_missing_model(mock_get_client, adapter) -> None:
 
 
 @patch("src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter._get_client")
-def test_validate_connection_errors(mock_get_client, adapter) -> None:
+def test_ollama_adapter_validate_connection_errors(mock_get_client, adapter) -> None:
     import sys
 
     sys.modules["httpx"]
@@ -165,7 +165,7 @@ def test_validate_connection_errors(mock_get_client, adapter) -> None:
     assert "status 500" in msg
 
 
-def test_format_messages(adapter) -> None:
+def test_ollama_adapter_format_messages(adapter) -> None:
     """Test conversion of context history."""
     ctx = ConversationContext()
     ctx.user_expertise = ExpertiseLevel.BEGINNER
@@ -187,7 +187,7 @@ def test_format_messages(adapter) -> None:
 
 
 @patch("src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter._get_client")
-def test_send_message_success(mock_get_client, adapter) -> None:
+def test_ollama_adapter_send_message_success(mock_get_client, adapter) -> None:
     """Test successful send_message call."""
     mock_client = MagicMock()
     mock_response = MagicMock()
@@ -255,7 +255,7 @@ def test_send_message_errors(mock_get_client, adapter) -> None:
 
 
 @patch("src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter._get_client")
-def test_stream_response(mock_get_client, adapter) -> None:
+def test_ollama_adapter_stream_response(mock_get_client, adapter) -> None:
     """Test streaming chunk iterator handles NDJSON."""
     mock_client = MagicMock()
 

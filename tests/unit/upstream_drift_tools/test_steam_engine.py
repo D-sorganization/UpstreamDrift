@@ -12,7 +12,7 @@ from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine impo
 
 
 class TestSteamCalculationEngineInit:
-    def test_instantiates(self) -> None:
+    def test_steam_engine_instantiates(self) -> None:
         eng = SteamCalculationEngine()
         assert eng is not None
 
@@ -26,7 +26,7 @@ class TestCalculateWaterVaporPressure:
         vp = eng.calculate_water_vapor_pressure(25.0)
         assert vp > 0.0
 
-    def test_increases_with_temperature(self) -> None:
+    def test_steam_engine_increases_with_temperature(self) -> None:
         eng = SteamCalculationEngine()
         vp_low = eng.calculate_water_vapor_pressure(20.0)
         vp_high = eng.calculate_water_vapor_pressure(80.0)
@@ -39,7 +39,7 @@ class TestCalculateWaterVaporPressure:
         vp = eng.calculate_water_vapor_pressure(100.0)
         assert vp > 10000.0  # At least 10 kPa
 
-    def test_returns_float(self) -> None:
+    def test_steam_engine_returns_float(self) -> None:
         eng = SteamCalculationEngine()
         vp = eng.calculate_water_vapor_pressure(50.0)
         assert isinstance(vp, float)
@@ -74,7 +74,7 @@ class TestCalculateSaturatedPropertiesFromTemperature:
 
 
 class TestGetSaturationPressure:
-    def test_returns_float(self) -> None:
+    def test_steam_engine_returns_float(self) -> None:
         eng = SteamCalculationEngine()
         sp = eng.get_saturation_pressure(373.15)
         assert isinstance(sp, float)
@@ -85,7 +85,7 @@ class TestGetSaturationPressure:
         # Simplified model: within 10% of 101325 Pa
         assert abs(sp - 101325.0) / 101325.0 < 0.10
 
-    def test_increases_with_temperature(self) -> None:
+    def test_steam_engine_increases_with_temperature(self) -> None:
         eng = SteamCalculationEngine()
         sp_low = eng.get_saturation_pressure(300.0)
         sp_high = eng.get_saturation_pressure(400.0)
@@ -93,7 +93,7 @@ class TestGetSaturationPressure:
 
 
 class TestCalculateDewPoint:
-    def test_returns_float(self) -> None:
+    def test_steam_engine_returns_float(self) -> None:
         eng = SteamCalculationEngine()
         # partial_pressure_pa=3000 Pa at total_pressure_pa=101325 Pa
         dp = eng.calculate_dew_point(3000.0, 101325.0)

@@ -22,7 +22,7 @@ class TestDataFittingSplitStructure:
     """Split modules must exist after refactor."""
 
     @pytest.mark.unit
-    def test_models_module_exists(self) -> None:
+    def test_data_fitting_split_2456_models_module_exists(self) -> None:
         assert (VAL_DIR / "_data_fitting_models.py").exists()
 
     @pytest.mark.unit
@@ -34,12 +34,12 @@ class TestDataFittingFileSizes:
     """Each file must be under 600 LOC after split."""
 
     @pytest.mark.unit
-    def test_coordinator_loc(self) -> None:
+    def test_data_fitting_split_2456_coordinator_loc(self) -> None:
         loc = _count_lines(VAL_DIR / "data_fitting.py")
         assert loc <= LOC_BUDGET, f"data_fitting.py has {loc} LOC; budget {LOC_BUDGET}"
 
     @pytest.mark.unit
-    def test_models_loc(self) -> None:
+    def test_data_fitting_split_2456_models_loc(self) -> None:
         loc = _count_lines(VAL_DIR / "_data_fitting_models.py")
         assert loc <= LOC_BUDGET, (
             f"_data_fitting_models.py has {loc} LOC; budget {LOC_BUDGET}"

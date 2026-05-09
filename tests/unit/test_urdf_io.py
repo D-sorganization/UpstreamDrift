@@ -204,7 +204,9 @@ class TestURDFExporter:
             assert 'joint name="joint_0"' in urdf_str
 
 
-def test_convenience_functions(sample_urdf, mock_mujoco_model, tmp_path) -> None:
+def test_urdf_io_convenience_functions(
+    sample_urdf, mock_mujoco_model, tmp_path
+) -> None:
     """Test convenience functions."""
     import src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io as urdf_io_mod
 

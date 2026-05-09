@@ -56,7 +56,7 @@ def _make_params(cor: float = 0.83, friction: float = 0.4) -> object:
 class TestRigidBodyImpactPreconditions(unittest.TestCase):
     """RigidBodyImpactModel.solve() preconditions."""
 
-    def test_zero_mass_raises(self) -> None:
+    def test_dbc_impact_and_flight_zero_mass_raises(self) -> None:
         from src.shared.python.core.contracts import ContractViolationError
         from src.shared.python.physics.impact_model import RigidBodyImpactModel
 
@@ -65,7 +65,7 @@ class TestRigidBodyImpactPreconditions(unittest.TestCase):
         with self.assertRaises((ContractViolationError, ValueError)):
             model.solve(pre, _make_params())
 
-    def test_negative_mass_raises(self) -> None:
+    def test_dbc_impact_and_flight_negative_mass_raises(self) -> None:
         from src.shared.python.core.contracts import ContractViolationError
         from src.shared.python.physics.impact_model import RigidBodyImpactModel
 
@@ -176,14 +176,14 @@ class TestRigidBodyImpactPostconditions(unittest.TestCase):
 class TestSpringDamperPreconditions(unittest.TestCase):
     """SpringDamperImpactModel preconditions."""
 
-    def test_negative_dt_raises(self) -> None:
+    def test_dbc_impact_and_flight_negative_dt_raises(self) -> None:
         from src.shared.python.core.contracts import ContractViolationError
         from src.shared.python.physics.impact_model import SpringDamperImpactModel
 
         with self.assertRaises((ContractViolationError, ValueError)):
             SpringDamperImpactModel(dt=-1e-7)
 
-    def test_zero_dt_raises(self) -> None:
+    def test_dbc_impact_and_flight_zero_dt_raises(self) -> None:
         from src.shared.python.core.contracts import ContractViolationError
         from src.shared.python.physics.impact_model import SpringDamperImpactModel
 
@@ -252,7 +252,7 @@ class TestGearEffectPreconditions(unittest.TestCase):
 class TestBallFlightSimulatorInvariants(unittest.TestCase):
     """BallFlightSimulator invariants: ball.mass > 0, gravity > 0."""
 
-    def test_zero_mass_raises(self) -> None:
+    def test_dbc_impact_and_flight_zero_mass_raises(self) -> None:
         from src.shared.python.core.contracts import InvariantError
         from src.shared.python.physics.ball_flight_physics import (
             BallFlightSimulator,
@@ -262,7 +262,7 @@ class TestBallFlightSimulatorInvariants(unittest.TestCase):
         with self.assertRaises((InvariantError, ValueError)):
             BallFlightSimulator(ball=BallProperties(mass=0.0))
 
-    def test_negative_mass_raises(self) -> None:
+    def test_dbc_impact_and_flight_negative_mass_raises(self) -> None:
         from src.shared.python.core.contracts import InvariantError
         from src.shared.python.physics.ball_flight_physics import (
             BallFlightSimulator,
@@ -323,7 +323,7 @@ class TestSimulateTrajectoryPreconditions(unittest.TestCase):
         with self.assertRaises((ContractViolationError, ValueError)):
             sim.simulate_trajectory(launch)
 
-    def test_zero_dt_raises(self) -> None:
+    def test_dbc_impact_and_flight_zero_dt_raises(self) -> None:
         from src.shared.python.core.contracts import ContractViolationError
         from src.shared.python.physics.ball_flight_physics import (
             BallFlightSimulator,

@@ -75,7 +75,7 @@ class TestNoiseGenerator:
         )
         assert sig.values.shape == t.shape
 
-    def test_negative_amplitude_raises(
+    def test_signal_toolkit_noise_negative_amplitude_raises(
         self, gen: NoiseGenerator, t: np.ndarray
     ) -> None:
         with pytest.raises((ValueError, AssertionError)):
@@ -86,7 +86,7 @@ class TestNoiseGenerator:
         assert "noise_type" in sig.metadata
         assert "amplitude" in sig.metadata
 
-    def test_reproducible_with_seed(self, t: np.ndarray) -> None:
+    def test_signal_toolkit_noise_reproducible_with_seed(self, t: np.ndarray) -> None:
         g1 = NoiseGenerator(seed=123)
         g2 = NoiseGenerator(seed=123)
         s1 = g1.generate(t, noise_type=NoiseType.WHITE)
@@ -117,7 +117,7 @@ class TestAddNoiseToSignal:
         )
         assert noisy.values.shape == sine_signal.values.shape
 
-    def test_name_updated(self, sine_signal: Signal) -> None:
+    def test_signal_toolkit_noise_name_updated(self, sine_signal: Signal) -> None:
         noisy = add_noise_to_signal(sine_signal, amplitude=0.1, seed=1)
         assert "_noisy" in noisy.name
 
@@ -174,7 +174,7 @@ class TestDisturbanceSimulator:
         result = sim.generate(t)
         assert result.values.shape == t.shape
 
-    def test_add_step(self, t: np.ndarray) -> None:
+    def test_signal_toolkit_noise_add_step(self, t: np.ndarray) -> None:
         sim = DisturbanceSimulator(seed=0)
         sim.add_step(step_time=1.0, magnitude=2.0)
         result = sim.generate(t)

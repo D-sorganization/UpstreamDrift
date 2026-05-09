@@ -68,7 +68,7 @@ def widget(qtbot, mock_flight_models) -> Any:
     return widget
 
 
-def test_initialization(widget) -> None:
+def test_shot_tracer_initialization(widget) -> None:
     """Test that the widget initializes correctly."""
     assert widget.windowTitle() == ""  # Widget doesn't have a title, Window does
     assert widget.speed_spin.value() == 163.0

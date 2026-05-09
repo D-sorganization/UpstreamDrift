@@ -31,12 +31,12 @@ def _make_instance(n_samples: int = 50, n_joints: int = 3) -> PowerWorkMetricsMi
 
 
 class TestComputeWorkMetrics:
-    def test_returns_dict(self) -> None:
+    def test_power_work_metrics_returns_dict(self) -> None:
         obj = _make_instance()
         result = obj.compute_work_metrics(0)
         assert isinstance(result, dict)
 
-    def test_has_expected_keys(self) -> None:
+    def test_power_work_metrics_has_expected_keys(self) -> None:
         obj = _make_instance()
         result = obj.compute_work_metrics(0)
         assert result is not None
@@ -62,7 +62,7 @@ class TestComputeWorkMetrics:
         assert result is not None
         assert np.isfinite(result["net_work"])
 
-    def test_out_of_range_returns_none(self) -> None:
+    def test_power_work_metrics_out_of_range_returns_none(self) -> None:
         obj = _make_instance(n_joints=2)
         result = obj.compute_work_metrics(5)
         assert result is None
@@ -92,7 +92,7 @@ class TestComputeJointPowerMetrics:
         assert result is not None
         assert result.peak_absorption <= 0.0
 
-    def test_durations_non_negative(self) -> None:
+    def test_power_work_metrics_durations_non_negative(self) -> None:
         obj = _make_instance()
         result = obj.compute_joint_power_metrics(0)
         assert result is not None
@@ -105,7 +105,7 @@ class TestComputeJointPowerMetrics:
         assert result is not None
         assert np.isfinite(result.net_work)
 
-    def test_out_of_range_returns_none(self) -> None:
+    def test_power_work_metrics_out_of_range_returns_none(self) -> None:
         obj = _make_instance(n_joints=2)
         result = obj.compute_joint_power_metrics(5)
         assert result is None
@@ -148,7 +148,7 @@ class TestComputeImpulseMetrics:
 
 
 class TestComputePhaseSpacePathLength:
-    def test_returns_float(self) -> None:
+    def test_power_work_metrics_returns_float(self) -> None:
         obj = _make_instance()
         result = obj.compute_phase_space_path_length(0)
         assert isinstance(result, float)
@@ -187,14 +187,14 @@ class TestComputeJointStiffness:
         assert result is not None
         assert 0.0 <= result.r_squared <= 1.0
 
-    def test_out_of_range_returns_none(self) -> None:
+    def test_power_work_metrics_out_of_range_returns_none(self) -> None:
         obj = _make_instance(n_joints=2)
         result = obj.compute_joint_stiffness(5)
         assert result is None
 
 
 class TestComputeDynamicStiffness:
-    def test_returns_tuple_of_three(self) -> None:
+    def test_power_work_metrics_returns_tuple_of_three(self) -> None:
         obj = _make_instance(n_samples=100)
         result = obj.compute_dynamic_stiffness(0, window_size=10)
         assert len(result) == 3
@@ -210,7 +210,7 @@ class TestComputeDynamicStiffness:
         if len(stiffness) > 0:
             assert np.all(np.isfinite(stiffness))
 
-    def test_out_of_range_returns_empty(self) -> None:
+    def test_power_work_metrics_out_of_range_returns_empty(self) -> None:
         obj = _make_instance(n_joints=2)
         times, stiffness, r2 = obj.compute_dynamic_stiffness(5)
         assert len(times) == 0

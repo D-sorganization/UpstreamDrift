@@ -56,7 +56,7 @@ from src.engines.physics_engines.drake.python.motion_matching.simulate import (
 class TestSimOptions:
     """Validation of the canonical options dataclass."""
 
-    def test_defaults(self) -> None:
+    def test_drake_simulate_defaults(self) -> None:
         opts = SimOptions()
         assert opts.simulation_time_s == pytest.approx(0.3)
         assert opts.sample_rate_hz == pytest.approx(1000.0)
@@ -368,3 +368,37 @@ try:  # pragma: no cover - best-effort detection
     _pydrake_available = True
 except Exception:  # noqa: BLE001
     _pydrake_available = False
+
+
+@pytest.mark.requires_drake
+@pytest.mark.skipif(not _pydrake_available, reason="pydrake not installed")
+def test_live_simulate_zero_theta_falls_under_gravity() -> None:
+    """With theta = 0 the unactuated humanoid drops in -Z under gravity."""
+    pytest.importorskip("pydrake")
+
+    # Determine n_actuators from the canonical URDF before sizing theta.
+    from pydrake.multibody.parsing import Parser
+    from pydrake.multibody.plant import MultibodyPlant
+
+    plant = MultibodyPlant(0.001)
+    Parser(plant).AddModels(
+        str(
+            Path(__file__).resolve().parents[1]
+            / "src"
+            / "engines"
+            / "physics_engines"
+            / "drake"
+            / "models"
+            / "generated"
+            / "golfer.urdf"
+        )
+    )
+    plant.Finalize()
+    n_act = max(plant.num_actuators(), plant.num_velocities() - 6)
+    theta = np.zeros(n_act * COEFFS_PER_JOINT)
+
+    out = simulate_with_coefficients(
+        theta, options=SimOptions(simulation_time_s=0.05, sample_rate_hz=1000.0)
+    )
+    assert out.solver_status in {"success", "warning"}
+    assert np.all(np.isfinite(out.q))

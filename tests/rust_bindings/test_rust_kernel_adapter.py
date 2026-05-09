@@ -29,12 +29,12 @@ class TestRustKernelAvailability:
 class TestIntegratorConfig:
     """Test create_integrator_config adapter."""
 
-    def test_default_config(self) -> None:
+    def test_rust_kernel_adapter_default_config(self) -> None:
         """Default integrator config must have dt=0.001, max_steps=10000."""
         config = create_integrator_config()
         assert config is not None
 
-    def test_custom_config(self) -> None:
+    def test_rust_kernel_adapter_custom_config(self) -> None:
         """Custom config with specified parameters."""
         config = create_integrator_config(dt=0.01, max_steps=500)
         assert config is not None
@@ -51,12 +51,12 @@ class TestIntegratorConfig:
 class TestContactParameters:
     """Test create_contact_parameters adapter."""
 
-    def test_default_params(self) -> None:
+    def test_rust_kernel_adapter_default_params(self) -> None:
         """Default contact params must have sensible golf defaults."""
         params = create_contact_parameters()
         assert params is not None
 
-    def test_custom_params(self) -> None:
+    def test_rust_kernel_adapter_custom_params(self) -> None:
         """Custom contact params with specified COR and friction."""
         params = create_contact_parameters(cor=0.6, friction=0.3)
         assert params is not None

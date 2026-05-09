@@ -21,11 +21,11 @@ def teardown_function() -> None:
 
 
 class TestGetDriveColors:
-    def test_returns_list(self) -> None:
+    def test_torque_history_constants_returns_list(self) -> None:
         colors = get_drive_colors()
         assert isinstance(colors, list)
 
-    def test_non_empty(self) -> None:
+    def test_torque_history_constants_non_empty(self) -> None:
         colors = get_drive_colors()
         assert len(colors) > 0
 
@@ -52,11 +52,11 @@ class TestGetDriveColors:
 
 
 class TestGetFrictionColors:
-    def test_returns_list(self) -> None:
+    def test_torque_history_constants_returns_list(self) -> None:
         colors = get_friction_colors()
         assert isinstance(colors, list)
 
-    def test_non_empty(self) -> None:
+    def test_torque_history_constants_non_empty(self) -> None:
         assert len(get_friction_colors()) > 0
 
     def test_colorblind_mode(self) -> None:
@@ -69,11 +69,11 @@ class TestGetFrictionColors:
 
 
 class TestGetTotalColors:
-    def test_returns_list(self) -> None:
+    def test_torque_history_constants_returns_list(self) -> None:
         colors = get_total_colors()
         assert isinstance(colors, list)
 
-    def test_non_empty(self) -> None:
+    def test_torque_history_constants_non_empty(self) -> None:
         assert len(get_total_colors()) > 0
 
     def test_colorblind_mode(self) -> None:

@@ -35,7 +35,7 @@ class TestSwingStyle:
 
 
 class TestSwingModification:
-    def test_construct(self) -> None:
+    def test_swing_modifications_construct(self) -> None:
         mod = SwingModification(
             name="Test Mod",
             target_style=SwingStyle.CLASSIC,
@@ -46,7 +46,7 @@ class TestSwingModification:
         assert mod.name == "Test Mod"
         assert mod.expected_risk_reduction == 10.0
 
-    def test_default_parameters_empty(self) -> None:
+    def test_swing_modifications_default_parameters_empty(self) -> None:
         mod = SwingModification(
             name="Test",
             target_style=SwingStyle.MODERN,
@@ -73,7 +73,7 @@ class TestSwingModification:
 
 
 class TestModificationPlan:
-    def test_defaults(self) -> None:
+    def test_swing_modifications_defaults(self) -> None:
         plan = ModificationPlan()
         assert plan.primary_modification is None
         assert plan.secondary_modifications == []
@@ -91,7 +91,7 @@ class TestModificationPlan:
 
 
 class TestSwingModificationRecommender:
-    def test_construct(self) -> None:
+    def test_swing_modifications_construct(self) -> None:
         recommender = SwingModificationRecommender()
         assert recommender is not None
 

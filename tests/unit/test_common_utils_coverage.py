@@ -95,7 +95,7 @@ def test_standardize_joint_angles() -> None:
     assert len(df) == 2
 
 
-def test_plot_joint_trajectories() -> None:
+def test_common_utils_coverage_plot_joint_trajectories() -> None:
     """Test plotting function."""
     df = pd.DataFrame({"time": [0, 1], "joint_0": [0, 1], "joint_1": [2, 3]})
 
@@ -119,7 +119,7 @@ def test_plot_joint_trajectories() -> None:
         assert fig is mock_fig
 
 
-def test_get_shared_urdf_path() -> None:
+def test_common_utils_coverage_get_shared_urdf_path() -> None:
     """Test URDF path resolution."""
     # This relies on the actual filesystem of the repo, might return None or Path
     path = get_shared_urdf_path()

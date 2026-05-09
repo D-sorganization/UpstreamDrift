@@ -148,7 +148,7 @@ class TestAPIErrorContract:
             "Assertion failed: isinstance(result, APIError)"
         )
 
-    def test_to_dict_returns_dict(self) -> None:
+    def test_error_codes_to_dict_returns_dict(self) -> None:
         """Postcondition: to_dict returns a dictionary."""
         from src.api.utils.error_codes import APIError, ErrorCode
 
@@ -475,7 +475,7 @@ class TestRaiseApiError:
 class TestAllExports:
     """Tests for module __all__ exports."""
 
-    def test_all_exports_importable(self) -> None:
+    def test_error_codes_all_exports_importable(self) -> None:
         """Test that all __all__ exports are importable."""
         import src.api.utils.error_codes as ec
         from src.api.utils.error_codes import __all__

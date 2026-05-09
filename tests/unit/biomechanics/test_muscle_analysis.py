@@ -22,7 +22,7 @@ def _make_data(n_samples: int = 100, n_muscles: int = 4) -> np.ndarray:
 
 
 class TestMuscleSynergyAnalyzerConstruction:
-    def test_valid_construction(self) -> None:
+    def test_muscle_analysis_valid_construction(self) -> None:
         data = _make_data(100, 4)
         analyzer = MuscleSynergyAnalyzer(data)
         assert analyzer.n_muscles == 4

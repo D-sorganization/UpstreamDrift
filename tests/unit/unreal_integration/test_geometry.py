@@ -10,7 +10,7 @@ from src.unreal_integration.geometry import Quaternion, Vector3
 class TestVector3:
     """Tests for Vector3 class."""
 
-    def test_default_construction(self) -> None:
+    def test_geometry_default_construction(self) -> None:
         v = Vector3()
         assert v.x == 0.0
         assert v.y == 0.0
@@ -37,7 +37,7 @@ class TestVector3:
         with pytest.raises(ValueError):
             Vector3.from_numpy(np.array([1.0, 2.0]))
 
-    def test_from_dict(self) -> None:
+    def test_geometry_from_dict(self) -> None:
         v = Vector3.from_dict({"x": 1.0, "y": 2.0, "z": 3.0})
         assert v.x == 1.0
 
@@ -46,17 +46,17 @@ class TestVector3:
         arr = v.to_numpy()
         np.testing.assert_array_equal(arr, [1.0, 2.0, 3.0])
 
-    def test_to_dict(self) -> None:
+    def test_geometry_to_dict(self) -> None:
         v = Vector3(1.0, 2.0, 3.0)
         d = v.to_dict()
         assert d == {"x": 1.0, "y": 2.0, "z": 3.0}
 
-    def test_magnitude(self) -> None:
+    def test_geometry_magnitude(self) -> None:
         v = Vector3(3.0, 4.0, 0.0)
         # magnitude is a property, not a method
         assert v.magnitude == pytest.approx(5.0)
 
-    def test_normalized(self) -> None:
+    def test_geometry_normalized(self) -> None:
         v = Vector3(0.0, 0.0, 5.0)
         n = v.normalized()
         assert n.magnitude == pytest.approx(1.0)
@@ -67,7 +67,7 @@ class TestVector3:
         with pytest.raises(ValueError):
             v.normalized()
 
-    def test_dot_product(self) -> None:
+    def test_geometry_dot_product(self) -> None:
         a = Vector3(1.0, 0.0, 0.0)
         b = Vector3(0.0, 1.0, 0.0)
         assert a.dot(b) == pytest.approx(0.0)
@@ -76,7 +76,7 @@ class TestVector3:
         a = Vector3(1.0, 2.0, 3.0)
         assert a.dot(a) == pytest.approx(14.0)
 
-    def test_cross_product(self) -> None:
+    def test_geometry_cross_product(self) -> None:
         x = Vector3(1.0, 0.0, 0.0)
         y = Vector3(0.0, 1.0, 0.0)
         z = x.cross(y)
@@ -141,21 +141,21 @@ class TestQuaternion:
         q = Quaternion.identity()
         assert q.w == pytest.approx(1.0)
 
-    def test_from_dict(self) -> None:
+    def test_geometry_from_dict(self) -> None:
         q = Quaternion.from_dict({"w": 1.0, "x": 0.0, "y": 0.0, "z": 0.0})
         assert q.w == pytest.approx(1.0)
 
-    def test_to_dict(self) -> None:
+    def test_geometry_to_dict(self) -> None:
         q = Quaternion(1.0, 0.0, 0.0, 0.0)
         d = q.to_dict()
         assert d["w"] == 1.0
 
-    def test_magnitude(self) -> None:
+    def test_geometry_magnitude(self) -> None:
         q = Quaternion(1.0, 0.0, 0.0, 0.0)
         # magnitude is a property, not a method
         assert q.magnitude == pytest.approx(1.0)
 
-    def test_normalized(self) -> None:
+    def test_geometry_normalized(self) -> None:
         q = Quaternion(2.0, 0.0, 0.0, 0.0)
         n = q.normalized()
         assert n.magnitude == pytest.approx(1.0)

@@ -40,7 +40,7 @@ class TestStandardModelManagerInit:
 
 
 class TestListAvailableModels:
-    def test_returns_dict(self, tmp_path: Path) -> None:
+    def test_standard_models_returns_dict(self, tmp_path: Path) -> None:
         mgr = StandardModelManager(suite_root=tmp_path)
         result = mgr.list_available_models()
         assert isinstance(result, dict)

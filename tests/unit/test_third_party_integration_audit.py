@@ -130,6 +130,47 @@ class TestDrakeIntegrationAudit:
 
         assert DrakePhysicsEngine is not None
 
+    @skip_if_unavailable("drake")
+    def test_third_party_integration_audit_drake_engine_initialization(self) -> None:
+        """DrakePhysicsEngine must initialize without a model."""
+        from src.engines.physics_engines.drake.python.drake_physics_engine import (
+            DrakePhysicsEngine,
+        )
+
+        engine = DrakePhysicsEngine()
+        assert not engine.is_initialized
+        assert engine.model_name == ""
+
+    @skip_if_unavailable("drake")
+    def test_drake_protocol_methods_exist(self) -> None:
+        """DrakePhysicsEngine must implement all PhysicsEngine protocol methods."""
+        from src.engines.physics_engines.drake.python.drake_physics_engine import (
+            DrakePhysicsEngine,
+        )
+
+        engine = DrakePhysicsEngine()
+        required_methods = [
+            "load_from_path",
+            "load_from_string",
+            "reset",
+            "step",
+            "forward",
+            "get_state",
+            "set_state",
+            "set_control",
+            "get_time",
+            "compute_mass_matrix",
+            "compute_bias_forces",
+            "compute_gravity_forces",
+            "compute_inverse_dynamics",
+            "compute_contact_forces",
+            "compute_jacobian",
+            "compute_drift_acceleration",
+        ]
+        for method in required_methods:
+            assert hasattr(engine, method), f"Missing method: {method}"
+            assert callable(getattr(engine, method)), f"Not callable: {method}"
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # 3. MuJoCo Integration Tests (#1811)
@@ -150,6 +191,18 @@ class TestMuJoCoIntegrationAudit:
             content = conftest_path.read_text(encoding="utf-8")
             assert "mujoco" in content, (
                 "conftest.py should import mujoco early to avoid DLL conflicts"
+            )
+
+    @skip_if_unavailable("mujoco")
+    def test_mujoco_gl_environment(self) -> None:
+        """MUJOCO_GL should not be set to 'egl' on Windows (headless)."""
+        import os
+        import sys
+
+        if sys.platform == "win32":
+            gl = os.environ.get("MUJOCO_GL", "")
+            assert gl != "egl", (
+                "MUJOCO_GL=egl is invalid on Windows; use osmesa or glfw"
             )
 
 
@@ -183,6 +236,45 @@ class TestOpenSimIntegrationAudit:
 
         assert OpenSimPhysicsEngine is not None
 
+    @skip_if_unavailable("opensim")
+    def test_opensim_engine_initialization(self) -> None:
+        """OpenSimPhysicsEngine must initialize without model."""
+        from src.engines.physics_engines.opensim.python.opensim_physics_engine import (
+            OpenSimPhysicsEngine,
+        )
+
+        engine = OpenSimPhysicsEngine()
+        assert not engine.is_initialized
+        assert engine.model_name == ""
+
+    @skip_if_unavailable("opensim")
+    def test_opensim_protocol_methods_exist(self) -> None:
+        """OpenSimPhysicsEngine must implement all PhysicsEngine protocol methods."""
+        from src.engines.physics_engines.opensim.python.opensim_physics_engine import (
+            OpenSimPhysicsEngine,
+        )
+
+        engine = OpenSimPhysicsEngine()
+        required_methods = [
+            "load_from_path",
+            "load_from_string",
+            "reset",
+            "step",
+            "forward",
+            "get_state",
+            "set_state",
+            "set_control",
+            "get_time",
+            "compute_mass_matrix",
+            "compute_bias_forces",
+            "compute_gravity_forces",
+            "compute_inverse_dynamics",
+            "compute_jacobian",
+            "compute_drift_acceleration",
+        ]
+        for method in required_methods:
+            assert hasattr(engine, method), f"Missing method: {method}"
+
     def test_opensim_muscle_analysis_importable(self) -> None:
         """muscle_analysis.py must be importable."""
         from src.engines.physics_engines.opensim.python import muscle_analysis
@@ -209,6 +301,42 @@ class TestMyoSuiteIntegrationAudit:
         )
 
         assert MyoSuitePhysicsEngine is not None
+
+    @skip_if_unavailable("myosuite")
+    def test_myosuite_engine_initialization(self) -> None:
+        """MyoSuitePhysicsEngine must initialize."""
+        from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
+            MyoSuitePhysicsEngine,
+        )
+
+        engine = MyoSuitePhysicsEngine()
+        assert not engine.is_initialized
+
+    @skip_if_unavailable("myosuite")
+    def test_myosuite_protocol_methods_exist(self) -> None:
+        """MyoSuitePhysicsEngine must implement all PhysicsEngine protocol methods."""
+        from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
+            MyoSuitePhysicsEngine,
+        )
+
+        engine = MyoSuitePhysicsEngine()
+        required_methods = [
+            "load_from_path",
+            "load_from_string",
+            "reset",
+            "step",
+            "forward",
+            "get_state",
+            "set_state",
+            "set_control",
+            "get_time",
+            "compute_mass_matrix",
+            "compute_bias_forces",
+            "compute_inverse_dynamics",
+            "compute_jacobian",
+        ]
+        for method in required_methods:
+            assert hasattr(engine, method), f"Missing method: {method}"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

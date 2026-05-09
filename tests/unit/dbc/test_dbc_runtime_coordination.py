@@ -59,7 +59,7 @@ class TestCouplingAnglesPostconditions(unittest.TestCase):
         self.assertTrue(np.all(angles >= 0))
         self.assertTrue(np.all(angles < 360.0))
 
-    def test_out_of_range_returns_empty(self) -> None:
+    def test_dbc_runtime_coordination_out_of_range_returns_empty(self) -> None:
         obj = _make_mixin()
         angles = obj.compute_coupling_angles(0, 99)
         self.assertEqual(len(angles), 0)
@@ -87,7 +87,7 @@ class TestCoordinationMetricsPostconditions(unittest.TestCase):
         )
         self.assertAlmostEqual(pct_sum, 100.0, places=4)
 
-    def test_variability_non_negative(self) -> None:
+    def test_dbc_runtime_coordination_variability_non_negative(self) -> None:
         obj = _make_mixin()
         result = obj.compute_coordination_metrics(0, 1)
         self.assertIsNotNone(result)
@@ -100,7 +100,7 @@ class TestCoordinationMetricsPostconditions(unittest.TestCase):
         self.assertGreaterEqual(result.mean_coupling_angle, 0.0)
         self.assertLess(result.mean_coupling_angle, 360.0)
 
-    def test_out_of_range_returns_none(self) -> None:
+    def test_dbc_runtime_coordination_out_of_range_returns_none(self) -> None:
         obj = _make_mixin()
         result = obj.compute_coordination_metrics(0, 99)
         self.assertIsNone(result)
@@ -156,7 +156,7 @@ class TestPhaseAnglePostconditions(unittest.TestCase):
         self.assertGreater(len(angles), 0)
         self.assertTrue(np.all(np.isfinite(angles)))
 
-    def test_out_of_range_returns_empty(self) -> None:
+    def test_dbc_runtime_coordination_out_of_range_returns_empty(self) -> None:
         obj = _make_mixin()
         angles = obj.compute_phase_angle(99)
         self.assertEqual(len(angles), 0)
@@ -171,7 +171,7 @@ class TestCRPPostconditions(unittest.TestCase):
         self.assertGreater(len(crp), 0)
         self.assertTrue(np.all(np.isfinite(crp)))
 
-    def test_out_of_range_returns_empty(self) -> None:
+    def test_dbc_runtime_coordination_out_of_range_returns_empty(self) -> None:
         obj = _make_mixin()
         crp = obj.compute_continuous_relative_phase(0, 99)
         self.assertEqual(len(crp), 0)

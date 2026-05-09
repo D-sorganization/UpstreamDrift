@@ -12,7 +12,7 @@ from src.shared.python.validation_pkg.workflow_diagnostics import (
 
 
 class TestWorkflowDiagnosticContextBasic:
-    def test_construction(self, tmp_path: Path) -> None:
+    def test_workflow_diagnostics_construction(self, tmp_path: Path) -> None:
         ctx = WorkflowDiagnosticContext(str(tmp_path), "test_workflow")
         assert ctx.workflow_name == "test_workflow"
         assert ctx.dump_dir == tmp_path

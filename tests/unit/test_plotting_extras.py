@@ -23,7 +23,7 @@ class _MockRecorder:
 
 
 class TestAnimationConfig:
-    def test_default_construction(self) -> None:
+    def test_plotting_extras_default_construction(self) -> None:
         config = AnimationConfig()
         assert config is not None
 
@@ -37,7 +37,7 @@ class TestAnimationConfig:
 
 
 class TestSwingAnimator:
-    def test_construction(self) -> None:
+    def test_plotting_extras_construction(self) -> None:
         animator = SwingAnimator(_MockRecorder())
         assert animator is not None
 

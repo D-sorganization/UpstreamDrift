@@ -293,7 +293,7 @@ class TestSwingPlaneVisualizer:
         assert "fsp" in data
         assert "trajectory" in data
 
-    def test_reset_clears_state(self) -> None:
+    def test_swing_plane_visualization_reset_clears_state(self) -> None:
         """Reset should clear all state."""
         viz = SwingPlaneVisualizer()
 

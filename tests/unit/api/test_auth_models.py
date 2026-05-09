@@ -209,7 +209,7 @@ class TestLoginRequestContract:
 class TestLoginResponseContract:
     """Design by Contract tests for LoginResponse model."""
 
-    def test_has_required_fields(self) -> None:
+    def test_auth_models_has_required_fields(self) -> None:
         """Postcondition: Has all required response fields."""
         from src.api.auth.models import (
             LoginResponse,

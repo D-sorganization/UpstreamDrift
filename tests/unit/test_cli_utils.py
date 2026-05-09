@@ -216,7 +216,7 @@ class TestGetEffectiveLogLevel:
 class TestPathType:
     """Tests for path_type function."""
 
-    def test_returns_path(self) -> None:
+    def test_cli_utils_returns_path(self) -> None:
         """Should return Path object."""
         validator = path_type()
         result = validator("/some/path")

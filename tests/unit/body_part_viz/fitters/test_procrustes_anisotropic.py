@@ -22,7 +22,7 @@ def _binding(n_markers: int = 4) -> MarkerBinding:
     return MarkerBinding(kind=BindingKind.CLUSTER, marker_names=names)
 
 
-def test_implements_shape_fitter_protocol() -> None:
+def test_procrustes_anisotropic_implements_shape_fitter_protocol() -> None:
     assert isinstance(ProcrustesAnisotropicFitter(), ShapeFitter)
 
 
@@ -81,7 +81,7 @@ def test_too_few_markers_logs_warning_and_falls_back_to_kabsch(
     assert np.allclose(fitted.scale, 1.0)
 
 
-def test_wrong_binding_kind_raises_type_error() -> None:
+def test_procrustes_anisotropic_wrong_binding_kind_raises_type_error() -> None:
     binding = MarkerBinding(kind=BindingKind.BETWEEN_TWO, marker_names=("a", "b"))
     with pytest.raises(TypeError, match="CLUSTER"):
         ProcrustesAnisotropicFitter().fit(

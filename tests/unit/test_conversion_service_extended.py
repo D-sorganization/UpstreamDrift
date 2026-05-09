@@ -310,7 +310,7 @@ class TestValidationHelpers:
 class TestModuleConvert:
     """Tests for the module-level convert() function."""
 
-    def test_basic_conversion(self) -> None:
+    def test_conversion_service_extended_basic_conversion(self) -> None:
         """convert() returns a numeric result for a valid unit pair."""
         from src.shared.python.upstream_drift_tools.calculators.conversion.service import (
             convert,

@@ -121,7 +121,7 @@ class TestWindowSetup:
         assert gui.width() == 640
         assert gui.height() == 480
 
-    def test_initial_state(self, gui: ConcreteSimGUI) -> None:
+    def test_simulation_gui_base_initial_state(self, gui: ConcreteSimGUI) -> None:
         assert gui.operating_mode == "dynamic"
         assert gui.is_running is False
         assert gui.sim_time == 0.0

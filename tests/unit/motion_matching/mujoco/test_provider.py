@@ -104,7 +104,7 @@ class TestRegistration:
         assert isinstance(provider, MujocoFitSwingProvider)
         assert provider.engine_name == "mujoco"
 
-    def test_capability_flags(self) -> None:
+    def test_provider_capability_flags(self) -> None:
         provider = MujocoFitSwingProvider()
         assert provider.supports_body_target() is False
         assert provider.supports_ball_target() is False

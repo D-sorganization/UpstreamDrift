@@ -60,7 +60,7 @@ def pipeline(mock_cv2, mock_output_manager) -> VideoPosePipeline:
     return pipeline
 
 
-def test_initialization(pipeline) -> None:
+def test_video_pose_pipeline_initialization(pipeline) -> None:
     """Test pipeline initialization."""
     assert pipeline.config.estimator_type == "mediapipe"
     assert pipeline.estimator is not None

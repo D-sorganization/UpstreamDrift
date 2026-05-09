@@ -219,7 +219,7 @@ class TestPose6DOF:
 class TestTransform6DOF:
     """Tests for Transform6DOF class - 6DOF rigid body transformations."""
 
-    def test_identity_transform(self) -> None:
+    def test_pose6dof_placement_identity_transform(self) -> None:
         """Test identity transformation."""
         T = Transform6DOF.identity()
         np.testing.assert_allclose(T.translation, [0, 0, 0], atol=1e-10)

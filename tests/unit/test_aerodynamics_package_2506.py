@@ -35,7 +35,7 @@ class TestAerodynamicsPackageStructure:
         assert (AERO_PKG / "_config.py").exists()
 
     @pytest.mark.unit
-    def test_models_module_exists(self) -> None:
+    def test_aerodynamics_package_2506_models_module_exists(self) -> None:
         assert (AERO_PKG / "_models.py").exists()
 
     @pytest.mark.unit
@@ -65,7 +65,7 @@ class TestAerodynamicsFileSizes:
         assert loc <= LOC_BUDGET, f"_config.py has {loc} LOC; budget {LOC_BUDGET}"
 
     @pytest.mark.unit
-    def test_models_loc(self) -> None:
+    def test_aerodynamics_package_2506_models_loc(self) -> None:
         loc = _count_lines(AERO_PKG / "_models.py")
         assert loc <= LOC_BUDGET, f"_models.py has {loc} LOC; budget {LOC_BUDGET}"
 

@@ -109,7 +109,7 @@ class TestApplyRateLimiter:
         with pytest.raises((ValueError, AssertionError)):
             apply_rate_limiter(sine_signal, max_rate=-1.0)
 
-    def test_name_updated(self, sine_signal: Signal) -> None:
+    def test_signal_toolkit_limits_name_updated(self, sine_signal: Signal) -> None:
         limited = apply_rate_limiter(sine_signal, max_rate=5.0)
         assert "_rate_limited" in limited.name
 
@@ -169,7 +169,7 @@ class TestApplyHysteresis:
         # should contain -5 or 5
         assert np.max(result.values) <= 5.0 + 1e-3
 
-    def test_name_updated(self, sine_signal: Signal) -> None:
+    def test_signal_toolkit_limits_name_updated(self, sine_signal: Signal) -> None:
         result = apply_hysteresis(sine_signal, threshold_up=1.0, threshold_down=-1.0)
         assert "_hysteresis" in result.name
 
@@ -193,7 +193,7 @@ class TestApplyBacklash:
         with pytest.raises(ValueError):
             apply_backlash(sine_signal, backlash_width=0.1, smoothness=0.0)
 
-    def test_name_updated(self, sine_signal: Signal) -> None:
+    def test_signal_toolkit_limits_name_updated(self, sine_signal: Signal) -> None:
         result = apply_backlash(sine_signal, backlash_width=0.1)
         assert "_backlash" in result.name
 

@@ -89,7 +89,7 @@ class TestAngularMomentumMetricsMixin:
         assert result is not None
         assert result.variability == pytest.approx(0.0, abs=1e-10)
 
-    def test_variability_non_negative(self) -> None:
+    def test_angular_momentum_variability_non_negative(self) -> None:
         rng = np.random.default_rng(42)
         am = rng.standard_normal((20, 3))
         times = np.linspace(0.0, 1.0, 20)

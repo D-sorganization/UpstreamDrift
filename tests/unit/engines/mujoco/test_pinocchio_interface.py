@@ -47,7 +47,7 @@ class TestPinocchioWrapper:
 
         assert isinstance(wrapper, PinocchioWrapper)
 
-    def test_compute_inverse_dynamics(self, simple_model) -> None:
+    def test_pinocchio_interface_compute_inverse_dynamics(self, simple_model) -> None:
         """Test inverse dynamics computation."""
         model, data = simple_model
         wrapper = PinocchioWrapper(model, data)
@@ -79,7 +79,7 @@ class TestPinocchioWrapper:
         assert a.shape == (model.nv,)
         assert np.all(np.isfinite(a))
 
-    def test_compute_mass_matrix(self, simple_model) -> None:
+    def test_pinocchio_interface_compute_mass_matrix(self, simple_model) -> None:
         """Test mass matrix computation."""
         model, data = simple_model
         wrapper = PinocchioWrapper(model, data)

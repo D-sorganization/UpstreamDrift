@@ -116,7 +116,7 @@ class TestFromSi:
         result = from_si(math.pi, UnitCategory.ANGLE, prefs)
         assert result == pytest.approx(180.0, rel=1e-6)
 
-    def test_round_trip(self) -> None:
+    def test_unit_converter_round_trip(self) -> None:
         prefs = UnitPreferences()
         prefs.set_unit(UnitCategory.LENGTH, "in")
         value = 5.3
@@ -126,7 +126,7 @@ class TestFromSi:
 
 
 class TestGetAvailableUnits:
-    def test_returns_list(self) -> None:
+    def test_unit_converter_returns_list(self) -> None:
         units = get_available_units(UnitCategory.LENGTH)
         assert isinstance(units, list)
 
@@ -141,7 +141,7 @@ class TestGetAvailableUnits:
 
 
 class TestGetPresetNames:
-    def test_returns_list(self) -> None:
+    def test_unit_converter_returns_list(self) -> None:
         names = get_preset_names()
         assert isinstance(names, list)
 

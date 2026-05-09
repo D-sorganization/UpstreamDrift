@@ -41,7 +41,7 @@ def _layer(
 
 
 class TestLayerConfig:
-    def test_name_stored(self) -> None:
+    def test_trc_geometry_name_stored(self) -> None:
         lc = _layer("Refractory")
         assert lc.name == "Refractory"
 

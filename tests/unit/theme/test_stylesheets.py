@@ -26,11 +26,11 @@ _THEME: dict[str, str] = {
 
 
 class TestGenerateStylesheet:
-    def test_returns_string(self) -> None:
+    def test_stylesheets_returns_string(self) -> None:
         result = generate_stylesheet(_THEME)
         assert isinstance(result, str)
 
-    def test_nonempty(self) -> None:
+    def test_stylesheets_nonempty(self) -> None:
         result = generate_stylesheet(_THEME)
         assert len(result) > 0
 
@@ -60,11 +60,11 @@ class TestGenerateStylesheet:
 
 
 class TestGenerateMinimalStylesheet:
-    def test_returns_string(self) -> None:
+    def test_stylesheets_returns_string(self) -> None:
         result = generate_minimal_stylesheet(_THEME)
         assert isinstance(result, str)
 
-    def test_nonempty(self) -> None:
+    def test_stylesheets_nonempty(self) -> None:
         result = generate_minimal_stylesheet(_THEME)
         assert len(result) > 0
 

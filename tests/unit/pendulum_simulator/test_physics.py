@@ -28,7 +28,7 @@ _P = _make_params()
 
 
 class TestPendulumParams:
-    def test_construction(self) -> None:
+    def test_physics_construction(self) -> None:
         p = _make_params()
         assert isinstance(p, PendulumParams)
 
@@ -39,7 +39,7 @@ class TestPendulumParams:
         assert pytest.approx(0.65) == p.L1
         assert pytest.approx(1.10) == p.L2
 
-    def test_default_gravity(self) -> None:
+    def test_physics_default_gravity(self) -> None:
         p = _make_params()
         assert p.g == pytest.approx(9.81)
 
@@ -57,11 +57,11 @@ class TestPendulumParams:
         assert p.mu1 == pytest.approx(0.0)
         assert p.mu2 == pytest.approx(0.0)
 
-    def test_custom_params(self) -> None:
+    def test_physics_custom_params(self) -> None:
         p = PendulumParams(m1=1.0, m2=0.2, L1=1.0, L2=0.5, mClub=0.1, g=9.81)
         assert p.mClub == pytest.approx(0.1)
 
-    def test_negative_mass_raises(self) -> None:
+    def test_physics_negative_mass_raises(self) -> None:
         with pytest.raises(AssertionError):
             PendulumParams(m1=-1.0, m2=0.3, L1=0.65, L2=1.10)
 
@@ -71,7 +71,7 @@ class TestPendulumParams:
 
 
 class TestJointLimits:
-    def test_construction(self) -> None:
+    def test_physics_construction(self) -> None:
         jl = JointLimits()
         assert isinstance(jl, JointLimits)
 
@@ -85,7 +85,7 @@ class TestJointLimits:
 
 
 class TestTorqueClamp:
-    def test_construction(self) -> None:
+    def test_physics_construction(self) -> None:
         tc = TorqueClamp()
         assert tc.max_torque1 == float("inf")
 
@@ -100,7 +100,7 @@ class TestMassMatrix:
         M = mass_matrix(0.0, _P)
         assert M.shape == (2, 2)
 
-    def test_is_symmetric(self) -> None:
+    def test_physics_is_symmetric(self) -> None:
         M = mass_matrix(0.3, _P)
         np.testing.assert_allclose(M, M.T, atol=1e-12)
 
@@ -109,22 +109,22 @@ class TestMassMatrix:
         eigenvalues = np.linalg.eigvalsh(M)
         assert np.all(eigenvalues > 0)
 
-    def test_finite_values(self) -> None:
+    def test_physics_finite_values(self) -> None:
         M = mass_matrix(-0.5, _P)
         assert np.all(np.isfinite(M))
 
-    def test_angle_dependence(self) -> None:
+    def test_physics_angle_dependence(self) -> None:
         M1 = mass_matrix(0.0, _P)
         M2 = mass_matrix(1.0, _P)
         assert not np.allclose(M1, M2)
 
 
 class TestMassMatrixComponents:
-    def test_returns_dict(self) -> None:
+    def test_physics_returns_dict(self) -> None:
         result = mass_matrix_components(0.0, _P)
         assert isinstance(result, dict)
 
-    def test_has_expected_keys(self) -> None:
+    def test_physics_has_expected_keys(self) -> None:
         result = mass_matrix_components(0.0, _P)
         assert "M11" in result
         assert "M12" in result
@@ -142,11 +142,11 @@ class TestMassMatrixComponents:
 
 
 class TestGravityVector:
-    def test_returns_shape_2(self) -> None:
+    def test_physics_returns_shape_2(self) -> None:
         G = gravity_vector(0.0, 0.0, _P)
         assert G.shape == (2,)
 
-    def test_finite_values(self) -> None:
+    def test_physics_finite_values(self) -> None:
         G = gravity_vector(0.3, -0.2, _P)
         assert np.all(np.isfinite(G))
 
@@ -155,28 +155,28 @@ class TestGravityVector:
         G = gravity_vector(0.3, 0.2, p_no_g)
         np.testing.assert_allclose(G, [0.0, 0.0])
 
-    def test_angle_dependence(self) -> None:
+    def test_physics_angle_dependence(self) -> None:
         G1 = gravity_vector(0.0, 0.0, _P)
         G2 = gravity_vector(0.5, 0.5, _P)
         assert not np.allclose(G1, G2)
 
 
 class TestCoriolisVector:
-    def test_returns_shape_2(self) -> None:
+    def test_physics_returns_shape_2(self) -> None:
         C = coriolis_vector(0.0, 0.0, 0.0, _P)
         assert C.shape == (2,)
 
-    def test_finite_values(self) -> None:
+    def test_physics_finite_values(self) -> None:
         C = coriolis_vector(0.2, 0.5, -0.3, _P)
         assert np.all(np.isfinite(C))
 
-    def test_zero_velocities_zero_coriolis(self) -> None:
+    def test_physics_zero_velocities_zero_coriolis(self) -> None:
         C = coriolis_vector(0.0, 0.0, 0.0, _P)
         np.testing.assert_allclose(C, [0.0, 0.0], atol=1e-12)
 
 
 class TestFrictionTorqueVector:
-    def test_returns_shape_2(self) -> None:
+    def test_physics_returns_shape_2(self) -> None:
         tau = friction_torque_vector(0.0, 0.0, _P)
         assert tau.shape == (2,)
 
@@ -193,11 +193,11 @@ class TestFrictionTorqueVector:
 
 
 class TestForwardKinematics:
-    def test_returns_dict(self) -> None:
+    def test_physics_returns_dict(self) -> None:
         result = forward_kinematics(0.0, 0.0, _P)
         assert isinstance(result, dict)
 
-    def test_has_expected_keys(self) -> None:
+    def test_physics_has_expected_keys(self) -> None:
         result = forward_kinematics(0.0, 0.0, _P)
         assert "shoulder" in result
         assert "wrist" in result
@@ -220,7 +220,7 @@ class TestForwardKinematics:
         dist = np.hypot(tx - wx, ty - wy)
         assert dist == pytest.approx(_P.L2, abs=1e-9)
 
-    def test_finite_values(self) -> None:
+    def test_physics_finite_values(self) -> None:
         result = forward_kinematics(0.3, -0.2, _P)
         for key, val in result.items():
             assert np.isfinite(val[0]) and np.isfinite(val[1]), f"Non-finite at {key}"
@@ -256,7 +256,7 @@ class TestPotentialEnergy:
         pe = potential_energy(state, _P)
         assert np.isfinite(pe)
 
-    def test_angle_dependence(self) -> None:
+    def test_physics_angle_dependence(self) -> None:
         state1 = np.array([0.0, 0.0, 0.0, 0.0])
         state2 = np.array([1.0, 0.5, 0.0, 0.0])
         pe1 = potential_energy(state1, _P)

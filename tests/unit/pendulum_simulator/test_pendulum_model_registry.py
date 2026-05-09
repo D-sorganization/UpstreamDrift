@@ -25,7 +25,7 @@ def _make_config(name: str = "TestModel", n_dof: int = 2) -> ModelConfig:
 
 
 class TestModelConfig:
-    def test_instantiates(self) -> None:
+    def test_pendulum_model_registry_instantiates(self) -> None:
         cfg = _make_config()
         assert cfg is not None
 

@@ -51,7 +51,7 @@ class TestGetEngineStatus:
         status = get_engine_status("sys")
         assert isinstance(status, EngineStatus)
 
-    def test_case_insensitive(self) -> None:
+    def test_engine_availability_case_insensitive(self) -> None:
         s1 = get_engine_status("numpy")
         s2 = get_engine_status("NUMPY")
         assert s1 == s2
@@ -69,7 +69,7 @@ class TestGetEngineStatus:
 
 
 class TestIsEngineAvailable:
-    def test_numpy_available(self) -> None:
+    def test_engine_availability_numpy_available(self) -> None:
         assert is_engine_available("numpy") is True
 
     def test_missing_engine_not_available(self) -> None:
@@ -111,7 +111,7 @@ class TestGetEngineCollections:
         unavailable = set(get_unavailable_engines())
         assert available.isdisjoint(unavailable)
 
-    def test_all_are_strings(self) -> None:
+    def test_engine_availability_all_are_strings(self) -> None:
         for name in get_available_engines():
             assert isinstance(name, str)
         for name in get_unavailable_engines():

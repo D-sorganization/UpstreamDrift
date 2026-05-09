@@ -109,7 +109,7 @@ def gusty_wind() -> WindConfig:
 class TestEnhancedSimulatorInit:
     """Tests for enhanced simulator initialization."""
 
-    def test_default_initialization(self) -> None:
+    def test_enhanced_ball_flight_default_initialization(self) -> None:
         """Test simulator initializes with defaults."""
         sim = EnhancedBallFlightSimulator()
         assert sim.ball is not None

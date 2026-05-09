@@ -59,7 +59,7 @@ class TestMediaPipeEstimator:
             )
             yield estimator
 
-    def test_initialization(
+    def test_mediapipe_estimator_initialization(
         self, estimator_instance: mediapipe_estimator.MediaPipeEstimator
     ) -> None:
         """Test initialization of the estimator."""

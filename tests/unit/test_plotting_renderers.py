@@ -37,7 +37,7 @@ def _make_dm() -> DataManager:
 
 
 class TestDataManager:
-    def test_construction(self) -> None:
+    def test_plotting_renderers_construction(self) -> None:
         dm = _make_dm()
         assert dm is not None
 
@@ -49,66 +49,66 @@ class TestDataManager:
 
 
 class TestClubRenderer:
-    def test_construction(self) -> None:
+    def test_plotting_renderers_construction(self) -> None:
         renderer = ClubRenderer(_make_dm())
         assert renderer is not None
 
 
 class TestEnergyRenderer:
-    def test_construction(self) -> None:
+    def test_plotting_renderers_construction(self) -> None:
         renderer = EnergyRenderer(_make_dm())
         assert renderer is not None
 
 
 class TestKinematicsRenderer:
-    def test_construction(self) -> None:
+    def test_plotting_renderers_construction(self) -> None:
         renderer = KinematicsRenderer(_make_dm())
         assert renderer is not None
 
 
 class TestKineticsRenderer:
-    def test_construction(self) -> None:
+    def test_plotting_renderers_construction(self) -> None:
         renderer = KineticsRenderer(_make_dm())
         assert renderer is not None
 
 
 class TestStabilityRenderer:
-    def test_construction(self) -> None:
+    def test_plotting_renderers_construction(self) -> None:
         renderer = StabilityRenderer(_make_dm())
         assert renderer is not None
 
 
 class TestVectorsRenderer:
-    def test_construction(self) -> None:
+    def test_plotting_renderers_construction(self) -> None:
         renderer = VectorOverlayRenderer(_make_dm())
         assert renderer is not None
 
 
 class TestSignalRenderer:
-    def test_construction(self) -> None:
+    def test_plotting_renderers_construction(self) -> None:
         renderer = SignalRenderer(_make_dm())
         assert renderer is not None
 
 
 class TestComparisonRenderer:
-    def test_construction(self) -> None:
+    def test_plotting_renderers_construction(self) -> None:
         renderer = ComparisonRenderer(_make_dm())
         assert renderer is not None
 
 
 class TestCoordinationRenderer:
-    def test_construction(self) -> None:
+    def test_plotting_renderers_construction(self) -> None:
         renderer = CoordinationRenderer(_make_dm())
         assert renderer is not None
 
 
 class TestDashboardRenderer:
-    def test_construction(self) -> None:
+    def test_plotting_renderers_construction(self) -> None:
         renderer = DashboardRenderer(_make_dm())
         assert renderer is not None
 
 
 class TestGolfSwingPlotter:
-    def test_construction(self) -> None:
+    def test_plotting_renderers_construction(self) -> None:
         plotter = GolfSwingPlotter(_MockRecorder(), joint_names=["hip", "knee"])
         assert plotter is not None

@@ -28,7 +28,7 @@ class TestMetricStatistics:
             p95=3.5,
         )
 
-    def test_to_dict_returns_dict(self) -> None:
+    def test_statistics_to_dict_returns_dict(self) -> None:
         assert isinstance(self._make().to_dict(), dict)
 
     def test_to_dict_has_all_keys(self) -> None:
@@ -105,7 +105,7 @@ class TestComputeMetricStatistics:
         stats = compute_metric_statistics(values)
         assert stats.mean == 7.0
 
-    def test_empty_raises(self) -> None:
+    def test_statistics_empty_raises(self) -> None:
         with pytest.raises((ValueError, AssertionError)):
             compute_metric_statistics(np.array([]))
 

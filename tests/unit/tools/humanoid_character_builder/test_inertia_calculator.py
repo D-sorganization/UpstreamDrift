@@ -21,7 +21,7 @@ from humanoid_character_builder.mesh.primitive_inertia import (
 class TestInertiaResult:
     """Tests for InertiaResult class."""
 
-    def test_default_creation(self) -> None:
+    def test_inertia_calculator_default_creation(self) -> None:
         result = InertiaResult.create_default(mass=1.0)
         assert result.mass == 1.0
         assert result.ixx > 0

@@ -102,7 +102,7 @@ class TestEnergyMetricsPostconditions(unittest.TestCase):
             h.club_head_speed = chs  # type: ignore[attr-defined]
         return h
 
-    def test_all_values_finite(self) -> None:
+    def test_dbc_runtime_analysis_metrics_all_values_finite(self) -> None:
         h = self._host(np.array([0.0, 5.0, 10.0, 8.0]))
         result = h.compute_energy_metrics(  # type: ignore[attr-defined]
             np.array([0.0, 10.0, 50.0, 30.0]),
@@ -193,7 +193,7 @@ class TestAngularMomentumPostconditions(unittest.TestCase):
         self.assertIsNotNone(result)
         self.assertGreaterEqual(result.mean_magnitude, 0)
 
-    def test_variability_non_negative(self) -> None:
+    def test_dbc_runtime_analysis_metrics_variability_non_negative(self) -> None:
         am = np.array([[1.0, 0.0, 0.0], [2.0, 0.0, 0.0], [3.0, 0.0, 0.0]])
         h = self._host(am=am, times=np.array([0.0, 0.1, 0.2]))
         result = h.compute_angular_momentum_metrics()  # type: ignore[attr-defined]

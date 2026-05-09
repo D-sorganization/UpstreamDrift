@@ -18,7 +18,7 @@ from src.shared.python.upstream_drift_tools.calculators.conversion.flow_rate_con
 
 
 class TestMassToMass:
-    def test_identity(self) -> None:
+    def test_flow_rate_converter_identity(self) -> None:
         result = mass_to_mass(100.0, "kg/h", "kg/h")
         assert abs(result - 100.0) < 1e-10
 
@@ -31,17 +31,17 @@ class TestMassToMass:
         result = mass_to_mass(1.0, "kg/h", "lb/hr")
         assert abs(result - 2.2046) < 0.01
 
-    def test_roundtrip(self) -> None:
+    def test_flow_rate_converter_roundtrip(self) -> None:
         original = 500.0
         lb_hr = mass_to_mass(original, "kg/h", "lb/hr")
         back = mass_to_mass(lb_hr, "lb/hr", "kg/h")
         assert abs(back - original) < 1e-6
 
-    def test_unknown_from_unit_raises(self) -> None:
+    def test_flow_rate_converter_unknown_from_unit_raises(self) -> None:
         with pytest.raises(ValueError):
             mass_to_mass(1.0, "INVALID_UNIT", "kg/h")
 
-    def test_unknown_to_unit_raises(self) -> None:
+    def test_flow_rate_converter_unknown_to_unit_raises(self) -> None:
         with pytest.raises(ValueError):
             mass_to_mass(1.0, "kg/h", "INVALID_UNIT")
 
@@ -56,7 +56,7 @@ class TestMassToMass:
 
 
 class TestMolarToMolar:
-    def test_identity(self) -> None:
+    def test_flow_rate_converter_identity(self) -> None:
         result = molar_to_molar(50.0, "kmol/h", "kmol/h")
         assert abs(result - 50.0) < 1e-10
 
@@ -65,7 +65,7 @@ class TestMolarToMolar:
         result = molar_to_molar(1.0, "kmol/h", "mol/s")
         assert abs(result - 0.2778) < 0.001
 
-    def test_roundtrip(self) -> None:
+    def test_flow_rate_converter_roundtrip(self) -> None:
         original = 10.0
         mol_s = molar_to_molar(original, "kmol/h", "mol/s")
         back = molar_to_molar(mol_s, "mol/s", "kmol/h")
@@ -106,10 +106,10 @@ class TestScfmAcfmConversions:
         back_scfm = acfm_to_scfm(acfm, temp, pressure, "SCFM")
         assert abs(back_scfm - original_scfm) < 0.01
 
-    def test_negative_temperature_raises(self) -> None:
+    def test_flow_rate_converter_negative_temperature_raises(self) -> None:
         with pytest.raises(ValueError):
             scfm_to_acfm(1000.0, -10.0, self._ATM_PA, "SCFM")
 
-    def test_zero_pressure_raises(self) -> None:
+    def test_flow_rate_converter_zero_pressure_raises(self) -> None:
         with pytest.raises(ValueError):
             scfm_to_acfm(1000.0, 300.0, 0.0, "SCFM")

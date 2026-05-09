@@ -21,7 +21,7 @@ pytestmark = [pytest.mark.unit, pytest.mark.requires_torch]
 # ---------------------------------------------------------------------------
 
 
-def test_config_defaults() -> None:
+def test_timestep_inverse_model_config_defaults() -> None:
     cfg = TimestepInverseConfig()
     cfg.validate()
     assert cfg.input_dim == DEFAULT_INPUT_DIM == 81
@@ -111,7 +111,7 @@ def test_forward_rejects_non_tensor() -> None:
         model([0.0] * DEFAULT_INPUT_DIM)  # type: ignore[arg-type]
 
 
-def test_forward_rejects_wrong_rank() -> None:
+def test_timestep_inverse_model_forward_rejects_wrong_rank() -> None:
     model = TimestepInverseDynamics()
     with pytest.raises(ValueError, match="2-D"):
         model(torch.zeros(DEFAULT_INPUT_DIM, dtype=torch.float32))

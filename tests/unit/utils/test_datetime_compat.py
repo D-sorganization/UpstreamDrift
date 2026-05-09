@@ -83,7 +83,7 @@ class TestAddDays:
 class TestIsoFormat:
     """Tests for iso_format function."""
 
-    def test_returns_string(self) -> None:
+    def test_datetime_compat_returns_string(self) -> None:
         dt = datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC)
         result = iso_format(dt)
         assert isinstance(result, str)
@@ -94,7 +94,7 @@ class TestIsoFormat:
         assert "2026-01-15" in result
         assert "14:30:00" in result
 
-    def test_round_trip(self) -> None:
+    def test_datetime_compat_round_trip(self) -> None:
         """ISO format should be parseable back."""
         dt = utc_now()
         formatted = iso_format(dt)

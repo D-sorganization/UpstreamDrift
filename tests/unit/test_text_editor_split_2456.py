@@ -22,7 +22,7 @@ class TestTextEditorSplitStructure:
     """Split modules must exist after refactor."""
 
     @pytest.mark.unit
-    def test_models_module_exists(self) -> None:
+    def test_text_editor_split_2456_models_module_exists(self) -> None:
         assert (EDITOR_DIR / "_text_editor_models.py").exists()
 
     @pytest.mark.unit
@@ -34,12 +34,12 @@ class TestTextEditorFileSizes:
     """Each file must be under 700 LOC after split."""
 
     @pytest.mark.unit
-    def test_coordinator_loc(self) -> None:
+    def test_text_editor_split_2456_coordinator_loc(self) -> None:
         loc = _count_lines(EDITOR_DIR / "text_editor.py")
         assert loc <= LOC_BUDGET, f"text_editor.py has {loc} LOC; budget {LOC_BUDGET}"
 
     @pytest.mark.unit
-    def test_models_loc(self) -> None:
+    def test_text_editor_split_2456_models_loc(self) -> None:
         loc = _count_lines(EDITOR_DIR / "_text_editor_models.py")
         assert loc <= LOC_BUDGET, (
             f"_text_editor_models.py has {loc} LOC; budget {LOC_BUDGET}"

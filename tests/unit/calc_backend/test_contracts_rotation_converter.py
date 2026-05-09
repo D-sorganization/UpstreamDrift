@@ -39,7 +39,7 @@ class TestRotationConverterRequest:
         )
         assert req.euler_convention == "zyx"
 
-    def test_invalid_type_raises(self) -> None:
+    def test_contracts_rotation_converter_invalid_type_raises(self) -> None:
         with pytest.raises(ValidationError):
             RotationConverterRequest(type="invalid_type", value=[1.0, 0.0, 0.0, 0.0])  # type: ignore[arg-type]
 
@@ -109,7 +109,7 @@ class TestReferenceFrameConversionRequest:
 
 
 class TestReferenceFrameConversionResponse:
-    def test_construction(self) -> None:
+    def test_contracts_rotation_converter_construction(self) -> None:
         resp = ReferenceFrameConversionResponse(
             operation="homogeneous_transform",
             results={
@@ -121,7 +121,7 @@ class TestReferenceFrameConversionResponse:
         assert resp.operation == "homogeneous_transform"
         assert isinstance(resp.results, dict)
 
-    def test_has_required_fields(self) -> None:
+    def test_contracts_rotation_converter_has_required_fields(self) -> None:
         resp = ReferenceFrameConversionResponse(
             operation="so3_so3_maps",
             results={},

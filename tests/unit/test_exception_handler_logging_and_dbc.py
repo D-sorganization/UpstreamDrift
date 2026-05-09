@@ -80,13 +80,13 @@ class TestComputeAccelerationMassRegression:
         self.velocity = np.array([60.0, 0.0, 20.0])
         self.spin = np.array([0.0, -250.0, 0.0])
 
-    def test_zero_mass_raises(self) -> None:
+    def test_exception_handler_logging_and_dbc_zero_mass_raises(self) -> None:
         from src.shared.python.core.contracts.exceptions import PreconditionError
 
         with pytest.raises(PreconditionError):
             self.engine.compute_acceleration(self.velocity, self.spin, mass=0.0)
 
-    def test_negative_mass_raises(self) -> None:
+    def test_exception_handler_logging_and_dbc_negative_mass_raises(self) -> None:
         from src.shared.python.core.contracts.exceptions import PreconditionError
 
         with pytest.raises(PreconditionError):

@@ -159,7 +159,7 @@ class TestRegistration:
         provider = registry_get_provider("opensim")
         assert isinstance(provider, OpenSimFitSwingProvider)
 
-    def test_capability_flags(self) -> None:
+    def test_provider_capability_flags(self) -> None:
         provider = OpenSimFitSwingProvider()
         assert provider.supports_body_target() is False
         assert provider.supports_ball_target() is False

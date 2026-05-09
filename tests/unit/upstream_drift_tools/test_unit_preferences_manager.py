@@ -22,10 +22,10 @@ class TestUnitCategories:
 
 
 class TestUnitPresets:
-    def test_is_dict(self) -> None:
+    def test_unit_preferences_manager_is_dict(self) -> None:
         assert isinstance(UNIT_PRESETS, dict)
 
-    def test_nonempty(self) -> None:
+    def test_unit_preferences_manager_nonempty(self) -> None:
         assert len(UNIT_PRESETS) > 0
 
 
@@ -34,7 +34,7 @@ class TestGetUnitPreferencesManager:
         mgr = get_unit_preferences_manager()
         assert isinstance(mgr, UnitPreferencesManager)
 
-    def test_singleton(self) -> None:
+    def test_unit_preferences_manager_singleton(self) -> None:
         m1 = get_unit_preferences_manager()
         m2 = get_unit_preferences_manager()
         assert m1 is m2

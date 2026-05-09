@@ -43,11 +43,11 @@ class TestConvertTemperature:
         # 273.15 K * 1.8 = 491.67 R
         assert abs(result - 491.67) < 0.1
 
-    def test_unknown_from_unit_raises(self) -> None:
+    def test_conversion_core_unknown_from_unit_raises(self) -> None:
         with pytest.raises(ValueError):
             convert_temperature(100.0, "X", "K")
 
-    def test_unknown_to_unit_raises(self) -> None:
+    def test_conversion_core_unknown_to_unit_raises(self) -> None:
         with pytest.raises(ValueError):
             convert_temperature(100.0, "K", "Z")
 
@@ -94,7 +94,7 @@ class TestScfmConversions:
         result = standard_m3_per_hour_to_scfm(1.0, self._SCFM_60F, self._STP)
         assert result > 0.0
 
-    def test_roundtrip(self) -> None:
+    def test_conversion_core_roundtrip(self) -> None:
         original = 100.0
         m3h = scfm_to_standard_m3_per_hour(original, self._STP, self._SCFM_60F)
         back = standard_m3_per_hour_to_scfm(m3h, self._SCFM_60F, self._STP)

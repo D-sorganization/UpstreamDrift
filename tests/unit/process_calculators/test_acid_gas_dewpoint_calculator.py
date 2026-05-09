@@ -13,17 +13,17 @@ from src.shared.python.upstream_drift_tools.process_calculators.acid_gas_dewpoin
 
 
 class TestAcidGasComposition:
-    def test_default_construction(self) -> None:
+    def test_acid_gas_dewpoint_calculator_default_construction(self) -> None:
         comp = AcidGasComposition()
         assert comp.h2o == 0.0
         assert comp.hcl == 0.0
 
-    def test_custom_values(self) -> None:
+    def test_acid_gas_dewpoint_calculator_custom_values(self) -> None:
         comp = AcidGasComposition(h2o=0.1, hcl=0.05)
         assert comp.h2o == pytest.approx(0.1)
         assert comp.hcl == pytest.approx(0.05)
 
-    def test_normalize_sums_to_one(self) -> None:
+    def test_acid_gas_dewpoint_calculator_normalize_sums_to_one(self) -> None:
         comp = AcidGasComposition(h2o=2.0, hcl=2.0, h2s=4.0, other=2.0)
         norm = comp.normalize()
         assert norm.total == pytest.approx(1.0)
@@ -42,7 +42,7 @@ class TestAcidGasComposition:
         comp = AcidGasComposition(h2o=0.3, hcl=0.2, h2s=0.1, hf=0.1, other=0.3)
         assert comp.total == pytest.approx(1.0)
 
-    def test_to_dict_keys(self) -> None:
+    def test_acid_gas_dewpoint_calculator_to_dict_keys(self) -> None:
         comp = AcidGasComposition(h2o=0.5)
         d = comp.to_dict()
         assert "H2O" in d
@@ -61,7 +61,7 @@ class TestAcidGasDewpointCalculator:
     def _make_comp(self) -> AcidGasComposition:
         return AcidGasComposition(h2o=0.1, hcl=0.02, other=0.88)
 
-    def test_construction(self) -> None:
+    def test_acid_gas_dewpoint_calculator_construction(self) -> None:
         calc = AcidGasDewpointCalculator()
         assert calc is not None
 
@@ -108,7 +108,7 @@ class TestAcidGasDewpointCalculator:
 
 
 class TestQuickDewpointCalculation:
-    def test_returns_dict(self) -> None:
+    def test_acid_gas_dewpoint_calculator_returns_dict(self) -> None:
         result = quick_dewpoint_calculation(200.0, 1.5, h2o_fraction=0.1)
         assert isinstance(result, dict)
 
@@ -135,7 +135,7 @@ class TestEstimateCondensationRisk:
     def _comp(self) -> AcidGasComposition:
         return AcidGasComposition(h2o=0.1, hcl=0.02, other=0.88)
 
-    def test_returns_dict(self) -> None:
+    def test_acid_gas_dewpoint_calculator_returns_dict(self) -> None:
         result = estimate_condensation_risk(200.0, 1.5, self._comp())
         assert isinstance(result, dict)
 

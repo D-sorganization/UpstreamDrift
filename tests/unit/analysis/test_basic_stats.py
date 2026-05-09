@@ -108,7 +108,7 @@ class TestFindPeaksInData:
             -((t - 0.75) ** 2) / 0.001
         )
 
-    def test_returns_list(self) -> None:
+    def test_basic_stats_returns_list(self) -> None:
         peaks = self.obj.find_peaks_in_data(self.two_peak_data)
         assert isinstance(peaks, list)
 

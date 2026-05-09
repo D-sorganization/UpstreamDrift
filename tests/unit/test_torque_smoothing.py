@@ -110,7 +110,7 @@ def test_rejects_non_finite_input(smoothing_module):
         )
 
 
-def test_unknown_method_raises(smoothing_module):
+def test_torque_smoothing_unknown_method_raises(smoothing_module):
     time = np.linspace(0.0, 1.0, 10)
     values = np.zeros_like(time)
     config = smoothing_module.SmoothingConfig.__new__(smoothing_module.SmoothingConfig)

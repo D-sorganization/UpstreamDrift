@@ -17,7 +17,7 @@ from src.engines.common.physics import (
 class TestAirProperties:
     """Tests for AirProperties dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_common_physics_default_values(self) -> None:
         """Test default sea-level air properties."""
         air = AirProperties()
         assert air.density == pytest.approx(1.225, rel=0.01)
@@ -143,7 +143,7 @@ class TestBallPhysics:
         expected_gravity = physics.ball.mass * physics.gravity[2]
         assert force[2] == pytest.approx(expected_gravity)
 
-    def test_spin_decay(self, physics: BallPhysics) -> None:
+    def test_common_physics_spin_decay(self, physics: BallPhysics) -> None:
         """Test spin decays over time."""
         spin = np.array([0.0, 300.0, 0.0])
         dt = 1.0  # 1 second

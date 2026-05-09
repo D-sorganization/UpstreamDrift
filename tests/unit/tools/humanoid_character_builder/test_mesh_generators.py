@@ -627,7 +627,7 @@ class TestGeneratedMeshResult:
         assert result.solver_status != "success"
         assert result.error_message == "Something went wrong"
 
-    def test_defaults(self) -> None:
+    def test_mesh_generators_defaults(self) -> None:
         result = GeneratedMeshResult(success=True)
         assert result.mesh_paths == {}
         assert result.collision_paths == {}

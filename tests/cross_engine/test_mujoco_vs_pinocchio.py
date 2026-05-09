@@ -275,7 +275,7 @@ class TestCrossEngineMassMatrix:
                 f"rel_error={rel_error[0, 0]:.2e}"
             )
 
-    def test_mass_matrix_positive_definite(self) -> None:
+    def test_mujoco_vs_pinocchio_mass_matrix_positive_definite(self) -> None:
         """Verify mass matrix is positive definite in both engines.
 
         PHYSICS:

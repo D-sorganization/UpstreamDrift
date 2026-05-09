@@ -18,7 +18,7 @@ from mujoco_humanoid_golf.motion_optimization import (
 class TestOptimizationObjectives:
     """Tests for OptimizationObjectives dataclass."""
 
-    def test_initialization(self) -> None:
+    def test_motion_optimization_initialization(self) -> None:
         """Test objectives initialization."""
         objectives = OptimizationObjectives()
 
@@ -38,7 +38,7 @@ class TestOptimizationObjectives:
 class TestOptimizationConstraints:
     """Tests for OptimizationConstraints dataclass."""
 
-    def test_initialization(self) -> None:
+    def test_motion_optimization_initialization(self) -> None:
         """Test constraints initialization."""
         constraints = OptimizationConstraints()
 
@@ -50,7 +50,7 @@ class TestOptimizationConstraints:
 class TestOptimizationResult:
     """Tests for OptimizationResult dataclass."""
 
-    def test_initialization(self) -> None:
+    def test_motion_optimization_initialization(self) -> None:
         """Test result initialization."""
         trajectory = np.zeros((10, 2))
         velocities = np.zeros((10, 2))
@@ -84,7 +84,7 @@ class TestSwingOptimizer:
         mujoco.mj_forward(model, data)
         return model, data
 
-    def test_initialization(self, model_and_data) -> None:
+    def test_motion_optimization_initialization(self, model_and_data) -> None:
         """Test optimizer initialization."""
         model, data = model_and_data
         optimizer = SwingOptimizer(model, data)
@@ -110,7 +110,7 @@ class TestSwingOptimizer:
 
         assert optimizer.constraints.joint_velocity_limits is False
 
-    def test_find_body_id(self, model_and_data) -> None:
+    def test_motion_optimization_find_body_id(self, model_and_data) -> None:
         """Test finding body ID."""
         model, data = model_and_data
         optimizer = SwingOptimizer(model, data)

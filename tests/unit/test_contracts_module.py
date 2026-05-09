@@ -22,7 +22,7 @@ pytestmark = pytest.mark.unit
 class TestContractLevel:
     """Tests for ContractLevel enum."""
 
-    def test_three_levels(self) -> None:
+    def test_contracts_module_three_levels(self) -> None:
         """ContractLevel has exactly three variants."""
         from src.shared.python.contracts import ContractLevel
 

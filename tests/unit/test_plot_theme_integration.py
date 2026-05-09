@@ -17,7 +17,7 @@ class TestGetPlotThemeManager:
         mgr = get_plot_theme_manager()
         assert isinstance(mgr, PlotThemeManager)
 
-    def test_singleton(self) -> None:
+    def test_plot_theme_integration_singleton(self) -> None:
         mgr1 = get_plot_theme_manager()
         mgr2 = get_plot_theme_manager()
         assert mgr1 is mgr2
@@ -41,7 +41,7 @@ class TestGetTheme:
 
 
 class TestGetThemeColors:
-    def test_returns_dict(self) -> None:
+    def test_plot_theme_integration_returns_dict(self) -> None:
         colors = get_theme_colors()
         assert isinstance(colors, dict)
 

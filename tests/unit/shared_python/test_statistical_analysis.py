@@ -65,13 +65,13 @@ class TestStatisticalAnalyzer:
             "cop_position": cop_position,
         }
 
-    def test_initialization(self, sample_data) -> None:
+    def test_statistical_analysis_initialization(self, sample_data) -> None:
         analyzer = StatisticalAnalyzer(**sample_data)
         assert len(analyzer.times) == 200
         assert analyzer.dt == 0.01
         assert analyzer.duration == 1.99
 
-    def test_compute_summary_stats(self, sample_data) -> None:
+    def test_statistical_analysis_compute_summary_stats(self, sample_data) -> None:
         analyzer = StatisticalAnalyzer(**sample_data)
         data = sample_data["joint_positions"][:, 0]
         stats = analyzer.compute_summary_stats(data)
@@ -80,7 +80,7 @@ class TestStatisticalAnalyzer:
         assert np.isclose(stats.max, 1.0, atol=0.01)
         assert np.isclose(stats.min, -1.0, atol=0.01)
 
-    def test_find_peaks_in_data(self, sample_data) -> None:
+    def test_statistical_analysis_find_peaks_in_data(self, sample_data) -> None:
         analyzer = StatisticalAnalyzer(**sample_data)
         data = sample_data["joint_positions"][:, 0]  # Sine wave
         peaks = analyzer.find_peaks_in_data(data, height=0.5)
@@ -89,7 +89,7 @@ class TestStatisticalAnalyzer:
         assert isinstance(peaks[0], PeakInfo)
         assert peaks[0].value > 0.5
 
-    def test_find_club_head_speed_peak(self, sample_data) -> None:
+    def test_statistical_analysis_find_club_head_speed_peak(self, sample_data) -> None:
         analyzer = StatisticalAnalyzer(**sample_data)
         peak = analyzer.find_club_head_speed_peak()
 
@@ -118,7 +118,7 @@ class TestStatisticalAnalyzer:
             assert bs > 0
             assert ds > 0
 
-    def test_detect_swing_phases(self, sample_data) -> None:
+    def test_statistical_analysis_detect_swing_phases(self, sample_data) -> None:
         analyzer = StatisticalAnalyzer(**sample_data)
         phases = analyzer.detect_swing_phases()
 

@@ -60,7 +60,7 @@ class TestPendulumParams:
         assert p.L1 > 0
         assert p.L2 > 0
 
-    def test_default_fields(self) -> None:
+    def test_pendulum_simulator_physics_default_fields(self) -> None:
         """Default optional fields are non-negative."""
         from src.shared.python.pendulum_simulator.physics import PendulumParams
 
@@ -216,7 +216,7 @@ class TestJointLimitsNDOF:
         )
         assert lims.angle_min.shape == (4,)
 
-    def test_shape_mismatch_raises(self) -> None:
+    def test_pendulum_simulator_physics_shape_mismatch_raises(self) -> None:
         """Mismatched min/max shapes raise AssertionError."""
         from src.shared.python.pendulum_simulator.physics import JointLimitsNDOF
 
@@ -252,14 +252,14 @@ class TestMassMatrix:
         M = mass_matrix(0.0, basic_params)
         assert M.shape == (2, 2)
 
-    def test_symmetric(self, basic_params) -> None:
+    def test_pendulum_simulator_physics_symmetric(self, basic_params) -> None:
         """Mass matrix is symmetric: M[0,1] == M[1,0]."""
         from src.shared.python.pendulum_simulator.physics import mass_matrix
 
         M = mass_matrix(0.3, basic_params)
         assert np.isclose(M[0, 1], M[1, 0])
 
-    def test_positive_definite(self, basic_params) -> None:
+    def test_pendulum_simulator_physics_positive_definite(self, basic_params) -> None:
         """Mass matrix has all positive eigenvalues."""
         from src.shared.python.pendulum_simulator.physics import mass_matrix
 
@@ -311,7 +311,7 @@ class TestCoriolisVector:
         C = coriolis_vector(0.0, 0.0, 0.0, basic_params)
         assert np.allclose(C, [0.0, 0.0])
 
-    def test_returns_shape_2(self, basic_params) -> None:
+    def test_pendulum_simulator_physics_returns_shape_2(self, basic_params) -> None:
         """coriolis_vector returns a shape (2,) array."""
         from src.shared.python.pendulum_simulator.physics import coriolis_vector
 
@@ -344,7 +344,7 @@ class TestGravityVector:
         G = gravity_vector(0.0, 0.0, basic_params)
         assert np.allclose(G, [0.0, 0.0])
 
-    def test_returns_shape_2(self, basic_params) -> None:
+    def test_pendulum_simulator_physics_returns_shape_2(self, basic_params) -> None:
         """gravity_vector returns shape (2,)."""
         from src.shared.python.pendulum_simulator.physics import gravity_vector
 
@@ -395,7 +395,7 @@ class TestFrictionTorqueVector:
         assert np.isclose(F[0], -2.0)
         assert np.isclose(F[1], -1.0)
 
-    def test_returns_shape_2(self, basic_params) -> None:
+    def test_pendulum_simulator_physics_returns_shape_2(self, basic_params) -> None:
         """Returns shape (2,)."""
         from src.shared.python.pendulum_simulator.physics import friction_torque_vector
 
@@ -422,7 +422,7 @@ class TestJointLimitTorque:
         tau = joint_limit_torque(0.0, 0.0, limits)
         assert np.allclose(tau, [0.0, 0.0])
 
-    def test_returns_shape_2(self) -> None:
+    def test_pendulum_simulator_physics_returns_shape_2(self) -> None:
         """Returns shape (2,)."""
         from src.shared.python.pendulum_simulator.physics import (
             JointLimits,
@@ -544,7 +544,7 @@ class TestForwardKinematics:
         dist = math.sqrt((tx - wx) ** 2 + (ty - wy) ** 2)
         assert abs(dist - basic_params.L2) < 1e-9
 
-    def test_returns_dict(self, basic_params) -> None:
+    def test_pendulum_simulator_physics_returns_dict(self, basic_params) -> None:
         """forward_kinematics returns a dict."""
         from src.shared.python.pendulum_simulator.physics import forward_kinematics
 

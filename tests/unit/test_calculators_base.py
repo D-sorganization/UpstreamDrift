@@ -37,7 +37,7 @@ class TestBaseCalculationEngineAbstract:
 
 
 class TestConcreteEngine:
-    def test_construction(self) -> None:
+    def test_calculators_base_construction(self) -> None:
         engine = _ConcreteEngine()
         assert engine is not None
 

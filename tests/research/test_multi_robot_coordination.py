@@ -37,7 +37,7 @@ class TestFormationConfig:
 class TestFormationController:
     """Smoke tests for FormationController."""
 
-    def test_construction(self) -> None:
+    def test_multi_robot_coordination_construction(self) -> None:
         config = FormationConfig.line_formation(3)
         fc = FormationController(robots=["r0", "r1", "r2"], formation=config)
         assert len(fc.robots) == 3
@@ -75,7 +75,7 @@ class TestFormationController:
 class TestCooperativeManipulation:
     """Smoke tests for CooperativeManipulation."""
 
-    def test_construction(self) -> None:
+    def test_multi_robot_coordination_construction(self) -> None:
         robots = [MagicMock(), MagicMock()]
         cm = CooperativeManipulation(robots)
         assert cm.n_robots == 2

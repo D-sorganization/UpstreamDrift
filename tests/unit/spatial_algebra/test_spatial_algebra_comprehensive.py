@@ -76,7 +76,7 @@ def _rotation_z(angle: float) -> npt.NDArray[np.float64]:
 class TestSkew:
     """Tests for skew-symmetric matrix construction."""
 
-    def test_basic(self) -> None:
+    def test_spatial_algebra_comprehensive_basic(self) -> None:
         v = np.array([1.0, 2.0, 3.0])
         s = skew(v)
         assert s.shape == (3, 3)
@@ -245,21 +245,21 @@ class TestCrossMotionAxis:
 class TestSpatialCross:
     """Tests for spatial_cross dispatcher."""
 
-    def test_motion_type(self) -> None:
+    def test_spatial_algebra_comprehensive_motion_type(self) -> None:
         v = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         u = np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0])
         result = spatial_cross(v, u, cross_type="motion")
         expected = cross_motion(v, u)
         np.testing.assert_allclose(result, expected)
 
-    def test_force_type(self) -> None:
+    def test_spatial_algebra_comprehensive_force_type(self) -> None:
         v = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         f = np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0])
         result = spatial_cross(v, f, cross_type="force")
         expected = cross_force(v, f)
         np.testing.assert_allclose(result, expected)
 
-    def test_invalid_type_raises(self) -> None:
+    def test_spatial_algebra_comprehensive_invalid_type_raises(self) -> None:
         with pytest.raises(ValueError, match="must be"):
             spatial_cross(np.zeros(6), np.zeros(6), cross_type="invalid")  # type: ignore[arg-type]
 
@@ -318,7 +318,7 @@ class TestXlt:
 class TestXtrans:
     """Tests for general spatial coordinate transformation."""
 
-    def test_identity(self) -> None:
+    def test_spatial_algebra_comprehensive_identity(self) -> None:
         X = xtrans(np.eye(3), np.zeros(3))
         np.testing.assert_allclose(X, np.eye(6), atol=1e-14)
 
@@ -380,7 +380,7 @@ class TestMcI:
         # Upper-left should be zero (no rotational inertia)
         np.testing.assert_allclose(I_s[:3, :3], np.zeros((3, 3)), atol=1e-14)
 
-    def test_symmetric(self) -> None:
+    def test_spatial_algebra_comprehensive_symmetric(self) -> None:
         """Spatial inertia matrix should be symmetric."""
         I_com = np.diag([0.1, 0.2, 0.3])
         I_s = mcI(5.0, np.array([0.1, 0.2, 0.3]), I_com)
@@ -421,7 +421,7 @@ class TestMcI:
 class TestTransformSpatialInertia:
     """Tests for spatial inertia transformation."""
 
-    def test_identity_transform(self) -> None:
+    def test_spatial_algebra_comprehensive_identity_transform(self) -> None:
         """Identity transform should not change inertia."""
         I_B = mcI(5.0, np.zeros(3), np.diag([1.0, 2.0, 3.0]))
         X = np.eye(6)

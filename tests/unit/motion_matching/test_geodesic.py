@@ -31,7 +31,7 @@ def test_known_90_degree_rotation_about_z() -> None:
     assert abs(angles[0] - np.pi / 2) < 1e-12
 
 
-def test_shape_mismatch_raises() -> None:
+def test_geodesic_shape_mismatch_raises() -> None:
     with pytest.raises(ValueError):
         quaternion_geodesic_angles(np.zeros((3, 4)), np.zeros((2, 4)))
 

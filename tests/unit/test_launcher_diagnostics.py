@@ -83,7 +83,7 @@ class TestDiagnosticResult:
         )
         assert result.duration_ms == 1.5, "Assertion failed: result.duration_ms == 1.5"
 
-    def test_diagnostic_result_to_dict(self) -> None:
+    def test_launcher_diagnostics_diagnostic_result_to_dict(self) -> None:
         """Test converting DiagnosticResult to dictionary."""
         result = DiagnosticResult(
             name="test_check",
@@ -185,7 +185,7 @@ class TestLauncherDiagnostics:
             == summary["total_checks"]
         )
 
-    def test_check_python_environment(self) -> None:
+    def test_launcher_diagnostics_check_python_environment(self) -> None:
         """Test Python environment check."""
         diag = LauncherDiagnostics()
         result = diag.check_python_environment()

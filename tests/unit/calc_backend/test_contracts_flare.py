@@ -24,7 +24,7 @@ def _valid_request(**kwargs) -> FlareRequest:
 
 
 class TestFlareRequest:
-    def test_valid_construction(self) -> None:
+    def test_contracts_flare_valid_construction(self) -> None:
         req = _valid_request()
         assert isinstance(req, FlareRequest)
 
@@ -32,11 +32,11 @@ class TestFlareRequest:
         req = _valid_request(total_flow_kg_hr=2000.0)
         assert req.total_flow_kg_hr == pytest.approx(2000.0)
 
-    def test_temperature_stored(self) -> None:
+    def test_contracts_flare_temperature_stored(self) -> None:
         req = _valid_request(temperature_k=500.0)
         assert req.temperature_k == pytest.approx(500.0)
 
-    def test_pressure_stored(self) -> None:
+    def test_contracts_flare_pressure_stored(self) -> None:
         req = _valid_request(pressure_bar=1.5)
         assert req.pressure_bar == pytest.approx(1.5)
 
@@ -49,11 +49,11 @@ class TestFlareRequest:
         with pytest.raises(ValidationError):
             _valid_request(total_flow_kg_hr=0.0)
 
-    def test_zero_temperature_rejected(self) -> None:
+    def test_contracts_flare_zero_temperature_rejected(self) -> None:
         with pytest.raises(ValidationError):
             _valid_request(temperature_k=0.0)
 
-    def test_zero_pressure_rejected(self) -> None:
+    def test_contracts_flare_zero_pressure_rejected(self) -> None:
         with pytest.raises(ValidationError):
             _valid_request(pressure_bar=0.0)
 
@@ -72,7 +72,7 @@ class TestFlareDesignOut:
             radiation_intensity_kw_m2=1.6,
         )
 
-    def test_construction(self) -> None:
+    def test_contracts_flare_construction(self) -> None:
         design = self._make_design()
         assert isinstance(design, FlareDesignOut)
 
@@ -94,7 +94,7 @@ class TestRadiationZonesOut:
             comfort_m=200.0,
         )
 
-    def test_construction(self) -> None:
+    def test_contracts_flare_construction(self) -> None:
         zones = self._make_zones()
         assert isinstance(zones, RadiationZonesOut)
 
@@ -107,7 +107,7 @@ class TestRadiationZonesOut:
 
 
 class TestFlareResponse:
-    def test_construction(self) -> None:
+    def test_contracts_flare_construction(self) -> None:
         resp = FlareResponse(
             design=FlareDesignOut(
                 height_m=30.0,

@@ -104,7 +104,9 @@ class TestMarkerMapping:
 class TestKabschAlgorithm:
     """Test Kabsch rigid registration."""
 
-    def test_identity_transform(self, simple_model: mujoco.MjModel) -> None:
+    def test_marker_mapping_identity_transform(
+        self, simple_model: mujoco.MjModel
+    ) -> None:
         """Test Kabsch with identity transformation."""
         mapper = MarkerToModelMapper(simple_model)
 

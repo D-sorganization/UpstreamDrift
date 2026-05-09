@@ -38,7 +38,7 @@ _Q = np.zeros(N_DOF)
 
 
 class TestConstraintVector:
-    def test_returns_ndarray(self) -> None:
+    def test_golfer_constraints_returns_ndarray(self) -> None:
         phi = constraint_vector(_Q, _P)
         assert isinstance(phi, np.ndarray)
 
@@ -46,7 +46,7 @@ class TestConstraintVector:
         phi = constraint_vector(_Q, _P)
         assert phi.shape == (4,)
 
-    def test_finite_values(self) -> None:
+    def test_golfer_constraints_finite_values(self) -> None:
         phi = constraint_vector(_Q, _P)
         assert np.all(np.isfinite(phi))
 
@@ -77,7 +77,7 @@ class TestConstraintVector:
 
 
 class TestNumericalConstraintJacobian:
-    def test_returns_ndarray(self) -> None:
+    def test_golfer_constraints_returns_ndarray(self) -> None:
         J = numerical_constraint_jacobian(_Q, _P)
         assert isinstance(J, np.ndarray)
 
@@ -85,7 +85,7 @@ class TestNumericalConstraintJacobian:
         J = numerical_constraint_jacobian(_Q, _P)
         assert J.shape == (4, N_DOF)
 
-    def test_finite_values(self) -> None:
+    def test_golfer_constraints_finite_values(self) -> None:
         J = numerical_constraint_jacobian(_Q, _P)
         assert np.all(np.isfinite(J))
 
@@ -99,7 +99,7 @@ class TestNumericalConstraintJacobian:
 
 
 class TestAnalyticalConstraintJacobian:
-    def test_returns_ndarray(self) -> None:
+    def test_golfer_constraints_returns_ndarray(self) -> None:
         J = analytical_constraint_jacobian(_Q, _P)
         assert isinstance(J, np.ndarray)
 
@@ -107,7 +107,7 @@ class TestAnalyticalConstraintJacobian:
         J = analytical_constraint_jacobian(_Q, _P)
         assert J.shape == (4, N_DOF)
 
-    def test_finite_values(self) -> None:
+    def test_golfer_constraints_finite_values(self) -> None:
         J = analytical_constraint_jacobian(_Q, _P)
         assert np.all(np.isfinite(J))
 

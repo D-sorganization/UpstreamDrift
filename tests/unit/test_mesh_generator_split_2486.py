@@ -43,7 +43,7 @@ class TestMeshGeneratorFileSizes:
     """Each file must be within LOC budget after split."""
 
     @pytest.mark.unit
-    def test_coordinator_loc(self) -> None:
+    def test_mesh_generator_split_2486_coordinator_loc(self) -> None:
         loc = _count_lines(GENERATORS_DIR / "mesh_generator.py")
         assert loc <= LOC_BUDGET_COORDINATOR, (
             f"mesh_generator.py has {loc} LOC; budget {LOC_BUDGET_COORDINATOR}"

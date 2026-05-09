@@ -109,7 +109,7 @@ class TestPhysicsValidationError:
         err = PhysicsValidationError("invalid input")
         assert isinstance(err, ValueError)
 
-    def test_message(self) -> None:
+    def test_validation_helpers_message(self) -> None:
         err = PhysicsValidationError("test message")
         assert "test message" in str(err)
 

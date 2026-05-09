@@ -93,7 +93,7 @@ class TestSafeWriteJson:
         assert success is True
         assert f.exists()
 
-    def test_round_trip(self, tmp_path: Path) -> None:
+    def test_state_manager_extended_round_trip(self, tmp_path: Path) -> None:
         """Write then read gives back the original data."""
         from src.shared.python.upstream_drift_tools.utils.state_manager import (
             safe_read_json,

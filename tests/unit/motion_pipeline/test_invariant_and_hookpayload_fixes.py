@@ -124,7 +124,7 @@ class TestJointStateFrameDimensionsInvariant:
 class TestHookPayloadConstruction:
     """HookPayload(stage=..., data=...) must construct + serialize cleanly."""
 
-    def test_basic_construction(self) -> None:
+    def test_invariant_and_hookpayload_fixes_basic_construction(self) -> None:
         payload = HookPayload(stage=Stage.ADAPTER, data={"key": "value"})
         assert payload.stage is Stage.ADAPTER
         assert payload.data == {"key": "value"}

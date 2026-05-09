@@ -61,11 +61,11 @@ def analyzer(sample_data) -> StatisticalAnalyzer:
 
 
 class TestStatisticalAnalyzer:
-    def test_initialization(self, analyzer) -> None:
+    def test_statistical_analysis_initialization(self, analyzer) -> None:
         assert analyzer.dt == pytest.approx(0.01)
         assert analyzer.duration == pytest.approx(1.0)
 
-    def test_compute_summary_stats(self, analyzer) -> None:
+    def test_statistical_analysis_compute_summary_stats(self, analyzer) -> None:
         data = np.array([1, 2, 3, 4, 5])
         # Manually create analyzer for simple data or just use method
         stats = analyzer.compute_summary_stats(data)
@@ -73,7 +73,7 @@ class TestStatisticalAnalyzer:
         assert stats.max == 5
         assert stats.mean == 3
 
-    def test_find_club_head_speed_peak(self, analyzer) -> None:
+    def test_statistical_analysis_find_club_head_speed_peak(self, analyzer) -> None:
         peak = analyzer.find_club_head_speed_peak()
         assert peak is not None
         assert peak.time == pytest.approx(0.5, abs=0.01)
@@ -99,7 +99,7 @@ class TestStatisticalAnalyzer:
         assert metrics.cop_path_length == pytest.approx(2 * np.pi, abs=0.1)
         assert metrics.peak_vertical_force == 1000.0
 
-    def test_detect_swing_phases(self, analyzer) -> None:
+    def test_statistical_analysis_detect_swing_phases(self, analyzer) -> None:
         phases = analyzer.detect_swing_phases()
         assert len(phases) > 0
         names = [p.name for p in phases]

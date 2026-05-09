@@ -544,7 +544,7 @@ class TestWholeBodyController:
 class TestWBCConfig:
     """Tests for WBCConfig dataclass."""
 
-    def test_default_config(self) -> None:
+    def test_control_default_config(self) -> None:
         """Test default configuration values."""
         config = WBCConfig()
 
@@ -552,7 +552,7 @@ class TestWBCConfig:
         assert config.regularization == 1e-6
         assert config.use_hierarchical is True
 
-    def test_custom_config(self) -> None:
+    def test_control_custom_config(self) -> None:
         """Test custom configuration."""
         limits = np.array([100.0, 100.0, 50.0, 50.0, 20.0, 20.0])
         config = WBCConfig(

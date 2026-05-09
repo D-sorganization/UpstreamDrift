@@ -63,7 +63,7 @@ class TestLogErrors:
 
         assert fail() is None
 
-    def test_preserves_function_name(self) -> None:
+    def test_error_decorators_preserves_function_name(self) -> None:
         """Decorator preserves __name__ via functools.wraps."""
 
         @log_errors("test")
@@ -145,7 +145,7 @@ class TestHandleImportError:
         with pytest.raises(ValueError, match="not an import error"):
             fail()
 
-    def test_preserves_function_name(self) -> None:
+    def test_error_decorators_preserves_function_name(self) -> None:
         """Decorator preserves __name__."""
 
         @handle_import_error(module_name="test")
@@ -212,7 +212,7 @@ class TestRetryOnError:
         with pytest.raises(ValueError):
             fail_different()
 
-    def test_preserves_function_name(self) -> None:
+    def test_error_decorators_preserves_function_name(self) -> None:
         """Decorator preserves __name__."""
 
         @retry_on_error()
@@ -329,7 +329,7 @@ class TestValidateArgs:
         with pytest.raises(ValueError):
             greet(name="")
 
-    def test_preserves_function_name(self) -> None:
+    def test_error_decorators_preserves_function_name(self) -> None:
         """Decorator preserves __name__."""
 
         @validate_args(x=lambda x: x > 0)
@@ -381,6 +381,6 @@ class TestCheckModuleAvailable:
         """Returns False for unavailable module."""
         assert check_module_available("nonexistent_module_xyz_123") is False
 
-    def test_numpy_available(self) -> None:
+    def test_error_decorators_numpy_available(self) -> None:
         """numpy is available in our environment."""
         assert check_module_available("numpy") is True

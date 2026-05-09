@@ -114,7 +114,7 @@ class TestRegistration:
         assert isinstance(provider, DrakeFitSwingProvider)
         assert provider.engine_name == "drake"
 
-    def test_capability_flags(self) -> None:
+    def test_provider_capability_flags(self) -> None:
         provider = DrakeFitSwingProvider()
         # Initial pass per #4516: club-only, no body / ball cost terms.
         assert provider.supports_body_target() is False

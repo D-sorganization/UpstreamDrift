@@ -133,3 +133,42 @@ def test_load_c3d_file_not_found(mock_exists) -> None:
 # ---------------------------------------------------------------------------
 # Test Loader Thread
 # ---------------------------------------------------------------------------
+
+
+@pytest.mark.skipif(
+    not PYQT6_AVAILABLE or not PYTEST_QT_AVAILABLE,
+    reason="PyQt6 or pytest-qt not available",
+)
+def test_loader_thread(qtbot) -> None:
+    """Test that thread emits signals."""
+    # Since we can't reliably import the module statically due to path issues,
+
+    # Ensure C3DLoaderThread and its module are from the same context
+    try:
+        from apps.core.models import C3DDataModel
+        from apps.services import loader_thread as loader_thread_mod
+    except ImportError:
+        pytest.fail("Failed to import loader_thread from apps")
+
+    C3DLoaderThread = loader_thread_mod.C3DLoaderThread
+
+    # Patch load_c3d_file in the loader_thread module namespace
+    with patch.object(loader_thread_mod, "load_c3d_file") as mock_load:
+        # Case 1: Success
+        mock_data = C3DDataModel(filepath="test_path.c3d")
+        mock_load.return_value = mock_data
+
+        worker = C3DLoaderThread("dummy.c3d")
+        with qtbot.waitSignal(worker.loaded, timeout=2000) as blocker:
+            worker.start()
+
+        # Verify result
+        assert blocker.args[0] == mock_data
+
+        # Case 2: Failure
+        mock_load.side_effect = ValueError("Corrupt file")
+        worker_fail = C3DLoaderThread("bad.c3d")
+        with qtbot.waitSignal(worker_fail.failed, timeout=2000) as blocker_fail:
+            worker_fail.start()
+
+        assert "Corrupt file" in blocker_fail.args[0]

@@ -64,7 +64,7 @@ class TestSegmentParams:
 class TestGolfModelParams:
     """Tests for GolfModelParams dataclass."""
 
-    def test_default_params(self) -> None:
+    def test_drake_model_default_params(self) -> None:
         """Test default parameter values."""
         params = GolfModelParams()
         assert params.pelvis_to_shoulders > 0
@@ -73,7 +73,7 @@ class TestGolfModelParams:
         assert params.club.length > 0
         assert params.club.mass > 0
 
-    def test_custom_params(self) -> None:
+    def test_drake_model_custom_params(self) -> None:
         """Test custom parameter values."""
         custom_club = SegmentParams(length=1.1, mass=0.45)
         params = GolfModelParams(club=custom_club)

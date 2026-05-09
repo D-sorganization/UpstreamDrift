@@ -29,3 +29,80 @@ def mock_pinocchio_gui_dependencies() -> Generator[None, None, None]:
         },
     ):
         yield
+
+
+@skip_if_unavailable("pyqt6")
+class TestPinocchioGUI:
+    """Test Pinocchio GUI."""
+
+    @pytest.fixture
+    def qapp(self) -> Any:
+        """Ensure QApplication exists."""
+        app = get_qapp()
+        return app
+
+    @pytest.fixture
+    def mock_gui(self, qapp) -> Any:
+        """Create a mocked PinocchioGUI instance."""
+        from contextlib import ExitStack
+
+        # Late import to ensure mocks apply
+        from src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui import (
+            MESHCAT_AVAILABLE,
+            PinocchioGUI,
+        )
+
+        with ExitStack() as stack:
+            if MESHCAT_AVAILABLE:
+                stack.enter_context(
+                    patch(
+                        "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.viz.Visualizer"
+                    )
+                )
+                stack.enter_context(
+                    patch(
+                        "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.MeshcatVisualizer"
+                    )
+                )
+
+            mock_urdf = stack.enter_context(
+                patch(
+                    "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.get_shared_urdf_path"
+                )
+            )
+            mock_urdf.return_value.exists.return_value = False
+
+            gui = PinocchioGUI()
+            return gui
+
+    def test_ensure_analyzer_initialized(self, mock_gui) -> None:
+        """Test _ensure_analyzer_initialized method."""
+        # 1. Model is None, Analyzer is None -> Should remain None
+        mock_gui.model = None
+        mock_gui.analyzer = None
+        mock_gui._ensure_analyzer_initialized()
+        assert mock_gui.analyzer is None
+
+        # 2. Model is set, Analyzer is None -> Should initialize
+        mock_gui.model = MagicMock()
+        mock_gui.data = MagicMock()
+
+        with patch(
+            "src.engines.physics_engines.pinocchio.python.pinocchio_golf.induced_acceleration.InducedAccelerationAnalyzer"
+        ) as MockAnalyzer:
+            mock_gui._ensure_analyzer_initialized()
+
+            assert mock_gui.analyzer is not None
+            MockAnalyzer.assert_called_once_with(mock_gui.model, mock_gui.data)
+
+        # 3. Model is set, Analyzer is set -> Should not re-initialize
+        existing_analyzer = MagicMock()
+        mock_gui.analyzer = existing_analyzer
+
+        with patch(
+            "src.engines.physics_engines.pinocchio.python.pinocchio_golf.induced_acceleration.InducedAccelerationAnalyzer"
+        ) as MockAnalyzer:
+            mock_gui._ensure_analyzer_initialized()
+
+            assert mock_gui.analyzer is existing_analyzer
+            MockAnalyzer.assert_not_called()

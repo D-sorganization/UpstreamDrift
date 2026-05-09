@@ -94,7 +94,7 @@ class TestPhysicalValidationError:
         err = PhysicalValidationError("mass", value=-1.0, physical_constraint="mass>0")
         assert err.physical_constraint == "mass>0"
 
-    def test_is_exception(self) -> None:
+    def test_validation_comprehensive_is_exception(self) -> None:
         with pytest.raises(PhysicalValidationError):
             raise PhysicalValidationError("test error")
 
@@ -174,7 +174,7 @@ class TestValidateInertiaMatrix:
     def test_valid_inertia(self, inertia: np.ndarray) -> None:
         validate_inertia_matrix(inertia)  # Should not raise
 
-    def test_wrong_shape_raises(self) -> None:
+    def test_validation_comprehensive_wrong_shape_raises(self) -> None:
         with pytest.raises(PhysicalValidationError, match="shape"):
             validate_inertia_matrix(np.eye(4))
 
@@ -228,7 +228,7 @@ class TestValidateJointLimits:
         with pytest.raises(PhysicalValidationError):
             validate_joint_limits(q, q)
 
-    def test_shape_mismatch_raises(self) -> None:
+    def test_validation_comprehensive_shape_mismatch_raises(self) -> None:
         with pytest.raises(PhysicalValidationError, match="shape"):
             validate_joint_limits(np.zeros(2), np.ones(3))
 
@@ -300,7 +300,7 @@ class TestValidateArrayShape:
     def test_correct_shape(self) -> None:
         validate_array_shape(np.eye(3), (3, 3))
 
-    def test_wrong_shape_raises(self) -> None:
+    def test_validation_comprehensive_wrong_shape_raises(self) -> None:
         with pytest.raises(ValueError, match="shape mismatch"):
             validate_array_shape(np.eye(3), (2, 2))
 
@@ -322,7 +322,7 @@ class TestValidateArrayLength:
     def test_correct_length(self) -> None:
         validate_array_length(np.zeros(5), 5)
 
-    def test_wrong_length_raises(self) -> None:
+    def test_validation_comprehensive_wrong_length_raises(self) -> None:
         with pytest.raises(ValueError, match="length"):
             validate_array_length(np.zeros(5), 3)
 
@@ -924,7 +924,7 @@ class TestGetValidationDataForClub:
         results = get_validation_data_for_club(club_query)
         assert len(results) >= min_results
 
-    def test_case_insensitive(self) -> None:
+    def test_validation_comprehensive_case_insensitive(self) -> None:
         results_lower = get_validation_data_for_club("driver")
         results_upper = get_validation_data_for_club("DRIVER")
         assert len(results_lower) == len(results_upper)

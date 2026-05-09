@@ -30,14 +30,14 @@ def mock_muscle_system() -> MagicMock:
 class TestMuscleDrivenEnv:
     """Tests for MuscleDrivenEnv class."""
 
-    def test_initialization(self, mock_muscle_system) -> None:
+    def test_myosuite_adapter_initialization(self, mock_muscle_system) -> None:
         """Test environment initialization."""
         env = MuscleDrivenEnv(mock_muscle_system, task="tracking", dt=0.01)
         assert env.task == "tracking"
         assert env.dt == 0.01
         assert env.muscle_system == mock_muscle_system
 
-    def test_reset(self, mock_muscle_system) -> None:
+    def test_myosuite_adapter_reset(self, mock_muscle_system) -> None:
         """Test environment reset."""
         env = MuscleDrivenEnv(mock_muscle_system)
         obs = env.reset()
@@ -47,7 +47,7 @@ class TestMuscleDrivenEnv:
         assert env.step_count == 0
 
     @patch("src.shared.python.biomechanics.activation_dynamics.ActivationDynamics")
-    def test_step(self, mock_dynamics_cls, mock_muscle_system) -> None:
+    def test_myosuite_adapter_step(self, mock_dynamics_cls, mock_muscle_system) -> None:
         """Test environment step."""
         # Mock ActivationDynamics
         mock_dynamics = mock_dynamics_cls.return_value

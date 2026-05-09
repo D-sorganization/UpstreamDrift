@@ -38,7 +38,7 @@ class TestXrot:
         with pytest.raises(ValueError):
             xrot(E)
 
-    def test_wrong_shape_raises(self) -> None:
+    def test_transforms_wrong_shape_raises(self) -> None:
         E = np.eye(4)
         with pytest.raises(ValueError):
             xrot(E)
@@ -67,7 +67,7 @@ class TestXlt:
         result = xlt(r)
         assert result.shape == (6, 6)
 
-    def test_wrong_shape_raises(self) -> None:
+    def test_transforms_wrong_shape_raises(self) -> None:
         r = np.array([1.0, 2.0])
         with pytest.raises((ValueError, Exception)):
             xlt(r)

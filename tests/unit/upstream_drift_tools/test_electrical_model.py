@@ -21,7 +21,7 @@ def _make_model() -> ThreePhaseElectricalModelEnhanced:
 
 
 class TestThreePhaseElectricalModelInit:
-    def test_instantiates(self) -> None:
+    def test_electrical_model_instantiates(self) -> None:
         m = _make_model()
         assert m is not None
 
@@ -43,7 +43,7 @@ class TestCalculateSystemState:
     _DEPTHS = np.array([10.0, 10.0, 10.0])
     _K = {"K_tt": 1.0, "K_vert": 1.0}
 
-    def test_returns_dict(self) -> None:
+    def test_electrical_model_returns_dict(self) -> None:
         m = _make_model()
         state = m.calculate_system_state(self._DEPTHS, 120.0, 24.0, 2.0, self._K)
         assert isinstance(state, dict)

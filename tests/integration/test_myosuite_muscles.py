@@ -111,7 +111,9 @@ class TestMyoSuiteMuscleAnalyzer:
 
         logger.info(f"Muscle forces: {forces}")
 
-    def test_moment_arm_computation(self, myosuite_env_available) -> None:
+    def test_myosuite_muscles_moment_arm_computation(
+        self, myosuite_env_available
+    ) -> None:
         """Section K: Compute moment arms via finite differences."""
         import gym
 
@@ -137,7 +139,9 @@ class TestMyoSuiteMuscleAnalyzer:
         for muscle_name, r in list(moment_arms.items())[:3]:  # First 3 muscles
             logger.info(f"Moment arms for {muscle_name}: {r}")
 
-    def test_muscle_induced_acceleration(self, myosuite_env_available) -> None:
+    def test_myosuite_muscles_muscle_induced_acceleration(
+        self, myosuite_env_available
+    ) -> None:
         """Section K: Compute muscle-induced accelerations."""
         import gym
 
@@ -170,7 +174,9 @@ class TestMyoSuiteMuscleAnalyzer:
 
         logger.info(f"Non-zero induced accelerations: {non_zero_count}/{len(induced)}")
 
-    def test_comprehensive_muscle_analysis(self, myosuite_env_available) -> None:
+    def test_myosuite_muscles_comprehensive_muscle_analysis(
+        self, myosuite_env_available
+    ) -> None:
         """Section K: Full muscle contribution report."""
         import gym
 

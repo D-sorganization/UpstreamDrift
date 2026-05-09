@@ -108,7 +108,7 @@ class TestGetDatasetStatistics:
             }
         )
 
-    def test_returns_dict(self) -> None:
+    def test_kaggle_validation_returns_dict(self) -> None:
         df = self._make_df()
         result = get_dataset_statistics(df)
         assert isinstance(result, dict)

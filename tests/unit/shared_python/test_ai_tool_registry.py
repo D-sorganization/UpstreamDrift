@@ -185,7 +185,7 @@ def test_get_tools_for_provider() -> None:
     assert "type" not in reg.get_tools_for_provider("json")[0]  # JSON schema format
 
 
-def test_global_registry() -> None:
+def test_ai_tool_registry_global_registry() -> None:
     r1 = get_global_registry()
     r2 = get_global_registry()
     assert r1 is r2

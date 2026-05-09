@@ -11,7 +11,7 @@ from src.shared.python.gui_launcher.registry import (
 )
 
 
-def test_launcher_module_imports() -> None:
+def test_gui_launcher_registry_launcher_module_imports() -> None:
     """Guard against syntax errors in the shared GUI launcher module."""
     from src.shared.python.gui_launcher import launcher
 
@@ -29,7 +29,7 @@ class TestGUIRegistry:
         reg = get_registry()
         assert isinstance(reg, GUIRegistry)
 
-    def test_singleton(self) -> None:
+    def test_gui_launcher_registry_singleton(self) -> None:
         r1 = get_registry()
         r2 = get_registry()
         assert r1 is r2
@@ -40,10 +40,10 @@ class TestGUIRegistry:
 
 
 class TestLaunchConfig:
-    def test_importable(self) -> None:
+    def test_gui_launcher_registry_importable(self) -> None:
         assert LaunchConfig is not None
 
 
 class TestGUIRegistration:
-    def test_importable(self) -> None:
+    def test_gui_launcher_registry_importable(self) -> None:
         assert GUIRegistration is not None

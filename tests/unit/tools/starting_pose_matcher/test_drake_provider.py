@@ -17,7 +17,7 @@ def test_import_without_drake():
     assert hasattr(drake, "MATCHER_TO_DRAKE")
 
 
-def test_vocabulary_mapping():
+def test_drake_provider_vocabulary_mapping():
     """Test that the vocabulary mapping is correct."""
     from src.tools.starting_pose_matcher.providers.drake import (
         DRAKE_TO_MATCHER_VOCAB,
@@ -65,7 +65,7 @@ def test_drake_not_available_error():
         DrakeSkeletonProvider(model_path=None, model_xml=None)
 
 
-def test_create_provider_function():
+def test_drake_provider_create_provider_function():
     """Test that create_provider function exists and has correct signature."""
     from src.tools.starting_pose_matcher.providers.drake import create_provider
 

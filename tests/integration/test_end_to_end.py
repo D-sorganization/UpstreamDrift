@@ -15,6 +15,16 @@ from src.shared.python.engine_core.engine_availability import skip_if_unavailabl
 class TestLauncherIntegration:
     """Integration tests for launcher functionality."""
 
+    @skip_if_unavailable("pyqt6")
+    def test_launch_golf_suite_imports(self) -> None:
+        """Verify launch_golf_suite can import UnifiedLauncher."""
+
+        from src.launchers.unified_launcher import UnifiedLauncher
+
+        launcher = UnifiedLauncher()
+        assert launcher is not None
+        assert hasattr(launcher, "mainloop")
+
     def test_launch_golf_suite_help(self) -> None:
         """Test launch_golf_suite.py --help command."""
         suite_root = get_repo_root()
@@ -34,6 +44,28 @@ class TestLauncherIntegration:
         assert (
             "Golf Modeling Suite" in result.stdout or "usage" in result.stdout.lower()
         )
+
+    @pytest.mark.skipif(
+        not sys.platform.startswith("win")
+        and not __import__("os").environ.get("DISPLAY"),
+        reason="Requires display for PyQt6 (not available in CI)",
+    )
+    def test_unified_launcher_show_status(self) -> None:
+        """Test UnifiedLauncher.show_status() method."""
+        get_repo_root()
+
+        from unittest.mock import patch
+
+        # Import inside the test to avoid circular dependencies
+        from src.launchers.unified_launcher import UnifiedLauncher
+
+        # Patch GolfLauncher to avoid instantiation issues (StopIteration from side_effects)
+        with patch("src.launchers.golf_launcher.GolfLauncher") as _:
+            launcher = UnifiedLauncher()
+
+            # Should not raise exception
+            # Note: This will print to stdout, which is expected
+            launcher.show_status()
 
 
 class TestEngineProbes:
@@ -163,7 +195,7 @@ class TestPhysicsParameters:
         assert gravity.unit == "m/s²"
         assert gravity.is_constant is True  # Should be constant
 
-    def test_parameter_validation(self) -> None:
+    def test_end_to_end_parameter_validation(self) -> None:
         """Test parameter validation."""
         from src.shared.python.physics.physics_parameters import get_registry
 

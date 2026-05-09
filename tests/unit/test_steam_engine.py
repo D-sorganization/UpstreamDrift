@@ -153,7 +153,7 @@ class TestSimplifiedSteamProperties:
         with pytest.raises(ValueError):
             engine.calculate_properties(temperature=400.0, pressure=0.0)
 
-    def test_to_dict_returns_dict(self, engine) -> None:
+    def test_steam_engine_to_dict_returns_dict(self, engine) -> None:
         """to_dict() should return a non-empty dict."""
         result = engine.calculate_properties(
             temperature=400.0, pressure=101325.0, engine="simplified"
@@ -201,7 +201,7 @@ class TestWaterVaporPressure:
         p_hot = engine.calculate_water_vapor_pressure(80.0, method="buck")
         assert p_hot > p_cold
 
-    def test_vapor_pressure_positive(self, engine) -> None:
+    def test_steam_engine_vapor_pressure_positive(self, engine) -> None:
         """Vapor pressure should always be positive for positive temperatures."""
         for T in [10.0, 25.0, 50.0, 80.0]:
             p = engine.calculate_water_vapor_pressure(T, method="buck")

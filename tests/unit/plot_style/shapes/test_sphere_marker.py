@@ -13,7 +13,7 @@ EXPECTED_VERTS = 16 * (8 + 1)  # = 144
 EXPECTED_FACES = 2 * 16 * 8  # = 256
 
 
-def test_default_counts() -> None:
+def test_sphere_marker_default_counts() -> None:
     m = SphereMarker()
     v, f = m.mesh(MarkerStyle(size_px=2.0))
     assert v.shape == (EXPECTED_VERTS, 3)
@@ -22,7 +22,7 @@ def test_default_counts() -> None:
     assert f.dtype == np.int64
 
 
-def test_unit_radius_bbox() -> None:
+def test_sphere_marker_unit_radius_bbox() -> None:
     m = SphereMarker()
     v, _ = m.mesh(MarkerStyle(size_px=2.0))  # radius == 1
     extent = v.max(axis=0) - v.min(axis=0)
@@ -31,18 +31,18 @@ def test_unit_radius_bbox() -> None:
     np.testing.assert_allclose(radii.max(), 1.0, atol=1e-9)
 
 
-def test_scale_linearity() -> None:
+def test_sphere_marker_scale_linearity() -> None:
     m = SphereMarker()
     v1, _ = m.mesh(MarkerStyle(size_px=2.0))
     v2, _ = m.mesh(MarkerStyle(size_px=4.0))
     np.testing.assert_allclose(v2, 2.0 * v1, atol=1e-12)
 
 
-def test_protocol_runtime_check() -> None:
+def test_sphere_marker_protocol_runtime_check() -> None:
     assert isinstance(SphereMarker(), MarkerShapeRenderer)
 
 
-def test_shape_id() -> None:
+def test_sphere_marker_shape_id() -> None:
     assert SphereMarker.shape_id == MarkerShape.SPHERE.value
 
 
@@ -66,7 +66,7 @@ def test_invalid_n_lat_value() -> None:
         SphereMarker(n_lat=1)
 
 
-def test_mesh_rejects_non_style() -> None:
+def test_sphere_marker_mesh_rejects_non_style() -> None:
     m = SphereMarker()
     with pytest.raises(TypeError):
         m.mesh("not a style")  # type: ignore[arg-type]

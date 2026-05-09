@@ -29,7 +29,7 @@ def _make_instance(n_samples: int = 100, n_joints: int = 3) -> SwingMetricsMixin
 
 
 class TestComputeRangeOfMotion:
-    def test_returns_tuple_of_three(self) -> None:
+    def test_swing_metrics_returns_tuple_of_three(self) -> None:
         obj = _make_instance()
         result = obj.compute_range_of_motion(0)
         assert len(result) == 3
@@ -63,7 +63,7 @@ class TestComputeTempo:
         result = obj.compute_tempo()
         assert result is None or len(result) == 3
 
-    def test_durations_non_negative(self) -> None:
+    def test_swing_metrics_durations_non_negative(self) -> None:
         obj = _make_instance(n_samples=200)
         result = obj.compute_tempo()
         if result is not None:
@@ -86,7 +86,7 @@ class TestComputeTempo:
 
 
 class TestComputeXFactor:
-    def test_returns_array(self) -> None:
+    def test_swing_metrics_returns_array(self) -> None:
         obj = _make_instance(n_joints=3)
         result = obj.compute_x_factor(0, 1)
         assert isinstance(result, np.ndarray)
@@ -97,7 +97,7 @@ class TestComputeXFactor:
         assert result is not None
         assert len(result) == len(obj.times)
 
-    def test_out_of_range_returns_none(self) -> None:
+    def test_swing_metrics_out_of_range_returns_none(self) -> None:
         obj = _make_instance(n_joints=2)
         result = obj.compute_x_factor(0, 5)
         assert result is None
@@ -111,7 +111,7 @@ class TestComputeXFactor:
 
 
 class TestComputeXFactorStretch:
-    def test_returns_tuple(self) -> None:
+    def test_swing_metrics_returns_tuple(self) -> None:
         obj = _make_instance(n_joints=3)
         result = obj.compute_x_factor_stretch(0, 1)
         assert result is not None
@@ -124,7 +124,7 @@ class TestComputeXFactorStretch:
         _, peak = result
         assert peak >= 0.0
 
-    def test_out_of_range_returns_none(self) -> None:
+    def test_swing_metrics_out_of_range_returns_none(self) -> None:
         obj = _make_instance(n_joints=2)
         result = obj.compute_x_factor_stretch(0, 5)
         assert result is None

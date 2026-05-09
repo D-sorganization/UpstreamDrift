@@ -12,7 +12,7 @@ import pytest
 class TestIsLocalModeContract:
     """Design by Contract tests for is_local_mode function."""
 
-    def test_returns_bool(self) -> None:
+    def test_auth_middleware_returns_bool(self) -> None:
         """Postcondition: Returns a boolean."""
         from src.api.auth.middleware import is_local_mode
 
@@ -71,7 +71,7 @@ class TestIsLocalMode:
 class TestLocalUserContract:
     """Design by Contract tests for LocalUser class."""
 
-    def test_instantiates(self) -> None:
+    def test_auth_middleware_instantiates(self) -> None:
         """Postcondition: LocalUser can be instantiated."""
         from src.api.auth.middleware import LocalUser
 
@@ -142,7 +142,7 @@ class TestOptionalAuthContract:
 
         assert issubclass(OptionalAuth, HTTPBearer)
 
-    def test_instantiates(self) -> None:
+    def test_auth_middleware_instantiates(self) -> None:
         """Postcondition: OptionalAuth can be instantiated."""
         from src.api.auth.middleware import OptionalAuth
 

@@ -19,7 +19,7 @@ from src.shared.python.upstream_drift_tools.calculators.conversion.service impor
 
 
 class TestConversionResult:
-    def test_construct(self) -> None:
+    def test_conversion_service_construct(self) -> None:
         r = ConversionResult(value=1.0, from_unit="m", to_unit="km")
         assert r.value == 1.0
         assert r.from_unit == "m"
@@ -29,7 +29,7 @@ class TestConversionResult:
         r = ConversionResult(value=1.0, from_unit="m", to_unit="km")
         assert r.uncertainty == 0.0
 
-    def test_default_warnings_empty(self) -> None:
+    def test_conversion_service_default_warnings_empty(self) -> None:
         r = ConversionResult(value=1.0, from_unit="m", to_unit="km")
         assert r.warnings == []
 
@@ -63,11 +63,11 @@ class TestConvert:
         result = self._SVC.convert(0.0, "C", "K")
         assert abs(result.value - 273.15) < 0.01
 
-    def test_unknown_from_unit_raises(self) -> None:
+    def test_conversion_service_unknown_from_unit_raises(self) -> None:
         with pytest.raises(UnknownUnitError):
             self._SVC.convert(1.0, "INVALID_UNIT_XYZ", "kg")
 
-    def test_unknown_to_unit_raises(self) -> None:
+    def test_conversion_service_unknown_to_unit_raises(self) -> None:
         with pytest.raises(UnknownUnitError):
             self._SVC.convert(1.0, "kg", "INVALID_UNIT_XYZ")
 

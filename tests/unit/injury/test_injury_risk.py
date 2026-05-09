@@ -36,7 +36,7 @@ class TestInjuryType:
 class TestRiskFactor:
     """Tests for RiskFactor dataclass."""
 
-    def test_construction(self) -> None:
+    def test_injury_risk_construction(self) -> None:
         rf = RiskFactor(
             name="test",
             value=50.0,
@@ -55,7 +55,7 @@ class TestRiskFactor:
 class TestInjuryRiskReport:
     """Tests for InjuryRiskReport dataclass."""
 
-    def test_default_construction(self) -> None:
+    def test_injury_risk_default_construction(self) -> None:
         report = InjuryRiskReport()
         assert report.overall_risk_score == 0.0
         assert report.overall_risk_level == RiskLevel.LOW
@@ -67,7 +67,7 @@ class TestInjuryRiskReport:
 class TestInjuryRiskScorer:
     """Tests for InjuryRiskScorer class."""
 
-    def test_construction(self) -> None:
+    def test_injury_risk_construction(self) -> None:
         scorer = InjuryRiskScorer()
         assert scorer is not None
 

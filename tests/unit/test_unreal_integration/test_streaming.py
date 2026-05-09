@@ -47,7 +47,7 @@ def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
 class TestStreamingConfig:
     """Tests for StreamingConfig."""
 
-    def test_default_config(self) -> None:
+    def test_streaming_default_config(self) -> None:
         """Test default streaming configuration."""
         config = StreamingConfig()
         assert config.host == "localhost"
@@ -55,7 +55,7 @@ class TestStreamingConfig:
         assert config.target_fps == 60
         assert config.buffer_size == 10
 
-    def test_custom_config(self) -> None:
+    def test_streaming_custom_config(self) -> None:
         """Test custom streaming configuration."""
         config = StreamingConfig(
             host="0.0.0.0",
@@ -73,7 +73,7 @@ class TestStreamingConfig:
         config = StreamingConfig(target_fps=60)
         assert config.frame_interval == pytest.approx(1 / 60)
 
-    def test_config_validation(self) -> None:
+    def test_streaming_config_validation(self) -> None:
         """Test configuration validation."""
         with pytest.raises(ValueError, match="port"):
             StreamingConfig(port=-1)

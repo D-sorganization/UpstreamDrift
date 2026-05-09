@@ -57,11 +57,11 @@ class TestValidateSecretKeyStrength:
 
 
 class TestGenerateSecureKeyCommand:
-    def test_returns_string(self) -> None:
+    def test_env_validator_returns_string(self) -> None:
         result = generate_secure_key_command()
         assert isinstance(result, str)
 
-    def test_non_empty(self) -> None:
+    def test_env_validator_non_empty(self) -> None:
         result = generate_secure_key_command()
         assert len(result) > 0
 

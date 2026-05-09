@@ -25,7 +25,7 @@ import pytest
 class TestSeriesExpansionContract:
     """Design by Contract tests for SeriesExpansion class."""
 
-    def test_instantiates(self) -> None:
+    def test_series_instantiates(self) -> None:
         """Postcondition: SeriesExpansion can be instantiated."""
         from signal_toolkit.series import SeriesExpansion
 
@@ -178,7 +178,7 @@ class TestMaclaurinSeriesContract:
 class TestGetCoefficientsContract:
     """Design by Contract tests for get_coefficients method."""
 
-    def test_returns_array(self) -> None:
+    def test_series_returns_array(self) -> None:
         """Postcondition: Returns numpy array of coefficients."""
         from signal_toolkit.series import SeriesExpansion
 

@@ -14,7 +14,7 @@ from src.shared.python.engine_core.capabilities import (
 
 
 class TestCapabilityLevel:
-    def test_three_levels(self) -> None:
+    def test_engine_capabilities_three_levels(self) -> None:
         assert len(CapabilityLevel) == 3
 
     def test_full_partial_none_exist(self) -> None:
@@ -99,7 +99,7 @@ class TestEngineCapabilitiesHasProperties:
 
 
 class TestEngineCapabilitiesToDict:
-    def test_returns_dict(self) -> None:
+    def test_engine_capabilities_returns_dict(self) -> None:
         caps = EngineCapabilities(engine_name="TestEngine")
         result = caps.to_dict()
         assert isinstance(result, dict)
@@ -140,7 +140,7 @@ class TestEngineCapabilitiesToDict:
 
 
 class TestEngineCapabilitiesFromDict:
-    def test_roundtrip(self) -> None:
+    def test_engine_capabilities_roundtrip(self) -> None:
         original = EngineCapabilities(
             engine_name="Pinocchio",
             jacobian=CapabilityLevel.FULL,

@@ -51,7 +51,7 @@ def estimator(mock_op_wrapper) -> OpenPoseEstimator:
     return est
 
 
-def test_initialization() -> None:
+def test_openpose_estimator_initialization() -> None:
     est = OpenPoseEstimator()
     assert est.wrapper is None
     assert est._is_loaded is False

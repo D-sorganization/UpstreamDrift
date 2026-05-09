@@ -117,7 +117,7 @@ class TestSegmentTimingAnalyzerPostconditions(unittest.TestCase):
         )
         self.assertEqual(result.sequence_consistency, 0.0)
 
-    def test_single_segment(self) -> None:
+    def test_dbc_runtime_kinematic_plane_single_segment(self) -> None:
         from src.shared.python.biomechanics.kinematic_sequence import (
             SegmentTimingAnalyzer,
         )
@@ -206,7 +206,7 @@ class TestSwingPlanePostconditions(unittest.TestCase):
         self.assertGreaterEqual(result.steepness_deg, 0.0)
         self.assertLessEqual(result.steepness_deg, 180.0)
 
-    def test_normal_is_unit_vector(self) -> None:
+    def test_dbc_runtime_kinematic_plane_normal_is_unit_vector(self) -> None:
         from src.shared.python.biomechanics.swing_plane_analysis import (
             SwingPlaneAnalyzer,
         )

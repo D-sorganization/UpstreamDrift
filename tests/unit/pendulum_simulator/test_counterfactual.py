@@ -21,12 +21,12 @@ def _make_triple_params() -> TriplePendulumParams:
 
 
 class TestZeroTorqueJointForcesDouble:
-    def test_returns_dict(self) -> None:
+    def test_counterfactual_returns_dict(self) -> None:
         state = np.zeros(4)
         result = zero_torque_joint_forces_double(state, _make_double_params())
         assert isinstance(result, dict)
 
-    def test_has_expected_keys(self) -> None:
+    def test_counterfactual_has_expected_keys(self) -> None:
         state = np.zeros(4)
         result = zero_torque_joint_forces_double(state, _make_double_params())
         # Should have joint force entries
@@ -58,12 +58,12 @@ class TestZeroTorqueJointForcesDouble:
 
 
 class TestZeroTorqueJointForcesTriple:
-    def test_returns_dict(self) -> None:
+    def test_counterfactual_returns_dict(self) -> None:
         state = np.zeros(6)
         result = zero_torque_joint_forces_triple(state, _make_triple_params())
         assert isinstance(result, dict)
 
-    def test_has_expected_keys(self) -> None:
+    def test_counterfactual_has_expected_keys(self) -> None:
         state = np.zeros(6)
         result = zero_torque_joint_forces_triple(state, _make_triple_params())
         assert len(result) > 0

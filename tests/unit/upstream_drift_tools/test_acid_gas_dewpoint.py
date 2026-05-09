@@ -35,7 +35,7 @@ class TestAcidGasComposition:
         n = c.normalize()
         assert n.total == 0.0
 
-    def test_to_dict_keys(self) -> None:
+    def test_acid_gas_dewpoint_to_dict_keys(self) -> None:
         c = AcidGasComposition(h2o=0.5)
         d = c.to_dict()
         assert "H2O" in d
@@ -55,7 +55,7 @@ class TestCalculateVaporPressure:
         vp = self._CALC.calculate_vapor_pressure(100.0, "H2O")
         assert abs(vp - 101325.0) / 101325.0 < 0.05  # within 5%
 
-    def test_vapor_pressure_positive(self) -> None:
+    def test_acid_gas_dewpoint_vapor_pressure_positive(self) -> None:
         vp = self._CALC.calculate_vapor_pressure(50.0, "H2O")
         assert vp > 0.0
 
@@ -76,7 +76,7 @@ class TestCalculateVaporPressure:
         vp = self._CALC.calculate_vapor_pressure(80.0, "H2O", method="extended_antoine")
         assert vp > 0.0
 
-    def test_unknown_method_raises(self) -> None:
+    def test_acid_gas_dewpoint_unknown_method_raises(self) -> None:
         with pytest.raises(ValueError):
             self._CALC.calculate_vapor_pressure(50.0, "H2O", method="magic")
 
@@ -87,7 +87,7 @@ class TestCalculateVaporPressure:
 
 
 class TestQuickDewpointCalculation:
-    def test_returns_dict(self) -> None:
+    def test_acid_gas_dewpoint_returns_dict(self) -> None:
         result = quick_dewpoint_calculation(200.0, 1.0, h2o_fraction=0.1)
         assert isinstance(result, dict)
 

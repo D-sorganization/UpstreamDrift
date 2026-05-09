@@ -42,6 +42,18 @@ class TestRouterPrefixesNoHardcodedApiSegment:
             f"terrain router prefix starts with /api: {router.prefix!r}."
         )
 
+    @pytest.mark.skipif(
+        not __import__("importlib").util.find_spec("multipart"),
+        reason="python-multipart not installed; data_explorer imports UploadFile",
+    )
+    def test_data_explorer_router_prefix_no_api(self) -> None:
+        """data_explorer.router prefix must not start with /api."""
+        from src.api.routes.data_explorer import router
+
+        assert not router.prefix.startswith("/api"), (
+            f"data_explorer router prefix starts with /api: {router.prefix!r}."
+        )
+
     def test_motion_capture_router_prefix_no_api(self) -> None:
         """motion_capture.router prefix must not start with /api."""
         from src.api.routes.motion_capture import router

@@ -51,10 +51,10 @@ _SMALL_CONFIG = PerturbationConfig(
 
 
 class TestMandatoryMetrics:
-    def test_non_empty(self) -> None:
+    def test_pinocchio_perturbation_analyzer_non_empty(self) -> None:
         assert len(MANDATORY_METRICS) >= 10
 
-    def test_contains_required_names(self) -> None:
+    def test_pinocchio_perturbation_analyzer_contains_required_names(self) -> None:
         required = {
             "end_effector_position_final",
             "end_effector_velocity_final",
@@ -69,12 +69,14 @@ class TestMandatoryMetrics:
         }
         assert required.issubset(set(MANDATORY_METRICS))
 
-    def test_no_duplicates(self) -> None:
+    def test_pinocchio_perturbation_analyzer_no_duplicates(self) -> None:
         assert len(MANDATORY_METRICS) == len(set(MANDATORY_METRICS))
 
 
 class TestPerturbCoeffsByMode:
-    def test_additive_zero_amplitude_no_change(self) -> None:
+    def test_pinocchio_perturbation_analyzer_additive_zero_amplitude_no_change(
+        self,
+    ) -> None:
         coeffs = [[1.0, 2.0], [3.0, 4.0]]
         config = PerturbationConfig(
             n_trials=1, noise_amplitude=0.0, noise_type="white", perturb_mode="additive"
@@ -166,7 +168,7 @@ class TestPinocchioSimResult:
             potential_energy_traj=pe,
         )
 
-    def test_n_steps(self) -> None:
+    def test_pinocchio_perturbation_analyzer_n_steps(self) -> None:
         r = self._make_sim_result(n=10)
         assert r.n_steps == 10
 
@@ -177,7 +179,7 @@ class TestPinocchioSimResult:
 
 
 class TestComparisonReport:
-    def test_default_fields(self) -> None:
+    def test_pinocchio_perturbation_analyzer_default_fields(self) -> None:
         report = ComparisonReport(winner="A", confidence=0.8)
         assert report.winner == "A"
         assert report.confidence == 0.8

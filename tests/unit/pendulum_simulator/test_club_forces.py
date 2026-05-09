@@ -18,7 +18,7 @@ class TestNetForceOnClub:
         result = net_force_on_club(f_r, f_l)
         np.testing.assert_allclose(result, [5.0, 0.0])
 
-    def test_returns_shape_2(self) -> None:
+    def test_club_forces_returns_shape_2(self) -> None:
         result = net_force_on_club(np.array([1.0, 0.0]), np.array([0.0, 1.0]))
         assert result.shape == (2,)
 
@@ -56,7 +56,7 @@ class TestMomentOfNetForce:
         pt = np.array([3.0, 4.0])
         assert moment_of_net_force(net, pt, pt) == pytest.approx(0.0)
 
-    def test_returns_float(self) -> None:
+    def test_club_forces_returns_float(self) -> None:
         net = np.array([1.0, 0.0])
         result = moment_of_net_force(net, np.array([1.0, 0.0]), np.array([0.0, 0.0]))
         assert isinstance(result, float)
@@ -86,7 +86,7 @@ class TestEquivalentCouple:
         result = equivalent_couple(f_r, pos_r, f_l, pos_l, action_pt)
         assert result == pytest.approx(5.0)
 
-    def test_returns_float(self) -> None:
+    def test_club_forces_returns_float(self) -> None:
         result = equivalent_couple(
             np.zeros(2), np.zeros(2), np.zeros(2), np.zeros(2), np.zeros(2)
         )

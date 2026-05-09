@@ -124,7 +124,7 @@ class TestXFactorStretchPostconditions(unittest.TestCase):
         velocity_arr, peak_rate = result
         self.assertGreaterEqual(peak_rate, 0.0)
 
-    def test_out_of_range_returns_none(self) -> None:
+    def test_dbc_runtime_swing_phase_out_of_range_returns_none(self) -> None:
         obj = _make_swing_mixin()
         result = obj.compute_x_factor_stretch(0, 99)
         self.assertIsNone(result)

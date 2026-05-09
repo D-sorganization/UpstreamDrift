@@ -21,7 +21,7 @@ from src.engines.common.export import (
 class TestVideoConfig:
     """Tests for VideoConfig dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_export_interfaces_default_values(self) -> None:
         config = VideoConfig()
         assert config.width == 1920
         assert config.height == 1080
@@ -30,7 +30,7 @@ class TestVideoConfig:
         assert config.codec is None
         assert config.show_overlays is True
 
-    def test_custom_values(self) -> None:
+    def test_export_interfaces_custom_values(self) -> None:
         config = VideoConfig(width=640, height=480, fps=30, format="gif")
         assert config.width == 640
         assert config.fps == 30
@@ -194,7 +194,7 @@ class TestDatasetExporter:
         with pytest.raises(ValueError, match="No records"):
             exporter.export_json(tmp_path / "empty.json")
 
-    def test_clear(self) -> None:
+    def test_export_interfaces_clear(self) -> None:
         exporter = self._make_exporter(5)
         assert exporter.record_count == 5
 

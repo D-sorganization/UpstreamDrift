@@ -17,16 +17,16 @@ from src.shared.python.launcher_factory import (
 
 
 class TestEngineModules:
-    def test_is_dict(self) -> None:
+    def test_launcher_factory_is_dict(self) -> None:
         assert isinstance(ENGINE_MODULES, dict)
 
-    def test_non_empty(self) -> None:
+    def test_launcher_factory_non_empty(self) -> None:
         assert len(ENGINE_MODULES) > 0
 
     def test_mujoco_key_exists(self) -> None:
         assert "mujoco" in ENGINE_MODULES
 
-    def test_values_are_strings(self) -> None:
+    def test_launcher_factory_values_are_strings(self) -> None:
         assert all(isinstance(v, str) for v in ENGINE_MODULES.values())
 
     def test_module_paths_have_dots(self) -> None:

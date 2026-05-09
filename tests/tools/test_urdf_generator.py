@@ -12,7 +12,7 @@ class TestURDFBuilder:
         """Initialize the builder before each test."""
         self.builder = URDFBuilder()
 
-    def test_initialization(self) -> None:
+    def test_urdf_generator_initialization(self) -> None:
         """Test initial state of the builder."""
         assert len(self.builder.segments) == 0
         assert len(self.builder.materials) == 0

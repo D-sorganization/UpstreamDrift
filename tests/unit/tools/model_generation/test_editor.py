@@ -445,7 +445,7 @@ class TestURDFTextEditor:
         assert count > 0
         assert "LINK" in editor.get_content()
 
-    def test_get_history(self) -> None:
+    def test_editor_get_history(self) -> None:
         """Test getting version history."""
         from model_generation.editor import URDFTextEditor
 

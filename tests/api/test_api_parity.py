@@ -53,7 +53,7 @@ class TestCoreEndpoints:
         assert "version" in data
         assert data["status"] == "running"
 
-    def test_health_check(self, client: TestClient) -> None:
+    def test_api_parity_health_check(self, client: TestClient) -> None:
         """GET /health returns healthy status with engine count."""
         response = client.get("/health")
         assert response.status_code == 200

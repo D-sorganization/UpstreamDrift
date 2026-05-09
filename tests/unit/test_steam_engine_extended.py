@@ -53,7 +53,7 @@ class TestAntoineEquation:
         # Antoine at 0°C: ~4.58 mmHg = 611 Pa
         assert 400 < p < 1000, f"Expected ~611 Pa at 0°C, got {p:.1f} Pa"
 
-    def test_increases_with_temperature(self, engine) -> None:
+    def test_steam_engine_extended_increases_with_temperature(self, engine) -> None:
         """Vapor pressure increases monotonically with temperature."""
         p_20 = engine._antoine_equation(20.0)
         p_50 = engine._antoine_equation(50.0)
@@ -74,7 +74,7 @@ class TestBuckEquation:
         p = engine._buck_equation(100.0)
         assert p > 50000, f"Expected positive pressure at 100°C, got {p:.1f} Pa"
 
-    def test_increases_with_temperature(self, engine) -> None:
+    def test_steam_engine_extended_increases_with_temperature(self, engine) -> None:
         """Buck vapor pressure increases with temperature."""
         p_10 = engine._buck_equation(10.0)
         p_60 = engine._buck_equation(60.0)
@@ -99,7 +99,7 @@ class TestCalculateWaterVaporPressure:
         p = engine.calculate_water_vapor_pressure(50.0)
         assert p > 0
 
-    def test_increases_with_temperature(self, engine) -> None:
+    def test_steam_engine_extended_increases_with_temperature(self, engine) -> None:
         """Vapor pressure is monotonically increasing with temperature."""
         p_20 = engine.calculate_water_vapor_pressure(20.0)
         p_60 = engine.calculate_water_vapor_pressure(60.0)
@@ -119,7 +119,7 @@ class TestCalculateWaterVaporPressure:
 class TestGetSaturationPressure:
     """Tests for get_saturation_pressure (saturation pressure at a temperature)."""
 
-    def test_returns_float(self, engine) -> None:
+    def test_steam_engine_extended_returns_float(self, engine) -> None:
         """get_saturation_pressure returns a float."""
         p = engine.get_saturation_pressure(373.15)  # 100°C in K
         assert isinstance(p, float)
@@ -129,7 +129,7 @@ class TestGetSaturationPressure:
         p = engine.get_saturation_pressure(373.15)
         assert p > 0
 
-    def test_increases_with_temperature(self, engine) -> None:
+    def test_steam_engine_extended_increases_with_temperature(self, engine) -> None:
         """Saturation pressure increases with temperature."""
         p_low = engine.get_saturation_pressure(300.0)
         p_high = engine.get_saturation_pressure(400.0)
@@ -205,7 +205,7 @@ class TestSaturatedFromPressure:
         result = engine.calculate_saturated_properties_from_pressure(101325.0)
         assert isinstance(result, SteamProperties)
 
-    def test_pressure_stored(self, engine) -> None:
+    def test_steam_engine_extended_pressure_stored(self, engine) -> None:
         """Returned SteamProperties contains the input pressure."""
         result = engine.calculate_saturated_properties_from_pressure(101325.0)
         assert abs(result.pressure - 101325.0) < 1.0
@@ -264,7 +264,7 @@ class TestCalculateProperties:
         )
         assert abs(result.temperature - 400.0) < 1.0
 
-    def test_zero_pressure_raises(self, engine) -> None:
+    def test_steam_engine_extended_zero_pressure_raises(self, engine) -> None:
         """Zero or negative pressure raises ValueError or AssertionError."""
         with pytest.raises((ValueError, AssertionError)):
             engine.calculate_properties(temperature=400.0, pressure=0.0)

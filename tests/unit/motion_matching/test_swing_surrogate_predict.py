@@ -80,7 +80,9 @@ def test_from_checkpoint_round_trip(trained_checkpoint: Path) -> None:
 
 @pytest.mark.unit
 @pytest.mark.requires_torch
-def test_from_checkpoint_missing_file_raises(tmp_path: Path) -> None:
+def test_swing_surrogate_predict_from_checkpoint_missing_file_raises(
+    tmp_path: Path,
+) -> None:
     """A nonexistent path must raise ``FileNotFoundError``."""
     with pytest.raises(FileNotFoundError):
         SwingSurrogate.from_checkpoint(tmp_path / "no.pt")

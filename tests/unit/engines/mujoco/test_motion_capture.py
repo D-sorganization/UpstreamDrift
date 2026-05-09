@@ -22,7 +22,7 @@ from mujoco_humanoid_golf.motion_capture import (
 class TestMotionCaptureFrame:
     """Tests for MotionCaptureFrame dataclass."""
 
-    def test_initialization(self) -> None:
+    def test_motion_capture_initialization(self) -> None:
         """Test frame initialization."""
         markers = {"marker1": np.array([1.0, 2.0, 3.0])}
         frame = MotionCaptureFrame(time=1.0, marker_positions=markers)
@@ -37,7 +37,7 @@ class TestMotionCaptureFrame:
 class TestMotionCaptureSequence:
     """Tests for MotionCaptureSequence dataclass."""
 
-    def test_initialization(self) -> None:
+    def test_motion_capture_initialization(self) -> None:
         """Test sequence initialization."""
         frames = [
             MotionCaptureFrame(time=0.0, marker_positions={"m1": np.array([0, 0, 0])}),
@@ -77,7 +77,7 @@ class TestMotionCaptureSequence:
 class TestMarkerSet:
     """Tests for MarkerSet dataclass."""
 
-    def test_initialization(self) -> None:
+    def test_motion_capture_initialization(self) -> None:
         """Test marker set initialization."""
         markers = {"m1": "body1", "m2": "body2"}
         offsets = {"m1": np.array([0, 0, 0]), "m2": np.array([0.1, 0, 0])}
@@ -173,7 +173,7 @@ class TestMotionRetargeting:
             marker_offsets={"m1": np.array([0, 0, 0])},
         )
 
-    def test_initialization(self, model_and_data, marker_set) -> None:
+    def test_motion_capture_initialization(self, model_and_data, marker_set) -> None:
         """Test retargeting initialization."""
         model, data = model_and_data
         retargeting = MotionRetargeting(model, data, marker_set)

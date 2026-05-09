@@ -76,14 +76,14 @@ class TestMuscleParameters:
 class TestMuscleState:
     """Tests for MuscleState dataclass."""
 
-    def test_defaults(self) -> None:
+    def test_biomechanics_comprehensive_defaults(self) -> None:
         state = MuscleState()
         assert state.activation == 0.0
         assert state.l_CE == 0.0
         assert state.v_CE == 0.0
         assert state.l_MT == 0.0
 
-    def test_custom_values(self) -> None:
+    def test_biomechanics_comprehensive_custom_values(self) -> None:
         state = MuscleState(activation=0.8, l_CE=0.15, v_CE=-0.5, l_MT=0.35)
         assert state.activation == 0.8
         assert state.v_CE == -0.5
@@ -263,7 +263,7 @@ class TestActivationDynamics:
     def dynamics(self) -> ActivationDynamics:
         return ActivationDynamics(tau_act=0.010, tau_deact=0.040)
 
-    def test_default_params(self) -> None:
+    def test_biomechanics_comprehensive_default_params(self) -> None:
         d = ActivationDynamics()
         assert d.tau_act == 0.010
         assert d.tau_deact == 0.040
@@ -342,7 +342,7 @@ class TestActivationDynamics:
             a = dynamics.update(u=0.0, a=a, dt=0.001)
         assert a < 0.05  # Should be near 0 after 500ms
 
-    def test_activation_faster_than_deactivation(
+    def test_biomechanics_comprehensive_activation_faster_than_deactivation(
         self, dynamics: ActivationDynamics
     ) -> None:
         """Activation (rise) should be faster than deactivation (fall)."""
@@ -475,7 +475,7 @@ class TestSwingPlaneAnalyzer:
 class TestSwingPlaneMetrics:
     """Tests for SwingPlaneMetrics dataclass fields."""
 
-    def test_instantiation(self) -> None:
+    def test_biomechanics_comprehensive_instantiation(self) -> None:
         m = SwingPlaneMetrics(
             normal_vector=np.array([0, 0, 1.0]),
             point_on_plane=np.zeros(3),

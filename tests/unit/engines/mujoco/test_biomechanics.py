@@ -14,7 +14,7 @@ from mujoco_humanoid_golf.models import DOUBLE_PENDULUM_XML
 class TestBiomechanicalData:
     """Tests for BiomechanicalData dataclass."""
 
-    def test_default_initialization(self) -> None:
+    def test_biomechanics_default_initialization(self) -> None:
         """Test default initialization of BiomechanicalData."""
         data = BiomechanicalData()
 
@@ -54,7 +54,7 @@ class TestBiomechanicalAnalyzer:
         data = mujoco.MjData(model)
         return model, data
 
-    def test_initialization(self, model_and_data) -> None:
+    def test_biomechanics_initialization(self, model_and_data) -> None:
         """Test analyzer initialization."""
         model, data = model_and_data
         analyzer = BiomechanicalAnalyzer(model, data)
@@ -64,7 +64,7 @@ class TestBiomechanicalAnalyzer:
         assert analyzer._prev_club_vel is None
         assert analyzer.prev_qvel is None
 
-    def test_find_body_id(self, model_and_data) -> None:
+    def test_biomechanics_find_body_id(self, model_and_data) -> None:
         """Test finding body ID by name pattern."""
         model, data = model_and_data
         analyzer = BiomechanicalAnalyzer(model, data)
@@ -273,14 +273,14 @@ class TestBiomechanicalAnalyzer:
 class TestSwingRecorder:
     """Tests for SwingRecorder class."""
 
-    def test_initialization(self) -> None:
+    def test_biomechanics_initialization(self) -> None:
         """Test recorder initialization."""
         recorder = SwingRecorder()
 
         assert len(recorder.frames) == 0
         assert not recorder.is_recording
 
-    def test_reset(self) -> None:
+    def test_biomechanics_reset(self) -> None:
         """Test resetting recorder."""
         recorder = SwingRecorder()
         recorder.start_recording()
@@ -418,7 +418,7 @@ class TestSwingRecorder:
 
         assert recorder.get_duration() == 0.0
 
-    def test_export_to_dict(self) -> None:
+    def test_biomechanics_export_to_dict(self) -> None:
         """Test exporting to dictionary."""
         recorder = SwingRecorder()
         recorder.start_recording()

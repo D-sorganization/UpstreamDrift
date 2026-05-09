@@ -748,14 +748,14 @@ class TestCollisionChecker:
 class TestCollisionCheckerConfig:
     """Tests for CollisionCheckerConfig."""
 
-    def test_default_config(self) -> None:
+    def test_planning_collision_default_config(self) -> None:
         """Test default configuration."""
         config = CollisionCheckerConfig()
         assert config.default_margin == 0.01
         assert config.use_broad_phase
         assert config.max_contacts == 100
 
-    def test_custom_config(self) -> None:
+    def test_planning_collision_custom_config(self) -> None:
         """Test custom configuration."""
         config = CollisionCheckerConfig(
             default_margin=0.05,

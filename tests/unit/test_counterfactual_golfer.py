@@ -33,13 +33,13 @@ def _make_params() -> GolferParams:
 
 
 class TestZeroTorqueAccelerations:
-    def test_returns_ndarray(self) -> None:
+    def test_counterfactual_golfer_returns_ndarray(self) -> None:
         params = _make_params()
         state = np.zeros(2 * N_DOF)
         acc = zero_torque_accelerations(state, params)
         assert isinstance(acc, np.ndarray)
 
-    def test_output_shape(self) -> None:
+    def test_counterfactual_golfer_output_shape(self) -> None:
         params = _make_params()
         state = np.zeros(2 * N_DOF)
         acc = zero_torque_accelerations(state, params)
@@ -53,7 +53,7 @@ class TestZeroTorqueAccelerations:
 
 
 class TestZeroTorqueJointForces:
-    def test_returns_dict(self) -> None:
+    def test_counterfactual_golfer_returns_dict(self) -> None:
         params = _make_params()
         state = np.zeros(2 * N_DOF)
         forces = zero_torque_joint_forces(state, params)

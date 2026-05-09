@@ -117,7 +117,7 @@ class TestLauncherManifestEndpoints:
             "Assertion failed: response.status_code == 404"
         )
 
-    def test_get_engines(self, client: TestClient) -> None:
+    def test_launcher_api_get_engines(self, client: TestClient) -> None:
         """GET /api/launcher/engines returns only physics engine tiles."""
         response = client.get("/api/launcher/engines")
         assert response.status_code == 200, (

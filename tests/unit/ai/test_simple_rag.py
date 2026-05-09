@@ -8,7 +8,7 @@ from src.shared.python.ai.rag.simple_rag import Document, SimpleRAGStore
 
 
 class TestDocument:
-    def test_construction(self) -> None:
+    def test_simple_rag_construction(self) -> None:
         doc = Document(id="d1", content="Hello world", metadata={"type": "text"})
         assert doc.id == "d1"
         assert doc.content == "Hello world"

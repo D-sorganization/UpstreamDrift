@@ -166,7 +166,7 @@ def test_log_generated_outputs(caplog, tmp_path) -> None:
 @patch("installer.windows.build_installer.build_msi", return_value=True)
 @patch("installer.windows.build_installer.create_installer_info")
 @patch("installer.windows.build_installer._log_generated_outputs")
-def test_main(
+def test_build_installer_main(
     mock_log_outputs,
     mock_info,
     mock_msi,

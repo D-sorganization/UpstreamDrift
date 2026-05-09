@@ -212,7 +212,7 @@ class TestAssertPhysicsState:
 class TestAssertJacobianSymmetry:
     """Tests for assert_jacobian_symmetry."""
 
-    def test_symmetric_matrix(self) -> None:
+    def test_numerical_symmetric_matrix(self) -> None:
         J = [
             [1.0, 2.0, 3.0],
             [2.0, 5.0, 6.0],
@@ -243,7 +243,7 @@ class TestAssertJacobianSymmetry:
         with pytest.raises(ValueError, match="must be square"):
             assert_jacobian_symmetry(J)
 
-    def test_empty_raises(self) -> None:
+    def test_numerical_empty_raises(self) -> None:
         with pytest.raises(ValueError, match="must not be empty"):
             assert_jacobian_symmetry([])
 

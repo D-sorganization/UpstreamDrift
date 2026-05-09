@@ -38,7 +38,7 @@ class _ConcreteResult(TrajectoryResultMixin):
 
 
 class TestTrajectoryResultMixin:
-    def test_n_steps(self) -> None:
+    def test_simulation_result_base_n_steps(self) -> None:
         result = _ConcreteResult(n=10)
         assert result.n_steps == 10
 
