@@ -43,6 +43,13 @@ except Exception:  # pragma: no cover - PyQt6 missing or unloadable
 else:
     SegmentPropertiesPanel = _Panel
 
+try:  # pragma: no cover - presence depends on the install environment
+    from .ui.calibration_dialog import SubjectCalibrationDialog as _Dialog
+except Exception:  # pragma: no cover - PyQt6 missing or unloadable
+    SubjectCalibrationDialog = None  # type: ignore[assignment]
+else:
+    SubjectCalibrationDialog = _Dialog
+
 # UNION resolution: combine top-level public names with the
 # engine_adapters subpackage's own __all__ so e.g.
 # ``from anthropometrics import DrakeAdapter`` works.
@@ -57,6 +64,7 @@ _LOCAL_ALL = [
     "SegmentPropertiesPanel",
     "Sex",
     "SubjectAnthropometrics",
+    "SubjectCalibrationDialog",
     "Writer",
     "default_subjects_dir",
     "engine_adapters",

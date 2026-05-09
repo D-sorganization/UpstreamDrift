@@ -9,6 +9,7 @@ constructs a widget.
 
 from __future__ import annotations
 
+from .calibration_dialog import SubjectCalibrationDialog
 from .segment_properties_panel import SegmentPropertiesPanel
 
-__all__ = ["SegmentPropertiesPanel"]
+__all__ = ["SegmentPropertiesPanel", "SubjectCalibrationDialog"]
