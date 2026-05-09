@@ -1,0 +1,109 @@
+{
+  "method": "zatsiorsky_seluyanov_1985",
+  "citation": "Zatsiorsky, V.M. & Seluyanov, V.N. (1985). Estimation of the mass and inertia characteristics of the human body by means of the best predictive regression equations. In: Biomechanics IX-B (Winter et al., eds.), Human Kinetics, pp. 233-239.",
+  "segments": {
+    "head": {
+      "mass_ratio": 0.0694,
+      "length_ratio": 0.1395,
+      "com_proximal_ratio": 0.5002,
+      "gyration_radii": {
+        "sagittal": 0.303,
+        "transverse": 0.315,
+        "longitudinal": 0.261
+      }
+    },
+    "trunk": {
+      "mass_ratio": 0.4346,
+      "length_ratio": 0.328,
+      "com_proximal_ratio": 0.5138,
+      "gyration_radii": {
+        "sagittal": 0.328,
+        "transverse": 0.306,
+        "longitudinal": 0.169
+      }
+    },
+    "upper_arm": {
+      "mass_ratio": 0.0271,
+      "length_ratio": 0.186,
+      "com_proximal_ratio": 0.5772,
+      "gyration_radii": {
+        "sagittal": 0.285,
+        "transverse": 0.269,
+        "longitudinal": 0.158
+      }
+    },
+    "forearm": {
+      "mass_ratio": 0.0162,
+      "length_ratio": 0.146,
+      "com_proximal_ratio": 0.4574,
+      "gyration_radii": {
+        "sagittal": 0.276,
+        "transverse": 0.265,
+        "longitudinal": 0.121
+      }
+    },
+    "hand": {
+      "mass_ratio": 0.0061,
+      "length_ratio": 0.108,
+      "com_proximal_ratio": 0.7900,
+      "gyration_radii": {
+        "sagittal": 0.628,
+        "transverse": 0.513,
+        "longitudinal": 0.401
+      }
+    },
+    "thigh": {
+      "mass_ratio": 0.1416,
+      "length_ratio": 0.245,
+      "com_proximal_ratio": 0.4095,
+      "gyration_radii": {
+        "sagittal": 0.329,
+        "transverse": 0.329,
+        "longitudinal": 0.149
+      }
+    },
+    "shank": {
+      "mass_ratio": 0.0433,
+      "length_ratio": 0.246,
+      "com_proximal_ratio": 0.4459,
+      "gyration_radii": {
+        "sagittal": 0.255,
+        "transverse": 0.249,
+        "longitudinal": 0.103
+      }
+    },
+    "foot": {
+      "mass_ratio": 0.0137,
+      "length_ratio": 0.152,
+      "com_proximal_ratio": 0.4415,
+      "gyration_radii": {
+        "sagittal": 0.257,
+        "transverse": 0.245,
+        "longitudinal": 0.124
+      }
+    }
+  },
+  "segment_name_map": {
+    "head": "head",
+    "neck": "trunk",
+    "thorax": "trunk",
+    "lumbar": "trunk",
+    "pelvis": "trunk",
+    "left_shoulder": "upper_arm",
+    "right_shoulder": "upper_arm",
+    "left_upper_arm": "upper_arm",
+    "right_upper_arm": "upper_arm",
+    "left_forearm": "forearm",
+    "right_forearm": "forearm",
+    "left_hand": "hand",
+    "right_hand": "hand",
+    "left_hip": "thigh",
+    "right_hip": "thigh",
+    "left_thigh": "thigh",
+    "right_thigh": "thigh",
+    "left_shin": "shank",
+    "right_shin": "shank",
+    "left_foot": "foot",
+    "right_foot": "foot"
+  }
+}
