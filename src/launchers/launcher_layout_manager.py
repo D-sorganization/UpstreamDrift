@@ -88,6 +88,7 @@ class LayoutManager:
         self.current_filter_text = ""
         self.current_view_mode: ViewMode = ViewMode.COMPACT
         self.tile_scale: float = TILE_SCALE_DEFAULT
+        self.current_category_filter = "All"
 
     def initialize_model_order(self, default_ids: list[str] | None = None) -> None:
         """Set a sensible default grid ordering.
@@ -282,24 +283,30 @@ class LayoutManager:
             return False  # ID not found
 
     def get_filtered_order(self) -> list[str]:
-        """Get model order filtered by current search text.
+        """Get model order filtered by current search text and category.
 
         Returns:
-            List of model IDs matching the current filter.
+            List of model IDs matching the current filters.
         """
-        if not self.current_filter_text:
-            return list(self.model_order)
-
         filtered = []
         for model_id in self.model_order:
             model = self._get_model(model_id)
             if not model:
                 continue
 
-            # Search in name, id, and description
-            search_content = f"{model.name} {model.id} {model.description}".lower()
-            if self.current_filter_text in search_content:
-                filtered.append(model_id)
+            # Category filter
+            if self.current_category_filter != "All":
+                cat = self._get_model_category(model)
+                if cat != self.current_category_filter:
+                    continue
+
+            # Search text filter
+            if self.current_filter_text:
+                search_content = f"{model.name} {model.id} {model.description}".lower()
+                if self.current_filter_text not in search_content:
+                    continue
+
+            filtered.append(model_id)
 
         return filtered
 
