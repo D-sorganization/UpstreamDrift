@@ -31,6 +31,49 @@ from src.shared.python.motion_pipeline.sources.base import (
 from src.shared.python.motion_pipeline.sources.registry import register_adapter
 
 
+def _landmark_to_keypoint(lm: object) -> Keypoint | None:
+    """Convert a MediaPipe landmark in any canonical form to a Keypoint.
+
+    Accepts:
+      * dict form: ``{"x":..,"y":..,"z":..,"visibility":..}``
+      * list/tuple form: ``[x, y, z, visibility, presence?]`` (3 to 5 entries).
+
+    Returns ``None`` when the landmark cannot be parsed.
+    """
+    if isinstance(lm, dict):
+        try:
+            x = float(lm.get("x", 0.0))
+            y = float(lm.get("y", 0.0))
+        except (TypeError, ValueError):
+            return None
+        z_raw = lm.get("z")
+        z = float(z_raw) if z_raw is not None else None
+        vis = lm.get("visibility")
+        if vis is None:
+            vis = lm.get("presence", 1.0)
+        try:
+            confidence = max(0.0, min(1.0, float(vis)))
+        except (TypeError, ValueError):
+            confidence = 1.0
+        return Keypoint(x=x, y=y, z=z, confidence=confidence)
+    if isinstance(lm, (list, tuple)) and len(lm) >= 2:
+        try:
+            x = float(lm[0])
+            y = float(lm[1])
+        except (TypeError, ValueError):
+            return None
+        z = float(lm[2]) if len(lm) >= 3 and lm[2] is not None else None
+        if len(lm) >= 4:
+            try:
+                confidence = max(0.0, min(1.0, float(lm[3])))
+            except (TypeError, ValueError):
+                confidence = 1.0
+        else:
+            confidence = 1.0
+        return Keypoint(x=x, y=y, z=z, confidence=confidence)
+    return None
+
+
 @register_adapter
 class MediaPipeJSONAdapter(MocapSourceAdapter):
     """MediaPipe Pose JSON adapter."""
@@ -88,19 +131,17 @@ class MediaPipeJSONAdapter(MocapSourceAdapter):
         for idx, raw in enumerate(data["frames"]):
             if not isinstance(raw, dict):
                 continue
-            landmarks = raw.get("landmarks", [])
+            landmarks = (
+                raw.get("landmarks")
+                or raw.get("pose_landmarks")
+                or raw.get("pose_world_landmarks")
+                or []
+            )
             kps: list[Keypoint] = []
             for lm in landmarks:
-                if not isinstance(lm, dict):
-                    continue
-                kps.append(
-                    Keypoint(
-                        x=float(lm.get("x", 0.0)),
-                        y=float(lm.get("y", 0.0)),
-                        z=float(lm["z"]) if lm.get("z") is not None else None,
-                        confidence=max(0.0, min(1.0, float(lm.get("visibility", 1.0)))),
-                    )
-                )
+                kp = _landmark_to_keypoint(lm)
+                if kp is not None:
+                    kps.append(kp)
             if not kps:
                 continue
             t = float(raw.get("timestamp", idx / fps))

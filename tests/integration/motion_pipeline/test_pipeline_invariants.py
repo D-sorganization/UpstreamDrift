@@ -137,8 +137,9 @@ def _golden_files() -> list[Path]:
 
 
 # Adapters known to raise on the current shipped golden fixtures - tracked
-# as #4683. Once that's fixed, drop the entries here.
-_BROKEN_ADAPTER_FIXTURES = frozenset({"mediapipe.json", "hrnet.json"})
+# as #4683. Fixed by mediapipe + hrnet adapter changes; set retained as a
+# hook in case future fixtures ship in a known-broken state.
+_BROKEN_ADAPTER_FIXTURES: frozenset[str] = frozenset()
 
 
 def _resolve_frames(payload: Any) -> list[Any] | None:

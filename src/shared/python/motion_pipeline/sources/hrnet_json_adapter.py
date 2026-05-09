@@ -23,6 +23,54 @@ from src.shared.python.motion_pipeline.sources.base import (
 from src.shared.python.motion_pipeline.sources.registry import register_adapter
 
 
+def _parse_keypoints(data: object) -> list[Keypoint]:
+    """Parse HRNet keypoints from canonical export variants.
+
+    Accepts:
+      * Nested list of triplets: ``[[x, y, score], ...]`` (HRNet-mmpose form).
+      * Flat list: ``[x, y, score, x, y, score, ...]`` (AlphaPose / coco-eval form).
+      * Empty / non-list inputs yield an empty result.
+    """
+    if not isinstance(data, list) or not data:
+        return []
+    kps: list[Keypoint] = []
+    # Nested form when first element is itself a list/tuple.
+    if isinstance(data[0], (list, tuple)):
+        for triplet in data:
+            if not isinstance(triplet, (list, tuple)) or len(triplet) < 2:
+                continue
+            try:
+                x = float(triplet[0])
+                y = float(triplet[1])
+            except (TypeError, ValueError):
+                continue
+            if len(triplet) >= 3:
+                try:
+                    conf = max(0.0, min(1.0, float(triplet[2])))
+                except (TypeError, ValueError):
+                    conf = 1.0
+            else:
+                conf = 1.0
+            kps.append(Keypoint(x=x, y=y, confidence=conf))
+        return kps
+    # Flat form fallback.
+    for i in range(0, len(data), 3):
+        triplet = data[i : i + 3]
+        if len(triplet) < 3:
+            continue
+        try:
+            kps.append(
+                Keypoint(
+                    x=float(triplet[0]),
+                    y=float(triplet[1]),
+                    confidence=max(0.0, min(1.0, float(triplet[2]))),
+                )
+            )
+        except (TypeError, ValueError):
+            continue
+    return kps
+
+
 @register_adapter
 class HRNetJSONAdapter(MocapSourceAdapter):
     """HRNet JSON adapter."""
@@ -51,7 +99,10 @@ class HRNetJSONAdapter(MocapSourceAdapter):
         if isinstance(data, dict) and "frames" in data:
             frames = data["frames"]
             if isinstance(frames, list) and frames and isinstance(frames[0], dict):
-                return "keypoints" in frames[0] and "frame_index" in frames[0]
+                first = frames[0]
+                return "keypoints" in first and (
+                    "frame_index" in first or "frame" in first
+                )
         return False
 
     def _normalise(self, data: object) -> list[dict]:
@@ -87,30 +138,27 @@ class HRNetJSONAdapter(MocapSourceAdapter):
         if not raw:
             raise ValueError(f"HRNet JSON {p} has no frames")
 
+        def _frame_key(d: dict) -> int:
+            for k in ("frame_index", "frame", "image_id"):
+                v = d.get(k)
+                if isinstance(v, int):
+                    return v
+            return 0
+
         frames: list[KeypointFrame] = []
-        for idx, item in enumerate(sorted(raw, key=lambda d: d.get("frame_index", 0))):
-            flat = item.get("keypoints", [])
-            kps: list[Keypoint] = []
-            for i in range(0, len(flat), 3):
-                triplet = flat[i : i + 3]
-                if len(triplet) < 3:
-                    continue
-                kps.append(
-                    Keypoint(
-                        x=float(triplet[0]),
-                        y=float(triplet[1]),
-                        confidence=max(0.0, min(1.0, float(triplet[2]))),
-                    )
-                )
+        for idx, item in enumerate(sorted(raw, key=_frame_key)):
+            kp_data = item.get("keypoints", [])
+            kps = _parse_keypoints(kp_data)
             if not kps:
                 continue
             t = float(item.get("timestamp", idx / self.fps))
+            frame_idx_val = item.get("frame_index", item.get("frame", idx))
             frames.append(
                 KeypointFrame(
                     timestamp=t,
                     keypoints=kps,
                     schema_name=self.schema,  # type: ignore[arg-type]
-                    frame_index=int(item.get("frame_index", idx)),
+                    frame_index=int(frame_idx_val),
                 )
             )
         if not frames:
