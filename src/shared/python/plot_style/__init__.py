@@ -1,0 +1,55 @@
+"""Plot-style contracts and dataclasses.
+
+This package defines the abstract surface (Protocols + frozen
+dataclasses) used by every marker / trace styling implementation in
+UpstreamDrift.
+
+Concrete implementations of color resolvers, renderers, Qt widgets, and
+marker-shape primitives live in the ``resolvers``, ``renderers``,
+``widgets``, and ``shapes`` sub-packages and are added in follow-up
+issues of EPIC #4796.
+"""
+
+from __future__ import annotations
+
+from ._types import RGBATuple
+from .channels import (
+    DataChannel,
+    derivative_channel,
+    magnitude_channel,
+    slice_channel,
+)
+from .colormaps import (
+    SEMANTIC_COLORMAP_ALIASES,
+    ColormapId,
+    CustomColormap,
+    resolve_colormap_alias,
+)
+from .colors import ColorScale, DataDrivenColor, PaletteColor, StaticColor
+from .contracts import ColorResolver, MarkerRenderer
+from .markers import CustomMeshSpec, MarkerShape, MarkerStyle
+from .persistence import SCHEMA_VERSION, PlotStyleSet, PlotStyleSpec
+
+__all__ = [
+    "SCHEMA_VERSION",
+    "SEMANTIC_COLORMAP_ALIASES",
+    "ColorResolver",
+    "ColorScale",
+    "ColormapId",
+    "CustomColormap",
+    "CustomMeshSpec",
+    "DataChannel",
+    "DataDrivenColor",
+    "MarkerRenderer",
+    "MarkerShape",
+    "MarkerStyle",
+    "PaletteColor",
+    "PlotStyleSet",
+    "PlotStyleSpec",
+    "RGBATuple",
+    "StaticColor",
+    "derivative_channel",
+    "magnitude_channel",
+    "resolve_colormap_alias",
+    "slice_channel",
+]
