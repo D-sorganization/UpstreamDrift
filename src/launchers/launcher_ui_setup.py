@@ -18,6 +18,7 @@ from PyQt6.QtGui import (
     QShortcut,
 )
 from PyQt6.QtWidgets import (
+    QButtonGroup,
     QCheckBox,
     QComboBox,
     QDockWidget,
@@ -241,6 +242,12 @@ class LauncherUISetupMixin:
         if hasattr(self, "_show_help_dialog"):
             btn_docs.clicked.connect(lambda: self._show_help_dialog())
 
+        # Setup mutually exclusive active-state routing for navigation
+        self.sidebar_group = QButtonGroup(self)
+        self.sidebar_group.addButton(btn_home, 0)
+        self.sidebar_group.addButton(btn_engines, 1)
+        self.sidebar_group.idClicked.connect(self._on_sidebar_routed)
+
         layout.addWidget(btn_home)
         layout.addWidget(btn_engines)
         layout.addStretch()
@@ -248,6 +255,19 @@ class LauncherUISetupMixin:
         layout.addWidget(btn_docs)
 
         return sidebar
+
+    def _on_sidebar_routed(self, button_id: int) -> None:
+        """Route sidebar navigation to filter the grid layout."""
+        if not hasattr(self, "layout_manager"):
+            return
+
+        if button_id == 0:
+            self.layout_manager.current_category_filter = "All"
+        elif button_id == 1:
+            self.layout_manager.current_category_filter = "Core Physics Engines"
+
+        if hasattr(self, "_rebuild_grid"):
+            self._rebuild_grid()
 
     def _setup_menu_bar(self) -> None:
         """Set up the application menu bar."""
@@ -259,9 +279,7 @@ class LauncherUISetupMixin:
         self._setup_help_menu(menubar)
 
     def _setup_file_menu(self, menubar: Any) -> None:
-        if not (menubar is not None):
-            raise ValueError("menubar must be provided")
-        if not (menubar is not None):
+        if menubar is None:
             raise ValueError("menubar must be provided")
         file_menu = menubar.addMenu("&File")
 
@@ -282,9 +300,7 @@ class LauncherUISetupMixin:
         file_menu.addAction(action_exit)
 
     def _setup_view_menu(self, menubar: Any) -> None:
-        if not (menubar is not None):
-            raise ValueError("menubar must be provided")
-        if not (menubar is not None):
+        if menubar is None:
             raise ValueError("menubar must be provided")
         view_menu = menubar.addMenu("&View")
 
@@ -323,9 +339,7 @@ class LauncherUISetupMixin:
         self._setup_theme_menu(theme_menu)
 
     def _setup_tools_menu(self, menubar: Any) -> None:
-        if not (menubar is not None):
-            raise ValueError("menubar must be provided")
-        if not (menubar is not None):
+        if menubar is None:
             raise ValueError("menubar must be provided")
         tools_menu = menubar.addMenu("&Tools")
 
@@ -342,9 +356,7 @@ class LauncherUISetupMixin:
         tools_menu.addAction(action_diag)
 
     def _setup_help_menu(self, menubar: Any) -> None:
-        if not (menubar is not None):
-            raise ValueError("menubar must be provided")
-        if not (menubar is not None):
+        if menubar is None:
             raise ValueError("menubar must be provided")
         help_menu = menubar.addMenu("&Help")
 
@@ -470,9 +482,7 @@ class LauncherUISetupMixin:
     def _setup_top_bar_status_and_search(self, top_bar: QHBoxLayout) -> None:
         """Add status indicator, execution mode label, and search bar to top bar."""
         # Status Indicator
-        if not (top_bar is not None):
-            raise ValueError("top_bar must be provided")
-        if not (top_bar is not None):
+        if top_bar is None:
             raise ValueError("top_bar must be provided")
         self.lbl_status = QLabel("Checking Docker...")
         self.lbl_status.setProperty("status", "inactive-bold")
@@ -510,8 +520,8 @@ class LauncherUISetupMixin:
         self.search_input.textChanged.connect(self.update_search_filter)
         top_bar.addWidget(self.search_input)
 
-    def _setup_top_bar_config_checkboxes(self) -> None:
-        """Create hidden configuration checkboxes and layout controls."""
+    def _setup_top_bar_config_checkboxes(self, top_bar: QHBoxLayout) -> None:
+        """Create config checkboxes and layout controls, adding them to top bar."""
         self.chk_live = QCheckBox("Live Viz")
         self.chk_live.setChecked(True)
 
@@ -537,11 +547,17 @@ class LauncherUISetupMixin:
         self.btn_customize_tiles.setEnabled(False)
         self.btn_customize_tiles.clicked.connect(self.open_layout_manager)
 
+        # Surface toggles in the top bar
+        top_bar.addWidget(self.chk_live)
+        top_bar.addWidget(self.chk_gpu)
+        top_bar.addWidget(self.chk_docker)
+        top_bar.addWidget(self.chk_wsl)
+        top_bar.addWidget(self.btn_modify_layout)
+        top_bar.addWidget(self.btn_customize_tiles)
+
     def _setup_top_bar_action_buttons(self, top_bar: QHBoxLayout) -> None:
         """Add Help, Settings, and AI Assistant buttons to top bar."""
-        if not (top_bar is not None):
-            raise ValueError("top_bar must be provided")
-        if not (top_bar is not None):
+        if top_bar is None:
             raise ValueError("top_bar must be provided")
         from src.launchers.launcher_constants import AI_AVAILABLE
 
@@ -717,7 +733,7 @@ class LauncherUISetupMixin:
 
         self._setup_top_bar_status_and_search(top_bar)
         self._setup_view_mode_and_zoom(top_bar)
-        self._setup_top_bar_config_checkboxes()
+        self._setup_top_bar_config_checkboxes(top_bar)
         self._setup_top_bar_action_buttons(top_bar)
 
         # Context Help Dock
@@ -730,9 +746,7 @@ class LauncherUISetupMixin:
 
     def _setup_grid_area(self, layout: QVBoxLayout) -> None:
         """Set up the scrollable grid area."""
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        if not (layout is not None):
+        if layout is None:
             raise ValueError("layout must be provided")
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
@@ -832,9 +846,7 @@ class LauncherUISetupMixin:
 
     def _append_console_line(self, engine_name: str, line: str) -> None:
         """Append a formatted line to the console widget (GUI thread only)."""
-        if not (engine_name is not None):
-            raise ValueError("engine_name must be provided")
-        if not (engine_name is not None):
+        if engine_name is None:
             raise ValueError("engine_name must be provided")
         if not self._console_dock.isVisible():
             self._console_dock.show()

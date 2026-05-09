@@ -150,9 +150,7 @@ class ProcessManager:
             use_separate_terminals: If True, each engine opens its own
                 console window (legacy behaviour).
         """
-        if not (repo_root is not None):
-            raise ValueError("repo_root must be provided")
-        if not (repo_root is not None):
+        if repo_root is None:
             raise ValueError("repo_root must be provided")
         self.repo_root = repo_root
         self.running_processes: dict[str, Popen[bytes]] = {}
@@ -357,9 +355,7 @@ class ProcessManager:
 
     def _emit_output(self, name: str, line: str) -> None:
         """Route a line of process output to callback, logger, and log file."""
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         self._write_log_line(name, line)
         if self.output_callback is not None:
@@ -374,9 +370,7 @@ class ProcessManager:
         containers) that still need their output captured in the unified
         console and log file.
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         self.running_processes[name] = process
         t = threading.Thread(
@@ -392,9 +386,7 @@ class ProcessManager:
 
         Runs in a daemon thread so the main GUI thread is never blocked.
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         try:
             if process.stdout:
@@ -709,9 +701,7 @@ class ProcessManager:
             True if launch succeeded, False otherwise.
         """
         # Convert Windows path to WSL path
-        if not (script_path is not None):
-            raise ValueError("script_path must be provided")
-        if not (script_path is not None):
+        if script_path is None:
             raise ValueError("script_path must be provided")
 
         resolved_project_dir = project_dir or self._get_wsl_project_dir()
@@ -771,9 +761,7 @@ class ProcessManager:
             True if launch succeeded, False otherwise.
         """
         # Determine working directory
-        if not (module_name is not None):
-            raise ValueError("module_name must be provided")
-        if not (module_name is not None):
+        if module_name is None:
             raise ValueError("module_name must be provided")
 
         # Validate module name: must be a dotted Python identifier.
@@ -833,9 +821,7 @@ class ProcessManager:
         Returns:
             WSL-style path string.
         """
-        if not (windows_path is not None):
-            raise ValueError("windows_path must be provided")
-        if not (windows_path is not None):
+        if windows_path is None:
             raise ValueError("windows_path must be provided")
         if len(windows_path) > 1 and windows_path[1] == ":":
             drive = windows_path[0].lower()
@@ -872,9 +858,7 @@ class ProcessManager:
         Returns:
             True if the process is running, False otherwise.
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if name not in self.running_processes:
             return False

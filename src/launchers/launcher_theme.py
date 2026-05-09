@@ -86,9 +86,7 @@ class LauncherThemeMixin:
 
     def _on_theme_changed(self, colors: object) -> None:
         """Handle dynamic theme change -- reapply stylesheet and update menu."""
-        if not (colors is not None):
-            raise ValueError("colors must be provided")
-        if not (colors is not None):
+        if colors is None:
             raise ValueError("colors must be provided")
         self.apply_styles()
 
@@ -117,9 +115,7 @@ class LauncherThemeMixin:
         Includes core presets (Dark, Light, High Contrast), fleet-wide themes,
         custom themes, a "Manage Themes..." dialog, and a Plot Theme submenu.
         """
-        if not (theme_menu is not None):
-            raise ValueError("theme_menu must be provided")
-        if not (theme_menu is not None):
+        if theme_menu is None:
             raise ValueError("theme_menu must be provided")
         from PyQt6.QtGui import QActionGroup
 
@@ -217,9 +213,7 @@ class LauncherThemeMixin:
         Plot themes affect matplotlib styling used by submodules.
         The setting is saved to QSettings so launched modules inherit it.
         """
-        if not (plot_menu is not None):
-            raise ValueError("plot_menu must be provided")
-        if not (plot_menu is not None):
+        if plot_menu is None:
             raise ValueError("plot_menu must be provided")
         from PyQt6.QtCore import QSettings
         from PyQt6.QtGui import QActionGroup
@@ -262,9 +256,7 @@ class LauncherThemeMixin:
 
     def _set_plot_theme(self, theme_name: str) -> None:
         """Save plot theme preference to QSettings."""
-        if not (theme_name is not None):
-            raise ValueError("theme_name must be provided")
-        if not (theme_name is not None):
+        if theme_name is None:
             raise ValueError("theme_name must be provided")
         from PyQt6.QtCore import QSettings
 

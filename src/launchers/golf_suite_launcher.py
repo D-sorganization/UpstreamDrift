@@ -15,7 +15,15 @@ It does NOT use Docker. For Docker support, use `golf_launcher.py`.
 import os
 import subprocess
 import sys
+import warnings
 from pathlib import Path
+
+warnings.warn(
+    "golf_suite_launcher.py is deprecated and will be removed in a future release. "
+    "Please use UpstreamDrift's unified launcher (golf_launcher.py) instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import (
@@ -45,8 +53,17 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         if not PYQT6_AVAILABLE:
             raise ImportError("PyQt6 is required to run this launcher.")
         super().__init__()
-        self.setWindowTitle("Golf Modeling Suite - Local Launcher")
+        self.setWindowTitle("Golf Modeling Suite - Local Launcher (DEPRECATED)")
         self.resize(400, 300)
+
+        # Show deprecation warning dialog
+        QtWidgets.QMessageBox.warning(
+            self,
+            "Deprecation Warning",
+            "This legacy launcher is deprecated and will be removed in a future release.\n\n"
+            "Please use the new Unified UpstreamDrift Launcher which supports Docker, WSL, "
+            "and all physics engines in a single modern interface."
+        )
 
         # Paths - UPDATED FOR GOLF_MODELING_SUITE
         # Script location: UpstreamDrift/launchers/golf_suite_launcher.py
@@ -98,7 +115,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         icon_pixmap: object = None,
     ) -> "QtWidgets.QPushButton":
         """Create a standard engine launch button."""
-        if not (label is not None):
+        if label is None:
             raise ValueError("label must be provided")
         btn = QtWidgets.QPushButton(label)
         btn.setMinimumHeight(40)
@@ -115,7 +132,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
     def _setup_engine_buttons(self, layout: "QtWidgets.QVBoxLayout") -> None:
         """Create and add all engine launch buttons to the layout."""
-        if not (layout is not None):
+        if layout is None:
             raise ValueError("layout must be provided")
         self.btn_mujoco = self._create_engine_button(
             "Launch &MuJoCo Engine",
@@ -188,7 +205,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
     def _setup_shot_tracer_section(self, layout: "QtWidgets.QVBoxLayout") -> None:
         """Add separator and shot tracer button to the layout."""
-        if not (layout is not None):
+        if layout is None:
             raise ValueError("layout must be provided")
         layout.addSpacing(10)
 
@@ -214,7 +231,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
     def _setup_log_area(self, layout: "QtWidgets.QVBoxLayout") -> None:
         """Create the simulation log group box with copy/clear controls."""
-        if not (layout is not None):
+        if layout is None:
             raise ValueError("layout must be provided")
         layout.addSpacing(20)
 
@@ -297,9 +314,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
     def log_message(self, message: str) -> None:
         """Add a timestamped message to the log area."""
-        if not (message is not None):
-            raise ValueError("message must be provided")
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         import datetime
 
@@ -371,9 +386,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         )
 
     def _launch_script(self, name: str, path: Path, cwd: Path) -> None:
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         self.status.setText(f"Launching {name}...")
         self.log_message(f"Starting {name} engine...")
