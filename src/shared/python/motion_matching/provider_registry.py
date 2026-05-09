@@ -15,6 +15,7 @@ Public API:
 
 from __future__ import annotations
 
+import logging
 import threading
 from typing import Any
 
@@ -28,6 +29,20 @@ __all__ = [
 
 _REGISTRY: dict[str, Any] = {}
 _LOCK = threading.Lock()
+_logger = logging.getLogger(__name__)
+
+
+def _provider_qualname(provider: object) -> str:
+    """Return the fully-qualified ``module.qualname`` for ``provider``'s class.
+
+    Used to detect re-registrations that originate from the same logical
+    class even after :func:`importlib.reload` has rebuilt it (and thus
+    broken ``type(a) is type(b)`` identity).
+    """
+    cls = type(provider)
+    module = getattr(cls, "__module__", "") or ""
+    qualname = getattr(cls, "__qualname__", cls.__name__)
+    return f"{module}.{qualname}" if module else qualname
 
 
 def register_provider(provider: Any) -> None:
@@ -42,14 +57,17 @@ def register_provider(provider: Any) -> None:
 
     Behaviour:
         Registration is idempotent: re-registering the *same* provider
-        instance under the same ``engine_name`` is a no-op. Registering
-        a *different* provider under a name already in the registry
-        replaces the existing entry (last-writer-wins) so test fixtures
-        and reload cycles do the obvious thing.
+        instance, or any instance of the *same* provider class (matched
+        by fully-qualified ``module.qualname`` so :func:`importlib.reload`
+        shadows count), is a no-op and emits a DEBUG log. Registering a
+        *different* provider class for an already-occupied ``engine_name``
+        raises :class:`ValueError` naming both classes.
 
     Raises:
         TypeError: If ``provider`` lacks an ``engine_name`` string or a
             callable ``fit_swing`` attribute.
+        ValueError: If a *different* provider class tries to register
+            under an ``engine_name`` already taken.
     """
     name = getattr(provider, "engine_name", None)
     if not isinstance(name, str) or not name:
@@ -61,6 +79,29 @@ def register_provider(provider: Any) -> None:
             f"provider for engine '{name}' must expose a callable 'fit_swing'"
         )
     with _LOCK:
+        existing = _REGISTRY.get(name)
+        if existing is provider:
+            _logger.debug(
+                "register_provider: %r already registered (same instance); no-op",
+                name,
+            )
+            return
+        if existing is not None and (
+            type(existing) is type(provider)
+            or _provider_qualname(existing) == _provider_qualname(provider)
+        ):
+            _logger.debug(
+                "register_provider: %r already registered to %s; no-op",
+                name,
+                _provider_qualname(existing),
+            )
+            return
+        if existing is not None:
+            raise ValueError(
+                f"engine_name {name!r} is already registered to "
+                f"{_provider_qualname(existing)}; got "
+                f"{_provider_qualname(provider)}"
+            )
         _REGISTRY[name] = provider
 
 

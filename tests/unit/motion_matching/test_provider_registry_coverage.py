@@ -37,13 +37,48 @@ def test_register_then_lookup() -> None:
     assert "drake" in available_engines()
 
 
-def test_register_replaces_existing() -> None:
-    """Pin: re-registering with a different instance overwrites."""
+def test_register_same_class_is_noop() -> None:
+    """Pin: re-registering an instance of the same class keeps the original.
+
+    Issue #4712 made registration strictly idempotent for same-class
+    re-registrations (covers both ordinary re-imports and
+    :func:`importlib.reload` shadows). To overwrite, callers must call
+    :func:`clear_registry` first.
+    """
     a = _FakeProvider("e1")
     b = _FakeProvider("e1")
     register_provider(a)
     register_provider(b)
-    assert get_provider("e1") is b
+    assert get_provider("e1") is a
+
+
+def test_register_different_class_raises() -> None:
+    """Pin: a different provider class for the same engine_name is rejected.
+
+    Per issue #4712 the error message names both the existing and
+    incoming provider class so debugging registry collisions is obvious.
+    """
+
+    class _OtherProvider:
+        engine_name = "e1"
+
+        def fit_swing(self, target, opts):  # noqa: ARG002
+            return None
+
+    register_provider(_FakeProvider("e1"))
+    with pytest.raises(ValueError, match="already registered") as exc:
+        register_provider(_OtherProvider())
+    msg = str(exc.value)
+    assert "_FakeProvider" in msg
+    assert "_OtherProvider" in msg
+
+
+def test_register_same_instance_twice_is_noop() -> None:
+    """Pin: registering the exact same instance twice is a silent no-op."""
+    p = _FakeProvider("e1")
+    register_provider(p)
+    register_provider(p)
+    assert get_provider("e1") is p
 
 
 def test_register_requires_engine_name() -> None:
