@@ -799,6 +799,12 @@ class MuscleActivationTrajectory(BaseModel):
         return self.frames[-1].timestamp - self.frames[0].timestamp
 
 
+#: Current ``MotionMatchingResult`` schema version. v2 enforces the
+#: payload-on-success invariant; v1 (legacy) documents predate it and
+#: are migrated forward on load with the invariant relaxed.
+MOTION_MATCHING_RESULT_SCHEMA_VERSION: int = 2
+
+
 class MotionMatchingResult(BaseModel):
     """Motion matching solver result."""
 
@@ -829,6 +835,15 @@ class MotionMatchingResult(BaseModel):
     metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
+    schema_version: int = Field(
+        default=MOTION_MATCHING_RESULT_SCHEMA_VERSION,
+        description=(
+            "Document schema version. v1 (legacy) results predate the "
+            "successful-payload invariant; v2 enforces it. Absent on "
+            "legacy documents and migrated to 1 on load."
+        ),
+        ge=1,
+    )
 
     @field_validator("solve_time")
     @classmethod
@@ -836,6 +851,22 @@ class MotionMatchingResult(BaseModel):
         if v is not None and not np.isfinite(v):
             raise ValueError("Solve time must be finite")
         return v
+
+    @model_validator(mode="before")
+    @classmethod
+    def _migrate_legacy_document(cls, data: Any) -> Any:
+        """Migrate v1 (legacy) serialized documents forward.
+
+        Legacy documents have no ``schema_version`` field. They are tagged
+        as ``schema_version=1`` so the post-validator can recognize them
+        and relax the payload-on-success invariant. In-process construction
+        (where ``data`` is already a model instance, or where the caller
+        explicitly sets ``schema_version``) is left untouched.
+        """
+        if isinstance(data, dict) and "schema_version" not in data:
+            # Shallow copy so we never mutate the caller's dict.
+            data = {**data, "schema_version": 1}
+        return data
 
     @model_validator(mode="after")
     def _invariant_has_payload_when_successful(self) -> MotionMatchingResult:
@@ -845,8 +876,16 @@ class MotionMatchingResult(BaseModel):
         trajectory, torques, or muscle activations. Failed results may
         carry only a message. Either ``torques`` or ``activations`` is
         sufficient — the two are not interchangeable.
+
+        The invariant is relaxed for ``schema_version < 2`` (legacy
+        documents) so that previously serialized successful results
+        without a payload still load. Newly-created results default to
+        the current schema version and are checked strictly.
         """
-        if self.success:
+        if (
+            self.success
+            and self.schema_version >= MOTION_MATCHING_RESULT_SCHEMA_VERSION
+        ):
             has_payload = (
                 self.matched_trajectory is not None
                 or self.torques is not None
@@ -925,6 +964,7 @@ __all__ = [
     "MotionTrajectory",
     "MotionMatchingRequest",
     "MotionMatchingResult",
+    "MOTION_MATCHING_RESULT_SCHEMA_VERSION",
     # Serialization
     "serialize_model",
     "deserialize_model",

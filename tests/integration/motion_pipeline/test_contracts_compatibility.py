@@ -181,7 +181,12 @@ def test_legacy_marker_trajectory_still_loads() -> None:
 
 
 def test_legacy_motion_matching_result_still_loads() -> None:
-    """A pre-existing :class:`MotionMatchingResult` JSON document still validates."""
+    """A pre-existing :class:`MotionMatchingResult` JSON document still validates.
+
+    Regression for #4842: legacy successful results predate the
+    payload-on-success invariant (no ``matched_trajectory``/``torques``/
+    ``activations``) and must still load via the v1->v2 migration.
+    """
     contracts = pytest.importorskip("src.shared.python.motion_pipeline.contracts")
     obj = contracts.MotionMatchingResult.model_validate_json(
         LEGACY_MOTION_MATCHING_RESULT_JSON
@@ -189,3 +194,27 @@ def test_legacy_motion_matching_result_still_loads() -> None:
     assert obj.success is True
     assert obj.error_metrics["rmse"] == pytest.approx(0.001)
     assert obj.matched_trajectory is None  # field added later, optional
+    # The migration tags legacy documents (no ``schema_version``) as v1
+    # so the post-validator knows to relax the payload invariant.
+    assert obj.schema_version == 1
+
+
+def test_v2_motion_matching_result_still_enforces_payload_invariant() -> None:
+    """New (v2) successful results without a payload must still fail.
+
+    Companion to #4842: legacy compatibility must not regress the
+    invariant for newly-created results.
+    """
+    contracts = pytest.importorskip("src.shared.python.motion_pipeline.contracts")
+    v2_no_payload = json.dumps(
+        {
+            "request_id": "v2-req",
+            "success": True,
+            "error_metrics": {"rmse": 0.001},
+            "iterations": 5,
+            "solve_time": 0.1,
+            "schema_version": contracts.MOTION_MATCHING_RESULT_SCHEMA_VERSION,
+        }
+    )
+    with pytest.raises(Exception, match="must include at least one"):
+        contracts.MotionMatchingResult.model_validate_json(v2_no_payload)
