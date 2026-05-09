@@ -27,6 +27,7 @@ from .persistence import (
     load_subject,
     save_subject,
 )
+from .pipeline import run_pipeline
 from .readers import C3DSubjectMetadata, read_c3d_subject_metadata, read_mjcf_body
 from .segment_properties import SegmentProperties
 from .writers import write_mjcf_body
@@ -62,6 +63,7 @@ _LOCAL_ALL = [
     "load_subject",
     "read_c3d_subject_metadata",
     "read_mjcf_body",
+    "run_pipeline",
     "save_subject",
     "write_mjcf_body",
 ]
