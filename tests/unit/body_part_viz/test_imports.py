@@ -33,12 +33,20 @@ def test_subpackages_importable() -> None:
 
     for pkg in (shapes, fitters, renderers):
         assert hasattr(pkg, "__all__")
-    # ``shapes`` is populated as concrete shapes land (issue #4759).
-    assert "LineShape" in shapes.__all__
-    assert "CylinderShape" in shapes.__all__
-    assert "EllipsoidShape" in shapes.__all__
-    assert "CapsuleShape" in shapes.__all__
-    assert "CompositeShape" in shapes.__all__
-    # ``fitters`` and ``renderers`` are still empty in this wave.
-    assert fitters.__all__ == []
+    # Shapes are populated by the primitives wave (#4759).
+    for shape_name in (
+        "LineShape",
+        "CylinderShape",
+        "EllipsoidShape",
+        "CapsuleShape",
+        "CompositeShape",
+    ):
+        assert shape_name in shapes.__all__
+    # Renderers land in a later wave — still empty.
     assert renderers.__all__ == []
+    # Fitters wave (#4756) ships three concrete strategies.
+    assert set(fitters.__all__) == {
+        "BetweenTwoMarkersFitter",
+        "ClusterKabschFitter",
+        "ProcrustesAnisotropicFitter",
+    }
