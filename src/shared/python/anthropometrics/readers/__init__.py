@@ -10,6 +10,12 @@ dataclasses to build a fully-populated
 from __future__ import annotations
 
 from .c3d_subject_info import C3DSubjectMetadata, read_c3d_subject_metadata
+from .osim_body import read_osim_body
 from .urdf_inertial import read_urdf_inertial
 
-__all__ = ["C3DSubjectMetadata", "read_c3d_subject_metadata", "read_urdf_inertial"]
+__all__ = [
+    "C3DSubjectMetadata",
+    "read_c3d_subject_metadata",
+    "read_osim_body",
+    "read_urdf_inertial",
+]
