@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {
+      "name": "club_head",
+      "target": "marker_group:club_head",
+      "style": {
+        "shape": "diamond",
+        "size_px": 11.0,
+        "edge_color": "#000000",
+        "edge_width": 1.5,
+        "fill_color": {
+          "kind": "static",
+          "hex_value": "#ff0000"
+        },
+        "opacity": 1.0
+      }
+    },
+    {
+      "name": "ball",
+      "target": "marker_group:ball",
+      "style": {
+        "shape": "sphere",
+        "size_px": 8.0,
+        "edge_color": "#000000",
+        "edge_width": 1.5,
+        "fill_color": {
+          "kind": "static",
+          "hex_value": "#00ffff"
+        },
+        "opacity": 1.0
+      }
+    },
+    {
+      "name": "left_hand",
+      "target": "marker_group:left_hand",
+      "style": {
+        "shape": "star",
+        "size_px": 8.0,
+        "edge_color": "#000000",
+        "edge_width": 1.25,
+        "fill_color": {
+          "kind": "palette",
+          "palette_name": "Set1",
+          "palette_index": 1
+        },
+        "opacity": 1.0
+      }
+    },
+    {
+      "name": "right_hand",
+      "target": "marker_group:right_hand",
+      "style": {
+        "shape": "star",
+        "size_px": 8.0,
+        "edge_color": "#000000",
+        "edge_width": 1.25,
+        "fill_color": {
+          "kind": "palette",
+          "palette_name": "Set1",
+          "palette_index": 4
+        },
+        "opacity": 1.0
+      }
+    },
+    {
+      "name": "skeleton",
+      "target": "marker_group:skeleton",
+      "style": {
+        "shape": "cube",
+        "size_px": 6.0,
+        "edge_color": "#000000",
+        "edge_width": 1.0,
+        "fill_color": {
+          "kind": "data_driven",
+          "channel": {
+            "name": "force",
+            "unit": "N",
+            "shape": [0],
+            "dtype": "float64"
+          },
+          "colormap": "turbo",
+          "vmin": 0.0,
+          "vmax": 200.0,
+          "nan_color": "#ffff00"
+        }
+      }
+    }
+  ]
+}
