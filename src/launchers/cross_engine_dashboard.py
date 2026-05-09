@@ -36,7 +36,7 @@ import argparse
 import contextlib
 import logging
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -59,35 +59,6 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
 logger = logging.getLogger(__name__)
-
-# ---------------------------------------------------------------------------
-# Style
-# ---------------------------------------------------------------------------
-
-_STYLE = """
-QMainWindow, QWidget#central {
-    background: #12121e;
-}
-QGroupBox {
-    color: #9090c8; font-size: 11px; font-weight: bold;
-    border: 1px solid #303050; border-radius: 4px;
-    margin-top: 8px; padding-top: 14px;
-}
-QGroupBox::title { subcontrol-origin: margin; left: 8px; }
-QLabel { color: #8080b0; font-size: 11px; }
-QPushButton {
-    background: #262650; color: #b0b0e8; border: 1px solid #404070;
-    border-radius: 3px; padding: 4px 12px; font-size: 11px;
-}
-QPushButton:hover { background: #303068; }
-QPushButton:disabled { color: #505060; }
-QSpinBox, QDoubleSpinBox {
-    background: #1a1a2a; color: #b0b0e8; border: 1px solid #303050;
-    border-radius: 2px; font-size: 11px; padding: 2px;
-}
-QCheckBox { color: #8080b0; font-size: 11px; }
-QCheckBox::indicator:checked { background: #5555b0; }
-"""
 
 # ---------------------------------------------------------------------------
 # Engine stub (graceful degradation when physics package is not installed)
@@ -618,7 +589,14 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
             super().__init__(parent)
             self.setWindowTitle("Cross-Engine Perturbation Comparison Dashboard")
             self.setMinimumSize(900, 620)
-            self.setStyleSheet(_STYLE)
+
+            try:
+                from src.shared.python.theme import apply_theme_to_window
+
+                if apply_theme_to_window:
+                    apply_theme_to_window(self)
+            except ImportError:
+                pass
 
             self._shape_per_engine = bool(shape_per_engine)
             # Single MatplotlibMarkerRenderer reused across overlays — DRY
@@ -741,36 +719,51 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
             layout.setContentsMargins(0, 0, 0, 0)
             layout.setSpacing(6)
 
+            try:
+                from src.shared.python.theme import DARK_THEME, get_theme_manager
+
+                tm = get_theme_manager()
+                c = tm.get_current_colors() if tm else DARK_THEME
+            except ImportError:
+
+                class FallbackColors:
+                    bg = "#12121e"
+                    bg_elevated = "#1a1a2e"
+                    text_secondary = "#8080b0"
+                    border_default = "#303050"
+
+                c = FallbackColors()  # type: ignore[assignment]
+
             # Robustness Score chart
             rs_grp = QGroupBox("Robustness Score (1 − CV, per engine)")
             rs_lay = QVBoxLayout(rs_grp)
-            fig_rs = Figure(figsize=(5, 2.5), facecolor="#12121e")
+            fig_rs = Figure(figsize=(5, 2.5), facecolor=c.bg)
             self._canvas_rs = FigureCanvasQTAgg(fig_rs)
             self._ax_rs = fig_rs.add_subplot(111)
-            self._ax_rs.set_facecolor("#1a1a2e")
-            self._style_ax(self._ax_rs)
+            self._ax_rs.set_facecolor(c.bg_elevated)
+            self._style_ax(self._ax_rs, c)
             rs_lay.addWidget(self._canvas_rs)
             layout.addWidget(rs_grp)
 
             # CV chart
             cv_grp = QGroupBox("Coefficient of Variation per Metric")
             cv_lay = QVBoxLayout(cv_grp)
-            fig_cv = Figure(figsize=(5, 2.5), facecolor="#12121e")
+            fig_cv = Figure(figsize=(5, 2.5), facecolor=c.bg)
             self._canvas_cv = FigureCanvasQTAgg(fig_cv)
             self._ax_cv = fig_cv.add_subplot(111)
-            self._ax_cv.set_facecolor("#1a1a2e")
-            self._style_ax(self._ax_cv)
+            self._ax_cv.set_facecolor(c.bg_elevated)
+            self._style_ax(self._ax_cv, c)
             cv_lay.addWidget(self._canvas_cv)
             layout.addWidget(cv_grp)
 
             # Trajectory overlay (issue #4810)
             tr_grp = QGroupBox("Trajectory Overlay (per-engine, plot_style)")
             tr_lay = QVBoxLayout(tr_grp)
-            fig_tr = Figure(figsize=(5, 2.5), facecolor="#12121e")
+            fig_tr = Figure(figsize=(5, 2.5), facecolor=c.bg)
             self._canvas_tr = FigureCanvasQTAgg(fig_tr)
             self._ax_tr = fig_tr.add_subplot(111)
-            self._ax_tr.set_facecolor("#1a1a2e")
-            self._style_ax(self._ax_tr)
+            self._ax_tr.set_facecolor(c.bg_elevated)
+            self._style_ax(self._ax_tr, c)
             tr_lay.addWidget(self._canvas_tr)
             layout.addWidget(tr_grp)
 
@@ -781,13 +774,13 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
             return panel
 
         @staticmethod
-        def _style_ax(ax: object) -> None:
-            """Apply dark theme styling to a Matplotlib axes."""
-            ax.tick_params(colors="#8080b0", labelsize=9)
+        def _style_ax(ax: object, colors: Any) -> None:
+            """Apply theme styling to a Matplotlib axes."""
+            ax.tick_params(colors=colors.text_secondary, labelsize=9)
             for spine in ax.spines.values():
-                spine.set_edgecolor("#303050")
-            ax.yaxis.label.set_color("#8080b0")
-            ax.xaxis.label.set_color("#8080b0")
+                spine.set_edgecolor(colors.border_default)
+            ax.yaxis.label.set_color(colors.text_secondary)
+            ax.xaxis.label.set_color(colors.text_secondary)
 
         # ------------------------------------------------------------------
         # Slots

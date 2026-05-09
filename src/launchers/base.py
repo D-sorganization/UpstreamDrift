@@ -65,9 +65,7 @@ class LaunchItem:
             icon: Optional icon path
             action: Optional custom action callable (overrides path launching)
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         self.name = name
         self.description = description
@@ -173,9 +171,7 @@ class BaseLauncher(QMainWindow):
         Returns:
             True if launch was successful, False otherwise
         """
-        if not (file_path is not None):
-            raise ValueError("file_path must be provided")
-        if not (file_path is not None):
+        if file_path is None:
             raise ValueError("file_path must be provided")
         if isinstance(file_path, str):
             file_path = Path(file_path)
@@ -211,9 +207,7 @@ class BaseLauncher(QMainWindow):
         Returns:
             QFrame containing the card UI
         """
-        if not (item is not None):
-            raise ValueError("item must be provided")
-        if not (item is not None):
+        if item is None:
             raise ValueError("item must be provided")
         card = QFrame()
         card.setStyleSheet(self.CARD_STYLE)
@@ -272,9 +266,7 @@ class BaseLauncher(QMainWindow):
         Returns:
             QGridLayout containing all cards
         """
-        if not (items is not None):
-            raise ValueError("items must be provided")
-        if not (items is not None):
+        if items is None:
             raise ValueError("items must be provided")
         if columns is None:
             columns = self.GRID_COLUMNS
@@ -300,9 +292,7 @@ class BaseLauncher(QMainWindow):
         Returns:
             QVBoxLayout containing header widgets
         """
-        if not (title is not None):
-            raise ValueError("title must be provided")
-        if not (title is not None):
+        if title is None:
             raise ValueError("title must be provided")
         layout = QVBoxLayout()
         layout.setSpacing(5)
