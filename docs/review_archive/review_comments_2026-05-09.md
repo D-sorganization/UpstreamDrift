@@ -4,7 +4,7 @@ Generated: 2026-05-09T15:45:04.294158
 
 ## Reviewer (chatgpt-codex-connector[bot]) (2 comments)
 
-### PR #4934: src/shared/python/pose_interchange/services/_mock.py:110
+### PR #4934: src/shared/python/pose_interchange/services/\_mock.py:110
 
 Actionable: No
 Has Suggestion: No

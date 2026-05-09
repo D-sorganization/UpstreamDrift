@@ -133,6 +133,15 @@ models:
       logo: "assets/data_explorer_modern.png"
       status: "ready"
 
+  - id: "pose_studio"
+    name: "Pose Studio"
+    description: "Cross-engine interactive pose editor. Drag the model, save as starting state or motion-matching target."
+    type: "special_app"
+    path: "src/tools/pose_studio/__main__.py"
+    launcher:
+      category: "tool"
+      status: "beta"
+
   - id: "project_map"
     name: "Project Map"
     description: "Complete map of all features, modules, and hidden gems in the suite"

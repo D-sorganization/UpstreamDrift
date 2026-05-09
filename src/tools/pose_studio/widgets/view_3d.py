@@ -1,0 +1,183 @@
+"""3D skeleton viewport using matplotlib's QtAgg canvas.
+
+Renders the canonical skeleton derived from :func:`forward_kinematics`
+applied to the current :class:`CanonicalPose`.  Click-to-highlight is
+supported for v1; drag/IK is deferred to a follow-up issue.
+
+Why matplotlib instead of :class:`PyQtGLRenderer` from
+:mod:`body_part_viz`?  The body_part_viz renderer expects fitted shape
+primitives (cylinders/ellipsoids for body segments) that are out of
+scope for v1 — pose_studio only needs a lines-and-dots skeleton, which
+matplotlib draws cheaply.  When IK drag-handles ship in a follow-up
+the renderer can be swapped for a proper rigged view without changing
+this widget's public surface.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import Any, cast
+
+import numpy as np
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
+from matplotlib.figure import Figure
+from PyQt6 import QtCore, QtWidgets
+
+from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.motion_matching.diagnostics.forward_kinematics import (
+    forward_kinematics,
+)
+from src.shared.python.pose_interchange.canonical import CanonicalPose
+
+logger = get_logger(__name__)
+
+
+# Skeleton bones, expressed as ordered pairs of landmark names returned
+# by forward_kinematics().  See SkeletonPose.points for the canonical
+# landmark set.
+_BONES: tuple[tuple[str, str], ...] = (
+    ("pelvis", "spine_top"),
+    ("spine_top", "torso_top"),
+    ("torso_top", "l_shoulder"),
+    ("torso_top", "r_shoulder"),
+    ("l_shoulder", "l_elbow"),
+    ("l_elbow", "l_wrist"),
+    ("l_wrist", "l_hand"),
+    ("r_shoulder", "r_elbow"),
+    ("r_elbow", "r_wrist"),
+    ("r_wrist", "r_hand"),
+    ("butt", "clubhead"),
+)
+
+
+class View3D(QtWidgets.QWidget):
+    """3D matplotlib canvas drawing the canonical skeleton.
+
+    Signals
+    -------
+    landmark_picked(str)
+        Emitted with the canonical landmark name when the user clicks a
+        landmark dot.  Used by the joint panel to scroll the matching
+        joint into view.
+    """
+
+    landmark_picked = QtCore.pyqtSignal(str)
+
+    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.setToolTip(
+            "3D skeleton view. Click a landmark dot to highlight the "
+            "joint. Drag-and-IK ships in a follow-up issue."
+        )
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        self._figure = Figure(figsize=(5, 5), tight_layout=True)
+        self._canvas = FigureCanvasQTAgg(self._figure)
+        self._canvas.setToolTip(self.toolTip())
+        # matplotlib 3D Axes carry methods (set_zlabel, set_zlim, set_box_aspect
+        # with 3-tuples) that the public Axes stub does not expose.  Use Any
+        # locally rather than importing mpl_toolkits.mplot3d.Axes3D, which is
+        # itself not present in older type stubs.
+        self._ax: Any = self._figure.add_subplot(111, projection="3d")
+        self._ax.set_xlabel("X (m)")
+        self._ax.set_ylabel("Y (m)")
+        self._ax.set_zlabel("Z (m)")
+        self._ax.set_box_aspect((1, 1, 1))
+
+        layout.addWidget(self._canvas)
+
+        # Pre-create artists so update_pose mutates rather than rebuilds.
+        # ``s=40`` is the marker size keyword for Axes3D.scatter; the 2D
+        # Axes stub treats the same kwarg as positional which mypy flags.
+        self._scatter: Any = self._ax.scatter(
+            [0.0], [0.0], [0.0], s=40, c="#5fa8ff", picker=True, pickradius=6
+        )
+        (self._bone_lines,) = self._ax.plot(
+            [0.0], [0.0], [0.0], lw=2.0, color="#cccccc"
+        )
+        self._bone_lines = cast(Any, self._bone_lines)
+        self._highlighted_landmark: str | None = None
+        self._landmarks_order: list[str] = []
+
+        self._canvas.mpl_connect("pick_event", self._on_pick)
+
+        # Show a sensible initial pose so the canvas is not blank.
+        self.update_pose(CanonicalPose.__new__(CanonicalPose) if False else None)
+
+    # ---- public surface ------------------------------------------------
+
+    def update_pose(self, pose: CanonicalPose | None) -> None:
+        """Re-draw the skeleton for *pose*.
+
+        ``None`` clears to the all-zero canonical pose, which is the
+        T-pose at the world origin.
+        """
+        angles: Mapping[str, float]
+        if pose is None:
+            angles = {}
+        elif isinstance(pose, CanonicalPose):
+            angles = pose.angles_full_dict_deg()
+        else:
+            raise TypeError(
+                f"pose must be a CanonicalPose or None, got {type(pose).__name__}"
+            )
+
+        skeleton = forward_kinematics(angles)
+        names = list(skeleton.points.keys())
+        coords = np.array([skeleton.points[n] for n in names], dtype=float)
+
+        self._landmarks_order = names
+
+        # Update scatter
+        self._scatter._offsets3d = (coords[:, 0], coords[:, 1], coords[:, 2])
+
+        # Update bones
+        bone_x: list[float] = []
+        bone_y: list[float] = []
+        bone_z: list[float] = []
+        for a, b in _BONES:
+            if a in skeleton.points and b in skeleton.points:
+                pa = skeleton.points[a]
+                pb = skeleton.points[b]
+                bone_x.extend([float(pa[0]), float(pb[0]), np.nan])
+                bone_y.extend([float(pa[1]), float(pb[1]), np.nan])
+                bone_z.extend([float(pa[2]), float(pb[2]), np.nan])
+        self._bone_lines.set_data_3d(bone_x, bone_y, bone_z)
+
+        # Auto-fit axes around the skeleton with a small margin.
+        if coords.size:
+            mins = coords.min(axis=0)
+            maxs = coords.max(axis=0)
+            spans = np.maximum(maxs - mins, 0.5)
+            half = float(spans.max() * 0.6)
+            cx, cy, cz = (mins + maxs) / 2.0
+            self._ax.set_xlim(cx - half, cx + half)
+            self._ax.set_ylim(cy - half, cy + half)
+            self._ax.set_zlim(cz - half, cz + half)
+
+        self._canvas.draw_idle()
+
+    def highlighted_landmark(self) -> str | None:
+        """Return the most recently clicked landmark, or ``None``."""
+        return self._highlighted_landmark
+
+    # ---- internals -----------------------------------------------------
+
+    def _on_pick(self, event: object) -> None:
+        artist = getattr(event, "artist", None)
+        ind = getattr(event, "ind", None)
+        if artist is not self._scatter or ind is None:
+            return
+        try:
+            idx = int(ind[0])
+        except (IndexError, TypeError):
+            return
+        if 0 <= idx < len(self._landmarks_order):
+            name = self._landmarks_order[idx]
+            self._highlighted_landmark = name
+            logger.debug("View3D landmark picked: %s", name)
+            self.landmark_picked.emit(name)
+
+
+__all__ = ["View3D"]
