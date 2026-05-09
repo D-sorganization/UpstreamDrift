@@ -50,7 +50,9 @@ class C3DAdapter(MocapSourceAdapter):
         try:
             c = _ezc3d.c3d(str(path))
         except OSError as e:
-            raise AdapterContractError(f"Failed to read C3D metadata from {path}: {e}") from e
+            raise AdapterContractError(
+                f"Failed to read C3D metadata from {path}: {e}"
+            ) from e
         params = c["parameters"]
         point = c["data"]["points"]
         fps = float(params["POINT"]["RATE"]["value"][0])

@@ -69,7 +69,9 @@ class TestSelfCollisionExclusions:
 
         # All joint pairs should be excluded
         missing = joint_pairs - excluded_pairs
-        assert len(missing) == 0, f"Parent-child pairs missing from exclusions: {missing}"
+        assert len(missing) == 0, (
+            f"Parent-child pairs missing from exclusions: {missing}"
+        )
 
     @pytest.mark.parametrize("preset", list_available_presets()[:5])
     def test_all_presets_have_collision_exclusions(self, preset: str) -> None:

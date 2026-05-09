@@ -55,9 +55,7 @@ def test_adapter_smoke_with_synthetic_inputs() -> None:
         InertiaResult,
     )
 
-    inertia = InertiaResult(
-        ixx=0.01, iyy=0.01, izz=0.01, mass=1.0, volume=0.001
-    )
+    inertia = InertiaResult(ixx=0.01, iyy=0.01, izz=0.01, mass=1.0, volume=0.001)
     link = GeneratedLink(
         name="base",
         mass=1.0,
@@ -93,7 +91,7 @@ def test_adapter_smoke_with_synthetic_inputs() -> None:
     )
 
     assert len(canon_links) == 2
-    assert {l.name for l in canon_links} == {"base", "arm"}
+    assert {link.name for link in canon_links} == {"base", "arm"}
     assert len(canon_joints) == 1
     assert canon_joints[0].name == "base_to_arm"
     assert canon_joints[0].limits is not None
@@ -112,9 +110,7 @@ def test_canonical_writer_emits_valid_urdf_from_synthetic_input() -> None:
         InertiaResult,
     )
 
-    inertia = InertiaResult(
-        ixx=0.01, iyy=0.01, izz=0.01, mass=1.0, volume=0.001
-    )
+    inertia = InertiaResult(ixx=0.01, iyy=0.01, izz=0.01, mass=1.0, volume=0.001)
     link = GeneratedLink(
         name="base",
         mass=1.0,

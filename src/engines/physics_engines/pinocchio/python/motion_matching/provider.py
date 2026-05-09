@@ -31,6 +31,7 @@ what ``club_target_adapter.load_robneal_target`` produces.
 from __future__ import annotations
 
 import logging
+from types import ModuleType
 from typing import TYPE_CHECKING, Final
 
 from .fit_swing import FitOptions, FitResult, fit_swing_pinocchio
@@ -121,6 +122,8 @@ class PinocchioFitSwingProvider:
         try:
             import pinocchio  # type: ignore[import-not-found]
         except ImportError:
+            return "unknown"
+        if not isinstance(pinocchio, ModuleType):
             return "unknown"
         version = getattr(pinocchio, "__version__", None)
         if isinstance(version, str) and version:

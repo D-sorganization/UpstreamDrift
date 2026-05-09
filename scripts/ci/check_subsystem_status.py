@@ -142,7 +142,7 @@ def check_subsystem_status(
             passed_count += 1
             print("PASS")
             if verbose:
-                for test_path, success, output in path_results:
+                for test_path, _success, output in path_results:
                     print(f"  ✓ {test_path}: {output}")
         else:
             all_passed = False

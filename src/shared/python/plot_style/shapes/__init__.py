@@ -53,9 +53,7 @@ def default_marker_for(shape: MarkerShape) -> MarkerShapeRenderer:
         construction with a :class:`CustomMeshSpec` or asset path).
     """
     if not isinstance(shape, MarkerShape):
-        raise TypeError(
-            f"shape must be MarkerShape; got {type(shape).__name__}"
-        )
+        raise TypeError(f"shape must be MarkerShape; got {type(shape).__name__}")
     if shape not in SHAPE_REGISTRY:
         raise KeyError(
             f"no default factory for {shape!r}; construct the marker "

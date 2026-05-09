@@ -154,7 +154,12 @@ class DockerMixin:
                     with open(dockerfile_path, "w") as f:
                         f.write(dockerfile_content)
 
-                    cmd = self._get_docker_cmd() + ["build", "-t", "upstream-drift:engine", "."]
+                    cmd = self._get_docker_cmd() + [
+                        "build",
+                        "-t",
+                        "upstream-drift:engine",
+                        ".",
+                    ]
                     host.root.after(0, host.log, f"Running: {' '.join(cmd)}")
                     host.root.after(
                         0, host.log, "Adding defusedxml to upstream-drift..."

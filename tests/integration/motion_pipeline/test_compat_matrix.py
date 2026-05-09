@@ -21,6 +21,7 @@ DOCS_DIR = REPO_ROOT / "docs" / "motion_pipeline"
 
 class MatrixResult(NamedTuple):
     """Result of a compatibility matrix test."""
+
     source_format: str
     ik_backend: str
     matching_backend: str
@@ -30,27 +31,27 @@ class MatrixResult(NamedTuple):
 
 # All source formats to test
 SOURCE_FORMATS = [
-    "c3d",           # C3D motion capture (Vicon, Qualisys)
-    "trc",           # Theia3D / Vicon Nexus TRC
-    "bvh",           # BioVision Hierarchy (Move.ai, etc.)
-    "openpose_json", # OpenPose 2D keypoints
-    "mediapipe_json",# MediaPipe Pose 2D keypoints
-    "fbx",           # FBX animation (Blender conversion)
+    "c3d",  # C3D motion capture (Vicon, Qualisys)
+    "trc",  # Theia3D / Vicon Nexus TRC
+    "bvh",  # BioVision Hierarchy (Move.ai, etc.)
+    "openpose_json",  # OpenPose 2D keypoints
+    "mediapipe_json",  # MediaPipe Pose 2D keypoints
+    "fbx",  # FBX animation (Blender conversion)
 ]
 
 # All IK backends
 IK_BACKENDS = [
-    "mujoco",    # MuJoCo inverse kinematics
-    "drake",     # Drake differential IK
-    "pinocchio", # Pinocchio analytical IK
-    "opensim",   # OpenSim IK (experimental)
+    "mujoco",  # MuJoCo inverse kinematics
+    "drake",  # Drake differential IK
+    "pinocchio",  # Pinocchio analytical IK
+    "opensim",  # OpenSim IK (experimental)
 ]
 
 # All motion matching backends
 MATCHING_BACKENDS = [
-    "mujoco",    # MuJoCo torque tracking
-    "drake",     # Drake trajectory optimization
-    "pinocchio", # Pinocchio operational space control
+    "mujoco",  # MuJoCo torque tracking
+    "drake",  # Drake trajectory optimization
+    "pinocchio",  # Pinocchio operational space control
 ]
 
 # Known unsupported combinations with reasons
@@ -74,7 +75,7 @@ HEAVY_COMBINATIONS = {
 
 def generate_compatibility_matrix() -> str:
     """Generate the compatibility matrix markdown table.
-    
+
     Returns:
         Markdown string containing the compatibility matrix
     """
@@ -86,18 +87,18 @@ def generate_compatibility_matrix() -> str:
         "## Source Format × Backend Compatibility",
         "",
     ]
-    
+
     # Generate matrix for each source format
     for fmt in SOURCE_FORMATS:
         lines.append(f"### {fmt.upper()}")
         lines.append("")
         lines.append("| IK Backend | Matching Backend | Status | Notes |")
         lines.append("|------------|------------------|--------|-------|")
-        
+
         for ik in IK_BACKENDS:
             for mm in MATCHING_BACKENDS:
                 key = (fmt, ik, mm)
-                
+
                 if key in KNOWN_UNSUPPORTED:
                     status = "❌ Unsupported"
                     notes = KNOWN_UNSUPPORTED[key]
@@ -107,35 +108,37 @@ def generate_compatibility_matrix() -> str:
                 else:
                     status = "✅ Supported"
                     notes = ""
-                
+
                 lines.append(f"| {ik} | {mm} | {status} | {notes} |")
-        
+
         lines.append("")
-    
+
     # Add legend
-    lines.extend([
-        "## Legend",
-        "",
-        "- ✅ Supported: Tested and working",
-        "- ⚠️ Heavy: Works but computationally expensive, may be skipped in CI",
-        "- ❌ Unsupported: Known incompatible combination",
-        "- ⏳ Pending: Implementation in progress",
-        "",
-        "## Generation Command",
-        "",
-        "```bash",
-        "# Regenerate this matrix",
-        "python3 tests/integration/motion_pipeline/test_compat_matrix.py --generate",
-        "```",
-        "",
-        "## Related Documents",
-        "",
-        "- [User Workflow Guide](README.md)",
-        "- [Format Matrix](formats.md)",
-        "- [Troubleshooting](troubleshooting.md)",
-        "- [Architecture ADR](../adr/0007-motion-pipeline-architecture.md)",
-    ])
-    
+    lines.extend(
+        [
+            "## Legend",
+            "",
+            "- ✅ Supported: Tested and working",
+            "- ⚠️ Heavy: Works but computationally expensive, may be skipped in CI",
+            "- ❌ Unsupported: Known incompatible combination",
+            "- ⏳ Pending: Implementation in progress",
+            "",
+            "## Generation Command",
+            "",
+            "```bash",
+            "# Regenerate this matrix",
+            "python3 tests/integration/motion_pipeline/test_compat_matrix.py --generate",
+            "```",
+            "",
+            "## Related Documents",
+            "",
+            "- [User Workflow Guide](README.md)",
+            "- [Format Matrix](formats.md)",
+            "- [Troubleshooting](troubleshooting.md)",
+            "- [Architecture ADR](../adr/0007-motion-pipeline-architecture.md)",
+        ]
+    )
+
     return "\n".join(lines)
 
 
@@ -143,13 +146,13 @@ def generate_matrix_file() -> None:
     """Generate the compatibility matrix markdown file."""
     # Ensure docs directory exists
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
-    
+
     matrix_md = generate_compatibility_matrix()
     matrix_path = DOCS_DIR / "compat.md"
-    
+
     # Write the matrix
     matrix_path.write_text(matrix_md, encoding="utf-8")
-    
+
     print(f"Generated compatibility matrix: {matrix_path}")
 
 
@@ -159,11 +162,13 @@ def generate_matrix_file() -> None:
 
 # Check if running under pytest (but not --generate)
 _args = sys.argv[1:]
-if "pytest" in sys.modules or (any(arg.startswith("-") for arg in _args) and "--generate" not in _args):
+if "pytest" in sys.modules or (
+    any(arg.startswith("-") for arg in _args) and "--generate" not in _args
+):
     import pytest
-    
+
     pytestmark = [pytest.mark.integration, pytest.mark.motion_pipeline]
-    
+
     def _check_backend_available(backend: str) -> tuple[bool, str]:
         """Check if a backend is available for testing."""
         try:
@@ -180,7 +185,7 @@ if "pytest" in sys.modules or (any(arg.startswith("-") for arg in _args) and "--
             return True, ""
         except ImportError as e:
             return False, f"Backend not installed: {e}"
-    
+
     def _check_source_format_available(fmt: str) -> tuple[bool, str]:
         """Check if a source format loader is available."""
         try:
@@ -202,7 +207,7 @@ if "pytest" in sys.modules or (any(arg.startswith("-") for arg in _args) and "--
             return True, ""
         except ImportError as e:
             return False, f"Format loader not available: {e}"
-    
+
     @pytest.mark.parametrize(
         "source_format,ik_backend,matching_backend",
         [
@@ -221,47 +226,49 @@ if "pytest" in sys.modules or (any(arg.startswith("-") for arg in _args) and "--
         key = (source_format, ik_backend, matching_backend)
         if key in KNOWN_UNSUPPORTED:
             pytest.skip(f"Known unsupported: {KNOWN_UNSUPPORTED[key]}")
-        
+
         if key in HEAVY_COMBINATIONS and os.environ.get("CI") == "true":
-            pytest.skip(f"Heavy integration test skipped in CI: {HEAVY_COMBINATIONS[key]}")
-        
+            pytest.skip(
+                f"Heavy integration test skipped in CI: {HEAVY_COMBINATIONS[key]}"
+            )
+
         ik_available, ik_reason = _check_backend_available(ik_backend)
         if not ik_available:
             pytest.skip(f"IK backend unavailable: {ik_reason}")
-        
+
         mm_available, mm_reason = _check_backend_available(matching_backend)
         if not mm_available:
             pytest.skip(f"Matching backend unavailable: {mm_reason}")
-        
+
         fmt_available, fmt_reason = _check_source_format_available(source_format)
         if not fmt_available:
             pytest.skip(f"Source format unavailable: {fmt_reason}")
-        
+
         try:
             from src.engines.motion_pipeline.core.pipeline import MotionPipeline
             from src.engines.motion_pipeline.core.config import PipelineConfig
-            
+
             config = PipelineConfig(
                 source_format=source_format,
                 ik_backend=ik_backend,
                 matching_backend=matching_backend,
             )
             _ = MotionPipeline(config)
-            
+
         except ImportError as e:
             pytest.skip(f"Pipeline not available: {e}")
         except NotImplementedError as e:
             pytest.xfail(f"Pipeline stage not implemented: {e}")
-    
+
     def test_generate_matrix_file() -> None:
         """Generate the compatibility matrix markdown file."""
         DOCS_DIR.mkdir(parents=True, exist_ok=True)
-        
+
         matrix_md = generate_compatibility_matrix()
         matrix_path = DOCS_DIR / "compat.md"
-        
+
         matrix_path.write_text(matrix_md, encoding="utf-8")
-        
+
         assert matrix_path.exists(), f"Matrix file not created: {matrix_path}"
         assert len(matrix_md) > 100, "Matrix file seems too short"
 
@@ -275,10 +282,11 @@ if __name__ == "__main__":
     if "--generate" in sys.argv:
         generate_matrix_file()
         sys.exit(0)
-    
+
     # Run pytest if available
     try:
         import pytest
+
         sys.exit(pytest.main([__file__, "-v"]))
     except ImportError:
         print("pytest not installed. Run with --generate to generate matrix file.")

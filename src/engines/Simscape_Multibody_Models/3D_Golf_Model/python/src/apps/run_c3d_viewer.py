@@ -27,18 +27,18 @@ from pathlib import Path
 _HERE = Path(__file__).resolve().parent
 _PYTHON_DIR = _HERE.parent.parent  # apps -> src -> python
 _REPO_ROOT = _HERE.parents[6]  # apps -> src -> python -> 3D_Golf_Model -> Simscape_..
-                                # -> engines -> src -> repo
+# -> engines -> src -> repo
 
 # Step 1: import canonical reader from the repo root.
 sys.path.insert(0, str(_REPO_ROOT))
-from src.shared.python.upstream_drift_tools.lab.bio import c3d_reader as _canonical  # noqa: E402
+from src.shared.python.upstream_drift_tools.lab.bio import (  # noqa: E402
+    c3d_reader as _canonical,  # noqa: E402
+)
 
 # Step 2: pivot ``src`` to the engine's local package so the viewer's
 # relative imports resolve. Keep the canonical module reachable via the
 # fully-qualified name so ``sys.modules`` cache hits don't re-execute it.
-_canonical_qualname = (
-    "src.shared.python.upstream_drift_tools.lab.bio.c3d_reader"
-)
+_canonical_qualname = "src.shared.python.upstream_drift_tools.lab.bio.c3d_reader"
 sys.modules[_canonical_qualname] = _canonical
 
 # Drop the repo's ``src`` so importing ``src`` afterwards picks up the
@@ -63,7 +63,6 @@ if _REPO_SRC.is_dir():
     sys.path.insert(0, str(_REPO_SRC))
 
 from src.apps.c3d_viewer import main  # noqa: E402  (post-sys.path pivot)
-
 
 if __name__ == "__main__":
     main()

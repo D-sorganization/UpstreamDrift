@@ -6,7 +6,14 @@ marker data using segment length estimation.
 """
 
 from .anthropometric import MarkerMap, scale_skeleton
-from .marker_maps import IOR, PLUG_IN_GAIT, THEIA, VICON_FULL_BODY, MarkerSet, get_marker_set
+from .marker_maps import (
+    IOR,
+    PLUG_IN_GAIT,
+    THEIA,
+    VICON_FULL_BODY,
+    MarkerSet,
+    get_marker_set,
+)
 
 __all__ = [
     "scale_skeleton",

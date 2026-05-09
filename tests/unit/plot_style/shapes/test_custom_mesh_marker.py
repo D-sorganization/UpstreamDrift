@@ -142,6 +142,8 @@ def test_load_from_obj_path(tmp_path: Path) -> None:
 def test_load_from_path_string(tmp_path: Path) -> None:
     """String paths are accepted alongside :class:`Path`."""
     obj_path = tmp_path / "tri.obj"
-    obj_path.write_text("v 0 0 0\nv 1 0 0\nv 0 1 0\nv 0 0 1\nf 1 2 3\nf 1 3 4\nf 1 4 2\nf 2 4 3\n")
+    obj_path.write_text(
+        "v 0 0 0\nv 1 0 0\nv 0 1 0\nv 0 0 1\nf 1 2 3\nf 1 3 4\nf 1 4 2\nf 2 4 3\n"
+    )
     m = CustomMeshMarker(str(obj_path), name="custom_name")
     assert m.name == "custom_name"

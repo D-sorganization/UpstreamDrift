@@ -34,12 +34,18 @@ _UNIT_VERTICES: np.ndarray = np.array(
 # 6 faces × 2 triangles each, outward-facing winding.
 _UNIT_FACES: np.ndarray = np.array(
     [
-        [0, 3, 2], [0, 2, 1],  # -z
-        [4, 5, 6], [4, 6, 7],  # +z
-        [0, 1, 5], [0, 5, 4],  # -y
-        [2, 3, 7], [2, 7, 6],  # +y
-        [1, 2, 6], [1, 6, 5],  # +x
-        [0, 4, 7], [0, 7, 3],  # -x
+        [0, 3, 2],
+        [0, 2, 1],  # -z
+        [4, 5, 6],
+        [4, 6, 7],  # +z
+        [0, 1, 5],
+        [0, 5, 4],  # -y
+        [2, 3, 7],
+        [2, 7, 6],  # +y
+        [1, 2, 6],
+        [1, 6, 5],  # +x
+        [0, 4, 7],
+        [0, 7, 3],  # -x
     ],
     dtype=np.int64,
 )
@@ -58,8 +64,6 @@ class CubeMarker:
 
     def mesh(self, style: MarkerStyle) -> tuple[np.ndarray, np.ndarray]:
         if not isinstance(style, MarkerStyle):
-            raise TypeError(
-                f"style must be MarkerStyle; got {type(style).__name__}"
-            )
+            raise TypeError(f"style must be MarkerStyle; got {type(style).__name__}")
         radius = float(style.size_px) / 2.0
         return self._unit_vertices * radius, self._faces.copy()

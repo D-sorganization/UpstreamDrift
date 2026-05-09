@@ -166,7 +166,7 @@ def test_registry_loads_every_golden_fixture(tmp_path: Path) -> None:
 
     # Fail on any per-fixture adapter exceptions - silent failures mask regressions
     if errors:
-        pytest.fail(f"Adapter exceptions on golden fixtures:\n" + "\n".join(errors))
+        pytest.fail("Adapter exceptions on golden fixtures:\n" + "\n".join(errors))
     assert loaded_any, "No fixtures loaded successfully"
 
 

@@ -19,6 +19,7 @@ swept in a follow-up.
 
 See issue #4532.
 """
+
 from __future__ import annotations
 
 import re

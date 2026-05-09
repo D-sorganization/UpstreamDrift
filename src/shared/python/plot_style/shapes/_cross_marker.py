@@ -19,12 +19,18 @@ __all__ = ["CrossMarker"]
 
 _BAR_FACES_TEMPLATE: np.ndarray = np.array(
     [
-        [0, 3, 2], [0, 2, 1],
-        [4, 5, 6], [4, 6, 7],
-        [0, 1, 5], [0, 5, 4],
-        [2, 3, 7], [2, 7, 6],
-        [1, 2, 6], [1, 6, 5],
-        [0, 4, 7], [0, 7, 3],
+        [0, 3, 2],
+        [0, 2, 1],
+        [4, 5, 6],
+        [4, 6, 7],
+        [0, 1, 5],
+        [0, 5, 4],
+        [2, 3, 7],
+        [2, 7, 6],
+        [1, 2, 6],
+        [1, 6, 5],
+        [0, 4, 7],
+        [0, 7, 3],
     ],
     dtype=np.int64,
 )
@@ -85,8 +91,6 @@ class CrossMarker:
 
     def mesh(self, style: MarkerStyle) -> tuple[np.ndarray, np.ndarray]:
         if not isinstance(style, MarkerStyle):
-            raise TypeError(
-                f"style must be MarkerStyle; got {type(style).__name__}"
-            )
+            raise TypeError(f"style must be MarkerStyle; got {type(style).__name__}")
         radius = float(style.size_px) / 2.0
         return self._unit_vertices * radius, self._faces.copy()

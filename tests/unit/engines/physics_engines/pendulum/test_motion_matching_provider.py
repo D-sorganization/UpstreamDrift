@@ -35,7 +35,7 @@ def test_provider_registers() -> None:
     clear_registry()
     provider = PendulumFitSwingProvider()
     register_provider(provider)
-    
+
     retrieved = get_provider("pendulum")
     assert retrieved is provider
 
@@ -44,9 +44,9 @@ def test_fit_swing_returns_baseline(dummy_club_target: ClubTarget) -> None:
     """Test that fit_swing returns a valid zero-cost baseline result."""
     provider = PendulumFitSwingProvider()
     opts = FitOptions(maxiter=10)
-    
+
     result = provider.fit_swing(dummy_club_target, opts)
-    
+
     assert result.solver_status == "success"
     assert result.final_cost == 0.0
     assert result.method == "analytic"
@@ -57,7 +57,7 @@ def test_extract_club_from_multisource(dummy_club_target: ClubTarget) -> None:
     """Test extracting the club target from a MultiSourceTarget."""
     provider = PendulumFitSwingProvider()
     multi = MultiSourceTarget(club=dummy_club_target, body=None)
-    
+
     extracted = provider._extract_club(multi)
     assert extracted is dummy_club_target
 
@@ -65,10 +65,10 @@ def test_extract_club_from_multisource(dummy_club_target: ClubTarget) -> None:
 def test_extract_club_rejects_invalid() -> None:
     """Test that _extract_club raises errors on bad input."""
     provider = PendulumFitSwingProvider()
-    
+
     with pytest.raises(TypeError, match="MultiSourceTarget or ClubTarget"):
         provider._extract_club("not a target")  # type: ignore
-        
+
     with pytest.raises(ValueError, match="at least one of \\(club, body\\) set"):
         MultiSourceTarget(club=None, body=None)
 
@@ -76,7 +76,7 @@ def test_extract_club_rejects_invalid() -> None:
 def test_provider_capabilities() -> None:
     """Test the static capability flags of the provider."""
     provider = PendulumFitSwingProvider()
-    
+
     assert not provider.supports_body_target()
     assert not provider.supports_ball_target()
     assert provider.engine_version() == "1.0.0"

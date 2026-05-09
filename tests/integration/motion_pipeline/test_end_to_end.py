@@ -76,7 +76,7 @@ TOLERANCE_THRESHOLDS = {
 
 def assert_motion_matching_result_invariants(result: Any) -> None:
     """Assert MotionMatchingResult invariants.
-    
+
     Verifies:
     - Result object is not None
     - Has required attributes: trajectory, joint_angles, metadata
@@ -86,12 +86,16 @@ def assert_motion_matching_result_invariants(result: Any) -> None:
     assert hasattr(result, "trajectory"), "Result must have trajectory attribute"
     assert hasattr(result, "joint_angles"), "Result must have joint_angles attribute"
     assert hasattr(result, "metadata"), "Result must have metadata attribute"
-    
+
     # Provenance metadata must be present
     assert "source_format" in result.metadata, "metadata must contain source_format"
     assert "ik_backend" in result.metadata, "metadata must contain ik_backend"
-    assert "matching_backend" in result.metadata, "metadata must contain matching_backend"
-    assert "processed_at" in result.metadata, "metadata must contain processed_at timestamp"
+    assert "matching_backend" in result.metadata, (
+        "metadata must contain matching_backend"
+    )
+    assert "processed_at" in result.metadata, (
+        "metadata must contain processed_at timestamp"
+    )
 
 
 def compute_rmse(actual: np.ndarray, expected: np.ndarray) -> float:
@@ -101,14 +105,14 @@ def compute_rmse(actual: np.ndarray, expected: np.ndarray) -> float:
 
 def load_golden_fixture(fixture_name: str, fmt: str) -> dict[str, Any]:
     """Load a golden fixture from the data directory.
-    
+
     Args:
         fixture_name: Name of the fixture (e.g., "c3d_vicon_driver")
         fmt: Format extension (e.g., "c3d", "json", "bvh")
-    
+
     Returns:
         Dictionary containing the golden data
-    
+
     Raises:
         FileNotFoundError: If the fixture file does not exist
     """
@@ -119,12 +123,11 @@ def load_golden_fixture(fixture_name: str, fmt: str) -> dict[str, Any]:
             "These fixtures are required for regression testing. "
             "See tests/data/motion_pipeline/golden/ for the fixture directory."
         )
-    
+
     if fmt == "json":
         return json.loads(fixture_path.read_text(encoding="utf-8"))
-    else:
-        # For binary formats, return path for downstream loading
-        return {"path": fixture_path}
+    # For binary formats, return path for downstream loading
+    return {"path": fixture_path}
 
 
 # ---------------------------------------------------------------------------
@@ -143,7 +146,7 @@ def test_full_pipeline_end_to_end(
     matching_backend: str,
 ) -> None:
     """Run the full MotionPipeline.run() and verify result invariants.
-    
+
     Each combination:
     1. Loads a golden fixture in the specified format
     2. Runs through the IK backend
@@ -151,7 +154,7 @@ def test_full_pipeline_end_to_end(
     4. Asserts MotionMatchingResult invariants
     5. Checks RMSE on tracked joint trajectory below tolerance
     6. Verifies provenance metadata is present
-    
+
     Heavy combinations are marked with @pytest.mark.heavy_integration
     and may be skipped in CI based on configuration.
     """
@@ -161,15 +164,17 @@ def test_full_pipeline_end_to_end(
         from src.engines.motion_pipeline.core.config import PipelineConfig
     except ImportError as e:
         pytest.skip(f"MotionPipeline not available: {e}")
-    
+
     # Skip combinations that are not yet supported
     unsupported_combos = [
         ("openpose_json", "drake", "mujoco"),  # Requires lifting implementation
         ("mediapipe_json", "drake", "mujoco"),  # Requires lifting implementation
     ]
     if (source_format, ik_backend, matching_backend) in unsupported_combos:
-        pytest.skip(f"Combination {source_format}-{ik_backend}-{matching_backend} not yet implemented")
-    
+        pytest.skip(
+            f"Combination {source_format}-{ik_backend}-{matching_backend} not yet implemented"
+        )
+
     # Select appropriate golden fixture for this source format
     fixture_map = {
         "c3d": ("c3d_vicon_driver", "c3d"),
@@ -178,20 +183,20 @@ def test_full_pipeline_end_to_end(
         "bvh": ("bvh_moveai", "bvh"),
         "trc": ("trc_opencap", "trc"),
     }
-    
+
     if source_format not in fixture_map:
         pytest.skip(f"No golden fixture defined for source format: {source_format}")
-    
+
     fixture_name, fmt = fixture_map[source_format]
     golden_data = load_golden_fixture(fixture_name, fmt)
-    
+
     # Configure pipeline
     config = PipelineConfig(
         source_format=source_format,
         ik_backend=ik_backend,
         matching_backend=matching_backend,
     )
-    
+
     # Run pipeline
     try:
         pipeline = MotionPipeline(config)
@@ -200,29 +205,32 @@ def test_full_pipeline_end_to_end(
         pytest.skip(f"Pipeline stage not implemented: {e}")
     except ImportError as e:
         pytest.skip(f"Backend not available: {e}")
-    
+
     # Assert result invariants
     assert_motion_matching_result_invariants(result)
-    
+
     # Check RMSE against golden trajectory if available
-    tolerances = TOLERANCE_THRESHOLDS.get(fixture_name, {
-        "rmse_position": 0.02,
-        "rmse_orientation": 0.05,
-    })
-    
+    tolerances = TOLERANCE_THRESHOLDS.get(
+        fixture_name,
+        {
+            "rmse_position": 0.02,
+            "rmse_orientation": 0.05,
+        },
+    )
+
     if "golden_trajectory" in golden_data:
         golden_traj = np.array(golden_data["golden_trajectory"])
         actual_traj = result.trajectory
         rmse_pos = compute_rmse(actual_traj["position"], golden_traj["position"])
         rmse_ori = compute_rmse(actual_traj["orientation"], golden_traj["orientation"])
-        
+
         assert rmse_pos <= tolerances["rmse_position"], (
             f"Position RMSE {rmse_pos:.4f} exceeds tolerance {tolerances['rmse_position']}"
         )
         assert rmse_ori <= tolerances["rmse_orientation"], (
             f"Orientation RMSE {rmse_ori:.4f} exceeds tolerance {tolerances['rmse_orientation']}"
         )
-    
+
     # Verify metadata provenance
     assert result.metadata["source_format"] == source_format
     assert result.metadata["ik_backend"] == ik_backend
@@ -236,13 +244,13 @@ def test_full_pipeline_end_to_end(
 
 def test_motion_pipeline_no_direct_engine_imports() -> None:
     """Verify LoD: motion_pipeline has no direct engine imports outside backends.
-    
+
     The motion_pipeline packages should only import engine modules through
     the designated backend interfaces in ik/*_backend.py and matching/*.
     """
     import importlib
     import sys
-    
+
     # Modules that are allowed to import engines directly
     ALLOWED_ENGINE_IMPORTS = {
         "src.engines.motion_pipeline.ik.mujoco_backend",
@@ -251,29 +259,30 @@ def test_motion_pipeline_no_direct_engine_imports() -> None:
         "src.engines.motion_pipeline.matching.mujoco_backend",
         "src.engines.motion_pipeline.matching.drake_backend",
     }
-    
+
     # Get all motion_pipeline modules
     pipeline_modules = [
-        name for name in sys.modules.keys()
+        name
+        for name in sys.modules.keys()
         if name.startswith("src.engines.motion_pipeline")
     ]
-    
+
     # Check each module for forbidden imports
     forbidden_imports = []
     for mod_name in pipeline_modules:
         if mod_name in ALLOWED_ENGINE_IMPORTS:
             continue
-        
+
         mod = importlib.import_module(mod_name)
         mod_file = getattr(mod, "__file__", "")
         if not mod_file:
             continue
-            
+
         try:
             content = Path(mod_file).read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError):
             continue
-        
+
         # Check for direct engine imports
         forbidden_patterns = [
             "from pydrake",
@@ -285,12 +294,12 @@ def test_motion_pipeline_no_direct_engine_imports() -> None:
             "from opensim",
             "import opensim",
         ]
-        
+
         for pattern in forbidden_patterns:
             if pattern in content:
                 forbidden_imports.append(f"{mod_name}: {pattern}")
-    
+
     assert not forbidden_imports, (
-        f"Found forbidden engine imports in motion_pipeline:\n"
+        "Found forbidden engine imports in motion_pipeline:\n"
         + "\n".join(forbidden_imports)
     )

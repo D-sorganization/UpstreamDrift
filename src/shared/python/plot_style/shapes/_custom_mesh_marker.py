@@ -36,9 +36,7 @@ def _normalise_to_unit_radius(
     radii = np.linalg.norm(centred, axis=1)
     max_radius = float(radii.max())
     if max_radius <= 0.0:
-        raise ValueError(
-            "custom mesh has zero extent; cannot normalise to unit radius"
-        )
+        raise ValueError("custom mesh has zero extent; cannot normalise to unit radius")
     return (centred / max_radius).astype(np.float64)
 
 
@@ -91,9 +89,7 @@ class CustomMeshMarker:
 
     def mesh(self, style: MarkerStyle) -> tuple[np.ndarray, np.ndarray]:
         if not isinstance(style, MarkerStyle):
-            raise TypeError(
-                f"style must be MarkerStyle; got {type(style).__name__}"
-            )
+            raise TypeError(f"style must be MarkerStyle; got {type(style).__name__}")
         if style.shape is not MarkerShape.CUSTOM_MESH:
             raise ValueError(
                 "CustomMeshMarker requires style.shape == CUSTOM_MESH; "

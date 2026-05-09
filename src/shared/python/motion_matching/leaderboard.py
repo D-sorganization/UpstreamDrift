@@ -370,9 +370,7 @@ def _coerce_theta(value: Any) -> list[float]:
     if hasattr(value, "tolist"):
         value = value.tolist()
     if not isinstance(value, (list, tuple)):
-        raise LeaderboardError(
-            f"theta must be a vector, got {type(value).__name__}"
-        )
+        raise LeaderboardError(f"theta must be a vector, got {type(value).__name__}")
     out: list[float] = []
     for i, x in enumerate(value):
         try:
@@ -392,9 +390,7 @@ def _row_from_fit_result(
     target_id: str | None,
 ) -> dict[str, Any]:
     if not isinstance(engine, str) or not engine:
-        raise LeaderboardError(
-            f"engine must be a non-empty string, got {engine!r}"
-        )
+        raise LeaderboardError(f"engine must be a non-empty string, got {engine!r}")
     if engine not in _VALID_ENGINES:
         raise LeaderboardError(
             f"engine must be one of {sorted(_VALID_ENGINES)}, got {engine!r}"

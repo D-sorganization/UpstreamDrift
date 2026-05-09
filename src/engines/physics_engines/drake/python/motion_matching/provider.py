@@ -22,6 +22,7 @@ this initial pass (see #4520). The provider advertises that via
 from __future__ import annotations
 
 import logging
+from types import ModuleType
 from typing import Any
 
 from src.shared.python.motion_matching.club_target import ClubTarget
@@ -121,6 +122,8 @@ class DrakeFitSwingProvider:
         try:
             import pydrake  # type: ignore[import-not-found]
         except ImportError:
+            return "unknown"
+        if not isinstance(pydrake, ModuleType):
             return "unknown"
         version = getattr(pydrake, "__version__", None)
         if isinstance(version, str) and version:

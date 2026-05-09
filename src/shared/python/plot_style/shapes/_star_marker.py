@@ -74,8 +74,6 @@ class StarMarker:
 
     def mesh(self, style: MarkerStyle) -> tuple[np.ndarray, np.ndarray]:
         if not isinstance(style, MarkerStyle):
-            raise TypeError(
-                f"style must be MarkerStyle; got {type(style).__name__}"
-            )
+            raise TypeError(f"style must be MarkerStyle; got {type(style).__name__}")
         radius = float(style.size_px) / 2.0
         return self._unit_vertices * radius, self._faces.copy()

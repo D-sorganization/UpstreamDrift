@@ -11,6 +11,13 @@ from src.shared.python.gui_launcher.registry import (
 )
 
 
+def test_launcher_module_imports() -> None:
+    """Guard against syntax errors in the shared GUI launcher module."""
+    from src.shared.python.gui_launcher import launcher
+
+    assert launcher.launch_pyqt6_app is not None
+
+
 class TestGUIType:
     def test_has_types(self) -> None:
         types = list(GUIType)

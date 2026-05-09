@@ -872,10 +872,10 @@ class MotionMatchingResult(BaseModel):
     def _invariant_has_payload_when_successful(self) -> MotionMatchingResult:
         """Successful results must carry at least one payload.
 
-        A successful match must produce at least one of: matched
-        trajectory, torques, or muscle activations. Failed results may
-        carry only a message. Either ``torques`` or ``activations`` is
-        sufficient — the two are not interchangeable.
+        trajectory, torques, muscle activations, or scalar error
+        metrics. Failed results may carry only a message. Either
+        ``torques`` or ``activations`` is sufficient — the two are not
+        interchangeable.
 
         The invariant is relaxed for ``schema_version < 2`` (legacy
         documents) so that previously serialized successful results
@@ -890,11 +890,12 @@ class MotionMatchingResult(BaseModel):
                 self.matched_trajectory is not None
                 or self.torques is not None
                 or self.activations is not None
+                or bool(self.error_metrics)
             )
             if not has_payload:
                 raise ValueError(
                     "Successful MotionMatchingResult must include at least one "
-                    "of: matched_trajectory, torques, activations"
+                    "of: matched_trajectory, torques, activations, error_metrics"
                 )
         return self
 

@@ -11,6 +11,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
+
 def get_docker_cmd() -> list[str]:
     """Get the base docker command, using WSL fallback on Windows if needed."""
     if shutil.which("docker"):
@@ -18,6 +19,7 @@ def get_docker_cmd() -> list[str]:
     if os.name == "nt" and shutil.which("wsl"):
         return ["wsl", "docker"]
     return ["docker"]
+
 
 from PyQt6.QtCore import QThread, pyqtSignal
 

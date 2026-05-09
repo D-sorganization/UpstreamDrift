@@ -10,7 +10,7 @@ from src.shared.python.plot_style.shapes import SphereMarker
 
 # Reference counts at default (n_lon=16, n_lat=8).
 EXPECTED_VERTS = 16 * (8 + 1)  # = 144
-EXPECTED_FACES = 2 * 16 * 8    # = 256
+EXPECTED_FACES = 2 * 16 * 8  # = 256
 
 
 def test_default_counts() -> None:

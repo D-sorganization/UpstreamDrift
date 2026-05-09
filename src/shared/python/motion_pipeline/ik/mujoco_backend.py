@@ -25,61 +25,62 @@ logger = logging.getLogger(__name__)
 class MuJoCoIKSolver(BaseIKSolver):
     """
     MuJoCo-based Inverse Kinematics solver.
-    
+
     Uses MuJoCo's physics engine for IK solving via
     position-based constraints on marker targets.
     """
-    
-    def __init__(self, config: Optional[IKConfig] = None):
+
+    def __init__(self, config: IKConfig | None = None):
         """
         Initialize MuJoCo IK solver.
-        
+
         Args:
             config: Solver configuration
         """
         super().__init__(config)
         self._model = None
         self._data = None
-    
+
     def solve(
         self,
         markers: MarkerTrajectory,
         rig: SkeletonRig,
-        weights: Optional[MarkerWeights] = None,
-        config: Optional[IKConfig] = None,
+        weights: MarkerWeights | None = None,
+        config: IKConfig | None = None,
     ) -> JointTrajectory:
         """
         Solve IK for a marker trajectory using MuJoCo.
-        
+
         Args:
             markers: Input marker trajectory
             rig: Scaled skeleton rig
             weights: Optional per-marker weights
             config: Optional solver configuration
-        
+
         Returns:
             JointTrajectory with solved joint angles
         """
         config = config or self.config
-        
+
         # Process each frame
         frames: list[JointStateFrame] = []
         for frame in markers.frames:
             marker_positions = {
-                name: (m.x, m.y, m.z)
-                for name, m in frame.markers.items()
+                name: (m.x, m.y, m.z) for name, m in frame.markers.items()
             }
-            
+
             q = self.solve_frame(marker_positions, rig, weights)
-            
-            frames.append(JointStateFrame(
-                timestamp=frame.timestamp,
-                q=q,
-                qdot=None,
-                qddot=None,
-                frame_index=frame.frame_index,
-            ))
-        
+
+            frames.append(
+                JointStateFrame(
+                    timestamp=frame.timestamp,
+                    q=q,
+                    qdot=None,
+                    qddot=None,
+                    frame_index=frame.frame_index,
+                )
+            )
+
         return JointTrajectory(
             id=f"ik-mujoco-{markers.id}",
             skeleton=rig,
@@ -89,24 +90,24 @@ class MuJoCoIKSolver(BaseIKSolver):
                 "config": {
                     "max_iterations": config.max_iterations,
                     "tolerance": config.tolerance,
-                }
-            }
+                },
+            },
         )
-    
+
     def solve_frame(
         self,
         markers: dict[str, tuple[float, float, float]],
         rig: SkeletonRig,
-        weights: Optional[MarkerWeights] = None,
+        weights: MarkerWeights | None = None,
     ) -> list[float]:
         """
         Solve IK for a single frame using MuJoCo.
-        
+
         Args:
             markers: Dict mapping marker names to (x, y, z) positions
             rig: Scaled skeleton rig
             weights: Optional per-marker weights
-        
+
         Returns:
             List of joint angles (q) in radians
         """
@@ -116,13 +117,13 @@ class MuJoCoIKSolver(BaseIKSolver):
         # 2. Set marker targets
         # 3. Run IK solver (e.g., damped least squares)
         # 4. Extract joint angles
-        
+
         num_dofs = rig.num_dofs
-        
+
         # Return neutral pose as placeholder
         q = [0.0] * num_dofs
-        
+
         # Apply joint limits
         q = self._clamp_to_limits(q, rig)
-        
+
         return q

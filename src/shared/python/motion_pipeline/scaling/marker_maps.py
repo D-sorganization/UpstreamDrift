@@ -8,21 +8,20 @@ for common marker sets used in motion capture.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List
 
 
 @dataclass
 class MarkerSet:
     """
     A marker set definition with segment mappings.
-    
+
     Attributes:
         name: Name of the marker set (e.g., "Plug-in-Gait")
         markers: List of marker names in this set
         marker_to_segment: Mapping from marker name to body segment
         segment_pairs: List of marker pairs used for segment length estimation
     """
-    
+
     name: str
     markers: list[str]
     marker_to_segment: dict[str, str]
@@ -156,7 +155,7 @@ PLUG_IN_GAIT = MarkerSet(
         ("CLAV", "T10"),
         # Shoulders
         ("RUPA", "LUPA"),
-    ]
+    ],
 )
 
 # IOR (Institute for Orthopaedic Research) marker set
@@ -252,7 +251,7 @@ IOR = MarkerSet(
         ("L_KNEE", "L_ANKLE"),
         # Torso
         ("T8", "T12"),
-    ]
+    ],
 )
 
 # Theia marker set
@@ -376,7 +375,7 @@ THEIA = MarkerSet(
         ("Left_Elbow_Lat", "Left_Wrist_Rad"),
         # Torso
         ("Sternum", "Spine_1"),
-    ]
+    ],
 )
 
 # Vicon Full Body marker set
@@ -504,7 +503,7 @@ VICON_FULL_BODY = MarkerSet(
         ("CLAV", "T10"),
         # Shoulders
         ("RUPA", "LUPA"),
-    ]
+    ],
 )
 
 # Registry of all marker sets
@@ -522,20 +521,18 @@ MARKER_SETS: dict[str, MarkerSet] = {
 def get_marker_set(name: str) -> MarkerSet:
     """
     Get a marker set by name.
-    
+
     Args:
         name: Name of the marker set (case-insensitive)
-    
+
     Returns:
         MarkerSet object
-    
+
     Raises:
         ValueError: If marker set not found
     """
     name_lower = name.lower()
     if name_lower not in MARKER_SETS:
         available = ", ".join(MARKER_SETS.keys())
-        raise ValueError(
-            f"Unknown marker set: {name}. Available: {available}"
-        )
+        raise ValueError(f"Unknown marker set: {name}. Available: {available}")
     return MARKER_SETS[name_lower]

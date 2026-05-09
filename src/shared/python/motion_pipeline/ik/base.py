@@ -22,7 +22,7 @@ from ..contracts import (
 
 class IKBackendType(str, Enum):
     """Available IK backend types."""
-    
+
     MUJOCO = "mujoco"
     OPENSIM = "opensim"
     DRAKE = "drake"
@@ -34,15 +34,15 @@ class IKBackendType(str, Enum):
 class MarkerWeights:
     """
     Per-marker weights for IK solving.
-    
+
     Attributes:
         default_weight: Default weight for all markers
         marker_weights: Per-marker weight overrides
     """
-    
+
     default_weight: float = field(default=1.0)
     marker_weights: dict[str, float] = field(default_factory=dict)
-    
+
     def get_weight(self, marker_name: str) -> float:
         """Get weight for a specific marker."""
         return self.marker_weights.get(marker_name, self.default_weight)
@@ -52,14 +52,14 @@ class MarkerWeights:
 class IKConfig:
     """
     Configuration for IK solving.
-    
+
     Attributes:
         max_iterations: Maximum solver iterations
         tolerance: Convergence tolerance (radians)
         use_orientation: Whether to use orientation constraints
         regularization: Regularization weight for joint limits
     """
-    
+
     max_iterations: int = field(default=100)
     tolerance: float = field(default=1e-6)
     use_orientation: bool = field(default=True)
@@ -69,50 +69,50 @@ class IKConfig:
 class InverseKinematicsSolver(Protocol):
     """
     Protocol for Inverse Kinematics solvers.
-    
+
     Takes a MarkerTrajectory (or KeypointSequence) + scaled SkeletonRig
     and returns a JointTrajectory.
     """
-    
+
     def solve(
         self,
         markers: MarkerTrajectory,
         rig: SkeletonRig,
-        weights: Optional[MarkerWeights] = None,
-        config: Optional[IKConfig] = None,
+        weights: MarkerWeights | None = None,
+        config: IKConfig | None = None,
     ) -> JointTrajectory:
         """
         Solve inverse kinematics for a marker trajectory.
-        
+
         Args:
             markers: Input marker trajectory
             rig: Scaled skeleton rig
             weights: Optional per-marker weights
             config: Optional solver configuration
-        
+
         Returns:
             JointTrajectory with solved joint angles
-        
+
         Raises:
             ValueError: If markers/rig are invalid
             RuntimeError: If solver fails to converge
         """
         ...
-    
+
     def solve_frame(
         self,
         markers: dict[str, tuple[float, float, float]],
         rig: SkeletonRig,
-        weights: Optional[MarkerWeights] = None,
+        weights: MarkerWeights | None = None,
     ) -> list[float]:
         """
         Solve IK for a single frame.
-        
+
         Args:
             markers: Dict mapping marker names to (x, y, z) positions
             rig: Scaled skeleton rig
             weights: Optional per-marker weights
-        
+
         Returns:
             List of joint angles (q) in radians
         """
@@ -122,51 +122,49 @@ class InverseKinematicsSolver(Protocol):
 class BaseIKSolver(ABC):
     """
     Abstract base class for IK solvers.
-    
+
     Provides common functionality for marker weighting,
     joint limit clamping, and validation.
     """
-    
-    def __init__(self, config: Optional[IKConfig] = None):
+
+    def __init__(self, config: IKConfig | None = None):
         """
         Initialize IK solver.
-        
+
         Args:
             config: Solver configuration
         """
         self.config = config or IKConfig()
-    
+
     @abstractmethod
     def solve(
         self,
         markers: MarkerTrajectory,
         rig: SkeletonRig,
-        weights: Optional[MarkerWeights] = None,
-        config: Optional[IKConfig] = None,
+        weights: MarkerWeights | None = None,
+        config: IKConfig | None = None,
     ) -> JointTrajectory:
         """Solve IK for a marker trajectory."""
-        pass
-    
+
     @abstractmethod
     def solve_frame(
         self,
         markers: dict[str, tuple[float, float, float]],
         rig: SkeletonRig,
-        weights: Optional[MarkerWeights] = None,
+        weights: MarkerWeights | None = None,
     ) -> list[float]:
         """Solve IK for a single frame."""
-        pass
-    
+
     def _apply_weights(
         self,
         marker_names: list[str],
-        weights: Optional[MarkerWeights],
+        weights: MarkerWeights | None,
     ) -> list[float]:
         """Apply marker weights."""
         if weights is None:
             return [1.0] * len(marker_names)
         return [weights.get_weight(name) for name in marker_names]
-    
+
     def _clamp_to_limits(
         self,
         q: list[float],
@@ -178,18 +176,18 @@ class BaseIKSolver(ABC):
             # Get joint limits if available
             joint_idx = i % rig.num_dofs
             joint = list(rig.joints.values())[joint_idx % len(rig.joints)]
-            
+
             if joint.limits and joint_idx < len(joint.limits):
                 limit = joint.limits[joint_idx]
                 if limit.lower is not None:
                     angle = max(angle, limit.lower)
                 if limit.upper is not None:
                     angle = min(angle, limit.upper)
-            
+
             clamped.append(angle)
-        
+
         return clamped
-    
+
     def _validate_result(
         self,
         q: list[float],
@@ -197,7 +195,7 @@ class BaseIKSolver(ABC):
     ) -> bool:
         """
         Validate IK result satisfies DbC postconditions.
-        
+
         Postconditions:
         - All joint angles within limits
         - No NaN or infinite values
@@ -205,7 +203,7 @@ class BaseIKSolver(ABC):
         # Check for NaN/Inf
         if any(not np.isfinite(v) for v in q):
             return False
-        
+
         # Check limits
         clamped = self._clamp_to_limits(q, rig)
         return np.allclose(q, clamped, atol=1e-6)
@@ -213,44 +211,48 @@ class BaseIKSolver(ABC):
 
 def make_ik_solver(
     backend: IKBackendType | str,
-    config: Optional[IKConfig] = None,
+    config: IKConfig | None = None,
 ) -> InverseKinematicsSolver:
     """
     Factory function to create an IK solver for the specified backend.
-    
+
     Args:
         backend: Backend type (mujoco, opensim, drake, pinocchio, geometric)
         config: Optional solver configuration
-    
+
     Returns:
         InverseKinematicsSolver instance
-    
+
     Raises:
         ImportError: If backend not available
         ValueError: If backend not recognized
     """
     if isinstance(backend, str):
         backend = IKBackendType(backend.lower())
-    
+
     if backend == IKBackendType.MUJOCO:
         from .mujoco_backend import MuJoCoIKSolver
+
         return MuJoCoIKSolver(config)
-    
-    elif backend == IKBackendType.OPENSIM:
+
+    if backend == IKBackendType.OPENSIM:
         from .opensim_backend import OpenSimIKSolver
+
         return OpenSimIKSolver(config)
-    
-    elif backend == IKBackendType.DRAKE:
+
+    if backend == IKBackendType.DRAKE:
         from .drake_backend import DrakeIKSolver
+
         return DrakeIKSolver(config)
-    
-    elif backend == IKBackendType.PINOCCHIO:
+
+    if backend == IKBackendType.PINOCCHIO:
         from .pinocchio_backend import PinocchioIKSolver
+
         return PinocchioIKSolver(config)
-    
-    elif backend == IKBackendType.GEOMETRIC:
+
+    if backend == IKBackendType.GEOMETRIC:
         from .geometric_backend import GeometricIKSolver
+
         return GeometricIKSolver(config)
-    
-    else:
-        raise ValueError(f"Unknown IK backend: {backend}")
+
+    raise ValueError(f"Unknown IK backend: {backend}")

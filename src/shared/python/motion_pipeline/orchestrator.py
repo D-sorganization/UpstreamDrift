@@ -584,7 +584,7 @@ def cli_run(source: str, output: str, engine: str, **kwargs) -> None:
     source_path = Path(source)
 
     if not source_path.exists():
-        print(f"Error: Source file not found: {source_path}", file=sys.stderr)
+        sys.stderr.write(f"Error: Source file not found: {source_path}\n")
         sys.exit(1)
 
     # Configure pipeline
@@ -599,14 +599,14 @@ def cli_run(source: str, output: str, engine: str, **kwargs) -> None:
 
     # Add progress hook for CLI
     def progress_hook(payload: HookPayload) -> None:
-        print(f"  [{payload.stage.value}] completed")
+        sys.stdout.write(f"  [{payload.stage.value}] completed\n")
 
     for stage in Stage:
         pipeline.add_hook(stage, progress_hook)
 
     # Run pipeline
     try:
-        print(f"Processing: {source_path}")
+        sys.stdout.write(f"Processing: {source_path}\n")
         result = pipeline.run(source_path)
 
         if result.success:
@@ -615,17 +615,17 @@ def cli_run(source: str, output: str, engine: str, **kwargs) -> None:
             output_path.parent.mkdir(parents=True, exist_ok=True)
             with open(output_path, "w") as f:
                 f.write(result.model_dump_json(indent=2))
-            print(f"Result saved to: {output_path}")
+            sys.stdout.write(f"Result saved to: {output_path}\n")
             sys.exit(0)
         else:
-            print(f"Pipeline failed: {result.message}", file=sys.stderr)
+            sys.stderr.write(f"Pipeline failed: {result.message}\n")
             sys.exit(1)
 
     except RuntimeError as e:
-        print(f"Pipeline error: {e}", file=sys.stderr)
+        sys.stderr.write(f"Pipeline error: {e}\n")
         sys.exit(1)
     except Exception as e:
-        print(f"Unexpected error: {e}", file=sys.stderr)
+        sys.stderr.write(f"Unexpected error: {e}\n")
         sys.exit(1)
 
 

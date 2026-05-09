@@ -31,8 +31,10 @@ def _install_invariant_shim() -> None:
     def _shim(*args, **kwargs):
         # Used as a decorator factory: @invariant("some_label")
         if len(args) == 1 and isinstance(args[0], str) and not kwargs:
+
             def decorator(func):
                 return func
+
             return decorator
         # Used as the original function-call primitive
         return original(*args, **kwargs)

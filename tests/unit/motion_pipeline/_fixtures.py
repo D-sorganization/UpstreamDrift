@@ -459,9 +459,7 @@ def make_motion_matching_result(
     ``metadata['torque_trajectory']``, and ``matched_trajectory.skeleton`` all
     reference the same rig.
     """
-    motion = make_motion_trajectory(
-        n_frames=n_frames, n_joints=rig.num_joints, rig=rig
-    )
+    motion = make_motion_trajectory(n_frames=n_frames, n_joints=rig.num_joints, rig=rig)
     metadata: dict[str, Any] = {
         "residual_report": make_residual_report(rig),
         "kind": kind,

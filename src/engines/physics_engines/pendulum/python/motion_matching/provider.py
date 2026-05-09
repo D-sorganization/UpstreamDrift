@@ -33,7 +33,7 @@ class PendulumFitSwingProvider:
         opts: FitOptions,
     ) -> CanonicalFitResult:
         club = self._extract_club(target)
-        
+
         # Analytic fitting via lagrangian placeholder
         # Returns a completely analytic zero-cost baseline FitResult
         return CanonicalFitResult(
