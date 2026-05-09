@@ -233,12 +233,12 @@ class SimulationService:
             active_tasks: Dictionary to store task status
         """
         try:
-            await active_tasks.set(task_id, {"status": "running", "progress": 0})
+            active_tasks.set(task_id, {"status": "running", "progress": 0})
 
             result = await self.run_simulation(request)
 
             if result.success:
-                await active_tasks.set(
+                active_tasks.set(
                     task_id,
                     {
                         "status": "completed",
@@ -246,7 +246,7 @@ class SimulationService:
                     },
                 )
             else:
-                await active_tasks.set(
+                active_tasks.set(
                     task_id,
                     {
                         "status": "failed",
@@ -255,7 +255,7 @@ class SimulationService:
                 )
 
         except (GolfSuiteError, ValueError, RuntimeError, OSError) as e:
-            await active_tasks.set(task_id, {"status": "failed", "error": str(e)})
+            active_tasks.set(task_id, {"status": "failed", "error": str(e)})
 
     def _extract_simulation_data(
         self, recorder: GenericPhysicsRecorder

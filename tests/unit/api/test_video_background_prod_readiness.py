@@ -48,7 +48,7 @@ async def test_process_video_background_does_not_block_event_loop(
     task_manager = TaskManager()
     video_path = tmp_path / "swing.mp4"
     video_path.write_bytes(b"video")
-    await task_manager.set("task-1", {"status": "started"})
+    task_manager.set("task-1", {"status": "started"})
 
     started = time.perf_counter()
     task = asyncio.create_task(
@@ -86,7 +86,7 @@ async def test_process_video_background_logs_cleanup_failure(
     task_manager = TaskManager()
     video_path = tmp_path / "swing.mp4"
     video_path.write_bytes(b"video")
-    await task_manager.set("task-1", {"status": "started"})
+    task_manager.set("task-1", {"status": "started"})
 
     original_unlink = Path.unlink
 

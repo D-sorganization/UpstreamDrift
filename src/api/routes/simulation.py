@@ -105,7 +105,7 @@ async def run_simulation_async(
         raise ValueError("payload must be provided")
     task_id = str(uuid.uuid4())
 
-    await task_manager.set(
+    task_manager.set(
         task_id,
         {
             "status": "started",
@@ -144,8 +144,8 @@ async def get_simulation_status(
     Raises:
         HTTPException: If task not found.
     """
-    if not await task_manager.exists(task_id):
+    if not task_manager.exists(task_id):
         raise HTTPException(status_code=404, detail="Task not found")
 
-    task_data = await task_manager.get(task_id)
+    task_data = task_manager.get(task_id)
     return dict(task_data) if task_data else {}

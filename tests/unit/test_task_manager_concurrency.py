@@ -1,29 +1,34 @@
-"""Regression test for issue #3506: TaskManager must use asyncio primitives only.
+"""Regression test for issues #3506 and #4843.
 
-Pins the contract that ``TaskManager._lock`` is an ``asyncio.Lock`` and
-``TaskManager._engine_semaphore`` is an ``asyncio.Semaphore``. This guards
-against re-introducing ``threading.Lock`` (which deadlocks when mixed with
-``asyncio.Semaphore``) and exercises high-concurrency set/get/active_count
-calls to ensure no deadlock occurs.
+Issue #3506 originally required asyncio-native locking inside an async-only
+TaskManager. Issue #4843 restored a synchronous + dict-like compatibility
+surface, so the data-store lock is now a ``threading.RLock`` (held only for
+in-memory dict mutations, never across an ``await``) while the engine
+concurrency primitive remains an ``asyncio.Semaphore``. The deadlock scenario
+guarded by #3506 (mixing a sync lock with an async semaphore *across awaits*)
+no longer applies because the two primitives are never composed.
 """
 
 from __future__ import annotations
 
 import asyncio
+import threading
 
 import pytest
 from src.api.task_manager import TaskManager
 
+_RLOCK_TYPE = type(threading.RLock())
+
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_lock_and_semaphore_are_asyncio_primitives() -> None:
-    """Regression guard: locking primitives must be asyncio-native (#3506)."""
+async def test_lock_and_semaphore_primitives() -> None:
+    """Regression guard: locking primitives match the #4843 contract."""
     tm = TaskManager(max_concurrent=2)
     try:
-        assert isinstance(tm._lock, asyncio.Lock), (
-            "TaskManager._lock must be asyncio.Lock to avoid deadlock with "
-            "asyncio.Semaphore (#3506)"
+        # Data-store lock is a threading.RLock to support sync callers (#4843).
+        assert isinstance(tm._lock, _RLOCK_TYPE), (
+            "TaskManager._lock must be threading.RLock for the sync API (#4843)"
         )
         assert isinstance(tm._engine_semaphore, asyncio.Semaphore), (
             "TaskManager._engine_semaphore must be asyncio.Semaphore (#3506)"
@@ -42,13 +47,13 @@ async def test_concurrent_set_get_active_count_no_deadlock() -> None:
         n_tasks = 20
 
         async def writer(i: int) -> None:
-            await tm.set(f"task-{i}", {"status": "pending", "value": i})
+            tm.set(f"task-{i}", {"status": "pending", "value": i})
 
         async def reader(i: int) -> dict | None:
-            return await tm.get(f"task-{i}")
+            return tm.get(f"task-{i}")
 
         async def counter() -> int:
-            return await tm.active_count()
+            return tm.active_count()
 
         # First wave: write all tasks concurrently.
         await asyncio.wait_for(
@@ -75,7 +80,7 @@ async def test_concurrent_set_get_active_count_no_deadlock() -> None:
             assert isinstance(count, int)
             assert 0 <= count <= n_tasks
 
-        final_count = await tm.active_count()
+        final_count = tm.active_count()
         assert final_count == n_tasks
     finally:
         await tm.shutdown()
@@ -117,13 +122,13 @@ async def test_get_touches_task_ttl() -> None:
     """Reading a task refreshes retention for active polling clients (#3941)."""
     tm = TaskManager(ttl_seconds=0.05)
     try:
-        await tm.set("task-1", {"status": "running"})
+        tm.set("task-1", {"status": "running"})
         await asyncio.sleep(0.03)
 
-        assert await tm.get("task-1") is not None
+        assert tm.get("task-1") is not None
 
         await asyncio.sleep(0.03)
-        assert await tm.get("task-1") is not None
+        assert tm.get("task-1") is not None
     finally:
         await tm.shutdown()
 
@@ -133,11 +138,11 @@ async def test_get_touches_task_ttl() -> None:
 async def test_shutdown_closes_and_clears_task_manager() -> None:
     """Shutdown prevents process-local task state from being reused (#3941)."""
     tm = TaskManager()
-    await tm.set("task-1", {"status": "running"})
+    tm.set("task-1", {"status": "running"})
 
     await tm.shutdown()
 
     with pytest.raises(RuntimeError, match="closed"):
-        await tm.set("task-2", {"status": "pending"})
+        tm.set("task-2", {"status": "pending"})
     with pytest.raises(RuntimeError, match="closed"):
-        await tm.get("task-1")
+        tm.get("task-1")

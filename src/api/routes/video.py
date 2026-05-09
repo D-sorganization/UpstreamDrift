@@ -268,7 +268,7 @@ async def analyze_video_async(
     input_hash = hashlib.sha256(temp_path.read_bytes()).hexdigest()[:16]
 
     # Store task with durable metadata for replay (issue #3941 alignment)
-    await task_manager.set(
+    task_manager.set(
         task_id,
         {
             "status": "pending",
@@ -320,10 +320,10 @@ async def _process_video_background(
         task_manager: Task manager for status updates.
     """
     try:
-        task_data = await task_manager.get(task_id) or {}
+        task_data = task_manager.get(task_id) or {}
         created_at = task_data.get("created_at", datetime.now(UTC))
 
-        await task_manager.set(
+        task_manager.set(
             task_id,
             {
                 "status": "processing",
@@ -341,11 +341,11 @@ async def _process_video_background(
 
         result = await asyncio.to_thread(pipeline.process_video, video_path)
 
-        task_data = await task_manager.get(task_id) or {}
+        task_data = task_manager.get(task_id) or {}
         created_at = task_data.get("created_at", datetime.now(UTC))
 
         # Store comprehensive result metadata for reproducibility
-        await task_manager.set(
+        task_manager.set(
             task_id,
             {
                 "status": "completed",
@@ -365,11 +365,11 @@ async def _process_video_background(
         )
 
     except (RuntimeError, ValueError, OSError, ImportError, HTTPException) as e:
-        task_data = await task_manager.get(task_id) or {}
+        task_data = task_manager.get(task_id) or {}
         created_at = task_data.get("created_at", datetime.now(UTC))
         error = e.detail if isinstance(e, HTTPException) else str(e)
 
-        await task_manager.set(
+        task_manager.set(
             task_id,
             {
                 "status": "failed",
