@@ -262,6 +262,42 @@ class LiveViewController:
         self._cached_body: Any | None = None
         self._cached_club: Any | None = None
         self._cached_ball: Any | None = None
+        # Optional sidebar slot (issue #4823): a SegmentPropertiesPanel
+        # supplied by the host. Hidden until a SegmentProperties is set.
+        self._segment_props_panel: Any = None
+
+    # ---------------------------------------------- segment properties slot
+    def attach_segment_props_panel(self, panel: Any) -> None:
+        """Attach the sidebar :class:`SegmentPropertiesPanel`.
+
+        Call this once after building the matcher's sidebar. Passing
+        ``None`` detaches the panel. The controller does not own the
+        widget — host is responsible for adding it to a layout.
+        """
+        self._segment_props_panel = panel
+        if panel is not None:
+            try:
+                panel.set_segment(None)
+                panel.setVisible(False)
+            except Exception:  # pragma: no cover - duck-typed slot
+                pass
+
+    def show_segment_properties(self, props: Any | None) -> None:
+        """Forward *props* to the attached sidebar panel.
+
+        ``props`` may be ``None`` (clears + hides the panel) or any
+        object the panel's ``set_segment`` accepts (typically a
+        :class:`SegmentProperties`). Silent no-op when no panel is
+        attached, so call sites are wiring-agnostic.
+        """
+        panel = self._segment_props_panel
+        if panel is None:
+            return
+        try:
+            panel.set_segment(props)
+            panel.setVisible(props is not None)
+        except Exception:  # pragma: no cover - duck-typed
+            logger.exception("segment-properties panel update failed")
 
     # -- accessors --------------------------------------------------------- #
 

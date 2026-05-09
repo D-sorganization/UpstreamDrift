@@ -28,6 +28,17 @@ from .persistence import (
 from .readers import C3DSubjectMetadata, read_c3d_subject_metadata
 from .segment_properties import SegmentProperties
 
+# Optional Qt UI surface — only re-exported when PyQt6 is installed.
+# Resolved as a UNION: importing the package never fails even on
+# PyQt6-less systems; consumers wishing to instantiate the panel are
+# expected to install the ``gui-tools`` / ``gui-test`` extras.
+try:  # pragma: no cover - presence depends on the install environment
+    from .ui.segment_properties_panel import SegmentPropertiesPanel as _Panel
+except Exception:  # pragma: no cover - PyQt6 missing or unloadable
+    SegmentPropertiesPanel = None  # type: ignore[assignment]
+else:
+    SegmentPropertiesPanel = _Panel
+
 __all__ = [
     "C3DSubjectMetadata",
     "EngineAdapter",
@@ -35,6 +46,7 @@ __all__ = [
     "Reader",
     "SCHEMA_VERSION",
     "SegmentProperties",
+    "SegmentPropertiesPanel",
     "Sex",
     "SubjectAnthropometrics",
     "Writer",

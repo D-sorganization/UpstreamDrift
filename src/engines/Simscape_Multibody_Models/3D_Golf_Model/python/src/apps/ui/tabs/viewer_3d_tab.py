@@ -352,7 +352,43 @@ class Viewer3DTab(QtWidgets.QWidget):
         right_panel = QtWidgets.QVBoxLayout()
         self.canvas_3d = MplCanvas(self, width=5, height=4, dpi=100)
         right_panel.addWidget(self.canvas_3d)
+
+        # Optional anthropometrics panel — hidden until a segment with a
+        # SegmentProperties record is selected. Lazy import so the viewer
+        # remains usable even when the anthropometrics deps are absent.
+        self._segment_props_panel: QtWidgets.QWidget | None = None
+        try:
+            from src.shared.python.anthropometrics.ui.segment_properties_panel import (  # noqa: E501
+                SegmentPropertiesPanel,
+            )
+
+            panel = SegmentPropertiesPanel(self)
+            panel.setVisible(False)
+            self._segment_props_panel = panel
+            right_panel.addWidget(panel)
+        except Exception:  # pragma: no cover - optional dep
+            pass
+
         layout.addLayout(right_panel, 3)
+
+    # ------------------------------------------------- Anthropometrics
+    def set_selected_segment_properties(self, props: Any | None) -> None:
+        """Wire-in slot for surfacing :class:`SegmentProperties`.
+
+        Hidden when *props* is ``None`` (no SegmentProperties available
+        for the current selection); shown and populated otherwise. Safe
+        to call when the optional anthropometrics dependency is not
+        installed (the call is a no-op).
+        """
+        panel = self._segment_props_panel
+        if panel is None:
+            return
+        if props is None:
+            panel.setVisible(False)
+            panel.set_segment(None)  # type: ignore[attr-defined]
+        else:
+            panel.set_segment(props)  # type: ignore[attr-defined]
+            panel.setVisible(True)
 
     # ---------------------------------------------------------- Shortcuts
 
