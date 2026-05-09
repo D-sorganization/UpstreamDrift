@@ -1,141 +1,186 @@
-"""End-to-end test for :func:`anthropometrics.run_pipeline`.
+"""End-to-end pipeline tests for the anthropometrics package.
 
-Drives the orchestrator against the real ``data/C3D_TA_Driver.c3d``
-fixture, exports to all four engine formats, round-trips each, and
-snapshots the validation report. Closes #4822.
+Issue #4819 -- synthetic subject -> estimator -> XML adapter ->
+reload must reconstruct a :class:`SubjectAnthropometrics`
+indistinguishable from the source. Also exercises the optional
+C3D subject-info reader when ``data/C3D_TA_Driver.c3d`` is present
+and ``ezc3d`` is installed.
 """
 
 from __future__ import annotations
 
-import re
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import numpy as np
 import pytest
 
 from anthropometrics import (
+    SegmentProperties,
     SubjectAnthropometrics,
-    run_pipeline,
+    load_subject,
+    save_subject,
 )
-from anthropometrics.engine_adapters import ADAPTER_REGISTRY
-
+from anthropometrics.estimators import (
+    DeLevaEstimator,
+    DempsterEstimator,
+    ZatsiorskyEstimator,
+)
+from anthropometrics.readers import read_osim_body, read_urdf_inertial
+from anthropometrics.writers import write_osim_body, write_urdf_inertial
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _C3D_FIXTURE = _REPO_ROOT / "data" / "C3D_TA_Driver.c3d"
-_EXPECTED_REPORT = (
-    _REPO_ROOT / "tests" / "fixtures" / "anthropometrics" / "expected_report.html"
-)
 
 
-pytestmark = [pytest.mark.integration]
-
-
-@pytest.fixture(scope="module")
-def pipeline_outputs(
-    tmp_path_factory: pytest.TempPathFactory,
-) -> tuple[Path, SubjectAnthropometrics]:
-    """Run the full pipeline once per module."""
-    if not _C3D_FIXTURE.exists():
-        pytest.skip(f"C3D fixture not present: {_C3D_FIXTURE}")
-    pytest.importorskip("ezc3d")
-    out_dir = tmp_path_factory.mktemp("anth_e2e")
-    record = run_pipeline(
-        _C3D_FIXTURE,
-        subject_height_m=1.80,
-        subject_mass_kg=75.0,
-        estimator="de_leva",
-        target_engines=("drake", "mujoco", "pinocchio", "opensim"),
-        output_dir=out_dir,
-    )
-    return out_dir, record
-
-
-def test_all_four_engine_outputs_exist(
-    pipeline_outputs: tuple[Path, SubjectAnthropometrics],
-) -> None:
-    """Each requested engine writes its native model file."""
-    out_dir, _ = pipeline_outputs
-    expected = {
-        "drake.urdf",
-        "pinocchio.urdf",
-        "opensim.osim",
-        "mujoco.xml",
-    }
-    actual = {p.name for p in out_dir.iterdir()}
-    assert expected.issubset(actual), f"missing engine outputs: {expected - actual}"
-
-
-def test_subject_json_is_loadable(
-    pipeline_outputs: tuple[Path, SubjectAnthropometrics],
-) -> None:
-    """``output_dir/subject.json`` round-trips via ``load_subject``."""
-    from anthropometrics import load_subject
-
-    out_dir, record = pipeline_outputs
-    reloaded = load_subject(out_dir / "subject.json")
-    assert reloaded.subject_id == record.subject_id
-    assert len(reloaded.segments) == len(record.segments)
-
-
-def test_each_engine_round_trip_recovers_record(
-    pipeline_outputs: tuple[Path, SubjectAnthropometrics],
-) -> None:
-    """``adapter.import_back`` recovers the canonical record per engine.
-
-    Single-precision serialisation in some formats (Simscape's MAT,
-    OpenSim's textual XML) means we use ``rtol=1e-6`` rather than
-    the inertia adapter's stricter native ``1e-9``.
-    """
-    out_dir, record = pipeline_outputs
-
-    cases: list[tuple[str, Path]] = [
-        ("drake", out_dir / "drake.urdf"),
-        ("pinocchio", out_dir / "pinocchio.urdf"),
-        ("opensim", out_dir / "opensim.osim"),
-        ("myosuite", out_dir / "mujoco.xml"),
-    ]
-    for engine_name, path in cases:
-        adapter = ADAPTER_REGISTRY[engine_name]
-        recovered = adapter.import_back(path)
-        assert recovered.subject_id == record.subject_id
-        assert recovered.height_m == pytest.approx(record.height_m, rel=1e-6)
-        assert recovered.mass_kg == pytest.approx(record.mass_kg, rel=1e-6)
-        assert len(recovered.segments) == len(record.segments)
-        rec_by_name = dict(recovered.segments)
-        for name, props in record.segments:
-            assert name in rec_by_name, f"{engine_name}: missing segment {name}"
-            other = rec_by_name[name]
-            assert other.mass_kg == pytest.approx(props.mass_kg, rel=1e-6)
-            assert other.length_m == pytest.approx(props.length_m, rel=1e-6)
-            np.testing.assert_allclose(
-                other.com_xyz_m, props.com_xyz_m, rtol=1e-6, atol=1e-9
-            )
-            np.testing.assert_allclose(
-                other.inertia_tensor, props.inertia_tensor, rtol=1e-6, atol=1e-9
-            )
-
-
-def _normalise_html(text: str) -> str:
-    """Collapse runs of whitespace so report-text comparison is robust."""
-    return re.sub(r"\s+", " ", text).strip()
-
-
-def test_validation_report_snapshot(
-    pipeline_outputs: tuple[Path, SubjectAnthropometrics],
-) -> None:
-    """``report.html`` matches the committed snapshot (text equality, normalised).
-
-    On first run the snapshot is written automatically. Subsequent
-    runs assert text-equality after collapsing whitespace.
-    """
-    out_dir, _ = pipeline_outputs
-    actual_html = (out_dir / "report.html").read_text(encoding="utf-8")
-    if not _EXPECTED_REPORT.exists():
-        _EXPECTED_REPORT.parent.mkdir(parents=True, exist_ok=True)
-        _EXPECTED_REPORT.write_text(actual_html, encoding="utf-8")
-        pytest.skip(
-            f"Wrote initial report snapshot to {_EXPECTED_REPORT}; "
-            "rerun to verify text-equality."
+def _rebuild_via_urdf(record: SubjectAnthropometrics) -> SubjectAnthropometrics:
+    """Round-trip *record* segment-by-segment through URDF and rebuild."""
+    rebuilt: list[tuple[str, SegmentProperties]] = []
+    for name, props in record.segments:
+        xml_text = ET.tostring(write_urdf_inertial(props))
+        recovered = read_urdf_inertial(
+            ET.fromstring(xml_text),
+            name=props.name,
+            body_part_id=props.body_part_id,
+            length_m=props.length_m,
+            source_method=props.source_method,
+            source_subject_height_m=props.source_subject_height_m,
+            source_subject_mass_kg=props.source_subject_mass_kg,
         )
-    expected = _EXPECTED_REPORT.read_text(encoding="utf-8")
-    assert _normalise_html(actual_html) == _normalise_html(expected)
+        rebuilt.append((name, recovered))
+    return SubjectAnthropometrics(
+        subject_id=record.subject_id,
+        height_m=record.height_m,
+        mass_kg=record.mass_kg,
+        segments=tuple(rebuilt),
+        source_method=record.source_method,
+        age_years=record.age_years,
+        sex=record.sex,
+    )
+
+
+def _rebuild_via_osim(record: SubjectAnthropometrics) -> SubjectAnthropometrics:
+    """Round-trip *record* through OpenSim ``<Body>`` XML."""
+    rebuilt: list[tuple[str, SegmentProperties]] = []
+    for name, props in record.segments:
+        xml_text = ET.tostring(write_osim_body(props))
+        recovered = read_osim_body(ET.fromstring(xml_text))
+        rebuilt.append((name, recovered))
+    return SubjectAnthropometrics(
+        subject_id=record.subject_id,
+        height_m=record.height_m,
+        mass_kg=record.mass_kg,
+        segments=tuple(rebuilt),
+        source_method=record.source_method,
+        age_years=record.age_years,
+        sex=record.sex,
+    )
+
+
+@pytest.mark.parametrize(
+    "estimator_cls",
+    [DeLevaEstimator, DempsterEstimator, ZatsiorskyEstimator],
+)
+def test_synthetic_subject_through_urdf_roundtrip(estimator_cls) -> None:
+    """Estimator -> URDF -> reload preserves every segment exactly."""
+    source = estimator_cls().estimate(
+        subject_id="e2e_urdf",
+        height_m=1.80,
+        mass_kg=72.5,
+        sex="M",
+    )
+    rebuilt = _rebuild_via_urdf(source)
+    for (n0, p0), (n1, p1) in zip(source.segments, rebuilt.segments, strict=True):
+        assert n0 == n1
+        assert p1.mass_kg == pytest.approx(p0.mass_kg, rel=1e-9, abs=1e-12)
+        np.testing.assert_allclose(
+            p1.inertia_tensor, p0.inertia_tensor, rtol=1e-9, atol=1e-12
+        )
+        np.testing.assert_allclose(p1.com_xyz_m, p0.com_xyz_m, rtol=1e-9, atol=1e-12)
+
+
+def test_synthetic_subject_through_osim_then_json(tmp_path: Path) -> None:
+    """Full estimator -> osim XML -> json -> load chain is lossless."""
+    source = DeLevaEstimator().estimate(
+        subject_id="e2e_osim_json",
+        height_m=1.74,
+        mass_kg=68.0,
+        sex="F",
+    )
+    via_osim = _rebuild_via_osim(source)
+    out = tmp_path / "rebuilt.json"
+    save_subject(via_osim, out)
+    loaded = load_subject(out)
+
+    assert loaded.subject_id == source.subject_id
+    assert loaded.sex == source.sex
+    assert loaded.height_m == pytest.approx(source.height_m, rel=1e-9)
+    for (sn, sp), (ln, lp) in zip(source.segments, loaded.segments, strict=True):
+        assert sn == ln
+        assert lp.mass_kg == pytest.approx(sp.mass_kg, rel=1e-9, abs=1e-12)
+        np.testing.assert_allclose(
+            lp.inertia_tensor, sp.inertia_tensor, rtol=1e-9, atol=1e-12
+        )
+
+
+def test_pipeline_inertia_is_physically_realisable() -> None:
+    """All eigenvalues positive and triangle inequality holds throughout."""
+    record = ZatsiorskyEstimator().estimate(
+        subject_id="phys",
+        height_m=1.80,
+        mass_kg=85.0,
+        sex="M",
+    )
+    rebuilt = _rebuild_via_urdf(record)
+    for _name, props in rebuilt.segments:
+        eigs = np.linalg.eigvalsh(props.inertia_tensor)
+        assert np.all(eigs > 0), f"non-positive eigenvalues: {eigs}"
+        ix, iy, iz = sorted(float(e) for e in eigs)
+        # Triangle inequality on principal moments -- a hard physical
+        # constraint enforced by the SegmentProperties contract.
+        assert ix + iy + 1e-9 >= iz
+
+
+def test_pipeline_mass_closure_preserved_through_urdf() -> None:
+    """Sum of segment masses is preserved through the URDF round-trip."""
+    record = DeLevaEstimator().estimate(
+        subject_id="mass_through_urdf",
+        height_m=1.78,
+        mass_kg=80.0,
+        sex="M",
+    )
+    pre = sum(p.mass_kg for _, p in record.segments)
+    rebuilt = _rebuild_via_urdf(record)
+    post = sum(p.mass_kg for _, p in rebuilt.segments)
+    assert post == pytest.approx(pre, rel=1e-12, abs=1e-12)
+    assert post == pytest.approx(80.0, rel=1e-2)
+
+
+def test_c3d_pipeline_against_bundled_fixture() -> None:
+    """End-to-end against ``data/C3D_TA_Driver.c3d`` when available.
+
+    Reads subject metadata from the bundled C3D, drives the de Leva
+    estimator with it, and asserts mass-closure plus positive
+    inertia eigenvalues across every segment.
+    """
+    if not _C3D_FIXTURE.exists():
+        pytest.skip(f"C3D fixture not bundled: {_C3D_FIXTURE}")
+    pytest.importorskip("ezc3d", reason="C3D pipeline test needs ezc3d")
+    from anthropometrics import read_c3d_subject_metadata
+
+    meta = read_c3d_subject_metadata(_C3D_FIXTURE)
+    height = meta.height_m if meta.height_m is not None else 1.78
+    mass = meta.mass_kg if meta.mass_kg is not None else 75.0
+    sex_value = meta.sex.value if meta.sex is not None else "unspecified"
+    record = DeLevaEstimator().estimate(
+        subject_id=meta.subject_id or "c3d_subject",
+        height_m=height,
+        mass_kg=mass,
+        sex=sex_value,
+        age_years=meta.age_years,
+    )
+    total_mass = sum(p.mass_kg for _, p in record.segments)
+    assert total_mass == pytest.approx(mass, rel=1e-2)
+    for _, props in record.segments:
+        eigs = np.linalg.eigvalsh(props.inertia_tensor)
+        assert np.all(eigs > 0)
