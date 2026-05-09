@@ -47,11 +47,21 @@ from src.shared.python.body_part_viz.shapes import (
     LineShape,
     MeshShape,
 )
+from src.shared.python.plot_style import (
+    ColormapId,
+    DataChannel,
+    DataDrivenColor,
+    MarkerStyle,
+    MatplotlibMarkerRenderer,
+    StaticColor,
+)
 from src.shared.python.qt_utils.wheel_event_filter import suppress_wheel_on_widgets
 
 from ...core.models import C3DDataModel
 from ...services.segment_set_io import SegmentSpec, spec_v1_to_v2
 from ..widgets.mpl_canvas import MplCanvas
+from ._plot_style_helpers import StylePersistence, default_style_for
+from .marker_plot_tab import _open_style_dialog
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -239,6 +249,19 @@ class Viewer3DTab(QtWidgets.QWidget):
         self._timer.timeout.connect(self._on_timer_tick)
         self._is_playing = False
 
+        # plot_style integration: the current-frame marker scatter is
+        # owned by a MatplotlibMarkerRenderer so it can be re-styled
+        # without rebuilding the rest of the scene.
+        self._marker_style_renderer: MatplotlibMarkerRenderer | None = None
+        self._marker_style_handle: str | None = None
+        self._persistence = StylePersistence(target_prefix="group:")
+        self._persistence.load()
+        # Cached color-by-channel state. When set, the renderer's style
+        # uses a DataDrivenColor whose channel is recomputed per frame.
+        self._color_channel: DataChannel | None = None
+        self._color_range: tuple[float, float] | None = None
+        self._color_colormap: ColormapId = ColormapId.VIRIDIS
+
         self._init_ui()
         self._install_shortcuts()
 
@@ -312,6 +335,31 @@ class Viewer3DTab(QtWidgets.QWidget):
         toggles_row.addWidget(self.check_labels)
         toggles_row.addStretch()
         left_panel.addLayout(toggles_row)
+
+        # plot_style controls: marker-group selector + per-group "Style…"
+        # button. Groups are coarse buckets matched against the built-in
+        # ``default`` preset (``body``, ``club``, ``ball``, …).
+        style_row = QtWidgets.QHBoxLayout()
+        style_row.addWidget(QtWidgets.QLabel("Marker group:"))
+        self.combo_marker_group = QtWidgets.QComboBox()
+        self.combo_marker_group.setObjectName("marker_group_combo")
+        for label in ("default", "body", "club", "ball", "skeleton"):
+            self.combo_marker_group.addItem(label)
+        suppress_wheel_on_widgets(self.combo_marker_group)
+        style_row.addWidget(self.combo_marker_group)
+        self.btn_marker_style = QtWidgets.QPushButton("Style…")
+        self.btn_marker_style.setObjectName("marker_group_style_button")
+        self.btn_marker_style.clicked.connect(self._on_marker_group_style_clicked)
+        style_row.addWidget(self.btn_marker_style)
+        style_row.addStretch()
+        left_panel.addLayout(style_row)
+
+        # Optional color-by-channel editor (collapsed by default).
+        self._color_channel_editor: QtWidgets.QWidget | None = None
+        self._color_channel_holder = QtWidgets.QWidget()
+        self._color_channel_layout = QtWidgets.QVBoxLayout(self._color_channel_holder)
+        self._color_channel_layout.setContentsMargins(0, 0, 0, 0)
+        left_panel.addWidget(self._color_channel_holder)
 
         # View-angle presets.
         view_row = QtWidgets.QHBoxLayout()
@@ -701,7 +749,8 @@ class Viewer3DTab(QtWidgets.QWidget):
             )
             self._trail_lines.append(ln)
 
-        # Current-frame point — high-contrast, larger.
+        # Current-frame point — owned by MatplotlibMarkerRenderer so the
+        # user can re-style it at runtime via the Style… button.
         self._point_artist = ax.scatter(
             [],
             [],
@@ -712,6 +761,7 @@ class Viewer3DTab(QtWidgets.QWidget):
             linewidths=0.6,
             depthshade=False,
         )
+        self._build_marker_style_renderer(ax, positions)
 
         # Labels (hidden by default).
         self._label_texts = []
@@ -774,7 +824,181 @@ class Viewer3DTab(QtWidgets.QWidget):
             self._renderer.clear()
         self._renderer = None
         self._render_entries = []
+        # plot_style renderer is recreated per scene rebuild — drop the
+        # handle so update_style/update_frame don't mis-reference the
+        # previous axes.
+        self._marker_style_renderer = None
+        self._marker_style_handle = None
         self._ax = None
+
+    # ---------------------------------------------------- plot_style hooks
+
+    def _build_marker_style_renderer(self, ax: Any, positions: np.ndarray) -> None:
+        """Register the current-frame scatter with a MarkerRenderer."""
+        if positions.size == 0:
+            return
+        # Use frame 0 as a starter; subsequent frames update the artist
+        # in place via update_frame.
+        frame0 = positions[:, 0, :]
+        finite = frame0[np.isfinite(frame0).all(axis=1)]
+        if finite.size == 0:
+            return
+        renderer = MatplotlibMarkerRenderer(ax)
+        group = (
+            self.combo_marker_group.currentText()
+            if hasattr(self, "combo_marker_group")
+            else "default"
+        )
+        style = self._persistence.get(group) or default_style_for(group)
+        try:
+            handle = renderer.add_markers(
+                np.asarray(finite, dtype=float), style, "current_frame"
+            )
+        except (TypeError, ValueError) as exc:
+            _LOGGER.warning("could not register current-frame scatter: %s", exc)
+            return
+        self._marker_style_renderer = renderer
+        self._marker_style_handle = handle
+
+    def apply_marker_group_style(self, group: str, style: MarkerStyle) -> None:
+        """Apply ``style`` to ``group`` and persist (debounced)."""
+        if not isinstance(style, MarkerStyle):
+            raise TypeError(f"style must be MarkerStyle; got {type(style).__name__}")
+        self._persistence.set(group, style)
+        active_group = self.combo_marker_group.currentText()
+        if (
+            active_group == group
+            and self._marker_style_renderer is not None
+            and self._marker_style_handle is not None
+        ):
+            try:
+                self._marker_style_renderer.update_style(
+                    self._marker_style_handle, style
+                )
+            except (KeyError, TypeError, ValueError) as exc:
+                _LOGGER.warning("update_style failed: %s", exc)
+            self.canvas_3d.draw_idle()
+        self._persistence.request_save()
+
+    def _on_marker_group_style_clicked(self) -> None:
+        group = self.combo_marker_group.currentText()
+        current = self._persistence.get(group) or default_style_for(group)
+        new_style = _open_style_dialog(self, current, f"Style — {group}")
+        if new_style is None:
+            return
+        self.apply_marker_group_style(group, new_style)
+
+    # ---------------------------------------------- color-by-channel mode
+
+    def install_data_channel_editor(self, channels: tuple[DataChannel, ...]) -> None:
+        """Install a :class:`DataChannelEditor` driving DataDrivenColor.
+
+        Replaces any existing editor. Pass an empty tuple to remove.
+        """
+        # Lazy import — widgets package depends on PyQt6.
+        from src.shared.python.plot_style.widgets.data_channel_editor import (
+            DataChannelEditor,
+        )
+
+        # Drop any previous editor.
+        if self._color_channel_editor is not None:
+            self._color_channel_layout.removeWidget(self._color_channel_editor)
+            self._color_channel_editor.setParent(None)
+            self._color_channel_editor.deleteLater()
+            self._color_channel_editor = None
+
+        if not channels:
+            self._color_channel = None
+            self._color_range = None
+            return
+
+        editor = DataChannelEditor(channels=list(channels))
+        editor.channelChanged.connect(self._on_color_channel_changed)
+        editor.rangeChanged.connect(self._on_color_range_changed)
+        self._color_channel_layout.addWidget(editor)
+        self._color_channel_editor = editor
+        # Seed cached state with the editor's initial picks.
+        self._color_channel = editor.value()
+        self._color_range = editor.range_value()
+        self._apply_color_channel_to_active_group()
+
+    def _on_color_channel_changed(self, channel: DataChannel) -> None:
+        self._color_channel = channel
+        self._apply_color_channel_to_active_group()
+
+    def _on_color_range_changed(self, vmin: float, vmax: float) -> None:
+        self._color_range = (float(vmin), float(vmax))
+        self._apply_color_channel_to_active_group()
+
+    def _apply_color_channel_to_active_group(self) -> None:
+        """Re-resolve the active group's style with current data-driven color."""
+        if self._color_channel is None:
+            return
+        group = self.combo_marker_group.currentText()
+        base = self._persistence.get(group) or default_style_for(group)
+        vmin, vmax = (None, None)
+        if self._color_range is not None:
+            vmin, vmax = self._color_range
+        fill = DataDrivenColor(
+            channel=self._color_channel,
+            colormap=self._color_colormap,
+            vmin=vmin,
+            vmax=vmax,
+        )
+        try:
+            new_style = MarkerStyle(
+                shape=base.shape,
+                size_px=base.size_px,
+                edge_color=base.edge_color,
+                edge_width=base.edge_width,
+                fill_color=fill,
+                opacity=base.opacity,
+            )
+        except (TypeError, ValueError) as exc:
+            _LOGGER.warning("could not apply data-driven color: %s", exc)
+            return
+        # Don't persist DataDrivenColor — it's session-scoped.
+        if (
+            self._marker_style_renderer is not None
+            and self._marker_style_handle is not None
+        ):
+            try:
+                self._marker_style_renderer.update_style(
+                    self._marker_style_handle, new_style
+                )
+            except (KeyError, TypeError, ValueError) as exc:
+                _LOGGER.warning("update_style failed: %s", exc)
+            self.canvas_3d.draw_idle()
+        # Track that the active style now uses a data-driven color so
+        # tests can introspect.
+        # (We could also push a recompute through DataDrivenColor.resolve
+        # at each frame, but update_frame on a built-in shape only moves
+        # offsets — colors stay attached to the artist.)
+
+    @property
+    def has_data_channel_editor(self) -> bool:
+        """Whether an active editor is wired into the panel."""
+        return self._color_channel_editor is not None
+
+    # Convenience accessor for tests.
+    @property
+    def active_color_uses_data_driven(self) -> bool:
+        """Whether the active scatter currently uses a DataDrivenColor."""
+        if self._marker_style_renderer is None or self._marker_style_handle is None:
+            return False
+        # Reach into the renderer's internal handle table — this is a
+        # pragmatic test-hook, not a public API. The renderer's record
+        # type is stable.
+        record = self._marker_style_renderer._handles.get(  # type: ignore[attr-defined]
+            self._marker_style_handle
+        )
+        if record is None:
+            return False
+        return isinstance(record.style.fill_color, DataDrivenColor)
+
+    @staticmethod
+    def _safe_static_color() -> StaticColor:
+        return StaticColor("#1f77b4")
 
     # ---------------------------------------------------- User segments API
 
@@ -976,7 +1200,9 @@ class Viewer3DTab(QtWidgets.QWidget):
         pts = self._selected_positions[:, frame, :]  # (M,3)
         finite_mask = np.isfinite(pts).all(axis=1)
 
-        # Update current-frame scatter.
+        # Update current-frame scatter (legacy path retained for layout
+        # bounds — the visible glyphs are owned by the plot_style
+        # renderer below).
         if self._point_artist is not None:
             valid = pts[finite_mask]
             if valid.size > 0:
@@ -987,6 +1213,30 @@ class Viewer3DTab(QtWidgets.QWidget):
                 )
             else:
                 self._point_artist._offsets3d = ([], [], [])
+
+        # Push the same offsets through the plot_style renderer so its
+        # scatter follows the slider too.
+        if (
+            self._marker_style_renderer is not None
+            and self._marker_style_handle is not None
+        ):
+            valid = pts[finite_mask]
+            if valid.size > 0:
+                # The renderer's update_frame indexes into the (T, M, D)
+                # array we'd have given it. Since we registered with a
+                # single static frame, we instead poke the artist offsets
+                # directly to keep the path simple.
+                record = self._marker_style_renderer._handles.get(  # type: ignore[attr-defined]
+                    self._marker_style_handle
+                )
+                if record is not None and record.artists:
+                    art = record.artists[0]
+                    if hasattr(art, "_offsets3d"):
+                        art._offsets3d = (
+                            valid[:, 0],
+                            valid[:, 1],
+                            valid[:, 2],
+                        )
 
         # Update labels at the current point.
         for i, txt in enumerate(self._label_texts):
