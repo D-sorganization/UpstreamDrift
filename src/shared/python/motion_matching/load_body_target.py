@@ -17,6 +17,7 @@ from pathlib import Path
 
 from .body_target import BodyTarget
 from .club_target import AlignOptions, ClubTarget
+from .loaders.body_json import load_body_target_json
 from .loaders.c3d_body import load_body_target_c3d
 
 logger = logging.getLogger(__name__)
@@ -24,9 +25,11 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "load_body_target",
     "load_body_target_c3d",
+    "load_body_target_json",
 ]
 
 _C3D_SUFFIXES = frozenset({".c3d"})
+_JSON_SUFFIXES = frozenset({".json"})
 
 
 def load_body_target(
@@ -61,7 +64,12 @@ def load_body_target(
         return load_body_target_c3d(
             p, options, marker_set=marker_set, impact_source=impact_source
         )
+    if suffix in _JSON_SUFFIXES:
+        logger.debug("Dispatching to load_body_target_json for %s", p.name)
+        return load_body_target_json(
+            p, options, marker_set=marker_set, impact_source=impact_source
+        )
     raise ValueError(
         f"Unsupported file format {suffix!r} for {p.name}; "
-        f"expected one of {sorted(_C3D_SUFFIXES)}"
+        f"expected one of {sorted(_C3D_SUFFIXES | _JSON_SUFFIXES)}"
     )
