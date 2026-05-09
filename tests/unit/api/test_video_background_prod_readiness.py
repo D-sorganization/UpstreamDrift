@@ -58,6 +58,7 @@ async def test_process_video_background_does_not_block_event_loop(
             "swing.mp4",
             "mediapipe",
             0.5,
+            "fake-hash",
             task_manager,
         )
     )
@@ -103,6 +104,7 @@ async def test_process_video_background_logs_cleanup_failure(
             "swing.mp4",
             "mediapipe",
             0.5,
+            "fake-hash",
             task_manager,
         )
 
