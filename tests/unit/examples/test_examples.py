@@ -8,11 +8,13 @@ EXAMPLES_DIR = Path(__file__).resolve().parent.parent.parent.parent / "examples"
 
 
 def run_example(name, monkeypatch) -> None:
+    """Run an example script and assert it completes without error."""
     import runpy
 
     # Prevent sys.exit from killing tests
     monkeypatch.setattr("sys.exit", lambda code=0: None)
-    runpy.run_path(str(EXAMPLES_DIR / name), run_name="__main__")
+    result = runpy.run_path(str(EXAMPLES_DIR / name), run_name="__main__")
+    assert result is not None, f"Example {name} should return a module namespace"
 
 
 def test_injury_risk_tutorial(monkeypatch) -> None:

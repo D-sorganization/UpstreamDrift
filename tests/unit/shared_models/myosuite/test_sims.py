@@ -91,7 +91,11 @@ class TestSims(unittest.TestCase):
             )
         for model_path in model_paths:
             logger.info(f"Testing: {model_path}")
-            self.get_sim(model_path)
+            model = self.get_sim(model_path)
+            self.assertIsNotNone(model, f"Model {model_path} should load successfully")
+            self.assertGreater(
+                model.nbody, 0, f"Model {model_path} should have at least one body"
+            )
 
 
 if __name__ == "__main__":

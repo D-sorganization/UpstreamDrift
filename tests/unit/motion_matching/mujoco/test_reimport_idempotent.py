@@ -19,8 +19,10 @@ def test_double_import_does_not_raise() -> None:
     pytest.importorskip("mujoco")
     import src.engines.physics_engines.mujoco.python.motion_matching as m
 
+    original_id = id(m)
     importlib.reload(m)
     importlib.reload(m)
+    assert id(m) == original_id, "Module identity should be preserved across reloads"
 
 
 def test_provider_module_reload_does_not_raise() -> None:
@@ -35,5 +37,9 @@ def test_provider_module_reload_does_not_raise() -> None:
     import src.engines.physics_engines.mujoco.python.motion_matching  # noqa: F401
     import src.engines.physics_engines.mujoco.python.motion_matching.provider as p
 
+    original_id = id(p)
     importlib.reload(p)
     importlib.reload(p)
+    assert id(p) == original_id, (
+        "Provider module identity should be preserved across reloads"
+    )

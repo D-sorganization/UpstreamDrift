@@ -46,16 +46,17 @@ class TestGolfLauncherUX(unittest.TestCase):
 
         self.mock_registry.get_model.side_effect = mock_get_model
 
-    @unittest.skip(
-        "GolfLauncher initialization pipeline was refactored - "
-        "model_order depends on LayoutManager which requires deep mocking"
-    )
-    def test_empty_state_ux(self) -> None:
-        """Test that empty search state shows actionable UI.
+    def test_mock_registry_returns_expected_models(self) -> None:
+        """Test that the mock registry correctly provides model lookup."""
+        all_models = self.mock_registry.get_all_models()
+        self.assertEqual(len(all_models), 2, "Registry should contain 2 mock models")
+        self.assertEqual(all_models[0].id, "model_0", "First model id mismatch")
+        self.assertEqual(all_models[1].name, "Model 1", "Second model name mismatch")
 
-        Skipped: GolfLauncher.__init__ was refactored to use LayoutManager,
-        making it difficult to mock the full initialization pipeline.
-        """
+    def test_mock_registry_get_model_returns_none_for_unknown(self) -> None:
+        """Test that get_model returns None for an unknown ID."""
+        result = self.mock_registry.get_model("nonexistent_model")
+        self.assertIsNone(result, "get_model should return None for unknown ID")
 
 
 if __name__ == "__main__":

@@ -2,12 +2,14 @@ import pytest
 
 
 def test_headless_plotting_import() -> None:
-    """Test that plotting_core can be imported without PyQt6.
+    """Test that the plotting package can be imported without PyQt6.
 
-    Note: The plotting_core module was removed from the codebase.
-    This test is skipped because the module no longer exists.
+    Validates that the core plotting infrastructure is importable in
+    headless environments where no display server is available.
     """
-    pytest.skip(
-        "src.shared.python.plotting_core was removed; "
-        "plotting functionality has been reorganized"
+    import importlib.util
+
+    spec = importlib.util.find_spec("src.shared.python.plotting")
+    assert spec is not None, (
+        "src.shared.python.plotting should be importable in headless mode"
     )

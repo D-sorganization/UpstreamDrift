@@ -72,8 +72,10 @@ class TestPhysicsEngines:
         v = np.ones(10)
 
         try:
-            _ztcf = engine.compute_ztcf(q, v)
-            _zvcf = engine.compute_zvcf(q)
+            ztcf = engine.compute_ztcf(q, v)
+            zvcf = engine.compute_zvcf(q)
+            assert ztcf is not None, "MyoSuite compute_ztcf should return a value"
+            assert zvcf is not None, "MyoSuite compute_zvcf should return a value"
             logger.info("MyoSuite ZTCF/ZVCF implemented successfully")
         except NotImplementedError:
             pytest.fail("MyoSuite ZTCF/ZVCF raised NotImplementedError")
@@ -115,8 +117,10 @@ class TestPhysicsEngines:
         v = np.zeros(6)
 
         try:
-            _ztcf = engine.compute_ztcf(q, v)
-            _zvcf = engine.compute_zvcf(q)
+            ztcf = engine.compute_ztcf(q, v)
+            zvcf = engine.compute_zvcf(q)
+            assert ztcf is not None, "OpenSim compute_ztcf should return a value"
+            assert zvcf is not None, "OpenSim compute_zvcf should return a value"
             logger.info("OpenSim ZTCF/ZVCF implemented successfully")
         except NotImplementedError:
             pytest.fail("OpenSim ZTCF/ZVCF raised NotImplementedError")
