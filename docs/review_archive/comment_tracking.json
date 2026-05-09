@@ -50,7 +50,9 @@
     "3211471648",
     "3211471651",
     "3211158550",
-    "3211158553"
+    "3211158553",
+    "3211902234",
+    "3211902238"
   ],
   "created_issues": {
     "3197917606": "https://github.com/D-sorganization/UpstreamDrift/issues/4140",
@@ -71,6 +73,7 @@
     "3211471648": "https://github.com/D-sorganization/UpstreamDrift/issues/4643",
     "3211471651": "https://github.com/D-sorganization/UpstreamDrift/issues/4644",
     "3211158550": "https://github.com/D-sorganization/UpstreamDrift/issues/4685",
-    "3211158553": "https://github.com/D-sorganization/UpstreamDrift/issues/4686"
+    "3211158553": "https://github.com/D-sorganization/UpstreamDrift/issues/4686",
+    "3211902238": "https://github.com/D-sorganization/UpstreamDrift/issues/4728"
   }
 }

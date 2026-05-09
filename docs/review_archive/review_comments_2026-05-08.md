@@ -1,38 +1,40 @@
 # Review Comments Archive - 2026-05-08
 
-Generated: 2026-05-08T15:49:50.717750
+Generated: 2026-05-08T16:54:38.258616
 
 ## Reviewer (chatgpt-codex-connector[bot]) (2 comments)
 
-### PR #4620: tests/unit/motion_pipeline/_fixtures.py:450
+### PR #4727: tests/integration/motion_pipeline/adversarial/test_concurrency_safety.py:83
 
-Actionable: Yes
+Actionable: No
 Has Suggestion: No
 
 ```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Preserve passed rig when building matching-result trajectory**
+**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Fail concurrent load test when worker raises**
 
-`make_motion_matching_result` accepts a `rig` but constructs `matched_trajectory` via `make_motion_trajectory(...)`, which creates a fresh default rig instead of reusing the caller’s rig. If a caller passes a non-default rig (different joint IDs/prefixes or rig ID), `metadata['residual_report']`/`torque_trajectory` are keyed to the input rig whil...
-```
-
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4620#discussion_r3211158550)
-
----
-
-### PR #4620: tests/unit/motion_pipeline/test_lod.py:76
-
-Actionable: Yes
-Has Suggestion: No
-
-```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Record imported submodule names in LoD import scan**
-
-For `ImportFrom`, `_collect_imports` only records `node.module`, so statements like `from src import engines` are recorded as `src` and never match `FORBIDDEN_EXACT`/`FORBIDDEN_PREFIXES`. That creates a bypass where forbidden roots can be imported without detection, weakening the architectural guard this test is meant to enforce.
+This test currently returns `True` in both the success and exception paths, so it passes even if every thread hits an exception during `load_any`. That masks the exact class of concurrency regressions this test is meant to catch (e.g., race-triggered parser errors), because thread-level failures are silently treated as success.
 
 Useful? React with 👍 / 👎.
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4620#discussion_r3211158553)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4727#discussion_r3211902234)
+
+---
+
+### PR #4727: tests/integration/motion_pipeline/adversarial/test_real_world_schema_drift.py:42
+
+Actionable: Yes
+Has Suggestion: No
+
+```
+**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Remove always-true exception assertion**
+
+The exception-path assertion is tautological because of the trailing `or True`, so this test will pass for any exception message and cannot verify the promised “fail cleanly” behavior. If the adapter starts failing with unrelated/internal errors, this test will still report green and hide the regression.
+
+Useful? React with 👍 / 👎.
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4727#discussion_r3211902238)
 
 ---
 
