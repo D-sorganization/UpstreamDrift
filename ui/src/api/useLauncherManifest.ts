@@ -24,6 +24,7 @@ export interface LauncherTile {
     capabilities: string[];
     order: number;
     engine_type?: string;
+    hidden?: boolean;
 }
 
 export interface LauncherManifest {
@@ -63,6 +64,11 @@ export function useLauncherManifest(): UseLauncherManifestResult {
                 throw new Error(`Failed to fetch manifest: ${response.status}`);
             }
             const data: LauncherManifest = await response.json();
+
+            // Filter hidden tiles (e.g. legacy aliases retained for saved
+            // layout resolution) so the dashboard does not render duplicate
+            // cards for the same app (issue #4507).
+            data.tiles = data.tiles.filter((tile) => !tile.hidden);
 
             // DBC Postcondition: sort tiles by order
             data.tiles.sort((a, b) => a.order - b.order);

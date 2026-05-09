@@ -22,8 +22,6 @@ Public surface (lazily imported to keep ``import opensim`` optional):
 
 from __future__ import annotations
 
-import logging
-
 from src.engines.physics_engines.opensim.python.motion_matching.coord_map import (
     OPENSIM_COORD_ORDER,
     OPENSIM_NEUTRAL_POSE,
@@ -126,13 +124,11 @@ try:
 except ImportError:  # pragma: no cover - defensive
     pass
 else:
-    try:
-        _register_canonical(OpenSimFitSwingProvider())
-    except Exception:  # pragma: no cover - defensive idempotency
-        logging.getLogger(__name__).debug(
-            "OpenSimFitSwingProvider canonical registration skipped",
-            exc_info=True,
-        )
+    # ``register_provider`` is idempotent for repeat same-class registrations,
+    # so any exception here (e.g. an ``engine_name`` collision with a different
+    # provider class) reflects a real registration bug and must surface rather
+    # than be silently swallowed (issue #4743).
+    _register_canonical(OpenSimFitSwingProvider())
 
 try:
     from src.shared.python.motion_matching.provider_registry import (
