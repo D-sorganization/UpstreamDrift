@@ -38,6 +38,27 @@ from .registry import (
 )
 from .renderers import MatplotlibMarkerRenderer
 
+# Qt widgets are an optional surface — we expose their names in
+# ``__all__`` (UNION resolution per #4807) but only import them when
+# PyQt6 is available so that headless / non-GUI consumers can still
+# import this package.
+try:
+    from .widgets import (  # noqa: F401
+        ColormapPicker,
+        ColorPicker,
+        DataChannelEditor,
+        MarkerStylePicker,
+    )
+
+    _WIDGET_NAMES: tuple[str, ...] = (
+        "ColormapPicker",
+        "ColorPicker",
+        "DataChannelEditor",
+        "MarkerStylePicker",
+    )
+except Exception:  # pragma: no cover - optional GUI dependency (PyQt6)
+    _WIDGET_NAMES = ()
+
 __all__ = [
     "BUILTIN_PRESET_NAMES",
     "SCHEMA_VERSION",
@@ -69,3 +90,7 @@ __all__ = [
     "slice_channel",
     "unregister_custom_colormap",
 ]
+# UNION resolution (#4807): widget names are appended only when the
+# optional PyQt6 import succeeded above.
+__all__.extend(_WIDGET_NAMES)
+__all__.sort()
