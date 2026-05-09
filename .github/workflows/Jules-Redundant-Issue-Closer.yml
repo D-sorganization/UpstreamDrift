@@ -35,9 +35,11 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            // Dry run only for scheduled runs or when explicitly set via workflow_dispatch
+            const dryRunInput = core.getInput('dry_run', { required: false });
             const dryRun =
               context.eventName === 'schedule' ||
-              core.getInput('dry_run', { required: false }) !== 'false';
+              (context.eventName === 'workflow_dispatch' && dryRunInput === 'true');
 
             const normalize = (title) =>
               title.toLowerCase().replace(/\s+/g, ' ').trim();
