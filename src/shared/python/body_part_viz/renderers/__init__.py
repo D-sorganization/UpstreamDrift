@@ -1,9 +1,12 @@
 """Renderer implementations sub-package.
 
 Concrete :class:`~body_part_viz.contracts.ShapeRenderer` backends
-(matplotlib, pyqtgraph, ...) land in follow-up issues of EPIC #4755.
+(matplotlib, pyqtgraph, ...). Additional backends land in follow-up
+issues of EPIC #4755.
 """
 
 from __future__ import annotations
 
-__all__: list[str] = []
+from .matplotlib_renderer import MatplotlibRenderer
+
+__all__ = ["MatplotlibRenderer"]

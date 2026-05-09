@@ -33,7 +33,7 @@ def test_subpackages_importable() -> None:
 
     for pkg in (shapes, fitters, renderers):
         assert hasattr(pkg, "__all__")
-    # Shapes are populated by the primitives wave (#4759).
+    # Shapes populated by Wave 2 (#4759) — primitives.
     for shape_name in (
         "LineShape",
         "CylinderShape",
@@ -42,11 +42,11 @@ def test_subpackages_importable() -> None:
         "CompositeShape",
     ):
         assert shape_name in shapes.__all__
-    # Renderers land in a later wave — still empty.
-    assert renderers.__all__ == []
     # Fitters wave (#4756) ships three concrete strategies.
     assert set(fitters.__all__) == {
         "BetweenTwoMarkersFitter",
         "ClusterKabschFitter",
         "ProcrustesAnisotropicFitter",
     }
+    # Renderers wave (#4760 + #4762) ships matplotlib + pyqtgl backends.
+    assert "MatplotlibRenderer" in renderers.__all__
