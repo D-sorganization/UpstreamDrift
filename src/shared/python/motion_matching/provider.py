@@ -101,6 +101,14 @@ class FitSwingProvider(Protocol):
         fit_swing(target, opts) -> CanonicalFitResult
         supports_body_target() -> bool
         supports_ball_target() -> bool
+
+    Optional methods:
+        engine_version() -> str
+            Version string of the underlying physics engine wheel
+            (e.g. ``pydrake.__version__``). Used to stamp leaderboard rows
+            so two runs against different wheels are distinguishable.
+            Defaults to ``"unknown"`` for back-compat with providers that
+            predate this hook (issue #4705).
     """
 
     engine_name: str
@@ -114,6 +122,17 @@ class FitSwingProvider(Protocol):
     def supports_body_target(self) -> bool: ...
 
     def supports_ball_target(self) -> bool: ...
+
+    def engine_version(self) -> str:
+        """Return the underlying engine's version string.
+
+        Default implementation returns ``"unknown"`` so providers
+        predating issue #4705 stay Protocol-compliant. Real providers
+        should override to query their engine's ``__version__``
+        attribute (with a ``try/except ImportError`` fallback so the
+        provider stays constructible without the engine wheel).
+        """
+        return "unknown"
 
 
 # --- Registry ---------------------------------------------------------------

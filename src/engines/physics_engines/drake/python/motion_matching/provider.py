@@ -103,3 +103,32 @@ class DrakeFitSwingProvider:
     def supports_ball_target(self) -> bool:
         """Ball-boundary-condition cost terms land separately (see #4488)."""
         return False
+
+    def engine_version(self) -> str:
+        """Return the installed ``pydrake`` version, or ``"unknown"``.
+
+        Stamps the resolved value into leaderboard rows so two runs
+        against different Drake wheels are distinguishable (issue
+        #4705). Falls back to :func:`importlib.metadata.version` when
+        the bindings expose no ``__version__`` attribute, and to
+        ``"unknown"`` when the wheel is not installed.
+        """
+        try:
+            import pydrake  # type: ignore[import-not-found]
+        except ImportError:
+            return "unknown"
+        version = getattr(pydrake, "__version__", None)
+        if isinstance(version, str) and version:
+            return version
+        try:
+            from importlib.metadata import PackageNotFoundError
+            from importlib.metadata import version as _v
+        except ImportError:  # pragma: no cover -- importlib.metadata is stdlib >=3.8
+            return "unknown"
+        try:
+            return _v("drake")
+        except PackageNotFoundError:
+            try:
+                return _v("pydrake")
+            except PackageNotFoundError:
+                return "unknown"

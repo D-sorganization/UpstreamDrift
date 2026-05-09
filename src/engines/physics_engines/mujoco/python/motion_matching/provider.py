@@ -93,6 +93,31 @@ class MujocoFitSwingProvider:
         """MuJoCo's swing fitter does not consume ball targets."""
         return False
 
+    def engine_version(self) -> str:
+        """Return the installed ``mujoco`` version, or ``"unknown"``.
+
+        Lets leaderboard rows distinguish runs across MuJoCo wheel
+        upgrades (issue #4705). Returns ``"unknown"`` when the
+        ``mujoco`` package is not installed so the provider stays
+        constructible in MuJoCo-less environments.
+        """
+        try:
+            import mujoco  # type: ignore[import-not-found]
+        except ImportError:
+            return "unknown"
+        version = getattr(mujoco, "__version__", None)
+        if isinstance(version, str) and version:
+            return version
+        try:
+            from importlib.metadata import PackageNotFoundError
+            from importlib.metadata import version as _v
+        except ImportError:  # pragma: no cover -- stdlib >=3.8
+            return "unknown"
+        try:
+            return _v("mujoco")
+        except PackageNotFoundError:
+            return "unknown"
+
     # --- Internal helpers ----------------------------------------------
 
     @staticmethod

@@ -100,6 +100,34 @@ class PinocchioFitSwingProvider:
         """Return ``False`` -- Pinocchio MM is club-target only."""
         return False
 
+    def engine_version(self) -> str:
+        """Return the installed ``pinocchio`` version, or ``"unknown"``.
+
+        Stamped into leaderboard rows (issue #4705) so two runs against
+        different Pinocchio wheels stay distinguishable. Returns
+        ``"unknown"`` when the bindings are not installed; the provider
+        class itself imports cleanly even without them.
+        """
+        try:
+            import pinocchio  # type: ignore[import-not-found]
+        except ImportError:
+            return "unknown"
+        version = getattr(pinocchio, "__version__", None)
+        if isinstance(version, str) and version:
+            return version
+        try:
+            from importlib.metadata import PackageNotFoundError
+            from importlib.metadata import version as _v
+        except ImportError:  # pragma: no cover -- stdlib >=3.8
+            return "unknown"
+        try:
+            return _v("pin")
+        except PackageNotFoundError:
+            try:
+                return _v("pinocchio")
+            except PackageNotFoundError:
+                return "unknown"
+
 
 # --------------------------------------------------------------------------- #
 # Auto-registration
