@@ -16,9 +16,11 @@ invariants at construction time (Design by Contract).
 
 from __future__ import annotations
 
+from . import engine_adapters as engine_adapters
 from ._subject_anthropometrics import SubjectAnthropometrics
 from ._types import Sex
 from .contracts import EngineAdapter, Estimator, Reader, Writer
+from .engine_adapters import ADAPTER_REGISTRY
 from .persistence import (
     SCHEMA_VERSION,
     default_subjects_dir,
@@ -40,7 +42,11 @@ except Exception:  # pragma: no cover - PyQt6 missing or unloadable
 else:
     SegmentPropertiesPanel = _Panel
 
-__all__ = [
+# UNION resolution: combine top-level public names with the
+# engine_adapters subpackage's own __all__ so e.g.
+# ``from anthropometrics import DrakeAdapter`` works.
+_LOCAL_ALL = [
+    "ADAPTER_REGISTRY",
     "C3DSubjectMetadata",
     "EngineAdapter",
     "Estimator",
@@ -52,9 +58,17 @@ __all__ = [
     "SubjectAnthropometrics",
     "Writer",
     "default_subjects_dir",
+    "engine_adapters",
     "load_subject",
     "read_c3d_subject_metadata",
     "read_mjcf_body",
     "save_subject",
     "write_mjcf_body",
 ]
+__all__ = sorted(set(_LOCAL_ALL) | set(engine_adapters.__all__))  # noqa: PLE0605
+
+# Re-export every concrete adapter at the top level for ergonomic
+# ``from anthropometrics import DrakeAdapter`` imports.
+for _name in engine_adapters.__all__:
+    globals()[_name] = getattr(engine_adapters, _name)
+del _name

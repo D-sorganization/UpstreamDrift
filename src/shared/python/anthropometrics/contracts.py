@@ -18,7 +18,6 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from ._subject_anthropometrics import SubjectAnthropometrics
-    from .segment_properties import SegmentProperties
 
 
 @runtime_checkable
@@ -62,14 +61,27 @@ class Writer(Protocol):
 
 @runtime_checkable
 class EngineAdapter(Protocol):
-    """Translate canonical segments into engine-specific structures.
+    """Export and re-import a :class:`SubjectAnthropometrics` for a physics engine.
 
-    Each physics engine (Pinocchio, Drake, MuJoCo, Bullet, ...)
-    has its own representation of inertial parameters; concrete
-    adapters bridge between :class:`SegmentProperties` and that
-    representation.
+    Each physics engine (Drake, Pinocchio, MyoSuite/MuJoCo, OpenSim,
+    Simscape, ...) has its own native description format. Concrete
+    adapters serialise a canonical :class:`SubjectAnthropometrics`
+    into that format via :meth:`export` and recover an equivalent
+    record via :meth:`import_back`. Adapters guarantee numerically
+    exact round-trips on all inertial fields (``rtol=1e-9,
+    atol=1e-12``) so that downstream pipelines can move between
+    engines without information loss.
     """
 
-    def to_engine_segment(self, props: SegmentProperties) -> object:
-        """Return the engine-native representation of *props*."""
+    engine_name: str
+    """Lower-case engine identifier, e.g. ``"drake"``, ``"pinocchio"``."""
+
+    def export(
+        self, anthropometrics: SubjectAnthropometrics, output_path: Path
+    ) -> None:
+        """Serialise *anthropometrics* to *output_path* in the engine format."""
+        ...
+
+    def import_back(self, input_path: Path) -> SubjectAnthropometrics:
+        """Re-load a previously-exported subject from *input_path*."""
         ...

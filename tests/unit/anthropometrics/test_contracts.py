@@ -308,8 +308,16 @@ class _StubWriter:
 
 
 class _StubEngineAdapter:
-    def to_engine_segment(self, props: SegmentProperties) -> object:
-        return {"mass": props.mass_kg, "length": props.length_m}
+    engine_name = "stub"
+
+    def export(
+        self, anthropometrics: SubjectAnthropometrics, output_path: Path
+    ) -> None:
+        del anthropometrics, output_path
+
+    def import_back(self, input_path: Path) -> SubjectAnthropometrics:
+        del input_path
+        return _make_subject()
 
 
 def test_estimator_protocol_satisfied_by_stub() -> None:
