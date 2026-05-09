@@ -202,7 +202,13 @@ class TaskManager:
         with self._lock:
             self._ensure_open()
             self._cleanup_expired_locked()
-            return task_id in self._tasks
+            if task_id in self._tasks:
+                # Refresh the TTL on membership so dict-style polling
+                # (``id in tm``) keeps long-running tasks alive,
+                # consistent with ``exists()`` / ``get()``. See #4871.
+                self._timestamps[task_id] = time.time()
+                return True
+            return False
 
     def __getitem__(self, task_id: str) -> dict[str, Any]:
         with self._lock:

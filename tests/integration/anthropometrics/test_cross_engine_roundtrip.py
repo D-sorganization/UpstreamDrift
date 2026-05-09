@@ -116,12 +116,36 @@ def test_json_persistence_round_trip(
 
 
 def _try_import_mjcf_pair():
-    """Return ``(write, read)`` for the MJCF adapter, or ``None`` if absent."""
+    """Return ``(write, read)`` for the MJCF adapter, or ``None`` if absent.
+
+    Only a *missing* adapter module returns ``None``. If the adapter module
+    exists but fails to import for some other reason (e.g. an internal import
+    typo or a missing dependency inside the adapter itself), the original
+    error propagates so the round-trip coverage cannot silently regress.
+    """
     try:
         writer_mod = importlib.import_module("anthropometrics.writers.mjcf_body")
+    except ModuleNotFoundError as exc:
+        # Only skip when *this* adapter module is the missing one. A
+        # ModuleNotFoundError raised from inside the adapter (i.e. its own
+        # imports) must surface as a real failure.
+        if exc.name in {
+            "anthropometrics.writers.mjcf_body",
+            "anthropometrics.writers",
+            "anthropometrics",
+        }:
+            return None
+        raise
+    try:
         reader_mod = importlib.import_module("anthropometrics.readers.mjcf_body")
-    except ModuleNotFoundError:
-        return None
+    except ModuleNotFoundError as exc:
+        if exc.name in {
+            "anthropometrics.readers.mjcf_body",
+            "anthropometrics.readers",
+            "anthropometrics",
+        }:
+            return None
+        raise
     write = getattr(writer_mod, "write_mjcf_body", None)
     read = getattr(reader_mod, "read_mjcf_body", None)
     if write is None or read is None:

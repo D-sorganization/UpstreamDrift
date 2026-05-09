@@ -15,6 +15,8 @@ Typical usage::
 from __future__ import annotations
 
 import json
+import os
+from importlib import resources
 from pathlib import Path
 from typing import Any
 
@@ -29,13 +31,45 @@ _SCHEMA_VERSION = 1
 def _default_asset_root() -> Path:
     """Return the on-disk location of the bundled ``default/`` library.
 
-    The repo layout is::
+    Resolution order (first existing directory wins):
 
-        <repo-root>/assets/body_part_shapes/default/
-        <repo-root>/src/shared/python/body_part_viz/asset_library.py
+    1. ``UD_BODY_PART_SHAPES_DIR`` environment variable, if set.
+    2. ``importlib.resources`` lookup of ``body_part_viz._assets`` /
+       ``default`` (so installed wheels can ship the library as package
+       data without depending on a source checkout).
+    3. The repo source layout
+       ``<repo-root>/assets/body_part_shapes/default/`` — five parents
+       up from this file.
 
-    so we walk five parents up from this file.
+    See #4798: the previous implementation only handled (3), making
+    ``ShapeLibrary.default()`` fail from an installed wheel/sdist where
+    the repo-relative path does not exist.
     """
+    env_root = os.environ.get("UD_BODY_PART_SHAPES_DIR")
+    if env_root:
+        candidate = Path(env_root)
+        if candidate.is_dir():
+            return candidate
+
+    # Try a package-data location adjacent to this module. This succeeds
+    # whenever the assets are shipped as ``body_part_viz._assets`` (or
+    # ``body_part_viz.assets``) in the installed distribution.
+    for pkg_subdir in ("_assets", "assets"):
+        try:
+            traversable = resources.files(__package__).joinpath(pkg_subdir, "default")
+        except (ModuleNotFoundError, TypeError):
+            traversable = None
+        if traversable is not None:
+            try:
+                # Materialise a real filesystem path. For wheel-installed
+                # packages this returns the on-disk directory directly.
+                with resources.as_file(traversable) as resolved:
+                    if resolved.is_dir():
+                        return Path(resolved)
+            except (FileNotFoundError, OSError):
+                pass
+
+    # Final fallback: source-checkout layout.
     return (
         Path(__file__).resolve().parents[4] / "assets" / "body_part_shapes" / "default"
     )

@@ -241,7 +241,7 @@ class Viewer3DTab(QtWidgets.QWidget):
         # could not be built (e.g. missing markers, missing mesh file)
         # and should be skipped on frame updates.
         self._renderer: MatplotlibRenderer | None = None
-        self._render_entries: list[tuple[str | None, str]] = []
+        self._render_entries: list[tuple[str | None, str, np.ndarray | None]] = []
         self._shape_library: ShapeLibrary | None = None
 
         # Playback timer.
@@ -1038,7 +1038,7 @@ class Viewer3DTab(QtWidgets.QWidget):
         """
         return sum(
             1
-            for handle, kind in self._render_entries
+            for handle, kind, _valid in self._render_entries
             if handle is not None and kind != "line"
         )
 
@@ -1047,7 +1047,7 @@ class Viewer3DTab(QtWidgets.QWidget):
         """Number of line-shape user segments currently rendered."""
         return sum(
             1
-            for handle, kind in self._render_entries
+            for handle, kind, _valid in self._render_entries
             if handle is not None and kind == "line"
         )
 
@@ -1118,16 +1118,16 @@ class Viewer3DTab(QtWidgets.QWidget):
         for spec in self._user_viz_segments:
             shape = _build_shape_from_spec(spec, library=library)
             if shape is None:
-                self._render_entries.append((None, spec.shape_kind))
+                self._render_entries.append((None, spec.shape_kind, None))
                 continue
             markers_xyz = self._markers_xyz(spec.binding.marker_names)
             if markers_xyz is None:
-                self._render_entries.append((None, spec.shape_kind))
+                self._render_entries.append((None, spec.shape_kind, None))
                 continue
             try:
                 fitter = _fitter_for_kind(spec.fitter_kind)
             except ValueError:
-                self._render_entries.append((None, spec.shape_kind))
+                self._render_entries.append((None, spec.shape_kind, None))
                 continue
             try:
                 # Library-shape mesh has its own shape_id; rebind the binding
@@ -1150,7 +1150,7 @@ class Viewer3DTab(QtWidgets.QWidget):
                     spec.binding.marker_names,
                     exc,
                 )
-                self._render_entries.append((None, spec.shape_kind))
+                self._render_entries.append((None, spec.shape_kind, None))
                 continue
             theme = self._theme_for_spec(spec)
             try:
@@ -1159,11 +1159,15 @@ class Viewer3DTab(QtWidgets.QWidget):
                 _LOGGER.warning(
                     "renderer.add_shape failed for %s: %s", spec.shape_kind, exc
                 )
-                self._render_entries.append((None, spec.shape_kind))
+                self._render_entries.append((None, spec.shape_kind, None))
                 continue
             if not spec.visible:
                 self._renderer.set_visible(handle, False)
-            self._render_entries.append((handle, spec.shape_kind))
+            # Capture the per-frame valid mask so the per-frame update path
+            # can hide segments on invalid frames (e.g. NaN-filled occluded
+            # markers) instead of drawing them at the origin. See #4835.
+            valid_mask = getattr(fitted, "valid_mask", None)
+            self._render_entries.append((handle, spec.shape_kind, valid_mask))
 
     def _update_user_segment_artists(self) -> None:
         if self._renderer is None or not self._user_viz_segments or self._n_frames <= 0:
@@ -1174,12 +1178,19 @@ class Viewer3DTab(QtWidgets.QWidget):
         for entry, spec in zip(
             self._render_entries, self._user_viz_segments, strict=False
         ):
-            handle, _kind = entry
+            handle, _kind, valid_mask = entry
             if handle is None:
                 continue
+            # If the fitter flagged this frame invalid (e.g. occluded marker
+            # NaNs), hide the segment for the frame instead of drawing it at
+            # the origin via the NaN->0 coercion in the renderer (#4835).
+            frame_valid = True
+            if valid_mask is not None and 0 <= frame < len(valid_mask):
+                frame_valid = bool(valid_mask[frame])
+            visible = bool(spec.visible) and frame_valid
             try:
-                self._renderer.set_visible(handle, bool(spec.visible))
-                if spec.visible:
+                self._renderer.set_visible(handle, visible)
+                if visible:
                     self._renderer.update_frame(handle, frame)
             except (KeyError, IndexError, TypeError) as exc:
                 _LOGGER.warning("renderer.update_frame failed: %s", exc)

@@ -113,8 +113,11 @@ def _resolve_color_from_style(style: MarkerStyle) -> tuple[float, float, float, 
 def _coerce_positions(positions: np.ndarray) -> np.ndarray:
     """Validate / normalise a positions ndarray to ``(T, M, 3)``.
 
-    Accepts ``(T, 3)`` (single marker per frame) and ``(M, 3)`` (single
-    frame). Returns a ``(T, M, 3)`` ``float32`` view.
+    Accepts ``(T, 3)`` (single-marker trajectory across ``T`` frames, as
+    documented by the :class:`MarkerRenderer` contract). Returns a
+    ``(T, M, 3)`` ``float32`` view; a 2-D ``(T, 3)`` input becomes
+    ``(T, 1, 3)`` so callers can still call ``update_frame`` for every
+    frame in the trajectory.
     """
     if not isinstance(positions, np.ndarray):
         raise TypeError(
@@ -123,10 +126,13 @@ def _coerce_positions(positions: np.ndarray) -> np.ndarray:
     if positions.ndim == 2:
         if positions.shape[1] != 3:
             raise ValueError(
-                f"2-D positions must have shape (N, 3); got {positions.shape}"
+                f"2-D positions must have shape (T, 3); got {positions.shape}"
             )
-        # Treat (N, 3) as 1 frame with N markers.
-        arr = positions.reshape(1, positions.shape[0], 3)
+        # Per the MarkerRenderer contract a 2-D (T, 3) input is a
+        # single-marker trajectory of length T, NOT a single frame with
+        # T markers. Reshape to (T, 1, 3) so update_frame(handle, t)
+        # works for every t in [0, T).
+        arr = positions.reshape(positions.shape[0], 1, 3)
     elif positions.ndim == 3:
         if positions.shape[2] != 3:
             raise ValueError(

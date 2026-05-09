@@ -282,13 +282,21 @@ class SegmentVizSpec:
             raise TypeError(
                 f"shape_params must be a dict; got {type(shape_params).__name__}"
             )
+        # Strict-bool validation for ``visible`` (#4793). ``bool(...)`` would
+        # silently accept truthy non-bool payloads such as ``"false"``, so
+        # reject any non-bool here and preserve the dataclass' contract.
+        visible_raw = data.get("visible", True)
+        if not isinstance(visible_raw, bool):
+            raise TypeError(
+                f"'visible' must be a JSON boolean; got {type(visible_raw).__name__}"
+            )
         return cls(
             binding=binding,
             shape_kind=shape_kind,
             shape_params=dict(shape_params),
             fitter_kind=fitter_kind,
             theme=theme,
-            visible=bool(data.get("visible", True)),
+            visible=visible_raw,
         )
 
     def to_dict(self) -> dict[str, Any]:
