@@ -33,13 +33,14 @@ def test_subpackages_importable() -> None:
 
     for pkg in (shapes, fitters, renderers):
         assert hasattr(pkg, "__all__")
-    # Shapes populated by Wave 2 (#4759) — primitives.
+    # Wave 2 (#4759 + #4758) populates ``shapes`` with primitives + MeshShape.
     for shape_name in (
         "LineShape",
         "CylinderShape",
         "EllipsoidShape",
         "CapsuleShape",
         "CompositeShape",
+        "MeshShape",
     ):
         assert shape_name in shapes.__all__
     # Fitters wave (#4756) ships three concrete strategies.

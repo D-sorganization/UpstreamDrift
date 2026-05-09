@@ -10,6 +10,7 @@ from .composite_shape import CompositeShape
 from .cylinder_shape import CylinderShape
 from .ellipsoid_shape import EllipsoidShape
 from .line_shape import LineShape
+from .mesh_shape import MeshShape
 
 __all__ = [
     "CapsuleShape",
@@ -17,4 +18,5 @@ __all__ = [
     "CylinderShape",
     "EllipsoidShape",
     "LineShape",
+    "MeshShape",
 ]
