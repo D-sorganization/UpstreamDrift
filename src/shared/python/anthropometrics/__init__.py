@@ -19,6 +19,12 @@ from __future__ import annotations
 from ._subject_anthropometrics import SubjectAnthropometrics
 from ._types import Sex
 from .contracts import EngineAdapter, Estimator, Reader, Writer
+from .persistence import (
+    SCHEMA_VERSION,
+    default_subjects_dir,
+    load_subject,
+    save_subject,
+)
 from .readers import C3DSubjectMetadata, read_c3d_subject_metadata
 from .segment_properties import SegmentProperties
 
@@ -27,9 +33,13 @@ __all__ = [
     "EngineAdapter",
     "Estimator",
     "Reader",
+    "SCHEMA_VERSION",
     "SegmentProperties",
     "Sex",
     "SubjectAnthropometrics",
     "Writer",
+    "default_subjects_dir",
+    "load_subject",
     "read_c3d_subject_metadata",
+    "save_subject",
 ]
