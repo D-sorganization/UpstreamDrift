@@ -26,7 +26,6 @@ from anthropometrics import (
 )
 from anthropometrics.persistence import _segment_from_dict, _segment_to_dict
 
-
 # Canonical 16-segment list used by downstream estimators.
 SIXTEEN_SEGMENTS: tuple[str, ...] = (
     "head",

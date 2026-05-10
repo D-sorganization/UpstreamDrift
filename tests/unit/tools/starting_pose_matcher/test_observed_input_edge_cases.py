@@ -21,7 +21,6 @@ from src.tools.starting_pose_matcher.providers.openpose import (
     OpenPoseProviderError,
 )
 
-
 pytestmark = pytest.mark.unit
 
 

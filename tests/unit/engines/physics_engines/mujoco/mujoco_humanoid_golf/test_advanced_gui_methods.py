@@ -76,8 +76,8 @@ def test_prepare_analysis_data():
     gui = MockGuiClass()
 
     mock_recorder = MagicMock()
-    mock_recorder.get_time_series.side_effect = (
-        lambda key: ([1], [2]) if key != "club_head_speed" else ([1], [100.0])
+    mock_recorder.get_time_series.side_effect = lambda key: (
+        ([1], [2]) if key != "club_head_speed" else ([1], [100.0])
     )
 
     mock_analyzer_cls = MagicMock()

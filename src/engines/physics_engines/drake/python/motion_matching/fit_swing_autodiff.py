@@ -879,9 +879,11 @@ def fit_swing_drake_autodiff(  # noqa: C901
     metadata.update(
         {
             "ipopt_iter": _safe_get_solver_detail(mp_result, "iter_count"),
-            "solver_id": str(mp_result.get_solver_id().name())
-            if hasattr(mp_result, "get_solver_id")
-            else solver_name,
+            "solver_id": (
+                str(mp_result.get_solver_id().name())
+                if hasattr(mp_result, "get_solver_id")
+                else solver_name
+            ),
         }
     )
 

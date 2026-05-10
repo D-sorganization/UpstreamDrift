@@ -133,9 +133,9 @@ class TestParity:
         # Should be JSON-serializable
         json_str = json.dumps(data)
         parsed = json.loads(json_str)
-        assert len(parsed["tiles"]) == len(manifest.tiles), (
-            "Assertion failed: len(parsed[tiles]) == len(manifest.tiles)"
-        )
+        assert len(parsed["tiles"]) == len(
+            manifest.tiles
+        ), "Assertion failed: len(parsed[tiles]) == len(manifest.tiles)"
 
 
 # =============================================================================

@@ -197,9 +197,11 @@ class MarkerStylePicker(QWidget):
                 size_px=float(self._size_spin.value()),
                 edge_color=self._edge_color.value(),
                 edge_width=float(self._edge_width_spin.value()),
-                fill_color=self._style.fill_color
-                if self._style.fill_color is not None
-                else StaticColor("#1f77b4"),
+                fill_color=(
+                    self._style.fill_color
+                    if self._style.fill_color is not None
+                    else StaticColor("#1f77b4")
+                ),
                 opacity=self._style.opacity,
             )
         except (TypeError, ValueError) as exc:

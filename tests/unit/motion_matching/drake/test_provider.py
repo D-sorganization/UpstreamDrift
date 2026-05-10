@@ -48,7 +48,6 @@ from src.shared.python.motion_matching.provider_registry import (
     get_provider,
 )
 
-
 # ---------------------------------------------------------------------------
 # Test helpers (mirror the patterns in tests/test_drake_fit_swing.py).
 # ---------------------------------------------------------------------------

@@ -29,7 +29,6 @@ from src.shared.python.upstream_drift_tools.lab.bio._c3d_models import (
 )
 from tests.unit.upstream_drift_tools.lab.bio._synthetic import _synthetic_c3d_dict
 
-
 # ----- load_c3d --------------------------------------------------------------
 
 

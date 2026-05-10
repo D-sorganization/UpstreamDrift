@@ -10,7 +10,6 @@ from src.shared.python.plot_style.colormaps import (
     resolve_colormap_alias,
 )
 
-
 # ---------- ColormapId --------------------------------------------------
 
 

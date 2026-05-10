@@ -241,9 +241,9 @@ def test_cross_engine_fk_mujoco_pinocchio(
 
     log_result_to_report("mujoco_vs_pinocchio", max_rmse)
 
-    assert max_rmse <= 0.005, (
-        f"MuJoCo vs Pinocchio RMSE {max_rmse:.4f} m > 5 mm threshold"
-    )
+    assert (
+        max_rmse <= 0.005
+    ), f"MuJoCo vs Pinocchio RMSE {max_rmse:.4f} m > 5 mm threshold"
 
 
 def test_cross_engine_fk_drake_pinocchio(
@@ -260,6 +260,6 @@ def test_cross_engine_fk_drake_pinocchio(
 
     log_result_to_report("drake_vs_pinocchio", max_rmse)
 
-    assert max_rmse <= 0.005, (
-        f"Drake vs Pinocchio RMSE {max_rmse:.4f} m > 5 mm threshold"
-    )
+    assert (
+        max_rmse <= 0.005
+    ), f"Drake vs Pinocchio RMSE {max_rmse:.4f} m > 5 mm threshold"

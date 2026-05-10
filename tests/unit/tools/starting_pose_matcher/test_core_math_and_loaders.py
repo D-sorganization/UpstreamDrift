@@ -41,7 +41,6 @@ from src.tools.starting_pose_matcher.core import (
     solve_shaft_rz_deg,
 )
 
-
 pytestmark = pytest.mark.unit
 
 

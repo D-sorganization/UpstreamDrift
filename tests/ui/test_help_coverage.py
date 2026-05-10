@@ -108,7 +108,9 @@ def test_matcher_tooltip_whitelist(matcher_window) -> None:  # noqa: ANN001
     assert not missing, "Missing tooltips:\n  - " + "\n  - ".join(missing)
 
 
-def test_matcher_pose_visibility_checks_have_tooltips(matcher_window) -> None:  # noqa: ANN001
+def test_matcher_pose_visibility_checks_have_tooltips(
+    matcher_window,
+) -> None:  # noqa: ANN001
     """Layer-visibility checkboxes (one per pose slot) must have tooltips."""
     checks = getattr(matcher_window, "_pose_visible_checks", {})
     assert checks, "No pose-visibility checkboxes were registered"

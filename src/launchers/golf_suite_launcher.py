@@ -62,7 +62,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
             "Deprecation Warning",
             "This legacy launcher is deprecated and will be removed in a future release.\n\n"
             "Please use the new Unified UpstreamDrift Launcher which supports Docker, WSL, "
-            "and all physics engines in a single modern interface."
+            "and all physics engines in a single modern interface.",
         )
 
         # Paths - UPDATED FOR GOLF_MODELING_SUITE

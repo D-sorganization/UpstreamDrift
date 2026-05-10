@@ -650,9 +650,7 @@ class MotionDataLoader:
                     diff = _to_numpy(prov1_df[prov1_col]) - wiffle_interp
 
                     # Store in DELTAQ format
-                    gui_col = (
-                        f"{component.upper().replace('_', '')[:2]}{axis[-1].upper()}"  # noqa: E501
-                    )
+                    gui_col = f"{component.upper().replace('_', '')[:2]}{axis[-1].upper()}"  # noqa: E501
                     deltaq_data[gui_col] = diff
                 else:
                     deltaq_data[

@@ -15,7 +15,6 @@ from src.shared.python.body_part_viz import (
     ShapeTheme,
 )
 
-
 # ---------- BindingKind --------------------------------------------------
 
 

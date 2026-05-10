@@ -181,9 +181,9 @@ def test_callback_uninstalls_cleanly_between_runs() -> None:
 
     # Different inputs must produce different trajectories. (Specifically,
     # theta_const drives the joints; theta_zero lets gravity dominate.)
-    assert not np.allclose(out_zero.q, out_const.q), (
-        "second run produced identical state — likely callback leakage"
-    )
+    assert not np.allclose(
+        out_zero.q, out_const.q
+    ), "second run produced identical state — likely callback leakage"
     # The downstream test ``test_no_residual_global_callback_after_run``
     # additionally probes that ``mjcb_control`` is cleared globally.
 
@@ -210,9 +210,9 @@ def test_no_residual_global_callback_after_run() -> None:
     d = mujoco.MjData(m)
     d.ctrl[:] = 0.0
     mujoco.mj_step(m, d)
-    assert np.all(d.ctrl == 0.0), (
-        "data.ctrl was modified by a residual global mjcb_control"
-    )
+    assert np.all(
+        d.ctrl == 0.0
+    ), "data.ctrl was modified by a residual global mjcb_control"
 
 
 # --- Postcondition shape checks --------------------------------------------

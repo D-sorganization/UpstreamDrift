@@ -27,7 +27,6 @@ from src.shared.python.motion_pipeline.contracts import (
 )
 from src.shared.python.motion_pipeline.orchestrator import HookPayload, Stage
 
-
 # =============================================================================
 # #4647 — invariants enforced via Pydantic model_validator
 # =============================================================================

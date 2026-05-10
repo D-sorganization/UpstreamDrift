@@ -30,7 +30,6 @@ from src.shared.python.launcher_embed import (  # noqa: E402
     EmbeddableTool,
 )
 
-
 _OPENSIM_PKG_NAME = "src.engines.physics_engines.opensim.python"
 _ADAPTER_MOD_NAME = f"{_OPENSIM_PKG_NAME}._embed_adapter"
 

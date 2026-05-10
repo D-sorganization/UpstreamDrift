@@ -44,7 +44,6 @@ from src.tools.starting_pose_matcher.widgets.joint_slider_panel import (  # noqa
     resolve_coord_names,
 )
 
-
 pytestmark = pytest.mark.unit
 
 

@@ -220,9 +220,9 @@ def build_search_manifest(  # noqa: C901
         "inputs": {
             "desired_target_csv": str(desired_target_csv),
             "column_manifest": str(column_manifest),
-            "starting_state_file": str(starting_state_file)
-            if starting_state_file is not None
-            else "",
+            "starting_state_file": (
+                str(starting_state_file) if starting_state_file is not None else ""
+            ),
         },
         "simulation": {
             "model_name": model_name,

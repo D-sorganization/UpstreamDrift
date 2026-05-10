@@ -121,6 +121,7 @@ class GolfLauncher(
         """
         super().__init__()
         from PyQt6.QtCore import Qt
+
         self.loading = loading
         self.setWindowTitle("UpstreamDrift")
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)

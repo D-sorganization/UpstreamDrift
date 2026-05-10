@@ -65,6 +65,10 @@ if "PyQt6" not in sys.modules:
     qt_widgets.QDoubleSpinBox = DummyWidget
     qt_widgets.QSlider = DummyWidget
     qt_widgets.QGroupBox = DummyWidget
+    qt_widgets.QMainWindow = DummyWidget
+    qt_widgets.QSplitter = DummyWidget
+    qt_widgets.QMenuBar = DummyWidget
+    qt_widgets.QMenu = DummyWidget
     pyqt_mock.QtWidgets = qt_widgets
     pyqt_mock.QtWebEngineWidgets = MagicMock()
     sys.modules["PyQt6"] = pyqt_mock

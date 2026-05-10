@@ -229,9 +229,11 @@ def _linear_interp_keypoints(
                     new_kp = Keypoint(
                         x=kp_before.x + t * (kp_after.x - kp_before.x),
                         y=kp_before.y + t * (kp_after.y - kp_before.y),
-                        z=kp_before.z + t * (kp_after.z - kp_before.z)
-                        if kp_before.z is not None
-                        else None,
+                        z=(
+                            kp_before.z + t * (kp_after.z - kp_before.z)
+                            if kp_before.z is not None
+                            else None
+                        ),
                         confidence=0.5,  # Mark as interpolated
                         name=kp.name,
                     )

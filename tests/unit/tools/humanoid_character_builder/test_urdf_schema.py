@@ -10,8 +10,9 @@ etree = pytest.importorskip("lxml.etree")
 
 from humanoid_character_builder import CharacterBuilder  # noqa: E402
 from humanoid_character_builder.core.body_parameters import BodyParameters  # noqa: E402
-from humanoid_character_builder.presets.loader import list_available_presets  # noqa: E402
-
+from humanoid_character_builder.presets.loader import (
+    list_available_presets,
+)  # noqa: E402
 
 # URDF XML namespace and root element validation
 URDF_ROOT_TAG = "robot"
@@ -40,9 +41,9 @@ class TestURDFSchemaValidation:
         urdf_xml = builder.generate_urdf(params)
 
         tree = etree.fromstring(urdf_xml.encode("utf-8"))
-        assert tree.tag == URDF_ROOT_TAG, (
-            f"URDF for preset '{preset}' should have <robot> root, got <{tree.tag}>"
-        )
+        assert (
+            tree.tag == URDF_ROOT_TAG
+        ), f"URDF for preset '{preset}' should have <robot> root, got <{tree.tag}>"
 
     @pytest.mark.parametrize("preset", list_available_presets())
     def test_urdf_has_required_elements(self, preset: str) -> None:
@@ -102,12 +103,12 @@ class TestURDFSchemaValidation:
             child = joint.find("child")
             assert parent is not None, f"Joint '{name}' missing parent element"
             assert child is not None, f"Joint '{name}' missing child element"
-            assert parent.get("link") is not None, (
-                f"Joint '{name}' parent missing link attribute"
-            )
-            assert child.get("link") is not None, (
-                f"Joint '{name}' child missing link attribute"
-            )
+            assert (
+                parent.get("link") is not None
+            ), f"Joint '{name}' parent missing link attribute"
+            assert (
+                child.get("link") is not None
+            ), f"Joint '{name}' child missing link attribute"
 
     def test_urdf_no_duplicate_link_names(self) -> None:
         """All link names should be unique."""

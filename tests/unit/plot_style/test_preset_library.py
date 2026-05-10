@@ -14,7 +14,6 @@ from src.shared.python.plot_style import (
 )
 from src.shared.python.plot_style.preset_library import _load_builtin_preset
 
-
 # ---------- Round-trip ------------------------------------------------------
 
 
@@ -77,9 +76,9 @@ def test_each_preset_has_curated_entries() -> None:
     for preset_name in BUILTIN_PRESET_NAMES:
         entries = library[preset_name].entries
         names = {entry.name for entry in entries}
-        assert expected_names <= names, (
-            f"preset {preset_name!r} missing entries: {expected_names - names}"
-        )
+        assert (
+            expected_names <= names
+        ), f"preset {preset_name!r} missing entries: {expected_names - names}"
 
 
 # ---------- Lookup errors ---------------------------------------------------

@@ -19,7 +19,6 @@ from src.shared.python.motion_pipeline.sources.mediapipe_json_adapter import (
     MediaPipeJSONAdapter,
 )
 
-
 REPO_ROOT = Path(__file__).resolve().parents[4]
 GOLDEN = REPO_ROOT / "tests" / "data" / "motion_pipeline" / "golden" / "mediapipe.json"
 

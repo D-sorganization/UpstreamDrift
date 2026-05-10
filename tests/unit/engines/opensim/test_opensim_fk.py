@@ -47,9 +47,10 @@ class TestFKModule:
 
         sig = inspect.signature(compute_grip)
         params = list(sig.parameters.keys())
-        assert params == ["model", "state"], (
-            f"Expected ['model', 'state'], got {params}"
-        )
+        assert params == [
+            "model",
+            "state",
+        ], f"Expected ['model', 'state'], got {params}"
 
     def test_compute_clubhead_signature(self) -> None:
         """Verify compute_clubhead has the correct signature."""
@@ -61,9 +62,10 @@ class TestFKModule:
 
         sig = inspect.signature(compute_clubhead)
         params = list(sig.parameters.keys())
-        assert params == ["model", "state"], (
-            f"Expected ['model', 'state'], got {params}"
-        )
+        assert params == [
+            "model",
+            "state",
+        ], f"Expected ['model', 'state'], got {params}"
 
     def test_compute_skeleton_fk_signature(self) -> None:
         """Verify compute_skeleton_fk has the correct signature."""
@@ -75,9 +77,10 @@ class TestFKModule:
 
         sig = inspect.signature(compute_skeleton_fk)
         params = list(sig.parameters.keys())
-        assert params == ["model", "states"], (
-            f"Expected ['model', 'states'], got {params}"
-        )
+        assert params == [
+            "model",
+            "states",
+        ], f"Expected ['model', 'states'], got {params}"
 
     def test_rotmat_to_quat_utility(self) -> None:
         """Verify the rotation-matrix-to-quaternion utility works."""

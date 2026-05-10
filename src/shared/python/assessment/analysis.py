@@ -144,7 +144,9 @@ def grep_count(
     return count
 
 
-def classify_assessment_category(source_name: str, description: str = "") -> str:  # noqa: C901
+def classify_assessment_category(
+    source_name: str, description: str = ""
+) -> str:  # noqa: C901
     """Classify an assessment finding into a standard category name.
 
     Args:

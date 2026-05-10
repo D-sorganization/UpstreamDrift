@@ -30,7 +30,6 @@ from src.shared.python.launcher_embed import (  # noqa: E402
     EmbeddableTool,
 )
 
-
 _APPS_PKG_NAME = "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps"
 _ADAPTER_MOD_NAME = f"{_APPS_PKG_NAME}._embed_adapter"
 

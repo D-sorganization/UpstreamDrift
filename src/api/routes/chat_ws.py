@@ -16,7 +16,9 @@ router = APIRouter()
 
 
 @router.websocket("/ws/chat/{session_id}")
-async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  # noqa: C901
+async def chat_stream(
+    websocket: WebSocket, session_id: str = "new"
+) -> None:  # noqa: C901
     """Stream AI chat over WebSocket.
 
     Protocol:

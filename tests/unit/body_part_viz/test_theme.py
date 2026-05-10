@@ -10,7 +10,6 @@ import pytest
 
 from src.shared.python.body_part_viz.theme import ShapeTheme
 
-
 # ---------------------------------------------------------------------------
 # Defaults + happy paths
 # ---------------------------------------------------------------------------

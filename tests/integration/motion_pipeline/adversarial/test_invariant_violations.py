@@ -20,7 +20,6 @@ from src.shared.python.motion_pipeline.contracts import (
     SkeletonRig,
 )
 
-
 # ---------------------------------------------------------------------------
 # Invariant violation matrix
 # ---------------------------------------------------------------------------

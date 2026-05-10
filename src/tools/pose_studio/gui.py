@@ -256,17 +256,17 @@ class PoseStudioWindow(QtWidgets.QMainWindow):
 
     def _apply_pose(self, pose: CanonicalPose, *, record_history: bool) -> None:
         """Apply *pose* to controller, view, and joint panel.
-        
+
         When a live kinematics service is available, the viewport renders
         from the service's computed transforms to show engine-specific
         kinematics, constraints, or convention differences. Otherwise,
         it renders from the canonical pose via forward_kinematics.
         """
         self._engine_controller.set_pose(pose)
-        
+
         # Try to render from live service transforms if available
         service = self._engine_controller.service
-        if service is not None and hasattr(service, 'get_link_transforms'):
+        if service is not None and hasattr(service, "get_link_transforms"):
             try:
                 transforms = service.get_link_transforms()
                 self.view_3d.update_from_service_transforms(transforms)
@@ -275,7 +275,7 @@ class PoseStudioWindow(QtWidgets.QMainWindow):
                 self.view_3d.update_pose(pose)
         else:
             self.view_3d.update_pose(pose)
-        
+
         self.joint_panel.set_angles(pose.angles_full_dict_deg())
         if record_history:
             self._history.push(pose)

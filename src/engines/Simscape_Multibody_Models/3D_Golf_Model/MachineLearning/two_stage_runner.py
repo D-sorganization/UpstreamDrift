@@ -108,9 +108,11 @@ def main(argv: list[str] | None = None) -> None:  # pragma: no cover - CLI glue
     n_steps = len(desired)
     n_joints = len(body_inputs)
     q_rest = torch.as_tensor(
-        reference[body_inputs].to_numpy(dtype=np.float32)
-        if all(c in reference.columns for c in body_inputs)
-        else np.zeros((n_steps, n_joints), dtype=np.float32),
+        (
+            reference[body_inputs].to_numpy(dtype=np.float32)
+            if all(c in reference.columns for c in body_inputs)
+            else np.zeros((n_steps, n_joints), dtype=np.float32)
+        ),
         device=args.device,
     )
     if q_rest.shape[0] != n_steps:

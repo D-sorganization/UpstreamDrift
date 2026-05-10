@@ -8,7 +8,6 @@ import pytest
 
 from src.shared.python.realtime.protocol import Subscription, validate_channel
 
-
 pytestmark = pytest.mark.unit
 
 

@@ -216,11 +216,13 @@ def scale_skeleton(
     # Compute measured segment lengths from markers
     if segment_pairs:
         measured_lengths = _compute_average_segment_lengths(
-            calibration_markers
-            if isinstance(calibration_markers, MarkerTrajectory)
-            else MarkerTrajectory(
-                id="calibration",
-                frames=[markers],
+            (
+                calibration_markers
+                if isinstance(calibration_markers, MarkerTrajectory)
+                else MarkerTrajectory(
+                    id="calibration",
+                    frames=[markers],
+                )
             ),
             segment_pairs,
         )

@@ -104,13 +104,14 @@ def test_reader_ingestion(mock_c3d_file, mock_ezc3d, tmp_path) -> None:
 
         assert meta.frame_count == 10, "Assertion failed: meta.frame_count == 10"
         assert meta.frame_rate == 100.0, "Assertion failed: meta.frame_rate == 100.0"
-        assert meta.marker_labels == ["Marker1", "Marker2"], (
-            "Assertion failed: meta.marker_labels == [Marker1, Marker2]"
-        )
+        assert meta.marker_labels == [
+            "Marker1",
+            "Marker2",
+        ], "Assertion failed: meta.marker_labels == [Marker1, Marker2]"
         assert meta.analog_units == ["V"], "Assertion failed: meta.analog_units == [V]"
-        assert meta.events[0].label == "Heel Strike", (
-            "Assertion failed: meta.events[0].label == Heel Strike"
-        )
+        assert (
+            meta.events[0].label == "Heel Strike"
+        ), "Assertion failed: meta.events[0].label == Heel Strike"
 
         ctx.record_state("metadata_assertions_passed", True)
 

@@ -369,7 +369,12 @@ class MyoSuitePerturbationAnalyzer(PerturbationAnalyzerBase):
                         mujoco.mj_energyVel(mj_model, mj_data)
                         pe = float(mj_data.energy[0])
                         ke = float(mj_data.energy[1])
-                    except (ValueError, RuntimeError, AttributeError, ImportError):  # noqa: BLE001
+                    except (
+                        ValueError,
+                        RuntimeError,
+                        AttributeError,
+                        ImportError,
+                    ):  # noqa: BLE001
                         pass
 
             t_list.append(t)

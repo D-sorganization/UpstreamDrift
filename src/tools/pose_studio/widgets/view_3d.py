@@ -131,23 +131,22 @@ class View3D(QtWidgets.QWidget):
         self._update_skeleton_coords(coords)
 
     def update_from_service_transforms(
-        self, transforms: Mapping[str, tuple[np.ndarray, np.ndarray]]
+        self, transforms: Mapping[str, np.ndarray]
     ) -> None:
         """Re-draw the skeleton from service-provided link transforms.
 
         Parameters
         ----------
         transforms
-            Mapping from landmark name to ``(position, orientation)`` tuples.
-            Position is a 3-element array (x, y, z); orientation is a 3x3
-            rotation matrix (not used for landmark rendering).
+            Mapping from landmark name to a 4x4 SE(3) matrix.
+            The position is extracted from the translation column (index 3).
 
         This method renders engine-specific kinematics that may differ
         from canonical forward_kinematics due to engine conventions,
         constraints, or numerical differences.
         """
         names = list(transforms.keys())
-        coords = np.array([transforms[n][0] for n in names], dtype=float)
+        coords = np.array([transforms[n][:3, 3] for n in names], dtype=float)
         self._landmarks_order = names
         self._update_skeleton_coords(coords)
 

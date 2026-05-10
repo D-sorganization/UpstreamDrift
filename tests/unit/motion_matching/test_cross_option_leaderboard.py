@@ -94,9 +94,9 @@ def test_cross_option_leaderboard_report_generation():
         assert result.returncode == 0, f"CLI failed: {result.stderr}"
 
         # Verify leaderboard was generated
-        assert leaderboard_path.exists(), (
-            f"Leaderboard not created at {leaderboard_path}"
-        )
+        assert (
+            leaderboard_path.exists()
+        ), f"Leaderboard not created at {leaderboard_path}"
         leaderboard_text = leaderboard_path.read_text()
         assert "Cross-Option Leaderboard" in leaderboard_text
         assert "TW_ProV1" in leaderboard_text

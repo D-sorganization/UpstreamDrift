@@ -11,7 +11,6 @@ from pathlib import Path
 
 import pytest
 
-
 PIPELINE_ROOT = (
     Path(__file__).resolve().parents[4]
     / "src"
@@ -49,9 +48,9 @@ def test_no_gui_imports(py_file: Path) -> None:
     """No motion_pipeline module may import a GUI toolkit."""
     text = py_file.read_text(encoding="utf-8", errors="replace")
     for forbidden in FORBIDDEN_IMPORTS:
-        assert f"import {forbidden}" not in text and f"from {forbidden}" not in text, (
-            f"{py_file.relative_to(PIPELINE_ROOT)} imports forbidden {forbidden}"
-        )
+        assert (
+            f"import {forbidden}" not in text and f"from {forbidden}" not in text
+        ), f"{py_file.relative_to(PIPELINE_ROOT)} imports forbidden {forbidden}"
 
 
 @pytest.mark.parametrize("py_file", _all_py_files(), ids=lambda p: p.name)
@@ -59,6 +58,6 @@ def test_no_network_imports(py_file: Path) -> None:
     """The pipeline core must not make outbound network calls."""
     text = py_file.read_text(encoding="utf-8", errors="replace")
     for forbidden in NETWORK_IMPORTS:
-        assert f"import {forbidden}" not in text and f"from {forbidden}" not in text, (
-            f"{py_file.relative_to(PIPELINE_ROOT)} imports {forbidden}"
-        )
+        assert (
+            f"import {forbidden}" not in text and f"from {forbidden}" not in text
+        ), f"{py_file.relative_to(PIPELINE_ROOT)} imports {forbidden}"

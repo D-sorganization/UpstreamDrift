@@ -36,15 +36,18 @@ class TestExtractSynergies:
         result = analyzer.extract_synergies(n_synergies=1)
 
         assert result.n_synergies == 1, "Assertion failed: result.n_synergies == 1"
-        assert result.weights.shape == (n_muscles, 1), (
-            "Assertion failed: result.weights.shape == (n_muscles, 1)"
-        )
-        assert result.activations.shape == (1, n_samples), (
-            "Assertion failed: result.activations.shape == (1, n_samples)"
-        )
-        assert result.reconstructed.shape == (n_samples, n_muscles), (
-            "Assertion failed: result.reconstructed.shape == (n_samples, n_muscles)"
-        )
+        assert result.weights.shape == (
+            n_muscles,
+            1,
+        ), "Assertion failed: result.weights.shape == (n_muscles, 1)"
+        assert result.activations.shape == (
+            1,
+            n_samples,
+        ), "Assertion failed: result.activations.shape == (1, n_samples)"
+        assert result.reconstructed.shape == (
+            n_samples,
+            n_muscles,
+        ), "Assertion failed: result.reconstructed.shape == (n_samples, n_muscles)"
 
     def test_extract_multiple_synergies(self) -> None:
         """Test extracting multiple synergies."""
@@ -55,15 +58,18 @@ class TestExtractSynergies:
         result = analyzer.extract_synergies(n_synergies=3)
 
         assert result.n_synergies == 3, "Assertion failed: result.n_synergies == 3"
-        assert result.weights.shape == (5, 3), (
-            "Assertion failed: result.weights.shape == (5, 3)"
-        )
-        assert result.activations.shape == (3, 100), (
-            "Assertion failed: result.activations.shape == (3, 100)"
-        )
-        assert result.reconstructed.shape == (100, 5), (
-            "Assertion failed: result.reconstructed.shape == (100, 5)"
-        )
+        assert result.weights.shape == (
+            5,
+            3,
+        ), "Assertion failed: result.weights.shape == (5, 3)"
+        assert result.activations.shape == (
+            3,
+            100,
+        ), "Assertion failed: result.activations.shape == (3, 100)"
+        assert result.reconstructed.shape == (
+            100,
+            5,
+        ), "Assertion failed: result.reconstructed.shape == (100, 5)"
 
     def test_vaf_is_between_zero_and_one(self) -> None:
         """Test that Variance Accounted For is between 0 and 1."""
@@ -101,14 +107,14 @@ class TestExtractSynergies:
         result = analyzer.extract_synergies(n_synergies=4)
 
         # VAF should be high
-        assert result.vaf > 0.80, (
-            "High number of synergies should give good reconstruction"
-        )
+        assert (
+            result.vaf > 0.80
+        ), "High number of synergies should give good reconstruction"
 
         # Reconstruction shape should match data
-        assert result.reconstructed.shape == data.shape, (
-            "Assertion failed: result.reconstructed.shape == data.shape"
-        )
+        assert (
+            result.reconstructed.shape == data.shape
+        ), "Assertion failed: result.reconstructed.shape == data.shape"
 
     def test_weights_are_nonnegative(self) -> None:
         """Test that muscle weights are non-negative (NMF property)."""
@@ -163,9 +169,9 @@ class TestExtractSynergies:
         analyzer = MuscleSynergyAnalyzer(data, muscle_names=names)
 
         result = analyzer.extract_synergies(n_synergies=2)
-        assert result.muscle_names == names, (
-            "Assertion failed: result.muscle_names == names"
-        )
+        assert (
+            result.muscle_names == names
+        ), "Assertion failed: result.muscle_names == names"
 
     def test_synergies_with_perfect_rank_1_data(self) -> None:
         """Test synergy extraction on perfect rank-1 data."""
@@ -181,6 +187,6 @@ class TestExtractSynergies:
         result = analyzer.extract_synergies(n_synergies=1)
 
         # VAF should be very high (near perfect reconstruction)
-        assert result.vaf > 0.98, (
-            f"VAF should be near 1.0 for rank-1 data, got {result.vaf}"
-        )
+        assert (
+            result.vaf > 0.98
+        ), f"VAF should be near 1.0 for rank-1 data, got {result.vaf}"

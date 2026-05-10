@@ -57,9 +57,7 @@ def test_myosuite_unknown_extension_raises(tmp_path: Path) -> None:
 
 def test_myosuite_export_rejects_non_subject(tmp_path: Path) -> None:
     with pytest.raises(TypeError):
-        MyoSuiteAdapter().export(  # type: ignore[arg-type]
-            "nope", tmp_path / "subject"
-        )
+        MyoSuiteAdapter().export("nope", tmp_path / "subject")  # type: ignore[arg-type]
 
 
 def test_myosuite_mjcf_missing_sidecar_raises(

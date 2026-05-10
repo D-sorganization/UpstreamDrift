@@ -601,7 +601,9 @@ class URDFParser:
 
         return Material(name=name, color=color, texture=texture)
 
-    def _resolve_mesh_path(self, filename: str, base_path: Path) -> Path | None:  # noqa: C901
+    def _resolve_mesh_path(
+        self, filename: str, base_path: Path
+    ) -> Path | None:  # noqa: C901
         """
         Resolve mesh file path.
 

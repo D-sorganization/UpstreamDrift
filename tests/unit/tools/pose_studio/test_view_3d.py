@@ -40,9 +40,14 @@ def test_view_3d_update_pose_invalid_type() -> None:
 def test_view_3d_update_from_service_transforms() -> None:
     view = View3D()
 
+    pelvis_mat = np.eye(4)
+    pelvis_mat[:3, 3] = [0.0, 0.0, 1.0]
+    spine_mat = np.eye(4)
+    spine_mat[:3, 3] = [0.0, 0.0, 1.5]
+
     transforms = {
-        "pelvis": (np.array([0.0, 0.0, 1.0]), np.eye(3)),
-        "spine_top": (np.array([0.0, 0.0, 1.5]), np.eye(3)),
+        "pelvis": pelvis_mat,
+        "spine_top": spine_mat,
     }
 
     view.update_from_service_transforms(transforms)

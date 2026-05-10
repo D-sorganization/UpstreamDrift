@@ -9,7 +9,6 @@ import pytest
 
 from src.shared.python.plot_style import DataChannel
 
-
 # ---------- Construction ------------------------------------------------
 
 

@@ -17,7 +17,6 @@ from src.shared.python.body_part_viz.bindings import (
     _check_unit_quaternion,
 )
 
-
 # ---------------------------------------------------------------------------
 # BindingKind enum
 # ---------------------------------------------------------------------------

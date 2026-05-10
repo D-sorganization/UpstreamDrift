@@ -108,9 +108,9 @@ class LauncherUISetupMixin:
             self.title_bar = CustomTitleBar(self)
             self.title_bar.minimize_requested.connect(self.showMinimized)
             self.title_bar.maximize_requested.connect(
-                lambda: self.showNormal()
-                if self.isMaximized()
-                else self.showMaximized()
+                lambda: (
+                    self.showNormal() if self.isMaximized() else self.showMaximized()
+                )
             )
             self.title_bar.close_requested.connect(self.close)
             self.title_bar.move_requested.connect(self.move)
@@ -963,7 +963,9 @@ class LauncherUISetupMixin:
             url = "http://127.0.0.1:8000/api/chat/sessions"
             req = urllib.request.Request(url, method="GET")
             # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
-            with urllib.request.urlopen(req, timeout=2) as resp:  # nosec B310 - hardcoded localhost URL, no external input
+            with urllib.request.urlopen(
+                req, timeout=2
+            ) as resp:  # nosec B310 - hardcoded localhost URL, no external input
                 sessions = json.loads(resp.read().decode("utf-8"))
 
             session_id = sessions[0]["session_id"] if sessions else None

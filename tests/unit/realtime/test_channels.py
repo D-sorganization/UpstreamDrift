@@ -6,7 +6,6 @@ import pytest
 
 from src.shared.python.realtime import channels
 
-
 pytestmark = pytest.mark.unit
 
 

@@ -21,7 +21,6 @@ from src.tools.starting_pose_matcher.core import (
     read_event_header,
 )
 
-
 pytestmark = pytest.mark.unit
 
 

@@ -17,7 +17,6 @@ from src.tools.starting_pose_matcher.skeleton_provider import (
     SkeletonProvider,
 )
 
-
 pytestmark = pytest.mark.unit
 
 

@@ -23,7 +23,6 @@ from src.shared.python.motion_matching.leaderboard import (
     maybe_append_row,
 )
 
-
 REQUIRED_COLUMNS: frozenset[str] = frozenset(
     {
         "engine",

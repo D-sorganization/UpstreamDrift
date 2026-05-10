@@ -29,7 +29,6 @@ from src.tools.starting_pose_matcher.widgets.run_fit_button import (  # noqa: E4
     RunFitButton,
 )
 
-
 pytestmark = pytest.mark.unit
 
 

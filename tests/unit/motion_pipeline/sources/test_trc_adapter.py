@@ -8,7 +8,6 @@ import pytest
 
 from src.shared.python.motion_pipeline.sources.trc_adapter import TRCAdapter
 
-
 _TRC = "\n".join(
     [
         "PathFileType\t4\t(X/Y/Z)\ttiny.trc",

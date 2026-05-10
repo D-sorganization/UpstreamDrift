@@ -21,7 +21,6 @@ from src.shared.python.plot_style import (
     StaticColor,
 )
 
-
 # ---------- PlotStyleSpec ----------------------------------------------
 
 

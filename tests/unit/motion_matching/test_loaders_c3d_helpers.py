@@ -13,7 +13,6 @@ from src.shared.python.motion_matching.loaders.c3d import (
     _shaft_quaternions,
 )
 
-
 # --- _pick_marker -----------------------------------------------------------
 
 

@@ -8,7 +8,6 @@ import pytest
 
 from src.shared.python.motion_pipeline.sources.csv_adapter import CSVAdapter
 
-
 _CSV = """frame,timestamp,x_hip,y_hip,z_hip,x_knee,y_knee,z_knee
 0,0.000,0.0,1.0,0.5,0.0,0.5,0.5
 1,0.033,0.1,1.0,0.5,0.05,0.5,0.5

@@ -64,9 +64,9 @@ class TestEngineProbeHTTP:
 
         data = resp.json()
         assert "available" in data, "Assertion failed: available in data"
-        assert isinstance(data["available"], bool), (
-            "Assertion failed: isinstance(data[available], bool)"
-        )
+        assert isinstance(
+            data["available"], bool
+        ), "Assertion failed: isinstance(data[available], bool)"
 
     @pytest.mark.parametrize("engine_name", ALL_ENGINES)
     def test_probe_includes_diagnostic(
@@ -91,16 +91,18 @@ class TestEngineLoadHTTP:
         resp = client.post("/api/engines/putting_green/load")
         assert resp.status_code == 200, "Assertion failed: resp.status_code == 200"
         data = resp.json()
-        assert data.get("loaded") is True or data.get("status") == "loaded", (
-            "Assertion failed: data.get(loaded) is True or data.get(status) == loaded"
-        )
+        assert (
+            data.get("loaded") is True or data.get("status") == "loaded"
+        ), "Assertion failed: data.get(loaded) is True or data.get(status) == loaded"
 
     def test_load_nonexistent_engine(self, client: TestClient) -> None:
         """Loading a non-existent engine returns appropriate error."""
         resp = client.post("/api/engines/completely_fake/load")
-        assert resp.status_code in [400, 404, 500], (
-            "Assertion failed: resp.status_code in [400, 404, 500]"
-        )
+        assert resp.status_code in [
+            400,
+            404,
+            500,
+        ], "Assertion failed: resp.status_code in [400, 404, 500]"
 
 
 # ──────────────────────────────────────────────────────────────
@@ -118,9 +120,9 @@ class TestEngineRegistryConsistency:
         for engine_type in EngineType:
             if engine_type in skip_types:
                 continue
-            assert engine_type in LOADER_MAP, (
-                f"{engine_type.value} missing from LOADER_MAP"
-            )
+            assert (
+                engine_type in LOADER_MAP
+            ), f"{engine_type.value} missing from LOADER_MAP"
 
     def test_loader_map_values_are_callable(self) -> None:
         """All LOADER_MAP values are callable functions."""
@@ -132,12 +134,12 @@ class TestEngineRegistryConsistency:
     def test_engine_type_enum_values_are_strings(self) -> None:
         """EngineType enum values are strings (used in API routes)."""
         for engine_type in EngineType:
-            assert isinstance(engine_type.value, str), (
-                "Assertion failed: isinstance(engine_type.value, str)"
-            )
-            assert len(engine_type.value) > 0, (
-                "Assertion failed: len(engine_type.value) > 0"
-            )
+            assert isinstance(
+                engine_type.value, str
+            ), "Assertion failed: isinstance(engine_type.value, str)"
+            assert (
+                len(engine_type.value) > 0
+            ), "Assertion failed: len(engine_type.value) > 0"
 
 
 # ──────────────────────────────────────────────────────────────

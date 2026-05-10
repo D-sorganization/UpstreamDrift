@@ -10,7 +10,6 @@ from fastapi.testclient import TestClient
 
 from src.api.routes.realtime import router as realtime_router
 
-
 pytestmark = pytest.mark.unit
 
 

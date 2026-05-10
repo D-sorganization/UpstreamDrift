@@ -39,7 +39,6 @@ from src.shared.python.body_part_viz.renderers.pyqtgl_renderer import (  # noqa:
     PyQtGLRenderer,
 )
 
-
 # --- Test fixtures / helpers ---------------------------------------
 
 

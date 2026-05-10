@@ -8,7 +8,6 @@ import pytest
 
 from src.shared.python.motion_pipeline.sources.bvh_adapter import BVHAdapter
 
-
 _BVH_FIXTURE = """HIERARCHY
 ROOT Hips
 {

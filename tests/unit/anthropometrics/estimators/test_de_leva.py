@@ -25,7 +25,6 @@ from anthropometrics.estimators import DeLevaEstimator
 from anthropometrics.estimators import from_de_leva as de_leva_module
 from humanoid_character_builder.core.anthropometry import DE_LEVA_DATA
 
-
 PUBLISHED_TOL = 1e-3
 
 

@@ -54,9 +54,9 @@ class TestEdgeCases:
             try:
                 result = analyzer.extract_synergies(n_synergies=2)
                 # If it succeeds, check basic properties
-                assert result.n_synergies == 2, (
-                    "Assertion failed: result.n_synergies == 2"
-                )
+                assert (
+                    result.n_synergies == 2
+                ), "Assertion failed: result.n_synergies == 2"
             except (ValueError, RuntimeError):
                 # Some NMF implementations may fail on zero data
                 pass
@@ -77,16 +77,17 @@ class TestEdgeCases:
         data = np.random.rand(50, n_muscles)
         analyzer = MuscleSynergyAnalyzer(data)
 
-        assert analyzer.n_muscles == n_muscles, (
-            "Assertion failed: analyzer.n_muscles == n_muscles"
-        )
+        assert (
+            analyzer.n_muscles == n_muscles
+        ), "Assertion failed: analyzer.n_muscles == n_muscles"
 
         if SKLEARN_AVAILABLE:
             # Should be able to extract synergies
             result = analyzer.extract_synergies(n_synergies=5)
-            assert result.weights.shape == (n_muscles, 5), (
-                "Assertion failed: result.weights.shape == (n_muscles, 5)"
-            )
+            assert result.weights.shape == (
+                n_muscles,
+                5,
+            ), "Assertion failed: result.weights.shape == (n_muscles, 5)"
 
     def test_very_long_time_series(self) -> None:
         """Test with very long time series."""
@@ -94,12 +95,13 @@ class TestEdgeCases:
         data = np.random.rand(n_samples, 5)
         analyzer = MuscleSynergyAnalyzer(data)
 
-        assert analyzer.n_samples == n_samples, (
-            "Assertion failed: analyzer.n_samples == n_samples"
-        )
+        assert (
+            analyzer.n_samples == n_samples
+        ), "Assertion failed: analyzer.n_samples == n_samples"
 
         if SKLEARN_AVAILABLE:
             result = analyzer.extract_synergies(n_synergies=2)
-            assert result.activations.shape == (2, n_samples), (
-                "Assertion failed: result.activations.shape == (2, n_samples)"
-            )
+            assert result.activations.shape == (
+                2,
+                n_samples,
+            ), "Assertion failed: result.activations.shape == (2, n_samples)"

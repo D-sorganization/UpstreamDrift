@@ -21,7 +21,6 @@ from src.shared.python.motion_matching.club_target import (
 
 from ._fixtures import make_provenance, make_target
 
-
 # --- BallImpactState happy path ------------------------------------------
 
 

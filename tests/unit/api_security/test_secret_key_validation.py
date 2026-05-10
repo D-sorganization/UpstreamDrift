@@ -78,9 +78,9 @@ class TestSecretKeyValidation:
             importlib.reload(security)
 
             # Check it uses the environment variable
-            assert security.SECRET_KEY == "x" * 64, (
-                "Assertion failed: security.SECRET_KEY == x * 64"
-            )
+            assert (
+                security.SECRET_KEY == "x" * 64
+            ), "Assertion failed: security.SECRET_KEY == x * 64"
 
         # Restore original state (reload without env var)
         importlib.reload(security)

@@ -14,7 +14,6 @@ from src.shared.python.realtime.file_pubsub import (
     _channel_to_filename,
 )
 
-
 pytestmark = pytest.mark.unit
 
 

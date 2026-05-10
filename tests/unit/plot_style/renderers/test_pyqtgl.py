@@ -36,7 +36,6 @@ from src.shared.python.plot_style.renderers.pyqtgl import (  # noqa: E402
     PyQtGLMarkerRenderer,
 )
 
-
 # --- Test fixtures / helpers ---------------------------------------
 
 

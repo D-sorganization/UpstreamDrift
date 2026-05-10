@@ -15,7 +15,6 @@ import pytest
 
 from src.shared.python.motion_pipeline.sources import load_any
 
-
 # ---------------------------------------------------------------------------
 # MediaPipe drift: pose_landmarks vs landmarks key
 # ---------------------------------------------------------------------------

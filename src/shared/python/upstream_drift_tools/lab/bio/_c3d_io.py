@@ -449,7 +449,10 @@ def validate_export_path(path: Path) -> None:
         [
             "pytest" in str(base_dir),
             "test" in str(base_dir).lower(),
-            "/tmp/pytest" in str(path),  # nosec B108 - string comparison only, not creating a temp file
+            "/tmp/pytest"
+            in str(
+                path
+            ),  # nosec B108 - string comparison only, not creating a temp file
             "pytest" in str(path),
         ]
     )

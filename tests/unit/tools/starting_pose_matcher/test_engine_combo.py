@@ -30,7 +30,6 @@ from PyQt6.QtWidgets import QApplication, QComboBox  # noqa: E402
 from src.shared.python.motion_matching import provider_registry  # noqa: E402
 from src.tools.starting_pose_matcher import gui as gui_mod  # noqa: E402
 
-
 pytestmark = pytest.mark.unit
 
 

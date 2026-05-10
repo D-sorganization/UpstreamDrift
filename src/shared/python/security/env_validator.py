@@ -284,7 +284,9 @@ echo 'GOLF_API_SECRET_KEY=[your-generated-key]' >> .env
 """
 
 
-def validate_environment(raise_on_error: bool = True) -> EnvironmentValidationResults:  # noqa: C901
+def validate_environment(
+    raise_on_error: bool = True,
+) -> EnvironmentValidationResults:  # noqa: C901
     """Validate all environment configuration.
 
     Args:

@@ -23,49 +23,50 @@ SVG_REGISTRY = {
     "maximize": _SVG_MAXIMIZE,
 }
 
+
 class IconColorizer:
     @staticmethod
     def get_icon(name: str, color: str) -> QIcon:
         """
         Get a QIcon generated from an SVG string with the specified stroke color.
-        
+
         Preconditions:
             - name must be a registered icon string.
             - color must be a valid hex string or color name.
         """
         assert isinstance(name, str), "name must be a string"
         assert isinstance(color, str), "color must be a string"
-        
+
         svg_content = SVG_REGISTRY.get(name)
         if not svg_content:
             raise ValueError(f"Icon '{name}' is not registered in SVG_REGISTRY.")
-        
+
         colored_svg = svg_content.replace("{color}", color)
         pixmap = QPixmap()
-        pixmap.loadFromData(QByteArray(colored_svg.encode('utf-8')))
+        pixmap.loadFromData(QByteArray(colored_svg.encode("utf-8")))
         return QIcon(pixmap)
 
     @staticmethod
     def colorize_svg_file(path: str | Path, color: str) -> QIcon:
         """
         Dynamically recolor an external SVG file's fill/stroke.
-        
+
         Preconditions:
             - path must be a valid, existing file path.
             - color must be a valid hex string or color name.
         """
         assert isinstance(color, str), "color must be a string"
-        
+
         path = Path(path)
         if not path.exists():
             raise FileNotFoundError(f"SVG file not found at {path}")
-        
-        with open(path, 'r', encoding='utf-8') as f:
+
+        with open(path, "r", encoding="utf-8") as f:
             svg_content = f.read()
-            
+
         svg_content = re.sub(r'fill="[^"]+"', f'fill="{color}"', svg_content)
         svg_content = re.sub(r'stroke="[^"]+"', f'stroke="{color}"', svg_content)
-        
+
         pixmap = QPixmap()
-        pixmap.loadFromData(QByteArray(svg_content.encode('utf-8')))
+        pixmap.loadFromData(QByteArray(svg_content.encode("utf-8")))
         return QIcon(pixmap)

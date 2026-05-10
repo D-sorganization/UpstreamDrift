@@ -164,7 +164,9 @@ def _git_commit() -> str | None:
 def _make_run_dir(
     output_root: Path, scenario: str, timestamp: datetime | None = None
 ) -> Path:
-    when = timestamp or datetime.now(timezone.utc)  # noqa: UP017 - mypy stub lacks datetime.UTC
+    when = timestamp or datetime.now(
+        timezone.utc
+    )  # noqa: UP017 - mypy stub lacks datetime.UTC
     label = when.strftime("%Y%m%dT%H%M%SZ")
     run_dir = output_root / scenario / label
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -288,7 +290,9 @@ def replay(
         existing_sim_csv=existing_sim_csv,
         joint_velocity_csv=joint_velocity_csv,
     )
-    when = timestamp or datetime.now(timezone.utc)  # noqa: UP017 - mypy stub lacks datetime.UTC
+    when = timestamp or datetime.now(
+        timezone.utc
+    )  # noqa: UP017 - mypy stub lacks datetime.UTC
     run_dir = _make_run_dir(Path(output_root), inputs.scenario, when)
     sim_csv = run_dir / SIM_CSV_NAME
     joint_csv = run_dir / JOINT_VELOCITY_CSV_NAME

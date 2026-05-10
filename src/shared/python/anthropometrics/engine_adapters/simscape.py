@@ -48,7 +48,6 @@ from scipy.io import loadmat, savemat
 from .._subject_anthropometrics import SubjectAnthropometrics
 from ..segment_properties import SegmentProperties
 
-
 _SENTINEL_NONE = ""  # empty MATLAB char array marks an absent optional marker.
 
 
@@ -104,9 +103,11 @@ class SimscapeAdapter:
             ).reshape(1, -1),
             "proximal_markers": np.array(
                 [
-                    p.proximal_marker
-                    if p.proximal_marker is not None
-                    else _SENTINEL_NONE
+                    (
+                        p.proximal_marker
+                        if p.proximal_marker is not None
+                        else _SENTINEL_NONE
+                    )
                     for p in props_list
                 ],
                 dtype=object,

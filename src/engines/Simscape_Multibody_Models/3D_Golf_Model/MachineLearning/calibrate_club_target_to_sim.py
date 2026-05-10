@@ -140,9 +140,11 @@ def calibrate(
 
     output = pd.DataFrame(
         {
-            "time": measured["time"]
-            if "time" in measured.columns
-            else np.arange(len(measured))
+            "time": (
+                measured["time"]
+                if "time" in measured.columns
+                else np.arange(len(measured))
+            )
         }
     )
     for idx, column in enumerate(MODEL_POSITION):

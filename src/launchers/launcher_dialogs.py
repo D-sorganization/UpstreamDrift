@@ -16,9 +16,7 @@ from typing import TYPE_CHECKING
 
 from PyQt6.QtCore import QUrl
 from PyQt6.QtGui import QDesktopServices, QKeySequence, QShortcut
-from PyQt6.QtWidgets import (
-    QMessageBox, QDialog
-)
+from PyQt6.QtWidgets import QMessageBox, QDialog
 
 from src.launchers.launcher_constants import (
     AI_AVAILABLE,

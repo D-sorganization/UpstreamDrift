@@ -460,9 +460,7 @@ class EmbeddedHostWidget(QWidget):
     # Convenience: double-click on tab content also toggles focus mode.
     # ------------------------------------------------------------------
 
-    def mouseDoubleClickEvent(  # noqa: N802
-        self, event: QMouseEvent
-    ) -> None:
+    def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:  # noqa: N802
         """Forward double-click on host chrome to focus-mode toggle."""
         # We intentionally only react to double-clicks that bubble up to
         # the host widget itself; tab-bar double-clicks are handled via

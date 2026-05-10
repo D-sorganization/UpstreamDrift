@@ -23,7 +23,6 @@ from src.tools.freemocap_sidecar import (
 )
 from src.tools.freemocap_sidecar.run_freemocap import main
 
-
 # ---------------------------------------------------------------------------
 # Dry-run / stub path
 # ---------------------------------------------------------------------------

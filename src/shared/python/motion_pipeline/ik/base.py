@@ -190,7 +190,7 @@ class BaseIKSolver(ABC):
                         angle = min(angle, limit.upper)
                 clamped.append(angle)
                 dof_idx += 1
-                
+
         # If there are any remaining elements in q (e.g. root transform), keep them as is
         while dof_idx < len(q):
             clamped.append(q[dof_idx])

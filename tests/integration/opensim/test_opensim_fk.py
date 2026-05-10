@@ -281,9 +281,9 @@ class TestForwardKinematicsLive:
         model, state = golf_humanoid
         grip_pos, _ = extract_grip_pose(state, model)
         head_pos, _ = extract_clubhead_pose(state, model)
-        assert head_pos[1] < grip_pos[1], (
-            f"Expected clubhead Y < grip Y; got grip={grip_pos}, clubhead={head_pos}"
-        )
+        assert (
+            head_pos[1] < grip_pos[1]
+        ), f"Expected clubhead Y < grip Y; got grip={grip_pos}, clubhead={head_pos}"
 
     def test_extract_full_pose_contains_all_landmarks(
         self, golf_humanoid: tuple[object, object]

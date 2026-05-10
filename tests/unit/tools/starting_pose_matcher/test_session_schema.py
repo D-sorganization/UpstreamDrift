@@ -24,7 +24,6 @@ from src.tools.starting_pose_matcher.session_schema import (
     serialize_data_sources,
 )
 
-
 pytestmark = pytest.mark.unit
 
 

@@ -30,7 +30,9 @@ class TestSecurityManagerVerifyPassword:
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
-            password = "correct_password"  # nosec B105 - test fixture, not a real credential
+            password = (
+                "correct_password"  # nosec B105 - test fixture, not a real credential
+            )
             hashed = manager.hash_password(password)
             assert manager.verify_password(password, hashed) is True
 

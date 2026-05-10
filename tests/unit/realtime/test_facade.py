@@ -15,7 +15,6 @@ from src.shared.python.realtime import (
     validate_channel,
 )
 
-
 pytestmark = pytest.mark.unit
 
 

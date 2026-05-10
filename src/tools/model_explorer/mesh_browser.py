@@ -639,7 +639,9 @@ class MeshBrowserWidget(QWidget):
         config = dialog.get_configuration()
         self._apply_mesh_copy(mesh, config)
 
-    def _apply_mesh_copy(self, mesh: MeshReference, config: dict[str, Any]) -> None:  # noqa: C901
+    def _apply_mesh_copy(
+        self, mesh: MeshReference, config: dict[str, Any]
+    ) -> None:  # noqa: C901
         """Apply the mesh copy to the target URDF."""
         if not (mesh is not None):
             raise ValueError("mesh must be provided")

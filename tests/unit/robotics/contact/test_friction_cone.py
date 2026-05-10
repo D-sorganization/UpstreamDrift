@@ -56,9 +56,9 @@ class TestFrictionCone:
         cone = FrictionCone(mu=0.5, normal=np.array([0, 0, 1]))
 
         # Pure normal force
-        assert cone.contains(np.array([0, 0, 100])) is True, (
-            "Assertion failed: cone.contains(np.array([0, 0, 100])) is True"
-        )
+        assert (
+            cone.contains(np.array([0, 0, 100])) is True
+        ), "Assertion failed: cone.contains(np.array([0, 0, 100])) is True"
 
         # Force within friction limit
         assert (
@@ -75,18 +75,19 @@ class TestFrictionCone:
         )  # 60 > 0.5 * 100, "Assertion failed: cone.contains(np.array([60, 0, 100])) is False  # 60 > 0.5 * 100"
 
         # Pulling force
-        assert cone.contains(np.array([0, 0, -100])) is False, (
-            "Assertion failed: cone.contains(np.array([0, 0, -100])) is False"
-        )
+        assert (
+            cone.contains(np.array([0, 0, -100])) is False
+        ), "Assertion failed: cone.contains(np.array([0, 0, -100])) is False"
 
     def test_get_generators_shape(self) -> None:
         """Test get_generators returns correct shape."""
         cone = FrictionCone(mu=0.5, normal=np.array([0, 0, 1]), num_sides=8)
         generators = cone.get_generators()
 
-        assert generators.shape == (3, 8), (
-            "Assertion failed: generators.shape == (3, 8)"
-        )
+        assert generators.shape == (
+            3,
+            8,
+        ), "Assertion failed: generators.shape == (3, 8)"
 
     def test_generators_on_cone_surface(self) -> None:
         """Test that generators lie on friction cone surface."""

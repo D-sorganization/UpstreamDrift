@@ -27,7 +27,6 @@ from src.tools.starting_pose_matcher.live_view_controller import (
     _maybe_xyz,
 )
 
-
 pytestmark = pytest.mark.unit
 
 

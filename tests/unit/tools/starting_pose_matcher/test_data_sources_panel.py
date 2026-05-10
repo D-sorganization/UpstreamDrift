@@ -57,7 +57,6 @@ from src.tools.starting_pose_matcher.session_schema import (  # noqa: E402
     DataSourcesBlock,
 )
 
-
 pytestmark = pytest.mark.unit
 
 

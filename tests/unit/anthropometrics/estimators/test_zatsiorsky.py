@@ -17,7 +17,6 @@ from anthropometrics import Estimator, SubjectAnthropometrics
 from anthropometrics.estimators import ZatsiorskyEstimator
 from anthropometrics.estimators.from_zatsiorsky import _DEFAULT_RATIO_FILE
 
-
 PUBLISHED_TOL = 1e-3
 
 

@@ -53,9 +53,9 @@ class TestGetAvailableExportFormats:
         formats = get_available_export_formats()
         for name, info in formats.items():
             assert "extension" in info, f"Format '{name}' missing extension"
-            assert info["extension"].startswith("."), (
-                f"Extension for '{name}' should start with '.'"
-            )
+            assert info["extension"].startswith(
+                "."
+            ), f"Extension for '{name}' should start with '.'"
 
     def test_each_format_has_name(self) -> None:
         formats = get_available_export_formats()

@@ -17,7 +17,6 @@ import pytest
 
 from src.launchers.assets import generate_tile_images, optimize_assets
 
-
 # --- generate_tile_images.py ------------------------------------------------
 
 

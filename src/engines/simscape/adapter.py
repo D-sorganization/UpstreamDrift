@@ -677,7 +677,9 @@ class SimscapeAdapter:
         lambda self, body_name: isinstance(body_name, str) and body_name != "",
         "body_name must be a non-empty string",
     )
-    def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:  # noqa: ARG002
+    def compute_jacobian(
+        self, body_name: str
+    ) -> dict[str, np.ndarray] | None:  # noqa: ARG002
         """Body Jacobian — returns ``None`` for unknown bodies (skeleton)."""
         self._lifecycle.require(
             AdapterState.LOADED,
@@ -700,7 +702,9 @@ class SimscapeAdapter:
         lambda self, tau: isinstance(tau, np.ndarray) and tau.ndim == 1,
         "tau must be a 1-D numpy array",
     )
-    def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:  # noqa: ARG002
+    def compute_control_acceleration(
+        self, tau: np.ndarray
+    ) -> np.ndarray:  # noqa: ARG002
         """Section F control acceleration — deferred to #4006."""
         self._lifecycle.require(
             AdapterState.LOADED,

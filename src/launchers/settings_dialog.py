@@ -669,6 +669,7 @@ class SettingsDialog(QDialog):
 
         class DiagnosticsWorker(QThread):
             """Background worker for running diagnostics."""
+
             finished = pyqtSignal(dict)
             error = pyqtSignal(str)
 
@@ -685,8 +686,12 @@ class SettingsDialog(QDialog):
 
                     if self._launcher and hasattr(self._launcher, "available_models"):
                         results["runtime_state"] = {
-                            "available_models_count": len(self._launcher.available_models),
-                            "available_model_ids": list(self._launcher.available_models.keys()),
+                            "available_models_count": len(
+                                self._launcher.available_models
+                            ),
+                            "available_model_ids": list(
+                                self._launcher.available_models.keys()
+                            ),
                             "model_order_count": len(self._launcher.model_order),
                             "model_order": self._launcher.model_order,
                             "model_cards_count": len(self._launcher.model_cards),

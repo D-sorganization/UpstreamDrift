@@ -62,7 +62,6 @@ from src.shared.python.motion_matching.provider_registry import (
     get_provider as registry_get_provider,
 )
 
-
 # --------------------------------------------------------------------------
 # Shared fixtures
 # --------------------------------------------------------------------------
