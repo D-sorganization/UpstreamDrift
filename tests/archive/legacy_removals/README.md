@@ -20,7 +20,7 @@ cat P1_dead_skips_removed.patch
 To fully restore the deleted tests from a patch:
 
 ```bash
-git apply R P1_dead_skips_removed.patch
+git apply -R P1_dead_skips_removed.patch
 ```
 
-(Note: Using `git apply -R` reverses the deletion patch, effectively restoring the code).
+(Note: The `-R`/`--reverse` flag reverses the deletion patch, effectively restoring the code).

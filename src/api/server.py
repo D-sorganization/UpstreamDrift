@@ -54,7 +54,7 @@ from .services.simulation_service import SimulationService
 from .task_manager import TaskManager
 from .utils.tracing import RequestTracer
 from .versioning import get_app_version
-from .routes import chat_ws, simulation_ws
+from .routes import chat_ws, realtime as realtime_route, simulation_ws
 
 setup_logging()
 logger = get_logger(__name__)
@@ -281,6 +281,12 @@ app.include_router(chat_ws.router, prefix=API_PREFIX)
 app.include_router(simulation_ws.router, prefix=API_PREFIX)
 app.include_router(chat_ws.router, prefix="")
 app.include_router(simulation_ws.router, prefix="")
+
+# Realtime IPC layer (issue #4997) — combined HTTP + WS endpoints under
+# /realtime; mounted at root so cross-process clients (WSPubSub) can use the
+# canonical "/realtime/publish" and "/realtime/subscribe" paths.
+app.include_router(realtime_route.router, prefix="")
+app.include_router(realtime_route.router, prefix=API_PREFIX)
 
 
 if __name__ == "__main__":

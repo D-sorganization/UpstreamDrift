@@ -50,6 +50,7 @@ _EXCLUDED_MODULES: frozenset[str] = frozenset(
     {
         "chat_ws",
         "simulation_ws",
+        "realtime",
     }
 )
 
