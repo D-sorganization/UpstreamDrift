@@ -20,14 +20,59 @@ import pytest
 
 # On Windows, missing PyQt6 DLLs can cause a fatal crash.
 # Mock them immediately before any imports happen.
-import sys
-from unittest.mock import MagicMock
-if 'PyQt6' not in sys.modules:
-    sys.modules['PyQt6'] = MagicMock()
-    sys.modules['PyQt6.QtCore'] = MagicMock()
-    sys.modules['PyQt6.QtGui'] = MagicMock()
-    sys.modules['PyQt6.QtWidgets'] = MagicMock()
-    sys.modules['PyQt6.QtWebEngineWidgets'] = MagicMock()
+if "PyQt6" not in sys.modules:
+    mock_core = MagicMock()
+    mock_core.QLibraryInfo.version.return_value.toString.return_value = "6.6.0"
+    mock_core.QLibraryInfo.version.return_value.segments.return_value = (6, 6, 0)
+    mock_core.PYQT_VERSION_STR = "6.6.0"
+    mock_core.PYQT_VERSION = 0x060600
+    mock_core.__version__ = "6.6.0"
+    mock_core.qVersion.return_value = "6.6.0"
+
+    pyqt_mock = MagicMock()
+    pyqt_mock.QtCore = mock_core
+    pyqt_mock.QtGui = MagicMock()
+
+    class DummyWidget:
+        def __init__(self, *args, **kwargs):
+            self.__dict__["_mocks"] = {}
+
+        def __getattr__(self, name):
+            if name not in self.__dict__["_mocks"]:
+                self.__dict__["_mocks"][name] = MagicMock()
+            return self.__dict__["_mocks"][name]
+
+        @classmethod
+        def instance(cls):
+            return MagicMock()
+
+    qt_widgets = MagicMock()
+    qt_widgets.QWidget = DummyWidget
+    qt_widgets.QApplication = DummyWidget
+    qt_widgets.QLabel = DummyWidget
+    qt_widgets.QComboBox = DummyWidget
+    qt_widgets.QToolBar = DummyWidget
+    qt_widgets.QDockWidget = DummyWidget
+    qt_widgets.QSplitter = DummyWidget
+    qt_widgets.QScrollArea = DummyWidget
+    qt_widgets.QToolButton = DummyWidget
+    qt_widgets.QDialog = DummyWidget
+    qt_widgets.QVBoxLayout = DummyWidget
+    qt_widgets.QHBoxLayout = DummyWidget
+    qt_widgets.QGridLayout = DummyWidget
+    qt_widgets.QFrame = DummyWidget
+    qt_widgets.QPushButton = DummyWidget
+    qt_widgets.QDoubleSpinBox = DummyWidget
+    qt_widgets.QSlider = DummyWidget
+    qt_widgets.QGroupBox = DummyWidget
+    pyqt_mock.QtWidgets = qt_widgets
+    pyqt_mock.QtWebEngineWidgets = MagicMock()
+    sys.modules["PyQt6"] = pyqt_mock
+    sys.modules["PyQt6.QtCore"] = mock_core
+    sys.modules["PyQt6.QtGui"] = pyqt_mock.QtGui
+    sys.modules["PyQt6.QtWidgets"] = pyqt_mock.QtWidgets
+    sys.modules["PyQt6.QtWebEngineWidgets"] = pyqt_mock.QtWebEngineWidgets
+
 
 @dataclass(frozen=True)
 class OptionalCollectionRule:
