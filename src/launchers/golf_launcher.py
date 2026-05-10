@@ -143,9 +143,10 @@ class GolfLauncher(
         self._load_window_icon()
         self._init_state(startup_results)
         self._init_managers()
-        self._init_registry(startup_results)
-        self._init_engine_manager(startup_results)
+        # Skip heavy initialization in loading mode; async worker will provide results
         if not self.loading:
+            self._init_registry(startup_results)
+            self._init_engine_manager(startup_results)
             self._build_available_models()
 
         self._init_layout_manager()
