@@ -1,8 +1,10 @@
 """3D skeleton viewport using matplotlib's QtAgg canvas.
 
-Renders the canonical skeleton derived from :func:`forward_kinematics`
-applied to the current :class:`CanonicalPose`.  Click-to-highlight is
-supported for v1; drag/IK is deferred to a follow-up issue.
+Renders the skeleton from either:
+1. Live kinematics service transforms (when available), or
+2. Canonical forward kinematics (fallback)
+
+Click-to-highlight is supported for v1; drag/IK is deferred to a follow-up issue.
 
 Why matplotlib instead of :class:`PyQtGLRenderer` from
 :mod:`body_part_viz`?  The body_part_viz renderer expects fitted shape
@@ -28,6 +30,7 @@ from src.shared.python.motion_matching.diagnostics.forward_kinematics import (
     forward_kinematics,
 )
 from src.shared.python.pose_interchange.canonical import CanonicalPose
+from src.shared.python.pose_interchange.live_kinematics import LiveKinematicsService
 
 logger = get_logger(__name__)
 
@@ -99,6 +102,7 @@ class View3D(QtWidgets.QWidget):
         self._bone_lines = cast(Any, self._bone_lines)
         self._highlighted_landmark: str | None = None
         self._landmarks_order: list[str] = []
+        self._service: LiveKinematicsService | None = None
 
         self._canvas.mpl_connect("pick_event", self._on_pick)
 
@@ -107,11 +111,29 @@ class View3D(QtWidgets.QWidget):
 
     # ---- public surface ------------------------------------------------
 
-    def update_pose(self, pose: CanonicalPose | None) -> None:
+    def set_service(self, service: LiveKinematicsService | None) -> None:
+        """Set the live kinematics service for engine-specific rendering.
+
+        When a service is set, :meth:`update_pose` will render using the
+        service's link transforms instead of canonical forward kinematics,
+        allowing engine-specific kinematics and constraints to be visible.
+        """
+        self._service = service
+
+    def update_pose(self, pose: CanonicalPose | None, *, use_service: bool = True) -> None:
         """Re-draw the skeleton for *pose*.
 
         ``None`` clears to the all-zero canonical pose, which is the
         T-pose at the world origin.
+
+        Parameters
+        ----------
+        pose
+            The canonical pose to render, or ``None`` for the zero pose.
+        use_service
+            If ``True`` and a live service is available, render using the
+            service's link transforms (showing engine-specific kinematics).
+            If ``False``, always use canonical forward kinematics.
         """
         angles: Mapping[str, float]
         if pose is None:
@@ -122,6 +144,20 @@ class View3D(QtWidgets.QWidget):
             raise TypeError(
                 f"pose must be a CanonicalPose or None, got {type(pose).__name__}"
             )
+
+        # Try to render from service transforms if available and requested.
+        # This shows engine-specific kinematics, constraints, and convention
+        # differences that canonical forward kinematics cannot show.
+        if use_service and self._service is not None:
+            try:
+                self._service.set_pose(pose) if pose else None
+                transforms = self._service.get_link_transforms()
+                self._render_from_transforms(transforms)
+                self._canvas.draw_idle()
+                return
+            except (NotImplementedError, RuntimeError, ValueError) as exc:
+                # Fall back to canonical forward kinematics if service fails.
+                logger.debug("Service render failed, using FK fallback: %s", exc)
 
         skeleton = forward_kinematics(angles)
         names = list(skeleton.points.keys())
@@ -188,6 +224,80 @@ class View3D(QtWidgets.QWidget):
         return self._highlighted_landmark
 
     # ---- internals -----------------------------------------------------
+
+    def _render_from_transforms(
+        self, transforms: dict[str, npt.NDArray[np.float64]]
+    ) -> None:
+        """Render skeleton from link transforms (service-based rendering).
+
+        Parameters
+        ----------
+        transforms
+            Mapping of link name to 4x4 SE(3) transform matrix.
+        """
+        # Extract landmark positions from transforms.
+        # Map canonical landmark names to expected transform keys.
+        landmark_keys = {
+            "pelvis": "pelvis",
+            "spine_top": "spine_top",
+            "torso_top": "torso_top",
+            "l_shoulder": "l_shoulder",
+            "r_shoulder": "r_shoulder",
+            "l_elbow": "l_elbow",
+            "r_elbow": "r_elbow",
+            "l_wrist": "l_wrist",
+            "r_wrist": "r_wrist",
+            "l_hand": "l_hand",
+            "r_hand": "r_hand",
+            "butt": "butt",
+            "clubhead": "clubhead",
+        }
+        names: list[str] = []
+        positions: list[npt.NDArray[np.float64]] = []
+        for lm_name, key in landmark_keys.items():
+            if key in transforms:
+                mat = transforms[key]
+                pos = mat[:3, 3]  # Extract translation from SE(3)
+                names.append(lm_name)
+                positions.append(pos)
+
+        if not positions:
+            # No transforms available, fall back to empty render.
+            self._landmarks_order = []
+            self._scatter._offsets3d = ([], [], [])
+            self._bone_lines.set_data_3d([], [], [])
+            return
+
+        coords = np.array(positions, dtype=float)
+        self._landmarks_order = names
+
+        # Update scatter
+        self._scatter._offsets3d = (coords[:, 0], coords[:, 1], coords[:, 2])
+
+        # Update bones
+        bone_x: list[float] = []
+        bone_y: list[float] = []
+        bone_z: list[float] = []
+        for a, b in _BONES:
+            if a in names and b in names:
+                idx_a = names.index(a)
+                idx_b = names.index(b)
+                pa = positions[idx_a]
+                pb = positions[idx_b]
+                bone_x.extend([float(pa[0]), float(pb[0]), np.nan])
+                bone_y.extend([float(pa[1]), float(pb[1]), np.nan])
+                bone_z.extend([float(pa[2]), float(pb[2]), np.nan])
+        self._bone_lines.set_data_3d(bone_x, bone_y, bone_z)
+
+        # Auto-fit axes around the skeleton with a small margin.
+        mins = coords.min(axis=0)
+        maxs = coords.max(axis=0)
+        spans = np.maximum(maxs - mins, 0.5)
+        half = float(spans.max() * 0.6)
+        cx, cy, cz = (mins + maxs) / 2.0
+        self._ax.set_xlim(cx - half, cx + half)
+        self._ax.set_ylim(cy - half, cy + half)
+        self._ax.set_zlim(cz - half, cz + half)
 
     def _on_pick(self, event: object) -> None:
         artist = getattr(event, "artist", None)
