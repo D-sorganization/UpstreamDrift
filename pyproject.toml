@@ -415,8 +415,8 @@ omit = [
 # Coverage floors by risk tier (issue #3939):
 #   - 85% for API routes, engine adapters, task management (production-critical)
 #   - 70% for shared utilities, services (important but lower risk)
-#   - 55% overall floor (raised from 45% to catch regressions)
-fail_under = 55
+#   - 65% overall floor (raised from 55% per issue #4929)
+fail_under = 65
 show_missing = true
 skip_empty = true
 precision = 1
