@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 import mujoco
 import numpy as np
 from scipy.linalg import lstsq
@@ -23,6 +25,16 @@ class _InverseDynamicsSolverMixin:
     kinematic_analyzer: KinematicForceAnalyzer
     _perturb_data: mujoco.MjData
     _use_flat_jacobian: bool
+    _jacp: np.ndarray | None
+    _jacr: np.ndarray | None
+    _jacp_flat: np.ndarray | None
+    _jacr_flat: np.ndarray | None
+    has_constraints: bool
+    compute_required_torques: Any
+    _compute_gravity_force: Any
+    _compute_coriolis_force: Any
+    _compute_control_force: Any
+    _solve_component_accelerations: Any
 
     def compute_torques_with_posture(
         self,
