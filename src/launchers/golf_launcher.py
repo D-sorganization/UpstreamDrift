@@ -28,6 +28,7 @@ from PyQt6.QtGui import QCloseEvent, QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox
 
 from src.launchers.docker_manager import DockerLauncher
+from src.launchers.embedded_tool_bootstrap import bootstrap_embeddable_tools
 from src.launchers.launcher_constants import (
     CONFIG_DIR,
     DOCKER_STAGES,
@@ -212,6 +213,11 @@ class GolfLauncher(
         self.model_handler_registry = ModelHandlerRegistry()
         self.docker_launcher = DockerLauncher(REPOS_ROOT)
         self.running_processes = self.process_manager.running_processes
+
+        # Bootstrap embeddable tools registry (fixes #5049)
+        # This ensures EMBEDDABLE_TOOL_REGISTRY is populated before any
+        # context menus or embedded host widgets are created
+        bootstrap_embeddable_tools()
 
     def _init_registry(self, startup_results: StartupResults | None) -> None:
         if startup_results and startup_results.registry is not None:
