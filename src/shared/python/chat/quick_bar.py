@@ -314,12 +314,16 @@ class ChatLauncherMixin:
         chat_toolbar = QToolBar("AI Chat")
         chat_toolbar.setMovable(False)
         chat_toolbar.addWidget(self._chat_quick_bar)
-        self.addToolBar(Qt.ToolBarArea.TopToolBarArea, chat_toolbar)
+
+        import typing
+
+        main_window = typing.cast(QMainWindow, self)
+        main_window.addToolBar(Qt.ToolBarArea.TopToolBarArea, chat_toolbar)
 
         # Keyboard shortcut (Ctrl+Shift+A)
         from PyQt6.QtGui import QKeySequence, QShortcut
 
-        shortcut = QShortcut(QKeySequence("Ctrl+Shift+A"), self)
+        shortcut = QShortcut(QKeySequence("Ctrl+Shift+A"), main_window)
         shortcut.activated.connect(self._chat_quick_bar.focus_input)
 
         # Auto-show dock if configured
@@ -339,12 +343,17 @@ class ChatLauncherMixin:
 
         # Lazy import to avoid circular deps
         from chat.chat_dock_widget import ChatDockWidget
+        import typing
+
+        main_window = typing.cast(QMainWindow, self)
 
         self._chat_dock = ChatDockWidget(
             app_context=app_context,
             app_name=app_name,
             server_url=server_url,
-            parent=self,
+            parent=main_window,
         )
-        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self._chat_dock)
+        main_window.addDockWidget(
+            Qt.DockWidgetArea.RightDockWidgetArea, self._chat_dock
+        )
         self._chat_dock.show()
