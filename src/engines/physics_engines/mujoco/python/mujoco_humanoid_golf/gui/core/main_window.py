@@ -163,7 +163,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         self.status_timer.timeout.connect(self._update_status_bar)
         self.status_timer.start(200)
 
-        if hasattr(self.sim_widget, "timer"):
+        if hasattr(self.sim_widget, "connect_timer"):
             self.sim_widget.connect_timer(self.live_plot.update_plot)
 
     @property

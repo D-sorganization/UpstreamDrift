@@ -13,6 +13,7 @@ models:
       category: "physics_engine"
       logo: "assets/mujoco.png"
       status: "ready"
+      default_launch: "tab"
 
   - id: "drake_golf"
     name: "Drake"
