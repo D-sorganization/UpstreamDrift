@@ -30,36 +30,38 @@ from .ui.tabs.segments_tab import SegmentsTab
 from .ui.tabs.viewer_3d_tab import Viewer3DTab
 
 # ---------------------------------------------------------------------------
-# Main Window
+# Embeddable Main Widget
 # ---------------------------------------------------------------------------
 
 
-class C3DViewerMainWindow(QtWidgets.QMainWindow):
-    """Main window for the C3D motion analysis viewer application."""
+class MainWidget(QtWidgets.QWidget):
+    """Embeddable C3D Motion Analysis viewer widget.
 
-    def __init__(self) -> None:
-        """Initialize the main window and create UI components."""
-        super().__init__()
+    Hosts the tabbed C3D analysis UI without requiring a top-level
+    :class:`QMainWindow`. Used by :class:`C3DViewerMainWindow` (standalone
+    shell) and by the launcher embed adapter (tab/dock host).
 
-        self.setWindowTitle("C3D Motion Analysis Viewer")
-        self.resize(1400, 900)
+    The widget owns the model + async loader thread; the embed adapter's
+    :meth:`cleanup` is responsible for releasing matplotlib figures held
+    by the various plot tabs.
+    """
+
+    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
+        """Initialize the embeddable widget and create UI components."""
+        super().__init__(parent)
         self.setAcceptDrops(True)
 
         self.model: C3DDataModel | None = None
         self._loader_thread: C3DLoaderThread | None = None
 
         self._create_actions()
-        self._create_menus()
         self._create_central_widget()
         self._update_ui_state(False)
-
-        if (sb := self.statusBar()) is not None:
-            sb.showMessage("Ready")
 
     # ----------------------------- UI setup --------------------------------
 
     def _create_actions(self) -> None:
-        """Create menu actions for the application."""
+        """Create QActions for menu wiring (host-agnostic)."""
         self.action_open = QtGui.QAction("Open &C3D…", self)
         self.action_open.setShortcut("Ctrl+O")
         self.action_open.setStatusTip("Open a C3D file for analysis")
@@ -74,33 +76,12 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         # Backwards-compatible alias for any existing test references.
         self.action_export_csv = self.action_export_markers
 
-        self.action_exit = QtGui.QAction("E&xit", self)
-        self.action_exit.setShortcut("Ctrl+Q")
-        self.action_exit.triggered.connect(self.close)
-
         self.action_about = QtGui.QAction("&About", self)
         self.action_about.triggered.connect(self.show_about_dialog)
 
-    def _create_menus(self) -> None:
-        """Create menu bar and menus."""
-        menubar = self.menuBar()
-        if menubar is None:
-            return
-
-        file_menu = menubar.addMenu("&File")
-        if file_menu is not None:
-            file_menu.addAction(self.action_open)
-            file_menu.addAction(self.action_export_markers)
-            file_menu.addSeparator()
-            file_menu.addAction(self.action_exit)
-
-        help_menu = menubar.addMenu("&Help")
-        if help_menu is not None:
-            help_menu.addAction(self.action_about)
-
     def _create_central_widget(self) -> None:
-        """Create the central tab widget with all tabs."""
-        self.tabs = QtWidgets.QTabWidget()
+        """Create the tab widget with all analysis tabs."""
+        self.tabs = QtWidgets.QTabWidget(self)
 
         self.overview_tab = OverviewTab()
         self.marker_plot_tab = MarkerPlotTab()
@@ -131,7 +112,9 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         self.tabs.addTab(self.force_plot_tab, "Force Plates")
         self.tabs.setTabToolTip(6, "Force plate GRF and COP visualization")
 
-        self.setCentralWidget(self.tabs)
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.tabs)
 
     # ---------------------- UI state management ----------------------------
 
@@ -139,13 +122,22 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         """Update the enabled state of UI widgets after loading a model."""
         if not (enabled is not None):
             raise ValueError("enabled must be provided")
-        if not (enabled is not None):
-            raise ValueError("enabled must be provided")
-        widgets = [
-            self.tabs,
-        ]
+        widgets = [self.tabs]
         for w in widgets:
             w.setEnabled(enabled)
+
+    def _status_message(self, text: str) -> None:
+        """Forward a status message to the host window's status bar, if any.
+
+        Walks the parent chain looking for a :class:`QMainWindow`; if found
+        and it has a non-``None`` status bar, posts ``text`` to it. Embedded
+        hosts without a status bar simply drop the message.
+        """
+        host = self.window()
+        if isinstance(host, QtWidgets.QMainWindow):
+            sb = host.statusBar()
+            if sb is not None:
+                sb.showMessage(text)
 
     def show_about_dialog(self) -> None:
         """Show the about dialog."""
@@ -162,8 +154,6 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         """Handle drag enter event."""
         if not (event is not None):
             raise ValueError("event must be provided")
-        if not (event is not None):
-            raise ValueError("event must be provided")
         if event.mimeData().hasUrls():
             urls = event.mimeData().urls()
             if len(urls) == 1:
@@ -177,8 +167,6 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         """Handle drop event."""
         if not (event is not None):
             raise ValueError("event must be provided")
-        if not (event is not None):
-            raise ValueError("event must be provided")
         urls = event.mimeData().urls()
         if urls:
             path = urls[0].toLocalFile()
@@ -188,8 +176,6 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         """Load a C3D file from the given path."""
         # Security validation (F-004)
         # shared module import must be available
-        if not (path is not None):
-            raise ValueError("path must be provided")
         if not (path is not None):
             raise ValueError("path must be provided")
         from shared.python.security.security_utils import validate_path
@@ -207,8 +193,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, "Security Warning", str(e))
             return
 
-        if (sb := self.statusBar()) is not None:
-            sb.showMessage(f"Loading {os.path.basename(path)}... (Async)")
+        self._status_message(f"Loading {os.path.basename(path)}... (Async)")
 
         # Ensure single cursor override
         QtWidgets.QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
@@ -238,22 +223,16 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         """Handle successful model load."""
         if not (model is not None):
             raise ValueError("model must be provided")
-        if not (model is not None):
-            raise ValueError("model must be provided")
         self.model = model
         self._populate_ui_with_model()
         self._update_ui_state(True)
-        if (sb := self.statusBar()) is not None:
-            sb.showMessage(f"Loaded {os.path.basename(model.filepath)} successfully.")
+        self._status_message(f"Loaded {os.path.basename(model.filepath)} successfully.")
 
     def _on_load_failure(self, error_msg: str) -> None:
         """Handle load failure."""
         if not (error_msg is not None):
             raise ValueError("error_msg must be provided")
-        if not (error_msg is not None):
-            raise ValueError("error_msg must be provided")
-        if (sb := self.statusBar()) is not None:
-            sb.showMessage("Error loading file.")
+        self._status_message("Error loading file.")
 
         QtWidgets.QMessageBox.critical(
             self,
@@ -312,8 +291,175 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
                 self, "Export failed", f"Could not export markers:\n{e}"
             )
             return
+        self._status_message(f"Exported markers to {os.path.basename(str(written))}")
+
+
+# ---------------------------------------------------------------------------
+# Main Window — thin shell hosting :class:`MainWidget`.
+# ---------------------------------------------------------------------------
+
+
+class C3DViewerMainWindow(QtWidgets.QMainWindow):
+    """Standalone main window for the C3D motion analysis viewer.
+
+    Wraps :class:`MainWidget` with a menu bar, a status bar, and the
+    standalone-app window chrome. The launcher embeds :class:`MainWidget`
+    directly via the embed adapter and skips this shell.
+    """
+
+    def __init__(self) -> None:
+        """Initialize the main window and create UI components."""
+        super().__init__()
+
+        self.setWindowTitle("C3D Motion Analysis Viewer")
+        self.resize(1400, 900)
+        # Existing test contract: ``window.acceptDrops()`` returns ``True``
+        # and ``window.dropEvent`` forwards to the loader. The actual DnD
+        # handling lives on :class:`MainWidget`; we mirror the flag and
+        # forward the events below to keep the standalone shell usable.
+        self.setAcceptDrops(True)
+
+        self._main_widget = MainWidget(self)
+        self.setCentralWidget(self._main_widget)
+
+        self._create_menus()
+
+        self.action_exit = QtGui.QAction("E&xit", self)
+        self.action_exit.setShortcut("Ctrl+Q")
+        self.action_exit.triggered.connect(self.close)
+        # Add Exit to the File menu after construction to keep the
+        # MainWidget host-agnostic (it does not own a File menu).
+        if hasattr(self, "_file_menu") and self._file_menu is not None:
+            self._file_menu.addSeparator()
+            self._file_menu.addAction(self.action_exit)
+
         if (sb := self.statusBar()) is not None:
-            sb.showMessage(f"Exported markers to {os.path.basename(str(written))}")
+            sb.showMessage("Ready")
+
+    # ----------------------------- UI setup --------------------------------
+
+    def _create_menus(self) -> None:
+        """Create menu bar wired to :class:`MainWidget`'s actions."""
+        menubar = self.menuBar()
+        if menubar is None:
+            self._file_menu = None
+            return
+
+        self._file_menu = menubar.addMenu("&File")
+        if self._file_menu is not None:
+            self._file_menu.addAction(self._main_widget.action_open)
+            self._file_menu.addAction(self._main_widget.action_export_markers)
+
+        help_menu = menubar.addMenu("&Help")
+        if help_menu is not None:
+            help_menu.addAction(self._main_widget.action_about)
+
+    # --------------- Backwards-compatible attribute proxies ----------------
+
+    # Existing tests and external callers reference attributes that used
+    # to live directly on the main window. Forward them to the embedded
+    # widget so the refactor does not break the public surface.
+    @property
+    def model(self) -> C3DDataModel | None:
+        return self._main_widget.model
+
+    @model.setter
+    def model(self, value: C3DDataModel | None) -> None:
+        self._main_widget.model = value
+
+    @property
+    def tabs(self) -> QtWidgets.QTabWidget:
+        return self._main_widget.tabs
+
+    @property
+    def overview_tab(self) -> OverviewTab:
+        return self._main_widget.overview_tab
+
+    @property
+    def marker_plot_tab(self) -> MarkerPlotTab:
+        return self._main_widget.marker_plot_tab
+
+    @property
+    def analog_plot_tab(self) -> AnalogPlotTab:
+        return self._main_widget.analog_plot_tab
+
+    @property
+    def viewer3d_tab(self) -> Viewer3DTab:
+        return self._main_widget.viewer3d_tab
+
+    @property
+    def segments_tab(self) -> SegmentsTab:
+        return self._main_widget.segments_tab
+
+    @property
+    def analysis_tab(self) -> AnalysisTab:
+        return self._main_widget.analysis_tab
+
+    @property
+    def force_plot_tab(self) -> ForcePlotTab:
+        return self._main_widget.force_plot_tab
+
+    @property
+    def action_open(self) -> QtGui.QAction:
+        return self._main_widget.action_open
+
+    @property
+    def action_export_markers(self) -> QtGui.QAction:
+        return self._main_widget.action_export_markers
+
+    @property
+    def action_export_csv(self) -> QtGui.QAction:
+        return self._main_widget.action_export_csv
+
+    @property
+    def action_about(self) -> QtGui.QAction:
+        return self._main_widget.action_about
+
+    # Forward the public file-loading entry points so existing tests that
+    # call ``window.load_c3d_file_from_path(...)`` keep working.
+    def load_c3d_file_from_path(self, path: str) -> None:
+        self._main_widget.load_c3d_file_from_path(path)
+
+    def open_c3d_file(self) -> None:
+        self._main_widget.open_c3d_file()
+
+    def show_about_dialog(self) -> None:
+        self._main_widget.show_about_dialog()
+
+    # ---- Drag & drop forwarding ------------------------------------------
+
+    def dragEnterEvent(self, event: QtGui.QDragEnterEvent) -> None:
+        """Forward drag-enter to the embedded :class:`MainWidget`."""
+        self._main_widget.dragEnterEvent(event)
+
+    def dropEvent(self, event: QtGui.QDropEvent) -> None:
+        """Forward drop to the embedded :class:`MainWidget`."""
+        self._main_widget.dropEvent(event)
+
+    # ---- Internal-method forwarding --------------------------------------
+
+    # Existing tests reach into ``_update_ui_state`` / ``_populate_ui_…`` /
+    # ``_on_load_success`` / ``_on_load_failure`` / ``_on_load_finished`` /
+    # ``_export_markers_dialog`` directly on the window. Forward them so
+    # the refactor preserves the legacy public surface.
+
+    def _update_ui_state(self, enabled: bool) -> None:
+        self._main_widget._update_ui_state(enabled)
+
+    def _populate_ui_with_model(self) -> None:
+        self._main_widget._populate_ui_with_model()
+
+    def _on_load_success(self, model: C3DDataModel) -> None:
+        self._main_widget._on_load_success(model)
+
+    def _on_load_failure(self, error_msg: str) -> None:
+        self._main_widget._on_load_failure(error_msg)
+
+    def _on_load_finished(self) -> None:
+        self._main_widget._on_load_finished()
+
+    def _export_markers_dialog(self) -> None:
+        self._main_widget._export_markers_dialog()
 
 
 def main() -> None:

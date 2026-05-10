@@ -132,6 +132,7 @@ models:
       category: "motion_capture"
       logo: "assets/c3d_viewer_modern.png"
       status: "ready"
+      default_launch: "tab"
 
   - id: "video_analyzer"
     name: "Video Analyzer"
