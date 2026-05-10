@@ -126,37 +126,48 @@ class TestAdapterFactory:
         mock_mgr = MagicMock()
         mock_mgr.get_api_key.return_value = "sk-from-keyring"
 
-        mock_cred_module = MagicMock()
-        mock_cred_module.CredentialManager.return_value = mock_mgr
+        # Patch the import inside _resolve_api_key by intercepting builtins
+        original_import = (
+            __builtins__.__import__
+            if hasattr(__builtins__, "__import__")
+            else __import__
+        )
 
-        import importlib
-        import sys
+        def mock_import(name: str, *args: object, **kwargs: object) -> object:
+            if name == "chat.credentials":
+                mod = MagicMock()
+                mod.CredentialManager.return_value = mock_mgr
+                return mod
+            return original_import(name, *args, **kwargs)
 
-        # Temporarily inject a mock module
-        sys.modules["chat.credentials"] = mock_cred_module
-        try:
+        with patch("builtins.__import__", side_effect=mock_import):
             key = AdapterFactory._resolve_api_key("openai")
             assert key == "sk-from-keyring"
-        finally:
-            sys.modules.pop("chat.credentials", None)
 
     def test_resolve_api_key_fallback_to_env(self) -> None:
         from src.shared.python.ai.adapters.factory import AdapterFactory
 
-        import sys
+        # Make the chat.credentials import fail by patching builtins
+        original_import = (
+            __builtins__.__import__
+            if hasattr(__builtins__, "__import__")
+            else __import__
+        )
 
-        # Remove chat.credentials from modules so import fails
-        saved = sys.modules.pop("chat.credentials", None)
-        try:
-            with patch(
+        def mock_import(name: str, *args: object, **kwargs: object) -> object:
+            if name == "chat.credentials":
+                raise ImportError("no chat.credentials")
+            return original_import(name, *args, **kwargs)
+
+        with (
+            patch("builtins.__import__", side_effect=mock_import),
+            patch(
                 "src.shared.python.ai.config.get_openai_api_key",
                 return_value="sk-from-env",
-            ):
-                key = AdapterFactory._resolve_api_key("openai")
-                assert key == "sk-from-env"
-        finally:
-            if saved is not None:
-                sys.modules["chat.credentials"] = saved
+            ),
+        ):
+            key = AdapterFactory._resolve_api_key("openai")
+            assert key == "sk-from-env"
 
     def test_clear_cache(self) -> None:
         from src.shared.python.ai.adapters.factory import AdapterFactory
