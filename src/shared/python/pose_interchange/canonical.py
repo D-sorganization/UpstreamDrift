@@ -41,6 +41,9 @@ from typing import Any, Final
 import numpy as np
 import numpy.typing as npt
 
+# Import directly from the diagnostics submodule to avoid triggering
+# the motion_matching package __init__.py which eagerly imports pandas-dependent loaders.
+# See issue #4926 for context on the optional pandas dependency coupling.
 from src.shared.python.motion_matching.diagnostics.reference_pose import (
     REFERENCE_GOLFER_FIELDS,
     reference_golfer_setup,
