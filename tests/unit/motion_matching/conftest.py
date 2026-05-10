@@ -26,10 +26,11 @@ from src.shared.python.pose_interchange.services._mock import MockKinematicsServ
 # Session-scoped C3D data fixtures (Issue #5104 - State & Data Management)
 # =============================================================================
 
+
 @pytest.fixture(scope="session")
 def c3d_data_dir() -> Path:
     """Return the path to the C3D data directory.
-    
+
     This fixture is session-scoped to avoid repeated path resolution.
     The actual C3D file loading is done in a separate fixture that
     loads the data exactly once.
@@ -50,7 +51,7 @@ def c3d_data_dir() -> Path:
 @pytest.fixture(scope="session")
 def real_c3d_path(c3d_data_dir: Path) -> Path | None:
     """Return the path to a real C3D file if available, else None.
-    
+
     This fixture is session-scoped so the existence check happens once.
     Tests that require real C3D data should skip if this returns None.
     """
@@ -70,21 +71,23 @@ def real_c3d_path(c3d_data_dir: Path) -> Path | None:
 @pytest.fixture(scope="session")
 def loaded_c3d_data(real_c3d_path: Path | None) -> dict[str, Any] | None:
     """Load C3D data exactly once per session.
-    
+
     This addresses the issue #5104 concern about tests reloading multi-megabyte
     C3D dataframes per test, causing severe garbage collection latency.
-    
+
     Returns:
         A dictionary containing the loaded C3D data structure, or None if
         no real C3D file is available.
     """
     if real_c3d_path is None:
         return None
-    
+
     try:
         from src.shared.python.upstream_drift_tools.lab.bio import _c3d_io as io_mod
-        from src.shared.python.upstream_drift_tools.lab.bio.c3d_reader import C3DDataReader
-        
+        from src.shared.python.upstream_drift_tools.lab.bio.c3d_reader import (
+            C3DDataReader,
+        )
+
         reader = C3DDataReader(real_c3d_path)
         # Return the raw c3d data structure for tests to consume
         return reader._load()
@@ -96,10 +99,11 @@ def loaded_c3d_data(real_c3d_path: Path | None) -> dict[str, Any] | None:
 # MockKinematicsService fixtures (Issue #5104 - Engine Isolation)
 # =============================================================================
 
+
 @pytest.fixture
 def mock_drake_kinematics() -> MockKinematicsService:
     """Return a MockKinematicsService impersonating Drake.
-    
+
     Use this in unit tests to avoid requiring real Drake installation.
     The mock satisfies the LiveKinematicsService Protocol.
     """
@@ -136,9 +140,9 @@ def any_mock_kinematics(
     mock_drake_kinematics: MockKinematicsService,
 ) -> MockKinematicsService:
     """Return any mock kinematics service for parametric tests.
-    
+
     This fixture accepts an optional 'engine_name' parameter:
-    
+
         @pytest.mark.parametrize("any_mock_kinematics", ["drake", "mujoco"], indirect=True)
         def test_something(any_mock_kinematics): ...
     """
@@ -150,13 +154,15 @@ def any_mock_kinematics(
 # CanonicalPose fixtures
 # =============================================================================
 
+
 @pytest.fixture
 def zero_canonical_pose() -> CanonicalPose:
     """Return a CanonicalPose with all angles at zero degrees.
-    
+
     This is useful for testing forward kinematics at the neutral pose.
     """
     import numpy as np
+
     return CanonicalPose(
         pelvis_translation_m=np.zeros(3, dtype=np.float64),
         pelvis_rotation_xyz_deg=np.zeros(3, dtype=np.float64),
@@ -167,10 +173,11 @@ def zero_canonical_pose() -> CanonicalPose:
 @pytest.fixture
 def canonical_pose_deg() -> CanonicalPose:
     """Return a CanonicalPose with realistic golf swing angles (in degrees).
-    
+
     This represents a mid-swing pose for testing.
     """
     import numpy as np
+
     # Use the actual REFERENCE_GOLFER_FIELDS names
     return CanonicalPose(
         pelvis_translation_m=np.array([0.0, 0.0, 1.0], dtype=np.float64),
@@ -192,14 +199,17 @@ def canonical_pose_deg() -> CanonicalPose:
 @pytest.fixture
 def canonical_pose_rad() -> CanonicalPose:
     """Return a CanonicalPose with angles in radians.
-    
+
     Note: CanonicalPose internally stores angles in degrees, so this
     fixture converts from radians for testing purposes.
     """
     import numpy as np
+
     return CanonicalPose(
         pelvis_translation_m=np.array([0.0, 0.0, 1.0], dtype=np.float64),
-        pelvis_rotation_xyz_deg=np.array([0.0, 0.0, np.rad2deg(45.0)], dtype=np.float64),
+        pelvis_rotation_xyz_deg=np.array(
+            [0.0, 0.0, np.rad2deg(45.0)], dtype=np.float64
+        ),
         joint_angles_deg={
             "TorsoStartPosition": np.rad2deg(30.0),
             "SpineStartPositionX": np.rad2deg(15.0),
@@ -218,13 +228,15 @@ def canonical_pose_rad() -> CanonicalPose:
 # Mock utilities for engine services
 # =============================================================================
 
+
 @pytest.fixture
 def mock_engine_service_factory() -> Any:
     """Return a factory for creating mock engine services.
-    
+
     This is useful for tests that need to create multiple mock services
     with different configurations.
     """
+
     def _create(engine_name: str = "mock") -> MagicMock:
         service = MagicMock()
         service.engine_name = engine_name
@@ -239,25 +251,26 @@ def mock_engine_service_factory() -> Any:
             "clubhead": np.eye(4, dtype=np.float64),
         }
         return service
+
     return _create
 
 
 @pytest.fixture
 def patch_kinematics_registry() -> Any:
     """Context manager for patching the KINEMATICS_SERVICE_REGISTRY.
-    
+
     Use this to test the registry dispatch logic without requiring
     real engine installations.
-    
+
     Example:
         with patch_kinematics_registry() as mock_registry:
             mock_registry["drake"] = lambda: MockKinematicsService("drake")
             # ... test code ...
     """
     from src.shared.python.pose_interchange.services import KINEMATICS_SERVICE_REGISTRY
-    
+
     original_registry = dict(KINEMATICS_SERVICE_REGISTRY)
-    
+
     def _patch() -> dict[str, Any]:
         # Create a fresh mock registry
         mock_registry = {}
@@ -266,7 +279,7 @@ def patch_kinematics_registry() -> Any:
         # Restore original registry
         KINEMATICS_SERVICE_REGISTRY.clear()
         KINEMATICS_SERVICE_REGISTRY.update(original_registry)
-    
+
     return _patch
 
 
@@ -274,10 +287,11 @@ def patch_kinematics_registry() -> Any:
 # Test data fixtures
 # =============================================================================
 
+
 @pytest.fixture
 def sample_joint_angles() -> dict[str, float]:
     """Return a dictionary of sample joint angles for testing.
-    
+
     This represents a neutral standing pose.
     """
     return {

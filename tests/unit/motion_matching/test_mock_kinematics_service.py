@@ -163,7 +163,7 @@ class TestMockKinematicsServiceGetLinkTransforms:
         service = MockKinematicsService(engine_name="drake")
         service.set_pose(canonical_pose_deg)
         transforms = service.get_link_transforms()
-        for name, transform in transforms.items():
+        for transform in transforms.values():
             # Check SE(3) structure: bottom row should be [0, 0, 0, 1]
             assert np.allclose(transform[3, :], [0, 0, 0, 1])
             # Rotation submatrix should be orthogonal
@@ -265,14 +265,18 @@ class TestMockKinematicsServiceFixtures:
 class TestCanonicalPoseFixtures:
     """Test the CanonicalPose fixtures from conftest.py."""
 
-    def test_zero_canonical_pose_fixture(self, zero_canonical_pose: CanonicalPose) -> None:
+    def test_zero_canonical_pose_fixture(
+        self, zero_canonical_pose: CanonicalPose
+    ) -> None:
         """zero_canonical_pose returns a pose with all zeros."""
         # Check that all angles are zero
         angles_dict = zero_canonical_pose.angles_full_dict_deg()
         for name, value in angles_dict.items():
             assert value == 0.0, f"{name} should be 0.0, got {value}"
 
-    def test_canonical_pose_deg_fixture(self, canonical_pose_deg: CanonicalPose) -> None:
+    def test_canonical_pose_deg_fixture(
+        self, canonical_pose_deg: CanonicalPose
+    ) -> None:
         """canonical_pose_deg returns a pose with realistic angles."""
         angles_dict = canonical_pose_deg.angles_full_dict_deg()
         # TorsoStartPosition should be 30 degrees
@@ -282,7 +286,9 @@ class TestCanonicalPoseFixtures:
         # pelvis rotation should be 45 degrees
         assert np.allclose(canonical_pose_deg.pelvis_rotation_xyz_deg, [0.0, 0.0, 45.0])
 
-    def test_canonical_pose_rad_fixture(self, canonical_pose_rad: CanonicalPose) -> None:
+    def test_canonical_pose_rad_fixture(
+        self, canonical_pose_rad: CanonicalPose
+    ) -> None:
         """canonical_pose_rad returns a pose with radian inputs converted."""
         # CanonicalPose stores angles in degrees internally
         angles_dict = canonical_pose_rad.angles_full_dict_deg()
@@ -292,7 +298,7 @@ class TestCanonicalPoseFixtures:
         assert np.allclose(
             canonical_pose_rad.pelvis_rotation_xyz_deg,
             [0.0, 0.0, np.rad2deg(45.0)],
-            atol=0.1
+            atol=0.1,
         )
 
 
