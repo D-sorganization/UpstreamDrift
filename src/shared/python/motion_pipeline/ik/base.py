@@ -172,19 +172,29 @@ class BaseIKSolver(ABC):
     ) -> list[float]:
         """Clamp joint angles to rig limits."""
         clamped = []
-        for i, angle in enumerate(q):
-            # Get joint limits if available
-            joint_idx = i % rig.num_dofs
-            joint = list(rig.joints.values())[joint_idx % len(rig.joints)]
+        dof_idx = 0
+        for joint in rig.joints.values():
+            num_dofs = len(joint.axes)
+            if num_dofs == 0:
+                continue
 
-            if joint.limits and joint_idx < len(joint.limits):
-                limit = joint.limits[joint_idx]
-                if limit.lower is not None:
-                    angle = max(angle, limit.lower)
-                if limit.upper is not None:
-                    angle = min(angle, limit.upper)
-
-            clamped.append(angle)
+            for i in range(num_dofs):
+                if dof_idx >= len(q):
+                    break
+                angle = q[dof_idx]
+                if joint.limits and i < len(joint.limits):
+                    limit = joint.limits[i]
+                    if limit.lower is not None:
+                        angle = max(angle, limit.lower)
+                    if limit.upper is not None:
+                        angle = min(angle, limit.upper)
+                clamped.append(angle)
+                dof_idx += 1
+                
+        # If there are any remaining elements in q (e.g. root transform), keep them as is
+        while dof_idx < len(q):
+            clamped.append(q[dof_idx])
+            dof_idx += 1
 
         return clamped
 

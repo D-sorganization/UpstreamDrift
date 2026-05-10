@@ -48,7 +48,7 @@ def test_ik_backend_type_enum_members() -> None:
 
 
 def test_make_ik_solver_unknown_backend_raises() -> None:
-    with pytest.raises(ValueError, match="(?i)unknown|enum"):
+    with pytest.raises(ValueError, match="(?i)not a valid|enum"):
         make_ik_solver("not-a-backend")
 
 

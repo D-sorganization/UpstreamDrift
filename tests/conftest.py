@@ -18,6 +18,16 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+# On Windows, missing PyQt6 DLLs can cause a fatal crash.
+# Mock them immediately before any imports happen.
+import sys
+from unittest.mock import MagicMock
+if 'PyQt6' not in sys.modules:
+    sys.modules['PyQt6'] = MagicMock()
+    sys.modules['PyQt6.QtCore'] = MagicMock()
+    sys.modules['PyQt6.QtGui'] = MagicMock()
+    sys.modules['PyQt6.QtWidgets'] = MagicMock()
+    sys.modules['PyQt6.QtWebEngineWidgets'] = MagicMock()
 
 @dataclass(frozen=True)
 class OptionalCollectionRule:
@@ -74,7 +84,7 @@ _OPTIONAL_COLLECTION_RULES = (
     ),
     OptionalCollectionRule(
         path_suffixes=_CALC_BACKEND_TESTS,
-        modules=("src.shared.python.calc_backend",),
+        modules=("src.shared.python.calc_backend.contracts.acid_gas_dewpoint",),
     ),
     OptionalCollectionRule(
         path_suffixes=(
