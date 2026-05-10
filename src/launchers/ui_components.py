@@ -47,6 +47,9 @@ from src.launchers.startup import (
     _get_theme_colors,
 )
 
+# Backward-compatibility alias for legacy code using GolfSplashScreen
+GolfSplashScreen = SplashScreen
+
 __all__ = [
     "ASSETS_DIR",
     "REPOS_ROOT",
@@ -54,6 +57,7 @@ __all__ = [
     "_get_theme_colors",
     "StartupResults",
     "SplashScreen",
+    "GolfSplashScreen",  # backward-compatibility alias
     "AsyncStartupWorker",
     "DraggableModelCard",
     "DockerCheckThread",
