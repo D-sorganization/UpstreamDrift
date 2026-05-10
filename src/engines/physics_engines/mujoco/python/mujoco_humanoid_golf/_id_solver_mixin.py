@@ -68,8 +68,6 @@ class _InverseDynamicsSolverMixin:
         # Note: This assumes qacc_primary satisfies the task constraints
         if not (qpos is not None):
             raise ValueError("qpos must be provided")
-        if not (qpos is not None):
-            raise ValueError("qpos must be provided")
         primary_result = self.compute_required_torques(qpos, qvel, qacc_primary)
         tau_primary = primary_result.joint_torques  # Total generalized force
 
@@ -147,8 +145,6 @@ class _InverseDynamicsSolverMixin:
         """
         if not (qpos is not None):
             raise ValueError("qpos must be provided")
-        if not (qpos is not None):
-            raise ValueError("qpos must be provided")
         self._perturb_data.qpos[:] = qpos
         self._perturb_data.qvel[:] = qvel
 
@@ -188,8 +184,6 @@ class _InverseDynamicsSolverMixin:
         """
         if not (times is not None):
             raise ValueError("times must be provided")
-        if not (times is not None):
-            raise ValueError("times must be provided")
         results = []
 
         for i in range(len(times)):
@@ -227,8 +221,6 @@ class _InverseDynamicsSolverMixin:
         # Full inverse dynamics
         if not (qpos is not None):
             raise ValueError("qpos must be provided")
-        if not (qpos is not None):
-            raise ValueError("qpos must be provided")
         full_result = self.compute_required_torques(qpos, qvel, qacc)
 
         # Create selection matrix for actuated joints
@@ -262,8 +254,6 @@ class _InverseDynamicsSolverMixin:
         Returns:
             ForceDecomposition with all components
         """
-        if not (qpos is not None):
-            raise ValueError("qpos must be provided")
         if not (qpos is not None):
             raise ValueError("qpos must be provided")
         result = self.compute_required_torques(qpos, qvel, qacc)
@@ -333,8 +323,6 @@ class _InverseDynamicsSolverMixin:
             End-effector force [3]
         """
         # Compute required torques
-        if not (qpos is not None):
-            raise ValueError("qpos must be provided")
         if not (qpos is not None):
             raise ValueError("qpos must be provided")
         result = self.compute_required_torques(qpos, qvel, qacc)
@@ -435,8 +423,6 @@ class _InverseDynamicsSolverMixin:
         Returns:
             Efficiency metrics
         """
-        if not (result is not None):
-            raise ValueError("result must be provided")
         if not (result is not None):
             raise ValueError("result must be provided")
         torques = result.joint_torques
