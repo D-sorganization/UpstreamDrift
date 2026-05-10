@@ -17,8 +17,26 @@ New in v2.0.0:
 __version__ = "2.0.0"
 __author__ = "Golf Modeling Suite Team"
 
+import contextlib
+
 from .segment_manager import SegmentManager
 from .urdf_builder import Handedness, URDFBuilder
+
+# Register the embed adapter with the launcher's embeddable-tool
+# registry on import. Wrapped in ``contextlib.suppress(ImportError)``
+# so ``import src.tools.model_explorer`` continues to work in headless
+# contexts where PyQt6 (transitively pulled in by ``_embed_adapter``)
+# is unavailable. See Subtask 5 / #4998 of EPIC #4993.
+with contextlib.suppress(ImportError):
+    from . import _embed_adapter  # noqa: F401
+    from src.shared.python.launcher_embed import (
+        get_embeddable_tool,
+        register_embeddable_tool,
+    )
+
+    _ADAPTER = _embed_adapter._ModelExplorerEmbedAdapter()
+    if get_embeddable_tool(_ADAPTER.tool_id) is None:
+        register_embeddable_tool(_ADAPTER)
 
 __all__ = [
     # Main windows

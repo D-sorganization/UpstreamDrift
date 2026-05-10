@@ -177,6 +177,7 @@ models:
       category: "tool"
       logo: "assets/urdf_icon.png"
       status: "ready"
+      default_launch: "tab"
 
   - id: "data_explorer"
     name: "Data Explorer"

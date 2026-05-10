@@ -1,29 +1,31 @@
-# ARCHITECTURE_DEBT:
-# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
-# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+"""Main window for the Interactive URDF Generator (Model Explorer).
 
-"""Main window for the Interactive URDF Generator."""
+This module is the standalone shell. The actual UI now lives in
+:class:`src.tools.model_explorer.gui.MainWidget`; the window here owns
+the menu bar, window icon, and unsaved-changes prompt, and delegates
+everything else to the embedded widget.
+
+The split is part of Subtask 5 / #4998 of EPIC #4993 — see
+``src/tools/model_explorer/_embed_adapter.py`` for the launcher contract.
+"""
+
+from __future__ import annotations
 
 import sys
 from pathlib import Path
 from typing import Any
 
-from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import (
     QApplication,
-    QDockWidget,
     QMainWindow,
     QMessageBox,
-    QStatusBar,
     QWidget,
 )
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 
-from .segment_panel import SegmentPanel
-from .urdf_builder import URDFBuilder
-from .visualization_widget import VisualizationWidget
+from .gui import MainWidget
 
 logger = get_logger(__name__)
 
@@ -37,161 +39,98 @@ except ImportError:
 
 
 class URDFGeneratorWindow(QMainWindow):
-    """Main window for the Interactive URDF Generator."""
+    """Standalone :class:`QMainWindow` shell around :class:`MainWidget`.
 
-    # Signals
-    urdf_generated = pyqtSignal(str)  # Emitted when URDF is generated
-    segment_added = pyqtSignal(dict)  # Emitted when a segment is added
-    segment_removed = pyqtSignal(str)  # Emitted when a segment is removed
+    Provides the menu bar, window icon, and ``closeEvent`` prompt. The
+    actual UI (segments dock, viewport, properties) is owned by the
+    embedded :class:`MainWidget`, so the same widget can be hosted by
+    the launcher embed adapter without spinning up a top-level window.
+    """
 
     def __init__(self, parent: QWidget | None = None) -> None:
-        """Initialize the main window.
-
-        Args:
-            parent: Parent widget, if any.
-        """
         super().__init__(parent)
-        self.urdf_builder = URDFBuilder()
-        self.current_file_path: Path | None = None
-        self._notepad_window: Any | None = None
-
-        self._setup_ui()
-        self._setup_menu_bar()
-        self._setup_status_bar()
-        self._setup_window_icon()
-        self._connect_signals()
-
-        logger.info("URDF Generator window initialized")
-
-        # Load default model if configured
-        self._load_default_model()
-
-    def _load_default_model(self) -> None:
-        """Load default model from settings if configured."""
-        try:
-            from PyQt6.QtCore import QSettings
-
-            from .model_library import ModelLibrary
-
-            settings = QSettings("UpstreamDrift", "URDFGenerator")
-            default_model = settings.value("default_human_model")
-
-            if not default_model:
-                # Fallback to MuJoCo Humanoid if no preference set
-                default_model = "mujoco_humanoid"
-
-            if default_model:
-                logger.info(f"Loading default model: {default_model}")
-                library = ModelLibrary()
-                urdf_path = library.get_human_model(str(default_model))
-
-                if urdf_path and urdf_path.exists():
-                    self._load_urdf_file(urdf_path)
-                    self.status_bar.showMessage(
-                        f"Loaded default model: {default_model}"
-                    )
-                else:
-                    logger.warning(f"Default model {default_model} not found")
-        except ImportError as e:
-            logger.error(f"Failed to load default model: {e}")
-
-    def _setup_ui(self) -> None:
-        """Set up the user interface."""
         self.setWindowTitle("Model Explorer - UpstreamDrift")
         self.setMinimumSize(1200, 800)
 
-        # Enable advanced docking features
-        self.setDockOptions(
-            QMainWindow.DockOption.AnimatedDocks
-            | QMainWindow.DockOption.AllowNestedDocks
-            | QMainWindow.DockOption.AllowTabbedDocks
-            | QMainWindow.DockOption.GroupedDragging
-        )
+        self._main_widget = MainWidget(self)
+        self.setCentralWidget(self._main_widget)
 
-        # Remove central widget (we will use docks for everything)
-        # Note: We need a dummy central widget to prevent weird layout issues on some platforms
-        self.setCentralWidget(None)
+        self._notepad_window: Any | None = None
 
-        # 1. Segments Panel (Dock)
-        self.segment_panel = SegmentPanel()
-        self.segment_dock = QDockWidget("Model Segments", self)
-        self.segment_dock.setWidget(self.segment_panel)
-        self.segment_dock.setObjectName("SegmentDock")
-        self.segment_dock.setAllowedAreas(Qt.DockWidgetArea.AllDockWidgetAreas)
-        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.segment_dock)
+        self._setup_menu_bar()
+        self._setup_window_icon()
 
-        # 2. Visualization (Dock)
-        self.visualization_widget = VisualizationWidget()
-        self.visualization_dock = QDockWidget("3D Viewport", self)
-        self.visualization_dock.setWidget(self.visualization_widget)
-        self.visualization_dock.setObjectName("ViewportDock")
-        self.visualization_dock.setAllowedAreas(Qt.DockWidgetArea.AllDockWidgetAreas)
+        # Re-emit the embedded widget's signals on the window so existing
+        # consumers that subscribed to the window keep working.
+        self.urdf_generated = self._main_widget.urdf_generated
+        self.segment_added = self._main_widget.segment_added
+        self.segment_removed = self._main_widget.segment_removed
 
-        # Make the viewport expanded by default
-        self.addDockWidget(
-            Qt.DockWidgetArea.RightDockWidgetArea, self.visualization_dock
-        )
+        logger.info("URDF Generator window initialized")
+        self._main_widget.load_default_model()
 
-        # 3. Properties (Dock)
-        self._setup_properties_dock()
+    # ---- accessors mirrored from the embedded widget -------------------
 
-        # Adjust initial sizes (give Viewport more space)
-        # We can't easily set exact pixel sizes for docks, but we can set splitters if shared
-        # This is handled by Qt's internal layout engine
+    @property
+    def urdf_builder(self) -> Any:
+        return self._main_widget.urdf_builder
 
-    def _setup_properties_dock(self) -> None:
-        """Set up the properties dock widget."""
-        self.properties_dock = QDockWidget("Properties", self)
-        self.properties_dock.setObjectName("PropertiesDock")
-        self.properties_dock.setAllowedAreas(Qt.DockWidgetArea.AllDockWidgetAreas)
+    @property
+    def current_file_path(self) -> Path | None:
+        return self._main_widget.current_file_path
 
-        # Properties widget will be implemented later
-        properties_widget = QWidget()
-        self.properties_dock.setWidget(properties_widget)
+    @property
+    def segment_panel(self) -> Any:
+        return self._main_widget.segment_panel
 
-        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.properties_dock)
+    @property
+    def visualization_widget(self) -> Any:
+        return self._main_widget.visualization_widget
 
-        # Tabify properties with segments or place below?
-        # Let's place it below Segments initially or tabbed with it
-        self.splitDockWidget(
-            self.segment_dock, self.properties_dock, Qt.Orientation.Vertical
-        )
+    @property
+    def status_bar(self) -> Any:
+        return self._main_widget.status_bar
 
-        # Ensure Viewport takes most space
-        # We can simulate this by resizing docks after show(), but for now let default handle it
+    @property
+    def segment_dock(self) -> Any:
+        return self._main_widget.segment_dock
+
+    @property
+    def visualization_dock(self) -> Any:
+        return self._main_widget.visualization_dock
+
+    @property
+    def properties_dock(self) -> Any:
+        return self._main_widget.properties_dock
+
+    # ---- menu construction --------------------------------------------
 
     def _setup_menu_bar(self) -> None:
-        """Set up the menu bar."""
         menubar = self.menuBar()
         if menubar is None:
             return
 
         file_menu = menubar.addMenu("&File")
-        if file_menu is None:
-            return
-        self._setup_file_menu(file_menu)
+        if file_menu is not None:
+            self._setup_file_menu(file_menu)
 
         edit_menu = menubar.addMenu("&Edit")
-        if edit_menu is None:
-            return
-        self._setup_edit_menu(edit_menu)
+        if edit_menu is not None:
+            self._setup_edit_menu(edit_menu)
 
         view_menu = menubar.addMenu("&View")
-        if view_menu is None:
-            return
-        self._setup_view_menu(view_menu)
+        if view_menu is not None:
+            self._setup_view_menu(view_menu)
 
         tools_menu = menubar.addMenu("&Tools")
-        if tools_menu is None:
-            return
-        self._setup_tools_menu(tools_menu)
+        if tools_menu is not None:
+            self._setup_tools_menu(tools_menu)
 
         help_menu = menubar.addMenu("&Help")
-        if help_menu is None:
-            return
-        about_action = QAction("&About", self)
-        about_action.triggered.connect(self.show_about)
-        help_menu.addAction(about_action)
+        if help_menu is not None:
+            about_action = QAction("&About", self)
+            about_action.triggered.connect(self.show_about)
+            help_menu.addAction(about_action)
 
     def _setup_file_menu(self, file_menu: Any) -> None:
         new_action = QAction("&New", self)
@@ -250,40 +189,36 @@ class URDFGeneratorWindow(QMainWindow):
     def _setup_edit_menu(self, edit_menu: Any) -> None:
         undo_action = QAction("&Undo", self)
         undo_action.setShortcut("Ctrl+Z")
-        undo_action.setEnabled(
-            False
-        )  # Undo/redo functionality planned for future release
+        undo_action.setEnabled(False)
         edit_menu.addAction(undo_action)
 
         redo_action = QAction("&Redo", self)
         redo_action.setShortcut("Ctrl+Y")
-        redo_action.setEnabled(
-            False
-        )  # Undo/redo functionality planned for future release
+        redo_action.setEnabled(False)
         edit_menu.addAction(redo_action)
 
     def _setup_view_menu(self, view_menu: Any) -> None:
         reset_view_action = QAction("&Reset View", self)
         reset_view_action.setShortcut("Ctrl+R")
-        reset_view_action.triggered.connect(self.visualization_widget.reset_view)
+        reset_view_action.triggered.connect(self._main_widget.reset_view)
         view_menu.addAction(reset_view_action)
 
     def _setup_tools_menu(self, tools_menu: Any) -> None:
         advanced_editor_action = QAction("Advanced URDF &Editor...", self)
         advanced_editor_action.setShortcut("Ctrl+E")
-        advanced_editor_action.triggered.connect(self._open_advanced_editor)
+        advanced_editor_action.triggered.connect(self._main_widget.open_advanced_editor)
         tools_menu.addAction(advanced_editor_action)
 
         tools_menu.addSeparator()
 
         frankenstein_action = QAction("&Frankenstein Mode...", self)
         frankenstein_action.setToolTip("Combine components from multiple URDFs")
-        frankenstein_action.triggered.connect(self._open_frankenstein_mode)
+        frankenstein_action.triggered.connect(self._main_widget.open_frankenstein_mode)
         tools_menu.addAction(frankenstein_action)
 
         code_editor_action = QAction("&Code Editor...", self)
         code_editor_action.setToolTip("Edit URDF XML directly with syntax highlighting")
-        code_editor_action.triggered.connect(self._open_code_editor)
+        code_editor_action.triggered.connect(self._main_widget.open_code_editor)
         tools_menu.addAction(code_editor_action)
 
         if HAS_NOTEPAD:
@@ -293,14 +228,7 @@ class URDFGeneratorWindow(QMainWindow):
             notepad_action.triggered.connect(self._open_notepad)
             tools_menu.addAction(notepad_action)
 
-    def _setup_status_bar(self) -> None:
-        """Set up the status bar."""
-        self.status_bar = QStatusBar()
-        self.setStatusBar(self.status_bar)
-        self.status_bar.showMessage("Ready")
-
     def _setup_window_icon(self) -> None:
-        """Set up the window icon."""
         from PyQt6.QtGui import QIcon
 
         icon_path = Path(__file__).parent / "assets" / "robot_arm_icon.png"
@@ -309,326 +237,49 @@ class URDFGeneratorWindow(QMainWindow):
         else:
             logger.warning(f"Icon file not found: {icon_path}")
 
-    def _connect_signals(self) -> None:
-        """Connect internal signals."""
-        self.segment_panel.segment_added.connect(self._on_segment_added)
-        self.segment_panel.segment_removed.connect(self._on_segment_removed)
-        self.segment_panel.segment_modified.connect(self._on_segment_modified)
-
-    def _on_segment_added(self, segment_data: dict) -> None:
-        """Handle segment addition.
-
-        Args:
-            segment_data: Dictionary containing segment information.
-        """
-        try:
-            self.urdf_builder.add_segment(segment_data)
-            self.visualization_widget.update_visualization(self.urdf_builder.get_urdf())
-            self.segment_added.emit(segment_data)
-            self.status_bar.showMessage(f"Added segment: {segment_data['name']}")
-            logger.info(f"Segment added: {segment_data['name']}")
-        except (RuntimeError, ValueError, OSError) as e:
-            logger.error(f"Error adding segment: {e}")
-            QMessageBox.warning(self, "Error", f"Failed to add segment: {e}")
-
-    def _on_segment_removed(self, segment_name: str) -> None:
-        """Handle segment removal.
-
-        Args:
-            segment_name: Name of the segment to remove.
-        """
-        try:
-            self.urdf_builder.remove_segment(segment_name)
-            self.visualization_widget.update_visualization(self.urdf_builder.get_urdf())
-            self.segment_removed.emit(segment_name)
-            self.status_bar.showMessage(f"Removed segment: {segment_name}")
-            logger.info(f"Segment removed: {segment_name}")
-        except (RuntimeError, ValueError, OSError) as e:
-            logger.error(f"Error removing segment: {e}")
-            QMessageBox.warning(self, "Error", f"Failed to remove segment: {e}")
-
-    def _on_segment_modified(self, segment_data: dict) -> None:
-        """Handle segment modification.
-
-        Args:
-            segment_data: Dictionary containing updated segment information.
-        """
-        try:
-            self.urdf_builder.modify_segment(segment_data)
-            self.visualization_widget.update_visualization(self.urdf_builder.get_urdf())
-            self.status_bar.showMessage(f"Modified segment: {segment_data['name']}")
-            logger.info(f"Segment modified: {segment_data['name']}")
-        except (RuntimeError, ValueError, OSError) as e:
-            logger.error(f"Error modifying segment: {e}")
-            QMessageBox.warning(self, "Error", f"Failed to modify segment: {e}")
+    # ---- menu action delegates ----------------------------------------
 
     def new_urdf(self) -> None:
-        """Create a new URDF."""
-        # Check for unsaved changes before creating new URDF
-        self.urdf_builder.clear()
-        self.segment_panel.clear()
-        self.visualization_widget.clear()
-        self.current_file_path = None
+        self._main_widget.new_urdf()
         self.setWindowTitle("Interactive URDF Generator - Golf Modeling Suite")
-        self.status_bar.showMessage("New URDF created")
-        logger.info("New URDF created")
 
     def open_urdf(self) -> None:
-        """Open an existing URDF file."""
-        from PyQt6.QtWidgets import QFileDialog
+        self._main_widget.open_urdf()
 
-        file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            "Open URDF File",
-            "",
-            "URDF Files (*.urdf);;XML Files (*.xml);;All Files (*)",
-        )
-
-        if file_path:
-            try:
-                _ = Path(file_path).read_text(encoding="utf-8")
-                # Parse URDF and populate segments (future enhancement)
-                self.status_bar.showMessage(f"Opened: {file_path}")
-                logger.info(f"URDF opened from: {file_path}")
-            except (FileNotFoundError, OSError) as e:
-                logger.error(f"Error opening URDF: {e}")
-                QMessageBox.critical(self, "Error", f"Failed to open URDF: {e}")
-
-    def load_from_library(self) -> None:  # noqa: C901
-        """Load a URDF model from the library."""
-        try:
-            from .model_library import ModelLibrary
-            from .model_loader_dialog import ModelLoaderDialog
-
-            dialog = ModelLoaderDialog(self)
-            dialog.model_selected.connect(self._on_library_model_selected)
-
-            if dialog.exec():
-                selection = dialog.get_selected_model()
-                if selection:
-                    category, model_key = selection
-                    library = ModelLibrary()
-
-                    if category == "golf_clubs":
-                        # Generate golf club URDF
-                        urdf_path = library.generate_golf_club_urdf(model_key)
-                        if urdf_path:
-                            self._load_urdf_file(urdf_path)
-                            self.status_bar.showMessage(
-                                f"Loaded golf club: {model_key}"
-                            )
-                    elif category == "human":
-                        # Load human model URDF (prefers bundled assets)
-                        urdf_path = library.get_human_model(model_key)
-
-                        if urdf_path and urdf_path.exists():
-                            self._load_urdf_file(urdf_path)
-                            self.status_bar.showMessage(
-                                f"Loaded human model: {model_key}"
-                            )
-                        else:
-                            QMessageBox.information(
-                                self,
-                                "Model Not Available",
-                                "This model is not bundled or downloaded.\n"
-                                "Check bundled_assets/ for available models.",
-                            )
-                    elif category in ["pendulum", "robotic", "component", "discovered"]:
-                        # Generic handler for path-based models
-                        model_info = library.get_model_info(category, model_key)
-                        if model_info and "path" in model_info:
-                            # ModelLibrary paths are relative to repo root in definitions usually
-                            # but let's check if it exists absolute or relative
-                            raw_path = model_info["path"]
-                            path = Path(raw_path)
-
-                            if not path.is_absolute():
-                                from src.tools.model_explorer.model_library import (
-                                    _project_root,
-                                )
-
-                                path = _project_root / raw_path
-
-                            if path.exists():
-                                self._load_urdf_file(path)
-                                self.status_bar.showMessage(
-                                    f"Loaded {category} model: {model_info['name']}"
-                                )
-                            else:
-                                QMessageBox.warning(
-                                    self, "Error", f"File not found: {path}"
-                                )
-                        else:
-                            QMessageBox.warning(
-                                self,
-                                "Error",
-                                f"Invalid model configuration for {category}",
-                            )
-
-                    elif category == "embedded":
-                        model_info = library.get_model_info(category, model_key)
-                        if model_info:
-                            content = model_info["content"]
-                            self.visualization_widget.update_visualization(
-                                content, None
-                            )
-                            self.current_file_path = None
-                            self.setWindowTitle(
-                                f"Interactive URDF Generator - {model_info['name']} (Embedded)"
-                            )
-                            self.status_bar.showMessage(
-                                f"Loaded embedded model: {model_info['name']}"
-                            )
-                            logger.info(f"Loaded embedded model: {model_info['name']}")
-
-        except ImportError as e:
-            logger.error(f"Error loading from library: {e}")
-            QMessageBox.critical(self, "Error", f"Failed to load from library: {e}")
-
-    def _on_library_model_selected(self, category: str, model_key: str) -> None:
-        """Handle model selection from library.
-
-        Args:
-            category: Model category ('human' or 'golf_clubs')
-            model_key: Model identifier
-        """
-        logger.info(f"Model selected from library: {category}/{model_key}")
-
-    def _load_urdf_file(self, file_path: Path) -> None:
-        """Load URDF file content and update visualization.
-
-        Args:
-            file_path: Path to URDF file to load
-        """
-        try:
-            urdf_content = file_path.read_text(encoding="utf-8")
-            # URDF parsing for segment panel population is a future enhancement
-            # Currently loading for visualization only
-            # Pass file path for mesh resolution in MuJoCo
-            self.visualization_widget.update_visualization(urdf_content, str(file_path))
-            self.current_file_path = file_path
-            self.setWindowTitle(f"Interactive URDF Generator - {file_path.name}")
-            logger.info(f"URDF loaded: {file_path}")
-        except (RuntimeError, TypeError, ValueError) as e:
-            logger.error(f"Error loading URDF file: {e}")
-            raise
+    def load_from_library(self) -> None:
+        self._main_widget.load_from_library()
+        if self._main_widget.current_file_path is not None:
+            self.setWindowTitle(
+                f"Interactive URDF Generator - "
+                f"{self._main_widget.current_file_path.name}"
+            )
 
     def save_urdf(self) -> None:
-        """Save the current URDF."""
-        if self.current_file_path:
-            self._save_to_file(self.current_file_path)
-        else:
-            self.save_urdf_as()
+        self._main_widget.save_urdf()
+        if self._main_widget.current_file_path is not None:
+            self.setWindowTitle(
+                f"Interactive URDF Generator - "
+                f"{self._main_widget.current_file_path.name}"
+            )
 
     def save_urdf_as(self) -> None:
-        """Save the current URDF with a new filename."""
-        from PyQt6.QtWidgets import QFileDialog
-
-        file_path, _ = QFileDialog.getSaveFileName(
-            self,
-            "Save URDF File",
-            "golf_robot.urdf",
-            "URDF Files (*.urdf);;XML Files (*.xml);;All Files (*)",
-        )
-
-        if file_path:
-            self._save_to_file(Path(file_path))
-
-    def _save_to_file(self, file_path: Path) -> None:
-        """Save URDF to the specified file.
-
-        Args:
-            file_path: Path to save the file to.
-        """
-        try:
-            urdf_content = self.urdf_builder.get_urdf()
-            file_path.write_text(urdf_content, encoding="utf-8")
-            self.current_file_path = file_path
-            self.setWindowTitle(f"Interactive URDF Generator - {file_path.name}")
-            self.status_bar.showMessage(f"Saved: {file_path}")
-            logger.info(f"URDF saved to: {file_path}")
-        except (RuntimeError, ValueError, OSError) as e:
-            logger.error(f"Error saving URDF: {e}")
-            QMessageBox.critical(self, "Error", f"Failed to save URDF: {e}")
+        self._main_widget.save_urdf_as()
+        if self._main_widget.current_file_path is not None:
+            self.setWindowTitle(
+                f"Interactive URDF Generator - "
+                f"{self._main_widget.current_file_path.name}"
+            )
 
     def export_for_mujoco(self) -> None:
-        """Export URDF optimized for MuJoCo."""
-        from PyQt6.QtWidgets import QFileDialog
-
-        file_path, _ = QFileDialog.getSaveFileName(
-            self,
-            "Export for MuJoCo",
-            "golf_robot_mujoco.urdf",
-            "URDF Files (*.urdf);;XML Files (*.xml)",
-        )
-
-        if file_path:
-            try:
-                # Get MuJoCo-optimized URDF
-                urdf_content = self.urdf_builder.get_urdf()
-                # Note: Currently exporting generic URDF which MuJoCo can read directly.
-                # Specific <mujoco> tags can be added here if needed in future.
-
-                Path(file_path).write_text(urdf_content, encoding="utf-8")
-                self.status_bar.showMessage(f"Exported for MuJoCo: {file_path}")
-                logger.info(f"MuJoCo export saved to: {file_path}")
-            except (FileNotFoundError, OSError) as e:
-                logger.error(f"Error exporting for MuJoCo: {e}")
-                QMessageBox.critical(self, "Error", f"Failed to export for MuJoCo: {e}")
+        self._main_widget.export_for_engine("MuJoCo", "golf_robot_mujoco.urdf")
 
     def export_for_drake(self) -> None:
-        """Export URDF optimized for Drake."""
-        from PyQt6.QtWidgets import QFileDialog
-
-        file_path, _ = QFileDialog.getSaveFileName(
-            self,
-            "Export for Drake",
-            "golf_robot_drake.urdf",
-            "URDF Files (*.urdf);;XML Files (*.xml)",
-        )
-
-        if file_path:
-            try:
-                # Get Drake-optimized URDF
-                urdf_content = self.urdf_builder.get_urdf()
-                # Note: Currently exporting generic URDF. Drake requires standard URDF.
-                # Collision tags are already handled by URDFBuilder.
-
-                Path(file_path).write_text(urdf_content, encoding="utf-8")
-                self.status_bar.showMessage(f"Exported for Drake: {file_path}")
-                logger.info(f"Drake export saved to: {file_path}")
-            except (FileNotFoundError, OSError) as e:
-                logger.error(f"Error exporting for Drake: {e}")
-                QMessageBox.critical(self, "Error", f"Failed to export for Drake: {e}")
+        self._main_widget.export_for_engine("Drake", "golf_robot_drake.urdf")
 
     def export_for_pinocchio(self) -> None:
-        """Export URDF optimized for Pinocchio."""
-        from PyQt6.QtWidgets import QFileDialog
-
-        file_path, _ = QFileDialog.getSaveFileName(
-            self,
-            "Export for Pinocchio",
-            "golf_robot_pinocchio.urdf",
-            "URDF Files (*.urdf);;XML Files (*.xml)",
-        )
-
-        if file_path:
-            try:
-                # Get Pinocchio-optimized URDF
-                urdf_content = self.urdf_builder.get_urdf()
-                # Note: Pinocchio uses standard URDF loader. No specific tags needed.
-
-                Path(file_path).write_text(urdf_content, encoding="utf-8")
-                self.status_bar.showMessage(f"Exported for Pinocchio: {file_path}")
-                logger.info(f"Pinocchio export saved to: {file_path}")
-            except (FileNotFoundError, OSError) as e:
-                logger.error(f"Error exporting for Pinocchio: {e}")
-                QMessageBox.critical(
-                    self, "Error", f"Failed to export for Pinocchio: {e}"
-                )
+        self._main_widget.export_for_engine("Pinocchio", "golf_robot_pinocchio.urdf")
 
     def show_about(self) -> None:
-        """Show the about dialog."""
         QMessageBox.about(
             self,
             "About URDF Generator",
@@ -646,85 +297,13 @@ class URDFGeneratorWindow(QMainWindow):
             "Compatible with MuJoCo, Drake, and Pinocchio.",
         )
 
-    def _open_advanced_editor(self) -> None:
-        """Open the advanced URDF editor window."""
-        try:
-            from .urdf_editor_window import URDFEditorWindow
-
-            self._editor_window = URDFEditorWindow()
-
-            # Load current URDF if available
-            if self.current_file_path and self.current_file_path.exists():
-                self._editor_window.load_file(self.current_file_path)
-
-            self._editor_window.show()
-            self.status_bar.showMessage("Opened Advanced URDF Editor")
-        except ImportError as e:
-            logger.error(f"Failed to open advanced editor: {e}")
-            QMessageBox.critical(self, "Error", f"Failed to open editor: {e}")
-
-    def _open_frankenstein_mode(self) -> None:
-        """Open Frankenstein mode for combining URDFs."""
-        try:
-            from PyQt6.QtWidgets import QDialog, QVBoxLayout
-
-            from .frankenstein_editor import FrankensteinEditor
-
-            dialog = QDialog(self)
-            dialog.setWindowTitle("Frankenstein Mode - Combine URDFs")
-            dialog.setMinimumSize(1200, 700)
-
-            layout = QVBoxLayout(dialog)
-            frankenstein = FrankensteinEditor()
-            layout.addWidget(frankenstein)
-
-            # Load current URDF as source if available
-            if self.current_file_path and self.current_file_path.exists():
-                frankenstein.load_source(self.current_file_path)
-
-            dialog.exec()
-            self.status_bar.showMessage("Frankenstein mode closed")
-        except ImportError as e:
-            logger.error(f"Failed to open Frankenstein mode: {e}")
-            QMessageBox.critical(
-                self, "Error", f"Failed to open Frankenstein mode: {e}"
-            )
-
-    def _open_code_editor(self) -> None:
-        """Open the URDF code editor."""
-        try:
-            from PyQt6.QtWidgets import QDialog, QVBoxLayout
-
-            from .urdf_code_editor import URDFCodeEditorWidget
-
-            dialog = QDialog(self)
-            dialog.setWindowTitle("URDF Code Editor")
-            dialog.setMinimumSize(800, 600)
-
-            layout = QVBoxLayout(dialog)
-            code_editor = URDFCodeEditorWidget()
-            layout.addWidget(code_editor)
-
-            # Load current URDF content if available
-            if self.current_file_path and self.current_file_path.exists():
-                content = self.current_file_path.read_text(encoding="utf-8")
-                code_editor.set_content(content, str(self.current_file_path))
-
-            dialog.exec()
-            self.status_bar.showMessage("Code editor closed")
-        except ImportError as e:
-            logger.error(f"Failed to open code editor: {e}")
-            QMessageBox.critical(self, "Error", f"Failed to open code editor: {e}")
+    # ---- notepad (window-only feature) --------------------------------
 
     def _open_notepad(self) -> None:
-        """Open the notepad window."""
         if not HAS_NOTEPAD:
             return
-
         try:
-            # Check if we already have a notepad window open
             if not hasattr(self, "_notepad_window") or self._notepad_window is None:
-                # Use UpstreamDrift storage path
                 try:
                     from src.shared.python.paths import get_user_data_dir
 
@@ -736,24 +315,20 @@ class URDFGeneratorWindow(QMainWindow):
                     storage_dir=storage_dir, app_name="Upstream Drift"
                 )
 
-                # Position relative to main window
                 main_geo = self.geometry()
                 self._notepad_window.move(main_geo.x() + 100, main_geo.y() + 100)
 
             self._notepad_window.show()
             self._notepad_window.raise_()
             self._notepad_window.activateWindow()
-
         except (ImportError, OSError, RuntimeError) as e:
             logger.error(f"Error opening notepad: {e}")
             QMessageBox.warning(self, "Error", f"Failed to open notepad: {e}")
 
-    def closeEvent(self, event: Any) -> None:
-        """Handle window close event."""
-        from PyQt6.QtWidgets import QMessageBox
+    # ---- close handling ------------------------------------------------
 
-        # Check for unsaved changes
-        if self.urdf_builder.get_segment_count() > 0 and not self.current_file_path:
+    def closeEvent(self, event: Any) -> None:
+        if self._main_widget.has_unsaved_changes():
             reply = QMessageBox.question(
                 self,
                 "Unsaved Changes",
@@ -762,29 +337,28 @@ class URDFGeneratorWindow(QMainWindow):
                 | QMessageBox.StandardButton.Discard
                 | QMessageBox.StandardButton.Cancel,
             )
-
             if reply == QMessageBox.StandardButton.Save:
                 self.save_urdf()
-                if not self.current_file_path:  # Save was cancelled
+                if self._main_widget.current_file_path is None:
                     event.ignore()
                     return
             elif reply == QMessageBox.StandardButton.Cancel:
                 event.ignore()
                 return
 
+        self._main_widget.cleanup()
         event.accept()
         logger.info("URDF Generator window closed")
 
 
 def main() -> None:
-    """Main entry point for the URDF Generator."""
+    """Standalone entry point for the URDF Generator."""
     from src.shared.python.logging_pkg.logging_config import configure_gui_logging
 
     app = QApplication(sys.argv)
     app.setApplicationName("URDF Generator")
     app.setApplicationVersion("1.0.0")
 
-    # Set up logging
     configure_gui_logging()
 
     window = URDFGeneratorWindow()
