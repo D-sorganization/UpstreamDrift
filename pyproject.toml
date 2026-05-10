@@ -337,8 +337,10 @@ pythonpath = [
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-addopts = "-ra -q --strict-markers --strict-config --durations=20 -m \"not live_simulation and not requires_mocap_fixtures\""
+addopts = "-ra -q --strict-markers --strict-config --durations=20 -m \"not slow and not live_simulation and not e2e and not requires_network and not requires_mocap_fixtures\""
 asyncio_mode = "auto"
+timeout = 60
+timeout_method = "thread"
 # Prevent ImportPathMismatchError from conftest.py files in engine subdirectories
 norecursedirs = [
     "src",
@@ -354,6 +356,7 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
+    "e2e: full-stack smoke tests; nightly + release gate only",
     "core_only: tests that must pass in a default install with no optional engine extras",
     "requires_gl: Tests needing OpenGL/moderngl or a display",
     "headless_safe: marks tests verified to work in headless mode",

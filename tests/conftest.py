@@ -6,9 +6,23 @@ and adherence to the DRY principle.
 
 from __future__ import annotations
 
+import os
+
+# ---------------------------------------------------------------------------
+# Fleet Testing Standards §5: thread-safety + headless env vars.
+# Must be set BEFORE any heavy import (numpy, matplotlib, Qt, etc.) so that
+# C-extension thread pools and matplotlib/Qt backends pick them up.
+# See: docs/FLEET_TESTING_STANDARDS.md in the Repository_Management repo.
+# ---------------------------------------------------------------------------
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+os.environ.setdefault("MKL_NUM_THREADS", "1")
+os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
+os.environ.setdefault("MPLBACKEND", "Agg")
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
 import importlib
 import importlib.util
-import os
 import sys
 from collections.abc import Callable, Generator
 from dataclasses import dataclass
@@ -76,6 +90,34 @@ if "PyQt6" not in sys.modules:
     sys.modules["PyQt6.QtGui"] = pyqt_mock.QtGui
     sys.modules["PyQt6.QtWidgets"] = pyqt_mock.QtWidgets
     sys.modules["PyQt6.QtWebEngineWidgets"] = pyqt_mock.QtWebEngineWidgets
+
+
+@pytest.fixture(autouse=True)
+def _no_real_network_in_unit_lane(request, monkeypatch):
+    """Block real outbound HTTP from unit tests by default.
+
+    Fleet Testing Standards §5: unit-marked tests must not make real
+    network calls. Tests that need the network must be marked
+    ``requires_network`` (and typically ``slow``).
+    """
+    if "unit" not in request.keywords:
+        return
+
+    def _refuse(*_a, **_kw):
+        raise RuntimeError(
+            "Unit test made a real network call. Mock with `responses` "
+            "or `pytest-httpx`, or mark the test "
+            "`@pytest.mark.requires_network`."
+        )
+
+    for module in ("httpx", "requests", "urllib.request"):
+        try:
+            mod = __import__(module, fromlist=["*"])
+        except ImportError:
+            continue
+        for attr in ("get", "post", "put", "delete", "request"):
+            if hasattr(mod, attr):
+                monkeypatch.setattr(mod, attr, _refuse, raising=False)
 
 
 @dataclass(frozen=True)
