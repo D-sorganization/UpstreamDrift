@@ -122,6 +122,8 @@ class ChatServiceBase(abc.ABC):
             self._cleanup_expired()
 
             if session_id and session_id in self._sessions:
+                # Move to end of OrderedDict to preserve true LRU order
+                self._sessions.move_to_end(session_id)
                 self._timestamps[session_id] = time.monotonic()
                 return self._sessions[session_id]
 
