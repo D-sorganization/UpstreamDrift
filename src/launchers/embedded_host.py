@@ -228,8 +228,13 @@ class EmbeddedHostWidget(QWidget):
             # ``close_tab(True)`` does not silently match index 1.
             return None
         if isinstance(target, int):
+            # Use indexOf() at lookup time to handle movable tabs correctly.
+            # With setMovable(True), tab positions can change via drag-reorder,
+            # so cached record.index values may be stale. By computing the
+            # current index from the tab widget, we ensure the correct tab
+            # is matched even after reordering.
             for record in self._active_tabs.values():
-                if record.index == target:
+                if self._tab_widget.indexOf(record.widget) == target:
                     return record
             return None
         if isinstance(target, str):
