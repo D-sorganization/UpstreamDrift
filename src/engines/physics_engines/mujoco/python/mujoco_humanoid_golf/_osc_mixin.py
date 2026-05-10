@@ -40,8 +40,6 @@ class OperationalSpaceControlMixin:
         # MuJoCo 3.3+ may require reshaped arrays - try both approaches
         if not (target_position is not None):
             raise ValueError("target_position must be provided")
-        if not (target_position is not None):
-            raise ValueError("target_position must be provided")
         try:
             jacp = np.zeros((3, self.model.nv))
             jacr = np.zeros((3, self.model.nv))
