@@ -49,6 +49,29 @@ class AdapterFactory:
 
     _cache: dict[str, BaseAgentAdapter] = {}
 
+    # Provider → (module_path, class_name, env_var_hint) for cloud providers
+    _CLOUD_PROVIDERS: dict[str, tuple[str, str, str]] = {
+        "openai": (
+            "src.shared.python.ai.adapters.openai_adapter",
+            "OpenAIAdapter",
+            "OPENAI_API_KEY",
+        ),
+        "anthropic": (
+            "src.shared.python.ai.adapters.anthropic_adapter",
+            "AnthropicAdapter",
+            "ANTHROPIC_API_KEY",
+        ),
+        "gemini": (
+            "src.shared.python.ai.adapters.gemini_adapter",
+            "GeminiAdapter",
+            "GEMINI_API_KEY",
+        ),
+    }
+
+    _SUPPORTED_PROVIDERS = frozenset(
+        {"ollama", "openai", "codex", "anthropic", "gemini", "cline"}
+    )
+
     @classmethod
     def create(
         cls,
@@ -72,59 +95,83 @@ class AdapterFactory:
             Configured adapter instance.
 
         Raises:
-            ValueError: If provider is unknown.
+            ValueError: If provider is unknown or empty.
+
+        Contract:
+            Pre: provider is a non-empty string.
+            Post: returned adapter is a BaseAgentAdapter instance.
         """
+        if not provider or not provider.strip():
+            raise ValueError("provider must be a non-empty string")
+
         provider = provider.lower().strip()
 
+        # Local adapters — no API key required
         if provider == "ollama":
             from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
 
             return OllamaAdapter(host=host, model=model, timeout=timeout)
-
-        if provider == "openai" or provider == "codex":
-            from src.shared.python.ai.adapters.openai_adapter import OpenAIAdapter
-
-            key = api_key or cls._resolve_api_key("openai")
-            if not key:
-                raise ValueError(
-                    "OpenAI API key required. Set OPENAI_API_KEY or use "
-                    "CredentialManager.store_api_key('openai', key)"
-                )
-            return OpenAIAdapter(api_key=key, model=model, timeout=timeout)
-
-        if provider == "anthropic":
-            from src.shared.python.ai.adapters.anthropic_adapter import (
-                AnthropicAdapter,
-            )
-
-            key = api_key or cls._resolve_api_key("anthropic")
-            if not key:
-                raise ValueError(
-                    "Anthropic API key required. Set ANTHROPIC_API_KEY or use "
-                    "CredentialManager.store_api_key('anthropic', key)"
-                )
-            return AnthropicAdapter(api_key=key, model=model, timeout=timeout)
-
-        if provider == "gemini":
-            from src.shared.python.ai.adapters.gemini_adapter import GeminiAdapter
-
-            key = api_key or cls._resolve_api_key("gemini")
-            if not key:
-                raise ValueError(
-                    "Gemini API key required. Set GEMINI_API_KEY or use "
-                    "CredentialManager.store_api_key('gemini', key)"
-                )
-            return GeminiAdapter(api_key=key, model=model)
 
         if provider == "cline":
             from src.shared.python.ai.adapters.cline_adapter import ClineAdapter
 
             return ClineAdapter(host=host, timeout=timeout)
 
+        # "codex" is an alias for OpenAI
+        lookup_key = "openai" if provider == "codex" else provider
+
+        # Cloud adapters — DRY key resolution
+        if lookup_key in cls._CLOUD_PROVIDERS:
+            return cls._create_cloud_adapter(
+                lookup_key, api_key=api_key, model=model, timeout=timeout
+            )
+
         raise ValueError(
             f"Unknown provider: {provider}. "
-            f"Supported: ollama, openai, anthropic, gemini, cline"
+            f"Supported: {', '.join(sorted(cls._SUPPORTED_PROVIDERS))}"
         )
+
+    @classmethod
+    def _create_cloud_adapter(
+        cls,
+        provider: str,
+        *,
+        api_key: str | None = None,
+        model: str | None = None,
+        timeout: float | None = None,
+    ) -> BaseAgentAdapter:
+        """Create a cloud provider adapter with key resolution (DRY helper).
+
+        Args:
+            provider: Canonical provider name (openai, anthropic, gemini).
+            api_key: Explicit API key override.
+            model: Model override.
+            timeout: Timeout override.
+
+        Returns:
+            Configured cloud adapter.
+
+        Raises:
+            ValueError: If no API key available.
+        """
+        import importlib
+
+        module_path, class_name, env_hint = cls._CLOUD_PROVIDERS[provider]
+
+        key = api_key or cls._resolve_api_key(provider)
+        if not key:
+            raise ValueError(
+                f"{provider.title()} API key required. Set {env_hint} or use "
+                f"CredentialManager.store_api_key('{provider}', key)"
+            )
+
+        module = importlib.import_module(module_path)
+        adapter_cls = getattr(module, class_name)
+
+        # Gemini adapter doesn't accept timeout
+        if provider == "gemini":
+            return adapter_cls(api_key=key, model=model)
+        return adapter_cls(api_key=key, model=model, timeout=timeout)
 
     @classmethod
     def get_best_available(

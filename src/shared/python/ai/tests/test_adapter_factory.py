@@ -40,6 +40,20 @@ class TestAdapterFactory:
         with pytest.raises(ValueError, match="Unknown provider"):
             AdapterFactory.create("nonexistent")
 
+    def test_create_empty_provider_raises(self) -> None:
+        """DbC: empty provider string is a precondition violation."""
+        from src.shared.python.ai.adapters.factory import AdapterFactory
+
+        with pytest.raises(ValueError, match="non-empty"):
+            AdapterFactory.create("")
+
+    def test_create_whitespace_provider_raises(self) -> None:
+        """DbC: whitespace-only provider string is a precondition violation."""
+        from src.shared.python.ai.adapters.factory import AdapterFactory
+
+        with pytest.raises(ValueError, match="non-empty"):
+            AdapterFactory.create("   ")
+
     def test_create_openai_without_key_raises(self) -> None:
         from src.shared.python.ai.adapters.factory import AdapterFactory
 
