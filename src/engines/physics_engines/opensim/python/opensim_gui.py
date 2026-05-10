@@ -87,21 +87,41 @@ class OpenSimGolfGUI(QMainWindow):
 
     # The original public surface delegated through the central widget
     # so existing callers (and any downstream tests) continue to work.
+    # These properties expose setters so callers that previously assigned
+    # plain attributes on ``OpenSimGolfGUI`` (e.g. reusing a window with a
+    # new ``model_path`` or test harnesses injecting ``model``/``result``)
+    # continue to work unchanged.
     @property
     def model(self) -> "GolfSwingModel | None":
         return self._main_widget.model
+
+    @model.setter
+    def model(self, value: "GolfSwingModel | None") -> None:
+        self._main_widget.model = value
 
     @property
     def model_path(self) -> str | None:
         return self._main_widget.model_path
 
+    @model_path.setter
+    def model_path(self, value: str | None) -> None:
+        self._main_widget.model_path = value
+
     @property
     def result(self) -> Any:
         return self._main_widget.result
 
+    @result.setter
+    def result(self, value: Any) -> None:
+        self._main_widget.result = value
+
     @property
     def initialization_error(self) -> str | None:
         return self._main_widget.initialization_error
+
+    @initialization_error.setter
+    def initialization_error(self, value: str | None) -> None:
+        self._main_widget.initialization_error = value
 
     @property
     def btn_run(self) -> QPushButton:
