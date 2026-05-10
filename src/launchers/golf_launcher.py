@@ -203,6 +203,11 @@ class GolfLauncher(
         self.available_models: dict[str, Any] = {}
         self.special_app_lookup: dict[str, Any] = {}
         self.current_filter_text = ""
+        # Initialize registry and engine_manager to None to preserve invariant
+        # that these attributes always exist (required by Settings dialog etc.)
+        # They will be populated by _init_registry() or update_startup_results()
+        self.registry: Any = None
+        self.engine_manager: Any = None
 
     def _init_managers(self) -> None:
         self._setup_process_console()
