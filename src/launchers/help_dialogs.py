@@ -164,16 +164,60 @@ class ContextHelpDock(QDockWidget):
         if model_id is None:
             raise ValueError("model_id must be provided")
         docs_dir = REPOS_ROOT / "docs" / "engines"
+        docs_user = REPOS_ROOT / "docs" / "user_guide"
 
+        # Physics Engines
         if "mujoco" in model_id:
             return docs_dir / "mujoco.md"
         if "drake" in model_id:
             return docs_dir / "drake.md"
         if "pinocchio" in model_id:
             return docs_dir / "pinocchio.md"
+        if "opensim" in model_id:
+            return docs_dir / "opensim.md"
+        if "myosim" in model_id or "myosuite" in model_id:
+            return docs_dir / "myosim.md"
         if "matlab" in model_id:
             return docs_dir / "matlab.md"
+        if "simscape" in model_id:
+            return docs_dir / "simscape.md"
+
+        # Tools and Applications
         if "urdf" in model_id:
             return REPOS_ROOT / "tools" / "urdf_generator" / "README.md"
+        if "c3d" in model_id or "motion_capture" in model_id:
+            return docs_user / "motion_pipeline" / "compat.md"
+        if "openpose" in model_id:
+            return docs_dir / "openpose.md"
+        if "mediapipe" in model_id:
+            return docs_user / "tools" / "mediapipe.md"
+        if "model_explorer" in model_id:
+            return docs_user / "tools" / "model_explorer.md"
+        if "data_explorer" in model_id:
+            return docs_user / "tools" / "data_explorer.md"
+        if "video_analyzer" in model_id:
+            return docs_user / "tools" / "video_analyzer.md"
+        if "putting_green" in model_id or "pendulum_putter" in model_id:
+            return docs_user / "models" / "pendulum_putter.md"
+        if "project_map" in model_id:
+            return REPOS_ROOT / "docs" / "project_map.md"
+        if "movement_optimizer" in model_id:
+            return REPOS_ROOT / "Movement_Optimizer" / "README.md"
+        if "shot_tracer" in model_id:
+            return REPOS_ROOT / "tools" / "shot_tracer" / "README.md"
+
+        # Fallback: Try to find engine-specific README files
+        engine_dirs = {
+            "mujoco": REPOS_ROOT / "src" / "engines" / "physics_engines" / "mujoco",
+            "drake": REPOS_ROOT / "src" / "engines" / "physics_engines" / "drake",
+            "pinocchio": REPOS_ROOT / "src" / "engines" / "physics_engines" / "pinocchio",
+            "opensim": REPOS_ROOT / "src" / "engines" / "physics_engines" / "opensim",
+            "myosuite": REPOS_ROOT / "src" / "engines" / "physics_engines" / "myosuite",
+        }
+        for engine, base_dir in engine_dirs.items():
+            if engine in model_id.lower():
+                readme = base_dir / "README.md"
+                if readme.exists():
+                    return readme
 
         return None
