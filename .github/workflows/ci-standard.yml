@@ -660,7 +660,7 @@ jobs:
                 -n 0 \
                 --timeout=60 \
                 --timeout-method=thread \
-                -m "not slow and not benchmark and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
+                -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
                 --no-cov \
                 --tb=short \
                 -v
@@ -711,7 +711,7 @@ jobs:
             --ignore=tests/shared_contracts \
             --ignore=tests/heavy_integration \
             --ignore=tests/benchmarks \
-            -m "not slow and not benchmark and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
+            -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
             --cov=src \
             --cov-report=term-missing \
             --cov-report=xml:coverage.xml \
@@ -851,7 +851,7 @@ jobs:
               raise SystemExit(f"PostgreSQL did not accept SQL connections: {last_error!r}")
           PY
           python3 -m pytest -p pytest_timeout tests/integration/test_alembic_round_trip.py \
-            -m "not slow and not benchmark and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
+            -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
             --timeout=180 \
             --timeout-method=thread \
             --durations=10 \
