@@ -125,7 +125,7 @@ def _get_transport() -> FileTransport:
     return _TRANSPORT
 
 
-def publish(channel: str, payload: Any) -> None:
+def publish(channel: str, payload: Any, transport: str | None = None) -> None:
     """Publish *payload* on *channel*.
 
     *payload* must be JSON-serialisable. Errors are logged and swallowed
@@ -133,11 +133,18 @@ def publish(channel: str, payload: Any) -> None:
     path. The default transport is the file transport; the websocket
     transport can be opted into via ``REALTIME_TRANSPORT=ws`` in the
     future (not implemented here).
+
+    Args:
+        channel: Channel to publish on (e.g., "scope/topic/sub")
+        payload: JSON-serialisable dict to publish
+        transport: Optional transport override ("file" or "ws"). If not
+            provided, uses REALTIME_TRANSPORT env var or defaults to "file".
     """
     if not isinstance(channel, str) or not channel.strip():
         logger.warning("realtime.publish: invalid channel %r", channel)
         return
-    transport = os.environ.get("REALTIME_TRANSPORT", "file")
+    if transport is None:
+        transport = os.environ.get("REALTIME_TRANSPORT", "file")
     if transport != "file":
         logger.debug(
             "realtime.publish: transport %r not wired in this build, "
