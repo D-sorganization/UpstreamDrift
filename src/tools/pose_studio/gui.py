@@ -13,6 +13,7 @@ each widget owns its own internal state.
 from __future__ import annotations
 
 import sys
+from typing import Any
 
 import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
@@ -22,6 +23,11 @@ from src.shared.python.pose_interchange.canonical import (
     CanonicalPose,
     canonical_from_reference_setup,
     canonical_zero_pose,
+)
+from src.shared.python.launcher_embed import (
+    EmbedCapabilities,
+    EmbeddableTool,
+    register_embeddable_tool,
 )
 from src.tools.pose_studio.controllers import (
     EngineController,
@@ -46,8 +52,14 @@ _LOAD_TOOLTIP = (
 )
 
 
-class PoseStudioWindow(QtWidgets.QMainWindow):
-    """Top-level :class:`QMainWindow` for the Pose Studio tool."""
+class MainWidget(QtWidgets.QWidget):
+    """Central widget containing the Pose Studio UI content.
+
+    This widget contains all the Pose Studio UI components and can be
+    embedded inside a QMainWindow shell or hosted directly by the launcher.
+
+    See PoseStudioWindow for the standalone QMainWindow wrapper.
+    """
 
     def __init__(
         self,
@@ -57,15 +69,12 @@ class PoseStudioWindow(QtWidgets.QMainWindow):
         super().__init__(parent)
         if initial_engine not in SUPPORTED_ENGINES:
             initial_engine = SUPPORTED_ENGINES[0]
-        self.setWindowTitle("Pose Studio")
-        self.resize(1200, 800)
 
         self._engine_controller = EngineController(initial_engine)
         self._history = HistoryController(canonical_zero_pose())
 
         self._build_widgets(initial_engine)
         self._build_layout()
-        self._build_menu()
         self._wire_signals()
 
         # Push the initial pose through the engine and refresh the view.
@@ -99,8 +108,7 @@ class PoseStudioWindow(QtWidgets.QMainWindow):
         self.btn_redo.clicked.connect(self._on_redo)
 
     def _build_layout(self) -> None:
-        central = QtWidgets.QWidget()
-        outer = QtWidgets.QVBoxLayout(central)
+        outer = QtWidgets.QVBoxLayout(self)
         outer.setContentsMargins(8, 8, 8, 8)
 
         # Top bar: engine picker on the left, units badge on the right.
@@ -125,69 +133,6 @@ class PoseStudioWindow(QtWidgets.QMainWindow):
         footer.addWidget(self.btn_load)
         footer.addWidget(self.btn_save)
         outer.addLayout(footer)
-
-        self.setCentralWidget(central)
-
-    def _build_menu(self) -> None:
-        # QMainWindow.menuBar() and QMenuBar.addMenu() return Optional in
-        # the Qt stubs, but always return real objects on a constructed
-        # main window. Pin them with asserts once here so mypy can follow
-        # without scattering casts through every addAction call.
-        menubar = self.menuBar()
-        assert menubar is not None  # noqa: S101 — Qt invariant
-
-        file_menu = menubar.addMenu("&File")
-        edit_menu = menubar.addMenu("&Edit")
-        pose_menu = menubar.addMenu("&Pose Library")
-        view_menu = menubar.addMenu("&View")
-        assert file_menu is not None  # noqa: S101 — Qt invariant
-        assert edit_menu is not None  # noqa: S101 — Qt invariant
-        assert pose_menu is not None  # noqa: S101 — Qt invariant
-        assert view_menu is not None  # noqa: S101 — Qt invariant
-
-        # File menu.
-        act_save = QtGui.QAction("&Save Pose...", self)
-        act_save.setToolTip(_SAVE_TOOLTIP)
-        act_save.triggered.connect(self._on_save_clicked)
-        file_menu.addAction(act_save)
-
-        act_load = QtGui.QAction("&Load Pose...", self)
-        act_load.setToolTip(_LOAD_TOOLTIP)
-        act_load.triggered.connect(self._on_load_clicked)
-        file_menu.addAction(act_load)
-        file_menu.addSeparator()
-        act_quit = QtGui.QAction("&Quit", self)
-        act_quit.triggered.connect(self.close)
-        file_menu.addAction(act_quit)
-
-        # Edit menu.
-        self.act_undo = QtGui.QAction("&Undo", self)
-        self.act_undo.setShortcut(QtGui.QKeySequence("Ctrl+Z"))
-        self.act_undo.triggered.connect(self._on_undo)
-        edit_menu.addAction(self.act_undo)
-        self.act_redo = QtGui.QAction("&Redo", self)
-        self.act_redo.setShortcut(QtGui.QKeySequence("Ctrl+Shift+Z"))
-        self.act_redo.triggered.connect(self._on_redo)
-        edit_menu.addAction(self.act_redo)
-
-        # Pose Library menu.
-        act_zero = QtGui.QAction("Load &Zero Pose", self)
-        act_zero.setToolTip("Reset to canonical_zero_pose() (T-pose at origin).")
-        act_zero.triggered.connect(self._on_load_zero)
-        pose_menu.addAction(act_zero)
-
-        act_ref = QtGui.QAction("Load &Reference Golfer Setup", self)
-        act_ref.setToolTip(
-            "Reset to canonical_from_reference_setup() (anatomical address)."
-        )
-        act_ref.triggered.connect(self._on_load_reference)
-        pose_menu.addAction(act_ref)
-
-        # View menu.
-        self.act_show_radians = QtGui.QAction("Show angles in &radians", self)
-        self.act_show_radians.setCheckable(True)
-        self.act_show_radians.toggled.connect(self.joint_panel.set_show_radians)
-        view_menu.addAction(self.act_show_radians)
 
     def _wire_signals(self) -> None:
         self.engine_picker.engine_selected.connect(self._on_engine_selected)
@@ -270,6 +215,150 @@ class PoseStudioWindow(QtWidgets.QMainWindow):
         self.btn_redo.setEnabled(self._history.can_redo)
         self.act_undo.setEnabled(self._history.can_undo)
         self.act_redo.setEnabled(self._history.can_redo)
+
+    def create_menu_bar(self, parent: QtWidgets.QMainWindow) -> QtGui.QMenuBar:
+        """Create and return a menu bar for the given parent window.
+        
+        Args:
+            parent: The QMainWindow that will host the menu bar.
+            
+        Returns:
+            The created QMenuBar with all Pose Studio menus.
+        """
+        menubar = parent.menuBar()
+        assert menubar is not None  # noqa: S101 — Qt invariant
+
+        file_menu = menubar.addMenu("&File")
+        edit_menu = menubar.addMenu("&Edit")
+        pose_menu = menubar.addMenu("&Pose Library")
+        view_menu = menubar.addMenu("&View")
+        assert file_menu is not None  # noqa: S101 — Qt invariant
+        assert edit_menu is not None  # noqa: S101 — Qt invariant
+        assert pose_menu is not None  # noqa: S101 — Qt invariant
+        assert view_menu is not None  # noqa: S101 — Qt invariant
+
+        # File menu.
+        act_save = QtGui.QAction("&Save Pose...", parent)
+        act_save.setToolTip(_SAVE_TOOLTIP)
+        act_save.triggered.connect(self._on_save_clicked)
+        file_menu.addAction(act_save)
+
+        act_load = QtGui.QAction("&Load Pose...", parent)
+        act_load.setToolTip(_LOAD_TOOLTIP)
+        act_load.triggered.connect(self._on_load_clicked)
+        file_menu.addAction(act_load)
+        file_menu.addSeparator()
+        act_quit = QtGui.QAction("&Quit", parent)
+        act_quit.triggered.connect(parent.close)
+        file_menu.addAction(act_quit)
+
+        # Edit menu.
+        self.act_undo = QtGui.QAction("&Undo", parent)
+        self.act_undo.setShortcut(QtGui.QKeySequence("Ctrl+Z"))
+        self.act_undo.triggered.connect(self._on_undo)
+        edit_menu.addAction(self.act_undo)
+        self.act_redo = QtGui.QAction("&Redo", parent)
+        self.act_redo.setShortcut(QtGui.QKeySequence("Ctrl+Shift+Z"))
+        self.act_redo.triggered.connect(self._on_redo)
+        edit_menu.addAction(self.act_redo)
+
+        # Pose Library menu.
+        act_zero = QtGui.QAction("Load &Zero Pose", parent)
+        act_zero.setToolTip("Reset to canonical_zero_pose() (T-pose at origin).")
+        act_zero.triggered.connect(self._on_load_zero)
+        pose_menu.addAction(act_zero)
+
+        act_ref = QtGui.QAction("Load &Reference Golfer Setup", parent)
+        act_ref.setToolTip(
+            "Reset to canonical_from_reference_setup() (anatomical address)."
+        )
+        act_ref.triggered.connect(self._on_load_reference)
+        pose_menu.addAction(act_ref)
+
+        # View menu.
+        self.act_show_radians = QtGui.QAction("Show angles in &radians", parent)
+        self.act_show_radians.setCheckable(True)
+        self.act_show_radians.toggled.connect(self.joint_panel.set_show_radians)
+        view_menu.addAction(self.act_show_radians)
+
+        return menubar
+
+
+class PoseStudioWindow(QtWidgets.QMainWindow):
+    """Top-level :class:`QMainWindow` for the Pose Studio tool.
+
+    This QMainWindow wraps the MainWidget content and provides a standalone
+    window for running Pose Studio independently of the launcher.
+    """
+
+    def __init__(
+        self,
+        initial_engine: str = "drake",
+        parent: QtWidgets.QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("Pose Studio")
+        self.resize(1200, 800)
+
+        # Create the main widget and set it as central widget
+        self._main_widget = MainWidget(initial_engine, self)
+        self.setCentralWidget(self._main_widget)
+
+        # Create menu bar
+        self._main_widget.create_menu_bar(self)
+
+    @property
+    def main_widget(self) -> MainWidget:
+        """Return the embedded MainWidget."""
+        return self._main_widget
+
+
+class _EmbedAdapter:
+    """Embed adapter for Pose Studio.
+
+    Implements the EmbeddableTool protocol for the launcher to embed
+    Pose Studio as a tab or dock widget.
+    """
+
+    tool_id = "pose_studio"
+
+    def __init__(self) -> None:
+        self._widget: MainWidget | None = None
+
+    def embed_capabilities(self) -> EmbedCapabilities:
+        return EmbedCapabilities(
+            supports_embedded=True,
+            prefers_dock=False,  # tab is fine
+            min_size=(640, 480),
+            requires_separate_qapplication=False,
+        )
+
+    def create_main_widget(self, parent: Any) -> Any:
+        """Create and return the MainWidget for embedding.
+
+        Args:
+            parent: The intended Qt parent widget.
+
+        Returns:
+            MainWidget instance for embedding.
+        """
+        self._widget = MainWidget(parent=parent)
+        return self._widget
+
+    def cleanup(self) -> None:
+        """Release any resources held by the embedded widget."""
+        self._widget = None
+
+    def is_dirty(self) -> bool:
+        """Return True if the tool has unsaved state.
+
+        Pose Studio does not currently track dirty state.
+        """
+        return False
+
+
+# Register the embed adapter when this module is imported
+register_embeddable_tool(_EmbedAdapter())
 
 
 def main(argv: list[str] | None = None) -> int:
