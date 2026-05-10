@@ -373,6 +373,71 @@ class PinocchioGUI(
         self._export_statistics()
 
 
+class MainWidget(QtWidgets.QWidget):
+    """Embeddable Pinocchio Dashboard widget.
+
+    Wraps a :class:`PinocchioGUI` instance with ``Qt.WindowType.Widget``
+    flags so the launcher can host the dashboard as a tab / dock without
+    spawning a top-level window.
+
+    The wrapped window is exposed as :attr:`inner_main_window` for
+    callers that need access to the dashboard's tabs, sliders, or
+    recorder (e.g. tests).
+
+    The historical entry point — :class:`PinocchioGUI` ``QMainWindow`` —
+    still exists for back-compat (standalone ``python gui.py``), but its
+    contents are also exposed through :class:`MainWidget` defined here.
+    Embeddable hosts construct :class:`MainWidget` directly and never
+    see the top-level ``QMainWindow`` shell.
+
+    See Subtask 5 / #4998 of EPIC #4993.
+    """
+
+    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
+        super().__init__(parent)
+
+        # Build the dashboard as a child window. ``Qt.WindowType.Widget``
+        # tells Qt to treat this ``QMainWindow`` as a regular child
+        # widget rather than a top-level window — that way it lays out
+        # cleanly inside our ``QHBoxLayout`` instead of popping into its
+        # own OS window.
+        self._inner: PinocchioGUI = PinocchioGUI()
+        self._inner.setWindowFlags(QtCore.Qt.WindowType.Widget)
+        self._inner.setParent(self)
+
+        layout = QtWidgets.QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self._inner)
+
+        logger.info("Pinocchio MainWidget initialized")
+
+    # ---- accessors -----------------------------------------------------
+
+    @property
+    def inner_main_window(self) -> "PinocchioGUI":
+        """Return the wrapped :class:`PinocchioGUI` ``QMainWindow``."""
+        return self._inner
+
+    # ---- lifecycle -----------------------------------------------------
+
+    def cleanup(self) -> None:
+        """Best-effort teardown of simulation timers.
+
+        Stops the periodic physics-loop timer so the host process does
+        not keep firing Qt timers after the embedded tab is closed.
+        Idempotent and defensive: never raises.
+        """
+        try:
+            timer = getattr(self._inner, "timer", None)
+            if timer is not None:
+                try:
+                    timer.stop()
+                except Exception:  # pragma: no cover - defensive
+                    logger.debug("PinocchioGUI.timer.stop raised", exc_info=True)
+        except Exception:  # pragma: no cover - defensive
+            logger.exception("Pinocchio MainWidget cleanup raised")
+
+
 def main() -> None:
     """Main entry point for the GUI application."""
     app = QtWidgets.QApplication(sys.argv)

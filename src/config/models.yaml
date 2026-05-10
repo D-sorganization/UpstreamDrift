@@ -37,6 +37,7 @@ models:
       category: "physics_engine"
       logo: "assets/pinocchio.png"
       status: "ready"
+      default_launch: "tab"
 
   - id: "opensim_golf"
     name: "OpenSim"
