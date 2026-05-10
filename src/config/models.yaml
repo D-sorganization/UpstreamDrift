@@ -49,6 +49,7 @@ models:
       category: "physics_engine"
       logo: "assets/opensim.png"
       status: "ready"
+      default_launch: "tab"
 
   - id: "myosim_suite"
     name: "MyoSuite"

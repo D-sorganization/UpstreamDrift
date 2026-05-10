@@ -6,6 +6,12 @@ A PyQt6 interface for the OpenSim Golf Model.
 IMPORTANT: This GUI requires OpenSim to be properly installed.
 There is NO demo or fallback mode - if OpenSim is unavailable,
 clear error dialogs will be shown.
+
+This module also exposes :class:`MainWidget`, a plain ``QWidget`` that
+hosts the same dashboard so the launcher can embed it as a tab or dock.
+The standalone ``main()`` entry point continues to use
+:class:`OpenSimGolfGUI` directly as a top-level window. Part of
+Subtask 5 / #4998 of EPIC #4993.
 """
 
 import sys
@@ -62,6 +68,12 @@ except ImportError:
 class OpenSimGolfGUI(QMainWindow):
     """OpenSim Golf Simulation GUI.
 
+    Thin :class:`QMainWindow` shell that hosts a :class:`MainWidget` as
+    its central widget. All dashboard logic lives on
+    :class:`MainWidget`; this class exists so that the standalone
+    ``python opensim_gui.py [model.osim]`` entry point continues to open
+    a top-level window with the expected title and size.
+
     This GUI requires a valid OpenSim model file. There is NO fallback
     or demo mode - errors are shown clearly when something fails.
     """
@@ -70,6 +82,81 @@ class OpenSimGolfGUI(QMainWindow):
         super().__init__()
         self.setWindowTitle("OpenSim Golf Interface")
         self.resize(1000, 800)
+        self._main_widget = MainWidget(self, model_path=model_path)
+        self.setCentralWidget(self._main_widget)
+
+    # The original public surface delegated through the central widget
+    # so existing callers (and any downstream tests) continue to work.
+    @property
+    def model(self) -> "GolfSwingModel | None":
+        return self._main_widget.model
+
+    @property
+    def model_path(self) -> str | None:
+        return self._main_widget.model_path
+
+    @property
+    def result(self) -> Any:
+        return self._main_widget.result
+
+    @property
+    def initialization_error(self) -> str | None:
+        return self._main_widget.initialization_error
+
+    @property
+    def btn_run(self) -> QPushButton:
+        return self._main_widget.btn_run
+
+    @property
+    def btn_load(self) -> QPushButton:
+        return self._main_widget.btn_load
+
+    @property
+    def btn_help(self) -> QPushButton:
+        return self._main_widget.btn_help
+
+    @property
+    def lbl_status(self) -> QLabel:
+        return self._main_widget.lbl_status
+
+    @property
+    def lbl_details(self) -> QLabel:
+        return self._main_widget.lbl_details
+
+    @property
+    def fig(self) -> Figure:
+        return self._main_widget.fig
+
+    @property
+    def canvas(self) -> FigureCanvas:
+        return self._main_widget.canvas
+
+    def run_simulation(self) -> None:
+        self._main_widget.run_simulation()
+
+    def plot_results(self) -> None:
+        self._main_widget.plot_results()
+
+
+class MainWidget(QWidget):
+    """Embeddable :class:`QWidget` hosting the OpenSim Golf dashboard.
+
+    Carries the full dashboard implementation that previously lived on
+    :class:`OpenSimGolfGUI`. The launcher's embed adapter constructs an
+    instance of this widget directly; the standalone
+    :class:`OpenSimGolfGUI` window also uses it as its central widget.
+
+    Implementation note — :class:`QMessageBox` instances are parented to
+    ``self`` so they remain modal to the embedded tab when hosted inside
+    the launcher.
+    """
+
+    def __init__(
+        self,
+        parent: QWidget | None = None,
+        model_path: str | None = None,
+    ) -> None:
+        super().__init__(parent)
 
         # Model state
         self.model: GolfSwingModel | None = None
@@ -190,10 +277,8 @@ class OpenSimGolfGUI(QMainWindow):
         self.lbl_status.setStyleSheet(f"color: {color}; font-weight: bold;")
 
     def init_ui(self) -> None:
-        """Build the main window layout and control widgets."""
-        central = QWidget()
-        self.setCentralWidget(central)
-        layout = QVBoxLayout(central)
+        """Build the dashboard layout and control widgets on ``self``."""
+        layout = QVBoxLayout(self)
 
         # Tab widget: Simulation | Screw Kinematics
         self._tabs = QTabWidget()
@@ -422,6 +507,17 @@ Use the URDF Generator from the main launcher to design models visually.
 
 For more help, see the documentation in docs/ folder.
         """.strip()
+
+    def cleanup(self) -> None:
+        """Best-effort cleanup of dashboard resources.
+
+        Idempotent: hosts may invoke :meth:`cleanup` multiple times during
+        shutdown. Currently the OpenSim dashboard does not own
+        long-running timers or background threads, so this is a no-op
+        beyond dropping the model reference.
+        """
+        self.model = None
+        self.result = None
 
 
 def main() -> None:
