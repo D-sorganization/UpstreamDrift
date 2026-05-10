@@ -191,3 +191,15 @@ class TestChatToolBridgeExecution:
         result = await bridge.handle_tool_call("s1", "tool", {})
         assert result["success"] is False
         assert "kaboom" in result["error"]
+
+    async def test_dbc_empty_session_id_raises(self) -> None:
+        """DbC: empty session_id is a precondition violation."""
+        bridge = ChatToolBridge(registry=MagicMock())
+        with pytest.raises(ValueError, match="session_id"):
+            await bridge.handle_tool_call("", "tool", {})
+
+    async def test_dbc_empty_tool_name_raises(self) -> None:
+        """DbC: empty tool_name is a precondition violation."""
+        bridge = ChatToolBridge(registry=MagicMock())
+        with pytest.raises(ValueError, match="tool_name"):
+            await bridge.handle_tool_call("s1", "", {})

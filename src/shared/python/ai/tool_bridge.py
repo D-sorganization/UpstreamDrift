@@ -107,7 +107,16 @@ class ChatToolBridge:
 
         Returns:
             Dict with keys: success, result, error, execution_time_s.
+
+        Contract:
+            Pre: session_id is a non-empty string.
+            Pre: tool_name is a non-empty string.
+            Pre: arguments is a dict (may be empty).
         """
+        if not session_id or not session_id.strip():
+            raise ValueError("session_id must be a non-empty string")
+        if not tool_name or not tool_name.strip():
+            raise ValueError("tool_name must be a non-empty string")
         if self._registry is None:
             return _result(
                 success=False,
