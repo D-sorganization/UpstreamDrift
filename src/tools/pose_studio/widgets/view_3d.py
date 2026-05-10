@@ -128,7 +128,31 @@ class View3D(QtWidgets.QWidget):
         coords = np.array([skeleton.points[n] for n in names], dtype=float)
 
         self._landmarks_order = names
+        self._update_skeleton_coords(coords)
 
+    def update_from_service_transforms(
+        self, transforms: Mapping[str, tuple[np.ndarray, np.ndarray]]
+    ) -> None:
+        """Re-draw the skeleton from service-provided link transforms.
+
+        Parameters
+        ----------
+        transforms
+            Mapping from landmark name to ``(position, orientation)`` tuples.
+            Position is a 3-element array (x, y, z); orientation is a 3x3
+            rotation matrix (not used for landmark rendering).
+
+        This method renders engine-specific kinematics that may differ
+        from canonical forward_kinematics due to engine conventions,
+        constraints, or numerical differences.
+        """
+        names = list(transforms.keys())
+        coords = np.array([transforms[n][0] for n in names], dtype=float)
+        self._landmarks_order = names
+        self._update_skeleton_coords(coords)
+
+    def _update_skeleton_coords(self, coords: np.ndarray) -> None:
+        """Update scatter and bones from landmark coordinates."""
         # Update scatter
         self._scatter._offsets3d = (coords[:, 0], coords[:, 1], coords[:, 2])
 
@@ -137,9 +161,11 @@ class View3D(QtWidgets.QWidget):
         bone_y: list[float] = []
         bone_z: list[float] = []
         for a, b in _BONES:
-            if a in skeleton.points and b in skeleton.points:
-                pa = skeleton.points[a]
-                pb = skeleton.points[b]
+            if a in self._landmarks_order and b in self._landmarks_order:
+                idx_a = self._landmarks_order.index(a)
+                idx_b = self._landmarks_order.index(b)
+                pa = coords[idx_a]
+                pb = coords[idx_b]
                 bone_x.extend([float(pa[0]), float(pb[0]), np.nan])
                 bone_y.extend([float(pa[1]), float(pb[1]), np.nan])
                 bone_z.extend([float(pa[2]), float(pb[2]), np.nan])
