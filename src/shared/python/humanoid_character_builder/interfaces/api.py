@@ -168,6 +168,7 @@ class CharacterBuilder:
                 urdf_xml=urdf_xml,
                 segments=segments,
                 mesh_result=mesh_result,
+                solver_status="success",
             )
 
         except ValueError as e:
@@ -178,6 +179,7 @@ class CharacterBuilder:
                 params=params,
                 error_message=str(e),
                 error_category=BuildErrorCategory.VALIDATION,
+                solver_status="failure",
             )
         except (PermissionError, OSError) as e:
             # Filesystem/IO errors
@@ -187,6 +189,7 @@ class CharacterBuilder:
                 params=params,
                 error_message=str(e),
                 error_category=BuildErrorCategory.IO,
+                solver_status="failure",
             )
         except ImportError as e:
             # Missing optional backend
@@ -196,6 +199,7 @@ class CharacterBuilder:
                 params=params,
                 error_message=str(e),
                 error_category=BuildErrorCategory.MISSING_BACKEND,
+                solver_status="failure",
             )
         except (KeyError, RuntimeError) as e:
             # Mesh generation or other runtime errors
@@ -205,6 +209,7 @@ class CharacterBuilder:
                 params=params,
                 error_message=str(e),
                 error_category=BuildErrorCategory.RUNTIME,
+                solver_status="failure",
             )
 
     def generate_urdf(
