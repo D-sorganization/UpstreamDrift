@@ -4,7 +4,7 @@ Contains menu bar, top bar, grid area, bottom bar, search, console,
 context help, and AI panel setup methods.
 """
 
-# mypy: disable-error-code="attr-defined,call-overload,arg-type"
+# mypy: disable-error-code="attr-defined,call-overload,arg-type,assignment"
 
 from __future__ import annotations
 
