@@ -1,78 +1,113 @@
 models:
   # =============================================================================
-  # PRIMARY TILES (Row 1)
+  # PHYSICS ENGINES — biomechanical golf-swing analysis backends
   # =============================================================================
 
   - id: "mujoco_unified"
     name: "MuJoCo"
-    description: "Biomechanical golf swing analysis with humanoid config & simulation"
+    description: "Biomechanical golf swing analysis (humanoid + simulation)"
     type: "custom_humanoid"
     path: "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/__main__.py"
     engine_type: "mujoco"
+    launcher:
+      category: "physics_engine"
+      logo: "assets/mujoco.png"
+      status: "ready"
 
   - id: "drake_golf"
     name: "Drake"
-    description: "Drake robotics framework with MeshCat visualization"
+    description: "Drake robotics with MeshCat visualisation"
     type: "drake"
     path: "src/engines/physics_engines/drake/python/src/drake_gui_app.py"
     engine_type: "drake"
+    launcher:
+      category: "physics_engine"
+      logo: "assets/drake.png"
+      status: "ready"
 
   - id: "pinocchio_golf"
     name: "Pinocchio"
-    description: "Pinocchio rigid body dynamics with analytical derivatives"
+    description: "Rigid-body dynamics with analytical derivatives"
     type: "pinocchio"
     path: "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
     engine_type: "pinocchio"
+    launcher:
+      category: "physics_engine"
+      logo: "assets/pinocchio.png"
+      status: "ready"
 
   - id: "opensim_golf"
     name: "OpenSim"
-    description: "OpenSim musculoskeletal modeling for biomechanics analysis"
+    description: "Musculoskeletal modelling for biomechanics"
     type: "opensim"
     path: "src/engines/physics_engines/opensim/python/opensim_gui.py"
     engine_type: "opensim"
-
-  # =============================================================================
-  # PRIMARY TILES (Row 2)
-  # =============================================================================
+    launcher:
+      category: "physics_engine"
+      logo: "assets/opensim.png"
+      status: "ready"
 
   - id: "myosim_suite"
     name: "MyoSuite"
-    description: "MyoSuite muscle-actuated simulation environment"
+    description: "Muscle-actuated simulation environment"
     type: "myosim"
     path: "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py"
     engine_type: "myosuite"
+    launcher:
+      category: "physics_engine"
+      logo: "assets/myosim.png"
+      status: "ready"
 
   - id: "matlab_suite"
-    name: "Matlab Simscape Models"
-    description: "Suite of MATLAB/Simscape models, dataset generators, and analysis tools."
+    name: "MATLAB Simscape"
+    description: "MATLAB / Simscape models, dataset generators, and tooling"
     type: "matlab_suite"
     path: "virtual/matlab_suite"
-
-  # --- Motion Capture (direct launch, no sub-launcher) ---
-  - id: "c3d_viewer"
-    name: "C3D Viewer"
-    description: "Visualize and analyze optical motion capture data (.c3d)"
-    type: "special_app"
-    path: "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py"
     launcher:
-      category: "tool"
-      logo: "assets/c3d_viewer_modern.png"
+      category: "physics_engine"
+      logo: "assets/matlab_logo.png"
+      status: "external"
+
+  # =============================================================================
+  # SIMULATION — playable / interactive simulators
+  # =============================================================================
+
+  - id: "putting_green"
+    name: "Putting Green"
+    description: "Realistic putting green with ball-rolling physics"
+    type: "putting_green"
+    path: "src/engines/physics_engines/putting_green/python/simulator.py"
+    engine_type: "putting_green"
+    launcher:
+      category: "simulation"
+      logo: "assets/putting_green_modern.png"
       status: "ready"
+
+  # =============================================================================
+  # MOTION MATCHING — pose / target editors and matchers
+  # =============================================================================
 
   - id: "motion_target_preview"
     name: "Motion-Match Preview"
-    description: "Preview multi-source motion-capture targets (C3D, .mat, body markers, club/ball) on a shared timegrid before driving a physics-engine model. Requires the gui-tools extra."
+    description: "Preview multi-source motion-capture targets on a shared timegrid"
     type: "special_app"
     path: "src/tools/starting_pose_matcher/__main__.py"
     tags: ["c3d", "mocap", "club", "body", "preview"]
     launcher:
-      category: "tool"
+      category: "motion_matching"
       logo: "motion_target_preview.svg"
       status: "ready"
 
-  # Legacy alias for `motion_target_preview` — kept hidden for one release so
-  # saved layouts referencing the old id keep resolving. Remove after the next
-  # cut.
+  - id: "pose_studio"
+    name: "Pose Studio"
+    description: "Cross-engine interactive pose editor"
+    type: "special_app"
+    path: "src/tools/pose_studio/__main__.py"
+    launcher:
+      category: "motion_matching"
+      logo: "assets/data_explorer_modern.png"
+      status: "beta"
+
   - id: "starting_pose_matcher"
     name: "Starting-Pose Matcher (legacy)"
     description: "Legacy alias for motion_target_preview. Hidden by default."
@@ -80,8 +115,32 @@ models:
     path: "src/tools/starting_pose_matcher/__main__.py"
     hidden: true
     launcher:
-      category: "tool"
+      category: "motion_matching"
       logo: "motion_target_preview.svg"
+      status: "deprecated"
+
+  # =============================================================================
+  # MOTION CAPTURE — mocap ingestion + pose estimation
+  # =============================================================================
+
+  - id: "c3d_viewer"
+    name: "C3D Viewer"
+    description: "Visualise and analyse optical mocap data (.c3d)"
+    type: "special_app"
+    path: "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py"
+    launcher:
+      category: "motion_capture"
+      logo: "assets/c3d_viewer_modern.png"
+      status: "ready"
+
+  - id: "video_analyzer"
+    name: "Video Analyzer"
+    description: "Video-based motion analysis with pose tracking"
+    type: "special_app"
+    path: "src/tools/video_analyzer/launch_video_analyzer.py"
+    launcher:
+      category: "motion_capture"
+      logo: "assets/video_analyzer_modern.png"
       status: "ready"
 
   - id: "openpose_analysis"
@@ -89,43 +148,38 @@ models:
     description: "High-accuracy body pose estimation (Academic License)"
     type: "special_app"
     path: "src/shared/python/pose_estimation/openpose_gui.py"
+    launcher:
+      category: "motion_capture"
+      logo: "assets/openpose.png"
+      status: "ready"
 
   - id: "mediapipe_analysis"
     name: "MediaPipe"
-    description: "Fast pose estimation using Google MediaPipe (Apache 2.0)"
+    description: "Fast pose estimation via Google MediaPipe (Apache 2.0)"
     type: "special_app"
     path: "src/shared/python/pose_estimation/mediapipe_gui.py"
+    launcher:
+      category: "motion_capture"
+      logo: "assets/mediapipe.png"
+      status: "ready"
+
+  # =============================================================================
+  # TOOLS & DATA — model exploration, datasets, utilities
+  # =============================================================================
 
   - id: "model_explorer"
     name: "Model Explorer"
     description: "Explore models and generate URDFs"
     type: "special_app"
     path: "src/tools/model_explorer/launch_model_explorer.py"
-
-  - id: "putting_green"
-    name: "Putting Green"
-    description: "Realistic putting green simulation with ball rolling physics"
-    type: "putting_green"
-    path: "src/engines/physics_engines/putting_green/python/simulator.py"
-    engine_type: "putting_green"
-    launcher:
-      category: "physics_engine"
-      logo: "assets/putting_green_modern.png"
-      status: "ready"
-
-  - id: "video_analyzer"
-    name: "Video Analyzer"
-    description: "Video-based motion analysis with pose estimation and tracking"
-    type: "special_app"
-    path: "src/tools/video_analyzer/launch_video_analyzer.py"
     launcher:
       category: "tool"
-      logo: "assets/video_analyzer_modern.png"
+      logo: "assets/urdf_icon.png"
       status: "ready"
 
   - id: "data_explorer"
     name: "Data Explorer"
-    description: "Import, filter, and visualize simulation datasets"
+    description: "Import, filter, and visualise simulation datasets"
     type: "special_app"
     path: "src/tools/data_explorer/data_explorer_app.py"
     launcher:
@@ -133,22 +187,16 @@ models:
       logo: "assets/data_explorer_modern.png"
       status: "ready"
 
-  - id: "pose_studio"
-    name: "Pose Studio"
-    description: "Cross-engine interactive pose editor. Drag the model, save as starting state or motion-matching target."
-    type: "special_app"
-    path: "src/tools/pose_studio/__main__.py"
-    launcher:
-      category: "tool"
-      status: "beta"
+  # =============================================================================
+  # DOCUMENTATION
+  # =============================================================================
 
   - id: "project_map"
     name: "Project Map"
-    description: "Complete map of all features, modules, and hidden gems in the suite"
+    description: "Map of every feature and module in the suite"
     type: "document"
     path: "docs/PROJECT_MAP.md"
-
-  # =============================================================================
-  # All sub-launchers have been eliminated. Each tile launches directly.
-  # Matlab files open with system MATLAB. Motion capture tools launch directly.
-  # =============================================================================
+    launcher:
+      category: "documentation"
+      logo: "assets/project_map.png"
+      status: "ready"

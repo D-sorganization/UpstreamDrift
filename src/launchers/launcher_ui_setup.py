@@ -108,7 +108,9 @@ class LauncherUISetupMixin:
             self.title_bar = CustomTitleBar(self)
             self.title_bar.minimize_requested.connect(self.showMinimized)
             self.title_bar.maximize_requested.connect(
-                lambda: self.showNormal() if self.isMaximized() else self.showMaximized()
+                lambda: self.showNormal()
+                if self.isMaximized()
+                else self.showMaximized()
             )
             self.title_bar.close_requested.connect(self.close)
             self.title_bar.move_requested.connect(self.move)
@@ -303,6 +305,37 @@ class LauncherUISetupMixin:
         if menubar is None:
             raise ValueError("menubar must be provided")
         view_menu = menubar.addMenu("&View")
+
+        # ---- View-mode submenu (Comfortable / Compact / Dense / List) ----
+        # The same four modes the top-bar combo exposes, but discoverable
+        # through the menu with keyboard shortcuts.
+        viewmode_menu = view_menu.addMenu("Tile &Layout")
+        from PyQt6.QtGui import QActionGroup
+
+        self._viewmode_action_group = QActionGroup(self)
+        self._viewmode_action_group.setExclusive(True)
+        self._viewmode_actions: dict[ViewMode, QAction] = {}
+        for label, mode, shortcut in (
+            ("&Comfortable", ViewMode.COMFORTABLE, "Ctrl+1"),
+            ("Co&mpact", ViewMode.COMPACT, "Ctrl+2"),
+            ("&Dense", ViewMode.DENSE, "Ctrl+3"),
+            ("&List", ViewMode.LIST, "Ctrl+4"),
+        ):
+            act = QAction(label, self)
+            act.setCheckable(True)
+            act.setShortcut(shortcut)
+            act.setToolTip(f"Switch tile layout to {label.replace('&', '')} mode")
+            act.setStatusTip(act.toolTip())
+            act.triggered.connect(
+                lambda _checked=False, m=mode: self._set_view_mode_from_menu(m)
+            )
+            self._viewmode_action_group.addAction(act)
+            viewmode_menu.addAction(act)
+            self._viewmode_actions[mode] = act
+        # Default checkmark on COMPACT (matches combo default).
+        self._viewmode_actions[ViewMode.COMPACT].setChecked(True)
+
+        view_menu.addSeparator()
 
         action_layout_mode = QAction("&Edit Layout Mode", self)
         action_layout_mode.setCheckable(True)
@@ -699,10 +732,36 @@ class LauncherUISetupMixin:
         mode = combo.itemData(index)
         if not isinstance(mode, ViewMode):
             return
+        self._apply_view_mode(mode, sync_combo=False)
+
+    def _set_view_mode_from_menu(self, mode: ViewMode) -> None:
+        """Drive the view-mode change from the View menu's submenu."""
+        self._apply_view_mode(mode, sync_combo=True)
+
+    def _apply_view_mode(self, mode: ViewMode, *, sync_combo: bool) -> None:
+        """Single source of truth for changing tile layout mode.
+
+        Keeps the menubar action group, the top-bar combo, the zoom
+        slider, and the grid in sync regardless of which surface
+        triggered the change.
+        """
         lm = getattr(self, "layout_manager", None)
         if lm is None:
             return
         lm.set_view_mode(mode)
+        # Sync combo box if the change came from the menu.
+        if sync_combo:
+            combo = getattr(self, "view_mode_combo", None)
+            if combo is not None:
+                idx = combo.findData(mode)
+                if idx >= 0 and combo.currentIndex() != idx:
+                    combo.blockSignals(True)
+                    combo.setCurrentIndex(idx)
+                    combo.blockSignals(False)
+        # Sync menu action checkmarks regardless.
+        actions = getattr(self, "_viewmode_actions", None)
+        if actions and mode in actions and not actions[mode].isChecked():
+            actions[mode].setChecked(True)
         # Update zoom slider/label to reflect the mode's default scale.
         if hasattr(self, "zoom_slider"):
             self.zoom_slider.blockSignals(True)
@@ -904,9 +963,7 @@ class LauncherUISetupMixin:
             url = "http://127.0.0.1:8000/api/chat/sessions"
             req = urllib.request.Request(url, method="GET")
             # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
-            with urllib.request.urlopen(
-                req, timeout=2
-            ) as resp:  # nosec B310 - hardcoded localhost URL, no external input
+            with urllib.request.urlopen(req, timeout=2) as resp:  # nosec B310 - hardcoded localhost URL, no external input
                 sessions = json.loads(resp.read().decode("utf-8"))
 
             session_id = sessions[0]["session_id"] if sessions else None

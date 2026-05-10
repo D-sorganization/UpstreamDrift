@@ -313,12 +313,18 @@ class LayoutManager:
             cat = getattr(launcher, "category", None) if launcher else None
 
         if cat:
-            if cat == "physics_engine":
-                return "Core Physics Engines"
-            if cat == "tool":
-                return "Analysis Tools"
-            if cat == "external":
-                return "Utilities"
+            cat_norm = str(cat).strip().lower()
+            mapping = {
+                "physics_engine": "Physics Engines",
+                "simulation": "Simulation",
+                "motion_matching": "Motion Matching",
+                "motion_capture": "Motion Capture",
+                "tool": "Tools & Data",
+                "documentation": "Documentation",
+                "external": "Tools & Data",
+            }
+            if cat_norm in mapping:
+                return mapping[cat_norm]
 
         t = getattr(model, "type", "").lower()
         if t in [
@@ -327,14 +333,17 @@ class LayoutManager:
             "pinocchio",
             "opensim",
             "myosim",
-            "putting_green",
         ]:
-            return "Core Physics Engines"
+            return "Physics Engines"
+        if t == "putting_green":
+            return "Simulation"
         if t == "matlab_suite":
-            return "Matlab Simscape Models"
+            return "Physics Engines"
+        if t == "document":
+            return "Documentation"
         if t == "special_app":
-            return "Analysis Tools"
-        return "Utilities"
+            return "Tools & Data"
+        return "Tools & Data"
 
     def _build_card(self, model: Any, **kwargs: Any) -> Any:
         """Invoke ``_create_card`` with optional keyword arguments.

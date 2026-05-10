@@ -32,6 +32,7 @@ from PyQt6.QtWidgets import (
     QGraphicsDropShadowEffect,
     QHBoxLayout,
     QLabel,
+    QPushButton,
     QVBoxLayout,
     QWidget,
 )
@@ -217,6 +218,12 @@ class DraggableModelCard(QFrame):
         self._hover_anim.setStartValue(self._hover_offset)
         self._hover_anim.setEndValue(4.0)
         self._hover_anim.start()
+        # Reveal the per-tile launch button.
+        btn = getattr(self, "_btn_quick_launch", None)
+        if btn is not None:
+            self._reposition_quick_launch_button()
+            btn.show()
+            btn.raise_()
         super().enterEvent(event)
 
     def leaveEvent(self, event: QEvent | None) -> None:
@@ -224,7 +231,65 @@ class DraggableModelCard(QFrame):
         self._hover_anim.setStartValue(self._hover_offset)
         self._hover_anim.setEndValue(0.0)
         self._hover_anim.start()
+        btn = getattr(self, "_btn_quick_launch", None)
+        if btn is not None:
+            btn.hide()
         super().leaveEvent(event)
+
+    def resizeEvent(self, event: Any) -> None:  # type: ignore[override]
+        """Keep the quick-launch button anchored to the top-right corner."""
+        super().resizeEvent(event)
+        self._reposition_quick_launch_button()
+
+    def _reposition_quick_launch_button(self) -> None:
+        btn = getattr(self, "_btn_quick_launch", None)
+        if btn is None:
+            return
+        margin = 6
+        btn_w = btn.sizeHint().width()
+        btn_h = btn.sizeHint().height()
+        btn.setFixedSize(btn_w, btn_h)
+        btn.move(self.width() - btn_w - margin, margin)
+
+    def _build_quick_launch_button(self) -> None:
+        """Create the per-tile hover launch button (hidden until hover)."""
+        btn = QPushButton("Launch ▶", self)
+        btn.setObjectName("CardQuickLaunch")
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn.setToolTip(f"Launch {getattr(self.model, 'name', 'this model')} now")
+        btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        # Visual: small pill with theme-friendly default styles.  Stylesheet
+        # is intentionally light-touch so the global QSS can override it.
+        btn.setStyleSheet(
+            "QPushButton#CardQuickLaunch {"
+            "  background: rgba(38, 110, 200, 220);"
+            "  color: white;"
+            "  border: none;"
+            "  border-radius: 10px;"
+            "  padding: 4px 10px;"
+            "  font-weight: 600;"
+            "  font-size: 10px;"
+            "}"
+            "QPushButton#CardQuickLaunch:hover {"
+            "  background: rgba(64, 140, 230, 240);"
+            "}"
+            "QPushButton#CardQuickLaunch:pressed {"
+            "  background: rgba(28, 90, 170, 240);"
+            "}"
+        )
+        btn.clicked.connect(self._on_quick_launch_clicked)
+        btn.hide()
+        self._btn_quick_launch = btn
+
+    def _on_quick_launch_clicked(self) -> None:
+        """Click handler: dispatch directly to the launcher's launch path."""
+        if self.parent_launcher and hasattr(
+            self.parent_launcher, "launch_model_direct"
+        ):
+            try:
+                self.parent_launcher.launch_model_direct(self.model.id)
+            except Exception:  # pragma: no cover — defensive UI
+                logger.exception("Quick-launch failed for model %s", self.model.id)
 
     def _resolve_image_name(self) -> str | None:  # noqa: C901
         """Determine the image filename for this model card."""
@@ -370,6 +435,12 @@ class DraggableModelCard(QFrame):
             self._setup_grid_ui()
 
         self._apply_card_padding()
+
+        # Quick-launch button: small floating pill in the top-right corner,
+        # revealed on hover. Hidden by default so it does not obscure the
+        # tile content. Adds a one-click launch path that bypasses the
+        # global header button for power users.
+        self._build_quick_launch_button()
 
         # Tile-level help text.  Tooltip is a one-line preview; What's-this
         # shows the description and a usage hint.
@@ -518,7 +589,36 @@ class DraggableModelCard(QFrame):
             )
         self._apply_card_padding()
 
+    # Status string -> (display_text, css_class) used when the YAML supplies
+    # an explicit launcher.status. Anything else falls back to type-based
+    # detection so older entries without a launcher block still render
+    # something meaningful (no more "Unknown" chips).
+    _STATUS_STRINGS: dict[str, tuple[str, str]] = {
+        "ready": ("Ready", "success"),
+        "available": ("Ready", "success"),
+        "stable": ("Ready", "success"),
+        "beta": ("Beta", "info"),
+        "experimental": ("Experimental", "info"),
+        "alpha": ("Alpha", "warning"),
+        "broken": ("Broken", "error"),
+        "deprecated": ("Deprecated", "warning"),
+        "external": ("External", "external"),
+    }
+
     def _get_status_info(self) -> tuple[str, str]:
+        # 1. Prefer an explicit launcher.status from the YAML — that is the
+        #    canonical declaration. Most tiles already set it.
+        launcher = getattr(self.model, "launcher", None)
+        if isinstance(launcher, dict):
+            yaml_status = launcher.get("status")
+        else:
+            yaml_status = getattr(launcher, "status", None) if launcher else None
+        if isinstance(yaml_status, str):
+            mapped = self._STATUS_STRINGS.get(yaml_status.strip().lower())
+            if mapped is not None:
+                return mapped
+
+        # 2. Fall back to type-based detection for legacy entries.
         t = getattr(self.model, "type", "").lower()
         if t in [
             "custom_humanoid",
@@ -534,12 +634,18 @@ class DraggableModelCard(QFrame):
             return "Viewer", "info"
         if t in ["opensim", "myosim"]:
             return "Engine Ready", "success"
-        if t in ["matlab", "matlab_app"]:
+        if t in ["matlab", "matlab_app", "matlab_suite"]:
             return "External", "external"
         if t in ["urdf_generator", "c3d_viewer"]:
             return "Utility", "utility"
+        if t == "putting_green":
+            return "Ready", "success"
+        if t == "special_app":
+            return "Ready", "success"
+        if t == "document":
+            return "Reference", "info"
 
-        return "Unknown", "unknown"
+        return "Ready", "success"
 
     def refresh_theme(self) -> None:
         """Refresh inline styles to match the current theme."""
