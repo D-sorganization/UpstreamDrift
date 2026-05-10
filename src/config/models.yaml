@@ -186,6 +186,7 @@ models:
       category: "tool"
       logo: "assets/data_explorer_modern.png"
       status: "ready"
+      default_launch: "tab"
 
   # =============================================================================
   # DOCUMENTATION
