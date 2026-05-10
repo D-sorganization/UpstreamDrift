@@ -30,7 +30,7 @@ REPO_ROOTS = {
 
 
 def main() -> int:
-    text = SPEC.read_text()
+    text = SPEC.read_text(encoding='utf-8')
     bad: list[str] = []
     for match in PATH_PATTERN.finditer(text):
         path = match.group(1)

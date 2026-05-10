@@ -839,6 +839,13 @@ def main() -> None:
 
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
+    
+    # Set global application icon
+    icon_path = ASSETS_DIR / "golf_logo.png"
+    if not icon_path.exists():
+        icon_path = ASSETS_DIR / "golf_logo.ico"
+    if icon_path.exists():
+        app.setWindowIcon(QIcon(str(icon_path)))
 
     qss_path = ASSETS_DIR / "theme" / "dark_modern.qss"
     if qss_path.exists():
@@ -867,6 +874,7 @@ def main() -> None:
         nonlocal main_window
         try:
             main_window.update_startup_results(results)
+            splash.finish(main_window)
         except Exception as e:  # noqa: BLE001
             import traceback
 

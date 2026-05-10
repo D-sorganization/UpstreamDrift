@@ -1,0 +1,216 @@
+"""Secure credential management for AI provider API keys.
+
+Uses the OS keyring (via the ``keyring`` package) for encrypted-at-rest
+storage.  Falls back to environment variables for backward compatibility
+when ``keyring`` is unavailable.
+
+Usage::
+
+    from chat.credentials import CredentialManager
+
+    creds = CredentialManager(service_name="ips_ai")
+    creds.store_api_key("anthropic", "sk-ant-...")
+    key = creds.get_api_key("anthropic")
+
+This module has ZERO application-specific imports.
+"""
+
+from __future__ import annotations
+
+import logging
+import os
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
+# Supported providers for validation
+SUPPORTED_PROVIDERS = frozenset(
+    {"ollama", "openai", "anthropic", "gemini", "cline", "codex"}
+)
+
+# Environment variable naming convention for backward compatibility
+_ENV_KEY_MAP: dict[str, str] = {
+    "openai": "OPENAI_API_KEY",
+    "anthropic": "ANTHROPIC_API_KEY",
+    "gemini": "GEMINI_API_KEY",
+    "codex": "OPENAI_API_KEY",  # Codex uses OpenAI key
+}
+
+# Lazy keyring import
+_keyring: Any = None
+_keyring_available: bool | None = None
+
+
+def _get_keyring() -> Any:
+    """Lazy-load keyring, returning None if unavailable."""
+    global _keyring, _keyring_available  # noqa: PLW0603
+    if _keyring_available is None:
+        try:
+            import keyring as kr
+
+            _keyring = kr
+            _keyring_available = True
+            logger.debug("keyring package available for credential storage")
+        except ImportError:
+            _keyring = None
+            _keyring_available = False
+            logger.warning(
+                "keyring package not available — falling back to env vars. "
+                "Install with: pip install keyring"
+            )
+    return _keyring
+
+
+class CredentialManager:
+    """Manages AI provider credentials with OS keyring storage.
+
+    Provides encrypted-at-rest storage for API keys using the system
+    keyring (Windows Credential Locker, macOS Keychain, Linux
+    Secret Service). Falls back to environment variables when keyring
+    is not available.
+
+    Attributes:
+        service_name: Keyring service namespace (e.g., "ips_ai").
+    """
+
+    def __init__(self, service_name: str = "shared_chat_ai") -> None:
+        """Initialize the credential manager.
+
+        Args:
+            service_name: Keyring service name for namespacing credentials.
+        """
+        if not service_name or not service_name.strip():
+            raise ValueError("service_name must be a non-empty string")
+        self._service_name = service_name
+
+    @property
+    def service_name(self) -> str:
+        """Return the keyring service namespace."""
+        return self._service_name
+
+    def store_api_key(self, provider: str, api_key: str) -> bool:
+        """Store an API key in the OS keyring.
+
+        Args:
+            provider: Provider name (e.g., "anthropic", "openai").
+            api_key: The API key to store.
+
+        Returns:
+            True if stored successfully, False if keyring unavailable.
+
+        Raises:
+            ValueError: If provider or api_key is empty.
+        """
+        if not provider or not provider.strip():
+            raise ValueError("provider must be a non-empty string")
+        if not api_key or not api_key.strip():
+            raise ValueError("api_key must be a non-empty string")
+
+        provider = provider.lower().strip()
+        kr = _get_keyring()
+        if kr is None:
+            logger.warning(
+                "Cannot store API key for %s — keyring not available",
+                provider,
+            )
+            return False
+
+        try:
+            username = f"{self._service_name}_{provider}"
+            kr.set_password(self._service_name, username, api_key)
+            logger.info("Stored API key for provider: %s", provider)
+            return True
+        except Exception:  # noqa: BLE001
+            logger.exception("Failed to store API key for %s", provider)
+            return False
+
+    def get_api_key(self, provider: str) -> str | None:
+        """Retrieve an API key, checking keyring first then env vars.
+
+        Args:
+            provider: Provider name (e.g., "anthropic", "openai").
+
+        Returns:
+            The API key string, or None if not found.
+        """
+        if not provider or not provider.strip():
+            raise ValueError("provider must be a non-empty string")
+
+        provider = provider.lower().strip()
+
+        # Try keyring first
+        kr = _get_keyring()
+        if kr is not None:
+            try:
+                username = f"{self._service_name}_{provider}"
+                key = kr.get_password(self._service_name, username)
+                if key:
+                    return key
+            except Exception:  # noqa: BLE001
+                logger.debug(
+                    "Keyring lookup failed for %s, falling back to env",
+                    provider,
+                )
+
+        # Fall back to environment variable
+        env_var = _ENV_KEY_MAP.get(provider)
+        if env_var:
+            key = os.environ.get(env_var)
+            if key:
+                logger.debug("Using env var %s for provider %s", env_var, provider)
+                return key
+
+        return None
+
+    def delete_api_key(self, provider: str) -> bool:
+        """Remove an API key from the keyring.
+
+        Args:
+            provider: Provider name.
+
+        Returns:
+            True if deleted, False if not found or keyring unavailable.
+        """
+        if not provider or not provider.strip():
+            raise ValueError("provider must be a non-empty string")
+
+        provider = provider.lower().strip()
+        kr = _get_keyring()
+        if kr is None:
+            return False
+
+        try:
+            username = f"{self._service_name}_{provider}"
+            kr.delete_password(self._service_name, username)
+            logger.info("Deleted API key for provider: %s", provider)
+            return True
+        except Exception:  # noqa: BLE001
+            logger.debug("Failed to delete key for %s", provider)
+            return False
+
+    def list_configured_providers(self) -> list[str]:
+        """List providers that have API keys configured.
+
+        Checks both keyring and environment variables.
+
+        Returns:
+            List of provider names with available credentials.
+        """
+        configured: list[str] = []
+
+        for provider in SUPPORTED_PROVIDERS:
+            if self.get_api_key(provider) is not None:
+                configured.append(provider)
+
+        return sorted(configured)
+
+    def has_credentials(self, provider: str) -> bool:
+        """Check if credentials are available for a provider.
+
+        Args:
+            provider: Provider name.
+
+        Returns:
+            True if credentials exist.
+        """
+        return self.get_api_key(provider) is not None
