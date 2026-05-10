@@ -99,6 +99,7 @@ models:
       category: "motion_matching"
       logo: "motion_target_preview.svg"
       status: "ready"
+      default_launch: "tab"
 
   - id: "pose_studio"
     name: "Pose Studio"

@@ -18,12 +18,6 @@
       "owner": "@physics-core",
       "reason": "Terrain representation at 1253 lines combines mesh, elevation, and surface-material models. Split into domain submodules planned, tracked in issue #2456.",
       "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/tools/starting_pose_matcher/gui.py",
-      "owner": "@matcher-gui",
-      "reason": "Starting-pose matcher GUI at ~2747 lines. Decomposition in progress: animated-playback helpers extracted into gui_playback.py / session_schema.py per issue #4482; new source-toggle panel for issue #4480 lives in its own gui_source_panel.py module. Further per-panel module splits to follow (issue #4480).",
-      "expires_on": "2026-07-31"
     }
   ]
 }

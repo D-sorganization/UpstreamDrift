@@ -44,10 +44,16 @@ class _StubProvider:
 
 class _Harness:
     """Tiny harness exercising the same combo + helpers without spinning
-    up the full 2900-line StartingPoseMatcher window."""
+    up the full StartingPoseMatcher window.
 
-    _populate_engine_combo = gui_mod.StartingPoseMatcher._populate_engine_combo
-    selected_engine = gui_mod.StartingPoseMatcher.selected_engine
+    The combo helpers live on :class:`MainWidget` (via the
+    :class:`_BuildersMixin`) since the Subtask 5 / #4998 refactor; the
+    ``StartingPoseMatcher`` shell now delegates its body to
+    :class:`MainWidget`.
+    """
+
+    _populate_engine_combo = gui_mod.MainWidget._populate_engine_combo
+    selected_engine = gui_mod.MainWidget.selected_engine
 
     def __init__(self) -> None:
         self.combo_fit_engine = QComboBox()
