@@ -17,6 +17,9 @@ it directly and assert behaviour without an X server.
 
 from __future__ import annotations
 
+import os
+import time
+
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.pose_interchange.adapters import ADAPTER_REGISTRY
 from src.shared.python.pose_interchange.canonical import (
@@ -31,9 +34,17 @@ from src.shared.python.pose_interchange.services import (
 from src.shared.python.pose_interchange.live_kinematics import (
     LiveKinematicsService,
 )
+from src.shared.python.realtime import publish as realtime_publish
 from src.tools.pose_studio.core import SUPPORTED_ENGINES, EngineStatus
 
 logger = get_logger(__name__)
+
+# Env-var gate: realtime publishing is opt-in so unit tests and CI never
+# touch the IPC layer unless they ask for it. The cross-tool demo
+# (Subtask 6 of EPIC #4993) and the dedicated integration test set this
+# variable to "1".
+_PUBLISH_ENV_VAR = "POSE_STUDIO_PUBLISH_REALTIME"
+_PUBLISH_DEBOUNCE_S = 1.0 / 30.0  # cap publish rate at ~30 Hz
 
 
 class EngineController:
@@ -61,6 +72,9 @@ class EngineController:
         self._service: LiveKinematicsService | None = None
         self._status: EngineStatus = EngineStatus.MOCK
         self._last_error: str | None = None
+        # Per-instance debounce timestamp for realtime publish; gated by
+        # ``POSE_STUDIO_PUBLISH_REALTIME`` (see :meth:`_maybe_publish_pose`).
+        self._last_publish_ts: float = 0.0
         self._activate(engine_name)
 
     # ---- public surface ------------------------------------------------
@@ -140,6 +154,10 @@ class EngineController:
         if not isinstance(pose, CanonicalPose):
             raise TypeError(f"pose must be a CanonicalPose, got {type(pose).__name__}")
         self._pose = pose
+        # Mirror the pose to the realtime IPC layer (gated by env var, debounced
+        # to 30 Hz) so subscribing tools — e.g. the Pose Subscriber demo — see
+        # live updates without each tool poking the others directly.
+        self._maybe_publish_pose()
         if self._service is None:
             return
         try:
@@ -165,6 +183,28 @@ class EngineController:
             )
 
     # ---- internals -----------------------------------------------------
+
+    def _maybe_publish_pose(self) -> None:
+        """Mirror the current pose to ``pose/canonical`` if enabled.
+
+        Three-stage gate:
+        1. The ``POSE_STUDIO_PUBLISH_REALTIME`` env var must be truthy
+           (so unit tests and CI never accidentally touch the IPC).
+        2. A 30 Hz debounce keeps the file transport from melting under
+           a slider drag.
+        3. Any exception from the realtime layer is logged and swallowed
+           — pose editing must never fail because IPC is unhappy.
+        """
+        if not os.environ.get(_PUBLISH_ENV_VAR):
+            return
+        now = time.monotonic()
+        if now - self._last_publish_ts < _PUBLISH_DEBOUNCE_S:
+            return
+        self._last_publish_ts = now
+        try:
+            realtime_publish("pose/canonical", self._pose.to_dict())
+        except Exception:
+            logger.exception("realtime publish failed")
 
     def _activate(self, engine_name: str) -> None:
         """Construct adapter + service for *engine_name* and cache them."""

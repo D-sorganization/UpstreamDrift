@@ -159,6 +159,41 @@ class CanonicalPose:
 
     # ---- (de)serialisation -----------------------------------------------------
 
+    def to_dict(self) -> dict[str, Any]:
+        """Return a JSON-serialisable plain-dict view of the pose.
+
+        Used by the realtime IPC layer (Subtask 4 of EPIC #4993) to ship
+        the canonical pose to subscribing tools without forcing them to
+        depend on numpy or this dataclass directly.
+        """
+        return {
+            "convention_tag": self.convention_tag,
+            "pelvis_translation_m": self.pelvis_translation_m.tolist(),
+            "pelvis_rotation_xyz_deg": self.pelvis_rotation_xyz_deg.tolist(),
+            "joint_angles_deg": self.angles_full_dict_deg(),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> CanonicalPose:
+        """Inverse of :meth:`to_dict`."""
+        if not isinstance(payload, Mapping):
+            raise TypeError(f"payload must be a Mapping, got {type(payload).__name__}")
+        try:
+            return cls(
+                pelvis_translation_m=np.asarray(
+                    payload["pelvis_translation_m"], dtype=float
+                ),
+                pelvis_rotation_xyz_deg=np.asarray(
+                    payload["pelvis_rotation_xyz_deg"], dtype=float
+                ),
+                joint_angles_deg=dict(payload.get("joint_angles_deg", {})),
+                convention_tag=payload.get("convention_tag", CONVENTION_TAG),
+            )
+        except KeyError as exc:
+            raise ValueError(
+                f"CanonicalPose payload missing required key: {exc}"
+            ) from exc
+
     def to_json(self) -> str:
         """Serialise to a stable JSON string.
 

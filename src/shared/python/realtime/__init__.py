@@ -1,102 +1,44 @@
-"""Real-time IPC layer with file and WebSocket pub-sub backends.
+"""Realtime IPC facade for cross-tool live data streaming.
 
-Provides a unified facade for in-process and cross-process publish/subscribe
-messaging, used by the embedded launcher to bridge the GUI tile and the
-underlying engine processes.
+This package exposes a tiny ``publish`` / ``subscribe`` pair that lets one
+launcher tool stream events to another without the two having to share a
+process or a Qt widget tree. The default transport is a JSON-line append
+log under the user cache dir; a websocket transport can be opted into via
+the ``REALTIME_TRANSPORT`` env var (left as a follow-up — see Subtask 4
+of EPIC #4993).
 
-Subtask 4 of EPIC #4993 (issue #4997).
+The contract is intentionally narrow:
 
-Public surface:
-    - ``publish(channel, payload, *, transport="auto")``
-    - ``subscribe(channel, callback, *, transport="auto") -> Subscription``
-    - ``Subscription`` (frozen dataclass with ``unsubscribe()``)
+- :func:`publish` writes a single JSON-serialisable payload onto a named
+  channel (e.g. ``"pose/canonical"``).
+- :func:`subscribe` registers a callback that fires for every published
+  payload on a channel and returns a :class:`Subscription` whose
+  :meth:`Subscription.unsubscribe` tears the watcher down.
 
-Transports:
-    - ``"file"`` — atomic JSON write under ``~/.upstream_drift/realtime/``,
-      using ``QFileSystemWatcher`` / ``watchdog`` / 100 ms polling fallback.
-      Latency budget: < 200 ms.
-    - ``"ws"`` — WebSocket pub-sub via the FastAPI server in :mod:`src.api`.
-      Latency budget: < 50 ms.
-    - ``"auto"`` — chosen via :func:`channels.get_channel_transport`.
+Both sides are best-effort: if the transport is unavailable, ``publish``
+swallows the error after logging it and ``subscribe`` returns an inert
+:class:`Subscription`. Tools should treat realtime as a *hint* layer, not
+a transactional one.
+
+The file transport polls at ~30 Hz on a background daemon thread and only
+delivers payloads written *after* :func:`subscribe` is called, so two
+processes started in either order both observe live updates.
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import Literal
-
-from .channels import get_channel_transport
-from .file_pubsub import FilePubSub
-from .protocol import Subscription, validate_channel
-from .ws_pubsub import WSPubSub
+from .api import (
+    CHANNEL_REGISTRY,
+    Subscription,
+    publish,
+    register_channel,
+    subscribe,
+)
 
 __all__ = [
-    "FilePubSub",
+    "CHANNEL_REGISTRY",
     "Subscription",
-    "WSPubSub",
     "publish",
+    "register_channel",
     "subscribe",
-    "validate_channel",
 ]
-
-
-_Transport = Literal["auto", "file", "ws"]
-
-
-# Module-level singletons so subscribers and publishers share state across
-# calls within the same process.
-_file_backend: FilePubSub | None = None
-_ws_backend: WSPubSub | None = None
-
-
-def _get_file_backend() -> FilePubSub:
-    global _file_backend
-    if _file_backend is None:
-        _file_backend = FilePubSub()
-    return _file_backend
-
-
-def _get_ws_backend() -> WSPubSub:
-    global _ws_backend
-    if _ws_backend is None:
-        _ws_backend = WSPubSub()
-    return _ws_backend
-
-
-def _resolve_transport(channel: str, transport: _Transport) -> Literal["file", "ws"]:
-    if transport == "auto":
-        return get_channel_transport(channel)
-    if transport in ("file", "ws"):
-        return transport
-    raise ValueError(
-        f"Invalid transport {transport!r}; expected 'auto', 'file', or 'ws'"
-    )
-
-
-def publish(
-    channel: str,
-    payload: dict,
-    *,
-    transport: _Transport = "auto",
-) -> None:
-    """Publish ``payload`` to ``channel`` via the chosen transport."""
-    validate_channel(channel)
-    chosen = _resolve_transport(channel, transport)
-    if chosen == "file":
-        _get_file_backend().publish(channel, payload)
-    else:
-        _get_ws_backend().publish(channel, payload)
-
-
-def subscribe(
-    channel: str,
-    callback: Callable[[dict], None],
-    *,
-    transport: _Transport = "auto",
-) -> Subscription:
-    """Subscribe to ``channel`` with ``callback``; returns a Subscription."""
-    validate_channel(channel)
-    chosen = _resolve_transport(channel, transport)
-    if chosen == "file":
-        return _get_file_backend().subscribe(channel, callback)
-    return _get_ws_backend().subscribe(channel, callback)

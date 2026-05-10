@@ -191,6 +191,17 @@ models:
   # DOCUMENTATION
   # =============================================================================
 
+  - id: "pose_subscriber_demo"
+    name: "Pose Subscriber (demo)"
+    description: "Live mirror of Pose Studio's canonical pose via the realtime IPC layer"
+    type: "special_app"
+    path: "src/tools/pose_subscriber_demo/__main__.py"
+    launcher:
+      category: "motion_matching"
+      logo: "assets/data_explorer_modern.png"
+      status: "experimental"
+      default_launch: "dock"
+
   - id: "project_map"
     name: "Project Map"
     description: "Map of every feature and module in the suite"
