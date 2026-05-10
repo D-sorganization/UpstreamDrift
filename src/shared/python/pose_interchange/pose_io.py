@@ -198,7 +198,13 @@ def _save_pinocchio(pose: CanonicalPose, path: Path) -> None:
 
 def _load_pinocchio(path: Path) -> CanonicalPose:
     # numpy adds .npz suffix if missing on save; on load, accept either form.
-    candidates = [path, path.with_suffix(".npz")]
+    # np.savez appends ".npz" to the full filename (e.g., "state.pin" -> "state.pin.npz"),
+    # so we must also check path with suffix appended, not just replaced.
+    candidates = [
+        path,
+        path.with_suffix(".npz"),  # replaces existing suffix
+        Path(str(path) + ".npz"),  # appends .npz (what np.savez does)
+    ]
     actual: Path | None = next((c for c in candidates if c.exists()), None)
     if actual is None:
         raise FileNotFoundError(f"pinocchio archive not found: {path}")
