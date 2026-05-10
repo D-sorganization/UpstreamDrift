@@ -54,6 +54,16 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 
+def _build_zoom_accessible_description() -> str:
+    """Describe the zoom slider using the configured tile-scale bounds."""
+    minimum_pct = int(round(TILE_SCALE_MIN * 100))
+    maximum_pct = int(round(TILE_SCALE_MAX * 100))
+    return (
+        f"Adjust tile size from {minimum_pct}% to {maximum_pct}%. "
+        "Use arrow keys or drag to adjust."
+    )
+
+
 class LauncherUISetupMixin:
     """Mixin for GolfLauncher UI initialization.
 
@@ -69,7 +79,7 @@ class LauncherUISetupMixin:
         checkable: bool = False,
     ) -> QToolButton:
         """Create an icon-first sidebar control with accessible labeling.
-        
+
         Provides both icon and visible text label for accessibility.
         """
         button = QToolButton()
@@ -706,11 +716,7 @@ class LauncherUISetupMixin:
         self.zoom_slider.setFixedWidth(140)
         self.zoom_slider.setToolTip("Adjust the size of the model tiles")
         self.zoom_slider.setAccessibleName("Tile zoom")
-        # Accessible description uses actual constants to stay accurate.
-        self.zoom_slider.setAccessibleDescription(
-            f"Adjust tile size from {int(round(TILE_SCALE_MIN * 100))}% to "
-            f"{int(round(TILE_SCALE_MAX * 100))}%. Use arrow keys or drag to adjust."
-        )
+        self.zoom_slider.setAccessibleDescription(_build_zoom_accessible_description())
         # Set focus policy for keyboard accessibility
         self.zoom_slider.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
@@ -983,9 +989,7 @@ class LauncherUISetupMixin:
             url = "http://127.0.0.1:8000/api/chat/sessions"
             req = urllib.request.Request(url, method="GET")
             # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
-            with urllib.request.urlopen(
-                req, timeout=2
-            ) as resp:  # nosec B310 - hardcoded localhost URL, no external input
+            with urllib.request.urlopen(req, timeout=2) as resp:  # nosec B310 - hardcoded localhost URL, no external input
                 sessions = json.loads(resp.read().decode("utf-8"))
 
             session_id = sessions[0]["session_id"] if sessions else None

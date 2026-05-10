@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                                                                                                                                   |
 | **License**             | MIT                                                                                                                                                              |
 | **Current Version**     | 2.1.0                                                                                                                                                            |
-| **Spec Version**        | 1.0.148                                                                                                                                                          |
-| **Last Spec Update**    | 2026-05-10 (fix/launcher-accessibility-4918 and fix/zoom-accessibility-range-5079 - matched zoom accessible description and added keyboard activation for tiles) |
+| **Spec Version**        | 1.0.149                                                                                                                                                          |
+| **Last Spec Update**    | 2026-05-10 (fix/issue-5095-zoom-a11y-range - generated the launcher zoom accessible description from the live tile-scale bounds)                               |
 
 ## 2. Purpose & Mission
 
@@ -673,4 +673,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-07 | 1.0.143 | Fixed Wave 2 manifest validator to parse `###` section headers matching the generated format, preventing self-inconsistent validation after `--update`. Fixed wheel event filter cache to use `weakref.WeakValueDictionary` preventing unbounded memory growth in long-running UI applications with transient controls. |
 | 2026-05-08 | 1.0.144 | Fixed Preferences dialog crash (issue #4491) by correcting `get_available_fleet_themes()` to `get_available_themes()` in `src/shared/python/ui/preferences_dialog.py:184`. |
 | 2026-05-10 | 1.0.148 | Added launcher accessibility coverage for sidebar tool buttons with visible labels and accessible descriptions, strong keyboard focus on sidebar and zoom controls, zoom slider range description, and keyboard activation/selection support on draggable model cards. |
+| 2026-05-10 | 1.0.149 | Corrected the launcher zoom slider accessible description helper to derive its percentage range from `TILE_SCALE_MIN` and `TILE_SCALE_MAX`, keeping screen-reader guidance aligned with the actual slider bounds after future constant changes. |
 ````
