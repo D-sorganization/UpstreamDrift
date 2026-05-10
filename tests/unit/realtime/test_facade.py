@@ -2,149 +2,165 @@
 
 from __future__ import annotations
 
+import json
+import os
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 import src.shared.python.realtime as facade_module
 from src.shared.python.realtime import (
+    CHANNEL_REGISTRY,
+    ChannelInfo,
     Subscription,
     publish,
+    register_channel,
     subscribe,
-    validate_channel,
 )
 
 pytestmark = pytest.mark.unit
 
 
 @pytest.fixture(autouse=True)
-def reset_backends() -> None:
-    """Reset the module-level backend singletons between tests."""
-    facade_module._file_backend = None
-    facade_module._ws_backend = None
+def reset_transport() -> None:
+    """Reset the module-level transport singleton between tests."""
+    facade_module._TRANSPORT = None
     yield
-    facade_module._file_backend = None
-    facade_module._ws_backend = None
+    facade_module._TRANSPORT = None
 
 
 @pytest.fixture()
-def patched_file_backend(monkeypatch: pytest.MonkeyPatch):
-    backend = MagicMock()
-    backend.publish = MagicMock()
-    backend.subscribe = MagicMock(
-        return_value=Subscription(
-            channel="target/active",
-            callback=lambda _p: None,
-            _unsubscribe=lambda: None,
+def patched_transport() -> MagicMock:
+    """Return a mock FileTransport wired into the facade."""
+    transport = MagicMock()
+    transport.publish = MagicMock()
+    token_counter = 0
+
+    def _subscribe(_channel, _callback):
+        nonlocal token_counter
+        token_counter += 1
+        return token_counter
+
+    transport.subscribe = MagicMock(side_effect=_subscribe)
+    transport.unsubscribe = MagicMock()
+    facade_module._TRANSPORT = transport
+    return transport
+
+
+class TestChannelRegistry:
+    def test_register_new_channel(self) -> None:
+        register_channel("test/chan", "Test channel")
+        assert "test/chan" in CHANNEL_REGISTRY
+        assert CHANNEL_REGISTRY["test/chan"].name == "test/chan"
+        assert CHANNEL_REGISTRY["test/chan"].description == "Test channel"
+        assert CHANNEL_REGISTRY["test/chan"].owner_tool_id is None
+
+    def test_register_existing_channel_same_description_is_noop(self) -> None:
+        register_channel("test/chan", "Test channel")
+        register_channel("test/chan", "Test channel")  # should not raise
+        assert len([k for k in CHANNEL_REGISTRY if k == "test/chan"]) == 1
+
+    def test_register_existing_channel_different_description_raises(self) -> None:
+        register_channel("test/chan", "Test channel")
+        with pytest.raises(ValueError):
+            register_channel("test/chan", "Different desc")
+
+    def test_register_empty_channel_raises(self) -> None:
+        with pytest.raises(ValueError):
+            register_channel("", "desc")
+
+    def test_builtin_pose_canonical_channel_is_registered(self) -> None:
+        assert "pose/canonical" in CHANNEL_REGISTRY
+        info = CHANNEL_REGISTRY["pose/canonical"]
+        assert info.owner_tool_id == "pose_studio"
+        assert "Pose Studio" in info.description
+
+
+class TestPublish:
+    def test_publish_calls_transport(self, patched_transport: MagicMock) -> None:
+        publish("test/chan", {"v": 1})
+        patched_transport.publish.assert_called_once_with("test/chan", {"v": 1})
+
+    def test_publish_with_explicit_file_transport(
+        self, patched_transport: MagicMock
+    ) -> None:
+        publish("test/chan", {"v": 1}, transport="file")
+        patched_transport.publish.assert_called_once_with("test/chan", {"v": 1})
+
+    def test_publish_with_ws_transport_falls_back_to_file(
+        self, patched_transport: MagicMock
+    ) -> None:
+        """When transport='ws' is requested but not wired, fall back to file."""
+        publish("test/chan", {"v": 1}, transport="ws")
+        patched_transport.publish.assert_called_once_with("test/chan", {"v": 1})
+
+    def test_publish_with_invalid_channel_logs_warning(
+        self, caplog: pytest.LogCaptureFixture, patched_transport: MagicMock
+    ) -> None:
+        publish("", {"v": 1})
+        patched_transport.publish.assert_not_called()
+        assert "invalid channel" in caplog.text.lower()
+
+    def test_publish_preserves_transport_parameter_signature(self) -> None:
+        """Regression test for #5058: transport= is preserved in the signature."""
+        import inspect
+
+        sig = inspect.signature(publish)
+        param_names = list(sig.parameters.keys())
+        assert "transport" in param_names, (
+            "publish() must preserve the 'transport' parameter "
+            "(#5058 — Preserve realtime facade transport parameter)"
         )
-    )
-    monkeypatch.setattr(facade_module, "_get_file_backend", lambda: backend)
-    return backend
 
 
-@pytest.fixture()
-def patched_ws_backend(monkeypatch: pytest.MonkeyPatch):
-    backend = MagicMock()
-    backend.publish = MagicMock()
-    backend.subscribe = MagicMock(
-        return_value=Subscription(
-            channel="pose/canonical",
-            callback=lambda _p: None,
-            _unsubscribe=lambda: None,
-        )
-    )
-    monkeypatch.setattr(facade_module, "_get_ws_backend", lambda: backend)
-    return backend
+class TestSubscribe:
+    def test_subscribe_returns_subscription(
+        self, patched_transport: MagicMock
+    ) -> None:
+        cb = MagicMock()
+        sub = subscribe("test/chan", cb)
+        assert isinstance(sub, Subscription)
+        assert sub.channel == "test/chan"
+        assert not sub._closed
+
+    def test_subscribe_invalid_channel_raises(self) -> None:
+        with pytest.raises(ValueError):
+            subscribe("", MagicMock())
+
+    def test_subscribe_non_callable_raises(self) -> None:
+        with pytest.raises(TypeError):
+            subscribe("test/chan", "not_callable")  # type: ignore[arg-type]
+
+    def test_unsubscribe_is_idempotent(
+        self, patched_transport: MagicMock
+    ) -> None:
+        sub = subscribe("test/chan", MagicMock())
+        sub.unsubscribe()
+        assert sub._closed is True
+        # Second call should not raise
+        sub.unsubscribe()
+        assert sub._closed is True
+
+    def test_unsubscribe_calls_transport(
+        self, patched_transport: MagicMock
+    ) -> None:
+        cb = MagicMock()
+        sub = subscribe("test/chan", cb)
+        sub.unsubscribe()
+        patched_transport.unsubscribe.assert_called_once()
 
 
-def test_facade_exports() -> None:
-    # Ensure the symbols are re-exported at the package surface.
-    assert callable(publish)
-    assert callable(subscribe)
-    assert callable(validate_channel)
-    assert Subscription is not None
-
-
-def test_publish_auto_routes_high_freq_to_ws(
-    patched_file_backend, patched_ws_backend
-) -> None:
-    publish("pose/canonical", {"v": 1})
-    patched_ws_backend.publish.assert_called_once_with("pose/canonical", {"v": 1})
-    patched_file_backend.publish.assert_not_called()
-
-
-def test_publish_auto_routes_low_freq_to_file(
-    patched_file_backend, patched_ws_backend
-) -> None:
-    publish("target/active", {"v": 1})
-    patched_file_backend.publish.assert_called_once_with("target/active", {"v": 1})
-    patched_ws_backend.publish.assert_not_called()
-
-
-def test_publish_explicit_transport_overrides_auto(
-    patched_file_backend, patched_ws_backend
-) -> None:
-    publish("pose/canonical", {"v": 1}, transport="file")
-    patched_file_backend.publish.assert_called_once()
-    patched_ws_backend.publish.assert_not_called()
-
-
-def test_publish_invalid_transport_raises(
-    patched_file_backend, patched_ws_backend
-) -> None:
-    with pytest.raises(ValueError):
-        publish("pose/canonical", {"v": 1}, transport="invalid")  # type: ignore[arg-type]
-
-
-def test_subscribe_auto_routes_high_freq_to_ws(
-    patched_file_backend, patched_ws_backend
-) -> None:
-    cb = lambda _p: None  # noqa: E731
-    sub = subscribe("engine/mujoco/state", cb)
-    patched_ws_backend.subscribe.assert_called_once_with("engine/mujoco/state", cb)
-    patched_file_backend.subscribe.assert_not_called()
-    assert isinstance(sub, Subscription)
-
-
-def test_subscribe_auto_routes_low_freq_to_file(
-    patched_file_backend, patched_ws_backend
-) -> None:
-    cb = lambda _p: None  # noqa: E731
-    sub = subscribe("session/marker", cb)
-    patched_file_backend.subscribe.assert_called_once_with("session/marker", cb)
-    patched_ws_backend.subscribe.assert_not_called()
-    assert isinstance(sub, Subscription)
-
-
-def test_subscribe_invalid_channel_raises(
-    patched_file_backend, patched_ws_backend
-) -> None:
-    with pytest.raises(ValueError):
-        subscribe("BAD/Name", lambda _p: None)
-
-
-def test_unknown_channel_routes_to_file_by_default(
-    patched_file_backend, patched_ws_backend
-) -> None:
-    publish("custom/unregistered", {"v": 1})
-    patched_file_backend.publish.assert_called_once()
-    patched_ws_backend.publish.assert_not_called()
-
-
-def test_real_file_backend_round_trip(tmp_path: Path) -> None:
-    """End-to-end: facade with real file backend (no patches)."""
-    import os
-
-    os.environ["UPSTREAM_DRIFT_REALTIME_ROOT"] = str(tmp_path)
-    try:
-        facade_module._file_backend = None
-        publish("target/active", {"answer": 42}, transport="file")
-        expected = tmp_path / "target__active.json"
-        assert expected.exists()
-        import json
-
-        assert json.loads(expected.read_text(encoding="utf-8")) == {"answer": 42}
-    finally:
-        os.environ.pop("UPSTREAM_DRIFT_REALTIME_ROOT", None)
-        facade_module._file_backend = None
+class TestRealFileTransportRoundTrip:
+    def test_round_trip_via_tmp_path(self, tmp_path: Path) -> None:
+        """End-to-end: publish writes a file; the file contains the payload."""
+        os.environ["UPSTREAM_DRIFT_REALTIME_ROOT"] = str(tmp_path)
+        facade_module._TRANSPORT = None
+        try:
+            publish("target/active", {"answer": 42}, transport="file")
+            expected = tmp_path / "target__active.json"
+            assert expected.exists()
+            assert json.loads(expected.read_text(encoding="utf-8")) == {"answer": 42}
+        finally:
+            os.environ.pop("UPSTREAM_DRIFT_REALTIME_ROOT", None)
+            facade_module._TRANSPORT = None
