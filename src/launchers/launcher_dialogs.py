@@ -220,33 +220,19 @@ class LauncherDialogsMixin:
                 tab constants (``TAB_LAYOUT`` / ``TAB_CONFIG`` /
                 ``TAB_DIAGNOSTICS``); the Configuration tab is where
                 Engine Runtime selection and Docker Image build live.
+
+        Note: Diagnostics are now loaded lazily when the Diagnostics tab
+        is first selected, not synchronously before dialog display.
+        See issue #4916.
         """
         if tab is None:
             raise ValueError("tab must be provided")
-        diagnostics_data = None
-        try:
-            from src.launchers.launcher_diagnostics import LauncherDiagnostics
-
-            diag = LauncherDiagnostics()
-            diagnostics_data = diag.run_all_checks()
-
-            diagnostics_data["runtime_state"] = {
-                "available_models_count": len(self.available_models),
-                "available_model_ids": list(self.available_models.keys()),
-                "model_order_count": len(self.model_order),
-                "model_order": self.model_order,
-                "model_cards_count": len(self.model_cards),
-                "selected_model": self.selected_model,
-                "docker_available": self.docker_available,
-                "registry_loaded": self.registry is not None,
-            }
-        except ImportError as e:
-            logger.warning(f"Failed to run diagnostics: {e}")
 
         dialog = SettingsDialog(
             parent=self,
-            diagnostics_data=diagnostics_data,
+            diagnostics_data=None,  # Lazy-load on tab select
             initial_tab=tab,
+            launcher=self,
         )
         dialog.reset_layout_requested.connect(self._reset_layout_to_defaults)
         dialog.exec()

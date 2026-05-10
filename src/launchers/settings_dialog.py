@@ -72,6 +72,7 @@ class SettingsDialog(QDialog):
         parent: QWidget | None = None,
         diagnostics_data: dict[str, Any] | None = None,
         initial_tab: int = 0,
+        launcher: Any | None = None,
     ) -> None:
         if initial_tab is None:
             raise ValueError("initial_tab must be provided")
@@ -79,8 +80,12 @@ class SettingsDialog(QDialog):
         self.setWindowTitle("Settings")
         self.resize(850, 650)
         self._diagnostics_data = diagnostics_data
+        self._launcher = launcher
+        self._diagnostics_loaded = False
         self._setup_ui()
         self.tabs.setCurrentIndex(validate_tab_index(initial_tab))
+        # Connect tab change signal for lazy diagnostics loading
+        self.tabs.currentChanged.connect(self._on_tab_changed)
 
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
@@ -637,3 +642,83 @@ class SettingsDialog(QDialog):
         if hasattr(self, "_build_start_time"):
             elapsed = time.monotonic() - self._build_start_time
             self._build_status.setText(f"Building... ({elapsed:.0f}s elapsed)")
+
+    def _on_tab_changed(self, index: int) -> None:
+        """Handle tab change for lazy diagnostics loading.
+
+        When the Diagnostics tab is first selected, run diagnostics
+        asynchronously and populate the display. Subsequent selections
+        do not re-run diagnostics.
+
+        Args:
+            index: The new tab index.
+        """
+        if index != TAB_DIAGNOSTICS or self._diagnostics_loaded:
+            return
+
+        # Mark as loaded to prevent re-running on subsequent tab visits
+        self._diagnostics_loaded = True
+
+        # Show loading indicator
+        self._diag_browser.setHtml(
+            "<p style='color:#d29922;'>Running diagnostics...</p>"
+        )
+
+        # Run diagnostics in a background thread
+        from PyQt6.QtCore import QThread, pyqtSignal
+
+        class DiagnosticsWorker(QThread):
+            """Background worker for running diagnostics."""
+            finished = pyqtSignal(dict)
+            error = pyqtSignal(str)
+
+            def __init__(self, launcher: Any | None = None) -> None:
+                super().__init__()
+                self._launcher = launcher
+
+            def run(self) -> None:
+                try:
+                    from src.launchers.launcher_diagnostics import LauncherDiagnostics
+
+                    diag = LauncherDiagnostics()
+                    results = diag.run_all_checks()
+
+                    if self._launcher and hasattr(self._launcher, "available_models"):
+                        results["runtime_state"] = {
+                            "available_models_count": len(self._launcher.available_models),
+                            "available_model_ids": list(self._launcher.available_models.keys()),
+                            "model_order_count": len(self._launcher.model_order),
+                            "model_order": self._launcher.model_order,
+                            "model_cards_count": len(self._launcher.model_cards),
+                            "selected_model": self._launcher.selected_model,
+                            "docker_available": self._launcher.docker_available,
+                            "registry_loaded": self._launcher.registry is not None,
+                        }
+
+                    self.finished.emit(results)
+                except ImportError as e:
+                    self.error.emit(str(e))
+
+        self._diag_worker = DiagnosticsWorker(self._launcher)
+        self._diag_worker.finished.connect(self._on_diagnostics_ready)
+        self._diag_worker.error.connect(self._on_diagnostics_error)
+        self._diag_worker.start()
+
+    def _on_diagnostics_ready(self, results: dict[str, Any]) -> None:
+        """Handle completed diagnostics results.
+
+        Args:
+            results: The diagnostics results dictionary.
+        """
+        self._diagnostics_data = results
+        self._render_diagnostics(results)
+
+    def _on_diagnostics_error(self, error_msg: str) -> None:
+        """Handle diagnostics error.
+
+        Args:
+            error_msg: The error message.
+        """
+        self._diag_browser.setHtml(
+            f"<p style='color:#f85149;'>Error running diagnostics: {error_msg}</p>"
+        )
