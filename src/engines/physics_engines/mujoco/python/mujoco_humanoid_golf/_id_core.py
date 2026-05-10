@@ -37,8 +37,6 @@ class InverseDynamicsSolver(_InverseDynamicsSolverMixin):
         """
         if not (model is not None):
             raise ValueError("model must be provided")
-        if not (model is not None):
-            raise ValueError("model must be provided")
         self.model = model
         self.data = data
 
@@ -104,8 +102,6 @@ class InverseDynamicsSolver(_InverseDynamicsSolverMixin):
         # Set state (Thread-Safe: use private data)
         if not (qpos is not None):
             raise ValueError("qpos must be provided")
-        if not (qpos is not None):
-            raise ValueError("qpos must be provided")
         self._perturb_data.qpos[:] = qpos
         self._perturb_data.qvel[:] = qvel
         self._perturb_data.qacc[:] = qacc
@@ -142,15 +138,11 @@ class InverseDynamicsSolver(_InverseDynamicsSolverMixin):
     def _compute_coriolis_force(self, g_force: np.ndarray) -> np.ndarray:
         if not (g_force is not None):
             raise ValueError("g_force must be provided")
-        if not (g_force is not None):
-            raise ValueError("g_force must be provided")
         mujoco.mj_forward(self.model, self._perturb_data)
         bias_force = self._perturb_data.qfrc_bias.copy()
         return bias_force - g_force
 
     def _compute_control_force(self, ctrl: np.ndarray) -> np.ndarray:
-        if not (ctrl is not None):
-            raise ValueError("ctrl must be provided")
         if not (ctrl is not None):
             raise ValueError("ctrl must be provided")
         self._perturb_data.ctrl[:] = 0
@@ -166,8 +158,6 @@ class InverseDynamicsSolver(_InverseDynamicsSolverMixin):
         tau_force: np.ndarray,
     ) -> InducedAccelerationResult:
         # Acc_G = M^-1 * (-G), Acc_C = M^-1 * (-C), Acc_Tau = M^-1 * (tau)
-        if not (g_force is not None):
-            raise ValueError("g_force must be provided")
         if not (g_force is not None):
             raise ValueError("g_force must be provided")
         a_g = (-g_force).copy()
@@ -201,8 +191,6 @@ class RecursiveNewtonEuler:
         """
         if not (model is not None):
             raise ValueError("model must be provided")
-        if not (model is not None):
-            raise ValueError("model must be provided")
         self.model = model
         self.data = data
 
@@ -224,8 +212,6 @@ class RecursiveNewtonEuler:
         """
         # MuJoCo's internal RNE is very efficient
         # We use MuJoCo's inverse dynamics
-        if not (qpos is not None):
-            raise ValueError("qpos must be provided")
         if not (qpos is not None):
             raise ValueError("qpos must be provided")
         self.data.qpos[:] = qpos
