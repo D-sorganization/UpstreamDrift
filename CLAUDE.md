@@ -68,6 +68,9 @@ Optional Rust extensions built via Maturin for performance-critical paths.
 
 - `src/` — core library: physics wrappers, URDF loaders, simulation runner
 - `src/shared/python/pose_interchange/` — engine-agnostic canonical pose + per-engine adapters / services
+- `src/shared/python/launcher_embed/` — embeddable-tool contract + registry (see [ADR-0013](docs/adr/0013-launcher-composability.md))
+- `src/shared/python/realtime/` — file + WebSocket pub-sub IPC
+- `src/launchers/embedded_host.py` — in-launcher tool host (tabs + docks)
 - `src/tools/pose_studio/` — interactive cross-engine pose editor (launcher tile: `pose_studio`)
 - `tests/` — pytest suite (unit, integration, live simulation)
 - `scripts/` — CI helpers including `check_file_size_budget.py`

@@ -266,6 +266,32 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
   windows; those should be standalone `QMainWindow` subclasses
   registered as tiles in `src/config/models.yaml`.
 
+### Launcher embedding + cross-tool IPC
+
+`src/shared/python/launcher_embed/`
+
+- `EmbedCapabilities`, `EmbeddableTool` Protocol, registry.
+- See [ADR-0013](docs/adr/0013-launcher-composability.md) for design
+  rationale and
+  [`docs/development/embedding_a_tool.md`](docs/development/embedding_a_tool.md)
+  for the tool-author guide.
+
+`src/shared/python/realtime/`
+
+- File + WebSocket pub-sub behind one `subscribe`/`publish` facade.
+- Channel registry in `channels.py` chooses transport per channel.
+- See [`docs/development/realtime_ipc.md`](docs/development/realtime_ipc.md).
+
+`src/launchers/embedded_host.py`
+
+- `EmbeddedHostWidget` — central QTabWidget + QDockWidget area for
+  in-launcher tool hosting.
+
+`src/launchers/launch_routing.py`
+
+- `LaunchMode` enum + `resolve_launch_mode()` for per-tile routing
+  (AUTO / NEW_WINDOW / TAB / DOCK / EXTERNAL).
+
 ### Rust kernels
 
 - `rust_core/upstream-physics/` — RK4 integrator, aerodynamics, contact,
@@ -443,6 +469,23 @@ xlsx parser, neither of which Rust can help with.
   precondition lambdas wrapped in bool(); excel loader pandas-cell
   type ignores). If a hook fails on a file you didn't author, follow
   the same sidecar pattern.
+- **Two-tool live coupling.** When a tool publishes high-frequency
+  state (e.g. Pose Studio's canonical pose at 30 Hz), use the
+  WebSocket transport — file pub-sub adds 100+ ms of disk latency.
+  The `realtime` facade picks automatically via the channel
+  registry; don't hard-code. See
+  [`docs/development/realtime_ipc.md`](docs/development/realtime_ipc.md).
+- **Embed adapters keep PyQt6 imports lazy.** The
+  `EmbeddableTool` Protocol module deliberately doesn't import
+  PyQt6 (widget types are spelled `typing.Any`) so headless CI and
+  the docs builder can introspect adapters without the GUI extras.
+  Your `_embed_adapter.py` should follow the same pattern: import
+  PyQt6 inside `create_main_widget`, not at module top.
+- **`cleanup()` must be idempotent.** The host calls it on tab
+  close, on parent shutdown, and on `closeEvent` — sometimes more
+  than once during teardown. Drop the widget reference first, then
+  tear down resources, and guard with `if widget is None: return`
+  at the top.
 
 ---
 
