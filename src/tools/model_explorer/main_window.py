@@ -15,6 +15,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import (
     QApplication,
@@ -47,6 +48,16 @@ class URDFGeneratorWindow(QMainWindow):
     the launcher embed adapter without spinning up a top-level window.
     """
 
+    # Declared as class-level ``pyqtSignal`` attributes so they remain part
+    # of ``URDFGeneratorWindow``'s Qt meta-object. Consumers that introspect
+    # the window's declared signal surface (class-level/introspection-based
+    # wiring) continue to see them; emissions are forwarded from the
+    # embedded :class:`MainWidget` via signal-to-signal connections in
+    # ``__init__``.
+    urdf_generated = pyqtSignal(str)
+    segment_added = pyqtSignal(dict)
+    segment_removed = pyqtSignal(str)
+
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Model Explorer - UpstreamDrift")
@@ -60,11 +71,13 @@ class URDFGeneratorWindow(QMainWindow):
         self._setup_menu_bar()
         self._setup_window_icon()
 
-        # Re-emit the embedded widget's signals on the window so existing
-        # consumers that subscribed to the window keep working.
-        self.urdf_generated = self._main_widget.urdf_generated
-        self.segment_added = self._main_widget.segment_added
-        self.segment_removed = self._main_widget.segment_removed
+        # Forward emissions from the embedded widget through the window's
+        # own declared signals so existing consumers that subscribed to
+        # the window keep working without losing the class-level signal
+        # declarations.
+        self._main_widget.urdf_generated.connect(self.urdf_generated)
+        self._main_widget.segment_added.connect(self.segment_added)
+        self._main_widget.segment_removed.connect(self.segment_removed)
 
         logger.info("URDF Generator window initialized")
         self._main_widget.load_default_model()
