@@ -27,5 +27,7 @@
     "live_visualization": true,
     "gpu_acceleration": false,
     "docker_mode": false
-  }
+  },
+  "view_mode": "compact",
+  "tile_scale": 0.3025
 }
