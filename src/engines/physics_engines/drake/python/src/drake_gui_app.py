@@ -412,6 +412,69 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
         self._export_data()
 
 
+class MainWidget(QtWidgets.QWidget if HAS_QT else object):  # type: ignore[misc]
+    """Embeddable host widget for the Drake Golf Swing Analysis dashboard.
+
+    Wraps a :class:`DrakeSimApp` (which inherits from :class:`QMainWindow`
+    via :class:`SimulationGUIBase`) inside a plain :class:`QWidget` so the
+    launcher can host the dashboard as a tab or dock. The standalone
+    ``main()`` continues to use :class:`DrakeSimApp` directly as a
+    top-level window; this widget is the embeddable surface used by the
+    launcher embed adapter.
+
+    Refactoring :class:`DrakeSimApp` itself into a :class:`QWidget` would
+    require touching every mixin (``UISetupMixin`` calls
+    :meth:`setCentralWidget`, :meth:`statusBar`, etc.). Hosting the
+    existing :class:`QMainWindow` as a child widget is a Qt-supported,
+    non-surgical alternative that preserves the engine's behavior while
+    exposing the embed surface required by Subtask 5 / #4998.
+
+    Caveat — Drake's Meshcat visualization opens in an external browser
+    window on construction (see :meth:`DrakeSimApp._init_simulation`).
+    The 3D view is therefore not embedded inside the launcher even when
+    the controls panel is. Wrapping Meshcat in a :class:`QWebEngineView`
+    is tracked as follow-up work.
+    """
+
+    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
+        super().__init__(parent)
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        # Construct the dashboard QMainWindow and host it as a child.
+        # ``QMainWindow`` is a ``QWidget`` subclass; Qt permits nesting it
+        # inside another widget's layout. We clear the ``Qt::Window``
+        # flag so it renders flush with the host instead of as a floating
+        # top-level window.
+        self._app = DrakeSimApp()
+        self._app.setWindowFlags(QtCore.Qt.WindowType.Widget)
+        layout.addWidget(self._app)
+
+    def cleanup(self) -> None:
+        """Stop the simulation timer and release Drake/Meshcat handles.
+
+        Idempotent: calling :meth:`cleanup` repeatedly is safe.
+        """
+        app = getattr(self, "_app", None)
+        if app is None:
+            return
+        timer = getattr(app, "timer", None)
+        if timer is not None:
+            try:
+                timer.stop()
+            except RuntimeError:
+                # Underlying QTimer C++ object already deleted.
+                pass
+        # Release the Drake/Meshcat handles so the host process doesn't
+        # leak the Meshcat HTTP server when the tab is closed.
+        for attr in ("simulator", "diagram", "plant", "context", "meshcat"):
+            if hasattr(app, attr):
+                try:
+                    setattr(app, attr, None)
+                except Exception:  # pragma: no cover - defensive
+                    pass
+
+
 def main() -> None:
     """Launch the Drake golf swing analysis GUI."""
     setup_logging()
