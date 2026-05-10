@@ -221,7 +221,8 @@ class FilePubSub:
 
             def _on_file_changed(_p: str) -> None:
                 # QFileSystemWatcher stops tracking after file is replaced
-                # (e.g., via os.replace). Re-arm the watcher after each event.
+                # (e.g., via os.replace). Re-arm the watcher BEFORE delivering
+                # to avoid missing rapid successive changes.
                 # The file must exist before re-adding to the watcher, so we
                 # touch it first to ensure it exists after the atomic replacement.
                 try:
@@ -231,6 +232,7 @@ class FilePubSub:
                 except OSError:
                     # File may have been deleted; watcher will stop tracking
                     pass
+                # Deliver after re-arming to ensure subsequent changes are caught
                 deliver()
 
             qfsw.fileChanged.connect(_on_file_changed)
