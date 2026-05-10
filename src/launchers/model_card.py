@@ -692,6 +692,23 @@ class DraggableModelCard(QFrame):
         drag.setHotSpot(self.drag_start_position)
         drag.exec(Qt.DropAction.MoveAction)
 
+    def keyPressEvent(self, event: Any) -> None:
+        """Handle keyboard navigation and activation.
+        
+        Supports:
+        - Enter/Return: Launch the model
+        - Space: Select the model
+        - Arrow keys: Navigate to adjacent cards (handled by parent grid)
+        """
+        if event and event.key() in (Qt.Key.Key_Enter, Qt.Key.Key_Return):
+            if self.parent_launcher:
+                self.parent_launcher.launch_model_direct(self.model.id)
+        elif event and event.key() == Qt.Key.Key_Space:
+            if self.parent_launcher:
+                self.parent_launcher.select_model(self.model.id)
+        else:
+            super().keyPressEvent(event)
+
     def mouseDoubleClickEvent(self, event: QMouseEvent | None) -> None:
         """Launch the model directly on double-click."""
         if self.parent_launcher:

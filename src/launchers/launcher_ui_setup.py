@@ -68,24 +68,31 @@ class LauncherUISetupMixin:
         *,
         checkable: bool = False,
     ) -> QToolButton:
-        """Create an icon-first sidebar control with accessible labeling."""
+        """Create an icon-first sidebar control with accessible labeling.
+        
+        Provides both icon and visible text label for accessibility.
+        """
         button = QToolButton()
-        button.setText("")
+        button.setText(label)
         button.setToolTip(label)
         button.setAccessibleName(label)
+        button.setAccessibleDescription(f"Navigate to {label} section")
         button.setCursor(Qt.CursorShape.PointingHandCursor)
-        button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
+        # Show both icon and text for better accessibility
+        button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
 
         try:
             from src.shared.python.theme.icon_utils import IconColorizer
 
             button.setIcon(IconColorizer.get_icon(icon_name, "#d4d4d4"))
         except (ImportError, ValueError):
-            button.setText(label[:1])
+            pass
 
         button.setIconSize(QSize(22, 22))
         button.setCheckable(checkable)
         button.setAutoRaise(True)
+        # Set focus policy for keyboard navigation
+        button.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         return button
 
     def init_ui(self) -> None:
@@ -255,6 +262,12 @@ class LauncherUISetupMixin:
         layout.addStretch()
         layout.addWidget(btn_settings)
         layout.addWidget(btn_docs)
+
+        # Set explicit focus order for keyboard navigation
+        sidebar.setFocusProxy(btn_home)
+        btn_home.setNextInFocusChain(btn_engines)
+        btn_engines.setNextInFocusChain(btn_settings)
+        btn_settings.setNextInFocusChain(btn_docs)
 
         return sidebar
 
@@ -696,8 +709,10 @@ class LauncherUISetupMixin:
         # Accessible description uses actual constants to stay accurate.
         self.zoom_slider.setAccessibleDescription(
             f"Adjust tile size from {int(round(TILE_SCALE_MIN * 100))}% to "
-            f"{int(round(TILE_SCALE_MAX * 100))}%"
+            f"{int(round(TILE_SCALE_MAX * 100))}%. Use arrow keys or drag to adjust."
         )
+        # Set focus policy for keyboard accessibility
+        self.zoom_slider.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
         # Initial position from layout_manager if available, else compact 0.5.
         from src.launchers.launcher_constants import TILE_SCALE_DEFAULT

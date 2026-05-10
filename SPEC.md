@@ -30,16 +30,16 @@
 
 ## 1. Identity
 
-| Field                   | Value                                                                                                                                   |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| **Repository Name**     | `UpstreamDrift`                                                                                                                         |
-| **GitHub URL**          | `https://github.com/D-sorganization/UpstreamDrift`                                                                                      |
-| **Owner**               | D-sorganization                                                                                                                         |
-| **Primary Language(s)** | Python 3.10+, Rust, TypeScript                                                                                                          |
-| **License**             | MIT                                                                                                                                     |
-| **Current Version**     | 2.1.0                                                                                                                                   |
-| **Spec Version**        | 1.0.148                                                                                                                                 |
-| **Last Spec Update**    | 2026-05-10 (fix/zoom-accessibility-range-5079 - matched launcher zoom slider accessible description to the configured tile scale range) |
+| Field                   | Value                                                                                                                                                            |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Repository Name**     | `UpstreamDrift`                                                                                                                                                  |
+| **GitHub URL**          | `https://github.com/D-sorganization/UpstreamDrift`                                                                                                               |
+| **Owner**               | D-sorganization                                                                                                                                                  |
+| **Primary Language(s)** | Python 3.10+, Rust, TypeScript                                                                                                                                   |
+| **License**             | MIT                                                                                                                                                              |
+| **Current Version**     | 2.1.0                                                                                                                                                            |
+| **Spec Version**        | 1.0.148                                                                                                                                                          |
+| **Last Spec Update**    | 2026-05-10 (fix/launcher-accessibility-4918 and fix/zoom-accessibility-range-5079 - matched zoom accessible description and added keyboard activation for tiles) |
 
 ## 2. Purpose & Mission
 
@@ -672,4 +672,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-07 | 1.0.141 | Added deterministic OpenSim multistart fit orchestration with seed-list reproducibility, per-start fresh simulator factories, best-success result selection, and typed all-starts-failed diagnostics. |
 | 2026-05-07 | 1.0.143 | Fixed Wave 2 manifest validator to parse `###` section headers matching the generated format, preventing self-inconsistent validation after `--update`. Fixed wheel event filter cache to use `weakref.WeakValueDictionary` preventing unbounded memory growth in long-running UI applications with transient controls. |
 | 2026-05-08 | 1.0.144 | Fixed Preferences dialog crash (issue #4491) by correcting `get_available_fleet_themes()` to `get_available_themes()` in `src/shared/python/ui/preferences_dialog.py:184`. |
+| 2026-05-10 | 1.0.148 | Added launcher accessibility coverage for sidebar tool buttons with visible labels and accessible descriptions, strong keyboard focus on sidebar and zoom controls, zoom slider range description, and keyboard activation/selection support on draggable model cards. |
 ````
