@@ -38,19 +38,34 @@ class _C3DViewerEmbedAdapter:
         # import time) load cleanly in headless contexts.
         from .c3d_viewer import MainWidget
 
-        return MainWidget(parent)
+        self._widget = MainWidget(parent)
+        return self._widget
 
     def cleanup(self) -> None:
         """Release matplotlib figures held by the plot tabs.
 
-        Must be idempotent; ``plt.close('all')`` is a no-op when no
-        figures remain. Wrapped in a defensive try/except so a
+        Must be idempotent; explicitly closes only the figures owned by
+        this tool's canvases. Wrapped in a defensive try/except so a
         misbehaving matplotlib never blocks host shutdown.
         """
         try:
             import matplotlib.pyplot as plt
 
-            plt.close("all")
+            if not hasattr(self, "_widget") or self._widget is None:
+                return
+
+            w = self._widget
+            canvases = [
+                w.viewer3d_tab.canvas_3d,
+                w.marker_plot_tab.canvas_marker,
+                w.analog_plot_tab.canvas_analog,
+                w.analysis_tab.canvas_analysis,
+                w.force_plot_tab.time_series_canvas,
+                w.force_plot_tab.cop_canvas,
+            ]
+            for canvas in canvases:
+                if hasattr(canvas, "fig"):
+                    plt.close(canvas.fig)
         except Exception:  # pragma: no cover - defensive
             # Host shutdown must not depend on us. Swallow rather than
             # raise; the registry contract requires ``cleanup`` to be
