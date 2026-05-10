@@ -115,9 +115,7 @@ class TestPublish:
 
 
 class TestSubscribe:
-    def test_subscribe_returns_subscription(
-        self, patched_transport: MagicMock
-    ) -> None:
+    def test_subscribe_returns_subscription(self, patched_transport: MagicMock) -> None:
         cb = MagicMock()
         sub = subscribe("test/chan", cb)
         assert isinstance(sub, Subscription)
@@ -132,9 +130,7 @@ class TestSubscribe:
         with pytest.raises(TypeError):
             subscribe("test/chan", "not_callable")  # type: ignore[arg-type]
 
-    def test_unsubscribe_is_idempotent(
-        self, patched_transport: MagicMock
-    ) -> None:
+    def test_unsubscribe_is_idempotent(self, patched_transport: MagicMock) -> None:
         sub = subscribe("test/chan", MagicMock())
         sub.unsubscribe()
         assert sub._closed is True
@@ -142,9 +138,7 @@ class TestSubscribe:
         sub.unsubscribe()
         assert sub._closed is True
 
-    def test_unsubscribe_calls_transport(
-        self, patched_transport: MagicMock
-    ) -> None:
+    def test_unsubscribe_calls_transport(self, patched_transport: MagicMock) -> None:
         cb = MagicMock()
         sub = subscribe("test/chan", cb)
         sub.unsubscribe()

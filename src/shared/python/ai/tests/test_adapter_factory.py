@@ -138,7 +138,7 @@ class TestAdapterFactory:
                 mod = MagicMock()
                 mod.CredentialManager.return_value = mock_mgr
                 return mod
-            return original_import(name, *args, **kwargs)
+            return original_import(name, *args, **kwargs)  # type: ignore
 
         with patch("builtins.__import__", side_effect=mock_import):
             key = AdapterFactory._resolve_api_key("openai")
@@ -157,7 +157,7 @@ class TestAdapterFactory:
         def mock_import(name: str, *args: object, **kwargs: object) -> object:
             if name == "chat.credentials":
                 raise ImportError("no chat.credentials")
-            return original_import(name, *args, **kwargs)
+            return original_import(name, *args, **kwargs)  # type: ignore
 
         with (
             patch("builtins.__import__", side_effect=mock_import),
