@@ -30,15 +30,15 @@
 
 ## 1. Identity
 
-| Field                   | Value                                                                                                                                           |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Repository Name**     | `UpstreamDrift`                                                                                                                                 |
-| **GitHub URL**          | `https://github.com/D-sorganization/UpstreamDrift`                                                                                              |
-| **Owner**               | D-sorganization                                                                                                                                 |
-| **Primary Language(s)** | Python 3.10+, Rust, TypeScript                                                                                                                  |
-| **License**             | MIT                                                                                                                                             |
-| **Current Version**     | 2.1.0                                                                                                                                           |
-| **Spec Version**        | 1.0.147                                                                                                                                         |
+| Field                   | Value                                              |
+| ----------------------- | -------------------------------------------------- |
+| **Repository Name**     | `UpstreamDrift`                                    |
+| **GitHub URL**          | `https://github.com/D-sorganization/UpstreamDrift` |
+| **Owner**               | D-sorganization                                    |
+| **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
+| **License**             | MIT                                                |
+| **Current Version**     | 2.1.0                                              |
+| **Spec Version**        | 1.0.147                                            |
 | **Last Spec Update**    | 2026-05-09 (feat/launcher-embed-4997-realtime - added realtime WebSocket pubsub, channels, and file-based pubsub for live simulation streaming) |
 
 ## 2. Purpose & Mission

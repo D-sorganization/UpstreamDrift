@@ -264,7 +264,7 @@ class LauncherUISetupMixin:
         if button_id == 0:
             self.layout_manager.current_category_filter = "All"
         elif button_id == 1:
-            self.layout_manager.current_category_filter = "Core Physics Engines"
+            self.layout_manager.current_category_filter = "Physics Engines"
 
         if hasattr(self, "_rebuild_grid"):
             self._rebuild_grid()

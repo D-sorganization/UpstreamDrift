@@ -90,7 +90,9 @@ class TestDriftControlDecomposition:
         assert a_control.ndim == 1, "Control acceleration should be 1D"
         assert len(a_control) == engine.nv, "Control dim should match nv"
 
-    def test_superposition_drift_plus_control_equals_full(self, engine: Any) -> None:
+    def test_superposition_drift_plus_control_equals_full(
+        self, engine: Any
+    ) -> None:
         """Verify a_full = a_drift + a_control (superposition principle).
 
         This is the core acceptance test for the drift-control decomposition.
