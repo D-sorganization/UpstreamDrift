@@ -25,6 +25,8 @@ try:  # support both package-style and tests/conftest.py path-injection import
 except ImportError:  # pragma: no cover - fallback for ad-hoc imports
     from simscape_adapter import ClubTarget, SimscapeAdapter  # type: ignore[no-redef]
 
+from src.shared.python.motion_matching.multi_source_target import MultiSourceTarget
+
 logger = logging.getLogger(__name__)
 
 
@@ -80,7 +82,7 @@ class FitResult:
 
 
 def fit_swing_scipy(
-    target: ClubTarget,
+    target: MultiSourceTarget | ClubTarget,
     adapter: SimscapeAdapter,
     options: FitOptions | None = None,
 ) -> FitResult:
@@ -162,7 +164,7 @@ def fit_swing_scipy(
 
 
 def fit_swing_jax(  # pragma: no cover - explicitly unimplemented
-    target: ClubTarget,
+    target: MultiSourceTarget | ClubTarget,
     adapter: SimscapeAdapter,
     options: FitOptions | None = None,
 ) -> FitResult:

@@ -54,7 +54,6 @@ from src.engines.physics_engines.pinocchio.python.motion_matching import (  # no
 )
 from src.engines.physics_engines.pinocchio.python.motion_matching.provider import (  # noqa: E402
     ENGINE_NAME,
-    PROVIDER_REGISTRY,
 )
 from src.engines.physics_engines.pinocchio.python.motion_matching.simulate import (  # noqa: E402
     COEFFS_PER_JOINT,
@@ -120,8 +119,8 @@ class TestProviderRegistration:
         assert ENGINE_NAME == "pinocchio"
 
     def test_registered_at_import_time(self) -> None:
-        assert ENGINE_NAME in PROVIDER_REGISTRY
-        provider = PROVIDER_REGISTRY[ENGINE_NAME]
+        from src.shared.python.motion_matching.provider import get_provider
+        provider = get_provider("pinocchio")
         assert isinstance(provider, PinocchioFitSwingProvider)
         assert provider.engine_name == "pinocchio"
 

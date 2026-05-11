@@ -34,6 +34,11 @@ import logging
 from types import ModuleType
 from typing import TYPE_CHECKING, Final
 
+from src.shared.python.motion_matching.provider import (
+    MultiSourceTarget,
+    register_provider,
+)
+
 from .fit_swing import FitOptions, FitResult, fit_swing_pinocchio
 
 if TYPE_CHECKING:  # pragma: no cover -- type-only import
@@ -42,7 +47,6 @@ if TYPE_CHECKING:  # pragma: no cover -- type-only import
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    "PROVIDER_REGISTRY",
     "PinocchioFitSwingProvider",
 ]
 
@@ -74,7 +78,7 @@ class PinocchioFitSwingProvider:
 
     def fit_swing(
         self,
-        target: ClubTarget,
+        target: MultiSourceTarget | ClubTarget,
         opts: FitOptions | None = None,
     ) -> FitResult:
         """Fit polynomial-torque coefficients for ``target``.
@@ -91,6 +95,11 @@ class PinocchioFitSwingProvider:
             ValueError: If ``target`` shapes are inconsistent.
             ImportError: If the ``pinocchio`` bindings are unavailable.
         """
+        if isinstance(target, MultiSourceTarget):
+            if target.club is None:
+                raise ValueError("PinocchioFitSwingProvider requires target.club to be set")
+            target = target.club
+
         result = fit_swing_pinocchio(target, opts)
         # Issue #4713: opt-in CI publication of the cross-engine leaderboard.
         from src.shared.python.motion_matching.leaderboard import maybe_append_row
@@ -142,27 +151,4 @@ class PinocchioFitSwingProvider:
                 return "unknown"
 
 
-# --------------------------------------------------------------------------- #
-# Auto-registration
-# --------------------------------------------------------------------------- #
-
-# Engine-local provider registry. When the canonical cross-engine
-# registry from #4514 lands, this module should re-export from there
-# instead. Until then, the dict keyed by ``engine_name`` is sufficient
-# for the symmetric pattern requested by #4517 ("provider registered at
-# import time"). Kept module-private (re-exported below) so that import
-# of this module is the registration step.
-PROVIDER_REGISTRY: dict[str, PinocchioFitSwingProvider] = {}
-
-
-def _register() -> None:
-    """Idempotently register the Pinocchio provider in the local registry."""
-    if ENGINE_NAME in PROVIDER_REGISTRY:
-        return
-    PROVIDER_REGISTRY[ENGINE_NAME] = PinocchioFitSwingProvider()
-    logger.debug(
-        "PinocchioFitSwingProvider registered under engine_name=%r", ENGINE_NAME
-    )
-
-
-_register()
+register_provider(PinocchioFitSwingProvider())

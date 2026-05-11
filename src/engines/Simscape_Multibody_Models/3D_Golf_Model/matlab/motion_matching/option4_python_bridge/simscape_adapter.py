@@ -30,6 +30,9 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.motion_matching.body_target import BodyTarget
+from src.shared.python.motion_matching.multi_source_target import MultiSourceTarget
+
 logger = logging.getLogger(__name__)
 
 
@@ -306,7 +309,7 @@ class SimscapeAdapter:
     def compute_cost(
         self,
         theta: np.ndarray,
-        target: ClubTarget,
+        target: MultiSourceTarget | ClubTarget,
         opts: dict[str, Any] | None = None,
     ) -> float:
         """Evaluate the canonical cost function for one theta against a target.
@@ -333,10 +336,20 @@ class SimscapeAdapter:
             raise EngineStartupError("matlab module unavailable") from e
 
         theta_m = matlab.double(theta_np.reshape(-1, 1).tolist())
-        target_m = _club_target_to_matlab(target, matlab)
-
-        # default opts come from MATLAB side; override fields if requested.
+        
+        import os
+        tmp_file = None
         try:
+            if hasattr(target, "club"):  # MultiSourceTarget
+                target_m = _club_target_to_matlab(target.club, matlab)
+                if hasattr(target, "body") and target.body is not None:
+                    tmp_file = _body_target_to_json_file(target.body)
+                    body_m = eng.load_body_target_json(tmp_file, nargout=1)
+                    target_m["body"] = body_m
+            else:
+                target_m = _club_target_to_matlab(target, matlab)
+
+            # default opts come from MATLAB side; override fields if requested.
             cost_opts = eng.default_cost_options(nargout=1)
             if opts:
                 for key, value in opts.items():
@@ -347,6 +360,13 @@ class SimscapeAdapter:
             )
         except Exception as e:
             raise _wrap_matlab_error(e, "compute_cost") from e
+        finally:
+            if tmp_file is not None and os.path.exists(tmp_file):
+                try:
+                    os.remove(tmp_file)
+                except OSError:
+                    pass
+
         return float(J)
 
     # Per-joint bound magnitudes from build_coefficient_bounds.m.
@@ -483,6 +503,40 @@ def _club_target_from_matlab(target_m: Any) -> ClubTarget:
         club_quat=club_quat,
         impact_idx=impact_idx,
     )
+
+
+def _body_target_to_json_file(body: BodyTarget) -> str:
+    """Serialize a BodyTarget to a temporary body_target_json_v1 file."""
+    import json
+    import tempfile
+    
+    events = [
+        {"label": ev.label, "frame": int(ev.frame), "time_s": float(ev.time_s)}
+        for ev in body.events
+    ]
+    src = body.source
+    source = {
+        "filename": src.filename,
+        "format": src.format,
+        "subject_id": src.subject_id,
+        "trial_id": src.trial_id,
+        "sha256": src.sha256,
+    }
+    
+    payload = {
+        "schema": "body_target_json_v1",
+        "time_s": body.time.tolist(),
+        "marker_names": list(body.marker_names),
+        "marker_xyz": body.marker_xyz.tolist(),
+        "impact_idx": int(body.impact_idx),
+        "events": events,
+        "source": source,
+        "coordinate_frame": body.coordinate_frame,
+    }
+    
+    with tempfile.NamedTemporaryFile(suffix=".json", delete=False, mode="w", encoding="utf-8") as fh:
+        json.dump(payload, fh)
+        return fh.name
 
 
 def _club_target_to_matlab(target: ClubTarget, matlab: Any) -> Any:
