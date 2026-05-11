@@ -418,7 +418,7 @@ omit = [
 #   - 85% for API routes, engine adapters, task management (production-critical)
 #   - 70% for shared utilities, services (important but lower risk)
 #   - 65% overall floor (raised from 55% per issue #4929)
-fail_under = 70
+fail_under = 75
 show_missing = true
 skip_empty = true
 precision = 1
