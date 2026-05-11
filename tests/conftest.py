@@ -295,6 +295,25 @@ def pytest_ignore_collect(collection_path: Path, config: pytest.Config) -> bool:
     return _should_ignore_optional_collection_path(collection_path)
 
 
+_BIOMECH_SIBLINGS_DIRECT = (
+    "MuJoCo_Models",
+    "Drake_Models",
+    "Pinocchio_Models",
+    "OpenSim_Models",
+    "Movement-Optimizer",
+)
+
+
+def _default_biomech_mode() -> str:
+    """Return ``editable`` if any sibling checkout exists, else ``vendored``."""
+    repo_root = Path(__file__).resolve().parent.parent
+    workspace_root = repo_root.parent
+    for repo_name in _BIOMECH_SIBLINGS_DIRECT:
+        if (workspace_root / repo_name).is_dir():
+            return "editable"
+    return "vendored"
+
+
 def pytest_addoption(parser: pytest.Parser) -> None:
     """Add command line options for Tools vendoring resolution."""
     parser.addoption(
@@ -304,31 +323,25 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         choices=["local", "vendored"],
         help="Tools resolution mode: 'local' (src/shared/python) or 'vendored' (vendor/ud-tools/src/shared/python)",
     )
-    is_ci = "CI" in os.environ
-    repo_root = Path(__file__).resolve().parent.parent
-    sibling_present = any(
-        (repo_root.parent / repo).exists()
-        for repo in [
-            "MuJoCo_Models",
-            "Drake_Models",
-            "Pinocchio_Models",
-            "OpenSim_Models",
-            "Movement-Optimizer",
-        ]
-    )
-    default_biomech = "vendored" if is_ci else ("editable" if sibling_present else "vendored")
     parser.addoption(
         "--biomech-mode",
         action="store",
-        default=default_biomech,
+        default=None,
         choices=["editable", "vendored", "env"],
-        help="Biomech repo resolution mode",
+        help=(
+            "Biomech sibling-repo resolution mode. Defaults to 'editable' if "
+            "any sibling checkout exists at ../<RepoName>/, else 'vendored'."
+        ),
     )
 
-@pytest.fixture
+
+@pytest.fixture(scope="session")
 def biomech_mode(request: pytest.FixtureRequest) -> str:
-    """Return the active biomechanics model resolution mode."""
-    return request.config.getoption("--biomech-mode")
+    """Expose the active ``--biomech-mode`` value to tests."""
+    explicit = request.config.getoption("--biomech-mode")
+    if explicit is not None:
+        return str(explicit)
+    return _default_biomech_mode()
 
 
 def pytest_configure(config: pytest.Config) -> None:

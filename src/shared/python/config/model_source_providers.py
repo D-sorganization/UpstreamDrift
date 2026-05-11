@@ -2,97 +2,27 @@
 
 This module centralizes provider-aware source resolution so launcher handlers,
 model-registry consumers, and engine discovery all rely on one path policy.
+
+It also hosts the **sibling-repo** discovery layer used by UpstreamDrift's
+launcher to find the five biomech sibling repos (MuJoCo_Models, Drake_Models,
+Pinocchio_Models, OpenSim_Models, Movement-Optimizer). See
+``docs/adr/0014-shared-biomech-models.md`` and UpstreamDrift#5184.
 """
 
 from __future__ import annotations
 
 import importlib.machinery
 import importlib.util
-from collections.abc import Iterable
+import os
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
 from src.shared.python.core.contracts import require
+from src.shared.python.logging_pkg.logging_config import get_logger
 
-import os
-from collections.abc import Callable
-
-_MODEL_SOURCES: dict[str, Callable[[], Path]] = {}
-
-
-def register_source(name: str) -> Callable[[Callable[[], Path]], Callable[[], Path]]:
-    """Register a global model source provider by name."""
-
-    def decorator(func: Callable[[], Path]) -> Callable[[], Path]:
-        _MODEL_SOURCES[name] = func
-        return func
-
-    return decorator
-
-
-def _resolve_sibling(repo_name: str, pkg: str, env_var: str) -> Path:
-    """Resolve a sibling biomechanics repo models path."""
-    if env_var in os.environ:
-        return Path(os.environ[env_var]).resolve()
-
-    repo_root = Path(__file__).resolve().parent.parent.parent.parent.parent
-    sibling_checkout = repo_root.parent / repo_name
-
-    if sibling_checkout.exists() and (sibling_checkout / "pyproject.toml").exists():
-        spec = importlib.util.spec_from_file_location(
-            f"{pkg}.model_pack", sibling_checkout / "src" / pkg / "model_pack.py"
-        )
-        if spec and spec.loader:
-            module = importlib.util.module_from_spec(spec)
-            try:
-                spec.loader.exec_module(module)
-                if hasattr(module, "resolve"):
-                    return Path(module.resolve()).resolve()
-            except Exception:
-                pass
-
-    try:
-        module = importlib.import_module(f"{pkg}.model_pack")
-        if hasattr(module, "resolve"):
-            return Path(module.resolve()).resolve()
-    except ImportError:
-        pass
-
-    vendored_path = repo_root / "vendor" / "biomech-models" / repo_name
-    if vendored_path.exists():
-        return vendored_path.resolve()
-
-    raise RuntimeError(f"Could not resolve sibling model repo: {repo_name}")
-
-
-@register_source("mujoco_models")
-def mujoco_models_source() -> Path:
-    return _resolve_sibling("MuJoCo_Models", "mujoco_models", "MUJOCO_MODELS_HOME")
-
-
-@register_source("drake_models")
-def drake_models_source() -> Path:
-    return _resolve_sibling("Drake_Models", "drake_models", "DRAKE_MODELS_HOME")
-
-
-@register_source("pinocchio_models")
-def pinocchio_models_source() -> Path:
-    return _resolve_sibling(
-        "Pinocchio_Models", "pinocchio_models", "PINOCCHIO_MODELS_HOME"
-    )
-
-
-@register_source("opensim_models")
-def opensim_models_source() -> Path:
-    return _resolve_sibling("OpenSim_Models", "opensim_models", "OPENSIM_MODELS_HOME")
-
-
-@register_source("movement_optimizer")
-def movement_optimizer_source() -> Path:
-    return _resolve_sibling(
-        "Movement-Optimizer", "movement_optimizer", "MOVEMENT_OPTIMIZER_HOME"
-    )
+logger = get_logger(__name__)
 
 
 def _get_optional_string_attr(model: Any, attr_name: str) -> str | None:
@@ -576,3 +506,366 @@ def _select_provider(model: Any) -> ModelSourceProvider:
         if provider.can_resolve(model):
             return provider
     raise ValueError("No model source provider matched the supplied model")
+
+
+# ---------------------------------------------------------------------------
+# Sibling-repo discovery layer (UpstreamDrift#5184)
+#
+# The five biomechanics sibling repos publish a ``model_pack.yaml`` /
+# ``tool_pack.yaml`` manifest plus a ``<pkg>.model_pack:resolve()`` entry
+# point. The functions below resolve the absolute ``models_root`` path for a
+# given sibling, walking a four-tier precedence order:
+#
+#   1. Editable sibling checkout at ``../<RepoName>/`` (detected by the
+#      presence of ``pyproject.toml`` — we deliberately do NOT import the
+#      sibling package because it may not yet be installed).
+#   2. Pip-installed sibling package — ``<pkg>.model_pack:resolve()``.
+#   3. Vendored snapshot at ``vendor/biomech-models/<RepoName>/``.
+#   4. Environment variable override ``<REPO>_HOME``.
+#
+# Each provider returns ``None`` if every tier misses, allowing the launcher
+# to report missing sources without crashing.
+# ---------------------------------------------------------------------------
+
+
+class SiblingResolutionTier:
+    """Identifier strings for the four resolution tiers."""
+
+    EDITABLE = "editable"
+    INSTALLED = "installed"
+    VENDORED = "vendored"
+    ENV = "env"
+    MISSING = "missing"
+
+
+@dataclass(frozen=True)
+class SiblingResolution:
+    """Result of resolving a sibling biomech repo to a concrete models root."""
+
+    repo_name: str
+    package: str
+    env_var: str
+    tier: str
+    models_root: Path | None
+    manifest_path: Path | None = None
+
+    @property
+    def resolved(self) -> bool:
+        """Return True when a concrete models root was discovered."""
+        return self.models_root is not None
+
+
+def _upstreamdrift_repo_root() -> Path:
+    """Return the absolute path of the UpstreamDrift checkout root."""
+    return Path(__file__).resolve().parents[4]
+
+
+def _detect_editable_sibling(repo_name: str) -> Path | None:
+    """Return the path to an editable sibling checkout if one exists.
+
+    Detection is by checking for ``pyproject.toml`` inside the sibling's
+    directory — we deliberately do not import the sibling package, since
+    it may not yet expose the published ``model_pack`` entry point.
+    """
+    candidate = _upstreamdrift_repo_root().parent / repo_name
+    if not candidate.is_dir():
+        return None
+    if not (candidate / "pyproject.toml").is_file():
+        return None
+    return candidate.resolve()
+
+
+def _read_models_root_from_manifest(manifest_path: Path) -> Path | None:
+    """Return the absolute ``models_root`` declared in a manifest file.
+
+    Returns ``None`` if PyYAML is unavailable, the file is missing, or the
+    manifest does not declare a usable ``models_root``.
+    """
+    try:
+        import yaml  # type: ignore[import-untyped]
+    except ImportError:
+        logger.debug("PyYAML missing — cannot parse %s", manifest_path)
+        return None
+    try:
+        raw = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        logger.debug("Failed to read manifest %s: %s", manifest_path, exc)
+        return None
+    if not isinstance(raw, dict):
+        return None
+    declared = raw.get("models_root")
+    if not isinstance(declared, str) or not declared.strip():
+        return None
+    return (manifest_path.parent / declared).resolve()
+
+
+def _manifest_path_for(checkout: Path) -> Path | None:
+    """Locate the manifest YAML in a sibling checkout (model_pack or tool_pack)."""
+    for name in ("model_pack.yaml", "tool_pack.yaml"):
+        candidate = checkout / name
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def _resolve_via_installed_package(pkg: str) -> tuple[Path, Path | None] | None:
+    """Call ``<pkg>.model_pack:resolve()`` on an installed sibling package.
+
+    Returns ``(models_root, manifest_path)`` or ``None`` if the package or
+    its ``model_pack`` submodule is unavailable. ``manifest_path`` is best
+    effort and may be ``None`` even when ``models_root`` resolves.
+    """
+    spec = importlib.util.find_spec(pkg)
+    if spec is None:
+        return None
+    submodule_name = f"{pkg}.model_pack"
+    if importlib.util.find_spec(submodule_name) is None:
+        # Tool-pack-style siblings (Movement-Optimizer) use tool_pack.
+        submodule_name = f"{pkg}.tool_pack"
+        if importlib.util.find_spec(submodule_name) is None:
+            return None
+    try:
+        module = importlib.import_module(submodule_name)
+    except ImportError as exc:
+        logger.debug("Could not import %s: %s", submodule_name, exc)
+        return None
+    resolve_callable = getattr(module, "resolve", None)
+    if not callable(resolve_callable):
+        return None
+    try:
+        models_root = Path(resolve_callable()).resolve()
+    except Exception as exc:  # noqa: BLE001 — entry-point may raise anything
+        logger.debug("%s.resolve() raised %s", submodule_name, exc)
+        return None
+    manifest_path: Path | None = None
+    manifest_callable = getattr(module, "manifest", None)
+    if callable(manifest_callable):
+        try:
+            _ = manifest_callable()
+        except Exception:  # noqa: BLE001
+            manifest_path = None
+    return models_root, manifest_path
+
+
+def _vendor_snapshot_root(repo_name: str) -> Path:
+    """Return the conventional vendor snapshot directory for a sibling."""
+    return _upstreamdrift_repo_root() / "vendor" / "biomech-models" / repo_name
+
+
+def _resolve_sibling(
+    repo_name: str,
+    pkg: str,
+    env_var: str,
+) -> SiblingResolution:
+    """Walk the four-tier resolution order for one sibling biomech repo.
+
+    Args:
+        repo_name: Human-friendly repo directory name (e.g. ``MuJoCo_Models``).
+        pkg: Importable Python package name (e.g. ``mujoco_models``).
+        env_var: Environment-variable override (e.g. ``MUJOCO_MODELS_HOME``).
+
+    Returns:
+        :class:`SiblingResolution` describing which tier (if any) won and
+        the absolute ``models_root``.
+    """
+    # Tier 1: editable checkout
+    editable = _detect_editable_sibling(repo_name)
+    if editable is not None:
+        manifest_path = _manifest_path_for(editable)
+        models_root: Path | None = None
+        if manifest_path is not None:
+            models_root = _read_models_root_from_manifest(manifest_path)
+        if models_root is None:
+            # Fall back to a conventional models tree if the manifest is
+            # absent or unparseable. This keeps editable mode useful while
+            # sibling repos are still adding their manifests.
+            for candidate_name in ("models", f"src/{pkg}/exercises"):
+                candidate = editable / candidate_name
+                if candidate.is_dir():
+                    models_root = candidate.resolve()
+                    break
+        if models_root is not None:
+            return SiblingResolution(
+                repo_name=repo_name,
+                package=pkg,
+                env_var=env_var,
+                tier=SiblingResolutionTier.EDITABLE,
+                models_root=models_root,
+                manifest_path=manifest_path,
+            )
+
+    # Tier 2: installed package
+    installed = _resolve_via_installed_package(pkg)
+    if installed is not None:
+        models_root, manifest_path = installed
+        return SiblingResolution(
+            repo_name=repo_name,
+            package=pkg,
+            env_var=env_var,
+            tier=SiblingResolutionTier.INSTALLED,
+            models_root=models_root,
+            manifest_path=manifest_path,
+        )
+
+    # Tier 3: vendored snapshot
+    vendored = _vendor_snapshot_root(repo_name)
+    if vendored.is_dir():
+        manifest_path = _manifest_path_for(vendored)
+        models_root = None
+        if manifest_path is not None:
+            models_root = _read_models_root_from_manifest(manifest_path)
+        if models_root is None:
+            models_root = vendored.resolve()
+        return SiblingResolution(
+            repo_name=repo_name,
+            package=pkg,
+            env_var=env_var,
+            tier=SiblingResolutionTier.VENDORED,
+            models_root=models_root,
+            manifest_path=manifest_path,
+        )
+
+    # Tier 4: env-var override
+    env_value = os.environ.get(env_var)
+    if env_value:
+        env_path = Path(env_value).expanduser()
+        if env_path.is_dir():
+            return SiblingResolution(
+                repo_name=repo_name,
+                package=pkg,
+                env_var=env_var,
+                tier=SiblingResolutionTier.ENV,
+                models_root=env_path.resolve(),
+                manifest_path=_manifest_path_for(env_path),
+            )
+        logger.warning(
+            "Env-var %s points at %s which is not a directory",
+            env_var,
+            env_path,
+        )
+
+    return SiblingResolution(
+        repo_name=repo_name,
+        package=pkg,
+        env_var=env_var,
+        tier=SiblingResolutionTier.MISSING,
+        models_root=None,
+        manifest_path=None,
+    )
+
+
+@dataclass(frozen=True)
+class _SiblingSpec:
+    """Static descriptor for a registered sibling provider."""
+
+    name: str
+    repo_name: str
+    package: str
+    env_var: str
+
+
+_SIBLINGS: tuple[_SiblingSpec, ...] = (
+    _SiblingSpec(
+        "mujoco_models", "MuJoCo_Models", "mujoco_models", "MUJOCO_MODELS_HOME"
+    ),
+    _SiblingSpec("drake_models", "Drake_Models", "drake_models", "DRAKE_MODELS_HOME"),
+    _SiblingSpec(
+        "pinocchio_models",
+        "Pinocchio_Models",
+        "pinocchio_models",
+        "PINOCCHIO_MODELS_HOME",
+    ),
+    _SiblingSpec(
+        "opensim_models",
+        "OpenSim_Models",
+        "opensim_models",
+        "OPENSIM_MODELS_HOME",
+    ),
+    _SiblingSpec(
+        "movement_optimizer",
+        "Movement-Optimizer",
+        "movement_optimizer",
+        "MOVEMENT_OPTIMIZER_HOME",
+    ),
+)
+
+_MODEL_SOURCES: dict[str, Callable[[], Path]] = {}
+
+
+def register_source(name: str) -> Callable[[Callable[[], Path]], Callable[[], Path]]:
+    """Register a named model-source resolver callable.
+
+    The decorator preserves the original callable so direct invocation
+    continues to work; the registered lookup table is used by the launcher
+    diagnostics and downstream callers that iterate sources by name.
+    """
+
+    def _decorator(func: Callable[[], Path]) -> Callable[[], Path]:
+        _MODEL_SOURCES[name] = func
+        return func
+
+    return _decorator
+
+
+def get_registered_source(name: str) -> Callable[[], Path]:
+    """Return the resolver registered under ``name`` or raise ``KeyError``."""
+    return _MODEL_SOURCES[name]
+
+
+def iter_registered_sources() -> tuple[str, ...]:
+    """Return the registered source names in registration order."""
+    return tuple(_MODEL_SOURCES)
+
+
+def resolve_sibling(name: str) -> SiblingResolution:
+    """Return the full :class:`SiblingResolution` for one named sibling."""
+    for spec in _SIBLINGS:
+        if spec.name == name:
+            return _resolve_sibling(spec.repo_name, spec.package, spec.env_var)
+    raise KeyError(f"Unknown biomech sibling: {name!r}")
+
+
+def resolve_all_siblings() -> dict[str, SiblingResolution]:
+    """Return the resolution for every registered sibling, by name."""
+    return {spec.name: resolve_sibling(spec.name) for spec in _SIBLINGS}
+
+
+def _require_resolved(resolution: SiblingResolution) -> Path:
+    """Return the resolved ``models_root`` or raise ``FileNotFoundError``."""
+    if resolution.models_root is None:
+        raise FileNotFoundError(
+            f"Sibling biomech repo {resolution.repo_name!r} could not be resolved "
+            f"via editable checkout, installed package, vendored snapshot, "
+            f"or env var {resolution.env_var}",
+        )
+    return resolution.models_root
+
+
+@register_source("mujoco_models")
+def mujoco_models_source() -> Path:
+    """Return the absolute ``models_root`` for the MuJoCo_Models sibling."""
+    return _require_resolved(resolve_sibling("mujoco_models"))
+
+
+@register_source("drake_models")
+def drake_models_source() -> Path:
+    """Return the absolute ``models_root`` for the Drake_Models sibling."""
+    return _require_resolved(resolve_sibling("drake_models"))
+
+
+@register_source("pinocchio_models")
+def pinocchio_models_source() -> Path:
+    """Return the absolute ``models_root`` for the Pinocchio_Models sibling."""
+    return _require_resolved(resolve_sibling("pinocchio_models"))
+
+
+@register_source("opensim_models")
+def opensim_models_source() -> Path:
+    """Return the absolute ``models_root`` for the OpenSim_Models sibling."""
+    return _require_resolved(resolve_sibling("opensim_models"))
+
+
+@register_source("movement_optimizer")
+def movement_optimizer_source() -> Path:
+    """Return the absolute ``models_root`` for the Movement-Optimizer sibling."""
+    return _require_resolved(resolve_sibling("movement_optimizer"))

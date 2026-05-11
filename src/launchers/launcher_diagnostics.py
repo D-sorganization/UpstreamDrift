@@ -38,6 +38,31 @@ CONFIG_DIR = Path.home() / ".golf_modeling_suite"
 LAYOUT_CONFIG_FILE = CONFIG_DIR / "launcher_layout.json"
 
 
+def _read_manifest_schema(manifest_path: Path | None) -> str | None:
+    """Return the ``schema`` field of a biomech manifest, or ``None``.
+
+    Best-effort: silently returns ``None`` when PyYAML is missing, the file
+    cannot be read, or the field is absent. Used by the launcher diagnostics
+    to report each sibling's published manifest version.
+    """
+    if manifest_path is None or not manifest_path.is_file():
+        return None
+    try:
+        import yaml  # type: ignore[import-untyped]
+    except ImportError:
+        return None
+    try:
+        data = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(data, dict):
+        return None
+    value = data.get("schema")
+    if isinstance(value, str) and value.strip():
+        return value
+    return None
+
+
 @dataclass
 class DiagnosticResult:
     """Result of a diagnostic check."""
@@ -126,7 +151,7 @@ class LauncherDiagnostics:
         self.check_asset_files()
         self.check_pyqt6_availability()
         self.check_engine_availability()
-        self.check_sibling_biomech_repos()
+        self.check_biomech_siblings()
 
         # Calculate summary
         passed = sum(1 for r in self.results if r.status == "pass")
@@ -695,80 +720,81 @@ class LauncherDiagnostics:
         self.results.append(result)
         return result
 
-    def check_sibling_biomech_repos(self) -> DiagnosticResult:
-        """Check resolution tier and model_pack.yaml version for sibling repos."""
+    def check_biomech_siblings(self) -> DiagnosticResult:
+        """Report the resolution tier for each of the five biomech sibling repos.
+
+        See ``docs/adr/0014-shared-biomech-models.md`` (UpstreamDrift#5184).
+        """
         start = time.time()
         details: dict[str, Any] = {}
 
         try:
-            from src.shared.python.config.model_source_providers import _MODEL_SOURCES
-            import yaml
-
-            repo_status = []
-            all_resolved = True
-
-            for source_name, provider_fn in _MODEL_SOURCES.items():
-                try:
-                    resolved_path = provider_fn()
-                    # Try to parse model_pack.yaml
-                    pack_file = resolved_path / "model_pack.yaml"
-                    version = "unknown"
-                    if pack_file.exists():
-                        with open(pack_file, encoding="utf-8") as f:
-                            pack_data = yaml.safe_load(f)
-                            if isinstance(pack_data, dict):
-                                version = pack_data.get("version", "unknown")
-
-                    tier = "unknown"
-                    if "vendor" in str(resolved_path):
-                        tier = "vendored"
-                    elif "site-packages" in str(
-                        resolved_path
-                    ) or "dist-packages" in str(resolved_path):
-                        tier = "pip-installed"
-                    else:
-                        tier = "editable"
-
-                    repo_status.append(
-                        {
-                            "source": source_name,
-                            "path": str(resolved_path),
-                            "tier": tier,
-                            "version": str(version),
-                        }
-                    )
-                except Exception as e:
-                    all_resolved = False
-                    repo_status.append(
-                        {
-                            "source": source_name,
-                            "error": str(e),
-                        }
-                    )
-
-            details["repos"] = repo_status
-            status = "pass" if all_resolved else "warning"
-            msg = (
-                "All sibling repos resolved"
-                if all_resolved
-                else "Some sibling repos failed to resolve"
+            from src.shared.python.config.model_source_providers import (
+                resolve_all_siblings,
             )
 
-            result = DiagnosticResult(
-                name="sibling_biomech_repos",
-                status=status,
-                message=msg,
-                details=details,
-                duration_ms=(time.time() - start) * 1000,
-            )
-        except Exception as e:
-            result = DiagnosticResult(
-                name="sibling_biomech_repos",
-                status="warning",
-                message=f"Failed to check sibling repos: {e}",
-                duration_ms=(time.time() - start) * 1000,
-            )
+            resolutions = resolve_all_siblings()
+            siblings_detail: list[dict[str, Any]] = []
+            resolved_count = 0
+            for name, resolution in resolutions.items():
+                manifest_schema = _read_manifest_schema(resolution.manifest_path)
+                if resolution.resolved:
+                    resolved_count += 1
+                siblings_detail.append(
+                    {
+                        "name": name,
+                        "repo_name": resolution.repo_name,
+                        "package": resolution.package,
+                        "env_var": resolution.env_var,
+                        "tier": resolution.tier,
+                        "models_root": (
+                            str(resolution.models_root)
+                            if resolution.models_root is not None
+                            else None
+                        ),
+                        "manifest_path": (
+                            str(resolution.manifest_path)
+                            if resolution.manifest_path is not None
+                            else None
+                        ),
+                        "manifest_schema": manifest_schema,
+                    }
+                )
 
+            details["siblings"] = siblings_detail
+            details["resolved"] = resolved_count
+            details["total"] = len(siblings_detail)
+
+            if resolved_count == len(siblings_detail):
+                status = "pass"
+                message = f"All {resolved_count} biomech siblings resolved"
+            elif resolved_count == 0:
+                status = "warning"
+                message = (
+                    "No biomech siblings resolved - install editable checkouts "
+                    "or run scripts/update_biomech_vendor.py"
+                )
+            else:
+                status = "warning"
+                message = (
+                    f"{resolved_count}/{len(siblings_detail)} biomech siblings resolved"
+                )
+        except ImportError as exc:
+            details["import_error"] = str(exc)
+            status = "warning"
+            message = f"Biomech sibling resolver unavailable: {exc}"
+        except (OSError, RuntimeError, ValueError) as exc:
+            details["error"] = str(exc)
+            status = "warning"
+            message = f"Biomech sibling check error: {exc}"
+
+        result = DiagnosticResult(
+            name="biomech_siblings",
+            status=status,
+            message=message,
+            details=details,
+            duration_ms=(time.time() - start) * 1000,
+        )
         self.results.append(result)
         return result
 

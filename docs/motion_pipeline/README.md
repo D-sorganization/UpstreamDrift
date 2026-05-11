@@ -30,13 +30,13 @@ This will return a JSON response containing the solved kinematics and motion mat
 
 ## When to Choose Each Engine
 
-| Use Case | Recommended Engine | Why |
-|----------|-------------------|-----|
-| **Contact-rich dynamics** (ground reaction, ball impact) | MuJoCo | Best contact handling, day-to-day development |
-| **Trajectory optimization** (finding optimal swing) | Drake | Built-in trajopt solvers, system analysis |
-| **Fast IK solutions** (real-time retargeting) | Pinocchio | Optimized rigid-body algorithms |
-| **Biomechanics validation** | OpenSim | Gold-standard musculoskeletal models |
-| **Muscle dynamics** | MyoSuite | Detailed muscle activation modeling |
+| Use Case                                                 | Recommended Engine | Why                                           |
+| -------------------------------------------------------- | ------------------ | --------------------------------------------- |
+| **Contact-rich dynamics** (ground reaction, ball impact) | MuJoCo             | Best contact handling, day-to-day development |
+| **Trajectory optimization** (finding optimal swing)      | Drake              | Built-in trajopt solvers, system analysis     |
+| **Fast IK solutions** (real-time retargeting)            | Pinocchio          | Optimized rigid-body algorithms               |
+| **Biomechanics validation**                              | OpenSim            | Gold-standard musculoskeletal models          |
+| **Muscle dynamics**                                      | MyoSuite           | Detailed muscle activation modeling           |
 
 ---
 
@@ -45,3 +45,4 @@ This will return a JSON response containing the solved kinematics and motion mat
 - [Format Matrix](formats.md) — Auto-generated support matrix for each mocap source
 - [Troubleshooting](troubleshooting.md) — Common failure modes and fixes
 - [Architecture ADR](../adr/0007-motion-pipeline-architecture.md) — Design decisions and alternatives
+- [Biomech Workspace Setup](../biomech-workspace.md) — Wire up the five sibling biomechanics repos as the source of truth for models (ADR-0014)
