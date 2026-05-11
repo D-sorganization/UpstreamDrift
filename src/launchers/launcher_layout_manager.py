@@ -425,10 +425,12 @@ class LayoutManager:
 
         # Group widgets by category maintaining order
         categories: dict[str, list[Any]] = {
-            "Core Physics Engines": [],
-            "Analysis Tools": [],
-            "Matlab Simscape Models": [],
-            "Utilities": [],
+            "Physics Engines": [],
+            "Simulation": [],
+            "Motion Matching": [],
+            "Motion Capture": [],
+            "Tools & Data": [],
+            "Documentation": [],
             "Other": [],
         }
 

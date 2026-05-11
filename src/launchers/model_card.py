@@ -446,7 +446,7 @@ class DraggableModelCard(QFrame):
         # shows the description and a usage hint.
         name = getattr(self.model, "name", "this model")
         desc = getattr(self.model, "description", "") or ""
-        self.setToolTip(f"Double-click to launch {name}")
+        self.setToolTip(f"<b>{name}</b><br>{desc}<br><br><i>Double-click to launch</i>")
         self.setStatusTip(f"Selects {name}")
         self.setWhatsThis(
             f"<b>{name}</b><br>"
@@ -694,7 +694,7 @@ class DraggableModelCard(QFrame):
 
     def keyPressEvent(self, event: Any) -> None:
         """Handle keyboard navigation and activation.
-        
+
         Supports:
         - Enter/Return: Launch the model
         - Space: Select the model

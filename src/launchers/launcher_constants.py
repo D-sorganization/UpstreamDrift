@@ -52,8 +52,8 @@ class ViewMode(IntEnum):
 
 # (tile_scale, columns, show_description, is_list)
 _VIEW_MODE_TABLE: dict[ViewMode, tuple[float, int, bool, bool]] = {
-    ViewMode.COMFORTABLE: (1.0, 4, True, False),
-    ViewMode.COMPACT: (0.5, 6, True, False),
+    ViewMode.COMFORTABLE: (1.0, 4, False, False),
+    ViewMode.COMPACT: (0.5, 6, False, False),
     ViewMode.DENSE: (0.35, 8, False, False),
     ViewMode.LIST: (0.30, 1, True, True),
 }

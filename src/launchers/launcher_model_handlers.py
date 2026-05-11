@@ -313,11 +313,64 @@ class MatlabFileHandler(_SystemFileHandler):
     HANDLER_NAME = "MatlabFileHandler"
 
 
-class DocumentHandler(_SystemFileHandler):
-    """Handler for opening document files (.md, .pdf, etc.) with the system viewer."""
+class DocumentHandler:
+    """Handler for opening document files (.md, .pdf, etc.) securely using a proxy runner."""
 
     MODEL_TYPES = {"document"}
     HANDLER_NAME = "DocumentHandler"
+
+    def can_handle(self, model_type: str) -> bool:
+        """Check if this handler supports the model type."""
+        return model_type.lower() in self.MODEL_TYPES
+
+    def launch(
+        self,
+        model: Any,
+        repo_path: Path,
+        process_manager: Any,
+    ) -> bool:
+        """Open a document securely using the approved document_proxy."""
+        if repo_path is None:
+            raise ValueError("repo_path must be provided")
+        model_path = getattr(model, "path", None) or ""
+        if not model_path:
+            logger.error(
+                "%s: model '%s' has no path",
+                self.HANDLER_NAME,
+                getattr(model, "id", "unknown"),
+            )
+            return False
+
+        file_path = resolve_model_artifact_path(model, repo_path)
+        if not file_path.exists():
+            logger.warning("%s: file not found: %s", self.HANDLER_NAME, file_path)
+            return False
+
+        proxy_script = repo_path / "src" / "launchers" / "document_proxy.py"
+        if not proxy_script.exists():
+            logger.error(
+                "%s: Proxy script not found: %s", self.HANDLER_NAME, proxy_script
+            )
+            return False
+
+        try:
+            from src.shared.python.security.secure_subprocess import secure_popen
+            import sys
+
+            process = secure_popen(
+                [sys.executable, str(proxy_script), str(file_path)],
+                cwd=str(repo_path),
+                suite_root=repo_path,
+            )
+            # Attach the process so it can be tracked/stopped if necessary, though it likely exits immediately.
+            process_manager.attach_process(f"Document_{file_path.name}", process)
+            logger.info("%s: launched proxy for %s", self.HANDLER_NAME, file_path.name)
+            return True
+        except Exception as e:
+            logger.error(
+                "%s: failed to launch document proxy: %s", self.HANDLER_NAME, e
+            )
+            return False
 
 
 # ============================================================

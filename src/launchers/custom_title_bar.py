@@ -34,6 +34,26 @@ class CustomTitleBar(QWidget):
         layout.setSpacing(5)
 
         # Logo/Title
+        from pathlib import Path
+        from PyQt6.QtGui import QPixmap
+
+        self.icon_label = QLabel()
+        assets_dir = Path(__file__).parent / "assets"
+        icon_path = assets_dir / "golf_logo.png"
+        if not icon_path.exists():
+            icon_path = assets_dir / "golf_logo.ico"
+
+        if icon_path.exists():
+            pixmap = QPixmap(str(icon_path)).scaled(
+                20,
+                20,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
+            )
+            self.icon_label.setPixmap(pixmap)
+
+        layout.addWidget(self.icon_label)
+
         self.title_label = QLabel("UpstreamDrift")
         self.title_label.setStyleSheet(
             "color: #d4d4d4; font-weight: bold; font-size: 13px;"
