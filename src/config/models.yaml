@@ -220,3 +220,41 @@ models:
       category: "documentation"
       logo: "assets/project_map.png"
       status: "ready"
+
+  # =============================================================================
+  # BIOMECHANICS
+  # =============================================================================
+
+  - id: "biomech_gait"
+    name: "Gait Model"
+    description: "Standardized human gait model across engines"
+    type: "biomech_exercise"
+    exercise: "gait"
+    launcher:
+      category: "biomechanics"
+      logo: "assets/biomech_gait.png"
+      status: "ready"
+      default_launch: "tab"
+
+  - id: "biomech_sit_to_stand"
+    name: "Sit-to-Stand Model"
+    description: "Standardized sit-to-stand motion model"
+    type: "biomech_exercise"
+    exercise: "sit_to_stand"
+    launcher:
+      category: "biomechanics"
+      logo: "assets/biomech_sit_stand.png"
+      status: "ready"
+      default_launch: "tab"
+
+  - id: "movement_optimizer"
+    name: "Movement Optimizer"
+    description: "Cross-engine trajectory optimization"
+    type: "special_app"
+    source_root: "movement_optimizer"
+    path: "src/movement_optimizer/main.py"
+    launcher:
+      category: "biomechanics"
+      logo: "assets/movement_optimizer.png"
+      status: "ready"
+      default_launch: "tab"

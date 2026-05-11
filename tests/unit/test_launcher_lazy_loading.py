@@ -8,6 +8,10 @@ does NOT trigger its heavy physics engine import at module level.
 import sys
 from unittest.mock import MagicMock, patch
 
+# Pre-import dashboard launcher to populate sys.modules with heavy dependencies (scipy, numpy, pyqt)
+# so that patch.dict("sys.modules") doesn't remove them and trigger C-extension reload errors.
+import src.shared.python.dashboard.launcher  # noqa: F401
+
 
 class TestMuJoCoDashboardLazyLoading:
     """Verify mujoco_dashboard does not import engine at module load time."""
