@@ -146,7 +146,11 @@ def compute_phase_stratified_metrics(
     here to bucket evaluation rows into swing phases for residual reporting.
     Returns an empty dict when ``time_values`` has no positive range.
     """
-    from .surrogate_validation import evaluate_per_phase, phase_stratified_split
+    try:
+        from .surrogate_validation import evaluate_per_phase, phase_stratified_split
+    except ImportError:
+        LOGGER.warning("surrogate_validation module not found. Skipping phase metrics.")
+        return {}
 
     if time_values.size == 0:
         return {}

@@ -12,7 +12,7 @@ def get_engine_catalog() -> dict[str, dict[str, bool]]:
 
     Dynamically scans src/engines/physics_engines/ to determine fit_swing capabilities.
     """
-    catalog = {}
+    catalog: dict[str, dict[str, bool]] = {}
     engine_dir = Path(__file__).parent / "physics_engines"
     if not engine_dir.exists():
         return catalog

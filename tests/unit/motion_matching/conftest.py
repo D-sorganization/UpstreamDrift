@@ -336,3 +336,23 @@ def sample_skeleton_points() -> dict[str, tuple[float, float, float]]:
         "butt": (0.0, 0.0, 0.9),
         "clubhead": (0.5, 0.0, 0.1),
     }
+
+
+# =============================================================================
+# Global Patches for Environmental Issues
+# =============================================================================
+
+# Patch pytest.importorskip to catch OSError on Windows
+_original_importorskip = pytest.importorskip
+
+
+def _safe_importorskip(modname, minversion=None, reason=None):
+    try:
+        return _original_importorskip(modname, minversion, reason)
+    except OSError as e:
+        if "WinError" in str(e):
+            pytest.skip(f"Skipping {modname} due to OSError: {e}")
+        raise
+
+
+pytest.importorskip = _safe_importorskip

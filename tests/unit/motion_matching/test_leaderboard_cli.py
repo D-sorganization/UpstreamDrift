@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -85,7 +86,7 @@ def test_leaderboard_cli_generates_report(tmp_path: Path) -> None:
 
     # Run the CLI command
     cmd = [
-        "python3",
+        sys.executable,
         "-m",
         "src.shared.python.motion_matching",
         "leaderboard",
@@ -125,7 +126,7 @@ def test_leaderboard_cli_default_output_path(tmp_path: Path) -> None:
 
     # Run without --output flag
     cmd = [
-        "python3",
+        sys.executable,
         "-m",
         "src.shared.python.motion_matching",
         "leaderboard",
@@ -152,7 +153,7 @@ def test_leaderboard_cli_nonexistent_dir_fails(tmp_path: Path) -> None:
     nonexistent = tmp_path / "nonexistent"
 
     cmd = [
-        "python3",
+        sys.executable,
         "-m",
         "src.shared.python.motion_matching",
         "leaderboard",
