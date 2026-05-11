@@ -61,7 +61,7 @@ class IconColorizer:
         if not path.exists():
             raise FileNotFoundError(f"SVG file not found at {path}")
 
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             svg_content = f.read()
 
         svg_content = re.sub(r'fill="[^"]+"', f'fill="{color}"', svg_content)

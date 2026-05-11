@@ -18,6 +18,7 @@ Example:
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import secrets
 import time
@@ -87,6 +88,38 @@ class UserProfile:
             return False
         return feature in self.features_enabled or self._tier_includes_feature(feature)
 
+    _TIER_FEATURES = {
+        SubscriptionTier.FREE: {
+            "ollama_chat",
+            "basic_tools",
+            "local_models",
+        },
+        SubscriptionTier.PRO: {
+            "ollama_chat",
+            "basic_tools",
+            "local_models",
+            "claude_code",
+            "codex_cli",
+            "cloud_models",
+            "priority_support",
+            "advanced_tools",
+        },
+        SubscriptionTier.ENTERPRISE: {
+            "ollama_chat",
+            "basic_tools",
+            "local_models",
+            "claude_code",
+            "codex_cli",
+            "cloud_models",
+            "priority_support",
+            "advanced_tools",
+            "custom_integrations",
+            "dedicated_support",
+            "sso_auth",
+            "audit_logs",
+        },
+    }
+
     def _tier_includes_feature(self, feature: str) -> bool:
         """Check if the subscription tier includes a feature.
 
@@ -96,38 +129,7 @@ class UserProfile:
         Returns:
             True if tier includes feature, False otherwise.
         """
-        tier_features = {
-            SubscriptionTier.FREE: {
-                "ollama_chat",
-                "basic_tools",
-                "local_models",
-            },
-            SubscriptionTier.PRO: {
-                "ollama_chat",
-                "basic_tools",
-                "local_models",
-                "claude_code",
-                "codex_cli",
-                "cloud_models",
-                "priority_support",
-                "advanced_tools",
-            },
-            SubscriptionTier.ENTERPRISE: {
-                "ollama_chat",
-                "basic_tools",
-                "local_models",
-                "claude_code",
-                "codex_cli",
-                "cloud_models",
-                "priority_support",
-                "advanced_tools",
-                "custom_integrations",
-                "dedicated_support",
-                "sso_auth",
-                "audit_logs",
-            },
-        }
-        return feature in tier_features.get(self.subscription_tier, set())
+        return feature in self._TIER_FEATURES.get(self.subscription_tier, set())
 
 
 @dataclass
@@ -143,7 +145,9 @@ class AuthToken:
 
     token: str
     token_type: str = "access"
-    expires_at: datetime = field(default_factory=lambda: datetime.now() + timedelta(hours=1))
+    expires_at: datetime = field(
+        default_factory=lambda: datetime.now() + timedelta(hours=1)
+    )
     scope: list[str] = field(default_factory=list)
 
     def is_valid(self) -> bool:
@@ -192,7 +196,9 @@ class AuthManager:
                 self._current_user = UserProfile(
                     user_id=user_data.get("user_id", ""),
                     email=user_data.get("email", ""),
-                    subscription_tier=SubscriptionTier(user_data.get("subscription_tier", "free")),
+                    subscription_tier=SubscriptionTier(
+                        user_data.get("subscription_tier", "free")
+                    ),
                     subscription_expires=(
                         datetime.fromisoformat(user_data["subscription_expires"])
                         if user_data.get("subscription_expires")
@@ -220,7 +226,10 @@ class AuthManager:
                     scope=token_data.get("scope", []),
                 )
 
-            logger.info("Loaded credentials for user: %s", self._current_user.user_id if self._current_user else "none")
+            logger.info(
+                "Loaded credentials for user: %s",
+                self._current_user.user_id if self._current_user else "none",
+            )
 
         except (json.JSONDecodeError, KeyError, ValueError) as e:
             logger.warning("Failed to load credentials: %s", e)
@@ -258,10 +267,8 @@ class AuthManager:
         self.CREDENTIALS_FILE.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
         # Set restrictive file permissions on Unix-like systems
-        try:
+        with contextlib.suppress(OSError, RuntimeError, AttributeError):
             self.CREDENTIALS_FILE.chmod(0o600)
-        except (OSError, RuntimeError, AttributeError):
-            pass  # Ignore on Windows or if chmod fails
 
     def login_with_api_key(self, api_key: str) -> bool:
         """Login using an API key.
@@ -365,7 +372,9 @@ class AuthManager:
             return False
         return self._current_user.has_feature(feature)
 
-    def upgrade_subscription(self, tier: SubscriptionTier, duration_days: int = 30) -> None:
+    def upgrade_subscription(
+        self, tier: SubscriptionTier, duration_days: int = 30
+    ) -> None:
         """Upgrade subscription tier.
 
         Args:
@@ -376,15 +385,19 @@ class AuthManager:
             raise ValueError("No user logged in")
 
         self._current_user.subscription_tier = tier
-        self._current_user.subscription_expires = datetime.now() + timedelta(days=duration_days)
+        self._current_user.subscription_expires = datetime.now() + timedelta(
+            days=duration_days
+        )
 
         # Update features based on tier
         self._current_user.features_enabled = list(
-            self._current_user._tier_includes_feature.__self__._tier_includes_feature.__class__
-        )  # type: ignore
+            UserProfile._TIER_FEATURES.get(tier, set())
+        )
 
         self._save_credentials()
-        logger.info("Upgraded subscription to %s for %d days", tier.value, duration_days)
+        logger.info(
+            "Upgraded subscription to %s for %d days", tier.value, duration_days
+        )
 
     def get_api_key(self) -> str | None:
         """Get current user's API key.

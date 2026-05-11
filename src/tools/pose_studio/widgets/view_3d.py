@@ -21,6 +21,7 @@ from collections.abc import Mapping
 from typing import Any, cast
 
 import numpy as np
+import numpy.typing as npt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from PyQt6 import QtCore, QtWidgets
@@ -120,7 +121,9 @@ class View3D(QtWidgets.QWidget):
         """
         self._service = service
 
-    def update_pose(self, pose: CanonicalPose | None, *, use_service: bool = True) -> None:
+    def update_pose(
+        self, pose: CanonicalPose | None, *, use_service: bool = True
+    ) -> None:
         """Re-draw the skeleton for *pose*.
 
         ``None`` clears to the all-zero canonical pose, which is the

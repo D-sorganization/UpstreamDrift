@@ -237,7 +237,9 @@ class CodexCLITool(CLIToolBase):
         """
         super().__init__("codex", working_dir)
 
-    def generate(self, prompt: str, language: str = "python", timeout: int = 300) -> CLIExecutionResult:
+    def generate(
+        self, prompt: str, language: str = "python", timeout: int = 300
+    ) -> CLIExecutionResult:
         """Generate code from a prompt.
 
         Args:
@@ -261,7 +263,9 @@ class CodexCLITool(CLIToolBase):
         Returns:
             CLIExecutionResult with completion.
         """
-        return self._execute_command(["complete"], input_text=code_prefix, timeout=timeout)
+        return self._execute_command(
+            ["complete"], input_text=code_prefix, timeout=timeout
+        )
 
     def explain(self, code: str, timeout: int = 120) -> CLIExecutionResult:
         """Explain what code does.
@@ -328,10 +332,7 @@ class ShellTool(CLIToolBase):
                 return False
 
         # Check against allowlist
-        for allowed in self._allowed_commands:
-            if command.startswith(allowed):
-                return True
-        return False
+        return any(command.startswith(allowed) for allowed in self._allowed_commands)
 
     def execute(self, command: str, timeout: int = 60) -> CLIExecutionResult:
         """Execute a shell command.
@@ -370,7 +371,18 @@ class CLIToolConfig:
     claude_enabled: bool = True
     codex_enabled: bool = False
     shell_enabled: bool = False
-    shell_allowed_commands: list[str] = field(default_factory=lambda: ["ls", "pwd", "cat", "head", "tail", "wc", "grep", "find"])
+    shell_allowed_commands: list[str] = field(
+        default_factory=lambda: [
+            "ls",
+            "pwd",
+            "cat",
+            "head",
+            "tail",
+            "wc",
+            "grep",
+            "find",
+        ]
+    )
     default_timeout: int = 300
     working_dir: Path | None = None
 
@@ -433,7 +445,7 @@ class CLIToolManager:
         Returns:
             Dictionary with tool availability status.
         """
-        status = {}
+        status: dict[str, dict[str, Any]] = {}
 
         if self._claude:
             status["claude"] = {
@@ -472,7 +484,12 @@ def create_cli_tools_for_registry() -> list[dict[str, Any]]:
                 "description": "Ask Claude Code CLI for code analysis or development assistance",
                 "handler": manager.claude.ask,
                 "parameters": [
-                    {"name": "prompt", "type": "string", "required": True, "description": "Question or request for Claude"}
+                    {
+                        "name": "prompt",
+                        "type": "string",
+                        "required": True,
+                        "description": "Question or request for Claude",
+                    }
                 ],
             }
         )
@@ -484,8 +501,19 @@ def create_cli_tools_for_registry() -> list[dict[str, Any]]:
                 "description": "Generate code using Codex CLI",
                 "handler": manager.codex.generate,
                 "parameters": [
-                    {"name": "prompt", "type": "string", "required": True, "description": "Description of code to generate"},
-                    {"name": "language", "type": "string", "required": False, "description": "Target programming language", "default": "python"}
+                    {
+                        "name": "prompt",
+                        "type": "string",
+                        "required": True,
+                        "description": "Description of code to generate",
+                    },
+                    {
+                        "name": "language",
+                        "type": "string",
+                        "required": False,
+                        "description": "Target programming language",
+                        "default": "python",
+                    },
                 ],
             }
         )
@@ -497,7 +525,12 @@ def create_cli_tools_for_registry() -> list[dict[str, Any]]:
                 "description": "Execute a safe shell command (limited to allowed commands)",
                 "handler": manager.shell.execute,
                 "parameters": [
-                    {"name": "command", "type": "string", "required": True, "description": "Shell command to execute"}
+                    {
+                        "name": "command",
+                        "type": "string",
+                        "required": True,
+                        "description": "Shell command to execute",
+                    }
                 ],
             }
         )
