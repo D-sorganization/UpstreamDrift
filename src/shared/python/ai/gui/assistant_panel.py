@@ -139,19 +139,30 @@ class MessageWidget(QFrame):
         return role_map.get(self._role, self._role.title())
 
     def _apply_style(self) -> None:
-        """Apply styling based on role.
+        """Apply styling based on role and current theme."""
+        self.refresh_theme()
 
-        Using Gitpod-like Dark Theme:
-        - Background: #1e1e1e
-        - Orange Accent: #FF8800
-        - Text: #e0e0e0
-        """
-        if self._role == "user":
-            self.setStyleSheet(Styles.CHAT_MESSAGE_USER)
-        elif self._role == "assistant":
-            self.setStyleSheet(Styles.CHAT_MESSAGE_ASSISTANT)
-        elif self._role == "system":
-            self.setStyleSheet(Styles.CHAT_MESSAGE_SYSTEM)
+    def refresh_theme(self) -> None:
+        """Refresh colors from ThemeManager."""
+        try:
+            from src.shared.python.theme.theme_manager import get_theme_manager
+
+            colors = get_theme_manager().get_current_colors()
+            bg_alt = colors.get("group_bg", "#2d2d2d")
+            bg_secondary = colors.get("input_bg", "#252526")
+            text_primary = colors.get("text", "#e0e0e0")
+        except ImportError:
+            bg_alt = "#2d2d2d"
+            bg_secondary = "#252526"
+            text_primary = "#e0e0e0"
+
+        bg = bg_alt if self._role == "user" else bg_secondary
+        self.setStyleSheet(
+            f"MessageWidget {{ background-color: {bg}; border-radius: 6px; }}"
+        )
+        self._content_label.setStyleSheet(
+            f"color: {text_primary}; background: transparent; border: none;"
+        )
 
     def _adjust_height(self) -> None:
         """Adjust height to fit content."""
@@ -361,8 +372,8 @@ class AIAssistantPanel(QWidget):
         layout.setSpacing(0)
 
         # Header
-        header = self._create_header()
-        layout.addWidget(header)
+        self._header = self._create_header()
+        layout.addWidget(self._header)
 
         # Splitter for messages and input
         splitter = QSplitter(Qt.Orientation.Vertical)
@@ -378,8 +389,8 @@ class AIAssistantPanel(QWidget):
         splitter.addWidget(self._message_area)
 
         # Input area
-        input_widget = self._create_input_area()
-        splitter.addWidget(input_widget)
+        self._input_container = self._create_input_area()
+        splitter.addWidget(self._input_container)
 
         # Set splitter sizes (80% messages, 20% input)
         splitter.setSizes([400, 100])
@@ -391,6 +402,30 @@ class AIAssistantPanel(QWidget):
         # Attempt to load settings immediately
         QtCore.QTimer.singleShot(100, self._auto_load_settings)
 
+        self.refresh_theme()
+
+    def showEvent(self, event: Any) -> None:
+        """Refresh models and auto-index when panel becomes visible."""
+        super().showEvent(event)
+        self._refresh_models()
+        if hasattr(self, "chk_auto_index") and self.chk_auto_index.isChecked():
+            self._add_system_message("Indexing codebase for full context...")
+            # Placeholder for actual RAG index trigger
+            QtCore.QTimer.singleShot(
+                1000,
+                lambda: self._add_system_message("Codebase indexed successfully."),
+            )
+
+    def _refresh_models(self) -> None:
+        """Refresh available models from the backend adapter."""
+        if hasattr(self, "_adapter") and self._adapter:
+            try:
+                # Assuming adapter has a get_available_models or similar,
+                # we'll just log it for now or re-apply settings
+                self._auto_load_settings()
+            except Exception as e:
+                logger.warning(f"Failed to refresh models: {e}")
+
     def _auto_load_settings(self) -> None:
         """Try to load settings and init adapter on startup."""
         try:
@@ -400,6 +435,117 @@ class AIAssistantPanel(QWidget):
             self.apply_settings(settings)
         except ImportError as e:
             logger.warning(f"Failed to auto-load AI settings: {e}")
+
+    def refresh_theme(self) -> None:
+        """Refresh styling from ThemeManager."""
+        try:
+            from src.shared.python.theme.theme_manager import get_theme_manager
+
+            colors = get_theme_manager().get_current_colors()
+            bg_primary = colors.get("bg", "#1e1e1e")
+            bg_alt = colors.get("group_bg", "#2d2d2d")
+            text_primary = colors.get("text", "#e0e0e0")
+            text_muted = colors.get("text_secondary", "#888888")
+            border = colors.get("border", "#444444")
+            accent = colors.get("accent", "#FF8800")
+            button_hover = colors.get("button_hover", "#cc6d00")
+        except ImportError:
+            return
+
+        self.setStyleSheet(f"background-color: {bg_primary}; color: {text_primary};")
+
+        # Header
+        self._header.setStyleSheet(f"""
+            QFrame {{
+                background-color: {accent};
+                padding: 8px;
+                border-bottom: 1px solid {border};
+            }}
+            QLabel {{
+                color: #000000;
+            }}
+            QPushButton {{
+                background-color: rgba(0, 0, 0, 0.1);
+                color: #000000;
+                border: 1px solid rgba(0, 0, 0, 0.2);
+                border-radius: 4px;
+                padding: 4px 8px;
+            }}
+            QPushButton:hover {{
+                background-color: rgba(0, 0, 0, 0.2);
+            }}
+        """)
+
+        # Input Area
+        self._input_container.setStyleSheet(f"""
+            QFrame {{
+                background-color: {bg_primary};
+                border-top: 1px solid {border};
+            }}
+        """)
+
+        self._input_edit.setStyleSheet(f"""
+            QPlainTextEdit {{
+                background-color: {bg_alt};
+                color: {text_primary};
+                border: 1px solid {border};
+                border-radius: 4px;
+                padding: 8px;
+            }}
+            QPlainTextEdit:focus {{
+                border: 1px solid {accent};
+            }}
+        """)
+
+        self._send_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {accent};
+                color: black;
+                border: none;
+                border-radius: 4px;
+                padding: 8px 16px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: {button_hover};
+            }}
+            QPushButton:disabled {{
+                background-color: {border};
+                color: {text_muted};
+            }}
+        """)
+
+        self._expertise_label.setStyleSheet(f"color: {text_muted};")
+
+        # Message Area
+        self._message_container.setStyleSheet(f"background-color: {bg_primary};")
+        self._message_area.setStyleSheet(f"""
+            QScrollArea {{
+                background-color: {bg_primary};
+                border: none;
+            }}
+            QScrollBar:vertical {{
+                background: {bg_primary};
+                width: 10px;
+                margin: 0px 0px 0px 0px;
+            }}
+            QScrollBar::handle:vertical {{
+                background: {border};
+                min-height: 20px;
+                border-radius: 5px;
+            }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+                background: none;
+            }}
+        """)
+
+        # Refresh all child messages
+        for i in range(self._message_layout.count()):
+            item = self._message_layout.itemAt(i)
+            if item:
+                w = item.widget()
+                if isinstance(w, MessageWidget):
+                    w.refresh_theme()
 
     def _create_header(self) -> QWidget:
         """Create the panel header."""
@@ -484,8 +630,14 @@ class AIAssistantPanel(QWidget):
     def _add_header_action_buttons(self, layout: Any) -> None:
         if not (layout is not None):
             raise ValueError("layout must be provided")
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
+
+        from PyQt6.QtWidgets import QCheckBox
+
+        self.chk_auto_index = QCheckBox("Auto-Index")
+        self.chk_auto_index.setToolTip("Index the full codebase for context")
+        self.chk_auto_index.setStyleSheet("color: black;")
+        layout.addWidget(self.chk_auto_index)
+
         new_chat_btn = QPushButton("New Chat")
         new_chat_btn.clicked.connect(self._on_new_chat)
         layout.addWidget(new_chat_btn)

@@ -1,6 +1,8 @@
 import matlab.engine
+
 eng = matlab.engine.start_matlab()
 import json
+
 payload = {
     "schema": "body_target_json_v1",
     "time_s": [0.0, 0.1],
@@ -13,6 +15,10 @@ payload = {
 }
 j = json.dumps(payload)
 out = eng.jsondecode(j)
-print(type(out))
-print(out)
+print(  # noqa: T201
+    type(out)
+)
+print(  # noqa: T201
+    out
+)
 eng.quit()

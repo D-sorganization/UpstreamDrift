@@ -73,9 +73,22 @@ class LauncherThemeMixin:
     def _apply_theme_system(self) -> None:
         """Initialize theme manager and register for theme change callbacks."""
         try:
-            from src.shared.python.theme import ThemeManager, apply_golf_suite_style
+            from src.shared.python.theme import (
+                ThemeManager,
+                FontManager,
+                apply_golf_suite_style,
+            )
 
             self._theme_manager = ThemeManager.instance()
+
+            # Initialize FontManager
+            if FontManager is not None:
+                self._font_manager = FontManager(
+                    app_context="UpstreamDrift",
+                    settings_org="D-sorganization",
+                    settings_app="UpstreamDrift",
+                )
+                self._font_manager.apply_font()
 
             # Apply matplotlib styling globally
             apply_golf_suite_style()
@@ -97,6 +110,10 @@ class LauncherThemeMixin:
         for card in self.model_cards.values():
             if hasattr(card, "refresh_theme"):
                 card.refresh_theme()
+
+        # Refresh AI panel if it exists
+        if hasattr(self, "ai_panel") and hasattr(self.ai_panel, "refresh_theme"):
+            self.ai_panel.refresh_theme()
 
         # Reapply card selection state with new theme colors
         if self.selected_model:
@@ -185,6 +202,12 @@ class LauncherThemeMixin:
             manage_action.triggered.connect(self._open_theme_manager_dialog)
             theme_menu.addAction(manage_action)
 
+            # Typography submenu
+            theme_menu.addSeparator()
+            typography_menu = theme_menu.addMenu("Typography")
+            if typography_menu:
+                self._setup_typography_menu(typography_menu)
+
             # Plot Theme submenu
             theme_menu.addSeparator()
             plot_menu = theme_menu.addMenu("Plot Theme")
@@ -193,9 +216,44 @@ class LauncherThemeMixin:
 
         except ImportError as e:
             logger.warning(f"Could not populate theme menu: {e}")
+
+    def _setup_typography_menu(self, typography_menu: QMenu) -> None:
+        """Populate the Typography submenu."""
+        if typography_menu is None:
+            raise ValueError("typography_menu must be provided")
+        from PyQt6.QtGui import QActionGroup
+
+        try:
+            from src.shared.python.theme.font_manager import (
+                FontManager,
+                get_font_manager,
+            )
+
+            if FontManager is None:
+                return
+
+            manager = get_font_manager()
+            group = QActionGroup(self)
+            group.setExclusive(True)
+
+            available_fonts = manager.get_available_fonts()
+            current_font = manager.get_current_font()
+
+            for font_name in available_fonts:
+                action = QAction(font_name, self)
+                action.setCheckable(True)
+                action.setChecked(font_name == current_font)
+                action.triggered.connect(
+                    lambda checked, f=font_name: manager.change_font(f)
+                )
+                group.addAction(action)
+                typography_menu.addAction(action)
+
+        except ImportError as e:
+            logger.warning(f"Could not populate typography menu: {e}")
             fallback = QAction("(Theme system unavailable)", self)
             fallback.setEnabled(False)
-            theme_menu.addAction(fallback)
+            typography_menu.addAction(fallback)
 
     def _open_theme_manager_dialog(self) -> None:
         """Open the full Theme Manager dialog."""

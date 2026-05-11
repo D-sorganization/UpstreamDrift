@@ -143,13 +143,20 @@ class TestSignalToolkitImport:
     def test_absolute_contracts_import_in_signal_core(self) -> None:
         """signal_toolkit/core.py must try absolute import path for contracts."""
         source_path = (
-            REPO_ROOT / "src" / "shared" / "python" / "signal_toolkit" / "core.py"
+            REPO_ROOT
+            / "vendor"
+            / "ud-tools"
+            / "src"
+            / "shared"
+            / "python"
+            / "signal_toolkit"
+            / "core.py"
         )
         assert source_path.exists(), f"Expected {source_path} to exist"
         source = source_path.read_text(encoding="utf-8")
-        assert (
-            "src.shared.python.contracts" in source
-        ), "signal_toolkit/core.py must try absolute import path for contracts"
+        assert "src.shared.python.contracts" in source, (
+            "signal_toolkit/core.py must try absolute import path for contracts"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -165,9 +172,9 @@ class TestEngineDiscoveryPaths:
         from src.shared.python.engine_core.engine_manager import EngineManager
 
         em = EngineManager(REPO_ROOT)
-        assert "src" in str(
-            em.engines_root
-        ), f"Expected engines_root under src/, got {em.engines_root}"
+        assert "src" in str(em.engines_root), (
+            f"Expected engines_root under src/, got {em.engines_root}"
+        )
 
     def test_myosuite_not_myosim(self) -> None:
         """MYOSIM engine path should point to myosuite, not myosim."""
@@ -175,9 +182,9 @@ class TestEngineDiscoveryPaths:
         from src.shared.python.engine_core.engine_registry import EngineType
 
         em = EngineManager(REPO_ROOT)
-        assert (
-            em.engine_paths[EngineType.MYOSIM].name == "myosuite"
-        ), f"Expected 'myosuite', got '{em.engine_paths[EngineType.MYOSIM].name}'"
+        assert em.engine_paths[EngineType.MYOSIM].name == "myosuite", (
+            f"Expected 'myosuite', got '{em.engine_paths[EngineType.MYOSIM].name}'"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -193,9 +200,9 @@ class TestWindowSizing:
         source_path = REPO_ROOT / "src" / "launchers" / "golf_launcher.py"
         assert source_path.exists(), f"Expected {source_path} to exist"
         source = source_path.read_text(encoding="utf-8")
-        assert (
-            "self.resize(1400, 900)" not in source
-        ), "Window size must be screen-aware, not hardcoded 1400x900"
+        assert "self.resize(1400, 900)" not in source, (
+            "Window size must be screen-aware, not hardcoded 1400x900"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -217,9 +224,9 @@ class TestSubprocessPythonpath:
         env = MujocoUnifiedLauncher._get_launch_env()
         # shared_python must be on PYTHONPATH
         pythonpath = env.get("PYTHONPATH", "")
-        assert (
-            "shared" in pythonpath and "python" in pythonpath
-        ), f"Expected shared/python in PYTHONPATH, got: {pythonpath}"
+        assert "shared" in pythonpath and "python" in pythonpath, (
+            f"Expected shared/python in PYTHONPATH, got: {pythonpath}"
+        )
 
     def test_process_manager_env_has_shared_python(self) -> None:
         """ProcessManager.get_subprocess_env must include src/shared/python."""
@@ -229,9 +236,9 @@ class TestSubprocessPythonpath:
         env = pm.get_subprocess_env()
         pythonpath = env.get("PYTHONPATH", "")
         shared_python = str(REPO_ROOT / "src" / "shared" / "python")
-        assert (
-            shared_python in pythonpath
-        ), f"Expected {shared_python} in PYTHONPATH, got: {pythonpath}"
+        assert shared_python in pythonpath, (
+            f"Expected {shared_python} in PYTHONPATH, got: {pythonpath}"
+        )
 
     def test_process_manager_env_has_repo_root(self) -> None:
         """ProcessManager.get_subprocess_env must include repo root."""
@@ -240,9 +247,9 @@ class TestSubprocessPythonpath:
         pm = ProcessManager(REPO_ROOT)
         env = pm.get_subprocess_env()
         pythonpath = env.get("PYTHONPATH", "")
-        assert (
-            str(REPO_ROOT) in pythonpath
-        ), f"Expected {REPO_ROOT} in PYTHONPATH, got: {pythonpath}"
+        assert str(REPO_ROOT) in pythonpath, (
+            f"Expected {REPO_ROOT} in PYTHONPATH, got: {pythonpath}"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -320,9 +327,9 @@ class TestLaunchDiagnostics:
         # Must have logged the failure with useful context
         mock_logger.error.assert_called()
         call_args = str(mock_logger.error.call_args)
-        assert (
-            "TestEngine" in call_args or "test_type" in call_args
-        ), f"Error log must mention engine name or type, got: {call_args}"
+        assert "TestEngine" in call_args or "test_type" in call_args, (
+            f"Error log must mention engine name or type, got: {call_args}"
+        )
 
     def test_execute_local_launch_success_path(self) -> None:
         """When handler.launch() returns True, success toast is shown."""
@@ -397,9 +404,9 @@ class TestProcessImmediateDeathDetection:
             # Check that exit code was logged
             calls = [str(c) for c in mock_emit.call_args_list]
             exit_logged = any("exited with code" in c for c in calls)
-            assert (
-                exit_logged
-            ), f"Expected 'exited with code' in output, got calls: {calls}"
+            assert exit_logged, (
+                f"Expected 'exited with code' in output, got calls: {calls}"
+            )
 
     def test_launch_module_logs_immediate_exit(self, tmp_path: Path) -> None:
         """If a launched module exits immediately, the exit is detected."""
