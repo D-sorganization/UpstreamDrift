@@ -1599,8 +1599,7 @@ class StartingPoseMatcher(QMainWindow):
         dt = np.diff(traj.times[: len(ch)])
         dt = np.where(dt == 0, 1e-6, dt)
         v = np.diff(ch, axis=0) / dt[:, None]
-        speed = np.linalg.norm(v, axis=1)
-        i = int(np.argmax(speed))
+        i = int(np.argmax(np.einsum("ij,ij->i", v, v)))
         return float(traj.times[i])
 
     def _on_frame_override_toggled(self, _state: int) -> None:

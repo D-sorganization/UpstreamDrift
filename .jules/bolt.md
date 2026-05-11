@@ -31,3 +31,6 @@
 ## 2026-05-18 - Optimize sum of squares along axis
 **Learning:** `np.sum(diff ** 2, axis=1)` evaluates element-wise square and sum operations along an axis, creating intermediate memory allocations and has overhead.
 **Action:** Replace `np.sqrt(np.mean(np.sum(diff ** 2, axis=1)))` with `np.sqrt(np.vdot(diff, diff) / diff.shape[0])` when evaluating the RMSE on an array of coordinates over N frames, by vectorizing the sum of squares across all the matrix coordinates at once. This avoids intermediate allocations and accelerates the calculations significantly.
+## 2026-05-18 - Optimize norm calculation combined with argmax
+**Learning:** `np.linalg.norm(..., axis=1)` creates intermediate memory allocations and has overhead when used with `np.argmax`. Since `argmax` is invariant to monotonic transformations like `sqrt`, the `sqrt` can be completely omitted.
+**Action:** Replace `np.argmax(np.linalg.norm(x, axis=1))` with `np.argmax(np.einsum('ij,ij->i', x, x))` to find the index of the maximum magnitude vector without calculating the full norm. This yields significant speedup by avoiding both intermediate allocations and square root computation.

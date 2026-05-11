@@ -466,8 +466,8 @@ def _sim_out_from_matlab(sim_out_m: Any) -> SimOut:
     impact_idx = sim_out_m.get("impact_idx", None)
     if impact_idx is None:
         if clubhead.shape[0] >= 2:
-            speed = np.linalg.norm(np.diff(clubhead, axis=0), axis=1)
-            impact_idx = int(np.argmax(speed))
+            diff = np.diff(clubhead, axis=0)
+            impact_idx = int(np.argmax(np.einsum("ij,ij->i", diff, diff)))
         else:
             impact_idx = 0
     else:
