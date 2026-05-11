@@ -91,19 +91,25 @@ def _cmd_export(args: argparse.Namespace) -> int:
     conn.close()
 
     from .db import SymbolRow
+    import gzip
 
-    import contextlib
-
-    with contextlib.ExitStack() as stack:
-        out = (
-            stack.enter_context(open(args.output, "w", encoding="utf-8"))
-            if args.output
-            else sys.stdout
-        )
-        for r in rows:
-            out.write(json.dumps(asdict(SymbolRow(*r))) + "\n")
-
-    _err(f"Exported {len(rows)} symbols.")
+    if args.jsonl and not args.output:
+        exports_dir = Path(".codemap/exports")
+        exports_dir.mkdir(parents=True, exist_ok=True)
+        out_path = exports_dir / "code_map.jsonl.gz"
+        with gzip.open(out_path, "wt", encoding="utf-8") as out_gz:
+            for r in rows:
+                out_gz.write(json.dumps(asdict(SymbolRow(*r))) + "\n")
+        _err(f"Exported {len(rows)} symbols to {out_path}.")
+    else:
+        out = open(args.output, "w", encoding="utf-8") if args.output else sys.stdout  # noqa: SIM115
+        try:
+            for r in rows:
+                out.write(json.dumps(asdict(SymbolRow(*r))) + "\n")
+        finally:
+            if args.output:
+                out.close()
+        _err(f"Exported {len(rows)} symbols.")
     return 0
 
 
