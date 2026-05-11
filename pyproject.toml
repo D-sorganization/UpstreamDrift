@@ -322,7 +322,6 @@ warn_return_any = true
 [tool.pytest.ini_options]
 # Consolidated pytest configuration (replaces duplicate pytest.ini files)
 testpaths = ["tests"]
-asyncio_default_fixture_loop_scope = "function"
 pythonpath = [
     ".",
     "src",
