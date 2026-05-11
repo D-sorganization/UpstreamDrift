@@ -55,6 +55,7 @@ def test_cross_option_leaderboard_report_generation():
                 "option": "option1",
                 "grip_rmse_mm": 3.5,
                 "clubhead_rmse_mm": 8.2,
+                "body_marker_rmse_mm": 8.2,
                 "total_work_J": 285.0,
                 "wall_clock_s": 420.5,
                 "n_iterations": 45,
@@ -67,6 +68,7 @@ def test_cross_option_leaderboard_report_generation():
                 "option": "option2",
                 "grip_rmse_mm": 4.2,
                 "clubhead_rmse_mm": 9.5,
+                "body_marker_rmse_mm": 9.5,
                 "total_work_J": 290.0,
                 "wall_clock_s": 0.85,
                 "n_iterations": 0,
@@ -94,9 +96,9 @@ def test_cross_option_leaderboard_report_generation():
         assert result.returncode == 0, f"CLI failed: {result.stderr}"
 
         # Verify leaderboard was generated
-        assert (
-            leaderboard_path.exists()
-        ), f"Leaderboard not created at {leaderboard_path}"
+        assert leaderboard_path.exists(), (
+            f"Leaderboard not created at {leaderboard_path}"
+        )
         leaderboard_text = leaderboard_path.read_text()
         assert "Cross-Option Leaderboard" in leaderboard_text
         assert "TW_ProV1" in leaderboard_text

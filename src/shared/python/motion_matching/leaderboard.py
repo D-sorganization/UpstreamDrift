@@ -76,6 +76,7 @@ _COLUMNS: tuple[str, ...] = (
     "solver",
     "grip_rmse_mm",
     "clubhead_rmse_mm",
+    "body_marker_rmse_mm",
     "total_work_J",
     "wall_clock_s",
     "commit",
@@ -85,6 +86,7 @@ _REQUIRED_FIELDS: tuple[str, ...] = ("trial", *_COLUMNS)
 _NONNEG_FIELDS: tuple[str, ...] = (
     "grip_rmse_mm",
     "clubhead_rmse_mm",
+    "body_marker_rmse_mm",
     "total_work_J",
     "wall_clock_s",
 )
@@ -160,6 +162,7 @@ class FitResult:
     solver: str
     grip_rmse_mm: float
     clubhead_rmse_mm: float
+    body_marker_rmse_mm: float
     total_work_J: float
     wall_clock_s: float
     commit: str
@@ -337,6 +340,7 @@ JSON_LEADERBOARD_COLUMNS: tuple[str, ...] = (
     "target_id",
     "theta",
     "residual_rms",
+    "body_marker_rms",
     "wallclock",
     "commit_sha",
 )
@@ -450,6 +454,9 @@ def _row_from_fit_result(
         "target_id": target,
         "theta": theta,
         "residual_rms": residual_rms,
+        "body_marker_rms": float(
+            _attr("body_marker_rms", "body_marker_rmse_mm", default=0.0)
+        ),
         "wallclock": wallclock,
         "commit_sha": _short_commit(commit),
         "run_at": str(run_at),
