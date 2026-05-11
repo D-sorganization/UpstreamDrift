@@ -3,12 +3,6 @@ Filtering for motion capture data.
 
 Part of issue #4564. Butterworth, Savitzky-Golay, and Kalman filters
 for smoothing noisy motion capture data.
-
-Hot-loop numeric kernels are routed through the Rust ``upstream-mocap-preproc``
-wheel when available (see ``rust_core/upstream-mocap-preproc/``). If the wheel
-is not installed, the pure-Python implementation in
-``_filter_pure_python.py`` is used as a transparent fallback. The public API
-(``apply_filter``, ``FilterType``) is identical either way.
 """
 
 from __future__ import annotations
@@ -19,14 +13,6 @@ from typing import Optional
 import numpy as np
 
 from ..contracts import KeypointFrame, KeypointSequence, MarkerFrame, MarkerTrajectory
-
-try:  # pragma: no cover - import guard exercised in CI matrix
-    import upstream_mocap_preproc as _rust_kernel  # type: ignore[import-not-found]
-
-    _RUST_AVAILABLE = True
-except ImportError:  # pragma: no cover - fallback path
-    _rust_kernel = None  # type: ignore[assignment]
-    _RUST_AVAILABLE = False
 
 
 class FilterType(str, Enum):
@@ -288,24 +274,29 @@ def _butterworth_filter(
     order: int,
     fps: float,
 ) -> np.ndarray:
-    """Apply Butterworth low-pass filter.
+    """Apply Butterworth low-pass filter."""
+    try:
+        from scipy.signal import butter, filtfilt
 
-    Routes to the Rust kernel when ``upstream_mocap_preproc`` is importable;
-    otherwise dispatches to the pure-Python implementation that mirrors the
-    historical SciPy-backed code path.
-    """
-    if _RUST_AVAILABLE:
-        return np.asarray(
-            _rust_kernel.butterworth_filter(  # type: ignore[union-attr]
-                np.ascontiguousarray(data, dtype=np.float64),
-                float(cutoff),
-                int(order),
-                float(fps),
-            )
-        )
-    from ._filter_pure_python import _butterworth_filter as _py_impl
+        nyquist = fps / 2
+        normalized_cutoff = cutoff / nyquist
 
-    return _py_impl(data, cutoff, order, fps)
+        # Ensure cutoff is valid
+        if normalized_cutoff >= 1.0:
+            normalized_cutoff = 0.99
+
+        b, a = butter(order, normalized_cutoff, btype="low")
+
+        # Apply filter to each dimension
+        filtered = np.zeros_like(data)
+        for i in range(data.shape[1]):
+            for j in range(data.shape[2]):
+                filtered[:, i, j] = filtfilt(b, a, data[:, i, j])
+
+        return filtered
+    except ImportError:
+        # Fallback to simple moving average if scipy not available
+        return _moving_average(data, window=5)
 
 
 def _savgol_filter(
@@ -313,52 +304,60 @@ def _savgol_filter(
     window_length: int = 11,
     polyorder: int = 2,
 ) -> np.ndarray:
-    """Apply Savitzky-Golay filter (Rust kernel with Python fallback)."""
-    if _RUST_AVAILABLE:
-        return np.asarray(
-            _rust_kernel.savgol_filter(  # type: ignore[union-attr]
-                np.ascontiguousarray(data, dtype=np.float64),
-                int(window_length),
-                int(polyorder),
-            )
-        )
-    from ._filter_pure_python import _savgol_filter as _py_impl
+    """Apply Savitzky-Golay filter."""
+    try:
+        from scipy.signal import savgol_filter
 
-    return _py_impl(data, window_length, polyorder)
+        # Ensure window_length is odd
+        if window_length % 2 == 0:
+            window_length += 1
+
+        # Ensure window_length > polyorder
+        if window_length <= polyorder:
+            window_length = polyorder + 2
+
+        filtered = np.zeros_like(data)
+        for i in range(data.shape[1]):
+            for j in range(data.shape[2]):
+                filtered[:, i, j] = savgol_filter(
+                    data[:, i, j], window_length, polyorder
+                )
+
+        return filtered
+    except ImportError:
+        # Fallback to moving average
+        return _moving_average(data, window=window_length)
 
 
 def _median_filter(
     data: np.ndarray,
     kernel_size: int = 3,
 ) -> np.ndarray:
-    """Apply median filter (Rust kernel with Python fallback)."""
-    if _RUST_AVAILABLE:
-        return np.asarray(
-            _rust_kernel.median_filter(  # type: ignore[union-attr]
-                np.ascontiguousarray(data, dtype=np.float64),
-                int(kernel_size),
-            )
-        )
-    from ._filter_pure_python import _median_filter as _py_impl
+    """Apply median filter."""
+    try:
+        from scipy.signal import medfilt
 
-    return _py_impl(data, kernel_size)
+        filtered = np.zeros_like(data)
+        for i in range(data.shape[1]):
+            for j in range(data.shape[2]):
+                filtered[:, i, j] = medfilt(data[:, i, j], kernel_size=kernel_size)
+
+        return filtered
+    except ImportError:
+        return _moving_average(data, window=kernel_size)
 
 
 def _gaussian_filter(
     data: np.ndarray,
     sigma: float = 1.0,
 ) -> np.ndarray:
-    """Apply Gaussian filter (Rust kernel with Python fallback)."""
-    if _RUST_AVAILABLE:
-        return np.asarray(
-            _rust_kernel.gaussian_filter(  # type: ignore[union-attr]
-                np.ascontiguousarray(data, dtype=np.float64),
-                float(sigma),
-            )
-        )
-    from ._filter_pure_python import _gaussian_filter as _py_impl
+    """Apply Gaussian filter."""
+    try:
+        from scipy.ndimage import gaussian_filter1d
 
-    return _py_impl(data, sigma)
+        return gaussian_filter1d(data, sigma=sigma, axis=0)
+    except ImportError:
+        return _moving_average(data, window=int(6 * sigma) + 1)
 
 
 def _moving_average(
@@ -384,23 +383,6 @@ from ..contracts import Keypoint, Marker
 
 
 def _kalman_filter(
-    data: np.ndarray,
-    process_noise: float = 0.01,
-    measurement_noise: float = 0.1,
-) -> np.ndarray:  # noqa: D401
-    """Apply Kalman filter — Rust kernel preferred, pure-Python fallback below."""
-    if _RUST_AVAILABLE:
-        return np.asarray(
-            _rust_kernel.kalman_filter(  # type: ignore[union-attr]
-                np.ascontiguousarray(data, dtype=np.float64),
-                float(process_noise),
-                float(measurement_noise),
-            )
-        )
-    return _kalman_filter_python(data, process_noise, measurement_noise)
-
-
-def _kalman_filter_python(
     data: np.ndarray,
     process_noise: float = 0.01,
     measurement_noise: float = 0.1,

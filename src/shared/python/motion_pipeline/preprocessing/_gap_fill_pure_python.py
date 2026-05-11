@@ -3,12 +3,6 @@ Gap-filling strategies for motion capture data.
 
 Part of issue #4564. Handles marker occlusion and missing keypoints
 using interpolation and reconstruction strategies.
-
-The PCA reconstruction inner loop (SVD on the visible-row submatrix plus
-per-row least-squares) is routed through the Rust ``upstream-mocap-preproc``
-kernel when available; the pure-Python implementation in
-``_gap_fill_pure_python.py`` is preserved as a fallback for environments
-that do not ship the wheel.
 """
 
 from __future__ import annotations
@@ -19,14 +13,6 @@ from typing import Optional
 import numpy as np
 
 from ..contracts import KeypointFrame, KeypointSequence, MarkerFrame, MarkerTrajectory
-
-try:  # pragma: no cover - import guard
-    import upstream_mocap_preproc as _rust_kernel  # type: ignore[import-not-found]
-
-    _RUST_AVAILABLE = True
-except ImportError:  # pragma: no cover
-    _rust_kernel = None  # type: ignore[assignment]
-    _RUST_AVAILABLE = False
 
 
 class GapFillStrategy(str, Enum):
@@ -419,85 +405,6 @@ def _pca_reconstruct_markers(
     rank: int | None = None,
 ) -> list[MarkerFrame]:
     """Reconstruct occluded markers via low-rank SVD projection.
-
-    Dispatches to the Rust ``upstream_mocap_preproc.pca_gap_fill`` kernel
-    when available, otherwise falls back to the pure-Python implementation.
-    """
-    if _RUST_AVAILABLE and frames:
-        return _pca_reconstruct_markers_rust(frames, gap_indices, max_gap, rank)
-    return _pca_reconstruct_markers_python(frames, gap_indices, max_gap, rank)
-
-
-def _pca_reconstruct_markers_rust(
-    frames: list[MarkerFrame],
-    gap_indices: list[tuple[int, int]],
-    max_gap: int,
-    rank: int | None,
-) -> list[MarkerFrame]:
-    """Rust-backed PCA reconstruction. Stacks frames, calls kernel, rebuilds frames."""
-    n_frames = len(frames)
-    marker_names = list(frames[0].markers.keys())
-    n_markers = len(marker_names)
-
-    data = np.zeros((n_frames, n_markers, 3), dtype=np.float64)
-    mask = np.zeros((n_frames, n_markers), dtype=bool)
-    for i, frame in enumerate(frames):
-        for j, name in enumerate(marker_names):
-            m = frame.markers.get(name)
-            if m is None:
-                mask[i, j] = True
-                continue
-            data[i, j, 0] = m.x
-            data[i, j, 1] = m.y
-            data[i, j, 2] = m.z
-            if m.occluded:
-                mask[i, j] = True
-
-    filled, filled_mask, pca_success = _rust_kernel.pca_gap_fill(  # type: ignore[union-attr]
-        data, mask, int(max_gap), rank
-    )
-    filled = np.asarray(filled)
-    filled_mask = np.asarray(filled_mask)
-    pca_success = np.asarray(pca_success)
-
-    # Reassemble frames with the filled entries.
-    filled_frames = list(frames)
-    for i, frame in enumerate(frames):
-        if not pca_success[i]:
-            continue
-        new_markers = dict(frame.markers)
-        for j, name in enumerate(marker_names):
-            if mask[i, j] and not filled_mask[i, j]:
-                new_markers[name] = Marker(
-                    name=name,
-                    x=float(filled[i, j, 0]),
-                    y=float(filled[i, j, 1]),
-                    z=float(filled[i, j, 2]),
-                    residual=None,
-                    occluded=False,
-                )
-        filled_frames[i] = MarkerFrame(
-            timestamp=frame.timestamp,
-            markers=new_markers,
-            frame_index=frame.frame_index,
-        )
-
-    # Linear fallback for frames PCA could not handle.
-    remaining_gaps = _find_gaps_markers(filled_frames)
-    if remaining_gaps:
-        filled_frames = _fill_gaps_markers(
-            filled_frames, remaining_gaps, GapFillStrategy.LINEAR, max_gap
-        )
-    return filled_frames
-
-
-def _pca_reconstruct_markers_python(
-    frames: list[MarkerFrame],
-    gap_indices: list[tuple[int, int]],
-    max_gap: int,
-    rank: int | None = None,
-) -> list[MarkerFrame]:
-    """Pure-Python PCA reconstruction (preserves original numpy-only path).
 
     Algorithm:
     1. Stack the trajectory into matrix M of shape (n_frames, n_markers * 3).

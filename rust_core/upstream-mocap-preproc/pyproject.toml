@@ -1,0 +1,21 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "upstream-mocap-preproc"
+version = "2.1.0"
+description = "Rust-compiled mocap preprocessing kernels: Butterworth/SavGol/Kalman/median/Gaussian, gap fill, FPS resample"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "numpy>=1.24",
+]
+
+[tool.maturin]
+features = ["python"]
+module-name = "upstream_mocap_preproc"
+manifest-path = "Cargo.toml"

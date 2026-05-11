@@ -2,10 +2,6 @@
 Resampling for motion capture data.
 
 Part of issue #4564. Frame-rate conversion with anti-aliasing.
-
-Linear-interpolation inner loops are routed through the Rust
-``upstream-mocap-preproc`` wheel when available; the pure-Python ``np.interp``
-fallback in ``_resample_pure_python.py`` is used otherwise.
 """
 
 from __future__ import annotations
@@ -15,36 +11,6 @@ from typing import Optional
 import numpy as np
 
 from ..contracts import KeypointFrame, KeypointSequence, MarkerFrame, MarkerTrajectory
-
-try:  # pragma: no cover - import guard
-    import upstream_mocap_preproc as _rust_kernel  # type: ignore[import-not-found]
-
-    _RUST_AVAILABLE = True
-except ImportError:  # pragma: no cover
-    _rust_kernel = None  # type: ignore[assignment]
-    _RUST_AVAILABLE = False
-
-
-def _rust_interp_axes(
-    data: np.ndarray,
-    source_ts: np.ndarray,
-    target_ts: np.ndarray,
-) -> np.ndarray:
-    """Inner numpy-only resample helper. Dispatches to Rust when available."""
-    if _RUST_AVAILABLE:
-        return np.asarray(
-            _rust_kernel.resample_fps(  # type: ignore[union-attr]
-                np.ascontiguousarray(data, dtype=np.float64),
-                np.ascontiguousarray(source_ts, dtype=np.float64),
-                np.ascontiguousarray(target_ts, dtype=np.float64),
-            )
-        )
-    # Pure-Python: per-axis np.interp.
-    out = np.zeros((target_ts.shape[0], data.shape[1], data.shape[2]))
-    for i in range(data.shape[1]):
-        for j in range(data.shape[2]):
-            out[:, i, j] = np.interp(target_ts, source_ts, data[:, i, j])
-    return out
 
 
 def resample(
@@ -97,8 +63,13 @@ def _resample_keypoints(
     data = _keypoints_to_array(seq.frames)
     timestamps = np.array([f.timestamp for f in seq.frames])
 
-    # Resample each keypoint dimension (Rust kernel or numpy fallback)
-    resampled_data = _rust_interp_axes(data, timestamps, new_timestamps)
+    # Resample each keypoint dimension
+    resampled_data = np.zeros((num_new_frames, data.shape[1], 3))
+    for i in range(data.shape[1]):
+        for j in range(data.shape[2]):
+            resampled_data[:, i, j] = np.interp(
+                new_timestamps, timestamps, data[:, i, j]
+            )
 
     # Reconstruct frames
     new_frames = _array_to_keypoint_frames_at_timestamps(
@@ -142,8 +113,13 @@ def _resample_markers(
     data = _markers_to_array(traj.frames)
     timestamps = np.array([f.timestamp for f in traj.frames])
 
-    # Resample each marker dimension (Rust kernel or numpy fallback)
-    resampled_data = _rust_interp_axes(data, timestamps, new_timestamps)
+    # Resample each marker dimension
+    resampled_data = np.zeros((num_new_frames, data.shape[1], 3))
+    for i in range(data.shape[1]):
+        for j in range(data.shape[2]):
+            resampled_data[:, i, j] = np.interp(
+                new_timestamps, timestamps, data[:, i, j]
+            )
 
     # Reconstruct frames
     new_frames = _array_to_marker_frames_at_timestamps(

@@ -1134,9 +1134,10 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/rust-venv"
           source "$RUNNER_TEMP/rust-venv/bin/activate"
           python -m pip install --upgrade pip maturin
-          cd rust_core/upstream-physics
-          python -m maturin build --interpreter python --features python --release
-          echo "Wheel built successfully"
+          for crate in rust_core/upstream-physics rust_core/upstream-mocap-preproc; do
+            (cd "$crate" && python -m maturin build --interpreter python --features python --release)
+          done
+          echo "Wheels built successfully"
           ls ../../target/wheels/
 
       - name: Verify Python Bindings
