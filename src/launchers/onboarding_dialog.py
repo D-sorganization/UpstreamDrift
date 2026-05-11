@@ -36,18 +36,18 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 # Config file path for storing onboarding dismissal state
-ONBOARDING_CONFIG_PATH = (
-    Path.home() / ".upstreamdrift" / "onboarding_config.json"
-)
+ONBOARDING_CONFIG_PATH = Path.home() / ".upstreamdrift" / "onboarding_config.json"
 
 
 def _get_theme_colors():
     """Get current theme colors, with fallback to dark theme defaults."""
     try:
         from src.shared.python.theme import get_current_colors
+
         return get_current_colors()
     except ImportError:
         from src.shared.python.theme import DARK_THEME
+
         return DARK_THEME
 
 
@@ -59,7 +59,7 @@ def is_first_run() -> bool:
         with open(ONBOARDING_CONFIG_PATH, encoding="utf-8") as f:
             config = json.load(f)
         return not config.get("onboarding_dismissed", False)
-    except (json.JSONDecodeError, IOError):
+    except (OSError, json.JSONDecodeError):
         return True
 
 
@@ -71,7 +71,7 @@ def dismiss_onboarding() -> None:
         with open(ONBOARDING_CONFIG_PATH, "w", encoding="utf-8") as f:
             json.dump(config, f, indent=2)
         logger.info("Onboarding dismissed by user")
-    except IOError as e:
+    except OSError as e:
         logger.warning(f"Failed to save onboarding config: {e}")
 
 
@@ -85,7 +85,7 @@ class OnboardingDialog(QDialog):
         self.setMinimumHeight(400)
         self.setModal(True)
         self.setWindowFlag(Qt.WindowType.WindowContextHelpButtonHint, False)
-        
+
         self._setup_ui()
 
     def _setup_ui(self) -> None:
@@ -123,17 +123,15 @@ class OnboardingDialog(QDialog):
         layout.addWidget(self.chk_dont_show)
 
         # Button box
-        button_box = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Ok
-        )
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok)
         button_box.accepted.connect(self._on_accepted)
-        
+
         # Add help button
         help_btn = QPushButton("Open Documentation")
         help_btn.setAutoDefault(False)
         help_btn.clicked.connect(self._open_docs)
         button_box.addButton(help_btn, QDialogButtonBox.ButtonRole.HelpRole)
-        
+
         layout.addWidget(button_box)
 
     def _get_welcome_html(self) -> str:
@@ -187,10 +185,10 @@ class OnboardingDialog(QDialog):
 
 def show_onboarding_if_needed(parent: QWidget | None = None) -> bool:
     """Show onboarding dialog if it's the first run.
-    
+
     Args:
         parent: Optional parent widget
-        
+
     Returns:
         True if onboarding was shown, False if skipped
     """
