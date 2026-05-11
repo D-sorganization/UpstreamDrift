@@ -52,6 +52,8 @@ def register_golf_suite_tools(registry: ToolRegistry) -> None:
     _register_analysis_tools(registry)
     _register_education_tools(registry)
     _register_validation_tools(registry)
+    _register_agent_control_tools(registry)
+    _register_cli_tools(registry)
     logger.info("Registered Golf Suite tools")
 
 
@@ -621,3 +623,53 @@ def _register_validation_tools(registry: ToolRegistry) -> None:
     _register_cross_engine_validation_tool(registry)
     _register_energy_conservation_tool(registry)
     _register_list_physics_engines_tool(registry)
+
+
+def _register_agent_control_tools(registry: ToolRegistry) -> None:
+    """Register agent control tools for AI-powered app management."""
+    try:
+        from src.shared.python.ai.tools.agent_control import (
+            AgentController,
+            create_agent_tools_for_registry,
+        )
+
+        controller = AgentController()
+        tools = create_agent_tools_for_registry()
+
+        for tool_def in tools:
+            registry.register(
+                name=tool_def["name"],
+                description=tool_def["description"],
+                category=ToolCategory.CONFIGURATION,
+                expertise_level=2,
+            )(tool_def["handler"])
+
+        logger.info("Registered %d agent control tools", len(tools))
+
+    except ImportError as e:
+        logger.warning("Could not register agent control tools: %s", e)
+
+
+def _register_cli_tools(registry: ToolRegistry) -> None:
+    """Register CLI tools (Claude Code, Codex, Shell)."""
+    try:
+        from src.shared.python.ai.tools.cli_tools import (
+            CLIToolManager,
+            create_cli_tools_for_registry,
+        )
+
+        manager = CLIToolManager()
+        tools = create_cli_tools_for_registry()
+
+        for tool_def in tools:
+            registry.register(
+                name=tool_def["name"],
+                description=tool_def["description"],
+                category=ToolCategory.CONFIGURATION,
+                expertise_level=3,
+            )(tool_def["handler"])
+
+        logger.info("Registered %d CLI tools", len(tools))
+
+    except ImportError as e:
+        logger.warning("Could not register CLI tools: %s", e)

@@ -15,6 +15,7 @@ Security:
 
 from __future__ import annotations
 
+import contextlib
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import TYPE_CHECKING
@@ -277,6 +278,7 @@ class ProviderConfigWidget(QWidget):
     """Widget for configuring a single AI provider."""
 
     key_changed = pyqtSignal(str)  # Emits new key value
+    models_refreshed = pyqtSignal(list)  # Emits list of available models
 
     def __init__(
         self,
@@ -346,8 +348,21 @@ class ProviderConfigWidget(QWidget):
             self._test_btn.clicked.connect(self._test_ollama_connection)
             layout.addWidget(self._test_btn)
 
+            # Refresh models button
+            self._refresh_models_btn = QPushButton("🔄 Refresh Available Models")
+            self._refresh_models_btn.setToolTip(
+                "Fetch the list of installed models from your local Ollama instance"
+            )
+            self._refresh_models_btn.clicked.connect(self._refresh_ollama_models)
+            layout.addWidget(self._refresh_models_btn)
+
             self._status_label = QLabel()
             layout.addWidget(self._status_label)
+
+            # Model count display
+            self._model_count_label = QLabel()
+            self._model_count_label.setStyleSheet(Styles.TEXT_MUTED)
+            layout.addWidget(self._model_count_label)
 
         layout.addStretch()
 
@@ -429,6 +444,8 @@ class ProviderConfigWidget(QWidget):
             if success:
                 self._status_label.setText(f"✓ {message}")
                 self._status_label.setStyleSheet(Styles.COLOR_GREEN)
+                # Also refresh models on successful connection
+                self._refresh_ollama_models()
             else:
                 self._status_label.setText(f"✗ {message}")
                 self._status_label.setStyleSheet(Styles.COLOR_RED)
@@ -436,6 +453,37 @@ class ProviderConfigWidget(QWidget):
         except ImportError as e:
             self._status_label.setText(f"✗ Error: {e}")
             self._status_label.setStyleSheet(Styles.COLOR_RED)
+
+    def _refresh_ollama_models(self) -> None:
+        """Refresh the list of available Ollama models."""
+        self._status_label.setText("Fetching available models...")
+        self._status_label.setStyleSheet(Styles.COLOR_RESET)
+
+        try:
+            from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
+
+            host = self._host_input.text().strip()
+            adapter = OllamaAdapter(host=host)
+            models = adapter.list_available_models()
+
+            if models:
+                self._model_count_label.setText(f"✓ Found {len(models)} model(s): {', '.join(models[:5])}")
+                if len(models) > 5:
+                    self._model_count_label.setText(
+                        f"✓ Found {len(models)} model(s): {', '.join(models[:5])}..."
+                    )
+                self._model_count_label.setStyleSheet(Styles.COLOR_GREEN)
+                # Emit signal to update parent dialog's model combo
+                self.models_refreshed.emit(models)
+            else:
+                self._model_count_label.setText("⚠ No models found. Pull one with: ollama pull llama3.1:8b")
+                self._model_count_label.setStyleSheet(Styles.COLOR_ORANGE)
+                self.models_refreshed.emit([])
+
+        except Exception as e:
+            self._model_count_label.setText(f"✗ Failed to fetch models: {e}")
+            self._model_count_label.setStyleSheet(Styles.COLOR_RED)
+            self.models_refreshed.emit([])
 
     def get_host(self) -> str:
         """Get Ollama host if applicable."""
@@ -763,6 +811,14 @@ class AISettingsDialog(QDialog):
         for p, widget in self._provider_configs.items():
             widget.setVisible(p == provider)
 
+        # Connect models_refreshed signal for Ollama provider
+        if provider == AIProvider.OLLAMA:
+            ollama_widget = self._provider_configs[AIProvider.OLLAMA]
+            # Disconnect any previous connection to avoid duplicates
+            with contextlib.suppress(TypeError):
+                ollama_widget.models_refreshed.disconnect(self._update_ollama_models)
+            ollama_widget.models_refreshed.connect(self._update_ollama_models)
+
     def _accept(self) -> None:
         """Accept dialog and save settings."""
         # Update settings from UI
@@ -788,3 +844,27 @@ class AISettingsDialog(QDialog):
             Current AISettings.
         """
         return self._settings
+
+    def _update_ollama_models(self, models: list[str]) -> None:
+        """Update the model dropdown with freshly fetched Ollama models.
+
+        Args:
+            models: List of model names from Ollama.
+        """
+        if not models:
+            return
+
+        # Save current selection if possible
+        current = self._model_combo.currentText()
+
+        # Clear and repopulate
+        self._model_combo.clear()
+        for model in models:
+            self._model_combo.addItem(model)
+
+        # Restore selection or pick first
+        idx = self._model_combo.findText(current)
+        if idx >= 0:
+            self._model_combo.setCurrentIndex(idx)
+        elif models:
+            self._model_combo.setCurrentIndex(0)
