@@ -41,12 +41,12 @@ class TestMetadata:
         builder = PendulumPutterModelBuilder()
         result = builder.build()
 
-        assert (
-            "robot_name" in result.metadata
-        ), "Assertion failed: robot_name in result.metadata"
-        assert (
-            result.metadata["robot_name"] == "pendulum_putter"
-        ), "Assertion failed: result.metadata[robot_name] == pendulum_putter"
+        assert "robot_name" in result.metadata, (
+            "Assertion failed: robot_name in result.metadata"
+        )
+        assert result.metadata["robot_name"] == "pendulum_putter", (
+            "Assertion failed: result.metadata[robot_name] == pendulum_putter"
+        )
 
     def test_metadata_includes_configuration(self) -> None:
         """Metadata should include configuration parameters."""
@@ -60,12 +60,12 @@ class TestMetadata:
         )
         result = builder.build()
 
-        assert (
-            "arm_length_m" in result.metadata
-        ), "Assertion failed: arm_length_m in result.metadata"
-        assert (
-            "shoulder_height_m" in result.metadata
-        ), "Assertion failed: shoulder_height_m in result.metadata"
+        assert "arm_length_m" in result.metadata, (
+            "Assertion failed: arm_length_m in result.metadata"
+        )
+        assert "shoulder_height_m" in result.metadata, (
+            "Assertion failed: shoulder_height_m in result.metadata"
+        )
 
 
 if __name__ == "__main__":

@@ -165,9 +165,9 @@ def test_category_fallback_for_engine_types(layout_manager):
         model = MagicMock()
         model.launcher = None
         model.type = t
-        assert (
-            layout_manager._get_model_category(model) == "Physics Engines"
-        ), f"type {t!r} did not map to Physics Engines"
+        assert layout_manager._get_model_category(model) == "Physics Engines", (
+            f"type {t!r} did not map to Physics Engines"
+        )
 
 
 def test_category_fallback_for_document_type(layout_manager):

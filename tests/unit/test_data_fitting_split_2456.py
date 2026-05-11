@@ -41,16 +41,16 @@ class TestDataFittingFileSizes:
     @pytest.mark.unit
     def test_data_fitting_split_2456_models_loc(self) -> None:
         loc = _count_lines(VAL_DIR / "_data_fitting_models.py")
-        assert (
-            loc <= LOC_BUDGET
-        ), f"_data_fitting_models.py has {loc} LOC; budget {LOC_BUDGET}"
+        assert loc <= LOC_BUDGET, (
+            f"_data_fitting_models.py has {loc} LOC; budget {LOC_BUDGET}"
+        )
 
     @pytest.mark.unit
     def test_solvers_loc(self) -> None:
         loc = _count_lines(VAL_DIR / "_data_fitting_solvers.py")
-        assert (
-            loc <= LOC_BUDGET
-        ), f"_data_fitting_solvers.py has {loc} LOC; budget {LOC_BUDGET}"
+        assert loc <= LOC_BUDGET, (
+            f"_data_fitting_solvers.py has {loc} LOC; budget {LOC_BUDGET}"
+        )
 
 
 class TestDataFittingPublicAPI:

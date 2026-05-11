@@ -76,6 +76,6 @@ class TestNumericalAccuracy:
         result = analyzer.extract_synergies(n_synergies=n_muscles)
 
         # VAF should be very high (near 1.0)
-        assert (
-            result.vaf > 0.95
-        ), f"VAF with {n_muscles} synergies should be > 0.95, got {result.vaf}"
+        assert result.vaf > 0.95, (
+            f"VAF with {n_muscles} synergies should be > 0.95, got {result.vaf}"
+        )

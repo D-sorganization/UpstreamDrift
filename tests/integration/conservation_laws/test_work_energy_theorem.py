@@ -198,6 +198,6 @@ class TestWorkEnergyTheorem:
         TOLERANCE_ABS = 0.001  # 1 mJ absolute tolerance
         TOLERANCE_REL = 0.05  # 5% relative tolerance for numerical integration
         relative_error = error / max(abs(delta_E), TOLERANCE_ABS)
-        assert (
-            relative_error < TOLERANCE_REL
-        ), f"Work-energy mismatch: {relative_error * 100:.2f}% > {TOLERANCE_REL * 100}%"
+        assert relative_error < TOLERANCE_REL, (
+            f"Work-energy mismatch: {relative_error * 100:.2f}% > {TOLERANCE_REL * 100}%"
+        )

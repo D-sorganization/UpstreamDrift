@@ -106,12 +106,12 @@ def test_pinocchio_aba_derivatives_available() -> None:
     """
     import pinocchio as pin
 
-    assert hasattr(
-        pin, "computeABADerivatives"
-    ), "pin.computeABADerivatives is missing - PIN-FIT-DRIVER will fail"
-    assert callable(
-        pin.computeABADerivatives
-    ), "pin.computeABADerivatives is not callable"
+    assert hasattr(pin, "computeABADerivatives"), (
+        "pin.computeABADerivatives is missing - PIN-FIT-DRIVER will fail"
+    )
+    assert callable(pin.computeABADerivatives), (
+        "pin.computeABADerivatives is not callable"
+    )
 
 
 @_requires_pinocchio
@@ -124,12 +124,12 @@ def test_pinocchio_forward_kinematics_available() -> None:
     """
     import pinocchio as pin
 
-    assert hasattr(
-        pin, "computeForwardKinematics"
-    ), "pin.computeForwardKinematics is missing"
-    assert callable(
-        pin.computeForwardKinematics
-    ), "pin.computeForwardKinematics is not callable"
+    assert hasattr(pin, "computeForwardKinematics"), (
+        "pin.computeForwardKinematics is missing"
+    )
+    assert callable(pin.computeForwardKinematics), (
+        "pin.computeForwardKinematics is not callable"
+    )
 
 
 @_requires_pinocchio
@@ -141,9 +141,9 @@ def test_pinocchio_rnea_derivatives_available() -> None:
     """
     import pinocchio as pin
 
-    assert hasattr(
-        pin, "computeRNEADerivatives"
-    ), "pin.computeRNEADerivatives is missing - PIN-FIT-DRIVER will fail"
+    assert hasattr(pin, "computeRNEADerivatives"), (
+        "pin.computeRNEADerivatives is missing - PIN-FIT-DRIVER will fail"
+    )
     assert callable(pin.computeRNEADerivatives)
 
 

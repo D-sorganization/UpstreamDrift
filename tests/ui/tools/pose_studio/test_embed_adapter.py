@@ -73,7 +73,7 @@ class TestEmbedCapabilities:
 
 class TestCreateMainWidget:
     """Tests for create_main_widget functionality.
-    
+
     Note: Full widget instantiation tests are skipped due to matplotlib 3D
     dependency issues in headless CI environments. The adapter contract
     tests above verify the embed protocol compliance.

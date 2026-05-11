@@ -120,6 +120,7 @@ class TestProviderRegistration:
 
     def test_registered_at_import_time(self) -> None:
         from src.shared.python.motion_matching.provider import get_provider
+
         provider = get_provider("pinocchio")
         assert isinstance(provider, PinocchioFitSwingProvider)
         assert provider.engine_name == "pinocchio"

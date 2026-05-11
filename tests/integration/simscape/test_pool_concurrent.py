@@ -80,6 +80,6 @@ def test_throughput_scales_with_pool_size() -> None:
 
     # Speedup should at minimum be > 1.5x for 4 workers (within 30% of
     # ideal); we are conservative to avoid flakiness on shared CI.
-    assert (
-        parallel_s < serial_s * 0.75
-    ), f"expected speedup; serial={serial_s:.2f}s parallel={parallel_s:.2f}s"
+    assert parallel_s < serial_s * 0.75, (
+        f"expected speedup; serial={serial_s:.2f}s parallel={parallel_s:.2f}s"
+    )

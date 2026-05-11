@@ -99,9 +99,9 @@ def _enumerate_package_files() -> list[Path]:
 
 def test_motion_pipeline_package_root_exists() -> None:
     """Sanity check - the motion_pipeline package is importable from disk."""
-    assert (
-        PACKAGE_ROOT.is_dir()
-    ), f"Expected motion_pipeline package at {PACKAGE_ROOT}, not found."
+    assert PACKAGE_ROOT.is_dir(), (
+        f"Expected motion_pipeline package at {PACKAGE_ROOT}, not found."
+    )
 
 
 def test_motion_pipeline_no_forbidden_imports_anywhere() -> None:
@@ -133,10 +133,9 @@ def test_motion_pipeline_no_forbidden_imports_anywhere() -> None:
             if _violates(name):
                 violations.append(f"{rel}:{lineno} imports forbidden '{name}'")
 
-    assert (
-        not violations
-    ), "motion_pipeline package contains forbidden imports:\n  - " + "\n  - ".join(
-        violations
+    assert not violations, (
+        "motion_pipeline package contains forbidden imports:\n  - "
+        + "\n  - ".join(violations)
     )
 
 

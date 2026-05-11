@@ -116,9 +116,9 @@ def test_pose_studio_publish_arrives_within_budget(
     finally:
         subscription.unsubscribe()
 
-    assert (
-        got
-    ), f"pose/canonical payload did not arrive within 200 ms (elapsed={elapsed:.3f}s)"
+    assert got, (
+        f"pose/canonical payload did not arrive within 200 ms (elapsed={elapsed:.3f}s)"
+    )
     assert len(received) >= 1
     payload = received[0]
     assert isinstance(payload, dict)

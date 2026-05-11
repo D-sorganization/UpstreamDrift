@@ -83,9 +83,9 @@ class TestRouteRegistry:
         # Priority modules should appear in _REGISTRATION_ORDER sequence
         priority_names = [n for n in names if n in _REGISTRATION_ORDER]
         expected_order = [n for n in _REGISTRATION_ORDER if n in priority_names]
-        assert (
-            priority_names == expected_order
-        ), f"Priority modules out of order: {priority_names} != {expected_order}"
+        assert priority_names == expected_order, (
+            f"Priority modules out of order: {priority_names} != {expected_order}"
+        )
 
     def test_register_routes_on_app(self) -> None:
         """register_routes includes discovered routers on a FastAPI app."""

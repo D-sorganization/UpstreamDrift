@@ -97,9 +97,9 @@ class TestSolveFiberLength:
             assert np.isfinite(l_CE), f"Solution should be finite at l_MT={l_MT}"
 
         # Longer muscle-tendon -> longer fiber (generally)
-        assert (
-            solutions[0] < solutions[-1]
-        ), "Longer muscle-tendon should have longer fiber"
+        assert solutions[0] < solutions[-1], (
+            "Longer muscle-tendon should have longer fiber"
+        )
 
     def test_custom_initial_guess(self, standard_muscle) -> None:
         """Test solver with custom initial guess."""

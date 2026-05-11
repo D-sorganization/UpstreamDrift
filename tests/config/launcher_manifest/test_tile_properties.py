@@ -89,9 +89,9 @@ class TestTileProperties:
         """Category must be one of the allowed values."""
         valid_categories = {"physics_engine", "tool", "external"}
         for tile in manifest.tiles:
-            assert (
-                tile.category in valid_categories
-            ), f"Tile '{tile.id}' has invalid category: '{tile.category}'"
+            assert tile.category in valid_categories, (
+                f"Tile '{tile.id}' has invalid category: '{tile.category}'"
+            )
 
     def test_physics_engines_have_engine_type(self, manifest: LauncherManifest) -> None:
         """All physics_engine tiles must have an engine_type."""
@@ -112,15 +112,15 @@ class TestTileProperties:
         """Tile can roundtrip through dict serialization."""
         tile = LauncherTile.from_dict(sample_tile_dict)
         result = tile.to_dict()
-        assert (
-            result["id"] == sample_tile_dict["id"]
-        ), "Assertion failed: result[id] == sample_tile_dict[id]"
-        assert (
-            result["name"] == sample_tile_dict["name"]
-        ), "Assertion failed: result[name] == sample_tile_dict[name]"
-        assert (
-            result["capabilities"] == sample_tile_dict["capabilities"]
-        ), "Assertion failed: result[capabilities] == sample_tile_dict[capabilities]"
+        assert result["id"] == sample_tile_dict["id"], (
+            "Assertion failed: result[id] == sample_tile_dict[id]"
+        )
+        assert result["name"] == sample_tile_dict["name"], (
+            "Assertion failed: result[name] == sample_tile_dict[name]"
+        )
+        assert result["capabilities"] == sample_tile_dict["capabilities"], (
+            "Assertion failed: result[capabilities] == sample_tile_dict[capabilities]"
+        )
 
 
 # =============================================================================
