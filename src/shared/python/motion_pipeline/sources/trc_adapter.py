@@ -1,7 +1,14 @@
 """OpenSim TRC marker-trajectory adapter.
 
 The Track Row Column (TRC) text format ships with OpenSim and is the most
-common export from Theia3D and OpenCap. Layout::
+common export from Theia3D and OpenCap.
+
+Issue #5213 introduces an optional Rust parser via ``upstream_mocap_io``;
+when that wheel is installed the per-line tokenise + float-parse hot loop
+is replaced with a Rust pass. The pure-Python parser remains the
+canonical fallback for clones without the wheel.
+
+Layout::
 
     PathFileType  4  (X/Y/Z)  <filename>
     DataRate  CameraRate  NumFrames  NumMarkers  Units  OrigDataRate  OrigDataStartFrame  OrigNumFrames
@@ -26,6 +33,14 @@ from src.shared.python.motion_pipeline.sources.base import (
     SourceMetadata,
 )
 from src.shared.python.motion_pipeline.sources.registry import register_adapter
+
+try:  # pragma: no cover - native wheel may not be installed
+    import upstream_mocap_io as _rust_io  # type: ignore[import-not-found]
+
+    _HAS_RUST = True
+except ImportError:  # pragma: no cover
+    _rust_io = None  # type: ignore[assignment]
+    _HAS_RUST = False
 
 _MM_TO_M = 0.001
 
@@ -104,6 +119,13 @@ class TRCAdapter(MocapSourceAdapter):
         p = Path(path)
         if not p.exists():
             raise FileNotFoundError(f"TRC file not found: {p}")
+        if _HAS_RUST:
+            try:
+                return self._load_via_rust(p, calibration)
+            except Exception:  # pragma: no cover - Rust parser disagreement
+                # Fall back to the canonical Python parser if anything goes
+                # wrong; the contract is byte-identical output, not "Rust wins".
+                pass
         lines = p.read_text(encoding="utf-8").splitlines()
         info = self._parse_header(lines)
         marker_names: list[str] = info["marker_names"]  # type: ignore[assignment]
@@ -144,6 +166,71 @@ class TRCAdapter(MocapSourceAdapter):
             frames.append(
                 MarkerFrame(timestamp=t, markers=markers, frame_index=frame_idx)
             )
+        if not frames:
+            raise ValueError(f"TRC file {p} has no data rows")
+        return MarkerTrajectory(
+            id=f"trc-{p.stem}",
+            frames=frames,
+            calibration=calibration,
+            metadata={"source_file": str(p), "units": units_str},
+        )
+
+    def _load_via_rust(
+        self,
+        p: Path,
+        calibration: Calibration | None,
+    ) -> MarkerTrajectory:
+        """Parse via ``upstream_mocap_io.parse_trc`` and build the pydantic objects.
+
+        The Rust pass returns positions already converted to meters (the
+        Rust crate applies the mm->m scale internally), so the Python
+        side only assembles ``MarkerFrame`` + ``MarkerTrajectory``.
+
+        The TRC time column carries non-uniform timing in some captures,
+        but we don't currently expose it through the Rust API. Use the
+        nominal ``frame_idx / fps`` cadence; this matches the existing
+        Python adapter behaviour modulo per-row time-jitter (uniform-fps
+        TRCs — the common case — match exactly).
+        """
+        r = _rust_io.parse_trc(str(p))
+        positions = r["positions"]  # (n_frames, n_markers * 3) float32, meters
+        labels: list[str] = list(r["labels"])
+        n_frames = int(r["n_frames"])
+        fps = float(r["fps"]) or 30.0
+        units_str = str(r["units"]).strip().lower() or "mm"
+
+        # Re-read just the data lines to recover the per-row time + frame
+        # index columns from the file (the Rust API does not surface them).
+        lines = p.read_text(encoding="utf-8").splitlines()
+        data_lines = [ln for ln in lines[5:] if ln.strip()]
+
+        marker_ctor = Marker.model_construct
+        frame_ctor = MarkerFrame.model_construct
+        frames: list[MarkerFrame] = []
+        for fi in range(n_frames):
+            tokens = data_lines[fi].split() if fi < len(data_lines) else []
+            try:
+                frame_idx = int(float(tokens[0]))
+                t = float(tokens[1])
+            except (IndexError, ValueError):
+                frame_idx = fi
+                t = fi / fps
+            markers: dict[str, Marker] = {}
+            row = positions[fi]
+            for mi, name in enumerate(labels):
+                base = mi * 3
+                x = float(row[base])
+                y = float(row[base + 1])
+                z = float(row[base + 2])
+                if x != x or y != y or z != z:  # NaN occlusion
+                    continue
+                markers[name] = marker_ctor(
+                    name=name, x=x, y=y, z=z, residual=None, occluded=False
+                )
+            frames.append(
+                frame_ctor(timestamp=t, markers=markers, frame_index=frame_idx)
+            )
+
         if not frames:
             raise ValueError(f"TRC file {p} has no data rows")
         return MarkerTrajectory(

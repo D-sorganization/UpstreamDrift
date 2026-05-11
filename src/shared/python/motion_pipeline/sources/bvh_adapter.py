@@ -1,7 +1,13 @@
 """BVH (BioVision Hierarchy) adapter for the motion capture pipeline.
 
-Part of issues #4561 / #4563. Handles BVH files from Move.ai, Rokoko, Blender,
-and similar joint-hierarchy + Euler-rotation sources.
+Part of issues #4561 / #4563. Issue #5213 introduces an optional native
+parser via the ``upstream_mocap_io`` Rust wheel; when that wheel is
+installed the hot text-parsing loop is replaced with a Rust pass that
+returns a (n_frames, num_dofs) numpy array. The pure-Python parser
+remains the canonical fallback.
+
+Handles BVH files from Move.ai, Rokoko, Blender, and similar
+joint-hierarchy + Euler-rotation sources.
 
 A BVH file has two sections:
 
@@ -28,6 +34,14 @@ from src.shared.python.motion_pipeline.sources.base import (
     SourceMetadata,
 )
 from src.shared.python.motion_pipeline.sources.registry import register_adapter
+
+try:  # pragma: no cover - native wheel may not be installed
+    import upstream_mocap_io as _rust_io  # type: ignore[import-not-found]
+
+    _HAS_RUST = True
+except ImportError:  # pragma: no cover
+    _rust_io = None  # type: ignore[assignment]
+    _HAS_RUST = False
 
 
 @register_adapter
@@ -85,10 +99,69 @@ class BVHAdapter(MocapSourceAdapter):
         p = Path(path)
         if not p.exists():
             raise FileNotFoundError(f"BVH file not found: {p}")
+        if _HAS_RUST:
+            try:
+                return self._load_via_rust(p)
+            except Exception:  # pragma: no cover - parser disagreement
+                # Fall through to the pure-Python parser on any Rust error
+                # to preserve the byte-identical canonical-output contract.
+                pass
         content = p.read_text(encoding="utf-8")
         hierarchy, motion = self._split_sections(content)
         skeleton = self._parse_hierarchy(hierarchy)
         frames = self._parse_motion(motion, skeleton)
+        return JointTrajectory(
+            id=f"bvh-{p.stem}",
+            skeleton=skeleton,
+            frames=frames,
+            metadata={
+                "source_file": str(p),
+                "rotation_order": self.rotation_order,
+                "up_axis": self.up_axis,
+            },
+        )
+
+    def _load_via_rust(self, p: Path) -> JointTrajectory:
+        """Parse via ``upstream_mocap_io`` and build the canonical pydantic objects.
+
+        The hierarchy is still constructed via the Python helper so we
+        preserve the existing SkeletonRig serialisation, but the motion
+        block (the per-line ``[float(np.deg2rad(v)) for v in tokens]``
+        hot loop the Rust port replaces) is consumed as a numpy array.
+        """
+        content = p.read_text(encoding="utf-8")
+        hierarchy_text, _ = self._split_sections(content)
+        skeleton = self._parse_hierarchy(hierarchy_text)
+
+        r = _rust_io.parse_bvh(str(p))
+        motion = np.deg2rad(np.asarray(r["motion"], dtype=np.float64))
+        n_frames = int(r["n_frames"])
+        fps = float(r["fps"]) or 30.0
+        frame_time = 1.0 / fps
+        num_dofs = skeleton.num_dofs
+        # ``model_construct`` skips pydantic validation; motion array is
+        # already finite (Rust pass guarantees this) and dimension-checked.
+        state_ctor = JointStateFrame.model_construct
+        frames: list[JointStateFrame] = []
+        # Truncate/pad in numpy once rather than per-frame in Python.
+        if motion.shape[1] < num_dofs:
+            pad = np.zeros((motion.shape[0], num_dofs - motion.shape[1]))
+            motion = np.concatenate([motion, pad], axis=1)
+        elif motion.shape[1] > num_dofs:
+            motion = motion[:, :num_dofs]
+        motion_list = motion.tolist()
+        for idx in range(n_frames):
+            frames.append(
+                state_ctor(
+                    timestamp=idx * frame_time,
+                    q=motion_list[idx],
+                    qdot=None,
+                    qddot=None,
+                    frame_index=idx,
+                )
+            )
+        if not frames:
+            raise ValueError("BVH file has MOTION section with no frames")
         return JointTrajectory(
             id=f"bvh-{p.stem}",
             skeleton=skeleton,

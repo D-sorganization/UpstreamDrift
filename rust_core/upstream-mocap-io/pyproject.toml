@@ -1,0 +1,21 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "upstream-mocap-io"
+version = "2.1.0"
+description = "Rust-native C3D / BVH / TRC mocap I/O for UpstreamDrift motion-pipeline source adapters"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "numpy>=1.24",
+]
+
+[tool.maturin]
+features = ["python"]
+module-name = "upstream_mocap_io"
+manifest-path = "Cargo.toml"
