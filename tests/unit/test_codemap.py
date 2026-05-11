@@ -20,14 +20,14 @@ from pathlib import Path
 
 import pytest
 
-from shared.python.codemap.api import (
+from src.shared.python.codemap.api import (
     get_symbol,
     imports_of,
     search,
     who_calls,
 )
-from shared.python.codemap.cli import main as cli_main
-from shared.python.codemap.db import (
+from src.shared.python.codemap.cli import main as cli_main
+from src.shared.python.codemap.db import (
     SymbolRow,
     get_manifest,
     open_db,
@@ -36,8 +36,8 @@ from shared.python.codemap.db import (
     upsert_symbols,
     who_calls_db,
 )
-from shared.python.codemap.indexer import CodeMapIndex
-from shared.python.codemap.parsers import (
+from src.shared.python.codemap.indexer import CodeMapIndex
+from src.shared.python.codemap.parsers import (
     parse_markdown,
     parse_python,
     parse_rust,
@@ -332,7 +332,7 @@ def test_api_get_symbol(simple_repo: Path) -> None:
     with CodeMapIndex(simple_repo, db_path=db_path) as idx:
         idx.rebuild()
         # Find what qualified name was used
-        from shared.python.codemap.db import open_db, search_fts
+        from src.shared.python.codemap.db import open_db, search_fts
 
         conn = open_db(db_path)
         hits = search_fts(conn, "top_func", limit=1)
@@ -387,3 +387,54 @@ def test_cli_search_no_results(simple_repo: Path, capsys) -> None:
     cli_main(["--db", str(db), "rebuild", "--repo", str(simple_repo)])
     exit_code = cli_main(["--db", str(db), "search", "xyzzy_nonexistent_symbol_abc"])
     assert exit_code == 1  # No results → exit 1
+
+
+# ── Performance and Size Budgets ───────────────────────────────────────────────
+
+
+@pytest.mark.benchmark
+def test_rebuild_perf(benchmark: pytest.FixtureRequest, tmp_path: Path) -> None:
+    repo = tmp_path / "perf_repo"
+    repo.mkdir()
+    for i in range(10):
+        (repo / f"mod_{i}.py").write_text(f"def func_{i}(): pass\n", encoding="utf-8")
+
+    def do_rebuild() -> None:
+        with CodeMapIndex(repo) as idx:
+            idx.rebuild()
+
+    benchmark(do_rebuild)
+
+
+@pytest.mark.benchmark
+def test_search_perf(benchmark: pytest.FixtureRequest, simple_repo: Path) -> None:
+    db_path = simple_repo / ".codemap" / "index.db"
+    with CodeMapIndex(simple_repo, db_path=db_path) as idx:
+        idx.rebuild()
+
+    def do_search() -> None:
+        search("top_func", db_path=db_path)
+
+    benchmark(do_search)
+
+
+@pytest.mark.benchmark
+def test_who_calls_perf(benchmark: pytest.FixtureRequest, simple_repo: Path) -> None:
+    db_path = simple_repo / ".codemap" / "index.db"
+    with CodeMapIndex(simple_repo, db_path=db_path) as idx:
+        idx.rebuild()
+
+    def do_who_calls() -> None:
+        who_calls("top_func", db_path=db_path)
+
+    benchmark(do_who_calls)
+
+
+@pytest.mark.unit
+def test_index_size_budget(simple_repo: Path) -> None:
+    db_path = simple_repo / ".codemap" / "index.db"
+    with CodeMapIndex(simple_repo, db_path=db_path) as idx:
+        idx.rebuild()
+
+    size_mb = db_path.stat().st_size / (1024 * 1024)
+    assert size_mb < 30.0, f"Index size {size_mb:.2f} MB exceeds 30 MB budget"
