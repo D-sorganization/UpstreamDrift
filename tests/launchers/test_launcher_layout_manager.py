@@ -346,3 +346,60 @@ def test_set_edit_mode(layout_manager) -> None:
     layout_manager.set_edit_mode(True)
     assert layout_manager.edit_mode is True
     layout_manager.model_cards["model_1"].setAcceptDrops.assert_called_with(True)
+
+
+# ---------------------------------------------------------------------------
+# Biomechanics category routing (issue #5180)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_get_model_category_biomechanics_via_launcher_dict(layout_manager) -> None:
+    """A model whose ``launcher.category`` is ``biomechanics`` resolves to the
+    ``Biomechanics`` group label."""
+    model = MagicMock()
+    model.launcher = {"category": "biomechanics"}
+    model.type = ""
+    assert layout_manager._get_model_category(model) == "Biomechanics"
+
+
+@pytest.mark.unit
+def test_get_model_category_biomechanics_case_insensitive(layout_manager) -> None:
+    """Category matching ignores surrounding whitespace and case."""
+    model = MagicMock()
+    model.launcher = {"category": "  Biomechanics  "}
+    model.type = ""
+    assert layout_manager._get_model_category(model) == "Biomechanics"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "type_value",
+    [
+        "mujoco_biomech",
+        "drake_biomech",
+        "opensim_biomech",
+        "pinocchio_biomech",
+        "movement_optimizer",
+    ],
+)
+def test_get_model_category_biomechanics_type_fallback(
+    layout_manager, type_value: str
+) -> None:
+    """When ``launcher.category`` is absent, biomech-style ``type`` values
+    fall through to the ``Biomechanics`` group (not ``Physics Engines``)."""
+    model = MagicMock()
+    model.launcher = None
+    model.type = type_value
+    assert layout_manager._get_model_category(model) == "Biomechanics"
+
+
+@pytest.mark.unit
+def test_get_model_category_existing_physics_engines_unchanged(
+    layout_manager,
+) -> None:
+    """Pre-existing physics engine routing must continue to work."""
+    model = MagicMock()
+    model.launcher = None
+    model.type = "drake"
+    assert layout_manager._get_model_category(model) == "Physics Engines"

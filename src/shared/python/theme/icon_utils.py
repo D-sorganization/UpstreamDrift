@@ -11,6 +11,7 @@ _SVG_SEARCH = """<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
 _SVG_CLOSE = """<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>"""
 _SVG_MINIMIZE = """<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>"""
 _SVG_MAXIMIZE = """<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/></svg>"""
+_SVG_BIOMECHANICS = """<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="M12 6v6"/><path d="M12 12 8 17"/><path d="M12 12l4 5"/><path d="M9 8H6"/><path d="M15 8h3"/><path d="M8 17v4"/><path d="M16 17v4"/></svg>"""
 
 SVG_REGISTRY = {
     "home": _SVG_HOME,
@@ -21,6 +22,7 @@ SVG_REGISTRY = {
     "close": _SVG_CLOSE,
     "minimize": _SVG_MINIMIZE,
     "maximize": _SVG_MAXIMIZE,
+    "biomechanics": _SVG_BIOMECHANICS,
 }
 
 

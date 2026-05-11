@@ -320,6 +320,7 @@ class LayoutManager:
                 "simulation": "Simulation",
                 "motion_matching": "Motion Matching",
                 "motion_capture": "Motion Capture",
+                "biomechanics": "Biomechanics",
                 "tool": "Tools & Data",
                 "documentation": "Documentation",
                 "external": "Tools & Data",
@@ -336,6 +337,14 @@ class LayoutManager:
             "opensim_biomech",
             "biomechanics",
         ):
+            return "Biomechanics"
+        if t in [
+            "mujoco_biomech",
+            "drake_biomech",
+            "opensim_biomech",
+            "pinocchio_biomech",
+            "movement_optimizer",
+        ]:
             return "Biomechanics"
         if t in [
             "custom_humanoid",

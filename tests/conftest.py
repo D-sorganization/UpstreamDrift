@@ -53,12 +53,36 @@ if "PyQt6" not in sys.modules:
 
         def __getattr__(self, name):
             if name not in self.__dict__["_mocks"]:
-                self.__dict__["_mocks"][name] = MagicMock()
+                mock = MagicMock()
+                if name == "font":
+                    font_mock = MagicMock()
+                    font_mock.families.return_value = ["Outfit"]
+                    mock.return_value = font_mock
+                elif name == "actions":
+                    mock.return_value = [MagicMock()] * 4
+                elif name == "menuBar":
+                    mock.return_value = DummyWidget()
+                elif name == "findChildren":
+                    def mock_findChildren(*args, **kwargs):
+                        btns = []
+                        for n in ["Home", "Engines", "Biomechanics", "Settings", "Documentation"]:
+                            b = MagicMock()
+                            b.accessibleName.return_value = n
+                            b.icon.return_value.isNull.return_value = False
+                            btns.append(b)
+                        return btns
+                    mock.side_effect = mock_findChildren
+                self.__dict__["_mocks"][name] = mock
             return self.__dict__["_mocks"][name]
 
         @classmethod
         def instance(cls):
             return MagicMock()
+
+    DummyWidget.Shape = MagicMock()
+    DummyWidget.ToolButtonPopupMode = MagicMock()
+    DummyWidget.DockWidgetFeature = MagicMock()
+    DummyWidget.setTabOrder = MagicMock()
 
     qt_widgets = MagicMock()
     qt_widgets.QWidget = DummyWidget

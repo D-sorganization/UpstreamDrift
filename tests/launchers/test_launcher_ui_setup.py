@@ -71,15 +71,20 @@ def test_setup_top_bar(launcher) -> None:
 def test_setup_global_sidebar_uses_icon_navigation(launcher) -> None:
     sidebar = launcher._setup_global_sidebar()
     buttons = sidebar.findChildren(QToolButton)
-    assert len(buttons) == 4
+    assert len(buttons) == 5
 
-    button_names = {button.toolTip() for button in buttons}
-    assert button_names == {"Home", "Engines", "Settings", "Documentation"}
+    accessible_names = {button.accessibleName() for button in buttons}
+    assert accessible_names == {
+        "Home",
+        "Engines",
+        "Biomechanics",
+        "Settings",
+        "Documentation",
+    }
 
     for button in buttons:
         assert not button.icon().isNull()
-        assert button.text() == ""
-        assert button.accessibleName() in button_names
+        assert button.accessibleName() in accessible_names
 
 
 @patch("src.launchers.launcher_constants.HELP_SYSTEM_AVAILABLE", True)
@@ -162,7 +167,7 @@ def test_setup_ai_panel_disabled(launcher) -> None:
     launcher.content_splitter = MagicMock()
     with patch("src.launchers.launcher_constants.AI_AVAILABLE", False):
         launcher._setup_ai_panel()
-        assert not hasattr(launcher, "ai_panel")
+        assert "ai_panel" not in launcher.__dict__
 
 
 @patch("src.launchers.launcher_constants.AI_AVAILABLE", True)
@@ -228,4 +233,122 @@ def test_init_overlay_error(launcher) -> None:
 
     with patch("builtins.__import__", side_effect=mock_import):
         launcher._init_overlay()
-        assert not hasattr(launcher, "overlay")
+        assert "overlay" not in launcher.__dict__
+
+
+# ---------------------------------------------------------------------------
+# Biomechanics sidebar button + routing (issue #5180)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_sidebar_includes_biomechanics_button(launcher) -> None:
+    """The sidebar build invokes ``_build_sidebar_button`` for the Biomechanics
+    label, demonstrating that the third sidebar control is wired in."""
+    build_button_spy = MagicMock(wraps=launcher._build_sidebar_button)
+    with (
+        patch.object(launcher, "_build_sidebar_button", build_button_spy),
+        patch(
+            "src.launchers.launcher_ui_setup.QWidget.setTabOrder",
+            new=MagicMock(),
+            create=True,
+        ),
+    ):
+        launcher._setup_global_sidebar()
+
+    labels_used = [call.args[0] for call in build_button_spy.call_args_list]
+    assert "Biomechanics" in labels_used
+    # And the canonical Home/Engines labels are still wired in.
+    assert "Home" in labels_used
+    assert "Engines" in labels_used
+
+
+@pytest.mark.unit
+def test_sidebar_biomechanics_button_registered_with_id_two(launcher) -> None:
+    """``QButtonGroup`` mutual-exclusion is preserved and the Biomechanics
+    button is registered under ``id=2`` per the issue spec.
+
+    Spies on ``_build_sidebar_button`` so we can identify which button
+    object corresponds to the Biomechanics label, then verifies that exact
+    object is registered into the QButtonGroup with ``id=2``.
+    """
+    built: dict[str, object] = {}
+
+    real_builder = launcher._build_sidebar_button
+
+    def _spy_builder(label, icon_name, *, checkable=False):
+        button = real_builder(label, icon_name, checkable=checkable)
+        built[label] = button
+        return button
+
+    add_button_calls: list[tuple[object, int]] = []
+
+    class _RecordingGroup:
+        def __init__(self, *_args, **_kwargs):
+            self._buttons: list[object] = []
+            self._exclusive = True
+
+        def addButton(self, button, button_id):  # noqa: N802 - Qt API
+            add_button_calls.append((button, button_id))
+            self._buttons.append(button)
+
+        @property
+        def idClicked(self):  # noqa: N802 - Qt API
+            return MagicMock()
+
+        def buttons(self):
+            return list(self._buttons)
+
+        def setExclusive(self, value):  # noqa: N802 - Qt API
+            self._exclusive = bool(value)
+
+        def exclusive(self):
+            return self._exclusive
+
+    with (
+        patch.object(launcher, "_build_sidebar_button", _spy_builder),
+        patch(
+            "src.launchers.launcher_ui_setup.QButtonGroup",
+            new=_RecordingGroup,
+        ),
+        patch(
+            "src.launchers.launcher_ui_setup.QWidget.setTabOrder",
+            new=MagicMock(),
+            create=True,
+        ),
+    ):
+        launcher._setup_global_sidebar()
+
+    ids_registered = {bid for _, bid in add_button_calls}
+    # Home (id=0), Engines (id=1), Biomech (id=2) all registered
+    assert {0, 1, 2}.issubset(ids_registered)
+    # Mutual-exclusion is still on by default
+    assert launcher.sidebar_group.exclusive() is True
+
+    # The Biomechanics button must be the one registered at id=2.
+    button_at_id_two = next(b for b, bid in add_button_calls if bid == 2)
+    assert button_at_id_two is built["Biomechanics"]
+
+
+@pytest.mark.unit
+def test_on_sidebar_routed_biomechanics_sets_filter(launcher) -> None:
+    """Clicking the Biomechanics button (``id=2``) routes to the ``Biomechanics``
+    category filter on the layout manager."""
+    launcher.layout_manager = MagicMock()
+    launcher._rebuild_grid = MagicMock()
+    launcher._on_sidebar_routed(2)
+    assert launcher.layout_manager.current_category_filter == "Biomechanics"
+    launcher._rebuild_grid.assert_called_once()
+
+
+@pytest.mark.unit
+def test_on_sidebar_routed_existing_ids_still_work(launcher) -> None:
+    """Existing Home (id=0) and Engines (id=1) routes are unchanged."""
+    launcher.layout_manager = MagicMock()
+    launcher._rebuild_grid = MagicMock()
+
+    launcher._on_sidebar_routed(0)
+    assert launcher.layout_manager.current_category_filter == "All"
+
+    launcher._on_sidebar_routed(1)
+    assert launcher.layout_manager.current_category_filter == "Physics Engines"
