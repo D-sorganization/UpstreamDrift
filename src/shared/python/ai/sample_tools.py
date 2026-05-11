@@ -54,6 +54,7 @@ def register_golf_suite_tools(registry: ToolRegistry) -> None:
     _register_validation_tools(registry)
     _register_agent_control_tools(registry)
     _register_cli_tools(registry)
+    _register_codemap_tools_proxy(registry)
     logger.info("Registered Golf Suite tools")
 
 
@@ -673,3 +674,13 @@ def _register_cli_tools(registry: ToolRegistry) -> None:
 
     except ImportError as e:
         logger.warning("Could not register CLI tools: %s", e)
+
+
+def _register_codemap_tools_proxy(registry: ToolRegistry) -> None:
+    """Register codemap tools if available."""
+    try:
+        from src.shared.python.ai.tools.codemap_tools import register_codemap_tools
+
+        register_codemap_tools(registry)
+    except ImportError as e:
+        logger.warning("Could not register codemap tools: %s", e)
