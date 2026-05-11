@@ -43,17 +43,63 @@ class PendulumFitSwingProvider:
         from scipy.optimize import minimize
         from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
             DoublePendulumDynamics,
+            DoublePendulumParameters,
+            DoublePendulumState,
         )
 
         n_eval = 0
         history: list[float] = []
+        
+        # Polynomial forcing functions
+        def make_forcing_func(coefs: np.ndarray):
+            # Evaluate polynomial: c0 + c1*t + c2*t^2 + ...
+            def forcing(t: float, state: DoublePendulumState) -> float:
+                return float(np.polyval(coefs[::-1], t))
+            return forcing
 
         def cost_func(theta: np.ndarray) -> float:
             nonlocal n_eval
             n_eval += 1
-            # Dummy cost evaluating the distance to the projected club
-            # A real implementation would simulate DoublePendulumDynamics and compute RMSE
-            cost = float(np.sum(theta**2))  # Dummy calculation
+            
+            # theta is 14 elements (7 for shoulder torque, 7 for wrist torque)
+            shoulder_coefs = theta[:7]
+            wrist_coefs = theta[7:]
+            
+            dynamics = DoublePendulumDynamics(
+                forcing_functions=(make_forcing_func(shoulder_coefs), make_forcing_func(wrist_coefs))
+            )
+            
+            # Time grid from projected club
+            dt = projected_club.dt_s
+            n_frames = projected_club.n_frames
+            
+            # Initial state
+            # Assuming club target butt is shoulder, clubhead is end of club
+            # For simplicity, we just use 0s for initial state or try to derive it.
+            # In a real model, we would IK the initial frame. Here we use zero for simplicity.
+            state = DoublePendulumState(theta1=0.0, theta2=0.0, omega1=0.0, omega2=0.0)
+            
+            total_sq_error = 0.0
+            
+            for i in range(n_frames):
+                t = i * dt
+                # Step physics
+                state = dynamics.step(t, state, dt)
+                
+                # Compute forward kinematics for clubhead
+                l1 = dynamics.parameters.upper_segment.length_m
+                l2 = dynamics.parameters.lower_segment.length_m
+                x_head = l1 * np.sin(state.theta1) + l2 * np.sin(state.theta1 + state.theta2)
+                y_head = -l1 * np.cos(state.theta1) - l2 * np.cos(state.theta1 + state.theta2)
+                
+                # Target clubhead
+                target_head = projected_club.clubhead[i]
+                
+                # Error (we assume target is translated such that shoulder is at 0,0)
+                sq_err = (x_head - target_head[0])**2 + (y_head - target_head[1])**2
+                total_sq_error += sq_err
+
+            cost = float(total_sq_error / n_frames)
             history.append(cost)
             return cost
 
@@ -72,7 +118,7 @@ class PendulumFitSwingProvider:
         return CanonicalFitResult(
             theta_optimal=np.asarray(res.x, dtype=np.float64),
             final_cost=float(res.fun),
-            final_rmse_m=0.0,
+            final_rmse_m=float(np.sqrt(res.fun)),
             solver_status="success" if res.success else "failure",
             iterations=int(getattr(res, "nit", 1)),
             n_evaluations=n_eval,
