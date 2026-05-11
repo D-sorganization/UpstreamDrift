@@ -1,21 +1,57 @@
+//! Configuration for the AI client and RAG system.
+//!
+//! Maintains Design by Contract (DbC) by ensuring valid configurations
+//! at instantiation time. The pure-Rust core (`AIConfig` struct + `validate`)
+//! is always compiled; PyO3 bindings are added under the `python` feature.
+
+#[cfg(feature = "python")]
 use pyo3::prelude::*;
 
 /// Configuration for the AI client and RAG system.
-/// Maintains Design by Contract (DbC) by ensuring valid configurations
-/// at instantiation time.
-#[pyclass]
+#[cfg_attr(feature = "python", pyclass(get_all, set_all))]
 #[derive(Clone, Debug)]
 pub struct AIConfig {
-    #[pyo3(get, set)]
     pub api_key: String,
-    #[pyo3(get, set)]
     pub base_url: String,
-    #[pyo3(get, set)]
     pub model_name: String,
-    #[pyo3(get, set)]
     pub db_path: String,
 }
 
+impl AIConfig {
+    /// Validate the public invariants of an `AIConfig`.
+    ///
+    /// # Contract
+    /// * `base_url` must not be empty.
+    /// * `model_name` must not be empty.
+    pub fn validate(&self) -> Result<(), String> {
+        if self.base_url.trim().is_empty() {
+            return Err("base_url cannot be empty".to_string());
+        }
+        if self.model_name.trim().is_empty() {
+            return Err("model_name cannot be empty".to_string());
+        }
+        Ok(())
+    }
+
+    /// Pure-Rust constructor used by tests and internal code.
+    pub fn try_new(
+        api_key: String,
+        base_url: String,
+        model_name: String,
+        db_path: String,
+    ) -> Result<Self, String> {
+        let config = Self {
+            api_key,
+            base_url,
+            model_name,
+            db_path,
+        };
+        config.validate()?;
+        Ok(config)
+    }
+}
+
+#[cfg(feature = "python")]
 #[pymethods]
 impl AIConfig {
     /// Creates a new AIConfig.
@@ -24,20 +60,14 @@ impl AIConfig {
     /// * `base_url` must not be empty.
     /// * `model_name` must not be empty.
     #[new]
-    pub fn new(api_key: String, base_url: String, model_name: String, db_path: String) -> PyResult<Self> {
-        if base_url.trim().is_empty() {
-            return Err(pyo3::exceptions::PyValueError::new_err("base_url cannot be empty"));
-        }
-        if model_name.trim().is_empty() {
-            return Err(pyo3::exceptions::PyValueError::new_err("model_name cannot be empty"));
-        }
-
-        Ok(Self {
-            api_key,
-            base_url,
-            model_name,
-            db_path,
-        })
+    pub fn new(
+        api_key: String,
+        base_url: String,
+        model_name: String,
+        db_path: String,
+    ) -> PyResult<Self> {
+        Self::try_new(api_key, base_url, model_name, db_path)
+            .map_err(pyo3::exceptions::PyValueError::new_err)
     }
 }
 
@@ -47,18 +77,19 @@ mod tests {
 
     #[test]
     fn test_valid_config() {
-        let config = AIConfig::new(
+        let config = AIConfig::try_new(
             "key".to_string(),
             "https://api.openai.com/v1".to_string(),
             "gpt-4".to_string(),
             "./memory.db".to_string(),
-        ).unwrap();
+        )
+        .unwrap();
         assert_eq!(config.model_name, "gpt-4");
     }
 
     #[test]
     fn test_invalid_config_empty_url() {
-        let config = AIConfig::new(
+        let config = AIConfig::try_new(
             "key".to_string(),
             "   ".to_string(),
             "gpt-4".to_string(),

@@ -9,8 +9,17 @@ authors.workspace = true
 name = "ai_backend"
 crate-type = ["cdylib", "rlib"]
 
+[features]
+default = []
+# Enables PyO3 bindings. The workspace-level pyo3 dependency already activates
+# the `extension-module` feature, which is required for the maturin-built wheel
+# but breaks plain `cargo test` linkage when pyo3 is unconditional. Keeping
+# pyo3 behind an opt-in feature mirrors the upstream-physics pattern and lets
+# `cargo test --workspace` succeed without linking libpython.
+python = ["dep:pyo3"]
+
 [dependencies]
-pyo3 = { workspace = true, features = ["extension-module"] }
+pyo3 = { workspace = true, optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tools-core = { workspace = true }
