@@ -8,6 +8,9 @@
 # Claude Code agent worktrees (ephemeral, per-session)
 .claude/worktrees/
 
+# Codemap index (regenerated on every clone via `codemap rebuild`)
+.codemap/
+
 # Merge conflict artifacts
 *.ours
 *.theirs

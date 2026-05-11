@@ -17,6 +17,11 @@ from src.shared.python.ai.tools.agent_control import (
     create_agent_tools_for_registry,
 )
 
+from src.shared.python.ai.tools.codemap_tools import (
+    CODEMAP_TOOL_NAMES,
+    register_codemap_tools,
+)
+
 __all__ = [
     # CLI Tools
     "ClaudeCodeTool",
@@ -31,4 +36,7 @@ __all__ = [
     "AgentActionResult",
     "EngineStatus",
     "create_agent_tools_for_registry",
+    # Codemap
+    "CODEMAP_TOOL_NAMES",
+    "register_codemap_tools",
 ]

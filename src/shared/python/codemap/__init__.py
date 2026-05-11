@@ -1,29 +1,39 @@
-"""Code-map package: tree-sitter + SQLite FTS5 symbol index.
+"""Repo-aware code map — tree-sitter symbol index + SQLite FTS5.
 
-Provides a repo-aware code map so the in-app chat can answer
-'where is X defined / called?' without re-scanning the tree per prompt.
-
-Sub-modules
------------
-db          SQLite FTS5 schema + CRUD helpers
-parsers     Tree-sitter language parsers
-indexer     Cold-rebuild + incremental update logic
-api         In-process query API (search, get_symbol, who_calls)
-cli         Command-line entry points (codemap rebuild / search / …)
-watcher     Watchdog + git-hook bridge for incremental updates
+See ``chat_codemap_design.md`` for the full design. The public surface is
+defined in :mod:`codemap.api`; this top-level module re-exports it for
+convenience.
 """
 
 from __future__ import annotations
 
+from .api import (
+    Hit,
+    RepoStats,
+    Symbol,
+    discover_repo_root,
+    get_symbol,
+    imports_of,
+    neighbors,
+    repo_summary,
+    search_code,
+    who_calls,
+)
+from .indexer import RebuildStats, rebuild
+
 __all__ = [
-    "CodeMapIndex",
-    "SymbolRow",
-    "rebuild",
-    "search",
+    "Hit",
+    "RebuildStats",
+    "RepoStats",
+    "Symbol",
+    "discover_repo_root",
     "get_symbol",
+    "imports_of",
+    "neighbors",
+    "rebuild",
+    "repo_summary",
+    "search_code",
     "who_calls",
 ]
 
-from .api import get_symbol, search, who_calls
-from .db import SymbolRow
-from .indexer import CodeMapIndex, rebuild
+__version__ = "0.1.0"

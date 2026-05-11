@@ -7,12 +7,32 @@ This allows agents like Claude Code or Codex to query the SQLite FTS5 index dire
 
 To expose the MCP server to Claude, you can configure it via `~/.mcp.json` or through the Claude Desktop configuration:
 
+The repo ships a `.mcp.json` at the root that Claude Code auto-discovers; it
+invokes the `codemap-mcp` console-script entry point (which resolves to
+`codemap.mcp_server:main`):
+
+```json
+{
+  "mcpServers": {
+    "codemap": {
+      "command": "codemap-mcp",
+      "args": [],
+      "env": {
+        "CODEMAP_REPO_ROOT": "${workspaceFolder}"
+      }
+    }
+  }
+}
+```
+
+If `codemap-mcp` is not on `PATH`, the equivalent module-form invocation is:
+
 ```json
 {
   "mcpServers": {
     "CodeMap": {
       "command": "python",
-      "args": ["-m", "shared.python.codemap.mcp"],
+      "args": ["-m", "shared.python.codemap.mcp_server"],
       "env": {
         "PYTHONPATH": "src"
       }

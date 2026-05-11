@@ -1,117 +1,149 @@
-"""Watchdog-based file watcher for incremental code-map updates.
+"""``codemap-watch`` daemon — incremental re-index on file save.
 
-When started, it monitors the repository tree for file-system changes and
-calls :meth:`CodeMapIndex.update_file` on each modified source file.
-
-Requires the ``watchdog`` package (``pip install watchdog``). Falls back
-gracefully with a warning when watchdog is not installed.
-
-Usage
------
-    from shared.python.codemap.watcher import start_watcher, stop_watcher
-
-    stop_event = start_watcher(repo_root=Path("."))
-    # ... application runs ...
-    stop_watcher(stop_event)
+Uses watchdog with a 500 ms debounce. On change, re-parses only the changed
+file. Logs to ``<repo>/.codemap/watcher.log``.
 """
 
 from __future__ import annotations
 
+import argparse
 import logging
+import logging.handlers
+import sys
 import threading
+import time
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
+from . import api as api_mod
+from . import db as db_mod
+from . import indexer as indexer_mod
+from . import parsers as parsers_mod
 
-_INDEXABLE_EXTS = {".py", ".rs", ".ts", ".tsx", ".js", ".jsx", ".md", ".mdx"}
+DEBOUNCE_S = 0.5
 
 
-def start_watcher(
-    repo_root: Path,
-    *,
-    db_path: Path | None = None,
-) -> threading.Event:
-    """Start a background watchdog thread for incremental index updates.
-
-    Args:
-        repo_root: Repository root to watch.
-        db_path:   Optional override for the database path.
-
-    Returns:
-        A :class:`threading.Event` that can be set to stop the watcher.
-        Pass it to :func:`stop_watcher`.
-    """
-    stop_event = threading.Event()
-
-    try:
-        from watchdog.events import (
-            FileSystemEventHandler,  # type: ignore[import-untyped]
-        )
-        from watchdog.observers import Observer  # type: ignore[import-untyped]
-    except ImportError:
-        logger.warning(
-            "watchdog not installed — incremental code-map updates disabled. "
-            "Install with: pip install watchdog"
-        )
-        return stop_event
-
-    from .indexer import CodeMapIndex
+def _make_handler(repo: Path, conn, lock: threading.Lock, pending: dict, schedule):
+    from watchdog.events import FileSystemEventHandler  # type: ignore[import-not-found]
 
     class _Handler(FileSystemEventHandler):
-        def __init__(self, index: CodeMapIndex) -> None:
-            self._index = index
-
-        def _handle(self, path_str: str) -> None:
-            p = Path(path_str)
-            if p.suffix.lower() in _INDEXABLE_EXTS:
-                try:
-                    n = self._index.update_file(p)
-                    logger.debug("Updated index for %s (%d symbols)", p.name, n)
-                except Exception as exc:  # noqa: BLE001
-                    logger.warning("Watch update failed for %s: %s", p, exc)
-
-        def on_modified(self, event: object) -> None:
-            if not getattr(event, "is_directory", True):
-                self._handle(getattr(event, "src_path", ""))
-
-        def on_created(self, event: object) -> None:
-            if not getattr(event, "is_directory", True):
-                self._handle(getattr(event, "src_path", ""))
-
-        def on_deleted(self, event: object) -> None:
-            if not getattr(event, "is_directory", True):
-                p = Path(getattr(event, "src_path", ""))
-                if p.suffix.lower() in _INDEXABLE_EXTS:
-                    try:
-                        rel = p.relative_to(repo_root).as_posix()
-                        from .db import delete_path
-
-                        delete_path(self._index.conn, rel)
-                        self._index.conn.commit()
-                    except Exception as exc:  # noqa: BLE001
-                        logger.warning(
-                            "Failed to remove deleted file from index: %s", exc
-                        )
-
-    def _run() -> None:
-        with CodeMapIndex(repo_root, db_path=db_path) as idx:
-            handler = _Handler(idx)
-            observer = Observer()
-            observer.schedule(handler, str(repo_root), recursive=True)
-            observer.start()
-            logger.info("Code-map watcher started for %s", repo_root)
+        def _enqueue(self, src_path: str) -> None:
             try:
-                stop_event.wait()
-            finally:
-                observer.stop()
-                observer.join()
-                logger.info("Code-map watcher stopped")
+                abs_p = Path(src_path)
+                if not abs_p.is_file():
+                    return
+                if parsers_mod.language_for(abs_p) is None:
+                    return
+                try:
+                    rel = abs_p.relative_to(repo).as_posix()
+                except ValueError:
+                    return
+                if rel.startswith(".codemap/") or "/.codemap/" in rel:
+                    return
+                with lock:
+                    pending[rel] = abs_p
+                schedule()
+            except Exception:  # pragma: no cover
+                logging.getLogger("codemap.watcher").exception("enqueue failed")
 
-    t = threading.Thread(target=_run, daemon=True, name="codemap-watcher")
-    t.start()
-    return stop_event
+        def on_modified(self, event):
+            self._enqueue(event.src_path)
+
+        def on_created(self, event):
+            self._enqueue(event.src_path)
+
+        def on_moved(self, event):
+            self._enqueue(getattr(event, "dest_path", event.src_path))
+
+        def on_deleted(self, event):
+            self._enqueue(event.src_path)
+
+    return _Handler()
 
 
-def stop_watcher(stop_event: threading.Event) -> None:
-    """Signal the watcher thread to shut down gracefully."""
-    stop_event.set()
+def run(repo_root: str | None = None, *, debounce: float = DEBOUNCE_S) -> int:
+    try:
+        from watchdog.observers import Observer  # type: ignore[import-not-found]
+    except Exception as exc:
+        print(f"codemap-watch requires watchdog: {exc}", file=sys.stderr)
+        return 2
+
+    repo = Path(repo_root).resolve() if repo_root else api_mod.discover_repo_root()
+    log_dir = repo / ".codemap"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    logger = logging.getLogger("codemap.watcher")
+    if not logger.handlers:
+        handler = logging.handlers.RotatingFileHandler(
+            log_dir / "watcher.log",
+            maxBytes=512_000,
+            backupCount=2,
+        )
+        handler.setFormatter(
+            logging.Formatter("%(asctime)s %(levelname)s: %(message)s")
+        )
+        logger.addHandler(handler)
+        logger.addHandler(logging.StreamHandler(sys.stderr))
+        logger.setLevel(logging.INFO)
+
+    conn = db_mod.open_db(repo)
+    pending: dict[str, Path] = {}
+    lock = threading.Lock()
+    timer_ref: dict[str, threading.Timer | None] = {"t": None}
+
+    def _flush() -> None:
+        with lock:
+            batch = dict(pending)
+            pending.clear()
+        if not batch:
+            return
+        logger.info("flushing %d change(s)", len(batch))
+        for rel, abs_p in batch.items():
+            try:
+                if abs_p.exists():
+                    stats = indexer_mod.RebuildStats()
+                    indexer_mod._process_file(abs_p, rel, repo, conn, stats)  # type: ignore[attr-defined]
+                else:
+                    conn.execute("DELETE FROM symbols WHERE path = ?", (rel,))
+                    conn.execute("DELETE FROM files WHERE path = ?", (rel,))
+            except Exception:
+                logger.exception("re-index failed for %s", rel)
+        conn.commit()
+
+    def _schedule() -> None:
+        old = timer_ref.get("t")
+        if old is not None:
+            old.cancel()
+        t = threading.Timer(debounce, _flush)
+        t.daemon = True
+        timer_ref["t"] = t
+        t.start()
+
+    handler = _make_handler(repo, conn, lock, pending, _schedule)
+    observer = Observer()
+    observer.schedule(handler, str(repo), recursive=True)
+    observer.start()
+    logger.info("codemap-watch started for %s", repo)
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        logger.info("codemap-watch stopping")
+    finally:
+        observer.stop()
+        observer.join(timeout=5)
+        _flush()
+        conn.close()
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    p = argparse.ArgumentParser(
+        prog="codemap-watch", description="Watch & re-index on save."
+    )
+    p.add_argument("--repo", default=None)
+    p.add_argument("--debounce", type=float, default=DEBOUNCE_S)
+    args = p.parse_args(argv)
+    return run(args.repo, debounce=args.debounce)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

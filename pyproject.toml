@@ -231,6 +231,10 @@ max-complexity = 10
 "tests/**" = ["T201"]
 "examples/**" = ["T201"]
 "tests/unit/test_calc_backend_protocols.py" = ["I"]
+# Codemap CLI / watcher / MCP server: stdout is the contract.
+"src/shared/python/codemap/cli.py" = ["T201"]
+"src/shared/python/codemap/watcher.py" = ["T201"]
+"src/shared/python/codemap/mcp_server.py" = ["T201"]
 
 
 [tool.mypy]

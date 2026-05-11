@@ -1,226 +1,157 @@
-"""SQLite FTS5 schema + CRUD helpers for the code-map index.
+"""SQLite schema + open/init helpers for the code map index.
 
-Schema
-------
-symbols (FTS5 virtual table)
-    kind            TEXT  — 'function', 'class', 'method', 'module', 'constant', etc.
-    qualified_name  TEXT  — fully-qualified dotted name (e.g. 'my_pkg.utils.parse')
-    path            TEXT  — repo-relative path (e.g. 'src/my_pkg/utils.py')
-    line_start      INT
-    line_end        INT
-    signature       TEXT  — condensed first-line signature or declaration
-    docstring       TEXT  — first paragraph of docstring (may be empty)
-    imports         TEXT  — space-separated imported names (for call-site search)
-    calls_out       TEXT  — space-separated called names (from AST)
-    blake3_hash     TEXT  — per-file content hash for incremental rebuild
+Single-file index living at ``<repo>/.codemap/index.db``. Uses SQLite FTS5
+(built into the stdlib ``sqlite3`` module on modern Python) for BM25 search
+over symbol names + signatures + docstrings.
 
-manifest (plain table)
-    key             TEXT  PRIMARY KEY
-    value           TEXT
+Source slices are NOT copied into the DB — only line ranges + a blake3 hash
+so the indexer can skip unchanged symbols on incremental rebuilds.
 """
 
 from __future__ import annotations
 
-import json
-import logging
 import sqlite3
-from dataclasses import dataclass, fields
 from pathlib import Path
-from typing import Any
 
-logger = logging.getLogger(__name__)
+SCHEMA_VERSION = 1
+"""Bump when any table definition changes incompatibly."""
 
-_DDL_MANIFEST = """
-CREATE TABLE IF NOT EXISTS manifest (
-    key   TEXT PRIMARY KEY,
-    value TEXT
-);
-"""
-
-_DDL_SYMBOLS = """
-CREATE VIRTUAL TABLE IF NOT EXISTS symbols USING fts5(
-    kind,
-    qualified_name,
-    path UNINDEXED,
-    line_start UNINDEXED,
-    line_end UNINDEXED,
-    signature,
-    docstring,
-    imports,
-    calls_out,
-    blake3_hash UNINDEXED,
-    tokenize = 'unicode61'
-);
-"""
-
-_DDL_SYMBOLS_FALLBACK = """
-CREATE TABLE IF NOT EXISTS symbols (
-    kind           TEXT,
-    qualified_name TEXT,
-    path           TEXT,
-    line_start     INTEGER,
-    line_end       INTEGER,
-    signature      TEXT,
-    docstring      TEXT,
-    imports        TEXT,
-    calls_out      TEXT,
-    blake3_hash    TEXT
-);
-CREATE INDEX IF NOT EXISTS idx_symbols_path ON symbols(path);
-CREATE INDEX IF NOT EXISTS idx_symbols_kind ON symbols(kind);
-"""
+DB_DIR_NAME = ".codemap"
+DB_FILE_NAME = "index.db"
+MANIFEST_FILE_NAME = "manifest.json"
 
 
-@dataclass
-class SymbolRow:
-    """A single indexed symbol entry."""
-
-    kind: str
-    qualified_name: str
-    path: str
-    line_start: int
-    line_end: int
-    signature: str = ""
-    docstring: str = ""
-    imports: str = ""
-    calls_out: str = ""
-    blake3_hash: str = ""
-
-    def as_tuple(self) -> tuple[Any, ...]:
-        """Return a tuple of values in field-declaration order."""
-        return tuple(getattr(self, f.name) for f in fields(self))
+def db_path(repo_root: Path) -> Path:
+    """Return the canonical index DB path for ``repo_root``."""
+    return Path(repo_root) / DB_DIR_NAME / DB_FILE_NAME
 
 
-def open_db(db_path: Path) -> sqlite3.Connection:
-    """Open (or create) the index database at *db_path*.
+def manifest_path(repo_root: Path) -> Path:
+    """Return the manifest JSON path."""
+    return Path(repo_root) / DB_DIR_NAME / MANIFEST_FILE_NAME
 
-    Applies WAL mode for concurrent read performance and attempts to create
-    the FTS5 virtual table, falling back to a plain table if the SQLite
-    build lacks FTS5 support.
-    """
-    db_path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(db_path))
-    conn.execute("PRAGMA journal_mode=WAL;")
-    conn.execute("PRAGMA synchronous=NORMAL;")
-    conn.execute(_DDL_MANIFEST)
 
-    try:
-        conn.execute(_DDL_SYMBOLS)
-    except sqlite3.OperationalError as exc:
-        if "fts5" in str(exc).lower():
-            logger.warning("SQLite FTS5 not available — falling back to plain table")
-            for stmt in _DDL_SYMBOLS_FALLBACK.split(";"):
-                stmt = stmt.strip()
-                if stmt:
-                    conn.execute(stmt)
-        else:
-            raise
-
-    conn.commit()
+def open_db(repo_root: Path) -> sqlite3.Connection:
+    """Open (and lazily initialise) the index DB for ``repo_root``."""
+    target = db_path(repo_root)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    # Ensure .codemap/ is gitignored locally regardless of repo .gitignore state.
+    gitignore = target.parent / ".gitignore"
+    if not gitignore.exists():
+        gitignore.write_text("*\n", encoding="utf-8")
+    conn = sqlite3.connect(target)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode = WAL")
+    conn.execute("PRAGMA synchronous = NORMAL")
+    conn.execute("PRAGMA foreign_keys = ON")
+    init_schema(conn)
     return conn
 
 
-def upsert_symbols(conn: sqlite3.Connection, rows: list[SymbolRow]) -> None:
-    """Insert or replace symbol rows in bulk."""
-    if not rows:
-        return
-    conn.execute("DELETE FROM symbols WHERE path = ?", (rows[0].path,))
-    conn.executemany(
-        "INSERT INTO symbols VALUES (?,?,?,?,?,?,?,?,?,?)",
-        [r.as_tuple() for r in rows],
+def init_schema(conn: sqlite3.Connection) -> None:
+    """Create tables if missing. Idempotent."""
+    cur = conn.cursor()
+    cur.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS meta (
+            key   TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS files (
+            path        TEXT PRIMARY KEY,
+            language    TEXT NOT NULL,
+            hash        TEXT NOT NULL,
+            mtime       REAL NOT NULL,
+            size        INTEGER NOT NULL,
+            imports     TEXT NOT NULL DEFAULT '[]',
+            indexed_at  REAL NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS symbols (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            path        TEXT NOT NULL,
+            kind        TEXT NOT NULL,
+            name        TEXT NOT NULL,
+            qualified   TEXT NOT NULL,
+            sig         TEXT NOT NULL DEFAULT '',
+            docstring   TEXT NOT NULL DEFAULT '',
+            start_line  INTEGER NOT NULL,
+            end_line    INTEGER NOT NULL,
+            calls_out   TEXT NOT NULL DEFAULT '[]',
+            hash        TEXT NOT NULL,
+            FOREIGN KEY (path) REFERENCES files(path) ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_symbols_qualified ON symbols(qualified);
+        CREATE INDEX IF NOT EXISTS idx_symbols_name      ON symbols(name);
+        CREATE INDEX IF NOT EXISTS idx_symbols_path      ON symbols(path);
+        CREATE INDEX IF NOT EXISTS idx_symbols_kind      ON symbols(kind);
+        """,
     )
 
+    # FTS5 virtual table — content-less, mirrors symbols(id) for BM25 search.
+    # Triggers below keep the FTS index in sync. `co` is the FTS column
+    # alias for `calls_out` to keep trigger bodies under the 88-char limit.
+    cur.executescript(
+        """
+        CREATE VIRTUAL TABLE IF NOT EXISTS symbols_fts USING fts5(
+            name, qualified, sig, docstring, co,
+            content='symbols', content_rowid='id',
+            tokenize='unicode61'
+        );
 
-def delete_path(conn: sqlite3.Connection, repo_rel_path: str) -> None:
-    """Remove all symbols for a given *repo_rel_path*."""
-    conn.execute("DELETE FROM symbols WHERE path = ?", (repo_rel_path,))
+        CREATE TRIGGER IF NOT EXISTS symbols_ai AFTER INSERT ON symbols BEGIN
+            INSERT INTO symbols_fts(rowid, name, qualified, sig, docstring, co)
+            VALUES (new.id, new.name, new.qualified,
+                    new.sig, new.docstring, new.calls_out);
+        END;
 
+        CREATE TRIGGER IF NOT EXISTS symbols_ad AFTER DELETE ON symbols BEGIN
+            INSERT INTO symbols_fts(
+                symbols_fts, rowid, name, qualified, sig, docstring, co
+            ) VALUES('delete', old.id, old.name, old.qualified,
+                     old.sig, old.docstring, old.calls_out);
+        END;
 
-def set_manifest(conn: sqlite3.Connection, key: str, value: Any) -> None:
-    """Write a manifest key/value (JSON-serialised)."""
-    conn.execute(
-        "INSERT OR REPLACE INTO manifest(key, value) VALUES (?, ?)",
-        (key, json.dumps(value)),
+        CREATE TRIGGER IF NOT EXISTS symbols_au AFTER UPDATE ON symbols BEGIN
+            INSERT INTO symbols_fts(
+                symbols_fts, rowid, name, qualified, sig, docstring, co
+            ) VALUES('delete', old.id, old.name, old.qualified,
+                     old.sig, old.docstring, old.calls_out);
+            INSERT INTO symbols_fts(rowid, name, qualified, sig, docstring, co)
+            VALUES (new.id, new.name, new.qualified,
+                    new.sig, new.docstring, new.calls_out);
+        END;
+        """,
     )
 
+    cur.execute(
+        "INSERT OR REPLACE INTO meta(key, value) VALUES(?, ?)",
+        ("schema_version", str(SCHEMA_VERSION)),
+    )
+    conn.commit()
 
-def get_manifest(conn: sqlite3.Connection, key: str) -> Any:
-    """Read a manifest value (JSON-deserialised), or None if absent."""
-    row = conn.execute("SELECT value FROM manifest WHERE key = ?", (key,)).fetchone()
-    return json.loads(row[0]) if row else None
 
-
-def search_fts(
-    conn: sqlite3.Connection,
-    query: str,
-    *,
-    limit: int = 20,
-    kind: str | None = None,
-) -> list[SymbolRow]:
-    """Full-text search across qualified_name, signature, and docstring.
-
-    Args:
-        conn:   Open database connection.
-        query:  FTS5 query string (e.g. 'parse*' or '"parse spec"').
-        limit:  Maximum rows to return.
-        kind:   Optional filter by symbol kind ('function', 'class', …).
-
-    Returns:
-        List of matching :class:`SymbolRow` objects, ranked by relevance.
-    """
+def get_schema_version(conn: sqlite3.Connection) -> int:
+    """Return the schema version recorded in the meta table, or 0 if unknown."""
+    row = conn.execute("SELECT value FROM meta WHERE key = 'schema_version'").fetchone()
+    if row is None:
+        return 0
     try:
-        if kind:
-            rows = conn.execute(
-                "SELECT kind,qualified_name,path,line_start,line_end,"
-                "signature,docstring,imports,calls_out,blake3_hash "
-                "FROM symbols WHERE symbols MATCH ? AND kind = ? LIMIT ?",
-                (query, kind, limit),
-            ).fetchall()
-        else:
-            rows = conn.execute(
-                "SELECT kind,qualified_name,path,line_start,line_end,"
-                "signature,docstring,imports,calls_out,blake3_hash "
-                "FROM symbols WHERE symbols MATCH ? LIMIT ?",
-                (query, limit),
-            ).fetchall()
-    except sqlite3.OperationalError:
-        # Fallback for plain-table mode (no FTS)
-        like_query = f"%{query}%"
-        if kind:
-            rows = conn.execute(
-                "SELECT kind,qualified_name,path,line_start,line_end,"
-                "signature,docstring,imports,calls_out,blake3_hash "
-                "FROM symbols WHERE qualified_name LIKE ? AND kind = ? LIMIT ?",
-                (like_query, kind, limit),
-            ).fetchall()
-        else:
-            rows = conn.execute(
-                "SELECT kind,qualified_name,path,line_start,line_end,"
-                "signature,docstring,imports,calls_out,blake3_hash "
-                "FROM symbols WHERE qualified_name LIKE ? LIMIT ?",
-                (like_query, limit),
-            ).fetchall()
-
-    return [SymbolRow(*r) for r in rows]
+        return int(row[0])
+    except (TypeError, ValueError):
+        return 0
 
 
-def who_calls_db(
-    conn: sqlite3.Connection, qualified_name: str, *, limit: int = 20
-) -> list[SymbolRow]:
-    """Find symbols whose *calls_out* includes *qualified_name*."""
-    try:
-        rows = conn.execute(
-            "SELECT kind,qualified_name,path,line_start,line_end,"
-            "signature,docstring,imports,calls_out,blake3_hash "
-            "FROM symbols WHERE calls_out MATCH ? LIMIT ?",
-            (qualified_name, limit),
-        ).fetchall()
-    except sqlite3.OperationalError:
-        like_query = f"%{qualified_name}%"
-        rows = conn.execute(
-            "SELECT kind,qualified_name,path,line_start,line_end,"
-            "signature,docstring,imports,calls_out,blake3_hash "
-            "FROM symbols WHERE calls_out LIKE ? LIMIT ?",
-            (like_query, limit),
-        ).fetchall()
-    return [SymbolRow(*r) for r in rows]
+__all__ = [
+    "DB_DIR_NAME",
+    "DB_FILE_NAME",
+    "MANIFEST_FILE_NAME",
+    "SCHEMA_VERSION",
+    "db_path",
+    "get_schema_version",
+    "init_schema",
+    "manifest_path",
+    "open_db",
+]

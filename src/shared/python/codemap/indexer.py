@@ -1,248 +1,347 @@
-"""Code-map cold-rebuild and incremental update indexer.
+"""Walk a repo, parse files, persist symbols into SQLite.
 
-Usage (programmatic)
---------------------
-    from shared.python.codemap.indexer import CodeMapIndex, rebuild
+Public entry point:
 
-    idx = CodeMapIndex(repo_root=Path("."))
-    idx.rebuild()          # full cold rebuild
-    idx.update_file(path)  # incremental update for one file
+    rebuild(repo_root, *, since=None) -> RebuildStats
 
-Usage (module script)
----------------------
-    python -m shared.python.codemap.indexer rebuild
+If ``since`` is set, runs ``git diff --name-only <since>..HEAD`` and only
+re-parses files that changed (incremental). Otherwise walks the whole tree
+(respecting ``.gitignore`` via ``pathspec`` if available).
 """
 
 from __future__ import annotations
 
-import contextlib
+import hashlib
+import json
 import logging
-import sqlite3
+import os
 import subprocess
 import time
-from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .db import (
-    delete_path,
-    get_manifest,
-    open_db,
-    set_manifest,
-    upsert_symbols,
-)
-from .parsers import parse_file
+from . import db as db_mod
+from . import parsers as parsers_mod
 
 logger = logging.getLogger(__name__)
 
-_SCHEMA_VERSION = "1.0"
-_DB_RELPATH = ".codemap/index.db"
-_MANIFEST_RELPATH = ".codemap/manifest.json"
 
-# Extensions to skip during indexing
-_SKIP_DIRS = {
+# ---------------------------------------------------------------------------
+# Hashing — prefer blake3 if available, else hashlib.blake2b.
+# ---------------------------------------------------------------------------
+
+
+def _hash_bytes(data: bytes) -> str:
+    try:
+        import blake3  # type: ignore[import-not-found]
+
+        return blake3.blake3(data).hexdigest()
+    except Exception:
+        return hashlib.blake2b(data, digest_size=16).hexdigest()
+
+
+# ---------------------------------------------------------------------------
+# Path walking + gitignore.
+# ---------------------------------------------------------------------------
+
+
+_DEFAULT_SKIP_DIRS = {
     ".git",
     ".hg",
     ".svn",
-    "__pycache__",
-    ".mypy_cache",
-    ".ruff_cache",
-    "node_modules",
     ".venv",
     "venv",
-    ".tox",
+    "env",
+    "__pycache__",
+    "node_modules",
+    "target",
     "dist",
     "build",
-    "target",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".tox",
     ".codemap",
+    ".idea",
+    ".vscode",
+    "htmlcov",
+    "site-packages",
 }
 
 
-def _get_git_commit(repo_root: Path) -> str:
-    """Return the current HEAD commit SHA, or 'unknown' if git is unavailable."""
+def _load_gitignore(repo_root: Path):
+    """Return a callable ``is_ignored(rel_path) -> bool``."""
     try:
-        result = subprocess.run(  # noqa: S603
-            ["git", "rev-parse", "HEAD"],  # noqa: S607
-            cwd=repo_root,
-            capture_output=True,
+        import pathspec  # type: ignore[import-not-found]
+    except Exception:
+        pathspec = None
+
+    patterns: list[str] = []
+    gi = repo_root / ".gitignore"
+    if gi.exists():
+        patterns.extend(gi.read_text(encoding="utf-8", errors="ignore").splitlines())
+    # Always exclude .codemap directory.
+    patterns.append(".codemap/")
+
+    if pathspec is not None:
+        spec = pathspec.PathSpec.from_lines("gitwildmatch", patterns)
+
+        def _ignored(rel: str) -> bool:
+            return spec.match_file(rel)
+
+        return _ignored
+
+    # Naive fallback: just match a few common substrings.
+    simple = [
+        p.strip().rstrip("/") for p in patterns if p.strip() and not p.startswith("#")
+    ]
+
+    def _ignored_simple(rel: str) -> bool:
+        rel_norm = rel.replace(os.sep, "/")
+        for pat in simple:
+            if not pat:
+                continue
+            if pat in rel_norm:
+                return True
+        return False
+
+    return _ignored_simple
+
+
+def _walk(repo_root: Path):
+    """Yield ``(abs_path, rel_path)`` for every supported source file."""
+    is_ignored = _load_gitignore(repo_root)
+    for dirpath, dirnames, filenames in os.walk(repo_root):
+        # Prune.
+        dirnames[:] = [
+            d
+            for d in dirnames
+            if d not in _DEFAULT_SKIP_DIRS
+            and not is_ignored(
+                str(Path(dirpath, d).relative_to(repo_root)).replace(os.sep, "/")
+            )
+        ]
+        for name in filenames:
+            abs_p = Path(dirpath) / name
+            rel = abs_p.relative_to(repo_root).as_posix()
+            if is_ignored(rel):
+                continue
+            if parsers_mod.language_for(abs_p) is None:
+                continue
+            yield abs_p, rel
+
+
+def _git_changed_files(repo_root: Path, since: str) -> list[str]:
+    try:
+        out = subprocess.check_output(
+            ["git", "diff", "--name-only", f"{since}..HEAD"],
+            cwd=str(repo_root),
+            stderr=subprocess.DEVNULL,
             text=True,
-            timeout=5,
         )
-        return result.stdout.strip() or "unknown"
-    except (OSError, subprocess.TimeoutExpired):
-        return "unknown"
+    except (subprocess.CalledProcessError, FileNotFoundError, OSError):
+        logger.warning(
+            "codemap: 'git diff' failed for since=%s; falling back to full rebuild",
+            since,
+        )
+        return []
+    files: list[str] = []
+    for line in out.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        files.append(line)
+    return files
 
 
-def _iter_source_files(repo_root: Path) -> Iterator[Path]:
-    """Walk *repo_root* and yield all indexable source files."""
-    for path in repo_root.rglob("*"):
-        if (
-            path.is_file()
-            and not any(part in _SKIP_DIRS for part in path.parts)
-            and path.suffix.lower()
-            in {
-                ".py",
-                ".rs",
-                ".ts",
-                ".tsx",
-                ".js",
-                ".jsx",
-                ".md",
-                ".mdx",
-            }
-        ):
-            yield path
+def _current_commit(repo_root: Path) -> str | None:
+    try:
+        out = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=str(repo_root),
+            stderr=subprocess.DEVNULL,
+            text=True,
+        )
+        return out.strip() or None
+    except (subprocess.CalledProcessError, FileNotFoundError, OSError):
+        return None
+
+
+# ---------------------------------------------------------------------------
+# Stats.
+# ---------------------------------------------------------------------------
 
 
 @dataclass
 class RebuildStats:
-    """Statistics from a full rebuild."""
+    files_seen: int = 0
+    files_parsed: int = 0
+    files_skipped_unchanged: int = 0
+    symbols_inserted: int = 0
+    symbols_deleted: int = 0
+    elapsed_s: float = 0.0
+    errors: list[str] = field(default_factory=list)
 
-    files_processed: int = 0
-    symbols_indexed: int = 0
-    duration_s: float = 0.0
-    errors: int = 0
-    skipped: int = 0
-    extra: dict[str, object] = field(default_factory=dict)
+
+# ---------------------------------------------------------------------------
+# Core indexing routine.
+# ---------------------------------------------------------------------------
 
 
-class CodeMapIndex:
-    """Manages the SQLite code-map index for a single repository.
+def _read_bytes(path: Path) -> bytes | None:
+    try:
+        return path.read_bytes()
+    except (OSError, PermissionError) as exc:
+        logger.debug("codemap: cannot read %s: %s", path, exc)
+        return None
 
-    Args:
-        repo_root: The root directory of the repository.
-        db_path:   Optional override for the database path.
-                   Defaults to ``<repo_root>/.codemap/index.db``.
-    """
 
-    def __init__(
-        self,
-        repo_root: Path,
-        db_path: Path | None = None,
-    ) -> None:
-        self.repo_root = repo_root.resolve()
-        self.db_path = (db_path or repo_root / _DB_RELPATH).resolve()
-        self._conn: sqlite3.Connection | None = None
+def _process_file(
+    abs_path: Path,
+    rel: str,
+    repo_root: Path,
+    conn,
+    stats: RebuildStats,
+) -> None:
+    data = _read_bytes(abs_path)
+    if data is None:
+        return
+    stats.files_seen += 1
+    file_hash = _hash_bytes(data)
 
-    # ── Connection lifecycle ────────────────────────────────────────────────────
+    cur = conn.cursor()
+    existing = cur.execute("SELECT hash FROM files WHERE path = ?", (rel,)).fetchone()
+    if existing is not None and existing["hash"] == file_hash:
+        stats.files_skipped_unchanged += 1
+        return
 
-    @property
-    def conn(self) -> sqlite3.Connection:
-        if self._conn is None:
-            self._conn = open_db(self.db_path)
-        return self._conn
+    parsed = parsers_mod.dispatch(rel, data)
+    if parsed is None:
+        return
 
-    def close(self) -> None:
-        """Close the underlying database connection."""
-        if self._conn:
-            self._conn.close()
-            self._conn = None
+    # Delete prior symbols for this file then re-insert.
+    deleted = cur.execute("DELETE FROM symbols WHERE path = ?", (rel,)).rowcount or 0
+    stats.symbols_deleted += deleted
 
-    def __enter__(self) -> CodeMapIndex:
-        return self
+    try:
+        st = abs_path.stat()
+        mtime = st.st_mtime
+        size = st.st_size
+    except OSError:
+        mtime = time.time()
+        size = len(data)
 
-    def __exit__(self, *_: object) -> None:
-        self.close()
+    cur.execute(
+        "INSERT OR REPLACE INTO files("
+        "path, language, hash, mtime, size, imports, indexed_at"
+        ") VALUES(?, ?, ?, ?, ?, ?, ?)",
+        (
+            rel,
+            parsed.language,
+            file_hash,
+            mtime,
+            size,
+            json.dumps(parsed.imports),
+            time.time(),
+        ),
+    )
 
-    # ── Rebuild ─────────────────────────────────────────────────────────────────
-
-    def rebuild(self) -> RebuildStats:
-        """Perform a full cold rebuild of the index.
-
-        1. Drops and recreates the ``symbols`` table.
-        2. Walks all source files in the repo.
-        3. Parses and inserts symbols.
-        4. Writes the manifest.
-
-        Returns:
-            :class:`RebuildStats` with timing and count information.
-        """
-        stats = RebuildStats()
-        t0 = time.monotonic()
-
-        # Drop and recreate symbols table for clean slate
-        with contextlib.suppress(sqlite3.OperationalError):
-            self.conn.execute("DROP TABLE IF EXISTS symbols")
-
-        # Re-open to recreate the table
-        self.close()
-        self._conn = open_db(self.db_path)
-
-        logger.info("Starting cold rebuild of code-map for %s", self.repo_root)
-
-        for src_path in _iter_source_files(self.repo_root):
-            try:
-                rows = parse_file(src_path, self.repo_root)
-                if rows:
-                    upsert_symbols(self.conn, rows)
-                    stats.symbols_indexed += len(rows)
-                stats.files_processed += 1
-            except Exception as exc:  # noqa: BLE001
-                logger.warning("Error indexing %s: %s", src_path, exc)
-                stats.errors += 1
-
-        self.conn.commit()
-
-        stats.duration_s = time.monotonic() - t0
-
-        # Write manifest
-        commit = _get_git_commit(self.repo_root)
-        set_manifest(self.conn, "repo_root", str(self.repo_root))
-        set_manifest(self.conn, "last_commit", commit)
-        set_manifest(self.conn, "schema_version", _SCHEMA_VERSION)
-        set_manifest(self.conn, "last_rebuild_s", stats.duration_s)
-        set_manifest(self.conn, "symbols_count", stats.symbols_indexed)
-        self.conn.commit()
-
-        logger.info(
-            "Code-map rebuild complete: %d files, %d symbols in %.2fs",
-            stats.files_processed,
-            stats.symbols_indexed,
-            stats.duration_s,
+    for sym in parsed.symbols:
+        slice_bytes = b"\n".join(data.splitlines()[sym.start_line - 1 : sym.end_line])
+        sym_hash = _hash_bytes(slice_bytes)
+        cur.execute(
+            "INSERT INTO symbols(path, kind, name, qualified, sig, docstring, "
+            "start_line, end_line, calls_out, hash) "
+            "VALUES(?,?,?,?,?,?,?,?,?,?)",
+            (
+                rel,
+                sym.kind,
+                sym.name,
+                sym.qualified,
+                sym.sig,
+                sym.docstring,
+                sym.start_line,
+                sym.end_line,
+                json.dumps(sym.calls_out),
+                sym_hash,
+            ),
         )
-        return stats
+        stats.symbols_inserted += 1
 
-    # ── Incremental update ──────────────────────────────────────────────────────
-
-    def update_file(self, path: Path) -> int:
-        """Re-index a single file (add/update/delete) incrementally.
-
-        Args:
-            path: Absolute or repo-relative path to the changed file.
-
-        Returns:
-            Number of symbols indexed (0 if file deleted or unsupported).
-        """
-        abs_path = path if path.is_absolute() else (self.repo_root / path)
-        rel_str = abs_path.relative_to(self.repo_root).as_posix()
-
-        delete_path(self.conn, rel_str)
-
-        if not abs_path.exists():
-            self.conn.commit()
-            logger.debug("Removed index entries for deleted file: %s", rel_str)
-            return 0
-
-        rows = parse_file(abs_path, self.repo_root)
-        if rows:
-            upsert_symbols(self.conn, rows)
-
-        self.conn.commit()
-        logger.debug("Updated index for %s: %d symbols", rel_str, len(rows))
-        return len(rows)
-
-    # ── Manifest access ─────────────────────────────────────────────────────────
-
-    def get_manifest_value(self, key: str) -> object:
-        """Read a value from the index manifest."""
-        return get_manifest(self.conn, key)
+    stats.files_parsed += 1
 
 
-# ── Module-level convenience function ─────────────────────────────────────────
+def rebuild(
+    repo_root: str | os.PathLike[str],
+    *,
+    since: str | None = None,
+) -> RebuildStats:
+    """(Re)index the codebase at ``repo_root``.
+
+    If ``since`` is provided, only files reported by ``git diff --name-only
+    <since>..HEAD`` (plus their untracked siblings) are re-parsed. Files
+    whose blake3 hash hasn't changed are skipped regardless.
+    """
+    start = time.perf_counter()
+    repo = Path(repo_root).resolve()
+    stats = RebuildStats()
+    conn = db_mod.open_db(repo)
+    try:
+        if since:
+            changed = _git_changed_files(repo, since)
+            if not changed:
+                # Fall back to full rebuild if git is unavailable.
+                logger.info("codemap: no changes from git diff; running full rebuild")
+                iterator = _walk(repo)
+            else:
+                pairs = []
+                for rel in changed:
+                    abs_p = repo / rel
+                    if not abs_p.exists():
+                        # File deleted — remove from index.
+                        deleted = (
+                            conn.execute(
+                                "DELETE FROM symbols WHERE path = ?",
+                                (rel,),
+                            ).rowcount
+                            or 0
+                        )
+                        conn.execute("DELETE FROM files WHERE path = ?", (rel,))
+                        stats.symbols_deleted += deleted
+                        continue
+                    if parsers_mod.language_for(abs_p) is None:
+                        continue
+                    pairs.append((abs_p, rel))
+                iterator = iter(pairs)
+        else:
+            iterator = _walk(repo)
+
+        for abs_p, rel in iterator:
+            try:
+                _process_file(abs_p, rel, repo, conn, stats)
+            except Exception as exc:  # pragma: no cover - defensive
+                logger.warning("codemap: failed to index %s: %s", rel, exc)
+                stats.errors.append(f"{rel}: {exc}")
+
+        # Refresh manifest.
+        manifest = {
+            "repo_root": str(repo),
+            "schema_version": db_mod.SCHEMA_VERSION,
+            "last_indexed": time.time(),
+            "last_commit": _current_commit(repo),
+            "files": stats.files_parsed,
+            "symbols": stats.symbols_inserted,
+        }
+        db_mod.manifest_path(repo).write_text(
+            json.dumps(manifest, indent=2), encoding="utf-8"
+        )
+
+        conn.commit()
+    finally:
+        conn.close()
+
+    stats.elapsed_s = time.perf_counter() - start
+    return stats
 
 
-def rebuild(repo_root: Path | None = None) -> RebuildStats:
-    """Rebuild the code-map index for *repo_root* (defaults to CWD)."""
-    root = (repo_root or Path(".")).resolve()
-    with CodeMapIndex(root) as idx:
-        return idx.rebuild()
+__all__ = ["RebuildStats", "rebuild"]

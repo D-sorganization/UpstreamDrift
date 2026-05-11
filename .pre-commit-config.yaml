@@ -74,7 +74,7 @@ repos:
         entry: "^\\s*print\\("
         language: pygrep
         files: ^src/
-        exclude: ^(src/.*/__main__\.py|tests/|\.github/)
+        exclude: ^(src/.*/__main__\.py|tests/|\.github/|src/shared/python/codemap/(cli|watcher|mcp_server)\.py$)
 
   # -------------------------------------------------------------------------
   # Stage 3: Config File Formatting - ALWAYS RUNS

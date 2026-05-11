@@ -1,159 +1,152 @@
-"""CLI entry points for the code-map indexer.
+"""``codemap`` command-line interface.
 
-Usage
------
-    python -m shared.python.codemap rebuild [--repo <path>]
-    python -m shared.python.codemap search <query> [--kind <kind>] [--limit N]
-    python -m shared.python.codemap who-calls <qualified_name>
-    python -m shared.python.codemap export --jsonl [--output <file>]
+Subcommands:
+
+    codemap rebuild [--repo PATH] [--since REV]
+    codemap search QUERY [--kind KIND] [-k N]
+    codemap who-calls QUALIFIED
+    codemap export [--jsonl PATH]
+    codemap info
 """
 
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import logging
 import sys
-from dataclasses import asdict
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
-
-
-def _out(msg: str) -> None:
-    """Write a message to stdout (CLI output — not application logging)."""
-    sys.stdout.write(msg + "\n")
-    sys.stdout.flush()
-
-
-def _err(msg: str) -> None:
-    """Write a message to stderr (CLI error output)."""
-    sys.stderr.write(msg + "\n")
-    sys.stderr.flush()
+from . import api as api_mod
+from . import db as db_mod
+from . import indexer as indexer_mod
 
 
 def _cmd_rebuild(args: argparse.Namespace) -> int:
-    from .indexer import rebuild
-
-    repo = Path(args.repo).resolve() if args.repo else Path.cwd()
-    _out(f"Rebuilding code-map index for: {repo}")
-    stats = rebuild(repo)
-    _out(
-        f"\u2713 {stats.files_processed} files, {stats.symbols_indexed} symbols "
-        f"in {stats.duration_s:.2f}s"
+    stats = indexer_mod.rebuild(args.repo, since=args.since)
+    print(
+        f"indexed {stats.files_parsed} files "
+        f"({stats.files_skipped_unchanged} unchanged), "
+        f"{stats.symbols_inserted} symbols in {stats.elapsed_s:.2f}s"
     )
     if stats.errors:
-        _err(f"  {stats.errors} files had errors (see logs)")
+        print(
+            f"  {len(stats.errors)} errors (first: {stats.errors[0]})", file=sys.stderr
+        )
     return 0
 
 
 def _cmd_search(args: argparse.Namespace) -> int:
-    from .api import search
-
-    db = Path(args.db) if args.db else None
-    results = search(args.query, limit=args.limit, kind=args.kind, db_path=db)
-    if not results:
-        _out("No results found.")
-        return 1
-    for r in results:
-        _out(f"  [{r.kind}] {r.qualified_name}  {r.path}:{r.line_start}")
-        if r.signature:
-            _out(f"           {r.signature}")
+    hits = api_mod.search_code(
+        args.query, k=args.k, kind=args.kind, repo_root=args.repo
+    )
+    if not hits:
+        print("(no matches)")
+        return 0
+    for h in hits:
+        s = h.symbol
+        print(f"[{h.score:7.2f}] {s.kind:8s} {s.qualified}")
+        print(f"           {s.path}:{s.start_line}-{s.end_line}  {s.sig}")
     return 0
 
 
 def _cmd_who_calls(args: argparse.Namespace) -> int:
-    from .api import who_calls
-
-    db = Path(args.db) if args.db else None
-    results = who_calls(args.name, limit=args.limit, db_path=db)
-    if not results:
-        _out(f"No callers found for: {args.name}")
-        return 1
-    for r in results:
-        _out(f"  {r.qualified_name}  {r.path}:{r.line_start}")
+    callers = api_mod.who_calls(args.qualified, repo_root=args.repo)
+    if not callers:
+        print("(no callers found)")
+        return 0
+    for c in callers:
+        print(f"{c.kind:8s} {c.qualified}  {c.path}:{c.start_line}")
     return 0
 
 
 def _cmd_export(args: argparse.Namespace) -> int:
-    from .db import open_db
-
-    db_path = Path(args.db) if args.db else Path(".codemap/index.db")
-    if not db_path.exists():
-        _err(f"Index not found at {db_path} \u2014 run 'rebuild' first.")
-        return 1
-
-    conn = open_db(db_path)
-    rows = conn.execute(
-        "SELECT kind,qualified_name,path,line_start,line_end,"
-        "signature,docstring,imports,calls_out,blake3_hash FROM symbols"
-    ).fetchall()
-    conn.close()
-
-    from .db import SymbolRow
-    import gzip
-
-    if args.jsonl and not args.output:
-        exports_dir = Path(".codemap/exports")
-        exports_dir.mkdir(parents=True, exist_ok=True)
-        out_path = exports_dir / "code_map.jsonl.gz"
-        with gzip.open(out_path, "wt", encoding="utf-8") as out_gz:
+    repo = Path(args.repo) if args.repo else api_mod.discover_repo_root()
+    conn = db_mod.open_db(repo)
+    out_path = (
+        Path(args.jsonl)
+        if args.jsonl
+        else repo / ".codemap" / "exports" / "code_map.jsonl.gz"
+    )
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    open_fn = gzip.open if out_path.suffix == ".gz" else open
+    n = 0
+    try:
+        rows = conn.execute("SELECT * FROM symbols")
+        with open_fn(out_path, "wt", encoding="utf-8") as fh:  # type: ignore[arg-type]
             for r in rows:
-                out_gz.write(json.dumps(asdict(SymbolRow(*r))) + "\n")
-        _err(f"Exported {len(rows)} symbols to {out_path}.")
-    else:
-        out = open(args.output, "w", encoding="utf-8") if args.output else sys.stdout  # noqa: SIM115
-        try:
-            for r in rows:
-                out.write(json.dumps(asdict(SymbolRow(*r))) + "\n")
-        finally:
-            if args.output:
-                out.close()
-        _err(f"Exported {len(rows)} symbols.")
+                rec = {k: r[k] for k in r.keys()}
+                fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+                n += 1
+    finally:
+        conn.close()
+    print(f"exported {n} symbols -> {out_path}")
+    return 0
+
+
+def _cmd_info(args: argparse.Namespace) -> int:
+    stats = api_mod.repo_summary(repo_root=args.repo)
+    print(f"repo:       {stats.repo_root}")
+    print(f"files:      {stats.files}")
+    print(f"symbols:    {stats.symbols}")
+    print(f"db size:    {stats.db_size_bytes / 1024:.1f} KiB")
+    print(f"last cmt:   {stats.last_commit or '(unknown)'}")
+    print("languages:")
+    for lang, n in sorted(stats.languages.items(), key=lambda kv: -kv[1]):
+        print(f"  {lang:10s} {n}")
     return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="codemap",
-        description="Code-map indexer: tree-sitter + SQLite FTS5 symbol index",
+    p = argparse.ArgumentParser(prog="codemap", description="Repo-aware code map.")
+    p.add_argument("--repo", default=None, help="Repo root (default: auto-discover).")
+    p.add_argument("-v", "--verbose", action="store_true", help="Verbose logging.")
+    sub = p.add_subparsers(dest="cmd", required=True)
+
+    rb = sub.add_parser("rebuild", help="(Re)build the index.")
+    rb.add_argument(
+        "--since", default=None, help="Only re-parse files changed since this git ref."
     )
-    parser.add_argument("--db", help="Override path to index.db", default=None)
-    sub = parser.add_subparsers(dest="command", required=True)
+    rb.set_defaults(func=_cmd_rebuild)
 
-    # rebuild
-    p_rebuild = sub.add_parser("rebuild", help="Cold rebuild the index")
-    p_rebuild.add_argument("--repo", help="Repo root (default: cwd)", default=None)
-    p_rebuild.set_defaults(func=_cmd_rebuild)
-
-    # search
-    p_search = sub.add_parser("search", help="Full-text search the index")
-    p_search.add_argument("query", help="FTS5 query string")
-    p_search.add_argument("--kind", help="Filter by symbol kind", default=None)
-    p_search.add_argument("--limit", type=int, default=20)
-    p_search.set_defaults(func=_cmd_search)
-
-    # who-calls
-    p_who = sub.add_parser("who-calls", help="Find callers of a symbol")
-    p_who.add_argument("name", help="Qualified name of the callee")
-    p_who.add_argument("--limit", type=int, default=20)
-    p_who.set_defaults(func=_cmd_who_calls)
-
-    # export
-    p_export = sub.add_parser("export", help="Export index as JSONL")
-    p_export.add_argument("--jsonl", action="store_true", help="Output as JSONL")
-    p_export.add_argument(
-        "--output", help="Output file (default: stdout)", default=None
+    sc = sub.add_parser("search", help="BM25 search across the symbol index.")
+    sc.add_argument("query", nargs="+", help="Search terms.")
+    sc.add_argument("-k", type=int, default=20, help="Max hits to return.")
+    sc.add_argument(
+        "--kind", default=None, help="Filter by kind (function, class, method, ...)."
     )
-    p_export.set_defaults(func=_cmd_export)
+    sc.set_defaults(
+        func=lambda a: _cmd_search(
+            argparse.Namespace(**{**vars(a), "query": " ".join(a.query)})
+        )
+    )
 
-    return parser
+    wc = sub.add_parser("who-calls", help="Find callers of a qualified symbol.")
+    wc.add_argument("qualified", help="Qualified symbol name (e.g. Foo.bar).")
+    wc.set_defaults(func=_cmd_who_calls)
+
+    ex = sub.add_parser("export", help="Export the index as JSONL.")
+    ex.add_argument(
+        "--jsonl",
+        default=None,
+        help="Output path (default: .codemap/exports/code_map.jsonl.gz).",
+    )
+    ex.set_defaults(func=_cmd_export)
+
+    info = sub.add_parser("info", help="Show repo index stats.")
+    info.set_defaults(func=_cmd_info)
+
+    return p
 
 
 def main(argv: list[str] | None = None) -> int:
-    logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(message)s")
     parser = build_parser()
     args = parser.parse_args(argv)
+    logging.basicConfig(
+        level=logging.DEBUG if getattr(args, "verbose", False) else logging.INFO,
+        format="%(levelname)s %(name)s: %(message)s",
+    )
     return args.func(args)
 
 

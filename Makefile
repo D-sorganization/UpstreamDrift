@@ -8,7 +8,7 @@
 #   make test     - Run tests
 #   make clean    - Clean build artifacts
 
-.PHONY: help lint format test test-unit test-int smoke clean install check all docs sync-deps sbom
+.PHONY: help lint format test test-unit test-int smoke clean install check all docs sync-deps sbom codemap codemap-watch codemap-mcp
 
 # Default target
 help:
@@ -26,6 +26,9 @@ help:
 	@echo "  make docs      - Build documentation"
 	@echo "  make sbom      - Generate core, extended, and full SBOMs"
 	@echo "  make sync-deps - Regenerate Python lockfiles and environment.yml"
+	@echo "  make codemap   - One-shot rebuild of .codemap/index.db for chat + MCP"
+	@echo "  make codemap-watch - Run the live codemap watcher daemon (foreground)"
+	@echo "  make codemap-mcp   - Run the codemap MCP server (stdio, for debugging)"
 	@echo "  make all       - Install, format, lint, test"
 	@echo ""
 
@@ -108,6 +111,37 @@ sbom:
 	bash scripts/security/generate_sbom.sh core
 	bash scripts/security/generate_sbom.sh extended
 	bash scripts/security/generate_sbom.sh full
+
+# ── Code-map (chat / MCP) ─────────────────────────────────────────────────────
+# One-shot rebuild of the local .codemap/index.db used by the in-app chat and
+# external MCP agents. See docs/codemap-integration.md.
+codemap:
+	@echo "Rebuilding .codemap/index.db ..."
+	@if command -v codemap >/dev/null 2>&1; then \
+		codemap rebuild; \
+	else \
+		python3 -m shared.python.codemap.cli rebuild || \
+			python3 -m src.shared.python.codemap.cli rebuild; \
+	fi
+	@echo "Code-map rebuild complete."
+
+# Start the file-watcher daemon that keeps the index live during development.
+# Run as: `make codemap-watch &` so it backgrounds in your dev shell.
+codemap-watch:
+	@echo "Starting codemap watcher (Ctrl-C to stop) ..."
+	@if command -v codemap-watch >/dev/null 2>&1; then \
+		codemap-watch; \
+	else \
+		python3 -m shared.python.codemap.cli watch || \
+			python3 -m src.shared.python.codemap.cli watch; \
+	fi
+
+# Launch the MCP server so external CLI agents (Claude Code, Codex) can query
+# the same index. Normally started by .mcp.json — only invoke manually for
+# debugging.
+codemap-mcp:
+	@echo "Starting codemap MCP server (stdio) ..."
+	@CODEMAP_REPO_ROOT=$$(pwd) codemap-mcp
 
 # Clean build artifacts
 clean:

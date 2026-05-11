@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/specification/main/schema/2024-11-05/schema.json",
+  "_comment": "MCP servers for this repo. Claude Code auto-discovers this file when launched from anywhere inside the repo tree. For Codex (~/.codex/config.toml) see docs/codemap/integration.md.",
+  "mcpServers": {
+    "codemap": {
+      "command": "codemap-mcp",
+      "args": [],
+      "env": {
+        "CODEMAP_REPO_ROOT": "${workspaceFolder}"
+      }
+    }
+  }
+}

@@ -30,16 +30,16 @@
 
 ## 1. Identity
 
-| Field                   | Value                                                                                                                                                            |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Repository Name**     | `UpstreamDrift`                                                                                                                                                  |
-| **GitHub URL**          | `https://github.com/D-sorganization/UpstreamDrift`                                                                                                               |
-| **Owner**               | D-sorganization                                                                                                                                                  |
-| **Primary Language(s)** | Python 3.10+, Rust, TypeScript                                                                                                                                   |
-| **License**             | MIT                                                                                                                                                              |
-| **Current Version**     | 2.1.0                                                                                                                                                            |
-| **Spec Version**        | 1.0.150                                                                                                                                                          |
-| **Last Spec Update**    | 2026-05-10 (fix/issue-5106-mujoco-qpos-layout - mapped MuJoCo live-kinematics poses through model qpos addresses instead of prefix truncation)                |
+| Field                   | Value                                                                                                                                                                |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Repository Name**     | `UpstreamDrift`                                                                                                                                                      |
+| **GitHub URL**          | `https://github.com/D-sorganization/UpstreamDrift`                                                                                                                   |
+| **Owner**               | D-sorganization                                                                                                                                                      |
+| **Primary Language(s)** | Python 3.10+, Rust, TypeScript                                                                                                                                       |
+| **License**             | MIT                                                                                                                                                                  |
+| **Current Version**     | 2.1.0                                                                                                                                                                |
+| **Spec Version**        | 1.0.151                                                                                                                                                              |
+| **Last Spec Update**    | 2026-05-11 (feat/consolidate-codemap-onto-tools — consolidated `src/shared/python/codemap/` onto the Tools canonical implementation; renamed mcp.py → mcp_server.py) |
 
 ## 2. Purpose & Mission
 
@@ -676,4 +676,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-10 | 1.0.148 | Added launcher accessibility coverage for sidebar tool buttons with visible labels and accessible descriptions, strong keyboard focus on sidebar and zoom controls, zoom slider range description, and keyboard activation/selection support on draggable model cards. |
 | 2026-05-10 | 1.0.149 | Corrected the launcher zoom slider accessible description helper to derive its percentage range from `TILE_SCALE_MIN` and `TILE_SCALE_MAX`, keeping screen-reader guidance aligned with the actual slider bounds after future constant changes. |
 | 2026-05-10 | 1.0.150 | Fixed MuJoCo live-kinematics pose application to honor model `jnt_qposadr` / free-joint addresses and added regression coverage for fixed-base plus reordered free-joint layouts. |
+| 2026-05-11 | 1.0.151 | Consolidated `src/shared/python/codemap/` onto the Tools canonical 9-module implementation (byte-identical copy of `__init__.py`, `api.py`, `cli.py`, `db.py`, `indexer.py`, `parsers.py`, `watcher.py` plus 6 new per-language extractors and embeddings stub); renamed `mcp.py` → `mcp_server.py` so the `codemap-mcp` console-script entry point resolves; updated the chat-tool adapter to use the canonical 6-function API; replaced 30 duplicate parser/db/indexer unit tests with 20 UD-specific chat-wiring + smoke + perf-budget integration tests. (PR #5207, closes #5206) |
 ````
