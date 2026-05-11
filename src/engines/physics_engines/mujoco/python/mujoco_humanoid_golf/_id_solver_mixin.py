@@ -333,6 +333,8 @@ class _InverseDynamicsSolverMixin:
 
         # Compute Jacobian using pre-allocated arrays and detected API
         if self._use_flat_jacobian:
+            assert self._jacp_flat is not None
+            assert self._jacr_flat is not None
             mujoco.mj_jacBody(
                 self.model,
                 self.data,
@@ -342,6 +344,8 @@ class _InverseDynamicsSolverMixin:
             )
             jacp = self._jacp_flat.reshape(3, self.model.nv)
         else:
+            assert self._jacp is not None
+            assert self._jacr is not None
             mujoco.mj_jacBody(self.model, self.data, self._jacp, self._jacr, body_id)
             jacp = self._jacp
 

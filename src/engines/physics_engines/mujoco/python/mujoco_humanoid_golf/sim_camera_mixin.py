@@ -235,6 +235,24 @@ class SimCameraMixin:
             self.camera.lookat[:] = [0, 0, 1]
             self._render_once()
 
+    def get_camera_azimuth(self: Any) -> float:
+        """Get the camera azimuth angle in degrees."""
+        return float(self.camera.azimuth) if self.camera else 0.0
+
+    def get_camera_elevation(self: Any) -> float:
+        """Get the camera elevation angle in degrees."""
+        return float(self.camera.elevation) if self.camera else 0.0
+
+    def get_camera_distance(self: Any) -> float:
+        """Get the camera orbit distance in meters."""
+        return float(self.camera.distance) if self.camera else 0.0
+
+    def get_camera_lookat(self: Any) -> tuple[float, float, float]:
+        """Get the camera look-at target position."""
+        if self.camera:
+            return (float(self.camera.lookat[0]), float(self.camera.lookat[1]), float(self.camera.lookat[2]))
+        return (0.0, 0.0, 0.0)
+
     def show_context_menu(self: Any, global_pos: QtCore.QPoint, body_id: int) -> None:
         """Display a right-click context menu for a selected body."""
         if not (global_pos is not None):

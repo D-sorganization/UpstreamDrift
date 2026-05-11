@@ -484,6 +484,55 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         mujoco.mj_forward(self.model, self.data)
         self._render_once()
 
+    def get_num_bodies(self) -> int:
+        """Return the number of bodies in the model."""
+        return int(self.model.nbody) if self.model else 0
+
+    def get_body_name(self, body_id: int) -> str:
+        """Return the name of a body given its ID."""
+        if self.model is None or body_id < 0 or body_id >= self.model.nbody:
+            return ""
+        name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, body_id)
+        return name or ""
+
+    def get_num_actuators(self) -> int:
+        """Return the number of actuators in the model."""
+        return int(self.model.nu) if self.model else 0
+
+    def get_actuator_name(self, actuator_id: int) -> str:
+        """Return the name of an actuator given its ID."""
+        if self.model is None or actuator_id < 0 or actuator_id >= self.model.nu:
+            return ""
+        name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, actuator_id)
+        return name or ""
+
+    def get_num_joints(self) -> int:
+        """Return the number of joints in the model."""
+        return int(self.model.njnt) if self.model else 0
+
+    def get_joint_name(self, joint_id: int) -> str:
+        """Return the name of a joint given its ID."""
+        if self.model is None or joint_id < 0 or joint_id >= self.model.njnt:
+            return ""
+        name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, joint_id)
+        return name or ""
+
+    def get_state(self) -> dict[str, Any]:
+        """Return the current simulation state."""
+        return self.engine.get_state() if self.engine else {}
+
+    def set_state_and_forward(self, state: dict[str, Any]) -> None:
+        """Set the simulation state and run forward dynamics."""
+        if self.engine:
+            self.engine.set_state(state)
+            if self.model and self.data:
+                mujoco.mj_forward(self.model, self.data)
+            self._render_once()
+
+    def get_time(self) -> float:
+        """Return the current simulation time."""
+        return float(self.data.time) if self.data else 0.0
+
     # -------- Control interface --------
 
     def set_joint_torque(self, index: int, torque: float) -> None:
