@@ -218,10 +218,10 @@ class MainWidget(QtWidgets.QWidget):
 
     def create_menu_bar(self, parent: QtWidgets.QMainWindow) -> QtGui.QMenuBar:
         """Create and return a menu bar for the given parent window.
-        
+
         Args:
             parent: The QMainWindow that will host the menu bar.
-            
+
         Returns:
             The created QMenuBar with all Pose Studio menus.
         """

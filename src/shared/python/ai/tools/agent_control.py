@@ -110,16 +110,29 @@ class AgentController:
                 error=f"Invalid engine: {engine_name}. Valid: {valid_engines}",
             )
 
-        if engine_name in self._running_engines and self._running_engines[engine_name].running:
+        if (
+            engine_name in self._running_engines
+            and self._running_engines[engine_name].running
+        ):
             return AgentActionResult(
                 success=True,
                 message=f"Engine '{engine_name}' is already running",
             )
 
         # Launch engine via launcher
-        launcher_script = self._repo_root / "src" / "launchers" / f"{engine_name}_unified_launcher.py"
+        launcher_script = (
+            self._repo_root / "src" / "launchers" / f"{engine_name}_unified_launcher.py"
+        )
         if not launcher_script.exists():
-            launcher_script = self._repo_root / "src" / "engines" / "physics_engines" / engine_name / "python" / f"{engine_name}_launcher.py"
+            launcher_script = (
+                self._repo_root
+                / "src"
+                / "engines"
+                / "physics_engines"
+                / engine_name
+                / "python"
+                / f"{engine_name}_launcher.py"
+            )
 
         if not launcher_script.exists():
             return AgentActionResult(
@@ -198,7 +211,9 @@ class AgentController:
         """
         return self._running_engines.copy()
 
-    def configure_engine(self, engine_name: str, config: dict[str, Any]) -> AgentActionResult:
+    def configure_engine(
+        self, engine_name: str, config: dict[str, Any]
+    ) -> AgentActionResult:
         """Configure engine settings.
 
         Args:
@@ -222,7 +237,9 @@ class AgentController:
     # Model Management
     # =========================================================================
 
-    def load_model(self, model_name: str, engine: str | None = None) -> AgentActionResult:
+    def load_model(
+        self, model_name: str, engine: str | None = None
+    ) -> AgentActionResult:
         """Load a model into the specified engine.
 
         Args:
@@ -258,7 +275,11 @@ class AgentController:
         return AgentActionResult(
             success=True,
             message=f"Loaded model '{model_name}' into {target_engine}",
-            data={"model": model_name, "engine": target_engine, "path": str(model_path)},
+            data={
+                "model": model_name,
+                "engine": target_engine,
+                "path": str(model_path),
+            },
         )
 
     def unload_model(self, model_name: str) -> AgentActionResult:
@@ -332,8 +353,19 @@ class AgentController:
             Path to model file or None if not found.
         """
         search_dirs = [
-            self._repo_root / "src" / "engines" / "physics_engines" / "mujoco" / "python" / "models",
-            self._repo_root / "src" / "engines" / "physics_engines" / "drake" / "models",
+            self._repo_root
+            / "src"
+            / "engines"
+            / "physics_engines"
+            / "mujoco"
+            / "python"
+            / "models",
+            self._repo_root
+            / "src"
+            / "engines"
+            / "physics_engines"
+            / "drake"
+            / "models",
             self._repo_root / "assets" / "models",
             self._repo_root / "models",
         ]
@@ -354,7 +386,9 @@ class AgentController:
     # File Operations
     # =========================================================================
 
-    def import_file(self, file_path: str, file_type: str | None = None) -> AgentActionResult:
+    def import_file(
+        self, file_path: str, file_type: str | None = None
+    ) -> AgentActionResult:
         """Import a file (URDF, MJCF, C3D, etc.).
 
         Args:
@@ -390,7 +424,9 @@ class AgentController:
             data={"path": str(path), "type": file_type},
         )
 
-    def export_model(self, model_name: str, output_path: str, format: str = "urdf") -> AgentActionResult:
+    def export_model(
+        self, model_name: str, output_path: str, format: str = "urdf"
+    ) -> AgentActionResult:
         """Export a model to a file.
 
         Args:
@@ -417,7 +453,9 @@ class AgentController:
     # Simulation Control
     # =========================================================================
 
-    def start_simulation(self, model_name: str, duration: float = 10.0) -> AgentActionResult:
+    def start_simulation(
+        self, model_name: str, duration: float = 10.0
+    ) -> AgentActionResult:
         """Start a simulation.
 
         Args:
@@ -530,7 +568,10 @@ class AgentController:
         import psutil
 
         status = {
-            "engines": {name: {"running": s.running} for name, s in self._running_engines.items()},
+            "engines": {
+                name: {"running": s.running}
+                for name, s in self._running_engines.items()
+            },
             "loaded_models": self._loaded_models,
             "memory_percent": psutil.virtual_memory().percent,
             "cpu_percent": psutil.cpu_percent(),
@@ -571,7 +612,11 @@ Available Commands:
             "models": "Use load_model() to load models into the active engine",
         }
 
-        topic_content = help_content.get(topic, help_content["general"]) if topic else help_content["general"]
+        topic_content = (
+            help_content.get(topic, help_content["general"])
+            if topic
+            else help_content["general"]
+        )
 
         return AgentActionResult(
             success=True,
@@ -594,7 +639,12 @@ def create_agent_tools_for_registry() -> list[dict[str, Any]]:
             "description": "Start a physics engine (mujoco, drake, pinocchio, opensim, myosim)",
             "handler": controller.start_engine,
             "parameters": [
-                {"name": "engine_name", "type": "string", "required": True, "description": "Name of engine to start"}
+                {
+                    "name": "engine_name",
+                    "type": "string",
+                    "required": True,
+                    "description": "Name of engine to start",
+                }
             ],
         },
         {
@@ -602,7 +652,12 @@ def create_agent_tools_for_registry() -> list[dict[str, Any]]:
             "description": "Stop a running physics engine",
             "handler": controller.stop_engine,
             "parameters": [
-                {"name": "engine_name", "type": "string", "required": True, "description": "Name of engine to stop"}
+                {
+                    "name": "engine_name",
+                    "type": "string",
+                    "required": True,
+                    "description": "Name of engine to stop",
+                }
             ],
         },
         {
@@ -610,8 +665,18 @@ def create_agent_tools_for_registry() -> list[dict[str, Any]]:
             "description": "Load a model into the physics engine",
             "handler": controller.load_model,
             "parameters": [
-                {"name": "model_name", "type": "string", "required": True, "description": "Name of model to load"},
-                {"name": "engine", "type": "string", "required": False, "description": "Engine to load into (optional)"},
+                {
+                    "name": "model_name",
+                    "type": "string",
+                    "required": True,
+                    "description": "Name of model to load",
+                },
+                {
+                    "name": "engine",
+                    "type": "string",
+                    "required": False,
+                    "description": "Engine to load into (optional)",
+                },
             ],
         },
         {
@@ -619,7 +684,12 @@ def create_agent_tools_for_registry() -> list[dict[str, Any]]:
             "description": "Unload a model from the physics engine",
             "handler": controller.unload_model,
             "parameters": [
-                {"name": "model_name", "type": "string", "required": True, "description": "Name of model to unload"}
+                {
+                    "name": "model_name",
+                    "type": "string",
+                    "required": True,
+                    "description": "Name of model to unload",
+                }
             ],
         },
         {
@@ -627,8 +697,19 @@ def create_agent_tools_for_registry() -> list[dict[str, Any]]:
             "description": "Start a physics simulation",
             "handler": controller.start_simulation,
             "parameters": [
-                {"name": "model_name", "type": "string", "required": True, "description": "Model to simulate"},
-                {"name": "duration", "type": "number", "required": False, "description": "Duration in seconds", "default": 10.0},
+                {
+                    "name": "model_name",
+                    "type": "string",
+                    "required": True,
+                    "description": "Model to simulate",
+                },
+                {
+                    "name": "duration",
+                    "type": "number",
+                    "required": False,
+                    "description": "Duration in seconds",
+                    "default": 10.0,
+                },
             ],
         },
         {
@@ -648,8 +729,18 @@ def create_agent_tools_for_registry() -> list[dict[str, Any]]:
             "description": "Import a file (URDF, MJCF, C3D, etc.)",
             "handler": controller.import_file,
             "parameters": [
-                {"name": "file_path", "type": "string", "required": True, "description": "Path to file to import"},
-                {"name": "file_type", "type": "string", "required": False, "description": "File type (auto-detected if not specified)"},
+                {
+                    "name": "file_path",
+                    "type": "string",
+                    "required": True,
+                    "description": "Path to file to import",
+                },
+                {
+                    "name": "file_type",
+                    "type": "string",
+                    "required": False,
+                    "description": "File type (auto-detected if not specified)",
+                },
             ],
         },
         {
@@ -657,7 +748,12 @@ def create_agent_tools_for_registry() -> list[dict[str, Any]]:
             "description": "Get application settings",
             "handler": controller.get_settings,
             "parameters": [
-                {"name": "category", "type": "string", "required": False, "description": "Settings category (optional)"}
+                {
+                    "name": "category",
+                    "type": "string",
+                    "required": False,
+                    "description": "Settings category (optional)",
+                }
             ],
         },
         {
@@ -665,7 +761,12 @@ def create_agent_tools_for_registry() -> list[dict[str, Any]]:
             "description": "Update application settings",
             "handler": controller.set_settings,
             "parameters": [
-                {"name": "settings", "type": "object", "required": True, "description": "Settings to update"}
+                {
+                    "name": "settings",
+                    "type": "object",
+                    "required": True,
+                    "description": "Settings to update",
+                }
             ],
         },
     ]

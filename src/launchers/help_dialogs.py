@@ -210,7 +210,11 @@ class ContextHelpDock(QDockWidget):
         engine_dirs = {
             "mujoco": REPOS_ROOT / "src" / "engines" / "physics_engines" / "mujoco",
             "drake": REPOS_ROOT / "src" / "engines" / "physics_engines" / "drake",
-            "pinocchio": REPOS_ROOT / "src" / "engines" / "physics_engines" / "pinocchio",
+            "pinocchio": REPOS_ROOT
+            / "src"
+            / "engines"
+            / "physics_engines"
+            / "pinocchio",
             "opensim": REPOS_ROOT / "src" / "engines" / "physics_engines" / "opensim",
             "myosuite": REPOS_ROOT / "src" / "engines" / "physics_engines" / "myosuite",
         }

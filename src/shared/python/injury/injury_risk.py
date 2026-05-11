@@ -232,9 +232,7 @@ class InjuryRiskScorer:
             compression_score + shear_score + x_factor_score
         ) / 3
 
-    def _score_joint_risks(
-        self, joint_results: dict, report: InjuryRiskReport
-    ) -> None:  # noqa: C901
+    def _score_joint_risks(self, joint_results: dict, report: InjuryRiskReport) -> None:  # noqa: C901
         """Score joint-related risk factors."""
         # Hip risks
         if not (joint_results is not None):

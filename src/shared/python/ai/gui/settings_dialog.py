@@ -18,9 +18,9 @@ from __future__ import annotations
 import contextlib
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from PyQt6.QtCore import QSettings, pyqtSignal
+from PyQt6.QtCore import QSettings, pyqtSignal, QTimer
 from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -70,12 +70,15 @@ class AIProvider(Enum):
     OPENAI = auto()  # GPT-4
     ANTHROPIC = auto()  # Claude
     GEMINI = auto()  # Google Gemini
+    CLAUDE_CLI = auto()  # Anthropic's Claude Code CLI
+    CLINE_CLI = auto()  # Cline CLI
+    CODEX_CLI = auto()  # OpenAI's Codex CLI
 
 
 # Provider display info - explicitly typed for mypy
 PROVIDER_INFO: dict[AIProvider, dict[str, str | bool | list[str]]] = {
     AIProvider.OLLAMA: {
-        "name": "Ollama (Local - FREE)",
+        "name": "Ollama",
         "description": "Run AI locally on your computer. No API key needed.",
         "requires_key": False,
         "default_model": "llama3.1:8b",
@@ -117,6 +120,27 @@ PROVIDER_INFO: dict[AIProvider, dict[str, str | bool | list[str]]] = {
         "key_service": "upstream_drift_gemini_key",
         "default_model": "gemini-1.5-pro",
         "models": ["gemini-1.5-pro", "gemini-1.5-flash", "gemini-1.0-pro"],
+    },
+    AIProvider.CLAUDE_CLI: {
+        "name": "Claude CLI (Agent)",
+        "description": "Run commands via Anthropic's Claude Code CLI tool.",
+        "requires_key": False,
+        "default_model": "claude-code",
+        "models": ["claude-code"],
+    },
+    AIProvider.CLINE_CLI: {
+        "name": "Cline CLI (Agent)",
+        "description": "Run tasks locally with the Cline CLI agent.",
+        "requires_key": False,
+        "default_model": "cline",
+        "models": ["cline"],
+    },
+    AIProvider.CODEX_CLI: {
+        "name": "Codex CLI (Agent)",
+        "description": "Use OpenAI's Codex CLI for local development.",
+        "requires_key": False,
+        "default_model": "codex-cli",
+        "models": ["codex-cli"],
     },
 }
 
@@ -454,6 +478,13 @@ class ProviderConfigWidget(QWidget):
             self._status_label.setText(f"✗ Error: {e}")
             self._status_label.setStyleSheet(Styles.COLOR_RED)
 
+    def showEvent(self, event: Any) -> None:
+        """Refresh models automatically when the widget becomes visible."""
+        super().showEvent(event)
+        if getattr(self, "_provider", None) == AIProvider.OLLAMA:
+            # Refresh models on a short delay to not block the UI from rendering
+            QTimer.singleShot(100, self._refresh_ollama_models)
+
     def _refresh_ollama_models(self) -> None:
         """Refresh the list of available Ollama models."""
         self._status_label.setText("Fetching available models...")
@@ -467,7 +498,9 @@ class ProviderConfigWidget(QWidget):
             models = adapter.list_available_models()
 
             if models:
-                self._model_count_label.setText(f"✓ Found {len(models)} model(s): {', '.join(models[:5])}")
+                self._model_count_label.setText(
+                    f"✓ Found {len(models)} model(s): {', '.join(models[:5])}"
+                )
                 if len(models) > 5:
                     self._model_count_label.setText(
                         f"✓ Found {len(models)} model(s): {', '.join(models[:5])}..."
@@ -476,7 +509,9 @@ class ProviderConfigWidget(QWidget):
                 # Emit signal to update parent dialog's model combo
                 self.models_refreshed.emit(models)
             else:
-                self._model_count_label.setText("⚠ No models found. Pull one with: ollama pull llama3.1:8b")
+                self._model_count_label.setText(
+                    "⚠ No models found. Pull one with: ollama pull llama3.1:8b"
+                )
                 self._model_count_label.setStyleSheet(Styles.COLOR_ORANGE)
                 self.models_refreshed.emit([])
 
@@ -668,21 +703,21 @@ class AISettingsDialog(QDialog):
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
-        # Expertise level
-        expertise_group = QGroupBox("Expertise Level")
+        # Verbosity level
+        expertise_group = QGroupBox("Response Verbosity")
         expertise_layout = QVBoxLayout(expertise_group)
 
         self._expertise_combo = QComboBox()
-        self._expertise_combo.addItem("Beginner - Clear explanations, no jargon", 1)
-        self._expertise_combo.addItem("Intermediate - Some technical terms", 2)
-        self._expertise_combo.addItem("Advanced - Full technical depth", 3)
-        self._expertise_combo.addItem("Expert - Research-level precision", 4)
+        self._expertise_combo.addItem("Verbose - Detailed explanations and examples", 1)
+        self._expertise_combo.addItem("Standard - Balanced technical responses", 2)
+        self._expertise_combo.addItem("Brief - Concise, to the point", 3)
+        self._expertise_combo.addItem("Succinct - Code and precise facts only", 4)
         expertise_layout.addWidget(self._expertise_combo)
 
         expertise_desc = QLabel(
-            "This setting adjusts how the AI explains concepts. "
-            "Beginners get analogies and simple language; "
-            "experts get equations and technical details."
+            "This setting adjusts how verbose the AI responds. "
+            "Choose 'Verbose' for extensive details or 'Succinct' "
+            "for minimal, code-focused answers."
         )
         expertise_desc.setWordWrap(True)
         expertise_layout.addWidget(expertise_desc)

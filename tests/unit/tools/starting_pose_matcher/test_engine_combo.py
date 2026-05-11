@@ -41,6 +41,36 @@ class _StubProvider:
         raise AssertionError("fit_swing must not run in slice 1 tests")
 
 
+class FakeComboBox:
+    def __init__(self):
+        self.items = []
+        self._current_text = ""
+
+    def blockSignals(self, b):
+        pass
+
+    def clear(self):
+        self.items.clear()
+        self._current_text = ""
+
+    def addItems(self, items):
+        self.items.extend(items)
+        if items and not self._current_text:
+            self._current_text = items[0]
+
+    def setCurrentText(self, text):
+        self._current_text = text
+
+    def currentText(self):
+        return self._current_text
+
+    def count(self):
+        return len(self.items)
+
+    def itemText(self, i):
+        return self.items[i]
+
+
 class _Harness:
     """Tiny harness exercising the same combo + helpers without spinning
     up the full StartingPoseMatcher window.
@@ -55,7 +85,7 @@ class _Harness:
     selected_engine = gui_mod.MainWidget.selected_engine
 
     def __init__(self) -> None:
-        self.combo_fit_engine = QComboBox()
+        self.combo_fit_engine = FakeComboBox()
 
 
 @pytest.fixture

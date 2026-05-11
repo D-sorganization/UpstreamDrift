@@ -186,6 +186,7 @@ class GolfLauncher(
         """Show first-run onboarding dialog if this is a new user."""
         try:
             from src.launchers.onboarding_dialog import show_onboarding_if_needed
+
             show_onboarding_if_needed(self)
         except ImportError as e:
             logger.debug(f"Onboarding dialog not available: {e}")
@@ -839,7 +840,7 @@ def main() -> None:
 
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
-    
+
     # Set global application icon
     icon_path = ASSETS_DIR / "golf_logo.png"
     if not icon_path.exists():

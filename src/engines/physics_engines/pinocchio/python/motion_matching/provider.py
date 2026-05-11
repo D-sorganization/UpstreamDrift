@@ -97,7 +97,9 @@ class PinocchioFitSwingProvider:
         """
         if isinstance(target, MultiSourceTarget):
             if target.club is None:
-                raise ValueError("PinocchioFitSwingProvider requires target.club to be set")
+                raise ValueError(
+                    "PinocchioFitSwingProvider requires target.club to be set"
+                )
             target = target.club
 
         result = fit_swing_pinocchio(target, opts)

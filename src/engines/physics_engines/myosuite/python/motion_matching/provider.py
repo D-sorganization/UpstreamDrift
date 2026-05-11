@@ -1,7 +1,7 @@
 """MyoSuite motion-matching provider.
 
 First-pass implementation satisfying the canonical discovery interface.
-The actual optimizer over muscle activations is deferred to a Phase 2 
+The actual optimizer over muscle activations is deferred to a Phase 2
 surrogate model. See AUDIT.md.
 """
 
@@ -51,8 +51,10 @@ class MyoSuiteFitSwingProvider:
     def engine_version(self) -> str:
         try:
             import myosuite
+
             return str(getattr(myosuite, "__version__", "unknown"))
         except ImportError:
             return "unknown"
+
 
 register_provider(MyoSuiteFitSwingProvider())

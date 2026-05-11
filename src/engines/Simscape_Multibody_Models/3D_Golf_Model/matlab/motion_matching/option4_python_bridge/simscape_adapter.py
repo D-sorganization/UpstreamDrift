@@ -336,8 +336,9 @@ class SimscapeAdapter:
             raise EngineStartupError("matlab module unavailable") from e
 
         theta_m = matlab.double(theta_np.reshape(-1, 1).tolist())
-        
+
         import os
+
         tmp_file = None
         try:
             if hasattr(target, "club"):  # MultiSourceTarget
@@ -509,7 +510,7 @@ def _body_target_to_json_file(body: BodyTarget) -> str:
     """Serialize a BodyTarget to a temporary body_target_json_v1 file."""
     import json
     import tempfile
-    
+
     events = [
         {"label": ev.label, "frame": int(ev.frame), "time_s": float(ev.time_s)}
         for ev in body.events
@@ -522,7 +523,7 @@ def _body_target_to_json_file(body: BodyTarget) -> str:
         "trial_id": src.trial_id,
         "sha256": src.sha256,
     }
-    
+
     payload = {
         "schema": "body_target_json_v1",
         "time_s": body.time.tolist(),
@@ -533,8 +534,10 @@ def _body_target_to_json_file(body: BodyTarget) -> str:
         "source": source,
         "coordinate_frame": body.coordinate_frame,
     }
-    
-    with tempfile.NamedTemporaryFile(suffix=".json", delete=False, mode="w", encoding="utf-8") as fh:
+
+    with tempfile.NamedTemporaryFile(
+        suffix=".json", delete=False, mode="w", encoding="utf-8"
+    ) as fh:
         json.dump(payload, fh)
         return fh.name
 

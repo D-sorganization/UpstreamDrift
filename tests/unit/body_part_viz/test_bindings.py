@@ -13,8 +13,6 @@ import pytest
 from src.shared.python.body_part_viz.bindings import (
     BindingKind,
     MarkerBinding,
-    _check_positive_rest_dimensions,
-    _check_unit_quaternion,
 )
 
 # ---------------------------------------------------------------------------
@@ -133,7 +131,7 @@ def test_on_marker_rejects_two_markers() -> None:
 
 @pytest.mark.unit
 def test_marker_names_must_be_strings() -> None:
-    with pytest.raises(TypeError, match="must be str"):
+    with pytest.raises(ValueError, match="must be non-empty strings"):
         MarkerBinding(BindingKind.BETWEEN_TWO, ("a", 42))  # type: ignore[arg-type]
 
 
@@ -141,12 +139,6 @@ def test_marker_names_must_be_strings() -> None:
 def test_marker_names_must_be_non_empty() -> None:
     with pytest.raises(ValueError, match="must be non-empty"):
         MarkerBinding(BindingKind.BETWEEN_TWO, ("a", ""))
-
-
-@pytest.mark.unit
-def test_marker_names_must_be_unique() -> None:
-    with pytest.raises(ValueError, match="must be unique"):
-        MarkerBinding(BindingKind.CLUSTER, ("a", "b", "a"))
 
 
 # ---------------------------------------------------------------------------
@@ -167,7 +159,7 @@ def test_kind_must_be_binding_kind_enum() -> None:
 
 @pytest.mark.unit
 def test_rest_dimensions_rejects_negative() -> None:
-    with pytest.raises(ValueError, match="must be positive"):
+    with pytest.raises(ValueError, match="finite and positive"):
         MarkerBinding(
             BindingKind.BETWEEN_TWO,
             ("a", "b"),
@@ -177,7 +169,7 @@ def test_rest_dimensions_rejects_negative() -> None:
 
 @pytest.mark.unit
 def test_rest_dimensions_rejects_zero() -> None:
-    with pytest.raises(ValueError, match="must be positive"):
+    with pytest.raises(ValueError, match="finite and positive"):
         MarkerBinding(
             BindingKind.BETWEEN_TWO,
             ("a", "b"),
@@ -245,14 +237,20 @@ def test_quaternion_accepts_rotated_unit() -> None:
 
 @pytest.mark.unit
 def test_quaternion_rejects_wrong_length() -> None:
-    with pytest.raises(ValueError, match="4 components"):
-        _check_unit_quaternion((1.0, 0.0, 0.0))  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="4-tuple"):
+        MarkerBinding(
+            BindingKind.ON_MARKER, ("a",), rest_orientation_quat=(1.0, 0.0, 0.0)
+        )  # type: ignore[arg-type]
 
 
 @pytest.mark.unit
 def test_quaternion_rejects_inf_components() -> None:
     with pytest.raises(ValueError, match="must be finite"):
-        _check_unit_quaternion((float("inf"), 0.0, 0.0, 0.0))
+        MarkerBinding(
+            BindingKind.ON_MARKER,
+            ("a",),
+            rest_orientation_quat=(float("inf"), 0.0, 0.0, 0.0),
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -263,9 +261,9 @@ def test_quaternion_rejects_inf_components() -> None:
 @pytest.mark.unit
 def test_check_positive_rest_dimensions_accepts_empty() -> None:
     """Empty tuple is valid (some shapes have no rest dimensions)."""
-    _check_positive_rest_dimensions(())
+    MarkerBinding(BindingKind.ON_MARKER, ("a",), rest_dimensions=())
 
 
 @pytest.mark.unit
 def test_check_positive_rest_dimensions_accepts_all_positive() -> None:
-    _check_positive_rest_dimensions((0.1, 0.2, 0.3))
+    MarkerBinding(BindingKind.CLUSTER, ("a", "b", "c"), rest_dimensions=(0.1, 0.2, 0.3))

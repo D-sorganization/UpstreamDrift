@@ -287,14 +287,16 @@ class LauncherDialogsMixin:
         self.layout_edit_mode = checked
         self.layout_manager.set_edit_mode(checked)
         if checked:
-            self.btn_modify_layout.setText("Edit Mode On")
+            self.btn_modify_layout.setText("Layout: Unlocked 🔓")
             self.btn_modify_layout.setStyleSheet(Styles.BTN_LAYOUT_EDIT_ON)
-            self.btn_customize_tiles.setEnabled(True)
+            if hasattr(self, "action_customize_tiles"):
+                self.action_customize_tiles.setEnabled(True)
             self.show_toast("Drag tiles to reorder. Double-click to launch.", "info")
         else:
-            self.btn_modify_layout.setText("Layout Locked")
+            self.btn_modify_layout.setText("Layout: Locked 🔒")
             self.btn_modify_layout.setStyleSheet(Styles.BTN_LAYOUT_LOCKED)
-            self.btn_customize_tiles.setEnabled(False)
+            if hasattr(self, "action_customize_tiles"):
+                self.action_customize_tiles.setEnabled(False)
 
     def _on_docker_mode_changed(self, state: int) -> None:
         """Handle Docker mode toggle change.

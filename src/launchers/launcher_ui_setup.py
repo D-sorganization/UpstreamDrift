@@ -254,12 +254,24 @@ class LauncherUISetupMixin:
         if hasattr(self, "_open_settings"):
             btn_settings.clicked.connect(self._open_settings)
 
+        from src.launchers.launcher_constants import AI_AVAILABLE
+
+        if AI_AVAILABLE:
+            self.btn_ai_sidebar = self._build_sidebar_button(
+                "AI Chat",
+                "chat",
+                checkable=True,
+            )
+            if hasattr(self, "toggle_ai_assistant"):
+                self.btn_ai_sidebar.clicked.connect(self.toggle_ai_assistant)
+
         btn_docs = self._build_sidebar_button(
             "Documentation",
             "help",
+            checkable=True,
         )
-        if hasattr(self, "_show_help_dialog"):
-            btn_docs.clicked.connect(lambda: self._show_help_dialog())
+        if hasattr(self, "_toggle_context_help"):
+            btn_docs.clicked.connect(self._toggle_context_help)
 
         # Setup mutually exclusive active-state routing for navigation
         self.sidebar_group = QButtonGroup(self)
@@ -270,14 +282,16 @@ class LauncherUISetupMixin:
         layout.addWidget(btn_home)
         layout.addWidget(btn_engines)
         layout.addStretch()
-        layout.addWidget(btn_settings)
+        if AI_AVAILABLE:
+            layout.addWidget(self.btn_ai_sidebar)
         layout.addWidget(btn_docs)
+        layout.addWidget(btn_settings)
 
         # Set explicit focus order for keyboard navigation
         sidebar.setFocusProxy(btn_home)
-        btn_home.setNextInFocusChain(btn_engines)
-        btn_engines.setNextInFocusChain(btn_settings)
-        btn_settings.setNextInFocusChain(btn_docs)
+        QWidget.setTabOrder(btn_home, btn_engines)
+        QWidget.setTabOrder(btn_engines, btn_settings)
+        QWidget.setTabOrder(btn_settings, btn_docs)
 
         return sidebar
 
@@ -593,15 +607,23 @@ class LauncherUISetupMixin:
         self.chk_wsl.setChecked(False)
         self.chk_wsl.stateChanged.connect(self._on_wsl_mode_changed)
 
-        # Layout controls
-        self.btn_modify_layout = QPushButton("Layout: Locked")
+        # Layout controls (combined toggle + dropdown)
+        from PyQt6.QtWidgets import QToolButton, QMenu
+
+        self.btn_modify_layout = QToolButton()
+        self.btn_modify_layout.setText("Layout: Locked 🔒")
+        self.btn_modify_layout.setPopupMode(
+            QToolButton.ToolButtonPopupMode.MenuButtonPopup
+        )
         self.btn_modify_layout.setCheckable(True)
         self.btn_modify_layout.setChecked(False)
         self.btn_modify_layout.clicked.connect(self.toggle_layout_mode)
 
-        self.btn_customize_tiles = QPushButton("Edit Tiles")
-        self.btn_customize_tiles.setEnabled(False)
-        self.btn_customize_tiles.clicked.connect(self.open_layout_manager)
+        self.layout_menu = QMenu(self.btn_modify_layout)
+        self.action_customize_tiles = self.layout_menu.addAction("Edit Tiles...")
+        self.action_customize_tiles.setEnabled(False)
+        self.action_customize_tiles.triggered.connect(self.open_layout_manager)
+        self.btn_modify_layout.setMenu(self.layout_menu)
 
         # Surface toggles in the top bar
         top_bar.addWidget(self.chk_live)
@@ -609,7 +631,6 @@ class LauncherUISetupMixin:
         top_bar.addWidget(self.chk_docker)
         top_bar.addWidget(self.chk_wsl)
         top_bar.addWidget(self.btn_modify_layout)
-        top_bar.addWidget(self.btn_customize_tiles)
 
     def _setup_top_bar_action_buttons(self, top_bar: QHBoxLayout) -> None:
         """Add Help, Settings, and AI Assistant buttons to top bar."""
@@ -631,15 +652,7 @@ class LauncherUISetupMixin:
         btn_settings.clicked.connect(self._open_settings)
         top_bar.addWidget(btn_settings)
 
-        # AI Assistant Button
-        if AI_AVAILABLE:
-            self.btn_ai = QPushButton("AI Chat [...]")
-            self.btn_ai.setToolTip("Open AI Assistant for help with analysis")
-            self.btn_ai.setCheckable(True)
-            self.btn_ai.clicked.connect(self.toggle_ai_assistant)
-            self.btn_ai.setProperty("class", "ai-chat")
-            self.btn_ai.style().polish(self.btn_ai)
-            top_bar.addWidget(self.btn_ai)
+        # AI Assistant Button was moved to the left sidebar
 
     def _register_top_bar_tooltips(self) -> None:
         """Register enhanced tooltips for configuration checkboxes."""
@@ -969,8 +982,12 @@ class LauncherUISetupMixin:
             self._sync_chat_session()
         except ImportError as e:
             logger.error(f"Failed to initialize AI panel: {e}")
-            self.btn_ai.setEnabled(False)
-            self.btn_ai.setToolTip(f"AI Assistant unavailable: {e}")
+            if hasattr(self, "btn_ai"):
+                self.btn_ai.setEnabled(False)
+                self.btn_ai.setToolTip(f"AI Assistant unavailable: {e}")
+            if hasattr(self, "btn_ai_sidebar"):
+                self.btn_ai_sidebar.setEnabled(False)
+                self.btn_ai_sidebar.setToolTip(f"AI Assistant unavailable: {e}")
 
     def _sync_chat_session(self) -> None:
         """Sync the launcher's chat session with the shared FastAPI server."""
