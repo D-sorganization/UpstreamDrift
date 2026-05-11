@@ -96,6 +96,28 @@ class TestAngularImpulse:
 
         np.testing.assert_allclose(angular_impulse, 0.0, atol=1e-10)
 
+    def test_dynamic_reference_point_produces_angular_impulse(self) -> None:
+        """Dynamic reference trajectory should produce correct angular impulse."""
+        n = 100
+        timestamps = np.linspace(0, 1, n)
+        forces = np.zeros((n, 3))
+        forces[:, 2] = 100.0  # Vertical force
+
+        # COP at origin
+        cops = np.zeros((n, 3))
+
+        # Reference point moving in X direction at 1 m/s (r_x = -t)
+        ref_trajectory = np.zeros((n, 3))
+        ref_trajectory[:, 0] = timestamps
+
+        angular_impulse = compute_angular_impulse(
+            forces, cops, timestamps, ref_trajectory
+        )
+
+        # Torque = r × F = [-t, 0, 0] × [0, 0, 100] = [0, 100*t, 0]
+        # Angular impulse = int(100*t dt) from 0 to 1 = 100 * (1^2 / 2) = 50.0
+        np.testing.assert_allclose(angular_impulse[1], 50.0, rtol=0.01)
+
 
 class TestCOPComputation:
     """Tests for center of pressure computation."""
@@ -208,6 +230,34 @@ class TestGRFAnalyzer:
         assert summary.peak_vertical_force > 0
         assert summary.cop_trajectory_length > 0
         assert summary.linear_impulse is not None
+
+    def test_analyzer_uses_dynamic_com(self, sample_grf_data: GRFTimeSeries) -> None:
+        """Analyzer should compute moments using dynamic COM if lengths match."""
+        analyzer = GRFAnalyzer()
+        analyzer.add_grf_data(sample_grf_data)
+
+        # Dynamic COM trajectory exactly matching timestamps
+        n = len(sample_grf_data.timestamps)
+        com_traj = np.zeros((n, 3))
+        com_traj[:, 0] = 1.0  # 1m offset in X
+
+        analyzer.set_com_trajectories(com_traj)
+        summary = analyzer.analyze(FootSide.COMBINED)
+
+        # The angular impulse should not be zero
+        assert np.any(summary.angular_impulse_about_golfer_com)
+
+        # Test fallback to static
+        short_com_traj = np.zeros((1, 3))
+        short_com_traj[0, 0] = 1.0
+        analyzer.set_com_trajectories(short_com_traj)
+        summary_fallback = analyzer.analyze(FootSide.COMBINED)
+
+        # The outputs should be identical since the dynamic and fallback offset are the same 1.0 in X
+        np.testing.assert_allclose(
+            summary.angular_impulse_about_golfer_com,
+            summary_fallback.angular_impulse_about_golfer_com,
+        )
 
 
 class TestExtractGRFFromContacts:

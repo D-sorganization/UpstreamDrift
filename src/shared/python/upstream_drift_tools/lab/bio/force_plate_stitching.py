@@ -1,0 +1,97 @@
+"""Force plate data stitching and combination.
+
+Implements combining multiple force plates into a single equivalent global force,
+moment, and center of pressure (COP) trajectory.
+"""
+
+from __future__ import annotations
+
+import numpy as np
+import pandas as pd
+
+from src.shared.python.contracts import require
+
+
+class CombinedForcePlateProcessor:
+    """Processor to merge multiple force plates into a global equivalent."""
+
+    def __init__(self, fz_threshold: float = 10.0) -> None:
+        """Initialize processor.
+
+        Args:
+            fz_threshold: Minimum vertical force [N] to compute a valid COP.
+                Below this threshold, COP defaults to origin to prevent
+                divide-by-zero spikes.
+        """
+        require(fz_threshold >= 0, "Force threshold must be non-negative")
+        self.fz_threshold = fz_threshold
+
+    def process(self, df: pd.DataFrame, ground_height: float = 0.0) -> pd.DataFrame:
+        """Combine multiple force plates.
+
+        Args:
+            df: Wide-format force plate DataFrame (from C3DDataReader).
+                Must contain columns: sample, time, plate, fx, fy, fz, mx, my, mz
+            ground_height: Height of the ground plane [m].
+
+        Returns:
+            A new DataFrame containing combined forces, moments, and COP.
+        """
+        required_cols = {"sample", "time", "fx", "fy", "fz", "mx", "my", "mz"}
+        require(
+            required_cols.issubset(df.columns),
+            f"DataFrame must contain columns: {required_cols}",
+        )
+
+        # If there's no data, return empty with correct columns
+        if df.empty:
+            return pd.DataFrame(
+                columns=[
+                    "sample",
+                    "time",
+                    "fx",
+                    "fy",
+                    "fz",
+                    "mx",
+                    "my",
+                    "mz",
+                    "cop_x",
+                    "cop_y",
+                    "cop_z",
+                ]
+            )
+
+        # Group by sample and time to sum forces and moments across all plates
+        combined = df.groupby(["sample", "time"], as_index=False).agg(
+            {
+                "fx": "sum",
+                "fy": "sum",
+                "fz": "sum",
+                "mx": "sum",
+                "my": "sum",
+                "mz": "sum",
+            }
+        )
+
+        # Vectorized COP computation
+        fz = combined["fz"].to_numpy()
+        mx = combined["mx"].to_numpy()
+        my = combined["my"].to_numpy()
+
+        cop_x = np.zeros_like(fz)
+        cop_y = np.zeros_like(fz)
+        cop_z = np.full_like(fz, ground_height)
+
+        # Apply threshold to prevent divide-by-zero spikes
+        valid_mask = np.abs(fz) >= self.fz_threshold
+        
+        # COP_x = -M_y / F_z
+        # COP_y = M_x / F_z
+        cop_x[valid_mask] = -my[valid_mask] / fz[valid_mask]
+        cop_y[valid_mask] = mx[valid_mask] / fz[valid_mask]
+
+        combined["cop_x"] = cop_x
+        combined["cop_y"] = cop_y
+        combined["cop_z"] = cop_z
+
+        return combined

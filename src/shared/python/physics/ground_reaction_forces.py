@@ -230,8 +230,8 @@ def compute_angular_impulse(
         (len(forces), len(cops), len(timestamps)),
     )
     require(
-        reference_point.shape == (3,),
-        "reference_point must be a (3,) vector",
+        reference_point.shape == (3,) or reference_point.shape == (len(timestamps), 3),
+        "reference_point must be a (3,) vector or an (N, 3) trajectory matching timestamps",
         reference_point.shape,
     )
 
@@ -461,15 +461,25 @@ class GRFAnalyzer:
 
         # Angular impulse about COMs
         if self.golfer_com_trajectory is not None:
+            ref_golfer = (
+                self.golfer_com_trajectory
+                if len(self.golfer_com_trajectory) == len(timestamps)
+                else self.golfer_com_trajectory[0]
+            )
             golfer_com_impulse = compute_angular_impulse(
-                forces, cops, timestamps, self.golfer_com_trajectory[0]
+                forces, cops, timestamps, ref_golfer
             )
         else:
             golfer_com_impulse = np.zeros(3)
 
         if self.system_com_trajectory is not None:
+            ref_system = (
+                self.system_com_trajectory
+                if len(self.system_com_trajectory) == len(timestamps)
+                else self.system_com_trajectory[0]
+            )
             system_com_impulse = compute_angular_impulse(
-                forces, cops, timestamps, self.system_com_trajectory[0]
+                forces, cops, timestamps, ref_system
             )
         else:
             system_com_impulse = np.zeros(3)
