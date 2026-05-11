@@ -1096,12 +1096,22 @@ class AIAssistantPanel(QWidget):
         adapter: BaseAgentAdapter | None = None
 
         if settings.provider == AIProvider.OLLAMA:
-            from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
+            try:
+                import ai_backend
+                from src.shared.python.ai.adapters.rust_adapter import RustAgentAdapter
+                adapter = RustAgentAdapter(
+                    api_key="ollama",
+                    base_url=settings.ollama_host,
+                    model=settings.model,
+                )
+                self._add_system_message("🚀 Using high-performance Rust AI backend.")
+            except ImportError:
+                from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
 
-            adapter = OllamaAdapter(
-                host=settings.ollama_host,
-                model=settings.model,
-            )
+                adapter = OllamaAdapter(
+                    host=settings.ollama_host,
+                    model=settings.model,
+                )
         elif settings.provider == AIProvider.OPENAI:
             api_key = get_api_key(AIProvider.OPENAI)
             if api_key:

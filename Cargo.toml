@@ -4,7 +4,7 @@
 
 [workspace]
 resolver = "2"
-members = ["rust_core/upstream-physics"]
+members = ["rust_core/upstream-physics", "rust_core/ai_backend"]
 exclude = ["ui/src-tauri"]
 
 [workspace.package]
