@@ -81,8 +81,8 @@ if "PyQt6" not in sys.modules:
 
     DummyWidget.Shape = MagicMock()
     DummyWidget.ToolButtonPopupMode = MagicMock()
-    DummyWidget.DockWidgetFeature = MagicMock()
     DummyWidget.setTabOrder = MagicMock()
+    DummyWidget.DockWidgetFeature = MagicMock()
 
     qt_widgets = MagicMock()
     qt_widgets.QWidget = DummyWidget

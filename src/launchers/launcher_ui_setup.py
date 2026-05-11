@@ -257,6 +257,30 @@ class LauncherUISetupMixin:
             "Filter tiles to show biomechanics and motion analysis tools"
         )
 
+        btn_simulation = self._build_sidebar_button(
+            "Simulation",
+            "sports_golf",
+            checkable=True,
+        )
+
+        btn_motion_matching = self._build_sidebar_button(
+            "Motion Match",
+            "directions_run",
+            checkable=True,
+        )
+
+        btn_motion_capture = self._build_sidebar_button(
+            "MoCap",
+            "videocam",
+            checkable=True,
+        )
+
+        btn_tools = self._build_sidebar_button(
+            "Tools",
+            "build",
+            checkable=True,
+        )
+
         # If open_settings exists in the mixed-in class, use it.
         # Otherwise, we gracefully handle it to avoid crashes in tests.
         btn_settings = self._build_sidebar_button(
@@ -286,16 +310,23 @@ class LauncherUISetupMixin:
             btn_docs.clicked.connect(self._toggle_context_help)
 
         # Setup mutually exclusive active-state routing for navigation
-        # Button IDs: 0=Home, 1=Engines, 2=Biomechanics
         self.sidebar_group = QButtonGroup(self)
         self.sidebar_group.addButton(btn_home, 0)
         self.sidebar_group.addButton(btn_engines, 1)
         self.sidebar_group.addButton(btn_biomechanics, 2)
+        self.sidebar_group.addButton(btn_simulation, 3)
+        self.sidebar_group.addButton(btn_motion_matching, 4)
+        self.sidebar_group.addButton(btn_motion_capture, 5)
+        self.sidebar_group.addButton(btn_tools, 6)
         self.sidebar_group.idClicked.connect(self._on_sidebar_routed)
 
         layout.addWidget(btn_home)
         layout.addWidget(btn_engines)
         layout.addWidget(btn_biomechanics)
+        layout.addWidget(btn_simulation)
+        layout.addWidget(btn_motion_matching)
+        layout.addWidget(btn_motion_capture)
+        layout.addWidget(btn_tools)
         layout.addStretch()
         if AI_AVAILABLE:
             layout.addWidget(self.btn_ai_sidebar)
@@ -306,7 +337,11 @@ class LauncherUISetupMixin:
         sidebar.setFocusProxy(btn_home)
         QWidget.setTabOrder(btn_home, btn_engines)
         QWidget.setTabOrder(btn_engines, btn_biomechanics)
-        QWidget.setTabOrder(btn_biomechanics, btn_settings)
+        QWidget.setTabOrder(btn_biomechanics, btn_simulation)
+        QWidget.setTabOrder(btn_simulation, btn_motion_matching)
+        QWidget.setTabOrder(btn_motion_matching, btn_motion_capture)
+        QWidget.setTabOrder(btn_motion_capture, btn_tools)
+        QWidget.setTabOrder(btn_tools, btn_settings)
         QWidget.setTabOrder(btn_settings, btn_docs)
 
         return sidebar
@@ -327,6 +362,10 @@ class LauncherUISetupMixin:
             0: "All",
             1: "Physics Engines",
             2: "Biomechanics",
+            3: "Simulation",
+            4: "Motion Matching",
+            5: "Motion Capture",
+            6: "Tools & Data",
         }
         self.layout_manager.current_category_filter = _CATEGORY_MAP.get(
             button_id, "All"
