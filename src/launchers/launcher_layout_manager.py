@@ -316,6 +316,7 @@ class LayoutManager:
             cat_norm = str(cat).strip().lower()
             mapping = {
                 "physics_engine": "Physics Engines",
+                "biomechanics": "Biomechanics",
                 "simulation": "Simulation",
                 "motion_matching": "Motion Matching",
                 "motion_capture": "Motion Capture",
@@ -327,6 +328,15 @@ class LayoutManager:
                 return mapping[cat_norm]
 
         t = getattr(model, "type", "").lower()
+        # Biomechanics types take priority over generic fallback
+        if t in (
+            "gait",
+            "sit_stand",
+            "movement_optimizer",
+            "opensim_biomech",
+            "biomechanics",
+        ):
+            return "Biomechanics"
         if t in [
             "custom_humanoid",
             "drake",
@@ -426,6 +436,7 @@ class LayoutManager:
         # Group widgets by category maintaining order
         categories: dict[str, list[Any]] = {
             "Physics Engines": [],
+            "Biomechanics": [],
             "Simulation": [],
             "Motion Matching": [],
             "Motion Capture": [],

@@ -248,6 +248,15 @@ class LauncherUISetupMixin:
             checkable=True,
         )
 
+        btn_biomechanics = self._build_sidebar_button(
+            "Biomechanics",
+            "accessibility",
+            checkable=True,
+        )
+        btn_biomechanics.setAccessibleDescription(
+            "Filter tiles to show biomechanics and motion analysis tools"
+        )
+
         # If open_settings exists in the mixed-in class, use it.
         # Otherwise, we gracefully handle it to avoid crashes in tests.
         btn_settings = self._build_sidebar_button(
@@ -277,13 +286,16 @@ class LauncherUISetupMixin:
             btn_docs.clicked.connect(self._toggle_context_help)
 
         # Setup mutually exclusive active-state routing for navigation
+        # Button IDs: 0=Home, 1=Engines, 2=Biomechanics
         self.sidebar_group = QButtonGroup(self)
         self.sidebar_group.addButton(btn_home, 0)
         self.sidebar_group.addButton(btn_engines, 1)
+        self.sidebar_group.addButton(btn_biomechanics, 2)
         self.sidebar_group.idClicked.connect(self._on_sidebar_routed)
 
         layout.addWidget(btn_home)
         layout.addWidget(btn_engines)
+        layout.addWidget(btn_biomechanics)
         layout.addStretch()
         if AI_AVAILABLE:
             layout.addWidget(self.btn_ai_sidebar)
@@ -293,20 +305,32 @@ class LauncherUISetupMixin:
         # Set explicit focus order for keyboard navigation
         sidebar.setFocusProxy(btn_home)
         QWidget.setTabOrder(btn_home, btn_engines)
-        QWidget.setTabOrder(btn_engines, btn_settings)
+        QWidget.setTabOrder(btn_engines, btn_biomechanics)
+        QWidget.setTabOrder(btn_biomechanics, btn_settings)
         QWidget.setTabOrder(btn_settings, btn_docs)
 
         return sidebar
 
     def _on_sidebar_routed(self, button_id: int) -> None:
-        """Route sidebar navigation to filter the grid layout."""
+        """Route sidebar navigation to filter the grid layout.
+
+        Button IDs
+        ----------
+        0  All (Home)
+        1  Physics Engines
+        2  Biomechanics
+        """
         if not hasattr(self, "layout_manager"):
             return
 
-        if button_id == 0:
-            self.layout_manager.current_category_filter = "All"
-        elif button_id == 1:
-            self.layout_manager.current_category_filter = "Physics Engines"
+        _CATEGORY_MAP: dict[int, str] = {
+            0: "All",
+            1: "Physics Engines",
+            2: "Biomechanics",
+        }
+        self.layout_manager.current_category_filter = _CATEGORY_MAP.get(
+            button_id, "All"
+        )
 
         if hasattr(self, "_rebuild_grid"):
             self._rebuild_grid()
