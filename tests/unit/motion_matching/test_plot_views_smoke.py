@@ -44,6 +44,7 @@ def _breakdown() -> CostBreakdown:
         position=1.0,
         orientation=0.5,
         impact_anchor=0.25,
+        body_marker=0.0,
         regularizer=0.01,
         total=1.76,
     )

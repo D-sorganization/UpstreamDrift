@@ -157,7 +157,13 @@ def test_terms_sum_to_total() -> None:
     target = make_target(n=15)
     sim = _matching_sim(target)
     j, terms = compute_cost(np.zeros(7), target, _const_sim_fn(sim), CostOptions())
-    s = terms.position + terms.orientation + terms.impact_anchor + terms.regularizer
+    s = (
+        terms.position
+        + terms.orientation
+        + terms.impact_anchor
+        + terms.body_marker
+        + terms.regularizer
+    )
     assert abs(s - terms.total) < 1e-15
     assert abs(terms.total - j) < 1e-15
     assert isinstance(terms, CostBreakdown)
@@ -236,3 +242,45 @@ def test_python_matches_matlab_compute_cost() -> None:
     assert delta_2 < 1e-12, f"case 2 delta={delta_2:.2e}"
     assert terms2.impact_anchor == 0.0
     assert terms2.regularizer == 0.0
+
+
+class DummyBody:
+    def __init__(self, marker_xyz):
+        self.marker_xyz = marker_xyz
+
+
+class DummyMultiTarget:
+    def __init__(self, club, marker_xyz):
+        self.club = club
+        self.body = DummyBody(marker_xyz)
+        self.time = club.time
+
+
+def test_body_marker_term() -> None:
+    from src.shared.python.motion_matching.cost import CostOptions, compute_cost
+
+    target_club = make_target(n=10)
+    target_markers = np.zeros((10, 2, 3))
+    target = DummyMultiTarget(target_club, target_markers)
+
+    sim_markers = np.zeros((10, 2, 3))
+    sim_markers[:, 0, 0] = 1e-3
+    sim = _matching_sim(target_club)
+    # create a new sim_out with marker_xyz
+    # Since SimOutput is frozen, we do it carefully:
+    sim_dict = {
+        "butt": sim.butt,
+        "clubhead": sim.clubhead,
+        "club_quat": sim.club_quat,
+        "time": sim.time,
+        "tau": sim.tau,
+        "omega": sim.omega,
+        "marker_xyz": sim_markers,
+    }
+    from src.shared.python.motion_matching.cost import SimOutput
+
+    sim = SimOutput(**sim_dict)
+
+    opts = CostOptions(w_body_marker=2.0)
+    _, terms = compute_cost(np.zeros(7), target, _const_sim_fn(sim), opts)
+    assert abs(terms.body_marker - 1e-6) < 1e-15
