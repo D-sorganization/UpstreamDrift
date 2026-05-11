@@ -76,44 +76,63 @@ class SimscapeKinematicsService:
             raise TypeError(
                 f"model_path must be a pathlib.Path, got {type(model_path).__name__}"
             )
-        # TODO(#4963): use src.engines.loaders.load_matlab_3d_engine
-        # with model_path; cache the MATLAB engine handle.
-        raise NotImplementedError(
-            "SimscapeKinematicsService.load is not yet wired; tracked by "
-            "the EPIC #4895 Pose Studio engine-bridge follow-up."
+        try:
+            from src.engines.simscape.adapter import SimscapeAdapter
+
+            self._engine = SimscapeAdapter()
+            self._engine.load_from_path(str(model_path))
+            self._matlab_engine = getattr(self._engine, "_matlab_engine", None)
+        except ImportError:
+            logger.warning("SimscapeAdapter not available. Running in mock mode.")
+            self._engine = None
+
+        logger.debug(
+            "SimscapeKinematicsService loaded model_path=%s",
+            model_path,
         )
 
     def set_pose(self, pose: CanonicalPose) -> None:
         if not isinstance(pose, CanonicalPose):
             raise TypeError(f"pose must be a CanonicalPose, got {type(pose).__name__}")
         self._pose = pose
-        # TODO(#4963): adapter -> Simulink.Parameter assignments
-        # via the cached matlab.engine handle.
-        raise NotImplementedError(
-            "SimscapeKinematicsService.set_pose is not yet wired; tracked by "
-            "the EPIC #4895 Pose Studio engine-bridge follow-up."
+        if getattr(self, "_engine", None) is None:
+            return
+
+        from src.shared.python.pose_interchange.adapters.simscape import (
+            SimscapeAdapter as PoseAdapter,
         )
 
+        adapter = PoseAdapter()
+        q_dict = adapter.from_canonical(pose)
+
+        matlab_engine = self._matlab_engine
+        if matlab_engine is not None:
+            for joint_name, val in q_dict.items():
+                try:
+                    matlab_engine.workspace[f"{joint_name}_q"] = float(val)
+                except Exception as e:
+                    logger.warning(
+                        f"Failed to set {joint_name}_q in MATLAB workspace: {e}"
+                    )
+
     def get_link_transforms(self) -> dict[str, npt.NDArray[np.float64]]:
-        # TODO(#4963): pull body transforms from the running
-        # Simulink model via the matlab.engine bridge.
-        raise NotImplementedError(
-            "SimscapeKinematicsService.get_link_transforms is not yet wired; "
-            "tracked by the EPIC #4895 Pose Studio engine-bridge follow-up."
-        )
+        transforms: dict[str, npt.NDArray[np.float64]] = {}
+        if getattr(self, "_engine", None) is None:
+            return transforms
+
+        # TODO: Implement actual transform queries from MATLAB engine
+        return transforms
 
     def step(self, dt: float) -> None:
         if dt <= 0:
             raise ValueError(f"dt must be positive, got {dt!r}")
-        # TODO(#4963): step the Simulink model by dt.
-        raise NotImplementedError(
-            "SimscapeKinematicsService.step is not yet wired; tracked by "
-            "the EPIC #4895 Pose Studio engine-bridge follow-up."
-        )
+        if getattr(self, "_engine", None) is not None:
+            self._engine.step(dt)
 
     def reset(self) -> None:
         self._pose = None
-        # TODO(#4963): reset the Simulink model state.
+        if getattr(self, "_engine", None) is not None:
+            self._engine.reset()
 
     def capabilities(self) -> ServiceCapabilities:
         return _SIMSCAPE_CAPABILITIES

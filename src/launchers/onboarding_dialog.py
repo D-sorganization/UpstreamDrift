@@ -42,9 +42,10 @@ ONBOARDING_CONFIG_PATH = Path.home() / ".upstreamdrift" / "onboarding_config.jso
 def _get_theme_colors():
     """Get current theme colors, with fallback to dark theme defaults."""
     try:
-        from src.shared.python.theme import get_current_colors
+        from src.shared.python.theme import DARK_THEME, get_theme_manager
 
-        return get_current_colors()
+        manager = get_theme_manager()
+        return manager.get_current_colors() if manager else DARK_THEME
     except ImportError:
         from src.shared.python.theme import DARK_THEME
 

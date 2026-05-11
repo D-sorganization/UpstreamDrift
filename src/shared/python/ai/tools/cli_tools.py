@@ -445,7 +445,7 @@ class CLIToolManager:
         Returns:
             Dictionary with tool availability status.
         """
-        status = {}
+        status: dict[str, dict[str, Any]] = {}
 
         if self._claude:
             status["claude"] = {

@@ -68,43 +68,97 @@ class OpenSimKinematicsService:
             raise TypeError(
                 f"model_path must be a pathlib.Path, got {type(model_path).__name__}"
             )
-        # TODO(#4963): opensim.Model(str(path)); initSystem().
-        raise NotImplementedError(
-            "OpenSimKinematicsService.load is not yet wired; tracked by "
-            "the EPIC #4895 Pose Studio engine-bridge follow-up."
+        import opensim  # type: ignore[import-not-found]
+
+        self._model = opensim.Model(str(model_path))
+        self._state = self._model.initSystem()
+        self._default_state = opensim.State(self._state)
+
+        logger.debug(
+            "OpenSimKinematicsService loaded model_path=%s",
+            model_path,
         )
 
     def set_pose(self, pose: CanonicalPose) -> None:
         if not isinstance(pose, CanonicalPose):
             raise TypeError(f"pose must be a CanonicalPose, got {type(pose).__name__}")
+        if (
+            getattr(self, "_model", None) is None
+            or getattr(self, "_state", None) is None
+        ):
+            raise RuntimeError(
+                "OpenSimKinematicsService.set_pose: model not loaded; call load() first."
+            )
+
         self._pose = pose
-        # TODO(#4963): adapter -> coordinate values via
-        # model.updCoordinateSet().get(name).setValue(state, value).
-        raise NotImplementedError(
-            "OpenSimKinematicsService.set_pose is not yet wired; tracked by "
-            "the EPIC #4895 Pose Studio engine-bridge follow-up."
-        )
+        from src.shared.python.pose_interchange.adapters.opensim import OpenSimAdapter
+
+        adapter = OpenSimAdapter()
+        q_dict = adapter.from_canonical(pose)
+
+        coord_set = self._model.updCoordinateSet()
+        for name, value in q_dict.items():
+            if coord_set.contains(name):
+                coord = coord_set.get(name)
+                coord.setValue(self._state, value)
+
+        self._model.realizePosition(self._state)
 
     def get_link_transforms(self) -> dict[str, npt.NDArray[np.float64]]:
-        # TODO(#4963): iterate model.getBodySet() and pull
-        # body.getTransformInGround(state) into 4x4 SE(3).
-        raise NotImplementedError(
-            "OpenSimKinematicsService.get_link_transforms is not yet wired; "
-            "tracked by the EPIC #4895 Pose Studio engine-bridge follow-up."
-        )
+        if (
+            getattr(self, "_model", None) is None
+            or getattr(self, "_state", None) is None
+        ):
+            raise RuntimeError(
+                "OpenSimKinematicsService.get_link_transforms: model not loaded; call load() first."
+            )
+
+        transforms: dict[str, npt.NDArray[np.float64]] = {}
+        body_set = self._model.getBodySet()
+        for i in range(body_set.getSize()):
+            body = body_set.get(i)
+            transform_in_ground = body.getTransformInGround(self._state)
+
+            R = transform_in_ground.R()
+            p = transform_in_ground.p()
+
+            mat = np.eye(4, dtype=np.float64)
+            for r in range(3):
+                for c in range(3):
+                    mat[r, c] = R.get(r, c)
+            mat[0, 3] = p.get(0)
+            mat[1, 3] = p.get(1)
+            mat[2, 3] = p.get(2)
+
+            transforms[body.getName()] = mat
+
+        return transforms
 
     def step(self, dt: float) -> None:
         if dt <= 0:
             raise ValueError(f"dt must be positive, got {dt!r}")
-        # TODO(#4963): drive an opensim.Manager forward by dt.
-        raise NotImplementedError(
-            "OpenSimKinematicsService.step is not yet wired; tracked by "
-            "the EPIC #4895 Pose Studio engine-bridge follow-up."
-        )
+        if (
+            getattr(self, "_model", None) is None
+            or getattr(self, "_state", None) is None
+        ):
+            raise RuntimeError(
+                "OpenSimKinematicsService.step: model not loaded; call load() first."
+            )
+
+        import opensim  # type: ignore[import-not-found]
+
+        manager = opensim.Manager(self._model)
+        manager.initialize(self._state)
+        current_time = self._state.getTime()
+        manager.integrate(current_time + dt)
+        self._state = manager.getState()
 
     def reset(self) -> None:
         self._pose = None
-        # TODO(#4963): re-initSystem() to recover defaults.
+        if getattr(self, "_model", None) is None:
+            return
+
+        self._state = self._model.initSystem()
 
     def capabilities(self) -> ServiceCapabilities:
         return _OPENSIM_CAPABILITIES

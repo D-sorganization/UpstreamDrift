@@ -88,6 +88,38 @@ class UserProfile:
             return False
         return feature in self.features_enabled or self._tier_includes_feature(feature)
 
+    _TIER_FEATURES = {
+        SubscriptionTier.FREE: {
+            "ollama_chat",
+            "basic_tools",
+            "local_models",
+        },
+        SubscriptionTier.PRO: {
+            "ollama_chat",
+            "basic_tools",
+            "local_models",
+            "claude_code",
+            "codex_cli",
+            "cloud_models",
+            "priority_support",
+            "advanced_tools",
+        },
+        SubscriptionTier.ENTERPRISE: {
+            "ollama_chat",
+            "basic_tools",
+            "local_models",
+            "claude_code",
+            "codex_cli",
+            "cloud_models",
+            "priority_support",
+            "advanced_tools",
+            "custom_integrations",
+            "dedicated_support",
+            "sso_auth",
+            "audit_logs",
+        },
+    }
+
     def _tier_includes_feature(self, feature: str) -> bool:
         """Check if the subscription tier includes a feature.
 
@@ -97,38 +129,7 @@ class UserProfile:
         Returns:
             True if tier includes feature, False otherwise.
         """
-        tier_features = {
-            SubscriptionTier.FREE: {
-                "ollama_chat",
-                "basic_tools",
-                "local_models",
-            },
-            SubscriptionTier.PRO: {
-                "ollama_chat",
-                "basic_tools",
-                "local_models",
-                "claude_code",
-                "codex_cli",
-                "cloud_models",
-                "priority_support",
-                "advanced_tools",
-            },
-            SubscriptionTier.ENTERPRISE: {
-                "ollama_chat",
-                "basic_tools",
-                "local_models",
-                "claude_code",
-                "codex_cli",
-                "cloud_models",
-                "priority_support",
-                "advanced_tools",
-                "custom_integrations",
-                "dedicated_support",
-                "sso_auth",
-                "audit_logs",
-            },
-        }
-        return feature in tier_features.get(self.subscription_tier, set())
+        return feature in self._TIER_FEATURES.get(self.subscription_tier, set())
 
 
 @dataclass
@@ -390,8 +391,8 @@ class AuthManager:
 
         # Update features based on tier
         self._current_user.features_enabled = list(
-            self._current_user._tier_includes_feature.__self__._tier_includes_feature.__class__
-        )  # type: ignore
+            UserProfile._TIER_FEATURES.get(tier, set())
+        )
 
         self._save_credentials()
         logger.info(

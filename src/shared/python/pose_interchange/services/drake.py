@@ -74,46 +74,97 @@ class DrakeKinematicsService:
             raise TypeError(
                 f"model_path must be a pathlib.Path, got {type(model_path).__name__}"
             )
-        # TODO(#4963): build MultibodyPlant + Parser, parse
-        # the URDF, finalize, and stash the plant + a default context.
-        raise NotImplementedError(
-            "DrakeKinematicsService.load is not yet wired; tracked by "
-            "the EPIC #4895 Pose Studio engine-bridge follow-up."
+        import pydrake.multibody.parsing as parsing  # type: ignore[import-not-found]
+        import pydrake.multibody.plant as plant  # type: ignore[import-not-found]
+        import pydrake.systems.framework as framework  # type: ignore[import-not-found]
+        import pydrake.systems.analysis as analysis  # type: ignore[import-not-found]
+
+        self._builder = framework.DiagramBuilder()
+        self._plant, self._scene_graph = plant.AddMultibodyPlantSceneGraph(
+            self._builder, time_step=0.001
+        )
+        parsing.Parser(self._plant).AddModels(str(model_path))
+        self._plant.Finalize()
+        self._diagram = self._builder.Build()
+
+        self._context = self._diagram.CreateDefaultContext()
+        self._plant_context = self._plant.GetMyContextFromRoot(self._context)
+
+        self._neutral_context = self._diagram.CreateDefaultContext()
+        self._simulator = analysis.Simulator(self._diagram, self._context)
+        self._simulator.Initialize()
+
+        logger.debug(
+            "DrakeKinematicsService loaded model_path=%s num_positions=%d",
+            model_path,
+            self._plant.num_positions(),
         )
 
     def set_pose(self, pose: CanonicalPose) -> None:
         if not isinstance(pose, CanonicalPose):
             raise TypeError(f"pose must be a CanonicalPose, got {type(pose).__name__}")
+        if (
+            getattr(self, "_plant", None) is None
+            or getattr(self, "_context", None) is None
+        ):
+            raise RuntimeError(
+                "DrakeKinematicsService.set_pose: model not loaded; call load() first."
+            )
         self._pose = pose
-        # TODO(#4963): use the Drake adapter (Subtask 2) to
-        # encode the canonical pose into the plant's q vector and write
-        # it into the cached context.
-        raise NotImplementedError(
-            "DrakeKinematicsService.set_pose is not yet wired; tracked by "
-            "the EPIC #4895 Pose Studio engine-bridge follow-up."
-        )
+        from src.shared.python.pose_interchange.adapters.drake import DrakeAdapter
+
+        adapter = DrakeAdapter()
+        q_full = adapter.from_canonical(pose, model=self._plant)
+
+        nq = int(self._plant.num_positions())
+        q = np.zeros(nq, dtype=np.float64)
+        n = min(nq, q_full.shape[0])
+        q[:n] = q_full[:n]
+        self._plant.SetPositions(self._plant_context, q)
 
     def get_link_transforms(self) -> dict[str, npt.NDArray[np.float64]]:
-        # TODO(#4963): iterate plant.GetBodyIndices() and call
-        # plant.EvalBodyPoseInWorld(context, body) for each to build the
-        # SE(3) dict.
-        raise NotImplementedError(
-            "DrakeKinematicsService.get_link_transforms is not yet wired; "
-            "tracked by the EPIC #4895 Pose Studio engine-bridge follow-up."
-        )
+        if (
+            getattr(self, "_plant", None) is None
+            or getattr(self, "_context", None) is None
+        ):
+            raise RuntimeError(
+                "DrakeKinematicsService.get_link_transforms: model not loaded; call load() first."
+            )
+
+        transforms: dict[str, npt.NDArray[np.float64]] = {}
+        for body_index in self._plant.GetBodyIndices(
+            self._plant.world_model_instance()
+        ):
+            body = self._plant.get_body(body_index)
+            name = body.name()
+            pose_in_world = self._plant.EvalBodyPoseInWorld(self._plant_context, body)
+            transforms[name] = pose_in_world.GetAsMatrix4()
+        return transforms
 
     def step(self, dt: float) -> None:
         if dt <= 0:
             raise ValueError(f"dt must be positive, got {dt!r}")
-        # TODO(#4963): advance a Simulator bound to the plant.
-        raise NotImplementedError(
-            "DrakeKinematicsService.step is not yet wired; tracked by "
-            "the EPIC #4895 Pose Studio engine-bridge follow-up."
-        )
+        if (
+            getattr(self, "_context", None) is None
+            or getattr(self, "_simulator", None) is None
+        ):
+            raise RuntimeError(
+                "DrakeKinematicsService.step: model not loaded; call load() first."
+            )
+        current_time = self._context.get_time()
+        self._simulator.AdvanceTo(current_time + dt)
 
     def reset(self) -> None:
         self._pose = None
-        # TODO(#4963): restore the cached default context.
+        if (
+            getattr(self, "_context", None) is None
+            or getattr(self, "_neutral_context", None) is None
+        ):
+            return
+
+        self._context.SetTimeStateAndParametersFrom(self._neutral_context)
+        if getattr(self, "_simulator", None) is not None:
+            self._simulator.Initialize()
 
     def capabilities(self) -> ServiceCapabilities:
         return _DRAKE_CAPABILITIES
