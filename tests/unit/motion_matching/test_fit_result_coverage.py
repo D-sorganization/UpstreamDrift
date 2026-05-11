@@ -33,6 +33,7 @@ def _make() -> CanonicalFitResult:
             position=0.5,
             orientation=0.5,
             impact_anchor=0.5,
+            body_marker=0.0,
             regularizer=0.0,
             total=1.5,
         ),

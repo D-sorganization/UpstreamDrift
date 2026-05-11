@@ -22,6 +22,7 @@ def _good_breakdown(total: float = 0.0) -> CostBreakdown:
         position=total / 4,
         orientation=total / 4,
         impact_anchor=total / 4,
+        body_marker=0.0,
         regularizer=total / 4,
         total=total,
     )

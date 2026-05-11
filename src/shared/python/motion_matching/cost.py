@@ -31,7 +31,11 @@ from src.shared.python.core.contracts.decorators import (
 )
 
 from ._geodesic import quaternion_geodesic_angles
+from typing import TYPE_CHECKING
 from .club_target import ClubTarget
+
+if TYPE_CHECKING:
+    from .provider import MultiSourceTarget
 
 __all__ = [
     "CostBreakdown",
@@ -71,6 +75,7 @@ class CostOptions:
     w_position: float = 1.0
     w_orientation: float = 0.1
     w_anchor_impact: float = 10.0
+    w_body_marker: float = 0.0
     regularizer: RegularizerName = "total_work"
     lambda_: float = 1e-4
     q_orientation_repr: QRepr = "quaternion"
@@ -91,6 +96,7 @@ class CostBreakdown:
     position: float
     orientation: float
     impact_anchor: float
+    body_marker: float
     regularizer: float
     total: float
 
@@ -117,6 +123,7 @@ class SimOutput:
     time: NDArray[np.float64] | None = None
     tau: NDArray[np.float64] | None = None
     omega: NDArray[np.float64] | None = None
+    marker_xyz: NDArray[np.float64] | None = None
 
 
 # --- compute_total_work --------------------------------------------------
@@ -161,32 +168,50 @@ def compute_total_work(sim_out: SimOutput) -> float:
 # --- per-term helpers (LOD <= 2) ----------------------------------------
 
 
-def _position_term(sim_out: SimOutput, target: ClubTarget) -> float:
+def _position_term(sim_out: SimOutput, target: ClubTarget | MultiSourceTarget) -> float:
+    club = getattr(target, "club", target)
     """``mean_n( ||r_butt_diff||^2 + ||r_ch_diff||^2 )``."""
-    db = sim_out.butt - target.butt
-    dc = sim_out.clubhead - target.clubhead
+    db = sim_out.butt - club.butt
+    dc = sim_out.clubhead - club.clubhead
     per_frame = np.sum(db * db, axis=1) + np.sum(dc * dc, axis=1)
     return float(np.mean(per_frame))
 
 
-def _orientation_term(sim_out: SimOutput, target: ClubTarget) -> float:
+def _orientation_term(
+    sim_out: SimOutput, target: ClubTarget | MultiSourceTarget
+) -> float:
+    club = getattr(target, "club", target)
     """``mean_n( d_geo(R_sim, R_meas)^2 )`` via quaternion dot."""
-    angles = quaternion_geodesic_angles(sim_out.club_quat, target.club_quat)
+    angles = quaternion_geodesic_angles(sim_out.club_quat, club.club_quat)
     return float(np.mean(angles * angles))
 
 
-def _anchor_term(sim_out: SimOutput, target: ClubTarget) -> float:
+def _anchor_term(sim_out: SimOutput, target: ClubTarget | MultiSourceTarget) -> float:
+    club = getattr(target, "club", target)
     """``||r_ch_sim(t_impact) - r_ch_meas(t_impact)||^2``.
 
     MATLAB uses 1-based indexing; ``ClubTarget.impact_idx`` follows that
     convention so this helper subtracts 1 here.
     """
-    n = target.clubhead.shape[0]
-    k = int(target.impact_idx)
+    n = club.clubhead.shape[0]
+    k = int(club.impact_idx)
     if not (1 <= k <= n):
         raise ValueError(f"impact_idx must be in [1, {n}], got {k}")
-    d = sim_out.clubhead[k - 1] - target.clubhead[k - 1]
+    d = sim_out.clubhead[k - 1] - club.clubhead[k - 1]
     return float(np.dot(d, d))
+
+
+def _body_marker_term(
+    sim_out: SimOutput, target: ClubTarget | MultiSourceTarget
+) -> float:
+    """``mean_n( ||r_marker_sim - r_marker_meas||^2 )`` over all markers."""
+    if not hasattr(target, "body") or target.body is None:
+        return 0.0
+    if sim_out.marker_xyz is None:
+        return 0.0
+    db = sim_out.marker_xyz - target.body.marker_xyz
+    per_frame_marker = np.sum(db * db, axis=2)
+    return float(np.mean(per_frame_marker))
 
 
 def _regularizer_term(
@@ -282,7 +307,7 @@ def _check_traj(
 
 def _check_compute_cost_args(
     theta: NDArray[np.float64],
-    target: ClubTarget,
+    target: ClubTarget | MultiSourceTarget,
     sim_fn: Callable[[NDArray[np.float64]], SimOutput],
     opts: CostOptions,
 ) -> bool:
@@ -292,7 +317,7 @@ def _check_compute_cost_args(
         and theta.ndim == 1
         and theta.size > 0
         and bool(np.all(np.isfinite(theta)))
-        and isinstance(target, ClubTarget)
+        and getattr(getattr(target, "club", target), "time", None) is not None
         and callable(sim_fn)
         and isinstance(opts, CostOptions)
     )
@@ -313,6 +338,7 @@ def _check_compute_cost_result(
             terms.position,
             terms.orientation,
             terms.impact_anchor,
+            terms.body_marker,
             terms.regularizer,
         )
     )
@@ -329,7 +355,7 @@ def _check_compute_cost_result(
 )
 def compute_cost(
     theta: NDArray[np.float64],
-    target: ClubTarget,
+    target: ClubTarget | MultiSourceTarget,
     sim_fn: Callable[[NDArray[np.float64]], SimOutput],
     opts: CostOptions = CostOptions(),
 ) -> tuple[float, CostBreakdown]:
@@ -353,7 +379,11 @@ def compute_cost(
     if not isinstance(sim_out, SimOutput):
         raise TypeError(f"sim_fn must return SimOutput, got {type(sim_out).__name__}")
 
-    n = target.time.shape[0]
+    club = getattr(target, "club", target)
+    if club is None:
+        raise ValueError("Target must have a club component for compute_cost")
+
+    n = club.time.shape[0]
     _check_traj(sim_out.butt, n, 3, "sim_out.butt")
     _check_traj(sim_out.clubhead, n, 3, "sim_out.clubhead")
     _check_traj(sim_out.club_quat, n, 4, "sim_out.club_quat")
@@ -361,13 +391,15 @@ def compute_cost(
     pos = opts.w_position * _position_term(sim_out, target)
     ori = opts.w_orientation * _orientation_term(sim_out, target)
     anc = opts.w_anchor_impact * _anchor_term(sim_out, target)
+    body_marker = opts.w_body_marker * _body_marker_term(sim_out, target)
     reg = opts.lambda_ * _regularizer_term(theta, sim_out, opts)
-    total = pos + ori + anc + reg
+    total = pos + ori + anc + body_marker + reg
 
     terms = CostBreakdown(
         position=pos,
         orientation=ori,
         impact_anchor=anc,
+        body_marker=body_marker,
         regularizer=reg,
         total=total,
     )
