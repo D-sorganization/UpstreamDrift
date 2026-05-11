@@ -280,6 +280,31 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         choices=["local", "vendored"],
         help="Tools resolution mode: 'local' (src/shared/python) or 'vendored' (vendor/ud-tools/src/shared/python)",
     )
+    is_ci = "CI" in os.environ
+    repo_root = Path(__file__).resolve().parent.parent
+    sibling_present = any(
+        (repo_root.parent / repo).exists()
+        for repo in [
+            "MuJoCo_Models",
+            "Drake_Models",
+            "Pinocchio_Models",
+            "OpenSim_Models",
+            "Movement-Optimizer",
+        ]
+    )
+    default_biomech = "vendored" if is_ci else ("editable" if sibling_present else "vendored")
+    parser.addoption(
+        "--biomech-mode",
+        action="store",
+        default=default_biomech,
+        choices=["editable", "vendored", "env"],
+        help="Biomech repo resolution mode",
+    )
+
+@pytest.fixture
+def biomech_mode(request: pytest.FixtureRequest) -> str:
+    """Return the active biomechanics model resolution mode."""
+    return request.config.getoption("--biomech-mode")
 
 
 def pytest_configure(config: pytest.Config) -> None:

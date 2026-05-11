@@ -15,6 +15,85 @@ from typing import Any, Protocol
 
 from src.shared.python.core.contracts import require
 
+import os
+from collections.abc import Callable
+
+_MODEL_SOURCES: dict[str, Callable[[], Path]] = {}
+
+
+def register_source(name: str) -> Callable[[Callable[[], Path]], Callable[[], Path]]:
+    """Register a global model source provider by name."""
+
+    def decorator(func: Callable[[], Path]) -> Callable[[], Path]:
+        _MODEL_SOURCES[name] = func
+        return func
+
+    return decorator
+
+
+def _resolve_sibling(repo_name: str, pkg: str, env_var: str) -> Path:
+    """Resolve a sibling biomechanics repo models path."""
+    if env_var in os.environ:
+        return Path(os.environ[env_var]).resolve()
+
+    repo_root = Path(__file__).resolve().parent.parent.parent.parent.parent
+    sibling_checkout = repo_root.parent / repo_name
+
+    if sibling_checkout.exists() and (sibling_checkout / "pyproject.toml").exists():
+        spec = importlib.util.spec_from_file_location(
+            f"{pkg}.model_pack", sibling_checkout / "src" / pkg / "model_pack.py"
+        )
+        if spec and spec.loader:
+            module = importlib.util.module_from_spec(spec)
+            try:
+                spec.loader.exec_module(module)
+                if hasattr(module, "resolve"):
+                    return Path(module.resolve()).resolve()
+            except Exception:
+                pass
+
+    try:
+        module = importlib.import_module(f"{pkg}.model_pack")
+        if hasattr(module, "resolve"):
+            return Path(module.resolve()).resolve()
+    except ImportError:
+        pass
+
+    vendored_path = repo_root / "vendor" / "biomech-models" / repo_name
+    if vendored_path.exists():
+        return vendored_path.resolve()
+
+    raise RuntimeError(f"Could not resolve sibling model repo: {repo_name}")
+
+
+@register_source("mujoco_models")
+def mujoco_models_source() -> Path:
+    return _resolve_sibling("MuJoCo_Models", "mujoco_models", "MUJOCO_MODELS_HOME")
+
+
+@register_source("drake_models")
+def drake_models_source() -> Path:
+    return _resolve_sibling("Drake_Models", "drake_models", "DRAKE_MODELS_HOME")
+
+
+@register_source("pinocchio_models")
+def pinocchio_models_source() -> Path:
+    return _resolve_sibling(
+        "Pinocchio_Models", "pinocchio_models", "PINOCCHIO_MODELS_HOME"
+    )
+
+
+@register_source("opensim_models")
+def opensim_models_source() -> Path:
+    return _resolve_sibling("OpenSim_Models", "opensim_models", "OPENSIM_MODELS_HOME")
+
+
+@register_source("movement_optimizer")
+def movement_optimizer_source() -> Path:
+    return _resolve_sibling(
+        "Movement-Optimizer", "movement_optimizer", "MOVEMENT_OPTIMIZER_HOME"
+    )
+
 
 def _get_optional_string_attr(model: Any, attr_name: str) -> str | None:
     """Return a stripped string attribute when the model explicitly provides one."""
@@ -105,6 +184,11 @@ class ModelSourcePathPolicy:
         """Resolve the canonical source root for a model."""
         if declared_root is None:
             return self.default_root
+
+        if declared_root in _MODEL_SOURCES:
+            return self._canonicalize(
+                _MODEL_SOURCES[declared_root](), field_name="source_root"
+            )
 
         root_path = Path(declared_root)
         if not root_path.is_absolute():

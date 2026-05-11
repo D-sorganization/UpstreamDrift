@@ -126,6 +126,7 @@ class LauncherDiagnostics:
         self.check_asset_files()
         self.check_pyqt6_availability()
         self.check_engine_availability()
+        self.check_sibling_biomech_repos()
 
         # Calculate summary
         passed = sum(1 for r in self.results if r.status == "pass")
@@ -688,6 +689,83 @@ class LauncherDiagnostics:
                 status="warning",
                 message=f"Engine check error: {e}",
                 details=details,
+                duration_ms=(time.time() - start) * 1000,
+            )
+
+        self.results.append(result)
+        return result
+
+    def check_sibling_biomech_repos(self) -> DiagnosticResult:
+        """Check resolution tier and model_pack.yaml version for sibling repos."""
+        start = time.time()
+        details: dict[str, Any] = {}
+
+        try:
+            from src.shared.python.config.model_source_providers import _MODEL_SOURCES
+            import yaml
+
+            repo_status = []
+            all_resolved = True
+
+            for source_name, provider_fn in _MODEL_SOURCES.items():
+                try:
+                    resolved_path = provider_fn()
+                    # Try to parse model_pack.yaml
+                    pack_file = resolved_path / "model_pack.yaml"
+                    version = "unknown"
+                    if pack_file.exists():
+                        with open(pack_file, encoding="utf-8") as f:
+                            pack_data = yaml.safe_load(f)
+                            if isinstance(pack_data, dict):
+                                version = pack_data.get("version", "unknown")
+
+                    tier = "unknown"
+                    if "vendor" in str(resolved_path):
+                        tier = "vendored"
+                    elif "site-packages" in str(
+                        resolved_path
+                    ) or "dist-packages" in str(resolved_path):
+                        tier = "pip-installed"
+                    else:
+                        tier = "editable"
+
+                    repo_status.append(
+                        {
+                            "source": source_name,
+                            "path": str(resolved_path),
+                            "tier": tier,
+                            "version": str(version),
+                        }
+                    )
+                except Exception as e:
+                    all_resolved = False
+                    repo_status.append(
+                        {
+                            "source": source_name,
+                            "error": str(e),
+                        }
+                    )
+
+            details["repos"] = repo_status
+            status = "pass" if all_resolved else "warning"
+            msg = (
+                "All sibling repos resolved"
+                if all_resolved
+                else "Some sibling repos failed to resolve"
+            )
+
+            result = DiagnosticResult(
+                name="sibling_biomech_repos",
+                status=status,
+                message=msg,
+                details=details,
+                duration_ms=(time.time() - start) * 1000,
+            )
+        except Exception as e:
+            result = DiagnosticResult(
+                name="sibling_biomech_repos",
+                status="warning",
+                message=f"Failed to check sibling repos: {e}",
                 duration_ms=(time.time() - start) * 1000,
             )
 
