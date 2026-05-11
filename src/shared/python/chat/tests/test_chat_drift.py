@@ -11,9 +11,13 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[5 if "tests" in __file__ else 4]
+# Note: ``src/shared/python/chat/__init__.py`` intentionally diverges from
+# Tools to add UpstreamDrift-specific exports (service_base, router_factory),
+# so it is not included in this hash baseline. Likewise ``chat_dock_widget.py``
+# in UpstreamDrift is a lazy import shim; the canonical Tools content lives in
+# ``_chat_dock_widget_qt.py``.
 TOOLS_BASELINE_HASHES: dict[str, str] = {
-    "src/shared/python/chat/__init__.py": "33ba253d1351e40b778e0c620d2c091f978285a4b8487040e5c2f93bb28e6268",
-    "src/shared/python/chat/chat_dock_widget.py": "c1947bcd98d7868c3681116b103547519a89a4010c46d89410c3f471133551fc",
+    "src/shared/python/chat/_chat_dock_widget_qt.py": "32a123174f93eb3ee877a21c489286707784e6927da6040f2b9eeff230a8ff12",
     "src/shared/python/chat/models.py": "efba02eab03e4b74cc7511fa45595b790379a2ddbc0f95fa54f9f67f91ba94e8",
     "src/shared/python/chat/tests/__init__.py": "5a0bba6299ce217de8cbfc2e20a354ccf479e8d45152f69ad2543d9183d07812",
     "src/shared/python/chat/tests/test_chat.py": "e7ed8d44073b8fe2015aa006218d6c1b717b52e057e51f5985a78e6177254c30",

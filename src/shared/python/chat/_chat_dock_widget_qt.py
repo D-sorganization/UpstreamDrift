@@ -40,6 +40,17 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+
+def _get_theme_colors() -> dict[str, str]:
+    """Get the current theme colors, falling back to defaults."""
+    try:
+        from src.shared.python.theme.theme_manager import get_theme_manager
+
+        return get_theme_manager().get_current_colors()
+    except ImportError:
+        return {}
+
+
 _DEFAULT_SERVER = "ws://127.0.0.1:8000"
 
 
@@ -81,8 +92,6 @@ class ChatMessageBubble(QFrame):
     ) -> None:
         if not (role is not None):
             raise ValueError("role must be provided")
-        if not (role is not None):
-            raise ValueError("role must be provided")
         super().__init__(parent)
         self._role = role
         self._content = content
@@ -91,9 +100,15 @@ class ChatMessageBubble(QFrame):
         layout.setContentsMargins(6, 4, 6, 4)
         layout.setSpacing(2)
 
+        colors = _get_theme_colors()
+        text_primary = colors.get("text", "#e0e0e0")
+        bg_alt = colors.get("group_bg", "#2d2d2d")
+        bg_secondary = colors.get("input_bg", "#252526")
+
         # Role label
         user_style = f"font-size: 10px; font-weight: bold; color: {accent_color};"
-        ai_style = "font-size: 10px; font-weight: bold; color: #58a6ff;"
+        ai_color = colors.get("accent", "#58a6ff")
+        ai_style = f"font-size: 10px; font-weight: bold; color: {ai_color};"
         role_label = QLabel("You" if role == "user" else "AI")
         role_label.setStyleSheet(user_style if role == "user" else ai_style)
         layout.addWidget(role_label)
@@ -102,10 +117,10 @@ class ChatMessageBubble(QFrame):
         self._content_label = QLabel(content)
         self._content_label.setWordWrap(True)
         self._content_label.setTextFormat(Qt.TextFormat.PlainText)
-        self._content_label.setStyleSheet("color: #e0e0e0; font-size: 12px;")
+        self._content_label.setStyleSheet(f"color: {text_primary}; font-size: 12px;")
         layout.addWidget(self._content_label)
 
-        bg = "#2d2d2d" if role == "user" else "#252526"
+        bg = bg_alt if role == "user" else bg_secondary
         self.setStyleSheet(
             f"ChatMessageBubble {{ background-color: {bg}; border-radius: 6px; }}"
         )
@@ -114,15 +129,11 @@ class ChatMessageBubble(QFrame):
         """Replace the content text."""
         if not (text is not None):
             raise ValueError("text must be provided")
-        if not (text is not None):
-            raise ValueError("text must be provided")
         self._content = text
         self._content_label.setText(text)
 
     def append_content(self, text: str) -> None:
         """Append text to existing content."""
-        if not (text is not None):
-            raise ValueError("text must be provided")
         if not (text is not None):
             raise ValueError("text must be provided")
         self._content += text
@@ -162,8 +173,6 @@ class ChatDockWidget(QDockWidget):
     ) -> None:
         if not (app_context is not None):
             raise ValueError("app_context must be provided")
-        if not (app_context is not None):
-            raise ValueError("app_context must be provided")
         super().__init__("AI Chat", parent)
         self._app_context = app_context
         self._app_name = app_name
@@ -188,10 +197,20 @@ class ChatDockWidget(QDockWidget):
             )
 
         self._setup_ui()
-        # Delay connection slightly so the parent window can finish setup
-        QTimer.singleShot(500, self._connect)
+        # Defer connection until the dock is actually shown so the parent
+        # window is guaranteed to have finished setup. Drives off showEvent
+        # rather than a hardcoded 500 ms delay (#2098).
+        self._connect_on_show = True
 
     def _setup_ui(self) -> None:
+        colors = _get_theme_colors()
+        bg_primary = colors.get("bg", "#1e1e1e")
+        bg_alt = colors.get("group_bg", "#2d2d2d")
+        text_primary = colors.get("text", "#e0e0e0")
+        text_secondary = colors.get("text_secondary", "#888")
+        border = colors.get("border", "#444")
+        button_hover = colors.get("button_hover", "#ffaa33")
+
         container = QWidget()
         layout = QVBoxLayout(container)
         layout.setContentsMargins(4, 4, 4, 4)
@@ -199,7 +218,7 @@ class ChatDockWidget(QDockWidget):
 
         # Status bar
         self._status_label = QLabel("Connecting...")
-        self._status_label.setStyleSheet("color: #888; font-size: 10px;")
+        self._status_label.setStyleSheet(f"color: {text_secondary}; font-size: 10px;")
         layout.addWidget(self._status_label)
 
         # Message scroll area
@@ -223,8 +242,8 @@ class ChatDockWidget(QDockWidget):
         self._input_edit.setPlaceholderText(self._placeholder_text)
         self._input_edit.setStyleSheet(
             "QPlainTextEdit {"
-            "  background-color: #2d2d2d; color: #e0e0e0;"
-            "  border: 1px solid #444; border-radius: 4px;"
+            f"  background-color: {bg_alt}; color: {text_primary};"
+            f"  border: 1px solid {border}; border-radius: 4px;"
             "  font-size: 12px; padding: 4px;"
             "}"
         )
@@ -237,7 +256,7 @@ class ChatDockWidget(QDockWidget):
             f"  background-color: {self._accent_color}; color: black;"
             "  border-radius: 4px; font-weight: bold; padding: 4px;"
             "}"
-            "QPushButton:hover { background-color: #ffaa33; }"
+            f"QPushButton:hover {{ background-color: {button_hover}; }}"
             "QPushButton:disabled { background-color: #555; color: #888; }"
         )
         self._send_btn.clicked.connect(self._on_send)
@@ -248,16 +267,16 @@ class ChatDockWidget(QDockWidget):
 
         # Dock widget styling
         self.setStyleSheet(
-            "QDockWidget { background-color: #1e1e1e; color: #e0e0e0; }"
+            f"QDockWidget {{ background-color: {bg_primary}; color: {text_primary}; }}"
             "QDockWidget::title {"
             f"  background-color: {self._accent_color}; color: black;"
             "  padding: 6px; font-weight: bold;"
             "}"
         )
         self._scroll_area.setStyleSheet(
-            "QScrollArea { background-color: #1e1e1e; border: none; }"
+            f"QScrollArea {{ background-color: {bg_primary}; border: none; }}"
         )
-        self._message_container.setStyleSheet("background-color: #1e1e1e;")
+        self._message_container.setStyleSheet(f"background-color: {bg_primary};")
 
     # ── WebSocket connection ─────────────────────────────────────────
 
@@ -290,10 +309,8 @@ class ChatDockWidget(QDockWidget):
         # Auto-reconnect
         self._reconnect_timer.start(3000)
 
-    def _on_message(self, raw: str) -> None:  # noqa: C901
+    def _on_message(self, raw: str) -> None:
         """Handle incoming WebSocket message."""
-        if not (raw is not None):
-            raise ValueError("raw must be provided")
         if not (raw is not None):
             raise ValueError("raw must be provided")
         try:
@@ -370,8 +387,6 @@ class ChatDockWidget(QDockWidget):
         """Add a message bubble to the scroll area."""
         if not (role is not None):
             raise ValueError("role must be provided")
-        if not (role is not None):
-            raise ValueError("role must be provided")
         bubble = ChatMessageBubble(role, content, accent_color=self._accent_color)
         # Insert before the stretch item at the end
         count = self._message_layout.count()
@@ -382,8 +397,6 @@ class ChatDockWidget(QDockWidget):
     def _populate_history(self, messages: list[dict]) -> None:
         """Clear and rebuild message bubbles from history."""
         # Remove existing bubbles (keep the stretch)
-        if not (messages is not None):
-            raise ValueError("messages must be provided")
         if not (messages is not None):
             raise ValueError("messages must be provided")
         while self._message_layout.count() > 1:
@@ -410,6 +423,13 @@ class ChatDockWidget(QDockWidget):
         )
 
     # ── Cleanup ──────────────────────────────────────────────────────
+
+    def showEvent(self, event: Any) -> None:  # noqa: D401 - Qt override
+        """Initiate WebSocket connection the first time the dock is shown."""
+        super().showEvent(event)
+        if getattr(self, "_connect_on_show", False):
+            self._connect_on_show = False
+            self._connect()
 
     def closeEvent(self, event: Any) -> None:
         """Clean up WebSocket on close."""

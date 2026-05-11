@@ -65,7 +65,8 @@ class FontManager(QObject):
 
         self.current_font = self._load_preference()
         logger.info(
-            f"FontManager initialized: font={self.current_font}, context={self.app_context}"
+            f"FontManager initialized: font={self.current_font}, "
+            f"context={self.app_context}"
         )
 
     def _load_preference(self) -> str:

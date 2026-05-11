@@ -155,7 +155,6 @@ This dashboard tracks all core modules that currently possess **0% test coverage
 | `src/motion_capture/freemocap_ingest/__main__.py`                                                            | ❌ Untested |
 | `src/motion_capture/freemocap_ingest/launcher.py`                                                            | ❌ Untested |
 | `src/motion_capture/freemocap_ingest/output_adapter.py`                                                      | ❌ Untested |
-| `src/shared/python/ai/gui/chat_dock_widget.py`                                                               | ❌ Untested |
 | `src/shared/python/body_part_viz/renderers/pyqtgl_renderer.py`                                               | ❌ Untested |
 | `src/shared/python/chat/_chat_dock_widget_qt.py`                                                             | ❌ Untested |
 | `src/shared/python/chat/chat_dock_widget.py`                                                                 | ❌ Untested |
