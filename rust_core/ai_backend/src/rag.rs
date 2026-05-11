@@ -34,21 +34,33 @@ impl RagPipeline {
 
         let mut files_indexed = 0;
         
-        // Pseudo-implementation:
-        // 1. Walk directory using walkdir.
-        // 2. Read file contents.
-        // 3. Chunk contents.
-        // 4. Generate embeddings (ONNX runtime / local model).
-        // 5. memory.store_embedding().
-
+        // Pseudo-implementation of embeddings since ONNX/local models require large dependencies:
+        // We'll generate a deterministic pseudo-random embedding based on text length for now,
+        // or zeroes. In a real environment, we'd use candle-core or tokenizers.
+        
         let memory_ref = self.memory.borrow(py);
         
-        // Simulate indexing one file
-        let dummy_payload = format!("File content from {}", root_path);
-        let dummy_embedding = vec![0.0; 384]; // e.g. sentence-transformers size
-        
-        memory_ref.store_embedding(dummy_payload, dummy_embedding)?;
-        files_indexed += 1;
+        for entry in walkdir::WalkDir::new(&root_path).into_iter().filter_map(|e| e.ok()) {
+            let path = entry.path();
+            if path.is_file() {
+                // Read file
+                if let Ok(content) = std::fs::read_to_string(path) {
+                    // Chunk contents roughly by lines
+                    let lines: Vec<&str> = content.lines().collect();
+                    for chunk in lines.chunks(50) {
+                        let chunk_text = chunk.join("\n");
+                        if chunk_text.trim().is_empty() { continue; }
+                        
+                        // Generate dummy embedding for now
+                        let dummy_embedding = vec![0.0; 384]; 
+                        
+                        if memory_ref.store_embedding(chunk_text, dummy_embedding).is_ok() {
+                            files_indexed += 1;
+                        }
+                    }
+                }
+            }
+        }
 
         Ok(files_indexed)
     }
