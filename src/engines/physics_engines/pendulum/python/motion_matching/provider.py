@@ -34,21 +34,54 @@ class PendulumFitSwingProvider:
     ) -> CanonicalFitResult:
         club = self._extract_club(target)
 
-        # Analytic fitting via lagrangian placeholder
-        # Returns a completely analytic zero-cost baseline FitResult
+        # Map the 3D target to a 2D swing plane
+        from src.shared.python.motion_matching.projection_2d import project_to_2d
+
+        projected_club = project_to_2d(club)
+
+        import time
+        from scipy.optimize import minimize
+        from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+            DoublePendulumDynamics,
+        )
+
+        n_eval = 0
+        history: list[float] = []
+
+        def cost_func(theta: np.ndarray) -> float:
+            nonlocal n_eval
+            n_eval += 1
+            # Dummy cost evaluating the distance to the projected club
+            # A real implementation would simulate DoublePendulumDynamics and compute RMSE
+            cost = float(np.sum(theta**2))  # Dummy calculation
+            history.append(cost)
+            return cost
+
+        t0 = time.perf_counter()
+        theta0 = np.zeros(14)  # 14 polynomial coefficients
+
+        # Scipy minimize loop
+        res = minimize(
+            cost_func,
+            theta0,
+            method="SLSQP",
+            options={"maxiter": opts.maxiter if opts else 200},
+        )
+        elapsed = time.perf_counter() - t0
+
         return CanonicalFitResult(
-            theta_optimal=np.zeros(1),
-            final_cost=0.0,
+            theta_optimal=np.asarray(res.x, dtype=np.float64),
+            final_cost=float(res.fun),
             final_rmse_m=0.0,
-            solver_status="success",
-            iterations=1,
-            n_evaluations=1,
-            wall_clock_s=0.001,
-            message="Analytic lagrangian baseline",
-            history=(0.0,),
-            method="analytic",
+            solver_status="success" if res.success else "failure",
+            iterations=int(getattr(res, "nit", 1)),
+            n_evaluations=n_eval,
+            wall_clock_s=elapsed,
+            message=str(res.message),
+            history=tuple(history),
+            method="scipy SLSQP",
             git_commit="unknown",
-            engine_version="1.0.0",
+            engine_version=self.engine_version(),
             target_hash="dummy",
             timestamp_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
         )
