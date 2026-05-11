@@ -543,8 +543,8 @@ def _club_target_to_matlab(target: ClubTarget, matlab: Any) -> Any:
     """Convert a Python ``ClubTarget`` into a MATLAB struct dict."""
     return {
         "time": matlab.double(target.time.reshape(-1, 1).tolist()),
-        "butt": matlab.double(target.grip.tolist()),
-        "grip": matlab.double(target.grip.tolist()),
+        "butt": matlab.double(target.butt.tolist()),
+        "grip": matlab.double(target.butt.tolist()),
         "clubhead": matlab.double(target.clubhead.tolist()),
         "club_quat": matlab.double(target.club_quat.tolist()),
         "impact_idx": float(target.impact_idx + 1),  # 1-based for MATLAB

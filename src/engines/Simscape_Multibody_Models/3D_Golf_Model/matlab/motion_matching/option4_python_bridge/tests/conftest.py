@@ -18,7 +18,10 @@ if str(_PKG_DIR) not in sys.path:
 
 
 def _matlab_engine_importable() -> bool:
-    return importlib.util.find_spec("matlab.engine") is not None
+    try:
+        return importlib.util.find_spec("matlab.engine") is not None
+    except ModuleNotFoundError:
+        return False
 
 
 def pytest_collection_modifyitems(config, items):
