@@ -130,12 +130,12 @@ def main() -> None:
     )
     torch.save(
         {
-            "coeff_mean": trained.norm_stats.coeff_mean,
-            "coeff_std": trained.norm_stats.coeff_std,
-            "r_butt_mean": trained.norm_stats.r_butt_mean,
-            "r_butt_std": trained.norm_stats.r_butt_std,
-            "r_head_mean": trained.norm_stats.r_head_mean,
-            "r_head_std": trained.norm_stats.r_head_std,
+            "coeff_mean": trained.norm_stats.coeffs_mean,
+            "coeff_std": trained.norm_stats.coeffs_std,
+            "r_butt_mean": trained.norm_stats.butt_mean,
+            "r_butt_std": trained.norm_stats.butt_std,
+            "r_head_mean": trained.norm_stats.clubhead_mean,
+            "r_head_std": trained.norm_stats.clubhead_std,
         },
         stats_path,
     )

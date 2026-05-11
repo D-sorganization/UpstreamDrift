@@ -71,6 +71,34 @@ class TestTraining:
         assert trained.model is not None
         assert len(trained.curves.train_loss) == 2
 
+    def test_main_synthetic(self, tmp_path) -> None:
+        """Test the CLI entry point with synthetic data."""
+        from src.shared.python.motion_matching.surrogate.train_10k import main
+        import sys
+        from unittest.mock import patch
+
+        output_dir = tmp_path / "models"
+
+        test_args = [
+            "train_10k.py",
+            "--use-synthetic",
+            "--output-dir",
+            str(output_dir),
+            "--n-epochs",
+            "1",
+            "--batch-size",
+            "4",
+            "--device",
+            "cpu",
+        ]
+
+        with patch.object(sys, "argv", test_args):
+            main()
+
+        assert (output_dir / "best_model.pt").exists()
+        assert (output_dir / "config.pt").exists()
+        assert (output_dir / "norm_stats.pt").exists()
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
