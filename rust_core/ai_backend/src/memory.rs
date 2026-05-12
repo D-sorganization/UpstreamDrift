@@ -199,14 +199,13 @@ impl MemoryManager {
 /// LIMIT-k retrieval path when the extension is not available.
 fn try_load_vss(conn: &Connection) -> bool {
     // Enable extension loading on the connection (bundled-full feature).
-    let enable_result = conn.load_extension_enable();
+    let enable_result = unsafe { conn.load_extension_enable() };
     if enable_result.is_err() {
         eprintln!("ai_backend: could not enable extension loading; vss0 disabled.");
         return false;
     }
-    // Keep the guard alive for as long as extensions should be loadable.
-    let _guard = match enable_result {
-        Ok(g) => g,
+    match enable_result {
+        Ok(()) => {}
         Err(_) => return false,
     };
 
@@ -230,10 +229,7 @@ fn try_load_vss(conn: &Connection) -> bool {
     for candidate in candidates {
         match unsafe { conn.load_extension(candidate, None) } {
             Ok(()) => {
-                eprintln!(
-                    "ai_backend: loaded vss0 extension from '{}'.",
-                    candidate
-                );
+                eprintln!("ai_backend: loaded vss0 extension from '{}'.", candidate);
                 return true;
             }
             Err(e) => {
