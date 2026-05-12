@@ -1036,9 +1036,32 @@ jobs:
   # Enforces: format (rustfmt), lint (clippy), tests (cargo test).
   # =============================================================================
   rust-quality-gate:
+    # Cross-platform matrix (issue #5221): catch platform-specific socket /
+    # filesystem / path bugs in IO-touching crates (realtime pub/sub, codemap
+    # CLI) before users see them. Workspace member enumeration is delegated to
+    # cargo (`--all`, `--all-targets`, `--workspace`) so new crates joining
+    # `[workspace] members = [...]` in the root Cargo.toml are automatically
+    # covered without editing this matrix. The Tauri shell stays excluded via
+    # `[workspace] exclude = ["ui/src-tauri"]` and is covered separately by
+    # tauri-build.yml.
+    #
+    # Runner choice: GitHub-hosted runners are used for all three OSes. The
+    # self-hosted `d-sorg-fleet` label is Linux-only, so Windows and macOS
+    # have to be hosted; running Linux on hosted too keeps the matrix uniform
+    # (same caching keys, same tool installs, same shell semantics).
     needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
-    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    defaults:
+      run:
+        # Git Bash is preinstalled on `windows-latest`, so a single `bash`
+        # default keeps the existing heredoc / `source` / POSIX idioms working
+        # uniformly across all three OSes.
+        shell: bash
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
@@ -1084,23 +1107,10 @@ jobs:
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
         with:
           components: rustfmt, clippy
+          # WASM target is only exercised on Linux (see WASM step below); we
+          # still install it everywhere so `rust-toolchain.toml` stays
+          # consistent across the matrix and `rustup target add` is a no-op.
           targets: wasm32-unknown-unknown
-
-      - name: Cache Cargo registry
-        if: steps.rust-changes.outputs.has_changes == 'true'
-
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-        with:
-          repository: ${{ vars.TOOLS_REPOSITORY || format('{0}/Tools', github.repository_owner) }}
-          path: _tools_dep
-          sparse-checkout: |
-            rust_core
-            Cargo.toml
-            rust-toolchain.toml
-
-      - name: Symlink Tools for Cargo path resolution
-        if: steps.rust-changes.outputs.has_changes == 'true'
-        run: ln -sfn "$GITHUB_WORKSPACE/_tools_dep" "$GITHUB_WORKSPACE/../Tools"
 
       - name: Cache Cargo registry and build
         if: steps.rust-changes.outputs.has_changes == 'true'
@@ -1124,12 +1134,21 @@ jobs:
       - name: Run Rust Tests
         if: steps.rust-changes.outputs.has_changes == 'true'
         run: |
-          # Features `python` and `wasm` use mutually-exclusive FFI systems
+          # Features `python` and `wasm` use mutually-exclusive FFI systems.
+          # `cargo test` enumerates all workspace members via the resolver, so
+          # new crates joining `[workspace] members = [...]` are auto-covered.
           cargo test
           cargo test --features python
 
+      # ----------------------------------------------------------------------
+      # The remaining steps (Maturin wheel build, Python-binding smoke test,
+      # WASM target build) are slow and largely platform-independent. We keep
+      # them on Linux only so the cross-platform matrix stays focused on the
+      # acceptance-criteria checks (fmt / clippy / test / test --features
+      # python) without burning Windows + macOS minutes on redundant work.
+      # ----------------------------------------------------------------------
       - name: Build PyO3 Wheel (Maturin)
-        if: steps.rust-changes.outputs.has_changes == 'true'
+        if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'ubuntu-latest'
         run: |
           python3 -m venv "$RUNNER_TEMP/rust-venv"
           source "$RUNNER_TEMP/rust-venv/bin/activate"
@@ -1141,7 +1160,7 @@ jobs:
           ls ../../target/wheels/
 
       - name: Verify Python Bindings
-        if: steps.rust-changes.outputs.has_changes == 'true'
+        if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'ubuntu-latest'
         run: |
           source "$RUNNER_TEMP/rust-venv/bin/activate"
           python -m pip install target/wheels/upstream_physics-*.whl
@@ -1157,7 +1176,7 @@ jobs:
           "
 
       - name: Build WASM Module (wasm-pack)
-        if: steps.rust-changes.outputs.has_changes == 'true'
+        if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'ubuntu-latest'
         run: |
           rustup target add wasm32-unknown-unknown
           cargo build --target wasm32-unknown-unknown --features wasm -p upstream-physics
@@ -1166,13 +1185,16 @@ jobs:
       - name: Rust Quality Gate Summary
         if: steps.rust-changes.outputs.has_changes == 'true'
         run: |
-          echo "## Rust Quality Gate" >> $GITHUB_STEP_SUMMARY
-          echo "- - rustfmt: formatted" >> $GITHUB_STEP_SUMMARY
-          echo "- - clippy: no warnings" >> $GITHUB_STEP_SUMMARY
-          echo "- - cargo test: all tests pass" >> $GITHUB_STEP_SUMMARY
-          echo "- - maturin: wheel built" >> $GITHUB_STEP_SUMMARY
-          echo "- - Python bindings: verified" >> $GITHUB_STEP_SUMMARY
-          echo "- - WASM: target compiled and verified" >> $GITHUB_STEP_SUMMARY
+          echo "## Rust Quality Gate (${{ matrix.os }})" >> $GITHUB_STEP_SUMMARY
+          echo "- rustfmt: formatted" >> $GITHUB_STEP_SUMMARY
+          echo "- clippy: no warnings" >> $GITHUB_STEP_SUMMARY
+          echo "- cargo test: all tests pass" >> $GITHUB_STEP_SUMMARY
+          echo "- cargo test --features python: all tests pass" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+            echo "- maturin: wheel built" >> $GITHUB_STEP_SUMMARY
+            echo "- Python bindings: verified" >> $GITHUB_STEP_SUMMARY
+            echo "- WASM: target compiled and verified" >> $GITHUB_STEP_SUMMARY
+          fi
 
   rust-quickstart:
     name: Rust Quickstart
