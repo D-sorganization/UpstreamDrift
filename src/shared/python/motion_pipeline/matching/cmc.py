@@ -142,12 +142,12 @@ class CMCMatchingSolver(BaseMotionMatchingSolver):
 
         return MotionMatchingResult(
             request_id=request_id,
-            success=True,
+            success=False,
             tracked_trajectory=reference,
             torque_trajectory=torque_traj,
             residual_report=residual_report,
             fit_metrics={"rmse": 0.0, "max_error": 0.0},
             solve_time=float(solve_time),
-            message="CMC solver - rust outer loop active",
+            message="CMC solver - placeholder torques (full CMC not yet implemented)",
             metadata={"backend": self.backend_type.value, "status": "placeholder", "n_frames": n_frames},
         )
