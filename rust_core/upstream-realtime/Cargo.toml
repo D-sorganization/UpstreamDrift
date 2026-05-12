@@ -1,0 +1,30 @@
+[package]
+name = "upstream-realtime"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Tokio + tokio-tungstenite WebSocket pub-sub backend for UpstreamDrift realtime IPC (replaces autostart FastAPI server)"
+
+[lib]
+name = "upstream_realtime"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+python = ["dep:pyo3"]
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+tokio-tungstenite = "0.24"
+futures-util = "0.3"
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = "0.1"
+once_cell = "1.19"
+regex = "1.10"
+pyo3 = { workspace = true, optional = true }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["full", "test-util", "macros"] }

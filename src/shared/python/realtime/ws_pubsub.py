@@ -1,19 +1,32 @@
 """WebSocket-based publish/subscribe backend.
 
-Uses the FastAPI server in :mod:`src.api.routes.realtime`. If no server is
-already listening on the configured port, a minimal one is spawned in a
-daemon thread.
+Two backends are wired in this module:
 
-Reconnection is exponential (1s, 2s, 4s, ..., capped at 30s).
+* ``rust`` (default when the ``upstream_realtime`` wheel is importable) —
+  the Tokio + tokio-tungstenite server in the ``upstream-realtime`` crate.
+  Owns its own runtime and exposes a sync publish/subscribe ABI; no
+  asyncio in the Python hot path.
+* ``python`` — the legacy FastAPI/uvicorn autostart server, kept as a
+  fallback for environments where the Rust wheel is unavailable.
 
-Latency budget: < 50 ms one-hop.
+Selection is controlled by the ``UD_REALTIME_BACKEND`` env var. When
+unset, ``rust`` is used iff the wheel imports; otherwise the python
+backend is used.
+
+Reconnection (python backend only) is exponential (1s, 2s, 4s, ...,
+capped at 30s).
+
+Latency budget: < 50 ms one-hop (acceptance < 10 ms median, < 50 ms p99
+for the rust backend — see issue #5214).
 """
 
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import logging
+import os
 import socket
 import threading
 import time
@@ -29,6 +42,38 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8765
+
+
+def _has_rust_wheel() -> bool:
+    """Return True iff the ``upstream_realtime`` wheel is importable."""
+    try:
+        import upstream_realtime  # noqa: F401
+    except Exception:
+        return False
+    return True
+
+
+def _resolve_backend() -> str:
+    """Resolve the realtime backend to use.
+
+    Honours ``UD_REALTIME_BACKEND`` (``"rust"`` or ``"python"``). Defaults
+    to ``"rust"`` when the wheel is present, otherwise ``"python"``.
+    """
+    requested = os.environ.get("UD_REALTIME_BACKEND", "").strip().lower()
+    if requested == "rust":
+        if not _has_rust_wheel():
+            logger.warning(
+                "UD_REALTIME_BACKEND=rust but upstream_realtime wheel "
+                "not importable; falling back to python backend"
+            )
+            return "python"
+        return "rust"
+    if requested == "python":
+        return "python"
+    return "rust" if _has_rust_wheel() else "python"
+
+
+REALTIME_BACKEND = _resolve_backend()
 
 
 def _port_in_use(host: str, port: int) -> bool:
@@ -60,13 +105,19 @@ class _BackoffSleeper:
 
 
 class WSPubSub:
-    """WebSocket pub-sub backend that talks to ``/realtime/*`` endpoints.
+    """WebSocket pub-sub backend.
+
+    Delegates to the Rust ``upstream_realtime`` server when available (and
+    when ``UD_REALTIME_BACKEND`` is not pinned to ``python``); otherwise
+    spawns a daemon FastAPI/uvicorn server on the configured port.
 
     Args:
-        host: Host of the FastAPI server. Defaults to 127.0.0.1.
-        port: Port of the FastAPI server. Defaults to 8765.
-        autostart: If True, spawn a minimal FastAPI server on the configured
-            port if nothing is listening. Defaults to True.
+        host: Host of the WS server. Defaults to 127.0.0.1.
+        port: Port of the WS server. Defaults to 8765.
+        autostart: If True, spawn the backend server on the configured port
+            if nothing is listening. Defaults to True.
+        backend: Override the module-level :data:`REALTIME_BACKEND` for this
+            instance. ``None`` (default) uses the module-level value.
     """
 
     def __init__(
@@ -75,12 +126,54 @@ class WSPubSub:
         port: int = DEFAULT_PORT,
         *,
         autostart: bool = True,
+        backend: str | None = None,
     ) -> None:
         self.host = host
         self.port = port
+        self.backend = (backend or REALTIME_BACKEND).lower()
         self._server_thread: threading.Thread | None = None
-        if autostart and not _port_in_use(host, port):
-            self._spawn_server()
+        self._rust_server = None  # upstream_realtime.Server | None
+        if autostart:
+            if self.backend == "rust":
+                self._start_rust_server()
+            elif not _port_in_use(host, port):
+                self._spawn_server()
+
+    # -- rust backend --------------------------------------------------------
+
+    def _start_rust_server(self) -> None:
+        try:
+            import upstream_realtime  # type: ignore
+        except Exception:
+            logger.warning(
+                "rust backend requested but upstream_realtime not importable; "
+                "falling back to python backend"
+            )
+            self.backend = "python"
+            if not _port_in_use(self.host, self.port):
+                self._spawn_server()
+            return
+        try:
+            srv = upstream_realtime.Server(self.host, self.port)
+            self._rust_server = srv
+            # Resolve port if caller passed 0 (OS-assigned).
+            with contextlib.suppress(Exception):
+                self.port = int(srv.bound_port())
+        except Exception:
+            logger.exception("failed to start rust upstream_realtime server")
+            self._rust_server = None
+            self.backend = "python"
+            if not _port_in_use(self.host, self.port):
+                self._spawn_server()
+
+    def stop(self) -> None:
+        """Tear down the Rust server (no-op for the python backend)."""
+        if self._rust_server is not None:
+            try:
+                self._rust_server.stop()
+            except Exception:
+                logger.exception("rust upstream_realtime stop failed")
+            self._rust_server = None
 
     # -- server bootstrap ----------------------------------------------------
 
@@ -141,6 +234,11 @@ class WSPubSub:
         validate_channel(channel)
         if not isinstance(payload, dict):
             raise TypeError(f"payload must be a dict, got {type(payload).__name__}")
+
+        if self.backend == "rust" and self._rust_server is not None:
+            self._rust_server.publish(channel, json.dumps(payload))
+            return
+
         try:
             import httpx
         except Exception as exc:
@@ -159,6 +257,10 @@ class WSPubSub:
         callback: Callable[[dict], None],
     ) -> Subscription:
         validate_channel(channel)
+
+        if self.backend == "rust" and self._rust_server is not None:
+            return self._subscribe_rust(channel, callback)
+
         stop = threading.Event()
         url = self._subscribe_url(channel)
 
@@ -209,6 +311,66 @@ class WSPubSub:
         thread = threading.Thread(
             target=_run,
             name=f"realtime-ws-sub-{channel}",
+            daemon=True,
+        )
+        thread.start()
+
+        def _unsubscribe() -> None:
+            stop.set()
+            if thread.is_alive() and threading.current_thread() is not thread:
+                thread.join(timeout=2.0)
+
+        return Subscription(
+            channel=channel, callback=callback, _unsubscribe=_unsubscribe
+        )
+
+    # -- rust subscribe ------------------------------------------------------
+
+    def _subscribe_rust(
+        self,
+        channel: str,
+        callback: Callable[[dict], None],
+    ) -> Subscription:
+        """Subscribe via the in-process Rust broadcast channel.
+
+        The Rust ``Subscriber`` exposes a blocking ``recv(timeout)`` that
+        releases the GIL during the wait, so we can park a single Python
+        thread per subscription without burning CPU.
+        """
+        assert self._rust_server is not None
+        sub = self._rust_server.subscribe(channel)
+        stop = threading.Event()
+
+        def _run() -> None:
+            while not stop.is_set():
+                try:
+                    payload_json = sub.recv(1.0)
+                except Exception:
+                    if stop.is_set():
+                        return
+                    logger.exception(
+                        "rust upstream_realtime recv failed for %s", channel
+                    )
+                    # Brief backoff to avoid a hot loop on a broken
+                    # subscriber; the broadcast channel is unrecoverable
+                    # once the underlying sender is dropped.
+                    if not stop.wait(1.0):
+                        continue
+                    return
+                if payload_json is None:
+                    continue
+                try:
+                    data = json.loads(payload_json)
+                except (TypeError, ValueError):
+                    continue
+                try:
+                    callback(data)
+                except Exception:
+                    logger.exception("rust subscriber callback raised for %s", channel)
+
+        thread = threading.Thread(
+            target=_run,
+            name=f"realtime-ws-sub-rust-{channel}",
             daemon=True,
         )
         thread.start()
