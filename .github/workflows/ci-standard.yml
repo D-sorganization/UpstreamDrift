@@ -138,7 +138,7 @@ jobs:
       - run: python -m pip install --ignore-installed "mypy==1.20.1" types-PyYAML types-requests
       - name: Create stub ui/dist for editable install (quality checks only)
         run: mkdir -p ui/dist
-      - run: pip install -e .[dev]
+      - run: python -m pip install --ignore-installed -e ".[dev]"
 
       - name: Pin Type Toolchain
         run: |
@@ -849,7 +849,7 @@ jobs:
           else:
               raise SystemExit(f"PostgreSQL did not accept SQL connections: {last_error!r}")
           PY
-          python3 -m pytest -p pytest_timeout tests/integration/test_alembic_round_trip.py \
+          python3 -m pytest -p pytest_timeout -p asyncio tests/integration/test_alembic_round_trip.py \
             -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
             --timeout=180 \
             --timeout-method=thread \
