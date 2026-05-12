@@ -37,6 +37,7 @@ class RustAgentAdapter(BaseAgentAdapter):
         chat_path: str | None = None,
         embed_path: str | None = None,
         embedding_model: str | None = None,
+        use_local_embeddings: bool = False,
     ) -> None:
         """Initialize the Rust Agent Adapter.
 
@@ -52,6 +53,13 @@ class RustAgentAdapter(BaseAgentAdapter):
                 ``/embeddings``.
             embedding_model: Embedding model name. Defaults to
                 ``text-embedding-3-small``.
+            use_local_embeddings: When ``True``, embed via a local ONNX
+                ``all-MiniLM-L6-v2`` model instead of the HTTP endpoint.
+                Requires ``ai_backend`` to be built with
+                ``--features python,local-embeddings``. The model is
+                cached at ``$UPSTREAM_DRIFT_MODEL_CACHE`` or
+                ``~/.cache/upstream-drift/models/`` and downloaded on
+                first use.
         """
         try:
             import ai_backend
@@ -70,7 +78,22 @@ class RustAgentAdapter(BaseAgentAdapter):
         self.engine = ai_backend.AIEngine(self.config)
         self.memory = ai_backend.MemoryManager(db_path)
         self.memory.initialize()
-        self.rag = ai_backend.RagPipeline(self.memory, self.config)
+        # The RagPipeline signature changed when local-embeddings landed
+        # (#5227): older wheels won't accept the third positional flag.
+        # Fall back to the old call when the new path raises a TypeError so
+        # mixed-version environments don't break.
+        try:
+            self.rag = ai_backend.RagPipeline(
+                self.memory, self.config, use_local_embeddings
+            )
+        except TypeError:
+            if use_local_embeddings:
+                raise RuntimeError(
+                    "Installed ai_backend wheel does not support "
+                    "use_local_embeddings; rebuild with "
+                    "`maturin develop --features python,local-embeddings`."
+                ) from None
+            self.rag = ai_backend.RagPipeline(self.memory, self.config)
 
     def stream_response(
         self,

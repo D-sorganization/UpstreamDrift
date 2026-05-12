@@ -1,6 +1,8 @@
 pub mod config;
 pub mod embeddings;
 pub mod llm;
+#[cfg(feature = "local-embeddings")]
+pub mod local_embed;
 pub mod memory;
 pub mod rag;
 

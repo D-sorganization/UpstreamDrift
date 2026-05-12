@@ -9,6 +9,11 @@ authors.workspace = true
 name = "ai_backend"
 crate-type = ["cdylib", "rlib"]
 
+[[bin]]
+name = "ai_backend_cli"
+path = "src/bin/cli.rs"
+required-features = []
+
 [features]
 default = []
 # Enables PyO3 bindings. The workspace-level pyo3 dependency already activates
@@ -17,18 +22,41 @@ default = []
 # pyo3 behind an opt-in feature mirrors the upstream-physics pattern and lets
 # `cargo test --workspace` succeed without linking libpython.
 python = ["dep:pyo3"]
+# Enables local ONNX-based embeddings via `ort` + `tokenizers`. Opt-in because
+# `ort` pulls in onnxruntime native binaries that are heavyweight (~30 MB) and
+# can be fragile to set up on Windows MSVC without `ONNXRUNTIME_LIB_DIR`. The
+# pure-Rust core (cosine search, indexing, sqlite persistence) stays buildable
+# without this feature; consumers that want offline embeddings opt in via
+# `--features local-embeddings`.
+local-embeddings = ["dep:ort", "dep:ort-sys", "dep:tokenizers", "dep:ndarray", "dep:sha2", "dep:dirs"]
 
 [dependencies]
 pyo3 = { workspace = true, optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { version = "1.0", features = ["full"] }
-reqwest = { version = "0.11", default-features = false, features = ["json", "stream", "rustls-tls"] }
+reqwest = { version = "0.11", default-features = false, features = ["json", "stream", "rustls-tls", "blocking"] }
 futures = "0.3"
 rusqlite = { version = "0.29", features = ["bundled-full"] }
 walkdir = "2.3"
 regex = "1.10"
+ignore = "0.4"
+sha2 = { version = "0.10", optional = true }
+dirs = { version = "5", optional = true }
+# ort = ONNX Runtime bindings. We use `load-dynamic` so the build does not
+# fetch onnxruntime binaries (the `download-binaries` path hit a ureq/tls
+# breakage on Windows MSVC at the time of #5227). Consumers point at their
+# system onnxruntime via the `ORT_DYLIB_PATH` env var at runtime.
+#
+# ort 2.x is still in -rc; we pin a known-good combination of ort + ort-sys
+# rather than letting Cargo float between -rc.x because the API surface
+# moves between RCs.
+ort = { version = "=2.0.0-rc.10", default-features = false, features = ["load-dynamic", "ndarray"], optional = true }
+ort-sys = { version = "=2.0.0-rc.10", optional = true }
+tokenizers = { version = "0.20", default-features = false, features = ["onig"], optional = true }
+ndarray = { version = "0.16", optional = true }
 
 [dev-dependencies]
 wiremock = "0.6"
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
+tempfile = "3"
