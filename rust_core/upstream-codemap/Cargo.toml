@@ -1,0 +1,47 @@
+[package]
+name = "upstream-codemap"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Standalone Rust CLI for indexing the UpstreamDrift repo into a tree-sitter + SQLite/FTS5 code map."
+
+[[bin]]
+name = "upstream-codemap"
+path = "src/main.rs"
+
+[lib]
+name = "upstream_codemap"
+path = "src/lib.rs"
+
+[features]
+default = []
+# Optional in-process Python binding (acceptance criterion §5217). Off by
+# default so the binary builds cleanly without a Python toolchain.
+pyo3 = ["dep:pyo3"]
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+rusqlite = { version = "0.29", features = ["bundled"] }
+blake3 = "1.5"
+walkdir = "2.5"
+ignore = "0.4"
+notify = "6.1"
+rayon = "1.10"
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = "1"
+flate2 = "1.0"
+
+tree-sitter = "0.25"
+tree-sitter-python = "0.25"
+tree-sitter-javascript = "0.25"
+tree-sitter-typescript = "0.23"
+tree-sitter-rust = "0.24"
+tree-sitter-md = "0.5"
+
+pyo3 = { workspace = true, optional = true }
+
+[dev-dependencies]
+tempfile = "3.14"

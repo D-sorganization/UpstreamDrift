@@ -8,7 +8,7 @@ members = [
     "rust_core/upstream-physics",
     "rust_core/ai_backend",
     "rust_core/upstream-mocap-preproc",
-    "rust_core/upstream-mocap-io",
+    "rust_core/upstream-codemap",
 ]
 exclude = ["ui/src-tauri"]
 

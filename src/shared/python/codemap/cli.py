@@ -15,6 +15,8 @@ import argparse
 import gzip
 import json
 import logging
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -23,7 +25,38 @@ from . import db as db_mod
 from . import indexer as indexer_mod
 
 
+def _rust_binary() -> str | None:
+    """Locate the ``upstream-codemap`` binary on PATH or under repo target/."""
+    exe = "upstream-codemap.exe" if sys.platform == "win32" else "upstream-codemap"
+    found = shutil.which(exe)
+    if found:
+        return found
+    # Try the workspace release dir (development convenience).
+    try:
+        repo = api_mod.discover_repo_root()
+    except Exception:
+        return None
+    candidate = repo / "target" / "release" / exe
+    if candidate.exists():
+        return str(candidate)
+    return None
+
+
 def _cmd_rebuild(args: argparse.Namespace) -> int:
+    if getattr(args, "rust", False):
+        binary = _rust_binary()
+        if binary is not None:
+            cmd = [binary, "rebuild"]
+            if args.repo:
+                cmd.extend(["--repo", str(args.repo)])
+            if args.since:
+                cmd.extend(["--since", args.since])
+            return subprocess.call(cmd)
+        print(
+            "codemap: --rust requested but upstream-codemap binary not found; "
+            "falling back to Python implementation.",
+            file=sys.stderr,
+        )
     stats = indexer_mod.rebuild(args.repo, since=args.since)
     print(
         f"indexed {stats.files_parsed} files "
@@ -107,6 +140,14 @@ def build_parser() -> argparse.ArgumentParser:
     rb = sub.add_parser("rebuild", help="(Re)build the index.")
     rb.add_argument(
         "--since", default=None, help="Only re-parse files changed since this git ref."
+    )
+    rb.add_argument(
+        "--rust",
+        action="store_true",
+        help=(
+            "Delegate to the upstream-codemap Rust binary if available "
+            "(falls back to the Python implementation otherwise)."
+        ),
     )
     rb.set_defaults(func=_cmd_rebuild)
 

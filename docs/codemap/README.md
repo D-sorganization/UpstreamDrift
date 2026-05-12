@@ -37,4 +37,28 @@ The canonical console-script entry points are `codemap` (CLI) and
 `codemap-mcp` (MCP server). The equivalent module-form invocations are
 `python -m codemap.cli ...` and `python -m codemap.mcp_server`.
 
+## Optional Rust binary (`upstream-codemap`)
+
+The Rust crate at `rust_core/upstream-codemap/` produces the same
+`.codemap/index.db` schema and is a drop-in for the rebuild step. Build it
+with `cargo build --release -p upstream-codemap`, then either invoke it
+directly:
+
+```bash
+./target/release/upstream-codemap rebuild
+./target/release/upstream-codemap search "Solver" -k 10
+./target/release/upstream-codemap watch --debounce-ms 500
+```
+
+…or opt-in to it from the Python CLI:
+
+```bash
+codemap rebuild --rust   # delegates to upstream-codemap if on PATH, else
+                         # falls back transparently to the Python indexer
+```
+
+On a clean checkout the cold rebuild walks the entire repo in ~30s vs the
+Python implementation's minutes. Tracked under
+[issue #5217](https://github.com/D-sorganization/UpstreamDrift/issues/5217).
+
 See [Agent Integration](agents.md) for using this with AI tools.
