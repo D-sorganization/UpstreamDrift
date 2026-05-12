@@ -30,8 +30,28 @@ __all__ = [
 from .provider import (
     available_engines,
     get_provider,
-    register_provider,
+    register_provider as _register_canonical,
 )
+
+def register_provider(provider: Any) -> None:
+    """Register an engine-side ``fit_swing`` provider.
+
+    Maintains legacy validation (raises TypeError for missing/invalid
+    engine_name or missing fit_swing) before delegating to the
+    canonical registry.
+    """
+    name = getattr(provider, "engine_name", None)
+    if not isinstance(name, str) or not name:
+        raise TypeError(
+            "provider must expose a non-empty 'engine_name' string attribute"
+        )
+    if not callable(getattr(provider, "fit_swing", None)):
+        raise TypeError(
+            f"provider for engine '{name}' must expose a callable 'fit_swing'"
+        )
+    
+    # Validation passed, delegate to the canonical registry
+    _register_canonical(provider)
 
 # clear_registry is not in provider.py, but it's used in tests. We can implement it here by reaching into provider.py's internals, or we can just import the internal ones.
 from .provider import _REGISTRY, _REGISTRY_LOCK
