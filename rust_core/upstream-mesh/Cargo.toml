@@ -1,0 +1,34 @@
+[package]
+name = "upstream-mesh"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Mesh kernels for UpstreamDrift: convex hull, decimation, primitive fitting (parry3d-backed). First slice for issue #5219."
+
+[lib]
+name = "upstream_mesh"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+# Optional PyO3 binding. Off by default so the crate builds in the workspace
+# without a Python toolchain. Enabled by maturin via [tool.maturin].features.
+python = ["dep:pyo3"]
+
+[dependencies]
+parry3d = "0.17"
+nalgebra = { workspace = true }
+serde = { workspace = true }
+pyo3 = { workspace = true, optional = true }
+
+[dev-dependencies]
+approx = "0.5"
+rand = "0.8"
+rand_chacha = "0.3"
+criterion = "0.5"
+
+[[bench]]
+name = "convex_hull"
+harness = false

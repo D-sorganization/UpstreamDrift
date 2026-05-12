@@ -1,0 +1,22 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "upstream-mesh"
+version = "2.1.0"
+description = "Rust mesh kernels (convex hull / decimation / primitive fitting) for UpstreamDrift"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "numpy>=1.24",
+    "scipy>=1.11",
+]
+
+[tool.maturin]
+features = ["python"]
+module-name = "upstream_mesh"
+manifest-path = "Cargo.toml"
