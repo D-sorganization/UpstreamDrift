@@ -5,7 +5,7 @@
 //! training loops (`stable_baselines3`) where releasing the GIL during
 //! batched evaluation is the win.
 //!
-//! ## Slice 1 (this crate)
+//! ## Implemented slices
 //!
 //! Pure scalar contractile/passive/tendon curves ported from
 //! `src/shared/python/biomechanics/hill_muscle.py`:
@@ -14,6 +14,8 @@
 //! - [`hill::f_p`] — passive force-length (PEE exponential spring)
 //! - [`hill::f_v`] — force-velocity (Hill hyperbola + eccentric plateau)
 //! - [`hill::f_t`] — tendon force (SEE quadratic)
+//! - [`model::HillMuscleModel`] — state-bearing force assembly
+//! - [`activation::ActivationDynamics`] — first-order activation dynamics
 //!
 //! Numerical parity vs the Python source is asserted within 1e-6 in
 //! `tests/parity_hill.rs`.
@@ -21,7 +23,6 @@
 //! ## Out of scope (future slices, tracked separately)
 //!
 //! - Full muscle equilibrium solver (`muscle_equilibrium.py`)
-//! - Activation dynamics Euler step (`activation_dynamics.py`)
 //! - Multi-muscle moment summation (`multi_muscle.py`)
 //! - Batched / `rayon`-parallel API for RL inner loops
 //! - OpenSim/MuJoCo parity test corpus
@@ -29,10 +30,14 @@
 //!
 //! See the umbrella issue UD#5216 and the slice-1 follow-up for status.
 
+pub mod activation;
 pub mod hill;
+pub mod model;
 
 // Convenience re-exports so callers can `use upstream_muscle::{f_l, f_v, f_t};`.
+pub use activation::ActivationDynamics;
 pub use hill::{f_l, f_l_with_width, f_p, f_t, f_v};
+pub use model::{HillMuscleModel, MuscleParameters, MuscleState};
 
 // ── Python bindings (feature-gated) ──────────────────────────────────────────
 //
@@ -95,6 +100,10 @@ fn upstream_muscle(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(py_f_p, m)?)?;
     m.add_function(wrap_pyfunction!(py_f_v, m)?)?;
     m.add_function(wrap_pyfunction!(py_f_t, m)?)?;
+    m.add_class::<activation::ActivationDynamics>()?;
+    m.add_class::<model::HillMuscleModel>()?;
+    m.add_class::<model::MuscleParameters>()?;
+    m.add_class::<model::MuscleState>()?;
     m.add(
         "DEFAULT_FORCE_LENGTH_WIDTH",
         hill::DEFAULT_FORCE_LENGTH_WIDTH,
