@@ -39,7 +39,6 @@ from src.shared.python.biomechanics.rust_muscle import (  # noqa: E402
     step_full,
 )
 
-
 N_MUSCLES = 1000
 N_STEPS = 1000
 DT = 0.001

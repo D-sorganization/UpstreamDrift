@@ -239,6 +239,7 @@ class PuttingGreenHandler:
         )
         return process is not None
 
+
 class BiomechExerciseHandler:
     """Handler for launching biomechanics exercise dashboards."""
 
@@ -259,22 +260,26 @@ class BiomechExerciseHandler:
             raise ValueError("repo_path must be provided")
 
         exercise_name = getattr(model, "exercise", "gait")
-        model_name = getattr(model, "name", f"Biomechanics Exercise: {exercise_name.title()}")
+        model_name = getattr(
+            model, "name", f"Biomechanics Exercise: {exercise_name.title()}"
+        )
         script_path = repo_path / "src" / "launchers" / "exercise_dashboard.py"
 
         # Pass the exercise as a CLI argument through an environment variable or module?
         # Actually, since process_manager.launch_script doesn't take args natively,
         # we can launch it using launch_module with the right module_name, but that doesn't take args either.
         # Let's use secure_popen manually or just set an environment variable.
-        env = process_manager.get_subprocess_env(get_model_python_paths(model, repo_path))
+        env = process_manager.get_subprocess_env(
+            get_model_python_paths(model, repo_path)
+        )
         env["BIOMECH_EXERCISE"] = exercise_name
 
-        # Wait, if we use launch_script, we can't pass args. 
+        # Wait, if we use launch_script, we can't pass args.
         # But we can modify launch_script to take args, or just use the environment variable fallback.
         # Let's use secure_popen if needed, but launch_script is safer. Let's see if we can pass args?
         # Let's use launch_script and let the script read sys.argv or env.
         # I'll modify exercise_dashboard.py to read BIOMECH_EXERCISE env var if --exercise is not passed.
-        
+
         process = process_manager.launch_script(
             name=model_name,
             script_path=script_path,
@@ -324,7 +329,9 @@ class GolfSimulationSuiteHandler:
 
         script_path = resolve_model_artifact_path(model, repo_path)
         if not script_path.exists():
-            logger.warning("GolfSimulationSuiteHandler: script not found: %s", script_path)
+            logger.warning(
+                "GolfSimulationSuiteHandler: script not found: %s", script_path
+            )
             return False
 
         process = process_manager.launch_script(

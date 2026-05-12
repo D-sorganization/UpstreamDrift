@@ -63,27 +63,27 @@ class TestVersionSurfacesAligned:
         server_src = (_REPO_ROOT / "src" / "api" / "server.py").read_text(
             encoding="utf-8"
         )
-        assert '"3.0.0"' not in server_src, (
-            "server.py must not hardcode version '3.0.0'; use __version__ from _version.py"
-        )
+        assert (
+            '"3.0.0"' not in server_src
+        ), "server.py must not hardcode version '3.0.0'; use __version__ from _version.py"
 
     def test_local_server_py_uses_canonical_version(self) -> None:
         """local_server.py FastAPI version should not hardcode a stale string."""
         local_src = (_REPO_ROOT / "src" / "api" / "local_server.py").read_text(
             encoding="utf-8"
         )
-        assert "_version" in local_src or "__version__" in local_src, (
-            "local_server.py must import __version__ from src.api._version"
-        )
+        assert (
+            "_version" in local_src or "__version__" in local_src
+        ), "local_server.py must import __version__ from src.api._version"
 
     def test_local_server_py_does_not_hardcode_old_version(self) -> None:
         """2.0.0 (old hardcoded value) is not in local_server.py."""
         local_src = (_REPO_ROOT / "src" / "api" / "local_server.py").read_text(
             encoding="utf-8"
         )
-        assert '"2.0.0"' not in local_src, (
-            "local_server.py must not hardcode version '2.0.0'; use __version__"
-        )
+        assert (
+            '"2.0.0"' not in local_src
+        ), "local_server.py must not hardcode version '2.0.0'; use __version__"
 
     def test_core_route_uses_canonical_version(self) -> None:
         """The root endpoint in core.py must not return a hardcoded version."""
@@ -100,6 +100,6 @@ class TestVersionSurfacesAligned:
         core_src = (_REPO_ROOT / "src" / "api" / "routes" / "core.py").read_text(
             encoding="utf-8"
         )
-        assert '"1.0.0"' not in core_src, (
-            "core.py must not hardcode version '1.0.0'; use __version__ from _version.py"
-        )
+        assert (
+            '"1.0.0"' not in core_src
+        ), "core.py must not hardcode version '1.0.0'; use __version__ from _version.py"

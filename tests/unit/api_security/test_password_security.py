@@ -63,23 +63,25 @@ class TestPasswordSecurity:
         """Test that passwords are hashed with bcrypt."""
         security_manager = SecurityManager()
 
-        password = "test_password_123!@#"  # nosec B105 - test fixture, not a real credential
+        password = (
+            "test_password_123!@#"  # nosec B105 - test fixture, not a real credential
+        )
         hashed = security_manager.hash_password(password)
 
         # Verify bcrypt format
-        assert hashed.startswith(("$2b$", "$2a$")), (
-            "Assertion failed: hashed.startswith(($2b$, $2a$))"
-        )
+        assert hashed.startswith(
+            ("$2b$", "$2a$")
+        ), "Assertion failed: hashed.startswith(($2b$, $2a$))"
 
         # Verify password can be verified
-        assert security_manager.verify_password(password, hashed), (
-            "Assertion failed: security_manager.verify_password(password, hashed)"
-        )
+        assert security_manager.verify_password(
+            password, hashed
+        ), "Assertion failed: security_manager.verify_password(password, hashed)"
 
         # Verify wrong password fails
-        assert not security_manager.verify_password("wrong_password", hashed), (
-            "Assertion failed: not security_manager.verify_password(wrong_password, hashed)"
-        )
+        assert not security_manager.verify_password(
+            "wrong_password", hashed
+        ), "Assertion failed: not security_manager.verify_password(wrong_password, hashed)"
 
     def test_password_not_logged(self) -> None:
         """Test that passwords are never logged in plaintext."""
@@ -124,22 +126,22 @@ class TestPasswordSecurity:
 
             # Check that no password appears in plaintext
             # Should have warning about no password set
-            assert "GOLF_ADMIN_PASSWORD" in log_output, (
-                "Assertion failed: GOLF_ADMIN_PASSWORD in log_output"
-            )
+            assert (
+                "GOLF_ADMIN_PASSWORD" in log_output
+            ), "Assertion failed: GOLF_ADMIN_PASSWORD in log_output"
 
             # Should NOT have "password: " or similar plaintext password
-            assert "Temporary admin password:" not in log_output, (
-                "Assertion failed: Temporary admin password: not in log_output"
-            )
-            assert "Temporary password:" not in log_output, (
-                "Assertion failed: Temporary password: not in log_output"
-            )
+            assert (
+                "Temporary admin password:" not in log_output
+            ), "Assertion failed: Temporary admin password: not in log_output"
+            assert (
+                "Temporary password:" not in log_output
+            ), "Assertion failed: Temporary password: not in log_output"
 
             # Should have instructions instead
-            assert "randomly generated password" in log_output.lower(), (
-                "Assertion failed: randomly generated password in log_output.lower()"
-            )
+            assert (
+                "randomly generated password" in log_output.lower()
+            ), "Assertion failed: randomly generated password in log_output.lower()"
 
         finally:
             logger.removeHandler(handler)

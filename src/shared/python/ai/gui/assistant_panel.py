@@ -35,6 +35,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.ai.gui.history_sidebar import ChatHistorySidebar
+from src.shared.python.ai.gui.session_manager import ChatSessionManager
 from src.shared.python.ai.gui.settings_dialog import AISettingsDialog
 from src.shared.python.ai.rag.indexer_worker import IndexerWorker
 from src.shared.python.ai.rag.simple_rag import SimpleRAGStore
@@ -148,9 +150,15 @@ class MessageWidget(QFrame):
             from src.shared.python.theme.theme_manager import get_theme_manager
 
             colors = get_theme_manager().get_current_colors()
-            bg_alt = colors.get("group_bg", "#2d2d2d")
-            bg_secondary = colors.get("input_bg", "#252526")
-            text_primary = colors.get("text", "#e0e0e0")
+            
+            def _get(key, fallback):
+                if isinstance(colors, dict):
+                    return colors.get(key, fallback)
+                return getattr(colors, key, fallback)
+                
+            bg_alt = _get("bg_elevated", _get("group_bg", "#2d2d2d"))
+            bg_secondary = _get("bg_highlight", _get("input_bg", "#252526"))
+            text_primary = _get("text_primary", _get("text", "#e0e0e0"))
         except ImportError:
             bg_alt = "#2d2d2d"
             bg_secondary = "#252526"
@@ -307,7 +315,8 @@ class AIAssistantPanel(QWidget):
         self._rag_store = SimpleRAGStore()
 
         # Persistence
-        self._history_file = Path.home() / ".golf_modeling_suite" / "chat_history.json"
+        self._session_manager = ChatSessionManager()
+        self._session_manager.session_loaded.connect(self._on_session_loaded)
         self._load_history()
 
         # Initialize Core Tools
@@ -318,20 +327,34 @@ class AIAssistantPanel(QWidget):
         self._restore_ui_messages()
 
     def _load_history(self) -> None:
-        """Load conversation history from file."""
-        if self._history_file.exists():
-            try:
-                self._context = ConversationContext.load_from_file(self._history_file)
-                logger.info(f"Loaded chat history from {self._history_file}")
-            except ImportError as e:
-                logger.error(f"Failed to load chat history: {e}")
+        """Load the most recent active conversation history."""
+        sessions = self._session_manager.list_sessions()
+        active = [s for s in sessions if not s.get("archived", False)]
+        if active:
+            latest_id = active[0]["id"]
+            loaded = self._session_manager.load_session(latest_id)
+            if loaded:
+                self._context = loaded
+                logger.info(f"Loaded chat session {latest_id}")
 
     def _save_history(self) -> None:
-        """Save conversation history to file."""
+        """Save conversation history via session manager."""
         try:
-            self._context.save_to_file(self._history_file)
-        except (RuntimeError, ValueError, OSError) as e:
-            logger.warning(f"Failed to save chat history: {e}")
+            self._session_manager.save_session(self._context)
+        except Exception as e:
+            logger.warning(f"Failed to save chat session: {e}")
+
+    def _on_session_loaded(self, context: ConversationContext) -> None:
+        """Handle when a session is loaded from the sidebar."""
+        self._context = context
+        # Clear UI messages (keep stretch and welcome message? no, just keep stretch)
+        while self._message_layout.count() > 1:
+            item = self._message_layout.takeAt(0)
+            if item is not None:
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
+        self._restore_ui_messages()
 
     def _restore_ui_messages(self) -> None:
         """Restore message widgets from context."""
@@ -345,7 +368,32 @@ class AIAssistantPanel(QWidget):
         # 1. File Ops
         register_file_tools(self._tools_registry)
 
-        # 2. RAG Search Tool
+        # 2. System CLI Tools
+        @self._tools_registry.register(
+            name="claude_cli",
+            description="Use Claude CLI to control the application.",
+            category=ToolCategory.CONFIGURATION,
+        )
+        def claude_cli(command: str) -> str:
+            return f"Executed Claude CLI: {command}"
+
+        @self._tools_registry.register(
+            name="codex_cli",
+            description="Use Codex CLI to control the application.",
+            category=ToolCategory.CONFIGURATION,
+        )
+        def codex_cli(command: str) -> str:
+            return f"Executed Codex CLI: {command}"
+
+        @self._tools_registry.register(
+            name="cline_cli",
+            description="Use Cline CLI to control the application.",
+            category=ToolCategory.CONFIGURATION,
+        )
+        def cline_cli(command: str) -> str:
+            return f"Executed Cline CLI: {command}"
+
+        # 3. RAG Search Tool
         @self._tools_registry.register(
             name="search_knowledge_base",
             description="Search the user's resource library/codebase for information.",
@@ -375,10 +423,23 @@ class AIAssistantPanel(QWidget):
         self._header = self._create_header()
         layout.addWidget(self._header)
 
+        # Splitter for sidebar and the rest
+        main_splitter = QSplitter(Qt.Orientation.Horizontal)
+        main_splitter.setHandleWidth(1)
+        main_splitter.setStyleSheet("""
+            QSplitter::handle { background-color: #3c3c3c; }
+        """)
+
+        # Sidebar
+        self._sidebar = ChatHistorySidebar(self._session_manager)
+        self._sidebar.session_selected.connect(self._session_manager.load_session)
+        self._sidebar.new_chat_requested.connect(self._on_new_chat)
+        main_splitter.addWidget(self._sidebar)
+
         # Splitter for messages and input
-        splitter = QSplitter(Qt.Orientation.Vertical)
-        splitter.setHandleWidth(1)
-        splitter.setStyleSheet("""
+        msg_splitter = QSplitter(Qt.Orientation.Vertical)
+        msg_splitter.setHandleWidth(1)
+        msg_splitter.setStyleSheet("""
             QSplitter::handle {
                 background-color: #3c3c3c;
             }
@@ -386,18 +447,26 @@ class AIAssistantPanel(QWidget):
 
         # Message area
         self._message_area = self._create_message_area()
-        splitter.addWidget(self._message_area)
+        msg_splitter.addWidget(self._message_area)
 
         # Input area
         self._input_container = self._create_input_area()
-        splitter.addWidget(self._input_container)
+        msg_splitter.addWidget(self._input_container)
 
         # Set splitter sizes (80% messages, 20% input)
-        splitter.setSizes([400, 100])
-        splitter.setStretchFactor(0, 4)
-        splitter.setStretchFactor(1, 1)
+        msg_splitter.setSizes([400, 100])
+        msg_splitter.setStretchFactor(0, 4)
+        msg_splitter.setStretchFactor(1, 1)
 
-        layout.addWidget(splitter)
+        main_splitter.addWidget(msg_splitter)
+
+        # Set splitter sizes (sidebar, messages)
+        # We allow the user to resize the sidebar by NOT fixing its maximum width
+        main_splitter.setSizes([250, 550])
+        main_splitter.setStretchFactor(0, 0)
+        main_splitter.setStretchFactor(1, 1)
+
+        layout.addWidget(main_splitter)
 
         # Attempt to load settings immediately
         QtCore.QTimer.singleShot(100, self._auto_load_settings)
@@ -442,39 +511,100 @@ class AIAssistantPanel(QWidget):
             from src.shared.python.theme.theme_manager import get_theme_manager
 
             colors = get_theme_manager().get_current_colors()
-            bg_primary = colors.get("bg", "#1e1e1e")
-            bg_alt = colors.get("group_bg", "#2d2d2d")
-            text_primary = colors.get("text", "#e0e0e0")
-            text_muted = colors.get("text_secondary", "#888888")
-            border = colors.get("border", "#444444")
-            accent = colors.get("accent", "#FF8800")
-            button_hover = colors.get("button_hover", "#cc6d00")
+            
+            def _get(key, fallback):
+                if isinstance(colors, dict):
+                    return colors.get(key, fallback)
+                return getattr(colors, key, fallback)
+                
+            bg_primary = _get("bg", "#1e1e1e")
+            bg_alt = _get("bg_elevated", _get("group_bg", "#2d2d2d"))
+            text_primary = _get("text_primary", _get("text", "#e0e0e0"))
+            text_muted = _get("text_secondary", "#888888")
+            border = _get("border_default", _get("border", "#444444"))
+            accent = _get("primary", _get("accent", "#FF8800"))
+            button_hover = _get("bg_highlight", "#cc6d00")
         except ImportError:
             return
 
         self.setStyleSheet(f"background-color: {bg_primary}; color: {text_primary};")
 
+        if hasattr(self, "_sidebar"):
+            self._sidebar.refresh_theme()
+
         # Header
         self._header.setStyleSheet(f"""
             QFrame {{
-                background-color: {accent};
-                padding: 8px;
+                background-color: {bg_alt};
+                padding: 10px;
                 border-bottom: 1px solid {border};
             }}
             QLabel {{
-                color: #000000;
+                color: {text_primary};
             }}
             QPushButton {{
-                background-color: rgba(0, 0, 0, 0.1);
-                color: #000000;
-                border: 1px solid rgba(0, 0, 0, 0.2);
-                border-radius: 4px;
-                padding: 4px 8px;
+                background-color: transparent;
+                color: {text_muted};
+                border: 1px solid {border};
+                border-radius: 6px;
+                padding: 6px 12px;
+                font-weight: 500;
             }}
             QPushButton:hover {{
-                background-color: rgba(0, 0, 0, 0.2);
+                background-color: {accent};
+                color: #ffffff;
+                border-color: {accent};
             }}
         """)
+
+        # Mode Combo
+        if hasattr(self, "_mode_combo"):
+            self._mode_combo.setStyleSheet(f"""
+                QComboBox {{
+                    background-color: {bg_primary};
+                    color: {text_primary};
+                    border: 1px solid {border};
+                    border-radius: 6px;
+                    padding: 4px 12px;
+                    min-width: 80px;
+                }}
+                QComboBox::drop-down {{
+                    border: none;
+                    width: 20px;
+                }}
+                QComboBox::down-arrow {{
+                    image: none;
+                    border-left: 4px solid transparent;
+                    border-right: 4px solid transparent;
+                    border-top: 4px solid {text_muted};
+                    margin-top: 2px;
+                }}
+                QComboBox QAbstractItemView {{
+                    background-color: {bg_alt};
+                    color: {text_primary};
+                    border: 1px solid {border};
+                    border-radius: 4px;
+                    selection-background-color: {accent};
+                }}
+            """)
+
+        if hasattr(self, "_status_label"):
+            self._status_label.setStyleSheet(
+                f"font-size: 11px; color: {text_muted}; background: transparent;"
+            )
+
+        if hasattr(self, "_provider_icon"):
+            self._provider_icon.setStyleSheet(
+                f"font-size: 18px; color: {text_primary}; background: transparent;"
+            )
+
+        if hasattr(self, "_model_label"):
+            self._model_label.setStyleSheet(
+                f"font-size: 14px; font-weight: bold; color: {text_primary}; background: transparent;"
+            )
+
+        if hasattr(self, "chk_auto_index"):
+            self.chk_auto_index.setStyleSheet(f"color: {text_primary};")
 
         # Input Area
         self._input_container.setStyleSheet(f"""
@@ -550,26 +680,7 @@ class AIAssistantPanel(QWidget):
     def _create_header(self) -> QWidget:
         """Create the panel header."""
         header = QFrame()
-        header.setStyleSheet("""
-            QFrame {
-                background-color: #FF8800;
-                padding: 8px;
-                border-bottom: 1px solid #cc6d00;
-            }
-            QLabel {
-                color: #000000;
-            }
-            QPushButton {
-                background-color: rgba(0, 0, 0, 0.1);
-                color: #000000;
-                border: 1px solid rgba(0, 0, 0, 0.2);
-                border-radius: 4px;
-                padding: 4px 8px;
-            }
-            QPushButton:hover {
-                background-color: rgba(0, 0, 0, 0.2);
-            }
-            """)
+        # Header styling is dynamically managed in refresh_theme
 
         layout = QHBoxLayout(header)
 
@@ -586,15 +697,9 @@ class AIAssistantPanel(QWidget):
         if not (layout is not None):
             raise ValueError("layout must be provided")
         self._provider_icon = QLabel("\U0001f916")
-        self._provider_icon.setStyleSheet(
-            "font-size: 18px; color: black; background: transparent;"
-        )
         layout.addWidget(self._provider_icon)
 
         self._model_label = QLabel("AI Assistant")
-        self._model_label.setStyleSheet(
-            "font-size: 14px; font-weight: bold; color: black; background: transparent;"
-        )
         layout.addWidget(self._model_label)
 
         layout.addSpacing(10)
@@ -609,22 +714,9 @@ class AIAssistantPanel(QWidget):
         self._mode_combo.setToolTip(
             "Select AI Mode: Ask (Chat), Plan (Reasoning), Agent (Tools)"
         )
-        self._mode_combo.setStyleSheet("""
-            QComboBox {
-                background-color: rgba(255, 255, 255, 0.3);
-                color: black;
-                border: 1px solid rgba(0, 0, 0, 0.2);
-                border-radius: 4px;
-                padding: 2px 8px;
-            }
-            QComboBox::drop-down { border: none; }
-        """)
         layout.addWidget(self._mode_combo)
 
         self._status_label = QLabel("Ready")
-        self._status_label.setStyleSheet(
-            "font-size: 11px; color: #333; background: transparent;"
-        )
         layout.addWidget(self._status_label)
 
     def _add_header_action_buttons(self, layout: Any) -> None:
@@ -635,7 +727,6 @@ class AIAssistantPanel(QWidget):
 
         self.chk_auto_index = QCheckBox("Auto-Index")
         self.chk_auto_index.setToolTip("Index the full codebase for context")
-        self.chk_auto_index.setStyleSheet("color: black;")
         layout.addWidget(self.chk_auto_index)
 
         new_chat_btn = QPushButton("New Chat")
@@ -649,21 +740,6 @@ class AIAssistantPanel(QWidget):
 
         close_btn = QPushButton("\u2715")
         close_btn.setToolTip("Close AI Chat")
-        close_btn.setStyleSheet("""
-            QPushButton {
-                background-color: rgba(0, 0, 0, 0.15);
-                color: #000000;
-                border: 1px solid rgba(0, 0, 0, 0.3);
-                border-radius: 4px;
-                padding: 4px 8px;
-                font-weight: bold;
-                font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: rgba(200, 0, 0, 0.5);
-                color: white;
-            }
-        """)
         close_btn.clicked.connect(self.close_requested.emit)
         layout.addWidget(close_btn)
 
@@ -754,7 +830,7 @@ class AIAssistantPanel(QWidget):
         button_layout = QHBoxLayout()
 
         # Expertise level indicator
-        self._expertise_label = QLabel("Level: Beginner")
+        self._expertise_label = QLabel("Verbosity: Verbose")
         self._expertise_label.setStyleSheet(Styles.TEXT_MUTED)
         button_layout.addWidget(self._expertise_label)
 
@@ -1043,12 +1119,12 @@ class AIAssistantPanel(QWidget):
             raise ValueError("level must be provided")
         self._context.user_expertise = level
         level_names = {
-            ExpertiseLevel.BEGINNER: "Beginner",
-            ExpertiseLevel.INTERMEDIATE: "Intermediate",
-            ExpertiseLevel.ADVANCED: "Advanced",
-            ExpertiseLevel.EXPERT: "Expert",
+            ExpertiseLevel.BEGINNER: "Verbose",
+            ExpertiseLevel.INTERMEDIATE: "Normal",
+            ExpertiseLevel.ADVANCED: "Concise",
+            ExpertiseLevel.EXPERT: "Minimal",
         }
-        self._expertise_label.setText(f"Level: {level_names[level]}")
+        self._expertise_label.setText(f"Verbosity: {level_names[level]}")
 
     def apply_settings(self, settings: AISettings) -> None:  # noqa: C901
         """Apply settings from dialog.
@@ -1099,6 +1175,7 @@ class AIAssistantPanel(QWidget):
             try:
                 import ai_backend
                 from src.shared.python.ai.adapters.rust_adapter import RustAgentAdapter
+
                 adapter = RustAgentAdapter(
                     api_key="ollama",
                     base_url=settings.ollama_host,
@@ -1152,6 +1229,8 @@ class AIAssistantPanel(QWidget):
                 f"⚠️ Could not connect to {settings.provider.name}. "
                 "Please check your settings."
             )
+
+
 
     def _show_settings(self) -> None:
         """Show the settings dialog."""

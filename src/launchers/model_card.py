@@ -152,8 +152,8 @@ class DraggableModelCard(QFrame):
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.drag_start_position = QPoint()
 
-        # Glassmorphism styling - enhanced with translucent backgrounds and background-blur effect
-        self.setStyleSheet("""
+        self.is_selected = False
+        self._base_style = """
             #ModelCard {
                 background-color: rgba(255, 255, 255, 0.05);
                 border: 1px solid rgba(255, 255, 255, 0.12);
@@ -163,7 +163,32 @@ class DraggableModelCard(QFrame):
                 background-color: rgba(255, 255, 255, 0.12);
                 border: 1px solid rgba(255, 255, 255, 0.25);
             }
-        """)
+            #CardName {
+                color: #ffffff;
+            }
+            #CardDescription {
+                color: #aaaaaa;
+            }
+        """
+        self._selected_style = """
+            #ModelCard {
+                background-color: rgba(255, 136, 0, 0.2);
+                border: 2px solid rgba(255, 136, 0, 0.8);
+                border-radius: 16px;
+            }
+            #ModelCard:hover {
+                background-color: rgba(255, 136, 0, 0.3);
+                border: 2px solid rgba(255, 136, 0, 0.9);
+            }
+            #CardName {
+                color: #ffffff;
+            }
+            #CardDescription {
+                color: #eeeeee;
+            }
+        """
+        # Glassmorphism styling - enhanced with translucent backgrounds and background-blur effect
+        self.setStyleSheet(self._base_style)
 
         # Drop Shadow - soft elevated shadow that deepens on hover
         self.shadow = QGraphicsDropShadowEffect(self)
@@ -234,7 +259,13 @@ class DraggableModelCard(QFrame):
         btn = getattr(self, "_btn_quick_launch", None)
         if btn is not None:
             btn.hide()
+            self._reposition_quick_launch_button()  # update info button position
         super().leaveEvent(event)
+
+    def set_selected(self, is_selected: bool) -> None:
+        """Update the glassmorphism styling to reflect selection state."""
+        self.is_selected = is_selected
+        self.setStyleSheet(self._selected_style if is_selected else self._base_style)
 
     def resizeEvent(self, event: Any) -> None:  # type: ignore[override]
         """Keep the quick-launch button anchored to the top-right corner."""
@@ -243,13 +274,30 @@ class DraggableModelCard(QFrame):
 
     def _reposition_quick_launch_button(self) -> None:
         btn = getattr(self, "_btn_quick_launch", None)
-        if btn is None:
-            return
+        info_btn = getattr(self, "_btn_info", None)
         margin = 6
-        btn_w = btn.sizeHint().width()
-        btn_h = btn.sizeHint().height()
-        btn.setFixedSize(btn_w, btn_h)
-        btn.move(self.width() - btn_w - margin, margin)
+
+        # Position launch button at top right
+        if btn is not None:
+            btn_w = btn.sizeHint().width()
+            btn_h = btn.sizeHint().height()
+            btn.setFixedSize(btn_w, btn_h)
+            btn.move(self.width() - btn_w - margin, margin)
+
+        # Position info button to the left of launch button
+        if info_btn is not None:
+            info_w = info_btn.sizeHint().width()
+            info_h = info_btn.sizeHint().height()
+            info_btn.setFixedSize(info_w, info_h)
+
+            # If launch button is visible, put info button to its left
+            if btn is not None and not btn.isHidden():
+                info_btn.move(
+                    self.width() - btn_w - info_w - margin * 2,
+                    margin + (btn_h - info_h) // 2,
+                )
+            else:
+                info_btn.move(self.width() - info_w - margin, margin)
 
     def _build_quick_launch_button(self) -> None:
         """Create the per-tile hover launch button (hidden until hover)."""
@@ -444,6 +492,11 @@ class DraggableModelCard(QFrame):
         # global header button for power users.
         self._build_quick_launch_button()
 
+        # Info button, also floating top right
+        self._build_info_button()
+
+        self._reposition_quick_launch_button()
+
         # Tile-level help text.  Tooltip is a one-line preview; What's-this
         # shows the description and a usage hint.
         name = getattr(self.model, "name", "this model")
@@ -482,6 +535,7 @@ class DraggableModelCard(QFrame):
             "}"
         )
         btn.clicked.connect(self._show_info_dialog)
+        self._btn_info = btn
         return btn
 
     def _show_info_dialog(self) -> None:
@@ -508,13 +562,10 @@ class DraggableModelCard(QFrame):
         self.lbl_name.setWordWrap(True)
         self.lbl_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        # Center the name, but keep the info button on the right
+        # Center the name
         title_layout = QHBoxLayout()
         title_layout.addStretch()
         title_layout.addWidget(self.lbl_name)
-        title_layout.addWidget(
-            self._build_info_button(), alignment=Qt.AlignmentFlag.AlignTop
-        )
         title_layout.addStretch()
         layout.addLayout(title_layout)
 
@@ -545,7 +596,6 @@ class DraggableModelCard(QFrame):
 
         name_layout = QHBoxLayout()
         name_layout.addWidget(self.lbl_name)
-        name_layout.addWidget(self._build_info_button())
         name_layout.addStretch()
         text_box.addLayout(name_layout)
 
@@ -558,8 +608,8 @@ class DraggableModelCard(QFrame):
         outer.addLayout(text_box, 1)
         self._create_status_chip(outer, embed_in_row=True)
 
-        # Force a row-strip footprint roughly matching the issue spec (~60 px).
-        self.setMinimumHeight(60)
+        # Ensure enough space for the content
+        self.setMinimumHeight(85)
 
     def _apply_card_padding(self) -> None:
         """Set contents margins on the active layout based on tile_scale."""
@@ -713,6 +763,19 @@ class DraggableModelCard(QFrame):
             style = chip.style()
             if style:
                 style.polish(chip)
+
+            # Compute a text color based on background
+            from PyQt6.QtGui import QColor
+
+            bg_color = chip.palette().color(chip.backgroundRole())
+            # For QLabels styled with QSS, we need to extract from the computed styles or just use heuristics.
+            # To be safe, we will apply an explicit style.
+            # If the background is bright, use black. If dark, use white.
+            # Usually 'warning' (yellow) and 'success' (light green) are bright, while 'error' (red) and 'info' (blue) are dark.
+            if status_class in ("warning", "success"):
+                chip.setStyleSheet("color: black;")
+            else:
+                chip.setStyleSheet("color: white;")
         # Update no-image fallback
         img = self.findChild(QLabel, "CardImage")
         if img and not img.pixmap():

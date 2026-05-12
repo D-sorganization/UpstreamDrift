@@ -44,9 +44,9 @@ class TestSetupGolfSuiteSourceImagePaths:
         lines = src.splitlines()
         for line in lines:
             if '"launchers"' in line or "'launchers'" in line:
-                assert '"src"' in line or "'src'" in line or "src" in line, (
-                    f"Line references bare launchers/ path without src/: {line.strip()}"
-                )
+                assert (
+                    '"src"' in line or "'src'" in line or "src" in line
+                ), f"Line references bare launchers/ path without src/: {line.strip()}"
 
     def test_output_icon_path_under_src_launchers(self) -> None:
         """The output_icon path in main() must reference src/launchers/assets, not launchers/assets."""
@@ -63,9 +63,9 @@ class TestSetupGolfSuiteSourceImagePaths:
                 # Check the left side doesn't skip "src"
                 source_segment = ast.unparse(node)
                 # If "launchers" is directly after repo_root without "src", that's the bug
-                assert "src" in source_segment, (
-                    f"Path construction found 'launchers' without 'src' prefix: {source_segment}"
-                )
+                assert (
+                    "src" in source_segment
+                ), f"Path construction found 'launchers' without 'src' prefix: {source_segment}"
 
 
 # ---------------------------------------------------------------------------
@@ -85,18 +85,18 @@ class TestWindowsInstallerPaths:
         # Find lines that reference golf_launcher.py
         for line in source.splitlines():
             if "golf_launcher.py" in line:
-                assert '"src"' in line or "'src'" in line or "src" in line, (
-                    f"golf_launcher.py path missing 'src': {line.strip()}"
-                )
+                assert (
+                    '"src"' in line or "'src'" in line or "src" in line
+                ), f"golf_launcher.py path missing 'src': {line.strip()}"
 
     def test_api_server_path_includes_src(self) -> None:
         """The api/server.py script path must include 'src/'."""
         source = self._read_installer_source()
         for line in source.splitlines():
             if "server.py" in line and "api" in line:
-                assert '"src"' in line or "'src'" in line or "src" in line, (
-                    f"api/server.py path missing 'src': {line.strip()}"
-                )
+                assert (
+                    '"src"' in line or "'src'" in line or "src" in line
+                ), f"api/server.py path missing 'src': {line.strip()}"
 
     def test_shared_urdf_path_includes_src(self) -> None:
         """The shared/urdf include_files path must reference src/shared/urdf."""

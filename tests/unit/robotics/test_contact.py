@@ -47,15 +47,15 @@ class TestContactState:
         assert contact.body_b == "ground", "Assertion failed: contact.body_b == ground"
         assert_allclose(contact.position, [0, 0, 0])
         assert_allclose(contact.normal, [0, 0, 1])
-        assert contact.penetration == 0.001, (
-            "Assertion failed: contact.penetration == 0.001"
-        )
-        assert contact.normal_force == 100.0, (
-            "Assertion failed: contact.normal_force == 100.0"
-        )
-        assert contact.friction_coefficient == 0.5, (
-            "Assertion failed: contact.friction_coefficient == 0.5"
-        )
+        assert (
+            contact.penetration == 0.001
+        ), "Assertion failed: contact.penetration == 0.001"
+        assert (
+            contact.normal_force == 100.0
+        ), "Assertion failed: contact.normal_force == 100.0"
+        assert (
+            contact.friction_coefficient == 0.5
+        ), "Assertion failed: contact.friction_coefficient == 0.5"
         assert contact.is_active is True, "Assertion failed: contact.is_active is True"
 
     def test_normal_is_normalized(self) -> None:
@@ -137,9 +137,9 @@ class TestContactState:
             friction_force=np.array([10.0, 0.0, 0.0]),
             friction_coefficient=0.5,  # Limit is 50 N
         )
-        assert contact_not_sliding.is_sliding() is False, (
-            "Assertion failed: contact_not_sliding.is_sliding() is False"
-        )
+        assert (
+            contact_not_sliding.is_sliding() is False
+        ), "Assertion failed: contact_not_sliding.is_sliding() is False"
 
         # Contact at friction limit
         contact_sliding = ContactState(
@@ -152,9 +152,9 @@ class TestContactState:
             friction_force=np.array([50.0, 0.0, 0.0]),
             friction_coefficient=0.5,
         )
-        assert contact_sliding.is_sliding() is True, (
-            "Assertion failed: contact_sliding.is_sliding() is True"
-        )
+        assert (
+            contact_sliding.is_sliding() is True
+        ), "Assertion failed: contact_sliding.is_sliding() is True"
 
     def test_with_force_creates_new_contact(self) -> None:
         """Test with_force creates new ContactState."""
@@ -173,21 +173,21 @@ class TestContactState:
         )
 
         # Original unchanged
-        assert original.normal_force == 100.0, (
-            "Assertion failed: original.normal_force == 100.0"
-        )
+        assert (
+            original.normal_force == 100.0
+        ), "Assertion failed: original.normal_force == 100.0"
         assert_allclose(original.friction_force, [0, 0, 0])
 
         # New contact has updated forces
-        assert new_contact.normal_force == 200.0, (
-            "Assertion failed: new_contact.normal_force == 200.0"
-        )
+        assert (
+            new_contact.normal_force == 200.0
+        ), "Assertion failed: new_contact.normal_force == 200.0"
         assert_allclose(new_contact.friction_force, [10, 0, 0])
 
         # Other fields preserved
-        assert new_contact.contact_id == 0, (
-            "Assertion failed: new_contact.contact_id == 0"
-        )
+        assert (
+            new_contact.contact_id == 0
+        ), "Assertion failed: new_contact.contact_id == 0"
         assert_allclose(new_contact.position, [1, 2, 3])
 
 
@@ -221,9 +221,9 @@ class TestFrictionCone:
         cone = FrictionCone(mu=0.5, normal=np.array([0, 0, 1]))
 
         # Pure normal force
-        assert cone.contains(np.array([0, 0, 100])) is True, (
-            "Assertion failed: cone.contains(np.array([0, 0, 100])) is True"
-        )
+        assert (
+            cone.contains(np.array([0, 0, 100])) is True
+        ), "Assertion failed: cone.contains(np.array([0, 0, 100])) is True"
 
         # Force within friction limit
         assert (
@@ -240,18 +240,19 @@ class TestFrictionCone:
         )  # 60 > 0.5 * 100, "Assertion failed: cone.contains(np.array([60, 0, 100])) is False  # 60 > 0.5 * 100"
 
         # Pulling force
-        assert cone.contains(np.array([0, 0, -100])) is False, (
-            "Assertion failed: cone.contains(np.array([0, 0, -100])) is False"
-        )
+        assert (
+            cone.contains(np.array([0, 0, -100])) is False
+        ), "Assertion failed: cone.contains(np.array([0, 0, -100])) is False"
 
     def test_get_generators_shape(self) -> None:
         """Test get_generators returns correct shape."""
         cone = FrictionCone(mu=0.5, normal=np.array([0, 0, 1]), num_sides=8)
         generators = cone.get_generators()
 
-        assert generators.shape == (3, 8), (
-            "Assertion failed: generators.shape == (3, 8)"
-        )
+        assert generators.shape == (
+            3,
+            8,
+        ), "Assertion failed: generators.shape == (3, 8)"
 
     def test_generators_on_cone_surface(self) -> None:
         """Test that generators lie on friction cone surface."""
@@ -301,9 +302,9 @@ class TestLinearizeFrictionCone:
         for f in inside_forces:
             # Should satisfy A @ f <= b (approximately, due to linearization)
             violations = A @ f - b
-            assert np.all(violations <= 1e-6), (
-                f"Force {f} should be inside linearized cone"
-            )
+            assert np.all(
+                violations <= 1e-6
+            ), f"Force {f} should be inside linearized cone"
 
     def test_compute_friction_cone_constraint(self) -> None:
         """Test compute_friction_cone_constraint returns complete info."""
@@ -426,8 +427,9 @@ class TestGraspAnalysis:
     def test_grasp_matrix_shape(self, simple_grasp: list[ContactState]) -> None:
         """Test grasp matrix has correct shape."""
         G = compute_grasp_matrix(simple_grasp)
-        assert (
-            G.shape == (6, 6)
+        assert G.shape == (
+            6,
+            6,
         )  # 6 wrench dims, 2 contacts * 3 force dims, "Assertion failed: G.shape == (6, 6)  # 6 wrench dims, 2 contacts * 3 force dims"
 
     def test_grasp_matrix_with_object_frame(
@@ -447,12 +449,12 @@ class TestGraspAnalysis:
 
         # The result depends on the solver availability and algorithm
         # At minimum, verify it returns valid types
-        assert isinstance(has_closure, bool), (
-            "Assertion failed: isinstance(has_closure, bool)"
-        )
-        assert isinstance(quality, float), (
-            "Assertion failed: isinstance(quality, float)"
-        )
+        assert isinstance(
+            has_closure, bool
+        ), "Assertion failed: isinstance(has_closure, bool)"
+        assert isinstance(
+            quality, float
+        ), "Assertion failed: isinstance(quality, float)"
         assert quality >= 0, "Assertion failed: quality >= 0"
 
         # Note: A proper two-finger opposing grasp with friction
@@ -466,12 +468,12 @@ class TestGraspAnalysis:
         has_closure, quality = check_force_closure(three_finger_grasp)
 
         # Verify valid return types
-        assert isinstance(has_closure, bool), (
-            "Assertion failed: isinstance(has_closure, bool)"
-        )
-        assert isinstance(quality, float), (
-            "Assertion failed: isinstance(quality, float)"
-        )
+        assert isinstance(
+            has_closure, bool
+        ), "Assertion failed: isinstance(has_closure, bool)"
+        assert isinstance(
+            quality, float
+        ), "Assertion failed: isinstance(quality, float)"
         assert quality >= 0, "Assertion failed: quality >= 0"
 
         # A symmetric three-finger grasp is well-suited for force closure
@@ -537,14 +539,14 @@ class TestContactManagerIntegration:
         assert len(hull) == 4, "Assertion failed: len(hull) == 4"
 
         # Center should be inside
-        assert _point_in_polygon(np.array([0, 0]), hull) is True, (
-            "Assertion failed: _point_in_polygon(np.array([0, 0]), hull) is True"
-        )
+        assert (
+            _point_in_polygon(np.array([0, 0]), hull) is True
+        ), "Assertion failed: _point_in_polygon(np.array([0, 0]), hull) is True"
 
         # Point outside should return False
-        assert _point_in_polygon(np.array([0.5, 0.5]), hull) is False, (
-            "Assertion failed: _point_in_polygon(np.array([0.5, 0.5]), hull) is False"
-        )
+        assert (
+            _point_in_polygon(np.array([0.5, 0.5]), hull) is False
+        ), "Assertion failed: _point_in_polygon(np.array([0.5, 0.5]), hull) is False"
 
     def test_point_in_triangle(self) -> None:
         """Test point in polygon for triangle."""
@@ -559,14 +561,14 @@ class TestContactManagerIntegration:
         )
 
         # Inside
-        assert _point_in_polygon(np.array([0.5, 0.3]), triangle) is True, (
-            "Assertion failed: _point_in_polygon(np.array([0.5, 0.3]), triangle) is True"
-        )
+        assert (
+            _point_in_polygon(np.array([0.5, 0.3]), triangle) is True
+        ), "Assertion failed: _point_in_polygon(np.array([0.5, 0.3]), triangle) is True"
 
         # Outside
-        assert _point_in_polygon(np.array([1.5, 0.5]), triangle) is False, (
-            "Assertion failed: _point_in_polygon(np.array([1.5, 0.5]), triangle) is False"
-        )
+        assert (
+            _point_in_polygon(np.array([1.5, 0.5]), triangle) is False
+        ), "Assertion failed: _point_in_polygon(np.array([1.5, 0.5]), triangle) is False"
 
         # On edge (may be inside or outside depending on implementation)
         # Just verify it doesn't crash

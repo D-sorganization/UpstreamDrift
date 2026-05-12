@@ -21,7 +21,6 @@ import pytest
 from src.shared.python.pose_interchange.canonical import CanonicalPose
 from src.shared.python.pose_interchange.services._mock import MockKinematicsService
 
-
 # =============================================================================
 # Session-scoped C3D data fixtures (Issue #5104 - State & Data Management)
 # =============================================================================

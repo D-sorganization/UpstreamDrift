@@ -33,7 +33,6 @@ from src.shared.python.pose_interchange.services._mock import (
     MockKinematicsService,
 )
 
-
 _TINY_MJCF = """<mujoco model="parity_tiny">
   <option timestep="0.01" gravity="0 0 -9.81"/>
   <worldbody>

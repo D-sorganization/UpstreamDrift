@@ -12,6 +12,7 @@ from PyQt6.QtWidgets import (
 )
 from src.shared.python.biomech.exercise_registry import discover_exercise
 
+
 class ExerciseDashboard(QMainWindow):
     """Cross-engine exercise dashboard. Toolbar selects engine; body swaps dashboards."""
 
@@ -28,7 +29,7 @@ class ExerciseDashboard(QMainWindow):
         if not self.engines:
             # Fallback for UI if engines aren't discovered correctly in tests
             self.engines = ["MuJoCo_Models", "Drake_Models", "Pinocchio_Models"]
-            
+
         self.engine_selector.addItems(self.engines)
         self.engine_selector.currentTextChanged.connect(self._on_engine_changed)
 
@@ -55,41 +56,54 @@ class ExerciseDashboard(QMainWindow):
         try:
             if name == "MuJoCo_Models":
                 from src.launchers.mujoco_dashboard import MuJoCoDashboard
+
                 self._current_widget = MuJoCoDashboard(exercise_filter=self.exercise)
             elif name == "Drake_Models":
                 from src.launchers.drake_dashboard import DrakeDashboard
+
                 self._current_widget = DrakeDashboard(exercise_filter=self.exercise)
             elif name == "Pinocchio_Models":
                 from src.launchers.pinocchio_dashboard import PinocchioDashboard
+
                 self._current_widget = PinocchioDashboard(exercise_filter=self.exercise)
             elif name == "OpenSim_Models":
                 self._current_widget = QLabel("OpenSim dashboard not yet available.")
             else:
                 self._current_widget = QLabel(f"Unknown engine: {name}")
-                
+
             if self._current_widget:
                 # Remove window flags since we're embedding it
                 if isinstance(self._current_widget, QMainWindow):
-                    self._current_widget.setWindowFlags(self._current_widget.windowFlags() & ~sys.modules['PyQt6.QtCore'].Qt.WindowType.Window)
+                    self._current_widget.setWindowFlags(
+                        self._current_widget.windowFlags()
+                        & ~sys.modules["PyQt6.QtCore"].Qt.WindowType.Window
+                    )
                 self.layout.addWidget(self._current_widget)
         except Exception as e:
             self._current_widget = QLabel(f"Error loading {name}:\n{e}")
             self.layout.addWidget(self._current_widget)
 
+
 def main() -> None:
     import argparse
     import os
+
     parser = argparse.ArgumentParser()
-    parser.add_argument("--exercise", required=False, help="Name of the exercise (e.g. gait, sit_to_stand)")
+    parser.add_argument(
+        "--exercise",
+        required=False,
+        help="Name of the exercise (e.g. gait, sit_to_stand)",
+    )
     args = parser.parse_args()
-    
+
     exercise = args.exercise or os.environ.get("BIOMECH_EXERCISE", "gait")
-    
+
     app = QApplication(sys.argv)
     window = ExerciseDashboard(exercise)
     window.resize(1200, 800)
     window.show()
     sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()

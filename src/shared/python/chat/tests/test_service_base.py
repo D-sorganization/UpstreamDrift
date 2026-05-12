@@ -19,7 +19,6 @@ import pytest
 
 from chat.service_base import ChatMessage, ChatServiceBase, ChatSession
 
-
 # ── Concrete test subclass ───────────────────────────────────────────
 
 

@@ -79,9 +79,8 @@ class FontManager(QObject):
 
     def get_available_fonts(self) -> list[str]:
         """Return a list of available built-in professional fonts."""
-        # Check which of the built-in fonts are actually available on the system
-        db = QFontDatabase()
-        system_fonts = db.families()
+        # PyQt6: families() is a static method of QFontDatabase
+        system_fonts = QFontDatabase.families()
 
         available = [f for f in BUILTIN_FONTS if f in system_fonts]
         # Always add a system default option

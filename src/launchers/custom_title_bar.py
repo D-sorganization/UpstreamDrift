@@ -106,7 +106,7 @@ class CustomTitleBar(QWidget):
             event.accept()
 
     def mouseMoveEvent(self, event: QMouseEvent):
-        if event.buttons() == Qt.MouseButton.LeftButton:
+        if event.buttons() & Qt.MouseButton.LeftButton:
             self.move_requested.emit(
                 event.globalPosition().toPoint() - self.drag_position
             )

@@ -267,6 +267,6 @@ models:
     path: "src/movement_optimizer/main.py"
     launcher:
       category: "biomechanics"
-      logo: "assets/movement_optimizer.png"
+      logo: "assets/logos/project_map.svg"
       status: "ready"
       default_launch: "tab"

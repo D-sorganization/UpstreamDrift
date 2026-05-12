@@ -49,31 +49,31 @@ class MyoSuiteFitSwingProvider:
             base_provider = get_provider("pinocchio")
         except KeyError:
             base_provider = get_provider("mujoco")
-            
+
         base_result = base_provider.fit_swing(target, opts)
 
         # 2. Inverse Surrogate Model (Mock generation of kinematics for now)
-        # In a full rollout, we would evaluate `base_result.theta_optimal` 
+        # In a full rollout, we would evaluate `base_result.theta_optimal`
         # through the engine to get true joint_q and joint_v over time.
-        n_joints = 22 # Standard full body model
-        n_muscles = 290 # MyoSuite standard musculature
+        n_joints = 22  # Standard full body model
+        n_muscles = 290  # MyoSuite standard musculature
         seq_len = 300
-        
+
         cfg = InverseSurrogateConfig(
-            n_joints=n_joints,
-            n_muscles=n_muscles,
-            seq_len=seq_len
+            n_joints=n_joints, n_muscles=n_muscles, seq_len=seq_len
         )
-        
+
         model = MyoSuiteInverseSurrogate(cfg)
         model.eval()
-        
+
         # Placeholder tensors (B=1, T=300, J=22)
         joint_q = torch.zeros((1, seq_len, n_joints))
         joint_v = torch.zeros((1, seq_len, n_joints))
-        
+
         with torch.no_grad():
-            muscle_activations = model(joint_q, joint_v).squeeze(0).numpy() # (300, 290)
+            muscle_activations = (
+                model(joint_q, joint_v).squeeze(0).numpy()
+            )  # (300, 290)
 
         # 3. Attach muscle activations to the FitResult
         meta = dict(base_result.meta) if base_result.meta else {}
@@ -81,10 +81,11 @@ class MyoSuiteFitSwingProvider:
         meta["inverse_surrogate_applied"] = True
 
         from dataclasses import replace
+
         return replace(
             base_result,
             method=f"{base_result.method}+myosuite_inverse_surrogate",
-            meta=meta
+            meta=meta,
         )
 
     def supports_body_target(self) -> bool:

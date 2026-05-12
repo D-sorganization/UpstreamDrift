@@ -36,17 +36,17 @@ class TestSynergyResult:
         )
 
         assert result.weights is weights, "Assertion failed: result.weights is weights"
-        assert result.activations is activations, (
-            "Assertion failed: result.activations is activations"
-        )
-        assert result.reconstructed is reconstructed, (
-            "Assertion failed: result.reconstructed is reconstructed"
-        )
+        assert (
+            result.activations is activations
+        ), "Assertion failed: result.activations is activations"
+        assert (
+            result.reconstructed is reconstructed
+        ), "Assertion failed: result.reconstructed is reconstructed"
         assert result.vaf == 0.92, "Assertion failed: result.vaf == 0.92"
         assert result.n_synergies == 3, "Assertion failed: result.n_synergies == 3"
-        assert result.muscle_names is None, (
-            "Assertion failed: result.muscle_names is None"
-        )
+        assert (
+            result.muscle_names is None
+        ), "Assertion failed: result.muscle_names is None"
 
     def test_with_muscle_names(self) -> None:
         """Test SynergyResult with muscle names."""
@@ -64,9 +64,9 @@ class TestSynergyResult:
             muscle_names=muscle_names,
         )
 
-        assert result.muscle_names == muscle_names, (
-            "Assertion failed: result.muscle_names == muscle_names"
-        )
+        assert (
+            result.muscle_names == muscle_names
+        ), "Assertion failed: result.muscle_names == muscle_names"
 
     def test_matrix_shapes_consistency(self) -> None:
         """Test that matrix shapes are consistent."""
@@ -86,15 +86,18 @@ class TestSynergyResult:
             n_synergies=n_synergies,
         )
 
-        assert result.weights.shape == (n_muscles, n_synergies), (
-            "Assertion failed: result.weights.shape == (n_muscles, n_synergies)"
-        )
-        assert result.activations.shape == (n_synergies, n_samples), (
-            "Assertion failed: result.activations.shape == (n_synergies, n_samples)"
-        )
-        assert result.reconstructed.shape == (n_samples, n_muscles), (
-            "Assertion failed: result.reconstructed.shape == (n_samples, n_muscles)"
-        )
+        assert result.weights.shape == (
+            n_muscles,
+            n_synergies,
+        ), "Assertion failed: result.weights.shape == (n_muscles, n_synergies)"
+        assert result.activations.shape == (
+            n_synergies,
+            n_samples,
+        ), "Assertion failed: result.activations.shape == (n_synergies, n_samples)"
+        assert result.reconstructed.shape == (
+            n_samples,
+            n_muscles,
+        ), "Assertion failed: result.reconstructed.shape == (n_samples, n_muscles)"
 
 
 class TestMuscleSynergyAnalyzerInitialization:
@@ -114,9 +117,11 @@ class TestMuscleSynergyAnalyzerInitialization:
         data = np.random.rand(50, 3)
         analyzer = MuscleSynergyAnalyzer(data)
 
-        assert analyzer.muscle_names == ["Muscle 0", "Muscle 1", "Muscle 2"], (
-            "Assertion failed: analyzer.muscle_names == [Muscle 0, Muscle 1, Muscle 2]"
-        )
+        assert analyzer.muscle_names == [
+            "Muscle 0",
+            "Muscle 1",
+            "Muscle 2",
+        ], "Assertion failed: analyzer.muscle_names == [Muscle 0, Muscle 1, Muscle 2]"
 
     def test_initialization_with_custom_muscle_names(self) -> None:
         """Test initialization with custom muscle names."""
@@ -124,9 +129,9 @@ class TestMuscleSynergyAnalyzerInitialization:
         names = ["Biceps", "Triceps", "Deltoid"]
         analyzer = MuscleSynergyAnalyzer(data, muscle_names=names)
 
-        assert analyzer.muscle_names == names, (
-            "Assertion failed: analyzer.muscle_names == names"
-        )
+        assert (
+            analyzer.muscle_names == names
+        ), "Assertion failed: analyzer.muscle_names == names"
 
     def test_initialization_clips_negative_values(self, caplog) -> None:
         """Test that negative values are clipped to zero with warning."""
@@ -143,14 +148,14 @@ class TestMuscleSynergyAnalyzerInitialization:
             analyzer = MuscleSynergyAnalyzer(data)
 
         # Should warn about negative values
-        assert "negative values" in caplog.text.lower(), (
-            "Assertion failed: negative values in caplog.text.lower()"
-        )
+        assert (
+            "negative values" in caplog.text.lower()
+        ), "Assertion failed: negative values in caplog.text.lower()"
 
         # Data should be clipped to zero
-        assert np.all(analyzer.data >= 0), (
-            "Assertion failed: np.all(analyzer.data >= 0)"
-        )
+        assert np.all(
+            analyzer.data >= 0
+        ), "Assertion failed: np.all(analyzer.data >= 0)"
         assert (
             analyzer.data[0, 1] == 0.0
         )  # Was -0.1, "Assertion failed: analyzer.data[0, 1] == 0.0  # Was -0.1"
@@ -165,9 +170,9 @@ class TestMuscleSynergyAnalyzerInitialization:
 
         assert analyzer.n_samples == 3, "Assertion failed: analyzer.n_samples == 3"
         assert analyzer.n_muscles == 2, "Assertion failed: analyzer.n_muscles == 2"
-        assert isinstance(analyzer.data, np.ndarray), (
-            "Assertion failed: isinstance(analyzer.data, np.ndarray)"
-        )
+        assert isinstance(
+            analyzer.data, np.ndarray
+        ), "Assertion failed: isinstance(analyzer.data, np.ndarray)"
 
     def test_data_shape_extraction(self) -> None:
         """Test that data shape is correctly extracted."""
@@ -175,15 +180,16 @@ class TestMuscleSynergyAnalyzerInitialization:
         data = np.random.rand(n_samples, n_muscles)
         analyzer = MuscleSynergyAnalyzer(data)
 
-        assert analyzer.n_samples == n_samples, (
-            "Assertion failed: analyzer.n_samples == n_samples"
-        )
-        assert analyzer.n_muscles == n_muscles, (
-            "Assertion failed: analyzer.n_muscles == n_muscles"
-        )
-        assert analyzer.data.shape == (n_samples, n_muscles), (
-            "Assertion failed: analyzer.data.shape == (n_samples, n_muscles)"
-        )
+        assert (
+            analyzer.n_samples == n_samples
+        ), "Assertion failed: analyzer.n_samples == n_samples"
+        assert (
+            analyzer.n_muscles == n_muscles
+        ), "Assertion failed: analyzer.n_muscles == n_muscles"
+        assert analyzer.data.shape == (
+            n_samples,
+            n_muscles,
+        ), "Assertion failed: analyzer.data.shape == (n_samples, n_muscles)"
 
 
 @skip_if_unavailable("sklearn")
@@ -205,15 +211,18 @@ class TestExtractSynergies:
         result = analyzer.extract_synergies(n_synergies=1)
 
         assert result.n_synergies == 1, "Assertion failed: result.n_synergies == 1"
-        assert result.weights.shape == (n_muscles, 1), (
-            "Assertion failed: result.weights.shape == (n_muscles, 1)"
-        )
-        assert result.activations.shape == (1, n_samples), (
-            "Assertion failed: result.activations.shape == (1, n_samples)"
-        )
-        assert result.reconstructed.shape == (n_samples, n_muscles), (
-            "Assertion failed: result.reconstructed.shape == (n_samples, n_muscles)"
-        )
+        assert result.weights.shape == (
+            n_muscles,
+            1,
+        ), "Assertion failed: result.weights.shape == (n_muscles, 1)"
+        assert result.activations.shape == (
+            1,
+            n_samples,
+        ), "Assertion failed: result.activations.shape == (1, n_samples)"
+        assert result.reconstructed.shape == (
+            n_samples,
+            n_muscles,
+        ), "Assertion failed: result.reconstructed.shape == (n_samples, n_muscles)"
 
     def test_extract_multiple_synergies(self) -> None:
         """Test extracting multiple synergies."""
@@ -224,15 +233,18 @@ class TestExtractSynergies:
         result = analyzer.extract_synergies(n_synergies=3)
 
         assert result.n_synergies == 3, "Assertion failed: result.n_synergies == 3"
-        assert result.weights.shape == (5, 3), (
-            "Assertion failed: result.weights.shape == (5, 3)"
-        )
-        assert result.activations.shape == (3, 100), (
-            "Assertion failed: result.activations.shape == (3, 100)"
-        )
-        assert result.reconstructed.shape == (100, 5), (
-            "Assertion failed: result.reconstructed.shape == (100, 5)"
-        )
+        assert result.weights.shape == (
+            5,
+            3,
+        ), "Assertion failed: result.weights.shape == (5, 3)"
+        assert result.activations.shape == (
+            3,
+            100,
+        ), "Assertion failed: result.activations.shape == (3, 100)"
+        assert result.reconstructed.shape == (
+            100,
+            5,
+        ), "Assertion failed: result.reconstructed.shape == (100, 5)"
 
     def test_vaf_is_between_zero_and_one(self) -> None:
         """Test that Variance Accounted For is between 0 and 1."""
@@ -270,14 +282,14 @@ class TestExtractSynergies:
         result = analyzer.extract_synergies(n_synergies=4)
 
         # VAF should be high
-        assert result.vaf > 0.80, (
-            "High number of synergies should give good reconstruction"
-        )
+        assert (
+            result.vaf > 0.80
+        ), "High number of synergies should give good reconstruction"
 
         # Reconstruction shape should match data
-        assert result.reconstructed.shape == data.shape, (
-            "Assertion failed: result.reconstructed.shape == data.shape"
-        )
+        assert (
+            result.reconstructed.shape == data.shape
+        ), "Assertion failed: result.reconstructed.shape == data.shape"
 
     def test_weights_are_nonnegative(self) -> None:
         """Test that muscle weights are non-negative (NMF property)."""
@@ -332,9 +344,9 @@ class TestExtractSynergies:
         analyzer = MuscleSynergyAnalyzer(data, muscle_names=names)
 
         result = analyzer.extract_synergies(n_synergies=2)
-        assert result.muscle_names == names, (
-            "Assertion failed: result.muscle_names == names"
-        )
+        assert (
+            result.muscle_names == names
+        ), "Assertion failed: result.muscle_names == names"
 
     def test_synergies_with_perfect_rank_1_data(self) -> None:
         """Test synergy extraction on perfect rank-1 data."""
@@ -350,9 +362,9 @@ class TestExtractSynergies:
         result = analyzer.extract_synergies(n_synergies=1)
 
         # VAF should be very high (near perfect reconstruction)
-        assert result.vaf > 0.98, (
-            f"VAF should be near 1.0 for rank-1 data, got {result.vaf}"
-        )
+        assert (
+            result.vaf > 0.98
+        ), f"VAF should be near 1.0 for rank-1 data, got {result.vaf}"
 
 
 @skip_if_unavailable("sklearn")
@@ -393,9 +405,9 @@ class TestFindOptimalSynergies:
         assert result.n_synergies == 2, "Assertion failed: result.n_synergies == 2"
 
         # Should warn that threshold not met
-        assert "threshold not met" in caplog.text.lower() or result.vaf >= 0.99, (
-            "Assertion failed: threshold not met in caplog.text.lower() or result.vaf >= 0.99"
-        )
+        assert (
+            "threshold not met" in caplog.text.lower() or result.vaf >= 0.99
+        ), "Assertion failed: threshold not met in caplog.text.lower() or result.vaf >= 0.99"
 
     def test_respects_max_synergies_limit(self) -> None:
         """Test that method respects max_synergies limit."""
@@ -435,9 +447,9 @@ class TestFindOptimalSynergies:
         )
 
         # Lower threshold should require fewer (or equal) synergies
-        assert result_low.n_synergies <= result_high.n_synergies, (
-            "Assertion failed: result_low.n_synergies <= result_high.n_synergies"
-        )
+        assert (
+            result_low.n_synergies <= result_high.n_synergies
+        ), "Assertion failed: result_low.n_synergies <= result_high.n_synergies"
 
     def test_threshold_of_one_uses_all_muscles(self) -> None:
         """Test that VAF threshold of 1.0 tries to use all muscles."""
@@ -458,9 +470,9 @@ class TestFindOptimalSynergies:
         analyzer = MuscleSynergyAnalyzer(data)
         result = analyzer.find_optimal_synergies(max_synergies=5, vaf_threshold=0.80)
 
-        assert isinstance(result, SynergyResult), (
-            "Assertion failed: isinstance(result, SynergyResult)"
-        )
+        assert isinstance(
+            result, SynergyResult
+        ), "Assertion failed: isinstance(result, SynergyResult)"
         assert result.n_synergies >= 1, "Assertion failed: result.n_synergies >= 1"
 
     def test_invalid_limit_raises_error(self) -> None:
@@ -531,9 +543,9 @@ class TestEdgeCases:
             try:
                 result = analyzer.extract_synergies(n_synergies=2)
                 # If it succeeds, check basic properties
-                assert result.n_synergies == 2, (
-                    "Assertion failed: result.n_synergies == 2"
-                )
+                assert (
+                    result.n_synergies == 2
+                ), "Assertion failed: result.n_synergies == 2"
             except (ValueError, RuntimeError):
                 # Some NMF implementations may fail on zero data
                 pass
@@ -554,16 +566,17 @@ class TestEdgeCases:
         data = np.random.rand(50, n_muscles)
         analyzer = MuscleSynergyAnalyzer(data)
 
-        assert analyzer.n_muscles == n_muscles, (
-            "Assertion failed: analyzer.n_muscles == n_muscles"
-        )
+        assert (
+            analyzer.n_muscles == n_muscles
+        ), "Assertion failed: analyzer.n_muscles == n_muscles"
 
         if SKLEARN_AVAILABLE:
             # Should be able to extract synergies
             result = analyzer.extract_synergies(n_synergies=5)
-            assert result.weights.shape == (n_muscles, 5), (
-                "Assertion failed: result.weights.shape == (n_muscles, 5)"
-            )
+            assert result.weights.shape == (
+                n_muscles,
+                5,
+            ), "Assertion failed: result.weights.shape == (n_muscles, 5)"
 
     def test_very_long_time_series(self) -> None:
         """Test with very long time series."""
@@ -571,15 +584,16 @@ class TestEdgeCases:
         data = np.random.rand(n_samples, 5)
         analyzer = MuscleSynergyAnalyzer(data)
 
-        assert analyzer.n_samples == n_samples, (
-            "Assertion failed: analyzer.n_samples == n_samples"
-        )
+        assert (
+            analyzer.n_samples == n_samples
+        ), "Assertion failed: analyzer.n_samples == n_samples"
 
         if SKLEARN_AVAILABLE:
             result = analyzer.extract_synergies(n_synergies=2)
-            assert result.activations.shape == (2, n_samples), (
-                "Assertion failed: result.activations.shape == (2, n_samples)"
-            )
+            assert result.activations.shape == (
+                2,
+                n_samples,
+            ), "Assertion failed: result.activations.shape == (2, n_samples)"
 
 
 @skip_if_unavailable("sklearn")
@@ -641,6 +655,6 @@ class TestNumericalAccuracy:
         result = analyzer.extract_synergies(n_synergies=n_muscles)
 
         # VAF should be very high (near 1.0)
-        assert result.vaf > 0.95, (
-            f"VAF with {n_muscles} synergies should be > 0.95, got {result.vaf}"
-        )
+        assert (
+            result.vaf > 0.95
+        ), f"VAF with {n_muscles} synergies should be > 0.95, got {result.vaf}"

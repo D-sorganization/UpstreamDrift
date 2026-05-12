@@ -72,9 +72,9 @@ def f_l(l_norm: float, width: float | None = None) -> float:
 
     model = HillMuscleModel(
         MuscleParameters(F_max=1.0, l_opt=1.0, l_slack=1.0),
-        force_length_width=width
-        if width is not None
-        else HillMuscleModel.DEFAULT_FORCE_LENGTH_WIDTH,
+        force_length_width=(
+            width if width is not None else HillMuscleModel.DEFAULT_FORCE_LENGTH_WIDTH
+        ),
     )
     return float(model.force_length_active(l_norm))
 

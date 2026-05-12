@@ -36,6 +36,7 @@ from PyQt6.QtWidgets import (
     QToolButton,
     QVBoxLayout,
     QWidget,
+    QSizePolicy,
 )
 
 from src.launchers.launcher_constants import (
@@ -131,15 +132,29 @@ class LauncherUISetupMixin:
             )
             self.title_bar.close_requested.connect(self.close)
             self.title_bar.move_requested.connect(self.move)
+
+            # Hide the native OS title bar since we are using a custom one
+            self.setWindowFlags(Qt.WindowType.FramelessWindowHint | self.windowFlags())
+
             outer_vbox.addWidget(self.title_bar)
         except ImportError:
             pass
 
-        # Main layout is now horizontal to accommodate the sidebar
-        main_layout = QHBoxLayout()
-        main_layout.setSpacing(0)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        outer_vbox.addLayout(main_layout)
+        # Main layout is now a horizontal splitter to accommodate the sidebar resizably
+        main_layout = QSplitter(Qt.Orientation.Horizontal)
+        main_layout.setProperty("class", "dark")
+        main_layout.setHandleWidth(4)
+        main_layout.setStyleSheet("""
+            QSplitter::handle {
+                background-color: #3c3c3c;
+                margin: 2px 0px;
+                border-radius: 2px;
+            }
+            QSplitter::handle:hover {
+                background-color: #FF8800;
+            }
+        """)
+        outer_vbox.addWidget(main_layout)
 
         # --- Global Sidebar ---
         sidebar = self._setup_global_sidebar()
@@ -175,8 +190,8 @@ class LauncherUISetupMixin:
 
         self.content_splitter.addWidget(left_panel)
 
-        # Right panel: AI chat (added to splitter, hidden by default)
-        self._ai_visible = False
+        # Right panel: AI chat (added to splitter, visible by default)
+        self._ai_visible = True
         from src.launchers.launcher_constants import AI_AVAILABLE
 
         if AI_AVAILABLE:
@@ -184,7 +199,12 @@ class LauncherUISetupMixin:
 
         content_layout.addWidget(self.content_splitter, 1)
 
-        main_layout.addWidget(content_container, 1)
+        main_layout.addWidget(content_container)
+
+        # Set stretch factors: Sidebar shouldn't stretch by default, content should take the rest
+        main_layout.setStretchFactor(0, 0)
+        main_layout.setStretchFactor(1, 1)
+        main_layout.setSizes([85, 1200])
 
         # Apply dark theme
         self.apply_styles()
@@ -196,9 +216,12 @@ class LauncherUISetupMixin:
         self._init_overlay()
 
     def _setup_global_sidebar(self) -> QWidget:
-        """Create the thin global sidebar navigation."""
+        """Create the global sidebar navigation."""
         sidebar = QWidget()
-        sidebar.setFixedWidth(70)
+        sidebar.setMinimumWidth(85)
+        sidebar.setSizePolicy(
+            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding
+        )
 
         try:
             from src.shared.python.theme import get_current_colors
@@ -294,7 +317,7 @@ class LauncherUISetupMixin:
 
         if AI_AVAILABLE:
             self.btn_ai_sidebar = self._build_sidebar_button(
-                "AI Chat",
+                "Chat",
                 "chat",
                 checkable=True,
             )
@@ -435,8 +458,8 @@ class LauncherUISetupMixin:
             self._viewmode_action_group.addAction(act)
             viewmode_menu.addAction(act)
             self._viewmode_actions[mode] = act
-        # Default checkmark on COMPACT (matches combo default).
-        self._viewmode_actions[ViewMode.COMPACT].setChecked(True)
+        # Default checkmark on LIST (matches combo default).
+        self._viewmode_actions[ViewMode.LIST].setChecked(True)
 
         view_menu.addSeparator()
 
@@ -1036,11 +1059,10 @@ class LauncherUISetupMixin:
             self.ai_panel = AIAssistantPanel(self)
             self.ai_panel.setMinimumWidth(0)
             self.content_splitter.addWidget(self.ai_panel)
-            self.content_splitter.setCollapsible(1, True)
-            self.ai_panel.setMaximumWidth(0)
+            self.ai_panel.setMaximumWidth(16777215)  # Make it open by default
             self.ai_panel.settings_requested.connect(self._open_ai_settings)
             self.ai_panel.close_requested.connect(
-                lambda: self.toggle_ai_assistant(False)
+                lambda: self.ai_panel.setMaximumWidth(0)
             )
             self._sync_chat_session()
         except ImportError as e:
@@ -1069,7 +1091,9 @@ class LauncherUISetupMixin:
             url = "http://127.0.0.1:8000/api/chat/sessions"
             req = urllib.request.Request(url, method="GET")
             # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
-            with urllib.request.urlopen(req, timeout=2) as resp:  # nosec B310 - hardcoded localhost URL, no external input
+            with urllib.request.urlopen(
+                req, timeout=2
+            ) as resp:  # nosec B310 - hardcoded localhost URL, no external input
                 sessions = json.loads(resp.read().decode("utf-8"))
 
             session_id = sessions[0]["session_id"] if sessions else None

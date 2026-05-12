@@ -84,7 +84,7 @@ class CombinedForcePlateProcessor:
 
         # Apply threshold to prevent divide-by-zero spikes
         valid_mask = np.abs(fz) >= self.fz_threshold
-        
+
         # COP_x = -M_y / F_z
         # COP_y = M_x / F_z
         cop_x[valid_mask] = -my[valid_mask] / fz[valid_mask]

@@ -38,6 +38,7 @@ logger = get_logger(__name__)
 
 try:
     import upstream_muscle
+
     HAS_RUST_BACKEND = True
 except ImportError:
     HAS_RUST_BACKEND = False
@@ -70,9 +71,13 @@ class EquilibriumSolver:
             muscle: HillMuscleModel instance
         """
         self.muscle = muscle
-        
+
         self._rust_backend = None
-        if HAS_RUST_BACKEND and hasattr(muscle, '_rust_backend') and muscle._rust_backend is not None:
+        if (
+            HAS_RUST_BACKEND
+            and hasattr(muscle, "_rust_backend")
+            and muscle._rust_backend is not None
+        ):
             self._rust_backend = upstream_muscle.EquilibriumSolver(muscle._rust_backend)
 
     def _equilibrium_residual(
@@ -170,13 +175,17 @@ class EquilibriumSolver:
 
         if initial_guess is None:
             initial_guess = INITIAL_GUESS_RATIO * self.muscle.params.l_opt
-            
+
         if self._rust_backend is not None:
             try:
-                return self._rust_backend.solve_fiber_length(l_MT, activation, v_CE, initial_guess)
+                return self._rust_backend.solve_fiber_length(
+                    l_MT, activation, v_CE, initial_guess
+                )
             except RuntimeError as e:
                 # Fallback to python solver on failure
-                logger.warning(f"Rust equilibrium solver failed, falling back to Python: {e}")
+                logger.warning(
+                    f"Rust equilibrium solver failed, falling back to Python: {e}"
+                )
 
         # Define residual function for newton()
         def residual_func(l_CE: float) -> float:
@@ -269,9 +278,13 @@ class EquilibriumSolver:
 
         if self._rust_backend is not None:
             try:
-                return self._rust_backend.solve_fiber_velocity(l_MT, v_MT, activation, l_CE, dt)
+                return self._rust_backend.solve_fiber_velocity(
+                    l_MT, v_MT, activation, l_CE, dt
+                )
             except RuntimeError as e:
-                logger.warning(f"Rust fiber velocity solver failed, falling back to Python: {e}")
+                logger.warning(
+                    f"Rust fiber velocity solver failed, falling back to Python: {e}"
+                )
 
         # Solve for future fiber length
         try:
@@ -341,14 +354,20 @@ def compute_equilibrium_state(
         activation,
     )
 
-    if HAS_RUST_BACKEND and hasattr(muscle, '_rust_backend') and muscle._rust_backend is not None:
+    if (
+        HAS_RUST_BACKEND
+        and hasattr(muscle, "_rust_backend")
+        and muscle._rust_backend is not None
+    ):
         try:
             l_ce, v_ce = upstream_muscle.compute_equilibrium_state(
                 muscle._rust_backend, l_MT, v_MT, activation, initial_l_CE
             )
             return float(l_ce), float(v_ce)
         except RuntimeError as e:
-            logger.warning(f"Rust compute_equilibrium_state failed, falling back to Python: {e}")
+            logger.warning(
+                f"Rust compute_equilibrium_state failed, falling back to Python: {e}"
+            )
 
     solver = EquilibriumSolver(muscle)
 

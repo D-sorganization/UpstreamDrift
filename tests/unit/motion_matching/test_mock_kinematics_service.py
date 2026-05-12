@@ -18,7 +18,6 @@ from src.shared.python.pose_interchange.live_kinematics import (
 )
 from src.shared.python.pose_interchange.services._mock import MockKinematicsService
 
-
 pytestmark = pytest.mark.unit
 
 

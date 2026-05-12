@@ -61,7 +61,10 @@ class BiomechanicalModel:
         require(len(distal_markers) > 0, "Must have at least one distal marker")
 
         key = get_anthropometry_key(name)
-        require(key in self.segment_masses, f"Unknown segment name: {name} (mapped to {key})")
+        require(
+            key in self.segment_masses,
+            f"Unknown segment name: {name} (mapped to {key})",
+        )
 
         self.segments.append(SegmentDefinition(name, proximal_markers, distal_markers))
 

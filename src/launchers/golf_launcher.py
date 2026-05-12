@@ -159,8 +159,10 @@ class GolfLauncher(
         self.init_ui()
         self._apply_theme_system()
 
-        # Show first-run onboarding dialog if needed
-        self._show_onboarding_if_needed()
+        if not self.loading:
+            from PyQt6.QtCore import QTimer as _QTimer
+
+            _QTimer.singleShot(100, self._show_onboarding_if_needed)
 
         if self.loading:
             pass  # Wait for update_startup_results
@@ -438,6 +440,10 @@ class GolfLauncher(
         self._apply_docker_status(results.docker_available)
         self._load_layout()
 
+        from PyQt6.QtCore import QTimer as _QTimer
+
+        _QTimer.singleShot(100, self._show_onboarding_if_needed)
+
     def create_model_card(self, model: Any) -> None:
         """Creates a clickable card widget (placeholder)."""
 
@@ -564,26 +570,30 @@ class GolfLauncher(
             )
 
         for mid, card in self.model_cards.items():
-            if mid == model_id:
-                card.setStyleSheet(f"""
-                    QFrame#ModelCard {{
-                        background-color: {c.bg_highlight};
-                        border: 2px solid {c.primary};
-                        border-radius: 12px;
-                    }}
-                    """)
+            if hasattr(card, "set_selected"):
+                card.set_selected(mid == model_id)
             else:
-                card.setStyleSheet(f"""
-                    QFrame#ModelCard {{
-                        background-color: {c.bg_elevated};
-                        border: 1px solid {c.border_default};
-                        border-radius: 12px;
-                    }}
-                    QFrame#ModelCard:hover {{
-                        background-color: {c.bg_highlight};
-                        border: 1px solid {c.border_strong};
-                    }}
-                    """)
+                # Fallback for older cards
+                if mid == model_id:
+                    card.setStyleSheet(f"""
+                        QFrame#ModelCard {{
+                            background-color: {c.bg_highlight};
+                            border: 2px solid {c.primary};
+                            border-radius: 12px;
+                        }}
+                        """)
+                else:
+                    card.setStyleSheet(f"""
+                        QFrame#ModelCard {{
+                            background-color: {c.bg_elevated};
+                            border: 1px solid {c.border_default};
+                            border-radius: 12px;
+                        }}
+                        QFrame#ModelCard:hover {{
+                            background-color: {c.bg_highlight};
+                            border: 1px solid {c.border_strong};
+                        }}
+                        """)
 
         # Update launch button
         model = self._get_model(model_id)

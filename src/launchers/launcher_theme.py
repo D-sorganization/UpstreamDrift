@@ -41,28 +41,16 @@ class LauncherThemeMixin:
             border_strong = colors.get("border_strong", colors.get("focus", "#0078D4"))
             text_sec = colors.get("text_secondary", "#AAAAAA")
 
-            self.setStyleSheet(
-                manager.get_current_stylesheet()
-                + f"""
+            self.setStyleSheet(manager.get_current_stylesheet() + f"""
                 QScrollArea {{ border: none; }}
                 QMenu::separator {{
                     height: 1px;
                     margin: 4px 8px;
                 }}
-                QFrame#ModelCard {{
-                    background-color: {bg_elevated};
-                    border: 1px solid {border_default};
-                    border-radius: 12px;
-                }}
-                QFrame#ModelCard:hover {{
-                    background-color: {bg_highlight};
-                    border: 1px solid {border_strong};
-                }}
                 QLabel#CardDescription {{
                     color: {text_sec};
                 }}
-            """
-            )
+            """)
         except (ImportError, AttributeError):
             # Fallback minimal dark style if theme system unavailable
             self.setStyleSheet(

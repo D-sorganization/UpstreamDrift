@@ -33,6 +33,7 @@ from .provider import (
     register_provider as _register_canonical,
 )
 
+
 def register_provider(provider: Any) -> None:
     """Register an engine-side ``fit_swing`` provider.
 
@@ -49,15 +50,16 @@ def register_provider(provider: Any) -> None:
         raise TypeError(
             f"provider for engine '{name}' must expose a callable 'fit_swing'"
         )
-    
+
     # Validation passed, delegate to the canonical registry
     _register_canonical(provider)
 
+
 # clear_registry is not in provider.py, but it's used in tests. We can implement it here by reaching into provider.py's internals, or we can just import the internal ones.
 from .provider import _REGISTRY, _REGISTRY_LOCK
+
 
 def clear_registry() -> None:
     """Remove every entry from the registry. Test helper only."""
     with _REGISTRY_LOCK:
         _REGISTRY.clear()
-

@@ -41,6 +41,7 @@ except Exception:  # pragma: no cover
 
 import os
 
+
 def _use_rust_outer_loop() -> bool:
     return _HAVE_RUST and os.environ.get("RUST_OUTER_LOOP", "1") == "1"
 
@@ -74,7 +75,11 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
                 import mujoco
 
                 # Check dimensional parity
-                if len(q_row) == model.nq and len(v_row) == model.nv and len(a_row) == model.nv:  # type: ignore
+                if (
+                    len(q_row) == model.nq
+                    and len(v_row) == model.nv
+                    and len(a_row) == model.nv
+                ):  # type: ignore
                     data.qpos[:] = q_row  # type: ignore
                     data.qvel[:] = v_row  # type: ignore
                     data.qacc[:] = a_row  # type: ignore

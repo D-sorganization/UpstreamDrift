@@ -121,8 +121,11 @@ def route_launch(args: argparse.Namespace) -> None:
             from src.launchers.golf_launcher import main as classic_main
 
             classic_main()
-        except ImportError:
-            logger.error("Could not load classic launcher. Check installation.")
+        except ImportError as e:
+            import traceback
+
+            traceback.print_exc()
+            logger.error(f"Could not load classic launcher: {e}")
             exit(1)
 
     elif api_only_arg:

@@ -29,6 +29,7 @@ logger = get_logger(__name__)
 
 try:
     import upstream_muscle
+
     HAS_RUST_BACKEND = True
 except ImportError:
     HAS_RUST_BACKEND = False
@@ -59,7 +60,7 @@ class MuscleGroup:
         self.name = name
         self.muscles: dict[str, HillMuscleModel] = {}
         self.attachments: dict[str, MuscleAttachment] = {}
-        
+
         self._rust_backend = None
         if HAS_RUST_BACKEND:
             self._rust_backend = upstream_muscle.MuscleGroup(name)
@@ -85,8 +86,12 @@ class MuscleGroup:
         require(moment_arm != 0.0, "moment_arm must be non-zero", moment_arm)
         self.muscles[name] = muscle
         self.attachments[name] = MuscleAttachment(name, moment_arm)
-        
-        if self._rust_backend is not None and hasattr(muscle, '_rust_backend') and muscle._rust_backend is not None:
+
+        if (
+            self._rust_backend is not None
+            and hasattr(muscle, "_rust_backend")
+            and muscle._rust_backend is not None
+        ):
             self._rust_backend.add_muscle(name, muscle._rust_backend, moment_arm)
 
     def compute_net_torque(
@@ -124,7 +129,9 @@ class MuscleGroup:
             try:
                 return self._rust_backend.compute_net_torque(activations, muscle_states)
             except RuntimeError as e:
-                logger.warning(f"Rust MuscleGroup compute_net_torque failed, falling back to Python: {e}")
+                logger.warning(
+                    f"Rust MuscleGroup compute_net_torque failed, falling back to Python: {e}"
+                )
 
         net_torque = 0.0
 
@@ -176,8 +183,14 @@ class AntagonistPair:
         self.antagonist = antagonist
 
         self._rust_backend = None
-        if HAS_RUST_BACKEND and agonist._rust_backend is not None and antagonist._rust_backend is not None:
-            self._rust_backend = upstream_muscle.AntagonistPair(agonist._rust_backend, antagonist._rust_backend)
+        if (
+            HAS_RUST_BACKEND
+            and agonist._rust_backend is not None
+            and antagonist._rust_backend is not None
+        ):
+            self._rust_backend = upstream_muscle.AntagonistPair(
+                agonist._rust_backend, antagonist._rust_backend
+            )
 
     def compute_net_torque(
         self,
@@ -205,9 +218,13 @@ class AntagonistPair:
 
         if self._rust_backend is not None:
             try:
-                return self._rust_backend.compute_net_torque(agonist_activations, antagonist_activations, muscle_states)
+                return self._rust_backend.compute_net_torque(
+                    agonist_activations, antagonist_activations, muscle_states
+                )
             except RuntimeError as e:
-                logger.warning(f"Rust AntagonistPair compute_net_torque failed, falling back to Python: {e}")
+                logger.warning(
+                    f"Rust AntagonistPair compute_net_torque failed, falling back to Python: {e}"
+                )
 
         tau_agonist = self.agonist.compute_net_torque(
             agonist_activations, muscle_states

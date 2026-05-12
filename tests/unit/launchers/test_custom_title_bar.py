@@ -14,13 +14,15 @@ def test_custom_title_bar_signals(qapp):
     title_bar.maximize_requested.emit = MagicMock()
     title_bar.close_requested.emit = MagicMock()
 
-    # Simulate clicks
+    title_bar.minimize_requested.emit.reset_mock()
     title_bar._minimize_window()
     title_bar.minimize_requested.emit.assert_called_once()
 
+    title_bar.maximize_requested.emit.reset_mock()
     title_bar._maximize_window()
     title_bar.maximize_requested.emit.assert_called_once()
 
+    title_bar.close_requested.emit.reset_mock()
     title_bar._close_window()
     title_bar.close_requested.emit.assert_called_once()
 

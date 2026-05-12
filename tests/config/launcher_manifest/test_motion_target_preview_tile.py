@@ -100,23 +100,23 @@ class TestMotionTargetPreviewTile:
         """The new generic Motion-Match Preview tile must be in the manifest."""
         tile = manifest.get_tile("motion_target_preview")
         assert tile is not None, "motion_target_preview tile missing"
-        assert tile.name == "Motion-Match Preview", (
-            "Assertion failed: tile.name == Motion-Match Preview"
-        )
+        assert (
+            tile.name == "Motion-Match Preview"
+        ), "Assertion failed: tile.name == Motion-Match Preview"
         assert tile.category == "tool", "Assertion failed: tile.category == tool"
-        assert tile.logo == "motion_target_preview.svg", (
-            "Assertion failed: tile.logo == motion_target_preview.svg"
-        )
+        assert (
+            tile.logo == "motion_target_preview.svg"
+        ), "Assertion failed: tile.logo == motion_target_preview.svg"
         assert tile.logo_path.exists(), "Assertion failed: tile.logo_path.exists()"
-        assert tile.path == "src.tools.starting_pose_matcher.__main__", (
-            "Assertion failed: tile.path == src.tools.starting_pose_matcher.__main__"
-        )
+        assert (
+            tile.path == "src.tools.starting_pose_matcher.__main__"
+        ), "Assertion failed: tile.path == src.tools.starting_pose_matcher.__main__"
         assert not tile.hidden, "Assertion failed: not tile.hidden"
         # Tags must be source-neutral and cover the issue's required set.
         for required_tag in ("c3d", "mocap", "club", "body", "preview"):
-            assert required_tag in tile.tags or required_tag in tile.capabilities, (
-                "Assertion failed: required_tag in tile.tags or required_tag in tile.capabilities"
-            )
+            assert (
+                required_tag in tile.tags or required_tag in tile.capabilities
+            ), "Assertion failed: required_tag in tile.tags or required_tag in tile.capabilities"
 
     def test_legacy_starting_pose_matcher_validates_with_logo(
         self, manifest: LauncherManifest
@@ -137,13 +137,13 @@ class TestMotionTargetPreviewTile:
     ) -> None:
         """`visible_tiles` and `tools` must skip hidden legacy aliases."""
         visible_ids = {t.id for t in manifest.visible_tiles}
-        assert "motion_target_preview" in visible_ids, (
-            "Assertion failed: motion_target_preview in visible_ids"
-        )
-        assert "starting_pose_matcher" not in visible_ids, (
-            "Assertion failed: starting_pose_matcher not in visible_ids"
-        )
+        assert (
+            "motion_target_preview" in visible_ids
+        ), "Assertion failed: motion_target_preview in visible_ids"
+        assert (
+            "starting_pose_matcher" not in visible_ids
+        ), "Assertion failed: starting_pose_matcher not in visible_ids"
         tool_ids = {t.id for t in manifest.tools}
-        assert "starting_pose_matcher" not in tool_ids, (
-            "Assertion failed: starting_pose_matcher not in tool_ids"
-        )
+        assert (
+            "starting_pose_matcher" not in tool_ids
+        ), "Assertion failed: starting_pose_matcher not in tool_ids"

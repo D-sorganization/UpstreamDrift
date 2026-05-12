@@ -2,9 +2,11 @@ import torch
 import torch.nn as nn
 from dataclasses import dataclass
 
+
 @dataclass(frozen=True)
 class InverseSurrogateConfig:
     """Architectural configuration for the MyoSuite inverse surrogate."""
+
     n_joints: int
     n_muscles: int
     seq_len: int
@@ -12,19 +14,21 @@ class InverseSurrogateConfig:
     n_layers: int = 4
     dropout: float = 0.1
 
+
 class MyoSuiteInverseSurrogate(nn.Module):
     """Inverse muscle surrogate mapping joint kinematics to muscle activations.
 
     Outputs muscle activations in the strictly bounded range [0, 1] suitable
     for MyoSuite actuation.
     """
+
     def __init__(self, cfg: InverseSurrogateConfig) -> None:
         super().__init__()
         self.cfg = cfg
-        
+
         # We take joint_q and joint_v (kinematic state) as input per timestep.
         in_dim = cfg.n_joints * 2
-        
+
         layers = []
         prev = in_dim
         for _ in range(cfg.n_layers):
@@ -34,10 +38,10 @@ class MyoSuiteInverseSurrogate(nn.Module):
             if cfg.dropout > 0:
                 layers.append(nn.Dropout(cfg.dropout))
             prev = cfg.hidden_dim
-            
+
         self.backbone = nn.Sequential(*layers)
         self.head = nn.Linear(cfg.hidden_dim, cfg.n_muscles)
-        
+
     def forward(self, joint_q: torch.Tensor, joint_v: torch.Tensor) -> torch.Tensor:
         """Predict muscle activations from joint kinematics.
 

@@ -36,7 +36,7 @@ def _make_heavy_rig(n_dof: int = 30) -> SkeletonRig:
         joints[name] = JointDef(
             name=name,
             parent=parent,
-            children=[] if i == n_dof - 1 else [f"joint_{i+1}"],
+            children=[] if i == n_dof - 1 else [f"joint_{i + 1}"],
             tpose_offset=[0.1, 0.0, 0.0],
             axes=["Z"],
         )

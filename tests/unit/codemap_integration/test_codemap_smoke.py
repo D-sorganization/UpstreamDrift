@@ -31,8 +31,7 @@ def tiny_repo(tmp_path: Path) -> Path:
     (tmp_path / "pkg").mkdir()
     (tmp_path / "pkg" / "__init__.py").write_text("", encoding="utf-8")
     (tmp_path / "pkg" / "alpha.py").write_text(
-        textwrap.dedent(
-            '''
+        textwrap.dedent('''
             """Alpha module."""
 
             def widget_factory(name: str) -> str:
@@ -44,23 +43,18 @@ def tiny_repo(tmp_path: Path) -> Path:
                 """A canary class our chat test searches for."""
 
                 def render(self) -> None: ...
-            '''
-        ).strip()
-        + "\n",
+            ''').strip() + "\n",
         encoding="utf-8",
     )
     (tmp_path / "pkg" / "beta.py").write_text(
-        textwrap.dedent(
-            '''
+        textwrap.dedent('''
             """Beta module."""
             from .alpha import widget_factory
 
 
             def use_widget() -> str:
                 return widget_factory("beta")
-            '''
-        ).strip()
-        + "\n",
+            ''').strip() + "\n",
         encoding="utf-8",
     )
     return tmp_path

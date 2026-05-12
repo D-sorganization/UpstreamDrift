@@ -551,7 +551,9 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.ax.set_title(title)
         self.ax.grid(True)
 
-    def _get_data_for_key(self, key: str) -> tuple[np.ndarray, np.ndarray | None, str]:  # noqa: C901
+    def _get_data_for_key(
+        self, key: str
+    ) -> tuple[np.ndarray, np.ndarray | None, str]:  # noqa: C901
         """Fetch data for a specific key."""
         if not (key is not None):
             raise ValueError("key must be provided")
@@ -745,9 +747,7 @@ class LivePlotWidget(QtWidgets.QWidget):
                 label = (
                     dim_label
                     if n_dims == 1
-                    else f"{dim_label} {i}"
-                    if plot_mode != "Norm"
-                    else "Norm"
+                    else f"{dim_label} {i}" if plot_mode != "Norm" else "Norm"
                 )
                 if plot_mode == "All Dimensions":
                     label = f"Dim {i}"

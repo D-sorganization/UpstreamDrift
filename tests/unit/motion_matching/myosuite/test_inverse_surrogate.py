@@ -7,6 +7,7 @@ Covers:
 - SurrogateDataset size/shape contract
 - train_surrogate smoke test (CPU, mock data, 1 epoch)
 """
+
 from __future__ import annotations
 
 import pytest
@@ -135,14 +136,18 @@ def test_gradient_flows_through_model(small_cfg: InverseSurrogateConfig) -> None
 @pytest.mark.unit
 def test_surrogate_dataset_len() -> None:
     """SurrogateDataset must report a positive length."""
-    ds = SurrogateDataset("mock", seq_len=SEQ_LEN, n_joints=N_JOINTS, n_muscles=N_MUSCLES)
+    ds = SurrogateDataset(
+        "mock", seq_len=SEQ_LEN, n_joints=N_JOINTS, n_muscles=N_MUSCLES
+    )
     assert len(ds) > 0
 
 
 @pytest.mark.unit
 def test_surrogate_dataset_item_shapes() -> None:
     """Each dataset item must have correct (seq_len, n_joints/muscles) shapes."""
-    ds = SurrogateDataset("mock", seq_len=SEQ_LEN, n_joints=N_JOINTS, n_muscles=N_MUSCLES)
+    ds = SurrogateDataset(
+        "mock", seq_len=SEQ_LEN, n_joints=N_JOINTS, n_muscles=N_MUSCLES
+    )
     q, v, m = ds[0]
     assert q.shape == (SEQ_LEN, N_JOINTS)
     assert v.shape == (SEQ_LEN, N_JOINTS)
@@ -152,7 +157,9 @@ def test_surrogate_dataset_item_shapes() -> None:
 @pytest.mark.unit
 def test_surrogate_dataset_activations_bounded() -> None:
     """Mock muscle activations returned by the dataset must be in [0, 1]."""
-    ds = SurrogateDataset("mock", seq_len=SEQ_LEN, n_joints=N_JOINTS, n_muscles=N_MUSCLES)
+    ds = SurrogateDataset(
+        "mock", seq_len=SEQ_LEN, n_joints=N_JOINTS, n_muscles=N_MUSCLES
+    )
     _, _, m = ds[0]
     assert torch.all(m >= 0.0)
     assert torch.all(m <= 1.0)

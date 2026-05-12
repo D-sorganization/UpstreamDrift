@@ -250,7 +250,11 @@ class SimCameraMixin:
     def get_camera_lookat(self: Any) -> tuple[float, float, float]:
         """Get the camera look-at target position."""
         if self.camera:
-            return (float(self.camera.lookat[0]), float(self.camera.lookat[1]), float(self.camera.lookat[2]))
+            return (
+                float(self.camera.lookat[0]),
+                float(self.camera.lookat[1]),
+                float(self.camera.lookat[2]),
+            )
         return (0.0, 0.0, 0.0)
 
     def show_context_menu(self: Any, global_pos: QtCore.QPoint, body_id: int) -> None:

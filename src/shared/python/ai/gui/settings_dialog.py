@@ -109,7 +109,9 @@ PROVIDER_INFO: dict[AIProvider, dict[str, str | bool | list[str]]] = {
         "key_service": "upstream_drift_anthropic_key",
         "default_model": "claude-3-5-sonnet-20240620",
         "models": [
+            "claude-3-5-sonnet-20241022",
             "claude-3-5-sonnet-20240620",
+            "claude-3-5-haiku-20241022",
             "claude-3-opus-20240229",
             "claude-3-sonnet-20240229",
             "claude-3-haiku-20240307",
@@ -127,22 +129,26 @@ PROVIDER_INFO: dict[AIProvider, dict[str, str | bool | list[str]]] = {
         "name": "Claude CLI (Agent)",
         "description": "Run commands via Anthropic's Claude Code CLI tool.",
         "requires_key": False,
-        "default_model": "claude-code",
-        "models": ["claude-code"],
+        "default_model": "claude-3-5-sonnet-20241022",
+        "models": [
+            "claude-3-5-sonnet-20241022",
+            "claude-3-5-haiku-20241022",
+            "claude-3-opus-20240229",
+        ],
     },
     AIProvider.CLINE_CLI: {
         "name": "Cline CLI (Agent)",
         "description": "Run tasks locally with the Cline CLI agent.",
         "requires_key": False,
-        "default_model": "cline",
-        "models": ["cline"],
+        "default_model": "claude-3-5-sonnet-20241022",
+        "models": ["claude-3-5-sonnet-20241022", "gpt-4o", "o1-preview"],
     },
     AIProvider.CODEX_CLI: {
         "name": "Codex CLI (Agent)",
         "description": "Use OpenAI's Codex CLI for local development.",
         "requires_key": False,
-        "default_model": "codex-cli",
-        "models": ["codex-cli"],
+        "default_model": "gpt-4o",
+        "models": ["gpt-4o", "o1-preview", "o1-mini", "gpt-4-turbo"],
     },
 }
 
@@ -684,8 +690,8 @@ class AISettingsDialog(QDialog):
 
         # Cost note
         cost_label = QLabel(
-            "<b>💡 Tip:</b> Ollama is completely FREE and runs locally. "
-            "No API keys or cloud costs!"
+            "<b>💡 Tip:</b> Local models (like Ollama) are completely FREE and run locally. "
+            "Cloud models may incur usage costs."
         )
         cost_label.setWordWrap(True)
         provider_layout.addWidget(cost_label)

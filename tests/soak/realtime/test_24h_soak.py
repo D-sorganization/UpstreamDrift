@@ -63,7 +63,6 @@ import psutil  # noqa: E402  (must follow importorskip)
 
 from src.shared.python.realtime.ws_pubsub import WSPubSub  # noqa: E402
 
-
 # ---------------------------------------------------------------------------
 # Configuration knobs (all env-driven so the same test serves dev smoke,
 # PR-CI smoke, and the 24h nightly).
@@ -494,12 +493,12 @@ def test_realtime_ws_soak() -> None:
             p99,
             mean,
         )
-        assert p50 < LATENCY_P50_MS_BUDGET, (
-            f"p50 latency {p50:.3f}ms exceeds {LATENCY_P50_MS_BUDGET}ms budget"
-        )
-        assert p99 < LATENCY_P99_MS_BUDGET, (
-            f"p99 latency {p99:.3f}ms exceeds {LATENCY_P99_MS_BUDGET}ms budget"
-        )
+        assert (
+            p50 < LATENCY_P50_MS_BUDGET
+        ), f"p50 latency {p50:.3f}ms exceeds {LATENCY_P50_MS_BUDGET}ms budget"
+        assert (
+            p99 < LATENCY_P99_MS_BUDGET
+        ), f"p99 latency {p99:.3f}ms exceeds {LATENCY_P99_MS_BUDGET}ms budget"
     else:
         pytest.fail("no latency samples captured (subscriber 0 did not receive)")
 
@@ -519,12 +518,16 @@ def test_realtime_ws_soak() -> None:
             tm=thread_max,
             ff=(fd_series[0] if fd_series else -1),
             fm=(fd_series[-1] if fd_series else -1),
-            p50=_percentile(latencies_ms[100:], 0.50)
-            if len(latencies_ms) > 200
-            else _percentile(latencies_ms, 0.50),
-            p99=_percentile(latencies_ms[100:], 0.99)
-            if len(latencies_ms) > 200
-            else _percentile(latencies_ms, 0.99),
+            p50=(
+                _percentile(latencies_ms[100:], 0.50)
+                if len(latencies_ms) > 200
+                else _percentile(latencies_ms, 0.50)
+            ),
+            p99=(
+                _percentile(latencies_ms[100:], 0.99)
+                if len(latencies_ms) > 200
+                else _percentile(latencies_ms, 0.99)
+            ),
         ),
         file=sys.stderr,
     )

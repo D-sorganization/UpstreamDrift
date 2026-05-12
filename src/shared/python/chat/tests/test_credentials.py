@@ -16,7 +16,6 @@ import pytest
 
 from chat.credentials import CredentialManager
 
-
 # ── Construction tests ───────────────────────────────────────────────
 
 

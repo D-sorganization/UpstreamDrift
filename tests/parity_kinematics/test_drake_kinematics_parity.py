@@ -22,7 +22,6 @@ from src.shared.python.pose_interchange.services._mock import (
     MockKinematicsService,
 )
 
-
 _TINY_URDF = """<?xml version="1.0"?>
 <robot name="parity_tiny">
   <link name="base_link">

@@ -208,9 +208,11 @@ class ChatToolBridge:
         return {
             "name": tool.name,
             "description": tool.description,
-            "category": tool.category.name
-            if hasattr(tool.category, "name")
-            else str(tool.category),
+            "category": (
+                tool.category.name
+                if hasattr(tool.category, "name")
+                else str(tool.category)
+            ),
             "requires_confirmation": tool.requires_confirmation,
             "parameters": tool.to_json_schema().get("parameters", {}),
         }

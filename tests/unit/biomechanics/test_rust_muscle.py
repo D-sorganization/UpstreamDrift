@@ -20,7 +20,6 @@ import pytest
 
 from src.shared.python.biomechanics import rust_muscle
 
-
 pytestmark = [pytest.mark.unit]
 
 

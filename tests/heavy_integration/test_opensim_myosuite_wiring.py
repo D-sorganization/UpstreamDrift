@@ -121,9 +121,9 @@ class TestOpenSimProtocol:
         ]
 
         for method in required_methods:
-            assert hasattr(OpenSimPhysicsEngine, method), (
-                f"OpenSimPhysicsEngine missing required method: {method}"
-            )
+            assert hasattr(
+                OpenSimPhysicsEngine, method
+            ), f"OpenSimPhysicsEngine missing required method: {method}"
             assert callable(getattr(OpenSimPhysicsEngine, method))
 
     def test_opensim_has_biomech_methods(self) -> None:
@@ -137,9 +137,9 @@ class TestOpenSimProtocol:
             "create_grip_model",
         ]
         for method in biomech_methods:
-            assert hasattr(OpenSimPhysicsEngine, method), (
-                f"OpenSimPhysicsEngine missing biomech method: {method}"
-            )
+            assert hasattr(
+                OpenSimPhysicsEngine, method
+            ), f"OpenSimPhysicsEngine missing biomech method: {method}"
 
     def test_opensim_uninitialized_state(self) -> None:
         """Uninitialized OpenSimPhysicsEngine reports not initialized."""
@@ -185,9 +185,9 @@ class TestMyoSuiteProtocol:
         ]
 
         for method in required_methods:
-            assert hasattr(MyoSuitePhysicsEngine, method), (
-                f"MyoSuitePhysicsEngine missing required method: {method}"
-            )
+            assert hasattr(
+                MyoSuitePhysicsEngine, method
+            ), f"MyoSuitePhysicsEngine missing required method: {method}"
             assert callable(getattr(MyoSuitePhysicsEngine, method))
 
     def test_myosuite_has_muscle_methods(self) -> None:
@@ -204,9 +204,9 @@ class TestMyoSuiteProtocol:
             "get_muscle_names",
         ]
         for method in muscle_methods:
-            assert hasattr(MyoSuitePhysicsEngine, method), (
-                f"MyoSuitePhysicsEngine missing muscle method: {method}"
-            )
+            assert hasattr(
+                MyoSuitePhysicsEngine, method
+            ), f"MyoSuitePhysicsEngine missing muscle method: {method}"
 
     def test_myosuite_uninitialized_state(self) -> None:
         """Uninitialized MyoSuitePhysicsEngine reports not initialized."""

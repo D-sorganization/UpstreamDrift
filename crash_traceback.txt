@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\ai\gui\assistant_panel.py", line 351, in _on_session_loaded
+    while self._message_layout.count() > 1:
+          ^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'AIAssistantPanel' object has no attribute '_message_layout'

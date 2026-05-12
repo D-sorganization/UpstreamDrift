@@ -34,14 +34,14 @@ class LayoutConfig:
 
 
 def _view_mode_from_string(name: str | None) -> ViewMode:
-    """Parse a stored string into a :class:`ViewMode`, defaulting to COMPACT."""
+    """Parse a stored string into a :class:`ViewMode`, defaulting to LIST."""
     if not name:
-        return ViewMode.COMPACT
+        return ViewMode.LIST
     try:
         return ViewMode[str(name).strip().upper()]
     except KeyError:
-        logger.warning("Unknown view_mode %r, falling back to COMPACT", name)
-        return ViewMode.COMPACT
+        logger.warning("Unknown view_mode %r, falling back to LIST", name)
+        return ViewMode.LIST
 
 
 class LayoutManager:
@@ -84,7 +84,7 @@ class LayoutManager:
         self.model_cards: dict[str, Any] = {}
         self.edit_mode = False
         self.current_filter_text = ""
-        self.current_view_mode: ViewMode = ViewMode.COMPACT
+        self.current_view_mode: ViewMode = ViewMode.LIST
         self.tile_scale: float = TILE_SCALE_DEFAULT
         self.current_category_filter = "All"
 
@@ -320,7 +320,6 @@ class LayoutManager:
                 "simulation": "Simulation",
                 "motion_matching": "Motion Matching",
                 "motion_capture": "Motion Capture",
-                "biomechanics": "Biomechanics",
                 "tool": "Tools & Data",
                 "documentation": "Documentation",
                 "external": "Tools & Data",

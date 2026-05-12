@@ -47,6 +47,7 @@ except Exception:  # pragma: no cover - fallback path
 
 import os
 
+
 def _use_rust_outer_loop() -> bool:
     return _HAVE_RUST_PIN_ID and os.environ.get("RUST_OUTER_LOOP", "1") == "1"
 

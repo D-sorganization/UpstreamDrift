@@ -38,7 +38,6 @@ from src.shared.python.biomechanics.multi_muscle import (  # noqa: E402
     MuscleGroup,
 )
 
-
 FIXTURES_DIR = Path(__file__).resolve().parent.parent / "tests"
 
 

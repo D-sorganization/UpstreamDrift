@@ -112,9 +112,9 @@ class OnboardingDialog(QDialog):
         content = QTextBrowser()
         content.setReadOnly(True)
         content.setOpenExternalLinks(True)
-        content.setFont(get_qfont(size=11, weight=Weights.NORMAL))
         content.setHtml(self._get_welcome_html())
-        content.setMaximumHeight(250)
+        content.setStyleSheet("background-color: transparent; border: none;")
+        content.setMinimumHeight(350)
         layout.addWidget(content)
 
         # "Don't show again" checkbox
@@ -139,36 +139,82 @@ class OnboardingDialog(QDialog):
         """Generate the welcome HTML content."""
         return """
         <style>
-            body { font-family: 'Inter', 'SF Pro Display', sans-serif; line-height: 1.6; }
-            h3 { color: #4CAF50; margin-top: 16px; margin-bottom: 8px; }
-            ul { margin: 8px 0 16px 20px; }
-            li { margin: 4px 0; }
-            a { color: #4CAF50; text-decoration: none; }
-            a:hover { text-decoration: underline; }
-            .tip { background: rgba(76, 175, 80, 0.1); padding: 10px; border-radius: 6px; margin: 10px 0; }
+            body { 
+                font-family: 'Inter', 'Segoe UI', sans-serif; 
+                line-height: 1.5;
+                color: #e0e0e0;
+                margin: 0;
+            }
+            .hero {
+                text-align: center;
+                padding: 10px 0 20px 0;
+                border-bottom: 1px solid #333;
+                margin-bottom: 20px;
+            }
+            .hero h2 {
+                background: linear-gradient(90deg, #FF8800, #FF5500);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                margin: 0 0 10px 0;
+                font-size: 28px;
+            }
+            .grid {
+                display: flex;
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+            .card {
+                background: #252526;
+                border: 1px solid #3c3c3c;
+                border-radius: 8px;
+                padding: 15px;
+                flex: 1;
+            }
+            .card h3 {
+                color: #FF8800;
+                margin: 0 0 10px 0;
+                font-size: 16px;
+            }
+            .card p {
+                margin: 0 0 10px 0;
+                font-size: 13px;
+                color: #aaa;
+            }
+            a.btn {
+                display: inline-block;
+                background: #FF8800;
+                color: #1e1e1e;
+                text-decoration: none;
+                padding: 6px 12px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            a.btn:hover { background: #FF9933; }
+            a.btn-outline {
+                background: transparent;
+                color: #FF8800;
+                border: 1px solid #FF8800;
+            }
+            a.btn-outline:hover { background: rgba(255,136,0,0.1); }
         </style>
         
-        <h3>🎯 What is UpstreamDrift?</h3>
-        <p>UpstreamDrift is a comprehensive biomechanics and robotics platform for 
-        simulation, analysis, and visualization of human movement models.</p>
+        <div class="hero">
+            <h2>UpstreamDrift</h2>
+            <p style="color: #aaa; margin:0; font-size: 14px;">Next-Generation Biomechanics & Robotics Platform</p>
+        </div>
         
-        <h3>🔧 Getting Started</h3>
-        <ul>
-            <li><b>Install Engines:</b> Run <code>pip install -e .[dev]</code> to install physics engines</li>
-            <li><b>Select a Model:</b> Click on any tile in the launcher grid</li>
-            <li><b>Launch:</b> Click the "Select a Model" button or double-click a tile</li>
-        </ul>
-        
-        <h3>📚 Resources</h3>
-        <ul>
-            <li><a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/user_guide/getting_started.md">Getting Started Guide</a></li>
-            <li><a href="https://github.com/D-sorganization/UpstreamDrift">GitHub Repository</a></li>
-            <li><a href="https://github.com/D-sorganization/UpstreamDrift/issues">Issue Tracker</a></li>
-        </ul>
-        
-        <div class="tip">
-            <b>💡 Tip:</b> Use the Settings dialog (⚙️) to configure engine runtime 
-            options including Docker and WSL2 support.
+        <div class="grid">
+            <div class="card">
+                <h3>🚀 Quick Start</h3>
+                <p>Launch your first physics model using the integrated grid layout.</p>
+                <a class="btn" href="https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/user_guide/getting_started.md">Read the Guide</a>
+            </div>
+            <div class="card">
+                <h3>⚙️ Configurations</h3>
+                <p>Adjust themes, install required dependencies, and set up your environment.</p>
+                <a class="btn btn-outline" href="https://github.com/D-sorganization/UpstreamDrift/issues">Report an Issue</a>
+            </div>
         </div>
         """
 

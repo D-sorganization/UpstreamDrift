@@ -1,21 +1,36 @@
 # Review Comments Archive - 2026-05-12
 
-Generated: 2026-05-12T06:39:18.616981
+Generated: 2026-05-12T14:14:54.567354
 
-## Reviewer (chatgpt-codex-connector[bot]) (1 comments)
+## Reviewer (chatgpt-codex-connector[bot]) (2 comments)
 
-### PR #5301: src/config/models.yaml:84
+### PR #5305: src/shared/python/ai/gui/assistant_panel.py:320
 
 Actionable: No
 Has Suggestion: No
 
 ```
-**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Point golf suite tile to an allowed launcher entrypoint**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Initialize chat UI before loading a persisted session**
 
-Using `launch_golf_suite.py` at the repository root makes this tile unlaunchable through `ProcessManager.launch_script`: `validate_script_path()` only allows scripts whose first path segment is in the whitelist (`src`, `engines`, `launchers`, `tools`, `shared`, `examples`). With the current path, launches fail with `Script in disallowed directory`, so...
+The panel now connects `session_loaded` and immediately calls `_load_history()` during `__init__`, but `_load_history()` calls `ChatSessionManager.load_session()`, which emits `session_loaded` synchronously. That invokes `_on_session_loaded()` before `_setup_ui()` has created `_message_layout`, so users with an existing saved chat can hit an `AttributeE...
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/5301#discussion_r3226831341)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/5305#discussion_r3229881496)
+
+---
+
+### PR #5305: src/launchers/launcher_ui_setup.py:1066
+
+Actionable: No
+Has Suggestion: No
+
+```
+**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Route AI panel close through toggle state handler**
+
+The close button wiring now directly sets `ai_panel` max width to 0, bypassing `toggle_ai_assistant()`, which is the only path that synchronizes `_ai_visible`, splitter sizes, and toggle button state. After closing via the panel's ✕, the sidebar toggle remains checked, so the next click applies another hide action and users typically need two clicks to reop...
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/5305#discussion_r3229881500)
 
 ---
 

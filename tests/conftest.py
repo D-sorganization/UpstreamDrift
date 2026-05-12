@@ -63,14 +63,22 @@ if "PyQt6" not in sys.modules:
                 elif name == "menuBar":
                     mock.return_value = DummyWidget()
                 elif name == "findChildren":
+
                     def mock_findChildren(*args, **kwargs):
                         btns = []
-                        for n in ["Home", "Engines", "Biomechanics", "Settings", "Documentation"]:
+                        for n in [
+                            "Home",
+                            "Engines",
+                            "Biomechanics",
+                            "Settings",
+                            "Documentation",
+                        ]:
                             b = MagicMock()
                             b.accessibleName.return_value = n
                             b.icon.return_value.isNull.return_value = False
                             btns.append(b)
                         return btns
+
                     mock.side_effect = mock_findChildren
                 self.__dict__["_mocks"][name] = mock
             return self.__dict__["_mocks"][name]

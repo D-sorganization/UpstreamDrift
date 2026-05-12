@@ -247,8 +247,18 @@ class LauncherPresentationMetadata:
 
         category = str(data["category"]).strip()
         require(
-            category in {"physics_engine", "tool", "external"},
-            "launcher category must be physics_engine, tool, or external",
+            category
+            in {
+                "physics_engine",
+                "simulation",
+                "motion_matching",
+                "motion_capture",
+                "tool",
+                "documentation",
+                "biomechanics",
+                "external",
+            },
+            "launcher category must be one of: physics_engine, simulation, motion_matching, motion_capture, tool, documentation, biomechanics, external",
             category,
         )
 

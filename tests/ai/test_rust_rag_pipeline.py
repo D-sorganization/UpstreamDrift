@@ -156,13 +156,11 @@ class TestLocalONNXEmbeddings:
         fixture.mkdir()
         for name, body in {
             "a.py": "def add(a, b): return a + b\n",
-            "b.py": textwrap.dedent(
-                f"""\
+            "b.py": textwrap.dedent(f"""\
                 # arbitrary file with a sentinel
                 {sentinel}
                 more lines below
-                """
-            ),
+                """),
             "c.py": "class Foo: pass\n",
         }.items():
             (fixture / name).write_text(body)
