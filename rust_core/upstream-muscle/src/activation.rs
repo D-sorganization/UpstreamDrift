@@ -3,6 +3,10 @@
 //! This is a direct scalar port of
 //! `src/shared/python/biomechanics/activation_dynamics.py`.
 
+#[cfg(feature = "python")]
+#[allow(unused_imports)]
+use pyo3::prelude::*;
+
 /// Default activation time constant, seconds.
 pub const DEFAULT_TAU_ACT: f64 = 0.010;
 
@@ -14,13 +18,10 @@ pub const DEFAULT_MIN_ACTIVATION: f64 = 0.001;
 
 /// First-order neural excitation to muscle activation dynamics.
 #[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
+#[cfg_attr(feature = "python", pyclass(get_all, set_all))]
 pub struct ActivationDynamics {
-    #[cfg_attr(feature = "python", pyo3(get, set))]
     pub tau_act: f64,
-    #[cfg_attr(feature = "python", pyo3(get, set))]
     pub tau_deact: f64,
-    #[cfg_attr(feature = "python", pyo3(get, set))]
     pub min_activation: f64,
 }
 
@@ -107,7 +108,7 @@ impl ActivationDynamics {
 }
 
 #[cfg(feature = "python")]
-#[pyo3::pymethods]
+#[pymethods]
 impl ActivationDynamics {
     #[new]
     #[pyo3(signature = (tau_act = DEFAULT_TAU_ACT, tau_deact = DEFAULT_TAU_DEACT, min_activation = DEFAULT_MIN_ACTIVATION))]

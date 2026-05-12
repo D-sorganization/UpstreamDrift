@@ -5,48 +5,62 @@
 //! training loops (`stable_baselines3`) where releasing the GIL during
 //! batched evaluation is the win.
 //!
-//! ## Implemented slices
+//! ## Implemented surface (UD#5216 complete)
 //!
-//! Pure scalar contractile/passive/tendon curves ported from
-//! `src/shared/python/biomechanics/hill_muscle.py`:
+//! Scalar primitives, ported from
+//! `src/shared/python/biomechanics/{hill_muscle,activation_dynamics,multi_muscle}.py`:
 //!
 //! - [`hill::f_l`] — active force-length (Gaussian)
 //! - [`hill::f_p`] — passive force-length (PEE exponential spring)
 //! - [`hill::f_v`] — force-velocity (Hill hyperbola + eccentric plateau)
 //! - [`hill::f_t`] — tendon force (SEE quadratic)
-//! - [`model::HillMuscleModel`] — state-bearing force assembly
-//! - [`activation::ActivationDynamics`] — first-order activation dynamics
-//! - [`muscle_equilibrium`] — equilibrium solver
-//! - [`multi_muscle`] — multi-muscle moment summation
+//! - [`model::HillMuscleModel`] — state-bearing force assembly (CE + PEE
+//!   + damping projected through pennation)
+//! - [`activation::ActivationDynamics`] — first-order excitation →
+//!   activation Euler step
+//! - [`muscle_equilibrium`] — equilibrium solver (PR #5247)
+//! - [`multi_muscle`] — multi-muscle moment summation, HashMap-attachment
+//!   API (PR #5247)
+//! - [`multi::joint_torques`] — dense `τ = R · F` for RL hot-loops
+//! - [`batch`] — Rayon-parallel batched RL inner-loop kernels
+//!
+//! ## Python facade
+//!
+//! Building with `--features python` (via `maturin`) compiles the PyO3
+//! module `upstream_muscle`. It exposes:
+//!
+//! - Scalar wrappers around the curves.
+//! - `ActivationDynamics`, `MuscleParameters`, `MuscleState`,
+//!   `HillMuscleModel` as Python classes (from PR #5246).
+//! - `MuscleAttachment`, `MuscleGroup`, `AntagonistPair`,
+//!   `PyEquilibriumSolver` (from PR #5247).
+//! - Numpy-backed batched APIs (`activation_step_batch`,
+//!   `muscle_force_batch`, `joint_torques_batch`, `step_full`).
+//!
+//! Batched entry points release the GIL via `py.allow_threads`.
 //!
 //! Numerical parity vs the Python source is asserted within 1e-6 in
-//! `tests/parity_hill.rs`.
-//!
-//! ## Out of scope (future slices, tracked separately)
-//!
-//! - Batched / `rayon`-parallel API for RL inner loops
-//! - OpenSim/MuJoCo parity test corpus
-//! - Python facade replacement
-//!
-//! See the umbrella issue UD#5216 and the slice-1 follow-up for status.
+//! `tests/parity_*.rs`. Pure-Python fallback lives in
+//! `src/shared/python/biomechanics/rust_muscle.py`.
 
 pub mod activation;
+pub mod batch;
 pub mod hill;
 pub mod model;
-pub mod muscle_equilibrium;
+pub mod multi;
 pub mod multi_muscle;
+pub mod muscle_equilibrium;
 
-// Convenience re-exports so callers can `use upstream_muscle::{f_l, f_v, f_t};`.
+// Convenience re-exports.
 pub use activation::ActivationDynamics;
 pub use hill::{f_l, f_l_with_width, f_p, f_t, f_v};
 pub use model::{HillMuscleModel, MuscleParameters, MuscleState};
+pub use multi::{joint_torque, joint_torques};
 
 // ── Python bindings (feature-gated) ──────────────────────────────────────────
-//
-// PyO3 is only compiled when the `python` feature is enabled (via maturin
-// for the production wheel). The pure-Rust internals above remain testable
-// with `cargo test` without linking libpython, mirroring the
-// upstream-physics / ai_backend pattern.
+
+#[cfg(feature = "python")]
+mod python_api;
 
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
@@ -90,11 +104,6 @@ fn py_f_t(py: Python<'_>, l_tendon_norm: f64) -> f64 {
 }
 
 /// `upstream_muscle` Python module.
-///
-/// ```python
-/// from upstream_muscle import f_l, f_v, f_t
-/// f = f_l(0.95)
-/// ```
 #[cfg(feature = "python")]
 #[pymodule]
 fn upstream_muscle(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -106,17 +115,24 @@ fn upstream_muscle(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<model::HillMuscleModel>()?;
     m.add_class::<model::MuscleParameters>()?;
     m.add_class::<model::MuscleState>()?;
-    
+
     m.add_class::<muscle_equilibrium::PyEquilibriumSolver>()?;
-    m.add_function(wrap_pyfunction!(muscle_equilibrium::compute_equilibrium_state, m)?)?;
-    
+    m.add_function(wrap_pyfunction!(
+        muscle_equilibrium::compute_equilibrium_state,
+        m
+    )?)?;
+
     m.add_class::<multi_muscle::MuscleAttachment>()?;
     m.add_class::<multi_muscle::MuscleGroup>()?;
     m.add_class::<multi_muscle::AntagonistPair>()?;
-    
+
     m.add(
         "DEFAULT_FORCE_LENGTH_WIDTH",
         hill::DEFAULT_FORCE_LENGTH_WIDTH,
     )?;
+    m.add("DEFAULT_TAU_ACT", activation::DEFAULT_TAU_ACT)?;
+    m.add("DEFAULT_TAU_DEACT", activation::DEFAULT_TAU_DEACT)?;
+    m.add("DEFAULT_MIN_ACTIVATION", activation::DEFAULT_MIN_ACTIVATION)?;
+    python_api::register(m)?;
     Ok(())
 }

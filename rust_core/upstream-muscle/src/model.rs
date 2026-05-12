@@ -2,23 +2,21 @@
 //!
 //! Direct scalar port of `src/shared/python/biomechanics/hill_muscle.py`.
 
+#[cfg(feature = "python")]
+#[allow(unused_imports)]
+use pyo3::prelude::*;
+
 use crate::hill::{f_l_with_width, f_p, f_v};
 
 /// Parameters defining a specific muscle.
 #[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
+#[cfg_attr(feature = "python", pyclass(get_all, set_all))]
 pub struct MuscleParameters {
-    #[cfg_attr(feature = "python", pyo3(get, set))]
     pub f_max: f64,
-    #[cfg_attr(feature = "python", pyo3(get, set))]
     pub l_opt: f64,
-    #[cfg_attr(feature = "python", pyo3(get, set))]
     pub l_slack: f64,
-    #[cfg_attr(feature = "python", pyo3(get, set))]
     pub v_max: f64,
-    #[cfg_attr(feature = "python", pyo3(get, set))]
     pub pennation_angle: f64,
-    #[cfg_attr(feature = "python", pyo3(get, set))]
     pub damping: f64,
 }
 
@@ -59,7 +57,7 @@ impl MuscleParameters {
 }
 
 #[cfg(feature = "python")]
-#[pyo3::pymethods]
+#[pymethods]
 impl MuscleParameters {
     #[new]
     #[pyo3(signature = (f_max, l_opt, l_slack, v_max = 10.0, pennation_angle = 0.0, damping = 0.05))]
@@ -78,15 +76,11 @@ impl MuscleParameters {
 
 /// Current muscle state.
 #[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
+#[cfg_attr(feature = "python", pyclass(get_all, set_all))]
 pub struct MuscleState {
-    #[cfg_attr(feature = "python", pyo3(get, set))]
     pub activation: f64,
-    #[cfg_attr(feature = "python", pyo3(get, set))]
     pub l_ce: f64,
-    #[cfg_attr(feature = "python", pyo3(get, set))]
     pub v_ce: f64,
-    #[cfg_attr(feature = "python", pyo3(get, set))]
     pub l_mt: f64,
 }
 
@@ -102,7 +96,7 @@ impl Default for MuscleState {
 }
 
 #[cfg(feature = "python")]
-#[pyo3::pymethods]
+#[pymethods]
 impl MuscleState {
     #[new]
     #[pyo3(signature = (activation = 0.0, l_ce = 0.0, v_ce = 0.0, l_mt = 0.0))]
@@ -118,7 +112,7 @@ impl MuscleState {
 
 /// Standard state-bearing Hill-type muscle model.
 #[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
+#[cfg_attr(feature = "python", pyclass(get_all, set_all))]
 pub struct HillMuscleModel {
     pub params: MuscleParameters,
     pub force_length_width: f64,
@@ -186,7 +180,7 @@ impl HillMuscleModel {
 }
 
 #[cfg(feature = "python")]
-#[pyo3::pymethods]
+#[pymethods]
 impl HillMuscleModel {
     #[new]
     #[pyo3(signature = (params, force_length_width = None))]

@@ -1,4 +1,4 @@
-use crate::hill_muscle::HillMuscleModel;
+use crate::model::HillMuscleModel;
 
 pub struct EquilibriumSolver<'a> {
     pub muscle: &'a HillMuscleModel,
@@ -42,7 +42,7 @@ impl<'a> EquilibriumSolver<'a> {
         if l_mt <= 0.0 {
             return Err("l_mt must be positive".to_string());
         }
-        if activation < 0.0 || activation > 1.0 {
+        if !(0.0..=1.0).contains(&activation) {
             return Err("activation must be in [0, 1]".to_string());
         }
 
@@ -70,7 +70,7 @@ impl<'a> EquilibriumSolver<'a> {
             }
 
             let x2 = x1 - f1 * (x1 - x0) / (f1 - f0);
-            
+
             x0 = x1;
             f0 = f1;
             x1 = x2;
@@ -97,7 +97,7 @@ impl<'a> EquilibriumSolver<'a> {
 
         let l_mt_next = l_mt + v_mt * dt;
         let l_ce_next = self.solve_fiber_length(l_mt_next, activation, 0.0, Some(l_ce))?;
-        
+
         Ok((l_ce_next - l_ce) / dt)
     }
 }
@@ -116,18 +116,19 @@ pub fn compute_equilibrium_state(
     initial_l_ce: Option<f64>,
 ) -> pyo3::PyResult<(f64, f64)> {
     let solver = EquilibriumSolver::new(muscle);
-    
+
     let l_ce = solver
         .solve_fiber_length(l_mt, activation, 0.0, initial_l_ce)
-        .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e))?;
-        
+        .map_err(pyo3::exceptions::PyRuntimeError::new_err)?;
+
     let v_ce = if v_mt.abs() > 1e-10 {
-        solver.solve_fiber_velocity(l_mt, v_mt, activation, l_ce, 0.001)
+        solver
+            .solve_fiber_velocity(l_mt, v_mt, activation, l_ce, 0.001)
             .unwrap_or(0.0)
     } else {
         0.0
     };
-    
+
     Ok((l_ce, v_ce))
 }
 
@@ -157,7 +158,7 @@ impl PyEquilibriumSolver {
         let solver = EquilibriumSolver::new(&self.muscle);
         solver
             .solve_fiber_length(l_mt, activation, v_ce, initial_guess)
-            .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e))
+            .map_err(pyo3::exceptions::PyRuntimeError::new_err)
     }
 
     #[pyo3(name = "solve_fiber_velocity")]
@@ -173,6 +174,6 @@ impl PyEquilibriumSolver {
         let solver = EquilibriumSolver::new(&self.muscle);
         solver
             .solve_fiber_velocity(l_mt, v_mt, activation, l_ce, dt)
-            .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e))
+            .map_err(pyo3::exceptions::PyRuntimeError::new_err)
     }
 }

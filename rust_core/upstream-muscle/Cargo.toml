@@ -5,7 +5,7 @@ edition.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
-description = "Hill-type muscle model kernels for UpstreamDrift biomechanics. Slice 1: scalar force-length / force-velocity / tendon curves with PyO3 bindings (UD#5216)."
+description = "Hill-type muscle model kernels for UpstreamDrift biomechanics: force-length / force-velocity / tendon curves, activation dynamics, multi-muscle moment summation, and batched RL APIs (UD#5216)."
 
 [lib]
 name = "upstream_muscle"
@@ -15,11 +15,14 @@ crate-type = ["cdylib", "rlib"]
 default = []
 # PyO3 bindings (extension-module). Off by default so `cargo test` runs without
 # linking libpython, mirroring the upstream-physics / ai_backend pattern.
-python = ["dep:pyo3"]
+python = ["dep:pyo3", "dep:numpy"]
 
 [dependencies]
 nalgebra = { workspace = true }
+ndarray = "0.16"
+rayon = "1.10"
 pyo3 = { workspace = true, optional = true }
+numpy = { version = "0.24", optional = true }
 
 [dev-dependencies]
 approx = "0.5"
@@ -27,4 +30,8 @@ criterion = { version = "0.5", default-features = false, features = ["cargo_benc
 
 [[bench]]
 name = "hill"
+harness = false
+
+[[bench]]
+name = "batch"
 harness = false
