@@ -38,8 +38,9 @@ pub struct DecimateParameters {
     pub max_hulls: usize,
     /// Concavity threshold; parts below this are kept as-is.
     pub concavity: f32,
-    /// `0` = surface fill, `1` = flood fill, `2` = raycast fill. Default 0
-    /// matches the trimesh facade.
+    /// `0` = surface fill, `1` = flood fill. Default 0 matches the trimesh
+    /// facade. Other values are rejected instead of silently changing the
+    /// decomposition contract.
     pub fill_mode: u8,
 }
 
@@ -80,6 +81,10 @@ impl DecimationResult {
 pub enum DecimationError {
     TooFewPoints(usize),
     NoTriangles,
+    InvalidResolution(u32),
+    InvalidMaxHulls(usize),
+    InvalidConcavity(f32),
+    UnsupportedFillMode(u8),
     NonFiniteInput {
         index: usize,
     },
@@ -95,6 +100,22 @@ impl core::fmt::Display for DecimationError {
         match self {
             Self::TooFewPoints(n) => write!(f, "decimation requires at least 4 vertices (got {n})"),
             Self::NoTriangles => write!(f, "decimation requires at least one triangle"),
+            Self::InvalidResolution(resolution) => write!(
+                f,
+                "decimation resolution must be greater than zero (got {resolution})"
+            ),
+            Self::InvalidMaxHulls(max_hulls) => write!(
+                f,
+                "decimation max_hulls must be greater than zero (got {max_hulls})"
+            ),
+            Self::InvalidConcavity(concavity) => write!(
+                f,
+                "decimation concavity must be finite and non-negative (got {concavity})"
+            ),
+            Self::UnsupportedFillMode(fill_mode) => write!(
+                f,
+                "decimation fill_mode must be 0 (surface) or 1 (flood fill), got {fill_mode}"
+            ),
             Self::NonFiniteInput { index } => {
                 write!(f, "vertex {index} contained non-finite coordinate")
             }
@@ -113,6 +134,22 @@ impl core::fmt::Display for DecimationError {
 }
 
 impl std::error::Error for DecimationError {}
+
+fn validate_params(params: &DecimateParameters) -> Result<(), DecimationError> {
+    if params.resolution == 0 {
+        return Err(DecimationError::InvalidResolution(params.resolution));
+    }
+    if params.max_hulls == 0 {
+        return Err(DecimationError::InvalidMaxHulls(params.max_hulls));
+    }
+    if !params.concavity.is_finite() || params.concavity < 0.0 {
+        return Err(DecimationError::InvalidConcavity(params.concavity));
+    }
+    if params.fill_mode > 1 {
+        return Err(DecimationError::UnsupportedFillMode(params.fill_mode));
+    }
+    Ok(())
+}
 
 fn fill_mode_from(code: u8) -> parry3d::transformation::voxelization::FillMode {
     use parry3d::transformation::voxelization::FillMode;
@@ -139,6 +176,7 @@ pub fn decimate_vhacd(
     indices: &[[u32; 3]],
     params: &DecimateParameters,
 ) -> Result<DecimationResult, DecimationError> {
+    validate_params(params)?;
     if vertices.len() < 4 {
         return Err(DecimationError::TooFewPoints(vertices.len()));
     }
@@ -259,6 +297,58 @@ mod tests {
         match decimate_vhacd(&v, &i, &DecimateParameters::default()) {
             Err(DecimationError::BadIndex { vertex: 99, .. }) => {}
             other => panic!("expected BadIndex, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn zero_resolution_errors_before_vhacd() {
+        let (v, i) = unit_cube_mesh();
+        let params = DecimateParameters {
+            resolution: 0,
+            ..Default::default()
+        };
+        match decimate_vhacd(&v, &i, &params) {
+            Err(DecimationError::InvalidResolution(0)) => {}
+            other => panic!("expected InvalidResolution, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn zero_max_hulls_errors_before_vhacd() {
+        let (v, i) = unit_cube_mesh();
+        let params = DecimateParameters {
+            max_hulls: 0,
+            ..Default::default()
+        };
+        match decimate_vhacd(&v, &i, &params) {
+            Err(DecimationError::InvalidMaxHulls(0)) => {}
+            other => panic!("expected InvalidMaxHulls, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn invalid_concavity_errors_before_vhacd() {
+        let (v, i) = unit_cube_mesh();
+        let params = DecimateParameters {
+            concavity: f32::NAN,
+            ..Default::default()
+        };
+        match decimate_vhacd(&v, &i, &params) {
+            Err(DecimationError::InvalidConcavity(value)) if value.is_nan() => {}
+            other => panic!("expected InvalidConcavity, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn unsupported_fill_mode_errors_before_vhacd() {
+        let (v, i) = unit_cube_mesh();
+        let params = DecimateParameters {
+            fill_mode: 2,
+            ..Default::default()
+        };
+        match decimate_vhacd(&v, &i, &params) {
+            Err(DecimationError::UnsupportedFillMode(2)) => {}
+            other => panic!("expected UnsupportedFillMode, got {other:?}"),
         }
     }
 }
