@@ -81,9 +81,12 @@ def test_round_trip_against_direct_matlab_call(adapter, bounds, has_simscape_mul
     quat_ml = np.array(sim_ml["q_club"], dtype=np.float64).reshape(-1, 4)
 
     assert sim_py.grip.shape == grip_ml.shape
-    rmse_grip = float(np.sqrt(np.mean((sim_py.grip - grip_ml) ** 2)))
-    rmse_clubhead = float(np.sqrt(np.mean((sim_py.clubhead - clubhead_ml) ** 2)))
-    rmse_quat = float(np.sqrt(np.mean((sim_py.club_quat - quat_ml) ** 2)))
+    diff_grip = sim_py.grip - grip_ml
+    rmse_grip = float(np.sqrt(np.vdot(diff_grip, diff_grip) / diff_grip.size))
+    diff_ch = sim_py.clubhead - clubhead_ml
+    rmse_clubhead = float(np.sqrt(np.vdot(diff_ch, diff_ch) / diff_ch.size))
+    diff_q = sim_py.club_quat - quat_ml
+    rmse_quat = float(np.sqrt(np.vdot(diff_q, diff_q) / diff_q.size))
     assert rmse_grip < 1e-6, f"grip RMSE {rmse_grip} too large"
     assert rmse_clubhead < 1e-6, f"clubhead RMSE {rmse_clubhead} too large"
     assert rmse_quat < 1e-6, f"quat RMSE {rmse_quat} too large"

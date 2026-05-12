@@ -289,7 +289,7 @@ def compare_clubhead_traces(
     delta_m = sim_club - meas_club
     delta_mm = delta_m * _M_TO_MM
     rmse_axes = np.sqrt(np.mean(delta_mm**2, axis=0))
-    total_rmse = float(np.sqrt(np.mean(np.sum(delta_mm**2, axis=1))))
+    total_rmse = float(np.sqrt(np.vdot(delta_mm, delta_mm) / delta_mm.shape[0]))
     # ⚡ Bolt: avoiding np.linalg.norm allows max computation before sqrt, saving ~2x time
     max_err = float(np.sqrt(np.max(np.einsum("ij,ij->i", delta_mm, delta_mm))))
 

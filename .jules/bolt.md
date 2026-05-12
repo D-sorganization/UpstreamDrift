@@ -34,3 +34,6 @@
 ## 2026-05-18 - Optimize norm calculation combined with argmax
 **Learning:** `np.linalg.norm(..., axis=1)` creates intermediate memory allocations and has overhead when used with `np.argmax`. Since `argmax` is invariant to monotonic transformations like `sqrt`, the `sqrt` can be completely omitted.
 **Action:** Replace `np.argmax(np.linalg.norm(x, axis=1))` with `np.argmax(np.einsum('ij,ij->i', x, x))` to find the index of the maximum magnitude vector without calculating the full norm. This yields significant speedup by avoiding both intermediate allocations and square root computation.
+## 2026-05-12 - Optimize sum of squares along axis using einsum and vdot
+**Learning:** Computing sum of squares over a dimension, or MSE with `np.mean(x**2)` causes a large intermediate allocation in `numpy` before it gets reduced/averaged. For frequently called hot paths, avoiding these allocations matters.
+**Action:** Use `np.vdot(x, x)` or `np.vdot(x, x)/x.size` to compute total squared norm or MSE. Use `np.einsum('ij,ij->i', x, x)` to compute row-wise squared norms without allocating a fully squared temporary matrix. Make sure the type is appropriately float.

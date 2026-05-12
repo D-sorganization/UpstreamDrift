@@ -212,7 +212,7 @@ def smoothness_cost(trajectory: JointTrajectory) -> float:
     if trajectory is None:
         raise ValueError("Trajectory must be provided")
     qddot = _qddot_matrix(trajectory)
-    return _ensure_finite(float(np.sum(qddot**2)), "smoothness")
+    return _ensure_finite(float(np.vdot(qddot, qddot)), "smoothness")
 
 
 def effort_cost(torques: TorqueTrajectory) -> float:
@@ -231,11 +231,11 @@ def effort_cost(torques: TorqueTrajectory) -> float:
     times = np.asarray([f.timestamp for f in torques.frames], dtype=float)
 
     if len(times) == 1:
-        return _ensure_finite(float(np.sum(tau**2)), "effort")
+        return _ensure_finite(float(np.vdot(tau, tau)), "effort")
 
     dts = np.diff(times)
     # Pair each interval with the average of its two endpoint sq-norms
-    sq = np.sum(tau**2, axis=1)
+    sq = np.einsum("ij,ij->i", tau, tau)
     integral = float(np.sum(0.5 * (sq[:-1] + sq[1:]) * dts))
     return _ensure_finite(integral, "effort")
 

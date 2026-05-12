@@ -293,9 +293,10 @@ def train(config: TrainConfig) -> None:
     pred = pred_scaled * y_std + y_mean
     target = y_raw[test_idx]
 
+    diff = pred - target
     metrics = {
         "best_val_loss_scaled": best_val,
-        "test_rmse_mean_unscaled": float(np.sqrt(np.mean((pred - target) ** 2))),
+        "test_rmse_mean_unscaled": float(np.sqrt(np.vdot(diff, diff) / diff.size)),
         "test_rmse_by_target_unscaled": _rmse_by_column(pred, target, target_columns),
         "test_nrmse_by_target_std": _normalized_rmse_by_column(
             pred, target, target_columns
