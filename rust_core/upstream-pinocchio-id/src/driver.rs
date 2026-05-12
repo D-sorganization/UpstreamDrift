@@ -22,6 +22,20 @@ pub enum DriverError {
     NonFiniteTau { frame: usize },
     /// The callback signalled failure on a given frame.
     CallbackFailure { frame: usize, message: String },
+    /// `qdot_override` shape did not match `(n_frames, n_dof)`.
+    QdotOverrideShapeMismatch {
+        expected_rows: usize,
+        expected_cols: usize,
+        actual_rows: usize,
+        actual_cols: usize,
+    },
+    /// `qddot_override` shape did not match `(n_frames, n_dof)`.
+    QddotOverrideShapeMismatch {
+        expected_rows: usize,
+        expected_cols: usize,
+        actual_rows: usize,
+        actual_cols: usize,
+    },
 }
 
 impl std::fmt::Display for DriverError {
@@ -37,6 +51,24 @@ impl std::fmt::Display for DriverError {
             Self::CallbackFailure { frame, message } => {
                 write!(f, "RNEA callback failed at frame {frame}: {message}")
             }
+            Self::QdotOverrideShapeMismatch {
+                expected_rows,
+                expected_cols,
+                actual_rows,
+                actual_cols,
+            } => write!(
+                f,
+                "qdot_override shape ({actual_rows}, {actual_cols}) does not match expected ({expected_rows}, {expected_cols})"
+            ),
+            Self::QddotOverrideShapeMismatch {
+                expected_rows,
+                expected_cols,
+                actual_rows,
+                actual_cols,
+            } => write!(
+                f,
+                "qddot_override shape ({actual_rows}, {actual_cols}) does not match expected ({expected_rows}, {expected_cols})"
+            ),
         }
     }
 }
@@ -78,11 +110,29 @@ where
     let mut buf = DriverBuffers::new(n_frames, n_dof);
 
     if let Some(v) = qdot_override {
+        let (vr, vc) = v.dim();
+        if vr != n_frames || vc != n_dof {
+            return Err(DriverError::QdotOverrideShapeMismatch {
+                expected_rows: n_frames,
+                expected_cols: n_dof,
+                actual_rows: vr,
+                actual_cols: vc,
+            });
+        }
         buf.qdot.assign(&v);
     } else {
         buf.qdot = finite_diff_qdot(q, times);
     }
     if let Some(a) = qddot_override {
+        let (ar, ac) = a.dim();
+        if ar != n_frames || ac != n_dof {
+            return Err(DriverError::QddotOverrideShapeMismatch {
+                expected_rows: n_frames,
+                expected_cols: n_dof,
+                actual_rows: ar,
+                actual_cols: ac,
+            });
+        }
         buf.qddot.assign(&a);
     } else {
         buf.qddot = finite_diff_qddot(q, times);
@@ -142,5 +192,43 @@ mod tests {
             Ok(array![f64::NAN])
         });
         assert!(matches!(err, Err(DriverError::NonFiniteTau { frame: 0 })));
+    }
+
+    #[test]
+    fn qdot_override_shape_mismatch_is_an_error() {
+        let times = array![0.0_f64, 0.1, 0.2];
+        let q = array![[0.0_f64], [0.01], [0.04]];
+        // Override has wrong number of frames (2 instead of 3)
+        let bad_qdot = array![[0.0_f64], [0.0]];
+        let err = run_inverse_dynamics(
+            q.view(),
+            times.view(),
+            Some(bad_qdot.view()),
+            None,
+            |_, _, _, _| Ok(Array1::<f64>::zeros(1)),
+        );
+        assert!(matches!(
+            err,
+            Err(DriverError::QdotOverrideShapeMismatch { .. })
+        ));
+    }
+
+    #[test]
+    fn qddot_override_shape_mismatch_is_an_error() {
+        let times = array![0.0_f64, 0.1, 0.2];
+        let q = array![[0.0_f64, 0.0], [0.01, 0.01], [0.04, 0.04]];
+        // Override has wrong DOF count (1 instead of 2)
+        let bad_qddot = array![[0.0_f64], [0.0], [0.0]];
+        let err = run_inverse_dynamics(
+            q.view(),
+            times.view(),
+            None,
+            Some(bad_qddot.view()),
+            |_, _, _, _| Ok(Array1::<f64>::zeros(2)),
+        );
+        assert!(matches!(
+            err,
+            Err(DriverError::QddotOverrideShapeMismatch { .. })
+        ));
     }
 }
