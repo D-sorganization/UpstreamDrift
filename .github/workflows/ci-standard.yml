@@ -1126,6 +1126,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Enable long Cargo git dependency paths on Windows
+        if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'windows-latest'
+        run: |
+          git config --global core.longpaths true
+          echo "CARGO_NET_GIT_FETCH_WITH_CLI=true" >> "$GITHUB_ENV"
+
       - name: Install Rust toolchain
         if: steps.rust-changes.outputs.has_changes == 'true'
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
@@ -1187,7 +1193,7 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/rust-venv"
           source "$RUNNER_TEMP/rust-venv/bin/activate"
           python -m pip install --upgrade pip maturin
-          for crate in rust_core/upstream-physics rust_core/upstream-mocap-preproc rust_core/upstream-muscle rust_core/upstream-motion-matching; do
+          for crate in rust_core/upstream-physics rust_core/upstream-mocap-preproc rust_core/upstream-muscle rust_core/upstream-motion-matching rust_core/ai_backend; do
             (cd "$crate" && python -m maturin build --interpreter python --features python --release)
           done
           echo "Wheels built successfully"
@@ -1207,6 +1213,20 @@ jobs:
           print('ContactParameters:', cp)
           print('SwingPlaneResult available:', hasattr(upstream_physics, 'SwingPlaneResult'))
           print('All Python bindings verified!')
+          "
+          # ai_backend wheel: smoke-test that the #[pymodule] is importable
+          # and exposes the four pyclasses + version. See issue #5220.
+          python -m pip install target/wheels/ai_backend-*.whl
+          python -c "
+          import ai_backend
+          assert hasattr(ai_backend, 'AIConfig'), 'AIConfig missing'
+          assert hasattr(ai_backend, 'AIEngine'), 'AIEngine missing'
+          assert hasattr(ai_backend, 'MemoryManager'), 'MemoryManager missing'
+          assert hasattr(ai_backend, 'RagPipeline'), 'RagPipeline missing'
+          cfg = ai_backend.AIConfig('k', 'https://api.example/v1', 'm', ':memory:')
+          assert cfg.chat_url() == 'https://api.example/v1/chat/completions', cfg.chat_url()
+          assert cfg.embed_url() == 'https://api.example/v1/embeddings', cfg.embed_url()
+          print('ai_backend bindings verified, version:', ai_backend.__version__)
           "
 
       - name: Build WASM Module (wasm-pack)

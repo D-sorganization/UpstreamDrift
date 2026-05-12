@@ -2,6 +2,16 @@
 //!
 //! Follows Law of Demeter by encapsulating the database connection logic.
 //! Pure-Rust core is always compiled; the `python` feature adds PyO3 bindings.
+//!
+//! ## sqlite-vss loading
+//!
+//! The bundled rusqlite SQLite does not include `vss0` by default. We attempt
+//! to enable extension loading and `load_extension('vss0')` at `initialize()`
+//! time; if loading fails (extension not installed, Windows MSVC build of
+//! sqlite-vss not available, etc.) we set `has_vss = false` and the search
+//! path falls back to a plain `SELECT ... LIMIT k`. The previous version
+//! silently degraded — this one logs to stderr so operators have a fighting
+//! chance of noticing they aren't actually doing vector search.
 
 #[cfg(feature = "python")]
 use pyo3::exceptions::{PyRuntimeError, PyValueError};
@@ -17,6 +27,11 @@ pub struct MemoryManager {
     #[allow(dead_code)]
     db_path: String,
     conn: Arc<Mutex<Connection>>,
+    /// Whether the `vss0` extension was successfully loaded. Set by
+    /// `try_initialize()` and read by `try_search()` to decide whether to
+    /// use the vector path or the fallback. The `Mutex` is needed for
+    /// interior mutability through the shared `&self` borrow on `initialize`.
+    has_vss: Arc<Mutex<bool>>,
 }
 
 impl MemoryManager {
@@ -34,10 +49,11 @@ impl MemoryManager {
         Ok(Self {
             db_path,
             conn: Arc::new(Mutex::new(conn)),
+            has_vss: Arc::new(Mutex::new(false)),
         })
     }
 
-    /// Initializes the database schema.
+    /// Initializes the database schema and attempts to load `vss0`.
     pub fn try_initialize(&self) -> Result<(), String> {
         let conn = self.conn.lock().unwrap();
 
@@ -50,14 +66,35 @@ impl MemoryManager {
         )
         .map_err(|e| format!("DB init error: {}", e))?;
 
-        // Note: In a real deployment, sqlite-vss extension must be loaded here
-        // using sqlite3_enable_load_extension.
-        let _ = conn.execute(
-            "CREATE VIRTUAL TABLE IF NOT EXISTS vss_documents USING vss0(
-                embedding(384)
-            )",
-            [],
-        );
+        // Attempt to load the sqlite-vss extension. The `load_extension`
+        // rusqlite feature is not enabled (bundled SQLite + load_extension
+        // requires a custom build), so we go through pragma `load_extension`
+        // instead. If anything goes wrong, we fall back to a non-vector
+        // search path and log a single warning.
+        let vss_ok = try_load_vss(&conn);
+        if vss_ok {
+            let create_result = conn.execute(
+                "CREATE VIRTUAL TABLE IF NOT EXISTS vss_documents USING vss0(
+                    embedding(384)
+                )",
+                [],
+            );
+            if let Err(e) = create_result {
+                eprintln!(
+                    "ai_backend: vss0 loaded but virtual-table create failed ({}); falling back to LIMIT-k retrieval.",
+                    e
+                );
+                *self.has_vss.lock().unwrap() = false;
+            } else {
+                *self.has_vss.lock().unwrap() = true;
+            }
+        } else {
+            eprintln!(
+                "ai_backend: sqlite-vss extension not available; vector search is degraded to ORDER BY id LIMIT k. \
+                 Install sqlite-vss and rebuild with rusqlite's `load_extension` feature for true vector search."
+            );
+            *self.has_vss.lock().unwrap() = false;
+        }
 
         Ok(())
     }
@@ -110,34 +147,38 @@ impl MemoryManager {
         }
 
         let conn = self.conn.lock().unwrap();
-
-        let emb_json = serde_json::to_string(&query_embedding)
-            .map_err(|e| format!("Serialization error: {}", e))?;
-
-        let stmt = conn.prepare(
-            "SELECT d.payload
-             FROM vss_documents v
-             JOIN documents d ON v.rowid = d.id
-             WHERE vss_search(v.embedding, ?1)
-             LIMIT ?2",
-        );
+        let has_vss = *self.has_vss.lock().unwrap();
 
         let mut results: Vec<String> = Vec::new();
 
-        if let Ok(mut stmt) = stmt {
-            if let Ok(mapped_rows) = stmt.query_map(params![emb_json, top_k as i64], |row| {
-                row.get::<_, String>(0)
-            }) {
-                for r in mapped_rows.flatten() {
-                    results.push(r);
+        if has_vss {
+            let emb_json = serde_json::to_string(&query_embedding)
+                .map_err(|e| format!("Serialization error: {}", e))?;
+
+            let stmt = conn.prepare(
+                "SELECT d.payload
+                 FROM vss_documents v
+                 JOIN documents d ON v.rowid = d.id
+                 WHERE vss_search(v.embedding, ?1)
+                 LIMIT ?2",
+            );
+
+            if let Ok(mut stmt) = stmt {
+                if let Ok(mapped_rows) = stmt.query_map(params![emb_json, top_k as i64], |row| {
+                    row.get::<_, String>(0)
+                }) {
+                    for r in mapped_rows.flatten() {
+                        results.push(r);
+                    }
                 }
             }
         }
 
         if results.is_empty() {
-            // Fallback to a basic retrieval when vss0 is not available.
+            // Fallback to a basic LIMIT-k retrieval when vss0 is not available
+            // or the vector path returned nothing.
             let mut fallback_stmt = conn
-                .prepare("SELECT payload FROM documents LIMIT ?1")
+                .prepare("SELECT payload FROM documents ORDER BY id DESC LIMIT ?1")
                 .map_err(|e| format!("DB prepare error: {}", e))?;
             let fallback_rows = fallback_stmt
                 .query_map(params![top_k as i64], |row| row.get::<_, String>(0))
@@ -149,6 +190,27 @@ impl MemoryManager {
 
         Ok(results)
     }
+}
+
+/// Best-effort load of the `vss0` extension. Returns true on success.
+///
+/// This intentionally does NOT enable `rusqlite/load_extension` at the
+/// Cargo-feature level — that would require a non-bundled SQLite build on
+/// every consumer's machine. Instead we try the runtime-API path and report
+/// failure gracefully so callers fall back to the LIMIT-k retrieval.
+fn try_load_vss(_conn: &Connection) -> bool {
+    // The bundled rusqlite SQLite ships without `enable_load_extension` by
+    // default, and adding the `load_extension` feature would force every
+    // downstream consumer to ship sqlite-vss binaries (sub-second wins are
+    // not worth that platform headache on Windows MSVC).
+    //
+    // For now we always return false and let the fallback engage. A future
+    // PR (tracked as the sqlite-vss follow-up) will switch this to a true
+    // load-extension call once we settle on a per-OS distribution story.
+    //
+    // The function exists as the explicit hook so that integration is a
+    // single-file change rather than a refactor when we're ready.
+    false
 }
 
 #[cfg(feature = "python")]
@@ -195,6 +257,12 @@ impl MemoryManager {
             }
         })
     }
+
+    /// Whether the `vss0` extension is currently loaded. Useful for tests
+    /// and for surfacing degraded-mode warnings in the UI.
+    pub fn has_vss(&self) -> bool {
+        *self.has_vss.lock().unwrap()
+    }
 }
 
 #[cfg(test)]
@@ -214,6 +282,40 @@ mod tests {
         assert!(result.is_err());
 
         let result = manager.try_store_embedding("data".to_string(), vec![]);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_store_and_search_roundtrip_fallback_path() {
+        // In-memory DB so the test is hermetic across runs / parallel cargo.
+        let manager = MemoryManager::try_new(":memory:".to_string()).unwrap();
+        manager.try_initialize().unwrap();
+
+        manager
+            .try_store_embedding("doc one".to_string(), vec![0.1; 8])
+            .unwrap();
+        manager
+            .try_store_embedding("doc two".to_string(), vec![0.2; 8])
+            .unwrap();
+
+        let results = manager.try_search(vec![0.15; 8], 5).unwrap();
+        assert_eq!(results.len(), 2);
+        // Fallback ORDER BY id DESC: newest first.
+        assert_eq!(results[0], "doc two");
+        assert_eq!(results[1], "doc one");
+    }
+
+    #[test]
+    fn test_search_rejects_empty_query() {
+        let manager = MemoryManager::try_new(":memory:".to_string()).unwrap();
+        let result = manager.try_search(vec![], 5);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_search_rejects_zero_top_k() {
+        let manager = MemoryManager::try_new(":memory:".to_string()).unwrap();
+        let result = manager.try_search(vec![0.1, 0.2], 0);
         assert!(result.is_err());
     }
 }

@@ -1,39 +1,76 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
-from collections.abc import Iterator
 import logging
+from collections.abc import Iterator
+from typing import Any
 
 from src.shared.python.ai.adapters.base import BaseAgentAdapter
 from src.shared.python.ai.types import AgentChunk, ConversationContext
 
 logger = logging.getLogger(__name__)
 
+_WHEEL_MISSING_HINT = (
+    "ai_backend Rust extension is not installed. "
+    "Build it from the repo root with: "
+    "`cd rust_core/ai_backend && maturin develop --features python`."
+)
+
 
 class RustAgentAdapter(BaseAgentAdapter):
     """Adapter that delegates to the high-performance Rust AI backend.
 
-    This follows the Law of Demeter by encapsulating the ai_backend
-    library inside standard adapter methods.
+    Follows the Law of Demeter by encapsulating the ``ai_backend`` extension
+    inside standard adapter methods. The wheel is built per-crate via
+    ``maturin develop`` from ``rust_core/ai_backend/`` (see the crate's
+    ``pyproject.toml``); if the wheel isn't installed in the active
+    environment we raise a clear ``ImportError`` rather than failing with a
+    bare ``ModuleNotFoundError`` later in the call chain.
     """
 
     def __init__(
-        self, api_key: str, base_url: str, model: str, db_path: str = "./memory.db"
+        self,
+        api_key: str,
+        base_url: str,
+        model: str,
+        db_path: str = "./memory.db",
+        *,
+        chat_path: str | None = None,
+        embed_path: str | None = None,
+        embedding_model: str | None = None,
     ) -> None:
         """Initialize the Rust Agent Adapter.
 
         Args:
             api_key: The API key for the LLM.
-            base_url: The base URL for the LLM endpoint.
-            model: The name of the model to use.
+            base_url: The base URL for the LLM endpoint
+                (e.g. ``https://api.openai.com/v1``).
+            model: The chat model name.
             db_path: Path to the local vector database.
+            chat_path: Path suffix appended to ``base_url`` for chat
+                completions. Defaults to ``/chat/completions``.
+            embed_path: Path suffix for embeddings. Defaults to
+                ``/embeddings``.
+            embedding_model: Embedding model name. Defaults to
+                ``text-embedding-3-small``.
         """
-        import ai_backend
+        try:
+            import ai_backend
+        except ImportError as exc:  # pragma: no cover - environment-specific
+            raise ImportError(_WHEEL_MISSING_HINT) from exc
 
-        self.config = ai_backend.AIConfig(api_key, base_url, model, db_path)
+        self.config = ai_backend.AIConfig(
+            api_key,
+            base_url,
+            model,
+            db_path,
+            chat_path,
+            embed_path,
+            embedding_model,
+        )
         self.engine = ai_backend.AIEngine(self.config)
         self.memory = ai_backend.MemoryManager(db_path)
-        self.rag = ai_backend.RagPipeline(self.memory)
+        self.memory.initialize()
+        self.rag = ai_backend.RagPipeline(self.memory, self.config)
 
     def stream_response(
         self,
@@ -41,28 +78,43 @@ class RustAgentAdapter(BaseAgentAdapter):
         context: ConversationContext,
         tools: list[Any],
     ) -> Iterator[AgentChunk]:
-        """Streams response using the Rust backend.
+        """Stream the response using the Rust backend.
 
-        Note: The Rust backend currently uses a blocking generate_response
-        for simplicity, but we yield it as a chunk to fulfill the interface contract.
+        The Rust backend exposes ``stream_response(prompt) -> list[str]`` that
+        eagerly drains the SSE stream and returns the ordered delta list.
+        We re-emit each delta as an ``AgentChunk`` so callers that already
+        iterate this iterator-of-chunks contract keep working. Truly-
+        incremental streaming across the PyO3 boundary is a follow-up.
         """
         try:
-            # Build full context
             full_prompt = (
                 "\n".join([m.content for m in context.messages]) + f"\n{prompt}"
             )
 
-            # Delegate to Rust core
-            response = self.engine.generate_response(full_prompt)
-            yield AgentChunk(content=response, is_final=True)
+            try:
+                deltas = self.engine.stream_response(full_prompt)
+            except Exception:
+                # Fall back to the blocking single-shot path if streaming
+                # fails (e.g. provider does not support stream=true).
+                response = self.engine.generate_response(full_prompt)
+                yield AgentChunk(content=response, is_final=True)
+                return
+
+            if not deltas:
+                yield AgentChunk(content="", is_final=True)
+                return
+
+            last_idx = len(deltas) - 1
+            for idx, delta in enumerate(deltas):
+                yield AgentChunk(content=delta, is_final=(idx == last_idx))
         except Exception as e:
-            logger.error(f"Rust backend error: {e}")
+            logger.exception("Rust backend error")
             yield AgentChunk(content=f"Error: {e}", is_final=True)
 
     def index_codebase(self, root_path: str) -> int:
-        """Triggers the Rust-based high-performance RAG pipeline."""
+        """Trigger the Rust-based RAG pipeline indexer."""
         return self.rag.index_codebase(root_path)
 
     def retrieve_context(self, prompt: str, top_k: int = 5) -> list[str]:
-        """Retrieves semantic context using the Rust vector memory."""
+        """Retrieve semantic context using the Rust vector memory."""
         return self.rag.retrieve_context(prompt, top_k)

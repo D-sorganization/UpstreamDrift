@@ -1,4 +1,5 @@
 pub mod config;
+pub mod embeddings;
 pub mod llm;
 pub mod memory;
 pub mod rag;
@@ -29,5 +30,6 @@ fn ai_backend(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<AIEngine>()?;
     m.add_class::<MemoryManager>()?;
     m.add_class::<RagPipeline>()?;
+    m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())
 }
