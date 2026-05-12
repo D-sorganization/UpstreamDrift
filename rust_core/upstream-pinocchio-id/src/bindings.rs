@@ -99,6 +99,22 @@ fn inverse_dynamics<'py>(
                 "RNEA callback failed at frame {frame}: {message}"
             )))
         }
+        Err(crate::driver::DriverError::QdotOverrideShapeMismatch {
+            expected_rows,
+            expected_cols,
+            actual_rows,
+            actual_cols,
+        }) => Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "qdot_override shape ({actual_rows}, {actual_cols}) does not match expected ({expected_rows}, {expected_cols})"
+        ))),
+        Err(crate::driver::DriverError::QddotOverrideShapeMismatch {
+            expected_rows,
+            expected_cols,
+            actual_rows,
+            actual_cols,
+        }) => Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "qddot_override shape ({actual_rows}, {actual_cols}) does not match expected ({expected_rows}, {expected_cols})"
+        ))),
     }
 }
 
