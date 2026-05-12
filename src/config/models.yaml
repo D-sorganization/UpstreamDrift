@@ -77,6 +77,18 @@ models:
   # SIMULATION — playable / interactive simulators
   # =============================================================================
 
+  - id: "golf_simulation_suite"
+    name: "Golf Simulation Suite"
+    description: "Complete golf simulation with ball flight physics and putting green"
+    type: "golf_simulation"
+    path: "launch_golf_suite.py"
+    engine_type: "golf_simulation"
+    launcher:
+      category: "simulation"
+      logo: "assets/golf_simulation.png"
+      status: "ready"
+      default_launch: "tab"
+
   - id: "putting_green"
     name: "Putting Green"
     description: "Realistic putting green with ball-rolling physics"

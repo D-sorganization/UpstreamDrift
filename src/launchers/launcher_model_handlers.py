@@ -285,6 +285,57 @@ class BiomechExerciseHandler:
         return process is not None
 
 
+class GolfSimulationSuiteHandler:
+    """Handler for launching the Golf Simulation Suite.
+
+    Design by Contract:
+        Precondition: model.path must point to launch_golf_suite.py
+        Postcondition: Golf Simulation Suite is launched
+    """
+
+    MODEL_TYPES = {"golf_simulation"}
+
+    def can_handle(self, model_type: str) -> bool:
+        """Check if this handler supports the model type."""
+        return model_type.lower() in self.MODEL_TYPES
+
+    def launch(
+        self,
+        model: Any,
+        repo_path: Path,
+        process_manager: ProcessManager,
+    ) -> bool:
+        """Launch the Golf Simulation Suite.
+
+        Args:
+            model: Model configuration with 'path' attr.
+            repo_path: Path to the repository root.
+            process_manager: Process manager for subprocess handling.
+
+        Returns:
+            True if launch succeeded, False otherwise.
+        """
+        if repo_path is None:
+            raise ValueError("repo_path must be provided")
+        model_path = getattr(model, "path", None) or ""
+        if not model_path:
+            logger.error("GolfSimulationSuiteHandler: model has no path")
+            return False
+
+        script_path = resolve_model_artifact_path(model, repo_path)
+        if not script_path.exists():
+            logger.warning("GolfSimulationSuiteHandler: script not found: %s", script_path)
+            return False
+
+        process = process_manager.launch_script(
+            name="Golf Simulation Suite",
+            script_path=script_path,
+            cwd=repo_path,
+            extra_python_paths=get_model_python_paths(model, repo_path),
+        )
+        return process is not None
+
+
 def _open_with_system_app(file_path: Path, handler_name: str) -> bool:
     """Open a file with the system default application.
 
@@ -499,6 +550,7 @@ class ModelHandlerRegistry:
             SpecialAppHandler(),
             PuttingGreenHandler(),
             BiomechExerciseHandler(),
+            GolfSimulationSuiteHandler(),
             MatlabFileHandler(),
             DocumentHandler(),
         ]

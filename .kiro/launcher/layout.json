@@ -5,6 +5,8 @@
     "pinocchio_golf",
     "opensim_golf",
     "myosim_suite",
+    "golf_simulation_suite",
+    "putting_green",
     "model_explorer",
     "data_explorer",
     "movement_optimizer",
