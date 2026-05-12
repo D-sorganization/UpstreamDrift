@@ -20,6 +20,7 @@ pub mod aerodynamics;
 pub mod ball_flight;
 pub mod contact;
 pub mod rk4;
+pub mod shaft_fem;
 pub mod swing_plane;
 pub mod wind;
 
