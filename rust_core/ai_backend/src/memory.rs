@@ -194,22 +194,61 @@ impl MemoryManager {
 
 /// Best-effort load of the `vss0` extension. Returns true on success.
 ///
-/// This intentionally does NOT enable `rusqlite/load_extension` at the
-/// Cargo-feature level — that would require a non-bundled SQLite build on
-/// every consumer's machine. Instead we try the runtime-API path and report
-/// failure gracefully so callers fall back to the LIMIT-k retrieval.
-fn try_load_vss(_conn: &Connection) -> bool {
-    // The bundled rusqlite SQLite ships without `enable_load_extension` by
-    // default, and adding the `load_extension` feature would force every
-    // downstream consumer to ship sqlite-vss binaries (sub-second wins are
-    // not worth that platform headache on Windows MSVC).
-    //
-    // For now we always return false and let the fallback engage. A future
-    // PR (tracked as the sqlite-vss follow-up) will switch this to a true
-    // load-extension call once we settle on a per-OS distribution story.
-    //
-    // The function exists as the explicit hook so that integration is a
-    // single-file change rather than a refactor when we're ready.
+/// Attempts to load the platform-specific `vss0` shared library from a
+/// well-known vendored path. Falls back gracefully so callers can use the
+/// LIMIT-k retrieval path when the extension is not available.
+fn try_load_vss(conn: &Connection) -> bool {
+    // Enable extension loading on the connection (bundled-full feature).
+    let enable_result = conn.load_extension_enable();
+    if enable_result.is_err() {
+        eprintln!("ai_backend: could not enable extension loading; vss0 disabled.");
+        return false;
+    }
+    // Keep the guard alive for as long as extensions should be loadable.
+    let _guard = match enable_result {
+        Ok(g) => g,
+        Err(_) => return false,
+    };
+
+    // Probe the well-known vss0 library name for the current platform.
+    #[cfg(target_os = "linux")]
+    let lib_name = "vss0.so";
+    #[cfg(target_os = "macos")]
+    let lib_name = "vss0.dylib";
+    #[cfg(target_os = "windows")]
+    let lib_name = "vss0.dll";
+
+    // Try loading by just the library name (relies on the system library
+    // search path or the vendored location being on LD_LIBRARY_PATH/DYLD_
+    // LIBRARY_PATH/PATH). Also try a relative vendored path as a fallback.
+    let candidates: &[&str] = &[
+        lib_name,
+        #[cfg(any(target_os = "linux", target_os = "macos"))]
+        &format!("./vendored/{}", lib_name).leak(),
+    ];
+
+    for candidate in candidates {
+        match unsafe { conn.load_extension(candidate, None) } {
+            Ok(()) => {
+                eprintln!(
+                    "ai_backend: loaded vss0 extension from '{}'.",
+                    candidate
+                );
+                return true;
+            }
+            Err(e) => {
+                eprintln!(
+                    "ai_backend: failed to load vss0 from '{}': {}",
+                    candidate, e
+                );
+            }
+        }
+    }
+
+    eprintln!(
+        "ai_backend: sqlite-vss extension not available; vector search is degraded to ORDER BY id LIMIT k. \
+         Install sqlite-vss and place the library on the search path or in ./vendored/ for true vector search."
+    );
     false
 }
 
