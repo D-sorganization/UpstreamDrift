@@ -218,7 +218,7 @@ pub fn index_with_embedder<E: Embedder>(
             );
             continue;
         }
-        for (chunk, emb) in chunks.into_iter().zip(embeddings_batch.into_iter()) {
+        for (chunk, emb) in chunks.into_iter().zip(embeddings_batch) {
             // Tag chunks with their source path so retrieval surfaces the
             // file location alongside the snippet. Keeps payload one string
             // (matches MemoryManager's payload-is-string contract).
