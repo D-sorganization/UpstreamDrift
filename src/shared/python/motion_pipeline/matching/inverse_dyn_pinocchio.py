@@ -45,6 +45,11 @@ except Exception:  # pragma: no cover - fallback path
     _rust_pin_id = None  # type: ignore[assignment]
     _HAVE_RUST_PIN_ID = False
 
+import os
+
+def _use_rust_outer_loop() -> bool:
+    return _HAVE_RUST_PIN_ID and os.environ.get("RUST_OUTER_LOOP", "1") == "1"
+
 
 class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
     """
@@ -98,7 +103,7 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
         have_qdot_override = all(f.qdot is not None for f in traj.frames)
         have_qddot_override = all(f.qddot is not None for f in traj.frames)
 
-        if _HAVE_RUST_PIN_ID and not (have_qdot_override and have_qddot_override):
+        if _use_rust_outer_loop() and not (have_qdot_override and have_qddot_override):
             q_c = np.ascontiguousarray(q, dtype=np.float64)
             t_c = np.ascontiguousarray(times, dtype=np.float64)
             qdot = (
@@ -211,7 +216,7 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
         Numerical parity with the pure-Python path is exact: both routes
         feed the same per-frame ``(q, v, a)`` to ``pin.rnea``.
         """
-        if _HAVE_RUST_PIN_ID:
+        if _use_rust_outer_loop():
             try:
                 return PinocchioInverseDynMatchingSolver._compute_torque_frames_rust(
                     model=model,

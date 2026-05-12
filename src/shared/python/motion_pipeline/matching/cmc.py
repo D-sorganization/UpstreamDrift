@@ -48,6 +48,11 @@ except Exception:  # pragma: no cover - fallback path
     _rust_outer_loop = None  # type: ignore[assignment]
     _HAVE_RUST = False
 
+import os
+
+def _use_rust_outer_loop() -> bool:
+    return _HAVE_RUST and os.environ.get("RUST_OUTER_LOOP", "1") == "1"
+
 
 class CMCMatchingSolver(BaseMotionMatchingSolver):
     """
@@ -205,7 +210,7 @@ class CMCMatchingSolver(BaseMotionMatchingSolver):
 
         callback = self._per_frame_callback(osim_model, state)
 
-        if _HAVE_RUST:
+        if _use_rust_outer_loop():
             try:
                 tau_all = self._compute_tau_rust(
                     times, q_all, qdot_all, qddot_all, callback
