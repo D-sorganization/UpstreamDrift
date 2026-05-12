@@ -140,16 +140,12 @@ def activation_step(
     if dt <= 0:
         raise ValueError(f"dt must be positive, got {dt}")
     if _RUST_AVAILABLE:
-        return float(
-            _rust.activation_step(
-                u,
-                a,
-                dt,
-                tau_act=tau_act,
-                tau_deact=tau_deact,
-                min_activation=min_activation,
-            )
+        dyn_rust = _rust.ActivationDynamics(
+            tau_act if tau_act is not None else 0.010,
+            tau_deact if tau_deact is not None else 0.040,
+            min_activation if min_activation is not None else 0.001,
         )
+        return float(dyn_rust.update(u, a, dt))
     from src.shared.python.biomechanics.activation_dynamics import ActivationDynamics
 
     dyn = ActivationDynamics(
