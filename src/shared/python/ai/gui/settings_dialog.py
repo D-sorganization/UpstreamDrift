@@ -57,7 +57,8 @@ SETTINGS_ORG = "UpstreamDrift"
 SETTINGS_APP = "AIAssistant"
 KEY_PROVIDER = "ai/provider"
 KEY_MODEL = "ai/model"
-KEY_EXPERTISE = "ai/expertise_level"
+KEY_EXPERTISE = "ai/expertise_level"  # legacy alias, see Tools #2552
+KEY_RESPONSE_STYLE = "ai/response_style"
 KEY_OLLAMA_HOST = "ai/ollama_host"
 KEY_STREAMING = "ai/streaming_enabled"
 KEY_RAG_ENABLED = "ai/rag_enabled"
@@ -152,7 +153,11 @@ class AISettings:
     Attributes:
         provider: Selected AI provider.
         model: Model name for the provider.
-        expertise_level: User's expertise level (1-4).
+        expertise_level: DEPRECATED — kept for backward compatibility with
+            stored QSettings values. New code should read ``response_style``
+            (Tools issue #2552).
+        response_style: How verbose AI replies should be — one of
+            ``"concise"``, ``"standard"``, or ``"detailed"``.
         ollama_host: Ollama server URL.
         streaming_enabled: Whether to stream responses.
         rag_enabled: Whether to use RAG (Codebase awareness).
@@ -162,6 +167,7 @@ class AISettings:
     provider: AIProvider = AIProvider.OLLAMA
     model: str = DEFAULT_OLLAMA_MODEL
     expertise_level: int = 1
+    response_style: str = "standard"
     ollama_host: str = DEFAULT_OLLAMA_HOST
     streaming_enabled: bool = True
     rag_enabled: bool = True
@@ -173,6 +179,7 @@ class AISettings:
         settings.setValue(KEY_PROVIDER, self.provider.name)
         settings.setValue(KEY_MODEL, self.model)
         settings.setValue(KEY_EXPERTISE, self.expertise_level)
+        settings.setValue(KEY_RESPONSE_STYLE, self.response_style)
         settings.setValue(KEY_OLLAMA_HOST, self.ollama_host)
         settings.setValue(KEY_STREAMING, self.streaming_enabled)
         settings.setValue(KEY_RAG_ENABLED, self.rag_enabled)
@@ -192,10 +199,16 @@ class AISettings:
 
         # Use environment variable as fallback for ollama_host
         default_host = get_ollama_host()
+        # Tools issue #2552: prefer the new ``response_style`` key but
+        # accept any legacy value persisted under the old contract.
+        response_style = str(settings.value(KEY_RESPONSE_STYLE, "standard")).lower()
+        if response_style not in {"concise", "standard", "detailed"}:
+            response_style = "standard"
         return cls(
             provider=provider,
             model=settings.value(KEY_MODEL, DEFAULT_OLLAMA_MODEL),
             expertise_level=int(settings.value(KEY_EXPERTISE, 1)),
+            response_style=response_style,
             ollama_host=settings.value(KEY_OLLAMA_HOST, default_host),
             streaming_enabled=settings.value(KEY_STREAMING, True, type=bool),
             rag_enabled=settings.value(KEY_RAG_ENABLED, True, type=bool),
@@ -703,21 +716,24 @@ class AISettingsDialog(QDialog):
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
-        # Verbosity level
+        # Verbosity selector. Tools issue #2552 / PR #2568 replaced the
+        # legacy 4-level ``expertise_level`` (1..4) with a 3-value
+        # ``response_style`` field (concise / standard / detailed). The
+        # combo stores the string value as itemData so the rest of the
+        # dialog can write it through to ``AISettings.response_style``.
         expertise_group = QGroupBox("Response Verbosity")
         expertise_layout = QVBoxLayout(expertise_group)
 
         self._expertise_combo = QComboBox()
-        self._expertise_combo.addItem("Verbose - Detailed explanations and examples", 1)
-        self._expertise_combo.addItem("Standard - Balanced technical responses", 2)
-        self._expertise_combo.addItem("Brief - Concise, to the point", 3)
-        self._expertise_combo.addItem("Succinct - Code and precise facts only", 4)
+        self._expertise_combo.addItem("Concise", "concise")
+        self._expertise_combo.addItem("Standard", "standard")
+        self._expertise_combo.addItem("Detailed", "detailed")
         expertise_layout.addWidget(self._expertise_combo)
 
         expertise_desc = QLabel(
-            "This setting adjusts how verbose the AI responds. "
-            "Choose 'Verbose' for extensive details or 'Succinct' "
-            "for minimal, code-focused answers."
+            "How verbose the AI's replies should be. 'Concise' favours "
+            "code and short bullet lists; 'Detailed' walks through "
+            "reasoning and trade-offs."
         )
         expertise_desc.setWordWrap(True)
         expertise_layout.addWidget(expertise_desc)
@@ -803,9 +819,12 @@ class AISettingsDialog(QDialog):
                 self._model_combo.setCurrentIndex(i)
                 break
 
-        # Expertise
+        # Response style (Tools #2552). Combo itemData carries the
+        # string ``response_style`` value. Default to 'standard' if the
+        # persisted value is unknown.
+        target_style = (self._settings.response_style or "standard").lower()
         for i in range(self._expertise_combo.count()):
-            if self._expertise_combo.itemData(i) == self._settings.expertise_level:
+            if self._expertise_combo.itemData(i) == target_style:
                 self._expertise_combo.setCurrentIndex(i)
                 break
 
@@ -859,7 +878,22 @@ class AISettingsDialog(QDialog):
         # Update settings from UI
         self._settings.provider = self._provider_combo.currentData()
         self._settings.model = self._model_combo.currentText()
-        self._settings.expertise_level = self._expertise_combo.currentData()
+        # Tools issue #2552: combo data is now the ``response_style``
+        # string ('concise' / 'standard' / 'detailed'). Mirror the
+        # selection back into the legacy ``expertise_level`` int so
+        # downstream consumers that still read it (e.g. assistant_panel)
+        # stay in sync until they migrate.
+        style = self._expertise_combo.currentData()
+        if isinstance(style, str):
+            self._settings.response_style = style
+            _STYLE_TO_LEGACY_LEVEL = {
+                "concise": 4,
+                "standard": 2,
+                "detailed": 1,
+            }
+            self._settings.expertise_level = _STYLE_TO_LEGACY_LEVEL.get(
+                style, self._settings.expertise_level
+            )
         self._settings.streaming_enabled = self._streaming_check.isChecked()
 
         # Get Ollama host if applicable
