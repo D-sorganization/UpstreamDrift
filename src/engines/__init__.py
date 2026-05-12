@@ -34,6 +34,15 @@ def get_engine_catalog() -> dict[str, dict[str, bool]]:
                 except ImportError:
                     pass
 
+            # If capable, try to import the provider to trigger registration
+            if fit_capable:
+                try:
+                    importlib.import_module(
+                        f"src.engines.physics_engines.{engine_name}.python.motion_matching.provider"
+                    )
+                except ImportError:
+                    pass
+
             catalog[engine_name] = {"fit_capable": fit_capable}
 
     return catalog
