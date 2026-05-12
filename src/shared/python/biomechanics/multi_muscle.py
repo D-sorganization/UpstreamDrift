@@ -27,6 +27,12 @@ if TYPE_CHECKING:
 
 logger = get_logger(__name__)
 
+try:
+    import upstream_muscle
+    HAS_RUST_BACKEND = True
+except ImportError:
+    HAS_RUST_BACKEND = False
+
 
 @dataclass
 class MuscleAttachment:
@@ -53,6 +59,10 @@ class MuscleGroup:
         self.name = name
         self.muscles: dict[str, HillMuscleModel] = {}
         self.attachments: dict[str, MuscleAttachment] = {}
+        
+        self._rust_backend = None
+        if HAS_RUST_BACKEND:
+            self._rust_backend = upstream_muscle.MuscleGroup(name)
 
     def add_muscle(self, name: str, muscle: HillMuscleModel, moment_arm: float) -> None:
         """Add a muscle to the group.
@@ -75,6 +85,9 @@ class MuscleGroup:
         require(moment_arm != 0.0, "moment_arm must be non-zero", moment_arm)
         self.muscles[name] = muscle
         self.attachments[name] = MuscleAttachment(name, moment_arm)
+        
+        if self._rust_backend is not None and hasattr(muscle, '_rust_backend') and muscle._rust_backend is not None:
+            self._rust_backend.add_muscle(name, muscle._rust_backend, moment_arm)
 
     def compute_net_torque(
         self,
@@ -106,6 +119,12 @@ class MuscleGroup:
                 f"activation for '{mname}' must be in [0, 1]",
                 act_val,
             )
+
+        if self._rust_backend is not None:
+            try:
+                return self._rust_backend.compute_net_torque(activations, muscle_states)
+            except RuntimeError as e:
+                logger.warning(f"Rust MuscleGroup compute_net_torque failed, falling back to Python: {e}")
 
         net_torque = 0.0
 
@@ -156,6 +175,10 @@ class AntagonistPair:
         self.agonist = agonist
         self.antagonist = antagonist
 
+        self._rust_backend = None
+        if HAS_RUST_BACKEND and agonist._rust_backend is not None and antagonist._rust_backend is not None:
+            self._rust_backend = upstream_muscle.AntagonistPair(agonist._rust_backend, antagonist._rust_backend)
+
     def compute_net_torque(
         self,
         agonist_activations: dict[str, float],
@@ -179,6 +202,13 @@ class AntagonistPair:
             raise ValueError("agonist_activations must be provided")
         if not (agonist_activations is not None):
             raise ValueError("agonist_activations must be provided")
+
+        if self._rust_backend is not None:
+            try:
+                return self._rust_backend.compute_net_torque(agonist_activations, antagonist_activations, muscle_states)
+            except RuntimeError as e:
+                logger.warning(f"Rust AntagonistPair compute_net_torque failed, falling back to Python: {e}")
+
         tau_agonist = self.agonist.compute_net_torque(
             agonist_activations, muscle_states
         )
