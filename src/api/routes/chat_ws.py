@@ -24,12 +24,14 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
             {"action": "send", "message": "...", "engine_context": "mujoco"}
             {"action": "history"}
             {"action": "new_session"}
+            {"action": "refresh_models"}
 
         Server -> Client:
             {"type": "session_info", "session_id": "..."}
             {"type": "chunk", "content": "..."}
             {"type": "complete", "session_id": "..."}
             {"type": "history", "messages": [...]}
+            {"type": "model_list", "models": [...], "refreshed_at": "..."}
             {"type": "error", "detail": "..."}
     """
     if not (websocket is not None):
@@ -93,6 +95,19 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
                 session_id = ctx.session_id
                 await websocket.send_json(
                     {"type": "session_created", "session_id": session_id}
+                )
+
+            elif action == "refresh_models":
+                # Tools issue #2547 / PR #2566: poll the configured provider
+                # for available models and ship the result over the chat
+                # socket so the dock widget can repopulate its dropdown.
+                payload = chat_service.refresh_models()
+                await websocket.send_json(
+                    {
+                        "type": "model_list",
+                        "models": payload["models"],
+                        "refreshed_at": payload["refreshed_at"],
+                    }
                 )
 
             else:

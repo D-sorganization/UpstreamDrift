@@ -177,3 +177,62 @@ class TestAdapterLoading:
         chat_service.add_user_message(ctx.session_id, "No adapter test")
         history = chat_service.get_session_history(ctx.session_id)
         assert len(history) == 1
+
+
+class TestRefreshModels:
+    """Tests for refresh_models (Tools issue #2547 / PR #2566)."""
+
+    def test_refresh_models_with_string_list(self, chat_service) -> None:
+        """Adapter returning ``list[str]`` is normalised to ChatModelInfo dicts."""
+
+        class _Adapter:
+            def list_available_models(self) -> list[str]:
+                return ["llama3.1:8b", "mistral"]
+
+        chat_service._adapter = _Adapter()
+        payload = chat_service.refresh_models()
+        assert "refreshed_at" in payload
+        assert isinstance(payload["models"], list)
+        assert len(payload["models"]) == 2
+        assert payload["models"][0]["name"] == "llama3.1:8b"
+        # provider is derived from the adapter class name
+        assert payload["models"][0]["provider"] == "_"
+        assert payload["models"][0]["display_name"] is None
+
+    def test_refresh_models_with_dict_entries(self, chat_service) -> None:
+        """Adapter returning dicts preserves provider/display_name fields."""
+
+        class FancyAdapter:
+            def list_available_models(self) -> list[dict]:
+                return [
+                    {
+                        "name": "gpt-4o",
+                        "provider": "openai",
+                        "display_name": "GPT-4o",
+                    }
+                ]
+
+        chat_service._adapter = FancyAdapter()
+        payload = chat_service.refresh_models()
+        assert payload["models"] == [
+            {"name": "gpt-4o", "provider": "openai", "display_name": "GPT-4o"}
+        ]
+
+    def test_refresh_models_handles_adapter_error(self, chat_service) -> None:
+        """A raising adapter yields an empty list, not an exception."""
+
+        class BrokenAdapter:
+            def list_available_models(self) -> list[str]:
+                raise ConnectionError("boom")
+
+        chat_service._adapter = BrokenAdapter()
+        payload = chat_service.refresh_models()
+        assert payload["models"] == []
+        assert "refreshed_at" in payload
+
+    def test_refresh_models_no_adapter(self, chat_service) -> None:
+        """No adapter configured yields an empty list."""
+        chat_service._adapter = None
+        payload = chat_service.refresh_models()
+        assert payload["models"] == []
+        assert "refreshed_at" in payload

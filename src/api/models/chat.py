@@ -95,6 +95,37 @@ class ChatMessageRequest(BaseModel):
         return self
 
 
+class ChatModelInfo(BaseModel):
+    """Single available chat model entry.
+
+    Mirrors the Tools-side ``ChatModelInfo`` contract introduced in
+    Tools issue #2547 / PR #2566. Serialised in ``model_list`` payloads
+    sent over the chat WebSocket.
+    """
+
+    name: str = Field(..., description="Provider-specific model identifier")
+    provider: str = Field(
+        ..., description="Provider id (e.g. 'ollama', 'openai', 'anthropic')"
+    )
+    display_name: str | None = Field(
+        None, description="Optional human-readable label for UI display"
+    )
+
+
+class ChatModelListResponse(BaseModel):
+    """Server response to a ``refresh_models`` action.
+
+    Sent in reply to the WebSocket ``{"action": "refresh_models"}`` request,
+    carrying the freshly polled list of available models for the configured
+    provider plus an ISO-8601 ``refreshed_at`` timestamp.
+    """
+
+    models: list[ChatModelInfo] = Field(default_factory=list)
+    refreshed_at: str = Field(
+        ..., description="ISO-8601 UTC timestamp of when the list was polled"
+    )
+
+
 class ChatChunkResponse(BaseModel):
     """A single streaming chunk from the AI."""
 

@@ -13,7 +13,7 @@ import time
 import uuid
 from collections import OrderedDict
 from collections.abc import AsyncIterator
-from datetime import timezone
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -380,6 +380,59 @@ class ChatService:
             yield item
 
         thread.join(timeout=5.0)
+
+    def refresh_models(self) -> dict[str, Any]:
+        """Poll the configured provider for available chat models.
+
+        Returns a payload matching the ``ChatModelListResponse`` contract
+        (Tools issue #2547 / PR #2566): a list of ``{"name", "provider",
+        "display_name"}`` entries plus an ISO-8601 ``refreshed_at``
+        timestamp. Failure to reach the provider is logged and yields an
+        empty list — the chat session itself stays alive.
+        """
+        models: list[dict[str, Any]] = []
+        provider_id = "unknown"
+        adapter = self._adapter
+        if adapter is not None:
+            provider_id = type(adapter).__name__.replace("Adapter", "").lower()
+            list_models = getattr(adapter, "list_available_models", None)
+            if callable(list_models):
+                try:
+                    raw_models = list_models()
+                except Exception as exc:  # noqa: BLE001
+                    # Adapter may raise transport errors (AIConnectionError,
+                    # OSError, httpx errors). Degrade gracefully so the chat
+                    # session doesn't drop.
+                    logger.warning(
+                        "ChatService.refresh_models: %s.list_available_models "
+                        "failed: %s",
+                        type(adapter).__name__,
+                        exc,
+                    )
+                    raw_models = []
+                for entry in raw_models:
+                    if isinstance(entry, str):
+                        models.append(
+                            {
+                                "name": entry,
+                                "provider": provider_id,
+                                "display_name": None,
+                            }
+                        )
+                    elif isinstance(entry, dict):
+                        name = str(entry.get("name", ""))
+                        if name:
+                            models.append(
+                                {
+                                    "name": name,
+                                    "provider": str(entry.get("provider", provider_id)),
+                                    "display_name": entry.get("display_name"),
+                                }
+                            )
+        return {
+            "models": models,
+            "refreshed_at": datetime.now(UTC).isoformat(),
+        }
 
     def get_session_history(self, session_id: str) -> list[dict[str, Any]]:
         """Return message history for a session."""

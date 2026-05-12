@@ -937,3 +937,43 @@ class AISettingsDialog(QDialog):
             self._model_combo.setCurrentIndex(idx)
         elif models:
             self._model_combo.setCurrentIndex(0)
+
+    def bind_to_chat_dock(self, chat_dock: Any) -> None:
+        """Wire the model dropdown to a ``ChatDockWidget.models_refreshed``.
+
+        Tools issue #2547 / PR #2566 added a server-side ``refresh_models``
+        action whose response (``{"type": "model_list", ...}``) is forwarded
+        by ``ChatDockWidget`` via the ``models_refreshed`` signal. Calling
+        ``bind_to_chat_dock(dock)`` connects that signal to a handler that
+        normalises the ``ChatModelInfo`` payloads and repopulates the model
+        dropdown.
+
+        Args:
+            chat_dock: A ``ChatDockWidget`` (or any QObject exposing a
+                ``models_refreshed`` signal that emits a ``list``).
+        """
+        signal = getattr(chat_dock, "models_refreshed", None)
+        if signal is None or not hasattr(signal, "connect"):
+            return
+        with contextlib.suppress(TypeError):
+            signal.disconnect(self._on_chat_models_refreshed)
+        signal.connect(self._on_chat_models_refreshed)
+
+    def _on_chat_models_refreshed(self, models: list[Any]) -> None:
+        """Handle a ``model_list`` payload coming from ``ChatDockWidget``.
+
+        Each entry may be a plain string (legacy / dropdown-style) or a
+        ``ChatModelInfo``-shaped dict (``{"name", "provider", ...}``).
+        Normalises both to a list of names and forwards to the existing
+        Ollama-style updater so the model dropdown repopulates.
+        """
+        names: list[str] = []
+        for entry in models:
+            if isinstance(entry, str):
+                if entry:
+                    names.append(entry)
+            elif isinstance(entry, dict):
+                name = entry.get("name")
+                if isinstance(name, str) and name:
+                    names.append(name)
+        self._update_ollama_models(names)

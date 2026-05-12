@@ -43,6 +43,13 @@ def mock_chat_service() -> MagicMock:
             "timestamp": "2026-01-01T00:00:00",
         }
     ]
+    svc.refresh_models.return_value = {
+        "models": [
+            {"name": "llama3.1:8b", "provider": "ollama", "display_name": None},
+            {"name": "mistral", "provider": "ollama", "display_name": None},
+        ],
+        "refreshed_at": "2026-05-11T00:00:00+00:00",
+    }
     svc.list_sessions.return_value = [
         {
             "session_id": "test-session-123",
@@ -157,6 +164,22 @@ class TestWebSocket:
             data = ws.receive_json()
             assert data["type"] == "session_created"
             assert "session_id" in data
+
+    def test_refresh_models_action(self, client, mock_chat_service) -> None:
+        """``refresh_models`` returns a ``model_list`` payload (Tools #2547)."""
+        with client.websocket_connect("/api/ws/chat/new") as ws:
+            ws.receive_json()  # session_info
+
+            ws.send_json({"action": "refresh_models"})
+            data = ws.receive_json()
+            assert data["type"] == "model_list"
+            assert isinstance(data["models"], list)
+            assert len(data["models"]) == 2
+            assert data["models"][0]["name"] == "llama3.1:8b"
+            assert data["models"][0]["provider"] == "ollama"
+            assert "refreshed_at" in data
+
+        mock_chat_service.refresh_models.assert_called()
 
     def test_unknown_action(self, client) -> None:
         """Sending an unknown action returns an error."""

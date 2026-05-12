@@ -8,6 +8,8 @@ from src.api.models.chat import (
     ChatChunkResponse,
     ChatHistoryResponse,
     ChatMessageRequest,
+    ChatModelInfo,
+    ChatModelListResponse,
     ChatSessionInfo,
     style_prompt,
 )
@@ -130,3 +132,44 @@ def test_style_prompt_unknown_falls_back() -> None:
     assert style_prompt(None) == default
     assert style_prompt("not-a-real-style") == default
     assert style_prompt("concise") == RESPONSE_STYLE_PROMPTS["concise"]
+
+
+# Tools issue #2547 / PR #2566: ChatModelInfo + ChatModelListResponse.
+
+
+def test_chat_model_info_minimal() -> None:
+    """ChatModelInfo only needs name + provider (Tools #2547)."""
+    info = ChatModelInfo(name="llama3.1:8b", provider="ollama")
+    assert info.name == "llama3.1:8b"
+    assert info.provider == "ollama"
+    assert info.display_name is None
+
+
+def test_chat_model_info_with_display_name() -> None:
+    """ChatModelInfo carries an optional display_name."""
+    info = ChatModelInfo(
+        name="gpt-4o",
+        provider="openai",
+        display_name="GPT-4o",
+    )
+    assert info.display_name == "GPT-4o"
+
+
+def test_chat_model_list_response_default_empty() -> None:
+    """ChatModelListResponse defaults models to an empty list."""
+    resp = ChatModelListResponse(refreshed_at="2026-05-11T00:00:00+00:00")
+    assert resp.models == []
+    assert resp.refreshed_at.startswith("2026-05-11")
+
+
+def test_chat_model_list_response_with_models() -> None:
+    """ChatModelListResponse carries a list of ChatModelInfo entries."""
+    resp = ChatModelListResponse(
+        refreshed_at="2026-05-11T00:00:00+00:00",
+        models=[
+            ChatModelInfo(name="llama3.1:8b", provider="ollama"),
+            ChatModelInfo(name="mistral", provider="ollama"),
+        ],
+    )
+    assert len(resp.models) == 2
+    assert resp.models[0].name == "llama3.1:8b"
