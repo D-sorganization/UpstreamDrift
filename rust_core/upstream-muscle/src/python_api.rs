@@ -65,6 +65,23 @@ fn py_activation_step_batch<'py>(
     Ok(out.into_pyarray(py))
 }
 
+#[pyfunction]
+#[pyo3(
+    name = "activation_step",
+    signature = (u, a, dt, tau_act = None, tau_deact = None, min_activation = None)
+)]
+fn py_activation_step(
+    u: f64,
+    a: f64,
+    dt: f64,
+    tau_act: Option<f64>,
+    tau_deact: Option<f64>,
+    min_activation: Option<f64>,
+) -> PyResult<f64> {
+    let dyn_params = build_dyn(tau_act, tau_deact, min_activation)?;
+    dyn_params.update(u, a, dt).map_err(PyValueError::new_err)
+}
+
 /// Compute muscle forces for `M` muscles.
 ///
 /// `activations`, `l_ce`, `v_ce` are all `(M,)` float64.
@@ -223,6 +240,7 @@ fn py_step_full<'py>(
 }
 
 pub(crate) fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(py_activation_step, m)?)?;
     m.add_function(wrap_pyfunction!(py_activation_step_batch, m)?)?;
     m.add_function(wrap_pyfunction!(py_muscle_force_batch, m)?)?;
     m.add_function(wrap_pyfunction!(py_joint_torques_batch, m)?)?;
