@@ -201,6 +201,31 @@ class URDFParser:
         else:
             xml_string = source
 
+        # Rust-backed fast path. Opt-in via UPSTREAM_URDF_USE_RUST=1; routed
+        # through the typed AST defined in rust_core/upstream-urdf/. The
+        # facade hands back a ParsedModel that is field-compatible with the
+        # pure-Python branch below. Closes work item under epic #4520
+        # (UpstreamDrift #5215).
+        try:
+            from model_generation.converters import _urdf_rust_facade as _rust_facade
+        except ImportError:  # pragma: no cover - layout safety net
+            _rust_facade = None  # type: ignore[assignment]
+        if _rust_facade is not None and _rust_facade.should_use_rust():
+            try:
+                ast = _rust_facade.parse_urdf_to_dict(xml_string)
+                return _rust_facade.parsed_model_from_rust_ast(
+                    ast,
+                    source_path=source_path,
+                    original_xml=xml_string,
+                    read_only=read_only,
+                )
+            except Exception as exc:  # pragma: no cover - fallback path
+                logger.warning(
+                    "upstream_urdf Rust parser failed (%s); "
+                    "falling back to pure Python",
+                    exc,
+                )
+
         # Parse XML
         try:
             root = DefusedET.fromstring(xml_string)
