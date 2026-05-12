@@ -28,11 +28,18 @@ from ._config import (
 from ._engine import AerodynamicsEngine
 from ._environment import EnvironmentRandomizer, EnvironmentSnapshot
 from ._models import DragModel, LiftModel, MagnusModel
+from ._rust_facade import (
+    AerodynamicsSpec,
+    compute_acceleration,
+    compute_total_force,
+    is_rust_available,
+)
 from ._wind import TurbulenceModel, WindGust, WindModel
 
 __all__ = [
     "AerodynamicsConfig",
     "AerodynamicsEngine",
+    "AerodynamicsSpec",
     "DragModel",
     "EnvironmentRandomizer",
     "EnvironmentSnapshot",
@@ -44,4 +51,7 @@ __all__ = [
     "WindConfig",
     "WindGust",
     "WindModel",
+    "compute_acceleration",
+    "compute_total_force",
+    "is_rust_available",
 ]

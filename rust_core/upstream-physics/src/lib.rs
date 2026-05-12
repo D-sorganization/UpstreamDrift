@@ -15,11 +15,13 @@
 //! - **DbC**: Public precondition validation runs in release and debug builds
 //! - **DRY**: Consumes `tools-core` for math primitives
 
+pub mod aero_engine;
 pub mod aerodynamics;
 pub mod ball_flight;
 pub mod contact;
 pub mod rk4;
 pub mod swing_plane;
+pub mod wind;
 
 // Re-export primary types from tools-core for convenience.
 pub use tools_core::Vector3;
@@ -81,6 +83,12 @@ fn upstream_physics(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<aerodynamics::AirProperties>()?;
     m.add_class::<aerodynamics::AeroBallProperties>()?;
     m.add_class::<aerodynamics::AeroForces>()?;
+
+    // Wind & engine orchestrator (Aerodynamics Rust Kernel — issue #5265).
+    m.add_class::<wind::WindConfig>()?;
+    m.add_class::<wind::WindModel>()?;
+    m.add_class::<aero_engine::AeroEngineConfig>()?;
+    m.add_class::<aero_engine::AerodynamicsEngine>()?;
 
     // Ball flight trajectory simulation (wires aerodynamics + RK4)
     m.add_class::<ball_flight::TrajectoryPoint>()?;
