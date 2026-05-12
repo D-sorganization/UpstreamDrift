@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                                                                                                                                       |
 | **License**             | MIT                                                                                                                                                                  |
 | **Current Version**     | 2.1.0                                                                                                                                                                |
-| **Spec Version**        | 1.0.151                                                                                                                                                              |
-| **Last Spec Update**    | 2026-05-11 (feat/consolidate-codemap-onto-tools — consolidated `src/shared/python/codemap/` onto the Tools canonical implementation; renamed mcp.py → mcp_server.py) |
+| **Spec Version**        | 1.0.156                                                                                                                                                              |
+| **Last Spec Update**    | 2026-05-12                                                                                                                                                           |
 
 ## 2. Purpose & Mission
 
@@ -679,4 +679,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-11 | 1.0.151 | Consolidated `src/shared/python/codemap/` onto the Tools canonical 9-module implementation (byte-identical copy of `__init__.py`, `api.py`, `cli.py`, `db.py`, `indexer.py`, `parsers.py`, `watcher.py` plus 6 new per-language extractors and embeddings stub); renamed `mcp.py` → `mcp_server.py` so the `codemap-mcp` console-script entry point resolves; updated the chat-tool adapter to use the canonical 6-function API; replaced 30 duplicate parser/db/indexer unit tests with 20 UD-specific chat-wiring + smoke + perf-budget integration tests. (PR #5207, closes #5206) |
 | 2026-05-11 | 1.0.152 | Ported the Python `cd_dimpled_sphere` drag-crisis coefficient into `rust_core/upstream-physics`, routed Rust aerodynamic drag through that parity curve, and added Rust DbC/parity tests for the Reynolds-number contract. |
 | 2026-05-12 | 1.0.153 | Added `AerodynamicsEngine`, `AeroEngineConfig`, `WindModel`, and `WindConfig` Rust pyclasses to `upstream-physics`; implemented a deterministic per-step force facade in `src/shared/python/physics/aerodynamics/_rust_facade.py` with pure-Python fallback; verified Rust/Python parity to RMSE < 1e-8 and ≥10× speedup on representative flight inputs (issue #5265). |
+| 2026-05-12 | 1.0.154 | Optimized sum-of-squares and MSE calculations via `np.vdot` and `np.einsum` to eliminate temporary array allocations (PR #5302). |
+| 2026-05-12 | 1.0.155 | Added Golf Simulation Suite to the GUI launcher (PR #5301). |
+| 2026-05-12 | 1.0.156 | Finalized motion-matching Rust loop optimizations, including MuJoCo torque outer-loop acceleration (slice 4) and end-to-end facade benchmarks (slice 5) (PR #5295, PR #5296). |
 ````
