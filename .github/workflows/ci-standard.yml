@@ -1102,6 +1102,20 @@ jobs:
         if: steps.rust-changes.outputs.has_changes != 'true'
         run: echo "No Rust changes detected; Rust quality gate is not required."
 
+      # Pin Python BEFORE installing Rust so PyO3-backed crates build cleanly
+      # on hosted macos-latest / windows-latest, which default to Python 3.14.
+      # `pyo3 0.24` (workspace pin) supports up to Python 3.13 only, so 3.14
+      # makes `pyo3-ffi` fail its build script with:
+      #   "the configured Python interpreter version (3.14) is newer than
+      #    PyO3's maximum supported version (3.13)"
+      # 3.12 is the safe middle of pyo3 0.24's supported range (3.7-3.13).
+      # Tracked: issue #5221.
+      - name: Set up Python (for PyO3 builds)
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: "3.12"
+
       - name: Install Rust toolchain
         if: steps.rust-changes.outputs.has_changes == 'true'
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
