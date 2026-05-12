@@ -1102,6 +1102,16 @@ jobs:
         if: steps.rust-changes.outputs.has_changes != 'true'
         run: echo "No Rust changes detected; Rust quality gate is not required."
 
+      # Enable Windows long-path support before cargo clones the `tools-core`
+      # git dep. The Tools repo contains a >260-char PDF filename
+      # (`.../psa_package/References/H16-1061 PSA upgrading proposal G4 rev 06
+      # with Perez notes from 2019 01 17 9am call with Xebec - Internal Use
+      # Only.pdf`) which fails cargo's git checkout on Windows without this.
+      - name: Enable Git long paths (Windows)
+        if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'windows-latest'
+        shell: bash
+        run: git config --system core.longpaths true
+
       # Pin Python BEFORE installing Rust so PyO3-backed crates build cleanly
       # on hosted macos-latest / windows-latest, which default to Python 3.14.
       # `pyo3 0.24` (workspace pin) supports up to Python 3.13 only, so 3.14
@@ -1152,7 +1162,17 @@ jobs:
           # `cargo test` enumerates all workspace members via the resolver, so
           # new crates joining `[workspace] members = [...]` are auto-covered.
           cargo test
-          cargo test --features python
+
+      - name: Run Rust Tests (--features python)
+        # The workspace pyo3 dep enables `extension-module`, which expects
+        # libpython linkage from the loader (i.e. when Python imports the
+        # extension). Plain `cargo test` cannot satisfy that on macOS / Windows
+        # without extra linker flags or PYO3 env config; on Linux libpython is
+        # on the default search path so the test binary links cleanly. Keep
+        # the python-features lane Linux-only — the wheel build + binding
+        # smoke test below already cover the actual integration.
+        if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'ubuntu-latest'
+        run: cargo test --features python
 
       # ----------------------------------------------------------------------
       # The remaining steps (Maturin wheel build, Python-binding smoke test,
@@ -1167,11 +1187,11 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/rust-venv"
           source "$RUNNER_TEMP/rust-venv/bin/activate"
           python -m pip install --upgrade pip maturin
-          for crate in rust_core/upstream-physics rust_core/upstream-mocap-preproc; do
+          for crate in rust_core/upstream-physics rust_core/upstream-mocap-preproc rust_core/upstream-muscle; do
             (cd "$crate" && python -m maturin build --interpreter python --features python --release)
           done
           echo "Wheels built successfully"
-          ls ../../target/wheels/
+          ls target/wheels/
 
       - name: Verify Python Bindings
         if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'ubuntu-latest'

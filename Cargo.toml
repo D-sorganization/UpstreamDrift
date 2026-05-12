@@ -12,6 +12,7 @@ members = [
     "rust_core/upstream-realtime",
     "rust_core/upstream-urdf",
     "rust_core/upstream-mesh",
+    "rust_core/upstream-muscle",
 ]
 exclude = ["ui/src-tauri"]
 
