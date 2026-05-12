@@ -3,7 +3,8 @@ import os
 
 
 def generate_untested_dashboard(
-    xml_path="coverage.xml", output_path="untested_modules_dashboard.md"
+    xml_path="coverage.xml",
+    output_path="docs/development/untested_modules_dashboard.md",
 ):
     if not os.path.exists(xml_path):
         print(f"Coverage file not found at {xml_path}")

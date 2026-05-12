@@ -23,7 +23,7 @@ The following Drake engine modules were fully tested using mock-based testing st
 - Diagnosed and resolved hard segmentation faults/crashes occurring due to `LivePlotWidget` and `QtGui.QKeySequence` initializing without an active `QApplication`.
 - Fixed `AttributeError` tracebacks in Pytest related to dynamic UI mixin architectures.
 - Updated `coverage.xml` by successfully re-running `pytest --cov` on the newly tested directories, appending the new hits.
-- Regenerated `untested_modules_dashboard.md`, successfully knocking the count down to **341**.
+- Regenerated `docs/development/untested_modules_dashboard.md`, successfully knocking the count down to **341**.
 
 ### 3. CI/CD and Branch Management
 
