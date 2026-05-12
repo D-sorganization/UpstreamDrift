@@ -149,6 +149,29 @@ class MJCFConverter:
         else:
             xml_string = source
 
+        # Rust-backed fast path. Opt-in via UPSTREAM_URDF_USE_RUST=1; routed
+        # through the typed AST defined in rust_core/upstream-urdf/. The Rust
+        # parser only handles document-level structure; the pure-Python
+        # converter below still owns the URDF-flattening step. We use the
+        # Rust parse here as a fast structural validator and to surface
+        # malformed MJCF earlier with a clearer error. See UpstreamDrift
+        # #5243 for the MJCF migration slice.
+        try:
+            from model_generation.converters import (
+                _mjcf_rust_facade as _mjcf_rust,
+            )
+        except ImportError:  # pragma: no cover - layout safety net
+            _mjcf_rust = None  # type: ignore[assignment]
+        if _mjcf_rust is not None and _mjcf_rust.should_use_rust():
+            try:
+                _mjcf_rust.parse_mjcf_to_dict(xml_string)
+            except Exception as exc:  # pragma: no cover - fallback path
+                logger.warning(
+                    "upstream_urdf Rust MJCF parser failed (%s); "
+                    "falling back to pure Python",
+                    exc,
+                )
+
         # Parse MJCF
         root = DefusedET.fromstring(xml_string)
         model = self._parse_mjcf(root)

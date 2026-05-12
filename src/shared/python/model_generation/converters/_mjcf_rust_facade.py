@@ -1,0 +1,76 @@
+"""Rust-backed MJCF parsing facade.
+
+Thin Python adapter over the `upstream_urdf` Rust crate's MJCF parser
+(`parse_mjcf` / `write_mjcf`). Mirrors the design of
+`_urdf_rust_facade.py` and is gated by the same opt-in env var,
+``UPSTREAM_URDF_USE_RUST``, so a single switch covers the URDF + MJCF
+migration. See UpstreamDrift issues #5215 (parent) and #5243 (MJCF
+slice).
+
+Design contract
+---------------
+- **Optional / opt-in**: importing this module is safe whether or not
+  the Rust extension is installed. ``HAVE_RUST`` advertises
+  availability.
+- **No API change**: callers obtain a JSON-serialisable dict
+  representing the [`MujocoDocument`] AST. Higher-level adapters
+  (e.g. `MJCFConverter`) are free to use it directly or fall back to
+  their pure-Python implementation.
+- **Lossless**: sections we don't model semantically (sensor / contact /
+  equality / tendon / keyframe / custom) round-trip through the
+  ``extras`` field as raw XML strings so writing back out preserves
+  them.
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import os
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
+try:  # pragma: no cover - import-time guard
+    import upstream_urdf as _rust  # type: ignore[import-not-found]
+
+    HAVE_RUST = hasattr(_rust, "parse_mjcf")
+except ImportError:  # pragma: no cover - exercised only when wheel absent
+    _rust = None  # type: ignore[assignment]
+    HAVE_RUST = False
+
+
+def should_use_rust() -> bool:
+    """Return True when the caller has opted in to the Rust MJCF parser."""
+    if not HAVE_RUST:
+        return False
+    return os.environ.get("UPSTREAM_URDF_USE_RUST", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
+def parse_mjcf_to_dict(xml: str) -> dict[str, Any]:
+    """Parse an MJCF string via the Rust crate, return the AST as a dict.
+
+    Raises:
+        RuntimeError: if the Rust extension is not importable or lacks
+            the MJCF entry points.
+    """
+    if not HAVE_RUST:
+        raise RuntimeError("upstream_urdf Rust extension does not expose parse_mjcf")
+    return json.loads(_rust.parse_mjcf(xml))  # type: ignore[union-attr]
+
+
+def write_mjcf_from_dict(doc: dict[str, Any]) -> str:
+    """Serialise an MJCF AST dict back to XML via the Rust crate.
+
+    Raises:
+        RuntimeError: if the Rust extension is not importable or lacks
+            the MJCF entry points.
+    """
+    if not HAVE_RUST:
+        raise RuntimeError("upstream_urdf Rust extension does not expose write_mjcf")
+    return str(_rust.write_mjcf(json.dumps(doc)))  # type: ignore[union-attr]

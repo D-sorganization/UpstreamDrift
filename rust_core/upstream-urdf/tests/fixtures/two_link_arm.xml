@@ -1,0 +1,26 @@
+<mujoco model="two_link_arm">
+  <compiler angle="radian" coordinate="local" inertiafromgeom="false"/>
+  <option timestep="0.002" gravity="0 0 -9.81"/>
+  <asset>
+    <material name="red" rgba="1 0 0 1"/>
+    <material name="blue" rgba="0 0 1 1" specular="0.5" shininess="0.25"/>
+    <mesh name="upper" file="upper.stl" scale="0.001 0.001 0.001"/>
+  </asset>
+  <worldbody>
+    <body name="upper_arm" pos="0 0 1">
+      <inertial mass="1" pos="0 0 0.25" diaginertia="0.1 0.1 0.01"/>
+      <joint name="shoulder" type="hinge" axis="0 1 0" range="-1.57 1.57" damping="0.5"/>
+      <geom name="upper_geom" type="capsule" size="0.05 0.25" pos="0 0 0.25" material="red"/>
+      <body name="forearm" pos="0 0 0.5">
+        <inertial mass="0.8" pos="0 0 0.2" fullinertia="0.05 0.05 0.005 0 0 0"/>
+        <joint name="elbow" type="hinge" axis="0 1 0" range="0 2.5" damping="0.3"/>
+        <geom type="cylinder" size="0.04 0.2" pos="0 0 0.2" material="blue"/>
+        <site name="end_effector" pos="0 0 0.4" size="0.01" rgba="0 1 0 1"/>
+      </body>
+    </body>
+  </worldbody>
+  <actuator>
+    <motor joint="shoulder" name="shoulder_motor"/>
+    <motor joint="elbow" name="elbow_motor"/>
+  </actuator>
+</mujoco>
