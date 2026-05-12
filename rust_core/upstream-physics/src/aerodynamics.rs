@@ -16,6 +16,14 @@
 use serde::{Deserialize, Serialize};
 use tools_core::Vector3;
 
+const MIN_VALID_REYNOLDS: f64 = 1.0e3;
+const MAX_VALID_REYNOLDS: f64 = 1.0e7;
+const CD_PRECRITICAL: f64 = 0.50;
+const RE_MIN_CD: f64 = 7.0e4;
+const CD_HIGH: f64 = 0.30;
+const TRANSITION_WIDTH: f64 = 0.16;
+const DRAG_CRISIS_RECOVERY_RE: f64 = 7.0e5;
+
 /// Air properties at given atmospheric conditions.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "python", pyo3::prelude::pyclass)]
@@ -295,15 +303,53 @@ pub fn compute_magnus(
 #[must_use]
 pub fn compute_drag_coefficient(speed: f64, ball: &AeroBallProperties, air: &AirProperties) -> f64 {
     let re = air.density * speed * (2.0 * ball.radius) / air.viscosity;
+    let clamped_re = re.clamp(MIN_VALID_REYNOLDS, MAX_VALID_REYNOLDS);
+    cd_dimpled_sphere(clamped_re, ball.drag_coefficient)
+        .expect("clamped Reynolds number and validated ball Cd must be accepted")
+}
 
-    if re < 8e4 {
-        0.5 // Laminar flow — high drag
-    } else if re < 2e5 {
-        // Transition region — linear interpolation
-        0.5 - 0.25 * (re - 8e4) / (2e5 - 8e4)
-    } else {
-        ball.drag_coefficient // Fully turbulent — dimple effect
+fn smoothstep_tanh(x: f64, x0: f64, width: f64) -> f64 {
+    0.5 * (1.0 + ((x - x0) / width).tanh())
+}
+
+/// Return the dimpled-sphere drag coefficient for a Reynolds number.
+///
+/// This ports `src.shared.python.physics.atmosphere.cd_dimpled_sphere` into
+/// Rust so the timestep kernel uses the same smooth drag-crisis model as the
+/// Python reference path.
+///
+/// # Design by Contract
+/// ## Preconditions
+/// - `reynolds` must be finite and in `[1e3, 1e7]`
+/// - `base_cd` must be finite
+///
+/// ## Postconditions
+/// - Returned Cd is finite and clamped to `[0.15, 0.55]`
+pub fn cd_dimpled_sphere(reynolds: f64, base_cd: f64) -> Result<f64, String> {
+    if !reynolds.is_finite() || reynolds <= 0.0 {
+        return Err("reynolds must be a positive finite number".to_string());
     }
+    if !(MIN_VALID_REYNOLDS..=MAX_VALID_REYNOLDS).contains(&reynolds) {
+        return Err(format!(
+            "reynolds={reynolds} is outside the supported range [{MIN_VALID_REYNOLDS}, {MAX_VALID_REYNOLDS}]"
+        ));
+    }
+    if !base_cd.is_finite() {
+        return Err("base_cd must be finite".to_string());
+    }
+
+    let cd_floor = base_cd.clamp(0.18, 0.30);
+    let log_re = reynolds.log10();
+    let log_re_crisis = RE_MIN_CD.log10();
+    let log_re_recovery = DRAG_CRISIS_RECOVERY_RE.log10();
+
+    let crisis_blend = smoothstep_tanh(log_re, log_re_crisis, TRANSITION_WIDTH);
+    let cd_crisis = CD_PRECRITICAL + (cd_floor - CD_PRECRITICAL) * crisis_blend;
+
+    let recovery_blend = smoothstep_tanh(log_re, log_re_recovery, 0.45);
+    let cd = cd_crisis + (CD_HIGH - cd_floor) * recovery_blend;
+
+    Ok(cd.clamp(0.15, 0.55))
 }
 
 /// Compute lift coefficient from dimensionless spin ratio.
@@ -558,8 +604,8 @@ mod tests {
         // Both fully turbulent → same Cd → ratio should be (160/80)^2 = 4
         let ratio = drag2.x.abs() / drag1.x.abs();
         assert!(
-            (ratio - 4.0).abs() < 0.1,
-            "Drag ratio should be ~4x in same Cd regime, got {}",
+            (ratio - 4.15).abs() < 0.1,
+            "Drag ratio should include v^2 plus smooth Cd recovery, got {}",
             ratio
         );
     }
@@ -685,24 +731,51 @@ mod tests {
         // Very low speed → laminar → Cd = 0.5
         let cd = compute_drag_coefficient(1.0, &ball, &air);
         assert!(
-            (cd - 0.5).abs() < 1e-6,
-            "Laminar Cd should be 0.5, got {}",
+            (cd - 0.500_001_242_489_331_1).abs() < 1e-12,
+            "Laminar Cd should match the Python dimpled-sphere curve, got {}",
             cd
         );
     }
 
     #[test]
-    fn test_drag_coefficient_turbulent() {
+    fn test_drag_coefficient_matches_python_drag_crisis_curve() {
         let ball = default_ball();
         let air = default_air();
-        // High speed → fully turbulent → Cd = ball.drag_coefficient
         let cd = compute_drag_coefficient(100.0, &ball, &air);
         assert!(
-            (cd - ball.drag_coefficient).abs() < 1e-6,
-            "Turbulent Cd should be {}, got {}",
-            ball.drag_coefficient,
+            (cd - 0.257_787_143_359_211_3).abs() < 1e-12,
+            "Rust Cd should match Python cd_dimpled_sphere at golf launch Re, got {}",
             cd
         );
+    }
+
+    #[test]
+    fn test_cd_dimpled_sphere_python_parity_anchors() {
+        let cases = [
+            (1.0e3, 0.500_000_161_176_627_4),
+            (1.0e4, 0.500_007_263_990_912_3),
+            (4.0e4, 0.488_763_716_427_621_5),
+            (7.0e4, 0.375_580_365_822_265_2),
+            (7.0e5, 0.275_000_931_659_821_1),
+            (1.0e7, 0.299_706_757_892_032_6),
+        ];
+
+        for (reynolds, expected) in cases {
+            let actual = cd_dimpled_sphere(reynolds, 0.25).unwrap();
+            assert!(
+                (actual - expected).abs() < 1e-12,
+                "Cd parity failed for Re={reynolds}: expected {expected}, got {actual}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_cd_dimpled_sphere_rejects_invalid_inputs() {
+        assert!(cd_dimpled_sphere(0.0, 0.25).is_err());
+        assert!(cd_dimpled_sphere(f64::NAN, 0.25).is_err());
+        assert!(cd_dimpled_sphere(999.0, 0.25).is_err());
+        assert!(cd_dimpled_sphere(1.0e8, 0.25).is_err());
+        assert!(cd_dimpled_sphere(1.0e5, f64::INFINITY).is_err());
     }
 
     #[test]
