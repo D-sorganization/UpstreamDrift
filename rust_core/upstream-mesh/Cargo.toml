@@ -5,7 +5,7 @@ edition.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
-description = "Mesh kernels for UpstreamDrift: convex hull, decimation, primitive fitting (parry3d-backed). First slice for issue #5219."
+description = "Mesh kernels for UpstreamDrift: convex hull, VHACD decomposition, primitive fitting (parry3d-backed). Issue #5219 / #5248."
 
 [lib]
 name = "upstream_mesh"
@@ -15,13 +15,15 @@ crate-type = ["cdylib", "rlib"]
 default = []
 # Optional PyO3 binding. Off by default so the crate builds in the workspace
 # without a Python toolchain. Enabled by maturin via [tool.maturin].features.
-python = ["dep:pyo3"]
+python = ["dep:pyo3", "dep:numpy"]
 
 [dependencies]
 parry3d = "0.17"
 nalgebra = { workspace = true }
 serde = { workspace = true }
 pyo3 = { workspace = true, optional = true }
+numpy = { version = "0.24", optional = true }
+ndarray = "0.16"
 
 [dev-dependencies]
 approx = "0.5"

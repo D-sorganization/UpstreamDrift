@@ -9,6 +9,22 @@ from ._cg_types import CollisionGeometryResult, PrimitiveFit, SimplificationMeth
 
 logger = logging.getLogger(__name__)
 
+# Optional Rust kernel — see _cg_convex_hull.py for context.
+try:  # pragma: no cover
+    import upstream_mesh as _rust_mesh
+except ImportError:  # pragma: no cover
+    _rust_mesh = None
+
+
+def _mesh_verts_f32(mesh: Any) -> np.ndarray | None:
+    try:
+        v = np.ascontiguousarray(mesh.vertices, dtype=np.float32)
+    except (ValueError, TypeError, AttributeError):
+        return None
+    if v.ndim != 2 or v.shape[1] != 3 or v.shape[0] < 4:
+        return None
+    return v
+
 
 def primitives_would_fit(mesh: Any, max_primitives: int) -> bool:
     if not (max_primitives is not None):
@@ -32,6 +48,27 @@ def primitives_would_fit(mesh: Any, max_primitives: int) -> bool:
 
 
 def fit_box(mesh: Any) -> PrimitiveFit:
+    verts = _mesh_verts_f32(mesh) if _rust_mesh is not None else None
+    if verts is not None:
+        try:
+            center, extents, rot_xyzw, vr = _rust_mesh.fit_obb(
+                verts, float(mesh.volume) if mesh.volume > 0 else None
+            )
+            return PrimitiveFit(
+                primitive_type="box",
+                center=(float(center[0]), float(center[1]), float(center[2])),
+                dimensions=(float(extents[0]), float(extents[1]), float(extents[2])),
+                rotation=(
+                    float(rot_xyzw[0]),
+                    float(rot_xyzw[1]),
+                    float(rot_xyzw[2]),
+                    float(rot_xyzw[3]),
+                ),
+                volume_ratio=float(vr),
+                error_metric=1.0 - float(vr),
+            )
+        except (ValueError, RuntimeError) as exc:  # pragma: no cover
+            logger.debug("upstream_mesh fit_obb failed, falling back: %s", exc)
     try:
         obb = mesh.bounding_box_oriented
         center = tuple(obb.centroid.tolist())
@@ -73,6 +110,26 @@ def fit_box(mesh: Any) -> PrimitiveFit:
 
 
 def fit_sphere(mesh: Any) -> PrimitiveFit:
+    verts = _mesh_verts_f32(mesh) if _rust_mesh is not None else None
+    if verts is not None:
+        try:
+            center_xyz, radius, vr = _rust_mesh.fit_sphere(
+                verts, float(mesh.volume) if mesh.volume > 0 else None
+            )
+            return PrimitiveFit(
+                primitive_type="sphere",
+                center=(
+                    float(center_xyz[0]),
+                    float(center_xyz[1]),
+                    float(center_xyz[2]),
+                ),
+                dimensions=(float(radius),),
+                rotation=(0.0, 0.0, 0.0, 1.0),
+                volume_ratio=float(vr),
+                error_metric=1.0 - float(vr),
+            )
+        except (ValueError, RuntimeError) as exc:  # pragma: no cover
+            logger.debug("upstream_mesh fit_sphere failed, falling back: %s", exc)
     try:
         center = tuple(mesh.centroid.tolist())
         vertices = mesh.vertices - mesh.centroid
@@ -102,6 +159,31 @@ def fit_sphere(mesh: Any) -> PrimitiveFit:
 
 
 def fit_cylinder(mesh: Any) -> PrimitiveFit:
+    verts = _mesh_verts_f32(mesh) if _rust_mesh is not None else None
+    if verts is not None:
+        try:
+            center_xyz, radius, height, rot_xyzw, vr = _rust_mesh.fit_cylinder(
+                verts, float(mesh.volume) if mesh.volume > 0 else None
+            )
+            return PrimitiveFit(
+                primitive_type="cylinder",
+                center=(
+                    float(center_xyz[0]),
+                    float(center_xyz[1]),
+                    float(center_xyz[2]),
+                ),
+                dimensions=(float(radius), float(height)),
+                rotation=(
+                    float(rot_xyzw[0]),
+                    float(rot_xyzw[1]),
+                    float(rot_xyzw[2]),
+                    float(rot_xyzw[3]),
+                ),
+                volume_ratio=float(vr),
+                error_metric=1.0 - float(vr),
+            )
+        except (ValueError, RuntimeError) as exc:  # pragma: no cover
+            logger.debug("upstream_mesh fit_cylinder failed, falling back: %s", exc)
     try:
         obb = mesh.bounding_box_oriented
         extents = obb.primitive.extents

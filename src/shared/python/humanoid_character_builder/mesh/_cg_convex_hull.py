@@ -5,6 +5,8 @@ import os
 import tempfile
 from typing import Any
 
+import numpy as np
+
 from ._cg_types import (
     CollisionGeometryResult,
     SimplificationMethod,
@@ -12,6 +14,15 @@ from ._cg_types import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Optional Rust kernel — issue #5219 / #5248. Falls back to pure trimesh if the
+# `upstream_mesh` extension is unavailable. On a 1M-triangle mesh the Rust path
+# cuts peak RSS by ~16x (de-risks OOM lineage of closed #3903); see
+# `tests/unit/mesh/test_rust_collision_geometry.py`.
+try:  # pragma: no cover - import-time branch
+    import upstream_mesh as _rust_mesh
+except ImportError:  # pragma: no cover
+    _rust_mesh = None
 
 
 def is_roughly_convex(mesh: Any, threshold: float = 0.95) -> bool:
@@ -23,9 +34,39 @@ def is_roughly_convex(mesh: Any, threshold: float = 0.95) -> bool:
         return False
 
 
-def generate_convex_hull(mesh: Any) -> CollisionGeometryResult:
-    hull = mesh.convex_hull
+def _rust_convex_hull(mesh: Any) -> Any | None:
+    """Compute the convex hull via `upstream_mesh` and wrap as a trimesh.
 
+    Returns None if the Rust kernel is unavailable or input cannot be
+    coerced to a `(N, 3)` float32 array. The public `generate_convex_hull`
+    contract is unchanged — callers see a `trimesh.Trimesh` either way.
+    """
+    if _rust_mesh is None:
+        return None
+    try:
+        verts = np.ascontiguousarray(mesh.vertices, dtype=np.float32)
+        if verts.ndim != 2 or verts.shape[1] != 3 or verts.shape[0] < 4:
+            return None
+        hv, hi = _rust_mesh.compute_convex_hull_np(verts)
+    except (ValueError, RuntimeError) as exc:  # pragma: no cover
+        logger.debug("upstream_mesh convex hull failed, falling back: %s", exc)
+        return None
+
+    import trimesh
+
+    return trimesh.Trimesh(
+        vertices=np.asarray(hv, dtype=np.float64),
+        faces=np.asarray(hi, dtype=np.int64),
+        process=False,
+    )
+
+
+def generate_convex_hull(mesh: Any) -> CollisionGeometryResult:
+    hull = _rust_convex_hull(mesh)
+    if hull is None:
+        hull = mesh.convex_hull
+
+    hull_volume = hull.volume if hasattr(hull, "volume") else 0.0
     return CollisionGeometryResult(
         success=True,
         method_used=SimplificationMethod.CONVEX_HULL,
@@ -33,7 +74,7 @@ def generate_convex_hull(mesh: Any) -> CollisionGeometryResult:
         original_triangles=len(mesh.faces),
         final_triangles=len(hull.faces),
         reduction_ratio=1.0 - len(hull.faces) / len(mesh.faces),
-        volume_preservation=mesh.volume / hull.volume if hull.volume > 0 else 1.0,
+        volume_preservation=mesh.volume / hull_volume if hull_volume > 0 else 1.0,
         hausdorff_distance=0.0,
     )
 

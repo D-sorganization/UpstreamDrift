@@ -3,10 +3,64 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+import numpy as np
+
 from ._cg_primitive_fitting import generate_primitives
 from ._cg_types import CollisionGeometryResult, SimplificationMethod
 
 logger = logging.getLogger(__name__)
+
+# Optional Rust kernel — see _cg_convex_hull.py for context. Decimation falls
+# back to trimesh's `simplify_quadric_decimation` when `upstream_mesh` isn't
+# available; the Rust path is VHACD-based collision-mesh decomposition (the
+# same notion of "decimation" used by the existing VHACD fallback).
+try:  # pragma: no cover
+    import upstream_mesh as _rust_mesh
+except ImportError:  # pragma: no cover
+    _rust_mesh = None
+
+
+def _rust_decimated(mesh: Any, max_triangles: int) -> Any | None:
+    """VHACD-based simplification via the Rust crate, packed into one trimesh.
+
+    Returns the concatenated simplified mesh, or None if the Rust kernel is
+    unavailable / the input geometry isn't suitable.
+    """
+    if _rust_mesh is None:
+        return None
+    try:
+        verts = np.ascontiguousarray(mesh.vertices, dtype=np.float32)
+        faces = np.ascontiguousarray(mesh.faces, dtype=np.uint32)
+        if verts.ndim != 2 or verts.shape[1] != 3 or verts.shape[0] < 4:
+            return None
+        if faces.ndim != 2 or faces.shape[1] != 3 or faces.shape[0] == 0:
+            return None
+        # Heuristic: pick a voxel resolution targeting roughly the requested
+        # triangle budget. parry3d's VHACD `resolution` is per-axis voxels.
+        resolution = int(np.clip(round(max_triangles ** (1 / 3)) * 4, 32, 256))
+        max_hulls = max(1, max_triangles // 64)
+        parts = _rust_mesh.decimate_vhacd(verts, faces, resolution, max_hulls, 0.001, 0)
+    except (ValueError, RuntimeError) as exc:  # pragma: no cover
+        logger.debug("upstream_mesh decimation failed, falling back: %s", exc)
+        return None
+    if not parts:
+        return None
+
+    import trimesh
+
+    # Concatenate hull parts into a single trimesh.
+    v_blocks: list[np.ndarray] = []
+    f_blocks: list[np.ndarray] = []
+    offset = 0
+    for hv, hi in parts:
+        v_blocks.append(np.asarray(hv, dtype=np.float64))
+        f_blocks.append(np.asarray(hi, dtype=np.int64) + offset)
+        offset += hv.shape[0]
+    return trimesh.Trimesh(
+        vertices=np.vstack(v_blocks),
+        faces=np.vstack(f_blocks),
+        process=False,
+    )
 
 
 def generate_decimated(mesh: Any, max_triangles: int) -> CollisionGeometryResult:
@@ -24,16 +78,18 @@ def generate_decimated(mesh: Any, max_triangles: int) -> CollisionGeometryResult
             hausdorff_distance=0.0,
         )
 
-    try:
-        simplified = mesh.simplify_quadric_decimation(max_triangles)
-    except (ValueError, RuntimeError, IndexError):
+    simplified = _rust_decimated(mesh, max_triangles)
+    if simplified is None or len(simplified.faces) == 0:
         try:
-            reduction = max_triangles / len(mesh.faces)
-            pitch = mesh.extents.max() * (1 - reduction) / 10
-            voxelized = mesh.voxelized(pitch)
-            simplified = voxelized.marching_cubes
-        except (ValueError, ZeroDivisionError, OverflowError, TypeError):
-            simplified = mesh.copy()
+            simplified = mesh.simplify_quadric_decimation(max_triangles)
+        except (ValueError, RuntimeError, IndexError):
+            try:
+                reduction = max_triangles / len(mesh.faces)
+                pitch = mesh.extents.max() * (1 - reduction) / 10
+                voxelized = mesh.voxelized(pitch)
+                simplified = voxelized.marching_cubes
+            except (ValueError, ZeroDivisionError, OverflowError, TypeError):
+                simplified = mesh.copy()
 
     return CollisionGeometryResult(
         success=True,
