@@ -236,3 +236,52 @@ class TestRefreshModels:
         payload = chat_service.refresh_models()
         assert payload["models"] == []
         assert "refreshed_at" in payload
+
+
+class TestCodemapRebuild:
+    """Tests for run_codemap_rebuild (Tools issue #2549 / PR #2567)."""
+
+    def test_rebuild_complete_payload(self, chat_service) -> None:
+        """A successful rebuild yields a 'complete' status with totals."""
+        import asyncio
+
+        from src.shared.python.codemap.indexer import RebuildStats
+
+        fake_stats = RebuildStats(files_parsed=11, symbols_inserted=99, elapsed_s=0.42)
+        with (
+            patch(
+                "src.shared.python.codemap.indexer.rebuild",
+                return_value=fake_stats,
+            ),
+            patch(
+                "src.shared.python.codemap.discover_repo_root",
+                return_value="/fake/repo",
+            ),
+        ):
+            payload = asyncio.run(chat_service.run_codemap_rebuild())
+
+        assert payload["state"] == "complete"
+        assert payload["files_parsed"] == 11
+        assert payload["symbols_inserted"] == 99
+        assert payload["duration_seconds"] == 0.42
+        assert payload["error"] is None
+
+    def test_rebuild_error_payload(self, chat_service) -> None:
+        """A raising rebuild yields an 'error' status with the message."""
+        import asyncio
+
+        with (
+            patch(
+                "src.shared.python.codemap.indexer.rebuild",
+                side_effect=RuntimeError("disk full"),
+            ),
+            patch(
+                "src.shared.python.codemap.discover_repo_root",
+                return_value="/fake/repo",
+            ),
+        ):
+            payload = asyncio.run(chat_service.run_codemap_rebuild())
+
+        assert payload["state"] == "error"
+        assert payload["error"] == "disk full"
+        assert payload["files_parsed"] == 0

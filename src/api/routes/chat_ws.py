@@ -25,6 +25,7 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
             {"action": "history"}
             {"action": "new_session"}
             {"action": "refresh_models"}
+            {"action": "index_codebase"}
 
         Server -> Client:
             {"type": "session_info", "session_id": "..."}
@@ -32,6 +33,7 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
             {"type": "complete", "session_id": "..."}
             {"type": "history", "messages": [...]}
             {"type": "model_list", "models": [...], "refreshed_at": "..."}
+            {"type": "index_status", "state": "running"|"complete"|"error", ...}
             {"type": "error", "detail": "..."}
     """
     if not (websocket is not None):
@@ -109,6 +111,24 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
                         "refreshed_at": payload["refreshed_at"],
                     }
                 )
+
+            elif action == "index_codebase":
+                # Tools issue #2549 / PR #2567. Run the existing
+                # codemap.indexer.rebuild pathway in a worker thread and
+                # ship a ``running`` event up front, then a final
+                # ``complete`` (or ``error``) event when the rebuild
+                # finishes. We deliberately don't reimplement the
+                # indexer here — see ``src/shared/python/codemap``.
+                await websocket.send_json(
+                    {
+                        "type": "index_status",
+                        "state": "running",
+                        "files_parsed": 0,
+                        "symbols_inserted": 0,
+                    }
+                )
+                payload = await chat_service.run_codemap_rebuild()
+                await websocket.send_json({"type": "index_status", **payload})
 
             else:
                 await websocket.send_json(

@@ -7,6 +7,7 @@ from src.api.models.chat import (
     RESPONSE_STYLE_PROMPTS,
     ChatChunkResponse,
     ChatHistoryResponse,
+    ChatIndexStatusResponse,
     ChatMessageRequest,
     ChatModelInfo,
     ChatModelListResponse,
@@ -173,3 +174,35 @@ def test_chat_model_list_response_with_models() -> None:
     )
     assert len(resp.models) == 2
     assert resp.models[0].name == "llama3.1:8b"
+
+
+def test_chat_index_status_response_running() -> None:
+    """ChatIndexStatusResponse defaults numeric fields to 0 (Tools #2549)."""
+    resp = ChatIndexStatusResponse(state="running")
+    assert resp.state == "running"
+    assert resp.files_parsed == 0
+    assert resp.symbols_inserted == 0
+    assert resp.duration_seconds is None
+    assert resp.error is None
+
+
+def test_chat_index_status_response_complete() -> None:
+    """ChatIndexStatusResponse carries totals + duration when complete."""
+    resp = ChatIndexStatusResponse(
+        state="complete",
+        files_parsed=42,
+        symbols_inserted=320,
+        duration_seconds=1.25,
+    )
+    assert resp.state == "complete"
+    assert resp.files_parsed == 42
+    assert resp.symbols_inserted == 320
+    assert resp.duration_seconds == 1.25
+    assert resp.error is None
+
+
+def test_chat_index_status_response_error() -> None:
+    """ChatIndexStatusResponse carries an error string on state='error'."""
+    resp = ChatIndexStatusResponse(state="error", error="permission denied")
+    assert resp.state == "error"
+    assert resp.error == "permission denied"

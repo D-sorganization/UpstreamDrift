@@ -67,6 +67,18 @@ def mock_chat_service() -> MagicMock:
 
     svc.stream_response = mock_stream
 
+    # Tools #2549: async run_codemap_rebuild needs an awaitable mock.
+    async def mock_rebuild() -> dict:
+        return {
+            "state": "complete",
+            "files_parsed": 7,
+            "symbols_inserted": 42,
+            "duration_seconds": 0.5,
+            "error": None,
+        }
+
+    svc.run_codemap_rebuild = mock_rebuild
+
     return svc
 
 
@@ -180,6 +192,23 @@ class TestWebSocket:
             assert "refreshed_at" in data
 
         mock_chat_service.refresh_models.assert_called()
+
+    def test_index_codebase_action(self, client, mock_chat_service) -> None:
+        """``index_codebase`` ships a 'running' then a 'complete' status (Tools #2549)."""
+        with client.websocket_connect("/api/ws/chat/new") as ws:
+            ws.receive_json()  # session_info
+
+            ws.send_json({"action": "index_codebase"})
+            running = ws.receive_json()
+            assert running["type"] == "index_status"
+            assert running["state"] == "running"
+            assert running["files_parsed"] == 0
+
+            done = ws.receive_json()
+            assert done["type"] == "index_status"
+            assert done["state"] == "complete"
+            assert done["files_parsed"] == 7
+            assert done["symbols_inserted"] == 42
 
     def test_unknown_action(self, client) -> None:
         """Sending an unknown action returns an error."""

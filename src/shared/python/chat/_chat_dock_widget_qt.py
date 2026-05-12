@@ -154,6 +154,9 @@ class ChatDockWidget(QDockWidget):
         ws_path_template: WebSocket path template with ``{session_id}`` placeholder.
         placeholder_text: Placeholder text for the input field.
         accent_color: Primary accent color for styling.
+        auto_index_on_open: When True, send an ``index_codebase`` action on
+            connect so the chat backend rebuilds its codemap before the user
+            starts typing. Tools issue #2549 / PR #2567.
         parent: Parent widget.
     """
 
@@ -164,6 +167,10 @@ class ChatDockWidget(QDockWidget):
     # so external UI (e.g. the AI settings dropdown) can repopulate itself.
     models_refreshed = pyqtSignal(list)
 
+    # Tools issue #2549 / PR #2567: emit on each ``index_status`` server
+    # push so external UI can surface indexing progress / completion.
+    index_status_changed = pyqtSignal(dict)
+
     def __init__(
         self,
         app_context: str = "unknown",
@@ -173,6 +180,7 @@ class ChatDockWidget(QDockWidget):
         ws_path_template: str = "/api/ws/chat/{session_id}",
         placeholder_text: str = "Ask a question...",
         accent_color: str = "#FF8800",
+        auto_index_on_open: bool = False,
         parent: QWidget | None = None,
     ) -> None:
         if not (app_context is not None):
@@ -184,6 +192,7 @@ class ChatDockWidget(QDockWidget):
         self._ws_path_template = ws_path_template
         self._accent_color = accent_color
         self._placeholder_text = placeholder_text
+        self._auto_index_on_open = bool(auto_index_on_open)
         self._is_streaming = False
         self._current_bubble: ChatMessageBubble | None = None
         self._socket: QWebSocket | None = None
@@ -308,6 +317,11 @@ class ChatDockWidget(QDockWidget):
         # model list so subscribers (e.g. the AI settings dropdown) start
         # with fresh data instead of whatever was cached at startup.
         self.refresh_models()
+        # Tools issue #2549 / PR #2567: kick off a codemap rebuild before
+        # the user starts typing if the embedder asked for it. Subscribers
+        # watch ``index_status_changed`` for progress / completion.
+        if self._auto_index_on_open:
+            self.index_codebase()
 
     def refresh_models(self) -> None:
         """Ask the server for the current chat-model list.
@@ -317,6 +331,16 @@ class ChatDockWidget(QDockWidget):
         receive the resulting payload (Tools issue #2547 / PR #2566).
         """
         self._send_ws({"action": "refresh_models"})
+
+    def index_codebase(self) -> None:
+        """Ask the server to (re)index the codebase.
+
+        Sends ``{"action": "index_codebase"}`` over the WebSocket. The
+        server is expected to push periodic ``index_status`` messages
+        which are forwarded via the ``index_status_changed`` signal
+        (Tools issue #2549 / PR #2567).
+        """
+        self._send_ws({"action": "index_codebase"})
 
     def _on_disconnected(self) -> None:
         self._status_label.setText("Disconnected - retrying in 3s...")
@@ -374,6 +398,23 @@ class ChatDockWidget(QDockWidget):
             models = data.get("models", [])
             if isinstance(models, list):
                 self.models_refreshed.emit(models)
+
+        elif msg_type == "index_status":
+            # Tools issue #2549 / PR #2567. Forward server-pushed indexing
+            # progress to subscribers via ``index_status_changed`` and
+            # mirror state into the status label so the user can see it.
+            self.index_status_changed.emit(dict(data))
+            state = data.get("state")
+            if state == "running":
+                files = data.get("files_parsed", 0)
+                self._status_label.setText(f"Indexing codebase ({files} files)...")
+            elif state == "complete":
+                self._status_label.setText("Connected")
+                self._status_label.setStyleSheet("color: #3fb950; font-size: 10px;")
+            elif state == "error":
+                detail = data.get("error", "Unknown indexing error")
+                self._status_label.setText(f"Index error: {detail}")
+                self._status_label.setStyleSheet("color: #f85149; font-size: 10px;")
 
         elif msg_type == "error":
             detail = data.get("detail", "Unknown error")

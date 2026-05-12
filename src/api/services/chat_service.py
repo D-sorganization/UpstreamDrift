@@ -434,6 +434,49 @@ class ChatService:
             "refreshed_at": datetime.now(UTC).isoformat(),
         }
 
+    async def run_codemap_rebuild(self) -> dict[str, Any]:
+        """Run the in-tree codemap rebuild and return a status payload.
+
+        Tools issue #2549 / PR #2567: handler for the chat ``index_codebase``
+        WebSocket action. Wraps the existing
+        ``src.shared.python.codemap.indexer.rebuild`` pathway and returns
+        a dict shaped like ``ChatIndexStatusResponse``. Runs in a worker
+        thread so the WebSocket loop stays responsive.
+        """
+
+        def _rebuild_in_thread() -> dict[str, Any]:
+            try:
+                from src.shared.python.codemap import discover_repo_root
+                from src.shared.python.codemap.indexer import rebuild
+
+                repo_root = discover_repo_root()
+                stats = rebuild(repo_root)
+                return {
+                    "state": "complete",
+                    "files_parsed": stats.files_parsed,
+                    "symbols_inserted": stats.symbols_inserted,
+                    "duration_seconds": float(stats.elapsed_s),
+                    "error": None,
+                }
+            except Exception as exc:  # noqa: BLE001
+                # Indexer can raise from import failures, sqlite errors, or
+                # filesystem permission issues — treat all as soft errors
+                # so the chat session stays alive.
+                logger.warning(
+                    "ChatService.run_codemap_rebuild failed: %s: %s",
+                    type(exc).__name__,
+                    exc,
+                )
+                return {
+                    "state": "error",
+                    "files_parsed": 0,
+                    "symbols_inserted": 0,
+                    "duration_seconds": None,
+                    "error": str(exc),
+                }
+
+        return await asyncio.to_thread(_rebuild_in_thread)
+
     def get_session_history(self, session_id: str) -> list[dict[str, Any]]:
         """Return message history for a session."""
         with self._lock:

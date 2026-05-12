@@ -62,6 +62,7 @@ KEY_RESPONSE_STYLE = "ai/response_style"
 KEY_OLLAMA_HOST = "ai/ollama_host"
 KEY_STREAMING = "ai/streaming_enabled"
 KEY_RAG_ENABLED = "ai/rag_enabled"
+KEY_AUTO_INDEX_ON_OPEN = "ai/auto_index_on_open"
 
 
 class AIProvider(Enum):
@@ -161,6 +162,8 @@ class AISettings:
         ollama_host: Ollama server URL.
         streaming_enabled: Whether to stream responses.
         rag_enabled: Whether to use RAG (Codebase awareness).
+        auto_index_on_open: When True, the chat dock asks the server to
+            rebuild the codemap on connect (Tools issue #2549 / PR #2567).
         api_keys: In-memory API keys (not persisted directly).
     """
 
@@ -171,6 +174,7 @@ class AISettings:
     ollama_host: str = DEFAULT_OLLAMA_HOST
     streaming_enabled: bool = True
     rag_enabled: bool = True
+    auto_index_on_open: bool = False
     api_keys: dict[AIProvider, str] = field(default_factory=dict)
 
     def save(self) -> None:
@@ -183,6 +187,7 @@ class AISettings:
         settings.setValue(KEY_OLLAMA_HOST, self.ollama_host)
         settings.setValue(KEY_STREAMING, self.streaming_enabled)
         settings.setValue(KEY_RAG_ENABLED, self.rag_enabled)
+        settings.setValue(KEY_AUTO_INDEX_ON_OPEN, self.auto_index_on_open)
         # Note: API keys are stored separately in keyring
         logger.info("Saved AI settings: provider=%s", self.provider.name)
 
@@ -212,6 +217,7 @@ class AISettings:
             ollama_host=settings.value(KEY_OLLAMA_HOST, default_host),
             streaming_enabled=settings.value(KEY_STREAMING, True, type=bool),
             rag_enabled=settings.value(KEY_RAG_ENABLED, True, type=bool),
+            auto_index_on_open=settings.value(KEY_AUTO_INDEX_ON_OPEN, False, type=bool),
         )
 
 
@@ -770,6 +776,17 @@ class AISettingsDialog(QDialog):
         )
         rag_layout.addWidget(self._rag_enabled_check)
 
+        # Tools issue #2549 / PR #2567: ChatDockWidget can request a
+        # codemap rebuild on connect via the ``index_codebase`` action.
+        # Toggling this persists ``auto_index_on_open`` in AISettings,
+        # which the dock reads at construction time.
+        self._auto_index_check = QCheckBox("Auto-index codebase when chat opens")
+        self._auto_index_check.setToolTip(
+            "Rebuild the codemap each time the chat dock connects so the "
+            "assistant has fresh symbol/import context. Slower first open."
+        )
+        rag_layout.addWidget(self._auto_index_check)
+
         layout.addWidget(rag_group)
 
         # Actions
@@ -835,6 +852,10 @@ class AISettingsDialog(QDialog):
         if hasattr(self, "_rag_enabled_check"):
             self._rag_enabled_check.setChecked(self._settings.rag_enabled)
 
+        # Auto-index on open (Tools #2549)
+        if hasattr(self, "_auto_index_check"):
+            self._auto_index_check.setChecked(self._settings.auto_index_on_open)
+
     def _on_provider_changed(self, index: int) -> None:
         """Handle provider selection change."""
         if not (index is not None):
@@ -895,6 +916,10 @@ class AISettingsDialog(QDialog):
                 style, self._settings.expertise_level
             )
         self._settings.streaming_enabled = self._streaming_check.isChecked()
+        if hasattr(self, "_rag_enabled_check"):
+            self._settings.rag_enabled = self._rag_enabled_check.isChecked()
+        if hasattr(self, "_auto_index_check"):
+            self._settings.auto_index_on_open = self._auto_index_check.isChecked()
 
         # Get Ollama host if applicable
         if self._settings.provider == AIProvider.OLLAMA:

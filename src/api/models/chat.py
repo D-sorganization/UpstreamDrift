@@ -149,3 +149,26 @@ class ChatHistoryResponse(BaseModel):
 
     session_id: str
     messages: list[dict[str, Any]]
+
+
+class ChatIndexStatusResponse(BaseModel):
+    """Server progress / completion event for the ``index_codebase`` action.
+
+    Tools issue #2549 / PR #2567 introduced the ``auto_index_on_open`` flag
+    on ``ChatDockWidget`` and an ``index_codebase`` WebSocket action that
+    rebuilds the in-tree codemap. The server pushes ``index_status``
+    messages of this shape so the widget can surface progress and
+    completion to the user.
+    """
+
+    state: str = Field(..., description="One of 'running', 'complete', or 'error'")
+    files_parsed: int = Field(
+        0, description="Files indexed so far (or total when state=='complete')"
+    )
+    symbols_inserted: int = Field(
+        0, description="Symbols inserted so far (or total when state=='complete')"
+    )
+    duration_seconds: float | None = Field(
+        None, description="Wall-clock elapsed seconds (set when state=='complete')"
+    )
+    error: str | None = Field(None, description="Error message when state=='error'")
