@@ -162,6 +162,8 @@ class LauncherTile:
     engine_type: str | None = None
     provider: str | None = None
     source_root: str | None = None
+    working_dir: str | None = None
+    python_paths: tuple[str, ...] = ()
     web_route: str | None = None
     hidden: bool = False
     hidden_reason: str | None = None
@@ -210,14 +212,18 @@ class LauncherTile:
             tags=tuple(data.get("tags", [])),
             order=data.get("order", 99),
             engine_type=data.get("engine_type"),
+            provider=data.get("provider"),
+            source_root=data.get("source_root"),
+            working_dir=data.get("working_dir"),
+            python_paths=tuple(data.get("python_paths", [])),
             web_route=data.get("web_route"),
             hidden=hidden,
-            hidden_reason=hidden_reason.strip()
-            if isinstance(hidden_reason, str)
-            else None,
-            hidden_owner=hidden_owner.strip()
-            if isinstance(hidden_owner, str)
-            else None,
+            hidden_reason=(
+                hidden_reason.strip() if isinstance(hidden_reason, str) else None
+            ),
+            hidden_owner=(
+                hidden_owner.strip() if isinstance(hidden_owner, str) else None
+            ),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -240,6 +246,14 @@ class LauncherTile:
         }
         if self.engine_type:
             result["engine_type"] = self.engine_type
+        if self.provider:
+            result["provider"] = self.provider
+        if self.source_root:
+            result["source_root"] = self.source_root
+        if self.working_dir:
+            result["working_dir"] = self.working_dir
+        if self.python_paths:
+            result["python_paths"] = list(self.python_paths)
         if self.web_route:
             result["web_route"] = self.web_route
         if self.tags:

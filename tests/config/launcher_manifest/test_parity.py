@@ -101,7 +101,9 @@ class TestParity:
         "model_explorer",
         "putting_green",
         "video_analyzer",
+        "video_processor",
         "data_explorer",
+        "data_processor",
     }
 
     REQUIRED_TAURI_IDS = {
@@ -112,7 +114,9 @@ class TestParity:
         "myosim_suite",
         "putting_green",
         "video_analyzer",
+        "video_processor",
         "data_explorer",
+        "data_processor",
     }
 
     def test_manifest_covers_all_pyqt_tiles(self, manifest: LauncherManifest) -> None:
@@ -126,6 +130,26 @@ class TestParity:
         manifest_ids = set(manifest.tile_ids)
         missing = self.REQUIRED_TAURI_IDS - manifest_ids
         assert not missing, f"Tauri tiles missing from manifest: {missing}"
+
+    def test_shared_tools_live_in_tools_repo(self, manifest: LauncherManifest) -> None:
+        """Video/data surfaces exposed in UpstreamDrift resolve to Tools."""
+        shared_ids = {
+            "video_analyzer",
+            "video_processor",
+            "data_explorer",
+            "data_processor",
+        }
+
+        for tile_id in shared_ids:
+            tile = manifest.get_tile(tile_id)
+            assert tile is not None, f"Missing shared Tools tile: {tile_id}"
+            assert tile.provider == "tools", f"{tile_id} must declare Tools as provider"
+            assert tile.source_root == "../Tools", (
+                f"{tile_id} must resolve from the sibling Tools repo"
+            )
+            assert not tile.path.startswith("src/tools/"), (
+                f"{tile_id} must not point at UpstreamDrift-local tool source"
+            )
 
     def test_manifest_serializes_for_api(self, manifest: LauncherManifest) -> None:
         """Manifest can be serialized to JSON for the API endpoint."""

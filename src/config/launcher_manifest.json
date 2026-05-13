@@ -194,9 +194,13 @@
       "description": "Video-based motion analysis with pose estimation and tracking",
       "category": "tool",
       "type": "special_app",
-      "path": "src/tools/video_analyzer/launch_video_analyzer.py",
+      "path": "src/video_analyzer/launch_video_analyzer.py",
+      "provider": "tools",
+      "source_root": "../Tools",
+      "working_dir": ".",
+      "python_paths": ["src", "src/shared/python"],
       "logo": "video_analyzer.svg",
-      "status": "utility",
+      "status": "external",
       "web_route": "/tools/video-analyzer",
       "capabilities": [
         "video_processing",
@@ -207,17 +211,71 @@
       "order": 11
     },
     {
+      "id": "video_processor",
+      "name": "Video Processor",
+      "description": "Shared Tools media processor for video conversion, frame extraction, and analysis",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/media_processing/video_processor/apps/web/launch_platform.py",
+      "provider": "tools",
+      "source_root": "../Tools",
+      "working_dir": "src/media_processing/video_processor/apps/web",
+      "python_paths": ["src", "src/shared/python"],
+      "logo": "video_analyzer.svg",
+      "status": "external",
+      "web_route": "/tools/video-processor",
+      "capabilities": [
+        "video_processing",
+        "format_conversion",
+        "frame_extraction",
+        "media_analysis"
+      ],
+      "order": 12
+    },
+    {
       "id": "data_explorer",
       "name": "Data Explorer",
       "description": "Import, filter, and visualize simulation datasets",
       "category": "tool",
       "type": "special_app",
-      "path": "src/tools/data_explorer/data_explorer_app.py",
+      "path": "src/data_explorer/data_explorer_app.py",
+      "provider": "tools",
+      "source_root": "../Tools",
+      "working_dir": ".",
+      "python_paths": ["src", "src/shared/python"],
       "logo": "data_explorer.svg",
-      "status": "utility",
+      "status": "external",
       "web_route": "/tools/data-explorer",
       "capabilities": ["data_import", "filtering", "visualization", "export"],
-      "order": 12
+      "order": 13
+    },
+    {
+      "id": "data_processor",
+      "name": "Data Processor",
+      "description": "Shared Tools signal processing and time-series data analysis tool",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/data_processing/data_processor/launch_pyqt6.py",
+      "provider": "tools",
+      "source_root": "../Tools",
+      "working_dir": ".",
+      "python_paths": [
+        "src",
+        "src/shared/python",
+        "src/data_processing/data_processor/python"
+      ],
+      "logo": "data_explorer.svg",
+      "status": "external",
+      "web_route": "/tools/data-processor",
+      "capabilities": [
+        "data_import",
+        "signal_processing",
+        "time_series",
+        "filtering",
+        "statistics",
+        "export"
+      ],
+      "order": 14
     },
     {
       "id": "project_map",
@@ -233,7 +291,7 @@
         "feature_discovery",
         "project_overview"
       ],
-      "order": 13
+      "order": 15
     }
   ]
 }

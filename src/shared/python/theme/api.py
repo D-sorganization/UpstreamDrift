@@ -180,9 +180,7 @@ def _register_custom_endpoints(router: APIRouter, theme_manager: Any) -> None:
         )
 
 
-def _register_active_and_list_endpoints(
-    router: APIRouter, theme_manager: Any
-) -> None:  # noqa: C901
+def _register_active_and_list_endpoints(router: APIRouter, theme_manager: Any) -> None:  # noqa: C901
     """Register active theme and full listing endpoints."""
 
     if not (router is not None):
@@ -251,7 +249,7 @@ def _register_active_and_list_endpoints(
         return ThemeListResponse(themes=themes)
 
 
-def create_theme_router(theme_manager: Any) -> APIRouter:
+def create_theme_router(theme_manager: Any, *, prefix: str = "") -> APIRouter:
     """Create a FastAPI router for theme CRUD operations.
 
     The router exposes endpoints for listing, creating, updating, and
@@ -259,11 +257,12 @@ def create_theme_router(theme_manager: Any) -> APIRouter:
 
     Args:
         theme_manager: A ThemeManager instance (from shared.python.theme)
+        prefix: Optional URL prefix for the router (e.g., "/themes")
 
     Returns:
         FastAPI APIRouter ready to be mounted
     """
-    router = APIRouter()
+    router = APIRouter(prefix=prefix)
     _register_builtin_endpoints(router, theme_manager)
     _register_custom_endpoints(router, theme_manager)
     _register_active_and_list_endpoints(router, theme_manager)

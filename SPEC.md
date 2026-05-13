@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.164                                            |
+| **Spec Version**        | 1.0.165                                            |
 | **Last Spec Update**    | 2026-05-13                                         |
 
 ## 2. Purpose & Mission
@@ -281,6 +281,8 @@ Configuration is managed through:
 - **YAML Config Files**: `~/.upstream_drift/config.yaml` with engine-specific sections
 - **API Request Parameters**: Engine selection, model path, solver options passed as JSON
 - **GUI Settings**: Stored in `~/.upstream_drift/gui_settings.json` (viewport, window size, recent files)
+- **Launcher Manifest**: `src/config/launcher_manifest.json` declares discoverable and hidden launcher surfaces, including shared Tools-hosted video/data utilities exposed to UpstreamDrift.
+- **Theme API Settings**: `src/api/routes/theme.py` and `ui/src/api/themeClient.ts` expose launcher theme metadata to the desktop/web UI without duplicating theme lists in the frontend.
 
 Example config.yaml:
 
@@ -690,4 +692,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-12 | 1.0.162 | Added a canonical launcher category taxonomy and category grouping contract so provider-backed entries such as biomechanics tools are discoverable instead of being rejected by legacy manifest validation (#5314). |
 | 2026-05-12 | 1.0.163 | Added Tools Pendulum Simulator nested provider-manifest discovery and provider-relative source-root resolution so launcher discovery can expose tool packages published below `Tools/src` without copying tool code (#5314). |
 | 2026-05-12 | 1.0.164 | Preserved registered symbolic model `source_root` aliases while still resolving provider-relative source roots, preventing aliases such as `movement_optimizer` from being rewritten under a provider checkout (#5353). |
+| 2026-05-13 | 1.0.165 | Documented the shared Tools-hosted video/data launcher surfaces, the launcher manifest contract, and the theme API client/server surface added for web UI parity. |
 ````
