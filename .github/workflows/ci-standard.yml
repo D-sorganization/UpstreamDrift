@@ -717,7 +717,7 @@ jobs:
             --cov-report=xml:coverage.xml \
             --cov-config=pyproject.toml \
 
-            --cov-fail-under=65 \
+            --cov-fail-under=75 \
             --tb=short \
             -v
 

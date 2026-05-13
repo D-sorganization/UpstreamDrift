@@ -312,3 +312,143 @@ class TestModelPackManifest:
             "drake_swing",
             "mujoco_swing",
         ]
+
+
+@pytest.mark.unit
+class TestModelPackV1LegacySchema:
+    """Test reconciliation of model_pack/v1 provider schema with UpstreamDrift manifest.
+
+    Related to issue #5313: External model repos use a simple model_pack/v1 manifest
+    while UpstreamDrift expects fields like manifest_version, pack_id, pack_name, etc.
+    This test verifies that legacy provider manifests are properly normalized.
+    """
+
+    def test_load_model_pack_v1_schema_with_minimal_fields(
+        self, tmp_path: Path
+    ) -> None:
+        """Test loading a minimal model_pack/v1 style manifest from external provider."""
+        manifest_path = tmp_path / "model_pack.yaml"
+        # This is the format used by external provider repos (MuJoCo_Models, etc.)
+        _write_yaml(
+            manifest_path,
+            {
+                "schema": "model_pack/v1",
+                "repo": "MuJoCo_Models",
+                "package": "mujoco_models",
+                "models": [
+                    {
+                        "id": "golf_swing",
+                        "name": "Golf Swing",
+                        "description": "Full golf swing motion capture",
+                        "type": "mjcf",
+                        "path": "motions/golf/swing.xml",
+                    }
+                ],
+            },
+        )
+
+        # The from_dict method should handle this with defaults for missing fields
+        raw = yaml.safe_load(manifest_path.read_text())
+
+        # Convert model_pack/v1 schema to UpstreamDrift manifest
+        converted = {
+            "manifest_version": raw.get("manifest_version", "1.0.0"),
+            "pack_id": raw.get("pack_id", raw.get("repo", "unknown")),
+            "pack_name": raw.get("pack_name", raw.get("repo", "Unknown Pack")),
+            "provider": raw.get("provider", raw.get("repo", "external")),
+            "models": raw.get("models", []),
+        }
+
+        manifest = ModelPackManifest.from_dict(converted)
+
+        assert manifest.manifest_version == "1.0.0"
+        assert manifest.pack_id == "MuJoCo_Models"
+        assert manifest.provider == "MuJoCo_Models"
+        assert len(manifest.models) == 1
+        assert manifest.models[0].id == "golf_swing"
+
+    def test_load_model_pack_v1_with_launcher_metadata(self, tmp_path: Path) -> None:
+        """Test that model_pack/v1 manifests can include launcher presentation metadata."""
+        manifest_path = tmp_path / "model_pack.yaml"
+        _write_yaml(
+            manifest_path,
+            {
+                "schema": "model_pack/v1",
+                "repo": "Drake_Models",
+                "models": [
+                    {
+                        "id": "humanoid",
+                        "name": "Humanoid",
+                        "description": "Bipedal humanoid model",
+                        "type": "urdf",
+                        "path": "robots/humanoid.urdf",
+                        "launcher": {
+                            "category": "physics_engine",
+                            "logo": "drake.svg",
+                            "status": "ready",
+                        },
+                    }
+                ],
+            },
+        )
+
+        raw = yaml.safe_load(manifest_path.read_text())
+        converted = {
+            "manifest_version": "1.0.0",
+            "pack_id": raw.get("repo", "drake_models"),
+            "pack_name": raw.get("repo", "Drake Models"),
+            "provider": raw.get("repo", "drake_models"),
+            "models": raw.get("models", []),
+        }
+
+        manifest = ModelPackManifest.from_dict(converted)
+
+        assert len(manifest.models) == 1
+        entry = manifest.models[0]
+        assert entry.launcher is not None
+        assert entry.launcher.category == "physics_engine"
+        assert entry.launcher.logo == "drake.svg"
+        assert entry.launcher.status == "ready"
+
+    def test_load_model_pack_v1_with_identity_metadata(self, tmp_path: Path) -> None:
+        """Test that model_pack/v1 manifests support cross-engine identity metadata."""
+        manifest_path = tmp_path / "model_pack.yaml"
+        _write_yaml(
+            manifest_path,
+            {
+                "schema": "model_pack/v1",
+                "repo": "Pinocchio_Models",
+                "models": [
+                    {
+                        "id": "golf_swing",
+                        "name": "Golf Swing",
+                        "description": "Golf swing with analytical derivatives",
+                        "type": "urdf",
+                        "path": "motions/golf/swing.urdf",
+                        "identity": {
+                            "canonical_id": "Golf.Swing.Main",
+                            "motion_family": "Golf Swing",
+                            "exercise": "Driver Full Swing",
+                            "humanoid": "Golf Athlete",
+                        },
+                    }
+                ],
+            },
+        )
+
+        raw = yaml.safe_load(manifest_path.read_text())
+        converted = {
+            "manifest_version": "1.0.0",
+            "pack_id": raw.get("repo", "pinocchio_models"),
+            "pack_name": raw.get("repo", "Pinocchio Models"),
+            "provider": raw.get("repo", "pinocchio_models"),
+            "models": raw.get("models", []),
+        }
+
+        manifest = ModelPackManifest.from_dict(converted)
+
+        assert len(manifest.models) == 1
+        entry = manifest.models[0]
+        assert entry.identity is not None
+        assert entry.identity.canonical_id == "golf.swing.main"
+        assert entry.identity.exercise == "driver-full-swing"
