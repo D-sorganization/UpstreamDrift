@@ -132,6 +132,8 @@ models:
     type: "special_app"
     path: "src/tools/starting_pose_matcher/__main__.py"
     hidden: true
+    hidden_reason: "Legacy alias retained for one release so saved layouts continue to resolve; use motion_target_preview for new launcher entries."
+    hidden_owner: "@launcher"
     launcher:
       category: "motion_matching"
       logo: "motion_target_preview.svg"

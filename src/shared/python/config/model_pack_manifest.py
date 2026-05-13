@@ -318,6 +318,8 @@ class ModelPackEntry:
     launcher: LauncherPresentationMetadata | None = None
     order: int = 99
     hidden: bool = False
+    hidden_reason: str | None = None
+    hidden_owner: str | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> ModelPackEntry:
@@ -378,6 +380,19 @@ class ModelPackEntry:
             "hidden must be a boolean when provided",
             hidden_raw,
         )
+        hidden_reason = data.get("hidden_reason")
+        hidden_owner = data.get("hidden_owner")
+        if hidden_raw:
+            require(
+                isinstance(hidden_reason, str) and hidden_reason.strip() != "",
+                "hidden_reason must be a non-empty string when hidden is true",
+                hidden_reason,
+            )
+            require(
+                isinstance(hidden_owner, str) and hidden_owner.strip() != "",
+                "hidden_owner must be a non-empty string when hidden is true",
+                hidden_owner,
+            )
 
         identity_raw = data.get("identity")
         identity = (
@@ -428,6 +443,12 @@ class ModelPackEntry:
             launcher=launcher,
             order=order,
             hidden=bool(hidden_raw),
+            hidden_reason=hidden_reason.strip()
+            if isinstance(hidden_reason, str)
+            else None,
+            hidden_owner=hidden_owner.strip()
+            if isinstance(hidden_owner, str)
+            else None,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -464,6 +485,8 @@ class ModelPackEntry:
             data["launcher"] = self.launcher.to_dict()
         if self.hidden:
             data["hidden"] = True
+            data["hidden_reason"] = self.hidden_reason
+            data["hidden_owner"] = self.hidden_owner
         return data
 
 

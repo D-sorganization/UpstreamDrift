@@ -104,6 +104,8 @@ class ModelConfig:
     launcher: LauncherPresentationMetadata | None = None
     order: int = 99
     hidden: bool = False
+    hidden_reason: str | None = None
+    hidden_owner: str | None = None
 
 
 class ModelRegistry(ContractChecker):
@@ -343,6 +345,8 @@ class ModelRegistry(ContractChecker):
             launcher=entry.launcher,
             order=entry.order,
             hidden=entry.hidden,
+            hidden_reason=entry.hidden_reason,
+            hidden_owner=entry.hidden_owner,
         )
 
     def _load_legacy_models(

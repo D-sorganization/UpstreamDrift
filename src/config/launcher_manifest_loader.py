@@ -98,6 +98,8 @@ def _build_provider_tile(model: ModelConfig) -> LauncherTile:
         source_root=model.source_root,
         web_route=metadata.web_route,
         hidden=model.hidden,
+        hidden_reason=model.hidden_reason,
+        hidden_owner=model.hidden_owner,
     )
 
 
@@ -136,6 +138,8 @@ class LauncherTile:
     source_root: str | None = None
     web_route: str | None = None
     hidden: bool = False
+    hidden_reason: str | None = None
+    hidden_owner: str | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> LauncherTile:
@@ -154,6 +158,18 @@ class LauncherTile:
         missing = required - set(data.keys())
         if missing:
             raise ValueError(f"Manifest entry missing required fields: {missing}")
+        hidden = bool(data.get("hidden", False))
+        hidden_reason = data.get("hidden_reason")
+        hidden_owner = data.get("hidden_owner")
+        if hidden:
+            if not isinstance(hidden_reason, str) or not hidden_reason.strip():
+                raise ValueError(
+                    f"Hidden launcher tile '{data.get('id')}' must define hidden_reason"
+                )
+            if not isinstance(hidden_owner, str) or not hidden_owner.strip():
+                raise ValueError(
+                    f"Hidden launcher tile '{data.get('id')}' must define hidden_owner"
+                )
 
         return cls(
             id=data["id"],
@@ -169,7 +185,13 @@ class LauncherTile:
             order=data.get("order", 99),
             engine_type=data.get("engine_type"),
             web_route=data.get("web_route"),
-            hidden=bool(data.get("hidden", False)),
+            hidden=hidden,
+            hidden_reason=hidden_reason.strip()
+            if isinstance(hidden_reason, str)
+            else None,
+            hidden_owner=hidden_owner.strip()
+            if isinstance(hidden_owner, str)
+            else None,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -198,6 +220,8 @@ class LauncherTile:
             result["tags"] = list(self.tags)
         if self.hidden:
             result["hidden"] = True
+            result["hidden_reason"] = self.hidden_reason
+            result["hidden_owner"] = self.hidden_owner
         return result
 
     @property

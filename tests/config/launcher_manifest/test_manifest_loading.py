@@ -81,16 +81,16 @@ class TestManifestLoading:
     def test_manifest_has_version(self, manifest: LauncherManifest) -> None:
         """Manifest includes a version string."""
         assert manifest.version, "Assertion failed: manifest.version"
-        assert isinstance(
-            manifest.version, str
-        ), "Assertion failed: isinstance(manifest.version, str)"
+        assert isinstance(manifest.version, str), (
+            "Assertion failed: isinstance(manifest.version, str)"
+        )
 
     def test_manifest_has_no_duplicate_ids(self, manifest: LauncherManifest) -> None:
         """DBC Postcondition: all tile IDs must be unique."""
         ids = [t.id for t in manifest.tiles]
-        assert len(ids) == len(
-            set(ids)
-        ), f"Duplicate IDs found: {[x for x in ids if ids.count(x) > 1]}"
+        assert len(ids) == len(set(ids)), (
+            f"Duplicate IDs found: {[x for x in ids if ids.count(x) > 1]}"
+        )
 
     def test_manifest_file_not_found_raises(self) -> None:
         """DBC Precondition: missing file raises FileNotFoundError."""
@@ -118,6 +118,24 @@ class TestManifestLoading:
         }
         bad.write_text(json.dumps({"tiles": [tile, tile]}))
         with pytest.raises(ValueError, match="Duplicate"):
+            LauncherManifest.load(bad)
+
+    def test_hidden_tile_without_owner_or_reason_raises(self, tmp_path: Path) -> None:
+        """Hidden launcher entries must explain ownership and unblock criteria."""
+        bad = tmp_path / "hidden.json"
+        tile = {
+            "id": "hidden_tool",
+            "name": "Hidden Tool",
+            "description": "A hidden tool",
+            "category": "tool",
+            "type": "special_app",
+            "path": "src.tools.hidden",
+            "logo": "golf_logo.svg",
+            "hidden": True,
+        }
+        bad.write_text(json.dumps({"tiles": [tile]}), encoding="utf-8")
+
+        with pytest.raises(ValueError, match="hidden_reason"):
             LauncherManifest.load(bad)
 
     def test_manifest_loads_provider_tiles_from_configured_roots(
@@ -163,18 +181,18 @@ models:
 
         tile = manifest.get_tile("external_mujoco")
         assert tile is not None, "Assertion failed: tile is not None"
-        assert (
-            tile.category == "physics_engine"
-        ), "Assertion failed: tile.category == physics_engine"
-        assert (
-            tile.provider == "mujoco_models"
-        ), "Assertion failed: tile.provider == mujoco_models"
-        assert tile.source_root == str(
-            provider_root
-        ), "Assertion failed: tile.source_root == str(provider_root)"
-        assert (
-            tile.logo == "mujoco_humanoid.svg"
-        ), "Assertion failed: tile.logo == mujoco_humanoid.svg"
+        assert tile.category == "physics_engine", (
+            "Assertion failed: tile.category == physics_engine"
+        )
+        assert tile.provider == "mujoco_models", (
+            "Assertion failed: tile.provider == mujoco_models"
+        )
+        assert tile.source_root == str(provider_root), (
+            "Assertion failed: tile.source_root == str(provider_root)"
+        )
+        assert tile.logo == "mujoco_humanoid.svg", (
+            "Assertion failed: tile.logo == mujoco_humanoid.svg"
+        )
         assert tile.capabilities == (
             "rigid_body",
             "contact",
@@ -226,16 +244,16 @@ models:
 
         tile = manifest.get_tile("external_drake")
         assert tile is not None, "Assertion failed: tile is not None"
-        assert (
-            tile.category == "physics_engine"
-        ), "Assertion failed: tile.category == physics_engine"
+        assert tile.category == "physics_engine", (
+            "Assertion failed: tile.category == physics_engine"
+        )
         assert tile.logo == "drake.svg", "Assertion failed: tile.logo == drake.svg"
-        assert (
-            tile.status == "experimental"
-        ), "Assertion failed: tile.status == experimental"
-        assert (
-            tile.web_route == "/providers/drake"
-        ), "Assertion failed: tile.web_route == /providers/drake"
+        assert tile.status == "experimental", (
+            "Assertion failed: tile.status == experimental"
+        )
+        assert tile.web_route == "/providers/drake", (
+            "Assertion failed: tile.web_route == /providers/drake"
+        )
 
     def test_manifest_marks_provider_tile_runtime_unavailable(
         self,
@@ -291,9 +309,9 @@ models:
 
         tile = manifest.get_tile("external_pinocchio")
         assert tile is not None, "Assertion failed: tile is not None"
-        assert (
-            tile.status == "runtime_unavailable"
-        ), "Assertion failed: tile.status == runtime_unavailable"
+        assert tile.status == "runtime_unavailable", (
+            "Assertion failed: tile.status == runtime_unavailable"
+        )
 
     def test_manifest_loads_utility_provider_tiles_from_known_roots_without_env(
         self,
@@ -344,9 +362,9 @@ models:
         assert tile is not None, "Assertion failed: tile is not None"
         assert tile.category == "tool", "Assertion failed: tile.category == tool"
         assert tile.status == "utility", "Assertion failed: tile.status == utility"
-        assert (
-            tile.web_route == "/tools/pendulum-suite"
-        ), "Assertion failed: tile.web_route == /tools/pendulum-suite"
+        assert tile.web_route == "/tools/pendulum-suite", (
+            "Assertion failed: tile.web_route == /tools/pendulum-suite"
+        )
 
     def test_manifest_ignores_provider_tiles_when_disabled(
         self,
@@ -387,9 +405,9 @@ models:
             registry_path=registry_path,
         )
 
-        assert (
-            manifest.get_tile("external_opensim") is None
-        ), "Assertion failed: manifest.get_tile(external_opensim) is None"
+        assert manifest.get_tile("external_opensim") is None, (
+            "Assertion failed: manifest.get_tile(external_opensim) is None"
+        )
 
 
 # =============================================================================
