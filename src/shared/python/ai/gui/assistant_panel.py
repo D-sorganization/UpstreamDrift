@@ -54,6 +54,14 @@ from src.shared.python.ai.types import ConversationContext, ExpertiseLevel
 logger = get_logger(__name__)
 
 
+def _rust_ollama_endpoint_paths(base_url: str) -> tuple[str, str]:
+    """Return Rust backend endpoint suffixes for an Ollama/OpenAI base URL."""
+    normalized = base_url.rstrip("/")
+    if normalized.endswith("/v1"):
+        return "/chat/completions", "/embeddings"
+    return "/v1/chat/completions", "/v1/embeddings"
+
+
 class MessageWidget(QFrame):
     """Widget displaying a single message in the conversation."""
 
@@ -150,12 +158,12 @@ class MessageWidget(QFrame):
             from src.shared.python.theme.theme_manager import get_theme_manager
 
             colors = get_theme_manager().get_current_colors()
-            
+
             def _get(key, fallback):
                 if isinstance(colors, dict):
                     return colors.get(key, fallback)
                 return getattr(colors, key, fallback)
-                
+
             bg_alt = _get("bg_elevated", _get("group_bg", "#2d2d2d"))
             bg_secondary = _get("bg_highlight", _get("input_bg", "#252526"))
             text_primary = _get("text_primary", _get("text", "#e0e0e0"))
@@ -511,12 +519,12 @@ class AIAssistantPanel(QWidget):
             from src.shared.python.theme.theme_manager import get_theme_manager
 
             colors = get_theme_manager().get_current_colors()
-            
+
             def _get(key, fallback):
                 if isinstance(colors, dict):
                     return colors.get(key, fallback)
                 return getattr(colors, key, fallback)
-                
+
             bg_primary = _get("bg", "#1e1e1e")
             bg_alt = _get("bg_elevated", _get("group_bg", "#2d2d2d"))
             text_primary = _get("text_primary", _get("text", "#e0e0e0"))
@@ -1176,10 +1184,15 @@ class AIAssistantPanel(QWidget):
                 import ai_backend
                 from src.shared.python.ai.adapters.rust_adapter import RustAgentAdapter
 
+                chat_path, embed_path = _rust_ollama_endpoint_paths(
+                    settings.ollama_host
+                )
                 adapter = RustAgentAdapter(
                     api_key="ollama",
                     base_url=settings.ollama_host,
                     model=settings.model,
+                    chat_path=chat_path,
+                    embed_path=embed_path,
                 )
                 self._add_system_message("🚀 Using high-performance Rust AI backend.")
             except ImportError:
@@ -1229,8 +1242,6 @@ class AIAssistantPanel(QWidget):
                 f"⚠️ Could not connect to {settings.provider.name}. "
                 "Please check your settings."
             )
-
-
 
     def _show_settings(self) -> None:
         """Show the settings dialog."""

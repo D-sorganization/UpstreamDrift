@@ -3,7 +3,7 @@
 This inventory is the ownership ledger for active GitHub Actions workflows.
 Archived workflows under `.github/workflows/archived/` are intentionally excluded.
 
-The current durable guardrail is a no-growth cap at 70 active workflows. The
+The current durable guardrail is a no-growth cap at 71 active workflows. The
 consolidation target for issue #3835 remains 25 active workflows or fewer after
 owners validate low-risk removals.
 
@@ -99,6 +99,7 @@ guardrails until the active workflow count reaches the 25-workflow target:
 | pdf-size-guard.yml                   | pull_request                                   | @docs     | contents: read                               | KEEP: PDF size guard.                                                                   | n/a                                |
 | pr-auto-labeler.yml                  | pull_request                                   | @triage   | pull-requests: write                         | KEEP: PR labeling.                                                                      | n/a                                |
 | quality-gate.yml                     | pull_request/workflow_dispatch                 | @core     | contents: read                               | KEEP: advisory engine-specific quality lints (e.g. pinocchio LOD).                      | n/a                                |
+| realtime-soak.yml                    | workflow_dispatch/schedule                     | @realtime | contents: read                               | KEEP: nightly/manual Rust realtime WebSocket soak validation (#5235).                   | n/a                                |
 | PR-Comment-Responder.yml             | issue_comment/workflow_dispatch                | @triage   | issues/pull-requests: write                  | KEEP: canonical PR comment responder.                                                   | n/a                                |
 | release.yml                          | push/workflow_dispatch                         | @release  | contents: write                              | KEEP: build and publish releases.                                                       | n/a                                |
 | security-osv-monitor.yml             | schedule/workflow_dispatch                     | @security | contents/issues/security-events: write       | KEEP: scheduled OSV vulnerability triage SLA monitor.                                   | n/a                                |
