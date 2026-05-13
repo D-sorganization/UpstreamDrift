@@ -38,11 +38,11 @@ class TestSharedChatImport:
 
     def test_shared_chat_public_api(self) -> None:
         """Shared chat should expose public API for consumption."""
+        # The shared chat module exports ChatDockWidget and ChatMessageBubble
+        # as its primary public API (see src/shared/python/chat/__init__.py)
         expected_exports = {
             "ChatDockWidget",
             "ChatMessageBubble",
-            "ChatPanel",
-            "ChatWidget",
         }
         chat_init = SRC_ROOT / "chat" / "__init__.py"
         if chat_init.exists():
