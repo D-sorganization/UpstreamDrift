@@ -107,6 +107,7 @@ jobs:
           # across reruns, `-p no:xvfb` because this is a non-GUI parity gate,
           # and `-rs` so skips show up clearly in the log.
           python3 -m pytest \
+            -o addopts="" \
             tests/motion_matching/test_cross_engine_equivalence.py \
             -v -rs --tb=short -p no:xvfb \
             --junitxml=test-results/cross-engine-equivalence-junit.xml

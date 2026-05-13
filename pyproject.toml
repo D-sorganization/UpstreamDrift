@@ -361,6 +361,7 @@ markers = [
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
     "e2e: full-stack smoke tests; nightly + release gate only",
+    "gate: production validation gate",
     "core_only: tests that must pass in a default install with no optional engine extras",
     "requires_gl: Tests needing OpenGL/moderngl or a display",
     "headless_safe: marks tests verified to work in headless mode",

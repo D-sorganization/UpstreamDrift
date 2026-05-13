@@ -147,7 +147,7 @@ def test_fit_options_defaults_validate() -> None:
     assert opts.max_iterations >= 1
     assert opts.tolerance > 0
     assert opts.dynamics_gradient_mode in {"autodiff", "finite_diff"}
-    assert opts.method in {"ipopt", "snopt", "auto"}
+    assert opts.solver in {"ipopt", "snopt", "auto"}
 
 
 @pytest.mark.unit
