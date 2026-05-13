@@ -179,9 +179,12 @@ jobs:
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
         run: |
           # Pin versions to match CI Standard quality gate
+          python -m ensurepip --upgrade || true
           pip install ruff==0.14.10 black==26.1.0 mypy==1.13.0 autoflake
           # Install project deps so mypy can resolve imports
+          python -m ensurepip --upgrade || true
           if ! pip install -e ".[dev]"; then
+            python -m ensurepip --upgrade || true
             pip install -e .
           fi
 

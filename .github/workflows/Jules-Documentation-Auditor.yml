@@ -61,6 +61,7 @@ jobs:
 
       - name: Install Documentation Tools
         run: |
+          python -m ensurepip --upgrade || true
           pip install pydocstyle interrogate darglint
 
       - name: Scan for Missing Docstrings

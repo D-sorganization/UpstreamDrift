@@ -69,8 +69,11 @@ jobs:
 
       - name: Install Python deps
         run: |
+          python -m ensurepip --upgrade || true
           python -m pip install --upgrade pip
+          python -m ensurepip --upgrade || true
           pip install -e ".[dev]" || pip install -e .
+          python -m ensurepip --upgrade || true
           pip install psutil maturin
 
       - name: Build & install upstream_realtime wheel (maturin develop)

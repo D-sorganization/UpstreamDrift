@@ -75,8 +75,11 @@ jobs:
       - name: Install dependencies
         id: install_deps
         run: |
+          python -m ensurepip --upgrade || true
           python -m pip install --upgrade pip
+          python -m ensurepip --upgrade || true
           pip install -e ".[dev,drake,pinocchio,opensim,myosuite]"
+          python -m ensurepip --upgrade || true
           pip install "mujoco>=3.3.0,<4.0.0"
           echo '{"status": "dependencies_installed"}' > test-results/setup-status.json
 

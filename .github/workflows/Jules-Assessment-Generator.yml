@@ -62,6 +62,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          python -m ensurepip --upgrade || true
           pip install -r requirements.txt
           sudo apt-get install -y jq
 

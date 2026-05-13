@@ -81,11 +81,13 @@ jobs:
       - name: Install minimal deps
         shell: bash
         run: |
+          python -m ensurepip --upgrade || true
           python3 -m pip install --upgrade pip
           # The orchestrator only needs PyYAML for argument parsing of
           # the shared YAML and stdlib for everything else; per-engine
           # builders import lazily, so missing engine deps just degrade
           # gracefully (drake → fail, opensim → warn-skip).
+          python -m ensurepip --upgrade || true
           python3 -m pip install pyyaml
 
       - name: Run drift check (advisory)

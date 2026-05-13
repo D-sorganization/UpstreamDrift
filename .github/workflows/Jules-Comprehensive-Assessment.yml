@@ -67,8 +67,10 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          python -m ensurepip --upgrade || true
           pip install -r requirements.txt
           # Install tabulate for reports if needed
+          python -m ensurepip --upgrade || true
           pip install tabulate
 
       # ---------------------------------------------------------

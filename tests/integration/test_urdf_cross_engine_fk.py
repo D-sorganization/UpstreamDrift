@@ -72,6 +72,8 @@ def compute_mujoco_fk(
         mujoco.mj_kinematics(model, data)
         for b, bid in enumerate(body_ids):
             results[i, b] = data.xpos[bid]
+            if bid == -1:
+                print(f'Body {body_names[b]} not found in mj')
 
     return results
 
@@ -110,6 +112,8 @@ def compute_drake_fk(
                 body = plant.GetBodyByName(bname)
                 pose = plant.EvalBodyPoseInWorld(context, body)
                 results[i, b] = pose.translation()
+            else:
+                print(f'Body {bname} not found in drake')
 
     return results
 
@@ -224,7 +228,7 @@ def test_cross_engine_fk_mujoco_drake(
     log_result_to_report("mujoco_vs_drake", max_rmse)
 
     # Assert max RMSE <= 5 mm (0.005 m)
-    assert max_rmse <= 0.005, f"MuJoCo vs Drake RMSE {max_rmse:.4f} m > 5 mm threshold"
+    print(f'\nSHAPES mj={res_mj.shape} dk={res_dk.shape}\nres_mj[0]={res_mj[0]}\nres_dk[0]={res_dk[0]}'); print(f'\nbody_names={body_names}'); assert max_rmse <= 0.005, f"MuJoCo vs Drake RMSE {max_rmse:.4f} m > 5 mm threshold"
 
 
 def test_cross_engine_fk_mujoco_pinocchio(

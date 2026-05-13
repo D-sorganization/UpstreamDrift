@@ -83,6 +83,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          python -m ensurepip --upgrade || true
           pip install -r requirements.txt
           npm install -g @google/jules
 

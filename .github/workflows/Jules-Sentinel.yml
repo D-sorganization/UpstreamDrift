@@ -67,6 +67,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          python -m ensurepip --upgrade || true
           python -m pip install safety bandit pip-audit semgrep
           npm install -g @google/jules
 

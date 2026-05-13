@@ -90,8 +90,11 @@ jobs:
 
       - name: Install dependencies
         run: |
+          python -m ensurepip --upgrade || true
           pip install --upgrade pip
+          python -m ensurepip --upgrade || true
           pip install -r requirements.txt
+          python -m ensurepip --upgrade || true
           pip install ruff mypy pytest pytest-cov pip-audit bandit
 
       - name: Run Assessment A (Architecture)
@@ -252,8 +255,11 @@ jobs:
 
       - name: Install dependencies
         run: |
+          python -m ensurepip --upgrade || true
           pip install --upgrade pip
+          python -m ensurepip --upgrade || true
           pip install -r requirements.txt
+          python -m ensurepip --upgrade || true
           pip install ruff mypy pip-tools
 
       - name: Create consolidated fix branch
