@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.161                                            |
+| **Spec Version**        | 1.0.162                                            |
 | **Last Spec Update**    | 2026-05-13                                         |
 
 ## 2. Purpose & Mission
@@ -686,4 +686,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-12 | 1.0.158 | Restricted review-comment archive commits to manual workflow dispatch runs so pull request synchronize events cannot push `docs/review_archive` churn onto feature branches, erase current-head checks, or block focused chat and GUI fixes behind generated archive drift. |
 | 2026-05-12 | 1.0.159 | Updated workflow governance for the Rust realtime soak workflow by pinning its Rust toolchain action to a full commit SHA and registering the workflow in the active inventory with the current 71-workflow no-growth cap. |
 | 2026-05-12 | 1.0.160 | Added a documented hidden-launcher contract so hidden feature entries must carry an owner and reason, preventing undiscoverable app features from drifting without accountability (#5314). |
+| 2026-05-12 | 1.0.162 | Added a canonical launcher category taxonomy and category grouping contract so provider-backed entries such as biomechanics tools are discoverable instead of being rejected by legacy manifest validation (#5314). |
 ````

@@ -44,6 +44,31 @@ _ENGINE_LOGOS = {
     "pinocchio": "pinocchio.svg",
     "putting_green": "putting_green.svg",
 }
+LAUNCHER_CATEGORY_LABELS: dict[str, str] = {
+    "physics_engine": "Physics Engines",
+    "biomechanics": "Biomechanics",
+    "simulation": "Simulation",
+    "motion_matching": "Motion Matching",
+    "motion_capture": "Motion Capture",
+    "analysis": "Analysis",
+    "documentation": "Documentation",
+    "external": "External Providers",
+    "developer_tools": "Developer Tools",
+    "tool": "Tools",
+}
+LAUNCHER_CATEGORIES = frozenset(LAUNCHER_CATEGORY_LABELS)
+TOOL_LIKE_CATEGORIES = frozenset(
+    {
+        "tool",
+        "biomechanics",
+        "simulation",
+        "motion_matching",
+        "motion_capture",
+        "analysis",
+        "documentation",
+        "developer_tools",
+    }
+)
 
 
 def _has_provider_metadata(model: ModelConfig) -> bool:
@@ -111,7 +136,8 @@ class LauncherTile:
         id: Unique identifier for the tile
         name: Display name shown in both launchers
         description: Brief description shown under the tile
-        category: One of: physics_engine, tool, external
+        category: One of the canonical launcher categories in
+            LAUNCHER_CATEGORIES.
         type: Engine/handler type for launch dispatch
         path: Relative path to the script/entry point
         logo: Logo filename (relative to assets dir)
@@ -242,7 +268,7 @@ class LauncherTile:
     @property
     def is_tool(self) -> bool:
         """Check if this tile represents a tool/utility."""
-        return self.category == "tool"
+        return self.category in TOOL_LIKE_CATEGORIES
 
 
 @dataclass
@@ -379,7 +405,8 @@ class LauncherManifest:
         """Get all tiles in a category.
 
         Args:
-            category: Category to filter by (physics_engine, tool, external)
+            category: Category to filter by. Must be a canonical launcher
+                category from LAUNCHER_CATEGORIES.
             include_hidden: When False (default), tiles flagged ``hidden`` are
                 excluded so legacy aliases do not appear as duplicate launcher
                 cards.
@@ -387,11 +414,21 @@ class LauncherManifest:
         Returns:
             List of matching tiles, ordered by their order field
         """
+        if category not in LAUNCHER_CATEGORIES:
+            raise ValueError(f"Unknown launcher category: {category}")
         return [
             t
             for t in self.tiles
             if t.category == category and (include_hidden or not t.hidden)
         ]
+
+    @property
+    def categories(self) -> dict[str, list[LauncherTile]]:
+        """Visible tiles grouped by canonical launcher category."""
+        return {
+            category: self.get_tiles_by_category(category)
+            for category in LAUNCHER_CATEGORY_LABELS
+        }
 
     @property
     def visible_tiles(self) -> list[LauncherTile]:
@@ -405,8 +442,8 @@ class LauncherManifest:
 
     @property
     def tools(self) -> list[LauncherTile]:
-        """Get all tool tiles (excluding hidden aliases)."""
-        return self.get_tiles_by_category("tool")
+        """Get all non-engine utility tiles (excluding hidden aliases)."""
+        return [t for t in self.visible_tiles if t.category in TOOL_LIKE_CATEGORIES]
 
     @property
     def tile_ids(self) -> list[str]:
@@ -435,6 +472,7 @@ class LauncherManifest:
             "version": self.version,
             "description": self.description,
             "tiles": [t.to_dict() for t in tiles],
+            "category_labels": dict(LAUNCHER_CATEGORY_LABELS),
         }
 
     def validate_logos(self) -> list[str]:

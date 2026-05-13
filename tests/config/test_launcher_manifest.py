@@ -20,6 +20,7 @@ from pathlib import Path
 import pytest
 from src.config.launcher_manifest_loader import (
     ASSETS_DIR,
+    LAUNCHER_CATEGORIES,
     MANIFEST_PATH,
     LauncherManifest,
     LauncherTile,
@@ -431,9 +432,8 @@ class TestTileProperties:
 
     def test_all_tiles_have_valid_category(self, manifest: LauncherManifest) -> None:
         """Category must be one of the allowed values."""
-        valid_categories = {"physics_engine", "tool", "external"}
         for tile in manifest.tiles:
-            assert tile.category in valid_categories, (
+            assert tile.category in LAUNCHER_CATEGORIES, (
                 f"Tile '{tile.id}' has invalid category: '{tile.category}'"
             )
 
@@ -643,8 +643,8 @@ class TestParity:
         # Should be JSON-serializable
         json_str = json.dumps(data)
         parsed = json.loads(json_str)
-        assert len(parsed["tiles"]) == len(manifest.tiles), (
-            "Assertion failed: len(parsed[tiles]) == len(manifest.tiles)"
+        assert len(parsed["tiles"]) == len(manifest.visible_tiles), (
+            "Assertion failed: len(parsed[tiles]) == len(manifest.visible_tiles)"
         )
 
 
@@ -665,6 +665,19 @@ class TestCategories:
     def test_tools_not_empty(self, manifest: LauncherManifest) -> None:
         """There must be at least one tool."""
         assert len(manifest.tools) > 0, "Assertion failed: len(manifest.tools) > 0"
+
+    def test_biomechanics_category_is_discoverable(
+        self, manifest: LauncherManifest
+    ) -> None:
+        """Provider-backed biomechanics tools must be discoverable by category."""
+        biomechanics = manifest.get_tiles_by_category("biomechanics")
+        assert {tile.id for tile in biomechanics} == {"movement_optimizer"}
+        assert manifest.categories["biomechanics"] == biomechanics
+
+    def test_unknown_category_raises(self, manifest: LauncherManifest) -> None:
+        """DBC: category queries reject unknown categories."""
+        with pytest.raises(ValueError, match="Unknown launcher category"):
+            manifest.get_tiles_by_category("misc")
 
     def test_get_tile_by_id(self, manifest: LauncherManifest) -> None:
         """get_tile returns correct tile for valid ID."""
