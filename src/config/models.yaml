@@ -158,11 +158,11 @@ models:
     name: "Video Analyzer"
     description: "Video-based motion analysis with pose tracking"
     type: "special_app"
-    path: "virtual/tools/video_analyzer"
+    path: "src/tools/video_analyzer/launch_video_analyzer.py"
     launcher:
       category: "motion_capture"
       logo: "assets/video_analyzer_modern.png"
-      status: "external"
+      status: "ready"
 
   - id: "openpose_analysis"
     name: "OpenPose"
@@ -203,11 +203,11 @@ models:
     name: "Data Explorer"
     description: "Import, filter, and visualise simulation datasets"
     type: "special_app"
-    path: "virtual/tools/data_explorer"
+    path: "src/tools/data_explorer/data_explorer_app.py"
     launcher:
       category: "tool"
       logo: "assets/data_explorer_modern.png"
-      status: "external"
+      status: "ready"
       default_launch: "tab"
 
   # =============================================================================
