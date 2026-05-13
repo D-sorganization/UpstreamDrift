@@ -95,3 +95,23 @@ def test_iter_provider_manifest_specs_supports_hidden_manifest_location(
     specs = iter_provider_manifest_specs(config_path, None)
 
     assert (provider_root, hidden_manifest) in specs
+
+
+def test_iter_provider_manifest_specs_discovers_tools_pendulum_manifest(
+    tmp_path: Path,
+) -> None:
+    """Tools publishes Pendulum Simulator as a nested provider manifest."""
+    workspace_root = tmp_path
+    repo_root = workspace_root / "UpstreamDrift"
+    config_path = repo_root / "src" / "config" / "models.yaml"
+    config_path.parent.mkdir(parents=True)
+    config_path.write_text("models: []\n", encoding="utf-8")
+
+    tools_root = workspace_root / "Tools"
+    nested_manifest = tools_root / "src" / "pendulum_simulator" / "model_pack.yaml"
+    nested_manifest.parent.mkdir(parents=True)
+    nested_manifest.write_text("manifest_version: '1.0.0'\n", encoding="utf-8")
+
+    specs = iter_provider_manifest_specs(config_path, None)
+
+    assert (tools_root, nested_manifest) in specs

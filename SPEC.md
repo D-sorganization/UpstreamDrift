@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.162                                            |
+| **Spec Version**        | 1.0.164                                            |
 | **Last Spec Update**    | 2026-05-13                                         |
 
 ## 2. Purpose & Mission
@@ -688,4 +688,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-12 | 1.0.159 | Updated workflow governance for the Rust realtime soak workflow by pinning its Rust toolchain action to a full commit SHA and registering the workflow in the active inventory with the current 71-workflow no-growth cap. |
 | 2026-05-12 | 1.0.160 | Added a documented hidden-launcher contract so hidden feature entries must carry an owner and reason, preventing undiscoverable app features from drifting without accountability (#5314). |
 | 2026-05-12 | 1.0.162 | Added a canonical launcher category taxonomy and category grouping contract so provider-backed entries such as biomechanics tools are discoverable instead of being rejected by legacy manifest validation (#5314). |
+| 2026-05-12 | 1.0.163 | Added Tools Pendulum Simulator nested provider-manifest discovery and provider-relative source-root resolution so launcher discovery can expose tool packages published below `Tools/src` without copying tool code (#5314). |
+| 2026-05-12 | 1.0.164 | Preserved registered symbolic model `source_root` aliases while still resolving provider-relative source roots, preventing aliases such as `movement_optimizer` from being rewritten under a provider checkout (#5353). |
 ````

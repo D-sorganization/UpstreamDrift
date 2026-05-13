@@ -366,6 +366,59 @@ models:
             "Assertion failed: tile.web_route == /tools/pendulum-suite"
         )
 
+    def test_manifest_loads_tools_nested_pendulum_provider_manifest(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        """Tools Pendulum Simulator is exposed from its nested provider manifest."""
+        workspace_root = tmp_path
+        repo_root = workspace_root / "UpstreamDrift"
+        manifest_path = repo_root / "src" / "config" / "launcher_manifest.json"
+        registry_path = repo_root / "src" / "config" / "models.yaml"
+        manifest_path.parent.mkdir(parents=True)
+        manifest_path.write_text(
+            json.dumps({"version": "1.0.0", "tiles": []}),
+            encoding="utf-8",
+        )
+        registry_path.write_text("models: []\n", encoding="utf-8")
+
+        tools_root = workspace_root / "Tools"
+        pendulum_root = tools_root / "src" / "pendulum_simulator"
+        pendulum_root.mkdir(parents=True)
+        (pendulum_root / "model_pack.yaml").write_text(
+            """
+manifest_version: "1.0.0"
+pack_id: "tools-pendulum-simulator"
+pack_name: "Tools Pendulum Simulator"
+provider: "tools"
+models:
+  - id: "pendulum_simulator"
+    name: "Pendulum Simulator"
+    description: "Shared pendulum simulation, analysis, and optimization suite."
+    type: "special_app"
+    path: "src/double_pendulum_golf/__main__.py"
+    source_root: "src/pendulum_simulator"
+    capabilities: ["pendulum", "simulation"]
+    launcher:
+      category: "tool"
+      logo: "golf_logo.svg"
+      status: "provider_ready"
+      web_route: "/tools/pendulum-simulator"
+""".strip(),
+            encoding="utf-8",
+        )
+
+        manifest = LauncherManifest.load(
+            manifest_path,
+            registry_path=registry_path,
+        )
+
+        tile = manifest.get_tile("pendulum_simulator")
+        assert tile is not None, "Assertion failed: tile is not None"
+        assert tile.status == "provider_ready"
+        assert tile.web_route == "/tools/pendulum-simulator"
+        assert tile.source_root == str(pendulum_root)
+
     def test_manifest_ignores_provider_tiles_when_disabled(
         self,
         tmp_path: Path,

@@ -613,6 +613,50 @@ class TestModelRegistry:
             assert registry.get_model("local_model") is not None
             assert registry.get_model("provider_model") is not None
 
+    def test_provider_manifest_preserves_symbolic_source_root(self):
+        """Registered source aliases must not be treated as provider-relative paths."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            config_path = root / "src" / "config" / "models.yaml"
+            config_path.parent.mkdir(parents=True)
+            config_path.write_text("models: []\n", encoding="utf-8")
+
+            provider_root = root / "providers" / "Movement-Optimizer"
+            provider_root.mkdir(parents=True)
+            (provider_root / "model_pack.yaml").write_text(
+                yaml.safe_dump(
+                    {
+                        "manifest_version": "1.0.0",
+                        "pack_id": "movement-optimizer-pack",
+                        "pack_name": "Movement Optimizer",
+                        "provider": "movement_optimizer",
+                        "models": [
+                            {
+                                "id": "movement_optimizer_cli",
+                                "name": "Movement Optimizer",
+                                "description": "Optimization utility",
+                                "type": "special_app",
+                                "path": "src/optimizer.py",
+                                "source_root": "movement_optimizer",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with patch.dict(
+                "os.environ",
+                {"UPSTREAM_DRIFT_PROVIDER_ROOTS": str(provider_root)},
+                clear=False,
+            ):
+                registry = ModelRegistry(config_path)
+
+            model = registry.get_model("movement_optimizer_cli")
+
+            assert model is not None
+            assert model.source_root == "movement_optimizer"
+
     def test_provider_first_mode_prefers_provider_definition_on_duplicates(self):
         """Provider-first mode should let provider manifests override legacy duplicates."""
         with tempfile.TemporaryDirectory() as tmpdir:

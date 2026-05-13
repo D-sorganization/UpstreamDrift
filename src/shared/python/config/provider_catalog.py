@@ -15,6 +15,7 @@ class ProviderRepoDefinition:
     repo_name: str
     provider_kind: str
     engine_type: str | None = None
+    manifest_relative_paths: tuple[Path, ...] = ()
 
 
 KNOWN_EXTERNAL_MODEL_PROVIDERS: tuple[ProviderRepoDefinition, ...] = (
@@ -46,6 +47,9 @@ KNOWN_EXTERNAL_MODEL_PROVIDERS: tuple[ProviderRepoDefinition, ...] = (
         provider_id="tools",
         repo_name="Tools",
         provider_kind="utility",
+        manifest_relative_paths=(
+            Path("src") / "pendulum_simulator" / "model_pack.yaml",
+        ),
     ),
     ProviderRepoDefinition(
         provider_id="movement_optimizer",
@@ -54,12 +58,30 @@ KNOWN_EXTERNAL_MODEL_PROVIDERS: tuple[ProviderRepoDefinition, ...] = (
     ),
 )
 
-_MANIFEST_RELATIVE_PATHS = (
+_DEFAULT_MANIFEST_RELATIVE_PATHS = (
     Path("model_pack.yaml"),
     Path("model_pack.yml"),
     Path(".upstreamdrift") / "model_pack.yaml",
     Path(".upstreamdrift") / "model_pack.yml",
 )
+
+
+def _iter_manifest_paths_for_provider(
+    provider_root: Path,
+) -> tuple[Path, ...]:
+    """Return manifest search paths for one provider root."""
+    provider_name = provider_root.name
+    extra_paths = tuple(
+        provider.manifest_relative_paths
+        for provider in KNOWN_EXTERNAL_MODEL_PROVIDERS
+        if provider.repo_name == provider_name
+    )
+    provider_relative_paths = _DEFAULT_MANIFEST_RELATIVE_PATHS + tuple(
+        path for paths in extra_paths for path in paths
+    )
+    return tuple(
+        provider_root / relative_path for relative_path in provider_relative_paths
+    )
 
 
 def infer_repo_root_from_config(config_path: str | Path) -> Path:
@@ -113,8 +135,7 @@ def iter_provider_manifest_specs(
     seen: set[Path] = set()
 
     for provider_root in iter_configured_provider_roots(config_path, env_value):
-        for relative_path in _MANIFEST_RELATIVE_PATHS:
-            manifest_path = provider_root / relative_path
+        for manifest_path in _iter_manifest_paths_for_provider(provider_root):
             if manifest_path in seen or not manifest_path.exists():
                 continue
             seen.add(manifest_path)
