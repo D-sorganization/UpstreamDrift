@@ -261,6 +261,20 @@ class TestImpactDetection:
         idx = synthesize_mod._impact_idx_from_clubhead(track)
         assert idx == 42  # 1-based
 
+    def test_integer_tracks_use_float_accumulation(self) -> None:
+        track = np.array(
+            [
+                [0, 0, 0],
+                [50_000, 0, 0],
+                [50_010, 0, 0],
+            ],
+            dtype=np.int32,
+        )
+
+        idx = synthesize_mod._impact_idx_from_clubhead(track)
+
+        assert idx == 1
+
     def test_rejects_short_tracks(self) -> None:
         with pytest.raises(ValueError, match=">= 2 samples"):
             synthesize_mod._impact_idx_from_clubhead(np.zeros((1, 3)))

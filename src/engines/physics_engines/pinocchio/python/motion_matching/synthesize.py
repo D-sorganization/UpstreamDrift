@@ -122,13 +122,13 @@ def _impact_idx_from_clubhead(clubhead: npt.NDArray[np.float64]) -> int:
             f"clubhead needs >= 2 samples for impact detection; got {clubhead.shape[0]}"
         )
         raise ValueError(msg)
-    diffs = np.diff(clubhead, axis=0)
-    speeds = np.linalg.norm(diffs, axis=1)
+    diffs = np.asarray(np.diff(clubhead, axis=0), dtype=np.float64)
     # ``np.argmax`` returns the first occurrence (0-based) into ``diffs``;
     # the corresponding clubhead sample lies at index ``argmax + 1``.
     # That happens to keep us in [1, N-1], i.e. strictly inside the
-    # open interval the schema requires.
-    return int(np.argmax(speeds)) + 1
+    # interval, away from boundaries.
+    # ⚡ Bolt: np.argmax(np.einsum(...)) avoids allocations & sqrt overhead
+    return int(np.argmax(np.einsum("ij,ij->i", diffs, diffs))) + 1
 
 
 def _sim_out_to_club_target(

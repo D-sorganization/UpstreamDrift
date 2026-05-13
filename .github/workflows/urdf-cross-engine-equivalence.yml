@@ -74,14 +74,20 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python -m ensurepip --upgrade || true
           python -m pip install --ignore-installed --no-deps pip
           # Always install the dev/test stack and the default mujoco engine.
+          python -m ensurepip --upgrade || true
           pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
           # Optional engines: best-effort. The test self-skips when any of
           # these is missing rather than failing the gate.
+          python -m ensurepip --upgrade || true
           pip install "mujoco>=3.6.0,<4.0.0" || echo "::warning::mujoco install failed"
+          python -m ensurepip --upgrade || true
           pip install "drake>=1.22.0" || echo "::warning::drake install failed (Linux+macOS only)"
+          python -m ensurepip --upgrade || true
           pip install "pinocchio>=2.6.0" || echo "::warning::pinocchio install failed"
+          python -m ensurepip --upgrade || true
           pip install "opensim>=4.4.0" || echo "::warning::opensim install failed"
 
       - name: Precheck — verify at least 2 engines are importable
