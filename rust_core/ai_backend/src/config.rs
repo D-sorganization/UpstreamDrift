@@ -100,7 +100,25 @@ impl AIConfig {
         if path.starts_with("http://") || path.starts_with("https://") {
             return path.to_string();
         }
+        // Handle path segments that may have overlapping prefixes
+        // e.g., base="http://localhost:11434/v1" + path="/v1/chat/completions"
+        // should produce "http://localhost:11434/v1/chat/completions" not "...v1/v1/..."
         if path.starts_with('/') {
+            // Check if path starts with a segment that base already ends with
+            let path_segments: Vec<&str> = path.split('/').filter(|s| !s.is_empty()).collect();
+            if let Some(first_segment) = path_segments.first() {
+                let base_segments: Vec<&str> = base.split('/').filter(|s| !s.is_empty()).collect();
+                if let Some(last_segment) = base_segments.last() {
+                    if first_segment == last_segment {
+                        // Skip the first segment of path since it duplicates the last segment of base
+                        let remaining_path = path_segments[1..].join("/");
+                        if remaining_path.is_empty() {
+                            return base.to_string();
+                        }
+                        return format!("{}/{}", base, remaining_path);
+                    }
+                }
+            }
             format!("{}{}", base, path)
         } else {
             format!("{}/{}", base, path)
@@ -244,5 +262,23 @@ mod tests {
         .unwrap();
         cfg.chat_path = "".into();
         assert_eq!(cfg.chat_url(), "https://full.example/chat");
+    }
+
+    #[test]
+    fn test_chat_url_handles_duplicate_path_segments() {
+        // Test case for issue #5307: users who configure ollama_host with /v1 suffix
+        // should not get /v1/v1/... URLs when default paths are applied
+        let mut cfg = AIConfig::try_new(
+            "k".into(),
+            "http://localhost:11434/v1".into(),
+            "llama3.1:8b".into(),
+            "x".into(),
+        )
+        .unwrap();
+        cfg.chat_path = "/v1/chat/completions".into();
+        cfg.embed_path = "/v1/embeddings".into();
+        // Should deduplicate the /v1 segment
+        assert_eq!(cfg.chat_url(), "http://localhost:11434/v1/chat/completions");
+        assert_eq!(cfg.embed_url(), "http://localhost:11434/v1/embeddings");
     }
 }
