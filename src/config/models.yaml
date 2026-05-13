@@ -267,8 +267,12 @@ models:
     type: "special_app"
     source_root: "movement_optimizer"
     path: "src/movement_optimizer/main.py"
+    capabilities:
+      - "trajectory_optimization"
+      - "cross_engine_analysis"
+      - "biomechanics"
     launcher:
       category: "biomechanics"
-      logo: "assets/logos/project_map.svg"
+      logo: "project_map.svg"
       status: "ready"
       default_launch: "tab"
