@@ -20,6 +20,8 @@ from collections.abc import Iterable
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.core.vector_math import row_euclidean_norm
+
 __all__ = [
     "REGULARIZER_KINDS",
     "must_be_finite_vector",
@@ -114,8 +116,7 @@ def must_be_unit_quaternion_rows(
     arr = arr.astype(np.float64, copy=False)
     if not np.all(np.isfinite(arr)):
         raise ValueError("quaternion array contains NaN or Inf")
-    # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) avoids temporary array allocations and is ~35% faster than np.linalg.norm(x, axis=1)
-    norms = np.sqrt(np.einsum("ij,ij->i", arr, arr))
+    norms = row_euclidean_norm(arr)
     worst = float(np.max(np.abs(norms - 1.0)))
     if worst > tol:
         raise ValueError(

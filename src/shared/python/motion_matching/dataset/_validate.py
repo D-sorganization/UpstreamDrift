@@ -12,6 +12,7 @@ from collections.abc import Iterable
 import numpy as np
 import pandas as pd
 
+from src.shared.python.core.vector_math import row_euclidean_norm
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -163,8 +164,7 @@ def validate_shaft_length(timesteps: pd.DataFrame) -> None:
     if butt.shape != head.shape or butt.shape[1] != 3:
         return
     diff = head - butt
-    # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) avoids temporary array allocations and is ~35% faster than np.linalg.norm(x, axis=1)
-    dist = np.sqrt(np.einsum("ij,ij->i", diff, diff))
+    dist = row_euclidean_norm(diff)
     bad_mask = (dist < _SHAFT_MIN_M) | (dist > _SHAFT_MAX_M)
     if bad_mask.any():
         idx = int(np.argmax(bad_mask))

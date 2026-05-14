@@ -15,6 +15,8 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from src.shared.python.core.vector_math import row_euclidean_norm
+
 from ._geodesic import quaternion_geodesic_angles
 from .sim_out import SimOut
 from .target import ClubTarget
@@ -32,8 +34,7 @@ def _pointwise_position_error(
 ) -> np.ndarray:
     """Per-frame Euclidean distance between two ``(N, 3)`` traces."""
     diff = target_xyz - sim_xyz
-    # ⚡ Bolt: np.sqrt(np.einsum('ij,ij->i', x, x)) avoids temporary array allocations and is ~35% faster than np.linalg.norm(x, axis=1)
-    return np.sqrt(np.einsum("ij,ij->i", diff, diff))
+    return row_euclidean_norm(diff)
 
 
 def plot_error_timecourse(
