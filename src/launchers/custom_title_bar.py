@@ -10,13 +10,44 @@ except ImportError:
     IconColorizer = None  # Fallback
 
 
+_WINDOW_CONTROL_BUTTON_STYLESHEET = """
+    QToolButton { border: none; background: transparent; padding: 5px; color: #d4d4d4; font-weight: bold; }
+    QToolButton:hover { background-color: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+"""
+
+
+def create_window_control_button(
+    icon_name: str,
+    fallback_text: str,
+    *,
+    tooltip: str,
+    accessible_name: str,
+    object_name: str,
+    color: str = "#d4d4d4",
+    parent: QWidget | None = None,
+) -> QToolButton:
+    """Create a launcher-styled window control button."""
+    button = QToolButton(parent)
+
+    if IconColorizer:
+        button.setIcon(IconColorizer.get_icon(icon_name, color))
+    else:
+        button.setText(fallback_text)
+
+    button.setObjectName(object_name)
+    button.setToolTip(tooltip)
+    button.setAccessibleName(accessible_name)
+    button.setStyleSheet(_WINDOW_CONTROL_BUTTON_STYLESHEET)
+    return button
+
+
 class CustomTitleBar(QWidget):
     minimize_requested = pyqtSignal()
     maximize_requested = pyqtSignal()
     close_requested = pyqtSignal()
     move_requested = pyqtSignal(QPoint)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, *, show_close_button: bool = True):
         super().__init__(parent)
         self.setFixedHeight(40)
         self.setProperty("class", "title-bar")
@@ -63,29 +94,41 @@ class CustomTitleBar(QWidget):
         layout.addStretch()
 
         # Window controls
-        color = "#d4d4d4"
-        self.btn_min = QToolButton()
-        self.btn_max = QToolButton()
-        self.btn_close = QToolButton()
-
-        if IconColorizer:
-            self.btn_min.setIcon(IconColorizer.get_icon("minimize", color))
-            self.btn_max.setIcon(IconColorizer.get_icon("maximize", color))
-            self.btn_close.setIcon(IconColorizer.get_icon("close", color))
-        else:
-            self.btn_min.setText("-")
-            self.btn_max.setText("[]")
-            self.btn_close.setText("X")
+        self.btn_min = create_window_control_button(
+            "minimize",
+            "-",
+            tooltip="Minimize",
+            accessible_name="Minimize window",
+            object_name="window-control-minimize",
+            parent=self,
+        )
+        self.btn_max = create_window_control_button(
+            "maximize",
+            "[]",
+            tooltip="Maximize",
+            accessible_name="Maximize window",
+            object_name="window-control-maximize",
+            parent=self,
+        )
+        self.btn_close: QToolButton | None = None
+        if show_close_button:
+            self.btn_close = create_window_control_button(
+                "close",
+                "X",
+                tooltip="Close the launcher",
+                accessible_name="Close launcher window",
+                object_name="window-control-close",
+                parent=self,
+            )
 
         self.btn_min.clicked.connect(self._minimize_window)
         self.btn_max.clicked.connect(self._maximize_window)
-        self.btn_close.clicked.connect(self._close_window)
+        if self.btn_close is not None:
+            self.btn_close.clicked.connect(self._close_window)
 
         for btn in (self.btn_min, self.btn_max, self.btn_close):
-            btn.setStyleSheet("""
-                QToolButton { border: none; background: transparent; padding: 5px; color: #d4d4d4; font-weight: bold; }
-                QToolButton:hover { background-color: rgba(255, 255, 255, 0.1); border-radius: 4px; }
-            """)
+            if btn is None:
+                continue
             layout.addWidget(btn)
 
     def _minimize_window(self):

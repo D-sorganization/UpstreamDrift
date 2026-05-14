@@ -44,6 +44,7 @@ from src.launchers.launcher_constants import (
     TILE_SCALE_MIN,
     ViewMode,
 )
+from src.launchers.custom_title_bar import create_window_control_button
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.theme.style_constants import Styles
@@ -63,6 +64,26 @@ def _build_zoom_accessible_description() -> str:
         f"Adjust tile size from {minimum_pct}% to {maximum_pct}%. "
         "Use arrow keys or drag to adjust."
     )
+
+
+def _build_menu_bar_close_widget(parent: QWidget, close_callback: Any) -> QWidget:
+    """Create the top-row close control for the launcher menu bar."""
+    container = QWidget(parent)
+    layout = QHBoxLayout(container)
+    layout.setContentsMargins(0, 1, 6, 1)
+    layout.setSpacing(0)
+
+    close_button = create_window_control_button(
+        "close",
+        "X",
+        tooltip="Close the launcher",
+        accessible_name="Close launcher window",
+        object_name="menu-bar-close-button",
+        parent=container,
+    )
+    close_button.clicked.connect(lambda _checked=False: close_callback())
+    layout.addWidget(close_button)
+    return container
 
 
 class LauncherUISetupMixin:
@@ -123,7 +144,7 @@ class LauncherUISetupMixin:
         try:
             from src.launchers.custom_title_bar import CustomTitleBar
 
-            self.title_bar = CustomTitleBar(self)
+            self.title_bar = CustomTitleBar(self, show_close_button=False)
             self.title_bar.minimize_requested.connect(self.showMinimized)
             self.title_bar.maximize_requested.connect(
                 lambda: (
@@ -405,6 +426,10 @@ class LauncherUISetupMixin:
         self._setup_view_menu(menubar)
         self._setup_tools_menu(menubar)
         self._setup_help_menu(menubar)
+        menubar.setCornerWidget(
+            _build_menu_bar_close_widget(self, self.close),
+            Qt.Corner.TopRightCorner,
+        )
 
     def _setup_file_menu(self, menubar: Any) -> None:
         if menubar is None:
@@ -1091,9 +1116,7 @@ class LauncherUISetupMixin:
             url = "http://127.0.0.1:8000/api/chat/sessions"
             req = urllib.request.Request(url, method="GET")
             # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
-            with urllib.request.urlopen(
-                req, timeout=2
-            ) as resp:  # nosec B310 - hardcoded localhost URL, no external input
+            with urllib.request.urlopen(req, timeout=2) as resp:  # nosec B310 - hardcoded localhost URL, no external input
                 sessions = json.loads(resp.read().decode("utf-8"))
 
             session_id = sessions[0]["session_id"] if sessions else None
