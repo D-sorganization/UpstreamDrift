@@ -350,7 +350,7 @@ def _resample_clubtarget_to_grid(
     quat = np.empty((n, 4), dtype=np.float64)
     for k in range(4):
         quat[:, k] = np.interp(t_grid, target.time, target.club_quat[:, k])
-    norms = np.linalg.norm(quat, axis=1, keepdims=True)
+    norms = np.sqrt(np.einsum("ij,ij->i", quat, quat))[:, np.newaxis]
     norms[norms == 0.0] = 1.0
     quat = quat / norms
     # Canonicalise scalar-positive.
@@ -836,7 +836,7 @@ def _interp_quat_to(
 ) -> NDArray[np.float64]:
     """Naive componentwise quaternion linear-interp + renormalise."""
     out = _interp_xyz_to(quats, t_src, t_dst, m=4)
-    norms = np.linalg.norm(out, axis=1, keepdims=True)
+    norms = np.sqrt(np.einsum("ij,ij->i", out, out))[:, np.newaxis]
     norms[norms == 0.0] = 1.0
     out = out / norms
     flip = out[:, 0] < 0.0

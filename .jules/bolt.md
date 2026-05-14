@@ -37,3 +37,6 @@
 ## 2026-05-12 - Optimize sum of squares along axis using einsum and vdot
 **Learning:** Computing sum of squares over a dimension, or MSE with `np.mean(x**2)` causes a large intermediate allocation in `numpy` before it gets reduced/averaged. For frequently called hot paths, avoiding these allocations matters.
 **Action:** Use `np.vdot(x, x)` or `np.vdot(x, x)/x.size` to compute total squared norm or MSE. Use `np.einsum('ij,ij->i', x, x)` to compute row-wise squared norms without allocating a fully squared temporary matrix. Make sure the type is appropriately float.
+## 2025-05-18 - Optimize norm calculation along axis using einsum
+**Learning:** `np.linalg.norm(..., axis=1)` is relatively slow for small inner dimensions because of internal overhead in NumPy and intermediate allocations. Replacing it with `np.sqrt(np.einsum('ij,ij->i', x, x))` computes the identical L2 norm while avoiding the overhead and allocations, yielding significant performance speedups.
+**Action:** When computing vector magnitudes or Euclidean norms along an axis, use `np.sqrt(np.einsum('ij,ij->i', x, x))` instead of `np.linalg.norm(x, axis=1)` to improve performance. For scenarios where `keepdims=True` was used, append `[:, np.newaxis]` to the einsum result.

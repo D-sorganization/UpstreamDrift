@@ -310,7 +310,7 @@ def _normalise_quat_rows(q: NDArray[np.float64]) -> NDArray[np.float64]:
         # Degenerate -- substitute identity quaternion to satisfy postcondition.
         return np.tile(np.array([1.0, 0.0, 0.0, 0.0]), (max(q.shape[0], 1), 1))
     out = q.astype(np.float64, copy=True)
-    norms = np.linalg.norm(out, axis=1, keepdims=True)
+    norms = np.sqrt(np.einsum("ij,ij->i", out, out))[:, np.newaxis]
     norms[norms == 0.0] = 1.0
     out = out / norms
     flip_mask = out[:, 0] < 0.0
@@ -356,7 +356,7 @@ def _detect_clubhead_impact(
     dt = np.diff(time)
     dt[dt == 0.0] = np.finfo(np.float64).eps
     velocity = np.diff(clubhead, axis=0) / dt[:, None]
-    speed = np.linalg.norm(velocity, axis=1)
+    speed = np.sqrt(np.einsum("ij,ij->i", velocity, velocity))
     if speed.size == 0 or not np.any(np.isfinite(speed)):
         return 1
     # argmax is 0-indexed on the velocity array (length N-1) -> map to 1..N.
