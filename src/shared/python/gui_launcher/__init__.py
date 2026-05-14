@@ -32,6 +32,10 @@ from .launcher import (
     make_pyqt6_launcher,
 )
 from .registry import GUIRegistry, auto_discover_guis, get_registry, register_gui
+from .tools_sidebar_integration import (
+    ToolsSidebarInstallStatus,
+    install_tools_sidebar,
+)
 
 __all__ = [
     "GUILauncher",
@@ -47,4 +51,6 @@ __all__ = [
     "make_pyqt6_launcher",
     "register_gui",
     "get_registry",
+    "ToolsSidebarInstallStatus",
+    "install_tools_sidebar",
 ]

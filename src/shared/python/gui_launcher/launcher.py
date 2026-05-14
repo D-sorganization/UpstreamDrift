@@ -457,6 +457,20 @@ def launch_pyqt6_app(config: LaunchConfig) -> int:
         except ImportError:
             logger.warning("Theme system not available, launching without theme")
 
+        try:
+            from .tools_sidebar_integration import install_tools_sidebar
+
+            sidebar_status = install_tools_sidebar(window, project_root=Path.cwd())
+            if sidebar_status.installed:
+                logger.info("Unified Tools Sidebar installed")
+            else:
+                logger.debug(
+                    "Unified Tools Sidebar not installed: %s",
+                    sidebar_status.reason,
+                )
+        except Exception as exc:  # noqa: BLE001 - optional host integration
+            logger.warning("Unified Tools Sidebar hook failed: %s", exc)
+
         window.show()
         return app.exec()
 

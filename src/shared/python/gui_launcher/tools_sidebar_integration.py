@@ -1,0 +1,393 @@
+"""Optional host integration for the shared Unified Tools Sidebar.
+
+The sidebar implementation lives in the Tools repository and may not be
+installed beside UpstreamDrift in every environment.  This module keeps the
+host-side contract small: import the shared component when it is available,
+attach it to a ``QMainWindow``-like object, and otherwise no-op.
+"""
+
+from __future__ import annotations
+
+import importlib
+import inspect
+import logging
+from collections.abc import Callable
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
+_SIDEBAR_MODULE_CANDIDATES = (
+    "upstream_drift_tools.ui.tools_sidebar",
+    "shared.python.upstream_drift_tools.ui.tools_sidebar",
+    "src.shared.python.upstream_drift_tools.ui.tools_sidebar",
+)
+_SIDEBAR_CLASS_CANDIDATES = (
+    "ToolsSidebar",
+    "UnifiedToolsSidebar",
+    "ToolsSidebarWidget",
+)
+_FILE_OPEN_SIGNAL_CANDIDATES = (
+    "file_open_requested",
+    "open_file_requested",
+    "fileRequested",
+    "openRequested",
+)
+_FILE_OPEN_METHOD_CANDIDATES = (
+    "open_file",
+    "load_file",
+    "_open_file",
+    "_load_file",
+    "load_data_file",
+)
+
+
+@dataclass(frozen=True)
+class ToolsSidebarInstallStatus:
+    """Result from attempting to install the optional shared tools sidebar."""
+
+    installed: bool
+    reason: str
+    dock: Any = None
+    sidebar: Any = None
+    module_name: str | None = None
+    file_open_connected: bool = False
+
+
+def install_tools_sidebar(
+    main_window: Any,
+    project_root: str | Path | None = None,
+    context_provider: Callable[[], Any] | None = None,
+) -> ToolsSidebarInstallStatus:
+    """Attach the shared Unified Tools Sidebar to a host main window if present.
+
+    Args:
+        main_window: QMainWindow-like host. It must provide ``addDockWidget``.
+        project_root: Optional project root passed through to the shared sidebar.
+        context_provider: Optional callback for host-specific context.
+
+    Returns:
+        A status object describing whether the sidebar was installed.
+    """
+    if main_window is None:
+        return ToolsSidebarInstallStatus(False, "main_window is required")
+    if not hasattr(main_window, "addDockWidget"):
+        return ToolsSidebarInstallStatus(
+            False,
+            "main_window does not support dock widgets",
+        )
+
+    module = _import_sidebar_module()
+    if module is None:
+        return ToolsSidebarInstallStatus(
+            False,
+            "shared tools sidebar module is not available",
+        )
+
+    try:
+        return _install_from_module(
+            module,
+            main_window=main_window,
+            project_root=Path(project_root).resolve() if project_root else None,
+            context_provider=context_provider,
+        )
+    except Exception as exc:  # noqa: BLE001 - this hook must not break launch
+        module_name = getattr(module, "__name__", None)
+        logger.warning("Unified Tools Sidebar integration failed: %s", exc)
+        return ToolsSidebarInstallStatus(
+            False,
+            f"shared tools sidebar integration failed: {exc}",
+            module_name=module_name,
+        )
+
+
+def _import_sidebar_module() -> Any | None:
+    for module_name in _SIDEBAR_MODULE_CANDIDATES:
+        try:
+            return importlib.import_module(module_name)
+        except ImportError:
+            continue
+    return None
+
+
+def _install_from_module(
+    module: Any,
+    *,
+    main_window: Any,
+    project_root: Path | None,
+    context_provider: Callable[[], Any] | None,
+) -> ToolsSidebarInstallStatus:
+    module_name = str(getattr(module, "__name__", ""))
+
+    module_installer = getattr(module, "install_tools_sidebar", None)
+    if callable(module_installer):
+        installed = module_installer(
+            main_window,
+            project_root=project_root,
+            context_provider=context_provider,
+        )
+        if isinstance(installed, ToolsSidebarInstallStatus):
+            return installed
+        if installed is None:
+            return ToolsSidebarInstallStatus(
+                False,
+                "shared module installer did not install sidebar",
+                module_name=module_name,
+            )
+        sidebar = _status_sidebar(installed)
+        dock = (
+            getattr(installed, "dock_widget", None)
+            or getattr(installed, "dock", None)
+            or installed
+        )
+        return ToolsSidebarInstallStatus(
+            True,
+            "installed by shared module",
+            dock=dock,
+            sidebar=sidebar,
+            module_name=module_name,
+            file_open_connected=_connect_file_open_request(sidebar, main_window),
+        )
+
+    sidebar = _create_sidebar_from_module(
+        module,
+        main_window=main_window,
+        project_root=project_root,
+        context_provider=context_provider,
+    )
+    if sidebar is None:
+        return ToolsSidebarInstallStatus(
+            False,
+            "shared tools sidebar module has no supported factory",
+            module_name=module_name,
+        )
+
+    dock = _ensure_dock_widget(sidebar, main_window)
+    _add_dock_widget(main_window, dock)
+    connected = _connect_file_open_request(sidebar, main_window)
+
+    return ToolsSidebarInstallStatus(
+        True,
+        "installed",
+        dock=dock,
+        sidebar=sidebar,
+        module_name=module_name,
+        file_open_connected=connected,
+    )
+
+
+def _create_sidebar_from_module(
+    module: Any,
+    *,
+    main_window: Any,
+    project_root: Path | None,
+    context_provider: Callable[[], Any] | None,
+) -> Any | None:
+    factory = getattr(module, "create_tools_sidebar", None)
+    if callable(factory):
+        return _call_sidebar_factory(
+            factory,
+            main_window=main_window,
+            project_root=project_root,
+            context_provider=context_provider,
+        )
+
+    for class_name in _SIDEBAR_CLASS_CANDIDATES:
+        sidebar_class = getattr(module, class_name, None)
+        if callable(sidebar_class):
+            return _call_sidebar_factory(
+                sidebar_class,
+                main_window=main_window,
+                project_root=project_root,
+                context_provider=context_provider,
+            )
+    return None
+
+
+def _call_sidebar_factory(
+    factory: Callable[..., Any],
+    *,
+    main_window: Any,
+    project_root: Path | None,
+    context_provider: Callable[[], Any] | None,
+) -> Any:
+    kwargs: dict[str, Any] = {
+        "parent": main_window,
+        "project_root": project_root,
+        "context_provider": context_provider,
+    }
+    try:
+        signature = inspect.signature(factory)
+    except (TypeError, ValueError):
+        return factory(
+            **{key: value for key, value in kwargs.items() if value is not None}
+        )
+
+    accepted = {
+        name
+        for name, param in signature.parameters.items()
+        if param.kind
+        in (
+            inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            inspect.Parameter.KEYWORD_ONLY,
+        )
+    }
+    accepts_kwargs = any(
+        param.kind == inspect.Parameter.VAR_KEYWORD
+        for param in signature.parameters.values()
+    )
+    if accepts_kwargs:
+        call_kwargs = {key: value for key, value in kwargs.items() if value is not None}
+    else:
+        call_kwargs = {
+            key: value
+            for key, value in kwargs.items()
+            if key in accepted and value is not None
+        }
+    return factory(**call_kwargs)
+
+
+def _ensure_dock_widget(sidebar: Any, main_window: Any) -> Any:
+    if _looks_like_dock_widget(sidebar):
+        return sidebar
+
+    try:
+        from PyQt6.QtWidgets import QDockWidget
+    except ImportError as exc:
+        raise RuntimeError("PyQt6 is required to wrap sidebar widgets") from exc
+
+    dock = QDockWidget("Tools", main_window)
+    dock.setObjectName("unifiedToolsSidebarDock")
+    dock.setWidget(sidebar)
+    return dock
+
+
+def _looks_like_dock_widget(widget: Any) -> bool:
+    return hasattr(widget, "setWidget") and hasattr(widget, "toggleViewAction")
+
+
+def _add_dock_widget(main_window: Any, dock: Any) -> None:
+    main_window.addDockWidget(_right_dock_area(), dock)
+
+
+def _right_dock_area() -> Any:
+    try:
+        from PyQt6.QtCore import Qt
+
+        return Qt.DockWidgetArea.RightDockWidgetArea
+    except ImportError:
+        return "right"
+
+
+def _connect_file_open_request(sidebar: Any, main_window: Any) -> bool:
+    signal_owner, signal = _find_signal(sidebar)
+    if signal is None and _looks_like_dock_widget(sidebar):
+        widget = sidebar.widget() if hasattr(sidebar, "widget") else None
+        signal_owner, signal = _find_signal(widget)
+    if signal is None:
+        return False
+
+    handler = _find_file_open_handler(main_window)
+    if handler is None:
+        handler = _build_status_handler(main_window)
+
+    try:
+        signal.connect(handler)
+    except (AttributeError, TypeError) as exc:
+        logger.debug("Could not connect sidebar file-open signal: %s", exc)
+        return False
+
+    logger.debug(
+        "Connected tools sidebar file-open signal from %s",
+        type(signal_owner).__name__,
+    )
+    return True
+
+
+def _find_signal(candidate: Any) -> tuple[Any | None, Any | None]:
+    if candidate is None:
+        return None, None
+    for attr_name in _FILE_OPEN_SIGNAL_CANDIDATES:
+        signal = getattr(candidate, attr_name, None)
+        if hasattr(signal, "connect"):
+            return candidate, signal
+    return None, None
+
+
+def _find_file_open_handler(main_window: Any) -> Callable[[Any], Any] | None:
+    candidates = [main_window]
+    central_widget = _maybe_call(main_window, "centralWidget")
+    if central_widget is not None:
+        candidates.append(central_widget)
+    inner_window = _maybe_call(main_window, "inner_main_window")
+    if inner_window is not None:
+        candidates.append(inner_window)
+
+    for target in candidates:
+        for method_name in _FILE_OPEN_METHOD_CANDIDATES:
+            method = getattr(target, method_name, None)
+            if callable(method) and _callable_accepts_path(method):
+                return method
+    return None
+
+
+def _callable_accepts_path(method: Callable[..., Any]) -> bool:
+    try:
+        signature = inspect.signature(method)
+    except (TypeError, ValueError):
+        return True
+
+    positional = [
+        param
+        for param in signature.parameters.values()
+        if param.kind
+        in (
+            inspect.Parameter.POSITIONAL_ONLY,
+            inspect.Parameter.POSITIONAL_OR_KEYWORD,
+        )
+    ]
+    return any(
+        param.kind == inspect.Parameter.VAR_POSITIONAL
+        for param in signature.parameters.values()
+    ) or bool(positional)
+
+
+def _build_status_handler(main_window: Any) -> Callable[[Any], None]:
+    def _handle_requested_file(path: Any) -> None:
+        message = f"Tools sidebar requested file open: {path}"
+        status_bar = _maybe_call(main_window, "statusBar")
+        if status_bar is not None and hasattr(status_bar, "showMessage"):
+            try:
+                status_bar.showMessage(message, 5000)
+                return
+            except TypeError:
+                status_bar.showMessage(message)
+                return
+        logger.info(message)
+
+    return _handle_requested_file
+
+
+def _maybe_call(obj: Any, method_name: str) -> Any | None:
+    method = getattr(obj, method_name, None)
+    if not callable(method):
+        return None
+    try:
+        return method()
+    except TypeError:
+        return None
+
+
+def _status_sidebar(installed: Any) -> Any:
+    if installed is None:
+        return None
+    sidebar = getattr(installed, "sidebar", None)
+    if sidebar is not None:
+        return sidebar
+    if hasattr(installed, "widget") and callable(installed.widget):
+        try:
+            return installed.widget()
+        except TypeError:
+            return installed
+    return installed
