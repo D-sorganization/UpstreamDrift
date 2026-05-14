@@ -124,7 +124,7 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
       const currentId = assistantIdRef.current;
       if (currentId) {
         return prev.map((m) =>
-          m.id === currentId ? { ...m, content: m.content + chunk } : m
+          m.id === currentId ? { ...m, content: m.content + chunk } : m,
         );
       }
       const id = makeId();
@@ -166,7 +166,7 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
                 id: makeId(),
                 role: m.role,
                 content: m.content,
-              }))
+              })),
             );
           }
           break;
@@ -186,7 +186,7 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
           break;
       }
     },
-    [appendAssistantChunk]
+    [appendAssistantChunk],
   );
 
   // Connect (and re-connect with exponential backoff).
@@ -228,7 +228,7 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
       reconnectAttemptsRef.current = attempt;
       const delay = Math.min(
         RECONNECT_BASE_MS * 2 ** (attempt - 1),
-        RECONNECT_MAX_MS
+        RECONNECT_MAX_MS,
       );
       reconnectTimerRef.current = setTimeout(connect, delay);
     };
@@ -318,11 +318,11 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
 
   return (
     <div
-      className="flex flex-col h-full w-full max-w-3xl rounded-lg border border-gray-600 bg-gray-900 text-gray-200 shadow-xl"
+      className="sidekick-chat-surface flex flex-col h-full w-full max-w-3xl rounded-lg border border-gray-600 bg-gray-900 text-gray-200 shadow-xl"
       data-testid="chat-panel"
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b border-gray-700">
+      <div className="sidekick-chat-header flex items-center justify-between p-3 border-b border-gray-700">
         <div className="flex items-center gap-2">
           <MessageSquare className="w-4 h-4 text-blue-400" aria-hidden="true" />
           <span className="font-semibold text-sm">Chat</span>
@@ -367,13 +367,14 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
             data-role={m.role}
           >
             <div
-              className={`max-w-[80%] rounded-lg px-3 py-2 whitespace-pre-wrap break-words ${
+              className={`sidekick-chat-bubble max-w-[80%] rounded-lg px-3 py-2 whitespace-pre-wrap break-words ${
                 m.role === 'user'
                   ? 'bg-blue-700/40 border border-blue-600 text-blue-100'
                   : m.role === 'assistant'
                     ? 'bg-gray-800 border border-gray-700 text-gray-100'
                     : 'bg-yellow-900/30 border border-yellow-700 text-yellow-200 text-xs'
               }`}
+              data-role={m.role}
             >
               {m.content}
             </div>
@@ -393,7 +394,7 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
       {/* Composer */}
       <form
         onSubmit={handleSubmit}
-        className="flex items-end gap-2 p-3 border-t border-gray-700"
+        className="sidekick-chat-composer flex items-end gap-2 p-3 border-t border-gray-700"
       >
         <textarea
           value={input}
@@ -407,7 +408,7 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
           rows={2}
           aria-label="Message input"
           data-testid="chat-input"
-          className="flex-1 resize-none rounded border border-gray-600 bg-gray-800 px-2 py-1.5 text-sm text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:outline-none disabled:opacity-50"
+          className="sidekick-focus-ring flex-1 resize-none rounded border border-gray-600 bg-gray-800 px-2 py-1.5 text-sm text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:outline-none disabled:opacity-50"
           disabled={status !== 'connected'}
         />
         <button
@@ -415,7 +416,7 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
           aria-label="Send message"
           data-testid="chat-send"
           disabled={status !== 'connected' || input.trim().length === 0}
-          className="flex items-center gap-1 px-3 py-1.5 rounded border border-blue-600 bg-blue-700/30 text-blue-300 hover:bg-blue-700/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm"
+          className="sidekick-focus-ring flex items-center gap-1 px-3 py-1.5 rounded border border-blue-600 bg-blue-700/30 text-blue-300 hover:bg-blue-700/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm"
         >
           <Send className="w-4 h-4" aria-hidden="true" />
           Send

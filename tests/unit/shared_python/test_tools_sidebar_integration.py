@@ -96,6 +96,35 @@ def test_install_tools_sidebar_adds_shared_dock_and_connects_file_open(
     assert window.opened_paths == ["model.urdf"]
 
 
+def test_install_tools_sidebar_passes_sidekick_tokens_when_supported(
+    monkeypatch: Any,
+) -> None:
+    module = ModuleType("upstream_drift_tools.ui.tools_sidebar")
+    created: dict[str, Any] = {}
+
+    class ToolsSidebar(FakeDock):
+        def __init__(
+            self,
+            *,
+            parent: Any,
+            sidekick_tokens: dict[str, str],
+        ) -> None:
+            super().__init__()
+            created["parent"] = parent
+            created["sidekick_tokens"] = sidekick_tokens
+
+    module.ToolsSidebar = ToolsSidebar  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, module.__name__, module)
+
+    window = FakeMainWindow()
+    status = install_tools_sidebar(window)
+
+    assert status.installed is True
+    assert created["parent"] is window
+    assert created["sidekick_tokens"]["sidekick.color.surface"]
+    assert created["sidekick_tokens"]["sidekick.radius.chat"] == "8px"
+
+
 def test_install_tools_sidebar_uses_shared_installer_status(monkeypatch: Any) -> None:
     module = ModuleType("upstream_drift_tools.ui.tools_sidebar")
     dock = FakeDock()
@@ -119,6 +148,31 @@ def test_install_tools_sidebar_uses_shared_installer_status(monkeypatch: Any) ->
     assert status.reason == "installed by shared module"
     assert status.dock is dock
     assert status.file_open_connected is True
+
+
+def test_install_tools_sidebar_shared_installer_can_accept_sidekick_tokens(
+    monkeypatch: Any,
+) -> None:
+    module = ModuleType("upstream_drift_tools.ui.tools_sidebar")
+    observed: dict[str, Any] = {}
+    dock = FakeDock()
+
+    def shared_installer(
+        main_window: Any,
+        *,
+        sidekick_tokens: dict[str, str],
+    ) -> FakeDock:
+        observed["tokens"] = sidekick_tokens
+        main_window.addDockWidget("right", dock)
+        return dock
+
+    module.install_tools_sidebar = shared_installer  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, module.__name__, module)
+
+    status = install_tools_sidebar(FakeMainWindow())
+
+    assert status.installed is True
+    assert observed["tokens"]["sidekick.color.canvas"]
 
 
 def test_install_tools_sidebar_rejects_non_dock_hosts(monkeypatch: Any) -> None:

@@ -11,11 +11,72 @@ body,
 }
 
 body {
-  background-color: #111827; /* gray-900 */
-  color: #f3f4f6; /* gray-100 */
+  background-color: var(--sidekick-color-canvas, #111827);
+  color: var(--sidekick-color-text, #f3f4f6);
   font-family:
     Inter,
     system-ui,
     -apple-system,
     sans-serif;
+}
+
+.sidekick-shell {
+  background: var(--sidekick-color-canvas, #111827);
+  color: var(--sidekick-color-text, #f3f4f6);
+  font-family: var(--sidekick-font-family, Inter, system-ui, sans-serif);
+}
+
+.sidekick-sidebar {
+  background: var(--sidekick-color-surface, #1f2937);
+  border-color: var(--sidekick-color-border, #374151);
+  color: var(--sidekick-color-text-muted, #d1d5db);
+}
+
+.sidekick-chat-surface {
+  background: var(--sidekick-color-surface, #111827);
+  border-color: var(--sidekick-color-border, #4b5563);
+  border-radius: var(--sidekick-radius-chat, 8px);
+  color: var(--sidekick-color-text, #e5e7eb);
+}
+
+.sidekick-chat-header,
+.sidekick-chat-composer {
+  border-color: var(--sidekick-color-border, #374151);
+}
+
+.sidekick-chat-bubble {
+  border-radius: var(--sidekick-radius-chat, 8px);
+  border: var(--sidekick-border-width, 1px) solid
+    var(--sidekick-color-border, #374151);
+}
+
+.sidekick-chat-bubble[data-role="assistant"] {
+  background: var(--sidekick-color-surface-muted, #1f2937);
+  color: var(--sidekick-color-text, #f3f4f6);
+}
+
+.sidekick-chat-bubble[data-role="user"] {
+  background: color-mix(
+    in srgb,
+    var(--sidekick-color-accent, #1d4ed8) 34%,
+    transparent
+  );
+  border-color: var(--sidekick-color-accent, #2563eb);
+  color: var(--sidekick-color-selection-text, #ffffff);
+}
+
+.sidekick-chat-bubble[data-role="system"] {
+  background: color-mix(
+    in srgb,
+    var(--sidekick-color-warning, #d29922) 22%,
+    transparent
+  );
+  border-color: var(--sidekick-color-warning, #d29922);
+  color: var(--sidekick-color-text, #f3f4f6);
+}
+
+.sidekick-focus-ring:focus-visible {
+  outline: var(--sidekick-focus-width, 2px) solid
+    var(--sidekick-color-focus, #58a6ff);
+  outline-offset: 2px;
 }

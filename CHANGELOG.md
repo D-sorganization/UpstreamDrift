@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Sidekick design-token adapters for React/Tauri CSS variables and guarded PyQt
+  Tools sidebar theme handoff (#5384).
 - Release governance guard `scripts/check_version_consistency.py` with CI wiring,
   release runbook, production-readiness contract, SBOM generation, and release
   artifact attestations for issue #3842.

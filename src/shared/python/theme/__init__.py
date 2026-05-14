@@ -48,6 +48,11 @@ from .colors import (
     normalise_hex_color,
 )
 from .protocols import StylesheetGenerator, ThemeProvider, ThemeSwitcher
+from .sidekick_tokens import (
+    REQUIRED_SIDEKICK_TOKENS,
+    get_current_sidekick_tokens,
+    sidekick_tokens_from_theme,
+)
 from .stylesheets import generate_minimal_stylesheet, generate_stylesheet
 
 # Convenience fallback: a ThemeColors-compatible dark theme.
@@ -199,6 +204,10 @@ __all__ = [
     "is_dark_theme",
     "is_valid_hex_color",
     "normalise_hex_color",
+    # Sidekick design-token adapter
+    "REQUIRED_SIDEKICK_TOKENS",
+    "get_current_sidekick_tokens",
+    "sidekick_tokens_from_theme",
     # Stylesheet generation
     "generate_minimal_stylesheet",
     "generate_stylesheet",

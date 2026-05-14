@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.166                                            |
-| **Last Spec Update**    | 2026-05-13                                         |
+| **Spec Version**        | 1.0.167                                            |
+| **Last Spec Update**    | 2026-05-14                                         |
 
 ## 2. Purpose & Mission
 
@@ -554,6 +554,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 ## 12. Change Log
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| 2026-05-14 | 1.0.167 | Added Sidekick design-token adapters that map existing launcher theme colors to canonical `sidekick.*` roles for React/Tauri CSS variables and guarded PyQt Tools sidebar integration, with token-contract tests for issue #5384. |
 | 2026-05-13 | 1.0.166 | Added a guarded optional Unified Tools Sidebar launcher integration that imports the shared Tools sidebar when available, docks it into the PyQt6 launcher, connects file-open requests to host handlers or status reporting, and no-ops cleanly when the shared module is absent. |
 | 2026-05-13 | 1.0.151 | Fixed launcher logo backdrop cleanup so full-canvas SVG backgrounds are detected from each icon's canvas dimensions, including 24x24 icons, while preserving legitimate inner logo geometry and keeping the drop-shadow wrapper idempotent under repeated processing. |
 | 2026-05-13 | 1.0.150 | ⚡ Bolt: Optimize Root Mean Square Error computation by vectorizing sum of squares |

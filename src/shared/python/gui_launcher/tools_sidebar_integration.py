@@ -3,7 +3,8 @@
 The sidebar implementation lives in the Tools repository and may not be
 installed beside UpstreamDrift in every environment.  This module keeps the
 host-side contract small: import the shared component when it is available,
-attach it to a ``QMainWindow``-like object, and otherwise no-op.
+attach it to a ``QMainWindow``-like object, pass Sidekick design tokens when
+the shared component accepts them, and otherwise no-op.
 """
 
 from __future__ import annotations
@@ -122,8 +123,9 @@ def _install_from_module(
 
     module_installer = getattr(module, "install_tools_sidebar", None)
     if callable(module_installer):
-        installed = module_installer(
-            main_window,
+        installed = _call_shared_installer(
+            module_installer,
+            main_window=main_window,
             project_root=project_root,
             context_provider=context_provider,
         )
@@ -205,6 +207,36 @@ def _create_sidebar_from_module(
     return None
 
 
+def _call_shared_installer(
+    installer: Callable[..., Any],
+    *,
+    main_window: Any,
+    project_root: Path | None,
+    context_provider: Callable[[], Any] | None,
+) -> Any:
+    kwargs: dict[str, Any] = _sidebar_factory_kwargs(
+        main_window=main_window,
+        project_root=project_root,
+        context_provider=context_provider,
+    )
+    try:
+        signature = inspect.signature(installer)
+    except (TypeError, ValueError):
+        return installer(
+            main_window, project_root=project_root, context_provider=context_provider
+        )
+
+    accepted = set(signature.parameters)
+    accepts_kwargs = any(
+        param.kind == inspect.Parameter.VAR_KEYWORD
+        for param in signature.parameters.values()
+    )
+    call_kwargs = {
+        key: value for key, value in kwargs.items() if accepts_kwargs or key in accepted
+    }
+    return installer(main_window, **call_kwargs)
+
+
 def _call_sidebar_factory(
     factory: Callable[..., Any],
     *,
@@ -212,11 +244,11 @@ def _call_sidebar_factory(
     project_root: Path | None,
     context_provider: Callable[[], Any] | None,
 ) -> Any:
-    kwargs: dict[str, Any] = {
-        "parent": main_window,
-        "project_root": project_root,
-        "context_provider": context_provider,
-    }
+    kwargs = _sidebar_factory_kwargs(
+        main_window=main_window,
+        project_root=project_root,
+        context_provider=context_provider,
+    )
     try:
         signature = inspect.signature(factory)
     except (TypeError, ValueError):
@@ -246,6 +278,29 @@ def _call_sidebar_factory(
             if key in accepted and value is not None
         }
     return factory(**call_kwargs)
+
+
+def _sidebar_factory_kwargs(
+    *,
+    main_window: Any,
+    project_root: Path | None,
+    context_provider: Callable[[], Any] | None,
+) -> dict[str, Any]:
+    return {
+        "parent": main_window,
+        "project_root": project_root,
+        "context_provider": context_provider,
+        "sidekick_tokens": _get_sidekick_tokens(),
+    }
+
+
+def _get_sidekick_tokens() -> dict[str, str]:
+    try:
+        from src.shared.python.theme.sidekick_tokens import get_current_sidekick_tokens
+
+        return get_current_sidekick_tokens()
+    except Exception:  # noqa: BLE001 - sidebar startup must stay optional
+        return {}
 
 
 def _ensure_dock_widget(sidebar: Any, main_window: Any) -> Any:

@@ -1,0 +1,102 @@
+"""Sidekick design-token adapter for UpstreamDrift theme colors.
+
+The canonical Sidekick token names are shared across the React/Tauri shell and
+optional PyQt Tools sidebar integration. Values are derived from the existing
+UpstreamDrift theme keys so host apps can customize colors without forking
+Sidekick layout code.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+
+SidekickTokens = dict[str, str]
+
+
+COLOR_TOKEN_MAP: Mapping[str, str] = {
+    "sidekick.color.canvas": "bg",
+    "sidekick.color.surface": "group_bg",
+    "sidekick.color.surface.muted": "table_alt",
+    "sidekick.color.surface.raised": "title_bg",
+    "sidekick.color.border": "border",
+    "sidekick.color.border.strong": "title_border",
+    "sidekick.color.text": "text",
+    "sidekick.color.text.muted": "text_secondary",
+    "sidekick.color.text.subtle": "label",
+    "sidekick.color.accent": "accent",
+    "sidekick.color.accent.hover": "button_hover",
+    "sidekick.color.focus": "focus",
+    "sidekick.color.input": "input_bg",
+    "sidekick.color.success": "success",
+    "sidekick.color.warning": "warning",
+    "sidekick.color.error": "error",
+    "sidekick.color.info": "info",
+    "sidekick.color.link": "link",
+    "sidekick.color.link.hover": "link_hover",
+    "sidekick.color.selection": "selection_bg",
+    "sidekick.color.selection.text": "selection_text",
+}
+
+DEFAULT_SIDEKICK_TOKENS: Mapping[str, str] = {
+    "sidekick.color.canvas": "#1a1d23",
+    "sidekick.color.surface": "#24272e",
+    "sidekick.color.surface.muted": "#24272e",
+    "sidekick.color.surface.raised": "#2d3748",
+    "sidekick.color.border": "#3a3f4a",
+    "sidekick.color.border.strong": "#4a7ba7",
+    "sidekick.color.text": "#e1e4e8",
+    "sidekick.color.text.muted": "#c9d1d9",
+    "sidekick.color.text.subtle": "#8b949e",
+    "sidekick.color.accent": "#4a7ba7",
+    "sidekick.color.accent.hover": "#5a8fc4",
+    "sidekick.color.focus": "#58a6ff",
+    "sidekick.color.input": "#0d1117",
+    "sidekick.color.success": "#3fb950",
+    "sidekick.color.warning": "#d29922",
+    "sidekick.color.error": "#f85149",
+    "sidekick.color.info": "#58a6ff",
+    "sidekick.color.link": "#58a6ff",
+    "sidekick.color.link.hover": "#79b8ff",
+    "sidekick.color.selection": "#264f78",
+    "sidekick.color.selection.text": "#ffffff",
+    "sidekick.space.1": "4px",
+    "sidekick.space.2": "8px",
+    "sidekick.space.3": "12px",
+    "sidekick.space.4": "16px",
+    "sidekick.space.6": "24px",
+    "sidekick.space.8": "32px",
+    "sidekick.radius.sm": "3px",
+    "sidekick.radius.md": "6px",
+    "sidekick.radius.lg": "8px",
+    "sidekick.radius.chat": "8px",
+    "sidekick.border.width": "1px",
+    "sidekick.focus.width": "2px",
+    "sidekick.font.family": "Inter, Segoe UI, system-ui, sans-serif",
+}
+
+REQUIRED_SIDEKICK_TOKENS: tuple[str, ...] = tuple(DEFAULT_SIDEKICK_TOKENS)
+
+
+def sidekick_tokens_from_theme(colors: Mapping[str, str]) -> SidekickTokens:
+    """Map UpstreamDrift theme colors onto canonical Sidekick token names."""
+    if colors is None:
+        raise ValueError("colors must be provided")
+
+    tokens = dict(DEFAULT_SIDEKICK_TOKENS)
+    for token_name, theme_key in COLOR_TOKEN_MAP.items():
+        value = colors.get(theme_key)
+        if value:
+            tokens[token_name] = value
+
+    return tokens
+
+
+def get_current_sidekick_tokens() -> SidekickTokens:
+    """Return Sidekick tokens for the active theme, falling back without PyQt6."""
+    try:
+        from src.shared.python.theme import ThemeManager
+
+        manager = ThemeManager.instance()
+        return sidekick_tokens_from_theme(manager.get_current_colors())
+    except Exception:  # noqa: BLE001 - optional launcher integration must not break
+        return dict(DEFAULT_SIDEKICK_TOKENS)
