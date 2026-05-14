@@ -213,11 +213,19 @@ class DataProcessorWidget(DataProcessorOpsMixin, BaseCalculatorWidget):
         self.rows_per_page.valueChanged.connect(self._update_table)
         pagination_layout.addWidget(self.rows_per_page)
         prev_btn = QPushButton("<")
-        prev_btn.setFixedWidth(40)
+        try:
+            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            set_text_minimum_width(prev_btn, TextWidthSpec(minimum_px=40))
+        except ImportError:
+            prev_btn.setFixedWidth(40)
         prev_btn.clicked.connect(self._prev_page)
         pagination_layout.addWidget(prev_btn)
         next_btn = QPushButton(">")
-        next_btn.setFixedWidth(40)
+        try:
+            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            set_text_minimum_width(next_btn, TextWidthSpec(minimum_px=40))
+        except ImportError:
+            next_btn.setFixedWidth(40)
         next_btn.clicked.connect(self._next_page)
         pagination_layout.addWidget(next_btn)
         layout.addLayout(pagination_layout)

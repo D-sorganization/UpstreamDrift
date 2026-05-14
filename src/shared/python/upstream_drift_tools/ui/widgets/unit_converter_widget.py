@@ -281,7 +281,11 @@ class UnitConverterWidget(BaseCalculatorWindow):
         # Left side
         row_widget.from_value = QLineEdit()
         row_widget.from_value.setText(conv.from_value)
-        row_widget.from_value.setFixedWidth(110)
+        try:
+            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            set_text_minimum_width(row_widget.from_value, TextWidthSpec(minimum_px=110))
+        except ImportError:
+            row_widget.from_value.setFixedWidth(110)
         row_widget.from_value.textChanged.connect(
             lambda t: self._on_value_changed(index, "from", t)
         )
@@ -290,20 +294,32 @@ class UnitConverterWidget(BaseCalculatorWindow):
         row_widget.from_unit.setEditable(True)
         row_widget.from_unit.addItems(self.all_units)
         row_widget.from_unit.setCurrentText(conv.from_unit)
-        row_widget.from_unit.setFixedWidth(130)
+        try:
+            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            set_text_minimum_width(row_widget.from_unit, TextWidthSpec(minimum_px=130))
+        except ImportError:
+            row_widget.from_unit.setFixedWidth(130)
         row_widget.from_unit.currentTextChanged.connect(
             lambda u: self._on_unit_changed(index, "from", u)
         )
 
         # Arrow
         row_widget.arrow = QPushButton("⇄")
-        row_widget.arrow.setFixedWidth(35)
+        try:
+            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            set_text_minimum_width(row_widget.arrow, TextWidthSpec(minimum_px=35))
+        except ImportError:
+            row_widget.arrow.setFixedWidth(35)
         row_widget.arrow.clicked.connect(lambda: self._swap_values(index))
 
         # Right side
         row_widget.to_value = QLineEdit()
         row_widget.to_value.setText(conv.to_value)
-        row_widget.to_value.setFixedWidth(110)
+        try:
+            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            set_text_minimum_width(row_widget.to_value, TextWidthSpec(minimum_px=110))
+        except ImportError:
+            row_widget.to_value.setFixedWidth(110)
         row_widget.to_value.textChanged.connect(
             lambda t: self._on_value_changed(index, "to", t)
         )
@@ -312,18 +328,30 @@ class UnitConverterWidget(BaseCalculatorWindow):
         row_widget.to_unit.setEditable(True)
         row_widget.to_unit.addItems(self._get_compatible_units(conv.from_unit))
         row_widget.to_unit.setCurrentText(conv.to_unit)
-        row_widget.to_unit.setFixedWidth(130)
+        try:
+            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            set_text_minimum_width(row_widget.to_unit, TextWidthSpec(minimum_px=130))
+        except ImportError:
+            row_widget.to_unit.setFixedWidth(130)
         row_widget.to_unit.currentTextChanged.connect(
             lambda u: self._on_unit_changed(index, "to", u)
         )
 
         # Buttons
         row_widget.copy_btn = QPushButton("📋")
-        row_widget.copy_btn.setFixedWidth(30)
+        try:
+            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            set_text_minimum_width(row_widget.copy_btn, TextWidthSpec(minimum_px=30))
+        except ImportError:
+            row_widget.copy_btn.setFixedWidth(30)
         row_widget.copy_btn.clicked.connect(lambda: self._copy_result(index))
 
         action_btn = QPushButton()
-        action_btn.setFixedWidth(30)
+        try:
+            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            set_text_minimum_width(action_btn, TextWidthSpec(minimum_px=30))
+        except ImportError:
+            action_btn.setFixedWidth(30)
         style = self.style()
         if not is_saved:
             if style:

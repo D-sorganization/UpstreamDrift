@@ -626,7 +626,7 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
 
         def _build_config_panel(self) -> QWidget:
             panel = QWidget()
-            panel.setFixedWidth(260)
+            panel.setMinimumWidth(260)
             layout = QVBoxLayout(panel)
             layout.setContentsMargins(0, 0, 0, 0)
             layout.setSpacing(6)

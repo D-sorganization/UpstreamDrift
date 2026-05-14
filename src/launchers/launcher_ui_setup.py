@@ -703,7 +703,14 @@ class LauncherUISetupMixin:
         # Search Bar
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Search models...")
-        self.search_input.setFixedWidth(250)
+        try:
+            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            set_text_minimum_width(
+                self.search_input,
+                TextWidthSpec(minimum_px=250),
+            )
+        except ImportError:
+            self.search_input.setFixedWidth(250)
         self.search_input.setToolTip("Filter models by name or description (Ctrl+F)")
         self.search_input.setAccessibleName("Search models")
         self.search_input.setClearButtonEnabled(True)
@@ -825,7 +832,12 @@ class LauncherUISetupMixin:
 
         self.zoom_slider = QSlider(Qt.Orientation.Horizontal)
         self.zoom_slider.setRange(0, self._ZOOM_SLIDER_STEPS)
-        self.zoom_slider.setFixedWidth(140)
+        self.zoom_slider.setMinimumWidth(140)
+        from PyQt6.QtWidgets import QSizePolicy
+        self.zoom_slider.setSizePolicy(
+            QSizePolicy.Policy.MinimumExpanding,
+            self.zoom_slider.sizePolicy().verticalPolicy(),
+        )
         self.zoom_slider.setToolTip("Adjust the size of the model tiles")
         self.zoom_slider.setAccessibleName("Tile zoom")
         self.zoom_slider.setAccessibleDescription(_build_zoom_accessible_description())
