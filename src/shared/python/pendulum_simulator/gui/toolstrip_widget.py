@@ -35,6 +35,10 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.pendulum_simulator.gui.responsive import (
+    apply_overlay_checkbox_sizing,
+)
+
 # ---------------------------------------------------------------------------
 # Stylesheet constants
 # ---------------------------------------------------------------------------
@@ -214,7 +218,7 @@ def _overlay_row(
     row = QHBoxLayout()
     row.setContentsMargins(0, 0, 0, 0)
     row.setSpacing(3)
-    checkbox.setFixedWidth(130)
+    apply_overlay_checkbox_sizing(checkbox)
     row.addWidget(checkbox)
     row.addWidget(slider, stretch=1)
     row.addWidget(label)

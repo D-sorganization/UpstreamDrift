@@ -1,0 +1,148 @@
+"""Responsive PyQt6 sizing helpers for fleet desktop applications.
+
+The helpers in this module keep text-bearing widgets readable under narrow
+window sizes. They use font metrics and Qt size policies instead of hard-coded
+pixel widths, so consumers can also reapply them after application zoom changes.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Iterable, Sequence
+from dataclasses import dataclass
+
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFontMetrics
+from PyQt6.QtWidgets import (
+    QAbstractButton,
+    QComboBox,
+    QFormLayout,
+    QFrame,
+    QLabel,
+    QLineEdit,
+    QScrollArea,
+    QSizePolicy,
+    QWidget,
+)
+
+
+@dataclass(frozen=True)
+class TextWidthSpec:
+    """Contract for computing readable minimum widths.
+
+    Preconditions:
+    - all pixel values must be non-negative.
+    - ``maximum_px`` must be greater than or equal to ``minimum_px`` when set.
+    """
+
+    padding_px: int = 16
+    chrome_px: int = 0
+    minimum_px: int = 0
+    maximum_px: int | None = None
+
+    def validate(self) -> None:
+        """Validate the sizing contract."""
+        _require_non_negative("padding_px", self.padding_px)
+        _require_non_negative("chrome_px", self.chrome_px)
+        _require_non_negative("minimum_px", self.minimum_px)
+        if self.maximum_px is not None and self.maximum_px < self.minimum_px:
+            msg = "maximum_px must be greater than or equal to minimum_px"
+            raise ValueError(msg)
+
+
+def readable_text_width(
+    metrics: QFontMetrics,
+    texts: Sequence[str],
+    spec: TextWidthSpec,
+) -> int:
+    """Return a readable width for the widest string in ``texts``."""
+    spec.validate()
+    candidates = _normalise_texts(texts)
+    widest = max(_horizontal_advance(metrics, text) for text in candidates)
+    width = max(spec.minimum_px, widest + spec.padding_px + spec.chrome_px)
+    if spec.maximum_px is None:
+        return width
+    return min(width, spec.maximum_px)
+
+
+def set_text_minimum_width(
+    widget: QWidget,
+    spec: TextWidthSpec | None = None,
+    texts: Iterable[str] | None = None,
+) -> int:
+    """Apply a readable minimum width to a text-bearing widget."""
+    width_spec = spec or TextWidthSpec()
+    candidates = list(texts) if texts is not None else derive_text_candidates(widget)
+    width = readable_text_width(widget.fontMetrics(), candidates, width_spec)
+    widget.setMinimumWidth(width)
+    widget.setSizePolicy(
+        QSizePolicy.Policy.MinimumExpanding,
+        widget.sizePolicy().verticalPolicy(),
+    )
+    return width
+
+
+def derive_text_candidates(widget: QWidget) -> list[str]:
+    """Return visible text candidates from common Qt widgets."""
+    if _is_widget_type(widget, QComboBox):
+        return _combo_items(widget)
+    if _is_widget_type(widget, QLineEdit):
+        return _line_edit_texts(widget)
+    if _is_widget_type(widget, QAbstractButton) or _is_widget_type(widget, QLabel):
+        return [widget.text()]
+    return [widget.accessibleName() or widget.toolTip() or widget.objectName()]
+
+
+def configure_form_layout_for_readability(layout: QFormLayout) -> None:
+    """Configure a form layout to wrap long rows instead of clipping fields."""
+    layout.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapLongRows)
+    layout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
+    layout.setLabelAlignment(Qt.AlignmentFlag.AlignLeft)
+    layout.setFormAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+
+
+def wrap_in_scroll_area(widget: QWidget, minimum_width: int = 0) -> QScrollArea:
+    """Wrap ``widget`` in a resizable, frame-free scroll area."""
+    _require_non_negative("minimum_width", minimum_width)
+    scroll = QScrollArea()
+    scroll.setWidget(widget)
+    scroll.setWidgetResizable(True)
+    scroll.setFrameShape(QFrame.Shape.NoFrame)
+    if minimum_width:
+        scroll.setMinimumWidth(minimum_width)
+    return scroll
+
+
+def _combo_items(combo: QComboBox) -> list[str]:
+    return [combo.itemText(index) for index in range(combo.count())]
+
+
+def _line_edit_texts(line_edit: QLineEdit) -> list[str]:
+    return [line_edit.text() or line_edit.placeholderText()]
+
+
+def _normalise_texts(texts: Sequence[str]) -> list[str]:
+    candidates = [text for text in texts if text]
+    if not candidates:
+        msg = "texts must contain at least one non-empty value"
+        raise ValueError(msg)
+    return candidates
+
+
+def _require_non_negative(name: str, value: int) -> None:
+    if value < 0:
+        msg = f"{name} must be non-negative"
+        raise ValueError(msg)
+
+
+def _is_widget_type(widget: QWidget, widget_type: object) -> bool:
+    return isinstance(widget_type, type) and isinstance(widget, widget_type)
+
+
+def _horizontal_advance(metrics: QFontMetrics, text: str) -> int:
+    width = metrics.horizontalAdvance(text)
+    if isinstance(width, int):
+        return width
+    try:
+        return int(width)
+    except (TypeError, ValueError):
+        return len(text) * 7

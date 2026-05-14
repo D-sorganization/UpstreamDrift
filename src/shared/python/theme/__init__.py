@@ -103,7 +103,22 @@ try:
         setup_themed_app,
     )
     from .font_manager import FontManager, get_font_manager
+    from .responsive import (
+        TextWidthSpec,
+        configure_form_layout_for_readability,
+        derive_text_candidates,
+        readable_text_width,
+        set_text_minimum_width,
+        wrap_in_scroll_area,
+    )
     from .theme_manager import ThemeManager, get_theme_manager
+    from .zoom import (
+        ApplicationZoomController,
+        ZoomConfig,
+        ZoomTokenSet,
+        install_application_zoom,
+        scale_px,
+    )
 
     _PYQT6_AVAILABLE = True
 except ImportError:
@@ -124,6 +139,17 @@ except ImportError:
     ThemeListItem = None  # type: ignore[assignment, misc]
     ThemeManagerDialog = None  # type: ignore[assignment, misc]
     ThemePreviewWidget = None  # type: ignore[assignment, misc]
+    ApplicationZoomController = None  # type: ignore[assignment, misc]
+    ZoomConfig = None  # type: ignore[assignment, misc]
+    ZoomTokenSet = None  # type: ignore[assignment, misc]
+    TextWidthSpec = None  # type: ignore[assignment, misc]
+    configure_form_layout_for_readability = None  # type: ignore[assignment]
+    derive_text_candidates = None  # type: ignore[assignment]
+    install_application_zoom = None  # type: ignore[assignment]
+    readable_text_width = None  # type: ignore[assignment]
+    scale_px = None  # type: ignore[assignment]
+    set_text_minimum_width = None  # type: ignore[assignment]
+    wrap_in_scroll_area = None  # type: ignore[assignment]
 
 # ---------------------------------------------------------------------------
 # Backward-compatible aliases for launcher code that references the old API.
@@ -192,6 +218,10 @@ __all__ = [
     "ThemeListItem",
     "ThemeManagerDialog",
     "ThemePreviewWidget",
+    "ApplicationZoomController",
+    "ZoomConfig",
+    "ZoomTokenSet",
+    "TextWidthSpec",
     # Color utilities
     "BUILTIN_THEMES",
     "CHART_COLORS",
@@ -204,6 +234,13 @@ __all__ = [
     "is_dark_theme",
     "is_valid_hex_color",
     "normalise_hex_color",
+    "configure_form_layout_for_readability",
+    "derive_text_candidates",
+    "install_application_zoom",
+    "readable_text_width",
+    "scale_px",
+    "set_text_minimum_width",
+    "wrap_in_scroll_area",
     # Sidekick design-token adapter
     "REQUIRED_SIDEKICK_TOKENS",
     "get_current_sidekick_tokens",

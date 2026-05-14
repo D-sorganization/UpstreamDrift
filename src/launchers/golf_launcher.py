@@ -825,6 +825,12 @@ class GolfLauncher(
         super().closeEvent(event)
 
 
+def _install_global_ui_zoom(app: QApplication) -> None:
+    from src.launchers.app_zoom import install_global_ui_zoom
+
+    install_global_ui_zoom(app)
+
+
 def main() -> None:
     """Application entry point."""
     import traceback
@@ -850,6 +856,7 @@ def main() -> None:
 
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
+    _install_global_ui_zoom(app)
 
     # Set global application icon
     icon_path = ASSETS_DIR / "golf_logo.png"

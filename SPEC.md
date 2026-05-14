@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.167                                            |
+| **Spec Version**        | 1.0.168                                            |
 | **Last Spec Update**    | 2026-05-14                                         |
 
 ## 2. Purpose & Mission
@@ -693,6 +693,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-12 | 1.0.158 | Restricted review-comment archive commits to manual workflow dispatch runs so pull request synchronize events cannot push `docs/review_archive` churn onto feature branches, erase current-head checks, or block focused chat and GUI fixes behind generated archive drift. |
 | 2026-05-12 | 1.0.162 | Clarified shared chat smoke coverage so the public API contract asserts the exported `ChatDockWidget` and `ChatMessageBubble` symbols from `src/shared/python/chat/__init__.py`. |
 | 2026-05-12 | 1.0.159 | Updated workflow governance for the Rust realtime soak workflow by pinning its Rust toolchain action to a full commit SHA and registering the workflow in the active inventory with the current 71-workflow no-growth cap. |
+| 2026-05-14 | 1.0.168 | Added shared PyQt responsive sizing helpers, fleet-style application zoom wiring for the classic launcher, and a pendulum toolstrip checkbox migration from fixed width to text-aware minimum sizing. |
 | 2026-05-12 | 1.0.160 | Added a documented hidden-launcher contract so hidden feature entries must carry an owner and reason, preventing undiscoverable app features from drifting without accountability (#5314). |
 | 2026-05-12 | 1.0.162 | Added a canonical launcher category taxonomy and category grouping contract so provider-backed entries such as biomechanics tools are discoverable instead of being rejected by legacy manifest validation (#5314). |
 | 2026-05-12 | 1.0.163 | Added Tools Pendulum Simulator nested provider-manifest discovery and provider-relative source-root resolution so launcher discovery can expose tool packages published below `Tools/src` without copying tool code (#5314). |
