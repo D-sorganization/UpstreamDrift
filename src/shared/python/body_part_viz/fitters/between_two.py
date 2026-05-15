@@ -80,7 +80,7 @@ class BetweenTwoMarkersFitter:
         b_valid = marker_b[idx]
 
         midpoint = 0.5 * (a_valid + b_valid)
-        delta = b_valid - a_valid
+        delta = (b_valid - a_valid).astype(np.float64)
         length = np.linalg.norm(delta, axis=1)
 
         # DbC: collinear markers (zero-length segment) cannot define orientation.
