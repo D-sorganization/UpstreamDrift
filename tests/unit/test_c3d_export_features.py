@@ -139,7 +139,7 @@ class TestCaptureExportFeatures:
             sample_dataframe, str(output_path), file_format="npz"
         )
 
-        with np.load(output_path) as archive:
+        with np.load(output_path, allow_pickle=False) as archive:
             assert "_metadata" in archive
             meta = json.loads(str(archive["_metadata"]))
             assert meta["schema_version"] == SCHEMA_VERSION

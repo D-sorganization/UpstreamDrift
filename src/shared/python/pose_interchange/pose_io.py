@@ -208,7 +208,7 @@ def _load_pinocchio(path: Path) -> CanonicalPose:
     actual: Path | None = next((c for c in candidates if c.exists()), None)
     if actual is None:
         raise FileNotFoundError(f"pinocchio archive not found: {path}")
-    with np.load(actual) as bundle:
+    with np.load(actual, allow_pickle=False) as bundle:
         if "q" not in bundle.files:
             raise ValueError(f"{actual}: pinocchio archive missing required 'q' array")
         q = np.asarray(bundle["q"], dtype=float)

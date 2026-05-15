@@ -88,3 +88,8 @@
 **Vulnerability:** Arbitrary Code Execution via `np.load(..., allow_pickle=True)`
 **Learning:** Legacy ML saving routines (`_bc.py`, `_gail.py`) directly dumped nested dictionaries (neural net layers, training config) into `.npz` files, which mandated `allow_pickle=True` to reload. This creates a critical insecure deserialization vulnerability.
 **Prevention:** Always flatten complex objects before saving. Serialize dictionaries or configurations into JSON strings, and extract individual layer weights (`W`, `b`) into separate numpy arrays with a primitive naming schema (`layer_0_W`, `layer_0_b`). This pattern completely eliminates the need for Python pickling during deserialization.
+## 2024-05-15 - Insecure Deserialization via np.load
+
+**Vulnerability:** Found uses of `np.load` without explicitly passing `allow_pickle=False` when loading `.npy` and `.npz` files (e.g., in `src/shared/python/physics/_topography_io.py`, `src/shared/python/pose_interchange/pose_io.py`, `src/engines/physics_engines/putting_green/python/_green_loader.py`, `src/engines/physics_engines/putting_green/python/_surface_io.py`).
+**Learning:** `np.load` in older numpy versions and by default can allow loading pickled python objects which is prone to arbitrary code execution attacks. Always explicitly pass `allow_pickle=False` unless absolutely necessary and loading trusted data.
+**Prevention:** Explicitly pass `allow_pickle=False` when using `np.load` or `np.savez`.

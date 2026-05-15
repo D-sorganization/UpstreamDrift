@@ -73,7 +73,7 @@ class _TopographyIOMixin:
             raise ValueError("filepath must be provided")
         if not (filepath is not None):
             raise ValueError("filepath must be provided")
-        heightmap = np.load(filepath)
+        heightmap = np.load(filepath, allow_pickle=False)
 
         if width is not None:
             self._bounds.max_x = self._bounds.min_x + width

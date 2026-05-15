@@ -135,7 +135,7 @@ def load_topographical_data(
         sim.green.height = height
 
     if suffix == ".npy":
-        heightmap = np.load(filepath)
+        heightmap = np.load(filepath, allow_pickle=False)
         sim.green.set_heightmap(heightmap)
     elif suffix == ".csv" or suffix in (".tif", ".tiff"):
         sim.green.load_from_file(filepath)

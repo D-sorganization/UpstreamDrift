@@ -30,7 +30,7 @@ class SurfaceIOMixin:
         suffix = filepath.suffix.lower()
 
         if suffix == ".npy":
-            heightmap = np.load(filepath)
+            heightmap = np.load(filepath, allow_pickle=False)
             self.set_heightmap(heightmap)  # type: ignore[attr-defined]
 
         elif suffix == ".csv":
