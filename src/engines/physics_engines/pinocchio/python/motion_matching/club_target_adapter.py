@@ -122,13 +122,13 @@ def _validate_stub_target(t: ClubTarget) -> None:  # noqa: C901
     for name, arr in (("butt", t.butt), ("clubhead", t.clubhead)):
         if not np.all(np.isfinite(arr)):
             raise ValueError(f"{name} contains NaN or Inf")
-        norms = np.linalg.norm(arr, axis=1)
+        norms = np.sqrt(np.einsum("ij,ij->i", arr, arr))
         if np.any(norms >= _MAX_POSITION_NORM_M):
             raise ValueError(
                 f"{name} has |r| >= {_MAX_POSITION_NORM_M} m "
                 f"(max {float(norms.max()):.3f})"
             )
-    qnorms = np.linalg.norm(t.club_quat, axis=1)
+    qnorms = np.sqrt(np.einsum("ij,ij->i", t.club_quat, t.club_quat))
     if np.any(np.abs(qnorms - 1.0) > _QUAT_NORM_TOL):
         max_dev = float(np.abs(qnorms - 1.0).max())
         raise ValueError(

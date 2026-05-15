@@ -316,7 +316,7 @@ def _normalise_quat_rows(q: NDArray[np.float64]) -> NDArray[np.float64]:
     flip_mask = out[:, 0] < 0.0
     out[flip_mask] = -out[flip_mask]
     # Re-check norms (post-flip should still be unit).
-    err = np.abs(np.linalg.norm(out, axis=1) - 1.0).max()
+    err = np.abs(np.sqrt(np.einsum("ij,ij->i", out, out)) - 1.0).max()
     if err > _QUAT_NORM_TOL:  # pragma: no cover -- guarded above
         raise ValueError(
             f"club_quat rows could not be normalised (max |1 - |q|| = {err:.2e})"

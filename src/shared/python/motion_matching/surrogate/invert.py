@@ -144,7 +144,7 @@ def _target_to_tensors(
         butt_np = _resample_uniform(butt_np, seq_len)
         head_np = _resample_uniform(head_np, seq_len)
         quat_np = _resample_uniform(quat_np, seq_len)
-        norms = np.linalg.norm(quat_np, axis=-1, keepdims=True)
+        norms = np.sqrt(np.einsum("...i,...i->...", quat_np, quat_np))[..., np.newaxis]
         quat_np = quat_np / np.maximum(norms, 1.0e-8)
     device = next(surrogate.parameters()).device
     butt_t = torch.from_numpy(butt_np).to(device).unsqueeze(0)

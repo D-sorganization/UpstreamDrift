@@ -222,7 +222,7 @@ def _build_targets_from_compact(
         chs = np.asarray(block["clubhead_speed_mph"], dtype=np.float32).reshape(-1, 1)
         # shaft_axis -> az/polar
         shaft = r_ch - r_gr
-        norm = np.linalg.norm(shaft, axis=-1, keepdims=True)
+        norm = np.sqrt(np.einsum("...i,...i->...", shaft, shaft))[..., np.newaxis]
         norm = np.maximum(norm, 1e-12)
         unit = shaft / norm
         azimuth = np.arctan2(unit[:, 1], unit[:, 0])

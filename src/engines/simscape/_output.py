@@ -142,7 +142,7 @@ class SimscapeOutput:
                 f"SimscapeOutput.q_club must have shape (N={n}, 4); "
                 f"got {self.q_club.shape}"
             )
-        norms = np.linalg.norm(self.q_club, axis=1)
+        norms = np.sqrt(np.einsum("ij,ij->i", self.q_club, self.q_club))
         if not np.all(np.abs(norms - 1.0) < _TOL_QUAT_NORM):
             max_dev = float(np.max(np.abs(norms - 1.0)))
             raise ValueError(

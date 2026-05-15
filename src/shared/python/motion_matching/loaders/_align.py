@@ -119,6 +119,6 @@ def _slerp_series(
         span = raw_t[j + 1] - raw_t[j]
         alpha = 0.0 if span == 0.0 else (t - raw_t[j]) / span
         out[i] = slerp(raw_q[j], raw_q[j + 1], float(alpha))
-    norms = np.linalg.norm(out, axis=1, keepdims=True)
+    norms = np.sqrt(np.einsum("ij,ij->i", out, out))[:, np.newaxis]
     norms[norms == 0.0] = 1.0
     return out / norms

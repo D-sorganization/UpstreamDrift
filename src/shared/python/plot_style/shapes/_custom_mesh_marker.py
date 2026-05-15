@@ -33,7 +33,7 @@ def _normalise_to_unit_radius(
     """Translate to AABB centroid and rescale so the bounding sphere is 1."""
     centroid = (vertices.min(axis=0) + vertices.max(axis=0)) * 0.5
     centred = vertices - centroid
-    radii = np.linalg.norm(centred, axis=1)
+    radii = np.sqrt(np.einsum("ij,ij->i", centred, centred))
     max_radius = float(radii.max())
     if max_radius <= 0.0:
         raise ValueError("custom mesh has zero extent; cannot normalise to unit radius")

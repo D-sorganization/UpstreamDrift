@@ -459,7 +459,7 @@ class MatplotlibMarkerRenderer:
         # Normalise so bounding sphere = 1, then scale by radius.
         centroid = (verts.min(axis=0) + verts.max(axis=0)) * 0.5
         centred = verts - centroid
-        radii = np.linalg.norm(centred, axis=1)
+        radii = np.sqrt(np.einsum("ij,ij->i", centred, centred))
         max_r = float(radii.max()) if radii.size else 1.0
         if max_r <= 0.0:
             max_r = 1.0

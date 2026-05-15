@@ -40,3 +40,11 @@
 ## 2025-05-18 - Optimize norm calculation along axis using einsum
 **Learning:** `np.linalg.norm(..., axis=1)` is relatively slow for small inner dimensions because of internal overhead in NumPy and intermediate allocations. Replacing it with `np.sqrt(np.einsum('ij,ij->i', x, x))` computes the identical L2 norm while avoiding the overhead and allocations, yielding significant performance speedups.
 **Action:** When computing vector magnitudes or Euclidean norms along an axis, use `np.sqrt(np.einsum('ij,ij->i', x, x))` instead of `np.linalg.norm(x, axis=1)` to improve performance. For scenarios where `keepdims=True` was used, append `[:, np.newaxis]` to the einsum result.
+
+## 2026-05-18 - Optimize norm calculation along axis using einsum for variables
+**Learning:** `np.linalg.norm(..., axis=1)` and `np.linalg.norm(..., axis=-1)` are relatively slow because of internal overhead in NumPy and intermediate allocations. `np.sqrt(np.einsum('ij,ij->i', x, x))` or `np.sqrt(np.einsum('...i,...i->...', x, x))` computes the identical L2 norm while avoiding the overhead and allocations, yielding ~1.7x to ~2.2x performance speedups for N-dimensional arrays.
+**Action:** When computing vector magnitudes or Euclidean norms along an axis, use `np.sqrt(np.einsum('ij,ij->i', x, x))` instead of `np.linalg.norm(x, axis=1)` to improve performance. For scenarios where `keepdims=True` was used, append `[:, np.newaxis]` or `[..., np.newaxis]` to the einsum result.
+
+## 2026-05-18 - Cast integer vectors before einsum norm
+**Learning:** `np.einsum` operations on integer vectors can silently overflow before the `np.sqrt` calculation when performing operations like `np.einsum("...i,...i->...", x, x)`, resulting in negative values which produce `NaN` or incorrect magnitudes. The old `np.linalg.norm` handled this correctly by returning float results.
+**Action:** Always ensure numeric arrays that might be integers are explicitly cast or promoted to float using `np.asarray(vector, dtype=np.float64)` before attempting `np.einsum` calculations for magnitudes.

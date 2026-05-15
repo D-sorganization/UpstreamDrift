@@ -126,11 +126,11 @@ def _normalise_quaternions(quat: NDArray[np.float64]) -> NDArray[np.float64]:
     if quat.shape[1] != 4:
         raise ValueError(f"quat must have 4 columns, got {quat.shape}")
     out = np.asarray(quat, dtype=np.float64).copy()
-    norms = np.linalg.norm(out, axis=1, keepdims=True)
+    norms = np.sqrt(np.einsum("ij,ij->i", out, out))[:, np.newaxis]
     # Identity fallback for any degenerate row.
     bad = norms.reshape(-1) < 1.0e-12
     out[bad] = np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float64)
-    norms = np.linalg.norm(out, axis=1, keepdims=True)
+    norms = np.sqrt(np.einsum("ij,ij->i", out, out))[:, np.newaxis]
     out = out / norms
     flip = out[:, 0] < 0
     out[flip] = -out[flip]
