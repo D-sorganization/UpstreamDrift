@@ -1,0 +1,70 @@
+"""Auto-completing line edit and text edit widgets.
+
+Provides global text prediction and variable tab completion
+using QCompleter to provide a professional UX.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from PyQt6.QtGui import QKeyEvent
+    from PyQt6.QtWidgets import QWidget
+
+from PyQt6.QtCore import QStringListModel, Qt
+from PyQt6.QtWidgets import QCompleter, QLineEdit
+
+
+class AutoCompleteLineEdit(QLineEdit):
+    """QLineEdit with global text prediction and tab completion.
+    
+    Features:
+    - Inline completion suggestions
+    - Tab-to-complete
+    - Dynamic population of dictionary terms (variables, constants)
+    """
+
+    def __init__(self, parent: QWidget | None = None, words: list[str] | None = None) -> None:
+        """Initialize the line edit with optional initial completion words."""
+        super().__init__(parent)
+        self.completer_words = words or []
+        self._setup_completer()
+
+    def _setup_completer(self) -> None:
+        """Set up the internal QCompleter with the current word list."""
+        self.model = QStringListModel(self.completer_words, self)
+        self.auto_completer = QCompleter(self.model, self)
+        
+        # Case insensitive filtering
+        self.auto_completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        
+        # Inline completion provides faded suggestion text UX
+        self.auto_completer.setCompletionMode(QCompleter.CompletionMode.InlineCompletion)
+        
+        self.setCompleter(self.auto_completer)
+
+    def set_completion_words(self, words: list[str]) -> None:
+        """Update the list of words for autocompletion dynamically.
+        
+        Args:
+            words: List of words (variables, physical constants, etc.)
+        """
+        self.completer_words = words
+        self.model.setStringList(self.completer_words)
+
+    def add_completion_words(self, words: list[str]) -> None:
+        """Add new words to the existing completion dictionary."""
+        new_set = list(set(self.completer_words + words))
+        self.set_completion_words(new_set)
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        """Handle Tab key for autocompletion to commit the inline suggestion."""
+        if event.key() == Qt.Key.Key_Tab:
+            if self.auto_completer and self.auto_completer.currentCompletion():
+                # Commit the current inline completion
+                self.setText(self.auto_completer.currentCompletion())
+                event.accept()
+                return
+                
+        super().keyPressEvent(event)

@@ -28,6 +28,7 @@ Usage:
     panel.model_selected.connect(on_select)
 """
 
+from .auto_complete import AutoCompleteLineEdit
 from .loading_button import IconLoadingButton, LoadingButton, LoadingSpinner
 from .preferences_dialog import PreferencesDialog, UserPreferences
 from .recent_models import RecentModelItem, RecentModelsPanel
@@ -40,6 +41,8 @@ from .shortcuts_overlay import (
 from .toast import Toast, ToastManager, ToastType
 
 __all__ = [
+    # Auto Complete
+    "AutoCompleteLineEdit",
     # Toast
     "Toast",
     "ToastManager",
