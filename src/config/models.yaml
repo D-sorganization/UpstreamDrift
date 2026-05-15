@@ -100,6 +100,17 @@ models:
       logo: "assets/putting_green_modern.png"
       status: "ready"
 
+  - id: "bunkershot3d"
+    name: "BunkerShot3D"
+    description: "3-D Granular Bunker-Shot Simulation"
+    type: "special_app"
+    path: "notebooks/bunkershot3d/phase1_mvp.py"
+    launcher:
+      category: "simulation"
+      logo: "assets/bunkershot_icon.png"
+      status: "ready"
+      default_launch: "tab"
+
   # =============================================================================
   # MOTION MATCHING — pose / target editors and matchers
   # =============================================================================
