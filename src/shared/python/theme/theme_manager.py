@@ -18,8 +18,9 @@ import logging
 import weakref
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, ClassVar
+from pathlib import Path
 
-from PyQt6.QtCore import QObject, QSettings, pyqtSignal
+from PyQt6.QtCore import QObject, QSettings, pyqtSignal, QStandardPaths
 
 from .colors import BUILTIN_THEMES, THEME_COLOR_KEYS, normalise_hex_color
 from .stylesheets import generate_stylesheet
@@ -444,14 +445,24 @@ class ThemeManager(QObject):
             return BUILTIN_THEMES[theme_name]
         return self.custom_themes.get(theme_name, BUILTIN_THEMES["Light"])
 
+    def _get_custom_theme_path(self) -> Path:
+        """Get the path to the user_themes.json file."""
+        config_dir = Path(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppConfigLocation))
+        config_dir.mkdir(parents=True, exist_ok=True)
+        return config_dir / "user_themes.json"
+
     def _load_custom_themes(self) -> dict[str, dict[str, str]]:
-        """Load custom themes from settings."""
-        raw_value = self.settings.value(self.CUSTOM_THEME_STORAGE_KEY, "{}", type=str)
+        """Load custom themes from user_themes.json."""
+        theme_path = self._get_custom_theme_path()
+        if not theme_path.exists():
+            return {}
+            
         try:
-            data = json.loads(raw_value)
+            with open(theme_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
             if not isinstance(data, dict):
                 raise ValueError("Invalid custom theme data structure")
-        except (json.JSONDecodeError, ValueError, TypeError) as exc:
+        except (json.JSONDecodeError, ValueError, TypeError, OSError) as exc:
             logger.warning("Failed to load custom themes: %s", exc)
             data = {}
 
@@ -469,15 +480,16 @@ class ThemeManager(QObject):
         return cleaned
 
     def _persist_custom_themes(self) -> None:
-        """Save custom themes to settings."""
+        """Save custom themes to user_themes.json."""
         to_save = {
             name: {k: v for k, v in colors.items() if k in THEME_COLOR_KEYS}
             for name, colors in self.custom_themes.items()
         }
-        self.settings.setValue(
-            self.CUSTOM_THEME_STORAGE_KEY, json.dumps(to_save, indent=2)
-        )
-        self.settings.sync()
+        try:
+            with open(self._get_custom_theme_path(), "w", encoding="utf-8") as f:
+                json.dump(to_save, f, indent=2)
+        except OSError as exc:
+            logger.error("Failed to persist custom themes: %s", exc)
 
     def _validate_custom_theme_colors(
         self, colors: dict[str, str] | Iterable[tuple[str, str]]
