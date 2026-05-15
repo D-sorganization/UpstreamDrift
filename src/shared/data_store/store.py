@@ -7,60 +7,78 @@ for training Physics-Informed Neural Networks (PINNs).
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+
 import numpy as np
 
 
 @dataclass
 class SwingDataSequence:
     """Represents a single time-series sequence of a golf swing."""
+
     sequence_id: str
     timestamps: np.ndarray  # Shape: (N,)
     joint_angles: np.ndarray  # Shape: (N, num_joints)
     joint_velocities: np.ndarray  # Shape: (N, num_joints)
     club_pose: np.ndarray  # Shape: (N, 7) - quaternion + translation
     applied_torques: np.ndarray  # Shape: (N, num_joints)
-    metadata: Dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, str] = field(default_factory=dict)
 
     def __post_init__(self):
         """Validate dimensions upon initialization."""
         n_steps = len(self.timestamps)
         if len(self.joint_angles) != n_steps:
-            raise ValueError("Mismatched dimensions: timestamps vs joint_angles")
+            raise ValueError(
+                f"joint_angles length {len(self.joint_angles)} != timestamps length {n_steps}"
+            )
+        if len(self.joint_velocities) != n_steps:
+            raise ValueError(
+                f"joint_velocities length {len(self.joint_velocities)} != timestamps length {n_steps}"
+            )
+        if len(self.club_pose) != n_steps:
+            raise ValueError(
+                f"club_pose length {len(self.club_pose)} != timestamps length {n_steps}"
+            )
+        if len(self.applied_torques) != n_steps:
+            raise ValueError(
+                f"applied_torques length {len(self.applied_torques)} != timestamps length {n_steps}"
+            )
 
 
 class SimulationDataStore:
     """In-memory (or database-backed) store for golf simulation sequences."""
-    
-    def __init__(self, storage_path: Optional[str] = None):
+
+    def __init__(self, storage_path: str | None = None):
         """Initialize the data store.
-        
+
         Args:
             storage_path: Optional path to SQLite/HDF5 file. If None, uses in-memory.
         """
         self.storage_path = storage_path
-        self._sequences: Dict[str, SwingDataSequence] = {}
-        
+        self._sequences: dict[str, SwingDataSequence] = {}
+
     def add_sequence(self, sequence: SwingDataSequence) -> None:
         """Add a new swing sequence to the store."""
         if sequence.sequence_id in self._sequences:
             raise KeyError(f"Sequence {sequence.sequence_id} already exists.")
         self._sequences[sequence.sequence_id] = sequence
-        
+
     def get_sequence(self, sequence_id: str) -> SwingDataSequence:
         """Retrieve a sequence by its ID."""
         return self._sequences[sequence_id]
-        
-    def list_sequences(self) -> List[str]:
+
+    def list_sequences(self) -> list[str]:
         """Return a list of all sequence IDs."""
         return list(self._sequences.keys())
 
     def flush_to_disk(self) -> None:
         """Serialize data to the storage backend (HDF5 or Database).
-        
-        TODO: Implement HDF5/Zarr serialization for high-performance ML ingestion.
+
+        Raises:
+            NotImplementedError: Disk persistence is not yet implemented. Callers
+                that provide a storage_path must not rely on this method until
+                HDF5/Zarr serialization is complete.
         """
-        if not self.storage_path:
-            return
-        # Implementation placeholder
-        pass
+        if self.storage_path is not None:
+            raise NotImplementedError(
+                "flush_to_disk: disk persistence is not yet implemented"
+            )
