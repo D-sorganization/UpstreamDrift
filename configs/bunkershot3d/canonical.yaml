@@ -1,0 +1,37 @@
+# Canonical Bunker Shot Configuration
+# Used by all three backends (Chrono, LIGGGHTS, MPM)
+
+bunker_bed:
+  domain:
+    length_x: 0.4  # m
+    width_y: 0.3   # m
+    depth_z: 0.1   # m
+  boundary: "fixed" # "periodic" or "fixed"
+
+grain_population:
+  count: 50000
+  diameter_mean: 0.0004 # m (0.4 mm)
+  diameter_sigma_log: 0.2
+  density: 2650.0 # kg/m^3 (silica sand)
+  coarse_graining_factor: 1.0 # >1 if scaling up grains
+
+contact_model:
+  # Base parameters used to derive backend-specific constants
+  friction_coefficient: 0.5
+  restitution_coefficient: 0.3
+  youngs_modulus: 1.0e7 # Pa
+  poisson_ratio: 0.25
+
+clubhead:
+  loft_deg: 60.0
+  bounce_deg: 10.0
+  width: 0.05 # m
+  height: 0.04 # m
+  mass: 0.300 # kg
+
+trajectory:
+  file: "configs/bunkershot3d/reference_swing.csv"
+  
+output:
+  downsample_grains: 10 # Only save grains every N steps
+  rate_hz: 2000.0 # 2kHz wrench output
