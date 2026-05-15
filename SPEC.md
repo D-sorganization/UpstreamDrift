@@ -554,6 +554,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 ## 12. Change Log
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| 2026-05-15 | 1.0.171 | ⚡ Bolt: Optimize norm computation using einsum in between_two fitter |
 | 2026-05-14 | 1.0.170 | ⚡ Bolt: Optimize sum of squares along axis in perstep train metrics |
 | 2026-05-14 | 1.0.169 | Added a shared row norm helper for vectorized norm calculations in motion-matching and validation paths. |
 | 2026-05-14 | 1.0.168 | Adopted responsive sizing and application zoom across the main launcher, cross-engine dashboard, and shared calculator widgets, with launcher regression coverage for the new scaling contract. |
