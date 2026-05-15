@@ -2,7 +2,6 @@
 Common result schema (HDF5) for BunkerShot3D results.
 """
 
-
 from pathlib import Path
 import h5py
 import numpy as np

@@ -3,11 +3,11 @@ LIGGGHTS backend driver for BunkerShot3D.
 """
 
 from pathlib import Path
-import yaml
 import contextlib
 import subprocess
 import tempfile
 import os
+from bunkershot3d.config import BunkerShotConfig
 
 
 class LiggghtsDriver:
@@ -15,8 +15,7 @@ class LiggghtsDriver:
 
     def __init__(self, config_path: Path | str) -> None:
         self.config_path = Path(config_path)
-        with open(self.config_path) as f:
-            self.config = yaml.safe_load(f)
+        self.config = BunkerShotConfig.from_yaml(self.config_path)
 
     def _generate_input_deck(self, work_dir: Path) -> Path:
         """Generate the LIGGGHTS LIGGGHTS.in script."""

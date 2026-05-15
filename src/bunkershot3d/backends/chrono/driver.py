@@ -3,8 +3,8 @@ Project Chrono backend driver for BunkerShot3D.
 """
 
 from pathlib import Path
-import yaml
 import numpy as np
+from bunkershot3d.config import BunkerShotConfig
 
 
 class ChronoDriver:
@@ -12,8 +12,7 @@ class ChronoDriver:
 
     def __init__(self, config_path: Path | str) -> None:
         self.config_path = Path(config_path)
-        with open(self.config_path) as f:
-            self.config = yaml.safe_load(f)
+        self.config = BunkerShotConfig.from_yaml(self.config_path)
 
     def setup(self) -> None:
         """Setup the Chrono system (grains, clubhead, constraints)."""

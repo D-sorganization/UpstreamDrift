@@ -4,10 +4,10 @@ Uses discrete spheres as an approximation for granular media if MPM is unavailab
 """
 
 from pathlib import Path
-import yaml
 import numpy as np
 import mujoco
 from bunkershot3d.io.schema import BunkerShotResultWriter
+from bunkershot3d.config import BunkerShotConfig
 
 
 class MPMDriver:
@@ -15,24 +15,23 @@ class MPMDriver:
 
     def __init__(self, config_path: Path | str) -> None:
         self.config_path = Path(config_path)
-        with open(self.config_path) as f:
-            self.config = yaml.safe_load(f)
+        self.config = BunkerShotConfig.from_yaml(self.config_path)
 
         self.model: mujoco.MjModel | None = None
         self.data: mujoco.MjData | None = None
 
     def _generate_xml(self) -> str:
         """Generate the MJCF XML string for the bunker and clubhead."""
-        domain = self.config["bunker_bed"]["domain"]
-        lx, ly, lz = domain["length_x"], domain["width_y"], domain["depth_z"]
+        domain = self.config.bunker_bed.domain
+        lx, ly, lz = domain.length_x, domain.width_y, domain.depth_z
 
         # We will use a smaller number of spheres for draft simulation performance
-        num_grains = min(1000, self.config["grain_population"]["count"])
-        r = self.config["grain_population"]["diameter_mean"] / 2.0
+        num_grains = min(1000, self.config.grain_population.count)
+        r = self.config.grain_population.diameter_mean / 2.0
 
         # Simple clubhead block
-        ch_w = self.config["clubhead"]["width"]
-        ch_h = self.config["clubhead"]["height"]
+        ch_w = self.config.clubhead.width
+        ch_h = self.config.clubhead.height
 
         xml = f"""
         <mujoco model="bunkershot">

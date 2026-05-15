@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+
 class SwingTrajectory:
     """Represents a prescribed swing trajectory for the clubhead."""
 
