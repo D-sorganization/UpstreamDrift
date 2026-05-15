@@ -312,6 +312,11 @@ class AIAssistantPanel(QWidget):
             parent: Parent widget.
         """
         super().__init__(parent)
+        # Brand the panel as Sidekick so the PyQt shell matches the React
+        # shell's tooltip/aria label without renaming the user-facing tab.
+        self.setObjectName("SidekickAssistantPanel")
+        self.setWindowTitle("Sidekick")
+        self.setToolTip("Sidekick assistant")
         self._context = ConversationContext()
         self._adapter: BaseAgentAdapter | None = None
         self._current_worker: StreamWorker | None = None

@@ -80,3 +80,48 @@ body {
     var(--sidekick-color-focus, #58a6ff);
   outline-offset: 2px;
 }
+
+/*
+ * Sidekick design-token fallback defaults.
+ *
+ * These mirror SIDEKICK_FALLBACK_COLOR_TOKENS and SIDEKICK_STATIC_TOKENS in
+ * ui/src/api/themeClient.ts and DEFAULT_SIDEKICK_TOKENS in
+ * src/shared/python/theme/sidekick_tokens.py. applyThemeToCSSVariables() will
+ * override these at runtime once a theme loads.
+ */
+:root {
+  --sidekick-color-canvas: #1a1d23;
+  --sidekick-color-surface: #24272e;
+  --sidekick-color-surface-muted: #24272e;
+  --sidekick-color-surface-raised: #2d3748;
+  --sidekick-color-border: #3a3f4a;
+  --sidekick-color-border-strong: #4a7ba7;
+  --sidekick-color-text: #e1e4e8;
+  --sidekick-color-text-muted: #c9d1d9;
+  --sidekick-color-text-subtle: #8b949e;
+  --sidekick-color-accent: #4a7ba7;
+  --sidekick-color-accent-hover: #5a8fc4;
+  --sidekick-color-focus: #58a6ff;
+  --sidekick-color-input: #0d1117;
+  --sidekick-color-success: #3fb950;
+  --sidekick-color-warning: #d29922;
+  --sidekick-color-error: #f85149;
+  --sidekick-color-info: #58a6ff;
+  --sidekick-color-link: #58a6ff;
+  --sidekick-color-link-hover: #79b8ff;
+  --sidekick-color-selection: #264f78;
+  --sidekick-color-selection-text: #ffffff;
+  --sidekick-space-1: 4px;
+  --sidekick-space-2: 8px;
+  --sidekick-space-3: 12px;
+  --sidekick-space-4: 16px;
+  --sidekick-space-6: 24px;
+  --sidekick-space-8: 32px;
+  --sidekick-radius-sm: 3px;
+  --sidekick-radius-md: 6px;
+  --sidekick-radius-lg: 8px;
+  --sidekick-radius-chat: 8px;
+  --sidekick-border-width: 1px;
+  --sidekick-focus-width: 2px;
+  --sidekick-font-family: Inter, Segoe UI, system-ui, sans-serif;
+}

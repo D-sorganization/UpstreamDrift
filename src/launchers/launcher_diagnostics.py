@@ -152,6 +152,7 @@ class LauncherDiagnostics:
         self.check_pyqt6_availability()
         self.check_engine_availability()
         self.check_biomech_siblings()
+        self.check_tools_sidebar()
 
         # Calculate summary
         passed = sum(1 for r in self.results if r.status == "pass")
@@ -795,6 +796,62 @@ class LauncherDiagnostics:
             details=details,
             duration_ms=(time.time() - start) * 1000,
         )
+        self.results.append(result)
+        return result
+
+    def check_tools_sidebar(self) -> DiagnosticResult:
+        """Report whether the optional shared Tools sidebar is importable.
+
+        The sidebar widget itself ships from the sibling
+        ``D-sorganization/Tools`` repository. When that repo is not installed
+        next to UpstreamDrift the launcher continues to work; this check
+        surfaces whether the Sidekick design tokens are actually reaching a
+        PyQt sidebar or being dropped on the floor.
+        """
+        start = time.time()
+        details: dict[str, Any] = {}
+
+        try:
+            from src.shared.python.gui_launcher.tools_sidebar_integration import (
+                _resolved_sidebar_module_name,
+                is_tools_sidebar_available,
+            )
+
+            available = is_tools_sidebar_available()
+            module_name = _resolved_sidebar_module_name() if available else None
+            details["available"] = available
+            details["module_name"] = module_name
+
+            if available:
+                result = DiagnosticResult(
+                    name="tools_sidebar",
+                    status="pass",
+                    message=f"Tools sidebar available ({module_name})",
+                    details=details,
+                    duration_ms=(time.time() - start) * 1000,
+                )
+            else:
+                result = DiagnosticResult(
+                    name="tools_sidebar",
+                    status="warning",
+                    message=(
+                        "Tools sidebar not installed - launcher will run "
+                        "without the optional PyQt sidebar (Sidekick tokens "
+                        "still apply to the React/Tauri shell)"
+                    ),
+                    details=details,
+                    duration_ms=(time.time() - start) * 1000,
+                )
+        except ImportError as exc:
+            details["import_error"] = str(exc)
+            result = DiagnosticResult(
+                name="tools_sidebar",
+                status="warning",
+                message=f"Tools sidebar probe unavailable: {exc}",
+                details=details,
+                duration_ms=(time.time() - start) * 1000,
+            )
+
         self.results.append(result)
         return result
 

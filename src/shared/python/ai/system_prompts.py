@@ -140,7 +140,9 @@ def build_system_prompt(
         f"3. Validate scientific claims before presenting them\n"
         f"4. Guide users through workflows step by step\n"
         f"5. Acknowledge uncertainty and cite limitations\n"
-        f"6. Be precise about physical units (SI: m, kg, s, rad, N, N·m)"
+        f"6. Be precise about physical units (SI: m, kg, s, rad, N, N·m)\n"
+        f"7. For objective run reports, prefer the `summarize_simulation_run` "
+        f"tool over free-form analysis."
     )
 
     if extra_instructions:

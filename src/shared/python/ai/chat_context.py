@@ -1,0 +1,267 @@
+"""In-memory app-state ring buffer for the Sidekick chat assistant.
+
+A thread-safe, fixed-capacity FIFO of recent app/diagnostic events so the
+chat WebSocket layer can inject a compact "recent app state" section into
+the assistant's system prompt.
+
+Privacy: :func:`get_chat_context` strips any leaf value whose key (or, for
+strings, value) matches ``(?i)(password|token|secret|api_key|file_path|
+/home/|C:\\)``; matches are replaced with ``"<redacted>"``.
+
+Size cap: the dump is capped at ~4 KB; if the JSON encoding exceeds the
+cap, oldest events are dropped from the dump (the buffer is unchanged).
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import threading
+from collections import deque
+from collections.abc import Iterable, Mapping
+from typing import Any
+
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
+
+# ── Constants ────────────────────────────────────────────────────────
+
+DEFAULT_CAPACITY: int = 50
+DEFAULT_MAX_BYTES: int = 4096
+_REDACTED: str = "<redacted>"
+
+# Pattern matching keys (and value substrings) that almost certainly carry
+# secrets or PII. Matched case-insensitively.
+_PRIVACY_PATTERN: re.Pattern[str] = re.compile(
+    r"(password|token|secret|api[_-]?key|file_path|/home/|C:\\)",
+    re.IGNORECASE,
+)
+
+
+# ── Ring buffer ──────────────────────────────────────────────────────
+
+
+class AppStateRingBuffer:
+    """Thread-safe, fixed-capacity FIFO buffer of app/diagnostic events.
+
+    The buffer is a "what just happened" sliding window, not a log: when
+    ``capacity`` is exceeded the oldest event is dropped to make room.
+
+    Args:
+        capacity: Maximum number of events retained. Must be a positive int.
+
+    Raises:
+        TypeError: If ``capacity`` is not an int.
+        ValueError: If ``capacity`` is not positive.
+    """
+
+    def __init__(self, capacity: int = DEFAULT_CAPACITY) -> None:
+        if not isinstance(capacity, int):
+            raise TypeError("capacity must be an int")
+        if capacity <= 0:
+            raise ValueError("capacity must be a positive integer")
+        self._capacity = capacity
+        self._events: deque[dict[str, Any]] = deque(maxlen=capacity)
+        self._lock = threading.Lock()
+
+    @property
+    def capacity(self) -> int:
+        """Return the maximum number of events retained."""
+        return self._capacity
+
+    def __len__(self) -> int:
+        """Return the current number of buffered events."""
+        with self._lock:
+            return len(self._events)
+
+    def record(self, category: str, payload: Mapping[str, Any]) -> None:
+        """Append a single event.
+
+        Args:
+            category: Non-empty event category (e.g. ``"diagnostic"``).
+            payload: Mapping of event fields. Shallow-copied on insertion.
+
+        Raises:
+            TypeError: If ``category`` is not a string or ``payload`` is
+                not a Mapping.
+            ValueError: If ``category`` is empty.
+        """
+        if not isinstance(category, str):
+            raise TypeError("category must be a string")
+        if not category.strip():
+            raise ValueError("category must be a non-empty string")
+        if not isinstance(payload, Mapping):
+            raise TypeError("payload must be a Mapping")
+
+        event = {"category": category, "payload": dict(payload)}
+        with self._lock:
+            self._events.append(event)
+
+    def snapshot(self) -> list[dict[str, Any]]:
+        """Return a shallow copy of the buffered events (oldest first).
+
+        Returns:
+            A new list containing the current events. Safe to mutate.
+        """
+        with self._lock:
+            return [dict(event) for event in self._events]
+
+    def clear(self) -> None:
+        """Remove all buffered events."""
+        with self._lock:
+            self._events.clear()
+
+
+# Module-level singleton — created lazily so tests can swap it if needed.
+_buffer_holder: dict[str, AppStateRingBuffer | None] = {"instance": None}
+_holder_lock = threading.Lock()
+
+
+def _get_buffer() -> AppStateRingBuffer:
+    """Return the process-wide :class:`AppStateRingBuffer`."""
+    with _holder_lock:
+        if _buffer_holder["instance"] is None:
+            _buffer_holder["instance"] = AppStateRingBuffer()
+        buf = _buffer_holder["instance"]
+    if buf is None:  # pragma: no cover - defensive
+        raise RuntimeError("ring buffer was not initialized")
+    return buf
+
+
+def reset_buffer(capacity: int = DEFAULT_CAPACITY) -> None:
+    """Reset the module-level ring buffer (used by tests)."""
+    with _holder_lock:
+        _buffer_holder["instance"] = AppStateRingBuffer(capacity=capacity)
+
+
+def record_event(category: str, payload: Mapping[str, Any]) -> None:
+    """Append an event to the module-level ring buffer.
+
+    See :meth:`AppStateRingBuffer.record` for preconditions.
+    """
+    _get_buffer().record(category, payload)
+
+
+# ── Redaction ────────────────────────────────────────────────────────
+
+
+def _looks_sensitive(text: str) -> bool:
+    """Return ``True`` if ``text`` matches the privacy pattern."""
+    return bool(_PRIVACY_PATTERN.search(text))
+
+
+def _redact(value: Any, key: str | None = None) -> Any:
+    """Recursively redact sensitive keys/values.
+
+    A leaf is redacted if its key matches the privacy pattern OR its
+    value is a string containing a sensitive substring (e.g. a /home/
+    path). Mappings and lists/tuples are scrubbed recursively.
+    """
+    if key is not None and _looks_sensitive(key):
+        return _REDACTED
+
+    if isinstance(value, Mapping):
+        return {str(k): _redact(v, str(k)) for k, v in value.items()}
+
+    if isinstance(value, (list, tuple)):
+        scrubbed = [_redact(item) for item in value]
+        return scrubbed if isinstance(value, list) else tuple(scrubbed)
+
+    if isinstance(value, str) and _looks_sensitive(value):
+        return _REDACTED
+
+    return value
+
+
+# ── Public dump ──────────────────────────────────────────────────────
+
+
+def _encode(events: Iterable[Mapping[str, Any]]) -> tuple[str, int]:
+    """Serialize ``events`` to JSON and return (text, byte length)."""
+    text = json.dumps(list(events), separators=(",", ":"), default=str)
+    return text, len(text.encode("utf-8"))
+
+
+def get_chat_context(
+    max_bytes: int = DEFAULT_MAX_BYTES,
+) -> dict[str, Any]:
+    """Return a redacted, size-capped snapshot of recent app state.
+
+    Privacy (see module docstring): leaf values whose key or string value
+    matches the privacy pattern are replaced with ``"<redacted>"``.
+
+    Size cap: if the serialized payload exceeds ``max_bytes`` the oldest
+    events are dropped from the dump (the buffer is unchanged).
+
+    Args:
+        max_bytes: Soft cap on serialized payload bytes; must be positive.
+
+    Returns:
+        Dict ``{"events": [...], "count": int, "dropped": int}``. The
+        ``dropped`` field counts events trimmed for the size cap.
+
+    Raises:
+        TypeError: If ``max_bytes`` is not an int.
+        ValueError: If ``max_bytes`` is not positive.
+    """
+    if not isinstance(max_bytes, int):
+        raise TypeError("max_bytes must be an int")
+    if max_bytes <= 0:
+        raise ValueError("max_bytes must be a positive integer")
+
+    events = _get_buffer().snapshot()
+    redacted = [_redact(ev) for ev in events]
+
+    dropped = 0
+    _, encoded_len = _encode(redacted)
+    while redacted and encoded_len > max_bytes:
+        # Drop oldest first.
+        redacted.pop(0)
+        dropped += 1
+        _, encoded_len = _encode(redacted)
+
+    return {
+        "events": redacted,
+        "count": len(redacted),
+        "dropped": dropped,
+    }
+
+
+def format_context_section(payload: Mapping[str, Any]) -> str:
+    """Format a :func:`get_chat_context` payload as a prompt section.
+
+    Returns the empty string when there are no events, so callers can
+    cheaply skip injection.
+
+    Raises:
+        TypeError: If ``payload`` is not a Mapping.
+    """
+    if not isinstance(payload, Mapping):
+        raise TypeError("payload must be a Mapping")
+
+    events = payload.get("events") or []
+    if not events:
+        return ""
+
+    encoded, _ = _encode(events)
+    return "Recent app state:\n" + encoded
+
+
+class ChatContextProvider:
+    """OO wrapper around module-level helpers for dependency injection."""
+
+    def __init__(self, max_bytes: int = DEFAULT_MAX_BYTES) -> None:
+        if not isinstance(max_bytes, int):
+            raise TypeError("max_bytes must be an int")
+        if max_bytes <= 0:
+            raise ValueError("max_bytes must be a positive integer")
+        self._max_bytes = max_bytes
+
+    def get(self) -> dict[str, Any]:
+        """Return the redacted, size-capped context dump."""
+        return get_chat_context(max_bytes=self._max_bytes)
+
+    def record(self, category: str, payload: Mapping[str, Any]) -> None:
+        """Record an event into the module-level buffer."""
+        record_event(category, payload)

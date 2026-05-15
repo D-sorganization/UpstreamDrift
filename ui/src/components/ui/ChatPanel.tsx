@@ -318,17 +318,36 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
 
   return (
     <div
-      className="sidekick-chat-surface flex flex-col h-full w-full max-w-3xl rounded-lg border border-gray-600 bg-gray-900 text-gray-200 shadow-xl"
+      className="sidekick-chat-surface flex flex-col h-full w-full max-w-3xl rounded-lg border shadow-xl"
+      style={{
+        backgroundColor: 'var(--sidekick-color-surface)',
+        borderColor: 'var(--sidekick-color-border)',
+        color: 'var(--sidekick-color-text)',
+      }}
       data-testid="chat-panel"
     >
       {/* Header */}
-      <div className="sidekick-chat-header flex items-center justify-between p-3 border-b border-gray-700">
+      <div
+        className="sidekick-chat-header flex items-center justify-between p-3 border-b"
+        style={{ borderBottomColor: 'var(--sidekick-color-border)' }}
+      >
         <div className="flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 text-blue-400" aria-hidden="true" />
-          <span className="font-semibold text-sm">Chat</span>
+          <MessageSquare
+            className="w-4 h-4"
+            aria-hidden="true"
+            style={{ color: 'var(--sidekick-color-accent)' }}
+          />
+          <span
+            className="font-semibold text-sm"
+            aria-label="Sidekick assistant"
+            title="Sidekick assistant"
+          >
+            Chat
+          </span>
           {sessionId && (
             <span
-              className="text-[10px] font-mono text-gray-500"
+              className="text-[10px] font-mono"
+              style={{ color: 'var(--sidekick-color-text-subtle)' }}
               title={`Session ${sessionId}`}
             >
               {sessionId.slice(0, 8)}
@@ -354,7 +373,10 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
         data-testid="chat-messages"
       >
         {messages.length === 0 && (
-          <div className="text-gray-500 text-center pt-6">
+          <div
+            className="text-center pt-6"
+            style={{ color: 'var(--sidekick-color-text-subtle)' }}
+          >
             Start a conversation. Press Enter to send, Shift+Enter for newline.
           </div>
         )}
@@ -367,13 +389,20 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
             data-role={m.role}
           >
             <div
-              className={`sidekick-chat-bubble max-w-[80%] rounded-lg px-3 py-2 whitespace-pre-wrap break-words ${
-                m.role === 'user'
-                  ? 'bg-blue-700/40 border border-blue-600 text-blue-100'
-                  : m.role === 'assistant'
-                    ? 'bg-gray-800 border border-gray-700 text-gray-100'
-                    : 'bg-yellow-900/30 border border-yellow-700 text-yellow-200 text-xs'
-              }`}
+              className="sidekick-chat-bubble max-w-[80%] rounded-lg px-3 py-2 whitespace-pre-wrap break-words border"
+              style={{
+                backgroundColor:
+                  m.role === 'user'
+                    ? 'var(--sidekick-color-accent)'
+                    : m.role === 'assistant'
+                      ? 'var(--sidekick-color-surface-raised)'
+                      : 'var(--sidekick-color-warning)',
+                borderColor:
+                  m.role === 'system'
+                    ? 'var(--sidekick-color-warning)'
+                    : 'var(--sidekick-color-border)',
+                color: 'var(--sidekick-color-text)',
+              }}
               data-role={m.role}
             >
               {m.content}
@@ -382,7 +411,8 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
         ))}
         {streaming && (
           <div
-            className="text-xs text-gray-500 italic"
+            className="text-xs italic"
+            style={{ color: 'var(--sidekick-color-text-subtle)' }}
             data-testid="chat-streaming"
           >
             assistant is typing...
@@ -394,7 +424,8 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
       {/* Composer */}
       <form
         onSubmit={handleSubmit}
-        className="sidekick-chat-composer flex items-end gap-2 p-3 border-t border-gray-700"
+        className="sidekick-chat-composer flex items-end gap-2 p-3 border-t"
+        style={{ borderTopColor: 'var(--sidekick-color-border)' }}
       >
         <textarea
           value={input}
@@ -408,7 +439,12 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
           rows={2}
           aria-label="Message input"
           data-testid="chat-input"
-          className="sidekick-focus-ring flex-1 resize-none rounded border border-gray-600 bg-gray-800 px-2 py-1.5 text-sm text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:outline-none disabled:opacity-50"
+          className="sidekick-focus-ring flex-1 resize-none rounded border px-2 py-1.5 text-sm focus:outline-none disabled:opacity-50"
+          style={{
+            backgroundColor: 'var(--sidekick-color-input)',
+            borderColor: 'var(--sidekick-color-border)',
+            color: 'var(--sidekick-color-text)',
+          }}
           disabled={status !== 'connected'}
         />
         <button
@@ -416,7 +452,12 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
           aria-label="Send message"
           data-testid="chat-send"
           disabled={status !== 'connected' || input.trim().length === 0}
-          className="sidekick-focus-ring flex items-center gap-1 px-3 py-1.5 rounded border border-blue-600 bg-blue-700/30 text-blue-300 hover:bg-blue-700/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm"
+          className="sidekick-focus-ring flex items-center gap-1 px-3 py-1.5 rounded border disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm"
+          style={{
+            backgroundColor: 'var(--sidekick-color-accent)',
+            borderColor: 'var(--sidekick-color-accent)',
+            color: 'var(--sidekick-color-selection-text)',
+          }}
         >
           <Send className="w-4 h-4" aria-hidden="true" />
           Send

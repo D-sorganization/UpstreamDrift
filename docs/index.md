@@ -23,6 +23,7 @@ navigation should start with the rendered documentation URL.
 | `assessments/`          | @quality-team         | archived  | Generated repository health assessments retained for historical comparison.                                   |
 | `audit_reports/`        | @quality-team         | archived  | Audit outputs and review evidence from repository-wide inspections.                                           |
 | `audits/`               | @quality-team         | archived  | Legacy audit notes preserved alongside `audit_reports/` for historical reference.                             |
+| `bunkershot3d/`         | @physics-team         | draft     | Granular bunker-shot backend comparison notes (Project Chrono, LIGGGHTS, MuJoCo MPM).                         |
 | `code-quality/`         | @quality-team         | stable    | Coding standards, quality gates, and maintainability guidance.                                                |
 | `codemap/`              | @docs-team            | stable    | Code-map indexer (chat + MCP) integration notes, agent setup, and MCP wiring guidance.                        |
 | `competitive_analysis/` | @product-team         | draft     | Market and ecosystem comparisons used for planning context.                                                   |

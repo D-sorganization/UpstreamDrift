@@ -6,9 +6,11 @@ import sys
 from pathlib import Path
 from types import ModuleType
 from typing import Any
+from unittest.mock import patch
 
 from src.shared.python.gui_launcher.tools_sidebar_integration import (
     install_tools_sidebar,
+    is_tools_sidebar_available,
 )
 
 
@@ -184,3 +186,64 @@ def test_install_tools_sidebar_rejects_non_dock_hosts(monkeypatch: Any) -> None:
 
     assert status.installed is False
     assert "dock widgets" in status.reason
+
+
+def test_install_tools_sidebar_passes_sidekick_tokens_via_factory() -> None:
+    """Success-path pin: tokens reach a ``create_tools_sidebar`` factory.
+
+    Uses ``patch.dict`` so the fake sidebar module is auto-cleaned after the
+    test (per CLAUDE.md's test-pollution guidance).
+    """
+    module_name = "upstream_drift_tools.ui.tools_sidebar"
+    module = ModuleType(module_name)
+    recorded: dict[str, Any] = {}
+
+    def create_tools_sidebar(
+        *,
+        parent: Any,
+        sidekick_tokens: dict[str, str],
+        project_root: Path | None = None,
+        context_provider: Any = None,
+    ) -> FakeDock:
+        recorded["parent"] = parent
+        recorded["project_root"] = project_root
+        recorded["context_provider"] = context_provider
+        recorded["sidekick_tokens"] = sidekick_tokens
+        return FakeDock()
+
+    module.create_tools_sidebar = create_tools_sidebar  # type: ignore[attr-defined]
+
+    with patch.dict(sys.modules, {module_name: module}):
+        window = FakeMainWindow()
+        status = install_tools_sidebar(window)
+
+    assert status.installed is True
+    assert status.module_name == module_name
+    assert recorded["parent"] is window
+    tokens = recorded["sidekick_tokens"]
+    assert isinstance(tokens, dict)
+    assert tokens, "Sidekick tokens must be a non-empty dict"
+    assert "sidekick.color.canvas" in tokens
+    assert tokens["sidekick.color.canvas"]
+
+
+def test_is_tools_sidebar_available_true_when_stub_registered() -> None:
+    module_name = "upstream_drift_tools.ui.tools_sidebar"
+    module = ModuleType(module_name)
+
+    with patch.dict(sys.modules, {module_name: module}):
+        assert is_tools_sidebar_available() is True
+
+
+def test_is_tools_sidebar_available_false_when_no_module_present() -> None:
+    candidates = (
+        "upstream_drift_tools.ui.tools_sidebar",
+        "shared.python.upstream_drift_tools.ui.tools_sidebar",
+        "src.shared.python.upstream_drift_tools.ui.tools_sidebar",
+    )
+    cleared = {name: None for name in candidates if name not in sys.modules}
+    with patch.dict(sys.modules, cleared):
+        # Remove any pre-registered candidates so the import truly fails.
+        for name in candidates:
+            sys.modules.pop(name, None)
+        assert is_tools_sidebar_available() is False

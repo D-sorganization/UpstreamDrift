@@ -292,6 +292,81 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 - `LaunchMode` enum + `resolve_launch_mode()` for per-tile routing
   (AUTO / NEW_WINDOW / TAB / DOCK / EXTERNAL).
 
+### Tools sidebar (optional)
+
+`src/shared/python/gui_launcher/tools_sidebar_integration.py` is the
+host-side adapter for the **Unified Tools Sidebar**, a PyQt dock widget
+that ships from the sibling [`D-sorganization/Tools`](https://github.com/D-sorganization/Tools)
+repository. The widget itself lives in Tools; UpstreamDrift only owns
+the optional install path and the Sidekick design-token passthrough.
+
+- **Setup:** run `scripts/setup_tools_workspace.sh` to wire an editable
+  sibling checkout, or pass `--tools-mode editable` to pytest (see the
+  `--tools-mode` fixture in `tests/conftest.py` and the "Cross-Repo
+  Dependencies" section of `CLAUDE.md`).
+- **Detection:** `gui_launcher.is_tools_sidebar_available()` returns
+  whether the shared module imports. `LauncherDiagnostics.check_tools_sidebar()`
+  exposes the same probe in the diagnostic report.
+- **Fallback:** when the sibling repo isn't installed (the default),
+  `install_tools_sidebar()` no-ops and the launcher continues to run.
+  The Sidekick design tokens still apply to the React/Tauri shell; only
+  the optional PyQt sidebar is skipped.
+
+### Sidekick (AI chat / agentic assistant)
+
+Sidekick is the cross-shell AI chat surface. Two host implementations
+consume one shared design-token contract:
+
+- **React/Tauri shell:** [`ui/src/pages/Chat.tsx`](ui/src/pages/Chat.tsx)
+  routes at `/chat`; the panel itself is
+  [`ui/src/components/ui/ChatPanel.tsx`](ui/src/components/ui/ChatPanel.tsx)
+  and binds its surface palette to `var(--sidekick-color-*)` /
+  `var(--sidekick-space-*)` CSS variables (declared in
+  [`ui/src/index.css`](ui/src/index.css)).
+- **PyQt launcher panel:**
+  [`src/shared/python/ai/gui/assistant_panel.py`](src/shared/python/ai/gui/assistant_panel.py)
+  (`AIAssistantPanel`, window title "Sidekick"). The launcher
+  embeds it both as a splitter pane
+  (`src/launchers/launcher_ui_setup.py`) and as a registered
+  [embeddable tool](#launcher-embedding--cross-tool-ipc) so users can
+  open it via right-click → "Launch in Tab" / "Launch in Dock".
+
+Shared infrastructure:
+
+- **Design tokens:**
+  [`src/shared/python/theme/sidekick_tokens.py`](src/shared/python/theme/sidekick_tokens.py)
+  maps active launcher theme colors onto canonical `sidekick.color.*` /
+  `sidekick.space.*` / `sidekick.radius.*` / `sidekick.font.*` keys. The
+  TypeScript mirror is
+  [`ui/src/api/themeClient.ts`](ui/src/api/themeClient.ts); both maps are
+  pinned in lock-step by
+  [`tests/unit/theme/test_sidekick_parity.py`](tests/unit/theme/test_sidekick_parity.py).
+- **Embeddable adapter:**
+  [`src/tools/sidekick/_embed_adapter.py`](src/tools/sidekick/_embed_adapter.py).
+  Self-registers via
+  [`src/launchers/embedded_tool_bootstrap.py`](src/launchers/embedded_tool_bootstrap.py)
+  and exposes the tile through
+  [`src/config/models.yaml`](src/config/models.yaml).
+- **Chat context bridge:**
+  [`src/shared/python/ai/chat_context.py`](src/shared/python/ai/chat_context.py)
+  — thread-safe ring buffer (`record_event`, `get_chat_context`) with
+  redaction of `password` / `token` / `secret` / `api_key` / `/home/` /
+  `C:\` patterns and a 4 KB dump cap. The WebSocket handler in
+  [`src/api/routes/chat_ws.py`](src/api/routes/chat_ws.py) injects the
+  payload as a `system` message when populated; gate with
+  `UPSTREAMDRIFT_SIDEKICK_CONTEXT=0` to disable.
+- **Agentic tools:** new analytical surfaces register through the existing
+  AI tool registry. The current cross-engine example is
+  [`src/shared/python/ai/tools/sidekick_analytics.py`](src/shared/python/ai/tools/sidekick_analytics.py)
+  (`summarize_simulation_run`). The system prompt in
+  [`src/shared/python/ai/system_prompts.py`](src/shared/python/ai/system_prompts.py)
+  advertises registered tools to the assistant.
+
+When extending Sidekick — adding a tool the assistant can call,
+extending the chat context bridge, or restyling the panel — reuse these
+surfaces rather than forking new color/spacing constants or new event
+buses.
+
 ### Rust kernels
 
 - `rust_core/upstream-physics/` — RK4 integrator, aerodynamics, contact,

@@ -55,6 +55,7 @@ def register_golf_suite_tools(registry: ToolRegistry) -> None:
     _register_agent_control_tools(registry)
     _register_cli_tools(registry)
     _register_codemap_tools_proxy(registry)
+    _register_sidekick_analytics_tools_proxy(registry)
     logger.info("Registered Golf Suite tools")
 
 
@@ -684,3 +685,15 @@ def _register_codemap_tools_proxy(registry: ToolRegistry) -> None:
         register_codemap_tools(registry)
     except ImportError as e:
         logger.warning("Could not register codemap tools: %s", e)
+
+
+def _register_sidekick_analytics_tools_proxy(registry: ToolRegistry) -> None:
+    """Register Sidekick analytics tools (issue #5464) if available."""
+    try:
+        from src.shared.python.ai.tools.sidekick_analytics import (
+            register_sidekick_analytics_tools,
+        )
+
+        register_sidekick_analytics_tools(registry)
+    except ImportError as e:
+        logger.warning("Could not register Sidekick analytics tools: %s", e)

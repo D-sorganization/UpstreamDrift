@@ -35,6 +35,7 @@ from .registry import GUIRegistry, auto_discover_guis, get_registry, register_gu
 from .tools_sidebar_integration import (
     ToolsSidebarInstallStatus,
     install_tools_sidebar,
+    is_tools_sidebar_available,
 )
 
 __all__ = [
@@ -53,4 +54,5 @@ __all__ = [
     "get_registry",
     "ToolsSidebarInstallStatus",
     "install_tools_sidebar",
+    "is_tools_sidebar_available",
 ]

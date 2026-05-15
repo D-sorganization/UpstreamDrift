@@ -112,6 +112,31 @@ def _import_sidebar_module() -> Any | None:
     return None
 
 
+def is_tools_sidebar_available() -> bool:
+    """Return ``True`` when one of the shared Tools sidebar modules imports.
+
+    This is a lightweight probe intended for diagnostics: it attempts to import
+    the same candidate module names that :func:`install_tools_sidebar` would
+    try, and returns ``True`` on the first success. No widgets are created and
+    no side effects are produced beyond what ``importlib.import_module``
+    performs.
+
+    Returns:
+        ``True`` if the sibling Tools repo's sidebar module is importable in
+        the current environment, ``False`` otherwise.
+    """
+    return _import_sidebar_module() is not None
+
+
+def _resolved_sidebar_module_name() -> str | None:
+    """Return the dotted module name of the shared sidebar, if importable."""
+    module = _import_sidebar_module()
+    if module is None:
+        return None
+    name = getattr(module, "__name__", None)
+    return name if isinstance(name, str) and name else None
+
+
 def _install_from_module(
     module: Any,
     *,

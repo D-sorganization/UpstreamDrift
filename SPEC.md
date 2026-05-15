@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.168                                            |
-| **Last Spec Update**    | 2026-05-14                                         |
+| **Spec Version**        | 1.0.172                                            |
+| **Last Spec Update**    | 2026-05-15                                         |
 
 ## 2. Purpose & Mission
 
@@ -554,6 +554,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 ## 12. Change Log
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| 2026-05-15 | 1.0.172 | Integrated Sidekick across the launcher: registered the AI chat panel as an EmbeddableTool tile (`src/tools/sidekick/`), bound React `ChatPanel` to `var(--sidekick-color-*)` design tokens with a Python/TypeScript parity test, added a redacted ring-buffer chat-context bridge that injects recent app state into the assistant prompt, registered a `summarize_simulation_run` agentic analytics tool, and surfaced Tools-sidebar availability through `LauncherDiagnostics`. Refs #5460 #5461 #5462 #5463 #5464 #5465. |
 | 2026-05-18 | 1.0.171 | ⚡ Bolt: Optimize norm calculations in plot_error_timecourse using np.einsum |
 | 2026-05-14 | 1.0.170 | ⚡ Bolt: Optimize sum of squares along axis in perstep train metrics |
 | 2026-05-14 | 1.0.169 | Added a shared row norm helper for vectorized norm calculations in motion-matching and validation paths. |

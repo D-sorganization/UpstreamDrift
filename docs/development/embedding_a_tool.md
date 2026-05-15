@@ -356,3 +356,9 @@ the launcher UI:
 - The Pose Studio package
   ([`src/tools/pose_studio/`](../../src/tools/pose_studio/)) —
   canonical worked example.
+- The Sidekick adapter
+  ([`src/tools/sidekick/_embed_adapter.py`](../../src/tools/sidekick/_embed_adapter.py))
+  — minimal worked example that wraps an existing `AIAssistantPanel`
+  widget rather than refactoring it into a new `MainWidget` factory.
+- [`docs/development/sidekick.md`](sidekick.md) — Sidekick feature
+  overview (design tokens, chat context bridge, agentic tools).
