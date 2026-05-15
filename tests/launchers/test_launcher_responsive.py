@@ -62,7 +62,10 @@ def test_launcher_ui_setup_responsive(qapp: QApplication) -> None:
 
 def test_cross_engine_dashboard_responsive(qapp: QApplication) -> None:
     """Cross-engine dashboard config panel uses a responsive minimum width."""
-    from src.launchers.cross_engine_dashboard import _create_dashboard_window_class
+    try:
+        from src.launchers.cross_engine_dashboard import _create_dashboard_window_class
+    except ImportError:
+        pytest.skip("matplotlib not available in this environment, skipping cross_engine_dashboard test")
 
     WindowCls = _create_dashboard_window_class()
     source = inspect.getsource(WindowCls)
