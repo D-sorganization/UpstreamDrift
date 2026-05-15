@@ -72,16 +72,17 @@ def plot_error_timecourse(  # noqa: C901
     t = np.asarray(target.time[:n], dtype=float)
 
     # Panel 1 — position error (mm).
-    butt_err_mm = (
-        np.linalg.norm(result.butt_sim[:n] - target.butt[:n], axis=1) * 1e3
-        if result.butt_sim.shape[0] >= n
-        else np.zeros((n,))
-    )
-    head_err_mm = (
-        np.linalg.norm(result.clubhead_sim[:n] - target.clubhead[:n], axis=1) * 1e3
-        if result.clubhead_sim.shape[0] >= n
-        else np.zeros((n,))
-    )
+    # ⚡ Bolt: einsum is faster than np.linalg.norm(..., axis=1)
+    if result.butt_sim.shape[0] >= n:
+        butt_diff = result.butt_sim[:n] - target.butt[:n]
+        butt_err_mm = np.sqrt(np.einsum("ij,ij->i", butt_diff, butt_diff)) * 1e3
+    else:
+        butt_err_mm = np.zeros((n,))
+    if result.clubhead_sim.shape[0] >= n:
+        head_diff = result.clubhead_sim[:n] - target.clubhead[:n]
+        head_err_mm = np.sqrt(np.einsum("ij,ij->i", head_diff, head_diff)) * 1e3
+    else:
+        head_err_mm = np.zeros((n,))
 
     # Panel 2 — orientation error (deg).
     if result.club_quat_sim.shape[0] >= n:
@@ -122,7 +123,8 @@ def plot_error_timecourse(  # noqa: C901
     # Numerical speed of the measured clubhead by central differences.
     if n >= 3:
         dt = np.gradient(t)
-        v_meas = np.linalg.norm(np.gradient(target.clubhead[:n], axis=0), axis=1)
+        grad_head = np.gradient(target.clubhead[:n], axis=0)
+        v_meas = np.sqrt(np.einsum("ij,ij->i", grad_head, grad_head))
         # Avoid divide-by-zero at degenerate steps.
         v_meas = np.divide(v_meas, np.where(dt > 0, dt, 1.0))
         speed_meas_mph = v_meas * 2.23693629

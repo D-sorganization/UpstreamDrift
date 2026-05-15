@@ -86,7 +86,7 @@ jobs:
           python -m ensurepip --upgrade || true
           pip install "drake>=1.22.0" || echo "::warning::drake install failed (Linux+macOS only)"
           python -m ensurepip --upgrade || true
-          pip install "pinocchio>=2.6.0" || echo "::warning::pinocchio install failed"
+          pip install "pin>=2.6.0" || echo "::warning::pinocchio install failed"
           python -m ensurepip --upgrade || true
           pip install "opensim>=4.4.0" || echo "::warning::opensim install failed"
 
