@@ -24,6 +24,14 @@
 
 - [ ] If AI-assisted: explain changes line-by-line or attach diff with comments.
 
+## Implementation completeness checklist
+
+- [ ] All acceptance criteria from the linked issue are implemented (not stubbed/mocked)
+- [ ] Tests cover the new behavior (TDD: tests written first or alongside)
+- [ ] No new `raise NotImplementedError`, `# TODO`, or hardcoded mock values without a tracking issue ID
+- [ ] Manual verification: I exercised the feature in a running app (where applicable)
+- [ ] Closes #<issue> (use this exact phrasing so the closure-guard recognises it)
+
 ## Checklist
 
 - [ ] Reproducible: `matlab/run_all.m` (or Python pipeline) completes

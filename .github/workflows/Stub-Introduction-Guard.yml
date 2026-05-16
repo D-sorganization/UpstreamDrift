@@ -1,0 +1,159 @@
+name: Stub Introduction Guard
+
+# Fails a PR that introduces NEW stub/placeholder/mock patterns without an
+# accompanying tracking-issue reference. Existing occurrences are
+# grandfathered — we only inspect lines added by this PR.
+#
+# Patterns that require a tracking issue reference (e.g. `# tracked: #1234`,
+# `// TODO #1234`, `# TODO(#1234)`):
+#   - raise NotImplementedError
+#   - pass  # stub
+#   - pass  # placeholder
+#   - # Placeholder for future ...
+#   - # TODO  (without #NNN)
+#   - # FIXME (without #NNN)
+#   - // TODO: Add to API   (and similar hardcoded-mock markers)
+#   - setTimeout + Math.random in *[Cc]hat*.tsx (fake-AI pattern)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out PR head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Compute new additions vs base
+        id: diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          git fetch --no-tags --depth=200 origin "$BASE_SHA" || true
+          # Produce a diff restricted to added lines, with file headers preserved.
+          git diff --unified=0 --no-color "$BASE_SHA"..."$HEAD_SHA" > /tmp/pr.diff || true
+          wc -l /tmp/pr.diff
+
+      - name: Scan diff for new stubs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import re
+          import sys
+          from pathlib import Path
+
+          diff_path = Path("/tmp/pr.diff")
+          if not diff_path.exists() or diff_path.stat().st_size == 0:
+              print("No diff content; nothing to scan.")
+              sys.exit(0)
+
+          # Patterns that count as "stub-like" additions. Each entry:
+          #   (label, line-regex, file-glob-or-None)
+          # A line is OK if it contains an issue reference like #1234 (in a
+          # comment) OR a `tracked:` token. Otherwise it's a violation.
+          STUB_PATTERNS = [
+              ("raise NotImplementedError", re.compile(r"raise\s+NotImplementedError"), None),
+              ("pass # stub", re.compile(r"\bpass\b\s*#\s*stub\b", re.IGNORECASE), None),
+              ("pass # placeholder", re.compile(r"\bpass\b\s*#\s*placeholder\b", re.IGNORECASE), None),
+              ("# Placeholder for future", re.compile(r"#\s*Placeholder\s+for\s+future", re.IGNORECASE), None),
+              ("# TODO without issue ref", re.compile(r"#\s*TODO\b(?!.*#\d)"), None),
+              ("# FIXME without issue ref", re.compile(r"#\s*FIXME\b(?!.*#\d)"), None),
+              ("// TODO without issue ref", re.compile(r"//\s*TODO\b(?!.*#\d)"), None),
+              ("// FIXME without issue ref", re.compile(r"//\s*FIXME\b(?!.*#\d)"), None),
+              ("// TODO: Add to API (hardcoded mock)", re.compile(r"//\s*TODO:\s*Add\s+to\s+API", re.IGNORECASE), None),
+          ]
+
+          # File-scoped patterns: chat UI fake-AI smell.
+          CHAT_FILE_RE = re.compile(r"[Cc]hat.*\.tsx?$")
+          SETTIMEOUT_RE = re.compile(r"\bsetTimeout\b")
+          MATHRANDOM_RE = re.compile(r"\bMath\.random\b")
+
+          # Track per-hunk state from the diff.
+          current_file = None
+          added_lines_by_file: dict[str, list[tuple[int, str]]] = {}
+          new_line_no = 0
+
+          hunk_re = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@")
+
+          with diff_path.open("r", encoding="utf-8", errors="replace") as fh:
+              for raw in fh:
+                  line = raw.rstrip("\n")
+                  if line.startswith("+++ b/"):
+                      current_file = line[len("+++ b/"):].strip()
+                      added_lines_by_file.setdefault(current_file, [])
+                      continue
+                  if line.startswith("--- "):
+                      continue
+                  m = hunk_re.match(line)
+                  if m:
+                      new_line_no = int(m.group(1)) - 1
+                      continue
+                  if not current_file:
+                      continue
+                  if line.startswith("+") and not line.startswith("+++"):
+                      new_line_no += 1
+                      added_lines_by_file[current_file].append((new_line_no, line[1:]))
+                  elif line.startswith("-"):
+                      # Removed line — does not advance new file line numbers.
+                      pass
+                  else:
+                      # Context line.
+                      new_line_no += 1
+
+          violations: list[str] = []
+
+          def has_issue_ref(text: str) -> bool:
+              # Accepts `#1234`, `(#1234)`, `tracked: #1234`, `TODO #1234`, etc.
+              return bool(re.search(r"#\d+", text)) or "tracked:" in text.lower()
+
+          for fpath, lines in added_lines_by_file.items():
+              # Skip the workflow itself (it legitimately contains pattern
+              # strings) and any docs/config that references the patterns.
+              if fpath.endswith("Stub-Introduction-Guard.yml"):
+                  continue
+              if fpath.endswith("pull_request_template.md"):
+                  continue
+              if fpath.endswith("AGENTS.md") or fpath.endswith("CLAUDE.md"):
+                  continue
+
+              for lineno, text in lines:
+                  for label, pat, _ in STUB_PATTERNS:
+                      if pat.search(text) and not has_issue_ref(text):
+                          violations.append(f"{fpath}:{lineno}: NEW {label}: {text.strip()}")
+
+              # Chat fake-AI pattern: setTimeout + Math.random both touched
+              # in a chat-related file by this PR.
+              if CHAT_FILE_RE.search(fpath):
+                  joined = "\n".join(t for _, t in lines)
+                  if SETTIMEOUT_RE.search(joined) and MATHRANDOM_RE.search(joined):
+                      violations.append(
+                          f"{fpath}: NEW fake-AI smell (setTimeout + Math.random in chat file). "
+                          "If this is intentional placeholder, add a tracking issue reference."
+                      )
+
+          if violations:
+              print("Stub-introduction guard FAILED:\n")
+              for v in violations:
+                  print(f"  - {v}")
+              print()
+              print("Each new stub/placeholder must reference a tracking issue.")
+              print("Examples that satisfy the guard:")
+              print("    raise NotImplementedError  # tracked: #1234")
+              print("    # TODO #1234: refactor when upstream ships v2")
+              print("    // FIXME #1234 — race condition under load")
+              sys.exit(1)
+
+          print("No new stub/placeholder additions without tracking issues.")
+          PY

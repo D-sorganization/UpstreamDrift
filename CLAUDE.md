@@ -153,3 +153,19 @@ maturin develop                                   # build Rust extensions locall
 
 - `/gaai-deliver` — Run Delivery Loop for next ready backlog item
 - `/gaai-status` — Show current backlog and memory state
+
+## Closing issues — non-negotiable rule
+
+NEVER close a feature or bug issue without one of:
+1. A merged PR that demonstrably implements the acceptance criteria (use `Closes #N` in the PR description), OR
+2. An explicit `wontfix`, `roadmap`, `duplicate`, or `invalid` label.
+
+The Verify-Issue-Closure workflow will automatically reopen any issue closed without evidence. Do not work around it.
+
+When implementing an issue:
+- Write or update tests FIRST (TDD: red → green → refactor)
+- Add Design-by-Contract preconditions/postconditions where it clarifies invariants
+- Respect Law of Demeter — don't reach through three layers of objects
+- Don't duplicate code (DRY)
+- Run the tests locally before pushing; don't rely on CI to find basic breakage
+- If you can't fully implement, leave the issue open and post a status comment instead of closing
