@@ -311,11 +311,15 @@ def _draw_position_error(
     sim: _adapters._NormalisedSeries,
 ) -> None:
     sim_clubhead = _interp_to_target(target.time, sim.time, sim.clubhead)
-    head_err_mm = 1000.0 * np.linalg.norm(target.clubhead - sim_clubhead, axis=1)
+    diff_head = target.clubhead - sim_clubhead
+    # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is faster than np.linalg.norm(..., axis=1)
+    head_err_mm = 1000.0 * np.sqrt(np.einsum("ij,ij->i", diff_head, diff_head))
     ax.plot(target.time, head_err_mm, color="#ff7f0e", label="clubhead")
     if target.butt is not None and sim.butt is not None:
         sim_butt = _interp_to_target(target.time, sim.time, sim.butt)
-        butt_err_mm = 1000.0 * np.linalg.norm(target.butt - sim_butt, axis=1)
+        diff_butt = target.butt - sim_butt
+        # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is faster than np.linalg.norm(..., axis=1)
+        butt_err_mm = 1000.0 * np.sqrt(np.einsum("ij,ij->i", diff_butt, diff_butt))
         ax.plot(target.time, butt_err_mm, color=COLOR_MEASURED, label="butt")
     ax.set_ylabel("Position\nerror (mm)", fontsize=AXES_FONTSIZE)
     ax.legend(fontsize=AXES_FONTSIZE - 2, loc="upper right")
@@ -329,7 +333,10 @@ def _draw_orientation_error(
     assert target.club_quat is not None and sim.club_quat is not None
     sim_quat = _interp_to_target(target.time, sim.time, sim.club_quat)
     # Renormalise after interpolation.
-    sim_quat = sim_quat / np.linalg.norm(sim_quat, axis=1, keepdims=True)
+    # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is faster than np.linalg.norm(..., axis=1)
+    sim_quat = (
+        sim_quat / np.sqrt(np.einsum("ij,ij->i", sim_quat, sim_quat))[:, np.newaxis]
+    )
     err_deg = quat_geodesic_deg(target.club_quat, sim_quat)
     ax.plot(target.time, err_deg, color=COLOR_ERROR)
     ax.set_ylabel("Orientation\nerror (deg)", fontsize=AXES_FONTSIZE)
