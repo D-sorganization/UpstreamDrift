@@ -49,6 +49,8 @@ from src.launchers.custom_title_bar import create_window_control_button
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.theme.style_constants import Styles
 from src.shared.python.theme.typography import Weights, get_display_font
+from src.shared.python.ui.auto_complete import AutoCompleteLineEdit
+from src.shared.python.ui.completion_vocab import build_vocabulary
 
 if TYPE_CHECKING:
     pass
@@ -719,7 +721,7 @@ class LauncherUISetupMixin:
         top_bar.addStretch()
 
         # Search Bar
-        self.search_input = QLineEdit()
+        self.search_input = AutoCompleteLineEdit(words=build_vocabulary())
         self.search_input.setPlaceholderText("Search models...")
         try:
             from src.shared.python.theme.responsive import (

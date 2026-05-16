@@ -350,3 +350,48 @@ def test_on_sidebar_routed_existing_ids_still_work(launcher) -> None:
 
     launcher._on_sidebar_routed(1)
     assert launcher.layout_manager.current_category_filter == "Physics Engines"
+
+
+# ---------------------------------------------------------------------------
+# AutoCompleteLineEdit wiring (issue #5479)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_search_input_is_auto_complete_line_edit(launcher) -> None:
+    """The launcher search field must be an AutoCompleteLineEdit with a
+    non-empty vocabulary so that the Global Text Prediction feature is
+    actually wired globally rather than living only in the test file."""
+    from src.shared.python.ui.auto_complete import AutoCompleteLineEdit
+
+    with patch("src.launchers.launcher_constants.HELP_SYSTEM_AVAILABLE", False):
+        launcher._setup_top_bar()
+
+    assert isinstance(
+        launcher.search_input,
+        AutoCompleteLineEdit,
+    ), "search_input must be AutoCompleteLineEdit, not bare QLineEdit"
+    assert len(launcher.search_input.completer_words) > 0, (
+        "AutoCompleteLineEdit vocabulary must be non-empty after construction"
+    )
+
+
+@pytest.mark.unit
+def test_search_vocabulary_contains_engine_names(launcher) -> None:
+    """Engine names from the config (mujoco, drake, pinocchio …) must appear
+    in the completion vocabulary so users can type them into the search bar."""
+    from src.shared.python.ui.completion_vocab import build_vocabulary
+
+    vocab = build_vocabulary()
+    for engine in ("mujoco", "drake", "pinocchio"):
+        assert engine in vocab, f"Expected engine '{engine}' in vocabulary"
+
+
+@pytest.mark.unit
+def test_build_vocabulary_returns_nonempty_sorted_list() -> None:
+    """build_vocabulary() must always return a sorted, non-empty list."""
+    from src.shared.python.ui.completion_vocab import build_vocabulary
+
+    vocab = build_vocabulary()
+    assert len(vocab) > 0
+    assert vocab == sorted(vocab), "vocabulary must be returned in sorted order"
