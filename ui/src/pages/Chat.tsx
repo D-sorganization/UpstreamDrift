@@ -9,7 +9,7 @@ import { ChatPanel } from '@/components/ui/ChatPanel';
 
 export function ChatPage() {
   return (
-    <div className="sidekick-shell flex justify-center items-stretch w-full h-screen bg-gray-950 p-4">
+    <div className="sidekick-shell flex justify-center items-stretch w-full h-screen p-4">
       <div className="flex w-full max-w-3xl h-full">
         <ChatPanel />
       </div>

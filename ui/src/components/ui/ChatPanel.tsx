@@ -355,11 +355,23 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
           )}
         </div>
         <span
-          className={`text-xs font-mono ${statusColor[status]}`}
+          className={`text-xs font-mono flex items-center gap-1 ${statusColor[status]}`}
           aria-live="polite"
           data-testid="chat-status"
         >
-          {status === 'connected' ? 'o ' : '. '}
+          <span
+            aria-hidden
+            style={{
+              display: 'inline-block',
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              background:
+                status === 'connected'
+                  ? 'var(--sidekick-color-success, #22c55e)'
+                  : 'var(--sidekick-color-warning, #f59e0b)',
+            }}
+          />
           {statusLabel[status]}
         </span>
       </div>

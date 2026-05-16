@@ -165,15 +165,29 @@ class LauncherUISetupMixin:
         main_layout = QSplitter(Qt.Orientation.Horizontal)
         main_layout.setProperty("class", "dark")
         main_layout.setHandleWidth(4)
-        main_layout.setStyleSheet("""
-            QSplitter::handle {
-                background-color: #3c3c3c;
+
+        try:
+            from src.shared.python.theme import get_current_colors
+
+            _colors = get_current_colors()
+        except (ImportError, AttributeError):
+            from src.shared.python.theme import DARK_THEME as _dt
+
+            _colors = {
+                "border": getattr(_dt, "border_default", "#555555"),
+                "accent": getattr(_dt, "accent", "#0A84FF"),
+            }
+        _splitter_bg = _colors.get("border", "#555555")
+        _splitter_hover = _colors.get("accent", "#0A84FF")
+        main_layout.setStyleSheet(f"""
+            QSplitter::handle {{
+                background-color: {_splitter_bg};
                 margin: 2px 0px;
                 border-radius: 2px;
-            }
-            QSplitter::handle:hover {
-                background-color: #FF8800;
-            }
+            }}
+            QSplitter::handle:hover {{
+                background-color: {_splitter_hover};
+            }}
         """)
         outer_vbox.addWidget(main_layout)
 
@@ -704,7 +718,11 @@ class LauncherUISetupMixin:
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Search models...")
         try:
-            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            from src.shared.python.theme.responsive import (
+                set_text_minimum_width,
+                TextWidthSpec,
+            )
+
             set_text_minimum_width(
                 self.search_input,
                 TextWidthSpec(minimum_px=250),
@@ -834,6 +852,7 @@ class LauncherUISetupMixin:
         self.zoom_slider.setRange(0, self._ZOOM_SLIDER_STEPS)
         self.zoom_slider.setMinimumWidth(140)
         from PyQt6.QtWidgets import QSizePolicy
+
         self.zoom_slider.setSizePolicy(
             QSizePolicy.Policy.MinimumExpanding,
             self.zoom_slider.sizePolicy().verticalPolicy(),

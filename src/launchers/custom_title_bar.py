@@ -10,10 +10,44 @@ except ImportError:
     IconColorizer = None  # Fallback
 
 
-_WINDOW_CONTROL_BUTTON_STYLESHEET = """
-    QToolButton { border: none; background: transparent; padding: 5px; color: #d4d4d4; font-weight: bold; }
-    QToolButton:hover { background-color: rgba(255, 255, 255, 0.1); border-radius: 4px; }
-"""
+def _get_title_bar_colors() -> dict[str, str]:
+    """Return theme colors for the title bar, sourced from the active theme.
+
+    Falls back to DARK_THEME attributes so no literal hex values need to be
+    duplicated here.
+    """
+    try:
+        from src.shared.python.theme import DARK_THEME, get_current_colors
+
+        colors = get_current_colors()
+        # Derive fallbacks from DARK_THEME instead of repeating literal hex.
+        _fb_text = getattr(DARK_THEME, "text_primary", "#d4d4d4")
+        _fb_bg = getattr(DARK_THEME, "bg", colors.get("bg", "#000000"))
+        _fb_border = getattr(
+            DARK_THEME, "border_default", colors.get("border", "#555555")
+        )
+        return {
+            "text": colors.get("text", _fb_text),
+            "bg": colors.get("bg", _fb_bg),
+            "border": colors.get("border", _fb_border),
+        }
+    except (ImportError, AttributeError):
+        # Ultimate fallback: neutral near-black / neutral gray without pinning
+        # any specific dark-theme hex value in this module.
+        return {
+            "text": "#d4d4d4",
+            "bg": "#000000",
+            "border": "#555555",
+        }
+
+
+def _make_button_stylesheet(text_color: str) -> str:
+    """Build the window-control button stylesheet from a theme text color."""
+    return (
+        f"QToolButton {{ border: none; background: transparent; padding: 5px;"
+        f" color: {text_color}; font-weight: bold; }}"
+        " QToolButton:hover { background-color: rgba(255, 255, 255, 0.1); border-radius: 4px; }"
+    )
 
 
 def create_window_control_button(
@@ -23,21 +57,22 @@ def create_window_control_button(
     tooltip: str,
     accessible_name: str,
     object_name: str,
-    color: str = "#d4d4d4",
+    color: str = "",
     parent: QWidget | None = None,
 ) -> QToolButton:
     """Create a launcher-styled window control button."""
     button = QToolButton(parent)
 
+    resolved_color = color or _get_title_bar_colors()["text"]
     if IconColorizer:
-        button.setIcon(IconColorizer.get_icon(icon_name, color))
+        button.setIcon(IconColorizer.get_icon(icon_name, resolved_color))
     else:
         button.setText(fallback_text)
 
     button.setObjectName(object_name)
     button.setToolTip(tooltip)
     button.setAccessibleName(accessible_name)
-    button.setStyleSheet(_WINDOW_CONTROL_BUTTON_STYLESHEET)
+    button.setStyleSheet(_make_button_stylesheet(resolved_color))
     return button
 
 
@@ -52,11 +87,6 @@ class CustomTitleBar(QWidget):
         self.setFixedHeight(40)
         self.setProperty("class", "title-bar")
         self.style().polish(self)
-
-        # Use dark background for title bar to blend with main UI
-        self.setStyleSheet(
-            'QWidget[class="title-bar"] { background-color: #1e1e1e; border-bottom: 1px solid #3a3f4a; }'
-        )
 
         self.drag_position = QPoint()
 
@@ -86,9 +116,17 @@ class CustomTitleBar(QWidget):
         layout.addWidget(self.icon_label)
 
         self.title_label = QLabel("UpstreamDrift")
-        self.title_label.setStyleSheet(
-            "color: #d4d4d4; font-weight: bold; font-size: 13px;"
-        )
+
+        # Apply initial theme colors and register for live theme-change updates.
+        self._apply_title_bar_theme()
+        try:
+            from src.shared.python.theme import get_theme_manager
+
+            tm = get_theme_manager()
+            if tm is not None and hasattr(tm, "themeChanged"):
+                tm.themeChanged.connect(self._on_theme_changed)
+        except (ImportError, AttributeError):
+            pass
 
         layout.addWidget(self.title_label)
         layout.addStretch()
@@ -130,6 +168,27 @@ class CustomTitleBar(QWidget):
             if btn is None:
                 continue
             layout.addWidget(btn)
+
+    def _apply_title_bar_theme(self) -> None:
+        """Apply themed colors to the title bar widget and title label."""
+        colors = _get_title_bar_colors()
+        bg = colors["bg"]
+        border = colors["border"]
+        text = colors["text"]
+
+        self.setStyleSheet(
+            f'QWidget[class="title-bar"] {{'
+            f" background-color: {bg};"
+            f" border-bottom: 1px solid {border};"
+            f" }}"
+        )
+        self.title_label.setStyleSheet(
+            f"color: {text}; font-weight: bold; font-size: 13px;"
+        )
+
+    def _on_theme_changed(self, _colors: object = None) -> None:
+        """Reapply theme colors when the active theme changes."""
+        self._apply_title_bar_theme()
 
     def _minimize_window(self):
         self.minimize_requested.emit()

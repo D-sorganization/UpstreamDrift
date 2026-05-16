@@ -275,7 +275,7 @@ models:
     path: "src/shared/python/upstream_drift_tools/ui/tools_sidebar/_embed_adapter.py"
     launcher:
       category: "tool"
-      logo: "assets/data_explorer_modern.png"
+      logo: "assets/sidekick.svg"
       status: "beta"
       default_launch: "dock"
 
