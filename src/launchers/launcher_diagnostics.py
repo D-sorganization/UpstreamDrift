@@ -833,9 +833,9 @@ class LauncherDiagnostics:
             else:
                 result = DiagnosticResult(
                     name="tools_sidebar",
-                    status="warning",
+                    status="info",
                     message=(
-                        "Tools sidebar not installed - launcher will run "
+                        "Tools sidebar not installed (expected) - launcher runs "
                         "without the optional PyQt sidebar (Sidekick tokens "
                         "still apply to the React/Tauri shell)"
                     ),

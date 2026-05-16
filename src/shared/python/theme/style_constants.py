@@ -345,6 +345,19 @@ class Styles:
     """No recording data (idle state)."""
 
     # ══════════════════════════════════════════════════════════════════
+    # Layout Dimension Constants (issue #5505)
+    # ══════════════════════════════════════════════════════════════════
+
+    SIDEBAR_MIN_WIDTH: int = 120
+    """Minimum width in pixels for the global launcher sidebar."""
+
+    SPACING_LG: int = 20
+    """Large spacing value (px) for layout setSpacing calls."""
+
+    MARGIN_PAGE: int = 30
+    """Page-level margin (px) for content layout setContentsMargins calls."""
+
+    # ══════════════════════════════════════════════════════════════════
     # Layout / Container Styles
     # ══════════════════════════════════════════════════════════════════
 
