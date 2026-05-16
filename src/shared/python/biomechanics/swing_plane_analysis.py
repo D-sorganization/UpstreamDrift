@@ -27,6 +27,21 @@ class SwingPlaneMetrics:
     max_deviation: float  # Maximum distance from plane
 
 
+def fit_plane(points: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Module-level convenience wrapper for :meth:SwingPlaneAnalyzer.fit_plane.
+
+    Args:
+        points: Array of 3-D points with shape (N, 3), N >= 3.
+
+    Returns:
+        Tuple of `(centroid, normal)` as float64 NumPy arrays of shape (3,).
+
+    Raises:
+        PreconditionError: If fewer than 3 points are provided.
+    """
+    return SwingPlaneAnalyzer().fit_plane(points)
+
+
 class SwingPlaneAnalyzer:
     """Analyzes the swing plane from 3D trajectory data."""
 
