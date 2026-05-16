@@ -272,7 +272,7 @@ models:
     name: "Sidekick"
     description: "AI assistant chat panel — embed as a dock or tab"
     type: "special_app"
-    path: "src/shared/python/ai/gui/assistant_panel.py"
+    path: "src/shared/python/upstream_drift_tools/ui/tools_sidebar/_embed_adapter.py"
     launcher:
       category: "tool"
       logo: "assets/data_explorer_modern.png"
