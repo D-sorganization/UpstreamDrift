@@ -3,7 +3,18 @@ name: Docker Size and Health Check
 on:
   push:
     branches: ["main"]
+    paths:
+      - "Dockerfile"
+      - "docker-compose*.yml"
+      - "pyproject.toml"
+      - "requirements*.txt"
+      - "src/**"
+      - ".github/workflows/docker-size-gates.yml"
   workflow_dispatch:
+
+concurrency:
+  group: docker-size-gates-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
@@ -22,6 +33,7 @@ jobs:
   docker-smoke-and-size:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 90
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
