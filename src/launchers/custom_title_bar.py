@@ -87,6 +87,7 @@ class CustomTitleBar(QWidget):
         self.setFixedHeight(40)
         self.setProperty("class", "title-bar")
         self.style().polish(self)
+        self.setAutoFillBackground(True)
 
         self.drag_position = QPoint()
 
@@ -114,8 +115,10 @@ class CustomTitleBar(QWidget):
             self.icon_label.setPixmap(pixmap)
 
         layout.addWidget(self.icon_label)
+        self.icon_label.installEventFilter(self)
 
         self.title_label = QLabel("UpstreamDrift")
+        self.title_label.installEventFilter(self)
 
         # Apply initial theme colors and register for live theme-change updates.
         self._apply_title_bar_theme()
@@ -199,17 +202,39 @@ class CustomTitleBar(QWidget):
     def _close_window(self):
         self.close_requested.emit()
 
+    def eventFilter(self, obj, event):
+        if event.type() == event.Type.MouseButtonPress:
+            if event.button() == Qt.MouseButton.LeftButton:
+                # If a button was clicked, let it handle its own event
+                if isinstance(obj, QToolButton):
+                    return False
+                self.drag_position = (
+                    event.globalPosition().toPoint()
+                    - self.window().frameGeometry().topLeft()
+                )
+                print(f"Set drag position: {self.drag_position}")
+                return True
+        elif event.type() == event.Type.MouseMove:
+            print(f"Mouse move event! buttons={event.buttons()}")
+            if event.buttons() & Qt.MouseButton.LeftButton:
+                if isinstance(obj, QToolButton):
+                    return False
+                    
+                target = event.globalPosition().toPoint() - self.drag_position
+                
+                # Clamp to screen geometry to prevent getting stuck off-screen
+                screen = self.window().screen()
+                if screen:
+                    geom = screen.availableGeometry()
+                    target.setX(max(geom.left(), min(target.x(), geom.right() - 50)))
+                    target.setY(max(geom.top(), min(target.y(), geom.bottom() - 20)))
+                    
+                self.move_requested.emit(target)
+                return True
+        return False
+
     def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.MouseButton.LeftButton:
-            self.drag_position = (
-                event.globalPosition().toPoint()
-                - self.window().frameGeometry().topLeft()
-            )
-            event.accept()
+        self.eventFilter(self, event)
 
     def mouseMoveEvent(self, event: QMouseEvent):
-        if event.buttons() & Qt.MouseButton.LeftButton:
-            self.move_requested.emit(
-                event.globalPosition().toPoint() - self.drag_position
-            )
-            event.accept()
+        self.eventFilter(self, event)
