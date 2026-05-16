@@ -6,6 +6,8 @@ build_message_area() for constructing the scrollable conversation history.
 
 from __future__ import annotations
 
+from src.shared.python.ai.gui.assistant._guards import require_not_none
+
 from datetime import datetime, timezone
 
 from PyQt6.QtCore import Qt
@@ -41,8 +43,7 @@ class MessageWidget(QFrame):
             timestamp: When the message was created.
             parent: Parent widget.
         """
-        if role is None:
-            raise ValueError("role must be provided")
+        require_not_none(role, "role")
         super().__init__(parent)
         self._role = role
         self._content = content
@@ -148,8 +149,7 @@ class MessageWidget(QFrame):
         Args:
             text: Text to append.
         """
-        if text is None:
-            raise ValueError("text must be provided")
+        require_not_none(text, "text")
         self._content += text
         self._content_label.setMarkdown(self._content)
 
@@ -159,8 +159,7 @@ class MessageWidget(QFrame):
         Args:
             text: New content.
         """
-        if text is None:
-            raise ValueError("text must be provided")
+        require_not_none(text, "text")
         self._content = text
         self._content_label.setMarkdown(self._content)
 

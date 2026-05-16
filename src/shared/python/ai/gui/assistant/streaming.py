@@ -6,6 +6,8 @@ selected AI adapter and emits chunk_received / finished / error signals.
 
 from __future__ import annotations
 
+from src.shared.python.ai.gui.assistant._guards import require_not_none
+
 from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import QThread, pyqtSignal
@@ -42,8 +44,7 @@ class StreamWorker(QThread):
             context: Conversation context.
             tools: Available tools.
         """
-        if adapter is None:
-            raise ValueError("adapter must be provided")
+        require_not_none(adapter, "adapter")
         super().__init__()
         self._adapter = adapter
         self._message = message

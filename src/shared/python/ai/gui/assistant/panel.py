@@ -6,6 +6,8 @@ history sidebar, and settings dialog into a single coherent QWidget.
 
 from __future__ import annotations
 
+from src.shared.python.ai.gui.assistant._guards import require_not_none
+
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -456,8 +458,7 @@ class AIAssistantPanel(QWidget):
         return header
 
     def _add_header_title_widgets(self, layout: Any) -> None:
-        if layout is None:
-            raise ValueError("layout must be provided")
+        require_not_none(layout, "layout")
         self._provider_icon = QLabel("\U0001f916")
         layout.addWidget(self._provider_icon)
 
@@ -467,8 +468,7 @@ class AIAssistantPanel(QWidget):
         layout.addSpacing(10)
 
     def _add_header_mode_and_status(self, layout: Any) -> None:
-        if layout is None:
-            raise ValueError("layout must be provided")
+        require_not_none(layout, "layout")
         self._mode_combo = QComboBox()
         self._mode_combo.addItems(["Ask", "Plan", "Agent"])
         self._mode_combo.setToolTip(
@@ -480,8 +480,7 @@ class AIAssistantPanel(QWidget):
         layout.addWidget(self._status_label)
 
     def _add_header_action_buttons(self, layout: Any) -> None:
-        if layout is None:
-            raise ValueError("layout must be provided")
+        require_not_none(layout, "layout")
 
         from PyQt6.QtWidgets import QCheckBox
 
@@ -524,8 +523,7 @@ class AIAssistantPanel(QWidget):
         Args:
             message: User's message.
         """
-        if message is None:
-            raise ValueError("message must be provided")
+        require_not_none(message, "message")
         if not self._adapter:
             self._add_system_message(
                 "No AI provider configured — open Settings to add one."
@@ -584,8 +582,7 @@ class AIAssistantPanel(QWidget):
 
     def _on_stream_error(self, error: str) -> None:
         """Handle stream error."""
-        if error is None:
-            raise ValueError("error must be provided")
+        require_not_none(error, "error")
         self._set_status("Error")
         self._send_btn.setEnabled(True)
 
@@ -627,8 +624,7 @@ class AIAssistantPanel(QWidget):
         Returns:
             The created MessageWidget.
         """
-        if role is None:
-            raise ValueError("role must be provided")
+        require_not_none(role, "role")
         idx = self._message_layout.count() - 1
         widget = MessageWidget(role, content, timestamp)
         self._message_layout.insertWidget(idx, widget)
@@ -674,15 +670,13 @@ class AIAssistantPanel(QWidget):
 
     def set_adapter(self, adapter: BaseAgentAdapter) -> None:
         """Set the AI adapter to use."""
-        if adapter is None:
-            raise ValueError("adapter must be provided")
+        require_not_none(adapter, "adapter")
         self._adapter = adapter
         self._set_status("Ready")
 
     def set_expertise_level(self, level: ExpertiseLevel) -> None:
         """Set the user's expertise level."""
-        if level is None:
-            raise ValueError("level must be provided")
+        require_not_none(level, "level")
         self._context.user_expertise = level
         level_names = {
             ExpertiseLevel.BEGINNER: "Verbose",
@@ -694,8 +688,7 @@ class AIAssistantPanel(QWidget):
 
     def apply_settings(self, settings: AISettings) -> None:  # noqa: C901
         """Apply settings from dialog."""
-        if settings is None:
-            raise ValueError("settings must be provided")
+        require_not_none(settings, "settings")
         from src.shared.python.ai.gui.settings_dialog import AIProvider, get_api_key
         from src.shared.python.ai.types import ExpertiseLevel
 
