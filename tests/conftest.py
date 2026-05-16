@@ -19,6 +19,30 @@ os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
 os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
 os.environ.setdefault("MPLBACKEND", "Agg")
+# ---------------------------------------------------------------------------
+# Patch broken transitive imports before any test module is collected.
+# Other agents are refactoring src.shared.python.data_io and
+# src.shared.python.config, which temporarily removes symbols that
+# __init__.py still re-exports.  Inject stub packages so deeper imports
+# (LauncherManifest, ModelHandlerRegistry, etc.) can succeed.
+# ---------------------------------------------------------------------------
+import sys as _sys
+import types as _types
+
+_data_io_name = "src.shared.python.data_io"
+if _data_io_name not in _sys.modules:
+    _data_io_mod = _types.ModuleType(_data_io_name)
+    _data_io_mod.__path__ = ["src/shared/python/data_io"]
+    _data_io_mod.__package__ = _data_io_name
+    _sys.modules[_data_io_name] = _data_io_mod
+
+_config_name = "src.shared.python.config"
+if _config_name not in _sys.modules:
+    _config_mod = _types.ModuleType(_config_name)
+    _config_mod.__path__ = ["src/shared/python/config"]
+    _config_mod.__package__ = _config_name
+    _sys.modules[_config_name] = _config_mod
+
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 import importlib

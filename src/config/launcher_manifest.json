@@ -11,7 +11,11 @@
       "path": "src/tools/model_explorer/launch_model_explorer.py",
       "logo": "urdf_icon.svg",
       "status": "utility",
-      "capabilities": ["model_browsing", "urdf_generation", "open_in_engine"],
+      "capabilities": [
+        "model_browsing",
+        "urdf_generation",
+        "open_in_engine"
+      ],
       "order": 1
     },
     {
@@ -37,7 +41,13 @@
         "wrench",
         "screw_theory",
         "video_export",
-        "dataset_export"
+        "dataset_export",
+        "biomechanics",
+        "spatial_algebra",
+        "actuator_controls",
+        "force_overlays",
+        "control_schemes",
+        "realtime"
       ],
       "order": 2
     },
@@ -56,7 +66,11 @@
         "optimization",
         "contact",
         "mass_matrix",
-        "jacobian"
+        "jacobian",
+        "actuator_controls",
+        "force_overlays",
+        "control_schemes",
+        "realtime"
       ],
       "order": 3
     },
@@ -74,7 +88,9 @@
         "rigid_body",
         "inverse_kinematics",
         "mass_matrix",
-        "jacobian"
+        "jacobian",
+        "actuator_controls",
+        "force_overlays"
       ],
       "order": 4
     },
@@ -93,7 +109,9 @@
         "inverse_kinematics",
         "muscle_analysis",
         "mass_matrix",
-        "jacobian"
+        "jacobian",
+        "biomechanics",
+        "actuator_controls"
       ],
       "order": 5
     },
@@ -127,7 +145,11 @@
       "logo": "putting_green.svg",
       "status": "simulator",
       "web_route": "/tools/putting-green",
-      "capabilities": ["surface_modeling", "ball_physics", "terrain"],
+      "capabilities": [
+        "surface_modeling",
+        "ball_physics",
+        "terrain"
+      ],
       "order": 7
     },
     {
@@ -139,7 +161,11 @@
       "path": "src/launchers/matlab_launcher_unified.py",
       "logo": "matlab_logo.svg",
       "status": "external",
-      "capabilities": ["simscape_2d", "simscape_3d", "analysis_tools"],
+      "capabilities": [
+        "simscape_2d",
+        "simscape_3d",
+        "analysis_tools"
+      ],
       "order": 8
     },
     {
@@ -151,24 +177,21 @@
       "path": "src.tools.starting_pose_matcher.__main__",
       "logo": "motion_target_preview.svg",
       "status": "utility",
-      "capabilities": ["c3d", "mocap", "club", "body", "preview"],
-      "tags": ["c3d", "mocap", "club", "body", "preview"],
+      "capabilities": [
+        "c3d",
+        "mocap",
+        "club",
+        "body",
+        "preview"
+      ],
+      "tags": [
+        "c3d",
+        "mocap",
+        "club",
+        "body",
+        "preview"
+      ],
       "order": 9
-    },
-    {
-      "id": "starting_pose_matcher",
-      "name": "Starting-Pose Matcher (legacy)",
-      "description": "Legacy alias for the motion-target preview tile. Hidden by default; kept for one release so saved layouts continue to resolve.",
-      "category": "tool",
-      "type": "special_app",
-      "path": "src.tools.starting_pose_matcher.__main__",
-      "logo": "motion_target_preview.svg",
-      "status": "utility",
-      "hidden": true,
-      "hidden_reason": "Legacy alias retained for one release so saved layouts continue to resolve; use motion_target_preview for new launcher entries.",
-      "hidden_owner": "@launcher",
-      "capabilities": ["c3d", "mocap", "club", "body", "preview"],
-      "order": 99
     },
     {
       "id": "motion_capture",
@@ -198,7 +221,10 @@
       "provider": "tools",
       "source_root": "../Tools",
       "working_dir": ".",
-      "python_paths": ["src", "src/shared/python"],
+      "python_paths": [
+        "src",
+        "src/shared/python"
+      ],
       "logo": "video_analyzer.svg",
       "status": "external",
       "web_route": "/tools/video-analyzer",
@@ -220,7 +246,10 @@
       "provider": "tools",
       "source_root": "../Tools",
       "working_dir": "src/media_processing/video_processor/apps/web",
-      "python_paths": ["src", "src/shared/python"],
+      "python_paths": [
+        "src",
+        "src/shared/python"
+      ],
       "logo": "video_analyzer.svg",
       "status": "external",
       "web_route": "/tools/video-processor",
@@ -242,11 +271,19 @@
       "provider": "tools",
       "source_root": "../Tools",
       "working_dir": ".",
-      "python_paths": ["src", "src/shared/python"],
+      "python_paths": [
+        "src",
+        "src/shared/python"
+      ],
       "logo": "data_explorer.svg",
       "status": "external",
       "web_route": "/tools/data-explorer",
-      "capabilities": ["data_import", "filtering", "visualization", "export"],
+      "capabilities": [
+        "data_import",
+        "filtering",
+        "visualization",
+        "export"
+      ],
       "order": 13
     },
     {
@@ -273,7 +310,8 @@
         "time_series",
         "filtering",
         "statistics",
-        "export"
+        "export",
+        "process_calculators"
       ],
       "order": 14
     },
@@ -294,56 +332,243 @@
       "order": 15
     },
     {
-      "id": "cross_engine_dashboard",
+      "id": "cross_engine",
       "name": "Cross-Engine Dashboard",
-      "description": "Compare perturbation robustness and trajectories across physics engines side-by-side",
+      "description": "Compare simulation results across MuJoCo, Drake, Pinocchio with perturbation and robustness analysis",
       "category": "simulation",
       "type": "special_app",
       "path": "src/launchers/cross_engine_dashboard.py",
-      "logo": "golf_logo.png",
+      "logo": "cross_engine.svg",
       "status": "gui_ready",
       "capabilities": [
-        "cross_engine",
+        "cross_validation",
         "perturbation",
-        "comparison",
-        "visualization"
+        "robustness_scoring",
+        "comparison"
       ],
       "order": 16
     },
     {
-      "id": "exercise_dashboard",
+      "id": "biomech_exercise",
       "name": "Exercise Dashboard",
-      "description": "Cross-engine biomechanics exercise dashboard — select a movement (gait, sit-to-stand) and compare engine outputs",
+      "description": "Biomechanics exercise workflows with injury risk and joint stress analysis",
       "category": "biomechanics",
       "type": "biomech_exercise",
       "path": "src/launchers/exercise_dashboard.py",
-      "logo": "biomechanics.svg",
+      "logo": "exercise_dashboard.svg",
       "status": "gui_ready",
       "capabilities": [
-        "biomechanics",
-        "exercise",
-        "cross_engine",
-        "gait",
-        "sit_to_stand"
+        "injury_risk",
+        "joint_stress",
+        "swing_modification",
+        "exercise_presets"
       ],
       "order": 17
     },
     {
-      "id": "golf_simulation_suite",
-      "name": "Golf Simulation Suite",
-      "description": "Complete golf simulation suite with ball-flight physics, putting green, and cross-engine playback",
+      "id": "shot_tracer",
+      "name": "Shot Tracer",
+      "description": "Multi-model trajectory visualization and comparison",
       "category": "simulation",
-      "type": "golf_simulation",
-      "path": "launch_golf_suite.py",
-      "logo": "golf_logo.png",
+      "type": "special_app",
+      "path": "src/launchers/_shot_tracer_gui.py",
+      "logo": "golf_logo.svg",
       "status": "gui_ready",
       "capabilities": [
-        "ball_flight",
-        "putting_green",
-        "cross_engine",
-        "golf_simulation"
+        "trajectory_visualization",
+        "multi_model_comparison"
       ],
       "order": 18
+    },
+    {
+      "id": "pose_studio",
+      "name": "Pose Studio",
+      "description": "Interactive pose editor for joint angle manipulation and retargeting",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/pose_studio/__main__.py",
+      "logo": "pose_studio.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "pose_editing",
+        "retargeting",
+        "joint_manipulation"
+      ],
+      "order": 19
+    },
+    {
+      "id": "golf_simulation_suite",
+      "name": "Golf Simulation Suite",
+      "description": "Comprehensive golf simulation suite with parameter sweeps and batch runs",
+      "category": "simulation",
+      "type": "golf_simulation",
+      "path": "src/tools/golf_simulation_suite/__main__.py",
+      "logo": "golf_logo.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "full_simulation",
+        "parameter_sweep",
+        "batch_runs"
+      ],
+      "order": 20
+    },
+    {
+      "id": "swing_optimizer",
+      "name": "Swing Optimizer",
+      "description": "Trajectory optimization with constraint solving and cost functions",
+      "category": "simulation",
+      "type": "special_app",
+      "path": "src/shared/python/optimization/swing_optimizer.py",
+      "logo": "swing_optimizer.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "trajectory_optimization",
+        "constraint_solving",
+        "cost_functions"
+      ],
+      "order": 21
+    },
+    {
+      "id": "injury_analysis",
+      "name": "Injury Risk Analysis",
+      "description": "Joint stress, spinal load, and swing modification analysis for injury prevention",
+      "category": "biomechanics",
+      "type": "special_app",
+      "path": "src/shared/python/injury/injury_risk.py",
+      "logo": "injury_analysis.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "injury_risk",
+        "joint_stress",
+        "spinal_load",
+        "swing_modification"
+      ],
+      "order": 22
+    },
+    {
+      "id": "terrain_engine",
+      "name": "Terrain Engine",
+      "description": "Terrain and topography configuration for surface modeling and ball physics",
+      "category": "tool",
+      "type": "special_app",
+      "path": "",
+      "web_route": "/tools/terrain",
+      "logo": "putting_green.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "surface_modeling",
+        "ball_physics",
+        "topography",
+        "terrain_query"
+      ],
+      "order": 23
+    },
+    {
+      "id": "dataset_generator",
+      "name": "Dataset Generator",
+      "description": "Generate and import swing datasets with configurable strategies and export",
+      "category": "tool",
+      "type": "special_app",
+      "path": "",
+      "web_route": "/tools/dataset",
+      "logo": "data_explorer.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "dataset_generation",
+        "swing_import",
+        "parameter_sweep",
+        "export"
+      ],
+      "order": 24
+    },
+    {
+      "id": "bunkershot3d",
+      "name": "BunkerShot3D",
+      "description": "Sand bunker shot simulation with MPM and LIGGGHTS backends",
+      "category": "physics_engine",
+      "type": "special_app",
+      "path": "src/bunkershot3d/",
+      "logo": "bunkershot3d.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "sand_simulation",
+        "mpm",
+        "liggghts",
+        "calibration"
+      ],
+      "order": 25
+    },
+    {
+      "id": "pendulum_simulator",
+      "name": "Pendulum Simulator",
+      "description": "Educational 2-DOF pendulum models for physics learning and quick prototyping",
+      "category": "physics_engine",
+      "type": "special_app",
+      "path": "src/shared/python/pendulum_simulator/__main__.py",
+      "logo": "pendulum.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "educational",
+        "2dof",
+        "pendulum"
+      ],
+      "order": 26
+    },
+    {
+      "id": "chat_assistant",
+      "name": "AI Assistant",
+      "description": "Chat-based AI assistant with calculator, workspace, and data explorer integration",
+      "category": "tool",
+      "type": "special_app",
+      "path": "",
+      "web_route": "/chat",
+      "logo": "golf_logo.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "ai_methods",
+        "calculator",
+        "workspace",
+        "data_explorer"
+      ],
+      "order": 27
+    },
+    {
+      "id": "character_builder",
+      "name": "Character Builder",
+      "description": "Build and customize humanoid URDF models with anthropometric scaling",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/shared/python/model_generation/cli/main.py",
+      "logo": "urdf_icon.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "urdf_generation",
+        "anthropometry",
+        "mesh_generation",
+        "collision_geometry"
+      ],
+      "order": 28
+    },
+    {
+      "id": "starting_pose_matcher",
+      "name": "Starting-Pose Matcher (legacy)",
+      "description": "Legacy alias for the motion-target preview tile. Hidden by default; kept for one release so saved layouts continue to resolve.",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src.tools.starting_pose_matcher.__main__",
+      "logo": "motion_target_preview.svg",
+      "status": "utility",
+      "hidden": true,
+      "hidden_reason": "Legacy alias retained for one release so saved layouts continue to resolve; use motion_target_preview for new launcher entries.",
+      "hidden_owner": "@launcher",
+      "capabilities": [
+        "c3d",
+        "mocap",
+        "club",
+        "body",
+        "preview"
+      ],
+      "order": 99
     }
   ]
 }

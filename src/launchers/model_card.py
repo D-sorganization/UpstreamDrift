@@ -96,6 +96,19 @@ MODEL_IMAGES = {
     "URDF Generator": "urdf_icon.png",
     "C3D Motion Viewer": "c3d_viewer_modern.png",
     "Shot Tracer": "golf_icon.png",
+    # New launcher tiles
+    "Cross Engine": "cross_engine.svg",
+    "Exercise Dashboard": "exercise_dashboard.svg",
+    "Swing Optimizer": "swing_optimizer.svg",
+    "Injury Analysis": "injury_analysis.svg",
+    "Terrain Engine": "putting_green_modern.png",
+    "BunkerShot 3D": "bunkershot3d.svg",
+    "Pendulum": "pendulum.svg",
+    "Chat Assistant": "golf_logo.png",
+    "Character Builder": "urdf_icon.png",
+    "Pose Studio": "pose_studio.svg",
+    "Dataset Generator": "data_explorer_modern.png",
+    "Golf Simulation Suite": "golf_logo.png",
 }
 
 

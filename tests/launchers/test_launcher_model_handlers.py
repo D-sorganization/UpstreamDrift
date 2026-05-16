@@ -8,8 +8,12 @@ if not hasattr(os, "startfile"):
 from pathlib import Path  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
+import pytest  # noqa: E402
+
 from src.launchers.launcher_model_handlers import (  # noqa: E402
+    BiomechExerciseHandler,
     DocumentHandler,
+    GolfSimulationSuiteHandler,
     MatlabFileHandler,
     ModelHandler,
     ModelHandlerRegistry,
@@ -19,6 +23,8 @@ from src.launchers.launcher_model_handlers import (  # noqa: E402
     SpecialAppHandler,
     _open_with_system_app,
 )
+from src.config.launcher_manifest_loader import LauncherManifest
+from src.launchers.model_card import MODEL_IMAGES
 
 
 def test_module_handler() -> None:
@@ -228,3 +234,174 @@ def test_registry() -> None:
     assert (
         registry.launch_model("unknown", "model", Path("/repo"), MagicMock()) is False
     )
+
+
+# ===========================================================================
+# New handler registration tests
+# ===========================================================================
+
+
+class TestBiomechExerciseHandler:
+    """Tests for BiomechExerciseHandler."""
+
+    def test_can_handle_biomech_exercise(self) -> None:
+        handler = BiomechExerciseHandler()
+        assert handler.can_handle("biomech_exercise") is True
+
+    def test_cannot_handle_other_types(self) -> None:
+        handler = BiomechExerciseHandler()
+        assert handler.can_handle("special_app") is False
+        assert handler.can_handle("putting_green") is False
+        assert handler.can_handle("random") is False
+
+    def test_launch_success(self) -> None:
+        handler = BiomechExerciseHandler()
+
+        class DummyModel:
+            path = "src/launchers/exercise_dashboard.py"
+            name = "Gait Analysis"
+            id = "biomech_gait"
+
+        mock_manager = MagicMock()
+        mock_manager.launch_script.return_value = "proc"
+        mock_manager.get_subprocess_env.return_value = {}
+
+        res = handler.launch(DummyModel(), Path("/repo"), mock_manager)
+        assert res is True
+        mock_manager.launch_script.assert_called_once()
+
+    def test_launch_uses_hardcoded_script_path(self) -> None:
+        """BiomechExerciseHandler constructs its own script path from repo_path,
+        not from model.path. It always tries to launch exercise_dashboard.py."""
+        handler = BiomechExerciseHandler()
+
+        class MinimalModel:
+            id = "biomech_1"
+
+        mock_manager = MagicMock()
+        mock_manager.launch_script.return_value = "proc"
+        mock_manager.get_subprocess_env.return_value = {}
+
+        res = handler.launch(MinimalModel(), Path("/repo"), mock_manager)
+        assert res is True
+        mock_manager.launch_script.assert_called_once()
+
+    def test_launch_returns_false_on_process_failure(self) -> None:
+        """If launch_script returns None, launch returns False."""
+        handler = BiomechExerciseHandler()
+
+        class MinimalModel:
+            id = "biomech_1"
+
+        mock_manager = MagicMock()
+        mock_manager.launch_script.return_value = None
+        mock_manager.get_subprocess_env.return_value = {}
+
+        res = handler.launch(MinimalModel(), Path("/repo"), mock_manager)
+        assert res is False
+
+
+class TestGolfSimulationSuiteHandler:
+    """Tests for GolfSimulationSuiteHandler."""
+
+    def test_can_handle_golf_simulation(self) -> None:
+        handler = GolfSimulationSuiteHandler()
+        assert handler.can_handle("golf_simulation") is True
+
+    def test_cannot_handle_other_types(self) -> None:
+        handler = GolfSimulationSuiteHandler()
+        assert handler.can_handle("special_app") is False
+        assert handler.can_handle("biomech_exercise") is False
+        assert handler.can_handle("random") is False
+
+    def test_launch_success(self) -> None:
+        handler = GolfSimulationSuiteHandler()
+
+        class DummyModel:
+            path = "launch_golf_suite.py"
+            name = "Golf Sim Suite"
+            id = "golf_sim"
+
+        mock_manager = MagicMock()
+        mock_manager.launch_script.return_value = "proc"
+
+        with patch.object(Path, "exists", return_value=True):
+            res = handler.launch(DummyModel(), Path("/repo"), mock_manager)
+            assert res is True
+            mock_manager.launch_script.assert_called_once()
+
+    def test_launch_no_path(self) -> None:
+        handler = GolfSimulationSuiteHandler()
+
+        class NoPathModel:
+            id = "gs_1"
+
+        assert handler.launch(NoPathModel(), Path("/repo"), MagicMock()) is False
+
+    def test_launch_missing_script(self) -> None:
+        handler = GolfSimulationSuiteHandler()
+
+        class DummyModel:
+            path = "launch_golf_suite.py"
+            name = "Golf Sim Suite"
+            id = "golf_sim"
+
+        with patch.object(Path, "exists", return_value=False):
+            assert handler.launch(DummyModel(), Path("/repo"), MagicMock()) is False
+
+
+class TestManifestTileHandlerRegistration:
+    """Verify every manifest tile type has a handler in ModelHandlerRegistry."""
+
+    @pytest.fixture
+    def manifest(self) -> LauncherManifest:
+        return LauncherManifest.load()
+
+    @pytest.fixture
+    def registry(self) -> ModelHandlerRegistry:
+        return ModelHandlerRegistry()
+
+    def test_all_manifest_tile_types_have_handlers(
+        self, manifest: LauncherManifest, registry: ModelHandlerRegistry
+    ) -> None:
+        """Every tile in the manifest must have a handler that can_handle() it."""
+        missing: list[str] = []
+        for tile in manifest.tiles:
+            handler = registry.get_handler(tile.type)
+            if handler is None:
+                missing.append(f"{tile.id!r} (type={tile.type!r})")
+        assert not missing, (
+            f"No handler registered for tiles: {', '.join(missing)}"
+        )
+
+    def test_handler_can_handle_returns_true_for_manifest_types(
+        self, manifest: LauncherManifest, registry: ModelHandlerRegistry
+    ) -> None:
+        """Each handler's can_handle() must return True for the declared type."""
+        for tile in manifest.tiles:
+            handler = registry.get_handler(tile.type)
+            assert handler is not None, f"No handler for tile {tile.id!r}"
+            assert handler.can_handle(tile.type) is True, (
+                f"Handler {type(handler).__name__}.can_handle({tile.type!r}) "
+                f"returned False for tile {tile.id!r}"
+            )
+
+    def test_manifest_static_tile_names_have_model_images(self) -> None:
+        """Every tile from the static manifest must have an entry in MODEL_IMAGES.
+        Provider-backed tiles may not have entries yet."""
+        manifest = LauncherManifest.load()
+        # Static tiles that must always have MODEL_IMAGES entries
+        static_ids = {
+            "model_explorer", "mujoco_unified", "drake_golf", "pinocchio_golf",
+            "opensim_golf", "myosim_suite", "putting_green", "matlab_unified",
+            "motion_target_preview", "motion_capture", "video_analyzer",
+            "video_processor", "data_explorer", "data_processor",
+            "project_map", "starting_pose_matcher",
+        }
+        missing: list[str] = []
+        for tile in manifest.tiles:
+            if tile.id in static_ids and tile.name not in MODEL_IMAGES:
+                missing.append(f"{tile.id!r} (name={tile.name!r})")
+        assert not missing, (
+            f"MODEL_IMAGES missing entries for: {', '.join(missing)}"
+        )
