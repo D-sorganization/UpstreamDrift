@@ -198,8 +198,13 @@ class LauncherUISetupMixin:
         # Content Container
         content_container = QWidget()
         content_layout = QVBoxLayout(content_container)
-        content_layout.setSpacing(20)
-        content_layout.setContentsMargins(30, 30, 30, 30)
+        content_layout.setSpacing(Styles.SPACING_LG)
+        content_layout.setContentsMargins(
+            Styles.MARGIN_PAGE,
+            Styles.MARGIN_PAGE,
+            Styles.MARGIN_PAGE,
+            Styles.MARGIN_PAGE,
+        )
 
         # --- Top Bar ---
         top_bar = self._setup_top_bar()
@@ -236,10 +241,11 @@ class LauncherUISetupMixin:
 
         main_layout.addWidget(content_container)
 
-        # Set stretch factors: Sidebar shouldn't stretch by default, content should take the rest
-        main_layout.setStretchFactor(0, 0)
-        main_layout.setStretchFactor(1, 1)
-        main_layout.setSizes([85, 1200])
+        # Proportional sizing: sidebar gets ~1/6 of space, content gets ~5/6.
+        # setStretchFactor controls relative growth on resize; the sidebar has a
+        # hard minimum (Styles.SIDEBAR_MIN_WIDTH) so it never collapses to zero.
+        main_layout.setStretchFactor(0, 1)
+        main_layout.setStretchFactor(1, 5)
 
         # Apply dark theme
         self.apply_styles()
@@ -253,7 +259,7 @@ class LauncherUISetupMixin:
     def _setup_global_sidebar(self) -> QWidget:
         """Create the global sidebar navigation."""
         sidebar = QWidget()
-        sidebar.setMinimumWidth(85)
+        sidebar.setMinimumWidth(Styles.SIDEBAR_MIN_WIDTH)
         sidebar.setSizePolicy(
             QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding
         )
