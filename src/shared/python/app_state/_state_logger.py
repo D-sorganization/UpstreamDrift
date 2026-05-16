@@ -23,8 +23,8 @@ class StateLogger:
         store: The :class:`HistoryStore` backing this logger.
     """
 
-    def __init__(self, maxlen: int = 500) -> None:
-        self.store = HistoryStore(maxlen=maxlen)
+    def __init__(self, store: HistoryStore | None = None) -> None:
+        self.store: HistoryStore = store if store is not None else HistoryStore()
 
     def log_event(self, event_type: str, payload: dict[str, Any] | None = None) -> None:
         """Record a named event with optional context payload.
@@ -42,7 +42,8 @@ class StateLogger:
         """
         if not event_type:
             raise ValueError("event_type must be non-empty")
-        self.store.append_event(event_type, payload or {})
+        resolved_payload: dict[str, Any] = payload if payload is not None else {}
+        self.store.append_event(event_type, resolved_payload)
         _logger.debug("AppState event recorded: %s", event_type)
 
     def log_exception(self, exc: Exception, context: str = "") -> None:
@@ -54,7 +55,11 @@ class StateLogger:
         """
         self.log_event(
             "exception",
-            {"type": type(exc).__name__, "message": str(exc), "context": context},
+            {
+                "exc_type": type(exc).__name__,
+                "exc_message": str(exc),
+                "context": context,
+            },
         )
 
     def log_fallback(self, component: str, reason: str) -> None:
@@ -75,7 +80,7 @@ def get_state_logger() -> StateLogger:
     Returns:
         The shared :class:`StateLogger` instance.
     """
-    global _singleton
+    global _singleton  # noqa: PLW0603
     if _singleton is None:
         with _SINGLETON_LOCK:
             if _singleton is None:

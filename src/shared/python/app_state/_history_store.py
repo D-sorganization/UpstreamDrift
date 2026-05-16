@@ -12,7 +12,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-_DEFAULT_MAXLEN: int = 500
+_DEFAULT_MAXLEN = 1000
 
 
 class HistoryStore:
@@ -28,13 +28,15 @@ class HistoryStore:
     def __init__(self, maxlen: int = _DEFAULT_MAXLEN) -> None:
         if maxlen <= 0:
             raise ValueError(f"maxlen must be positive, got {maxlen}")
-        self.maxlen = maxlen
+        self.maxlen: int = maxlen
+        self._deque: deque[AppEvent] = deque(maxlen=maxlen)
         self._lock = threading.Lock()
-        self._store: deque[AppEvent] = deque(maxlen=maxlen)
 
-    def append_event(
-        self, event_type: str, payload: dict[str, Any] | None = None
-    ) -> None:
+    # ------------------------------------------------------------------
+    # Mutation
+    # ------------------------------------------------------------------
+
+    def append_event(self, event_type: str, payload: dict[str, Any]) -> None:
         """Append a new event.
 
         Args:
@@ -46,19 +48,23 @@ class HistoryStore:
         """
         if not event_type:
             raise ValueError("event_type must be non-empty")
-        event = AppEvent(type=event_type, payload=payload or {})
+        event = AppEvent(type=event_type, payload=payload)
         with self._lock:
-            self._store.append(event)
+            self._deque.append(event)
 
     def clear(self) -> None:
         """Remove all stored events."""
         with self._lock:
-            self._store.clear()
+            self._deque.clear()
+
+    # ------------------------------------------------------------------
+    # Queries
+    # ------------------------------------------------------------------
 
     def latest(self) -> AppEvent | None:
         """Return the most recent event, or ``None`` if the store is empty."""
         with self._lock:
-            return self._store[-1] if self._store else None
+            return self._deque[-1] if self._deque else None
 
     def snapshot(self, max_events: int | None = None) -> list[AppEvent]:
         """Return a point-in-time copy of stored events.
@@ -70,10 +76,10 @@ class HistoryStore:
             List of :class:`AppEvent`, oldest first.
         """
         with self._lock:
-            events = list(self._store)
-        if max_events is not None:
-            events = events[-max_events:]
-        return events
+            items = list(self._deque)
+        if max_events is not None and max_events < len(items):
+            items = items[-max_events:]
+        return items
 
     def as_json(self) -> str:
         """Serialise the store to a JSON string.
@@ -90,9 +96,13 @@ class HistoryStore:
             logger.warning("HistoryStore.as_json serialisation failed: %s", exc)
             return "[]"
 
+    # ------------------------------------------------------------------
+    # Dunder helpers
+    # ------------------------------------------------------------------
+
     def __len__(self) -> int:
         with self._lock:
-            return len(self._store)
+            return len(self._deque)
 
     def __iter__(self):  # type: ignore[override]
         return iter(self.snapshot())

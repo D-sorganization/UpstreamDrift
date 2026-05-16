@@ -73,8 +73,16 @@ Import from there (or from this module for convenience):
         get_api_host,
         get_api_port,
         get_log_level,
+        get_setting,
+        load_settings,
+        save_settings,
     )
 """
+
+from __future__ import annotations
+
+import logging
+from typing import Any
 
 from src.shared.python.config.environment import (
     get_admin_password,
@@ -103,6 +111,76 @@ from src.shared.python.config.environment import (
     require_env,
 )
 
+_logger = logging.getLogger(__name__)
+
+# In-process settings overlay: persists only for the lifetime of the process.
+# Use environment variables or persistent config files for cross-process state.
+_settings_store: dict[str, Any] = {}
+
+
+def get_setting(key: str, default: Any = None) -> Any:
+    """Return the value for *key* from the in-process settings store.
+
+    Preconditions:
+        key must be a non-empty string.
+
+    Args:
+        key: The setting name.
+        default: Value to return when *key* is absent. Defaults to ``None``.
+
+    Returns:
+        The stored value, or *default* if *key* is not present.
+
+    Raises:
+        TypeError: If *key* is not a string.
+
+    Example:
+        >>> get_setting("simulation_timeout", default=60)
+        60
+    """
+    if not isinstance(key, str):
+        raise TypeError(f"key must be a str, got {type(key).__name__!r}")
+    return _settings_store.get(key, default)
+
+
+def load_settings() -> dict[str, Any]:
+    """Return a snapshot of the current in-process settings store.
+
+    Returns:
+        A shallow copy of the settings dict so callers cannot mutate internal
+        state directly.
+
+    Example:
+        >>> settings = load_settings()
+        >>> isinstance(settings, dict)
+        True
+    """
+    return dict(_settings_store)
+
+
+def save_settings(data: dict[str, Any]) -> None:
+    """Merge *data* into the in-process settings store.
+
+    Existing keys are overwritten; keys not in *data* are preserved.
+
+    Preconditions:
+        data must be a dict.
+
+    Args:
+        data: Mapping of setting names to values.
+
+    Raises:
+        TypeError: If *data* is not a dict.
+
+    Example:
+        >>> save_settings({"simulation_timeout": 120})
+    """
+    if not isinstance(data, dict):
+        raise TypeError(f"data must be a dict, got {type(data).__name__!r}")
+    _settings_store.update(data)
+    _logger.debug("Settings updated: %d key(s) merged", len(data))
+
+
 __all__ = [
     "get_admin_password",
     "get_api_host",
@@ -120,6 +198,7 @@ __all__ = [
     "get_golf_ui_dist",
     "get_log_level",
     "get_secret_key",
+    "get_setting",
     "is_auth_disabled",
     "is_browser_suppressed",
     "is_development",
@@ -127,5 +206,7 @@ __all__ = [
     "is_headless",
     "is_production",
     "is_wsl",
+    "load_settings",
     "require_env",
+    "save_settings",
 ]

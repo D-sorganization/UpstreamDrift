@@ -76,6 +76,7 @@ from src.api.routes import (  # noqa: E402
     simulation_ws,
 )
 from src.api.services.chat_service import ChatService  # noqa: E402
+from src.shared.python.app_state import agent_context, get_state_logger  # noqa: E402
 from src.shared.python.config.environment import is_production  # noqa: E402
 from src.shared.python.engine_core.engine_manager import EngineManager  # noqa: E402
 from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
@@ -784,7 +785,9 @@ def create_local_app() -> FastAPI:
     app.state.analysis_service = _LazyServiceProxy(
         lambda: _create_analysis_service(engine_manager)
     )
-    app.state.chat_service = ChatService()
+    app.state.chat_service = ChatService(
+        app_state_provider=lambda: agent_context(get_state_logger().store)
+    )
 
     # Register routes (no auth required in local mode)
     _register_api_routers(app)

@@ -8,15 +8,17 @@ sessions to disk for cross-process sharing.
 from __future__ import annotations
 
 import asyncio
+import json
 import threading
 import time
 import uuid
 from collections import OrderedDict
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Callable
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from src.shared.python.app_state import get_state_logger
 from src.shared.python.core.contracts import precondition
 from src.shared.python.core.error_utils import InvalidRequestError
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -42,7 +44,15 @@ class ChatService:
     SESSION_TTL_SECONDS = 7200  # 2 hours
     PERSIST_DIR = Path.home() / ".golf_modeling_suite" / "chat_sessions"
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        app_state_provider: Callable[[], dict[str, Any]] | None = None,
+    ) -> None:
+        if app_state_provider is not None and not callable(app_state_provider):
+            raise TypeError(
+                "app_state_provider must be a callable returning a dict, or None"
+            )
+        self._app_state_provider = app_state_provider
         self._sessions: OrderedDict[str, ConversationContext] = OrderedDict()
         self._timestamps: dict[str, float] = {}
         self._adapter: BaseAgentAdapter | None = None
@@ -124,6 +134,32 @@ class ChatService:
         except ImportError as e:
             logger.error("ChatService: could not create fallback adapter: %s", e)
 
+    def _build_app_state_message(self) -> Any | None:
+        """Build a system :class:`Message` containing the current app state.
+
+        Returns ``None`` when no provider is configured or when the provider
+        raises an exception (degraded gracefully — chat continues).
+
+        Returns:
+            A ``Message(role="system", ...)`` instance, or ``None``.
+        """
+        if self._app_state_provider is None:
+            return None
+        try:
+            state = self._app_state_provider()
+            content = "Current application state:\n" + json.dumps(
+                state, indent=2, default=str
+            )
+            from src.shared.python.ai.types import Message
+
+            return Message(role="system", content=content)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(
+                "ChatService: app_state_provider raised %s — skipping state injection",
+                exc,
+            )
+            return None
+
     def get_or_create_session(self, session_id: str | None) -> ConversationContext:
         """Return existing session or create a new one."""
         from src.shared.python.ai.types import ConversationContext
@@ -187,15 +223,18 @@ class ChatService:
 
             ctx.add_user_message(content)
             self._persist_session(session_id)
-            return str(uuid.uuid4().hex[:12])
+
+        get_state_logger().log_event(
+            "chat.message_sent",
+            {"session_id": session_id, "role": "user"},
+        )
+        return str(uuid.uuid4().hex[:12])
 
     @precondition(
         lambda self, session_id: session_id is not None and len(session_id) > 0,
         "Session ID must be a non-empty string",
     )
-    async def stream_response(
-        self, session_id: str
-    ) -> AsyncIterator[Any]:  # noqa: C901
+    async def stream_response(self, session_id: str) -> AsyncIterator[Any]:  # noqa: C901
         """Stream AI response chunks for the latest user message.
 
         Runs the synchronous adapter in a thread pool executor.
@@ -211,19 +250,21 @@ class ChatService:
                 return
 
         # Build engine context system message
+        from src.shared.python.ai.types import Message
+
+        temp_messages = list(ctx.messages)
         engine = ctx.metadata.get("last_engine")
         if engine:
             system_hint = (
                 f"The user is currently working in the {engine} physics engine. "
                 "Tailor your responses to that context when relevant."
             )
-            # Temporarily inject system context (don't persist it)
-            from src.shared.python.ai.types import Message
-
-            temp_messages = list(ctx.messages)
             temp_messages.insert(0, Message(role="system", content=system_hint))
-        else:
-            temp_messages = list(ctx.messages)
+
+        # Inject app state context if a provider is configured
+        app_state_msg = self._build_app_state_message()
+        if app_state_msg is not None:
+            temp_messages.insert(0, app_state_msg)
 
         # Create a temporary context copy for the adapter
         from src.shared.python.ai.types import ConversationContext
@@ -235,7 +276,6 @@ class ChatService:
             metadata=ctx.metadata,
         )
 
-        import json
         import queue
 
         from src.shared.python.ai.types import ToolCall
@@ -313,6 +353,14 @@ class ChatService:
                             )
                             self._persist_session(session_id)
 
+                    get_state_logger().log_event(
+                        "chat.response_received",
+                        {
+                            "session_id": session_id,
+                            "chars": len(complete_response),
+                        },
+                    )
+
                     if not tool_calls:
                         break
 
@@ -366,6 +414,9 @@ class ChatService:
             # hanging the queue consumer.
             except Exception as e:  # noqa: BLE001
                 chunk_queue.put(f"\n[Error: {e}]")
+                get_state_logger().log_exception(
+                    e, context="ChatService.stream_response"
+                )
             finally:
                 chunk_queue.put(None)  # Sentinel
 

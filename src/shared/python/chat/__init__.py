@@ -5,6 +5,10 @@ to any FastAPI-based chat WebSocket endpoint, plus Pydantic contract models
 for the chat protocol, a shared ChatServiceBase for session management,
 and a reusable WebSocket router factory.
 
+Importing this package also registers :class:`~.sidekick_tool.SidekickTool`
+with the launcher's embeddable-tool registry (guarded by
+:func:`contextlib.suppress` so headless contexts are unaffected).
+
 Usage::
 
     from chat import ChatDockWidget
@@ -16,6 +20,11 @@ Usage::
     )
     main_window.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
 """
+
+import contextlib
+
+with contextlib.suppress(ImportError):
+    from . import sidekick_tool as _sidekick_tool  # noqa: F401
 
 from .service_base import ChatMessage, ChatServiceBase, ChatSession
 

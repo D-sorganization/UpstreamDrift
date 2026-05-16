@@ -3,115 +3,16 @@
 from __future__ import annotations
 
 import contextlib
-import hashlib
-import os
 from typing import Any
 
 from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 
-from src.shared.python.ai.chat_context import (
-    format_context_section,
-    get_chat_context,
-)
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
 router = APIRouter()
-
-
-_CONTEXT_ENV_VAR = "UPSTREAMDRIFT_SIDEKICK_CONTEXT"
-
-# Metadata key used to record the SHA-256 of the last injected context so
-# identical state is not re-injected on every "send" action.
-_CONTEXT_HASH_KEY = "_context_injected_hash"
-
-
-def _context_injection_enabled() -> bool:
-    """Return ``True`` when env-var-gated Sidekick context injection is on."""
-    return os.environ.get(_CONTEXT_ENV_VAR, "1") != "0"
-
-
-def _context_section_hash(section: str) -> str:
-    """Return a truncated SHA-256 hex digest of *section*.
-
-    Args:
-        section: The formatted context string to hash. Must be a str.
-
-    Returns:
-        First 16 hex characters of the SHA-256 digest.
-    """
-    if not isinstance(section, str):
-        raise TypeError("section must be a str")
-    return hashlib.sha256(section.encode()).hexdigest()[:16]
-
-
-def _maybe_inject_chat_context(session: Any) -> str | None:
-    """Inject a ``Recent app state`` system message into ``session``.
-
-    The injection is gated on:
-      * the ``UPSTREAMDRIFT_SIDEKICK_CONTEXT`` env var (default on),
-      * a non-empty :func:`get_chat_context` payload, and
-      * the context content having changed since the last injection
-        (watermark check via a SHA-256 hash stored in
-        ``session.metadata[_CONTEXT_HASH_KEY]``).
-
-    Re-injection is skipped when the context hash matches the stored
-    watermark, preventing near-duplicate system messages from
-    accumulating in the conversation history on every "send" action.
-
-    Args:
-        session: The chat-service session/context object. Must expose an
-            ``add_message(role, content)`` method (UpstreamDrift's
-            ``ConversationContext`` does). Sessions lacking that method
-            are silently skipped so test doubles remain decoupled.
-
-    Returns:
-        The formatted prompt section that was injected, or ``None`` when
-        no injection happened.
-    """
-    if not _context_injection_enabled():
-        return None
-
-    try:
-        payload = get_chat_context()
-    except (ValueError, TypeError) as exc:
-        logger.warning("chat_context.get_chat_context failed: %s", exc)
-        return None
-
-    section = format_context_section(payload)
-    if not section:
-        return None
-
-    # Watermark check: skip injection when the context has not changed.
-    new_hash = _context_section_hash(section)
-    metadata: dict[str, Any] | None = getattr(session, "metadata", None)
-    if isinstance(metadata, dict) and metadata.get(_CONTEXT_HASH_KEY) == new_hash:
-        logger.debug(
-            "Sidekick context unchanged (hash=%s); skipping re-injection",
-            new_hash,
-        )
-        return None
-
-    add_message = getattr(session, "add_message", None)
-    if not callable(add_message):
-        logger.debug(
-            "Skipping Sidekick context injection: session has no add_message()"
-        )
-        return None
-
-    try:
-        add_message("system", section)
-    except (TypeError, ValueError) as exc:
-        logger.warning("Failed to inject Sidekick chat context: %s", exc)
-        return None
-
-    # Store the watermark after a successful injection.
-    if isinstance(metadata, dict):
-        metadata[_CONTEXT_HASH_KEY] = new_hash
-
-    return section
 
 
 @router.websocket("/ws/chat/{session_id}")
@@ -164,9 +65,9 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
                     )
                     continue
 
-                engine_context = msg.get("engine_context")
-
-                _maybe_inject_chat_context(ctx)
+                # Accept both keys: React clients send ``engine_context``;
+                # PyQt clients send ``app_context``. Mirrors router_factory.py.
+                engine_context = msg.get("engine_context") or msg.get("app_context")
 
                 try:
                     chat_service.add_user_message(
