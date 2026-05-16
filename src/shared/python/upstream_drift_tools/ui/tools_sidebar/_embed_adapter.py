@@ -11,7 +11,7 @@ from src.shared.python.launcher_embed import (
     EmbedCapabilities,
     register_embeddable_tool,
 )
-from sidekick.ui.tools_sidebar.api import (
+from .api import (
     create_tools_sidebar,
 )
 

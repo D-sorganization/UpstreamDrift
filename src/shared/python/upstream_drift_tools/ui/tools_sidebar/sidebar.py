@@ -5,10 +5,12 @@ tab uses ChatDockWidget from src.shared.python.chat rather than a placeholder.
 
 Issue #5490: replace the placeholder QLabel in the Chat tab with the real
 ChatDockWidget implementation.
+Issue #5616: add LayoutMode enum + Workspace tab with MATLAB-style layout.
 """
 
 from __future__ import annotations
 
+import enum
 import logging
 from dataclasses import dataclass, field
 from typing import Any
@@ -16,7 +18,26 @@ from collections.abc import Callable
 
 from PyQt6.QtWidgets import QWidget
 
+from .registry import WorkspaceRegistry
+
 logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# LayoutMode enum (Issue #5616)
+# ---------------------------------------------------------------------------
+
+
+class LayoutMode(enum.Enum):
+    """Sidebar layout mode selector.
+
+    SIDEBAR (default): conventional right-edge dock with tab icons.
+    MATLAB_HOME: replaces the dock with a full 70/30 horizontal split
+        (command window left, workspace inspector + history right).
+    """
+
+    SIDEBAR = "sidebar"
+    MATLAB_HOME = "matlab_home"
 
 
 # ---------------------------------------------------------------------------
@@ -53,15 +74,24 @@ class UnifiedToolsSidebar(QWidget):
     lazily instantiates panel widgets via their ``factory`` callable on first
     activation so startup cost is minimised.
 
+    Attributes:
+        registry: WorkspaceRegistry shared between the workspace tab and
+            the Python REPL. Seed variables here after construction so they
+            appear in the variable inspector.
+        layout_mode: Active LayoutMode (SIDEBAR or MATLAB_HOME).
+
     Usage::
 
         sidebar = UnifiedToolsSidebar(parent=main_window)
+        sidebar.registry.set_variable('engine_manager', engine_manager)
         main_layout.addWidget(sidebar)
     """
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._parent = parent
+        self.registry: WorkspaceRegistry = WorkspaceRegistry()
+        self.layout_mode: LayoutMode = LayoutMode.SIDEBAR
         self._tab_definitions: list[SidebarTabDefinition] = (
             self._default_tab_definitions()
         )
@@ -79,8 +109,10 @@ class UnifiedToolsSidebar(QWidget):
         1. chat      — AI chat assistant (Issue #5490)
         2. terminal  — Real OS shell with PTY backend (Issue #5617)
         3. python-repl — Python REPL sharing workspace variables (Issue #5617)
+        4. workspace — MATLAB-style variable inspector (Issue #5616)
 
-        Postcondition: returned list contains 'terminal' and 'python-repl' tabs.
+        Postcondition: returned list contains 'terminal', 'python-repl', and
+        'workspace' tabs.
         """
         return [
             SidebarTabDefinition(
@@ -106,6 +138,12 @@ class UnifiedToolsSidebar(QWidget):
                     "workspace registry."
                 ),
                 factory=self._make_python_repl_widget,
+            ),
+            SidebarTabDefinition(
+                tab_id="workspace",
+                label="Workspace",
+                tooltip="Variable inspector + Python REPL (MATLAB-style)",
+                factory=self._make_workspace_widget,
             ),
         ]
 
@@ -178,6 +216,37 @@ class UnifiedToolsSidebar(QWidget):
         """
         logger.debug("Python REPL tab: created placeholder")
         return self._placeholder("Python REPL")
+
+    def _make_workspace_widget(self, _sidebar: Any) -> QWidget:
+        """Build the MATLAB-style workspace tab (Issue #5616).
+
+        Delegates to :func:`default_tabs.build_workspace_tab`, injecting
+        this sidebar as the host so the widget shares ``self.registry``.
+
+        Args:
+            _sidebar: Unused; matches factory signature.
+
+        Returns:
+            QWidget with command-window / variable-inspector layout.
+        """
+        from .default_tabs import build_workspace_tab
+
+        widget = build_workspace_tab(self)
+        logger.debug("Workspace tab: created MATLAB-style layout")
+        return widget
+
+    def set_context_variable(self, name: str, value: Any) -> None:
+        """Set a variable in the shared workspace registry.
+
+        Convenience method that lets REPL widgets call
+        ``sidebar.set_context_variable(name, value)`` without reaching
+        directly into the registry internals.
+
+        Args:
+            name: Variable name.
+            value: Variable value.
+        """
+        self.registry.set_variable(name, value)
 
     def _placeholder(self, label: str) -> QWidget:
         """Return a simple placeholder label widget.

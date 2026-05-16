@@ -546,10 +546,53 @@ class GolfLauncher(
         self._initialize_model_order()
         self._apply_docker_status(results.docker_available)
         self._load_layout()
+        self._seed_sidekick_workspace()
 
         from PyQt6.QtCore import QTimer as _QTimer
 
         _QTimer.singleShot(100, self._show_onboarding_if_needed)
+
+    def _seed_sidekick_workspace(self) -> None:
+        """Push launcher state into any active Sidekick workspace registry.
+
+        Called after startup results are applied so the Sidekick workspace
+        tab shows live state (engine manager, model registry, current scenario)
+        rather than an empty inspector.
+
+        Issue #5616 — seed the registry from the launcher.
+
+        Postcondition: if a sidebar with a WorkspaceRegistry is reachable,
+        its registry contains 'engine_manager' and 'model_registry' keys.
+        LOD: reaches only one level deep (sidebar.registry).
+        """
+        sidebar = getattr(self, "sidekick_sidebar", None)
+        if sidebar is None:
+            # Try the tools-sidebar integration hook if present
+            try:
+                from src.shared.python.gui_launcher.tools_sidebar_integration import (
+                    get_active_sidebar,
+                )
+
+                sidebar = get_active_sidebar()
+            except (ImportError, AttributeError):
+                pass
+
+        if sidebar is None:
+            logger.debug("No sidekick sidebar found; workspace seed skipped")
+            return
+
+        registry = getattr(sidebar, "registry", None)
+        if not hasattr(registry, "set_variable"):
+            logger.debug(
+                "sidebar.registry has no set_variable method; workspace seed skipped"
+            )
+            return
+
+        if self.engine_manager is not None:
+            registry.set_variable("engine_manager", self.engine_manager)
+        if self.registry is not None:
+            registry.set_variable("model_registry", self.registry)
+        logger.info("Sidekick workspace seeded with engine_manager and model_registry")
 
     def create_model_card(self, model: Any) -> None:
         """Create a clickable card widget for *model*.

@@ -18,7 +18,7 @@ def create_tools_sidebar(parent: Any = None) -> Any:
     Returns:
         A UnifiedToolsSidebar widget.
     """
-    from sidekick.ui.tools_sidebar.sidebar import (
+    from .sidebar import (
         UnifiedToolsSidebar,
     )
 
