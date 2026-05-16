@@ -1,15 +1,22 @@
 name: Verify Issue Closure
 
-# Reopens any issue closed without evidence of implementation.
-# An issue may be legitimately closed only if ONE of these is true:
-#   1. A merged PR exists referencing the issue with a closing keyword
-#      (closes/fixes/resolves #N).
-#   2. The issue carries one of: wontfix, roadmap, duplicate, invalid,
-#      not-planned.
-#   3. The closer is a bot AND the issue carries the `auto-generated` label.
+# Reopens issues closed without evidence of implementation, with multi-layer
+# loop protection so a misbehaving closer cannot cause a notification cascade.
 #
-# Otherwise the workflow reopens the issue and posts a comment explaining
-# what's needed to close it for real.
+# An issue may be legitimately closed if ANY of these is true:
+#   1. A merged PR exists referencing the issue with a closing keyword
+#      (closes/fixes/resolves #N) in its body or title.
+#   2. A commit on the default branch closed the issue (commit-event evidence).
+#   3. The issue carries one of: wontfix, roadmap, duplicate, invalid,
+#      not-planned, verified-closed, needs-human-review, closure-guard-bypass.
+#   4. The closer is a bot AND the issue carries the `auto-generated` label.
+#   5. The closer left a comment within 10 minutes of closing that references a
+#      merged PR — this handles the "forgot the Closes keyword" case.
+#
+# Loop protection: after this workflow has auto-reopened the same issue
+# MAX_REOPENS (default 2) times within a 7-day window, it stops reopening and
+# instead labels the issue `needs-human-review` with an escalation comment.
+# Once labeled, future closes are exempt until the label is removed.
 
 on:
   issues:
@@ -21,9 +28,6 @@ permissions:
 
 jobs:
   verify-closure:
-    # Skip if the issue was just reopened (state_reason == 'reopened') so we
-    # don't loop on our own reopen action. Also skip if the closer is the
-    # github-actions bot itself (defence in depth).
     if: >-
       github.event.issue.state_reason != 'reopened' &&
       github.event.sender.login != 'github-actions[bot]'
@@ -34,6 +38,12 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const MAX_REOPENS = 2;
+            const REOPEN_WINDOW_DAYS = 7;
+            const CLOSE_COMMENT_WINDOW_MIN = 10;
+            const REOPEN_MARKER = '<!-- closure-guard:auto-reopen -->';
+            const ESCALATION_MARKER = '<!-- closure-guard:escalation -->';
+
             const issue = context.payload.issue;
             const issueNumber = issue.number;
             const owner = context.repo.owner;
@@ -43,41 +53,79 @@ jobs:
 
             core.info(`Verifying closure of issue #${issueNumber} by ${senderLogin} (${senderType})`);
 
-            // 1. Label-based exemption.
+            const issueLabels = (issue.labels || []).map(l => (typeof l === 'string' ? l : l.name).toLowerCase());
+
+            // === LOOP PROTECTION ===
+            // Count prior auto-reopens in the last REOPEN_WINDOW_DAYS days.
+            const allComments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number: issueNumber, per_page: 100 }
+            );
+            const cutoffMs = Date.now() - REOPEN_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+            const priorAutoReopens = allComments.filter(c =>
+              (c.body || '').includes(REOPEN_MARKER) &&
+              new Date(c.created_at).getTime() > cutoffMs
+            );
+
+            if (priorAutoReopens.length >= MAX_REOPENS) {
+              core.warning(`Issue #${issueNumber} has been auto-reopened ${priorAutoReopens.length} times in ${REOPEN_WINDOW_DAYS} days. Escalating to human review and standing down.`);
+
+              try {
+                await github.rest.issues.addLabels({
+                  owner, repo, issue_number: issueNumber,
+                  labels: ['needs-human-review']
+                });
+              } catch (e) {
+                core.warning(`Could not add needs-human-review label: ${e.message}. Continuing with comment only.`);
+              }
+
+              const escalationBody = [
+                ESCALATION_MARKER,
+                `⚠️ **Closure-guard standing down to prevent notification loop.**`,
+                ``,
+                `This issue has been auto-reopened ${priorAutoReopens.length} times in the past ${REOPEN_WINDOW_DAYS} days. To avoid a cascade, the workflow will not reopen it again.`,
+                ``,
+                `**Next steps for a human reviewer:**`,
+                `1. Verify whether the issue is truly resolved.`,
+                `2. If yes: add the \`verified-closed\` label, then close manually. The workflow will respect that label.`,
+                `3. If no: leave it open and link the work that's still needed.`,
+                ``,
+                `The closure-guard will resume normal behaviour for this issue once the \`needs-human-review\` label is removed.`,
+              ].join('\n');
+
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: issueNumber, body: escalationBody,
+              });
+
+              core.info(`Escalated #${issueNumber} to human review. Closure stands.`);
+              return;
+            }
+
+            // === EXEMPTIONS ===
+
+            // 1. Label-based exemption (original + new bypass labels).
             const exemptLabels = new Set([
-              'wontfix',
-              'roadmap',
-              'duplicate',
-              'invalid',
-              'not-planned',
+              'wontfix', 'roadmap', 'duplicate', 'invalid', 'not-planned',
+              'verified-closed', 'needs-human-review', 'closure-guard-bypass',
             ]);
-            const issueLabels = (issue.labels || []).map(l => (typeof l === 'string' ? l : l.name));
-            const hasExemptLabel = issueLabels.some(name => exemptLabels.has((name || '').toLowerCase()));
-            if (hasExemptLabel) {
+            if (issueLabels.some(name => exemptLabels.has(name))) {
               core.info(`Issue #${issueNumber} has an exempt label; allowing closure.`);
               return;
             }
 
             // 2. Bot + auto-generated label exemption.
             const isBot = senderType === 'Bot' || senderLogin.endsWith('[bot]');
-            const hasAutoGenerated = issueLabels.some(name => (name || '').toLowerCase() === 'auto-generated');
-            if (isBot && hasAutoGenerated) {
+            if (isBot && issueLabels.includes('auto-generated')) {
               core.info(`Auto-generated issue closed by bot; allowing closure.`);
               return;
             }
 
-            // 3. Look for a merged PR with a closing keyword referencing this issue.
-            //    Use the timeline to find cross-referenced PRs, then check each
-            //    PR's merge state and body for closing keywords.
+            // === EVIDENCE CHECKS ===
+
             const timeline = await github.paginate(
               github.rest.issues.listEventsForTimeline,
-              {
-                owner,
-                repo,
-                issue_number: issueNumber,
-                per_page: 100,
-                mediaType: { previews: ['mockingbird'] },
-              }
+              { owner, repo, issue_number: issueNumber, per_page: 100,
+                mediaType: { previews: ['mockingbird'] } }
             );
 
             const closingRegex = new RegExp(
@@ -89,26 +137,21 @@ jobs:
             for (const event of timeline) {
               if (event.event === 'cross-referenced' && event.source && event.source.type === 'issue') {
                 const src = event.source.issue;
-                if (src && src.pull_request) {
-                  candidatePRs.add(src.number);
-                }
+                if (src && src.pull_request) candidatePRs.add(src.number);
               }
               if (event.event === 'closed' && event.commit_id) {
-                // A commit closed the issue; the commit message itself counts as evidence.
                 core.info(`Issue #${issueNumber} closed by commit ${event.commit_id}; treating as evidence.`);
                 return;
               }
             }
 
+            // 3a. Strict: closing keyword in merged PR body or title.
             for (const prNumber of candidatePRs) {
               try {
                 const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
-                if (pr.merged === true && closingRegex.test(pr.body || '')) {
+                if (pr.merged === true &&
+                    (closingRegex.test(pr.body || '') || closingRegex.test(pr.title || ''))) {
                   core.info(`Merged PR #${prNumber} closes #${issueNumber} via closing keyword.`);
-                  return;
-                }
-                if (pr.merged === true && closingRegex.test(pr.title || '')) {
-                  core.info(`Merged PR #${prNumber} title contains closing keyword for #${issueNumber}.`);
                   return;
                 }
               } catch (err) {
@@ -116,33 +159,57 @@ jobs:
               }
             }
 
-            // No evidence found — reopen and comment.
+            // 3b. Lenient: closer referenced a merged PR within CLOSE_COMMENT_WINDOW_MIN.
+            //     Handles the "forgot the Closes keyword" case — if the human/agent
+            //     explicitly says "Closed by #1234" and that PR is merged, accept it.
+            const closeTimeMs = new Date(issue.closed_at || Date.now()).getTime();
+            const windowStart = closeTimeMs - CLOSE_COMMENT_WINDOW_MIN * 60 * 1000;
+            const closerComments = allComments.filter(c =>
+              c.user && c.user.login === senderLogin &&
+              new Date(c.created_at).getTime() >= windowStart &&
+              new Date(c.created_at).getTime() <= closeTimeMs + CLOSE_COMMENT_WINDOW_MIN * 60 * 1000
+            );
+
+            const prRefRegex = /(?:#|pull\/)(\d+)/g;
+            for (const comment of closerComments) {
+              const body = comment.body || '';
+              for (const m of body.matchAll(prRefRegex)) {
+                const prNum = parseInt(m[1], 10);
+                if (prNum === issueNumber) continue;
+                try {
+                  const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNum });
+                  if (pr.merged === true) {
+                    core.info(`Closer referenced merged PR #${prNum} in a close-time comment; accepting as evidence.`);
+                    return;
+                  }
+                } catch (e) {
+                  // Number wasn't a PR; continue.
+                }
+              }
+            }
+
+            // === NO EVIDENCE — REOPEN ===
+            const reopenNumber = priorAutoReopens.length + 1;
             const body = [
-              `Hi @${senderLogin} — this issue was closed without evidence of implementation, so the closure-guard workflow has reopened it.`,
+              REOPEN_MARKER,
+              `Hi @${senderLogin} — this issue was closed without evidence of implementation, so the closure-guard workflow has reopened it. (Auto-reopen ${reopenNumber} of ${MAX_REOPENS} — after ${MAX_REOPENS}, the workflow stands down and requests human review.)`,
               ``,
-              `To legitimately close this issue, one of the following must be true:`,
+              `**To legitimately close this issue, do ONE of:**`,
               ``,
-              `1. A **merged PR** references this issue with a closing keyword in its body or title — use the exact phrasing \`Closes #${issueNumber}\` (or \`Fixes\`/\`Resolves\`).`,
-              `2. Apply one of these labels to explicitly mark it as not-going-to-be-implemented: \`wontfix\`, \`roadmap\`, \`duplicate\`, \`invalid\`, \`not-planned\`.`,
-              ``,
-              `If you believe the work _is_ done but the PR didn't use the closing keyword, edit the PR description to add \`Closes #${issueNumber}\` and close this issue again.`,
+              `1. Open/update a **merged PR** with a closing keyword in its body or title — use \`Closes #${issueNumber}\` (or \`Fixes\`/\`Resolves\`).`,
+              `2. Apply one of these labels: \`wontfix\`, \`roadmap\`, \`duplicate\`, \`invalid\`, \`not-planned\`, \`verified-closed\` (human override), or \`closure-guard-bypass\`.`,
+              `3. Within ${CLOSE_COMMENT_WINDOW_MIN} minutes of closing, post a comment that references the merged PR by number (e.g., "Closed by #1234"). The workflow will accept that as evidence.`,
               ``,
               `See \`.github/workflows/Verify-Issue-Closure.yml\` for the full rule set.`,
             ].join('\n');
 
             await github.rest.issues.createComment({
-              owner,
-              repo,
-              issue_number: issueNumber,
-              body,
+              owner, repo, issue_number: issueNumber, body,
             });
 
             await github.rest.issues.update({
-              owner,
-              repo,
-              issue_number: issueNumber,
-              state: 'open',
-              state_reason: 'reopened',
+              owner, repo, issue_number: issueNumber,
+              state: 'open', state_reason: 'reopened',
             });
 
-            core.setFailed(`Issue #${issueNumber} reopened: no merged PR with closing keyword and no exempt label.`);
+            core.setFailed(`Issue #${issueNumber} reopened (${reopenNumber}/${MAX_REOPENS}): no merged PR with closing keyword and no exempt label.`);
