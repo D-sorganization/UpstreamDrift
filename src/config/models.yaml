@@ -108,7 +108,7 @@ models:
     launcher:
       category: "simulation"
       logo: "assets/bunkershot_icon.png"
-      status: "ready"
+      status: "experimental"
       default_launch: "tab"
 
   # =============================================================================

@@ -6,7 +6,7 @@ from pathlib import Path
 import contextlib
 import subprocess
 import tempfile
-import os
+
 from bunkershot3d.config import BunkerShotConfig
 
 
@@ -16,6 +16,17 @@ class LiggghtsDriver:
     def __init__(self, config_path: Path | str) -> None:
         self.config_path = Path(config_path)
         self.config = BunkerShotConfig.from_yaml(self.config_path)
+
+    def setup(self) -> None:
+        """Setup the LIGGGHTS system.
+
+        Raises:
+            NotImplementedError: LiggghtsDriver is not yet implemented.
+                Use the MPM backend instead.
+        """
+        raise NotImplementedError(  # tracked: #5486
+            "LiggghtsDriver is not yet implemented. Use the MPM backend instead."
+        )
 
     def _generate_input_deck(self, work_dir: Path) -> Path:
         """Generate the LIGGGHTS LIGGGHTS.in script."""
@@ -28,28 +39,18 @@ class LiggghtsDriver:
             f.write("communicate single vel yes\n")
             f.write("units si\n")
             f.write(
-                "# TODO: Add full LIGGGHTS commands for geometry, particles, and meshes\n"
+                "# Placeholder deck — full LIGGGHTS commands tracked in issue #5486\n"
             )
             f.write("run 0\n")
         return input_deck_path
 
     def run(self, output_path: Path | str) -> None:
-        """Run the simulation via subprocess and parse dump output into HDF5."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            work_dir = Path(temp_dir)
+        """Run the simulation via subprocess and parse dump output into HDF5.
 
-            # Write STL and trajectory data needed by LIGGGHTS meshes
-            # ...
-
-            input_deck = self._generate_input_deck(work_dir)
-
-            # Execute LIGGGHTS
-            with contextlib.suppress(subprocess.CalledProcessError):
-                subprocess.run(
-                    ["liggghts", "-in", str(input_deck)],
-                    cwd=str(work_dir),
-                    check=True,
-                    capture_output=True,
-                )
-
-            # TODO: Parse the generated dump files and use BunkerShotResultWriter
+        Raises:
+            NotImplementedError: LiggghtsDriver is not yet implemented.
+                Use the MPM backend instead.
+        """
+        raise NotImplementedError(  # tracked: #5486
+            "LiggghtsDriver is not yet implemented. Use the MPM backend instead."
+        )

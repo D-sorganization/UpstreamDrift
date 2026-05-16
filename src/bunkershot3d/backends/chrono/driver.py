@@ -3,7 +3,7 @@ Project Chrono backend driver for BunkerShot3D.
 """
 
 from pathlib import Path
-import numpy as np
+
 from bunkershot3d.config import BunkerShotConfig
 
 
@@ -15,11 +15,23 @@ class ChronoDriver:
         self.config = BunkerShotConfig.from_yaml(self.config_path)
 
     def setup(self) -> None:
-        """Setup the Chrono system (grains, clubhead, constraints)."""
-        # TODO: import pychrono as chrono
-        # Initialize chrono.ChSystemSMC()
+        """Setup the Chrono system (grains, clubhead, constraints).
+
+        Raises:
+            NotImplementedError: ChronoDriver is not yet implemented.
+                Use the MPM backend instead.
+        """
+        raise NotImplementedError(  # tracked: #5486
+            "ChronoDriver is not yet implemented. Use the MPM backend instead."
+        )
 
     def run(self, output_path: Path | str) -> None:
-        """Run the simulation and write HDF5 output."""
-        # TODO: Advance timestep, interpolate trajectory, set clubhead kinematics
-        # Query contact forces, extract grains, and use BunkerShotResultWriter
+        """Run the simulation and write HDF5 output.
+
+        Raises:
+            NotImplementedError: ChronoDriver is not yet implemented.
+                Use the MPM backend instead.
+        """
+        raise NotImplementedError(  # tracked: #5486
+            "ChronoDriver is not yet implemented. Use the MPM backend instead."
+        )
