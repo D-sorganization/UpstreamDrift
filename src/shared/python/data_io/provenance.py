@@ -258,47 +258,6 @@ class ProvenanceInfo:
         return lines
 
 
-def add_provenance_header(content: str, metadata: dict[str, Any]) -> str:
-    """Prepend a provenance header to an in-memory string.
-
-    This is the in-memory counterpart to :func:`add_provenance_header_file`.
-    It constructs a lightweight comment block from *metadata* and prepends it
-    to *content*, returning the combined string.  No file I/O is performed.
-
-    Preconditions:
-        - ``content`` must be a ``str``
-        - ``metadata`` must be a ``dict``
-
-    Args:
-        content: The original text content (e.g. CSV data as a string).
-        metadata: Arbitrary key/value pairs to embed in the header.  Each
-            pair is written as ``# key: value``.
-
-    Returns:
-        A new string with the provenance comment block prepended to *content*.
-
-    Raises:
-        TypeError: If *content* is not a ``str`` or *metadata* is not a
-            ``dict``.
-
-    Example:
-        >>> result = add_provenance_header("col1,col2\\n1,2\\n", {"run": "001"})
-        >>> result.splitlines()[0].startswith("#")
-        True
-    """
-    if not isinstance(content, str):
-        raise TypeError(f"content must be a str, got {type(content).__name__!r}")
-    if not isinstance(metadata, dict):
-        raise TypeError(f"metadata must be a dict, got {type(metadata).__name__!r}")
-
-    header_lines: list[str] = ["# Provenance header"]
-    for key, value in sorted(metadata.items()):
-        header_lines.append(f"# {key}: {value}")
-    header_lines.append("#")
-    header_block = "\n".join(header_lines) + "\n"
-    return header_block + content
-
-
 def add_provenance_header_file(file: TextIO, provenance: ProvenanceInfo) -> None:
     """Add provenance header to an open text file.
 
@@ -313,12 +272,14 @@ def add_provenance_header_file(file: TextIO, provenance: ProvenanceInfo) -> None
         ...     f.write("time,position,velocity\\n")
         ...     # ... write data
     """
-    if not (file is not None):
-        raise ValueError("file must be provided")
-    if not (file is not None):
+    if file is None:
         raise ValueError("file must be provided")
     file.writelines(line + "\n" for line in provenance.to_header_lines())
     file.write("#\n")  # Blank comment line separator
+
+
+#: Canonical short alias for :func:`add_provenance_header_file`.
+add_provenance_header = add_provenance_header_file
 
 
 def add_provenance_to_csv(
@@ -367,7 +328,6 @@ def add_provenance_to_csv(
 # Export public API
 __all__ = [
     "ProvenanceInfo",
-    "add_provenance_header",
     "add_provenance_header_file",
     "add_provenance_to_csv",
 ]

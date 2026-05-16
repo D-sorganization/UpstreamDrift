@@ -1,23 +1,22 @@
-"""Configuration management, environment, and model registry.
+"""Configuration management, environment, and model registry."""
 
-Public surface
---------------
-The most commonly needed accessors are re-exported here so that call-sites
-can import from a single place::
-
-    from src.shared.python.config import get_setting, load_settings, save_settings
-
-For the full catalogue of environment-variable accessors see
-``src.shared.python.config.settings``.
-"""
-
-from src.shared.python.config.settings import (
+from .config_utils import (
+    ConfigLoader,
+    load_json_config,
+    load_yaml_config,
+    merge_configs,
+    save_json_config,
+    save_yaml_config,
+    validate_config,
+)
+from .configuration_manager import ConfigurationManager, SimulationConfig
+from .environment import (
+    EnvironmentError,
     get_admin_password,
     get_api_host,
     get_api_port,
     get_database_url,
-    get_dbc_level,
-    get_display,
+    get_env,
     get_env_bool,
     get_env_float,
     get_env_int,
@@ -28,7 +27,6 @@ from src.shared.python.config.settings import (
     get_golf_ui_dist,
     get_log_level,
     get_secret_key,
-    get_setting,
     is_auth_disabled,
     is_browser_suppressed,
     is_development,
@@ -36,29 +34,86 @@ from src.shared.python.config.settings import (
     is_headless,
     is_production,
     is_wsl,
-    load_settings,
     require_env,
-    save_settings,
 )
+from .handedness_support import (
+    Handedness,
+    HandednessConverter,
+    MirrorTransform,
+    create_mirror_transform,
+    detect_handedness_from_metadata,
+    mirror_joint_configuration,
+    mirror_position,
+    mirror_rotation_matrix,
+    mirror_trajectory,
+    mirror_velocity,
+    validate_energy_conservation,
+    validate_mirror_trajectory,
+)
+from .model_pack_manifest import (
+    CrossEngineIdentity,
+    ExchangeArtifact,
+    LauncherPresentationMetadata,
+    ModelPackEntry,
+    ModelPackManifest,
+    ProvenanceMetadata,
+    group_entries_by_canonical_id,
+)
+from .model_registry import ModelConfig, ModelRegistry, ModelRegistryLoadError
+from .model_source_providers import (
+    LocalRepoModelSourceProvider,
+    ModelSourcePathPolicy,
+    ResolvedModelSource,
+    SiblingRepoModelSourceProvider,
+    collect_engine_provider_paths,
+    iter_unique_python_path_strings,
+    resolve_model_artifact,
+    resolve_model_python_paths,
+    resolve_model_source,
+    resolve_model_source_root,
+    resolve_model_working_directory,
+)
+from .provider_catalog import (
+    ProviderRepoDefinition,
+    infer_repo_root_from_config,
+    iter_configured_provider_roots,
+    iter_known_engine_provider_ids,
+    iter_known_provider_ids,
+    iter_known_provider_repo_names,
+    iter_known_utility_provider_ids,
+    iter_provider_manifest_specs,
+)
+from .standard_models import StandardModelManager
 
-__all__ = [
+__all__: list[str] = [
+    # config_utils
+    "ConfigLoader",
+    "load_json_config",
+    "load_yaml_config",
+    "merge_configs",
+    "save_json_config",
+    "save_yaml_config",
+    "validate_config",
+    # configuration_manager
+    "ConfigurationManager",
+    "SimulationConfig",
+    # environment
+    "EnvironmentError",
     "get_admin_password",
     "get_api_host",
     "get_api_port",
     "get_database_url",
-    "get_dbc_level",
-    "get_display",
-    "get_environment",
+    "get_env",
     "get_env_bool",
     "get_env_float",
     "get_env_int",
     "get_env_list",
+    "get_environment",
     "get_golf_port",
     "get_golf_suite_mode",
     "get_golf_ui_dist",
     "get_log_level",
     "get_secret_key",
-    "get_setting",
     "is_auth_disabled",
     "is_browser_suppressed",
     "is_development",
@@ -66,7 +121,53 @@ __all__ = [
     "is_headless",
     "is_production",
     "is_wsl",
-    "load_settings",
     "require_env",
-    "save_settings",
+    # handedness_support
+    "Handedness",
+    "HandednessConverter",
+    "MirrorTransform",
+    "create_mirror_transform",
+    "detect_handedness_from_metadata",
+    "mirror_joint_configuration",
+    "mirror_position",
+    "mirror_rotation_matrix",
+    "mirror_trajectory",
+    "mirror_velocity",
+    "validate_energy_conservation",
+    "validate_mirror_trajectory",
+    # model_pack_manifest
+    "CrossEngineIdentity",
+    "ExchangeArtifact",
+    "LauncherPresentationMetadata",
+    "ModelPackEntry",
+    "ModelPackManifest",
+    "ProvenanceMetadata",
+    "group_entries_by_canonical_id",
+    # model_registry
+    "ModelConfig",
+    "ModelRegistry",
+    "ModelRegistryLoadError",
+    # model_source_providers
+    "LocalRepoModelSourceProvider",
+    "ModelSourcePathPolicy",
+    "ResolvedModelSource",
+    "SiblingRepoModelSourceProvider",
+    "collect_engine_provider_paths",
+    "iter_unique_python_path_strings",
+    "resolve_model_artifact",
+    "resolve_model_python_paths",
+    "resolve_model_source",
+    "resolve_model_source_root",
+    "resolve_model_working_directory",
+    # provider_catalog
+    "ProviderRepoDefinition",
+    "infer_repo_root_from_config",
+    "iter_configured_provider_roots",
+    "iter_known_engine_provider_ids",
+    "iter_known_provider_ids",
+    "iter_known_provider_repo_names",
+    "iter_known_utility_provider_ids",
+    "iter_provider_manifest_specs",
+    # standard_models
+    "StandardModelManager",
 ]

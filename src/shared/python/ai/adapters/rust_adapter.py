@@ -4,8 +4,14 @@ import logging
 from collections.abc import Iterator
 from typing import Any
 
-from src.shared.python.ai.adapters.base import BaseAgentAdapter
-from src.shared.python.ai.types import AgentChunk, ConversationContext
+from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
+from src.shared.python.ai.types import (
+    AgentChunk,
+    AgentResponse,
+    ConversationContext,
+    ProviderCapabilities,
+    ProviderCapability,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -133,6 +139,50 @@ class RustAgentAdapter(BaseAgentAdapter):
         except Exception as e:
             logger.exception("Rust backend error")
             yield AgentChunk(content=f"Error: {e}", is_final=True)
+
+    def send_message(
+        self,
+        message: str,
+        context: ConversationContext,
+        tools: list[ToolDeclaration],
+    ) -> AgentResponse:
+        """Send a message synchronously using the Rust backend.
+
+        Args:
+            message: User message to process.
+            context: Current conversation context.
+            tools: Available tools (not yet used by the Rust backend).
+
+        Returns:
+            AgentResponse with the generated content.
+        """
+        full_prompt = "\n".join([m.content for m in context.messages]) + f"\n{message}"
+        try:
+            response = self.engine.generate_response(full_prompt)
+            return AgentResponse(content=response)
+        except Exception as e:
+            logger.exception("Rust backend send_message error")
+            return AgentResponse(content=f"Error: {e}")
+
+    @property
+    def capabilities(self) -> ProviderCapabilities:
+        """Return the Rust backend's provider capabilities."""
+        return ProviderCapabilities(
+            supported=frozenset({ProviderCapability.STREAMING}),
+            max_tokens=8192,
+            model_name=getattr(self.config, "model", "rust"),
+            provider_name="rust",
+        )
+
+    def validate_connection(self) -> tuple[bool, str]:
+        """Validate that the Rust AI backend is available.
+
+        Returns:
+            Tuple of (success, message).
+        """
+        if self.engine is None:
+            return False, "Rust AI engine not initialized"
+        return True, "Rust backend available"
 
     def index_codebase(self, root_path: str) -> int:
         """Trigger the Rust-based RAG pipeline indexer."""
