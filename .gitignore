@@ -105,6 +105,12 @@ test.npz
 htmlcov/
 
 # Test output debris (prevent accumulation at root)
+crash_traceback.txt
+output_debug.log
+pytest_output.txt
+test_out.txt
+gh_run_*_failed.log
+*_failed.log
 test_*.txt
 *_output.txt
 *_results.txt

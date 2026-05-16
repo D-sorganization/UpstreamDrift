@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import os
 from typing import Any
 
@@ -22,18 +23,43 @@ router = APIRouter()
 
 _CONTEXT_ENV_VAR = "UPSTREAMDRIFT_SIDEKICK_CONTEXT"
 
+# Metadata key used to record the SHA-256 of the last injected context so
+# identical state is not re-injected on every "send" action.
+_CONTEXT_HASH_KEY = "_context_injected_hash"
+
 
 def _context_injection_enabled() -> bool:
     """Return ``True`` when env-var-gated Sidekick context injection is on."""
     return os.environ.get(_CONTEXT_ENV_VAR, "1") != "0"
 
 
+def _context_section_hash(section: str) -> str:
+    """Return a truncated SHA-256 hex digest of *section*.
+
+    Args:
+        section: The formatted context string to hash. Must be a str.
+
+    Returns:
+        First 16 hex characters of the SHA-256 digest.
+    """
+    if not isinstance(section, str):
+        raise TypeError("section must be a str")
+    return hashlib.sha256(section.encode()).hexdigest()[:16]
+
+
 def _maybe_inject_chat_context(session: Any) -> str | None:
     """Inject a ``Recent app state`` system message into ``session``.
 
     The injection is gated on:
-      * the ``UPSTREAMDRIFT_SIDEKICK_CONTEXT`` env var (default on), and
-      * a non-empty :func:`get_chat_context` payload.
+      * the ``UPSTREAMDRIFT_SIDEKICK_CONTEXT`` env var (default on),
+      * a non-empty :func:`get_chat_context` payload, and
+      * the context content having changed since the last injection
+        (watermark check via a SHA-256 hash stored in
+        ``session.metadata[_CONTEXT_HASH_KEY]``).
+
+    Re-injection is skipped when the context hash matches the stored
+    watermark, preventing near-duplicate system messages from
+    accumulating in the conversation history on every "send" action.
 
     Args:
         session: The chat-service session/context object. Must expose an
@@ -58,6 +84,16 @@ def _maybe_inject_chat_context(session: Any) -> str | None:
     if not section:
         return None
 
+    # Watermark check: skip injection when the context has not changed.
+    new_hash = _context_section_hash(section)
+    metadata: dict[str, Any] | None = getattr(session, "metadata", None)
+    if isinstance(metadata, dict) and metadata.get(_CONTEXT_HASH_KEY) == new_hash:
+        logger.debug(
+            "Sidekick context unchanged (hash=%s); skipping re-injection",
+            new_hash,
+        )
+        return None
+
     add_message = getattr(session, "add_message", None)
     if not callable(add_message):
         logger.debug(
@@ -70,6 +106,10 @@ def _maybe_inject_chat_context(session: Any) -> str | None:
     except (TypeError, ValueError) as exc:
         logger.warning("Failed to inject Sidekick chat context: %s", exc)
         return None
+
+    # Store the watermark after a successful injection.
+    if isinstance(metadata, dict):
+        metadata[_CONTEXT_HASH_KEY] = new_hash
 
     return section
 
