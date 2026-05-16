@@ -706,4 +706,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-12 | 1.0.164 | Preserved registered symbolic model `source_root` aliases while still resolving provider-relative source roots, preventing aliases such as `movement_optimizer` from being rewritten under a provider checkout (#5353). |
 | 2026-05-13 | 1.0.165 | Documented the shared Tools-hosted video/data launcher surfaces, the launcher manifest contract, and the theme API client/server surface added for web UI parity. |
 | 2026-05-13 | 1.0.166 | Moved the PyQt launcher close control into the top menu-bar row while keeping the custom title strip for drag/minimize/maximize behavior (#5374). |
+| 2026-05-16 | 1.0.169 | Added 14 remaining launcher tiles covering engine-specific dashboards (Drake, MuJoCo, Pinocchio), Analysis Tools API, Motion Pipeline, capability surfaces (perturbation analysis, force overlays, realtime WebSocket, AIP, actuator controls), and feature tiles (Unreal integration, robotics module, Tools calculator hub, P&ID generator); closed 12 issues resolved by prior #5556 merge and 2 by-design closures (#5515, #5521, #5523–#5524, #5527–#5535). |
 ````
