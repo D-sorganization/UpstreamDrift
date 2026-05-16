@@ -15,7 +15,7 @@ from .kinematic_sequence import SegmentPeak, SegmentTimingResult
 from .multi_muscle import MuscleAttachment, MuscleGroup
 from .muscle_equilibrium import EquilibriumSolver
 from .swing_comparison import ComparisonMetric, DTWResult, SwingComparator
-from .swing_plane_analysis import SwingPlaneAnalyzer, SwingPlaneMetrics, fit_plane
+from .swing_plane_analysis import SwingPlaneAnalyzer, SwingPlaneMetrics
 from .ztcf import ZTCFResult
 
 # Optional modules with external dependencies (dynamic_com depends on
@@ -26,7 +26,6 @@ except ImportError:
     BiomechanicalModel = None  # type: ignore[assignment,misc]
     SegmentDefinition = None  # type: ignore[assignment,misc]
 
-# Optional modules with external dependencies (continued)
 try:
     from .grf_visualization import plot_grf_and_com_3d
 except ImportError:
@@ -95,7 +94,6 @@ __all__: list[str] = [
     # swing_plane_analysis
     "SwingPlaneAnalyzer",
     "SwingPlaneMetrics",
-    "fit_plane",
     # ztcf
     "ZTCFResult",
 ]
