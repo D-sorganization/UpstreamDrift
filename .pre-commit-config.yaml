@@ -104,12 +104,10 @@ repos:
           - types-requests
           - types-PyYAML
           - pydantic
-        args: [--config-file, pyproject.toml, --follow-imports=silent]
+        args: [src/, --config-file, pyproject.toml, --follow-imports=silent]
         # pass_filenames=false: let mypy use pyproject.toml [tool.mypy] exclude
         # patterns instead of receiving explicit file paths (which bypass excludes)
         pass_filenames: false
-        types: [python]
-        files: ^src/
 
   # Bandit - Security scanning (pre-push only, Python only)
   - repo: https://github.com/PyCQA/bandit
