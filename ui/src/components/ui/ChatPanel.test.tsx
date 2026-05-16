@@ -197,4 +197,45 @@ describe('ChatPanel', () => {
     const payload = JSON.parse(socket.sent[0].data) as Record<string, unknown>;
     expect(payload.engine_context).toBe('mujoco');
   });
+
+  it('renders message bubbles with data-role but no inline style overrides (CSS should own colors)', async () => {
+    render(<ChatPanel />);
+    const socket = await waitForSocket();
+
+    // User message
+    fireEvent.change(screen.getByTestId('chat-input'), { target: { value: 'hi' } });
+    fireEvent.click(screen.getByTestId('chat-send'));
+
+    await waitFor(() => {
+      expect(screen.getByText('hi')).toBeInTheDocument();
+    });
+
+    // System error message
+    act(() => {
+      socket.emit({ type: 'error', detail: 'err' });
+    });
+    await waitFor(() => {
+      expect(screen.getByText('err')).toBeInTheDocument();
+    });
+
+    // Assistant streaming chunk
+    act(() => {
+      socket.emit({ type: 'chunk', content: 'reply' });
+    });
+    await waitFor(() => {
+      expect(screen.getByText('reply')).toBeInTheDocument();
+    });
+
+    // Every bubble must have data-role and must NOT have inline backgroundColor/borderColor/color
+    const allBubbles = document.querySelectorAll('.sidekick-chat-bubble');
+    expect(allBubbles.length).toBeGreaterThan(0);
+
+    allBubbles.forEach((bubble) => {
+      const el = bubble as HTMLElement;
+      expect(el.dataset.role).toBeTruthy();
+      expect(el.style.backgroundColor).toBe('');
+      expect(el.style.borderColor).toBe('');
+      expect(el.style.color).toBe('');
+    });
+  });
 });

@@ -404,19 +404,6 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
           >
             <div
               className="sidekick-chat-bubble max-w-[80%] rounded-lg px-3 py-2 whitespace-pre-wrap break-words border"
-              style={{
-                backgroundColor:
-                  m.role === 'user'
-                    ? 'var(--sidekick-color-accent)'
-                    : m.role === 'assistant'
-                      ? 'var(--sidekick-color-surface-raised)'
-                      : 'var(--sidekick-color-warning)',
-                borderColor:
-                  m.role === 'system'
-                    ? 'var(--sidekick-color-warning)'
-                    : 'var(--sidekick-color-border)',
-                color: 'var(--sidekick-color-text)',
-              }}
               data-role={m.role}
             >
               {m.content}
