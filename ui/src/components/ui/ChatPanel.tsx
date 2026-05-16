@@ -381,8 +381,6 @@ export function ChatPanel({ engineContext, url }: ChatPanelProps = {}) {
         className="flex-1 overflow-y-auto p-3 space-y-2 text-sm"
         role="log"
         aria-live="polite"
-        aria-relevant="additions"
-        aria-atomic="false"
         aria-label="Chat messages"
         data-testid="chat-messages"
       >

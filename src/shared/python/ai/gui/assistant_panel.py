@@ -795,7 +795,7 @@ class AIAssistantPanel(QWidget):
 
         # Add welcome message
         self._add_system_message(
-            "Welcome to the Golf Modeling Suite AI Assistant!\n\n"
+            "👋 Welcome to the Golf Modeling Suite AI Assistant!\n\n"
             "I can help you:\n"
             "- Load and analyze C3D motion capture files\n"
             "- Run inverse dynamics simulations\n"
@@ -917,7 +917,7 @@ class AIAssistantPanel(QWidget):
             raise ValueError("message must be provided")
         if not self._adapter:
             self._add_system_message(
-                "No AI provider configured — open Settings to add one."
+                "⚠️ No AI provider configured. Click ⚙️ to set up a provider."
             )
             return
 
@@ -998,7 +998,7 @@ class AIAssistantPanel(QWidget):
         self._send_btn.setEnabled(True)
 
         if self._current_assistant_message:
-            self._current_assistant_message.append_content(f"\n\n**Error:** {error}")
+            self._current_assistant_message.append_content(f"\n\n⚠️ **Error:** {error}")
 
         self._current_assistant_message = None
         # Disconnect signals before clearing worker reference to prevent memory leaks
@@ -1105,7 +1105,7 @@ class AIAssistantPanel(QWidget):
         self._save_history()
 
         # Add welcome back
-        self._add_system_message("New chat started. How can I help you?")
+        self._add_system_message("🔄 New chat started. How can I help you?")
 
     def set_adapter(self, adapter: BaseAgentAdapter) -> None:
         """Set the AI adapter to use.
@@ -1153,13 +1153,13 @@ class AIAssistantPanel(QWidget):
         from src.shared.python.ai.types import ExpertiseLevel
 
         # Update Header Icons
-        provider_labels = {
-            AIProvider.OLLAMA: "[Ollama]",
-            AIProvider.OPENAI: "[OpenAI]",
-            AIProvider.ANTHROPIC: "[Anthropic]",
-            AIProvider.GEMINI: "[Gemini]",
+        provider_icons = {
+            AIProvider.OLLAMA: "🦙",
+            AIProvider.OPENAI: "🧠",
+            AIProvider.ANTHROPIC: "🤖",
+            AIProvider.GEMINI: "✨",
         }
-        icon = provider_labels.get(settings.provider, "[AI]")
+        icon = provider_icons.get(settings.provider, "🤖")
         self._provider_icon.setText(icon)
 
         # Update Model Label
@@ -1199,7 +1199,7 @@ class AIAssistantPanel(QWidget):
                     chat_path=chat_path,
                     embed_path=embed_path,
                 )
-                self._add_system_message("Using high-performance Rust AI backend.")
+                self._add_system_message("🚀 Using high-performance Rust AI backend.")
             except ImportError:
                 from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
 
@@ -1240,11 +1240,11 @@ class AIAssistantPanel(QWidget):
         if adapter:
             self.set_adapter(adapter)
             self._add_system_message(
-                f"Connected to {settings.provider.name} ({settings.model})"
+                f"✓ Connected to {settings.provider.name} ({settings.model})"
             )
         else:
             self._add_system_message(
-                f"Could not connect to {settings.provider.name}. "
+                f"⚠️ Could not connect to {settings.provider.name}. "
                 "Please check your settings."
             )
 

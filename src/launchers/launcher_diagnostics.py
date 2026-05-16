@@ -831,21 +831,18 @@ class LauncherDiagnostics:
                     duration_ms=(time.time() - start) * 1000,
                 )
             else:
-                # "not installed" is the expected state when the sibling Tools
-                # repo is absent — informational, not a degradation.
                 result = DiagnosticResult(
                     name="tools_sidebar",
-                    status="info",
+                    status="warning",
                     message=(
-                        "Tools sidebar not installed (expected in this configuration) — "
-                        "launcher runs without the optional PyQt sidebar; "
-                        "Sidekick tokens still apply to the React/Tauri shell"
+                        "Tools sidebar not installed - launcher will run "
+                        "without the optional PyQt sidebar (Sidekick tokens "
+                        "still apply to the React/Tauri shell)"
                     ),
                     details=details,
                     duration_ms=(time.time() - start) * 1000,
                 )
         except ImportError as exc:
-            # The probe module itself failed to import — unexpected; warrants attention.
             details["import_error"] = str(exc)
             result = DiagnosticResult(
                 name="tools_sidebar",
