@@ -19,6 +19,7 @@ pub mod aero_engine;
 pub mod aerodynamics;
 pub mod ball_flight;
 pub mod contact;
+pub mod fsp;
 pub mod rk4;
 pub mod shaft_fem;
 pub mod swing_plane;
@@ -77,8 +78,15 @@ fn upstream_physics(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<contact::ContactParameters>()?;
     m.add_class::<contact::ContactResult>()?;
 
-    // Swing plane
+    // Swing plane (legacy least-squares fitter)
     m.add_class::<swing_plane::SwingPlaneResult>()?;
+
+    // FSP - SVD-based Functional Swing Plane (issue #5502)
+    m.add_class::<fsp::Plane>()?;
+    m.add_function(pyo3::wrap_pyfunction!(fsp::python::calculate_fsp, m)?)?;
+    m.add_function(pyo3::wrap_pyfunction!(fsp::python::fsp_slope_deg, m)?)?;
+    m.add_function(pyo3::wrap_pyfunction!(fsp::python::fsp_direction_deg, m)?)?;
+    m.add_function(pyo3::wrap_pyfunction!(fsp::python::point_to_fsp_distance, m)?)?;
 
     // Aerodynamics
     m.add_class::<aerodynamics::AirProperties>()?;
