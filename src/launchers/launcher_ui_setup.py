@@ -273,12 +273,17 @@ class LauncherUISetupMixin:
 
         self.content_splitter.addWidget(left_panel)
 
-        # Right panel: AI chat (added to splitter, visible by default)
-        self._ai_visible = True
-        from src.launchers.launcher_constants import AI_AVAILABLE
-
-        if AI_AVAILABLE:
-            self._setup_ai_panel()
+        # NOTE: The legacy right-panel AIAssistantPanel that used to be
+        # spliced into ``content_splitter`` here was removed as part of the
+        # deprecated-chat sweep (UpstreamDrift #5620). The canonical chat
+        # surface is now the Sidekick dock's "Chat" tab, provided by the
+        # vendored ``upstream_drift_tools.ui.tools_sidebar`` package via
+        # ``_install_sidekick_sidebar()`` in ``golf_launcher.py``.
+        # ``toggle_ai_assistant`` and other ``hasattr(self, "ai_panel")``
+        # call sites become safe no-ops; a follow-up issue rewires them to
+        # raise/focus the Sidekick chat tab. Do NOT re-introduce a second
+        # ``AIAssistantPanel`` here.
+        self._ai_visible = False
 
         content_layout.addWidget(self.content_splitter, 1)
 
@@ -1184,69 +1189,20 @@ class LauncherUISetupMixin:
         """Toggle visibility of the Process Output dock."""
         self._console_dock.setVisible(not self._console_dock.isVisible())
 
-    # -- AI Panel --
-
-    def _setup_ai_panel(self) -> None:
-        """Set up the AI Assistant panel inside the content splitter."""
-        from src.launchers.launcher_constants import AI_AVAILABLE
-
-        if not AI_AVAILABLE:
-            return
-
-        try:
-            from src.shared.python.ai.gui import AIAssistantPanel
-
-            self.ai_panel = AIAssistantPanel(self)
-            self.ai_panel.setMinimumWidth(0)
-            self.content_splitter.addWidget(self.ai_panel)
-            self.ai_panel.setMaximumWidth(16777215)  # Make it open by default
-            self.ai_panel.settings_requested.connect(self._open_ai_settings)
-            self.ai_panel.close_requested.connect(
-                lambda: self.ai_panel.setMaximumWidth(0)
-            )
-            self._sync_chat_session()
-        except ImportError as e:
-            logger.error(f"Failed to initialize AI panel: {e}")
-            if hasattr(self, "btn_ai"):
-                self.btn_ai.setEnabled(False)
-                self.btn_ai.setToolTip(f"AI Assistant unavailable: {e}")
-            if hasattr(self, "btn_ai_sidebar"):
-                self.btn_ai_sidebar.setEnabled(False)
-                self.btn_ai_sidebar.setToolTip(f"AI Assistant unavailable: {e}")
-
-    def _sync_chat_session(self) -> None:
-        """Sync the launcher's chat session with the shared FastAPI server."""
-        import json
-        from pathlib import Path
-
-        try:
-            import urllib.request
-
-            # The URL is a hardcoded literal pointing at the launcher's
-            # locally-spawned FastAPI server on 127.0.0.1; there is no
-            # path through which user-controlled data can influence it.
-            # The companion `# nosec B310` keeps Bandit happy; the
-            # `# nosemgrep` line below silences the matching Semgrep
-            # `dynamic-urllib-use-detected` rule with the same rationale.
-            url = "http://127.0.0.1:8000/api/chat/sessions"
-            req = urllib.request.Request(url, method="GET")
-            # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
-            with urllib.request.urlopen(req, timeout=2) as resp:  # nosec B310 - hardcoded localhost URL, no external input
-                sessions = json.loads(resp.read().decode("utf-8"))
-
-            session_id = sessions[0]["session_id"] if sessions else None
-
-            session_file = (
-                Path.home() / ".golf_modeling_suite" / "active_chat_session.txt"
-            )
-            session_file.parent.mkdir(parents=True, exist_ok=True)
-            if session_id:
-                session_file.write_text(session_id, encoding="utf-8")
-                logger.info("Synced chat session: %s", session_id)
-        except (ImportError, OSError) as e:
-            logger.debug("Chat server sync skipped (server may not be running): %s", e)
-        except (ValueError, KeyError, IndexError, json.JSONDecodeError) as e:
-            logger.debug("Chat session sync failed: %s", e)
+    # -- AI Panel (DEPRECATED, removed by UpstreamDrift #5620) --
+    #
+    # ``_setup_ai_panel`` previously spliced a second ``AIAssistantPanel``
+    # into the launcher's right-edge splitter, duplicating the canonical
+    # Sidekick chat tab. That method was deleted so the launcher only
+    # surfaces ONE chat path (the Sidekick dock's Chat tab). Do not
+    # restore an AI panel here; extend the Sidekick chat tab in Tools'
+    # ``upstream_drift_tools.ui.tools_sidebar`` package instead.
+    #
+    # The chat-session sync helper that lived next to it
+    # (``_sync_chat_session``) was also dropped because the Sidekick
+    # ``ChatDockWidget`` performs the equivalent session-id handshake via
+    # the shared ``active_chat_session.txt`` file (see
+    # ``Tools/src/shared/python/chat/chat_dock_widget.py``).
 
     # -- Context Help --
 
