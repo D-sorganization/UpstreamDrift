@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from .activation_dynamics import ActivationDynamics
 from .biomechanics_data import BiomechanicalData
-from .dynamic_com import BiomechanicalModel, SegmentDefinition, add_segment
+from .fsp_integration import (
+    FspResult,
+    compute_swing_fsp,
+    detect_md_mf_window,
+    extract_clubhead_trajectory,
+)
 from .hill_muscle import HillMuscleModel, MuscleParameters, MuscleState
 from .kinematic_sequence import SegmentPeak, SegmentTimingResult
 from .multi_muscle import MuscleAttachment, MuscleGroup
@@ -13,7 +18,15 @@ from .swing_comparison import ComparisonMetric, DTWResult, SwingComparator
 from .swing_plane_analysis import SwingPlaneAnalyzer, SwingPlaneMetrics, fit_plane
 from .ztcf import ZTCFResult
 
-# Optional modules with external dependencies
+# Optional modules with external dependencies (dynamic_com depends on
+# humanoid_character_builder which may not be available in all environments)
+try:
+    from .dynamic_com import BiomechanicalModel, SegmentDefinition
+except ImportError:
+    BiomechanicalModel = None  # type: ignore[assignment,misc]
+    SegmentDefinition = None  # type: ignore[assignment,misc]
+
+# Optional modules with external dependencies (continued)
 try:
     from .grf_visualization import plot_grf_and_com_3d
 except ImportError:
@@ -54,14 +67,15 @@ except ImportError:
     SwingPlaneVisualization = None  # type: ignore[assignment,misc]
 
 __all__: list[str] = [
+    # fsp_integration
+    "FspResult",
+    "compute_swing_fsp",
+    "detect_md_mf_window",
+    "extract_clubhead_trajectory",
     # activation_dynamics
     "ActivationDynamics",
     # biomechanics_data
     "BiomechanicalData",
-    # dynamic_com
-    "BiomechanicalModel",
-    "SegmentDefinition",
-    "add_segment",
     # hill_muscle
     "HillMuscleModel",
     "MuscleParameters",
@@ -87,6 +101,8 @@ __all__: list[str] = [
 ]
 
 # Append optional symbols when available
+if BiomechanicalModel is not None:
+    __all__.extend(["BiomechanicalModel", "SegmentDefinition"])
 if ContractViolation is not None:
     __all__.extend(["ContractViolation", "ValidationReport", "describe"])
 if f_l is not None:
