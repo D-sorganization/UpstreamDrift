@@ -1,0 +1,225 @@
+# Anti-Phantom-Merge Guard
+#
+# Blocks PRs that exhibit the "phantom PR" pathology — they claim to
+# implement something but contain no real change. Runs as a required
+# check on every PR to main.
+#
+# Rules (any failure blocks merge):
+#   1. Empty diff           — base..head has 0 changed files
+#                             Exception: PR title is exactly "chore: empty PR"
+#   2. Feature claim, no code — title matches /^feat[:\(]/ or contains
+#                             Implement/System/Engine/Framework, BUT
+#                             diff touches 0 files under src/, rust_core/, api/
+#   3. Closes-issue mismatch — body has "Closes #N"/"Fixes #N"/"Resolves #N"
+#                             AND issue body lists src/tests/rust_core/api
+#                             paths AND PR touches none of them
+#   4. Bot-only commits     — last commit is github-actions[bot] "Merge branch 'main'"
+#                             with no author commits since branch point
+#
+# Escape hatch:
+#   Add the label `phantom-guard-override` to the PR.
+#   The label is honored ONLY if the actor who toggled it has `admin`
+#   permission on the repo. Non-admins applying the label have no effect.
+#
+# Owner: dieterolson — see Tools #2728/#2729/#2807 for the motivating cases.
+
+name: Anti-Phantom-Merge Guard
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  pull_request_target:
+    types: [labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: read
+
+concurrency:
+  group: anti-phantom-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    name: phantom-guard
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.base.ref == 'main'
+    steps:
+      - name: Check out PR head with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Fetch base branch
+        run: |
+          git fetch origin "${{ github.event.pull_request.base.ref }}" --depth=1 || true
+          git fetch origin "${{ github.event.pull_request.base.sha }}" || true
+
+      - name: Check admin override label
+        id: override
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          EVENT_NAME: ${{ github.event_name }}
+          SENDER: ${{ github.event.sender.login }}
+        run: |
+          set -euo pipefail
+          labels=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json labels --jq '[.labels[].name]')
+          has_label=$(echo "$labels" | grep -c 'phantom-guard-override' || true)
+          if [ "$has_label" -eq 0 ]; then
+            echo "override=false" >> "$GITHUB_OUTPUT"
+            echo "Override label not present."
+            exit 0
+          fi
+          # Label is present — only honor if the sender (who toggled the label
+          # most recently) has admin permission. For non-label events, check the
+          # last user who applied the label via the timeline.
+          actor="$SENDER"
+          if [ "$EVENT_NAME" != "pull_request_target" ]; then
+            actor=$(gh api "repos/$REPO/issues/$PR_NUMBER/timeline" \
+              --jq '[.[] | select(.event=="labeled" and .label.name=="phantom-guard-override")] | last | .actor.login' 2>/dev/null || echo "")
+          fi
+          if [ -z "$actor" ] || [ "$actor" = "null" ]; then
+            echo "override=false" >> "$GITHUB_OUTPUT"
+            echo "Label present but no actor found in timeline — ignoring override."
+            exit 0
+          fi
+          perm=$(gh api "repos/$REPO/collaborators/$actor/permission" --jq '.permission' 2>/dev/null || echo "none")
+          if [ "$perm" = "admin" ]; then
+            echo "override=true" >> "$GITHUB_OUTPUT"
+            echo "Override honored: $actor has admin permission."
+          else
+            echo "override=false" >> "$GITHUB_OUTPUT"
+            echo "Override label present but $actor has permission=$perm (not admin) — ignoring."
+          fi
+
+      - name: Run phantom guard checks
+        if: steps.override.outputs.override != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          REPO: ${{ github.repository }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          fail() {
+            local rule="$1"
+            local msg="$2"
+            echo "::error title=Phantom-Guard Rule $rule failed::$msg"
+            # Post a single consolidated comment on the PR.
+            cat > /tmp/phantom-comment.md <<EOF
+          ## Anti-Phantom-Merge Guard — Rule $rule failed
+
+          $msg
+
+          ### How to fix
+          - If this PR genuinely has no implementation yet, mark it as a draft.
+          - If the title overstates the change, retitle it to match the diff.
+          - If you're closing an issue, ensure the diff touches the paths the issue references.
+
+          ### Escape hatch
+          A repo **admin** can add the label \`phantom-guard-override\` to bypass this check.
+          The label is ignored when applied by non-admins.
+
+          _Workflow:_ \`.github/workflows/anti-phantom-merge.yml\`
+          EOF
+            gh pr comment "$PR_NUMBER" --repo "$REPO" --body-file /tmp/phantom-comment.md || true
+            exit 1
+          }
+
+          # Gather diff against base merge-base
+          MERGE_BASE=$(git merge-base "$BASE_SHA" "$HEAD_SHA" 2>/dev/null || echo "$BASE_SHA")
+          CHANGED_FILES=$(git diff --name-only "$MERGE_BASE...$HEAD_SHA" || true)
+          NUM_CHANGED=$(echo "$CHANGED_FILES" | sed '/^$/d' | wc -l)
+          echo "merge_base=$MERGE_BASE"
+          echo "num_changed=$NUM_CHANGED"
+          echo "changed files:"
+          echo "$CHANGED_FILES"
+
+          # -------- Rule 1 — empty diff --------
+          if [ "$NUM_CHANGED" -eq 0 ]; then
+            if [ "$PR_TITLE" = "chore: empty PR" ]; then
+              echo "Rule 1: empty diff but title is the documented escape — allowed."
+            else
+              fail "1 (empty diff)" "This PR has **0 changed files** against the base branch. Empty PRs are not mergeable. If you intentionally want an empty PR, set the title to exactly \`chore: empty PR\`."
+            fi
+          fi
+
+          # -------- Rule 2 — feature claim vs no implementation --------
+          claim_re='^feat[:\(]|Implement|System|Engine|Framework'
+          if echo "$PR_TITLE" | grep -E -q "$claim_re"; then
+            IMPL_FILES=$(echo "$CHANGED_FILES" | grep -E '^(src|rust_core|api)/' || true)
+            if [ -z "$IMPL_FILES" ] && [ "$NUM_CHANGED" -gt 0 ]; then
+              fail "2 (feature claim, no implementation)" "PR title \`$PR_TITLE\` claims a feature/system/engine/framework, but the diff touches **no files under \`src/\`, \`rust_core/\`, or \`api/\`**. Either retitle the PR to reflect the actual scope (e.g. \`docs:\`, \`chore:\`, \`test:\`) or add the implementation."
+            fi
+          fi
+
+          # -------- Rule 3 — closes-issue path mismatch --------
+          # Extract issue numbers from Closes/Fixes/Resolves
+          ISSUES=$(echo "$PR_BODY" | grep -Eoi '(Closes|Fixes|Resolves)[[:space:]]+#[0-9]+' | grep -Eo '[0-9]+' | sort -u || true)
+          if [ -n "$ISSUES" ]; then
+            for n in $ISSUES; do
+              echo "Checking referenced issue #$n"
+              ISSUE_BODY=$(gh issue view "$n" --repo "$REPO" --json body --jq '.body' 2>/dev/null || echo "")
+              if [ -z "$ISSUE_BODY" ]; then
+                echo "  (issue #$n inaccessible or empty — skipping)"
+                continue
+              fi
+              ISSUE_PATHS=$(echo "$ISSUE_BODY" | grep -Eo '(src|tests|rust_core|api)/[A-Za-z0-9_/.-]+' | sort -u || true)
+              if [ -z "$ISSUE_PATHS" ]; then
+                echo "  (issue #$n has no path references — skipping)"
+                continue
+              fi
+              echo "  Issue paths:"
+              echo "$ISSUE_PATHS" | sed 's/^/    /'
+              MATCH=""
+              for p in $ISSUE_PATHS; do
+                if echo "$CHANGED_FILES" | grep -qF "$p"; then
+                  MATCH="$p"
+                  break
+                fi
+                # Also try directory-prefix match if the issue lists a file but the PR touches the dir
+                dir=$(dirname "$p")
+                if [ "$dir" != "." ] && [ "$dir" != "/" ] && echo "$CHANGED_FILES" | grep -q "^$dir/"; then
+                  MATCH="$dir"
+                  break
+                fi
+              done
+              if [ -z "$MATCH" ]; then
+                paths_summary=$(echo "$ISSUE_PATHS" | head -5 | sed 's/^/    /')
+                fail "3 (closes-issue path mismatch)" "PR closes issue #$n, but the diff touches **none** of the paths referenced in that issue's body:
+          \`\`\`
+          $paths_summary
+          \`\`\`
+          If the PR is intentionally addressing a different part of the issue, remove the \`Closes #$n\` keyword from the PR body."
+              fi
+            done
+          fi
+
+          # -------- Rule 4 — bot-only commits --------
+          COMMITS=$(git log --format='%H|%an|%s' "$MERGE_BASE..$HEAD_SHA" || true)
+          if [ -n "$COMMITS" ]; then
+            LAST_LINE=$(echo "$COMMITS" | head -1)
+            LAST_AUTHOR=$(echo "$LAST_LINE" | cut -d'|' -f2)
+            LAST_SUBJECT=$(echo "$LAST_LINE" | cut -d'|' -f3-)
+            AUTHOR_COMMITS=$(echo "$COMMITS" | grep -v '|github-actions\[bot\]|' || true)
+            if [ "$LAST_AUTHOR" = "github-actions[bot]" ] && \
+               echo "$LAST_SUBJECT" | grep -q "^Merge branch 'main'" && \
+               [ -z "$AUTHOR_COMMITS" ]; then
+              fail "4 (bot-only commits)" "The only commits between this branch and \`main\` are auto-merge-bot commits (\`Merge branch 'main'\` by \`github-actions[bot]\`). The branch appears to have been absorbed into main via a sibling PR — there is no original work left to merge. Close this PR."
+            fi
+          fi
+
+          echo "All phantom-guard rules passed."
+
+      - name: Note override
+        if: steps.override.outputs.override == 'true'
+        run: |
+          echo "::notice title=Phantom-Guard overridden::Admin override label honored — skipping checks."
