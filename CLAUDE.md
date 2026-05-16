@@ -149,6 +149,19 @@ maturin develop                                   # build Rust extensions locall
 - Breaking changes to Tools public API require a coordinated PR here.
 - Gasification_Model also depends on Tools — avoid transitive breakage.
 
+## Where to edit shared code
+
+Tools is the source of truth for: `shared/python/chat/`, `shared/python/ai/`,
+`shared/python/upstream_drift_tools/` (planned rename: `sidekick`).
+**Never edit these inside `vendor/ud-tools/`**; vendor changes are erased on the
+next `git submodule update` or vendor bump.
+
+Repository-hygiene tests at `tests/unit/repo_hygiene/` enforce this:
+- `test_no_shadow_of_tools_shared.py` — fails if a UD module shadows a Tools shared module without an allow-list entry
+- `test_vendor_submodule_clean.py` — fails if the vendor submodule has uncommitted edits in its working tree
+
+See issue #5623.
+
 ## Slash Commands
 
 - `/gaai-deliver` — Run Delivery Loop for next ready backlog item

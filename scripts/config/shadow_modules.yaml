@@ -1,0 +1,66 @@
+# Shadow-module allow-list — see UpstreamDrift issue #5623.
+#
+# Every entry justifies a UD-side module that intentionally shadows a
+# same-named module in the vendored Tools tree. Each entry MUST include
+# a tracking issue and a sunset date. Once the sunset date passes, the
+# allow-list test fails and forces a refactor or removal.
+#
+# Default: EMPTY. Adding a shadow is a deliberate policy exception.
+#
+# The entries currently present capture the pre-existing shadows that
+# existed on `main` at the time issue #5623 was opened. They all point
+# at issue #5623 as the umbrella tracking issue for cleanup. Sunset
+# date enforces a deadline by which each shadow must be removed or
+# reassigned to a more specific tracking issue.
+shadows:
+  ai:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  chat:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  codemap:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  contracts.py:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  cors.py:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  data_processing:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  gui_launcher:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  humanoid_character_builder:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  model_generation:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  notes:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  plot_engine:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  plot_theme:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  safe_eval.py:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  signal_toolkit:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  theme:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  ui:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  upstream_drift_tools:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
