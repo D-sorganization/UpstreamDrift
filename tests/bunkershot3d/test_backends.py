@@ -1,8 +1,19 @@
+import importlib
+import sys
+
 import pytest
 from pathlib import Path
-from bunkershot3d.backends.chrono.driver import ChronoDriver
+from bunkershot3d.backends.chrono.driver import BackendNotImplementedError, ChronoDriver
 from bunkershot3d.backends.liggghts.driver import LiggghtsDriver
 from bunkershot3d.backends.mpm.driver import MPMDriver
+
+# Detect whether pychrono is available in the test environment
+try:
+    import pychrono  # noqa: F401
+
+    _PYCHRONO_AVAILABLE = True
+except ImportError:
+    _PYCHRONO_AVAILABLE = False
 
 
 @pytest.fixture
@@ -47,6 +58,45 @@ def test_chrono_driver_init(dummy_config: Path) -> None:
     driver = ChronoDriver(dummy_config)
     assert driver.config is not None
     assert driver.config.bunker_bed.domain.length_x == 2.0
+
+
+def test_chrono_driver_raises_without_pychrono(
+    monkeypatch: pytest.MonkeyPatch, dummy_config: Path
+) -> None:
+    """Without pychrono, setup() must raise BackendNotImplementedError, not ImportError."""
+    import bunkershot3d.backends.chrono.driver as mod
+
+    # Simulate pychrono being absent by patching the module-level flag
+    monkeypatch.setattr(mod, "_HAS_CHRONO", False)
+
+    driver = ChronoDriver(dummy_config)
+    with pytest.raises(BackendNotImplementedError, match="pychrono is not installed"):
+        driver.setup()
+
+
+def test_chrono_driver_run_raises_without_setup(
+    monkeypatch: pytest.MonkeyPatch, dummy_config: Path
+) -> None:
+    """run() without setup() must raise BackendNotImplementedError."""
+    import bunkershot3d.backends.chrono.driver as mod
+
+    monkeypatch.setattr(mod, "_HAS_CHRONO", False)
+
+    driver = ChronoDriver(dummy_config)
+    with pytest.raises(BackendNotImplementedError):
+        driver.run("/dev/null")
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(not _PYCHRONO_AVAILABLE, reason="pychrono not installed")
+def test_chrono_driver_short_shot(dummy_config: Path, tmp_path: Path) -> None:
+    """Integration: run a short simulation with pychrono when available."""
+    driver = ChronoDriver(dummy_config)
+    driver.setup()
+    output_path = tmp_path / "chrono_result.h5"
+    driver.run(output_path)
+    assert output_path.exists()
+    assert output_path.stat().st_size > 0
 
 
 def test_liggghts_driver_init(dummy_config: Path) -> None:
