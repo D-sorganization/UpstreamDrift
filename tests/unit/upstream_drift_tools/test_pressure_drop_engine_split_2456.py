@@ -12,7 +12,7 @@ import pytest
 REPO = Path(__file__).parents[3]
 ENGINE_DIR = (
     REPO
-    / "src/shared/python/upstream_drift_tools/process_calculators"
+    / "src/shared/python/sidekick/process_calculators"
     / "pressure_drop_calculator/engine"
 )
 LOC_BUDGET = 600
@@ -40,23 +40,23 @@ class TestPressureDropEngineFileSizes:
     @pytest.mark.unit
     def test_engine_coordinator_loc(self) -> None:
         loc = _count_lines(ENGINE_DIR / "pressure_drop_calculation_engine.py")
-        assert (
-            loc <= LOC_BUDGET
-        ), f"pressure_drop_calculation_engine.py has {loc} LOC; budget {LOC_BUDGET}"
+        assert loc <= LOC_BUDGET, (
+            f"pressure_drop_calculation_engine.py has {loc} LOC; budget {LOC_BUDGET}"
+        )
 
     @pytest.mark.unit
     def test_friction_factors_loc(self) -> None:
         loc = _count_lines(ENGINE_DIR / "_friction_factors.py")
-        assert (
-            loc <= LOC_BUDGET
-        ), f"_friction_factors.py has {loc} LOC; budget {LOC_BUDGET}"
+        assert loc <= LOC_BUDGET, (
+            f"_friction_factors.py has {loc} LOC; budget {LOC_BUDGET}"
+        )
 
     @pytest.mark.unit
     def test_flow_calculations_loc(self) -> None:
         loc = _count_lines(ENGINE_DIR / "_flow_calculations.py")
-        assert (
-            loc <= LOC_BUDGET
-        ), f"_flow_calculations.py has {loc} LOC; budget {LOC_BUDGET}"
+        assert loc <= LOC_BUDGET, (
+            f"_flow_calculations.py has {loc} LOC; budget {LOC_BUDGET}"
+        )
 
 
 class TestPressureDropEnginePublicAPI:
@@ -64,7 +64,7 @@ class TestPressureDropEnginePublicAPI:
 
     @pytest.mark.unit
     def test_import_friction_factor_laminar(self) -> None:
-        from src.shared.python.upstream_drift_tools.process_calculators.pressure_drop_calculator.engine.pressure_drop_calculation_engine import (
+        from sidekick.process_calculators.pressure_drop_calculator.engine.pressure_drop_calculation_engine import (
             friction_factor_laminar,
         )
 
@@ -72,7 +72,7 @@ class TestPressureDropEnginePublicAPI:
 
     @pytest.mark.unit
     def test_import_calculate_flow_properties(self) -> None:
-        from src.shared.python.upstream_drift_tools.process_calculators.pressure_drop_calculator.engine.pressure_drop_calculation_engine import (
+        from sidekick.process_calculators.pressure_drop_calculator.engine.pressure_drop_calculation_engine import (
             calculate_flow_properties,
         )
 
@@ -80,7 +80,7 @@ class TestPressureDropEnginePublicAPI:
 
     @pytest.mark.unit
     def test_import_calculation_engine_class(self) -> None:
-        from src.shared.python.upstream_drift_tools.process_calculators.pressure_drop_calculator.engine.pressure_drop_calculation_engine import (
+        from sidekick.process_calculators.pressure_drop_calculator.engine.pressure_drop_calculation_engine import (
             PressureDropCalculationEngine,
         )
 

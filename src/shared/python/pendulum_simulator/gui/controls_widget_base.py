@@ -372,9 +372,9 @@ class ControlsWidgetBase(QWidget):
         inputs = self._get_torque_inputs()
         key = joint.lower()
         valid_keys = {k.lower() for k in inputs}
-        assert (
-            key in valid_keys
-        ), f"Unknown joint '{joint}', expected one of {valid_keys}"
+        assert key in valid_keys, (
+            f"Unknown joint '{joint}', expected one of {valid_keys}"
+        )
         assert len(coeffs) >= 1, "Coefficients list must not be empty"
 
         coeffs_str = ", ".join(f"{c:.4g}" for c in coeffs)
@@ -402,9 +402,9 @@ class ControlsWidgetBase(QWidget):
 
     def set_slider_value(self, val: int) -> None:
         """Pre: 0 <= val <= slider.maximum()"""
-        assert (
-            0 <= val <= self.slider.maximum()
-        ), f"Slider value {val} out of range [0, {self.slider.maximum()}]"
+        assert 0 <= val <= self.slider.maximum(), (
+            f"Slider value {val} out of range [0, {self.slider.maximum()}]"
+        )
         self.slider.blockSignals(True)
         self.slider.setValue(val)
         self.slider.blockSignals(False)
@@ -469,7 +469,7 @@ class ControlsWidgetBase(QWidget):
     def _uai_or_parse(widget: object, label: str) -> float:
         """Extract SI value from UnitAwareInput or parse from LabeledInput.
 
-        Works regardless of whether upstream_drift_tools is installed.
+        Works regardless of whether sidekick is installed.
         Subclasses should use this when parsing inputs that might be
         UnitAwareInput or plain LabeledInput widgets.
         """
@@ -477,7 +477,7 @@ class ControlsWidgetBase(QWidget):
         from .controls_utils import parse_float
 
         try:
-            from upstream_drift_tools.ui.widgets.unit_aware_input import (
+            from sidekick.ui.widgets.unit_aware_input import (
                 UnitAwareInput as _UAI,
             )
 

@@ -28,7 +28,7 @@ from src.shared.python.motion_matching import (
 from src.shared.python.motion_matching.loaders.c3d_body import (
     default_anatomical_marker_set,
 )
-from tests.unit.upstream_drift_tools.lab.bio._synthetic import _synthetic_c3d_dict
+from tests.unit.sidekick.lab.bio._synthetic import _synthetic_c3d_dict
 
 # Frame counts and rates picked so a uniform timeline cleanly separates an
 # "Impact" event (frame 50, t=0.5 s) from the kinematic-peak frame (80) of a
@@ -158,7 +158,7 @@ def fake_c3d_path(tmp_path: Path) -> Path:
 
 def _patch_load_c3d(monkeypatch: pytest.MonkeyPatch, payload: dict[str, Any]) -> None:
     """Replace the canonical ``load_c3d`` so the loader sees ``payload``."""
-    from src.shared.python.upstream_drift_tools.lab.bio import _c3d_io, c3d_reader
+    from sidekick.lab.bio import _c3d_io, c3d_reader
 
     monkeypatch.setattr(_c3d_io, "load_c3d", lambda _p: payload)
     monkeypatch.setattr(c3d_reader, "load_c3d", lambda _p: payload)

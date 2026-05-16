@@ -7,11 +7,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from upstream_drift_tools.lab.bio._c3d_analog import (
+from sidekick.lab.bio._c3d_analog import (
     build_force_plate_dataframe_from_calibration,
 )
-from upstream_drift_tools.lab.bio._c3d_io import build_metadata
-from upstream_drift_tools.lab.bio._c3d_models import ForcePlateCalibration
+from sidekick.lab.bio._c3d_io import build_metadata
+from sidekick.lab.bio._c3d_models import ForcePlateCalibration
 
 from ._synthetic import _synthetic_c3d_dict
 

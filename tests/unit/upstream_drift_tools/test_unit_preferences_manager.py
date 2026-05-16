@@ -1,8 +1,8 @@
-"""Tests for upstream_drift_tools.ui.managers.unit_preferences_manager (Issues #1949, #1744)."""
+"""Tests for sidekick.ui.managers.unit_preferences_manager (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
-from src.shared.python.upstream_drift_tools.ui.managers.unit_preferences_manager import (
+from sidekick.ui.managers.unit_preferences_manager import (
     UNIT_CATEGORIES,
     UNIT_PRESETS,
     UnitPreferencesManager,

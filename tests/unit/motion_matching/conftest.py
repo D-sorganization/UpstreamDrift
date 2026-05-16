@@ -82,8 +82,8 @@ def loaded_c3d_data(real_c3d_path: Path | None) -> dict[str, Any] | None:
         return None
 
     try:
-        from src.shared.python.upstream_drift_tools.lab.bio import _c3d_io as io_mod
-        from src.shared.python.upstream_drift_tools.lab.bio.c3d_reader import (
+        from sidekick.lab.bio import _c3d_io as io_mod
+        from sidekick.lab.bio.c3d_reader import (
             C3DDataReader,
         )
 

@@ -1,4 +1,4 @@
-"""Logging utilities for upstream_drift_tools."""
+"""Logging utilities for sidekick."""
 
 from __future__ import annotations
 

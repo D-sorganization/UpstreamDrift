@@ -1,4 +1,4 @@
-"""Tests for upstream_drift_tools.data_processing.io (Issues #1949, #1744)."""
+"""Tests for sidekick.data_processing.io (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
-from src.shared.python.upstream_drift_tools.data_processing.io import (
+from sidekick.data_processing.io import (
     DataReader,
     DataWriter,
     FileFormatDetector,

@@ -1,15 +1,15 @@
-"""Tests for src.shared.python.upstream_drift_tools.calculators.conversion.core (Issues #1949, #1744)."""
+"""Tests for sidekick.calculators.conversion.core (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
 import pytest
-from src.shared.python.upstream_drift_tools.calculators.conversion.core import (
+from sidekick.calculators.conversion.core import (
     convert_temperature,
     convert_via_table,
     scfm_to_standard_m3_per_hour,
     standard_m3_per_hour_to_scfm,
 )
-from src.shared.python.upstream_drift_tools.calculators.conversion.tables import (
+from sidekick.calculators.conversion.tables import (
     StandardCondition,
 )
 

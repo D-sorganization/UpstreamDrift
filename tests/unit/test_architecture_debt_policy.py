@@ -43,7 +43,7 @@ def test_architecture_policy_tracks_priority_subtargets() -> None:
         "src/shared/python/physics/terrain_representation.py",
         "src/shared/python/pendulum_simulator/gui/equations_popup_reference_content.py",
         "src/shared/python/pendulum_simulator/gui/equations_popup_jacobian_content.py",
-        "src/shared/python/upstream_drift_tools/process_calculators/pressure_drop_calculator/pressure_drop_api.py",
+        "src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_api.py",
         "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/motion_capture_plotter_visualization.py",
         "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_renderer.py",
         "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/dataset_generator/Dataset_GUI.m",

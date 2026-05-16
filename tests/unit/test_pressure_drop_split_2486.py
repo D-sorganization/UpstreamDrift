@@ -14,8 +14,7 @@ _upstream_tools_available = importlib.util.find_spec("sympy") is not None
 
 REPO = Path(__file__).parents[2]
 CALC_DIR = (
-    REPO
-    / "src/shared/python/upstream_drift_tools/process_calculators/pressure_drop_calculator"
+    REPO / "src/shared/python/sidekick/process_calculators/pressure_drop_calculator"
 )
 LOC_BUDGET_HELPERS = 450
 LOC_BUDGET_VALIDATION = 280
@@ -49,30 +48,30 @@ class TestPressureDropFileSizes:
     @pytest.mark.unit
     def test_pressure_drop_split_2486_coordinator_loc(self) -> None:
         loc = _count_lines(CALC_DIR / "pressure_drop_interface.py")
-        assert (
-            loc <= LOC_BUDGET_COORDINATOR
-        ), f"pressure_drop_interface.py has {loc} LOC; budget {LOC_BUDGET_COORDINATOR}"
+        assert loc <= LOC_BUDGET_COORDINATOR, (
+            f"pressure_drop_interface.py has {loc} LOC; budget {LOC_BUDGET_COORDINATOR}"
+        )
 
     @pytest.mark.unit
     def test_helpers_loc(self) -> None:
         loc = _count_lines(CALC_DIR / "_pressure_drop_helpers.py")
-        assert (
-            loc <= LOC_BUDGET_HELPERS
-        ), f"_pressure_drop_helpers.py has {loc} LOC; budget {LOC_BUDGET_HELPERS}"
+        assert loc <= LOC_BUDGET_HELPERS, (
+            f"_pressure_drop_helpers.py has {loc} LOC; budget {LOC_BUDGET_HELPERS}"
+        )
 
     @pytest.mark.unit
     def test_validation_loc(self) -> None:
         loc = _count_lines(CALC_DIR / "_pressure_drop_validation.py")
-        assert (
-            loc <= LOC_BUDGET_VALIDATION
-        ), f"_pressure_drop_validation.py has {loc} LOC; budget {LOC_BUDGET_VALIDATION}"
+        assert loc <= LOC_BUDGET_VALIDATION, (
+            f"_pressure_drop_validation.py has {loc} LOC; budget {LOC_BUDGET_VALIDATION}"
+        )
 
     @pytest.mark.unit
     def test_output_loc(self) -> None:
         loc = _count_lines(CALC_DIR / "_pressure_drop_output.py")
-        assert (
-            loc <= LOC_BUDGET_OUTPUT
-        ), f"_pressure_drop_output.py has {loc} LOC; budget {LOC_BUDGET_OUTPUT}"
+        assert loc <= LOC_BUDGET_OUTPUT, (
+            f"_pressure_drop_output.py has {loc} LOC; budget {LOC_BUDGET_OUTPUT}"
+        )
 
 
 @pytest.mark.skipif(not _upstream_tools_available, reason="sympy not installed")
@@ -81,7 +80,7 @@ class TestPressureDropPublicAPI:
 
     @pytest.mark.unit
     def test_import_calculate_pressure_drop(self) -> None:
-        from upstream_drift_tools.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
+        from sidekick.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
             calculate_pressure_drop,
         )
 
@@ -89,7 +88,7 @@ class TestPressureDropPublicAPI:
 
     @pytest.mark.unit
     def test_import_show_help(self) -> None:
-        from upstream_drift_tools.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
+        from sidekick.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
             show_help,
         )
 
@@ -97,7 +96,7 @@ class TestPressureDropPublicAPI:
 
     @pytest.mark.unit
     def test_import_validate_inputs(self) -> None:
-        from upstream_drift_tools.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
+        from sidekick.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
             validate_inputs,
         )
 
@@ -105,7 +104,7 @@ class TestPressureDropPublicAPI:
 
     @pytest.mark.unit
     def test_import_print_results(self) -> None:
-        from upstream_drift_tools.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
+        from sidekick.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
             print_results,
         )
 
@@ -113,7 +112,7 @@ class TestPressureDropPublicAPI:
 
     @pytest.mark.unit
     def test_import_list_gas_components(self) -> None:
-        from upstream_drift_tools.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
+        from sidekick.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
             list_gas_components,
         )
 

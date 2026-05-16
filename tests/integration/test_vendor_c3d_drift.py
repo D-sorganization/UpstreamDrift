@@ -1,7 +1,7 @@
 """Vendor drift sentinel for the canonical C3D reader.
 
 The vendored copy at
-``vendor/ud-tools/src/shared/python/upstream_drift_tools/lab/bio/c3d_reader.py``
+``vendor/ud-tools/src/shared/python/sidekick/lab/bio/c3d_reader.py``
 is duplicated content sourced from the ``D-sorganization/Tools`` repo per the
 cross-repo dependency contract. Until that contract migrates the canonical
 import path (issue #4484), the two copies must remain byte-identical to
@@ -43,7 +43,5 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-CANONICAL_REL = Path("src/shared/python/upstream_drift_tools/lab/bio/c3d_reader.py")
-VENDOR_REL = Path(
-    "vendor/ud-tools/src/shared/python/upstream_drift_tools/lab/bio/c3d_reader.py"
-)
+CANONICAL_REL = Path("src/shared/python/sidekick/lab/bio/c3d_reader.py")
+VENDOR_REL = Path("vendor/ud-tools/src/shared/python/sidekick/lab/bio/c3d_reader.py")

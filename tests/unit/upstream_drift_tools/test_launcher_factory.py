@@ -1,8 +1,8 @@
-"""Tests for upstream_drift_tools.launcher_factory (Issues #1949, #1744)."""
+"""Tests for sidekick.launcher_factory (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
-from src.shared.python.upstream_drift_tools.launcher_factory import (
+from sidekick.launcher_factory import (
     LauncherConfig,
     LauncherError,
     create_launcher_config,

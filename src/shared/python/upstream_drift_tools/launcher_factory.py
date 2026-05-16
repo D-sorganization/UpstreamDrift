@@ -5,7 +5,7 @@ Provides a unified, DRY launcher pattern to replace the 30+ duplicate
 
 Usage::
 
-    from upstream_drift_tools.launcher_factory import (
+    from sidekick.launcher_factory import (
         create_launcher_config,
         launch_app,
     )

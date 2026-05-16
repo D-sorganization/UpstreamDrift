@@ -1,9 +1,9 @@
-"""Tests for upstream_drift_tools.calculators.base (Issues #1949, #1744)."""
+"""Tests for sidekick.calculators.base (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
 import pytest
-from src.shared.python.upstream_drift_tools.calculators.base import (
+from sidekick.calculators.base import (
     BaseCalculationEngine,
 )
 

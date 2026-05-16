@@ -1,4 +1,4 @@
-"""Comprehensive tests for upstream_drift_tools.calculators.mechanical.trc_geometry.
+"""Comprehensive tests for sidekick.calculators.mechanical.trc_geometry.
 
 Covers:
 - LayerConfig dataclass initialisation and validation
@@ -14,7 +14,7 @@ from __future__ import annotations
 import math
 
 import pytest
-from upstream_drift_tools.calculators.mechanical.trc_geometry import (
+from sidekick.calculators.mechanical.trc_geometry import (
     LayerConfig,
     LayerResult,
     TRCGeometryEngine,

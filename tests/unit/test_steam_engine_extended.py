@@ -26,7 +26,7 @@ pytestmark = pytest.mark.unit
 @pytest.fixture
 def engine():
     """SteamCalculationEngine instance."""
-    from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine import (
+    from sidekick.calculators.thermo.steam_engine import (
         SteamCalculationEngine,
     )
 
@@ -170,7 +170,7 @@ class TestSaturatedFromTemperature:
 
     def test_returns_steam_properties(self, engine) -> None:
         """Returns a SteamProperties instance."""
-        from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine import (
+        from sidekick.calculators.thermo.steam_engine import (
             SteamProperties,
         )
 
@@ -198,7 +198,7 @@ class TestSaturatedFromPressure:
 
     def test_returns_steam_properties(self, engine) -> None:
         """Returns a SteamProperties instance."""
-        from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine import (
+        from sidekick.calculators.thermo.steam_engine import (
             SteamProperties,
         )
 
@@ -247,7 +247,7 @@ class TestCalculateProperties:
 
     def test_returns_steam_properties(self, engine) -> None:
         """calculate_properties returns a SteamProperties object."""
-        from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine import (
+        from sidekick.calculators.thermo.steam_engine import (
             SteamProperties,
         )
 

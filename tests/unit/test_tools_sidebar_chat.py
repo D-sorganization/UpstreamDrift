@@ -18,13 +18,13 @@ import pytest
 
 def _make_sidebar():
     """Instantiate UnifiedToolsSidebar with all Qt widgets mocked."""
-    from src.shared.python.upstream_drift_tools.ui.tools_sidebar.sidebar import (
+    from sidekick.ui.tools_sidebar.sidebar import (
         UnifiedToolsSidebar,
     )
 
     # Patch QWidget so no real Qt application is needed.
     with patch(
-        "src.shared.python.upstream_drift_tools.ui.tools_sidebar.sidebar.QWidget.__init__",
+        "sidekick.ui.tools_sidebar.sidebar.QWidget.__init__",
         return_value=None,
     ):
         sidebar = object.__new__(UnifiedToolsSidebar)
@@ -38,7 +38,7 @@ def _make_sidebar():
 
 class TestSidebarTabDefinition:
     def test_has_required_fields(self) -> None:
-        from src.shared.python.upstream_drift_tools.ui.tools_sidebar.sidebar import (
+        from sidekick.ui.tools_sidebar.sidebar import (
             SidebarTabDefinition,
         )
 
@@ -79,7 +79,7 @@ class TestChatTabFactory:
         app = QApplication.instance() or QApplication([])  # noqa: F841
 
         from src.shared.python.chat._chat_dock_widget_qt import ChatDockWidget
-        from src.shared.python.upstream_drift_tools.ui.tools_sidebar.sidebar import (
+        from sidekick.ui.tools_sidebar.sidebar import (
             UnifiedToolsSidebar,
         )
 
@@ -98,7 +98,7 @@ class TestChatTabFactory:
 
     def test_chat_tab_not_qlabel_no_qt(self) -> None:
         """Without constructing Qt widgets, verify the factory imports ChatDockWidget."""
-        from src.shared.python.upstream_drift_tools.ui.tools_sidebar.sidebar import (
+        from sidekick.ui.tools_sidebar.sidebar import (
             UnifiedToolsSidebar,
         )
 
@@ -118,7 +118,7 @@ class TestChatTabFactory:
 
     def test_default_tabs_include_chat(self) -> None:
         """_default_tab_definitions returns a list containing a 'chat' entry."""
-        from src.shared.python.upstream_drift_tools.ui.tools_sidebar.sidebar import (
+        from sidekick.ui.tools_sidebar.sidebar import (
             SidebarTabDefinition,
             UnifiedToolsSidebar,
         )

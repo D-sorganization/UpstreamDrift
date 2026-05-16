@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import pytest
-from src.shared.python.upstream_drift_tools.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
+from sidekick.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
     calculate_pressure_drop,
     get_roughness,
     list_gas_components,

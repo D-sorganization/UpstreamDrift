@@ -1,4 +1,4 @@
-"""Unit tests for src/shared/python/upstream_drift_tools/utils/state_manager.py.
+"""Unit tests for src/shared/python/sidekick/utils/state_manager.py.
 
 Tests cover safe_read_json, safe_write_json, StateManager CRUD operations,
 protect/unprotect, export/import, session save/load, and get_state_manager.
@@ -25,7 +25,7 @@ class TestSafeReadJson:
 
     def test_returns_default_on_missing_file(self, tmp_path: Path) -> None:
         """Returns the given default when the file does not exist."""
-        from src.shared.python.upstream_drift_tools.utils.state_manager import (
+        from sidekick.utils.state_manager import (
             safe_read_json,
         )
 
@@ -34,7 +34,7 @@ class TestSafeReadJson:
 
     def test_parses_valid_json(self, tmp_path: Path) -> None:
         """Parses a valid JSON file and returns the parsed object."""
-        from src.shared.python.upstream_drift_tools.utils.state_manager import (
+        from sidekick.utils.state_manager import (
             safe_read_json,
         )
 
@@ -45,7 +45,7 @@ class TestSafeReadJson:
 
     def test_returns_default_on_bad_json(self, tmp_path: Path) -> None:
         """Returns default when file contains invalid JSON."""
-        from src.shared.python.upstream_drift_tools.utils.state_manager import (
+        from sidekick.utils.state_manager import (
             safe_read_json,
         )
 
@@ -56,7 +56,7 @@ class TestSafeReadJson:
 
     def test_accepts_string_path(self, tmp_path: Path) -> None:
         """Accepts a string path as well as a Path object."""
-        from src.shared.python.upstream_drift_tools.utils.state_manager import (
+        from sidekick.utils.state_manager import (
             safe_read_json,
         )
 
@@ -71,7 +71,7 @@ class TestSafeWriteJson:
 
     def test_writes_json_file(self, tmp_path: Path) -> None:
         """Writes data as JSON and returns True on success."""
-        from src.shared.python.upstream_drift_tools.utils.state_manager import (
+        from sidekick.utils.state_manager import (
             safe_write_json,
         )
 
@@ -84,7 +84,7 @@ class TestSafeWriteJson:
 
     def test_creates_parent_directories(self, tmp_path: Path) -> None:
         """Creates parent directories when create_parents=True."""
-        from src.shared.python.upstream_drift_tools.utils.state_manager import (
+        from sidekick.utils.state_manager import (
             safe_write_json,
         )
 
@@ -95,7 +95,7 @@ class TestSafeWriteJson:
 
     def test_state_manager_extended_round_trip(self, tmp_path: Path) -> None:
         """Write then read gives back the original data."""
-        from src.shared.python.upstream_drift_tools.utils.state_manager import (
+        from sidekick.utils.state_manager import (
             safe_read_json,
             safe_write_json,
         )
@@ -108,7 +108,7 @@ class TestSafeWriteJson:
 
     def test_returns_false_on_unserializable(self, tmp_path: Path) -> None:
         """Returns False when data is not JSON-serializable."""
-        from src.shared.python.upstream_drift_tools.utils.state_manager import (
+        from sidekick.utils.state_manager import (
             safe_write_json,
         )
 
@@ -126,7 +126,7 @@ class TestSafeWriteJson:
 @pytest.fixture
 def manager(tmp_path: Path):
     """StateManager instance using a temporary directory."""
-    from src.shared.python.upstream_drift_tools.utils.state_manager import StateManager
+    from sidekick.utils.state_manager import StateManager
 
     return StateManager(base_directory=str(tmp_path / "states"))
 
@@ -136,7 +136,7 @@ class TestStateManagerInit:
 
     def test_creates_required_directories(self, tmp_path: Path) -> None:
         """StateManager creates states, sessions, backups, exports directories."""
-        from src.shared.python.upstream_drift_tools.utils.state_manager import (
+        from sidekick.utils.state_manager import (
             StateManager,
         )
 
@@ -295,7 +295,7 @@ class TestGetStateManager:
 
     def test_returns_state_manager_instance(self, tmp_path: Path) -> None:
         """get_state_manager returns a StateManager instance."""
-        from src.shared.python.upstream_drift_tools.utils.state_manager import (
+        from sidekick.utils.state_manager import (
             StateManager,
             get_state_manager,
         )
@@ -305,7 +305,7 @@ class TestGetStateManager:
 
     def test_singleton_returns_same_instance(self, tmp_path: Path) -> None:
         """get_state_manager with same directory returns same instance."""
-        from src.shared.python.upstream_drift_tools.utils.state_manager import (
+        from sidekick.utils.state_manager import (
             get_state_manager,
         )
 

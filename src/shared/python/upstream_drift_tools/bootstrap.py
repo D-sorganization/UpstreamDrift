@@ -12,11 +12,11 @@ Usage in launch_pyqt6.py scripts::
     from pathlib import Path
     # One-time bootstrap: find repo root and add standard paths
     _root = Path(__file__).resolve().parents[2]  # adjust depth to reach repo root
-    exec((_root / "src" / "shared" / "python" / "upstream_drift_tools" / "bootstrap.py").read_text())
+    exec((_root / "src" / "shared" / "python" / "sidekick" / "bootstrap.py").read_text())
 
 Or more explicitly::
 
-    from upstream_drift_tools.bootstrap import ensure_paths
+    from sidekick.bootstrap import ensure_paths
     ensure_paths()
 
 This module exists as a transition mechanism. Once all imports use the installed
@@ -42,7 +42,7 @@ def ensure_paths(repo_root: Path | str | None = None) -> Path:
         The resolved repository root path.
     """
     if repo_root is None:
-        from upstream_drift_tools.utils.paths import get_repo_root
+        from sidekick.utils.paths import get_repo_root
 
         repo_root = get_repo_root()
     else:

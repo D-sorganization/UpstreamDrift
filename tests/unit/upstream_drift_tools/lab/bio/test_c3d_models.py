@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import pytest
-from src.shared.python.upstream_drift_tools.lab.bio._c3d_models import (
+from sidekick.lab.bio._c3d_models import (
     BIOMECHANICAL_MARKER_MAX_M,
     BIOMECHANICAL_MARKER_MIN_M,
     SCHEMA_VERSION,

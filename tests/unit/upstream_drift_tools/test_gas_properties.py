@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from src.shared.python.upstream_drift_tools.process_calculators.pressure_drop_calculator.utils.gas_properties import (
+from sidekick.process_calculators.pressure_drop_calculator.utils.gas_properties import (
     calculate_ideal_gas_density,
     calculate_mixture_molecular_weight,
 )

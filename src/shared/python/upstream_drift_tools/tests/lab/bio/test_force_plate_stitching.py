@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from upstream_drift_tools.lab.bio.force_plate_stitching import (
+from sidekick.lab.bio.force_plate_stitching import (
     CombinedForcePlateProcessor,
 )
 

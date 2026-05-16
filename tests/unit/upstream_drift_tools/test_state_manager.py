@@ -1,10 +1,10 @@
-"""Tests for src.shared.python.upstream_drift_tools.utils.state_manager (Issues #1949, #1744)."""
+"""Tests for sidekick.utils.state_manager (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from src.shared.python.upstream_drift_tools.utils.state_manager import (
+from sidekick.utils.state_manager import (
     StateManager,
     safe_read_json,
     safe_write_json,

@@ -7,7 +7,7 @@ without breaking existing code.
 See issue #565.
 
 Usage:
-    from upstream_drift_tools.data_io import read_data
+    from sidekick.data_io import read_data
 
     # Reads .parquet if it exists, otherwise .csv
     df = read_data("path/to/data.csv")

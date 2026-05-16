@@ -11,7 +11,7 @@ from src.shared.python.launcher_embed import (
     EmbedCapabilities,
     register_embeddable_tool,
 )
-from src.shared.python.upstream_drift_tools.ui.tools_sidebar.api import (
+from sidekick.ui.tools_sidebar.api import (
     create_tools_sidebar,
 )
 

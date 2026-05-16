@@ -1,16 +1,16 @@
 """Theme management system for the UpstreamDrift fleet.
 
 This subpackage re-exports the fleet-wide shared theme system,
-making it available as ``upstream_drift_tools.theme``.
+making it available as ``sidekick.theme``.
 
 The canonical source is ``shared.python.theme`` (in this repository).
 This module exists so external consumers (e.g., MEB_Conversion) can
-``pip install upstream_drift_tools`` and import themes without needing
+``pip install sidekick`` and import themes without needing
 a git submodule or direct path manipulation.
 
 Usage::
 
-    from upstream_drift_tools.theme import (
+    from sidekick.theme import (
         BUILTIN_THEMES,
         THEME_COLOR_KEYS,
         ThemeManager,

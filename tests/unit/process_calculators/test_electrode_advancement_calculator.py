@@ -1,9 +1,9 @@
-"""Tests for upstream_drift_tools.process_calculators.electrode_advancement_calculator (Issues #1949, #1744)."""
+"""Tests for sidekick.process_calculators.electrode_advancement_calculator (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
 import pytest
-from src.shared.python.upstream_drift_tools.process_calculators.electrode_advancement_calculator import (
+from sidekick.process_calculators.electrode_advancement_calculator import (
     ElectrodeAdvancementCalculator,
 )
 

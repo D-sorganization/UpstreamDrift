@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import pytest
 
-pytest.importorskip("sympy")  # upstream_drift_tools package chain requires sympy
+pytest.importorskip("sympy")  # sidekick package chain requires sympy
 
 
 class TestCompressionStageImport:
     @pytest.mark.unit
     def test_can_import(self) -> None:
-        from src.shared.python.upstream_drift_tools.process_calculators.syngas_compression_engine import (
+        from sidekick.process_calculators.syngas_compression_engine import (
             CompressionStage,
         )
 
@@ -18,7 +18,7 @@ class TestCompressionStageImport:
 
     @pytest.mark.unit
     def test_dataclass_fields(self) -> None:
-        from src.shared.python.upstream_drift_tools.process_calculators.syngas_compression_engine import (
+        from sidekick.process_calculators.syngas_compression_engine import (
             CompressionStage,
         )
 
@@ -37,7 +37,7 @@ class TestCompressionStageImport:
 class TestSyngasCompressionEngineImport:
     @pytest.mark.unit
     def test_can_import(self) -> None:
-        from src.shared.python.upstream_drift_tools.process_calculators.syngas_compression_engine import (
+        from sidekick.process_calculators.syngas_compression_engine import (
             SyngasCompressionEngine,
         )
 
@@ -45,7 +45,7 @@ class TestSyngasCompressionEngineImport:
 
     @pytest.mark.unit
     def test_calculate_water_dropout_no_condensation(self) -> None:
-        from src.shared.python.upstream_drift_tools.process_calculators.syngas_compression_engine import (
+        from sidekick.process_calculators.syngas_compression_engine import (
             SyngasCompressionEngine,
         )
 
@@ -61,7 +61,7 @@ class TestSyngasCompressionEngineImport:
 
     @pytest.mark.unit
     def test_calculate_water_dropout_invalid_pressure(self) -> None:
-        from src.shared.python.upstream_drift_tools.process_calculators.syngas_compression_engine import (
+        from sidekick.process_calculators.syngas_compression_engine import (
             SyngasCompressionEngine,
         )
 
@@ -75,7 +75,7 @@ class TestSyngasCompressionEngineImport:
 
     @pytest.mark.unit
     def test_calculate_compression_work_isentropic(self) -> None:
-        from src.shared.python.upstream_drift_tools.process_calculators.syngas_compression_engine import (
+        from sidekick.process_calculators.syngas_compression_engine import (
             CompressionStage,
             SyngasCompressionEngine,
         )
@@ -96,7 +96,7 @@ class TestSyngasCompressionEngineImport:
 
     @pytest.mark.unit
     def test_calculate_compression_work_isothermal(self) -> None:
-        from src.shared.python.upstream_drift_tools.process_calculators.syngas_compression_engine import (
+        from sidekick.process_calculators.syngas_compression_engine import (
             CompressionStage,
             SyngasCompressionEngine,
         )
@@ -116,7 +116,7 @@ class TestSyngasCompressionEngineImport:
 
     @pytest.mark.unit
     def test_calculate_compression_work_unknown_type(self) -> None:
-        from src.shared.python.upstream_drift_tools.process_calculators.syngas_compression_engine import (
+        from sidekick.process_calculators.syngas_compression_engine import (
             CompressionStage,
             SyngasCompressionEngine,
         )
@@ -136,7 +136,7 @@ class TestSyngasCompressionEngineImport:
 
     @pytest.mark.unit
     def test_analyze_process_conditions_no_concerns(self) -> None:
-        from src.shared.python.upstream_drift_tools.process_calculators.syngas_compression_engine import (
+        from sidekick.process_calculators.syngas_compression_engine import (
             SyngasCompressionEngine,
         )
 
@@ -164,7 +164,7 @@ class TestSyngasCompressionEngineImport:
 class TestSyngasDisplayFunctions:
     @pytest.mark.unit
     def test_format_results_text(self) -> None:
-        from src.shared.python.upstream_drift_tools.process_calculators.syngas_compression_display import (
+        from sidekick.process_calculators.syngas_compression_display import (
             format_results_text,
         )
 
@@ -201,7 +201,7 @@ class TestSyngasDisplayFunctions:
 
     @pytest.mark.unit
     def test_format_analysis_text_no_issues(self) -> None:
-        from src.shared.python.upstream_drift_tools.process_calculators.syngas_compression_display import (
+        from sidekick.process_calculators.syngas_compression_display import (
             format_analysis_text,
         )
 
@@ -215,7 +215,7 @@ class TestSyngasDisplayFunctions:
 
     @pytest.mark.unit
     def test_format_analysis_text_with_concerns(self) -> None:
-        from src.shared.python.upstream_drift_tools.process_calculators.syngas_compression_display import (
+        from sidekick.process_calculators.syngas_compression_display import (
             format_analysis_text,
         )
 

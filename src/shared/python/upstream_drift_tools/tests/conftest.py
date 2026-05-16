@@ -1,4 +1,4 @@
-"""Pytest configuration for upstream_drift_tools tests.
+"""Pytest configuration for sidekick tests.
 
 Uses shared path setup from utils.path_helpers.
 """

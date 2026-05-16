@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import numpy as np
-from src.shared.python.upstream_drift_tools.process_calculators.electrode_advancement_calculator import (
+from sidekick.process_calculators.electrode_advancement_calculator import (
     ElectrodeAdvancementCalculator,
 )
-from src.shared.python.upstream_drift_tools.process_calculators.thermal_profile_predictor import (
+from sidekick.process_calculators.thermal_profile_predictor import (
     predict_temperature_profile,
 )
 

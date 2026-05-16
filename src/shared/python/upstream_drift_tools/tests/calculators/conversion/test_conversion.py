@@ -1,7 +1,7 @@
 """test_conversion.py module."""
 
 import pytest
-from upstream_drift_tools.calculators.conversion.service import (
+from sidekick.calculators.conversion.service import (
     UnknownUnitError,
     convert,
     get_service,

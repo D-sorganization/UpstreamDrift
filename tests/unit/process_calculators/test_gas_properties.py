@@ -1,9 +1,9 @@
-"""Tests for upstream_drift_tools.process_calculators.pressure_drop_calculator.utils.gas_properties (Issues #1949, #1744)."""
+"""Tests for sidekick.process_calculators.pressure_drop_calculator.utils.gas_properties (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
 import pytest
-from src.shared.python.upstream_drift_tools.process_calculators.pressure_drop_calculator.utils.gas_properties import (
+from sidekick.process_calculators.pressure_drop_calculator.utils.gas_properties import (
     calculate_compressibility_factor,
     calculate_heat_capacity_ratio,
     calculate_ideal_gas_cp,

@@ -1,10 +1,10 @@
-"""Tests for upstream_drift_tools.calculators.thermo.steam_engine (Issues #1949, #1744)."""
+"""Tests for sidekick.calculators.thermo.steam_engine (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
 import math
 
-from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine import (
+from sidekick.calculators.thermo.steam_engine import (
     STANDARD_ATMOSPHERIC_PRESSURE,
     SteamCalculationEngine,
     SteamProperties,

@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from upstream_drift_tools.lab.bio._c3d_io import build_metadata
-from upstream_drift_tools.lab.bio._c3d_marker_set import (
+from sidekick.lab.bio._c3d_io import build_metadata
+from sidekick.lab.bio._c3d_marker_set import (
     MarkerSet,
     MarkerSetMismatchError,
     detect_marker_set,

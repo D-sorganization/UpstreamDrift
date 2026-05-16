@@ -14,12 +14,12 @@ location is listed first; the other copy is kept for backward compat.
 +-------------------+---------------------------------------+-----------------------------+
 | Function          | Canonical                             | Duplicate (compat)          |
 +-------------------+---------------------------------------+-----------------------------+
-| get_repo_root()   | upstream_drift_tools.utils.paths      | utils.path_setup            |
-| get_logger()      | utils.logging_utils                   | upstream_drift_tools.utils  |
+| get_repo_root()   | sidekick.utils.paths      | utils.path_setup            |
+| get_logger()      | utils.logging_utils                   | sidekick.utils  |
 |                   |                                       |   .logging (wraps canonical)|
-| safe_read_json()  | utils.file_utils                      | upstream_drift_tools.utils  |
+| safe_read_json()  | utils.file_utils                      | sidekick.utils  |
 |                   |                                       |   .state_manager (private)  |
-| safe_write_json() | utils.file_utils                      | upstream_drift_tools.utils  |
+| safe_write_json() | utils.file_utils                      | sidekick.utils  |
 |                   |                                       |   .state_manager (private)  |
 +-------------------+---------------------------------------+-----------------------------+
 

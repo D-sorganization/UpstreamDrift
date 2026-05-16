@@ -1,10 +1,10 @@
-"""Tests for upstream_drift_tools.process_calculators.thermal_profile_predictor (Issues #1949, #1744)."""
+"""Tests for sidekick.process_calculators.thermal_profile_predictor (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
-from src.shared.python.upstream_drift_tools.process_calculators.thermal_profile_predictor import (
+from sidekick.process_calculators.thermal_profile_predictor import (
     fit_heating_parameters,
     predict_temperature_profile,
 )

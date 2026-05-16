@@ -1,9 +1,9 @@
-"""Tests for upstream_drift_tools.calculators.electrical.config (Issues #1949, #1744)."""
+"""Tests for sidekick.calculators.electrical.config (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
 import numpy as np
-from src.shared.python.upstream_drift_tools.calculators.electrical.config import (
+from sidekick.calculators.electrical.config import (
     ElectrodeConfig,
 )
 

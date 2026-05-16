@@ -31,7 +31,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from upstream_drift_tools.utils.logging import get_logger
+from sidekick.utils.logging import get_logger
 
 from .._types import Sex
 

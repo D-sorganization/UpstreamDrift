@@ -18,7 +18,7 @@ def create_tools_sidebar(parent: Any = None) -> Any:
     Returns:
         A UnifiedToolsSidebar widget.
     """
-    from src.shared.python.upstream_drift_tools.ui.tools_sidebar.sidebar import (
+    from sidekick.ui.tools_sidebar.sidebar import (
         UnifiedToolsSidebar,
     )
 

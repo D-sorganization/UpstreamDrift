@@ -16,7 +16,7 @@ class TestSteamCalculationEngineImport:
 
     def test_steam_engine_importable(self) -> None:
         """SteamCalculationEngine should be importable."""
-        from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine import (
+        from sidekick.calculators.thermo.steam_engine import (
             SteamCalculationEngine,
         )
 
@@ -24,7 +24,7 @@ class TestSteamCalculationEngineImport:
 
     def test_steam_properties_importable(self) -> None:
         """SteamProperties dataclass should be importable."""
-        from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine import (
+        from sidekick.calculators.thermo.steam_engine import (
             SteamProperties,
         )
 
@@ -32,7 +32,7 @@ class TestSteamCalculationEngineImport:
 
     def test_constants_importable(self) -> None:
         """Module-level constants should be importable and sane."""
-        from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine import (
+        from sidekick.calculators.thermo.steam_engine import (
             CRITICAL_PRESSURE_WATER,
             CRITICAL_TEMPERATURE_WATER,
             STANDARD_ATMOSPHERIC_PRESSURE,
@@ -48,7 +48,7 @@ class TestSteamEngineInit:
 
     def test_engine_creates_without_error(self) -> None:
         """Engine should instantiate regardless of optional dependencies."""
-        from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine import (
+        from sidekick.calculators.thermo.steam_engine import (
             SteamCalculationEngine,
         )
 
@@ -57,7 +57,7 @@ class TestSteamEngineInit:
 
     def test_engine_select_simplified_when_no_optional_deps(self) -> None:
         """With no optional libs, auto-selection should fall back to 'simplified'."""
-        from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine import (
+        from sidekick.calculators.thermo.steam_engine import (
             CANTERA_AVAILABLE,
             COOLPROP_AVAILABLE,
             SteamCalculationEngine,
@@ -73,7 +73,7 @@ class TestSteamEngineInit:
 
     def test_engine_accepts_simplified_engine_request(self) -> None:
         """Explicitly requesting 'simplified' should always return 'simplified'."""
-        from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine import (
+        from sidekick.calculators.thermo.steam_engine import (
             SteamCalculationEngine,
         )
 
@@ -87,7 +87,7 @@ class TestSimplifiedSteamProperties:
     @pytest.fixture
     def engine(self) -> Any:
         """Create a SteamCalculationEngine."""
-        from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine import (
+        from sidekick.calculators.thermo.steam_engine import (
             SteamCalculationEngine,
         )
 
@@ -95,7 +95,7 @@ class TestSimplifiedSteamProperties:
 
     def test_calculate_properties_returns_steam_properties(self, engine) -> None:
         """calculate_properties should return a SteamProperties instance."""
-        from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine import (
+        from sidekick.calculators.thermo.steam_engine import (
             SteamProperties,
         )
 
@@ -170,7 +170,7 @@ class TestWaterVaporPressure:
     @pytest.fixture
     def engine(self) -> Any:
         """Create engine."""
-        from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine import (
+        from sidekick.calculators.thermo.steam_engine import (
             SteamCalculationEngine,
         )
 
@@ -213,7 +213,7 @@ class TestSteamPropertiesDataclass:
 
     def test_create_steam_properties(self) -> None:
         """Should create a SteamProperties instance with all fields."""
-        from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine import (
+        from sidekick.calculators.thermo.steam_engine import (
             SteamProperties,
         )
 
@@ -239,7 +239,7 @@ class TestSteamPropertiesDataclass:
 
     def test_optional_fields_default_none(self) -> None:
         """Optional fields should default to None."""
-        from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine import (
+        from sidekick.calculators.thermo.steam_engine import (
             SteamProperties,
         )
 

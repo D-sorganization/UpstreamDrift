@@ -1,4 +1,4 @@
-"""Tests for upstream_drift_tools.data_io (Issues #1949, #1744)."""
+"""Tests for sidekick.data_io (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ try:
 except ImportError:
     HAS_PYARROW = False
 
-from src.shared.python.upstream_drift_tools.data_io import read_data, write_data
+from sidekick.data_io import read_data, write_data
 
 needs_parquet = pytest.mark.skipif(not HAS_PYARROW, reason="pyarrow not installed")
 

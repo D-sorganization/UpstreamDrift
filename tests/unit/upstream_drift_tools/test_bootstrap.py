@@ -1,11 +1,11 @@
-"""Tests for upstream_drift_tools.bootstrap (Issues #1949, #1744)."""
+"""Tests for sidekick.bootstrap (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
-from src.shared.python.upstream_drift_tools.bootstrap import ensure_paths
+from sidekick.bootstrap import ensure_paths
 
 
 class TestEnsurePaths:
