@@ -32,11 +32,10 @@ except ImportError:
     plot_grf_and_com_3d = None  # type: ignore[assignment]
 
 try:
-    from .humanoid_urdf_contracts import ContractViolation, ValidationReport, describe
+    from .humanoid_urdf_contracts import ContractViolation, ValidationReport
 except ImportError:
     ContractViolation = None  # type: ignore[assignment,misc]
     ValidationReport = None  # type: ignore[assignment,misc]
-    describe = None  # type: ignore[assignment]
 
 try:
     from .muscle_analysis import MuscleSynergyAnalyzer, SynergyResult
@@ -102,7 +101,7 @@ __all__: list[str] = [
 if BiomechanicalModel is not None:
     __all__.extend(["BiomechanicalModel", "SegmentDefinition"])
 if ContractViolation is not None:
-    __all__.extend(["ContractViolation", "ValidationReport", "describe"])
+    __all__.extend(["ContractViolation", "ValidationReport"])
 if f_l is not None:
     __all__.extend(["f_l", "is_rust_available"])
 if MuscleSynergyAnalyzer is not None:

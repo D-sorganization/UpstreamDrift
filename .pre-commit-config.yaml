@@ -104,7 +104,7 @@ repos:
           - types-requests
           - types-PyYAML
           - pydantic
-        args: [--ignore-missing-imports]
+        args: [--config-file, pyproject.toml, --follow-imports=silent]
         types: [python]
         files: ^src/
         exclude: |

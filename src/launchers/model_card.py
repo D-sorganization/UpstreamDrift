@@ -82,6 +82,8 @@ MODEL_IMAGES = {
     # Legacy names (backward compatibility)
     "MuJoCo Humanoid": "mujoco_humanoid.png",
     "MuJoCo Dashboard": "mujoco_hand.png",
+    "Drake Dashboard": "drake.png",
+    "Pinocchio Dashboard": "pinocchio.png",
     "Drake Golf Model": "drake.png",
     "Pinocchio Golf Model": "pinocchio.png",
     "OpenSim Golf": "opensim.png",

@@ -521,64 +521,73 @@
       "order": 28
     },
     {
-      "id": "drake_dashboard",
-      "name": "Drake Dashboard",
-      "description": "Interactive Drake simulation dashboard",
-      "category": "physics_engine",
-      "type": "special_app",
-      "path": "src/launchers/drake_dashboard.py",
-      "engine_type": "drake",
-      "logo": "drake.svg",
-      "status": "experimental",
-      "web_route": "/tools/drake-dashboard",
-      "capabilities": [
-        "rigid_body",
-        "optimization",
-        "dashboard",
-        "recorder",
-        "advanced_analysis"
-      ],
-      "order": 29
-    },
-    {
       "id": "mujoco_dashboard",
       "name": "MuJoCo Dashboard",
-      "description": "Interactive MuJoCo simulation dashboard",
+      "description": "Unified Analytics Dashboard: force vectors, energy plots, and advanced biomechanical metrics powered by MuJoCo",
       "category": "physics_engine",
-      "type": "special_app",
+      "type": "custom_humanoid",
       "path": "src/launchers/mujoco_dashboard.py",
       "engine_type": "mujoco",
       "logo": "mujoco_humanoid.svg",
-      "status": "experimental",
-      "web_route": "/tools/mujoco-dashboard",
+      "status": "gui_ready",
       "capabilities": [
+        "analytics",
+        "force_vectors",
+        "energy_plots",
+        "advanced_metrics",
         "rigid_body",
         "contact",
         "dashboard",
         "recorder",
-        "advanced_analysis"
+        "advanced_analysis",
+        "mass_matrix"
       ],
-      "order": 30
+      "order": 20
+    },
+    {
+      "id": "drake_dashboard",
+      "name": "Drake Dashboard",
+      "description": "Unified Analytics Dashboard: force vectors, energy plots, and advanced biomechanical metrics powered by Drake",
+      "category": "physics_engine",
+      "type": "drake",
+      "path": "src/launchers/drake_dashboard.py",
+      "engine_type": "drake",
+      "logo": "drake.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "analytics",
+        "force_vectors",
+        "energy_plots",
+        "advanced_metrics",
+        "rigid_body",
+        "optimization",
+        "mass_matrix"
+      ],
+      "order": 21
     },
     {
       "id": "pinocchio_dashboard",
       "name": "Pinocchio Dashboard",
-      "description": "Interactive Pinocchio simulation dashboard",
+      "description": "Unified Analytics Dashboard: force vectors, energy plots, and advanced biomechanical metrics powered by Pinocchio",
       "category": "physics_engine",
-      "type": "special_app",
+      "type": "pinocchio",
       "path": "src/launchers/pinocchio_dashboard.py",
       "engine_type": "pinocchio",
       "logo": "pinocchio.svg",
-      "status": "experimental",
-      "web_route": "/tools/pinocchio-dashboard",
+      "status": "gui_ready",
       "capabilities": [
+        "analytics",
+        "force_vectors",
+        "energy_plots",
+        "advanced_metrics",
         "rigid_body",
         "inverse_kinematics",
         "dashboard",
         "recorder",
-        "advanced_analysis"
+        "advanced_analysis",
+        "mass_matrix"
       ],
-      "order": 31
+      "order": 22
     },
     {
       "id": "analysis_tools_api",
