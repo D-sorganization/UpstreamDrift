@@ -1158,12 +1158,25 @@ class AIAssistantPanel(QWidget):
         self._set_status("Thinking...")
         self._send_btn.setEnabled(False)
 
+        # Build tool declarations from the registry (issue #5475).
+        from src.shared.python.ai.adapters.base import ToolDeclaration
+
+        tool_declarations = [
+            ToolDeclaration(
+                name=t.name,
+                description=t.description,
+                parameters={p.name: p.to_json_schema() for p in t.parameters},
+                required=[p.name for p in t.parameters if p.required],
+            )
+            for t in self._tools_registry.list_tools()
+        ]
+
         # Create streaming worker
         self._current_worker = StreamWorker(
             self._adapter,
             message,
             self._context,
-            [],  # Tools will be added later
+            tool_declarations,
         )
         self._current_worker.chunk_received.connect(self._on_stream_chunk)
         self._current_worker.finished.connect(self._on_stream_finished)
