@@ -180,3 +180,42 @@ def test_extract_positions_are_correct() -> None:
     traj = extract_lead_hand_trajectory(frames)
     for i, frame in enumerate(frames):
         assert np.allclose(traj[i], frame.joint_positions["lead_hand"])
+
+
+# ---------------------------------------------------------------------------
+# Shape validation tests (issue #5566)
+# ---------------------------------------------------------------------------
+
+
+class TestComputeHandPathPlaneShapeValidation:
+    """Tests for the (N, 3) shape guard introduced in #5566."""
+
+    def test_rejects_wrong_column_count(self) -> None:
+        """(N, 2) input must raise ValueError mentioning 'shape'."""
+        bad = np.random.rand(5, 2)
+        with pytest.raises(ValueError, match="shape"):
+            compute_hand_path_plane(bad)
+
+    def test_rejects_1d_array(self) -> None:
+        """1-D input must raise ValueError mentioning 'shape'."""
+        bad = np.random.rand(9)
+        with pytest.raises(ValueError, match="shape"):
+            compute_hand_path_plane(bad)
+
+    def test_rejects_3d_array(self) -> None:
+        """3-D input must raise ValueError mentioning 'shape'."""
+        bad = np.random.rand(5, 3, 2)
+        with pytest.raises(ValueError, match="shape"):
+            compute_hand_path_plane(bad)
+
+    def test_rejects_too_few_points(self) -> None:
+        """(2, 3) input must raise ValueError mentioning 'at least 3 points'."""
+        bad = np.random.rand(2, 3)
+        with pytest.raises(ValueError, match="at least 3 points"):
+            compute_hand_path_plane(bad)
+
+    def test_rejects_four_column_array(self) -> None:
+        """(N, 4) input must raise ValueError mentioning 'shape'."""
+        bad = np.random.rand(5, 4)
+        with pytest.raises(ValueError, match="shape"):
+            compute_hand_path_plane(bad)

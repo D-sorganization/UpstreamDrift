@@ -141,6 +141,8 @@ def compute_hand_path_plane(trajectory: np.ndarray) -> Plane3D:
     Raises:
         ValueError: If ``trajectory`` has fewer than 3 rows.
     """
+    if trajectory.ndim != 2 or trajectory.shape[1] != 3:
+        raise ValueError(f"trajectory must be shape (N, 3), got {trajectory.shape!r}")
     n_points = len(trajectory)
     if n_points < 3:
         raise ValueError(
