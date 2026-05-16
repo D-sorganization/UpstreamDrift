@@ -174,11 +174,11 @@ class; only the chrome differs.
 
 ## C. Capability declaration cheat-sheet
 
-| Flag                             | Set to `True` when…                                                                                                                                               | Set to `False` when…                                                                          |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `supports_embedded`              | Your tool can run as a child widget (no top-level window required).                                                                                               | The tool needs camera / audio capture, uses pygame, or otherwise hard-codes its window setup. |
-| `prefers_dock`                   | The tool is a small status panel, parameter sidebar, or live-preview widget that pairs with a primary workspace.                                                  | The tool is a primary workspace (Pose Studio, Cross-Engine Dashboard).                        |
-| `requires_separate_qapplication` | The tool manages its own GL context that conflicts with the launcher's `QApplication` (rare — almost always a sign the tool should be `supports_embedded=False`). | Default. The vast majority of tools share the launcher's `QApplication`.                      |
+| Flag                             | Set to `True` when…                                                                                                                                                                        | Set to `False` when…                                                                          |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| `supports_embedded`              | Your tool can run as a child widget (no top-level window required).                                                                                                                        | The tool needs camera / audio capture, uses pygame, or otherwise hard-codes its window setup. |
+| `prefers_dock`                   | The tool is a small status panel, parameter sidebar, or live-preview widget that pairs with a primary workspace. **Sidekick** Chat/Reporting tools must set this to True to dock properly. | The tool is a primary workspace (Pose Studio, Cross-Engine Dashboard).                        |
+| `requires_separate_qapplication` | The tool manages its own GL context that conflicts with the launcher's `QApplication` (rare — almost always a sign the tool should be `supports_embedded=False`).                          | Default. The vast majority of tools share the launcher's `QApplication`.                      |
 
 Notes:
 

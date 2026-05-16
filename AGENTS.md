@@ -282,6 +282,11 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 - Channel registry in `channels.py` chooses transport per channel.
 - See [`docs/development/realtime_ipc.md`](docs/development/realtime_ipc.md).
 
+`src/shared/python/upstream_drift_tools/ui/tools_sidebar/`
+
+- **Sidekick (UnifiedToolsSidebar)**: The right-hand collapsible dock that provides Chat Assistant, Reporting/Summarization, and context-aware utilities.
+- Exposes `create_tools_sidebar()` to act as the universal in-repo fallback.
+
 `src/launchers/embedded_host.py`
 
 - `EmbeddedHostWidget` — central QTabWidget + QDockWidget area for
