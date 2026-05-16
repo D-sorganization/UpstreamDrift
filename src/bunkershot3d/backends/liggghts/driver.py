@@ -1,13 +1,22 @@
 """
 LIGGGHTS backend driver for BunkerShot3D.
+
+LIGGGHTS is invoked as a subprocess: ``liggghts -in <input_deck>``.
+Install from https://www.lammps.org/download.html (LIGGGHTS-PUBLIC fork).
 """
 
-from pathlib import Path
-import contextlib
+from __future__ import annotations
+
+import math
 import subprocess
 import tempfile
+from pathlib import Path
+
+import numpy as np
 
 from bunkershot3d.config import BunkerShotConfig
+from bunkershot3d.exceptions import BackendNotImplementedError
+from bunkershot3d.io.schema import BunkerShotResultWriter
 
 
 class LiggghtsDriver:
@@ -17,40 +26,277 @@ class LiggghtsDriver:
         self.config_path = Path(config_path)
         self.config = BunkerShotConfig.from_yaml(self.config_path)
 
+        # Work directory and input deck path set during setup()
+        self._work_dir: tempfile.TemporaryDirectory | None = None  # type: ignore[type-arg]
+        self._work_path: Path | None = None
+        self._input_deck_path: Path | None = None
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
     def setup(self) -> None:
-        """Setup the LIGGGHTS system.
+        """Generate the LIGGGHTS input deck in a temporary work directory.
 
         Raises:
-            NotImplementedError: LiggghtsDriver is not yet implemented.
-                Use the MPM backend instead.
+            BackendNotImplementedError: If LIGGGHTS binary is not on PATH.
         """
-        raise NotImplementedError(  # tracked: #5486
-            "LiggghtsDriver is not yet implemented. Use the MPM backend instead."
-        )
+        import shutil
 
-    def _generate_input_deck(self, work_dir: Path) -> Path:
-        """Generate the LIGGGHTS LIGGGHTS.in script."""
-        input_deck_path = work_dir / "in.bunkershot"
-        with open(input_deck_path, "w") as f:
-            f.write("# LIGGGHTS input script for BunkerShot3D\n")
-            f.write("atom_style granular\n")
-            f.write("boundary f f f\n")
-            f.write("newton off\n")
-            f.write("communicate single vel yes\n")
-            f.write("units si\n")
-            f.write(
-                "# Placeholder deck — full LIGGGHTS commands tracked in issue #5486\n"
+        if shutil.which("liggghts") is None:
+            raise BackendNotImplementedError(
+                "LIGGGHTS not installed. Install from lammps.org"
             )
-            f.write("run 0\n")
-        return input_deck_path
+
+        self._work_dir = tempfile.TemporaryDirectory(prefix="bunkershot3d_liggghts_")
+        self._work_path = Path(self._work_dir.name)
+        self._input_deck_path = self._generate_input_deck(self._work_path)
 
     def run(self, output_path: Path | str) -> None:
-        """Run the simulation via subprocess and parse dump output into HDF5.
+        """Execute LIGGGHTS, parse dump files, and write HDF5 results.
+
+        If ``setup()`` was not called beforehand it will be called
+        automatically.
+
+        Args:
+            output_path: Path for the HDF5 result file.
 
         Raises:
-            NotImplementedError: LiggghtsDriver is not yet implemented.
-                Use the MPM backend instead.
+            BackendNotImplementedError: If LIGGGHTS binary is not on PATH.
+            subprocess.CalledProcessError: If LIGGGHTS exits with a non-zero
+                status (propagated as-is so failures are diagnosable).
         """
-        raise NotImplementedError(  # tracked: #5486
-            "LiggghtsDriver is not yet implemented. Use the MPM backend instead."
-        )
+        if self._input_deck_path is None:
+            self.setup()
+
+        assert self._input_deck_path is not None
+        assert self._work_path is not None
+
+        try:
+            subprocess.run(
+                ["liggghts", "-in", str(self._input_deck_path)],
+                capture_output=True,
+                check=True,
+                cwd=str(self._work_path),
+            )
+        except FileNotFoundError:
+            raise BackendNotImplementedError(
+                "LIGGGHTS not installed. Install from lammps.org"
+            )
+        # CalledProcessError is NOT caught — let it propagate for diagnosability.
+
+        self._parse_and_write(self._work_path, Path(output_path))
+
+    # ------------------------------------------------------------------
+    # Input-deck generation
+    # ------------------------------------------------------------------
+
+    def _generate_input_deck(self, work_dir: Path) -> Path:
+        """Generate a complete LIGGGHTS input script from *BunkerShotConfig*.
+
+        The deck uses Hertz-Mindlin contact, SI units, fixed boundary walls,
+        and dumps atom positions + velocities at the configured output rate.
+        """
+        cfg = self.config
+        domain = cfg.bunker_bed.domain
+        gp = cfg.grain_population
+        cm = cfg.contact_model
+        out = cfg.output
+
+        lx, ly, lz = domain.length_x, domain.width_y, domain.depth_z
+
+        # Lognormal: median diameter = mean in log space
+        r_mean = gp.diameter_mean / 2.0
+        # sigma of the underlying normal distribution for diameter
+        sigma_log = gp.diameter_sigma_log
+        # min/max radii spanning ~3σ in log-space to bound the polydispersity
+        r_min = r_mean * math.exp(-3.0 * sigma_log)
+        r_max = r_mean * math.exp(3.0 * sigma_log)
+
+        # Dump frequency: steps between dumps = 1 / (rate_hz * dt)
+        # We target dt = 1e-5 s (typical for LIGGGHTS granular sims)
+        dt = 1.0e-5
+        dump_every = max(1, round(1.0 / (out.rate_hz * dt)))
+
+        # Total steps: run long enough for ~0.5 s of simulation
+        total_steps = round(0.5 / dt)
+
+        input_deck_path = work_dir / "in.bunkershot"
+        with open(input_deck_path, "w") as f:
+            f.write(
+                f"""# LIGGGHTS input script generated by BunkerShot3D
+# Issue: #5552
+
+atom_style      granular
+atom_modify     map array
+boundary        f f f
+newton          off
+communicate     single vel yes
+units           si
+
+# ── Domain ──────────────────────────────────────────────────────────────────
+region          domain block 0.0 {lx:.6g} 0.0 {ly:.6g} 0.0 {lz:.6g} units box
+create_box      1 domain
+
+# ── Neighbour / communication ────────────────────────────────────────────────
+neighbor        {r_max * 0.5:.6g} bin
+neigh_modify    delay 0
+
+# ── Contact model: Hertz-Mindlin ─────────────────────────────────────────────
+pair_style      gran model hertz tangential history
+pair_coeff      * *
+
+# ── Material properties ──────────────────────────────────────────────────────
+fix             m1 all property/global youngsModulus peratomtype {cm.youngs_modulus:.6g}
+fix             m2 all property/global poissonsRatio peratomtype {cm.poisson_ratio:.6g}
+fix             m3 all property/global coefficientRestitution peratomtypepair 1 1 {cm.restitution_coefficient:.6g}
+fix             m4 all property/global coefficientFriction peratomtypepair 1 1 {cm.friction_coefficient:.6g}
+
+# ── Walls (fixed boundary) ───────────────────────────────────────────────────
+fix             wall_bot all wall/gran model hertz tangential history primitive type 1 zplane 0.0
+fix             wall_top all wall/gran model hertz tangential history primitive type 1 zplane {lz:.6g}
+fix             wall_xlo all wall/gran model hertz tangential history primitive type 1 xplane 0.0
+fix             wall_xhi all wall/gran model hertz tangential history primitive type 1 xplane {lx:.6g}
+fix             wall_ylo all wall/gran model hertz tangential history primitive type 1 yplane 0.0
+fix             wall_yhi all wall/gran model hertz tangential history primitive type 1 yplane {ly:.6g}
+
+# ── Particle insertion: lognormal diameter distribution ──────────────────────
+fix             pts1 all particletemplate/sphere 1 atom_type 1 \\
+                    density constant {gp.density:.6g} \\
+                    radius gaussian {r_mean:.6g} {sigma_log:.6g} {r_min:.6g} {r_max:.6g}
+
+fix             pdd1 all particledistribution/discrete 1 1 pts1 1.0
+
+fix             ins all insert/pack seed 5330 distributiontemplate pdd1 \\
+                    insert_every once overlapcheck yes all_in yes \\
+                    vel constant 0.0 0.0 -0.1 \\
+                    region domain ntry_mc 10000 \\
+                    particles_in_region {gp.count}
+
+# ── Gravity + integrator ─────────────────────────────────────────────────────
+fix             grav all gravity 9.81 vector 0.0 0.0 -1.0
+fix             integ all nve/sphere
+
+# ── Timestep ─────────────────────────────────────────────────────────────────
+timestep        {dt:.2e}
+
+# ── Thermo output ────────────────────────────────────────────────────────────
+thermo_style    custom step atoms ke vol
+thermo          {dump_every}
+
+# ── Dump: positions and velocities ──────────────────────────────────────────
+dump            dmp all custom {dump_every} dump.bunkershot id type x y z vx vy vz
+dump_modify     dmp sort id pad 8
+
+# ── Run ─────────────────────────────────────────────────────────────────────
+run             {total_steps}
+"""
+            )
+
+        return input_deck_path
+
+    # ------------------------------------------------------------------
+    # Post-processing: parse dump → HDF5
+    # ------------------------------------------------------------------
+
+    def _parse_and_write(self, work_dir: Path, output_path: Path) -> None:
+        """Parse LIGGGHTS dump files and write results via *BunkerShotResultWriter*.
+
+        LIGGGHTS dump format (custom)::
+
+            ITEM: TIMESTEP
+            <step>
+            ITEM: NUMBER OF ATOMS
+            <n>
+            ITEM: BOX BOUNDS ...
+            ...
+            ITEM: ATOMS id type x y z vx vy vz
+            <id> <type> <x> <y> <z> <vx> <vy> <vz>
+            ...
+
+        Args:
+            work_dir: Directory containing ``dump.bunkershot``.
+            output_path: Destination HDF5 file.
+        """
+        cfg = self.config
+        dt = 1.0e-5
+        downsample = cfg.output.downsample_grains
+
+        dump_file = work_dir / "dump.bunkershot"
+
+        writer = BunkerShotResultWriter(output_path)
+        try:
+            for timestep, positions, velocities in _iter_dump_frames(dump_file):
+                time = timestep * dt
+
+                # Apply downsampling
+                if downsample > 1:
+                    positions = positions[::downsample]
+                    velocities = velocities[::downsample]
+
+                writer.write_grain_state(time, positions, velocities)
+        finally:
+            writer.close()
+
+
+# ---------------------------------------------------------------------------
+# Utility: dump-file parser
+# ---------------------------------------------------------------------------
+
+
+def _iter_dump_frames(
+    dump_path: Path,
+) -> "collections.abc.Generator[tuple[int, np.ndarray, np.ndarray], None, None]":
+    """Yield ``(timestep, positions, velocities)`` for each frame in a LIGGGHTS dump.
+
+    Args:
+        dump_path: Path to the LIGGGHTS dump file (custom per-atom format).
+
+    Yields:
+        Tuple of (timestep: int, positions: ndarray shape (N,3),
+        velocities: ndarray shape (N,3)).
+    """
+    import collections.abc  # noqa: PLC0415 — local import to satisfy yield type hint
+
+    with open(dump_path) as fh:
+        while True:
+            # ── ITEM: TIMESTEP ────────────────────────────────────────────
+            line = fh.readline()
+            if not line:
+                return
+            # Skip blank lines between frames
+            while line.strip() == "":
+                line = fh.readline()
+                if not line:
+                    return
+            if "TIMESTEP" not in line:
+                continue
+            timestep = int(fh.readline().strip())
+
+            # ── ITEM: NUMBER OF ATOMS ─────────────────────────────────────
+            fh.readline()  # "ITEM: NUMBER OF ATOMS"
+            n_atoms = int(fh.readline().strip())
+
+            # ── ITEM: BOX BOUNDS … (3 lines of header + 3 lines of data) ──
+            fh.readline()  # "ITEM: BOX BOUNDS ..."
+            fh.readline()
+            fh.readline()
+            fh.readline()
+
+            # ── ITEM: ATOMS … ─────────────────────────────────────────────
+            fh.readline()  # "ITEM: ATOMS id type x y z vx vy vz"
+
+            positions = np.empty((n_atoms, 3), dtype=np.float64)
+            velocities = np.empty((n_atoms, 3), dtype=np.float64)
+
+            for i in range(n_atoms):
+                parts = fh.readline().split()
+                # id type x y z vx vy vz
+                positions[i, 0] = float(parts[2])
+                positions[i, 1] = float(parts[3])
+                positions[i, 2] = float(parts[4])
+                velocities[i, 0] = float(parts[5])
+                velocities[i, 1] = float(parts[6])
+                velocities[i, 2] = float(parts[7])
+
+            yield timestep, positions, velocities

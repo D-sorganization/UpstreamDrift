@@ -2,6 +2,9 @@
 
 Verifies that unimplemented backends raise NotImplementedError rather than  # tracked: #5486
 silently returning mock data.
+
+Note: TestLiggghtsDriverStub has been removed because the LIGGGHTS backend
+is now implemented (#5552). See tests/bunkershot3d/test_liggghts_driver.py.
 """
 
 from __future__ import annotations
@@ -39,36 +42,6 @@ class TestChronoDriverStub:
         driver = self._make_driver()
         with pytest.raises(NotImplementedError):
             driver.run("output.h5")
-
-    def test_setup_error_message_mentions_mpm(self) -> None:
-        driver = self._make_driver()
-        with pytest.raises(NotImplementedError, match="MPM"):
-            driver.setup()
-
-
-# ---------------------------------------------------------------------------
-# LiggghtsDriver stub guard
-# ---------------------------------------------------------------------------
-
-
-class TestLiggghtsDriverStub:
-    """LiggghtsDriver must raise NotImplementedError on setup()."""  # tracked: #5486
-
-    def _make_driver(self) -> object:
-        """Create a LiggghtsDriver with a mocked config."""
-        from src.bunkershot3d.backends.liggghts.driver import LiggghtsDriver
-
-        mock_config = MagicMock()
-        with patch(
-            "src.bunkershot3d.backends.liggghts.driver.BunkerShotConfig.from_yaml",
-            return_value=mock_config,
-        ):
-            return LiggghtsDriver("fake_config.yaml")
-
-    def test_setup_raises_not_implemented(self) -> None:
-        driver = self._make_driver()
-        with pytest.raises(NotImplementedError):
-            driver.setup()
 
     def test_setup_error_message_mentions_mpm(self) -> None:
         driver = self._make_driver()
