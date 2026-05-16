@@ -27,16 +27,17 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QMenuBar,
     QPlainTextEdit,
     QPushButton,
     QScrollArea,
+    QSizePolicy,
     QSlider,
     QSplitter,
     QStyle,
     QToolButton,
     QVBoxLayout,
     QWidget,
-    QSizePolicy,
 )
 
 from src.launchers.launcher_constants import (
@@ -115,12 +116,27 @@ class LauncherUISetupMixin:
         # Show both icon and text for better accessibility
         button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
 
+        # Sidebar buttons must always render a visible icon (#5624).
+        # If the requested glyph is missing from SVG_REGISTRY, fall back
+        # to a registered glyph so the icon is never null — null icons
+        # produce the text-only sidebar regression visible in #5624.
         try:
-            from src.shared.python.theme.icon_utils import IconColorizer
+            from src.shared.python.theme.icon_utils import (
+                SVG_REGISTRY,
+                IconColorizer,
+            )
 
-            button.setIcon(IconColorizer.get_icon(icon_name, "#d4d4d4"))
+            resolved_name = icon_name if icon_name in SVG_REGISTRY else "settings"
+            button.setIcon(IconColorizer.get_icon(resolved_name, "#d4d4d4"))
         except (ImportError, ValueError):
-            pass
+            # Last-resort fallback: any QIcon (even with a tinted blank
+            # pixmap) is preferable to a null icon for hit-testing and
+            # screen-reader semantics.
+            from PyQt6.QtGui import QIcon, QPixmap
+
+            pixmap = QPixmap(22, 22)
+            pixmap.fill(Qt.GlobalColor.transparent)
+            button.setIcon(QIcon(pixmap))
 
         button.setIconSize(QSize(22, 22))
         button.setCheckable(checkable)
@@ -130,15 +146,26 @@ class LauncherUISetupMixin:
         return button
 
     def init_ui(self) -> None:
-        """Initialize the user interface."""
-        # --- Menu Bar ---
-        self._setup_menu_bar()
+        """Initialize the user interface.
 
+        Frameless-window chrome contract (#5624):
+
+            outer_vbox  (top to bottom)
+              ├─ self.title_bar   (CustomTitleBar — black)
+              ├─ self.menu_bar    (QMenuBar — File / View / Tools / Help)
+              └─ self.main_layout (QSplitter — sidebar | content | sidekick)
+
+        ``QMainWindow.setMenuBar`` is intentionally **not** used: that
+        API reserves a native strip above the central widget, which on
+        a frameless main window renders above the custom title bar —
+        the exact regression #5624 fixes.
+        """
         # Main Widget
         central = QWidget()
         self.setCentralWidget(central)
 
-        # Outer layout to hold the title bar and then the horizontal main layout
+        # Outer layout to hold the title bar, menu bar, and the horizontal
+        # main layout (#5624: explicit, controlled vertical ordering).
         outer_vbox = QVBoxLayout(central)
         outer_vbox.setSpacing(0)
         outer_vbox.setContentsMargins(0, 0, 0, 0)
@@ -162,6 +189,14 @@ class LauncherUISetupMixin:
             outer_vbox.addWidget(self.title_bar)
         except ImportError:
             pass
+
+        # --- Menu Bar (immediately below the title bar) ---
+        # Postcondition: ``self.menu_bar`` is a non-null populated QMenuBar
+        # owned by ``central`` (the QMainWindow.centralWidget()), NOT by
+        # the native main-window menu strip.  Tests in
+        # tests/unit/launcher/test_layout_hierarchy.py pin this contract.
+        self.menu_bar = self._build_menu_bar_widget()
+        outer_vbox.addWidget(self.menu_bar)
 
         # Main layout is now a horizontal splitter to accommodate the sidebar resizably
         main_layout = QSplitter(Qt.Orientation.Horizontal)
@@ -192,6 +227,12 @@ class LauncherUISetupMixin:
             }}
         """)
         outer_vbox.addWidget(main_layout)
+
+        # Expose the splitter for downstream features that embed extra
+        # panes (e.g. ``_install_sidekick_sidebar`` in #5624 adds the
+        # Sidekick widget as the third pane instead of using
+        # ``addDockWidget``, which misbehaves on a frameless window).
+        self.main_layout = main_layout
 
         # --- Global Sidebar ---
         sidebar = self._setup_global_sidebar()
@@ -438,8 +479,45 @@ class LauncherUISetupMixin:
         if hasattr(self, "_rebuild_grid"):
             self._rebuild_grid()
 
+    def _build_menu_bar_widget(self) -> QMenuBar:
+        """Build a populated ``QMenuBar`` for the frameless launcher (#5624).
+
+        Returns a standalone ``QMenuBar`` (parent ``self``) that the
+        caller adds to the central widget's outer ``QVBoxLayout`` so it
+        sits **below** the custom title bar.
+
+        Postcondition: the returned widget is non-null, parented to
+        ``self``, and populated with the File/View/Tools/Help menus.
+
+        We deliberately do not call ``QMainWindow.setMenuBar`` — that
+        reserves the native top strip above the central widget, which
+        on a frameless window draws above the custom title bar.
+        """
+        menubar = QMenuBar(self)
+        # Postcondition (DbC): a non-null QMenuBar is returned.
+        assert menubar is not None, (
+            "QMenuBar construction returned None — should be impossible"
+        )
+
+        self._setup_file_menu(menubar)
+        self._setup_view_menu(menubar)
+        self._setup_tools_menu(menubar)
+        self._setup_help_menu(menubar)
+        menubar.setCornerWidget(
+            _build_menu_bar_close_widget(self, self.close),
+            Qt.Corner.TopRightCorner,
+        )
+        return menubar
+
     def _setup_menu_bar(self) -> None:
-        """Set up the application menu bar."""
+        """Set up the application menu bar.
+
+        .. deprecated:: #5624
+            Kept for backwards compatibility with any caller still
+            reaching for the legacy hook.  Prefer
+            ``_build_menu_bar_widget`` + adding the result to the
+            central widget's outer layout.
+        """
         menubar = self.menuBar()
 
         self._setup_file_menu(menubar)

@@ -217,6 +217,89 @@ class GolfLauncher(
         except ImportError as e:
             logger.debug(f"Onboarding dialog not available: {e}")
 
+    def _install_sidekick_sidebar(self) -> None:
+        """Embed the Sidekick multitab sidebar as a third splitter pane.
+
+        Issue #5624: on a ``FramelessWindowHint`` + ``WA_TranslucentBackground``
+        main window, ``QMainWindow.addDockWidget`` defaults its dock to a
+        free-floating top-level window because dock geometry calculations
+        depend on the native OS window frame that the frameless hint
+        removes.  Embedding the bare ``UnifiedToolsSidebar`` widget into
+        the existing ``main_layout`` ``QSplitter`` (built by
+        ``LauncherUISetupMixin.init_ui``) keeps Sidekick inside the
+        launcher window as the rightmost pane.
+
+        The Sidekick package (Files, Workspace, Chat, Terminal, Calculator,
+        Data Explorer, Notes, Reporting, Units, Rotation Converter, etc.)
+        is vendored at ``vendor/ud-tools/src/shared/python/sidekick``.
+        Failure to install is non-fatal — the launcher remains usable
+        with just the tile grid.
+        """
+        try:
+            from src.shared.python.gui_launcher.tools_sidebar_integration import (
+                _import_sidebar_module,
+            )
+        except ImportError as e:
+            logger.debug("Sidekick integration shim not importable: %s", e)
+            return
+
+        module = _import_sidebar_module()
+        if module is None:
+            logger.warning("Sidekick sidebar not installed: shared module unavailable")
+            return
+
+        # The shared factory ``create_tools_sidebar`` returns the bare
+        # ``UnifiedToolsSidebar`` widget without dock wrapping — exactly
+        # what the frameless launcher needs.
+        factory = getattr(module, "create_tools_sidebar", None)
+        if factory is None:
+            logger.warning(
+                "Sidekick sidebar not installed: create_tools_sidebar() missing "
+                "from %s",
+                getattr(module, "__name__", "<unknown>"),
+            )
+            return
+
+        # Tools-side ``create_tools_sidebar`` accepts ``parent`` and
+        # optional ``project_root``; the in-repo stub accepts only
+        # ``parent``.  Try the full signature, fall back to bare parent.
+        try:
+            sidebar_widget = factory(parent=self, project_root=str(REPOS_ROOT))
+        except TypeError:
+            try:
+                sidebar_widget = factory(parent=self)
+            except Exception as exc:  # noqa: BLE001 - best-effort install
+                logger.warning("Sidekick factory call failed: %s", exc)
+                return
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Sidekick factory call failed: %s", exc)
+            return
+
+        if sidebar_widget is None:
+            logger.warning("Sidekick sidebar not installed: factory returned None")
+            return
+
+        main_layout = getattr(self, "main_layout", None)
+        if main_layout is None or not hasattr(main_layout, "addWidget"):
+            logger.warning(
+                "Sidekick sidebar not installed: main_layout splitter not "
+                "available on host launcher"
+            )
+            return
+
+        # Add as the third pane (after the global sidebar and the
+        # content container).  Give it a small initial weight.
+        main_layout.addWidget(sidebar_widget)
+        if hasattr(main_layout, "setStretchFactor"):
+            with contextlib.suppress(Exception):
+                main_layout.setStretchFactor(main_layout.count() - 1, 2)
+
+        self.sidekick_sidebar = sidebar_widget
+        logger.info(
+            "Sidekick sidebar embedded in main splitter from %s",
+            getattr(module, "__name__", "<unknown>"),
+        )
+
     def _load_window_icon(self) -> None:
         icon_candidates = [
             ASSETS_DIR / "golf_logo.ico",
