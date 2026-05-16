@@ -25,7 +25,13 @@ ALLOWED_SCRIPT_DIRECTORIES = [
     "examples",
 ]
 
-# Allowed executables (whitelist approach)
+# Allowed executables (whitelist approach).
+#
+# `wsl`/`wsl.exe` are allowed because `get_docker_cmd()` in
+# `src/launchers/docker_manager.py` falls back to `["wsl", "docker"]` on
+# Windows hosts where Docker Desktop is not installed but Docker is reachable
+# inside WSL. Blocking `wsl` caused the launcher's Docker probe to silently
+# report "unavailable" on every WSL-only Windows dev box.
 ALLOWED_EXECUTABLES = [
     "python",
     "python3",
@@ -35,6 +41,8 @@ ALLOWED_EXECUTABLES = [
     "matlab.exe",
     "docker",
     "docker.exe",
+    "wsl",
+    "wsl.exe",
     "echo",
 ]
 

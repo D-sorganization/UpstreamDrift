@@ -6,33 +6,52 @@ orthogonality of the main launcher application.
 
 from __future__ import annotations
 
+import logging
 import os
 import shutil
 import subprocess
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
+
 
 def get_docker_cmd() -> list[str]:
-    """Get the base docker command, using WSL fallback on Windows if needed."""
+    """Get the base docker command, using WSL fallback on Windows if needed.
+
+    Resolution order:
+        1. Native ``docker``/``docker.exe`` on PATH (Docker Desktop / Linux)
+        2. ``wsl docker`` on Windows when Docker lives inside a WSL distro
+        3. Bare ``docker`` as a last resort (subsequent calls will surface
+           a clear FileNotFoundError if neither is available)
+
+    The selected command is logged at DEBUG so failed Docker probes are
+    diagnosable from launcher logs.
+    """
     if shutil.which("docker"):
+        logger.debug("Docker resolved to native 'docker' on PATH")
         return ["docker"]
     if os.name == "nt" and shutil.which("wsl"):
+        logger.debug("Docker resolved to 'wsl docker' fallback")
         return ["wsl", "docker"]
+    logger.debug(
+        "Neither 'docker' nor 'wsl' on PATH; falling back to bare 'docker' "
+        "(probe will fail)"
+    )
     return ["docker"]
 
 
-from PyQt6.QtCore import QThread, pyqtSignal
+from PyQt6.QtCore import QThread, pyqtSignal  # noqa: E402
 
-from src.launchers.launcher_constants import validate_docker_stage
-from src.shared.python.docker_config import (
+from src.launchers.launcher_constants import validate_docker_stage  # noqa: E402
+from src.shared.python.docker_config import (  # noqa: E402
     DOCKER_IMAGE_ENGINE,
 )
-from src.shared.python.docker_config import (
+from src.shared.python.docker_config import (  # noqa: E402
     LEGACY_DOCKER_ALIASES as LEGACY_DOCKER_IMAGE_ALIASES,
 )
 
 # Reuse existing subprocess utilities
-from src.shared.python.security.secure_subprocess import (
+from src.shared.python.security.secure_subprocess import (  # noqa: E402
     SecureSubprocessError,
     secure_run,
 )
@@ -44,17 +63,36 @@ class DockerCheckThread(QThread):
     result = pyqtSignal(bool)
 
     def run(self) -> None:
-        """Run docker check."""
+        """Run docker check.
+
+        Logs the resolved command and failure cause so the user has visible
+        diagnostics when Docker is unavailable. Previously this silently
+        emitted ``False`` for any failure, which made the
+        ``wsl``-not-whitelisted regression invisible until log inspection.
+        """
+        cmd = get_docker_cmd() + ["--version"]
         try:
             secure_run(
-                get_docker_cmd() + ["--version"],
+                cmd,
                 timeout=5.0,
                 check=True,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
             self.result.emit(True)
-        except (SecureSubprocessError, FileNotFoundError):
+        except SecureSubprocessError as exc:
+            logger.warning(
+                "Docker check rejected by secure_subprocess gate (cmd=%s): %s",
+                cmd,
+                exc,
+            )
+            self.result.emit(False)
+        except FileNotFoundError:
+            logger.warning(
+                "Docker check failed: %s not found on PATH (cmd=%s)",
+                cmd[0],
+                cmd,
+            )
             self.result.emit(False)
 
 
