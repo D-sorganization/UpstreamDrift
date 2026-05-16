@@ -597,15 +597,32 @@ class AIAssistantPanel(QWidget):
                 f"font-size: 11px; color: {text_muted}; background: transparent;"
             )
 
-        if hasattr(self, "_provider_icon"):
-            self._provider_icon.setStyleSheet(
-                f"font-size: 18px; color: {text_primary}; background: transparent;"
-            )
-
-        if hasattr(self, "_model_label"):
-            self._model_label.setStyleSheet(
-                f"font-size: 14px; font-weight: bold; color: {text_primary}; background: transparent;"
-            )
+        _combo_style = f"""
+            QComboBox {{
+                background-color: {bg_primary};
+                color: {text_primary};
+                border: 1px solid {border};
+                border-radius: 6px;
+                padding: 4px 8px;
+            }}
+            QComboBox::drop-down {{ border: none; width: 18px; }}
+            QComboBox::down-arrow {{
+                image: none;
+                border-left: 4px solid transparent;
+                border-right: 4px solid transparent;
+                border-top: 4px solid {text_muted};
+                margin-top: 2px;
+            }}
+            QComboBox QAbstractItemView {{
+                background-color: {bg_alt};
+                color: {text_primary};
+                border: 1px solid {border};
+                selection-background-color: {accent};
+            }}
+        """
+        for _attr in ("_provider_combo", "_model_combo", "_thinking_combo"):
+            if hasattr(self, _attr):
+                getattr(self, _attr).setStyleSheet(_combo_style)
 
         if hasattr(self, "chk_auto_index"):
             self.chk_auto_index.setStyleSheet(f"color: {text_primary};")
@@ -696,13 +713,41 @@ class AIAssistantPanel(QWidget):
         return header
 
     def _add_header_title_widgets(self, layout: Any) -> None:
+        """Add Provider, Model, and Thinking combo boxes to the header."""
         if layout is None:
             raise ValueError("layout must be provided")
-        self._provider_icon = QLabel("\U0001f916")
-        layout.addWidget(self._provider_icon)
 
-        self._model_label = QLabel("AI Assistant")
-        layout.addWidget(self._model_label)
+        from src.shared.python.ai.gui.settings_dialog import AIProvider
+
+        # Provider combo
+        self._provider_combo = QComboBox()
+        _provider_display = [
+            ("Ollama", AIProvider.OLLAMA),
+            ("OpenAI", AIProvider.OPENAI),
+            ("Anthropic", AIProvider.ANTHROPIC),
+            ("Gemini", AIProvider.GEMINI),
+        ]
+        for _label, _prov in _provider_display:
+            self._provider_combo.addItem(_label, _prov)
+        self._provider_combo.setToolTip("Select AI provider")
+        self._provider_combo.currentTextChanged.connect(self._on_provider_changed)
+        layout.addWidget(self._provider_combo)
+
+        # Model combo (populated when provider changes)
+        self._model_combo = QComboBox()
+        self._model_combo.setMinimumWidth(130)
+        self._model_combo.setToolTip("Select model")
+        self._model_combo.currentTextChanged.connect(self._on_model_changed)
+        layout.addWidget(self._model_combo)
+
+        # Thinking-level combo
+        self._thinking_combo = QComboBox()
+        self._thinking_combo.addItems(["off", "low", "medium", "high"])
+        self._thinking_combo.setToolTip("Thinking / reasoning effort level")
+        layout.addWidget(self._thinking_combo)
+
+        # Populate models for initial provider
+        self._on_provider_changed(self._provider_combo.currentText())
 
         layout.addSpacing(10)
 
@@ -1127,23 +1172,31 @@ class AIAssistantPanel(QWidget):
         from src.shared.python.ai.gui.settings_dialog import AIProvider, get_api_key
         from src.shared.python.ai.types import ExpertiseLevel
 
-        # Update Header Icons
-        provider_labels = {
-            AIProvider.OLLAMA: "[Ollama]",
-            AIProvider.OPENAI: "[OpenAI]",
-            AIProvider.ANTHROPIC: "[Anthropic]",
-            AIProvider.GEMINI: "[Gemini]",
+        # Sync provider combo to match settings (block signal to avoid re-init)
+        _prov_name_map = {
+            AIProvider.OLLAMA: "Ollama",
+            AIProvider.OPENAI: "OpenAI",
+            AIProvider.ANTHROPIC: "Anthropic",
+            AIProvider.GEMINI: "Gemini",
         }
-        icon = provider_labels.get(settings.provider, "[AI]")
-        self._provider_icon.setText(icon)
+        _prov_label = _prov_name_map.get(settings.provider, "")
+        if hasattr(self, "_provider_combo") and _prov_label:
+            self._provider_combo.blockSignals(True)
+            idx = self._provider_combo.findText(_prov_label)
+            if idx >= 0:
+                self._provider_combo.setCurrentIndex(idx)
+            self._provider_combo.blockSignals(False)
 
-        # Update Model Label
-        self._model_label.setText(
-            f"{settings.provider.name.title()} ({settings.model})"
-        )
-        self._model_label.setToolTip(
-            f"Provider: {settings.provider.name}\nModel: {settings.model}"
-        )
+        # Sync model combo
+        if hasattr(self, "_model_combo"):
+            self._model_combo.blockSignals(True)
+            m_idx = self._model_combo.findText(settings.model)
+            if m_idx >= 0:
+                self._model_combo.setCurrentIndex(m_idx)
+            else:
+                self._model_combo.insertItem(0, settings.model)
+                self._model_combo.setCurrentIndex(0)
+            self._model_combo.blockSignals(False)
 
         # Set expertise level
         level_map = {
@@ -1222,6 +1275,263 @@ class AIAssistantPanel(QWidget):
                 f"Could not connect to {settings.provider.name}. "
                 "Please check your settings."
             )
+
+    # ── Provider / Model / Thinking combo handlers ──────────────────────────
+
+    def _get_models_for_provider(self, provider_label: str) -> list[Any]:
+        """Return ChatModelInfo list for a named provider (no network required).
+
+        Args:
+            provider_label: Human-readable provider name from the combo.
+
+        Returns:
+            List of ChatModelInfo entries.
+        """
+        from src.shared.python.ai.types import ChatModelInfo
+
+        _static: dict[str, list[ChatModelInfo]] = {
+            "Ollama": [
+                ChatModelInfo("llama3.1:8b"),
+                ChatModelInfo("llama3.1:70b"),
+                ChatModelInfo("mistral"),
+                ChatModelInfo("codellama"),
+                ChatModelInfo("deepseek-coder"),
+                ChatModelInfo("phi3"),
+            ],
+            "OpenAI": [
+                ChatModelInfo("gpt-4o", "GPT-4o"),
+                ChatModelInfo("gpt-4o-mini", "GPT-4o Mini"),
+                ChatModelInfo("gpt-4-turbo", "GPT-4 Turbo"),
+                ChatModelInfo("o1", "o1"),
+                ChatModelInfo("o3-mini", "o3-mini"),
+            ],
+            "Anthropic": [
+                ChatModelInfo("claude-sonnet-4-6", "Claude Sonnet 4.6"),
+                ChatModelInfo("claude-3-5-sonnet-20241022", "Claude 3.5 Sonnet"),
+                ChatModelInfo("claude-3-5-haiku-20241022", "Claude 3.5 Haiku"),
+                ChatModelInfo("claude-3-opus-20240229", "Claude 3 Opus"),
+            ],
+            "Gemini": [
+                ChatModelInfo("gemini-2.0-flash", "Gemini 2.0 Flash"),
+                ChatModelInfo("gemini-1.5-pro", "Gemini 1.5 Pro"),
+                ChatModelInfo("gemini-1.5-flash", "Gemini 1.5 Flash"),
+            ],
+        }
+        return _static.get(provider_label, [])
+
+    def _get_thinking_capabilities_for_model(self, model_id: str) -> Any:
+        """Return ThinkingCapabilities for a model id.
+
+        Args:
+            model_id: The model identifier string.
+
+        Returns:
+            ThinkingCapabilities dataclass.
+        """
+        from src.shared.python.ai.types import ThinkingCapabilities, ThinkingLevel
+
+        _thinking_models = {
+            "claude-sonnet-4-6",
+            "claude-3-5-sonnet-20241022",
+            "claude-3-5-sonnet-20240620",
+            "gemini-2.0-flash",
+            "gemini-1.5-pro",
+            "o1",
+            "o3-mini",
+            "o3",
+        }
+        supports = any(m in model_id for m in _thinking_models)
+        if supports:
+            return ThinkingCapabilities(
+                supports_levels=True,
+                available_levels=[
+                    ThinkingLevel.OFF,
+                    ThinkingLevel.LOW,
+                    ThinkingLevel.MEDIUM,
+                    ThinkingLevel.HIGH,
+                ],
+            )
+        return ThinkingCapabilities(
+            supports_levels=False,
+            available_levels=[ThinkingLevel.OFF],
+        )
+
+    def _on_provider_changed(self, provider_label: str) -> None:
+        """Handle provider combo change — repopulate model list.
+
+        Args:
+            provider_label: Selected provider display name.
+        """
+        if not hasattr(self, "_model_combo"):
+            return
+        models = self._get_models_for_provider(provider_label)
+        self._model_combo.blockSignals(True)
+        self._model_combo.clear()
+        for m in models:
+            self._model_combo.addItem(m.display_name or m.model_id, m.model_id)
+        self._model_combo.blockSignals(False)
+        # Trigger thinking update for first model
+        if models and hasattr(self, "_thinking_combo"):
+            self._on_model_changed(models[0].model_id)
+
+    def _on_model_changed(self, model_text: str) -> None:
+        """Handle model combo change — enable/disable thinking combo.
+
+        Args:
+            model_text: Selected model display name or id.
+        """
+        if not hasattr(self, "_thinking_combo"):
+            return
+        # Use the data (model_id) if available, otherwise the text
+        if hasattr(self, "_model_combo"):
+            model_id = self._model_combo.currentData() or model_text
+        else:
+            model_id = model_text
+        caps = self._get_thinking_capabilities_for_model(model_id)
+        self._thinking_combo.setEnabled(caps.supports_levels)
+
+    def _history_snapshot(self) -> list[Any]:
+        """Return a copy of the current conversation message list.
+
+        Post-condition: returned list is independent of self._context.messages.
+
+        Returns:
+            Shallow copy of message list (messages themselves are immutable).
+        """
+        return list(self._context.messages)
+
+    def _create_adapter_for_provider(
+        self,
+        provider_label: str,
+        model_id: str,
+    ) -> Any:
+        """Build a new adapter for the given provider/model pair.
+
+        Args:
+            provider_label: Human-readable provider name ('Anthropic', etc.).
+            model_id: The model identifier string.
+
+        Returns:
+            Configured BaseAgentAdapter instance, or None on failure.
+        """
+        from src.shared.python.ai.gui.settings_dialog import AIProvider, get_api_key
+
+        _label_to_provider = {
+            "Ollama": AIProvider.OLLAMA,
+            "OpenAI": AIProvider.OPENAI,
+            "Anthropic": AIProvider.ANTHROPIC,
+            "Gemini": AIProvider.GEMINI,
+        }
+        provider = _label_to_provider.get(provider_label)
+        if provider is None:
+            return None
+
+        if provider == AIProvider.OLLAMA:
+            try:
+                from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
+
+                return OllamaAdapter(model=model_id)
+            except Exception:  # noqa: BLE001
+                return None
+
+        api_key = get_api_key(provider)
+        if not api_key:
+            return None
+
+        adapter_map = {
+            AIProvider.OPENAI: (
+                "src.shared.python.ai.adapters.openai_adapter",
+                "OpenAIAdapter",
+            ),
+            AIProvider.ANTHROPIC: (
+                "src.shared.python.ai.adapters.anthropic_adapter",
+                "AnthropicAdapter",
+            ),
+            AIProvider.GEMINI: (
+                "src.shared.python.ai.adapters.gemini_adapter",
+                "GeminiAdapter",
+            ),
+        }
+        if provider not in adapter_map:
+            return None
+
+        import importlib
+
+        module_path, class_name = adapter_map[provider]
+        try:
+            mod = importlib.import_module(module_path)
+            cls = getattr(mod, class_name)
+            if provider == AIProvider.GEMINI:
+                return cls(api_key=api_key, model=model_id)
+            return cls(api_key=api_key, model=model_id)
+        except Exception:  # noqa: BLE001
+            return None
+
+    def switch_provider(
+        self,
+        provider_label: str,
+        model_id: str,
+        thinking_level: str,
+    ) -> None:
+        """Switch provider/model mid-thread preserving full history.
+
+        Pre-condition: An active session exists (self._context.messages is non-empty).
+        Post-condition: self._adapter points to the new provider; session metadata
+            records a 'provider_switched' event with old/new provider names and timestamp.
+        Invariant: self._context.messages is never mutated by this method.
+
+        Args:
+            provider_label: Human-readable provider name ('OpenAI', etc.).
+            model_id: Model identifier for the new provider.
+            thinking_level: Thinking level string ('off', 'low', etc.).
+
+        Raises:
+            RuntimeError: If no active session is loaded.
+        """
+        if not self._context.messages:
+            raise RuntimeError(
+                "No active session: cannot switch provider without a loaded conversation. "
+                "Start a new chat or load an existing session first."
+            )
+
+        old_provider = (
+            self._adapter.capabilities.provider_name if self._adapter else "none"
+        )
+
+        # Build new adapter (invariant: history not touched)
+        new_adapter = self._create_adapter_for_provider(provider_label, model_id)
+        if new_adapter is None:
+            self._set_status(f"⚠ Could not connect to {provider_label}")
+            logger.warning(
+                "switch_provider: failed to create adapter for %s/%s",
+                provider_label,
+                model_id,
+            )
+            return
+
+        self._adapter = new_adapter
+
+        # Record provenance event
+        from datetime import datetime, timezone
+
+        events: list[Any] = self._context.metadata.setdefault("events", [])
+        events.append(
+            {
+                "type": "provider_switched",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "old_provider": old_provider,
+                "new_provider": provider_label.lower(),
+                "new_model": model_id,
+                "thinking_level": thinking_level,
+            }
+        )
+
+        self._set_status(f"Switched to {provider_label} ({model_id})")
+        logger.info(
+            "switch_provider: %s -> %s (%s)", old_provider, provider_label, model_id
+        )
+
+    # ────────────────────────────────────────────────────────────────────────
 
     def _show_settings(self) -> None:
         """Show the settings dialog."""

@@ -40,9 +40,12 @@ from src.shared.python.ai.exceptions import (
 from src.shared.python.ai.types import (
     AgentChunk,
     AgentResponse,
+    ChatModelInfo,
     ConversationContext,
     ProviderCapabilities,
     ProviderCapability,
+    ThinkingCapabilities,
+    ThinkingLevel,
     ToolCall,
 )
 from src.shared.python.contracts import precondition
@@ -301,6 +304,73 @@ class AnthropicAdapter(BaseAgentAdapter):
             if "rate limit" in error_str:
                 return False, "Rate limited. Try again later."
             return False, f"Connection error: {e}"
+
+    def list_models(self) -> list[ChatModelInfo]:
+        """Return available Anthropic Claude models (static curated list).
+
+        Returns:
+            List of ChatModelInfo entries, newest models first.
+        """
+        return [
+            ChatModelInfo(
+                model_id="claude-sonnet-4-6",
+                display_name="Claude Sonnet 4.6",
+                context_window=200_000,
+                supports_thinking=True,
+            ),
+            ChatModelInfo(
+                model_id="claude-3-5-sonnet-20241022",
+                display_name="Claude 3.5 Sonnet",
+                context_window=200_000,
+                supports_thinking=True,
+            ),
+            ChatModelInfo(
+                model_id="claude-3-5-haiku-20241022",
+                display_name="Claude 3.5 Haiku",
+                context_window=200_000,
+                supports_thinking=False,
+            ),
+            ChatModelInfo(
+                model_id="claude-3-opus-20240229",
+                display_name="Claude 3 Opus",
+                context_window=200_000,
+                supports_thinking=False,
+            ),
+            ChatModelInfo(
+                model_id="claude-3-haiku-20240307",
+                display_name="Claude 3 Haiku",
+                context_window=200_000,
+                supports_thinking=False,
+            ),
+        ]
+
+    def thinking_capabilities(self) -> ThinkingCapabilities:
+        """Return extended-thinking capabilities for this Anthropic model.
+
+        Claude 3.5 Sonnet and newer support extended thinking with a
+        token budget.
+
+        Returns:
+            ThinkingCapabilities reflecting Anthropic's extended thinking support.
+        """
+        # All Claude 3+ models can use extended thinking via budget_tokens
+        _thinking_prefixes = ("claude-3", "claude-sonnet", "claude-opus")
+        supports = any(self._model.startswith(p) for p in _thinking_prefixes)
+        if supports:
+            return ThinkingCapabilities(
+                supports_levels=True,
+                available_levels=[
+                    ThinkingLevel.OFF,
+                    ThinkingLevel.LOW,
+                    ThinkingLevel.MEDIUM,
+                    ThinkingLevel.HIGH,
+                    ThinkingLevel.BUDGET,
+                ],
+            )
+        return ThinkingCapabilities(
+            supports_levels=False,
+            available_levels=[ThinkingLevel.OFF],
+        )
 
     def _format_messages(
         self,

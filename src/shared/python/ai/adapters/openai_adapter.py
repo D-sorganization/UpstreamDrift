@@ -41,9 +41,12 @@ from src.shared.python.ai.exceptions import (
 from src.shared.python.ai.types import (
     AgentChunk,
     AgentResponse,
+    ChatModelInfo,
     ConversationContext,
     ProviderCapabilities,
     ProviderCapability,
+    ThinkingCapabilities,
+    ThinkingLevel,
     ToolCall,
 )
 from src.shared.python.contracts import precondition
@@ -333,6 +336,73 @@ class OpenAIAdapter(BaseAgentAdapter):
             if "rate limit" in error_str:
                 return False, "Rate limited. Try again later."
             return False, f"Connection error: {e}"
+
+    def list_models(self) -> list[ChatModelInfo]:
+        """Return available OpenAI models (static list).
+
+        Returns a curated static list so no API call is required.
+        Models with reasoning support (o-series) are flagged appropriately.
+
+        Returns:
+            List of ChatModelInfo entries for OpenAI.
+        """
+        return [
+            ChatModelInfo(
+                model_id="gpt-4o",
+                display_name="GPT-4o",
+                context_window=128_000,
+                supports_thinking=False,
+            ),
+            ChatModelInfo(
+                model_id="gpt-4o-mini",
+                display_name="GPT-4o Mini",
+                context_window=128_000,
+                supports_thinking=False,
+            ),
+            ChatModelInfo(
+                model_id="gpt-4-turbo",
+                display_name="GPT-4 Turbo",
+                context_window=128_000,
+                supports_thinking=False,
+            ),
+            ChatModelInfo(
+                model_id="o1",
+                display_name="o1",
+                context_window=200_000,
+                supports_thinking=True,
+            ),
+            ChatModelInfo(
+                model_id="o3-mini",
+                display_name="o3-mini",
+                context_window=200_000,
+                supports_thinking=True,
+            ),
+        ]
+
+    def thinking_capabilities(self) -> ThinkingCapabilities:
+        """Return thinking capabilities for the current OpenAI model.
+
+        o-series models support reasoning_effort (low/medium/high).
+
+        Returns:
+            ThinkingCapabilities reflecting whether the model is an o-series.
+        """
+        _thinking_models = {"o1", "o1-mini", "o1-preview", "o3", "o3-mini", "o4-mini"}
+        is_thinking = any(self._model.startswith(m) for m in _thinking_models)
+        if is_thinking:
+            return ThinkingCapabilities(
+                supports_levels=True,
+                available_levels=[
+                    ThinkingLevel.OFF,
+                    ThinkingLevel.LOW,
+                    ThinkingLevel.MEDIUM,
+                    ThinkingLevel.HIGH,
+                ],
+            )
+        return ThinkingCapabilities(
+            supports_levels=False,
+            available_levels=[ThinkingLevel.OFF],
+        )
 
     def _format_messages(
         self,

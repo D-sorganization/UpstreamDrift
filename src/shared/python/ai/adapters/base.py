@@ -21,8 +21,11 @@ if TYPE_CHECKING:
 from src.shared.python.ai.types import (
     AgentChunk,
     AgentResponse,
+    ChatModelInfo,
     ConversationContext,
     ProviderCapabilities,
+    ThinkingCapabilities,
+    ThinkingLevel,
 )
 
 logger = get_logger(__name__)
@@ -181,6 +184,34 @@ class BaseAgentAdapter(ABC):
             Tuple of (success: bool, diagnostic_message: str).
         """
         ...
+
+    def list_models(self) -> list[ChatModelInfo]:
+        """Return available models for this provider.
+
+        Concrete adapters should override this to query the provider API
+        or return a static list.  The default implementation returns an
+        empty list so that existing adapters continue to work without
+        modification.
+
+        Returns:
+            List of ChatModelInfo entries, at least one entry expected
+            for providers that support model enumeration.
+        """
+        return []
+
+    def thinking_capabilities(self) -> ThinkingCapabilities:
+        """Return the thinking/reasoning capabilities of the current model.
+
+        Override in concrete adapters that support extended thinking or
+        reasoning effort control.
+
+        Returns:
+            ThinkingCapabilities indicating level support and available levels.
+        """
+        return ThinkingCapabilities(
+            supports_levels=False,
+            available_levels=[ThinkingLevel.OFF],
+        )
 
     def format_messages_for_provider(
         self,

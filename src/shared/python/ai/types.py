@@ -526,3 +526,64 @@ class AgentChunk:
     tool_call_delta: dict[str, Any] | None = None
     is_final: bool = False
     index: int = 0
+
+
+class ThinkingLevel(Enum):
+    """Thinking / reasoning effort levels for AI models.
+
+    Controls how much "extended thinking" or "reasoning effort" a model
+    applies before generating its response.  Not all models support all
+    levels — consult the adapter's ``thinking_capabilities()`` method.
+
+    Values:
+        OFF: No extended thinking (default, fastest).
+        LOW: Minimal reasoning budget.
+        MEDIUM: Balanced reasoning budget.
+        HIGH: Maximum reasoning budget (slowest, most thorough).
+        AUTO: Provider-selected budget (Gemini-specific).
+        BUDGET: Budget-token mode (Anthropic extended-thinking token budget).
+    """
+
+    OFF = "off"
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    AUTO = "auto"
+    BUDGET = "budget"
+
+
+@dataclass(frozen=True)
+class ChatModelInfo:
+    """Metadata about a single chat model offered by a provider.
+
+    Attributes:
+        model_id: The canonical model identifier sent to the API.
+        display_name: Human-readable name shown in the UI.
+        context_window: Maximum context window [tokens]. 0 if unknown.
+        supports_thinking: True if the model supports extended thinking.
+    """
+
+    model_id: str
+    display_name: str = ""
+    context_window: int = 0
+    supports_thinking: bool = False
+
+    def __post_init__(self) -> None:
+        """Set display_name to model_id when not provided."""
+        if not self.display_name:
+            # frozen=True means we must use object.__setattr__
+            object.__setattr__(self, "display_name", self.model_id)
+
+
+@dataclass(frozen=True)
+class ThinkingCapabilities:
+    """Describes a model's extended-thinking / reasoning-effort support.
+
+    Attributes:
+        supports_levels: True if the model supports multiple thinking levels.
+        available_levels: Ordered list of levels the model supports.
+            Always contains at least ThinkingLevel.OFF when non-empty.
+    """
+
+    supports_levels: bool
+    available_levels: list[ThinkingLevel]

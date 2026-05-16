@@ -13,8 +13,11 @@ from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
 from src.shared.python.ai.types import (
     AgentChunk,
     AgentResponse,
+    ChatModelInfo,
     ConversationContext,
     ProviderCapabilities,
+    ThinkingCapabilities,
+    ThinkingLevel,
 )
 from src.shared.python.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -125,6 +128,61 @@ class GeminiAdapter(BaseAgentAdapter):
         except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Gemini validation error: {e}")
             return False, f"Connection failed: {e}"
+
+    def list_models(self) -> list[ChatModelInfo]:
+        """Return available Gemini models (static curated list).
+
+        Returns:
+            List of ChatModelInfo entries for Google Gemini.
+        """
+        return [
+            ChatModelInfo(
+                model_id="gemini-2.0-flash",
+                display_name="Gemini 2.0 Flash",
+                context_window=1_048_576,
+                supports_thinking=True,
+            ),
+            ChatModelInfo(
+                model_id="gemini-1.5-pro",
+                display_name="Gemini 1.5 Pro",
+                context_window=2_000_000,
+                supports_thinking=True,
+            ),
+            ChatModelInfo(
+                model_id="gemini-1.5-flash",
+                display_name="Gemini 1.5 Flash",
+                context_window=1_048_576,
+                supports_thinking=False,
+            ),
+        ]
+
+    def thinking_capabilities(self) -> ThinkingCapabilities:
+        """Return thinking capabilities for Gemini models.
+
+        Gemini 1.5 Pro and 2.0 Flash support thinking_budget (auto/off/manual).
+
+        Returns:
+            ThinkingCapabilities for the current Gemini model.
+        """
+        _thinking_models = {
+            "gemini-2.0-flash",
+            "gemini-2.0-flash-thinking",
+            "gemini-1.5-pro",
+        }
+        supports = any(m in self._model_name for m in _thinking_models)
+        if supports:
+            return ThinkingCapabilities(
+                supports_levels=True,
+                available_levels=[
+                    ThinkingLevel.OFF,
+                    ThinkingLevel.AUTO,
+                    ThinkingLevel.HIGH,
+                ],
+            )
+        return ThinkingCapabilities(
+            supports_levels=False,
+            available_levels=[ThinkingLevel.OFF],
+        )
 
     def _build_chat_session(self, context: ConversationContext) -> Any:
         """Build a chat session with history."""

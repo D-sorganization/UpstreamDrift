@@ -39,9 +39,12 @@ from src.shared.python.ai.exceptions import (
 from src.shared.python.ai.types import (
     AgentChunk,
     AgentResponse,
+    ChatModelInfo,
     ConversationContext,
     ProviderCapabilities,
     ProviderCapability,
+    ThinkingCapabilities,
+    ThinkingLevel,
     ToolCall,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -346,6 +349,49 @@ class OllamaAdapter(BaseAgentAdapter):
                 )
             logger.debug("Ollama connection check failed: %s: %s", type(e).__name__, e)
             return False, f"Connection error: {e}"
+
+    def list_models(self) -> list[ChatModelInfo]:
+        """Return models available on the local Ollama server.
+
+        Queries the /api/tags endpoint.  Falls back to a default list
+        when the server is not reachable.
+
+        Returns:
+            List of ChatModelInfo, one per installed model.
+        """
+        _defaults = [
+            ChatModelInfo(model_id="llama3.1:8b", display_name="llama3.1:8b"),
+            ChatModelInfo(model_id="mistral", display_name="mistral"),
+        ]
+        try:
+            import requests
+
+            resp = requests.get(f"{self._host}/api/tags", timeout=5)
+            if resp.status_code == 200:
+                raw_models = resp.json().get("models", [])
+                if raw_models:
+                    return [
+                        ChatModelInfo(
+                            model_id=m.get("name", ""),
+                            display_name=m.get("name", ""),
+                        )
+                        for m in raw_models
+                        if m.get("name")
+                    ]
+        except Exception:  # noqa: BLE001
+            pass
+        return _defaults
+
+    def thinking_capabilities(self) -> ThinkingCapabilities:
+        """Return thinking capabilities (none for Ollama models).
+
+        Returns:
+            ThinkingCapabilities with supports_levels=False.
+        """
+        return ThinkingCapabilities(
+            supports_levels=False,
+            available_levels=[ThinkingLevel.OFF],
+        )
 
     def _format_messages(
         self,
