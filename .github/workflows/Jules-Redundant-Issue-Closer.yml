@@ -112,6 +112,19 @@ jobs:
               return;
             }
 
+            // Add 'duplicate' label BEFORE closing so Verify-Issue-Closure
+            // recognises the exempt label and does not reopen-close-loop.
+            try {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: issue.number,
+                labels: ['duplicate'],
+              });
+            } catch (labelErr) {
+              core.warning(`Could not add duplicate label to #${issue.number}: ${labelErr.message}`);
+            }
+
             await github.rest.issues.update({
               owner,
               repo,
