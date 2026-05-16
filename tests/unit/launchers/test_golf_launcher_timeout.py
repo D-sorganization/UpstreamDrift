@@ -96,7 +96,8 @@ class TestCreateModelCard:
 
         # Filter out docstrings (Expr nodes with string constants)
         non_doc_stmts = [
-            s for s in body_stmts
+            s
+            for s in body_stmts
             if not (isinstance(s, ast.Expr) and isinstance(s.value, ast.Constant))
         ]
 

@@ -142,32 +142,28 @@ def test_realtime_ws_short_soak_smoke() -> None:
     assert sent > 0, "smoke publisher sent zero messages"
     for i, n in enumerate(received_counts):
         # Looser than the 24 h test — CI variance on shared runners is real.
-        assert n >= int(
-            sent * 0.90
-        ), f"subscriber {i} received {n}/{sent} messages ({n / max(sent, 1):.3f})"
+        assert n >= int(sent * 0.90), (
+            f"subscriber {i} received {n}/{sent} messages ({n / max(sent, 1):.3f})"
+        )
 
     rss_growth = (rss_peak - rss0) / max(rss0, 1e-9)
     assert rss_growth <= SMOKE_MAX_RSS_GROWTH_FRAC, (
         f"smoke RSS grew {rss_growth * 100:.1f}% (>{SMOKE_MAX_RSS_GROWTH_FRAC * 100:.0f}%): "
         f"{rss0:.1f}MB -> {rss_peak:.1f}MB"
     )
-    assert (
-        threads_peak - threads0
-    ) <= SMOKE_MAX_THREAD_GROWTH, (
+    assert (threads_peak - threads0) <= SMOKE_MAX_THREAD_GROWTH, (
         f"thread count {threads0} -> {threads_peak} (>{SMOKE_MAX_THREAD_GROWTH})"
     )
     if fds0 >= 0:
-        assert (
-            fds_peak - fds0
-        ) <= SMOKE_MAX_FD_GROWTH, (
+        assert (fds_peak - fds0) <= SMOKE_MAX_FD_GROWTH, (
             f"open FD count {fds0} -> {fds_peak} (>{SMOKE_MAX_FD_GROWTH})"
         )
 
     if latencies_ms:
         steady = latencies_ms[50:] if len(latencies_ms) > 100 else latencies_ms
         p99 = _percentile(steady, 0.99)
-        assert (
-            p99 < SMOKE_LATENCY_P99_MS_BUDGET
-        ), f"smoke p99 latency {p99:.2f}ms exceeds {SMOKE_LATENCY_P99_MS_BUDGET}ms"
+        assert p99 < SMOKE_LATENCY_P99_MS_BUDGET, (
+            f"smoke p99 latency {p99:.2f}ms exceeds {SMOKE_LATENCY_P99_MS_BUDGET}ms"
+        )
     else:
         pytest.fail("no latency samples captured by smoke soak")

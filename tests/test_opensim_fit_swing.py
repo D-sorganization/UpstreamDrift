@@ -210,16 +210,16 @@ def test_recovery_within_10_percent(
     pp = float(np.ptp(target.clubhead))  # peak-to-peak of target trajectory
     rmse_clubhead = float(np.sqrt(np.mean((sim_fit.clubhead - target.clubhead) ** 2)))
     rmse_butt = float(np.sqrt(np.mean((sim_fit.butt - target.butt) ** 2)))
-    assert (
-        rmse_clubhead < 0.10 * pp
-    ), f"clubhead RMSE {rmse_clubhead:.3e} > 10% of {pp:.3e}"
+    assert rmse_clubhead < 0.10 * pp, (
+        f"clubhead RMSE {rmse_clubhead:.3e} > 10% of {pp:.3e}"
+    )
     assert rmse_butt < 0.10 * pp, f"butt RMSE {rmse_butt:.3e} > 10% of {pp:.3e}"
     # Final cost contract: the cost-monotone-decrease test below covers
     # the per-iteration trace; the *final* cost must reflect a well-fit
     # trajectory (cross-engine spec final-cost criterion: < 1e-3).
-    assert (
-        result.final_cost < 1e-3
-    ), f"final cost {result.final_cost:.3e} > 1e-3 (target trivially recoverable)"
+    assert result.final_cost < 1e-3, (
+        f"final cost {result.final_cost:.3e} > 1e-3 (target trivially recoverable)"
+    )
 
 
 @pytest.mark.parametrize("rng_seed", [42, 1337, 999])
@@ -277,10 +277,10 @@ def test_cost_monotone_running_minimum(
     history = np.asarray(result.history, dtype=np.float64)
     running_min = np.minimum.accumulate(history)
     diffs = np.diff(running_min)
-    assert np.all(
-        diffs <= 1e-12
-    ), f"running-min cost increased somewhere: max delta = {diffs.max():.3e}"
+    assert np.all(diffs <= 1e-12), (
+        f"running-min cost increased somewhere: max delta = {diffs.max():.3e}"
+    )
     # End-to-end: the optimisation strictly improved on the warm start.
-    assert (
-        running_min[-1] < running_min[0]
-    ), f"final cost {running_min[-1]:.3e} not better than start {running_min[0]:.3e}"
+    assert running_min[-1] < running_min[0], (
+        f"final cost {running_min[-1]:.3e} not better than start {running_min[0]:.3e}"
+    )

@@ -327,9 +327,7 @@ class PlotGenerator:
         plt.close(fig)
         return filepath
 
-    def _create_plot(
-        self, data: SimulationData, plot_type: str
-    ) -> Figure | None:  # noqa: C901
+    def _create_plot(self, data: SimulationData, plot_type: str) -> Figure | None:  # noqa: C901
         """Create a plot figure without saving.
 
         Args:

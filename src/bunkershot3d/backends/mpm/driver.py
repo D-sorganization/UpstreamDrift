@@ -173,9 +173,7 @@ class MPMDriver:
                 pos, quat, _lv, _av = trajectory.interpolate(time)
                 # Override clubhead qpos: positions then quaternion (wxyz)
                 self.data.qpos[clubhead_qpos_start : clubhead_qpos_start + 3] = pos
-                self.data.qpos[
-                    clubhead_qpos_start + 3 : clubhead_qpos_start + 7
-                ] = quat
+                self.data.qpos[clubhead_qpos_start + 3 : clubhead_qpos_start + 7] = quat
             else:
                 # Fallback: advance position along x at a fixed velocity
                 vel = 5.0  # m/s

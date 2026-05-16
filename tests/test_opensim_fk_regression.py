@@ -178,9 +178,9 @@ def test_extract_grip_pose_at_neutral_returns_finite_sane_pose(
     assert quat.shape == (4,)
     assert np.all(np.isfinite(pos)), f"grip position has non-finite entries: {pos}"
     assert np.all(np.isfinite(quat))
-    assert (
-        np.linalg.norm(pos) < 5.0
-    ), f"grip position |{pos}| = {np.linalg.norm(pos):.3f} m exceeds 5 m"
+    assert np.linalg.norm(pos) < 5.0, (
+        f"grip position |{pos}| = {np.linalg.norm(pos):.3f} m exceeds 5 m"
+    )
     # Unit quaternion check.
     assert abs(float(np.linalg.norm(quat)) - 1.0) < 1e-6
 
@@ -205,9 +205,9 @@ def test_extract_clubhead_pose_at_neutral_returns_finite_sane_pose(
     assert quat.shape == (4,)
     assert np.all(np.isfinite(pos)), f"clubhead position has non-finite entries: {pos}"
     assert np.all(np.isfinite(quat))
-    assert (
-        np.linalg.norm(pos) < 5.0
-    ), f"clubhead position |{pos}| = {np.linalg.norm(pos):.3f} m exceeds 5 m"
+    assert np.linalg.norm(pos) < 5.0, (
+        f"clubhead position |{pos}| = {np.linalg.norm(pos):.3f} m exceeds 5 m"
+    )
     assert abs(float(np.linalg.norm(quat)) - 1.0) < 1e-6
 
 
@@ -228,9 +228,9 @@ def test_extract_full_pose_returns_canonical_landmark_keys(
     pose = extract_full_pose(state, model)
 
     expected_keys = {"grip_pos", "grip_quat", "clubhead_pos", "clubhead_quat"}
-    assert (
-        set(pose) == expected_keys
-    ), f"unexpected pose keys: {set(pose)} != {expected_keys}"
+    assert set(pose) == expected_keys, (
+        f"unexpected pose keys: {set(pose)} != {expected_keys}"
+    )
     assert pose["grip_pos"].shape == (3,)
     assert pose["grip_quat"].shape == (4,)
     assert pose["clubhead_pos"].shape == (3,)

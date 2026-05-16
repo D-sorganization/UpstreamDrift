@@ -71,9 +71,9 @@ class TestEdgeCases:
         l_CE = solver.solve_fiber_length(l_MT, activation)
 
         # Should have stretched fiber (long muscle-tendon)
-        assert (
-            l_CE > standard_muscle.params.l_opt
-        ), "Long muscle-tendon should have stretched fiber"
+        assert l_CE > standard_muscle.params.l_opt, (
+            "Long muscle-tendon should have stretched fiber"
+        )
 
     def test_pennated_muscle_equilibrium(self, pennated_muscle) -> None:
         """Test equilibrium with pennation angle."""

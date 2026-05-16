@@ -282,7 +282,11 @@ class UnitConverterWidget(BaseCalculatorWindow):
         row_widget.from_value = QLineEdit()
         row_widget.from_value.setText(conv.from_value)
         try:
-            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            from src.shared.python.theme.responsive import (
+                set_text_minimum_width,
+                TextWidthSpec,
+            )
+
             set_text_minimum_width(row_widget.from_value, TextWidthSpec(minimum_px=110))
         except ImportError:
             row_widget.from_value.setFixedWidth(110)
@@ -295,7 +299,11 @@ class UnitConverterWidget(BaseCalculatorWindow):
         row_widget.from_unit.addItems(self.all_units)
         row_widget.from_unit.setCurrentText(conv.from_unit)
         try:
-            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            from src.shared.python.theme.responsive import (
+                set_text_minimum_width,
+                TextWidthSpec,
+            )
+
             set_text_minimum_width(row_widget.from_unit, TextWidthSpec(minimum_px=130))
         except ImportError:
             row_widget.from_unit.setFixedWidth(130)
@@ -306,7 +314,11 @@ class UnitConverterWidget(BaseCalculatorWindow):
         # Arrow
         row_widget.arrow = QPushButton("⇄")
         try:
-            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            from src.shared.python.theme.responsive import (
+                set_text_minimum_width,
+                TextWidthSpec,
+            )
+
             set_text_minimum_width(row_widget.arrow, TextWidthSpec(minimum_px=35))
         except ImportError:
             row_widget.arrow.setFixedWidth(35)
@@ -316,7 +328,11 @@ class UnitConverterWidget(BaseCalculatorWindow):
         row_widget.to_value = QLineEdit()
         row_widget.to_value.setText(conv.to_value)
         try:
-            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            from src.shared.python.theme.responsive import (
+                set_text_minimum_width,
+                TextWidthSpec,
+            )
+
             set_text_minimum_width(row_widget.to_value, TextWidthSpec(minimum_px=110))
         except ImportError:
             row_widget.to_value.setFixedWidth(110)
@@ -329,7 +345,11 @@ class UnitConverterWidget(BaseCalculatorWindow):
         row_widget.to_unit.addItems(self._get_compatible_units(conv.from_unit))
         row_widget.to_unit.setCurrentText(conv.to_unit)
         try:
-            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            from src.shared.python.theme.responsive import (
+                set_text_minimum_width,
+                TextWidthSpec,
+            )
+
             set_text_minimum_width(row_widget.to_unit, TextWidthSpec(minimum_px=130))
         except ImportError:
             row_widget.to_unit.setFixedWidth(130)
@@ -340,7 +360,11 @@ class UnitConverterWidget(BaseCalculatorWindow):
         # Buttons
         row_widget.copy_btn = QPushButton("📋")
         try:
-            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            from src.shared.python.theme.responsive import (
+                set_text_minimum_width,
+                TextWidthSpec,
+            )
+
             set_text_minimum_width(row_widget.copy_btn, TextWidthSpec(minimum_px=30))
         except ImportError:
             row_widget.copy_btn.setFixedWidth(30)
@@ -348,7 +372,11 @@ class UnitConverterWidget(BaseCalculatorWindow):
 
         action_btn = QPushButton()
         try:
-            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            from src.shared.python.theme.responsive import (
+                set_text_minimum_width,
+                TextWidthSpec,
+            )
+
             set_text_minimum_width(action_btn, TextWidthSpec(minimum_px=30))
         except ImportError:
             action_btn.setFixedWidth(30)

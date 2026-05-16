@@ -72,9 +72,9 @@ def test_local_app_registers_versioned_routes(monkeypatch, tmp_path) -> None:
     route_paths = [getattr(r, "path", "") for r in app.routes if hasattr(r, "path")]
     versioned = [p for p in route_paths if p.startswith("/api/v1/")]
 
-    assert (
-        len(versioned) > 0
-    ), f"No /api/v1/ routes found. Registered paths: {route_paths[:20]}"
+    assert len(versioned) > 0, (
+        f"No /api/v1/ routes found. Registered paths: {route_paths[:20]}"
+    )
 
 
 def test_local_app_keeps_legacy_routes(monkeypatch, tmp_path) -> None:
@@ -98,9 +98,9 @@ def test_local_app_keeps_legacy_routes(monkeypatch, tmp_path) -> None:
     legacy = [
         p for p in route_paths if p.startswith("/api/") and not p.startswith("/api/v1/")
     ]
-    assert (
-        len(legacy) > 0
-    ), f"No legacy /api/ routes found. Registered paths: {route_paths[:20]}"
+    assert len(legacy) > 0, (
+        f"No legacy /api/ routes found. Registered paths: {route_paths[:20]}"
+    )
 
 
 def test_local_app_description_mentions_versioning(monkeypatch, tmp_path) -> None:

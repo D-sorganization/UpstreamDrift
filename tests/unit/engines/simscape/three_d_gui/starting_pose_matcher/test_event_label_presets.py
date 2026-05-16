@@ -105,9 +105,9 @@ class TestEventLabelPresets:
 
     def test_all_presets_cover_all_keys(self, core):
         for name, mapping in core.EVENT_LABEL_PRESETS.items():
-            assert set(mapping.keys()) == set(
-                core.EVENT_KEYS
-            ), f"Preset {name!r} missing keys; got {sorted(mapping)}"
+            assert set(mapping.keys()) == set(core.EVENT_KEYS), (
+                f"Preset {name!r} missing keys; got {sorted(mapping)}"
+            )
 
     def test_default_preset_exists(self, core):
         assert core.DEFAULT_EVENT_PRESET in core.EVENT_LABEL_PRESETS

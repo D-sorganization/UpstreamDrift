@@ -134,9 +134,9 @@ def test_gradients_flow_through_full_model() -> None:
     missing = [n for n, g in named_grads if g is None]
     assert not missing, f"parameters with None grad: {missing}"
     nonzero = sum(1 for _, g in named_grads if float(g.abs().sum()) > 0)
-    assert nonzero == len(
-        named_grads
-    ), f"only {nonzero}/{len(named_grads)} parameters got non-zero gradients"
+    assert nonzero == len(named_grads), (
+        f"only {nonzero}/{len(named_grads)} parameters got non-zero gradients"
+    )
 
 
 # ---- KL non-negativity -----------------------------------------------------
@@ -190,9 +190,9 @@ def test_bound_vector_layout() -> None:
 def test_parameter_count_in_documented_range() -> None:
     model = SwingInverseCVAE()
     n = parameter_count(model)
-    assert (
-        1_000_000 <= n <= 4_000_000
-    ), f"parameter count {n:,} outside the 1-4 M budget"
+    assert 1_000_000 <= n <= 4_000_000, (
+        f"parameter count {n:,} outside the 1-4 M budget"
+    )
 
 
 def test_invalid_config_rejected() -> None:

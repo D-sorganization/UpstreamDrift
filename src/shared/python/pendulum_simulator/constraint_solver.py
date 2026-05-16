@@ -105,9 +105,9 @@ def _solve_constrained_dynamics(
     if native_result is not None:
         qddot, lambda_forces = native_result
         assert np.all(np.isfinite(qddot)), f"qddot has non-finite values: {qddot}"
-        assert np.all(
-            np.isfinite(lambda_forces)
-        ), f"Constraint forces have non-finite values: {lambda_forces}"
+        assert np.all(np.isfinite(lambda_forces)), (
+            f"Constraint forces have non-finite values: {lambda_forces}"
+        )
         return qddot, lambda_forces
 
     # Compute dynamic terms
@@ -157,9 +157,9 @@ def _solve_constrained_dynamics(
     lambda_forces = sol[n:]
 
     assert np.all(np.isfinite(qddot)), f"qddot has non-finite values: {qddot}"
-    assert np.all(
-        np.isfinite(lambda_forces)
-    ), f"Constraint forces have non-finite values: {lambda_forces}"
+    assert np.all(np.isfinite(lambda_forces)), (
+        f"Constraint forces have non-finite values: {lambda_forces}"
+    )
     return qddot, lambda_forces
 
 

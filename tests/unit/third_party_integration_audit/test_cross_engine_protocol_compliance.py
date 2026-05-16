@@ -137,9 +137,9 @@ class TestCrossEngineProtocolCompliance:
         cls = getattr(mod, engine_class)
 
         for method in self.PHYSICS_ENGINE_METHODS:
-            assert hasattr(
-                cls, method
-            ), f"{engine_class} missing protocol method: {method}"
+            assert hasattr(cls, method), (
+                f"{engine_class} missing protocol method: {method}"
+            )
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

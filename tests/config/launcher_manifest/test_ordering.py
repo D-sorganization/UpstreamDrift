@@ -92,9 +92,9 @@ class TestOrdering:
     def test_model_explorer_is_first(self, manifest: LauncherManifest) -> None:
         """Model Explorer must be the first tile (order=1)."""
         first = manifest.tiles[0]
-        assert (
-            first.id == "model_explorer"
-        ), f"First tile should be model_explorer, got: {first.id}"
+        assert first.id == "model_explorer", (
+            f"First tile should be model_explorer, got: {first.id}"
+        )
 
     def test_ordered_ids_returns_deterministic_list(
         self, manifest: LauncherManifest

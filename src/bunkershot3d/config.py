@@ -81,4 +81,3 @@ class BunkerShotConfig(BaseModel):
         with open(path) as f:
             data = yaml.safe_load(f)
         return cls(**data)
-

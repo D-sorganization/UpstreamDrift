@@ -376,15 +376,11 @@ class GolfLauncher(
         from src.shared.python.theme.typography import Weights, get_display_font
 
         try:
-            from src.shared.python.theme import (
-                get_current_colors,  # type: ignore[attr-defined]
-            )
+            import src.shared.python.theme as _theme
 
-            c = get_current_colors()  # type: ignore[attr-defined]
-        except ImportError:
-            from src.shared.python.theme import (
-                DARK_THEME as c,  # type: ignore[assignment]
-            )
+            c = _theme.get_current_colors()  # type: ignore[attr-defined]
+        except (ImportError, AttributeError):
+            from src.shared.python.theme import DARK_THEME as c  # type: ignore[assignment]
 
         lbl = QLabel(title)
         lbl.setFont(get_display_font(size=14, weight=Weights.BOLD))
@@ -521,15 +517,16 @@ class GolfLauncher(
                 if item.widget():
                     item.widget().deleteLater()
 
-            try:
-                from src.launchers.model_card import SkeletonCard
-            except ImportError:
-                SkeletonCard = None
+            import contextlib
 
-            if SkeletonCard:
+            _SkeletonCard: type | None = None
+            with contextlib.suppress(ImportError):
+                from src.launchers.model_card import SkeletonCard as _SkeletonCard
+
+            if _SkeletonCard is not None:
                 for i in range(8):
                     self.grid_layout.addWidget(
-                        SkeletonCard(self), i // GRID_COLUMNS, i % GRID_COLUMNS
+                        _SkeletonCard(self), i // GRID_COLUMNS, i % GRID_COLUMNS
                     )
             return
 
@@ -755,15 +752,11 @@ class GolfLauncher(
 
         # Update visual selection state using theme colors
         try:
-            from src.shared.python.theme import (
-                get_current_colors,  # type: ignore[attr-defined]
-            )
+            import src.shared.python.theme as _theme
 
-            c = get_current_colors()  # type: ignore[attr-defined]
-        except ImportError:
-            from src.shared.python.theme import (
-                DARK_THEME as c,  # type: ignore[assignment]
-            )
+            c = _theme.get_current_colors()  # type: ignore[attr-defined]
+        except (ImportError, AttributeError):
+            from src.shared.python.theme import DARK_THEME as c  # type: ignore[assignment]
 
         for mid, card in self.model_cards.items():
             if hasattr(card, "set_selected"):
@@ -803,15 +796,11 @@ class GolfLauncher(
     def update_launch_button(self, model_name: str | None = None) -> None:
         """Update the launch button state."""
         try:
-            from src.shared.python.theme import (
-                get_current_colors,  # type: ignore[attr-defined]
-            )
+            import src.shared.python.theme as _theme
 
-            c = get_current_colors()  # type: ignore[attr-defined]
-        except ImportError:
-            from src.shared.python.theme import (
-                DARK_THEME as c,  # type: ignore[assignment]
-            )
+            c = _theme.get_current_colors()  # type: ignore[attr-defined]
+        except (ImportError, AttributeError):
+            from src.shared.python.theme import DARK_THEME as c  # type: ignore[assignment]
 
         if not self.selected_model:
             self.btn_launch.setText("Select a Model")
