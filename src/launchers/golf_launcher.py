@@ -67,8 +67,19 @@ __all__ = [
     "CONFIG_DIR",
     "LAYOUT_CONFIG_FILE",
     "DOCKER_STAGES",
+    "STARTUP_TIMEOUT_SEC",
     "main",
 ]
+
+
+# Async startup is normally well under a second; 30s is a generous ceiling
+# that comfortably covers cold-disk Docker probes and slow first-run
+# registry imports while still surfacing a true hang (e.g. crashed worker
+# thread) before the user concludes the app is broken.  See issue #5490.
+STARTUP_TIMEOUT_SEC: int = 30
+assert STARTUP_TIMEOUT_SEC > 0, (
+    "STARTUP_TIMEOUT_SEC must be > 0 to schedule a recovery timer"
+)
 
 
 class ProcessCleanupWorkerSignals(QObject):
@@ -165,7 +176,20 @@ class GolfLauncher(
             _QTimer.singleShot(100, self._show_onboarding_if_needed)
 
         if self.loading:
-            pass  # Wait for update_startup_results
+            # Issue #5490: previously this branch was a silent ``pass`` that
+            # waited forever for ``update_startup_results``.  If the async
+            # startup worker crashed in a sibling thread the user was left
+            # staring at an empty skeleton with no diagnostic.  Emit a log
+            # line and arm a recovery timeout that surfaces a visible
+            # error if the worker never reports back.
+            logger.info(
+                "Launcher entered async-startup wait state; "
+                "arming %ss timeout for update_startup_results",
+                STARTUP_TIMEOUT_SEC,
+            )
+            QTimer.singleShot(
+                int(STARTUP_TIMEOUT_SEC * 1000), self._handle_startup_timeout
+            )
         elif startup_results:
             self._apply_docker_status(startup_results.docker_available)
         else:
@@ -444,8 +468,41 @@ class GolfLauncher(
 
         _QTimer.singleShot(100, self._show_onboarding_if_needed)
 
-    def create_model_card(self, model: Any) -> None:
-        """Creates a clickable card widget (placeholder)."""
+    def _handle_startup_timeout(self) -> None:
+        """Recover from a hung async-startup worker (issue #5490).
+
+        Fires ``STARTUP_TIMEOUT_SEC`` after the launcher entered the
+        loading-skeleton wait state.  If ``update_startup_results`` already
+        completed, this is a no-op — ``self.loading`` will be ``False``
+        and we leave the live UI untouched.  Otherwise we clear the
+        loading flag, log a diagnostic, and surface a user-visible toast
+        so the user knows the app didn't silently freeze.
+
+        LoD: uses the public ``show_toast`` method exposed by
+        ``LauncherDialogsMixin`` rather than reaching into private toast
+        manager internals.
+        """
+        if not self.loading:
+            # update_startup_results already finished — nothing to do.
+            return
+
+        logger.error(
+            "Async startup did not complete within %ss; surfacing timeout "
+            "to user. The startup worker likely crashed in a sibling thread.",
+            STARTUP_TIMEOUT_SEC,
+        )
+        self.loading = False
+
+        # Surface the failure via the existing toast subsystem.  Guard
+        # against the toast manager not yet being initialized — the
+        # constructor wires it up after the timeout is armed, but a
+        # mid-init crash could leave it ``None``.
+        if getattr(self, "toast_manager", None) is not None:
+            self.show_toast(
+                f"Startup timed out after {STARTUP_TIMEOUT_SEC}s. "
+                "Click the refresh / retry button or restart the launcher.",
+                "error",
+            )
 
     def launch_model_direct(self, model_id: str) -> None:
         """Selects and immediately launches the model (for double-click)."""
