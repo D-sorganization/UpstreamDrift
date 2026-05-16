@@ -236,9 +236,9 @@ class TestGolfSuiteLauncher:
         assert launcher_app is not None, "Launcher should be instantiated"
 
         # Verify PYQT6_AVAILABLE flag is set correctly for testing
-        assert (
-            golf_suite_launcher.PYQT6_AVAILABLE is True
-        ), "PYQT6_AVAILABLE should be True for launcher logic tests"
+        assert golf_suite_launcher.PYQT6_AVAILABLE is True, (
+            "PYQT6_AVAILABLE should be True for launcher logic tests"
+        )
 
         # Verify launcher has essential UI components (as mocked)
         assert hasattr(launcher_app, "log_text"), "Launcher should have log_text widget"
@@ -254,13 +254,13 @@ class TestGolfSuiteLauncher:
         args, kwargs = mock_subprocess.call_args
         cmd = args[0]
         assert cmd[0] == sys.executable, "Assertion failed: cmd[0] == sys.executable"
-        assert "humanoid_launcher.py" in str(
-            cmd[1]
-        ), "Assertion failed: humanoid_launcher.py in str(cmd[1])"
+        assert "humanoid_launcher.py" in str(cmd[1]), (
+            "Assertion failed: humanoid_launcher.py in str(cmd[1])"
+        )
         # CWD is the python root, checks only for mujoco path component
-        assert "mujoco" in str(
-            kwargs["cwd"]
-        ), "Assertion failed: mujoco in str(kwargs[cwd])"
+        assert "mujoco" in str(kwargs["cwd"]), (
+            "Assertion failed: mujoco in str(kwargs[cwd])"
+        )
 
     def test_launch_drake(self, launcher_app, mock_subprocess) -> None:
         """Test launching Drake engine."""
@@ -269,9 +269,9 @@ class TestGolfSuiteLauncher:
 
         mock_subprocess.assert_called_once()
         args, kwargs = mock_subprocess.call_args
-        assert "drake_gui_app.py" in str(
-            args[0][1]
-        ), "Assertion failed: drake_gui_app.py in str(args[0][1])"
+        assert "drake_gui_app.py" in str(args[0][1]), (
+            "Assertion failed: drake_gui_app.py in str(args[0][1])"
+        )
 
     def test_launch_pinocchio(self, launcher_app, mock_subprocess) -> None:
         """Test launching Pinocchio engine."""
@@ -280,9 +280,9 @@ class TestGolfSuiteLauncher:
 
         mock_subprocess.assert_called_once()
         args, kwargs = mock_subprocess.call_args
-        assert "gui.py" in str(
-            args[0][1]
-        ), "Assertion failed: gui.py in str(args[0][1])"
+        assert "gui.py" in str(args[0][1]), (
+            "Assertion failed: gui.py in str(args[0][1])"
+        )
 
     def test_script_not_found(self, launcher_app, mock_subprocess) -> None:
         """Test handling of missing script."""
@@ -296,9 +296,9 @@ class TestGolfSuiteLauncher:
             # Verify error logged
             launcher_app.log_text.append.assert_called()
             args = launcher_app.log_text.append.call_args_list
-            assert any(
-                "ERROR" in str(a) for a in args
-            ), "Assertion failed: any(ERROR in str(a) for a in args)"
+            assert any("ERROR" in str(a) for a in args), (
+                "Assertion failed: any(ERROR in str(a) for a in args)"
+            )
 
     def test_log_functions(self, launcher_app) -> None:
         """Test logging functions."""
@@ -306,9 +306,9 @@ class TestGolfSuiteLauncher:
 
         launcher_app.log_message("Test message")
         launcher_app.log_text.append.assert_called()
-        assert "Test message" in str(
-            launcher_app.log_text.append.call_args
-        ), "Assertion failed: Test message in str(launcher_app.log_text.append.call_args)"
+        assert "Test message" in str(launcher_app.log_text.append.call_args), (
+            "Assertion failed: Test message in str(launcher_app.log_text.append.call_args)"
+        )
 
         launcher_app.clear_log()
         launcher_app.log_text.clear.assert_called()
@@ -323,19 +323,19 @@ class TestGolfSuiteLauncher:
 
         # Check if clipboard.setText was called with the correct content
         clipboard = mock_widgets.QApplication.clipboard()
-        assert (
-            clipboard.text == "Log content"
-        ), "Assertion failed: clipboard.text == Log content"
+        assert clipboard.text == "Log content", (
+            "Assertion failed: clipboard.text == Log content"
+        )
 
         # Check log message and status update
         # The log message includes a timestamp, so we check if the message content is present
-        assert (
-            launcher_app.log_text.append.called
-        ), "Assertion failed: launcher_app.log_text.append.called"
+        assert launcher_app.log_text.append.called, (
+            "Assertion failed: launcher_app.log_text.append.called"
+        )
         args = launcher_app.log_text.append.call_args[0]
-        assert (
-            "Log copied to clipboard." in args[0]
-        ), "Assertion failed: Log copied to clipboard. in args[0]"
+        assert "Log copied to clipboard." in args[0], (
+            "Assertion failed: Log copied to clipboard. in args[0]"
+        )
         launcher_app.status.setText.assert_called_with("Log copied")
 
     def test_main_function(self, launcher_app) -> None:

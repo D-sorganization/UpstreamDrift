@@ -92,7 +92,9 @@ class MotionTrainingPipeline:
     4. Visualize and export results
     """
 
-    DEFAULT_URDF = "src/engines/physics_engines/pinocchio/models/generated/golfer_ik.urdf"  # noqa: E501
+    DEFAULT_URDF = (
+        "src/engines/physics_engines/pinocchio/models/generated/golfer_ik.urdf"  # noqa: E501
+    )
 
     def __init__(self, config: PipelineConfig | None = None) -> None:
         """Initialize the pipeline.
@@ -230,9 +232,7 @@ class MotionTrainingPipeline:
 
         with open(output_dir / "joint_trajectory.csv", "w", newline="") as f:
             writer = csv.writer(f)
-            header = ["time"] + [
-                f"q{i}" for i in range(self.ik_result.q_dim)
-            ]  # noqa: E501
+            header = ["time"] + [f"q{i}" for i in range(self.ik_result.q_dim)]  # noqa: E501
             writer.writerow(header)
             for i, t in enumerate(self.ik_result.times):
                 row = [t] + list(self.ik_result.q_trajectory[i])

@@ -171,7 +171,10 @@ class LauncherUISetupMixin:
         outer_vbox.setContentsMargins(0, 0, 0, 0)
 
         try:
-            from src.launchers.custom_title_bar import CustomTitleBar
+            from src.launchers.custom_title_bar import (
+                CustomTitleBar,
+                clamp_to_visible_screen,
+            )
 
             self.title_bar = CustomTitleBar(self, show_close_button=False)
             self.title_bar.minimize_requested.connect(self.showMinimized)
@@ -181,7 +184,11 @@ class LauncherUISetupMixin:
                 )
             )
             self.title_bar.close_requested.connect(self.close)
-            self.title_bar.move_requested.connect(self.move)
+            # Clamp every move target into the virtual desktop so an
+            # off-screen drag does not silently strand the window.
+            self.title_bar.move_requested.connect(
+                lambda pos: self.move(clamp_to_visible_screen(pos))
+            )
 
             # Hide the native OS title bar since we are using a custom one
             self.setWindowFlags(Qt.WindowType.FramelessWindowHint | self.windowFlags())

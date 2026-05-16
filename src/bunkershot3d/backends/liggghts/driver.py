@@ -7,6 +7,7 @@ Install from https://www.lammps.org/download.html (LIGGGHTS-PUBLIC fork).
 
 from __future__ import annotations
 
+import collections.abc
 import math
 import subprocess
 import tempfile
@@ -79,10 +80,10 @@ class LiggghtsDriver:
                 check=True,
                 cwd=str(self._work_path),
             )
-        except FileNotFoundError:
+        except FileNotFoundError as err:
             raise BackendNotImplementedError(
                 "LIGGGHTS not installed. Install from lammps.org"
-            )
+            ) from err
         # CalledProcessError is NOT caught — let it propagate for diagnosability.
 
         self._parse_and_write(self._work_path, Path(output_path))
@@ -246,7 +247,7 @@ run             {total_steps}
 
 def _iter_dump_frames(
     dump_path: Path,
-) -> "collections.abc.Generator[tuple[int, np.ndarray, np.ndarray], None, None]":
+) -> collections.abc.Generator[tuple[int, np.ndarray, np.ndarray], None, None]:
     """Yield ``(timestep, positions, velocities)`` for each frame in a LIGGGHTS dump.
 
     Args:

@@ -163,9 +163,9 @@ class TestAerodynamicsEngineParity:
         s = np.array([10.0, 280.0, -40.0])
         fb = _python_fallback_total(spec, v, s)
         ref = _python_reference_total(spec, v, s)
-        assert np.allclose(
-            fb, ref, atol=1e-15
-        ), f"Python fallback drifted from reference: fb={fb} ref={ref}"
+        assert np.allclose(fb, ref, atol=1e-15), (
+            f"Python fallback drifted from reference: fb={fb} ref={ref}"
+        )
 
 
 class TestAerodynamicsEngineBenchmark:

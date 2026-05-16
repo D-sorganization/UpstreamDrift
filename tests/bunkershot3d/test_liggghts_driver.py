@@ -87,17 +87,21 @@ class TestSetupRaisesWhenBinaryMissing:
         self, dummy_config: Path
     ) -> None:
         driver = LiggghtsDriver(dummy_config)
-        with patch("shutil.which", return_value=None):
-            with pytest.raises(BackendNotImplementedError):
-                driver.setup()
+        with (
+            patch("shutil.which", return_value=None),
+            pytest.raises(BackendNotImplementedError),
+        ):
+            driver.setup()
 
     def test_setup_error_message_mentions_install_location(
         self, dummy_config: Path
     ) -> None:
         driver = LiggghtsDriver(dummy_config)
-        with patch("shutil.which", return_value=None):
-            with pytest.raises(BackendNotImplementedError, match="lammps.org"):
-                driver.setup()
+        with (
+            patch("shutil.which", return_value=None),
+            pytest.raises(BackendNotImplementedError, match="lammps.org"),
+        ):
+            driver.setup()
 
     def test_setup_does_not_raise_file_not_found_error(
         self, dummy_config: Path
@@ -130,9 +134,9 @@ class TestRunRaisesWhenBinaryMissing:
                 "subprocess.run",
                 side_effect=FileNotFoundError("No such file or directory: liggghts"),
             ),
+            pytest.raises(BackendNotImplementedError, match="lammps.org"),
         ):
-            with pytest.raises(BackendNotImplementedError, match="lammps.org"):
-                driver.run(tmp_path / "out.h5")
+            driver.run(tmp_path / "out.h5")
 
     def test_called_process_error_propagates(
         self, dummy_config: Path, tmp_path: Path
@@ -144,15 +148,17 @@ class TestRunRaisesWhenBinaryMissing:
         with (
             patch("shutil.which", return_value="/usr/bin/liggghts"),
             patch("subprocess.run", side_effect=error),
+            pytest.raises(subprocess.CalledProcessError),
         ):
-            with pytest.raises(subprocess.CalledProcessError):
-                driver.run(tmp_path / "out.h5")
+            driver.run(tmp_path / "out.h5")
 
 
 class TestInputDeckGeneration:
     """_generate_input_deck() must produce a syntactically reasonable script."""
 
-    def test_deck_contains_hertz_mindlin(self, dummy_config: Path, tmp_path: Path) -> None:
+    def test_deck_contains_hertz_mindlin(
+        self, dummy_config: Path, tmp_path: Path
+    ) -> None:
         driver = LiggghtsDriver(dummy_config)
         deck = driver._generate_input_deck(tmp_path)
         content = deck.read_text()
@@ -193,7 +199,9 @@ class TestInputDeckGeneration:
 class TestDumpParser:
     """_iter_dump_frames() must parse the standard LIGGGHTS custom dump format."""
 
-    def _write_dump(self, path: Path, frames: list[tuple[int, list[list[float]]]]) -> None:
+    def _write_dump(
+        self, path: Path, frames: list[tuple[int, list[list[float]]]]
+    ) -> None:
         """Write a minimal LIGGGHTS custom dump file."""
         with open(path, "w") as f:
             for step, atoms in frames:
@@ -203,8 +211,10 @@ class TestDumpParser:
                 f.write("ITEM: BOX BOUNDS pp pp pp\n")
                 f.write("0.0 2.0\n0.0 1.0\n0.0 0.5\n")
                 f.write("ITEM: ATOMS id type x y z vx vy vz\n")
-                for i, row in enumerate(atoms, start=1):
-                    f.write(f"{i} 1 " + " ".join(f"{v:.4f}" for v in row) + "\n")
+                f.writelines(
+                    f"{i} 1 " + " ".join(f"{v:.4f}" for v in row) + "\n"
+                    for i, row in enumerate(atoms, start=1)
+                )
 
     def test_parses_single_frame(self, tmp_path: Path) -> None:
         dump = tmp_path / "dump.test"
@@ -244,15 +254,19 @@ class TestParseAndWrite:
     def _write_dump(self, path: Path) -> None:
         with open(path, "w") as f:
             for step in [0, 200]:
-                atoms = [[0.1 * j, 0.05 * j, 0.02 * j, 0.0, 0.0, -0.01] for j in range(3)]
+                atoms = [
+                    [0.1 * j, 0.05 * j, 0.02 * j, 0.0, 0.0, -0.01] for j in range(3)
+                ]
                 n = len(atoms)
                 f.write(f"ITEM: TIMESTEP\n{step}\n")
                 f.write(f"ITEM: NUMBER OF ATOMS\n{n}\n")
                 f.write("ITEM: BOX BOUNDS pp pp pp\n")
                 f.write("0.0 2.0\n0.0 1.0\n0.0 0.5\n")
                 f.write("ITEM: ATOMS id type x y z vx vy vz\n")
-                for i, row in enumerate(atoms, start=1):
-                    f.write(f"{i} 1 " + " ".join(f"{v:.4f}" for v in row) + "\n")
+                f.writelines(
+                    f"{i} 1 " + " ".join(f"{v:.4f}" for v in row) + "\n"
+                    for i, row in enumerate(atoms, start=1)
+                )
 
     def test_creates_hdf5_output(self, dummy_config: Path, tmp_path: Path) -> None:
         driver = LiggghtsDriver(dummy_config)
@@ -262,7 +276,9 @@ class TestParseAndWrite:
         driver._parse_and_write(tmp_path, output)
         assert output.exists()
 
-    def test_hdf5_contains_grain_group(self, dummy_config: Path, tmp_path: Path) -> None:
+    def test_hdf5_contains_grain_group(
+        self, dummy_config: Path, tmp_path: Path
+    ) -> None:
         import h5py
 
         driver = LiggghtsDriver(dummy_config)

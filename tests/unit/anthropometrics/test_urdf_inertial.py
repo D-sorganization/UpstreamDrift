@@ -199,9 +199,9 @@ def test_round_trip_preserves_record(case_id: str, props: SegmentProperties) -> 
         source_subject_mass_kg=props.source_subject_mass_kg,
     )
 
-    assert restored.mass_kg == pytest.approx(
-        props.mass_kg, rel=1e-9, abs=1e-12
-    ), case_id
+    assert restored.mass_kg == pytest.approx(props.mass_kg, rel=1e-9, abs=1e-12), (
+        case_id
+    )
     np.testing.assert_allclose(
         restored.com_xyz_m, props.com_xyz_m, rtol=1e-9, atol=1e-12
     )

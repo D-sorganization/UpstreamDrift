@@ -294,9 +294,7 @@ def export_telemetry_json(filename: str, data_dict: dict[str, Any]) -> bool:
         return False
 
 
-def export_telemetry_csv(
-    filename: str, data_dict: dict[str, Any]
-) -> bool:  # noqa: C901
+def export_telemetry_csv(filename: str, data_dict: dict[str, Any]) -> bool:  # noqa: C901
     """Export telemetry data to CSV."""
     try:
         # Filter for array-like data

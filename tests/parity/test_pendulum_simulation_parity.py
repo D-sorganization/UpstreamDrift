@@ -152,9 +152,9 @@ class TestPendulumEngineDirectly:
         if expected.get("theta1_decreases"):
             # From pi/2, gravity should pull link back toward 0
             theta1_values = [p[0] for p in positions_history]
-            assert (
-                theta1_values[-1] < math.pi / 2
-            ), f"theta1 should decrease from pi/2, got {theta1_values[-1]}"
+            assert theta1_values[-1] < math.pi / 2, (
+                f"theta1 should decrease from pi/2, got {theta1_values[-1]}"
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -179,9 +179,9 @@ class TestPendulumSimulationAPI:
                 },
             },
         )
-        assert (
-            response.status_code == 200
-        ), "Assertion failed: response.status_code == 200"
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
         data = response.json()
         assert data["success"] is True, "Assertion failed: data[success] is True"
         assert data["frames"] == 10, "Assertion failed: data[frames] == 10"
@@ -197,16 +197,16 @@ class TestPendulumSimulationAPI:
                 "timestep": 0.01,
             },
         )
-        assert (
-            response.status_code == 200
-        ), "Assertion failed: response.status_code == 200"
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
         data = response.json()
         assert "data" in data, "Assertion failed: data in data"
         # Data fields depend on recorder implementation
         # At minimum we expect the response to have the standard shape
-        assert isinstance(
-            data["data"], dict
-        ), "Assertion failed: isinstance(data[data], dict)"
+        assert isinstance(data["data"], dict), (
+            "Assertion failed: isinstance(data[data], dict)"
+        )
 
     def test_api_rejects_invalid_engine(self, client) -> None:
         """API should reject requests for non-existent engines."""
@@ -247,17 +247,17 @@ class TestPendulumSimulationAPI:
                 "initial_state": vector["initial_state"],
             },
         )
-        assert (
-            response.status_code == 200
-        ), "Assertion failed: response.status_code == 200"
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
         data = response.json()
         expected = vector["expected"]
-        assert (
-            data["success"] is expected["success"]
-        ), "Assertion failed: data[success] is expected[success]"
-        assert (
-            data["frames"] == expected["frames"]
-        ), "Assertion failed: data[frames] == expected[frames]"
+        assert data["success"] is expected["success"], (
+            "Assertion failed: data[success] is expected[success]"
+        )
+        assert data["frames"] == expected["frames"], (
+            "Assertion failed: data[frames] == expected[frames]"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -292,13 +292,13 @@ class TestPendulumEngineAPIConsistency:
                 },
             },
         )
-        assert (
-            response.status_code == 200
-        ), "Assertion failed: response.status_code == 200"
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
         data = response.json()
-        assert (
-            data["frames"] == expected_frames
-        ), "Assertion failed: data[frames] == expected_frames"
+        assert data["frames"] == expected_frames, (
+            "Assertion failed: data[frames] == expected_frames"
+        )
 
     def test_equilibrium_consistency(self, client, pendulum_engine) -> None:
         """Both paths should agree on equilibrium behavior."""
@@ -321,9 +321,9 @@ class TestPendulumEngineAPIConsistency:
                 },
             },
         )
-        assert (
-            response.status_code == 200
-        ), "Assertion failed: response.status_code == 200"
+        assert response.status_code == 200, (
+            "Assertion failed: response.status_code == 200"
+        )
         data = response.json()
         assert data["success"] is True, "Assertion failed: data[success] is True"
 

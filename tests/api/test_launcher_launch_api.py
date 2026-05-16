@@ -131,12 +131,12 @@ class TestLaunchEndpoint:
         resp = client.get("/api/launcher/manifest")
         assert resp.status_code == 200, "Assertion failed: resp.status_code == 200"
         data = resp.json()
-        assert (
-            data["launcher_csrf_header"] == local_server.LAUNCHER_CSRF_HEADER
-        ), "Assertion failed: data[launcher_csrf_header] == local_server.LAUNCHER_CSRF_HEADER"
-        assert (
-            data["launcher_csrf_token"] == client.app.state.launcher_csrf_token
-        ), "Assertion failed: data[launcher_csrf_token] == client.app.state.launcher_csrf_token"
+        assert data["launcher_csrf_header"] == local_server.LAUNCHER_CSRF_HEADER, (
+            "Assertion failed: data[launcher_csrf_header] == local_server.LAUNCHER_CSRF_HEADER"
+        )
+        assert data["launcher_csrf_token"] == client.app.state.launcher_csrf_token, (
+            "Assertion failed: data[launcher_csrf_token] == client.app.state.launcher_csrf_token"
+        )
 
     def test_launch_without_token_returns_403(self, client) -> None:
         """Cross-site form POSTs cannot launch subprocesses without the token."""
@@ -176,12 +176,12 @@ class TestLaunchEndpoint:
         resp = client.post("/api/launcher/launch/mujoco_unified")
         assert resp.status_code == 200, "Assertion failed: resp.status_code == 200"
         data = resp.json()
-        assert (
-            data["status"] == "launched"
-        ), "Assertion failed: data[status] == launched"
-        assert (
-            data["tile_id"] == "mujoco_unified"
-        ), "Assertion failed: data[tile_id] == mujoco_unified"
+        assert data["status"] == "launched", (
+            "Assertion failed: data[status] == launched"
+        )
+        assert data["tile_id"] == "mujoco_unified", (
+            "Assertion failed: data[tile_id] == mujoco_unified"
+        )
         assert data["name"] == "MuJoCo", "Assertion failed: data[name] == MuJoCo"
 
     def test_launch_drake_success(self, client) -> None:
@@ -189,12 +189,12 @@ class TestLaunchEndpoint:
         resp = client.post("/api/launcher/launch/drake_golf")
         assert resp.status_code == 200, "Assertion failed: resp.status_code == 200"
         data = resp.json()
-        assert (
-            data["status"] == "launched"
-        ), "Assertion failed: data[status] == launched"
-        assert (
-            data["tile_id"] == "drake_golf"
-        ), "Assertion failed: data[tile_id] == drake_golf"
+        assert data["status"] == "launched", (
+            "Assertion failed: data[status] == launched"
+        )
+        assert data["tile_id"] == "drake_golf", (
+            "Assertion failed: data[tile_id] == drake_golf"
+        )
         assert data["name"] == "Drake", "Assertion failed: data[name] == Drake"
 
     def test_launch_tool_tile_success(self, client) -> None:
@@ -202,21 +202,21 @@ class TestLaunchEndpoint:
         resp = client.post("/api/launcher/launch/model_explorer")
         assert resp.status_code == 200, "Assertion failed: resp.status_code == 200"
         data = resp.json()
-        assert (
-            data["status"] == "launched"
-        ), "Assertion failed: data[status] == launched"
-        assert (
-            data["name"] == "Model Explorer"
-        ), "Assertion failed: data[name] == Model Explorer"
+        assert data["status"] == "launched", (
+            "Assertion failed: data[status] == launched"
+        )
+        assert data["name"] == "Model Explorer", (
+            "Assertion failed: data[name] == Model Explorer"
+        )
 
     def test_launch_unknown_tile_returns_404(self, client) -> None:
         """Launching a non-existent tile returns 404."""
         resp = client.post("/api/launcher/launch/nonexistent_tile")
         assert resp.status_code == 404, "Assertion failed: resp.status_code == 404"
         data = resp.json()
-        assert (
-            "not found" in data["detail"].lower()
-        ), "Assertion failed: not found in data[detail].lower()"
+        assert "not found" in data["detail"].lower(), (
+            "Assertion failed: not found in data[detail].lower()"
+        )
 
     def test_launch_calls_handler(self, client) -> None:
         """Launch endpoint invokes the correct handler with the tile's type."""
@@ -229,30 +229,30 @@ class TestLaunchEndpoint:
         client._mock_handler_registry.get_handler.return_value = None
         resp = client.post("/api/launcher/launch/mujoco_unified")
         assert resp.status_code == 400, "Assertion failed: resp.status_code == 400"
-        assert (
-            "no handler" in resp.json()["detail"].lower()
-        ), "Assertion failed: no handler in resp.json()[detail].lower()"
+        assert "no handler" in resp.json()["detail"].lower(), (
+            "Assertion failed: no handler in resp.json()[detail].lower()"
+        )
 
     def test_launch_handler_failure_returns_500(self, client) -> None:
         """If handler.launch() returns False, returns 500."""
         client._mock_handler.launch.return_value = False
         resp = client.post("/api/launcher/launch/drake_golf")
         assert resp.status_code == 500, "Assertion failed: resp.status_code == 500"
-        assert (
-            "failed to launch" in resp.json()["detail"].lower()
-        ), "Assertion failed: failed to launch in resp.json()[detail].lower()"
+        assert "failed to launch" in resp.json()["detail"].lower(), (
+            "Assertion failed: failed to launch in resp.json()[detail].lower()"
+        )
 
     def test_launch_all_manifest_tiles(self, client, manifest) -> None:
         """Every tile in the manifest can be launched (handler returns True)."""
         for tile in manifest["tiles"]:
             resp = client.post(f"/api/launcher/launch/{tile['id']}")
-            assert (
-                resp.status_code == 200
-            ), f"Failed to launch tile '{tile['id']}': {resp.json()}"
+            assert resp.status_code == 200, (
+                f"Failed to launch tile '{tile['id']}': {resp.json()}"
+            )
             data = resp.json()
-            assert (
-                data["tile_id"] == tile["id"]
-            ), "Assertion failed: data[tile_id] == tile[id]"
+            assert data["tile_id"] == tile["id"], (
+                "Assertion failed: data[tile_id] == tile[id]"
+            )
 
     def test_launch_response_shape(self, client) -> None:
         """Launch response has exactly {status, tile_id, name} keys."""
@@ -269,9 +269,9 @@ class TestLaunchEndpoint:
         client.post("/api/launcher/launch/putting_green")
         # The manifest says putting_green has type "putting_green"
         call_args = client._mock_handler_registry.get_handler.call_args_list[-1]
-        assert (
-            call_args[0][0] == "putting_green"
-        ), "Assertion failed: call_args[0][0] == putting_green"
+        assert call_args[0][0] == "putting_green", (
+            "Assertion failed: call_args[0][0] == putting_green"
+        )
 
 
 # ── GET /api/launcher/processes ──────────────────────────────────────
@@ -299,18 +299,18 @@ class TestProcessesEndpoint:
         resp = client.get("/api/launcher/processes")
         assert resp.status_code == 200, "Assertion failed: resp.status_code == 200"
         procs = resp.json()["processes"]
-        assert (
-            "MuJoCo Humanoid Golf" in procs
-        ), "Assertion failed: MuJoCo Humanoid Golf in procs"
-        assert (
-            procs["MuJoCo Humanoid Golf"]["pid"] == 12345
-        ), "Assertion failed: procs[MuJoCo Humanoid Golf][pid] == 12345"
-        assert (
-            procs["MuJoCo Humanoid Golf"]["running"] is True
-        ), "Assertion failed: procs[MuJoCo Humanoid Golf][running] is True"
-        assert (
-            procs["MuJoCo Humanoid Golf"]["exit_code"] is None
-        ), "Assertion failed: procs[MuJoCo Humanoid Golf][exit_code] is None"
+        assert "MuJoCo Humanoid Golf" in procs, (
+            "Assertion failed: MuJoCo Humanoid Golf in procs"
+        )
+        assert procs["MuJoCo Humanoid Golf"]["pid"] == 12345, (
+            "Assertion failed: procs[MuJoCo Humanoid Golf][pid] == 12345"
+        )
+        assert procs["MuJoCo Humanoid Golf"]["running"] is True, (
+            "Assertion failed: procs[MuJoCo Humanoid Golf][running] is True"
+        )
+        assert procs["MuJoCo Humanoid Golf"]["exit_code"] is None, (
+            "Assertion failed: procs[MuJoCo Humanoid Golf][exit_code] is None"
+        )
 
     def test_exited_process_listed(self, client) -> None:
         """An exited process is listed with running=False and exit_code."""
@@ -321,15 +321,15 @@ class TestProcessesEndpoint:
 
         resp = client.get("/api/launcher/processes")
         procs = resp.json()["processes"]
-        assert (
-            "Drake Golf Model" in procs
-        ), "Assertion failed: Drake Golf Model in procs"
-        assert (
-            procs["Drake Golf Model"]["running"] is False
-        ), "Assertion failed: procs[Drake Golf Model][running] is False"
-        assert (
-            procs["Drake Golf Model"]["exit_code"] == 1
-        ), "Assertion failed: procs[Drake Golf Model][exit_code] == 1"
+        assert "Drake Golf Model" in procs, (
+            "Assertion failed: Drake Golf Model in procs"
+        )
+        assert procs["Drake Golf Model"]["running"] is False, (
+            "Assertion failed: procs[Drake Golf Model][running] is False"
+        )
+        assert procs["Drake Golf Model"]["exit_code"] == 1, (
+            "Assertion failed: procs[Drake Golf Model][exit_code] == 1"
+        )
 
     def test_multiple_processes(self, client) -> None:
         """Multiple processes are listed correctly."""
@@ -342,15 +342,15 @@ class TestProcessesEndpoint:
         resp = client.get("/api/launcher/processes")
         procs = resp.json()["processes"]
         assert len(procs) == 3, "Assertion failed: len(procs) == 3"
-        assert (
-            procs["Engine A"]["pid"] == 100
-        ), "Assertion failed: procs[Engine A][pid] == 100"
-        assert (
-            procs["Engine B"]["pid"] == 200
-        ), "Assertion failed: procs[Engine B][pid] == 200"
-        assert (
-            procs["Tool C"]["pid"] == 300
-        ), "Assertion failed: procs[Tool C][pid] == 300"
+        assert procs["Engine A"]["pid"] == 100, (
+            "Assertion failed: procs[Engine A][pid] == 100"
+        )
+        assert procs["Engine B"]["pid"] == 200, (
+            "Assertion failed: procs[Engine B][pid] == 200"
+        )
+        assert procs["Tool C"]["pid"] == 300, (
+            "Assertion failed: procs[Tool C][pid] == 300"
+        )
 
 
 # ── POST /api/launcher/stop/{name} ──────────────────────────────────
@@ -391,17 +391,17 @@ class TestStopEndpoint:
         assert resp.status_code == 200, "Assertion failed: resp.status_code == 200"
         data = resp.json()
         assert data["status"] == "stopped", "Assertion failed: data[status] == stopped"
-        assert (
-            data["name"] == "MuJoCo Humanoid Golf"
-        ), "Assertion failed: data[name] == MuJoCo Humanoid Golf"
+        assert data["name"] == "MuJoCo Humanoid Golf", (
+            "Assertion failed: data[name] == MuJoCo Humanoid Golf"
+        )
 
     def test_stop_unknown_process_returns_404(self, client) -> None:
         """Stopping a non-existent process returns 404."""
         resp = client.post("/api/launcher/stop/nonexistent_engine")
         assert resp.status_code == 404, "Assertion failed: resp.status_code == 404"
-        assert (
-            "not found" in resp.json()["detail"].lower()
-        ), "Assertion failed: not found in resp.json()[detail].lower()"
+        assert "not found" in resp.json()["detail"].lower(), (
+            "Assertion failed: not found in resp.json()[detail].lower()"
+        )
 
     def test_stop_removes_from_running(self, client) -> None:
         """After stopping, the process is removed from running_processes."""
@@ -412,9 +412,9 @@ class TestStopEndpoint:
         with patch("src.shared.python.security.subprocess_utils.kill_process_tree"):
             client.post("/api/launcher/stop/Test Engine")
 
-        assert (
-            "Test Engine" not in client._mock_process_manager.running_processes
-        ), "Assertion failed: Test Engine not in client._mock_process_manager.running_processes"
+        assert "Test Engine" not in client._mock_process_manager.running_processes, (
+            "Assertion failed: Test Engine not in client._mock_process_manager.running_processes"
+        )
 
     def test_stop_calls_kill_process_tree(self, client) -> None:
         """Stop endpoint uses kill_process_tree to terminate the process."""
@@ -449,9 +449,9 @@ class TestLaunchLifecycle:
 
         # List
         resp = client.get("/api/launcher/processes")
-        assert (
-            "MuJoCo" in resp.json()["processes"]
-        ), "Assertion failed: MuJoCo in resp.json()[processes]"
+        assert "MuJoCo" in resp.json()["processes"], (
+            "Assertion failed: MuJoCo in resp.json()[processes]"
+        )
 
     def test_launch_list_stop_list(self, client) -> None:
         """Full lifecycle: launch → list → stop → list empty."""
@@ -464,9 +464,9 @@ class TestLaunchLifecycle:
 
         # List — should have process
         resp = client.get("/api/launcher/processes")
-        assert (
-            "Drake Golf Model" in resp.json()["processes"]
-        ), "Assertion failed: Drake Golf Model in resp.json()[processes]"
+        assert "Drake Golf Model" in resp.json()["processes"], (
+            "Assertion failed: Drake Golf Model in resp.json()[processes]"
+        )
 
         # Stop
         with patch("src.shared.python.security.subprocess_utils.kill_process_tree"):
@@ -475,9 +475,9 @@ class TestLaunchLifecycle:
 
         # List — should be empty
         resp = client.get("/api/launcher/processes")
-        assert (
-            "Drake Golf Model" not in resp.json()["processes"]
-        ), "Assertion failed: Drake Golf Model not in resp.json()[processes]"
+        assert "Drake Golf Model" not in resp.json()["processes"], (
+            "Assertion failed: Drake Golf Model not in resp.json()[processes]"
+        )
 
 
 # ── Manifest consistency ─────────────────────────────────────────────

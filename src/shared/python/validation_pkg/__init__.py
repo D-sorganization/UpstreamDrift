@@ -1,6 +1,10 @@
 """Physics validation, statistical analysis, data fitting, and workflow diagnostics."""
 
-from .comparative_analysis import AlignedSignals, ComparativeSwingAnalyzer, ComparisonMetric
+from .comparative_analysis import (
+    AlignedSignals,
+    ComparativeSwingAnalyzer,
+    ComparisonMetric,
+)
 from .comparative_plotting import ComparativePlotter
 from .data_fitting import (
     A3FittingPipeline,

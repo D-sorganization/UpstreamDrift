@@ -43,17 +43,17 @@ class TestLoaderWiring:
         """OpenSim has a loader in LOADER_MAP."""
         from src.shared.python.engine_core.engine_loaders import LOADER_MAP
 
-        assert (
-            EngineType.OPENSIM in LOADER_MAP
-        ), "Assertion failed: EngineType.OPENSIM in LOADER_MAP"
+        assert EngineType.OPENSIM in LOADER_MAP, (
+            "Assertion failed: EngineType.OPENSIM in LOADER_MAP"
+        )
 
     def test_myosim_in_loader_map(self) -> None:
         """MyoSim has a loader in LOADER_MAP."""
         from src.shared.python.engine_core.engine_loaders import LOADER_MAP
 
-        assert (
-            EngineType.MYOSIM in LOADER_MAP
-        ), "Assertion failed: EngineType.MYOSIM in LOADER_MAP"
+        assert EngineType.MYOSIM in LOADER_MAP, (
+            "Assertion failed: EngineType.MYOSIM in LOADER_MAP"
+        )
 
     def test_opensim_loader_imports_correct_class(self) -> None:
         """OpenSim loader references OpenSimPhysicsEngine."""
@@ -62,9 +62,9 @@ class TestLoaderWiring:
         from src.shared.python.engine_core.engine_loaders import load_opensim_engine
 
         source = inspect.getsource(load_opensim_engine)
-        assert (
-            "OpenSimPhysicsEngine" in source
-        ), "Assertion failed: OpenSimPhysicsEngine in source"
+        assert "OpenSimPhysicsEngine" in source, (
+            "Assertion failed: OpenSimPhysicsEngine in source"
+        )
 
     def test_myosim_loader_imports_correct_class(self) -> None:
         """MyoSim loader references MyoSuitePhysicsEngine."""
@@ -73,9 +73,9 @@ class TestLoaderWiring:
         from src.shared.python.engine_core.engine_loaders import load_myosim_engine
 
         source = inspect.getsource(load_myosim_engine)
-        assert (
-            "MyoSuitePhysicsEngine" in source
-        ), "Assertion failed: MyoSuitePhysicsEngine in source"
+        assert "MyoSuitePhysicsEngine" in source, (
+            "Assertion failed: MyoSuitePhysicsEngine in source"
+        )
 
 
 # ──────────────────────────────────────────────────────────────
@@ -88,17 +88,17 @@ class TestEngineAvailability:
         """OPENSIM_AVAILABLE flag is defined."""
         from src.shared.python.engine_core.engine_availability import OPENSIM_AVAILABLE
 
-        assert isinstance(
-            OPENSIM_AVAILABLE, bool
-        ), "Assertion failed: isinstance(OPENSIM_AVAILABLE, bool)"
+        assert isinstance(OPENSIM_AVAILABLE, bool), (
+            "Assertion failed: isinstance(OPENSIM_AVAILABLE, bool)"
+        )
 
     def test_myosuite_availability_flag_exists(self) -> None:
         """MYOSUITE_AVAILABLE flag is defined."""
         from src.shared.python.engine_core.engine_availability import MYOSUITE_AVAILABLE
 
-        assert isinstance(
-            MYOSUITE_AVAILABLE, bool
-        ), "Assertion failed: isinstance(MYOSUITE_AVAILABLE, bool)"
+        assert isinstance(MYOSUITE_AVAILABLE, bool), (
+            "Assertion failed: isinstance(MYOSUITE_AVAILABLE, bool)"
+        )
 
 
 # ──────────────────────────────────────────────────────────────
@@ -133,12 +133,12 @@ class TestOpenSimProtocol:
         ]
 
         for method in required_methods:
-            assert hasattr(
-                OpenSimPhysicsEngine, method
-            ), f"OpenSimPhysicsEngine missing required method: {method}"
-            assert callable(
-                getattr(OpenSimPhysicsEngine, method)
-            ), "Assertion failed: callable(getattr(OpenSimPhysicsEngine, method))"
+            assert hasattr(OpenSimPhysicsEngine, method), (
+                f"OpenSimPhysicsEngine missing required method: {method}"
+            )
+            assert callable(getattr(OpenSimPhysicsEngine, method)), (
+                "Assertion failed: callable(getattr(OpenSimPhysicsEngine, method))"
+            )
 
     def test_opensim_has_biomech_methods(self) -> None:
         """OpenSimPhysicsEngine has golf-specific biomechanics methods."""
@@ -151,9 +151,9 @@ class TestOpenSimProtocol:
             "create_grip_model",
         ]
         for method in biomech_methods:
-            assert hasattr(
-                OpenSimPhysicsEngine, method
-            ), f"OpenSimPhysicsEngine missing biomech method: {method}"
+            assert hasattr(OpenSimPhysicsEngine, method), (
+                f"OpenSimPhysicsEngine missing biomech method: {method}"
+            )
 
     def test_opensim_uninitialized_state(self) -> None:
         """Uninitialized OpenSimPhysicsEngine reports not initialized."""
@@ -162,13 +162,11 @@ class TestOpenSimProtocol:
         )
 
         engine = OpenSimPhysicsEngine()
-        assert (
-            engine.is_initialized is False
-        )  # noqa: E712, "Assertion failed: engine.is_initialized is False  # noqa: E712"
+        assert engine.is_initialized is False  # noqa: E712, "Assertion failed: engine.is_initialized is False  # noqa: E712"
         # When uninitialized, model_name may return a default marker string
-        assert isinstance(
-            engine.model_name, str
-        ), "Assertion failed: isinstance(engine.model_name, str)"
+        assert isinstance(engine.model_name, str), (
+            "Assertion failed: isinstance(engine.model_name, str)"
+        )
 
 
 # ──────────────────────────────────────────────────────────────
@@ -203,12 +201,12 @@ class TestMyoSuiteProtocol:
         ]
 
         for method in required_methods:
-            assert hasattr(
-                MyoSuitePhysicsEngine, method
-            ), f"MyoSuitePhysicsEngine missing required method: {method}"
-            assert callable(
-                getattr(MyoSuitePhysicsEngine, method)
-            ), "Assertion failed: callable(getattr(MyoSuitePhysicsEngine, method))"
+            assert hasattr(MyoSuitePhysicsEngine, method), (
+                f"MyoSuitePhysicsEngine missing required method: {method}"
+            )
+            assert callable(getattr(MyoSuitePhysicsEngine, method)), (
+                "Assertion failed: callable(getattr(MyoSuitePhysicsEngine, method))"
+            )
 
     def test_myosuite_has_muscle_methods(self) -> None:
         """MyoSuitePhysicsEngine has muscle control methods."""
@@ -224,9 +222,9 @@ class TestMyoSuiteProtocol:
             "get_muscle_names",
         ]
         for method in muscle_methods:
-            assert hasattr(
-                MyoSuitePhysicsEngine, method
-            ), f"MyoSuitePhysicsEngine missing muscle method: {method}"
+            assert hasattr(MyoSuitePhysicsEngine, method), (
+                f"MyoSuitePhysicsEngine missing muscle method: {method}"
+            )
 
     def test_myosuite_uninitialized_state(self) -> None:
         """Uninitialized MyoSuitePhysicsEngine reports not initialized."""
@@ -235,13 +233,11 @@ class TestMyoSuiteProtocol:
         )
 
         engine = MyoSuitePhysicsEngine()
-        assert (
-            engine.is_initialized is False
-        )  # noqa: E712, "Assertion failed: engine.is_initialized is False  # noqa: E712"
+        assert engine.is_initialized is False  # noqa: E712, "Assertion failed: engine.is_initialized is False  # noqa: E712"
         # When uninitialized, model_name may return a default marker string
-        assert isinstance(
-            engine.model_name, str
-        ), "Assertion failed: isinstance(engine.model_name, str)"
+        assert isinstance(engine.model_name, str), (
+            "Assertion failed: isinstance(engine.model_name, str)"
+        )
 
 
 # ──────────────────────────────────────────────────────────────
@@ -254,17 +250,17 @@ class TestMyoSuiteAdapter:
         """MuscleDrivenEnv is importable from the adapter module."""
         from src.shared.python.biomechanics.myosuite_adapter import MuscleDrivenEnv
 
-        assert (
-            MuscleDrivenEnv is not None
-        ), "Assertion failed: MuscleDrivenEnv is not None"
+        assert MuscleDrivenEnv is not None, (
+            "Assertion failed: MuscleDrivenEnv is not None"
+        )
 
     def test_train_policy_function_exists(self) -> None:
         """train_muscle_policy function is importable."""
         from src.shared.python.biomechanics.myosuite_adapter import train_muscle_policy
 
-        assert callable(
-            train_muscle_policy
-        ), "Assertion failed: callable(train_muscle_policy)"
+        assert callable(train_muscle_policy), (
+            "Assertion failed: callable(train_muscle_policy)"
+        )
 
     def test_muscle_driven_env_init_with_mock(self) -> None:
         """MuscleDrivenEnv initializes with a mock muscle system."""

@@ -71,9 +71,7 @@ def _mujoco_angle_of_repose(
         '<geom type="plane" size="1 1 0.1" rgba="0.5 0.5 0.5 1"/>'
         f'<geom type="cylinder" size="{cyl_radius} {cyl_height / 2}" '
         f'pos="0 0 {cyl_height / 2}" rgba="0.7 0.7 0.9 0.3" '
-        'contype="1" conaffinity="1"/>'
-        + grains_xml
-        + "</worldbody></mujoco>"
+        'contype="1" conaffinity="1"/>' + grains_xml + "</worldbody></mujoco>"
     )
 
     model = mujoco.MjModel.from_xml_string(xml)

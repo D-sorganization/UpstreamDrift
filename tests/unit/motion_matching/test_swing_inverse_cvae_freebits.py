@@ -206,9 +206,9 @@ def test_training_keeps_nonzero_val_kl(tmp_path: Path) -> None:
     )
     last = result.history[-1]
     # The headline sanity check: posterior didn't collapse to the prior.
-    assert (
-        last.val_kl > 0.05
-    ), f"val_kl looks collapsed: {last.val_kl} (history={result.history})"
+    assert last.val_kl > 0.05, (
+        f"val_kl looks collapsed: {last.val_kl} (history={result.history})"
+    )
 
 
 def test_recon_now_o1_under_standardisation(tmp_path: Path) -> None:

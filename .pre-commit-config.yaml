@@ -115,6 +115,18 @@ repos:
             src/legacy/|
             src/experimental/|
             src/shared/python/pendulum_simulator/|
+            src/launchers/|
+            src/engines/physics_engines/mujoco/python/|
+            src/engines/physics_engines/drake/python/src/|
+            src/engines/physics_engines/pinocchio/python/pinocchio_golf/|
+            src/bunkershot3d/backends/chrono/|
+            src/shared/python/humanoid_character_builder/generators/|
+            src/shared/python/assessment/|
+            src/tools/starting_pose_matcher/|
+            src/shared/python/data_io/export\.py|
+            src/shared/python/data_io/marker_mapping\.py|
+            src/engines/common/export\.py|
+            src/engines/Simscape_Multibody_Models/|
             __pycache__/|
             \.pytest_cache/|
             \.venv/|

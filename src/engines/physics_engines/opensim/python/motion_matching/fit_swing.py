@@ -181,7 +181,7 @@ def _resolve_simulate_fn(
             "Install/merge #4120 or pass a simulate_fn for tests."
         ) from exc
 
-    return simulate_with_coefficients
+    return simulate_with_coefficients  # type: ignore[return-value]
 
 
 def _resolve_theta0(
@@ -344,7 +344,7 @@ def fit_swing_opensim(
     # within floating-point tolerance.
     assert result.history, "FitResult.history must not be empty"
     assert np.isfinite(result.final_cost), "FitResult.cost must be finite"
-    assert result.theta_optimal.shape == (
-        d,
-    ), f"FitResult.theta shape {result.theta_optimal.shape} != ({d},)"
+    assert result.theta_optimal.shape == (d,), (
+        f"FitResult.theta shape {result.theta_optimal.shape} != ({d},)"
+    )
     return result

@@ -63,7 +63,11 @@ from .plotting_utils import (
     save_figure,
     setup_plot_style,
 )
-from .video_pose_pipeline import VideoPosePipeline, VideoProcessingConfig, VideoProcessingResult
+from .video_pose_pipeline import (
+    VideoPosePipeline,
+    VideoProcessingConfig,
+    VideoProcessingResult,
+)
 from .viewpoint_controls import (
     CameraPreset,
     CameraState,

@@ -29,23 +29,23 @@ class TestEngineIntegration:
         manager = EngineManager()
 
         # Should have initialized with real paths
-        assert (
-            manager.suite_root.exists()
-        ), "Assertion failed: manager.suite_root.exists()"
-        assert (
-            manager.engines_root.exists()
-        ), "Assertion failed: manager.engines_root.exists()"
+        assert manager.suite_root.exists(), (
+            "Assertion failed: manager.suite_root.exists()"
+        )
+        assert manager.engines_root.exists(), (
+            "Assertion failed: manager.engines_root.exists()"
+        )
 
         # Should have discovered some engines (at least the ones in the repo)
         available_engines = manager.get_available_engines()
-        assert isinstance(
-            available_engines, list
-        ), "Assertion failed: isinstance(available_engines, list)"
+        assert isinstance(available_engines, list), (
+            "Assertion failed: isinstance(available_engines, list)"
+        )
 
         # Each engine type should have a path defined
-        assert (
-            len(manager.engine_paths) >= len(EngineType) - 1
-        ), "Assertion failed: len(manager.engine_paths) >= len(EngineType) - 1"
+        assert len(manager.engine_paths) >= len(EngineType) - 1, (
+            "Assertion failed: len(manager.engine_paths) >= len(EngineType) - 1"
+        )
 
     @pytest.mark.integration
     def test_engine_availability_matches_filesystem(self) -> None:
@@ -59,9 +59,9 @@ class TestEngineIntegration:
         # For each available engine, verify its path actually exists
         for engine in available_engines:
             engine_path = manager.engine_paths[engine]
-            assert (
-                engine_path.exists()
-            ), f"{engine} marked available but path missing: {engine_path}"
+            assert engine_path.exists(), (
+                f"{engine} marked available but path missing: {engine_path}"
+            )
 
         # For unavailable engines, verify why they're unavailable
         for engine in EngineType:
@@ -71,9 +71,9 @@ class TestEngineIntegration:
                 if engine_path.exists():
                     # Path exists but validation failed - expected for incomplete installations
                     result = manager.validate_engine_configuration(engine)
-                    assert (
-                        result is False
-                    ), f"{engine} exists but should fail validation"
+                    assert result is False, (
+                        f"{engine} exists but should fail validation"
+                    )
 
     @pytest.mark.integration
     def test_engine_probe_consistency(self) -> None:
@@ -85,9 +85,9 @@ class TestEngineIntegration:
 
         # Most engine types should have an associated probe
         # (newer engines may not have probes yet)
-        assert (
-            len(manager.probes) >= len(EngineType) - 3
-        ), "Assertion failed: len(manager.probes) >= len(EngineType) - 3"
+        assert len(manager.probes) >= len(EngineType) - 3, (
+            "Assertion failed: len(manager.probes) >= len(EngineType) - 3"
+        )
 
         # Run probes and check consistency
         for engine_type, probe in manager.probes.items():
@@ -96,9 +96,9 @@ class TestEngineIntegration:
                 probe_result = probe.is_available()  # type: ignore[attr-defined]
 
                 # Result should be a dict or have expected attributes
-                assert isinstance(
-                    probe_result, dict | bool | type(None)
-                ), "Assertion failed: isinstance(probe_result, dict | bool | type(None))"
+                assert isinstance(probe_result, dict | bool | type(None)), (
+                    "Assertion failed: isinstance(probe_result, dict | bool | type(None))"
+                )
 
                 # If probe says available, engine should be in available list
                 available_engines = manager.get_available_engines()
@@ -142,12 +142,12 @@ class TestEngineIntegration:
                 setattr(mock_instance, param, value)
 
             # Should not raise exceptions
-            assert (
-                mock_instance.swing_speed == 100.0
-            ), "Assertion failed: mock_instance.swing_speed == 100.0"
-            assert (
-                mock_instance.club_type == "driver"
-            ), "Assertion failed: mock_instance.club_type == driver"
+            assert mock_instance.swing_speed == 100.0, (
+                "Assertion failed: mock_instance.swing_speed == 100.0"
+            )
+            assert mock_instance.club_type == "driver", (
+                "Assertion failed: mock_instance.club_type == driver"
+            )
 
     @pytest.mark.integration
     @pytest.mark.slow
@@ -183,19 +183,19 @@ class TestEngineIntegration:
             }
 
         # Verify we have performance data
-        assert (
-            len(performance_results) > 0
-        ), "Assertion failed: len(performance_results) > 0"
+        assert len(performance_results) > 0, (
+            "Assertion failed: len(performance_results) > 0"
+        )
 
         # All simulations should complete successfully
         for perf_data in performance_results.values():
-            assert (
-                "simulation_time" in perf_data
-            ), "Assertion failed: simulation_time in perf_data"
+            assert "simulation_time" in perf_data, (
+                "Assertion failed: simulation_time in perf_data"
+            )
             assert "result" in perf_data, "Assertion failed: result in perf_data"
-            assert (
-                perf_data["result"]["ball_distance"] == 250.0
-            ), "Assertion failed: perf_data[result][ball_distance] == 250.0"
+            assert perf_data["result"]["ball_distance"] == 250.0, (
+                "Assertion failed: perf_data[result][ball_distance] == 250.0"
+            )
 
 
 class TestEngineDataFlow:

@@ -57,15 +57,15 @@ class TestModelPortability:
         # Find joint connecting world to base
         world_to_base = result.get_joint("world_to_base")
         assert world_to_base is not None, "Assertion failed: world_to_base is not None"
-        assert (
-            world_to_base.joint_type.value == "fixed"
-        ), "Assertion failed: world_to_base.joint_type.value == fixed"
-        assert (
-            world_to_base.parent == "world"
-        ), "Assertion failed: world_to_base.parent == world"
-        assert (
-            world_to_base.child == "base_link"
-        ), "Assertion failed: world_to_base.child == base_link"
+        assert world_to_base.joint_type.value == "fixed", (
+            "Assertion failed: world_to_base.joint_type.value == fixed"
+        )
+        assert world_to_base.parent == "world", (
+            "Assertion failed: world_to_base.parent == world"
+        )
+        assert world_to_base.child == "base_link", (
+            "Assertion failed: world_to_base.child == base_link"
+        )
 
 
 if __name__ == "__main__":

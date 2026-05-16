@@ -98,12 +98,12 @@ class TestPyQtStartResetsState:
 
         assert controller.time == pytest.approx(0.0), "_start() must reset time to 0"
         # State must be at the default/reset position, not the evolved one
-        assert controller.state_double.omega1 == pytest.approx(
-            0.0
-        ), "_start() must reset omega1 to 0"
-        assert controller.state_double.omega2 == pytest.approx(
-            0.0
-        ), "_start() must reset omega2 to 0"
+        assert controller.state_double.omega1 == pytest.approx(0.0), (
+            "_start() must reset omega1 to 0"
+        )
+        assert controller.state_double.omega2 == pytest.approx(0.0), (
+            "_start() must reset omega2 to 0"
+        )
 
     def test_start_resets_state_triple(self, qapp) -> None:  # noqa: ARG002
         """After _start(), state_triple must be the initial/default state."""
@@ -117,12 +117,12 @@ class TestPyQtStartResetsState:
         controller._start()
 
         assert controller.time == pytest.approx(0.0)
-        assert controller.state_triple.omega1 == pytest.approx(
-            0.0
-        ), "_start() must reset omega1 to 0"
-        assert controller.state_triple.omega3 == pytest.approx(
-            0.0
-        ), "_start() must reset omega3 to 0"
+        assert controller.state_triple.omega1 == pytest.approx(0.0), (
+            "_start() must reset omega1 to 0"
+        )
+        assert controller.state_triple.omega3 == pytest.approx(0.0), (
+            "_start() must reset omega3 to 0"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -172,9 +172,9 @@ class TestTriplePendulumPlaneConstraint:
         )
         pts = controller._points_triple(state)
         y_coords = pts[:, 1]
-        assert np.allclose(
-            y_coords, 0.0, atol=1e-6
-        ), f"At plane_inclination=0, y-coords should be ~0 but got {y_coords}"
+        assert np.allclose(y_coords, 0.0, atol=1e-6), (
+            f"At plane_inclination=0, y-coords should be ~0 but got {y_coords}"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -231,6 +231,6 @@ class TestSafeEvalErrorSurfacing:
                     has_error_display = True
                     break
 
-        assert (
-            has_error_display
-        ), "After an invalid torque expression, no visible error was shown in the UI"
+        assert has_error_display, (
+            "After an invalid torque expression, no visible error was shown in the UI"
+        )

@@ -20,7 +20,12 @@ class TestExpectedTileIdsMatchesModelsYaml:
         """EXPECTED_TILE_IDS must not contain removed IDs like 'simscape_2d'."""
         from src.launchers.launcher_diagnostics import LauncherDiagnostics
 
-        stale_ids = {"simscape_2d", "simscape_3d", "dataset_generator", "matlab_analysis"}
+        stale_ids = {
+            "simscape_2d",
+            "simscape_3d",
+            "dataset_generator",
+            "matlab_analysis",
+        }
         present_stale = stale_ids & set(LauncherDiagnostics.EXPECTED_TILE_IDS)
         assert not present_stale, (
             f"EXPECTED_TILE_IDS still contains stale IDs: {present_stale}"
@@ -115,7 +120,9 @@ class TestDiagnosticEmitsAppStateEvents:
             patch.dict(
                 "sys.modules",
                 {
-                    "yaml": MagicMock(safe_load=MagicMock(return_value=mock_yaml_result)),
+                    "yaml": MagicMock(
+                        safe_load=MagicMock(return_value=mock_yaml_result)
+                    ),
                 },
                 clear=False,
             ),

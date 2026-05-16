@@ -36,16 +36,16 @@ class TestGripModellingFileSizes:
     @pytest.mark.unit
     def test_grip_modelling_split_2456_coordinator_loc(self) -> None:
         loc = _count_lines(GRIP_DIR / "grip_modelling_tab.py")
-        assert (
-            loc <= LOC_BUDGET_COORDINATOR
-        ), f"grip_modelling_tab.py has {loc} LOC; budget {LOC_BUDGET_COORDINATOR}"
+        assert loc <= LOC_BUDGET_COORDINATOR, (
+            f"grip_modelling_tab.py has {loc} LOC; budget {LOC_BUDGET_COORDINATOR}"
+        )
 
     @pytest.mark.unit
     def test_widgets_loc(self) -> None:
         loc = _count_lines(GRIP_DIR / "_grip_modelling_widgets.py")
-        assert (
-            loc <= LOC_BUDGET_WIDGETS
-        ), f"_grip_modelling_widgets.py has {loc} LOC; budget {LOC_BUDGET_WIDGETS}"
+        assert loc <= LOC_BUDGET_WIDGETS, (
+            f"_grip_modelling_widgets.py has {loc} LOC; budget {LOC_BUDGET_WIDGETS}"
+        )
 
 
 @pytest.mark.skipif(not _mujoco_available, reason="mujoco not installed")

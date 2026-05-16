@@ -317,7 +317,13 @@ class AsyncStartupWorker(QThread):
 
             self.progress_signal.emit("Checking Docker status...", 60)
             try:
-                secure_run(["docker", "--version"], timeout=2.0, check=True)
+                # Use the WSL-aware resolver so Windows hosts running Docker
+                # inside WSL pass the probe instead of hitting WinError 2 on
+                # a non-existent native ``docker.exe``.
+                from src.launchers.docker_manager import get_docker_cmd
+
+                docker_cmd = get_docker_cmd() + ["--version"]
+                secure_run(docker_cmd, timeout=2.0, check=True)
                 self.results.docker_available = True
             except Exception as e:  # noqa: BLE001
                 self.results.docker_available = False

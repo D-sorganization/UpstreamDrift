@@ -10,6 +10,6 @@ def test_headless_plotting_import() -> None:
     import importlib.util
 
     spec = importlib.util.find_spec("src.shared.python.plotting")
-    assert (
-        spec is not None
-    ), "src.shared.python.plotting should be importable in headless mode"
+    assert spec is not None, (
+        "src.shared.python.plotting should be importable in headless mode"
+    )
