@@ -345,3 +345,25 @@ models:
       logo: "project_map.svg"
       status: "ready"
       default_launch: "tab"
+
+  # =============================================================================
+  # PHYSICS-INFORMED NEURAL NETWORKS
+  # =============================================================================
+
+  - id: "pinn_pure_rigid"
+    name: "Pure Rigid Body"
+    description: "Pinocchio inverse dynamics only — no ML"
+    type: "physics_informed"
+    mode: "pure_rigid"
+    launcher:
+      category: "biomechanics"
+      status: "experimental"
+
+  - id: "pinn_hybrid"
+    name: "PINN Hybrid"
+    description: "Rigid body + JAX residual torque MLP"
+    type: "physics_informed"
+    mode: "pinn_hybrid"
+    launcher:
+      category: "biomechanics"
+      status: "experimental"
