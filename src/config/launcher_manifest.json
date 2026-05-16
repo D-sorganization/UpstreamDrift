@@ -120,7 +120,7 @@
       "id": "putting_green",
       "name": "Putting Green",
       "description": "Realistic putting green simulation with ball rolling physics",
-      "category": "physics_engine",
+      "category": "simulation",
       "type": "putting_green",
       "path": "src/engines/physics_engines/putting_green/python/simulator.py",
       "engine_type": "putting_green",
@@ -146,7 +146,7 @@
       "id": "motion_target_preview",
       "name": "Motion-Match Preview",
       "description": "Preview multi-source motion-capture targets (C3D, .mat, body markers, club/ball) on a shared timegrid before driving a physics-engine model.",
-      "category": "tool",
+      "category": "motion_matching",
       "type": "special_app",
       "path": "src.tools.starting_pose_matcher.__main__",
       "logo": "motion_target_preview.svg",
@@ -292,6 +292,58 @@
         "project_overview"
       ],
       "order": 15
+    },
+    {
+      "id": "cross_engine_dashboard",
+      "name": "Cross-Engine Dashboard",
+      "description": "Compare perturbation robustness and trajectories across physics engines side-by-side",
+      "category": "simulation",
+      "type": "special_app",
+      "path": "src/launchers/cross_engine_dashboard.py",
+      "logo": "golf_logo.png",
+      "status": "gui_ready",
+      "capabilities": [
+        "cross_engine",
+        "perturbation",
+        "comparison",
+        "visualization"
+      ],
+      "order": 16
+    },
+    {
+      "id": "exercise_dashboard",
+      "name": "Exercise Dashboard",
+      "description": "Cross-engine biomechanics exercise dashboard — select a movement (gait, sit-to-stand) and compare engine outputs",
+      "category": "biomechanics",
+      "type": "biomech_exercise",
+      "path": "src/launchers/exercise_dashboard.py",
+      "logo": "biomechanics.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "biomechanics",
+        "exercise",
+        "cross_engine",
+        "gait",
+        "sit_to_stand"
+      ],
+      "order": 17
+    },
+    {
+      "id": "golf_simulation_suite",
+      "name": "Golf Simulation Suite",
+      "description": "Complete golf simulation suite with ball-flight physics, putting green, and cross-engine playback",
+      "category": "simulation",
+      "type": "golf_simulation",
+      "path": "launch_golf_suite.py",
+      "logo": "golf_logo.png",
+      "status": "gui_ready",
+      "capabilities": [
+        "ball_flight",
+        "putting_green",
+        "cross_engine",
+        "golf_simulation"
+      ],
+      "order": 18
     }
   ]
 }
