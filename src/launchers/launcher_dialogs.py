@@ -59,6 +59,28 @@ class LauncherDialogsMixin:
         else:
             self.toast_manager = None
 
+        # Register the Sidekick feature Window menu (Tools surfacing).
+        # Done after the menu bar exists; tolerated as a no-op when
+        # menuBar() returns None (e.g. test fixtures without a window).
+        self._register_feature_window_menu()
+
+    def _register_feature_window_menu(self) -> None:
+        """Add the Window menu surfacing Sidekick features to the menu bar.
+
+        Idempotent: safe to call multiple times (we drop a previously
+        attached menu before re-adding).
+        """
+        menubar = getattr(self, "menuBar", lambda: None)()
+        if menubar is None:
+            return
+        try:
+            from src.launchers.feature_menu import register_feature_menu
+
+            self._feature_menu_actions = register_feature_menu(self, menubar)
+        except ImportError as exc:  # pragma: no cover - guarded
+            logger.debug("feature_menu unavailable: %s", exc)
+            self._feature_menu_actions = {}
+
     def _setup_keyboard_shortcuts(self) -> None:
         """Set up global keyboard shortcuts."""
         # F1 for help dialog (User Manual)
@@ -76,6 +98,20 @@ class LauncherDialogsMixin:
         # Ctrl+Q to quit
         shortcut_quit = QShortcut(QKeySequence("Ctrl+Q"), self)
         shortcut_quit.activated.connect(self.close)
+
+        # Sidekick feature shortcuts (Tools #2882/#2883/#2884/#2888/#2889).
+        # The single source of truth lives in feature_menu.FEATURE_ENTRIES so
+        # menu actions and these shortcuts cannot drift apart.
+        try:
+            from src.launchers.feature_menu import FEATURE_ENTRIES
+
+            for entry in FEATURE_ENTRIES:
+                if not entry.availability_probe():
+                    continue
+                sc = QShortcut(QKeySequence(entry.shortcut), self)
+                sc.activated.connect(lambda e=entry: e.factory(self))
+        except ImportError as exc:  # pragma: no cover — guard import path
+            logger.debug("feature_menu not importable: %s", exc)
 
     def _show_help_dialog(self, topic: str | None = None) -> None:
         """Show the help dialog.
@@ -141,6 +177,55 @@ class LauncherDialogsMixin:
 
             dialog = PreferencesDialog(self)
             dialog.exec()
+
+    def open_sidekick_tab(self, tool_id: str) -> None:
+        """Open *tool_id* as a Sidekick tab in the launcher.
+
+        Best-effort dispatcher that delegates to the embedded host if
+        available. Logs a warning (and shows a toast) when the host or
+        the tool isn't wired up — never raises, so the menu/shortcut
+        path remains robust during the transitional period while
+        Sidekick tabs are being wired feature-by-feature.
+
+        Tools surfaced through this hook: #2882 (OS terminal),
+        #2883 (Python REPL, workspace), #2884 (MCP servers),
+        #2888 (skills), #2889 (Jupyter).
+        """
+        if not tool_id:
+            raise ValueError("tool_id must be non-empty")
+
+        host = getattr(self, "embedded_host", None)
+        opener = getattr(host, "open_tab", None) if host is not None else None
+        if callable(opener):
+            try:
+                opener(tool_id)
+                return
+            except Exception as exc:  # noqa: BLE001 — bubble via toast
+                logger.warning("embedded_host.open_tab(%r) failed: %s", tool_id, exc)
+                self.show_toast(f"Failed to open {tool_id} tab: {exc}", "error")
+                return
+
+        logger.info(
+            "open_sidekick_tab(%r): embedded host not available yet — "
+            "Sidekick tab integration lands with Tools surfacing PR.",
+            tool_id,
+        )
+        self.show_toast(
+            f"Sidekick tab '{tool_id}' is not yet wired in this build.",
+            "info",
+        )
+
+    def open_preferences_section(self, section_id: str) -> None:
+        """Open the preferences dialog focused on *section_id*.
+
+        Currently delegates to the generic preferences entry point; the
+        section_id parameter is accepted so callers can use a stable
+        API while a section-aware dialog is wired up.
+        """
+        if not section_id:
+            raise ValueError("section_id must be non-empty")
+        logger.debug("open_preferences_section(%r)", section_id)
+        self._show_preferences()
 
     def show_toast(self, message: str, toast_type: str = "info") -> None:
         """Show a toast notification.
