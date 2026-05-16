@@ -1,0 +1,67 @@
+"""CLI agent providers — Claude CLI, Codex CLI, Cline.
+
+Public package surface for the CLI-mode provider category introduced
+by UpstreamDrift #5622. CLI-mode providers are agents accessed via a
+local subprocess or socket (not an HTTP API).
+
+Consumer code (chat header populator, settings dialog) should import
+from this package, never from individual modules — that keeps the
+provider implementations swappable.
+
+Typical usage::
+
+    from src.shared.python.ai.cli_providers import (
+        AllProviders,
+        discover_cli_providers,
+    )
+
+    providers = AllProviders()
+    providers.set_http_providers(http_provider_list)
+    for entry in providers.list():
+        if entry.category == AllProviders.CLI_CATEGORY:
+            ...  # show under "CLI Agents" section
+"""
+
+from __future__ import annotations
+
+from src.shared.python.ai.cli_providers.base import (
+    CliProvider,
+    CliProviderUnavailableError,
+    ResponseChunk,
+)
+from src.shared.python.ai.cli_providers.claude_cli_provider import (
+    ClaudeCliProvider,
+)
+from src.shared.python.ai.cli_providers.cline_provider import ClineProvider
+from src.shared.python.ai.cli_providers.codex_cli_provider import (
+    CodexCliProvider,
+)
+from src.shared.python.ai.cli_providers.contracts import (
+    CliProviderConfig,
+    CliProviderDescriptor,
+    CliTransport,
+)
+from src.shared.python.ai.cli_providers.discovery import (
+    discover_cli_providers,
+)
+from src.shared.python.ai.cli_providers.registry import (
+    AllProviders,
+    CliProviderRegistry,
+    ProviderEntry,
+)
+
+__all__ = [
+    "AllProviders",
+    "ClaudeCliProvider",
+    "CliProvider",
+    "CliProviderConfig",
+    "CliProviderDescriptor",
+    "CliProviderRegistry",
+    "CliProviderUnavailableError",
+    "ClineProvider",
+    "CodexCliProvider",
+    "CliTransport",
+    "ProviderEntry",
+    "ResponseChunk",
+    "discover_cli_providers",
+]

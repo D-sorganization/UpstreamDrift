@@ -1,0 +1,182 @@
+"""Abstract base for CLI agent providers.
+
+A ``CliProvider`` wraps a subprocess (or local socket peer) and exposes a
+single async streaming ``send()`` API. Concrete implementations live in
+this package for Claude CLI, Codex CLI, and Cline.
+
+The class is deliberately small — it owns the descriptor, an
+availability check, and the streaming contract. Subprocess plumbing is
+delegated to ``_spawn_subprocess`` in this module so Claude CLI and
+Codex CLI can share the same launch path (DRY).
+
+Contract:
+    - ``send()`` requires ``is_available()`` to return True; calling it
+      on an unavailable provider raises ``CliProviderUnavailableError``.
+    - ``cancel()`` is idempotent — calling it twice is a no-op.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import os
+from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator, Mapping
+from dataclasses import dataclass
+from typing import Any
+
+from src.shared.python.ai.cli_providers.contracts import CliProviderDescriptor
+
+
+class CliProviderUnavailableError(RuntimeError):
+    """Raised when ``send()`` is called on a provider that isn't ready.
+
+    Common causes: the executable was uninstalled after discovery, the
+    Cline server stopped running, or a required env var is missing.
+    """
+
+
+@dataclass(frozen=True)
+class ResponseChunk:
+    """A single streamed piece of a CLI provider's reply.
+
+    Attributes:
+        text: User-visible text fragment.
+        kind: ``"text"`` for normal output, ``"tool_use"`` when the CLI
+            announces a tool invocation, ``"error"`` for diagnostic
+            output from stderr that should surface to the user.
+    """
+
+    text: str
+    kind: str = "text"
+
+
+async def _spawn_subprocess(
+    executable: str,
+    args: tuple[str, ...],
+    env: Mapping[str, str] | None = None,
+    cwd: str | None = None,
+) -> asyncio.subprocess.Process:
+    """Shared subprocess launcher used by stdio-transport CLI providers.
+
+    Centralized here so Claude CLI and Codex CLI cannot drift apart on
+    quoting, env merging, or pipe configuration (DRY).
+
+    Args:
+        executable: Absolute path to the CLI binary.
+        args: Command-line arguments (excluding argv[0]).
+        env: Extra environment variables to merge over ``os.environ``.
+        cwd: Working directory for the subprocess.
+
+    Returns:
+        An ``asyncio.subprocess.Process`` with stdin/stdout/stderr
+        pipes wired up.
+
+    Raises:
+        ValueError: If ``executable`` is empty.
+
+    Contract:
+        Pre: ``executable`` is a non-empty string.
+        Post: returned process has stdin/stdout/stderr pipes.
+    """
+    if not executable:
+        raise ValueError("executable must be a non-empty string")
+
+    merged_env = dict(os.environ)
+    if env:
+        merged_env.update(env)
+
+    return await asyncio.create_subprocess_exec(
+        executable,
+        *args,
+        stdin=asyncio.subprocess.PIPE,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+        env=merged_env,
+        cwd=cwd,
+    )
+
+
+class CliProvider(ABC):
+    """Abstract base class for CLI agent providers.
+
+    Subclasses must implement ``send()``, ``cancel()``, and
+    ``is_available()``. They inherit the descriptor accessor and a
+    helper for the shared subprocess launch path.
+    """
+
+    def __init__(self, descriptor: CliProviderDescriptor) -> None:
+        """Initialize with the provider's descriptor.
+
+        Args:
+            descriptor: Immutable identity record for this provider.
+
+        Raises:
+            ValueError: If ``descriptor`` is None.
+        """
+        if descriptor is None:
+            raise ValueError("descriptor must be provided")
+        self._descriptor = descriptor
+
+    @property
+    def descriptor(self) -> CliProviderDescriptor:
+        """Return the immutable descriptor for this provider."""
+        return self._descriptor
+
+    @abstractmethod
+    def is_available(self) -> bool:
+        """Return True if the provider is ready to accept messages.
+
+        Subclasses check executable existence, server reachability,
+        required env vars, etc. Must be cheap — called every time
+        ``send()`` runs.
+        """
+
+    @abstractmethod
+    async def send(
+        self,
+        message: str,
+        context: Mapping[str, Any] | None = None,
+    ) -> AsyncIterator[ResponseChunk]:
+        """Send a message and stream back response chunks.
+
+        Args:
+            message: User prompt.
+            context: Optional metadata (working directory, conversation
+                history, etc.) — exact shape is provider-specific.
+
+        Yields:
+            ``ResponseChunk`` instances in order.
+
+        Raises:
+            CliProviderUnavailableError: If ``is_available()`` is False.
+        """
+
+    @abstractmethod
+    async def cancel(self) -> None:
+        """Cancel the currently-streaming request.
+
+        Idempotent: calling twice (or before any send) is a no-op.
+        """
+
+    async def _spawn(
+        self,
+        args: tuple[str, ...],
+        env: Mapping[str, str] | None = None,
+        cwd: str | None = None,
+    ) -> asyncio.subprocess.Process:
+        """Subclass helper: spawn the descriptor's executable.
+
+        Args:
+            args: Command-line arguments to pass.
+            env: Extra environment variables.
+            cwd: Working directory.
+
+        Returns:
+            An asyncio subprocess with pipes.
+        """
+        return await _spawn_subprocess(
+            self._descriptor.executable_path,
+            args,
+            env=env,
+            cwd=cwd,
+        )

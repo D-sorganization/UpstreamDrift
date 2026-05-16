@@ -781,7 +781,13 @@ class AIAssistantPanel(QWidget):
         return header
 
     def _add_header_title_widgets(self, layout: Any) -> None:
-        """Add Provider, Model, and Thinking combo boxes to the header."""
+        """Add Provider, Model, and Thinking combo boxes to the header.
+
+        The provider combo lists HTTP-API providers first, then a
+        separator and the "CLI Agents" section (Claude CLI / Codex CLI
+        / Cline) for whichever ones the discovery probe found. See
+        UpstreamDrift #5622.
+        """
         if layout is None:
             raise ValueError("layout must be provided")
 
@@ -797,6 +803,10 @@ class AIAssistantPanel(QWidget):
         ]
         for _label, _prov in _provider_display:
             self._provider_combo.addItem(_label, _prov)
+
+        # CLI agent providers — only shown when discovery found them.
+        self._populate_cli_provider_entries(self._provider_combo)
+
         self._provider_combo.setToolTip("Select AI provider")
         self._provider_combo.currentTextChanged.connect(self._on_provider_changed)
         layout.addWidget(self._provider_combo)
@@ -818,6 +828,58 @@ class AIAssistantPanel(QWidget):
         self._on_provider_changed(self._provider_combo.currentText())
 
         layout.addSpacing(10)
+
+    def _populate_cli_provider_entries(self, combo: QComboBox) -> None:
+        """Append a 'CLI Agents' section to the provider combo.
+
+        Reads only through ``AllProviders`` so the populator stays
+        decoupled from subprocess introspection (Law of Demeter).
+        Entries are appended only when at least one CLI provider was
+        discovered; otherwise the combo is left untouched.
+
+        Args:
+            combo: The provider QComboBox to extend.
+
+        Raises:
+            ValueError: If ``combo`` is None.
+        """
+        if combo is None:
+            raise ValueError("combo must be provided")
+
+        try:
+            from src.shared.python.ai.cli_providers import AllProviders
+        except ImportError:
+            return
+
+        try:
+            all_providers = AllProviders()
+            cli_entries = all_providers.cli_entries()
+        except OSError:
+            return
+
+        if not cli_entries:
+            return
+
+        # Visual separator between HTTP and CLI sections.
+        combo.insertSeparator(combo.count())
+        # Section header item — disabled so users can't pick it.
+        combo.addItem("— CLI Agents —")
+        try:
+            from PyQt6.QtGui import QStandardItemModel
+
+            model = combo.model()
+            if isinstance(model, QStandardItemModel):
+                item = model.item(combo.count() - 1)
+                if item is not None:
+                    item.setEnabled(False)
+                    item.setSelectable(False)  # type: ignore[attr-defined]
+        except (ImportError, AttributeError, TypeError):
+            pass
+
+        self._cli_provider_entries = {}
+        for entry in cli_entries:
+            combo.addItem(entry.name, entry.id)
+            self._cli_provider_entries[entry.name] = entry
 
     def _add_header_mode_and_status(self, layout: Any) -> None:
         if layout is None:
@@ -1458,7 +1520,14 @@ class AIAssistantPanel(QWidget):
                 ChatModelInfo("gemini-1.5-flash", "Gemini 1.5 Flash"),
             ],
         }
-        return _static.get(provider_label, [])
+        if provider_label in _static:
+            return _static[provider_label]
+        # CLI agent providers (UpstreamDrift #5622) — single passthrough model.
+        if hasattr(self, "_cli_provider_entries"):
+            entry = self._cli_provider_entries.get(provider_label)
+            if entry is not None:
+                return [ChatModelInfo("auto", f"{entry.name} (default)")]
+        return []
 
     def _get_thinking_capabilities_for_model(self, model_id: str) -> Any:
         """Return ThinkingCapabilities for a model id.
