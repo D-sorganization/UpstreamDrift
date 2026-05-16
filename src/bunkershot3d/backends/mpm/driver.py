@@ -4,10 +4,13 @@ Uses discrete spheres as an approximation for granular media if MPM is unavailab
 """
 
 from pathlib import Path
-import numpy as np
+
 import mujoco
-from bunkershot3d.io.schema import BunkerShotResultWriter
+import numpy as np
+
 from bunkershot3d.config import BunkerShotConfig
+from bunkershot3d.io.schema import BunkerShotResultWriter
+from bunkershot3d.kinematics.trajectory import SwingTrajectory
 
 
 class MPMDriver:
@@ -44,7 +47,7 @@ class MPMDriver:
                 <geom type="box" size="{lx / 2} 0.01 {lz / 2}" pos="0 {ly / 2} {lz / 2}" rgba="0.8 0.8 0.8 0.5"/>
                 <geom type="box" size="0.01 {ly / 2} {lz / 2}" pos="{-lx / 2} 0 {lz / 2}" rgba="0.8 0.8 0.8 0.5"/>
                 <geom type="box" size="0.01 {ly / 2} {lz / 2}" pos="{lx / 2} 0 {lz / 2}" rgba="0.8 0.8 0.8 0.5"/>
-                
+
                 <!-- Clubhead -->
                 <body name="clubhead" pos="{-lx / 2} 0 {lz}">
                     <freejoint/>
@@ -76,6 +79,57 @@ class MPMDriver:
         self.model = mujoco.MjModel.from_xml_string(xml_string)
         self.data = mujoco.MjData(self.model)
 
+    def _load_trajectory(self) -> SwingTrajectory | None:
+        """Load the swing trajectory from the configured file, or return None if unavailable."""
+        traj_file = Path(self.config.trajectory.file)
+        if traj_file.is_absolute() and traj_file.exists():
+            return SwingTrajectory.from_csv(traj_file)
+        # Try relative to config directory
+        candidate = self.config_path.parent / traj_file
+        if candidate.exists():
+            return SwingTrajectory.from_csv(candidate)
+        return None
+
+    def _extract_contact_wrench(
+        self, clubhead_id: int
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Aggregate contact forces/torques for contacts involving the clubhead body.
+
+        Iterates over ``data.contact`` entries and sums the 6-DOF contact force
+        (expressed in the world frame via ``mj_contactForce``) whenever one of
+        the two geoms in the contact pair belongs to the clubhead body.
+
+        Args:
+            clubhead_id: MuJoCo body id of the clubhead.
+
+        Returns:
+            force (3,), torque (3,) summed over all relevant contacts.
+        """
+        assert self.model is not None and self.data is not None
+
+        force_total = np.zeros(3)
+        torque_total = np.zeros(3)
+
+        for i in range(self.data.ncon):
+            contact = self.data.contact[i]
+            geom1_id = contact.geom1
+            geom2_id = contact.geom2
+
+            body1 = self.model.geom_bodyid[geom1_id]
+            body2 = self.model.geom_bodyid[geom2_id]
+
+            if body1 == clubhead_id or body2 == clubhead_id:
+                # Extract the 6-DOF contact wrench in the contact frame
+                raw = np.zeros(6)
+                mujoco.mj_contactForce(self.model, self.data, i, raw)
+                # raw[:3] is force, raw[3:] is torque in contact frame
+                # Rotate to world frame via the contact frame matrix
+                frame = contact.frame.reshape(3, 3)
+                force_total += frame @ raw[:3]
+                torque_total += frame @ raw[3:]
+
+        return force_total, torque_total
+
     def run(self, output_path: Path | str) -> None:
         """Run the simulation and write HDF5 output."""
         if self.model is None or self.data is None:
@@ -95,23 +149,47 @@ class MPMDriver:
         )
 
         dt = self.model.opt.timestep
-        for i in range(200):
+        # Derive step count from configured trajectory duration
+        n_steps = int(round(self.config.trajectory.duration / dt))
+
+        # Load swing trajectory if available
+        trajectory = self._load_trajectory()
+
+        # Determine the qpos offset for the clubhead freejoint (first body after world)
+        # A freejoint contributes 7 qpos values (pos xyz + quat wxyz).
+        # The clubhead is the first free body; its qpos start index is 0.
+        clubhead_qpos_start = 0
+        # Walk bodies to find the correct qpos address for the clubhead freejoint
+        for jid in range(self.model.njnt):
+            if self.model.jnt_bodyid[jid] == clubhead_id:
+                clubhead_qpos_start = self.model.jnt_qposadr[jid]
+                break
+
+        for i in range(n_steps):
             time = i * dt
 
-            # Kinematic override (move clubhead forward)
-            vel = 5.0  # m/s
-            self.data.qpos[0] += vel * dt  # Move x
+            if trajectory is not None:
+                # Interpolate prescribed position and orientation from trajectory
+                pos, quat, _lv, _av = trajectory.interpolate(time)
+                # Override clubhead qpos: positions then quaternion (wxyz)
+                self.data.qpos[clubhead_qpos_start : clubhead_qpos_start + 3] = pos
+                self.data.qpos[
+                    clubhead_qpos_start + 3 : clubhead_qpos_start + 7
+                ] = quat
+            else:
+                # Fallback: advance position along x at a fixed velocity
+                vel = 5.0  # m/s
+                self.data.qpos[clubhead_qpos_start] += vel * dt
 
             mujoco.mj_step(self.model, self.data)
 
             # Extract state
             pos = self.data.xpos[clubhead_id]
             quat = self.data.xquat[clubhead_id]
-
             writer.write_clubhead_state(time, pos, quat)
 
-            # Wrench (mock extraction for draft)
-            cfrc_ext = self.data.cfrc_ext[clubhead_id]
-            writer.write_contact_wrench(time, cfrc_ext[:3], cfrc_ext[3:])
+            # Proper contact wrench aggregation over clubhead contacts
+            force, torque = self._extract_contact_wrench(clubhead_id)
+            writer.write_contact_wrench(time, force, torque)
 
         writer.close()

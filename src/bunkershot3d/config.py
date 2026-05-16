@@ -62,6 +62,7 @@ class TrajectoryConfig(BaseModel):
     """Trajectory source configuration."""
 
     file: str
+    duration: float = Field(default=0.1, gt=0.0, description="Simulation duration (s)")
 
 
 class BunkerShotConfig(BaseModel):
@@ -80,3 +81,4 @@ class BunkerShotConfig(BaseModel):
         with open(path) as f:
             data = yaml.safe_load(f)
         return cls(**data)
+
