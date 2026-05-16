@@ -18,12 +18,6 @@
       "owner": "@physics-core",
       "reason": "Terrain representation at 1253 lines combines mesh, elevation, and surface-material models. Split into domain submodules planned, tracked in issue #2456.",
       "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/shared/python/ai/gui/assistant_panel.py",
-      "owner": "@ai-team",
-      "reason": "AIAssistantPanel at 1286 lines consolidates the PyQt chat host (history sidebar, streaming worker, tool bridge, settings hooks). The file was already 1281 lines on main when the Sidekick branding (+5 lines) landed in #5461. Decomposition into orchestration / streaming / sidebar submodules is planned as a follow-up to the Sidekick integration PR.",
-      "expires_on": "2026-07-31"
     }
   ]
 }
