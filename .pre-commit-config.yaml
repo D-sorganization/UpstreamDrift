@@ -105,21 +105,11 @@ repos:
           - types-PyYAML
           - pydantic
         args: [--config-file, pyproject.toml, --follow-imports=silent]
+        # pass_filenames=false: let mypy use pyproject.toml [tool.mypy] exclude
+        # patterns instead of receiving explicit file paths (which bypass excludes)
+        pass_filenames: false
         types: [python]
         files: ^src/
-        exclude: |
-          (?x)^(
-            src/matlab/|
-            src/javascript/|
-            src/archive/|
-            src/legacy/|
-            src/experimental/|
-            src/shared/python/pendulum_simulator/|
-            __pycache__/|
-            \.pytest_cache/|
-            \.venv/|
-            \.github/
-          )
 
   # Bandit - Security scanning (pre-push only, Python only)
   - repo: https://github.com/PyCQA/bandit

@@ -517,9 +517,7 @@ class GolfLauncher(
                 if item.widget():
                     item.widget().deleteLater()
 
-            import contextlib
-
-            _SkeletonCard: type | None = None
+            _SkeletonCard: Any = None
             with contextlib.suppress(ImportError):
                 from src.launchers.model_card import SkeletonCard as _SkeletonCard
 
