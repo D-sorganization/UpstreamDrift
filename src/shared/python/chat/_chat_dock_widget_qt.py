@@ -41,8 +41,10 @@ from PyQt6.QtWidgets import (
 )
 
 
-def _get_theme_colors() -> dict[str, str]:
+def _get_theme_colors(theme_provider: Any = None) -> dict[str, str]:
     """Get the current theme colors, falling back to defaults."""
+    if theme_provider is not None and hasattr(theme_provider, "get_current_colors"):
+        return theme_provider.get_current_colors()
     try:
         from src.shared.python.theme.theme_manager import get_theme_manager
 
@@ -88,6 +90,7 @@ class ChatMessageBubble(QFrame):
         role: str,
         content: str,
         accent_color: str = "#FF8800",
+        theme_provider: Any = None,
         parent: QWidget | None = None,
     ) -> None:
         if not (role is not None):
@@ -95,12 +98,13 @@ class ChatMessageBubble(QFrame):
         super().__init__(parent)
         self._role = role
         self._content = content
+        self._theme_provider = theme_provider
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(6, 4, 6, 4)
         layout.setSpacing(2)
 
-        colors = _get_theme_colors()
+        colors = _get_theme_colors(self._theme_provider)
         text_primary = colors.get("text", "#e0e0e0")
         bg_alt = colors.get("group_bg", "#2d2d2d")
         bg_secondary = colors.get("input_bg", "#252526")
@@ -181,6 +185,8 @@ class ChatDockWidget(QDockWidget):
         placeholder_text: str = "Ask a question...",
         accent_color: str = "#FF8800",
         auto_index_on_open: bool = False,
+        project_root: str | Path | None = None,
+        theme_provider: Any = None,
         parent: QWidget | None = None,
     ) -> None:
         if not (app_context is not None):
@@ -193,6 +199,8 @@ class ChatDockWidget(QDockWidget):
         self._accent_color = accent_color
         self._placeholder_text = placeholder_text
         self._auto_index_on_open = bool(auto_index_on_open)
+        self._project_root = Path(project_root) if project_root else None
+        self._theme_provider = theme_provider
         self._is_streaming = False
         self._current_bubble: ChatMessageBubble | None = None
         self._socket: QWebSocket | None = None
@@ -216,7 +224,7 @@ class ChatDockWidget(QDockWidget):
         self._connect_on_show = True
 
     def _setup_ui(self) -> None:
-        colors = _get_theme_colors()
+        colors = _get_theme_colors(self._theme_provider)
         bg_primary = colors.get("bg", "#1e1e1e")
         bg_alt = colors.get("group_bg", "#2d2d2d")
         text_primary = colors.get("text", "#e0e0e0")
@@ -453,7 +461,12 @@ class ChatDockWidget(QDockWidget):
         """Add a message bubble to the scroll area."""
         if not (role is not None):
             raise ValueError("role must be provided")
-        bubble = ChatMessageBubble(role, content, accent_color=self._accent_color)
+        bubble = ChatMessageBubble(
+            role,
+            content,
+            accent_color=self._accent_color,
+            theme_provider=self._theme_provider,
+        )
         # Insert before the stretch item at the end
         count = self._message_layout.count()
         self._message_layout.insertWidget(count - 1, bubble)
