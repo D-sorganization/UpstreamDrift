@@ -6,6 +6,10 @@ Provides a welcome overlay for new users with:
 - How to select and launch a model
 - Links to documentation
 - Dismissible with "Don't show again" checkbox
+
+All colors are sourced from QPalette roles — no hard-coded hex values.
+Layout uses native PyQt6 widgets (QFrame, QLabel, QHBoxLayout) instead
+of an inline-HTML content widget.
 """
 
 from __future__ import annotations
@@ -14,15 +18,16 @@ import json
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from PyQt6.QtCore import QPoint, Qt, QUrl
-from PyQt6.QtGui import QDesktopServices, QFont
+from PyQt6.QtCore import QUrl, Qt
+from PyQt6.QtGui import QDesktopServices, QPalette
 from PyQt6.QtWidgets import (
     QCheckBox,
     QDialog,
     QDialogButtonBox,
+    QFrame,
+    QHBoxLayout,
     QLabel,
     QPushButton,
-    QTextBrowser,
     QVBoxLayout,
     QWidget,
 )
@@ -39,21 +44,12 @@ logger = get_logger(__name__)
 ONBOARDING_CONFIG_PATH = Path.home() / ".upstreamdrift" / "onboarding_config.json"
 
 
-def _get_theme_colors():
-    """Get current theme colors, with fallback to dark theme defaults."""
-    try:
-        from src.shared.python.theme import DARK_THEME, get_theme_manager
-
-        manager = get_theme_manager()
-        return manager.get_current_colors() if manager else DARK_THEME
-    except ImportError:
-        from src.shared.python.theme import DARK_THEME
-
-        return DARK_THEME
-
-
 def is_first_run() -> bool:
-    """Check if this is the first run (onboarding not dismissed)."""
+    """Check if this is the first run (onboarding not dismissed).
+
+    Returns:
+        True when the onboarding config does not exist or has not been dismissed.
+    """
     if not ONBOARDING_CONFIG_PATH.exists():
         return True
     try:
@@ -65,7 +61,11 @@ def is_first_run() -> bool:
 
 
 def dismiss_onboarding() -> None:
-    """Mark onboarding as dismissed (don't show again)."""
+    """Mark onboarding as dismissed (don't show again).
+
+    Postcondition: ONBOARDING_CONFIG_PATH exists and contains
+    ``onboarding_dismissed: true``.
+    """
     ONBOARDING_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
     config = {"onboarding_dismissed": True}
     try:
@@ -76,12 +76,55 @@ def dismiss_onboarding() -> None:
         logger.warning(f"Failed to save onboarding config: {e}")
 
 
+def _make_info_card(title: str, body: str, link_text: str, link_url: str) -> QFrame:
+    """Build a single information card using native widgets.
+
+    Args:
+        title: Card heading text.
+        body: Card body text.
+        link_text: Visible text for the action link label.
+        link_url: URL opened when the link label is clicked.
+
+    Returns:
+        A QFrame styled as a card using QPalette roles only.
+    """
+    frame = QFrame()
+    frame.setFrameShape(QFrame.Shape.StyledPanel)
+
+    layout = QVBoxLayout(frame)
+    layout.setSpacing(8)
+    layout.setContentsMargins(12, 12, 12, 12)
+
+    title_label = QLabel(title)
+    title_label.setFont(get_qfont(size=13, weight=Weights.BOLD))
+    title_label.setWordWrap(True)
+    layout.addWidget(title_label)
+
+    body_label = QLabel(body)
+    body_label.setFont(get_qfont(size=11, weight=Weights.NORMAL))
+    body_label.setWordWrap(True)
+    body_label.setForegroundRole(QPalette.ColorRole.PlaceholderText)
+    layout.addWidget(body_label)
+
+    link_label = QLabel(f'<a href="{link_url}">{link_text}</a>')
+    link_label.setFont(get_qfont(size=11, weight=Weights.NORMAL))
+    link_label.setOpenExternalLinks(True)
+    link_label.setTextFormat(Qt.TextFormat.RichText)
+    layout.addWidget(link_label)
+
+    return frame
+
+
 class OnboardingDialog(QDialog):
-    """First-run onboarding dialog with welcome information."""
+    """First-run onboarding dialog with welcome information.
+
+    Uses only native PyQt6 widgets and QPalette color roles — no hard-coded
+    hex colors, no inline HTML content widget, and no inline HTML for layout.
+    """
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self.setWindowTitle("Welcome to UpstreamDrift!")
+        self.setWindowTitle("Welcome to UpstreamDrift")
         self.setMinimumWidth(500)
         self.setMinimumHeight(400)
         self.setModal(True)
@@ -90,9 +133,9 @@ class OnboardingDialog(QDialog):
         self._setup_ui()
 
     def _setup_ui(self) -> None:
-        """Build the onboarding dialog UI."""
+        """Build the onboarding dialog UI using native widgets."""
         layout = QVBoxLayout(self)
-        layout.setSpacing(20)
+        layout.setSpacing(16)
         layout.setContentsMargins(30, 30, 30, 30)
 
         # Header
@@ -101,21 +144,47 @@ class OnboardingDialog(QDialog):
         header_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(header_label)
 
-        # Subtitle
-        subtitle_label = QLabel("Biomechanics & Robotics Platform")
+        # Subtitle — uses placeholder-text palette role (theme-aware)
+        subtitle_label = QLabel("Biomechanics and Robotics Platform")
         subtitle_label.setFont(get_qfont(size=12, weight=Weights.NORMAL))
         subtitle_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        subtitle_label.setStyleSheet("color: #888;")
+        subtitle_label.setForegroundRole(QPalette.ColorRole.PlaceholderText)
         layout.addWidget(subtitle_label)
 
-        # Content browser with welcome information
-        content = QTextBrowser()
-        content.setReadOnly(True)
-        content.setOpenExternalLinks(True)
-        content.setHtml(self._get_welcome_html())
-        content.setStyleSheet("background-color: transparent; border: none;")
-        content.setMinimumHeight(350)
-        layout.addWidget(content)
+        # Separator line
+        separator = QFrame()
+        separator.setFrameShape(QFrame.Shape.HLine)
+        layout.addWidget(separator)
+
+        # Card grid — two cards side-by-side
+        cards_row = QHBoxLayout()
+        cards_row.setSpacing(12)
+
+        quick_start_card = _make_info_card(
+            title="Quick Start",
+            body="Launch your first physics model using the integrated grid layout.",
+            link_text="Read the Guide",
+            link_url=(
+                "https://github.com/D-sorganization/UpstreamDrift"
+                "/blob/main/docs/user_guide/getting_started.md"
+            ),
+        )
+        cards_row.addWidget(quick_start_card)
+
+        config_card = _make_info_card(
+            title="Configurations",
+            body=(
+                "Adjust themes, install required dependencies,"
+                " and set up your environment."
+            ),
+            link_text="Report an Issue",
+            link_url="https://github.com/D-sorganization/UpstreamDrift/issues",
+        )
+        cards_row.addWidget(config_card)
+
+        layout.addLayout(cards_row)
+
+        layout.addStretch()
 
         # "Don't show again" checkbox
         self.chk_dont_show = QCheckBox("Don't show this welcome message again")
@@ -135,98 +204,18 @@ class OnboardingDialog(QDialog):
 
         layout.addWidget(button_box)
 
-    def _get_welcome_html(self) -> str:
-        """Generate the welcome HTML content."""
-        return """
-        <style>
-            body { 
-                font-family: 'Inter', 'Segoe UI', sans-serif; 
-                line-height: 1.5;
-                color: #e0e0e0;
-                margin: 0;
-            }
-            .hero {
-                text-align: center;
-                padding: 10px 0 20px 0;
-                border-bottom: 1px solid #333;
-                margin-bottom: 20px;
-            }
-            .hero h2 {
-                background: linear-gradient(90deg, #FF8800, #FF5500);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                margin: 0 0 10px 0;
-                font-size: 28px;
-            }
-            .grid {
-                display: flex;
-                gap: 15px;
-                margin-bottom: 20px;
-            }
-            .card {
-                background: #252526;
-                border: 1px solid #3c3c3c;
-                border-radius: 8px;
-                padding: 15px;
-                flex: 1;
-            }
-            .card h3 {
-                color: #FF8800;
-                margin: 0 0 10px 0;
-                font-size: 16px;
-            }
-            .card p {
-                margin: 0 0 10px 0;
-                font-size: 13px;
-                color: #aaa;
-            }
-            a.btn {
-                display: inline-block;
-                background: #FF8800;
-                color: #1e1e1e;
-                text-decoration: none;
-                padding: 6px 12px;
-                border-radius: 4px;
-                font-weight: bold;
-                font-size: 12px;
-            }
-            a.btn:hover { background: #FF9933; }
-            a.btn-outline {
-                background: transparent;
-                color: #FF8800;
-                border: 1px solid #FF8800;
-            }
-            a.btn-outline:hover { background: rgba(255,136,0,0.1); }
-        </style>
-        
-        <div class="hero">
-            <h2>UpstreamDrift</h2>
-            <p style="color: #aaa; margin:0; font-size: 14px;">Next-Generation Biomechanics & Robotics Platform</p>
-        </div>
-        
-        <div class="grid">
-            <div class="card">
-                <h3>🚀 Quick Start</h3>
-                <p>Launch your first physics model using the integrated grid layout.</p>
-                <a class="btn" href="https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/user_guide/getting_started.md">Read the Guide</a>
-            </div>
-            <div class="card">
-                <h3>⚙️ Configurations</h3>
-                <p>Adjust themes, install required dependencies, and set up your environment.</p>
-                <a class="btn btn-outline" href="https://github.com/D-sorganization/UpstreamDrift/issues">Report an Issue</a>
-            </div>
-        </div>
-        """
-
     def _on_accepted(self) -> None:
-        """Handle dialog acceptance."""
+        """Handle dialog acceptance — optionally persist dismissal."""
         if self.chk_dont_show.isChecked():
             dismiss_onboarding()
         self.accept()
 
     def _open_docs(self) -> None:
         """Open the documentation in the system browser."""
-        docs_url = "https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/user_guide/getting_started.md"
+        docs_url = (
+            "https://github.com/D-sorganization/UpstreamDrift"
+            "/blob/main/docs/user_guide/getting_started.md"
+        )
         QDesktopServices.openUrl(QUrl(docs_url))
 
 
@@ -234,10 +223,10 @@ def show_onboarding_if_needed(parent: QWidget | None = None) -> bool:
     """Show onboarding dialog if it's the first run.
 
     Args:
-        parent: Optional parent widget
+        parent: Optional parent widget.
 
     Returns:
-        True if onboarding was shown, False if skipped
+        True if onboarding was shown, False if skipped.
     """
     if is_first_run():
         dialog = OnboardingDialog(parent)
