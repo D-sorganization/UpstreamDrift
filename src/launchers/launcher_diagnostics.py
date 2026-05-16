@@ -23,7 +23,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from src.shared.python.app_state import get_state_logger
 from src.shared.python.data_io.path_utils import get_repo_root
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -38,50 +37,36 @@ ASSETS_DIR = Path(__file__).parent / "assets"
 CONFIG_DIR = Path.home() / ".golf_modeling_suite"
 LAYOUT_CONFIG_FILE = CONFIG_DIR / "launcher_layout.json"
 
+def load_models_yaml() -> dict[str, Any]:
+    """Load and return the canonical models.yaml configuration.
 
-def _load_expected_tile_ids() -> list[str]:
-    """Derive tile IDs from ModelRegistry at import time (fixes #5476).
+    Returns the parsed YAML dict with at least a `models` key.
+    Raises on missing file or malformed content.
+    """
+    import yaml  # type: ignore[import-untyped]
 
-    Returns an empty list (with a logged warning) when the registry is
-    unavailable so the module can still be imported in test environments.
+    models_path = REPOS_ROOT / "src" / "config" / "models.yaml"
+    data = yaml.safe_load(models_path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict) or "models" not in data:
+        raise ValueError(f"{models_path} is missing a top-level 'models' key")
+    return data
+
+
+def _derive_tile_metadata() -> tuple[list[str], dict[str, str]]:
+    """Derive EXPECTED_TILE_IDS and EXPECTED_TILE_NAMES from models.yaml.
+
+    Falls back to empty defaults if models.yaml is unreadable at import
+    time (e.g. during isolated unit tests).
     """
     try:
-        from src.shared.python.config.model_registry import ModelRegistry
-
-        yaml_path = REPOS_ROOT / "src" / "config" / "models.yaml"
-        registry = ModelRegistry(yaml_path)
-        return sorted(m.id for m in registry.get_all_models())
-    except Exception as exc:  # noqa: BLE001
-        logger.warning(
-            "Could not derive EXPECTED_TILE_IDS from ModelRegistry: %s"
-            " — falling back to empty list",
-            exc,
-        )
-        return []
-
-
-def _load_yaml_local_tile_ids() -> frozenset[str]:
-    """Return IDs defined directly in models.yaml (excluding provider packs).
-
-    Used by ``_check_models_yaml_completeness`` to compute the correct
-    intersection: provider-only models (e.g. ``pendulum_simulator``) must not
-    be required to appear in the raw YAML.
-    """
-    try:
-        import yaml  # type: ignore[import-untyped]
-
-        yaml_path = REPOS_ROOT / "src" / "config" / "models.yaml"
-        with open(yaml_path, encoding="utf-8") as f:
-            data = yaml.safe_load(f)
-        if isinstance(data, dict) and "models" in data:
-            return frozenset(
-                m.get("id", "")
-                for m in data["models"]
-                if isinstance(m, dict) and m.get("id")
-            )
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("Could not load YAML-local tile IDs: %s", exc)
-    return frozenset()
+        data = load_models_yaml()
+        models = data["models"]
+        tile_ids = sorted(m["id"] for m in models)
+        tile_names = {m["id"]: m["name"] for m in models}
+        return tile_ids, tile_names
+    except Exception:
+        logger.warning("Could not derive tile metadata from models.yaml; using empty defaults")
+        return [], {}
 
 
 def _read_manifest_schema(manifest_path: Path | None) -> str | None:
@@ -133,64 +118,14 @@ class DiagnosticResult:
 class LauncherDiagnostics:
     """Diagnostic utilities for the UpstreamDrift Launcher."""
 
-    # Derived dynamically from ModelRegistry at import time (fixes #5476).
-    # Stale hard-coded values (simscape_2d, simscape_3d, dataset_generator,
-    # matlab_analysis) have been removed.
-    EXPECTED_TILE_IDS: list[str] = _load_expected_tile_ids()
+    # Expected tile model IDs and names -- derived from models.yaml at class definition
+    EXPECTED_TILE_IDS, EXPECTED_TILE_NAMES = _derive_tile_metadata()
 
-    # IDs defined directly in models.yaml (excludes provider-pack-only models).
-    # Used for the YAML completeness check so provider-only IDs (e.g.
-    # pendulum_simulator) do not generate false "missing" failures.
-    _YAML_LOCAL_IDS: frozenset[str] = _load_yaml_local_tile_ids()
 
     def __init__(self) -> None:
         """Initialize diagnostics."""
         self.results: list[DiagnosticResult] = []
         self._start_time = time.time()
-
-    # -- App-state event helpers (fixes #5474) --
-
-    @staticmethod
-    def _emit_diagnostic_event(check_name: str, status: str, message: str) -> None:
-        """Emit a ``diagnostic_check`` event to the singleton StateLogger.
-
-        Args:
-            check_name: Name of the check that produced the result.
-            status: Result status string (``"pass"``, ``"fail"``, ``"warning"``).
-            message: Human-readable result summary.
-
-        Raises:
-            ValueError: If *check_name* or *status* is empty.
-        """
-        if not check_name:
-            raise ValueError("check_name must be non-empty")
-        if not status:
-            raise ValueError("status must be non-empty")
-        try:
-            get_state_logger().log_event(
-                "diagnostic_check",
-                {"check_name": check_name, "status": status, "message": message},
-            )
-        except Exception as exc:  # noqa: BLE001
-            logger.debug("Failed to emit diagnostic event for %s: %s", check_name, exc)
-
-    def _record(self, result: DiagnosticResult) -> DiagnosticResult:
-        """Append *result* to ``self.results`` and emit an app-state event.
-
-        Args:
-            result: The completed :class:`DiagnosticResult` to record.
-
-        Returns:
-            The same *result* (pass-through for caller convenience).
-
-        Raises:
-            TypeError: If *result* is not a :class:`DiagnosticResult`.
-        """
-        if not isinstance(result, DiagnosticResult):
-            raise TypeError(f"result must be a DiagnosticResult, got {type(result)!r}")
-        self.results.append(result)
-        self._emit_diagnostic_event(result.name, result.status, result.message)
-        return result
 
     def run_all_checks(self) -> dict[str, Any]:
         """Run all diagnostic checks and return comprehensive report.
@@ -250,7 +185,8 @@ class LauncherDiagnostics:
             details=details,
             duration_ms=(time.time() - start) * 1000,
         )
-        return self._record(result)
+        self.results.append(result)
+        return result
 
     def _validate_models_yaml_content(
         self, data: Any, details: dict[str, Any]
@@ -281,42 +217,24 @@ class LauncherDiagnostics:
     def _check_models_yaml_completeness(
         self, models: list, details: dict[str, Any]
     ) -> DiagnosticResult:
-        """Check that the YAML model list contains all expected YAML-local IDs.
-
-        Provider-pack-only models (e.g. ``pendulum_simulator``) that appear in
-        ``EXPECTED_TILE_IDS`` but *not* in the raw YAML are excluded from the
-        required set via the ``_YAML_LOCAL_IDS`` intersection.
-
-        Args:
-            models: List of raw model dicts loaded from the YAML ``models`` key.
-            details: Mutable details dict that will be annotated in-place.
-
-        Raises:
-            ValueError: If *models* is ``None``.
-        """
         if models is None:
             raise ValueError("models must be provided")
         details["model_count"] = len(models)
         details["model_ids"] = [m.get("id", "unknown") for m in models]
 
         found_ids = set(details["model_ids"])
-        # Only check IDs that are both in the YAML file AND in the registry.
-        # This prevents false failures for provider-pack-only IDs.
-        if self._YAML_LOCAL_IDS:
-            validated_yaml_ids = self._YAML_LOCAL_IDS & set(self.EXPECTED_TILE_IDS)
-        else:
-            validated_yaml_ids = set(self.EXPECTED_TILE_IDS)
-        missing_ids = validated_yaml_ids - found_ids
-        extra_ids = found_ids - set(self.EXPECTED_TILE_IDS)
+        expected_ids = set(self.EXPECTED_TILE_IDS)
+        missing_ids = expected_ids - found_ids
+        extra_ids = found_ids - expected_ids
 
-        details["missing_expected_ids"] = sorted(missing_ids)
-        details["extra_ids"] = sorted(extra_ids)
+        details["missing_expected_ids"] = list(missing_ids)
+        details["extra_ids"] = list(extra_ids)
 
         if missing_ids:
             return DiagnosticResult(
                 name="models_yaml",
                 status="fail",
-                message=f"Missing {len(missing_ids)} expected models: {sorted(missing_ids)}",
+                message=f"Missing {len(missing_ids)} expected models: {missing_ids}",
                 details=details,
                 duration_ms=0,
             )
@@ -346,7 +264,8 @@ class LauncherDiagnostics:
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
-            return self._record(result)
+            self.results.append(result)
+            return result
 
         try:
             import yaml
@@ -357,7 +276,8 @@ class LauncherDiagnostics:
             early_result = self._validate_models_yaml_content(data, details)
             if early_result is not None:
                 early_result.duration_ms = (time.time() - start) * 1000
-                return self._record(early_result)
+                self.results.append(early_result)
+                return early_result
 
             result = self._check_models_yaml_completeness(data["models"], details)
 
@@ -381,7 +301,8 @@ class LauncherDiagnostics:
             )
 
         result.duration_ms = (time.time() - start) * 1000
-        return self._record(result)
+        self.results.append(result)
+        return result
 
     def check_model_registry(self) -> DiagnosticResult:
         """Check ModelRegistry loading."""
@@ -443,7 +364,8 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        return self._record(result)
+        self.results.append(result)
+        return result
 
     def check_launcher_provider_compatibility(self) -> DiagnosticResult:
         """Check that launcher model entries resolve cleanly as local/provider sources."""
@@ -518,7 +440,8 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        return self._record(result)
+        self.results.append(result)
+        return result
 
     def check_layout_config(self) -> DiagnosticResult:
         """Check saved layout configuration."""
@@ -538,7 +461,8 @@ class LauncherDiagnostics:
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
-            return self._record(result)
+            self.results.append(result)
+            return result
 
         try:
             with open(LAYOUT_CONFIG_FILE, encoding="utf-8") as f:
@@ -592,7 +516,8 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        return self._record(result)
+        self.results.append(result)
+        return result
 
     def check_asset_files(self) -> DiagnosticResult:
         """Check that required asset files exist."""
@@ -623,7 +548,8 @@ class LauncherDiagnostics:
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
-            return self._record(result)
+            self.results.append(result)
+            return result
 
         missing_assets = []
         found_assets = []
@@ -660,7 +586,8 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        return self._record(result)
+        self.results.append(result)
+        return result
 
     def check_pyqt6_availability(self) -> DiagnosticResult:
         """Check PyQt6 availability."""
@@ -695,7 +622,8 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        return self._record(result)
+        self.results.append(result)
+        return result
 
     def check_engine_availability(self) -> DiagnosticResult:
         """Check physics engine availability with per-engine probe details."""
@@ -783,7 +711,8 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        return self._record(result)
+        self.results.append(result)
+        return result
 
     def check_biomech_siblings(self) -> DiagnosticResult:
         """Report the resolution tier for each of the five biomech sibling repos.
@@ -860,7 +789,8 @@ class LauncherDiagnostics:
             details=details,
             duration_ms=(time.time() - start) * 1000,
         )
-        return self._record(result)
+        self.results.append(result)
+        return result
 
     def check_tools_sidebar(self) -> DiagnosticResult:
         """Report whether the optional shared Tools sidebar is importable.
@@ -894,21 +824,18 @@ class LauncherDiagnostics:
                     duration_ms=(time.time() - start) * 1000,
                 )
             else:
-                # "not installed" is the expected state when the sibling Tools
-                # repo is absent — informational, not a degradation.
                 result = DiagnosticResult(
                     name="tools_sidebar",
                     status="info",
                     message=(
-                        "Tools sidebar not installed (expected in this configuration) — "
-                        "launcher runs without the optional PyQt sidebar; "
-                        "Sidekick tokens still apply to the React/Tauri shell"
+                        "Tools sidebar not installed (expected) - launcher runs "
+                        "without the optional PyQt sidebar (Sidekick tokens "
+                        "still apply to the React/Tauri shell)"
                     ),
                     details=details,
                     duration_ms=(time.time() - start) * 1000,
                 )
         except ImportError as exc:
-            # The probe module itself failed to import — unexpected; warrants attention.
             details["import_error"] = str(exc)
             result = DiagnosticResult(
                 name="tools_sidebar",
@@ -918,7 +845,8 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        return self._record(result)
+        self.results.append(result)
+        return result
 
     def _generate_recommendations(self) -> list[str]:  # noqa: C901
         """Generate recommendations based on diagnostic results."""
@@ -928,7 +856,7 @@ class LauncherDiagnostics:
             if result.status == "fail":
                 if result.name == "models_yaml":
                     recommendations.append(
-                        "CRITICAL: Ensure src/config/models.yaml exists and contains all expected model definitions"
+                        f"CRITICAL: Ensure src/config/models.yaml exists and contains all {len(self.EXPECTED_TILE_IDS)} model definitions"
                     )
                 elif result.name == "model_registry":
                     recommendations.append(
@@ -950,7 +878,7 @@ class LauncherDiagnostics:
                     details = result.details
                     if details.get("missing_from_saved"):
                         recommendations.append(
-                            f"LIKELY CAUSE: Saved layout is missing tiles. Delete {LAYOUT_CONFIG_FILE} to reset to defaults"
+                            f"LIKELY CAUSE: Saved layout is missing tiles. Delete {LAYOUT_CONFIG_FILE} to reset to defaults with all {len(self.EXPECTED_TILE_IDS)} tiles"
                         )
                 elif result.name == "asset_files":
                     recommendations.append("Some tile icons may not display correctly")
@@ -978,7 +906,7 @@ def reset_layout_config() -> bool:
             LAYOUT_CONFIG_FILE.rename(backup_path)
             logger.info("Backed up existing config to %s", backup_path)
 
-        logger.info("Layout config reset - launcher will use defaults")
+        logger.info(f"Layout config reset - launcher will use defaults ({len(LauncherDiagnostics.EXPECTED_TILE_IDS)} tiles)")
         return True
     except (RuntimeError, ValueError, OSError) as e:
         logger.error("Failed to reset layout config: %s", e)
@@ -1056,3 +984,4 @@ if __name__ == "__main__":
         logger.info(json.dumps(results, indent=2))
     else:
         run_cli_diagnostics()
+
