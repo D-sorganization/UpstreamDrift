@@ -96,6 +96,22 @@ jobs:
               return;
             }
 
+            // Anti-phantom-merge gate: if either issue is linked to a PR carrying
+            // jules-verification-failed, do NOT silently close as duplicate — that
+            // hides the diagnostic. Leave both open for human triage.
+            const flaggedPRs = await github.paginate(github.rest.search.issuesAndPullRequests, {
+              q: `repo:${owner}/${repo} is:pr label:jules-verification-failed`,
+              per_page: 100,
+            }).catch(() => []);
+            const isFlagged = (issueNumber) => flaggedPRs.some(pr => {
+              const text = `${pr.title || ''} ${pr.body || ''}`;
+              return new RegExp(`(?:fixes|closes|resolves)\\s+#${issueNumber}\\b`, 'i').test(text);
+            });
+            if (isFlagged(issue.number) || isFlagged(canonical.number)) {
+              core.warning(`Skipping duplicate-close: issue #${issue.number} or #${canonical.number} is linked to a jules-verification-failed PR. Leaving both open for human triage.`);
+              return;
+            }
+
             await github.rest.issues.update({
               owner,
               repo,

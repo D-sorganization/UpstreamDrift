@@ -146,11 +146,20 @@ jobs:
             }
 
             // 3a. Strict: closing keyword in merged PR body or title.
+            //     ANTI-PHANTOM-MERGE GATE: if the merged PR carries the
+            //     jules-verification-failed label, the closure is NOT trusted —
+            //     the PR was flagged because its base..head diff collapsed
+            //     (sibling PR absorbed the work). Fall through to the reopen path.
             for (const prNumber of candidatePRs) {
               try {
                 const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
                 if (pr.merged === true &&
                     (closingRegex.test(pr.body || '') || closingRegex.test(pr.title || ''))) {
+                  const prLabels = (pr.labels || []).map(l => (typeof l === 'string' ? l : l.name).toLowerCase());
+                  if (prLabels.includes('jules-verification-failed')) {
+                    core.warning(`Merged PR #${prNumber} carries jules-verification-failed; refusing to accept it as closure evidence for #${issueNumber}. This is a phantom merge — the diff collapsed because a sibling PR absorbed the work.`);
+                    continue;
+                  }
                   core.info(`Merged PR #${prNumber} closes #${issueNumber} via closing keyword.`);
                   return;
                 }

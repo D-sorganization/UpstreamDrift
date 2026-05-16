@@ -143,16 +143,25 @@ jobs:
             if [ "$DRY_RUN" = "true" ]; then
               echo "[DRY RUN] Would close PR #$PR_NUM: $PR_TITLE"
             else
+              # Anti-phantom-merge gate: skip PRs flagged jules-verification-failed
+              # so the diagnostic remains visible to the user.
+              has_failed_label=$(gh pr view "$PR_NUM" --json labels \
+                --jq '[.labels[].name] | contains(["jules-verification-failed"])' \
+                2>/dev/null || echo "false")
+              if [ "$has_failed_label" = "true" ]; then
+                echo "Skipping PR #$PR_NUM: jules-verification-failed label present."
+                continue
+              fi
+
               echo "Closing PR #$PR_NUM: $PR_TITLE"
               COMMENT=$(printf '%s\n' \
                 "Auto-closed: Stale Jules-generated PR with failing CI." \
                 "" \
                 "If this PR is still needed, you can:" \
                 "1. Reopen it and push new commits" \
-                "2. Add the `jules-keep` label to prevent auto-closure" \
+                "2. Add the \`jules-keep\` label to prevent auto-closure" \
                 "" \
                 "This cleanup runs weekly to prevent PR accumulation.")
-              gh pr close "$PR_NUM" --comment "$COMMENT"
               gh pr close "$PR_NUM" --comment "$COMMENT"
 
               # Also delete the branch

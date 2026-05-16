@@ -264,5 +264,21 @@ jobs:
             # Post-processing: Remove reviewers to reduce noise
             if [ -n "$PR_NUM" ]; then
                gh pr edit "$PR_NUM" --remove-reviewer "dieterolson" || true
+               echo "PR_NUM=$PR_NUM" >> "$GITHUB_ENV"
             fi
           fi
+
+      - name: Anti-phantom-merge verification on resolver PR
+        if: env.PR_NUM != ''
+        uses: ./.github/actions/verify-issue-resolution
+        continue-on-error: true
+        with:
+          pr_number: ${{ env.PR_NUM }}
+          github_token: ${{ secrets.RUNNER_CHECK_TOKEN }}
+
+      - name: Label PR if verification failed
+        if: env.PR_NUM != '' && failure()
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          gh pr edit "$PR_NUM" --add-label "jules-verification-failed" || true

@@ -499,10 +499,18 @@ jobs:
           ---
           - Closed by Jules Assessment Auto-Fix Workflow"
 
-          # Close the PR
-          gh pr close "$SOURCE_PR"
-
-          echo "- Closed PR #$SOURCE_PR"
+          # Anti-phantom-merge gate: skip PRs flagged jules-verification-failed
+          # so the diagnostic remains visible to the user.
+          has_failed_label=$(gh pr view "$SOURCE_PR" --json labels \
+            --jq '[.labels[].name] | contains(["jules-verification-failed"])' \
+            2>/dev/null || echo "false")
+          if [ "$has_failed_label" = "true" ]; then
+            echo "Skipping close of PR #$SOURCE_PR: jules-verification-failed label present."
+          else
+            # Close the PR
+            gh pr close "$SOURCE_PR"
+            echo "- Closed PR #$SOURCE_PR"
+          fi
 
   # Dry run summary - runs independently when dry_run is true
   dry-run-summary:
