@@ -37,37 +37,6 @@ ASSETS_DIR = Path(__file__).parent / "assets"
 CONFIG_DIR = Path.home() / ".golf_modeling_suite"
 LAYOUT_CONFIG_FILE = CONFIG_DIR / "launcher_layout.json"
 
-def load_models_yaml() -> dict[str, Any]:
-    """Load and return the canonical models.yaml configuration.
-
-    Returns the parsed YAML dict with at least a `models` key.
-    Raises on missing file or malformed content.
-    """
-    import yaml  # type: ignore[import-untyped]
-
-    models_path = REPOS_ROOT / "src" / "config" / "models.yaml"
-    data = yaml.safe_load(models_path.read_text(encoding="utf-8"))
-    if not isinstance(data, dict) or "models" not in data:
-        raise ValueError(f"{models_path} is missing a top-level 'models' key")
-    return data
-
-
-def _derive_tile_metadata() -> tuple[list[str], dict[str, str]]:
-    """Derive EXPECTED_TILE_IDS and EXPECTED_TILE_NAMES from models.yaml.
-
-    Falls back to empty defaults if models.yaml is unreadable at import
-    time (e.g. during isolated unit tests).
-    """
-    try:
-        data = load_models_yaml()
-        models = data["models"]
-        tile_ids = sorted(m["id"] for m in models)
-        tile_names = {m["id"]: m["name"] for m in models}
-        return tile_ids, tile_names
-    except Exception:
-        logger.warning("Could not derive tile metadata from models.yaml; using empty defaults")
-        return [], {}
-
 
 def _read_manifest_schema(manifest_path: Path | None) -> str | None:
     """Return the ``schema`` field of a biomech manifest, or ``None``.
@@ -118,14 +87,99 @@ class DiagnosticResult:
 class LauncherDiagnostics:
     """Diagnostic utilities for the UpstreamDrift Launcher."""
 
-    # Expected tile model IDs and names -- derived from models.yaml at class definition
-    EXPECTED_TILE_IDS, EXPECTED_TILE_NAMES = _derive_tile_metadata()
+    # Expected tile model IDs
+    EXPECTED_TILE_IDS = [
+        "mujoco_unified",
+        "drake_golf",
+        "pinocchio_golf",
+        "opensim_golf",
+        "myosim_suite",
+        "putting_green",
+        "simscape_2d",
+        "simscape_3d",
+        "dataset_generator",
+        "matlab_analysis",
+        "c3d_viewer",
+        "openpose_analysis",
+        "mediapipe_analysis",
+        "model_explorer",
+        "video_analyzer",
+        "data_explorer",
+        "project_map",
+    ]
 
+    # Expected tile names
+    EXPECTED_TILE_NAMES = {
+        "mujoco_unified": "MuJoCo",
+        "drake_golf": "Drake",
+        "pinocchio_golf": "Pinocchio",
+        "opensim_golf": "OpenSim",
+        "myosim_suite": "MyoSuite",
+        "putting_green": "Putting Green",
+        "simscape_2d": "Simscape 2D",
+        "simscape_3d": "Simscape 3D",
+        "dataset_generator": "Dataset Generator",
+        "matlab_analysis": "Analysis GUI",
+        "c3d_viewer": "C3D Viewer",
+        "openpose_analysis": "OpenPose",
+        "mediapipe_analysis": "MediaPipe",
+        "model_explorer": "Model Explorer",
+        "video_analyzer": "Video Analyzer",
+        "data_explorer": "Data Explorer",
+        "project_map": "Project Map",
+    }
 
     def __init__(self) -> None:
         """Initialize diagnostics."""
         self.results: list[DiagnosticResult] = []
         self._start_time = time.time()
+
+    @staticmethod
+    def _push_to_ring_buffer(results: list[DiagnosticResult]) -> None:
+        """Emit diagnostic results into the app-state ring buffer (issue #5474).
+
+                Called at the end of :meth:
+        un_all_checks after all checks complete.
+                Uses a lazy import so the ring buffer is only required at call-time.
+                Best-effort: any import or record error is silently swallowed.
+        """
+        try:
+            from src.shared.python.ai.chat_context import record_event
+
+            for r in results:
+                record_event(
+                    "diagnostic",
+                    {
+                        "check": r.name,
+                        "status": r.status,
+                        "message": r.message,
+                        "duration_ms": r.duration_ms,
+                    },
+                )
+        except Exception:  # noqa: BLE001
+            pass
+
+    def _record_result(self, result: DiagnosticResult) -> None:
+        """Append *result* to ``self.results`` and push it to the ring buffer.
+
+        Best-effort ring-buffer write: any failure from `record_event` is
+        silently swallowed so a buffer outage never breaks the diagnostic run.
+        """
+        self.results.append(result)
+        try:
+            from src.shared.python.ai.chat_context import record_event
+
+            record_event(
+                "diagnostic",
+                {
+                    "check": result.name,
+                    "status": result.status,
+                    "message": result.message,
+                    "duration_ms": result.duration_ms,
+                },
+            )
+        except Exception:  # noqa: BLE001
+            pass
 
     def run_all_checks(self) -> dict[str, Any]:
         """Run all diagnostic checks and return comprehensive report.
@@ -147,6 +201,9 @@ class LauncherDiagnostics:
         self.check_biomech_siblings()
         self.check_tools_sidebar()
 
+        # Feed all results into the app-state ring buffer so the Sidekick
+        # chat assistant can include them via get_chat_context() (issue #5474).
+        self._push_to_ring_buffer(self.results)
         # Calculate summary
         passed = sum(1 for r in self.results if r.status == "pass")
         failed = sum(1 for r in self.results if r.status == "fail")
@@ -185,7 +242,7 @@ class LauncherDiagnostics:
             details=details,
             duration_ms=(time.time() - start) * 1000,
         )
-        self.results.append(result)
+        self._record_result(result)
         return result
 
     def _validate_models_yaml_content(
@@ -457,7 +514,7 @@ class LauncherDiagnostics:
             result = DiagnosticResult(
                 name="layout_config",
                 status="pass",
-                message=f"No saved layout (will use defaults with {len(self.EXPECTED_TILE_IDS)} tiles)",
+                message="No saved layout (will use defaults with 17 tiles)",
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
@@ -856,7 +913,7 @@ class LauncherDiagnostics:
             if result.status == "fail":
                 if result.name == "models_yaml":
                     recommendations.append(
-                        f"CRITICAL: Ensure src/config/models.yaml exists and contains all {len(self.EXPECTED_TILE_IDS)} model definitions"
+                        "CRITICAL: Ensure src/config/models.yaml exists and contains all 17 model definitions"
                     )
                 elif result.name == "model_registry":
                     recommendations.append(
@@ -878,7 +935,7 @@ class LauncherDiagnostics:
                     details = result.details
                     if details.get("missing_from_saved"):
                         recommendations.append(
-                            f"LIKELY CAUSE: Saved layout is missing tiles. Delete {LAYOUT_CONFIG_FILE} to reset to defaults with all {len(self.EXPECTED_TILE_IDS)} tiles"
+                            f"LIKELY CAUSE: Saved layout is missing tiles. Delete {LAYOUT_CONFIG_FILE} to reset to defaults with all 17 tiles"
                         )
                 elif result.name == "asset_files":
                     recommendations.append("Some tile icons may not display correctly")
@@ -906,7 +963,7 @@ def reset_layout_config() -> bool:
             LAYOUT_CONFIG_FILE.rename(backup_path)
             logger.info("Backed up existing config to %s", backup_path)
 
-        logger.info(f"Layout config reset - launcher will use defaults ({len(LauncherDiagnostics.EXPECTED_TILE_IDS)} tiles)")
+        logger.info("Layout config reset - launcher will use defaults (17 tiles)")
         return True
     except (RuntimeError, ValueError, OSError) as e:
         logger.error("Failed to reset layout config: %s", e)
@@ -984,4 +1041,3 @@ if __name__ == "__main__":
         logger.info(json.dumps(results, indent=2))
     else:
         run_cli_diagnostics()
-
