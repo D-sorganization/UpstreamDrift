@@ -11,11 +11,7 @@
       "path": "src/tools/model_explorer/launch_model_explorer.py",
       "logo": "urdf_icon.svg",
       "status": "utility",
-      "capabilities": [
-        "model_browsing",
-        "urdf_generation",
-        "open_in_engine"
-      ],
+      "capabilities": ["model_browsing", "urdf_generation", "open_in_engine"],
       "order": 1
     },
     {
@@ -47,7 +43,14 @@
         "actuator_controls",
         "force_overlays",
         "control_schemes",
-        "realtime"
+        "realtime",
+        "realtime_ws",
+        "unreal_streaming",
+        "biomechanics_library",
+        "data_io",
+        "plot_engine",
+        "recorder",
+        "advanced_analysis"
       ],
       "order": 2
     },
@@ -70,7 +73,16 @@
         "actuator_controls",
         "force_overlays",
         "control_schemes",
-        "realtime"
+        "realtime",
+        "realtime_ws",
+        "unreal_streaming",
+        "screw_theory",
+        "spatial_algebra",
+        "biomechanics_library",
+        "data_io",
+        "plot_engine",
+        "recorder",
+        "advanced_analysis"
       ],
       "order": 3
     },
@@ -90,7 +102,15 @@
         "mass_matrix",
         "jacobian",
         "actuator_controls",
-        "force_overlays"
+        "force_overlays",
+        "control_schemes",
+        "realtime_ws",
+        "unreal_streaming",
+        "biomechanics_library",
+        "data_io",
+        "plot_engine",
+        "recorder",
+        "advanced_analysis"
       ],
       "order": 4
     },
@@ -145,11 +165,7 @@
       "logo": "putting_green.svg",
       "status": "simulator",
       "web_route": "/tools/putting-green",
-      "capabilities": [
-        "surface_modeling",
-        "ball_physics",
-        "terrain"
-      ],
+      "capabilities": ["surface_modeling", "ball_physics", "terrain"],
       "order": 7
     },
     {
@@ -161,11 +177,7 @@
       "path": "src/launchers/matlab_launcher_unified.py",
       "logo": "matlab_logo.svg",
       "status": "external",
-      "capabilities": [
-        "simscape_2d",
-        "simscape_3d",
-        "analysis_tools"
-      ],
+      "capabilities": ["simscape_2d", "simscape_3d", "analysis_tools"],
       "order": 8
     },
     {
@@ -177,26 +189,14 @@
       "path": "src.tools.starting_pose_matcher.__main__",
       "logo": "motion_target_preview.svg",
       "status": "utility",
-      "capabilities": [
-        "c3d",
-        "mocap",
-        "club",
-        "body",
-        "preview"
-      ],
-      "tags": [
-        "c3d",
-        "mocap",
-        "club",
-        "body",
-        "preview"
-      ],
+      "capabilities": ["c3d", "mocap", "club", "body", "preview"],
+      "tags": ["c3d", "mocap", "club", "body", "preview"],
       "order": 9
     },
     {
       "id": "motion_capture",
       "name": "Motion Capture",
-      "description": "C3D Viewer, OpenPose, and MediaPipe Analysis",
+      "description": "C3D Viewer, OpenPose, and MediaPipe Analysis \u2014 with retargeting, inverse-dynamics solving, signal processing, and anthropometric scaling pipeline",
       "category": "tool",
       "type": "special_app",
       "path": "src/launchers/motion_capture_launcher.py",
@@ -207,7 +207,11 @@
         "c3d_viewer",
         "openpose",
         "mediapipe",
-        "pose_estimation"
+        "pose_estimation",
+        "retargeting",
+        "id_solving",
+        "signal_processing",
+        "scaling"
       ],
       "order": 10
     },
@@ -221,10 +225,7 @@
       "provider": "tools",
       "source_root": "../Tools",
       "working_dir": ".",
-      "python_paths": [
-        "src",
-        "src/shared/python"
-      ],
+      "python_paths": ["src", "src/shared/python"],
       "logo": "video_analyzer.svg",
       "status": "external",
       "web_route": "/tools/video-analyzer",
@@ -246,10 +247,7 @@
       "provider": "tools",
       "source_root": "../Tools",
       "working_dir": "src/media_processing/video_processor/apps/web",
-      "python_paths": [
-        "src",
-        "src/shared/python"
-      ],
+      "python_paths": ["src", "src/shared/python"],
       "logo": "video_analyzer.svg",
       "status": "external",
       "web_route": "/tools/video-processor",
@@ -271,19 +269,11 @@
       "provider": "tools",
       "source_root": "../Tools",
       "working_dir": ".",
-      "python_paths": [
-        "src",
-        "src/shared/python"
-      ],
+      "python_paths": ["src", "src/shared/python"],
       "logo": "data_explorer.svg",
       "status": "external",
       "web_route": "/tools/data-explorer",
-      "capabilities": [
-        "data_import",
-        "filtering",
-        "visualization",
-        "export"
-      ],
+      "capabilities": ["data_import", "filtering", "visualization", "export"],
       "order": 13
     },
     {
@@ -344,7 +334,8 @@
         "cross_validation",
         "perturbation",
         "robustness_scoring",
-        "comparison"
+        "comparison",
+        "cross_engine_robustness"
       ],
       "order": 16
     },
@@ -374,10 +365,7 @@
       "path": "src/launchers/_shot_tracer_gui.py",
       "logo": "golf_logo.svg",
       "status": "gui_ready",
-      "capabilities": [
-        "trajectory_visualization",
-        "multi_model_comparison"
-      ],
+      "capabilities": ["trajectory_visualization", "multi_model_comparison"],
       "order": 18
     },
     {
@@ -389,11 +377,7 @@
       "path": "src/tools/pose_studio/__main__.py",
       "logo": "pose_studio.svg",
       "status": "gui_ready",
-      "capabilities": [
-        "pose_editing",
-        "retargeting",
-        "joint_manipulation"
-      ],
+      "capabilities": ["pose_editing", "retargeting", "joint_manipulation"],
       "order": 19
     },
     {
@@ -405,11 +389,7 @@
       "path": "src/tools/golf_simulation_suite/__main__.py",
       "logo": "golf_logo.svg",
       "status": "gui_ready",
-      "capabilities": [
-        "full_simulation",
-        "parameter_sweep",
-        "batch_runs"
-      ],
+      "capabilities": ["full_simulation", "parameter_sweep", "batch_runs"],
       "order": 20
     },
     {
@@ -490,12 +470,7 @@
       "path": "src/bunkershot3d/",
       "logo": "bunkershot3d.svg",
       "status": "gui_ready",
-      "capabilities": [
-        "sand_simulation",
-        "mpm",
-        "liggghts",
-        "calibration"
-      ],
+      "capabilities": ["sand_simulation", "mpm", "liggghts", "calibration"],
       "order": 25
     },
     {
@@ -507,11 +482,7 @@
       "path": "src/shared/python/pendulum_simulator/__main__.py",
       "logo": "pendulum.svg",
       "status": "gui_ready",
-      "capabilities": [
-        "educational",
-        "2dof",
-        "pendulum"
-      ],
+      "capabilities": ["educational", "2dof", "pendulum"],
       "order": 26
     },
     {
@@ -563,7 +534,9 @@
       "capabilities": [
         "rigid_body",
         "optimization",
-        "dashboard"
+        "dashboard",
+        "recorder",
+        "advanced_analysis"
       ],
       "order": 29
     },
@@ -581,7 +554,9 @@
       "capabilities": [
         "rigid_body",
         "contact",
-        "dashboard"
+        "dashboard",
+        "recorder",
+        "advanced_analysis"
       ],
       "order": 30
     },
@@ -599,7 +574,9 @@
       "capabilities": [
         "rigid_body",
         "inverse_kinematics",
-        "dashboard"
+        "dashboard",
+        "recorder",
+        "advanced_analysis"
       ],
       "order": 31
     },
@@ -613,11 +590,7 @@
       "web_route": "/api/analysis",
       "logo": "data_explorer.svg",
       "status": "ready",
-      "capabilities": [
-        "swing_metrics",
-        "biomechanics",
-        "api"
-      ],
+      "capabilities": ["swing_metrics", "biomechanics", "api"],
       "order": 32
     },
     {
@@ -630,11 +603,7 @@
       "web_route": "/tools/motion-pipeline",
       "logo": "c3d_icon.svg",
       "status": "experimental",
-      "capabilities": [
-        "markerless_mocap",
-        "forward_dynamics",
-        "pipeline"
-      ],
+      "capabilities": ["markerless_mocap", "forward_dynamics", "pipeline"],
       "order": 33
     },
     {
@@ -647,11 +616,7 @@
       "web_route": "/api/perturbation",
       "logo": "data_explorer.svg",
       "status": "experimental",
-      "capabilities": [
-        "perturbation",
-        "robustness",
-        "cross_engine"
-      ],
+      "capabilities": ["perturbation", "robustness", "cross_engine"],
       "order": 34
     },
     {
@@ -664,11 +629,7 @@
       "web_route": "/api/force-overlays",
       "logo": "mujoco_humanoid.svg",
       "status": "experimental",
-      "capabilities": [
-        "force_visualization",
-        "joint_torques",
-        "3d_overlay"
-      ],
+      "capabilities": ["force_visualization", "joint_torques", "3d_overlay"],
       "order": 35
     },
     {
@@ -681,11 +642,7 @@
       "web_route": "/ws/realtime",
       "logo": "data_explorer.svg",
       "status": "experimental",
-      "capabilities": [
-        "websocket",
-        "realtime",
-        "pubsub"
-      ],
+      "capabilities": ["websocket", "realtime", "pubsub"],
       "order": 36
     },
     {
@@ -698,11 +655,7 @@
       "web_route": "/api/aip",
       "logo": "golf_logo.svg",
       "status": "experimental",
-      "capabilities": [
-        "ai_methods",
-        "protocol",
-        "dispatch"
-      ],
+      "capabilities": ["ai_methods", "protocol", "dispatch"],
       "order": 37
     },
     {
@@ -715,11 +668,7 @@
       "web_route": "/api/actuator-controls",
       "logo": "mujoco_humanoid.svg",
       "status": "experimental",
-      "capabilities": [
-        "actuator_tuning",
-        "control_schemes",
-        "realtime"
-      ],
+      "capabilities": ["actuator_tuning", "control_schemes", "realtime"],
       "order": 38
     },
     {
@@ -732,11 +681,7 @@
       "web_route": "/docs/unreal-integration",
       "logo": "golf_logo.svg",
       "status": "external",
-      "capabilities": [
-        "streaming",
-        "vr",
-        "visualization"
-      ],
+      "capabilities": ["streaming", "vr", "visualization"],
       "order": 39
     },
     {
@@ -749,11 +694,7 @@
       "web_route": "/docs/robotics",
       "logo": "drake.svg",
       "status": "experimental",
-      "capabilities": [
-        "locomotion",
-        "contact",
-        "planning"
-      ],
+      "capabilities": ["locomotion", "contact", "planning"],
       "order": 40
     },
     {
@@ -766,11 +707,7 @@
       "web_route": "/tools/calculators",
       "logo": "data_explorer.svg",
       "status": "external",
-      "capabilities": [
-        "process_calculators",
-        "engineering",
-        "analysis"
-      ],
+      "capabilities": ["process_calculators", "engineering", "analysis"],
       "order": 41
     },
     {
@@ -783,11 +720,7 @@
       "web_route": "/docs/pid-generator",
       "logo": "data_explorer.svg",
       "status": "external",
-      "capabilities": [
-        "pid_generation",
-        "isa_5_1",
-        "diagrams"
-      ],
+      "capabilities": ["pid_generation", "isa_5_1", "diagrams"],
       "order": 42
     },
     {
@@ -802,13 +735,7 @@
       "hidden": true,
       "hidden_reason": "Legacy alias retained for one release so saved layouts continue to resolve; use motion_target_preview for new launcher entries.",
       "hidden_owner": "@launcher",
-      "capabilities": [
-        "c3d",
-        "mocap",
-        "club",
-        "body",
-        "preview"
-      ],
+      "capabilities": ["c3d", "mocap", "club", "body", "preview"],
       "order": 99
     }
   ]
