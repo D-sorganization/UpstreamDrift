@@ -75,7 +75,12 @@ class UnifiedToolsSidebar(QWidget):
     def _default_tab_definitions(self) -> list[SidebarTabDefinition]:
         """Return the ordered list of default sidebar tab definitions.
 
-        The 'chat' tab creates a real ChatDockWidget (Issue #5490).
+        Tab order (left → right):
+        1. chat      — AI chat assistant (Issue #5490)
+        2. terminal  — Real OS shell with PTY backend (Issue #5617)
+        3. python-repl — Python REPL sharing workspace variables (Issue #5617)
+
+        Postcondition: returned list contains 'terminal' and 'python-repl' tabs.
         """
         return [
             SidebarTabDefinition(
@@ -83,6 +88,24 @@ class UnifiedToolsSidebar(QWidget):
                 label="Chat",
                 tooltip="AI Chat assistant",
                 factory=self._make_chat_widget,
+            ),
+            SidebarTabDefinition(
+                tab_id="terminal",
+                label="Terminal",
+                tooltip=(
+                    "Real OS shell (bash / pwsh / cmd) with PTY backend, "
+                    "shell selector, and live cwd display."
+                ),
+                factory=self._make_os_terminal_widget,
+            ),
+            SidebarTabDefinition(
+                tab_id="python-repl",
+                label="Python REPL",
+                tooltip=(
+                    "Python execution surface sharing variables with the "
+                    "workspace registry."
+                ),
+                factory=self._make_python_repl_widget,
             ),
         ]
 
@@ -112,6 +135,49 @@ class UnifiedToolsSidebar(QWidget):
         )
         logger.debug("Chat tab: created ChatDockWidget")
         return widget
+
+    def _make_os_terminal_widget(self, _sidebar: Any) -> QWidget:
+        """Create the PTY-backed OS terminal widget for the Terminal tab.
+
+        Uses :class:`~os_terminal.SidekickOsTerminalWidget` which runs a real
+        OS shell with a shell-selector combo and live cwd label.  Degrades to a
+        placeholder when Qt widgets cannot be constructed.
+
+        Args:
+            _sidebar: The sidebar instance (matches factory signature).
+
+        Returns:
+            The OS terminal Qt widget, or a placeholder on failure.
+
+        Issue #5617.
+        """
+        try:
+            from src.shared.python.upstream_drift_tools.ui.tools_sidebar.os_terminal import (
+                SidekickOsTerminalWidget,
+            )
+
+            terminal = SidekickOsTerminalWidget(parent=self)
+            if terminal.widget is not None:
+                logger.debug("OS terminal tab: created SidekickOsTerminalWidget")
+                return terminal.widget
+        except Exception:  # noqa: BLE001 — degrade gracefully
+            logger.debug("OS terminal unavailable, using placeholder")
+
+        return self._placeholder("Terminal (OS shell unavailable)")
+
+    def _make_python_repl_widget(self, _sidebar: Any) -> QWidget:
+        """Create the Python REPL widget for the Python REPL tab.
+
+        Args:
+            _sidebar: The sidebar instance (matches factory signature).
+
+        Returns:
+            A placeholder until a Qt-capable REPL widget is wired in.
+
+        Issue #5617.
+        """
+        logger.debug("Python REPL tab: created placeholder")
+        return self._placeholder("Python REPL")
 
     def _placeholder(self, label: str) -> QWidget:
         """Return a simple placeholder label widget.

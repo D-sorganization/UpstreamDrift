@@ -58,8 +58,14 @@ def build_chat_tab(sidebar: Any) -> QtWidgets.QWidget:
 
 
 def build_terminal_tab(sidebar: Any) -> QtWidgets.QWidget:
-    """Build an embedded Python terminal tab bound to the workspace registry."""
-    widget = SidekickTerminalWidget(
+    """Build an embedded Python REPL terminal tab bound to the workspace registry.
+
+    .. note::
+        This builder creates the *Python REPL* tab (``python-repl``), not the
+        OS terminal tab.  The OS terminal tab is built by
+        :func:`build_os_terminal_tab`.
+    """
+    widget = SidekickPythonReplWidget(
         registry=sidebar.registry,
         set_variable=sidebar.set_context_variable,
         terminal_theme=theme.SidekickTerminalTheme.inherited(
@@ -69,6 +75,39 @@ def build_terminal_tab(sidebar: Any) -> QtWidgets.QWidget:
     )
     widget.setToolTip(DEFAULT_SIDEBAR_TAB_HELP["terminal"]["summary"])
     return widget
+
+
+def build_os_terminal_tab(sidebar: Any) -> QtWidgets.QWidget:
+    """Build an OS PTY-backed terminal tab for the Sidekick sidebar.
+
+    Uses :class:`~os_terminal.SidekickOsTerminalWidget` which runs a real OS
+    shell (bash, pwsh, cmd, …) with shell selector and live cwd display.
+    Falls back to the Python REPL tab when no OS shells are discovered.
+    """
+    try:
+        from .os_terminal import SidekickOsTerminalWidget
+
+        terminal = SidekickOsTerminalWidget(parent=sidebar)
+        widget = terminal.widget
+        if widget is not None:
+            widget.setToolTip("Real OS shell terminal (bash / pwsh / cmd).")
+            return widget
+    except Exception:  # noqa: BLE001 — degrade gracefully to Python REPL
+        logger.debug("OS terminal widget unavailable, falling back to Python REPL")
+
+    # Graceful degradation: render the Python REPL with a warning tooltip
+    repl = SidekickPythonReplWidget(
+        registry=sidebar.registry,
+        set_variable=sidebar.set_context_variable,
+        terminal_theme=theme.SidekickTerminalTheme.inherited(
+            getattr(sidebar, "_design_tokens", None),
+        ),
+        parent=sidebar,
+    )
+    repl.setToolTip(
+        "Python REPL (OS terminal unavailable — install pywinpty or ptyprocess)."
+    )
+    return repl
 
 
 def build_calculator_tab(sidebar: Any) -> QtWidgets.QWidget:
@@ -96,8 +135,14 @@ def build_notes_tab(sidebar: Any) -> QtWidgets.QWidget:
     return widget
 
 
-class SidekickTerminalWidget(QtWidgets.QWidget):
-    """Small Python execution surface sharing values with Workspace."""
+class SidekickPythonReplWidget(QtWidgets.QWidget):
+    """Small Python execution surface sharing values with Workspace.
+
+    Formerly named ``SidekickTerminalWidget``.  Renamed in issue #5617 to
+    distinguish the Python REPL from the new real OS terminal widget
+    (:class:`~os_terminal.SidekickOsTerminalWidget`).  The old name is kept
+    as a module-level alias for backward compatibility.
+    """
 
     def __init__(
         self,
@@ -502,3 +547,12 @@ def _format_terminal_output(
     if not parts:
         return "Executed."
     return "".join(parts).strip()
+
+
+# ---------------------------------------------------------------------------
+# Backward-compatibility alias
+# ---------------------------------------------------------------------------
+
+#: Alias preserved for backward compatibility.  New code should use
+#: :class:`SidekickPythonReplWidget` directly.
+SidekickTerminalWidget = SidekickPythonReplWidget
