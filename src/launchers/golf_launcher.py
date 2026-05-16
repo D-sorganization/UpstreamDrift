@@ -468,6 +468,19 @@ class GolfLauncher(
 
         _QTimer.singleShot(100, self._show_onboarding_if_needed)
 
+    def create_model_card(self, model: Any) -> None:
+        """Create a clickable card widget for *model*.
+
+        Raises:
+            NotImplementedError: Always — callers must use
+                :class:`DraggableModelCard` directly or delegate to
+                :class:`LayoutManager` (issue #5488).
+        """
+        raise NotImplementedError(
+            "create_model_card is a deprecated stub. "
+            "Use DraggableModelCard(model, self) or LayoutManager directly."
+        )
+
     def _handle_startup_timeout(self) -> None:
         """Recover from a hung async-startup worker (issue #5490).
 

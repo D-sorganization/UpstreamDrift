@@ -1,6 +1,14 @@
 """Configuration management, environment, and model registry."""
 
-from .config_utils import ConfigLoader, load_json_config, load_yaml_config, merge_configs, save_json_config, save_yaml_config, validate_config
+from .config_utils import (
+    ConfigLoader,
+    load_json_config,
+    load_yaml_config,
+    merge_configs,
+    save_json_config,
+    save_yaml_config,
+    validate_config,
+)
 from .configuration_manager import ConfigurationManager, SimulationConfig
 from .environment import (
     EnvironmentError,
@@ -75,7 +83,6 @@ from .provider_catalog import (
     iter_known_utility_provider_ids,
     iter_provider_manifest_specs,
 )
-from .settings import get_setting, load_settings, save_settings
 from .standard_models import StandardModelManager
 
 __all__: list[str] = [
@@ -161,10 +168,6 @@ __all__: list[str] = [
     "iter_known_provider_repo_names",
     "iter_known_utility_provider_ids",
     "iter_provider_manifest_specs",
-    # settings
-    "get_setting",
-    "load_settings",
-    "save_settings",
     # standard_models
     "StandardModelManager",
 ]

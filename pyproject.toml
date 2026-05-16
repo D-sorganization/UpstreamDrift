@@ -53,6 +53,7 @@ rust = ["upstream-physics>=0.1.0", "upstream-mocap-preproc>=0.1.0"]
 mocap-preproc = ["upstream-mocap-preproc>=0.1.0"]
 drake = ["drake>=1.22.0"]
 pinocchio = ["pin>=2.6.0", "meshcat>=0.3.0"]
+physics_informed = ["jax>=0.4", "equinox>=0.11"]
 
 all-engines = ["upstream-drift[drake,pinocchio]"]
 
