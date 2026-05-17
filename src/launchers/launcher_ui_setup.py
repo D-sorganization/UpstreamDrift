@@ -344,10 +344,10 @@ class LauncherUISetupMixin:
                 if visible and hasattr(self, "btn_popout_sidekick"):
                     self.btn_popout_sidekick.setVisible(True)
         else:
-            logger.warning("Sidekick sidebar not found or not initialized.")
+            logger.info("Sidekick sidebar still loading or not initialized.")
             if hasattr(self, "show_toast"):
-                self.show_toast("AI Assistant is not available. Please check environment variables or module installation.", "error")
-            # Uncheck the button since we couldn't open it
+                self.show_toast("Sidekick is still loading, please wait a moment…", "info")
+            # Uncheck the button since it's not ready yet
             if hasattr(self, "btn_ai_sidebar"):
                 self.btn_ai_sidebar.setChecked(False)
 
@@ -520,17 +520,26 @@ class LauncherUISetupMixin:
         self.sidebar_group.addButton(btn_tools, 6)
         self.sidebar_group.idClicked.connect(self._on_sidebar_routed)
 
+        # Space navigation buttons evenly to fill available height
         layout.addWidget(btn_home)
+        layout.addStretch(1)
         layout.addWidget(btn_engines)
+        layout.addStretch(1)
         layout.addWidget(btn_biomechanics)
+        layout.addStretch(1)
         layout.addWidget(btn_simulation)
+        layout.addStretch(1)
         layout.addWidget(btn_motion_matching)
+        layout.addStretch(1)
         layout.addWidget(btn_motion_capture)
+        layout.addStretch(1)
         layout.addWidget(btn_tools)
-        layout.addStretch()
+        layout.addStretch(3)  # larger gap before bottom group
         if AI_AVAILABLE:
             layout.addWidget(self.btn_ai_sidebar)
+            layout.addStretch(1)
         layout.addWidget(btn_docs)
+        layout.addStretch(1)
         layout.addWidget(btn_settings)
 
         # Set explicit focus order for keyboard navigation
@@ -660,9 +669,7 @@ class LauncherUISetupMixin:
             raise ValueError("menubar must be provided")
         view_menu = menubar.addMenu("&View")
 
-        # ---- View-mode submenu (Large / Medium / Small / List) ----
-        # The same four modes the top-bar combo exposes, but discoverable
-        # through the menu with keyboard shortcuts.
+        # ---- View-mode submenu (Large / Medium / Small / List Large / List Small) ----
         viewmode_menu = view_menu.addMenu("Tile &Layout")
         from PyQt6.QtGui import QActionGroup
 
@@ -673,7 +680,8 @@ class LauncherUISetupMixin:
             ("&Large", ViewMode.LARGE, "Ctrl+1"),
             ("&Medium", ViewMode.MEDIUM, "Ctrl+2"),
             ("&Small", ViewMode.SMALL, "Ctrl+3"),
-            ("&List", ViewMode.LIST, "Ctrl+4"),
+            ("List Lar&ge", ViewMode.LIST_LARGE, "Ctrl+4"),
+            ("List S&mall", ViewMode.LIST_SMALL, "Ctrl+5"),
         ):
             act = QAction(label, self)
             act.setCheckable(True)
@@ -686,8 +694,8 @@ class LauncherUISetupMixin:
             self._viewmode_action_group.addAction(act)
             viewmode_menu.addAction(act)
             self._viewmode_actions[mode] = act
-        # Default checkmark on LIST (matches combo default).
-        self._viewmode_actions[ViewMode.LIST].setChecked(True)
+        # Default checkmark on LIST_LARGE.
+        self._viewmode_actions[ViewMode.LIST_LARGE].setChecked(True)
 
         view_menu.addSeparator()
 
@@ -1018,8 +1026,9 @@ class LauncherUISetupMixin:
         self.view_mode_combo.addItem("Large", ViewMode.LARGE)
         self.view_mode_combo.addItem("Medium", ViewMode.MEDIUM)
         self.view_mode_combo.addItem("Small", ViewMode.SMALL)
-        self.view_mode_combo.addItem("List", ViewMode.LIST)
-        self.view_mode_combo.setCurrentIndex(1)  # Medium default
+        self.view_mode_combo.addItem("List Large", ViewMode.LIST_LARGE)
+        self.view_mode_combo.addItem("List Small", ViewMode.LIST_SMALL)
+        self.view_mode_combo.setCurrentIndex(3)  # List Large default
         self.view_mode_combo.setToolTip("Choose how the model tiles are arranged")
         self.view_mode_combo.setAccessibleName("View mode")
         self.view_mode_combo.currentIndexChanged.connect(self._on_view_mode_changed)
@@ -1069,6 +1078,19 @@ class LauncherUISetupMixin:
         if slider is None:
             return
         slider.setValue(slider.value() + delta_steps)
+
+    def wheelEvent(self, event: Any) -> None:  # noqa: N802
+        """Ctrl+scroll wheel adjusts the zoom slider."""
+        from PyQt6.QtCore import Qt as _Qt
+
+        if event.modifiers() & _Qt.KeyboardModifier.ControlModifier:
+            delta = event.angleDelta().y()
+            if delta != 0:
+                steps = 5 if delta > 0 else -5
+                self._nudge_zoom(steps)
+                event.accept()
+                return
+        super().wheelEvent(event)  # type: ignore[misc]
 
     def _on_view_mode_changed(self, index: int) -> None:
         """Apply the selected view mode to the layout manager + grid."""

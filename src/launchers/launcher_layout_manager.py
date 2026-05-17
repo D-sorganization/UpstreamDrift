@@ -34,21 +34,22 @@ class LayoutConfig:
 
 
 def _view_mode_from_string(name: str | None) -> ViewMode:
-    """Parse a stored string into a :class:`ViewMode`, defaulting to LIST."""
+    """Parse a stored string into a :class:`ViewMode`, defaulting to LIST_LARGE."""
     if not name:
-        return ViewMode.LIST
+        return ViewMode.LIST_LARGE
     # Backward compat: map old enum names to new ones
     _compat = {
-        "comfortable": "large",
+        "comfortable": "list_large",
         "compact": "medium",
         "dense": "small",
+        "list": "list_large",
     }
     key = _compat.get(str(name).strip().lower(), str(name).strip()).upper()
     try:
         return ViewMode[key]
     except KeyError:
-        logger.warning("Unknown view_mode %r, falling back to LIST", name)
-        return ViewMode.LIST
+        logger.warning("Unknown view_mode %r, falling back to LIST_LARGE", name)
+        return ViewMode.LIST_LARGE
 
 
 class LayoutManager:
@@ -91,7 +92,7 @@ class LayoutManager:
         self.model_cards: dict[str, Any] = {}
         self.edit_mode = False
         self.current_filter_text = ""
-        self.current_view_mode: ViewMode = ViewMode.LIST
+        self.current_view_mode: ViewMode = ViewMode.LIST_LARGE
         self.tile_scale: float = TILE_SCALE_DEFAULT
         self.current_category_filter = "All"
 
@@ -219,6 +220,7 @@ class LayoutManager:
 
         # Create cards for any newly added models
         _scale, _cols, show_desc, is_list = view_mode_settings(self.current_view_mode)
+        _compact = self.current_view_mode == ViewMode.LIST_SMALL
         for model_id in self.model_order:
             if model_id not in self.model_cards:
                 model = self._get_model(model_id)
@@ -228,6 +230,7 @@ class LayoutManager:
                         tile_scale=self.tile_scale,
                         show_description=show_desc,
                         list_mode=is_list,
+                        list_compact=_compact,
                     )
 
     def apply_model_selection(self, selected_ids: list[str]) -> list[str]:
@@ -389,16 +392,17 @@ class LayoutManager:
         if not isinstance(mode, ViewMode):
             raise TypeError(f"mode must be a ViewMode, got {type(mode).__name__}")
         scale, _cols, show_desc, is_list = view_mode_settings(mode)
+        _compact = mode == ViewMode.LIST_SMALL
         self.current_view_mode = mode
         self.tile_scale = scale
-        # When switching into/out of LIST mode the grid topology changes, so
-        # we drop existing cards and let rebuild_grid recreate them with the
-        # right list_mode flag. For grid->grid switches an in-place
-        # set_tile_scale is sufficient.
+        # When switching list topology the cards need full rebuild.
         was_list = any(
             getattr(c, "_list_mode", False) for c in self.model_cards.values()
         )
-        if is_list != was_list:
+        was_compact = any(
+            getattr(c, "_list_compact", False) for c in self.model_cards.values()
+        )
+        if is_list != was_list or _compact != was_compact:
             for c in list(self.model_cards.values()):
                 c.setParent(None)
                 c.deleteLater()
@@ -410,6 +414,7 @@ class LayoutManager:
                         scale,
                         show_description=show_desc,
                         list_mode=is_list,
+                        list_compact=_compact,
                     )
 
     def set_tile_scale(self, scale: float) -> None:
@@ -472,6 +477,7 @@ class LayoutManager:
                         tile_scale=active_scale,
                         show_description=show_desc,
                         list_mode=is_list,
+                        list_compact=(self.current_view_mode == ViewMode.LIST_SMALL),
                     )
             else:
                 # Existing card — make sure it matches current scale/mode.

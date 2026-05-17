@@ -248,7 +248,9 @@ class GolfLauncher(
             self._initialize_model_order()
 
         self.init_ui()
-        self._install_sidekick_sidebar()
+        # Defer sidebar installation to avoid blocking the UI thread during
+        # first paint — the sidebar's AI adapters make synchronous HTTP calls.
+        QTimer.singleShot(0, self._install_sidekick_sidebar)
         self._apply_theme_system()
 
         if not self.loading:
@@ -348,6 +350,26 @@ class GolfLauncher(
             return
 
         module = _import_sidebar_module()
+
+        # Fallback: direct import when the candidate list fails due to
+        # sys.path state differences in async-startup mode.
+        if module is None:
+            import importlib
+            import sys as _sys
+
+            vendor_src = str(REPOS_ROOT / "vendor" / "ud-tools" / "src")
+            if vendor_src not in _sys.path:
+                _sys.path.insert(0, vendor_src)
+            for _name in (
+                "shared.python.sidekick.ui.tools_sidebar",
+                "sidekick.ui.tools_sidebar",
+            ):
+                try:
+                    module = importlib.import_module(_name)
+                    break
+                except ImportError:
+                    continue
+
         if module is None:
             logger.warning("Sidekick sidebar not installed: shared module unavailable")
             return
@@ -399,8 +421,9 @@ class GolfLauncher(
                 main_layout.setStretchFactor(main_layout.count() - 1, 2)
 
         self.sidekick_sidebar = sidebar_widget
-        # Mark that the splitter hasn't been sized yet; showEvent will do it.
-        self._sidekick_needs_initial_sizing = True
+        # The sidebar is installed after the window is already visible
+        # (deferred via QTimer), so apply splitter sizes immediately.
+        self._apply_sidekick_splitter_sizes()
 
         logger.info(
             "Sidekick sidebar embedded in main splitter from %s",

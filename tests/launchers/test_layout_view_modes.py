@@ -59,7 +59,8 @@ def make_layout_manager(available_models, get_model_func):
         (ViewMode.LARGE, 1.0, 4, False, False),
         (ViewMode.MEDIUM, 0.5, 6, False, False),
         (ViewMode.SMALL, 0.35, 8, False, False),
-        (ViewMode.LIST, 0.20, 1, True, True),
+        (ViewMode.LIST_LARGE, 0.30, 1, True, True),
+        (ViewMode.LIST_SMALL, 0.20, 1, False, True),
     ],
 )
 def test_view_mode_table_matches_spec(
@@ -82,7 +83,8 @@ def test_view_mode_table_matches_spec(
         (ViewMode.LARGE, 1.0, 4),
         (ViewMode.MEDIUM, 0.5, 6),
         (ViewMode.SMALL, 0.35, 8),
-        (ViewMode.LIST, 0.20, 1),
+        (ViewMode.LIST_LARGE, 0.30, 1),
+        (ViewMode.LIST_SMALL, 0.20, 1),
     ],
 )
 def test_set_view_mode_updates_state(
