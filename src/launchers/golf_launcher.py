@@ -289,6 +289,29 @@ class GolfLauncher(
         if self._startup_time_ms > 0:
             logger.info(f"Application startup completed in {self._startup_time_ms}ms")
 
+    def showEvent(self, event: Any) -> None:
+        """Force sidekick splitter sizes on first display."""
+        super().showEvent(event)
+        if getattr(self, "_sidekick_needs_initial_sizing", False):
+            self._sidekick_needs_initial_sizing = False
+            self._apply_sidekick_splitter_sizes()
+
+    def _apply_sidekick_splitter_sizes(self) -> None:
+        """Set main_layout splitter sizes to give the sidekick 300px."""
+        layout = getattr(self, "main_layout", None)
+        sidebar = getattr(self, "sidekick_sidebar", None)
+        if layout is None or sidebar is None:
+            return
+        sizes = layout.sizes()
+        if len(sizes) == 3 and sum(sizes) > 0:
+            total = sum(sizes)
+            sizes[0] = 120
+            sizes[2] = 300
+            sizes[1] = max(100, total - 120 - 300)
+            layout.setSizes(sizes)
+            sidebar.setVisible(True)
+            logger.info("Sidekick splitter sized: %s", sizes)
+
     def _show_onboarding_if_needed(self) -> None:
         """Show first-run onboarding dialog if this is a new user."""
         try:
@@ -374,21 +397,10 @@ class GolfLauncher(
         if hasattr(main_layout, "setStretchFactor"):
             with contextlib.suppress(Exception):
                 main_layout.setStretchFactor(main_layout.count() - 1, 2)
-                
-        def _force_splitter_sizes():
-            if hasattr(self, "main_layout") and hasattr(self.main_layout, "sizes"):
-                sizes = self.main_layout.sizes()
-                if sum(sizes) > 0 and len(sizes) == 3:
-                    total = sum(sizes)
-                    sizes[0] = 120
-                    sizes[2] = 300
-                    sizes[1] = max(100, total - 120 - 300)
-                    self.main_layout.setSizes(sizes)
-        
-        QTimer.singleShot(100, _force_splitter_sizes)
-        
+
         self.sidekick_sidebar = sidebar_widget
-        self.sidekick_sidebar.show()
+        # Mark that the splitter hasn't been sized yet; showEvent will do it.
+        self._sidekick_needs_initial_sizing = True
 
         logger.info(
             "Sidekick sidebar embedded in main splitter from %s",

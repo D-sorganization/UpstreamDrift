@@ -333,6 +333,10 @@ class LauncherUISetupMixin:
                 logger.info(f"Setting sidekick visible={visible}")
                 self.sidekick_sidebar.setVisible(visible)
                 
+                # When showing the sidebar, ensure the splitter gives it width
+                if visible and hasattr(self, "_apply_sidekick_splitter_sizes"):
+                    self._apply_sidekick_splitter_sizes()
+                
                 # Keep button in sync
                 if hasattr(self, "btn_ai_sidebar") and self.btn_ai_sidebar.isChecked() != visible:
                     self.btn_ai_sidebar.setChecked(visible)
@@ -656,7 +660,7 @@ class LauncherUISetupMixin:
             raise ValueError("menubar must be provided")
         view_menu = menubar.addMenu("&View")
 
-        # ---- View-mode submenu (Comfortable / Compact / Dense / List) ----
+        # ---- View-mode submenu (Large / Medium / Small / List) ----
         # The same four modes the top-bar combo exposes, but discoverable
         # through the menu with keyboard shortcuts.
         viewmode_menu = view_menu.addMenu("Tile &Layout")
@@ -666,9 +670,9 @@ class LauncherUISetupMixin:
         self._viewmode_action_group.setExclusive(True)
         self._viewmode_actions: dict[ViewMode, QAction] = {}
         for label, mode, shortcut in (
-            ("&Comfortable", ViewMode.COMFORTABLE, "Ctrl+1"),
-            ("Co&mpact", ViewMode.COMPACT, "Ctrl+2"),
-            ("&Dense", ViewMode.DENSE, "Ctrl+3"),
+            ("&Large", ViewMode.LARGE, "Ctrl+1"),
+            ("&Medium", ViewMode.MEDIUM, "Ctrl+2"),
+            ("&Small", ViewMode.SMALL, "Ctrl+3"),
             ("&List", ViewMode.LIST, "Ctrl+4"),
         ):
             act = QAction(label, self)
@@ -1011,11 +1015,11 @@ class LauncherUISetupMixin:
             raise ValueError("top_bar must be provided")
 
         self.view_mode_combo = QComboBox()
-        self.view_mode_combo.addItem("Comfortable", ViewMode.COMFORTABLE)
-        self.view_mode_combo.addItem("Compact", ViewMode.COMPACT)
-        self.view_mode_combo.addItem("Dense", ViewMode.DENSE)
+        self.view_mode_combo.addItem("Large", ViewMode.LARGE)
+        self.view_mode_combo.addItem("Medium", ViewMode.MEDIUM)
+        self.view_mode_combo.addItem("Small", ViewMode.SMALL)
         self.view_mode_combo.addItem("List", ViewMode.LIST)
-        self.view_mode_combo.setCurrentIndex(1)  # Compact default
+        self.view_mode_combo.setCurrentIndex(1)  # Medium default
         self.view_mode_combo.setToolTip("Choose how the model tiles are arranged")
         self.view_mode_combo.setAccessibleName("View mode")
         self.view_mode_combo.currentIndexChanged.connect(self._on_view_mode_changed)
@@ -1125,6 +1129,8 @@ class LauncherUISetupMixin:
         if lm is None:
             return
         lm.set_tile_scale(scale)
+        if hasattr(self, "_rebuild_grid"):
+            self._rebuild_grid()
         if hasattr(self, "_save_layout"):
             self._save_layout()
 

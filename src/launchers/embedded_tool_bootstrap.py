@@ -41,11 +41,25 @@ def bootstrap_embeddable_tools() -> list[str]:
     if _bootstrap_complete:
         return _registered_tools
 
+    # Ensure vendored Tools repo is in sys.path so embeddable tools can be found
+    import sys
+    from pathlib import Path
+    
+    # Path to vendor/ud-tools/src
+    vendor_src_path = str(Path(__file__).resolve().parent.parent.parent.parent / "vendor" / "ud-tools" / "src")
+    if vendor_src_path not in sys.path:
+        sys.path.insert(0, vendor_src_path)
+        
+    # Path to vendor/ud-tools/src/shared/python (for 'sidekick' legacy imports)
+    vendor_shared_py_path = str(Path(vendor_src_path) / "shared" / "python")
+    if vendor_shared_py_path not in sys.path:
+        sys.path.insert(0, vendor_shared_py_path)
+
     # List of tool adapter modules that self-register on import
     # Each module's __init__.py calls register_embeddable_tool()
     adapter_modules = [
         "src.tools.model_explorer._embed_adapter",
-        "src.tools.data_explorer._embed_adapter",
+        "data_explorer._embed_adapter",  # Moved from src.tools in vendor
         "src.tools.starting_pose_matcher._embed_adapter",
         "src.tools.pose_subscriber_demo._embed_adapter",
         "src.tools.sidekick._embed_adapter",
@@ -57,7 +71,8 @@ def bootstrap_embeddable_tools() -> list[str]:
             # Import the module - it self-registers at module level
             __import__(module_path)
             # Extract tool_id from module name for tracking
-            tool_id = module_path.split(".")[-1].replace("_embed_adapter", "")
+            tool_id = module_path.split(".")[-2] if "_embed_adapter" in module_path else module_path.split(".")[-1]
+
             registered.append(tool_id)
             logger.debug(f"Bootstrapped embeddable tool: {tool_id}")
         except ImportError as e:

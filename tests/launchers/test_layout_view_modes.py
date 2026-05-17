@@ -56,10 +56,10 @@ def make_layout_manager(available_models, get_model_func):
 @pytest.mark.parametrize(
     "mode,expected_scale,expected_columns,expected_show_desc,expected_list",
     [
-        (ViewMode.COMFORTABLE, 1.0, 4, True, False),
-        (ViewMode.COMPACT, 0.5, 6, True, False),
-        (ViewMode.DENSE, 0.35, 8, False, False),
-        (ViewMode.LIST, 0.30, 1, True, True),
+        (ViewMode.LARGE, 1.0, 4, False, False),
+        (ViewMode.MEDIUM, 0.5, 6, False, False),
+        (ViewMode.SMALL, 0.35, 8, False, False),
+        (ViewMode.LIST, 0.20, 1, True, True),
     ],
 )
 def test_view_mode_table_matches_spec(
@@ -79,10 +79,10 @@ def test_view_mode_table_matches_spec(
 @pytest.mark.parametrize(
     "mode,expected_scale,expected_columns",
     [
-        (ViewMode.COMFORTABLE, 1.0, 4),
-        (ViewMode.COMPACT, 0.5, 6),
-        (ViewMode.DENSE, 0.35, 8),
-        (ViewMode.LIST, 0.30, 1),
+        (ViewMode.LARGE, 1.0, 4),
+        (ViewMode.MEDIUM, 0.5, 6),
+        (ViewMode.SMALL, 0.35, 8),
+        (ViewMode.LIST, 0.20, 1),
     ],
 )
 def test_set_view_mode_updates_state(
@@ -132,7 +132,7 @@ def test_list_mode_yields_one_card_per_row(make_layout_manager) -> None:
 
 def test_grid_mode_columns_drive_wrap(make_layout_manager) -> None:
     lm = make_layout_manager()
-    # Use 8 cards to ensure wrap in COMFORTABLE (4 cols) -> 2 rows of cards.
+    # Use 8 cards to ensure wrap in LARGE (4 cols) -> 2 rows of cards.
     for i in range(5, 9):
         lm.available_models[f"model_{i}"] = ModelSpec(
             id=f"model_{i}",
@@ -142,13 +142,13 @@ def test_grid_mode_columns_drive_wrap(make_layout_manager) -> None:
             path=f"path_{i}",
         )
     lm.model_order = [f"model_{i}" for i in range(1, 9)]
-    lm.set_view_mode(ViewMode.COMFORTABLE)
+    lm.set_view_mode(ViewMode.LARGE)
 
     grid_layout = MagicMock()
     grid_layout.count.return_value = 0
     lm.rebuild_grid(grid_layout)
 
-    # COMFORTABLE => 4 columns; the last card (8th) should land at col == 3.
+    # LARGE => 4 columns; the last card (8th) should land at col == 3.
     # Grid-mode cards are added as addWidget(widget, row, col) (3 args).
     cards = {id(c) for c in lm.model_cards.values()}
     cols_seen = set()

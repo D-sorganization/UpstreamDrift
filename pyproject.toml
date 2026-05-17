@@ -144,6 +144,7 @@ gui-tools = [
     "matplotlib>=3.10.8",
     "pandas>=2.0.0",
     "openpyxl>=3.1.0",   # required by pandas.read_excel for .xlsx
+    "pywinpty>=2.0; platform_system == 'Windows'", # required for Sidekick Terminal PTY support
 ]
 
 # Body-part visualisation: optional GPU-accelerated renderer (pyqtgraph.opengl).

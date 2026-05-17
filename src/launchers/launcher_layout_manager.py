@@ -37,8 +37,15 @@ def _view_mode_from_string(name: str | None) -> ViewMode:
     """Parse a stored string into a :class:`ViewMode`, defaulting to LIST."""
     if not name:
         return ViewMode.LIST
+    # Backward compat: map old enum names to new ones
+    _compat = {
+        "comfortable": "large",
+        "compact": "medium",
+        "dense": "small",
+    }
+    key = _compat.get(str(name).strip().lower(), str(name).strip()).upper()
     try:
-        return ViewMode[str(name).strip().upper()]
+        return ViewMode[key]
     except KeyError:
         logger.warning("Unknown view_mode %r, falling back to LIST", name)
         return ViewMode.LIST
@@ -433,10 +440,13 @@ class LayoutManager:
                 if widget:
                     widget.setParent(None)
 
-        scale, columns, show_desc, is_list = view_mode_settings(self.current_view_mode)
+        scale, base_cols, show_desc, is_list = view_mode_settings(self.current_view_mode)
         # Honour any explicit tile_scale set by the zoom slider, but fall
         # back to the view-mode default if it matches the previous mode.
         active_scale = self.tile_scale if self.tile_scale > 0 else scale
+        
+        # Dynamically determine columns based on active_scale if not in list mode
+        columns = 1 if is_list else max(1, int(4 / active_scale))
 
         # Get filtered model order
         filtered_order = self.get_filtered_order()

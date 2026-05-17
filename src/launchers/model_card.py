@@ -432,10 +432,10 @@ class DraggableModelCard(QFrame):
         img_name = self._resolve_image_name()
         img_path = self._find_image_path(img_name)
 
-        # In LIST mode the image is forced to a small (60x60) horizontal-row
-        # icon regardless of tile_scale. In other modes it scales from the
+        # In LIST mode the image is forced to a small icon
+        # regardless of tile_scale. In other modes it scales from the
         # 200px reference by ``tile_scale``.
-        img_size = 60 if self._list_mode else scaled_image_px(self.tile_scale)
+        img_size = 32 if self._list_mode else scaled_image_px(self.tile_scale)
         pixmap_target = max(1, int(img_size * 0.9))
 
         self.lbl_img = QLabel()
@@ -611,35 +611,30 @@ class DraggableModelCard(QFrame):
         self._create_status_chip(layout)
 
     def _setup_list_ui(self) -> None:
-        """Build the horizontal LIST-mode layout (icon | name+desc | status)."""
+        """Build the horizontal LIST-mode layout (icon | name | status)."""
         outer = QHBoxLayout(self)
-        outer.setSpacing(12)
+        outer.setSpacing(8)
+        outer.setContentsMargins(6, 2, 6, 2)
 
         self._create_image_widget(outer)
 
-        text_box = QVBoxLayout()
-        text_box.setSpacing(2)
-        name_pt = max(scaled_font_pt(self.tile_scale, base_pt=12), 10)
+        # Single-line name (no description sub-label in compact list)
+        name_pt = max(scaled_font_pt(self.tile_scale, base_pt=10), 9)
         self.lbl_name = QLabel(self.model.name)
         self.lbl_name.setObjectName("CardName")
         self.lbl_name.setFont(get_display_font(size=name_pt, weight=Weights.BOLD))
 
-        name_layout = QHBoxLayout()
-        name_layout.addWidget(self.lbl_name)
-        name_layout.addStretch()
-        text_box.addLayout(name_layout)
-
+        # Keep desc hidden but allocated for API compat
         self.lbl_desc = QLabel(self.model.description)
         self.lbl_desc.setObjectName("CardDescription")
-        self.lbl_desc.setFont(get_qfont(size=9))
-        self.lbl_desc.setVisible(self._show_description)
-        text_box.addWidget(self.lbl_desc)
+        self.lbl_desc.setFont(get_qfont(size=8))
+        self.lbl_desc.setVisible(False)
 
-        outer.addLayout(text_box, 1)
+        outer.addWidget(self.lbl_name, 1)
         self._create_status_chip(outer, embed_in_row=True)
 
-        # Ensure enough space for the content
-        self.setMinimumHeight(85)
+        # Compact row height
+        self.setFixedHeight(40)
 
     def _apply_card_padding(self) -> None:
         """Set contents margins on the active layout based on tile_scale."""
