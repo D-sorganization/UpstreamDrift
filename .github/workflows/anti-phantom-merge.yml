@@ -44,7 +44,7 @@ jobs:
   guard:
     timeout-minutes: 30
     name: phantom-guard
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     if: github.event.pull_request.base.ref == 'main'
     steps:
       - name: Check out PR head with full history
