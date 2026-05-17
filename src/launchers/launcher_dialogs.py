@@ -282,7 +282,10 @@ class LauncherDialogsMixin:
 
         self._ai_visible = checked
         # Keep the toggle button in sync when called programmatically
-        if hasattr(self, "btn_ai_sidebar") and self.btn_ai_sidebar.isChecked() != checked:
+        if (
+            hasattr(self, "btn_ai_sidebar")
+            and self.btn_ai_sidebar.isChecked() != checked
+        ):
             self.btn_ai_sidebar.setChecked(checked)
 
         if hasattr(self, "sidekick_sidebar") and self.sidekick_sidebar is not None:
@@ -378,9 +381,12 @@ class LauncherDialogsMixin:
             raise ValueError("checked must be provided")
         self.layout_edit_mode = checked
         self.layout_manager.set_edit_mode(checked)
-        
+
         # Keep the menu action in sync
-        if hasattr(self, "_action_layout_mode") and self._action_layout_mode.isChecked() != checked:
+        if (
+            hasattr(self, "_action_layout_mode")
+            and self._action_layout_mode.isChecked() != checked
+        ):
             self._action_layout_mode.setChecked(checked)
 
         if checked:

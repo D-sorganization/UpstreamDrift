@@ -691,8 +691,12 @@ class DraggableModelCard(QFrame):
         if show_description is not None:
             self._show_description = bool(show_description)
         new_list_mode = self._list_mode if list_mode is None else bool(list_mode)
-        new_list_compact = self._list_compact if list_compact is None else bool(list_compact)
-        full_rebuild = (new_list_mode != self._list_mode) or (new_list_compact != self._list_compact)
+        new_list_compact = (
+            self._list_compact if list_compact is None else bool(list_compact)
+        )
+        full_rebuild = (new_list_mode != self._list_mode) or (
+            new_list_compact != self._list_compact
+        )
         self.tile_scale = scale
         self._list_mode = new_list_mode
         self._list_compact = new_list_compact

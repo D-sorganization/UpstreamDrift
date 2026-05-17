@@ -44,12 +44,17 @@ def bootstrap_embeddable_tools() -> list[str]:
     # Ensure vendored Tools repo is in sys.path so embeddable tools can be found
     import sys
     from pathlib import Path
-    
+
     # Path to vendor/ud-tools/src
-    vendor_src_path = str(Path(__file__).resolve().parent.parent.parent.parent / "vendor" / "ud-tools" / "src")
+    vendor_src_path = str(
+        Path(__file__).resolve().parent.parent.parent.parent
+        / "vendor"
+        / "ud-tools"
+        / "src"
+    )
     if vendor_src_path not in sys.path:
         sys.path.insert(0, vendor_src_path)
-        
+
     # Path to vendor/ud-tools/src/shared/python (for 'sidekick' legacy imports)
     vendor_shared_py_path = str(Path(vendor_src_path) / "shared" / "python")
     if vendor_shared_py_path not in sys.path:
@@ -71,7 +76,11 @@ def bootstrap_embeddable_tools() -> list[str]:
             # Import the module - it self-registers at module level
             __import__(module_path)
             # Extract tool_id from module name for tracking
-            tool_id = module_path.split(".")[-2] if "_embed_adapter" in module_path else module_path.split(".")[-1]
+            tool_id = (
+                module_path.split(".")[-2]
+                if "_embed_adapter" in module_path
+                else module_path.split(".")[-1]
+            )
 
             registered.append(tool_id)
             logger.debug(f"Bootstrapped embeddable tool: {tool_id}")

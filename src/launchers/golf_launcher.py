@@ -180,9 +180,9 @@ __all__ = [
 # registry imports while still surfacing a true hang (e.g. crashed worker
 # thread) before the user concludes the app is broken.  See issue #5490.
 STARTUP_TIMEOUT_SEC: int = 30
-assert (
-    STARTUP_TIMEOUT_SEC > 0
-), "STARTUP_TIMEOUT_SEC must be > 0 to schedule a recovery timer"
+assert STARTUP_TIMEOUT_SEC > 0, (
+    "STARTUP_TIMEOUT_SEC must be > 0 to schedule a recovery timer"
+)
 
 
 class ProcessCleanupWorkerSignals(QObject):
@@ -334,13 +334,15 @@ class GolfLauncher(
             return
         sizes = layout.sizes()
         if len(sizes) == 3 and sum(sizes) > 0:
-            total = sum(sizes)
-            sizes[0] = 120
-            sizes[2] = 300
-            sizes[1] = max(100, total - 120 - 300)
-            layout.setSizes(sizes)
+            if sizes[2] == 0:
+                total = sum(sizes)
+                # Keep current sidebar width if it's > 0, otherwise default to 120
+                sizes[0] = max(sizes[0], 120) if sizes[0] > 0 else 120
+                sizes[2] = 300
+                sizes[1] = max(100, total - sizes[0] - sizes[2])
+                layout.setSizes(sizes)
+                logger.info("Sidekick splitter sized: %s", sizes)
             sidebar.setVisible(True)
-            logger.info("Sidekick splitter sized: %s", sizes)
 
     def _show_onboarding_if_needed(self) -> None:
         """Show first-run onboarding dialog if this is a new user."""

@@ -302,7 +302,7 @@ def register_feature_menu(
         if action.text().replace("&", "") == "Tools":
             before_action = action
             break
-            
+
     if before_action:
         menubar.insertMenu(before_action, window_menu)
     else:

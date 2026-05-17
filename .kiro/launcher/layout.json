@@ -17,10 +17,10 @@
   ],
   "selected_model": null,
   "window_geometry": {
-    "x": 270,
-    "y": 98,
-    "width": 1463,
-    "height": 924
+    "x": 625,
+    "y": 1080,
+    "width": 1345,
+    "height": 991
   },
   "options": {
     "live_visualization": true,
@@ -28,5 +28,5 @@
     "docker_mode": false
   },
   "view_mode": "large",
-  "tile_scale": 1.0
+  "tile_scale": 0.25
 }

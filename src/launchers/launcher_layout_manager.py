@@ -445,11 +445,13 @@ class LayoutManager:
                 if widget:
                     widget.setParent(None)
 
-        scale, base_cols, show_desc, is_list = view_mode_settings(self.current_view_mode)
+        scale, base_cols, show_desc, is_list = view_mode_settings(
+            self.current_view_mode
+        )
         # Honour any explicit tile_scale set by the zoom slider, but fall
         # back to the view-mode default if it matches the previous mode.
         active_scale = self.tile_scale if self.tile_scale > 0 else scale
-        
+
         # Dynamically determine columns based on active_scale if not in list mode
         columns = 1 if is_list else max(1, int(4 / active_scale))
 

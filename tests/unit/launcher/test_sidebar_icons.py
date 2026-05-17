@@ -34,7 +34,6 @@ _REQUIRED_BUTTON_LABELS = (
     "Motion Match",
     "MoCap",
     "Tools",
-    "Chat",
     "Documentation",
     "Settings",
 )
