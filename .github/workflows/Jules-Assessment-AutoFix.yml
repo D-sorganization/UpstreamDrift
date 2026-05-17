@@ -37,6 +37,7 @@ concurrency:
 
 jobs:
   check-kill-switch:
+    timeout-minutes: 30
     runs-on: d-sorg-fleet
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
@@ -67,6 +68,7 @@ jobs:
           echo "Self-hosted dispatcher selected d-sorg-fleet"
 
   run-assessments:
+    timeout-minutes: 30
     needs: [check-kill-switch, pick-runner]
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -233,6 +235,7 @@ jobs:
   # HARDENING: Consolidated auto-fix job - creates ONE PR instead of 4 separate PRs
   # This prevents PR proliferation from matrix strategy
   auto-fix-issues:
+    timeout-minutes: 30
     name: Auto-Fix All Issues (Consolidated)
     needs: [pick-runner, run-assessments]
     if: github.event.inputs.auto_fix != 'false' && github.event.inputs.dry_run != 'true'
@@ -408,6 +411,7 @@ jobs:
             --head "$BRANCH_NAME"
 
   create-github-issues:
+    timeout-minutes: 30
     name: Create GitHub Issues for Untracked Problems
     needs: [pick-runner, run-assessments]
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -457,6 +461,7 @@ jobs:
 
   # Close source PR if specified (prevents PR proliferation)
   close-source-pr:
+    timeout-minutes: 30
     name: Close Source PR (Superseded)
     needs: [pick-runner, run-assessments, auto-fix-issues]
     if: |
@@ -514,6 +519,7 @@ jobs:
 
   # Dry run summary - runs independently when dry_run is true
   dry-run-summary:
+    timeout-minutes: 30
     needs: pick-runner
     name: Dry Run Summary
     if: inputs.dry_run == 'true'

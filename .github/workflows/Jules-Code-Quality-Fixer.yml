@@ -26,6 +26,7 @@ concurrency:
 
 jobs:
   check-kill-switch:
+    timeout-minutes: 30
     runs-on: d-sorg-fleet
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
@@ -56,6 +57,7 @@ jobs:
           echo "Self-hosted dispatcher selected d-sorg-fleet"
 
   code-quality-fixer:
+    timeout-minutes: 30
     needs: [check-kill-switch, pick-runner]
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}

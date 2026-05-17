@@ -18,10 +18,22 @@ on:
     paths:
       - "ui/**"
       - ".github/workflows/tauri-build.yml"
+      - "src-tauri/**"
+      - "**/Cargo.toml"
+      - "**/Cargo.lock"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "package-lock.json"
   pull_request:
     paths:
       - "ui/**"
       - ".github/workflows/tauri-build.yml"
+      - "src-tauri/**"
+      - "**/Cargo.toml"
+      - "**/Cargo.lock"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "package-lock.json"
   release:
     types: [published]
   workflow_dispatch:

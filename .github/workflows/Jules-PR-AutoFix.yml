@@ -53,6 +53,7 @@ env:
 
 jobs:
   check-kill-switch:
+    timeout-minutes: 30
     runs-on: d-sorg-fleet
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}

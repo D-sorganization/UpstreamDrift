@@ -221,6 +221,7 @@ jobs:
             })
 
   publish-dashboard:
+    timeout-minutes: 30
     needs: [pick-runner, cross-engine-validation]
     if: always()
     runs-on: ${{ needs.pick-runner.outputs.runner }}

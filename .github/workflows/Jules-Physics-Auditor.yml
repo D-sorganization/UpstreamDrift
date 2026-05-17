@@ -24,6 +24,7 @@ permissions:
 
 jobs:
   check-kill-switch:
+    timeout-minutes: 20
     runs-on: d-sorg-fleet
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
@@ -54,6 +55,7 @@ jobs:
           echo "Self-hosted dispatcher selected d-sorg-fleet"
 
   physics-auditor:
+    timeout-minutes: 20
     needs: [check-kill-switch, pick-runner]
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}

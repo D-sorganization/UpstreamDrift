@@ -1,0 +1,68 @@
+name: Lint Workflow Files
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: lint-workflow-files-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Identify modified workflow files
+        id: changed
+        run: |
+          set -eo pipefail
+          CHANGED=$(git diff --name-only HEAD~1 HEAD -- '.github/workflows/*.yml' '.github/workflows/*.yaml' | grep -v 'lint-workflow-files.yml' || true)
+          if [ -z "$CHANGED" ]; then
+            echo "No workflow files changed."
+            exit 0
+          fi
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Require timeout-minutes, concurrency, cancel-in-progress
+        env:
+          FILES: ${{ steps.changed.outputs.files }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eo pipefail
+          [ -z "$FILES" ] && exit 0
+          FAIL=""
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            [ ! -f "$f" ] && continue  # deleted file — skip
+            # Check timeout-minutes (anywhere in file)
+            if ! grep -q '^\s*timeout-minutes:' "$f"; then
+              FAIL="${FAIL}\n  - $f: missing timeout-minutes"
+            fi
+            # Check concurrency block
+            if ! grep -q '^concurrency:' "$f"; then
+              FAIL="${FAIL}\n  - $f: missing concurrency block"
+            fi
+            # Check cancel-in-progress: true (only if concurrency exists)
+            if grep -q '^concurrency:' "$f" && ! grep -q 'cancel-in-progress:\s*true' "$f"; then
+              FAIL="${FAIL}\n  - $f: cancel-in-progress not set to true"
+            fi
+          done <<< "$FILES"
+          if [ -n "$FAIL" ]; then
+            printf "::error::Workflow lint failed:%b\n" "$FAIL"
+            COMMENT=$(printf "## Workflow lint failed\n\nThe following modified workflow files are missing required protections:%b\n\n### Required keys\n- \`timeout-minutes:\` at job level (e.g. 30 for tests, 60 for builds)\n- \`concurrency:\` block at workflow level\n- \`cancel-in-progress: true\` inside concurrency\n\n### Why\nThese protections prevent the queue-saturation pattern that clogged the fleet on 2026-05-15/16. See CLAUDE.md for the canonical YAML pattern." "$FAIL")
+            gh pr comment "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --body "$COMMENT" >/dev/null
+            exit 1
+          fi
+          echo "::notice::All modified workflow files pass lint."
