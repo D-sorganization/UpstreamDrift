@@ -378,15 +378,16 @@ class LauncherDialogsMixin:
             raise ValueError("checked must be provided")
         self.layout_edit_mode = checked
         self.layout_manager.set_edit_mode(checked)
+        
+        # Keep the menu action in sync
+        if hasattr(self, "_action_layout_mode") and self._action_layout_mode.isChecked() != checked:
+            self._action_layout_mode.setChecked(checked)
+
         if checked:
-            self.btn_modify_layout.setText("Layout: Unlocked 🔓")
-            self.btn_modify_layout.setStyleSheet(Styles.BTN_LAYOUT_EDIT_ON)
             if hasattr(self, "action_customize_tiles"):
                 self.action_customize_tiles.setEnabled(True)
             self.show_toast("Drag tiles to reorder. Double-click to launch.", "info")
         else:
-            self.btn_modify_layout.setText("Layout: Locked 🔒")
-            self.btn_modify_layout.setStyleSheet(Styles.BTN_LAYOUT_LOCKED)
             if hasattr(self, "action_customize_tiles"):
                 self.action_customize_tiles.setEnabled(False)
 

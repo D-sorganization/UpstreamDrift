@@ -258,12 +258,16 @@ class DraggableModelCard(QFrame):
         self._hover_anim.setStartValue(self._hover_offset)
         self._hover_anim.setEndValue(4.0)
         self._hover_anim.start()
-        # Reveal the per-tile launch button.
+        # Reveal the per-tile launch button and info button.
         btn = getattr(self, "_btn_quick_launch", None)
+        info_btn = getattr(self, "_btn_info", None)
         if btn is not None:
-            self._reposition_quick_launch_button()
             btn.show()
             btn.raise_()
+        if info_btn is not None:
+            info_btn.show()
+            info_btn.raise_()
+        self._reposition_quick_launch_button()
         super().enterEvent(event)
 
     def leaveEvent(self, event: QEvent | None) -> None:
@@ -274,13 +278,23 @@ class DraggableModelCard(QFrame):
         btn = getattr(self, "_btn_quick_launch", None)
         if btn is not None:
             btn.hide()
-            self._reposition_quick_launch_button()  # update info button position
+        info_btn = getattr(self, "_btn_info", None)
+        if info_btn is not None and not self.is_selected:
+            info_btn.hide()
+        self._reposition_quick_launch_button()  # update info button position
         super().leaveEvent(event)
 
     def set_selected(self, is_selected: bool) -> None:
         """Update the glassmorphism styling to reflect selection state."""
         self.is_selected = is_selected
         self.setStyleSheet(self._selected_style if is_selected else self._base_style)
+        info_btn = getattr(self, "_btn_info", None)
+        if info_btn is not None:
+            if is_selected:
+                info_btn.show()
+                info_btn.raise_()
+            else:
+                info_btn.hide()
 
     def resizeEvent(self, event: Any) -> None:  # type: ignore[override]
         """Keep the quick-launch button anchored to the top-right corner."""
@@ -550,6 +564,7 @@ class DraggableModelCard(QFrame):
             "}"
         )
         btn.clicked.connect(self._show_info_dialog)
+        btn.hide()
         self._btn_info = btn
         return btn
 

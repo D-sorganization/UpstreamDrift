@@ -374,8 +374,22 @@ class GolfLauncher(
         if hasattr(main_layout, "setStretchFactor"):
             with contextlib.suppress(Exception):
                 main_layout.setStretchFactor(main_layout.count() - 1, 2)
-
+                
+        def _force_splitter_sizes():
+            if hasattr(self, "main_layout") and hasattr(self.main_layout, "sizes"):
+                sizes = self.main_layout.sizes()
+                if sum(sizes) > 0 and len(sizes) == 3:
+                    total = sum(sizes)
+                    sizes[0] = 120
+                    sizes[2] = 300
+                    sizes[1] = max(100, total - 120 - 300)
+                    self.main_layout.setSizes(sizes)
+        
+        QTimer.singleShot(100, _force_splitter_sizes)
+        
         self.sidekick_sidebar = sidebar_widget
+        self.sidekick_sidebar.show()
+
         logger.info(
             "Sidekick sidebar embedded in main splitter from %s",
             getattr(module, "__name__", "<unknown>"),
@@ -984,7 +998,7 @@ class GolfLauncher(
         """Toggle layout edit mode from menu action."""
         if hasattr(self, "btn_modify_layout"):
             self.btn_modify_layout.setChecked(checked)
-            self.toggle_layout_mode(checked)
+        self.toggle_layout_mode(checked)
 
     def _toggle_context_help(self, checked: bool) -> None:
         """Toggle the context help panel visibility."""

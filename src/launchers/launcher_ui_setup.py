@@ -229,7 +229,7 @@ class LauncherUISetupMixin:
                 background-color: {_splitter_hover};
             }}
         """)
-        outer_vbox.addWidget(main_layout)
+        outer_vbox.addWidget(main_layout, 1)
 
         # Expose the splitter for downstream features that embed extra
         # panes (e.g. ``_install_sidekick_sidebar`` in #5624 adds the
@@ -243,6 +243,7 @@ class LauncherUISetupMixin:
 
         # Content Container
         content_container = QWidget()
+        content_container.setMinimumWidth(300)
         content_layout = QVBoxLayout(content_container)
         content_layout.setSpacing(Styles.SPACING_LG)
         content_layout.setContentsMargins(
@@ -313,23 +314,42 @@ class LauncherUISetupMixin:
         # Keyboard shortcuts
         self._setup_search_shortcuts()
 
-    def _toggle_sidekick(self) -> None:
+    def _toggle_sidekick(self, checked: bool = None) -> None:
         """Toggle the visibility of the Sidekick pane."""
-        if hasattr(self, "sidebar_widget") and self.sidebar_widget is not None:
+        logger.info(f"_toggle_sidekick called with checked={checked}")
+        if hasattr(self, "sidekick_sidebar") and self.sidekick_sidebar is not None:
             if self._sidekick_popped_out and self.sidekick_window:
                 if self.sidekick_window.isHidden():
                     self.sidekick_window.show()
                 else:
                     self.sidekick_window.hide()
             else:
-                visible = not self.sidebar_widget.isVisible()
-                self.sidebar_widget.setVisible(visible)
+                if checked is None:
+                    # If called programmatically without arg, invert current state
+                    visible = not self.sidekick_sidebar.isVisible()
+                else:
+                    visible = checked
+                
+                logger.info(f"Setting sidekick visible={visible}")
+                self.sidekick_sidebar.setVisible(visible)
+                
+                # Keep button in sync
+                if hasattr(self, "btn_ai_sidebar") and self.btn_ai_sidebar.isChecked() != visible:
+                    self.btn_ai_sidebar.setChecked(visible)
+
                 if visible and hasattr(self, "btn_popout_sidekick"):
                     self.btn_popout_sidekick.setVisible(True)
+        else:
+            logger.warning("Sidekick sidebar not found or not initialized.")
+            if hasattr(self, "show_toast"):
+                self.show_toast("AI Assistant is not available. Please check environment variables or module installation.", "error")
+            # Uncheck the button since we couldn't open it
+            if hasattr(self, "btn_ai_sidebar"):
+                self.btn_ai_sidebar.setChecked(False)
 
     def _popout_sidekick(self) -> None:
         """Toggle Sidekick pop-out state."""
-        if not hasattr(self, "sidebar_widget") or self.sidebar_widget is None:
+        if not hasattr(self, "sidekick_sidebar") or self.sidekick_sidebar is None:
             return
 
         if not self._sidekick_popped_out:
@@ -344,7 +364,7 @@ class LauncherUISetupMixin:
             
             layout = QVBoxLayout(self.sidekick_window)
             layout.setContentsMargins(0, 0, 0, 0)
-            layout.addWidget(self.sidebar_widget)
+            layout.addWidget(self.sidekick_sidebar)
             
             def on_close(event):
                 event.ignore()
@@ -473,13 +493,14 @@ class LauncherUISetupMixin:
                 "chat",
                 checkable=True,
             )
+            self.btn_ai_sidebar.setChecked(True)  # Open by default
             if hasattr(self, "_toggle_sidekick"):
                 self.btn_ai_sidebar.clicked.connect(self._toggle_sidekick)
 
         btn_docs = self._build_sidebar_button(
             "Documentation",
             "help",
-            checkable=True,
+            checkable=False,
         )
         if hasattr(self, "_toggle_context_help"):
             btn_docs.clicked.connect(self._toggle_context_help)
@@ -519,7 +540,21 @@ class LauncherUISetupMixin:
         QWidget.setTabOrder(btn_tools, btn_settings)
         QWidget.setTabOrder(btn_settings, btn_docs)
 
-        return sidebar
+        scroll_area = QScrollArea()
+        scroll_area.setWidget(sidebar)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll_area.setFixedWidth(Styles.SIDEBAR_MIN_WIDTH)
+        scroll_area.setMaximumWidth(Styles.SIDEBAR_MIN_WIDTH)
+        scroll_area.setFrameShape(QFrame.Shape.NoFrame)
+        scroll_area.setStyleSheet(f"""
+            QScrollArea {{
+                background-color: {colors.bg_elevated};
+                border-right: 1px solid {colors.border_default};
+            }}
+        """)
+        
+        return scroll_area
 
     def _on_sidebar_routed(self, button_id: int) -> None:
         """Route sidebar navigation to filter the grid layout.
@@ -659,6 +694,14 @@ class LauncherUISetupMixin:
         action_layout_mode.triggered.connect(self._toggle_layout_mode_from_menu)
         view_menu.addAction(action_layout_mode)
         self._action_layout_mode = action_layout_mode
+
+        action_customize_tiles = QAction("&Select Visible Tiles...", self)
+        action_customize_tiles.setEnabled(False)
+        action_customize_tiles.setToolTip("Select which tiles are visible in the layout")
+        action_customize_tiles.setStatusTip("Select visible tiles")
+        action_customize_tiles.triggered.connect(self.open_layout_manager)
+        view_menu.addAction(action_customize_tiles)
+        self.action_customize_tiles = action_customize_tiles
 
         view_menu.addSeparator()
 
@@ -902,27 +945,7 @@ class LauncherUISetupMixin:
         self.chk_wsl.setChecked(False)
         self.chk_wsl.stateChanged.connect(self._on_wsl_mode_changed)
 
-        # Layout controls (combined toggle + dropdown)
-        from PyQt6.QtWidgets import QToolButton, QMenu
-
-        self.btn_modify_layout = QToolButton()
-        self.btn_modify_layout.setText("Layout: Locked 🔒")
-        self.btn_modify_layout.setPopupMode(
-            QToolButton.ToolButtonPopupMode.MenuButtonPopup
-        )
-        self.btn_modify_layout.setCheckable(True)
-        self.btn_modify_layout.setChecked(False)
-        self.btn_modify_layout.clicked.connect(self.toggle_layout_mode)
-
-        self.layout_menu = QMenu(self.btn_modify_layout)
-        self.action_customize_tiles = self.layout_menu.addAction("Edit Tiles...")
-        if self.action_customize_tiles:
-            self.action_customize_tiles.setEnabled(False)
-            self.action_customize_tiles.triggered.connect(self.open_layout_manager)
-        self.btn_modify_layout.setMenu(self.layout_menu)
-
-        # Only Layout controls remain in the top bar (config options moved to settings)
-        top_bar.addWidget(self.btn_modify_layout)
+        # Layout controls were moved to the View menu per user request.
 
     def _setup_top_bar_action_buttons(self, top_bar: QHBoxLayout) -> None:
         """Add Help, Settings, and AI Assistant buttons to top bar."""
