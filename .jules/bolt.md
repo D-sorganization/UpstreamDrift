@@ -51,3 +51,7 @@
 ## 2026-05-18 - Optimize norm calculations in UI/Viz adapters
 **Learning:** `np.linalg.norm(..., axis=1)` creates an intermediate memory allocation and has significant internal overhead when used on multi-dimensional numpy arrays inside tight loops, leading to suboptimal performance, particularly when parsing and calculating distances in data visualizers.
 **Action:** Replace `np.linalg.norm(diff, axis=1)` with `np.sqrt(np.einsum("ij,ij->i", diff, diff))` for all generic vector distance calculations that map down dimensions. Remember to retain any shape alterations such as `[:, np.newaxis]` when performing element-wise broadcasting on multi-dimensional arrays, so the shapes do not mismatch.
+
+## 2026-05-18 - Optimize norm calculations in UI/Viz adapters
+**Learning:** `np.linalg.norm(..., axis=1)` creates an intermediate memory allocation and has significant internal overhead when used on multi-dimensional numpy arrays inside tight loops, leading to suboptimal performance, particularly when parsing and calculating distances in data visualizers.
+**Action:** Replace `np.linalg.norm(diff, axis=1)` with `np.sqrt(np.einsum("ij,ij->i", diff, diff))` for all generic vector distance calculations that map down dimensions. Remember to retain any shape alterations such as `[:, np.newaxis]` when performing element-wise broadcasting on multi-dimensional arrays, so the shapes do not mismatch.
