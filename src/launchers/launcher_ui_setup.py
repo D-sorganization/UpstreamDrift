@@ -299,6 +299,20 @@ class LauncherUISetupMixin:
         self.sidekick_window = None
         self._sidekick_popped_out = False
 
+        content_layout.addWidget(self.content_splitter, 1)
+
+        main_layout.addWidget(content_container)
+
+        # Proportional sizing: sidebar gets ~1/6, content ~5/6.
+        main_layout.setStretchFactor(0, 1)
+        main_layout.setStretchFactor(1, 5)
+
+        # Apply dark theme
+        self.apply_styles()
+
+        # Keyboard shortcuts
+        self._setup_search_shortcuts()
+
     def _toggle_sidekick(self) -> None:
         """Toggle the visibility of the Sidekick pane."""
         if hasattr(self, "sidebar_widget") and self.sidebar_widget is not None:
@@ -348,20 +362,6 @@ class LauncherUISetupMixin:
             
             self.main_layout.addWidget(self.sidebar_widget)
             self.sidebar_widget.show()
-
-        content_layout.addWidget(self.content_splitter, 1)
-
-        main_layout.addWidget(content_container)
-
-        # Proportional sizing: sidebar gets ~1/6, content ~5/6.
-        main_layout.setStretchFactor(0, 1)
-        main_layout.setStretchFactor(1, 5)
-
-        # Apply dark theme
-        self.apply_styles()
-
-        # Keyboard shortcuts
-        self._setup_search_shortcuts()
 
         # Initialize Overlay
         self._init_overlay()
