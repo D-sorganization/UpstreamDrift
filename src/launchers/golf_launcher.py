@@ -59,6 +59,7 @@ from src.launchers.ui_components import (
 )
 from PyQt6.QtCore import QEvent, Qt, QRect
 
+
 class FramelessResizeFilter(QObject):
     def __init__(self, window):
         super().__init__(window)
@@ -69,7 +70,12 @@ class FramelessResizeFilter(QObject):
         self._start_geo = None
 
     def eventFilter(self, obj, event):
-        if event.type() in (QEvent.Type.MouseMove, QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease, QEvent.Type.HoverMove):
+        if event.type() in (
+            QEvent.Type.MouseMove,
+            QEvent.Type.MouseButtonPress,
+            QEvent.Type.MouseButtonRelease,
+            QEvent.Type.HoverMove,
+        ):
             if hasattr(event, "globalPosition"):
                 gpos = event.globalPosition().toPoint()
             elif hasattr(event, "globalPos"):
@@ -101,15 +107,21 @@ class FramelessResizeFilter(QObject):
                         edge = 12
                     elif y > h - border:
                         edge = 15
- 
+
                     if edge != 0:
-                        if event.type() == QEvent.Type.MouseButtonPress and event.button() == Qt.MouseButton.LeftButton:
+                        if (
+                            event.type() == QEvent.Type.MouseButtonPress
+                            and event.button() == Qt.MouseButton.LeftButton
+                        ):
                             self._resizing = True
                             self._resize_edge = edge
                             self._start_pos = gpos
                             self._start_geo = self.window.geometry()
                             return True
-                        if event.type() in (QEvent.Type.HoverMove, QEvent.Type.MouseMove):
+                        if event.type() in (
+                            QEvent.Type.HoverMove,
+                            QEvent.Type.MouseMove,
+                        ):
                             if edge in (13, 17):
                                 self.window.setCursor(Qt.CursorShape.SizeFDiagCursor)
                             elif edge in (14, 16):
@@ -134,8 +146,11 @@ class FramelessResizeFilter(QObject):
                         rect.setTop(rect.top() + delta.y())
                     if self._resize_edge in (15, 16, 17):
                         rect.setBottom(rect.bottom() + delta.y())
-                    
-                    if rect.width() >= self.window.minimumWidth() and rect.height() >= self.window.minimumHeight():
+
+                    if (
+                        rect.width() >= self.window.minimumWidth()
+                        and rect.height() >= self.window.minimumHeight()
+                    ):
                         self.window.setGeometry(rect)
                     return True
                 if event.type() == QEvent.Type.MouseButtonRelease:
@@ -143,6 +158,7 @@ class FramelessResizeFilter(QObject):
                     self.window.setCursor(Qt.CursorShape.ArrowCursor)
                     return True
         return super().eventFilter(obj, event)
+
 
 from src.shared.python.security.subprocess_utils import kill_process_tree
 from src.shared.python.theme.style_constants import Styles
@@ -164,9 +180,9 @@ __all__ = [
 # registry imports while still surfacing a true hang (e.g. crashed worker
 # thread) before the user concludes the app is broken.  See issue #5490.
 STARTUP_TIMEOUT_SEC: int = 30
-assert STARTUP_TIMEOUT_SEC > 0, (
-    "STARTUP_TIMEOUT_SEC must be > 0 to schedule a recovery timer"
-)
+assert (
+    STARTUP_TIMEOUT_SEC > 0
+), "STARTUP_TIMEOUT_SEC must be > 0 to schedule a recovery timer"
 
 
 class ProcessCleanupWorkerSignals(QObject):
@@ -224,16 +240,15 @@ class GolfLauncher(
         self.loading = loading
         self.setWindowTitle("UpstreamDrift")
         self.setWindowFlags(
-            Qt.WindowType.FramelessWindowHint 
-            | Qt.WindowType.WindowMinimizeButtonHint
+            Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowMinimizeButtonHint
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setMinimumSize(800, 600)
-        
+
         # Enable app-level mouse tracking filter for frameless resizing
         self._resize_filter = FramelessResizeFilter(self)
         QApplication.instance().installEventFilter(self._resize_filter)
-        
+
         # Size to 80% of screen, capped at 1400x900
         screen = QApplication.primaryScreen()
         if screen:
@@ -264,9 +279,6 @@ class GolfLauncher(
             self._initialize_model_order()
 
         self.init_ui()
-        # Defer sidebar installation to avoid blocking the UI thread during
-        # first paint — the sidebar's AI adapters make synchronous HTTP calls.
-        QTimer.singleShot(0, self._install_sidekick_sidebar)
         self._apply_theme_system()
 
         if not self.loading:
@@ -287,7 +299,7 @@ class GolfLauncher(
                 STARTUP_TIMEOUT_SEC,
             )
             QTimer.singleShot(
-                int(STARTUP_TIMEOUT_SEC * 1000), self._handle_startup_timeout
+                int(STARTUP_TIMEOUT_SEC * 1000), lambda: self._handle_startup_timeout()
             )
         elif startup_results:
             self._apply_docker_status(startup_results.docker_available)
@@ -357,6 +369,7 @@ class GolfLauncher(
         Failure to install is non-fatal — the launcher remains usable
         with just the tile grid.
         """
+        logger.info("Initializing _install_sidekick_sidebar")
         try:
             from src.shared.python.gui_launcher.tools_sidebar_integration import (
                 _import_sidebar_module,
@@ -374,8 +387,13 @@ class GolfLauncher(
             import sys as _sys
 
             vendor_src = str(REPOS_ROOT / "vendor" / "ud-tools" / "src")
+            vendor_python = str(
+                REPOS_ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python"
+            )
             if vendor_src not in _sys.path:
                 _sys.path.insert(0, vendor_src)
+            if vendor_python not in _sys.path:
+                _sys.path.insert(0, vendor_python)
             for _name in (
                 "shared.python.sidekick.ui.tools_sidebar",
                 "sidekick.ui.tools_sidebar",
@@ -687,6 +705,7 @@ class GolfLauncher(
         self._initialize_model_order()
         self._apply_docker_status(results.docker_available)
         self._load_layout()
+        self._install_sidekick_sidebar()
         self._seed_sidekick_workspace()
 
         from PyQt6.QtCore import QTimer as _QTimer

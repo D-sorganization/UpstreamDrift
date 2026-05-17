@@ -106,12 +106,17 @@ def install_tools_sidebar(
 def _import_sidebar_module() -> Any | None:
     import sys
     from pathlib import Path
-    
-    # Try adding vendor paths to sys.path so we can import the vendored module
-    vendor_src_path = str(Path(__file__).resolve().parent.parent.parent.parent.parent / "vendor" / "ud-tools" / "src")
+
+    vendor_root = Path(__file__).resolve().parent.parent.parent.parent
+    vendor_src_path = str(vendor_root / "vendor" / "ud-tools" / "src")
+    vendor_python_path = str(
+        vendor_root / "vendor" / "ud-tools" / "src" / "shared" / "python"
+    )
     if vendor_src_path not in sys.path:
         sys.path.insert(0, vendor_src_path)
-        
+    if vendor_python_path not in sys.path:
+        sys.path.insert(0, vendor_python_path)
+
     for module_name in _SIDEBAR_MODULE_CANDIDATES:
         try:
             return importlib.import_module(module_name)
