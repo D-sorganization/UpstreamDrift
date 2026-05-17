@@ -386,6 +386,17 @@ class GolfLauncher(
             import importlib
             import sys as _sys
 
+            # Try checking out sibling Tools repository first
+            sibling_tools = REPOS_ROOT.parent / "Tools"
+            if sibling_tools.is_dir():
+                sibling_src = str(sibling_tools / "src")
+                sibling_python = str(sibling_tools / "src" / "shared" / "python")
+                if sibling_src not in _sys.path:
+                    _sys.path.insert(0, sibling_src)
+                if sibling_python not in _sys.path:
+                    _sys.path.insert(0, sibling_python)
+
+            # Fall back to vendored ud-tools
             vendor_src = str(REPOS_ROOT / "vendor" / "ud-tools" / "src")
             vendor_python = str(
                 REPOS_ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python"

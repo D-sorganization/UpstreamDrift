@@ -184,9 +184,7 @@ class LauncherUISetupMixin:
             self.title_bar.close_requested.connect(self.close)
             # Clamp every move target into the virtual desktop so an
             # off-screen drag does not silently strand the window.
-            self.title_bar.move_requested.connect(
-                lambda pos: self.move(pos)
-            )
+            self.title_bar.move_requested.connect(lambda pos: self.move(pos))
 
             # The native OS title bar is hidden via FramelessWindowHint set in __init__
             outer_vbox.addWidget(self.title_bar)
@@ -255,13 +253,13 @@ class LauncherUISetupMixin:
 
         # --- Top Bar ---
         top_bar = self._setup_top_bar()
-        
+
         self.btn_popout_sidekick = QPushButton("⇱ Pop Out Sidekick")
         self.btn_popout_sidekick.setToolTip("Pop out Sidekick into a separate window")
         self.btn_popout_sidekick.clicked.connect(self._popout_sidekick)
         self.btn_popout_sidekick.setVisible(False)
         top_bar.insertWidget(top_bar.count() - 1, self.btn_popout_sidekick)
-        
+
         content_layout.addLayout(top_bar)
 
         # --- Content area with horizontal splitter (tiles | AI chat) ---
@@ -295,7 +293,7 @@ class LauncherUISetupMixin:
         # raise/focus the Sidekick chat tab. Do NOT re-introduce a second
         # ``AIAssistantPanel`` here.
         self._ai_visible = False
-        
+
         # Sidekick pane management
         self.sidekick_window = None
         self._sidekick_popped_out = False
@@ -329,16 +327,19 @@ class LauncherUISetupMixin:
                     visible = not self.sidekick_sidebar.isVisible()
                 else:
                     visible = checked
-                
+
                 logger.info(f"Setting sidekick visible={visible}")
                 self.sidekick_sidebar.setVisible(visible)
-                
+
                 # When showing the sidebar, ensure the splitter gives it width
                 if visible and hasattr(self, "_apply_sidekick_splitter_sizes"):
                     self._apply_sidekick_splitter_sizes()
-                
+
                 # Keep button in sync
-                if hasattr(self, "btn_ai_sidebar") and self.btn_ai_sidebar.isChecked() != visible:
+                if (
+                    hasattr(self, "btn_ai_sidebar")
+                    and self.btn_ai_sidebar.isChecked() != visible
+                ):
                     self.btn_ai_sidebar.setChecked(visible)
 
                 if visible and hasattr(self, "btn_popout_sidekick"):
@@ -346,7 +347,9 @@ class LauncherUISetupMixin:
         else:
             logger.info("Sidekick sidebar still loading or not initialized.")
             if hasattr(self, "show_toast"):
-                self.show_toast("Sidekick is still loading, please wait a moment…", "info")
+                self.show_toast(
+                    "Sidekick is still loading, please wait a moment…", "info"
+                )
             # Uncheck the button since it's not ready yet
             if hasattr(self, "btn_ai_sidebar"):
                 self.btn_ai_sidebar.setChecked(False)
@@ -360,30 +363,31 @@ class LauncherUISetupMixin:
             # Pop out
             self._sidekick_popped_out = True
             self.btn_popout_sidekick.setText("⇲ Dock Sidekick")
-            
+
             from PyQt6.QtWidgets import QDialog, QVBoxLayout
+
             self.sidekick_window = QDialog(self)
             self.sidekick_window.setWindowTitle("UpstreamDrift Sidekick")
             self.sidekick_window.resize(400, 800)
-            
+
             layout = QVBoxLayout(self.sidekick_window)
             layout.setContentsMargins(0, 0, 0, 0)
             layout.addWidget(self.sidekick_sidebar)
-            
+
             def on_close(event):
                 event.ignore()
                 self.sidekick_window.hide()
-                
+
             self.sidekick_window.closeEvent = on_close
             self.sidekick_window.show()
         else:
             # Re-dock
             self._sidekick_popped_out = False
             self.btn_popout_sidekick.setText("⇱ Pop Out Sidekick")
-            
+
             if self.sidekick_window:
                 self.sidekick_window.hide()
-            
+
             self.main_layout.addWidget(self.sidebar_widget)
             self.sidebar_widget.show()
 
@@ -566,7 +570,7 @@ class LauncherUISetupMixin:
                 border-right: 1px solid {colors.border_default};
             }}
         """)
-        
+
         return scroll_area
 
     def _on_sidebar_routed(self, button_id: int) -> None:
@@ -613,9 +617,9 @@ class LauncherUISetupMixin:
         """
         menubar = QMenuBar(self)
         # Postcondition (DbC): a non-null QMenuBar is returned.
-        assert menubar is not None, (
-            "QMenuBar construction returned None — should be impossible"
-        )
+        assert (
+            menubar is not None
+        ), "QMenuBar construction returned None — should be impossible"
 
         self._setup_file_menu(menubar)
         self._setup_view_menu(menubar)
@@ -669,17 +673,15 @@ class LauncherUISetupMixin:
             raise ValueError("menubar must be provided")
         view_menu = menubar.addMenu("&View")
 
-        # ---- View-mode submenu (Large / Medium / Small / List Large / List Small) ----
-        viewmode_menu = view_menu.addMenu("Tile &Layout")
         from PyQt6.QtGui import QActionGroup
 
         self._viewmode_action_group = QActionGroup(self)
         self._viewmode_action_group.setExclusive(True)
         self._viewmode_actions: dict[ViewMode, QAction] = {}
         for label, mode, shortcut in (
-            ("&Large", ViewMode.LARGE, "Ctrl+1"),
-            ("&Medium", ViewMode.MEDIUM, "Ctrl+2"),
-            ("&Small", ViewMode.SMALL, "Ctrl+3"),
+            ("Tile &Large", ViewMode.LARGE, "Ctrl+1"),
+            ("Tile &Medium", ViewMode.MEDIUM, "Ctrl+2"),
+            ("Tile &Small", ViewMode.SMALL, "Ctrl+3"),
             ("List Lar&ge", ViewMode.LIST_LARGE, "Ctrl+4"),
             ("List S&mall", ViewMode.LIST_SMALL, "Ctrl+5"),
         ):
@@ -692,7 +694,7 @@ class LauncherUISetupMixin:
                 lambda _checked=False, m=mode: self._set_view_mode_from_menu(m)
             )
             self._viewmode_action_group.addAction(act)
-            viewmode_menu.addAction(act)
+            view_menu.addAction(act)
             self._viewmode_actions[mode] = act
         # Default checkmark on LIST_LARGE.
         self._viewmode_actions[ViewMode.LIST_LARGE].setChecked(True)
@@ -709,7 +711,9 @@ class LauncherUISetupMixin:
 
         action_customize_tiles = QAction("&Select Visible Tiles...", self)
         action_customize_tiles.setEnabled(False)
-        action_customize_tiles.setToolTip("Select which tiles are visible in the layout")
+        action_customize_tiles.setToolTip(
+            "Select which tiles are visible in the layout"
+        )
         action_customize_tiles.setStatusTip("Select visible tiles")
         action_customize_tiles.triggered.connect(self.open_layout_manager)
         view_menu.addAction(action_customize_tiles)
@@ -1023,9 +1027,9 @@ class LauncherUISetupMixin:
             raise ValueError("top_bar must be provided")
 
         self.view_mode_combo = QComboBox()
-        self.view_mode_combo.addItem("Large", ViewMode.LARGE)
-        self.view_mode_combo.addItem("Medium", ViewMode.MEDIUM)
-        self.view_mode_combo.addItem("Small", ViewMode.SMALL)
+        self.view_mode_combo.addItem("Tile Large", ViewMode.LARGE)
+        self.view_mode_combo.addItem("Tile Medium", ViewMode.MEDIUM)
+        self.view_mode_combo.addItem("Tile Small", ViewMode.SMALL)
         self.view_mode_combo.addItem("List Large", ViewMode.LIST_LARGE)
         self.view_mode_combo.addItem("List Small", ViewMode.LIST_SMALL)
         self.view_mode_combo.setCurrentIndex(3)  # List Large default
@@ -1036,13 +1040,29 @@ class LauncherUISetupMixin:
 
         self.zoom_slider = QSlider(Qt.Orientation.Horizontal)
         self.zoom_slider.setRange(0, self._ZOOM_SLIDER_STEPS)
-        self.zoom_slider.setMinimumWidth(140)
-        from PyQt6.QtWidgets import QSizePolicy
+        self.zoom_slider.setFixedWidth(80)  # Compact, discrete fixed width
 
-        self.zoom_slider.setSizePolicy(
-            QSizePolicy.Policy.MinimumExpanding,
-            self.zoom_slider.sizePolicy().verticalPolicy(),
-        )
+        self.zoom_slider.setStyleSheet("""
+            QSlider::groove:horizontal {
+                border: 1px solid #3a3a3a;
+                height: 4px;
+                background: #1a1a1a;
+                margin: 0px;
+                border-radius: 2px;
+            }
+            QSlider::handle:horizontal {
+                background: #888888;
+                border: 1px solid #555555;
+                width: 10px;
+                height: 10px;
+                margin: -3px 0;
+                border-radius: 5px;
+            }
+            QSlider::handle:horizontal:hover {
+                background: #007acc;
+                border-color: #0098ff;
+            }
+        """)
         self.zoom_slider.setToolTip("Adjust the size of the model tiles")
         self.zoom_slider.setAccessibleName("Tile zoom")
         self.zoom_slider.setAccessibleDescription(_build_zoom_accessible_description())
