@@ -277,24 +277,18 @@ class LauncherDialogsMixin:
         """
         if checked is None:
             raise ValueError("checked must be provided")
-        if not AI_AVAILABLE or not hasattr(self, "ai_panel"):
+        if not AI_AVAILABLE:
             return
 
         self._ai_visible = checked
         # Keep the toggle button in sync when called programmatically
-        if hasattr(self, "btn_ai") and self.btn_ai.isChecked() != checked:
-            self.btn_ai.setChecked(checked)
+        if hasattr(self, "btn_ai_sidebar") and self.btn_ai_sidebar.isChecked() != checked:
+            self.btn_ai_sidebar.setChecked(checked)
 
-        total = self.content_splitter.width() or 1200
-
-        if checked:
-            # Remove max-width constraint and allocate 30% to AI panel
-            self.ai_panel.setMaximumWidth(16777215)  # QWIDGETSIZE_MAX
-            self.content_splitter.setSizes([int(total * 0.7), int(total * 0.3)])
-        else:
-            # Collapse AI panel to zero width
-            self.content_splitter.setSizes([total, 0])
-            self.ai_panel.setMaximumWidth(0)
+        if hasattr(self, "sidekick_sidebar") and self.sidekick_sidebar is not None:
+            self.sidekick_sidebar.setVisible(checked)
+            if checked and hasattr(self, "open_sidekick_tab"):
+                self.open_sidekick_tab("chat")
 
     def _report_bug(self) -> None:
         """Open default mail client to report a bug."""
