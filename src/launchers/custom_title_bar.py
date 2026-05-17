@@ -22,13 +22,12 @@ def _get_title_bar_colors() -> dict[str, str]:
         colors = get_current_colors()
         # Derive fallbacks from DARK_THEME instead of repeating literal hex.
         _fb_text = getattr(DARK_THEME, "text_primary", "#d4d4d4")
-        _fb_bg = getattr(DARK_THEME, "bg_elevated", colors.get("bg_elevated", "#1A1A1A"))
         _fb_border = getattr(
             DARK_THEME, "border_default", colors.get("border", "#555555")
         )
         return {
             "text": colors.get("text", _fb_text),
-            "bg": colors.get("bg_elevated", _fb_bg),
+            "bg": "#0D0D0D",  # Hardcoded darker background for contrast against menu bar
             "border": colors.get("border", _fb_border),
         }
     except (ImportError, AttributeError):
@@ -36,7 +35,7 @@ def _get_title_bar_colors() -> dict[str, str]:
         # any specific dark-theme hex value in this module.
         return {
             "text": "#d4d4d4",
-            "bg": "#000000",
+            "bg": "#0D0D0D",
             "border": "#555555",
         }
 
@@ -91,6 +90,15 @@ class CustomTitleBar(QWidget):
         self.setProperty("class", "title-bar")
         self.style().polish(self)
         self.setAutoFillBackground(True)
+
+        from PyQt6.QtWidgets import QGraphicsDropShadowEffect
+        from PyQt6.QtGui import QColor
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(15)
+        shadow.setYOffset(3)
+        shadow.setXOffset(0)
+        shadow.setColor(QColor(0, 0, 0, 150))
+        self.setGraphicsEffect(shadow)
 
         self.drag_position = QPoint()
 
@@ -193,7 +201,7 @@ class CustomTitleBar(QWidget):
             f" }}"
         )
         self.title_label.setStyleSheet(
-            f"color: {text}; font-weight: bold; font-size: 13px;"
+            f"color: {text}; font-family: 'Inter', 'Segoe UI', sans-serif; font-weight: 800; font-size: 14px; letter-spacing: 1px;"
         )
 
     def _on_theme_changed(self, _colors: object = None) -> None:
