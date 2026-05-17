@@ -64,7 +64,7 @@ models:
       default_launch: "tab"
 
   - id: "matlab_suite"
-    name: "MATLAB Simscape"
+    name: "Simscape"
     description: "MATLAB / Simscape models, dataset generators, and tooling"
     type: "matlab_suite"
     path: "virtual/matlab_suite"
