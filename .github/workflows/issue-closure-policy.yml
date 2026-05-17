@@ -1,0 +1,84 @@
+name: Issue Closure Policy
+
+on:
+  issues:
+    types: [closed]
+
+permissions:
+  issues: write
+  pull-requests: read
+
+concurrency:
+  group: issue-closure-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.event.issue.state_reason == 'completed'
+    steps:
+      - name: Reopen if epic/acceptance-criteria closed without linked PR or wontfix
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -eo pipefail
+
+          # Fetch labels and check for protected ones
+          LABELS=$(gh issue view "$ISSUE_NUMBER" --repo "$REPO" --json labels --jq '[.labels[].name] | join(",")')
+          PROTECTED="epic acceptance-criteria"
+
+          IS_PROTECTED=false
+          for plabel in $PROTECTED; do
+            if echo "$LABELS" | grep -qw "$plabel"; then
+              IS_PROTECTED=true
+              echo "Issue is labeled with protected label: $plabel"
+            fi
+          done
+
+          if [ "$IS_PROTECTED" = "false" ]; then
+            echo "Not protected; allowing closure."
+            exit 0
+          fi
+
+          # Check for linked PR via closedByPullRequestsReferences (GitHub API)
+          OWNER=$(echo "$REPO" | cut -d/ -f1)
+          NAME=$(echo "$REPO" | cut -d/ -f2)
+          LINKED_PRS=$(gh api graphql -f query="
+          query {
+            repository(owner: \"$OWNER\", name: \"$NAME\") {
+              issue(number: $ISSUE_NUMBER) {
+                closedByPullRequestsReferences(first: 5) {
+                  nodes { number, merged }
+                }
+              }
+            }
+          }" --jq '[.data.repository.issue.closedByPullRequestsReferences.nodes[] | select(.merged == true)] | length')
+
+          if [ "$LINKED_PRS" -gt 0 ]; then
+            echo "Protected issue has $LINKED_PRS merged linked PR(s); allowing closure."
+            exit 0
+          fi
+
+          # Check for explicit wontfix/duplicate label
+          if echo "$LABELS" | grep -qwE "wontfix|duplicate|invalid|not-planned"; then
+            echo "Protected issue has wontfix/duplicate/invalid label; allowing closure."
+            exit 0
+          fi
+
+          # Reopen the issue with explanation
+          gh issue reopen "$ISSUE_NUMBER" --repo "$REPO" --comment "## Reopened by Issue Closure Policy
+
+          This issue is labeled with a protected label (\`epic\` or \`acceptance-criteria\`) and was closed without:
+          - a merged PR explicitly closing it (via \`Closes #N\` / \`Fixes #N\` syntax), OR
+          - a \`wontfix\` / \`duplicate\` / \`invalid\` / \`not-planned\` label explaining why it shouldn't be done
+
+          To close this issue, please either:
+          1. Open a PR that addresses the acceptance criteria and includes \`Closes #${ISSUE_NUMBER}\` in the body, OR
+          2. Add a \`wontfix\` label with a comment explaining why the work won't be done.
+
+          This policy prevents the phantom-close pattern where issues are closed in batch without verifying implementation. See https://github.com/D-sorganization for the audit that motivated this policy."
+
+          exit 1
