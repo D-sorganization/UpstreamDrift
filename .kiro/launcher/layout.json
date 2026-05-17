@@ -15,10 +15,10 @@
     "data_explorer",
     "project_map"
   ],
-  "selected_model": "myosim_suite",
+  "selected_model": null,
   "window_geometry": {
     "x": 282,
-    "y": 1080,
+    "y": 39,
     "width": 1463,
     "height": 992
   },
@@ -27,6 +27,6 @@
     "gpu_acceleration": false,
     "docker_mode": false
   },
-  "view_mode": "comfortable",
-  "tile_scale": 0.3725
+  "view_mode": "small",
+  "tile_scale": 1.1075
 }

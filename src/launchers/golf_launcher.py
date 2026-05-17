@@ -85,15 +85,23 @@ class FramelessResizeFilter(QObject):
             if not self._resizing:
                 if 0 <= x <= w and 0 <= y <= h:
                     edge = 0
-                    if x < border and y < border: edge = 13
-                    elif x > w - border and y < border: edge = 14
-                    elif x < border and y > h - border: edge = 16
-                    elif x > w - border and y > h - border: edge = 17
-                    elif x < border: edge = 10
-                    elif x > w - border: edge = 11
-                    elif y < border: edge = 12
-                    elif y > h - border: edge = 15
-
+                    if x < border and y < border:
+                        edge = 13
+                    elif x > w - border and y < border:
+                        edge = 14
+                    elif x < border and y > h - border:
+                        edge = 16
+                    elif x > w - border and y > h - border:
+                        edge = 17
+                    elif x < border:
+                        edge = 10
+                    elif x > w - border:
+                        edge = 11
+                    elif y < border:
+                        edge = 12
+                    elif y > h - border:
+                        edge = 15
+ 
                     if edge != 0:
                         if event.type() == QEvent.Type.MouseButtonPress and event.button() == Qt.MouseButton.LeftButton:
                             self._resizing = True
@@ -101,11 +109,15 @@ class FramelessResizeFilter(QObject):
                             self._start_pos = gpos
                             self._start_geo = self.window.geometry()
                             return True
-                        elif event.type() in (QEvent.Type.HoverMove, QEvent.Type.MouseMove):
-                            if edge in (13, 17): self.window.setCursor(Qt.CursorShape.SizeFDiagCursor)
-                            elif edge in (14, 16): self.window.setCursor(Qt.CursorShape.SizeBDiagCursor)
-                            elif edge in (10, 11): self.window.setCursor(Qt.CursorShape.SizeHorCursor)
-                            elif edge in (12, 15): self.window.setCursor(Qt.CursorShape.SizeVerCursor)
+                        if event.type() in (QEvent.Type.HoverMove, QEvent.Type.MouseMove):
+                            if edge in (13, 17):
+                                self.window.setCursor(Qt.CursorShape.SizeFDiagCursor)
+                            elif edge in (14, 16):
+                                self.window.setCursor(Qt.CursorShape.SizeBDiagCursor)
+                            elif edge in (10, 11):
+                                self.window.setCursor(Qt.CursorShape.SizeHorCursor)
+                            elif edge in (12, 15):
+                                self.window.setCursor(Qt.CursorShape.SizeVerCursor)
                             return True
                     else:
                         if self.window.cursor().shape() != Qt.CursorShape.ArrowCursor:
@@ -114,15 +126,19 @@ class FramelessResizeFilter(QObject):
                 if event.type() == QEvent.Type.MouseMove:
                     delta = gpos - self._start_pos
                     rect = QRect(self._start_geo)
-                    if self._resize_edge in (10, 13, 16): rect.setLeft(rect.left() + delta.x())
-                    if self._resize_edge in (11, 14, 17): rect.setRight(rect.right() + delta.x())
-                    if self._resize_edge in (12, 13, 14): rect.setTop(rect.top() + delta.y())
-                    if self._resize_edge in (15, 16, 17): rect.setBottom(rect.bottom() + delta.y())
+                    if self._resize_edge in (10, 13, 16):
+                        rect.setLeft(rect.left() + delta.x())
+                    if self._resize_edge in (11, 14, 17):
+                        rect.setRight(rect.right() + delta.x())
+                    if self._resize_edge in (12, 13, 14):
+                        rect.setTop(rect.top() + delta.y())
+                    if self._resize_edge in (15, 16, 17):
+                        rect.setBottom(rect.bottom() + delta.y())
                     
                     if rect.width() >= self.window.minimumWidth() and rect.height() >= self.window.minimumHeight():
                         self.window.setGeometry(rect)
                     return True
-                elif event.type() == QEvent.Type.MouseButtonRelease:
+                if event.type() == QEvent.Type.MouseButtonRelease:
                     self._resizing = False
                     self.window.setCursor(Qt.CursorShape.ArrowCursor)
                     return True
@@ -1172,9 +1188,9 @@ def main() -> None:
     _install_global_ui_zoom(app)
 
     # Set global application icon
-    icon_path = ASSETS_DIR / "golf_logo.png"
+    icon_path = ASSETS_DIR / "golf_logo.ico"
     if not icon_path.exists():
-        icon_path = ASSETS_DIR / "golf_logo.ico"
+        icon_path = ASSETS_DIR / "golf_logo.png"
     if icon_path.exists():
         app.setWindowIcon(QIcon(str(icon_path)))
 
