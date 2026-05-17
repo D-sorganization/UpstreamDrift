@@ -204,6 +204,7 @@ class LauncherUISetupMixin:
         main_layout = QSplitter(Qt.Orientation.Horizontal)
         main_layout.setProperty("class", "dark")
         main_layout.setHandleWidth(4)
+        main_layout.setChildrenCollapsible(False)
 
         try:
             from src.shared.python.theme import get_current_colors
@@ -281,6 +282,7 @@ class LauncherUISetupMixin:
         # --- Content area with horizontal splitter (tiles | AI chat) ---
         self.content_splitter = QSplitter(Qt.Orientation.Horizontal)
         self.content_splitter.setHandleWidth(3)
+        self.content_splitter.setChildrenCollapsible(False)
         self.content_splitter.setProperty("class", "dark")
         _style = self.content_splitter.style()
 
