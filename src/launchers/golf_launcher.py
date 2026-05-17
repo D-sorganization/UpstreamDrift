@@ -522,6 +522,21 @@ class GolfLauncher(
         # context menus or embedded host widgets are created
         bootstrap_embeddable_tools()
 
+        # Start the background API server so the Sidekick Chat UI can connect
+        import sys
+        
+        # Determine the correct directory to run the server from
+        # It must be run from the root of the UpstreamDrift repo to resolve src.api.server
+        cwd = str(REPOS_ROOT / "UpstreamDrift") if (REPOS_ROOT / "UpstreamDrift").exists() else str(REPOS_ROOT)
+        
+        self.process_manager.run_command(
+            [sys.executable, "-m", "src.api.server"],
+            cwd=cwd,
+            task_name="background_api_server",
+            window_title="Golf Modeling API Server (Background)",
+            wait=False
+        )
+
     def _init_registry(self, startup_results: StartupResults | None) -> None:
         if startup_results and startup_results.registry is not None:
             self.registry = startup_results.registry
