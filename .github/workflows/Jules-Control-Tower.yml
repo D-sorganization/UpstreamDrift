@@ -250,7 +250,6 @@ jobs:
   # This parent workflow only routes and passes context
 
   call-repair:
-    timeout-minutes: 30
     needs: triage
     if: needs.triage.outputs.target == 'auto-repair'
     uses: ./.github/workflows/Jules-Auto-Repair.yml
@@ -265,7 +264,6 @@ jobs:
     secrets: inherit
 
   call-hotfix-creator:
-    timeout-minutes: 30
     needs: triage
     if: needs.triage.outputs.target == 'hotfix-creator'
     uses: ./.github/workflows/Jules-Hotfix-Creator.yml
@@ -279,7 +277,6 @@ jobs:
     secrets: inherit
 
   call-scribe:
-    timeout-minutes: 30
     needs: triage
     if: needs.triage.outputs.target == 'doc-scribe'
     uses: ./.github/workflows/Jules-Documentation-Scribe.yml
@@ -292,7 +289,6 @@ jobs:
     secrets: inherit
 
   call-tests:
-    timeout-minutes: 30
     needs: triage
     if: needs.triage.outputs.target == 'test-generator'
     uses: ./.github/workflows/Jules-Test-Generator.yml
@@ -307,7 +303,6 @@ jobs:
   # call-auto-rebase: archived (was a placeholder stub only) -- issue #2055
 
   call-archivist:
-    timeout-minutes: 30
     needs: triage
     if: needs.triage.outputs.target == 'archivist'
     uses: ./.github/workflows/Jules-Archivist.yml
@@ -315,7 +310,6 @@ jobs:
     secrets: inherit
 
   call-sentinel:
-    timeout-minutes: 30
     needs: triage
     if: needs.triage.outputs.target == 'sentinel'
     uses: ./.github/workflows/Jules-Sentinel.yml
@@ -323,7 +317,6 @@ jobs:
     secrets: inherit
 
   call-code-quality-reviewer:
-    timeout-minutes: 30
     needs: triage
     if: needs.triage.outputs.target == 'code-quality-reviewer'
     uses: ./.github/workflows/Jules-Code-Quality-Reviewer.yml
@@ -335,7 +328,6 @@ jobs:
     secrets: inherit
 
   call-assessment-generator:
-    timeout-minutes: 30
     needs: triage
     if: needs.triage.outputs.target == 'assessment-generator'
     uses: ./.github/workflows/Jules-Assessment-Generator.yml
@@ -348,7 +340,6 @@ jobs:
     secrets: inherit
 
   call-issue-resolver:
-    timeout-minutes: 30
     needs: triage
     if: needs.triage.outputs.target == 'issue-resolver'
     uses: ./.github/workflows/Jules-Issue-Resolver.yml
@@ -363,7 +354,6 @@ jobs:
     secrets: inherit
 
   call-completist:
-    timeout-minutes: 30
     needs: triage
     if: needs.triage.outputs.target == 'completist'
     uses: ./.github/workflows/Jules-Completist.yml
@@ -375,7 +365,6 @@ jobs:
     secrets: inherit
 
   call-documentation-auditor:
-    timeout-minutes: 30
     needs: triage
     if: needs.triage.outputs.target == 'documentation-auditor'
     uses: ./.github/workflows/Jules-Documentation-Auditor.yml
@@ -388,7 +377,6 @@ jobs:
     secrets: inherit
 
   call-pr-compiler:
-    timeout-minutes: 30
     needs: triage
     if: needs.triage.outputs.target == 'pr-compiler'
     uses: ./.github/workflows/Jules-PR-Compiler.yml

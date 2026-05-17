@@ -22,6 +22,10 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Ensure PyYAML available
+        run: |
+          python3 -c "import yaml" 2>/dev/null || python3 -m pip install --quiet pyyaml
+
       - name: Identify modified workflow files
         id: changed
         run: |
@@ -42,13 +46,46 @@ jobs:
         run: |
           set -eo pipefail
           [ -z "$FILES" ] && exit 0
+          # Per-job timeout-minutes checker (skips reusable-caller jobs which forbid it)
+          # See: https://docs.github.com/en/actions/using-workflows/reusing-workflows
+          # Caller jobs (those with `uses:`) only allow:
+          #   name, uses, with, secrets, needs, if, permissions, concurrency, strategy
+          cat > /tmp/check_timeouts.py <<'PYEOF'
+          import sys, yaml
+          path = sys.argv[1]
+          try:
+              with open(path, encoding="utf-8") as fh:
+                  data = yaml.safe_load(fh)
+          except Exception as exc:
+              print(f"yaml-parse-error: {exc}")
+              sys.exit(0)
+          if not isinstance(data, dict) or "jobs" not in data:
+              sys.exit(0)
+          missing, forbidden = [], []
+          for name, job in data["jobs"].items():
+              if not isinstance(job, dict):
+                  continue
+              has_uses = "uses" in job
+              has_tm = "timeout-minutes" in job
+              if has_uses and has_tm:
+                  forbidden.append(name)
+              elif not has_uses and not has_tm:
+                  missing.append(name)
+          parts = []
+          if missing:
+              parts.append("missing timeout-minutes on jobs: " + ",".join(missing))
+          if forbidden:
+              parts.append("timeout-minutes forbidden on reusable-caller jobs: " + ",".join(forbidden))
+          if parts:
+              print("; ".join(parts))
+          PYEOF
           FAIL=""
           while IFS= read -r f; do
             [ -z "$f" ] && continue
             [ ! -f "$f" ] && continue  # deleted file — skip
-            # Check timeout-minutes (anywhere in file)
-            if ! grep -q '^\s*timeout-minutes:' "$f"; then
-              FAIL="${FAIL}\n  - $f: missing timeout-minutes"
+            TM_ERR=$(python3 /tmp/check_timeouts.py "$f")
+            if [ -n "$TM_ERR" ]; then
+              FAIL="${FAIL}\n  - $f: $TM_ERR"
             fi
             # Check concurrency block
             if ! grep -q '^concurrency:' "$f"; then
@@ -70,7 +107,7 @@ jobs:
           done <<< "$FILES"
           if [ -n "$FAIL" ]; then
             printf "::error::Workflow lint failed:%b\n" "$FAIL"
-            COMMENT=$(printf "## Workflow lint failed\n\nThe following modified workflow files are missing required protections:%b\n\n### Required keys\n- \`timeout-minutes:\` at job level (e.g. 30 for tests, 60 for builds)\n- \`concurrency:\` block at workflow level\n- \`cancel-in-progress: true\` inside concurrency\n\n### Why\nThese protections prevent the queue-saturation pattern that clogged the fleet on 2026-05-15/16. See CLAUDE.md for the canonical YAML pattern." "$FAIL")
+            COMMENT=$(printf "## Workflow lint failed\n\nThe following modified workflow files are missing required protections:%b\n\n### Required keys\n- \`timeout-minutes:\` on every job EXCEPT reusable-caller jobs (jobs with \`uses: ./.github/workflows/...\`); GitHub forbids \`timeout-minutes\` on caller jobs\n- \`concurrency:\` block at workflow level\n- \`cancel-in-progress: true\` inside concurrency\n\n### Why\nThese protections prevent the queue-saturation pattern that clogged the fleet on 2026-05-15/16. See CLAUDE.md for the canonical YAML pattern." "$FAIL")
             gh pr comment "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --body "$COMMENT" >/dev/null
             exit 1
           fi
