@@ -716,12 +716,19 @@ class GolfLauncher(
         self._initialize_model_order()
         self._apply_docker_status(results.docker_available)
         self._load_layout()
-        self._install_sidekick_sidebar()
-        self._seed_sidekick_workspace()
 
         from PyQt6.QtCore import QTimer as _QTimer
 
+        # Defer Sidekick installation slightly so the main UI can render and
+        # become 100% responsive immediately, bypassing any startup freeze
+        # caused by blocking/synchronous AI network calls on initialization.
+        _QTimer.singleShot(300, self._install_sidekick_sidebar_deferred)
         _QTimer.singleShot(100, self._show_onboarding_if_needed)
+
+    def _install_sidekick_sidebar_deferred(self) -> None:
+        """Deferred Sidekick installation to prevent startup freeze."""
+        self._install_sidekick_sidebar()
+        self._seed_sidekick_workspace()
 
     def _seed_sidekick_workspace(self) -> None:
         """Push launcher state into any active Sidekick workspace registry.
