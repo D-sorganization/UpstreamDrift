@@ -46,7 +46,7 @@ concurrency:
 jobs:
   publish:
     name: publish cross-engine leaderboard JSON
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     timeout-minutes: 15
 
     env:
