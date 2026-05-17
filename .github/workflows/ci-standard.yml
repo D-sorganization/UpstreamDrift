@@ -620,8 +620,7 @@ jobs:
         # Force-reinstall hypothesis + sortedcontainers: the shared self-
         # hosted toolcache occasionally carries half-installed versions
         # where the pip metadata says 2.4.0 but the package namespace is
-        # missing exports (e.g. `SortedSet`). A plain `python -m ensurepip --upgrade || true
-          pip install -e` sees
+        # missing exports (e.g. `SortedSet`). A plain `pip install -e` sees
         # "Requirement already satisfied" and doesn't repair the cache,
         # which causes hypothesis to fail its terminal-summary import.
         run: |
@@ -1109,7 +1108,6 @@ jobs:
             pyproject.toml
             requirements*.txt
       - run: |
-          python -m ensurepip --upgrade || true
           python -m ensurepip --upgrade || true
           pip install platformio
       - name: Verify Build
