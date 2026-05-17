@@ -458,7 +458,7 @@ class LauncherUISetupMixin:
             }}
             QToolButton {{
                 background-color: transparent;
-                border: none;
+                border: 1px solid transparent;
                 border-radius: 8px;
                 color: {colors.text_secondary};
                 padding: 12px 0;
@@ -466,10 +466,12 @@ class LauncherUISetupMixin:
             QToolButton:hover {{
                 background-color: {colors.bg_highlight};
                 color: {colors.text_primary};
+                border: 1px solid {colors.border_light};
             }}
             QToolButton:checked {{
                 background-color: {colors.primary};
                 color: {colors.bg};
+                border: 1px solid {colors.primary_dark};
             }}
         """)
 
