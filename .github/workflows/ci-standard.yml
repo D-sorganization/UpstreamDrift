@@ -101,7 +101,8 @@ jobs:
           # RECORD metadata. Ignore ambient installs so pip lays down clean
           # copies instead of trying to uninstall corrupted cache entries.
           python -m ensurepip --upgrade || true
-          python -m pip install --ignore-installed ruff==0.14.10 "mypy==1.20.1" bandit==1.7.7 pydocstyle==6.3.0 semgrep
+          python -m python -m ensurepip --upgrade || true
+          pip install --ignore-installed ruff==0.14.10 "mypy==1.20.1" bandit==1.7.7 pydocstyle==6.3.0 semgrep
 
       - name: Lint
         shell: bash
@@ -143,17 +144,20 @@ jobs:
 
       - run: |
           python -m ensurepip --upgrade || true
-          python -m pip install --ignore-installed "mypy==1.20.1" types-PyYAML types-requests
+          python -m python -m ensurepip --upgrade || true
+          pip install --ignore-installed "mypy==1.20.1" types-PyYAML types-requests
       - name: Create stub ui/dist for editable install (quality checks only)
         run: mkdir -p ui/dist
       - run: |
           python -m ensurepip --upgrade || true
-          python -m pip install --ignore-installed -e ".[dev]"
+          python -m python -m ensurepip --upgrade || true
+          pip install --ignore-installed -e ".[dev]"
 
       - name: Pin Type Toolchain
         run: |
           python -m ensurepip --upgrade || true
-          python -m pip install --ignore-installed --no-cache-dir "mypy==1.20.1" "numpy==2.2.6"
+          python -m python -m ensurepip --upgrade || true
+          pip install --ignore-installed --no-cache-dir "mypy==1.20.1" "numpy==2.2.6"
           mypy --version
           python - << 'PY'
           from importlib import metadata
@@ -303,12 +307,15 @@ jobs:
           python3 -m venv "$audit_venv"
           audit_python="$audit_venv/bin/python"
           python -m ensurepip --upgrade || true
-          "$audit_python" -m pip install --upgrade pip
+          "$audit_python" -m python -m ensurepip --upgrade || true
+          pip install --upgrade pip
           mkdir -p ui/dist
           python -m ensurepip --upgrade || true
-          "$audit_python" -m pip install -e ".[dev]"
+          "$audit_python" -m python -m ensurepip --upgrade || true
+          pip install -e ".[dev]"
           python -m ensurepip --upgrade || true
-          "$audit_python" -m pip install pip-audit
+          "$audit_python" -m python -m ensurepip --upgrade || true
+          pip install pip-audit
 
           set +e
           "$audit_python" -m pip_audit --format json --output pip-audit-report.json
@@ -470,10 +477,12 @@ jobs:
           python3 -m venv .venv-core-only
           . .venv-core-only/bin/activate
           python -m ensurepip --upgrade || true
-          python3 -m pip install --upgrade pip
+          python3 -m python -m ensurepip --upgrade || true
+          pip install --upgrade pip
           mkdir -p ui/dist
           python -m ensurepip --upgrade || true
-          python3 -m pip install -e .
+          python3 -m python -m ensurepip --upgrade || true
+          pip install -e .
       - name: Verify optional engines are absent from core install
         shell: bash
         run: |
@@ -486,7 +495,8 @@ jobs:
           set -euo pipefail
           . .venv-core-only/bin/activate
           python -m ensurepip --upgrade || true
-          python3 -m pip install pytest pytest-timeout
+          python3 -m python -m ensurepip --upgrade || true
+          pip install pytest pytest-timeout
           python3 -m pytest \
             tests/architecture/test_core_public_api.py \
             tests/unit/test_core_install_isolation.py \
@@ -520,12 +530,15 @@ jobs:
           python -m venv "$RUNNER_TEMP/runtime-audit-venv"
           source "$RUNNER_TEMP/runtime-audit-venv/bin/activate"
           python -m ensurepip --upgrade || true
-          python -m pip install --upgrade pip
+          python -m python -m ensurepip --upgrade || true
+          pip install --upgrade pip
           mkdir -p ui/dist
           python -m ensurepip --upgrade || true
-          python -m pip install .
+          python -m python -m ensurepip --upgrade || true
+          pip install .
           python -m ensurepip --upgrade || true
-          python -m pip install pip-audit
+          python -m python -m ensurepip --upgrade || true
+          pip install pip-audit
           pip-audit -r <(pip freeze)
 
   tests:
@@ -607,7 +620,8 @@ jobs:
         # Force-reinstall hypothesis + sortedcontainers: the shared self-
         # hosted toolcache occasionally carries half-installed versions
         # where the pip metadata says 2.4.0 but the package namespace is
-        # missing exports (e.g. `SortedSet`). A plain `pip install -e` sees
+        # missing exports (e.g. `SortedSet`). A plain `python -m ensurepip --upgrade || true
+          pip install -e` sees
         # "Requirement already satisfied" and doesn't repair the cache,
         # which causes hypothesis to fail its terminal-summary import.
         run: |
@@ -615,14 +629,18 @@ jobs:
           echo "$RUNNER_TEMP/core-ci-venv/bin" >> "$GITHUB_PATH"
           echo "VIRTUAL_ENV=$RUNNER_TEMP/core-ci-venv" >> "$GITHUB_ENV"
           python -m ensurepip --upgrade || true
-          "$RUNNER_TEMP/core-ci-venv/bin/python" -m pip install --upgrade pip
+          "$RUNNER_TEMP/core-ci-venv/bin/python" -m python -m ensurepip --upgrade || true
+          pip install --upgrade pip
           python="$RUNNER_TEMP/core-ci-venv/bin/python"
           python -m ensurepip --upgrade || true
-          "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
+          "$python" -m python -m ensurepip --upgrade || true
+          pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
           python -m ensurepip --upgrade || true
-          "$python" -m pip install -e ".[dev,gui-test]"
+          "$python" -m python -m ensurepip --upgrade || true
+          pip install -e ".[dev,gui-test]"
           python -m ensurepip --upgrade || true
-          "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
+          "$python" -m python -m ensurepip --upgrade || true
+          pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
 
       - name: Document Native Engine Coverage In Core Lane
         if: steps.core-test-changes.outputs.skip != 'true'
@@ -861,11 +879,14 @@ jobs:
       - name: Install migration test dependencies
         run: |
           python -m ensurepip --upgrade || true
-          python -m pip install --upgrade pip
+          python -m python -m ensurepip --upgrade || true
+          pip install --upgrade pip
           python -m ensurepip --upgrade || true
-          python -m pip install -e ".[dev]"
+          python -m python -m ensurepip --upgrade || true
+          pip install -e ".[dev]"
           python -m ensurepip --upgrade || true
-          python -m pip install "psycopg[binary]>=3.1"
+          python -m python -m ensurepip --upgrade || true
+          pip install "psycopg[binary]>=3.1"
       - name: Run Alembic PostgreSQL round-trip
         env:
           ALEMBIC_ROUND_TRIP_DATABASE_URL: postgresql+psycopg://upstreamdrift:upstreamdrift@localhost:${{ job.services.postgres.ports[5432] }}/upstreamdrift_migrations
@@ -968,14 +989,18 @@ jobs:
           echo "$RUNNER_TEMP/shared-contracts-venv/bin" >> "$GITHUB_PATH"
           echo "VIRTUAL_ENV=$RUNNER_TEMP/shared-contracts-venv" >> "$GITHUB_ENV"
           python -m ensurepip --upgrade || true
-          "$RUNNER_TEMP/shared-contracts-venv/bin/python" -m pip install --upgrade pip
+          "$RUNNER_TEMP/shared-contracts-venv/bin/python" -m python -m ensurepip --upgrade || true
+          pip install --upgrade pip
           python="$RUNNER_TEMP/shared-contracts-venv/bin/python"
           python -m ensurepip --upgrade || true
-          "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
+          "$python" -m python -m ensurepip --upgrade || true
+          pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
           python -m ensurepip --upgrade || true
-          "$python" -m pip install -e ".[dev,gui-test]"
+          "$python" -m python -m ensurepip --upgrade || true
+          pip install -e ".[dev,gui-test]"
           python -m ensurepip --upgrade || true
-          "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
+          "$python" -m python -m ensurepip --upgrade || true
+          pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
       - name: Run Shared Tools Consumer Contracts
         env:
           QT_QPA_PLATFORM: offscreen
@@ -1084,6 +1109,7 @@ jobs:
             pyproject.toml
             requirements*.txt
       - run: |
+          python -m ensurepip --upgrade || true
           python -m ensurepip --upgrade || true
           pip install platformio
       - name: Verify Build
@@ -1258,7 +1284,8 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/rust-venv"
           source "$RUNNER_TEMP/rust-venv/bin/activate"
           python -m ensurepip --upgrade || true
-          python -m pip install --upgrade pip maturin
+          python -m python -m ensurepip --upgrade || true
+          pip install --upgrade pip maturin
           for crate in rust_core/upstream-physics rust_core/upstream-mocap-preproc rust_core/upstream-muscle rust_core/upstream-motion-matching rust_core/ai_backend; do
             (cd "$crate" && python -m maturin build --interpreter python --features python --release)
           done
@@ -1270,7 +1297,8 @@ jobs:
         run: |
           source "$RUNNER_TEMP/rust-venv/bin/activate"
           python -m ensurepip --upgrade || true
-          python -m pip install target/wheels/upstream_physics-*.whl
+          python -m python -m ensurepip --upgrade || true
+          pip install target/wheels/upstream_physics-*.whl
           python -c "
           import upstream_physics
           # Verify key types are importable
@@ -1284,7 +1312,8 @@ jobs:
           # ai_backend wheel: smoke-test that the #[pymodule] is importable
           # and exposes the four pyclasses + version. See issue #5220.
           python -m ensurepip --upgrade || true
-          python -m pip install target/wheels/ai_backend-*.whl
+          python -m python -m ensurepip --upgrade || true
+          pip install target/wheels/ai_backend-*.whl
           python -c "
           import ai_backend
           assert hasattr(ai_backend, 'AIConfig'), 'AIConfig missing'
@@ -1386,7 +1415,8 @@ jobs:
           python -m venv "$RUNNER_TEMP/rust-quickstart-venv"
           source "$RUNNER_TEMP/rust-quickstart-venv/bin/activate"
           python -m ensurepip --upgrade || true
-          python -m pip install --upgrade pip maturin
+          python -m python -m ensurepip --upgrade || true
+          pip install --upgrade pip maturin
           cd rust_core/upstream-physics
           python -m maturin develop --features python
           python -c "
