@@ -71,13 +71,13 @@ class TestMyoSuiteMuscleAnalyzer:
         # Get activations
         activations = analyzer.get_muscle_activations()
 
-        assert len(activations) == len(analyzer.muscle_names), (
-            "Assertion failed: len(activations) == len(analyzer.muscle_names)"
-        )
+        assert len(activations) == len(
+            analyzer.muscle_names
+        ), "Assertion failed: len(activations) == len(analyzer.muscle_names)"
         # Activations should be in [0, 1]
-        assert np.all(activations >= 0.0) and np.all(activations <= 1.0), (
-            "Assertion failed: np.all(activations >= 0.0) and np.all(activations <= 1.0)"
-        )
+        assert np.all(activations >= 0.0) and np.all(
+            activations <= 1.0
+        ), "Assertion failed: np.all(activations >= 0.0) and np.all(activations <= 1.0)"
 
         logger.info(f"Muscle activations: {activations}")
 
@@ -103,9 +103,9 @@ class TestMyoSuiteMuscleAnalyzer:
         # Get forces
         forces = analyzer.get_muscle_forces()
 
-        assert len(forces) == len(analyzer.muscle_names), (
-            "Assertion failed: len(forces) == len(analyzer.muscle_names)"
-        )
+        assert len(forces) == len(
+            analyzer.muscle_names
+        ), "Assertion failed: len(forces) == len(analyzer.muscle_names)"
         # At least some muscles should have non-zero force
         assert np.any(forces != 0.0), "All muscle forces are zero"
 
@@ -131,9 +131,9 @@ class TestMyoSuiteMuscleAnalyzer:
         # Compute moment arms
         moment_arms = analyzer.compute_moment_arms()
 
-        assert len(moment_arms) == len(analyzer.muscle_names), (
-            "Assertion failed: len(moment_arms) == len(analyzer.muscle_names)"
-        )
+        assert len(moment_arms) == len(
+            analyzer.muscle_names
+        ), "Assertion failed: len(moment_arms) == len(analyzer.muscle_names)"
 
         # Log moment arm values
         for muscle_name, r in list(moment_arms.items())[:3]:  # First 3 muscles
@@ -164,9 +164,9 @@ class TestMyoSuiteMuscleAnalyzer:
         # Compute induced accelerations
         induced = analyzer.compute_muscle_induced_accelerations()
 
-        assert len(induced) == len(analyzer.muscle_names), (
-            "Assertion failed: len(induced) == len(analyzer.muscle_names)"
-        )
+        assert len(induced) == len(
+            analyzer.muscle_names
+        ), "Assertion failed: len(induced) == len(analyzer.muscle_names)"
 
         # At least some muscles should produce non-zero acceleration
         non_zero_count = sum(1 for a in induced.values() if not np.allclose(a, 0.0))
@@ -200,21 +200,21 @@ class TestMyoSuiteMuscleAnalyzer:
         analysis = analyzer.analyze_all()
 
         # Verify all fields populated
-        assert analysis.muscle_state is not None, (
-            "Assertion failed: analysis.muscle_state is not None"
-        )
-        assert len(analysis.muscle_state.muscle_names) > 0, (
-            "Assertion failed: len(analysis.muscle_state.muscle_names) > 0"
-        )
-        assert len(analysis.moment_arms) > 0, (
-            "Assertion failed: len(analysis.moment_arms) > 0"
-        )
-        assert len(analysis.joint_torques) > 0, (
-            "Assertion failed: len(analysis.joint_torques) > 0"
-        )
-        assert len(analysis.total_muscle_torque) > 0, (
-            "Assertion failed: len(analysis.total_muscle_torque) > 0"
-        )
+        assert (
+            analysis.muscle_state is not None
+        ), "Assertion failed: analysis.muscle_state is not None"
+        assert (
+            len(analysis.muscle_state.muscle_names) > 0
+        ), "Assertion failed: len(analysis.muscle_state.muscle_names) > 0"
+        assert (
+            len(analysis.moment_arms) > 0
+        ), "Assertion failed: len(analysis.moment_arms) > 0"
+        assert (
+            len(analysis.joint_torques) > 0
+        ), "Assertion failed: len(analysis.joint_torques) > 0"
+        assert (
+            len(analysis.total_muscle_torque) > 0
+        ), "Assertion failed: len(analysis.total_muscle_torque) > 0"
 
         logger.info("Analysis complete:")
         logger.info(f"  Muscles: {len(analysis.muscle_state.muscle_names)}")

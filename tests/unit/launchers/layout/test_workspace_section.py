@@ -39,7 +39,9 @@ def test_workspace_section_persists_selection(qt_real, qapp) -> None:  # noqa: A
     assert saved and saved[-1] == "MATLAB_HOME"
 
 
-def test_workspace_section_unknown_default_falls_through(qt_real, qapp) -> None:  # noqa: ARG001
+def test_workspace_section_unknown_default_falls_through(
+    qt_real, qapp
+) -> None:  # noqa: ARG001
     """An unknown default leaves the combo at its first item."""
     section = WorkspaceSection(get_default=lambda: "NONEXISTENT")
     section.build_widget()

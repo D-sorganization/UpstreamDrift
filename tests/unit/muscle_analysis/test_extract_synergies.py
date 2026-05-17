@@ -107,14 +107,14 @@ class TestExtractSynergies:
         result = analyzer.extract_synergies(n_synergies=4)
 
         # VAF should be high
-        assert result.vaf > 0.80, (
-            "High number of synergies should give good reconstruction"
-        )
+        assert (
+            result.vaf > 0.80
+        ), "High number of synergies should give good reconstruction"
 
         # Reconstruction shape should match data
-        assert result.reconstructed.shape == data.shape, (
-            "Assertion failed: result.reconstructed.shape == data.shape"
-        )
+        assert (
+            result.reconstructed.shape == data.shape
+        ), "Assertion failed: result.reconstructed.shape == data.shape"
 
     def test_weights_are_nonnegative(self) -> None:
         """Test that muscle weights are non-negative (NMF property)."""
@@ -169,9 +169,9 @@ class TestExtractSynergies:
         analyzer = MuscleSynergyAnalyzer(data, muscle_names=names)
 
         result = analyzer.extract_synergies(n_synergies=2)
-        assert result.muscle_names == names, (
-            "Assertion failed: result.muscle_names == names"
-        )
+        assert (
+            result.muscle_names == names
+        ), "Assertion failed: result.muscle_names == names"
 
     def test_synergies_with_perfect_rank_1_data(self) -> None:
         """Test synergy extraction on perfect rank-1 data."""
@@ -187,6 +187,6 @@ class TestExtractSynergies:
         result = analyzer.extract_synergies(n_synergies=1)
 
         # VAF should be very high (near perfect reconstruction)
-        assert result.vaf > 0.98, (
-            f"VAF should be near 1.0 for rank-1 data, got {result.vaf}"
-        )
+        assert (
+            result.vaf > 0.98
+        ), f"VAF should be near 1.0 for rank-1 data, got {result.vaf}"

@@ -66,9 +66,9 @@ class TestPhysicsAccuracy:
         # Physics engine produces nearly identical distances for small stimp differences;
         # verify the results are within ~1% of each other (engine precision limit)
         diff = abs(fast_result.total_distance - slow_result.total_distance)
-        assert diff < 0.1, (
-            f"Distances should be similar: fast={fast_result.total_distance}, slow={slow_result.total_distance}"
-        )
+        assert (
+            diff < 0.1
+        ), f"Distances should be similar: fast={fast_result.total_distance}, slow={slow_result.total_distance}"
 
     def test_uphill_vs_downhill(self) -> None:
         """Uphill putts should roll shorter than downhill."""
@@ -113,9 +113,9 @@ class TestPhysicsAccuracy:
         # Physics engine produces nearly identical distances for small slope values;
         # verify the results are within ~1% of each other (engine precision limit)
         diff = abs(downhill_result.total_distance - uphill_result.total_distance)
-        assert diff < 0.1, (
-            f"Distances should be similar: downhill={downhill_result.total_distance}, uphill={uphill_result.total_distance}"
-        )
+        assert (
+            diff < 0.1
+        ), f"Distances should be similar: downhill={downhill_result.total_distance}, uphill={uphill_result.total_distance}"
 
     def test_spin_affects_roll(self) -> None:
         """Backspin should reduce initial roll distance (check effect)."""
@@ -140,9 +140,9 @@ class TestPhysicsAccuracy:
 
         # High backspin should travel less distance initially
         # (ball checks due to sliding friction converting spin)
-        assert high_result["positions"][-1][0] < low_result["positions"][-1][0], (
-            "Assertion failed: high_result[positions][-1][0] < low_result[positions][-1][0]"
-        )
+        assert (
+            high_result["positions"][-1][0] < low_result["positions"][-1][0]
+        ), "Assertion failed: high_result[positions][-1][0] < low_result[positions][-1][0]"
 
     def test_energy_conservation_approximate(self) -> None:
         """Energy should decrease monotonically due to friction."""
@@ -167,6 +167,6 @@ class TestPhysicsAccuracy:
         # Energy should generally decrease (allow numerical fluctuation from integrator;
         # Euler integration can produce transient energy spikes of ~2% per step)
         for i in range(1, len(energies)):
-            assert energies[i] <= energies[i - 1] + 0.02, (
-                "Assertion failed: energies[i] <= energies[i - 1] + 0.02"
-            )
+            assert (
+                energies[i] <= energies[i - 1] + 0.02
+            ), "Assertion failed: energies[i] <= energies[i - 1] + 0.02"

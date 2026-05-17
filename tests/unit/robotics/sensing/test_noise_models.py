@@ -157,9 +157,9 @@ class TestNoiseModels:
 
         # 2nd-order filter should respond more slowly to a step than 1st-order
         # at early samples, the 2nd-order output must lag behind the 1st-order
-        assert arr2[3] < arr1[3], (
-            "order=2 filter should be slower than order=1 at early samples"
-        )
+        assert (
+            arr2[3] < arr1[3]
+        ), "order=2 filter should be slower than order=1 at early samples"
         # Both should eventually converge toward 1.0
         assert arr2[-1] > 0.8
 

@@ -18,9 +18,9 @@ class TestStartupTimeoutHandler:
         """GolfLauncher must have a _handle_startup_timeout method."""
         from src.launchers.golf_launcher import GolfLauncher
 
-        assert hasattr(GolfLauncher, "_handle_startup_timeout"), (
-            "GolfLauncher is missing _handle_startup_timeout method"
-        )
+        assert hasattr(
+            GolfLauncher, "_handle_startup_timeout"
+        ), "GolfLauncher is missing _handle_startup_timeout method"
 
     def test_startup_timeout_handler_is_callable(self) -> None:
         """_handle_startup_timeout must be callable."""
@@ -48,9 +48,9 @@ class TestStartupTimeoutHandler:
 
         GolfLauncher._handle_startup_timeout(mock_self)
 
-        assert mock_self.loading is False, (
-            "_handle_startup_timeout did not clear the loading flag"
-        )
+        assert (
+            mock_self.loading is False
+        ), "_handle_startup_timeout did not clear the loading flag"
 
     def test_startup_timeout_shows_error_message(self) -> None:
         """_handle_startup_timeout must surface a user-visible error."""
@@ -62,9 +62,9 @@ class TestStartupTimeoutHandler:
         with patch("src.launchers.golf_launcher.logger") as mock_logger:
             GolfLauncher._handle_startup_timeout(mock_self)
             # Must log an error-level message
-            assert mock_logger.error.called or mock_logger.warning.called, (
-                "_handle_startup_timeout did not log any error/warning"
-            )
+            assert (
+                mock_logger.error.called or mock_logger.warning.called
+            ), "_handle_startup_timeout did not log any error/warning"
 
 
 class TestCreateModelCard:

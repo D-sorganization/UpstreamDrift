@@ -22,6 +22,6 @@ def test_provider_migration_boundary_files_avoid_legacy_repo_path_shortcuts() ->
     for file_path in _BOUNDARY_FILES:
         contents = file_path.read_text(encoding="utf-8")
         for snippet in _DISALLOWED_SNIPPETS:
-            assert snippet not in contents, (
-                f"{file_path.name} contains legacy shortcut: {snippet}"
-            )
+            assert (
+                snippet not in contents
+            ), f"{file_path.name} contains legacy shortcut: {snippet}"

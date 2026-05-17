@@ -153,9 +153,9 @@ def test_compute_cost_matches_matlab_analytic_shift() -> None:
     j, terms = compute_cost(theta, target, sim_fn=lambda _t: sim, opts=opts)
 
     rmse = np.sqrt((j - expected_total) ** 2)
-    assert rmse < PARITY_RMSE_TOL, (
-        f"compute_cost RMSE {rmse:.3e} exceeds parity tolerance {PARITY_RMSE_TOL:.0e}"
-    )
+    assert (
+        rmse < PARITY_RMSE_TOL
+    ), f"compute_cost RMSE {rmse:.3e} exceeds parity tolerance {PARITY_RMSE_TOL:.0e}"
     assert terms.position == pytest.approx(expected_position, abs=PARITY_RMSE_TOL)
     assert terms.orientation == pytest.approx(0.0, abs=PARITY_RMSE_TOL)
     assert terms.impact_anchor == pytest.approx(expected_anchor, abs=PARITY_RMSE_TOL)

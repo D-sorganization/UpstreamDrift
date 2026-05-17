@@ -69,14 +69,14 @@ class TestBcryptAPIKeyVerification:
         key_hash = bcrypt_lib.hashpw(api_key.encode("utf-8"), salt).decode("utf-8")
 
         # Verify the hash is bcrypt format (starts with $2b$)
-        assert key_hash.startswith(("$2b$", "$2a$")), (
-            "Assertion failed: key_hash.startswith(($2b$, $2a$))"
-        )
+        assert key_hash.startswith(
+            ("$2b$", "$2a$")
+        ), "Assertion failed: key_hash.startswith(($2b$, $2a$))"
 
         # Verify the key can be verified
-        assert bcrypt_lib.checkpw(api_key.encode("utf-8"), key_hash.encode("utf-8")), (
-            "Assertion failed: bcrypt_lib.checkpw(api_key.encode(utf-8), key_hash.encode(utf-8))"
-        )
+        assert bcrypt_lib.checkpw(
+            api_key.encode("utf-8"), key_hash.encode("utf-8")
+        ), "Assertion failed: bcrypt_lib.checkpw(api_key.encode(utf-8), key_hash.encode(utf-8))"
 
         # Verify a different key fails
         wrong_key = f"gms_{secrets.token_urlsafe(32)}"
@@ -119,9 +119,9 @@ class TestBcryptAPIKeyVerification:
         """Test that API keys must have gms_ prefix."""
         # Valid format
         valid_key = f"gms_{secrets.token_urlsafe(32)}"
-        assert valid_key.startswith("gms_"), (
-            "Assertion failed: valid_key.startswith(gms_)"
-        )
+        assert valid_key.startswith(
+            "gms_"
+        ), "Assertion failed: valid_key.startswith(gms_)"
 
         # Invalid formats (should be rejected)
         invalid_keys = [
@@ -132,9 +132,9 @@ class TestBcryptAPIKeyVerification:
         ]
 
         for invalid_key in invalid_keys:
-            assert not invalid_key.startswith("gms_") or len(invalid_key) <= 4, (
-                "Assertion failed: not invalid_key.startswith(gms_) or len(invalid_key) <= 4"
-            )
+            assert (
+                not invalid_key.startswith("gms_") or len(invalid_key) <= 4
+            ), "Assertion failed: not invalid_key.startswith(gms_) or len(invalid_key) <= 4"
 
     @requires_bcrypt
     def test_bcrypt_cost_factor(self) -> None:
@@ -197,9 +197,9 @@ class TestBcryptAPIKeyVerification:
         with pytest.raises(HTTPException) as exc_info:
             await get_current_user_from_api_key(wrong_credentials, mock_db)
 
-        assert exc_info.value.status_code == 401, (
-            "Assertion failed: exc_info.value.status_code == 401"
-        )
+        assert (
+            exc_info.value.status_code == 401
+        ), "Assertion failed: exc_info.value.status_code == 401"
 
     async def test_create_api_key_persists_prefix_hash(self) -> None:
         """Created API key records should persist the lookup prefix hash."""
@@ -231,16 +231,16 @@ class TestBcryptAPIKeyVerification:
             response = await create_api_key(api_key_data, current_user, mock_db)
 
         saved_record = mock_db.add.call_args.args[0]
-        assert isinstance(saved_record, APIKey), (
-            "Assertion failed: isinstance(saved_record, APIKey)"
-        )
-        assert saved_record.key_prefix == compute_prefix_hash("abcdefgh"), (
-            "Assertion failed: saved_record.key_prefix == compute_prefix_hash(abcdefgh)"
-        )
+        assert isinstance(
+            saved_record, APIKey
+        ), "Assertion failed: isinstance(saved_record, APIKey)"
+        assert saved_record.key_prefix == compute_prefix_hash(
+            "abcdefgh"
+        ), "Assertion failed: saved_record.key_prefix == compute_prefix_hash(abcdefgh)"
         assert response is fake_response, "Assertion failed: response is fake_response"
-        assert response.key == generated_api_key, (
-            "Assertion failed: response.key == generated_api_key"
-        )
+        assert (
+            response.key == generated_api_key
+        ), "Assertion failed: response.key == generated_api_key"
 
 
 if __name__ == "__main__":

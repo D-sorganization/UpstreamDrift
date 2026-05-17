@@ -142,7 +142,7 @@ def resolve_coord_names(provider: Any | None) -> tuple[str, ...]:
     except Exception:  # noqa: BLE001 - provider errors shouldn't break GUI
         logger.exception("provider.coord_names() raised; using defaults")
         return DEFAULT_JOINT_COORDS
-    return names if names else DEFAULT_JOINT_COORDS
+    return names or DEFAULT_JOINT_COORDS
 
 
 @dataclass(frozen=True)

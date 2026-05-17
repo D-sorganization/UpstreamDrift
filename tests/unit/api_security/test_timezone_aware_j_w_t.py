@@ -77,9 +77,9 @@ class TestTimezoneAwareJWT:
 
         # The exp should be a timestamp (Unix epoch)
         exp_timestamp = payload["exp"]
-        assert isinstance(exp_timestamp, int | float), (
-            "Assertion failed: isinstance(exp_timestamp, int | float)"
-        )
+        assert isinstance(
+            exp_timestamp, int | float
+        ), "Assertion failed: isinstance(exp_timestamp, int | float)"
 
         # Convert to datetime and verify it's in the future
         exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=UTC)
@@ -103,9 +103,9 @@ class TestTimezoneAwareJWT:
         )
 
         # Verify token type
-        assert payload.get("type") == "refresh", (
-            "Assertion failed: payload.get(type) == refresh"
-        )
+        assert (
+            payload.get("type") == "refresh"
+        ), "Assertion failed: payload.get(type) == refresh"
 
         # Check expiration is timezone-aware
         exp_timestamp = payload["exp"]
@@ -113,9 +113,9 @@ class TestTimezoneAwareJWT:
         now = datetime.now(UTC)
 
         assert exp_datetime > now, "Assertion failed: exp_datetime > now"
-        assert exp_datetime.tzinfo is not None, (
-            "Assertion failed: exp_datetime.tzinfo is not None"
-        )
+        assert (
+            exp_datetime.tzinfo is not None
+        ), "Assertion failed: exp_datetime.tzinfo is not None"
 
     def test_no_deprecated_datetime_utcnow(self) -> None:
         """Test that code doesn't use deprecated datetime.utcnow()."""

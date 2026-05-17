@@ -29,15 +29,10 @@ def discover_shells_safe() -> list[dict[str, str]]:
     try:
         from sidekick.terminal.shells import discover_shells  # type: ignore[import-not-found]
     except ImportError:
-        try:
-            from upstream_drift_tools.terminal.shells import (  # type: ignore[import-not-found]
-                discover_shells,
-            )
-        except ImportError:
-            logger.debug(
-                "Sidekick terminal package not available — using fallback shell list"
-            )
-            return _fallback_shells()
+        logger.debug(
+            "Sidekick terminal package not available — using fallback shell list"
+        )
+        return _fallback_shells()
 
     try:
         shells = list(discover_shells())

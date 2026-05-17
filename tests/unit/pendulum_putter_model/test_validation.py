@@ -41,12 +41,12 @@ class TestValidation:
         builder = PendulumPutterModelBuilder()
         result = builder.build()
 
-        assert result.validation is not None, (
-            "Assertion failed: result.validation is not None"
-        )
-        assert result.validation.is_valid, (
-            f"Validation failed: {result.validation.get_error_messages()}"
-        )
+        assert (
+            result.validation is not None
+        ), "Assertion failed: result.validation is not None"
+        assert (
+            result.validation.is_valid
+        ), f"Validation failed: {result.validation.get_error_messages()}"
 
     def test_validation_catches_invalid_parameters(self) -> None:
         """Should catch invalid configuration parameters."""

@@ -4,36 +4,36 @@ no src/ or tests/ file (except this one) should import from upstream_drift_tools
 
 Issue: #5619
 """
-import pathlib
-import subprocess
 
+import pathlib
 
 REPO_ROOT = pathlib.Path(__file__).parents[3]
 
 
+def _find_deprecated_imports(directory: str, ignore_self: bool = False) -> list[str]:
+    found_files = []
+    dir_path = REPO_ROOT / directory
+    for py_file in dir_path.rglob("*.py"):
+        if ignore_self and py_file.name == "test_no_deprecated_imports.py":
+            continue
+        try:
+            content = py_file.read_text(encoding="utf-8")
+            if "upstream_drift_tools" in content:
+                found_files.append(
+                    str(py_file.relative_to(REPO_ROOT)).replace("\\", "/")
+                )
+        except UnicodeDecodeError:
+            pass
+    return found_files
+
+
 def test_no_upstream_drift_tools_imports_in_src():
     """After Stage 2, no src/ file should import from upstream_drift_tools."""
-    result = subprocess.run(
-        ["grep", "-r", "--include=*.py", "-l", "upstream_drift_tools", "src/"],
-        capture_output=True,
-        text=True,
-        cwd=str(REPO_ROOT),
-    )
-    files = [f for f in result.stdout.strip().splitlines() if f]
+    files = _find_deprecated_imports("src")
     assert files == [], f"Found upstream_drift_tools imports in src/: {files}"
 
 
 def test_no_upstream_drift_tools_imports_in_tests():
     """After Stage 2, no tests/ file (except this hygiene test) should import from upstream_drift_tools."""
-    result = subprocess.run(
-        ["grep", "-r", "--include=*.py", "-l", "upstream_drift_tools", "tests/"],
-        capture_output=True,
-        text=True,
-        cwd=str(REPO_ROOT),
-    )
-    files = [
-        f
-        for f in result.stdout.strip().splitlines()
-        if f and "test_no_deprecated_imports" not in f
-    ]
+    files = _find_deprecated_imports("tests", ignore_self=True)
     assert files == [], f"Found upstream_drift_tools imports in tests/: {files}"

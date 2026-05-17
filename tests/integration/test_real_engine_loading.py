@@ -54,20 +54,20 @@ class TestEngineManagerIntegration:
         manager = EngineManager()
 
         # Should have initialized with real project structure
-        assert manager.suite_root.exists(), (
-            "Assertion failed: manager.suite_root.exists()"
-        )
-        assert manager.engines_root.exists(), (
-            "Assertion failed: manager.engines_root.exists()"
-        )
+        assert (
+            manager.suite_root.exists()
+        ), "Assertion failed: manager.suite_root.exists()"
+        assert (
+            manager.engines_root.exists()
+        ), "Assertion failed: manager.engines_root.exists()"
 
         # Get available engines
         available = manager.get_available_engines()
 
         # Should have found at least some engines
-        assert isinstance(available, list), (
-            "Assertion failed: isinstance(available, list)"
-        )
+        assert isinstance(
+            available, list
+        ), "Assertion failed: isinstance(available, list)"
 
         # Each available engine should have a valid path
         for engine in available:
@@ -84,13 +84,13 @@ class TestEngineManagerIntegration:
         for engine_type, path in manager.engine_paths.items():
             # Path should be absolute and within suite root
             assert path.is_absolute(), "Assertion failed: path.is_absolute()"
-            assert manager.suite_root in path.parents, (
-                "Assertion failed: manager.suite_root in path.parents"
-            )
+            assert (
+                manager.suite_root in path.parents
+            ), "Assertion failed: manager.suite_root in path.parents"
 
             # If status says available, path must exist
             status = manager.get_engine_status(engine_type)
             if status == EngineStatus.AVAILABLE or status == EngineStatus.LOADED:
-                assert path.exists(), (
-                    f"{engine_type} marked as {status} but path doesn't exist"
-                )
+                assert (
+                    path.exists()
+                ), f"{engine_type} marked as {status} but path doesn't exist"

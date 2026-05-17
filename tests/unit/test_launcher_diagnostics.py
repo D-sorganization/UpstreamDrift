@@ -71,16 +71,16 @@ class TestDiagnosticResult:
             details={"key": "value"},
             duration_ms=1.5,
         )
-        assert result.name == "test_check", (
-            "Assertion failed: result.name == test_check"
-        )
+        assert (
+            result.name == "test_check"
+        ), "Assertion failed: result.name == test_check"
         assert result.status == "pass", "Assertion failed: result.status == pass"
-        assert result.message == "Test passed", (
-            "Assertion failed: result.message == Test passed"
-        )
-        assert result.details == {"key": "value"}, (
-            "Assertion failed: result.details == {key: value}"
-        )
+        assert (
+            result.message == "Test passed"
+        ), "Assertion failed: result.message == Test passed"
+        assert result.details == {
+            "key": "value"
+        }, "Assertion failed: result.details == {key: value}"
         assert result.duration_ms == 1.5, "Assertion failed: result.duration_ms == 1.5"
 
     def test_launcher_diagnostics_diagnostic_result_to_dict(self) -> None:
@@ -95,12 +95,12 @@ class TestDiagnosticResult:
         d = result.to_dict()
         assert d["name"] == "test_check", "Assertion failed: d[name] == test_check"
         assert d["status"] == "warning", "Assertion failed: d[status] == warning"
-        assert d["message"] == "Warning message", (
-            "Assertion failed: d[message] == Warning message"
-        )
-        assert d["details"]["warning_code"] == 123, (
-            "Assertion failed: d[details][warning_code] == 123"
-        )
+        assert (
+            d["message"] == "Warning message"
+        ), "Assertion failed: d[message] == Warning message"
+        assert (
+            d["details"]["warning_code"] == 123
+        ), "Assertion failed: d[details][warning_code] == 123"
         assert (
             d["duration_ms"] == 2.57
         )  # Rounded to 2 decimal places, "Assertion failed: d[duration_ms] == 2.57  # Rounded to 2 decimal places"
@@ -115,45 +115,45 @@ class TestLauncherDiagnostics:
         expected_ids = diag.EXPECTED_TILE_IDS
 
         assert len(expected_ids) == 17, "Assertion failed: len(expected_ids) == 17"
-        assert "mujoco_unified" in expected_ids, (
-            "Assertion failed: mujoco_unified in expected_ids"
-        )
-        assert "drake_golf" in expected_ids, (
-            "Assertion failed: drake_golf in expected_ids"
-        )
-        assert "pinocchio_golf" in expected_ids, (
-            "Assertion failed: pinocchio_golf in expected_ids"
-        )
-        assert "opensim_golf" in expected_ids, (
-            "Assertion failed: opensim_golf in expected_ids"
-        )
-        assert "myosim_suite" in expected_ids, (
-            "Assertion failed: myosim_suite in expected_ids"
-        )
-        assert "putting_green" in expected_ids, (
-            "Assertion failed: putting_green in expected_ids"
-        )
-        assert "model_explorer" in expected_ids, (
-            "Assertion failed: model_explorer in expected_ids"
-        )
-        assert "c3d_viewer" in expected_ids, (
-            "Assertion failed: c3d_viewer in expected_ids"
-        )
+        assert (
+            "mujoco_unified" in expected_ids
+        ), "Assertion failed: mujoco_unified in expected_ids"
+        assert (
+            "drake_golf" in expected_ids
+        ), "Assertion failed: drake_golf in expected_ids"
+        assert (
+            "pinocchio_golf" in expected_ids
+        ), "Assertion failed: pinocchio_golf in expected_ids"
+        assert (
+            "opensim_golf" in expected_ids
+        ), "Assertion failed: opensim_golf in expected_ids"
+        assert (
+            "myosim_suite" in expected_ids
+        ), "Assertion failed: myosim_suite in expected_ids"
+        assert (
+            "putting_green" in expected_ids
+        ), "Assertion failed: putting_green in expected_ids"
+        assert (
+            "model_explorer" in expected_ids
+        ), "Assertion failed: model_explorer in expected_ids"
+        assert (
+            "c3d_viewer" in expected_ids
+        ), "Assertion failed: c3d_viewer in expected_ids"
 
     def test_expected_tile_names(self) -> None:
         """Test that expected tile names are defined correctly."""
         diag = LauncherDiagnostics()
         names = diag.EXPECTED_TILE_NAMES
 
-        assert names["mujoco_unified"] == "MuJoCo", (
-            "Assertion failed: names[mujoco_unified] == MuJoCo"
-        )
-        assert names["drake_golf"] == "Drake", (
-            "Assertion failed: names[drake_golf] == Drake"
-        )
-        assert names["putting_green"] == "Putting Green", (
-            "Assertion failed: names[putting_green] == Putting Green"
-        )
+        assert (
+            names["mujoco_unified"] == "MuJoCo"
+        ), "Assertion failed: names[mujoco_unified] == MuJoCo"
+        assert (
+            names["drake_golf"] == "Drake"
+        ), "Assertion failed: names[drake_golf] == Drake"
+        assert (
+            names["putting_green"] == "Putting Green"
+        ), "Assertion failed: names[putting_green] == Putting Green"
 
     def test_diagnostics_initialization(self) -> None:
         """Test LauncherDiagnostics initialization."""
@@ -172,12 +172,12 @@ class TestLauncherDiagnostics:
         assert "warnings" in summary, "Assertion failed: warnings in summary"
         assert "status" in summary, "Assertion failed: status in summary"
         assert "timestamp" in summary, "Assertion failed: timestamp in summary"
-        assert "expected_tiles" in summary, (
-            "Assertion failed: expected_tiles in summary"
-        )
-        assert summary["expected_tiles"] == 17, (
-            "Assertion failed: summary[expected_tiles] == 17"
-        )
+        assert (
+            "expected_tiles" in summary
+        ), "Assertion failed: expected_tiles in summary"
+        assert (
+            summary["expected_tiles"] == 17
+        ), "Assertion failed: summary[expected_tiles] == 17"
 
         # Verify counts add up
         assert (
@@ -190,45 +190,45 @@ class TestLauncherDiagnostics:
         diag = LauncherDiagnostics()
         result = diag.check_python_environment()
 
-        assert result.name == "python_environment", (
-            "Assertion failed: result.name == python_environment"
-        )
+        assert (
+            result.name == "python_environment"
+        ), "Assertion failed: result.name == python_environment"
         assert result.status == "pass", "Assertion failed: result.status == pass"
-        assert "python_version" in result.details, (
-            "Assertion failed: python_version in result.details"
-        )
-        assert "platform" in result.details, (
-            "Assertion failed: platform in result.details"
-        )
-        assert "repos_root" in result.details, (
-            "Assertion failed: repos_root in result.details"
-        )
+        assert (
+            "python_version" in result.details
+        ), "Assertion failed: python_version in result.details"
+        assert (
+            "platform" in result.details
+        ), "Assertion failed: platform in result.details"
+        assert (
+            "repos_root" in result.details
+        ), "Assertion failed: repos_root in result.details"
 
     def test_check_models_yaml(self) -> None:
         """Test models.yaml configuration check."""
         diag = LauncherDiagnostics()
         result = diag.check_models_yaml()
 
-        assert result.name == "models_yaml", (
-            "Assertion failed: result.name == models_yaml"
-        )
+        assert (
+            result.name == "models_yaml"
+        ), "Assertion failed: result.name == models_yaml"
         assert "path" in result.details, "Assertion failed: path in result.details"
         assert "exists" in result.details, "Assertion failed: exists in result.details"
 
         # If the file exists, more details should be present
         if result.details.get("exists"):
-            assert "model_count" in result.details or result.status == "fail", (
-                "Assertion failed: model_count in result.details or result.status == fail"
-            )
+            assert (
+                "model_count" in result.details or result.status == "fail"
+            ), "Assertion failed: model_count in result.details or result.status == fail"
 
     def test_check_model_registry(self) -> None:
         """Test ModelRegistry loading check."""
         diag = LauncherDiagnostics()
         result = diag.check_model_registry()
 
-        assert result.name == "model_registry", (
-            "Assertion failed: result.name == model_registry"
-        )
+        assert (
+            result.name == "model_registry"
+        ), "Assertion failed: result.name == model_registry"
         # Status depends on whether registry can be loaded
         assert result.status in (
             "pass",
@@ -246,14 +246,14 @@ class TestLauncherDiagnostics:
             mock_path.exists.return_value = False
             result = diag.check_layout_config()
 
-        assert result.name == "layout_config", (
-            "Assertion failed: result.name == layout_config"
-        )
+        assert (
+            result.name == "layout_config"
+        ), "Assertion failed: result.name == layout_config"
         # Should pass with no saved layout (uses defaults)
         assert result.status == "pass", "Assertion failed: result.status == pass"
-        assert "will use defaults" in result.message.lower(), (
-            "Assertion failed: will use defaults in result.message.lower()"
-        )
+        assert (
+            "will use defaults" in result.message.lower()
+        ), "Assertion failed: will use defaults in result.message.lower()"
 
     def test_check_layout_config_with_file(self) -> None:
         """Test layout config check with existing config file."""
@@ -273,19 +273,19 @@ class TestLauncherDiagnostics:
             ):
                 result = diag.check_layout_config()
 
-            assert result.name == "layout_config", (
-                "Assertion failed: result.name == layout_config"
-            )
+            assert (
+                result.name == "layout_config"
+            ), "Assertion failed: result.name == layout_config"
             # Should warn that layout is missing some tiles
-            assert result.status == "warning", (
-                "Assertion failed: result.status == warning"
-            )
-            assert "saved_model_order" in result.details, (
-                "Assertion failed: saved_model_order in result.details"
-            )
-            assert len(result.details["saved_model_order"]) == 3, (
-                "Assertion failed: len(result.details[saved_model_order]) == 3"
-            )
+            assert (
+                result.status == "warning"
+            ), "Assertion failed: result.status == warning"
+            assert (
+                "saved_model_order" in result.details
+            ), "Assertion failed: saved_model_order in result.details"
+            assert (
+                len(result.details["saved_model_order"]) == 3
+            ), "Assertion failed: len(result.details[saved_model_order]) == 3"
         finally:
             temp_path.unlink()
 
@@ -303,17 +303,15 @@ class TestLauncherDiagnostics:
             ):
                 result = diag.check_layout_config()
 
-            assert result.name == "layout_config", (
-                "Assertion failed: result.name == layout_config"
-            )
-            assert result.status == "warning", (
-                "Assertion failed: result.status == warning"
-            )
+            assert (
+                result.name == "layout_config"
+            ), "Assertion failed: result.name == layout_config"
+            assert (
+                result.status == "warning"
+            ), "Assertion failed: result.status == warning"
             assert (
                 "json_error" in result.details or "invalid" in result.message.lower()
-            ), (
-                "Assertion failed: json_error in result.details or invalid in result.message.lower()"
-            )
+            ), "Assertion failed: json_error in result.details or invalid in result.message.lower()"
         finally:
             temp_path.unlink()
 
@@ -322,32 +320,32 @@ class TestLauncherDiagnostics:
         diag = LauncherDiagnostics()
         result = diag.check_asset_files()
 
-        assert result.name == "asset_files", (
-            "Assertion failed: result.name == asset_files"
-        )
-        assert "assets_dir" in result.details, (
-            "Assertion failed: assets_dir in result.details"
-        )
-        assert "assets_dir_exists" in result.details, (
-            "Assertion failed: assets_dir_exists in result.details"
-        )
+        assert (
+            result.name == "asset_files"
+        ), "Assertion failed: result.name == asset_files"
+        assert (
+            "assets_dir" in result.details
+        ), "Assertion failed: assets_dir in result.details"
+        assert (
+            "assets_dir_exists" in result.details
+        ), "Assertion failed: assets_dir_exists in result.details"
 
         if result.details.get("assets_dir_exists"):
-            assert "found_assets" in result.details, (
-                "Assertion failed: found_assets in result.details"
-            )
-            assert "missing_assets" in result.details, (
-                "Assertion failed: missing_assets in result.details"
-            )
+            assert (
+                "found_assets" in result.details
+            ), "Assertion failed: found_assets in result.details"
+            assert (
+                "missing_assets" in result.details
+            ), "Assertion failed: missing_assets in result.details"
 
     def test_check_pyqt6_availability(self) -> None:
         """Test PyQt6 availability check."""
         diag = LauncherDiagnostics()
         result = diag.check_pyqt6_availability()
 
-        assert result.name == "pyqt6_availability", (
-            "Assertion failed: result.name == pyqt6_availability"
-        )
+        assert (
+            result.name == "pyqt6_availability"
+        ), "Assertion failed: result.name == pyqt6_availability"
         # Status depends on whether PyQt6 is installed
         assert result.status in (
             "pass",
@@ -359,9 +357,9 @@ class TestLauncherDiagnostics:
         diag = LauncherDiagnostics()
         result = diag.check_engine_availability()
 
-        assert result.name == "engine_availability", (
-            "Assertion failed: result.name == engine_availability"
-        )
+        assert (
+            result.name == "engine_availability"
+        ), "Assertion failed: result.name == engine_availability"
         # Status depends on engine availability
         assert result.status in (
             "pass",
@@ -374,15 +372,15 @@ class TestLauncherDiagnostics:
         diag = LauncherDiagnostics()
         results = diag.run_all_checks()
 
-        assert "recommendations" in results, (
-            "Assertion failed: recommendations in results"
-        )
-        assert isinstance(results["recommendations"], list), (
-            "Assertion failed: isinstance(results[recommendations], list)"
-        )
-        assert len(results["recommendations"]) > 0, (
-            "Assertion failed: len(results[recommendations]) > 0"
-        )
+        assert (
+            "recommendations" in results
+        ), "Assertion failed: recommendations in results"
+        assert isinstance(
+            results["recommendations"], list
+        ), "Assertion failed: isinstance(results[recommendations], list)"
+        assert (
+            len(results["recommendations"]) > 0
+        ), "Assertion failed: len(results[recommendations]) > 0"
 
     def test_recommendations_for_layout_issues(self) -> None:
         """Test recommendations are generated for layout config issues."""
@@ -398,9 +396,9 @@ class TestLauncherDiagnostics:
         diag.results = [warning_result]
 
         recommendations = diag._generate_recommendations()
-        assert any("layout" in rec.lower() for rec in recommendations), (
-            "Assertion failed: any(layout in rec.lower() for rec in recommendations)"
-        )
+        assert any(
+            "layout" in rec.lower() for rec in recommendations
+        ), "Assertion failed: any(layout in rec.lower() for rec in recommendations)"
 
 
 class TestLauncherDiagnosticsPerformance:
@@ -420,9 +418,9 @@ class TestLauncherDiagnosticsPerformance:
         # Verify timing data is captured
         for check in results["checks"]:
             assert "duration_ms" in check, "Assertion failed: duration_ms in check"
-            assert check["duration_ms"] >= 0, (
-                "Assertion failed: check[duration_ms] >= 0"
-            )
+            assert (
+                check["duration_ms"] >= 0
+            ), "Assertion failed: check[duration_ms] >= 0"
 
     def test_individual_check_performance(self) -> None:
         """Test individual check performance."""
@@ -469,9 +467,9 @@ class TestResetLayoutConfig:
                 assert result is True, "Assertion failed: result is True"
 
                 # Original file should be renamed to .bak
-                assert not config_file.exists(), (
-                    "Assertion failed: not config_file.exists()"
-                )
+                assert (
+                    not config_file.exists()
+                ), "Assertion failed: not config_file.exists()"
                 backup_file = config_file.with_suffix(".json.bak")
                 assert backup_file.exists(), "Assertion failed: backup_file.exists()"
 
@@ -492,13 +490,13 @@ class TestCLIDiagnostics:
             run_cli_diagnostics()
 
         log_text = caplog.text
-        assert "Golf Modeling Suite" in log_text, (
-            "Assertion failed: Golf Modeling Suite in log_text"
-        )
+        assert (
+            "Golf Modeling Suite" in log_text
+        ), "Assertion failed: Golf Modeling Suite in log_text"
         assert "Status:" in log_text, "Assertion failed: Status: in log_text"
-        assert "Recommendations:" in log_text, (
-            "Assertion failed: Recommendations: in log_text"
-        )
+        assert (
+            "Recommendations:" in log_text
+        ), "Assertion failed: Recommendations: in log_text"
 
 
 if __name__ == "__main__":

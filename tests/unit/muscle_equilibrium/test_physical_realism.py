@@ -62,9 +62,9 @@ class TestPhysicalRealism:
         l_tendon_long = l_MT_long - l_CE_long
 
         # Longer muscle-tendon should have longer tendon
-        assert l_tendon_long > l_tendon_short, (
-            "Longer muscle-tendon should stretch tendon more"
-        )
+        assert (
+            l_tendon_long > l_tendon_short
+        ), "Longer muscle-tendon should stretch tendon more"
 
     def test_fiber_length_decreases_with_activation(self, standard_muscle) -> None:
         """Test that fiber shortens with higher activation (for given l_MT).
@@ -128,6 +128,6 @@ class TestPhysicalRealism:
         # Change should be small and smooth
         relative_change = abs(l_CE_perturbed - l_CE_nominal) / l_CE_nominal
 
-        assert relative_change < 0.05, (
-            f"Small perturbation caused large change: {relative_change * 100:.2f}%"
-        )
+        assert (
+            relative_change < 0.05
+        ), f"Small perturbation caused large change: {relative_change * 100:.2f}%"

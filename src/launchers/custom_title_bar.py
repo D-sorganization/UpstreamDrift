@@ -212,25 +212,25 @@ class CustomTitleBar(QWidget):
                     event.globalPosition().toPoint()
                     - self.window().frameGeometry().topLeft()
                 )
-                print(f"Set drag position: {self.drag_position}")
                 return True
-        elif event.type() == event.Type.MouseMove:
-            print(f"Mouse move event! buttons={event.buttons()}")
-            if event.buttons() & Qt.MouseButton.LeftButton:
-                if isinstance(obj, QToolButton):
-                    return False
-                    
-                target = event.globalPosition().toPoint() - self.drag_position
-                
-                # Clamp to screen geometry to prevent getting stuck off-screen
-                screen = self.window().screen()
-                if screen:
-                    geom = screen.availableGeometry()
-                    target.setX(max(geom.left(), min(target.x(), geom.right() - 50)))
-                    target.setY(max(geom.top(), min(target.y(), geom.bottom() - 20)))
-                    
-                self.move_requested.emit(target)
-                return True
+        elif (
+            event.type() == event.Type.MouseMove
+            and event.buttons() & Qt.MouseButton.LeftButton
+        ):
+            if isinstance(obj, QToolButton):
+                return False
+
+            target = event.globalPosition().toPoint() - self.drag_position
+
+            # Clamp to screen geometry to prevent getting stuck off-screen
+            screen = self.window().screen()
+            if screen:
+                geom = screen.availableGeometry()
+                target.setX(max(geom.left(), min(target.x(), geom.right() - 50)))
+                target.setY(max(geom.top(), min(target.y(), geom.bottom() - 20)))
+
+            self.move_requested.emit(target)
+            return True
         return False
 
     def mousePressEvent(self, event: QMouseEvent):

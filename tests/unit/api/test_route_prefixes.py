@@ -38,9 +38,9 @@ class TestRouterPrefixesNoHardcodedApiSegment:
         """terrain.router prefix must not start with /api."""
         from src.api.routes.terrain import router
 
-        assert not router.prefix.startswith("/api"), (
-            f"terrain router prefix starts with /api: {router.prefix!r}."
-        )
+        assert not router.prefix.startswith(
+            "/api"
+        ), f"terrain router prefix starts with /api: {router.prefix!r}."
 
     @pytest.mark.skipif(
         not __import__("importlib").util.find_spec("multipart"),
@@ -50,25 +50,25 @@ class TestRouterPrefixesNoHardcodedApiSegment:
         """data_explorer.router prefix must not start with /api."""
         from src.api.routes.data_explorer import router
 
-        assert not router.prefix.startswith("/api"), (
-            f"data_explorer router prefix starts with /api: {router.prefix!r}."
-        )
+        assert not router.prefix.startswith(
+            "/api"
+        ), f"data_explorer router prefix starts with /api: {router.prefix!r}."
 
     def test_motion_capture_router_prefix_no_api(self) -> None:
         """motion_capture.router prefix must not start with /api."""
         from src.api.routes.motion_capture import router
 
-        assert not router.prefix.startswith("/api"), (
-            f"motion_capture router prefix starts with /api: {router.prefix!r}."
-        )
+        assert not router.prefix.startswith(
+            "/api"
+        ), f"motion_capture router prefix starts with /api: {router.prefix!r}."
 
     def test_putting_green_router_prefix_no_api(self) -> None:
         """putting_green.router prefix must not start with /api."""
         from src.api.routes.putting_green import router
 
-        assert not router.prefix.startswith("/api"), (
-            f"putting_green router prefix starts with /api: {router.prefix!r}."
-        )
+        assert not router.prefix.startswith(
+            "/api"
+        ), f"putting_green router prefix starts with /api: {router.prefix!r}."
 
 
 class TestVersionedRoutePathsNoDoubleApi:
@@ -79,18 +79,18 @@ class TestVersionedRoutePathsNoDoubleApi:
         from src.api.routes.launcher import router
 
         simulated_path = "/api/v1" + router.prefix
-        assert "/api/v1/api" not in simulated_path, (
-            f"Joining launcher prefix with /api/v1 gives double-api: {simulated_path!r}"
-        )
+        assert (
+            "/api/v1/api" not in simulated_path
+        ), f"Joining launcher prefix with /api/v1 gives double-api: {simulated_path!r}"
 
     def test_terrain_prefix_under_versioned_no_double(self) -> None:
         """terrain router's prefix joined with /api/v1 must not produce /api/v1/api/."""
         from src.api.routes.terrain import router
 
         simulated_path = "/api/v1" + router.prefix
-        assert "/api/v1/api" not in simulated_path, (
-            f"Joining terrain prefix with /api/v1 gives double-api: {simulated_path!r}"
-        )
+        assert (
+            "/api/v1/api" not in simulated_path
+        ), f"Joining terrain prefix with /api/v1 gives double-api: {simulated_path!r}"
 
     def test_data_explorer_prefix_under_versioned_no_double(self) -> None:
         """data_explorer router prefix literal must not start with /api (source-level check)."""
@@ -108,24 +108,24 @@ class TestVersionedRoutePathsNoDoubleApi:
                 for kw in node.keywords:
                     if kw.arg == "prefix" and isinstance(kw.value, ast.Constant):
                         prefix_val: str = kw.value.value
-                        assert not prefix_val.startswith("/api"), (
-                            f"data_explorer APIRouter prefix starts with /api: {prefix_val!r}"
-                        )
+                        assert not prefix_val.startswith(
+                            "/api"
+                        ), f"data_explorer APIRouter prefix starts with /api: {prefix_val!r}"
 
     def test_motion_capture_prefix_under_versioned_no_double(self) -> None:
         """motion_capture router's prefix joined with /api/v1 must not produce /api/v1/api/."""
         from src.api.routes.motion_capture import router
 
         simulated_path = "/api/v1" + router.prefix
-        assert "/api/v1/api" not in simulated_path, (
-            f"Joining motion_capture prefix with /api/v1 gives double-api: {simulated_path!r}"
-        )
+        assert (
+            "/api/v1/api" not in simulated_path
+        ), f"Joining motion_capture prefix with /api/v1 gives double-api: {simulated_path!r}"
 
     def test_putting_green_prefix_under_versioned_no_double(self) -> None:
         """putting_green router's prefix joined with /api/v1 must not produce /api/v1/api/."""
         from src.api.routes.putting_green import router
 
         simulated_path = "/api/v1" + router.prefix
-        assert "/api/v1/api" not in simulated_path, (
-            f"Joining putting_green prefix with /api/v1 gives double-api: {simulated_path!r}"
-        )
+        assert (
+            "/api/v1/api" not in simulated_path
+        ), f"Joining putting_green prefix with /api/v1 gives double-api: {simulated_path!r}"

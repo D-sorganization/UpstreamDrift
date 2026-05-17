@@ -314,7 +314,9 @@ class EndEffectorManagerWidget(_EndEffectorManagerWidgetUIMixin, QWidget):
         config = dialog.get_configuration()
         self._attach_end_effector(ee, config)
 
-    def _attach_end_effector(self, ee: EndEffector, config: dict[str, Any]) -> None:  # noqa: C901
+    def _attach_end_effector(
+        self, ee: EndEffector, config: dict[str, Any]
+    ) -> None:  # noqa: C901
         """Attach an end effector to the model."""
         if not (ee is not None):
             raise ValueError("ee must be provided")

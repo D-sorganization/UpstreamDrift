@@ -18,7 +18,6 @@ import pytest
 from bunkershot3d.backends.liggghts.driver import LiggghtsDriver, _iter_dump_frames
 from bunkershot3d.exceptions import BackendNotImplementedError
 
-
 # ---------------------------------------------------------------------------
 # Shared fixture
 # ---------------------------------------------------------------------------
@@ -26,8 +25,7 @@ from bunkershot3d.exceptions import BackendNotImplementedError
 
 @pytest.fixture
 def dummy_config(tmp_path: Path) -> Path:
-    yaml_content = textwrap.dedent(
-        """\
+    yaml_content = textwrap.dedent("""\
         bunker_bed:
           domain:
             length_x: 2.0
@@ -56,8 +54,7 @@ def dummy_config(tmp_path: Path) -> Path:
         output:
           downsample_grains: 1
           rate_hz: 500.0
-        """
-    )
+        """)
     config_path = tmp_path / "canonical.yaml"
     config_path.write_text(yaml_content)
     return config_path

@@ -20,15 +20,15 @@ class TestWebSocketRoutesRegistered:
 
     def test_server_imports_simulation_ws(self) -> None:
         """server.py imports simulation_ws router module."""
-        assert "simulation_ws" in _SERVER_SRC, (
-            "server.py must import simulation_ws to register its WebSocket route"
-        )
+        assert (
+            "simulation_ws" in _SERVER_SRC
+        ), "server.py must import simulation_ws to register its WebSocket route"
 
     def test_server_imports_chat_ws(self) -> None:
         """server.py imports chat_ws router module."""
-        assert "chat_ws" in _SERVER_SRC, (
-            "server.py must import chat_ws to register its WebSocket route"
-        )
+        assert (
+            "chat_ws" in _SERVER_SRC
+        ), "server.py must import chat_ws to register its WebSocket route"
 
     def test_server_includes_simulation_ws_router(self) -> None:
         """server.py calls app.include_router for simulation_ws.router."""
@@ -53,9 +53,9 @@ class TestWebSocketRoutesRegistered:
             "server.py lifespan must initialise ChatService and store it in "
             "app.state.chat_service for the chat WebSocket route to work."
         )
-        assert "ChatService" in _SERVER_SRC, (
-            "server.py must import and instantiate ChatService"
-        )
+        assert (
+            "ChatService" in _SERVER_SRC
+        ), "server.py must import and instantiate ChatService"
 
     def test_route_registry_exclusion_set_contains_websocket_modules(self) -> None:
         """Auto-discovery exclusion list skips chat_ws and simulation_ws."""
