@@ -390,12 +390,7 @@ class LauncherDialogsMixin:
             self._action_layout_mode.setChecked(checked)
 
         if checked:
-            if hasattr(self, "action_customize_tiles"):
-                self.action_customize_tiles.setEnabled(True)
             self.show_toast("Drag tiles to reorder. Double-click to launch.", "info")
-        else:
-            if hasattr(self, "action_customize_tiles"):
-                self.action_customize_tiles.setEnabled(False)
 
     def _on_docker_mode_changed(self, state: int) -> None:
         """Handle Docker mode toggle change.

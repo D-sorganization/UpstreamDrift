@@ -466,12 +466,12 @@ class LauncherUISetupMixin:
             QToolButton:hover {{
                 background-color: {colors.bg_highlight};
                 color: {colors.text_primary};
-                border: 1px solid {colors.border_light};
+                border: 1px solid {colors.border_default};
             }}
             QToolButton:checked {{
                 background-color: {colors.primary};
                 color: {colors.bg};
-                border: 1px solid {colors.primary_dark};
+                border: 1px solid {colors.primary};
             }}
         """)
 
@@ -736,7 +736,6 @@ class LauncherUISetupMixin:
         self._action_layout_mode = action_layout_mode
 
         action_customize_tiles = QAction("&Select Visible Tiles...", self)
-        action_customize_tiles.setEnabled(False)
         action_customize_tiles.setToolTip(
             "Select which tiles are visible in the layout"
         )
