@@ -77,6 +77,10 @@ jobs:
         uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55
         with:
           python-version: "3.11"
+          cache: 'pip'
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
 
       - name: Install minimal deps
         shell: bash
