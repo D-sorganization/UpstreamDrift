@@ -525,8 +525,8 @@ jobs:
           set -euo pipefail
           python -m venv "$RUNNER_TEMP/runtime-audit-venv"
           source "$RUNNER_TEMP/runtime-audit-venv/bin/activate"
-          python -m ensurepip --upgrade || true
-          python -m pip install --upgrade pip
+          "$RUNNER_TEMP/shared-contracts-venv/bin/python" -m ensurepip --upgrade || true
+          "$RUNNER_TEMP/shared-contracts-venv/bin/python" -m pip install --upgrade pip
           mkdir -p ui/dist
           python -m ensurepip --upgrade || true
           python -m pip install .
