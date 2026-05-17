@@ -54,8 +54,9 @@ jobs:
             exit 1
           fi
       - name: Install build tools
-        python -m ensurepip --upgrade || true
-        run: python3 -m pip install build twine pip-audit
+        run: |
+          python -m ensurepip --upgrade || true
+          python3 -m pip install build twine pip-audit
       - name: Build package
         run: python3 -m build
       - name: Generate SBOM
@@ -103,8 +104,9 @@ jobs:
           name: dist
           path: dist/
       - name: Install smoke dependencies
-        python -m ensurepip --upgrade || true
-        run: python -m pip install pytest
+        run: |
+          python -m ensurepip --upgrade || true
+          python -m pip install pytest
       - name: Run Python wheel smoke tests
         run: python -m pytest tests/smoke/python_wheel
 
