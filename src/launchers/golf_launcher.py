@@ -982,7 +982,8 @@ class GolfLauncher(
                     elif y > h - border: hit = 15 # HTBOTTOM
                     
                     if hit != 0:
-                        return True, hit
+                        from PyQt6 import sip
+                        return True, sip.voidptr(hit)
             except Exception:
                 pass
         return super().nativeEvent(event_type, message)
