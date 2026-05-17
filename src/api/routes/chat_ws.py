@@ -78,17 +78,21 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
                     continue
 
                 # Stream response chunks
-                async for chunk in chat_service.stream_response(session_id):
-                    if isinstance(chunk, dict):
-                        await websocket.send_json(chunk)
-                    else:
-                        await websocket.send_json(
-                            {"type": "chunk", "content": str(chunk)}
-                        )
+                try:
+                    async for chunk in chat_service.stream_response(session_id):
+                        if isinstance(chunk, dict):
+                            await websocket.send_json(chunk)
+                        else:
+                            await websocket.send_json(
+                                {"type": "chunk", "content": str(chunk)}
+                            )
 
-                await websocket.send_json(
-                    {"type": "complete", "session_id": session_id}
-                )
+                    await websocket.send_json(
+                        {"type": "complete", "session_id": session_id}
+                    )
+                except Exception as e:
+                    logger.error("Error during streaming response: %s", e)
+                    await websocket.send_json({"type": "error", "detail": str(e)})
 
             elif action == "history":
                 messages = chat_service.get_session_history(session_id)
