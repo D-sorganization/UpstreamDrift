@@ -27,6 +27,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QMenu,
     QMenuBar,
     QPlainTextEdit,
     QPushButton,
@@ -617,9 +618,9 @@ class LauncherUISetupMixin:
         """
         menubar = QMenuBar(self)
         # Postcondition (DbC): a non-null QMenuBar is returned.
-        assert (
-            menubar is not None
-        ), "QMenuBar construction returned None — should be impossible"
+        assert menubar is not None, (
+            "QMenuBar construction returned None — should be impossible"
+        )
 
         self._setup_file_menu(menubar)
         self._setup_view_menu(menubar)
@@ -679,11 +680,11 @@ class LauncherUISetupMixin:
         self._viewmode_action_group.setExclusive(True)
         self._viewmode_actions: dict[ViewMode, QAction] = {}
         for label, mode, shortcut in (
-            ("Tile &Large", ViewMode.LARGE, "Ctrl+1"),
+            ("Tile &Small", ViewMode.SMALL, "Ctrl+1"),
             ("Tile &Medium", ViewMode.MEDIUM, "Ctrl+2"),
-            ("Tile &Small", ViewMode.SMALL, "Ctrl+3"),
-            ("List Lar&ge", ViewMode.LIST_LARGE, "Ctrl+4"),
-            ("List S&mall", ViewMode.LIST_SMALL, "Ctrl+5"),
+            ("Tile &Large", ViewMode.LARGE, "Ctrl+3"),
+            ("List &Small", ViewMode.LIST_SMALL, "Ctrl+4"),
+            ("List &Large", ViewMode.LIST_LARGE, "Ctrl+5"),
         ):
             act = QAction(label, self)
             act.setCheckable(True)
@@ -1022,45 +1023,116 @@ class LauncherUISetupMixin:
         return int(round(frac * self._ZOOM_SLIDER_STEPS))
 
     def _setup_view_mode_and_zoom(self, top_bar: QHBoxLayout) -> None:
-        """Add view-mode combobox, zoom slider, and percent label to top bar."""
+        """Add discrete view-mode dropdown and a compact, elegant zoom slider to top bar."""
         if top_bar is None:
             raise ValueError("top_bar must be provided")
 
-        self.view_mode_combo = QComboBox()
-        self.view_mode_combo.addItem("Tile Large", ViewMode.LARGE)
-        self.view_mode_combo.addItem("Tile Medium", ViewMode.MEDIUM)
-        self.view_mode_combo.addItem("Tile Small", ViewMode.SMALL)
-        self.view_mode_combo.addItem("List Large", ViewMode.LIST_LARGE)
-        self.view_mode_combo.addItem("List Small", ViewMode.LIST_SMALL)
-        self.view_mode_combo.setCurrentIndex(3)  # List Large default
-        self.view_mode_combo.setToolTip("Choose how the model tiles are arranged")
-        self.view_mode_combo.setAccessibleName("View mode")
-        self.view_mode_combo.currentIndexChanged.connect(self._on_view_mode_changed)
-        top_bar.addWidget(self.view_mode_combo)
+        # Create a dropdown menu button for Layout options
+        self.view_dropdown_btn = QToolButton(self)
+        self.view_dropdown_btn.setText("View")
+        self.view_dropdown_btn.setPopupMode(
+            QToolButton.ToolButtonPopupMode.InstantPopup
+        )
+        self.view_dropdown_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.view_dropdown_btn.setStyleSheet("""
+            QToolButton {
+                background: transparent;
+                border: 1px solid #3a3a3a;
+                border-radius: 4px;
+                padding: 4px 8px;
+                color: #cccccc;
+                font-size: 11px;
+                font-weight: 500;
+            }
+            QToolButton:hover {
+                background: #2a2a2a;
+                color: #ffffff;
+                border-color: #555555;
+            }
+            QToolButton::menu-indicator {
+                image: none; /* Clean look without indicator */
+            }
+        """)
 
+        view_dropdown_menu = QMenu(self.view_dropdown_btn)
+        view_dropdown_menu.setStyleSheet("""
+            QMenu {
+                background-color: #1e1e1e;
+                border: 1px solid #333333;
+                padding: 4px 0px;
+            }
+            QMenu::item {
+                padding: 6px 20px 6px 20px;
+                color: #cccccc;
+                font-size: 11px;
+            }
+            QMenu::item:selected {
+                background-color: #2a2a2a;
+                color: #ffffff;
+            }
+            QMenu::separator {
+                height: 1px;
+                background-color: #333333;
+                margin: 4px 0px;
+            }
+        """)
+
+        # Add a heading/section labeled "Layout View Modes"
+        view_heading = QAction("Layout View Modes", self)
+        view_heading.setEnabled(False)
+        view_dropdown_menu.addAction(view_heading)
+        view_dropdown_menu.addSeparator()
+
+        from PyQt6.QtGui import QActionGroup
+
+        self._top_viewmode_action_group = QActionGroup(self)
+        self._top_viewmode_action_group.setExclusive(True)
+        self._top_viewmode_actions: dict[ViewMode, QAction] = {}
+
+        for label, mode in (
+            ("Tile Small", ViewMode.SMALL),
+            ("Tile Medium", ViewMode.MEDIUM),
+            ("Tile Large", ViewMode.LARGE),
+            ("List Small", ViewMode.LIST_SMALL),
+            ("List Large", ViewMode.LIST_LARGE),
+        ):
+            act = QAction(label, self)
+            act.setCheckable(True)
+            act.triggered.connect(
+                lambda _checked=False, m=mode: self._set_view_mode_from_menu(m)
+            )
+            self._top_viewmode_action_group.addAction(act)
+            view_dropdown_menu.addAction(act)
+            self._top_viewmode_actions[mode] = act
+
+        # Default checkmark on LIST_LARGE.
+        self._top_viewmode_actions[ViewMode.LIST_LARGE].setChecked(True)
+        self.view_dropdown_btn.setMenu(view_dropdown_menu)
+        top_bar.addWidget(self.view_dropdown_btn)
+
+        # Discrete, slim zoom slider
         self.zoom_slider = QSlider(Qt.Orientation.Horizontal)
         self.zoom_slider.setRange(0, self._ZOOM_SLIDER_STEPS)
-        self.zoom_slider.setFixedWidth(80)  # Compact, discrete fixed width
+        self.zoom_slider.setFixedWidth(60)  # Extremely discrete width
 
         self.zoom_slider.setStyleSheet("""
             QSlider::groove:horizontal {
-                border: 1px solid #3a3a3a;
-                height: 4px;
-                background: #1a1a1a;
+                border: none;
+                height: 2px;
+                background: #333333;
                 margin: 0px;
-                border-radius: 2px;
+                border-radius: 1px;
             }
             QSlider::handle:horizontal {
-                background: #888888;
-                border: 1px solid #555555;
-                width: 10px;
-                height: 10px;
-                margin: -3px 0;
-                border-radius: 5px;
+                background: #aaaaaa;
+                border: none;
+                width: 6px;
+                height: 6px;
+                margin: -2px 0;
+                border-radius: 3px;
             }
             QSlider::handle:horizontal:hover {
                 background: #007acc;
-                border-color: #0098ff;
             }
         """)
         self.zoom_slider.setToolTip("Adjust the size of the model tiles")
@@ -1082,6 +1154,9 @@ class LauncherUISetupMixin:
 
         self.lbl_zoom_pct = QLabel(f"{int(round(initial_scale * 100))}%")
         self.lbl_zoom_pct.setToolTip("Current tile size as a percentage of base")
+        self.lbl_zoom_pct.setStyleSheet(
+            "font-size: 10px; color: #888888; font-family: monospace;"
+        )
         top_bar.addWidget(self.lbl_zoom_pct)
 
         # Ctrl+= / Ctrl+- shortcuts adjust zoom by one step (~1.75% scale).
@@ -1129,7 +1204,7 @@ class LauncherUISetupMixin:
     def _apply_view_mode(self, mode: ViewMode, *, sync_combo: bool) -> None:
         """Single source of truth for changing tile layout mode.
 
-        Keeps the menubar action group, the top-bar combo, the zoom
+        Keeps the menubar action group, the top-bar dropdown, the zoom
         slider, and the grid in sync regardless of which surface
         triggered the change.
         """
@@ -1137,19 +1212,14 @@ class LauncherUISetupMixin:
         if lm is None:
             return
         lm.set_view_mode(mode)
-        # Sync combo box if the change came from the menu.
-        if sync_combo:
-            combo = getattr(self, "view_mode_combo", None)
-            if combo is not None:
-                idx = combo.findData(mode)
-                if idx >= 0 and combo.currentIndex() != idx:
-                    combo.blockSignals(True)
-                    combo.setCurrentIndex(idx)
-                    combo.blockSignals(False)
         # Sync menu action checkmarks regardless.
         actions = getattr(self, "_viewmode_actions", None)
         if actions and mode in actions and not actions[mode].isChecked():
             actions[mode].setChecked(True)
+        # Sync top-bar dropdown menu action checkmarks regardless.
+        top_actions = getattr(self, "_top_viewmode_actions", None)
+        if top_actions and mode in top_actions and not top_actions[mode].isChecked():
+            top_actions[mode].setChecked(True)
         # Update zoom slider/label to reflect the mode's default scale.
         if hasattr(self, "zoom_slider"):
             self.zoom_slider.blockSignals(True)
