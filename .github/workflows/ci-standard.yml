@@ -303,14 +303,11 @@ jobs:
           python3 -m venv "$audit_venv"
           audit_python="$audit_venv/bin/python"
           python -m ensurepip --upgrade || true
-          "$audit_python" -m ensurepip --upgrade || true
           "$audit_python" -m pip install --upgrade pip
           mkdir -p ui/dist
           python -m ensurepip --upgrade || true
-          "$audit_python" -m ensurepip --upgrade || true
           "$audit_python" -m pip install -e ".[dev]"
           python -m ensurepip --upgrade || true
-          "$audit_python" -m ensurepip --upgrade || true
           "$audit_python" -m pip install pip-audit
 
           set +e
@@ -473,11 +470,9 @@ jobs:
           python3 -m venv .venv-core-only
           . .venv-core-only/bin/activate
           python -m ensurepip --upgrade || true
-          python3 -m ensurepip --upgrade || true
           python3 -m pip install --upgrade pip
           mkdir -p ui/dist
           python -m ensurepip --upgrade || true
-          python3 -m ensurepip --upgrade || true
           python3 -m pip install -e .
       - name: Verify optional engines are absent from core install
         shell: bash
@@ -491,7 +486,6 @@ jobs:
           set -euo pipefail
           . .venv-core-only/bin/activate
           python -m ensurepip --upgrade || true
-          python3 -m ensurepip --upgrade || true
           python3 -m pip install pytest pytest-timeout
           python3 -m pytest \
             tests/architecture/test_core_public_api.py \
@@ -525,8 +519,8 @@ jobs:
           set -euo pipefail
           python -m venv "$RUNNER_TEMP/runtime-audit-venv"
           source "$RUNNER_TEMP/runtime-audit-venv/bin/activate"
-          "$RUNNER_TEMP/shared-contracts-venv/bin/python" -m ensurepip --upgrade || true
-          "$RUNNER_TEMP/shared-contracts-venv/bin/python" -m pip install --upgrade pip
+          python -m ensurepip --upgrade || true
+          python -m pip install --upgrade pip
           mkdir -p ui/dist
           python -m ensurepip --upgrade || true
           python -m pip install .
@@ -620,14 +614,14 @@ jobs:
           python -m venv "$RUNNER_TEMP/core-ci-venv"
           echo "$RUNNER_TEMP/core-ci-venv/bin" >> "$GITHUB_PATH"
           echo "VIRTUAL_ENV=$RUNNER_TEMP/core-ci-venv" >> "$GITHUB_ENV"
-          "$RUNNER_TEMP/core-ci-venv/bin/python" -m ensurepip --upgrade || true
+          python -m ensurepip --upgrade || true
           "$RUNNER_TEMP/core-ci-venv/bin/python" -m pip install --upgrade pip
           python="$RUNNER_TEMP/core-ci-venv/bin/python"
-          "$python" -m ensurepip --upgrade || true
+          python -m ensurepip --upgrade || true
           "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
-          "$python" -m ensurepip --upgrade || true
+          python -m ensurepip --upgrade || true
           "$python" -m pip install -e ".[dev,gui-test]"
-          "$python" -m ensurepip --upgrade || true
+          python -m ensurepip --upgrade || true
           "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
 
       - name: Document Native Engine Coverage In Core Lane
@@ -973,14 +967,14 @@ jobs:
           python -m venv "$RUNNER_TEMP/shared-contracts-venv"
           echo "$RUNNER_TEMP/shared-contracts-venv/bin" >> "$GITHUB_PATH"
           echo "VIRTUAL_ENV=$RUNNER_TEMP/shared-contracts-venv" >> "$GITHUB_ENV"
-          "$RUNNER_TEMP/shared-contracts-venv/bin/python" -m ensurepip --upgrade || true
+          python -m ensurepip --upgrade || true
           "$RUNNER_TEMP/shared-contracts-venv/bin/python" -m pip install --upgrade pip
           python="$RUNNER_TEMP/shared-contracts-venv/bin/python"
-          "$python" -m ensurepip --upgrade || true
+          python -m ensurepip --upgrade || true
           "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
-          "$python" -m ensurepip --upgrade || true
+          python -m ensurepip --upgrade || true
           "$python" -m pip install -e ".[dev,gui-test]"
-          "$python" -m ensurepip --upgrade || true
+          python -m ensurepip --upgrade || true
           "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
       - name: Run Shared Tools Consumer Contracts
         env:
@@ -1091,7 +1085,7 @@ jobs:
             requirements*.txt
       - run: |
           python -m ensurepip --upgrade || true
-          python -m pip install platformio
+          pip install platformio
       - name: Verify Build
         working-directory: ./arduino
         run: pio run -e uno
