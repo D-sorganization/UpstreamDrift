@@ -70,7 +70,7 @@ class LauncherDialogsMixin:
         Idempotent: safe to call multiple times (we drop a previously
         attached menu before re-adding).
         """
-        menubar = getattr(self, "menuBar", lambda: None)()
+        menubar = getattr(self, "menu_bar", None)
         if menubar is None:
             return
         try:

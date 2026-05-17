@@ -20,9 +20,9 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 _SIDEBAR_MODULE_CANDIDATES = (
+    "upstream_drift_tools.ui.tools_sidebar",
     "sidekick.ui.tools_sidebar",
     "shared.python.sidekick.ui.tools_sidebar",
-    "sidekick.ui.tools_sidebar",
 )
 _SIDEBAR_CLASS_CANDIDATES = (
     "ToolsSidebar",

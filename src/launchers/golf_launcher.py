@@ -168,6 +168,7 @@ class GolfLauncher(
             self._initialize_model_order()
 
         self.init_ui()
+        self._install_sidekick_sidebar()
         self._apply_theme_system()
 
         if not self.loading:

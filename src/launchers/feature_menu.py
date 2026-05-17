@@ -294,8 +294,19 @@ def register_feature_menu(
         raise ValueError("menubar must be provided")
 
     from PyQt6.QtGui import QAction  # local import: PyQt is optional fleet-wide
+    from PyQt6.QtWidgets import QMenu
 
-    window_menu = menubar.addMenu(menu_title)
+    window_menu = QMenu(menu_title, menubar)
+    before_action = None
+    for action in menubar.actions():
+        if action.text().replace("&", "") == "Tools":
+            before_action = action
+            break
+            
+    if before_action:
+        menubar.insertMenu(before_action, window_menu)
+    else:
+        menubar.addMenu(window_menu)
     actions: dict[str, Any] = {}
 
     for entry in FEATURE_ENTRIES:

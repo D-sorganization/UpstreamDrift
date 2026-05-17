@@ -143,6 +143,7 @@ class LauncherUISetupMixin:
         button.setAutoRaise(True)
         # Set focus policy for keyboard navigation
         button.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         return button
 
     def init_ui(self) -> None:
@@ -171,12 +172,9 @@ class LauncherUISetupMixin:
         outer_vbox.setContentsMargins(0, 0, 0, 0)
 
         try:
-            from src.launchers.custom_title_bar import (
-                CustomTitleBar,
-                clamp_to_visible_screen,
-            )
+            from src.launchers.custom_title_bar import CustomTitleBar
 
-            self.title_bar = CustomTitleBar(self, show_close_button=False)
+            self.title_bar = CustomTitleBar(self, show_close_button=True)
             self.title_bar.minimize_requested.connect(self.showMinimized)
             self.title_bar.maximize_requested.connect(
                 lambda: (
@@ -187,12 +185,10 @@ class LauncherUISetupMixin:
             # Clamp every move target into the virtual desktop so an
             # off-screen drag does not silently strand the window.
             self.title_bar.move_requested.connect(
-                lambda pos: self.move(clamp_to_visible_screen(pos))
+                lambda pos: self.move(pos)
             )
 
-            # Hide the native OS title bar since we are using a custom one
-            self.setWindowFlags(Qt.WindowType.FramelessWindowHint | self.windowFlags())
-
+            # The native OS title bar is hidden via FramelessWindowHint set in __init__
             outer_vbox.addWidget(self.title_bar)
         except ImportError:
             pass
@@ -515,10 +511,6 @@ class LauncherUISetupMixin:
         self._setup_view_menu(menubar)
         self._setup_tools_menu(menubar)
         self._setup_help_menu(menubar)
-        menubar.setCornerWidget(
-            _build_menu_bar_close_widget(self, self.close),
-            Qt.Corner.TopRightCorner,
-        )
         return menubar
 
     def _setup_menu_bar(self) -> None:

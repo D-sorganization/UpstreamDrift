@@ -205,24 +205,20 @@ class CustomTitleBar(QWidget):
     def eventFilter(self, obj, event):
         if event.type() == event.Type.MouseButtonPress:
             if event.button() == Qt.MouseButton.LeftButton:
-                # If a button was clicked, let it handle its own event
                 if isinstance(obj, QToolButton):
                     return False
                 self.drag_position = (
                     event.globalPosition().toPoint()
                     - self.window().frameGeometry().topLeft()
                 )
-                print(f"Set drag position: {self.drag_position}")
-                return True
+                return False  # Let the event propagate or at least don't eat it so mouse grab works
         elif event.type() == event.Type.MouseMove:
-            print(f"Mouse move event! buttons={event.buttons()}")
             if event.buttons() & Qt.MouseButton.LeftButton:
                 if isinstance(obj, QToolButton):
                     return False
                     
                 target = event.globalPosition().toPoint() - self.drag_position
                 
-                # Clamp to screen geometry to prevent getting stuck off-screen
                 screen = self.window().screen()
                 if screen:
                     geom = screen.availableGeometry()
@@ -231,10 +227,24 @@ class CustomTitleBar(QWidget):
                     
                 self.move_requested.emit(target)
                 return True
-        return False
+        return super().eventFilter(obj, event)
 
     def mousePressEvent(self, event: QMouseEvent):
-        self.eventFilter(self, event)
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.drag_position = event.globalPosition().toPoint() - self.window().frameGeometry().topLeft()
+            event.accept()
+        else:
+            super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event: QMouseEvent):
-        self.eventFilter(self, event)
+        if event.buttons() & Qt.MouseButton.LeftButton:
+            target = event.globalPosition().toPoint() - self.drag_position
+            screen = self.window().screen()
+            if screen:
+                geom = screen.availableGeometry()
+                target.setX(max(geom.left(), min(target.x(), geom.right() - 50)))
+                target.setY(max(geom.top(), min(target.y(), geom.bottom() - 20)))
+            self.move_requested.emit(target)
+            event.accept()
+        else:
+            super().mouseMoveEvent(event)
