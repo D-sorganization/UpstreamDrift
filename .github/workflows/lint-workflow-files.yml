@@ -55,9 +55,18 @@ jobs:
               FAIL="${FAIL}\n  - $f: missing concurrency block"
             fi
             # Check cancel-in-progress: true (only if concurrency exists)
-            if grep -q '^concurrency:' "$f" && ! grep -q 'cancel-in-progress:\s*true' "$f"; then
-              FAIL="${FAIL}\n  - $f: cancel-in-progress not set to true"
-            fi
+            # Exception allowlist — workflows where cancel-in-progress: false is legitimate
+            # (publishes/releases should not be interrupted mid-stream)
+            case "$(basename "$f")" in
+              publish-artifacts.yml|release.yml|publish.yml|deploy.yml|nightly-publish.yml)
+                echo "::notice::Skipping cancel-in-progress check for $f (intentional exception)"
+                ;;
+              *)
+                if grep -q '^concurrency:' "$f" && ! grep -q 'cancel-in-progress:\s*true' "$f"; then
+                  FAIL="${FAIL}\n  - $f: cancel-in-progress not set to true"
+                fi
+                ;;
+            esac
           done <<< "$FILES"
           if [ -n "$FAIL" ]; then
             printf "::error::Workflow lint failed:%b\n" "$FAIL"
