@@ -318,9 +318,9 @@ class LauncherUISetupMixin:
 
         main_layout.addWidget(content_container)
 
-        # Proportional sizing: sidebar gets ~1/6, content ~5/6.
-        main_layout.setStretchFactor(0, 1)
-        main_layout.setStretchFactor(1, 5)
+        # Sidebar should not stretch, content should take the rest.
+        main_layout.setStretchFactor(0, 0)
+        main_layout.setStretchFactor(1, 1)
 
         # Apply dark theme
         self.apply_styles()
@@ -402,8 +402,9 @@ class LauncherUISetupMixin:
             self.btn_popout_sidekick.setText("⇲ Dock Sidekick")
 
             from PyQt6.QtWidgets import QDialog, QVBoxLayout
+            from PyQt6.QtCore import Qt
 
-            self.sidekick_window = QDialog(self)
+            self.sidekick_window = QDialog(self, Qt.WindowType.Window)
             self.sidekick_window.setWindowTitle("UpstreamDrift Sidekick")
             self.sidekick_window.resize(400, 800)
 
