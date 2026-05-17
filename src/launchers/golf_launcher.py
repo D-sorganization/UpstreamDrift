@@ -950,44 +950,6 @@ class GolfLauncher(
         ]
         self._on_cleanup_finished(finished_keys)
 
-    def nativeEvent(self, event_type, message):
-        """Handle native Windows events for frameless resizing."""
-        if event_type == "windows_generic_MSG" or event_type == b"windows_generic_MSG":
-            try:
-                import ctypes
-                import ctypes.wintypes
-                msg = ctypes.wintypes.MSG.from_address(message.__int__())
-                if msg.message == 0x0084:  # WM_NCHITTEST
-                    # High word is Y, Low word is X
-                    x_screen = (msg.lParam & 0xFFFF)
-                    y_screen = ((msg.lParam >> 16) & 0xFFFF)
-                    # Handle negative coordinates for multi-monitor setups
-                    if x_screen > 32767: x_screen -= 65536
-                    if y_screen > 32767: y_screen -= 65536
-                    
-                    pos = self.mapFromGlobal(self.mapFromGlobal(self.pos()).__class__(x_screen, y_screen))
-                    x, y = pos.x(), pos.y()
-                    
-                    w, h = self.width(), self.height()
-                    border = 6
-                    
-                    hit = 0
-                    if x < border and y < border: hit = 13 # HTTOPLEFT
-                    elif x > w - border and y < border: hit = 14 # HTTOPRIGHT
-                    elif x < border and y > h - border: hit = 16 # HTBOTTOMLEFT
-                    elif x > w - border and y > h - border: hit = 17 # HTBOTTOMRIGHT
-                    elif x < border: hit = 10 # HTLEFT
-                    elif x > w - border: hit = 11 # HTRIGHT
-                    elif y < border: hit = 12 # HTTOP
-                    elif y > h - border: hit = 15 # HTBOTTOM
-                    
-                    if hit != 0:
-                        from PyQt6 import sip
-                        return True, sip.voidptr(hit)
-            except Exception:
-                pass
-        return super().nativeEvent(event_type, message)
-
     def closeEvent(self, event: QCloseEvent | None) -> None:  # noqa: C901
         """Handle window close event to save layout."""
         running_count = sum(
