@@ -76,6 +76,8 @@ jobs:
           python -m pip install --upgrade pip
           python -m ensurepip --upgrade || true
           python -m pip install -e ".[dev]"
+          python -m ensurepip --upgrade || true
+          python -m pip install "numpy<3.0.0,>=1.26.4" "scipy>=1.13.1" "mujoco<4.0.0,>=3.6.0" "drake>=1.22.0"
 
       - name: Validate workflow YAML
         run: |
