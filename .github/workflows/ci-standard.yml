@@ -529,10 +529,11 @@ jobs:
           pip-audit -r <(pip freeze)
 
   tests:
-    needs: [pick-runner, quality-gate, dependency-consistency]
+    needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20 # Prevent runaway tests - hard cutoff
     strategy:
+      fail-fast: false
       matrix:
         python: ["3.10", "3.11", "3.12"]
     steps:
@@ -902,7 +903,7 @@ jobs:
             -vv --tb=short
 
   shared-tools-consumer-contracts:
-    needs: [pick-runner, quality-gate]
+    needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
     steps:
@@ -989,7 +990,7 @@ jobs:
             -v --tb=short
 
   frontend-tests:
-    needs: [pick-runner, quality-gate]
+    needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     defaults:
       run:
@@ -1050,7 +1051,7 @@ jobs:
   # Users with local MATLAB can run: matlab/run_all.m for equivalent tests.
   # =============================================================================
   matlab-tests:
-    needs: [pick-runner, quality-gate]
+    needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     if: false # DISABLED - Requires MATLAB license not available in CI
     continue-on-error: true
@@ -1070,7 +1071,7 @@ jobs:
   # No Arduino components in this project - disabled.
   # =============================================================================
   arduino-build:
-    needs: [pick-runner, quality-gate]
+    needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     if: false # DISABLED - No Arduino components in this project
     steps:
