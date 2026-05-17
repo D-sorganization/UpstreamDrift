@@ -57,6 +57,77 @@ from src.launchers.ui_components import (
     SplashScreen,
     StartupResults,
 )
+from PyQt6.QtCore import QEvent, Qt, QRect
+
+class FramelessResizeFilter(QObject):
+    def __init__(self, window):
+        super().__init__(window)
+        self.window = window
+        self._resizing = False
+        self._resize_edge = 0
+        self._start_pos = None
+        self._start_geo = None
+
+    def eventFilter(self, obj, event):
+        if event.type() in (QEvent.Type.MouseMove, QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease, QEvent.Type.HoverMove):
+            if hasattr(event, "globalPosition"):
+                gpos = event.globalPosition().toPoint()
+            elif hasattr(event, "globalPos"):
+                gpos = event.globalPos()
+            else:
+                return super().eventFilter(obj, event)
+
+            local_pos = self.window.mapFromGlobal(gpos)
+            x, y = local_pos.x(), local_pos.y()
+            w, h = self.window.width(), self.window.height()
+            border = 8
+
+            if not self._resizing:
+                if 0 <= x <= w and 0 <= y <= h:
+                    edge = 0
+                    if x < border and y < border: edge = 13
+                    elif x > w - border and y < border: edge = 14
+                    elif x < border and y > h - border: edge = 16
+                    elif x > w - border and y > h - border: edge = 17
+                    elif x < border: edge = 10
+                    elif x > w - border: edge = 11
+                    elif y < border: edge = 12
+                    elif y > h - border: edge = 15
+
+                    if edge != 0:
+                        if event.type() == QEvent.Type.MouseButtonPress and event.button() == Qt.MouseButton.LeftButton:
+                            self._resizing = True
+                            self._resize_edge = edge
+                            self._start_pos = gpos
+                            self._start_geo = self.window.geometry()
+                            return True
+                        elif event.type() in (QEvent.Type.HoverMove, QEvent.Type.MouseMove):
+                            if edge in (13, 17): self.window.setCursor(Qt.CursorShape.SizeFDiagCursor)
+                            elif edge in (14, 16): self.window.setCursor(Qt.CursorShape.SizeBDiagCursor)
+                            elif edge in (10, 11): self.window.setCursor(Qt.CursorShape.SizeHorCursor)
+                            elif edge in (12, 15): self.window.setCursor(Qt.CursorShape.SizeVerCursor)
+                            return True
+                    else:
+                        if self.window.cursor().shape() != Qt.CursorShape.ArrowCursor:
+                            self.window.setCursor(Qt.CursorShape.ArrowCursor)
+            else:
+                if event.type() == QEvent.Type.MouseMove:
+                    delta = gpos - self._start_pos
+                    rect = QRect(self._start_geo)
+                    if self._resize_edge in (10, 13, 16): rect.setLeft(rect.left() + delta.x())
+                    if self._resize_edge in (11, 14, 17): rect.setRight(rect.right() + delta.x())
+                    if self._resize_edge in (12, 13, 14): rect.setTop(rect.top() + delta.y())
+                    if self._resize_edge in (15, 16, 17): rect.setBottom(rect.bottom() + delta.y())
+                    
+                    if rect.width() >= self.window.minimumWidth() and rect.height() >= self.window.minimumHeight():
+                        self.window.setGeometry(rect)
+                    return True
+                elif event.type() == QEvent.Type.MouseButtonRelease:
+                    self._resizing = False
+                    self.window.setCursor(Qt.CursorShape.ArrowCursor)
+                    return True
+        return super().eventFilter(obj, event)
+
 from src.shared.python.security.subprocess_utils import kill_process_tree
 from src.shared.python.theme.style_constants import Styles
 
@@ -141,13 +212,11 @@ class GolfLauncher(
             | Qt.WindowType.WindowMinimizeButtonHint
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setMinimumSize(800, 600)
         
-        # Resize tracking variables
-        self.setMouseTracking(True)
-        self._resizing = False
-        self._resize_edge = 0
-        self._resize_start_pos = None
-        self._resize_start_geometry = None
+        # Enable app-level mouse tracking filter for frameless resizing
+        self._resize_filter = FramelessResizeFilter(self)
+        QApplication.instance().installEventFilter(self._resize_filter)
         
         # Size to 80% of screen, capped at 1400x900
         screen = QApplication.primaryScreen()
@@ -957,71 +1026,6 @@ class GolfLauncher(
             if proc.poll() is not None
         ]
         self._on_cleanup_finished(finished_keys)
-
-    def mouseMoveEvent(self, event) -> None:
-        if self._resizing:
-            delta = event.globalPosition().toPoint() - self._resize_start_pos
-            rect = self._resize_start_geometry
-            from PyQt6.QtCore import QRect
-            new_rect = QRect(rect)
-            
-            if self._resize_edge in (10, 13, 16): # Left edges
-                new_rect.setLeft(rect.left() + delta.x())
-            if self._resize_edge in (11, 14, 17): # Right edges
-                new_rect.setRight(rect.right() + delta.x())
-            if self._resize_edge in (12, 13, 14): # Top edges
-                new_rect.setTop(rect.top() + delta.y())
-            if self._resize_edge in (15, 16, 17): # Bottom edges
-                new_rect.setBottom(rect.bottom() + delta.y())
-                
-            self.setGeometry(new_rect)
-            return
-            
-        pos = event.position().toPoint()
-        x, y, w, h = pos.x(), pos.y(), self.width(), self.height()
-        border = 8
-        from PyQt6.QtCore import Qt
-        
-        if x < border and y < border: self.setCursor(Qt.CursorShape.SizeFDiagCursor)
-        elif x > w - border and y < border: self.setCursor(Qt.CursorShape.SizeBDiagCursor)
-        elif x < border and y > h - border: self.setCursor(Qt.CursorShape.SizeBDiagCursor)
-        elif x > w - border and y > h - border: self.setCursor(Qt.CursorShape.SizeFDiagCursor)
-        elif x < border or x > w - border: self.setCursor(Qt.CursorShape.SizeHorCursor)
-        elif y < border or y > h - border: self.setCursor(Qt.CursorShape.SizeVerCursor)
-        else: self.setCursor(Qt.CursorShape.ArrowCursor)
-        super().mouseMoveEvent(event)
-
-    def mousePressEvent(self, event) -> None:
-        from PyQt6.QtCore import Qt
-        if event.button() == Qt.MouseButton.LeftButton:
-            pos = event.position().toPoint()
-            x, y, w, h = pos.x(), pos.y(), self.width(), self.height()
-            border = 8
-            edge = 0
-            if x < border and y < border: edge = 13
-            elif x > w - border and y < border: edge = 14
-            elif x < border and y > h - border: edge = 16
-            elif x > w - border and y > h - border: edge = 17
-            elif x < border: edge = 10
-            elif x > w - border: edge = 11
-            elif y < border: edge = 12
-            elif y > h - border: edge = 15
-            
-            if edge != 0:
-                self._resizing = True
-                self._resize_edge = edge
-                self._resize_start_pos = event.globalPosition().toPoint()
-                self._resize_start_geometry = self.geometry()
-                return
-        super().mousePressEvent(event)
-
-    def mouseReleaseEvent(self, event) -> None:
-        if self._resizing:
-            self._resizing = False
-            from PyQt6.QtCore import Qt
-            self.setCursor(Qt.CursorShape.ArrowCursor)
-            return
-        super().mouseReleaseEvent(event)
 
     def closeEvent(self, event: QCloseEvent | None) -> None:  # noqa: C901
         """Handle window close event to save layout."""

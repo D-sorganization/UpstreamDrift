@@ -254,6 +254,13 @@ class LauncherUISetupMixin:
 
         # --- Top Bar ---
         top_bar = self._setup_top_bar()
+        
+        self.btn_popout_sidekick = QPushButton("⇱ Pop Out Sidekick")
+        self.btn_popout_sidekick.setToolTip("Pop out Sidekick into a separate window")
+        self.btn_popout_sidekick.clicked.connect(self._popout_sidekick)
+        self.btn_popout_sidekick.setVisible(False)
+        top_bar.insertWidget(top_bar.count() - 1, self.btn_popout_sidekick)
+        
         content_layout.addLayout(top_bar)
 
         # --- Content area with horizontal splitter (tiles | AI chat) ---
@@ -287,6 +294,60 @@ class LauncherUISetupMixin:
         # raise/focus the Sidekick chat tab. Do NOT re-introduce a second
         # ``AIAssistantPanel`` here.
         self._ai_visible = False
+        
+        # Sidekick pane management
+        self.sidekick_window = None
+        self._sidekick_popped_out = False
+
+    def _toggle_sidekick(self) -> None:
+        """Toggle the visibility of the Sidekick pane."""
+        if hasattr(self, "sidebar_widget") and self.sidebar_widget is not None:
+            if self._sidekick_popped_out and self.sidekick_window:
+                if self.sidekick_window.isHidden():
+                    self.sidekick_window.show()
+                else:
+                    self.sidekick_window.hide()
+            else:
+                visible = not self.sidebar_widget.isVisible()
+                self.sidebar_widget.setVisible(visible)
+                if visible and hasattr(self, "btn_popout_sidekick"):
+                    self.btn_popout_sidekick.setVisible(True)
+
+    def _popout_sidekick(self) -> None:
+        """Toggle Sidekick pop-out state."""
+        if not hasattr(self, "sidebar_widget") or self.sidebar_widget is None:
+            return
+
+        if not self._sidekick_popped_out:
+            # Pop out
+            self._sidekick_popped_out = True
+            self.btn_popout_sidekick.setText("⇲ Dock Sidekick")
+            
+            from PyQt6.QtWidgets import QDialog, QVBoxLayout
+            self.sidekick_window = QDialog(self)
+            self.sidekick_window.setWindowTitle("UpstreamDrift Sidekick")
+            self.sidekick_window.resize(400, 800)
+            
+            layout = QVBoxLayout(self.sidekick_window)
+            layout.setContentsMargins(0, 0, 0, 0)
+            layout.addWidget(self.sidebar_widget)
+            
+            def on_close(event):
+                event.ignore()
+                self.sidekick_window.hide()
+                
+            self.sidekick_window.closeEvent = on_close
+            self.sidekick_window.show()
+        else:
+            # Re-dock
+            self._sidekick_popped_out = False
+            self.btn_popout_sidekick.setText("⇱ Pop Out Sidekick")
+            
+            if self.sidekick_window:
+                self.sidekick_window.hide()
+            
+            self.main_layout.addWidget(self.sidebar_widget)
+            self.sidebar_widget.show()
 
         content_layout.addWidget(self.content_splitter, 1)
 
@@ -394,14 +455,15 @@ class LauncherUISetupMixin:
             checkable=True,
         )
 
-        # If open_settings exists in the mixed-in class, use it.
+        # If _show_preferences exists in the mixed-in class, use it.
         # Otherwise, we gracefully handle it to avoid crashes in tests.
         btn_settings = self._build_sidebar_button(
             "Settings",
             "settings",
+            checkable=False,
         )
-        if hasattr(self, "_open_settings"):
-            btn_settings.clicked.connect(self._open_settings)
+        if hasattr(self, "_show_preferences"):
+            btn_settings.clicked.connect(self._show_preferences)
 
         from src.launchers.launcher_constants import AI_AVAILABLE
 
@@ -411,8 +473,8 @@ class LauncherUISetupMixin:
                 "chat",
                 checkable=True,
             )
-            if hasattr(self, "toggle_ai_assistant"):
-                self.btn_ai_sidebar.clicked.connect(self.toggle_ai_assistant)
+            if hasattr(self, "_toggle_sidekick"):
+                self.btn_ai_sidebar.clicked.connect(self._toggle_sidekick)
 
         btn_docs = self._build_sidebar_button(
             "Documentation",
