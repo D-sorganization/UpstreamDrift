@@ -23,6 +23,8 @@ on:
       - "docs/**"
       - "specs/**"
       - "**/*.md"
+      - "src/**"
+      - "tests/**"
 permissions:
   contents: read
   pull-requests: write

@@ -8,6 +8,8 @@ on:
       - "docker-compose*.yml"
       - "pyproject.toml"
       - "requirements*.txt"
+      - "requirements.lock"
+      - "requirements*.lock"
       - "src/**"
       - ".github/workflows/docker-size-gates.yml"
   workflow_dispatch:
