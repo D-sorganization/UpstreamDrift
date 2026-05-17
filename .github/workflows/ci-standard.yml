@@ -304,14 +304,14 @@ jobs:
           audit_python="$audit_venv/bin/python"
           python -m ensurepip --upgrade || true
           "$audit_python" -m ensurepip --upgrade || true
-          python -m pip install --upgrade pip
+          "$audit_python" -m pip install --upgrade pip
           mkdir -p ui/dist
           python -m ensurepip --upgrade || true
           "$audit_python" -m ensurepip --upgrade || true
-          python -m pip install -e ".[dev]"
+          "$audit_python" -m pip install -e ".[dev]"
           python -m ensurepip --upgrade || true
           "$audit_python" -m ensurepip --upgrade || true
-          python -m pip install pip-audit
+          "$audit_python" -m pip install pip-audit
 
           set +e
           "$audit_python" -m pip_audit --format json --output pip-audit-report.json
@@ -474,11 +474,11 @@ jobs:
           . .venv-core-only/bin/activate
           python -m ensurepip --upgrade || true
           python3 -m ensurepip --upgrade || true
-          python -m pip install --upgrade pip
+          python3 -m pip install --upgrade pip
           mkdir -p ui/dist
           python -m ensurepip --upgrade || true
           python3 -m ensurepip --upgrade || true
-          python -m pip install -e .
+          python3 -m pip install -e .
       - name: Verify optional engines are absent from core install
         shell: bash
         run: |
@@ -492,7 +492,7 @@ jobs:
           . .venv-core-only/bin/activate
           python -m ensurepip --upgrade || true
           python3 -m ensurepip --upgrade || true
-          python -m pip install pytest pytest-timeout
+          python3 -m pip install pytest pytest-timeout
           python3 -m pytest \
             tests/architecture/test_core_public_api.py \
             tests/unit/test_core_install_isolation.py \
