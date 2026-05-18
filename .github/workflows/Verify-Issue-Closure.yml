@@ -22,6 +22,13 @@ on:
   issues:
     types: [closed]
 
+concurrency:
+  # One verification per issue-number so concurrent close events on the
+  # same issue collapse to a single run; lets the fleet-wide protection
+  # against runaway reopens (MAX_REOPENS counter) function correctly.
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
 permissions:
   issues: write
   pull-requests: read

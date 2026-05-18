@@ -34,7 +34,10 @@ permissions:
 
 concurrency:
   group: realtime-soak-${{ github.ref }}
-  cancel-in-progress: false
+  # Per fleet workflow-lint policy: cancel-in-progress must be true. Soaks
+  # are long; in-flight runs against an older ref can be safely cancelled
+  # when a new push lands — the scheduled cron will re-run.
+  cancel-in-progress: true
 
 jobs:
   soak:
