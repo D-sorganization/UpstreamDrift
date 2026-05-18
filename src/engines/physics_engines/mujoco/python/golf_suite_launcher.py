@@ -19,7 +19,7 @@ configure_gui_logging()
 logger = get_logger("GolfSuiteLauncher")
 
 
-class GolfLauncher(QtWidgets.QMainWindow):
+class UpstreamDriftLauncher(QtWidgets.QMainWindow):
     def __init__(self) -> None:
         """Initialize the launcher."""
         super().__init__()
@@ -185,7 +185,7 @@ class GolfLauncher(QtWidgets.QMainWindow):
 def main() -> None:
     """Run the application."""
     app = QtWidgets.QApplication(sys.argv)
-    window = GolfLauncher()
+    window = UpstreamDriftLauncher()
     window.show()
     sys.exit(app.exec())
 

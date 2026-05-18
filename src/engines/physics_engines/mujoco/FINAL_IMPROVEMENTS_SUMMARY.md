@@ -89,7 +89,7 @@ The `robotics_env` Docker image now contains:
 
 2. **Repository Launcher**:
    ```bash
-   python Repository_Management/launchers/golf_launcher.py
+   python Repository_Management/launchers/upstream_drift_launcher.py
    ```
    - Select "MuJoCo Golf Model"
    - Click "LAUNCH SIMULATION"

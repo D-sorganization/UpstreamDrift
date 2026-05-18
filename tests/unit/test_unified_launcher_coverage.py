@@ -27,17 +27,17 @@ def test_unified_launcher_coverage_initialization(launcher):
 
 
 def test_mainloop(launcher):
-    """Test mainloop execution delegates to golf_launcher.main()."""
+    """Test mainloop execution delegates to upstream_drift_launcher.main()."""
     # Temporarily remove the legacy module mock that test_unified_launcher.py sets
-    # at session level, so _get_golf_main falls through to src.launchers.golf_launcher
-    legacy_key = "launchers.golf_launcher"
+    # at session level, so _get_golf_main falls through to src.launchers.upstream_drift_launcher
+    legacy_key = "launchers.upstream_drift_launcher"
     legacy_saved = sys.modules.pop(legacy_key, None)
     mock_module = MagicMock()
     mock_module.main.return_value = 0
     try:
-        # Use patch.dict to avoid importing the real golf_launcher.py, which has
+        # Use patch.dict to avoid importing the real upstream_drift_launcher.py, which has
         # top-level PyQt6 imports that crash xdist workers in subprocess context.
-        with patch.dict(sys.modules, {"src.launchers.golf_launcher": mock_module}):
+        with patch.dict(sys.modules, {"src.launchers.upstream_drift_launcher": mock_module}):
             launcher.mainloop()
             mock_module.main.assert_called_once()
     finally:
@@ -86,11 +86,11 @@ def test_get_version(launcher):
 
 def test_cli_launch():
     """Test CLI launch function."""
-    # Use patch.dict to avoid importing the real golf_launcher.py, which has
+    # Use patch.dict to avoid importing the real upstream_drift_launcher.py, which has
     # top-level PyQt6 imports that crash xdist workers in subprocess context.
     mock_module = MagicMock()
     mock_module.main.return_value = 0
-    with patch.dict(sys.modules, {"src.launchers.golf_launcher": mock_module}):
+    with patch.dict(sys.modules, {"src.launchers.upstream_drift_launcher": mock_module}):
         from src.launchers.unified_launcher import launch
 
         launch()

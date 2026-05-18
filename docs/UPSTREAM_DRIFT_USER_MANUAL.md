@@ -639,7 +639,7 @@ the physics engine backends:
 +===========================================================================+
 |                        LAUNCHER & ORCHESTRATION                            |
 |  +--------------------+  +------------------+  +----------------------+   |
-|  | unified_launcher   |  | golf_launcher    |  | engine dashboards    |   |
+|  | unified_launcher   |  | upstream_drift_launcher    |  | engine dashboards    |   |
 |  +--------------------+  +------------------+  +----------------------+   |
 +===========================================================================+
                                     |
@@ -1016,7 +1016,7 @@ launch_golf_suite.py
     │           ├── src/api/auth/* (JWT, bcrypt)
     │           ├── src/api/middleware/* (security, upload)
     │           └── src/shared/python/engine_manager
-    ├── src/launchers/golf_launcher (PyQt6)
+    ├── src/launchers/upstream_drift_launcher (PyQt6)
     │     ├── src/launchers/unified_launcher
     │     ├── src/launchers/ui_components
     │     ├── src/launchers/model_registry

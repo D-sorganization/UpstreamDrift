@@ -31,11 +31,11 @@ from src.shared.python.security.secure_subprocess import (
 # Use the current Python executable for cross-platform subprocess tests
 PYTHON_EXE = sys.executable
 
-# GolfLauncher requires PyQt6, import conditionally
+# UpstreamDriftLauncher requires PyQt6, import conditionally
 if PYQT6_AVAILABLE:
-    from src.launchers.golf_launcher import GolfLauncher
+    from src.launchers.upstream_drift_launcher import UpstreamDriftLauncher
 else:
-    GolfLauncher = None  # type: ignore[misc, assignment]
+    UpstreamDriftLauncher = None  # type: ignore[misc, assignment]
 
 
 if __name__ == "__main__":

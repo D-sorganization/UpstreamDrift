@@ -32,7 +32,7 @@ def test_route_launch_web_engine(mock_server_main, monkeypatch) -> None:
     mock_server_main.assert_called_once()
 
 
-@patch("src.launchers.golf_launcher.main")
+@patch("src.launchers.upstream_drift_launcher.main")
 def test_route_launch_classic(mock_classic_main) -> None:
     args = argparse.Namespace(engine=None, classic=True, api_only=False)
     launch_golf_suite.route_launch(args)

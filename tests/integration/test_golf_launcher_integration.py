@@ -1,4 +1,4 @@
-"""Integration tests for GolfLauncher."""
+"""Integration tests for UpstreamDriftLauncher."""
 
 import os
 import sys
@@ -179,7 +179,7 @@ def mock_pyqt_modules() -> Generator[None, None, None]:
         yield
 
 
-# Note: We do not import GolfLauncher at the top level to avoid
+# Note: We do not import UpstreamDriftLauncher at the top level to avoid
 # importing it before the sys.modules patch is active, and to avoid
 # referencing a "stale" class definition if we reload it later.
 
@@ -225,7 +225,7 @@ models:
         temp_registry = ModelRegistry(models_yaml)
 
         # Override ASSETS_DIR to point to our empty temp dir.
-        # In the real application, GolfLauncher creates QIcon instances from
+        # In the real application, UpstreamDriftLauncher creates QIcon instances from
         # files under ASSETS_DIR. In headless/CI test runs, fully initializing
         # QIcon with real image assets can trigger Qt plugin loading and C++
         # type handling that is fragile without a complete desktop environment
@@ -245,12 +245,12 @@ models:
         )
 
         if is_ci:
-            pytest.skip("GolfLauncher construction unreliable in CI (mock/real Qt mix)")
+            pytest.skip("UpstreamDriftLauncher construction unreliable in CI (mock/real Qt mix)")
 
         # Mock AIAssistantPanel before importing to prevent Qt crashes
         # Clear modules first so patches take effect
-        sys.modules.pop("src.launchers.golf_launcher", None)
-        sys.modules.pop("src.launchers.golf_launcher", None)
+        sys.modules.pop("src.launchers.upstream_drift_launcher", None)
+        sys.modules.pop("src.launchers.upstream_drift_launcher", None)
         sys.modules.pop("src.launchers.ui_components", None)
         sys.modules.pop("src.shared.python.ai.gui.assistant_panel", None)
         sys.modules.pop("src.shared.python.ai.gui", None)
@@ -260,7 +260,7 @@ models:
         mock_ai_panel = MagicMock()
         mock_ai_panel.settings_requested = MagicMock()
 
-        # Patch AIAssistantPanel BEFORE importing golf_launcher
+        # Patch AIAssistantPanel BEFORE importing upstream_drift_launcher
         # The import happens at module level, so we need the patch in place first
         ai_panel_patcher = patch(
             "src.shared.python.ai.gui.AIAssistantPanel",
@@ -269,7 +269,7 @@ models:
         ai_panel_patcher.start()
 
         # Patch ContextHelpDock to avoid TypeError from real QDockWidget parent
-        # ContextHelpDock was refactored from golf_launcher into ui_components
+        # ContextHelpDock was refactored from upstream_drift_launcher into ui_components
         context_help_patcher = patch(
             "src.launchers.ui_components.ContextHelpDock",
             MagicMock(),
@@ -311,7 +311,7 @@ models:
         init_ui_patcher.start()
 
         # Patch _init_ui_components to prevent QShortcut creation which
-        # rejects GolfLauncher (inheriting MockQMainWindow) as parent
+        # rejects UpstreamDriftLauncher (inheriting MockQMainWindow) as parent
         # when the real PyQt6.QtGui.QShortcut is cached at module scope.
         ui_components_patcher = patch(
             "src.launchers.launcher_dialogs.LauncherDialogsMixin._init_ui_components",
@@ -324,17 +324,17 @@ models:
                 patch(
                     "src.shared.python.config.model_registry.ModelRegistry"
                 ) as MockRegistry,
-                patch("src.launchers.golf_launcher.ASSETS_DIR", new=temp_path),
+                patch("src.launchers.upstream_drift_launcher.ASSETS_DIR", new=temp_path),
             ):
                 MockRegistry.return_value = temp_registry
 
                 # Create Launcher
                 # Import after patches are in place
-                from src.launchers.golf_launcher import (
-                    GolfLauncher as FreshGolfLauncher,
+                from src.launchers.upstream_drift_launcher import (
+                    UpstreamDriftLauncher as FreshUpstreamDriftLauncher,
                 )
 
-                launcher = FreshGolfLauncher()
+                launcher = FreshUpstreamDriftLauncher()
                 yield launcher, model_xml
         finally:
             ui_components_patcher.stop()

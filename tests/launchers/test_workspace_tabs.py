@@ -3,11 +3,11 @@ from __future__ import annotations
 import pytest
 from PyQt6.QtWidgets import QTabWidget, QWidget
 
-from src.launchers.golf_launcher import GolfLauncher
+from src.launchers.upstream_drift_launcher import UpstreamDriftLauncher
 
 @pytest.fixture
 def launcher(qtbot):
-    app = GolfLauncher(loading=True)
+    app = UpstreamDriftLauncher(loading=True)
     qtbot.addWidget(app)
     return app
 
@@ -22,7 +22,7 @@ def test_can_dock_engine_as_tab(launcher):
     """Launcher should expose a method to dock a widget as a new tab."""
     dummy_widget = QWidget()
     
-    # This method needs to be implemented in GolfLauncher
+    # This method needs to be implemented in UpstreamDriftLauncher
     launcher.dock_widget_as_tab(dummy_widget, "Test Engine")
     
     assert launcher.workspace_tabs.count() == 2, "Tab count should increase to 2"

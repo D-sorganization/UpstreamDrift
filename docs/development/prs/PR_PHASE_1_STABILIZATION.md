@@ -17,7 +17,7 @@ This PR addresses critical stability and configuration issues identified in the 
   - Replaced raw `print()` statements with `logger.error()` and `logger.warning()`.
   - Added specific exception handling for `yaml.YAMLError` and `OSError`.
   - Added explicit UTF-8 encoding for file operations.
-- **Launcher (`launchers/golf_launcher.py`)**:
+- **Launcher (`launchers/upstream_drift_launcher.py`)**:
   - Added `timeout=5.0` to Docker version check to prevent UI hanging if Docker is unresponsive.
   - Added `subprocess.TimeoutExpired` handling.
 

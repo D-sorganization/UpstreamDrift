@@ -25,11 +25,11 @@ def mock_pyqt(qapp) -> Generator[tuple[MagicMock, MagicMock], None, None]:
 
 @pytest.fixture
 def launcher(mock_pyqt) -> Generator[MagicMock, None, None]:
-    """Provide a minimal instantiated GolfLauncher."""
-    with patch("src.launchers.golf_suite_launcher.GolfLauncher._setup_ui"):
-        from src.launchers.golf_suite_launcher import GolfLauncher
+    """Provide a minimal instantiated UpstreamDriftLauncher."""
+    with patch("src.launchers.golf_suite_launcher.UpstreamDriftLauncher._setup_ui"):
+        from src.launchers.golf_suite_launcher import UpstreamDriftLauncher
 
-        inst = GolfLauncher()
+        inst = UpstreamDriftLauncher()
         inst.status = MagicMock()
         inst.log_text = MagicMock()
         inst.clear_btn = MagicMock()
@@ -53,7 +53,7 @@ def test_init_raises_without_pyqt() -> None:
             importlib.reload(gsl)
 
             with pytest.raises(ImportError, match="PyQt6 is required"):
-                gsl.GolfLauncher()
+                gsl.UpstreamDriftLauncher()
         finally:
             importlib.reload(gsl)
 
@@ -80,10 +80,10 @@ def test_imports_without_pyqt() -> None:
 
 
 def test_init_sets_paths(mock_pyqt) -> None:
-    from src.launchers.golf_suite_launcher import GolfLauncher
+    from src.launchers.golf_suite_launcher import UpstreamDriftLauncher
 
-    with patch.object(GolfLauncher, "_setup_ui"):
-        launcher = GolfLauncher()
+    with patch.object(UpstreamDriftLauncher, "_setup_ui"):
+        launcher = UpstreamDriftLauncher()
         assert hasattr(launcher, "suite_root")
         assert hasattr(launcher, "mujoco_path")
         assert hasattr(launcher, "drake_path")
@@ -91,10 +91,10 @@ def test_init_sets_paths(mock_pyqt) -> None:
 
 
 def test_setup_ui_execution(qapp) -> None:
-    from src.launchers.golf_suite_launcher import GolfLauncher
+    from src.launchers.golf_suite_launcher import UpstreamDriftLauncher
 
     # Do not patch _setup_ui, let it execute with real PyQT
-    launcher = GolfLauncher()
+    launcher = UpstreamDriftLauncher()
 
     # Verify that UI components were created
     assert hasattr(launcher, "status")
@@ -261,7 +261,7 @@ def test_main_no_pyqt() -> None:
 def test_main_with_pyqt(mock_pyqt) -> None:
     with (
         patch("src.launchers.golf_suite_launcher.PYQT6_AVAILABLE", True),
-        patch("src.launchers.golf_suite_launcher.GolfLauncher"),
+        patch("src.launchers.golf_suite_launcher.UpstreamDriftLauncher"),
     ):
         from src.launchers.golf_suite_launcher import main
 

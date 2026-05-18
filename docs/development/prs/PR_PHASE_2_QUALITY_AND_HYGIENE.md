@@ -2,17 +2,17 @@
 
 ## Summary
 
-This PR completes Phase 2 of the Improvement Roadmap, focusing on code hygiene, technical debt reduction, and test stabilization for the `GolfLauncher` GUI.
+This PR completes Phase 2 of the Improvement Roadmap, focusing on code hygiene, technical debt reduction, and test stabilization for the `UpstreamDriftLauncher` GUI.
 
 ## Changes
 
-### 1. GolfLauncher Test Stabilization
+### 1. UpstreamDriftLauncher Test Stabilization
 
-- **Fixed `Popen` Mocking**: Patched `os.name` to `posix` in `test_golf_launcher_logic.py` to bypass Windows-specific terminal wrapper logic, enabling reliable verification of Docker commands.
+- **Fixed `Popen` Mocking**: Patched `os.name` to `posix` in `test_upstream_drift_launcher_logic.py` to bypass Windows-specific terminal wrapper logic, enabling reliable verification of Docker commands.
 - **Refined Mocks**: Improved `MockQWidget` and other PyQt6 mocks to support `setFont` and other required methods.
 - **Path Validation**: Mocked `pathlib.Path.exists` to ensure tests don't fail on missing local model paths.
 - **Assertion Fixes**: Corrected index assertions for volume mount arguments in Docker runs.
-- **Result**: All 4 logic tests in `tests/unit/test_golf_launcher_logic.py` now pass.
+- **Result**: All 4 logic tests in `tests/unit/test_upstream_drift_launcher_logic.py` now pass.
 
 ### 2. Pendulum Model Consolidation
 
@@ -26,7 +26,7 @@ This PR completes Phase 2 of the Improvement Roadmap, focusing on code hygiene, 
 
 ## Validation
 
-- **Unit Tests**: `pytest tests/unit/test_golf_launcher_logic.py` -> **PASS**
+- **Unit Tests**: `pytest tests/unit/test_upstream_drift_launcher_logic.py` -> **PASS**
 - **Manual Verification**: Verified `config/models.yaml` correctly references the new pendulum model path.
 
 ## Known Issues

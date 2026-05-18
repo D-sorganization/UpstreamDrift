@@ -26,7 +26,7 @@
 - `engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_headless_gui.py`: 32
 - `engines/physics_engines/mujoco/docker/gui/deepmind_control_suite_MuJoCo_GUI.py`: 1106
 - `engines/physics_engines/mujoco/python/humanoid_launcher.py`: 841
-- `launchers/golf_launcher.py`: 2892
+- `launchers/upstream_drift_launcher.py`: 2892
 - `tests/integration/test_engine_manager_coverage.py`: 32, 35
 - `tests/integration/test_phase1_security_integration.py`: 80
 - `tests/unit/test_common_utils.py`: Multiple lines

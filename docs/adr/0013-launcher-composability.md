@@ -28,7 +28,7 @@
 
 ## Context
 
-Until this EPIC, every tile in the GolfLauncher launched its tool via
+Until this EPIC, every tile in the UpstreamDriftLauncher launched its tool via
 `subprocess.Popen` with the system Python. The launcher acted as a
 shortcut grid; once a tool was running it was a separate top-level
 window with no relationship to the launcher process. Two problems

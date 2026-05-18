@@ -149,7 +149,7 @@ print('Models setup:', 'Success' if success else 'Failed')
 python -m pytest tests/test_installation.py -v
 
 # Launch the application
-python launchers/golf_launcher.py
+python launchers/upstream_drift_launcher.py
 ```
 
 ## 🚀 Professional Features Setup

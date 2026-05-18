@@ -36,18 +36,18 @@ def qapp():
 def ui_setup(qapp):
     """Construct just enough of the launcher to call ``init_ui``.
 
-    The full ``GolfLauncher`` pulls in async startup workers, Docker
+    The full ``UpstreamDriftLauncher`` pulls in async startup workers, Docker
     probes, and a worker thread pool that we do not need here.  We
     mount the UI-setup mixin on a bare ``QMainWindow`` subclass that
     provides the handful of attribute/method stubs ``init_ui`` reads
     from its co-mixins.
 
     The ``_install_sidekick_sidebar`` method is borrowed from the real
-    ``GolfLauncher`` so the same code path #5624 fixes is exercised.
+    ``UpstreamDriftLauncher`` so the same code path #5624 fixes is exercised.
     """
     from PyQt6.QtWidgets import QApplication, QMainWindow
 
-    from src.launchers.golf_launcher import GolfLauncher as _RealLauncher
+    from src.launchers.upstream_drift_launcher import UpstreamDriftLauncher as _RealLauncher
     from src.launchers.launcher_ui_setup import LauncherUISetupMixin
 
     class _DummyLayoutManager:

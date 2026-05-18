@@ -36,7 +36,7 @@
 
 **Scenario:** User loads a large 500-body humanoid model via the GUI launcher.
 
-1. `GolfLauncher._launch_model()` calls `secure_popen()` with default 30s timeout
+1. `UpstreamDriftLauncher._launch_model()` calls `secure_popen()` with default 30s timeout
 2. MuJoCo model compilation takes 45s on user's machine
 3. `SecureSubprocessError: Subprocess timeout` raised
 4. User sees cryptic error, no retry offered, state corrupted
@@ -395,7 +395,7 @@ def get_registry() -> EngineRegistry:
 | `drake_physics_engine.py`    | 8/10       | Complex context management, lazy finalization       |
 | `secure_subprocess.py`       | 8/10       | Security-critical, any bug is a vulnerability       |
 | `configuration_manager.py`   | 7/10       | Touched by all features, validation gaps            |
-| `golf_launcher.py`           | 7/10       | 800+ lines GUI, subprocess spawning                 |
+| `upstream_drift_launcher.py`           | 7/10       | 800+ lines GUI, subprocess spawning                 |
 | `urdf_io.py`                 | 7/10       | XML parsing, format conversion, edge cases          |
 | `output_manager.py`          | 6/10       | File I/O, format handling, HDF5/Parquet             |
 | `model_registry.py`          | 6/10       | YAML parsing, path resolution, caching              |
@@ -409,7 +409,7 @@ def get_registry() -> EngineRegistry:
 | File system (model load) | `*_physics_engine.py`   | None      | N/A   | Path check (partial) | N/A             |
 | File system (output)     | `output_manager.py`     | None      | N/A   | Directory creation   | N/A             |
 | Network (Meshcat)        | `meshcat_adapter.py`    | Unknown   | None  | None                 | None            |
-| Docker API               | `golf_launcher.py`      | None      | None  | None                 | None            |
+| Docker API               | `upstream_drift_launcher.py`      | None      | None  | None                 | None            |
 
 **Verdict:** 6/6 boundaries lack proper resilience patterns. Priority fix: MATLAB engine timeout + retry.
 
@@ -433,7 +433,7 @@ def get_registry() -> EngineRegistry:
 | God class              | `engine_manager.py:41-553`    | 513 lines, 20+ methods                        |
 | Feature envy           | `sim_widget.py:300-350`       | Manipulator logic duplicated                  |
 | Primitive obsession    | `configuration_manager.py:36` | `control_mode: str = "pd"` should be enum     |
-| Long method            | `golf_launcher.py:400-550`    | `_launch_model` is 150 lines                  |
+| Long method            | `upstream_drift_launcher.py:400-550`    | `_launch_model` is 150 lines                  |
 | Magic numbers          | `secure_subprocess.py:186`    | `timeout: float = 30.0`                       |
 | Duplicate code         | `output_manager.py:174, 345`  | `json_serializer` defined twice               |
 | Dead code              | `output_manager.py:367`       | Commented PDF generation                      |
@@ -445,7 +445,7 @@ def get_registry() -> EngineRegistry:
 
 1. **Path Traversal** (F-004): `load_from_path(path)` in all physics engines accepts arbitrary paths without validation
 2. **XML External Entity (XXE)**: `xml.etree.ElementTree` used in `urdf_io.py:18` - should use `defusedxml` (already imported but not used for output)
-3. **Subprocess Command Injection**: `golf_launcher.py:75-82` imports `subprocess` directly despite having secure wrapper
+3. **Subprocess Command Injection**: `upstream_drift_launcher.py:75-82` imports `subprocess` directly despite having secure wrapper
 4. **Insecure Temp Files**: `test_secure_subprocess.py:28` uses `tempfile.mkdtemp()` without restrictive permissions
 5. **Log Injection**: No sanitization of user input before logging (attacker-controlled model names could inject log entries)
 
@@ -454,7 +454,7 @@ def get_registry() -> EngineRegistry:
 1. **Race condition**: `sim_widget.py:193-197` - `loader_thread` accessed without lock while potentially being modified
 2. **Thread safety**: `CV2_LIB` global modified without lock in `get_cv2()`
 3. **Stale closure**: `ModelLoaderThread.run()` captures `self.xml_content` which could be modified after thread starts
-4. **Resource leak**: `QThread` in `golf_launcher.py` may not be properly joined on app close
+4. **Resource leak**: `QThread` in `upstream_drift_launcher.py` may not be properly joined on app close
 5. **Deadlock risk**: `engine_manager.py:440-453` - `cleanup()` could be called while engine loading is in progress
 
 ### Packaging/Distribution Evaluation
@@ -466,7 +466,7 @@ def get_registry() -> EngineRegistry:
 git clone https://github.com/dieterolson/UpstreamDrift.git
 cd Golf_Modeling_Suite
 pip install -r requirements.txt  # Will install DIFFERENT versions each time!
-python launchers/golf_launcher.py  # May fail due to version mismatches
+python launchers/upstream_drift_launcher.py  # May fail due to version mismatches
 ```
 
 **Verdict: NO.** Missing lockfile means `pip install` will resolve to different versions on different days.
@@ -538,7 +538,7 @@ Golf_Modeling_Suite/
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                        CLI / GUI Layer                       │
-│  (golf_launcher, unified_launcher)                          │
+│  (upstream_drift_launcher, unified_launcher)                          │
 ├─────────────────────────────────────────────────────────────┤
 │                    Application Services                      │
 │  (EngineManager, OutputManager, ConfigManager)              │

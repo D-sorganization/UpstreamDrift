@@ -207,7 +207,7 @@ You can still use the desktop application alongside the API:
 
 ```bash
 # Launch the desktop GUI
-python launchers/golf_launcher.py
+python launchers/upstream_drift_launcher.py
 
 # Or use the unified interface
 python -c "

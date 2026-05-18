@@ -11,7 +11,7 @@ Probable insecure usage of temp file/directory. This usually involves creating t
 - `engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/c3d_reader.py:740`
 - `engines/physics_engines/mujoco/docker/gui/deepmind_control_suite_MuJoCo_GUI.py:1106`
 - `engines/physics_engines/mujoco/python/humanoid_launcher.py:841`
-- `launchers/golf_launcher.py:2892`
+- `launchers/upstream_drift_launcher.py:2892`
 
 ## Remediation
 

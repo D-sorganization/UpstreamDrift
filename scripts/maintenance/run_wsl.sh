@@ -48,5 +48,5 @@ elif [ "$1" == "--drake" ]; then
     python src/engines/physics_engines/drake/python/src/drake_gui_app.py
 else
     echo "Launching Golf Suite Launcher..."
-    python src/launchers/golf_launcher.py "$@"
+    python src/launchers/upstream_drift_launcher.py "$@"
 fi

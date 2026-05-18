@@ -30,7 +30,7 @@ python -m src.tools.pose_studio
 ```
 
 ```text
-2. From the GolfLauncher main grid: click the "Pose Studio" tile
+2. From the UpstreamDriftLauncher main grid: click the "Pose Studio" tile
    (registered as `pose_studio` in src/config/models.yaml).
 ```
 

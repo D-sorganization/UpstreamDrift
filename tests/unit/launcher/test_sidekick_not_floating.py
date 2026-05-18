@@ -51,7 +51,7 @@ def ui_setup_with_sidekick(ui_setup):  # noqa: F811 - intentional fixture chain
     # ``_install_sidekick_sidebar`` is now expected to embed the widget
     # in the splitter directly, NOT via addDockWidget.  We patch out the
     # real Sidekick factory so we can keep this fast and dependency-free.
-    from src.launchers import golf_launcher as _gl
+    from src.launchers import upstream_drift_launcher as _gl
 
     class _FakeSidebar(QWidget):
         """Stand-in for ``UnifiedToolsSidebar`` — bare QWidget."""

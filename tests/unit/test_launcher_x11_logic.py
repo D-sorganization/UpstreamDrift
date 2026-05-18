@@ -1,5 +1,5 @@
 """
-Integration test for verifying GolfLauncher logic regarding X11 environment flags.
+Integration test for verifying UpstreamDriftLauncher logic regarding X11 environment flags.
 Ensure that selecting 'Live Visualization' correctly sets the necessary
 OSMesa/GLFW/X11 environment variables, specifically testing for the
 presence of LIBGL_ALWAYS_INDIRECT which was identified as a critical regression.
@@ -41,7 +41,7 @@ class MockModel:
 
 @pytest.fixture
 def mocked_launcher() -> Generator[Any, None, None]:
-    """Import golf_launcher with Qt mocks."""
+    """Import upstream_drift_launcher with Qt mocks."""
     mock_modules = {
         "PyQt6": MagicMock(),
         "PyQt6.QtCore": MagicMock(),
@@ -52,10 +52,10 @@ def mocked_launcher() -> Generator[Any, None, None]:
     mock_modules["PyQt6.QtWidgets"].QCheckBox = MockQCheckBox
 
     with patch.dict(sys.modules, mock_modules):
-        import src.launchers.golf_launcher
+        import src.launchers.upstream_drift_launcher
 
         # Patch the class to avoid __init__ doing GUI stuff
-        class TestLauncher(src.launchers.golf_launcher.GolfLauncher):
+        class TestLauncher(src.launchers.upstream_drift_launcher.UpstreamDriftLauncher):
             def __init__(self):
                 self.chk_live: MockQCheckBox = MockQCheckBox(checked=True)  # type: ignore[assignment]
                 self.chk_gpu: MockQCheckBox = MockQCheckBox(checked=False)  # type: ignore[assignment]

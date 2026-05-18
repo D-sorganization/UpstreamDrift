@@ -37,7 +37,7 @@ The existing `robotics_env` contains:
 
 ### From Repository Launcher
 
-1. Launch: `python Repository_Management/launchers/golf_launcher.py`
+1. Launch: `python Repository_Management/launchers/upstream_drift_launcher.py`
 2. Select "MuJoCo Golf Model"
 3. Click "LAUNCH SIMULATION" - uses the same robotics_env
 
@@ -127,7 +127,7 @@ To add new packages to the robotics_env:
 - `MuJoCo_Golf_Swing_Model/docker/gui/deepmind_control_suite_MuJoCo_GUI.py` - Main GUI with Docker integration
 - `MuJoCo_Golf_Swing_Model/add_defusedxml_to_robotics_env.py` - Dependency updater script
 - `MuJoCo_Golf_Swing_Model/test_docker_venv.py` - Environment testing script
-- `Repository_Management/launchers/golf_launcher.py` - Unified launcher for all models
+- `Repository_Management/launchers/upstream_drift_launcher.py` - Unified launcher for all models
 
 ## Next Steps
 

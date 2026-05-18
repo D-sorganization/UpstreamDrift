@@ -25,7 +25,7 @@ MyoSuite is a physics-based environment for musculoskeletal control using reinfo
 ├──────────────────────────────────────────────────────────────┤
 │  GUI Layer (PyQt6)                                            │
 │  ┌─────────────────┐  ┌─────────────────┐                    │
-│  │ myosuite_gui    │  │ golf_launcher   │                    │
+│  │ myosuite_gui    │  │ upstream_drift_launcher   │                    │
 │  │ - Env Select    │  │ - Engine Select │                    │
 │  │ - RL Training   │  │ - Status Badge  │                    │
 │  │ - Visualization │  │ - Help System   │                    │

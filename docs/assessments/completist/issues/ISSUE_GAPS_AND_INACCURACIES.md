@@ -121,7 +121,7 @@ Implementation choices that pose legal or maintenance risks.
 
 ### Testing Gaps
 
-- **Files:** `tests/integration/test_golf_launcher_integration.py`, `tests/unit/test_golf_launcher_logic.py`, `tests/deployment/test_safety.py`, and many others.
+- **Files:** `tests/integration/test_upstream_drift_launcher_integration.py`, `tests/unit/test_upstream_drift_launcher_logic.py`, `tests/deployment/test_safety.py`, and many others.
   - **Issue:** Extensive use of `pass` blocks in tests, resulting in empty or completely bypassed test logic.
 - **Impact:** Critical quality assurance risk. "Passing" CI jobs do not guarantee functional correctness because tests make no assertions. This presents a false sense of security, especially for safety tests. (See [ISSUE_TESTING_GAPS_2026_02_28.md](ISSUE_TESTING_GAPS_2026_02_28.md))
 

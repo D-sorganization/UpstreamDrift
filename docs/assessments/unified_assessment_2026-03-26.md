@@ -44,7 +44,7 @@ _Pragmatic Principles: DRY, Orthogonality, Broken Windows, Law of Demeter_
 **Findings:**
 
 - Perturbation analyzer modules across 5 physics engines (Drake, MuJoCo, MyoSuite, OpenSim, Pinocchio) share near-identical exception handling patterns and analysis logic
-- Multiple launcher files (`golf_launcher.py`, `golf_suite_launcher.py`, `drake_dashboard.py`, `cross_engine_dashboard.py`) duplicate UI setup boilerplate
+- Multiple launcher files (`upstream_drift_launcher.py`, `golf_suite_launcher.py`, `drake_dashboard.py`, `cross_engine_dashboard.py`) duplicate UI setup boilerplate
 - GUI tab implementations across engines repeat similar widget construction patterns
 - `unit_constants.py` has a 379-line function `_t_dict_tuple` that is a massive data dictionary (not duplicated but monolithic)
 

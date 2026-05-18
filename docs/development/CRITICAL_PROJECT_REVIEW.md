@@ -43,7 +43,7 @@ While the project demonstrates sophisticated architecture and strong documentati
 - **God Objects**: Three monolithic files violate Single Responsibility Principle:
   - `shared/python/plotting.py` (4,454 lines, 71 functions)
   - `shared/python/statistical_analysis.py` (2,808 lines, 48 functions)
-  - `launchers/golf_launcher.py` (2,634 lines, 69 functions)
+  - `launchers/upstream_drift_launcher.py` (2,634 lines, 69 functions)
 - **Tight Coupling**: Large modules create dependency graphs that impede testing
 - **Archive Code**: Legacy code with unsafe `eval()` still in repository pollutes architecture
 
@@ -284,7 +284,7 @@ Recent commits show good discipline:
 
 ```
 Fix CWT/XWT logic: correct indentation of RuntimeError
-Fix test_mainloop: patch GolfLauncher at source module
+Fix test_mainloop: patch UpstreamDriftLauncher at source module
 Fix failing tests: update mock paths and lazy-loading expectations
 Fix mypy type errors with proper type annotations
 Apply black formatting
@@ -454,7 +454,7 @@ Apply black formatting
 1. **🚨 CRITICAL**: Remove `eval()` from archive code or delete archive directory
 2. **🚨 CRITICAL**: Change API key hashing from SHA256 to bcrypt
 3. **🚨 CRITICAL**: Remove plaintext password logging
-4. **🚨 HIGH**: Refactor 3 god objects (plotting, statistical_analysis, golf_launcher)
+4. **🚨 HIGH**: Refactor 3 god objects (plotting, statistical_analysis, upstream_drift_launcher)
 5. **🚨 MEDIUM**: Resolve 40+ type ignore suppressions
 
 ### SHOULD FIX (Technical Debt)
@@ -525,7 +525,7 @@ Apply black formatting
 
 1. **Refactor plotting.py** (4,454 lines → 5-8 focused modules)
 2. **Refactor statistical_analysis.py** (2,808 lines → 4-6 modules)
-3. **Refactor golf_launcher.py** (2,634 lines → 4-6 modules)
+3. **Refactor upstream_drift_launcher.py** (2,634 lines → 4-6 modules)
 4. **Resolve type ignore suppressions** (40+ instances)
 5. **Remove global state** variables
 
