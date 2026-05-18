@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from typing import Optional
 
-from PyQt6.QtCore import Qt, pyqtSignal, QSize, pyqtSlot
+from PyQt6.QtCore import Qt, QUrl, pyqtSignal, QSize, pyqtSlot
 from PyQt6.QtGui import QImage, QPixmap, QFont
 from PyQt6.QtWidgets import (
     QWidget,
@@ -109,20 +109,38 @@ class DocumentReaderWidget(QWidget):
             logger.exception("Failed to load document")
             QMessageBox.critical(self, "Error", f"Could not load {path.name}: {e}")
 
-    @pyqtSlot(object)
-    def _handle_link_click(self, url) -> None:
+    @pyqtSlot(QUrl)
+    def _handle_link_click(self, url: QUrl) -> None:
+        """Handle a clicked hyperlink inside the document browser.
+
+        DbC precondition: url is a QUrl instance.
+
+        Fragment-link handling (fixes #5725):
+        - A bare fragment URL (e.g. ``#section``) scrolls within the current
+          document via :meth:`QTextBrowser.scrollToAnchor`.
+        - A file URL that contains a fragment (e.g. ``doc.md#step-1``) has the
+          fragment stripped before the file-existence check so that the path
+          resolves correctly.
+        """
+        assert isinstance(url, QUrl), f"Expected QUrl, got {type(url).__name__}"
+
+        fragment = url.fragment()
+
+        # Bare fragment — scroll to anchor within the current document
+        if not url.path() and fragment:
+            self.text_browser.scrollToAnchor(fragment)
+            return
+
         scheme = url.scheme()
         if scheme == "file" or not scheme:
-            # Local file - resolve relative to current doc if needed
-            path_str = url.toLocalFile()
-            if not path_str and url.toString():
-                path_str = url.toString()
+            # Strip the fragment so Path.exists() works correctly
+            path_str = url.toLocalFile() or url.toString().split("#")[0]
 
             p = Path(path_str)
             if not p.is_absolute() and self.current_file:
                 p = self.current_file.parent / p
             if p.exists():
-                # Open in a new document reader window
+                # Open in a new document reader window; pass anchor for future use
                 show_document(p)
                 return
 

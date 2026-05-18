@@ -146,7 +146,7 @@ class SettingsDialog(QDialog):
         self.combo_view_mode = QComboBox()
         # Ensure enums are imported correctly inside the method scope
         try:
-            from src.shared.python.gui_pkg.layout_manager import ViewMode
+            from src.launchers.launcher_constants import ViewMode
 
             self.combo_view_mode.addItem("Tile Small", ViewMode.SMALL)
             self.combo_view_mode.addItem("Tile Medium", ViewMode.MEDIUM)
@@ -217,8 +217,8 @@ class SettingsDialog(QDialog):
                         self.lbl_zoom_pct.setText(
                             f"{int(round(launcher._slider_to_scale(v) * 100))}%"
                         )
-                    if hasattr(launcher, "_zoom_slider_changed"):
-                        launcher._zoom_slider_changed(v)
+                    if hasattr(launcher, "_on_zoom_slider_changed"):
+                        launcher._on_zoom_slider_changed(v)
 
                 self.zoom_slider.valueChanged.connect(on_zoom)
 

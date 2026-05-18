@@ -304,3 +304,42 @@ def test_timer_event_no_start_time(parent_launcher, qapp) -> None:
 
     # Should not raise any error
     dialog.timerEvent(None)
+
+
+# ── Issue #5730 / #5723: ViewMode import and zoom slider wiring ──────────────
+
+
+def test_layout_tab_view_mode_combo_populated(parent_launcher, qapp) -> None:
+    """#5730: ViewMode combo must be populated (import from correct module)."""
+    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_LAYOUT)
+    # If the import is broken the combo stays empty (count == 0)
+    assert dialog.combo_view_mode.count() > 0, (
+        "combo_view_mode has no items — ViewMode import failed (check #5730)"
+    )
+
+
+def test_layout_tab_zoom_slider_calls_on_zoom_slider_changed(
+    parent_launcher, qapp
+) -> None:
+    """#5723: Moving the zoom slider must call _on_zoom_slider_changed, not _zoom_slider_changed."""
+    from src.launchers.launcher_constants import ViewMode
+    from src.launchers.launcher_layout_manager import LayoutManager
+
+    layout_manager = MagicMock(spec=LayoutManager)
+    layout_manager.view_mode = ViewMode.LIST_LARGE
+    layout_manager.tile_scale = 1.0
+    parent_launcher.layout_manager = layout_manager
+    parent_launcher._scale_to_slider = MagicMock(return_value=50)
+    parent_launcher._slider_to_scale = MagicMock(return_value=0.75)
+    # The real method name is _on_zoom_slider_changed (not _zoom_slider_changed)
+    parent_launcher._on_zoom_slider_changed = MagicMock()
+    # Ensure the wrong name is not present (so hasattr check routes correctly)
+    if hasattr(parent_launcher, "_zoom_slider_changed"):
+        del parent_launcher._zoom_slider_changed
+
+    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_LAYOUT)
+
+    # Simulate slider movement
+    dialog.zoom_slider.setValue(75)
+
+    parent_launcher._on_zoom_slider_changed.assert_called_with(75)
