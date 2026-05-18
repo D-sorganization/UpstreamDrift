@@ -1,0 +1,174 @@
+"""ReportTemplate and ReportSection — Markdown report template engine.
+
+Design
+------
+- ``ReportSection`` is a frozen dataclass for a single section (heading + content
+  + optional nested subsections).  Nesting is deliberate and bounded: only two
+  levels are rendered distinctly (``##`` and ``###``), deeper nesting uses
+  the same ``###`` heading to stay readable.
+- ``ReportTemplate`` aggregates a title and an ordered list of sections and
+  exposes a single ``render() -> str`` method that produces a complete Markdown
+  document.
+
+Design-by-Contract invariants
+------------------------------
+- ``ReportTemplate.title`` must be a non-empty string.
+- ``ReportTemplate.sections`` must be a list.
+- ``ReportSection.heading`` must be a non-empty string.
+- ``render()`` postcondition: returns a ``str`` containing the title.
+
+Law of Demeter
+--------------
+``ReportTemplate.render()`` delegates per-section rendering to
+``ReportSection.render(level)``.  No cross-object attribute traversal.
+
+Implements part of Epic #5393.
+"""
+
+from __future__ import annotations
+
+import logging
+from dataclasses import dataclass, field
+
+from src.shared.python.contracts import ensure, require
+
+logger = logging.getLogger(__name__)
+
+# Maximum heading level emitted (Markdown uses 1-6; we cap at 4 for readability)
+_MAX_HEADING_LEVEL = 4
+
+
+@dataclass(frozen=True)
+class ReportSection:
+    """A single section within a report.
+
+    Attributes:
+        heading: Section title (non-empty).
+        content: Body text for this section (may be empty).
+        subsections: Nested child sections (default empty list).
+    """
+
+    heading: str
+    content: str = ""
+    subsections: list[ReportSection] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        require(
+            isinstance(self.heading, str) and len(self.heading.strip()) > 0,
+            "ReportSection.heading must be a non-empty string",
+            self.heading,
+        )
+        require(
+            isinstance(self.content, str),
+            "ReportSection.content must be a string",
+            self.content,
+        )
+        require(
+            isinstance(self.subsections, list),
+            "ReportSection.subsections must be a list",
+            self.subsections,
+        )
+
+    def render(self, level: int = 2) -> str:
+        """Render this section and its subsections as Markdown.
+
+        Args:
+            level: Heading level (2 = ``##``, 3 = ``###``, etc.)
+                   Capped at ``_MAX_HEADING_LEVEL``.
+
+        Returns:
+            Markdown string for this section.
+
+        Postcondition:
+            Returns a non-empty string.
+        """
+        require(
+            isinstance(level, int) and level >= 1,
+            "level must be a positive integer",
+            level,
+        )
+        effective_level = min(level, _MAX_HEADING_LEVEL)
+        hashes = "#" * effective_level
+        lines: list[str] = [f"{hashes} {self.heading}"]
+
+        if self.content:
+            lines.append("")
+            lines.append(self.content)
+
+        for subsection in self.subsections:
+            lines.append("")
+            lines.append(subsection.render(level=effective_level + 1))
+
+        result = "\n".join(lines)
+        ensure(
+            isinstance(result, str) and len(result) > 0,
+            "render must return a non-empty str",
+        )
+        return result
+
+
+@dataclass
+class ReportTemplate:
+    """A complete report template composed of a title and ordered sections.
+
+    Attributes:
+        title: Report title (non-empty).
+        sections: Ordered list of top-level sections.
+
+    Examples::
+
+        tmpl = ReportTemplate(
+            title="Swing Analysis Report",
+            sections=[
+                ReportSection("Summary", "Overview of the swing."),
+                ReportSection("Kinematics", "Joint angles and velocities."),
+            ],
+        )
+        md = tmpl.render()
+    """
+
+    title: str
+    sections: list[ReportSection] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        require(
+            isinstance(self.title, str) and len(self.title.strip()) > 0,
+            "ReportTemplate.title must be a non-empty string",
+            self.title,
+        )
+        require(
+            isinstance(self.sections, list),
+            "ReportTemplate.sections must be a list",
+            self.sections,
+        )
+
+    def render(self) -> str:
+        """Render the full report as a Markdown string.
+
+        The output format is::
+
+            # <title>
+
+            ## <section 1 heading>
+            ...
+            ## <section N heading>
+            ...
+
+        Postcondition:
+            Returns a ``str`` that starts with the title.
+        """
+        lines: list[str] = [f"# {self.title}"]
+
+        for section in self.sections:
+            lines.append("")
+            lines.append(section.render(level=2))
+
+        result = "\n".join(lines)
+        ensure(
+            isinstance(result, str) and self.title in result,
+            "render postcondition: output must be str containing the title",
+        )
+        logger.debug(
+            "report_rendered title=%s sections=%d", self.title, len(self.sections)
+        )
+        return result
