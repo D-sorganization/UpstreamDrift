@@ -173,6 +173,8 @@ pillow==12.2.0
     #   bokeh
     #   matplotlib
     #   upstream-drift (pyproject.toml)
+platformdirs==4.3.8
+    # via upstream-drift (pyproject.toml)
 pluggy==1.6.0
     # via
     #   pytest

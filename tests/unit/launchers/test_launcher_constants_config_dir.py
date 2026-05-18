@@ -97,3 +97,39 @@ def test_repos_root_not_used_for_config_dir() -> None:
         f"CONFIG_DIR ({CONFIG_DIR}) must not be under REPOS_ROOT ({REPOS_ROOT}). "
         "Runtime state must not be stored in the repository tree."
     )
+
+
+def test_platformdirs_importable() -> None:
+    """DbC: platformdirs must be importable (declared in pyproject.toml and environment.yml).
+
+    Precondition: the package is installed in the current environment.
+    Postcondition: importing platformdirs raises no ImportError.
+
+    This is the canonical test that the dependency-consistency CI check covers:
+    platformdirs>=4.2.0 must be present in both pyproject.toml dependencies and
+    environment.yml pip section so conda users get the same package as pip users.
+    Closes #5713 / fixes dependency-consistency failure from PR #5726.
+    """
+    import importlib
+
+    spec = importlib.util.find_spec("platformdirs")
+    assert spec is not None, (
+        "platformdirs is not installed. "
+        "Add 'platformdirs>=4.2.0' to both pyproject.toml dependencies "
+        "and environment.yml pip section, then re-run `make sync-deps`."
+    )
+
+
+def test_platformdirs_user_config_dir_callable() -> None:
+    """DbC postcondition: platformdirs.user_config_dir must return a non-empty string.
+
+    Verifies the function used by launcher_constants.py works correctly on this platform.
+    """
+    import importlib
+
+    platformdirs = importlib.import_module("platformdirs")
+    result = platformdirs.user_config_dir("upstream-drift")
+    assert isinstance(result, str), (
+        f"user_config_dir must return str, got {type(result)}"
+    )
+    assert result.strip(), "user_config_dir must return a non-empty path"

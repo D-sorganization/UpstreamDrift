@@ -1,7 +1,7 @@
 """BunkerShot3D: A 3-D simulation of a golf bunker shot.
 
 Re-exports the public API from all subpackages so consumers can import
-directly from \`bunkershot3d\` instead of reaching into submodules.
+directly from ``bunkershot3d`` instead of reaching into submodules.
 """
 
 __version__ = "0.1.0"
@@ -15,6 +15,9 @@ from .calibration import (
     CalibrationOptimizer,
     DrainedShearCellExperiment,
 )
+
+# Exceptions
+from .exceptions import BackendNotImplementedError
 
 # Geometry
 from .geometry import ClubheadGenerator
@@ -35,6 +38,7 @@ from .postproc import WrenchTrace
 
 __all__: list[str] = [
     "AngleOfReposeExperiment",
+    "BackendNotImplementedError",
     "BunkerShotResultReader",
     "BunkerShotResultWriter",
     "CalibrationOptimizer",
@@ -49,20 +53,4 @@ __all__: list[str] = [
     "WrenchTrace",
     "__version__",
     "generate_reference_trajectory",
-]
-
-# Exceptions
-from .exceptions import BackendNotImplementedError
-
-__all__ = [
-    "BackendNotImplementedError",
-    "ChronoDriver",
-    "LiggghtsDriver",
-    "MPMDriver",
-    "AngleOfReposeExperiment",
-    "CalibrationOptimizer",
-    "DrainedShearCellExperiment",
-    "ClubheadGenerator",
-    "BunkerShotResultReader",
-    "BunkerShotResultWriter",
 ]

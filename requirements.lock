@@ -91,6 +91,8 @@ pillow==12.2.0
     # via
     #   bokeh
     #   upstream-drift (pyproject.toml)
+platformdirs==4.3.8
+    # via upstream-drift (pyproject.toml)
 pydantic==2.12.5
     # via
     #   fastapi
