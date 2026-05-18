@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from src.launchers.launcher_constants import ViewMode, view_mode_settings
-from src.launchers.launcher_layout_manager import LayoutManager
+from src.launchers.launcher_layout_manager import LayoutManager, _view_mode_from_string
 from src.launchers.model_registry import ModelSpec
 
 
@@ -158,3 +158,52 @@ def test_grid_mode_columns_drive_wrap(make_layout_manager) -> None:
         if len(call[0]) == 3 and id(call[0][0]) in cards:
             cols_seen.add(call[0][2])
     assert max(cols_seen) == 3
+
+
+# ---------------------------------------------------------------------------
+# Backward-compat mapping regression tests (UpstreamDrift #5690)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "raw_name,expected_mode",
+    [
+        # Current canonical names (upper-case direct lookup)
+        ("LARGE", ViewMode.LARGE),
+        ("MEDIUM", ViewMode.MEDIUM),
+        ("SMALL", ViewMode.SMALL),
+        ("LIST_LARGE", ViewMode.LIST_LARGE),
+        ("LIST_SMALL", ViewMode.LIST_SMALL),
+        # LIST is a compat alias for LIST_LARGE in the enum definition
+        ("LIST", ViewMode.LIST_LARGE),
+        # Legacy lower-case aliases from pre-#5688 saved configs
+        # "comfortable" must map to LARGE (tile grid), NOT list mode (#5690)
+        ("comfortable", ViewMode.LARGE),
+        ("compact", ViewMode.MEDIUM),
+        ("dense", ViewMode.SMALL),
+        ("list", ViewMode.LIST_LARGE),
+        # Legacy layout tokens that weren't valid enum names (fall back to LIST_LARGE)
+        ("panel", ViewMode.LIST_LARGE),
+        ("floating", ViewMode.LIST_LARGE),
+        # None / empty string → default to LIST_LARGE
+        (None, ViewMode.LIST_LARGE),
+        ("", ViewMode.LIST_LARGE),
+        # Completely unknown strings → fall back to LIST_LARGE
+        ("unknown_xyz", ViewMode.LIST_LARGE),
+    ],
+)
+def test_view_mode_from_string_backward_compat(
+    raw_name: str | None, expected_mode: ViewMode
+) -> None:
+    """Regression guard for UpstreamDrift #5690.
+
+    ``"comfortable"`` must map to ``ViewMode.LARGE`` (tile grid), NOT to
+    ``LIST_LARGE`` (list mode) as the pre-fix compat dict erroneously did.
+    Legacy tokens ``"panel"`` and ``"floating"`` must fall back to
+    ``ViewMode.LIST_LARGE`` rather than raising.
+    """
+    result = _view_mode_from_string(raw_name)
+    assert result == expected_mode, (
+        f"_view_mode_from_string({raw_name!r}) → {result!r}, expected {expected_mode!r}"
+    )
+    assert isinstance(result, ViewMode)

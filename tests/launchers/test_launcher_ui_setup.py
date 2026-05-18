@@ -49,9 +49,13 @@ def test_init_ui(launcher) -> None:
 
 @patch("src.launchers.launcher_constants.AI_AVAILABLE", True)
 def test_init_ui_with_ai(launcher) -> None:
-    with patch.object(launcher, "_setup_ai_panel") as mock_ai:
-        launcher.init_ui()
-        mock_ai.assert_called_once()
+    # _setup_ai_panel was removed in UpstreamDrift #5620 (deprecated-chat sweep).
+    # AI access now lives exclusively in the Sidekick sidebar (btn_ai_sidebar).
+    # Verify that init_ui completes and sets up main_layout without the old
+    # duplicate AI panel; no AttributeError must occur on re-dock.
+    launcher.init_ui()
+    assert launcher.content_splitter is not None
+    assert hasattr(launcher, "main_layout")
 
 
 def test_setup_menu_bar(launcher) -> None:
@@ -89,7 +93,10 @@ def test_setup_top_bar_with_help(mock_register, launcher) -> None:
         top_bar = launcher._setup_top_bar()
         assert isinstance(top_bar, QHBoxLayout)
         assert mock_register.call_count >= 4
-        assert hasattr(launcher, "btn_ai")
+        # btn_ai was removed in #5620; AI now lives in the sidebar as btn_ai_sidebar.
+        assert not hasattr(launcher, "btn_ai"), (
+            "btn_ai must not exist after #5620 deprecated-chat sweep"
+        )
 
 
 def test_setup_grid_area(launcher) -> None:
@@ -157,57 +164,73 @@ def test_on_process_output(mock_timer, launcher) -> None:
     mock_timer.assert_called_once()
 
 
-def test_setup_ai_panel_disabled(launcher) -> None:
-    launcher.content_splitter = MagicMock()
-    with patch("src.launchers.launcher_constants.AI_AVAILABLE", False):
-        if "ai_panel" in launcher.__dict__.get("_mocks", {}):
-            del launcher.__dict__["_mocks"]["ai_panel"]
-        launcher._setup_ai_panel()
-        assert "ai_panel" not in launcher.__dict__.get("_mocks", {})
+@patch("src.launchers.launcher_constants.AI_AVAILABLE", False)
+def test_sidebar_ai_button_absent_when_ai_unavailable(launcher) -> None:
+    """When AI is unavailable, no AI button should be added to the sidebar.
+
+    Regression guard for UpstreamDrift #5689: ``_setup_ai_panel`` and
+    ``_sync_chat_session`` were removed in the deprecated-chat sweep (#5620).
+    The sidebar should build without AttributeError even when AI is off.
+
+    We check the instance ``__dict__`` directly (not ``hasattr``) because
+    the test environment's ``DummyWidget.__getattr__`` mock intercepts *all*
+    attribute lookups and would make ``hasattr`` return ``True`` for any name.
+    """
+    # Building the sidebar must not raise AttributeError for any deleted method.
+    launcher._setup_global_sidebar()
+    # btn_ai_sidebar must NOT be set when AI_AVAILABLE is False
+    assert "btn_ai_sidebar" not in launcher.__dict__, (
+        "btn_ai_sidebar must not be created in the sidebar when AI_AVAILABLE is False"
+    )
+    # btn_ai (old top-bar button) must never be set at all
+    assert "btn_ai" not in launcher.__dict__, (
+        "btn_ai must not exist after #5620 deprecated-chat sweep"
+    )
 
 
 @patch("src.launchers.launcher_constants.AI_AVAILABLE", True)
-def test_setup_ai_panel(launcher) -> None:
-    with patch("src.shared.python.ai.gui.AIAssistantPanel"):
-        launcher.content_splitter = MagicMock()
-        with patch.object(launcher, "_sync_chat_session") as mock_sync:
-            launcher._setup_ai_panel()
-            mock_sync.assert_called_once()
-            assert hasattr(launcher, "ai_panel")
+def test_sidebar_ai_button_present_when_ai_available(launcher) -> None:
+    """When AI is available, the sidebar builds without error and btn_ai is absent.
+
+    Regression guard for UpstreamDrift #5689: ``_setup_ai_panel`` and
+    ``_sync_chat_session`` were deleted in #5620 (deprecated-chat sweep).
+    The old ``btn_ai`` top-bar button was removed at the same time.
+    AI access now flows exclusively through the Sidekick dock; the global
+    sidebar must not raise AttributeError when AI_AVAILABLE is True.
+    """
+    # _setup_global_sidebar must complete without AttributeError when AI is on
+    launcher._setup_global_sidebar()
+    # btn_ai (old top-bar button) must never exist after #5620
+    assert "btn_ai" not in launcher.__dict__, (
+        "Deprecated btn_ai top-bar button must not exist after #5620"
+    )
 
 
-@patch("src.launchers.launcher_constants.AI_AVAILABLE", True)
-def test_setup_ai_panel_error(launcher) -> None:
-    original_import = __import__
+def test_no_setup_ai_panel_method() -> None:
+    """_setup_ai_panel must not exist on LauncherUISetupMixin after #5620.
 
-    def mock_import(name, globals=None, locals=None, fromlist=(), level=0) -> object:
-        if name == "src.shared.python.ai.gui":
-            raise ImportError("test error")
-        return original_import(name, globals, locals, fromlist, level)
+    Regression guard for UpstreamDrift #5689: the reviewer's AttributeError
+    was triggered when a stale test used ``patch.object(launcher,
+    '_setup_ai_panel')`` against an attribute that no longer exists.  We
+    check the *class* dictionary (not an instance) so that DummyWidget's
+    permissive ``__getattr__`` does not mask the absence of the method.
+    """
+    mro_attrs = {name for cls in LauncherUISetupMixin.__mro__ for name in vars(cls)}
+    assert "_setup_ai_panel" not in mro_attrs, (
+        "_setup_ai_panel was deleted in #5620 and must not be re-introduced"
+    )
 
-    with patch("builtins.__import__", side_effect=mock_import):
-        launcher.btn_ai = MagicMock()
-        launcher._setup_ai_panel()
-        launcher.btn_ai.setEnabled.assert_called_with(False)
 
+def test_no_sync_chat_session_method() -> None:
+    """_sync_chat_session must not exist on LauncherUISetupMixin after #5620.
 
-@patch("urllib.request.urlopen")
-def test_sync_chat_session(mock_urlopen, launcher) -> None:
-    mock_resp = MagicMock()
-    mock_resp.read.return_value = b'[{"session_id": "test_id"}]'
-    mock_resp.__enter__.return_value = mock_resp
-    mock_urlopen.return_value = mock_resp
-
-    with (
-        patch("pathlib.Path.home", return_value=MagicMock()),
-        patch("pathlib.Path.mkdir"),
-        patch("pathlib.Path.write_text"),
-    ):
-        # Test success
-        launcher._sync_chat_session()
-        # Test exception
-        mock_urlopen.side_effect = OSError("err")
-        launcher._sync_chat_session()
+    The Sidekick ChatDockWidget performs the equivalent session-id handshake
+    via the shared active_chat_session.txt file.
+    """
+    mro_attrs = {name for cls in LauncherUISetupMixin.__mro__ for name in vars(cls)}
+    assert "_sync_chat_session" not in mro_attrs, (
+        "_sync_chat_session was deleted in #5620 and must not be re-introduced"
+    )
 
 
 def test_init_overlay(launcher) -> None:

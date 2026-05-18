@@ -9,17 +9,21 @@ from src.launchers.settings_dialog import (  # noqa: E402
     TAB_CONFIG,
     TAB_DIAGNOSTICS,
     TAB_LAYOUT,
+    TAB_MCP_SERVERS,
     SettingsDialog,
     validate_tab_index,
 )
 
 
 def test_validate_tab_index() -> None:
-    assert validate_tab_index(0) == 0
-    assert validate_tab_index(1) == 1
-    assert validate_tab_index(2) == 2
+    """Validate all four legal tab indexes; ensure out-of-range raises ValueError."""
+    assert validate_tab_index(0) == 0  # TAB_LAYOUT
+    assert validate_tab_index(1) == 1  # TAB_CONFIG
+    assert validate_tab_index(2) == 2  # TAB_DIAGNOSTICS
+    # TAB_MCP_SERVERS = 3 is a valid index (added in UpstreamDrift #5688)
+    assert validate_tab_index(3) == 3  # TAB_MCP_SERVERS
     with pytest.raises(ValueError):
-        validate_tab_index(3)
+        validate_tab_index(4)  # out of range
 
 
 @pytest.fixture

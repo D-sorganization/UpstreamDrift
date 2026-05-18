@@ -34,22 +34,47 @@ class LayoutConfig:
 
 
 def _view_mode_from_string(name: str | None) -> ViewMode:
-    """Parse a stored string into a :class:`ViewMode`, defaulting to LIST_LARGE."""
+    """Parse a stored string into a :class:`ViewMode`, defaulting to LIST_LARGE.
+
+    Accepts both the current enum key names (e.g. ``"LARGE"``) and legacy
+    aliases that may have been persisted by older launchers before PR #5688
+    renamed the enum members (e.g. ``"comfortable"``).
+
+    Backward-compat mapping (pre-#5688 → current)
+    -----------------------------------------------
+    ``"comfortable"``  → ``ViewMode.LARGE``       (tile grid, NOT list)
+    ``"compact"``      → ``ViewMode.MEDIUM``
+    ``"dense"``        → ``ViewMode.SMALL``
+    ``"list"``         → ``ViewMode.LIST_LARGE``
+    ``"panel"``        → ``ViewMode.LIST_LARGE``  (old sidebar panel layout)
+    ``"floating"``     → ``ViewMode.LIST_LARGE``  (old floating window layout)
+
+    DbC postcondition: always returns a :class:`ViewMode` member.
+    """
     if not name:
         return ViewMode.LIST_LARGE
-    # Backward compat: map old enum names to new ones
-    _compat = {
-        "comfortable": "list_large",
-        "compact": "medium",
-        "dense": "small",
-        "list": "list_large",
+    # Backward compat: map pre-#5688 token names → new canonical enum key names.
+    # "comfortable" must map → LARGE (tile grid), NOT list mode (fixes #5690).
+    _compat: dict[str, str] = {
+        "comfortable": "LARGE",
+        "compact": "MEDIUM",
+        "dense": "SMALL",
+        "list": "LIST_LARGE",
+        # Pre-#5688 layout tokens that were never valid enum names
+        "panel": "LIST_LARGE",
+        "floating": "LIST_LARGE",
     }
-    key = _compat.get(str(name).strip().lower(), str(name).strip()).upper()
+    raw = str(name).strip().lower()
+    key = _compat.get(raw, str(name).strip().upper())
     try:
-        return ViewMode[key]
+        mode = ViewMode[key]
     except KeyError:
         logger.warning("Unknown view_mode %r, falling back to LIST_LARGE", name)
-        return ViewMode.LIST_LARGE
+        mode = ViewMode.LIST_LARGE
+    assert isinstance(mode, ViewMode), (  # DbC postcondition
+        f"_view_mode_from_string postcondition violated: got {mode!r}"
+    )
+    return mode
 
 
 class LayoutManager:
