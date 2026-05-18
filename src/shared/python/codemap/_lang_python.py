@@ -27,7 +27,7 @@ def _docstring(body_node, source: bytes) -> str:
                         break
                 return raw.strip().splitlines()[0] if raw.strip() else ""
             return ""
-        if c.type not in ("comment",):
+        if c.type != "comment":
             return ""
     return ""
 

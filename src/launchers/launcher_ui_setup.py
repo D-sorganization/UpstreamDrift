@@ -304,7 +304,7 @@ class LauncherUISetupMixin:
         # spliced into ``content_splitter`` here was removed as part of the
         # deprecated-chat sweep (UpstreamDrift #5620). The canonical chat
         # surface is now the Sidekick dock's "Chat" tab, provided by the
-        # vendored ``upstream_drift_tools.ui.tools_sidebar`` package via
+        # vendored ``sidekick.ui.tools_sidebar`` package via
         # ``_install_sidekick_sidebar()`` in ``golf_launcher.py``.
         # ``toggle_ai_assistant`` and other ``hasattr(self, "ai_panel")``
         # call sites become safe no-ops; a follow-up issue rewires them to
@@ -640,9 +640,9 @@ class LauncherUISetupMixin:
         """
         menubar = QMenuBar(self)
         # Postcondition (DbC): a non-null QMenuBar is returned.
-        assert menubar is not None, (
-            "QMenuBar construction returned None — should be impossible"
-        )
+        assert (
+            menubar is not None
+        ), "QMenuBar construction returned None — should be impossible"
 
         self._setup_file_menu(menubar)
         self._setup_view_menu(menubar)
@@ -1323,7 +1323,7 @@ class LauncherUISetupMixin:
     # Sidekick chat tab. That method was deleted so the launcher only
     # surfaces ONE chat path (the Sidekick dock's Chat tab). Do not
     # restore an AI panel here; extend the Sidekick chat tab in Tools'
-    # ``upstream_drift_tools.ui.tools_sidebar`` package instead.
+    # ``sidekick.ui.tools_sidebar`` package instead.
     #
     # The chat-session sync helper that lived next to it
     # (``_sync_chat_session``) was also dropped because the Sidekick

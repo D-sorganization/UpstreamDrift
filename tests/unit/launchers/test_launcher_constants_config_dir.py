@@ -64,9 +64,7 @@ def test_config_dir_is_path_instance() -> None:
     """CONFIG_DIR must be a pathlib.Path instance."""
     from src.launchers.launcher_constants import CONFIG_DIR
 
-    assert isinstance(CONFIG_DIR, Path), (
-        f"CONFIG_DIR must be Path, got {type(CONFIG_DIR)}"
-    )
+    assert isinstance(CONFIG_DIR, Path), f"CONFIG_DIR must be Path, got {type(CONFIG_DIR)}"
 
 
 def test_layout_config_file_is_path_instance() -> None:

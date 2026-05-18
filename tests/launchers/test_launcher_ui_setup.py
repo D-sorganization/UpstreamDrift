@@ -394,9 +394,9 @@ def test_search_input_is_auto_complete_line_edit(launcher) -> None:
         launcher.search_input,
         AutoCompleteLineEdit,
     ), "search_input must be AutoCompleteLineEdit, not bare QLineEdit"
-    assert len(launcher.search_input.completer_words) > 0, (
-        "AutoCompleteLineEdit vocabulary must be non-empty after construction"
-    )
+    assert (
+        len(launcher.search_input.completer_words) > 0
+    ), "AutoCompleteLineEdit vocabulary must be non-empty after construction"
 
 
 @pytest.mark.unit

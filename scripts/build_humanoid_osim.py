@@ -191,9 +191,9 @@ def _make_club_body() -> ET.Element:
     # Frame geometry (axes display).
     fg = ET.SubElement(body, "FrameGeometry", attrib={"name": "frame_geometry"})
     ET.SubElement(fg, "socket_frame").text = ".."
-    ET.SubElement(fg, "scale_factors").text = (
-        "0.20000000000000001 0.20000000000000001 0.20000000000000001"
-    )
+    ET.SubElement(
+        fg, "scale_factors"
+    ).text = "0.20000000000000001 0.20000000000000001 0.20000000000000001"
 
     ET.SubElement(body, "attached_geometry")
 
@@ -222,9 +222,9 @@ def _make_offset_frame(
     frame = ET.Element("PhysicalOffsetFrame", attrib={"name": name})
     fg = ET.SubElement(frame, "FrameGeometry", attrib={"name": "frame_geometry"})
     ET.SubElement(fg, "socket_frame").text = ".."
-    ET.SubElement(fg, "scale_factors").text = (
-        "0.20000000000000001 0.20000000000000001 0.20000000000000001"
-    )
+    ET.SubElement(
+        fg, "scale_factors"
+    ).text = "0.20000000000000001 0.20000000000000001 0.20000000000000001"
     ET.SubElement(frame, "socket_parent").text = socket_parent
     ET.SubElement(frame, "translation").text = " ".join(repr(v) for v in translation)
     ET.SubElement(frame, "orientation").text = " ".join(repr(v) for v in orientation)

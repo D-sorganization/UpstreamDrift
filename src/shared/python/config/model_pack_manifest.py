@@ -443,12 +443,12 @@ class ModelPackEntry:
             launcher=launcher,
             order=order,
             hidden=bool(hidden_raw),
-            hidden_reason=hidden_reason.strip()
-            if isinstance(hidden_reason, str)
-            else None,
-            hidden_owner=hidden_owner.strip()
-            if isinstance(hidden_owner, str)
-            else None,
+            hidden_reason=(
+                hidden_reason.strip() if isinstance(hidden_reason, str) else None
+            ),
+            hidden_owner=(
+                hidden_owner.strip() if isinstance(hidden_owner, str) else None
+            ),
         )
 
     def to_dict(self) -> dict[str, Any]:
