@@ -26,6 +26,10 @@ permissions:
   issues: write
   pull-requests: read
 
+concurrency:
+  group: verify-issue-closure-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
 jobs:
   verify-closure:
     timeout-minutes: 30
