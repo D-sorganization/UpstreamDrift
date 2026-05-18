@@ -878,7 +878,7 @@ class AIAssistantPanel(QWidget):
         except OSError:
             return
 
-        if not cli_entries:
+        if cli_entries is None or not cli_entries:
             return
 
         # Visual separator between HTTP and CLI sections.
