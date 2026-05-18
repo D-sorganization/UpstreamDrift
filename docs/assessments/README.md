@@ -239,31 +239,31 @@ In addition to the standard framework, specialized audits monitor specific quali
 
 ## Version History
 
-| Version | Date    | Changes                                                                            |
-| ------- | ------- | ---------------------------------------------------------------------------------- |
-| 1.0     | 2025-12 | Initial 15-point framework                                                         |
-| 2.0     | 2026-01 | Reorganized based on UX/strategic gap analysis                                     |
-| 2.1     | 2026-02 | Added comprehensive multi-framework assessment                                     |
-| 2.2     | 2026-02 | Added Physics Audit (Specialized Assessment)                                       |
-| 2.3     | 2026-02 | Added Injury Risk Scoring issue (ISSUE-016)                                        |
-| 2.4     | 2026-02 | Added Implementation Gaps Report                                                   |
-| 2.5     | 2026-02 | Updated Gaps Report with Critical Issues                                           |
-| 2.6     | 2026-02 | Added Data Copyright and Kinematic Sequence Issues                                 |
-| 2.7     | 2025-05 | Added Implementation Gaps Review 2025                                              |
-| 2.8     | 2026-02 | Updated Completist Report 2026-02-21                                               |
-| 2.9     | 2026-02 | Updated Comprehensive Gaps Report (Testing & Patent)                               |
-| 3.0     | 2026-02 | Consolidated Implementation Gaps and Inaccuracies Report                           |
-| 3.1     | 2026-03 | Removed stale assessments and archives older than 2026-03-08                       |
-| 3.2     | 2026-03 | Removed duplicate `Assessment_H_CICD.md` (superseded by CI/CD results)             |
-| 3.3     | 2026-03 | Populated empty `Assessment_H_CI_CD.md` with content from archived version (#1962) |
-| 3.4     | 2026-03 | Added Completist Report 2026-03-26                                                 |
-| 3.5     | 2026-03 | Updated Completist Report 2026-03-27 with gap analysis and 32 stub issue files     |
-| 3.5     | 2026-03 | Added Completist Report 2026-03-27 + 32 incomplete-stub issues (#2194-#2243)       |
-| 3.6     | 2026-04 | Added Completist Report 2026-04-05                                                 | 
-| 3.7 | 2026-04 | Added A-N Assessment 2026-04-10 refresh (see `A-N_Assessment_2026-04-10.md`) |
-| 3.8 | 2026-04 | Added Completist Report 2026-04-26 |
-| 3.9 | 2026-05 | Added Assessment_H_CICD.md; updated A, B, C, D, F, G, I, K, L, M, N, O assessments for Python 3.10 compatibility; added issues ISSUE_Assessment_E_Performance.md and ISSUE_Assessment_J_API_Design.md; refreshed Comprehensive_Assessment.md and assessment_summary.json |
-| 4.0 | 2026-05 | Added comprehensive assessment 2026-05-07 (A-N categories + comprehensive report) |
+| Version | Date    | Changes                                                                                                                                                                                                                                                                  |
+| ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1.0     | 2025-12 | Initial 15-point framework                                                                                                                                                                                                                                               |
+| 2.0     | 2026-01 | Reorganized based on UX/strategic gap analysis                                                                                                                                                                                                                           |
+| 2.1     | 2026-02 | Added comprehensive multi-framework assessment                                                                                                                                                                                                                           |
+| 2.2     | 2026-02 | Added Physics Audit (Specialized Assessment)                                                                                                                                                                                                                             |
+| 2.3     | 2026-02 | Added Injury Risk Scoring issue (ISSUE-016)                                                                                                                                                                                                                              |
+| 2.4     | 2026-02 | Added Implementation Gaps Report                                                                                                                                                                                                                                         |
+| 2.5     | 2026-02 | Updated Gaps Report with Critical Issues                                                                                                                                                                                                                                 |
+| 2.6     | 2026-02 | Added Data Copyright and Kinematic Sequence Issues                                                                                                                                                                                                                       |
+| 2.7     | 2025-05 | Added Implementation Gaps Review 2025                                                                                                                                                                                                                                    |
+| 2.8     | 2026-02 | Updated Completist Report 2026-02-21                                                                                                                                                                                                                                     |
+| 2.9     | 2026-02 | Updated Comprehensive Gaps Report (Testing & Patent)                                                                                                                                                                                                                     |
+| 3.0     | 2026-02 | Consolidated Implementation Gaps and Inaccuracies Report                                                                                                                                                                                                                 |
+| 3.1     | 2026-03 | Removed stale assessments and archives older than 2026-03-08                                                                                                                                                                                                             |
+| 3.2     | 2026-03 | Removed duplicate `Assessment_H_CICD.md` (superseded by CI/CD results)                                                                                                                                                                                                   |
+| 3.3     | 2026-03 | Populated empty `Assessment_H_CI_CD.md` with content from archived version (#1962)                                                                                                                                                                                       |
+| 3.4     | 2026-03 | Added Completist Report 2026-03-26                                                                                                                                                                                                                                       |
+| 3.5     | 2026-03 | Updated Completist Report 2026-03-27 with gap analysis and 32 stub issue files                                                                                                                                                                                           |
+| 3.5     | 2026-03 | Added Completist Report 2026-03-27 + 32 incomplete-stub issues (#2194-#2243)                                                                                                                                                                                             |
+| 3.6     | 2026-04 | Added Completist Report 2026-04-05                                                                                                                                                                                                                                       |
+| 3.7     | 2026-04 | Added A-N Assessment 2026-04-10 refresh (see `A-N_Assessment_2026-04-10.md`)                                                                                                                                                                                             |
+| 3.8     | 2026-04 | Added Completist Report 2026-04-26                                                                                                                                                                                                                                       |
+| 3.9     | 2026-05 | Added Assessment_H_CICD.md; updated A, B, C, D, F, G, I, K, L, M, N, O assessments for Python 3.10 compatibility; added issues ISSUE_Assessment_E_Performance.md and ISSUE_Assessment_J_API_Design.md; refreshed Comprehensive_Assessment.md and assessment_summary.json |
+| 4.0     | 2026-05 | Added comprehensive assessment 2026-05-07 (A-N categories + comprehensive report)                                                                                                                                                                                        |
 
 ---
 

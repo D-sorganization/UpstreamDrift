@@ -23,6 +23,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate:
+
 - After `codebase-scan` during Bootstrap initialization
 - When architectural understanding is needed before memory ingestion
 
@@ -40,6 +41,7 @@ Activate:
 ## Outputs
 
 **`architecture_insights`** — concise summary including:
+
 - System structure overview
 - Module boundaries and responsibilities
 - Key data flows
@@ -61,6 +63,7 @@ Activate:
 ## Non-Goals
 
 This skill must NOT:
+
 - Make architectural recommendations
 - Propose changes
 - Read deeply into implementation details

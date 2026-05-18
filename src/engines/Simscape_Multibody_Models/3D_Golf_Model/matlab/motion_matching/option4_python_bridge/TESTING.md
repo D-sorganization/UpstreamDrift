@@ -48,6 +48,7 @@ Each test below has a one-line description, the file it lives in, and the issue 
 ### Lifecycle tests
 
 #### `test_engine_starts_and_stops_cleanly`
+
 **File:** `tests/test_lifecycle.py` — **gates:** #036
 
 ```python
@@ -70,6 +71,7 @@ def test_engine_starts_and_stops_cleanly(slx_path: str) -> None:
 `count_matlab_processes()` uses `psutil` to count processes named `matlab.exe`. Tolerates a 5 s grace period for the OS to reap.
 
 #### `test_load_simscape_model_succeeds`
+
 **File:** `tests/test_lifecycle.py` — **gates:** #036
 
 ```python
@@ -82,6 +84,7 @@ def test_load_simscape_model_succeeds(slx_path: str) -> None:
 ```
 
 #### `test_load_invalid_path_raises`
+
 **File:** `tests/test_lifecycle.py` — **gates:** #036
 
 ```python
@@ -97,6 +100,7 @@ This test does **not** require MATLAB — `load_from_path` validates the path be
 ### Behavioural tests
 
 #### `test_simulate_with_zero_coefficients_produces_static_pose`
+
 **File:** `tests/test_behaviour.py` — **gates:** #036
 
 ```python
@@ -123,6 +127,7 @@ def test_simulate_with_zero_coefficients_produces_static_pose(
 ```
 
 #### `test_simulate_with_known_coefficients_matches_matlab_direct`
+
 **File:** `tests/test_regression.py` — **gates:** #036
 
 ```python
@@ -156,6 +161,7 @@ def test_simulate_with_known_coefficients_matches_matlab_direct(
 ### Protocol-compliance test
 
 #### `test_protocol_compliance`
+
 **File:** `tests/test_protocol_compliance.py` — **gates:** #036
 
 ```python
@@ -200,6 +206,7 @@ This test does **not** require MATLAB — it inspects the class only.
 ### Concurrency test
 
 #### `test_concurrent_engines_isolated`
+
 **File:** `tests/test_pool.py` — **gates:** #038
 
 ```python
@@ -232,6 +239,7 @@ def test_concurrent_engines_isolated(slx_path: str) -> None:
 ### Cache test
 
 #### `test_cache_hit_skips_simulation`
+
 **File:** `tests/test_cache.py` — **gates:** #039
 
 ```python
@@ -261,6 +269,7 @@ def test_cache_hit_skips_simulation(adapter: SimscapeAdapter) -> None:
 ```
 
 #### `test_cache_invalidates_on_param_change`
+
 **File:** `tests/test_cache.py` — **gates:** #039
 
 ```python
@@ -282,6 +291,7 @@ def test_cache_invalidates_on_param_change(adapter: SimscapeAdapter) -> None:
 ### Determinism test
 
 #### `test_simulation_is_deterministic_within_session`
+
 **File:** `tests/test_determinism.py` — **gates:** #036
 
 ```python
@@ -304,6 +314,7 @@ def test_simulation_is_deterministic_within_session(
 ### Integration tests against existing consumers
 
 #### `test_system_identification_works_against_adapter`
+
 **File:** `tests/test_integration_sysid.py` — **gates:** #040
 
 ```python
@@ -339,6 +350,7 @@ def test_system_identification_works_against_adapter(slx_path: str) -> None:
 ```
 
 #### `test_dataset_generator_core_works_against_adapter`
+
 **File:** `tests/test_integration_datagen.py` — **gates:** #040
 
 ```python

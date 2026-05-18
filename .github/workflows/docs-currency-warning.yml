@@ -19,12 +19,12 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - 'src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/**'
-      - 'src/engines/physics_engines/mujoco/**'
-      - 'src/engines/physics_engines/drake/**'
-      - 'src/engines/physics_engines/pinocchio/**'
-      - 'src/engines/physics_engines/opensim/**'
-      - 'shared/python/motion_matching/**'
+      - "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/**"
+      - "src/engines/physics_engines/mujoco/**"
+      - "src/engines/physics_engines/drake/**"
+      - "src/engines/physics_engines/pinocchio/**"
+      - "src/engines/physics_engines/opensim/**"
+      - "shared/python/motion_matching/**"
 
 permissions:
   contents: read

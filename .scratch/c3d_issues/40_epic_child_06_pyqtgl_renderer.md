@@ -39,6 +39,7 @@ class PyQtGLRenderer:
 ## Tests
 
 `tests/unit/body_part_viz/renderers/test_pyqtgl_renderer.py`:
+
 - `pytest.importorskip("pyqtgraph")`.
 - Headless `QT_QPA_PLATFORM=offscreen`.
 - Build a `GLViewWidget` (in `app.exec` mode? — no, just instantiate and never show).

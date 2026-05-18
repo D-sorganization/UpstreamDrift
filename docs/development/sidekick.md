@@ -6,10 +6,10 @@ adding capabilities once makes them available in both places.
 
 ## Surfaces
 
-| Shell           | File                                                                  | Notes                                                                                                                |
-| --------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| React/Tauri     | [`ui/src/pages/Chat.tsx`](../../ui/src/pages/Chat.tsx) (route `/chat`)| Renders `ChatPanel` over the FastAPI WebSocket in `src/api/routes/chat_ws.py`. Styled with `var(--sidekick-*)` vars. |
-| PyQt launcher   | [`src/shared/python/ai/gui/assistant_panel.py`](../../src/shared/python/ai/gui/assistant_panel.py) | `AIAssistantPanel`, embedded as splitter pane and as an `EmbeddableTool` tile.                                       |
+| Shell         | File                                                                                               | Notes                                                                                                                |
+| ------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| React/Tauri   | [`ui/src/pages/Chat.tsx`](../../ui/src/pages/Chat.tsx) (route `/chat`)                             | Renders `ChatPanel` over the FastAPI WebSocket in `src/api/routes/chat_ws.py`. Styled with `var(--sidekick-*)` vars. |
+| PyQt launcher | [`src/shared/python/ai/gui/assistant_panel.py`](../../src/shared/python/ai/gui/assistant_panel.py) | `AIAssistantPanel`, embedded as splitter pane and as an `EmbeddableTool` tile.                                       |
 
 Both shells display the same brand ("Sidekick") in their window/header
 text and route messages through the same FastAPI chat service.

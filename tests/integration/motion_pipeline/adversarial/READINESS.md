@@ -13,16 +13,16 @@ real-data integration.
 
 ## Module status
 
-| Module | Status | Notes |
-|---|---|---|
-| `contracts.py` | GREEN | 93.5% coverage. Most invariants enforced. Two gaps filed (#4720). |
-| `sources/` (loaders) | YELLOW | All 9 formats import; 5/9 golden roundtrips fail on main (pre-existing). c3d adapter leaks raw OSError (#4721). |
-| `preprocessing/` | YELLOW | Pipeline imports cleanly. Kalman filter declared but unimplemented (existing xfail). PCA gap-fill missing (existing xfail). |
-| `scaling/` | YELLOW | anthropometric works; opensim_scale 13.87% covered (deps missing). |
-| `ik/` | GREEN | All 4 backend stubs import; base class 83% covered. |
-| `matching/` | YELLOW | base + costs work; inverse_dyn_pinocchio 52% covered, opensim variants skipped. |
-| `orchestrator.py` | YELLOW | 44% coverage. Several wiring gaps tracked (#4647/#4648/#4649). |
-| `api.py` | **RED** | `create_app()` crashes at registration time (#4722). HTTP API is non-functional. |
+| Module               | Status  | Notes                                                                                                                       |
+| -------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `contracts.py`       | GREEN   | 93.5% coverage. Most invariants enforced. Two gaps filed (#4720).                                                           |
+| `sources/` (loaders) | YELLOW  | All 9 formats import; 5/9 golden roundtrips fail on main (pre-existing). c3d adapter leaks raw OSError (#4721).             |
+| `preprocessing/`     | YELLOW  | Pipeline imports cleanly. Kalman filter declared but unimplemented (existing xfail). PCA gap-fill missing (existing xfail). |
+| `scaling/`           | YELLOW  | anthropometric works; opensim_scale 13.87% covered (deps missing).                                                          |
+| `ik/`                | GREEN   | All 4 backend stubs import; base class 83% covered.                                                                         |
+| `matching/`          | YELLOW  | base + costs work; inverse_dyn_pinocchio 52% covered, opensim variants skipped.                                             |
+| `orchestrator.py`    | YELLOW  | 44% coverage. Several wiring gaps tracked (#4647/#4648/#4649).                                                              |
+| `api.py`             | **RED** | `create_app()` crashes at registration time (#4722). HTTP API is non-functional.                                            |
 
 ## Real-world data scenarios exercised
 
@@ -50,12 +50,12 @@ exercises:
 
 ## Issues filed in this review
 
-| Issue | Title | Severity |
-|---|---|---|
-| [#4720](https://github.com/D-sorganization/UpstreamDrift/issues/4720) | JointDef accepts empty name and non-3D offset | HIGH (silent contract bypass) |
-| [#4721](https://github.com/D-sorganization/UpstreamDrift/issues/4721) | C3D adapter raises raw OSError on empty file | MEDIUM (typed-exception leak) |
-| [#4722](https://github.com/D-sorganization/UpstreamDrift/issues/4722) | FastAPI create_app() crashes — entire HTTP API non-functional | **CRITICAL** |
-| [#4723](https://github.com/D-sorganization/UpstreamDrift/issues/4723) | README advertises 5 CLI commands that do not exist | HIGH (user-facing) |
+| Issue                                                                 | Title                                                         | Severity                      |
+| --------------------------------------------------------------------- | ------------------------------------------------------------- | ----------------------------- |
+| [#4720](https://github.com/D-sorganization/UpstreamDrift/issues/4720) | JointDef accepts empty name and non-3D offset                 | HIGH (silent contract bypass) |
+| [#4721](https://github.com/D-sorganization/UpstreamDrift/issues/4721) | C3D adapter raises raw OSError on empty file                  | MEDIUM (typed-exception leak) |
+| [#4722](https://github.com/D-sorganization/UpstreamDrift/issues/4722) | FastAPI create_app() crashes — entire HTTP API non-functional | **CRITICAL**                  |
+| [#4723](https://github.com/D-sorganization/UpstreamDrift/issues/4723) | README advertises 5 CLI commands that do not exist            | HIGH (user-facing)            |
 
 ## Pre-existing baseline (origin/main)
 

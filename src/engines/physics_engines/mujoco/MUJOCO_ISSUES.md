@@ -8,6 +8,7 @@ See `MUJOCO_PARITY_SPEC.md` for the architectural backdrop. All work targets
 ---
 
 ## Issue: Fix gravity-constant interpolation bug in MuJoCo MJCF generators
+
 **Labels:** mujoco, motion-matching, priority:high, bug
 **Depends on:** —
 
@@ -23,13 +24,15 @@ parsing with `XML Error: bad format in attribute 'gravity'`.
 (model recommendation).
 
 **Deliverable.**
+
 - Cast `GRAVITY_M_S2`, `GOLF_BALL_MASS_KG`, `GOLF_BALL_RADIUS_M`,
   `DEFAULT_TIME_STEP` to `float()` at module load (already done for some;
-  apply consistently to *every* f-string interpolation site).
+  apply consistently to _every_ f-string interpolation site).
 - Equivalent fix in `_golf_swing_advanced_xml.py`,
   `_golf_swing_full_body_xml.py`, `_golf_swing_upper_body_xml.py`.
 
 **Acceptance.**
+
 - New test `tests/motion_matching/mujoco/test_model_builder.py::test_all_three_variants_compile`
   loads each XML and constructs an `MjModel` without raising.
 - Test asserts `model.opt.gravity[2] ≈ -9.807` for each variant.
@@ -42,6 +45,7 @@ parsing with `XML Error: bad format in attribute 'gravity'`.
 ---
 
 ## Issue: Add `_model_builder.py` to load + cache compiled MuJoCo MJCF
+
 **Labels:** mujoco, motion-matching, priority:high
 **Depends on:** ISSUE-MUJOCO-1
 
@@ -54,6 +58,7 @@ polynomial-torque driver will write into.
 and §3.2 (club attachment).
 
 **Deliverable.**
+
 - `src/engines/physics_engines/mujoco/motion_matching/_model_builder.py`:
   ```python
   @lru_cache(maxsize=4)
@@ -67,6 +72,7 @@ and §3.2 (club attachment).
   `CompiledModel.joint_names: list[str]`.
 
 **Acceptance.**
+
 - `test_model_builder.py::test_build_model_returns_consistent_id_order`:
   asserts joint name list is deterministic across calls.
 - `test_model_builder.py::test_actuators_present`: asserts `model.nu == len(joint_names)`.
@@ -79,6 +85,7 @@ and §3.2 (club attachment).
 ---
 
 ## Issue: `simulate_with_coefficients.py` + polynomial-torque driver
+
 **Labels:** mujoco, motion-matching, priority:high
 **Depends on:** ISSUE-MUJOCO-2
 
@@ -92,6 +99,7 @@ with `time, grip, grip_quat, clubhead, club_quat, tau, omega`.
 Mirrors the Simscape `simulate_with_coefficients` callback (shared/COST_FUNCTION_SPEC.md).
 
 **Deliverable.**
+
 - `src/engines/physics_engines/mujoco/motion_matching/simulate_with_coefficients.py`
 - `src/engines/physics_engines/mujoco/motion_matching/_torque_driver.py`
   (`PolynomialTorqueDriver` class wired via `mujoco.set_mjcb_control`).
@@ -101,6 +109,7 @@ Mirrors the Simscape `simulate_with_coefficients` callback (shared/COST_FUNCTION
   own timestep), `t0=0.0`, `output_rate_hz=1000`.
 
 **Acceptance.**
+
 - `test_simulate_with_coefficients.py::test_zero_torque_falls_under_gravity`:
   with θ=0, the grip Z drops monotonically.
 - `test_simulate_with_coefficients.py::test_output_shapes`: every array has
@@ -118,6 +127,7 @@ Mirrors the Simscape `simulate_with_coefficients` callback (shared/COST_FUNCTION
 ---
 
 ## Issue: `fit_swing_mujoco.py` canonical fit driver
+
 **Labels:** mujoco, motion-matching, priority:high
 **Depends on:** ISSUE-MUJOCO-3, PARITY-COST
 
@@ -132,6 +142,7 @@ behind a flag) with `compute_cost` from
 `shared/COST_FUNCTION_SPEC.md`; `shared/CODING_STANDARDS.md` §provenance.
 
 **Deliverable.**
+
 - `src/engines/physics_engines/mujoco/motion_matching/fit_swing_mujoco.py`:
   ```python
   def fit_swing_mujoco(target: ClubTarget, opts: FitOptions) -> FitResult:
@@ -139,11 +150,12 @@ behind a flag) with `compute_cost` from
 - `FitOptions` frozen dataclass holding `CostOptions`, `SimOptions`,
   `MinimizerOptions`, `rng_seed`.
 - `FitResult` mirrors Simscape's: `coefficients, final_rmse_m,
-  final_total_work_J, solver, solver_options, target_hash, git_commit,
-  mujoco_version, duration_s, timestamp_utc`.
+final_total_work_J, solver, solver_options, target_hash, git_commit,
+mujoco_version, duration_s, timestamp_utc`.
 - Bounds via the shared `build_coefficient_bounds(n_joints)` helper.
 
 **Acceptance.**
+
 - `test_fit_swing_mujoco.py::test_synth_then_fit_recovers_theta`:
   fit a synthesized target back to its θ_truth, RMSE < 1 mm,
   `‖θ_fit - θ_truth‖∞ < 1e-2`.
@@ -162,6 +174,7 @@ GPU / MJX path (deferred per spec §6.3).
 ---
 
 ## Issue: `synthesize_target_from_coefficients` engine implementation
+
 **Labels:** mujoco, motion-matching, priority:medium
 **Depends on:** ISSUE-MUJOCO-3, PARITY-LOADERS
 
@@ -175,6 +188,7 @@ that delegates to this engine when `opts.engine == "mujoco"`.
 §"Synthetic source"; `loaders/synthetic.py` line 36 (`NotImplementedError`).
 
 **Deliverable.**
+
 - `src/engines/physics_engines/mujoco/motion_matching/synthesize_target.py`:
   ```python
   def synthesize_target_from_coefficients(
@@ -185,9 +199,10 @@ that delegates to this engine when `opts.engine == "mujoco"`.
   on `opts.engine` (add the field if missing) — import is **lazy** to keep
   the GUI from pulling mujoco transitively.
 - Provenance: `SourceProvenance(filename="synthetic", format="synthetic",
-  subject_id="theta_seed_<n>", trial_id="...", sha256=sha256(theta.tobytes()))`.
+subject_id="theta_seed_<n>", trial_id="...", sha256=sha256(theta.tobytes()))`.
 
 **Acceptance.**
+
 - `test_synthesize_target.py::test_validates_against_clubtarget_schema`:
   the result construct passes the `_validate_clubtarget` postcondition
   block in `club_target.py`.
@@ -206,6 +221,7 @@ that delegates to this engine when `opts.engine == "mujoco"`.
 ---
 
 ## Issue: `viz/render_swing.py` — thin renderer over `mujoco.viewer`
+
 **Labels:** mujoco, motion-matching, priority:low
 **Depends on:** ISSUE-MUJOCO-3
 
@@ -218,6 +234,7 @@ Mirrors the Simscape `animate_trajectory_overlay.m` thin renderer at
 `shared/VISUALIZATION_SPEC.md`.
 
 **Deliverable.**
+
 - `src/engines/physics_engines/mujoco/motion_matching/viz/render_swing.py`:
   ```python
   def render_swing(
@@ -235,6 +252,7 @@ Mirrors the Simscape `animate_trajectory_overlay.m` thin renderer at
 - Headless mode: `mujoco.Renderer` to write an MP4 to `output_path`.
 
 **Acceptance.**
+
 - `test_render_swing.py::test_headless_mode_writes_file`
   (skip on `requires_gl` if the test runner can't render — gate with
   the existing `headless_safe` marker).
@@ -256,7 +274,7 @@ Once all six issues are merged:
 
 1. `python3 -m pytest tests/motion_matching/mujoco -n auto --timeout=60` passes.
 2. `python3 -c "from src.engines.physics_engines.mujoco.motion_matching import \
-   simulate_with_coefficients, fit_swing_mujoco, synthesize_target_from_coefficients"`
+simulate_with_coefficients, fit_swing_mujoco, synthesize_target_from_coefficients"`
    succeeds with no transitive heavy GUI imports.
 3. Synth-then-fit acceptance gate (`MUJOCO_PARITY_SPEC.md` §4 closing line)
    holds on developer hardware.

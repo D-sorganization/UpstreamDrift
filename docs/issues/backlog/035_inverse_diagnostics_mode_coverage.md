@@ -85,11 +85,13 @@ def diversity_metric(samples: np.ndarray) -> float:
 ## DbC contract
 
 Preconditions:
+
 - `config.cvae_checkpoint` exists.
 - `config.dataset_path` exists.
 - `config.n_samples_per_target >= 2` (need pairs for diversity).
 
 Postconditions:
+
 - All three output PNGs exist on disk.
 - `report.fraction_collapsed_targets in [0, 1]`.
 - `report.mean_diversity >= 0`.

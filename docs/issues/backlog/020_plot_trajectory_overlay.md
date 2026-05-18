@@ -89,11 +89,13 @@ end
 ## DbC contract
 
 Preconditions (`arguments` block):
+
 - `result` has fields `sim_out` (per #018 schema) and `coefficients`.
 - `target` conforms to `CLUB_IK_SPEC.md` schema.
 - `opts` is a `default_viz_options()` struct (or override).
 
 Postconditions:
+
 - `fig` is a valid figure handle (or for `animate_*`, a valid `VideoWriter` handle).
 - Two axes children present in `fig.Children` for `plot_trajectory_overlay`.
 

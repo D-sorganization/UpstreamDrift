@@ -7,7 +7,7 @@ Today every plotting surface in the repo (C3D Viewer 2D plots, the Motion-Match 
 1. **Pick a marker shape** (sphere / cube / cross / star / diamond / custom STL) consistently across plots.
 2. **Pick a marker size + edge** in a way that persists.
 3. **Pick a color** from a UI palette + custom hex.
-4. **Apply a colormap** that drives marker color from a *data channel* — e.g. clubhead-velocity-magnitude colors the marker red at peak speed, blue at rest.
+4. **Apply a colormap** that drives marker color from a _data channel_ — e.g. clubhead-velocity-magnitude colors the marker red at peak speed, blue at rest.
 
 The user has asked for a single shared toolkit that does all four, in a way that's reusable across the C3D Viewer, the matcher, the URDF generator's preview, the cross-engine dashboard, and any future plotting surface.
 
@@ -68,22 +68,22 @@ This epic creates a new shared package `src/shared/python/plot_style/` that **co
 
 ## Children (14 issues)
 
-| # | Title | Type | Priority |
-|---|---|---|---|
-| 1 | feat(plot-style): core contracts + dataclasses (MarkerStyle / ColorScale / DataChannel / PlotStyleSpec) | architecture | high |
-| 2 | feat(plot-style): marker shape primitives — sphere, cube, cross, star, diamond, custom-mesh | feature | high |
-| 3 | feat(plot-style): color resolution layer — Static / Palette / DataDriven | feature | high |
-| 4 | feat(plot-style): colormap registry + named semantic colormaps (velocity / force / acceleration) | feature | high |
-| 5 | feat(plot-style): DataChannel abstraction (per-frame scalar source from any np.ndarray of shape (T,) or (T, M)) | feature | high |
-| 6 | feat(plot-style): MarkerStylePicker / ColorPicker / ColormapPicker / DataChannelEditor Qt widgets | feature | high |
-| 7 | feat(plot-style): MatplotlibMarkerRenderer (3D scatter + 2D scatter backends) | feature | high |
-| 8 | feat(plot-style): PyQtGLMarkerRenderer (GLScatterPlotItem backend) | feature | medium |
-| 9 | feat(plot-style): PlotStyleSet JSON v1 persistence with theme presets | feature | high |
-| 10 | feat(c3d-viewer): integrate plot_style into 2D + 3D plot tabs (Markers / Analog / 3D Viewer) | integration | high |
-| 11 | feat(matcher): integrate plot_style into live view controller marker rendering | integration | high |
-| 12 | feat(cross-engine-dashboard): integrate plot_style into trajectory overlays | integration | medium |
-| 13 | test(plot-style): comprehensive TDD coverage + golden image snapshots | testing | high |
-| 14 | docs(plot-style): ADR + user guide + colormap-author guide | docs | medium |
+| #   | Title                                                                                                           | Type         | Priority |
+| --- | --------------------------------------------------------------------------------------------------------------- | ------------ | -------- |
+| 1   | feat(plot-style): core contracts + dataclasses (MarkerStyle / ColorScale / DataChannel / PlotStyleSpec)         | architecture | high     |
+| 2   | feat(plot-style): marker shape primitives — sphere, cube, cross, star, diamond, custom-mesh                     | feature      | high     |
+| 3   | feat(plot-style): color resolution layer — Static / Palette / DataDriven                                        | feature      | high     |
+| 4   | feat(plot-style): colormap registry + named semantic colormaps (velocity / force / acceleration)                | feature      | high     |
+| 5   | feat(plot-style): DataChannel abstraction (per-frame scalar source from any np.ndarray of shape (T,) or (T, M)) | feature      | high     |
+| 6   | feat(plot-style): MarkerStylePicker / ColorPicker / ColormapPicker / DataChannelEditor Qt widgets               | feature      | high     |
+| 7   | feat(plot-style): MatplotlibMarkerRenderer (3D scatter + 2D scatter backends)                                   | feature      | high     |
+| 8   | feat(plot-style): PyQtGLMarkerRenderer (GLScatterPlotItem backend)                                              | feature      | medium   |
+| 9   | feat(plot-style): PlotStyleSet JSON v1 persistence with theme presets                                           | feature      | high     |
+| 10  | feat(c3d-viewer): integrate plot_style into 2D + 3D plot tabs (Markers / Analog / 3D Viewer)                    | integration  | high     |
+| 11  | feat(matcher): integrate plot_style into live view controller marker rendering                                  | integration  | high     |
+| 12  | feat(cross-engine-dashboard): integrate plot_style into trajectory overlays                                     | integration  | medium   |
+| 13  | test(plot-style): comprehensive TDD coverage + golden image snapshots                                           | testing      | high     |
+| 14  | docs(plot-style): ADR + user guide + colormap-author guide                                                      | docs         | medium   |
 
 ## Cross-cutting principles (binding for every child PR)
 
@@ -185,6 +185,7 @@ renderer.update_marker_style(handle, style, frame_idx=t)
 ```
 
 The same pattern works for:
+
 - Per-marker scalar (shape `(T, M)`) → per-marker color per frame.
 - Joint torque magnitude → bone color.
 - Force-plate force magnitude → ground reaction marker color.

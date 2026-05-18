@@ -3,6 +3,7 @@
 from __future__ import annotations
 import importlib
 from pathlib import Path
+import contextlib
 
 __all__ = ["get_engine_catalog", "is_fit_capable"]
 
@@ -36,12 +37,10 @@ def get_engine_catalog() -> dict[str, dict[str, bool]]:
 
             # If capable, try to import the provider to trigger registration
             if fit_capable:
-                try:
+                with contextlib.suppress(ImportError):
                     importlib.import_module(
                         f"src.engines.physics_engines.{engine_name}.python.motion_matching.provider"
                     )
-                except ImportError:
-                    pass
 
             catalog[engine_name] = {"fit_capable": fit_capable}
 

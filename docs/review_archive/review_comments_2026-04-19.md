@@ -18,4 +18,3 @@ The state initialization short-circuits after the first call, so `_bias` and `_s
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/2830#discussion_r3108141090)
 
 ---
-

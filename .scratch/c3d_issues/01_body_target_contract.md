@@ -36,23 +36,23 @@ with a companion `BodyEvent(label: str, frame: int, time_s: float)` dataclass.
 
 ### Validation rules (`__post_init__`)
 
-| Rule | Failure |
-|---|---|
-| `time` is 1-D, length `N >= 2`, strictly increasing, `time[0] == 0` (within `1e-9`) | ValueError |
-| `marker_xyz.shape == (N, M, 3)`, M == `len(marker_names)`, M >= 3 | ValueError |
-| `marker_names` are strings, unique, non-empty | ValueError |
-| Per-marker `|xyz|` < `MAX_BODY_POSITION_NORM_M = 3.0` (sanity bound for human-scale motion) for finite samples | ValueError |
+| Rule                                                                                                                                 | Failure    |
+| ------------------------------------------------------------------------------------------------------------------------------------ | ---------- | ------------------------------------------------------------------------------------------- | ---------- |
+| `time` is 1-D, length `N >= 2`, strictly increasing, `time[0] == 0` (within `1e-9`)                                                  | ValueError |
+| `marker_xyz.shape == (N, M, 3)`, M == `len(marker_names)`, M >= 3                                                                    | ValueError |
+| `marker_names` are strings, unique, non-empty                                                                                        | ValueError |
+| Per-marker `                                                                                                                         | xyz        | `<`MAX_BODY_POSITION_NORM_M = 3.0` (sanity bound for human-scale motion) for finite samples | ValueError |
 | At least one frame is fully finite for at least 50% of markers (loader is responsible for cropping leading/trailing all-NaN windows) | ValueError |
-| `0 <= impact_idx < N` | ValueError |
-| `events` frame indices in `[0, N)`; labels non-empty unique | ValueError |
-| `source` is a `SourceProvenance` instance | TypeError |
+| `0 <= impact_idx < N`                                                                                                                | ValueError |
+| `events` frame indices in `[0, N)`; labels non-empty unique                                                                          | ValueError |
+| `source` is a `SourceProvenance` instance                                                                                            | TypeError  |
 
 Reuse `SourceProvenance` from `club_target.py`. Add `MAX_BODY_POSITION_NORM_M = 3.0` and a `BODY_TARGET_SCHEMA_VERSION = 1` constant.
 
 ### Re-exports
 
-* `target.py` — re-export `BodyTarget`, `BodyEvent`, `MAX_BODY_POSITION_NORM_M`, `BODY_TARGET_SCHEMA_VERSION` so external callers can keep using the `from src.shared.python.motion_matching import target` entry point.
-* `__init__.py` — extend `__all__` with the new symbols.
+- `target.py` — re-export `BodyTarget`, `BodyEvent`, `MAX_BODY_POSITION_NORM_M`, `BODY_TARGET_SCHEMA_VERSION` so external callers can keep using the `from src.shared.python.motion_matching import target` entry point.
+- `__init__.py` — extend `__all__` with the new symbols.
 
 ## Generic naming requirement
 

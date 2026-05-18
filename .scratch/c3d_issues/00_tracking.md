@@ -17,20 +17,20 @@ After this effort:
 
 ## Children
 
-| # | Title |
-|---|---|
-| 1 | feat(motion-matching): introduce `BodyTarget` canonical contract for full-body marker trajectories |
-| 2 | feat(motion-matching): C3D body-marker loader producing `BodyTarget` |
-| 3 | feat(motion-matching): `.mat` club-target loader (TW/GW × ProV1/Wiffle) |
-| 4 | feat(motion-matching): `ClubBallTarget` — club kinematics + ball impact boundary condition |
-| 5 | refactor(motion-matching): rename source-revealing identifiers and directories to generic names |
-| 6 | feat(starting-pose-matcher): animated full-trajectory marker preview with timeline scrubber |
-| 7 | feat(starting-pose-matcher): source-toggle UI — choose Club, Club+Ball, Body, or any combination |
-| 8 | feat(motion-matching): body-skeleton segments — connect anatomical markers into a stick figure |
-| 9 | refactor(c3d): consolidate three duplicate C3D readers into one canonical module |
-| 10 | feat(launcher): expose multi-source motion-target preview as a launcher tile |
-| 11 | test(motion-matching): integration tests + golden fixtures for body / club / ball pipeline |
-| 12 | docs(motion-matching): ADR + user guide for multi-source motion targets |
+| #   | Title                                                                                              |
+| --- | -------------------------------------------------------------------------------------------------- |
+| 1   | feat(motion-matching): introduce `BodyTarget` canonical contract for full-body marker trajectories |
+| 2   | feat(motion-matching): C3D body-marker loader producing `BodyTarget`                               |
+| 3   | feat(motion-matching): `.mat` club-target loader (TW/GW × ProV1/Wiffle)                            |
+| 4   | feat(motion-matching): `ClubBallTarget` — club kinematics + ball impact boundary condition         |
+| 5   | refactor(motion-matching): rename source-revealing identifiers and directories to generic names    |
+| 6   | feat(starting-pose-matcher): animated full-trajectory marker preview with timeline scrubber        |
+| 7   | feat(starting-pose-matcher): source-toggle UI — choose Club, Club+Ball, Body, or any combination   |
+| 8   | feat(motion-matching): body-skeleton segments — connect anatomical markers into a stick figure     |
+| 9   | refactor(c3d): consolidate three duplicate C3D readers into one canonical module                   |
+| 10  | feat(launcher): expose multi-source motion-target preview as a launcher tile                       |
+| 11  | test(motion-matching): integration tests + golden fixtures for body / club / ball pipeline         |
+| 12  | docs(motion-matching): ADR + user guide for multi-source motion targets                            |
 
 ## Dependency graph
 

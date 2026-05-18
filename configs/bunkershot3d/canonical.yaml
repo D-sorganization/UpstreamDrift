@@ -3,9 +3,9 @@
 
 bunker_bed:
   domain:
-    length_x: 0.4  # m
-    width_y: 0.3   # m
-    depth_z: 0.1   # m
+    length_x: 0.4 # m
+    width_y: 0.3 # m
+    depth_z: 0.1 # m
   boundary: "fixed" # "periodic" or "fixed"
 
 grain_population:
@@ -31,7 +31,7 @@ clubhead:
 
 trajectory:
   file: "configs/bunkershot3d/reference_swing.csv"
-  
+
 output:
   downsample_grains: 10 # Only save grains every N steps
   rate_hz: 2000.0 # 2kHz wrench output

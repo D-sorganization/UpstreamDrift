@@ -10,7 +10,11 @@ __version__ = "0.1.0"
 from .backends import ChronoDriver, LiggghtsDriver, MPMDriver
 
 # Calibration
-from .calibration import AngleOfReposeExperiment, CalibrationOptimizer, DrainedShearCellExperiment
+from .calibration import (
+    AngleOfReposeExperiment,
+    CalibrationOptimizer,
+    DrainedShearCellExperiment,
+)
 
 # Geometry
 from .geometry import ClubheadGenerator
@@ -19,7 +23,12 @@ from .geometry import ClubheadGenerator
 from .io import BunkerShotResultReader, BunkerShotResultWriter
 
 # Kinematics
-from .kinematics import CoSimulator, MockDoublePendulum, SwingTrajectory, generate_reference_trajectory
+from .kinematics import (
+    CoSimulator,
+    MockDoublePendulum,
+    SwingTrajectory,
+    generate_reference_trajectory,
+)
 
 # Post-processing
 from .postproc import WrenchTrace
@@ -57,4 +66,3 @@ __all__ = [
     "BunkerShotResultReader",
     "BunkerShotResultWriter",
 ]
-

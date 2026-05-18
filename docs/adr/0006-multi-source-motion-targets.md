@@ -9,16 +9,16 @@
 The motion-matching pipeline in `src/shared/python/motion_matching/` was
 originally built around a single frozen dataclass, `ClubTarget`, that
 captured the time-aligned six-degree-of-freedom trajectory of a club
-during a swing.  All cost terms, validators, alignment helpers, and
+during a swing. All cost terms, validators, alignment helpers, and
 visualisations consumed `ClubTarget` directly, and the Excel and C3D
 loaders both produced one.
 
-That design is no longer sufficient.  Two adjacent capture modalities
+That design is no longer sufficient. Two adjacent capture modalities
 are entering the pipeline:
 
 1. **Ball-aware club captures** — some sources record both the club
-   trajectory *and* the launch-frame ball state on the same clock
-   (impact-pinned).  Cost terms that score launch quality need both
+   trajectory _and_ the launch-frame ball state on the same clock
+   (impact-pinned). Cost terms that score launch quality need both
    tracks aligned to a shared time grid, but the ball track is
    optional and not present in legacy xlsx workbooks.
 2. **Full-body motion capture** — C3D files from full-body marker sets
@@ -30,19 +30,19 @@ are entering the pipeline:
 
 Trying to bolt these onto `ClubTarget` creates a validation explosion:
 optional ball fields, optional segment dictionaries, optional segment
-labels, optional shared-clock metadata.  Every cost term then has to
+labels, optional shared-clock metadata. Every cost term then has to
 re-check which optional attributes are populated, and the post-init
 validator becomes a thicket of cross-field guards.
 
 The cost-function surface also needs to dispatch on what is actually
-available in a given run.  A "club only" run, a "club + ball" run, a
+available in a given run. A "club only" run, a "club + ball" run, a
 "club + body" run, and a "club + ball + body" run share large amounts
 of code but score different terms.
 
-A separate forcing function is naming.  Several of the historical
+A separate forcing function is naming. Several of the historical
 identifiers leaked source-specific terminology into otherwise generic
 code (the matcher tile is still labelled "Starting Pose Matcher", the
-xlsx variant carried a vendor-specific label).  Any restructuring is
+xlsx variant carried a vendor-specific label). Any restructuring is
 also an opportunity to clear those out so file-on-disk names can stay
 specific while everything in code, directories, and UI stays
 source-agnostic.
@@ -53,18 +53,18 @@ Introduce three frozen dataclasses and one aggregator, plus a pair of
 format-agnostic dispatchers, and treat them as the canonical surface
 for downstream cost code:
 
-- `ClubTarget` — unchanged.  Six-DoF club trajectory on a sim timegrid.
+- `ClubTarget` — unchanged. Six-DoF club trajectory on a sim timegrid.
 - `ClubBallTarget` — frozen dataclass adding launch-frame ball state on
-  the same impact-pinned clock as the club track.  Validates that ball
+  the same impact-pinned clock as the club track. Validates that ball
   samples and club samples share the same time vector.
 - `BodyTarget` — frozen dataclass holding a labelled bag of segment
-  trajectories from a full-body capture.  Each segment carries its own
+  trajectories from a full-body capture. Each segment carries its own
   position (and where available, orientation) array on the shared time
-  vector.  A `default_body_segments` helper returns the canonical
+  vector. A `default_body_segments` helper returns the canonical
   segment labels for the supported marker set.
 - `MultiSourceTarget` — aggregator that holds at most one `ClubTarget`,
   at most one `ClubBallTarget`, and at most one `BodyTarget`, plus the
-  shared time grid.  Exposes `has_club()`, `has_ball()`, and
+  shared time grid. Exposes `has_club()`, `has_ball()`, and
   `has_body()` accessors that cost-function code dispatches on.
 
 Loading is split into two format-agnostic dispatchers:
@@ -72,7 +72,7 @@ Loading is split into two format-agnostic dispatchers:
 - `load_club_target(path, ...)` — already present; routes on extension
   (xlsx / xlsm / xls / c3d) to the per-format loader.
 - `load_body_target(path, ...)` — new dispatcher for full-body marker
-  sets.  Currently routes only `.c3d` to the C3D body-segment loader,
+  sets. Currently routes only `.c3d` to the C3D body-segment loader,
   with the same dispatch shape as `load_club_target` so further
   formats can plug in without changing call sites.
 
@@ -99,11 +99,11 @@ file.
 Add ball, segment-bag, and shared-clock fields to `ClubTarget` itself
 and make them all `None`-able.
 
-Rejected.  The post-init validator becomes a combinatorial mess (ball
+Rejected. The post-init validator becomes a combinatorial mess (ball
 implies club, body may or may not share a clock with club, segment
 labels must match a registered set when present, time vectors must
-agree across whichever subset is populated).  Cost-function code has
-to keep guarding on `is None` for every term it touches.  Worse, the
+agree across whichever subset is populated). Cost-function code has
+to keep guarding on `is None` for every term it touches. Worse, the
 "is this a body target?" question stops being answerable by type and
 becomes an attribute probe.
 
@@ -112,10 +112,10 @@ becomes an attribute probe.
 Define a `Target` ABC and make `ClubTarget`, `ClubBallTarget`, and
 `BodyTarget` subclasses; have cost terms pattern-match on `isinstance`.
 
-Rejected.  Cost terms are not polymorphic over a single target — most
-of them want both a club track *and* a body track at once, so an ABC
+Rejected. Cost terms are not polymorphic over a single target — most
+of them want both a club track _and_ a body track at once, so an ABC
 hierarchy implies dispatching N ways and re-assembling state on every
-call.  The flat frozen-dataclass + aggregator shape matches the actual
+call. The flat frozen-dataclass + aggregator shape matches the actual
 data flow more honestly: cost terms receive one `MultiSourceTarget`
 and dispatch on `has_*()` for the terms they need.
 
@@ -124,9 +124,9 @@ and dispatch on `has_*()` for the terms they need.
 ### Positive
 
 - Cost-function code reads a single `MultiSourceTarget` and dispatches
-  on `has_club()`, `has_ball()`, `has_body()`.  No more `is None`
+  on `has_club()`, `has_ball()`, `has_body()`. No more `is None`
   guards on optional attributes of the same dataclass.
-- Loaders stay independent and composable.  A caller that only needs
+- Loaders stay independent and composable. A caller that only needs
   the club track does not pay the cost of opening a body file.
 - The dispatcher pattern (`load_club_target`, `load_body_target`)
   scales: adding a new file format means adding one entry to the
@@ -137,10 +137,10 @@ and dispatch on `has_*()` for the terms they need.
 ### Negative
 
 - One additional aggregation step at call sites that previously
-  consumed a `ClubTarget` directly.  A thin shim lets legacy code keep
+  consumed a `ClubTarget` directly. A thin shim lets legacy code keep
   passing a bare `ClubTarget` for one release while migrating.
 - Three dataclasses and one aggregator is more surface than one
-  dataclass.  The trade-off is paid back in cost-term clarity.
+  dataclass. The trade-off is paid back in cost-term clarity.
 
 ## Validation Strategy
 
@@ -168,7 +168,7 @@ and dispatch on `has_*()` for the terms they need.
   `ClubTarget` or a `MultiSourceTarget` for one release; the bare
   form is wrapped internally and a `DeprecationWarning` points at the
   new aggregator.
-- No on-disk format changes.  Existing xlsx / C3D files are still
+- No on-disk format changes. Existing xlsx / C3D files are still
   loaded by the same per-format loaders.
 
 ## References

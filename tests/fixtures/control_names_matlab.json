@@ -1,140 +1,39 @@
 {
   "_provenance": "Auto-generated placeholder mirroring the Python registry. Regenerate via tools/regen_control_names_fixture.m once MATLAB is available locally.",
   "torque_to_polynomial_base": [
-    [
-      "LScapLogs_ActuatorTorqueX",
-      "LScapInputX"
-    ],
-    [
-      "LScapLogs_ActuatorTorqueY",
-      "LScapInputY"
-    ],
-    [
-      "RScapLogs_ActuatorTorqueX",
-      "RScapInputX"
-    ],
-    [
-      "RScapLogs_ActuatorTorqueY",
-      "RScapInputY"
-    ],
-    [
-      "LSLogs_ActuatorTorqueX",
-      "LSInputX"
-    ],
-    [
-      "LSLogs_ActuatorTorqueY",
-      "LSInputY"
-    ],
-    [
-      "LSLogs_ActuatorTorqueZ",
-      "LSInputZ"
-    ],
-    [
-      "RSLogs_ActuatorTorqueX",
-      "RSInputX"
-    ],
-    [
-      "RSLogs_ActuatorTorqueY",
-      "RSInputY"
-    ],
-    [
-      "RSLogs_ActuatorTorqueZ",
-      "RSInputZ"
-    ],
-    [
-      "SpineLogs_ActuatorTorqueX",
-      "SpineInputX"
-    ],
-    [
-      "SpineLogs_ActuatorTorqueY",
-      "SpineInputY"
-    ],
-    [
-      "HipLogs_TranslationForceXInput",
-      "TranslationInputX"
-    ],
-    [
-      "HipLogs_TranslationForceYInput",
-      "TranslationInputY"
-    ],
-    [
-      "HipLogs_TranslationForceZInput",
-      "TranslationInputZ"
-    ],
-    [
-      "HipLogs_HipTorqueXInput",
-      "HipInputX"
-    ],
-    [
-      "HipLogs_HipTorqueYInput",
-      "HipInputY"
-    ],
-    [
-      "HipLogs_HipTorqueZInput",
-      "HipInputZ"
-    ],
-    [
-      "LScapTorqueXInput",
-      "LScapInputX"
-    ],
-    [
-      "LScapTorqueYInput",
-      "LScapInputY"
-    ],
-    [
-      "RScapTorqueXInput",
-      "RScapInputX"
-    ],
-    [
-      "RScapTorqueYInput",
-      "RScapInputY"
-    ],
-    [
-      "LSTorqueXInput",
-      "LSInputX"
-    ],
-    [
-      "LSTorqueYInput",
-      "LSInputY"
-    ],
-    [
-      "LSTorqueZInput",
-      "LSInputZ"
-    ],
-    [
-      "RSTorqueXInput",
-      "RSInputX"
-    ],
-    [
-      "RSTorqueYInput",
-      "RSInputY"
-    ],
-    [
-      "RSTorqueZInput",
-      "RSInputZ"
-    ],
-    [
-      "HipTorqueXInput",
-      "HipInputX"
-    ],
-    [
-      "HipTorqueYInput",
-      "HipInputY"
-    ],
-    [
-      "HipTorqueZInput",
-      "HipInputZ"
-    ]
+    ["LScapLogs_ActuatorTorqueX", "LScapInputX"],
+    ["LScapLogs_ActuatorTorqueY", "LScapInputY"],
+    ["RScapLogs_ActuatorTorqueX", "RScapInputX"],
+    ["RScapLogs_ActuatorTorqueY", "RScapInputY"],
+    ["LSLogs_ActuatorTorqueX", "LSInputX"],
+    ["LSLogs_ActuatorTorqueY", "LSInputY"],
+    ["LSLogs_ActuatorTorqueZ", "LSInputZ"],
+    ["RSLogs_ActuatorTorqueX", "RSInputX"],
+    ["RSLogs_ActuatorTorqueY", "RSInputY"],
+    ["RSLogs_ActuatorTorqueZ", "RSInputZ"],
+    ["SpineLogs_ActuatorTorqueX", "SpineInputX"],
+    ["SpineLogs_ActuatorTorqueY", "SpineInputY"],
+    ["HipLogs_TranslationForceXInput", "TranslationInputX"],
+    ["HipLogs_TranslationForceYInput", "TranslationInputY"],
+    ["HipLogs_TranslationForceZInput", "TranslationInputZ"],
+    ["HipLogs_HipTorqueXInput", "HipInputX"],
+    ["HipLogs_HipTorqueYInput", "HipInputY"],
+    ["HipLogs_HipTorqueZInput", "HipInputZ"],
+    ["LScapTorqueXInput", "LScapInputX"],
+    ["LScapTorqueYInput", "LScapInputY"],
+    ["RScapTorqueXInput", "RScapInputX"],
+    ["RScapTorqueYInput", "RScapInputY"],
+    ["LSTorqueXInput", "LSInputX"],
+    ["LSTorqueYInput", "LSInputY"],
+    ["LSTorqueZInput", "LSInputZ"],
+    ["RSTorqueXInput", "RSInputX"],
+    ["RSTorqueYInput", "RSInputY"],
+    ["RSTorqueZInput", "RSInputZ"],
+    ["HipTorqueXInput", "HipInputX"],
+    ["HipTorqueYInput", "HipInputY"],
+    ["HipTorqueZInput", "HipInputZ"]
   ],
-  "coefficient_letters": [
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G"
-  ],
+  "coefficient_letters": ["A", "B", "C", "D", "E", "F", "G"],
   "all_coefficient_names": [
     "LScapInputXA",
     "LScapInputXB",

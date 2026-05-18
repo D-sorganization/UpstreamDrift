@@ -7,6 +7,7 @@ Depends on every other child issue (lands last).
 ### ADR
 
 `docs/adr/00<next>-body-part-viz-toolkit.md` covering:
+
 - Context: motion-matching pipeline already exists; segments rendered as lines or cylinders only.
 - Decision: ship a shared `body_part_viz` package with shapes / fitters / renderers contracts.
 - Alternatives considered:

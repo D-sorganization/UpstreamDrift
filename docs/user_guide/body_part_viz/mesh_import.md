@@ -14,12 +14,12 @@ default library so every capture starts with it, see
 
 `MeshShape` loads any of the formats `trimesh` can parse:
 
-| Extension | Notes |
-| --- | --- |
-| `.stl` | Binary or ASCII STL. The bundled defaults are STL. |
-| `.obj` | Triangulated; multi-material OBJs are flattened. |
-| `.ply` | Binary or ASCII; vertex colours are dropped. |
-| `.glb` | Embedded binary glTF; the first mesh primitive is used. |
+| Extension | Notes                                                   |
+| --------- | ------------------------------------------------------- |
+| `.stl`    | Binary or ASCII STL. The bundled defaults are STL.      |
+| `.obj`    | Triangulated; multi-material OBJs are flattened.        |
+| `.ply`    | Binary or ASCII; vertex colours are dropped.            |
+| `.glb`    | Embedded binary glTF; the first mesh primitive is used. |
 
 Loading goes through `body_part_viz.shapes._mesh_io.load_mesh`, which
 returns a `(vertices, faces)` pair and the mesh's oriented-bounding-

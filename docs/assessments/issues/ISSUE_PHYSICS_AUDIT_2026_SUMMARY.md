@@ -17,10 +17,12 @@ This audit reviewed the core physics engine implementation, focusing on Ball Fli
 ## Critical Findings
 
 ### 1. New Critical Issue: Ground Reaction Force (GRF) Placeholder
+
 - **Issue File:** `docs/assessments/issues/ISSUE_PHYSICS_AUDIT_2026_001_GRF_IMPLEMENTATION.md`
 - **Description:** The `extract_grf_from_contacts` function in `src/shared/python/ground_reaction_forces.py` is a placeholder that assumes static equilibrium and ignores dynamic forces, rendering biomechanical analysis invalid for swings.
 
 ### 2. Confirmed Existing Critical Issues
+
 - **Missing Spin Decay:** `src/shared/python/ball_flight_physics.py` does not model spin decay. (Ref: `Issue_008_Physics_Ball_Spin_Decay.md`)
 - **Impact MOI Ignored:** `RigidBodyImpactModel` treats clubhead as point mass. (Ref: `ISSUE_PHYSICS_001_IMPACT_MOI.md`)
 - **Heuristic Gear Effect:** Gear effect is based on empirical scaling rather than physics. (Ref: `Issue_011_Physics_Gear_Effect_Heuristic.md`)

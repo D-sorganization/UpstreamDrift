@@ -30,6 +30,7 @@ The Delivery Agent acts as orchestrator. It spawns specialized sub-agents, colle
 **Delivery Agent / Orchestrator** (`agents/delivery.agent.md`)
 
 Sub-agents spawned during execution:
+
 - `agents/sub-agents/micro-delivery.sub-agent.md` (Tier 1)
 - `agents/sub-agents/planning.sub-agent.md` (Tier 2/3)
 - `agents/sub-agents/implementation.sub-agent.md` (Tier 2/3)
@@ -41,6 +42,7 @@ Sub-agents spawned during execution:
 ## Prerequisites
 
 Before starting the loop:
+
 - ✅ Stories are validated (`validate-artefacts` has PASSED)
 - ✅ Acceptance criteria are present and testable
 - ✅ Backlog item status is `refined`
@@ -121,6 +123,7 @@ Spawn `micro-delivery.sub-agent.md` with minimal context bundle.
 Collect `{id}.micro-delivery-report.md`.
 
 Invoke `coordinate-handoffs`:
+
 - PASS → proceed to step 8
 - FAIL (recoverable: test failure, logic bug) → retry once; if second attempt fails → complexity-escalation to Tier 2
 - FAIL (structural: AC ambiguous, context gap, rule conflict) → ESCALATE immediately, no retry
@@ -146,6 +149,7 @@ Collect `{id}.impl-report.md`.
 Invoke `coordinate-handoffs` → validate artefact → PROCEED or RE-SPAWN or ESCALATE.
 
 **After PROCEED — atomic commit:**
+
 ```bash
 git -C ../{id}-workspace add .
 git -C ../{id}-workspace commit -m "feat({id}): {Story title summary}
@@ -163,6 +167,7 @@ Spawn `qa.sub-agent.md` with QA context bundle.
 Collect `{id}.qa-report.md`.
 
 Invoke `coordinate-handoffs`:
+
 - PASS → proceed to step 8
 - FAIL → re-spawn Implementation Sub-Agent with qa-report, then re-spawn QA Sub-Agent (max 3 cycles — see `qa.sub-agent.md`)
 - ESCALATE → stop, surface to human
@@ -258,6 +263,7 @@ Next: review and merge the PR on GitHub.
 **8d. On PR creation failure:**
 
 If `gh pr create` fails (e.g., branch conflict, auth issue):
+
 - Log the error
 - Do NOT update backlog to done
 - ESCALATE to human with the error details
@@ -273,11 +279,13 @@ Every sub-agent follows: `SPAWN (with context bundle) → EXECUTE (autonomous) �
 ## Stop Conditions
 
 **Recoverable failures** — retry is authorized (up to the cycle limits above):
+
 - Test failure with a clear root cause
 - Logic bug with a deterministic fix
 - Missing file or dependency that can be created within Story scope
 
 **Structural failures** — ESCALATE immediately, no retry:
+
 - Acceptance criteria are ambiguous or contradictory
 - A fix would require changing product scope or intent
 - A rule violation has no compliant resolution path

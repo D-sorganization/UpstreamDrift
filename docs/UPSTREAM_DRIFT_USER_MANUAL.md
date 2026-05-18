@@ -16179,7 +16179,7 @@ conda env create -f environment.yml --name golf-suite-light
 | `help`      | `make help`      | Display available targets and descriptions                                                         |
 | `install`   | `make install`   | Install requirements.txt and package in editable mode with dev extras                              |
 | `lint`      | `make lint`      | Run ruff check and mypy (mypy errors are advisory)                                                 |
-| `format`    | `make format`    | Run ruff format and ruff check --fix                                                            |
+| `format`    | `make format`    | Run ruff format and ruff check --fix                                                               |
 | `test`      | `make test`      | Run full pytest suite with verbose output                                                          |
 | `test-unit` | `make test-unit` | Run only `tests/unit/`                                                                             |
 | `test-int`  | `make test-int`  | Run only `tests/integration/`                                                                      |
@@ -16217,7 +16217,7 @@ Multi-stage build for the complete application container.
 | User         | Non-root `golfer` (UID 1000)                                          |
 | Exposed port | 8000                                                                  |
 | Health check | `curl -f http://localhost:8000/api/health` (30s interval)             |
-| Default CMD  | `upstream-drift --no-browser`                                             |
+| Default CMD  | `upstream-drift --no-browser`                                         |
 
 #### D.4.2 Running the Container
 
@@ -16237,13 +16237,13 @@ docker run -it upstream-drift:latest bash
 
 #### D.4.3 Environment Variables
 
-| Variable                    | Default      | Description               |
-| --------------------------- | ------------ | ------------------------- |
+| Variable                    | Default          | Description               |
+| --------------------------- | ---------------- | ------------------------- |
 | `ENV_NAME`                  | `upstream-drift` | Conda environment name    |
-| `MAMBA_DOCKERFILE_ACTIVATE` | `1`          | Auto-activate environment |
-| `GMS_LOG_LEVEL`             | `INFO`       | Logging verbosity         |
-| `GMS_API_PORT`              | `8000`       | API server port           |
-| `GMS_API_HOST`              | `0.0.0.0`    | API server bind address   |
+| `MAMBA_DOCKERFILE_ACTIVATE` | `1`              | Auto-activate environment |
+| `GMS_LOG_LEVEL`             | `INFO`           | Logging verbosity         |
+| `GMS_API_PORT`              | `8000`           | API server port           |
+| `GMS_API_HOST`              | `0.0.0.0`        | API server bind address   |
 
 ---
 
@@ -16364,7 +16364,7 @@ GMS-{CATEGORY}-{NUMBER}
 | `GMS-SIM-001` | SIMULATION_FAILED          | 500         | The simulation execution failed                           | Check simulation parameters for physical validity (time step, joint limits). Review model stability. |
 | `GMS-SIM-002` | SIMULATION_TIMEOUT         | 504         | The simulation exceeded the maximum allowed time          | Reduce simulation duration, increase time step, or simplify the model.                               |
 | `GMS-SIM-003` | SIMULATION_INVALID_PARAMS  | 400         | One or more simulation parameters are invalid             | Verify parameter ranges: time_step > 0, duration > 0, joint angles within limits.                    |
-| `GMS-SIM-004` | SIMULATION_MODEL_NOT_FOUND | 404         | The specified simulation model file was not found         | Verify the model path. Run `upstream-drift --setup-models` to download standard models.                  |
+| `GMS-SIM-004` | SIMULATION_MODEL_NOT_FOUND | 404         | The specified simulation model file was not found         | Verify the model path. Run `upstream-drift --setup-models` to download standard models.              |
 | `GMS-SIM-005` | SIMULATION_STATE_ERROR     | 500         | The simulation reached an invalid state (NaN, divergence) | Reduce time step, check for unrealistic forces, verify contact parameters.                           |
 | `GMS-SIM-006` | TASK_NOT_FOUND             | 404         | The specified async task ID was not found                 | The task may have expired or the ID is incorrect. Submit a new simulation request.                   |
 | `GMS-SIM-007` | TASK_NOT_COMPLETED         | 400         | The task has not completed yet; results not available     | Poll the task status endpoint until completion, or use the WebSocket notification channel.           |

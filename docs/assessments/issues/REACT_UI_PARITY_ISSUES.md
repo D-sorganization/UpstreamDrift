@@ -360,15 +360,15 @@ Several old, incomplete, or explicitly-labeled backup directories remain in the 
 
 ### Directories to Archive
 
-| Current Path | Evidence |
-|---|---|
-| `Simscape.../Python Version/golf_gui_r0/` | Revision 0 — 5-file old GUI with `golf_main_application.py`, `golf_visualizer_implementation.py`. Superseded by current MuJoCo/Drake GUIs. |
-| `Simscape.../Python Version/integrated_golf_gui_r0/` | Revision 0 — 15+ files including `golf_gui_application.py`, `golf_opengl_renderer.py`, `golf_inverse_dynamics.py`, test files. |
-| `2D_Golf_Model/matlab/Backup Folder/` | Explicitly named "Backup Folder" containing `ModelInputsZVCF.mat`. |
-| `SkeletonPlotter/Older Revs/` | Explicitly labeled "Older Revs". |
-| `Model Output/Scripts/_Archived Scripts/` | Already labeled "Archived" but still in active source tree. |
-| `3D_Golf_Model/golf_swing_dataset_20250907_bk` | `_bk` suffix = backup of dataset. |
-| `2D_Golf_Model/matlab/Scripts/` vs `Model Output/Scripts/` | Near-duplicate directory trees with same subfolder names. |
+| Current Path                                               | Evidence                                                                                                                                   |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Simscape.../Python Version/golf_gui_r0/`                  | Revision 0 — 5-file old GUI with `golf_main_application.py`, `golf_visualizer_implementation.py`. Superseded by current MuJoCo/Drake GUIs. |
+| `Simscape.../Python Version/integrated_golf_gui_r0/`       | Revision 0 — 15+ files including `golf_gui_application.py`, `golf_opengl_renderer.py`, `golf_inverse_dynamics.py`, test files.             |
+| `2D_Golf_Model/matlab/Backup Folder/`                      | Explicitly named "Backup Folder" containing `ModelInputsZVCF.mat`.                                                                         |
+| `SkeletonPlotter/Older Revs/`                              | Explicitly labeled "Older Revs".                                                                                                           |
+| `Model Output/Scripts/_Archived Scripts/`                  | Already labeled "Archived" but still in active source tree.                                                                                |
+| `3D_Golf_Model/golf_swing_dataset_20250907_bk`             | `_bk` suffix = backup of dataset.                                                                                                          |
+| `2D_Golf_Model/matlab/Scripts/` vs `Model Output/Scripts/` | Near-duplicate directory trees with same subfolder names.                                                                                  |
 
 ### Acceptance Criteria
 

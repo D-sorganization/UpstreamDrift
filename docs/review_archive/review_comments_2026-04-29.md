@@ -18,4 +18,3 @@ Adding `[tool.ruff.lint.mccabe]` before `ignore = [...]` changes the TOML scope 
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3498#discussion_r3165433456)
 
 ---
-

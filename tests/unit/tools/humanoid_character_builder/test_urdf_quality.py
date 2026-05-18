@@ -75,9 +75,9 @@ def test_urdf_generation_is_deterministic_across_presets(
     """Determinism check across the typical body-size range."""
     builder = CharacterBuilder()
     runs = [builder.generate_urdf(params) for _ in range(5)]
-    assert (
-        len(set(runs)) == 1
-    ), f"5 runs produced {len(set(runs))} distinct URDFs; expected 1."
+    assert len(set(runs)) == 1, (
+        f"5 runs produced {len(set(runs))} distinct URDFs; expected 1."
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -109,15 +109,15 @@ def test_generated_urdf_has_required_structure(baseline_urdf: str) -> None:
         assert child is not None, f"joint {joint.get('name')!r} missing <child>"
         parent_link = parent.get("link")
         child_link = child.get("link")
-        assert (
-            parent_link in link_names
-        ), f"joint {joint.get('name')!r} references unknown parent {parent_link!r}"
-        assert (
-            child_link in link_names
-        ), f"joint {joint.get('name')!r} references unknown child {child_link!r}"
-        assert (
-            parent_link != child_link
-        ), f"joint {joint.get('name')!r} has same link as parent and child"
+        assert parent_link in link_names, (
+            f"joint {joint.get('name')!r} references unknown parent {parent_link!r}"
+        )
+        assert child_link in link_names, (
+            f"joint {joint.get('name')!r} references unknown child {child_link!r}"
+        )
+        assert parent_link != child_link, (
+            f"joint {joint.get('name')!r} has same link as parent and child"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -172,9 +172,9 @@ def test_total_mass_matches_requested_within_tolerance(
 def test_every_segment_mass_is_positive(baseline_urdf: str) -> None:
     """No segment may have zero or negative mass."""
     for seg in _parse_inertias(baseline_urdf):
-        assert (
-            seg["mass"] > 0
-        ), f"Segment {seg['link']!r} has non-positive mass {seg['mass']}"
+        assert seg["mass"] > 0, (
+            f"Segment {seg['link']!r} has non-positive mass {seg['mass']}"
+        )
 
 
 @pytest.mark.unit
@@ -260,9 +260,9 @@ def test_every_joint_lower_below_upper(baseline_urdf: str) -> None:
             continue
         if j["lower"] == float("-inf") or j["upper"] == float("inf"):
             continue
-        assert (
-            j["lower"] < j["upper"]
-        ), f"Joint {j['name']!r} has lower {j['lower']} >= upper {j['upper']}"
+        assert j["lower"] < j["upper"], (
+            f"Joint {j['name']!r} has lower {j['lower']} >= upper {j['upper']}"
+        )
 
 
 @pytest.mark.unit

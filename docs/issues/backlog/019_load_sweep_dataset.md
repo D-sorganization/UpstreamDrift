@@ -69,6 +69,7 @@ function dataset = load_sweep_dataset(path, opts)
 ## Required tests (TDD)
 
 Python:
+
 - `test_loader_reads_trials_and_timesteps_into_dataframes`
 - `test_loader_validates_trial_id_uniqueness_in_trials_table`
 - `test_loader_validates_every_timestep_trial_id_exists_in_trials`
@@ -85,6 +86,7 @@ Python:
 - `test_loader_handles_partitioned_timesteps_parquet_by_trial_id`
 
 MATLAB shim:
+
 - `test_matlab_shim_returns_struct_with_trials_and_timesteps_tables`
 - `test_matlab_shim_results_match_python_loader_on_same_fixture`
 - `test_matlab_shim_handles_missing_python_environment_with_clear_error`
@@ -92,10 +94,12 @@ MATLAB shim:
 ## DbC contract
 
 Preconditions:
+
 - `path` exists.
 - Contains `trials.parquet` (or partitioned equivalent) and `timesteps.parquet`.
 
 Postconditions (per `DATASET_SCHEMA.md` §"Validation rules"):
+
 - `trials.trial_id` are unique.
 - Every `timesteps.trial_id` exists in `trials.trial_id`.
 - `timesteps.t` is monotonic non-decreasing per trial; first value is 0;

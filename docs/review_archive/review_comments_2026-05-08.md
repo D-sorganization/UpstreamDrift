@@ -18,4 +18,3 @@ When `marker_set_override` is provided, it only bypasses the new `MarkerSetMisma
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4751#discussion_r3212069067)
 
 ---
-

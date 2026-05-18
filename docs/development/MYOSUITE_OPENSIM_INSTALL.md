@@ -3,9 +3,11 @@
 ## Changes
 
 ### Docker Environment
+
 Added MyoSuite and OpenSim to the Docker build process:
 
 **Dockerfile**:
+
 ```dockerfile
 RUN pip install --no-cache-dir \
     ...
@@ -15,6 +17,7 @@ RUN pip install --no-cache-dir \
 ```
 
 **requirements.txt**:
+
 ```
 myosuite>=2.0.0
 opensim>=4.4.0
@@ -23,12 +26,14 @@ opensim>=4.4.0
 ## Installation Details
 
 ### MyoSuite
+
 - **Package**: `myosuite`
 - **Purpose**: Musculoskeletal simulation with 290-muscle models
 - **Features**: Muscle activation, tendon dynamics, realistic biomechanics
 - **Use Case**: Golf swing muscle activation analysis
 
 ### OpenSim
+
 - **Package**: `opensim`
 - **Purpose**: Biomechanical modeling and simulation
 - **Features**: Kinematic analysis, inverse dynamics, muscle force estimation
@@ -53,6 +58,7 @@ docker exec golf-backend python -c "import opensim; print(f'OpenSim: {opensim.__
 ## API Integration
 
 Both engines are already integrated in the engine loader system:
+
 - `EngineType.MYOSIM` - MyoSuite engine
 - `EngineType.OPENSIM` - OpenSim engine
 

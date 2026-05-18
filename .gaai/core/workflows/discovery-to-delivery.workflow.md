@@ -18,6 +18,7 @@ Discovery ends. Delivery begins. This workflow governs the transition.
 ## Why This Workflow Exists
 
 Without an explicit handoff gate:
+
 - Delivery starts on ambiguous artefacts
 - Acceptance criteria are missing or untestable
 - Scope creep enters silently
@@ -31,16 +32,16 @@ This workflow prevents all of the above.
 
 Discovery may hand off to Delivery **only when ALL of the following are true**:
 
-| Condition | Check | Bug Triage |
-|---|---|---|
-| All Stories have explicit acceptance criteria | ✅ | ✅ |
-| `validate-artefacts` returned PASS for all Stories | ✅ | ✅ |
-| Each Story maps to a parent Epic | ✅ | ⬚ not required |
-| Backlog items are status: `refined` | ✅ | ✅ |
-| No open blocking questions remain | ✅ | ✅ |
-| No rule violations in artefacts | ✅ | ✅ |
-| Story includes root cause analysis | — | ✅ |
-| Story includes reproduction scenario | — | ✅ |
+| Condition                                          | Check | Bug Triage     |
+| -------------------------------------------------- | ----- | -------------- |
+| All Stories have explicit acceptance criteria      | ✅    | ✅             |
+| `validate-artefacts` returned PASS for all Stories | ✅    | ✅             |
+| Each Story maps to a parent Epic                   | ✅    | ⬚ not required |
+| Backlog items are status: `refined`                | ✅    | ✅             |
+| No open blocking questions remain                  | ✅    | ✅             |
+| No rule violations in artefacts                    | ✅    | ✅             |
+| Story includes root cause analysis                 | —     | ✅             |
+| Story includes reproduction scenario               | —     | ✅             |
 
 If any required condition is not met → return to Discovery. Use `refine-scope` or `validate-artefacts` to resolve.
 
@@ -78,12 +79,14 @@ If any required condition is not met → return to Discovery. Use `refine-scope`
 ## Handoff Contract
 
 The Discovery Agent guarantees:
+
 - Artefacts are outcome-driven and unambiguous
 - Acceptance criteria are testable
 - Scope is locked
 - For bug triage: root cause analysis and reproduction scenario are included
 
 The Delivery Agent commits to:
+
 - Implementing exactly what the artefacts define
 - Not reinterpreting product intent
 - Escalating if anything is unclear

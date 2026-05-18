@@ -5,16 +5,16 @@ All meshes in this directory are **procedurally generated** by
 (icosphere, cylinder, box). They contain no captured anatomical data,
 no vendor-supplied geometry, and no person-identifying content.
 
-| File | License | Source |
-| --- | --- | --- |
-| `head.stl` | CC0-1.0 | procedural-low-poly (icosphere, scaled) |
-| `torso.stl` | CC0-1.0 | procedural-low-poly (box) |
-| `upper_arm.stl` | CC0-1.0 | procedural-low-poly (cylinder) |
-| `forearm.stl` | CC0-1.0 | procedural-low-poly (cylinder) |
-| `hand.stl` | CC0-1.0 | procedural-low-poly (icosphere, scaled) |
-| `thigh.stl` | CC0-1.0 | procedural-low-poly (cylinder) |
-| `shin.stl` | CC0-1.0 | procedural-low-poly (cylinder) |
-| `foot.stl` | CC0-1.0 | procedural-low-poly (box) |
+| File            | License | Source                                  |
+| --------------- | ------- | --------------------------------------- |
+| `head.stl`      | CC0-1.0 | procedural-low-poly (icosphere, scaled) |
+| `torso.stl`     | CC0-1.0 | procedural-low-poly (box)               |
+| `upper_arm.stl` | CC0-1.0 | procedural-low-poly (cylinder)          |
+| `forearm.stl`   | CC0-1.0 | procedural-low-poly (cylinder)          |
+| `hand.stl`      | CC0-1.0 | procedural-low-poly (icosphere, scaled) |
+| `thigh.stl`     | CC0-1.0 | procedural-low-poly (cylinder)          |
+| `shin.stl`      | CC0-1.0 | procedural-low-poly (cylinder)          |
+| `foot.stl`      | CC0-1.0 | procedural-low-poly (box)               |
 
 ## CC0-1.0
 

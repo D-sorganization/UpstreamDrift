@@ -16,14 +16,14 @@ Simscape blocks, and follow-up work.
 
 ## Module layout
 
-| File | Lines | Role |
-|---|---|---|
-| `simscape_converter.py` | 393 | Public `SimscapeToURDFConverter` class. Entry points: `convert()`, `convert_string()`. |
-| `mdl_parser.py` | 611 | Parser for Simscape `.mdl` text format. |
-| `_body_conversion.py` | 179 | Maps SimScape `Solid` blocks (Brick/Cylinder/Sphere) to URDF Links. |
-| `_joint_conversion.py` | 243 | Maps SimScape Joint blocks to URDF Joints. |
-| `_graph_utils.py` | 114 | Graph helpers for the SimScape block topology. |
-| `__init__.py` | 36 | Public exports. |
+| File                    | Lines | Role                                                                                   |
+| ----------------------- | ----- | -------------------------------------------------------------------------------------- |
+| `simscape_converter.py` | 393   | Public `SimscapeToURDFConverter` class. Entry points: `convert()`, `convert_string()`. |
+| `mdl_parser.py`         | 611   | Parser for Simscape `.mdl` text format.                                                |
+| `_body_conversion.py`   | 179   | Maps SimScape `Solid` blocks (Brick/Cylinder/Sphere) to URDF Links.                    |
+| `_joint_conversion.py`  | 243   | Maps SimScape Joint blocks to URDF Joints.                                             |
+| `_graph_utils.py`       | 114   | Graph helpers for the SimScape block topology.                                         |
+| `__init__.py`           | 36    | Public exports.                                                                        |
 
 Total: 6 files, ~1,576 LOC.
 
@@ -32,18 +32,21 @@ Total: 6 files, ~1,576 LOC.
 From `_body_conversion.py` and `_joint_conversion.py`:
 
 ### Solids → URDF links
+
 - ✅ `Brick Solid` → URDF `<box>` geometry
 - ✅ `Cylindrical Solid` → URDF `<cylinder>` geometry
 - ✅ `Spherical Solid` → URDF `<sphere>` geometry
 - ✅ `Inertia` blocks → URDF `<inertial>` element
 
 ### Joints → URDF joints
+
 - ✅ `Revolute Joint` → URDF `<joint type="revolute">`
 - ✅ `Prismatic Joint` → URDF `<joint type="prismatic">`
 - ✅ `Spherical Joint` → URDF `<joint type="floating">` (degraded; URDF spec lacks ball joints)
 - ✅ `Fixed Joint` → URDF `<joint type="fixed">`
 
 ### Transforms
+
 - ✅ `Rigid Transform` → consumed into the URDF `<origin>` of the downstream joint or link
 
 ## Unsupported (intentional)
@@ -80,6 +83,7 @@ assert isinstance(result.urdf_string, str | type(None))
 ## Test coverage
 
 **15 unit tests passing** in `test_simscape.py`. Covers:
+
 - MDL parser happy path
 - Brick/Cylinder/Sphere → URDF link conversion
 - Revolute/Prismatic/Fixed joint conversion
@@ -90,7 +94,7 @@ assert isinstance(result.urdf_string, str | type(None))
 
 1. **No round-trip integration test.** The acceptance criteria specified
    "Simscape → URDF → MuJoCo load succeeds for at least 3 fixture models."
-   Currently only the URDF *generation* is tested; whether the resulting
+   Currently only the URDF _generation_ is tested; whether the resulting
    URDF actually loads in MuJoCo / Drake / Pinocchio is not. **Filed as
    a follow-up under #4545.**
 2. **No fixtures for non-trivial models.** All current tests use
@@ -102,15 +106,15 @@ assert isinstance(result.urdf_string, str | type(None))
 
 ## Production readiness
 
-| Criterion | Status |
-|---|---|
-| Public API documented | ✅ |
-| Type hints | ✅ |
-| Lint clean | ✅ |
-| Unit test coverage breadth | ✅ (15 tests) |
-| MuJoCo / Drake / Pinocchio load test | ❌ Missing |
-| Non-trivial fixture models | ⚠️ Limited |
-| MATLAB expression handling | ⚠️ Silent passthrough |
+| Criterion                            | Status                |
+| ------------------------------------ | --------------------- |
+| Public API documented                | ✅                    |
+| Type hints                           | ✅                    |
+| Lint clean                           | ✅                    |
+| Unit test coverage breadth           | ✅ (15 tests)         |
+| MuJoCo / Drake / Pinocchio load test | ❌ Missing            |
+| Non-trivial fixture models           | ⚠️ Limited            |
+| MATLAB expression handling           | ⚠️ Silent passthrough |
 
 **Verdict: Beta.** Core conversion paths work; the converter is good
 enough for hand-prepared MDL test fixtures. Not yet ready for arbitrary

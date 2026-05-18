@@ -23,12 +23,12 @@ models are not production surfaces.
 UpstreamDrift ships exactly four production artifacts. Everything else in this
 repository is a development or test convenience.
 
-| Artifact | Source | Distribution channel | Audience |
-| --- | --- | --- | --- |
-| `upstream-drift` wheel + sdist | `pyproject.toml` build via `release.yml` | PyPI | Library users, CI/CD pipelines |
-| `upstream-drift-api` Docker image | `Dockerfile` build via `release.yml` | GHCR | Self-hosted API operators |
-| Tauri desktop app | `ui/` build via `tauri-build.yml` | GitHub Releases | End users, researchers, and practitioners |
-| `upstream-physics` Rust crate | `rust_core/upstream-physics/` via `release.yml` | crates.io or bundled native extension | Performance-sensitive embedders |
+| Artifact                          | Source                                          | Distribution channel                  | Audience                                  |
+| --------------------------------- | ----------------------------------------------- | ------------------------------------- | ----------------------------------------- |
+| `upstream-drift` wheel + sdist    | `pyproject.toml` build via `release.yml`        | PyPI                                  | Library users, CI/CD pipelines            |
+| `upstream-drift-api` Docker image | `Dockerfile` build via `release.yml`            | GHCR                                  | Self-hosted API operators                 |
+| Tauri desktop app                 | `ui/` build via `tauri-build.yml`               | GitHub Releases                       | End users, researchers, and practitioners |
+| `upstream-physics` Rust crate     | `rust_core/upstream-physics/` via `release.yml` | crates.io or bundled native extension | Performance-sensitive embedders           |
 
 ## Version Contract
 
@@ -41,12 +41,12 @@ repository is a development or test convenience.
 
 ## Compatibility Matrix
 
-| Artifact | OS | Python | Tier(s) supported | Hardware |
-| --- | --- | --- | --- | --- |
-| Python wheel | Linux x86_64, macOS arm64, Windows 10+ x86_64 | 3.10-3.13 | core; +extras | CPU |
-| Docker image (API) | Linux x86_64 | 3.11 | core+extended | CPU; optional CUDA 12 |
-| Tauri desktop | Linux x86_64, macOS arm64, Windows 10+ x86_64 | bundled | core+extended | CPU |
-| Rust crate | Linux, macOS, Windows | n/a | n/a | CPU |
+| Artifact           | OS                                            | Python    | Tier(s) supported | Hardware              |
+| ------------------ | --------------------------------------------- | --------- | ----------------- | --------------------- |
+| Python wheel       | Linux x86_64, macOS arm64, Windows 10+ x86_64 | 3.10-3.13 | core; +extras     | CPU                   |
+| Docker image (API) | Linux x86_64                                  | 3.11      | core+extended     | CPU; optional CUDA 12 |
+| Tauri desktop      | Linux x86_64, macOS arm64, Windows 10+ x86_64 | bundled   | core+extended     | CPU                   |
+| Rust crate         | Linux, macOS, Windows                         | n/a       | n/a               | CPU                   |
 
 Supported means a release has a green smoke test in `tests/smoke/` for the
 artifact and the combination is on the release checklist. Combinations outside
@@ -69,12 +69,12 @@ this matrix are best-effort.
 
 Each canonical artifact owns a smoke-test directory:
 
-| Artifact | Smoke suite | Artifact input |
-| --- | --- | --- |
-| Python wheel | `tests/smoke/python_wheel/` | `dist/upstream_drift-*.whl` |
-| Docker image (API) | `tests/smoke/docker_api/` | `UPSTREAM_DRIFT_API_IMAGE` |
-| Tauri desktop | `tests/smoke/tauri_desktop/` | `UPSTREAM_DRIFT_TAURI_BUNDLE` |
-| Rust crate | `tests/smoke/rust_crate/` | `rust_core/upstream-physics/Cargo.toml` |
+| Artifact           | Smoke suite                  | Artifact input                          |
+| ------------------ | ---------------------------- | --------------------------------------- |
+| Python wheel       | `tests/smoke/python_wheel/`  | `dist/upstream_drift-*.whl`             |
+| Docker image (API) | `tests/smoke/docker_api/`    | `UPSTREAM_DRIFT_API_IMAGE`              |
+| Tauri desktop      | `tests/smoke/tauri_desktop/` | `UPSTREAM_DRIFT_TAURI_BUNDLE`           |
+| Rust crate         | `tests/smoke/rust_crate/`    | `rust_core/upstream-physics/Cargo.toml` |
 
 The existing tag release workflow blocks PyPI and GitHub Release publication
 until the built Python wheel passes its matrix smoke tests. Docker, desktop,

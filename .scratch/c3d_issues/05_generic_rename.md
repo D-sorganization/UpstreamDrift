@@ -10,24 +10,24 @@ This issue is the rename pass. It is mechanical and large-surface but each renam
 
 ### Modules / functions / classes (Python)
 
-| Old | New | Reason |
-|---|---|---|
-| `src/shared/python/motion_matching/loaders/_optical.py` | `src/shared/python/motion_matching/loaders/_marker_clusters.py` | Source name in module file |
-| `is_optical_schema(...)` | `has_marker_clusters(...)` | Source name in function name |
-| `extract_optical_pose(...)` | `extract_cluster_club_pose(...)` | Source name in function name |
-| `OpticalClubPose` | `ClusterClubPose` | Source name in class |
-| `optical_marker_map.m` (MATLAB) | `cluster_marker_map.m` | Source name |
-| `tests/.../test_load_club_target_c3d_optical.m` | `tests/.../test_load_club_target_c3d_clusters.m` | Source name in test |
-| `src/engines/physics_engines/pinocchio/python/dtack/utils/optical_parser.py` | `mat_dataset_parser.py` | Source name |
-| `src/engines/physics_engines/pinocchio/python/dtack/viz/rob_neal_viewer.py` | `swing_dataset_viewer.py` | Person name |
-| `tests/unit/engines/pinocchio/dtack/viz/test_rob_neal_viewer.py` | `test_swing_dataset_viewer.py` | Person name |
+| Old                                                                         | New                                                             | Reason                       |
+| --------------------------------------------------------------------------- | --------------------------------------------------------------- | ---------------------------- |
+| `src/shared/python/motion_matching/loaders/_optical.py`                       | `src/shared/python/motion_matching/loaders/_marker_clusters.py` | Source name in module file   |
+| `is_optical_schema(...)`                                                      | `has_marker_clusters(...)`                                      | Source name in function name |
+| `extract_optical_pose(...)`                                                   | `extract_cluster_club_pose(...)`                                | Source name in function name |
+| `OpticalClubPose`                                                             | `ClusterClubPose`                                               | Source name in class         |
+| `optical_marker_map.m` (MATLAB)                                               | `cluster_marker_map.m`                                          | Source name                  |
+| `tests/.../test_load_club_target_c3d_optical.m`                               | `tests/.../test_load_club_target_c3d_clusters.m`                | Source name in test          |
+| `src/engines/physics_engines/pinocchio/python/dtack/utils/optical_parser.py`  | `mat_dataset_parser.py`                                         | Source name                  |
+| `src/engines/physics_engines/pinocchio/python/dtack/viz/rob_neal_viewer.py` | `swing_dataset_viewer.py`                                       | Person name                  |
+| `tests/unit/engines/pinocchio/dtack/viz/test_rob_neal_viewer.py`            | `test_swing_dataset_viewer.py`                                  | Person name                  |
 
 ### Directories (data trees)
 
-| Old | New |
-|---|---|
-| `src/engines/physics_engines/pinocchio/data/rob_neal/` | `src/engines/physics_engines/pinocchio/data/club_swing_dataset/` |
-| `src/engines/physics_engines/pinocchio/data/optical_tour_average/` | `src/engines/physics_engines/pinocchio/data/tour_average_mocap/` |
+| Old                                                                                | New                                                                                |
+| ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `src/engines/physics_engines/pinocchio/data/rob_neal/`                             | `src/engines/physics_engines/pinocchio/data/club_swing_dataset/`                   |
+| `src/engines/physics_engines/pinocchio/data/optical_tour_average/`                   | `src/engines/physics_engines/pinocchio/data/tour_average_mocap/`                   |
 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Optical C3D Files/` | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/` |
 
 ### Inside files

@@ -3,8 +3,8 @@
   "citation": "Dempster, W.T. (1955). Space requirements of the seated operator. WADC Technical Report 55-159.",
   "segments": {
     "head": {
-      "mass_ratio": 0.0810,
-      "length_ratio": 0.130,
+      "mass_ratio": 0.081,
+      "length_ratio": 0.13,
       "com_proximal_ratio": 0.434,
       "gyration_radii": {
         "sagittal": 0.495,
@@ -13,17 +13,17 @@
       }
     },
     "trunk": {
-      "mass_ratio": 0.4970,
+      "mass_ratio": 0.497,
       "length_ratio": 0.288,
-      "com_proximal_ratio": 0.500,
+      "com_proximal_ratio": 0.5,
       "gyration_radii": {
-        "sagittal": 0.500,
-        "transverse": 0.500,
-        "longitudinal": 0.380
+        "sagittal": 0.5,
+        "transverse": 0.5,
+        "longitudinal": 0.38
       }
     },
     "upper_arm": {
-      "mass_ratio": 0.0280,
+      "mass_ratio": 0.028,
       "length_ratio": 0.186,
       "com_proximal_ratio": 0.436,
       "gyration_radii": {
@@ -33,9 +33,9 @@
       }
     },
     "forearm": {
-      "mass_ratio": 0.0160,
+      "mass_ratio": 0.016,
       "length_ratio": 0.146,
-      "com_proximal_ratio": 0.430,
+      "com_proximal_ratio": 0.43,
       "gyration_radii": {
         "sagittal": 0.303,
         "transverse": 0.303,
@@ -43,7 +43,7 @@
       }
     },
     "hand": {
-      "mass_ratio": 0.0060,
+      "mass_ratio": 0.006,
       "length_ratio": 0.108,
       "com_proximal_ratio": 0.506,
       "gyration_radii": {
@@ -53,7 +53,7 @@
       }
     },
     "thigh": {
-      "mass_ratio": 0.1000,
+      "mass_ratio": 0.1,
       "length_ratio": 0.245,
       "com_proximal_ratio": 0.433,
       "gyration_radii": {

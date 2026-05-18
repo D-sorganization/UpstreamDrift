@@ -4,15 +4,16 @@ The cost function is the heart of the inverse problem. All four options consume 
 
 ## Symbols
 
-| Symbol | Meaning |
-|---|---|
-| `θ` | coefficient vector, `n_joints × 7` flattened, decision variables |
-| `q_sim(t; θ)` | simulated kinematic trajectory at time t given coefficients θ |
-| `q_meas(t)` | measured kinematic trajectory (the target) |
-| `T` | simulation duration (~0.3 s); we evaluate at the simulation timestep |
-| `N` | number of timesteps over T |
+| Symbol        | Meaning                                                              |
+| ------------- | -------------------------------------------------------------------- |
+| `θ`           | coefficient vector, `n_joints × 7` flattened, decision variables     |
+| `q_sim(t; θ)` | simulated kinematic trajectory at time t given coefficients θ        |
+| `q_meas(t)`   | measured kinematic trajectory (the target)                           |
+| `T`           | simulation duration (~0.3 s); we evaluate at the simulation timestep |
+| `N`           | number of timesteps over T                                           |
 
 For Phase 1 (club-only), `q` is a 12-vector per timestep:
+
 - `r_grip ∈ ℝ³` (mid-hands / grip position, metres) — **PRIMARY** matching anchor
 - `R_grip ∈ SO(3)` (mid-hands / grip orientation) — **PRIMARY** matching anchor
 - `r_clubhead ∈ ℝ³` (clubhead position, metres) — **SECONDARY** (optional)
@@ -34,7 +35,7 @@ Where:
 
 - `d_geo(R1, R2) = ‖log(R1ᵀ R2)‖_F / √2` — the geodesic angle between two rotations (radians). Implementation: convert to quaternions and use `2·acos(|q1·q2|)`.
 - `W_total(θ)` — total mechanical work, defined below.
-- `w_pg`, `w_pc`, `w_og`, `w_oc`, `λ` — weights, defaults in [DEFAULTS](#defaults).  By default `w_pc = w_oc = 0` so the cost ignores the clubhead entirely.
+- `w_pg`, `w_pc`, `w_og`, `w_oc`, `λ` — weights, defaults in [DEFAULTS](#defaults). By default `w_pc = w_oc = 0` so the cost ignores the clubhead entirely.
 
 ### Endpoint-anchor variant
 
@@ -75,14 +76,14 @@ end
 
 ### Variants
 
-| Regularizer | Formula | When useful |
-|---|---|---|
-| `total_work` (default) | `∫ Σ\|τω\| dt` | Bias toward physiologically efficient swings |
-| `peak_power` | `max_t Σ\|τω\|` | Bias against torque spikes |
-| `torque_l2` | `∫ Σ τ² dt` | Bias against large torques regardless of motion |
-| `coeff_l2` | `‖θ‖²` | Trivial bias toward the model's nominal |
-| `effort_l2` (new) | `mean Σ (τ − τ_ref)² · w_j` | Penalise deviation from a reference torque profile (PR #3966 parity) |
-| `smoothness_l2` (new) | `mean Σ (Δτ)² · w_j` | Penalise jerky control inputs (PR #3966 parity) |
+| Regularizer            | Formula                     | When useful                                                          |
+| ---------------------- | --------------------------- | -------------------------------------------------------------------- |
+| `total_work` (default) | `∫ Σ\|τω\| dt`              | Bias toward physiologically efficient swings                         |
+| `peak_power`           | `max_t Σ\|τω\|`             | Bias against torque spikes                                           |
+| `torque_l2`            | `∫ Σ τ² dt`                 | Bias against large torques regardless of motion                      |
+| `coeff_l2`             | `‖θ‖²`                      | Trivial bias toward the model's nominal                              |
+| `effort_l2` (new)      | `mean Σ (τ − τ_ref)² · w_j` | Penalise deviation from a reference torque profile (PR #3966 parity) |
+| `smoothness_l2` (new)  | `mean Σ (Δτ)² · w_j`        | Penalise jerky control inputs (PR #3966 parity)                      |
 
 The default is **total work**. Other variants are exposed via `options.regularizer = "total_work" | "peak_power" | "torque_l2" | "coeff_l2" | "effort_l2" | "smoothness_l2"`.
 

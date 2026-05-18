@@ -12,6 +12,8 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+import collections.abc
+
 import numpy as np
 
 from bunkershot3d.config import BunkerShotConfig
@@ -82,7 +84,7 @@ class LiggghtsDriver:
         except FileNotFoundError:
             raise BackendNotImplementedError(
                 "LIGGGHTS not installed. Install from lammps.org"
-            )
+            ) from None
         # CalledProcessError is NOT caught — let it propagate for diagnosability.
 
         self._parse_and_write(self._work_path, Path(output_path))
@@ -246,7 +248,7 @@ run             {total_steps}
 
 def _iter_dump_frames(
     dump_path: Path,
-) -> "collections.abc.Generator[tuple[int, np.ndarray, np.ndarray], None, None]":
+) -> collections.abc.Generator[tuple[int, np.ndarray, np.ndarray], None, None]:
     """Yield ``(timestep, positions, velocities)`` for each frame in a LIGGGHTS dump.
 
     Args:

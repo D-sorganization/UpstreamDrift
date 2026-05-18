@@ -86,12 +86,12 @@ result.export_urdf("./output/my_character")
 
 ### Available Presets
 
-| Category | Presets |
-|----------|---------|
-| Basic types | `athletic`, `average`, `heavy`, `lean`, `compact`, `tall`, `minimal` |
-| Gender-specific | `male_average`, `female_average`, `tall_male`, `petite_female` |
-| Age-specific | `child_8yo`, `senior_70yo` |
-| Sport-specific | `golfer_pro`, `pro_golfer_male`, `pro_golfer_female` |
+| Category        | Presets                                                              |
+| --------------- | -------------------------------------------------------------------- |
+| Basic types     | `athletic`, `average`, `heavy`, `lean`, `compact`, `tall`, `minimal` |
+| Gender-specific | `male_average`, `female_average`, `tall_male`, `petite_female`       |
+| Age-specific    | `child_8yo`, `senior_70yo`                                           |
+| Sport-specific  | `golfer_pro`, `pro_golfer_male`, `pro_golfer_female`                 |
 
 ## When to Use model_generation
 
@@ -189,17 +189,17 @@ urdf_to_simscape("my_humanoid.urdf", "my_humanoid.smdb")
 
 ## Summary Table
 
-| Feature | humanoid_character_builder | model_generation |
-|---------|---------------------------|------------------|
-| Humanoid presets | ✅ Yes (16 presets) | ❌ No |
-| SMPL-X integration | ✅ Yes | ❌ No |
-| MakeHuman integration | ✅ Yes | ❌ No |
-| Anthropometric scaling | ✅ CDC/NHANES based | ❌ Manual |
-| Gender-specific models | ✅ Yes | ❌ Manual |
-| Simscape export | ❌ Via converter | ✅ Native |
-| Custom robots | ❌ No | ✅ Yes |
-| Quadrupeds | ❌ No | ✅ Yes |
-| CAD import | ❌ No | ✅ Yes |
+| Feature                | humanoid_character_builder | model_generation |
+| ---------------------- | -------------------------- | ---------------- |
+| Humanoid presets       | ✅ Yes (16 presets)        | ❌ No            |
+| SMPL-X integration     | ✅ Yes                     | ❌ No            |
+| MakeHuman integration  | ✅ Yes                     | ❌ No            |
+| Anthropometric scaling | ✅ CDC/NHANES based        | ❌ Manual        |
+| Gender-specific models | ✅ Yes                     | ❌ Manual        |
+| Simscape export        | ❌ Via converter           | ✅ Native        |
+| Custom robots          | ❌ No                      | ✅ Yes           |
+| Quadrupeds             | ❌ No                      | ✅ Yes           |
+| CAD import             | ❌ No                      | ✅ Yes           |
 
 ## References
 

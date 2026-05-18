@@ -56,6 +56,7 @@ Module name `c3d_body.py`. Function names `load_body_target_c3d` / `load_body_ta
 ## Tests
 
 `tests/unit/motion_matching/test_load_body_target_c3d.py`:
+
 - happy path on `data/C3D_TA_Driver.c3d`: 28 markers, sample count matches `opts`, impact_idx in expected window.
 - occlusion handling: `RShoulderTop` (~14% coverage) is not silently filled; remains mostly NaN.
 - shared-clock test: load body + club from same file with same `AlignOptions`; body's `time` == club's `time` exactly when `impact_source=club_target`.
@@ -63,6 +64,7 @@ Module name `c3d_body.py`. Function names `load_body_target_c3d` / `load_body_ta
 - explicit `marker_set` honoured (subset returned in given order).
 
 `tests/integration/test_c3d_body_pipeline.py` (heavy; marker `slow`):
+
 - All four C3D files load, validate, return the expected marker set.
 
 ## Files touched

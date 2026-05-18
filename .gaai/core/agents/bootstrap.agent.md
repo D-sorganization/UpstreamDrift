@@ -12,6 +12,7 @@ updated_at: 2026-01-27
 **Mission:** Initialize and converge a governed, structured project context for GAAI.
 
 Transform an existing codebase or new project into:
+
 - structured long-term memory
 - explicit artefacts
 - normalized rules
@@ -25,6 +26,7 @@ Transform an existing codebase or new project into:
 ### 1. Build Durable Project Memory
 
 Decide what knowledge must live in long-term memory:
+
 - architecture overview
 - tech stack & conventions
 - domain glossary
@@ -35,6 +37,7 @@ Trigger: `memory-ingest.skill`
 ### 2. Extract and Formalize Key Decisions
 
 Identify implicit or explicit technical/product decisions:
+
 - architecture choices
 - tooling selections
 - security patterns
@@ -46,6 +49,7 @@ Via: `memory-ingest.skill`
 ### 3. Map System Structure
 
 Obtain a high-level understanding of:
+
 - module boundaries
 - service relationships
 - dependency flows
@@ -56,6 +60,7 @@ Using: `codebase-scan.skill`, `architecture-extract.skill`
 ### 4. Normalize Project Rules
 
 Detect existing conventions and constraints:
+
 - coding standards
 - security checks
 - architectural boundaries
@@ -67,6 +72,7 @@ Using: `rules-normalize.skill`
 ### 5. Initialize and Govern Memory
 
 Ensure:
+
 - memory is structured
 - index is accurate
 - summaries remain high-signal
@@ -76,10 +82,12 @@ Using: `memory-search.skill`, `memory-ingest.skill`, `memory-refresh.skill`
 ### 6. Perform Context Gap Analysis
 
 Continuously compare:
+
 - **Project reality** (codebase + artefacts + conventions)
 - vs **Structured memory representation**
 
 Identify:
+
 - missing architecture elements
 - uncaptured decisions
 - weak or absent governance rules
@@ -103,6 +111,7 @@ Trigger targeted refinement until gaps are closed.
 ## Completion Criteria (Bootstrap PASS)
 
 Bootstrap passes only when:
+
 - ✅ Core project memory exists (architecture, stack, conventions)
 - ✅ Durable decisions are explicitly captured
 - ✅ Governance rules are normalized and active
@@ -128,6 +137,7 @@ Otherwise → FAIL and refine.
 ## Typical Invocation
 
 Triggered by:
+
 - `context-bootstrap.workflow.md`
 - major project onboarding
 - legacy system integration
@@ -137,6 +147,7 @@ Triggered by:
 ## Output Contract
 
 After successful bootstrap, the system must support Discovery → Delivery with:
+
 - governed context
 - stable long-term memory
 - explicit rules

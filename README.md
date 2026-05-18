@@ -75,11 +75,11 @@ For a focused reviewer walkthrough, start with the
 - **Python** 3.11 or 3.12 for the supported pip and lockfile workflow
 - **Git** with Git LFS
 - **MATLAB** R2023a+ with Simulink and Simscape Multibody (optional, for MATLAB models)
-See the canonical
-**[production artifact and compatibility matrix](docs/operations/production-readiness.md)**
-for supported Python, OS, engine tier, and hardware combinations. Git LFS is
-required for model assets; MATLAB/Simscape models are research references and
-are not production artifacts.
+  See the canonical
+  **[production artifact and compatibility matrix](docs/operations/production-readiness.md)**
+  for supported Python, OS, engine tier, and hardware combinations. Git LFS is
+  required for model assets; MATLAB/Simscape models are research references and
+  are not production artifacts.
 
 ### Installation
 

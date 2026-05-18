@@ -13,9 +13,10 @@ To accelerate the process, we sought to move the loop execution to Rust via PyO3
 
 ## Decision
 
-We introduce an engine-agnostic Rust crate (`upstream_pinocchio_id` / `upstream-motion-matching`) that acts as a **Rust-driven outer loop**. 
+We introduce an engine-agnostic Rust crate (`upstream_pinocchio_id` / `upstream-motion-matching`) that acts as a **Rust-driven outer loop**.
 
 The architecture pattern is:
+
 1. Python calls a Rust facade function, passing contiguous `(N, D)` NumPy buffers (`q_all`, `times`) and a `Py<PyAny>` Python callback representing the physics engine's per-frame logic (e.g., `pin.rnea` or `mujoco.mj_inverse`).
 2. Rust precomputes `qdot` and `qddot` buffers natively using fast array iteration (when not overridden).
 3. Rust loops over the frames, yielding the GIL to invoke the Python callback once per frame using `py.allow_threads` and safely marshalling `(q_row, v_row, a_row)` views.
@@ -23,12 +24,12 @@ The architecture pattern is:
 
 ## Alternatives Considered
 
-1. **Native Rust bindings via `pin-sys` / C++ FFI:** 
-   - *Pros*: Completely removes the GIL and Python interpreter from the loop. Maximum performance.
-   - *Cons*: Explodes the Rust workspace dependency matrix. Requires compiling large C++ libraries natively for all platforms, severely harming CI/CD reliability and local build times.
-2. **Vectorized Python / NumPy without Rust:** 
-   - *Pros*: Pure Python implementation.
-   - *Cons*: Physics engines (Pinocchio, MuJoCo) do not generally support vectorized `(N, D)` inputs to their inverse dynamics routines. An interpreted loop is unavoidable on the Python side, limiting speedups.
+1. **Native Rust bindings via `pin-sys` / C++ FFI:**
+   - _Pros_: Completely removes the GIL and Python interpreter from the loop. Maximum performance.
+   - _Cons_: Explodes the Rust workspace dependency matrix. Requires compiling large C++ libraries natively for all platforms, severely harming CI/CD reliability and local build times.
+2. **Vectorized Python / NumPy without Rust:**
+   - _Pros_: Pure Python implementation.
+   - _Cons_: Physics engines (Pinocchio, MuJoCo) do not generally support vectorized `(N, D)` inputs to their inverse dynamics routines. An interpreted loop is unavoidable on the Python side, limiting speedups.
 
 ## Consequences
 

@@ -16,35 +16,35 @@ The simulation controls allow you to run physics simulations, adjust parameters,
 
 ### Keyboard Shortcuts
 
-| Key | Action |
-|-----|--------|
-| Enter | Launch selected model |
-| Ctrl+L | Quick launch dialog |
+| Key    | Action                 |
+| ------ | ---------------------- |
+| Enter  | Launch selected model  |
+| Ctrl+L | Quick launch dialog    |
 | Ctrl+R | Reset to initial state |
 
 ## Playback Controls
 
 ### Basic Controls
 
-| Control | Keyboard | Description |
-|---------|----------|-------------|
-| Play/Pause | Space | Toggle simulation |
-| Step Forward | Right Arrow | Advance one timestep |
-| Step Backward | Left Arrow | Go back one timestep |
-| Reset | R | Return to initial state |
-| Stop | Escape | Stop and reset |
+| Control       | Keyboard    | Description             |
+| ------------- | ----------- | ----------------------- |
+| Play/Pause    | Space       | Toggle simulation       |
+| Step Forward  | Right Arrow | Advance one timestep    |
+| Step Backward | Left Arrow  | Go back one timestep    |
+| Reset         | R           | Return to initial state |
+| Stop          | Escape      | Stop and reset          |
 
 ### Speed Control
 
 Adjust playback speed to observe dynamics at different rates:
 
-| Speed | Description |
-|-------|-------------|
-| 0.1x | Slow motion (detailed analysis) |
-| 0.5x | Half speed |
-| 1.0x | Real-time |
-| 2.0x | Fast forward |
-| Max | As fast as possible |
+| Speed | Description                     |
+| ----- | ------------------------------- |
+| 0.1x  | Slow motion (detailed analysis) |
+| 0.5x  | Half speed                      |
+| 1.0x  | Real-time                       |
+| 2.0x  | Fast forward                    |
+| Max   | As fast as possible             |
 
 **Keyboard:** Use `+` and `-` to adjust speed.
 
@@ -64,11 +64,11 @@ The simulation timestep affects accuracy and speed:
 
 Different integration methods are available depending on engine:
 
-| Integrator | Accuracy | Speed | Best For |
-|------------|----------|-------|----------|
-| Euler | Low | Fast | Quick tests |
-| RK4 | High | Medium | General use |
-| Implicit | High | Slow | Stiff systems |
+| Integrator | Accuracy | Speed  | Best For      |
+| ---------- | -------- | ------ | ------------- |
+| Euler      | Low      | Fast   | Quick tests   |
+| RK4        | High     | Medium | General use   |
+| Implicit   | High     | Slow   | Stiff systems |
 
 ### Physics Options
 
@@ -108,15 +108,16 @@ Enable recording to capture simulation data:
 
 ### Export Formats
 
-| Format | Use Case |
-|--------|----------|
-| CSV | Spreadsheet analysis, MATLAB |
-| JSON | Structured data, programming |
-| MAT | MATLAB native format |
+| Format | Use Case                     |
+| ------ | ---------------------------- |
+| CSV    | Spreadsheet analysis, MATLAB |
+| JSON   | Structured data, programming |
+| MAT    | MATLAB native format         |
 
 ### Exported Data
 
 Recordings include:
+
 - Time series (t)
 - Joint positions (q)
 - Joint velocities (v)
@@ -150,12 +151,12 @@ Load a pre-computed trajectory:
 
 ### Control Modes
 
-| Mode | Description |
-|------|-------------|
-| Manual | Direct torque control via sliders |
-| Trajectory | Follow pre-defined motion |
-| PD Control | Position/velocity feedback |
-| Free | No control (passive dynamics) |
+| Mode       | Description                       |
+| ---------- | --------------------------------- |
+| Manual     | Direct torque control via sliders |
+| Trajectory | Follow pre-defined motion         |
+| PD Control | Position/velocity feedback        |
+| Free       | No control (passive dynamics)     |
 
 ## Tips and Best Practices
 
@@ -187,6 +188,7 @@ Load a pre-computed trajectory:
 **Symptoms:** Values go to infinity, NaN errors
 
 **Solutions:**
+
 - Reduce timestep
 - Check for extreme initial conditions
 - Enable joint limits
@@ -195,6 +197,7 @@ Load a pre-computed trajectory:
 ### Slow Simulation
 
 **Solutions:**
+
 - Increase timestep (if accuracy allows)
 - Disable unnecessary visualization
 - Use simpler model
@@ -203,6 +206,7 @@ Load a pre-computed trajectory:
 ### Simulation Won't Start
 
 **Check:**
+
 - Engine is properly loaded
 - Model file exists and is valid
 - Initial state is within limits
@@ -210,4 +214,4 @@ Load a pre-computed trajectory:
 
 ---
 
-*See also: [Full User Manual](../USER_MANUAL.md) | [Engine Selection](engine_selection.md) | [Visualization](visualization.md)*
+_See also: [Full User Manual](../USER_MANUAL.md) | [Engine Selection](engine_selection.md) | [Visualization](visualization.md)_

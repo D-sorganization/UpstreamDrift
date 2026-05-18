@@ -8,8 +8,8 @@ significant figure.
 > produce a `SubjectAnthropometrics` and an output directory of
 > per-engine files. This guide picks up from there.
 
-The canonical `SubjectAnthropometrics` record is the *source of
-truth*. URDF is the cross-engine *interchange* format because Drake
+The canonical `SubjectAnthropometrics` record is the _source of
+truth_. URDF is the cross-engine _interchange_ format because Drake
 and Pinocchio read it natively; OpenSim and MJCF have paired adapters
 in `engine_adapters/`. Every adapter pair satisfies
 `numpy.allclose(a, b, rtol=1e-9, atol=1e-12)` on inertia tensors —
@@ -206,10 +206,10 @@ neck) — switch estimators or add a residual segment.
 Per-segment table of principal moments `I₁ ≤ I₂ ≤ I₃`, plus two
 status columns:
 
-| Column   | Meaning                                                     |
-| -------- | ----------------------------------------------------------- |
-| **PD**   | All eigenvalues > 0 (positive-definite tensor).             |
-| **Triangle** | `I₁ + I₂ ≥ I₃` and the two cyclic permutations.         |
+| Column       | Meaning                                         |
+| ------------ | ----------------------------------------------- |
+| **PD**       | All eigenvalues > 0 (positive-definite tensor). |
+| **Triangle** | `I₁ + I₂ ≥ I₃` and the two cyclic permutations. |
 
 Any **FAIL** here indicates a non-physical segment — the DbC layer
 would have raised on construction, so a FAIL in the report means

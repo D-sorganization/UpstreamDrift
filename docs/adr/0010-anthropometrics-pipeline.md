@@ -94,15 +94,15 @@ is the single public entry point that drives the whole flow:
 **UI surface.**
 `anthropometrics.ui.calibration_dialog.SubjectCalibrationDialog`
 wraps `run_pipeline()` for end users: pick a C3D file, confirm
-height/mass, choose an estimator and target engines, click *Compute*,
-inspect every segment in `SegmentPropertiesPanel`, then *Save* /
-*Export*. The dialog is a thin shell — every callable surface is also
+height/mass, choose an estimator and target engines, click _Compute_,
+inspect every segment in `SegmentPropertiesPanel`, then _Save_ /
+_Export_. The dialog is a thin shell — every callable surface is also
 available as a scripting API.
 
 **URDF as interchange.** Drake and Pinocchio read URDF natively;
 OpenSim `.osim` and MJCF have paired adapters in
 `engine_adapters/_urdf_io.py` and `engine_adapters/_mjcf_io.py`.
-URDF is verbose but universal — it is the *interchange* format, not
+URDF is verbose but universal — it is the _interchange_ format, not
 the in-memory canonical. Round-trips through every adapter satisfy
 `numpy.allclose(a, b, rtol=1e-9, atol=1e-12)` on inertia tensors.
 
@@ -114,8 +114,8 @@ the in-memory canonical. Round-trips through every adapter satisfy
 2. **URDF as the in-memory canonical record.** Rejected — URDF is
    ~30× larger than the dataclass on disk, and round-tripping through
    `xml.etree` on every internal call would blow the 1 ms / segment
-   budget. URDF is right for *interchange*; a frozen dataclass is
-   right for *compute*.
+   budget. URDF is right for _interchange_; a frozen dataclass is
+   right for _compute_.
 3. **OpenSim `.osim` as canonical interchange.** Rejected — `.osim`
    is tightly coupled to the OpenSim wrapped-muscle / Body / Joint
    model. Engines without that machinery (Pinocchio, plain Drake
@@ -133,7 +133,7 @@ the in-memory canonical. Round-trips through every adapter satisfy
   - One subject record; identical numbers across Drake, Pinocchio,
     MyoSuite/MuJoCo, OpenSim, and Simscape.
   - GUI (`SubjectCalibrationDialog`) and scripting API
-    (`run_pipeline`) read and write the *same* canonical record —
+    (`run_pipeline`) read and write the _same_ canonical record —
     no GUI/CLI drift.
   - Round-trip URDF / `.osim` / MJCF guaranteed by the
     `read(write(x)) == x` test pairs in

@@ -37,4 +37,3 @@ Useful? React with 👍 / 👎.
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3269#discussion_r3142275007)
 
 ---
-

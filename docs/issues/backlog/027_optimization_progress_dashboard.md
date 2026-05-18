@@ -92,10 +92,12 @@ end
 ## DbC contract
 
 Preconditions:
+
 - `target` per `CLUB_IK_SPEC.md`.
 - `opts.refresh_hz > 0`.
 
 Postconditions:
+
 - After construction: `Figure` is valid; `RefreshTimer` is running.
 - After `close()`: `RefreshTimer` is stopped; figure is invalid.
 - `outputFcn` returns a function handle that is non-blocking.

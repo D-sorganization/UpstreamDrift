@@ -88,6 +88,7 @@ FAIL      → gaps remain, retry bounded (max 3 attempts)
 ## After Bootstrap
 
 Switch to:
+
 - **Discovery Track** → if intent needs clarification before building
 - **Delivery Track** → if a validated backlog already exists
 

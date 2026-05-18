@@ -83,11 +83,13 @@ def round_trip_validation(config: RoundTripConfig) -> RoundTripReport:
 ## DbC contract
 
 Preconditions:
+
 - `config.surrogate_checkpoint` exists.
 - `config.validation_dataset` exists.
 - `config.n_trials >= 1`.
 
 Postconditions:
+
 - `report.rmse_per_trial_m.shape == (n_trials,)`.
 - `report.rmse_overall_m == sqrt(mean(rmse_per_trial_m**2))`.
 - `report.histogram_path` exists on disk.

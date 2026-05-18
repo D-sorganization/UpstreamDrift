@@ -32,8 +32,8 @@ without per-tool ad-hoc code, because no tool had a notion of "channel"
 or "colormap" outside the matplotlib symbol space.
 
 The body-part visualisation toolkit ([ADR 0008](0008-body-part-viz-toolkit.md))
-solved the *segment-shape* drift problem with a shared package; this ADR
-solves the parallel *marker-style* drift problem with the same pattern.
+solved the _segment-shape_ drift problem with a shared package; this ADR
+solves the parallel _marker-style_ drift problem with the same pattern.
 
 Constraints:
 
@@ -81,22 +81,22 @@ style = MarkerStyle(
 **Color model.** `colors.py` defines three `ColorScale` variants — the
 union covers every styling case currently in use:
 
-| Variant            | Use-case                                                           |
-| ------------------ | ------------------------------------------------------------------ |
-| `StaticColor`      | One constant color (most marker groups).                           |
-| `PaletteColor`     | Categorical pick from a named matplotlib palette (engine overlays).|
-| `DataDrivenColor`  | Channel value → vmin/vmax normalisation → colormap LUT sample.     |
+| Variant           | Use-case                                                            |
+| ----------------- | ------------------------------------------------------------------- |
+| `StaticColor`     | One constant color (most marker groups).                            |
+| `PaletteColor`    | Categorical pick from a named matplotlib palette (engine overlays). |
+| `DataDrivenColor` | Channel value → vmin/vmax normalisation → colormap LUT sample.      |
 
 `MarkerStyle.fill_color` accepts any of the three; `__post_init__`
 rejects anything else.
 
 **Protocols** (`contracts.py`):
 
-| Protocol               | Purpose                                                  |
-| ---------------------- | -------------------------------------------------------- |
-| `MarkerRenderer`       | `add_markers / update_frame / update_style / remove`     |
-| `MarkerShapeRenderer`  | `style -> (vertices, faces)` mesh in marker-local frame  |
-| `ColorResolver`        | `scale -> RGBA` via `resolve_one` and `resolve_array`    |
+| Protocol              | Purpose                                                 |
+| --------------------- | ------------------------------------------------------- |
+| `MarkerRenderer`      | `add_markers / update_frame / update_style / remove`    |
+| `MarkerShapeRenderer` | `style -> (vertices, faces)` mesh in marker-local frame |
+| `ColorResolver`       | `scale -> RGBA` via `resolve_one` and `resolve_array`   |
 
 All three are `@runtime_checkable` so call sites and tests can fail
 fast.
@@ -198,7 +198,7 @@ contract, not the rendering code.
   styling code. The bulk path (`resolve_array`) is allocation-free
   beyond the output and clears 60 fps for 1000 frames × 32 markers.
 - **Portability.** A user customisation saved by one tool re-opens
-  identically in any other.  The four built-in presets are good
+  identically in any other. The four built-in presets are good
   defaults for publication, screen-share, and accessibility-focused
   setups.
 - **Extensibility.** Adding a new shape kind means dropping one module
@@ -242,7 +242,7 @@ contract, not the rendering code.
   `PlotStyleSet`, round-trips it through JSON, drives a
   `DataDrivenColor` resolver from a `DataChannel`, renders via
   `MatplotlibMarkerRenderer`, and asserts pixel parity with the
-  PyQtGL backend.  Any divergence between tools surfaces as a test
+  PyQtGL backend. Any divergence between tools surfaces as a test
   failure, not as a runtime UI bug.
 - CI gates: `ruff check`, `ruff format --check`, file-size budget,
   pytest with the coverage `fail_under` from `pyproject.toml`.

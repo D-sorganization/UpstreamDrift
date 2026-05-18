@@ -16,17 +16,17 @@ frontends could truly share features.
 
 ### 1.1 React/Tauri Frontend (`ui/`)
 
-| Component | File | Function |
-|-----------|------|----------|
-| App shell | `ui/src/App.tsx` | BrowserRouter with Dashboard + Simulation routes |
-| Dashboard | `ui/src/pages/Dashboard.tsx` | Launcher tile grid, navigates to simulation |
-| Simulation | `ui/src/pages/Simulation.tsx` | Engine selector, parameter panel, 3D view, live plot |
-| API client | `ui/src/api/client.ts` | WebSocket simulation streaming, REST engine queries |
-| Engine hook | `ui/src/api/useEngineManager.ts` | Lazy engine load/unload via REST |
-| Backend mgmt | `ui/src/api/backend.ts` | Tauri IPC to start/stop Python backend |
-| 3D scene | `ui/src/components/visualization/Scene3D.tsx` | Three.js/R3F visualization |
-| Live plot | `ui/src/components/analysis/LivePlot.tsx` | Recharts real-time plotting |
-| Tauri shell | `ui/src-tauri/src/lib.rs` | Rust process manager for Python backend |
+| Component    | File                                          | Function                                             |
+| ------------ | --------------------------------------------- | ---------------------------------------------------- |
+| App shell    | `ui/src/App.tsx`                              | BrowserRouter with Dashboard + Simulation routes     |
+| Dashboard    | `ui/src/pages/Dashboard.tsx`                  | Launcher tile grid, navigates to simulation          |
+| Simulation   | `ui/src/pages/Simulation.tsx`                 | Engine selector, parameter panel, 3D view, live plot |
+| API client   | `ui/src/api/client.ts`                        | WebSocket simulation streaming, REST engine queries  |
+| Engine hook  | `ui/src/api/useEngineManager.ts`              | Lazy engine load/unload via REST                     |
+| Backend mgmt | `ui/src/api/backend.ts`                       | Tauri IPC to start/stop Python backend               |
+| 3D scene     | `ui/src/components/visualization/Scene3D.tsx` | Three.js/R3F visualization                           |
+| Live plot    | `ui/src/components/analysis/LivePlot.tsx`     | Recharts real-time plotting                          |
+| Tauri shell  | `ui/src-tauri/src/lib.rs`                     | Rust process manager for Python backend              |
 
 **Stack:** React 19, React Router 7, TanStack Query, Three.js (R3F), Recharts,
 Tailwind CSS, Vite 7, Tauri 2 (Rust).
@@ -36,38 +36,38 @@ Tailwind CSS, Vite 7, Tauri 2 (Rust).
 There is no single PyQt6 "app" — there are **several independent PyQt6 GUIs**, each
 tailored to a specific engine or tool:
 
-| GUI | File | Scope |
-|-----|------|-------|
-| MuJoCo Analysis | `src/engines/.../mujoco/.../gui/core/main_window.py` | 9 tabs: Physics, Controls, Visualization, Analysis, Plotting, Live Analysis, Interactive Pose, Manipulability, Grip Modelling |
-| Unified Dashboard | `src/shared/python/dashboard/window.py` | Generic: Control Panel, Live Plot, Plotting tab, Counterfactuals tab, Export tab |
-| Drake GUI | `src/engines/.../drake/python/src/drake_gui_app.py` | Drake-specific simulation + MeshCat |
-| Pinocchio GUI | `src/engines/.../pinocchio/python/dtack/gui/main_window.py` | Pinocchio-specific dynamics |
-| Pendulum GUI | `src/engines/.../pendulum_models/.../ui/pendulum_pyqt_app.py` | Double/triple pendulum simulation |
-| C3D Viewer | `src/engines/.../3D_Golf_Model/python/src/apps/c3d_viewer.py` | Motion capture data viewer |
-| OpenSim GUI | `src/engines/.../opensim/python/opensim_gui.py` | OpenSim wrapper |
-| Pose GUIs | `src/shared/python/pose_estimation/mediapipe_gui.py`, `openpose_gui.py` | Video pose estimation |
-| AI Assistant | `src/shared/python/ai/gui/assistant_panel.py` | AI chat panel |
-| Launcher | `src/launchers/golf_suite_launcher.py` | Main desktop launcher (tile grid) |
+| GUI               | File                                                                    | Scope                                                                                                                         |
+| ----------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| MuJoCo Analysis   | `src/engines/.../mujoco/.../gui/core/main_window.py`                    | 9 tabs: Physics, Controls, Visualization, Analysis, Plotting, Live Analysis, Interactive Pose, Manipulability, Grip Modelling |
+| Unified Dashboard | `src/shared/python/dashboard/window.py`                                 | Generic: Control Panel, Live Plot, Plotting tab, Counterfactuals tab, Export tab                                              |
+| Drake GUI         | `src/engines/.../drake/python/src/drake_gui_app.py`                     | Drake-specific simulation + MeshCat                                                                                           |
+| Pinocchio GUI     | `src/engines/.../pinocchio/python/dtack/gui/main_window.py`             | Pinocchio-specific dynamics                                                                                                   |
+| Pendulum GUI      | `src/engines/.../pendulum_models/.../ui/pendulum_pyqt_app.py`           | Double/triple pendulum simulation                                                                                             |
+| C3D Viewer        | `src/engines/.../3D_Golf_Model/python/src/apps/c3d_viewer.py`           | Motion capture data viewer                                                                                                    |
+| OpenSim GUI       | `src/engines/.../opensim/python/opensim_gui.py`                         | OpenSim wrapper                                                                                                               |
+| Pose GUIs         | `src/shared/python/pose_estimation/mediapipe_gui.py`, `openpose_gui.py` | Video pose estimation                                                                                                         |
+| AI Assistant      | `src/shared/python/ai/gui/assistant_panel.py`                           | AI chat panel                                                                                                                 |
+| Launcher          | `src/launchers/golf_suite_launcher.py`                                  | Main desktop launcher (tile grid)                                                                                             |
 
 ### 1.3 Shared Backend Infrastructure
 
-| Layer | Key Files | Purpose |
-|-------|-----------|---------|
-| FastAPI server | `src/api/server.py` | REST + WebSocket API |
-| Simulation routes | `src/api/routes/simulation.py` | POST /simulate, /simulate/async |
-| WS streaming | `src/api/routes/simulation_ws.py` | Real-time WebSocket frame streaming |
-| Engine routes | `src/api/routes/engines.py` | Engine discovery, load/unload |
-| Analysis routes | `src/api/routes/analysis.py` | Biomechanical analysis |
-| Video routes | `src/api/routes/video.py` | Video pose estimation |
-| Export routes | `src/api/routes/export.py` | Data export |
-| Request models | `src/api/models/requests.py` | Pydantic request schemas |
-| Response models | `src/api/models/responses.py` | Pydantic response schemas |
-| Engine Manager | `src/shared/python/engine_manager.py` | Engine discovery, loading, switching |
-| PhysicsEngine | `src/shared/python/interfaces.py` | Abstract protocol all engines implement |
-| Engine Registry | `src/shared/python/engine_registry.py` | Plugin-style engine registration |
-| Launcher Manifest | `src/config/launcher_manifest.json` | Shared tile definitions for both UIs |
-| GUI utils | `src/shared/python/gui_utils.py` | PyQt6 base classes, helpers |
-| Shared UI widgets | `src/shared/python/ui/` | Reusable PyQt6 components |
+| Layer             | Key Files                              | Purpose                                 |
+| ----------------- | -------------------------------------- | --------------------------------------- |
+| FastAPI server    | `src/api/server.py`                    | REST + WebSocket API                    |
+| Simulation routes | `src/api/routes/simulation.py`         | POST /simulate, /simulate/async         |
+| WS streaming      | `src/api/routes/simulation_ws.py`      | Real-time WebSocket frame streaming     |
+| Engine routes     | `src/api/routes/engines.py`            | Engine discovery, load/unload           |
+| Analysis routes   | `src/api/routes/analysis.py`           | Biomechanical analysis                  |
+| Video routes      | `src/api/routes/video.py`              | Video pose estimation                   |
+| Export routes     | `src/api/routes/export.py`             | Data export                             |
+| Request models    | `src/api/models/requests.py`           | Pydantic request schemas                |
+| Response models   | `src/api/models/responses.py`          | Pydantic response schemas               |
+| Engine Manager    | `src/shared/python/engine_manager.py`  | Engine discovery, loading, switching    |
+| PhysicsEngine     | `src/shared/python/interfaces.py`      | Abstract protocol all engines implement |
+| Engine Registry   | `src/shared/python/engine_registry.py` | Plugin-style engine registration        |
+| Launcher Manifest | `src/config/launcher_manifest.json`    | Shared tile definitions for both UIs    |
+| GUI utils         | `src/shared/python/gui_utils.py`       | PyQt6 base classes, helpers             |
+| Shared UI widgets | `src/shared/python/ui/`                | Reusable PyQt6 components               |
 
 ### 1.4 Launch Modes (Already Dual)
 
@@ -86,35 +86,35 @@ golf-suite --engine X   # Direct engine launch
 
 ### 2.1 Feature Coverage Gap
 
-| Feature | React UI | PyQt6 GUIs | Notes |
-|---------|----------|------------|-------|
-| Engine selection/loading | Yes (lazy) | Yes (tile launcher) | React is more mature |
-| Real-time simulation | Yes (WebSocket) | Yes (QThread + timer) | Different transport |
-| 3D visualization | Three.js/R3F | MuJoCo native / OpenGL | Fundamentally different renderers |
-| Live plotting | Recharts (2D) | Matplotlib (2D) | Could share data format |
-| Static analysis plots | Not yet | 20+ plot types | Major gap |
-| Counterfactual analysis | Not yet | ZTCF/ZVCF, Induced Accel | Major gap |
-| Data export | Not yet | CSV, MAT, HDF5, C3D | Major gap |
-| Interactive pose editing | Not yet | Drag joints in MuJoCo | Hard to replicate |
-| Grip modelling | Not yet | Full tab | Major gap |
-| Camera controls | Basic orbit | Full preset system | Moderate gap |
-| Video pose estimation | Via API only | Dedicated GUI | Different UX |
-| Keyboard shortcuts | None | Full shortcut system | Easy to add |
-| Recording/playback | Not yet | Full recorder + overlay | Moderate gap |
+| Feature                  | React UI        | PyQt6 GUIs               | Notes                             |
+| ------------------------ | --------------- | ------------------------ | --------------------------------- |
+| Engine selection/loading | Yes (lazy)      | Yes (tile launcher)      | React is more mature              |
+| Real-time simulation     | Yes (WebSocket) | Yes (QThread + timer)    | Different transport               |
+| 3D visualization         | Three.js/R3F    | MuJoCo native / OpenGL   | Fundamentally different renderers |
+| Live plotting            | Recharts (2D)   | Matplotlib (2D)          | Could share data format           |
+| Static analysis plots    | Not yet         | 20+ plot types           | Major gap                         |
+| Counterfactual analysis  | Not yet         | ZTCF/ZVCF, Induced Accel | Major gap                         |
+| Data export              | Not yet         | CSV, MAT, HDF5, C3D      | Major gap                         |
+| Interactive pose editing | Not yet         | Drag joints in MuJoCo    | Hard to replicate                 |
+| Grip modelling           | Not yet         | Full tab                 | Major gap                         |
+| Camera controls          | Basic orbit     | Full preset system       | Moderate gap                      |
+| Video pose estimation    | Via API only    | Dedicated GUI            | Different UX                      |
+| Keyboard shortcuts       | None            | Full shortcut system     | Easy to add                       |
+| Recording/playback       | Not yet         | Full recorder + overlay  | Moderate gap                      |
 
 **Key finding:** The React UI covers ~30% of the PyQt6 feature set. The MuJoCo
 `AdvancedGolfAnalysisWindow` alone has 9 specialized tabs vs the React UI's 2 pages.
 
 ### 2.2 Architectural Divergence
 
-| Aspect | React UI | PyQt6 GUIs |
-|--------|----------|------------|
-| Data transport | HTTP/WebSocket to FastAPI | Direct Python object calls |
-| Plotting | Recharts (client-side JS) | Matplotlib (server-side Python) |
-| 3D rendering | Three.js (WebGL) | MuJoCo viewer (OpenGL) / VTK |
-| State management | React hooks + TanStack Query | PyQt signals/slots |
-| Layout system | Tailwind CSS flexbox | QSplitter + QTabWidget |
-| Process model | Browser tab + API server | Single Python process |
+| Aspect           | React UI                     | PyQt6 GUIs                      |
+| ---------------- | ---------------------------- | ------------------------------- |
+| Data transport   | HTTP/WebSocket to FastAPI    | Direct Python object calls      |
+| Plotting         | Recharts (client-side JS)    | Matplotlib (server-side Python) |
+| 3D rendering     | Three.js (WebGL)             | MuJoCo viewer (OpenGL) / VTK    |
+| State management | React hooks + TanStack Query | PyQt signals/slots              |
+| Layout system    | Tailwind CSS flexbox         | QSplitter + QTabWidget          |
+| Process model    | Browser tab + API server     | Single Python process           |
 
 ---
 
@@ -161,6 +161,7 @@ directly. This logic should be extracted into an `AnalysisService` that returns
 plot data (numpy arrays / dicts) rather than rendering directly to matplotlib.
 
 **Before (PyQt6-coupled):**
+
 ```python
 # In window.py — logic embedded in widget
 def refresh_static_plot(self):
@@ -169,6 +170,7 @@ def refresh_static_plot(self):
 ```
 
 **After (shared service):**
+
 ```python
 # In shared/python/services/analysis_service.py
 class AnalysisOrchestrator:
@@ -189,17 +191,17 @@ self.plotter.render_to_canvas(data, self.static_canvas)
 
 Add API routes for features currently only available in PyQt6:
 
-| New Endpoint | Mirrors PyQt6 Feature |
-|---|---|
+| New Endpoint                         | Mirrors PyQt6 Feature                          |
+| ------------------------------------ | ---------------------------------------------- |
 | `GET /api/analysis/plot-data/{type}` | `UnifiedDashboardWindow.refresh_static_plot()` |
-| `POST /api/analysis/counterfactual` | `compute_analysis()` in dashboard |
-| `GET /api/export/formats` | `get_available_export_formats()` |
-| `POST /api/export/{format}` | `export_data()` in dashboard |
-| `POST /api/recording/start` | `recorder.start_recording()` |
-| `POST /api/recording/stop` | `recorder.stop_recording()` |
-| `GET /api/recording/frames` | `recorder.get_num_frames()` |
-| `GET /api/engine/{type}/models` | Model configs from PhysicsTab |
-| `POST /api/engine/{type}/camera` | Camera preset system |
+| `POST /api/analysis/counterfactual`  | `compute_analysis()` in dashboard              |
+| `GET /api/export/formats`            | `get_available_export_formats()`               |
+| `POST /api/export/{format}`          | `export_data()` in dashboard                   |
+| `POST /api/recording/start`          | `recorder.start_recording()`                   |
+| `POST /api/recording/stop`           | `recorder.stop_recording()`                    |
+| `GET /api/recording/frames`          | `recorder.get_num_frames()`                    |
+| `GET /api/engine/{type}/models`      | Model configs from PhysicsTab                  |
+| `POST /api/engine/{type}/camera`     | Camera preset system                           |
 
 #### Step 3: Shared Layout Specification
 
@@ -319,12 +321,12 @@ by:
 
 ### 5.4 Testing Strategy
 
-| Layer | Testing Approach |
-|-------|------------------|
-| Shared services | Unit tests (pytest) — engine-agnostic |
-| API endpoints | Integration tests (httpx/TestClient) |
-| React UI | Vitest + Testing Library (already exists) |
-| PyQt6 UI | pytest-qt (partially exists) |
+| Layer            | Testing Approach                                 |
+| ---------------- | ------------------------------------------------ |
+| Shared services  | Unit tests (pytest) — engine-agnostic            |
+| API endpoints    | Integration tests (httpx/TestClient)             |
+| React UI         | Vitest + Testing Library (already exists)        |
+| PyQt6 UI         | pytest-qt (partially exists)                     |
 | Cross-GUI parity | API contract tests (same inputs -> same outputs) |
 
 ---
@@ -353,14 +355,14 @@ integration).
 
 ## 7. Files to Modify (Phase 1)
 
-| Action | File | Change |
-|--------|------|--------|
-| Extract | `src/shared/python/dashboard/window.py` | Move plot dispatch to new service |
-| Create | `src/shared/python/services/plotting_orchestrator.py` | Plot data generation (no rendering) |
-| Create | `src/api/routes/plots.py` | `GET /api/plots/{type}` endpoint |
-| Extend | `src/api/routes/analysis.py` | Counterfactual analysis endpoint |
-| Extend | `src/api/routes/export.py` | Multi-format export endpoint |
-| Create | `ui/src/pages/Analysis.tsx` | New Analysis page in React |
-| Create | `ui/src/components/analysis/PlotViewer.tsx` | Server-rendered plot display |
-| Update | `ui/src/App.tsx` | Add `/analysis` route |
-| Extend | `src/config/launcher_manifest.json` | Add layout specs for new pages |
+| Action  | File                                                  | Change                              |
+| ------- | ----------------------------------------------------- | ----------------------------------- |
+| Extract | `src/shared/python/dashboard/window.py`               | Move plot dispatch to new service   |
+| Create  | `src/shared/python/services/plotting_orchestrator.py` | Plot data generation (no rendering) |
+| Create  | `src/api/routes/plots.py`                             | `GET /api/plots/{type}` endpoint    |
+| Extend  | `src/api/routes/analysis.py`                          | Counterfactual analysis endpoint    |
+| Extend  | `src/api/routes/export.py`                            | Multi-format export endpoint        |
+| Create  | `ui/src/pages/Analysis.tsx`                           | New Analysis page in React          |
+| Create  | `ui/src/components/analysis/PlotViewer.tsx`           | Server-rendered plot display        |
+| Update  | `ui/src/App.tsx`                                      | Add `/analysis` route               |
+| Extend  | `src/config/launcher_manifest.json`                   | Add layout specs for new pages      |

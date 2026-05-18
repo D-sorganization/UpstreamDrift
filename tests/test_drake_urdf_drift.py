@@ -50,9 +50,9 @@ def test_build_script_supports_check_flag() -> None:
         check=True,
         cwd=REPO_ROOT,
     )
-    assert (
-        "--check" in result.stdout
-    ), "scripts/build_humanoid_models.py must expose --check; see #4129."
+    assert "--check" in result.stdout, (
+        "scripts/build_humanoid_models.py must expose --check; see #4129."
+    )
 
 
 @pytest.mark.unit

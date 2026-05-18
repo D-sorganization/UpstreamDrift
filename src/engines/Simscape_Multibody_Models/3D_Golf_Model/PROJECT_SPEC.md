@@ -147,13 +147,13 @@ PR #4267) when consuming this parquet.
 
 ## 5. Which option to use when
 
-| Situation                                                 | Pick                                  | Status                                                          |
-| --------------------------------------------------------- | ------------------------------------- | --------------------------------------------------------------- |
-| First time fitting a swing; want a baseline you can trust | **Option 1 — fmincon**                | ✅ Production                                                    |
-| Already have a trained surrogate, want sub-second fits    | Option 2 — NN surrogate               | ✅ Shipped (see Option 2 notes below)                            |
-| Full-trial inverse `(trajectory → 189 coefficients)`      | Option 3a — full-trial inverse        | 🟡 Shipped but data-limited (see Option 3 notes below)          |
-| Per-timestep inverse-dynamics on filtered realistic data  | Option 3b — per-timestep inverse      | 🟢 New production inverse path (`feat/timestep-inverse-model`)  |
-| Want JAX / scipy.optimize over the MATLAB sim             | Option 4 — Python bridge              | 🔴 Needs implementation                                         |
+| Situation                                                 | Pick                             | Status                                                         |
+| --------------------------------------------------------- | -------------------------------- | -------------------------------------------------------------- |
+| First time fitting a swing; want a baseline you can trust | **Option 1 — fmincon**           | ✅ Production                                                  |
+| Already have a trained surrogate, want sub-second fits    | Option 2 — NN surrogate          | ✅ Shipped (see Option 2 notes below)                          |
+| Full-trial inverse `(trajectory → 189 coefficients)`      | Option 3a — full-trial inverse   | 🟡 Shipped but data-limited (see Option 3 notes below)         |
+| Per-timestep inverse-dynamics on filtered realistic data  | Option 3b — per-timestep inverse | 🟢 New production inverse path (`feat/timestep-inverse-model`) |
+| Want JAX / scipy.optimize over the MATLAB sim             | Option 4 — Python bridge         | 🔴 Needs implementation                                        |
 
 Every option must consume the same `target` schema and emit the same
 `result` schema. Mixing options is then a one-line code change (see the

@@ -30,34 +30,34 @@ def default_body_segments(marker_names: Sequence[str]) -> tuple[BodySegment, ...
 
 ### Canonical segment table (28-marker anatomical subset)
 
-| Group | a | b |
-|---|---|---|
-| pelvis | `WaistLeft` | `WaistRight` |
-| pelvis | `WaistLeft` | `WaistLBack` |
-| pelvis | `WaistRight` | `WaistRBack` |
-| pelvis | `WaistLBack` | `WaistRBack` |
-| torso | `BackTop` | `BackLeft` |
-| torso | `BackTop` | `BackRight` |
-| torso | `BackTop` | `WaistLBack` (proxy spine) |
-| torso | `BackTop` | `WaistRBack` |
-| head | `HeadTop` | `HeadFront` |
-| head | `HeadTop` | `HeadSide` |
-| left_arm | `LShoulderTop` | `LShoulderBack` |
-| left_arm | `LShoulderTop` | `LUArmHigh` |
-| left_arm | `LUArmHigh` | `LElbowOut` |
-| left_arm | `LElbowOut` | `LWristTop` |
-| right_arm | `RShoulderTop` | `RShoulderBack` |
-| right_arm | `RShoulderTop` | `RUArmHigh` |
-| right_arm | `RUArmHigh` | `RElbowOut` |
-| right_arm | `RElbowOut` | `RWristTop` |
-| left_leg | `WaistLeft` | `LKneeOut` |
-| left_leg | `LKneeOut` | `LAnkleOut` |
-| left_leg | `LAnkleOut` | `LToeIn` |
-| left_leg | `LToeIn` | `LToeOut` |
-| right_leg | `WaistRight` | `RKneeOut` |
-| right_leg | `RKneeOut` | `RAnkleOut` |
-| right_leg | `RAnkleOut` | `RToeIn` |
-| right_leg | `RToeIn` | `RToeOut` |
+| Group     | a              | b                          |
+| --------- | -------------- | -------------------------- |
+| pelvis    | `WaistLeft`    | `WaistRight`               |
+| pelvis    | `WaistLeft`    | `WaistLBack`               |
+| pelvis    | `WaistRight`   | `WaistRBack`               |
+| pelvis    | `WaistLBack`   | `WaistRBack`               |
+| torso     | `BackTop`      | `BackLeft`                 |
+| torso     | `BackTop`      | `BackRight`                |
+| torso     | `BackTop`      | `WaistLBack` (proxy spine) |
+| torso     | `BackTop`      | `WaistRBack`               |
+| head      | `HeadTop`      | `HeadFront`                |
+| head      | `HeadTop`      | `HeadSide`                 |
+| left_arm  | `LShoulderTop` | `LShoulderBack`            |
+| left_arm  | `LShoulderTop` | `LUArmHigh`                |
+| left_arm  | `LUArmHigh`    | `LElbowOut`                |
+| left_arm  | `LElbowOut`    | `LWristTop`                |
+| right_arm | `RShoulderTop` | `RShoulderBack`            |
+| right_arm | `RShoulderTop` | `RUArmHigh`                |
+| right_arm | `RUArmHigh`    | `RElbowOut`                |
+| right_arm | `RElbowOut`    | `RWristTop`                |
+| left_leg  | `WaistLeft`    | `LKneeOut`                 |
+| left_leg  | `LKneeOut`     | `LAnkleOut`                |
+| left_leg  | `LAnkleOut`    | `LToeIn`                   |
+| left_leg  | `LToeIn`       | `LToeOut`                  |
+| right_leg | `WaistRight`   | `RKneeOut`                 |
+| right_leg | `RKneeOut`     | `RAnkleOut`                |
+| right_leg | `RAnkleOut`    | `RToeIn`                   |
+| right_leg | `RToeIn`       | `RToeOut`                  |
 
 ### Renderer integration
 

@@ -81,12 +81,14 @@ def invert_via_surrogate(target: "ClubTarget", config: InversionConfig) -> Inver
 ## DbC contract
 
 Preconditions:
+
 - `target` is a `ClubTarget`.
 - `config.surrogate_checkpoint` exists.
 - `config.n_iterations >= 1`.
 - `config.learning_rate > 0`.
 
 Postconditions:
+
 - `result.coefficients` is a finite vector within coefficient bounds.
 - `result.final_J >= 0` and finite.
 - `len(result.history) == config.n_iterations // config.log_every + 1`.

@@ -7,12 +7,14 @@
 First issue. Pure data model + Protocols.
 
 Files in `src/shared/python/anthropometrics/`:
+
 - `contracts.py` — `Estimator`, `Reader`, `Writer`, `EngineAdapter` Protocols.
 - `segment_properties.py` — `SegmentProperties` frozen dataclass (full spec in epic body).
 - `_subject_anthropometrics.py` — `SubjectAnthropometrics(subject_id, height_m, mass_kg, segments: dict[str, SegmentProperties], source_method, ...)`.
 - `__init__.py` re-exports.
 
 Validation:
+
 - All masses, lengths > 0.
 - inertia_tensor 3×3 symmetric, positive-definite.
 - Eigenvalue triangle inequality (Ix + Iy ≥ Iz, Iy + Iz ≥ Ix, Ix + Iz ≥ Iy) — strict invariant of physical realisability.
@@ -46,6 +48,7 @@ class Estimator(Protocol):
 `from_dempster.py` and `from_zatsiorsky.py` ship their own ratio tables (committed JSON) since `humanoid_character_builder` only ships de Leva.
 
 **Validation tests**: assert published numbers reproduce. Examples:
+
 - de Leva upper-arm mass ratio = 0.0271 of total body mass for males.
 - de Leva forearm CoM = 45.7% of segment length from proximal end.
 - These published values must reproduce exactly to ≤1e-3.
@@ -75,6 +78,7 @@ Where `SegmentDef = (segment_name, proximal_marker, distal_marker)`.
 Reuses logic from `motion_pipeline/scaling/anthropometric.py` — wrap, don't duplicate.
 
 Tests:
+
 - Synthetic 100-frame trajectory with known segment length recovers within 1e-9.
 - NaN-tolerant: half-NaN markers still produce a length via remaining frames.
 - Method comparison: median is robust to outliers; min is conservative.
@@ -92,6 +96,7 @@ Tests:
 Wraps `model_generation.inertia.calculator` (already in repo) and the de Leva radius-of-gyration ratios to produce `SegmentProperties.inertia_tensor` for each segment.
 
 For a cylinder approximation:
+
 - `Ix` (long axis) = mass × r² / 2
 - `Iy = Iz` (transverse) = mass × (3r² + L²) / 12
 
@@ -139,6 +144,7 @@ Real-data note: our existing `data/C3D_TA_*.c3d` files do NOT carry `SUBJECT_INF
 `src/shared/python/anthropometrics/{readers,writers}/urdf_inertial.py`.
 
 Reader:
+
 ```python
 def read_urdf_inertial(visual_element: ET.Element) -> SegmentProperties:
     """Parse a <link><inertial> block into SegmentProperties.
@@ -148,6 +154,7 @@ def read_urdf_inertial(visual_element: ET.Element) -> SegmentProperties:
 ```
 
 Writer:
+
 ```python
 def write_urdf_inertial(props: SegmentProperties) -> ET.Element:
     """Produce <inertial><origin xyz="..."/><mass value="..."/><inertia ...></inertia></inertial>"""
@@ -166,6 +173,7 @@ Round-trip test: every `SegmentProperties` instance written then re-read recover
 `src/shared/python/anthropometrics/{readers,writers}/osim_body.py`.
 
 OpenSim `<Body>` schema:
+
 - `<mass>kg</mass>`
 - `<mass_center>x y z</mass_center>`
 - `<inertia>Ixx Iyy Izz Ixy Ixz Iyz</inertia>`
@@ -183,6 +191,7 @@ Round-trip test required.
 `src/shared/python/anthropometrics/{readers,writers}/mjcf_body.py`.
 
 MJCF `<body><inertial>` schema:
+
 - `pos="x y z"`
 - `mass="kg"`
 - `diaginertia="Ix Iy Iz"` OR `fullinertia="Ixx Iyy Izz Ixy Ixz Iyz"`
@@ -242,6 +251,7 @@ def run_pipeline(
 ```
 
 Validation report: HTML at `output_dir/report.html` showing:
+
 - Mass closure (sum of segment masses ÷ subject mass — should be 1.00 ± 1%).
 - Inertia spectral check (all eigenvalues positive, triangle inequality holds).
 - Length closure (sum of axial lengths ÷ subject height — sanity check).
@@ -259,9 +269,11 @@ Tests: end-to-end on `data/C3D_TA_Driver.c3d` produces all 4 engine outputs; loa
 `src/shared/python/anthropometrics/ui/segment_properties_panel.py`:
 
 `QGroupBox` showing for currently-selected segment:
+
 - Length (m), Mass (kg), CoM offset (m), Inertia tensor (3×3 monospaced grid), Principal moments (sorted eigenvalues), Source method, Source subject params.
 
 Wired into both:
+
 - C3D Viewer's `viewer_3d_tab` — "Segments" sub-pane.
 - Motion-Match Preview's `live_view_controller` — sidebar.
 
@@ -278,6 +290,7 @@ Headless tests + visual regression snapshot.
 `src/shared/python/anthropometrics/ui/calibration_dialog.py`:
 
 User-facing modal. Shows:
+
 - Subject height + mass spinboxes (auto-filled from C3D SUBJECT_INFO if present).
 - Estimator combobox (de Leva / Dempster / Zatsiorsky).
 - "Compute" button → live-updates the SegmentPropertiesPanel below.
@@ -295,6 +308,7 @@ Tests: headless; programmatic state-change reaches export.
 ### feat(anthropometrics): SubjectAnthropometrics JSON persistence
 
 `src/shared/python/anthropometrics/persistence.py`:
+
 - `save_subject(record, path)` / `load_subject(path) -> SubjectAnthropometrics`.
 - Schema v1.
 - Default location `~/.golf_modeling_suite/subjects/`.
@@ -326,11 +340,13 @@ In addition to per-child unit tests (≥85% each), this issue ships:
 Three new docs:
 
 1. **ADR** at `docs/adr/00<next>-anthropometrics-pipeline.md`:
+
    - Context: algorithms scattered, no UI exposure, no cross-engine bridge.
    - Decision: canonical `SegmentProperties` + Protocol-driven readers/writers/adapters + URDF as common interchange.
    - Consequences: cross-model anthropometrics pipeline; engines all work from the same subject record.
 
 2. **User guide** `docs/user_guide/anthropometrics/quickstart.md`:
+
    - Pick subject mass + height in the matcher's calibration dialog → "Run pipeline" → see SegmentPropertiesPanel populate → "Export to Drake".
    - Worked example using `data/C3D_TA_Driver.c3d`.
 

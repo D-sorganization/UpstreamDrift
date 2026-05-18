@@ -18,4 +18,3 @@ The `CMD` uses Docker’s exec form, so `"${FORWARDED_ALLOW_IPS:-127.0.0.1}"` is
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3944#discussion_r3179164612)
 
 ---
-

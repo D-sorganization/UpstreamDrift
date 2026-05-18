@@ -1,1 +1,19 @@
-{"clubhead_speed_at_impact_mph":112.3,"clubhead_speed_meas_mph":113.5,"git_commit":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","matlab_version":"R2024b","n_iterations":42,"option":1,"peak_power_W":2845.0,"python_version":"","rmse_butt_mm":1.85,"rmse_clubhead_mm":3.21,"rmse_orientation_deg":2.4,"schema_version":"1.0.0","solver":"fmincon-sqp","swing_id":"TW_ProV1","timestamp_iso8601":"2026-05-05T17:34:21Z","total_work_J":310.5,"wall_clock_s":17.4}
+{
+  "clubhead_speed_at_impact_mph": 112.3,
+  "clubhead_speed_meas_mph": 113.5,
+  "git_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "matlab_version": "R2024b",
+  "n_iterations": 42,
+  "option": 1,
+  "peak_power_W": 2845.0,
+  "python_version": "",
+  "rmse_butt_mm": 1.85,
+  "rmse_clubhead_mm": 3.21,
+  "rmse_orientation_deg": 2.4,
+  "schema_version": "1.0.0",
+  "solver": "fmincon-sqp",
+  "swing_id": "TW_ProV1",
+  "timestamp_iso8601": "2026-05-05T17:34:21Z",
+  "total_work_J": 310.5,
+  "wall_clock_s": 17.4
+}

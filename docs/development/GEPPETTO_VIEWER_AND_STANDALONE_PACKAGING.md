@@ -317,8 +317,8 @@ specs:
 
 ## Appendix: Current Viewer Implementations
 
-| Viewer        | File                           | Status                     |
-| ------------- | ------------------------------ | -------------------------- |
-| MeshCat       | `dtack/viz/meshcat_viewer.py`  | Fully functional           |
-| Geppetto      | `dtack/viz/geppetto_viewer.py` | Needs fixes                |
+| Viewer        | File                                | Status                     |
+| ------------- | ----------------------------------- | -------------------------- |
+| MeshCat       | `dtack/viz/meshcat_viewer.py`       | Fully functional           |
+| Geppetto      | `dtack/viz/geppetto_viewer.py`      | Needs fixes                |
 | Swing Dataset | `dtack/viz/swing_dataset_viewer.py` | Specialized for .mat files |

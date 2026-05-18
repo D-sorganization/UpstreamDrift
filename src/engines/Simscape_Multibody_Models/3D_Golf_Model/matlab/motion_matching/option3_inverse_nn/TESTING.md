@@ -4,19 +4,21 @@
 
 ## Test taxonomy
 
-| Marker | Speed | When |
-|---|---|---|
-| `unit` | < 1 s | Every push |
-| `integration` | < 60 s | Every push |
-| `slow` | < 10 min | Nightly + pre-merge to `main` |
+| Marker            | Speed     | When                               |
+| ----------------- | --------- | ---------------------------------- |
+| `unit`            | < 1 s     | Every push                         |
+| `integration`     | < 60 s    | Every push                         |
+| `slow`            | < 10 min  | Nightly + pre-merge to `main`      |
 | `live_simulation` | unbounded | Pre-merge only; uses MATLAB Engine |
 
 ## Required tests
 
 ### `test_cvae_overfits_single_trial`
+
 **Marker:** `unit`. **Issue:** #032.
 
 Take **one** `(x, θ)` pair from the dataset, train for 500 iterations on it alone (effectively memorize), and assert:
+
 - Reconstruction MSE on `θ` is near zero (< 1e-3 in normalized units).
 - The model can generate `θ` to within `1e-3` from a fixed `z = μ`.
 
@@ -34,6 +36,7 @@ def test_cvae_overfits_single_trial(single_trial_fixture, default_cvae_config):
 ---
 
 ### `test_held_out_round_trip_rmse_under_10mm`
+
 **Marker:** `slow`, `live_simulation`. **Issue:** #033.
 
 On 16 trials from the held-out test split, run `predict_coefficients(..., validate=True)` and assert the **median** round-trip clubhead RMSE is `< 10 mm`. Mean is too easy to game; median is the bar.
@@ -54,9 +57,11 @@ def test_held_out_round_trip_rmse_under_10mm(trained_model, held_out_test_set, s
 ---
 
 ### `test_kl_does_not_collapse`
+
 **Marker:** `integration`. **Issue:** #032.
 
 After full training, on a held-out batch of 64 trials, assert:
+
 - Mean `KL(q(z|x,θ) ‖ N(0,I))` over the batch is `> 0.5 nats`.
 - Per-sample KL is `> 0.05 nats` for `> 95%` of samples (no collapsed individuals).
 
@@ -74,11 +79,13 @@ def test_kl_does_not_collapse(trained_model, held_out_batch):
 ---
 
 ### `test_multiple_samples_produce_distinct_coefficients_for_under_determined_target`
+
 **Marker:** `integration`. **Issue:** #034.
 
 Use a **synthetic under-determined target** — built per [APPROACH.md §Mode-coverage diagnostic](APPROACH.md#mode-coverage-diagnostic) — that we know admits at least two coefficient vectors `θ_a`, `θ_b` producing the same club trajectory.
 
 Sample 32 coefficient vectors from `g_φ`. Assert:
+
 - Sample standard deviation across samples (per-coefficient, then averaged) is `> 0.05` in normalized units. A deterministic regressor would score ~0 here.
 - At least two samples lie within `0.1` of `θ_a` and at least two within `0.1` of `θ_b` — the model is covering both modes.
 
@@ -102,6 +109,7 @@ def test_multiple_samples_produce_distinct_coefficients_for_under_determined_tar
 ---
 
 ### `test_predict_under_50ms_for_single_target`
+
 **Marker:** `unit`. **Issue:** #032.
 
 Cold start (model loaded), no validation, `n_samples=1`: `predict_coefficients` returns in `< 50 ms` on a CPU. This is the latency budget for the **fast** mode (the warm-start path into Option 1's `fmincon`). Validation passes are obviously slower; that's a different test.
@@ -120,6 +128,7 @@ def test_predict_under_50ms_for_single_target(trained_model_cpu, one_target):
 ---
 
 ### `test_round_trip_validation_filters_invalid_samples`
+
 **Marker:** `integration`. **Issue:** #033.
 
 Construct a deliberately-bad sample — e.g. inject a noise vector into `model.sample_coefficients` output — and verify `validate_round_trip` ranks it last. Then verify `predict_coefficients(..., validate=True)` does **not** return it.
@@ -142,17 +151,17 @@ def test_round_trip_validation_filters_invalid_samples(trained_model, one_target
 
 Live in `tests/conftest.py`. Required fixtures:
 
-| Fixture | Scope | Description |
-|---|---|---|
-| `single_trial_fixture` | session | One `(x, θ)` pair from the dataset for overfit tests |
-| `default_cvae_config` | session | `CVAEConfig` with `n_joints` matching the test dataset |
-| `held_out_test_set` | session | Iterable of `(ClubTarget, theta)` from the held-out split |
-| `held_out_batch` | session | Tensor batch of 64 held-out samples for KL test |
-| `trained_model` | session (slow), function (fast) | Real or stub `TrainedInverseCVAE` |
-| `trained_model_cpu` | session | `TrainedInverseCVAE` forced to CPU for latency test |
-| `under_determined_synthetic_target` | session | Triple `(x, θ_a, θ_b)` produced offline; cached |
-| `sim_fn` | session | Simscape callback. Stub for fast tests; real Engine for `live_simulation` |
-| `one_target` | function | Any `ClubTarget` for ad-hoc tests |
+| Fixture                             | Scope                           | Description                                                               |
+| ----------------------------------- | ------------------------------- | ------------------------------------------------------------------------- |
+| `single_trial_fixture`              | session                         | One `(x, θ)` pair from the dataset for overfit tests                      |
+| `default_cvae_config`               | session                         | `CVAEConfig` with `n_joints` matching the test dataset                    |
+| `held_out_test_set`                 | session                         | Iterable of `(ClubTarget, theta)` from the held-out split                 |
+| `held_out_batch`                    | session                         | Tensor batch of 64 held-out samples for KL test                           |
+| `trained_model`                     | session (slow), function (fast) | Real or stub `TrainedInverseCVAE`                                         |
+| `trained_model_cpu`                 | session                         | `TrainedInverseCVAE` forced to CPU for latency test                       |
+| `under_determined_synthetic_target` | session                         | Triple `(x, θ_a, θ_b)` produced offline; cached                           |
+| `sim_fn`                            | session                         | Simscape callback. Stub for fast tests; real Engine for `live_simulation` |
+| `one_target`                        | function                        | Any `ClubTarget` for ad-hoc tests                                         |
 
 The `under_determined_synthetic_target` fixture's offline construction is itself a script under `notebooks/` (per the deliverable list). Output is committed under `tests/data/synthetic_under_determined.pt` (~MB-scale). Documented in [RUNBOOK.md](RUNBOOK.md).
 

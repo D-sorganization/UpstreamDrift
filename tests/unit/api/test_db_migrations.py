@@ -83,9 +83,9 @@ class TestAlembicIni:
         cfg.read(str(ini))
         script_location = cfg.get("alembic", "script_location")
         scripts_dir = REPO_ROOT / script_location
-        assert (
-            scripts_dir.is_dir()
-        ), f"script_location '{script_location}' does not exist as a directory"
+        assert scripts_dir.is_dir(), (
+            f"script_location '{script_location}' does not exist as a directory"
+        )
 
     def test_alembic_ini_versions_dir(self):
         """The versions/ directory referenced in alembic.ini must exist."""
@@ -110,25 +110,25 @@ class TestMigrationsEnvPy:
         """env.py must import Base from src.api.auth.models."""
         env = REPO_ROOT / "src" / "api" / "migrations" / "env.py"
         source = env.read_text()
-        assert (
-            "from src.api.auth.models import Base" in source
-        ), "env.py must import Base from src.api.auth.models"
+        assert "from src.api.auth.models import Base" in source, (
+            "env.py must import Base from src.api.auth.models"
+        )
 
     def test_env_py_sets_target_metadata(self):
         """env.py must assign target_metadata = Base.metadata."""
         env = REPO_ROOT / "src" / "api" / "migrations" / "env.py"
         source = env.read_text()
-        assert (
-            "target_metadata = Base.metadata" in source
-        ), "env.py must set target_metadata = Base.metadata"
+        assert "target_metadata = Base.metadata" in source, (
+            "env.py must set target_metadata = Base.metadata"
+        )
 
     def test_env_py_has_render_as_batch(self):
         """env.py must enable render_as_batch for SQLite ALTER TABLE support."""
         env = REPO_ROOT / "src" / "api" / "migrations" / "env.py"
         source = env.read_text()
-        assert (
-            "render_as_batch=True" in source
-        ), "env.py must set render_as_batch=True for SQLite ALTER TABLE emulation"
+        assert "render_as_batch=True" in source, (
+            "env.py must set render_as_batch=True for SQLite ALTER TABLE emulation"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -141,9 +141,9 @@ class TestInitialMigrationMetadata:
 
     def test_initial_migration_exists(self):
         """The initial migration file must exist."""
-        assert (
-            INITIAL_MIGRATION_PATH.exists()
-        ), f"Initial migration not found at {INITIAL_MIGRATION_PATH}"
+        assert INITIAL_MIGRATION_PATH.exists(), (
+            f"Initial migration not found at {INITIAL_MIGRATION_PATH}"
+        )
 
     def test_initial_migration_revision_id(self):
         """Initial migration revision must be '0001'."""
@@ -153,23 +153,23 @@ class TestInitialMigrationMetadata:
     def test_initial_migration_no_parent(self):
         """Initial migration must have no parent revision (down_revision is None)."""
         mod = _import_migration_module()
-        assert (
-            mod.down_revision is None
-        ), f"Initial migration should have no parent, got {mod.down_revision!r}"
+        assert mod.down_revision is None, (
+            f"Initial migration should have no parent, got {mod.down_revision!r}"
+        )
 
     def test_initial_migration_has_upgrade(self):
         """Initial migration must define an upgrade() function."""
         mod = _import_migration_module()
-        assert callable(
-            getattr(mod, "upgrade", None)
-        ), "Initial migration must define upgrade()"
+        assert callable(getattr(mod, "upgrade", None)), (
+            "Initial migration must define upgrade()"
+        )
 
     def test_initial_migration_has_downgrade(self):
         """Initial migration must define a downgrade() function."""
         mod = _import_migration_module()
-        assert callable(
-            getattr(mod, "downgrade", None)
-        ), "Initial migration must define downgrade()"
+        assert callable(getattr(mod, "downgrade", None)), (
+            "Initial migration must define downgrade()"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -222,9 +222,9 @@ class TestMigrationRoundTrip:
             inspector2 = inspect(engine2)
             tables_after_downgrade = set(inspector2.get_table_names())
         for tbl in ("users", "api_keys", "sessions"):
-            assert (
-                tbl not in tables_after_downgrade
-            ), f"Table '{tbl}' still present after downgrade to base"
+            assert tbl not in tables_after_downgrade, (
+                f"Table '{tbl}' still present after downgrade to base"
+            )
 
     def test_idempotent_upgrade(self, alembic_cfg):
         """Applying migrations twice must not raise an error."""

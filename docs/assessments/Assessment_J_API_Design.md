@@ -4,7 +4,9 @@
 **Grade**: 8.0/10
 
 ## Details
+
 API design seems modular.
 
 ## Recommendations
+
 1. Use OpenAPI/FastAPI.

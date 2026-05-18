@@ -47,6 +47,7 @@ class MatplotlibRenderer:
 ## Tests
 
 `tests/unit/body_part_viz/renderers/test_matplotlib_renderer.py`:
+
 - Headless: `QT_QPA_PLATFORM=offscreen`, matplotlib `Agg` backend.
 - Build axes, add 3 cylinders + 1 line shape; assert 4 artists added.
 - `update_frame(handle, 5)` updates the artist's verts; `update_frame(handle, 5)` again is idempotent.

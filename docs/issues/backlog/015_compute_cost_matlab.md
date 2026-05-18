@@ -84,6 +84,7 @@ end
 ## Required tests (TDD)
 
 For `compute_cost`:
+
 - `test_zero_residual_yields_only_regularizer_term`
 - `test_position_term_is_mean_squared_butt_plus_clubhead_distance`
 - `test_orientation_term_uses_geodesic_quaternion_distance_with_abs`
@@ -99,11 +100,13 @@ For `compute_cost`:
 - `test_rejects_target_missing_butt_field_with_validator_error`
 
 For `compute_total_work`:
+
 - `test_total_work_zero_for_zero_torque`
 - `test_total_work_matches_handcalc_for_constant_torque_constant_omega`
 - `test_total_work_uses_absolute_value_so_eccentric_counts_positive`
 
 For validators:
+
 - `test_must_have_fields_passes_for_complete_struct`
 - `test_must_have_fields_errors_with_clear_message_listing_missing_fields`
 - `test_must_be_finite_vector_rejects_inf_and_nan`
@@ -113,17 +116,20 @@ For validators:
 ## DbC contract
 
 `compute_cost` preconditions (in `arguments` block):
+
 - `theta (:,1) double {mustBeFiniteVector}`
 - `target (1,1) struct {validators.mustHaveFields(target, ["time","butt","clubhead","club_quat","impact_idx"])}`
 - `sim_fn (1,1) function_handle`
 - `opts (1,1) struct = default_cost_options()`
 
 `compute_cost` postconditions:
+
 - `J` is a finite non-negative scalar.
 - `terms.total == J` to within `eps`.
 - Every field of `terms` is non-negative.
 
 `compute_total_work` postconditions:
+
 - `W >= 0`.
 
 ## Acceptance Criteria

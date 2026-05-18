@@ -9,7 +9,7 @@ The PyQt6 launcher (`launch_golf_suite.py --classic`) discovers tiles via `src/c
 Update `src/config/models.yaml` and `src/config/launcher_manifest.json` so the launcher tile name and description reflect the new scope:
 
 ```yaml
-- key: motion_target_preview        # new key (replaces / aliases the old starting_pose_matcher)
+- key: motion_target_preview # new key (replaces / aliases the old starting_pose_matcher)
   display_name: "Motion-Match Preview"
   description: |
     Preview club, ball, and full-body mocap targets alongside any engine model.

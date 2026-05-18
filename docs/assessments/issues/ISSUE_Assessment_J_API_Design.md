@@ -9,5 +9,6 @@ labels: jules:assessment, needs-attention
 **Details**: The assessment for this category returned a score below 5/10.
 
 ## Recommended Actions
+
 - Review the detailed assessment in `docs/assessments/Assessment_J_API_Design.md`
 - Create a remediation plan.

@@ -31,4 +31,3 @@ This change removes `_validate_dataframe_expression(...)` and now forwards raw `
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/2684#discussion_r3086987416)
 
 ---
-

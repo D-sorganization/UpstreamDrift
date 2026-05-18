@@ -108,8 +108,8 @@ class TestTileFieldValidation:
                     missing_fields.append(
                         f"{tile.get('id', '<unknown>')!r} missing {field!r}"
                     )
-        assert not missing_fields, (
-            f"Tiles missing required fields:\n" + "\n".join(missing_fields)
+        assert not missing_fields, "Tiles missing required fields:\n" + "\n".join(
+            missing_fields
         )
 
     def test_every_tile_has_path_or_web_route(self, manifest_json: dict) -> None:
@@ -119,14 +119,10 @@ class TestTileFieldValidation:
             has_path = bool(tile.get("path"))
             has_web_route = bool(tile.get("web_route"))
             if not has_path and not has_web_route:
-                missing.append(
-                    f"{tile['id']!r} has neither 'path' nor 'web_route'"
-                )
+                missing.append(f"{tile['id']!r} has neither 'path' nor 'web_route'")
         assert not missing, "\n".join(missing)
 
-    def test_all_tiles_have_valid_category(
-        self, manifest: LauncherManifest
-    ) -> None:
+    def test_all_tiles_have_valid_category(self, manifest: LauncherManifest) -> None:
         """Every tile category must be one of the canonical categories."""
         for tile in manifest.tiles:
             assert tile.category in LAUNCHER_CATEGORIES, (
@@ -177,12 +173,10 @@ class TestHiddenTileValidation:
         """Every hidden tile must explain why it is hidden."""
         hidden_without_reason: list[str] = []
         for tile in manifest_json["tiles"]:
-            if tile.get("hidden", False):
-                if not tile.get("hidden_reason"):
-                    hidden_without_reason.append(tile["id"])
+            if tile.get("hidden", False) and not tile.get("hidden_reason"):
+                hidden_without_reason.append(tile["id"])
         assert not hidden_without_reason, (
-            f"Hidden tiles missing 'hidden_reason': "
-            f"{', '.join(hidden_without_reason)}"
+            f"Hidden tiles missing 'hidden_reason': {', '.join(hidden_without_reason)}"
         )
 
 

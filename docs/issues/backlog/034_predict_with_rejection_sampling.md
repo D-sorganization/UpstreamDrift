@@ -83,12 +83,14 @@ def predict_with_rejection_sampling(
 ## DbC contract
 
 Preconditions:
+
 - `target` is a `ClubTarget`.
 - `config.cvae_checkpoint` exists.
 - When `scorer_forward in {"surrogate","both"}`, `config.surrogate_checkpoint` exists.
 - `config.n_samples >= 1`.
 
 Postconditions:
+
 - `result.best_J == result.all_J.min()`.
 - `result.best_coefficients` is within coefficient bounds.
 - `result.all_J.shape == (n_samples,)`.

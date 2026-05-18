@@ -31,9 +31,9 @@ target = struct( ...
 The body→club interface is **rigid at the grip** (the player's hands holding the club).
 The clubhead is a non-rigid extension because of (a) shaft flex during the swing and
 (b) the player's actual club length almost never matches the modeled club length to the
-millimetre.  Matching on the grip position + grip orientation gives an exact (sub-mm),
+millimetre. Matching on the grip position + grip orientation gives an exact (sub-mm),
 club-length-independent target for the body kinematics; the modeled club's clubhead is
-then a deterministic rigid extension of that grip pose.  See COST_FUNCTION_SPEC.md
+then a deterministic rigid extension of that grip pose. See COST_FUNCTION_SPEC.md
 for the corresponding cost-term reweighting.
 
 Python mirror is a `dataclass`:
@@ -57,9 +57,9 @@ class ClubTarget:
 
 [Wiffle_ProV1_club_3D_data.xlsx](../../src/apps/golf_gui/Motion%20Capture%20Plotter/) — already parsed by [mocap_data_loader.py](../../src/apps/golf_gui/Motion%20Capture%20Plotter/mocap_data_loader.py).
 
-- **Units in source:** **centimetres** (the Definitions tab claims "inches" but the actual values are cm; mid-hands→clubhead distance is constant 106.93 across every frame, which is 1.07 m in cm and 2.71 m if treated as inches).  Frames at the file's native rate (240 Hz).
+- **Units in source:** **centimetres** (the Definitions tab claims "inches" but the actual values are cm; mid-hands→clubhead distance is constant 106.93 across every frame, which is 1.07 m in cm and 2.71 m if treated as inches). Frames at the file's native rate (240 Hz).
 - **Conversion:** cm → metres via `× 0.01`.
-- **Event markers:** row 1 of each sheet is `<trial> | A | <addr#> | T | <top#> | I | <impact#> | F | <finish#> | CHS | <mph>`.  The loader reads these into `target.events` and uses the documented `I_sample` for `impact_idx` (the speed-argmax heuristic is not authoritative — it can latch onto the wrong local maximum).
+- **Event markers:** row 1 of each sheet is `<trial> | A | <addr#> | T | <top#> | I | <impact#> | F | <finish#> | CHS | <mph>`. The loader reads these into `target.events` and uses the documented `I_sample` for `impact_idx` (the speed-argmax heuristic is not authoritative — it can latch onto the wrong local maximum).
 - **Orientation:** the file stores 3×3 rotation matrices per frame; convert to unit quaternion with sign normalised so `q[0] >= 0` to suppress the `q ↔ -q` ambiguity at the source.
 - **Sheets:** `TW_wiffle`, `TW_ProV1`, `GW_wiffle`, `GW_ProV11`. Each is one swing. See [TEST_TRIALS.md](TEST_TRIALS.md) for the canonical inventory of trials, their event markers, expected CHS values, and per-trial data-quality notes.
 

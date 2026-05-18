@@ -493,12 +493,12 @@ def test_realtime_ws_soak() -> None:
             p99,
             mean,
         )
-        assert (
-            p50 < LATENCY_P50_MS_BUDGET
-        ), f"p50 latency {p50:.3f}ms exceeds {LATENCY_P50_MS_BUDGET}ms budget"
-        assert (
-            p99 < LATENCY_P99_MS_BUDGET
-        ), f"p99 latency {p99:.3f}ms exceeds {LATENCY_P99_MS_BUDGET}ms budget"
+        assert p50 < LATENCY_P50_MS_BUDGET, (
+            f"p50 latency {p50:.3f}ms exceeds {LATENCY_P50_MS_BUDGET}ms budget"
+        )
+        assert p99 < LATENCY_P99_MS_BUDGET, (
+            f"p99 latency {p99:.3f}ms exceeds {LATENCY_P99_MS_BUDGET}ms budget"
+        )
     else:
         pytest.fail("no latency samples captured (subscriber 0 did not receive)")
 

@@ -33,4 +33,3 @@ The close button wiring now directly sets `ai_panel` max width to 0, bypassing `
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/5305#discussion_r3229881500)
 
 ---
-

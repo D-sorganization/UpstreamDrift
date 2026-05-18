@@ -5,12 +5,12 @@ runtime from optional and exploratory integrations. The canonical metadata is
 stored in `src/engines/tiers.py` and each in-scope engine package declares its
 own `_tier.py`.
 
-| Tier | Examples | Stability bar | Dependencies | Vulnerability SLA |
-| --- | --- | --- | --- | --- |
-| core | MuJoCo, FastAPI, shared | Must pass on every PR; semver-stable public API; no skip | Installed by default | High/Critical: 7 days |
-| extended | Drake, Pinocchio | Must pass nightly; semver-stable within major versions | Installed only through extras | High: 30 days |
-| experimental | OpenSim, MyoSuite | Best effort; may be skipped; API may break | Installed only through extras; emits warning | Best effort |
-| archived | None today | Read-only; not built; not tested | Not installed | n/a |
+| Tier         | Examples                | Stability bar                                            | Dependencies                                 | Vulnerability SLA     |
+| ------------ | ----------------------- | -------------------------------------------------------- | -------------------------------------------- | --------------------- |
+| core         | MuJoCo, FastAPI, shared | Must pass on every PR; semver-stable public API; no skip | Installed by default                         | High/Critical: 7 days |
+| extended     | Drake, Pinocchio        | Must pass nightly; semver-stable within major versions   | Installed only through extras                | High: 30 days         |
+| experimental | OpenSim, MyoSuite       | Best effort; may be skipped; API may break               | Installed only through extras; emits warning | Best effort           |
+| archived     | None today              | Read-only; not built; not tested                         | Not installed                                | n/a                   |
 
 ## Tier Changes
 

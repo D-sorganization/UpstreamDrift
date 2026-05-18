@@ -405,25 +405,25 @@ class SimscapeAdapter(PhysicsEngine):
 
 For PR review and CI, every method must declare its support level:
 
-| Method | Status | Latency | Notes |
-|---|---|---|---|
-| `model_name` | full | <1 ms | property, no engine call |
-| `load_from_path` | full | 10–30 s first time, 1–3 s thereafter | engine startup amortized |
-| `load_from_string` | **NotImplementedError** | — | .slx is binary; no string form |
-| `reset` | full | ~10 ms | resets `Simulink.SimulationInput.setInitialState` |
-| `step` | full but slow | ~10–20 ms | RL inner-loop infeasible — use surrogate |
-| `forward` | full | ~5–10 ms | sim with duration 0 |
-| `get_state`, `set_state` | full | ~5–10 ms | flat double marshalling |
-| `set_control`, `get_time` | full | ~5–10 ms | |
-| `compute_mass_matrix` | full | ~10–20 ms | uses Simscape `mass_matrix` API |
-| `compute_bias_forces`, `compute_gravity_forces` | full | ~10–20 ms | |
-| `compute_inverse_dynamics` | full | ~15–25 ms | |
-| `compute_jacobian` | partial | ~10 ms | returns `None` for bodies not in the .slx |
-| `compute_drift_acceleration`, `compute_control_acceleration` | full | ~15–25 ms | per Section F superposition |
-| `compute_ztcf`, `compute_zvcf` | full | ~15–25 ms | per Section G |
-| `get_time_series`, `get_induced_acceleration_series` | full | ~5–15 ms | reads from cached `logsout` of last sim |
-| `set_analysis_config` | full | <1 ms | toggles which fields the .slx logs |
-| `simulate_with_coefficients` | full (headline) | ~50–200 ms | the motion-matching path |
+| Method                                                       | Status                  | Latency                              | Notes                                             |
+| ------------------------------------------------------------ | ----------------------- | ------------------------------------ | ------------------------------------------------- |
+| `model_name`                                                 | full                    | <1 ms                                | property, no engine call                          |
+| `load_from_path`                                             | full                    | 10–30 s first time, 1–3 s thereafter | engine startup amortized                          |
+| `load_from_string`                                           | **NotImplementedError** | —                                    | .slx is binary; no string form                    |
+| `reset`                                                      | full                    | ~10 ms                               | resets `Simulink.SimulationInput.setInitialState` |
+| `step`                                                       | full but slow           | ~10–20 ms                            | RL inner-loop infeasible — use surrogate          |
+| `forward`                                                    | full                    | ~5–10 ms                             | sim with duration 0                               |
+| `get_state`, `set_state`                                     | full                    | ~5–10 ms                             | flat double marshalling                           |
+| `set_control`, `get_time`                                    | full                    | ~5–10 ms                             |                                                   |
+| `compute_mass_matrix`                                        | full                    | ~10–20 ms                            | uses Simscape `mass_matrix` API                   |
+| `compute_bias_forces`, `compute_gravity_forces`              | full                    | ~10–20 ms                            |                                                   |
+| `compute_inverse_dynamics`                                   | full                    | ~15–25 ms                            |                                                   |
+| `compute_jacobian`                                           | partial                 | ~10 ms                               | returns `None` for bodies not in the .slx         |
+| `compute_drift_acceleration`, `compute_control_acceleration` | full                    | ~15–25 ms                            | per Section F superposition                       |
+| `compute_ztcf`, `compute_zvcf`                               | full                    | ~15–25 ms                            | per Section G                                     |
+| `get_time_series`, `get_induced_acceleration_series`         | full                    | ~5–15 ms                             | reads from cached `logsout` of last sim           |
+| `set_analysis_config`                                        | full                    | <1 ms                                | toggles which fields the .slx logs                |
+| `simulate_with_coefficients`                                 | full (headline)         | ~50–200 ms                           | the motion-matching path                          |
 
 `test_protocol_compliance` (see [TESTING.md](TESTING.md)) iterates every method on `PhysicsEngine` and asserts it is either implemented or raises `NotImplementedError` with a clear message.
 

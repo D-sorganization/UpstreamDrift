@@ -67,9 +67,9 @@ def test_old_paths_still_importable_with_warning(old_name: str) -> None:
     module, caught = _import_with_warning(old_name)
     assert module is not None
     deprecations = [w for w in caught if issubclass(w.category, DeprecationWarning)]
-    assert (
-        deprecations
-    ), f"Expected DeprecationWarning when importing {old_name}; got {caught!r}"
+    assert deprecations, (
+        f"Expected DeprecationWarning when importing {old_name}; got {caught!r}"
+    )
     text = " ".join(str(w.message) for w in deprecations)
     assert "perstep" in text and "#4044" in text
 

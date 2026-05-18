@@ -55,12 +55,12 @@ def test_simscape_order_has_25_unique_entries():
 @pytest.mark.unit
 def test_mapping_table_uses_only_known_names():
     for os_name, sim_name in OPENSIM_TO_SIMSCAPE.items():
-        assert (
-            os_name in OPENSIM_COORD_ORDER
-        ), f"{os_name!r} not a known OpenSim coordinate"
-        assert (
-            sim_name in SIMSCAPE_COORD_ORDER
-        ), f"{sim_name!r} not a known Simscape coordinate"
+        assert os_name in OPENSIM_COORD_ORDER, (
+            f"{os_name!r} not a known OpenSim coordinate"
+        )
+        assert sim_name in SIMSCAPE_COORD_ORDER, (
+            f"{sim_name!r} not a known Simscape coordinate"
+        )
 
 
 @pytest.mark.unit

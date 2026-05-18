@@ -90,11 +90,11 @@ The pool is opt-in. The default deployment is a single shared engine. Pool size 
 
 Three categories of state, three different mechanisms:
 
-| Category | Examples | Mechanism | Frequency |
-|---|---|---|---|
-| Long-lived model parameters | link masses, joint damping, friction, integrator settings | `engine.set_param(model_name, "Mass", "5.0", nargout=0)` | Once at load, then on `set_link_masses` etc. |
-| Per-call run inputs | polynomial coefficients, rng seed | `Simulink.SimulationInput` + `setVariable` | Every `simulate_with_coefficients` call |
-| Live state during stepped sim | q, v at time `t` | Block parameter writes + `set_param("SimulationCommand", "update")` | Per `step()` (slow path; only used by RL eval) |
+| Category                      | Examples                                                  | Mechanism                                                           | Frequency                                      |
+| ----------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------- |
+| Long-lived model parameters   | link masses, joint damping, friction, integrator settings | `engine.set_param(model_name, "Mass", "5.0", nargout=0)`            | Once at load, then on `set_link_masses` etc.   |
+| Per-call run inputs           | polynomial coefficients, rng seed                         | `Simulink.SimulationInput` + `setVariable`                          | Every `simulate_with_coefficients` call        |
+| Live state during stepped sim | q, v at time `t`                                          | Block parameter writes + `set_param("SimulationCommand", "update")` | Per `step()` (slow path; only used by RL eval) |
 
 The first two are the hot paths and what the existing MATLAB code (`simulate_with_coefficients.m` from issue #018) already supports. The third is the awkward path; see [§ Stepped vs whole-simulation execution](#stepped-vs-whole-simulation-execution).
 
@@ -166,12 +166,12 @@ MATLAB exception (any kind)
 
 Sub-types:
 
-| Python exception | When raised |
-|---|---|
+| Python exception     | When raised                                                                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `EngineStartupError` | `import matlab.engine` failed, `start_matlab` failed, license checkout failed at startup, or the engine process died mid-call. |
-| `LicenseError` | License checkout failure with a recognizable error id (`MATLAB:license:...`). Subclass of `EngineStartupError`. |
-| `SimulationError` | Any error during a `sim()` call (integrator divergence, missing block, etc.). |
-| `ModelLoadError` | `load_system` failed (file missing, .slx corrupt). Subclass of `SimulationError`. |
+| `LicenseError`       | License checkout failure with a recognizable error id (`MATLAB:license:...`). Subclass of `EngineStartupError`.                |
+| `SimulationError`    | Any error during a `sim()` call (integrator divergence, missing block, etc.).                                                  |
+| `ModelLoadError`     | `load_system` failed (file missing, .slx corrupt). Subclass of `SimulationError`.                                              |
 
 Errors are **not** caught and converted to dummy outputs. The optimizer is responsible for the penalty-on-failure policy; see [option1/ASSUMPTIONS § 12](../option1_direct_optimization/ASSUMPTIONS.md#12-failure-mode-simulator-side-errors).
 
@@ -255,14 +255,14 @@ This is single-process; for a 10⁴-trial sweep on a 4-engine pool, throughput i
 
 The following Python modules **work against the Simscape model** the moment Option 4 lands. None of them require any change beyond passing a `SimscapeAdapter` instance.
 
-| Module | What it does | What changes with Option 4 |
-|---|---|---|
-| `src/learning/sim2real/system_identification.py` | Fits link masses, damping, friction to measured trajectories. | Today: works against MuJoCo/Drake/Pinocchio. Tomorrow: works against Simscape — the highest-fidelity option in the suite. |
-| `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/` (Python `core.py`) | Generates the random-sweep parquet dataset. | Today: shells out to MATLAB or uses `pyrunfile`. Tomorrow: clean Python loop calling `adapter.simulate_with_coefficients`. |
-| `src/shared/python/data_io/swing_capture_import.py` | Imports C3D / CSV / JSON swing demos as `Demonstration`s. | Demos can now be replayed and re-simulated through Simscape for ground-truth comparison. |
-| `src/learning/rl/humanoid_envs.py` (and `manipulation_envs.py`) | RL gym environments. | Eval rollouts run through the adapter; training inner loop still uses Option 2's surrogate. |
-| `src/learning/imitation/` (retargeter, BC, GAIL) | Imitation learning over `Demonstration`s. | Retargeted demos can be validated against Simscape. |
-| `src/learning/sim2real/domain_randomization.py` | Randomizes engine params for sim-to-real. | Now includes Simscape link masses / damping / friction in the randomization domain. |
+| Module                                                                                                           | What it does                                                  | What changes with Option 4                                                                                                 |
+| ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `src/learning/sim2real/system_identification.py`                                                                 | Fits link masses, damping, friction to measured trajectories. | Today: works against MuJoCo/Drake/Pinocchio. Tomorrow: works against Simscape — the highest-fidelity option in the suite.  |
+| `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/` (Python `core.py`) | Generates the random-sweep parquet dataset.                   | Today: shells out to MATLAB or uses `pyrunfile`. Tomorrow: clean Python loop calling `adapter.simulate_with_coefficients`. |
+| `src/shared/python/data_io/swing_capture_import.py`                                                              | Imports C3D / CSV / JSON swing demos as `Demonstration`s.     | Demos can now be replayed and re-simulated through Simscape for ground-truth comparison.                                   |
+| `src/learning/rl/humanoid_envs.py` (and `manipulation_envs.py`)                                                  | RL gym environments.                                          | Eval rollouts run through the adapter; training inner loop still uses Option 2's surrogate.                                |
+| `src/learning/imitation/` (retargeter, BC, GAIL)                                                                 | Imitation learning over `Demonstration`s.                     | Retargeted demos can be validated against Simscape.                                                                        |
+| `src/learning/sim2real/domain_randomization.py`                                                                  | Randomizes engine params for sim-to-real.                     | Now includes Simscape link masses / damping / friction in the randomization domain.                                        |
 
 ## Open future work
 

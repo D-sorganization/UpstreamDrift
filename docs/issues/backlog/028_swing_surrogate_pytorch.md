@@ -99,10 +99,12 @@ Use `@precondition` / `@postcondition` decorators from
 `src.shared.python.core.contracts`.
 
 Preconditions:
+
 - `coeffs.shape[-1] == config.n_joints * config.n_coefficients_per_joint`.
 - `coeffs` is finite.
 
 Postconditions:
+
 - `output.shape == (B, config.n_timesteps, config.output_kinematic_dim)`.
 - `output` is finite when `coeffs` is within trained-distribution bounds.
 

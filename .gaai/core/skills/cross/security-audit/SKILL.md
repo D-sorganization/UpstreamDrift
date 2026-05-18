@@ -28,6 +28,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate:
+
 - After implementation as a security gate
 - Periodically on active projects
 - When security rules are added or updated
@@ -67,6 +68,7 @@ Enforces security as a system rule, not a human task.
 ## Non-Goals
 
 This skill must NOT:
+
 - Fix vulnerabilities (use `remediate-failures` for that)
 - Make architectural decisions
 - Replace dedicated security tooling

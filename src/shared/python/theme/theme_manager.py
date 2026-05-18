@@ -447,7 +447,11 @@ class ThemeManager(QObject):
 
     def _get_custom_theme_path(self) -> Path:
         """Get the path to the user_themes.json file."""
-        config_dir = Path(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppConfigLocation))
+        config_dir = Path(
+            QStandardPaths.writableLocation(
+                QStandardPaths.StandardLocation.AppConfigLocation
+            )
+        )
         config_dir.mkdir(parents=True, exist_ok=True)
         return config_dir / "user_themes.json"
 
@@ -456,9 +460,9 @@ class ThemeManager(QObject):
         theme_path = self._get_custom_theme_path()
         if not theme_path.exists():
             return {}
-            
+
         try:
-            with open(theme_path, "r", encoding="utf-8") as f:
+            with open(theme_path, encoding="utf-8") as f:
                 data = json.load(f)
             if not isinstance(data, dict):
                 raise ValueError("Invalid custom theme data structure")

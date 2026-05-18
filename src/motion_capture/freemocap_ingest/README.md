@@ -46,6 +46,7 @@ chmod +x setup_freemocap_env.sh
 ```
 
 This will:
+
 - Create a virtual environment at `~/freemocap-env`
 - Install FreeMoCap and its dependencies
 - Verify the installation
@@ -166,6 +167,7 @@ The parsed session contains 3D landmark data from MediaPipe Holistic:
 - **Face**: Simplified key points
 
 Each landmark has:
+
 - `x, y, z`: 3D coordinates in meters (origin at camera array center)
 - `confidence`: Tracking confidence (0.0 - 1.0)
 - `visible`: Boolean indicating if landmark is visible
@@ -173,6 +175,7 @@ Each landmark has:
 ### Calibration Data
 
 FreeMoCap outputs camera calibration data including:
+
 - Camera intrinsics (focal length, principal point)
 - Camera extrinsics (position and orientation)
 - Triangulation parameters
@@ -235,6 +238,7 @@ FreeMoCap is licensed under AGPL-3.0. This integration maintains a clean boundar
 - Main UpstreamDrift environment has no FreeMoCap packages installed
 
 Verify the boundary:
+
 ```bash
 # In main UpstreamDrift env
 pip list | grep -E "freemocap|skelly|anipose|PySide"
@@ -255,6 +259,7 @@ Error: FreeMoCap environment not found.
 ```
 
 Run the setup script to create the environment:
+
 ```bash
 ./setup_freemocap_env.sh
 ```
@@ -270,6 +275,7 @@ Run the setup script to create the environment:
 ### Import errors
 
 If you see import errors when running FreeMoCap:
+
 ```bash
 source ~/freemocap-env/bin/activate
 pip install --upgrade freemocap

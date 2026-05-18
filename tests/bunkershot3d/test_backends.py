@@ -155,9 +155,7 @@ def test_mpm_contact_wrench_shape(dummy_config: Path, tmp_path: Path) -> None:
     driver.setup()
     assert driver.model is not None and driver.data is not None
 
-    clubhead_id = mujoco.mj_name2id(
-        driver.model, mujoco.mjtObj.mjOBJ_BODY, "clubhead"
-    )
+    clubhead_id = mujoco.mj_name2id(driver.model, mujoco.mjtObj.mjOBJ_BODY, "clubhead")
     force, torque = driver._extract_contact_wrench(clubhead_id)
     assert force.shape == (3,), f"Expected (3,) force, got {force.shape}"
     assert torque.shape == (3,), f"Expected (3,) torque, got {torque.shape}"

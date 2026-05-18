@@ -105,12 +105,12 @@ L = w_butt · MSE(butt_pred, butt_true)
 
 Defaults (in `TrainConfig`):
 
-| Weight | Value | Rationale |
-|---|---|---|
-| `w_butt` | `1.0` | Position in metres²; sets the scale |
-| `w_clubhead` | `1.0` | Same scale as butt |
-| `w_quat` | `0.1` | Same orientation/position ratio as `compute_cost` |
-| `w_aux` | `0.1` | Auxiliary; small enough to stay a regularizer, large enough to learn |
+| Weight       | Value | Rationale                                                            |
+| ------------ | ----- | -------------------------------------------------------------------- |
+| `w_butt`     | `1.0` | Position in metres²; sets the scale                                  |
+| `w_clubhead` | `1.0` | Same scale as butt                                                   |
+| `w_quat`     | `0.1` | Same orientation/position ratio as `compute_cost`                    |
+| `w_aux`      | `0.1` | Auxiliary; small enough to stay a regularizer, large enough to learn |
 
 The quaternion term uses `(1 − ⟨q,q*⟩²)` rather than `‖q − q*‖²` because the latter is double-valued for sign-flipped quaternions. The `⟨·,·⟩²` form is smooth, sign-invariant, and equals `sin²(θ/2)·cos²(θ/2)` in the angle θ between rotations — small near zero, monotonic in θ on `[0, π/2]`. This is the standard quaternion-supervision trick and is what passes `test_surrogate_gradient_finite`.
 
@@ -182,15 +182,15 @@ The forward map is multi-modal; multiple coefficient regions can produce the sam
 
 ### Default `InvertOptions`
 
-| Option | Default | Notes |
-|---|---|---|
-| `n_restarts` | `8` | K random starts |
-| `max_iters` | `200` | per restart |
-| `invert_lr` | `1e-2` | Adam learning rate on coefficients |
-| `early_stop_loss` | `1e-6` | bail early if loss falls below this |
-| `regularizer` | `"none"` | optional `‖coeffs‖²` (`"coeff_l2"`) — see `COST_FUNCTION_SPEC.md` |
-| `lambda` | `0.0` | regularizer strength |
-| `seed` | `None` | reproducibility |
+| Option            | Default  | Notes                                                             |
+| ----------------- | -------- | ----------------------------------------------------------------- |
+| `n_restarts`      | `8`      | K random starts                                                   |
+| `max_iters`       | `200`    | per restart                                                       |
+| `invert_lr`       | `1e-2`   | Adam learning rate on coefficients                                |
+| `early_stop_loss` | `1e-6`   | bail early if loss falls below this                               |
+| `regularizer`     | `"none"` | optional `‖coeffs‖²` (`"coeff_l2"`) — see `COST_FUNCTION_SPEC.md` |
+| `lambda`          | `0.0`    | regularizer strength                                              |
+| `seed`            | `None`   | reproducibility                                                   |
 
 ### Wall-clock budget
 
@@ -228,7 +228,7 @@ Why this is good:
 
 - Option 2 lands you in the right basin in seconds.
 - Option 1's `fmincon` polish (~1–2 minutes from a warm start, vs ~10 minutes cold) closes the surrogate-truth gap by running on the true Simscape forward.
-- The leaderboard column shows both: *"surrogate seed → fmincon polish"*.
+- The leaderboard column shows both: _"surrogate seed → fmincon polish"_.
 
 The MATLAB-side glue:
 

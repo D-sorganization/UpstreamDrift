@@ -1,6 +1,6 @@
 # Plot-Style Toolkit — Colormap & Palette Author Guide
 
-This guide walks through the workflow for *adding* colormaps and
+This guide walks through the workflow for _adding_ colormaps and
 palettes to the plot-style toolkit — both ad-hoc registrations made at
 runtime and contributions intended to ship in-tree.
 
@@ -33,9 +33,9 @@ cmap = CustomColormap(
 register_custom_colormap(cmap)
 ```
 
-`register_custom_colormap` is *idempotent* for the same logical
+`register_custom_colormap` is _idempotent_ for the same logical
 colormap — re-registering an identical `(name, stops)` is a no-op.
-Re-registering a *different* colormap under an existing name raises
+Re-registering a _different_ colormap under an existing name raises
 `ValueError`. Names that clash with a built-in `ColormapId` value
 (`viridis`, `plasma`, `velocity`, ...) are also rejected.
 
@@ -122,7 +122,7 @@ follow the same convention:
 
 ### Perceptually-uniform recommendations
 
-When the data is *quantitative* (continuous numeric channel) the
+When the data is _quantitative_ (continuous numeric channel) the
 colormap should be perceptually uniform — equal differences in
 underlying value should look like equal differences in color. The
 matplotlib built-ins that satisfy this for sequential data are
@@ -133,13 +133,13 @@ The semantic aliases ship the perceptually-uniform pick for each data
 family — prefer them over the underlying matplotlib name at call
 sites:
 
-| Semantic alias        | Underlying built-in | Use-case                            |
-| --------------------- | ------------------- | ----------------------------------- |
-| `VELOCITY`            | `PLASMA`            | Speed magnitudes (0 → max)          |
-| `FORCE`               | `INFERNO`           | Force / pressure magnitudes         |
-| `ACCELERATION`        | `TURBO`             | Higher-frequency derivatives        |
-| `HEIGHT`              | `VIRIDIS`           | Vertical position / elevation       |
-| `GENERIC_DIVERGING`   | `COOLWARM`          | Signed deviations around zero       |
+| Semantic alias      | Underlying built-in | Use-case                      |
+| ------------------- | ------------------- | ----------------------------- |
+| `VELOCITY`          | `PLASMA`            | Speed magnitudes (0 → max)    |
+| `FORCE`             | `INFERNO`           | Force / pressure magnitudes   |
+| `ACCELERATION`      | `TURBO`             | Higher-frequency derivatives  |
+| `HEIGHT`            | `VIRIDIS`           | Vertical position / elevation |
+| `GENERIC_DIVERGING` | `COOLWARM`          | Signed deviations around zero |
 
 Using the alias keeps call sites readable — and if a future review
 changes the underlying matplotlib pick, every existing caller updates

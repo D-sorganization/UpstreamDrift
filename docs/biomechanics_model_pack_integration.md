@@ -1,6 +1,7 @@
 # Biomechanics Model Pack Integration Plan
 
 **Parent Issues:**
+
 - [#5312](https://github.com/D-sorganization/UpstreamDrift/issues/5312) - Incorporate MuJoCo/Drake/Pinocchio/OpenSim model packs
 - [#5313](https://github.com/D-sorganization/UpstreamDrift/issues/5313) - Reconcile model_pack/v1 provider schema
 - [#5314](https://github.com/D-sorganization/UpstreamDrift/issues/5314) - Expose and categorize all runnable tools
@@ -23,16 +24,17 @@ This document addresses three interconnected issues related to biomechanics mode
 
 All four biomechanics provider repos have `model_pack.yaml` on `origin/main`:
 
-| Repo | Manifest | Model Pack Module | Tests |
-|------|----------|-------------------|-------|
-| MuJoCo_Models | ✅ | `src/mujoco_models/model_pack.py` | ✅ |
-| Drake_Models | ✅ | `src/drake_models/model_pack.py` | ✅ |
-| Pinocchio_Models | ✅ | `src/pinocchio_models/model_pack.py` | ✅ |
-| OpenSim_Models | ✅ | `src/opensim_models/model_pack.py` | ✅ |
+| Repo             | Manifest | Model Pack Module                    | Tests |
+| ---------------- | -------- | ------------------------------------ | ----- |
+| MuJoCo_Models    | ✅       | `src/mujoco_models/model_pack.py`    | ✅    |
+| Drake_Models     | ✅       | `src/drake_models/model_pack.py`     | ✅    |
+| Pinocchio_Models | ✅       | `src/pinocchio_models/model_pack.py` | ✅    |
+| OpenSim_Models   | ✅       | `src/opensim_models/model_pack.py`   | ✅    |
 
 ### Schema Mismatch
 
 The external model repos use a simple `model_pack/v1` manifest, while UpstreamDrift's stricter loader expects:
+
 - `manifest_version`
 - `pack_id`
 - `pack_name`
@@ -48,6 +50,7 @@ The external model repos use a simple `model_pack/v1` manifest, while UpstreamDr
 #### Implementation Steps
 
 1. **Create Schema Adapter** (`src/shared/python/biomech/model_pack_adapter.py`):
+
    ```python
    class ModelPackAdapter:
        """Normalizes model_pack/v1 manifests into UpstreamDrift contract."""
@@ -60,6 +63,7 @@ The external model repos use a simple `model_pack/v1` manifest, while UpstreamDr
    ```
 
 2. **Add Fixture Tests** (`tests/test_model_pack_normalization.py`):
+
    - Test valid `model_pack/v1` manifests from all four providers
    - Test malformed manifests produce actionable errors
    - Test normalized output includes required metadata
@@ -81,6 +85,7 @@ The external model repos use a simple `model_pack/v1` manifest, while UpstreamDr
 #### Implementation Steps
 
 1. **Create Provider Registry** (`src/shared/python/biomech/provider_registry.py`):
+
    ```python
    BIOMECHANICS_PROVIDERS = {
        "mujoco": {
@@ -95,6 +100,7 @@ The external model repos use a simple `model_pack/v1` manifest, while UpstreamDr
    ```
 
 2. **Update Launcher** to consume provider registry:
+
    - Add Biomechanics category
    - Register exercises under appropriate providers
    - Add visibility tests
@@ -117,26 +123,28 @@ The external model repos use a simple `model_pack/v1` manifest, while UpstreamDr
 
 #### Categories
 
-| Category | Tools |
-|----------|-------|
-| Physics Engines | Drake, MuJoCo, Pinocchio, OpenSim simulators |
-| Biomechanics | Model pack viewers, exercise analyzers |
-| Simulation | Forward dynamics, inverse kinematics |
-| Motion Matching | Database search, trajectory extraction |
-| Motion Capture | C3D processing, marker tracking |
-| Analysis | Swing analysis, joint angle extraction |
-| Documentation | Spec viewers, ADR browser |
-| External Providers | Ollama, OpenAI adapters |
-| Developer Tools | Test runners, schema validators |
+| Category           | Tools                                        |
+| ------------------ | -------------------------------------------- |
+| Physics Engines    | Drake, MuJoCo, Pinocchio, OpenSim simulators |
+| Biomechanics       | Model pack viewers, exercise analyzers       |
+| Simulation         | Forward dynamics, inverse kinematics         |
+| Motion Matching    | Database search, trajectory extraction       |
+| Motion Capture     | C3D processing, marker tracking              |
+| Analysis           | Swing analysis, joint angle extraction       |
+| Documentation      | Spec viewers, ADR browser                    |
+| External Providers | Ollama, OpenAI adapters                      |
+| Developer Tools    | Test runners, schema validators              |
 
 #### Implementation Steps
 
 1. **Create Tool Inventory** (`src/launchers/tool_inventory.py`):
+
    - Scan source for runnable tools
    - Cross-check with launcher manifests
    - Identify hidden/missing entries
 
 2. **Update Launcher Categories**:
+
    - Add missing categories
    - Fix `hidden: true` entries with documentation
    - Add coverage tests
@@ -160,11 +168,11 @@ The external model repos use a simple `model_pack/v1` manifest, while UpstreamDr
 
 ## PR Tracking
 
-| Phase | Issue | PR # | Status |
-|-------|-------|------|--------|
-| Phase 1: Schema Adapter | #5313 | - | ⏳ Pending |
-| Phase 2: Provider Registry | #5312 | - | ⏳ Pending |
-| Phase 3: Tool Exposure | #5314 | - | ⏳ Pending |
+| Phase                      | Issue | PR # | Status     |
+| -------------------------- | ----- | ---- | ---------- |
+| Phase 1: Schema Adapter    | #5313 | -    | ⏳ Pending |
+| Phase 2: Provider Registry | #5312 | -    | ⏳ Pending |
+| Phase 3: Tool Exposure     | #5314 | -    | ⏳ Pending |
 
 ## Related Issues
 
@@ -174,4 +182,4 @@ The external model repos use a simple `model_pack/v1` manifest, while UpstreamDr
 
 ---
 
-*This document will be updated as integration PRs are created and merged.*
+_This document will be updated as integration PRs are created and merged._

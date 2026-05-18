@@ -34,15 +34,15 @@ When **not** to use it:
 
 ## What it ships
 
-| File | Purpose |
-|---|---|
-| `simscape_adapter.py` | `SimscapeAdapter(PhysicsEngine)` — implements the full protocol and adds `simulate_with_coefficients`. |
-| `simscape_adapter_pool.py` | `SimscapeAdapterPool` — pool of N engines for parallel inference. |
-| `simscape_output.py` | `SimscapeOutput` dataclass and the `logsout → numpy` converter. |
-| `simscape_errors.py` | `SimulationError`, `EngineStartupError`, `LicenseError` — Python wrappers around MATLAB exceptions. |
-| `cache.py` | Hash-keyed cache of `(coefficients, model_params) → SimscapeOutput`. |
-| `loader.py` | `load_matlab_3d_engine(suite_root)` — to be wired into `src/engines/loaders.py` under `EngineType.MATLAB_3D`. |
-| `tests/` | `pytest` suite per [TESTING.md](TESTING.md). |
+| File                       | Purpose                                                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `simscape_adapter.py`      | `SimscapeAdapter(PhysicsEngine)` — implements the full protocol and adds `simulate_with_coefficients`.        |
+| `simscape_adapter_pool.py` | `SimscapeAdapterPool` — pool of N engines for parallel inference.                                             |
+| `simscape_output.py`       | `SimscapeOutput` dataclass and the `logsout → numpy` converter.                                               |
+| `simscape_errors.py`       | `SimulationError`, `EngineStartupError`, `LicenseError` — Python wrappers around MATLAB exceptions.           |
+| `cache.py`                 | Hash-keyed cache of `(coefficients, model_params) → SimscapeOutput`.                                          |
+| `loader.py`                | `load_matlab_3d_engine(suite_root)` — to be wired into `src/engines/loaders.py` under `EngineType.MATLAB_3D`. |
+| `tests/`                   | `pytest` suite per [TESTING.md](TESTING.md).                                                                  |
 
 The contracts are in [INTERFACES.md](INTERFACES.md). The architecture and lifecycle are in [APPROACH.md](APPROACH.md). The assumptions are in [ASSUMPTIONS.md](ASSUMPTIONS.md). Install steps are in [INSTALLATION.md](INSTALLATION.md). How to run it is in [RUNBOOK.md](RUNBOOK.md). What to test is in [TESTING.md](TESTING.md).
 
@@ -80,19 +80,19 @@ Option 4 consumes — does not re-implement:
 
 ## GitHub issues for Option 4
 
-| # | Title | Notes |
-|---|---|---|
-| **#036** | `SimscapeAdapter(PhysicsEngine)` core | Engine lifecycle, protocol methods, `simulate_with_coefficients`. Acceptance: passes `test_protocol_compliance` and `test_simulate_with_known_coefficients_matches_matlab_direct`. |
-| **#037** | `load_matlab_3d_engine` + registration in `src/engines/loaders.py` | Wires `EngineType.MATLAB_3D` to a working factory. Acceptance: `loaders.LOADER_MAP[EngineType.MATLAB_3D]` returns a working adapter on a license-equipped host. |
-| **#038** | `SimscapeAdapterPool` | Pool of N engines for parallel inference. Acceptance: `test_concurrent_engines_isolated` passes. |
-| **#039** | Output extraction + cache | `logsout → numpy` converter and `(coeffs, model_params) → SimscapeOutput` cache. Acceptance: `test_cache_hit_skips_simulation` passes. |
-| **#040** | Integration tests against `system_identification.py` and `dataset_generator/core.py` | End-to-end fit using the adapter. Acceptance: `test_system_identification_works_against_adapter` passes. |
+| #        | Title                                                                                | Notes                                                                                                                                                                              |
+| -------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **#036** | `SimscapeAdapter(PhysicsEngine)` core                                                | Engine lifecycle, protocol methods, `simulate_with_coefficients`. Acceptance: passes `test_protocol_compliance` and `test_simulate_with_known_coefficients_matches_matlab_direct`. |
+| **#037** | `load_matlab_3d_engine` + registration in `src/engines/loaders.py`                   | Wires `EngineType.MATLAB_3D` to a working factory. Acceptance: `loaders.LOADER_MAP[EngineType.MATLAB_3D]` returns a working adapter on a license-equipped host.                    |
+| **#038** | `SimscapeAdapterPool`                                                                | Pool of N engines for parallel inference. Acceptance: `test_concurrent_engines_isolated` passes.                                                                                   |
+| **#039** | Output extraction + cache                                                            | `logsout → numpy` converter and `(coeffs, model_params) → SimscapeOutput` cache. Acceptance: `test_cache_hit_skips_simulation` passes.                                             |
+| **#040** | Integration tests against `system_identification.py` and `dataset_generator/core.py` | End-to-end fit using the adapter. Acceptance: `test_system_identification_works_against_adapter` passes.                                                                           |
 
 Shared infrastructure consumed by Option 4: issues #014 (synthetic target oracle), #015 (`compute_cost`), #018 (`simulate_with_coefficients`).
 
 ## How Option 4 relates to Options 1, 2, 3
 
-- **Option 1 (direct MATLAB fmincon)** — Option 4 calls the *same* `simulate_with_coefficients.m` that Option 1 calls. Useful for: cross-validating that a Python-driven fit and a MATLAB-driven fit on the same target converge to the same coefficients.
+- **Option 1 (direct MATLAB fmincon)** — Option 4 calls the _same_ `simulate_with_coefficients.m` that Option 1 calls. Useful for: cross-validating that a Python-driven fit and a MATLAB-driven fit on the same target converge to the same coefficients.
 - **Option 2 (NN surrogate)** — Option 4 is the round-trip oracle. After the surrogate produces `θ̂`, the adapter runs `simulate_with_coefficients(θ̂)` and the result is compared to the surrogate's prediction. Mismatches above a configurable budget reject the fit as out-of-distribution.
 - **Option 3 (inverse NN)** — same role as for Option 2: validation oracle. The inverse network proposes `θ̂` from `q_meas`; the adapter checks the round-trip.
 

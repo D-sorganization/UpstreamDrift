@@ -32,6 +32,7 @@ class FitSwingProvider(Protocol):
 `FitOptions` extends `AlignOptions` with optimisation knobs (`max_iters`, `tol`, `seed`, `regulariser`, `cost_terms` enum set, `initial_theta`).
 
 `FitResult` (frozen dataclass) carries:
+
 - `theta` — fitted joint-angle trajectory `(N, n_joints)`
 - `target` — the input target (so consumers can re-render)
 - `simulated_clubhead` `(N, 3)` — engine-rendered clubhead trace

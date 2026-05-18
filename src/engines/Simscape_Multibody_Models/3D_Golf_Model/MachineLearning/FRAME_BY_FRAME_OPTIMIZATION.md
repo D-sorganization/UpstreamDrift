@@ -104,6 +104,7 @@ candidate_level_count ^ control_count
 ### Complete (Epic #3976)
 
 **#3977 — Simscape Stepping Hooks**
+
 - `+frame_search/evaluate_candidate_step.m`: Restores previous-frame `xFinal` or
   starting-state MAT, applies candidate as a flat polynomial torque (constant term
   G = torque, A..F = 0), runs the model from current time to target time.
@@ -116,6 +117,7 @@ candidate_level_count ^ control_count
   in `matlab/tests/test_frame_by_frame_hooks.m`.
 
 **#3978 — Checkpoint/Resume + Progress Artifacts**
+
 - `frame_search.checkpoint()`: Atomically writes the run state to
   `<run_dir>/checkpoint.mat` with manifest SHA-256 validation.
 - `frame_search.resume()`: Reads the checkpoint, validates manifest hash, and detects
@@ -127,6 +129,7 @@ candidate_level_count ^ control_count
   when manifest hash matches.
 
 **#3979-#3980 — Replay Diagnostics + Torque Smoothing**
+
 - `torque_smoothing.py`: Moving-average, Savitzky-Golay, Butterworth lowpass, and
   spline smoothing methods. Polynomial residual diagnostic flags fits exceeding a
   configurable threshold.

@@ -68,10 +68,12 @@ end
 ## DbC contract
 
 Preconditions:
+
 - `target` per `CLUB_IK_SPEC.md`.
 - `options.MaxFunctionEvaluations >= options.MinSurrogatePoints`.
 
 Postconditions:
+
 - When `skip_polish == false`, `result.final_rmse_m <= result.global_phase.final_rmse_m`.
 - All required provenance fields present.
 - `result.solver` == "surrogateopt+fmincon" (or "surrogateopt" when `skip_polish==true`).

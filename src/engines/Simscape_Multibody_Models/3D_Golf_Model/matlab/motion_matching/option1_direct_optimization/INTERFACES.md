@@ -28,29 +28,29 @@ end
 
 Required fields and defaults:
 
-| Field | Type | Default | Notes |
-|---|---|---|---|
-| `solver` | string | `"hybrid"` | One of `"fmincon", "multistart", "surrogateopt", "hybrid"`. Selecting via this is equivalent to calling the matching `fit_swing_*` directly. |
-| `schedule` | string | `"staged"` | `"flat" \| "staged"` (see [APPROACH.md](APPROACH.md#multi-stage-schedule)). |
-| `cost` | struct | from `default_cost_options()` | Cost-fn weights — see [shared/COST_FUNCTION_SPEC.md](../shared/COST_FUNCTION_SPEC.md#defaults). |
-| `cold_start_strategy` | string | `"dataset"` | `"dataset" \| "sobol" \| "zeros"`. See [APPROACH.md — Cold-start](APPROACH.md#cold-start-strategy). |
-| `multistart_n` | uint32 | 8 | N for `MultiStart`. |
-| `max_iterations` | uint32 | 200 | `fmincon` cap. |
-| `max_function_evals` | uint32 | 500 | `surrogateopt` cap and `fmincon`'s eval cap. |
-| `fd_central` | logical | false | `true` ⇒ central diffs. ~2× cost, more accurate. |
-| `tol_fun` | double | 1e-6 | `OptimalityTolerance`. |
-| `tol_x` | double | 1e-8 | `StepTolerance`. |
-| `use_parallel` | logical | depends on PCT license | Parallel pool for MultiStart / surrogateopt. |
-| `num_workers` | uint32 | `feature('numcores')` | Pool size. |
-| `rng_seed` | uint32 | 42 | Reproducibility seed. |
-| `use_cache` | logical | true | Result-cache opt-out. |
-| `cache_dir` | string | `"results/cache"` | Path relative to `motion_matching/`. |
-| `verbosity` | string | `"Normal"` | `"Silent" \| "Normal" \| "Verbose" \| "Debug"`. |
-| `dashboard` | logical | true | Live `OptimizationProgressDashboard`. |
-| `dashboard_refresh_hz` | double | 5 | Cap per [shared/VISUALIZATION_SPEC.md — Live updates](../shared/VISUALIZATION_SPEC.md#live-updates). |
-| `penalty_on_sim_failure` | double | 1e9 | Per [ASSUMPTIONS.md — Failure mode](ASSUMPTIONS.md#12-failure-mode-simulator-side-errors). |
-| `max_sim_failures` | uint32 | 50 | Abort threshold. |
-| `global_stage` | string | `"surrogateopt"` | For `fit_swing_hybrid`. `"surrogateopt" \| "particleswarm"`. |
+| Field                    | Type    | Default                       | Notes                                                                                                                                        |
+| ------------------------ | ------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `solver`                 | string  | `"hybrid"`                    | One of `"fmincon", "multistart", "surrogateopt", "hybrid"`. Selecting via this is equivalent to calling the matching `fit_swing_*` directly. |
+| `schedule`               | string  | `"staged"`                    | `"flat" \| "staged"` (see [APPROACH.md](APPROACH.md#multi-stage-schedule)).                                                                  |
+| `cost`                   | struct  | from `default_cost_options()` | Cost-fn weights — see [shared/COST_FUNCTION_SPEC.md](../shared/COST_FUNCTION_SPEC.md#defaults).                                              |
+| `cold_start_strategy`    | string  | `"dataset"`                   | `"dataset" \| "sobol" \| "zeros"`. See [APPROACH.md — Cold-start](APPROACH.md#cold-start-strategy).                                          |
+| `multistart_n`           | uint32  | 8                             | N for `MultiStart`.                                                                                                                          |
+| `max_iterations`         | uint32  | 200                           | `fmincon` cap.                                                                                                                               |
+| `max_function_evals`     | uint32  | 500                           | `surrogateopt` cap and `fmincon`'s eval cap.                                                                                                 |
+| `fd_central`             | logical | false                         | `true` ⇒ central diffs. ~2× cost, more accurate.                                                                                             |
+| `tol_fun`                | double  | 1e-6                          | `OptimalityTolerance`.                                                                                                                       |
+| `tol_x`                  | double  | 1e-8                          | `StepTolerance`.                                                                                                                             |
+| `use_parallel`           | logical | depends on PCT license        | Parallel pool for MultiStart / surrogateopt.                                                                                                 |
+| `num_workers`            | uint32  | `feature('numcores')`         | Pool size.                                                                                                                                   |
+| `rng_seed`               | uint32  | 42                            | Reproducibility seed.                                                                                                                        |
+| `use_cache`              | logical | true                          | Result-cache opt-out.                                                                                                                        |
+| `cache_dir`              | string  | `"results/cache"`             | Path relative to `motion_matching/`.                                                                                                         |
+| `verbosity`              | string  | `"Normal"`                    | `"Silent" \| "Normal" \| "Verbose" \| "Debug"`.                                                                                              |
+| `dashboard`              | logical | true                          | Live `OptimizationProgressDashboard`.                                                                                                        |
+| `dashboard_refresh_hz`   | double  | 5                             | Cap per [shared/VISUALIZATION_SPEC.md — Live updates](../shared/VISUALIZATION_SPEC.md#live-updates).                                         |
+| `penalty_on_sim_failure` | double  | 1e9                           | Per [ASSUMPTIONS.md — Failure mode](ASSUMPTIONS.md#12-failure-mode-simulator-side-errors).                                                   |
+| `max_sim_failures`       | uint32  | 50                            | Abort threshold.                                                                                                                             |
+| `global_stage`           | string  | `"surrogateopt"`              | For `fit_swing_hybrid`. `"surrogateopt" \| "particleswarm"`.                                                                                 |
 
 The validator `mustBeOption1Options(s)` enforces field presence + types and **errors** on unknown fields (a typo like `options.lamda = 1e-3` must not silently fail).
 
@@ -280,34 +280,34 @@ end
 
 Every `fit_swing_*` function returns a struct with these fields (per [APPROACH.md — Output structure](APPROACH.md#output-structure)). The exact list is fixed; tests assert presence (`test_result_struct_contains_all_provenance_fields` in [TESTING.md](TESTING.md)).
 
-| Field | Type | Source |
-|---|---|---|
-| `coefficients` | double, `d × 1` | optimizer |
-| `final_rmse_m` | scalar double | derived from `terms.position` |
-| `final_total_work_J` | scalar double | derived from regularizer |
-| `final_cost_terms` | struct | breakdown from `compute_cost` |
-| `solver` | string | constant per fn |
-| `solver_options` | struct | full `optimoptions` used |
-| `target_hash` | string (hex) | `sha256(target without .source)` |
-| `git_commit` | string | `git rev-parse HEAD` (best-effort) |
-| `matlab_version` | string | `version()` |
-| `duration_s` | scalar double | wall clock |
-| `timestamp_utc` | string (ISO-8601) | `datetime("now","TimeZone","UTC")` |
-| `iter_history` | table | per-iter rows |
-| `exitflag` | int | from solver |
-| `output` | struct | raw solver output |
-| `start_points` | `d × N` double or `[]` | only for MultiStart |
-| `start_costs` | `1 × N` double or `[]` | only for MultiStart |
-| `cache_hit` | logical | always present |
+| Field                | Type                   | Source                             |
+| -------------------- | ---------------------- | ---------------------------------- |
+| `coefficients`       | double, `d × 1`        | optimizer                          |
+| `final_rmse_m`       | scalar double          | derived from `terms.position`      |
+| `final_total_work_J` | scalar double          | derived from regularizer           |
+| `final_cost_terms`   | struct                 | breakdown from `compute_cost`      |
+| `solver`             | string                 | constant per fn                    |
+| `solver_options`     | struct                 | full `optimoptions` used           |
+| `target_hash`        | string (hex)           | `sha256(target without .source)`   |
+| `git_commit`         | string                 | `git rev-parse HEAD` (best-effort) |
+| `matlab_version`     | string                 | `version()`                        |
+| `duration_s`         | scalar double          | wall clock                         |
+| `timestamp_utc`      | string (ISO-8601)      | `datetime("now","TimeZone","UTC")` |
+| `iter_history`       | table                  | per-iter rows                      |
+| `exitflag`           | int                    | from solver                        |
+| `output`             | struct                 | raw solver output                  |
+| `start_points`       | `d × N` double or `[]` | only for MultiStart                |
+| `start_costs`        | `1 × N` double or `[]` | only for MultiStart                |
+| `cache_hit`          | logical                | always present                     |
 
 ## Validators (shared)
 
 These validators must exist before any `fit_swing_*` function compiles. They are documented here so the implementer files them with the right signatures. Implementation issues are listed.
 
-| Validator | File | Issue |
-|---|---|---|
-| `mustBeClubTarget(target)` | `motion_matching/shared/+validators/mustBeClubTarget.m` | #013 |
-| `mustBeOption1Options(opts)` | `option1_direct_optimization/private/+validators/mustBeOption1Options.m` | #024 |
-| `mustBeBoundsStruct(b)` | `option1_direct_optimization/private/+validators/mustBeBoundsStruct.m` | #024 |
-| `mustBeIterRow(r)` | `option1_direct_optimization/private/+validators/mustBeIterRow.m` | #027 |
-| `mustHaveFields(s, names)` | `motion_matching/shared/+validators/mustHaveFields.m` | #015 |
+| Validator                    | File                                                                     | Issue |
+| ---------------------------- | ------------------------------------------------------------------------ | ----- |
+| `mustBeClubTarget(target)`   | `motion_matching/shared/+validators/mustBeClubTarget.m`                  | #013  |
+| `mustBeOption1Options(opts)` | `option1_direct_optimization/private/+validators/mustBeOption1Options.m` | #024  |
+| `mustBeBoundsStruct(b)`      | `option1_direct_optimization/private/+validators/mustBeBoundsStruct.m`   | #024  |
+| `mustBeIterRow(r)`           | `option1_direct_optimization/private/+validators/mustBeIterRow.m`        | #027  |
+| `mustHaveFields(s, names)`   | `motion_matching/shared/+validators/mustHaveFields.m`                    | #015  |

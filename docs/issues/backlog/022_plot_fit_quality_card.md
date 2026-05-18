@@ -65,12 +65,14 @@ end
 ## DbC contract
 
 Preconditions:
+
 - `result` has fields `final_rmse_m`, `final_total_work_J`, `solver`,
   `solver_options`, `target_hash`, `git_commit`, `duration_s`,
   `timestamp_utc` (per `CODING_STANDARDS.md` §"Provenance and reproducibility").
 - `target` conforms to `CLUB_IK_SPEC.md`.
 
 Postconditions:
+
 - `fig` is a valid figure handle.
 - When `opts.save_to_disk == true`, the `.png` and `.fig` files exist on disk.
 

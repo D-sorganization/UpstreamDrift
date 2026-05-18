@@ -41,6 +41,7 @@ The line is: **hardcode the framework, discover the project.**
 A skill MUST NOT hardcode specific file paths to project-owned resources.
 
 **Forbidden examples:**
+
 ```yaml
 # ❌ hardcoded memory file path
 inputs:
@@ -50,6 +51,7 @@ inputs:
 ```
 
 **Correct pattern:**
+
 ```yaml
 # ✅ registry-driven
 inputs:
@@ -68,6 +70,7 @@ The only hardcoded memory path allowed in any skill is `contexts/memory/index.md
 A skill MUST NOT hardcode values that describe the current project's specific state: technology names, provider names, team size assumptions, stack details.
 
 **Forbidden examples:**
+
 ```
 # ❌ project-specific stack hardcoded in a framework skill
 - Stack compatibility — does it work with CF Workers, Supabase, TypeScript, edge compute?
@@ -77,6 +80,7 @@ A skill MUST NOT hardcode values that describe the current project's specific st
 ```
 
 **Correct pattern:**
+
 ```
 # ✅ derived from the project context file
 - Stack compatibility — does it work with the project's tech stack?
@@ -91,6 +95,7 @@ A skill MUST NOT hardcode values that describe the current project's specific st
 ## R10 — Reference Memory by Category, Not by File Path
 
 When a skill needs to load memory, it MUST:
+
 1. Read `contexts/memory/index.md` first
 2. Identify the relevant category by name or tag
 3. Load the file path registered for that category
@@ -98,6 +103,7 @@ When a skill needs to load memory, it MUST:
 A skill MUST NOT construct or assume a memory file path without consulting the index.
 
 **Correct resolution pattern (in Process sections):**
+
 ```
 Read contexts/memory/index.md.
 Resolve the `project` category → load that file.
@@ -113,13 +119,13 @@ If a category is absent from the index, omit it — do not fail, do not assume a
 
 The following categories of values ARE correct to hardcode in skills:
 
-| Category | Examples | Rationale |
-|---|---|---|
-| State machines | Backlog states, QA verdicts, memory delta verdicts | Define the framework protocol — changing them is a governance event |
-| Output schemas | QA report format, execution plan format, story format | Define the inter-agent contract — must be stable |
-| Severity scales | `low / medium / high / critical` | Universal, not project-specific |
-| Tier thresholds | Complexity ≤ 2 → Tier 1 | Operational heuristic, not a project value |
-| Framework paths | `.gaai/core/`, `contexts/rules/`, `contexts/artefacts/` | Define the framework structure itself |
+| Category        | Examples                                                | Rationale                                                           |
+| --------------- | ------------------------------------------------------- | ------------------------------------------------------------------- |
+| State machines  | Backlog states, QA verdicts, memory delta verdicts      | Define the framework protocol — changing them is a governance event |
+| Output schemas  | QA report format, execution plan format, story format   | Define the inter-agent contract — must be stable                    |
+| Severity scales | `low / medium / high / critical`                        | Universal, not project-specific                                     |
+| Tier thresholds | Complexity ≤ 2 → Tier 1                                 | Operational heuristic, not a project value                          |
+| Framework paths | `.gaai/core/`, `contexts/rules/`, `contexts/artefacts/` | Define the framework structure itself                               |
 
 These are hardcoded because they **are** the framework. They do not describe the project — they define the system within which the project operates.
 

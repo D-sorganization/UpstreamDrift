@@ -133,7 +133,9 @@ class VideoExporter(QObject):
                 logger.info(f"✅ Video exported successfully to {config.output_path}")
                 self.finished.emit(config.output_path)
             else:
-                error_msg = f"ffmpeg failed with return code {ffmpeg_process.returncode}"  # noqa: E501
+                error_msg = (
+                    f"ffmpeg failed with return code {ffmpeg_process.returncode}"  # noqa: E501
+                )
                 logger.error(f"❌ {error_msg}")
                 self.error.emit(error_msg)
 

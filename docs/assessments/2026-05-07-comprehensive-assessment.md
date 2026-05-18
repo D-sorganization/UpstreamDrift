@@ -11,24 +11,24 @@
 
 ## Scores
 
-| Criterion | Name | Score | Weight | Weighted |
-|-----------|------|-------|--------|----------|
-| A | Project Organization | 52 | 5% | 2.60 |
-| B | Documentation | 100 | 8% | 8.00 |
-| C | Testing | 75 | 12% | 9.00 |
-| D | Error Handling | 0 | 10% | 0.00 |
-| E | Performance | 50 | 7% | 3.50 |
-| F | Code Quality | 46 | 10% | 4.60 |
-| G | Dependency Hygiene | 90 | 8% | 7.20 |
-| H | Security | 45 | 10% | 4.50 |
-| I | Configuration Management | 100 | 6% | 6.00 |
-| J | Observability | 100 | 7% | 7.00 |
-| K | Maintenance Debt | 0 | 7% | 0.00 |
-| L | CI/CD | 100 | 8% | 8.00 |
-| M | Deployment | 90 | 5% | 4.50 |
-| N | Legal & Compliance | 100 | 4% | 4.00 |
-| O | Agentic Usability | 90 | 3% | 2.70 |
-| **Total** | | | | **71.60** |
+| Criterion | Name                     | Score | Weight | Weighted  |
+| --------- | ------------------------ | ----- | ------ | --------- |
+| A         | Project Organization     | 52    | 5%     | 2.60      |
+| B         | Documentation            | 100   | 8%     | 8.00      |
+| C         | Testing                  | 75    | 12%    | 9.00      |
+| D         | Error Handling           | 0     | 10%    | 0.00      |
+| E         | Performance              | 50    | 7%     | 3.50      |
+| F         | Code Quality             | 46    | 10%    | 4.60      |
+| G         | Dependency Hygiene       | 90    | 8%     | 7.20      |
+| H         | Security                 | 45    | 10%    | 4.50      |
+| I         | Configuration Management | 100   | 6%     | 6.00      |
+| J         | Observability            | 100   | 7%     | 7.00      |
+| K         | Maintenance Debt         | 0     | 7%     | 0.00      |
+| L         | CI/CD                    | 100   | 8%     | 8.00      |
+| M         | Deployment               | 90    | 5%     | 4.50      |
+| N         | Legal & Compliance       | 100   | 4%     | 4.00      |
+| O         | Agentic Usability        | 90    | 3%     | 2.70      |
+| **Total** |                          |       |        | **71.60** |
 
 ## Findings Summary
 
@@ -52,7 +52,6 @@
 ### P2 Findings
 
 - **[F]** [UpstreamDrift] 22 TODO/FIXME/XXX items without tracked issues
-
 
 ## Full Evidence
 

@@ -7,7 +7,7 @@ Status: planning — no code in this PR.
 
 > This spec defines the work to bring the MuJoCo engine into parity with the
 > Simscape Multibody motion-matching pipeline (Option-1 fmincon-SQP fit driver).
-> MuJoCo is the *closest-to-parity* of the four engines — it already has model
+> MuJoCo is the _closest-to-parity_ of the four engines — it already has model
 > variants, a mocap loader, and a `SwingOptimizer`, so the work is mostly
 > **wiring to the canonical schema**, **filling stubs**, and **fixing bugs**
 > that block even a basic `from_xml_string` compile today.
@@ -18,27 +18,27 @@ Status: planning — no code in this PR.
 
 ### 1.1 Surface area inventory
 
-| Path | LoC | Status |
-|---|---|---|
-| `src/engines/physics_engines/mujoco/_golf_swing_advanced_xml.py` | 491 | **Broken at import time** (gravity attr renders as `PhysicalConstant(...)` literal — fails MJCF compile) |
-| `src/engines/physics_engines/mujoco/_golf_swing_full_body_xml.py` | 288 | **Broken at import time** (same gravity bug) |
-| `src/engines/physics_engines/mujoco/_golf_swing_upper_body_xml.py` | 213 | **Broken at import time** (same gravity bug) |
-| `src/engines/physics_engines/mujoco/golf_swing_models_xml.py` | n/a | re-export shim over the three above |
-| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_motion_opt_simulation.py` | 209 | Joint-space PD-tracking forward sim; **not** a polynomial-torque driver |
-| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_motion_opt_trajectory.py` | 111 | Cubic-spline trajectory interp + bounds + jerk; reusable |
-| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_motion_opt_types.py` | 52 | `OptimizationObjectives`, `OptimizationConstraints`, `OptimizationResult` dataclasses |
-| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_loader.py` | 139 | Generic CSV / JSON / BVH loader; emits `MotionCaptureSequence`, **not** `ClubTarget` |
-| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_data.py` | n/a | `MotionCaptureFrame`, `MotionCaptureSequence` dataclasses |
-| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_processor.py` | n/a | Filtering / smoothing |
-| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_retargeting.py` | n/a | Marker→joint retargeting (stub) |
-| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_validator.py` | n/a | Validation rules |
-| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py` | 602 | `SwingOptimizer`: scipy `minimize` + `differential_evolution`; objectives are speed/jerk/torque, **not** the canonical cost function |
-| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/polynomial_generator.py` | 668 | Qt UI for sketching polynomial torque profiles. Not wired to the forward sim. |
-| `src/engines/physics_engines/mujoco/docker/gui/golf_gui_docker.py` | n/a | Containerised viewer; not part of the fit loop |
-| `src/shared/python/motion_matching/` | 1232 | **Canonical Python package** the engine must call into |
-| `src/shared/python/motion_matching/loaders/synthetic.py` | 40 | **Stub** — raises `NotImplementedError` pending the engine wiring this spec defines |
-| `src/shared/models/myosuite/myo_sim/body/myobody.xml` | 30 | Full-body myosuite MJCF (asset paths broken when loaded standalone) |
-| `src/shared/models/myosuite/myo_sim/body/myoupperbody.xml` | 19 | Upper-body myosuite MJCF (same asset-path issue) |
+| Path                                                                                       | LoC  | Status                                                                                                                               |
+| ------------------------------------------------------------------------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/engines/physics_engines/mujoco/_golf_swing_advanced_xml.py`                           | 491  | **Broken at import time** (gravity attr renders as `PhysicalConstant(...)` literal — fails MJCF compile)                             |
+| `src/engines/physics_engines/mujoco/_golf_swing_full_body_xml.py`                          | 288  | **Broken at import time** (same gravity bug)                                                                                         |
+| `src/engines/physics_engines/mujoco/_golf_swing_upper_body_xml.py`                         | 213  | **Broken at import time** (same gravity bug)                                                                                         |
+| `src/engines/physics_engines/mujoco/golf_swing_models_xml.py`                              | n/a  | re-export shim over the three above                                                                                                  |
+| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_motion_opt_simulation.py` | 209  | Joint-space PD-tracking forward sim; **not** a polynomial-torque driver                                                              |
+| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_motion_opt_trajectory.py` | 111  | Cubic-spline trajectory interp + bounds + jerk; reusable                                                                             |
+| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_motion_opt_types.py`      | 52   | `OptimizationObjectives`, `OptimizationConstraints`, `OptimizationResult` dataclasses                                                |
+| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_loader.py`          | 139  | Generic CSV / JSON / BVH loader; emits `MotionCaptureSequence`, **not** `ClubTarget`                                                 |
+| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_data.py`            | n/a  | `MotionCaptureFrame`, `MotionCaptureSequence` dataclasses                                                                            |
+| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_processor.py`       | n/a  | Filtering / smoothing                                                                                                                |
+| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_retargeting.py`     | n/a  | Marker→joint retargeting (stub)                                                                                                      |
+| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_validator.py`       | n/a  | Validation rules                                                                                                                     |
+| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py`    | 602  | `SwingOptimizer`: scipy `minimize` + `differential_evolution`; objectives are speed/jerk/torque, **not** the canonical cost function |
+| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/polynomial_generator.py`   | 668  | Qt UI for sketching polynomial torque profiles. Not wired to the forward sim.                                                        |
+| `src/engines/physics_engines/mujoco/docker/gui/golf_gui_docker.py`                         | n/a  | Containerised viewer; not part of the fit loop                                                                                       |
+| `src/shared/python/motion_matching/`                                                       | 1232 | **Canonical Python package** the engine must call into                                                                               |
+| `src/shared/python/motion_matching/loaders/synthetic.py`                                   | 40   | **Stub** — raises `NotImplementedError` pending the engine wiring this spec defines                                                  |
+| `src/shared/models/myosuite/myo_sim/body/myobody.xml`                                      | 30   | Full-body myosuite MJCF (asset paths broken when loaded standalone)                                                                  |
+| `src/shared/models/myosuite/myo_sim/body/myoupperbody.xml`                                 | 19   | Upper-body myosuite MJCF (same asset-path issue)                                                                                     |
 
 Totals: 195 Python files in `src/engines/physics_engines/mujoco/`; ~50 of them are GUI/launcher/Docker glue irrelevant to the fit loop.
 
@@ -64,11 +64,11 @@ Totals: 195 Python files in `src/engines/physics_engines/mujoco/`; ~50 of them a
 
 All three are hand-written MJCF strings emitted from Python f-strings:
 
-| Variant | Bodies | DOFs (approx) | Use-case rationale |
-|---|---|---|---|
-| `_golf_swing_upper_body_xml.py` (213 lines) | pelvis fixed, torso + 2 arms + club | ~9 hinge joints | Smallest tractable target; mirrors Simscape's `golf_3D_upper.slx` |
-| `_golf_swing_full_body_xml.py` (288 lines) | feet → ankle → knee → hip → torso → arms → club | ~17 hinge joints | Default for production fits; mirrors Simscape's `golf_3D_full.slx` |
-| `_golf_swing_advanced_xml.py` (491 lines) | adds scapulae, finer forearm/wrist split, RK4+Newton solver, 50 iter, 8k shadows | ~21 hinge joints | Research / visualisation. Compile-only diff vs full_body is an extra scapula chain and a stiffer solver. |
+| Variant                                     | Bodies                                                                           | DOFs (approx)    | Use-case rationale                                                                                       |
+| ------------------------------------------- | -------------------------------------------------------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------- |
+| `_golf_swing_upper_body_xml.py` (213 lines) | pelvis fixed, torso + 2 arms + club                                              | ~9 hinge joints  | Smallest tractable target; mirrors Simscape's `golf_3D_upper.slx`                                        |
+| `_golf_swing_full_body_xml.py` (288 lines)  | feet → ankle → knee → hip → torso → arms → club                                  | ~17 hinge joints | Default for production fits; mirrors Simscape's `golf_3D_full.slx`                                       |
+| `_golf_swing_advanced_xml.py` (491 lines)   | adds scapulae, finer forearm/wrist split, RK4+Newton solver, 50 iter, 8k shadows | ~21 hinge joints | Research / visualisation. Compile-only diff vs full_body is an extra scapula chain and a stiffer solver. |
 
 The three are **not** auto-generated from a shared YAML — they have copy-pasted `<material>`, `<camera>`, and `<default>` blocks. This is a DRY violation that PARITY-DIMENSIONS aims to address; see §3.
 
@@ -276,14 +276,14 @@ constants module). Do **not** hard-code per-variant.
 
 Six issues, sized for one PR each. Issue bodies live in `MUJOCO_ISSUES.md`.
 
-| # | Title | Size | Depends on |
-|---|---|---|---|
-| ISSUE-MUJOCO-1 | Fix gravity-constant bug in MJCF generators | XS | — |
-| ISSUE-MUJOCO-2 | `_model_builder.py` — load + cache compiled MJCF | S | ISSUE-MUJOCO-1 |
-| ISSUE-MUJOCO-3 | `simulate_with_coefficients.py` + polynomial-torque driver | M | ISSUE-MUJOCO-2 |
-| ISSUE-MUJOCO-4 | `fit_swing_mujoco.py` — canonical fit driver | M | ISSUE-MUJOCO-3, PARITY-COST |
-| ISSUE-MUJOCO-5 | `synthesize_target_from_coefficients` engine impl | S | ISSUE-MUJOCO-3, PARITY-LOADERS |
-| ISSUE-MUJOCO-6 | `viz/render_swing.py` — thin renderer | S | ISSUE-MUJOCO-3 |
+| #              | Title                                                      | Size | Depends on                     |
+| -------------- | ---------------------------------------------------------- | ---- | ------------------------------ |
+| ISSUE-MUJOCO-1 | Fix gravity-constant bug in MJCF generators                | XS   | —                              |
+| ISSUE-MUJOCO-2 | `_model_builder.py` — load + cache compiled MJCF           | S    | ISSUE-MUJOCO-1                 |
+| ISSUE-MUJOCO-3 | `simulate_with_coefficients.py` + polynomial-torque driver | M    | ISSUE-MUJOCO-2                 |
+| ISSUE-MUJOCO-4 | `fit_swing_mujoco.py` — canonical fit driver               | M    | ISSUE-MUJOCO-3, PARITY-COST    |
+| ISSUE-MUJOCO-5 | `synthesize_target_from_coefficients` engine impl          | S    | ISSUE-MUJOCO-3, PARITY-LOADERS |
+| ISSUE-MUJOCO-6 | `viz/render_swing.py` — thin renderer                      | S    | ISSUE-MUJOCO-3                 |
 
 Total: ~1 XS, 3 S, 2 M. Roughly 2 weeks of single-developer work assuming
 the cross-engine and dimensions specs land in parallel.
@@ -302,6 +302,7 @@ acceptance criterion for the spec as a whole is:
 ### 5.1 Replicating MATLAB's `arguments` block
 
 MATLAB:
+
 ```matlab
 function result = fit_swing_fmincon(target, opts)
     arguments
@@ -312,6 +313,7 @@ function result = fit_swing_fmincon(target, opts)
 ```
 
 Python:
+
 ```python
 from dataclasses import dataclass
 from src.shared.python.core.contracts.decorators import precondition, postcondition
@@ -339,7 +341,7 @@ construction (`src/shared/python/motion_matching/club_target.py:75–77`), so
 `isinstance(target, ClubTarget)` covers the MATLAB `mustHaveFields` check —
 no need to re-implement it. **DRY.**
 
-`pydantic` is *not* required here; `dataclasses(frozen=True)` plus the
+`pydantic` is _not_ required here; `dataclasses(frozen=True)` plus the
 `precondition` / `postcondition` decorators from
 `src.shared.python.core.contracts.decorators` already ship and are used
 throughout `motion_matching/`. Adding pydantic would be a new dep with no
@@ -347,17 +349,17 @@ benefit.
 
 ### 5.2 Sharing with `src/shared/python/motion_matching/`
 
-| Component | Lives in shared/ | Engine package re-exports |
-|---|---|---|
-| `ClubTarget`, `AlignOptions`, `SourceProvenance` | yes (`club_target.py`) | import — never redefine |
-| `CostOptions`, `compute_cost`, `SimOutput` | yes (`cost.py`) | import |
-| `compute_total_work` | yes (`cost.py`) | import |
-| `quaternion_geodesic_angles` | yes (`_geodesic.py`) | import |
-| Excel / C3D loaders | yes (`loaders/`) | engine **never** loads files; consumes `ClubTarget` |
-| Synthetic loader dispatch | yes (`loaders/synthetic.py`) | engine **registers** its `synthesize_target_from_coefficients` impl |
-| `simulate_with_coefficients` | **engine-specific** | lives at `src/engines/physics_engines/mujoco/motion_matching/` |
-| Polynomial driver | **engine-specific** | same |
-| `fit_swing_*` driver | **engine-specific** | same |
+| Component                                        | Lives in shared/             | Engine package re-exports                                           |
+| ------------------------------------------------ | ---------------------------- | ------------------------------------------------------------------- |
+| `ClubTarget`, `AlignOptions`, `SourceProvenance` | yes (`club_target.py`)       | import — never redefine                                             |
+| `CostOptions`, `compute_cost`, `SimOutput`       | yes (`cost.py`)              | import                                                              |
+| `compute_total_work`                             | yes (`cost.py`)              | import                                                              |
+| `quaternion_geodesic_angles`                     | yes (`_geodesic.py`)         | import                                                              |
+| Excel / C3D loaders                              | yes (`loaders/`)             | engine **never** loads files; consumes `ClubTarget`                 |
+| Synthetic loader dispatch                        | yes (`loaders/synthetic.py`) | engine **registers** its `synthesize_target_from_coefficients` impl |
+| `simulate_with_coefficients`                     | **engine-specific**          | lives at `src/engines/physics_engines/mujoco/motion_matching/`      |
+| Polynomial driver                                | **engine-specific**          | same                                                                |
+| `fit_swing_*` driver                             | **engine-specific**          | same                                                                |
 
 The dispatcher pattern: `loaders/synthetic.py` becomes:
 
@@ -448,12 +450,12 @@ With ~200 fmincon iterations that's **~6 s per fit, warm**.
 
 ### 6.2 Targets
 
-| Metric | Today (estimated) | Target | How |
-|---|---|---|---|
-| Forward-sim wall-clock per swing | 2–5 ms | < 5 ms | Hold the line; no actuator network needed |
-| Cost evaluation per swing | ~1 ms | < 1 ms | Pure NumPy in `compute_cost` |
-| One fit (200 iter SQP) | ~6 s | **< 0.5 s** | (1) cache `MjModel` across iterations, (2) reuse `MjData` (don't realloc), (3) batch-evaluate finite-difference gradients across `n_proc` workers, (4) optionally swap fmincon-SQP for L-BFGS-B which has better step quality at low dimension |
-| 100-swing dataset sweep | not yet possible | < 60 s | `multiprocessing.Pool(n=8)` over a process-pool that holds compiled `MjModel` per worker |
+| Metric                           | Today (estimated) | Target      | How                                                                                                                                                                                                                                            |
+| -------------------------------- | ----------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Forward-sim wall-clock per swing | 2–5 ms            | < 5 ms      | Hold the line; no actuator network needed                                                                                                                                                                                                      |
+| Cost evaluation per swing        | ~1 ms             | < 1 ms      | Pure NumPy in `compute_cost`                                                                                                                                                                                                                   |
+| One fit (200 iter SQP)           | ~6 s              | **< 0.5 s** | (1) cache `MjModel` across iterations, (2) reuse `MjData` (don't realloc), (3) batch-evaluate finite-difference gradients across `n_proc` workers, (4) optionally swap fmincon-SQP for L-BFGS-B which has better step quality at low dimension |
+| 100-swing dataset sweep          | not yet possible  | < 60 s      | `multiprocessing.Pool(n=8)` over a process-pool that holds compiled `MjModel` per worker                                                                                                                                                       |
 
 **Why < 0.5 s is realistic:** Simscape's 7 s/swing baseline is dominated by
 Simulink's compile-once-per-call overhead. MuJoCo's overhead is ~10 ms compile
@@ -470,7 +472,7 @@ helper) + a smoothed, low-iter-count solver, or warm-start from a CVAE prior
 - **`mujoco.MjData(model)` reuse** — never re-allocate; just `mj_resetData`.
 - **`mjcb_control` global callback** — already discussed; keeps the inner
   loop in C.
-- **`compile_mjs`** is *not* relevant here — that's MuJoCo's MJS scenegraph
+- **`compile_mjs`** is _not_ relevant here — that's MuJoCo's MJS scenegraph
   authoring API, not a JIT.
 - **GPU offload** — MuJoCo MJX (the JAX port) gives ~100× speedup on parallel
   rollouts but compiling MJX is non-trivial and its body-model coverage is
@@ -533,7 +535,7 @@ helper) + a smoothed, low-iter-count solver, or warm-start from a CVAE prior
 
 - **MuJoCo:** Apache-2.0 (since 2.1.5). No concern.
 - **myosuite assets:** Apache-2.0. The asset path issue (§1.3) is mechanical,
-  not legal. This spec recommends *not* using myosuite for the parity work
+  not legal. This spec recommends _not_ using myosuite for the parity work
   (§3.1) so the issue is moot for now.
 - **scipy.optimize:** BSD-3. `differential_evolution` exists; SQP via
   `scipy.optimize.minimize(method="SLSQP")`. No new deps.

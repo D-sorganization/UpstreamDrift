@@ -7,6 +7,7 @@
 ## Quick Start
 
 ### Docker Images
+
 ```bash
 # Build runtime (headless API server)
 docker build --target runtime -t upstream-drift:runtime .
@@ -22,6 +23,7 @@ docker run --gpus all -it upstream-drift:training /bin/bash
 ```
 
 ### Python Development
+
 ```bash
 python3 -m ruff check .                              # Lint (zero violations)
 python3 -m ruff format .                             # Auto-format
@@ -30,6 +32,7 @@ python3 scripts/check_file_size_budget.py            # Enforce 1200 lines/file
 ```
 
 ### Rust Extensions
+
 ```bash
 maturin develop                     # Build and install locally
 maturin build --release             # Build wheel for distribution
@@ -50,6 +53,7 @@ FROM python:3.12-slim AS builder
 ```
 
 **Optimization**:
+
 - Caching: Dependencies only rebuild if requirements.lock changes
 - Isolation: Build tools not included in final image
 - Size: Builder layer discarded in final runtime image
@@ -68,6 +72,7 @@ FROM python:3.12-slim AS runtime
 ```
 
 **Security**:
+
 - Non-root user: Containers run as golfer:1000
 - Slim base: python:3.12-slim reduces attack surface
 - No build tools: gcc, git excluded from runtime
@@ -89,6 +94,7 @@ FROM runtime AS training
 ```
 
 **Deployment**:
+
 - Requires: NVIDIA container runtime with `--gpus all`
 - CUDA: Host driver provides libcuda via nvidia-container-toolkit
 
@@ -97,6 +103,7 @@ FROM runtime AS training
 ### Authoritative Core Workflows
 
 #### ci-standard.yml
+
 ```
 Scope: All PRs to main, all pushes to main, weekly schedule
 Runner: Self-hosted d-sorg-fleet (fails closed if unavailable)
@@ -110,6 +117,7 @@ Jobs:
 ```
 
 **Blocking Checks**:
+
 - Ruff lint + format (zero violations)
 - Type hints: mypy strict on src/api/, baseline on src/
 - Security: bandit (medium+), pip-audit (all CVEs)
@@ -117,6 +125,7 @@ Jobs:
 - Coverage: minimum 30% across src/
 
 #### ci-optional-stack.yml
+
 ```
 Trigger: Workflow dispatch (manual opt-in)
 Purpose: Heavy integration tests for optional physics engines
@@ -126,14 +135,16 @@ Rationale: Full engine matrix too expensive to run on every PR
 ```
 
 #### nightly-cross-engine.yml
+
 ```
-Trigger: Scheduled nightly  
+Trigger: Scheduled nightly
 Purpose: Full cross-validation of all physics engines
 Outputs: Engine interoperability metrics and performance reports
 Frequency: Daily at scheduled time (catches drift independent of PRs)
 ```
 
 #### docker-size-gates.yml
+
 ```
 Trigger: Push to main branch only
 Purpose: Validate Docker image size and health
@@ -172,6 +183,7 @@ Repair & Response:
 ### Archived Workflows
 
 Disabled in `.github/workflows/archived/`:
+
 - `auto-remediate-issues.yml.disabled` — Superseded by Jules-Assessment-Remediator
 - `assessment-auto-fix.yml.disabled` — Superseded by Jules-Assessment-AutoFix
 
@@ -191,6 +203,7 @@ pyproject.toml [dependencies]
 ```
 
 **Security Auditing**:
+
 ```bash
 # Run via ci-standard.yml quality-gate
 pip-audit -r requirements-dev.lock \
@@ -202,6 +215,7 @@ pip-audit -r requirements-dev.lock \
 ### Rust Dependencies
 
 **Workspace Configuration** (Cargo.toml):
+
 ```toml
 [workspace]
 members = ["rust_core/upstream-physics"]
@@ -247,6 +261,7 @@ uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
 ## Performance Metrics
 
 ### CI Execution Times
+
 - **Quality Gate**: ~5 min (ruff, mypy, bandit, pip-audit)
 - **Core Tests**: ~15 min (pytest parallel, 3 Python versions)
 - **Tools Consumer Contracts**: ~5 min (interoperability)
@@ -254,6 +269,7 @@ uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
 - **Docker Build**: ~10 min (buildx + cache)
 
 ### Image Sizes
+
 - **Runtime**: ~1.5 GB (slim base + venv + headless libs)
 - **Training**: ~4-5 GB (runtime + PyTorch cu124)
 - **Compressed (DockerHub)**: 500-800 MB (layer compression)

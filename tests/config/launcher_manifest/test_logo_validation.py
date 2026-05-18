@@ -89,19 +89,19 @@ class TestLogoValidation:
         All SVG logos were created in Phase 3 (closes #1164).
         """
         missing = manifest.validate_logos()
-        assert (
-            not missing
-        ), f"Missing logo files for tiles: {missing}. Expected in: {ASSETS_DIR}"
+        assert not missing, (
+            f"Missing logo files for tiles: {missing}. Expected in: {ASSETS_DIR}"
+        )
 
     def test_logo_path_property(self, sample_tile_dict: dict) -> None:
         """Tile logo_path property returns absolute path."""
         tile = LauncherTile.from_dict(sample_tile_dict)
-        assert (
-            tile.logo_path.is_absolute()
-        ), "Assertion failed: tile.logo_path.is_absolute()"
-        assert str(tile.logo_path).endswith(
-            sample_tile_dict["logo"]
-        ), "Assertion failed: str(tile.logo_path).endswith(sample_tile_dict[logo])"
+        assert tile.logo_path.is_absolute(), (
+            "Assertion failed: tile.logo_path.is_absolute()"
+        )
+        assert str(tile.logo_path).endswith(sample_tile_dict["logo"]), (
+            "Assertion failed: str(tile.logo_path).endswith(sample_tile_dict[logo])"
+        )
 
 
 # =============================================================================

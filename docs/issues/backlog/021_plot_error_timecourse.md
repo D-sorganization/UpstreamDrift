@@ -61,10 +61,12 @@ end
 ## DbC contract
 
 Preconditions (`arguments` block + `validators.mustHaveFields`):
+
 - `result.sim_out` has all fields per #018.
 - `target` conforms to `CLUB_IK_SPEC.md`.
 
 Postconditions:
+
 - `fig` has exactly four axes.
 - Per-frame error arrays are non-negative.
 

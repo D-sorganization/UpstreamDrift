@@ -108,11 +108,13 @@ class SwingInverseCVAE(nn.Module):
 ## DbC contract
 
 Preconditions:
+
 - `kinematics.shape == (B, n_timesteps, kinematic_dim)`.
 - `coefficients.shape == (B, n_joints * 7)`.
 - All inputs finite.
 
 Postconditions:
+
 - Output shapes match those documented in each method's signature.
 - Sampled coefficients normalized to bounded distribution (tanh or clamp).
 - ELBO loss is non-negative.

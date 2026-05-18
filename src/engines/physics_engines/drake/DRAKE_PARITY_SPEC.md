@@ -27,20 +27,20 @@ pipeline, per the contracts laid out in
 
 ### 1.1 Inventory of `src/engines/physics_engines/drake/`
 
-| File | LOC | Status | Notes |
-|---|---:|---|---|
-| `python/drake_physics_engine.py` | 641 | Working | `PhysicsEngine` protocol implementation. Hosts `DiagramBuilder`/`MultibodyPlant`, lazy `_ensure_finalized`, persistent `Simulator`, plus `compute_mass_matrix`, `compute_bias_forces`, `compute_gravity_forces`, `compute_inverse_dynamics`, `compute_jacobian`, ZTCF/ZVCF (Section F drift/control decomposition). Uses explicit `from pydrake.X import Y` per CLAUDE.md. |
-| `python/motion_optimization.py` | 493 | Stubbed | `DrakeMotionOptimizer` with `OptimizationObjective` / `OptimizationConstraint` / `OptimizationResult` dataclasses. Wraps `scipy.optimize.minimize(SLSQP)`. **Cost functions are placeholders** (see §1.3); does not consume `ClubTarget` or call `simulate_with_coefficients`. |
-| `python/src/drake_golf_model.py` | 828 | Partial | `GolfURDFGenerator` with `add_link` / `add_joint` / `_add_pelvis` / `_add_spine` / `_add_torso` / `_add_arms` / `_add_club` private builders. **Generates an in-process URDF tree from `GolfModelParams` dataclass** but the parameters (`pelvis_to_shoulders=0.35`, `spine_mass=15.0`, etc.) are **hard-coded defaults in the dataclass**, not pulled from the shared YAML. No URDF file is ever written to disk. |
-| `python/swing_plane_integration.py` | 319 | Working | `SwingPlaneIntegrator` for swing-plane analysis. Independent of motion-matching pipeline. |
-| `python/src/drake_visualizer.py` | 196 | Working | Thin Meshcat wrapper (frame axes, COM markers). Reusable. |
-| `python/src/drake_gui_app.py` | 425 | Stub | Tkinter GUI shell. Not on the parity critical path. |
-| `python/src/drake_gui_viz.py` | 430 | Stub | Companion to `drake_gui_app.py`. |
-| `python/src/drake_gui_*.py` (×4 more) | ~600 | Stubs | Tkinter GUI tabs. Not on critical path. |
-| `python/src/drake_recorder.py`, `induced_acceleration.py`, `manipulability.py` | ~600 | Working | Auxiliary analysis utilities. Reusable for §6 visualisation. |
-| `python/src/spatial_algebra/*.py` | ~600 | Working | In-house SE(3) helpers (predates pydrake usage in many places). Not blocking parity work. |
-| `python/src/rigid_body_dynamics/__init__.py` | small | Stub | Empty package. |
-| `python/tests/__init__.py` | 1 | Empty | **No motion-matching tests.** |
+| File                                                                           |   LOC | Status  | Notes                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------------------------------------------------------------ | ----: | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `python/drake_physics_engine.py`                                               |   641 | Working | `PhysicsEngine` protocol implementation. Hosts `DiagramBuilder`/`MultibodyPlant`, lazy `_ensure_finalized`, persistent `Simulator`, plus `compute_mass_matrix`, `compute_bias_forces`, `compute_gravity_forces`, `compute_inverse_dynamics`, `compute_jacobian`, ZTCF/ZVCF (Section F drift/control decomposition). Uses explicit `from pydrake.X import Y` per CLAUDE.md.                                         |
+| `python/motion_optimization.py`                                                |   493 | Stubbed | `DrakeMotionOptimizer` with `OptimizationObjective` / `OptimizationConstraint` / `OptimizationResult` dataclasses. Wraps `scipy.optimize.minimize(SLSQP)`. **Cost functions are placeholders** (see §1.3); does not consume `ClubTarget` or call `simulate_with_coefficients`.                                                                                                                                     |
+| `python/src/drake_golf_model.py`                                               |   828 | Partial | `GolfURDFGenerator` with `add_link` / `add_joint` / `_add_pelvis` / `_add_spine` / `_add_torso` / `_add_arms` / `_add_club` private builders. **Generates an in-process URDF tree from `GolfModelParams` dataclass** but the parameters (`pelvis_to_shoulders=0.35`, `spine_mass=15.0`, etc.) are **hard-coded defaults in the dataclass**, not pulled from the shared YAML. No URDF file is ever written to disk. |
+| `python/swing_plane_integration.py`                                            |   319 | Working | `SwingPlaneIntegrator` for swing-plane analysis. Independent of motion-matching pipeline.                                                                                                                                                                                                                                                                                                                          |
+| `python/src/drake_visualizer.py`                                               |   196 | Working | Thin Meshcat wrapper (frame axes, COM markers). Reusable.                                                                                                                                                                                                                                                                                                                                                          |
+| `python/src/drake_gui_app.py`                                                  |   425 | Stub    | Tkinter GUI shell. Not on the parity critical path.                                                                                                                                                                                                                                                                                                                                                                |
+| `python/src/drake_gui_viz.py`                                                  |   430 | Stub    | Companion to `drake_gui_app.py`.                                                                                                                                                                                                                                                                                                                                                                                   |
+| `python/src/drake_gui_*.py` (×4 more)                                          |  ~600 | Stubs   | Tkinter GUI tabs. Not on critical path.                                                                                                                                                                                                                                                                                                                                                                            |
+| `python/src/drake_recorder.py`, `induced_acceleration.py`, `manipulability.py` |  ~600 | Working | Auxiliary analysis utilities. Reusable for §6 visualisation.                                                                                                                                                                                                                                                                                                                                                       |
+| `python/src/spatial_algebra/*.py`                                              |  ~600 | Working | In-house SE(3) helpers (predates pydrake usage in many places). Not blocking parity work.                                                                                                                                                                                                                                                                                                                          |
+| `python/src/rigid_body_dynamics/__init__.py`                                   | small | Stub    | Empty package.                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `python/tests/__init__.py`                                                     |     1 | Empty   | **No motion-matching tests.**                                                                                                                                                                                                                                                                                                                                                                                      |
 
 ### 1.2 What works vs what is stubbed
 
@@ -78,16 +78,16 @@ pipeline, per the contracts laid out in
 The current `DrakeMotionOptimizer` is a generic NLP wrapper; the parity
 work should **keep its scaffolding and replace its semantics**:
 
-| Symbol | Reuse plan |
-|---|---|
-| `OptimizationObjective` dataclass | Keep — repurpose as the wrapper around `shared/python/motion_matching/cost.py` (one objective: `weighted_grip_cost`). |
-| `OptimizationConstraint` dataclass | Keep — used for joint-limit and impact-timing constraints in `fit_swing_drake_constrained.py`. |
-| `OptimizationResult` dataclass | **Replace** with the canonical `FitResult` from `shared/python/motion_matching/...` (see §2 below). The current shape (`optimal_trajectory`, `optimal_cost`, `objective_values`) is engine-specific; the canonical schema has `theta_optimal`, `final_rmse_m`, `solver_status`, `iterations`, `wall_clock_s`. |
-| `_build_total_cost_function` | Delete — replaced by a closure that calls `compute_cost_drake.py` (see §2.5). |
-| `_build_scipy_constraints` | Keep — generalize to also build `MathematicalProgram` constraints. |
-| `optimize_trajectory(initial_trajectory)` | **Replace** with `fit_swing_drake(target: ClubTarget, options: FitOptions)` that decision-variables on `theta` (length `n_joints * 7`), not on a flat trajectory matrix. |
-| `setup_standard_golf_*` (placeholder costs/constraints) | Delete — these violate the cross-engine "no engine-specific cost" rule. |
-| `optimize_for_distance` / `optimize_for_accuracy` | Delete — out of parity scope. The cross-engine spec mandates a single `fit_swing_<engine>` entry point. |
+| Symbol                                                  | Reuse plan                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OptimizationObjective` dataclass                       | Keep — repurpose as the wrapper around `shared/python/motion_matching/cost.py` (one objective: `weighted_grip_cost`).                                                                                                                                                                                         |
+| `OptimizationConstraint` dataclass                      | Keep — used for joint-limit and impact-timing constraints in `fit_swing_drake_constrained.py`.                                                                                                                                                                                                                |
+| `OptimizationResult` dataclass                          | **Replace** with the canonical `FitResult` from `shared/python/motion_matching/...` (see §2 below). The current shape (`optimal_trajectory`, `optimal_cost`, `objective_values`) is engine-specific; the canonical schema has `theta_optimal`, `final_rmse_m`, `solver_status`, `iterations`, `wall_clock_s`. |
+| `_build_total_cost_function`                            | Delete — replaced by a closure that calls `compute_cost_drake.py` (see §2.5).                                                                                                                                                                                                                                 |
+| `_build_scipy_constraints`                              | Keep — generalize to also build `MathematicalProgram` constraints.                                                                                                                                                                                                                                            |
+| `optimize_trajectory(initial_trajectory)`               | **Replace** with `fit_swing_drake(target: ClubTarget, options: FitOptions)` that decision-variables on `theta` (length `n_joints * 7`), not on a flat trajectory matrix.                                                                                                                                      |
+| `setup_standard_golf_*` (placeholder costs/constraints) | Delete — these violate the cross-engine "no engine-specific cost" rule.                                                                                                                                                                                                                                       |
+| `optimize_for_distance` / `optimize_for_accuracy`       | Delete — out of parity scope. The cross-engine spec mandates a single `fit_swing_<engine>` entry point.                                                                                                                                                                                                       |
 
 The dataclasses are good abstractions; the placeholder cost bodies go.
 
@@ -320,11 +320,11 @@ def synthesize_target_from_coefficients(theta: np.ndarray,
 Build on the existing `drake_visualizer.py` (Meshcat wrapper) plus new
 shared plotters in `shared/python/motion_matching/plot_*.py`:
 
-| View | Implementation |
-|---|---|
+| View                   | Implementation                                                                                                                                                                                                                                       |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Trajectory overlay** | `Meshcat` scene: humanoid skeleton (drawn from plant + URDF), measured-grip path as a `Cylinder` polyline, simulated-grip path as a contrasting `Cylinder` polyline, clubhead trace optional. Use `MeshcatVisualizer.AddToBuilder` for the skeleton. |
-| **Error timecourse** | `shared/python/motion_matching/plot_error_timecourse.py` — engine-agnostic Matplotlib. |
-| **Fit quality card** | `shared/python/motion_matching/plot_fit_quality_card.py` — engine-agnostic. |
+| **Error timecourse**   | `shared/python/motion_matching/plot_error_timecourse.py` — engine-agnostic Matplotlib.                                                                                                                                                               |
+| **Fit quality card**   | `shared/python/motion_matching/plot_fit_quality_card.py` — engine-agnostic.                                                                                                                                                                          |
 
 Drake-specific code stays inside `visualize_fit.py` and is limited to
 the Meshcat scene set-up; the 2D plots come from the shared module.
@@ -334,16 +334,16 @@ the Meshcat scene set-up; the 2D plots come from the shared module.
 TDD-first. Every new public function lands with a test in the same
 PR. The test plan is:
 
-| Test | Asserts |
-|---|---|
-| `test_humanoid_urdf.py::test_parses` | Generated URDF parses via pydrake `Parser` and yields 25 generalized velocities (6 floating-base + 19 actuated rotational). |
-| `test_humanoid_urdf.py::test_segment_lengths` | Distance from pelvis frame to shoulder frame matches the YAML to 1 mm. |
-| `test_simulate_with_coefficients.py::test_canonical_simout_shape` | Returns a `SimOut` with N rows on the requested grid; no NaNs. |
-| `test_simulate_with_coefficients.py::test_zero_torque_falls_under_gravity` | With `theta = 0`, the grip falls in the −z direction (sanity for gravity sign). |
-| `test_synthesize_oracle.py::test_round_trip` | `synthesize_target_from_coefficients(theta)` returns a `ClubTarget` whose `source.theta_truth` equals `theta`. |
-| `test_fit_swing_drake.py::test_recovers_synthetic_swing` | Synthetic target → `fit_swing_drake` → `final_rmse_m < 0.005`. |
-| `test_fit_swing_drake.py::test_autodiff_converges_faster` | `fit_swing_drake_autodiff` uses ≤ ½ the simulator calls of the scipy driver on the same trial. |
-| `test_equivalence_simscape.py::test_grip_rmse_under_5mm` | Fixed `theta` → Drake grip vs Simscape ground-truth grip RMSE ≤ 5 mm at three poses (impact, top-of-backswing, address). Cross-engine §2.2. |
+| Test                                                                       | Asserts                                                                                                                                     |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `test_humanoid_urdf.py::test_parses`                                       | Generated URDF parses via pydrake `Parser` and yields 25 generalized velocities (6 floating-base + 19 actuated rotational).                 |
+| `test_humanoid_urdf.py::test_segment_lengths`                              | Distance from pelvis frame to shoulder frame matches the YAML to 1 mm.                                                                      |
+| `test_simulate_with_coefficients.py::test_canonical_simout_shape`          | Returns a `SimOut` with N rows on the requested grid; no NaNs.                                                                              |
+| `test_simulate_with_coefficients.py::test_zero_torque_falls_under_gravity` | With `theta = 0`, the grip falls in the −z direction (sanity for gravity sign).                                                             |
+| `test_synthesize_oracle.py::test_round_trip`                               | `synthesize_target_from_coefficients(theta)` returns a `ClubTarget` whose `source.theta_truth` equals `theta`.                              |
+| `test_fit_swing_drake.py::test_recovers_synthetic_swing`                   | Synthetic target → `fit_swing_drake` → `final_rmse_m < 0.005`.                                                                              |
+| `test_fit_swing_drake.py::test_autodiff_converges_faster`                  | `fit_swing_drake_autodiff` uses ≤ ½ the simulator calls of the scipy driver on the same trial.                                              |
+| `test_equivalence_simscape.py::test_grip_rmse_under_5mm`                   | Fixed `theta` → Drake grip vs Simscape ground-truth grip RMSE ≤ 5 mm at three poses (impact, top-of-backswing, address). Cross-engine §2.2. |
 
 Marker discipline (per `pyproject.toml`):
 
@@ -375,20 +375,20 @@ Mirror the Simscape skeleton joint-by-joint. Drake natively supports
 than SDF — we use URDF because the existing `GolfURDFGenerator` already
 emits it; SDF migration is a future option.
 
-| Body chain | Joints | DOF | URDF encoding |
-|---|---|---:|---|
-| World → pelvis | 1 floating root | 6 | `<joint type="floating">` with quaternion convention `[w,x,y,z]` matching the Simscape model. |
-| pelvis → spine_lower | 2 (universal) | 2 | Two `revolute` joints sharing a massless dummy link, axes `[1,0,0]` and `[0,1,0]`. |
-| spine_lower → spine_upper | 1 twist | 1 | `revolute`, axis `[0,0,1]`. |
-| spine_upper → torso_hub | 0 (welded) | 0 | `<joint type="fixed">`. |
-| torso_hub → R_scapula | 2 (universal) | 2 | Two `revolute`, axes `[0,1,0]` and `[0,0,1]`. |
-| R_scapula → R_shoulder | 3 (gimbal) | 3 | Three `revolute` chained with two massless dummy links (axes `[1,0,0]`, `[0,1,0]`, `[0,0,1]`). |
-| R_shoulder → R_elbow | 1 hinge | 1 | `revolute`, axis `[0,1,0]`. |
-| R_elbow → R_wrist | 2 (universal) | 2 | Two `revolute`. |
-| R_wrist → R_hand | 0 (welded) | 0 | `<joint type="fixed">`. |
-| (Mirror chain L_scapula … L_hand) | | 8 | Symmetric structure, mirrored axes/origins. |
-| R_hand + L_hand → club_grip | 6 (welded loop) | 0 | `<joint type="fixed">` from R_hand to club. The L_hand → club connection becomes a closed-loop constraint, which URDF cannot express. **Resolution:** weld the club to R_hand only and rely on the IK / cost function to keep both hands on the grip. (Same compromise the Pinocchio URDF makes — see `pinocchio/models/generated/golfer.urdf`.) |
-| club_grip → clubhead | 0 (welded) | 0 | `<joint type="fixed">` shaft length from YAML. |
+| Body chain                        | Joints          | DOF | URDF encoding                                                                                                                                                                                                                                                                                                                                    |
+| --------------------------------- | --------------- | --: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| World → pelvis                    | 1 floating root |   6 | `<joint type="floating">` with quaternion convention `[w,x,y,z]` matching the Simscape model.                                                                                                                                                                                                                                                    |
+| pelvis → spine_lower              | 2 (universal)   |   2 | Two `revolute` joints sharing a massless dummy link, axes `[1,0,0]` and `[0,1,0]`.                                                                                                                                                                                                                                                               |
+| spine_lower → spine_upper         | 1 twist         |   1 | `revolute`, axis `[0,0,1]`.                                                                                                                                                                                                                                                                                                                      |
+| spine_upper → torso_hub           | 0 (welded)      |   0 | `<joint type="fixed">`.                                                                                                                                                                                                                                                                                                                          |
+| torso_hub → R_scapula             | 2 (universal)   |   2 | Two `revolute`, axes `[0,1,0]` and `[0,0,1]`.                                                                                                                                                                                                                                                                                                    |
+| R_scapula → R_shoulder            | 3 (gimbal)      |   3 | Three `revolute` chained with two massless dummy links (axes `[1,0,0]`, `[0,1,0]`, `[0,0,1]`).                                                                                                                                                                                                                                                   |
+| R_shoulder → R_elbow              | 1 hinge         |   1 | `revolute`, axis `[0,1,0]`.                                                                                                                                                                                                                                                                                                                      |
+| R_elbow → R_wrist                 | 2 (universal)   |   2 | Two `revolute`.                                                                                                                                                                                                                                                                                                                                  |
+| R_wrist → R_hand                  | 0 (welded)      |   0 | `<joint type="fixed">`.                                                                                                                                                                                                                                                                                                                          |
+| (Mirror chain L_scapula … L_hand) |                 |   8 | Symmetric structure, mirrored axes/origins.                                                                                                                                                                                                                                                                                                      |
+| R_hand + L_hand → club_grip       | 6 (welded loop) |   0 | `<joint type="fixed">` from R_hand to club. The L_hand → club connection becomes a closed-loop constraint, which URDF cannot express. **Resolution:** weld the club to R_hand only and rely on the IK / cost function to keep both hands on the grip. (Same compromise the Pinocchio URDF makes — see `pinocchio/models/generated/golfer.urdf`.) |
+| club_grip → clubhead              | 0 (welded)      |   0 | `<joint type="fixed">` shaft length from YAML.                                                                                                                                                                                                                                                                                                   |
 
 **Total v-DOF: 6 (floating root) + 2 + 1 + 0 + 2 + 3 + 1 + 2 + 0 + 8 (mirror) + 0 + 0 = 25.** ✅
 (The previous spec quoted "23" — an arithmetic error caught by issue #4155.
@@ -420,7 +420,7 @@ issue **PARITY-DIMENSIONS**). Each segment specifies:
 - name: right_upper_arm
   parent: right_shoulder_gimbal_z
   joint:
-    type: revolute      # composed; this entry is the last gimbal axis
+    type: revolute # composed; this entry is the last gimbal axis
     axis: [0, 0, 1]
     damping: 0.5
     limits: [-3.14, 3.14]
@@ -428,8 +428,7 @@ issue **PARITY-DIMENSIONS**). Each segment specifies:
     xyz: [0.0, -0.18, 0.0]
     rpy: [0.0, 0.0, 0.0]
   mass: 2.0
-  inertia: { ixx: 0.018, iyy: 0.018, izz: 0.0024,
-             ixy: 0.0, ixz: 0.0, iyz: 0.0 }
+  inertia: { ixx: 0.018, iyy: 0.018, izz: 0.0024, ixy: 0.0, ixz: 0.0, iyz: 0.0 }
   geometry: { type: cylinder, size: [0.04, 0.30] }
 ```
 
@@ -482,6 +481,7 @@ the existing `drake_golf_model.GolfURDFGenerator` to consume
 `models/generated/golfer.urdf`.
 
 **Acceptance:**
+
 1. `pytest tests/motion_matching/test_humanoid_urdf.py` green.
 2. The on-disk URDF parses via `pydrake.multibody.parsing.Parser` with
    exactly 25 generalized velocities (6 floating-base + 19 actuated).
@@ -498,6 +498,7 @@ Stateflow-equivalent torque polynomial as a `LeafSystem` (float-only
 this issue; templated AutoDiffXd version in DRAKE-4).
 
 **Acceptance:**
+
 1. `simulate_with_coefficients(theta_known) → SimOut` with finite
    `q`, `qd`, `tau`.
 2. Round-trip test: `theta = 0` → grip falls under gravity.
@@ -515,6 +516,7 @@ directly. Default optimizer is `scipy.optimize.minimize(method="L-BFGS-B")`
 with finite-difference Jacobians.
 
 **Acceptance:**
+
 1. Synthetic-recovery test: `synthesize_target_from_coefficients(theta_truth)`
    → `fit_swing_drake` → `final_rmse_m < 5 mm`.
 2. `FitResult` schema matches the cross-engine canonical shape
@@ -531,6 +533,7 @@ plus a templated `LeafSystem_[T]` polynomial-torque source. Uses
 `MathematicalProgram` + `IpoptSolver`. The killer-feature milestone.
 
 **Acceptance:**
+
 1. Round-trip on the same synthetic target as DRAKE-3 with
    `final_rmse_m < 1 mm` (tighter, because gradients).
 2. **Sim-call budget:** ≤ 50 forward simulations to converge vs ≥ 100
@@ -552,6 +555,7 @@ Simscape ground-truth grip path at impact, top-of-backswing, and
 address.
 
 **Acceptance:**
+
 1. Test passes on CI.
 2. Cross-engine §2.2 equivalence row turns 🟢 in the parity matrix
    (cross-engine spec table).
@@ -568,6 +572,7 @@ trajectory overlay; depends on `shared/python/motion_matching/plot_*.py`
 for the 2D plots.
 
 **Acceptance:**
+
 1. `python -m motion_matching.visualize_fit results/<trial>/drake.json`
    pops a Meshcat browser tab with skeleton + grip-path overlay.
 2. Error timecourse + fit quality card use the shared plotters
@@ -680,21 +685,21 @@ rather than spinning up its own diagram.
 
 ### 6.1 Baseline (extrapolated from `drake_physics_engine` benchmarks)
 
-| Quantity | Value | Source |
-|---|---|---|
-| Single forward sim, 0.3 s @ 1 ms timestep, 25-DOF humanoid | ~1.5 s wall-clock | extrapolated from `compute_mass_matrix` micro-benchmarks in `drake_physics_engine.py` (~0.5 ms per call × 300 steps × overhead). |
-| `simulate_with_coefficients` (one full call) | 1.5–3 s | adds polynomial-torque LeafSystem + state recording. |
-| `fit_swing_drake` (scipy L-BFGS-B, finite diff) | ~150 sim calls × 2 s = **5 min** | matches Simscape `fmincon` baseline. |
-| `fit_swing_drake_autodiff` (Ipopt + analytic gradients) | ~30 sim calls × 3 s = **90 s** | autodiff overhead × fewer iters. |
+| Quantity                                                   | Value                            | Source                                                                                                                           |
+| ---------------------------------------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Single forward sim, 0.3 s @ 1 ms timestep, 25-DOF humanoid | ~1.5 s wall-clock                | extrapolated from `compute_mass_matrix` micro-benchmarks in `drake_physics_engine.py` (~0.5 ms per call × 300 steps × overhead). |
+| `simulate_with_coefficients` (one full call)               | 1.5–3 s                          | adds polynomial-torque LeafSystem + state recording.                                                                             |
+| `fit_swing_drake` (scipy L-BFGS-B, finite diff)            | ~150 sim calls × 2 s = **5 min** | matches Simscape `fmincon` baseline.                                                                                             |
+| `fit_swing_drake_autodiff` (Ipopt + analytic gradients)    | ~30 sim calls × 3 s = **90 s**   | autodiff overhead × fewer iters.                                                                                                 |
 
 ### 6.2 Targets
 
-| Goal | Target | How |
-|---|---|---|
-| Sim wall-clock | ≤ 3 s | Acceptable as-is. |
-| Fit wall-clock (scipy) | ≤ 5 min per swing | Matches Simscape. |
-| Fit wall-clock (autodiff) | **≤ 30 s per swing** | Drake's killer feature; the parity-matrix justification. |
-| Memory | ≤ 1 GB resident during fit | Drake's autodiff scalars are heavy; budget caps need monitoring. |
+| Goal                      | Target                     | How                                                              |
+| ------------------------- | -------------------------- | ---------------------------------------------------------------- |
+| Sim wall-clock            | ≤ 3 s                      | Acceptable as-is.                                                |
+| Fit wall-clock (scipy)    | ≤ 5 min per swing          | Matches Simscape.                                                |
+| Fit wall-clock (autodiff) | **≤ 30 s per swing**       | Drake's killer feature; the parity-matrix justification.         |
+| Memory                    | ≤ 1 GB resident during fit | Drake's autodiff scalars are heavy; budget caps need monitoring. |
 
 ### 6.3 Profiling hooks
 
@@ -751,7 +756,7 @@ the leaderboard helper picks them up.
 
 ---
 
-*Last updated 2026-05-06. Tracks the same parity wave as
+_Last updated 2026-05-06. Tracks the same parity wave as
 [`../mujoco/MUJOCO_PARITY_SPEC.md`](../mujoco/MUJOCO_PARITY_SPEC.md),
 [`../pinocchio/PINOCCHIO_PARITY_SPEC.md`](../pinocchio/PINOCCHIO_PARITY_SPEC.md),
-and [`../opensim/OPENSIM_PARITY_SPEC.md`](../opensim/OPENSIM_PARITY_SPEC.md).*
+and [`../opensim/OPENSIM_PARITY_SPEC.md`](../opensim/OPENSIM_PARITY_SPEC.md)._

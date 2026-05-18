@@ -41,7 +41,7 @@ fleet = ThemeManager.instance().get_available_themes()
 
 ### Option B — add a `get_available_fleet_themes()` method
 
-If "fleet themes" is supposed to be a *subset* (only themes loaded from `vendor/ud-tools`), add a new method on `ThemeManager` that filters:
+If "fleet themes" is supposed to be a _subset_ (only themes loaded from `vendor/ud-tools`), add a new method on `ThemeManager` that filters:
 
 ```python
 # src/shared/python/theme/theme_manager.py

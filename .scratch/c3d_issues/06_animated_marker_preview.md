@@ -23,19 +23,20 @@ Extend `gui.py` with an animated 3D view backed by `matplotlib.animation.FuncAni
 
 Each layer is a separate matplotlib `Artist` (Line3D / Line3DCollection / quiver) with a per-layer visibility checkbox:
 
-| Layer | Source | When shown |
-|---|---|---|
-| Body markers (points) | `BodyTarget.marker_xyz[t, :, :]` | when a BodyTarget is loaded |
-| Body skeleton segments | computed via the body-segments issue | when a BodyTarget is loaded |
-| Club mid-hands trace | `ClubTarget.butt[:t+1]` (trail) | when a ClubTarget is loaded |
-| Clubface trace | `ClubTarget.clubhead[:t+1]` | when a ClubTarget is loaded |
-| Clubface frame triad | `club_quat[t]` × 3 unit vectors | when a ClubTarget is loaded |
-| Ball impact point | `BallImpactState.position_at_impact_m` | when a ClubBallTarget is loaded |
-| Model skeleton (current pose) | provider's FK at slider time | when a model provider is selected |
+| Layer                         | Source                                 | When shown                        |
+| ----------------------------- | -------------------------------------- | --------------------------------- |
+| Body markers (points)         | `BodyTarget.marker_xyz[t, :, :]`       | when a BodyTarget is loaded       |
+| Body skeleton segments        | computed via the body-segments issue   | when a BodyTarget is loaded       |
+| Club mid-hands trace          | `ClubTarget.butt[:t+1]` (trail)        | when a ClubTarget is loaded       |
+| Clubface trace                | `ClubTarget.clubhead[:t+1]`            | when a ClubTarget is loaded       |
+| Clubface frame triad          | `club_quat[t]` × 3 unit vectors        | when a ClubTarget is loaded       |
+| Ball impact point             | `BallImpactState.position_at_impact_m` | when a ClubBallTarget is loaded   |
+| Model skeleton (current pose) | provider's FK at slider time           | when a model provider is selected |
 
 ### Performance budget
 
 Animation must run at ≥30 fps on a typical office laptop with a 301-sample target. Approach:
+
 - Pre-compute all per-frame segment endpoints once after loading.
 - Update artist data via `set_data_3d` / `set_segments` rather than re-creating artists each frame.
 - Pause the `FuncAnimation` when the window is hidden (use `QShowEvent` / `QHideEvent`).
@@ -43,9 +44,11 @@ Animation must run at ≥30 fps on a typical office laptop with a 301-sample tar
 ### State persistence
 
 Add timeline state to the existing session JSON (schema bump in `src/tools/starting_pose_matcher/session_schema.py`):
+
 ```json
 "playback": { "current_frame": 0, "speed": 1.0, "loop": true, "trail_frames": 30 }
 ```
+
 Existing v3 sessions still load (treat missing block as defaults).
 
 ## Generic naming

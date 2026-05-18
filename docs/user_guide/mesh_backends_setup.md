@@ -6,11 +6,11 @@ This guide explains how to set up and use the MakeHuman and SMPLX mesh generatio
 
 The Character Builder supports multiple mesh generation backends:
 
-| Backend | Status | Description |
-|---------|--------|-------------|
+| Backend   | Status        | Description                                     |
+| --------- | ------------- | ----------------------------------------------- |
 | Primitive | ✅ Production | Capsule/box primitive meshes (no external deps) |
-| MakeHuman | ⚠️ Alpha | Realistic human meshes from MakeHuman |
-| SMPL-X | ⚠️ Alpha | Parametric body model from SMPL-X |
+| MakeHuman | ⚠️ Alpha      | Realistic human meshes from MakeHuman           |
+| SMPL-X    | ⚠️ Alpha      | Parametric body model from SMPL-X               |
 
 ## MakeHuman Backend
 
@@ -90,11 +90,11 @@ result.export_urdf("./output/makehuman_character")
 
 ### Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| "MakeHuman mesh not found" | Verify `MAKEHUMAN_MESH_DIR` is set correctly |
-| "Invalid mesh format" | Ensure OBJ files are exported in meters |
-| "Mesh import failed" | Check that mesh has valid topology (no holes) |
+| Issue                      | Solution                                      |
+| -------------------------- | --------------------------------------------- |
+| "MakeHuman mesh not found" | Verify `MAKEHUMAN_MESH_DIR` is set correctly  |
+| "Invalid mesh format"      | Ensure OBJ files are exported in meters       |
+| "Mesh import failed"       | Check that mesh has valid topology (no holes) |
 
 ---
 
@@ -188,12 +188,12 @@ builder = CharacterBuilder(mesh_backend=MeshGeneratorBackend.SMPLX)
 
 ### Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| "SMPLX model not found" | Verify `SMPLX_MODEL_DIR` and file names |
+| Issue                   | Solution                                               |
+| ----------------------- | ------------------------------------------------------ |
+| "SMPLX model not found" | Verify `SMPLX_MODEL_DIR` and file names                |
 | "Torch DLL load failed" | Reinstall torch: `pip install --force-reinstall torch` |
-| "NPZ file corrupted" | Re-download from SMPL-X website |
-| "Out of memory" | Reduce batch_size in config |
+| "NPZ file corrupted"    | Re-download from SMPL-X website                        |
+| "Out of memory"         | Reduce batch_size in config                            |
 
 ---
 
@@ -202,6 +202,7 @@ builder = CharacterBuilder(mesh_backend=MeshGeneratorBackend.SMPLX)
 ### Why Separate CI?
 
 MakeHuman and SMPLX backends require:
+
 - Large binary assets (mesh files, model weights)
 - Optional dependencies (torch, trimesh)
 - Platform-specific configuration
@@ -217,58 +218,58 @@ name: Mesh Backends Test
 
 on:
   schedule:
-    - cron: '0 2 * * *'  # Daily at 2 AM
-  workflow_dispatch:     # Manual trigger
+    - cron: "0 2 * * *" # Daily at 2 AM
+  workflow_dispatch: # Manual trigger
 
 jobs:
   test-smplx:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          
+          python-version: "3.11"
+
       - name: Install dependencies
         run: |
           pip install -e ".[biomechanics]"
           pip install smplx trimesh torch
-          
+
       - name: Cache SMPL-X models
         uses: actions/cache@v4
         with:
           path: ~/.smplx_models
           key: smplx-models-v1
-          
+
       - name: Download SMPL-X models (if not cached)
         run: |
           mkdir -p ~/.smplx_models
           # Download from authorized source
-          
+
       - name: Run SMPL-X tests
         run: pytest tests/unit/tools/humanoid_character_builder/test_mesh_generators.py -v -m smplx
-        
+
   test-makehuman:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          
+          python-version: "3.11"
+
       - name: Install dependencies
         run: pip install -e ".[biomechanics]"
-        
+
       - name: Cache MakeHuman meshes
         uses: actions/cache@v4
         with:
           path: ~/.makehuman_meshes
           key: makehuman-meshes-v1
-          
+
       - name: Run MakeHuman tests
         run: pytest tests/unit/tools/humanoid_character_builder/test_mesh_generators.py -v -m makehuman
 ```

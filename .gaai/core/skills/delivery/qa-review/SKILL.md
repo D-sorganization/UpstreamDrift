@@ -34,28 +34,33 @@ Activate after implementation is complete. This is a **hard quality gate**.
 ## Process
 
 ### 1. Story Compliance Check
+
 - Parse Story YAML frontmatter
 - Extract acceptance criteria
 - Validate each criterion is demonstrably satisfied in code
 - Any criterion unclear or unmet → FAIL immediately
 
 ### 2. Scope Integrity Check
+
 - Only files within Story scope were modified
 - No feature creep introduced
 - No unrelated refactors included
 - Unexpected changes → FAIL
 
 ### 3. Rule Enforcement
+
 - Confirm compliance with each applicable rule
 - Surface violations explicitly
 - Any broken rule → FAIL
 
 ### 4. Regression Scan
+
 - Broken tests → FAIL
 - Behavior drift → FAIL
 - Known risk patterns from memory → FAIL
 
 ### 5. Quality Checks
+
 - Error-prone operations lack error handling → FAIL
 - External input enters functions without validation → FAIL
 - Identifiers are ambiguous or non-descriptive → FAIL
@@ -68,6 +73,7 @@ Activate after implementation is complete. This is a **hard quality gate**.
 ## Outputs
 
 **If PASS:**
+
 ```
 status: PASS
 validated_stories:
@@ -79,6 +85,7 @@ notes:
 ```
 
 **If FAIL:**
+
 ```
 status: FAIL
 blocking_issues:
@@ -96,6 +103,7 @@ recommended_actions:
 ## Hard Rules
 
 This skill must NEVER:
+
 - Modify code
 - Reinterpret Stories
 - Negotiate acceptance criteria

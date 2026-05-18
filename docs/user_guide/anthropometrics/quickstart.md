@@ -23,14 +23,14 @@ users who prefer code.
 
 The dialog ships in
 `src/shared/python/anthropometrics/ui/calibration_dialog.py` and is
-launched from the matcher (Tools → *Subject Calibration*) or directly
+launched from the matcher (Tools → _Subject Calibration_) or directly
 from a tile in the launcher.
 
 ### 1. Pick the mocap file and subject scalars
 
 ![Calibration dialog — initial screen](img/calibration_dialog.png)
 
-- **C3D file.** Click *Browse…* and select `data/C3D_TA_Driver.c3d`
+- **C3D file.** Click _Browse…_ and select `data/C3D_TA_Driver.c3d`
   (the bundled worked example). The dialog reads
   `SUBJECT_INFO`/`PROCESSING` parameters and pre-fills any of
   `subject_id`, `height_m`, `mass_kg`, `sex`, `age_years` it finds.
@@ -38,9 +38,9 @@ from a tile in the launcher.
   physically realistic ranges (height 0.5 – 2.5 m, mass 10 – 300 kg).
   For the worked example, set **height = 1.75 m** and **mass = 75 kg**
   if not auto-filled.
-- **Sex.** *M*, *F*, or *unspecified*. de Leva publishes only male
-  and female tables; *unspecified* falls back to the male table.
-- **Estimator.** *de_leva* (default), *dempster*, or *zatsiorsky*.
+- **Sex.** _M_, _F_, or _unspecified_. de Leva publishes only male
+  and female tables; _unspecified_ falls back to the male table.
+- **Estimator.** _de_leva_ (default), _dempster_, or _zatsiorsky_.
   See the [cookbook in the consolidated user guide](../anthropometrics.md#pick-the-right-estimator)
   for guidance on which to pick.
 - **Target engines.** Multi-select; defaults to all four
@@ -73,12 +73,12 @@ records.
 ### 4. Export to Drake (or any other engine)
 
 Click **Export to Drake** to write the URDF. The same button row
-exposes *Export to Pinocchio*, *Export to OpenSim*, *Export to
-MJCF*. Files land in the directory shown at the bottom of the
+exposes _Export to Pinocchio_, _Export to OpenSim_, _Export to
+MJCF_. Files land in the directory shown at the bottom of the
 dialog (default `~/.golf_modeling_suite/subjects/<subject_id>/`).
 
 Click **Save** to persist the canonical `subject.json` (schema
-version `SCHEMA_VERSION`). Reloading via *Open subject…* re-runs
+version `SCHEMA_VERSION`). Reloading via _Open subject…_ re-runs
 every DbC invariant — corrupt files fail loudly at load time,
 never mid-simulation.
 
@@ -90,24 +90,24 @@ Bundled with the repo. The `SUBJECT_INFO` block in this file does
 not encode height or mass, so the dialog will leave the spinboxes at
 their defaults. Set:
 
-| Field      | Value           |
-| ---------- | --------------- |
-| height_m   | 1.75            |
-| mass_kg    | 75.0            |
-| sex        | M               |
-| estimator  | de_leva         |
+| Field     | Value   |
+| --------- | ------- |
+| height_m  | 1.75    |
+| mass_kg   | 75.0    |
+| sex       | M       |
+| estimator | de_leva |
 
-Expected outputs after clicking *Run pipeline* with all four target
+Expected outputs after clicking _Run pipeline_ with all four target
 engines selected:
 
-| Field                          | Approximate value | Source                |
-| ------------------------------ | ----------------- | --------------------- |
-| total mass (Σ segment masses)  | 75.0 kg ± 1 %     | mass closure          |
-| total axial length             | ≈ 1.75 m          | length closure        |
-| segments produced              | 16                | de Leva male table    |
-| trunk mass                     | ≈ 33.3 kg         | de Leva male, 0.4346  |
-| thigh mass (each)              | ≈ 10.5 kg         | de Leva male, 0.1416  |
-| `report.html` mass_ratio cell  | green / *OK*      | within 1 % tolerance  |
+| Field                         | Approximate value | Source               |
+| ----------------------------- | ----------------- | -------------------- |
+| total mass (Σ segment masses) | 75.0 kg ± 1 %     | mass closure         |
+| total axial length            | ≈ 1.75 m          | length closure       |
+| segments produced             | 16                | de Leva male table   |
+| trunk mass                    | ≈ 33.3 kg         | de Leva male, 0.4346 |
+| thigh mass (each)             | ≈ 10.5 kg         | de Leva male, 0.1416 |
+| `report.html` mass_ratio cell | green / _OK_      | within 1 % tolerance |
 
 Files written to `output_dir`:
 

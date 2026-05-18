@@ -8,12 +8,14 @@
 ## Context
 
 The UpstreamDrift project needs a unified motion capture pipeline that can:
+
 1. Accept input from multiple mocap sources (Theia, OpenPose, MediaPipe, BVH, C3D)
 2. Process 2D poses into 3D motion
 3. Retarget motion to various humanoid character models
 4. Export to multiple physics engines (MuJoCo, Drake, Pinocchio, OpenSim)
 
 Currently, each engine has its own ad-hoc mocap loading code, leading to:
+
 - Duplicated conversion logic
 - Inconsistent coordinate system handling
 - Difficult onboarding for new contributors
@@ -64,14 +66,14 @@ class Motion:
 
 The pipeline is split into levels of detail:
 
-| Level | Module | Responsibility |
-|-------|--------|----------------|
-| L1 | `sources/` | Parse raw formats → CIR |
-| L2 | `converters/` | Unit/axis normalization |
-| L3 | `cleaning/` | Data quality improvements |
-| L4 | `lifting/` | 2D → 3D estimation |
-| L5 | `retargeting/` | Skeleton mapping |
-| L6 | `exporters/` | CIR → engine format |
+| Level | Module         | Responsibility            |
+| ----- | -------------- | ------------------------- |
+| L1    | `sources/`     | Parse raw formats → CIR   |
+| L2    | `converters/`  | Unit/axis normalization   |
+| L3    | `cleaning/`    | Data quality improvements |
+| L4    | `lifting/`     | 2D → 3D estimation        |
+| L5    | `retargeting/` | Skeleton mapping          |
+| L6    | `exporters/`   | CIR → engine format       |
 
 ### Rejected Alternatives
 
@@ -80,6 +82,7 @@ The pipeline is split into levels of detail:
 Each engine (MuJoCo, Drake, Pinocchio) maintains its own pipeline.
 
 **Rejected because:**
+
 - Duplicates 80% of conversion logic
 - Inconsistent behavior across engines
 - Harder to add new engines
@@ -90,6 +93,7 @@ Each engine (MuJoCo, Drake, Pinocchio) maintains its own pipeline.
 One large `motion_pipeline.py` handling all cases.
 
 **Rejected because:**
+
 - Violates single responsibility principle
 - Hard to test individual transformations
 - Difficult to extend with new formats
@@ -100,6 +104,7 @@ One large `motion_pipeline.py` handling all cases.
 Use existing libraries (e.g., `bvh`, `c3d`, `mediapipe`) directly.
 
 **Rejected because:**
+
 - No unified interface
 - Inconsistent coordinate systems
 - Hard to add custom processing steps

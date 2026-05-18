@@ -66,11 +66,13 @@ end
 ## DbC contract
 
 Preconditions:
+
 - `target` per `CLUB_IK_SPEC.md`.
 - `options.n_starts >= 1`.
 - `options.parallel_method in {"parsim","parfor"}`.
 
 Postconditions:
+
 - `result.final_rmse_m == min([result.all_starts{:}.final_rmse_m])`.
 - `length(result.all_starts) == options.n_starts`.
 - All starting points within coefficient bounds.

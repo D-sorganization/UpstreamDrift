@@ -52,8 +52,8 @@ Checking core dependencies:
 Checking Golf Suite modules:
 ...
 Core dependencies: <passed>/<total> passed
-Suite modules:     <passed>/<total> passed
-Overall:           <passed>/<total> passed
+Suite modules: <passed>/<total> passed
+Overall: <passed>/<total> passed
 \`\`\`
 
 The verification script's final launcher recommendation is not yet fully
@@ -65,7 +65,9 @@ covered; see #G12.
 
 \`\`\`bash
 upstream-drift
+
 # or, from a repository checkout:
+
 python launch_golf_suite.py
 \`\`\`
 

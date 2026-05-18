@@ -115,9 +115,9 @@ def test_schema_name_literal_values_stable() -> None:
     expected = {"BODY_25", "MediaPipe_33", "COCO_17", "OpenPose_25", "custom"}
     actual = set(get_args(contracts.SchemaName))
     missing = expected - actual
-    assert (
-        not missing
-    ), f"SchemaName Literal lost values {sorted(missing)}; actual: {sorted(actual)}"
+    assert not missing, (
+        f"SchemaName Literal lost values {sorted(missing)}; actual: {sorted(actual)}"
+    )
 
 
 def test_up_axis_literal_values_stable() -> None:
@@ -125,9 +125,9 @@ def test_up_axis_literal_values_stable() -> None:
     contracts = pytest.importorskip("src.shared.python.motion_pipeline.contracts")
     expected = {"+Y", "+Z", "+X", "-Y", "-Z", "-X"}
     actual = set(get_args(contracts.UpAxis))
-    assert (
-        expected == actual
-    ), f"UpAxis Literal changed: expected {sorted(expected)}, got {sorted(actual)}"
+    assert expected == actual, (
+        f"UpAxis Literal changed: expected {sorted(expected)}, got {sorted(actual)}"
+    )
 
 
 # ---------------------------------------------------------------------------

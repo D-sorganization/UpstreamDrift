@@ -44,19 +44,23 @@ Three orthogonal fitter strategies cover the realistic mocap → shape attachmen
 ## Tests
 
 `tests/unit/body_part_viz/fitters/test_between_two.py`:
+
 - 100-frame straight-line trajectory; assert centroids are midpoints.
 - Rotated trajectory; assert rotation matrix is orthogonal, det == +1.
 - One marker NaN at frames 50–60; assert valid_mask correct.
 
 `tests/unit/body_part_viz/fitters/test_cluster_kabsch.py`:
+
 - 4-marker cluster rotated by known angle; recovered rotation within 1e-9.
 - Reflection guard: cluster reflected → rotation has det == +1 (no reflection).
 
 `tests/unit/body_part_viz/fitters/test_procrustes_anisotropic.py`:
+
 - Cluster scaled anisotropically (1.0, 2.0, 0.5); recovered scale within 1e-6.
 - DbC: < 4 markers raises ValueError or logs WARNING and falls back to Kabsch.
 
 `tests/unit/body_part_viz/fitters/test_kabsch_helper.py`:
+
 - Pure-NumPy SVD round-trip, including degenerate cases (collinear cluster).
 
 ## Acceptance criteria

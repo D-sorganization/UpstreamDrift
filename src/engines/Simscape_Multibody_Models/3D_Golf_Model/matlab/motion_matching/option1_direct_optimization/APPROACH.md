@@ -76,7 +76,7 @@ When no warm start is available:
 
 1. If the parquet random-sweep dataset (see [shared/DATASET_SCHEMA.md](../shared/DATASET_SCHEMA.md)) is on disk, evaluate the cost (cheaply, by re-using the precomputed kinematics if the schema permits) on every member, take the K=8 best as the starting points for `MultiStart`. **No Simscape calls** for this step — it's a table lookup.
 2. Otherwise, draw K=8 Sobol-spaced points across the bounds and evaluate `J` on each (`K` simulations). Take the lowest as the warm start.
-3. If even (2) is too expensive, fall back to `theta = zeros(d, 1)` (the model's nominal). This is rarely good but it always converges to *something*.
+3. If even (2) is too expensive, fall back to `theta = zeros(d, 1)` (the model's nominal). This is rarely good but it always converges to _something_.
 
 The cold-start logic lives in `private/cold_start_seed.m` and is selected by `options.cold_start_strategy ∈ {"dataset","sobol","zeros"}` (default `"dataset"` if dataset is available, else `"sobol"`).
 
@@ -90,11 +90,11 @@ Single solver, single set of weights, no schedule.
 
 ### Schedule B — staged (default for `fit_swing_hybrid`)
 
-| Stage | Solver | Iterations / evals | `w_anchor_impact` | `lambda` |
-|---|---|---|---|---|
-| 0. Warm seed | (cold-start lookup) | — | — | — |
-| 1. Global | `surrogateopt` (or `particleswarm`) | 70% of `options.max_function_evals` | `5 × w_p` | `0` |
-| 2. Polish | `fmincon-sqp` | 30% remaining | ramps `5 × w_p → 0` over the first 25% of iters | ramps `0 → options.lambda` over 50% |
+| Stage        | Solver                              | Iterations / evals                  | `w_anchor_impact`                               | `lambda`                            |
+| ------------ | ----------------------------------- | ----------------------------------- | ----------------------------------------------- | ----------------------------------- |
+| 0. Warm seed | (cold-start lookup)                 | —                                   | —                                               | —                                   |
+| 1. Global    | `surrogateopt` (or `particleswarm`) | 70% of `options.max_function_evals` | `5 × w_p`                                       | `0`                                 |
+| 2. Polish    | `fmincon-sqp`                       | 30% remaining                       | ramps `5 × w_p → 0` over the first 25% of iters | ramps `0 → options.lambda` over 50% |
 
 Rationale: in stage 1 the optimizer needs the anchor to get into the right basin (otherwise it drifts into low-work, low-fidelity solutions). In stage 2 we want the unbiased cost so the final answer is **the** answer, not the answer-with-anchor. The regularizer is annealed in only after the position term is small enough that `lambda · W_total` doesn't dominate.
 
@@ -107,6 +107,7 @@ w_a(k) = w_a_start + (w_a_end - w_a_start) · clamp((k - k0) / (k1 - k0), 0, 1)
 ```
 
 Defaults:
+
 - Stage 1 (`surrogateopt`): `w_a` is **constant** at `5 × w_p` (no schedule — surrogateopt doesn't expose iteration count cleanly).
 - Stage 2 (`fmincon`): `w_a_start = 5 × w_p`, `w_a_end = 0`, `k0 = 0`, `k1 = 0.25 × max_iter`.
 

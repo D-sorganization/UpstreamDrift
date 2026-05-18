@@ -11,6 +11,7 @@ f_θ : coefficients (D,) → kinematic_trajectory (N, 10)
 ```
 
 where:
+
 - `D = n_joints × 7` (polynomial coefficients)
 - `N = 300` (timesteps at 1 kHz over 0.3 s)
 - Output per timestep: `[r_butt(3), r_clubhead(3), q_club(4)]`
@@ -43,17 +44,17 @@ Total parameters: ~12M (float32: ~48 MB)
 
 ### Training Hyperparameters
 
-| Parameter | Default | Notes |
-|-----------|---------|-------|
-| n_epochs | 50 | Can be reduced for faster iteration |
-| batch_size | 32 | Trials per batch; adjust based on GPU memory |
-| learning_rate | 3.0e-4 | AdamW initial learning rate |
-| weight_decay | 1.0e-4 | L2 regularization strength |
-| grad_clip | 1.0 | Global gradient norm clipping |
-| w_butt | 1.0 | Weight on butt position MSE |
-| w_clubhead | 1.0 | Weight on clubhead position MSE |
-| w_quat | 0.1 | Weight on quaternion loss |
-| w_aux | 0.1 | Weight on auxiliary joint angles |
+| Parameter     | Default | Notes                                        |
+| ------------- | ------- | -------------------------------------------- |
+| n_epochs      | 50      | Can be reduced for faster iteration          |
+| batch_size    | 32      | Trials per batch; adjust based on GPU memory |
+| learning_rate | 3.0e-4  | AdamW initial learning rate                  |
+| weight_decay  | 1.0e-4  | L2 regularization strength                   |
+| grad_clip     | 1.0     | Global gradient norm clipping                |
+| w_butt        | 1.0     | Weight on butt position MSE                  |
+| w_clubhead    | 1.0     | Weight on clubhead position MSE              |
+| w_quat        | 0.1     | Weight on quaternion loss                    |
+| w_aux         | 0.1     | Weight on auxiliary joint angles             |
 
 ### Loss Function
 
@@ -71,6 +72,7 @@ The quaternion loss is sign-invariant: `(1 - dot²(q, q*))` instead of `‖q - q
 ### Loading the Real Dataset
 
 Place the 10k parquet dataset at:
+
 ```
 data/sweep/20251030/
 ├── trials.parquet        # Per-trial metadata and coefficients
@@ -79,6 +81,7 @@ data/sweep/20251030/
 ```
 
 The dataset contract is defined in:
+
 ```
 src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/DATASET_SCHEMA.md
 ```
@@ -86,6 +89,7 @@ src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/share
 ### Synthetic Dataset (Testing)
 
 For testing without the real dataset:
+
 ```python
 from src.shared.python.motion_matching.dataset import make_synthetic_sweep
 make_synthetic_sweep("data/sweep_test", n_trials=100, n_joints=14)
@@ -132,12 +136,14 @@ torch.save(trained.model.state_dict(), "model.pt")
 ### Training Output
 
 The training loop logs:
+
 - Epoch-by-epoch training loss
 - Validation loss and clubhead RMSE (mm)
 - Model parameters and architecture summary
 - Training time and throughput
 
 Example output:
+
 ```
 epoch 1/50 train=0.482391 val=0.421920 rmse_m=0.0142
 epoch 2/50 train=0.325841 val=0.298412 rmse_m=0.0091
@@ -158,6 +164,7 @@ jupyter notebook notebooks/evaluate_surrogate.ipynb
 ```
 
 The notebook covers:
+
 1. Load dataset and create test split
 2. Train or load a trained model
 3. Model architecture summary and parameter count
@@ -170,9 +177,11 @@ The notebook covers:
 ### Inference Speed Benchmark
 
 Expected on CPU (batch of 32, fp32):
+
 - **~30 ms per batch** → ~1 ms per sample ✓
 
 Expected on GPU (batch of 32, fp16):
+
 - **~5 ms per batch** → ~0.15 ms per sample ✓
 
 The target is **≤ 1 ms per prediction** for real-time fitting.
@@ -180,6 +189,7 @@ The target is **≤ 1 ms per prediction** for real-time fitting.
 ### Test Set Accuracy
 
 Grade: clubhead position RMSE on holdout test set:
+
 - **Excellent**: < 5 mm
 - **Good**: 5-10 mm
 - **Acceptable**: 10-20 mm
@@ -190,6 +200,7 @@ Grade: clubhead position RMSE on holdout test set:
 Once the model is trained and saved:
 
 1. **Export to ONNX or TorchScript** (optional, for MATLAB integration):
+
    ```python
    import torch
    model = trained.model
@@ -199,21 +210,24 @@ Once the model is trained and saved:
    ```
 
 2. **Implement coefficient inversion** in `fit_swing_surrogate.m`:
+
    - Load trained surrogate weights
    - Gradient descent on coefficients to minimize clubhead position error
    - Apply bound projection (hard clamp, not soft penalty)
    - K-restart strategy (default 8 restarts) to avoid local minima
 
 3. **Round-trip validation** (mandatory):
+
    - Once surrogate fit finds `coeffs*`, run through full Simscape simulator
    - If `RMSE_simscape > 2× RMSE_surrogate`, flag as extrapolation
    - Use Simscape RMSE in leaderboard, never surrogate RMSE
 
 4. **Hybrid warm-start** (recommended production pattern):
+
    ```matlab
    % Warm-start with surrogate
    coeffs_warm = fit_via_surrogate_python(target, opts);
-   
+
    % Polish with fmincon (Option 1)
    result = fit_swing_fmincon(target, ...
        default_option1_options().with_initial(coeffs_warm));
@@ -228,12 +242,14 @@ Once the model is trained and saved:
 ### Issue: "Inference time > 1 ms"
 
 **Possible causes**:
+
 - Using fp32 instead of fp16 (consider `torch.float16`)
 - Batch size too small (inference is more efficient with batch_size ≥ 8)
 - CPU is throttling (check system load)
 - Using older GPU with poor tensor core support
 
 **Solutions**:
+
 1. Enable mixed precision: `torch.amp.autocast("cuda")`
 2. Use larger batch sizes for amortized latency
 3. Profile with `torch.profiler` to identify bottlenecks
@@ -241,11 +257,13 @@ Once the model is trained and saved:
 ### Issue: "Validation RMSE > 5 mm"
 
 **Possible causes**:
+
 - Dataset is too small (need at least 500+ trials)
 - Hyperparameters not tuned (try `lr=1e-3`, `hidden_dim=512`)
 - Insufficient training (try `n_epochs=100`)
 
 **Solutions**:
+
 1. Verify dataset size: `dataset.n_trials()`
 2. Increase `hidden_dim` or `n_layers`
 3. Try longer training with early stopping
@@ -255,6 +273,7 @@ Once the model is trained and saved:
 **Meaning**: Surrogate prediction disagrees significantly with Simscape ground truth.
 
 **Solution**:
+
 - Do **not** trust this fit; re-run inversion with stricter bounds
 - Check if coefficients are at the boundary of the training distribution
 - Consider hybrid approach: use surrogate fit as warm-start only, always polish with Simscape

@@ -4,19 +4,19 @@
 
 ## Format Support Matrix
 
-| Format | Extension | Adapter | 3D Support | Confidence | Temporal | Notes |
-|--------|-----------|---------|------------|------------|----------|-------|
-| **BVH** | `.bvh` | `BVHAdapter` | ✅ Yes | ❌ No | ✅ Yes | Euler order varies (XYZ vs ZXY) |
-| **TRC** | `.trc` | `TRCAdapter` | ✅ Yes | ❌ No | ✅ Yes | OpenSim / Vicon Nexus / Theia, Y-up |
-| **OpenSim STO/MOT** | `.sto`, `.mot` | `STOMotAdapter` | n/a (joint angles) | ❌ No | ✅ Yes | `inDegrees` flag honored |
-| **OpenPose** | `.json` | `OpenPoseJSONAdapter` | ❌ 2D only | ✅ Yes | ✅ Yes | BODY_25 or COCO_18 schema |
-| **AlphaPose** | `.json` | `AlphaPoseJSONAdapter` | ❌ 2D only | ✅ Yes | ✅ Yes | COCO-17 multi-frame |
-| **HRNet** | `.json` | `HRNetJSONAdapter` | ❌ 2D only | ✅ Yes | ✅ Yes | COCO-17 single-person |
-| **MediaPipe** | `.json` | `MediaPipeJSONAdapter` | partial 3D (relative depth) | ✅ Yes | ✅ Yes | 33 landmarks, normalized coords |
-| **CSV** | `.csv` | `CSVAdapter` | ✅ Yes | ❌ No | ✅ Yes | columns: `frame, time, x_*/y_*/z_*` |
-| **C3D** | `.c3d` | `C3DAdapter` | ✅ Yes | ✅ Yes | ✅ Yes | Binary, requires `ezc3d` |
-| **FBX** | `.fbx` | _planned_ | ✅ Yes | ❌ No | ✅ Yes | Proprietary, Blender conversion |
-| **Qualisys** | `.qtm` | _planned_ | ✅ Yes | ✅ Yes | ✅ Yes | Native QTM format |
+| Format              | Extension      | Adapter                | 3D Support                  | Confidence | Temporal | Notes                               |
+| ------------------- | -------------- | ---------------------- | --------------------------- | ---------- | -------- | ----------------------------------- |
+| **BVH**             | `.bvh`         | `BVHAdapter`           | ✅ Yes                      | ❌ No      | ✅ Yes   | Euler order varies (XYZ vs ZXY)     |
+| **TRC**             | `.trc`         | `TRCAdapter`           | ✅ Yes                      | ❌ No      | ✅ Yes   | OpenSim / Vicon Nexus / Theia, Y-up |
+| **OpenSim STO/MOT** | `.sto`, `.mot` | `STOMotAdapter`        | n/a (joint angles)          | ❌ No      | ✅ Yes   | `inDegrees` flag honored            |
+| **OpenPose**        | `.json`        | `OpenPoseJSONAdapter`  | ❌ 2D only                  | ✅ Yes     | ✅ Yes   | BODY_25 or COCO_18 schema           |
+| **AlphaPose**       | `.json`        | `AlphaPoseJSONAdapter` | ❌ 2D only                  | ✅ Yes     | ✅ Yes   | COCO-17 multi-frame                 |
+| **HRNet**           | `.json`        | `HRNetJSONAdapter`     | ❌ 2D only                  | ✅ Yes     | ✅ Yes   | COCO-17 single-person               |
+| **MediaPipe**       | `.json`        | `MediaPipeJSONAdapter` | partial 3D (relative depth) | ✅ Yes     | ✅ Yes   | 33 landmarks, normalized coords     |
+| **CSV**             | `.csv`         | `CSVAdapter`           | ✅ Yes                      | ❌ No      | ✅ Yes   | columns: `frame, time, x_*/y_*/z_*` |
+| **C3D**             | `.c3d`         | `C3DAdapter`           | ✅ Yes                      | ✅ Yes     | ✅ Yes   | Binary, requires `ezc3d`            |
+| **FBX**             | `.fbx`         | _planned_              | ✅ Yes                      | ❌ No      | ✅ Yes   | Proprietary, Blender conversion     |
+| **Qualisys**        | `.qtm`         | _planned_              | ✅ Yes                      | ✅ Yes     | ✅ Yes   | Native QTM format                   |
 
 > The full canonical list of shipped adapters lives in
 > `src/shared/python/motion_pipeline/sources/` and is exercised by

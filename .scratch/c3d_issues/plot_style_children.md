@@ -7,6 +7,7 @@
 Depends on contracts (#1).
 
 Implement six classes in `src/shared/python/plot_style/shapes/`:
+
 - `_sphere_marker.py` — UV-sphere triangulation (configurable lat/lon).
 - `_cube_marker.py` — 12-triangle cube.
 - `_cross_marker.py` — 3 crossed quads (Greek cross).
@@ -17,6 +18,7 @@ Implement six classes in `src/shared/python/plot_style/shapes/`:
 Each class implements `MarkerShapeRenderer` (Protocol from #1) returning vertices + faces in unit-radius local frame; size scales via `MarkerStyle.size_px`.
 
 Tests under `tests/unit/plot_style/shapes/`:
+
 - Vertex / face counts at default params match reference.
 - Unit-bounding-box check: every shape inscribed in unit cube before scale.
 - DbC: invalid params raise.
@@ -32,6 +34,7 @@ Constraints + commit + PR + cleanup pattern matches body_part_viz children.
 Depends on contracts (#1).
 
 Implement the `ColorResolver` Protocol with three strategies in `src/shared/python/plot_style/resolvers/`:
+
 - `static_resolver.py` — passes through hex.
 - `palette_resolver.py` — looks up index in named palettes (matplotlib + custom).
 - `data_driven_resolver.py` — applies channel → vmin/vmax normalisation → colormap sampling.
@@ -39,6 +42,7 @@ Implement the `ColorResolver` Protocol with three strategies in `src/shared/pyth
 Bulk path `resolve_array(scale, n_frames, n_markers)` is the perf-critical one: pre-computes a lookup-table once at load time, slices per frame.
 
 Tests verify:
+
 - Static: hex round-trips through resolver.
 - Palette: index in range; index out of bounds raises.
 - DataDriven: per-frame, per-(frame, marker), and bulk paths produce identical results.
@@ -68,6 +72,7 @@ def list_colormaps() -> tuple[str, ...]:
 ```
 
 Semantic alias map (immutable at module load):
+
 - VELOCITY → plasma
 - FORCE → inferno
 - ACCELERATION → turbo
@@ -75,6 +80,7 @@ Semantic alias map (immutable at module load):
 - GENERIC_DIVERGING → coolwarm
 
 Tests:
+
 - All ColormapId values resolve.
 - Custom colormap registration round-trips.
 - Idempotent registration → no-op.
@@ -99,6 +105,7 @@ Already partially specified in #1's `channels.py`. This child fully implements:
 - Vector channels: a helper `magnitude_channel(vector_per_frame: np.ndarray, ...)` that takes shape `(T, 3)` velocity → returns `DataChannel` of magnitudes.
 
 Tests:
+
 - All API exercised; NaN paths covered.
 - Magnitude helper round-trips against synthetic constant-velocity input.
 
@@ -123,6 +130,7 @@ Widgets in `src/shared/python/plot_style/widgets/`:
 - `data_channel_editor.py` — for the data-driven coloring case: shows channel name + current vmin/vmax + colormap picker; "auto" toggles auto-detection of vmin/vmax. Emits `style_updated: pyqtSignal[DataDrivenColor]`.
 
 Tests:
+
 - Headless (`QT_QPA_PLATFORM=offscreen`).
 - Each widget instantiated; programmatic state-change emits the right signal.
 
@@ -139,6 +147,7 @@ Depends on contracts (#1), shapes (#2), resolvers (#3), colormaps (#4), channels
 Implements `MarkerRenderer` Protocol for matplotlib.
 
 Two backends:
+
 - 3D: `Axes3D.scatter` for shape == POINT/SPHERE; `Poly3DCollection` for the rest.
 - 2D: `Axes.scatter` (always — even non-sphere shapes degrade to filled patches).
 
@@ -147,6 +156,7 @@ Per-frame update via `set_offsets3d` (3D) or `set_offsets` (2D); never `ax.clear
 For `DataDrivenColor`: pre-compute the per-frame color array once at `add_markers()`, slice in `update_frame`. ≥60 fps target.
 
 Tests:
+
 - Headless. Each shape rendered. Each ColorScale variant rendered. Per-frame update timing ≤16 ms.
 
 ≥90% line coverage.
@@ -176,10 +186,12 @@ Tests gated on `pytest.importorskip("pyqtgraph")`. ≥80% coverage.
 Depends on contracts (#1) + all subsequent shape/color/colormap/channel/resolver children for round-trip coverage.
 
 `src/shared/python/plot_style/persistence.py`:
+
 - `PlotStyleSpec` and `PlotStyleSet` dataclasses (already in #1).
 - `PlotStyleSet.load(path) / save(path)` round-trips JSON.
 
 Theme presets shipped in `src/shared/python/plot_style/presets/`:
+
 - `default.json` — neutral palette.
 - `scientific_violet.json` — matches existing `plot_theme.themes`.
 - `monochrome.json` — for print.
@@ -198,6 +210,7 @@ Tests: round-trip every shape/color/colormap variant. ≥95% line coverage.
 Depends on all prior children.
 
 Three tabs touched in `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/`:
+
 - `marker_plot_tab.py` (2D markers): "Style…" button per selected marker → opens `MarkerStylePicker`.
 - `analog_plot_tab.py` (2D analog): "Style…" per channel.
 - `viewer_3d_tab.py` (3D): "Style…" per marker group; data-channel editor for "color by speed/force/...".
@@ -247,6 +260,7 @@ Cross-tool integration: same `PlotStyleSet` JSON consumed by C3D Viewer + matche
 ### docs(plot-style): ADR + user guide + colormap-author guide
 
 ADR `docs/adr/00<next>-plot-style-toolkit.md`. User guide pages:
+
 - `quickstart.md` — picking a marker shape and color.
 - `data_driven_coloring.md` — coloring markers by clubhead speed.
 - `colormap_author_guide.md` — how to register a custom colormap.

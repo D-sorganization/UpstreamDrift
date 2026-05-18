@@ -14,9 +14,9 @@ optimizer / cost-function options. See issue #4081 for context.
 
 ## Source files
 
-| File | Subjects | Sheets | Native rate |
-|------|----------|--------|-------------|
-| `src/apps/golf_gui/Motion Capture Plotter/Wiffle_ProV1_club_3D_data.xlsx` | TW, GW | 4 | 240 Hz |
+| File                                                                      | Subjects | Sheets | Native rate |
+| ------------------------------------------------------------------------- | -------- | ------ | ----------- |
+| `src/apps/golf_gui/Motion Capture Plotter/Wiffle_ProV1_club_3D_data.xlsx` | TW, GW   | 4      | 240 Hz      |
 
 ## Trial summary
 
@@ -25,12 +25,12 @@ All four trials below come from the same xlsx, parsed by
 (≈ 1.25 s of motion at 240 Hz). Sample rate is 240 Hz native; the loader
 resamples onto the simulation timegrid via `align_to_simulation_grid`.
 
-| Sheet | Subject | Club | A_sample | T_sample | I_sample | F_sample | CHS_mph | Median shaft (m) |
-|-------|---------|------|----------|----------|----------|----------|---------|------------------|
-| `TW_ProV1`  | TW | ProV1   | 240 | 418 | 525 | 725 | 114.5 | 1.069 |
-| `TW_wiffle` | TW | Wiffle  | NaN | NaN | NaN | NaN | 114.5 | 1.069 |
-| `GW_wiffle` | GW | Wiffle  | 240 | 448 | 517 | 724 | 104.6 | 1.081 |
-| `GW_ProV11` | GW | ProV1.1 | 240 | 452 | 521 | 721 | 115.1 | 1.081 |
+| Sheet       | Subject | Club    | A_sample | T_sample | I_sample | F_sample | CHS_mph | Median shaft (m) |
+| ----------- | ------- | ------- | -------- | -------- | -------- | -------- | ------- | ---------------- |
+| `TW_ProV1`  | TW      | ProV1   | 240      | 418      | 525      | 725      | 114.5   | 1.069            |
+| `TW_wiffle` | TW      | Wiffle  | NaN      | NaN      | NaN      | NaN      | 114.5   | 1.069            |
+| `GW_wiffle` | GW      | Wiffle  | 240      | 448      | 517      | 724      | 104.6   | 1.081            |
+| `GW_ProV11` | GW      | ProV1.1 | 240      | 452      | 521      | 721      | 115.1   | 1.081            |
 
 Notes on the column meanings:
 
@@ -88,13 +88,13 @@ Notes on the column meanings:
 
 Each trial exercises a subtly different code path through the loader:
 
-| Failure mode | Exercised by |
-|--------------|--------------|
-| Fully-populated event header path | `TW_ProV1`, `GW_wiffle`, `GW_ProV11` |
-| Missing event-marker fallback to speed-argmax | `TW_wiffle` |
-| Two distinct subjects (different median shaft length) | TW vs GW |
-| Two ball types per subject | `*_ProV1` vs `*_wiffle` |
-| CHS sensitivity (104.6 mph low end vs 115.1 mph high end) | `GW_wiffle` vs `GW_ProV11` |
+| Failure mode                                              | Exercised by                         |
+| --------------------------------------------------------- | ------------------------------------ |
+| Fully-populated event header path                         | `TW_ProV1`, `GW_wiffle`, `GW_ProV11` |
+| Missing event-marker fallback to speed-argmax             | `TW_wiffle`                          |
+| Two distinct subjects (different median shaft length)     | TW vs GW                             |
+| Two ball types per subject                                | `*_ProV1` vs `*_wiffle`              |
+| CHS sensitivity (104.6 mph low end vs 115.1 mph high end) | `GW_wiffle` vs `GW_ProV11`           |
 
 If the cost function or alignment code starts treating any of these
 trials specially (e.g. branches on subject ID), the corresponding test

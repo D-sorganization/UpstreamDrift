@@ -26,6 +26,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate when:
+
 - A new capability is needed that no existing skill covers
 - A skill is being extracted from agent logic that has become reusable
 - Extending a forked GAAI installation with project-specific skills
@@ -37,6 +38,7 @@ This skill is self-referential: it uses the agentskills.io spec to author a spec
 ## Prerequisites
 
 Before activating:
+
 1. Confirm no existing skill already covers the intended capability (check `README.skills.md`)
 2. Confirm the new skill is a **pure execution unit** — it executes, it does not reason
 3. Confirm the skill belongs to exactly one category (discovery / delivery / cross)
@@ -51,6 +53,7 @@ If a skill "appears to think" in the design, it is wrongly scoped. Redesign or s
 ### Step 1 — Name and classify
 
 Derive the skill name from the action it performs:
+
 - Use lowercase kebab-case
 - Name should be a verb phrase: `generate-stories`, `qa-review`, `memory-compact`
 - Category: discovery (produces artefacts) | delivery (implements/validates) | cross (shared utility)
@@ -60,11 +63,13 @@ Verify name does not conflict with an existing skill in `README.skills.md`.
 ### Step 2 — Define inputs and outputs explicitly
 
 List every input the skill requires. Be specific:
+
 - What file paths does it read?
 - What structured data does it receive from the invoking agent?
 - What context is assumed to be present?
 
 List every output the skill produces:
+
 - File paths created or modified
 - Structured data returned to the agent
 - Side effects (backlog state changes, memory updates)
@@ -75,27 +80,28 @@ If inputs or outputs are unclear, the skill is not ready to be written. Clarify 
 
 ```yaml
 ---
-name: {skill-name}                  # matches directory name exactly
-description: {one sentence}         # WHAT it does + WHEN to activate
+name: { skill-name } # matches directory name exactly
+description: { one sentence } # WHAT it does + WHEN to activate
 license: MIT
 compatibility: Works with any filesystem-based AI coding agent
 metadata:
-  author: {author}
+  author: { author }
   version: "1.0"
-  category: {discovery|delivery|cross}
-  track: {discovery|delivery|cross-cutting}
+  category: { discovery|delivery|cross }
+  track: { discovery|delivery|cross-cutting }
   id: SKILL-{CAT}-{NNN}
-  updated_at: {YYYY-MM-DD}
-  status: stable|experimental       # use experimental for new/unproven skills
+  updated_at: { YYYY-MM-DD }
+  status: stable|experimental # use experimental for new/unproven skills
 inputs:
-  - {input_1}: {description}
-  - {input_2}: {description}
+  - { input_1 }: { description }
+  - { input_2 }: { description }
 outputs:
-  - {output_path_or_description}
+  - { output_path_or_description }
 ---
 ```
 
 **Description rule:** Must be one sentence, ≤ 1024 characters. Format:
+
 > "{Verb phrase that describes the output} when {activation condition}."
 
 Example: "Generate Stories from an Epic with testable acceptance criteria when Discovery is refining a new feature scope."
@@ -108,24 +114,30 @@ Required sections:
 # {Skill Title}
 
 ## Purpose / When to Activate
+
 When and why an agent should invoke this skill. Be explicit.
 
 ## Process
+
 Numbered steps. Each step produces a specific output or advances the state.
 Steps must be deterministic: same inputs → same outputs.
 
 ## Quality Checks
+
 What must be true for the output to be acceptable.
 List as assertions, not descriptions.
 
 ## Outputs
+
 Exact file paths or structured outputs produced.
 
 ## Non-Goals
+
 What this skill must NOT do. Prevents scope creep.
 ```
 
 Add a final line if applicable:
+
 > **No silent assumptions. Every {X} becomes explicit and governed.**
 
 ### Step 5 — Create directory and file
@@ -137,6 +149,7 @@ Add a final line if applicable:
 `SKILL.md` filename is always uppercase (spec requirement).
 
 Optional subdirectories (create only if needed):
+
 - `references/` — supporting documents the skill references
 - `assets/` — templates or static files the skill produces
 
@@ -145,14 +158,17 @@ Optional subdirectories (create only if needed):
 This step is non-negotiable. A skill that is not indexed is invisible to agents.
 
 **6a. Skills index YAML:**
+
 - Invoke `build-skills-index` to regenerate both `.gaai/core/skills/skills-index.yaml` (core) and `.gaai/project/skills/skills-index.yaml` (project)
 - Verify the new skill appears in the generated index with correct `id`, `name`, `path`, and `tags`
 
 **6b. Skills README:**
+
 - Core skills: update `.gaai/core/skills/README.skills.md` — add the skill to the appropriate category section
 - Project skills: update `.gaai/project/skills/README.md` — add the skill to the appropriate section
 
 **6c. Domain index (if domain-scoped skill):**
+
 - If the skill belongs to a domain (e.g., `domains/content-production/`), update the domain's `index.md` in memory:
   - `.gaai/project/contexts/memory/domains/{domain}/index.md` — add a row to the skills table
 - This ensures domain sub-agents discover the skill when loading their domain context
@@ -162,6 +178,7 @@ This step is non-negotiable. A skill that is not indexed is invisible to agents.
 ### Step 7 — Reference in agent file
 
 If the skill is intended for a specific agent (Discovery or Delivery), add it to the agent's skill list in:
+
 - `.gaai/core/agents/discovery.agent.md` — Skills Used section
 - `.gaai/core/agents/delivery.agent.md` — Skills Used section
 - Or neither, if it's a general cross skill invoked opportunistically
@@ -185,6 +202,7 @@ If the skill is intended for a specific agent (Discovery or Delivery), add it to
 ## Non-Goals
 
 This skill must NOT:
+
 - Design agent behavior or orchestration logic (that is an agent concern)
 - Make decisions about when to activate the skill (the invoking agent decides)
 - Merge or replace an existing skill (deprecation requires explicit human decision)

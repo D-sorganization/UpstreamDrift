@@ -110,6 +110,7 @@ All preconditions and postconditions inherited verbatim from
 `INTERFACES.md`. The implementation must NOT loosen them.
 
 Additional postcondition:
+
 - After `simulate_with_coefficients` returns, the cache contains the new entry
   unless `cache_enabled is False`.
 

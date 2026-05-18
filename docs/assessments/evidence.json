@@ -4,18 +4,29 @@
   "branch": "main",
   "head_sha": "9fc03ba39df06acef46221a08322e305c3c734f8",
   "head_date": "2026-05-06",
-  "A": {"src_files": 8348, "test_files": 3559, "manifests": 2, "gitignore_lines": 215, "has_readme": 1},
-  "B": {"readme_lines": 297, "readme_headers": 31, "docs_files": 735, "md_files": 9},
-  "C": {"test_py": 1270, "test_rs": 0, "src_py": 1656, "src_rs": 0},
-  "D": {"bare_except": 1, "except_exception": 208, "noqa_suppressions": 3705},
-  "F": {"todo_fixme": 45},
-  "G": {"req_lockfiles": 1},
-  "H": {"secrets_raw": 29},
-  "I": {"env_example": 1},
-  "J": {"logging_refs": 3541, "metrics_refs": 1440},
-  "K": {"suppressions": 3710},
-  "L": {"workflow_files": 78},
-  "M": {"dockerfile": 1},
-  "N": {"license": 1},
-  "O": {"claude_md": 1, "agents_md": 1, "claude_lines": 91}
+  "A": {
+    "src_files": 8348,
+    "test_files": 3559,
+    "manifests": 2,
+    "gitignore_lines": 215,
+    "has_readme": 1
+  },
+  "B": {
+    "readme_lines": 297,
+    "readme_headers": 31,
+    "docs_files": 735,
+    "md_files": 9
+  },
+  "C": { "test_py": 1270, "test_rs": 0, "src_py": 1656, "src_rs": 0 },
+  "D": { "bare_except": 1, "except_exception": 208, "noqa_suppressions": 3705 },
+  "F": { "todo_fixme": 45 },
+  "G": { "req_lockfiles": 1 },
+  "H": { "secrets_raw": 29 },
+  "I": { "env_example": 1 },
+  "J": { "logging_refs": 3541, "metrics_refs": 1440 },
+  "K": { "suppressions": 3710 },
+  "L": { "workflow_files": 78 },
+  "M": { "dockerfile": 1 },
+  "N": { "license": 1 },
+  "O": { "claude_md": 1, "agents_md": 1, "claude_lines": 91 }
 }

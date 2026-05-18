@@ -3,7 +3,11 @@
 Contains utilities for URDF generation, MATLAB integration, and other tools.
 """
 
-from .check_markdown_links import check_links, extract_links_from_markdown, resolve_and_verify_link
+from .check_markdown_links import (
+    check_links,
+    extract_links_from_markdown,
+    resolve_and_verify_link,
+)
 from .code_quality_check import (
     Colors,
     check_ast_issues,

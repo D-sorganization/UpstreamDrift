@@ -29,6 +29,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate:
+
 - After generating Epics
 - After generating Stories
 - Before any Delivery planning or execution
@@ -40,12 +41,14 @@ This is the **mandatory gate** between Discovery and Delivery. No Story proceeds
 ## Process
 
 ### Epic Validation
+
 - Expresses a user outcome (not a feature or technical task)
 - Aligns with product direction
 - Avoids technical implementation detail
 - Clearly scoped with no hidden assumptions
 
 ### Story Validation
+
 - Maps to a parent Epic
 - Includes measurable acceptance criteria
 - Is unambiguous and executable
@@ -53,6 +56,7 @@ This is the **mandatory gate** between Discovery and Delivery. No Story proceeds
 - Avoids solution design
 
 ### Cross-checks
+
 - No Story exists without a parent Epic
 - No scope contradictions with memory
 - No rule violations
@@ -88,6 +92,7 @@ PASS | BLOCKED
 ## Blocking Conditions
 
 The skill MUST block progression if:
+
 - Any Story lacks acceptance criteria
 - Epics are solution-oriented rather than outcome-oriented
 - Scope is unclear or ambiguous
@@ -101,6 +106,7 @@ The skill MUST block progression if:
 ## Non-Goals
 
 This skill must NOT:
+
 - Rewrite artefacts
 - Invent missing content
 - Make product decisions

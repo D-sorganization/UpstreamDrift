@@ -18,4 +18,3 @@ The autouse guard only monkeypatches module-level `get/post/put/delete/request`,
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/5112#discussion_r3215371991)
 
 ---
-

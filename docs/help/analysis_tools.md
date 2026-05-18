@@ -12,32 +12,34 @@ UpstreamDrift provides comprehensive analysis tools to extract insights from sim
 
 The energy panel displays:
 
-| Component | Formula | Description |
-|-----------|---------|-------------|
-| Kinetic Energy (KE) | KE = (1/2) * v^T * M * v | Energy of motion |
-| Potential Energy (PE) | PE = m * g * h | Energy from height |
-| Total Energy | E = KE + PE | Conservation check |
+| Component             | Formula                   | Description        |
+| --------------------- | ------------------------- | ------------------ |
+| Kinetic Energy (KE)   | KE = (1/2) _ v^T _ M \* v | Energy of motion   |
+| Potential Energy (PE) | PE = m _ g _ h            | Energy from height |
+| Total Energy          | E = KE + PE               | Conservation check |
 
 ### Energy Plots
 
 **Time Series:**
+
 - KE, PE, and Total energy over time
 - Energy conservation verification
 - Energy transfer visualization
 
 **Energy Distribution:**
+
 - Energy by segment/body
 - Peak energy timing
 - Energy flow direction
 
 ### Interpreting Energy
 
-| Observation | Meaning |
-|-------------|---------|
-| Total energy constant | Energy conserved (expected) |
-| Total energy decreasing | Damping/friction present |
-| KE spike | Rapid movement phase |
-| PE spike | Height gained |
+| Observation             | Meaning                     |
+| ----------------------- | --------------------------- |
+| Total energy constant   | Energy conserved (expected) |
+| Total energy decreasing | Damping/friction present    |
+| KE spike                | Rapid movement phase        |
+| PE spike                | Height gained               |
 
 ### Using Energy Analysis
 
@@ -61,6 +63,7 @@ peak_time, peak_ke = analyzer.find_peak_kinetic()
 ### What are Phase Diagrams?
 
 Phase diagrams plot position vs. velocity for each degree of freedom, revealing:
+
 - Dynamic stability
 - Limit cycles
 - Chaotic behavior
@@ -68,13 +71,13 @@ Phase diagrams plot position vs. velocity for each degree of freedom, revealing:
 
 ### Reading Phase Diagrams
 
-| Pattern | Meaning |
-|---------|---------|
-| Closed loop | Periodic motion |
-| Spiral inward | Damped oscillation |
-| Spiral outward | Unstable growth |
-| Fixed point | Equilibrium |
-| Strange attractor | Chaotic dynamics |
+| Pattern           | Meaning            |
+| ----------------- | ------------------ |
+| Closed loop       | Periodic motion    |
+| Spiral inward     | Damped oscillation |
+| Spiral outward    | Unstable growth    |
+| Fixed point       | Equilibrium        |
+| Strange attractor | Chaotic dynamics   |
 
 ### Creating Phase Plots
 
@@ -106,17 +109,18 @@ The kinematic sequence is crucial for golf swing efficiency:
 
 ### Metrics
 
-| Metric | Description | Optimal |
-|--------|-------------|---------|
-| Pelvis peak velocity | Max angular velocity | 550-650 deg/s |
-| Torso peak velocity | Max angular velocity | 750-900 deg/s |
-| Arm peak velocity | Max angular velocity | 1000-1200 deg/s |
-| Club peak velocity | Max angular velocity | 2000+ deg/s |
-| Sequence timing | Time between peaks | 0.05-0.1s |
+| Metric               | Description          | Optimal         |
+| -------------------- | -------------------- | --------------- |
+| Pelvis peak velocity | Max angular velocity | 550-650 deg/s   |
+| Torso peak velocity  | Max angular velocity | 750-900 deg/s   |
+| Arm peak velocity    | Max angular velocity | 1000-1200 deg/s |
+| Club peak velocity   | Max angular velocity | 2000+ deg/s     |
+| Sequence timing      | Time between peaks   | 0.05-0.1s       |
 
 ### X-Factor
 
 The X-factor measures torso-pelvis separation:
+
 - **Address:** Initial separation
 - **Top of backswing:** Maximum separation
 - **X-factor stretch:** Increase during transition
@@ -146,6 +150,7 @@ is_correct = analyzer.verify_sequence_order()
 Display and analyze torques at each joint:
 
 **Plots:**
+
 - Torque vs. time
 - Torque vs. joint angle
 - Peak torque identification
@@ -155,16 +160,17 @@ Display and analyze torques at each joint:
 
 Analyze foot-ground interaction:
 
-| Component | Description |
-|-----------|-------------|
-| Vertical (Fz) | Weight support, push-off |
-| Anterior-Posterior (Fx) | Forward/backward shear |
-| Medial-Lateral (Fy) | Side-to-side forces |
-| COP | Center of pressure path |
+| Component               | Description              |
+| ----------------------- | ------------------------ |
+| Vertical (Fz)           | Weight support, push-off |
+| Anterior-Posterior (Fx) | Forward/backward shear   |
+| Medial-Lateral (Fy)     | Side-to-side forces      |
+| COP                     | Center of pressure path  |
 
 ### Contact Forces
 
 Analyze ball-club impact:
+
 - Impact force magnitude
 - Contact duration
 - Force direction
@@ -201,15 +207,16 @@ v_clubhead = J(q) * q_dot
 
 Manipulability measures how effectively joint motion translates to clubhead motion:
 
-| Metric | Description |
-|--------|-------------|
-| Manipulability index | sqrt(det(J * J^T)) |
-| Condition number | Ratio of max/min singular values |
-| Singular directions | Directions of low manipulability |
+| Metric               | Description                      |
+| -------------------- | -------------------------------- |
+| Manipulability index | sqrt(det(J \* J^T))              |
+| Condition number     | Ratio of max/min singular values |
+| Singular directions  | Directions of low manipulability |
 
 ### Manipulability Ellipsoid
 
 The manipulability ellipsoid visualizes:
+
 - Easy-to-move directions (long axes)
 - Difficult directions (short axes)
 - Singular configurations (collapsed ellipsoid)
@@ -238,6 +245,7 @@ singulars = analyzer.find_singular_configurations()
 Compare multiple swings:
 
 **Metrics:**
+
 - Joint angle differences
 - Velocity profiles
 - Timing differences
@@ -267,12 +275,12 @@ for engine, data in results.items():
 
 ### Export Formats
 
-| Format | Best For | Includes |
-|--------|----------|----------|
-| CSV | Spreadsheets, MATLAB | Raw numerical data |
-| JSON | Programming, APIs | Structured with metadata |
-| MAT | MATLAB | Native MATLAB format |
-| HDF5 | Large datasets | Efficient binary storage |
+| Format | Best For             | Includes                 |
+| ------ | -------------------- | ------------------------ |
+| CSV    | Spreadsheets, MATLAB | Raw numerical data       |
+| JSON   | Programming, APIs    | Structured with metadata |
+| MAT    | MATLAB               | Native MATLAB format     |
+| HDF5   | Large datasets       | Efficient binary storage |
 
 ### Export Options
 
@@ -357,4 +365,4 @@ def my_plot(data, ax):
 
 ---
 
-*See also: [Full User Manual](../USER_MANUAL.md) | [Simulation Controls](simulation_controls.md) | [Visualization](visualization.md)*
+_See also: [Full User Manual](../USER_MANUAL.md) | [Simulation Controls](simulation_controls.md) | [Visualization](visualization.md)_

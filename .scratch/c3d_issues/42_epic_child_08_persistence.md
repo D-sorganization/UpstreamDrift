@@ -66,21 +66,21 @@ Migration is automatic on load; round-trip ALWAYS writes v2.
         "rest_dimensions": [0.32]
       },
       "shape_kind": "cylinder",
-      "shape_params": {"length": 0.32, "radius": 0.04, "n_facets": 16},
+      "shape_params": { "length": 0.32, "radius": 0.04, "n_facets": 16 },
       "fitter_kind": "between_two",
-      "theme": {"color": "#1f77b4", "opacity": 0.8, "group": "pelvis"},
+      "theme": { "color": "#1f77b4", "opacity": 0.8, "group": "pelvis" },
       "visible": true
     },
     {
       "binding": {
         "kind": "between_two",
         "marker_names": ["LShoulderTop", "LElbowOut"],
-        "rest_dimensions": [0.30]
+        "rest_dimensions": [0.3]
       },
       "shape_kind": "library_shape",
-      "shape_params": {"library_name": "default", "shape_id": "upper_arm"},
+      "shape_params": { "library_name": "default", "shape_id": "upper_arm" },
       "fitter_kind": "between_two",
-      "theme": {"color": "#ff7f0e", "opacity": 1.0, "group": "left_arm"},
+      "theme": { "color": "#ff7f0e", "opacity": 1.0, "group": "left_arm" },
       "visible": true
     }
   ]
@@ -90,6 +90,7 @@ Migration is automatic on load; round-trip ALWAYS writes v2.
 ## Tests
 
 `tests/unit/body_part_viz/test_persistence.py`:
+
 - v1 sample loads; round-trip writes v2.
 - All shape kinds round-trip.
 - All fitter kinds round-trip.

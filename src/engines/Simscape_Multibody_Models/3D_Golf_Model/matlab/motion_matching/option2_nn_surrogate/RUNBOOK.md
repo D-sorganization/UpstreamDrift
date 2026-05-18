@@ -210,14 +210,14 @@ The `bless` tool writes `models/blessed/v1.metadata.json` with `(run_id, dataset
 
 ## 7. Troubleshooting
 
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| Training loss is NaN at step 0 | unnormalized inputs, `coeffs` not z-scored | check `norm_stats.npz` exists and is loaded |
-| Val RMSE plateaus at ~50 mm | quaternion sign-flip during data loading | confirm canonicalize-on-load in `dataset.py` |
-| `pyrunfile` errors on import | wrong `pyenv()` | run `pyenv("Version", "...")` in MATLAB pointing at `requirements.lock`'s python |
-| Extrapolation flagged on every fit | bounds in inversion don't match training bounds | re-run inversion with the bounds stored in the checkpoint metadata |
-| Adam diverges | `invert_lr` too high for this checkpoint | lower to `1e-3` |
-| MATLAB shim returns surrogate RMSE not Simscape RMSE | round-trip step skipped | set `opts.validate = true` (default) |
+| Symptom                                              | Likely cause                                    | Fix                                                                              |
+| ---------------------------------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------- |
+| Training loss is NaN at step 0                       | unnormalized inputs, `coeffs` not z-scored      | check `norm_stats.npz` exists and is loaded                                      |
+| Val RMSE plateaus at ~50 mm                          | quaternion sign-flip during data loading        | confirm canonicalize-on-load in `dataset.py`                                     |
+| `pyrunfile` errors on import                         | wrong `pyenv()`                                 | run `pyenv("Version", "...")` in MATLAB pointing at `requirements.lock`'s python |
+| Extrapolation flagged on every fit                   | bounds in inversion don't match training bounds | re-run inversion with the bounds stored in the checkpoint metadata               |
+| Adam diverges                                        | `invert_lr` too high for this checkpoint        | lower to `1e-3`                                                                  |
+| MATLAB shim returns surrogate RMSE not Simscape RMSE | round-trip step skipped                         | set `opts.validate = true` (default)                                             |
 
 ## 8. CI hooks
 

@@ -48,9 +48,11 @@ python3 -m src.engines.Simscape_Multibody_Models._3D_Golf_Model.matlab.motion_ma
 **Expected wall clock:** ~2–6 hours on a single 12 GB GPU for `~20k` trials. CPU training is feasible but slow (~24 h); use only for smoke tests.
 
 **TensorBoard:**
+
 ```bash
 tensorboard --logdir runs/option3
 ```
+
 Watch for: KL ramping smoothly to ~1, val MSE on θ decreasing, val round-trip RMSE (logged every 5 epochs) stabilizing under 10 mm.
 
 The run produces a checkpoint under `models/inverse_cvae_<git_sha>_<timestamp>.pt` plus a sibling `<...>.config.json` and `<...>.norm_stats.npz`. Promote one to `models/inverse_cvae_latest.pt` (symlink) for downstream use.

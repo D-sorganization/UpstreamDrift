@@ -25,23 +25,23 @@ Validate i18n JSON files for completeness, consistency, and quality across multi
 {
   "locales_path": "locales/",
   "languages": ["en", "fr", "de", "es"],
-  "reference_language": "en",          // master language (source of truth for keys)
+  "reference_language": "en", // master language (source of truth for keys)
   "validation_rules": {
     "check_missing_translations": true,
     "check_orphaned_keys": true,
     "check_placeholder_consistency": true,
-    "check_length_budget": true,        // translations ≤ 120% of EN length
+    "check_length_budget": true, // translations ≤ 120% of EN length
     "check_json_syntax": true,
-    "check_glossary_alignment": true    // terms match glossary.md
+    "check_glossary_alignment": true // terms match glossary.md
   },
   "length_budget": {
     "en": "baseline",
-    "fr": 1.2,                          // 120% of EN
-    "de": 1.3,                          // German is typically longer
+    "fr": 1.2, // 120% of EN
+    "de": 1.3, // German is typically longer
     "es": 1.15
   },
   "glossary_path": "domains/i18n/glossary.md",
-  "ignore_keys": ["copyright", "version"],  // optional: keys to skip validation
+  "ignore_keys": ["copyright", "version"], // optional: keys to skip validation
   "output_format": "json"
 }
 ```
@@ -51,7 +51,7 @@ Validate i18n JSON files for completeness, consistency, and quality across multi
 ```json
 {
   "validation_summary": {
-    "status": "FAIL",                   // PASS, FAIL, WARNINGS
+    "status": "FAIL", // PASS, FAIL, WARNINGS
     "total_keys": 342,
     "languages_checked": 4,
     "errors": 8,
@@ -131,9 +131,24 @@ Validate i18n JSON files for completeness, consistency, and quality across multi
   "statistics": {
     "by_language": {
       "en": { "total_keys": 342, "complete": true },
-      "fr": { "total_keys": 342, "translated": 334, "missing": 8, "completion": "97.7%" },
-      "de": { "total_keys": 342, "translated": 340, "missing": 2, "completion": "99.4%" },
-      "es": { "total_keys": 342, "translated": 336, "missing": 6, "completion": "98.2%" }
+      "fr": {
+        "total_keys": 342,
+        "translated": 334,
+        "missing": 8,
+        "completion": "97.7%"
+      },
+      "de": {
+        "total_keys": 342,
+        "translated": 340,
+        "missing": 2,
+        "completion": "99.4%"
+      },
+      "es": {
+        "total_keys": 342,
+        "translated": 336,
+        "missing": 6,
+        "completion": "98.2%"
+      }
     },
     "by_severity": {
       "critical": 2,
@@ -267,7 +282,7 @@ For automated validation (e.g., GitHub Actions):
 ```json
 {
   "status": "FAIL",
-  "exit_code": 1,              // non-zero for CI/CD failure
+  "exit_code": 1, // non-zero for CI/CD failure
   "error_count": 8,
   "critical_errors": 2,
   "warnings": 12,
@@ -276,6 +291,7 @@ For automated validation (e.g., GitHub Actions):
 ```
 
 Exit code rules:
+
 - `0` = PASS (all validations successful)
 - `1` = FAIL (critical or high errors)
 - `2` = WARNINGS (only medium/low issues)
@@ -285,6 +301,7 @@ Exit code rules:
 ## Integration with i18next
 
 Best practice: Run this validation:
+
 1. **Before merge:** Every PR that modifies locale files
 2. **Before deploy:** Pre-release validation
 3. **Post-build:** After bundle creation (verify all keys are present)
@@ -313,12 +330,14 @@ Example GitHub Actions workflow:
 ## Notes for Delivery Agent
 
 This skill is **validation & reporting only**. It does NOT:
+
 - Auto-fix errors
 - Generate missing translations
 - Remove orphaned keys
 - Shorten long translations
 
 Delivery Agent must:
+
 1. Run this skill
 2. Review errors + recommendations
 3. Manually fix issues (add missing translations, remove orphaned keys, etc.)

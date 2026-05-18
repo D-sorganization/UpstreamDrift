@@ -4,7 +4,9 @@
 **Grade**: 10.0/10
 
 ## Details
+
 Found 58 CI workflows.
 
 ## Recommendations
+
 1. Enhance CI pipeline checks.

@@ -109,9 +109,9 @@ def test_total_work_regularizer_reduces_torque_magnitude() -> None:
 
     base = run(0.0)
     reg = run(0.5)
-    assert (
-        reg < base
-    ), f"expected regularised mean |tau| ({reg}) < unregularised ({base})"
+    assert reg < base, (
+        f"expected regularised mean |tau| ({reg}) < unregularised ({base})"
+    )
 
 
 def test_total_work_numpy_matches_shared_helper() -> None:

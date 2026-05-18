@@ -59,6 +59,6 @@ def test_cross_backend_parity_on_3dof_phantom() -> None:
     reference = results[backend_names[0]]
     for name in backend_names[1:]:
         diff = np.abs(results[name] - reference)
-        assert (
-            diff.max() <= _TOL_RAD
-        ), f"{name} differs from {backend_names[0]} by {diff.max()} rad > 5°"
+        assert diff.max() <= _TOL_RAD, (
+            f"{name} differs from {backend_names[0]} by {diff.max()} rad > 5°"
+        )

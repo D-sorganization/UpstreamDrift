@@ -5,8 +5,8 @@ Target SLA: convert each marker to a tracked issue within 14 days.
 
 Total markers: 58
 
-| Marker | Location                                                                                                                                         | Suggested Action                          |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| Marker         | Location                                                                                                                                         | Suggested Action                          |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
 | TRACKED_TASK   | `scripts/pragmatic_programmer_review.py:176`                                                                                                     | Create/Link GitHub issue and assign owner |
 | TRACKED_TASK   | `scripts/pragmatic_programmer_review.py:182`                                                                                                     | Create/Link GitHub issue and assign owner |
 | TRACKED_TASK   | `scripts/pragmatic_programmer_review.py:192`                                                                                                     | Create/Link GitHub issue and assign owner |
@@ -19,10 +19,10 @@ Total markers: 58
 | TRACKED_TASK   | `scripts/generate_todo_fixme_register.py:41`                                                                                                     | Create/Link GitHub issue and assign owner |
 | TRACKED_TASK   | `scripts/analyze_completist_data.py:120`                                                                                                         | Create/Link GitHub issue and assign owner |
 | TRACKED_TASK   | `scripts/analyze_completist_data.py:134`                                                                                                         | Create/Link GitHub issue and assign owner |
-| TRACKED_DEFECT  | `scripts/analyze_completist_data.py:215`                                                                                                         | Create/Link GitHub issue and assign owner |
+| TRACKED_DEFECT | `scripts/analyze_completist_data.py:215`                                                                                                         | Create/Link GitHub issue and assign owner |
 | TRACKED_TASK   | `scripts/analyze_completist_data.py:216`                                                                                                         | Create/Link GitHub issue and assign owner |
 | TRACKED_TASK   | `scripts/analyze_completist_data.py:289`                                                                                                         | Create/Link GitHub issue and assign owner |
-| TRACKED_DEFECT  | `scripts/analyze_completist_data.py:290`                                                                                                         | Create/Link GitHub issue and assign owner |
+| TRACKED_DEFECT | `scripts/analyze_completist_data.py:290`                                                                                                         | Create/Link GitHub issue and assign owner |
 | TRACKED_TASK   | `scripts/analyze_completist_data.py:436`                                                                                                         | Create/Link GitHub issue and assign owner |
 | TRACKED_TASK   | `scripts/refresh_completist_data.py:54`                                                                                                          | Create/Link GitHub issue and assign owner |
 | TRACKED_TASK   | `scripts/refresh_completist_data.py:56`                                                                                                          | Create/Link GitHub issue and assign owner |
@@ -64,4 +64,4 @@ Total markers: 58
 | TRACKED_TASK   | `src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp:122`                           | Create/Link GitHub issue and assign owner |
 | TRACKED_TASK   | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/docs/MATLAB_QUALITY_CONTROLS.md:67`                                                         | Create/Link GitHub issue and assign owner |
 | TRACKED_TASK   | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/docs/MATLAB_QUALITY_CONTROLS.md:179`                                                        | Create/Link GitHub issue and assign owner |
-| TRACKED_DEFECT  | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/docs/MATLAB_QUALITY_CONTROLS.md:180`                                                        | Create/Link GitHub issue and assign owner |
+| TRACKED_DEFECT | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/docs/MATLAB_QUALITY_CONTROLS.md:180`                                                        | Create/Link GitHub issue and assign owner |

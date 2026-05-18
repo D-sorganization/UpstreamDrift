@@ -12,11 +12,11 @@ loss = MSE(θ̂, θ_truth)
 This **silently fails** on the under-determined inverse:
 
 - For any club trajectory `x*`, there are many coefficient vectors `Θ(x*) = {θ : sim(θ) ≈ x*}`.
-- The dataset contains samples `(x_i, θ_i)` where different `θ_i` produced *similar* `x_i`.
+- The dataset contains samples `(x_i, θ_i)` where different `θ_i` produced _similar_ `x_i`.
 - The MSE-optimal estimator is `g_φ(x*) = E[θ | x*]` — the **mean** of the manifold `Θ(x*)`.
 - The mean of a manifold is generally **not on the manifold**. The output is a fictional "average swing" that, when fed back through Simscape, produces an unphysical trajectory unrelated to `x*`.
 
-A CVAE solves this by modelling `p(θ | x)` as a distribution rather than a point, parameterized so each draw is *one mode* of the manifold:
+A CVAE solves this by modelling `p(θ | x)` as a distribution rather than a point, parameterized so each draw is _one mode_ of the manifold:
 
 ```
 encoder:   q_φ(z | x, θ_truth) = N(μ_φ(x, θ), σ_φ(x, θ))     # only used during training
@@ -57,15 +57,15 @@ At inference, `θ̂ = decode(z, x)` for `z ~ p(z)` is one sample of one mode. Di
 
 **Sizes (defaults; tune per Issue #032).**
 
-| Component | Param |
-|---|---|
-| `d_model` (encoder) | 256 |
-| Encoder depth | 4 layers, 8 heads |
-| `d_ctx` | 256 |
-| `d_z` (latent) | 32 |
-| Decoder | MLP `[d_z + d_ctx → 512 → 512 → n_joints·7]`, GELU |
-| θ embed | Linear(`n_joints·7 → 128`) |
-| Posterior MLP | `[d_ctx + 128 → 256 → 2·d_z]` |
+| Component           | Param                                              |
+| ------------------- | -------------------------------------------------- |
+| `d_model` (encoder) | 256                                                |
+| Encoder depth       | 4 layers, 8 heads                                  |
+| `d_ctx`             | 256                                                |
+| `d_z` (latent)      | 32                                                 |
+| Decoder             | MLP `[d_z + d_ctx → 512 → 512 → n_joints·7]`, GELU |
+| θ embed             | Linear(`n_joints·7 → 128`)                         |
+| Posterior MLP       | `[d_ctx + 128 → 256 → 2·d_z]`                      |
 
 Total parameters: ~6–10 M. Trains on a single 12 GB GPU.
 
@@ -87,11 +87,11 @@ L = β·KL(q(z|x,θ) ‖ N(0,I))           # latent regularization
   + λ_W·|Ŵ(θ̂) − W_trial|              # match the dataset's logged total_work_J
 ```
 
-| Term | Default weight | Purpose |
-|---|---|---|
-| KL | `β`, KL-annealed `0 → 1` over 20 epochs | Forces latent toward the prior; prevents collapse |
-| MSE on `θ` | `λ_θ = 1.0` | Anchors the decoder to the demonstrated mode for this `(x, θ)` pair |
-| Work regularizer | `λ_W = 1e-3` | Biases the decoder toward modes with realistic total work |
+| Term             | Default weight                          | Purpose                                                             |
+| ---------------- | --------------------------------------- | ------------------------------------------------------------------- |
+| KL               | `β`, KL-annealed `0 → 1` over 20 epochs | Forces latent toward the prior; prevents collapse                   |
+| MSE on `θ`       | `λ_θ = 1.0`                             | Anchors the decoder to the demonstrated mode for this `(x, θ)` pair |
+| Work regularizer | `λ_W = 1e-3`                            | Biases the decoder toward modes with realistic total work           |
 
 ### Why work regularization on top of MSE
 
@@ -128,13 +128,13 @@ function predict_coefficients(x: ClubTarget, model, n_samples=32, validate=True)
 
 ### Rejection-sampling budget
 
-| Mode | `n_samples` | Wall clock (CPU + Simscape) | Use |
-|---|---|---|---|
-| Fast (no validate) | 1 | < 50 ms | Initial seed for Option 1 hybrid |
-| Default | 32 | ~30 s (32 × ~1 s Simscape) | Standard fit |
-| Thorough | 128 | ~2 min | Diagnostic / leaderboard |
+| Mode               | `n_samples` | Wall clock (CPU + Simscape) | Use                              |
+| ------------------ | ----------- | --------------------------- | -------------------------------- |
+| Fast (no validate) | 1           | < 50 ms                     | Initial seed for Option 1 hybrid |
+| Default            | 32          | ~30 s (32 × ~1 s Simscape)  | Standard fit                     |
+| Thorough           | 128         | ~2 min                      | Diagnostic / leaderboard         |
 
-The Simscape forward call is the cost driver. When Option 2's surrogate is trustworthy, a **two-stage validation** is preferred: rank all 32 samples by *surrogate* RMSE, run real Simscape only on the top 4. This brings default-mode wall clock to ~5 s.
+The Simscape forward call is the cost driver. When Option 2's surrogate is trustworthy, a **two-stage validation** is preferred: rank all 32 samples by _surrogate_ RMSE, run real Simscape only on the top 4. This brings default-mode wall clock to ~5 s.
 
 Acceptance threshold: round-trip club RMSE `< 10 mm` (looser than Option 2; see [ASSUMPTIONS.md §A1–A2](ASSUMPTIONS.md)). If no sample meets the threshold, return the best one and flag `validated=False, threshold_met=False` in the result struct.
 
@@ -167,7 +167,7 @@ Why it works: CVAE puts you on (or near) the right mode of the manifold. `fminco
 
 ### v2: Normalizing flow for exact density
 
-A CVAE gives a learned approximate posterior. A **conditional normalizing flow** `θ = T_φ(z; x)` with `z ~ N(0,I)` gives an *exact* density `log p_φ(θ|x)`, which lets us:
+A CVAE gives a learned approximate posterior. A **conditional normalizing flow** `θ = T_φ(z; x)` with `z ~ N(0,I)` gives an _exact_ density `log p_φ(θ|x)`, which lets us:
 
 - Score multiple candidates by likelihood, not just round-trip RMSE.
 - Detect out-of-distribution targets (low likelihood under all modes) cleanly.

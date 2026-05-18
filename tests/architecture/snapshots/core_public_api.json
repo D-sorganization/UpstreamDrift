@@ -1,8 +1,6 @@
 {
   "src.api": [],
-  "src.engines.physics_engines.mujoco": [
-    "Engine"
-  ],
+  "src.engines.physics_engines.mujoco": ["Engine"],
   "src.shared.python.physics": [
     "DimpleGeometry",
     "MudBallAdjustment",

@@ -86,6 +86,7 @@ None. **Root issue** — every other issue blocks on this one.
 ### Context
 
 OpenSim and Simscape disagree on:
+
 - Frame orientation (Y-up vs Z-up).
 - Quaternion ordering (`[x,y,z,w]` vs `[w,x,y,z]`).
 - Joint-angle sign conventions on a coordinate-by-coordinate basis.
@@ -273,7 +274,7 @@ cost function (cross-engine spec §2.3).
 ### Acceptance criteria
 
 - Recovery test "synthesize → fit → `np.allclose(theta_fit,
-  theta_truth, atol=1e-2)`" converges in < 60 s for a 1.0 s
+theta_truth, atol=1e-2)`" converges in < 60 s for a 1.0 s
   synthesised target on a developer laptop.
 - `FitResult.solver_status == "success"`.
 - Final cost < `1e-3` for noise-free synthesis-recovery cases.
@@ -386,4 +387,4 @@ they aren't lost:
 
 ---
 
-*Issue drafts landed 2026-05-06 alongside the OpenSim parity spec.*
+_Issue drafts landed 2026-05-06 alongside the OpenSim parity spec._

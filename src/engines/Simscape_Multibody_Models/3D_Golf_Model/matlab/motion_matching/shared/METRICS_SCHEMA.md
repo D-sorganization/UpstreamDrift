@@ -15,25 +15,25 @@ and a coordinated update of all emitters/consumers.
 
 ## Field reference
 
-| field                          | type   | unit / format            | description                                                                                  |
-|--------------------------------|--------|--------------------------|----------------------------------------------------------------------------------------------|
-| `swing_id`                     | str    | identifier               | Identifier of the swing being matched (e.g. `"TW_ProV1"`).                                   |
-| `option`                       | int    | 1..4                     | Which of the four motion-matching options produced this fit.                                 |
-| `solver`                       | str    | label                    | Solver label, e.g. `"fmincon-sqp"`, `"surrogate+fmincon"`, `"cvae-rejection"`.               |
-| `n_iterations`                 | int    | count                    | Solver iterations consumed.                                                                  |
-| `rmse_clubhead_mm`             | float  | millimetres              | Final clubhead-position RMSE (Euclidean, sample mean) over the matched window.               |
-| `rmse_butt_mm`                 | float  | millimetres              | Final butt-position RMSE (Euclidean, sample mean) over the matched window.                   |
-| `rmse_orientation_deg`         | float  | degrees                  | Final orientation RMSE as the geodesic angle between simulated and target quaternions, mean. |
-| `clubhead_speed_at_impact_mph` | float  | mph                      | Simulated clubhead speed at the impact frame.                                                |
-| `clubhead_speed_meas_mph`      | float  | mph                      | Measured clubhead speed at impact (used to compute the delta).                               |
-| `total_work_J`                 | float  | joules                   | Total mechanical work integrated over the swing (sum of joint torque-power integrals).       |
-| `peak_power_W`                 | float  | watts                    | Peak instantaneous mechanical power across the swing.                                        |
-| `wall_clock_s`                 | float  | seconds                  | Solver wall-clock time.                                                                      |
-| `git_commit`                   | str    | 40-char SHA              | Git rev of the codebase at fit time. Use `"0" * 40` if dirty/unknown.                        |
-| `matlab_version`               | str    | release string           | MATLAB release if applicable (e.g. `"R2024b"`); empty string `""` for Python-only fits.      |
-| `python_version`               | str    | `major.minor.patch`      | `platform.python_version()` of the emitter; empty `""` for MATLAB-only fits.                 |
-| `timestamp_iso8601`            | str    | ISO-8601 UTC             | UTC timestamp, RFC 3339 form, e.g. `"2026-05-05T17:34:21Z"`.                                 |
-| `schema_version`               | str    | semver                   | Must equal the current schema version (`"1.0.0"`).                                           |
+| field                          | type  | unit / format       | description                                                                                  |
+| ------------------------------ | ----- | ------------------- | -------------------------------------------------------------------------------------------- |
+| `swing_id`                     | str   | identifier          | Identifier of the swing being matched (e.g. `"TW_ProV1"`).                                   |
+| `option`                       | int   | 1..4                | Which of the four motion-matching options produced this fit.                                 |
+| `solver`                       | str   | label               | Solver label, e.g. `"fmincon-sqp"`, `"surrogate+fmincon"`, `"cvae-rejection"`.               |
+| `n_iterations`                 | int   | count               | Solver iterations consumed.                                                                  |
+| `rmse_clubhead_mm`             | float | millimetres         | Final clubhead-position RMSE (Euclidean, sample mean) over the matched window.               |
+| `rmse_butt_mm`                 | float | millimetres         | Final butt-position RMSE (Euclidean, sample mean) over the matched window.                   |
+| `rmse_orientation_deg`         | float | degrees             | Final orientation RMSE as the geodesic angle between simulated and target quaternions, mean. |
+| `clubhead_speed_at_impact_mph` | float | mph                 | Simulated clubhead speed at the impact frame.                                                |
+| `clubhead_speed_meas_mph`      | float | mph                 | Measured clubhead speed at impact (used to compute the delta).                               |
+| `total_work_J`                 | float | joules              | Total mechanical work integrated over the swing (sum of joint torque-power integrals).       |
+| `peak_power_W`                 | float | watts               | Peak instantaneous mechanical power across the swing.                                        |
+| `wall_clock_s`                 | float | seconds             | Solver wall-clock time.                                                                      |
+| `git_commit`                   | str   | 40-char SHA         | Git rev of the codebase at fit time. Use `"0" * 40` if dirty/unknown.                        |
+| `matlab_version`               | str   | release string      | MATLAB release if applicable (e.g. `"R2024b"`); empty string `""` for Python-only fits.      |
+| `python_version`               | str   | `major.minor.patch` | `platform.python_version()` of the emitter; empty `""` for MATLAB-only fits.                 |
+| `timestamp_iso8601`            | str   | ISO-8601 UTC        | UTC timestamp, RFC 3339 form, e.g. `"2026-05-05T17:34:21Z"`.                                 |
+| `schema_version`               | str   | semver              | Must equal the current schema version (`"1.0.0"`).                                           |
 
 ## Computation rules
 

@@ -33,6 +33,7 @@ Activate when an agent needs to **find** relevant memory but does not know the e
 This skill **locates** memory — it does not **load** it. After results are returned, the agent invokes `memory-retrieve` to load the specific files.
 
 Use cases:
+
 - "Which decisions relate to Hyperdrive?" → Mode A (frontmatter: domain=infrastructure, tags contains hyperdrive)
 - "Where did we discuss pool exhaustion?" → Mode B (full-text keyword: "pool exhaustion")
 - "What decisions are related to DEC-42?" → Mode C (cross-reference: DEC-42 → related_to + mentions)
@@ -102,8 +103,8 @@ For a given DEC ID, find all files that reference it + traverse `related_to` (de
 - file_path: decisions/DEC-42.md
   id: DEC-42
   title: "Use connection pooling for database access"
-  relevance: related_to_inbound  # or: frontmatter_match | content_match | direct_mention | related_to_outbound
-  excerpt: "prevents connection exhaustion under load"  # ~50 tokens max, absent in Mode A
+  relevance: related_to_inbound # or: frontmatter_match | content_match | direct_mention | related_to_outbound
+  excerpt: "prevents connection exhaustion under load" # ~50 tokens max, absent in Mode A
 ```
 
 Agent receives this list and decides which files to load via `memory-retrieve`.
@@ -113,6 +114,7 @@ Agent receives this list and decides which files to load via `memory-retrieve`.
 ## Non-Goals
 
 This skill must NOT:
+
 - Load full file contents (that is `memory-retrieve`)
 - Modify any memory files (that is `memory-ingest`)
 - Make decisions about which results to act on (that is the agent's job)

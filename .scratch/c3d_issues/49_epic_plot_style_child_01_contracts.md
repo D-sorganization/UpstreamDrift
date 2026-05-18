@@ -240,6 +240,7 @@ class PlotStyleSet:
 ## Validation rules (DbC)
 
 Every dataclass validates in `__post_init__`:
+
 - Strings non-empty.
 - Numerical fields in their documented range.
 - ColorScale fields: hex strings parseable, palette index in range, channel array dtype numeric.
@@ -250,33 +251,40 @@ Public functions on the Protocols document postconditions in their docstring.
 ## Tests
 
 `tests/unit/plot_style/test_contracts.py`:
+
 - Each Protocol satisfied by a stub — `isinstance(stub, MarkerRenderer)` etc.
 
 `tests/unit/plot_style/test_markers.py`:
+
 - `MarkerStyle` validates every constraint (one happy + one fail per rule).
 - `shape == CUSTOM_MESH` requires `custom_mesh` set.
 
 `tests/unit/plot_style/test_colors.py`:
+
 - `StaticColor` validates hex.
 - `PaletteColor` validates palette name + index.
 - `DataDrivenColor` validates channel + colormap.
 - All three `resolve()` methods return a 4-tuple in [0, 1].
 
 `tests/unit/plot_style/test_colormaps.py`:
+
 - `ColormapId` round-trips through string.
 - `CustomColormap` validates stops monotonic + parseable.
 
 `tests/unit/plot_style/test_channels.py`:
+
 - `DataChannel.from_array` happy path.
 - 1-D and 2-D shapes both supported.
 - `value_at` returns NaN for OOB index, not raises.
 - `auto_range` ignores NaN.
 
 `tests/unit/plot_style/test_persistence.py`:
+
 - Round-trip of every ColorScale variant.
 - v1 schema with extra unknown keys is tolerated (forward-compat).
 
 `tests/unit/plot_style/test_imports.py`:
+
 - All public names import cleanly.
 
 ## Acceptance criteria

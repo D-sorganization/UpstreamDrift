@@ -214,7 +214,11 @@ class DataProcessorWidget(DataProcessorOpsMixin, BaseCalculatorWidget):
         pagination_layout.addWidget(self.rows_per_page)
         prev_btn = QPushButton("<")
         try:
-            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            from src.shared.python.theme.responsive import (
+                set_text_minimum_width,
+                TextWidthSpec,
+            )
+
             set_text_minimum_width(prev_btn, TextWidthSpec(minimum_px=40))
         except ImportError:
             prev_btn.setFixedWidth(40)
@@ -222,7 +226,11 @@ class DataProcessorWidget(DataProcessorOpsMixin, BaseCalculatorWidget):
         pagination_layout.addWidget(prev_btn)
         next_btn = QPushButton(">")
         try:
-            from src.shared.python.theme.responsive import set_text_minimum_width, TextWidthSpec
+            from src.shared.python.theme.responsive import (
+                set_text_minimum_width,
+                TextWidthSpec,
+            )
+
             set_text_minimum_width(next_btn, TextWidthSpec(minimum_px=40))
         except ImportError:
             next_btn.setFixedWidth(40)

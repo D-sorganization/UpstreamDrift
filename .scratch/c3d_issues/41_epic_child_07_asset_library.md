@@ -9,6 +9,7 @@ Curated default meshes for the most-used body parts so users don't have to find 
 ## What
 
 `assets/body_part_shapes/default/`:
+
 - `head.stl` — anonymized human head, ~2000 triangles.
 - `torso.stl`
 - `upper_arm.stl`
@@ -44,6 +45,7 @@ Curated default meshes for the most-used body parts so users don't have to find 
 ## Asset generation strategy
 
 To keep the assets generic and re-distributable:
+
 - Use `trimesh.creation.icosphere` / `cylinder` / `capsule` to generate basic shapes procedurally at build time, OR
 - Vendor low-poly CC0 meshes from public sources (e.g. MakeHuman base mesh, downsampled to ~2k tris).
 
@@ -71,6 +73,7 @@ class ShapeLibrary:
 ## Tests
 
 `tests/unit/body_part_viz/test_asset_library.py`:
+
 - `ShapeLibrary.default()` loads without raising.
 - Every name in the manifest resolves to a `MeshShape` whose `rest_dimensions` matches the manifest within 1e-3.
 - Unknown name → `KeyError` with available names listed.

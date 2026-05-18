@@ -11,16 +11,16 @@ slice.
 
 ## Findings
 
-| Path | Disposition | Reason |
-| --- | --- | --- |
-| `docs/sphinx/_static/_sphinx_javascript_frameworks_compat.js` | Justified | Sphinx-generated compatibility JavaScript; already documented in `docs/sphinx/_static/VENDORED.md`. |
-| `docs/sphinx/_static/jquery.js` | Justified | Vendored jQuery distribution; editing would fork upstream library behavior. |
-| `docs/sphinx/_static/js/badge_only.js` | Justified | Vendored Read the Docs theme asset; upgrade through theme regeneration. |
-| `docs/sphinx/_static/js/theme.js` | Justified | Vendored Read the Docs theme asset; upgrade through theme regeneration. |
-| `docs/sphinx/_static/js/versions.js` | Justified | Vendored Read the Docs version flyout asset; upgrade through theme regeneration. |
-| `docs/sphinx/_static/searchtools.js` | Justified | Sphinx-generated search implementation; upgrade through Sphinx regeneration. |
-| `docs/sphinx/_static/sphinx_highlight.js` | Justified | Sphinx-generated highlighting implementation; upgrade through Sphinx regeneration. |
-| `build_hooks.py` | False positive | Matches occur in documentation text and the `hatchling.builders.hooks.plugin.interface` import path, not in runtime object-graph traversal. Runtime access stays within the build hook object and direct paths. |
+| Path                                                          | Disposition    | Reason                                                                                                                                                                                                          |
+| ------------------------------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/sphinx/_static/_sphinx_javascript_frameworks_compat.js` | Justified      | Sphinx-generated compatibility JavaScript; already documented in `docs/sphinx/_static/VENDORED.md`.                                                                                                             |
+| `docs/sphinx/_static/jquery.js`                               | Justified      | Vendored jQuery distribution; editing would fork upstream library behavior.                                                                                                                                     |
+| `docs/sphinx/_static/js/badge_only.js`                        | Justified      | Vendored Read the Docs theme asset; upgrade through theme regeneration.                                                                                                                                         |
+| `docs/sphinx/_static/js/theme.js`                             | Justified      | Vendored Read the Docs theme asset; upgrade through theme regeneration.                                                                                                                                         |
+| `docs/sphinx/_static/js/versions.js`                          | Justified      | Vendored Read the Docs version flyout asset; upgrade through theme regeneration.                                                                                                                                |
+| `docs/sphinx/_static/searchtools.js`                          | Justified      | Sphinx-generated search implementation; upgrade through Sphinx regeneration.                                                                                                                                    |
+| `docs/sphinx/_static/sphinx_highlight.js`                     | Justified      | Sphinx-generated highlighting implementation; upgrade through Sphinx regeneration.                                                                                                                              |
+| `build_hooks.py`                                              | False positive | Matches occur in documentation text and the `hatchling.builders.hooks.plugin.interface` import path, not in runtime object-graph traversal. Runtime access stays within the build hook object and direct paths. |
 
 ## Boundary Decision
 
