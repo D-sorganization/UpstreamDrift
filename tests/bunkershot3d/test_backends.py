@@ -2,7 +2,8 @@ import importlib
 import sys
 
 import pytest
-import mujoco
+
+mujoco = pytest.importorskip("mujoco")
 from pathlib import Path
 from bunkershot3d.backends.chrono.driver import BackendNotImplementedError, ChronoDriver
 from bunkershot3d.backends.liggghts.driver import LiggghtsDriver

@@ -169,7 +169,7 @@ class AngleOfReposeExperiment:
 
 
 def compute_angle_of_repose(
-    friction: float, backend: str = "mpm", *, use_mock: bool = False
+    friction: float, backend: str = "mpm", *, use_mock: bool | None = None
 ) -> float:
     """Convenience function: single angle-of-repose measurement."""
     experiment = AngleOfReposeExperiment(backend=backend, use_mock=use_mock)

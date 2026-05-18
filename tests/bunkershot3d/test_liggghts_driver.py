@@ -200,7 +200,7 @@ class TestDumpParser:
         self, path: Path, frames: list[tuple[int, list[list[float]]]]
     ) -> None:
         """Write a minimal LIGGGHTS custom dump file."""
-        with open(path, "w") as f:
+        with open(path, "w", encoding="utf-8") as f:
             for step, atoms in frames:
                 n = len(atoms)
                 f.write(f"ITEM: TIMESTEP\n{step}\n")
@@ -249,7 +249,7 @@ class TestParseAndWrite:
     """_parse_and_write() must produce a valid HDF5 file with grain states."""
 
     def _write_dump(self, path: Path) -> None:
-        with open(path, "w") as f:
+        with open(path, "w", encoding="utf-8") as f:
             for step in [0, 200]:
                 atoms = [
                     [0.1 * j, 0.05 * j, 0.02 * j, 0.0, 0.0, -0.01] for j in range(3)
