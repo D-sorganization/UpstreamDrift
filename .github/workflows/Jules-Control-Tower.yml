@@ -86,6 +86,7 @@ jobs:
           echo "runner=d-sorg-fleet" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet"
   triage:
+    timeout-minutes: 30
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     # Removed global actor check to allow scheduled runs even if file modified by bot

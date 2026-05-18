@@ -63,9 +63,9 @@ class TestDragCrisisCdDimpledSphere:
         """Cd must stay in [0.15, 0.55] across the supported Re range."""
         for re in [1e3, 1e4, 4e4, 5e4, 7e4, 1e5, 2e5, 5e5, 1e6, 5e6, 1e7]:
             cd = cd_dimpled_sphere(re)
-            assert (
-                0.15 <= cd <= 0.55
-            ), f"Cd({re:g})={cd:.3f} outside the supported [0.15, 0.55]"
+            assert 0.15 <= cd <= 0.55, (
+                f"Cd({re:g})={cd:.3f} outside the supported [0.15, 0.55]"
+            )
 
     def test_drag_crisis_minimum_near_post_crisis(self) -> None:
         """Minimum Cd should sit near Re ~ 1e5 -- 3e5 with Cd ~ 0.20 -- 0.26."""
@@ -78,9 +78,9 @@ class TestDragCrisisCdDimpledSphere:
             f"Drag-crisis minimum at Re={re_at_min:.2e} is outside the "
             f"expected band [8e4, 5e5]"
         )
-        assert (
-            0.20 <= cd_at_min <= 0.28
-        ), f"Cd at minimum = {cd_at_min:.3f} is outside the expected [0.20, 0.28] band"
+        assert 0.20 <= cd_at_min <= 0.28, (
+            f"Cd at minimum = {cd_at_min:.3f} is outside the expected [0.20, 0.28] band"
+        )
 
     def test_drag_crisis_invalid_inputs(self) -> None:
         """Reynolds outside supported range or non-positive must raise."""
@@ -115,18 +115,18 @@ class TestAirDensityISA:
     def test_air_density_sea_level_15c(self) -> None:
         """rho(0 m, 15 C) must match 1.225 kg/m^3 within 0.005."""
         rho = air_density(0.0, temperature_c=15.0)
-        assert (
-            abs(rho - ISA_RHO0_KG_M3) <= 0.005
-        ), f"rho(0,15C)={rho:.4f}, expected {ISA_RHO0_KG_M3} +/- 0.005"
+        assert abs(rho - ISA_RHO0_KG_M3) <= 0.005, (
+            f"rho(0,15C)={rho:.4f}, expected {ISA_RHO0_KG_M3} +/- 0.005"
+        )
 
     def test_air_density_drops_with_altitude(self) -> None:
         """Density at 1500 m must be roughly 12--18% lower than sea level."""
         rho_sea = air_density(0.0)
         rho_high = air_density(1500.0)
         ratio = rho_high / rho_sea
-        assert (
-            0.82 <= ratio <= 0.88
-        ), f"Density ratio at 1500m = {ratio:.3f}, expected ~0.85 (12--18% drop)"
+        assert 0.82 <= ratio <= 0.88, (
+            f"Density ratio at 1500m = {ratio:.3f}, expected ~0.85 (12--18% drop)"
+        )
 
     def test_air_density_monotonic_decreasing(self) -> None:
         """Density must decrease monotonically up the troposphere."""
@@ -139,9 +139,9 @@ class TestAirDensityISA:
         """Hot day should have lower density than cold day at same altitude."""
         rho_hot = air_density(0.0, temperature_c=35.0)
         rho_cold = air_density(0.0, temperature_c=-5.0)
-        assert (
-            rho_hot < rho_cold
-        ), f"Expected hot day rho ({rho_hot:.4f}) < cold day rho ({rho_cold:.4f})"
+        assert rho_hot < rho_cold, (
+            f"Expected hot day rho ({rho_hot:.4f}) < cold day rho ({rho_cold:.4f})"
+        )
 
     def test_air_density_pressure_override(self) -> None:
         """Pressure override must reproduce p / (R*T) at sea level."""
@@ -253,9 +253,9 @@ class TestTrajectoryAltitudeIntegration:
         )
         # And the gain should be material -- at least 1% but no more than 50%.
         gain = (carry_high - carry_sea) / carry_sea
-        assert (
-            0.01 < gain < 0.5
-        ), f"Altitude carry gain {gain * 100:.2f}% is outside the expected 1--50% band"
+        assert 0.01 < gain < 0.5, (
+            f"Altitude carry gain {gain * 100:.2f}% is outside the expected 1--50% band"
+        )
 
     def test_track_altitude_density_disabled_uses_constant_rho(self) -> None:
         """With ``track_altitude_density=False`` the engine keeps its initial rho."""

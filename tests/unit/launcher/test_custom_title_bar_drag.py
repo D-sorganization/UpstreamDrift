@@ -28,6 +28,7 @@ from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow, QToolButton, QWid
 
 from src.launchers.custom_title_bar import CustomTitleBar, clamp_to_visible_screen
 
+
 pytestmark = pytest.mark.ui
 
 
@@ -269,9 +270,9 @@ class TestTitleBarMovesParentWindow:
 
         # DbC postcondition: window's new position is inside virtualGeometry.
         vg = QApplication.primaryScreen().virtualGeometry()
-        assert vg.contains(
-            window.pos()
-        ), f"Window moved to {window.pos()} which is outside virtualGeometry {vg}"
+        assert vg.contains(window.pos()), (
+            f"Window moved to {window.pos()} which is outside virtualGeometry {vg}"
+        )
         # And the window actually moved — we don't pin the exact delta
         # because Qt's synthetic event coordinate math depends on the
         # window's frame geometry, which is platform-dependent.

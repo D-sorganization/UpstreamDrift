@@ -25,6 +25,7 @@ jobs:
           echo "runner=d-sorg-fleet" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet"
   stale:
+    timeout-minutes: 30
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:

@@ -41,6 +41,7 @@ concurrency:
 
 jobs:
   verify:
+    timeout-minutes: 30
     name: Verify Diff Substance
     runs-on: ubuntu-latest
     # Only gate Jules-generated branches. Other PRs pass through automatically.

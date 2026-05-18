@@ -272,9 +272,9 @@ def test_user_segments_60fps_scrub_budget(qt_app):
     # Switch ALL 26 default segments to cylinders so the per-frame budget
     # exercises Poly3DCollection updates rather than line-only updates.
     n_segments = len(seg_tab.viz_segments)
-    assert (
-        n_segments == 26
-    ), f"Expected 26 default segments for the 28-marker subset; got {n_segments}"
+    assert n_segments == 26, (
+        f"Expected 26 default segments for the 28-marker subset; got {n_segments}"
+    )
     for i in range(n_segments):
         seg_tab.set_segment_geometry(i, "cylinder")
 

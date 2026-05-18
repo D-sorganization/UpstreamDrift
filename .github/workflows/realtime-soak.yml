@@ -39,7 +39,7 @@ concurrency:
 jobs:
   soak:
     name: 24h realtime soak
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     # 24 h + headroom for setup/teardown/artifact upload. GitHub-hosted
     # runners cap at 360 minutes; the nightly run uses the d-sorg-fleet
     # runner via a separate self-hosted dispatch when available. For
@@ -66,6 +66,11 @@ jobs:
 
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            .
 
       - name: Install Python deps
         run: |

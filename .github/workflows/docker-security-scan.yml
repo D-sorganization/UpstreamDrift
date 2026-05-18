@@ -20,6 +20,7 @@ on:
 
 jobs:
   trivy-scan:
+    timeout-minutes: 20
     name: Trivy Container Scan
     runs-on: d-sorg-fleet
     permissions:

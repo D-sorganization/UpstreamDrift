@@ -110,6 +110,18 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
+      # Cache pip download cache. The optional-stack lane installs ~1.5GB of
+      # wheels (fastapi[all], pinocchio, pink, crocoddyl, pyqt6, etc.) and a
+      # warm cache avoids re-downloading them on every PR.
+      - name: Cache pip wheels
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-optstack-${{ runner.os }}-py${{ matrix.python }}-${{ hashFiles('pyproject.toml', 'requirements*.txt') }}
+          restore-keys: |
+            pip-optstack-${{ runner.os }}-py${{ matrix.python }}-
+            pip-optstack-${{ runner.os }}-
+
       - name: Prepare Optional-Stack Venv
         # The shared self-hosted runner can expose partially installed ambient
         # site-packages (for example matplotlib without a RECORD file), which

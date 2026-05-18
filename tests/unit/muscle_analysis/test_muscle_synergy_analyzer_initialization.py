@@ -46,9 +46,9 @@ class TestMuscleSynergyAnalyzerInitialization:
         names = ["Biceps", "Triceps", "Deltoid"]
         analyzer = MuscleSynergyAnalyzer(data, muscle_names=names)
 
-        assert (
-            analyzer.muscle_names == names
-        ), "Assertion failed: analyzer.muscle_names == names"
+        assert analyzer.muscle_names == names, (
+            "Assertion failed: analyzer.muscle_names == names"
+        )
 
     def test_initialization_clips_negative_values(self, caplog) -> None:
         """Test that negative values are clipped to zero with warning."""
@@ -65,14 +65,14 @@ class TestMuscleSynergyAnalyzerInitialization:
             analyzer = MuscleSynergyAnalyzer(data)
 
         # Should warn about negative values
-        assert (
-            "negative values" in caplog.text.lower()
-        ), "Assertion failed: negative values in caplog.text.lower()"
+        assert "negative values" in caplog.text.lower(), (
+            "Assertion failed: negative values in caplog.text.lower()"
+        )
 
         # Data should be clipped to zero
-        assert np.all(
-            analyzer.data >= 0
-        ), "Assertion failed: np.all(analyzer.data >= 0)"
+        assert np.all(analyzer.data >= 0), (
+            "Assertion failed: np.all(analyzer.data >= 0)"
+        )
         assert (
             analyzer.data[0, 1] == 0.0
         )  # Was -0.1, "Assertion failed: analyzer.data[0, 1] == 0.0  # Was -0.1"
@@ -87,9 +87,9 @@ class TestMuscleSynergyAnalyzerInitialization:
 
         assert analyzer.n_samples == 3, "Assertion failed: analyzer.n_samples == 3"
         assert analyzer.n_muscles == 2, "Assertion failed: analyzer.n_muscles == 2"
-        assert isinstance(
-            analyzer.data, np.ndarray
-        ), "Assertion failed: isinstance(analyzer.data, np.ndarray)"
+        assert isinstance(analyzer.data, np.ndarray), (
+            "Assertion failed: isinstance(analyzer.data, np.ndarray)"
+        )
 
     def test_data_shape_extraction(self) -> None:
         """Test that data shape is correctly extracted."""
@@ -97,12 +97,12 @@ class TestMuscleSynergyAnalyzerInitialization:
         data = np.random.rand(n_samples, n_muscles)
         analyzer = MuscleSynergyAnalyzer(data)
 
-        assert (
-            analyzer.n_samples == n_samples
-        ), "Assertion failed: analyzer.n_samples == n_samples"
-        assert (
-            analyzer.n_muscles == n_muscles
-        ), "Assertion failed: analyzer.n_muscles == n_muscles"
+        assert analyzer.n_samples == n_samples, (
+            "Assertion failed: analyzer.n_samples == n_samples"
+        )
+        assert analyzer.n_muscles == n_muscles, (
+            "Assertion failed: analyzer.n_muscles == n_muscles"
+        )
         assert analyzer.data.shape == (
             n_samples,
             n_muscles,

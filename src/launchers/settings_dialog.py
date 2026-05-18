@@ -39,11 +39,12 @@ logger = get_logger(__name__)
 TAB_LAYOUT = 0
 TAB_CONFIG = 1
 TAB_DIAGNOSTICS = 2
+TAB_MCP_SERVERS = 3
 
 
 def validate_tab_index(tab_index: int) -> int:
     """Validate SettingsDialog startup tab index."""
-    valid_indexes = {TAB_LAYOUT, TAB_CONFIG, TAB_DIAGNOSTICS}
+    valid_indexes = {TAB_LAYOUT, TAB_CONFIG, TAB_DIAGNOSTICS, TAB_MCP_SERVERS}
     if tab_index not in valid_indexes:
         raise ValueError(
             f"Invalid tab index {tab_index}; expected one of {sorted(valid_indexes)}"
@@ -52,12 +53,13 @@ def validate_tab_index(tab_index: int) -> int:
 
 
 class SettingsDialog(QDialog):
-    """Settings dialog with Layout, Configuration, and Diagnostics tabs.
+    """Settings dialog with Layout, Configuration, Diagnostics, and MCP Servers tabs.
 
     Tab order:
         0 - Layout: tile arrangement, lock, reset
         1 - Configuration: execution env, simulation opts, Docker rebuild
         2 - Diagnostics: system checks, error logs, terminal output
+        3 - MCP Servers: manage Model Context Protocol server connections
     """
 
     reset_layout_requested = pyqtSignal()
@@ -66,6 +68,7 @@ class SettingsDialog(QDialog):
     TAB_LAYOUT = TAB_LAYOUT
     TAB_CONFIG = TAB_CONFIG
     TAB_DIAGNOSTICS = TAB_DIAGNOSTICS
+    TAB_MCP_SERVERS = TAB_MCP_SERVERS
 
     def __init__(
         self,
@@ -93,7 +96,7 @@ class SettingsDialog(QDialog):
         from src.shared.python.gui_pkg.draggable_tabs import DraggableTabWidget
 
         self.tabs = DraggableTabWidget(
-            core_tabs={"Layout", "Configuration", "Diagnostics"}
+            core_tabs={"Layout", "Configuration", "Diagnostics", "MCP Servers"}
         )
         self.tabs.setTabsClosable(False)
         layout.addWidget(self.tabs)
@@ -101,6 +104,7 @@ class SettingsDialog(QDialog):
         self.tabs.addTab(self._create_layout_tab(), "Layout")
         self.tabs.addTab(self._create_configuration_tab(), "Configuration")
         self.tabs.addTab(self._create_diagnostics_tab(), "Diagnostics")
+        self.tabs.addTab(self._create_mcp_servers_tab(), "MCP Servers")
 
         close_btn = QPushButton("Close")
         close_btn.clicked.connect(self.accept)
@@ -376,6 +380,39 @@ class SettingsDialog(QDialog):
 
         tab_layout.addLayout(btn_row)
         return tab
+
+    # ── MCP Servers tab ─────────────────────────────────────────────
+
+    def _create_mcp_servers_tab(self) -> QWidget:
+        """MCP Servers tab: list, add, disable, remove MCP server configs."""
+        from PyQt6.QtWidgets import QMessageBox, QScrollArea, QVBoxLayout, QWidget
+
+        from src.launchers.mcp_servers_preferences import (  # type: ignore[attr-defined]
+            McpServersSection,
+        )
+
+        tab = QWidget()
+        tab_layout = QVBoxLayout(tab)
+
+        self._mcp_section = McpServersSection(parent=tab)
+        self._mcp_section.restart_required.connect(self._on_mcp_restart_required)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(self._mcp_section)
+        tab_layout.addWidget(scroll)
+        return tab
+
+    def _on_mcp_restart_required(self) -> None:
+        """Prompt the user to restart the Sidekick chat after MCP config changes."""
+        from PyQt6.QtWidgets import QMessageBox
+
+        QMessageBox.information(
+            self,
+            "Restart Required",
+            "MCP server configuration changed.\n\n"
+            "Restart the Sidekick chat session for changes to take effect.",
+        )
 
     def _load_app_log(self) -> None:
         """Load recent lines from the application log file."""

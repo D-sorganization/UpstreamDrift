@@ -338,6 +338,11 @@ class AIAssistantPanel(QWidget):
         # Initialize Core Tools
         self._init_tools()
 
+        # MCP integration — loads ~/.upstreamdrift/mcp_servers.json
+        # Degrades gracefully if the config file is absent.
+        self._mcp_integration: Any | None = None
+        self._init_mcp()
+
         self._setup_ui()
         # Restore messages to UI
         self._restore_ui_messages()
@@ -428,6 +433,22 @@ class AIAssistantPanel(QWidget):
                     doc.content[:500] + "..." if len(doc.content) > 500 else doc.content
                 )
             return "\n\n".join(output)
+
+    def _init_mcp(self) -> None:
+        """Initialise MCP integration; degrades gracefully on error."""
+        try:
+            from src.shared.python.ai.mcp.mcp_chat_integration import (
+                McpChatIntegration,
+            )
+
+            self._mcp_integration = McpChatIntegration()
+            logger.info(
+                "MCP integration initialised: %s",
+                self._mcp_integration.status(),
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("MCP integration unavailable: %s", exc)
+            self._mcp_integration = None
 
     def _setup_ui(self) -> None:
         """Set up the panel UI."""
@@ -893,6 +914,18 @@ class AIAssistantPanel(QWidget):
 
         self._status_label = QLabel("Ready")
         layout.addWidget(self._status_label)
+
+        # MCP status indicator — shows "MCP: N/M connected" when servers
+        # are configured, hidden otherwise.
+        mcp_text = (
+            self._mcp_integration.status() if self._mcp_integration is not None else ""
+        )
+        self._mcp_status_label = QLabel(mcp_text)
+        self._mcp_status_label.setToolTip(
+            "MCP (Model Context Protocol) server connection status"
+        )
+        self._mcp_status_label.setVisible(bool(mcp_text))
+        layout.addWidget(self._mcp_status_label)
 
     def _add_header_action_buttons(self, layout: Any) -> None:
         if layout is None:
