@@ -34,6 +34,7 @@ jobs:
   local-only-workflows:
     name: Reject hosted runner routing
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Run local-only workflow guard
         shell: bash
@@ -43,6 +44,7 @@ jobs:
   pinned-actions:
     name: Enforce action SHA pinning
     runs-on: d-sorg-fleet
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Run GitHub Actions pinning guard
@@ -52,6 +54,7 @@ jobs:
   workflow-inventory:
     name: Enforce workflow inventory
     runs-on: d-sorg-fleet
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Run workflow inventory guard
@@ -61,6 +64,7 @@ jobs:
   urdf-layering:
     name: Enforce URDF subsystem layering (ADR 0007)
     runs-on: d-sorg-fleet
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Run URDF layering guard
@@ -992,6 +996,7 @@ jobs:
   frontend-tests:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: ./ui
@@ -1053,6 +1058,7 @@ jobs:
   matlab-tests:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 30
     if: false # DISABLED - Requires MATLAB license not available in CI
     continue-on-error: true
     steps:
@@ -1073,6 +1079,7 @@ jobs:
   arduino-build:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 15
     if: false # DISABLED - No Arduino components in this project
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd

@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 WORKFLOW_GLOB_PATTERNS = ("*.yml", "*.yaml")
-DEFAULT_MAX_ACTIVE_WORKFLOWS = 71
+DEFAULT_MAX_ACTIVE_WORKFLOWS = 78
 AGENT_CONFIG_ROOTS = (".claude", ".gaai", ".agent", ".kiro", ".jules")
 INVENTORY_PATH = Path(".github/WORKFLOWS.md")
 AGENT_GOVERNANCE_PATH = Path("docs/development/agents/migration.md")

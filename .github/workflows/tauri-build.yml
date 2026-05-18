@@ -79,7 +79,7 @@ jobs:
       # Cache cargo registry, git deps, and ui/src-tauri/target/. Cold Tauri
       # builds compile ~400 crates; warm cache typically cuts time by 60-70%.
       - name: Cache Rust target (check)
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32
         with:
           workspaces: ui/src-tauri -> target
           key: ud-tauri-check
@@ -147,7 +147,7 @@ jobs:
       # Per-target Rust cache for release builds. Each platform gets its own
       # cache so the Linux/Windows/macOS matrix legs don't trash each other.
       - name: Cache Rust target (build)
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32
         with:
           workspaces: ui/src-tauri -> target
           key: ud-tauri-build-${{ matrix.target }}
