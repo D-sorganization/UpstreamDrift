@@ -18,10 +18,22 @@ on:
     paths:
       - "ui/**"
       - ".github/workflows/tauri-build.yml"
+      - "src-tauri/**"
+      - "**/Cargo.toml"
+      - "**/Cargo.lock"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "package-lock.json"
   pull_request:
     paths:
       - "ui/**"
       - ".github/workflows/tauri-build.yml"
+      - "src-tauri/**"
+      - "**/Cargo.toml"
+      - "**/Cargo.lock"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "package-lock.json"
   release:
     types: [published]
   workflow_dispatch:
@@ -63,6 +75,14 @@ jobs:
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
         with:
           components: rustfmt, clippy
+
+      # Cache cargo registry, git deps, and ui/src-tauri/target/. Cold Tauri
+      # builds compile ~400 crates; warm cache typically cuts time by 60-70%.
+      - name: Cache Rust target (check)
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ui/src-tauri -> target
+          key: ud-tauri-check
 
       - name: Install Linux dependencies
         run: |
@@ -123,6 +143,14 @@ jobs:
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
         with:
           targets: ${{ matrix.target }}
+
+      # Per-target Rust cache for release builds. Each platform gets its own
+      # cache so the Linux/Windows/macOS matrix legs don't trash each other.
+      - name: Cache Rust target (build)
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ui/src-tauri -> target
+          key: ud-tauri-build-${{ matrix.target }}
 
       - name: Install Linux dependencies
         if: matrix.platform == 'd-sorg-fleet'

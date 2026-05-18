@@ -63,9 +63,9 @@ def _expected_joint_names_from_yaml() -> set[str]:
 @pytest.mark.unit
 def test_yaml_exists_and_parses() -> None:
     """The shared YAML is on disk and parses without error."""
-    assert (
-        SHARED_DIMENSIONS_YAML.exists()
-    ), f"Expected {SHARED_DIMENSIONS_YAML}; #4093 owns this file."
+    assert SHARED_DIMENSIONS_YAML.exists(), (
+        f"Expected {SHARED_DIMENSIONS_YAML}; #4093 owns this file."
+    )
     dims = load_humanoid_dimensions()
     assert dims.schema_version >= 1
     assert len(dims.segments) >= 12, f"Expected >=12 segments, got {len(dims.segments)}"

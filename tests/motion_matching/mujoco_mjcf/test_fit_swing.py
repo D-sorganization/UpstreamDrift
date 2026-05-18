@@ -241,9 +241,9 @@ def test_cost_decreases_across_iterations(synth_pair_upper, sim_opts_short) -> N
         "Did SLSQP terminate immediately?"
     )
     running_min = np.minimum.accumulate(history)
-    assert np.all(
-        np.diff(running_min) <= 1e-12
-    ), f"running-min cost is not monotone non-increasing: {running_min.tolist()}"
+    assert np.all(np.diff(running_min) <= 1e-12), (
+        f"running-min cost is not monotone non-increasing: {running_min.tolist()}"
+    )
     assert running_min[-1] < running_min[0] - 1e-12, (
         f"final running-min cost {running_min[-1]:.4e} is not below initial "
         f"{running_min[0]:.4e}; the optimizer made no progress"
@@ -308,6 +308,6 @@ def test_target_hash_is_sha256_and_sensitive(synth_pair_upper, sim_opts_short) -
     res_b = fit_swing_mujoco(perturbed, options)
 
     assert len(res_a.target_hash) == 64
-    assert (
-        res_a.target_hash != res_b.target_hash
-    ), "target_hash must change when impact_idx changes"
+    assert res_a.target_hash != res_b.target_hash, (
+        "target_hash must change when impact_idx changes"
+    )

@@ -80,9 +80,9 @@ class TestEngineAvailabilityInfrastructure:
         from src.shared.python.engine_core import engine_availability
 
         source = inspect.getsource(engine_availability)
-        assert (
-            "import pyopenpose" in source
-        ), "engine_availability.py should check for 'pyopenpose', not 'openpose'"
+        assert "import pyopenpose" in source, (
+            "engine_availability.py should check for 'pyopenpose', not 'openpose'"
+        )
 
     def test_skip_if_unavailable_returns_marker(self) -> None:
         """skip_if_unavailable must return a pytest marker."""

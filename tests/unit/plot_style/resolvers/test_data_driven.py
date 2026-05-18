@@ -254,6 +254,6 @@ def test_resolve_array_meets_60fps_target() -> None:
     elapsed = time.perf_counter() - start
     # Each call resolves all 1000 frames; fps = (n_iters * n_frames) / elapsed.
     frames_per_sec = (n_iters * n_frames) / elapsed
-    assert (
-        frames_per_sec > 60
-    ), f"resolve_array fps {frames_per_sec:.0f} below 60 fps target"
+    assert frames_per_sec > 60, (
+        f"resolve_array fps {frames_per_sec:.0f} below 60 fps target"
+    )

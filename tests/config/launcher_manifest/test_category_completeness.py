@@ -174,9 +174,9 @@ class TestHiddenTileValidation:
         for tile in manifest_json["tiles"]:
             if tile.get("hidden", False) and not tile.get("hidden_reason"):
                 hidden_without_reason.append(tile["id"])
-        assert (
-            not hidden_without_reason
-        ), f"Hidden tiles missing 'hidden_reason': {', '.join(hidden_without_reason)}"
+        assert not hidden_without_reason, (
+            f"Hidden tiles missing 'hidden_reason': {', '.join(hidden_without_reason)}"
+        )
 
 
 # =============================================================================

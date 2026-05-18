@@ -180,9 +180,9 @@ class TestEnergyConservation:
         )
         logger.info(f"Energy drift: {final_drift_pct:.4f}% (max: {max_drift_pct:.4f}%)")
 
-        assert (
-            max_drift_pct < 1.0
-        ), f"Energy drift {max_drift_pct:.2f}% exceeds 1% tolerance (Guideline O3)"
+        assert max_drift_pct < 1.0, (
+            f"Energy drift {max_drift_pct:.2f}% exceeds 1% tolerance (Guideline O3)"
+        )
 
     @pytest.mark.skipif(not _check_mujoco_available(), reason="MuJoCo not installed")
     def test_pendulum_energy_at_extremes(self) -> None:

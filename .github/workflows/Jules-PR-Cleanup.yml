@@ -32,6 +32,7 @@ concurrency:
 
 jobs:
   check-kill-switch:
+    timeout-minutes: 30
     runs-on: d-sorg-fleet
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
@@ -61,6 +62,7 @@ jobs:
           echo "runner=d-sorg-fleet" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet"
   cleanup:
+    timeout-minutes: 30
     needs: [check-kill-switch, pick-runner]
     if: needs.check-kill-switch.outputs.enabled == 'true'
     name: Cleanup Stale Jules PRs

@@ -41,12 +41,12 @@ class TestPendulumPutterModelConstruction:
         builder = PendulumPutterModelBuilder()
         result = builder.build()
 
-        assert (
-            result.solver_status == "success"
-        ), f"Build failed: {result.error_message}"
-        assert (
-            result.urdf_xml is not None
-        ), "Assertion failed: result.urdf_xml is not None"
+        assert result.solver_status == "success", (
+            f"Build failed: {result.error_message}"
+        )
+        assert result.urdf_xml is not None, (
+            "Assertion failed: result.urdf_xml is not None"
+        )
 
     def test_model_has_correct_link_count(self) -> None:
         """Model should have expected number of links."""

@@ -35,6 +35,6 @@ def test_synthetic_coefficient_bounds_documented_ranges(tmp_path: Path) -> None:
     for coeffs in trials["coefficients"]:
         for i, value in enumerate(coeffs):
             half = half_ranges[i % 7]
-            assert (
-                -half <= value <= half
-            ), f"slot {i % 7} value {value} outside [-{half}, {half}]"
+            assert -half <= value <= half, (
+                f"slot {i % 7} value {value} outside [-{half}, {half}]"
+            )

@@ -1,10 +1,16 @@
-"""Preferences subpages for the launcher.
+"""Launcher preferences subpages.
 
-This package exposes one widget per Sidekick-feature settings section:
+This package is the UpstreamDrift launcher's collection of preferences
+panes. Most heavy lifting lives in shared Tools (`src/shared/python/...`)
+— the modules here are thin embed wrappers so this launcher and the
+Gasification_Model launcher render the same widget for shared concerns.
+
+Subpages:
 
 * :mod:`terminal_section` — default shell selection (Tools #2882)
 * :mod:`workspace_section` — workspace layout-mode default (Tools #2883)
-* :mod:`mcp_servers_section` — MCP server table editor (Tools #2884)
+* :mod:`mcp_servers_section` — MCP server table editor; wraps
+  :class:`McpServersPrefsWidget` from Tools (Tools #2884 / #2914)
 * :mod:`jupyter_section` — notebook directory + kernel prefs (Tools #2889)
 
 Each subpage is self-contained (orthogonal); removing or adding one
@@ -15,7 +21,10 @@ group-box header to keep DRY out of the per-section code.
 
 from __future__ import annotations
 
+from src.launchers.preferences.mcp_servers_section import McpServersSection
+
 __all__ = [
+    "McpServersSection",
     "build_prefs_section",
 ]
 

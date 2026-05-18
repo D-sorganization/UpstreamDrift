@@ -57,9 +57,9 @@ class TestPutterInteraction:
         mallet_state = mallet.execute_stroke(np.array([0.0, 0.0]), off_center_params)
 
         # Mallet should lose less speed on off-center hit (higher MOI)
-        assert (
-            mallet_state.speed >= blade_state.speed - 0.1
-        ), "Assertion failed: mallet_state.speed >= blade_state.speed - 0.1"
+        assert mallet_state.speed >= blade_state.speed - 0.1, (
+            "Assertion failed: mallet_state.speed >= blade_state.speed - 0.1"
+        )
 
     def test_face_angle_affects_direction(self) -> None:
         """Open/closed face should affect ball direction."""
@@ -86,6 +86,6 @@ class TestPutterInteraction:
         square_dir = square_state.velocity / np.linalg.norm(square_state.velocity)
         open_dir = open_state.velocity / np.linalg.norm(open_state.velocity)
 
-        assert (
-            open_dir[1] > square_dir[1]
-        ), "Assertion failed: open_dir[1] > square_dir[1]"
+        assert open_dir[1] > square_dir[1], (
+            "Assertion failed: open_dir[1] > square_dir[1]"
+        )

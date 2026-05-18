@@ -39,8 +39,9 @@ jobs:
           python-version: "3.11"
 
       - name: Install Radon
-        python -m ensurepip --upgrade || true
-        run: pip install radon
+        run: |
+          python -m ensurepip --upgrade || true
+          pip install radon
 
       - name: Run Complexity Analysis
         run: |

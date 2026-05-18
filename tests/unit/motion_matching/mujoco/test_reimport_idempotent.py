@@ -40,6 +40,6 @@ def test_provider_module_reload_does_not_raise() -> None:
     original_id = id(p)
     importlib.reload(p)
     importlib.reload(p)
-    assert (
-        id(p) == original_id
-    ), "Provider module identity should be preserved across reloads"
+    assert id(p) == original_id, (
+        "Provider module identity should be preserved across reloads"
+    )

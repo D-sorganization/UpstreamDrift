@@ -70,6 +70,6 @@ def test_gravity_is_approximately_minus_9_807() -> None:
     """Loose check that every variant's gravity is close to -9.807 m/s^2."""
     for name, xml in _VARIANTS:
         model = mujoco.MjModel.from_xml_string(xml)
-        assert model.opt.gravity[2] == pytest.approx(
-            -9.807, abs=1e-3
-        ), f"{name}: unexpected gravity {model.opt.gravity[2]}"
+        assert model.opt.gravity[2] == pytest.approx(-9.807, abs=1e-3), (
+            f"{name}: unexpected gravity {model.opt.gravity[2]}"
+        )

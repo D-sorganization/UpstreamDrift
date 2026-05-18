@@ -256,6 +256,19 @@ class LauncherDialogsMixin:
         if dialog.exec() and hasattr(self, "ai_panel"):
             pass
 
+    def _open_integrations_health(self) -> None:
+        """Open the integrations health dashboard window (UD #5643).
+
+        Hosts the shared :class:`IntegrationsHealthDashboardWidget` from
+        Tools (PR #2914) in a modeless dialog.
+        """
+        from src.launchers.integrations_health_window import (
+            open_integrations_health_window,
+        )
+
+        # Keep a reference so the dialog isn't garbage-collected.
+        self._integrations_health_dialog = open_integrations_health_window(self)
+
     def toggle_ai_assistant(self, checked: bool) -> None:
         """Toggle the AI Assistant panel visibility via the content splitter.
 

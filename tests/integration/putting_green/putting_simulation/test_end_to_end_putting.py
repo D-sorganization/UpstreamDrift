@@ -102,9 +102,9 @@ class TestEndToEndPutting:
         result = sloped_simulator.simulate_putt(stroke)
 
         # Ball should have curved due to slope (y position changed)
-        assert (
-            result.final_position[1] != 10.0
-        ), "Assertion failed: result.final_position[1] != 10.0"
+        assert result.final_position[1] != 10.0, (
+            "Assertion failed: result.final_position[1] != 10.0"
+        )
 
     def test_ball_stops_eventually(
         self, tournament_simulator: PuttingGreenSimulator
