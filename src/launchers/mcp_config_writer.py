@@ -8,8 +8,7 @@ testable.
 
 Validation strategy:
 
-1. If Tools' :class:`sidekick.mcp.config.McpServerConfig` (or its
-   ``upstream_drift_tools`` deprecated alias) is importable, we delegate
+1. If Tools' :class:`sidekick.mcp.config.McpServerConfig` is importable, we delegate
    validation to it — single source of truth.
 2. Otherwise we fall back to a small local Pydantic model that captures
    the public schema Tools #2884 documented (``name``, ``command``,

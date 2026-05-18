@@ -60,6 +60,28 @@ OLLAMA_DEFAULT_MODEL = DEFAULT_OLLAMA_MODEL
 OLLAMA_DEFAULT_TIMEOUT = DEFAULT_OLLAMA_TIMEOUT
 
 
+def _normalize_host(host: str) -> str:
+    """Coerce a user-provided Ollama host into a usable URL.
+
+    The settings dialog and legacy configs sometimes store the host without a
+    scheme (e.g. ``"0.0.0.0:11434"``, ``"localhost:11434"``). httpx requires a
+    scheme and will raise ``UnsupportedProtocol`` otherwise, which surfaces in
+    the chat UI as a generic connection failure. Defensive prepending of
+    ``http://`` (the only protocol Ollama serves on by default) makes the
+    adapter tolerant of these inputs.
+
+    ``0.0.0.0`` is rewritten to ``127.0.0.1`` because it is a wildcard
+    *listen* address, not a routable client address, and httpx will fail to
+    connect to it on Windows.
+    """
+    if not host:
+        return DEFAULT_OLLAMA_HOST
+    host = host.strip().rstrip("/")
+    if not host.startswith(("http://", "https://")):
+        host = f"http://{host}"
+    return host.replace("://0.0.0.0", "://127.0.0.1")
+
+
 class OllamaAdapter(BaseAgentAdapter):
     """Adapter for local Ollama LLM inference.
 
@@ -105,7 +127,7 @@ class OllamaAdapter(BaseAgentAdapter):
             model: Model name to use. Uses OLLAMA_MODEL env var or default.
             timeout: Request timeout [s]. Uses OLLAMA_TIMEOUT env var or default.
         """
-        self._host = (host or get_ollama_host()).rstrip("/")
+        self._host = _normalize_host(host or get_ollama_host())
         self._model = model or get_ollama_model()
         self._timeout = timeout if timeout is not None else get_ollama_timeout()
         self._client: Any = None  # Lazy-loaded httpx client
@@ -329,8 +351,22 @@ class OllamaAdapter(BaseAgentAdapter):
                     return False, (
                         f"No models installed. Pull one with: ollama pull {self._model}"
                     )
-                return False, (
-                    f"Model '{self._model}' not found. "
+                # Saved-settings model no longer exists locally. Prefer a real
+                # (non-:cloud) model so chat stays offline-capable; fall back to
+                # whatever is listed first if none qualify.
+                fallback = next(
+                    (m for m in model_names if not m.endswith(":cloud")),
+                    model_names[0],
+                )
+                logger.warning(
+                    "Configured Ollama model '%s' not installed; "
+                    "auto-falling back to '%s'. Update saved settings to dismiss.",
+                    self._model,
+                    fallback,
+                )
+                self._model = fallback
+                return True, (
+                    f"Configured model not installed; using '{fallback}' instead. "
                     f"Available: {', '.join(model_names[:5])}"
                 )
 

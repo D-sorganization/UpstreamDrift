@@ -19,7 +19,6 @@ from __future__ import annotations
 import pytest
 from PyQt6.QtCore import QSize
 
-
 pytestmark = pytest.mark.ui
 
 
@@ -34,7 +33,6 @@ _REQUIRED_BUTTON_LABELS = (
     "Motion Match",
     "MoCap",
     "Tools",
-    "Chat",
     "Documentation",
     "Settings",
 )

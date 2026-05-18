@@ -2,7 +2,6 @@ import xml.etree.ElementTree as ET
 
 from scripts.remove_icon_backdrops import process_svgs
 
-
 SVG_NS = "http://www.w3.org/2000/svg"
 
 

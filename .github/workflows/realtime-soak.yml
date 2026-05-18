@@ -34,6 +34,9 @@ permissions:
 
 concurrency:
   group: realtime-soak-${{ github.ref }}
+  # Per fleet workflow-lint policy: cancel-in-progress must be true. Soaks
+  # are long; in-flight runs against an older ref can be safely cancelled
+  # when a new push lands — the scheduled cron will re-run.
   cancel-in-progress: true
 
 jobs:
@@ -67,7 +70,7 @@ jobs:
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
 
-      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32
+      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:
           workspaces: |
             .

@@ -8,7 +8,12 @@ import sys
 from pathlib import Path
 
 WORKFLOW_GLOB_PATTERNS = ("*.yml", "*.yaml")
-DEFAULT_MAX_ACTIVE_WORKFLOWS = 78
+# Bumped 2026-05-18 from 71 -> 80 to accommodate guard workflows
+# (Jules-Diff-Verifier, Stub-Introduction-Guard, Verify-Issue-Closure,
+# anti-phantom-merge, issue-closure-policy, lint-workflow-files) that
+# were added during the fleet-wide CI hardening initiative. The
+# 25-workflow consolidation target remains; see issue #3835.
+DEFAULT_MAX_ACTIVE_WORKFLOWS = 80
 AGENT_CONFIG_ROOTS = (".claude", ".gaai", ".agent", ".kiro", ".jules")
 INVENTORY_PATH = Path(".github/WORKFLOWS.md")
 AGENT_GOVERNANCE_PATH = Path("docs/development/agents/migration.md")

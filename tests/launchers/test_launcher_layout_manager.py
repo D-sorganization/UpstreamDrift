@@ -302,8 +302,14 @@ def test_rebuild_grid_missing_model(layout_manager) -> None:
 
 def test_rebuild_grid_existing_card(layout_manager) -> None:
     # Test path where card is already in model_cards
+    from src.launchers.launcher_constants import ViewMode
+
     grid_layout = MagicMock()
     grid_layout.count.return_value = 0
+
+    # Set grid mode before populating cards (LIST->MEDIUM transition
+    # clears model_cards, so we must switch before adding the card).
+    layout_manager.set_view_mode(ViewMode.MEDIUM)
 
     # Pre-populate card
     mock_card = MagicMock()
@@ -325,10 +331,10 @@ def test_rebuild_grid_multiple_columns(layout_manager, available_models) -> None
 
     grid_layout = MagicMock()
     grid_layout.count.return_value = 0
-    # Force COMFORTABLE (4 cols) so that 5 cards wrap to a second row.
+    # Force LARGE (4 cols) so that 5 cards wrap to a second row.
     from src.launchers.launcher_constants import ViewMode
 
-    layout_manager.set_view_mode(ViewMode.COMFORTABLE)
+    layout_manager.set_view_mode(ViewMode.LARGE)
     layout_manager.model_order = ["model_1", "model_2", "model_3", "model_4", "model_5"]
     layout_manager.rebuild_grid(grid_layout)
 

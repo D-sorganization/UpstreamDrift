@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import shutil
 import subprocess
 import sys
 from enum import IntEnum
@@ -21,7 +22,59 @@ logger = get_logger(__name__)
 # Constants
 REPOS_ROOT = Path(__file__).parent.parent.parent.resolve()
 
-CONFIG_DIR = REPOS_ROOT / ".kiro" / "launcher"
+
+def _get_config_dir() -> Path:
+    """Return the platform-appropriate config directory for upstream-drift.
+
+    Migrates from the defunct .kiro/ path (issue #5713) to a proper location:
+    - Linux/macOS: ~/.config/upstream-drift/launcher  (via platformdirs)
+    - Windows:     %LOCALAPPDATA%/UpstreamDrift/launcher (via platformdirs)
+
+    Backward compatibility: if the old .kiro/launcher path exists and the new
+    path does not yet contain a layout.json, existing config is copied on first
+    run.
+
+    DbC postcondition: returned path does not contain '.kiro'.
+    """
+    try:
+        from platformdirs import user_config_dir
+
+        new_dir = Path(user_config_dir("upstream-drift")) / "launcher"
+    except ImportError:
+        # Graceful fallback if platformdirs is somehow unavailable at runtime
+        if sys.platform == "win32":
+            new_dir = Path.home() / "AppData" / "Local" / "UpstreamDrift" / "launcher"
+        else:
+            new_dir = Path.home() / ".config" / "upstream-drift" / "launcher"
+
+    # Backward-compatibility migration: copy config from old .kiro/ path on first run
+    old_dir = REPOS_ROOT / ".kiro" / "launcher"
+    if old_dir.exists() and not (new_dir / "layout.json").exists():
+        try:
+            new_dir.mkdir(parents=True, exist_ok=True)
+            for item in old_dir.iterdir():
+                dest = new_dir / item.name
+                if not dest.exists():
+                    if item.is_dir():
+                        shutil.copytree(str(item), str(dest))
+                    else:
+                        shutil.copy2(str(item), str(dest))
+            logger.info(
+                "Migrated launcher config from %s to %s (issue #5713)",
+                old_dir,
+                new_dir,
+            )
+        except OSError as exc:
+            logger.warning("Could not migrate old .kiro/ config: %s", exc)
+
+    # DbC postcondition
+    assert ".kiro" not in str(new_dir), (
+        f"Config dir must not be under .kiro/: {new_dir}"
+    )
+    return new_dir
+
+
+CONFIG_DIR = _get_config_dir()
 LAYOUT_CONFIG_FILE = CONFIG_DIR / "layout.json"
 GRID_COLUMNS = 4  # Changed to 3x4 grid (12 tiles total)
 
@@ -44,18 +97,23 @@ class ViewMode(IntEnum):
     via :func:`view_mode_settings`.
     """
 
-    COMFORTABLE = 0
-    COMPACT = 1
-    DENSE = 2
-    LIST = 3
+    LARGE = 0
+    MEDIUM = 1
+    SMALL = 2
+    LIST_LARGE = 3
+    LIST_SMALL = 4
+
+    # Backward compat alias
+    LIST = 3  # maps to LIST_LARGE
 
 
 # (tile_scale, columns, show_description, is_list)
 _VIEW_MODE_TABLE: dict[ViewMode, tuple[float, int, bool, bool]] = {
-    ViewMode.COMFORTABLE: (1.0, 4, False, False),
-    ViewMode.COMPACT: (0.5, 6, False, False),
-    ViewMode.DENSE: (0.35, 8, False, False),
-    ViewMode.LIST: (0.30, 1, True, True),
+    ViewMode.LARGE: (1.0, 4, False, False),
+    ViewMode.MEDIUM: (0.5, 6, False, False),
+    ViewMode.SMALL: (0.35, 8, False, False),
+    ViewMode.LIST_LARGE: (0.30, 1, True, True),
+    ViewMode.LIST_SMALL: (0.20, 1, False, True),
 }
 
 

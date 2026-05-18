@@ -14,7 +14,6 @@ from src.shared.python.biomechanics.shallowing.hand_path_plane import (
     extract_lead_hand_trajectory,
 )
 
-
 # ---------------------------------------------------------------------------
 # compute_hand_path_plane
 # ---------------------------------------------------------------------------

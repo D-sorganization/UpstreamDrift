@@ -19,13 +19,13 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: read
-
-concurrency:
-  group: stub-guard-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   guard:
@@ -33,7 +33,7 @@ jobs:
     runs-on: d-sorg-fleet
     steps:
       - name: Check out PR head
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}

@@ -152,6 +152,7 @@ class DraggableModelCard(QFrame):
         *,
         show_description: bool = True,
         list_mode: bool = False,
+        list_compact: bool = False,
     ) -> None:
         super().__init__(None)
         self.model = model
@@ -159,6 +160,7 @@ class DraggableModelCard(QFrame):
         self.tile_scale: float = validate_tile_scale(tile_scale)
         self._show_description: bool = bool(show_description)
         self._list_mode: bool = bool(list_mode)
+        self._list_compact: bool = bool(list_compact)
 
         # Match initial drag-and-drop state to the parent's mode
         self.setAcceptDrops(bool(getattr(parent_launcher, "layout_edit_mode", False)))
@@ -258,12 +260,16 @@ class DraggableModelCard(QFrame):
         self._hover_anim.setStartValue(self._hover_offset)
         self._hover_anim.setEndValue(4.0)
         self._hover_anim.start()
-        # Reveal the per-tile launch button.
+        # Reveal the per-tile launch button and info button.
         btn = getattr(self, "_btn_quick_launch", None)
+        info_btn = getattr(self, "_btn_info", None)
         if btn is not None:
-            self._reposition_quick_launch_button()
             btn.show()
             btn.raise_()
+        if info_btn is not None:
+            info_btn.show()
+            info_btn.raise_()
+        self._reposition_quick_launch_button()
         super().enterEvent(event)
 
     def leaveEvent(self, event: QEvent | None) -> None:
@@ -274,13 +280,23 @@ class DraggableModelCard(QFrame):
         btn = getattr(self, "_btn_quick_launch", None)
         if btn is not None:
             btn.hide()
-            self._reposition_quick_launch_button()  # update info button position
+        info_btn = getattr(self, "_btn_info", None)
+        if info_btn is not None and not self.is_selected:
+            info_btn.hide()
+        self._reposition_quick_launch_button()  # update info button position
         super().leaveEvent(event)
 
     def set_selected(self, is_selected: bool) -> None:
         """Update the glassmorphism styling to reflect selection state."""
         self.is_selected = is_selected
         self.setStyleSheet(self._selected_style if is_selected else self._base_style)
+        info_btn = getattr(self, "_btn_info", None)
+        if info_btn is not None:
+            if is_selected:
+                info_btn.show()
+                info_btn.raise_()
+            else:
+                info_btn.hide()
 
     def resizeEvent(self, event: Any) -> None:  # type: ignore[override]
         """Keep the quick-launch button anchored to the top-right corner."""
@@ -418,10 +434,11 @@ class DraggableModelCard(QFrame):
         img_name = self._resolve_image_name()
         img_path = self._find_image_path(img_name)
 
-        # In LIST mode the image is forced to a small (60x60) horizontal-row
-        # icon regardless of tile_scale. In other modes it scales from the
-        # 200px reference by ``tile_scale``.
-        img_size = 60 if self._list_mode else scaled_image_px(self.tile_scale)
+        # LIST_SMALL → 32px, LIST_LARGE → 60px, grid → scaled
+        if self._list_mode:
+            img_size = 32 if self._list_compact else 60
+        else:
+            img_size = scaled_image_px(self.tile_scale)
         pixmap_target = max(1, int(img_size * 0.9))
 
         self.lbl_img = QLabel()
@@ -550,6 +567,7 @@ class DraggableModelCard(QFrame):
             "}"
         )
         btn.clicked.connect(self._show_info_dialog)
+        btn.hide()
         self._btn_info = btn
         return btn
 
@@ -596,35 +614,58 @@ class DraggableModelCard(QFrame):
         self._create_status_chip(layout)
 
     def _setup_list_ui(self) -> None:
-        """Build the horizontal LIST-mode layout (icon | name+desc | status)."""
+        """Build the horizontal LIST-mode layout.
+
+        LIST_LARGE: 60px icon | name + desc | status, 85px row height.
+        LIST_SMALL: 32px icon | name only   | status, 40px row height.
+        """
         outer = QHBoxLayout(self)
-        outer.setSpacing(12)
 
-        self._create_image_widget(outer)
+        if self._list_compact:
+            # ── LIST_SMALL: compact single-line rows ──
+            outer.setSpacing(8)
+            outer.setContentsMargins(6, 2, 6, 2)
+            self._create_image_widget(outer)
 
-        text_box = QVBoxLayout()
-        text_box.setSpacing(2)
-        name_pt = max(scaled_font_pt(self.tile_scale, base_pt=12), 10)
-        self.lbl_name = QLabel(self.model.name)
-        self.lbl_name.setObjectName("CardName")
-        self.lbl_name.setFont(get_display_font(size=name_pt, weight=Weights.BOLD))
+            name_pt = max(scaled_font_pt(self.tile_scale, base_pt=10), 9)
+            self.lbl_name = QLabel(self.model.name)
+            self.lbl_name.setObjectName("CardName")
+            self.lbl_name.setFont(get_display_font(size=name_pt, weight=Weights.BOLD))
 
-        name_layout = QHBoxLayout()
-        name_layout.addWidget(self.lbl_name)
-        name_layout.addStretch()
-        text_box.addLayout(name_layout)
+            self.lbl_desc = QLabel(self.model.description)
+            self.lbl_desc.setObjectName("CardDescription")
+            self.lbl_desc.setFont(get_qfont(size=8))
+            self.lbl_desc.setVisible(False)
 
-        self.lbl_desc = QLabel(self.model.description)
-        self.lbl_desc.setObjectName("CardDescription")
-        self.lbl_desc.setFont(get_qfont(size=9))
-        self.lbl_desc.setVisible(self._show_description)
-        text_box.addWidget(self.lbl_desc)
+            outer.addWidget(self.lbl_name, 1)
+            self._create_status_chip(outer, embed_in_row=True)
+            self.setFixedHeight(40)
+        else:
+            # ── LIST_LARGE: original list with description ──
+            outer.setSpacing(12)
+            self._create_image_widget(outer)
 
-        outer.addLayout(text_box, 1)
-        self._create_status_chip(outer, embed_in_row=True)
+            text_box = QVBoxLayout()
+            text_box.setSpacing(2)
+            name_pt = max(scaled_font_pt(self.tile_scale, base_pt=12), 10)
+            self.lbl_name = QLabel(self.model.name)
+            self.lbl_name.setObjectName("CardName")
+            self.lbl_name.setFont(get_display_font(size=name_pt, weight=Weights.BOLD))
 
-        # Ensure enough space for the content
-        self.setMinimumHeight(85)
+            name_layout = QHBoxLayout()
+            name_layout.addWidget(self.lbl_name)
+            name_layout.addStretch()
+            text_box.addLayout(name_layout)
+
+            self.lbl_desc = QLabel(self.model.description)
+            self.lbl_desc.setObjectName("CardDescription")
+            self.lbl_desc.setFont(get_qfont(size=9))
+            self.lbl_desc.setVisible(self._show_description)
+            text_box.addWidget(self.lbl_desc)
+
+            outer.addLayout(text_box, 1)
+            self._create_status_chip(outer, embed_in_row=True)
+            self.setMinimumHeight(85)
 
     def _apply_card_padding(self) -> None:
         """Set contents margins on the active layout based on tile_scale."""
@@ -639,19 +680,26 @@ class DraggableModelCard(QFrame):
         *,
         show_description: bool | None = None,
         list_mode: bool | None = None,
+        list_compact: bool | None = None,
     ) -> None:
         """Resize this card in place using the supplied tile scale.
 
         Existing labels/pixmap are reused — no disk reload — but the layout
-        is rebuilt when ``list_mode`` changes (vertical vs. horizontal).
+        is rebuilt when ``list_mode`` or ``list_compact`` changes.
         """
         scale = validate_tile_scale(scale)
         if show_description is not None:
             self._show_description = bool(show_description)
         new_list_mode = self._list_mode if list_mode is None else bool(list_mode)
-        full_rebuild = new_list_mode != self._list_mode
+        new_list_compact = (
+            self._list_compact if list_compact is None else bool(list_compact)
+        )
+        full_rebuild = (new_list_mode != self._list_mode) or (
+            new_list_compact != self._list_compact
+        )
         self.tile_scale = scale
         self._list_mode = new_list_mode
+        self._list_compact = new_list_compact
 
         if full_rebuild:
             # Clear children + layout, then rebuild from scratch.

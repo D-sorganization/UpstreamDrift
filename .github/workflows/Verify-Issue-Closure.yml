@@ -22,13 +22,16 @@ on:
   issues:
     types: [closed]
 
+concurrency:
+  # One verification per issue-number so concurrent close events on the
+  # same issue collapse to a single run; lets the fleet-wide protection
+  # against runaway reopens (MAX_REOPENS counter) function correctly.
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
 permissions:
   issues: write
   pull-requests: read
-
-concurrency:
-  group: verify-issue-closure-${{ github.event.issue.number }}
-  cancel-in-progress: true
 
 jobs:
   verify-closure:
@@ -39,7 +42,7 @@ jobs:
     runs-on: d-sorg-fleet
     steps:
       - name: Check for closure evidence
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

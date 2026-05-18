@@ -31,7 +31,6 @@ from src.shared.python.physics_informed.hybrid_model import HybridPINN
 from src.shared.python.physics_informed.mlp_residual import MlpResidual
 from src.shared.python.physics_informed.rigid_core import RigidCore
 
-
 # ---------------------------------------------------------------------------
 # MlpResidual tests
 # ---------------------------------------------------------------------------

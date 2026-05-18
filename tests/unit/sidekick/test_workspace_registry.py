@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from upstream_drift_tools.ui.tools_sidebar.registry import WorkspaceRegistry
+from sidekick.ui.tools_sidebar.registry import WorkspaceRegistry
 
 pytestmark = pytest.mark.unit
 
