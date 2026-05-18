@@ -223,3 +223,11 @@ test_venv/
 # 3D golf ML generated datasets and model runs
 src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/data/processed/
 src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/runs/
+
+# Runtime logs and crash dumps (development artifacts, never commit)
+crash_log.txt
+launcher_log.txt
+stderr.txt
+stdout.txt
+error3.txt
+test_event_filter.py

@@ -1,5 +1,9 @@
 """Unified launcher interface wrapping PyQt GolfLauncher.
 
+.. deprecated::
+    This module is a legacy wrapper and should not be used for new code.
+    Use ``python -m src.launchers.golf_launcher`` directly instead.
+
 This module provides a consistent interface for launch_golf_suite.py
 that wraps the PyQt-based GolfLauncher implementation.
 
@@ -12,6 +16,7 @@ The launcher now features:
 
 import importlib
 import sys
+import warnings
 from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -28,6 +33,12 @@ else:
     QApplication = None  # type: ignore
 
 logger = get_logger(__name__)
+
+warnings.warn(
+    "unified_launcher is deprecated. Use 'python -m src.launchers.golf_launcher' instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
 def _emit_stdout(message: str) -> None:

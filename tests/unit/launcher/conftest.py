@@ -61,6 +61,7 @@ def ui_setup(qapp):
         # Re-use the production install method so #5624 tests exercise
         # the real code path.
         _install_sidekick_sidebar = _RealLauncher._install_sidekick_sidebar
+        _apply_sidekick_splitter_sizes = _RealLauncher._apply_sidekick_splitter_sizes
 
         def __init__(self) -> None:
             super().__init__()

@@ -139,6 +139,47 @@ class SettingsDialog(QDialog):
 
         tab_layout.addWidget(group)
 
+        # --- View Mode --------------------------------------------------
+        view_mode_group = QGroupBox("View Mode")
+        view_mode_inner = QVBoxLayout(view_mode_group)
+
+        self.combo_view_mode = QComboBox()
+        # Ensure enums are imported correctly inside the method scope
+        try:
+            from src.shared.python.gui_pkg.layout_manager import ViewMode
+
+            self.combo_view_mode.addItem("Tile Small", ViewMode.SMALL)
+            self.combo_view_mode.addItem("Tile Medium", ViewMode.MEDIUM)
+            self.combo_view_mode.addItem("Tile Large", ViewMode.LARGE)
+            self.combo_view_mode.addItem("List Small", ViewMode.LIST_SMALL)
+            self.combo_view_mode.addItem("List Large", ViewMode.LIST_LARGE)
+        except ImportError:
+            pass
+
+        view_mode_inner.addWidget(self.combo_view_mode)
+        tab_layout.addWidget(view_mode_group)
+
+        # --- Tile Zoom --------------------------------------------------
+        zoom_group = QGroupBox("Tile Zoom")
+        zoom_inner = QHBoxLayout(zoom_group)
+
+        from PyQt6.QtWidgets import QSlider
+
+        self.zoom_slider = QSlider(Qt.Orientation.Horizontal)
+        self.zoom_slider.setRange(0, 100)
+        self.zoom_slider.setToolTip("Adjust the size of the model tiles")
+
+        self.lbl_zoom_pct = QLabel("100%")
+        self.lbl_zoom_pct.setFixedWidth(35)
+        self.lbl_zoom_pct.setStyleSheet("color: #888888; font-family: monospace;")
+
+        zoom_inner.addWidget(QLabel("Smaller"))
+        zoom_inner.addWidget(self.zoom_slider)
+        zoom_inner.addWidget(QLabel("Larger"))
+        zoom_inner.addSpacing(10)
+        zoom_inner.addWidget(self.lbl_zoom_pct)
+        tab_layout.addWidget(zoom_group)
+
         # Sync with parent launcher
         launcher = self.parent()
         if launcher and hasattr(launcher, "btn_modify_layout"):
@@ -146,6 +187,40 @@ class SettingsDialog(QDialog):
             self._btn_layout_lock.toggled.connect(launcher.btn_modify_layout.click)
             self._btn_edit_tiles.clicked.connect(launcher.open_layout_manager)
             self._btn_layout_lock.toggled.connect(self._btn_edit_tiles.setEnabled)
+
+            # Sync view mode
+            if hasattr(launcher, "layout_manager"):
+                current_mode = launcher.layout_manager.view_mode
+                index = self.combo_view_mode.findData(current_mode)
+                if index >= 0:
+                    self.combo_view_mode.setCurrentIndex(index)
+
+                self.combo_view_mode.currentIndexChanged.connect(
+                    lambda idx: launcher._set_view_mode_from_menu(
+                        self.combo_view_mode.itemData(idx)
+                    )
+                )
+
+            # Sync zoom
+            if hasattr(launcher, "layout_manager"):
+                scale = launcher.layout_manager.tile_scale
+                val = (
+                    launcher._scale_to_slider(scale)
+                    if hasattr(launcher, "_scale_to_slider")
+                    else 50
+                )
+                self.zoom_slider.setValue(val)
+                self.lbl_zoom_pct.setText(f"{int(round(scale * 100))}%")
+
+                def on_zoom(v):
+                    if hasattr(launcher, "_slider_to_scale"):
+                        self.lbl_zoom_pct.setText(
+                            f"{int(round(launcher._slider_to_scale(v) * 100))}%"
+                        )
+                    if hasattr(launcher, "_zoom_slider_changed"):
+                        launcher._zoom_slider_changed(v)
+
+                self.zoom_slider.valueChanged.connect(on_zoom)
 
         tab_layout.addStretch()
         return tab
