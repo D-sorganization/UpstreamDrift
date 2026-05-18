@@ -55,7 +55,7 @@ models:
     name: "MyoSuite"
     description: "Muscle-actuated simulation environment"
     type: "myosim"
-    path: "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py"
+    path: "src/engines/physics_engines/myosuite/python/gui.py"
     engine_type: "myosuite"
     launcher:
       category: "physics_engine"
@@ -81,7 +81,7 @@ models:
     name: "Golf Simulation Suite"
     description: "Complete golf simulation with ball flight physics and putting green"
     type: "golf_simulation"
-    path: "launch_golf_suite.py"
+    path: "src/tools/golf_simulation_suite/__main__.py"
     engine_type: "golf_simulation"
     launcher:
       category: "simulation"
@@ -109,6 +109,39 @@ models:
       category: "simulation"
       logo: "assets/bunkershot_icon.png"
       status: "experimental"
+      default_launch: "tab"
+
+  - id: "pendulum_simulator"
+    name: "Pendulum Simulator"
+    description: "Double/triple pendulum golf swing dynamics simulator"
+    type: "special_app"
+    path: "src/shared/python/pendulum_simulator/__main__.py"
+    launcher:
+      category: "simulation"
+      logo: "assets/pendulum_icon.png"
+      status: "ready"
+      default_launch: "tab"
+
+  - id: "shot_tracer"
+    name: "Shot Tracer"
+    description: "Multi-model golf ball trajectory comparison (Waterloo, MacDonald, Nathan)"
+    type: "special_app"
+    path: "src/launchers/_shot_tracer_gui.py"
+    launcher:
+      category: "simulation"
+      logo: "assets/golf_simulation.png"
+      status: "ready"
+      default_launch: "tab"
+
+  - id: "cross_engine_dashboard"
+    name: "Cross-Engine Dashboard"
+    description: "Perturbation robustness comparison across physics engines"
+    type: "special_app"
+    path: "src/launchers/cross_engine_dashboard.py"
+    launcher:
+      category: "simulation"
+      logo: "assets/cross_engine.png"
+      status: "ready"
       default_launch: "tab"
 
   # =============================================================================
@@ -226,7 +259,7 @@ models:
     name: "Model Explorer"
     description: "Explore models and generate URDFs"
     type: "special_app"
-    path: "src/tools/model_explorer/launch_model_explorer.py"
+    path: "src/tools/model_explorer/main_window.py"
     launcher:
       category: "tool"
       logo: "assets/urdf_icon.png"

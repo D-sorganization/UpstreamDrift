@@ -20,9 +20,14 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from humanoid_launcher_analysis import AnalysisMixin
-from humanoid_launcher_sim import SimulationMixin
-from humanoid_launcher_ui import UISetupMixin
+try:
+    from humanoid_launcher_analysis import AnalysisMixin
+    from humanoid_launcher_sim import SimulationMixin
+    from humanoid_launcher_ui import UISetupMixin
+except ImportError:
+    from src.engines.physics_engines.mujoco.python.humanoid_launcher_analysis import AnalysisMixin
+    from src.engines.physics_engines.mujoco.python.humanoid_launcher_sim import SimulationMixin
+    from src.engines.physics_engines.mujoco.python.humanoid_launcher_ui import UISetupMixin
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QPalette
 from PyQt6.QtWidgets import (
@@ -223,6 +228,11 @@ class HumanoidLauncher(UISetupMixin, SimulationMixin, AnalysisMixin, QMainWindow
 
         # UI Setup
         self.setup_ui()
+
+
+def get_dockable_ui() -> QMainWindow:
+    """Return the main window instance for docking in the unified launcher."""
+    return HumanoidLauncher()
 
 
 if __name__ == "__main__":

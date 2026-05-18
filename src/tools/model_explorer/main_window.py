@@ -364,6 +364,11 @@ class URDFGeneratorWindow(QMainWindow):
         logger.info("URDF Generator window closed")
 
 
+def get_dockable_ui() -> URDFGeneratorWindow:
+    """Return the main window instance for docking in the unified launcher."""
+    return URDFGeneratorWindow()
+
+
 def main() -> None:
     """Standalone entry point for the URDF Generator."""
     from src.shared.python.logging_pkg.logging_config import configure_gui_logging

@@ -222,6 +222,26 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
         handler = self.model_handler_registry.get_handler(model.type)
         if handler:
+            # Unified Architecture: Check if handler supports docking
+            if hasattr(handler, "get_dockable_ui"):
+                try:
+                    ui_widget = handler.get_dockable_ui(model, REPOS_ROOT)
+                    if ui_widget:
+                        # Check user preference or model default; for now default to docking
+                        launch_mode = getattr(model, "launcher", {}).get("default_launch", "tab")
+                        if launch_mode == "window" and hasattr(self, "popout_widget"):
+                            self.popout_widget(ui_widget, model.name)
+                            self.show_toast(f"{model.name} Popped Out", "success")
+                        elif hasattr(self, "dock_widget_as_tab"):
+                            self.dock_widget_as_tab(ui_widget, model.name)
+                            self.show_toast(f"{model.name} Docked", "success")
+                        
+                        self.lbl_status.setText(f"* {model.name} Running")
+                        self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
+                        return
+                except Exception as e:
+                    logger.error("Failed to load dockable UI for %s: %s", model.name, e)
+
             success = handler.launch(model, REPOS_ROOT, self.process_manager)
             if success:
                 self.show_toast(f"{model.name} Launched", "success")

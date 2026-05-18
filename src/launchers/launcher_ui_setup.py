@@ -316,7 +316,26 @@ class LauncherUISetupMixin:
         self.sidekick_window = None
         self._sidekick_popped_out = False
 
-        content_layout.addWidget(self.content_splitter, 1)
+        # Add Workspace Tabs for Unified Architecture
+        from PyQt6.QtWidgets import QTabWidget
+        self.workspace_tabs = QTabWidget()
+        self.workspace_tabs.setTabsClosable(True)
+        self.workspace_tabs.setDocumentMode(True)
+        
+        def _on_tab_close_requested(index: int) -> None:
+            if index > 0:
+                widget = self.workspace_tabs.widget(index)
+                self.workspace_tabs.removeTab(index)
+                widget.deleteLater()
+                
+        self.workspace_tabs.tabCloseRequested.connect(_on_tab_close_requested)
+        
+        self.workspace_tabs.addTab(self.content_splitter, "Home")
+        # Prevent closing the Home tab
+        self.workspace_tabs.tabBar().setTabButton(0, self.workspace_tabs.tabBar().ButtonPosition.RightSide, None)
+        self.workspace_tabs.tabBar().setTabButton(0, self.workspace_tabs.tabBar().ButtonPosition.LeftSide, None)
+
+        content_layout.addWidget(self.workspace_tabs, 1)
 
         main_layout.addWidget(content_container)
 
@@ -329,6 +348,41 @@ class LauncherUISetupMixin:
 
         # Keyboard shortcuts
         self._setup_search_shortcuts()
+
+    def dock_widget_as_tab(self, widget: QWidget, title: str) -> None:
+        """Dock a submodule widget as a new tab in the workspace."""
+        if not hasattr(self, "workspace_tabs"):
+            logger.error("Workspace tabs not initialized; cannot dock widget.")
+            return
+            
+        index = self.workspace_tabs.addTab(widget, title)
+        self.workspace_tabs.setCurrentIndex(index)
+
+    def popout_widget(self, widget: QWidget, title: str) -> None:
+        """Pop out a submodule widget into a separate window."""
+        if not hasattr(self, "_popped_out_windows"):
+            self._popped_out_windows = []
+            
+        from PyQt6.QtWidgets import QDialog, QVBoxLayout
+        from PyQt6.QtCore import Qt
+        
+        # We use a non-modal dialog to allow it to float freely
+        win = QDialog(self, Qt.WindowType.Window)
+        win.setWindowTitle(title)
+        win.resize(1000, 800)
+        
+        layout = QVBoxLayout(win)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(widget)
+        
+        def on_close(event):
+            if win in self._popped_out_windows:
+                self._popped_out_windows.remove(win)
+            event.accept()
+            
+        win.closeEvent = on_close
+        self._popped_out_windows.append(win)
+        win.show()
 
     def _toggle_sidekick(self, checked: bool = None) -> None:
         """Toggle the visibility of the Sidekick pane."""

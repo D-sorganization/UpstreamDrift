@@ -109,6 +109,10 @@ class StartingPoseMatcher(QMainWindow):
 # --------------------------------------------------------------------------- #
 
 
+def get_dockable_ui() -> QtWidgets.QMainWindow:
+    """Return the main window instance for docking in the unified launcher."""
+    return StartingPoseMatcher()
+
 def main() -> int:
     app = QApplication.instance() or QApplication(sys.argv)
     if "Fusion" in QStyleFactory.keys():

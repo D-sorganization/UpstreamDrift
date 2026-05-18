@@ -44,6 +44,10 @@ class ModelHandler(Protocol):
         """Launch the model."""
         ...
 
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """Get the dockable UI widget for the model, if supported."""
+        return None
+
 
 class ModuleHandler:
     """Handler that launches a Python module via process_manager.launch_module.
@@ -80,6 +84,17 @@ class ModuleHandler:
             extra_python_paths=get_model_python_paths(model, repo_path),
         )
         return process is not None
+
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """Try to load the module and get its dockable UI widget."""
+        import importlib
+        try:
+            module = importlib.import_module(self.module_name)
+            if hasattr(module, "get_dockable_ui"):
+                return module.get_dockable_ui()
+        except Exception as e:
+            logger.debug("No dockable UI found in module %s: %s", self.module_name, e)
+        return None
 
 
 class ScriptHandler:
@@ -126,6 +141,36 @@ class ScriptHandler:
             extra_python_paths=get_model_python_paths(model, repo_path),
         )
         return process is not None
+
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """Try to load the script as a module and get its dockable UI widget."""
+        if repo_path is None:
+            return None
+        script_path = repo_path / self._script_path
+        if not script_path.exists():
+            return None
+        
+        import importlib.util
+        import sys
+        
+        # Add repo_path to sys.path temporarily to resolve imports
+        original_sys_path = sys.path.copy()
+        if str(repo_path) not in sys.path:
+            sys.path.insert(0, str(repo_path))
+            
+        try:
+            module_name = self._script_path.replace("/", "_").replace("\\", "_").replace(".py", "")
+            spec = importlib.util.spec_from_file_location(module_name, str(script_path))
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                if hasattr(module, "get_dockable_ui"):
+                    return module.get_dockable_ui()
+        except Exception as e:
+            logger.debug("No dockable UI found in script %s: %s", self._script_path, e)
+        finally:
+            sys.path = original_sys_path
+        return None
 
 
 class SpecialAppHandler:
@@ -187,6 +232,44 @@ class SpecialAppHandler:
             extra_python_paths=get_model_python_paths(model, repo_path),
         )
         return process is not None
+
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """Try to load the special app script and get its dockable UI widget."""
+        if repo_path is None:
+            return None
+        model_path = getattr(model, "path", None) or ""
+        if not model_path:
+            return None
+            
+        script_path = resolve_model_artifact_path(model, repo_path)
+        if not script_path.exists():
+            return None
+            
+        import importlib.util
+        import sys
+        
+        original_sys_path = sys.path.copy()
+        try:
+            # Inject paths
+            paths = get_model_python_paths(model, repo_path)
+            if str(repo_path) not in sys.path:
+                sys.path.insert(0, str(repo_path))
+            for p in paths:
+                if str(p) not in sys.path:
+                    sys.path.insert(0, str(p))
+                    
+            module_name = str(script_path.name).replace(".py", "")
+            spec = importlib.util.spec_from_file_location(module_name, str(script_path))
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                if hasattr(module, "get_dockable_ui"):
+                    return module.get_dockable_ui()
+        except Exception as e:
+            logger.debug("No dockable UI found in special app %s: %s", script_path, e)
+        finally:
+            sys.path = original_sys_path
+        return None
 
 
 class PuttingGreenHandler:
