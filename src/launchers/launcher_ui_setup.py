@@ -376,10 +376,9 @@ class LauncherUISetupMixin:
         """Toggle the visibility of the global navigation sidebar."""
         if not hasattr(self, "sidebar_widget") or self.sidebar_widget is None:
             return
-        if checked is None:
-            visible = not self.sidebar_widget.isVisible()
-        else:
-            visible = checked
+        visible = (
+            not self.sidebar_widget.isVisible() if checked is None else checked
+        )
         self.sidebar_widget.setVisible(visible)
 
         # Ensure proper splitter sizes when showing
@@ -1144,7 +1143,10 @@ class LauncherUISetupMixin:
         self.btn_toggle_left_sidebar = QToolButton(self)
         try:
             from src.shared.python.theme.icon_utils import IconColorizer
-            self.btn_toggle_left_sidebar.setIcon(IconColorizer.get_icon("menu", "#cccccc"))
+
+            self.btn_toggle_left_sidebar.setIcon(
+                IconColorizer.get_icon("menu", "#cccccc")
+            )
         except ImportError:
             self.btn_toggle_left_sidebar.setText("☰")
         self.btn_toggle_left_sidebar.setToolTip("Toggle Navigation Sidebar")
@@ -1164,7 +1166,10 @@ class LauncherUISetupMixin:
         self.btn_toggle_right_sidebar = QToolButton(self)
         try:
             from src.shared.python.theme.icon_utils import IconColorizer
-            self.btn_toggle_right_sidebar.setIcon(IconColorizer.get_icon("chat", "#cccccc"))
+
+            self.btn_toggle_right_sidebar.setIcon(
+                IconColorizer.get_icon("chat", "#cccccc")
+            )
         except ImportError:
             self.btn_toggle_right_sidebar.setText("💬")
         self.btn_toggle_right_sidebar.setToolTip("Toggle Sidekick Chat")

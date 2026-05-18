@@ -26,7 +26,7 @@ def _get_title_bar_colors() -> dict[str, str]:
             DARK_THEME, "border_default", colors.get("border", "#555555")
         )
         _fb_bg = getattr(DARK_THEME, "bg_elevated", "#1A1A1A")
-        
+
         return {
             "text": "#E0E0E0",  # Always light text for dark background
             "bg": colors.get("bg_elevated", _fb_bg),  # Match left sidebar background
@@ -45,6 +45,7 @@ def _get_title_bar_colors() -> dict[str, str]:
 def clamp_to_visible_screen(target: QPoint) -> QPoint:
     """Clamp a QPoint to the nearest visible screen area."""
     from PyQt6.QtWidgets import QApplication
+
     screen = QApplication.primaryScreen()
     if screen:
         geom = screen.availableGeometry()
@@ -249,7 +250,7 @@ class CustomTitleBar(QWidget):
                     - self.window().frameGeometry().topLeft()
                 )
                 return False  # Let the event propagate or at least don't eat it so mouse grab works
-        elif event.type() == event.Type.MouseMove:
+        elif event.type() == event.Type.MouseMove:  # noqa: SIM102 (separated for symmetry with the press branch above)
             if event.buttons() & Qt.MouseButton.LeftButton:
                 if isinstance(obj, QToolButton):
                     return False

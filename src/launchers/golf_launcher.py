@@ -523,8 +523,12 @@ class GolfLauncher(
         bootstrap_embeddable_tools()
 
         # Start the background API server so the Sidekick Chat UI can connect
-        cwd = REPOS_ROOT / "UpstreamDrift" if (REPOS_ROOT / "UpstreamDrift").exists() else REPOS_ROOT
-        
+        cwd = (
+            REPOS_ROOT / "UpstreamDrift"
+            if (REPOS_ROOT / "UpstreamDrift").exists()
+            else REPOS_ROOT
+        )
+
         self.process_manager.launch_module(
             name="background_api_server",
             module_name="src.api.server",
