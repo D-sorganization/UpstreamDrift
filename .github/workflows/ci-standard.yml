@@ -34,6 +34,7 @@ jobs:
   local-only-workflows:
     name: Reject hosted runner routing
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Run local-only workflow guard
         shell: bash
@@ -43,6 +44,7 @@ jobs:
   pinned-actions:
     name: Enforce action SHA pinning
     runs-on: d-sorg-fleet
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Run GitHub Actions pinning guard
@@ -52,6 +54,7 @@ jobs:
   workflow-inventory:
     name: Enforce workflow inventory
     runs-on: d-sorg-fleet
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Run workflow inventory guard
@@ -61,6 +64,7 @@ jobs:
   urdf-layering:
     name: Enforce URDF subsystem layering (ADR 0007)
     runs-on: d-sorg-fleet
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Run URDF layering guard
@@ -992,6 +996,7 @@ jobs:
   frontend-tests:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: ./ui
@@ -1053,6 +1058,7 @@ jobs:
   matlab-tests:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 30
     if: false # DISABLED - Requires MATLAB license not available in CI
     continue-on-error: true
     steps:
@@ -1073,6 +1079,7 @@ jobs:
   arduino-build:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 15
     if: false # DISABLED - No Arduino components in this project
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
@@ -1106,16 +1113,20 @@ jobs:
     # `[workspace] exclude = ["ui/src-tauri"]` and is covered separately by
     # tauri-build.yml.
     #
-    # Runner choice: GitHub-hosted runners are used for all three OSes. The
-    # self-hosted `d-sorg-fleet` label is Linux-only, so Windows and macOS
-    # have to be hosted; running Linux on hosted too keeps the matrix uniform
-    # (same caching keys, same tool installs, same shell semantics).
+    # Runner choice: Linux-only on self-hosted d-sorg-fleet. The
+    # cross-platform matrix entries (windows-latest, macos-latest) were dropped
+    # 2026-05-17 because the fleet has no Windows or macOS runners and the org
+    # policy forbids fallback to GitHub-hosted runners (Runner_Dashboard#641).
+    # The os axis is retained as a single-entry matrix so step-level
+    # `if: matrix.os == 'ubuntu-latest'` guards continue to fire and artifact
+    # naming keyed on `${{ matrix.os }}` stays stable. Restoring Windows and
+    # macOS coverage is tracked in Runner_Dashboard#642 (macOS) and #643 (Windows).
     needs: pick-runner
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+        os: [ubuntu-latest]
+    runs-on: d-sorg-fleet
     timeout-minutes: 25
     defaults:
       run:
