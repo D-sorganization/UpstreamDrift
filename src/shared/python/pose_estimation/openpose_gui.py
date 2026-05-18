@@ -293,6 +293,11 @@ class OpenPoseGUI(QMainWindow):
         self.log_area.append(msg)
 
 
+def get_dockable_ui() -> OpenPoseGUI:
+    """Return the main window instance for docking in the unified launcher."""
+    return OpenPoseGUI()
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = OpenPoseGUI()

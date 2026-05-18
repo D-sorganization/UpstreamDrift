@@ -1,4 +1,4 @@
-"""UI setup and initialization mixins for GolfLauncher.
+"""UI setup and initialization mixins for UpstreamDriftLauncher.
 
 Contains menu bar, top bar, grid area, bottom bar, search, console,
 context help, and AI panel setup methods.
@@ -91,7 +91,7 @@ def _build_menu_bar_close_widget(parent: QWidget, close_callback: Any) -> QWidge
 
 
 class LauncherUISetupMixin:
-    """Mixin for GolfLauncher UI initialization.
+    """Mixin for UpstreamDriftLauncher UI initialization.
 
     Provides methods for building the menu bar, top bar, grid area,
     bottom bar, search shortcuts, process console, context help, and AI panel.
@@ -305,7 +305,7 @@ class LauncherUISetupMixin:
         # deprecated-chat sweep (UpstreamDrift #5620). The canonical chat
         # surface is now the Sidekick dock's "Chat" tab, provided by the
         # vendored ``sidekick.ui.tools_sidebar`` package via
-        # ``_install_sidekick_sidebar()`` in ``golf_launcher.py``.
+        # ``_install_sidekick_sidebar()`` in ``upstream_drift_launcher.py``.
         # ``toggle_ai_assistant`` and other ``hasattr(self, "ai_panel")``
         # call sites become safe no-ops; a follow-up issue rewires them to
         # raise/focus the Sidekick chat tab. Do NOT re-introduce a second
@@ -316,7 +316,31 @@ class LauncherUISetupMixin:
         self.sidekick_window = None
         self._sidekick_popped_out = False
 
-        content_layout.addWidget(self.content_splitter, 1)
+        # Add Workspace Tabs for Unified Architecture
+        from PyQt6.QtWidgets import QTabWidget
+
+        self.workspace_tabs = QTabWidget()
+        self.workspace_tabs.setTabsClosable(True)
+        self.workspace_tabs.setDocumentMode(True)
+
+        def _on_tab_close_requested(index: int) -> None:
+            if index > 0:
+                widget = self.workspace_tabs.widget(index)
+                self.workspace_tabs.removeTab(index)
+                widget.deleteLater()
+
+        self.workspace_tabs.tabCloseRequested.connect(_on_tab_close_requested)
+
+        self.workspace_tabs.addTab(self.content_splitter, "Home")
+        # Prevent closing the Home tab
+        self.workspace_tabs.tabBar().setTabButton(
+            0, self.workspace_tabs.tabBar().ButtonPosition.RightSide, None
+        )
+        self.workspace_tabs.tabBar().setTabButton(
+            0, self.workspace_tabs.tabBar().ButtonPosition.LeftSide, None
+        )
+
+        content_layout.addWidget(self.workspace_tabs, 1)
 
         main_layout.addWidget(content_container)
 
@@ -329,6 +353,41 @@ class LauncherUISetupMixin:
 
         # Keyboard shortcuts
         self._setup_search_shortcuts()
+
+    def dock_widget_as_tab(self, widget: QWidget, title: str) -> None:
+        """Dock a submodule widget as a new tab in the workspace."""
+        if not hasattr(self, "workspace_tabs"):
+            logger.error("Workspace tabs not initialized; cannot dock widget.")
+            return
+
+        index = self.workspace_tabs.addTab(widget, title)
+        self.workspace_tabs.setCurrentIndex(index)
+
+    def popout_widget(self, widget: QWidget, title: str) -> None:
+        """Pop out a submodule widget into a separate window."""
+        if not hasattr(self, "_popped_out_windows"):
+            self._popped_out_windows = []
+
+        from PyQt6.QtWidgets import QDialog, QVBoxLayout
+        from PyQt6.QtCore import Qt
+
+        # We use a non-modal dialog to allow it to float freely
+        win = QDialog(self, Qt.WindowType.Window)
+        win.setWindowTitle(title)
+        win.resize(1000, 800)
+
+        layout = QVBoxLayout(win)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(widget)
+
+        def on_close(event):
+            if win in self._popped_out_windows:
+                self._popped_out_windows.remove(win)
+            event.accept()
+
+        win.closeEvent = on_close
+        self._popped_out_windows.append(win)
+        win.show()
 
     def _toggle_sidekick(self, checked: bool = None) -> None:
         """Toggle the visibility of the Sidekick pane."""
@@ -968,19 +1027,25 @@ class LauncherUISetupMixin:
 
     def _setup_top_bar_config_checkboxes(self, top_bar: QHBoxLayout) -> None:
         """Create config checkboxes and layout controls, adding them to top bar."""
+        from PyQt6.QtCore import QSettings
+
+        settings = QSettings("UpstreamDrift", "Launcher")
+
         self.chk_live = QCheckBox("Live Viz")
-        self.chk_live.setChecked(True)
+        self.chk_live.setChecked(settings.value("chk_live", True, type=bool))
 
         self.chk_gpu = QCheckBox("GPU")
-        self.chk_gpu.setChecked(False)
+        self.chk_gpu.setChecked(settings.value("chk_gpu", False, type=bool))
 
         self.chk_docker = QCheckBox("Docker")
-        # Default to Docker mode if available
-        self.chk_docker.setChecked(getattr(self, "docker_available", False))
+        docker_default = getattr(self, "docker_available", False)
+        self.chk_docker.setChecked(
+            settings.value("chk_docker", docker_default, type=bool)
+        )
         self.chk_docker.stateChanged.connect(self._on_docker_mode_changed)
 
         self.chk_wsl = QCheckBox("WSL")
-        self.chk_wsl.setChecked(False)
+        self.chk_wsl.setChecked(settings.value("chk_wsl", False, type=bool))
         self.chk_wsl.stateChanged.connect(self._on_wsl_mode_changed)
 
         # Layout controls were moved to the View menu per user request.
@@ -1283,14 +1348,16 @@ class LauncherUISetupMixin:
         toolbar.addWidget(clear_btn)
         console_layout.addLayout(toolbar)
 
-        self._console_dock = QDockWidget("Process Output", self)
-        self._console_dock.setAllowedAreas(
-            Qt.DockWidgetArea.BottomDockWidgetArea
-            | Qt.DockWidgetArea.RightDockWidgetArea
-            | Qt.DockWidgetArea.LeftDockWidgetArea
-        )
-        self._console_dock.setWidget(console_container)
-        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self._console_dock)
+        from PyQt6.QtWidgets import QDialog
+
+        self._console_dock = QDialog(self, Qt.WindowType.Window)
+        self._console_dock.setWindowTitle("Process Output")
+        self._console_dock.resize(800, 300)
+
+        dl_layout = QVBoxLayout(self._console_dock)
+        dl_layout.setContentsMargins(0, 0, 0, 0)
+        dl_layout.addWidget(console_container)
+
         self._console_dock.hide()
 
     def _on_process_output(self, engine_name: str, line: str) -> None:
@@ -1336,9 +1403,21 @@ class LauncherUISetupMixin:
     def _setup_context_help(self) -> None:
         """Setup context help dock."""
         from src.launchers.ui_components import ContextHelpDock
+        from PyQt6.QtWidgets import QDialog
 
-        self.context_help = ContextHelpDock(self)
-        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.context_help)
+        self.context_help = QDialog(self, Qt.WindowType.Window)
+        self.context_help.setWindowTitle("Context Help")
+        self.context_help.resize(400, 800)
+
+        dl_layout = QVBoxLayout(self.context_help)
+        dl_layout.setContentsMargins(0, 0, 0, 0)
+
+        help_widget = ContextHelpDock(self)
+        dl_layout.addWidget(help_widget)
+
+        # Proxy the update_context method to the inner widget
+        self.context_help.update_context = help_widget.update_context
+
         self.context_help.hide()
 
     # -- Overlay --

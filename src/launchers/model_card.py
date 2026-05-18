@@ -170,39 +170,40 @@ class DraggableModelCard(QFrame):
         self.drag_start_position = QPoint()
 
         self.is_selected = False
-        self._base_style = """
-            #ModelCard {
-                background-color: rgba(255, 255, 255, 0.05);
-                border: 1px solid rgba(255, 255, 255, 0.12);
+        c = _get_theme_colors()
+        self._base_style = f"""
+            #ModelCard {{
+                background-color: {c.surface_hover};
+                border: 1px solid {c.border_light};
                 border-radius: 16px;
-            }
-            #ModelCard:hover {
-                background-color: rgba(255, 255, 255, 0.12);
-                border: 1px solid rgba(255, 255, 255, 0.25);
-            }
-            #CardName {
-                color: #ffffff;
-            }
-            #CardDescription {
-                color: #aaaaaa;
-            }
+            }}
+            #ModelCard:hover {{
+                background-color: {c.surface_active};
+                border: 1px solid {c.border_strong};
+            }}
+            #CardName {{
+                color: {c.text_primary};
+            }}
+            #CardDescription {{
+                color: {c.text_secondary};
+            }}
         """
-        self._selected_style = """
-            #ModelCard {
-                background-color: rgba(255, 136, 0, 0.2);
-                border: 2px solid rgba(255, 136, 0, 0.8);
+        self._selected_style = f"""
+            #ModelCard {{
+                background-color: {c.accent_muted};
+                border: 2px solid {c.accent_primary};
                 border-radius: 16px;
-            }
-            #ModelCard:hover {
-                background-color: rgba(255, 136, 0, 0.3);
-                border: 2px solid rgba(255, 136, 0, 0.9);
-            }
-            #CardName {
-                color: #ffffff;
-            }
-            #CardDescription {
-                color: #eeeeee;
-            }
+            }}
+            #ModelCard:hover {{
+                background-color: {c.accent_muted};
+                border: 2px solid {c.accent_hover};
+            }}
+            #CardName {{
+                color: {c.text_primary};
+            }}
+            #CardDescription {{
+                color: {c.text_secondary};
+            }}
         """
         # Glassmorphism styling - enhanced with translucent backgrounds and background-blur effect
         self.setStyleSheet(self._base_style)

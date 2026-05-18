@@ -361,6 +361,10 @@ class _EmbedAdapter:
 register_embeddable_tool(_EmbedAdapter())
 
 
+def get_dockable_ui() -> QtWidgets.QMainWindow:
+    """Return the main window instance for docking in the unified launcher."""
+    return PoseStudioWindow()
+
 def main(argv: list[str] | None = None) -> int:
     """Entry point used by ``python -m src.tools.pose_studio``."""
     if argv is None:

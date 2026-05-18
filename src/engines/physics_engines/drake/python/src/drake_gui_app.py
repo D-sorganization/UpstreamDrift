@@ -475,6 +475,10 @@ class MainWidget(QtWidgets.QWidget if HAS_QT else object):  # type: ignore[misc]
                     pass
 
 
+def get_dockable_ui() -> QtWidgets.QMainWindow:
+    """Return the main window instance for docking in the unified launcher."""
+    return DrakeSimApp()
+
 def main() -> None:
     """Launch the Drake golf swing analysis GUI."""
     setup_logging()

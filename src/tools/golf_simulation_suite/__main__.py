@@ -77,9 +77,13 @@ class GolfSimulationWindow(QMainWindow):
         self.plotter.reset_camera()
 
 
+def get_dockable_ui() -> QMainWindow:
+    """Return the main window instance for docking in the unified launcher."""
+    return GolfSimulationWindow()
+
 def main():
     logging.basicConfig(level=logging.INFO)
-    app = QApplication(sys.argv)
+    app = QApplication.instance() or QApplication(sys.argv)
     window = GolfSimulationWindow()
     window.show()
     sys.exit(app.exec())

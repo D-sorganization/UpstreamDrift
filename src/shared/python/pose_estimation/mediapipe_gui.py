@@ -296,6 +296,11 @@ class MediaPipeGUI(QMainWindow):
         self.log_area.append(msg)
 
 
+def get_dockable_ui() -> MediaPipeGUI:
+    """Return the main window instance for docking in the unified launcher."""
+    return MediaPipeGUI()
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MediaPipeGUI()
