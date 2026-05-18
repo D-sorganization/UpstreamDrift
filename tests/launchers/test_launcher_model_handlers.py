@@ -370,9 +370,7 @@ class TestManifestTileHandlerRegistration:
             handler = registry.get_handler(tile.type)
             if handler is None:
                 missing.append(f"{tile.id!r} (type={tile.type!r})")
-        assert not missing, (
-            f"No handler registered for tiles: {', '.join(missing)}"
-        )
+        assert not missing, f"No handler registered for tiles: {', '.join(missing)}"
 
     def test_handler_can_handle_returns_true_for_manifest_types(
         self, manifest: LauncherManifest, registry: ModelHandlerRegistry
@@ -392,16 +390,25 @@ class TestManifestTileHandlerRegistration:
         manifest = LauncherManifest.load()
         # Static tiles that must always have MODEL_IMAGES entries
         static_ids = {
-            "model_explorer", "mujoco_unified", "drake_golf", "pinocchio_golf",
-            "opensim_golf", "myosim_suite", "putting_green", "matlab_unified",
-            "motion_target_preview", "motion_capture", "video_analyzer",
-            "video_processor", "data_explorer", "data_processor",
-            "project_map", "starting_pose_matcher",
+            "model_explorer",
+            "mujoco_unified",
+            "drake_golf",
+            "pinocchio_golf",
+            "opensim_golf",
+            "myosim_suite",
+            "putting_green",
+            "matlab_unified",
+            "motion_target_preview",
+            "motion_capture",
+            "video_analyzer",
+            "video_processor",
+            "data_explorer",
+            "data_processor",
+            "project_map",
+            "starting_pose_matcher",
         }
         missing: list[str] = []
         for tile in manifest.tiles:
             if tile.id in static_ids and tile.name not in MODEL_IMAGES:
                 missing.append(f"{tile.id!r} (name={tile.name!r})")
-        assert not missing, (
-            f"MODEL_IMAGES missing entries for: {', '.join(missing)}"
-        )
+        assert not missing, f"MODEL_IMAGES missing entries for: {', '.join(missing)}"

@@ -4,6 +4,7 @@ no src/ or tests/ file (except this one) should import from upstream_drift_tools
 
 Issue: #5619
 """
+
 import pathlib
 import subprocess
 

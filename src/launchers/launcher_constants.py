@@ -68,7 +68,9 @@ def _get_config_dir() -> Path:
             logger.warning("Could not migrate old .kiro/ config: %s", exc)
 
     # DbC postcondition
-    assert ".kiro" not in str(new_dir), f"Config dir must not be under .kiro/: {new_dir}"
+    assert ".kiro" not in str(new_dir), (
+        f"Config dir must not be under .kiro/: {new_dir}"
+    )
     return new_dir
 
 

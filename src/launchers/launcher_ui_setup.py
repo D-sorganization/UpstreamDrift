@@ -376,9 +376,7 @@ class LauncherUISetupMixin:
         """Toggle the visibility of the global navigation sidebar."""
         if not hasattr(self, "sidebar_widget") or self.sidebar_widget is None:
             return
-        visible = (
-            not self.sidebar_widget.isVisible() if checked is None else checked
-        )
+        visible = not self.sidebar_widget.isVisible() if checked is None else checked
         self.sidebar_widget.setVisible(visible)
 
         # Ensure proper splitter sizes when showing
