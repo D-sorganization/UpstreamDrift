@@ -98,7 +98,9 @@ class LauncherDialogsMixin:
         """Open the Project Map document in the system viewer."""
         project_map = REPOS_ROOT / "docs" / "PROJECT_MAP.md"
         if project_map.exists():
-            QDesktopServices.openUrl(QUrl.fromLocalFile(str(project_map)))
+            from src.shared.python.ui.qt.widgets.document_reader import show_document
+
+            show_document(project_map, self)
         else:
             QMessageBox.warning(
                 self,

@@ -116,6 +116,26 @@ def build_help_menu(
         handler=open_motion_match_loaders_doc,
     )
     menu.addSeparator()
+
+    def open_document_reader_file_dialog() -> None:
+        from PyQt6.QtWidgets import QFileDialog
+        from src.shared.python.ui.qt.widgets.document_reader import show_document
+
+        path, _ = QFileDialog.getOpenFileName(
+            parent, "Open Document", "", "Documents (*.md *.pdf *.tex);;All Files (*.*)"
+        )
+        if path:
+            show_document(path)
+
+    _add_action(
+        menu,
+        parent,
+        "&Open Document Reader...",
+        tooltip="Open a local PDF, Markdown, or LaTeX document",
+        status_tip="Opens local document for troubleshooting",
+        handler=open_document_reader_file_dialog,
+    )
+    menu.addSeparator()
     _add_action(
         menu,
         parent,
