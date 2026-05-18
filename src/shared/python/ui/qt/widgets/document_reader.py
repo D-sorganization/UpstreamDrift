@@ -133,7 +133,7 @@ class DocumentReaderWidget(QWidget):
 
     def _load_markdown(self, path: Path) -> None:
         try:
-            import markdown
+            import markdown  # type: ignore
 
             with open(path, encoding="utf-8") as f:
                 text = f.read()
@@ -151,7 +151,7 @@ class DocumentReaderWidget(QWidget):
 
     def _load_pdf(self, path: Path) -> None:
         try:
-            import pypdfium2 as pdfium
+            import pypdfium2 as pdfium  # type: ignore
         except ImportError:
             QMessageBox.warning(
                 self, "Dependency Missing", "pypdfium2 is required for PDF rendering."
