@@ -15,7 +15,7 @@ from typing import Any
 
 import pytest
 
-from upstream_drift_tools.ui.tools_sidebar.registry import WorkspaceRegistry
+from sidekick.ui.tools_sidebar.registry import WorkspaceRegistry
 
 pytestmark = pytest.mark.unit
 
@@ -44,7 +44,7 @@ _skip_qt = pytest.mark.skipif(
 
 def _make_model(registry: WorkspaceRegistry) -> Any:
     """Import and construct WorkspaceTableModel (lazy to avoid collection errors)."""
-    from upstream_drift_tools.ui.tools_sidebar.workspace_table import (
+    from sidekick.ui.tools_sidebar.workspace_table import (
         WorkspaceTableModel,
     )
 

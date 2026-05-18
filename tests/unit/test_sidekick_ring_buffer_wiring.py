@@ -17,7 +17,6 @@ import pytest
 
 import src.shared.python.ai.chat_context as chat_context
 
-
 # ── Fixtures ─────────────────────────────────────────────────────────
 
 
@@ -67,9 +66,9 @@ class TestDiagnosticsRingBufferIntegration:
             if isinstance(ev.get("payload"), dict)
         }
         # Events should contain check names
-        assert check_names, (
-            "Ring-buffer events should contain 'check' fields with check names."
-        )
+        assert (
+            check_names
+        ), "Ring-buffer events should contain 'check' fields with check names."
 
     def test_single_check_populates_ring_buffer(self) -> None:
         """A single check (check_python_environment) emits one ring-buffer event."""
@@ -82,9 +81,9 @@ class TestDiagnosticsRingBufferIntegration:
         diag.check_python_environment()
 
         ctx = chat_context.get_chat_context()
-        assert ctx["count"] >= 1, (
-            "check_python_environment() must emit at least one ring-buffer event."
-        )
+        assert (
+            ctx["count"] >= 1
+        ), "check_python_environment() must emit at least one ring-buffer event."
         first_event = ctx["events"][0]
         assert first_event.get("category") == "diagnostic"
         payload = first_event.get("payload", {})

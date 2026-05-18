@@ -185,9 +185,7 @@ class OptionalCollectionRule:
     symbols: tuple[tuple[str, str], ...] = ()
 
 
-_PROCESS_CALCULATOR_ANCHOR = (
-    "sidekick.process_calculators.acid_gas_dewpoint_calculator"
-)
+_PROCESS_CALCULATOR_ANCHOR = "sidekick.process_calculators.acid_gas_dewpoint_calculator"
 _PROCESS_CALCULATOR_TESTS = (
     "tests/unit/process_calculators",
     "tests/unit/injury/test_injury_risk.py",

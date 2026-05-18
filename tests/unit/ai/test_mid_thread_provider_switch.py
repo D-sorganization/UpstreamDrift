@@ -105,9 +105,9 @@ class TestSwitchDoesNotMutateHistory:
             panel.switch_provider("openai", "gpt-4o", "off")
 
         messages_after = [(m.role, m.content) for m in panel._context.messages]
-        assert messages_before == messages_after, (
-            "Message history must not be mutated by provider switch"
-        )
+        assert (
+            messages_before == messages_after
+        ), "Message history must not be mutated by provider switch"
 
     def test_switch_does_not_add_messages_to_history(self) -> None:
         """switch_provider must not append any messages to the history."""
@@ -153,9 +153,9 @@ class TestSwitchReplaysHistoryToNewAdapter:
         ):
             panel.switch_provider("openai", "gpt-4o", "off")
 
-        assert panel._adapter is mock_new_adapter, (
-            "self._adapter must be the new adapter after switch_provider()"
-        )
+        assert (
+            panel._adapter is mock_new_adapter
+        ), "self._adapter must be the new adapter after switch_provider()"
 
     def test_failed_switch_does_not_update_adapter(self) -> None:
         """If adapter creation fails, self._adapter is unchanged."""
@@ -173,9 +173,9 @@ class TestSwitchReplaysHistoryToNewAdapter:
         with patch.object(panel, "_create_adapter_for_provider", return_value=None):
             panel.switch_provider("openai", "gpt-4o", "off")
 
-        assert panel._adapter is original_adapter, (
-            "self._adapter must be unchanged when adapter creation fails"
-        )
+        assert (
+            panel._adapter is original_adapter
+        ), "self._adapter must be unchanged when adapter creation fails"
 
 
 class TestSwitchRecordsProvenance:

@@ -82,16 +82,16 @@ class TestManifestLoading:
     def test_manifest_has_version(self, manifest: LauncherManifest) -> None:
         """Manifest includes a version string."""
         assert manifest.version, "Assertion failed: manifest.version"
-        assert isinstance(manifest.version, str), (
-            "Assertion failed: isinstance(manifest.version, str)"
-        )
+        assert isinstance(
+            manifest.version, str
+        ), "Assertion failed: isinstance(manifest.version, str)"
 
     def test_manifest_has_no_duplicate_ids(self, manifest: LauncherManifest) -> None:
         """DBC Postcondition: all tile IDs must be unique."""
         ids = [t.id for t in manifest.tiles]
-        assert len(ids) == len(set(ids)), (
-            f"Duplicate IDs found: {[x for x in ids if ids.count(x) > 1]}"
-        )
+        assert len(ids) == len(
+            set(ids)
+        ), f"Duplicate IDs found: {[x for x in ids if ids.count(x) > 1]}"
 
     def test_manifest_file_not_found_raises(self) -> None:
         """DBC Precondition: missing file raises FileNotFoundError."""
@@ -182,18 +182,18 @@ models:
 
         tile = manifest.get_tile("external_mujoco")
         assert tile is not None, "Assertion failed: tile is not None"
-        assert tile.category == "physics_engine", (
-            "Assertion failed: tile.category == physics_engine"
-        )
-        assert tile.provider == "mujoco_models", (
-            "Assertion failed: tile.provider == mujoco_models"
-        )
-        assert tile.source_root == str(provider_root), (
-            "Assertion failed: tile.source_root == str(provider_root)"
-        )
-        assert tile.logo == "mujoco_humanoid.svg", (
-            "Assertion failed: tile.logo == mujoco_humanoid.svg"
-        )
+        assert (
+            tile.category == "physics_engine"
+        ), "Assertion failed: tile.category == physics_engine"
+        assert (
+            tile.provider == "mujoco_models"
+        ), "Assertion failed: tile.provider == mujoco_models"
+        assert tile.source_root == str(
+            provider_root
+        ), "Assertion failed: tile.source_root == str(provider_root)"
+        assert (
+            tile.logo == "mujoco_humanoid.svg"
+        ), "Assertion failed: tile.logo == mujoco_humanoid.svg"
         assert tile.capabilities == (
             "rigid_body",
             "contact",
@@ -245,16 +245,16 @@ models:
 
         tile = manifest.get_tile("external_drake")
         assert tile is not None, "Assertion failed: tile is not None"
-        assert tile.category == "physics_engine", (
-            "Assertion failed: tile.category == physics_engine"
-        )
+        assert (
+            tile.category == "physics_engine"
+        ), "Assertion failed: tile.category == physics_engine"
         assert tile.logo == "drake.svg", "Assertion failed: tile.logo == drake.svg"
-        assert tile.status == "experimental", (
-            "Assertion failed: tile.status == experimental"
-        )
-        assert tile.web_route == "/providers/drake", (
-            "Assertion failed: tile.web_route == /providers/drake"
-        )
+        assert (
+            tile.status == "experimental"
+        ), "Assertion failed: tile.status == experimental"
+        assert (
+            tile.web_route == "/providers/drake"
+        ), "Assertion failed: tile.web_route == /providers/drake"
 
     def test_manifest_marks_provider_tile_runtime_unavailable(
         self,
@@ -310,9 +310,9 @@ models:
 
         tile = manifest.get_tile("external_pinocchio")
         assert tile is not None, "Assertion failed: tile is not None"
-        assert tile.status == "runtime_unavailable", (
-            "Assertion failed: tile.status == runtime_unavailable"
-        )
+        assert (
+            tile.status == "runtime_unavailable"
+        ), "Assertion failed: tile.status == runtime_unavailable"
 
     def test_manifest_loads_utility_provider_tiles_from_known_roots_without_env(
         self,
@@ -363,9 +363,9 @@ models:
         assert tile is not None, "Assertion failed: tile is not None"
         assert tile.category == "tool", "Assertion failed: tile.category == tool"
         assert tile.status == "utility", "Assertion failed: tile.status == utility"
-        assert tile.web_route == "/tools/pendulum-suite", (
-            "Assertion failed: tile.web_route == /tools/pendulum-suite"
-        )
+        assert (
+            tile.web_route == "/tools/pendulum-suite"
+        ), "Assertion failed: tile.web_route == /tools/pendulum-suite"
 
     def test_manifest_ignores_provider_tiles_when_disabled(
         self,
@@ -406,9 +406,9 @@ models:
             registry_path=registry_path,
         )
 
-        assert manifest.get_tile("external_opensim") is None, (
-            "Assertion failed: manifest.get_tile(external_opensim) is None"
-        )
+        assert (
+            manifest.get_tile("external_opensim") is None
+        ), "Assertion failed: manifest.get_tile(external_opensim) is None"
 
 
 # =============================================================================
@@ -433,9 +433,9 @@ class TestTileProperties:
     def test_all_tiles_have_valid_category(self, manifest: LauncherManifest) -> None:
         """Category must be one of the allowed values."""
         for tile in manifest.tiles:
-            assert tile.category in LAUNCHER_CATEGORIES, (
-                f"Tile '{tile.id}' has invalid category: '{tile.category}'"
-            )
+            assert (
+                tile.category in LAUNCHER_CATEGORIES
+            ), f"Tile '{tile.id}' has invalid category: '{tile.category}'"
 
     def test_physics_engines_have_engine_type(self, manifest: LauncherManifest) -> None:
         """All physics_engine tiles must have an engine_type."""
@@ -456,15 +456,15 @@ class TestTileProperties:
         """Tile can roundtrip through dict serialization."""
         tile = LauncherTile.from_dict(sample_tile_dict)
         result = tile.to_dict()
-        assert result["id"] == sample_tile_dict["id"], (
-            "Assertion failed: result[id] == sample_tile_dict[id]"
-        )
-        assert result["name"] == sample_tile_dict["name"], (
-            "Assertion failed: result[name] == sample_tile_dict[name]"
-        )
-        assert result["capabilities"] == sample_tile_dict["capabilities"], (
-            "Assertion failed: result[capabilities] == sample_tile_dict[capabilities]"
-        )
+        assert (
+            result["id"] == sample_tile_dict["id"]
+        ), "Assertion failed: result[id] == sample_tile_dict[id]"
+        assert (
+            result["name"] == sample_tile_dict["name"]
+        ), "Assertion failed: result[name] == sample_tile_dict[name]"
+        assert (
+            result["capabilities"] == sample_tile_dict["capabilities"]
+        ), "Assertion failed: result[capabilities] == sample_tile_dict[capabilities]"
 
 
 # =============================================================================
@@ -485,19 +485,19 @@ class TestLogoValidation:
         All SVG logos were created in Phase 3 (closes #1164).
         """
         missing = manifest.validate_logos()
-        assert not missing, (
-            f"Missing logo files for tiles: {missing}. Expected in: {ASSETS_DIR}"
-        )
+        assert (
+            not missing
+        ), f"Missing logo files for tiles: {missing}. Expected in: {ASSETS_DIR}"
 
     def test_logo_path_property(self, sample_tile_dict: dict) -> None:
         """Tile logo_path property returns absolute path."""
         tile = LauncherTile.from_dict(sample_tile_dict)
-        assert tile.logo_path.is_absolute(), (
-            "Assertion failed: tile.logo_path.is_absolute()"
-        )
-        assert str(tile.logo_path).endswith(sample_tile_dict["logo"]), (
-            "Assertion failed: str(tile.logo_path).endswith(sample_tile_dict[logo])"
-        )
+        assert (
+            tile.logo_path.is_absolute()
+        ), "Assertion failed: tile.logo_path.is_absolute()"
+        assert str(tile.logo_path).endswith(
+            sample_tile_dict["logo"]
+        ), "Assertion failed: str(tile.logo_path).endswith(sample_tile_dict[logo])"
 
 
 # =============================================================================
@@ -516,9 +516,9 @@ class TestOrdering:
     def test_model_explorer_is_first(self, manifest: LauncherManifest) -> None:
         """Model Explorer must be the first tile (order=1)."""
         first = manifest.tiles[0]
-        assert first.id == "model_explorer", (
-            f"First tile should be model_explorer, got: {first.id}"
-        )
+        assert (
+            first.id == "model_explorer"
+        ), f"First tile should be model_explorer, got: {first.id}"
 
     def test_ordered_ids_returns_deterministic_list(
         self, manifest: LauncherManifest
@@ -654,12 +654,12 @@ class TestParity:
             tile = manifest.get_tile(tile_id)
             assert tile is not None, f"Missing shared Tools tile: {tile_id}"
             assert tile.provider == "tools", f"{tile_id} must declare Tools as provider"
-            assert tile.source_root == "../Tools", (
-                f"{tile_id} must resolve from the sibling Tools repo"
-            )
-            assert not tile.path.startswith("src/tools/"), (
-                f"{tile_id} must not point at UpstreamDrift-local tool source"
-            )
+            assert (
+                tile.source_root == "../Tools"
+            ), f"{tile_id} must resolve from the sibling Tools repo"
+            assert not tile.path.startswith(
+                "src/tools/"
+            ), f"{tile_id} must not point at UpstreamDrift-local tool source"
 
     def test_manifest_serializes_for_api(self, manifest: LauncherManifest) -> None:
         """Manifest can be serialized to JSON for the API endpoint."""
@@ -667,9 +667,9 @@ class TestParity:
         # Should be JSON-serializable
         json_str = json.dumps(data)
         parsed = json.loads(json_str)
-        assert len(parsed["tiles"]) == len(manifest.visible_tiles), (
-            "Assertion failed: len(parsed[tiles]) == len(manifest.visible_tiles)"
-        )
+        assert len(parsed["tiles"]) == len(
+            manifest.visible_tiles
+        ), "Assertion failed: len(parsed[tiles]) == len(manifest.visible_tiles)"
 
 
 # =============================================================================
@@ -682,9 +682,9 @@ class TestCategories:
 
     def test_physics_engines_not_empty(self, manifest: LauncherManifest) -> None:
         """There must be at least one physics engine."""
-        assert len(manifest.physics_engines) > 0, (
-            "Assertion failed: len(manifest.physics_engines) > 0"
-        )
+        assert (
+            len(manifest.physics_engines) > 0
+        ), "Assertion failed: len(manifest.physics_engines) > 0"
 
     def test_tools_not_empty(self, manifest: LauncherManifest) -> None:
         """There must be at least one tool."""
@@ -713,9 +713,9 @@ class TestCategories:
         self, manifest: LauncherManifest
     ) -> None:
         """get_tile returns None for nonexistent ID."""
-        assert manifest.get_tile("nonexistent") is None, (
-            "Assertion failed: manifest.get_tile(nonexistent) is None"
-        )
+        assert (
+            manifest.get_tile("nonexistent") is None
+        ), "Assertion failed: manifest.get_tile(nonexistent) is None"
 
     def test_is_physics_engine_property(self, manifest: LauncherManifest) -> None:
         """is_physics_engine correctly identifies engines."""
@@ -724,27 +724,27 @@ class TestCategories:
         assert mujoco.is_physics_engine, "Assertion failed: mujoco.is_physics_engine"
 
         model_explorer = manifest.get_tile("model_explorer")
-        assert model_explorer is not None, (
-            "Assertion failed: model_explorer is not None"
-        )
-        assert not model_explorer.is_physics_engine, (
-            "Assertion failed: not model_explorer.is_physics_engine"
-        )
+        assert (
+            model_explorer is not None
+        ), "Assertion failed: model_explorer is not None"
+        assert (
+            not model_explorer.is_physics_engine
+        ), "Assertion failed: not model_explorer.is_physics_engine"
 
     def test_motion_capture_is_tool(self, manifest: LauncherManifest) -> None:
         """Motion Capture (C3D + OpenPose + MediaPipe) is categorized as a tool."""
         mc = manifest.get_tile("motion_capture")
         assert mc is not None, "Assertion failed: mc is not None"
         assert mc.is_tool, "Assertion failed: mc.is_tool"
-        assert "openpose" in mc.capabilities, (
-            "Assertion failed: openpose in mc.capabilities"
-        )
-        assert "mediapipe" in mc.capabilities, (
-            "Assertion failed: mediapipe in mc.capabilities"
-        )
-        assert "c3d_viewer" in mc.capabilities, (
-            "Assertion failed: c3d_viewer in mc.capabilities"
-        )
+        assert (
+            "openpose" in mc.capabilities
+        ), "Assertion failed: openpose in mc.capabilities"
+        assert (
+            "mediapipe" in mc.capabilities
+        ), "Assertion failed: mediapipe in mc.capabilities"
+        assert (
+            "c3d_viewer" in mc.capabilities
+        ), "Assertion failed: c3d_viewer in mc.capabilities"
 
 
 class TestMotionTargetPreviewTile:
@@ -756,23 +756,23 @@ class TestMotionTargetPreviewTile:
         """The new generic Motion-Match Preview tile must be in the manifest."""
         tile = manifest.get_tile("motion_target_preview")
         assert tile is not None, "motion_target_preview tile missing"
-        assert tile.name == "Motion-Match Preview", (
-            "Assertion failed: tile.name == Motion-Match Preview"
-        )
+        assert (
+            tile.name == "Motion-Match Preview"
+        ), "Assertion failed: tile.name == Motion-Match Preview"
         assert tile.category == "tool", "Assertion failed: tile.category == tool"
-        assert tile.logo == "motion_target_preview.svg", (
-            "Assertion failed: tile.logo == motion_target_preview.svg"
-        )
+        assert (
+            tile.logo == "motion_target_preview.svg"
+        ), "Assertion failed: tile.logo == motion_target_preview.svg"
         assert tile.logo_path.exists(), "Assertion failed: tile.logo_path.exists()"
-        assert tile.path == "src.tools.starting_pose_matcher.__main__", (
-            "Assertion failed: tile.path == src.tools.starting_pose_matcher.__main__"
-        )
+        assert (
+            tile.path == "src.tools.starting_pose_matcher.__main__"
+        ), "Assertion failed: tile.path == src.tools.starting_pose_matcher.__main__"
         assert not tile.hidden, "Assertion failed: not tile.hidden"
         # Tags must be source-neutral and cover the issue's required set.
         for required_tag in ("c3d", "mocap", "club", "body", "preview"):
-            assert required_tag in tile.tags or required_tag in tile.capabilities, (
-                "Assertion failed: required_tag in tile.tags or required_tag in tile.capabilities"
-            )
+            assert (
+                required_tag in tile.tags or required_tag in tile.capabilities
+            ), "Assertion failed: required_tag in tile.tags or required_tag in tile.capabilities"
 
     def test_legacy_starting_pose_matcher_validates_with_logo(
         self, manifest: LauncherManifest
@@ -795,16 +795,16 @@ class TestMotionTargetPreviewTile:
     ) -> None:
         """`visible_tiles` and `tools` must skip hidden legacy aliases."""
         visible_ids = {t.id for t in manifest.visible_tiles}
-        assert "motion_target_preview" in visible_ids, (
-            "Assertion failed: motion_target_preview in visible_ids"
-        )
-        assert "starting_pose_matcher" not in visible_ids, (
-            "Assertion failed: starting_pose_matcher not in visible_ids"
-        )
+        assert (
+            "motion_target_preview" in visible_ids
+        ), "Assertion failed: motion_target_preview in visible_ids"
+        assert (
+            "starting_pose_matcher" not in visible_ids
+        ), "Assertion failed: starting_pose_matcher not in visible_ids"
         tool_ids = {t.id for t in manifest.tools}
-        assert "starting_pose_matcher" not in tool_ids, (
-            "Assertion failed: starting_pose_matcher not in tool_ids"
-        )
+        assert (
+            "starting_pose_matcher" not in tool_ids
+        ), "Assertion failed: starting_pose_matcher not in tool_ids"
 
 
 class TestWebRouteFieldRoundTrip:
@@ -824,9 +824,9 @@ class TestWebRouteFieldRoundTrip:
             "web_route": "/tools/test",
         }
         tile = LauncherTile.from_dict(data)
-        assert tile.web_route == "/tools/test", (
-            "Assertion failed: tile.web_route == /tools/test"
-        )
+        assert (
+            tile.web_route == "/tools/test"
+        ), "Assertion failed: tile.web_route == /tools/test"
 
     def test_to_dict_includes_web_route(self) -> None:
         """to_dict() must serialize web_route so it survives a round-trip."""
@@ -844,9 +844,9 @@ class TestWebRouteFieldRoundTrip:
         tile = LauncherTile.from_dict(data)
         serialized = tile.to_dict()
         assert "web_route" in serialized, "Assertion failed: web_route in serialized"
-        assert serialized["web_route"] == "/tools/test", (
-            "Assertion failed: serialized[web_route] == /tools/test"
-        )
+        assert (
+            serialized["web_route"] == "/tools/test"
+        ), "Assertion failed: serialized[web_route] == /tools/test"
 
     def test_web_route_none_by_default(self) -> None:
         """web_route defaults to None when absent from the manifest dict."""
@@ -876,6 +876,6 @@ class TestWebRouteFieldRoundTrip:
         }
         tile = LauncherTile.from_dict(data)
         serialized = tile.to_dict()
-        assert "web_route" not in serialized, (
-            "Assertion failed: web_route not in serialized"
-        )
+        assert (
+            "web_route" not in serialized
+        ), "Assertion failed: web_route not in serialized"

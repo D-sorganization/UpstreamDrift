@@ -13,7 +13,6 @@ import pytest
 
 from shared.data_store import SimulationDataStore, SwingDataSequence
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
