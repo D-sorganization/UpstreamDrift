@@ -144,6 +144,39 @@ models:
       status: "ready"
       default_launch: "tab"
 
+  - id: "swing_flight_pipeline"
+    name: "Swing → Flight Pipeline"
+    description: "End-to-end swing dynamics → impact → aerodynamic ball flight pipeline"
+    type: "special_app"
+    path: "src/tools/swing_flight_pipeline/gui.py"
+    launcher:
+      category: "simulation"
+      logo: "assets/golf_simulation.png"
+      status: "ready"
+      default_launch: "tab"
+
+  - id: "ball_flight_simulator"
+    name: "Ball Flight Simulator"
+    description: "Aerodynamic ball flight simulator with drag, Magnus, and wind models"
+    type: "special_app"
+    path: "src/tools/ball_flight_gui/gui.py"
+    launcher:
+      category: "simulation"
+      logo: "assets/golf_simulation.png"
+      status: "ready"
+      default_launch: "tab"
+
+  - id: "putting_green_gui"
+    name: "Putting Green"
+    description: "Interactive putting green simulator with turf physics"
+    type: "special_app"
+    path: "src/tools/putting_green_gui/gui.py"
+    launcher:
+      category: "simulation"
+      logo: "assets/putting_green_modern.png"
+      status: "ready"
+      default_launch: "tab"
+
   # =============================================================================
   # MOTION MATCHING — pose / target editors and matchers
   # =============================================================================
@@ -213,6 +246,7 @@ models:
       category: "motion_capture"
       logo: "assets/video_analyzer_modern.png"
       status: "external"
+    embed_adapter: "src/launchers/external_tools_adapter.py::get_video_analyzer_dockable_ui"
 
   - id: "video_processor"
     name: "Video Processor"
@@ -277,6 +311,7 @@ models:
     python_paths:
       - "src"
       - "src/shared/python"
+    embed_adapter: "src/launchers/external_tools_adapter.py::get_data_explorer_dockable_ui"
     launcher:
       category: "tool"
       logo: "assets/data_explorer_modern.png"
@@ -295,6 +330,7 @@ models:
       - "src"
       - "src/shared/python"
       - "src/data_processing/data_processor/python"
+    embed_adapter: "src/launchers/external_tools_adapter.py::get_data_processor_dockable_ui"
     launcher:
       category: "tool"
       logo: "assets/data_explorer_modern.png"
