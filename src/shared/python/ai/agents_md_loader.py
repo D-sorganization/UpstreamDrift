@@ -1,0 +1,210 @@
+"""Loader that reads ``AGENTS.md`` and injects it as a global system prompt.
+
+``AGENTS.md`` documents the shared infrastructure, discovery workflow, and
+behavioral consistency rules for all AI adapters in UpstreamDrift.  By
+injecting it at session start we ensure every AI session is aware of those
+rules without repeating them in every per-adapter system prompt.
+
+Design contracts
+----------------
+- :class:`AgentsMdLoader` validates ``repo_root`` is a :class:`~pathlib.Path`.
+- :meth:`AgentsMdLoader.load` never raises; returns ``None`` and logs a debug
+  message when the file is missing.
+- Large files are truncated to ``max_chars`` to stay within LLM token budgets.
+- :func:`build_system_prompt_with_agents_md` composes the base prompt from
+  :func:`~src.shared.python.ai.system_prompts.build_system_prompt` with the
+  AGENTS.md section appended under a clear heading.
+
+Related issue: #5373.
+"""
+
+from __future__ import annotations
+
+import logging
+from pathlib import Path
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
+# Default max characters for the AGENTS.md section in the prompt.
+# ~2 048 tokens at 4 chars/token — large enough to cover the discovery
+# workflow and key module directory while leaving space for conversation.
+_DEFAULT_MAX_CHARS: int = 8192
+
+# Location of AGENTS.md relative to the UpstreamDrift repo root.
+_AGENTS_MD_FILENAME: str = "AGENTS.md"
+
+# Resolved once: repo root is four levels above this file
+# (src/shared/python/ai/agents_md_loader.py → repo root)
+_UD_REPO_ROOT: Path = Path(__file__).resolve().parents[4]
+
+
+# ── Loader ────────────────────────────────────────────────────────────
+
+
+class AgentsMdLoader:
+    """Discovers and loads ``AGENTS.md`` relative to a repository root.
+
+    Args:
+        repo_root: Root directory of the repository containing ``AGENTS.md``.
+                   Defaults to the UpstreamDrift repo root inferred from
+                   this file's location.
+        max_chars: Maximum number of characters to return from the file.
+                   Content is truncated (with a notice) if the file exceeds
+                   this limit.
+
+    Raises:
+        TypeError: If ``repo_root`` is not a :class:`~pathlib.Path`.
+    """
+
+    def __init__(
+        self,
+        repo_root: Path | None = None,
+        max_chars: int = _DEFAULT_MAX_CHARS,
+    ) -> None:
+        if repo_root is not None and not isinstance(repo_root, Path):
+            raise TypeError(
+                f"repo_root must be a Path or None, got {type(repo_root).__name__}"
+            )
+        self._repo_root: Path = repo_root if repo_root is not None else _UD_REPO_ROOT
+        self._max_chars: int = max_chars
+
+    @property
+    def max_chars(self) -> int:
+        """Maximum character count for loaded content."""
+        return self._max_chars
+
+    @property
+    def agents_md_path(self) -> Path:
+        """Absolute path to ``AGENTS.md``."""
+        return self._repo_root / _AGENTS_MD_FILENAME
+
+    @property
+    def is_available(self) -> bool:
+        """Return ``True`` when ``AGENTS.md`` exists on disk."""
+        return self.agents_md_path.is_file()
+
+    def load(self) -> str | None:
+        """Read and return the content of ``AGENTS.md``.
+
+        Returns:
+            Stripped file content, truncated to :attr:`max_chars` when
+            the file is very large.  Returns ``None`` when the file does
+            not exist or cannot be read.
+
+        Postcondition: return value is either ``None`` or a non-empty string
+        with no leading/trailing whitespace.
+        """
+        path = self.agents_md_path
+        if not path.is_file():
+            logger.debug("AGENTS.md not found at %s", path)
+            return None
+
+        try:
+            raw = path.read_text(encoding="utf-8")
+        except OSError as exc:
+            logger.warning("Failed to read AGENTS.md at %s: %s", path, exc)
+            return None
+
+        content = raw.strip()
+        if not content:
+            logger.debug("AGENTS.md at %s is empty", path)
+            return None
+
+        if len(content) > self._max_chars:
+            truncated = content[: self._max_chars]
+            # Back off to a clean line boundary
+            last_nl = truncated.rfind("\n")
+            if last_nl > 0:
+                truncated = truncated[:last_nl]
+            content = truncated + "\n\n[... AGENTS.md truncated for token budget ...]"
+            logger.debug(
+                "AGENTS.md truncated from %d to %d chars",
+                len(raw),
+                len(content),
+            )
+
+        return content
+
+    def __repr__(self) -> str:
+        return (
+            f"AgentsMdLoader(repo_root={self._repo_root!r}, "
+            f"agents_md_path={self.agents_md_path!r}, "
+            f"is_available={self.is_available})"
+        )
+
+
+# ── Convenience functions ─────────────────────────────────────────────
+
+
+def load_agents_md(
+    repo_root: Path | None = None,
+    max_chars: int = _DEFAULT_MAX_CHARS,
+) -> str | None:
+    """Load ``AGENTS.md`` from ``repo_root`` (or the default UD repo root).
+
+    Convenience wrapper around :class:`AgentsMdLoader`.
+
+    Args:
+        repo_root: Override the repository root directory.
+        max_chars: Maximum characters to return.
+
+    Returns:
+        File content string or ``None`` if the file is missing.
+    """
+    loader = AgentsMdLoader(repo_root=repo_root, max_chars=max_chars)
+    return loader.load()
+
+
+def build_system_prompt_with_agents_md(
+    app_context: str = "upstream_drift",
+    expertise_level: str = "beginner",
+    extra_instructions: str | None = None,
+    repo_root: Path | None = None,
+    max_agents_md_chars: int = _DEFAULT_MAX_CHARS,
+) -> str:
+    """Build a system prompt that includes the AGENTS.md behavioral rules.
+
+    Composes the standard context-aware prompt from
+    :func:`~src.shared.python.ai.system_prompts.build_system_prompt` and
+    appends the contents of ``AGENTS.md`` under a clear section heading.
+
+    When ``AGENTS.md`` is unavailable the function degrades gracefully and
+    returns only the base prompt.
+
+    Args:
+        app_context:         Application context key (e.g. ``"upstream_drift"``).
+        expertise_level:     User expertise level.
+        extra_instructions:  Additional instructions appended after AGENTS.md.
+        repo_root:           Repository root for AGENTS.md discovery.
+        max_agents_md_chars: Maximum characters from AGENTS.md to include.
+
+    Returns:
+        Complete system prompt string.
+
+    Postcondition: returned string is always non-empty.
+    """
+    from src.shared.python.ai.system_prompts import build_system_prompt
+
+    base = build_system_prompt(
+        app_context=app_context,
+        expertise_level=expertise_level,
+        extra_instructions=extra_instructions,
+    )
+
+    agents_content = load_agents_md(repo_root=repo_root, max_chars=max_agents_md_chars)
+    if agents_content:
+        base = (
+            base
+            + "\n\n---\n\n"
+            + "## Repository rules and shared infrastructure (AGENTS.md)\n\n"
+            + agents_content
+        )
+        logger.debug(
+            "AGENTS.md injected into system prompt (%d chars)", len(agents_content)
+        )
+    else:
+        logger.debug("AGENTS.md not available; base prompt returned without it")
+
+    assert base, "build_system_prompt_with_agents_md must return a non-empty string"
+    return base
