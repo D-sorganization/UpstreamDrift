@@ -5,7 +5,13 @@ Uses discrete spheres as an approximation for granular media if MPM is unavailab
 
 from pathlib import Path
 
-import mujoco
+import typing
+
+try:
+    import mujoco
+except ImportError:
+    mujoco = None
+
 import numpy as np
 
 from bunkershot3d.config import BunkerShotConfig
@@ -20,8 +26,8 @@ class MPMDriver:
         self.config_path = Path(config_path)
         self.config = BunkerShotConfig.from_yaml(self.config_path)
 
-        self.model: mujoco.MjModel | None = None
-        self.data: mujoco.MjData | None = None
+        self.model: typing.Any = None
+        self.data: typing.Any = None
 
     def _generate_xml(self) -> str:
         """Generate the MJCF XML string for the bunker and clubhead."""
