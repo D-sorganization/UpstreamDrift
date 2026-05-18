@@ -91,6 +91,14 @@ Examples:
 
 def route_launch(args: argparse.Namespace) -> None:
     """Route the launch based on parsed arguments."""
+    import warnings
+
+    # Protection: Error out if deprecated sidekick/tools imports are used
+    warnings.filterwarnings(
+        "error",
+        category=DeprecationWarning,
+        module=r".*(sidekick|upstream_drift_tools).*",
+    )
     if not (args is not None):
         raise ValueError("Parsed arguments must be provided")
     if not isinstance(args, argparse.Namespace):
@@ -130,7 +138,7 @@ def route_launch(args: argparse.Namespace) -> None:
         # Classic PyQt6 launcher
         try:
             # Try new location first
-            from src.launchers.golf_launcher import main as classic_main
+            from src.launchers.upstream_drift_launcher import main as classic_main
 
             classic_main()
         except ImportError as e:

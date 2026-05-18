@@ -1,4 +1,4 @@
-"""Shared constants and lazy imports for the GolfLauncher."""
+"""Shared constants and lazy imports for the UpstreamDriftLauncher."""
 
 from __future__ import annotations
 
@@ -227,11 +227,10 @@ THEME_AVAILABLE = importlib.util.find_spec("src.shared.python.theme") is not Non
 
 AI_AVAILABLE: bool
 try:
-    importlib.util.find_spec("src.shared.python.ai.gui")
-    # Actually try importing to verify it works (catches missing deps)
-    import src.shared.python.ai.gui  # noqa: F401
-
-    AI_AVAILABLE = True
+    if importlib.util.find_spec("src.shared.python.ai.gui"):
+        AI_AVAILABLE = True
+    else:
+        AI_AVAILABLE = False
 except (ImportError, ModuleNotFoundError):
     AI_AVAILABLE = False
 

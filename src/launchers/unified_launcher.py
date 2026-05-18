@@ -1,11 +1,11 @@
-"""Unified launcher interface wrapping PyQt GolfLauncher.
+"""Unified launcher interface wrapping PyQt UpstreamDriftLauncher.
 
 .. deprecated::
     This module is a legacy wrapper and should not be used for new code.
-    Use ``python -m src.launchers.golf_launcher`` directly instead.
+    Use ``python -m src.launchers.upstream_drift_launcher`` directly instead.
 
 This module provides a consistent interface for launch_golf_suite.py
-that wraps the PyQt-based GolfLauncher implementation.
+that wraps the PyQt-based UpstreamDriftLauncher implementation.
 
 The launcher now features:
 - Async startup with background worker thread
@@ -35,7 +35,7 @@ else:
 logger = get_logger(__name__)
 
 warnings.warn(
-    "unified_launcher is deprecated. Use 'python -m src.launchers.golf_launcher' instead.",
+    "unified_launcher is deprecated. Use 'python -m src.launchers.upstream_drift_launcher' instead.",
     DeprecationWarning,
     stacklevel=2,
 )
@@ -57,29 +57,29 @@ def _is_pyqt6_available() -> bool:
 def _get_golf_main(*, prefer_legacy: bool = False) -> Callable[..., None]:
     """Resolve golf launcher entry point across legacy/new module paths."""
     if prefer_legacy:
-        legacy_module = sys.modules.get("launchers.golf_launcher")
+        legacy_module = sys.modules.get("launchers.upstream_drift_launcher")
         if legacy_module is not None and hasattr(legacy_module, "main"):
             return legacy_module.main
 
     try:
-        from .golf_launcher import main as golf_main
+        from .upstream_drift_launcher import main as golf_main
 
         return golf_main
     except ImportError:
         logger.debug(
-            "Could not import golf_launcher via relative import, trying absolute"
+            "Could not import upstream_drift_launcher via relative import, trying absolute"
         )
 
     try:
-        module = importlib.import_module("launchers.golf_launcher")
+        module = importlib.import_module("launchers.upstream_drift_launcher")
         if hasattr(module, "main"):
             return module.main
     except ImportError:
         logger.debug(
-            "Could not import launchers.golf_launcher, falling back to direct import"
+            "Could not import launchers.upstream_drift_launcher, falling back to direct import"
         )
 
-    from .golf_launcher import main as golf_main
+    from .upstream_drift_launcher import main as golf_main
 
     return golf_main
 
@@ -87,10 +87,10 @@ def _get_golf_main(*, prefer_legacy: bool = False) -> Callable[..., None]:
 class UnifiedLauncher:
     """Unified launcher interface compatible with launch_golf_suite.py.
 
-    This class wraps the PyQt GolfLauncher to provide a consistent
+    This class wraps the PyQt UpstreamDriftLauncher to provide a consistent
     interface with a mainloop() method as expected by the CLI launcher.
 
-    The mainloop() method now delegates to the golf_launcher.main() function
+    The mainloop() method now delegates to the upstream_drift_launcher.main() function
     which implements async startup with splash screen for optimal UX.
     """
 
@@ -108,7 +108,7 @@ class UnifiedLauncher:
     def mainloop(self) -> None:
         """Start the launcher main loop with async startup.
 
-        This method delegates to golf_launcher.main() which implements:
+        This method delegates to upstream_drift_launcher.main() which implements:
         - Immediate splash screen display
         - Background worker for heavy initialization
         - Real progress updates during startup
@@ -250,7 +250,7 @@ def launch() -> None:
         logger.warning("PyQt6 not available.")
         return
 
-    # Delegate directly to golf_launcher.main() for async startup
+    # Delegate directly to upstream_drift_launcher.main() for async startup
     golf_main = _get_golf_main(prefer_legacy=False)
     golf_main()
 

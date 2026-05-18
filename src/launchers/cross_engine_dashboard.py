@@ -992,6 +992,11 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
 # ---------------------------------------------------------------------------
 
 
+def get_dockable_ui() -> object:
+    """Return the dashboard window instance for docking in the unified launcher."""
+    return _build_qt_window()
+
+
 def _build_qt_window(*, shape_per_engine: bool = True) -> object:
     """Build and return the QMainWindow instance (deferred Qt import).
 

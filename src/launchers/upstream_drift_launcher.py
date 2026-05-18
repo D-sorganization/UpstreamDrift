@@ -10,25 +10,32 @@ Features:
 - Modular Docker Environment Management.
 - Integrated Help and Documentation.
 
-This module composes focused mixin classes into the GolfLauncher:
+This module composes focused mixin classes into the UpstreamDriftLauncher:
 - LauncherUISetupMixin: Menu bar, top bar, grid area, bottom bar, search, console
 - LauncherThemeMixin: Theme application, theme menus, plot theme
 - LauncherSimulationMixin: Simulation launching, dependency checking
 - LauncherDialogsMixin: Dialogs, settings, keyboard shortcuts, toast
 """
 
-from __future__ import annotations
+print("[DIAG] Loading upstream_drift_launcher module...")
 
 import contextlib
 import sys
 from typing import Any
 
+print("[DIAG] Importing PyQt6...")
 from PyQt6.QtCore import QEventLoop, QObject, QRunnable, QThreadPool, QTimer, pyqtSignal
 from PyQt6.QtGui import QCloseEvent, QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt6.QtCore import QEvent, Qt, QRect
 
+print("[DIAG] Importing docker_manager...")
 from src.launchers.docker_manager import DockerLauncher
+
+print("[DIAG] Importing embedded_tool_bootstrap...")
 from src.launchers.embedded_tool_bootstrap import bootstrap_embeddable_tools
+
+print("[DIAG] Importing launcher_constants...")
 from src.launchers.launcher_constants import (
     CONFIG_DIR,
     DOCKER_STAGES,
@@ -39,6 +46,8 @@ from src.launchers.launcher_constants import (
     _lazy_load_model_registry,
     logger,
 )
+
+print("[DIAG] Importing launcher mixins...")
 from src.launchers.launcher_dialogs import LauncherDialogsMixin
 from src.launchers.launcher_layout_manager import (
     LayoutManager,
@@ -49,6 +58,8 @@ from src.launchers.launcher_process_manager import ProcessManager
 from src.launchers.launcher_simulation import LauncherSimulationMixin
 from src.launchers.launcher_theme import LauncherThemeMixin
 from src.launchers.launcher_ui_setup import LauncherUISetupMixin
+
+print("[DIAG] Importing ui_components...")
 from src.launchers.ui_components import (
     ASSETS_DIR,
     AsyncStartupWorker,
@@ -57,7 +68,8 @@ from src.launchers.ui_components import (
     SplashScreen,
     StartupResults,
 )
-from PyQt6.QtCore import QEvent, Qt, QRect
+
+print("[DIAG] Imports complete!")
 
 
 class FramelessResizeFilter(QObject):
@@ -165,7 +177,7 @@ from src.shared.python.theme.style_constants import Styles
 
 # Backward-compatible re-exports
 __all__ = [
-    "GolfLauncher",
+    "UpstreamDriftLauncher",
     "GRID_COLUMNS",
     "CONFIG_DIR",
     "LAYOUT_CONFIG_FILE",
@@ -212,7 +224,7 @@ class ProcessCleanupWorker(QRunnable):
         self.signals.finished.emit(finished_keys)
 
 
-class GolfLauncher(
+class UpstreamDriftLauncher(
     LauncherUISetupMixin,
     LauncherThemeMixin,
     LauncherSimulationMixin,
@@ -1146,13 +1158,16 @@ class GolfLauncher(
 
     def closeEvent(self, event: QCloseEvent | None) -> None:  # noqa: C901
         """Handle window close event to save layout."""
-        running_count = sum(
-            1 for p in self.running_processes.values() if p.poll() is None
-        )
+        running_names = [
+            k for k, p in self.running_processes.items() if p.poll() is None
+        ]
+        running_count = len(running_names)
 
         if running_count > 0:
             word_is = "is" if running_count == 1 else "are"
             word_es = "es" if running_count > 1 else ""
+
+            names_bullet_list = "\n".join(f"• {n}" for n in running_names)
 
             from src.launchers.launcher_dialogs import ThemedModalDialog
             from PyQt6.QtWidgets import QWidget, QDialog
@@ -1165,7 +1180,7 @@ class GolfLauncher(
             dialog = ThemedModalDialog(
                 self,
                 "Confirm Exit",
-                f"There {word_is} {running_count} running process{word_es}.\n\nClosing will terminate all running simulations.\nAre you sure you want to exit?",
+                f"There {word_is} {running_count} running process{word_es}:\n\n{names_bullet_list}\n\nClosing will terminate all running simulations.\nAre you sure you want to exit?",
             )
 
             reply = dialog.exec()
@@ -1178,6 +1193,18 @@ class GolfLauncher(
                 return
 
         self._save_layout()
+
+        from PyQt6.QtCore import QSettings
+
+        settings = QSettings("UpstreamDrift", "Launcher")
+        if hasattr(self, "chk_live"):
+            settings.setValue("chk_live", self.chk_live.isChecked())
+        if hasattr(self, "chk_gpu"):
+            settings.setValue("chk_gpu", self.chk_gpu.isChecked())
+        if hasattr(self, "chk_docker"):
+            settings.setValue("chk_docker", self.chk_docker.isChecked())
+        if hasattr(self, "chk_wsl"):
+            settings.setValue("chk_wsl", self.chk_wsl.isChecked())
 
         # Stop cleanup timer
         if hasattr(self, "cleanup_timer") and self.cleanup_timer is not None:
@@ -1214,11 +1241,29 @@ def _install_global_ui_zoom(app: QApplication) -> None:
 
 def main() -> None:
     """Application entry point."""
+    print("[DIAG] Starting main()")
     import traceback
 
+    print("[DIAG] Imported traceback")
+
     def excepthook(exc_type, exc_value, exc_tb):
+        from PyQt6.QtWidgets import QMessageBox
+
+        err_msg = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
         with open("crash_traceback.txt", "w") as f:
-            traceback.print_exception(exc_type, exc_value, exc_tb, file=f)
+            f.write(err_msg)
+
+        # Don't show MessageBox for SystemExit
+        if exc_type is not SystemExit:
+            msg_box = QMessageBox()
+            msg_box.setIcon(QMessageBox.Icon.Critical)
+            msg_box.setWindowTitle("Application Crash")
+            msg_box.setText(
+                "UpstreamDrift has encountered an unexpected error and must close."
+            )
+            msg_box.setDetailedText(err_msg)
+            msg_box.exec()
+
         QApplication.quit()
 
     sys.excepthook = excepthook
@@ -1235,9 +1280,13 @@ def main() -> None:
                 "ctypes not available; skipping Windows AppUserModelID assignment"
             )
 
+    print("[DIAG] Creating QApplication")
     app = QApplication(sys.argv)
+    print("[DIAG] Setting style")
     app.setStyle("Fusion")
+    print("[DIAG] Installing global UI zoom")
     _install_global_ui_zoom(app)
+    print("[DIAG] Checking assets")
 
     # Set global application icon
     icon_path = ASSETS_DIR / "golf_logo.ico"
@@ -1268,12 +1317,17 @@ def main() -> None:
     except ImportError as e:
         logger.debug(f"Zoom support not available: {e}")
 
+    print("[DIAG] Creating SplashScreen")
     splash = SplashScreen()
     splash.show()
+    print("[DIAG] Creating AsyncStartupWorker")
     worker = AsyncStartupWorker(REPOS_ROOT)
 
-    main_window = GolfLauncher(loading=True)
+    print("[DIAG] Creating UpstreamDriftLauncher")
+    main_window = UpstreamDriftLauncher(loading=True)
+    print("[DIAG] Showing UpstreamDriftLauncher")
     main_window.show()
+    print("[DIAG] Showing UpstreamDriftLauncher completed")
 
     def on_startup_finished(results: StartupResults) -> None:
         """Create and display the main window after startup completes."""
@@ -1285,7 +1339,7 @@ def main() -> None:
             import traceback
 
             traceback.print_exc()
-            logger.error(f"Failed to update GolfLauncher: {e}")
+            logger.error(f"Failed to update UpstreamDriftLauncher: {e}")
             QApplication.quit()
         worker.wait(1000)
 

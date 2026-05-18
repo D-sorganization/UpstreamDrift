@@ -94,6 +94,14 @@ def _configure_logging() -> None:
 __version__ = "0.1.0"
 
 
+def get_dockable_ui() -> MainWindow:
+    """Return the main window instance for docking in the unified launcher."""
+    return MainWindow()
+
+def get_dockable_ui() -> MainWindow:
+    """Return the main window instance for docking in the unified launcher."""
+    return MainWindow()
+
 def main() -> None:
     # Handle --version flag before any GUI initialization
     if "--version" in sys.argv:

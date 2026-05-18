@@ -1,4 +1,4 @@
-"""Dialog and settings management mixin for GolfLauncher.
+"""Dialog and settings management mixin for UpstreamDriftLauncher.
 
 Contains methods for help dialogs, about dialog, shortcuts overlay,
 preferences, settings, diagnostics, environment manager, layout manager,
@@ -39,7 +39,7 @@ logger = get_logger(__name__)
 
 
 class LauncherDialogsMixin:
-    """Mixin for GolfLauncher dialog and settings management.
+    """Mixin for UpstreamDriftLauncher dialog and settings management.
 
     Provides methods for displaying help, about, shortcuts, preferences,
     settings, diagnostics, environment manager, layout manager dialogs,

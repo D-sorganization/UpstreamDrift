@@ -1,4 +1,4 @@
-"""Reporting — standardized simulation and calculation report templates.
+"""Reporting package — standardised simulation report generation.
 
 Public surface::
 
@@ -6,18 +6,33 @@ Public surface::
         ReportSection,
         ReportTemplate,
         REPORT_TEMPLATES,
+        JinjaReportTemplate,
+        AgenticSummaryGenerator,
+        GLOBAL_REPORT_REGISTRY,
     )
 
-Implements Epic #5393: Standardized Simulation and Calculation Report Templates.
+Implements:
+- Epic #5393: Standardized Simulation and Calculation Report Templates
+  (``ReportSection``, ``ReportTemplate``, ``REPORT_TEMPLATES``)
+- Issue #5423: Global Report Templates and Agentic Summaries Integration
+  (``JinjaReportTemplate``, ``AgenticSummaryGenerator``, ``GLOBAL_REPORT_REGISTRY``)
 """
 
 from __future__ import annotations
 
 from src.shared.python.reporting._templates import REPORT_TEMPLATES
 from src.shared.python.reporting._template_engine import ReportSection, ReportTemplate
+from src.shared.python.reporting._jinja_template import JinjaReportTemplate
+from src.shared.python.reporting._agentic_summary import AgenticSummaryGenerator
+from src.shared.python.reporting._registry import GLOBAL_REPORT_REGISTRY
 
 __all__ = [
+    # From Epic #5393
     "ReportSection",
     "ReportTemplate",
     "REPORT_TEMPLATES",
+    # From Issue #5423
+    "JinjaReportTemplate",
+    "AgenticSummaryGenerator",
+    "GLOBAL_REPORT_REGISTRY",
 ]
