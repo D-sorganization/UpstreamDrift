@@ -151,8 +151,10 @@ maturin develop                                   # build Rust extensions locall
 
 ## Where to edit shared code
 
-Tools is the source of truth for: `shared/python/chat/`, `shared/python/ai/`,
-`shared/python/sidekick/` (canonical package name as of Stage 2, #5619).
+Tools is the source of truth for the shared utilities vendored here as
+`vendor/ud-tools/`. Within this repo those modules live at
+`src/shared/python/chat/`, `src/shared/python/ai/`, and the sidekick package
+(canonical name as of Stage 2, #5619) is provided by `vendor/ud-tools/`.
 **Never edit these inside `vendor/ud-tools/`**; vendor changes are erased on the
 next `git submodule update` or vendor bump.
 
