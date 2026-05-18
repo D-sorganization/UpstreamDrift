@@ -19,6 +19,12 @@ on:
     paths-ignore:
       - ".github/**"
 
+    paths:
+      - "docs/**"
+      - "specs/**"
+      - "**/*.md"
+      - "src/**"
+      - "tests/**"
 permissions:
   contents: read
   pull-requests: write

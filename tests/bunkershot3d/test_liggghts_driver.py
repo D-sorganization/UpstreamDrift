@@ -18,7 +18,6 @@ import pytest
 from bunkershot3d.backends.liggghts.driver import LiggghtsDriver, _iter_dump_frames
 from bunkershot3d.exceptions import BackendNotImplementedError
 
-
 # ---------------------------------------------------------------------------
 # Shared fixture
 # ---------------------------------------------------------------------------
@@ -26,8 +25,7 @@ from bunkershot3d.exceptions import BackendNotImplementedError
 
 @pytest.fixture
 def dummy_config(tmp_path: Path) -> Path:
-    yaml_content = textwrap.dedent(
-        """\
+    yaml_content = textwrap.dedent("""\
         bunker_bed:
           domain:
             length_x: 2.0
@@ -56,8 +54,7 @@ def dummy_config(tmp_path: Path) -> Path:
         output:
           downsample_grains: 1
           rate_hz: 500.0
-        """
-    )
+        """)
     config_path = tmp_path / "canonical.yaml"
     config_path.write_text(yaml_content)
     return config_path
@@ -203,7 +200,7 @@ class TestDumpParser:
         self, path: Path, frames: list[tuple[int, list[list[float]]]]
     ) -> None:
         """Write a minimal LIGGGHTS custom dump file."""
-        with open(path, "w") as f:
+        with open(path, "w", encoding="utf-8") as f:
             for step, atoms in frames:
                 n = len(atoms)
                 f.write(f"ITEM: TIMESTEP\n{step}\n")
@@ -252,7 +249,7 @@ class TestParseAndWrite:
     """_parse_and_write() must produce a valid HDF5 file with grain states."""
 
     def _write_dump(self, path: Path) -> None:
-        with open(path, "w") as f:
+        with open(path, "w", encoding="utf-8") as f:
             for step in [0, 200]:
                 atoms = [
                     [0.1 * j, 0.05 * j, 0.02 * j, 0.0, 0.0, -0.01] for j in range(3)

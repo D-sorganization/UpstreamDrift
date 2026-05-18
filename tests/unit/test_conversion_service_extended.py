@@ -29,7 +29,7 @@ pytestmark = pytest.mark.unit
 @pytest.fixture
 def service():
     """Fresh UnitConversionService for each test."""
-    from src.shared.python.upstream_drift_tools.calculators.conversion.service import (
+    from sidekick.calculators.conversion.service import (
         UnitConversionService,
     )
 
@@ -50,7 +50,7 @@ class TestServiceInit:
 
     def test_enable_validation_stored(self) -> None:
         """enable_validation flag is stored on the instance."""
-        from src.shared.python.upstream_drift_tools.calculators.conversion.service import (
+        from sidekick.calculators.conversion.service import (
             UnitConversionService,
         )
 
@@ -248,7 +248,7 @@ class TestValidationHelpers:
 
     def test_require_positive_finite_valid(self) -> None:
         """_require_positive_finite does not raise for positive finite float."""
-        from src.shared.python.upstream_drift_tools.calculators.conversion.service import (
+        from sidekick.calculators.conversion.service import (
             UnitConversionService,
         )
 
@@ -256,7 +256,7 @@ class TestValidationHelpers:
 
     def test_require_positive_finite_raises_for_zero(self) -> None:
         """_require_positive_finite raises ValueError for zero."""
-        from src.shared.python.upstream_drift_tools.calculators.conversion.service import (
+        from sidekick.calculators.conversion.service import (
             UnitConversionService,
         )
 
@@ -265,7 +265,7 @@ class TestValidationHelpers:
 
     def test_require_positive_finite_raises_for_negative(self) -> None:
         """_require_positive_finite raises ValueError for negative values."""
-        from src.shared.python.upstream_drift_tools.calculators.conversion.service import (
+        from sidekick.calculators.conversion.service import (
             UnitConversionService,
         )
 
@@ -274,7 +274,7 @@ class TestValidationHelpers:
 
     def test_require_positive_finite_raises_for_inf(self) -> None:
         """_require_positive_finite raises ValueError for infinity."""
-        from src.shared.python.upstream_drift_tools.calculators.conversion.service import (
+        from sidekick.calculators.conversion.service import (
             UnitConversionService,
         )
 
@@ -283,7 +283,7 @@ class TestValidationHelpers:
 
     def test_require_finite_valid(self) -> None:
         """_require_finite does not raise for finite float."""
-        from src.shared.python.upstream_drift_tools.calculators.conversion.service import (
+        from sidekick.calculators.conversion.service import (
             UnitConversionService,
         )
 
@@ -294,7 +294,7 @@ class TestValidationHelpers:
         """_require_finite raises ValueError for NaN."""
         import math
 
-        from src.shared.python.upstream_drift_tools.calculators.conversion.service import (
+        from sidekick.calculators.conversion.service import (
             UnitConversionService,
         )
 
@@ -312,7 +312,7 @@ class TestModuleConvert:
 
     def test_conversion_service_extended_basic_conversion(self) -> None:
         """convert() returns a numeric result for a valid unit pair."""
-        from src.shared.python.upstream_drift_tools.calculators.conversion.service import (
+        from sidekick.calculators.conversion.service import (
             convert,
         )
 
@@ -321,7 +321,7 @@ class TestModuleConvert:
 
     def test_temperature_conversion(self) -> None:
         """convert() handles temperature conversions."""
-        from src.shared.python.upstream_drift_tools.calculators.conversion.service import (
+        from sidekick.calculators.conversion.service import (
             convert,
         )
 
@@ -339,7 +339,7 @@ class TestGetService:
 
     def test_returns_service_instance(self) -> None:
         """get_service() returns a UnitConversionService."""
-        from src.shared.python.upstream_drift_tools.calculators.conversion.service import (
+        from sidekick.calculators.conversion.service import (
             UnitConversionService,
             get_service,
         )
@@ -349,7 +349,7 @@ class TestGetService:
 
     def test_singleton_returns_same_instance(self) -> None:
         """get_service() returns the same instance on repeated calls."""
-        from src.shared.python.upstream_drift_tools.calculators.conversion.service import (
+        from sidekick.calculators.conversion.service import (
             get_service,
         )
 

@@ -18,10 +18,22 @@ on:
     paths:
       - "ui/**"
       - ".github/workflows/tauri-build.yml"
+      - "src-tauri/**"
+      - "**/Cargo.toml"
+      - "**/Cargo.lock"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "package-lock.json"
   pull_request:
     paths:
       - "ui/**"
       - ".github/workflows/tauri-build.yml"
+      - "src-tauri/**"
+      - "**/Cargo.toml"
+      - "**/Cargo.lock"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "package-lock.json"
   release:
     types: [published]
   workflow_dispatch:
@@ -64,6 +76,14 @@ jobs:
         with:
           components: rustfmt, clippy
 
+      # Cache cargo registry, git deps, and ui/src-tauri/target/. Cold Tauri
+      # builds compile ~400 crates; warm cache typically cuts time by 60-70%.
+      - name: Cache Rust target (check)
+        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        with:
+          workspaces: ui/src-tauri -> target
+          key: ud-tauri-check
+
       - name: Install Linux dependencies
         run: |
           sudo apt-get -o DPkg::Lock::Timeout=300 update
@@ -104,8 +124,9 @@ jobs:
             target: x86_64-unknown-linux-gnu
           - platform: [self-hosted, Windows]
             target: x86_64-pc-windows-msvc
-          - platform: [self-hosted, macOS]
-            target: x86_64-apple-darwin
+          # macOS leg removed: org has no `[self-hosted, macOS]` runners. Jobs
+          # with this label queued indefinitely. Re-add when macOS runner
+          # capacity is provisioned and macOS becomes an active deliverable.
 
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 30
@@ -123,6 +144,14 @@ jobs:
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
         with:
           targets: ${{ matrix.target }}
+
+      # Per-target Rust cache for release builds. Each platform gets its own
+      # cache so the Linux/Windows matrix legs don't trash each other.
+      - name: Cache Rust target (build)
+        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        with:
+          workspaces: ui/src-tauri -> target
+          key: ud-tauri-build-${{ matrix.target }}
 
       - name: Install Linux dependencies
         if: matrix.platform == 'd-sorg-fleet'

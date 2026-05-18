@@ -1,11 +1,11 @@
-"""Tests for src.shared.python.upstream_drift_tools.calculators.conversion.flow_rate_converter (Issues #1949, #1744)."""
+"""Tests for sidekick.calculators.conversion.flow_rate_converter (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
 import math
 
 import pytest
-from src.shared.python.upstream_drift_tools.calculators.conversion.flow_rate_converter import (
+from sidekick.calculators.conversion.flow_rate_converter import (
     acfm_to_scfm,
     mass_to_mass,
     molar_to_molar,

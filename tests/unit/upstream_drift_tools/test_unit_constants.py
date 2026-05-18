@@ -1,8 +1,8 @@
-"""Tests for upstream_drift_tools.utils.unit_constants (Issues #1949, #1744)."""
+"""Tests for sidekick.utils.unit_constants (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
-from src.shared.python.upstream_drift_tools.utils.unit_constants import (
+from sidekick.utils.unit_constants import (
     ATMOSPHERE_TO_PASCAL,
     CELSIUS_OFFSET,
     FOOT_TO_METER,

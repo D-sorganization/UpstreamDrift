@@ -13,7 +13,7 @@ REPO = Path(__file__).parents[2]
 
 SYNGAS_CALC = (
     REPO
-    / "src/shared/python/upstream_drift_tools/process_calculators"
+    / "src/shared/python/sidekick/process_calculators"
     / "syngas_compression_calculator.py"
 )
 CONTROLS_TAB = (

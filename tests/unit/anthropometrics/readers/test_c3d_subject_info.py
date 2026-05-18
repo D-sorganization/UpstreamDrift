@@ -33,7 +33,7 @@ from anthropometrics.readers.c3d_subject_info import (
     _iter_flat,
     _read_scalar,
 )
-from tests.unit.upstream_drift_tools.lab.bio._synthetic import (
+from tests.unit.sidekick.lab.bio._synthetic import (
     _synthetic_c3d_dict,
 )
 

@@ -22,7 +22,7 @@ import pandas as pd
 import pytest
 
 if TYPE_CHECKING:
-    from src.shared.python.upstream_drift_tools.data_processing.core import (
+    from sidekick.data_processing.core import (
         DataProcessorEngine,
     )
 
@@ -65,7 +65,7 @@ class TestAggregationType:
 
     def test_has_expected_members(self) -> None:
         """AggregationType has SUM, MEAN, MEDIAN, STD, MIN, MAX, COUNT."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             AggregationType,
         )
 
@@ -76,7 +76,7 @@ class TestAggregationType:
 
     def test_at_least_six_members(self) -> None:
         """AggregationType has at least 6 variants."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             AggregationType,
         )
 
@@ -88,7 +88,7 @@ class TestDataFormat:
 
     def test_csv_and_json(self) -> None:
         """DataFormat includes CSV and JSON."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             DataFormat,
         )
 
@@ -101,7 +101,7 @@ class TestFitType:
 
     def test_linear_and_polynomial(self) -> None:
         """FitType includes LINEAR and POLYNOMIAL."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import FitType
+        from sidekick.data_processing.core import FitType
 
         assert FitType.LINEAR.value == "linear"
         assert FitType.POLYNOMIAL.value == "polynomial"
@@ -117,10 +117,10 @@ class TestExceptions:
 
     def test_data_not_loaded_is_base(self) -> None:
         """DataNotLoadedError can be raised and caught as a DataProcessingError."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             DataNotLoadedError,
         )
-        from src.shared.python.upstream_drift_tools.data_processing.exceptions import (
+        from sidekick.data_processing.exceptions import (
             DataProcessingError,
         )
 
@@ -129,7 +129,7 @@ class TestExceptions:
 
     def test_column_not_found_carries_column_name(self) -> None:
         """ColumnNotFoundError stores the missing column name."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             ColumnNotFoundError,
         )
 
@@ -138,10 +138,10 @@ class TestExceptions:
 
     def test_filter_error_is_base(self) -> None:
         """FilterError is a DataProcessingError."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             FilterError,
         )
-        from src.shared.python.upstream_drift_tools.data_processing.exceptions import (
+        from sidekick.data_processing.exceptions import (
             DataProcessingError,
         )
 
@@ -150,10 +150,10 @@ class TestExceptions:
 
     def test_transformation_error_is_base(self) -> None:
         """TransformationError is a DataProcessingError."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             TransformationError,
         )
-        from src.shared.python.upstream_drift_tools.data_processing.exceptions import (
+        from sidekick.data_processing.exceptions import (
             DataProcessingError,
         )
 
@@ -162,8 +162,8 @@ class TestExceptions:
 
     def test_fit_error_is_base(self) -> None:
         """FitError is a DataProcessingError."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import FitError
-        from src.shared.python.upstream_drift_tools.data_processing.exceptions import (
+        from sidekick.data_processing.core import FitError
+        from sidekick.data_processing.exceptions import (
             DataProcessingError,
         )
 
@@ -172,10 +172,10 @@ class TestExceptions:
 
     def test_unsupported_operation_is_base(self) -> None:
         """UnsupportedOperationError is a DataProcessingError."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             UnsupportedOperationError,
         )
-        from src.shared.python.upstream_drift_tools.data_processing.exceptions import (
+        from sidekick.data_processing.exceptions import (
             DataProcessingError,
         )
 
@@ -193,7 +193,7 @@ class TestColumnStats:
 
     def test_data_processing_core_extended_instantiation(self) -> None:
         """ColumnStats can be instantiated with all fields."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             ColumnStats,
         )
 
@@ -225,7 +225,7 @@ class TestProcessingResult:
 
     def test_success_field(self) -> None:
         """ProcessingResult stores success and message."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             ProcessingResult,
         )
 
@@ -235,7 +235,7 @@ class TestProcessingResult:
 
     def test_default_data_and_stats(self) -> None:
         """ProcessingResult data defaults to None; stats defaults to empty dict."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             ProcessingResult,
         )
 
@@ -255,7 +255,7 @@ class TestFitResult:
 
     def test_data_processing_core_extended_instantiation(self) -> None:
         """FitResult can be constructed with required fields."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             FitResult,
             FitType,
         )
@@ -280,7 +280,7 @@ class TestFitResult:
 @pytest.fixture
 def engine() -> DataProcessorEngine:
     """Fresh DataProcessorEngine for each test."""
-    from src.shared.python.upstream_drift_tools.data_processing.core import (
+    from sidekick.data_processing.core import (
         DataProcessorEngine,
     )
 
@@ -290,7 +290,7 @@ def engine() -> DataProcessorEngine:
 @pytest.fixture
 def loaded_engine() -> DataProcessorEngine:
     """DataProcessorEngine with a 5-row DataFrame already loaded."""
-    from src.shared.python.upstream_drift_tools.data_processing.core import (
+    from sidekick.data_processing.core import (
         DataProcessorEngine,
     )
 
@@ -363,7 +363,7 @@ class TestGetStatistics:
 
     def test_stats_values_are_column_stats(self, loaded_engine) -> None:
         """Each stats value is a ColumnStats instance."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             ColumnStats,
         )
 
@@ -405,7 +405,7 @@ class TestFilterData:
 
     def test_filter_no_data_raises(self, engine) -> None:
         """filter_data raises DataNotLoadedError when no data is loaded."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             DataNotLoadedError,
         )
 
@@ -414,7 +414,7 @@ class TestFilterData:
 
     def test_filter_missing_column_raises(self, loaded_engine) -> None:
         """filter_data raises ColumnNotFoundError for unknown column."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             ColumnNotFoundError,
         )
 
@@ -432,7 +432,7 @@ class TestAggregate:
 
     def test_aggregate_mean_all_rows(self, loaded_engine) -> None:
         """aggregate(None, 'a', MEAN) computes global mean."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             AggregationType,
         )
 
@@ -441,7 +441,7 @@ class TestAggregate:
 
     def test_aggregate_sum_all_rows(self, loaded_engine) -> None:
         """aggregate(None, 'a', SUM) returns sum of column a."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             AggregationType,
         )
 
@@ -450,7 +450,7 @@ class TestAggregate:
 
     def test_aggregate_by_group(self, engine) -> None:
         """aggregate('grp', 'a', SUM) groups by grp and sums a."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             AggregationType,
         )
 
@@ -476,7 +476,7 @@ class TestQuery:
 
     def test_query_no_data_raises(self, engine) -> None:
         """query raises DataNotLoadedError when no data loaded."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             DataNotLoadedError,
         )
 
@@ -501,7 +501,7 @@ class TestRenameAndDrop:
 
     def test_rename_missing_column_raises(self, loaded_engine) -> None:
         """rename_column raises ColumnNotFoundError for unknown column."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             ColumnNotFoundError,
         )
 
@@ -516,7 +516,7 @@ class TestRenameAndDrop:
 
     def test_drop_missing_column_raises(self, loaded_engine) -> None:
         """drop_columns raises ColumnNotFoundError for unknown column."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             ColumnNotFoundError,
         )
 
@@ -545,7 +545,7 @@ class TestCalculatedAndTransform:
 
     def test_transform_column_missing_column_raises(self, loaded_engine) -> None:
         """transform_column raises ColumnNotFoundError for unknown column."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             ColumnNotFoundError,
         )
 
@@ -563,14 +563,14 @@ class TestFitCurve:
 
     def test_linear_fit_perfect_data(self, loaded_engine) -> None:
         """Linear fit on perfectly linear data gives r_squared=1.0."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import FitType
+        from sidekick.data_processing.core import FitType
 
         fr = loaded_engine.fit_curve("a", "b", FitType.LINEAR)
         assert abs(fr.r_squared - 1.0) < 1e-6
 
     def test_fit_result_has_coefficients(self, loaded_engine) -> None:
         """FitResult from linear fit contains non-empty coefficients."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import FitType
+        from sidekick.data_processing.core import FitType
 
         fr = loaded_engine.fit_curve("a", "b", FitType.LINEAR)
         assert fr.theta_optimal is not None
@@ -578,14 +578,14 @@ class TestFitCurve:
 
     def test_polynomial_fit(self, loaded_engine) -> None:
         """Polynomial fit returns a FitResult with r_squared."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import FitType
+        from sidekick.data_processing.core import FitType
 
         fr = loaded_engine.fit_curve("a", "b", FitType.POLYNOMIAL, degree=2)
         assert fr.r_squared is not None
 
     def test_fit_missing_column_raises(self, loaded_engine) -> None:
         """fit_curve raises ColumnNotFoundError for unknown x column."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             ColumnNotFoundError,
             FitType,
         )
@@ -604,7 +604,7 @@ class TestSmoothColumn:
 
     def _long_engine(self) -> DataProcessorEngine:
         """Engine with 20-row data for smoothing."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             DataProcessorEngine,
         )
 
@@ -630,7 +630,7 @@ class TestSmoothColumn:
 
     def test_data_processing_core_extended_unknown_method_raises(self) -> None:
         """smooth_column with unknown method raises UnsupportedOperationError."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             UnsupportedOperationError,
         )
 
@@ -640,7 +640,7 @@ class TestSmoothColumn:
 
     def test_smooth_no_data_raises(self, engine) -> None:
         """smooth_column raises DataNotLoadedError when no data loaded."""
-        from src.shared.python.upstream_drift_tools.data_processing.core import (
+        from sidekick.data_processing.core import (
             DataNotLoadedError,
         )
 

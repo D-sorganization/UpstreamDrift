@@ -39,11 +39,12 @@ logger = get_logger(__name__)
 TAB_LAYOUT = 0
 TAB_CONFIG = 1
 TAB_DIAGNOSTICS = 2
+TAB_MCP_SERVERS = 3
 
 
 def validate_tab_index(tab_index: int) -> int:
     """Validate SettingsDialog startup tab index."""
-    valid_indexes = {TAB_LAYOUT, TAB_CONFIG, TAB_DIAGNOSTICS}
+    valid_indexes = {TAB_LAYOUT, TAB_CONFIG, TAB_DIAGNOSTICS, TAB_MCP_SERVERS}
     if tab_index not in valid_indexes:
         raise ValueError(
             f"Invalid tab index {tab_index}; expected one of {sorted(valid_indexes)}"
@@ -52,12 +53,13 @@ def validate_tab_index(tab_index: int) -> int:
 
 
 class SettingsDialog(QDialog):
-    """Settings dialog with Layout, Configuration, and Diagnostics tabs.
+    """Settings dialog with Layout, Configuration, Diagnostics, and MCP Servers tabs.
 
     Tab order:
         0 - Layout: tile arrangement, lock, reset
         1 - Configuration: execution env, simulation opts, Docker rebuild
         2 - Diagnostics: system checks, error logs, terminal output
+        3 - MCP Servers: manage Model Context Protocol server connections
     """
 
     reset_layout_requested = pyqtSignal()
@@ -66,6 +68,7 @@ class SettingsDialog(QDialog):
     TAB_LAYOUT = TAB_LAYOUT
     TAB_CONFIG = TAB_CONFIG
     TAB_DIAGNOSTICS = TAB_DIAGNOSTICS
+    TAB_MCP_SERVERS = TAB_MCP_SERVERS
 
     def __init__(
         self,
@@ -93,7 +96,7 @@ class SettingsDialog(QDialog):
         from src.shared.python.gui_pkg.draggable_tabs import DraggableTabWidget
 
         self.tabs = DraggableTabWidget(
-            core_tabs={"Layout", "Configuration", "Diagnostics"}
+            core_tabs={"Layout", "Configuration", "Diagnostics", "MCP Servers"}
         )
         self.tabs.setTabsClosable(False)
         layout.addWidget(self.tabs)
@@ -101,6 +104,7 @@ class SettingsDialog(QDialog):
         self.tabs.addTab(self._create_layout_tab(), "Layout")
         self.tabs.addTab(self._create_configuration_tab(), "Configuration")
         self.tabs.addTab(self._create_diagnostics_tab(), "Diagnostics")
+        self.tabs.addTab(self._create_mcp_servers_tab(), "MCP Servers")
 
         close_btn = QPushButton("Close")
         close_btn.clicked.connect(self.accept)
@@ -135,6 +139,47 @@ class SettingsDialog(QDialog):
 
         tab_layout.addWidget(group)
 
+        # --- View Mode --------------------------------------------------
+        view_mode_group = QGroupBox("View Mode")
+        view_mode_inner = QVBoxLayout(view_mode_group)
+
+        self.combo_view_mode = QComboBox()
+        # Ensure enums are imported correctly inside the method scope
+        try:
+            from src.shared.python.gui_pkg.layout_manager import ViewMode
+
+            self.combo_view_mode.addItem("Tile Small", ViewMode.SMALL)
+            self.combo_view_mode.addItem("Tile Medium", ViewMode.MEDIUM)
+            self.combo_view_mode.addItem("Tile Large", ViewMode.LARGE)
+            self.combo_view_mode.addItem("List Small", ViewMode.LIST_SMALL)
+            self.combo_view_mode.addItem("List Large", ViewMode.LIST_LARGE)
+        except ImportError:
+            pass
+
+        view_mode_inner.addWidget(self.combo_view_mode)
+        tab_layout.addWidget(view_mode_group)
+
+        # --- Tile Zoom --------------------------------------------------
+        zoom_group = QGroupBox("Tile Zoom")
+        zoom_inner = QHBoxLayout(zoom_group)
+
+        from PyQt6.QtWidgets import QSlider
+
+        self.zoom_slider = QSlider(Qt.Orientation.Horizontal)
+        self.zoom_slider.setRange(0, 100)
+        self.zoom_slider.setToolTip("Adjust the size of the model tiles")
+
+        self.lbl_zoom_pct = QLabel("100%")
+        self.lbl_zoom_pct.setFixedWidth(35)
+        self.lbl_zoom_pct.setStyleSheet("color: #888888; font-family: monospace;")
+
+        zoom_inner.addWidget(QLabel("Smaller"))
+        zoom_inner.addWidget(self.zoom_slider)
+        zoom_inner.addWidget(QLabel("Larger"))
+        zoom_inner.addSpacing(10)
+        zoom_inner.addWidget(self.lbl_zoom_pct)
+        tab_layout.addWidget(zoom_group)
+
         # Sync with parent launcher
         launcher = self.parent()
         if launcher and hasattr(launcher, "btn_modify_layout"):
@@ -142,6 +187,40 @@ class SettingsDialog(QDialog):
             self._btn_layout_lock.toggled.connect(launcher.btn_modify_layout.click)
             self._btn_edit_tiles.clicked.connect(launcher.open_layout_manager)
             self._btn_layout_lock.toggled.connect(self._btn_edit_tiles.setEnabled)
+
+            # Sync view mode
+            if hasattr(launcher, "layout_manager"):
+                current_mode = launcher.layout_manager.view_mode
+                index = self.combo_view_mode.findData(current_mode)
+                if index >= 0:
+                    self.combo_view_mode.setCurrentIndex(index)
+
+                self.combo_view_mode.currentIndexChanged.connect(
+                    lambda idx: launcher._set_view_mode_from_menu(
+                        self.combo_view_mode.itemData(idx)
+                    )
+                )
+
+            # Sync zoom
+            if hasattr(launcher, "layout_manager"):
+                scale = launcher.layout_manager.tile_scale
+                val = (
+                    launcher._scale_to_slider(scale)
+                    if hasattr(launcher, "_scale_to_slider")
+                    else 50
+                )
+                self.zoom_slider.setValue(val)
+                self.lbl_zoom_pct.setText(f"{int(round(scale * 100))}%")
+
+                def on_zoom(v):
+                    if hasattr(launcher, "_slider_to_scale"):
+                        self.lbl_zoom_pct.setText(
+                            f"{int(round(launcher._slider_to_scale(v) * 100))}%"
+                        )
+                    if hasattr(launcher, "_zoom_slider_changed"):
+                        launcher._zoom_slider_changed(v)
+
+                self.zoom_slider.valueChanged.connect(on_zoom)
 
         tab_layout.addStretch()
         return tab
@@ -376,6 +455,39 @@ class SettingsDialog(QDialog):
 
         tab_layout.addLayout(btn_row)
         return tab
+
+    # ── MCP Servers tab ─────────────────────────────────────────────
+
+    def _create_mcp_servers_tab(self) -> QWidget:
+        """MCP Servers tab: list, add, disable, remove MCP server configs."""
+        from PyQt6.QtWidgets import QMessageBox, QScrollArea, QVBoxLayout, QWidget
+
+        from src.launchers.mcp_servers_preferences import (  # type: ignore[attr-defined]
+            McpServersSection,
+        )
+
+        tab = QWidget()
+        tab_layout = QVBoxLayout(tab)
+
+        self._mcp_section = McpServersSection(parent=tab)
+        self._mcp_section.restart_required.connect(self._on_mcp_restart_required)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(self._mcp_section)
+        tab_layout.addWidget(scroll)
+        return tab
+
+    def _on_mcp_restart_required(self) -> None:
+        """Prompt the user to restart the Sidekick chat after MCP config changes."""
+        from PyQt6.QtWidgets import QMessageBox
+
+        QMessageBox.information(
+            self,
+            "Restart Required",
+            "MCP server configuration changed.\n\n"
+            "Restart the Sidekick chat session for changes to take effect.",
+        )
 
     def _load_app_log(self) -> None:
         """Load recent lines from the application log file."""

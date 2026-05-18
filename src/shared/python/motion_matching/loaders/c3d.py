@@ -1,7 +1,7 @@
 """C3D loader for cluster-marker mocap files.
 
 Reuses the canonical ``C3DDataReader`` from
-``src/shared/python/upstream_drift_tools/lab/bio/c3d_reader.py``.
+``src/shared/python/sidekick/lab/bio/c3d_reader.py``.
 Marker-name discovery is heuristic because the cluster-marker set is not
 documented in this repo (issue #013 is the verification pass).
 """
@@ -16,12 +16,12 @@ import numpy as np
 import pandas as pd
 
 from src.shared.python.core.contracts import postcondition, precondition
-from src.shared.python.upstream_drift_tools.lab.bio.c3d_reader import C3DDataReader
-from src.shared.python.upstream_drift_tools.lab.bio._c3d_marker_set import (
+from sidekick.lab.bio.c3d_reader import C3DDataReader
+from sidekick.lab.bio._c3d_marker_set import (
     MarkerSet,
     MarkerSetMismatchError,
 )
-from src.shared.python.upstream_drift_tools.lab.bio._c3d_models import C3DEvent
+from sidekick.lab.bio._c3d_models import C3DEvent
 
 from ..club_target import AlignOptions, ClubTarget, SourceProvenance
 from ._align import detect_impact_index, resample_target

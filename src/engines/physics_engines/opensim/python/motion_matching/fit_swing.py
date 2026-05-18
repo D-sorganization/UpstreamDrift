@@ -181,7 +181,7 @@ def _resolve_simulate_fn(
             "Install/merge #4120 or pass a simulate_fn for tests."
         ) from exc
 
-    return simulate_with_coefficients
+    return simulate_with_coefficients  # type: ignore[return-value]
 
 
 def _resolve_theta0(

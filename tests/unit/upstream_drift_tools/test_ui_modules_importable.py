@@ -1,17 +1,17 @@
-"""Importability tests for upstream_drift_tools UI modules (Issues #1949, #1744)."""
+"""Importability tests for sidekick UI modules (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
-from src.shared.python.upstream_drift_tools.process_calculators.scrubber.tests.test_scrubber_engine import (
+from sidekick.process_calculators.scrubber.tests.test_scrubber_engine import (
     ScrubberEngine,
     ScrubberInputs,
     TestScrubberEngine,
 )
-from src.shared.python.upstream_drift_tools.ui.mixins.base_calculator_mixin import (
+from sidekick.ui.mixins.base_calculator_mixin import (
     BaseCalculatorMixin,
     CalculatorStateMixin,
 )
-from src.shared.python.upstream_drift_tools.ui.widgets.mixins.data_processor_ops import (
+from sidekick.ui.widgets.mixins.data_processor_ops import (
     DataProcessorOpsMixin,
 )
 

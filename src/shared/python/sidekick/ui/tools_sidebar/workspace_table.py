@@ -1,0 +1,226 @@
+"""WorkspaceTableModel — sortable QAbstractTableModel backed by WorkspaceRegistry.
+
+Columns: Name | Type | Size | Preview
+
+The model subscribes to WorkspaceRegistry change events and refreshes
+itself automatically when variables are added, updated, or removed.
+Double-clicking a row emits the ``inspect_requested`` signal.
+
+Design-by-Contract:
+- Precondition: __init__ requires a WorkspaceRegistry instance.
+- Postcondition: after set_variable on the registry, rowCount() reflects
+  the new state within the same Qt event loop tick (synchronous update).
+- LOD: The model receives only a WorkspaceRegistry reference; it does not
+  reach into sidebar internals or theme tokens.
+"""
+
+from __future__ import annotations
+
+import logging
+from typing import Any
+
+from PyQt6.QtCore import (
+    QAbstractTableModel,
+    QModelIndex,
+    Qt,
+    pyqtSignal,
+)
+from PyQt6.QtWidgets import QTableView
+
+from .registry import WorkspaceRegistry, WorkspaceVariable
+
+logger = logging.getLogger(__name__)
+
+__all__ = ["WorkspaceTableModel", "WorkspaceTableView"]
+
+_COLUMNS = ["Name", "Type", "Size", "Preview"]
+_COL_NAME = 0
+_COL_TYPE = 1
+_COL_SIZE = 2
+_COL_PREVIEW = 3
+_MAX_PREVIEW_LEN = 64
+
+
+class WorkspaceTableModel(QAbstractTableModel):
+    """Sortable table model mirroring WorkspaceRegistry contents.
+
+    Each row represents one workspace variable. The model subscribes to
+    the registry so it refreshes automatically on every change.
+
+    Usage::
+
+        registry = WorkspaceRegistry()
+        model = WorkspaceTableModel(registry)
+        view = QTableView()
+        view.setModel(model)
+    """
+
+    def __init__(self, registry: WorkspaceRegistry, parent: Any = None) -> None:
+        """Initialise the model.
+
+        Args:
+            registry: The WorkspaceRegistry to mirror.
+            parent: Optional QObject parent.
+
+        Raises:
+            TypeError: If registry is not a WorkspaceRegistry.
+        """
+        if not isinstance(registry, WorkspaceRegistry):
+            raise TypeError(
+                f"registry must be a WorkspaceRegistry, got {type(registry).__name__!r}"
+            )
+        super().__init__(parent)
+        self._registry = registry
+        self._rows: list[WorkspaceVariable] = []
+        self._sort_column = _COL_NAME
+        self._sort_order = Qt.SortOrder.AscendingOrder
+        self._subscription = registry.subscribe(self._on_registry_change)
+        self._refresh()
+
+    # ------------------------------------------------------------------
+    # QAbstractTableModel interface
+    # ------------------------------------------------------------------
+
+    def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:  # noqa: N803
+        """Return the number of rows (one per variable)."""
+        return len(self._rows)
+
+    def columnCount(self, parent: QModelIndex = QModelIndex()) -> int:  # noqa: N803
+        """Return the number of columns (always 4)."""
+        return len(_COLUMNS)
+
+    def data(
+        self,
+        index: QModelIndex,
+        role: int = Qt.ItemDataRole.DisplayRole,
+    ) -> Any:
+        """Return data for the given *index* and *role*.
+
+        Only DisplayRole is handled; other roles return None.
+        """
+        if not index.isValid() or role != Qt.ItemDataRole.DisplayRole:
+            return None
+        row = index.row()
+        col = index.column()
+        if row >= len(self._rows) or col >= len(_COLUMNS):
+            return None
+        var = self._rows[row]
+        return self._cell_text(var, col)
+
+    def headerData(
+        self,
+        section: int,
+        orientation: Qt.Orientation,
+        role: int = Qt.ItemDataRole.DisplayRole,
+    ) -> Any:
+        """Return column header labels for horizontal orientation."""
+        if role != Qt.ItemDataRole.DisplayRole:
+            return None
+        if orientation == Qt.Orientation.Horizontal and 0 <= section < len(_COLUMNS):
+            return _COLUMNS[section]
+        return None
+
+    def sort(
+        self,
+        column: int,
+        order: Qt.SortOrder = Qt.SortOrder.AscendingOrder,
+    ) -> None:
+        """Sort rows by the given *column* in *order*.
+
+        Args:
+            column: Column index (0 = Name, 1 = Type, 2 = Size, 3 = Preview).
+            order: Qt.SortOrder.AscendingOrder or DescendingOrder.
+        """
+        self.layoutAboutToBeChanged.emit()
+        self._sort_column = column
+        self._sort_order = order
+        self._sort_rows()
+        self.layoutChanged.emit()
+
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+
+    def _refresh(self) -> None:
+        """Reload rows from the registry and notify views."""
+        self.beginResetModel()
+        self._rows = self._registry.variables()
+        self._sort_rows()
+        self.endResetModel()
+
+    def _sort_rows(self) -> None:
+        reverse = self._sort_order == Qt.SortOrder.DescendingOrder
+        self._rows.sort(
+            key=lambda var: self._sort_key(var, self._sort_column),
+            reverse=reverse,
+        )
+
+    @staticmethod
+    def _sort_key(var: WorkspaceVariable, column: int) -> str:
+        if column == _COL_NAME:
+            return var.name.lower()
+        if column == _COL_TYPE:
+            return var.type_name.lower()
+        if column == _COL_SIZE:
+            return var.summary.lower()
+        return repr(var.value)[:_MAX_PREVIEW_LEN].lower()
+
+    @staticmethod
+    def _cell_text(var: WorkspaceVariable, col: int) -> str:
+        if col == _COL_NAME:
+            return var.name
+        if col == _COL_TYPE:
+            return var.type_name
+        if col == _COL_SIZE:
+            return var.summary
+        # Preview column
+        if var.json_safe:
+            preview = repr(var.value)
+        else:
+            preview = var.repr_value or repr(var.value)
+        return preview[:_MAX_PREVIEW_LEN]
+
+    def _on_registry_change(self, name: str, value: Any) -> None:  # noqa: ARG002
+        """Subscriber callback — refresh the model when registry changes."""
+        self._refresh()
+
+
+class WorkspaceTableView(QTableView):
+    """QTableView wired to a WorkspaceTableModel.
+
+    Emits ``inspect_requested(name)`` on double-click.
+
+    Usage::
+
+        registry = WorkspaceRegistry()
+        view = WorkspaceTableView(registry)
+        view.inspect_requested.connect(my_inspector)
+    """
+
+    inspect_requested = pyqtSignal(str)
+
+    def __init__(
+        self,
+        registry: WorkspaceRegistry,
+        parent: Any = None,
+    ) -> None:
+        """Initialise the view.
+
+        Args:
+            registry: WorkspaceRegistry to display.
+            parent: Optional parent widget.
+        """
+        super().__init__(parent)
+        self._model = WorkspaceTableModel(registry, parent=self)
+        self.setModel(self._model)
+        self.setSortingEnabled(True)
+        self.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
+        self.setEditTriggers(QTableView.EditTrigger.NoEditTriggers)
+        self.doubleClicked.connect(self._on_double_click)
+
+    def _on_double_click(self, index: QModelIndex) -> None:
+        row = index.row()
+        name_index = self._model.index(row, _COL_NAME)
+        name = self._model.data(name_index, Qt.ItemDataRole.DisplayRole)
+        if name:
+            self.inspect_requested.emit(name)

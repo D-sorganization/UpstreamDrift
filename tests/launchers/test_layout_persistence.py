@@ -51,16 +51,16 @@ def test_save_and_reload_view_mode_and_scale(make_layout_manager, tmp_path) -> N
     cfg = tmp_path / "launcher_layout.json"
     lm = make_layout_manager(cfg)
     lm.model_order = ["model_1"]
-    lm.set_view_mode(ViewMode.DENSE)  # sets tile_scale=0.35
+    lm.set_view_mode(ViewMode.SMALL)  # sets tile_scale=0.35
     lm.save_layout({"selected_model": "model_1", "geometry": {}})
 
     payload = json.loads(cfg.read_text())
-    assert payload["view_mode"] == "dense"
+    assert payload["view_mode"] == "small"
     assert payload["tile_scale"] == pytest.approx(0.35)
 
     lm2 = make_layout_manager(cfg)
     lm2.load_layout()
-    assert lm2.current_view_mode == ViewMode.DENSE
+    assert lm2.current_view_mode == ViewMode.SMALL
     assert lm2.tile_scale == pytest.approx(0.35)
 
 
@@ -70,8 +70,8 @@ def test_load_layout_missing_keys_uses_defaults(make_layout_manager, tmp_path) -
 
     lm = make_layout_manager(cfg)
     lm.load_layout()
-    # Default view_mode is COMPACT; default tile_scale unchanged from init.
-    assert lm.current_view_mode == ViewMode.COMPACT
+    # Default view_mode when key is missing is LIST (fallback).
+    assert lm.current_view_mode == ViewMode.LIST
     # tile_scale defaults to TILE_SCALE_DEFAULT (0.5) on the manager
     assert lm.tile_scale == pytest.approx(0.5)
 
@@ -91,7 +91,7 @@ def test_load_layout_invalid_view_mode_falls_back(
     )
     lm = make_layout_manager(cfg)
     lm.load_layout()
-    assert lm.current_view_mode == ViewMode.COMPACT
+    assert lm.current_view_mode == ViewMode.LIST
     assert lm.tile_scale == pytest.approx(0.75)
 
 
@@ -101,7 +101,7 @@ def test_load_layout_invalid_tile_scale_skipped(make_layout_manager, tmp_path) -
         json.dumps(
             {
                 "model_order": ["model_1"],
-                "view_mode": "compact",
+                "view_mode": "medium",
                 "tile_scale": -2.0,
             }
         )

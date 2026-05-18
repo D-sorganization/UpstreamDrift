@@ -60,7 +60,7 @@ def test_install_tools_sidebar_noops_when_shared_module_is_missing() -> None:
 def test_install_tools_sidebar_adds_shared_dock_and_connects_file_open(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
-    module = ModuleType("upstream_drift_tools.ui.tools_sidebar")
+    module = ModuleType("sidekick.ui.tools_sidebar")
     created: dict[str, Any] = {}
 
     class ToolsSidebar(FakeDock):
@@ -101,7 +101,7 @@ def test_install_tools_sidebar_adds_shared_dock_and_connects_file_open(
 def test_install_tools_sidebar_passes_sidekick_tokens_when_supported(
     monkeypatch: Any,
 ) -> None:
-    module = ModuleType("upstream_drift_tools.ui.tools_sidebar")
+    module = ModuleType("sidekick.ui.tools_sidebar")
     created: dict[str, Any] = {}
 
     class ToolsSidebar(FakeDock):
@@ -128,7 +128,7 @@ def test_install_tools_sidebar_passes_sidekick_tokens_when_supported(
 
 
 def test_install_tools_sidebar_uses_shared_installer_status(monkeypatch: Any) -> None:
-    module = ModuleType("upstream_drift_tools.ui.tools_sidebar")
+    module = ModuleType("sidekick.ui.tools_sidebar")
     dock = FakeDock()
 
     def shared_installer(
@@ -155,7 +155,7 @@ def test_install_tools_sidebar_uses_shared_installer_status(monkeypatch: Any) ->
 def test_install_tools_sidebar_shared_installer_can_accept_sidekick_tokens(
     monkeypatch: Any,
 ) -> None:
-    module = ModuleType("upstream_drift_tools.ui.tools_sidebar")
+    module = ModuleType("sidekick.ui.tools_sidebar")
     observed: dict[str, Any] = {}
     dock = FakeDock()
 
@@ -178,7 +178,7 @@ def test_install_tools_sidebar_shared_installer_can_accept_sidekick_tokens(
 
 
 def test_install_tools_sidebar_rejects_non_dock_hosts(monkeypatch: Any) -> None:
-    module = ModuleType("upstream_drift_tools.ui.tools_sidebar")
+    module = ModuleType("sidekick.ui.tools_sidebar")
     module.ToolsSidebar = FakeDock  # type: ignore[attr-defined]
     monkeypatch.setitem(sys.modules, module.__name__, module)
 
@@ -194,7 +194,7 @@ def test_install_tools_sidebar_passes_sidekick_tokens_via_factory() -> None:
     Uses ``patch.dict`` so the fake sidebar module is auto-cleaned after the
     test (per CLAUDE.md's test-pollution guidance).
     """
-    module_name = "upstream_drift_tools.ui.tools_sidebar"
+    module_name = "sidekick.ui.tools_sidebar"
     module = ModuleType(module_name)
     recorded: dict[str, Any] = {}
 
@@ -228,7 +228,7 @@ def test_install_tools_sidebar_passes_sidekick_tokens_via_factory() -> None:
 
 
 def test_is_tools_sidebar_available_true_when_stub_registered() -> None:
-    module_name = "upstream_drift_tools.ui.tools_sidebar"
+    module_name = "sidekick.ui.tools_sidebar"
     module = ModuleType(module_name)
 
     with patch.dict(sys.modules, {module_name: module}):
@@ -237,9 +237,9 @@ def test_is_tools_sidebar_available_true_when_stub_registered() -> None:
 
 def test_is_tools_sidebar_available_false_when_no_module_present() -> None:
     candidates = (
-        "upstream_drift_tools.ui.tools_sidebar",
-        "shared.python.upstream_drift_tools.ui.tools_sidebar",
-        "src.shared.python.upstream_drift_tools.ui.tools_sidebar",
+        "sidekick.ui.tools_sidebar",
+        "shared.python.sidekick.ui.tools_sidebar",
+        "sidekick.ui.tools_sidebar",
     )
     cleared = {name: None for name in candidates if name not in sys.modules}
     with patch.dict(sys.modules, cleared):

@@ -9,8 +9,8 @@ from unittest.mock import patch
 import numpy as np
 import pandas as pd
 import pytest
-from src.shared.python.upstream_drift_tools.lab.bio import _c3d_io as io_mod
-from src.shared.python.upstream_drift_tools.lab.bio._c3d_io import (
+from sidekick.lab.bio import _c3d_io as io_mod
+from sidekick.lab.bio._c3d_io import (
     build_metadata,
     export_dataframe,
     get_analog_details,
@@ -23,11 +23,11 @@ from src.shared.python.upstream_drift_tools.lab.bio._c3d_io import (
     validate_export_path,
     write_export,
 )
-from src.shared.python.upstream_drift_tools.lab.bio._c3d_models import (
+from sidekick.lab.bio._c3d_models import (
     SCHEMA_VERSION,
     C3DEvent,
 )
-from tests.unit.upstream_drift_tools.lab.bio._synthetic import _synthetic_c3d_dict
+from tests.unit.sidekick.lab.bio._synthetic import _synthetic_c3d_dict
 
 # ----- load_c3d --------------------------------------------------------------
 

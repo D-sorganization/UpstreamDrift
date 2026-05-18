@@ -17,6 +17,7 @@ permissions:
 
 jobs:
   control:
+    timeout-minutes: 30
     runs-on: d-sorg-fleet
     steps:
       - name: Checkout repository

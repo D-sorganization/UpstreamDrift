@@ -7,6 +7,7 @@ lazy-loading: importing this module does not trigger the Drake/pydrake dependenc
 """
 
 import argparse
+import contextlib
 
 from PyQt6.QtWidgets import QFileDialog
 

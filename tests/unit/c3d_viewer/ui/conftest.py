@@ -39,7 +39,7 @@ def _pivot_sys_path() -> None:
     import importlib
 
     for qual in (
-        "src.shared.python.upstream_drift_tools.lab.bio.c3d_reader",
+        "sidekick.lab.bio.c3d_reader",
         "src.shared.python.qt_utils.wheel_event_filter",
         "src.shared.python.motion_matching.body_skeleton",
         "src.shared.python.plot_style",

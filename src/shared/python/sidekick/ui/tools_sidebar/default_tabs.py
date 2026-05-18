@@ -1,0 +1,170 @@
+"""Default tab builder functions for the Sidekick/UnifiedToolsSidebar.
+
+Provides ``build_workspace_tab()`` — the MATLAB-style workspace panel that
+replaces the blank QListWidget placeholder with a live variable table,
+a Python REPL command window, and a command-history list.
+
+Layout (70/30 horizontal splitter):
+    Left pane  (~70%): PythonReplWidget — shared REPL tied to workspace namespace
+    Right pane (~30%):
+        Top half:    WorkspaceTableView — auto-refreshing variable table
+        Bottom half: Command history QListWidget — double-click to re-run
+
+Design-by-Contract:
+- build_workspace_tab(sidebar): precondition sidebar.registry is a
+  WorkspaceRegistry; postcondition returns a QWidget.
+- LOD: accesses only sidebar.registry and sidebar.set_context_variable.
+"""
+
+from __future__ import annotations
+
+import logging
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
+__all__ = ["build_workspace_tab"]
+
+
+def build_workspace_tab(sidebar: Any) -> Any:
+    """Build the MATLAB-style workspace panel.
+
+    Creates a two-pane QSplitter layout:
+    - Left (~70%): Python REPL sharing the workspace namespace
+    - Right (~30%): live variable table (top) + command history list (bottom)
+
+    Precondition: sidebar.registry is a WorkspaceRegistry instance.
+    Postcondition: returns a QWidget.
+
+    Args:
+        sidebar: The UnifiedToolsSidebar (or compatible host) instance.
+
+    Returns:
+        QWidget containing the workspace layout.
+    """
+    try:
+        from PyQt6.QtWidgets import QListWidget, QSplitter, QVBoxLayout, QWidget
+        from PyQt6.QtCore import Qt
+
+        from .python_repl import PythonReplWidget
+        from .registry import WorkspaceRegistry
+        from .workspace_table import WorkspaceTableView
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("build_workspace_tab: Qt unavailable — %s", exc)
+        return _fallback_workspace_tab(sidebar, str(exc))
+
+    registry: WorkspaceRegistry | None = getattr(sidebar, "registry", None)
+    if registry is None or not isinstance(registry, WorkspaceRegistry):
+        logger.warning(
+            "build_workspace_tab: sidebar.registry is not a WorkspaceRegistry; "
+            "falling back to empty panel"
+        )
+        return _fallback_workspace_tab(sidebar, "registry not initialised")
+
+    set_variable = getattr(sidebar, "set_context_variable", registry.set_variable)
+
+    # Shared globals namespace initialised from the registry
+    namespace: dict[str, Any] = {
+        name: registry.get(name) for name in registry.list_names()
+    }
+
+    # -----------------------------------------------------------------------
+    # Build top-level horizontal splitter (left repl / right inspector)
+    # -----------------------------------------------------------------------
+    outer_splitter = QSplitter(Qt.Orientation.Horizontal, sidebar)
+    outer_splitter.setObjectName("WorkspaceOuterSplitter")
+
+    # -----------------------------------------------------------------------
+    # Left pane: Python REPL
+    # -----------------------------------------------------------------------
+    repl = PythonReplWidget(
+        namespace=namespace, registry=registry, parent=outer_splitter
+    )
+    repl_widget = (
+        repl.widget
+        if repl.widget is not None
+        else _label_placeholder(outer_splitter, "Python REPL (Qt unavailable)")
+    )
+    outer_splitter.addWidget(repl_widget)
+
+    # -----------------------------------------------------------------------
+    # Right pane: variable table (top) + history list (bottom)
+    # -----------------------------------------------------------------------
+    right_pane = QSplitter(Qt.Orientation.Vertical, outer_splitter)
+    right_pane.setObjectName("WorkspaceRightPane")
+
+    workspace_view = WorkspaceTableView(registry, parent=right_pane)
+    workspace_view.setObjectName("WorkspaceTableView")
+    right_pane.addWidget(workspace_view)
+
+    history_list = QListWidget(right_pane)
+    history_list.setObjectName("WorkspaceHistoryList")
+    history_list.setToolTip(
+        "Command history — double-click to re-run an entry in the REPL"
+    )
+
+    def _on_repl_run(code: str) -> None:
+        """Update history list when code is evaluated."""
+        history_list.addItem(code)
+
+    # Wire history: the REPL widget updates history internally; we mirror it
+    # into the QListWidget by hooking into a signal if available, else polling.
+    # For now, we expose a simple mechanism: the right-side list updates after
+    # each evaluate. Since PythonReplWidget does not yet emit a signal, we
+    # wrap the evaluate method.
+    _original_evaluate = repl.evaluate
+
+    def _evaluate_and_record(code: str) -> str:
+        result = _original_evaluate(code)
+        if code.strip():
+            history_list.addItem(code.strip())
+        return result
+
+    repl.evaluate = _evaluate_and_record  # type: ignore[method-assign]
+
+    # Double-click history item to re-run
+    def _on_history_double_clicked(item: Any) -> None:
+        repl.evaluate(item.text())
+
+    history_list.itemDoubleClicked.connect(_on_history_double_clicked)
+    right_pane.addWidget(history_list)
+    right_pane.setSizes([300, 150])
+
+    outer_splitter.addWidget(right_pane)
+    # 70/30 split
+    outer_splitter.setSizes([700, 300])
+
+    return outer_splitter
+
+
+def _fallback_workspace_tab(sidebar: Any, reason: str) -> Any:
+    """Return a minimal placeholder when Qt is unavailable.
+
+    Args:
+        sidebar: Parent sidebar widget.
+        reason: Human-readable reason for the fallback.
+
+    Returns:
+        A simple QWidget (or bare object) with the reason text.
+    """
+    try:
+        from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget
+
+        widget = QWidget(sidebar)
+        layout = QVBoxLayout(widget)
+        label = QLabel(f"Workspace tab unavailable: {reason}", widget)
+        label.setWordWrap(True)
+        layout.addWidget(label)
+        return widget
+    except Exception:  # noqa: BLE001
+        # Absolute last resort
+        return None
+
+
+def _label_placeholder(parent: Any, text: str) -> Any:
+    try:
+        from PyQt6.QtWidgets import QLabel
+
+        return QLabel(text, parent)
+    except Exception:  # noqa: BLE001
+        return None

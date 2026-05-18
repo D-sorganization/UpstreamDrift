@@ -59,6 +59,28 @@ class LauncherDialogsMixin:
         else:
             self.toast_manager = None
 
+        # Register the Sidekick feature Window menu (Tools surfacing).
+        # Done after the menu bar exists; tolerated as a no-op when
+        # menuBar() returns None (e.g. test fixtures without a window).
+        self._register_feature_window_menu()
+
+    def _register_feature_window_menu(self) -> None:
+        """Add the Window menu surfacing Sidekick features to the menu bar.
+
+        Idempotent: safe to call multiple times (we drop a previously
+        attached menu before re-adding).
+        """
+        menubar = getattr(self, "menu_bar", None)
+        if menubar is None:
+            return
+        try:
+            from src.launchers.feature_menu import register_feature_menu
+
+            self._feature_menu_actions = register_feature_menu(self, menubar)
+        except ImportError as exc:  # pragma: no cover - guarded
+            logger.debug("feature_menu unavailable: %s", exc)
+            self._feature_menu_actions = {}
+
     def _setup_keyboard_shortcuts(self) -> None:
         """Set up global keyboard shortcuts."""
         # F1 for help dialog (User Manual)
@@ -76,6 +98,20 @@ class LauncherDialogsMixin:
         # Ctrl+Q to quit
         shortcut_quit = QShortcut(QKeySequence("Ctrl+Q"), self)
         shortcut_quit.activated.connect(self.close)
+
+        # Sidekick feature shortcuts (Tools #2882/#2883/#2884/#2888/#2889).
+        # The single source of truth lives in feature_menu.FEATURE_ENTRIES so
+        # menu actions and these shortcuts cannot drift apart.
+        try:
+            from src.launchers.feature_menu import FEATURE_ENTRIES
+
+            for entry in FEATURE_ENTRIES:
+                if not entry.availability_probe():
+                    continue
+                sc = QShortcut(QKeySequence(entry.shortcut), self)
+                sc.activated.connect(lambda e=entry: e.factory(self))
+        except ImportError as exc:  # pragma: no cover — guard import path
+            logger.debug("feature_menu not importable: %s", exc)
 
     def _show_help_dialog(self, topic: str | None = None) -> None:
         """Show the help dialog.
@@ -144,6 +180,55 @@ class LauncherDialogsMixin:
             dialog = PreferencesDialog(self)
             dialog.exec()
 
+    def open_sidekick_tab(self, tool_id: str) -> None:
+        """Open *tool_id* as a Sidekick tab in the launcher.
+
+        Best-effort dispatcher that delegates to the embedded host if
+        available. Logs a warning (and shows a toast) when the host or
+        the tool isn't wired up — never raises, so the menu/shortcut
+        path remains robust during the transitional period while
+        Sidekick tabs are being wired feature-by-feature.
+
+        Tools surfaced through this hook: #2882 (OS terminal),
+        #2883 (Python REPL, workspace), #2884 (MCP servers),
+        #2888 (skills), #2889 (Jupyter).
+        """
+        if not tool_id:
+            raise ValueError("tool_id must be non-empty")
+
+        host = getattr(self, "embedded_host", None)
+        opener = getattr(host, "open_tab", None) if host is not None else None
+        if callable(opener):
+            try:
+                opener(tool_id)
+                return
+            except Exception as exc:  # noqa: BLE001 — bubble via toast
+                logger.warning("embedded_host.open_tab(%r) failed: %s", tool_id, exc)
+                self.show_toast(f"Failed to open {tool_id} tab: {exc}", "error")
+                return
+
+        logger.info(
+            "open_sidekick_tab(%r): embedded host not available yet — "
+            "Sidekick tab integration lands with Tools surfacing PR.",
+            tool_id,
+        )
+        self.show_toast(
+            f"Sidekick tab '{tool_id}' is not yet wired in this build.",
+            "info",
+        )
+
+    def open_preferences_section(self, section_id: str) -> None:
+        """Open the preferences dialog focused on *section_id*.
+
+        Currently delegates to the generic preferences entry point; the
+        section_id parameter is accepted so callers can use a stable
+        API while a section-aware dialog is wired up.
+        """
+        if not section_id:
+            raise ValueError("section_id must be non-empty")
+        logger.debug("open_preferences_section(%r)", section_id)
+        self._show_preferences()
+
     def show_toast(self, message: str, toast_type: str = "info") -> None:
         """Show a toast notification.
 
@@ -173,6 +258,19 @@ class LauncherDialogsMixin:
         if dialog.exec() and hasattr(self, "ai_panel"):
             pass
 
+    def _open_integrations_health(self) -> None:
+        """Open the integrations health dashboard window (UD #5643).
+
+        Hosts the shared :class:`IntegrationsHealthDashboardWidget` from
+        Tools (PR #2914) in a modeless dialog.
+        """
+        from src.launchers.integrations_health_window import (
+            open_integrations_health_window,
+        )
+
+        # Keep a reference so the dialog isn't garbage-collected.
+        self._integrations_health_dialog = open_integrations_health_window(self)
+
     def toggle_ai_assistant(self, checked: bool) -> None:
         """Toggle the AI Assistant panel visibility via the content splitter.
 
@@ -181,24 +279,21 @@ class LauncherDialogsMixin:
         """
         if checked is None:
             raise ValueError("checked must be provided")
-        if not AI_AVAILABLE or not hasattr(self, "ai_panel"):
+        if not AI_AVAILABLE:
             return
 
         self._ai_visible = checked
         # Keep the toggle button in sync when called programmatically
-        if hasattr(self, "btn_ai") and self.btn_ai.isChecked() != checked:
-            self.btn_ai.setChecked(checked)
+        if (
+            hasattr(self, "btn_ai_sidebar")
+            and self.btn_ai_sidebar.isChecked() != checked
+        ):
+            self.btn_ai_sidebar.setChecked(checked)
 
-        total = self.content_splitter.width() or 1200
-
-        if checked:
-            # Remove max-width constraint and allocate 30% to AI panel
-            self.ai_panel.setMaximumWidth(16777215)  # QWIDGETSIZE_MAX
-            self.content_splitter.setSizes([int(total * 0.7), int(total * 0.3)])
-        else:
-            # Collapse AI panel to zero width
-            self.content_splitter.setSizes([total, 0])
-            self.ai_panel.setMaximumWidth(0)
+        if hasattr(self, "sidekick_sidebar") and self.sidekick_sidebar is not None:
+            self.sidekick_sidebar.setVisible(checked)
+            if checked and hasattr(self, "open_sidekick_tab"):
+                self.open_sidekick_tab("chat")
 
     def _report_bug(self) -> None:
         """Open default mail client to report a bug."""
@@ -288,17 +383,16 @@ class LauncherDialogsMixin:
             raise ValueError("checked must be provided")
         self.layout_edit_mode = checked
         self.layout_manager.set_edit_mode(checked)
+
+        # Keep the menu action in sync
+        if (
+            hasattr(self, "_action_layout_mode")
+            and self._action_layout_mode.isChecked() != checked
+        ):
+            self._action_layout_mode.setChecked(checked)
+
         if checked:
-            self.btn_modify_layout.setText("Layout: Unlocked 🔓")
-            self.btn_modify_layout.setStyleSheet(Styles.BTN_LAYOUT_EDIT_ON)
-            if hasattr(self, "action_customize_tiles"):
-                self.action_customize_tiles.setEnabled(True)
             self.show_toast("Drag tiles to reorder. Double-click to launch.", "info")
-        else:
-            self.btn_modify_layout.setText("Layout: Locked 🔒")
-            self.btn_modify_layout.setStyleSheet(Styles.BTN_LAYOUT_LOCKED)
-            if hasattr(self, "action_customize_tiles"):
-                self.action_customize_tiles.setEnabled(False)
 
     def _on_docker_mode_changed(self, state: int) -> None:
         """Handle Docker mode toggle change.

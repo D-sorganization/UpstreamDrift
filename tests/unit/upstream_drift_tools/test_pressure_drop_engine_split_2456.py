@@ -12,7 +12,7 @@ import pytest
 REPO = Path(__file__).parents[3]
 ENGINE_DIR = (
     REPO
-    / "src/shared/python/upstream_drift_tools/process_calculators"
+    / "src/shared/python/sidekick/process_calculators"
     / "pressure_drop_calculator/engine"
 )
 LOC_BUDGET = 600
@@ -64,7 +64,7 @@ class TestPressureDropEnginePublicAPI:
 
     @pytest.mark.unit
     def test_import_friction_factor_laminar(self) -> None:
-        from src.shared.python.upstream_drift_tools.process_calculators.pressure_drop_calculator.engine.pressure_drop_calculation_engine import (
+        from sidekick.process_calculators.pressure_drop_calculator.engine.pressure_drop_calculation_engine import (
             friction_factor_laminar,
         )
 
@@ -72,7 +72,7 @@ class TestPressureDropEnginePublicAPI:
 
     @pytest.mark.unit
     def test_import_calculate_flow_properties(self) -> None:
-        from src.shared.python.upstream_drift_tools.process_calculators.pressure_drop_calculator.engine.pressure_drop_calculation_engine import (
+        from sidekick.process_calculators.pressure_drop_calculator.engine.pressure_drop_calculation_engine import (
             calculate_flow_properties,
         )
 
@@ -80,7 +80,7 @@ class TestPressureDropEnginePublicAPI:
 
     @pytest.mark.unit
     def test_import_calculation_engine_class(self) -> None:
-        from src.shared.python.upstream_drift_tools.process_calculators.pressure_drop_calculator.engine.pressure_drop_calculation_engine import (
+        from sidekick.process_calculators.pressure_drop_calculator.engine.pressure_drop_calculation_engine import (
             PressureDropCalculationEngine,
         )
 

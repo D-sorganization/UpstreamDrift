@@ -302,7 +302,7 @@ if __name__ == "__main__":
         logger.warning("Running with auto-reload enabled (development mode)")
 
     uvicorn.run(
-        "api.server:app",
+        "src.api.server:app",
         host=get_server_host(),
         port=get_server_port(),
         reload=enable_reload,

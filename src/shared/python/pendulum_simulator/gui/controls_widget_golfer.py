@@ -33,7 +33,7 @@ from .controls_widget import LabeledInput
 from .controls_widget_base import ControlsWidgetBase
 
 try:
-    from upstream_drift_tools.ui.widgets.unit_aware_input import UnitAwareInput
+    from sidekick.ui.widgets.unit_aware_input import UnitAwareInput
 
     _HAS_UAI = True
 except ImportError:

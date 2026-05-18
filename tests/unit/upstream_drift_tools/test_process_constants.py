@@ -1,8 +1,8 @@
-"""Tests for src.shared.python.upstream_drift_tools.process_calculators.constants (Issues #1949, #1744)."""
+"""Tests for sidekick.process_calculators.constants (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
-from src.shared.python.upstream_drift_tools.process_calculators.constants import (
+from sidekick.process_calculators.constants import (
     ATM_PA,
     MOLECULAR_WEIGHTS,
     R_GAS_J_MOL_K,

@@ -20,6 +20,7 @@ concurrency:
 
 jobs:
   check-kill-switch:
+    timeout-minutes: 30
     runs-on: d-sorg-fleet
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
@@ -50,6 +51,7 @@ jobs:
           echo "Self-hosted dispatcher selected d-sorg-fleet"
 
   supersede-check:
+    timeout-minutes: 30
     needs: [check-kill-switch, pick-runner]
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -143,6 +145,17 @@ jobs:
             PR_NUM=$(echo "$pr_json" | jq -r '.number')
             PR_TITLE=$(echo "$pr_json" | jq -r '.title')
             PR_BRANCH=$(echo "$pr_json" | jq -r '.branch')
+
+            # Anti-phantom-merge gate: skip PRs flagged jules-verification-failed
+            # so the diagnostic remains visible to the user.
+            has_failed_label=$(gh pr view "$PR_NUM" --json labels \
+              --jq '[.labels[].name] | contains(["jules-verification-failed"])' \
+              2>/dev/null || echo "false")
+            if [ "$has_failed_label" = "true" ]; then
+              echo "Skipping PR #$PR_NUM ($PR_TITLE): jules-verification-failed label present."
+              gh pr comment "$PR_NUM" --body "Skipped auto-close-as-superseded because this PR is flagged jules-verification-failed. Investigate before closing." 2>/dev/null || true
+              continue
+            fi
 
             echo "Closing PR #$PR_NUM: $PR_TITLE"
 

@@ -58,7 +58,14 @@ import pytest
 
 # On Windows, missing PyQt6 DLLs can cause a fatal crash.
 # Mock them immediately before any imports happen.
-if "PyQt6" not in sys.modules:
+try:
+    import PyQt6.QtCore
+
+    _has_pyqt6 = True
+except ImportError:
+    _has_pyqt6 = False
+
+if not _has_pyqt6 and "PyQt6" not in sys.modules:
     mock_core = MagicMock()
     mock_core.QLibraryInfo.version.return_value.toString.return_value = "6.6.0"
     mock_core.QLibraryInfo.version.return_value.segments.return_value = (6, 6, 0)
@@ -185,28 +192,25 @@ class OptionalCollectionRule:
     symbols: tuple[tuple[str, str], ...] = ()
 
 
-_PROCESS_CALCULATOR_ANCHOR = (
-    "src.shared.python.upstream_drift_tools.process_calculators."
-    "acid_gas_dewpoint_calculator"
-)
+_PROCESS_CALCULATOR_ANCHOR = "sidekick.process_calculators.acid_gas_dewpoint_calculator"
 _PROCESS_CALCULATOR_TESTS = (
     "tests/unit/process_calculators",
     "tests/unit/injury/test_injury_risk.py",
     "tests/unit/injury/test_joint_stress.py",
     "tests/unit/injury/test_spinal_load_analysis.py",
-    "tests/unit/upstream_drift_tools/test_acid_gas_dewpoint.py",
-    "tests/unit/upstream_drift_tools/test_analysis_utils.py",
-    "tests/unit/upstream_drift_tools/test_baghouse_calculator.py",
-    "tests/unit/upstream_drift_tools/test_electrode_and_thermal.py",
-    "tests/unit/upstream_drift_tools/test_financial_calculator.py",
-    "tests/unit/upstream_drift_tools/test_flare_calculator.py",
-    "tests/unit/upstream_drift_tools/test_gas_properties.py",
-    "tests/unit/upstream_drift_tools/test_pipe_database.py",
-    "tests/unit/upstream_drift_tools/test_pressure_drop_interface.py",
-    "tests/unit/upstream_drift_tools/test_process_constants.py",
-    "tests/unit/upstream_drift_tools/test_syngas_compression.py",
-    "tests/unit/upstream_drift_tools/test_ui_modules_importable.py",
-    "tests/unit/upstream_drift_tools/test_wgs_reactor_calculator.py",
+    "tests/unit/sidekick/test_acid_gas_dewpoint.py",
+    "tests/unit/sidekick/test_analysis_utils.py",
+    "tests/unit/sidekick/test_baghouse_calculator.py",
+    "tests/unit/sidekick/test_electrode_and_thermal.py",
+    "tests/unit/sidekick/test_financial_calculator.py",
+    "tests/unit/sidekick/test_flare_calculator.py",
+    "tests/unit/sidekick/test_gas_properties.py",
+    "tests/unit/sidekick/test_pipe_database.py",
+    "tests/unit/sidekick/test_pressure_drop_interface.py",
+    "tests/unit/sidekick/test_process_constants.py",
+    "tests/unit/sidekick/test_syngas_compression.py",
+    "tests/unit/sidekick/test_ui_modules_importable.py",
+    "tests/unit/sidekick/test_wgs_reactor_calculator.py",
 )
 _CALC_BACKEND_TESTS = (
     "tests/security/test_rate_limiting.py",

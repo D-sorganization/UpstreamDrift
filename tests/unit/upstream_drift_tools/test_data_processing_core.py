@@ -1,10 +1,10 @@
-"""Tests for src.shared.python.upstream_drift_tools.data_processing.core (Issues #1949, #1744, #2065)."""
+"""Tests for sidekick.data_processing.core (Issues #1949, #1744, #2065)."""
 
 from __future__ import annotations
 
 import pandas as pd
 import pytest
-from src.shared.python.upstream_drift_tools.data_processing.core import (
+from sidekick.data_processing.core import (
     AggregationType,
     ColumnStats,
     DataFormat,
@@ -13,7 +13,7 @@ from src.shared.python.upstream_drift_tools.data_processing.core import (
     ProcessingResult,
     _validate_dataframe_expression,
 )
-from src.shared.python.upstream_drift_tools.data_processing.exceptions import (
+from sidekick.data_processing.exceptions import (
     TransformationError,
 )
 

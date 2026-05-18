@@ -1,7 +1,7 @@
 """Backwards-compatible shim. Use the canonical reader instead.
 
 The canonical implementation lives at
-``src/shared/python/upstream_drift_tools/lab/bio/c3d_reader.py`` (issue #4484).
+``src/shared/python/sidekick/lab/bio/c3d_reader.py`` (issue #4484).
 This module re-exports the public API plus a project-local
 ``load_tour_average_reader`` convenience that resolves the Tour-average C3D
 relative to this engine's repo layout.
@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from src.shared.python.upstream_drift_tools.lab.bio.c3d_reader import (  # noqa: F401
+from sidekick.lab.bio.c3d_reader import (  # noqa: F401
     BIOMECHANICAL_MARKER_MAX_M,
     BIOMECHANICAL_MARKER_MIN_M,
     SCHEMA_VERSION,

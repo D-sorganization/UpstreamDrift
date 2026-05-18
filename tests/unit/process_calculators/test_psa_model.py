@@ -1,10 +1,10 @@
-"""Tests for upstream_drift_tools.process_calculators.psa_package.psa_model (Issues #1949, #1744)."""
+"""Tests for sidekick.process_calculators.psa_package.psa_model (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
-from src.shared.python.upstream_drift_tools.process_calculators.psa_package.psa_model import (
+from sidekick.process_calculators.psa_package.psa_model import (
     DEFAULT_COMPONENTS,
     PSAModel,
     PSAResults,

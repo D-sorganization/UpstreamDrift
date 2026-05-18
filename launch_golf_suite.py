@@ -13,9 +13,21 @@ import argparse
 import logging
 import os
 from os import environ, getcwd
+from pathlib import Path
 from sys import exit, path
 
-from src.api._version import warn_if_unsupported_platform
+# Bootstrap import paths before any project imports. The repo root must be on
+# sys.path so `src.*` resolves; the vendored Tools tree must be on sys.path so
+# the shared Sidekick package (`upstream_drift_tools.ui.tools_sidebar`) can be
+# imported at runtime — pytest reads this from pyproject.toml, but a direct
+# `python launch_golf_suite.py` invocation does not.
+_REPO_ROOT = Path(__file__).resolve().parent
+_VENDOR_SHARED = _REPO_ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python"
+for _p in (str(_REPO_ROOT), str(_REPO_ROOT / "src"), str(_VENDOR_SHARED)):
+    if _p not in path:
+        path.insert(0, _p)
+
+from src.api._version import warn_if_unsupported_platform  # noqa: E402
 
 path.append(os.path.join(getcwd(), "src"))
 

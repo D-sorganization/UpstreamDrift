@@ -1,11 +1,11 @@
-"""Tests for upstream_drift_tools.utils.paths (Issues #1949, #1744)."""
+"""Tests for sidekick.utils.paths (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
 import pytest
-from src.shared.python.upstream_drift_tools.utils.paths import get_repo_root
+from sidekick.utils.paths import get_repo_root
 
 
 class TestGetRepoRoot:

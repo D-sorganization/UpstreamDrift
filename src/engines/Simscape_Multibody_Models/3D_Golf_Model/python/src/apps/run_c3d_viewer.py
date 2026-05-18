@@ -31,14 +31,14 @@ _REPO_ROOT = _HERE.parents[6]  # apps -> src -> python -> 3D_Golf_Model -> Simsc
 
 # Step 1: import canonical reader from the repo root.
 sys.path.insert(0, str(_REPO_ROOT))
-from src.shared.python.upstream_drift_tools.lab.bio import (  # noqa: E402
+from sidekick.lab.bio import (  # noqa: E402
     c3d_reader as _canonical,  # noqa: E402
 )
 
 # Step 2: pivot ``src`` to the engine's local package so the viewer's
 # relative imports resolve. Keep the canonical module reachable via the
 # fully-qualified name so ``sys.modules`` cache hits don't re-execute it.
-_canonical_qualname = "src.shared.python.upstream_drift_tools.lab.bio.c3d_reader"
+_canonical_qualname = "sidekick.lab.bio.c3d_reader"
 sys.modules[_canonical_qualname] = _canonical
 
 # Drop the repo's ``src`` so importing ``src`` afterwards picks up the

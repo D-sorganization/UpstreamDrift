@@ -30,11 +30,17 @@ from PyQt6.QtWidgets import (
     QScrollArea,
     QSizePolicy,
     QSplitter,
+    QTabWidget,
     QTextEdit,
     QVBoxLayout,
     QWidget,
 )
 
+from src.launchers.chat_history import (
+    HistoryServiceAdapter,
+    HistorySidebarPane,
+    MemoryPanel,
+)
 from src.shared.python.ai.gui.history_sidebar import ChatHistorySidebar
 from src.shared.python.ai.gui.session_manager import ChatSessionManager
 from src.shared.python.ai.gui.settings_dialog import AISettingsDialog
@@ -323,8 +329,19 @@ class AIAssistantPanel(QWidget):
         self._session_manager.session_loaded.connect(self._on_session_loaded)
         self._load_history()
 
+        # Chat history + persistent memory adapter (UpstreamDrift #5621).
+        # The adapter lazily imports the Sidekick conversation service; when
+        # the sidekick package is unavailable the adapter degrades gracefully
+        # and the new panes simply show an empty state.
+        self._history_adapter = HistoryServiceAdapter()
+
         # Initialize Core Tools
         self._init_tools()
+
+        # MCP integration — loads ~/.upstreamdrift/mcp_servers.json
+        # Degrades gracefully if the config file is absent.
+        self._mcp_integration: Any | None = None
+        self._init_mcp()
 
         self._setup_ui()
         # Restore messages to UI
@@ -417,6 +434,22 @@ class AIAssistantPanel(QWidget):
                 )
             return "\n\n".join(output)
 
+    def _init_mcp(self) -> None:
+        """Initialise MCP integration; degrades gracefully on error."""
+        try:
+            from src.shared.python.ai.mcp.mcp_chat_integration import (
+                McpChatIntegration,
+            )
+
+            self._mcp_integration = McpChatIntegration()
+            logger.info(
+                "MCP integration initialised: %s",
+                self._mcp_integration.status(),
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("MCP integration unavailable: %s", exc)
+            self._mcp_integration = None
+
     def _setup_ui(self) -> None:
         """Set up the panel UI."""
         layout = QVBoxLayout(self)
@@ -434,11 +467,25 @@ class AIAssistantPanel(QWidget):
             QSplitter::handle { background-color: #3c3c3c; }
         """)
 
-        # Sidebar
+        # Sidebar — tabbed container holding the existing session list
+        # plus the new History + Memory panes (UpstreamDrift #5621).
         self._sidebar = ChatHistorySidebar(self._session_manager)
         self._sidebar.session_selected.connect(self._session_manager.load_session)
         self._sidebar.new_chat_requested.connect(self._on_new_chat)
-        main_splitter.addWidget(self._sidebar)
+
+        self._history_pane = HistorySidebarPane(self._history_adapter)
+        self._history_pane.context_loaded.connect(self._on_history_context_loaded)
+        self._history_pane.refresh()
+
+        self._memory_panel = MemoryPanel(self._history_adapter)
+        self._memory_panel.refresh()
+
+        self._sidebar_tabs = QTabWidget()
+        self._sidebar_tabs.setObjectName("ChatSidebarTabs")
+        self._sidebar_tabs.addTab(self._sidebar, "Sessions")
+        self._sidebar_tabs.addTab(self._history_pane, "History")
+        self._sidebar_tabs.addTab(self._memory_panel, "Memory")
+        main_splitter.addWidget(self._sidebar_tabs)
 
         # Splitter for messages and input
         msg_splitter = QSplitter(Qt.Orientation.Vertical)
@@ -472,10 +519,52 @@ class AIAssistantPanel(QWidget):
 
         layout.addWidget(main_splitter)
 
+        # Ctrl+H toggles the history pane (UpstreamDrift #5621).
+        self._toggle_history_shortcut = QShortcut(QKeySequence("Ctrl+H"), self)
+        self._toggle_history_shortcut.activated.connect(self._toggle_history_pane)
+
         # Attempt to load settings immediately
         QtCore.QTimer.singleShot(100, self._auto_load_settings)
 
         self.refresh_theme()
+
+    def _toggle_history_pane(self) -> None:
+        """Toggle visibility of the tabbed sidebar (UpstreamDrift #5621)."""
+        if not hasattr(self, "_sidebar_tabs"):
+            return
+        if self._sidebar_tabs.isVisible():
+            self._sidebar_tabs.hide()
+        else:
+            self._sidebar_tabs.show()
+            # Surface the History tab on toggle-on so Ctrl+H always lands on
+            # the new feature rather than the legacy session list.
+            history_idx = self._sidebar_tabs.indexOf(self._history_pane)
+            if history_idx >= 0:
+                self._sidebar_tabs.setCurrentIndex(history_idx)
+
+    def _on_history_context_loaded(self, payload: dict[str, Any]) -> None:
+        """Swap the live conversation when the user clicks Load-as-context."""
+        # The payload comes from the Sidekick service via the adapter. We
+        # convert the dict into a ConversationContext if needed and replay
+        # its messages through the existing session-loaded path so the rest
+        # of the panel does not need to know about the new code path.
+        if not isinstance(payload, dict):
+            return
+        session_id = payload.get("session_id")
+        if not session_id:
+            return
+        loaded = self._session_manager.load_session(str(session_id))
+        if loaded is None:
+            # Fallback: synthesize a context from the payload's messages.
+            self._context = ConversationContext()
+            for msg in payload.get("messages", []) or []:
+                role = msg.get("role", "user")
+                content = msg.get("content", "")
+                if role == "user":
+                    self._context.add_user_message(content)
+                elif role == "assistant":
+                    self._context.add_assistant_message(content)
+            self._on_session_loaded(self._context)
 
     def showEvent(self, event: Any) -> None:
         """Refresh models and auto-index when panel becomes visible."""
@@ -713,7 +802,13 @@ class AIAssistantPanel(QWidget):
         return header
 
     def _add_header_title_widgets(self, layout: Any) -> None:
-        """Add Provider, Model, and Thinking combo boxes to the header."""
+        """Add Provider, Model, and Thinking combo boxes to the header.
+
+        The provider combo lists HTTP-API providers first, then a
+        separator and the "CLI Agents" section (Claude CLI / Codex CLI
+        / Cline) for whichever ones the discovery probe found. See
+        UpstreamDrift #5622.
+        """
         if layout is None:
             raise ValueError("layout must be provided")
 
@@ -729,6 +824,10 @@ class AIAssistantPanel(QWidget):
         ]
         for _label, _prov in _provider_display:
             self._provider_combo.addItem(_label, _prov)
+
+        # CLI agent providers — only shown when discovery found them.
+        self._populate_cli_provider_entries(self._provider_combo)
+
         self._provider_combo.setToolTip("Select AI provider")
         self._provider_combo.currentTextChanged.connect(self._on_provider_changed)
         layout.addWidget(self._provider_combo)
@@ -751,6 +850,58 @@ class AIAssistantPanel(QWidget):
 
         layout.addSpacing(10)
 
+    def _populate_cli_provider_entries(self, combo: QComboBox) -> None:
+        """Append a 'CLI Agents' section to the provider combo.
+
+        Reads only through ``AllProviders`` so the populator stays
+        decoupled from subprocess introspection (Law of Demeter).
+        Entries are appended only when at least one CLI provider was
+        discovered; otherwise the combo is left untouched.
+
+        Args:
+            combo: The provider QComboBox to extend.
+
+        Raises:
+            ValueError: If ``combo`` is None.
+        """
+        if combo is None:
+            raise ValueError("combo must be provided")
+
+        try:
+            from src.shared.python.ai.cli_providers import AllProviders
+        except ImportError:
+            return
+
+        try:
+            all_providers = AllProviders()
+            cli_entries = all_providers.cli_entries()
+        except OSError:
+            return
+
+        if not cli_entries:
+            return
+
+        # Visual separator between HTTP and CLI sections.
+        combo.insertSeparator(combo.count())
+        # Section header item — disabled so users can't pick it.
+        combo.addItem("— CLI Agents —")
+        try:
+            from PyQt6.QtGui import QStandardItemModel
+
+            model = combo.model()
+            if isinstance(model, QStandardItemModel):
+                item = model.item(combo.count() - 1)
+                if item is not None:
+                    item.setEnabled(False)
+                    item.setSelectable(False)  # type: ignore[attr-defined]
+        except (ImportError, AttributeError, TypeError):
+            pass
+
+        self._cli_provider_entries = {}
+        for entry in cli_entries:
+            combo.addItem(entry.name, entry.id)
+            self._cli_provider_entries[entry.name] = entry
+
     def _add_header_mode_and_status(self, layout: Any) -> None:
         if layout is None:
             raise ValueError("layout must be provided")
@@ -763,6 +914,18 @@ class AIAssistantPanel(QWidget):
 
         self._status_label = QLabel("Ready")
         layout.addWidget(self._status_label)
+
+        # MCP status indicator — shows "MCP: N/M connected" when servers
+        # are configured, hidden otherwise.
+        mcp_text = (
+            self._mcp_integration.status() if self._mcp_integration is not None else ""
+        )
+        self._mcp_status_label = QLabel(mcp_text)
+        self._mcp_status_label.setToolTip(
+            "MCP (Model Context Protocol) server connection status"
+        )
+        self._mcp_status_label.setVisible(bool(mcp_text))
+        layout.addWidget(self._mcp_status_label)
 
     def _add_header_action_buttons(self, layout: Any) -> None:
         if layout is None:
@@ -850,6 +1013,13 @@ class AIAssistantPanel(QWidget):
 
         layout = QVBoxLayout(widget)
 
+        # Inline history action bar (UpstreamDrift #5621). Provides icon-
+        # only quick-access buttons above the message input so the most
+        # common history operations are reachable without opening the
+        # sidebar.
+        self._inline_history_bar = self._create_inline_history_bar()
+        layout.addWidget(self._inline_history_bar)
+
         # Input text area
         self._input_edit = ChatInput()
         self._input_edit.setPlaceholderText(
@@ -908,6 +1078,72 @@ class AIAssistantPanel(QWidget):
 
         return widget
 
+    def _create_inline_history_bar(self) -> QWidget:
+        """Build the icon-only inline history action bar.
+
+        Implements the bar requested by phantom-closed #5371: a slim row
+        of icon buttons above the message input so the most common
+        history operations are one click away even when the sidebar is
+        hidden via Ctrl+H.
+        """
+        bar = QFrame()
+        bar.setObjectName("InlineHistoryBar")
+        bar_layout = QHBoxLayout(bar)
+        bar_layout.setContentsMargins(0, 0, 0, 4)
+        bar_layout.setSpacing(4)
+
+        toggle_btn = QPushButton("\U0001f4dc")  # scroll glyph
+        toggle_btn.setToolTip("Toggle history pane (Ctrl+H)")
+        toggle_btn.setFixedWidth(28)
+        toggle_btn.clicked.connect(self._toggle_history_pane)
+        bar_layout.addWidget(toggle_btn)
+
+        new_btn = QPushButton("➕")  # plus glyph
+        new_btn.setToolTip("New chat")
+        new_btn.setFixedWidth(28)
+        new_btn.clicked.connect(self._on_new_chat)
+        bar_layout.addWidget(new_btn)
+
+        archive_btn = QPushButton("\U0001f5c4")  # file box glyph
+        archive_btn.setToolTip("Archive current conversation")
+        archive_btn.setFixedWidth(28)
+        archive_btn.clicked.connect(self._on_inline_archive_current)
+        bar_layout.addWidget(archive_btn)
+
+        memory_btn = QPushButton("\U0001f9e0")  # brain glyph
+        memory_btn.setToolTip("Open memory editor")
+        memory_btn.setFixedWidth(28)
+        memory_btn.clicked.connect(self._on_inline_open_memory)
+        bar_layout.addWidget(memory_btn)
+
+        bar_layout.addStretch()
+
+        return bar
+
+    def _on_inline_archive_current(self) -> None:
+        """Archive the active session via the history adapter."""
+        session_id = self._context.session_id
+        if not session_id:
+            return
+        try:
+            self._history_adapter.archive(session_id)
+        except RuntimeError:
+            # Sidekick service unavailable — fall back to the legacy
+            # session manager so the action still has an effect.
+            self._session_manager.archive_session(session_id, True)
+        if hasattr(self, "_history_pane"):
+            self._history_pane.refresh()
+
+    def _on_inline_open_memory(self) -> None:
+        """Bring the Memory tab to the front."""
+        if not hasattr(self, "_sidebar_tabs"):
+            return
+        if not self._sidebar_tabs.isVisible():
+            self._sidebar_tabs.show()
+        memory_idx = self._sidebar_tabs.indexOf(self._memory_panel)
+        if memory_idx >= 0:
+            self._sidebar_tabs.setCurrentIndex(memory_idx)
+
     def _connect_signals(self) -> None:
         """Connect internal signals."""
         # Ctrl+Enter to send
@@ -955,12 +1191,25 @@ class AIAssistantPanel(QWidget):
         self._set_status("Thinking...")
         self._send_btn.setEnabled(False)
 
+        # Build tool declarations from the registry (issue #5475).
+        from src.shared.python.ai.adapters.base import ToolDeclaration
+
+        tool_declarations = [
+            ToolDeclaration(
+                name=t.name,
+                description=t.description,
+                parameters={p.name: p.to_json_schema() for p in t.parameters},
+                required=[p.name for p in t.parameters if p.required],
+            )
+            for t in self._tools_registry.list_tools()
+        ]
+
         # Create streaming worker
         self._current_worker = StreamWorker(
             self._adapter,
             message,
             self._context,
-            [],  # Tools will be added later
+            tool_declarations,
         )
         self._current_worker.chunk_received.connect(self._on_stream_chunk)
         self._current_worker.finished.connect(self._on_stream_finished)
@@ -1317,7 +1566,14 @@ class AIAssistantPanel(QWidget):
                 ChatModelInfo("gemini-1.5-flash", "Gemini 1.5 Flash"),
             ],
         }
-        return _static.get(provider_label, [])
+        if provider_label in _static:
+            return _static[provider_label]
+        # CLI agent providers (UpstreamDrift #5622) — single passthrough model.
+        if hasattr(self, "_cli_provider_entries"):
+            entry = self._cli_provider_entries.get(provider_label)
+            if entry is not None:
+                return [ChatModelInfo("auto", f"{entry.name} (default)")]
+        return []
 
     def _get_thinking_capabilities_for_model(self, model_id: str) -> Any:
         """Return ThinkingCapabilities for a model id.

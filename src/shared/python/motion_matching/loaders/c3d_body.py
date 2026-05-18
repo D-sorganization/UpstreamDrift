@@ -7,7 +7,7 @@ resamples each marker onto the simulation timegrid via NaN-preserving cubic
 interpolation, and returns a validated :class:`BodyTarget`.
 
 Uses the canonical :class:`C3DDataReader` from
-``src.shared.python.upstream_drift_tools.lab.bio.c3d_reader`` (NOT the legacy
+``sidekick.lab.bio.c3d_reader`` (NOT the legacy
 duplicate under ``src/engines``, which is being deprecated by a separate
 issue).
 
@@ -116,7 +116,7 @@ def _sha256_of(path: Path) -> str:
 
 def _import_c3d_reader_class():
     """Import :class:`C3DDataReader` from the canonical bio module."""
-    from src.shared.python.upstream_drift_tools.lab.bio.c3d_reader import (
+    from sidekick.lab.bio.c3d_reader import (
         C3DDataReader,
     )
 

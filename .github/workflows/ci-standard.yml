@@ -34,6 +34,7 @@ jobs:
   local-only-workflows:
     name: Reject hosted runner routing
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Run local-only workflow guard
         shell: bash
@@ -43,6 +44,7 @@ jobs:
   pinned-actions:
     name: Enforce action SHA pinning
     runs-on: d-sorg-fleet
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Run GitHub Actions pinning guard
@@ -52,6 +54,7 @@ jobs:
   workflow-inventory:
     name: Enforce workflow inventory
     runs-on: d-sorg-fleet
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Run workflow inventory guard
@@ -61,6 +64,7 @@ jobs:
   urdf-layering:
     name: Enforce URDF subsystem layering (ADR 0007)
     runs-on: d-sorg-fleet
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Run URDF layering guard
@@ -89,7 +93,12 @@ jobs:
         with:
           fetch-depth: 0
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
-        with: { python-version: "3.11" }
+        with:
+          python-version: "3.11"
+          cache: 'pip'
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
       - name: Install Quality Tools
         run: |
           # Shared self-hosted runners can retain broken tool packages without
@@ -136,12 +145,14 @@ jobs:
             ruff format --check .
           fi
 
-      python -m ensurepip --upgrade || true
-      - run: python -m pip install --ignore-installed "mypy==1.20.1" types-PyYAML types-requests
+      - run: |
+          python -m ensurepip --upgrade || true
+          python -m pip install --ignore-installed "mypy==1.20.1" types-PyYAML types-requests
       - name: Create stub ui/dist for editable install (quality checks only)
         run: mkdir -p ui/dist
-      python -m ensurepip --upgrade || true
-      - run: python -m pip install --ignore-installed -e ".[dev]"
+      - run: |
+          python -m ensurepip --upgrade || true
+          python -m pip install --ignore-installed -e ".[dev]"
 
       - name: Pin Type Toolchain
         run: |
@@ -450,7 +461,12 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
-        with: { python-version: "3.11" }
+        with:
+          python-version: "3.11"
+          cache: 'pip'
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
       - name: Create isolated core install
         shell: bash
         run: |
@@ -489,7 +505,12 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
-        with: { python-version: "3.12" }
+        with:
+          python-version: "3.12"
+          cache: 'pip'
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
       - name: Regenerate dependency artifacts
         shell: bash
         run: |
@@ -512,10 +533,11 @@ jobs:
           pip-audit -r <(pip freeze)
 
   tests:
-    needs: [pick-runner, quality-gate, dependency-consistency]
+    needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20 # Prevent runaway tests - hard cutoff
     strategy:
+      fail-fast: false
       matrix:
         python: ["3.10", "3.11", "3.12"]
     steps:
@@ -576,6 +598,10 @@ jobs:
         if: steps.core-test-changes.outputs.skip != 'true'
         with:
           python-version: ${{ matrix.python }}
+          cache: 'pip'
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
 
       - name: Create stub ui/dist for editable install
         if: steps.core-test-changes.outputs.skip != 'true'
@@ -830,6 +856,10 @@ jobs:
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
+          cache: 'pip'
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
       - name: Create stub ui/dist for editable install
         run: mkdir -p ui/dist
       - name: Install migration test dependencies
@@ -877,7 +907,7 @@ jobs:
             -vv --tb=short
 
   shared-tools-consumer-contracts:
-    needs: [pick-runner, quality-gate]
+    needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
     steps:
@@ -924,6 +954,10 @@ jobs:
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
+          cache: 'pip'
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
       - name: Create stub ui/dist for editable install
         run: mkdir -p ui/dist
       - name: Install Core Test Dependencies
@@ -960,8 +994,9 @@ jobs:
             -v --tb=short
 
   frontend-tests:
-    needs: [pick-runner, quality-gate]
+    needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: ./ui
@@ -1021,8 +1056,9 @@ jobs:
   # Users with local MATLAB can run: matlab/run_all.m for equivalent tests.
   # =============================================================================
   matlab-tests:
-    needs: [pick-runner, quality-gate]
+    needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 30
     if: false # DISABLED - Requires MATLAB license not available in CI
     continue-on-error: true
     steps:
@@ -1041,15 +1077,22 @@ jobs:
   # No Arduino components in this project - disabled.
   # =============================================================================
   arduino-build:
-    needs: [pick-runner, quality-gate]
+    needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 15
     if: false # DISABLED - No Arduino components in this project
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
-        with: { python-version: "3.11" }
-      python -m ensurepip --upgrade || true
-      - run: pip install platformio
+        with:
+          python-version: "3.11"
+          cache: 'pip'
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
+      - run: |
+          python -m ensurepip --upgrade || true
+          pip install platformio
       - name: Verify Build
         working-directory: ./arduino
         run: pio run -e uno
@@ -1070,16 +1113,20 @@ jobs:
     # `[workspace] exclude = ["ui/src-tauri"]` and is covered separately by
     # tauri-build.yml.
     #
-    # Runner choice: GitHub-hosted runners are used for all three OSes. The
-    # self-hosted `d-sorg-fleet` label is Linux-only, so Windows and macOS
-    # have to be hosted; running Linux on hosted too keeps the matrix uniform
-    # (same caching keys, same tool installs, same shell semantics).
+    # Runner choice: Linux-only on self-hosted d-sorg-fleet. The
+    # cross-platform matrix entries (windows-latest, macos-latest) were dropped
+    # 2026-05-17 because the fleet has no Windows or macOS runners and the org
+    # policy forbids fallback to GitHub-hosted runners (Runner_Dashboard#641).
+    # The os axis is retained as a single-entry matrix so step-level
+    # `if: matrix.os == 'ubuntu-latest'` guards continue to fire and artifact
+    # naming keyed on `${{ matrix.os }}` stays stable. Restoring Windows and
+    # macOS coverage is tracked in Runner_Dashboard#642 (macOS) and #643 (Windows).
     needs: pick-runner
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+        os: [ubuntu-latest]
+    runs-on: d-sorg-fleet
     timeout-minutes: 25
     defaults:
       run:
@@ -1150,6 +1197,10 @@ jobs:
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.12"
+          cache: 'pip'
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
 
       - name: Enable long Cargo git dependency paths on Windows
         if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'windows-latest'
@@ -1316,6 +1367,10 @@ jobs:
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
+          cache: 'pip'
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
 
       - name: Install Rust toolchain
         if: steps.rust-changes.outputs.has_changes == 'true'

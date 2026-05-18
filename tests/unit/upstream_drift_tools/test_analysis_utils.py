@@ -1,10 +1,10 @@
-"""Tests for src.shared.python.upstream_drift_tools.process_calculators.analysis_utils (Issues #1949, #1744)."""
+"""Tests for sidekick.process_calculators.analysis_utils (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
 from typing import Any
 
-from src.shared.python.upstream_drift_tools.process_calculators.analysis_utils import (
+from sidekick.process_calculators.analysis_utils import (
     evaluate_output,
 )
 

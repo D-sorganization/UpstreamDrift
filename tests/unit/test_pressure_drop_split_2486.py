@@ -14,8 +14,7 @@ _upstream_tools_available = importlib.util.find_spec("sympy") is not None
 
 REPO = Path(__file__).parents[2]
 CALC_DIR = (
-    REPO
-    / "src/shared/python/upstream_drift_tools/process_calculators/pressure_drop_calculator"
+    REPO / "src/shared/python/sidekick/process_calculators/pressure_drop_calculator"
 )
 LOC_BUDGET_HELPERS = 450
 LOC_BUDGET_VALIDATION = 280
@@ -81,7 +80,7 @@ class TestPressureDropPublicAPI:
 
     @pytest.mark.unit
     def test_import_calculate_pressure_drop(self) -> None:
-        from upstream_drift_tools.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
+        from sidekick.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
             calculate_pressure_drop,
         )
 
@@ -89,7 +88,7 @@ class TestPressureDropPublicAPI:
 
     @pytest.mark.unit
     def test_import_show_help(self) -> None:
-        from upstream_drift_tools.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
+        from sidekick.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
             show_help,
         )
 
@@ -97,7 +96,7 @@ class TestPressureDropPublicAPI:
 
     @pytest.mark.unit
     def test_import_validate_inputs(self) -> None:
-        from upstream_drift_tools.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
+        from sidekick.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
             validate_inputs,
         )
 
@@ -105,7 +104,7 @@ class TestPressureDropPublicAPI:
 
     @pytest.mark.unit
     def test_import_print_results(self) -> None:
-        from upstream_drift_tools.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
+        from sidekick.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
             print_results,
         )
 
@@ -113,7 +112,7 @@ class TestPressureDropPublicAPI:
 
     @pytest.mark.unit
     def test_import_list_gas_components(self) -> None:
-        from upstream_drift_tools.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
+        from sidekick.process_calculators.pressure_drop_calculator.pressure_drop_interface import (
             list_gas_components,
         )
 

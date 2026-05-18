@@ -1,6 +1,8 @@
 """Engine package - provides physics engine implementations."""
 
 from __future__ import annotations
+
+import contextlib
 import importlib
 from pathlib import Path
 import contextlib

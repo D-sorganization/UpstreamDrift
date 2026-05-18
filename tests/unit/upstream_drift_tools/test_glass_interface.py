@@ -1,8 +1,8 @@
-"""Tests for upstream_drift_tools.calculators.electrical.glass_interface (Issues #1949, #1744)."""
+"""Tests for sidekick.calculators.electrical.glass_interface (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
-from src.shared.python.upstream_drift_tools.calculators.electrical.glass_interface import (
+from sidekick.calculators.electrical.glass_interface import (
     GlassPropertiesInterface,
 )
 

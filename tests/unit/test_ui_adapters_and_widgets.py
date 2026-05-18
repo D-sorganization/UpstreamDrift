@@ -5,10 +5,10 @@ from __future__ import annotations
 from src.shared.python.ui.adapters.canvas import CanvasAdapter, CanvasProtocol
 from src.shared.python.ui.adapters.thread import BackgroundWorker, QtWorker
 from src.shared.python.ui.widgets import LogPanel, SignalBlocker
-from src.shared.python.upstream_drift_tools.ui.mixins.calculator_state_mixin import (
+from sidekick.ui.mixins.calculator_state_mixin import (
     CalculatorStateMixin,
 )
-from src.shared.python.upstream_drift_tools.ui.widgets.unit_aware_input import (
+from sidekick.ui.widgets.unit_aware_input import (
     UnitAwareDisplay,
     UnitAwareInput,
 )

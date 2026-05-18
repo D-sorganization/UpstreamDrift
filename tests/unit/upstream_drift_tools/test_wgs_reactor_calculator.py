@@ -1,8 +1,8 @@
-"""Tests for src.shared.python.upstream_drift_tools.process_calculators.wgs_reactor_calculator (Issues #1949, #1744)."""
+"""Tests for sidekick.process_calculators.wgs_reactor_calculator (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
-from src.shared.python.upstream_drift_tools.process_calculators.wgs_reactor_calculator import (
+from sidekick.process_calculators.wgs_reactor_calculator import (
     WGSReactorEngine,
 )
 

@@ -31,12 +31,12 @@ from .gui import MainWidget
 logger = get_logger(__name__)
 
 try:
-    from upstream_drift_tools.ui.widgets.notepad_widget import NotepadWidget
+    from sidekick.ui.widgets.notepad_widget import NotepadWidget
 
     HAS_NOTEPAD = True
 except ImportError:
     HAS_NOTEPAD = False
-    logger.warning("upstream_drift_tools not found, Notepad disabled")
+    logger.warning("sidekick not found, Notepad disabled")
 
 
 class URDFGeneratorWindow(QMainWindow):

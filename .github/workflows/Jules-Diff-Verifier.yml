@@ -1,0 +1,146 @@
+name: Jules Diff Verifier (Anti-Phantom-Merge Gate)
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │ BLAST RADIUS DOCUMENTATION — Jules Diff Verifier                           │
+# │                                                                             │
+# │ WHAT THIS WORKFLOW CAN DO:                                                  │
+# │  • Run diff-substance checks on every Jules-generated PR                   │
+# │  • Apply the jules-verification-failed label when diff is phantom         │
+# │  • Comment once on the PR explaining why it should not be merged          │
+# │  • Set a failing job status (acts as required check for the merge bot)    │
+# │                                                                             │
+# │ WHAT THIS WORKFLOW CANNOT DO:                                               │
+# │  • Close PRs or issues directly                                            │
+# │  • Modify the PR contents                                                  │
+# │  • Push commits or branches                                                │
+# │                                                                             │
+# │ PURPOSE:                                                                    │
+# │  • Stops the close-and-reopen notification spam loop by failing the gate  │
+# │    on phantom merges (PRs whose diff collapsed to zero after a sibling    │
+# │    PR with the same files merged first).                                  │
+# └─────────────────────────────────────────────────────────────────────────────┘
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to re-verify"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: read
+
+concurrency:
+  group: jules-diff-verifier-${{ github.event.pull_request.number || inputs.pr_number }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    timeout-minutes: 30
+    name: Verify Diff Substance
+    runs-on: ubuntu-latest
+    # Only gate Jules-generated branches. Other PRs pass through automatically.
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.event.pull_request.head.ref, 'jules/') ||
+      startsWith(github.event.pull_request.head.ref, 'fix/jules') ||
+      startsWith(github.event.pull_request.head.ref, 'fix/pragmatic') ||
+      startsWith(github.event.pull_request.head.ref, 'fix/code-quality') ||
+      startsWith(github.event.pull_request.head.ref, 'auto-fix/')
+    steps:
+      - name: Checkout (for composite action)
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 1
+
+      - name: Extract linked issue number
+        id: extract
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Try to pull "Fixes #NNN" or "Closes #NNN" from PR title or body.
+          PR_JSON=$(gh pr view "$PR_NUMBER" --json title,body)
+          TITLE=$(echo "$PR_JSON" | jq -r .title)
+          BODY=$(echo "$PR_JSON" | jq -r .body)
+
+          ISSUE_NUM=$(printf '%s\n%s\n' "$TITLE" "$BODY" \
+            | grep -oiE '(fixes|closes|resolves)[[:space:]]*#[0-9]+' \
+            | head -1 | grep -oE '[0-9]+' || true)
+          echo "issue_number=${ISSUE_NUM:-}" >> "$GITHUB_OUTPUT"
+          echo "Linked issue: ${ISSUE_NUM:-<none>}"
+
+      - name: Run diff verification
+        id: gate
+        uses: ./.github/actions/verify-issue-resolution
+        continue-on-error: true
+        with:
+          pr_number: ${{ github.event.pull_request.number || inputs.pr_number }}
+          issue_number: ${{ steps.extract.outputs.issue_number }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Label + comment on failure
+        if: steps.gate.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh pr edit "$PR_NUMBER" --add-label "jules-verification-failed" || true
+
+          # Only comment once. Check existing comments for our marker.
+          MARKER="<!-- jules-verification-failed-comment -->"
+          EXISTING=$(gh pr view "$PR_NUMBER" --json comments \
+            --jq "[.comments[] | select(.body | contains(\"$MARKER\"))] | length")
+          if [ "$EXISTING" -gt 0 ]; then
+            echo "Verification-failed comment already posted, skipping."
+            exit 0
+          fi
+
+          cat > /tmp/verifier_comment.md <<EOF
+          $MARKER
+          ## Jules Diff Verification Failed
+
+          This PR did not pass the anti-phantom-merge gate. The diff appears to be
+          trivial or inconsistent with what the PR title / linked issue claims.
+
+          Likely cause: a sibling PR touching the same files merged first, so the
+          base..head diff for this PR collapsed. The Jules merge bot must NOT merge
+          this PR because doing so would close the linked issue without actually
+          shipping the work.
+
+          To clear this gate:
+          - Either rebase/push real changes onto this branch, OR
+          - Close this PR manually (it is a phantom — its work shipped elsewhere)
+          - Re-running this workflow will re-evaluate.
+
+          Label \`jules-verification-failed\` has been applied. Closer / cleaner
+          workflows will respect this label and refuse to propagate issue closure.
+          EOF
+          gh pr comment "$PR_NUMBER" --body-file /tmp/verifier_comment.md
+
+      - name: Remove failure label on pass
+        if: steps.gate.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
+        shell: bash
+        run: |
+          # If we previously labelled this PR as failed but the diff now has
+          # substance (e.g. the author pushed real commits), clear the label.
+          gh pr edit "$PR_NUMBER" --remove-label "jules-verification-failed" 2>/dev/null || true
+
+      - name: Fail the job if gate failed
+        if: steps.gate.outcome == 'failure'
+        shell: bash
+        run: |
+          echo "::error::Jules diff verification failed for this PR. See PR comment for details."
+          exit 1

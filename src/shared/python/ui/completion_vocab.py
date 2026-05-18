@@ -136,7 +136,7 @@ def build_vocabulary() -> list[str]:
         Sorted, deduplicated list of completion terms.
     """
     config_engines = _load_engine_names_from_config()
-    engines = config_engines if config_engines else _ENGINE_NAMES
+    engines = config_engines or _ENGINE_NAMES
 
     merged: set[str] = set(engines) | set(_PHYSICS_TERMS) | set(_MODEL_SHORTCUTS)
     return sorted(merged)

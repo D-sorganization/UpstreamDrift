@@ -75,14 +75,14 @@ def _load_allow_list() -> dict[str, dict[str, Any]]:
     )
     raw = yaml.safe_load(_ALLOW_LIST_PATH.read_text(encoding="utf-8")) or {}
     shadows = raw.get("shadows") or {}
-    assert isinstance(shadows, dict), (
-        f"shadow_modules.yaml: 'shadows' must be a mapping, got {type(shadows)!r}"
-    )
+    assert isinstance(
+        shadows, dict
+    ), f"shadow_modules.yaml: 'shadows' must be a mapping, got {type(shadows)!r}"
 
     for name, entry in shadows.items():
-        assert isinstance(entry, dict), (
-            f"shadow_modules.yaml entry {name!r}: must be a mapping, got {type(entry)!r}"
-        )
+        assert isinstance(
+            entry, dict
+        ), f"shadow_modules.yaml entry {name!r}: must be a mapping, got {type(entry)!r}"
         issue = entry.get("tracking_issue")
         sunset = entry.get("sunset_date")
         assert isinstance(issue, int) and issue > 0, (
@@ -96,13 +96,64 @@ def _load_allow_list() -> dict[str, dict[str, Any]]:
         # date.fromisoformat raises ValueError on bad input — surface as
         # AssertionError so the failure mode is uniform.
         try:
-            date.fromisoformat(sunset)
+            parsed_sunset = date.fromisoformat(sunset)
         except ValueError as exc:
             raise AssertionError(
                 f"shadow_modules.yaml entry {name!r}: 'sunset_date' "
                 f"{sunset!r} is not a valid ISO date — {exc}"
             ) from exc
+        # Enforce that the sunset date has not yet passed. Once it does the
+        # allow-list entry must be removed (shadow resolved) or the sunset date
+        # extended with a new tracking issue. Fixes UD issue #5627.
+        assert parsed_sunset >= date.today(), (
+            f"shadow_modules.yaml entry {name!r}: 'sunset_date' {sunset!r} "
+            f"has passed (today is {date.today().isoformat()}). The shadow "
+            f"must be resolved — remove the UD-side copy or update the "
+            f"entry with a new sunset_date and tracking_issue."
+        )
     return shadows
+
+
+def test_load_allow_list_rejects_expired_sunset_date() -> None:
+    """Regression UD#5627: _load_allow_list must fail on an expired sunset_date.
+
+    The policy comment in shadow_modules.yaml says "Once the sunset date
+    passes, the allow-list test fails." Before the fix the date was parsed
+    but never compared to today(), so expired entries silently passed.
+    """
+    import textwrap
+    import tempfile
+    import importlib
+    import sys
+
+    expired_yaml = textwrap.dedent(
+        """\
+        shadows:
+          some_module:
+            tracking_issue: 9999
+            sunset_date: "2000-01-01"
+        """
+    )
+
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".yaml", delete=False, encoding="utf-8"
+    ) as tmp:
+        tmp.write(expired_yaml)
+        tmp_path = Path(tmp.name)
+
+    try:
+        # Patch the module-level path constant and call the loader directly.
+        import tests.unit.repo_hygiene.test_no_shadow_of_tools_shared as _mod
+
+        original = _mod._ALLOW_LIST_PATH
+        _mod._ALLOW_LIST_PATH = tmp_path
+        try:
+            with pytest.raises(AssertionError, match="sunset_date.*has passed"):
+                _mod._load_allow_list()
+        finally:
+            _mod._ALLOW_LIST_PATH = original
+    finally:
+        tmp_path.unlink(missing_ok=True)
 
 
 @pytest.mark.unit

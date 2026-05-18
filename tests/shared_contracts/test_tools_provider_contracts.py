@@ -53,11 +53,11 @@ def test_model_generation_imports_resolve_from_tools_provider() -> None:
     assert module.DEFAULT_HEIGHT_M > 0
 
 
-def test_upstream_drift_tools_imports_resolve_from_tools_provider() -> None:
-    module = importlib.import_module("upstream_drift_tools")
+def test_sidekick_imports_resolve_from_tools_provider() -> None:
+    module = importlib.import_module("sidekick")
     _assert_from_tools(Path(module.__file__).resolve())
 
-    state_manager = importlib.import_module("upstream_drift_tools.utils.state_manager")
+    state_manager = importlib.import_module("sidekick.utils.state_manager")
     _assert_from_tools(Path(state_manager.__file__).resolve())
 
     # Execute actual contract behavior

@@ -1,15 +1,15 @@
-"""Tests for upstream_drift_tools.calculators.electrical.electrical_model (Issues #1949, #1744)."""
+"""Tests for sidekick.calculators.electrical.electrical_model (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
 import numpy as np
-from src.shared.python.upstream_drift_tools.calculators.electrical.config import (
+from sidekick.calculators.electrical.config import (
     ElectrodeConfig,
 )
-from src.shared.python.upstream_drift_tools.calculators.electrical.electrical_model import (
+from sidekick.calculators.electrical.electrical_model import (
     ThreePhaseElectricalModelEnhanced,
 )
-from src.shared.python.upstream_drift_tools.calculators.electrical.glass_interface import (
+from sidekick.calculators.electrical.glass_interface import (
     GlassPropertiesInterface,
 )
 

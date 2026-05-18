@@ -27,9 +27,9 @@ class TestExpectedTileIdsMatchesModelsYaml:
             "matlab_analysis",
         }
         present_stale = stale_ids & set(LauncherDiagnostics.EXPECTED_TILE_IDS)
-        assert not present_stale, (
-            f"EXPECTED_TILE_IDS still contains stale IDs: {present_stale}"
-        )
+        assert (
+            not present_stale
+        ), f"EXPECTED_TILE_IDS still contains stale IDs: {present_stale}"
 
     def test_expected_tile_ids_contains_current_tiles(self) -> None:
         """EXPECTED_TILE_IDS must include currently-shipped tiles."""
@@ -42,9 +42,9 @@ class TestExpectedTileIdsMatchesModelsYaml:
         yaml_ids = {m.id for m in registry.get_all_models()}
 
         missing_from_expected = yaml_ids - set(LauncherDiagnostics.EXPECTED_TILE_IDS)
-        assert not missing_from_expected, (
-            f"EXPECTED_TILE_IDS is missing current tiles: {missing_from_expected}"
-        )
+        assert (
+            not missing_from_expected
+        ), f"EXPECTED_TILE_IDS is missing current tiles: {missing_from_expected}"
 
     def test_expected_tile_ids_equals_models_yaml_ids(self) -> None:
         """EXPECTED_TILE_IDS must exactly match the set of IDs in models.yaml."""
@@ -86,9 +86,9 @@ class TestCheckModelsYamlReturnsPass:
         # Build a fake models list that exactly matches EXPECTED_TILE_IDS
         fake_models = [{"id": tid} for tid in LauncherDiagnostics.EXPECTED_TILE_IDS]
         result = diag._check_models_yaml_completeness(fake_models, {})
-        assert result.status == "pass", (
-            f"Expected pass, got {result.status}: {result.message}"
-        )
+        assert (
+            result.status == "pass"
+        ), f"Expected pass, got {result.status}: {result.message}"
 
     def test_completeness_fails_when_expected_not_in_actual(self) -> None:
         """_check_models_yaml_completeness returns fail when IDs are missing."""
@@ -138,9 +138,9 @@ class TestDiagnosticEmitsAppStateEvents:
             # Run only the models-yaml check which is headless-safe
             diag.check_models_yaml()
 
-            assert len(logger_singleton.store) > initial_len, (
-                "check_models_yaml did not emit any app-state events"
-            )
+            assert (
+                len(logger_singleton.store) > initial_len
+            ), "check_models_yaml did not emit any app-state events"
 
     def test_each_check_method_emits_diagnostic_event(self) -> None:
         """check_python_environment must emit a diagnostic event."""
@@ -155,9 +155,9 @@ class TestDiagnosticEmitsAppStateEvents:
         diag.check_python_environment()
 
         after_len = len(logger_singleton.store)
-        assert after_len > before_len, (
-            "check_python_environment did not emit a diagnostic event to StateLogger"
-        )
+        assert (
+            after_len > before_len
+        ), "check_python_environment did not emit a diagnostic event to StateLogger"
 
     def test_emitted_event_has_diagnostic_type(self) -> None:
         """Emitted events must have a 'diagnostic_check' type and a 'check_name' payload."""
@@ -175,9 +175,9 @@ class TestDiagnosticEmitsAppStateEvents:
         assert diagnostic_events, "No 'diagnostic_check' events found in StateLogger"
 
         last = diagnostic_events[-1]
-        assert "check_name" in last.payload, (
-            f"Event payload missing 'check_name': {last.payload}"
-        )
-        assert "status" in last.payload, (
-            f"Event payload missing 'status': {last.payload}"
-        )
+        assert (
+            "check_name" in last.payload
+        ), f"Event payload missing 'check_name': {last.payload}"
+        assert (
+            "status" in last.payload
+        ), f"Event payload missing 'status': {last.payload}"

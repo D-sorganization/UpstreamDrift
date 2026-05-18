@@ -22,31 +22,50 @@ def _get_title_bar_colors() -> dict[str, str]:
         colors = get_current_colors()
         # Derive fallbacks from DARK_THEME instead of repeating literal hex.
         _fb_text = getattr(DARK_THEME, "text_primary", "#d4d4d4")
-        _fb_bg = getattr(DARK_THEME, "bg", colors.get("bg", "#000000"))
         _fb_border = getattr(
             DARK_THEME, "border_default", colors.get("border", "#555555")
         )
+        _fb_bg = getattr(DARK_THEME, "bg_elevated", "#1A1A1A")
+
         return {
-            "text": colors.get("text", _fb_text),
-            "bg": colors.get("bg", _fb_bg),
+            "text": "#E0E0E0",  # Always light text for dark background
+            "bg": colors.get("bg_elevated", _fb_bg),  # Match left sidebar background
             "border": colors.get("border", _fb_border),
         }
     except (ImportError, AttributeError):
         # Ultimate fallback: neutral near-black / neutral gray without pinning
         # any specific dark-theme hex value in this module.
         return {
-            "text": "#d4d4d4",
-            "bg": "#000000",
+            "text": "#E0E0E0",
+            "bg": "#1A1A1A",
             "border": "#555555",
         }
 
 
-def _make_button_stylesheet(text_color: str) -> str:
+def clamp_to_visible_screen(target: QPoint) -> QPoint:
+    """Clamp a QPoint to the nearest visible screen area."""
+    from PyQt6.QtWidgets import QApplication
+
+    screen = QApplication.primaryScreen()
+    if screen:
+        geom = screen.availableGeometry()
+        x = max(geom.left(), min(target.x(), geom.right() - 50))
+        y = max(geom.top(), min(target.y(), geom.bottom() - 20))
+        return QPoint(x, y)
+    return target
+
+
+def _make_button_stylesheet(
+    text_color: str,
+    hover_bg: str = "rgba(255, 255, 255, 0.1)",
+    hover_text_color: str = "",
+) -> str:
     """Build the window-control button stylesheet from a theme text color."""
+    hover_text = f"color: {hover_text_color};" if hover_text_color else ""
     return (
         f"QToolButton {{ border: none; background: transparent; padding: 5px;"
-        f" color: {text_color}; font-weight: bold; }}"
-        " QToolButton:hover { background-color: rgba(255, 255, 255, 0.1); border-radius: 4px; }"
+        f" color: {text_color}; font-weight: bold; border-radius: 4px; }}"
+        f" QToolButton:hover {{ background-color: {hover_bg}; {hover_text} }}"
     )
 
 
@@ -58,6 +77,8 @@ def create_window_control_button(
     accessible_name: str,
     object_name: str,
     color: str = "",
+    hover_bg: str = "rgba(255, 255, 255, 0.1)",
+    hover_text_color: str = "",
     parent: QWidget | None = None,
 ) -> QToolButton:
     """Create a launcher-styled window control button."""
@@ -72,7 +93,9 @@ def create_window_control_button(
     button.setObjectName(object_name)
     button.setToolTip(tooltip)
     button.setAccessibleName(accessible_name)
-    button.setStyleSheet(_make_button_stylesheet(resolved_color))
+    button.setStyleSheet(
+        _make_button_stylesheet(resolved_color, hover_bg, hover_text_color)
+    )
     return button
 
 
@@ -87,6 +110,18 @@ class CustomTitleBar(QWidget):
         self.setFixedHeight(40)
         self.setProperty("class", "title-bar")
         self.style().polish(self)
+        self.setAutoFillBackground(True)
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+
+        from PyQt6.QtWidgets import QGraphicsDropShadowEffect
+        from PyQt6.QtGui import QColor
+
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(8)
+        shadow.setYOffset(2)
+        shadow.setXOffset(0)
+        shadow.setColor(QColor(0, 0, 0, 80))
+        self.setGraphicsEffect(shadow)
 
         self.drag_position = QPoint()
 
@@ -114,8 +149,10 @@ class CustomTitleBar(QWidget):
             self.icon_label.setPixmap(pixmap)
 
         layout.addWidget(self.icon_label)
+        self.icon_label.installEventFilter(self)
 
         self.title_label = QLabel("UpstreamDrift")
+        self.title_label.installEventFilter(self)
 
         # Apply initial theme colors and register for live theme-change updates.
         self._apply_title_bar_theme()
@@ -138,6 +175,7 @@ class CustomTitleBar(QWidget):
             tooltip="Minimize",
             accessible_name="Minimize window",
             object_name="window-control-minimize",
+            hover_bg="rgba(255, 255, 255, 0.15)",
             parent=self,
         )
         self.btn_max = create_window_control_button(
@@ -146,6 +184,7 @@ class CustomTitleBar(QWidget):
             tooltip="Maximize",
             accessible_name="Maximize window",
             object_name="window-control-maximize",
+            hover_bg="rgba(255, 255, 255, 0.15)",
             parent=self,
         )
         self.btn_close: QToolButton | None = None
@@ -156,6 +195,8 @@ class CustomTitleBar(QWidget):
                 tooltip="Close the launcher",
                 accessible_name="Close launcher window",
                 object_name="window-control-close",
+                hover_bg="#E81123",
+                hover_text_color="#FFFFFF",
                 parent=self,
             )
 
@@ -183,7 +224,7 @@ class CustomTitleBar(QWidget):
             f" }}"
         )
         self.title_label.setStyleSheet(
-            f"color: {text}; font-weight: bold; font-size: 13px;"
+            f"color: {text}; font-family: 'Inter', 'Segoe UI', sans-serif; font-weight: 800; font-size: 14px; letter-spacing: 1px;"
         )
 
     def _on_theme_changed(self, _colors: object = None) -> None:
@@ -199,6 +240,27 @@ class CustomTitleBar(QWidget):
     def _close_window(self):
         self.close_requested.emit()
 
+    def eventFilter(self, obj, event):
+        if event.type() == event.Type.MouseButtonPress:
+            if event.button() == Qt.MouseButton.LeftButton:
+                if isinstance(obj, QToolButton):
+                    return False
+                self.drag_position = (
+                    event.globalPosition().toPoint()
+                    - self.window().frameGeometry().topLeft()
+                )
+                return False  # Let the event propagate or at least don't eat it so mouse grab works
+        elif event.type() == event.Type.MouseMove:  # noqa: SIM102 (separated for symmetry with the press branch above)
+            if event.buttons() & Qt.MouseButton.LeftButton:
+                if isinstance(obj, QToolButton):
+                    return False
+
+                target = event.globalPosition().toPoint() - self.drag_position
+                target = clamp_to_visible_screen(target)
+                self.move_requested.emit(target)
+                return True
+        return super().eventFilter(obj, event)
+
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.MouseButton.LeftButton:
             self.drag_position = (
@@ -206,10 +268,14 @@ class CustomTitleBar(QWidget):
                 - self.window().frameGeometry().topLeft()
             )
             event.accept()
+        else:
+            super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event: QMouseEvent):
         if event.buttons() & Qt.MouseButton.LeftButton:
-            self.move_requested.emit(
-                event.globalPosition().toPoint() - self.drag_position
-            )
+            target = event.globalPosition().toPoint() - self.drag_position
+            target = clamp_to_visible_screen(target)
+            self.move_requested.emit(target)
             event.accept()
+        else:
+            super().mouseMoveEvent(event)

@@ -14,9 +14,9 @@ from unittest.mock import patch
 import numpy as np
 import pandas as pd
 import pytest
-from src.shared.python.upstream_drift_tools.lab.bio import _c3d_io as io_mod
-from src.shared.python.upstream_drift_tools.lab.bio.c3d_reader import C3DDataReader
-from tests.unit.upstream_drift_tools.lab.bio._synthetic import _synthetic_c3d_dict
+from sidekick.lab.bio import _c3d_io as io_mod
+from sidekick.lab.bio.c3d_reader import C3DDataReader
+from tests.unit.sidekick.lab.bio._synthetic import _synthetic_c3d_dict
 
 REAL_C3D = Path(__file__).resolve().parents[5] / "data" / "C3D_TA_Driver.c3d"
 

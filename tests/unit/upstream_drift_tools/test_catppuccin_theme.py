@@ -1,8 +1,8 @@
-"""Tests for upstream_drift_tools.ui.catppuccin_theme (Issues #1949, #1744)."""
+"""Tests for sidekick.ui.catppuccin_theme (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
-from src.shared.python.upstream_drift_tools.ui.catppuccin_theme import (
+from sidekick.ui.catppuccin_theme import (
     COLORS,
     get_stylesheet,
 )

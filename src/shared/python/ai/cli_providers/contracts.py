@@ -1,0 +1,110 @@
+"""Pydantic contracts for CLI agent providers.
+
+CLI-mode providers are agents accessed via a local subprocess (NOT an HTTP
+API). These contracts describe what a CLI provider looks like, what
+transport it uses, and what environment it needs.
+
+A ``CliProviderDescriptor`` is the immutable identity of a CLI provider
+discovered on the user's system. A ``CliProviderConfig`` extends a
+descriptor with user-tunable preferences such as model selection and an
+optional working directory override.
+
+Used by:
+    - The discovery module to advertise installed CLI agents.
+    - The chat header populator to merge them into the unified provider
+      dropdown alongside HTTP-API providers (Tools #2880).
+    - Individual provider implementations (Claude CLI, Codex CLI, Cline).
+
+This module is intentionally Qt-free and import-light so it can be loaded
+by headless CI tests.
+"""
+
+from __future__ import annotations
+
+from typing import Literal
+
+try:
+    from pydantic import BaseModel, Field
+except ImportError:  # pragma: no cover - exercised only on stripped envs
+    BaseModel = object  # type: ignore[assignment, misc]
+
+    def Field(*_args: object, **kwargs: object):  # type: ignore[no-redef]
+        return kwargs.get("default")
+
+
+CliTransport = Literal["stdio", "socket", "pty"]
+"""Supported transports for a CLI provider.
+
+- ``stdio``: spawn the executable and stream JSONL on stdin/stdout.
+- ``socket``: connect to an already-running local server (e.g. Cline).
+- ``pty``: spawn under a pseudo-terminal for interactive CLI tools that
+  refuse to operate without a TTY.
+"""
+
+
+class CliProviderDescriptor(BaseModel):
+    """Immutable identity record for a CLI agent provider.
+
+    Attributes:
+        id: Stable machine-readable identifier (e.g. ``"claude-cli"``).
+        name: Human-readable display name shown in the dropdown.
+        executable_path: Absolute path to the executable on the user's
+            machine. For ``socket`` transport this may be empty.
+        transport: How the consumer talks to the provider.
+        required_env: Environment variable names that must be present
+            for the provider to operate (e.g. ``["ANTHROPIC_API_KEY"]``
+            for Claude CLI in API mode; empty for tool-only mode).
+        working_dir_aware: True when the provider uses its CWD as
+            project context (Claude CLI, Codex CLI). False for socket
+            providers like Cline where the IDE owns the workspace.
+
+    Contract:
+        Pre: ``id`` and ``name`` are non-empty strings.
+        Pre: ``transport`` is one of {"stdio", "socket", "pty"}.
+        Post: returned instance is immutable (frozen).
+    """
+
+    id: str = Field(min_length=1)
+    name: str = Field(min_length=1)
+    executable_path: str = ""
+    transport: CliTransport = "stdio"
+    required_env: tuple[str, ...] = ()
+    working_dir_aware: bool = True
+
+    model_config = {"frozen": True}
+
+
+class CliProviderConfig(BaseModel):
+    """User-tunable configuration overlay for a CLI provider.
+
+    The descriptor describes *what the provider is*; the config
+    describes *how the user wants to talk to it right now*.
+
+    Attributes:
+        descriptor: The provider this config applies to.
+        model: Optional model override (e.g. ``"claude-sonnet-4-6"``).
+        working_dir: Optional working-directory override. If unset and
+            ``descriptor.working_dir_aware`` is True, the provider falls
+            back to ``os.getcwd()``.
+        extra_args: Additional command-line arguments to append.
+
+    Contract:
+        Pre: ``descriptor`` is a valid ``CliProviderDescriptor``.
+        Post: ``effective_working_dir()`` is None or a non-empty string.
+    """
+
+    descriptor: CliProviderDescriptor
+    model: str | None = None
+    working_dir: str | None = None
+    extra_args: tuple[str, ...] = ()
+
+    def effective_working_dir(self) -> str | None:
+        """Return the working directory to launch the subprocess in.
+
+        Returns ``None`` for socket-transport providers that don't own
+        their CWD. For stdio/pty providers, returns the explicit
+        override if set, otherwise None (caller falls back to cwd).
+        """
+        if not self.descriptor.working_dir_aware:
+            return None
+        return self.working_dir

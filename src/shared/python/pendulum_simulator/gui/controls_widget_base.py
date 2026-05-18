@@ -469,7 +469,7 @@ class ControlsWidgetBase(QWidget):
     def _uai_or_parse(widget: object, label: str) -> float:
         """Extract SI value from UnitAwareInput or parse from LabeledInput.
 
-        Works regardless of whether upstream_drift_tools is installed.
+        Works regardless of whether sidekick is installed.
         Subclasses should use this when parsing inputs that might be
         UnitAwareInput or plain LabeledInput widgets.
         """
@@ -477,7 +477,7 @@ class ControlsWidgetBase(QWidget):
         from .controls_utils import parse_float
 
         try:
-            from upstream_drift_tools.ui.widgets.unit_aware_input import (
+            from sidekick.ui.widgets.unit_aware_input import (
                 UnitAwareInput as _UAI,
             )
 

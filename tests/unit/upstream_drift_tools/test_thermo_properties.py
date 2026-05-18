@@ -1,8 +1,8 @@
-"""Tests for src.shared.python.upstream_drift_tools.calculators.thermo.thermo_properties (Issues #1949, #1744)."""
+"""Tests for sidekick.calculators.thermo.thermo_properties (Issues #1949, #1744)."""
 
 from __future__ import annotations
 
-from src.shared.python.upstream_drift_tools.calculators.thermo.thermo_properties import (
+from sidekick.calculators.thermo.thermo_properties import (
     MOLAR_CP_298,
     MOLECULAR_WEIGHTS,
     R_GAS,

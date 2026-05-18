@@ -7,16 +7,16 @@ import logging
 import numpy as np
 import pandas as pd
 import pytest
-from src.shared.python.upstream_drift_tools.lab.bio._c3d_analog import (
+from sidekick.lab.bio._c3d_analog import (
     build_analog_dataframe,
     build_force_plate_dataframe,
     build_plate_dataframe,
     detect_force_plate_channels,
     force_plate_columns,
 )
-from src.shared.python.upstream_drift_tools.lab.bio._c3d_models import C3DMetadata
+from sidekick.lab.bio._c3d_models import C3DMetadata
 
-ANALOG_LOGGER = "src.shared.python.upstream_drift_tools.lab.bio._c3d_analog"
+ANALOG_LOGGER = "sidekick.lab.bio._c3d_analog"
 
 
 def _meta(

@@ -157,9 +157,9 @@ class TestGetModelsForProvider:
         panel = _MockPanel()
         for provider in ("Ollama", "OpenAI", "Anthropic", "Gemini"):
             models = panel._get_models_for_provider(provider)
-            assert all(isinstance(m, ChatModelInfo) for m in models), (
-                f"All models for {provider} must be ChatModelInfo instances"
-            )
+            assert all(
+                isinstance(m, ChatModelInfo) for m in models
+            ), f"All models for {provider} must be ChatModelInfo instances"
 
 
 class TestGetThinkingCapabilitiesForModel:
@@ -206,9 +206,9 @@ class TestOnProviderChanged:
     def test_adds_items_for_known_provider(self) -> None:
         panel = _MockPanel()
         panel._on_provider_changed("Anthropic")
-        assert panel._model_combo.addItem.called, (
-            "addItem must be called for each model when provider is known"
-        )
+        assert (
+            panel._model_combo.addItem.called
+        ), "addItem must be called for each model when provider is known"
 
     def test_provider_change_triggers_thinking_update(self) -> None:
         """After provider change, _on_model_changed is called for first model."""
@@ -301,28 +301,28 @@ class TestPanelHasRequiredCombos:
     def test_has_provider_combo(self) -> None:
         """Panel has _provider_combo attribute."""
         panel = self._get_panel()
-        assert hasattr(panel, "_provider_combo"), (
-            "_provider_combo must be created in _add_header_title_widgets"
-        )
+        assert hasattr(
+            panel, "_provider_combo"
+        ), "_provider_combo must be created in _add_header_title_widgets"
 
     def test_has_model_combo(self) -> None:
         """Panel has _model_combo attribute."""
         panel = self._get_panel()
-        assert hasattr(panel, "_model_combo"), (
-            "_model_combo must be created in _add_header_title_widgets"
-        )
+        assert hasattr(
+            panel, "_model_combo"
+        ), "_model_combo must be created in _add_header_title_widgets"
 
     def test_has_thinking_combo(self) -> None:
         """Panel has _thinking_combo attribute."""
         panel = self._get_panel()
-        assert hasattr(panel, "_thinking_combo"), (
-            "_thinking_combo must be created in _add_header_title_widgets"
-        )
+        assert hasattr(
+            panel, "_thinking_combo"
+        ), "_thinking_combo must be created in _add_header_title_widgets"
 
     def test_has_switch_provider_method(self) -> None:
         """Panel has switch_provider() method."""
         panel = self._get_panel()
-        assert hasattr(panel, "switch_provider"), (
-            "switch_provider must be defined on AIAssistantPanel"
-        )
+        assert hasattr(
+            panel, "switch_provider"
+        ), "switch_provider must be defined on AIAssistantPanel"
         assert callable(panel.switch_provider)
