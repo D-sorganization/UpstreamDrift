@@ -25,6 +25,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate when:
+
 - Context window pressure is high
 - Memory has grown across many sessions
 - A single targeted compression pass is needed
@@ -38,6 +39,7 @@ More focused than `memory-refresh` — this is a single-pass compression operati
 1. **Select memory by category or tags.** Read `contexts/memory/index.md`. Prioritize categories by: (a) largest file count first, (b) oldest entries first, (c) categories not referenced by the current task last. Under extreme pressure, compact the single largest category only.
 
 2. **Classify entries by durability (R7 gate).** Before compacting, classify each entry:
+
    - **Durable** (decisions, patterns, project, ops, contacts, domains): only entries with explicit supersession markers (`> SUPERSEDED by DEC-XX`, `> RETRACTED`, `> OBSOLETE — {reason}`) may be archived. All other entries are ACTIVE and MUST NOT be archived regardless of file size. Note: decisions are already individual ADR files (`decisions/DEC-{N}.md`). For other oversized durable files → domain-split, not archive.
    - **Ephemeral** (sessions): standard compaction applies — summarize and archive.
 
@@ -47,17 +49,21 @@ More focused than `memory-refresh` — this is a single-pass compression operati
 
 ```markdown
 # {Category} — Compact Summary
+
 > Compacted from {N} files on {YYYY-MM-DD}
 > Original token estimate: ~{X} | Summary: ~{Y}
 
 ## Key Decisions
+
 - {decision 1}
 - {decision 2}
 
 ## Active Constraints
+
 - {constraint 1}
 
 ## Current State
+
 - {fact 1}
 ```
 
@@ -90,6 +96,7 @@ More focused than `memory-refresh` — this is a single-pass compression operati
 ## Non-Goals
 
 This skill must NOT:
+
 - Create new project knowledge
 - Invent or reinterpret decisions
 - Delete (only archive) source files

@@ -12,29 +12,30 @@ This document summarizes the fleet remediation work completed through 10 sequent
 
 ### Completed Fixes
 
-| Issue # | Title | Resolution | PR |
-|---------|-------|------------|-----|
-| #5307 | Derive Ollama endpoint paths from host prefix | ✅ Fixed | [#5326](https://github.com/D-sorganization/UpstreamDrift/pull/5326) |
-| #5328 | Smoke test API symbol check | ✅ Fixed | Included in #5327 |
+| Issue # | Title                                         | Resolution | PR                                                                  |
+| ------- | --------------------------------------------- | ---------- | ------------------------------------------------------------------- |
+| #5307   | Derive Ollama endpoint paths from host prefix | ✅ Fixed   | [#5326](https://github.com/D-sorganization/UpstreamDrift/pull/5326) |
+| #5328   | Smoke test API symbol check                   | ✅ Fixed   | Included in #5327                                                   |
 
 ### Documentation Plans Created
 
-| Issue # | Title | Plan Document | PR |
-|---------|-------|---------------|-----|
-| #5309 | [EPIC] Recover fleet chat architecture | Fleet Recovery Tracking | [#5330](https://github.com/D-sorganization/UpstreamDrift/pull/5330) |
-| #5310 | Replace local shared-chat fork | Shared Chat Migration Plan | [#5338](https://github.com/D-sorganization/UpstreamDrift/pull/5338) |
-| #5311 | Verify May 10-12 work landed | May 10-12 Audit Plan | [#5339](https://github.com/D-sorganization/UpstreamDrift/pull/5339) |
-| #5312 | Incorporate biomechanics model packs | Biomechanics Integration Plan | [#5336](https://github.com/D-sorganization/UpstreamDrift/pull/5336) |
-| #5313 | Reconcile model_pack/v1 schema | Biomechanics Integration Plan | [#5336](https://github.com/D-sorganization/UpstreamDrift/pull/5336) |
-| #5314 | Expose and categorize tools | Biomechanics Integration Plan | [#5336](https://github.com/D-sorganization/UpstreamDrift/pull/5336) |
-| #5315 | Recover modernized chat UI | Chat UI Recovery Plan | [#5333](https://github.com/D-sorganization/UpstreamDrift/pull/5333) |
-| #5316 | Add end-to-end smoke tests | Smoke Tests Implementation | [#5327](https://github.com/D-sorganization/UpstreamDrift/pull/5327) |
+| Issue # | Title                                  | Plan Document                 | PR                                                                  |
+| ------- | -------------------------------------- | ----------------------------- | ------------------------------------------------------------------- |
+| #5309   | [EPIC] Recover fleet chat architecture | Fleet Recovery Tracking       | [#5330](https://github.com/D-sorganization/UpstreamDrift/pull/5330) |
+| #5310   | Replace local shared-chat fork         | Shared Chat Migration Plan    | [#5338](https://github.com/D-sorganization/UpstreamDrift/pull/5338) |
+| #5311   | Verify May 10-12 work landed           | May 10-12 Audit Plan          | [#5339](https://github.com/D-sorganization/UpstreamDrift/pull/5339) |
+| #5312   | Incorporate biomechanics model packs   | Biomechanics Integration Plan | [#5336](https://github.com/D-sorganization/UpstreamDrift/pull/5336) |
+| #5313   | Reconcile model_pack/v1 schema         | Biomechanics Integration Plan | [#5336](https://github.com/D-sorganization/UpstreamDrift/pull/5336) |
+| #5314   | Expose and categorize tools            | Biomechanics Integration Plan | [#5336](https://github.com/D-sorganization/UpstreamDrift/pull/5336) |
+| #5315   | Recover modernized chat UI             | Chat UI Recovery Plan         | [#5333](https://github.com/D-sorganization/UpstreamDrift/pull/5333) |
+| #5316   | Add end-to-end smoke tests             | Smoke Tests Implementation    | [#5327](https://github.com/D-sorganization/UpstreamDrift/pull/5327) |
 
 ## PR Summary
 
 ### Code Changes
 
 1. **PR #5326** - Fix Ollama Path Deduplication
+
    - **Files Changed:** `rust_core/ai_backend/src/config.rs`
    - **Changes:** Modified `join_url()` to detect and skip duplicate path segments
    - **Tests Added:** `test_chat_url_handles_duplicate_path_segments()`
@@ -48,18 +49,22 @@ This document summarizes the fleet remediation work completed through 10 sequent
 ### Documentation
 
 1. **PR #5330** - Fleet Recovery Tracking Document
+
    - Tracks progress on all child issues of EPIC #5309
    - Includes status table and completed work summaries
 
 2. **PR #5333** - Chat UI Recovery Plan
+
    - Six-slice recovery strategy for chat UI work
    - TDD/DbC/LOD/DRY principles documented
 
 3. **PR #5336** - Biomechanics Model Pack Integration Plan
+
    - Three-phase integration strategy
    - Covers issues #5312, #5313, #5314
 
 4. **PR #5338** - Shared Chat Migration Plan
+
    - Five-phase migration from local fork to Tools-owned implementation
    - Path ordering issue documentation
 
@@ -76,6 +81,7 @@ This document summarizes the fleet remediation work completed through 10 sequent
 **Solution:** Modified the `join_url()` function in `rust_core/ai_backend/src/config.rs` to detect when the first path segment of the path parameter matches the last segment of the base URL and skip the duplicate segment.
 
 **Code Change:**
+
 ```rust
 fn join_url(base: &str, path: &str) -> String {
     let base = base.trim_end_matches('/');
@@ -112,6 +118,7 @@ fn join_url(base: &str, path: &str) -> String {
 ### Smoke Tests Added
 
 The smoke tests verify:
+
 - Shared chat module exists and exposes public API
 - Launcher has chat entry points
 - Model configuration exists
@@ -126,6 +133,7 @@ The smoke tests verify:
 The documentation plans created outline the following remaining work:
 
 ### Chat UI Recovery (6 slices)
+
 1. Shared UI Components (Tools)
 2. Session/History Storage (Tools)
 3. Settings Management (Tools)
@@ -134,11 +142,13 @@ The documentation plans created outline the following remaining work:
 6. Launcher Integration (UpstreamDrift)
 
 ### Biomechanics Integration (3 phases)
+
 1. Schema Reconciliation
 2. Provider Registry
 3. Tool Exposure
 
 ### Shared Chat Migration (5 phases)
+
 1. Audit
 2. Adapter Creation
 3. Migration
@@ -146,6 +156,7 @@ The documentation plans created outline the following remaining work:
 5. Documentation
 
 ### May 10-12 Audit (4 steps)
+
 1. Inventory Collection
 2. Product Verification
 3. Gap Analysis
@@ -153,15 +164,15 @@ The documentation plans created outline the following remaining work:
 
 ## Metrics
 
-| Metric | Count |
-|--------|-------|
-| Issues with fixes implemented | 2 |
-| Issues with documentation plans | 8 |
-| PRs created | 8 |
-| Files added/modified | 10 |
-| Lines of code added | ~500 |
-| Lines of documentation added | ~1500 |
-| Test coverage added | 196 lines |
+| Metric                          | Count     |
+| ------------------------------- | --------- |
+| Issues with fixes implemented   | 2         |
+| Issues with documentation plans | 8         |
+| PRs created                     | 8         |
+| Files added/modified            | 10        |
+| Lines of code added             | ~500      |
+| Lines of documentation added    | ~1500     |
+| Test coverage added             | 196 lines |
 
 ## TDD / DbC / LOD / DRY Principles Applied
 
@@ -189,4 +200,4 @@ All PRs are pending review and CI validation. The code fix (PR #5326) has verifi
 
 ---
 
-*This summary document will be updated as PRs are merged and implementation progresses.*
+_This summary document will be updated as PRs are merged and implementation progresses._

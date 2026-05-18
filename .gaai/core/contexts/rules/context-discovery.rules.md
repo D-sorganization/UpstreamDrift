@@ -19,6 +19,7 @@ and what context conditions must be met before Discovery begins.
 ## 🎯 Purpose
 
 Context discovery rules ensure that:
+
 - Discovery only activates on appropriate inputs
 - Context is explicit before reasoning begins
 - The right track (Discovery vs Delivery) is selected deliberately
@@ -32,6 +33,7 @@ Context discovery rules ensure that:
 ### R1 — Use Discovery Track When
 
 The Discovery track MUST be activated when:
+
 - user intent is vague, ambiguous, or exploratory
 - a new feature, product, or epic is being initiated
 - scope is undefined or disputed
@@ -41,6 +43,7 @@ The Discovery track MUST be activated when:
 ### R2 — Use Delivery Track When
 
 The Delivery track MUST be activated when:
+
 - a backlog item exists with status `refined`
 - acceptance criteria are explicit and approved
 - scope is locked
@@ -48,6 +51,7 @@ The Delivery track MUST be activated when:
 ### R3 — When in Doubt, Use Discovery
 
 If track selection is ambiguous:
+
 - default to Discovery
 - never default to Delivery
 - never execute without a governed backlog item
@@ -55,6 +59,7 @@ If track selection is ambiguous:
 ## 📋 Discovery Activation Context
 
 Before the Discovery Agent begins, it MUST have:
+
 - explicit human intent (written or verbal)
 - access to `.gaai/project/contexts/memory/project/context.md`
 - access to current backlog state (`contexts/backlog/active.backlog.yaml`)
@@ -65,6 +70,7 @@ It MUST NOT auto-load full memory.
 ## 🚫 Forbidden Activation Patterns
 
 The following are **explicitly forbidden**:
+
 - Delivery activating without a `refined` backlog item
 - Discovery activating without a human intent input
 - Auto-switching between tracks without agent decision

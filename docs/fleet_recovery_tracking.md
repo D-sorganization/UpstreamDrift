@@ -19,17 +19,17 @@ This document tracks the recovery of May 10-12, 2026 chat, codemap, theme, launc
 
 ## Child Issues Status
 
-| Issue # | Repo | Title | Status | PR |
-|---------|------|-------|--------|-----|
-| #5307 | UpstreamDrift | Derive Ollama endpoint paths from host prefix | ✅ Fixed | [#5326](https://github.com/D-sorganization/UpstreamDrift/pull/5326) |
-| #5309 | UpstreamDrift | [EPIC] Recover fleet chat architecture | 🔄 In Progress | - |
-| #5310 | UpstreamDrift | Replace local shared-chat fork with Tools-owned component | ⏳ Pending | - |
-| #5311 | UpstreamDrift | Verify May 10-12 chat/codemap/theme work landed | ⏳ Pending | - |
-| #5312 | UpstreamDrift | Incorporate MuJoCo/Drake/Pinocchio/OpenSim model packs | ⏳ Pending | - |
-| #5313 | UpstreamDrift | Reconcile model_pack/v1 provider schema | ⏳ Pending | - |
-| #5314 | UpstreamDrift | Expose and categorize all runnable UpstreamDrift tools | ⏳ Pending | - |
-| #5315 | UpstreamDrift | Recover modernized chat UI/session history | ⏳ Pending | - |
-| #5316 | UpstreamDrift | Add end-to-end chat and launcher feature-discovery verification | ✅ Fixed | [#5327](https://github.com/D-sorganization/UpstreamDrift/pull/5327) |
+| Issue # | Repo          | Title                                                           | Status         | PR                                                                  |
+| ------- | ------------- | --------------------------------------------------------------- | -------------- | ------------------------------------------------------------------- |
+| #5307   | UpstreamDrift | Derive Ollama endpoint paths from host prefix                   | ✅ Fixed       | [#5326](https://github.com/D-sorganization/UpstreamDrift/pull/5326) |
+| #5309   | UpstreamDrift | [EPIC] Recover fleet chat architecture                          | 🔄 In Progress | -                                                                   |
+| #5310   | UpstreamDrift | Replace local shared-chat fork with Tools-owned component       | ⏳ Pending     | -                                                                   |
+| #5311   | UpstreamDrift | Verify May 10-12 chat/codemap/theme work landed                 | ⏳ Pending     | -                                                                   |
+| #5312   | UpstreamDrift | Incorporate MuJoCo/Drake/Pinocchio/OpenSim model packs          | ⏳ Pending     | -                                                                   |
+| #5313   | UpstreamDrift | Reconcile model_pack/v1 provider schema                         | ⏳ Pending     | -                                                                   |
+| #5314   | UpstreamDrift | Expose and categorize all runnable UpstreamDrift tools          | ⏳ Pending     | -                                                                   |
+| #5315   | UpstreamDrift | Recover modernized chat UI/session history                      | ⏳ Pending     | -                                                                   |
+| #5316   | UpstreamDrift | Add end-to-end chat and launcher feature-discovery verification | ✅ Fixed       | [#5327](https://github.com/D-sorganization/UpstreamDrift/pull/5327) |
 
 ## Completed Work
 
@@ -38,6 +38,7 @@ This document tracks the recovery of May 10-12, 2026 chat, codemap, theme, launc
 **Issue:** #5307
 **Branch:** `fix/ollama-v1-path-dedup`
 **Changes:**
+
 - Modified `join_url()` in `rust_core/ai_backend/src/config.rs` to detect and skip duplicate path segments
 - Added `test_chat_url_handles_duplicate_path_segments()` test
 - All 33 unit tests pass
@@ -49,6 +50,7 @@ This document tracks the recovery of May 10-12, 2026 chat, codemap, theme, launc
 **Issue:** #5316
 **Branch:** `feat/chat-launcher-smoke-tests`
 **Changes:**
+
 - Added `tests/smoke/test_chat_launcher_discovery.py` with tests for:
   - Shared chat import and public API contract
   - Launcher chat entry points
@@ -103,4 +105,4 @@ This document tracks the recovery of May 10-12, 2026 chat, codemap, theme, launc
 
 ---
 
-*This document is auto-updated as PRs are merged and issues are resolved.*
+_This document is auto-updated as PRs are merged and issues are resolved._

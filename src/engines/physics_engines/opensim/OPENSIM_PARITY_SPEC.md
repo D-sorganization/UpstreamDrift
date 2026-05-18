@@ -1,8 +1,8 @@
 # OpenSim Parity Specification
 
 > **Status:** greenfield. OpenSim is **the most-stubbed of the five engines**
-> in this repository. Today the engine has *no* humanoid model, *no* forward
-> simulator wrapper, *no* fit driver, *no* visualisation, and *no* tests.
+> in this repository. Today the engine has _no_ humanoid model, _no_ forward
+> simulator wrapper, _no_ fit driver, _no_ visualisation, and _no_ tests.
 > This document is the implementation plan to bring it to feature parity
 > with the Simscape Multibody motion-matching pipeline (the "primary path"
 > defined in [`../../CROSS_ENGINE_PARITY_SPEC.md`](../../CROSS_ENGINE_PARITY_SPEC.md)).
@@ -65,13 +65,13 @@ exercised by the motion-matching pipeline today.
 
 The 796-LOC `OpenSimPhysicsEngine` class is **load-and-introspect only**:
 
-| Method | What it does | Relevant to motion-matching? |
-|---|---|---|
-| `load_from_path(path)` | `osim.Model(path)`; `model.initSystem()`; instantiates `osim.Manager` | Yes — needed |
-| `load_from_string(content)` | Writes to tempfile then `load_from_path` | Probably useful for tests |
-| `model_name`, `is_initialized` | trivial getters | Trivial |
-| Inspection helpers (DOF count, body list, joint list, etc.) | walk the model | Useful for diagnostics |
-| `step`, `set_state`, `get_state` | thin SimTK wrappers | **Not enough** — there is no torque-controller wiring or forward-sim loop |
+| Method                                                      | What it does                                                          | Relevant to motion-matching?                                              |
+| ----------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `load_from_path(path)`                                      | `osim.Model(path)`; `model.initSystem()`; instantiates `osim.Manager` | Yes — needed                                                              |
+| `load_from_string(content)`                                 | Writes to tempfile then `load_from_path`                              | Probably useful for tests                                                 |
+| `model_name`, `is_initialized`                              | trivial getters                                                       | Trivial                                                                   |
+| Inspection helpers (DOF count, body list, joint list, etc.) | walk the model                                                        | Useful for diagnostics                                                    |
+| `step`, `set_state`, `get_state`                            | thin SimTK wrappers                                                   | **Not enough** — there is no torque-controller wiring or forward-sim loop |
 
 There is **no `simulate_with_coefficients`**, **no controller class that
 applies a polynomial torque profile**, **no `SimOutput`-shaped return**, and
@@ -85,7 +85,7 @@ applies a polynomial torque profile**, **no `SimOutput`-shaped return**, and
   fails fast with `OpenSimNotInstalledError` / `OpenSimModelLoadError` /
   `FileNotFoundError`.
 - A `SimulationResult` dataclass with `(time, states, muscle_forces,
-  control_signals, joint_torques, marker_positions)` — close in spirit to
+control_signals, joint_torques, marker_positions)` — close in spirit to
   the canonical `SimOutput` but **missing** `grip`, `grip_quat`, `clubhead`,
   `club_quat`, `solver_status`, `duration_s`.
 - No actual simulation method. Imports `constants` but does not run
@@ -99,12 +99,12 @@ On a fresh clone the directory is empty until `git submodule update --init`.
 
 Once initialised, the upstream repo provides 50+ reference `.osim` models:
 
-| Family | Notable models | Relevance |
-|---|---|---|
-| **Lower-extremity gait** | `gait2392.osim`, `gait2354.osim` | Older, well-validated 23-DOF lower-body + lumbar models — **good MVP base** |
-| **Full-body musculoskeletal** | `Rajagopal2015.osim` (full body, 80 muscles) | Modern peer-reviewed full-body model — **best long-term base** |
-| **Upper extremity** | `arm26.osim`, `MoBL-ARMS` upper-extremity model | Useful reference for shoulder/elbow/wrist DOF naming |
-| **Single-DOF demos** | `arm26.osim`, `leg6dof9musc.osim` | Useful for unit tests |
+| Family                        | Notable models                                  | Relevance                                                                   |
+| ----------------------------- | ----------------------------------------------- | --------------------------------------------------------------------------- |
+| **Lower-extremity gait**      | `gait2392.osim`, `gait2354.osim`                | Older, well-validated 23-DOF lower-body + lumbar models — **good MVP base** |
+| **Full-body musculoskeletal** | `Rajagopal2015.osim` (full body, 80 muscles)    | Modern peer-reviewed full-body model — **best long-term base**              |
+| **Upper extremity**           | `arm26.osim`, `MoBL-ARMS` upper-extremity model | Useful reference for shoulder/elbow/wrist DOF naming                        |
+| **Single-DOF demos**          | `arm26.osim`, `leg6dof9musc.osim`               | Useful for unit tests                                                       |
 
 **There is no golf-specific humanoid in the submodule.** We must build one
 by adapting an existing model (see §3) and we must respect upstream
@@ -305,13 +305,13 @@ floating-base + 19 actuated rotational)** matching the Simscape model;
 the canonical totals live in `shared/models/golf_humanoid_topology.yaml`
 (PR #4150). OpenSim has two candidate base models in its submodule:
 
-| Candidate | Pros | Cons |
-|---|---|---|
-| `gait2392.osim` | Simpler (23 DOF), well-validated, smaller XML | Lower-body + lumbar only — **need to graft a full upper-body chain** |
-| `Rajagopal2015.osim` | Already full-body, peer-reviewed, modern joint definitions | Larger; muscles must be stripped for MVP |
+| Candidate            | Pros                                                       | Cons                                                                 |
+| -------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------- |
+| `gait2392.osim`      | Simpler (23 DOF), well-validated, smaller XML              | Lower-body + lumbar only — **need to graft a full upper-body chain** |
+| `Rajagopal2015.osim` | Already full-body, peer-reviewed, modern joint definitions | Larger; muscles must be stripped for MVP                             |
 
 **Decision: start from `Rajagopal2015.osim`** for the MVP, because the
-upper-body chain (scapula → shoulder → elbow → wrist) is *already*
+upper-body chain (scapula → shoulder → elbow → wrist) is _already_
 present and we'd otherwise be hand-authoring it. We strip muscles for
 the MVP and add joint-torque actuators on every coordinate.
 
@@ -399,6 +399,7 @@ issue depends on it.
 **Title:** Author golf-humanoid `.osim` from Rajagopal2015 base + joint-torque actuators.
 
 **Deliverable:**
+
 - `scripts/build_humanoid_osim.py` (generator script).
 - `models/golf_humanoid.osim` (committed, generated artifact).
 - `models/golf_humanoid_actuators.xml` (separate actuator-set XML).
@@ -408,6 +409,7 @@ issue depends on it.
   names, has a `Club` body and a clubhead frame.
 
 **Acceptance criteria:**
+
 - `python scripts/build_humanoid_osim.py` is deterministic — running it
   twice produces byte-identical `.osim` output.
 - `osim.Model("models/golf_humanoid.osim").initSystem()` succeeds.
@@ -427,6 +429,7 @@ issue depends on it.
 **Title:** OpenSim ↔ Simscape coordinate-convention mapping helper.
 
 **Deliverable:**
+
 - `python/opensim_golf/coordinate_map.py` with:
   - `to_simscape(q_opensim) -> q_simscape`
   - `from_simscape(q_simscape) -> q_opensim`
@@ -436,6 +439,7 @@ issue depends on it.
   for 100 random poses; specific golden values for at-address pose.
 
 **Acceptance criteria:**
+
 - Round-trip identity within 1e-12 absolute tolerance.
 - Golden test for at-address pose: spec the expected Simscape pose for
   the OpenSim default state and assert.
@@ -453,6 +457,7 @@ issue depends on it.
 **Title:** Forward-kinematics extraction: `(model, state) -> grip + clubhead`.
 
 **Deliverable:**
+
 - `python/opensim_golf/fk.py` with:
   - `compute_grip(model, state) -> (pos: np.ndarray(3,), quat: np.ndarray(4,))`
   - `compute_clubhead(model, state) -> (pos, quat)`
@@ -462,6 +467,7 @@ issue depends on it.
   5 mm; clubhead position matches within 5 mm.
 
 **Acceptance criteria:**
+
 - Equivalence test against Simscape `compute_skeleton_fk.m` at three
   poses (address, top-of-backswing, impact) — all within **5 mm grip
   RMSE**, **5 mm clubhead RMSE**.
@@ -478,6 +484,7 @@ issue depends on it.
 **Title:** `simulate_with_coefficients` forward-sim wrapper + polynomial controller.
 
 **Deliverable:**
+
 - `python/opensim_golf/controller.py` — `PolynomialTorqueController`
   (subclass of `osim.Controller`) with `set_theta`, `get_theta`,
   `tau_at(t, j)`.
@@ -492,6 +499,7 @@ issue depends on it.
   unit step → expected linear ramp in joint velocity.
 
 **Acceptance criteria:**
+
 - `simulate_with_coefficients(theta_zeros, default_options)` returns a
   `SimOutput` with `np.allclose(out.q, q_initial)` over the entire grid.
 - Canonical `SimOutput` produced (correct field names, dtypes, shapes).
@@ -509,11 +517,13 @@ issue depends on it.
 **Title:** TDD oracle `synthesize_target_from_coefficients`.
 
 **Deliverable:**
+
 - `python/opensim_golf/synthesize_target_from_coefficients.py`.
 - Tests: synthesizer round-trips a known `theta` to a `ClubTarget` with
   finite, monotone-time-grid, expected schema fields populated.
 
 **Acceptance criteria:**
+
 - Output is a valid `ClubTarget` (time, grip, grip_quat, clubhead,
   club_quat, impact_idx, source).
 - `source.format == "synthetic"` and `source.subject_id == "opensim"`
@@ -543,14 +553,16 @@ issue depends on it.
 **Title:** `fit_swing_opensim` motion-matching driver.
 
 **Deliverable:**
+
 - `python/opensim_golf/fit_swing_opensim.py` using
   `scipy.optimize.minimize(method="L-BFGS-B")`.
 - Imports `compute_cost` from `shared/python/motion_matching/cost.py`.
 - Returns canonical `FitResult`.
 - Tests: recovery test "synthesize → fit → `np.allclose(theta_fit,
-  theta_truth, atol=1e-2)`" passes on three randomly generated truths.
+theta_truth, atol=1e-2)`" passes on three randomly generated truths.
 
 **Acceptance criteria:**
+
 - Recovery test converges in < 60 s for a 1.0 s synthesised target on a
   dev laptop.
 - `FitResult.solver_status == "success"`.
@@ -567,6 +579,7 @@ issue depends on it.
 **Title:** Three canonical visualisation figures.
 
 **Deliverable:**
+
 - `python/opensim_golf/visualize.py` exporting:
   - `plot_trajectory_overlay(target, sim_out) -> Figure`
   - `plot_error_timecourse(target, sim_out) -> Figure`
@@ -576,6 +589,7 @@ issue depends on it.
   with expected axes count and no warnings.
 
 **Acceptance criteria:**
+
 - Three figures render headlessly (Agg backend) under pytest.
 - Layout matches the Simscape reference figures within visual tolerance
   (snapshot test against committed PNGs, with 5% pixel tolerance).
@@ -592,12 +606,14 @@ issue depends on it.
 **Title:** Cross-engine equivalence test: OpenSim vs Simscape oracle.
 
 **Deliverable:**
+
 - `tests/cross_engine/test_opensim_vs_simscape.py` running a fixed
   `theta` through both engines (Simscape via the existing harness, or
   via a committed reference `.mat` if Simscape is unavailable on CI).
 - Asserts grip RMSE ≤ 5 mm and clubhead RMSE ≤ 5 mm at three poses.
 
 **Acceptance criteria:**
+
 - CI passes with the equivalence assertions enabled.
 - Test is marked `@pytest.mark.slow` and `@pytest.mark.requires_opensim`
   (gate appropriately).
@@ -639,12 +655,12 @@ Practical implications:
   `typing.cast`) at every public boundary so `ruff` / `mypy` can lint
   our calls.
 - **Reference semantics:** most methods return references into the
-  C++ object graph. Mutating a `Body` via Python *does* mutate the
+  C++ object graph. Mutating a `Body` via Python _does_ mutate the
   underlying model. Wrap defensively with explicit copies in the
   controller's `set_theta` path.
-- **`initSystem()` discards changes.** Every model edit *after*
+- **`initSystem()` discards changes.** Every model edit _after_
   `initSystem()` is silently ignored. Our builder script always
-  finalises edits *before* calling `initSystem()`.
+  finalises edits _before_ calling `initSystem()`.
 - **Pickling:** OpenSim objects do **not** pickle. Multiprocess fitting
   (`scipy.optimize` + `pool`) must serialise the model via
   `model.printToXML(tempfile)` and reload in each worker.
@@ -662,7 +678,7 @@ Standards":
   Anywhere else that imports `opensim` is a smell — fix or refactor.
 - **DbC:** every public function uses
   `src.shared.python.core.contracts.{precondition, postcondition,
-  check_finite}` (already imported in `opensim_physics_engine.py`).
+check_finite}` (already imported in `opensim_physics_engine.py`).
 - **DRY:** the cost function, target loaders, and plot helpers are
   imported from `shared/python/motion_matching/`. **No engine writes its
   own cost.**
@@ -701,7 +717,7 @@ We have no measurements yet (greenfield). Reference points:
 ### 6.2 MVP target
 
 - **Cold call (first sim after import):** ≤ 30 s. Includes model load
-  + `initSystem()` (~10–15 s).
+  - `initSystem()` (~10–15 s).
 - **Warm call (subsequent sim, cached model + state):** ≤ 7 s for a
   1.0 s sim. **Equal to or faster than Simscape warm.**
 - **Recovery test** (~50 cost-function evaluations × 1 s sim):
@@ -830,6 +846,6 @@ to be reversed when muscles come back.**
 
 ---
 
-*Spec landed 2026-05-06 alongside the Drake / Pinocchio / MuJoCo parity
+_Spec landed 2026-05-06 alongside the Drake / Pinocchio / MuJoCo parity
 specs. Tracks the eight implementation issues enumerated in
-[`OPENSIM_ISSUES.md`](OPENSIM_ISSUES.md).*
+[`OPENSIM_ISSUES.md`](OPENSIM_ISSUES.md)._

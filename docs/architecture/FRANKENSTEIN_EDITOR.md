@@ -24,27 +24,27 @@ src/shared/python/model_generation/editor/
 
 ### Core Editor
 
-| File | Purpose | Status |
-|------|---------|--------|
+| File                     | Purpose                                | Status         |
+| ------------------------ | -------------------------------------- | -------------- |
 | `frankenstein_editor.py` | Main editor class combining all mixins | ✅ Implemented |
-| `text_editor.py` | Base text editing with XML parsing | ✅ Implemented |
+| `text_editor.py`         | Base text editing with XML parsing     | ✅ Implemented |
 
 ### Mixins
 
-| File | Purpose | Status |
-|------|---------|--------|
-| `text_editor_diff_mixin.py` | Diff generation and application | ✅ Implemented |
-| `text_editor_history_mixin.py` | Undo/redo history stack | ✅ Implemented |
+| File                           | Purpose                         | Status         |
+| ------------------------------ | ------------------------------- | -------------- |
+| `text_editor_diff_mixin.py`    | Diff generation and application | ✅ Implemented |
+| `text_editor_history_mixin.py` | Undo/redo history stack         | ✅ Implemented |
 
 ### Supporting Modules
 
-| File | Purpose | Status |
-|------|---------|--------|
-| `editor_clipboard.py` | Copy/paste/cut operations | ✅ Implemented |
-| `editor_modifications.py` | URDF modification primitives | ✅ Implemented |
-| `editor_types.py` | Type aliases and enums | ✅ Implemented |
-| `_text_editor_models.py` | Internal data models | ✅ Implemented |
-| `_text_editor_validation.py` | XML/URDF validation | ✅ Implemented |
+| File                         | Purpose                      | Status         |
+| ---------------------------- | ---------------------------- | -------------- |
+| `editor_clipboard.py`        | Copy/paste/cut operations    | ✅ Implemented |
+| `editor_modifications.py`    | URDF modification primitives | ✅ Implemented |
+| `editor_types.py`            | Type aliases and enums       | ✅ Implemented |
+| `_text_editor_models.py`     | Internal data models         | ✅ Implemented |
+| `_text_editor_validation.py` | XML/URDF validation          | ✅ Implemented |
 
 ## Features
 
@@ -93,17 +93,17 @@ modified_urdf = editor.get_content()
 
 Current coverage targets:
 
-| File | Coverage |
-|------|----------|
-| `frankenstein_editor.py` | Target: 70% |
-| `text_editor.py` | Target: 70% |
-| `text_editor_diff_mixin.py` | Target: 70% |
+| File                           | Coverage    |
+| ------------------------------ | ----------- |
+| `frankenstein_editor.py`       | Target: 70% |
+| `text_editor.py`               | Target: 70% |
+| `text_editor_diff_mixin.py`    | Target: 70% |
 | `text_editor_history_mixin.py` | Target: 70% |
-| `editor_clipboard.py` | Target: 70% |
-| `editor_modifications.py` | Target: 70% |
-| `editor_types.py` | Target: 70% |
-| `_text_editor_models.py` | Target: 70% |
-| `_text_editor_validation.py` | Target: 70% |
+| `editor_clipboard.py`          | Target: 70% |
+| `editor_modifications.py`      | Target: 70% |
+| `editor_types.py`              | Target: 70% |
+| `_text_editor_models.py`       | Target: 70% |
+| `_text_editor_validation.py`   | Target: 70% |
 
 ## Demo Script
 

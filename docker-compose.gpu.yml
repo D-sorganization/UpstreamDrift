@@ -14,7 +14,11 @@ services:
               count: ${NVIDIA_GPU_COUNT:-all}
               capabilities: [gpu, compute, utility]
     healthcheck:
-      test: ["CMD-SHELL", "nvidia-smi > /dev/null 2>&1 && curl -f http://localhost:8001/health"]
+      test:
+        [
+          "CMD-SHELL",
+          "nvidia-smi > /dev/null 2>&1 && curl -f http://localhost:8001/health",
+        ]
 
   training:
     environment:

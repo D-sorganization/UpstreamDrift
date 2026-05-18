@@ -46,9 +46,9 @@ UpperTorso:
   mass_kg: 9.072
   com_offset_m: [0.0, 0.0, 0.03048]
   inertia_kgm2:
-    - [0.0281805888, 0.0,         0.0]
-    - [0.0,         0.0281805888, 0.0]
-    - [0.0,         0.0,          0.04645152]
+    - [0.0281805888, 0.0, 0.0]
+    - [0.0, 0.0281805888, 0.0]
+    - [0.0, 0.0, 0.04645152]
   source: "SegmentInertiaLogs.UpperTorso{COM,Inertia} at t=0; mass = 20 lb × 0.453592"
   notes: >
     Modelled as a solid cylinder, radius 6 in (0.1524 m), height 12 in
@@ -59,9 +59,9 @@ LowerTorso:
   mass_kg: 11.34
   com_offset_m: [0.0, 0.0, 0.1524]
   inertia_kgm2:
-    - [0.7354824, 0.0,       0.0]
-    - [0.0,       0.7354824, 0.0]
-    - [0.0,       0.0,       0.2322576]
+    - [0.7354824, 0.0, 0.0]
+    - [0.0, 0.7354824, 0.0]
+    - [0.0, 0.0, 0.2322576]
   source: "SegmentInertiaLogs.LowerTorso{COM,Inertia} at t=0; mass = 25 lb × 0.453592"
   notes: >
     Modelled as a solid cylinder, radius and height from the Simscape body
@@ -75,9 +75,9 @@ LeftShoulderToHub:
   mass_kg: 4.536
   com_offset_m: [-0.127, 0.0, 0.0]
   inertia_kgm2:
-    - [0.0290322,         0.0,                0.0]
-    - [0.0,               0.229569433333333,  0.0]
-    - [0.0,               0.0,                0.229569433333333]
+    - [0.0290322, 0.0, 0.0]
+    - [0.0, 0.229569433333333, 0.0]
+    - [0.0, 0.0, 0.229569433333333]
   source: "SegmentInertiaLogs.LeftShouldertoHub{COM,Inertia} at t=0; mass = 10 lb"
   notes: >
     Strut from the spinal hub out to the left glenohumeral joint. COM is
@@ -87,9 +87,9 @@ RightShoulderToHub:
   mass_kg: 4.536
   com_offset_m: [-0.127, 0.0, 0.0]
   inertia_kgm2:
-    - [0.0290322,         0.0,                0.0]
-    - [0.0,               0.229569433333333,  0.0]
-    - [0.0,               0.0,                0.229569433333333]
+    - [0.0290322, 0.0, 0.0]
+    - [0.0, 0.229569433333333, 0.0]
+    - [0.0, 0.0, 0.229569433333333]
   source: "SegmentInertiaLogs.RightShouldertoHub{COM,Inertia} at t=0; mass = 10 lb"
   notes: Mirror of LeftShoulderToHub.
 
@@ -101,9 +101,9 @@ LeftUpperArm:
   mass_kg: 2.268
   com_offset_m: [-0.1524, 0.0, 0.0]
   inertia_kgm2:
-    - [0.00224052234656731, 0.0,                0.0]
-    - [0.0,                 0.0713537779962917, 0.0]
-    - [0.0,                 0.0,                0.0713537779962916]
+    - [0.00224052234656731, 0.0, 0.0]
+    - [0.0, 0.0713537779962917, 0.0]
+    - [0.0, 0.0, 0.0713537779962916]
   source: "SegmentInertiaLogs.LeftUpperArm{COM,Inertia} at t=0; mass = 5 lb"
   notes: >
     Solid cylinder approximation. COM at the segment midpoint along local x
@@ -113,9 +113,9 @@ RightUpperArm:
   mass_kg: 2.268
   com_offset_m: [-0.1524, 0.0, 0.0]
   inertia_kgm2:
-    - [0.00224052234656731, 0.0,                0.0]
-    - [0.0,                 0.0713537779962917, 0.0]
-    - [0.0,                 0.0,                0.0713537779962916]
+    - [0.00224052234656731, 0.0, 0.0]
+    - [0.0, 0.0713537779962917, 0.0]
+    - [0.0, 0.0, 0.0713537779962916]
   source: "SegmentInertiaLogs.RightUpperArm{COM,Inertia} at t=0; mass = 5 lb"
   notes: Mirror of LeftUpperArm.
 
@@ -127,9 +127,9 @@ LeftForearmUpper:
   mass_kg: 1.134
   com_offset_m: [0.0889, 0.0, 0.0]
   inertia_kgm2:
-    - [0.00112026117328366, 0.0,                0.0]
-    - [0.0,                 0.0125095831016675, 0.0]
-    - [0.0,                 0.0,                0.0125095831016675]
+    - [0.00112026117328366, 0.0, 0.0]
+    - [0.0, 0.0125095831016675, 0.0]
+    - [0.0, 0.0, 0.0125095831016675]
   source: "SegmentInertiaLogs.LFUpper{COM,Inertia} at t=0"
   notes: >
     Proximal half of the left forearm (LFUpper in the Simscape model). The
@@ -141,9 +141,9 @@ LeftForearmLower:
   mass_kg: 1.134
   com_offset_m: [0.0, -0.0889, 0.0]
   inertia_kgm2:
-    - [0.0125095831016675, 0.0,                0.0]
-    - [0.0,                0.00112026117328366, 0.0]
-    - [0.0,                0.0,                 0.0125095831016675]
+    - [0.0125095831016675, 0.0, 0.0]
+    - [0.0, 0.00112026117328366, 0.0]
+    - [0.0, 0.0, 0.0125095831016675]
   source: "SegmentInertiaLogs.LFLower{COM,Inertia} at t=0"
   notes: Distal half of the left forearm (LFLower in the Simscape model).
 
@@ -151,9 +151,9 @@ RightForearmUpper:
   mass_kg: 1.134
   com_offset_m: [0.0889, 0.0, 0.0]
   inertia_kgm2:
-    - [0.00112026117328366, 0.0,                0.0]
-    - [0.0,                 0.0125095831016675, 0.0]
-    - [0.0,                 0.0,                0.0125095831016675]
+    - [0.00112026117328366, 0.0, 0.0]
+    - [0.0, 0.0125095831016675, 0.0]
+    - [0.0, 0.0, 0.0125095831016675]
   source: "SegmentInertiaLogs.RFUpper{COM,Inertia} at t=0"
   notes: Mirror of LeftForearmUpper.
 
@@ -161,9 +161,9 @@ RightForearmLower:
   mass_kg: 1.134
   com_offset_m: [0.0, -0.0889, 0.0]
   inertia_kgm2:
-    - [0.0125095831016675, 0.0,                0.0]
-    - [0.0,                0.00112026117328366, 0.0]
-    - [0.0,                0.0,                 0.0125095831016675]
+    - [0.0125095831016675, 0.0, 0.0]
+    - [0.0, 0.00112026117328366, 0.0]
+    - [0.0, 0.0, 0.0125095831016675]
   source: "SegmentInertiaLogs.RFLower{COM,Inertia} at t=0"
   notes: Mirror of LeftForearmLower.
 
@@ -175,9 +175,9 @@ LeftHand:
   mass_kg: 0.453
   com_offset_m: [0.0, 0.0, 0.0127]
   inertia_kgm2:
-    - [2.55375833333333e-06, 0.0,                  0.0]
-    - [0.0,                  2.55375833333333e-06, 0.0]
-    - [0.0,                  0.0,                  8.0645e-07]
+    - [2.55375833333333e-06, 0.0, 0.0]
+    - [0.0, 2.55375833333333e-06, 0.0]
+    - [0.0, 0.0, 8.0645e-07]
   source: "SegmentInertiaLogs.LH{COM,Inertia} at t=0"
   notes: >
     Left hand rigid body. The grip-anchor frame attaches the club to a 6-DOF
@@ -187,9 +187,9 @@ RightHand:
   mass_kg: 0.453
   com_offset_m: [-0.00351963996945186, 0.0, 0.0]
   inertia_kgm2:
-    - [0.0011443635214626, 0.0,                0.0]
-    - [0.0,                0.0313182884447391, 0.0]
-    - [0.0,                0.0,                0.0313182884447391]
+    - [0.0011443635214626, 0.0, 0.0]
+    - [0.0, 0.0313182884447391, 0.0]
+    - [0.0, 0.0, 0.0313182884447391]
   source: "SegmentInertiaLogs.RH{COM,Inertia} at t=0"
   notes: >
     Right hand. Asymmetric COM relative to the left hand because the right

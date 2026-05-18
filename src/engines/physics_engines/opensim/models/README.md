@@ -5,8 +5,8 @@ the OpenSim engine integrates into the cross-engine motion-matching
 pipeline. The model is the joint-torque-actuated MVP body from
 [`OPENSIM_PARITY_SPEC.md`](../OPENSIM_PARITY_SPEC.md) §3.
 
-| File | Description |
-| --- | --- |
+| File                 | Description                                    |
+| -------------------- | ---------------------------------------------- |
 | `golf_humanoid.osim` | Committed, generated model — do not hand-edit. |
 
 ## Provenance
@@ -17,8 +17,8 @@ pipeline. The model is the joint-torque-actuated MVP body from
   Path within the submodule:
   `Models/Rajagopal_OpenSense/Rajagopal2015_opensense.osim`.
 - **Original publication:** Rajagopal et al. (2016),
-  *Full-Body Musculoskeletal Model for Muscle-Driven Simulation of Human
-  Gait*, IEEE TBME 63(10): 2068–2079.
+  _Full-Body Musculoskeletal Model for Muscle-Driven Simulation of Human
+  Gait_, IEEE TBME 63(10): 2068–2079.
   doi: [10.1109/TBME.2016.2586891](https://doi.org/10.1109/TBME.2016.2586891).
 - **Why the OpenSense variant?** The OpenSense Rajagopal2015 model is a
   kinematics-focused descendant of the muscle-driven Rajagopal2016 model
@@ -82,11 +82,11 @@ following modifications:
    `club_head_offset` exposes the clubhead position for FK extraction.
 4. **Joint-torque actuators on every DOF.** A `CoordinateActuator` is
    added to the `ForceSet` for every `Coordinate` in the model
-   (39 in total: 6-DOF pelvis root, lower-limb chains incl. knee_beta
+   (39 in total: 6-DOF pelvis root, lower-limb chains incl. knee*beta
    coupled coordinates, lumbar 3-DOF, both shoulder/elbow/wrist chains).
-   Naming convention: `tau_<coordinate_name>`. Each actuator has
-   `optimal_force=1`, `min_control=-Inf`, `max_control=+Inf`; the
-   polynomial torque controller (issue `OPENSIM-SIMULATE`) writes
+   Naming convention: `tau*<coordinate_name>`. Each actuator has
+`optimal_force=1`, `min_control=-Inf`, `max_control=+Inf`; the
+polynomial torque controller (issue `OPENSIM-SIMULATE`) writes
    torques in N·m directly into the controls vector.
 
 Muscles are **explicitly stripped for the MVP** — the OpenSense base is
@@ -105,19 +105,19 @@ unchanged) align with the Simscape chain as follows; the runtime mapping
 table lives in `python/opensim_golf/coordinate_map.py` (issue
 `OPENSIM-COORD-MAP`).
 
-| Body-chain segment | Simscape DOF naming | OpenSim coordinate(s) |
-| --- | --- | --- |
-| Root translation | `pelvis_tx,ty,tz` | `pelvis_tx`, `pelvis_ty`, `pelvis_tz` |
-| Root rotation | pelvis tilt/list/rotation | `pelvis_tilt`, `pelvis_list`, `pelvis_rotation` |
-| Lumbar 3-DOF | torso ext/bend/rot | `lumbar_extension`, `lumbar_bending`, `lumbar_rotation` |
-| Right hip | hip flex/add/rot R | `hip_flexion_r`, `hip_adduction_r`, `hip_rotation_r` |
-| Right knee | knee R (+ patellar coupler) | `knee_angle_r` (+ coupled `knee_angle_r_beta`) |
-| Right ankle / foot | ankle / subtalar / mtp R | `ankle_angle_r`, `subtalar_angle_r`, `mtp_angle_r` |
-| Left hip / knee / ankle | mirror of right | `*_l` analogues |
-| Right shoulder 3-DOF | shoulder flex/add/rot R | `arm_flex_r`, `arm_add_r`, `arm_rot_r` |
-| Right elbow + forearm | elbow / forearm pron/sup R | `elbow_flex_r`, `pro_sup_r` |
-| Right wrist 2-DOF | wrist flex/dev R | `wrist_flex_r`, `wrist_dev_r` |
-| Left arm chain | mirror of right arm | `*_l` analogues |
+| Body-chain segment      | Simscape DOF naming         | OpenSim coordinate(s)                                   |
+| ----------------------- | --------------------------- | ------------------------------------------------------- |
+| Root translation        | `pelvis_tx,ty,tz`           | `pelvis_tx`, `pelvis_ty`, `pelvis_tz`                   |
+| Root rotation           | pelvis tilt/list/rotation   | `pelvis_tilt`, `pelvis_list`, `pelvis_rotation`         |
+| Lumbar 3-DOF            | torso ext/bend/rot          | `lumbar_extension`, `lumbar_bending`, `lumbar_rotation` |
+| Right hip               | hip flex/add/rot R          | `hip_flexion_r`, `hip_adduction_r`, `hip_rotation_r`    |
+| Right knee              | knee R (+ patellar coupler) | `knee_angle_r` (+ coupled `knee_angle_r_beta`)          |
+| Right ankle / foot      | ankle / subtalar / mtp R    | `ankle_angle_r`, `subtalar_angle_r`, `mtp_angle_r`      |
+| Left hip / knee / ankle | mirror of right             | `*_l` analogues                                         |
+| Right shoulder 3-DOF    | shoulder flex/add/rot R     | `arm_flex_r`, `arm_add_r`, `arm_rot_r`                  |
+| Right elbow + forearm   | elbow / forearm pron/sup R  | `elbow_flex_r`, `pro_sup_r`                             |
+| Right wrist 2-DOF       | wrist flex/dev R            | `wrist_flex_r`, `wrist_dev_r`                           |
+| Left arm chain          | mirror of right arm         | `*_l` analogues                                         |
 
 The Rajagopal model is **39-DOF generalized-coordinate-rich**; the
 patellar `knee_angle_*_beta` coordinates are coupled to the knee angle

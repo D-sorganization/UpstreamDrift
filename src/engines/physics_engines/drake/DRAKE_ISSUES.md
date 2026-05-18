@@ -31,6 +31,7 @@ never serialised to disk. We need a regenerable on-disk URDF driven
 by the shared anthropometric YAML.
 
 **Deliverables:**
+
 - New module `python/motion_matching/humanoid_urdf.py` exposing
   `build_humanoid_urdf(yaml_path, out_path) → Path` and
   `load_humanoid_into_plant(plant, urdf_path) → ModelInstanceIndex`.
@@ -42,6 +43,7 @@ by the shared anthropometric YAML.
   module (PARITY-MODEL-BUILD wires the orchestrator).
 
 **Acceptance:**
+
 - `pytest tests/motion_matching/test_humanoid_urdf.py` green.
 - The URDF parses cleanly via `pydrake.multibody.parsing.Parser` and
   the resulting plant reports exactly **23 generalized velocities**.
@@ -70,6 +72,7 @@ duration simulation. This issue lands the **float-only** version; the
 templated `AutoDiffXd` version is DRAKE-4.
 
 **Deliverables:**
+
 - `python/motion_matching/simulate_with_coefficients.py` with the
   canonical signature
   `simulate_with_coefficients(theta, options, initial_pose) → SimOut`.
@@ -81,6 +84,7 @@ templated `AutoDiffXd` version is DRAKE-4.
 - Sample to the canonical 1 kHz grid via `SimOptions.sample_rate_hz`.
 
 **Acceptance:**
+
 - Returns a fully-populated `SimOut` (no NaNs, finite
   `q`/`qd`/`tau`/`grip`).
 - With `theta = 0`, the grip falls in the −z world direction
@@ -107,6 +111,7 @@ adapter. Mirrors `fit_swing_fmincon` (Simscape) and `fit_swing_mujoco`
 (MuJoCo).
 
 **Deliverables:**
+
 - `python/motion_matching/fit_swing_drake.py` exposing
   `fit_swing_drake(target, options) → FitResult`.
 - `python/motion_matching/compute_cost_drake.py` (≤ 100 LOC) that
@@ -122,8 +127,9 @@ adapter. Mirrors `fit_swing_fmincon` (Simscape) and `fit_swing_mujoco`
   cost-contract (Drake adapter agrees with shared cost numerically).
 
 **Acceptance:**
+
 - `synthesize_target_from_coefficients(theta_truth) →
-  fit_swing_drake → final_rmse_m < 5 mm`.
+fit_swing_drake → final_rmse_m < 5 mm`.
 - `FitResult` schema matches cross-engine canonical (`theta_optimal`,
   `final_rmse_m`, `solver_status`, `iterations`, `wall_clock_s`).
 - `compute_cost_drake.py` ≤ 100 LOC.
@@ -146,6 +152,7 @@ lands the milestone that justifies the engine's place alongside
 MuJoCo and Pinocchio.
 
 **Deliverables:**
+
 - Templated `LeafSystem_[T]` polynomial-torque source (so the
   autodiff plant connects identically to the float plant).
 - `python/motion_matching/fit_swing_drake_autodiff.py` exposing
@@ -159,6 +166,7 @@ MuJoCo and Pinocchio.
   polynomial torques.
 
 **Acceptance:**
+
 - Same synthetic target as DRAKE-3 → `final_rmse_m < 1 mm` (tighter
   because gradients).
 - **Sim-call budget:** ≤ 50 forward simulations to converge vs
@@ -185,6 +193,7 @@ trajectory within 5 mm RMSE of the Simscape reference at three
 canonical poses (impact, top-of-backswing, address).
 
 **Deliverables:**
+
 - `tests/motion_matching/test_equivalence_simscape.py` marked
   `@pytest.mark.scientific`.
 - `tests/motion_matching/fixtures/simscape_ground_truth.json` (the
@@ -194,6 +203,7 @@ canonical poses (impact, top-of-backswing, address).
   sim with the same `theta`, and computes per-pose grip RMSE.
 
 **Acceptance:**
+
 - Test passes on CI's `nightly` lane.
 - Cross-engine parity-matrix row for Drake turns 🟢 in
   `CROSS_ENGINE_PARITY_SPEC.md` § 3 (the spec edit is part of this PR).
@@ -217,6 +227,7 @@ error timecourse, fit-quality card. The 2D plots come from
 3D overlay is Drake-specific (Meshcat).
 
 **Deliverables:**
+
 - `python/motion_matching/visualize_fit.py` consuming a
   `FitResult` + `ClubTarget` and rendering in Meshcat using the
   existing `drake_visualizer.DrakeVisualizer` helper.
@@ -224,10 +235,11 @@ error timecourse, fit-quality card. The 2D plots come from
   asserts the Meshcat URL is reachable (or, if Meshcat fails in CI,
   that a fallback static PNG was produced).
 - CLI entry point `python -m
-  src.engines.physics_engines.drake.python.motion_matching.visualize_fit
-  results/<trial>/drake.json`.
+src.engines.physics_engines.drake.python.motion_matching.visualize_fit
+results/<trial>/drake.json`.
 
 **Acceptance:**
+
 - Meshcat overlay shows the humanoid skeleton, measured-grip path,
   and simulated-grip path on the same scene.
 - Error timecourse + fit-quality card use the shared plotters
@@ -252,12 +264,14 @@ already in place for Pinocchio. Closes the loop on "hand-edited engine
 files are forbidden" (cross-engine §6).
 
 **Deliverables:**
+
 - New job in `.github/workflows/ci-standard.yml` (or a dedicated
   `ci-engine-models.yml`) that runs the build script with `--check`.
 - Build-script support for `--check`: regenerate to a tmpfile, diff
   against the on-disk URDF, exit non-zero on mismatch.
 
 **Acceptance:**
+
 - A deliberately edited URDF causes the gate to fail with a clear
   error message pointing the contributor to the YAML.
 - A clean checkout passes the gate in ≤ 30 s.
@@ -265,6 +279,6 @@ files are forbidden" (cross-engine §6).
 
 ---
 
-*Last updated 2026-05-06. Tracks the same parity wave as the
+_Last updated 2026-05-06. Tracks the same parity wave as the
 sister engines' issue lists. PRs reference this file in their body and
-target branch `main`.*
+target branch `main`._

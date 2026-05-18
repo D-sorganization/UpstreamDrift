@@ -11,6 +11,7 @@ The new `BodyTarget`, `ClubBallTarget`, `.mat` loader, body-segments helper, and
 `tests/integration/test_multi_source_pipeline.py` (marker `integration`):
 
 For each of the eight `.mat` files and the four `.c3d` files:
+
 - Load the matching `ClubTarget` (or `ClubBallTarget`) and, where the C3D body markers apply (the four C3D files), the `BodyTarget` sharing the same timegrid.
 - Validate: 1 kHz × 0.300 s grid (301 samples) by default, `impact_idx == 251`, `time[0] == 0`.
 - Sanity-check kinematic ranges against the verified-by-hand baseline:
@@ -27,6 +28,7 @@ For each of the eight `.mat` files and the four `.c3d` files:
 ### B. Golden-snapshot tests
 
 Add a small `tests/fixtures/motion_matching/` directory with **JSON snapshots** (not the raw .npy — text-diffable) of:
+
 - Last 10 frames of `time`, `butt`, `clubhead`, `club_quat` for the driver C3D.
 - Last 10 frames of `time`, marker_xyz` for a stable subset (Mid-hands/clubface/HeadTop/WaistLeft/WaistRight).
 
@@ -37,6 +39,7 @@ A regenerator command: `python -m tests.fixtures.motion_matching.regenerate` —
 ### C. Headless GUI smoke test
 
 `tests/ui/test_motion_target_preview_headless.py`:
+
 - `QT_QPA_PLATFORM=offscreen` plus matplotlib `Agg`.
 - Open the matcher, load `data/C3D_TA_Driver.c3d` for both club and body, scrub the timeline from 0 → end, assert the bottom-right artist count matches the layer-visibility settings.
 

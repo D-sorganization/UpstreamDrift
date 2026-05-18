@@ -30,12 +30,12 @@ Applied inside `SweepDatasetTorch` on `__getitem__`, **not** stored on disk. (St
 
 Computed on the **train split only** — never on the full dataset, never on val/test. Bake the stats into the checkpoint so inference reproduces them exactly.
 
-| Feature | Normalization | Notes |
-|---|---|---|
-| `coeffs` (D,) | z-score per dim | mean and std over train trials |
-| `r_butt` (N, 3) | z-score per dim | mean and std over (train trials × timesteps) |
-| `r_clubhead` (N, 3) | z-score per dim | same |
-| `q_club` (N, 4) | none | already unit-norm; canonicalize sign on load (`w >= 0`) |
+| Feature             | Normalization   | Notes                                                   |
+| ------------------- | --------------- | ------------------------------------------------------- |
+| `coeffs` (D,)       | z-score per dim | mean and std over train trials                          |
+| `r_butt` (N, 3)     | z-score per dim | mean and std over (train trials × timesteps)            |
+| `r_clubhead` (N, 3) | z-score per dim | same                                                    |
+| `q_club` (N, 4)     | none            | already unit-norm; canonicalize sign on load (`w >= 0`) |
 
 Stats live in `NormalizationStats` (see [INTERFACES.md](INTERFACES.md)) and are saved as `norm_stats.npz` next to the checkpoint.
 

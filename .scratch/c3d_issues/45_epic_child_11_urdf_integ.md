@@ -51,11 +51,13 @@ def urdf_to_shape(
 ## Tests
 
 `tests/unit/body_part_viz/test_urdf_bridge.py`:
+
 - Round-trip every supported shape kind.
 - LineShape → ValueError ("URDF cannot render line visuals; use cylinder").
 - CompositeShape → multi-visual list.
 
 `tests/unit/humanoid_character_builder/test_urdf_generator_with_shapes.py`:
+
 - Generate a URDF using the default ShapeLibrary; assert each link has the expected `<visual>` payload.
 
 ## Acceptance criteria

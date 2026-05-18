@@ -5,12 +5,12 @@
 
 ## Severity Legend
 
-| Severity | Meaning |
-|----------|---------|
-| 🔴 **CRITICAL** | Data loss, security vulnerability, or silent wrong results |
-| 🟠 **HIGH** | Runtime crash path, incorrect physics, or API contract violation |
-| 🟡 **MEDIUM** | Logic gap, missing guard, or DRY/SOLID violation |
-| 🟢 **LOW** | Code hygiene, documentation inaccuracy, cosmetic defect |
+| Severity        | Meaning                                                          |
+| --------------- | ---------------------------------------------------------------- |
+| 🔴 **CRITICAL** | Data loss, security vulnerability, or silent wrong results       |
+| 🟠 **HIGH**     | Runtime crash path, incorrect physics, or API contract violation |
+| 🟡 **MEDIUM**   | Logic gap, missing guard, or DRY/SOLID violation                 |
+| 🟢 **LOW**      | Code hygiene, documentation inaccuracy, cosmetic defect          |
 
 ---
 
@@ -25,7 +25,7 @@ logger = get_logger(__name__)           # line 82
 ```
 
 The first `logger` assignment is immediately overwritten by the second. This
-is harmless *now* but reveals that a merge introduced silent overwriting —
+is harmless _now_ but reveals that a merge introduced silent overwriting —
 the stdlib `logging.getLogger` call is dead code. More dangerously, if the
 two loggers had different handlers/levels, log messages would vanish.
 
@@ -40,11 +40,11 @@ two loggers had different handlers/levels, log messages would vanish.
 
 The Bolt optimization comments proudly note:
 
-> ⚡ Bolt: math.hypot(*vec) is ~5x faster than np.linalg.norm(vec) for 3D magnitudes
+> ⚡ Bolt: math.hypot(\*vec) is ~5x faster than np.linalg.norm(vec) for 3D magnitudes
 
 However, `math.hypot(*x)` unpacks the array. If `velocity` is a 2-D array
 (e.g. batch mode shape `(3, N)`) or an ndarray with `ndim > 1`, `*velocity`
-unpacks rows, and `math.hypot` receives three *arrays*, not three scalars.
+unpacks rows, and `math.hypot` receives three _arrays_, not three scalars.
 On Python < 3.14, this silently coerces to `float` with unexpected results;
 on numpy 2.x with strict casting, it raises `TypeError`.
 
@@ -103,7 +103,7 @@ gravity[2, ...] = -self.ball.mass * self.environment.gravity
 
 When `vel` is a single 1-D vector `(3,)`, the array `gravity` is also `(3,)`.
 The assignment `gravity[2, ...] = …` works (the `...` is a no-op for 1-D),
-but the *intent* clearly assumes `(3, N)` batch layout. The bigger issue is
+but the _intent_ clearly assumes `(3, N)` batch layout. The bigger issue is
 the function then dispatches to `_calculate_forces_single(vel, omega, launch)`
 which returns drag/magnus arrays of shape `(3,)` — fine.
 
@@ -113,9 +113,9 @@ However, line 339:
 is_batch = vel.ndim > 1
 ```
 
-This means a `(3, 1)` column-vector input enters the *batch* path, where
+This means a `(3, 1)` column-vector input enters the _batch_ path, where
 `valid_rel_vel = rel_vel[:, mask]` indexes along axis-1. But `gravity[2, ...]`
-for shape `(3, 1)` uses a *scalar* mask, which silently broadcasts incorrectly.
+for shape `(3, 1)` uses a _scalar_ mask, which silently broadcasts incorrectly.
 
 **Impact:** Ambiguity between single-vector and 1-column batch causes subtle
 wrong results or index errors.
@@ -159,6 +159,7 @@ The `create_local_app()` function (line 705) stores
 `getattr(request.app.state, "simulation_service", None)` and raises a 503.
 
 Compare with `server.py` line 132 which does:
+
 ```python
 fastapi_app.state.simulation_service = SimulationService(engine_manager)
 ```
@@ -270,12 +271,12 @@ adds confusion.
 
 ## Summary
 
-| Severity | Count |
-|----------|-------|
-| 🔴 CRITICAL | 1 |
-| 🟠 HIGH | 7 |
-| 🟡 MEDIUM | 5 |
-| 🟢 LOW | 4 |
+| Severity    | Count |
+| ----------- | ----- |
+| 🔴 CRITICAL | 1     |
+| 🟠 HIGH     | 7     |
+| 🟡 MEDIUM   | 5     |
+| 🟢 LOW      | 4     |
 
 Total findings: **17**
 
@@ -335,7 +336,7 @@ def _handle_violation(condition_type, message, value=None):
 The module defines `DBC_LEVEL` and `CONTRACTS_ENABLED` as simple name
 bindings at import time. `set_contract_level()` (line 97) does update
 `sys.modules[__name__].DBC_LEVEL`, but `_handle_violation` captures the
-*original* name at definition time — not the module-level attribute.
+_original_ name at definition time — not the module-level attribute.
 
 In practice, calling `set_contract_level(ContractLevel.OFF)` at runtime
 does NOT disable contract enforcement in the `require()` / `ensure()`
@@ -379,4 +380,4 @@ dicts rather than reading from `_startup_metrics`.
 
 ---
 
-*Reviewer: adversarial audit agent — 2026-04-22*
+_Reviewer: adversarial audit agent — 2026-04-22_

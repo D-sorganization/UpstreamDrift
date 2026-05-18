@@ -7,10 +7,11 @@ Raise unit-level line coverage of `src/shared/python/motion_matching/` to **≥8
 ## Current state
 
 74 production `.py` files, 61 test files. Sub-areas with thin coverage are typically:
+
 - `surrogate/` (model + invert + validate)
 - `inverse/` (regressor, cvae, training, predict)
 - `inverse_timestep/` (filter, model, predict, training)
-- `dataset/` (sweep, synthetic, _validate)
+- `dataset/` (sweep, synthetic, \_validate)
 - `hybrid.py`, `engine_init_profiler.py`, `align_to_simulation_grid.py`, `final_cost.py`, `validators.py`, `validate_theta.py`
 - `loaders/` private helpers (`_align.py`, `_marker_clusters.py`, `_quaternion.py`, `_machinelearning_compat.py`)
 

@@ -31,6 +31,7 @@ It evaluates, composes, coordinates, and escalates.
 ## What the Delivery Orchestrator Does NOT Do
 
 The Delivery Agent must never:
+
 - Write code or tests
 - Produce implementation plans
 - Run QA reviews directly
@@ -49,6 +50,7 @@ If an action requires writing code or producing a plan, it belongs to a sub-agen
 The backlog is the single source of truth. **Never infer story selection from git branch, artefact existence, or working directory.**
 
 Selection algorithm:
+
 1. If a story ID was passed as argument → use that story. Verify `status: refined` or `in_progress`.
 2. If no argument → pick the first story with `status: refined` in `active.backlog.yaml` (top-to-bottom).
 3. A story with `status: done` is done — regardless of what branches, artefacts, or files exist.
@@ -57,6 +59,7 @@ Selection algorithm:
 ### Pre-Flight Checks
 
 Before acting on any Story, the Delivery Orchestrator must:
+
 1. Pull latest staging: `flock .gaai/project/contexts/backlog/.delivery-locks/.staging.lock git pull origin staging`
 2. Confirm the Story has `status: refined` or `status: in_progress` in the backlog
 3. If `refined` → mark `in_progress` + commit + push staging (manual launch case)
@@ -115,7 +118,7 @@ Specialists are dispatched by the Implementation Sub-Agent, not by the Orchestra
 - `memory-search` — find relevant memory by frontmatter, keywords, or cross-references
 - `memory-retrieve` — load minimal relevant memory before composing context bundles
 - `context-building` — assemble context bundles for sub-agents
-- `decision-extraction` — **invoked after QA PASS when notable architectural or governance decisions emerged** — scan impl-report + qa-report; write DEC-{N}.md + update _log.md + index.md; no-op if no durable decisions found
+- `decision-extraction` — **invoked after QA PASS when notable architectural or governance decisions emerged** — scan impl-report + qa-report; write DEC-{N}.md + update \_log.md + index.md; no-op if no durable decisions found
 - `risk-analysis` — pre-flight for Tier 3 or high-risk Stories before spawning Planning Sub-Agent
 
 ### Skill Tier Preference
@@ -126,6 +129,7 @@ Avoid invoking `meta` tier skills unless performing bootstrap, framework mainten
 authoring — these are not part of the regular delivery loop.
 
 Tier assignments are documented in:
+
 - `.gaai/core/skills/skills-index.yaml` (field: `tier`)
 - `.gaai/project/skills/skills-index.yaml` (field: `tier`)
 
@@ -150,6 +154,7 @@ This step is non-negotiable. Skipping it risks implementations that contradict e
 → Defined in `workflows/delivery-loop.workflow.md` (the authoritative source for git lifecycle, step-by-step execution, and PR creation).
 
 **Key invariants (repeated here for emphasis):**
+
 - The main working tree stays on `staging` at ALL times
 - All staging operations serialized via `flock`
 - AI never interacts with `production`
@@ -161,17 +166,17 @@ This step is non-negotiable. Skipping it risks implementations that contradict e
 
 All artefacts are written by sub-agents and read by the Orchestrator:
 
-| Artefact | Directory | Written by | Read by |
-|----------|-----------|-----------|---------|
-| `{id}.approach-evaluation.md` | `evaluations/` | Planning Sub-Agent (via `approach-evaluation` skill, when triggered) | Planning Sub-Agent, Implementation Sub-Agent |
-| `{id}.execution-plan.md` | `plans/` | Planning Sub-Agent | Implementation Sub-Agent, QA Sub-Agent |
-| `{id}.impl-report.md` | `impl-reports/` | Implementation Sub-Agent | QA Sub-Agent, Orchestrator |
-| `{id}.qa-report.md` | `qa-reports/` | QA Sub-Agent | Orchestrator |
-| `{id}.memory-delta.md` | `memory-deltas/` | QA Sub-Agent (PASS only) | Orchestrator → Discovery |
-| `{id}-thread.md` | `content/drafts/` | Orchestrator (via `generate-build-in-public-content`) | Human review → publication |
-| `{id}-blog.md` | `content/drafts/` | Orchestrator (milestone stories only) | Human review → publication |
-| `{id}.micro-delivery-report.md` | `delivery/` | MicroDelivery Sub-Agent | Orchestrator |
-| `{id}.plan-blocked.md` | `plans/` | Planning Sub-Agent (on failure or architectural escalation from approach evaluation) | Orchestrator (triggers escalation) |
+| Artefact                        | Directory         | Written by                                                                           | Read by                                      |
+| ------------------------------- | ----------------- | ------------------------------------------------------------------------------------ | -------------------------------------------- |
+| `{id}.approach-evaluation.md`   | `evaluations/`    | Planning Sub-Agent (via `approach-evaluation` skill, when triggered)                 | Planning Sub-Agent, Implementation Sub-Agent |
+| `{id}.execution-plan.md`        | `plans/`          | Planning Sub-Agent                                                                   | Implementation Sub-Agent, QA Sub-Agent       |
+| `{id}.impl-report.md`           | `impl-reports/`   | Implementation Sub-Agent                                                             | QA Sub-Agent, Orchestrator                   |
+| `{id}.qa-report.md`             | `qa-reports/`     | QA Sub-Agent                                                                         | Orchestrator                                 |
+| `{id}.memory-delta.md`          | `memory-deltas/`  | QA Sub-Agent (PASS only)                                                             | Orchestrator → Discovery                     |
+| `{id}-thread.md`                | `content/drafts/` | Orchestrator (via `generate-build-in-public-content`)                                | Human review → publication                   |
+| `{id}-blog.md`                  | `content/drafts/` | Orchestrator (milestone stories only)                                                | Human review → publication                   |
+| `{id}.micro-delivery-report.md` | `delivery/`       | MicroDelivery Sub-Agent                                                              | Orchestrator                                 |
+| `{id}.plan-blocked.md`          | `plans/`          | Planning Sub-Agent (on failure or architectural escalation from approach evaluation) | Orchestrator (triggers escalation)           |
 
 Artefacts persist until the Story is archived. They are the audit trail.
 
@@ -180,6 +185,7 @@ Artefacts persist until the Story is archived. They are the audit trail.
 ## Stop & Escalation Conditions
 
 The Delivery Orchestrator stops and reports to the human when:
+
 - Planning Sub-Agent issues a plan-blocked artefact (acceptance criteria ambiguous)
 - QA Sub-Agent issues ESCALATE verdict (scope change required or 3 attempts exhausted)
 - Implementation Sub-Agent fails twice on the same step
@@ -187,6 +193,7 @@ The Delivery Orchestrator stops and reports to the human when:
 - A rule violation has no compliant resolution path
 
 Escalation target:
+
 - **Back to Discovery** — when blocker is product ambiguity or scope question
 - **Remain in Delivery** — when blocker is execution quality (retry with different approach)
 
@@ -194,13 +201,13 @@ Escalation target:
 
 ## Sub-Agent Files
 
-| Sub-Agent | File |
-|-----------|------|
-| Planning | `agents/sub-agents/planning.sub-agent.md` |
+| Sub-Agent      | File                                            |
+| -------------- | ----------------------------------------------- |
+| Planning       | `agents/sub-agents/planning.sub-agent.md`       |
 | Implementation | `agents/sub-agents/implementation.sub-agent.md` |
-| QA | `agents/sub-agents/qa.sub-agent.md` |
-| MicroDelivery | `agents/sub-agents/micro-delivery.sub-agent.md` |
-| Specialists | Defined in `agents/specialists.registry.yaml` |
+| QA             | `agents/sub-agents/qa.sub-agent.md`             |
+| MicroDelivery  | `agents/sub-agents/micro-delivery.sub-agent.md` |
+| Specialists    | Defined in `agents/specialists.registry.yaml`   |
 
 ---
 
@@ -208,14 +215,14 @@ Escalation target:
 
 Every delivery session must update the following fields on the Story's backlog entry. All 6 fields are **mandatory** for any story marked `done`.
 
-| Field | When to set | Format | How |
-|-------|-------------|--------|-----|
-| `started_at` | When marking `in_progress` (first session only) | ISO 8601 datetime with timezone (e.g. `"2026-02-28T22:00:00Z"`) | `.gaai/core/scripts/backlog-scheduler.sh --set-field {id} started_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)"` |
-| `completed_at` | When marking `done` (QA PASS) | ISO 8601 datetime with timezone | `.gaai/core/scripts/backlog-scheduler.sh --set-field {id} completed_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)"` |
-| `pr_url` | After `gh pr create` | Full GitHub PR URL (e.g. `"https://github.com/your-org/your-repo/pull/71"`) | `.gaai/core/scripts/backlog-scheduler.sh --set-field {id} pr_url "$(gh pr view --json url -q .url)"` |
-| `pr_number` | After `gh pr create` | Integer — PR number | `.gaai/core/scripts/backlog-scheduler.sh --set-field {id} pr_number "$(gh pr view --json number -q .number)"` |
-| `pr_status` | After `gh pr merge` | `merged` / `open` / `escalated` | `.gaai/core/scripts/backlog-scheduler.sh --set-field {id} pr_status merged` |
-| `cost_usd` | Post-session (cumulative across sessions) | Number — Claude Code `costUSD` value | Auto-captured by `post-delivery-hook.sh` (Stop event). Manual fallback: `.gaai/core/scripts/backlog-scheduler.sh --set-field {id} cost_usd <value>` |
+| Field          | When to set                                     | Format                                                                      | How                                                                                                                                                 |
+| -------------- | ----------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `started_at`   | When marking `in_progress` (first session only) | ISO 8601 datetime with timezone (e.g. `"2026-02-28T22:00:00Z"`)             | `.gaai/core/scripts/backlog-scheduler.sh --set-field {id} started_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)"`                                              |
+| `completed_at` | When marking `done` (QA PASS)                   | ISO 8601 datetime with timezone                                             | `.gaai/core/scripts/backlog-scheduler.sh --set-field {id} completed_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)"`                                            |
+| `pr_url`       | After `gh pr create`                            | Full GitHub PR URL (e.g. `"https://github.com/your-org/your-repo/pull/71"`) | `.gaai/core/scripts/backlog-scheduler.sh --set-field {id} pr_url "$(gh pr view --json url -q .url)"`                                                |
+| `pr_number`    | After `gh pr create`                            | Integer — PR number                                                         | `.gaai/core/scripts/backlog-scheduler.sh --set-field {id} pr_number "$(gh pr view --json number -q .number)"`                                       |
+| `pr_status`    | After `gh pr merge`                             | `merged` / `open` / `escalated`                                             | `.gaai/core/scripts/backlog-scheduler.sh --set-field {id} pr_status merged`                                                                         |
+| `cost_usd`     | Post-session (cumulative across sessions)       | Number — Claude Code `costUSD` value                                        | Auto-captured by `post-delivery-hook.sh` (Stop event). Manual fallback: `.gaai/core/scripts/backlog-scheduler.sh --set-field {id} cost_usd <value>` |
 
 **`cost_usd` source:** The Claude Code CLI `/cost` command shows cumulative session cost at any time. The value displayed at session end (`costUSD` = `total_cost_usd`) is the authoritative total for that session. If a Story spans multiple sessions, sum all session costs. The `post-delivery-hook.sh` Stop hook captures this automatically from the session transcript.
 
@@ -228,6 +235,7 @@ These fields enable tracking total AI delivery time and API-equivalent cost vs M
 **Before the final `flock: mark done` step**, the Delivery Agent MUST verify that all delivery metadata fields are present on the story entry. This is the "BACKLOG VALIDATION CHECKPOINT" referenced in the Orchestration Flow.
 
 Required fields checklist (all must be non-empty):
+
 1. `started_at` — should already be set from the `in_progress` step
 2. `completed_at` — set now (QA PASS timestamp)
 3. `pr_url` — set after PR creation/merge
@@ -236,6 +244,7 @@ Required fields checklist (all must be non-empty):
 6. `cost_usd` — set if available; if not, the post-delivery-hook will capture it at session end
 
 Additionally verify these Discovery-provided fields are present (warn if missing, do not block):
+
 - `human_md_estimate`
 - `human_cost_usd`
 - `artefact`

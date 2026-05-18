@@ -30,6 +30,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate after:
+
 - Significant delivery failures
 - Repeated QA failures on the same area
 - Delivery that missed its success metrics
@@ -69,6 +70,7 @@ Activate after:
 ## Non-Goals
 
 This skill must NOT:
+
 - Propose solutions (produces inputs for backlog and rules, not fixes)
 - Assign blame
 - Generalize into vague lessons

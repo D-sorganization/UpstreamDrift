@@ -119,22 +119,27 @@ This document tracks the audit of files flagged for potential hardcoded secrets.
 ### Issue #2957 Follow-up
 
 - [x] `tests/api/test_auth_security.py` - **False Positive**
+
   - Contains: Fake passwords and a temporary auth env var for coverage
   - Status: Test-only fixtures, no committed secret values
 
 - [x] `tests/unit/api/test_security.py` - **False Positive**
+
   - Contains: Test secret and API-key fixtures for JWT and cache coverage
   - Status: Regression coverage uses explicit fake values, not real credentials
 
 - [x] `tests/unit/test_api_security.py` - **False Positive**
+
   - Contains: Generated API-key fixtures and token validation helpers
   - Status: Security regression tests with obvious dummy values
 
 - [x] `tests/unit/test_issue_fixes_1777_1778_1779_1782.py` - **False Positive**
+
   - Contains: Static placeholder keys used to verify security regressions
   - Status: Purpose-built test fixtures, not production secrets
 
 - [x] `tests/unit/test_security_and_module_fixes.py` - **False Positive**
+
   - Contains: Placeholder secret strings used to confirm insecure fallbacks are rejected
   - Status: Test-only fixtures, no live credentials
 

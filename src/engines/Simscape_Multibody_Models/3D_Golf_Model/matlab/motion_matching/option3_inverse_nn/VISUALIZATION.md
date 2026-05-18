@@ -14,6 +14,7 @@
 - A black star marks the encoder's posterior mean for the new target (for in-distribution targets — for out-of-distribution targets we use only `N(0,I)` samples and there is no star).
 
 **Diagnostic value.**
+
 - **Collapsed latent → all training points pile on one or two clusters.** Fail.
 - **Healthy latent → diffuse cloud roughly Gaussian-shaped with smooth `total_work` gradient.**
 - **Out-of-distribution prediction → red dots fall in empty regions of the cloud.**
@@ -31,11 +32,13 @@ Stored: `option3_inverse_nn/visualization/latent_umap.{png,pkl}`. The pkl is the
 **Purpose.** Show that 16 latent samples produce 16 distinct but valid swings.
 
 **Layout.** A single 3-D plot animated through the swing:
+
 - Solid blue line: measured club skeleton.
 - 16 translucent red lines: simulated club skeletons from `θ̂_1, …, θ̂_16`.
 - Time slider shared with the trajectory-overlay view.
 
 **Diagnostic value.**
+
 - All 16 traces collapse onto each other → mode collapse, even if KL test passed (latent is being decoded near-deterministically). Investigate.
 - 16 traces fan out wildly → the rejection-sampling stage is doing real work; the variance is the option's "uncertainty quantification."
 - 16 traces cluster around 2–3 distinct paths → multi-modal coverage. Best case.
@@ -75,6 +78,7 @@ Stored: `option3_inverse_nn/visualization/round_trip_compare.png`.
 **Purpose.** Surface dataset-coverage gaps. Where in coefficient/kinematic space does Option 3 produce high round-trip residuals?
 
 **Layout.** A 2-D plot:
+
 - Same UMAP projection as V1 (so the plots overlay nicely).
 - Each held-out trial coloured by its **round-trip RMSE** in mm (sequential YlOrRd colormap).
 - Trials above the 10 mm threshold get a black ring.
@@ -91,6 +95,7 @@ Stored: `option3_inverse_nn/visualization/coverage_map.png`.
 ## Live training curves
 
 For the training run itself (Issue #032), expose:
+
 - Train and val loss (total + KL + MSE + work-reg components separately).
 - KL value vs the annealing schedule (so we can see if it's actually being respected).
 - Validation round-trip RMSE every `eval_every_epochs` (default 5).
@@ -100,6 +105,7 @@ Use TensorBoard if available; else `matplotlib` `FuncAnimation` capped at 5 Hz p
 ## Styling
 
 Inherits from [shared/VISUALIZATION_SPEC.md §Styling](../shared/VISUALIZATION_SPEC.md#styling):
+
 - Measured = `#1f77b4` blue.
 - Simulated = `#d62728` red. (V2's 16 samples are this colour at α=0.3.)
 - Error / annotation = `#7f7f7f` grey.

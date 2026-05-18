@@ -14,11 +14,11 @@ cd UpstreamDrift
 docker-compose up --build
 ```
 
-| Service   | URL                        |
-|-----------|----------------------------|
-| Frontend  | http://localhost:5180       |
-| Backend   | http://localhost:8001       |
-| API Docs  | http://localhost:8001/docs  |
+| Service  | URL                        |
+| -------- | -------------------------- |
+| Frontend | http://localhost:5180      |
+| Backend  | http://localhost:8001      |
+| API Docs | http://localhost:8001/docs |
 
 ---
 
@@ -146,14 +146,14 @@ docker exec golf-suite-backend pytest tests/api/ -v
 
 ## Environment Variables
 
-| Variable        | Default           | Description                   |
-|-----------------|-------------------|-------------------------------|
-| `API_HOST`      | `0.0.0.0`         | Backend bind address          |
-| `API_PORT`      | `8001`            | Backend port                  |
-| `ENVIRONMENT`   | `development`     | `development` or `production` |
-| `MUJOCO_GL`     | `egl`             | MuJoCo rendering backend      |
-| `DATABASE_URL`  | `sqlite:///...`   | Database connection string     |
-| `VITE_API_URL`  | `http://backend:8001` | Frontend → backend URL    |
+| Variable       | Default               | Description                   |
+| -------------- | --------------------- | ----------------------------- |
+| `API_HOST`     | `0.0.0.0`             | Backend bind address          |
+| `API_PORT`     | `8001`                | Backend port                  |
+| `ENVIRONMENT`  | `development`         | `development` or `production` |
+| `MUJOCO_GL`    | `egl`                 | MuJoCo rendering backend      |
+| `DATABASE_URL` | `sqlite:///...`       | Database connection string    |
+| `VITE_API_URL` | `http://backend:8001` | Frontend → backend URL        |
 
 ---
 

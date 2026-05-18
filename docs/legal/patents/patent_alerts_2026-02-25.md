@@ -6,6 +6,7 @@
 ## New Findings / Refinements
 
 ### 1. Gear Effect Heuristic Constants (Medium Risk)
+
 - **File:** `src/shared/python/physics/impact_model.py`
 - **Finding:** The `compute_gear_effect_spin` function uses explicit heuristic constants:
   - `gear_effect_h_scale = 100.0`
@@ -14,6 +15,7 @@
 - **Action:** Document origin immediately. If derived from public data, cite the dataset. If copied from a forum or SDK, flag for removal/replacement with a clean-room implementation.
 
 ### 2. Injury Risk Thresholds (Medium Risk)
+
 - **File:** `src/shared/python/injury/injury_risk.py`
 - **Finding:** The `InjuryRiskScorer` uses specific hardcoded thresholds for "X-Factor Stretch":
   - `threshold_safe = 45.0` degrees
@@ -22,6 +24,7 @@
 - **Action:** Verify if these specific numbers are protected by patent or copyright. Re-label to generic "Torso-Pelvis Separation" and cite academic sources for the thresholds (e.g., McHardy et al., 2006) to demonstrate independent development.
 
 ### 3. Kinematic Sequence Efficiency Score (CRITICAL Risk)
+
 - **File:** `src/shared/python/analysis/pca_analysis.py`
 - **Finding:** Despite the renaming of `KinematicSequenceAnalyzer` to `SegmentTimingAnalyzer` in `kinematic_sequence.py`, the `pca_analysis.py` module retains the infringing logic:
   ```python
@@ -31,6 +34,7 @@
 - **Action:** **IMMEDIATE REMOVAL** of this specific calculation is required. Replace with an energy-transfer-based metric (which is already implemented in `reporting.py`) or a generic "Sequence Consistency" metric that does not use the specific TPI formulation.
 
 ### 4. Ball Flight Coefficients (Medium Risk)
+
 - **File:** `src/shared/python/physics/ball_flight_physics.py`
 - **Finding:** `BallProperties` class uses:
   - `cd0 = 0.21`
@@ -41,10 +45,12 @@
 - **Action:** Add citation.
 
 ### 5. Data Copyright / Database Rights (Low/Medium Risk)
+
 - **File:** `src/shared/python/validation_pkg/validation_data.py`
 - **Finding:** Contains hardcoded list `PGA_TOUR_2024` citing "Source: trackman.com".
 - **Risk:** While individual facts (averages) are generally not copyrightable, the collection/database might be protected, especially if scraped against terms of service.
 - **Action:** Ensure this usage falls under "Fair Use" (informational/educational) and that we are not redistributing a substantial portion of their proprietary database. Verify "trackman.com" Terms of Use regarding data scraping/usage.
 
 ## Summary
+
 The "Kinematic Sequence" risk remains **CRITICAL** due to the persistence of the scoring logic in `pca_analysis.py`. The "Injury Risk" and "Gear Effect" risks are now **CONFIRMED** with specific evidence in the codebase. New potential data copyright issue identified in validation module.

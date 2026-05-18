@@ -24,14 +24,14 @@ Cross-cutting assumptions are also in the shared specs and are linked back here.
 From [generateRandomCoefficients.m](../../src/functions/dataset_generator/generateRandomCoefficients.m):
 
 | Coefficient | Power | Lower | Upper |
-|---|---|---|---|
-| A | t^6 | −1000 | +1000 |
-| B | t^5 | −1000 | +1000 |
-| C | t^4 | −500 | +500 |
-| D | t^3 | −500 | +500 |
-| E | t^2 | −100 | +100 |
-| F | t^1 | −100 | +100 |
-| G | t^0 | −25 | +25 |
+| ----------- | ----- | ----- | ----- |
+| A           | t^6   | −1000 | +1000 |
+| B           | t^5   | −1000 | +1000 |
+| C           | t^4   | −500  | +500  |
+| D           | t^3   | −500  | +500  |
+| E           | t^2   | −100  | +100  |
+| F           | t^1   | −100  | +100  |
+| G           | t^0   | −25   | +25   |
 
 These are **outer bounds**. The optimizer is free to converge inside them. Option 1 builds `lb`, `ub` vectors of length `n_joints × 7` from this table at the start of every fit.
 

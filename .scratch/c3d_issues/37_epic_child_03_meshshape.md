@@ -52,17 +52,18 @@ class MeshShape:
 
 ### Format support matrix
 
-| Extension | Read | Notes |
-|---|---|---|
-| `.stl`  | ✓ | binary or ascii |
-| `.obj`  | ✓ | vertex-only; mtl ignored in v1 |
-| `.ply`  | ✓ | binary or ascii |
-| `.glb`  | ✓ | first mesh node only |
-| `.gltf` | ✗ | rejected with "use .glb" message |
+| Extension | Read | Notes                            |
+| --------- | ---- | -------------------------------- |
+| `.stl`    | ✓    | binary or ascii                  |
+| `.obj`    | ✓    | vertex-only; mtl ignored in v1   |
+| `.ply`    | ✓    | binary or ascii                  |
+| `.glb`    | ✓    | first mesh node only             |
+| `.gltf`   | ✗    | rejected with "use .glb" message |
 
 ## Tests
 
 `tests/unit/body_part_viz/shapes/test_mesh_shape.py`:
+
 - Synthesize a known triangle-mesh on disk (use `trimesh.creation.box(extents=(1,2,3))` as fixture; write to tmp_path as STL/OBJ/PLY).
 - Load each format; assert vertex / face count + bounding-box extents.
 - Bad path → `FileNotFoundError`.
@@ -71,6 +72,7 @@ class MeshShape:
 - Loaded mesh's `rest_dimensions` matches bbox of input within 1e-6.
 
 `tests/unit/body_part_viz/shapes/test_mesh_decimation.py`:
+
 - Quadric decimation reduces a high-poly icosphere to target.
 - Uniform fallback runs when quadric fails on non-manifold.
 

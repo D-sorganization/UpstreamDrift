@@ -12,6 +12,7 @@ Currently, our monolith is bloating due to the mixing of end-user features (simu
 
 1. **Docker Profiles `core` vs `training` (Resolves #1558)**
    UpstreamDrift now publishes tiers.
+
    - `upstream-drift:runtime` (Core) – strictly physics, API, and fast visualization.
    - `upstream-drift:training` (ML) – built ON TOP of runtime, adding `ray`, `stable-baselines3`, `gymnasium`.
 
@@ -25,4 +26,4 @@ Currently, our monolith is bloating due to the mixing of end-user features (simu
 - **Artifact Export:** Save the converged model strictly as an ONNX file or TorchScript `.pt` file within the `MLProjects` output registry.
 - **Artifact Import:** In `UpstreamDrift`, load the frozen `.onnx` or `.pt` model using the standalone `onnxruntime` or basic `torch` evaluation module. Since inference dependencies are extremely small compared to full training environments, UpstreamDrift's core footprint remains small.
 
-If a user *must* train directly inside `UpstreamDrift` (e.g., visual humanoid RL loop), they simply execute `docker compose --profile training up` or build the `training` target in the `Dockerfile`.
+If a user _must_ train directly inside `UpstreamDrift` (e.g., visual humanoid RL loop), they simply execute `docker compose --profile training up` or build the `training` target in the `Dockerfile`.

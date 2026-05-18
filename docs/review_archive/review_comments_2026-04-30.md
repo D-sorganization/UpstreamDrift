@@ -18,4 +18,3 @@ The generator now builds the fixture with `BallProperties()` defaults, but the d
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3561#discussion_r3172073490)
 
 ---
-

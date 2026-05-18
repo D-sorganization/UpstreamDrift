@@ -29,35 +29,35 @@ coefficients).
 
 ## `trials.parquet` (one row per simulation, ~10 000 rows)
 
-| Column | Type | Notes |
-|---|---|---|
-| `trial_id` | `uint32` | Unique within the dataset; matches the raw dump's `trial_id` |
-| `coefficients` | `list<float64>[189]` | Polynomial coefficients flattened in `(joint, letter)` order — see "Joint and coefficient ordering" |
-| `joint_names` | `list<string>[27]` | Same for every trial; stored per-row for portability |
-| `coefficient_letters` | `list<string>[7]` | `["A","B","C","D","E","F","G"]`; bounds in PROJECT_SPEC.md |
-| `simulation_time_s` | `float64` | Total simulation duration (≈ 0.30 s for the 31-sample dump) |
-| `sample_rate_hz` | `float64` | Sample rate of the timesteps table (≈ 100 Hz for 31 samples × 0.30 s) |
-| `clubhead_speed_max_mph` | `float64` | Max of `ClubLogs_CHS__mph_` over the trial — convenience filter |
-| `total_work_J` | `float64` | Trapezoidal integral of Σⱼ τⱼ · ωⱼ; convenience metric |
-| `solver_status` | `string` | `"success"`; failed trials filtered out at compaction time |
+| Column                   | Type                 | Notes                                                                                               |
+| ------------------------ | -------------------- | --------------------------------------------------------------------------------------------------- |
+| `trial_id`               | `uint32`             | Unique within the dataset; matches the raw dump's `trial_id`                                        |
+| `coefficients`           | `list<float64>[189]` | Polynomial coefficients flattened in `(joint, letter)` order — see "Joint and coefficient ordering" |
+| `joint_names`            | `list<string>[27]`   | Same for every trial; stored per-row for portability                                                |
+| `coefficient_letters`    | `list<string>[7]`    | `["A","B","C","D","E","F","G"]`; bounds in PROJECT_SPEC.md                                          |
+| `simulation_time_s`      | `float64`            | Total simulation duration (≈ 0.30 s for the 31-sample dump)                                         |
+| `sample_rate_hz`         | `float64`            | Sample rate of the timesteps table (≈ 100 Hz for 31 samples × 0.30 s)                               |
+| `clubhead_speed_max_mph` | `float64`            | Max of `ClubLogs_CHS__mph_` over the trial — convenience filter                                     |
+| `total_work_J`           | `float64`            | Trapezoidal integral of Σⱼ τⱼ · ωⱼ; convenience metric                                              |
+| `solver_status`          | `string`             | `"success"`; failed trials filtered out at compaction time                                          |
 
 ## `timesteps.parquet` (one row per simulation timestep, ~310 000 rows)
 
-| Column | Type | Length | Notes |
-|---|---|---|---|
-| `trial_id` | `uint32` | scalar | FK to `trials.parquet` |
-| `t` | `float64` | scalar | Time in seconds, monotonic per trial_id, starts at 0 |
-| `q` | `list<float64>` | 27 | Joint positions in canonical joint order (see below) |
-| `qd` | `list<float64>` | 27 | Joint velocities, same order |
-| `qdd` | `list<float64>` | 27 | Joint accelerations, same order |
-| `tau` | `list<float64>` | 27 | Applied joint torques (input/Actuator/control torques) |
-| `r_clubhead` | `list<float64>` | 3 | Clubhead world xyz (m), from `ClubLogs_CHGlobalPosition_*` |
-| `v_clubhead` | `list<float64>` | 3 | Clubhead world velocity (m/s), from `ClubLogs_CHGlobalVelocity_*` |
-| `r_buttend` | `list<float64>` | 3 | Club tip / butt-end xyz (m), from `ClubLogs_TipPosition_*` |
-| `r_lhand` | `list<float64>` | 3 | Left-hand global xyz (m), from `LWLogs_LHGlobalPosition_*` |
-| `r_rhand` | `list<float64>` | 3 | Right-hand global xyz (m), from `RWLogs_RHGlobalPosition_*` |
-| `r_grip` | `list<float64>` | 3 | Mid-hands position (computed: `(r_lhand + r_rhand) / 2`) |
-| `clubhead_speed_mph` | `float64` | scalar | Convenience copy of `ClubLogs_CHS__mph_` |
+| Column               | Type            | Length | Notes                                                             |
+| -------------------- | --------------- | ------ | ----------------------------------------------------------------- |
+| `trial_id`           | `uint32`        | scalar | FK to `trials.parquet`                                            |
+| `t`                  | `float64`       | scalar | Time in seconds, monotonic per trial_id, starts at 0              |
+| `q`                  | `list<float64>` | 27     | Joint positions in canonical joint order (see below)              |
+| `qd`                 | `list<float64>` | 27     | Joint velocities, same order                                      |
+| `qdd`                | `list<float64>` | 27     | Joint accelerations, same order                                   |
+| `tau`                | `list<float64>` | 27     | Applied joint torques (input/Actuator/control torques)            |
+| `r_clubhead`         | `list<float64>` | 3      | Clubhead world xyz (m), from `ClubLogs_CHGlobalPosition_*`        |
+| `v_clubhead`         | `list<float64>` | 3      | Clubhead world velocity (m/s), from `ClubLogs_CHGlobalVelocity_*` |
+| `r_buttend`          | `list<float64>` | 3      | Club tip / butt-end xyz (m), from `ClubLogs_TipPosition_*`        |
+| `r_lhand`            | `list<float64>` | 3      | Left-hand global xyz (m), from `LWLogs_LHGlobalPosition_*`        |
+| `r_rhand`            | `list<float64>` | 3      | Right-hand global xyz (m), from `RWLogs_RHGlobalPosition_*`       |
+| `r_grip`             | `list<float64>` | 3      | Mid-hands position (computed: `(r_lhand + r_rhand) / 2`)          |
+| `clubhead_speed_mph` | `float64`       | scalar | Convenience copy of `ClubLogs_CHS__mph_`                          |
 
 **Storage estimate.** 31 × 10 000 = 310 000 rows × (4 + 8 + 4·27·8 + 6·3·8 + 8) ≈
 1.05 KB per row × 310 000 ≈ 326 MB uncompressed; with Snappy compression ≈ 100 MB.

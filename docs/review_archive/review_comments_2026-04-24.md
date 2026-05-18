@@ -18,4 +18,3 @@ When `main()` hits the missing trajectory path branch, the new error text tells 
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3247#discussion_r3141362698)
 
 ---
-

@@ -18,4 +18,3 @@ The workflow now audits `requirements-dev.lock` (`pip-audit -r requirements-dev.
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/2660#discussion_r3076668454)
 
 ---
-

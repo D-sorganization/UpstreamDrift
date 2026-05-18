@@ -17,9 +17,9 @@ See [`src/engines/CROSS_ENGINE_PARITY_SPEC.md`](../../src/engines/CROSS_ENGINE_P
 
 ## Files
 
-| File | Purpose |
-|---|---|
-| `golf_humanoid_dimensions.yaml` | Per-segment lengths and visualisation radii |
+| File                            | Purpose                                          |
+| ------------------------------- | ------------------------------------------------ |
+| `golf_humanoid_dimensions.yaml` | Per-segment lengths and visualisation radii      |
 | `golf_humanoid_inertia.yaml`    | Per-segment mass, COM offset, 3×3 inertia tensor |
 | `golf_humanoid_topology.yaml`   | Joint chain (parents, children, types, DOF axes) |
 
@@ -48,14 +48,14 @@ schema_version: 1
 units_system: SI
 
 <segment_name>:
-  mass_kg:       <float>
-  com_offset_m:  [<float>, <float>, <float>]   # in segment-local frame
-  inertia_kgm2:                                 # 3×3 tensor, segment-local
+  mass_kg: <float>
+  com_offset_m: [<float>, <float>, <float>] # in segment-local frame
+  inertia_kgm2: # 3×3 tensor, segment-local
     - [<I11>, <I12>, <I13>]
     - [<I21>, <I22>, <I23>]
     - [<I31>, <I32>, <I33>]
   source: <str>
-  notes:  <str>
+  notes: <str>
 ```
 
 The `Club` entry has a richer schema (shaft + clubhead sub-objects); see the

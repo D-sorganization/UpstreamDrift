@@ -6,14 +6,18 @@
 ## Issues Fixed
 
 ### 1. ✅ Removed Simscape from Engine Options
+
 **Problem**: Simscape requires MATLAB and cannot run in the web GUI  
-**Fix**: 
+**Fix**:
+
 - Removed from `ui/src/api/useEngineManager.ts` ENGINE_REGISTRY
 - Removed from backend `src/api/routes/engines.py` engine mappings
 
 ### 2. ✅ Added OpenSim and MyoSuite to Engine Options
+
 **Problem**: OpenSim and MyoSuite were not showing in UI  
 **Fix**:
+
 - Added to `ui/src/api/useEngineManager.ts` ENGINE_REGISTRY:
   ```typescript
   {
@@ -32,8 +36,10 @@
 - Added to backend engine mappings in `src/api/routes/engines.py`
 
 ### 3. ✅ Updated Dockerfile with All Dependencies
+
 **Problem**: Missing Python packages causing runtime errors  
 **Fix**: Added to Dockerfile:
+
 - `email-validator`
 - `bcrypt`
 - `python-jose[cryptography]`
@@ -44,13 +50,16 @@
 - `websockets`
 
 ### 4. ⚠️ Putting Green / Pinocchio Not Loading Issue
+
 **Status**: Partially diagnosed  
 **Known Issues**:
+
 - Putting Green temporarily mapped to PENDULUM engine (needs proper integration - Issue #1136)
 - Engines may fail to load if backend dependencies missing
 - "Reconnecting" spinner suggests WebSocket or API communication issue
 
 **Next Steps to Debug**:
+
 1. Check browser console for errors when clicking "Load Engine"
 2. Monitor Docker backend logs: `docker-compose logs -f backend`
 3. Test engine probe endpoints:
@@ -62,15 +71,15 @@
 
 ## Current Engine Status
 
-| Engine | UI Status | Backend Mapping | Docker Image | Notes |
-|--------|-----------|-----------------|--------------|-------|
-| MuJoCo | ✅ Showing | ✅ Mapped | ✅ Installed | Should work |
-| Drake | ✅ Showing | ✅ Mapped | ✅ Installed | Should work |
-| Pinocchio | ✅ Showing | ✅ Mapped | ✅ Installed | Should work |
-| OpenSim | ✅ Showing | ✅ Mapped | ❌ Not installed | Will show as unavailable |
-| MyoSuite | ✅ Showing | ✅ Mapped | ❌ Not installed | Will show as unavailable |
+| Engine        | UI Status  | Backend Mapping    | Docker Image           | Notes                            |
+| ------------- | ---------- | ------------------ | ---------------------- | -------------------------------- |
+| MuJoCo        | ✅ Showing | ✅ Mapped          | ✅ Installed           | Should work                      |
+| Drake         | ✅ Showing | ✅ Mapped          | ✅ Installed           | Should work                      |
+| Pinocchio     | ✅ Showing | ✅ Mapped          | ✅ Installed           | Should work                      |
+| OpenSim       | ✅ Showing | ✅ Mapped          | ❌ Not installed       | Will show as unavailable         |
+| MyoSuite      | ✅ Showing | ✅ Mapped          | ❌ Not installed       | Will show as unavailable         |
 | Putting Green | ✅ Showing | ⚠️ Temp (PENDULUM) | ⚠️ Backend code exists | Needs proper integration (#1136) |
-| Simscape | ❌ Removed | ❌ Removed | N/A | Requires MATLAB |
+| Simscape      | ❌ Removed | ❌ Removed         | N/A                    | Requires MATLAB                  |
 
 ## How to Test
 
@@ -84,12 +93,14 @@
 ## Simulation "Reconnecting" Issue
 
 **Possible Causes**:
+
 1. Simulation endpoints not implemented in backend
 2. WebSocket connection failing
 3. Missing simulation service initialization
 4. Frontend expecting different API response format
 
 **Debug Steps**:
+
 ```bash
 # Check if simulation endpoints exist:
 curl http://localhost:8001/docs | grep -i simulation
@@ -103,9 +114,11 @@ docker-compose logs -f backend
 ## Files Modified
 
 ### Frontend (`ui/`)
+
 - `src/api/useEngineManager.ts` - Updated ENGINE_REGISTRY
 
 ### Backend (`src/`)
+
 - `api/routes/engines.py` - Updated engine mappings
 - `Dockerfile` - Added all required dependencies
 

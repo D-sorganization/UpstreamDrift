@@ -7,24 +7,33 @@
   "poses": {
     "address": {
       "description": "Neutral/address position - start of swing",
-      "joint_angles_rad": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+      "joint_angles_rad": [
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0
+      ],
       "n_joints": 19
     },
     "top_of_backswing": {
       "description": "Maximum backswing position - peak of takeaway",
-      "joint_angles_rad": [0.5, 0.3, 0.2, 0.4, 0.1, 0.0, 0.2, 0.15, 0.1, 0.25, 0.2, 0.0, 0.15, 0.1, 0.05, 0.2, 0.15, 0.1, 0.05],
+      "joint_angles_rad": [
+        0.5, 0.3, 0.2, 0.4, 0.1, 0.0, 0.2, 0.15, 0.1, 0.25, 0.2, 0.0, 0.15, 0.1,
+        0.05, 0.2, 0.15, 0.1, 0.05
+      ],
       "n_joints": 19
     },
     "impact": {
       "description": "Club contact position - peak clubhead speed",
-      "joint_angles_rad": [-0.1, 0.2, 0.3, 0.1, 0.0, 0.1, 0.4, 0.3, 0.2, 0.35, 0.3, 0.1, 0.25, 0.2, 0.1, 0.3, 0.25, 0.2, 0.15],
+      "joint_angles_rad": [
+        -0.1, 0.2, 0.3, 0.1, 0.0, 0.1, 0.4, 0.3, 0.2, 0.35, 0.3, 0.1, 0.25, 0.2,
+        0.1, 0.3, 0.25, 0.2, 0.15
+      ],
       "n_joints": 19
     }
   },
   "reference_rmse_mm": {
     "description": "Expected grip RMSE bounds per pose (baseline for 5mm gate)",
-    "address": {"max_mm": 5.0, "source": "Simscape reference"},
-    "top_of_backswing": {"max_mm": 5.0, "source": "Simscape reference"},
-    "impact": {"max_mm": 5.0, "source": "Simscape reference"}
+    "address": { "max_mm": 5.0, "source": "Simscape reference" },
+    "top_of_backswing": { "max_mm": 5.0, "source": "Simscape reference" },
+    "impact": { "max_mm": 5.0, "source": "Simscape reference" }
   }
 }

@@ -59,11 +59,11 @@ World ─[6-DOF Hip]─ Pelvis ─[Spine universal]─ Spine
 
 Each rotational joint subsystem is one of three reusable types:
 
-| Subsystem | DOFs | Use |
-|---|---|---|
-| `Kinetically_Driven_Revolute_Joint.slx` | 1 | Elbow, Torso |
-| `Kinetically_Driven_Universal_Joint.slx` | 2 | Wrist, Spine, Scapula |
-| `Kinetically_Driven_Gimbal_Joint.slx` | 3 | Shoulder |
+| Subsystem                                | DOFs | Use                   |
+| ---------------------------------------- | ---- | --------------------- |
+| `Kinetically_Driven_Revolute_Joint.slx`  | 1    | Elbow, Torso          |
+| `Kinetically_Driven_Universal_Joint.slx` | 2    | Wrist, Spine, Scapula |
+| `Kinetically_Driven_Gimbal_Joint.slx`    | 3    | Shoulder              |
 
 Each subsystem outputs a **`SignalBus`** containing every kinematic and
 dynamic signal Simscape will give you for that joint:
@@ -116,12 +116,12 @@ workspace and is structural, not a tuning input.
 
 ### 2.4 Input MATs (`src/model/inputs/`)
 
-| File | Contents | Use |
-|---|---|---|
-| `3DModelInputs.mat` | 669 vars: tunable inputs (gains, set-points, polynomial coefficients, damping tuning, etc.) for a generic mid-swing pose | reference / starting point |
-| `3DModelInputs_Impact.mat` | 595 vars: same shape, tuned for an impact-pose initial condition | the "starting position" the user typically asks for |
-| `3DModelInputs_TopofBackswing.mat` | 668 vars: top-of-backswing pose | alternate IC |
-| `ImpactVelocityOptimization.mat` | 1 var (a `Simulink.SimulationInput` object) | legacy fixture |
+| File                               | Contents                                                                                                                 | Use                                                 |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------- |
+| `3DModelInputs.mat`                | 669 vars: tunable inputs (gains, set-points, polynomial coefficients, damping tuning, etc.) for a generic mid-swing pose | reference / starting point                          |
+| `3DModelInputs_Impact.mat`         | 595 vars: same shape, tuned for an impact-pose initial condition                                                         | the "starting position" the user typically asks for |
+| `3DModelInputs_TopofBackswing.mat` | 668 vars: top-of-backswing pose                                                                                          | alternate IC                                        |
+| `ImpactVelocityOptimization.mat`   | 1 var (a `Simulink.SimulationInput` object)                                                                              | legacy fixture                                      |
 
 These are flat structs with scalar parameters; `setVariable` overlays them onto
 a `Simulink.SimulationInput` in our wrappers. They do **not** include
@@ -151,12 +151,12 @@ virtual-block / virtual-signal limit). This is the single most important
 When you call `sim(simIn)` you get back a `Simulink.SimulationOutput` with
 four populated fields:
 
-| Field | What's in it | Used by |
-|---|---|---|
-| `tout` | scalar time vector | everyone |
-| `simlog` | full Simscape per-block log (`SimscapeLogType='all'`) | dataset generator (`extractSimscapeDataRecursive`) |
+| Field               | What's in it                                                                          | Used by                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `tout`              | scalar time vector                                                                    | everyone                                                                    |
+| `simlog`            | full Simscape per-block log (`SimscapeLogType='all'`)                                 | dataset generator (`extractSimscapeDataRecursive`)                          |
 | `CombinedSignalBus` | structured bus with named groups (LSLogs, LFLogs, ClubLogs, AngularKinematicsLogs, …) | motion-matching loaders, `extract_sim_out`, `load_impact_starting_position` |
-| `xout` | continuous-state log | rarely used directly |
+| `xout`              | continuous-state log                                                                  | rarely used directly                                                        |
 
 Note: **SaveOutput defaults to `off`** for `.tout` in this model; the dataset
 generator and motion-matching tooling explicitly turn it on via
@@ -164,23 +164,23 @@ generator and motion-matching tooling explicitly turn it on via
 
 ### Key signal locations in the bus (cheat sheet)
 
-| What | Path |
-|---|---|
-| Hip angles, vel, accel | `CombinedSignalBus.AngularKinematicsLogs.HipAngularPosition{X,Y,Z}` etc. |
-| Hip world position | `…HipPosition{X,Y,Z}` |
-| Spine, torso, scapula angles | `…{Spine,Torso,LScap,RScap}AngularPosition{X,Y}` |
-| Shoulder angles | `…{LS,RS}AngularPosition{X,Y,Z}` (gimbal = 3-DOF) |
-| Elbow angles | `…{LE,RE}AngularPosition` (revolute = 1-DOF) |
-| Wrist angles | `…{LW,RW}AngularPosition{X,Y}` |
-| **Body landmarks (world)** | `LSLogs.GlobalPosition`, `RSLogs.GlobalPosition`, `LFLogs.GlobalPosition` (= L elbow), `RFLogs.GlobalPosition` (= R elbow), `LWLogs.LHGlobalPosition` (= L hand), `RWLogs.RHGlobalPosition`, `HipLogs.HUBGlobalPosition`, `TorsoLogs.GlobalPosition`, `SpineLogs.GlobalPosition` |
-| **Mid-grip world position** | `MidpointCalcsLogs.MPGlobalPosition` |
-| **Mid-grip orientation** | `MomentandCoupleLogs.RotationTransformMP` |
-| **Clubhead world position** | `ClubLogs.CHGlobalPosition` |
-| Clubhead velocity | `ClubLogs.CHGlobalVelocity` |
-| Hand forces / torques on club | `LWLogs.LHonClubFGlobal`, `RWLogs.RHonClubFGlobal`, etc. |
-| Total hand force / torque on club | `CalculatedSignalsLogs.TotalHandForceGlobal`, `…TotalHandTorqueGlobal` |
-| Equivalent midpoint couple | `MomentandCoupleLogs.EquivalentMidpointCoupleGlobal` |
-| Butt of club world position | `LHCalcsLogs.ButtPosition` |
+| What                              | Path                                                                                                                                                                                                                                                                             |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Hip angles, vel, accel            | `CombinedSignalBus.AngularKinematicsLogs.HipAngularPosition{X,Y,Z}` etc.                                                                                                                                                                                                         |
+| Hip world position                | `…HipPosition{X,Y,Z}`                                                                                                                                                                                                                                                            |
+| Spine, torso, scapula angles      | `…{Spine,Torso,LScap,RScap}AngularPosition{X,Y}`                                                                                                                                                                                                                                 |
+| Shoulder angles                   | `…{LS,RS}AngularPosition{X,Y,Z}` (gimbal = 3-DOF)                                                                                                                                                                                                                                |
+| Elbow angles                      | `…{LE,RE}AngularPosition` (revolute = 1-DOF)                                                                                                                                                                                                                                     |
+| Wrist angles                      | `…{LW,RW}AngularPosition{X,Y}`                                                                                                                                                                                                                                                   |
+| **Body landmarks (world)**        | `LSLogs.GlobalPosition`, `RSLogs.GlobalPosition`, `LFLogs.GlobalPosition` (= L elbow), `RFLogs.GlobalPosition` (= R elbow), `LWLogs.LHGlobalPosition` (= L hand), `RWLogs.RHGlobalPosition`, `HipLogs.HUBGlobalPosition`, `TorsoLogs.GlobalPosition`, `SpineLogs.GlobalPosition` |
+| **Mid-grip world position**       | `MidpointCalcsLogs.MPGlobalPosition`                                                                                                                                                                                                                                             |
+| **Mid-grip orientation**          | `MomentandCoupleLogs.RotationTransformMP`                                                                                                                                                                                                                                        |
+| **Clubhead world position**       | `ClubLogs.CHGlobalPosition`                                                                                                                                                                                                                                                      |
+| Clubhead velocity                 | `ClubLogs.CHGlobalVelocity`                                                                                                                                                                                                                                                      |
+| Hand forces / torques on club     | `LWLogs.LHonClubFGlobal`, `RWLogs.RHonClubFGlobal`, etc.                                                                                                                                                                                                                         |
+| Total hand force / torque on club | `CalculatedSignalsLogs.TotalHandForceGlobal`, `…TotalHandTorqueGlobal`                                                                                                                                                                                                           |
+| Equivalent midpoint couple        | `MomentandCoupleLogs.EquivalentMidpointCoupleGlobal`                                                                                                                                                                                                                             |
+| Butt of club world position       | `LHCalcsLogs.ButtPosition`                                                                                                                                                                                                                                                       |
 
 ### What the dataset generator extracts (~1856 columns)
 
@@ -207,14 +207,14 @@ Empirical measurement on this codebase (R2025b, Home licence, 0.30 s sim
 window, default Impact MAT inputs; full data in
 [motion_matching/shared/scripts/probe_perf.m](motion_matching/shared/scripts/probe_perf.m)):
 
-| Configuration | Mean wall-clock | vs. baseline |
-|---|---|---|
-| Cold sim, model defaults | **14.9 s** | 1.00× |
-| `SimscapeLogType='all'`, `SignalLogging='off'` | 14.8 s | 0.99× |
-| `SimscapeLogType='local'`, `SignalLogging='on'` | 14.9 s | 1.00× |
-| `SimscapeLogType='local'`, `SignalLogging='off'` | 14.9 s | 1.00× |
-| `SimscapeLogType='none'`, `SignalLogging='off'` | 14.8 s | 0.99× |
-| **Warm sim, FastRestart=on** | **6.9 s** | **0.46×** |
+| Configuration                                    | Mean wall-clock | vs. baseline |
+| ------------------------------------------------ | --------------- | ------------ |
+| Cold sim, model defaults                         | **14.9 s**      | 1.00×        |
+| `SimscapeLogType='all'`, `SignalLogging='off'`   | 14.8 s          | 0.99×        |
+| `SimscapeLogType='local'`, `SignalLogging='on'`  | 14.9 s          | 1.00×        |
+| `SimscapeLogType='local'`, `SignalLogging='off'` | 14.9 s          | 1.00×        |
+| `SimscapeLogType='none'`, `SignalLogging='off'`  | 14.8 s          | 0.99×        |
+| **Warm sim, FastRestart=on**                     | **6.9 s**       | **0.46×**    |
 
 **Conclusion: the solver dominates wall-clock; logging is essentially free.**
 Don't bother stripping the `CombinedSignalBus` or `simlog` plumbing.
@@ -246,6 +246,7 @@ sim_out = sim(in);
 ```
 
 Other deferred experiments worth running:
+
 - `SignalLoggingSaveFormat='ModelDataLogs'` (the alternative format) sometimes serialises faster than `Dataset`.
 - Setting `SimulationMode='accelerator'` builds a C-MEX accelerator on first call; can give 2–10× speedup on stiff continuous models. Cost is a longer first-run compile.
 
@@ -253,16 +254,16 @@ Other deferred experiments worth running:
 
 ## 5. The four motion-matching options
 
-All four consume the same `target` schema (CLUB_IK_SPEC.md) and should produce
-the same `result` shape (CODING_STANDARDS.md). They differ in *how* they get
+All four consume the same `target` schema (CLUB*IK_SPEC.md) and should produce
+the same `result` shape (CODING_STANDARDS.md). They differ in \_how* they get
 from a target to a coefficient vector.
 
-| Option | Status | Approach | When to reach for it |
-|---|---|---|---|
-| **1 — Direct fmincon** ([option1_direct_optimization](motion_matching/option1_direct_optimization)) | ✅ Implemented (`fit_swing_fmincon.m`, `fit_swing_hybrid.m`) | SQP on `compute_cost`; ~10 wall-minutes per fit; deterministic | Default. Use first to get a baseline; needs no offline training. |
-| **2 — Forward NN surrogate** ([option2_nn_surrogate](motion_matching/option2_nn_surrogate)) | 🟡 Scaffolded (`surrogate.py`) | PyTorch model trained on dataset_generator output; cheap forward eval; gradient-based fit on the surrogate then refined on the true sim | Use when you have ≥5k labelled trials and want sub-second fits |
-| **3 — Inverse NN (cVAE)** ([option3_inverse_nn](motion_matching/option3_inverse_nn)) | 🟡 Scaffolded (`inverse_cvae.py`) | Train a conditional VAE that emits `theta` from a target; one-shot inference | Use when you need to fit many swings interactively |
-| **4 — MATLAB↔Python bridge** ([option4_python_bridge](motion_matching/option4_python_bridge)) | 🟡 Spec-only | Forward sim still runs in MATLAB; optimizer runs in Python (scipy/JAX) | Use when you want Python-native tooling around the optimizer |
+| Option                                                                                              | Status                                                       | Approach                                                                                                                                | When to reach for it                                             |
+| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| **1 — Direct fmincon** ([option1_direct_optimization](motion_matching/option1_direct_optimization)) | ✅ Implemented (`fit_swing_fmincon.m`, `fit_swing_hybrid.m`) | SQP on `compute_cost`; ~10 wall-minutes per fit; deterministic                                                                          | Default. Use first to get a baseline; needs no offline training. |
+| **2 — Forward NN surrogate** ([option2_nn_surrogate](motion_matching/option2_nn_surrogate))         | 🟡 Scaffolded (`surrogate.py`)                               | PyTorch model trained on dataset_generator output; cheap forward eval; gradient-based fit on the surrogate then refined on the true sim | Use when you have ≥5k labelled trials and want sub-second fits   |
+| **3 — Inverse NN (cVAE)** ([option3_inverse_nn](motion_matching/option3_inverse_nn))                | 🟡 Scaffolded (`inverse_cvae.py`)                            | Train a conditional VAE that emits `theta` from a target; one-shot inference                                                            | Use when you need to fit many swings interactively               |
+| **4 — MATLAB↔Python bridge** ([option4_python_bridge](motion_matching/option4_python_bridge))      | 🟡 Spec-only                                                 | Forward sim still runs in MATLAB; optimizer runs in Python (scipy/JAX)                                                                  | Use when you want Python-native tooling around the optimizer     |
 
 For all four the **target** is now grip-primary (see the new
 [CLUB_IK_SPEC.md](motion_matching/shared/CLUB_IK_SPEC.md) — `target.grip` and
@@ -349,13 +350,13 @@ full recipe. In short:
 
 ## 8. Known issues / caveats
 
-| Issue | Where | Impact | Mitigation |
-|---|---|---|---|
-| Wiffle xlsx Definitions tab claims "inches" but data is **centimetres** | `Wiffle_ProV1_club_3D_data.xlsx` | Misreading would 2.54×-inflate everything | Loader applies `0.01` (cm→m); regression test guards plausibility |
-| Speed-argmax impact detection latches on wrong frame | `private/detect_clubhead_impact.m` | Was returning idx 254 instead of doc'd 525 | Loader now reads documented `I_sample` from row-1 header and passes it as `known_impact_s` |
-| Measured shaft length differs from modeled club length | xlsx vs `LowerArmLength`/`ShaftLength` | ~7 cm gap on TW_ProV1 | `grip_pose` alignment matches grip+shaft direction; clubhead residual is the legitimate club-length difference |
-| `ScaleFactor` of CSB output struct is ~40 MB | model intrinsic | Memory pressure for large datasets | Don't aggregate sim_out across many trials in memory; persist per-trial CSV (dataset generator already does this) |
-| LE/RE/LS/RS world positions came online only after we noticed `LFLogs.GlobalPosition` etc. | model | Earlier code computed FK from joint angles instead | Fixed: extractor now reads positions directly; FK helper kept as a fallback validator |
+| Issue                                                                                      | Where                                  | Impact                                             | Mitigation                                                                                                        |
+| ------------------------------------------------------------------------------------------ | -------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Wiffle xlsx Definitions tab claims "inches" but data is **centimetres**                    | `Wiffle_ProV1_club_3D_data.xlsx`       | Misreading would 2.54×-inflate everything          | Loader applies `0.01` (cm→m); regression test guards plausibility                                                 |
+| Speed-argmax impact detection latches on wrong frame                                       | `private/detect_clubhead_impact.m`     | Was returning idx 254 instead of doc'd 525         | Loader now reads documented `I_sample` from row-1 header and passes it as `known_impact_s`                        |
+| Measured shaft length differs from modeled club length                                     | xlsx vs `LowerArmLength`/`ShaftLength` | ~7 cm gap on TW_ProV1                              | `grip_pose` alignment matches grip+shaft direction; clubhead residual is the legitimate club-length difference    |
+| `ScaleFactor` of CSB output struct is ~40 MB                                               | model intrinsic                        | Memory pressure for large datasets                 | Don't aggregate sim_out across many trials in memory; persist per-trial CSV (dataset generator already does this) |
+| LE/RE/LS/RS world positions came online only after we noticed `LFLogs.GlobalPosition` etc. | model                                  | Earlier code computed FK from joint angles instead | Fixed: extractor now reads positions directly; FK helper kept as a fallback validator                             |
 
 ---
 
@@ -364,20 +365,20 @@ full recipe. In short:
 A direct inspection of `GolfSwing3D_Kinetic.slx` and the three joint sub-models
 turned up the following — none are bugs, but several are worth knowing about:
 
-| Item | Status | Note |
-|---|---|---|
-| `SimscapeLogType='all'` persistent | ✅ saved | Line 4256 of MDL; live `get_param` confirmed |
-| `SignalLogging='on'` persistent | ✅ saved | `logsout` is rarely populated; CSB does the heavy lifting |
-| `SaveOutput='off'` persistent | ⚠ check | Motion-matching turns it on per call; OK |
-| `StopTime='0.1'` persistent | ⚠ confusing | Cost-function default is 0.30s; the persisted value is the model's editor default, not a fitting target |
-| `MaxStep='0.001'` persistent | 🔴 perf | This forces ≥300 solver steps per 0.3 s sim; the largest single perf lever (see §4) |
-| 27× `*StartPosition*` + 27× `*StartVelocity*` workspace vars | ✅ as expected | Drives the Stage-1 starting-pose solver |
-| 16× Transform Sensor blocks | ✅ as expected | These are why `LSLogs.GlobalPosition`, `LFLogs.GlobalPosition`, etc. land in the CSB without us adding any virtual signals |
-| 15× top-level BusCreator blocks | ✅ as expected | Build the `CombinedSignalBus` from the 16 Transform Sensors + every joint subsystem's `SignalBus` |
-| 98 referenced subsystems | ✅ clean | Each joint is one of three reusable sub-blocks; good decomposition |
-| `LocalDampeningEnable` parameter | ✅ wired correctly | Stateflow PARAMETER_DATA + model-workspace Parameter; gates between local-vs-global damping. **Never overwrite from per-trial inputs.** |
-| Two `Mechanical_Rotational_Reference` blocks per Universal/Gimbal joint | ⚠ redundant? | Each axis has its own reference — appears intentional but worth verifying that they aren't both contributing damping inadvertently when `LocalDampeningEnable=1` |
-| Some "duplicate signal" warnings in older diagnostic scripts | 🟡 cosmetic | The scripts in `apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/` reference identifying duplicate logged signals; not a model defect, just a side-effect of the bus topology |
+| Item                                                                    | Status             | Note                                                                                                                                                                                                              |
+| ----------------------------------------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SimscapeLogType='all'` persistent                                      | ✅ saved           | Line 4256 of MDL; live `get_param` confirmed                                                                                                                                                                      |
+| `SignalLogging='on'` persistent                                         | ✅ saved           | `logsout` is rarely populated; CSB does the heavy lifting                                                                                                                                                         |
+| `SaveOutput='off'` persistent                                           | ⚠ check           | Motion-matching turns it on per call; OK                                                                                                                                                                          |
+| `StopTime='0.1'` persistent                                             | ⚠ confusing       | Cost-function default is 0.30s; the persisted value is the model's editor default, not a fitting target                                                                                                           |
+| `MaxStep='0.001'` persistent                                            | 🔴 perf            | This forces ≥300 solver steps per 0.3 s sim; the largest single perf lever (see §4)                                                                                                                               |
+| 27× `*StartPosition*` + 27× `*StartVelocity*` workspace vars            | ✅ as expected     | Drives the Stage-1 starting-pose solver                                                                                                                                                                           |
+| 16× Transform Sensor blocks                                             | ✅ as expected     | These are why `LSLogs.GlobalPosition`, `LFLogs.GlobalPosition`, etc. land in the CSB without us adding any virtual signals                                                                                        |
+| 15× top-level BusCreator blocks                                         | ✅ as expected     | Build the `CombinedSignalBus` from the 16 Transform Sensors + every joint subsystem's `SignalBus`                                                                                                                 |
+| 98 referenced subsystems                                                | ✅ clean           | Each joint is one of three reusable sub-blocks; good decomposition                                                                                                                                                |
+| `LocalDampeningEnable` parameter                                        | ✅ wired correctly | Stateflow PARAMETER_DATA + model-workspace Parameter; gates between local-vs-global damping. **Never overwrite from per-trial inputs.**                                                                           |
+| Two `Mechanical_Rotational_Reference` blocks per Universal/Gimbal joint | ⚠ redundant?      | Each axis has its own reference — appears intentional but worth verifying that they aren't both contributing damping inadvertently when `LocalDampeningEnable=1`                                                  |
+| Some "duplicate signal" warnings in older diagnostic scripts            | 🟡 cosmetic        | The scripts in `apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/` reference identifying duplicate logged signals; not a model defect, just a side-effect of the bus topology |
 
 The main thing to watch out for: **don't try to "clean up" the
 CombinedSignalBus by removing groups you don't think you need.** The bus is
@@ -403,20 +404,20 @@ and `TESTING.md`.
 
 ## 12. Glossary
 
-| Term | Meaning in this codebase |
-|---|---|
-| `theta` | flat polynomial coefficient vector, `n_joints × 7`, ordered `[A B C D E F G]` per joint |
-| `target` | canonical struct containing the measured swing (CLUB_IK_SPEC) |
-| `result` | canonical struct returned by an optimizer (CODING_STANDARDS) |
-| `sim_out` | canonical struct returned by `simulate_with_coefficients` |
-| `grip` | mid-hands position on the shaft (rigid body→club interface; primary motion-matching anchor) |
-| `mp` | mid-grip in model code (= grip; legacy short name) |
-| `butt` | end of grip (backward-compat alias of `grip` in measured-data structs; distinct point in model structs) |
-| `clubhead` / `ch` | striking face of the club |
-| `hub` | top of spine / base of neck |
-| `CSB` | `CombinedSignalBus` (top-level structured output bus from the model) |
-| `simlog` | full Simscape per-block log (enabled by `SimscapeLogType='all'`) |
+| Term              | Meaning in this codebase                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------- |
+| `theta`           | flat polynomial coefficient vector, `n_joints × 7`, ordered `[A B C D E F G]` per joint                 |
+| `target`          | canonical struct containing the measured swing (CLUB_IK_SPEC)                                           |
+| `result`          | canonical struct returned by an optimizer (CODING_STANDARDS)                                            |
+| `sim_out`         | canonical struct returned by `simulate_with_coefficients`                                               |
+| `grip`            | mid-hands position on the shaft (rigid body→club interface; primary motion-matching anchor)             |
+| `mp`              | mid-grip in model code (= grip; legacy short name)                                                      |
+| `butt`            | end of grip (backward-compat alias of `grip` in measured-data structs; distinct point in model structs) |
+| `clubhead` / `ch` | striking face of the club                                                                               |
+| `hub`             | top of spine / base of neck                                                                             |
+| `CSB`             | `CombinedSignalBus` (top-level structured output bus from the model)                                    |
+| `simlog`          | full Simscape per-block log (enabled by `SimscapeLogType='all'`)                                        |
 
 ---
 
-*Last updated 2026-05-06 alongside the grip-primary motion-matching refactor (PR #4071).*
+_Last updated 2026-05-06 alongside the grip-primary motion-matching refactor (PR #4071)._

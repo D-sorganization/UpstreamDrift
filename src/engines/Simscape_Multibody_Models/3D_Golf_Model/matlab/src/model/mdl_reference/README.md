@@ -11,12 +11,12 @@ edits to round-trip. If the .slx is changed, regenerate these by exporting via
 `Simulink.MDLInfo` / "Save As" → MDL. The MDL XML format is documented at
 <https://www.mathworks.com/help/simulink/slref/save-system.html>.
 
-| File | Maps to | Lines |
-|---|---|---|
-| `GolfSwing3D_Kinetic.mdl` | `../GolfSwing3D_Kinetic.slx` (top-level model) | ~82,000 |
-| `Kinetically_Driven_Gimbal_Joint.mdl` | `../Kinetically_Driven_Gimbal_Joint.slx` (3-DOF rotational joint subsystem) | ~3,500 |
-| `Kinetically_Driven_Revolute_Joint.mdl` | `../Kinetically_Driven_Revolute_Joint.slx` (1-DOF rotational joint subsystem) | ~2,300 |
-| `Kinetically_Driven_Universal_Joint.mdl` | `../Kinetically_Driven_Universal_Joint.slx` (2-DOF rotational joint subsystem) | ~3,000 |
+| File                                     | Maps to                                                                        | Lines   |
+| ---------------------------------------- | ------------------------------------------------------------------------------ | ------- |
+| `GolfSwing3D_Kinetic.mdl`                | `../GolfSwing3D_Kinetic.slx` (top-level model)                                 | ~82,000 |
+| `Kinetically_Driven_Gimbal_Joint.mdl`    | `../Kinetically_Driven_Gimbal_Joint.slx` (3-DOF rotational joint subsystem)    | ~3,500  |
+| `Kinetically_Driven_Revolute_Joint.mdl`  | `../Kinetically_Driven_Revolute_Joint.slx` (1-DOF rotational joint subsystem)  | ~2,300  |
+| `Kinetically_Driven_Universal_Joint.mdl` | `../Kinetically_Driven_Universal_Joint.slx` (2-DOF rotational joint subsystem) | ~3,000  |
 
 ## Things worth grepping for
 

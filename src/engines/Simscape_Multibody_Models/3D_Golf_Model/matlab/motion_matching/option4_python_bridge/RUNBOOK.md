@@ -210,9 +210,9 @@ If `python -c "import matlab.engine; matlab.engine.start_matlab()"` hangs or fai
 
 ## 11. Useful environment variables
 
-| Variable | Purpose | Default |
-|---|---|---|
-| `GOLF_SWING_3D_SLX_PATH` | Override the .slx path used by the test fixtures. | `<repo>/src/engines/.../GolfSwing3D_Kinetic.slx` |
-| `SIMSCAPE_ADAPTER_TIMING` | If `1`, every adapter call appends to `_timing_log`. | unset |
-| `SIMSCAPE_ADAPTER_CACHE_DISABLED` | If `1`, force `cache_enabled=False` regardless of constructor argument. | unset |
-| `MATLAB_ENGINE_LICENSE_TIMEOUT_S` | Per-engine license-checkout timeout. | `60` |
+| Variable                          | Purpose                                                                 | Default                                          |
+| --------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------ |
+| `GOLF_SWING_3D_SLX_PATH`          | Override the .slx path used by the test fixtures.                       | `<repo>/src/engines/.../GolfSwing3D_Kinetic.slx` |
+| `SIMSCAPE_ADAPTER_TIMING`         | If `1`, every adapter call appends to `_timing_log`.                    | unset                                            |
+| `SIMSCAPE_ADAPTER_CACHE_DISABLED` | If `1`, force `cache_enabled=False` regardless of constructor argument. | unset                                            |
+| `MATLAB_ENGINE_LICENSE_TIMEOUT_S` | Per-engine license-checkout timeout.                                    | `60`                                             |

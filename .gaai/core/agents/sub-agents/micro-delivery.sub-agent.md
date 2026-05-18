@@ -21,7 +21,7 @@ Spawned by the Delivery Orchestrator for low-complexity Stories (complexity ≤ 
 complexity: ≤ 2
 files_affected: ≤ 2
 acceptance_criteria_count: ≤ 3
-no_specialists_triggered: true   # registry scan returns no matches
+no_specialists_triggered: true # registry scan returns no matches
 ```
 
 Typical tasks: bug fixes, typo corrections, single-line changes, dependency updates, rename operations, copy changes.
@@ -42,6 +42,7 @@ DIE     ← Terminates; context window released
 ## Context Bundle (Provided at Spawn)
 
 Deliberately minimal:
+
 - `contexts/artefacts/stories/{id}.story.md`
 - `contexts/memory/patterns/conventions.md`
 - Directly affected file(s) only
@@ -65,6 +66,7 @@ No planning skill invocation. For complexity ≤ 2, the plan is implicit in the 
 Writes to: `contexts/artefacts/delivery/{id}.micro-delivery-report.md`
 
 Includes:
+
 - Files changed
 - Change summary
 - Acceptance criteria result (PASS / FAIL / ESCALATE)

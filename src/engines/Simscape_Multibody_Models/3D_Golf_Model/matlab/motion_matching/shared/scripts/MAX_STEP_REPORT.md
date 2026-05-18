@@ -11,13 +11,13 @@ _GitHub issue: D-sorganization/UpstreamDrift#4078._
 ## Results
 
 | MaxStep | mean_warm_s | grip_rmse_mm | total_work_J | rel_work_error_pct |
-|---|---|---|---|---|
-| 0.0001 | 7.885 | 0.000 | 2.77e+08 | 0.000 |
-| 0.001 | 6.949 | 539.933 | 3.917e+08 | 41.399 |
-| 0.002 | 7.122 | 539.933 | 3.917e+08 | 41.399 |
-| 0.005 | 7.096 | 539.933 | 3.917e+08 | 41.399 |
-| 0.01 | 7.065 | 539.933 | 3.917e+08 | 41.399 |
-| 0.02 | 6.544 | 539.933 | 3.917e+08 | 41.399 |
+| ------- | ----------- | ------------ | ------------ | ------------------ |
+| 0.0001  | 7.885       | 0.000        | 2.77e+08     | 0.000              |
+| 0.001   | 6.949       | 539.933      | 3.917e+08    | 41.399             |
+| 0.002   | 7.122       | 539.933      | 3.917e+08    | 41.399             |
+| 0.005   | 7.096       | 539.933      | 3.917e+08    | 41.399             |
+| 0.01    | 7.065       | 539.933      | 3.917e+08    | 41.399             |
+| 0.02    | 6.544       | 539.933      | 3.917e+08    | 41.399             |
 
 ## Recommendation
 
@@ -28,4 +28,3 @@ MaxStep is not the binding step-size constraint at the current default (0.001): 
 ## Method
 
 Each setting runs 1 cold sim (discarded — pays the FastRestart compile cost) then 3 warm sims with `FastRestart=on`. Wall-clock is per-call seconds. Grip position is `CombinedSignalBus.MidpointCalcsLogs.MPGlobalPosition`; RMSE is computed against the smallest MaxStep's trace interpolated onto its native grid. Total work uses `W = trapz(t, sum(abs(tau .* qd), 2))` with joint torque and velocity traces from `logsout` / `CombinedSignalBus`. Acceptance gates: grip RMSE <= 5 mm and |rel_work_error| <= 5%; results above 100 mm grip RMSE are flagged as broken rather than recommended.
-

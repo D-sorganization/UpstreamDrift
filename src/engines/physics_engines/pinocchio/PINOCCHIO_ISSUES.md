@@ -56,13 +56,13 @@ frames in the address pose), and the pelvis is a floating base (6 DOF).
 
 - [ ] Both URDFs load without error via `pin.buildModelFromUrdf`.
 - [ ] `mid_hands` frame exists and is positioned ≤ 1 cm from the
-  geometric mean of the two hand-tip frames in the address pose
-  (`q = q0`).
+      geometric mean of the two hand-tip frames in the address pose
+      (`q = q0`).
 - [ ] Floating base present; verified with
-  `model.joints[1].shortname() == 'JointModelFreeFlyer'`.
+      `model.joints[1].shortname() == 'JointModelFreeFlyer'`.
 - [ ] Header comment block in both URDFs explains scope.
 - [ ] Test `tests/unit/test_urdf_invariants.py` passes
-  (TDD-first: written before the URDF edits).
+      (TDD-first: written before the URDF edits).
 
 ### Size
 
@@ -122,7 +122,7 @@ def simulate_with_coefficients(
 
 - [ ] Zero-torque + zero-velocity → trajectory drifts only via gravity.
 - [ ] Energy conservation in zero-gravity, zero-damping mode: drift
-  ≤ 1% over 1.0 s.
+      ≤ 1% over 1.0 s.
 - [ ] Returned `SimOut` has correct shapes and finite values.
 - [ ] Determinism: same theta twice → identical trajectories.
 
@@ -130,7 +130,7 @@ def simulate_with_coefficients(
 
 - [ ] All four tests above pass.
 - [ ] Wall-clock per call ≤ 100 ms for 1.0 s @ 1 kHz sim on a single
-  modern CPU core (post-warmup, theta = zeros).
+      modern CPU core (post-warmup, theta = zeros).
 - [ ] Function signature matches cross-engine §2.2 exactly.
 
 ### Size
@@ -242,7 +242,7 @@ def fit_swing_pinocchio(
 
 - [ ] Recovery test (`test_fit_swing_pinocchio_recovery.py` — un-skip).
 - [ ] Smoke test on a real Rob Neal trial:
-  `final_rmse_m < 0.05` and wall-clock `< 5 s`.
+      `final_rmse_m < 0.05` and wall-clock `< 5 s`.
 - [ ] Determinism on a fixed seed.
 - [ ] LM convergence: outer iterations < 50 on the recovery problem.
 
@@ -250,9 +250,9 @@ def fit_swing_pinocchio(
 
 - [ ] All tests pass.
 - [ ] **5-second wall-clock fit** demonstrated in the smoke test on
-  CI's standard runner (single core).
+      CI's standard runner (single core).
 - [ ] PR description includes a benchmark table:
-  Simscape fmincon vs Pinocchio LM on the same trial.
+      Simscape fmincon vs Pinocchio LM on the same trial.
 
 ### Size
 
@@ -299,10 +299,10 @@ location to the shared package and replace this engine's import with
 ### Acceptance criteria
 
 - [ ] `to_club_target()` round-trips through a sample Rob Neal trial
-  with byte-identical (within float tolerance) output to a hand-checked
-  fixture.
+      with byte-identical (within float tolerance) output to a hand-checked
+      fixture.
 - [ ] Rob Neal loader handles all 8 trial files in
-  `data/club_swing_dataset/{TW,GW}_{ProV1,wiffle}*.mat`.
+      `data/club_swing_dataset/{TW,GW}_{ProV1,wiffle}*.mat`.
 - [ ] Tests pass.
 
 ### Size
@@ -347,7 +347,7 @@ JSON file the cross-engine leaderboard consumes.
 ### Tests
 
 - [ ] `tests/unit/test_visualize_fit_smoke.py` — runs end-to-end on
-  a fixture and asserts files exist.
+      a fixture and asserts files exist.
 - [ ] `tests/unit/test_leaderboard_writer.py` — round-trip JSON.
 
 ### Acceptance criteria
@@ -355,7 +355,7 @@ JSON file the cross-engine leaderboard consumes.
 - [ ] `visualize_fit` produces three figures + a Meshcat URL string.
 - [ ] `pinocchio.json` validates against the canonical FitResult schema.
 - [ ] PARITY-LEADERBOARD picks up the Pinocchio entry without code
-  changes on the leaderboard side.
+      changes on the leaderboard side.
 
 ### Size
 
@@ -422,24 +422,24 @@ delegating methods. Labels: `engine:pinocchio`, `area:cleanup`, `size:M`.
 
 ## Summary table
 
-| # | ID | Size | Priority | Depends |
-|---|---|---|---|---|
-| 1 | PIN-MODEL-GRIP-FRAME | S | P0 | — |
-| 2 | PIN-SIMULATE | M | P0 | #1 |
-| 3 | PIN-TDD-ORACLE | S | P0 | #2 |
-| 4 | PIN-FIT-DRIVER | L | P0 | #2, #3, PARITY-LOADERS |
-| 5 | PIN-LOADER-ADAPTER | S | P1 | — |
-| 6 | PIN-VIZ-AND-LEADERBOARD | S | P1 | #4 |
-| h | PIN-RENAME-TORQUE-UTIL | S | P2 | — |
-| h | PIN-DOF-AUDIT | M | P1 | #1 |
-| h | PIN-DOC-URDF-SCOPE | S | P2 | — |
-| h | PIN-IK-FALLBACK | M | P2 | #2 |
-| h | PIN-DEPS-AUDIT | S | P0 | — (do first!) |
-| h | PIN-LOD-CLEANUP | M | P2 | — |
+| #   | ID                      | Size | Priority | Depends                |
+| --- | ----------------------- | ---- | -------- | ---------------------- |
+| 1   | PIN-MODEL-GRIP-FRAME    | S    | P0       | —                      |
+| 2   | PIN-SIMULATE            | M    | P0       | #1                     |
+| 3   | PIN-TDD-ORACLE          | S    | P0       | #2                     |
+| 4   | PIN-FIT-DRIVER          | L    | P0       | #2, #3, PARITY-LOADERS |
+| 5   | PIN-LOADER-ADAPTER      | S    | P1       | —                      |
+| 6   | PIN-VIZ-AND-LEADERBOARD | S    | P1       | #4                     |
+| h   | PIN-RENAME-TORQUE-UTIL  | S    | P2       | —                      |
+| h   | PIN-DOF-AUDIT           | M    | P1       | #1                     |
+| h   | PIN-DOC-URDF-SCOPE      | S    | P2       | —                      |
+| h   | PIN-IK-FALLBACK         | M    | P2       | #2                     |
+| h   | PIN-DEPS-AUDIT          | S    | P0       | — (do first!)          |
+| h   | PIN-LOD-CLEANUP         | M    | P2       | —                      |
 
 `h` = housekeeping (not in the critical six but worth filing).
 
 The natural delivery order is:
 **PIN-DEPS-AUDIT → #1 → #2 → #3 → #5 (in parallel) → #4 → #6.**
 
-*Last updated 2026-05-06; tracks PR `feat/pinocchio-parity-spec`.*
+_Last updated 2026-05-06; tracks PR `feat/pinocchio-parity-spec`._

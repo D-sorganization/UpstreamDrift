@@ -40,6 +40,7 @@ def load_club_target_mat(path: Path | str, opts: AlignOptions) -> ClubTarget: ..
 ### Dispatcher wiring
 
 Update `load_club_target` in `load_club_target.py`:
+
 - Add `_MAT_SUFFIXES = frozenset({".mat"})` and route accordingly.
 - `load_club_target_mat` becomes part of the `__all__` re-exports.
 
@@ -59,6 +60,7 @@ Module file is `matlab_dataset.py` — the `.mat` extension is the MATLAB binary
 ## Tests
 
 `tests/unit/motion_matching/test_loaders_matlab.py`:
+
 - All four canonical files (`TW_ProV1`, `TW_wiffle`, `GW_ProV1`, `GW_wiffle`) load to a `ClubTarget` whose impact-time clubhead speed is in `[35, 55] m/s` (driver) or `[30, 45] m/s` (iron — `GW` files).
 - Stamped vs. heuristic impact: assert `impact_idx_from_mat == impact_idx_from_xlsx ± 2` for the same trial loaded both ways.
 - Reflect-rejection test: synthetic `dircos` with `det = -1` raises with a message mentioning "rotation".

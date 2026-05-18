@@ -83,23 +83,23 @@ src/shared/python/anthropometrics/
 
 ## Children (15 issues)
 
-| # | Title | Type | Priority |
-|---|---|---|---|
-| 1 | feat(anthropometrics): canonical `SegmentProperties` + `SubjectAnthropometrics` dataclasses + Protocols | architecture | high |
-| 2 | feat(anthropometrics): `from_de_leva` + `from_dempster` + `from_zatsiorsky` regression estimators | feature | high |
-| 3 | feat(anthropometrics): `from_mocap` segment-length estimator (already partially in motion_pipeline; consolidate) | feature | high |
-| 4 | feat(anthropometrics): `from_inertia_calc` regression-based inertia tensor + CoM (uses existing inertia calculator) | feature | high |
-| 5 | feat(anthropometrics): C3D `SUBJECT_INFO` / `PROCESSING` parameter group reader | feature | medium |
-| 6 | feat(anthropometrics): URDF `<inertial>` reader + writer (round-trip canonical SegmentProperties) | feature | high |
-| 7 | feat(anthropometrics): OpenSim `.osim` `<Body>` reader + writer | feature | high |
-| 8 | feat(anthropometrics): MJCF `<body><inertial>` reader + writer | feature | high |
-| 9 | feat(anthropometrics): Drake / Pinocchio / MyoSuite / Simscape engine adapters | feature | high |
-| 10 | feat(anthropometrics): high-level `pipeline.py` (load → compute → export to chosen engine) | feature | high |
-| 11 | feat(c3d-viewer + matcher): SegmentPropertiesPanel UI (select segment → see length / mass / inertia / CoM) | integration | high |
-| 12 | feat(matcher): subject-anthropometrics calibration dialog (slider-driven, mocap-grounded) | integration | medium |
-| 13 | feat(anthropometrics): SubjectAnthropometrics JSON persistence (save / load subject records) | feature | high |
-| 14 | test(anthropometrics): comprehensive TDD coverage + validation against published anthropometric tables | testing | high |
-| 15 | docs(anthropometrics): ADR + user guide + cross-engine pipeline guide | docs | medium |
+| #   | Title                                                                                                               | Type         | Priority |
+| --- | ------------------------------------------------------------------------------------------------------------------- | ------------ | -------- |
+| 1   | feat(anthropometrics): canonical `SegmentProperties` + `SubjectAnthropometrics` dataclasses + Protocols             | architecture | high     |
+| 2   | feat(anthropometrics): `from_de_leva` + `from_dempster` + `from_zatsiorsky` regression estimators                   | feature      | high     |
+| 3   | feat(anthropometrics): `from_mocap` segment-length estimator (already partially in motion_pipeline; consolidate)    | feature      | high     |
+| 4   | feat(anthropometrics): `from_inertia_calc` regression-based inertia tensor + CoM (uses existing inertia calculator) | feature      | high     |
+| 5   | feat(anthropometrics): C3D `SUBJECT_INFO` / `PROCESSING` parameter group reader                                     | feature      | medium   |
+| 6   | feat(anthropometrics): URDF `<inertial>` reader + writer (round-trip canonical SegmentProperties)                   | feature      | high     |
+| 7   | feat(anthropometrics): OpenSim `.osim` `<Body>` reader + writer                                                     | feature      | high     |
+| 8   | feat(anthropometrics): MJCF `<body><inertial>` reader + writer                                                      | feature      | high     |
+| 9   | feat(anthropometrics): Drake / Pinocchio / MyoSuite / Simscape engine adapters                                      | feature      | high     |
+| 10  | feat(anthropometrics): high-level `pipeline.py` (load → compute → export to chosen engine)                          | feature      | high     |
+| 11  | feat(c3d-viewer + matcher): SegmentPropertiesPanel UI (select segment → see length / mass / inertia / CoM)          | integration  | high     |
+| 12  | feat(matcher): subject-anthropometrics calibration dialog (slider-driven, mocap-grounded)                           | integration  | medium   |
+| 13  | feat(anthropometrics): SubjectAnthropometrics JSON persistence (save / load subject records)                        | feature      | high     |
+| 14  | test(anthropometrics): comprehensive TDD coverage + validation against published anthropometric tables              | testing      | high     |
+| 15  | docs(anthropometrics): ADR + user guide + cross-engine pipeline guide                                               | docs         | medium   |
 
 ## Cross-cutting principles (binding for every child PR)
 

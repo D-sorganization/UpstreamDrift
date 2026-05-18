@@ -2,7 +2,6 @@ skill: qa-review
 version: "1.0"
 description: "Baseline eval set for QA review reports — validates structure, verdict, AC coverage, and rule compliance"
 assertions:
-
   - id: A01
     type: code
     description: "QA report contains a verdict (PASS, FAIL, or ESCALATE)"

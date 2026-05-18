@@ -117,14 +117,14 @@ end
 
 At the end of every fit, regardless of solver, write to `motion_matching/results/<run_id>/`:
 
-| File | Source |
-|---|---|
-| `dashboard.png` | `OptimizationProgressDashboard` final render at 1.5× retina |
-| `dashboard.fig` | Same, MATLAB-native for interactive inspection |
-| `multistart_parallel_coords.{png,fig}` | Only for MultiStart / hybrid |
-| `trajectory_overlay.{png,fig}` | Shared view 1, final render |
-| `error_timecourse.{png,fig}` | Shared view 2, final render |
-| `fit_quality_card.{png,fig}` | Shared view 3, final render |
-| `result.mat` | The full `result` struct |
+| File                                   | Source                                                      |
+| -------------------------------------- | ----------------------------------------------------------- |
+| `dashboard.png`                        | `OptimizationProgressDashboard` final render at 1.5× retina |
+| `dashboard.fig`                        | Same, MATLAB-native for interactive inspection              |
+| `multistart_parallel_coords.{png,fig}` | Only for MultiStart / hybrid                                |
+| `trajectory_overlay.{png,fig}`         | Shared view 1, final render                                 |
+| `error_timecourse.{png,fig}`           | Shared view 2, final render                                 |
+| `fit_quality_card.{png,fig}`           | Shared view 3, final render                                 |
+| `result.mat`                           | The full `result` struct                                    |
 
 The run ID is `result.timestamp_utc` rendered as `yyyyMMddTHHmmssZ`.

@@ -67,10 +67,13 @@
 **Prevention:** Ensured the `.github/workflows/docker-security-scan.yml` is enabled by removing its `.disabled` extension so that Trivy runs on every PR and push.
 
 ## 2024-04-24 - Fix SQL Injection Vulnerability in Recording Library
+
 **Vulnerability:** String-based query construction with `f-strings` in `get_unique_values` (Bandit B608).
 **Learning:** Even when input is validated against a whitelist, security scanners will flag string-based SQL query construction. Using a hardcoded mapping of query strings eliminates both the actual risk and the static analysis warnings.
 **Prevention:** Use hardcoded SQL query maps for column names (which cannot be parameterized in standard SQL bindings) instead of dynamic string construction.
+
 ## 2026-01-20 - Fix SQL Injection in recording_library.py
+
 **Vulnerability:** String-based query construction allows potential SQL injection (Bandit B608).
 **Learning:** For dynamic column selection where parameterization is not possible, hardcoded query mapping prevents SQL injection and satisfies static analysis without needing nosec annotations.
 **Prevention:** Use dictionary mapping with static SQL strings for queries that depend on variable column names.
@@ -80,14 +83,19 @@
 **Vulnerability:** Subprocess `shell=True` (Bandit B604) flagged in testing files intentionally checking security blocks.
 **Learning:** Static analysis tools flag intentional security failures in tests unless explicitly suppressed.
 **Prevention:** Added `# nosec` annotations to intentional `shell=True` tests.
+
 ## 2024-04-27 - Command Injection Risk in Process Worker
+
 **Vulnerability:** Direct use of `subprocess.Popen` without command validation in `ProcessWorker`.
 **Learning:** Raw subprocess calls can allow arbitrary command injection if unsanitized inputs are provided as command arguments.
 **Prevention:** Always use the custom `secure_popen` wrapper from `src.shared.python.security.secure_subprocess` which provides validation against allowed commands and prevents dangerous arguments like `shell=True`.
+
 ## 2024-05-09 - [Insecure Deserialization in Imitation Learning Models]
+
 **Vulnerability:** Arbitrary Code Execution via `np.load(..., allow_pickle=True)`
 **Learning:** Legacy ML saving routines (`_bc.py`, `_gail.py`) directly dumped nested dictionaries (neural net layers, training config) into `.npz` files, which mandated `allow_pickle=True` to reload. This creates a critical insecure deserialization vulnerability.
 **Prevention:** Always flatten complex objects before saving. Serialize dictionaries or configurations into JSON strings, and extract individual layer weights (`W`, `b`) into separate numpy arrays with a primitive naming schema (`layer_0_W`, `layer_0_b`). This pattern completely eliminates the need for Python pickling during deserialization.
+
 ## 2024-05-15 - Insecure Deserialization via np.load
 
 **Vulnerability:** Found uses of `np.load` without explicitly passing `allow_pickle=False` when loading `.npy` and `.npz` files (e.g., in `src/shared/python/physics/_topography_io.py`, `src/shared/python/pose_interchange/pose_io.py`, `src/engines/physics_engines/putting_green/python/_green_loader.py`, `src/engines/physics_engines/putting_green/python/_surface_io.py`).

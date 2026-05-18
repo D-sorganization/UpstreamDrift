@@ -15,7 +15,7 @@ Two side-by-side 3D plots:
 
 A shared playback control. The two views are tied to the same time slider so the eye sees them tracking (or drifting).
 
-A small inset shows the per-frame error vector (drawn from the simulated to the measured clubhead) so you can see *where* the fit is failing.
+A small inset shows the per-frame error vector (drawn from the simulated to the measured clubhead) so you can see _where_ the fit is failing.
 
 ### View 2 — Error timecourse
 
@@ -68,15 +68,15 @@ Saved as both `.png` (for PRs) and `.fig` (for interactive inspection).
 
 ## Optional / option-specific views
 
-| View | Owner | Purpose |
-|---|---|---|
-| **Optimizer progress dashboard** | Option 1 | `fmincon` iterations: cost vs iter, gradient norm, step size; updated live |
-| **Multi-start parallel-coords** | Option 1 | One line per starting point; coloured by final cost; reveals which basins are explored |
-| **Surrogate training curves** | Option 2 | Train/val loss; learning rate; validation RMSE on held-out trials |
-| **Surrogate-vs-truth residuals** | Option 2 | Histogram of `f_θ(coeffs) - truth_kinematics` across the validation set |
-| **Latent space projection** | Option 3 | t-SNE/UMAP of the inverse model's latent — useful for spotting mode collapse |
-| **Round-trip residuals** | Option 3 | `‖truth - sim(g_φ(truth))‖` per trial — the only honest measure of an inverse model |
-| **Engine-side adapter trace** | Option 4 | Per-call latency; correctness vs MATLAB-direct on a fixed regression suite |
+| View                             | Owner    | Purpose                                                                                |
+| -------------------------------- | -------- | -------------------------------------------------------------------------------------- |
+| **Optimizer progress dashboard** | Option 1 | `fmincon` iterations: cost vs iter, gradient norm, step size; updated live             |
+| **Multi-start parallel-coords**  | Option 1 | One line per starting point; coloured by final cost; reveals which basins are explored |
+| **Surrogate training curves**    | Option 2 | Train/val loss; learning rate; validation RMSE on held-out trials                      |
+| **Surrogate-vs-truth residuals** | Option 2 | Histogram of `f_θ(coeffs) - truth_kinematics` across the validation set                |
+| **Latent space projection**      | Option 3 | t-SNE/UMAP of the inverse model's latent — useful for spotting mode collapse           |
+| **Round-trip residuals**         | Option 3 | `‖truth - sim(g_φ(truth))‖` per trial — the only honest measure of an inverse model    |
+| **Engine-side adapter trace**    | Option 4 | Per-call latency; correctness vs MATLAB-direct on a fixed regression suite             |
 
 ## Styling
 

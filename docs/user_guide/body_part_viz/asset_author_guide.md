@@ -114,7 +114,7 @@ regeneratable from source.
    helper is a convenient wrapper around scaled icospheres.
 
 2. **Register it in the builder list.** Add `("pelvis",
-   _build_pelvis)` to the iteration list at the bottom of the file.
+_build_pelvis)` to the iteration list at the bottom of the file.
    The script writes `<name>.stl` for each entry; the order does
    not matter.
 
@@ -180,19 +180,19 @@ dataset and the licence:
 The repo ships under MIT (see `LICENSE` in the repo root). Asset
 licences must be compatible with redistribution.
 
-| OK | Notes |
-| --- | --- |
-| CC0-1.0 | Recommended for procedural shapes. |
+| OK                       | Notes                                    |
+| ------------------------ | ---------------------------------------- |
+| CC0-1.0                  | Recommended for procedural shapes.       |
 | MIT, Apache-2.0, BSD-2/3 | Fine; note attribution in `LICENSES.md`. |
-| CC-BY-4.0 | Fine; note attribution in `LICENSES.md`. |
-| Public domain | Fine. |
+| CC-BY-4.0                | Fine; note attribution in `LICENSES.md`. |
+| Public domain            | Fine.                                    |
 
-| Not OK | Why |
-| --- | --- |
-| CC-BY-NC-* | Forbids commercial use; we cannot guarantee that. |
-| CC-BY-ND | Forbids derivatives, including the OBB re-centring + decimation. |
-| GPL / AGPL | Viral; would force the entire repo to that licence. |
-| "Free for personal use" | Not a real licence. |
+| Not OK                  | Why                                                              |
+| ----------------------- | ---------------------------------------------------------------- |
+| CC-BY-NC-\*             | Forbids commercial use; we cannot guarantee that.                |
+| CC-BY-ND                | Forbids derivatives, including the OBB re-centring + decimation. |
+| GPL / AGPL              | Viral; would force the entire repo to that licence.              |
+| "Free for personal use" | Not a real licence.                                              |
 
 If you are not sure, ask in the PR.
 

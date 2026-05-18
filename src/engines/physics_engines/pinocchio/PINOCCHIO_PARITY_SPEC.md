@@ -8,7 +8,7 @@
 >
 > **Status:** spec; implementation tracked in
 > [PINOCCHIO_ISSUES.md](./PINOCCHIO_ISSUES.md). Existing surface area is
-> substantial but **parallel to** rather than *aligned with* the Simscape
+> substantial but **parallel to** rather than _aligned with_ the Simscape
 > motion-matching pipeline. The plan is **decouple-and-rewire**, not
 > ground-up rewrite.
 >
@@ -62,7 +62,7 @@ src/engines/physics_engines/pinocchio/
 └── tests/{integration,validation}/__init__.py    (placeholders only)
 ```
 
-91 Python files in total; the *motion-matching-relevant* set is the seven
+91 Python files in total; the _motion-matching-relevant_ set is the seven
 above, plus `dtack/sim/dynamics.py` and `pinocchio_physics_engine.py` which
 host the lower-level forward-dynamics primitives we'll wrap.
 
@@ -75,10 +75,10 @@ and a 2-DOF elbow/forearm split — see §3.1 and §3.2 below, and the
 canonical totals in `shared/models/golf_humanoid_topology.yaml`).
 The diff is exclusively in the right-hand subtree at line ~585:
 
-| URDF | Right after `hand_left` link |
-|---|---|
-| `golfer.urdf` | `hand_left_to_club_shaft` (fixed) → `club_shaft` link → `club_shaft_to_club_head` (fixed) → `club_head` link → only then `hand_left_to_fingers_left` |
-| `golfer_ik.urdf` | `hand_left_to_fingers_left` directly — no club at all |
+| URDF             | Right after `hand_left` link                                                                                                                         |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `golfer.urdf`    | `hand_left_to_club_shaft` (fixed) → `club_shaft` link → `club_shaft_to_club_head` (fixed) → `club_head` link → only then `hand_left_to_fingers_left` |
+| `golfer_ik.urdf` | `hand_left_to_fingers_left` directly — no club at all                                                                                                |
 
 The two are otherwise byte-for-byte identical. Implication:
 
@@ -86,7 +86,7 @@ The two are otherwise byte-for-byte identical. Implication:
   the lead hand; matches the Simscape "club locked to mid-hands frame"
   assumption).
 - `golfer_ik.urdf` is the **IK-target model** for `dual_hand_ik_solver.py`,
-  which solves *both hands as end-effectors* tracking external grip frames
+  which solves _both hands as end-effectors_ tracking external grip frames
   on a free-floating club. The club is intentionally absent so its position
   does not constrain IK redundantly.
 
@@ -112,7 +112,7 @@ addresses this.
 **Verdict — is this surface-equivalent to `fit_swing_*`?**
 
 **No.** `motion_training` is the Pinocchio counterpart to
-*`option3_inverse_nn` data preparation* — it produces ground-truth body
+_`option3_inverse_nn` data preparation_ — it produces ground-truth body
 poses from measured club motion. It does **not** fit polynomial torque
 coefficients. There is no cost function, no optimiser, no
 `SimOut/FitResult` round-trip. The cross-engine `fit_swing_pinocchio`
@@ -140,9 +140,9 @@ def fit_torque_poly(t: ArrayLike, tau: ArrayLike, degree: int = 6) -> NDArray:
     return np.polyfit(t, tau, degree)
 ```
 
-It takes a *known* per-joint torque time series and fits an N-th degree
+It takes a _known_ per-joint torque time series and fits an N-th degree
 polynomial to it (numpy `polyfit`). Useful as a **post-hoc smoother** on a
-measured/computed torque signal, but *unrelated* to motion-matching.
+measured/computed torque signal, but _unrelated_ to motion-matching.
 
 **Plan:** keep the file (it has utility), but **rename and document its
 scope** so no one mistakes it for the fitter. The new
@@ -153,9 +153,9 @@ optimiser. Renaming tracked under PIN-RENAME-TORQUE-UTIL.
 
 The `data/club_swing_dataset/` directory has **paired files**:
 
-| Pair | Contents (inferred from filename + ClubDataGUI_v2.m) |
-|---|---|
-| `<name>.mat` | Raw club-marker positions/rotations at native MoCap rate |
+| Pair                          | Contents (inferred from filename + ClubDataGUI_v2.m)              |
+| ----------------------------- | ----------------------------------------------------------------- |
+| `<name>.mat`                  | Raw club-marker positions/rotations at native MoCap rate          |
 | `<name>_targetKinematics.mat` | Resampled, smoothed target kinematics for downstream optimisation |
 
 Naming convention: `{TW,GW}_{ProV1,wiffle}` = subjects Tiger Woods (TW) /
@@ -163,16 +163,16 @@ Generic Walker (GW), balls ProV1 / wiffle. Four trials per category.
 
 **Mapping to canonical `ClubTarget`:**
 
-| ClubTarget field | Rob Neal source |
-|---|---|
-| `time` | derived from MoCap sample rate (240 Hz default) + `_targetKinematics` time vector |
-| `grip` | grip-marker XYZ from `_targetKinematics.mat` (already in metres after parser) |
-| `grip_quat` | grip-frame rotation matrix → quaternion (parser handles 3×3 → quat) |
-| `clubhead` | club-face-marker XYZ from `_targetKinematics.mat` |
-| `club_quat` | club-face rotation → quaternion |
-| `impact_idx` | `events.impact` from `SwingEventMarkers` (parser extracts from sheet metadata) |
-| `events` | `{address, top, impact, finish, club_head_speed}` from event markers |
-| `source` | new: `SourceProvenance(loader='club_swing', file=<name>.mat, sheet=<name>)` |
+| ClubTarget field | Rob Neal source                                                                   |
+| ---------------- | --------------------------------------------------------------------------------- |
+| `time`           | derived from MoCap sample rate (240 Hz default) + `_targetKinematics` time vector |
+| `grip`           | grip-marker XYZ from `_targetKinematics.mat` (already in metres after parser)     |
+| `grip_quat`      | grip-frame rotation matrix → quaternion (parser handles 3×3 → quat)               |
+| `clubhead`       | club-face-marker XYZ from `_targetKinematics.mat`                                 |
+| `club_quat`      | club-face rotation → quaternion                                                   |
+| `impact_idx`     | `events.impact` from `SwingEventMarkers` (parser extracts from sheet metadata)    |
+| `events`         | `{address, top, impact, finish, club_head_speed}` from event markers              |
+| `source`         | new: `SourceProvenance(loader='club_swing', file=<name>.mat, sheet=<name>)`       |
 
 **Coverage gap:** the canonical Python loader at
 `shared/python/motion_matching/load_club_target.py` (issue PARITY-LOADERS)
@@ -271,10 +271,11 @@ def simulate_with_coefficients(
     """
 ```
 
-**Why analytical Jacobians matter here, but not yet:** for *forward*
+**Why analytical Jacobians matter here, but not yet:** for _forward_
 simulation we don't need them. They become the killer feature in §2.3.
 
 **Pinocchio-specific implementation notes:**
+
 - Use `pin.aba` (Articulated Body Algorithm), O(n), not `pin.crba` + solve.
 - Cache `pin.Data` per worker thread (not safe across threads).
 - For energy diagnostics in `SimOut`, sum
@@ -331,6 +332,7 @@ Initial guess strategy:
    primary fitter.
 
 Acceptance:
+
 - Recovery test (synthesize → fit → recover) on a held-out theta with
   noise σ=0 must hit `‖θ_recovered − θ_truth‖∞ < 1e-3`.
 - Wall-clock target: **< 5 s per swing fit** end-to-end on a single
@@ -410,14 +412,15 @@ Six tests, written **before** the implementation in the same PR:
 The 23-DOF internal chain in `golfer.urdf` is a **superset** of the
 canonical 19-actuated Simscape kinematic breakdown: Hip(6) + Spine via
 lumbar1/2/3 (each 2 DOF intermediate + revolute = 6) + Torso/thorax1-3 (3)
-+ Scapula (2 each) + Shoulder-gimbal (3 each) + Elbow (1 each) + Wrist
-intermediate+revolute (2 each) + fingers (1 each, decorative). Total 23
-internal revolute DOFs + 6 base = **29 v-velocities** (and 30 q-positions
-because the floating base contributes 7 q vs 6 v). The +4 over the
-canonical 25 v-velocity Simscape count come from the two decorative
-finger joints and the elbow/forearm 2-DOF split (vs Simscape's lumped
-1 DOF). The canonical count lives in
-`shared/models/golf_humanoid_topology.yaml` (PR #4150).
+
+- Scapula (2 each) + Shoulder-gimbal (3 each) + Elbow (1 each) + Wrist
+  intermediate+revolute (2 each) + fingers (1 each, decorative). Total 23
+  internal revolute DOFs + 6 base = **29 v-velocities** (and 30 q-positions
+  because the floating base contributes 7 q vs 6 v). The +4 over the
+  canonical 25 v-velocity Simscape count come from the two decorative
+  finger joints and the elbow/forearm 2-DOF split (vs Simscape's lumped
+  1 DOF). The canonical count lives in
+  `shared/models/golf_humanoid_topology.yaml` (PR #4150).
 
 When `shared/models/golf_humanoid_dimensions.yaml` lands (issue
 PARITY-DIMENSIONS), wire `scripts/build_humanoid_models.py` to regenerate
@@ -426,19 +429,19 @@ authoritative for Pinocchio.
 
 ### 3.2 Joint mapping to the Simscape 25-DOF (6 floating + 19 actuated) chain
 
-| Simscape joint name | Pinocchio joint(s) | Notes |
-|---|---|---|
-| `Pelvis_RX/RY/RZ/TX/TY/TZ` | floating-base joint | Add per §2.1 |
-| `Hip_FlexExt`, `Hip_AbAd`, `Hip_IntExt` (per side) | `pelvis_to_<side>_thigh_gimbal_z` + `..._gimbal_y` + `..._to_<side>_thigh` | 3-DOF gimbal split as expected |
-| `Knee_FlexExt` (per side) | `<side>_thigh_to_<side>_shank` | 1 DOF |
-| `Ankle_PlantarDorsiflex`, `Ankle_InvEv` (per side) | `<side>_shank_to_<side>_foot_intermediate` + `<side>_foot_intermediate_to_<side>_foot` | 2 DOF |
-| `Lumbar1/2/3_FlexExt`, `Lumbar*_Lateral` | `pelvis_to_lumbar1_intermediate` + `lumbar1_intermediate_to_lumbar1`, repeat ×3 | 2 DOF per lumbar segment |
-| `Thorax1/2/3_<axis>` | `lumbar3_to_thorax1`, `thorax1_to_thorax2`, `thorax2_to_thorax3` | 1 DOF each (matches Simscape) |
-| `Scapula_<side>_X/Y` | `thorax3_to_scapula_<side>_intermediate` + `scapula_<side>_intermediate_to_scapula_<side>` | 2 DOF per side |
-| `Shoulder_<side>_X/Y/Z` | `scapula_<side>_to_upper_arm_<side>_gimbal_z` + `..._gimbal_y` + `..._to_upper_arm_<side>` | 3 DOF gimbal |
-| `Elbow_<side>_FlexExt` | `upper_arm_<side>_to_forearm_<side>_intermediate` + `forearm_<side>_intermediate_to_forearm_<side>` | NOTE Pinocchio uses 2 DOFs here for prono-supination + elbow flexion; Simscape lumps as 1 — see PIN-DOF-AUDIT |
-| `Wrist_<side>_FlexExt`, `Wrist_<side>_RadUlnar` | `forearm_<side>_to_hand_<side>_intermediate` + `hand_<side>_intermediate_to_hand_<side>` | 2 DOF |
-| (decorative, no Simscape twin) | `hand_<side>_to_fingers_<side>` | locked or weakly constrained at q=0 |
+| Simscape joint name                                | Pinocchio joint(s)                                                                                  | Notes                                                                                                         |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `Pelvis_RX/RY/RZ/TX/TY/TZ`                         | floating-base joint                                                                                 | Add per §2.1                                                                                                  |
+| `Hip_FlexExt`, `Hip_AbAd`, `Hip_IntExt` (per side) | `pelvis_to_<side>_thigh_gimbal_z` + `..._gimbal_y` + `..._to_<side>_thigh`                          | 3-DOF gimbal split as expected                                                                                |
+| `Knee_FlexExt` (per side)                          | `<side>_thigh_to_<side>_shank`                                                                      | 1 DOF                                                                                                         |
+| `Ankle_PlantarDorsiflex`, `Ankle_InvEv` (per side) | `<side>_shank_to_<side>_foot_intermediate` + `<side>_foot_intermediate_to_<side>_foot`              | 2 DOF                                                                                                         |
+| `Lumbar1/2/3_FlexExt`, `Lumbar*_Lateral`           | `pelvis_to_lumbar1_intermediate` + `lumbar1_intermediate_to_lumbar1`, repeat ×3                     | 2 DOF per lumbar segment                                                                                      |
+| `Thorax1/2/3_<axis>`                               | `lumbar3_to_thorax1`, `thorax1_to_thorax2`, `thorax2_to_thorax3`                                    | 1 DOF each (matches Simscape)                                                                                 |
+| `Scapula_<side>_X/Y`                               | `thorax3_to_scapula_<side>_intermediate` + `scapula_<side>_intermediate_to_scapula_<side>`          | 2 DOF per side                                                                                                |
+| `Shoulder_<side>_X/Y/Z`                            | `scapula_<side>_to_upper_arm_<side>_gimbal_z` + `..._gimbal_y` + `..._to_upper_arm_<side>`          | 3 DOF gimbal                                                                                                  |
+| `Elbow_<side>_FlexExt`                             | `upper_arm_<side>_to_forearm_<side>_intermediate` + `forearm_<side>_intermediate_to_forearm_<side>` | NOTE Pinocchio uses 2 DOFs here for prono-supination + elbow flexion; Simscape lumps as 1 — see PIN-DOF-AUDIT |
+| `Wrist_<side>_FlexExt`, `Wrist_<side>_RadUlnar`    | `forearm_<side>_to_hand_<side>_intermediate` + `hand_<side>_intermediate_to_hand_<side>`            | 2 DOF                                                                                                         |
+| (decorative, no Simscape twin)                     | `hand_<side>_to_fingers_<side>`                                                                     | locked or weakly constrained at q=0                                                                           |
 
 The forearm-elbow split is the only known mismatch. Issue
 **PIN-DOF-AUDIT** validates the kinematic equivalence by FK at three test
@@ -469,16 +472,17 @@ the file header. Issue **PIN-DOC-URDF-SCOPE** lands the comment block.
 
 Detailed bodies in [PINOCCHIO_ISSUES.md](./PINOCCHIO_ISSUES.md).
 
-| # | ID | Title | Size | Depends |
-|---|---|---|---|---|
-| 1 | PIN-MODEL-GRIP-FRAME | Add mid-hands frame + floating base to `golfer.urdf`; document scope of both URDFs | S | — |
-| 2 | PIN-SIMULATE | `simulate_with_coefficients.py` with RK4 + ABA forward simulator | M | #1 |
-| 3 | PIN-TDD-ORACLE | `synthesize_target_from_coefficients.py` + recovery test infra | S | #2 |
-| 4 | PIN-FIT-DRIVER | `fit_swing_pinocchio.py` — LM + analytical Jacobians; **the killer-feature issue** | L | #2, #3, PARITY-LOADERS |
-| 5 | PIN-LOADER-ADAPTER | `club_trajectory_parser.to_club_target()` + Rob Neal `_targetKinematics.mat` reader | S | PARITY-LOADERS (read-only) |
-| 6 | PIN-VIZ-AND-LEADERBOARD | Wire `visualize_fit.py` + emit `results/<trial>/pinocchio.json` for the cross-engine leaderboard | S | #4 |
+| #   | ID                      | Title                                                                                            | Size | Depends                    |
+| --- | ----------------------- | ------------------------------------------------------------------------------------------------ | ---- | -------------------------- |
+| 1   | PIN-MODEL-GRIP-FRAME    | Add mid-hands frame + floating base to `golfer.urdf`; document scope of both URDFs               | S    | —                          |
+| 2   | PIN-SIMULATE            | `simulate_with_coefficients.py` with RK4 + ABA forward simulator                                 | M    | #1                         |
+| 3   | PIN-TDD-ORACLE          | `synthesize_target_from_coefficients.py` + recovery test infra                                   | S    | #2                         |
+| 4   | PIN-FIT-DRIVER          | `fit_swing_pinocchio.py` — LM + analytical Jacobians; **the killer-feature issue**               | L    | #2, #3, PARITY-LOADERS     |
+| 5   | PIN-LOADER-ADAPTER      | `club_trajectory_parser.to_club_target()` + Rob Neal `_targetKinematics.mat` reader              | S    | PARITY-LOADERS (read-only) |
+| 6   | PIN-VIZ-AND-LEADERBOARD | Wire `visualize_fit.py` + emit `results/<trial>/pinocchio.json` for the cross-engine leaderboard | S    | #4                         |
 
 Additional housekeeping issues (not counted toward the six):
+
 - **PIN-RENAME-TORQUE-UTIL** — rename `torque_fitting.py` → `poly_torque_util.py`.
 - **PIN-DOF-AUDIT** — validate joint-mapping equivalence vs Simscape at 3 poses.
 - **PIN-DOC-URDF-SCOPE** — add header comments to both URDFs.
@@ -543,13 +547,13 @@ disabled with `python -O` for production deployments where appropriate.
 
 ### 5.3 DRY plan — what gets pushed to `shared/python/motion_matching/`
 
-| Lift target | Currently lives at | Promote to |
-|---|---|---|
-| `ClubTarget`, `SimOut`, `FitResult` dataclasses | nowhere — to be authored | `shared/python/motion_matching/types.py` (issue PARITY-LOADERS) |
-| `compute_cost(sim_out, target, opts)` | `compute_cost.m` MATLAB only | `shared/python/motion_matching/cost.py` (issue PARITY-LOADERS) |
-| Polynomial torque evaluation `tau(t; theta)` | inline in §2.2 plan | `shared/python/motion_matching/poly_torque.py` |
-| Rob Neal `*.mat` reader | `motion_training/club_trajectory_parser.py` | `shared/python/motion_matching/loaders/club_swing_dataset.py` (issue PARITY-LOADERS-ROBNEAL) |
-| Error timecourse / fit quality plots | `motion_training/motion_visualizer.py` (partial) | `shared/python/motion_matching/plot_*.py` |
+| Lift target                                     | Currently lives at                               | Promote to                                                                                   |
+| ----------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| `ClubTarget`, `SimOut`, `FitResult` dataclasses | nowhere — to be authored                         | `shared/python/motion_matching/types.py` (issue PARITY-LOADERS)                              |
+| `compute_cost(sim_out, target, opts)`           | `compute_cost.m` MATLAB only                     | `shared/python/motion_matching/cost.py` (issue PARITY-LOADERS)                               |
+| Polynomial torque evaluation `tau(t; theta)`    | inline in §2.2 plan                              | `shared/python/motion_matching/poly_torque.py`                                               |
+| Rob Neal `*.mat` reader                         | `motion_training/club_trajectory_parser.py`      | `shared/python/motion_matching/loaders/club_swing_dataset.py` (issue PARITY-LOADERS-ROBNEAL) |
+| Error timecourse / fit quality plots            | `motion_training/motion_visualizer.py` (partial) | `shared/python/motion_matching/plot_*.py`                                                    |
 
 The Pinocchio engine then **imports** all of the above; engine-bespoke
 code is exclusively the forward-sim wrapper, the LM driver, and the
@@ -591,13 +595,13 @@ the integrator inner loop.
 
 ### 6.2 Targets (acceptance criteria)
 
-| Metric | Target | Issue |
-|---|---|---|
-| Single forward sim wall-clock | < 100 ms | PIN-SIMULATE |
-| Single swing fit (LM, analytical Jacobians) | **< 5 s** | PIN-FIT-DRIVER |
-| Recovery error on noise-free synthetic | `‖θ_rec − θ_truth‖∞ < 1e-3` | PIN-TDD-ORACLE / PIN-FIT-DRIVER |
-| Real-trial RMSE (Rob Neal) | grip < 5 cm | PIN-FIT-DRIVER |
-| Equivalence vs Simscape on fixed θ | grip RMSE ≤ 5 mm at 3 poses | PARITY-EQUIVALENCE |
+| Metric                                      | Target                      | Issue                           |
+| ------------------------------------------- | --------------------------- | ------------------------------- |
+| Single forward sim wall-clock               | < 100 ms                    | PIN-SIMULATE                    |
+| Single swing fit (LM, analytical Jacobians) | **< 5 s**                   | PIN-FIT-DRIVER                  |
+| Recovery error on noise-free synthetic      | `‖θ_rec − θ_truth‖∞ < 1e-3` | PIN-TDD-ORACLE / PIN-FIT-DRIVER |
+| Real-trial RMSE (Rob Neal)                  | grip < 5 cm                 | PIN-FIT-DRIVER                  |
+| Equivalence vs Simscape on fixed θ          | grip RMSE ≤ 5 mm at 3 poses | PARITY-EQUIVALENCE              |
 
 ### 6.3 Why these are realistic
 
@@ -616,8 +620,8 @@ the integrator inner loop.
 ### 7.1 `motion_training/` — refactor or rewrite?
 
 **Verdict: refactor.** The IK solver and club-trajectory parser are
-solid. The orchestration (training_pipeline.py) is misnamed but the
-pipeline graph is correct for the *IK-seed* role it will play in the new
+solid. The orchestration (training*pipeline.py) is misnamed but the
+pipeline graph is correct for the \_IK-seed* role it will play in the new
 architecture. Specifically:
 
 - `MotionTrainingPipeline.run()` becomes the implementation of the
@@ -706,4 +710,4 @@ sweep.
 
 ---
 
-*Last updated 2026-05-06; tracks PR `feat/pinocchio-parity-spec`.*
+_Last updated 2026-05-06; tracks PR `feat/pinocchio-parity-spec`._

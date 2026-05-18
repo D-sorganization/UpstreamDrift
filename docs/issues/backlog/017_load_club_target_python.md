@@ -92,11 +92,13 @@ Use `@precondition` and `@postcondition` from
 `src.shared.python.core.contracts`:
 
 Preconditions:
+
 - `path.exists()`.
 - For Excel: `sheet in {"TW_wiffle", "TW_ProV1", "GW_wiffle", "GW_ProV11"}`.
 - `opts.sample_rate_hz > 0`.
 
 Postconditions (each loader must satisfy `CLUB_IK_SPEC.md` §"Validation rules"):
+
 - `time` strictly increasing, starts at 0.
 - All trajectory arrays share `time`'s row count.
 - No NaN/Inf in position arrays; magnitudes plausible.

@@ -45,7 +45,7 @@
     "hand": {
       "mass_ratio": 0.0061,
       "length_ratio": 0.108,
-      "com_proximal_ratio": 0.7900,
+      "com_proximal_ratio": 0.79,
       "gyration_radii": {
         "sagittal": 0.628,
         "transverse": 0.513,

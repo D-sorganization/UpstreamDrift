@@ -40,6 +40,7 @@ This separation is foundational to GAAI.
 ### R1 — Skills Never Decide
 
 A skill MUST NOT:
+
 - interpret user intent
 - make product or technical decisions
 - decide priorities or strategies
@@ -50,10 +51,12 @@ All decisions belong exclusively to **agents**.
 ### R2 — Explicit Invocation Only
 
 A skill MUST:
+
 - be explicitly selected by an agent
 - receive all inputs explicitly
 
 A skill MUST NOT:
+
 - select itself
 - auto-run
 - infer when it should be invoked
@@ -67,6 +70,7 @@ Tooling MAY expose skills, but **only agents decide invocation**.
 Every skill MUST execute in a **fully isolated context window**.
 
 This means:
+
 - no inheritance of agent reasoning
 - no access to previous skill contexts
 - no shared memory between executions
@@ -76,6 +80,7 @@ A skill only sees its declared inputs — nothing else.
 ### R4 — No Implicit Context Access
 
 A skill MUST NOT:
+
 - auto-load memory
 - read rules autonomously
 - access backlog state
@@ -89,10 +94,12 @@ All context must be **explicitly passed by the agent**.
 ### R5 — Strict Input Contract
 
 A skill MUST:
+
 - declare its expected inputs
 - fail explicitly if inputs are missing
 
 A skill MUST NOT:
+
 - guess missing information
 - enrich inputs creatively
 - expand scope beyond inputs
@@ -100,11 +107,13 @@ A skill MUST NOT:
 ### R6 — Explicit Outputs Only
 
 A skill MAY:
+
 - produce structured data
 - generate artefacts
 - return execution results
 
 A skill MUST NOT:
+
 - modify memory directly
 - update backlog state
 - persist decisions
@@ -117,6 +126,7 @@ All outputs return to the **invoking agent**.
 ### R7 — No Autonomous Skill Chaining
 
 A skill MUST NOT:
+
 - invoke another skill
 - retry itself autonomously
 - orchestrate execution flows
@@ -126,6 +136,7 @@ Only agents may chain skills.
 ## 🚫 Forbidden Behaviors (Hard Fail)
 
 The following behaviors are **explicitly forbidden**:
+
 - implicit context loading
 - hidden state retention
 - creative interpretation

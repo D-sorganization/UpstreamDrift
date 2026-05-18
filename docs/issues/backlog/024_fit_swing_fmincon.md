@@ -89,11 +89,13 @@ end
 ## DbC contract
 
 Preconditions (`arguments` block):
+
 - `target (1,1) struct {validators.mustHaveFields(target, ["time","butt","clubhead","club_quat","impact_idx"])}`
 - `options (1,1) struct = default_fmincon_options()`
 - If `options.x0` is numeric: finite vector of length `n_joints*7` within bounds.
 
 Postconditions (`assert(...)` after solve):
+
 - `result.final_rmse_m >= 0` and finite.
 - `result.coefficients` within bounds from `generateRandomCoefficients.m`.
 - All required provenance fields present (per `CODING_STANDARDS.md`).

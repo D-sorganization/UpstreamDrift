@@ -90,9 +90,11 @@ Live tests marked `@pytest.mark.live_simulation`; offline tests stub
 ## DbC contract
 
 Preconditions:
+
 - `suite_root.exists()`.
 
 Postconditions:
+
 - Returned engine is non-None.
 - `engine.model_name != ""`.
 

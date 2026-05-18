@@ -23,19 +23,19 @@ When **not** to use it:
 
 ## What it ships
 
-| File | Purpose |
-|---|---|
-| `surrogate.py` | `SwingSurrogate(nn.Module)` — the differentiable forward model. Skeleton lives in this folder; agents fill in. |
-| `train.py` | `train_surrogate(dataset, config) -> TrainedSurrogate`. AdamW + cosine schedule + mixed precision. |
-| `invert.py` | `fit_swing_via_surrogate(target, surrogate, opts) -> FitResult`. Adam over coefficients with bound projection + restarts. |
-| `validate.py` | `validate_against_simscape(result, sim_fn) -> ValidationReport`. Round-trips every fit through the true forward simulator. |
-| `dataset.py` | Dataset adapter wrapping `shared/load_sweep_dataset` (#019) into a PyTorch `Dataset`. |
-| `config.py` | `TrainConfig`, `InvertOptions`, `SurrogateConfig` dataclasses. |
-| `fit_swing_surrogate.m` | MATLAB shim that calls the Python entry-point via `pyrunfile`. |
-| `tests/` | `pytest` suite per [TESTING.md](TESTING.md). |
-| `models/` | Trained checkpoint store. Contents `.gitignore`'d (only `.gitkeep` is tracked). |
-| `notebooks/` | Exploration notebooks. Contents `.gitignore`'d. |
-| `visualization/` | Option-specific viz (training curves, residual histograms, inversion progress). |
+| File                    | Purpose                                                                                                                    |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `surrogate.py`          | `SwingSurrogate(nn.Module)` — the differentiable forward model. Skeleton lives in this folder; agents fill in.             |
+| `train.py`              | `train_surrogate(dataset, config) -> TrainedSurrogate`. AdamW + cosine schedule + mixed precision.                         |
+| `invert.py`             | `fit_swing_via_surrogate(target, surrogate, opts) -> FitResult`. Adam over coefficients with bound projection + restarts.  |
+| `validate.py`           | `validate_against_simscape(result, sim_fn) -> ValidationReport`. Round-trips every fit through the true forward simulator. |
+| `dataset.py`            | Dataset adapter wrapping `shared/load_sweep_dataset` (#019) into a PyTorch `Dataset`.                                      |
+| `config.py`             | `TrainConfig`, `InvertOptions`, `SurrogateConfig` dataclasses.                                                             |
+| `fit_swing_surrogate.m` | MATLAB shim that calls the Python entry-point via `pyrunfile`.                                                             |
+| `tests/`                | `pytest` suite per [TESTING.md](TESTING.md).                                                                               |
+| `models/`               | Trained checkpoint store. Contents `.gitignore`'d (only `.gitkeep` is tracked).                                            |
+| `notebooks/`            | Exploration notebooks. Contents `.gitignore`'d.                                                                            |
+| `visualization/`        | Option-specific viz (training curves, residual histograms, inversion progress).                                            |
 
 The contracts are in [INTERFACES.md](INTERFACES.md). The algorithm is in [APPROACH.md](APPROACH.md). The assumptions are in [ASSUMPTIONS.md](ASSUMPTIONS.md). How to run it is in [RUNBOOK.md](RUNBOOK.md). What to test is in [TESTING.md](TESTING.md). The dataset dependency is in [DATA.md](DATA.md).
 
@@ -77,12 +77,12 @@ Option 2 consumes — does not re-implement:
 
 ## GitHub issues for Option 2
 
-| # | Title | Notes |
-|---|---|---|
-| **#028** | `SwingSurrogate` model + `train_surrogate` | Architecture + training loop. Acceptance: held-out RMSE < 5 mm. See [APPROACH.md](APPROACH.md). |
-| **#029** | `fit_swing_via_surrogate` (Adam over coefficients) | Differentiable inversion with bound projection + K-restart. Acceptance: recovers known coefficients on synthetic targets. |
-| **#030** | `validate_against_simscape` + hybrid Option-2→Option-1 handoff | Round-trip oracle and warm-start to `fmincon`. |
-| **#031** | `fit_swing_surrogate.m` MATLAB shim + viz | `pyrunfile` integration; training curves; residual hists; inversion progress plot. |
+| #        | Title                                                          | Notes                                                                                                                     |
+| -------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **#028** | `SwingSurrogate` model + `train_surrogate`                     | Architecture + training loop. Acceptance: held-out RMSE < 5 mm. See [APPROACH.md](APPROACH.md).                           |
+| **#029** | `fit_swing_via_surrogate` (Adam over coefficients)             | Differentiable inversion with bound projection + K-restart. Acceptance: recovers known coefficients on synthetic targets. |
+| **#030** | `validate_against_simscape` + hybrid Option-2→Option-1 handoff | Round-trip oracle and warm-start to `fmincon`.                                                                            |
+| **#031** | `fit_swing_surrogate.m` MATLAB shim + viz                      | `pyrunfile` integration; training curves; residual hists; inversion progress plot.                                        |
 
 Shared infrastructure consumed by Option 2: issues #013, #014, #015, #017, #018, #019, #023.
 

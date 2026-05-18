@@ -46,6 +46,7 @@ The OLD `SegmentSpec` struct stays as a **deprecated** shim that calls into `Seg
 ## Tests
 
 `tests/unit/engines/simscape/three_d_gui/test_segments_tab_v2.py`:
+
 - Open the Segments tab; assert Shape column is a combobox with 6 options.
 - Select Cylinder; assert the rendered artist is a `Poly3DCollection` from the renderer.
 - Import a synthetic STL; assert the new segment uses `MeshShape`.

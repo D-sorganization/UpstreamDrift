@@ -14,21 +14,21 @@ The four options consume the same contracts. This folder holds the specs (so any
 
 ## Code that will live here (one PR per file, all tracked by issues)
 
-| File | Issue | Description |
-|---|---|---|
-| `compute_cost.m` / `cost.py` | #015, #016 | Reference cost function (MATLAB and Python; numerically equivalent) |
-| `compute_total_work.m` | #015 | Regularizer; integrates `Σ|τ·ω|` |
-| `load_club_target_excel.m` | #013 | Wiffle xlsx → `target` struct |
-| `load_club_target_c3d.m` | #013 | C3D → `target` struct (validates the one untested capture) |
-| `synthesize_target_from_coefficients.m` | #014 | TDD oracle: known θ → target |
-| `simulate_with_coefficients.m` | #018 | The single Simscape-call wrapper. Every option uses this — DRY |
-| `load_sweep_dataset.py` | #019 | Parquet loader for the random-sweep dataset |
-| `+validators/` | #015 | `mustHaveFields`, `mustBeFiniteVector`, etc. |
-| `plot_trajectory_overlay.m` | #020 | View 1 |
-| `animate_trajectory_overlay.m` | #020 | View 1 animated |
-| `plot_error_timecourse.m` | #021 | View 2 |
-| `plot_fit_quality_card.m` | #022 | View 3 |
-| `leaderboard.m` | #023 | Cross-option comparison table |
+| File                                    | Issue      | Description                                                         |
+| --------------------------------------- | ---------- | ------------------------------------------------------------------- | --- | --- |
+| `compute_cost.m` / `cost.py`            | #015, #016 | Reference cost function (MATLAB and Python; numerically equivalent) |
+| `compute_total_work.m`                  | #015       | Regularizer; integrates `Σ                                          | τ·ω | `   |
+| `load_club_target_excel.m`              | #013       | Wiffle xlsx → `target` struct                                       |
+| `load_club_target_c3d.m`                | #013       | C3D → `target` struct (validates the one untested capture)          |
+| `synthesize_target_from_coefficients.m` | #014       | TDD oracle: known θ → target                                        |
+| `simulate_with_coefficients.m`          | #018       | The single Simscape-call wrapper. Every option uses this — DRY      |
+| `load_sweep_dataset.py`                 | #019       | Parquet loader for the random-sweep dataset                         |
+| `+validators/`                          | #015       | `mustHaveFields`, `mustBeFiniteVector`, etc.                        |
+| `plot_trajectory_overlay.m`             | #020       | View 1                                                              |
+| `animate_trajectory_overlay.m`          | #020       | View 1 animated                                                     |
+| `plot_error_timecourse.m`               | #021       | View 2                                                              |
+| `plot_fit_quality_card.m`               | #022       | View 3                                                              |
+| `leaderboard.m`                         | #023       | Cross-option comparison table                                       |
 
 ## How the contracts compose
 

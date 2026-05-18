@@ -27,6 +27,7 @@ Raise unit + integration coverage of `src/engines/Simscape_Multibody_Models/3D_G
 Same as the tracking issue (run coverage, identify gaps, add unit + Qt-offscreen tests). The per-directory `conftest.py` (already on `main`) sets up `sys.modules['src']` so the engine package and the repo's `src.shared.*` both resolve.
 
 For Qt-driven tests:
+
 - `QT_QPA_PLATFORM=offscreen`
 - matplotlib `Agg` backend
 - `QApplication.instance() or QApplication([])`

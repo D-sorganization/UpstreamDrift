@@ -26,6 +26,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate after `delivery-high-level-plan` when the Story meets at least one of:
+
 - Touches more than 3 files or modules
 - Has cross-cutting concerns (shared state, API contracts, migrations)
 - Requires a specific implementation order to avoid breakage
@@ -40,12 +41,13 @@ For simple Stories (1-2 files, clear criteria, no order constraints), `delivery-
 
 **CRITICAL — Anti-Collision Guard (MUST execute before writing any output file):**
 Before writing `contexts/artefacts/plans/{id}.execution-plan.md` (or `{id}.plan-blocked.md`), check if the target file already exists on disk:
+
 - If it does NOT exist → proceed normally.
 - If it DOES exist → **read the existing file first**. Then decide:
   - If the existing content is from a **different entity** (different story ID, different epic) → **STOP immediately**, surface the ID collision to the human, do not proceed.
   - If the existing content is from the **same entity** and an update is warranted → proceed, but preserve any human edits or prior findings that remain relevant. Treat this as an **update**, not a replacement.
   - If the existing content is identical or still valid → skip writing, report "no changes needed".
-This guard prevents the silent data loss incident of 2026-03-17 where concurrent sessions overwrote story files.
+    This guard prevents the silent data loss incident of 2026-03-17 where concurrent sessions overwrote story files.
 
 ### Phase 1 — Codebase Mapping
 
@@ -102,14 +104,15 @@ This guard prevents the silent data loss incident of 2026-03-17 where concurrent
 
 ## Implementation Sequence
 
-| Step | Action | Files | Checkpoint |
-|------|--------|-------|------------|
-| 1 | {action} | {files} | {test or review gate} |
-| 2 | {action} | {files} | {test or review gate} |
+| Step | Action   | Files   | Checkpoint            |
+| ---- | -------- | ------- | --------------------- |
+| 1    | {action} | {files} | {test or review gate} |
+| 2    | {action} | {files} | {test or review gate} |
 
 ## Edge Cases
 
 ### {Acceptance Criterion 1}
+
 - Happy path: {behavior}
 - Boundary: {condition → expected behavior}
 - Error path: {condition → expected behavior}
@@ -122,9 +125,9 @@ This guard prevents the silent data loss incident of 2026-03-17 where concurrent
 
 ## Risk Register
 
-| Risk | Severity | Mitigation |
-|------|----------|------------|
-| {risk} | high/medium/low | {action} |
+| Risk   | Severity        | Mitigation |
+| ------ | --------------- | ---------- |
+| {risk} | high/medium/low | {action}   |
 
 ## Rollback Boundaries
 
@@ -149,6 +152,7 @@ Saves to `contexts/artefacts/plans/{id}.execution-plan.md`.
 ## Non-Goals
 
 This skill must NOT:
+
 - Write any code
 - Modify the Story's acceptance criteria or scope
 - Make architectural decisions not already implied by the high-level plan

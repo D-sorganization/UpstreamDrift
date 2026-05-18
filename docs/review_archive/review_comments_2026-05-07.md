@@ -4,7 +4,7 @@ Generated: 2026-05-07T22:45:03.366487
 
 ## Reviewer (chatgpt-codex-connector[bot]) (3 comments)
 
-### PR #4417: src/tools/starting_pose_matcher/__init__.py:16
+### PR #4417: src/tools/starting_pose_matcher/**init**.py:16
 
 Actionable: No
 Has Suggestion: No
@@ -48,4 +48,3 @@ Has Suggestion: No
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4417#discussion_r3206539612)
 
 ---
-

@@ -31,6 +31,7 @@ outputs:
 Activate after Delivery to verify outcomes, not just outputs. Prevents "output without outcome."
 
 Use when:
+
 - Success metrics were defined in the PRD or Story
 - Delivery is complete and runtime data is available
 - Objective quality gates are required
@@ -67,6 +68,7 @@ Use when:
 ## Non-Goals
 
 This skill must NOT:
+
 - Redefine success metrics post-delivery
 - Make product decisions about gaps
 - Substitute for `qa-review`

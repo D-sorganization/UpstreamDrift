@@ -108,6 +108,7 @@ exportgraphics(plot_fit_quality_card(result, target),       fullfile(run_dir, "f
 **Expected wall clock:** ~5–15 minutes on a 16-core workstation with `parsim` enabled.
 
 **Tuning notes:**
+
 - If RMSE plateaus above ~5 mm, increase `opts.multistart_n` to 16 or extend `opts.max_function_evals`.
 - If the optimized swing has implausibly high peak power (> 2 kW per joint), increase `opts.cost.lambda` to `5e-4` and re-run.
 - If the orientation error is large but position error is small, increase `opts.cost.w_orientation` from 0.1 to 0.5.
@@ -183,15 +184,15 @@ The shared leaderboard (`motion_matching/shared/leaderboard.m`, issue #023) scan
 
 ## 5. Troubleshooting
 
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| `error("validator:unknownField",...)` | Typo in `opts` field | Inspect `default_option1_options()`; bad fields must error per [TESTING.md](TESTING.md#test_options_struct_contract). |
-| RMSE never goes below ~5 cm | Time alignment off | Inspect `target.time` and `target.impact_idx`; re-load with `time_alignment = "address"`. |
-| One coefficient pinned to bound | Bounds too tight, or regularizer wrong | Check the bottom-right panel of the `OptimizationProgressDashboard`. |
-| `fmincon` stalls at the start | `w_anchor_impact` too low; wrong basin | Increase `opts.cost.w_anchor_impact` to 50 for the first 25% of iterations (see [APPROACH.md — Impact-anchor schedule](APPROACH.md#impact-anchor-schedule)). |
-| `surrogateopt` runs but doesn't improve | `d` too high for `surrogateopt` | Switch to `fit_swing_hybrid` with `global_stage = "particleswarm"`. |
-| Sim diverges (penalty path hit) | `theta` outside the integrator's stable region | Check `result.iter_history.fval == options.penalty_on_sim_failure`; widen bounds or restart. |
-| Cache stale | New simulator commit | Delete `motion_matching/results/cache/`. Cache is keyed by git commit but if you committed without re-running, manually clear it. |
+| Symptom                                 | Likely cause                                   | Fix                                                                                                                                                          |
+| --------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `error("validator:unknownField",...)`   | Typo in `opts` field                           | Inspect `default_option1_options()`; bad fields must error per [TESTING.md](TESTING.md#test_options_struct_contract).                                        |
+| RMSE never goes below ~5 cm             | Time alignment off                             | Inspect `target.time` and `target.impact_idx`; re-load with `time_alignment = "address"`.                                                                    |
+| One coefficient pinned to bound         | Bounds too tight, or regularizer wrong         | Check the bottom-right panel of the `OptimizationProgressDashboard`.                                                                                         |
+| `fmincon` stalls at the start           | `w_anchor_impact` too low; wrong basin         | Increase `opts.cost.w_anchor_impact` to 50 for the first 25% of iterations (see [APPROACH.md — Impact-anchor schedule](APPROACH.md#impact-anchor-schedule)). |
+| `surrogateopt` runs but doesn't improve | `d` too high for `surrogateopt`                | Switch to `fit_swing_hybrid` with `global_stage = "particleswarm"`.                                                                                          |
+| Sim diverges (penalty path hit)         | `theta` outside the integrator's stable region | Check `result.iter_history.fval == options.penalty_on_sim_failure`; widen bounds or restart.                                                                 |
+| Cache stale                             | New simulator commit                           | Delete `motion_matching/results/cache/`. Cache is keyed by git commit but if you committed without re-running, manually clear it.                            |
 
 ## 6. Verification before opening a PR
 

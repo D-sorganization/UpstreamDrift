@@ -73,11 +73,13 @@ def hybrid_surrogate_polish(target: "ClubTarget", config: HybridConfig) -> Hybri
 ## DbC contract
 
 Preconditions:
+
 - `target` is a `ClubTarget`.
 - `config.surrogate_inversion.surrogate_checkpoint` exists.
 - `config.output_dir` is creatable.
 
 Postconditions:
+
 - `result.final_rmse_m <= result.surrogate_rmse_m`.
 - `result.output_mat_path` exists on disk and contains all provenance fields per
   `CODING_STANDARDS.md`.

@@ -3,12 +3,12 @@
 The response time for a reported or detected vulnerability depends on its
 severity (CVSS) and the affected dependency tier.
 
-| Severity \ Tier | core | extended | experimental | archived |
-| --- | --- | --- | --- | --- |
-| Critical (>=9.0) | 24h | 48h | 7d or remove from list | n/a |
-| High (7.0-8.9) | 7d | 14d | 30d or remove | n/a |
-| Medium (4.0-6.9) | 30d | 60d | 90d | n/a |
-| Low (<4.0) | next release | best effort | best effort | n/a |
+| Severity \ Tier  | core         | extended    | experimental           | archived |
+| ---------------- | ------------ | ----------- | ---------------------- | -------- |
+| Critical (>=9.0) | 24h          | 48h         | 7d or remove from list | n/a      |
+| High (7.0-8.9)   | 7d           | 14d         | 30d or remove          | n/a      |
+| Medium (4.0-6.9) | 30d          | 60d         | 90d                    | n/a      |
+| Low (<4.0)       | next release | best effort | best effort            | n/a      |
 
 Response means one of the following exists before the deadline: a tracking issue,
 a remediation PR, or a documented waiver that follows the waiver rules below.

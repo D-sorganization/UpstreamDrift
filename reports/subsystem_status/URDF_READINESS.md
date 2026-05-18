@@ -13,14 +13,14 @@ The URDF / Character Builder subsystem is currently in **ALPHA** status. This re
 
 ### Current State at a Glance
 
-| Metric                          | Target | Actual      | Status     |
-| ------------------------------- | ------ | ----------- | ---------- |
-| Code Quality (ruff violations)  | 0      | See CI      | ⚠️ Pending |
-| Test Suite Coverage             | ≥90%   | TBD         | ⚠️ Pending |
-| Tests Passing                   | ≥100   | TBD         | ⚠️ Pending |
-| URDF Generation Success Rate    | 100%   | TBD         | ⚠️ Pending |
-| Cross-Engine Load Success       | 4/4    | TBD         | ⚠️ Pending |
-| Documentation Current           | Yes    | Yes         | ✅ Pass    |
+| Metric                         | Target | Actual | Status     |
+| ------------------------------ | ------ | ------ | ---------- |
+| Code Quality (ruff violations) | 0      | See CI | ⚠️ Pending |
+| Test Suite Coverage            | ≥90%   | TBD    | ⚠️ Pending |
+| Tests Passing                  | ≥100   | TBD    | ⚠️ Pending |
+| URDF Generation Success Rate   | 100%   | TBD    | ⚠️ Pending |
+| Cross-Engine Load Success      | 4/4    | TBD    | ⚠️ Pending |
+| Documentation Current          | Yes    | Yes    | ✅ Pass    |
 
 ---
 
@@ -30,33 +30,33 @@ The URDF / Character Builder subsystem is currently in **ALPHA** status. This re
 
 ### Test Counts by Category
 
-| Category                                    | Count | Passing | Failing | Skipped |
-| ------------------------------------------- | ----- | ------- | ------- | ------- |
-| Body Parameters Tests                       | TBD   | TBD     | TBD     | TBD     |
-| Anthropometry Tests                         | TBD   | TBD     | TBD     | TBD     |
-| URDF Generator Tests                        | TBD   | TBD     | TBD     | TBD     |
-| Inertia Calculator Tests                    | TBD   | TBD     | TBD     | TBD     |
-| Mesh Generator Tests                        | TBD   | TBD     | TBD     | TBD     |
-| Integration Tests                           | TBD   | TBD     | TBD     | TBD     |
-| Cross-Engine Load Tests (MuJoCo/Drake/Pin)  | TBD   | TBD     | TBD     | TBD     |
-| **Total**                                   | **0** | **0**   | **0**   | **0**   |
+| Category                                   | Count | Passing | Failing | Skipped |
+| ------------------------------------------ | ----- | ------- | ------- | ------- |
+| Body Parameters Tests                      | TBD   | TBD     | TBD     | TBD     |
+| Anthropometry Tests                        | TBD   | TBD     | TBD     | TBD     |
+| URDF Generator Tests                       | TBD   | TBD     | TBD     | TBD     |
+| Inertia Calculator Tests                   | TBD   | TBD     | TBD     | TBD     |
+| Mesh Generator Tests                       | TBD   | TBD     | TBD     | TBD     |
+| Integration Tests                          | TBD   | TBD     | TBD     | TBD     |
+| Cross-Engine Load Tests (MuJoCo/Drake/Pin) | TBD   | TBD     | TBD     | TBD     |
+| **Total**                                  | **0** | **0**   | **0**   | **0**   |
 
 ### Known Failing Tests
 
 <!-- CI_AUTO_UPDATE: List of currently failing tests -->
 
-| Test Path | Test Name | Failure Reason | First Seen |
-| --------- | --------- | -------------- | ---------- |
-| *No known failures* | - | - | - |
+| Test Path           | Test Name | Failure Reason | First Seen |
+| ------------------- | --------- | -------------- | ---------- |
+| _No known failures_ | -         | -              | -          |
 
 ### Test Coverage Gaps
 
-| Module | Current Coverage | Target Coverage | Gap |
-| ------ | ---------------- | --------------- | --- |
-| humanoid_character_builder.core | TBD% | 90% | TBD% |
-| humanoid_character_builder.generators | TBD% | 90% | TBD% |
-| humanoid_character_builder.mesh | TBD% | 90% | TBD% |
-| humanoid_character_builder.interfaces | TBD% | 90% | TBD% |
+| Module                                | Current Coverage | Target Coverage | Gap  |
+| ------------------------------------- | ---------------- | --------------- | ---- |
+| humanoid_character_builder.core       | TBD%             | 90%             | TBD% |
+| humanoid_character_builder.generators | TBD%             | 90%             | TBD% |
+| humanoid_character_builder.mesh       | TBD%             | 90%             | TBD% |
+| humanoid_character_builder.interfaces | TBD%             | 90%             | TBD% |
 
 ---
 
@@ -64,30 +64,30 @@ The URDF / Character Builder subsystem is currently in **ALPHA** status. This re
 
 ### Implemented Features
 
-| Feature | Status | Test Coverage | Notes |
-| ------- | ------ | ------------- | ----- |
-| Body Parameters API | ✅ Complete | Yes | Height, mass, muscularity, gender factor |
-| Segment Anthropometry | ✅ Complete | Yes | Mass ratios, dimensions estimation |
-| URDF Generation | ✅ Complete | Yes | Full humanoid URDF export |
-| Primitive Mesh Generation | ✅ Complete | Yes | Capsule/box primitive meshes |
-| Preset System | ✅ Complete | Yes | Athletic, average, heavy presets |
-| Quick URDF API | ✅ Complete | Yes | `quick_urdf()` function |
+| Feature                   | Status      | Test Coverage | Notes                                    |
+| ------------------------- | ----------- | ------------- | ---------------------------------------- |
+| Body Parameters API       | ✅ Complete | Yes           | Height, mass, muscularity, gender factor |
+| Segment Anthropometry     | ✅ Complete | Yes           | Mass ratios, dimensions estimation       |
+| URDF Generation           | ✅ Complete | Yes           | Full humanoid URDF export                |
+| Primitive Mesh Generation | ✅ Complete | Yes           | Capsule/box primitive meshes             |
+| Preset System             | ✅ Complete | Yes           | Athletic, average, heavy presets         |
+| Quick URDF API            | ✅ Complete | Yes           | `quick_urdf()` function                  |
 
 ### In Progress Features
 
-| Feature | Progress | Expected Completion | Blockers |
-| ------- | -------- | ------------------- | -------- |
-| SMPL-X Integration | 50% | 2026-Q3 | External dependency licensing |
-| MakeHuman Import | 30% | 2026-Q3 | File format conversion pipeline |
-| Frankenstein Editor | 20% | 2026-Q4 | UI framework selection |
+| Feature             | Progress | Expected Completion | Blockers                        |
+| ------------------- | -------- | ------------------- | ------------------------------- |
+| SMPL-X Integration  | 50%      | 2026-Q3             | External dependency licensing   |
+| MakeHuman Import    | 30%      | 2026-Q3             | File format conversion pipeline |
+| Frankenstein Editor | 20%      | 2026-Q4             | UI framework selection          |
 
 ### Missing Features (Roadmap)
 
-| Feature | Priority | Target Release | Description |
-| ------- | -------- | -------------- | ----------- |
-| Advanced Mesh Generation | High | 2026-Q3 | Custom mesh import/export |
-| Muscle Attachment Points | Medium | 2026-Q4 | For biomechanics simulation |
-| Clothing/Equipment Layers | Low | 2027-Q1 | Optional visual layers |
+| Feature                   | Priority | Target Release | Description                 |
+| ------------------------- | -------- | -------------- | --------------------------- |
+| Advanced Mesh Generation  | High     | 2026-Q3        | Custom mesh import/export   |
+| Muscle Attachment Points  | Medium   | 2026-Q4        | For biomechanics simulation |
+| Clothing/Equipment Layers | Low      | 2027-Q1        | Optional visual layers      |
 
 ---
 
@@ -97,19 +97,19 @@ The URDF / Character Builder subsystem is currently in **ALPHA** status. This re
 
 | Issue ID | Description | Impact | Workaround |
 | -------- | ----------- | ------ | ---------- |
-| None | - | - | - |
+| None     | -           | -      | -          |
 
 ### Medium Priority Issues
 
-| Issue ID | Description | Impact | Workaround |
-| -------- | ----------- | ------ | ---------- |
-| #4552 | User guide quickstart | Documentation | See PR #4574 |
+| Issue ID | Description           | Impact        | Workaround   |
+| -------- | --------------------- | ------------- | ------------ |
+| #4552    | User guide quickstart | Documentation | See PR #4574 |
 
 ### Low Priority Issues
 
 | Issue ID | Description | Impact | Workaround |
 | -------- | ----------- | ------ | ---------- |
-| N/A | - | - | - |
+| N/A      | -           | -      | -          |
 
 ---
 
@@ -117,11 +117,11 @@ The URDF / Character Builder subsystem is currently in **ALPHA** status. This re
 
 ### Active CI Gates
 
-| Gate Name | Status | Enforcement |
-| --------- | ------ | ----------- |
-| URDF Schema Validation | ⚠️ Planned | PR merge |
-| Cross-Engine Load Test | ⚠️ Planned | Nightly |
-| API Contract Tests | ⚠️ Planned | PR merge |
+| Gate Name              | Status     | Enforcement |
+| ---------------------- | ---------- | ----------- |
+| URDF Schema Validation | ⚠️ Planned | PR merge    |
+| Cross-Engine Load Test | ⚠️ Planned | Nightly     |
+| API Contract Tests     | ⚠️ Planned | PR merge    |
 
 ### Planned CI Gates (Not Yet Enforced)
 
@@ -133,12 +133,12 @@ The URDF / Character Builder subsystem is currently in **ALPHA** status. This re
 
 ## Documentation Status
 
-| Document | Status | Last Updated | Location |
-| -------- | ------ | ------------ | -------- |
-| Character Builder Quickstart | ✅ Complete | 2026-05-08 | `docs/user_guide/character_builder_quickstart.md` |
-| API Reference | ⚠️ Partial | TBD | `docs/api/character_builder.md` |
-| Architecture Guide | ❌ Missing | - | - |
-| Contributing Guide | ❌ Missing | - | - |
+| Document                     | Status      | Last Updated | Location                                          |
+| ---------------------------- | ----------- | ------------ | ------------------------------------------------- |
+| Character Builder Quickstart | ✅ Complete | 2026-05-08   | `docs/user_guide/character_builder_quickstart.md` |
+| API Reference                | ⚠️ Partial  | TBD          | `docs/api/character_builder.md`                   |
+| Architecture Guide           | ❌ Missing  | -            | -                                                 |
+| Contributing Guide           | ❌ Missing  | -            | -                                                 |
 
 ---
 
@@ -147,6 +147,7 @@ The URDF / Character Builder subsystem is currently in **ALPHA** status. This re
 ### Current Status: ALPHA
 
 **Definition:** The URDF subsystem is in ALPHA status, meaning:
+
 - Core functionality is implemented and working
 - Test coverage is being expanded
 - Documentation is in progress

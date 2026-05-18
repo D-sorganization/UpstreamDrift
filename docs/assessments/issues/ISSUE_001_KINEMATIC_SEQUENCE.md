@@ -11,11 +11,13 @@ The implementation of "Kinematic Sequence" analysis in the codebase has been ide
 ### Problem Areas
 
 1.  **`src/shared/python/analysis/pca_analysis.py`**:
+
     - Contains `efficiency_score = matches / len(expected_order)`.
     - This is a direct implementation of the patented sequencing score.
     - **Status:** Active / Critical.
 
 2.  **`src/shared/python/biomechanics/kinematic_sequence.py`**:
+
     - Renamed to `SegmentTimingAnalyzer` (Good).
     - But alias `KinematicSequenceAnalyzer` still exists (Acceptable for compat, but risky).
 
@@ -30,8 +32,8 @@ The implementation of "Kinematic Sequence" analysis in the codebase has been ide
 - [ ] **Code Removal:** Remove the `efficiency_score` calculation from `pca_analysis.py`.
 - [ ] **Refactor:** Implement a non-infringing scoring metric (e.g., "Energy Transfer Efficiency" or "Timing Consistency").
 - [ ] **UI Updates:** Rename all user-facing strings from "Kinematic Sequence" to "Segment Timing" or "Movement Sequence".
-    - [ ] Update `src/shared/python/dashboard/window.py`
-    - [ ] Update `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/advanced_gui_methods.py`
+  - [ ] Update `src/shared/python/dashboard/window.py`
+  - [ ] Update `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/advanced_gui_methods.py`
 - [ ] **Documentation:** Ensure no claims of "Kinematic Sequence Efficiency" are made in docs.
 
 ## References

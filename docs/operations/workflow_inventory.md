@@ -28,11 +28,11 @@ follow-ups.
 The repo mixes **three** conventions. This is the primary orphan/overlap risk
 flagged in #2717.
 
-| Convention          | Count | Example                       |
-| ------------------- | ----- | ----------------------------- |
-| `Title-Case-Dashed` | 7     | `Bot-CI-Trigger.yml`          |
-| `Jules-*` (fleet)   | 32    | `Jules-Archivist.yml`         |
-| `kebab-case`        | 18    | `ci-standard.yml`             |
+| Convention          | Count | Example               |
+| ------------------- | ----- | --------------------- |
+| `Title-Case-Dashed` | 7     | `Bot-CI-Trigger.yml`  |
+| `Jules-*` (fleet)   | 32    | `Jules-Archivist.yml` |
+| `kebab-case`        | 18    | `ci-standard.yml`     |
 
 Goal state (follow-up): collapse everything to `kebab-case` with a small set of
 prefixes — `ci-*`, `docs-*`, `jules-*`, `pr-*`, `ops-*`, `release-*`.
@@ -48,97 +48,97 @@ Triggers abbreviations: `PR` = `pull_request`, `P` = `push`,
 
 ### Group: CI / Quality Gates (kebab-case)
 
-| File                        | `name:` field                  | Triggers             | Purpose                                                  |
-| --------------------------- | ------------------------------ | -------------------- | -------------------------------------------------------- |
-| `ci-standard.yml`           | CI Standard                    | P, PR, WD, S         | Primary quality gate (ruff, format, tests, coverage).    |
-| `ci-optional-stack.yml`     | CI Optional Stack              | P, PR, WD, S         | Optional engine stack (Drake / Pinocchio / MuJoCo).      |
-| `ci-failure-digest.yml`     | Weekly CI Failure Digest       | WD                   | Weekly rollup of failing required checks.                |
-| `spec-check.yml`            | Spec Check                     | PR                   | `SPEC.md` freshness / specification-exempt gate.         |
-| `critical-files-guard.yml`  | Critical Files Guard           | PR                   | Blocks unauthorised edits to critical files.             |
-| `docker-security-scan.yml`  | Docker Security Scan           | P, PR, S, WD         | Trivy / grype scan on published images.                  |
-| `docker-size-gates.yml`     | Docker Size and Health Check   | P, WD                | Image-size budget enforcement.                           |
-| `heavy-tests-opt-in.yml`    | Heavy Integration Tests        | WD, S                | Opt-in long-running integration suite.                   |
-| `nightly-cross-engine.yml`  | Nightly Cross-Engine Validation| S, WD                | Nightly cross-engine parity checks.                      |
+| File                       | `name:` field                   | Triggers     | Purpose                                               |
+| -------------------------- | ------------------------------- | ------------ | ----------------------------------------------------- |
+| `ci-standard.yml`          | CI Standard                     | P, PR, WD, S | Primary quality gate (ruff, format, tests, coverage). |
+| `ci-optional-stack.yml`    | CI Optional Stack               | P, PR, WD, S | Optional engine stack (Drake / Pinocchio / MuJoCo).   |
+| `ci-failure-digest.yml`    | Weekly CI Failure Digest        | WD           | Weekly rollup of failing required checks.             |
+| `spec-check.yml`           | Spec Check                      | PR           | `SPEC.md` freshness / specification-exempt gate.      |
+| `critical-files-guard.yml` | Critical Files Guard            | PR           | Blocks unauthorised edits to critical files.          |
+| `docker-security-scan.yml` | Docker Security Scan            | P, PR, S, WD | Trivy / grype scan on published images.               |
+| `docker-size-gates.yml`    | Docker Size and Health Check    | P, WD        | Image-size budget enforcement.                        |
+| `heavy-tests-opt-in.yml`   | Heavy Integration Tests         | WD, S        | Opt-in long-running integration suite.                |
+| `nightly-cross-engine.yml` | Nightly Cross-Engine Validation | S, WD        | Nightly cross-engine parity checks.                   |
 
 ### Group: Docs (kebab-case)
 
-| File                  | `name:` field     | Triggers | Purpose                                    |
-| --------------------- | ----------------- | -------- | ------------------------------------------ |
-| `docs-ci.yml`         | Docs CI           | PR       | Docs build (Sphinx/MkDocs) on PRs.         |
-| `docs-governance.yml` | Docs Governance   | PR, P    | Docs quality / placeholder / link gate.    |
+| File                  | `name:` field   | Triggers | Purpose                                 |
+| --------------------- | --------------- | -------- | --------------------------------------- |
+| `docs-ci.yml`         | Docs CI         | PR       | Docs build (Sphinx/MkDocs) on PRs.      |
+| `docs-governance.yml` | Docs Governance | PR, P    | Docs quality / placeholder / link gate. |
 
 ### Group: PR Plumbing (kebab-case)
 
-| File                  | `name:` field    | Triggers | Purpose                                       |
-| --------------------- | ---------------- | -------- | --------------------------------------------- |
-| `auto-update-prs.yml` | Auto-Update PRs  | P        | Rebase open PRs onto freshly-merged main.     |
-| `pr-auto-labeler.yml` | PR Auto-Labeler  | PR       | Applies scope / size labels to PRs.           |
-| `stale-cleanup.yml`   | Stale PR/Issue Cleanup | S, WD | Closes stale issues and PRs.                |
+| File                  | `name:` field          | Triggers | Purpose                                   |
+| --------------------- | ---------------------- | -------- | ----------------------------------------- |
+| `auto-update-prs.yml` | Auto-Update PRs        | P        | Rebase open PRs onto freshly-merged main. |
+| `pr-auto-labeler.yml` | PR Auto-Labeler        | PR       | Applies scope / size labels to PRs.       |
+| `stale-cleanup.yml`   | Stale PR/Issue Cleanup | S, WD    | Closes stale issues and PRs.              |
 
 ### Group: Release / Build (kebab-case)
 
-| File                | `name:` field | Triggers       | Purpose                         |
-| ------------------- | ------------- | -------------- | ------------------------------- |
-| `release.yml`       | Release       | P              | Tag-driven release pipeline.    |
-| `tauri-build.yml`   | Tauri Build   | P, PR, R, WD   | Tauri desktop app build matrix. |
+| File              | `name:` field | Triggers     | Purpose                         |
+| ----------------- | ------------- | ------------ | ------------------------------- |
+| `release.yml`     | Release       | P            | Tag-driven release pipeline.    |
+| `tauri-build.yml` | Tauri Build   | P, PR, R, WD | Tauri desktop app build matrix. |
 
 ### Group: Ops / Misc (kebab-case)
 
-| File                           | `name:` field              | Triggers | Purpose                                              |
-| ------------------------------ | -------------------------- | -------- | ---------------------------------------------------- |
-| `agent-metrics-dashboard.yml`  | Agent Metrics Dashboard    | WD       | Emits fleet / agent metrics.                         |
-| `vendor-freshness.yml`         | Vendor Submodule Freshness | S, WD    | Checks vendored submodules for upstream drift.       |
+| File                          | `name:` field              | Triggers | Purpose                                        |
+| ----------------------------- | -------------------------- | -------- | ---------------------------------------------- |
+| `agent-metrics-dashboard.yml` | Agent Metrics Dashboard    | WD       | Emits fleet / agent metrics.                   |
+| `vendor-freshness.yml`        | Vendor Submodule Freshness | S, WD    | Checks vendored submodules for upstream drift. |
 
 ### Group: Title-Case-Dashed (legacy; rename candidates)
 
-| File                                | `name:` field                     | Triggers         | Purpose                                                   |
-| ----------------------------------- | --------------------------------- | ---------------- | --------------------------------------------------------- |
-| `Bot-CI-Trigger.yml`                | Bot CI Trigger                    | PR, S, WD        | Re-runs failed CI on bot PRs.                             |
-| `Code-Metrics.yml`                  | Code Metrics                      | WD               | Emits LOC / complexity metrics.                           |
-| `Comment-to-Issue-Converter.yml`    | Convert Review Comments to Issues | PR, RVC, WD      | Converts actionable review comments into issues.          |
-| `PR-Comment-Responder.yml`          | PR Comment Collector              | IC, RVC          | Aggregates PR comments for downstream bots.               |
-| `Maintenance-Global-Control.yml`    | Maintenance Global Control        | WD               | Global kill-switch for maintenance workflows.             |
-| `Manual-Run-All.yml`                | Manual Run All Workflows          | WD               | Operator-triggered fanout for recovery scenarios.         |
-| `Nightly-Doc-Organizer.yml`         | Nightly Documentation Organizer   | WD               | Tidies docs tree on a nightly (currently WD-only) basis.  |
+| File                             | `name:` field                     | Triggers    | Purpose                                                  |
+| -------------------------------- | --------------------------------- | ----------- | -------------------------------------------------------- |
+| `Bot-CI-Trigger.yml`             | Bot CI Trigger                    | PR, S, WD   | Re-runs failed CI on bot PRs.                            |
+| `Code-Metrics.yml`               | Code Metrics                      | WD          | Emits LOC / complexity metrics.                          |
+| `Comment-to-Issue-Converter.yml` | Convert Review Comments to Issues | PR, RVC, WD | Converts actionable review comments into issues.         |
+| `PR-Comment-Responder.yml`       | PR Comment Collector              | IC, RVC     | Aggregates PR comments for downstream bots.              |
+| `Maintenance-Global-Control.yml` | Maintenance Global Control        | WD          | Global kill-switch for maintenance workflows.            |
+| `Manual-Run-All.yml`             | Manual Run All Workflows          | WD          | Operator-triggered fanout for recovery scenarios.        |
+| `Nightly-Doc-Organizer.yml`      | Nightly Documentation Organizer   | WD          | Tidies docs tree on a nightly (currently WD-only) basis. |
 
 ### Group: Jules fleet — dispatched via `Jules-Control-Tower.yml` (32 files)
 
 These are the workforce workflows that the Control Tower orchestrates. Renaming
 must happen in lockstep with Control Tower's regex / filename dispatch.
 
-| File                                    | Triggers             |
-| --------------------------------------- | -------------------- |
-| `Jules-Control-Tower.yml`               | P, PR, WR, S, WD     |
-| `Jules-Archivist.yml`                   | WC                   |
-| `Jules-Assessment-AutoFix.yml`          | WD                   |
-| `Jules-Assessment-Generator.yml`        | WC, WD               |
-| `Jules-Assessment-Remediator.yml`       | WD                   |
-| `Jules-Auto-Assign-Issues.yml`          | I                    |
-| `Jules-Auto-Repair.yml`                 | WC, WD               |
-| `Jules-Code-Quality-Fixer.yml`          | WC, WD               |
-| `Jules-Code-Quality-Reviewer.yml`       | WC, WD               |
-| `Jules-Comment-Processor.yml`           | WC, WD, S            |
-| `Jules-Completist.yml`                  | WC, WD               |
-| `Jules-Comprehensive-Assessment.yml`    | WC, WD               |
-| `Jules-Conflict-Fix.yml`                | WC                   |
-| `Jules-Consolidator.yml`                | WD                   |
-| `Jules-Critics-Comments.yml`            | WC, WD               |
-| `Jules-Documentation-Auditor.yml`       | WC, WD               |
-| `Jules-Documentation-Scribe.yml`        | WC                   |
-| `Jules-Hotfix-Creator.yml`              | WC                   |
-| `Jules-Issue-Mention-Handler.yml`       | IC                   |
-| `Jules-Issue-Resolver.yml`              | WC, WD               |
-| `Jules-Laymans-Terms-Writer.yml`        | WC, WD               |
-| `Jules-PR-AutoFix.yml`                  | WR, WD               |
-| `Jules-PR-Cleanup.yml`                  | S, WD                |
-| `Jules-PR-Compiler.yml`                 | WC, WD, S            |
-| `Jules-Physics-Auditor.yml`             | WC, WD               |
-| `Jules-Review-Fix.yml`                  | RV                   |
-| `Jules-Sentinel.yml`                    | WC, WD               |
-| `Jules-Supersede-Check.yml`             | P, WD                |
-| `Jules-Tech-Custodian.yml`              | WC                   |
-| `Jules-Tech-Debt-Assessor.yml`          | WC, WD               |
-| `Jules-Test-Generator.yml`              | WC                   |
+| File                                 | Triggers         |
+| ------------------------------------ | ---------------- |
+| `Jules-Control-Tower.yml`            | P, PR, WR, S, WD |
+| `Jules-Archivist.yml`                | WC               |
+| `Jules-Assessment-AutoFix.yml`       | WD               |
+| `Jules-Assessment-Generator.yml`     | WC, WD           |
+| `Jules-Assessment-Remediator.yml`    | WD               |
+| `Jules-Auto-Assign-Issues.yml`       | I                |
+| `Jules-Auto-Repair.yml`              | WC, WD           |
+| `Jules-Code-Quality-Fixer.yml`       | WC, WD           |
+| `Jules-Code-Quality-Reviewer.yml`    | WC, WD           |
+| `Jules-Comment-Processor.yml`        | WC, WD, S        |
+| `Jules-Completist.yml`               | WC, WD           |
+| `Jules-Comprehensive-Assessment.yml` | WC, WD           |
+| `Jules-Conflict-Fix.yml`             | WC               |
+| `Jules-Consolidator.yml`             | WD               |
+| `Jules-Critics-Comments.yml`         | WC, WD           |
+| `Jules-Documentation-Auditor.yml`    | WC, WD           |
+| `Jules-Documentation-Scribe.yml`     | WC               |
+| `Jules-Hotfix-Creator.yml`           | WC               |
+| `Jules-Issue-Mention-Handler.yml`    | IC               |
+| `Jules-Issue-Resolver.yml`           | WC, WD           |
+| `Jules-Laymans-Terms-Writer.yml`     | WC, WD           |
+| `Jules-PR-AutoFix.yml`               | WR, WD           |
+| `Jules-PR-Cleanup.yml`               | S, WD            |
+| `Jules-PR-Compiler.yml`              | WC, WD, S        |
+| `Jules-Physics-Auditor.yml`          | WC, WD           |
+| `Jules-Review-Fix.yml`               | RV               |
+| `Jules-Sentinel.yml`                 | WC, WD           |
+| `Jules-Supersede-Check.yml`          | P, WD            |
+| `Jules-Tech-Custodian.yml`           | WC               |
+| `Jules-Tech-Debt-Assessor.yml`       | WC, WD           |
+| `Jules-Test-Generator.yml`           | WC               |
 
 ### Archived (quarantined — not active)
 

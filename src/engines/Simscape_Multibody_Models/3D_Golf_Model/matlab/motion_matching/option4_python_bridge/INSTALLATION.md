@@ -10,14 +10,14 @@ This document is Windows-first because that is the host platform per [`CLAUDE.md
 
 The MathWorks compatibility matrix maps each MATLAB release to a small range of supported Python minor versions and to one `matlabengine` pip package version. **Pick a row first, then install matching versions of all three.**
 
-| MATLAB release | Supported Python | `matlabengine` pip version | Notes |
-|---|---|---|---|
-| **R2025b** ✅ | 3.9, 3.10, 3.11, **3.12** | `matlabengine==25.2.*` | Verified working on the dev box (May 2026). |
-| R2024a | 3.9, 3.10, **3.11** | `matlabengine==24.1.*` | Originally recommended row. |
-| R2023b | 3.9, 3.10, 3.11 | `matlabengine==23.2.*` | Also fine if R2024a not available. |
-| R2023a | 3.8, 3.9, 3.10 | `matlabengine==9.14.*` | Pre-versioning-rename. |
-| R2022b | 3.8, 3.9, 3.10 | `matlabengine==9.13.*` | Older but still supported by the `matlabengine` package. |
-| ≤ R2022a | varies | use `cd "$matlabroot/extern/engines/python" && python setup.py install` | The pre-pip era; out of scope. |
+| MATLAB release | Supported Python          | `matlabengine` pip version                                              | Notes                                                    |
+| -------------- | ------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------- |
+| **R2025b** ✅  | 3.9, 3.10, 3.11, **3.12** | `matlabengine==25.2.*`                                                  | Verified working on the dev box (May 2026).              |
+| R2024a         | 3.9, 3.10, **3.11**       | `matlabengine==24.1.*`                                                  | Originally recommended row.                              |
+| R2023b         | 3.9, 3.10, 3.11           | `matlabengine==23.2.*`                                                  | Also fine if R2024a not available.                       |
+| R2023a         | 3.8, 3.9, 3.10            | `matlabengine==9.14.*`                                                  | Pre-versioning-rename.                                   |
+| R2022b         | 3.8, 3.9, 3.10            | `matlabengine==9.13.*`                                                  | Older but still supported by the `matlabengine` package. |
+| ≤ R2022a       | varies                    | use `cd "$matlabroot/extern/engines/python" && python setup.py install` | The pre-pip era; out of scope.                           |
 
 > **Heads up — Python 3.13 / 3.14 are NOT yet supported** by any released `matlabengine` wheel as of MATLAB R2025b. If your repo's default interpreter is 3.13 or newer, install `matlabengine` into a 3.12 or 3.11 sidecar interpreter and run the Option-4 tests with that (e.g. `py -3.12 -m pytest ...` on Windows). The repo's `pyproject.toml` requires `>=3.10`, but only `<=3.12` interpreters can drive the bridge.
 

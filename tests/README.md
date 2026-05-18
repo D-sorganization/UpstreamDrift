@@ -32,20 +32,20 @@ directories below.
 
 ## Conftests
 
-| Path | Scope | Purpose |
-| --- | --- | --- |
-| `conftest.py` | session | Imports MuJoCo before collection on Windows to avoid DLL initialization crashes. |
-| `tests/conftest.py` | session/function | Adds `--tools-mode`, controls Tools path precedence, and isolates protected engine modules per test. |
-| `tests/heavy_integration/conftest.py` | session/function | Marks heavy tests as `live_simulation` and provides headless display plus engine fixtures. |
-| `tests/integration/conftest.py` | package | Re-exports shared fixture-library helpers for integration tests. |
-| `tests/parity/conftest.py` | module/function | Provides FastAPI client and fresh pendulum engine fixtures. |
-| `tests/shared_contracts/conftest.py` | session | Resolves real, vendored, or sibling Tools checkouts for shared contract tests. |
-| `tests/unit/conftest.py` | function | Mocks optional native dependencies and resets those mocks between unit tests. |
-| `tests/unit/dashboard/conftest.py` | package | Documents dashboard test path handling; no fixtures. |
-| `tests/unit/engines/*/conftest.py` | package | Documents engine test path handling or mocks missing optional engine modules. |
-| `tests/unit/engines/simscape/*/conftest.py` | package | Documents Simscape test path handling; no fixtures. |
-| `tests/unit/plotting/conftest.py` | package | Pre-mocks PyQt6 modules to avoid Qt DLL crashes in plotting tests. |
-| `tests/unit/tools/humanoid_character_builder/conftest.py` | function | Skips torch-dependent tests when local torch binaries are unavailable. |
+| Path                                                      | Scope            | Purpose                                                                                              |
+| --------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------- |
+| `conftest.py`                                             | session          | Imports MuJoCo before collection on Windows to avoid DLL initialization crashes.                     |
+| `tests/conftest.py`                                       | session/function | Adds `--tools-mode`, controls Tools path precedence, and isolates protected engine modules per test. |
+| `tests/heavy_integration/conftest.py`                     | session/function | Marks heavy tests as `live_simulation` and provides headless display plus engine fixtures.           |
+| `tests/integration/conftest.py`                           | package          | Re-exports shared fixture-library helpers for integration tests.                                     |
+| `tests/parity/conftest.py`                                | module/function  | Provides FastAPI client and fresh pendulum engine fixtures.                                          |
+| `tests/shared_contracts/conftest.py`                      | session          | Resolves real, vendored, or sibling Tools checkouts for shared contract tests.                       |
+| `tests/unit/conftest.py`                                  | function         | Mocks optional native dependencies and resets those mocks between unit tests.                        |
+| `tests/unit/dashboard/conftest.py`                        | package          | Documents dashboard test path handling; no fixtures.                                                 |
+| `tests/unit/engines/*/conftest.py`                        | package          | Documents engine test path handling or mocks missing optional engine modules.                        |
+| `tests/unit/engines/simscape/*/conftest.py`               | package          | Documents Simscape test path handling; no fixtures.                                                  |
+| `tests/unit/plotting/conftest.py`                         | package          | Pre-mocks PyQt6 modules to avoid Qt DLL crashes in plotting tests.                                   |
+| `tests/unit/tools/humanoid_character_builder/conftest.py` | function         | Skips torch-dependent tests when local torch binaries are unavailable.                               |
 
 ## Layout Guard
 

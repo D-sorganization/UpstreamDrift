@@ -11,6 +11,7 @@ Higher bar than other areas because this is the foundational C3D reader — ever
 `tests/unit/upstream_drift_tools/lab/bio/test_c3d_markers.py` exists (3 tests from PR #4616 covering the cp1252 + heuristic fix). Other modules have spot coverage from `tests/heavy_integration/test_c3d_data_pipeline.py` and `tests/integration/test_c3d_workflow.py`.
 
 Likely uncovered surface:
+
 - `c3d_reader.py:C3DDataReader` — `export_points` / `export_analog` JSON / NPZ paths, `force_plate_dataframe` with synthetic plate data, `points_dataframe` with `markers` filter / `residual_nan_threshold`
 - `_c3d_io.py` — `validate_export_path`, `unit_scale` (every unit pair), `sanitize_for_csv` (every prefix), `write_export` per format, `build_metadata` corner cases (missing analog, missing events)
 - `_c3d_analog.py` — `detect_force_plate_channels` (each pattern: plain, prefixed, Vicon-style), `build_force_plate_dataframe` with explicit plate filter, COP computation with synthetic forces

@@ -12,7 +12,7 @@ Greenfield. This folder contains documentation and a single skeleton `.py` only.
 
 - You already have Option 2 trained (its parquet preprocessing is reused — see [Dependency on Option 2](#dependency-on-option-2)).
 - You need the **lowest possible per-fit latency** (~ms / target).
-- You can afford a Simscape round-trip *after* the prediction to validate it.
+- You can afford a Simscape round-trip _after_ the prediction to validate it.
 - The target swing falls inside the dataset's coverage (random sweep around the model's nominal coefficients). Out-of-distribution targets fall back to Option 1 or Option 2.
 
 ## When NOT to use it
@@ -61,12 +61,12 @@ The skeleton `.py` is the **only** code allowed to land in this folder before th
 
 ## Relationship to the other options
 
-| Direction | Detail |
-|---|---|
-| **From Option 1** | Option 1 is the validation oracle. Use Option 1 to fit the same target; if Option 3's RMSE is within ~5x of Option 1's RMSE, the inverse model is healthy. |
-| **From Option 2** | Reuses the dataset loader, normalization, and train/val/test split. Cannot start until Option 2's dataset pipeline is green (Issue #019, #024). |
-| **To Option 1 (hybrid)** | `g_φ` output as `x0` for `fmincon` cuts Option 1's wall-clock by ~10x on average. See [APPROACH.md §Hybrid](APPROACH.md#hybrid-with-option-1). |
-| **To Option 4** | Once Option 4's `SimscapeAdapter` is up, the round-trip validation step in Option 3 should call it instead of MATLAB Engine directly. |
+| Direction                | Detail                                                                                                                                                     |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **From Option 1**        | Option 1 is the validation oracle. Use Option 1 to fit the same target; if Option 3's RMSE is within ~5x of Option 1's RMSE, the inverse model is healthy. |
+| **From Option 2**        | Reuses the dataset loader, normalization, and train/val/test split. Cannot start until Option 2's dataset pipeline is green (Issue #019, #024).            |
+| **To Option 1 (hybrid)** | `g_φ` output as `x0` for `fmincon` cuts Option 1's wall-clock by ~10x on average. See [APPROACH.md §Hybrid](APPROACH.md#hybrid-with-option-1).             |
+| **To Option 4**          | Once Option 4's `SimscapeAdapter` is up, the round-trip validation step in Option 3 should call it instead of MATLAB Engine directly.                      |
 
 ## Acceptance bar (for "Option 3 is done")
 
@@ -80,12 +80,12 @@ The skeleton `.py` is the **only** code allowed to land in this folder before th
 
 Reserved for this option:
 
-| # | Title | Scope |
-|---|---|---|
-| #032 | Option 3 — CVAE architecture and training loop | `inverse_cvae.py`, `train_inverse_cvae`, training tests |
-| #033 | Option 3 — Round-trip validation and rejection sampling | `predict_coefficients`, `validate_round_trip`, Simscape callback wiring |
-| #034 | Option 3 — Latent diagnostics and mode-coverage tests | t-SNE/UMAP plots, null-space synthetic targets, mode-coverage test |
-| #035 | Option 3 — Hybrid handoff to Option 1 (`fmincon` warm start) | Adapter from `InverseFitResult.coefficients` to Option 1's `x0` |
+| #    | Title                                                        | Scope                                                                   |
+| ---- | ------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| #032 | Option 3 — CVAE architecture and training loop               | `inverse_cvae.py`, `train_inverse_cvae`, training tests                 |
+| #033 | Option 3 — Round-trip validation and rejection sampling      | `predict_coefficients`, `validate_round_trip`, Simscape callback wiring |
+| #034 | Option 3 — Latent diagnostics and mode-coverage tests        | t-SNE/UMAP plots, null-space synthetic targets, mode-coverage test      |
+| #035 | Option 3 — Hybrid handoff to Option 1 (`fmincon` warm start) | Adapter from `InverseFitResult.coefficients` to Option 1's `x0`         |
 
 Each issue's acceptance criteria reference specific tests in [TESTING.md](TESTING.md).
 

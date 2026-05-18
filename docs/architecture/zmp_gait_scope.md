@@ -6,27 +6,27 @@ Closes the investigation requested in issue #2707.
 
 The `src/robotics/locomotion/` subtree implements a bipedal walking stack
 (ZMP, footstep planner, gait state machine, gait types). A golf swing is a
-*stationary* motion: both feet stay planted for the entire swing. None of
+_stationary_ motion: both feet stay planted for the entire swing. None of
 these locomotion modules are imported, constructed, or executed anywhere in
 the golf-swing simulation path. They exist only as a library and are
 exercised exclusively by their own unit tests.
 
 **Recommendation: archive** (move to `archive/locomotion/`). See
-[Recommendation](#recommendation) for rationale and why we are *not*
+[Recommendation](#recommendation) for rationale and why we are _not_
 deleting in this PR.
 
 ## Inventory
 
 Files under `src/robotics/locomotion/`:
 
-| File                       | Lines | Exports                                                                                |
-|----------------------------|------:|----------------------------------------------------------------------------------------|
-| `__init__.py`              |    63 | Re-exports all public symbols                                                          |
-| `footstep_planner.py`      |   610 | `FootstepPlanner`, `Footstep`, step-sequence dataclasses                               |
-| `gait_state_machine.py`    |   391 | `GaitStateMachine`, `GaitState`                                                        |
-| `gait_types.py`            |   193 | `GaitType`, `GaitPhase`, `FootState`, `GaitParameters`, `WALKING_PARAMETERS`, etc.     |
-| `zmp_computer.py`          |   415 | `ZMPComputer`, `ZMPResult`, `SupportPolygon`, `CapturePoint`                           |
-| **Total**                  | **1 672** |                                                                                   |
+| File                    |     Lines | Exports                                                                            |
+| ----------------------- | --------: | ---------------------------------------------------------------------------------- |
+| `__init__.py`           |        63 | Re-exports all public symbols                                                      |
+| `footstep_planner.py`   |       610 | `FootstepPlanner`, `Footstep`, step-sequence dataclasses                           |
+| `gait_state_machine.py` |       391 | `GaitStateMachine`, `GaitState`                                                    |
+| `gait_types.py`         |       193 | `GaitType`, `GaitPhase`, `FootState`, `GaitParameters`, `WALKING_PARAMETERS`, etc. |
+| `zmp_computer.py`       |       415 | `ZMPComputer`, `ZMPResult`, `SupportPolygon`, `CapturePoint`                       |
+| **Total**               | **1 672** |                                                                                    |
 
 Associated tests:
 
@@ -94,7 +94,7 @@ implementation even in its nominal walking domain. Summarised:
    walking phases regardless of actual foot contact state.
 6. Footstep planner emits steps with no IK reachability check.
 7. Yaw extraction from quaternion lacks gimbal-lock handling.
-8. The module that *would* be relevant to a swing — an address-pose
+8. The module that _would_ be relevant to a swing — an address-pose
    composer from `ClubSpec` + `TargetShot` — does not exist.
 
 Items 1-7 are bugs in the walking-domain behaviour; item 8 is the
@@ -103,12 +103,12 @@ at all.
 
 ## Relevance matrix
 
-| Module                  | Relevant to walking | Relevant to stationary swing | Currently called from swing code |
-|-------------------------|---------------------|------------------------------|-----------------------------------|
-| `ZMPComputer`           | Yes (buggy)         | No (double-support undefined)| No                                |
-| `GaitStateMachine`      | Yes (buggy)         | No (no gait phases in swing) | No                                |
-| `FootstepPlanner`       | Yes (buggy)         | No (feet don't move)         | No                                |
-| `gait_types`            | Yes                 | No                           | Only by the other three           |
+| Module             | Relevant to walking | Relevant to stationary swing  | Currently called from swing code |
+| ------------------ | ------------------- | ----------------------------- | -------------------------------- |
+| `ZMPComputer`      | Yes (buggy)         | No (double-support undefined) | No                               |
+| `GaitStateMachine` | Yes (buggy)         | No (no gait phases in swing)  | No                               |
+| `FootstepPlanner`  | Yes (buggy)         | No (feet don't move)          | No                               |
+| `gait_types`       | Yes                 | No                            | Only by the other three          |
 
 The intersection of "used by swing pipeline" and "correct enough to rely
 on" is empty.

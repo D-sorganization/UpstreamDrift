@@ -1,6 +1,6 @@
 # Plot-Style Toolkit — Data-Driven Coloring
 
-A *data-driven* color is one that varies with a numeric channel:
+A _data-driven_ color is one that varies with a numeric channel:
 "colour the clubhead marker by clubhead speed", "colour each foot
 marker by ground-reaction-force magnitude", "colour each frame by
 per-frame fit error". This is a first-class feature of the plot-style

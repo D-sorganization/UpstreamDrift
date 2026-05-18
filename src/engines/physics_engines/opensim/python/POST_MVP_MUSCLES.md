@@ -24,7 +24,7 @@ error; it embeds the absolute path that was probed.
 You need:
 
 1. **Rajagopal2015 model.** The 80-muscle lower-extremity OpenSim model
-   from Rajagopal *et al.* 2015, distributed via SimTK / the upstream
+   from Rajagopal _et al._ 2015, distributed via SimTK / the upstream
    `opensim-models` repo. Download it yourself and respect the upstream
    license. Place the `.osim` at:
 
@@ -57,28 +57,28 @@ variable when you stage assets elsewhere.
 
 The new tests live at `tests/opensim/test_muscle_cmc.py`.
 
-| Selector                                         | Behaviour                                |
-|--------------------------------------------------|------------------------------------------|
-| `pytest tests/opensim/test_muscle_cmc.py`        | DbC tests run; opt-in tests collected    |
-| `pytest -m "requires_mocap_fixtures"`            | Loud-fails until fixtures present        |
-| `pytest -m "not requires_mocap_fixtures"`        | Default-CI selector — fixtures-free path |
-| `pytest -m "requires_opensim and requires_mocap_fixtures"` | Full integration smoke           |
+| Selector                                                   | Behaviour                                |
+| ---------------------------------------------------------- | ---------------------------------------- |
+| `pytest tests/opensim/test_muscle_cmc.py`                  | DbC tests run; opt-in tests collected    |
+| `pytest -m "requires_mocap_fixtures"`                      | Loud-fails until fixtures present        |
+| `pytest -m "not requires_mocap_fixtures"`                  | Default-CI selector — fixtures-free path |
+| `pytest -m "requires_opensim and requires_mocap_fixtures"` | Full integration smoke                   |
 
 ## Provenance and licensing
 
-* Rajagopal *et al.* 2015 model — IEEE TBME, distributed via SimTK under
+- Rajagopal _et al._ 2015 model — IEEE TBME, distributed via SimTK under
   the project's stated terms. Do **not** redistribute the `.osim` from
   this repository.
-* OpenSim Python bindings — Apache 2.0.
-* Mocap kinematics fixtures — must be derived from data the contributor
+- OpenSim Python bindings — Apache 2.0.
+- Mocap kinematics fixtures — must be derived from data the contributor
   has the rights to share. Document provenance alongside any fixture
   added under `tests/fixtures/mocap/`.
 
 ## Non-regression contract
 
-* The joint-torque MVP path under
+- The joint-torque MVP path under
   `src/engines/physics_engines/opensim/python/motion_matching/` is **not**
   touched by this scaffold.
-* `build_rajagopal2015_muscle_model` and `run_cmc_smoke` are pure
+- `build_rajagopal2015_muscle_model` and `run_cmc_smoke` are pure
   additions; importing `muscle_analysis` does not import `opensim` at
   module load.

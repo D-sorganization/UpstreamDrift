@@ -6,6 +6,7 @@
 **Approval:** Signed off by team lead and CI validation suite
 
 > **Note:** This report covers the **motion-matching pipeline only**. For other subsystems, see per-subsystem readiness reports:
+>
 > - [URDF / Character Builder](subsystem_status/URDF_READINESS.md) (ALPHA)
 > - [SUBSYSTEM_STATUS.yaml](../docs/status/SUBSYSTEM_STATUS.yaml) for full registry
 

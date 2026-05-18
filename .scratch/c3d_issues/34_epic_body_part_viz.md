@@ -55,21 +55,21 @@ This epic creates a new shared package `src/shared/python/body_part_viz/` and in
 
 ## Children (13 issues)
 
-| # | Title | Type | Priority |
-|---|---|---|---|
-| 1 | feat(body-part-viz): core contracts + dataclasses (Shape / Binding / Fitter / Theme) | architecture | high |
-| 2 | feat(body-part-viz): primitive shapes — Line, Cylinder, Ellipsoid, Capsule, Composite | feature | high |
-| 3 | feat(body-part-viz): MeshShape with STL/OBJ/PLY/GLB loaders via trimesh | feature | high |
-| 4 | feat(body-part-viz): fitters — BetweenTwoMarkers, ClusterKabsch, ProcrustesAnisotropic | feature | high |
-| 5 | feat(body-part-viz): MatplotlibRenderer (3D Poly3DCollection backend) | feature | high |
-| 6 | feat(body-part-viz): PyQtGLRenderer (pyqtgraph.opengl backend) — performant 3D | feature | medium |
-| 7 | feat(body-part-viz): asset library — default body-part meshes + manifest | feature | medium |
-| 8 | feat(body-part-viz): SegmentVizSpec JSON v2 persistence (extends current SegmentSpec) | feature | high |
-| 9 | feat(c3d-viewer): integrate body_part_viz into Segments tab — shape picker, mesh-import dialog | integration | high |
-| 10 | feat(motion-matcher): integrate body_part_viz into live view controller | integration | medium |
-| 11 | feat(urdf-generator): bind URDF link visuals to body_part_viz shapes (cross-tool reuse) | integration | medium |
-| 12 | test(body-part-viz): comprehensive TDD coverage + golden snapshots | testing | high |
-| 13 | docs(body-part-viz): ADR + user guide + asset-author guide | docs | medium |
+| #   | Title                                                                                          | Type         | Priority |
+| --- | ---------------------------------------------------------------------------------------------- | ------------ | -------- |
+| 1   | feat(body-part-viz): core contracts + dataclasses (Shape / Binding / Fitter / Theme)           | architecture | high     |
+| 2   | feat(body-part-viz): primitive shapes — Line, Cylinder, Ellipsoid, Capsule, Composite          | feature      | high     |
+| 3   | feat(body-part-viz): MeshShape with STL/OBJ/PLY/GLB loaders via trimesh                        | feature      | high     |
+| 4   | feat(body-part-viz): fitters — BetweenTwoMarkers, ClusterKabsch, ProcrustesAnisotropic         | feature      | high     |
+| 5   | feat(body-part-viz): MatplotlibRenderer (3D Poly3DCollection backend)                          | feature      | high     |
+| 6   | feat(body-part-viz): PyQtGLRenderer (pyqtgraph.opengl backend) — performant 3D                 | feature      | medium   |
+| 7   | feat(body-part-viz): asset library — default body-part meshes + manifest                       | feature      | medium   |
+| 8   | feat(body-part-viz): SegmentVizSpec JSON v2 persistence (extends current SegmentSpec)          | feature      | high     |
+| 9   | feat(c3d-viewer): integrate body_part_viz into Segments tab — shape picker, mesh-import dialog | integration  | high     |
+| 10  | feat(motion-matcher): integrate body_part_viz into live view controller                        | integration  | medium   |
+| 11  | feat(urdf-generator): bind URDF link visuals to body_part_viz shapes (cross-tool reuse)        | integration  | medium   |
+| 12  | test(body-part-viz): comprehensive TDD coverage + golden snapshots                             | testing      | high     |
+| 13  | docs(body-part-viz): ADR + user guide + asset-author guide                                     | docs         | medium   |
 
 ## Cross-cutting principles
 

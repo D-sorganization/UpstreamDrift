@@ -24,6 +24,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate when context is fragmented or multiple memory sources need to be merged before a complex task:
+
 - After `memory-retrieve` when inputs come from multiple memory files
 - Before planning or implementation skills on complex, multi-artefact Stories
 - When previous context bundles are stale or need restructuring
@@ -38,6 +39,7 @@ For simple, single-artefact tasks, an agent may reason directly without this ski
 2. Remove duplicated or overlapping information
 3. Prioritize: acceptance criteria, constraints, decisions, current artefacts
 4. Structure the bundle in canonical order:
+
    - Current Objective
    - Governed Artefacts (Epics / Stories / Plans)
    - Acceptance Criteria & Constraints
@@ -88,6 +90,7 @@ No prose. No fluff. No hidden reasoning.
 ## Non-Goals
 
 This skill must NOT:
+
 - Retrieve memory (use `memory-retrieve` first)
 - Infer missing artefacts
 - Add assumptions or expand scope

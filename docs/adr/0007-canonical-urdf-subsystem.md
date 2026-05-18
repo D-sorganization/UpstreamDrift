@@ -9,18 +9,18 @@
 
 UpstreamDrift currently has **two parallel URDF generation subsystems** with substantially overlapping responsibilities. Until this campaign, neither was clearly canonical, both shipped tests, and the public API in `src/shared/python/__init__.py` re-exported types from both.
 
-| Concern              | `humanoid_character_builder/`            | `model_generation/`                 |
-| -------------------- | ---------------------------------------- | ----------------------------------- |
-| URDF XML emission    | `generators/urdf_generator.py`, `_urdf_xml_writer.py` | `builders/urdf_writer.py`           |
-| Mesh generation      | `generators/mesh_generator*.py`          | `mesh/`                             |
-| Inertia computation  | `mesh/inertia_calculator.py`             | `inertia/`                          |
-| Builder API          | `interfaces/api.py::CharacterBuilder`    | `builders/parametric_builder.py`    |
-| Editor               | _none_                                   | `editor/frankenstein_editor.py`     |
-| Library              | `presets/`                               | `library/`                          |
-| Converters           | _none_                                   | `converters/simscape/`              |
-| Plugin system        | _none_                                   | `plugins/`                          |
-| REST API             | _none_                                   | `api/rest_api.py`                   |
-| CLI                  | _none_                                   | `cli/main.py`                       |
+| Concern             | `humanoid_character_builder/`                         | `model_generation/`              |
+| ------------------- | ----------------------------------------------------- | -------------------------------- |
+| URDF XML emission   | `generators/urdf_generator.py`, `_urdf_xml_writer.py` | `builders/urdf_writer.py`        |
+| Mesh generation     | `generators/mesh_generator*.py`                       | `mesh/`                          |
+| Inertia computation | `mesh/inertia_calculator.py`                          | `inertia/`                       |
+| Builder API         | `interfaces/api.py::CharacterBuilder`                 | `builders/parametric_builder.py` |
+| Editor              | _none_                                                | `editor/frankenstein_editor.py`  |
+| Library             | `presets/`                                            | `library/`                       |
+| Converters          | _none_                                                | `converters/simscape/`           |
+| Plugin system       | _none_                                                | `plugins/`                       |
+| REST API            | _none_                                                | `api/rest_api.py`                |
+| CLI                 | _none_                                                | `cli/main.py`                    |
 
 Phase 1+2 of the URDF Hardening Campaign brought both subsystems' result classes into alignment with the canonical motion-matching `solver_status` contract, but the underlying duplication remains. We need a decision before further structural refactoring.
 
@@ -58,7 +58,7 @@ Fold `humanoid_character_builder` into `model_generation` as a domain-specific b
 Reasoning:
 
 1. **The duplication is real, not philosophical.** Both subsystems emit URDF XML, both compute inertia primitives, both have mesh generators. Removing duplication is the higher-order win.
-2. **Anthropometry is a domain, not infrastructure.** Body parameters, segment definitions, vertex group mappings, SMPLX/MakeHuman bindings — these are *specific* to humanoid character creation. Keeping them isolated from the generic toolkit makes both easier to evolve.
+2. **Anthropometry is a domain, not infrastructure.** Body parameters, segment definitions, vertex group mappings, SMPLX/MakeHuman bindings — these are _specific_ to humanoid character creation. Keeping them isolated from the generic toolkit makes both easier to evolve.
 3. **The test surface confirms the layering already.** `tests/unit/tools/model_generation/` tests low-level primitives (Link, Joint, Inertia, geometry conversions). `tests/unit/tools/humanoid_character_builder/` tests body-parameter-driven workflows. The test directories already reflect the right boundary.
 4. **Option A loses domain clarity.** Folding anthropometry into `model_generation/humanoid/` makes the "generic toolkit" claim weaker — `model_generation` would now contain humanoid-specific code that has nothing to do with URDF emission. Option B keeps the toolkit truly generic.
 5. **Option C is the do-nothing-much option.** It documents the current mess as the intended state, leaves duplication, and lets the next refactor be even bigger.
@@ -73,15 +73,18 @@ Estimated migration effort: 3–4 PRs over the campaign:
 ## Consequences
 
 ### Positive
+
 - One source of truth for URDF emission (closes a class of regressions where outputs differ).
 - Domain-driven layering — tests, docs, and contributors all benefit.
 - Unblocks #4523 (boundary documentation), #4533 (split api.py), and the cross-engine validation work in #4535/#4542.
 
 ### Negative
+
 - Migration cost: 3–4 PRs of churn before the new layer feels stable.
 - Some integrations may need updating (any caller currently importing from `humanoid_character_builder.mesh.primitive_inertia` would now get a re-export from `model_generation.inertia`).
 
 ### Risks
+
 - If Option B is adopted but enforcement is weak, the code can drift back into duplication. Mitigation: add a CI check that `humanoid_character_builder/` does not import its own URDF XML writer (#4523 acceptance criteria).
 
 ## Acceptance criteria for closing this ADR

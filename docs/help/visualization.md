@@ -10,49 +10,54 @@ UpstreamDrift provides real-time 3D visualization of physics simulations with cu
 
 ### Mouse Controls
 
-| Action | Control |
-|--------|---------|
-| Rotate view | Left-click + drag |
-| Pan view | Right-click + drag |
-| Zoom | Scroll wheel |
-| Reset view | Middle-click |
-| Quick rotate | Ctrl + drag |
+| Action       | Control            |
+| ------------ | ------------------ |
+| Rotate view  | Left-click + drag  |
+| Pan view     | Right-click + drag |
+| Zoom         | Scroll wheel       |
+| Reset view   | Middle-click       |
+| Quick rotate | Ctrl + drag        |
 
 ### Keyboard Shortcuts
 
-| Key | Action |
-|-----|--------|
-| 1 | Side view (golfer's right) |
-| 2 | Front view (face-on) |
-| 3 | Top view (bird's eye) |
-| 4 | Down-the-line view |
-| 5 | Follow clubhead mode |
-| F | Focus on selection |
-| R | Reset camera |
+| Key | Action                     |
+| --- | -------------------------- |
+| 1   | Side view (golfer's right) |
+| 2   | Front view (face-on)       |
+| 3   | Top view (bird's eye)      |
+| 4   | Down-the-line view         |
+| 5   | Follow clubhead mode       |
+| F   | Focus on selection         |
+| R   | Reset camera               |
 
 ### Preset Views
 
 #### Side View (Key: 1)
+
 - Camera positioned to golfer's right
 - Best for: Swing plane analysis, spine angle
 - Shows: Full swing arc, weight shift
 
 #### Front View (Key: 2)
+
 - Camera facing golfer directly
 - Best for: Posture, balance, width
 - Shows: Shoulder rotation, hip sway
 
 #### Top View (Key: 3)
+
 - Camera positioned above
 - Best for: Swing path, body rotation
 - Shows: Club path, shoulder turn
 
 #### Down-the-Line (Key: 4)
+
 - Camera behind golfer, facing target
 - Best for: Club path, face angle
 - Shows: Attack angle, swing direction
 
 #### Follow Mode (Key: 5)
+
 - Camera tracks clubhead position
 - Best for: Impact analysis
 - Shows: Ball contact, low point
@@ -61,34 +66,36 @@ UpstreamDrift provides real-time 3D visualization of physics simulations with cu
 
 ### Model Rendering
 
-| Option | Description |
-|--------|-------------|
-| Solid | Full textured rendering |
-| Wireframe | Mesh structure only |
-| Points | Joint/vertex points only |
+| Option      | Description               |
+| ----------- | ------------------------- |
+| Solid       | Full textured rendering   |
+| Wireframe   | Mesh structure only       |
+| Points      | Joint/vertex points only  |
 | Transparent | Semi-transparent surfaces |
 
 ### Coordinate Frames
 
 Display reference frames at:
+
 - World origin
 - Body/segment centers
 - Joint locations
 - End-effector (clubhead)
 
 **Settings:**
+
 - Frame size: Adjust arrow length
 - Axis colors: X=Red, Y=Green, Z=Blue
 - Show/hide specific frames
 
 ### Ground and Grid
 
-| Option | Description |
-|--------|-------------|
+| Option       | Description             |
+| ------------ | ----------------------- |
 | Ground plane | Show/hide floor surface |
-| Grid | Distance grid overlay |
-| Target line | Line toward target |
-| Impact zone | Ball position area |
+| Grid         | Distance grid overlay   |
+| Target line  | Line toward target      |
+| Impact zone  | Ball position area      |
 
 ### Shadows
 
@@ -103,12 +110,14 @@ Display reference frames at:
 Display force vectors at joints or contact points:
 
 **Settings:**
+
 - Show/hide forces
 - Scale factor (cm per Newton)
 - Color by: Magnitude, Type, or Direction
 - Minimum threshold (hide small forces)
 
 **Colors (by type):**
+
 - Blue: Gravitational
 - Green: Reaction forces
 - Red: Applied/muscle forces
@@ -119,6 +128,7 @@ Display force vectors at joints or contact points:
 Display joint torques as curved arrows:
 
 **Settings:**
+
 - Show/hide torques
 - Scale factor (degrees per N-m)
 - Arrow style: Curved or Straight
@@ -127,6 +137,7 @@ Display joint torques as curved arrows:
 ### Ground Reaction Forces
 
 Special visualization for foot-ground interaction:
+
 - Force plate vectors
 - Center of pressure path
 - Vertical/horizontal components
@@ -136,6 +147,7 @@ Special visualization for foot-ground interaction:
 ### Energy Panel
 
 Real-time display of:
+
 - Kinetic energy (KE)
 - Potential energy (PE)
 - Total energy (KE + PE)
@@ -154,12 +166,12 @@ Real-time display of:
 
 Show paths traced by selected points:
 
-| Setting | Description |
-|---------|-------------|
-| Trail length | Number of frames to display |
-| Trail style | Line, dots, or fading |
-| Trail color | Solid or velocity-coded |
-| Points | Select which bodies to trail |
+| Setting      | Description                  |
+| ------------ | ---------------------------- |
+| Trail length | Number of frames to display  |
+| Trail style  | Line, dots, or fading        |
+| Trail color  | Solid or velocity-coded      |
+| Points       | Select which bodies to trail |
 
 ### Common Trail Targets
 
@@ -172,12 +184,12 @@ Show paths traced by selected points:
 
 ### Render Quality
 
-| Level | Description | Use Case |
-|-------|-------------|----------|
-| Low | Basic rendering | Slow hardware |
-| Medium | Balanced | General use |
-| High | Full quality | Screenshots |
-| Ultra | Maximum detail | Presentation |
+| Level  | Description     | Use Case      |
+| ------ | --------------- | ------------- |
+| Low    | Basic rendering | Slow hardware |
+| Medium | Balanced        | General use   |
+| High   | Full quality    | Screenshots   |
+| Ultra  | Maximum detail  | Presentation  |
 
 ### Frame Rate
 
@@ -208,11 +220,13 @@ Show paths traced by selected points:
 4. Choose format and location
 
 **Formats:**
+
 - MP4 (H.264)
 - AVI (uncompressed)
 - GIF (animated)
 
 **Settings:**
+
 - Resolution: 720p, 1080p, 4K
 - Frame rate: 30, 60, 120 fps
 - Quality: Low, Medium, High
@@ -221,12 +235,12 @@ Show paths traced by selected points:
 
 ### Light Types
 
-| Type | Description |
-|------|-------------|
-| Ambient | Overall scene brightness |
-| Directional | Sun-like parallel rays |
-| Point | Local light source |
-| Spot | Focused beam |
+| Type        | Description              |
+| ----------- | ------------------------ |
+| Ambient     | Overall scene brightness |
+| Directional | Sun-like parallel rays   |
+| Point       | Local light source       |
+| Spot        | Focused beam             |
 
 ### Presets
 
@@ -240,6 +254,7 @@ Show paths traced by selected points:
 ### Split Screen
 
 Display multiple views simultaneously:
+
 - **Vertical split:** 2 views side-by-side
 - **Quad view:** 4 views (top, side, front, 3D)
 - **Custom:** Configure any layout
@@ -273,4 +288,4 @@ Display multiple views simultaneously:
 
 ---
 
-*See also: [Full User Manual](../USER_MANUAL.md) | [Simulation Controls](simulation_controls.md) | [Analysis Tools](analysis_tools.md)*
+_See also: [Full User Manual](../USER_MANUAL.md) | [Simulation Controls](simulation_controls.md) | [Analysis Tools](analysis_tools.md)_

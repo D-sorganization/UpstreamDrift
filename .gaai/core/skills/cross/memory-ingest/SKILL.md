@@ -28,6 +28,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate after:
+
 - Bootstrap scan produces architecture insights
 - Discovery produces validated artefacts or decisions
 - New validated project knowledge needs to be persisted
@@ -40,12 +41,13 @@ Activate after:
 
 **CRITICAL — Anti-Collision Guard (MUST execute before writing any memory file):**
 Before writing any file under `contexts/memory/**`, check if the target file already exists on disk:
+
 - If it does NOT exist → proceed normally.
 - If it DOES exist → **read the existing file first**. Then decide:
   - If the existing content covers a **different topic or entity** than what you are about to write → **STOP immediately**, surface the collision to the human, do not proceed.
   - If the existing content covers the **same topic** and an update is warranted → proceed, but preserve any human edits or prior knowledge that remains valid. Treat this as an **update**, not a replacement.
   - If the existing content is identical or still valid → skip writing, report "no changes needed".
-This guard prevents the silent data loss incident of 2026-03-17 where concurrent sessions overwrote memory files.
+    This guard prevents the silent data loss incident of 2026-03-17 where concurrent sessions overwrote memory files.
 
 1. Read new validated knowledge (discovery results, decisions, architecture insights, validated hypotheses, GTM decisions)
 2. Read `contexts/memory/index.md` to discover available categories (shared and domain). Classify knowledge into the most appropriate existing category. If no existing category fits, create a new one — name it clearly, create the directory, and register it in `index.md` before writing any file.
@@ -59,6 +61,7 @@ This guard prevents the silent data loss incident of 2026-03-17 where concurrent
 ## Outputs
 
 Memory files created at any registered category path (see `contexts/memory/index.md`). Current categories as of last update:
+
 - `contexts/memory/project/` — project-level facts, architecture, constraints
 - `contexts/memory/decisions/` — governance decisions
 - `contexts/memory/patterns/` — coding conventions, procedural knowledge
@@ -85,6 +88,7 @@ Memory files created at any registered category path (see `contexts/memory/index
 ## Non-Goals
 
 This skill must NOT:
+
 - Store raw session conversations
 - Ingest speculative or unvalidated information
 - Duplicate existing memory entries

@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import importlib
 from pathlib import Path
+import contextlib
 
 __all__ = ["get_engine_catalog", "is_fit_capable"]
 

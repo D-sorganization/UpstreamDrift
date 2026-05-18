@@ -33,34 +33,34 @@ Two files per dataset, joinable on `trial_id`:
 
 ### `trials.parquet` (one row per simulation)
 
-| Column | Type | Notes |
-|---|---|---|
-| `trial_id` | `uint32` | Unique within the dataset |
-| `coefficients` | `list<float64>` | Flat vector, length `n_joints × 7`, ordering matches `joint_names` × `[A,B,C,D,E,F,G]` |
-| `joint_names` | `list<string>` | Length `n_joints`. Same for every trial in a given dataset, but stored per-row for portability |
-| `simulation_time_s` | `float64` | Total simulation duration |
-| `sample_rate_hz` | `float64` | Sample rate of the timesteps table |
-| `solver_status` | `string` | `"success"` / `"warning"` / `"failed"` |
-| `clubhead_speed_max_mph` | `float64` | Convenience metric for filtering |
-| `total_work_J` | `float64` | Sum over joints, integrated over the trial |
-| `dataset_run_id` | `string` | The dated folder name, e.g. `"20251030"` |
-| `seed` | `int64` | RNG seed used to generate this trial's coefficients |
+| Column                   | Type            | Notes                                                                                          |
+| ------------------------ | --------------- | ---------------------------------------------------------------------------------------------- |
+| `trial_id`               | `uint32`        | Unique within the dataset                                                                      |
+| `coefficients`           | `list<float64>` | Flat vector, length `n_joints × 7`, ordering matches `joint_names` × `[A,B,C,D,E,F,G]`         |
+| `joint_names`            | `list<string>`  | Length `n_joints`. Same for every trial in a given dataset, but stored per-row for portability |
+| `simulation_time_s`      | `float64`       | Total simulation duration                                                                      |
+| `sample_rate_hz`         | `float64`       | Sample rate of the timesteps table                                                             |
+| `solver_status`          | `string`        | `"success"` / `"warning"` / `"failed"`                                                         |
+| `clubhead_speed_max_mph` | `float64`       | Convenience metric for filtering                                                               |
+| `total_work_J`           | `float64`       | Sum over joints, integrated over the trial                                                     |
+| `dataset_run_id`         | `string`        | The dated folder name, e.g. `"20251030"`                                                       |
+| `seed`                   | `int64`         | RNG seed used to generate this trial's coefficients                                            |
 
 ### `timesteps.parquet` (one row per simulation timestep)
 
-| Column | Type | Notes |
-|---|---|---|
-| `trial_id` | `uint32` | FK to `trials.parquet` |
-| `t` | `float64` | Time in seconds, monotonic per trial_id |
-| `q` | `list<float64>` | Joint angles (rad), length `n_joints` |
-| `qd` | `list<float64>` | Joint angular velocities (rad/s), length `n_joints` |
-| `qdd` | `list<float64>` | Joint angular accelerations (rad/s²), length `n_joints` |
-| `tau` | `list<float64>` | Joint torques (N·m), length `n_joints` |
-| `r_butt` | `list<float64>` | (3,) butt position in metres |
-| `r_clubhead` | `list<float64>` | (3,) clubhead position in metres |
-| `q_club` | `list<float64>` | (4,) club orientation quaternion `[w,x,y,z]` |
-| `v_clubhead` | `list<float64>` | (3,) clubhead linear velocity (m/s) |
-| `omega_club` | `list<float64>` | (3,) club angular velocity (rad/s) |
+| Column       | Type            | Notes                                                   |
+| ------------ | --------------- | ------------------------------------------------------- |
+| `trial_id`   | `uint32`        | FK to `trials.parquet`                                  |
+| `t`          | `float64`       | Time in seconds, monotonic per trial_id                 |
+| `q`          | `list<float64>` | Joint angles (rad), length `n_joints`                   |
+| `qd`         | `list<float64>` | Joint angular velocities (rad/s), length `n_joints`     |
+| `qdd`        | `list<float64>` | Joint angular accelerations (rad/s²), length `n_joints` |
+| `tau`        | `list<float64>` | Joint torques (N·m), length `n_joints`                  |
+| `r_butt`     | `list<float64>` | (3,) butt position in metres                            |
+| `r_clubhead` | `list<float64>` | (3,) clubhead position in metres                        |
+| `q_club`     | `list<float64>` | (4,) club orientation quaternion `[w,x,y,z]`            |
+| `v_clubhead` | `list<float64>` | (3,) clubhead linear velocity (m/s)                     |
+| `omega_club` | `list<float64>` | (3,) club angular velocity (rad/s)                      |
 
 Partition `timesteps.parquet` by `trial_id` (or chunks of `trial_id`) to keep per-trial reads fast.
 
@@ -68,7 +68,7 @@ Partition `timesteps.parquet` by `trial_id` (or chunks of `trial_id`) to keep pe
 
 For training, the typical access pattern is:
 
-- **Surrogate (Option 2):** read `coefficients` from `trials` + the *full* timestep sequence per trial → `(coeffs, kinematic_trajectory)` pair.
+- **Surrogate (Option 2):** read `coefficients` from `trials` + the _full_ timestep sequence per trial → `(coeffs, kinematic_trajectory)` pair.
 - **Inverse NN (Option 3):** same but with the input/output swapped.
 - **Per-timestep matching:** `(q, qd, qdd) → tau` — load `timesteps.parquet` only, no join needed. This is the user's stated framing.
 

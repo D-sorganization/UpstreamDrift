@@ -132,7 +132,7 @@ class CliProvider(ABC):
         """
 
     @abstractmethod
-    async def send(
+    def send(
         self,
         message: str,
         context: Mapping[str, Any] | None = None,

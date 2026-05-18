@@ -291,14 +291,15 @@ class BodyParameters:
 class CharacterBuilder:
     def generate_urdf(self, params: BodyParameters) -> str:
         """Generate URDF XML from body parameters."""
-    
+
     def build(self, params: BodyParameters) -> CharacterBuildResult:
         """Build complete character with meshes and URDF."""
-    
+
     @staticmethod
     def list_presets() -> list[str]:
         """List available body presets."""
-    
+
     @staticmethod
     def list_segments() -> list[str]:
         """List all available body segments."""
+```

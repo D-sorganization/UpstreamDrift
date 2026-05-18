@@ -37,10 +37,12 @@ It ignores negative power (eccentric work), where the body absorbs energy (e.g.,
 ## Resolution Notes
 
 The code in `src/shared/python/statistical_analysis.py` has been updated to use:
+
 ```python
 abs_power = np.abs(power)
 # Integrate absolute power across time for each joint
 ```
+
 This correctly accounts for both concentric and eccentric work.
 
 Note: A separate issue has been opened regarding the hardcoded 1.0 kg mass in the same function (`ISSUE_PHYSICS_EFFICIENCY_HARDCODED_MASS.md`).

@@ -4,7 +4,9 @@
 **Grade**: 8.0/10
 
 ## Details
+
 Basic performance assessment.
 
 ## Recommendations
+
 1. Profile critical paths.

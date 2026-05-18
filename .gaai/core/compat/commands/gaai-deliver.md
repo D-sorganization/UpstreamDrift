@@ -15,6 +15,7 @@ Discovery and Delivery system prompts must NEVER coexist in the same context win
 ## What This Does
 
 Spawns an isolated sub-agent that runs the Delivery Loop:
+
 1. Reads `.gaai/project/contexts/backlog/active.backlog.yaml`
 2. Selects the next ready Story (status: refined)
 3. Builds execution context

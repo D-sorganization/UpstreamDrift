@@ -17,14 +17,14 @@ These two models represent fundamentally different physical approximations. A si
 
 ## Impact
 
--   **Reproducibility:** Users may get different results for the "same" shot depending on whether they use the "basic" or "enhanced" simulator.
--   **Maintenance:** Updates to coefficients in one model (e.g., `BallProperties`) do not propagate to the other (`AerodynamicsConfig`), leading to divergence over time.
--   **Validation:** Validating one model against trackman data does not validate the other.
+- **Reproducibility:** Users may get different results for the "same" shot depending on whether they use the "basic" or "enhanced" simulator.
+- **Maintenance:** Updates to coefficients in one model (e.g., `BallProperties`) do not propagate to the other (`AerodynamicsConfig`), leading to divergence over time.
+- **Validation:** Validating one model against trackman data does not validate the other.
 
 ## Affected Files
 
--   `src/shared/python/ball_flight_physics.py`
--   `src/shared/python/aerodynamics.py`
+- `src/shared/python/ball_flight_physics.py`
+- `src/shared/python/aerodynamics.py`
 
 ## Recommended Fix
 

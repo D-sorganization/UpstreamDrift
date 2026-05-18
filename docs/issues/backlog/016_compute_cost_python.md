@@ -90,6 +90,7 @@ def compute_total_work(sim_out: "SimOutput") -> float:
 - `test_postcondition_J_nonnegative_for_random_finite_inputs`
 
 Cross-check tests (use the fixture file):
+
 - `test_cross_check_position_term_matches_matlab_within_1e_minus_10`
 - `test_cross_check_orientation_term_matches_matlab_within_1e_minus_10`
 - `test_cross_check_total_work_matches_matlab_within_1e_minus_10`
@@ -101,12 +102,14 @@ Cross-check tests (use the fixture file):
 Use existing decorators from `src.shared.python.core.contracts`:
 
 Preconditions:
+
 - `theta` is a 1-D finite numpy array of length `n_joints * 7`.
 - `target` is a `ClubTarget` instance (from #017).
 - `sim_fn` is callable.
 - `opts` is a `CostOptions` instance.
 
 Postconditions:
+
 - Return tuple `(J, terms)` where `J` is finite and non-negative.
 - `terms.total == J` to within `1e-12`.
 - Every field of `terms` is non-negative.

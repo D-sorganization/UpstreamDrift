@@ -25,17 +25,17 @@ opaque blob (`Simulink.Parameter` array) plus a 944 KB
 The 50+ field names were recovered by reading
 `SCRIPT_TransferStartPositionVelocityIntoModelFromMATFile.m`:
 
-| Group | Fields (X / Y / Z as applicable) |
-|---|---|
-| Pelvis rotation | `HipStartPosition`, `HipStartVelocity` |
-| Pelvis translation | `TranslationStartPosition`, `TranslationStartVelocity` |
-| Spine | `SpineStartPosition` (X, Y), `SpineStartVelocity` (X, Y) |
-| Torso (axial) | `TorsoStartPosition`, `TorsoStartVelocity` |
-| Scapulae | `LScapStartPosition` (X, Y), `RScapStartPosition` (X, Y) + velocities |
-| Shoulders | `LSStartPosition` (X, Y, Z), `RSStartPosition` (X, Y, Z) + velocities |
-| Elbows | `LEStartPosition`, `REStartPosition` + velocities |
-| Forearms | `LFStartPosition`, `RFStartPosition` + velocities |
-| Wrists | `LWStartPosition` (X, Y), `RWStartPosition` (X, Y) + velocities |
+| Group              | Fields (X / Y / Z as applicable)                                      |
+| ------------------ | --------------------------------------------------------------------- |
+| Pelvis rotation    | `HipStartPosition`, `HipStartVelocity`                                |
+| Pelvis translation | `TranslationStartPosition`, `TranslationStartVelocity`                |
+| Spine              | `SpineStartPosition` (X, Y), `SpineStartVelocity` (X, Y)              |
+| Torso (axial)      | `TorsoStartPosition`, `TorsoStartVelocity`                            |
+| Scapulae           | `LScapStartPosition` (X, Y), `RScapStartPosition` (X, Y) + velocities |
+| Shoulders          | `LSStartPosition` (X, Y, Z), `RSStartPosition` (X, Y, Z) + velocities |
+| Elbows             | `LEStartPosition`, `REStartPosition` + velocities                     |
+| Forearms           | `LFStartPosition`, `RFStartPosition` + velocities                     |
+| Wrists             | `LWStartPosition` (X, Y), `RWStartPosition` (X, Y) + velocities       |
 
 Numeric values are stored as scalar `double` inside each
 `Simulink.Parameter`, in **degrees** for angular DOFs.
@@ -49,21 +49,21 @@ parameters into every trial CSV under `model_<Field>` columns
 Every dated CSV in the repo carries the same signature, so it
 reflects the values currently loaded from `3DModelInputs_Impact.mat`.
 
-| Field | Stored value (deg) |
-|---|---:|
-| `HipStartPositionZ` | -45.00 |
-| `SpineStartPositionX` | **0.00** |
-| `SpineStartPositionY` | **0.00** |
-| `TorsoStartPosition` | -45.00 |
-| `LScapStartPositionX` | 34.16 |
-| `LSStartPositionX` | -50.37 |
-| `LSStartPositionY` | -24.61 |
-| `LSStartPositionZ` | **-135.72** |
-| `RSStartPositionZ` | **+96.03** |
-| `LEStartPosition` | 5.78 |
-| `REStartPosition` | **+100.70** |
-| `LWStartPositionX` | **-97.84** |
-| `RWStartPositionX` | **-80.02** |
+| Field                 | Stored value (deg) |
+| --------------------- | -----------------: |
+| `HipStartPositionZ`   |             -45.00 |
+| `SpineStartPositionX` |           **0.00** |
+| `SpineStartPositionY` |           **0.00** |
+| `TorsoStartPosition`  |             -45.00 |
+| `LScapStartPositionX` |              34.16 |
+| `LSStartPositionX`    |             -50.37 |
+| `LSStartPositionY`    |             -24.61 |
+| `LSStartPositionZ`    |        **-135.72** |
+| `RSStartPositionZ`    |         **+96.03** |
+| `LEStartPosition`     |               5.78 |
+| `REStartPosition`     |        **+100.70** |
+| `LWStartPositionX`    |         **-97.84** |
+| `RWStartPositionX`    |         **-80.02** |
 
 Bold rows fail the address-pose plausibility check (see
 `compare_to_reference` in
@@ -103,13 +103,13 @@ the cause of this specific report.
 
 Two options:
 
-* **Quick win:** treat `3DModelInputs_TopofBackswing.mat` as the
-  authoritative top-of-backswing pose, and *replace*
+- **Quick win:** treat `3DModelInputs_TopofBackswing.mat` as the
+  authoritative top-of-backswing pose, and _replace_
   `3DModelInputs_Impact.mat` with values that come either from the
   impact frame of an existing motion-capture trial or from a
   hand-authored impact pose with proper forward tilt. A starter set
   is encoded in `scripts/fix_impact_pose.m`.
-* **Long-term:** make the file regeneration explicit — a MATLAB
+- **Long-term:** make the file regeneration explicit — a MATLAB
   script that takes a chosen frame from a measured swing, transfers
   the joint angles into the model workspace via
   `SCRIPT_TransferStartPositionVelocityIntoModelFromMATFile.m`, then

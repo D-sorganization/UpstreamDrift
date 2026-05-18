@@ -9,13 +9,13 @@ and that the corresponding workflow owners approve the migration.
 repository a GAAI Fleet member and `AGENTS.md` delegates binding contributor
 policy to `CLAUDE.md`.
 
-| Directory | Status | Owner | Migration note |
-|-----------|--------|-------|----------------|
-| .gaai/ | Canonical | @core | Owns governance rules, memory, backlog, skills, hooks, and orchestration docs. |
-| .claude/ | Mirror | @core | Contains Claude command shims and duplicated skill entries; migrate durable content into `.gaai/core/compat/` or `.gaai/project/` before deletion. |
-| .agent/ | Legacy | @agents | Contains older skill and workflow shims; compare with `.gaai/core/skills/` before removing duplicates. |
-| .kiro/ | Legacy | @agents | Tool-specific steering/config root; migrate unique steering guidance into `.gaai/project/contexts/rules/` before deletion. |
-| .jules/ | Legacy | @agents | Jules-specific automation configuration; migrate unique ownership metadata into `.gaai/project/` and `.github/WORKFLOWS.md` before deletion. |
+| Directory | Status    | Owner   | Migration note                                                                                                                                     |
+| --------- | --------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| .gaai/    | Canonical | @core   | Owns governance rules, memory, backlog, skills, hooks, and orchestration docs.                                                                     |
+| .claude/  | Mirror    | @core   | Contains Claude command shims and duplicated skill entries; migrate durable content into `.gaai/core/compat/` or `.gaai/project/` before deletion. |
+| .agent/   | Legacy    | @agents | Contains older skill and workflow shims; compare with `.gaai/core/skills/` before removing duplicates.                                             |
+| .kiro/    | Legacy    | @agents | Tool-specific steering/config root; migrate unique steering guidance into `.gaai/project/contexts/rules/` before deletion.                         |
+| .jules/   | Legacy    | @agents | Jules-specific automation configuration; migrate unique ownership metadata into `.gaai/project/` and `.github/WORKFLOWS.md` before deletion.       |
 
 ## Ownership Rules
 

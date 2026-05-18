@@ -5,26 +5,27 @@ This document describes the subsystem status governance system used to ensure pr
 ## Overview
 
 The subsystem status system provides a declarative way to:
+
 1. Define the maturity level of each subsystem in the project
 2. Automatically enforce that production subsystems have passing tests
 3. Track ownership and review status of subsystems
 
 ## Status Levels
 
-| Status | Description | CI Enforcement |
-|--------|-------------|----------------|
-| `production` | Stable, production-ready code | **Required** - CI fails if tests are red |
-| `beta` | Feature-complete, testing in progress | Reported but not blocking |
-| `alpha` | Experimental, under active development | Not enforced |
-| `deprecated` | Being phased out | Not enforced |
+| Status       | Description                            | CI Enforcement                           |
+| ------------ | -------------------------------------- | ---------------------------------------- |
+| `production` | Stable, production-ready code          | **Required** - CI fails if tests are red |
+| `beta`       | Feature-complete, testing in progress  | Reported but not blocking                |
+| `alpha`      | Experimental, under active development | Not enforced                             |
+| `deprecated` | Being phased out                       | Not enforced                             |
 
 ## File Locations
 
-| File | Purpose |
-|------|---------|
-| `docs/status/SUBSYSTEM_STATUS.yaml` | Declarative subsystem registry |
+| File                                   | Purpose                                        |
+| -------------------------------------- | ---------------------------------------------- |
+| `docs/status/SUBSYSTEM_STATUS.yaml`    | Declarative subsystem registry                 |
 | `scripts/ci/check_subsystem_status.py` | CI script that validates production subsystems |
-| `docs/governance/SUBSYSTEM_STATUS.md` | This documentation |
+| `docs/governance/SUBSYSTEM_STATUS.md`  | This documentation                             |
 
 ## Subsystem Registry Format
 
@@ -70,11 +71,11 @@ python scripts/ci/check_subsystem_status.py --subsystem drake_engine
 
 ### Exit Codes
 
-| Code | Meaning |
-|------|---------|
-| 0 | All production subsystems have passing tests |
-| 1 | One or more production subsystems have failing tests |
-| 2 | Configuration error (missing registry, invalid YAML, etc.) |
+| Code | Meaning                                                    |
+| ---- | ---------------------------------------------------------- |
+| 0    | All production subsystems have passing tests               |
+| 1    | One or more production subsystems have failing tests       |
+| 2    | Configuration error (missing registry, invalid YAML, etc.) |
 
 ## Adding a New Subsystem
 
@@ -110,6 +111,7 @@ When submitting a PR that affects a subsystem, answer:
 ### Status Demotion
 
 A production subsystem may be demoted to beta if:
+
 - Tests consistently fail in CI
 - The subsystem is no longer actively maintained
 - Critical bugs are discovered that require significant refactoring
@@ -117,6 +119,7 @@ A production subsystem may be demoted to beta if:
 ### Status Promotion
 
 To promote a subsystem to production:
+
 1. Ensure all tests pass consistently
 2. Update `SUBSYSTEM_STATUS.yaml` with `status: production`
 3. Update `last_reviewed` date

@@ -76,11 +76,13 @@ target = struct( ...
 ## DbC contract
 
 Preconditions (enforced in `arguments` block):
+
 - `xlsx_path` / `c3d_path` exist as files.
 - `sheet_name` is one of `["TW_wiffle", "TW_ProV1", "GW_wiffle", "GW_ProV11"]` for Excel.
 - `opts` is the result of `default_align_options()` with optional overrides.
 
 Postconditions (assertions, per `CLUB_IK_SPEC.md` §"Validation rules"):
+
 - `target.time` strictly increasing, `time(1) == 0`, `time(end) <= T_max + eps`.
 - All trajectory arrays have the same number of rows as `time`.
 - `target.butt`, `target.clubhead` contain no NaN/Inf; `‖r‖ < 5 m`.

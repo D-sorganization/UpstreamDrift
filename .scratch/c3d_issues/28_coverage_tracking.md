@@ -6,13 +6,13 @@ Several rapid waves landed major C3D + motion-matching features in a short windo
 
 ## Production vs test surface (today)
 
-| Area | .py files (excl __init__) | test files |
-|---|---|---|
-| `src/shared/python/motion_matching/` | 74 | 61 |
-| `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/` (C3D viewer) | 17 | 8 |
-| `src/tools/starting_pose_matcher/` (matcher tool) | 14 | 7 |
-| `src/shared/python/upstream_drift_tools/lab/bio/` (C3D reader) | 5 | (mixed in 37) |
-| `src/launchers/` | 38 | 36 |
+| Area                                                                                | .py files (excl **init**) | test files    |
+| ----------------------------------------------------------------------------------- | ------------------------- | ------------- |
+| `src/shared/python/motion_matching/`                                                | 74                        | 61            |
+| `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/` (C3D viewer) | 17                        | 8             |
+| `src/tools/starting_pose_matcher/` (matcher tool)                                   | 14                        | 7             |
+| `src/shared/python/upstream_drift_tools/lab/bio/` (C3D reader)                      | 5                         | (mixed in 37) |
+| `src/launchers/`                                                                    | 38                        | 36            |
 
 ## Plan
 
@@ -26,11 +26,11 @@ Each child issue covers one area. The agent for each:
 
 ## Children
 
-- #__a__ — `motion_matching` coverage to ≥85%
-- #__b__ — C3D Viewer (`apps/` engine subtree) coverage to ≥85%
-- #__c__ — Starting-pose matcher tool (`src/tools/starting_pose_matcher/`) coverage to ≥85%
-- #__d__ — `upstream_drift_tools.lab.bio` (C3D reader internals) coverage to ≥85%
-- #__e__ — `launchers/` coverage to ≥85% (excluding GUI-only smoke that needs `pytest-qt`)
+- #**a** — `motion_matching` coverage to ≥85%
+- #**b** — C3D Viewer (`apps/` engine subtree) coverage to ≥85%
+- #**c** — Starting-pose matcher tool (`src/tools/starting_pose_matcher/`) coverage to ≥85%
+- #**d** — `upstream_drift_tools.lab.bio` (C3D reader internals) coverage to ≥85%
+- #**e** — `launchers/` coverage to ≥85% (excluding GUI-only smoke that needs `pytest-qt`)
 
 ## Acceptance
 

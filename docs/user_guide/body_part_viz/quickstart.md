@@ -32,13 +32,13 @@ dispatch on; see [ADR 0006](../../adr/0006-multi-source-motion-targets.md)).
 
 Each row shows:
 
-| Column | What it is |
-| --- | --- |
-| **Segment** | The canonical segment label (e.g. `LeftForearm`). |
-| **Binding** | Which markers the segment is attached to. |
-| **Shape** | The current shape kind — `line`, `cylinder`, `ellipsoid`, `capsule`, `mesh_file`, `library_shape`, or `composite`. |
-| **Fitter** | How the shape is positioned each frame — `between_two`, `cluster_kabsch`, or `procrustes_anisotropic`. |
-| **Visible** | Whether the segment is drawn. |
+| Column      | What it is                                                                                                         |
+| ----------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Segment** | The canonical segment label (e.g. `LeftForearm`).                                                                  |
+| **Binding** | Which markers the segment is attached to.                                                                          |
+| **Shape**   | The current shape kind — `line`, `cylinder`, `ellipsoid`, `capsule`, `mesh_file`, `library_shape`, or `composite`. |
+| **Fitter**  | How the shape is positioned each frame — `between_two`, `cluster_kabsch`, or `procrustes_anisotropic`.             |
+| **Visible** | Whether the segment is drawn.                                                                                      |
 
 The defaults are minimal — every row starts as a `line` between two
 markers — to keep the first render fast. The next step swaps in

@@ -81,14 +81,14 @@ When a field changes in Python, TypeScript silently becomes stale.
 
 ## Files to create/modify
 
-| Action | File |
-|--------|------|
-| Create | `scripts/generate_ts_types.py` |
-| Create | `ui/src/api/generated-types.ts` (auto-generated) |
-| Modify | `ui/src/api/client.ts` — import from generated types |
+| Action | File                                                           |
+| ------ | -------------------------------------------------------------- |
+| Create | `scripts/generate_ts_types.py`                                 |
+| Create | `ui/src/api/generated-types.ts` (auto-generated)               |
+| Modify | `ui/src/api/client.ts` — import from generated types           |
 | Modify | `ui/src/api/useEngineManager.ts` — import from generated types |
-| Modify | `Makefile` — add `types` target |
-| Modify | `pyproject.toml` — add dev dependency |
+| Modify | `Makefile` — add `types` target                                |
+| Modify | `pyproject.toml` — add dev dependency                          |
 
 ## Acceptance criteria
 
@@ -104,7 +104,7 @@ When a field changes in Python, TypeScript silently becomes stale.
 
 **Labels:** `enhancement`, `dual-gui`, `phase-0`, `tracking`
 
-```markdown
+````markdown
 ## Summary
 
 Create a machine-readable feature parity registry that tracks which features
@@ -138,6 +138,8 @@ coverage and developers to identify what's missing.
      ]
    }
    ```
+````
+
 2. Populate with ALL features from the gap analysis table in
    `docs/architecture/dual-gui-architecture-review.md`
 3. Create `scripts/report_feature_parity.py` that reads the JSON and outputs
@@ -166,7 +168,8 @@ coverage and developers to identify what's missing.
 - [ ] `src/config/feature_parity.json` exists with >= 40 features enumerated
 - [ ] `scripts/report_feature_parity.py` outputs clean summary
 - [ ] Each feature has a clear `id`, `category`, and `pyqt`/`react` booleans
-```
+
+````
 
 ---
 
@@ -239,7 +242,8 @@ page and in *what arrangement*, not *how* to render them.
        }
      }
    }
-   ```
+````
+
 2. Create a Pydantic model `src/config/layout_models.py` for validation
 3. Create a loader `src/config/layout_loader.py` used by both UIs
 4. Create a React hook `ui/src/api/useLayoutManifest.ts` to fetch layout specs
@@ -250,7 +254,8 @@ page and in *what arrangement*, not *how* to render them.
 - [ ] Pydantic model validates the manifest at startup
 - [ ] PyQt6 launcher can read the manifest (even if not yet used for rendering)
 - [ ] React hook can fetch and parse the manifest
-```
+
+````
 
 ---
 
@@ -329,7 +334,8 @@ serializable dicts, above the renderers.
        ) -> bytes:
            """Convenience: render via Matplotlib and return image bytes."""
            ...
-   ```
+````
+
 3. Implement `get_plot_data()` for all 20 plot types from `window.py:119-141`:
    - `joint_angles`, `joint_velocities`, `joint_torques` → time series
    - `energies`, `club_head_speed`, `angular_momentum` → time series
@@ -359,12 +365,12 @@ serializable dicts, above the renderers.
 
 ## Files to create/modify
 
-| Action | File |
-|--------|------|
-| Create | `src/shared/python/services/__init__.py` |
-| Create | `src/shared/python/services/plotting_orchestrator.py` |
+| Action | File                                                          |
+| ------ | ------------------------------------------------------------- |
+| Create | `src/shared/python/services/__init__.py`                      |
+| Create | `src/shared/python/services/plotting_orchestrator.py`         |
 | Create | `src/shared/python/services/models.py` (Pydantic data models) |
-| Create | `tests/shared/test_plotting_orchestrator.py` |
+| Create | `tests/shared/test_plotting_orchestrator.py`                  |
 
 ## Acceptance criteria
 
@@ -374,7 +380,8 @@ serializable dicts, above the renderers.
 - [ ] No PyQt6 or Matplotlib imports at module level (Matplotlib only in `render_to_image`)
 - [ ] Unit tests cover at least 10 of the 20 plot types with mock recorder data
 - [ ] `PlotDataResult` has a `.to_dict()` that produces JSON-safe output
-```
+
+````
 
 ---
 
@@ -427,7 +434,8 @@ instances keyed by session/engine, so the API can expose recording controls.
            ...
        def cleanup_session(self, session_id: str) -> None:
            ...
-   ```
+````
+
 2. Manage concurrent sessions with cleanup (TTL-based, like `TaskManager`)
 3. Wire into FastAPI `app.state` at startup (alongside `SimulationService`)
 4. Update `SimulationService` to create recording sessions during simulations
@@ -435,12 +443,12 @@ instances keyed by session/engine, so the API can expose recording controls.
 
 ## Files to create/modify
 
-| Action | File |
-|--------|------|
-| Create | `src/shared/python/services/recording_service.py` |
-| Modify | `src/api/server.py` — register service in `app.state` |
+| Action | File                                                    |
+| ------ | ------------------------------------------------------- |
+| Create | `src/shared/python/services/recording_service.py`       |
+| Modify | `src/api/server.py` — register service in `app.state`   |
 | Modify | `src/api/dependencies.py` — add `get_recording_service` |
-| Create | `tests/shared/test_recording_service.py` |
+| Create | `tests/shared/test_recording_service.py`                |
 
 ## Acceptance criteria
 
@@ -448,7 +456,8 @@ instances keyed by session/engine, so the API can expose recording controls.
 - [ ] Sessions have TTL-based cleanup (configurable, default 1 hour)
 - [ ] `get_time_series()` returns JSON-serializable data
 - [ ] Unit tests cover full lifecycle (create → start → record → stop → query → cleanup)
-```
+
+````
 
 ---
 
@@ -505,16 +514,17 @@ This logic is already mostly UI-independent; we just need a clean service wrappe
        ) -> CounterfactualResult:
            """Extract result for a specific analysis type."""
            ...
-   ```
+````
+
 2. Pydantic models for the result types
 3. Unit tests with mock recorder
 
 ## Files to create/modify
 
-| Action | File |
-|--------|------|
+| Action | File                                                   |
+| ------ | ------------------------------------------------------ |
 | Create | `src/shared/python/services/counterfactual_service.py` |
-| Create | `tests/shared/test_counterfactual_service.py` |
+| Create | `tests/shared/test_counterfactual_service.py`          |
 
 ## Acceptance criteria
 
@@ -522,7 +532,8 @@ This logic is already mostly UI-independent; we just need a clean service wrappe
 - [ ] Results are JSON-serializable
 - [ ] No PyQt6 imports
 - [ ] Tests cover all 5 types
-```
+
+````
 
 ---
 
@@ -571,17 +582,18 @@ multi-format file export that the PyQt6 dashboard has.
        ) -> ExportResult:
            """Export to in-memory bytes (for HTTP download responses)."""
            ...
-   ```
+````
+
 2. Wrap existing functions from `src/shared/python/export.py`
 3. Add `export_to_bytes()` variants for server-side generation (streaming downloads)
 4. Unit tests
 
 ## Files to create/modify
 
-| Action | File |
-|--------|------|
+| Action | File                                           |
+| ------ | ---------------------------------------------- |
 | Create | `src/shared/python/services/export_service.py` |
-| Create | `tests/shared/test_export_service.py` |
+| Create | `tests/shared/test_export_service.py`          |
 
 ## Acceptance criteria
 
@@ -589,7 +601,8 @@ multi-format file export that the PyQt6 dashboard has.
 - [ ] `export_to_bytes()` returns bytes for HTTP streaming
 - [ ] `get_available_formats()` reports which formats are available (based on installed deps)
 - [ ] Graceful handling when scipy/h5py/ezc3d not installed
-```
+
+````
 
 ---
 
@@ -617,7 +630,8 @@ layer works for PyQt6.
        result = self.plotting_service.get_plot_data(plot_type_id)
        # Render to canvas (still Matplotlib, but data comes from service)
        self._render_plot_result(result, self.static_canvas)
-   ```
+````
+
 2. Replace `compute_analysis()` with `CounterfactualService.compute()`
 3. Replace `show_analysis_plot()` with `CounterfactualService.get_result()`
 4. Replace `export_data()` with `ExportService.export_to_file()`
@@ -626,9 +640,9 @@ layer works for PyQt6.
 
 ## Files to modify
 
-| Action | File |
-|--------|------|
-| Modify | `src/shared/python/dashboard/window.py` |
+| Action | File                                                               |
+| ------ | ------------------------------------------------------------------ |
+| Modify | `src/shared/python/dashboard/window.py`                            |
 | Verify | `src/shared/python/dashboard/tests/test_widgets.py` — still passes |
 
 ## Acceptance criteria
@@ -638,7 +652,8 @@ layer works for PyQt6.
 - [ ] `window.py` no longer directly calls `export_recording_all_formats()` (delegated)
 - [ ] All 20 plot types still render correctly in the PyQt6 dashboard
 - [ ] Existing tests pass
-```
+
+````
 
 ---
 
@@ -685,7 +700,7 @@ shared from `src/shared/python/dashboard/widgets.py`.
 - [ ] MuJoCo GUI uses `PlottingOrchestrator` for shared plot types
 - [ ] MuJoCo-specific plots remain in engine-specific code
 - [ ] No regressions in MuJoCo GUI functionality
-```
+````
 
 ---
 
@@ -699,7 +714,7 @@ shared from `src/shared/python/dashboard/widgets.py`.
 
 **Depends on:** #1.1
 
-```markdown
+````markdown
 ## Summary
 
 Expose the `PlottingOrchestrator` via FastAPI endpoints so the React UI can
@@ -708,6 +723,7 @@ request plot data as JSON or rendered images.
 ## Requirements
 
 1. Create `src/api/routes/plots.py` with:
+
    ```python
    router = APIRouter(prefix="/api/plots")
 
@@ -734,19 +750,21 @@ request plot data as JSON or rendered images.
    ) -> StreamingResponse:
        """Return rendered plot image."""
    ```
+````
+
 2. Register in `src/api/server.py`
 3. Add Pydantic request/response models for query parameters
 4. Integration tests using `httpx.AsyncClient` / `TestClient`
 
 ## Files to create/modify
 
-| Action | File |
-|--------|------|
-| Create | `src/api/routes/plots.py` |
-| Modify | `src/api/server.py` — register router |
+| Action | File                                                       |
+| ------ | ---------------------------------------------------------- |
+| Create | `src/api/routes/plots.py`                                  |
+| Modify | `src/api/server.py` — register router                      |
 | Modify | `src/api/models/requests.py` — add `PlotRequest` if needed |
-| Modify | `src/api/models/responses.py` — add `PlotDataResponse` |
-| Create | `tests/api/test_plots_routes.py` |
+| Modify | `src/api/models/responses.py` — add `PlotDataResponse`     |
+| Create | `tests/api/test_plots_routes.py`                           |
 
 ## Acceptance criteria
 
@@ -756,7 +774,8 @@ request plot data as JSON or rendered images.
 - [ ] `GET /api/plots/render/joint_angles?format=svg` returns valid SVG
 - [ ] Error handling for invalid plot types (404), no data available (400)
 - [ ] Integration tests pass
-```
+
+````
 
 ---
 
@@ -795,16 +814,17 @@ recording during simulation.
 
    @router.delete("/sessions/{session_id}")
    async def delete_session(session_id: str) -> dict
-   ```
+````
+
 2. Register in server.py
 3. Integration tests
 
 ## Files to create/modify
 
-| Action | File |
-|--------|------|
-| Create | `src/api/routes/recording.py` |
-| Modify | `src/api/server.py` |
+| Action | File                                 |
+| ------ | ------------------------------------ |
+| Create | `src/api/routes/recording.py`        |
+| Modify | `src/api/server.py`                  |
 | Create | `tests/api/test_recording_routes.py` |
 
 ## Acceptance criteria
@@ -812,7 +832,8 @@ recording during simulation.
 - [ ] Full CRUD lifecycle for recording sessions works via REST
 - [ ] Recording integrates with WebSocket simulation (frames get recorded)
 - [ ] Session cleanup works (TTL and explicit delete)
-```
+
+````
 
 ---
 
@@ -842,7 +863,8 @@ results.
 
    @router.get("/analysis/counterfactual/types")
    async def list_counterfactual_types() -> list[str]
-   ```
+````
+
 2. Integration tests
 
 ## Acceptance criteria
@@ -850,7 +872,8 @@ results.
 - [ ] All 5 counterfactual types available via API
 - [ ] Compute endpoint triggers analysis and returns status
 - [ ] Result endpoint returns structured data
-```
+
+````
 
 ---
 
@@ -886,17 +909,18 @@ endpoints that support streaming file downloads.
        formats: list[str] | None = None,
    ) -> dict:
        """Export to multiple formats, return download URLs."""
-   ```
+````
+
 2. Use `StreamingResponse` with appropriate `Content-Type` and
    `Content-Disposition` headers for file downloads
 3. Integration tests
 
 ## Files to modify
 
-| Action | File |
-|--------|------|
+| Action | File                                                    |
+| ------ | ------------------------------------------------------- |
 | Modify | `src/api/routes/export.py` — replace with new endpoints |
-| Create | `tests/api/test_export_routes.py` |
+| Create | `tests/api/test_export_routes.py`                       |
 
 ## Acceptance criteria
 
@@ -904,7 +928,8 @@ endpoints that support streaming file downloads.
 - [ ] `POST /export/csv` returns downloadable CSV file
 - [ ] `POST /export/mat` returns downloadable .mat file (if scipy installed)
 - [ ] Proper error when format dependency missing (h5py, ezc3d, scipy)
-```
+
+````
 
 ---
 
@@ -935,7 +960,8 @@ camera controls as the PyQt6 GUIs.
 
    @router.get("/api/engines/{engine_type}/camera/presets")
    async def list_camera_presets(engine_type: str) -> list[CameraPreset]
-   ```
+````
+
 2. Model configs should come from the same source as the MuJoCo PhysicsTab's
    `model_configs` list
 3. Camera presets should match the MuJoCo GUI's preset system (side, front, top,
@@ -946,7 +972,8 @@ camera controls as the PyQt6 GUIs.
 - [ ] Model list endpoint returns engine-specific model configurations
 - [ ] Camera preset endpoint returns named presets with azimuth/elevation/distance
 - [ ] React UI can query and display model options
-```
+
+````
 
 ---
 
@@ -977,7 +1004,7 @@ as the single source of truth for both frontends.
 - [ ] Every API endpoint has at least one contract test
 - [ ] Tests verify response Pydantic model validation
 - [ ] Tests run in CI on every PR
-```
+````
 
 ---
 
@@ -1016,13 +1043,13 @@ rendered images (for complex plots).
 
 ## Files to create/modify
 
-| Action | File |
-|--------|------|
-| Create | `ui/src/pages/Analysis.tsx` |
-| Create | `ui/src/components/analysis/PlotViewer.tsx` |
+| Action | File                                                     |
+| ------ | -------------------------------------------------------- |
+| Create | `ui/src/pages/Analysis.tsx`                              |
+| Create | `ui/src/components/analysis/PlotViewer.tsx`              |
 | Create | `ui/src/api/usePlots.ts` — hooks for plot data/rendering |
-| Modify | `ui/src/App.tsx` — add route |
-| Create | `ui/src/pages/Analysis.test.tsx` |
+| Modify | `ui/src/App.tsx` — add route                             |
+| Create | `ui/src/pages/Analysis.test.tsx`                         |
 
 ## Acceptance criteria
 
@@ -1060,11 +1087,11 @@ recording and see frame count, mirroring the PyQt6 overlay's REC button.
 
 ## Files to create/modify
 
-| Action | File |
-|--------|------|
-| Create | `ui/src/components/simulation/RecordingControls.tsx` |
-| Create | `ui/src/api/useRecording.ts` |
-| Modify | `ui/src/pages/Simulation.tsx` — add recording controls |
+| Action | File                                                      |
+| ------ | --------------------------------------------------------- |
+| Create | `ui/src/components/simulation/RecordingControls.tsx`      |
+| Create | `ui/src/api/useRecording.ts`                              |
+| Modify | `ui/src/pages/Simulation.tsx` — add recording controls    |
 | Create | `ui/src/components/simulation/RecordingControls.test.tsx` |
 
 ## Acceptance criteria
@@ -1160,14 +1187,14 @@ H (help).
 
 ## Key mapping (from `main_window.py:230-278`)
 
-| Key | Action |
-|-----|--------|
-| Space | Play/Pause simulation |
-| R | Reset simulation |
-| 1-5 | Camera presets (side, front, top, follow, down-the-line) |
-| O | Toggle overlay |
-| H | Toggle help panel |
-| Escape | Stop simulation |
+| Key    | Action                                                   |
+| ------ | -------------------------------------------------------- |
+| Space  | Play/Pause simulation                                    |
+| R      | Reset simulation                                         |
+| 1-5    | Camera presets (side, front, top, follow, down-the-line) |
+| O      | Toggle overlay                                           |
+| H      | Toggle help panel                                        |
+| Escape | Stop simulation                                          |
 
 ## Acceptance criteria
 
@@ -1222,6 +1249,7 @@ and contour plots.
 ## Context
 
 Recharts handles simple 2D time-series well but cannot render:
+
 - 3D scatter plots (Poincare map, club head trajectory)
 - Radar/spider charts (swing profile)
 - Heatmaps (recurrence plot)
@@ -1356,23 +1384,23 @@ using the shared service layer pattern.
 
 ## Summary: Issue Count by Phase
 
-| Phase | Issues | Effort Estimate |
-|-------|--------|-----------------|
-| Phase 0: Foundation | 3 | Small (setup/config) |
-| Phase 1: Extract Services | 6 | **Large** (core refactoring) |
-| Phase 2: API Endpoints | 6 | Medium (wiring) |
-| Phase 3: React UI | 7 | Medium-Large (new UI code) |
-| Phase 4: Polish | 3 | Medium (testing/docs) |
-| **Total** | **25** | |
+| Phase                     | Issues | Effort Estimate              |
+| ------------------------- | ------ | ---------------------------- |
+| Phase 0: Foundation       | 3      | Small (setup/config)         |
+| Phase 1: Extract Services | 6      | **Large** (core refactoring) |
+| Phase 2: API Endpoints    | 6      | Medium (wiring)              |
+| Phase 3: React UI         | 7      | Medium-Large (new UI code)   |
+| Phase 4: Polish           | 3      | Medium (testing/docs)        |
+| **Total**                 | **25** |                              |
 
 ## Recommended Sprint Assignment
 
-| Sprint | Issues | Goal |
-|--------|--------|------|
-| Sprint 1 | #0.1, #0.2, #0.3 | Foundation in place |
-| Sprint 2 | #1.1, #1.2, #1.3, #1.4 | All services created |
+| Sprint   | Issues                 | Goal                                  |
+| -------- | ---------------------- | ------------------------------------- |
+| Sprint 1 | #0.1, #0.2, #0.3       | Foundation in place                   |
+| Sprint 2 | #1.1, #1.2, #1.3, #1.4 | All services created                  |
 | Sprint 3 | #1.5, #1.6, #2.1, #2.2 | PyQt6 refactored, first API endpoints |
-| Sprint 4 | #2.3, #2.4, #2.5, #2.6 | All API endpoints live |
-| Sprint 5 | #3.1, #3.2, #3.3 | Core React pages |
-| Sprint 6 | #3.4, #3.5, #3.6, #3.7 | React UI enhancements |
-| Sprint 7 | #4.1, #4.2, #4.3 | Testing, docs, polish |
+| Sprint 4 | #2.3, #2.4, #2.5, #2.6 | All API endpoints live                |
+| Sprint 5 | #3.1, #3.2, #3.3       | Core React pages                      |
+| Sprint 6 | #3.4, #3.5, #3.6, #3.7 | React UI enhancements                 |
+| Sprint 7 | #4.1, #4.2, #4.3       | Testing, docs, polish                 |

@@ -24,6 +24,7 @@ tests/
 ```
 
 `Option1Fixture` should:
+
 - Open a tiny `parpool` (1–2 workers) for the suite, close at teardown.
 - Pre-load the `.slx` once; share the model handle across tests via the fixture.
 - Provide `target_synthetic = synthesize_target_from_coefficients(theta_known)` lazily and cache to disk.
@@ -232,15 +233,15 @@ python3 -m ruff check src/  # if any Python was added
 
 Per the markers in [CLAUDE.md — Test markers](../../../../../../CLAUDE.md):
 
-| Test | Marker | Where it runs |
-|---|---|---|
-| `test_options_struct_contract` | `unit` | Every CI run |
-| `test_fits_synthetic_to_within_1mm` | `integration`, `live_simulation` | Hourly nightly |
-| `test_recovers_known_coefficients_within_5pct` | `integration`, `slow` | Nightly |
-| `test_total_work_regularizer_reduces_torque_magnitude` | `integration` | Every CI run |
-| `test_multistart_outperforms_single_start_on_known_multimodal_target` | `slow`, `live_simulation` | Nightly |
-| `test_surrogateopt_completes_in_under_5min_on_30coeff_problem` | `slow`, `benchmark` | Nightly |
-| `test_result_struct_contains_all_provenance_fields` | `unit` | Every CI run |
-| `test_cache_hit_returns_identical_result` | `unit` | Every CI run |
+| Test                                                                  | Marker                           | Where it runs  |
+| --------------------------------------------------------------------- | -------------------------------- | -------------- |
+| `test_options_struct_contract`                                        | `unit`                           | Every CI run   |
+| `test_fits_synthetic_to_within_1mm`                                   | `integration`, `live_simulation` | Hourly nightly |
+| `test_recovers_known_coefficients_within_5pct`                        | `integration`, `slow`            | Nightly        |
+| `test_total_work_regularizer_reduces_torque_magnitude`                | `integration`                    | Every CI run   |
+| `test_multistart_outperforms_single_start_on_known_multimodal_target` | `slow`, `live_simulation`        | Nightly        |
+| `test_surrogateopt_completes_in_under_5min_on_30coeff_problem`        | `slow`, `benchmark`              | Nightly        |
+| `test_result_struct_contains_all_provenance_fields`                   | `unit`                           | Every CI run   |
+| `test_cache_hit_returns_identical_result`                             | `unit`                           | Every CI run   |
 
 The `unit`-marked subset must complete in under 60 s to fit the [CLAUDE.md pytest timeout](../../../../../../CLAUDE.md#development-commands).

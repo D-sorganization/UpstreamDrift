@@ -26,6 +26,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate when:
+
 - Artefacts are ambiguous or incomplete
 - Acceptance criteria are missing or unclear
 - Human or peer feedback highlights gaps
@@ -51,9 +52,11 @@ This skill is **not** for first-draft creation — it deepens clarity and reduce
 ## Outputs
 
 **Written outputs:**
+
 - `contexts/artefacts/` — refined artefacts written back to their original locations
 
 **Inline outputs:**
+
 - `refined_discovery_plan` — returned inline to the invoking agent
 
 ```
@@ -90,6 +93,7 @@ Validation:
 ## Non-Goals
 
 This skill must NOT:
+
 - Invent new product direction
 - Override human intent
 - Generate completely new artefacts unconnected to context

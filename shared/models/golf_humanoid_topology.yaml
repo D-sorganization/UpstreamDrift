@@ -71,12 +71,12 @@ bodies:
 
   - name: Hip
     parent_joint: hip_floating
-    inertia_ref: LowerTorso          # Hip carries the LowerTorso inertia in the Simscape model
+    inertia_ref: LowerTorso # Hip carries the LowerTorso inertia in the Simscape model
     description: Pelvis / hip-base link.
 
   - name: Spine
     parent_joint: spine
-    inertia_ref: null                # massless intermediate frame in the Simscape model
+    inertia_ref: null # massless intermediate frame in the Simscape model
     description: Spine pivot midway between hip and chest.
 
   - name: Torso
@@ -95,7 +95,7 @@ bodies:
     description: Left glenohumeral pivot frame.
 
   - name: LUpperArm
-    parent_joint: null               # rigidly attached to LShoulder pivot frame
+    parent_joint: null # rigidly attached to LShoulder pivot frame
     attach_to: LShoulder
     inertia_ref: LeftUpperArm
 
@@ -110,7 +110,7 @@ bodies:
     description: Left forearm distal half + wrist DOFs.
 
   - name: LHand
-    parent_joint: null               # rigid extension from the wrist frame
+    parent_joint: null # rigid extension from the wrist frame
     attach_to: LWrist
     inertia_ref: LeftHand
 
@@ -123,7 +123,7 @@ bodies:
     inertia_ref: null
 
   - name: RUpperArm
-    parent_joint: null               # rigidly attached to RShoulder pivot frame
+    parent_joint: null # rigidly attached to RShoulder pivot frame
     attach_to: RShoulder
     inertia_ref: RightUpperArm
 
@@ -136,7 +136,7 @@ bodies:
     inertia_ref: RightForearmLower
 
   - name: RHand
-    parent_joint: null               # rigid extension from the wrist frame
+    parent_joint: null # rigid extension from the wrist frame
     attach_to: RWrist
     inertia_ref: RightHand
 
@@ -161,7 +161,6 @@ bodies:
 # ---------------------------------------------------------------------------
 
 joints:
-
   - name: hip_floating
     parent: world
     child: Hip
@@ -171,8 +170,13 @@ joints:
     rotation_order: ZYX
     simscape_signal_prefix: HipLogs
     start_position_params:
-      translation: [TranslationStartPositionX, TranslationStartPositionY, TranslationStartPositionZ]
-      rotation:    [HipStartPositionX,         HipStartPositionY,         HipStartPositionZ]
+      translation:
+        [
+          TranslationStartPositionX,
+          TranslationStartPositionY,
+          TranslationStartPositionZ,
+        ]
+      rotation: [HipStartPositionX, HipStartPositionY, HipStartPositionZ]
     notes: >
       Implemented in Simscape as a Cartesian Joint (3 prismatic) followed by
       a Gimbal Joint (3 revolute) in series. The `Hip(6)` in the spec maps
@@ -218,7 +222,8 @@ joints:
     axes: [rx, ry, rz]
     rotation_order: ZYX
     simscape_signal_prefix: LSLogs
-    start_position_params: [LSStartPositionX, LSStartPositionY, LSStartPositionZ]
+    start_position_params:
+      [LSStartPositionX, LSStartPositionY, LSStartPositionZ]
 
   - name: l_elbow
     parent: LShoulder
@@ -259,7 +264,8 @@ joints:
     axes: [rx, ry, rz]
     rotation_order: ZYX
     simscape_signal_prefix: RSLogs
-    start_position_params: [RSStartPositionX, RSStartPositionY, RSStartPositionZ]
+    start_position_params:
+      [RSStartPositionX, RSStartPositionY, RSStartPositionZ]
 
   - name: r_elbow
     parent: RShoulder
@@ -283,7 +289,7 @@ joints:
   # ----- Club attachment -----
 
   - name: grip_locked
-    parent: LHand                 # left hand is the primary grip-anchor
+    parent: LHand # left hand is the primary grip-anchor
     child: Club
     type: welded
     dof: 0
@@ -316,28 +322,28 @@ frames:
 # ---------------------------------------------------------------------------
 
 q_order:
-  - { joint: hip_floating, dof: tx }    # 0
-  - { joint: hip_floating, dof: ty }    # 1
-  - { joint: hip_floating, dof: tz }    # 2
-  - { joint: hip_floating, dof: rx }    # 3
-  - { joint: hip_floating, dof: ry }    # 4
-  - { joint: hip_floating, dof: rz }    # 5
-  - { joint: spine,        dof: rx }    # 6
-  - { joint: spine,        dof: ry }    # 7
-  - { joint: torso,        dof: rz }    # 8
-  - { joint: l_scap,       dof: rx }    # 9
-  - { joint: l_scap,       dof: ry }    # 10
-  - { joint: l_shoulder,   dof: rx }    # 11
-  - { joint: l_shoulder,   dof: ry }    # 12
-  - { joint: l_shoulder,   dof: rz }    # 13
-  - { joint: l_elbow,      dof: rz }    # 14
-  - { joint: l_wrist,      dof: rx }    # 15
-  - { joint: l_wrist,      dof: ry }    # 16
-  - { joint: r_scap,       dof: rx }    # 17
-  - { joint: r_scap,       dof: ry }    # 18
-  - { joint: r_shoulder,   dof: rx }    # 19
-  - { joint: r_shoulder,   dof: ry }    # 20
-  - { joint: r_shoulder,   dof: rz }    # 21
-  - { joint: r_elbow,      dof: rz }    # 22
-  - { joint: r_wrist,      dof: rx }    # 23
-  - { joint: r_wrist,      dof: ry }    # 24
+  - { joint: hip_floating, dof: tx } # 0
+  - { joint: hip_floating, dof: ty } # 1
+  - { joint: hip_floating, dof: tz } # 2
+  - { joint: hip_floating, dof: rx } # 3
+  - { joint: hip_floating, dof: ry } # 4
+  - { joint: hip_floating, dof: rz } # 5
+  - { joint: spine, dof: rx } # 6
+  - { joint: spine, dof: ry } # 7
+  - { joint: torso, dof: rz } # 8
+  - { joint: l_scap, dof: rx } # 9
+  - { joint: l_scap, dof: ry } # 10
+  - { joint: l_shoulder, dof: rx } # 11
+  - { joint: l_shoulder, dof: ry } # 12
+  - { joint: l_shoulder, dof: rz } # 13
+  - { joint: l_elbow, dof: rz } # 14
+  - { joint: l_wrist, dof: rx } # 15
+  - { joint: l_wrist, dof: ry } # 16
+  - { joint: r_scap, dof: rx } # 17
+  - { joint: r_scap, dof: ry } # 18
+  - { joint: r_shoulder, dof: rx } # 19
+  - { joint: r_shoulder, dof: ry } # 20
+  - { joint: r_shoulder, dof: rz } # 21
+  - { joint: r_elbow, dof: rz } # 22
+  - { joint: r_wrist, dof: rx } # 23
+  - { joint: r_wrist, dof: ry } # 24

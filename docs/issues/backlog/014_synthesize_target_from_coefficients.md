@@ -64,12 +64,14 @@ end
 ## DbC contract
 
 Preconditions:
+
 - `theta` is a real, finite vector of length `n_joints * 7`.
 - `theta` lies within the bounds from `generateRandomCoefficients.m`
   (A,B in ±1000; C,D in ±500; E,F in ±100; G in ±25).
 - `opts.sample_rate` is positive; `opts.simulation_time` in (0, 1].
 
 Postconditions:
+
 - `target` satisfies all rules from `CLUB_IK_SPEC.md` §"Validation rules".
 - `target.source.theta_truth` equals the input `theta` (so the test oracle can
   recover the truth).

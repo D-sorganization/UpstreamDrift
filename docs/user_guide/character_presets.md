@@ -10,39 +10,39 @@ Character presets provide pre-configured anthropometric parameters for quickly c
 
 ### Basic Body Types
 
-| Preset | Height (m) | Mass (kg) | Build Type | Gender | Description |
-|--------|------------|-----------|------------|--------|-------------|
-| `athletic` | 1.80 | 80.0 | Mesomorph | Neutral | Athletic, muscular build with broad shoulders |
-| `average` | 1.75 | 75.0 | Average | Neutral | Average proportions |
-| `heavy` | 1.78 | 100.0 | Endomorph | Neutral | Heavier build with higher body fat |
-| `lean` | 1.82 | 70.0 | Ectomorph | Neutral | Lean, tall build with long limbs |
-| `compact` | 1.65 | 65.0 | Average | Neutral | Shorter, compact build |
-| `tall` | 1.95 | 90.0 | Average | Neutral | Tall build |
-| `minimal` | 1.70 | 60.0 | Ectomorph | Neutral | Minimal/lightweight build for testing |
+| Preset     | Height (m) | Mass (kg) | Build Type | Gender  | Description                                   |
+| ---------- | ---------- | --------- | ---------- | ------- | --------------------------------------------- |
+| `athletic` | 1.80       | 80.0      | Mesomorph  | Neutral | Athletic, muscular build with broad shoulders |
+| `average`  | 1.75       | 75.0      | Average    | Neutral | Average proportions                           |
+| `heavy`    | 1.78       | 100.0     | Endomorph  | Neutral | Heavier build with higher body fat            |
+| `lean`     | 1.82       | 70.0      | Ectomorph  | Neutral | Lean, tall build with long limbs              |
+| `compact`  | 1.65       | 65.0      | Average    | Neutral | Shorter, compact build                        |
+| `tall`     | 1.95       | 90.0      | Average    | Neutral | Tall build                                    |
+| `minimal`  | 1.70       | 60.0      | Ectomorph  | Neutral | Minimal/lightweight build for testing         |
 
 ### Gender-Specific Presets
 
-| Preset | Height (m) | Mass (kg) | Build Type | Gender | Description |
-|--------|------------|-----------|------------|--------|-------------|
-| `male_average` | 1.78 | 80.0 | Average | Male | Average male proportions |
-| `female_average` | 1.65 | 62.0 | Average | Female | Average female proportions |
-| `tall_male` | 1.93 | 88.0 | Mesomorph | Male | Tall male (95th percentile height, CDC) |
-| `petite_female` | 1.55 | 52.0 | Average | Female | Petite female (5th percentile height, CDC) |
+| Preset           | Height (m) | Mass (kg) | Build Type | Gender | Description                                |
+| ---------------- | ---------- | --------- | ---------- | ------ | ------------------------------------------ |
+| `male_average`   | 1.78       | 80.0      | Average    | Male   | Average male proportions                   |
+| `female_average` | 1.65       | 62.0      | Average    | Female | Average female proportions                 |
+| `tall_male`      | 1.93       | 88.0      | Mesomorph  | Male   | Tall male (95th percentile height, CDC)    |
+| `petite_female`  | 1.55       | 52.0      | Average    | Female | Petite female (5th percentile height, CDC) |
 
 ### Age-Specific Presets
 
-| Preset | Height (m) | Mass (kg) | Build Type | Gender | Description |
-|--------|------------|-----------|------------|--------|-------------|
-| `child_8yo` | 1.28 | 26.0 | Ectomorph | Neutral | 8-year-old child (CDC growth charts, 50th percentile) |
-| `senior_70yo` | 1.70 | 72.0 | Average | Neutral | 70-year-old senior (NHANES data, average) |
+| Preset        | Height (m) | Mass (kg) | Build Type | Gender  | Description                                           |
+| ------------- | ---------- | --------- | ---------- | ------- | ----------------------------------------------------- |
+| `child_8yo`   | 1.28       | 26.0      | Ectomorph  | Neutral | 8-year-old child (CDC growth charts, 50th percentile) |
+| `senior_70yo` | 1.70       | 72.0      | Average    | Neutral | 70-year-old senior (NHANES data, average)             |
 
 ### Sport-Specific Presets
 
-| Preset | Height (m) | Mass (kg) | Build Type | Gender | Description |
-|--------|------------|-----------|------------|--------|-------------|
-| `golfer_pro` | 1.83 | 82.0 | Mesomorph | Male | Professional golfer body type |
-| `pro_golfer_male` | 1.83 | 82.0 | Mesomorph | Male | Male professional golfer (PGA Tour anthropometry) |
-| `pro_golfer_female` | 1.68 | 64.0 | Mesomorph | Female | Female professional golfer (LPGA Tour anthropometry) |
+| Preset              | Height (m) | Mass (kg) | Build Type | Gender | Description                                          |
+| ------------------- | ---------- | --------- | ---------- | ------ | ---------------------------------------------------- |
+| `golfer_pro`        | 1.83       | 82.0      | Mesomorph  | Male   | Professional golfer body type                        |
+| `pro_golfer_male`   | 1.83       | 82.0      | Mesomorph  | Male   | Male professional golfer (PGA Tour anthropometry)    |
+| `pro_golfer_female` | 1.68       | 64.0      | Mesomorph  | Female | Female professional golfer (LPGA Tour anthropometry) |
 
 ## Usage Examples
 
@@ -110,11 +110,11 @@ Professional golfer anthropometry is derived from published sports science resea
 
 The character builder supports three somatotype build categories:
 
-| Build Type | Description | Characteristics |
-|------------|-------------|-----------------|
-| `ECTOMORPH` | Lean and slender | Lower body mass, longer limbs relative to torso |
-| `MESOMORPH` | Muscular and athletic | Higher muscularity, broader shoulders |
-| `ENDOMORPH` | Rounder and softer | Higher body fat, wider hips |
+| Build Type  | Description           | Characteristics                                 |
+| ----------- | --------------------- | ----------------------------------------------- |
+| `ECTOMORPH` | Lean and slender      | Lower body mass, longer limbs relative to torso |
+| `MESOMORPH` | Muscular and athletic | Higher muscularity, broader shoulders           |
+| `ENDOMORPH` | Rounder and softer    | Higher body fat, wider hips                     |
 
 ## Custom Presets
 
@@ -139,15 +139,15 @@ save_preset_to_file(params, "presets/my_custom_preset.yaml")
 
 ## Expected Use Cases
 
-| Use Case | Recommended Presets |
-|----------|---------------------|
-| General biomechanics simulation | `average`, `male_average`, `female_average` |
-| Sports performance analysis | `athletic`, `pro_golfer_male`, `pro_golfer_female` |
-| Pediatric studies | `child_8yo` |
-| Geriatric studies | `senior_70yo` |
-| Ergonomics testing | `compact`, `petite_female`, `tall_male` |
-| Lightweight robotics | `minimal`, `lean` |
-| Heavy load testing | `heavy` |
+| Use Case                        | Recommended Presets                                |
+| ------------------------------- | -------------------------------------------------- |
+| General biomechanics simulation | `average`, `male_average`, `female_average`        |
+| Sports performance analysis     | `athletic`, `pro_golfer_male`, `pro_golfer_female` |
+| Pediatric studies               | `child_8yo`                                        |
+| Geriatric studies               | `senior_70yo`                                      |
+| Ergonomics testing              | `compact`, `petite_female`, `tall_male`            |
+| Lightweight robotics            | `minimal`, `lean`                                  |
+| Heavy load testing              | `heavy`                                            |
 
 ## Contributing New Presets
 

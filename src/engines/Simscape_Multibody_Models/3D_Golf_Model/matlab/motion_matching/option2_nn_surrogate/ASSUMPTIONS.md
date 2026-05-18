@@ -12,7 +12,7 @@ The random-sweep bounds are defined by [generateRandomCoefficients.m](../../src/
 
 - The Adam inversion in `fit_swing_via_surrogate` **must project** onto these bounds at every step. See [APPROACH.md § Inversion](APPROACH.md#inversion).
 - Round-trip validation (run the fitted coefficients through Simscape) is **mandatory** before publishing a fit. See [TESTING.md § round-trip](TESTING.md#round-trip-validation).
-- A measured swing whose physiologically-plausible coefficients lie *outside* the random-sweep envelope **cannot be fit by Option 2 alone** — fall back to Option 1 or expand the envelope and regenerate the dataset.
+- A measured swing whose physiologically-plausible coefficients lie _outside_ the random-sweep envelope **cannot be fit by Option 2 alone** — fall back to Option 1 or expand the envelope and regenerate the dataset.
 
 ## A2. The surrogate is differentiable w.r.t. its input
 

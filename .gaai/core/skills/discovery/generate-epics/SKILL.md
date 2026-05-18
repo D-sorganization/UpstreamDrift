@@ -22,6 +22,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate when:
+
 - Starting a new product
 - Adding a significant feature or domain
 - Restructuring product scope
@@ -36,6 +37,7 @@ Works with or without a PRD.
 1. Read the Epic template at `contexts/artefacts/epics/_template.epic.md` before writing any Epic file.
 
    **CRITICAL — ID Collision Guard (MUST execute before assigning any Epic ID):**
+
    - **a)** Scan `contexts/backlog/active.backlog.yaml` to find the **highest existing Epic number** (e.g., if E52 is the last, the next Epic must be E53 or higher).
    - **b)** Also scan `contexts/artefacts/epics/` for existing `.epic.md` files to catch any that may not yet be in the backlog.
    - **c)** For each Epic file to be created, **check if the file already exists** at `contexts/artefacts/epics/{id}.epic.md`. If it exists with different content, **STOP immediately** — surface the conflict to the human.
@@ -58,6 +60,7 @@ Template: `contexts/artefacts/epics/_template.epic.md`
 Produces files at `contexts/artefacts/epics/{id}.epic.md`.
 
 Key sections per Epic:
+
 - Purpose: what user outcome this delivers and why it matters
 - Scope: high-level description of what is included
 - Out of Scope: what is explicitly excluded
@@ -80,6 +83,7 @@ Key sections per Epic:
 ## Non-Goals
 
 This skill must NOT:
+
 - Generate Stories (use `generate-stories`)
 - Make technical architecture decisions
 - Produce more than 7 Epics per initiative

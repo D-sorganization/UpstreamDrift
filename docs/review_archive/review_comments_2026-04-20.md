@@ -33,4 +33,3 @@ The parser calls `Path(source).exists()` for all string inputs, but valid raw XM
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/2848#discussion_r3110001759)
 
 ---
-

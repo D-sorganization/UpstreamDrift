@@ -22,6 +22,7 @@ This effort introduces three target types (`ClubTarget`, `ClubBallTarget`, `Body
 ### B. User guide
 
 `docs/user_guide/motion_matching/loading_targets.md`:
+
 - How to load club data from xlsx (`load_club_target(path, sheet=...)`) / `.mat` (auto-dispatch) / `.c3d` (auto-dispatch).
 - How to load body markers from `.c3d` (`load_body_target(path, opts=opts)`).
 - How to share a clock between body and club (pass `impact_source`).
@@ -30,6 +31,7 @@ This effort introduces three target types (`ClubTarget`, `ClubBallTarget`, `Body
 ### C. Update the motion-matching index
 
 `docs/motion_matching/README.md` (or create if missing): table of contents linking to:
+
 - The loaders ADR (above).
 - The CLUB_IK_SPEC.
 - The starting-pose-matcher README.
@@ -38,6 +40,7 @@ This effort introduces three target types (`ClubTarget`, `ClubBallTarget`, `Body
 ### D. Update AGENTS.md
 
 `AGENTS.md` "shared infrastructure" list — add:
+
 - `BodyTarget`, `ClubBallTarget`, `MultiSourceTarget` dataclasses location.
 - `load_body_target`, `load_club_target` dispatchers.
 - `default_body_segments` helper.

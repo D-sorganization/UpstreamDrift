@@ -34,34 +34,42 @@ URDF Model Generation and Manipulation Tools
 ## Per-subcommand inventory
 
 ### `generate` (alias: `gen`)
+
 Generates a humanoid URDF from `BodyParameters`. Produces output to
 stdout or a file via `--output`. Exit 0 on success, non-zero on failure.
 
 ### `convert` (alias: `conv`)
+
 Converts between supported model formats (URDF ↔ MJCF; Simscape MDL → URDF).
 Delegates to `model_generation.converters`.
 
 ### `validate` (alias: `val`)
+
 Runs the validator from `model_generation.core.validation` against an
 input URDF. Reports errors and warnings.
 
 ### `diff`
+
 Diff two URDF files. Returns structural changes (added/removed links,
 joints, materials).
 
 ### `info`
+
 Prints summary statistics for a URDF (link count, joint count, total mass,
 total DOF).
 
 ### `library` (alias: `lib`)
+
 Wraps `model_generation.library.ModelLibrary`. Subcommands include
 `list`, `add`, `remove`, `refresh`.
 
 ### `compose`
+
 Composes a model from multiple URDF inputs (similar to a CLI front-end
 for the Frankenstein editor).
 
 ### `inertia`
+
 Computes inertia tensors for primitive shapes. Useful as a calculator;
 delegates to `model_generation.inertia.primitives`.
 
@@ -102,14 +110,14 @@ CLI invocation in the test suite.
 
 ## Production readiness
 
-| Criterion | Status |
-|---|---|
-| `--help` works | ✅ |
-| `--version` works | ✅ |
-| Per-subcommand parser tests | ✅ |
-| End-to-end subprocess smoke tests | ❌ Missing |
-| `pyproject.toml` console-script entry | ❌ Missing |
-| User-guide page | ⏳ Pending in #4552 |
+| Criterion                             | Status              |
+| ------------------------------------- | ------------------- |
+| `--help` works                        | ✅                  |
+| `--version` works                     | ✅                  |
+| Per-subcommand parser tests           | ✅                  |
+| End-to-end subprocess smoke tests     | ❌ Missing          |
+| `pyproject.toml` console-script entry | ❌ Missing          |
+| User-guide page                       | ⏳ Pending in #4552 |
 
 **Verdict: Beta.** The CLI is feature-complete and has parser-level
 test coverage. The main gap is end-to-end smoke testing and the missing

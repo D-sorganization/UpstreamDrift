@@ -18,4 +18,3 @@ The new export test asserts that the function docstring contains the literal nam
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4257#discussion_r3198764095)
 
 ---
-

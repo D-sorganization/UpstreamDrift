@@ -100,11 +100,13 @@ Tests that touch real workers should be marked
 ## DbC contract
 
 Preconditions inherited verbatim from `INTERFACES.md`:
+
 - `pool_size >= 1`.
 - `model_path.endswith(".slx")`.
 - Every theta is a 1-D numpy array with size multiple of 7.
 
 Postconditions:
+
 - `len(map_simulate(thetas)) == len(thetas)`.
 - Order of `map_simulate` results matches input order.
 

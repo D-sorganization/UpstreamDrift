@@ -20,6 +20,7 @@ class DrakeFitSwingProvider:
 ```
 
 Initial implementation:
+
 1. Accept `MultiSourceTarget`; pull out `target.club` for the club fit.
 2. Optimiser: keep the existing scipy.optimize / pydrake gradient path; just rewire input/output.
 3. Return `FitResult` with `theta` `(N, n_joints)`, `simulated_clubhead`, `simulated_butt`, basic RMSE metrics.

@@ -13,6 +13,7 @@ UpstreamDrift supports multiple motion capture formats and pose estimation syste
 C3D is the industry-standard format for biomechanics motion capture.
 
 **Features:**
+
 - 3D marker positions
 - Analog data (force plates, EMG)
 - Frame rate and timing information
@@ -25,11 +26,13 @@ C3D is the industry-standard format for biomechanics motion capture.
 Flexible format for custom marker data.
 
 **Expected columns:**
+
 - Time or frame number
 - X, Y, Z coordinates per marker
 - Optional: velocity, acceleration data
 
 **Example format:**
+
 ```csv
 time,marker1_x,marker1_y,marker1_z,marker2_x,marker2_y,marker2_z
 0.000,0.123,0.456,0.789,0.321,0.654,0.987
@@ -43,6 +46,7 @@ Structured format with hierarchical data.
 **Use for:** Pose estimation output, custom applications
 
 **Example structure:**
+
 ```json
 {
   "frame_rate": 120,
@@ -63,19 +67,23 @@ Structured format with hierarchical data.
 ### Using the Import Dialog
 
 1. **Open Import Dialog**
+
    - File menu > Import Motion Capture
    - Or press Ctrl+I
 
 2. **Select File**
+
    - Browse to your data file
    - Supported formats shown in filter
 
 3. **Configure Import Settings**
+
    - Set coordinate system (if needed)
    - Map markers to standard names
    - Specify frame range (optional)
 
 4. **Preview Data**
+
    - View marker trajectories
    - Check for gaps or errors
    - Verify coordinate system
@@ -109,11 +117,13 @@ The built-in C3D Viewer provides specialized visualization for motion capture da
 ### Features
 
 - **3D Marker Visualization**
+
   - Animated marker positions
   - Trajectory trails
   - Color-coded marker groups
 
 - **Analog Data Plotting**
+
   - Force plate data
   - EMG signals
   - Custom analog channels
@@ -125,13 +135,13 @@ The built-in C3D Viewer provides specialized visualization for motion capture da
 
 ### Controls
 
-| Key | Action |
-|-----|--------|
-| Space | Play/Pause |
-| Left/Right | Step frame |
-| Home | Go to start |
-| End | Go to end |
-| +/- | Adjust speed |
+| Key        | Action       |
+| ---------- | ------------ |
+| Space      | Play/Pause   |
+| Left/Right | Step frame   |
+| Home       | Go to start  |
+| End        | Go to end    |
+| +/-        | Adjust speed |
 
 ## Pose Estimation from Video
 
@@ -139,29 +149,33 @@ UpstreamDrift can extract motion data from video using pose estimation.
 
 ### Supported Systems
 
-| System | Keypoints | Speed | Accuracy |
-|--------|-----------|-------|----------|
-| MediaPipe | 33 | Fast | Good |
-| OpenPose | 25 | Medium | Excellent |
-| MoveNet | 17 | Very Fast | Good |
+| System    | Keypoints | Speed     | Accuracy  |
+| --------- | --------- | --------- | --------- |
+| MediaPipe | 33        | Fast      | Good      |
+| OpenPose  | 25        | Medium    | Excellent |
+| MoveNet   | 17        | Very Fast | Good      |
 
 ### Processing Video
 
 1. **Import Video**
+
    - File > Import Video for Pose Estimation
    - Supported formats: MP4, AVI, MOV
 
 2. **Select Pose Estimator**
+
    - MediaPipe (recommended for local processing)
    - OpenPose (requires separate installation)
    - MoveNet (fast, lower accuracy)
 
 3. **Configure Settings**
+
    - Frame rate for extraction
    - Confidence threshold
    - Smoothing options
 
 4. **Process**
+
    - Click "Process Video"
    - Progress bar shows completion
    - Results saved automatically
@@ -186,21 +200,26 @@ Map motion capture data to your simulation model.
 ### Retargeting Process
 
 1. **Load Motion Data**
+
    - Import your motion capture file
 
 2. **Select Target Model**
+
    - Choose the simulation model to drive
 
 3. **Define Marker Mapping**
+
    - Map mocap markers to model joints/bodies
    - Example: "LSHO" marker -> "left_shoulder" joint
 
 4. **Configure Options**
+
    - Scaling: Match model proportions
    - Filtering: Smooth noisy data
    - Gap filling: Interpolate missing data
 
 5. **Execute Retargeting**
+
    - Click "Retarget"
    - Review results in 3D view
 
@@ -213,12 +232,12 @@ Map motion capture data to your simulation model.
 
 Standard marker set mappings are provided for common configurations:
 
-| Marker Set | Markers | Use Case |
-|------------|---------|----------|
-| Plug-in Gait | 39 | Full body clinical |
-| Helen Hayes | 15 | Lower body |
-| Cleveland Clinic | 12 | Upper body golf |
-| Custom | Variable | User-defined |
+| Marker Set       | Markers  | Use Case           |
+| ---------------- | -------- | ------------------ |
+| Plug-in Gait     | 39       | Full body clinical |
+| Helen Hayes      | 15       | Lower body         |
+| Cleveland Clinic | 12       | Upper body golf    |
+| Custom           | Variable | User-defined       |
 
 ### Python API for Retargeting
 
@@ -248,16 +267,17 @@ joint_trajectory = retargeter.retarget(mocap_data)
 
 ### Common Issues
 
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| Gaps | Occlusion | Gap filling interpolation |
-| Noise | Marker vibration | Low-pass filtering |
-| Spikes | Marker swap | Manual correction |
-| Drift | Calibration | Re-calibrate or correct |
+| Issue  | Cause            | Solution                  |
+| ------ | ---------------- | ------------------------- |
+| Gaps   | Occlusion        | Gap filling interpolation |
+| Noise  | Marker vibration | Low-pass filtering        |
+| Spikes | Marker swap      | Manual correction         |
+| Drift  | Calibration      | Re-calibrate or correct   |
 
 ### Quality Metrics
 
 The system reports:
+
 - Gap percentage per marker
 - RMS noise estimate
 - Outlier detection
@@ -286,4 +306,4 @@ The system reports:
 
 ---
 
-*See also: [Full User Manual](../USER_MANUAL.md) | [Visualization](visualization.md) | [Analysis Tools](analysis_tools.md)*
+_See also: [Full User Manual](../USER_MANUAL.md) | [Visualization](visualization.md) | [Analysis Tools](analysis_tools.md)_

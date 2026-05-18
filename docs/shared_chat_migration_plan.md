@@ -18,6 +18,7 @@ UpstreamDrift consumes the Tools-owned shared chat component through a declared 
 ### Local Chat Implementation
 
 UpstreamDrift contains local chat code at:
+
 - `src/shared/python/chat/__init__.py`
 - `src/shared/python/chat/chat_dock_widget.py`
 - `src/shared/python/chat/chat_message_bubble.py`
@@ -26,6 +27,7 @@ UpstreamDrift contains local chat code at:
 ### Tools-Owned Chat
 
 The canonical chat implementation lives in:
+
 - `Tools/src/chat/` (canonical source)
 - May be vendored at `UpstreamDrift/vendor/Tools/src/chat/`
 
@@ -42,12 +44,14 @@ Python's `sys.path` ordering can cause `src/shared/python/chat` to be imported b
 #### Tasks
 
 1. **Audit Import Paths**:
+
    ```bash
    grep -r "from.*chat" src/ tests/ --include="*.py"
    grep -r "import.*chat" src/ tests/ --include="*.py"
    ```
 
 2. **Audit Shared Components**:
+
    - `shared.python.chat` modules
    - Chat UI components
    - Codemap integration
@@ -66,6 +70,7 @@ Python's `sys.path` ordering can cause `src/shared/python/chat` to be imported b
 #### Implementation
 
 1. **Create App Adapter** (`src/adapters/chat_adapter.py`):
+
    ```python
    """UpstreamDrift adapter for Tools-owned shared chat.
 
@@ -104,6 +109,7 @@ Python's `sys.path` ordering can cause `src/shared/python/chat` to be imported b
 #### Implementation
 
 1. **Update Import Statements**:
+
    ```python
    # Before
    from src.shared.python.chat import ChatDockWidget
@@ -115,6 +121,7 @@ Python's `sys.path` ordering can cause `src/shared/python/chat` to be imported b
    ```
 
 2. **Update Module References**:
+
    - Update all `src/` files importing chat
    - Update test files
    - Update configuration files
@@ -131,6 +138,7 @@ Python's `sys.path` ordering can cause `src/shared/python/chat` to be imported b
 #### Tests Required
 
 1. **Module Resolution Tests**:
+
    ```python
    def test_chat_imports_from_tools():
        """Verify chat imports from Tools, not local."""
@@ -140,6 +148,7 @@ Python's `sys.path` ordering can cause `src/shared/python/chat` to be imported b
    ```
 
 2. **Launcher Integration Tests**:
+
    - Chat opens from launcher
    - Session history loads
    - Model refresh works
@@ -158,11 +167,13 @@ Python's `sys.path` ordering can cause `src/shared/python/chat` to be imported b
 #### Documentation Updates
 
 1. **Update docs/SPEC.md**:
+
    - Document Tools ownership
    - Document adapter pattern
    - Document path ordering requirements
 
 2. **Update README.md**:
+
    - Add vendor setup instructions
    - Add troubleshooting for path issues
 
@@ -190,13 +201,13 @@ Python's `sys.path` ordering can cause `src/shared/python/chat` to be imported b
 
 ## PR Tracking
 
-| Phase | PR # | Status | Notes |
-|-------|------|--------|-------|
-| Phase 1: Audit | - | ⏳ Pending | - |
-| Phase 2: Adapter | - | ⏳ Pending | - |
-| Phase 3: Migration | - | ⏳ Pending | - |
-| Phase 4: Testing | - | ⏳ Pending | - |
-| Phase 5: Documentation | - | ⏳ Pending | - |
+| Phase                  | PR # | Status     | Notes |
+| ---------------------- | ---- | ---------- | ----- |
+| Phase 1: Audit         | -    | ⏳ Pending | -     |
+| Phase 2: Adapter       | -    | ⏳ Pending | -     |
+| Phase 3: Migration     | -    | ⏳ Pending | -     |
+| Phase 4: Testing       | -    | ⏳ Pending | -     |
+| Phase 5: Documentation | -    | ⏳ Pending | -     |
 
 ## Related Issues
 
@@ -209,10 +220,11 @@ Python's `sys.path` ordering can cause `src/shared/python/chat` to be imported b
 ## Gasification_Model Notes
 
 Gasification_Model has a similar issue tracked at:
+
 - [Gasification_Model #3514](https://github.com/D-sorganization/Gasification_Model/issues/3514)
 
 The migration pattern should be consistent across both repos.
 
 ---
 
-*This document will be updated as migration PRs are created and merged.*
+_This document will be updated as migration PRs are created and merged._

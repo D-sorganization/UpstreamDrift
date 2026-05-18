@@ -70,6 +70,7 @@ else:
 After a successful run the output directory contains at minimum:
 
 - **`landmarks.csv`** — frame-by-frame 3D landmark positions:
+
   ```
   frame,landmark_id,x,y,z
   0,0,0.123,-0.045,1.677
@@ -79,11 +80,11 @@ After a successful run the output directory contains at minimum:
 - **`metadata.json`** — session metadata:
   ```json
   {
-      "freemocap_version": "1.6.0",
-      "n_frames": 1234,
-      "n_landmarks": 33,
-      "fps": 60,
-      "duration_s": 20.5
+    "freemocap_version": "1.6.0",
+    "n_frames": 1234,
+    "n_landmarks": 33,
+    "fps": 60,
+    "duration_s": 20.5
   }
   ```
 
@@ -98,13 +99,13 @@ install. Stub metadata carries `"stub": true` and
 `run_freemocap_sidecar()` returns a `FreeMoCapResult` rather than
 raising on subprocess failure. Inspect:
 
-| Field | Meaning |
-|---|---|
-| `success` | True iff subprocess exited 0 AND output files exist |
-| `used_real_freemocap` | True if real freemocap was invoked, False if stub |
-| `return_code` | subprocess exit code (-1 = timeout, 127 = interpreter missing) |
-| `stderr_tail` | last 4 KB of subprocess stderr |
-| `landmarks_csv`, `metadata_json` | absolute paths if produced, else None |
+| Field                            | Meaning                                                        |
+| -------------------------------- | -------------------------------------------------------------- |
+| `success`                        | True iff subprocess exited 0 AND output files exist            |
+| `used_real_freemocap`            | True if real freemocap was invoked, False if stub              |
+| `return_code`                    | subprocess exit code (-1 = timeout, 127 = interpreter missing) |
+| `stderr_tail`                    | last 4 KB of subprocess stderr                                 |
+| `landmarks_csv`, `metadata_json` | absolute paths if produced, else None                          |
 
 Common cases:
 

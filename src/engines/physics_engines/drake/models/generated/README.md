@@ -31,7 +31,7 @@ python3 -m pytest tests/test_drake_urdf_drift.py -v
 
 ## How to fix a failing CI gate
 
-1. Make your change in the *source* — usually
+1. Make your change in the _source_ — usually
    `shared/models/golf_humanoid_dimensions.yaml` or
    `src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py`.
 2. Run `python3 scripts/build_humanoid_models.py --engine drake`.

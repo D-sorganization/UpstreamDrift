@@ -25,6 +25,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate when:
+
 - Session memory grows large
 - Decisions accumulate across sessions
 - Project context becomes fragmented
@@ -55,19 +56,24 @@ For each category that meets the threshold:
 
 ```markdown
 # {Category} — Summary
+
 > Summarized from {N} files on {YYYY-MM-DD}
 > Compression: ~{original_tokens} → ~{summary_tokens} ({percentage}%)
 
 ## Decisions
+
 - {bullet per confirmed decision}
 
 ## Constraints
+
 - {bullet per active constraint}
 
 ## Priorities
+
 - {bullet per current priority}
 
 ## Open Questions
+
 - {bullet per unresolved question, if still relevant}
 ```
 
@@ -84,6 +90,7 @@ For each category that meets the threshold:
 ## Quality Checks
 
 A good summary:
+
 - Summary token count is ≤20% of original — verify before replacing active memory
 - Every summarized category has its archive file created before the summary replaces it
 - Preserves all actionable knowledge
@@ -95,6 +102,7 @@ A good summary:
 ## Non-Goals
 
 This skill must NOT:
+
 - Invent new knowledge
 - Reinterpret decisions
 - Remove active constraints

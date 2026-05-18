@@ -18,30 +18,30 @@ documents the smoke-test strategy.
 
 ## Module layout (selected)
 
-| File | Lines | Role |
-|---|---|---|
-| `main_window.py` | _not in head_ | `URDFGeneratorWindow(QMainWindow)` — top-level shell. |
-| `model_library.py` | 1030 | Model library browser (URDF / MJCF assets). |
-| `model_loader_dialog.py` | 1059 | "Open URDF" dialog with mesh resolution. |
-| `mujoco_viewer.py` | 1045 | Embedded MuJoCo viewer widget. |
-| `_mujoco_viewer_backend.py` | — | Backend abstraction for the viewer. |
-| `urdf_editor_window.py` | 583 | URDF text editor sub-window. |
-| `urdf_code_editor.py` | 833 | Syntax-highlighted URDF code editor. |
-| `urdf_builder.py` | 712 | Visual URDF builder (drag-and-drop). |
-| `visualization_widget.py` | 678 | 3D visualization scaffolding. |
-| `segment_manager.py` | 405 | Per-segment property manager. |
-| `segment_panel.py` | 643 | Per-segment UI panel. |
-| `chain_manipulation.py` | — | Kinematic chain editing. |
-| `_chain_model.py` / `_chain_widget.py` / `_chain_visualizer.py` | — | Chain MVC. |
-| `joint_manipulator.py` | — | Interactive joint dragger. |
-| `mesh_browser.py` | — | STL/OBJ/DAE file picker. |
-| `component_library.py` | — | Reusable URDF component palette. |
-| `end_effector_manager.py` | — | End-effector library. |
-| `_ee_library.py` / `_ee_model.py` / `_ee_widget.py` / `_ee_widget_ui.py` | — | EE MVC + UI. |
-| `frankenstein_editor.py` | — | Cross-model paste UI. |
-| `_frankenstein_model.py` / `_frankenstein_panels.py` | — | Frankenstein MVC. |
-| `_attachment_dialog.py` | — | Attachment-point dialog. |
-| `launch_model_explorer.py` | — | Entry-point wrapper. |
+| File                                                                     | Lines         | Role                                                  |
+| ------------------------------------------------------------------------ | ------------- | ----------------------------------------------------- |
+| `main_window.py`                                                         | _not in head_ | `URDFGeneratorWindow(QMainWindow)` — top-level shell. |
+| `model_library.py`                                                       | 1030          | Model library browser (URDF / MJCF assets).           |
+| `model_loader_dialog.py`                                                 | 1059          | "Open URDF" dialog with mesh resolution.              |
+| `mujoco_viewer.py`                                                       | 1045          | Embedded MuJoCo viewer widget.                        |
+| `_mujoco_viewer_backend.py`                                              | —             | Backend abstraction for the viewer.                   |
+| `urdf_editor_window.py`                                                  | 583           | URDF text editor sub-window.                          |
+| `urdf_code_editor.py`                                                    | 833           | Syntax-highlighted URDF code editor.                  |
+| `urdf_builder.py`                                                        | 712           | Visual URDF builder (drag-and-drop).                  |
+| `visualization_widget.py`                                                | 678           | 3D visualization scaffolding.                         |
+| `segment_manager.py`                                                     | 405           | Per-segment property manager.                         |
+| `segment_panel.py`                                                       | 643           | Per-segment UI panel.                                 |
+| `chain_manipulation.py`                                                  | —             | Kinematic chain editing.                              |
+| `_chain_model.py` / `_chain_widget.py` / `_chain_visualizer.py`          | —             | Chain MVC.                                            |
+| `joint_manipulator.py`                                                   | —             | Interactive joint dragger.                            |
+| `mesh_browser.py`                                                        | —             | STL/OBJ/DAE file picker.                              |
+| `component_library.py`                                                   | —             | Reusable URDF component palette.                      |
+| `end_effector_manager.py`                                                | —             | End-effector library.                                 |
+| `_ee_library.py` / `_ee_model.py` / `_ee_widget.py` / `_ee_widget_ui.py` | —             | EE MVC + UI.                                          |
+| `frankenstein_editor.py`                                                 | —             | Cross-model paste UI.                                 |
+| `_frankenstein_model.py` / `_frankenstein_panels.py`                     | —             | Frankenstein MVC.                                     |
+| `_attachment_dialog.py`                                                  | —             | Attachment-point dialog.                              |
+| `launch_model_explorer.py`                                               | —             | Entry-point wrapper.                                  |
 
 Total: 30+ modules, ~14,145 LOC.
 
@@ -126,13 +126,13 @@ as a follow-up).
 
 ## Production readiness
 
-| Criterion | Status |
-|---|---|
-| Launchable | ✅ |
+| Criterion                            | Status                         |
+| ------------------------------------ | ------------------------------ |
+| Launchable                           | ✅                             |
 | Core flows manually verified to work | ✅ (per existing user reports) |
-| Manual smoke checklist exists | ✅ (this doc) |
-| Automated GUI smoke test | ❌ Missing |
-| User-guide screenshot | ❌ Missing |
+| Manual smoke checklist exists        | ✅ (this doc)                  |
+| Automated GUI smoke test             | ❌ Missing                     |
+| User-guide screenshot                | ❌ Missing                     |
 
 **Verdict: Beta.** The tool is functional and broadly used. The gap is
 purely automated test coverage; the feature surface itself appears

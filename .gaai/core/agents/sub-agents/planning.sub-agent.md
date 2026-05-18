@@ -54,6 +54,7 @@ No communication with the Orchestrator or sibling sub-agents during execution. A
 After `delivery-high-level-plan` and before `prepare-execution-plan`, the Planning Sub-Agent evaluates whether `approach-evaluation` should be invoked.
 
 **Invoke when ANY of:**
+
 - A technology, library, or service is being introduced for the first time in the project
 - Multiple viable implementation approaches exist and the best choice is non-obvious
 - No established convention exists in `conventions.md` for the problem domain
@@ -61,6 +62,7 @@ After `delivery-high-level-plan` and before `prepare-execution-plan`, the Planni
 - A prior approach on similar work failed (check `decisions/_log.md`)
 
 **Skip when ALL of:**
+
 - The approach follows an established convention in `conventions.md`
 - The Story is Tier 1 / MicroDelivery
 - The approach is explicitly defined in the Story or a prior decision
@@ -96,6 +98,7 @@ Handoff artefact
 **Primary:** `contexts/artefacts/plans/{id}.execution-plan.md`
 
 The artefact must include:
+
 - Implementation sequence (ordered steps, files, checkpoints)
 - Edge cases per acceptance criterion
 - Test checkpoints

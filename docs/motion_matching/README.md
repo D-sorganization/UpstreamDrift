@@ -10,8 +10,8 @@ preview tool.
 
 - [ADR 0006 — Multi-Source Motion Targets](../adr/0006-multi-source-motion-targets.md)
   Decision record for the `ClubTarget` / `ClubBallTarget` / `BodyTarget`
-  + `MultiSourceTarget` aggregator surface and the format-agnostic
-  loader dispatchers.
+  - `MultiSourceTarget` aggregator surface and the format-agnostic
+    loader dispatchers.
 - [ADR 0008 — Body-Part Visualisation Toolkit](../adr/0008-body-part-viz-toolkit.md)
   Decision record for the shared `body_part_viz` package that backs
   the C3D Viewer's Segments tab, the starting-pose matcher, and the

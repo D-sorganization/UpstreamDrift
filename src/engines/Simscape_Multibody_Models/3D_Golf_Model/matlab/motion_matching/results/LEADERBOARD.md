@@ -12,18 +12,18 @@ for the manual-step contract).
 
 ## Per-pair fit results
 
-| swing_id | option | solver | rmse_mm | work_J | wall_s | commit | timestamp | status |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| TW_ProV1 | fmincon | n/a | n/a | n/a | n/a | - | - | pending #4074 |
-| TW_ProV1 | surrogate | n/a | n/a | n/a | n/a | - | - | pending #4075 |
-| TW_ProV1 | inverse | n/a | n/a | n/a | n/a | - | - | pending #4076 |
-| TW_ProV1 | hybrid | n/a | n/a | n/a | n/a | - | - | pending #4077 |
+| swing_id | option    | solver | rmse_mm | work_J | wall_s | commit | timestamp | status        |
+| -------- | --------- | ------ | ------- | ------ | ------ | ------ | --------- | ------------- |
+| TW_ProV1 | fmincon   | n/a    | n/a     | n/a    | n/a    | -      | -         | pending #4074 |
+| TW_ProV1 | surrogate | n/a    | n/a     | n/a    | n/a    | -      | -         | pending #4075 |
+| TW_ProV1 | inverse   | n/a    | n/a     | n/a    | n/a    | -      | -         | pending #4076 |
+| TW_ProV1 | hybrid    | n/a    | n/a     | n/a    | n/a    | -      | -         | pending #4077 |
 
 ## Cross-option grid (rmse_mm)
 
-| trial \ option | fmincon | surrogate | inverse | hybrid |
-| --- | --- | --- | --- | --- |
-| TW_ProV1 | _pending #4074_ | _pending #4075_ | _pending #4076_ | _pending #4077_ |
+| trial \ option | fmincon         | surrogate       | inverse         | hybrid          |
+| -------------- | --------------- | --------------- | --------------- | --------------- |
+| TW_ProV1       | _pending #4074_ | _pending #4075_ | _pending #4076_ | _pending #4077_ |
 
 ## Notes
 

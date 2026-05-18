@@ -159,8 +159,8 @@ costs more than it saves.
 
 - Every public dataclass (`MarkerBinding`, `FittedShape`, `ShapeTheme`,
   `SegmentVizSpec`, `SegmentVizSet`) runs post-init validation. Frozen
-  + validated is the design contract; cost terms and renderers can
-  trust the shape of what they receive.
+  - validated is the design contract; cost terms and renderers can
+    trust the shape of what they receive.
 - The Protocols are `@runtime_checkable` so tests can assert that a
   newly added shape / fitter / renderer satisfies the contract before
   the type checker sees it.
@@ -198,7 +198,7 @@ costs more than it saves.
 - `src/shared/python/body_part_viz/urdf_bridge.py` — shape-to-URDF
   mapping.
 - `assets/body_part_shapes/default/` — bundled procedural STL meshes
-  + manifest + LICENSES.
+  - manifest + LICENSES.
 - `docs/user_guide/body_part_viz/quickstart.md` — companion user guide.
 - `docs/user_guide/body_part_viz/mesh_import.md` — custom-mesh import
   guide.

@@ -39,6 +39,7 @@ class ClubBallTarget:
 ### Validation
 
 `ClubBallTarget.__post_init__`:
+
 - `club` is a `ClubTarget`.
 - `ball_impact` is a `BallImpactState`.
 - `ball_impact.position_at_impact_m` shape `(3,)`, all finite, `|r| < MAX_POSITION_NORM_M`.
@@ -51,6 +52,7 @@ class ClubBallTarget:
 For our existing club datasets we don't have a Trackman/launch-monitor feed. The default ball-impact extractor must therefore approximate from the club state:
 
 `extract_ball_impact_from_clubtarget(target: ClubTarget) -> BallImpactState`
+
 - `position_at_impact_m` := `target.clubhead[target.impact_idx]` (within ball-radius, fine for visualisation; flag in docstring this is an approximation).
 - `launch_direction` := unit vector of clubhead velocity at impact (numerical gradient on the resampled grid).
 - `launch_speed_mps` := `|v_clubhead at impact|` × elasticity factor `e=1.5` clamped to 100 (documented as a stand-in pending real launch-monitor data).

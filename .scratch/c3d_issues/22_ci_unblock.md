@@ -4,13 +4,13 @@
 
 Five open motion-matching PRs are stuck behind orthogonal CI failures unrelated to their actual changes:
 
-| PR | Title | Failing checks |
-|---|---|---|
-| #4488 | ClubBallTarget | `quality-gate` |
-| #4493 | unify C3D readers | `regenerate cross-engine leaderboard`, `Verify SPEC.md freshness` |
-| #4500 | Motion-Match Preview tile | `Verify SPEC.md freshness` |
-| #4505 | source-toggle UI | `Verify SPEC.md freshness` |
-| #4496 | body-skeleton segments | (last sweep clean — recheck) |
+| PR    | Title                     | Failing checks                                                    |
+| ----- | ------------------------- | ----------------------------------------------------------------- |
+| #4488 | ClubBallTarget            | `quality-gate`                                                    |
+| #4493 | unify C3D readers         | `regenerate cross-engine leaderboard`, `Verify SPEC.md freshness` |
+| #4500 | Motion-Match Preview tile | `Verify SPEC.md freshness`                                        |
+| #4505 | source-toggle UI          | `Verify SPEC.md freshness`                                        |
+| #4496 | body-skeleton segments    | (last sweep clean — recheck)                                      |
 
 All five are blocking the headline "wire C3D plot into matcher" issue (#4512). Get them green so they merge.
 
@@ -42,6 +42,7 @@ Don't change the implementation logic of any PR — this is a CI-unstick pass on
 ## Files touched
 
 Per-PR. Likely:
+
 - Regenerated `SPEC.md` files
 - Regenerated `cross_engine_leaderboard.json` or similar
 - `spec-exempt` label additions

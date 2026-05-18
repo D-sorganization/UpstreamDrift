@@ -9,11 +9,13 @@ This implements a complete training pipeline for the Option-3 inverse cVAE model
 ### Model Components
 
 1. **Encoder**: 1D Transformer over kinematic sequences
+
    - Input: `(B, T, 12)` → butt position (3) + clubhead position (3) + club quaternion (4) + padding (2)
    - Outputs: Per-timestep hidden states, mean-pooled to context `h_x`
    - Posterior head: `h_x` → `(mu, log_var)` for diagonal-Gaussian posterior
 
 2. **Decoder**: MLP on concatenated latent and context
+
    - Input: `concat(z, h_x)` where `z ~ q(z | kinematics)`
    - Output: `(B, n_joints * 7)` flat coefficient vector (A, B, C, D, E, F, G per joint)
 
@@ -28,6 +30,7 @@ L = λ_θ · MSE(θ_pred, θ_true) + β(t) · KL(q(z|x) || N(0,I)) + λ_W · |W_
 ```
 
 Where:
+
 - `β(t)` linearly ramps from 0 to `max_beta` over `kl_warmup_epochs`
 - `W_estimate()` is a closed-form polynomial work estimator
 - `λ_θ = 1.0`, `λ_W = 1e-3` by default
@@ -37,7 +40,7 @@ Where:
 - **train_option3_cvae.py**: Main training orchestrator (new)
 - **train_option3_example.py**: Example script with CLI (new)
 - **test_train_option3_cvae.py**: Unit test suite (new)
-- **inverse/__init__.py**: Updated to export new APIs
+- **inverse/**init**.py**: Updated to export new APIs
 
 ## Usage
 
@@ -124,6 +127,7 @@ After training completes, the following are saved to `output_dir`:
 1. **model_state.pt**: PyTorch state_dict of trained weights
 2. **config.json**: Complete training configuration (architecture + hyperparameters)
 3. **metrics.json**: Evaluation metrics including:
+
    - `final_train_loss`, `final_val_loss` — ELBO values
    - `coverage_mean_rmse_m` — Round-trip RMSE on test set
    - `diversity_mean_pairwise_l2` — Mean L2 distance between samples
@@ -141,7 +145,7 @@ After training completes, the following are saved to `output_dir`:
 ✅ (3) Support stochastic exploration via latent space sampling  
 ✅ (4) Model fast enough for real-time (≤ 1 ms per sample)  
 ✅ (5) Save trained model (encoder, decoder, VAE weights)  
-✅ (6) Create evaluation showing posterior coverage, reconstruction accuracy, diversity  
+✅ (6) Create evaluation showing posterior coverage, reconstruction accuracy, diversity
 
 ## Testing
 
@@ -152,14 +156,17 @@ python3 -m pytest tests/unit/motion_matching/test_train_option3_cvae.py -v
 ## Model Architecture Details
 
 ### Real-Time Inference Requirement
+
 - **Target**: ≤ 1 ms per sample
 - **Measured**: ~0.2–0.5 ms per sample on GPU (batch=1)
 
 ### Posterior Coverage
+
 - **Definition**: Fraction of test trials where round-trip RMSE > threshold
 - **Typical**: < 5% flagged on well-tuned models
 
 ### Latent-Space Diversity
+
 - **Definition**: Mean pairwise L2 distance between `n_test_samples` per input
 - **Typical**: 1.5–3.0 for well-trained models
 - **Failure Mode**: `< 1e-3` indicates mode collapse

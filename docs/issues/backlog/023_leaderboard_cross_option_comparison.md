@@ -75,9 +75,11 @@ end
 ## DbC contract
 
 Preconditions:
+
 - `results_dir` exists.
 
 Postconditions:
+
 - Returned table has the documented columns.
 - Every row's `result` struct passed `verify_result_provenance` (had all
   fields per `CODING_STANDARDS.md` §"Provenance").

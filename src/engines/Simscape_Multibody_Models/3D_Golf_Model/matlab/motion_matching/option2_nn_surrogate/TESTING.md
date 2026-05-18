@@ -147,14 +147,14 @@ CPU CI slack: bumped to 30 s rather than 10 s to accommodate runners without GPU
 
 Not required for issue acceptance but expected before declaring v1 done.
 
-| Test | Purpose | Marker |
-|---|---|---|
-| `test_normalization_stats_round_trip` | denormalize(normalize(x)) == x | unit |
-| `test_quaternion_canonicalization_idempotent` | canonicalize(canonicalize(q)) == canonicalize(q) | unit |
-| `test_bound_projection_keeps_iterates_inside` | clamped Adam step never exits the box | unit |
-| `test_dataset_split_no_trial_id_leakage` | train ∩ val ∩ test = ∅ | unit |
-| `test_checkpoint_round_trip` | train → save → load → predict identical | unit |
-| `test_polish_handoff_matches_option1_format` | hybrid result struct conforms to CODING_STANDARDS.md | integration |
+| Test                                            | Purpose                                                 | Marker            |
+| ----------------------------------------------- | ------------------------------------------------------- | ----------------- |
+| `test_normalization_stats_round_trip`           | denormalize(normalize(x)) == x                          | unit              |
+| `test_quaternion_canonicalization_idempotent`   | canonicalize(canonicalize(q)) == canonicalize(q)        | unit              |
+| `test_bound_projection_keeps_iterates_inside`   | clamped Adam step never exits the box                   | unit              |
+| `test_dataset_split_no_trial_id_leakage`        | train ∩ val ∩ test = ∅                                  | unit              |
+| `test_checkpoint_round_trip`                    | train → save → load → predict identical                 | unit              |
+| `test_polish_handoff_matches_option1_format`    | hybrid result struct conforms to CODING_STANDARDS.md    | integration       |
 | `test_matlab_shim_produces_valid_result_struct` | `fit_swing_surrogate.m` round-trips through `pyrunfile` | integration, slow |
 
 ## Fixtures

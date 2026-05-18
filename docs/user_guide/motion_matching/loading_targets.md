@@ -2,18 +2,18 @@
 
 This guide walks through loading club, ball-aware, and full-body motion
 targets and assembling them into a `MultiSourceTarget` for the
-motion-matching pipeline.  See
+motion-matching pipeline. See
 [ADR 0006](../../adr/0006-multi-source-motion-targets.md) for the
 design rationale.
 
 ## Source formats at a glance
 
-| Source                     | Loader              | Returns           |
-| -------------------------- | ------------------- | ----------------- |
-| Wiffle-style xlsx workbook | `load_club_target`  | `ClubTarget`      |
-| C3D club capture           | `load_club_target`  | `ClubTarget`      |
-| MAT club capture           | `load_club_target`  | `ClubTarget`      |
-| C3D full-body marker set   | `load_body_target`  | `BodyTarget`      |
+| Source                     | Loader             | Returns      |
+| -------------------------- | ------------------ | ------------ |
+| Wiffle-style xlsx workbook | `load_club_target` | `ClubTarget` |
+| C3D club capture           | `load_club_target` | `ClubTarget` |
+| MAT club capture           | `load_club_target` | `ClubTarget` |
+| C3D full-body marker set   | `load_body_target` | `BodyTarget` |
 
 Both dispatchers route on file extension, so call sites do not need to
 special-case the source format.
@@ -43,7 +43,7 @@ club = load_club_target(Path("data/some_capture.mat"))
 
 The returned `ClubTarget` carries a unit-normalised quaternion track,
 position samples on the simulation timegrid, and impact-pinned
-indices.  Validation runs in `__post_init__`; an invalid file raises
+indices. Validation runs in `__post_init__`; an invalid file raises
 `ValueError`.
 
 ## Loading a body track
@@ -55,7 +55,7 @@ body = load_body_target(Path("data/C3D_TA_Driver.c3d"))
 ```
 
 `load_body_target` returns a `BodyTarget` containing a labelled
-mapping of segment trajectories.  The default segment set is exposed
+mapping of segment trajectories. The default segment set is exposed
 by the `default_body_segments` helper for callers that want to
 restrict cost terms to a known subset:
 
@@ -87,16 +87,16 @@ target = MultiSourceTarget(
 )
 ```
 
-`impact_source` accepts `"club"`, `"body"`, or `"explicit"`.  If the
+`impact_source` accepts `"club"`, `"body"`, or `"explicit"`. If the
 two tracks already agree on time, `MultiSourceTarget` validates that
-their time vectors are equal within `TIME_EPS`.  If not, the body
+their time vectors are equal within `TIME_EPS`. If not, the body
 track is re-aligned to the chosen impact source and re-validated.
 
 ## Worked example: a representative full-body mocap capture
 
 The repository ships with a small representative full-body mocap
 capture, `data/C3D_TA_Driver.c3d`, that contains both a club track and
-a body marker set on the same clock.  This example walks through
+a body marker set on the same clock. This example walks through
 loading both, assembling a `MultiSourceTarget`, and querying the
 aggregator from cost-function code.
 
@@ -155,7 +155,7 @@ the new track do not change.
 ## Naming conventions
 
 File-on-disk names follow whatever the capture system publishes; this
-guide uses the literal filenames present in `data/`.  Everything
+guide uses the literal filenames present in `data/`. Everything
 above the loader boundary uses source-agnostic names: `BodyTarget`
 not `MarkerSetTarget`, `load_body_target` not the per-vendor variant.
 The motivation is documented in

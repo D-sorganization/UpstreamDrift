@@ -106,6 +106,7 @@ node .gaai/core/scripts/check-and-update-skills-index.js
 ```
 
 Then:
+
 ```bash
 git add .gaai/core/skills/skills-index.yaml .gaai/project/skills/skills-index.yaml
 git commit -m "regenerate(gaai): update skills indices"
@@ -114,10 +115,12 @@ git commit -m "regenerate(gaai): update skills indices"
 ## Index Consistency
 
 Two separate indices:
+
 - `.gaai/core/skills/skills-index.yaml` — core framework skills only (ships with OSS)
 - `.gaai/project/skills/skills-index.yaml` — project-specific skills only
 
 Both are:
+
 - **Source of truth:** Frontmatter in each SKILL.md file
 - **Derived cache:** Generated YAML, never edit manually
 - **Update trigger:** Any SKILL.md file modification
@@ -130,12 +133,14 @@ The post-commit hook ensures index is never stale at commit time.
 **Q: Hook didn't run, but I committed a SKILL.md**
 
 A: Check that hook is executable:
+
 ```bash
 ls -la .git/hooks/post-commit
 # Should show: -rwxr-xr-x
 ```
 
 If not executable:
+
 ```bash
 chmod +x .git/hooks/post-commit
 ```
@@ -143,6 +148,7 @@ chmod +x .git/hooks/post-commit
 **Q: Index is stale even though hook exists**
 
 A: If working with a fresh clone or git worktree:
+
 ```bash
 # Make hook executable
 chmod +x .git/hooks/post-commit
@@ -154,6 +160,7 @@ node .gaai/core/scripts/check-and-update-skills-index.js
 **Q: What if Node.js isn't available?**
 
 A: The hook fails silently (returns 0 without regenerating). Fallback:
+
 ```bash
 # Use the build-skills-index skill via CLI
 /gaai-discover build-skills-index

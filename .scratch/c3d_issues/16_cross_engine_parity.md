@@ -15,33 +15,33 @@ This issue is the umbrella; child issues land per-engine implementation work.
 
 ## Current state (audit)
 
-| Engine | motion_matching dir | `fit_swing` API? | Consumes ClubTarget? | Consumes BodyTarget? | Notes |
-|---|---|---|---|---|---|
-| Drake (`src/engines/physics_engines/drake/python/motion_matching/`) | yes | partial | partial | no | uses local Excel adapter; needs `MultiSourceTarget` plumbing |
-| MuJoCo (`.../mujoco/python/motion_matching/`) | yes | partial | partial | no | recent `synthesize.py` work — extend |
-| Pinocchio (`.../pinocchio/python/motion_matching/`) | yes | partial | partial (via `club_target_adapter.py`) | no | most mature; reference for others |
-| OpenSim (`.../opensim/python/motion_matching/`) | yes | partial | partial | no | prescribed-controller path needs refresh |
-| MyoSim (`.../myosuite/python/motion_matching/`) | unknown | unknown | unknown | unknown | needs audit |
-| Simscape 3D (MATLAB) (`src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/`) | yes | yes | yes | partial | MATLAB layer — different surface |
-| Simscape 2D (MATLAB) | partial | unknown | unknown | unknown | needs audit |
-| Pendulum (`.../pendulum/python/motion_matching/`?) | unknown | unknown | unknown | unknown | needs audit |
-| Pendulum models | similar | unknown | unknown | unknown | needs audit |
+| Engine                                                                                               | motion_matching dir | `fit_swing` API? | Consumes ClubTarget?                   | Consumes BodyTarget? | Notes                                                        |
+| ---------------------------------------------------------------------------------------------------- | ------------------- | ---------------- | -------------------------------------- | -------------------- | ------------------------------------------------------------ |
+| Drake (`src/engines/physics_engines/drake/python/motion_matching/`)                                  | yes                 | partial          | partial                                | no                   | uses local Excel adapter; needs `MultiSourceTarget` plumbing |
+| MuJoCo (`.../mujoco/python/motion_matching/`)                                                        | yes                 | partial          | partial                                | no                   | recent `synthesize.py` work — extend                         |
+| Pinocchio (`.../pinocchio/python/motion_matching/`)                                                  | yes                 | partial          | partial (via `club_target_adapter.py`) | no                   | most mature; reference for others                            |
+| OpenSim (`.../opensim/python/motion_matching/`)                                                      | yes                 | partial          | partial                                | no                   | prescribed-controller path needs refresh                     |
+| MyoSim (`.../myosuite/python/motion_matching/`)                                                      | unknown             | unknown          | unknown                                | unknown              | needs audit                                                  |
+| Simscape 3D (MATLAB) (`src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/`) | yes                 | yes              | yes                                    | partial              | MATLAB layer — different surface                             |
+| Simscape 2D (MATLAB)                                                                                 | partial             | unknown          | unknown                                | unknown              | needs audit                                                  |
+| Pendulum (`.../pendulum/python/motion_matching/`?)                                                   | unknown             | unknown          | unknown                                | unknown              | needs audit                                                  |
+| Pendulum models                                                                                      | similar             | unknown          | unknown                                | unknown              | needs audit                                                  |
 
 ## Children to file (one issue each)
 
-| # | Title | Effort |
-|---|---|---|
-| A | feat(motion-matching): canonical engine-side `fit_swing(target, opts) -> FitResult` API + provider registry | M |
-| B | feat(drake): adapt motion-matching to `MultiSourceTarget`; expose `fit_swing` provider | M |
-| C | feat(mujoco): adapt motion-matching to `MultiSourceTarget`; expose `fit_swing` provider | M |
-| D | feat(pinocchio): adapt motion-matching to `MultiSourceTarget`; bring forward existing `club_target_adapter` | M |
-| E | feat(opensim): adapt motion-matching to `MultiSourceTarget`; refresh prescribed-controller path | M |
-| F | audit + feat(myosim): motion-matching plumbing audit + first-pass implementation | M |
-| G | feat(matlab/simscape-3d): consume `BodyTarget` via .json bridge from Python | M |
-| H | audit(matlab/simscape-2d): identify motion-matching gaps + file follow-ups | S |
-| I | audit(pendulum): identify motion-matching gaps + file follow-ups | S |
-| J | feat(motion-matching): cost-function term that uses BodyTarget marker error (foot-contact, hand position, etc.) | L |
-| K | feat(motion-matching): leaderboard rows for each engine + "compare against measured C3D" view | M |
+| #   | Title                                                                                                           | Effort |
+| --- | --------------------------------------------------------------------------------------------------------------- | ------ |
+| A   | feat(motion-matching): canonical engine-side `fit_swing(target, opts) -> FitResult` API + provider registry     | M      |
+| B   | feat(drake): adapt motion-matching to `MultiSourceTarget`; expose `fit_swing` provider                          | M      |
+| C   | feat(mujoco): adapt motion-matching to `MultiSourceTarget`; expose `fit_swing` provider                         | M      |
+| D   | feat(pinocchio): adapt motion-matching to `MultiSourceTarget`; bring forward existing `club_target_adapter`     | M      |
+| E   | feat(opensim): adapt motion-matching to `MultiSourceTarget`; refresh prescribed-controller path                 | M      |
+| F   | audit + feat(myosim): motion-matching plumbing audit + first-pass implementation                                | M      |
+| G   | feat(matlab/simscape-3d): consume `BodyTarget` via .json bridge from Python                                     | M      |
+| H   | audit(matlab/simscape-2d): identify motion-matching gaps + file follow-ups                                      | S      |
+| I   | audit(pendulum): identify motion-matching gaps + file follow-ups                                                | S      |
+| J   | feat(motion-matching): cost-function term that uses BodyTarget marker error (foot-contact, hand position, etc.) | L      |
+| K   | feat(motion-matching): leaderboard rows for each engine + "compare against measured C3D" view                   | M      |
 
 ## Generic-naming policy
 

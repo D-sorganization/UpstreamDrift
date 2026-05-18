@@ -2,13 +2,13 @@
 
 ## Slash Commands
 
-| Command | What it does |
-|---|---|
-| `/gaai-bootstrap` | Scan codebase, extract decisions, build memory files |
-| `/gaai-discover` | Start Discovery — clarify intent, create Stories with acceptance criteria |
-| `/gaai-deliver` | Start Delivery — execute the next refined Story from the backlog |
-| `/gaai-status` | Show current backlog state and memory summary |
-| `/gaai-daemon` | Start/stop/monitor the Delivery Daemon |
+| Command           | What it does                                                              |
+| ----------------- | ------------------------------------------------------------------------- |
+| `/gaai-bootstrap` | Scan codebase, extract decisions, build memory files                      |
+| `/gaai-discover`  | Start Discovery — clarify intent, create Stories with acceptance criteria |
+| `/gaai-deliver`   | Start Delivery — execute the next refined Story from the backlog          |
+| `/gaai-status`    | Show current backlog state and memory summary                             |
+| `/gaai-daemon`    | Start/stop/monitor the Delivery Daemon                                    |
 
 ## Starting a Session
 
@@ -24,16 +24,16 @@
 
 ## Key Files
 
-| File | Purpose |
-|---|---|
-| `.gaai/project/contexts/backlog/active.backlog.yaml` | What's authorized for execution |
-| `.gaai/project/contexts/memory/project/context.md` | What the agent knows about your project |
-| `.gaai/project/contexts/memory/decisions/_log.md` | Decisions that persist across sessions |
-| `.gaai/core/GAAI.md` | Full framework orientation |
+| File                                                 | Purpose                                 |
+| ---------------------------------------------------- | --------------------------------------- |
+| `.gaai/project/contexts/backlog/active.backlog.yaml` | What's authorized for execution         |
+| `.gaai/project/contexts/memory/project/context.md`   | What the agent knows about your project |
+| `.gaai/project/contexts/memory/decisions/_log.md`    | Decisions that persist across sessions  |
+| `.gaai/core/GAAI.md`                                 | Full framework orientation              |
 
 ## Core Rule
 
-Nothing gets built that isn't in the backlog. Discovery decides *what*. Delivery decides *how*. You decide *when*.
+Nothing gets built that isn't in the backlog. Discovery decides _what_. Delivery decides _how_. You decide _when_.
 
 ---
 

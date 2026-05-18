@@ -21,17 +21,17 @@ When you need to fit **hundreds of swings** in an evening, switch to Option 2 or
 
 ## What it ships
 
-| File | Purpose |
-|---|---|
-| `fit_swing_fmincon.m` | Single-start gradient (SQP) fit. Cheapest, locally optimal. |
-| `fit_swing_multistart.m` | `MultiStart` over N random starts, parallelized via `parsim`/`parfor`. |
-| `fit_swing_surrogateopt.m` | Global gradient-free fit using `surrogateopt`. |
-| `fit_swing_hybrid.m` | `surrogateopt` (or `particleswarm`) → `fmincon` polish. The recommended default. |
-| `default_option1_options.m` | Returns the canonical options struct; everything overrides from here. |
-| `OptimizationProgressDashboard.m` | Handle class, live dashboard during fits. |
-| `private/` | Internal helpers (not callable from outside this folder). |
-| `tests/` | `matlab.unittest.TestCase` suite. Tests-first per [shared/CODING_STANDARDS.md](../shared/CODING_STANDARDS.md). |
-| `visualization/` | Option-specific viz (see [VISUALIZATION.md](VISUALIZATION.md)). |
+| File                              | Purpose                                                                                                        |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `fit_swing_fmincon.m`             | Single-start gradient (SQP) fit. Cheapest, locally optimal.                                                    |
+| `fit_swing_multistart.m`          | `MultiStart` over N random starts, parallelized via `parsim`/`parfor`.                                         |
+| `fit_swing_surrogateopt.m`        | Global gradient-free fit using `surrogateopt`.                                                                 |
+| `fit_swing_hybrid.m`              | `surrogateopt` (or `particleswarm`) → `fmincon` polish. The recommended default.                               |
+| `default_option1_options.m`       | Returns the canonical options struct; everything overrides from here.                                          |
+| `OptimizationProgressDashboard.m` | Handle class, live dashboard during fits.                                                                      |
+| `private/`                        | Internal helpers (not callable from outside this folder).                                                      |
+| `tests/`                          | `matlab.unittest.TestCase` suite. Tests-first per [shared/CODING_STANDARDS.md](../shared/CODING_STANDARDS.md). |
+| `visualization/`                  | Option-specific viz (see [VISUALIZATION.md](VISUALIZATION.md)).                                                |
 
 The contracts are in [INTERFACES.md](INTERFACES.md). The algorithm is in [APPROACH.md](APPROACH.md). The assumptions are in [ASSUMPTIONS.md](ASSUMPTIONS.md). How to run it is in [RUNBOOK.md](RUNBOOK.md). What to test is in [TESTING.md](TESTING.md).
 
@@ -58,12 +58,12 @@ This option **does not** re-implement these — it consumes them from `motion_ma
 
 ## GitHub issues for Option 1
 
-| # | Title | Notes |
-|---|---|---|
-| **#024** | `fit_swing_fmincon` | Single-start SQP. Acceptance: passes `test_fits_synthetic_to_within_1mm`. |
-| **#025** | `fit_swing_multistart` | `MultiStart` + parallel. Acceptance: outperforms #024 on multimodal target. |
-| **#026** | `fit_swing_surrogateopt` and hybrid | `surrogateopt` standalone + the `surrogateopt → fmincon` polish. |
-| **#027** | `OptimizationProgressDashboard` and viz | Live dashboard + `MultiStartParallelCoords` + final summary card. |
+| #        | Title                                   | Notes                                                                       |
+| -------- | --------------------------------------- | --------------------------------------------------------------------------- |
+| **#024** | `fit_swing_fmincon`                     | Single-start SQP. Acceptance: passes `test_fits_synthetic_to_within_1mm`.   |
+| **#025** | `fit_swing_multistart`                  | `MultiStart` + parallel. Acceptance: outperforms #024 on multimodal target. |
+| **#026** | `fit_swing_surrogateopt` and hybrid     | `surrogateopt` standalone + the `surrogateopt → fmincon` polish.            |
+| **#027** | `OptimizationProgressDashboard` and viz | Live dashboard + `MultiStartParallelCoords` + final summary card.           |
 
 Shared infrastructure consumed by Option 1: issues #013 (C3D loader), #014 (synthetic target), #015 (`compute_cost`), #018 (`simulate_with_coefficients`), #023 (shared visualization).
 

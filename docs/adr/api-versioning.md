@@ -15,8 +15,8 @@ conflate, sunset windows are ad hoc, and clients cannot reliably detect
 deprecated endpoints.
 
 This ADR establishes the policy for evolving the public HTTP surface. It is
-intentionally narrow in scope: it codifies *how* versions are expressed and
-deprecated, not *what* belongs in any specific version.
+intentionally narrow in scope: it codifies _how_ versions are expressed and
+deprecated, not _what_ belongs in any specific version.
 
 ## Decision
 
@@ -24,7 +24,7 @@ Adopt **URI-path versioning** for the HTTP API:
 
 - All versioned endpoints are mounted under a major-version segment:
   `/v1/...`, `/v2/...`. Minor and patch revisions are non-breaking and do
-  *not* change the URI.
+  _not_ change the URI.
 - The current major version is additionally exposed via a
   **default-unprefixed alias** (e.g. `/simulations` resolves to
   `/v1/simulations` while `v1` is current). This preserves backwards
@@ -45,7 +45,7 @@ Adopt **URI-path versioning** for the HTTP API:
   earliest date the endpoint may be removed.
 - **Deprecation signaling**: deprecated endpoints set `Deprecation: true`
   (per RFC 9745) on every response. Where available, a `Link: <...>;
-  rel="successor-version"` header points clients at the replacement.
+rel="successor-version"` header points clients at the replacement.
 - **Removal**: only after the sunset date has passed and at least one
   release has shipped containing the new major. The default-unprefixed
   alias is reassigned to the new current major at removal time.
@@ -83,7 +83,7 @@ Adopt **URI-path versioning** for the HTTP API:
 ### Implementation outline
 
 - `src/api/versioning.py` exports `make_versioned_router(version, *,
-  deprecated=False, sunset=None)`.
+deprecated=False, sunset=None)`.
 - Internally it returns a `fastapi.APIRouter(prefix=f"/{version}")` with a
   `dependencies=[Depends(_deprecation_headers)]` hook when
   `deprecated=True`. The dependency mutates the outgoing `Response` to set

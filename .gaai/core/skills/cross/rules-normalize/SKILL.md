@@ -24,6 +24,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate when:
+
 - **Bootstrap** — project has existing conventions (linters, security policies, style guides, architecture docs, CI constraints) that need to become explicit governance
 - **Creating a new rule** — any agent or human intends to add a new `.rules.md` file
 - **Modifying an existing rule** — any agent or human intends to change the content or structure of an existing rule file
@@ -68,6 +69,7 @@ Converts all implicit conventions into explicit GAAI governance rules. Ensures r
 ## Non-Goals
 
 This skill must NOT:
+
 - Create new architectural decisions
 - Modify business logic
 - Enforce rules during delivery (enforcement is handled by workflows and validation stages)

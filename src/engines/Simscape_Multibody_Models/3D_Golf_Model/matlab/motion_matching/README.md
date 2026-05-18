@@ -10,12 +10,12 @@ Greenfield. Nothing in this folder has executable code yet. Folder structure, co
 
 The user has explicitly asked for four parallel pathways so the team can compare what works. They are not redundant — each makes different assumptions, has different cost/risk/iteration-speed profiles, and is useful in different regimes:
 
-| # | Option | Per-fit cost | Setup cost | Best for |
-|---|---|---|---|---|
-| 1 | Direct MATLAB optimization (`fmincon` / `surrogateopt` / `MultiStart`) over Simscape forward sims | High (~minutes per fit) | Low (~days) | First fits, ground-truth, validation oracle |
-| 2 | NN forward surrogate `f_θ: coeffs → kinematics`, then differentiable inversion | Low (~seconds per fit) | Medium (~weeks; needs the parquet dataset) | High-volume fitting once trained |
-| 3 | NN inverse model `g_φ: kinematics → coeffs` | Lowest (~ms per fit) | Medium-high (multi-modal, needs CVAE) | Once enough demonstrations exist; fast bulk inference |
-| 4 | `SimscapeAdapter(PhysicsEngineProtocol)` Python ↔ Simscape bridge | Medium-high | High (MATLAB Engine for Python plumbing) | Reuses existing `system_identification`, RL, retargeter stack |
+| #   | Option                                                                                            | Per-fit cost            | Setup cost                                 | Best for                                                      |
+| --- | ------------------------------------------------------------------------------------------------- | ----------------------- | ------------------------------------------ | ------------------------------------------------------------- |
+| 1   | Direct MATLAB optimization (`fmincon` / `surrogateopt` / `MultiStart`) over Simscape forward sims | High (~minutes per fit) | Low (~days)                                | First fits, ground-truth, validation oracle                   |
+| 2   | NN forward surrogate `f_θ: coeffs → kinematics`, then differentiable inversion                    | Low (~seconds per fit)  | Medium (~weeks; needs the parquet dataset) | High-volume fitting once trained                              |
+| 3   | NN inverse model `g_φ: kinematics → coeffs`                                                       | Lowest (~ms per fit)    | Medium-high (multi-modal, needs CVAE)      | Once enough demonstrations exist; fast bulk inference         |
+| 4   | `SimscapeAdapter(PhysicsEngineProtocol)` Python ↔ Simscape bridge                                | Medium-high             | High (MATLAB Engine for Python plumbing)   | Reuses existing `system_identification`, RL, retargeter stack |
 
 **Recommended sequencing.** Build Option 1 to ship a fit on a real swing within ~2 weeks. Build Option 2 in parallel on the random-sweep parquet dataset; expect it to mature ~1 week behind Option 1. Option 3 follows Option 2's data pipeline. Option 4 is independent and high-value but high-cost; defer until 1+2 close the loop.
 

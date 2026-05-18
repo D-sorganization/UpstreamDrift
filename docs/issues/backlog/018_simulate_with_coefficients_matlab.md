@@ -98,10 +98,12 @@ end
 ## DbC contract
 
 Preconditions (`arguments` block, using validators from #015):
+
 - `theta (:,1) double {validators.mustBeFiniteVector, validators.mustBeWithinCoefficientBounds}`
 - `opts (1,1) struct = default_sim_options()`
 
 Postconditions (`assert(...)` after the sim run):
+
 - `numel(unique([size(sim_out.q,1), size(sim_out.qd,1), numel(sim_out.time)]))==1`
 - `sim_out.time(1) == 0`; `sim_out.time` is monotonic non-decreasing.
 - `sim_out.solver_status` is a string in {"success","warning","failed"}.

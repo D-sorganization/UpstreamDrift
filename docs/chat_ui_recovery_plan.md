@@ -35,12 +35,14 @@ Recover the modern chat UI/session-history improvements as narrow PRs that land 
 
 **Target Location:** `src/chat/` in Tools
 **Components:**
+
 - `ChatDockWidget` - Main chat container
 - `ChatMessageBubble` - Message display component
 - `ChatSidebar` - Session list sidebar
 - `ChatInputArea` - Message input with controls
 
 **Tests Required:**
+
 - Widget instantiation tests
 - Message rendering tests
 - Sidebar selection behavior
@@ -49,11 +51,13 @@ Recover the modern chat UI/session-history improvements as narrow PRs that land 
 
 **Target Location:** `src/chat/session_manager.py` in Tools
 **Components:**
+
 - `SessionManager` - Create/load/delete sessions
 - `SessionStore` - SQLite-backed persistence
 - `ChatHistory` - Message history management
 
 **Tests Required:**
+
 - Session create/load/delete lifecycle
 - Persistence verification
 - Migration tests for schema changes
@@ -62,11 +66,13 @@ Recover the modern chat UI/session-history improvements as narrow PRs that land 
 
 **Target Location:** `src/chat/settings.py` in Tools
 **Components:**
+
 - `ChatSettings` - Settings schema
 - `SettingsPersistence` - Settings storage
 - `SettingsMigration` - Version migrations
 
 **Tests Required:**
+
 - Settings validation
 - Persistence round-trip
 - Migration path tests
@@ -75,11 +81,13 @@ Recover the modern chat UI/session-history improvements as narrow PRs that land 
 
 **Target Location:** `src/chat/themes/` in Tools
 **Components:**
+
 - Theme loader
 - Theme inheritance chain
 - Theme application to chat widgets
 
 **Tests Required:**
+
 - Theme loading tests
 - Inheritance verification
 - Visual regression tests (if applicable)
@@ -88,11 +96,13 @@ Recover the modern chat UI/session-history improvements as narrow PRs that land 
 
 **Target Location:** `src/adapters/chat_adapter.py`
 **Components:**
+
 - `ChatAdapter` - Bridge between Tools and app
 - Launcher integration hooks
 - App-specific customizations
 
 **Tests Required:**
+
 - Adapter instantiation
 - Launcher integration
 - App-specific behavior
@@ -101,11 +111,13 @@ Recover the modern chat UI/session-history improvements as narrow PRs that land 
 
 **Target Location:** `src/launchers/chat_launcher.py`
 **Components:**
+
 - Chat menu entry
 - Chat window management
 - Keyboard shortcuts
 
 **Tests Required:**
+
 - Menu presence verification
 - Window open/close behavior
 - Shortcut activation
@@ -129,14 +141,14 @@ Recover the modern chat UI/session-history improvements as narrow PRs that land 
 
 ## PR Tracking
 
-| Slice | PR # | Status | Notes |
-|-------|------|--------|-------|
-| Slice 1: Shared UI | - | ⏳ Pending | - |
-| Slice 2: Session Storage | - | ⏳ Pending | - |
-| Slice 3: Settings | - | ⏳ Pending | - |
-| Slice 4: Themes | - | ⏳ Pending | - |
-| Slice 5: Adapters | - | ⏳ Pending | - |
-| Slice 6: Launcher | - | ⏳ Pending | - |
+| Slice                    | PR # | Status     | Notes |
+| ------------------------ | ---- | ---------- | ----- |
+| Slice 1: Shared UI       | -    | ⏳ Pending | -     |
+| Slice 2: Session Storage | -    | ⏳ Pending | -     |
+| Slice 3: Settings        | -    | ⏳ Pending | -     |
+| Slice 4: Themes          | -    | ⏳ Pending | -     |
+| Slice 5: Adapters        | -    | ⏳ Pending | -     |
+| Slice 6: Launcher        | -    | ⏳ Pending | -     |
 
 ## Related Issues
 
@@ -147,4 +159,4 @@ Recover the modern chat UI/session-history improvements as narrow PRs that land 
 
 ---
 
-*This document will be updated as recovery PRs are created and merged.*
+_This document will be updated as recovery PRs are created and merged._

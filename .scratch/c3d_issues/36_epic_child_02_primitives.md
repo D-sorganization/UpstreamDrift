@@ -53,29 +53,35 @@ Five concrete `BodyPartShape` implementations covering the most-used cases witho
 ## Tests
 
 `tests/unit/body_part_viz/shapes/test_line_shape.py`:
+
 - Vertex count == 2; face count == 0.
 - `transform` with identity fitted shape returns input unchanged.
 - `transform` with rotation rotates correctly (Procrustes-shaped check).
 
 `tests/unit/body_part_viz/shapes/test_cylinder_shape.py`:
+
 - Default 16-facet cylinder has `2 * (n_facets + 1) = 34` vertices, `4 * n_facets = 64` triangles.
 - DbC: `n_facets < 3` raises ValueError; negative `radius` raises ValueError.
 - Anisotropic scale applies length to x and radius to yz independently.
 
 `tests/unit/body_part_viz/shapes/test_ellipsoid_shape.py`:
+
 - Vertex count matches `n_lon * (n_lat + 1)`.
 - All vertices satisfy `(x/a)^2 + (y/b)^2 + (z/c)^2 == 1` to 1e-9.
 
 `tests/unit/body_part_viz/shapes/test_capsule_shape.py`:
+
 - Vertex count = cylinder + 2 hemispheres.
 - Capsule with `radius == length / 2` reduces to a sphere shape.
 
 `tests/unit/body_part_viz/shapes/test_composite_shape.py`:
+
 - Composite of 2 cylinders → vertex count is sum + each cylinder's local transform applied.
 - DbC: empty children list raises ValueError.
 
 `tests/unit/body_part_viz/shapes/test_mesh_primitives.py`:
-- `make_uv_sphere(16, 8)`: 16*9 = 144 vertices.
+
+- `make_uv_sphere(16, 8)`: 16\*9 = 144 vertices.
 - `make_cylinder(1, 0.5, 16)` produces watertight mesh.
 
 ## Acceptance criteria

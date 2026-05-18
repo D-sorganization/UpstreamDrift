@@ -19,14 +19,14 @@ files (`tests/benchmarks/test_physics_benchmarks.py`,
 
 ## Layout
 
-| Path                                           | Purpose                                                                 |
-| ---------------------------------------------- | ----------------------------------------------------------------------- |
-| `tests/benchmarks/test_regression_benchmarks.py` | CI-runnable regression tests (uses `time.perf_counter`).               |
+| Path                                             | Purpose                                                                  |
+| ------------------------------------------------ | ------------------------------------------------------------------------ |
+| `tests/benchmarks/test_regression_benchmarks.py` | CI-runnable regression tests (uses `time.perf_counter`).                 |
 | `tests/benchmarks/regression_helpers.py`         | Helpers: `measure_median_seconds`, `assert_within_regression_threshold`. |
-| `tests/benchmarks/baseline.json`                 | Checked-in median-per-call baselines (seconds).                         |
-| `tests/benchmarks/test_physics_benchmarks.py`    | Existing pytest-benchmark suite for physics functions (unchanged).      |
-| `tests/benchmarks/test_dynamics_benchmarks.py`   | Existing pytest-benchmark suite for spatial dynamics (unchanged).       |
-| `tests/benchmarks/test_performance_baseline.py`  | Existing pytest-benchmark micro baselines (unchanged).                  |
+| `tests/benchmarks/baseline.json`                 | Checked-in median-per-call baselines (seconds).                          |
+| `tests/benchmarks/test_physics_benchmarks.py`    | Existing pytest-benchmark suite for physics functions (unchanged).       |
+| `tests/benchmarks/test_dynamics_benchmarks.py`   | Existing pytest-benchmark suite for spatial dynamics (unchanged).        |
+| `tests/benchmarks/test_performance_baseline.py`  | Existing pytest-benchmark micro baselines (unchanged).                   |
 
 All tests in this suite are marked with `pytest.mark.benchmark` (already
 registered in `pyproject.toml`).
@@ -68,12 +68,12 @@ small regressions over flaky CI noise. Tighten the multiplier in
 
 ## Current baseline (captured 2026-04-30)
 
-| Benchmark                               | Median per call |
-| --------------------------------------- | --------------- |
-| `drag_force_calculation`                | ~4 us           |
-| `aerodynamics_engine_compute_forces`    | ~130 us         |
-| `ball_flight_force_step`                | ~27 us          |
-| `simulation_request_model_validate`     | ~1.6 us         |
+| Benchmark                            | Median per call |
+| ------------------------------------ | --------------- |
+| `drag_force_calculation`             | ~4 us           |
+| `aerodynamics_engine_compute_forces` | ~130 us         |
+| `ball_flight_force_step`             | ~27 us          |
+| `simulation_request_model_validate`  | ~1.6 us         |
 
 Baselines were captured on Python 3.11.15 on the development self-hosted
 runner. Runner-to-runner variation is expected; the 5x threshold absorbs
@@ -99,7 +99,7 @@ it.
 Re-baseline only when an intentional change moves the measurement:
 
 1. Run `python3 -m pytest tests/benchmarks/test_regression_benchmarks.py
-   -m benchmark -v` and capture the printed measured value (or the
+-m benchmark -v` and capture the printed measured value (or the
    failure diagnostic).
 2. Update the value in `tests/benchmarks/baseline.json`.
 3. Reference the rationale in the commit message (which optimization,

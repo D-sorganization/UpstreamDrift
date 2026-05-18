@@ -78,11 +78,13 @@ def kl_anneal_schedule(strategy: str, epoch: int, n_epochs: int,
 ## DbC contract
 
 Preconditions:
+
 - `config.dataset_path` exists and contains a valid `SweepDataset`.
 - `config.cvae_config` is a valid `CVAEConfig`.
 - `config.batch_size >= 1`.
 
 Postconditions:
+
 - Returned model is a `SwingInverseCVAE` instance.
 - Best checkpoint exists at `config.output_dir / "best.pt"`.
 - Validation diversity metric is non-zero at end of training (no KL collapse).

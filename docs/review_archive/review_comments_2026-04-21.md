@@ -18,4 +18,3 @@ Catching `OSError` around both `path.exists()` and `ET.parse(path)` changes beha
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/2948#discussion_r3121184372)
 
 ---
-

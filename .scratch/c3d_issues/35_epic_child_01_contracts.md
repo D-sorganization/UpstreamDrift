@@ -164,6 +164,7 @@ class ShapeTheme:
 ## Validation rules (DbC)
 
 Every dataclass validates in `__post_init__`:
+
 - arrays are NumPy ndarrays of the documented shape;
 - floats finite, in their documented range;
 - string identifiers non-empty;

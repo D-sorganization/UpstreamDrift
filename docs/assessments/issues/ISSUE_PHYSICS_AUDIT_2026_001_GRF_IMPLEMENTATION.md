@@ -24,6 +24,7 @@ if len(g) > 0:
 ```
 
 It seemingly just sums the gravity force, assuming static equilibrium, and completely ignores:
+
 1.  Dynamic forces (acceleration of body segments).
 2.  Actual contact constraints (friction, normal force) from the physics engine.
 3.  Center of Pressure (COP) distribution (it defaults to `[0,0,0]` or simplistic average).
