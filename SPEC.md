@@ -159,7 +159,7 @@ UpstreamDrift/
 | Pendulum Models          | `src/engines/physics_engines/pendulum/`  | Educational simplified models for learning and quick prototyping                            |
 | FastAPI Backend          | `src/api/`                               | REST API exposing simulation, IK/ID, trajectory optimization, and control endpoints         |
 | PyQt6 GUI                | `src/launchers/golf_launcher.py`         | Professional interactive GUI with real-time 3D visualization                                |
-| Sidekick Sidebar         | `src/shared/python/upstream_drift_tools/ui/tools_sidebar/` | Unified collapsible dock providing Chat Assistant, Reporting, and context-aware utilities   |
+| Sidekick (AI assistant)  | PyQt: `src/shared/python/ai/gui/assistant_panel.py` · React: `ui/src/components/ui/ChatPanel.tsx` · Adapter: `src/tools/sidekick/_embed_adapter.py` | In-app AI chat surface with streaming, RAG, session history, and agentic tool dispatch. Design tokens: `src/shared/python/theme/sidekick_tokens.py`. See `docs/sidekick/README.md`. |
 | Tauri Desktop App        | `ui/`                                    | Cross-platform desktop application wrapper (Windows, macOS, Linux)                          |
 | Rust Physics Kernels     | `rust_core/upstream-physics/`            | High-performance compiled physics routines for critical paths, including initial flexible shaft FEM element primitives |
 | Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
@@ -198,6 +198,7 @@ Engine tier metadata is declared in each in-scope engine package with
 | F12 | Muscle dynamics analysis           | ✅     | IK, ID, and muscle dynamics computation with Hill-type and Millard muscle models                    |
 | F13 | Motion capture integration         | 🔄     | Import and track motion capture data (C3D, BVH, TRC formats) and compare with simulation            |
 | F14 | Reinforcement learning integration | 🔄     | Gym-compatible interface for RL-based controller learning and policy optimization                   |
+| F15 | Sidekick AI assistant              | 🔄     | In-app AI chat surface (PyQt + React/Tauri) with streaming, RAG, session history, and agentic tool dispatch. See `docs/sidekick/README.md`. |
 
 ### API / Interface Contract
 
