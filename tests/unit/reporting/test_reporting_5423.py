@@ -1,7 +1,7 @@
 """Tests for Issue #5423: Global Report Templates and Agentic Summaries.
 
 Coverage:
-- ReportTemplate construction, validation, and rendering (7 tests)
+- JinjaReportTemplate construction, validation, and rendering (7 tests)
 - AgenticSummaryGenerator with mocked AI client (8 tests)
 - AgenticSummaryGenerator fallback behaviour (5 tests)
 - GLOBAL_REPORT_REGISTRY structure and content (5 tests)
@@ -17,7 +17,7 @@ from src.shared.python.contracts import PreconditionError
 from src.shared.python.reporting import (
     GLOBAL_REPORT_REGISTRY,
     AgenticSummaryGenerator,
-    ReportTemplate,
+    JinjaReportTemplate,
 )
 from src.shared.python.reporting._agentic_summary import AIClient
 from src.shared.python.simulation_store import SimulationDataStore
@@ -69,69 +69,69 @@ class _FailingAIClient:
 
 
 # ===========================================================================
-# ReportTemplate tests
+# JinjaReportTemplate tests
 # ===========================================================================
 
 
-class TestReportTemplateConstruction:
+class TestJinjaReportTemplateConstruction:
     def test_valid_construction(self):
-        tpl = ReportTemplate("swing_analysis", "# {{ title }}")
+        tpl = JinjaReportTemplate("swing_analysis", "# {{ title }}")
         assert tpl.report_type == "swing_analysis"
 
     def test_template_text_preserved(self):
         text = "# {{ title }}\n\n{{ body }}"
-        tpl = ReportTemplate("test", text)
+        tpl = JinjaReportTemplate("test", text)
         assert tpl.template_text == text
 
     def test_empty_report_type_raises(self):
         with pytest.raises((ValueError, PreconditionError)):
-            ReportTemplate("", "# content")
+            JinjaReportTemplate("", "# content")
 
     def test_whitespace_report_type_raises(self):
         with pytest.raises((ValueError, PreconditionError)):
-            ReportTemplate("   ", "# content")
+            JinjaReportTemplate("   ", "# content")
 
     def test_empty_template_text_raises(self):
         with pytest.raises((ValueError, PreconditionError)):
-            ReportTemplate("swing", "")
+            JinjaReportTemplate("swing", "")
 
     def test_whitespace_template_text_raises(self):
         with pytest.raises((ValueError, PreconditionError)):
-            ReportTemplate("swing", "   ")
+            JinjaReportTemplate("swing", "   ")
 
 
-class TestReportTemplateRendering:
+class TestJinjaReportTemplateRendering:
     def test_render_returns_string(self):
-        tpl = ReportTemplate("test", "Hello {{ name }}")
+        tpl = JinjaReportTemplate("test", "Hello {{ name }}")
         result = tpl.render({"name": "World"})
         assert isinstance(result, str)
         assert result  # non-empty
 
     def test_render_substitutes_variable(self):
-        tpl = ReportTemplate("test", "Run: {{ run_id }}")
+        tpl = JinjaReportTemplate("test", "Run: {{ run_id }}")
         result = tpl.render({"run_id": "abc_123"})
         assert "abc_123" in result
 
     def test_render_missing_variable_does_not_crash(self):
-        tpl = ReportTemplate("test", "Val: {{ missing }}")
+        tpl = JinjaReportTemplate("test", "Val: {{ missing }}")
         # Jinja2 Undefined renders as empty string; fallback replaces with ""
         result = tpl.render({})
         assert isinstance(result, str)
 
     def test_render_context_must_be_dict(self):
-        tpl = ReportTemplate("test", "{{ x }}")
+        tpl = JinjaReportTemplate("test", "{{ x }}")
         with pytest.raises((TypeError, PreconditionError)):
             tpl.render("not a dict")  # type: ignore[arg-type]
 
     def test_render_multiple_variables(self):
-        tpl = ReportTemplate("test", "{{ a }}-{{ b }}-{{ c }}")
+        tpl = JinjaReportTemplate("test", "{{ a }}-{{ b }}-{{ c }}")
         result = tpl.render({"a": "X", "b": "Y", "c": "Z"})
         assert "X" in result
         assert "Y" in result
         assert "Z" in result
 
     def test_render_numeric_values(self):
-        tpl = ReportTemplate("test", "CHS={{ chs }}")
+        tpl = JinjaReportTemplate("test", "CHS={{ chs }}")
         result = tpl.render({"chs": 108.5})
         assert "108.5" in result
 
@@ -245,8 +245,8 @@ class TestGlobalReportRegistry:
 
     def test_all_values_are_report_templates(self):
         for key, value in GLOBAL_REPORT_REGISTRY.items():
-            assert isinstance(value, ReportTemplate), (
-                f"Entry {key!r} is not a ReportTemplate"
+            assert isinstance(value, JinjaReportTemplate), (
+                f"Entry {key!r} is not a JinjaReportTemplate"
             )
 
     def test_report_type_matches_key(self):

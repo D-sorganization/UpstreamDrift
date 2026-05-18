@@ -1,4 +1,4 @@
-"""Global report registry — maps report type names to ``ReportTemplate`` instances.
+"""Global report registry — maps report type names to ``JinjaReportTemplate`` instances.
 
 Usage::
 
@@ -19,7 +19,7 @@ Implements part of Issue #5423.
 
 from __future__ import annotations
 
-from src.shared.python.reporting._template_engine import ReportTemplate
+from src.shared.python.reporting._jinja_template import JinjaReportTemplate
 
 # ---------------------------------------------------------------------------
 # Template bodies (DRY: each section is defined once)
@@ -146,13 +146,13 @@ _EQUIPMENT_TEMPLATE = """\
 # Public registry — one entry per report type
 # ---------------------------------------------------------------------------
 
-GLOBAL_REPORT_REGISTRY: dict[str, ReportTemplate] = {
-    "swing_analysis": ReportTemplate("swing_analysis", _SWING_ANALYSIS_TEMPLATE),
-    "ball_flight": ReportTemplate("ball_flight", _BALL_FLIGHT_TEMPLATE),
-    "biomechanics": ReportTemplate("biomechanics", _BIOMECHANICS_TEMPLATE),
-    "equipment": ReportTemplate("equipment", _EQUIPMENT_TEMPLATE),
+GLOBAL_REPORT_REGISTRY: dict[str, JinjaReportTemplate] = {
+    "swing_analysis": JinjaReportTemplate("swing_analysis", _SWING_ANALYSIS_TEMPLATE),
+    "ball_flight": JinjaReportTemplate("ball_flight", _BALL_FLIGHT_TEMPLATE),
+    "biomechanics": JinjaReportTemplate("biomechanics", _BIOMECHANICS_TEMPLATE),
+    "equipment": JinjaReportTemplate("equipment", _EQUIPMENT_TEMPLATE),
 }
-"""Global mapping of report type → ``ReportTemplate`` instance.
+"""Global mapping of report type → ``JinjaReportTemplate`` instance.
 
 Registered report types: ``swing_analysis``, ``ball_flight``,
 ``biomechanics``, ``equipment``.

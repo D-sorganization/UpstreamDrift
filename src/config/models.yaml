@@ -155,6 +155,17 @@ models:
       status: "ready"
       default_launch: "tab"
 
+  - id: "bunker_shot"
+    name: "Bunker Shot 3D"
+    description: "Sand impact simulation (Chrono DEM Experimental)"
+    type: "special_app"
+    path: "src/tools/bunker_shot_gui/gui.py"
+    launcher:
+      category: "simulation"
+      logo: "assets/sand.png"
+      status: "experimental"
+      default_launch: "tab"
+
   - id: "swing_flight_pipeline"
     name: "Swing → Flight Pipeline"
     description: "End-to-end swing dynamics → impact → aerodynamic ball flight pipeline"

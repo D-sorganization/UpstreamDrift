@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+import numpy as np
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QApplication,
@@ -129,30 +130,47 @@ class PuttingGreenWidget(QWidget):
 
         try:
             import pyqtgraph as pg
+            import pyqtgraph.opengl as gl
 
-            self._plot_widget = pg.PlotWidget(title="Putting Green (Top-Down)")
-            self._plot_widget.setAspectLocked(True)
-            self._plot_widget.showGrid(x=True, y=True, alpha=0.3)
-            self._plot_widget.setLabel("bottom", "Distance X (m)")
-            self._plot_widget.setLabel("left", "Distance Y (m)")
+            self._gl_view = gl.GLViewWidget()
+            self._gl_view.opts["distance"] = 25
+            self._gl_view.opts["elevation"] = 30
+            self._gl_view.opts["azimuth"] = 45
 
-            # Draw cup (assuming at some X distance)
-            self._cup_circle = pg.ScatterPlotItem(
-                size=15, pen=pg.mkPen(None), brush=pg.mkBrush(50, 50, 50, 255)
+            # Base grid
+            grid = gl.GLGridItem()
+            grid.setSize(x=50, y=50, z=0)
+            grid.setSpacing(x=5, y=5, z=0)
+            self._gl_view.addItem(grid)
+
+            # Terrain surface
+            self._terrain_item = gl.GLSurfacePlotItem(
+                computeNormals=False, smooth=False, shader="normalColor"
             )
-            self._plot_widget.addItem(self._cup_circle)
+            # Semi-transparent green
+            self._terrain_item.setColor((0.1, 0.8, 0.1, 0.5))
+            self._gl_view.addItem(self._terrain_item)
+
+            # Draw cup
+            self._cup_item = gl.GLScatterPlotItem(
+                pos=np.array([[10.0, 0.0, 0.0]]),
+                color=(0.1, 0.1, 0.1, 1.0),
+                size=10,
+            )
+            self._gl_view.addItem(self._cup_item)
 
             # Ball trajectory
-            self._path_item = pg.PlotDataItem(
-                pen=pg.mkPen(color=(255, 255, 255), width=2)
+            self._path_item = gl.GLLinePlotItem(
+                color=(1.0, 1.0, 1.0, 1.0), width=3, antialias=True
             )
-            self._plot_widget.addItem(self._path_item)
+            self._gl_view.addItem(self._path_item)
 
-            results_layout.addWidget(self._plot_widget, stretch=3)
+            results_layout.addWidget(self._gl_view, stretch=3)
         except ImportError:
-            self._plot_widget = None
+            self._gl_view = None
+            self._terrain_item = None
             self._path_item = None
-            self._cup_circle = None
+            self._cup_item = None
 
         self._results_text = QTextEdit()
         self._results_text.setReadOnly(True)
@@ -215,6 +233,21 @@ class PuttingGreenWidget(QWidget):
                     x[i] = x[i - 1] + v_curr * np.cos(aim_rad) * dt
                     y[i] = y[i - 1] + v_curr * np.sin(aim_rad) * dt
 
+            # Generate Terrain Mesh (Saddle shape influenced by slope)
+            # Create grid from -5 to 30 in X, -10 to 10 in Y
+            xx = np.linspace(-5, max(dist + 5, 30), 50)
+            yy = np.linspace(-10, 10, 50)
+            X, Y = np.meshgrid(xx, yy)
+
+            # Simple procedural terrain: base slope + subtle undulations
+            slope_rad = np.radians(self._slope_spin.value())
+            Z = X * np.tan(slope_rad) + 0.1 * np.sin(X * 0.5) * np.cos(Y * 0.5)
+
+            # Recalculate ball Z to stick to terrain
+            z_traj = np.interp(
+                x, xx, xx * np.tan(slope_rad) + 0.1 * np.sin(x * 0.5) * np.cos(y * 0.5)
+            )
+
             self._results_text.setPlainText(
                 f"Putting Simulation\n"
                 f"{'=' * 40}\n"
@@ -223,20 +256,28 @@ class PuttingGreenWidget(QWidget):
                 f"Stimpmeter:   {stimp:.1f}\n"
                 f"Slope:        {self._slope_spin.value():.1f}°\n\n"
                 f"Simulator loaded successfully.\n"
+                f"Terrain generated procedurally.\n"
             )
 
-            # Update 2D Plot
-            if getattr(self, "_plot_widget", None) is not None:
-                self._path_item.setData(x, y)
-                self._cup_circle.setData([dist], [0.0])
+            # Update 3D Plot
+            if getattr(self, "_gl_view", None) is not None:
+                self._terrain_item.setData(x=xx, y=yy, z=Z)
 
-                # Auto-range
-                max_x = max(dist + 1.0, np.max(x) + 1.0)
-                min_x = min(-1.0, np.min(x) - 1.0)
-                max_y = max(1.0, np.max(y) + 1.0)
-                min_y = min(-1.0, np.min(y) - 1.0)
-                self._plot_widget.setXRange(min_x, max_x)
-                self._plot_widget.setYRange(min_y, max_y)
+                # Z position of cup on terrain
+                cup_z = dist * np.tan(slope_rad) + 0.1 * np.sin(dist * 0.5) * np.cos(
+                    0.0
+                )
+                self._cup_item.setData(pos=np.array([[dist, 0.0, cup_z]]))
+
+                # Update trajectory
+                pts = np.column_stack((x, y, z_traj))
+                self._path_item.setData(pos=pts)
+
+                # Auto-center camera on cup
+                from pyqtgraph import Vector
+
+                self._gl_view.opts["center"] = Vector(dist / 2, 0, 0)
+                self._gl_view.opts["distance"] = max(dist * 1.5, 10.0)
 
         except ImportError as e:
             self._results_text.setPlainText(
