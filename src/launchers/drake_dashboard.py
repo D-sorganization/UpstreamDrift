@@ -14,7 +14,6 @@ from PyQt6.QtWidgets import QFileDialog
 from src.shared.python.dashboard.launcher import launch_dashboard
 from src.shared.python.dashboard.window import UnifiedDashboardWindow
 from src.shared.python.ui.qt.utils import get_qapp
-import contextlib
 
 
 class DrakeDashboard(UnifiedDashboardWindow):

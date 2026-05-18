@@ -7,6 +7,7 @@ Provides a tabbed dialog with Layout, Configuration, and Diagnostics tabs.
 
 from __future__ import annotations
 
+import os
 import time
 from pathlib import Path
 from typing import Any
@@ -314,6 +315,31 @@ class SettingsDialog(QDialog):
         sim_inner.addWidget(self.chk_gpu)
 
         tab_layout.addWidget(sim_group)
+
+        # --- Sidekick AI context sharing --------------------------------
+        sidekick_group = QGroupBox("Sidekick AI Assistant")
+        sidekick_inner = QVBoxLayout(sidekick_group)
+
+        self.chk_sidekick_context = QCheckBox("Share app state with AI assistant")
+        self.chk_sidekick_context.setToolTip(
+            "When enabled, the Sidekick AI assistant receives a compact summary "
+            "of recent diagnostic events and simulation activity as context. "
+            "No file paths, passwords, or API keys are included. "
+            "Disable to prevent any app state from reaching the assistant."
+        )
+        self.chk_sidekick_context.setChecked(
+            os.environ.get("UPSTREAMDRIFT_SIDEKICK_CONTEXT", "1") != "0"
+        )
+        self.chk_sidekick_context.toggled.connect(self._on_sidekick_context_toggled)
+        sidekick_inner.addWidget(self.chk_sidekick_context)
+
+        sidekick_footer = QLabel(
+            "<i>Context is capped at ~4 KB; only the last few events are sent.</i>"
+        )
+        sidekick_footer.setTextFormat(Qt.TextFormat.RichText)
+        sidekick_inner.addWidget(sidekick_footer)
+
+        tab_layout.addWidget(sidekick_group)
 
         # --- Docker Image build -----------------------------------------
         # Renamed from "Rebuild Environment" — that label conflated the
@@ -734,6 +760,25 @@ class SettingsDialog(QDialog):
         status = "SUCCESS" if success else "FAILED"
         self._build_status.setText(f"Build {status} ({elapsed:.0f}s): {message}")
         self.build_console.append(f"\n=== Build {status} ({elapsed:.0f}s) ===")
+
+    def _on_sidekick_context_toggled(self, enabled: bool) -> None:
+        """Persist the Sidekick context-sharing toggle to the environment.
+
+        Sets ``UPSTREAMDRIFT_SIDEKICK_CONTEXT`` to ``"0"`` when disabled so
+        the chat WebSocket skips context injection for this process lifetime.
+        The setting is not persisted across process restarts — users must
+        re-toggle it in the next session.
+
+        Args:
+            enabled: ``True`` to enable context sharing, ``False`` to disable.
+        """
+        if enabled:
+            os.environ.pop("UPSTREAMDRIFT_SIDEKICK_CONTEXT", None)
+        else:
+            os.environ["UPSTREAMDRIFT_SIDEKICK_CONTEXT"] = "0"
+        logger.debug(
+            "Sidekick context sharing: %s", "enabled" if enabled else "disabled"
+        )
 
     def _cancel_build(self) -> None:
         if (

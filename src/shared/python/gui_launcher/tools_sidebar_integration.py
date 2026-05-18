@@ -5,6 +5,14 @@ installed beside UpstreamDrift in every environment.  This module keeps the
 host-side contract small: import the shared component when it is available,
 attach it to a ``QMainWindow``-like object, pass Sidekick design tokens when
 the shared component accepts them, and otherwise no-op.
+
+Fallback
+--------
+When the shared module is absent, :func:`install_tools_sidebar` installs a
+:class:`NullToolsSidebar` placeholder so that Sidekick design tokens are
+consumed and the launcher shows a clearly-labelled "not installed" panel
+rather than a blank dock.  Pass ``install_fallback=False`` to restore the
+old behaviour (return ``installed=False`` with no widget).
 """
 
 from __future__ import annotations
@@ -18,6 +26,74 @@ from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+
+class NullToolsSidebar:
+    """Minimal in-repo placeholder for the optional Tools sidebar.
+
+    Used when the sibling Tools repository is not installed.  The widget
+    itself is a no-op QLabel (or a pure-Python stub when PyQt6 is absent)
+    so that:
+
+    * Sidekick design tokens are accepted and stored (preventing the
+      "tokens discarded" problem described in issue #5463).
+    * The launcher can dock *something* without crashing.
+    * A visible "Tools not installed" message guides users.
+
+    Args:
+        parent: Optional host window (passed to QLabel when PyQt6 is present).
+        sidekick_tokens: Design-token mapping from
+            :func:`src.shared.python.theme.sidekick_tokens.get_current_sidekick_tokens`.
+            Stored on ``self.sidekick_tokens`` for inspection / testing.
+
+    Postconditions:
+        * ``self.sidekick_tokens`` is always set, even when empty.
+        * ``self._widget`` is either a QLabel or this object itself (PyQt6 absent).
+    """
+
+    def __init__(
+        self,
+        *,
+        parent: Any = None,
+        sidekick_tokens: dict[str, str] | None = None,
+        **_kwargs: Any,
+    ) -> None:
+        self.sidekick_tokens: dict[str, str] = (
+            dict(sidekick_tokens) if sidekick_tokens else {}
+        )
+        self._widget: Any = self
+        try:
+            from PyQt6.QtWidgets import QApplication, QLabel
+
+            # Only attempt to create a QLabel when a QApplication is running;
+            # otherwise the call segfaults or raises in headless / test contexts.
+            if QApplication.instance() is not None:
+                label = QLabel(
+                    text=(
+                        "<b>Sidekick Tools</b><br/>"
+                        "<small>Install the Tools workspace to enable the full sidebar.<br/>"
+                        "Run: <code>scripts/setup_tools_workspace.sh</code></small>"
+                    ),
+                )
+                label.setWordWrap(True)
+                label.setContentsMargins(12, 12, 12, 12)
+                self._widget = label
+        except (ImportError, RuntimeError, TypeError):
+            pass
+
+    # ── QDockWidget-compatible protocol ──────────────────────────────
+
+    def setWidget(self, widget: Any) -> None:
+        """No-op: this placeholder is its own widget."""
+
+    def toggleViewAction(self) -> object:
+        """Return a dummy action object (duck-typed QAction stub)."""
+        return object()
+
+    def widget(self) -> Any:
+        """Return the inner display widget."""
+        return self._widget
+
 
 _SIDEBAR_MODULE_CANDIDATES = (
     "upstream_drift_tools.ui.tools_sidebar",
@@ -60,13 +136,23 @@ def install_tools_sidebar(
     main_window: Any,
     project_root: str | Path | None = None,
     context_provider: Callable[[], Any] | None = None,
+    install_fallback: bool = True,
 ) -> ToolsSidebarInstallStatus:
     """Attach the shared Unified Tools Sidebar to a host main window if present.
+
+    When the shared module is absent and *install_fallback* is ``True`` (the
+    default), a :class:`NullToolsSidebar` placeholder is docked instead so
+    that Sidekick design tokens are still consumed and the user sees a helpful
+    "not installed" message.
 
     Args:
         main_window: QMainWindow-like host. It must provide ``addDockWidget``.
         project_root: Optional project root passed through to the shared sidebar.
         context_provider: Optional callback for host-specific context.
+        install_fallback: When ``True`` (default) and the shared module is
+            absent, install a :class:`NullToolsSidebar` placeholder.  Pass
+            ``False`` to restore the pre-#5463 behaviour where an absent
+            module returns ``installed=False`` with no widget.
 
     Returns:
         A status object describing whether the sidebar was installed.
@@ -81,6 +167,8 @@ def install_tools_sidebar(
 
     module = _import_sidebar_module()
     if module is None:
+        if install_fallback:
+            return _install_null_sidebar(main_window)
         return ToolsSidebarInstallStatus(
             False,
             "shared tools sidebar module is not available",
@@ -96,11 +184,43 @@ def install_tools_sidebar(
     except Exception as exc:  # noqa: BLE001 - this hook must not break launch
         module_name = getattr(module, "__name__", None)
         logger.warning("Unified Tools Sidebar integration failed: %s", exc)
+        if install_fallback:
+            return _install_null_sidebar(main_window)
         return ToolsSidebarInstallStatus(
             False,
             f"shared tools sidebar integration failed: {exc}",
             module_name=module_name,
         )
+
+
+def _install_null_sidebar(main_window: Any) -> ToolsSidebarInstallStatus:
+    """Install a :class:`NullToolsSidebar` placeholder into *main_window*.
+
+    Args:
+        main_window: QMainWindow-like host.
+
+    Returns:
+        A :class:`ToolsSidebarInstallStatus` with ``installed=True`` and
+        ``sidebar`` pointing at the :class:`NullToolsSidebar` instance.
+    """
+    tokens = _get_sidekick_tokens()
+    sidebar = NullToolsSidebar(sidekick_tokens=tokens)
+    try:
+        dock = _ensure_dock_widget(sidebar, main_window)
+        _add_dock_widget(main_window, dock)
+    except (TypeError, RuntimeError) as exc:
+        # Qt not available or main_window is a non-Qt stub — still report
+        # installed=True so callers know the fallback path was reached.
+        logger.debug("NullToolsSidebar dock setup skipped: %s", exc)
+        dock = sidebar
+    return ToolsSidebarInstallStatus(
+        installed=True,
+        reason="null sidebar fallback installed (Tools repo not available)",
+        dock=dock,
+        sidebar=sidebar,
+        module_name=None,
+        file_open_connected=False,
+    )
 
 
 def _import_sidebar_module() -> Any | None:

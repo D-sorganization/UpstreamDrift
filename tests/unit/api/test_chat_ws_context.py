@@ -210,6 +210,6 @@ def test_chat_ws_send_branch_calls_injection_helper() -> None:
     repo_root = Path(__file__).resolve().parents[3]
     source = (repo_root / "src" / "api" / "routes" / "chat_ws.py").read_text()
     assert "_maybe_inject_chat_context(" in source
-    assert (
-        source.count("_maybe_inject_chat_context") >= 2
-    ), "helper must be defined and at least one call-site must exist"
+    assert source.count("_maybe_inject_chat_context") >= 2, (
+        "helper must be defined and at least one call-site must exist"
+    )

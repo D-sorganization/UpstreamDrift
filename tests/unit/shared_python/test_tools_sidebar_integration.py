@@ -8,9 +8,24 @@ from types import ModuleType
 from typing import Any
 from unittest.mock import patch
 
+import src.shared.python.gui_launcher.tools_sidebar_integration as _tsi_module
 from src.shared.python.gui_launcher.tools_sidebar_integration import (
     install_tools_sidebar,
     is_tools_sidebar_available,
+)
+
+# ── Helpers ───────────────────────────────────────────────────────────
+
+#: All module names that _import_sidebar_module() tries in order.
+_ALL_CANDIDATES = (
+    "upstream_drift_tools.ui.tools_sidebar",
+    "sidekick.ui.tools_sidebar",
+    "shared.python.sidekick.ui.tools_sidebar",
+)
+
+# The fully-qualified name of the private loader function we need to patch.
+_IMPORT_FN = (
+    "src.shared.python.gui_launcher.tools_sidebar_integration._import_sidebar_module"
 )
 
 
@@ -50,11 +65,35 @@ class FakeMainWindow:
         self.opened_paths.append(path)
 
 
-def test_install_tools_sidebar_noops_when_shared_module_is_missing() -> None:
-    status = install_tools_sidebar(FakeMainWindow())
+def test_install_tools_sidebar_returns_not_installed_with_fallback_disabled(
+    monkeypatch: Any,
+) -> None:
+    """With ``install_fallback=False``, status is not-installed when no module found."""
+    monkeypatch.setattr(_tsi_module, "_import_sidebar_module", lambda: None)
+
+    status = install_tools_sidebar(FakeMainWindow(), install_fallback=False)
 
     assert status.installed is False
     assert "not available" in status.reason
+
+
+def test_install_tools_sidebar_installs_null_fallback_when_module_missing(
+    monkeypatch: Any,
+) -> None:
+    """With ``install_fallback=True`` (default), a NullToolsSidebar is docked."""
+    from src.shared.python.gui_launcher.tools_sidebar_integration import (
+        NullToolsSidebar,
+    )
+
+    monkeypatch.setattr(_tsi_module, "_import_sidebar_module", lambda: None)
+    window = FakeMainWindow()
+    status = install_tools_sidebar(window)
+
+    assert status.installed is True
+    assert "null sidebar fallback" in status.reason
+    assert isinstance(status.sidebar, NullToolsSidebar)
+    # dock may be sidebar itself if Qt is unavailable in test context
+    assert status.dock is not None
 
 
 def test_install_tools_sidebar_adds_shared_dock_and_connects_file_open(
@@ -77,7 +116,7 @@ def test_install_tools_sidebar_adds_shared_dock_and_connects_file_open(
             created["context_provider"] = context_provider
 
     module.ToolsSidebar = ToolsSidebar  # type: ignore[attr-defined]
-    monkeypatch.setitem(sys.modules, module.__name__, module)
+    monkeypatch.setattr(_tsi_module, "_import_sidebar_module", lambda: module)
 
     window = FakeMainWindow()
     status = install_tools_sidebar(
@@ -116,7 +155,7 @@ def test_install_tools_sidebar_passes_sidekick_tokens_when_supported(
             created["sidekick_tokens"] = sidekick_tokens
 
     module.ToolsSidebar = ToolsSidebar  # type: ignore[attr-defined]
-    monkeypatch.setitem(sys.modules, module.__name__, module)
+    monkeypatch.setattr(_tsi_module, "_import_sidebar_module", lambda: module)
 
     window = FakeMainWindow()
     status = install_tools_sidebar(window)
@@ -141,7 +180,7 @@ def test_install_tools_sidebar_uses_shared_installer_status(monkeypatch: Any) ->
         return dock
 
     module.install_tools_sidebar = shared_installer  # type: ignore[attr-defined]
-    monkeypatch.setitem(sys.modules, module.__name__, module)
+    monkeypatch.setattr(_tsi_module, "_import_sidebar_module", lambda: module)
 
     window = FakeMainWindow()
     status = install_tools_sidebar(window)
@@ -169,7 +208,7 @@ def test_install_tools_sidebar_shared_installer_can_accept_sidekick_tokens(
         return dock
 
     module.install_tools_sidebar = shared_installer  # type: ignore[attr-defined]
-    monkeypatch.setitem(sys.modules, module.__name__, module)
+    monkeypatch.setattr(_tsi_module, "_import_sidebar_module", lambda: module)
 
     status = install_tools_sidebar(FakeMainWindow())
 
@@ -180,7 +219,7 @@ def test_install_tools_sidebar_shared_installer_can_accept_sidekick_tokens(
 def test_install_tools_sidebar_rejects_non_dock_hosts(monkeypatch: Any) -> None:
     module = ModuleType("sidekick.ui.tools_sidebar")
     module.ToolsSidebar = FakeDock  # type: ignore[attr-defined]
-    monkeypatch.setitem(sys.modules, module.__name__, module)
+    monkeypatch.setattr(_tsi_module, "_import_sidebar_module", lambda: module)
 
     status = install_tools_sidebar(object())
 
@@ -213,7 +252,7 @@ def test_install_tools_sidebar_passes_sidekick_tokens_via_factory() -> None:
 
     module.create_tools_sidebar = create_tools_sidebar  # type: ignore[attr-defined]
 
-    with patch.dict(sys.modules, {module_name: module}):
+    with patch.object(_tsi_module, "_import_sidebar_module", return_value=module):
         window = FakeMainWindow()
         status = install_tools_sidebar(window)
 
@@ -228,22 +267,57 @@ def test_install_tools_sidebar_passes_sidekick_tokens_via_factory() -> None:
 
 
 def test_is_tools_sidebar_available_true_when_stub_registered() -> None:
-    module_name = "sidekick.ui.tools_sidebar"
-    module = ModuleType(module_name)
+    module = ModuleType("sidekick.ui.tools_sidebar")
 
-    with patch.dict(sys.modules, {module_name: module}):
+    with patch.object(_tsi_module, "_import_sidebar_module", return_value=module):
         assert is_tools_sidebar_available() is True
 
 
 def test_is_tools_sidebar_available_false_when_no_module_present() -> None:
-    candidates = (
-        "sidekick.ui.tools_sidebar",
-        "shared.python.sidekick.ui.tools_sidebar",
-        "sidekick.ui.tools_sidebar",
-    )
-    cleared = {name: None for name in candidates if name not in sys.modules}
-    with patch.dict(sys.modules, cleared):
-        # Remove any pre-registered candidates so the import truly fails.
-        for name in candidates:
-            sys.modules.pop(name, None)
+    with patch.object(_tsi_module, "_import_sidebar_module", return_value=None):
         assert is_tools_sidebar_available() is False
+
+
+# ── NullToolsSidebar unit tests ───────────────────────────────────────
+
+
+def test_null_tools_sidebar_stores_tokens() -> None:
+    """NullToolsSidebar stores the sidekick_tokens mapping on construction."""
+    from src.shared.python.gui_launcher.tools_sidebar_integration import (
+        NullToolsSidebar,
+    )
+
+    tokens = {"sidekick.color.surface": "#1e1e2e", "sidekick.radius.chat": "8px"}
+    sidebar = NullToolsSidebar(sidekick_tokens=tokens)
+    assert sidebar.sidekick_tokens == tokens
+
+
+def test_null_tools_sidebar_empty_tokens_when_none_passed() -> None:
+    """NullToolsSidebar defaults to an empty token dict."""
+    from src.shared.python.gui_launcher.tools_sidebar_integration import (
+        NullToolsSidebar,
+    )
+
+    sidebar = NullToolsSidebar()
+    assert sidebar.sidekick_tokens == {}
+
+
+def test_null_tools_sidebar_setwidget_noop() -> None:
+    """setWidget is accepted without error (protocol conformance)."""
+    from src.shared.python.gui_launcher.tools_sidebar_integration import (
+        NullToolsSidebar,
+    )
+
+    sidebar = NullToolsSidebar()
+    sidebar.setWidget(object())  # must not raise
+
+
+def test_null_tools_sidebar_toggle_view_action_returns_object() -> None:
+    """toggleViewAction returns something (duck-typed dock-widget protocol)."""
+    from src.shared.python.gui_launcher.tools_sidebar_integration import (
+        NullToolsSidebar,
+    )
+
+    sidebar = NullToolsSidebar()
+    action = sidebar.toggleViewAction()
+    assert action is not None
