@@ -11,7 +11,6 @@ import os
 
 import pytest
 
-
 # Force Qt to use the offscreen platform so headless CI / sandboxed
 # runners do not fail to instantiate widgets.
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")

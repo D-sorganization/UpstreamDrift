@@ -17,7 +17,6 @@ import pytest
 
 from src.shared.python.app_state import HistoryStore, StateLogger, agent_context
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -57,7 +56,11 @@ class TestAppStateProviderInit:
 
     def test_chat_service_with_callable_provider_stores_it(self) -> None:
         """A callable app_state_provider is stored on the service."""
-        provider = lambda: {"events": [], "last_diagnostics": [], "summary": ""}  # noqa: E731
+        provider = lambda: {
+            "events": [],
+            "last_diagnostics": [],
+            "summary": "",
+        }  # noqa: E731
         svc = _make_chat_service(app_state_provider=provider)
         assert svc._app_state_provider is provider
 
@@ -139,9 +142,9 @@ class TestStateContextInjection:
         state_messages = [
             m for m in system_messages if "application state" in m.content.lower()
         ]
-        assert state_messages, (
-            "Expected at least one 'application state' system message"
-        )
+        assert (
+            state_messages
+        ), "Expected at least one 'application state' system message"
 
     def test_state_context_includes_events_key(self, tmp_path) -> None:
         """Injected state JSON contains the 'events' key."""

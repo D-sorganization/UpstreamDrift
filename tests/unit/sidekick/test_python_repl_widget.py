@@ -15,7 +15,7 @@ from typing import Any
 
 import pytest
 
-from upstream_drift_tools.ui.tools_sidebar.registry import WorkspaceRegistry
+from sidekick.ui.tools_sidebar.registry import WorkspaceRegistry
 
 pytestmark = pytest.mark.unit
 
@@ -43,7 +43,7 @@ _skip_qt = pytest.mark.skipif(
 
 def _make_repl(namespace: dict, registry: WorkspaceRegistry | None = None) -> Any:
     """Construct PythonReplWidget lazily."""
-    from upstream_drift_tools.ui.tools_sidebar.python_repl import PythonReplWidget
+    from sidekick.ui.tools_sidebar.python_repl import PythonReplWidget
 
     return PythonReplWidget(namespace=namespace, registry=registry)
 
@@ -111,7 +111,7 @@ def test_repl_no_registry_still_evaluates() -> None:
 
 def test_repl_evaluate_logic_expression() -> None:
     """Standalone test: evaluate helper produces correct output."""
-    from upstream_drift_tools.ui.tools_sidebar.python_repl import _evaluate_in_namespace
+    from sidekick.ui.tools_sidebar.python_repl import _evaluate_in_namespace
 
     ns: dict = {}
     result = _evaluate_in_namespace("2 + 2", ns)
@@ -120,7 +120,7 @@ def test_repl_evaluate_logic_expression() -> None:
 
 def test_repl_evaluate_logic_assignment() -> None:
     """Assignment via eval helper populates the namespace."""
-    from upstream_drift_tools.ui.tools_sidebar.python_repl import _evaluate_in_namespace
+    from sidekick.ui.tools_sidebar.python_repl import _evaluate_in_namespace
 
     ns: dict = {}
     _evaluate_in_namespace("x = 42", ns)
@@ -129,7 +129,7 @@ def test_repl_evaluate_logic_assignment() -> None:
 
 def test_repl_evaluate_logic_exception() -> None:
     """Exceptions are returned as formatted strings, not raised."""
-    from upstream_drift_tools.ui.tools_sidebar.python_repl import _evaluate_in_namespace
+    from sidekick.ui.tools_sidebar.python_repl import _evaluate_in_namespace
 
     ns: dict = {}
     result = _evaluate_in_namespace("1 / 0", ns)

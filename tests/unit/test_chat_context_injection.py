@@ -26,7 +26,6 @@ import pytest
 
 from src.shared.python.ai import chat_context
 
-
 # ── Module loader ────────────────────────────────────────────────────
 
 

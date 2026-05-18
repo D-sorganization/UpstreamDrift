@@ -124,8 +124,9 @@ jobs:
             target: x86_64-unknown-linux-gnu
           - platform: [self-hosted, Windows]
             target: x86_64-pc-windows-msvc
-          - platform: [self-hosted, macOS]
-            target: x86_64-apple-darwin
+          # macOS leg removed: org has no `[self-hosted, macOS]` runners. Jobs
+          # with this label queued indefinitely. Re-add when macOS runner
+          # capacity is provisioned and macOS becomes an active deliverable.
 
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 30
@@ -145,7 +146,7 @@ jobs:
           targets: ${{ matrix.target }}
 
       # Per-target Rust cache for release builds. Each platform gets its own
-      # cache so the Linux/Windows/macOS matrix legs don't trash each other.
+      # cache so the Linux/Windows matrix legs don't trash each other.
       - name: Cache Rust target (build)
         uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:
