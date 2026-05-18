@@ -2,7 +2,7 @@
 # This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
 # It requires domain-aware structural extraction to isolate its internal classes appropriately.
 
-"""Simulation launching mixin for GolfLauncher.
+"""Simulation launching mixin for UpstreamDriftLauncher.
 
 Contains methods for launching simulations, MJCF viewers, Docker containers,
 script processes, module processes, URDF generator, C3D viewer, shot tracer,
@@ -39,7 +39,7 @@ logger = get_logger(__name__)
 
 
 class LauncherSimulationMixin:
-    """Mixin for GolfLauncher simulation launching.
+    """Mixin for UpstreamDriftLauncher simulation launching.
 
     Provides methods for launching various simulation types,
     dependency checking, and subprocess management.

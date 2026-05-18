@@ -151,7 +151,17 @@ class CustomTitleBar(QWidget):
         layout.addWidget(self.icon_label)
         self.icon_label.installEventFilter(self)
 
-        self.title_label = QLabel("UpstreamDrift")
+        try:
+            from src.shared.python.core.version import __version__
+
+            version = __version__
+        except ImportError:
+            version = "2.1.0"
+
+        self.title_label = QLabel(
+            f"<b><font color='#266EC8'>Upstream</font><font color='#FF8800'>Drift</font></b> <span style='font-size: 10px; color: gray;'>v{version}</span>"
+        )
+        self.title_label.setTextFormat(Qt.TextFormat.RichText)
         self.title_label.installEventFilter(self)
 
         # Apply initial theme colors and register for live theme-change updates.
@@ -224,7 +234,7 @@ class CustomTitleBar(QWidget):
             f" }}"
         )
         self.title_label.setStyleSheet(
-            f"color: {text}; font-family: 'Inter', 'Segoe UI', sans-serif; font-weight: 800; font-size: 14px; letter-spacing: 1px;"
+            "font-family: 'Inter', 'Segoe UI', sans-serif; font-size: 14px; letter-spacing: 0.5px; background: transparent;"
         )
 
     def _on_theme_changed(self, _colors: object = None) -> None:

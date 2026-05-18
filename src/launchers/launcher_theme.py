@@ -1,4 +1,4 @@
-"""Theme management mixin for GolfLauncher.
+"""Theme management mixin for UpstreamDriftLauncher.
 
 Contains theme application, theme menu setup, plot theme management,
 and dynamic theme change handling.
@@ -18,7 +18,7 @@ logger = get_logger(__name__)
 
 
 class LauncherThemeMixin:
-    """Mixin for GolfLauncher theme management.
+    """Mixin for UpstreamDriftLauncher theme management.
 
     Provides methods for applying styles, managing theme menus,
     and handling dynamic theme changes.
