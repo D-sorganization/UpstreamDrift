@@ -179,12 +179,15 @@ def open_user_guide() -> None:
     found.
     """
     candidates = [
+        Path(__file__).resolve().parents[2] / "docs" / "USER_MANUAL.md",
         Path(__file__).resolve().parents[2] / "docs" / "user_guide" / "index.md",
         Path(__file__).resolve().parents[3] / "docs" / "user_guide" / "index.md",
     ]
     for path in candidates:
         if path.exists():
-            QDesktopServices.openUrl(QUrl.fromLocalFile(str(path)))
+            from src.shared.python.ui.qt.widgets.document_reader import show_document
+
+            show_document(path)
             return
     QDesktopServices.openUrl(QUrl(REPO_URL))
 
@@ -205,7 +208,9 @@ def open_motion_match_loaders_doc() -> None:
     ]
     for path in candidates:
         if path.exists():
-            QDesktopServices.openUrl(QUrl.fromLocalFile(str(path)))
+            from src.shared.python.ui.qt.widgets.document_reader import show_document
+
+            show_document(path)
             return
     open_user_guide()
 
