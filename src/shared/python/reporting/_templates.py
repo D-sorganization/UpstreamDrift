@@ -1,0 +1,214 @@
+"""Standard report template registry.
+
+``REPORT_TEMPLATES`` maps a template key to a ``ReportTemplate`` instance.
+Keys are stable identifiers callers use to look up the appropriate template
+for their output type.
+
+Registered templates
+--------------------
+- ``"swing_analysis"``  — full golf swing biomechanical analysis
+- ``"ball_flight"``     — ball flight and aerodynamics summary
+- ``"biomechanics"``    — joint/segment biomechanics breakdown
+
+Implements part of Epic #5393.
+"""
+
+from __future__ import annotations
+
+from src.shared.python.reporting._template_engine import ReportSection, ReportTemplate
+
+# ---------------------------------------------------------------------------
+# Swing Analysis Template
+# ---------------------------------------------------------------------------
+
+_SWING_ANALYSIS = ReportTemplate(
+    title="Swing Analysis Report",
+    sections=[
+        ReportSection(
+            heading="Executive Summary",
+            content=(
+                "High-level assessment of the swing performance, "
+                "highlighting key metrics and areas for improvement."
+            ),
+        ),
+        ReportSection(
+            heading="Setup and Address",
+            content="Posture, grip, stance width, ball position, and alignment.",
+            subsections=[
+                ReportSection(
+                    heading="Posture",
+                    content="Spine angle, knee flex, and weight distribution at address.",
+                ),
+                ReportSection(
+                    heading="Alignment",
+                    content="Foot, hip, and shoulder alignment relative to target.",
+                ),
+            ],
+        ),
+        ReportSection(
+            heading="Kinematic Sequence",
+            content=(
+                "Segmental velocity sequencing from pelvis through torso, "
+                "lead arm, and club."
+            ),
+            subsections=[
+                ReportSection(
+                    heading="Pelvis",
+                    content="Pelvis rotation velocity and sequencing order.",
+                ),
+                ReportSection(
+                    heading="Thorax",
+                    content="Thorax rotation velocity and timing relative to pelvis.",
+                ),
+                ReportSection(
+                    heading="Lead Arm",
+                    content="Lead arm angular velocity peak and timing.",
+                ),
+                ReportSection(
+                    heading="Club",
+                    content="Club angular velocity and lag release timing.",
+                ),
+            ],
+        ),
+        ReportSection(
+            heading="Impact Metrics",
+            content="Club path, face angle, attack angle, and dynamic loft at impact.",
+        ),
+        ReportSection(
+            heading="Follow-Through and Finish",
+            content="Post-impact club path, balance, and finish position.",
+        ),
+        ReportSection(
+            heading="Recommendations",
+            content="Prioritized list of movement corrections and drill prescriptions.",
+        ),
+    ],
+)
+
+# ---------------------------------------------------------------------------
+# Ball Flight Template
+# ---------------------------------------------------------------------------
+
+_BALL_FLIGHT = ReportTemplate(
+    title="Ball Flight Analysis Report",
+    sections=[
+        ReportSection(
+            heading="Summary",
+            content="Overview of ball flight characteristics and carry/total distance.",
+        ),
+        ReportSection(
+            heading="Launch Conditions",
+            content="Ball speed, launch angle, and spin rate at departure.",
+            subsections=[
+                ReportSection(
+                    heading="Ball Speed",
+                    content="Measured and estimated peak ball speed (m/s / mph).",
+                ),
+                ReportSection(
+                    heading="Launch Angle",
+                    content="Vertical launch angle (degrees above horizontal).",
+                ),
+                ReportSection(
+                    heading="Spin Rate",
+                    content="Total spin, backspin, and side-spin components (rpm).",
+                ),
+            ],
+        ),
+        ReportSection(
+            heading="Trajectory",
+            content="Peak height, descent angle, and lateral deviation.",
+            subsections=[
+                ReportSection(
+                    heading="Apex",
+                    content="Maximum height reached (metres / feet).",
+                ),
+                ReportSection(
+                    heading="Lateral Deviation",
+                    content="Left/right deviation from intended target line (metres).",
+                ),
+            ],
+        ),
+        ReportSection(
+            heading="Distance",
+            content="Carry, roll, and total distance.",
+        ),
+        ReportSection(
+            heading="Aerodynamic Parameters",
+            content=(
+                "Coefficient of drag and lift values used in the simulation, "
+                "and sensitivity analysis."
+            ),
+        ),
+    ],
+)
+
+# ---------------------------------------------------------------------------
+# Biomechanics Template
+# ---------------------------------------------------------------------------
+
+_BIOMECHANICS = ReportTemplate(
+    title="Biomechanics Analysis Report",
+    sections=[
+        ReportSection(
+            heading="Overview",
+            content=(
+                "Summary of joint loading, muscle activation patterns, "
+                "and injury-risk indicators."
+            ),
+        ),
+        ReportSection(
+            heading="Joint Kinematics",
+            content="Range of motion and angular velocity for each joint of interest.",
+            subsections=[
+                ReportSection(
+                    heading="Hip",
+                    content="Hip flexion/extension, abduction/adduction, and rotation.",
+                ),
+                ReportSection(
+                    heading="Lumbar Spine",
+                    content="Lumbar flexion, lateral bend, and axial rotation.",
+                ),
+                ReportSection(
+                    heading="Shoulder",
+                    content="Shoulder plane of elevation, elevation angle, and rotation.",
+                ),
+                ReportSection(
+                    heading="Elbow and Wrist",
+                    content="Elbow flexion and wrist flexion/extension during downswing.",
+                ),
+            ],
+        ),
+        ReportSection(
+            heading="Joint Kinetics",
+            content="Net joint moments and powers through the swing cycle.",
+        ),
+        ReportSection(
+            heading="Ground Reaction Forces",
+            content=(
+                "Vertical, anterior-posterior, and medial-lateral GRF "
+                "for lead and trail foot."
+            ),
+        ),
+        ReportSection(
+            heading="Muscle Activation",
+            content="EMG or musculoskeletal model-estimated activation levels.",
+        ),
+        ReportSection(
+            heading="Injury Risk Assessment",
+            content=(
+                "Composite injury-risk scores for lumbar spine, lead wrist, "
+                "and trail elbow based on peak loading metrics."
+            ),
+        ),
+    ],
+)
+
+# ---------------------------------------------------------------------------
+# Registry
+# ---------------------------------------------------------------------------
+
+REPORT_TEMPLATES: dict[str, ReportTemplate] = {
+    "swing_analysis": _SWING_ANALYSIS,
+    "ball_flight": _BALL_FLIGHT,
+    "biomechanics": _BIOMECHANICS,
+}
