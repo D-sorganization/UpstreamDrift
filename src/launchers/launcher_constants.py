@@ -95,18 +95,23 @@ class ViewMode(IntEnum):
     via :func:`view_mode_settings`.
     """
 
-    COMFORTABLE = 0
-    COMPACT = 1
-    DENSE = 2
-    LIST = 3
+    LARGE = 0
+    MEDIUM = 1
+    SMALL = 2
+    LIST_LARGE = 3
+    LIST_SMALL = 4
+
+    # Backward compat alias
+    LIST = 3  # maps to LIST_LARGE
 
 
 # (tile_scale, columns, show_description, is_list)
 _VIEW_MODE_TABLE: dict[ViewMode, tuple[float, int, bool, bool]] = {
-    ViewMode.COMFORTABLE: (1.0, 4, False, False),
-    ViewMode.COMPACT: (0.5, 6, False, False),
-    ViewMode.DENSE: (0.35, 8, False, False),
-    ViewMode.LIST: (0.30, 1, True, True),
+    ViewMode.LARGE: (1.0, 4, False, False),
+    ViewMode.MEDIUM: (0.5, 6, False, False),
+    ViewMode.SMALL: (0.35, 8, False, False),
+    ViewMode.LIST_LARGE: (0.30, 1, True, True),
+    ViewMode.LIST_SMALL: (0.20, 1, False, True),
 }
 
 

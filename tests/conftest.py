@@ -58,7 +58,14 @@ import pytest
 
 # On Windows, missing PyQt6 DLLs can cause a fatal crash.
 # Mock them immediately before any imports happen.
-if "PyQt6" not in sys.modules:
+try:
+    import PyQt6.QtCore
+
+    _has_pyqt6 = True
+except ImportError:
+    _has_pyqt6 = False
+
+if not _has_pyqt6 and "PyQt6" not in sys.modules:
     mock_core = MagicMock()
     mock_core.QLibraryInfo.version.return_value.toString.return_value = "6.6.0"
     mock_core.QLibraryInfo.version.return_value.segments.return_value = (6, 6, 0)
@@ -185,9 +192,7 @@ class OptionalCollectionRule:
     symbols: tuple[tuple[str, str], ...] = ()
 
 
-_PROCESS_CALCULATOR_ANCHOR = (
-    "sidekick.process_calculators.acid_gas_dewpoint_calculator"
-)
+_PROCESS_CALCULATOR_ANCHOR = "sidekick.process_calculators.acid_gas_dewpoint_calculator"
 _PROCESS_CALCULATOR_TESTS = (
     "tests/unit/process_calculators",
     "tests/unit/injury/test_injury_risk.py",

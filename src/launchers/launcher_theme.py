@@ -91,10 +91,8 @@ class LauncherThemeMixin:
         except ImportError as e:
             logger.warning(f"Theme system unavailable: {e}")
 
-    def _on_theme_changed(self, colors: object) -> None:
+    def _on_theme_changed(self, colors: object = None) -> None:
         """Handle dynamic theme change -- reapply stylesheet and update menu."""
-        if colors is None:
-            raise ValueError("colors must be provided")
         self.apply_styles()
 
         # Refresh all model card inline styles

@@ -34,14 +34,47 @@ class LayoutConfig:
 
 
 def _view_mode_from_string(name: str | None) -> ViewMode:
-    """Parse a stored string into a :class:`ViewMode`, defaulting to LIST."""
+    """Parse a stored string into a :class:`ViewMode`, defaulting to LIST_LARGE.
+
+    Accepts both the current enum key names (e.g. ``"LARGE"``) and legacy
+    aliases that may have been persisted by older launchers before PR #5688
+    renamed the enum members (e.g. ``"comfortable"``).
+
+    Backward-compat mapping (pre-#5688 → current)
+    -----------------------------------------------
+    ``"comfortable"``  → ``ViewMode.LARGE``       (tile grid, NOT list)
+    ``"compact"``      → ``ViewMode.MEDIUM``
+    ``"dense"``        → ``ViewMode.SMALL``
+    ``"list"``         → ``ViewMode.LIST_LARGE``
+    ``"panel"``        → ``ViewMode.LIST_LARGE``  (old sidebar panel layout)
+    ``"floating"``     → ``ViewMode.LIST_LARGE``  (old floating window layout)
+
+    DbC postcondition: always returns a :class:`ViewMode` member.
+    """
     if not name:
-        return ViewMode.LIST
+        return ViewMode.LIST_LARGE
+    # Backward compat: map pre-#5688 token names → new canonical enum key names.
+    # "comfortable" must map → LARGE (tile grid), NOT list mode (fixes #5690).
+    _compat: dict[str, str] = {
+        "comfortable": "LARGE",
+        "compact": "MEDIUM",
+        "dense": "SMALL",
+        "list": "LIST_LARGE",
+        # Pre-#5688 layout tokens that were never valid enum names
+        "panel": "LIST_LARGE",
+        "floating": "LIST_LARGE",
+    }
+    raw = str(name).strip().lower()
+    key = _compat.get(raw, str(name).strip().upper())
     try:
-        return ViewMode[str(name).strip().upper()]
+        mode = ViewMode[key]
     except KeyError:
-        logger.warning("Unknown view_mode %r, falling back to LIST", name)
-        return ViewMode.LIST
+        logger.warning("Unknown view_mode %r, falling back to LIST_LARGE", name)
+        mode = ViewMode.LIST_LARGE
+    assert isinstance(mode, ViewMode), (  # DbC postcondition
+        f"_view_mode_from_string postcondition violated: got {mode!r}"
+    )
+    return mode
 
 
 class LayoutManager:
@@ -84,7 +117,7 @@ class LayoutManager:
         self.model_cards: dict[str, Any] = {}
         self.edit_mode = False
         self.current_filter_text = ""
-        self.current_view_mode: ViewMode = ViewMode.LIST
+        self.current_view_mode: ViewMode = ViewMode.LIST_LARGE
         self.tile_scale: float = TILE_SCALE_DEFAULT
         self.current_category_filter = "All"
 
@@ -212,6 +245,7 @@ class LayoutManager:
 
         # Create cards for any newly added models
         _scale, _cols, show_desc, is_list = view_mode_settings(self.current_view_mode)
+        _compact = self.current_view_mode == ViewMode.LIST_SMALL
         for model_id in self.model_order:
             if model_id not in self.model_cards:
                 model = self._get_model(model_id)
@@ -221,6 +255,7 @@ class LayoutManager:
                         tile_scale=self.tile_scale,
                         show_description=show_desc,
                         list_mode=is_list,
+                        list_compact=_compact,
                     )
 
     def apply_model_selection(self, selected_ids: list[str]) -> list[str]:
@@ -382,16 +417,17 @@ class LayoutManager:
         if not isinstance(mode, ViewMode):
             raise TypeError(f"mode must be a ViewMode, got {type(mode).__name__}")
         scale, _cols, show_desc, is_list = view_mode_settings(mode)
+        _compact = mode == ViewMode.LIST_SMALL
         self.current_view_mode = mode
         self.tile_scale = scale
-        # When switching into/out of LIST mode the grid topology changes, so
-        # we drop existing cards and let rebuild_grid recreate them with the
-        # right list_mode flag. For grid->grid switches an in-place
-        # set_tile_scale is sufficient.
+        # When switching list topology the cards need full rebuild.
         was_list = any(
             getattr(c, "_list_mode", False) for c in self.model_cards.values()
         )
-        if is_list != was_list:
+        was_compact = any(
+            getattr(c, "_list_compact", False) for c in self.model_cards.values()
+        )
+        if is_list != was_list or _compact != was_compact:
             for c in list(self.model_cards.values()):
                 c.setParent(None)
                 c.deleteLater()
@@ -403,6 +439,7 @@ class LayoutManager:
                         scale,
                         show_description=show_desc,
                         list_mode=is_list,
+                        list_compact=_compact,
                     )
 
     def set_tile_scale(self, scale: float) -> None:
@@ -433,10 +470,15 @@ class LayoutManager:
                 if widget:
                     widget.setParent(None)
 
-        scale, columns, show_desc, is_list = view_mode_settings(self.current_view_mode)
+        scale, base_cols, show_desc, is_list = view_mode_settings(
+            self.current_view_mode
+        )
         # Honour any explicit tile_scale set by the zoom slider, but fall
         # back to the view-mode default if it matches the previous mode.
         active_scale = self.tile_scale if self.tile_scale > 0 else scale
+
+        # Dynamically determine columns based on active_scale if not in list mode
+        columns = 1 if is_list else max(1, int(4 / active_scale))
 
         # Get filtered model order
         filtered_order = self.get_filtered_order()
@@ -462,6 +504,7 @@ class LayoutManager:
                         tile_scale=active_scale,
                         show_description=show_desc,
                         list_mode=is_list,
+                        list_compact=(self.current_view_mode == ViewMode.LIST_SMALL),
                     )
             else:
                 # Existing card — make sure it matches current scale/mode.

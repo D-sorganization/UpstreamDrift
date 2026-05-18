@@ -5,23 +5,28 @@
     "pinocchio_golf",
     "opensim_golf",
     "myosim_suite",
+    "putting_green",
+    "matlab_suite",
+    "c3d_viewer",
+    "openpose_analysis",
+    "mediapipe_analysis",
     "model_explorer",
+    "video_analyzer",
     "data_explorer",
-    "movement_optimizer",
-    "matlab_suite"
+    "project_map"
   ],
-  "selected_model": "myosim_suite",
+  "selected_model": null,
   "window_geometry": {
-    "x": 40,
-    "y": 30,
-    "width": 1880,
-    "height": 992
+    "x": 0,
+    "y": 0,
+    "width": 1920,
+    "height": 1032
   },
   "options": {
     "live_visualization": true,
     "gpu_acceleration": false,
     "docker_mode": false
   },
-  "view_mode": "list",
-  "tile_scale": 0.3
+  "view_mode": "large",
+  "tile_scale": 0.25
 }

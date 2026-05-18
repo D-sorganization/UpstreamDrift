@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from src.launchers.launcher_constants import ViewMode, view_mode_settings
-from src.launchers.launcher_layout_manager import LayoutManager
+from src.launchers.launcher_layout_manager import LayoutManager, _view_mode_from_string
 from src.launchers.model_registry import ModelSpec
 
 
@@ -56,10 +56,11 @@ def make_layout_manager(available_models, get_model_func):
 @pytest.mark.parametrize(
     "mode,expected_scale,expected_columns,expected_show_desc,expected_list",
     [
-        (ViewMode.COMFORTABLE, 1.0, 4, True, False),
-        (ViewMode.COMPACT, 0.5, 6, True, False),
-        (ViewMode.DENSE, 0.35, 8, False, False),
-        (ViewMode.LIST, 0.30, 1, True, True),
+        (ViewMode.LARGE, 1.0, 4, False, False),
+        (ViewMode.MEDIUM, 0.5, 6, False, False),
+        (ViewMode.SMALL, 0.35, 8, False, False),
+        (ViewMode.LIST_LARGE, 0.30, 1, True, True),
+        (ViewMode.LIST_SMALL, 0.20, 1, False, True),
     ],
 )
 def test_view_mode_table_matches_spec(
@@ -79,10 +80,11 @@ def test_view_mode_table_matches_spec(
 @pytest.mark.parametrize(
     "mode,expected_scale,expected_columns",
     [
-        (ViewMode.COMFORTABLE, 1.0, 4),
-        (ViewMode.COMPACT, 0.5, 6),
-        (ViewMode.DENSE, 0.35, 8),
-        (ViewMode.LIST, 0.30, 1),
+        (ViewMode.LARGE, 1.0, 4),
+        (ViewMode.MEDIUM, 0.5, 6),
+        (ViewMode.SMALL, 0.35, 8),
+        (ViewMode.LIST_LARGE, 0.30, 1),
+        (ViewMode.LIST_SMALL, 0.20, 1),
     ],
 )
 def test_set_view_mode_updates_state(
@@ -132,7 +134,7 @@ def test_list_mode_yields_one_card_per_row(make_layout_manager) -> None:
 
 def test_grid_mode_columns_drive_wrap(make_layout_manager) -> None:
     lm = make_layout_manager()
-    # Use 8 cards to ensure wrap in COMFORTABLE (4 cols) -> 2 rows of cards.
+    # Use 8 cards to ensure wrap in LARGE (4 cols) -> 2 rows of cards.
     for i in range(5, 9):
         lm.available_models[f"model_{i}"] = ModelSpec(
             id=f"model_{i}",
@@ -142,13 +144,13 @@ def test_grid_mode_columns_drive_wrap(make_layout_manager) -> None:
             path=f"path_{i}",
         )
     lm.model_order = [f"model_{i}" for i in range(1, 9)]
-    lm.set_view_mode(ViewMode.COMFORTABLE)
+    lm.set_view_mode(ViewMode.LARGE)
 
     grid_layout = MagicMock()
     grid_layout.count.return_value = 0
     lm.rebuild_grid(grid_layout)
 
-    # COMFORTABLE => 4 columns; the last card (8th) should land at col == 3.
+    # LARGE => 4 columns; the last card (8th) should land at col == 3.
     # Grid-mode cards are added as addWidget(widget, row, col) (3 args).
     cards = {id(c) for c in lm.model_cards.values()}
     cols_seen = set()
@@ -156,3 +158,52 @@ def test_grid_mode_columns_drive_wrap(make_layout_manager) -> None:
         if len(call[0]) == 3 and id(call[0][0]) in cards:
             cols_seen.add(call[0][2])
     assert max(cols_seen) == 3
+
+
+# ---------------------------------------------------------------------------
+# Backward-compat mapping regression tests (UpstreamDrift #5690)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "raw_name,expected_mode",
+    [
+        # Current canonical names (upper-case direct lookup)
+        ("LARGE", ViewMode.LARGE),
+        ("MEDIUM", ViewMode.MEDIUM),
+        ("SMALL", ViewMode.SMALL),
+        ("LIST_LARGE", ViewMode.LIST_LARGE),
+        ("LIST_SMALL", ViewMode.LIST_SMALL),
+        # LIST is a compat alias for LIST_LARGE in the enum definition
+        ("LIST", ViewMode.LIST_LARGE),
+        # Legacy lower-case aliases from pre-#5688 saved configs
+        # "comfortable" must map to LARGE (tile grid), NOT list mode (#5690)
+        ("comfortable", ViewMode.LARGE),
+        ("compact", ViewMode.MEDIUM),
+        ("dense", ViewMode.SMALL),
+        ("list", ViewMode.LIST_LARGE),
+        # Legacy layout tokens that weren't valid enum names (fall back to LIST_LARGE)
+        ("panel", ViewMode.LIST_LARGE),
+        ("floating", ViewMode.LIST_LARGE),
+        # None / empty string → default to LIST_LARGE
+        (None, ViewMode.LIST_LARGE),
+        ("", ViewMode.LIST_LARGE),
+        # Completely unknown strings → fall back to LIST_LARGE
+        ("unknown_xyz", ViewMode.LIST_LARGE),
+    ],
+)
+def test_view_mode_from_string_backward_compat(
+    raw_name: str | None, expected_mode: ViewMode
+) -> None:
+    """Regression guard for UpstreamDrift #5690.
+
+    ``"comfortable"`` must map to ``ViewMode.LARGE`` (tile grid), NOT to
+    ``LIST_LARGE`` (list mode) as the pre-fix compat dict erroneously did.
+    Legacy tokens ``"panel"`` and ``"floating"`` must fall back to
+    ``ViewMode.LIST_LARGE`` rather than raising.
+    """
+    result = _view_mode_from_string(raw_name)
+    assert result == expected_mode, (
+        f"_view_mode_from_string({raw_name!r}) → {result!r}, expected {expected_mode!r}"
+    )
+    assert isinstance(result, ViewMode)
