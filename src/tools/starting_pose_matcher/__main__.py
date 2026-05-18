@@ -14,6 +14,12 @@ from __future__ import annotations
 import sys
 
 
+def get_dockable_ui():
+    """Return the main window instance for docking in the unified launcher."""
+    from src.tools.starting_pose_matcher.gui import get_dockable_ui as _get_dock
+    return _get_dock()
+
+
 def main() -> int:
     try:
         from src.tools.starting_pose_matcher.gui import main as _gui_main

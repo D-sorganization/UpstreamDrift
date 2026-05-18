@@ -55,7 +55,7 @@ models:
     name: "MyoSuite"
     description: "Muscle-actuated simulation environment"
     type: "myosim"
-    path: "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py"
+    path: "src/engines/physics_engines/myosuite/python/gui.py"
     engine_type: "myosuite"
     launcher:
       category: "physics_engine"
@@ -81,7 +81,7 @@ models:
     name: "Golf Simulation Suite"
     description: "Complete golf simulation with ball flight physics and putting green"
     type: "golf_simulation"
-    path: "launch_golf_suite.py"
+    path: "src/tools/golf_simulation_suite/__main__.py"
     engine_type: "golf_simulation"
     launcher:
       category: "simulation"
@@ -109,6 +109,94 @@ models:
       category: "simulation"
       logo: "assets/bunkershot_icon.png"
       status: "experimental"
+      default_launch: "tab"
+
+  - id: "pendulum_simulator"
+    name: "Pendulum Simulator"
+    description: "Double/triple pendulum golf swing dynamics simulator"
+    type: "special_app"
+    path: "src/shared/python/pendulum_simulator/__main__.py"
+    launcher:
+      category: "simulation"
+      logo: "assets/pendulum_icon.png"
+      status: "ready"
+      default_launch: "tab"
+
+  - id: "shot_tracer"
+    name: "Shot Tracer"
+    description: "Multi-model golf ball trajectory comparison (Waterloo, MacDonald, Nathan)"
+    type: "special_app"
+    path: "src/launchers/_shot_tracer_gui.py"
+    launcher:
+      category: "simulation"
+      logo: "assets/golf_simulation.png"
+      status: "ready"
+      default_launch: "tab"
+
+  - id: "cross_engine_dashboard"
+    name: "Cross-Engine Dashboard"
+    description: "Perturbation robustness comparison across physics engines"
+    type: "special_app"
+    path: "src/launchers/cross_engine_dashboard.py"
+    launcher:
+      category: "simulation"
+      logo: "assets/cross_engine.png"
+      status: "ready"
+      default_launch: "tab"
+
+  - id: "golf_environment"
+    name: "Golf Environment"
+    description: "3D Driving Range and Golf Course Hole visualization"
+    type: "special_app"
+    path: "src/tools/golf_environment/gui.py"
+    launcher:
+      category: "simulation"
+      logo: "assets/golf_simulation.png"
+      status: "ready"
+      default_launch: "tab"
+
+  - id: "bunker_shot"
+    name: "Bunker Shot 3D"
+    description: "Sand impact simulation (Chrono DEM Experimental)"
+    type: "special_app"
+    path: "src/tools/bunker_shot_gui/gui.py"
+    launcher:
+      category: "simulation"
+      logo: "assets/sand.png"
+      status: "experimental"
+      default_launch: "tab"
+
+  - id: "swing_flight_pipeline"
+    name: "Swing → Flight Pipeline"
+    description: "End-to-end swing dynamics → impact → aerodynamic ball flight pipeline"
+    type: "special_app"
+    path: "src/tools/swing_flight_pipeline/gui.py"
+    launcher:
+      category: "simulation"
+      logo: "assets/golf_simulation.png"
+      status: "ready"
+      default_launch: "tab"
+
+  - id: "ball_flight_simulator"
+    name: "Ball Flight Simulator"
+    description: "Aerodynamic ball flight simulator with drag, Magnus, and wind models"
+    type: "special_app"
+    path: "src/tools/ball_flight_gui/gui.py"
+    launcher:
+      category: "simulation"
+      logo: "assets/golf_simulation.png"
+      status: "ready"
+      default_launch: "tab"
+
+  - id: "putting_green_gui"
+    name: "Putting Green"
+    description: "Interactive putting green simulator with turf physics"
+    type: "special_app"
+    path: "src/tools/putting_green_gui/gui.py"
+    launcher:
+      category: "simulation"
+      logo: "assets/putting_green_modern.png"
+      status: "ready"
       default_launch: "tab"
 
   # =============================================================================
@@ -180,6 +268,7 @@ models:
       category: "motion_capture"
       logo: "assets/video_analyzer_modern.png"
       status: "external"
+    embed_adapter: "src/launchers/external_tools_adapter.py::get_video_analyzer_dockable_ui"
 
   - id: "video_processor"
     name: "Video Processor"
@@ -226,7 +315,7 @@ models:
     name: "Model Explorer"
     description: "Explore models and generate URDFs"
     type: "special_app"
-    path: "src/tools/model_explorer/launch_model_explorer.py"
+    path: "src/tools/model_explorer/main_window.py"
     launcher:
       category: "tool"
       logo: "assets/urdf_icon.png"
@@ -244,6 +333,7 @@ models:
     python_paths:
       - "src"
       - "src/shared/python"
+    embed_adapter: "src/launchers/external_tools_adapter.py::get_data_explorer_dockable_ui"
     launcher:
       category: "tool"
       logo: "assets/data_explorer_modern.png"
@@ -262,6 +352,7 @@ models:
       - "src"
       - "src/shared/python"
       - "src/data_processing/data_processor/python"
+    embed_adapter: "src/launchers/external_tools_adapter.py::get_data_processor_dockable_ui"
     launcher:
       category: "tool"
       logo: "assets/data_explorer_modern.png"

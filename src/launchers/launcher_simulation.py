@@ -2,7 +2,7 @@
 # This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
 # It requires domain-aware structural extraction to isolate its internal classes appropriately.
 
-"""Simulation launching mixin for GolfLauncher.
+"""Simulation launching mixin for UpstreamDriftLauncher.
 
 Contains methods for launching simulations, MJCF viewers, Docker containers,
 script processes, module processes, URDF generator, C3D viewer, shot tracer,
@@ -39,7 +39,7 @@ logger = get_logger(__name__)
 
 
 class LauncherSimulationMixin:
-    """Mixin for GolfLauncher simulation launching.
+    """Mixin for UpstreamDriftLauncher simulation launching.
 
     Provides methods for launching various simulation types,
     dependency checking, and subprocess management.
@@ -222,6 +222,34 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
         handler = self.model_handler_registry.get_handler(model.type)
         if handler:
+            # Unified Architecture: Check if handler supports docking
+            if hasattr(handler, "get_dockable_ui"):
+                try:
+                    ui_widget = handler.get_dockable_ui(model, REPOS_ROOT)
+                    if ui_widget:
+                        if hasattr(self, "sidekick_sidebar") and hasattr(ui_widget, "set_sidekick_session"):
+                            # The sidebar widget might have a direct session attribute or IS the session.
+                            session = getattr(self.sidekick_sidebar, "session", self.sidekick_sidebar)
+                            try:
+                                ui_widget.set_sidekick_session(session)
+                            except Exception as e:
+                                logger.warning("Failed to inject Sidekick session: %s", e)
+
+                        # Check user preference or model default; for now default to docking
+                        launch_mode = getattr(model, "launcher", {}).get("default_launch", "tab")
+                        if launch_mode == "window" and hasattr(self, "popout_widget"):
+                            self.popout_widget(ui_widget, model.name)
+                            self.show_toast(f"{model.name} Popped Out", "success")
+                        elif hasattr(self, "dock_widget_as_tab"):
+                            self.dock_widget_as_tab(ui_widget, model.name)
+                            self.show_toast(f"{model.name} Docked", "success")
+                        
+                        self.lbl_status.setText(f"* {model.name} Running")
+                        self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
+                        return
+                except Exception as e:
+                    logger.error("Failed to load dockable UI for %s: %s", model.name, e)
+
             success = handler.launch(model, REPOS_ROOT, self.process_manager)
             if success:
                 self.show_toast(f"{model.name} Launched", "success")

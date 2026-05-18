@@ -15,6 +15,15 @@ from PyQt6 import QtWidgets
 from src.tools.pose_subscriber_demo.gui import MainWidget
 
 
+def get_dockable_ui() -> QtWidgets.QMainWindow:
+    """Return the main window instance for docking in the unified launcher."""
+    win = QtWidgets.QMainWindow()
+    win.setWindowTitle("Pose Subscriber (demo)")
+    widget = MainWidget(win)
+    win.setCentralWidget(widget)
+    win.resize(640, 640)
+    return win
+
 def main(argv: list[str] | None = None) -> int:
     """Entry point used by ``python -m src.tools.pose_subscriber_demo``."""
     if argv is None:

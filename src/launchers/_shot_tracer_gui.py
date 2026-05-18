@@ -481,6 +481,11 @@ class MultiModelShotTracerWindow(QMainWindow):
         )
 
 
+def get_dockable_ui() -> MultiModelShotTracerWindow:
+    """Return the main window instance for docking in the unified launcher."""
+    return MultiModelShotTracerWindow()
+
+
 def main() -> None:
     """Launch the Multi-Model Shot Tracer application."""
     _sync_public_overrides()

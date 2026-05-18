@@ -1,0 +1,152 @@
+"""JinjaReportTemplate — Jinja2-based markdown report generation.
+
+This complements the structural ``ReportTemplate`` (which composes
+``ReportSection`` dataclasses) with a template-string approach for
+use cases where callers pass a Jinja2/mustache-style string and a
+context dict (e.g. the ``GLOBAL_REPORT_REGISTRY`` for Issue #5423).
+
+Design-by-Contract invariants
+------------------------------
+- ``report_type`` must be a non-empty string.
+- ``template_text`` must be a non-empty string.
+- ``render`` postcondition: result is a non-empty string.
+
+Law of Demeter
+--------------
+``JinjaReportTemplate`` delegates all Jinja2 rendering to ``_Renderer``, a
+private helper that owns template compilation.  ``JinjaReportTemplate`` never
+reaches through more than one Jinja2 layer.
+
+Implements part of Issue #5423.
+"""
+
+from __future__ import annotations
+
+import logging
+from typing import Any
+
+from src.shared.python.contracts import ensure, require
+
+logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Private helper — Law of Demeter boundary
+# ---------------------------------------------------------------------------
+
+
+class _Renderer:
+    """Compiles and renders a single Jinja2 template string."""
+
+    def __init__(self, template_text: str) -> None:
+        try:
+            import jinja2  # lazy import — not always available
+
+            self._template = jinja2.Environment(
+                autoescape=False,
+                undefined=jinja2.Undefined,
+                keep_trailing_newline=True,
+            ).from_string(template_text)
+            self._has_jinja = True
+        except ImportError:
+            # Graceful fallback: simple ``{{ key }}`` substitution
+            self._template_text = template_text
+            self._has_jinja = False
+
+    def render(self, context: dict[str, Any]) -> str:
+        """Return rendered string for *context*."""
+        if self._has_jinja:
+            return self._template.render(**context)
+        # Minimal fallback: replace ``{{ key }}`` patterns
+        result = self._template_text
+        for key, value in context.items():
+            result = result.replace("{{ " + key + " }}", str(value))
+            result = result.replace("{{" + key + "}}", str(value))
+        return result
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+
+class JinjaReportTemplate:
+    """A named, Jinja2-renderable markdown report template.
+
+    Unlike the structural :class:`ReportTemplate` (which composes
+    ``ReportSection`` dataclasses), ``JinjaReportTemplate`` accepts a raw
+    Jinja2/mustache-style template string and renders it with a context dict.
+    This is useful for the ``GLOBAL_REPORT_REGISTRY`` and
+    :class:`AgenticSummaryGenerator`.
+
+    Args:
+        report_type: Unique identifier for this template (e.g. ``"swing_analysis"``).
+        template_text: Jinja2-compatible template string.  Falls back to a
+            simple ``{{ key }}`` substitution when Jinja2 is unavailable.
+
+    Examples::
+
+        tpl = JinjaReportTemplate("swing_analysis", "# {{ title }}\\n\\n{{ metrics }}")
+        md = tpl.render({"title": "Driver 3W", "metrics": "CHS: 110 mph"})
+    """
+
+    def __init__(self, report_type: str, template_text: str) -> None:
+        require(
+            isinstance(report_type, str) and bool(report_type.strip()),
+            "report_type must be a non-empty string",
+            report_type,
+        )
+        require(
+            isinstance(template_text, str) and bool(template_text.strip()),
+            "template_text must be a non-empty string",
+            template_text,
+        )
+        self._report_type = report_type
+        self._renderer = _Renderer(template_text)
+        self._template_text = template_text
+        logger.debug("jinja_report_template_created report_type=%s", report_type)
+
+    # ------------------------------------------------------------------
+    # Properties
+    # ------------------------------------------------------------------
+
+    @property
+    def report_type(self) -> str:
+        """Return the unique report type identifier."""
+        return self._report_type
+
+    @property
+    def template_text(self) -> str:
+        """Return the raw template text."""
+        return self._template_text
+
+    # ------------------------------------------------------------------
+    # Rendering
+    # ------------------------------------------------------------------
+
+    def render(self, context: dict[str, Any]) -> str:
+        """Render the template with *context* and return a markdown string.
+
+        Preconditions:
+            - ``context`` is a ``dict``.
+
+        Postcondition:
+            Returns a non-empty string.
+
+        Args:
+            context: Template variables (e.g. ``title``, ``run_id``, ``metrics``).
+
+        Returns:
+            Rendered markdown string.
+        """
+        require(isinstance(context, dict), "context must be a dict", context)
+
+        result = self._renderer.render(context)
+        ensure(
+            isinstance(result, str) and bool(result),
+            "render postcondition: result must be a non-empty string",
+        )
+        logger.debug(
+            "jinja_report_template_rendered report_type=%s", self._report_type
+        )
+        return result
