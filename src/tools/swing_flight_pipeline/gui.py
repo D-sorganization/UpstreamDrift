@@ -103,7 +103,7 @@ class SwingFlightWidget(QWidget):
         ]:
             btn = QPushButton(name)
             btn.clicked.connect(
-                lambda checked, s=speed, l=loft: self._apply_preset(s, l)
+                lambda checked, s=speed, loft_val=loft: self._apply_preset(s, loft_val)
             )
             preset_layout.addWidget(btn)
         left_layout.addWidget(preset_group)
@@ -126,6 +126,31 @@ class SwingFlightWidget(QWidget):
 
         results_group = QGroupBox("Pipeline Results")
         results_layout = QVBoxLayout(results_group)
+
+        try:
+            import pyqtgraph as pg
+            import pyqtgraph.opengl as gl
+
+            self._gl_view = gl.GLViewWidget()
+            self._gl_view.opts["distance"] = 250
+            self._gl_view.opts["elevation"] = 20
+            self._gl_view.opts["azimuth"] = 45
+
+            grid = gl.GLGridItem()
+            grid.setSize(x=500, y=500, z=0)
+            grid.setSpacing(x=50, y=50, z=0)
+            self._gl_view.addItem(grid)
+
+            axis = gl.GLAxisItem()
+            axis.setSize(x=50, y=50, z=50)
+            self._gl_view.addItem(axis)
+
+            self._plot_item = None
+            results_layout.addWidget(self._gl_view, stretch=3)
+        except ImportError:
+            self._gl_view = None
+            self._plot_item = None
+
         self._results_text = QTextEdit()
         self._results_text.setReadOnly(True)
         self._results_text.setPlainText(
@@ -194,6 +219,29 @@ class SwingFlightWidget(QWidget):
                 f"  Landing:    {result.landing_angle_deg:.1f}°\n\n"
                 f"Trajectory: {len(result.trajectory)} points\n"
             )
+
+            # Update 3D Visualization
+            if getattr(self, "_gl_view", None) is not None and result.trajectory:
+                import pyqtgraph as pg
+                import pyqtgraph.opengl as gl
+
+                pts = np.array([p.position for p in result.trajectory])
+
+                if self._plot_item is not None:
+                    self._gl_view.removeItem(self._plot_item)
+
+                self._plot_item = gl.GLLinePlotItem(
+                    pos=pts, color=(1.0, 0.5, 0.0, 1.0), width=3, antialias=True
+                )
+                self._gl_view.addItem(self._plot_item)
+
+                # Auto-center camera
+                if len(pts) > 0:
+                    from pyqtgraph import Vector
+
+                    mid_x = max(pts[:, 0]) / 2.0
+                    self._gl_view.opts["center"] = Vector(mid_x, 0, 0)
+
         except ImportError as e:
             self._results_text.setPlainText(
                 f"Pipeline not available: {e}\n\n"

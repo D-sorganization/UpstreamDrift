@@ -237,6 +237,23 @@ class SpecialAppHandler:
         """Try to load the special app script and get its dockable UI widget."""
         if repo_path is None:
             return None
+
+        embed_adapter = getattr(model, "embed_adapter", None)
+        if embed_adapter and "::" in embed_adapter:
+            mod_path, func_name = embed_adapter.split("::")
+            adapter_script = repo_path / mod_path
+            if adapter_script.exists():
+                import importlib.util
+                try:
+                    spec = importlib.util.spec_from_file_location("embed_adapter", str(adapter_script))
+                    if spec and spec.loader:
+                        module = importlib.util.module_from_spec(spec)
+                        spec.loader.exec_module(module)
+                        if hasattr(module, func_name):
+                            return getattr(module, func_name)()
+                except Exception as e:
+                    logger.warning("Failed to load embed_adapter %s: %s", embed_adapter, e)
+
         model_path = getattr(model, "path", None) or ""
         if not model_path:
             return None

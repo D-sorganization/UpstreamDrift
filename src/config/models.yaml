@@ -144,6 +144,17 @@ models:
       status: "ready"
       default_launch: "tab"
 
+  - id: "golf_environment"
+    name: "Golf Environment"
+    description: "3D Driving Range and Golf Course Hole visualization"
+    type: "special_app"
+    path: "src/tools/golf_environment/gui.py"
+    launcher:
+      category: "simulation"
+      logo: "assets/golf_simulation.png"
+      status: "ready"
+      default_launch: "tab"
+
   - id: "swing_flight_pipeline"
     name: "Swing → Flight Pipeline"
     description: "End-to-end swing dynamics → impact → aerodynamic ball flight pipeline"

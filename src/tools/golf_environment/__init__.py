@@ -1,0 +1,1 @@
+"""Golf environment visualization package."""

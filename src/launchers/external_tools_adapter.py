@@ -127,7 +127,6 @@ class _UnavailableToolWidget(QWidget):
 
     def cleanup(self) -> None:
         """No-op cleanup for the placeholder."""
-        pass
 
 
 class _UnavailableToolWindow(QMainWindow):
@@ -149,9 +148,7 @@ class _UnavailableToolWindow(QMainWindow):
 # ---------------------------------------------------------------------------
 
 
-def _wrap_external_widget(
-    tool_name: str, import_func: Any
-) -> QMainWindow:
+def _wrap_external_widget(tool_name: str, import_func: Any) -> QMainWindow:
     """Attempt to import and wrap an external tool widget.
 
     Args:
@@ -162,9 +159,7 @@ def _wrap_external_widget(
         QMainWindow wrapping the tool widget, or an error placeholder.
     """
     if not _ensure_tools_on_path():
-        return _UnavailableToolWindow(
-            tool_name, "Tools repository not found."
-        )
+        return _UnavailableToolWindow(tool_name, "Tools repository not found.")
     try:
         widget = import_func()
         window = QMainWindow()

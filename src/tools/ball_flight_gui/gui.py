@@ -153,6 +153,31 @@ class BallFlightWidget(QWidget):
         right_layout = QVBoxLayout(right)
         results_group = QGroupBox("Flight Results")
         results_layout = QVBoxLayout(results_group)
+
+        try:
+            import pyqtgraph as pg
+            import pyqtgraph.opengl as gl
+
+            self._gl_view = gl.GLViewWidget()
+            self._gl_view.opts["distance"] = 250
+            self._gl_view.opts["elevation"] = 20
+            self._gl_view.opts["azimuth"] = 45
+
+            grid = gl.GLGridItem()
+            grid.setSize(x=500, y=500, z=0)
+            grid.setSpacing(x=50, y=50, z=0)
+            self._gl_view.addItem(grid)
+
+            axis = gl.GLAxisItem()
+            axis.setSize(x=50, y=50, z=50)
+            self._gl_view.addItem(axis)
+
+            self._plot_item = None
+            results_layout.addWidget(self._gl_view, stretch=3)
+        except ImportError:
+            self._gl_view = None
+            self._plot_item = None
+
         self._results_text = QTextEdit()
         self._results_text.setReadOnly(True)
         self._results_text.setPlainText(
@@ -217,12 +242,32 @@ class BallFlightWidget(QWidget):
                     f"  Y: {last.position[1]:.1f} m\n"
                     f"  Z: {last.position[2]:.1f} m\n"
                 )
+
+                # Update 3D Visualization
+                if getattr(self, "_gl_view", None) is not None:
+                    import pyqtgraph as pg
+                    import pyqtgraph.opengl as gl
+
+                    pts = np.array([p.position for p in trajectory])
+
+                    if self._plot_item is not None:
+                        self._gl_view.removeItem(self._plot_item)
+
+                    self._plot_item = gl.GLLinePlotItem(
+                        pos=pts, color=(0.0, 0.7, 1.0, 1.0), width=3, antialias=True
+                    )
+                    self._gl_view.addItem(self._plot_item)
+
+                    # Auto-center camera on the trajectory midpoint
+                    if len(pts) > 0:
+                        from pyqtgraph import Vector
+
+                        mid_x = max(pts[:, 0]) / 2.0
+                        self._gl_view.opts["center"] = Vector(mid_x, 0, 0)
             else:
                 self._results_text.setPlainText("No trajectory generated.")
         except ImportError as e:
-            self._results_text.setPlainText(
-                f"Ball flight simulator not available: {e}"
-            )
+            self._results_text.setPlainText(f"Ball flight simulator not available: {e}")
         except Exception as e:
             logger.exception("Ball flight simulation failed")
             self._results_text.setPlainText(f"Simulation error: {e}")
@@ -244,8 +289,7 @@ class BallFlightWindow(QMainWindow):
         status = QStatusBar()
         self.setStatusBar(status)
         status.showMessage(
-            "Forces: Drag + Magnus + Gravity + Wind | "
-            "Configure and run simulation"
+            "Forces: Drag + Magnus + Gravity + Wind | " "Configure and run simulation"
         )
 
     def closeEvent(self, event: Any) -> None:

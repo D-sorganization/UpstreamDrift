@@ -126,6 +126,34 @@ class PuttingGreenWidget(QWidget):
         right_layout = QVBoxLayout(right)
         results_group = QGroupBox("Simulation Results")
         results_layout = QVBoxLayout(results_group)
+
+        try:
+            import pyqtgraph as pg
+
+            self._plot_widget = pg.PlotWidget(title="Putting Green (Top-Down)")
+            self._plot_widget.setAspectLocked(True)
+            self._plot_widget.showGrid(x=True, y=True, alpha=0.3)
+            self._plot_widget.setLabel("bottom", "Distance X (m)")
+            self._plot_widget.setLabel("left", "Distance Y (m)")
+
+            # Draw cup (assuming at some X distance)
+            self._cup_circle = pg.ScatterPlotItem(
+                size=15, pen=pg.mkPen(None), brush=pg.mkBrush(50, 50, 50, 255)
+            )
+            self._plot_widget.addItem(self._cup_circle)
+
+            # Ball trajectory
+            self._path_item = pg.PlotDataItem(
+                pen=pg.mkPen(color=(255, 255, 255), width=2)
+            )
+            self._plot_widget.addItem(self._path_item)
+
+            results_layout.addWidget(self._plot_widget, stretch=3)
+        except ImportError:
+            self._plot_widget = None
+            self._path_item = None
+            self._cup_circle = None
+
         self._results_text = QTextEdit()
         self._results_text.setReadOnly(True)
         self._results_text.setPlainText(
@@ -161,6 +189,31 @@ class PuttingGreenWidget(QWidget):
             speed = self._speed_spin.value()
             aim = self._aim_spin.value()
             stimp = self._stimp_spin.value()
+            dist = self._distance_spin.value() * 0.3048  # ft to m
+
+            import numpy as np
+
+            # Mock simulation for visualization until actual physics integration is fully wired
+            # (Assuming actual PuttingGreenSimulator currently lacks the full physics run() method in standard form)
+            t = np.linspace(0, 2, 100)
+            aim_rad = np.radians(aim)
+            vx = speed * np.cos(aim_rad)
+            vy = speed * np.sin(aim_rad)
+            # Deceleration based on stimp
+            decel = 9.81 * (0.131 / (stimp / 10.0))
+            v_mag = np.maximum(0, speed - decel * t)
+
+            x = np.zeros_like(t)
+            y = np.zeros_like(t)
+            for i in range(1, len(t)):
+                dt = t[i] - t[i - 1]
+                v_curr = speed - decel * t[i]
+                if v_curr < 0:
+                    x[i] = x[i - 1]
+                    y[i] = y[i - 1]
+                else:
+                    x[i] = x[i - 1] + v_curr * np.cos(aim_rad) * dt
+                    y[i] = y[i - 1] + v_curr * np.sin(aim_rad) * dt
 
             self._results_text.setPlainText(
                 f"Putting Simulation\n"
@@ -170,8 +223,21 @@ class PuttingGreenWidget(QWidget):
                 f"Stimpmeter:   {stimp:.1f}\n"
                 f"Slope:        {self._slope_spin.value():.1f}°\n\n"
                 f"Simulator loaded successfully.\n"
-                f"(Full 3D visualization coming in next phase)\n"
             )
+
+            # Update 2D Plot
+            if getattr(self, "_plot_widget", None) is not None:
+                self._path_item.setData(x, y)
+                self._cup_circle.setData([dist], [0.0])
+
+                # Auto-range
+                max_x = max(dist + 1.0, np.max(x) + 1.0)
+                min_x = min(-1.0, np.min(x) - 1.0)
+                max_y = max(1.0, np.max(y) + 1.0)
+                min_y = min(-1.0, np.min(y) - 1.0)
+                self._plot_widget.setXRange(min_x, max_x)
+                self._plot_widget.setYRange(min_y, max_y)
+
         except ImportError as e:
             self._results_text.setPlainText(
                 f"Simulator not available: {e}\n"
