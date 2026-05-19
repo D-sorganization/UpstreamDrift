@@ -173,12 +173,8 @@ class LauncherDialogsMixin:
             overlay.setFocus()
 
     def _show_preferences(self) -> None:
-        """Show the preferences dialog."""
-        if UI_COMPONENTS_AVAILABLE:
-            from src.shared.python.ui import PreferencesDialog
-
-            dialog = PreferencesDialog(self)
-            dialog.exec()
+        """Show the preferences in the unified settings tab."""
+        self._open_settings(tab=4)  # 4 is the appearance/preferences tab
 
     def open_sidekick_tab(self, tool_id: str) -> None:
         """Open *tool_id* as a Sidekick tab in the launcher.
@@ -227,7 +223,7 @@ class LauncherDialogsMixin:
         if not section_id:
             raise ValueError("section_id must be non-empty")
         logger.debug("open_preferences_section(%r)", section_id)
-        self._show_preferences()
+        self._open_settings(tab=0)
 
     def show_toast(self, message: str, toast_type: str = "info") -> None:
         """Show a toast notification.
@@ -308,29 +304,35 @@ class LauncherDialogsMixin:
         QDesktopServices.openUrl(QUrl(mailto_url))
 
     def _open_settings(self, tab: int = 0) -> None:
-        """Open the Settings dialog (Layout / Configuration / Diagnostics).
-
-        Args:
-            tab: Initial tab index. See ``settings_dialog.SettingsDialog``
-                tab constants (``TAB_LAYOUT`` / ``TAB_CONFIG`` /
-                ``TAB_DIAGNOSTICS``); the Configuration tab is where
-                Engine Runtime selection and Docker Image build live.
-
-        Note: Diagnostics are now loaded lazily when the Diagnostics tab
-        is first selected, not synchronously before dialog display.
-        See issue #4916.
-        """
+        """Open the Settings tab in the workspace (Layout / Configuration / Diagnostics)."""
         if tab is None:
             raise ValueError("tab must be provided")
 
-        dialog = SettingsDialog(
-            parent=self,
-            diagnostics_data=None,  # Lazy-load on tab select
-            initial_tab=tab,
+        # Check if settings tab is already open
+        if hasattr(self, "workspace_tabs"):
+            for i in range(self.workspace_tabs.count()):
+                if self.workspace_tabs.tabText(i) == "Settings":
+                    self.workspace_tabs.setCurrentIndex(i)
+                    widget = self.workspace_tabs.widget(i)
+                    if hasattr(widget, "tabs"):
+                        widget.tabs.setCurrentIndex(tab)
+                    return
+
+        from src.launchers.settings_dialog import SettingsWidget
+
+        settings_widget = SettingsWidget(
             launcher=self,
+            initial_tab=tab,
         )
-        dialog.reset_layout_requested.connect(self._reset_layout_to_defaults)
-        dialog.exec()
+        settings_widget.reset_layout_requested.connect(self._reset_layout_to_defaults)
+
+        if hasattr(self, "dock_widget_as_tab"):
+            self.dock_widget_as_tab(settings_widget, "Settings")
+            # Select the correct inner tab
+            settings_widget.tabs.setCurrentIndex(tab)
+        else:
+            # Fallback if no workspace_tabs available
+            settings_widget.show()
 
     def open_diagnostics(self) -> None:
         """Open the settings dialog on the Diagnostics tab."""

@@ -591,14 +591,6 @@ class LauncherUISetupMixin:
         if hasattr(self, "_show_preferences"):
             btn_settings.clicked.connect(self._show_preferences)
 
-        btn_docs = self._build_sidebar_button(
-            "Documentation",
-            "help",
-            checkable=False,
-        )
-        if hasattr(self, "_toggle_context_help"):
-            btn_docs.clicked.connect(self._toggle_context_help)
-
         # Setup mutually exclusive active-state routing for navigation
         self.sidebar_group = QButtonGroup(self)
         self.sidebar_group.addButton(btn_home, 0)
@@ -625,8 +617,6 @@ class LauncherUISetupMixin:
         layout.addStretch(1)
         layout.addWidget(btn_tools)
         layout.addStretch(3)  # larger gap before bottom group
-        layout.addWidget(btn_docs)
-        layout.addStretch(1)
         layout.addWidget(btn_settings)
 
         # Set explicit focus order for keyboard navigation
@@ -636,9 +626,7 @@ class LauncherUISetupMixin:
         QWidget.setTabOrder(btn_biomechanics, btn_simulation)
         QWidget.setTabOrder(btn_simulation, btn_motion_matching)
         QWidget.setTabOrder(btn_motion_matching, btn_motion_capture)
-        QWidget.setTabOrder(btn_motion_capture, btn_tools)
         QWidget.setTabOrder(btn_tools, btn_settings)
-        QWidget.setTabOrder(btn_settings, btn_docs)
 
         scroll_area = QScrollArea()
         scroll_area.setWidget(sidebar)
@@ -867,6 +855,13 @@ class LauncherUISetupMixin:
         action_manual.setStatusTip("Opens user manual")
         action_manual.triggered.connect(lambda: self._show_help_dialog())
         help_menu.addAction(action_manual)
+
+        action_context_docs = QAction("Context &Documentation", self)
+        action_context_docs.setToolTip("Open context-aware documentation")
+        action_context_docs.setStatusTip("Opens Context Help")
+        if hasattr(self, "_toggle_context_help"):
+            action_context_docs.triggered.connect(self._toggle_context_help)
+        help_menu.addAction(action_context_docs)
 
         action_user_guide = QAction("User &Guide (online)", self)
         action_user_guide.setToolTip(

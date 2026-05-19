@@ -53,14 +53,18 @@ def validate_tab_index(tab_index: int) -> int:
     return tab_index
 
 
-class SettingsDialog(QDialog):
-    """Settings dialog with Layout, Configuration, Diagnostics, and MCP Servers tabs.
+class SettingsWidget(QWidget):
+    """Settings widget with Layout, Configuration, Diagnostics, MCP Servers, and Preferences tabs.
 
     Tab order:
         0 - Layout: tile arrangement, lock, reset
         1 - Configuration: execution env, simulation opts, Docker rebuild
         2 - Diagnostics: system checks, error logs, terminal output
         3 - MCP Servers: manage Model Context Protocol server connections
+        4 - Appearance
+        5 - Startup
+        6 - Notifications
+        7 - Performance
     """
 
     reset_layout_requested = pyqtSignal()
@@ -97,7 +101,16 @@ class SettingsDialog(QDialog):
         from src.shared.python.gui_pkg.draggable_tabs import DraggableTabWidget
 
         self.tabs = DraggableTabWidget(
-            core_tabs={"Layout", "Configuration", "Diagnostics", "MCP Servers"}
+            core_tabs={
+                "Layout",
+                "Configuration",
+                "Diagnostics",
+                "MCP Servers",
+                "Appearance",
+                "Startup",
+                "Notifications",
+                "Performance",
+            }
         )
         self.tabs.setTabsClosable(False)
         layout.addWidget(self.tabs)
@@ -107,9 +120,28 @@ class SettingsDialog(QDialog):
         self.tabs.addTab(self._create_diagnostics_tab(), "Diagnostics")
         self.tabs.addTab(self._create_mcp_servers_tab(), "MCP Servers")
 
-        close_btn = QPushButton("Close")
-        close_btn.clicked.connect(self.accept)
-        layout.addWidget(close_btn)
+        # Load preferences dialog tabs
+        try:
+            from src.shared.python.ui.preferences_dialog import PreferencesDialog
+
+            self._prefs_dialog = PreferencesDialog(
+                self._launcher if self._launcher else self
+            )
+            self.tabs.addTab(self._prefs_dialog._create_appearance_tab(), "Appearance")
+            self.tabs.addTab(self._prefs_dialog._create_startup_tab(), "Startup")
+            self.tabs.addTab(
+                self._prefs_dialog._create_notifications_tab(), "Notifications"
+            )
+            self.tabs.addTab(
+                self._prefs_dialog._create_performance_tab(), "Performance"
+            )
+
+            # Add an Apply Preferences button
+            btn_apply = QPushButton("Apply Preferences")
+            btn_apply.clicked.connect(self._prefs_dialog._on_apply)
+            layout.addWidget(btn_apply)
+        except ImportError:
+            pass
 
     # ── Layout tab ──────────────────────────────────────────────────
 
