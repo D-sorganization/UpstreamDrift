@@ -6,24 +6,33 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 import pytest  # noqa: E402
 from PyQt6.QtWidgets import QWidget  # noqa: E402
 from src.launchers.settings_dialog import (  # noqa: E402
+    TAB_APPEARANCE,
     TAB_CONFIG,
     TAB_DIAGNOSTICS,
     TAB_LAYOUT,
     TAB_MCP_SERVERS,
+    TAB_NOTIFICATIONS,
+    TAB_PERFORMANCE,
+    TAB_STARTUP,
+    SettingsDialog,
     SettingsWidget,
     validate_tab_index,
 )
 
 
 def test_validate_tab_index() -> None:
-    """Validate all four legal tab indexes; ensure out-of-range raises ValueError."""
+    """Validate all legal tab indexes; ensure out-of-range raises ValueError."""
     assert validate_tab_index(0) == 0  # TAB_LAYOUT
     assert validate_tab_index(1) == 1  # TAB_CONFIG
     assert validate_tab_index(2) == 2  # TAB_DIAGNOSTICS
     # TAB_MCP_SERVERS = 3 is a valid index (added in UpstreamDrift #5688)
     assert validate_tab_index(3) == 3  # TAB_MCP_SERVERS
+    assert validate_tab_index(TAB_APPEARANCE) == TAB_APPEARANCE
+    assert validate_tab_index(TAB_STARTUP) == TAB_STARTUP
+    assert validate_tab_index(TAB_NOTIFICATIONS) == TAB_NOTIFICATIONS
+    assert validate_tab_index(TAB_PERFORMANCE) == TAB_PERFORMANCE
     with pytest.raises(ValueError):
-        validate_tab_index(4)  # out of range
+        validate_tab_index(8)  # out of range
 
 
 @pytest.fixture
@@ -68,6 +77,23 @@ def test_settings_dialog_init(parent_launcher, qapp) -> None:
     assert dialog.chk_gpu.isChecked() is True
 
     assert dialog.tabs.currentIndex() == TAB_CONFIG
+
+
+def test_settings_widget_accepts_preferences_tab(parent_launcher, qapp) -> None:
+    """Preferences shortcut uses tab 4; settings startup must accept it."""
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_APPEARANCE)
+
+    assert dialog.tabs.currentIndex() == TAB_APPEARANCE
+
+
+def test_settings_dialog_wrapper_keeps_legacy_dialog_contract(
+    parent_launcher, qapp
+) -> None:
+    """Legacy imports still get a QDialog-like settings surface."""
+    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
+
+    assert dialog.tabs.currentIndex() == TAB_CONFIG
+    assert dialog.widget.parent() is dialog
 
 
 def test_on_reset_layout(parent_launcher, qapp) -> None:

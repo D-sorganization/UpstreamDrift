@@ -340,21 +340,8 @@ class LauncherUISetupMixin:
             0, self.workspace_tabs.tabBar().ButtonPosition.LeftSide, None
         )
 
-        # Add Library Tab
-        try:
-            from src.launchers.library_widget import LibraryWidget
-
-            self.library_widget = LibraryWidget(self)
-            self.workspace_tabs.addTab(self.library_widget, "Library")
-            # Prevent closing the Library tab
-            self.workspace_tabs.tabBar().setTabButton(
-                1, self.workspace_tabs.tabBar().ButtonPosition.RightSide, None
-            )
-            self.workspace_tabs.tabBar().setTabButton(
-                1, self.workspace_tabs.tabBar().ButtonPosition.LeftSide, None
-            )
-        except ImportError as e:
-            logger.warning(f"Could not load Library tab: {e}")
+        self.library_widget = None
+        self.library_window = None
 
         content_layout.addWidget(self.workspace_tabs, 1)
 
@@ -378,6 +365,46 @@ class LauncherUISetupMixin:
 
         index = self.workspace_tabs.addTab(widget, title)
         self.workspace_tabs.setCurrentIndex(index)
+
+    def _open_library_tab(self) -> None:
+        """Open or focus the Library workspace tab."""
+        if not hasattr(self, "workspace_tabs"):
+            logger.error("Workspace tabs not initialized; cannot open Library.")
+            return
+
+        try:
+            from src.launchers.library_widget import LibraryWidget
+        except ImportError as e:
+            logger.warning("Could not load Library tab: %s", e)
+            if hasattr(self, "show_toast"):
+                self.show_toast("Library is unavailable in this environment.", "error")
+            return
+
+        existing = getattr(self, "library_widget", None)
+        if existing is None:
+            existing = LibraryWidget(self)
+            self.library_widget = existing
+
+        index = self.workspace_tabs.indexOf(existing)
+        if index < 0:
+            self.dock_widget_as_tab(existing, "Library")
+        else:
+            self.workspace_tabs.setCurrentIndex(index)
+
+    def _popout_library(self) -> None:
+        """Open the Library in a floating window, preserving one widget instance."""
+        self._open_library_tab()
+        widget = getattr(self, "library_widget", None)
+        if widget is None:
+            return
+
+        index = self.workspace_tabs.indexOf(widget)
+        if index >= 0:
+            self.workspace_tabs.removeTab(index)
+
+        self.popout_widget(widget, "Library")
+        windows = getattr(self, "_popped_out_windows", [])
+        self.library_window = windows[-1] if windows else None
 
     def popout_widget(self, widget: QWidget, title: str) -> None:
         """Pop out a submodule widget into a separate window."""
@@ -597,6 +624,13 @@ class LauncherUISetupMixin:
             checkable=True,
         )
 
+        btn_library = self._build_sidebar_button(
+            "Library",
+            "book",
+            checkable=True,
+        )
+        btn_library.setAccessibleDescription("Open the document library tab")
+
         # If _show_preferences exists in the mixed-in class, use it.
         # Otherwise, we gracefully handle it to avoid crashes in tests.
         btn_settings = self._build_sidebar_button(
@@ -616,7 +650,10 @@ class LauncherUISetupMixin:
         self.sidebar_group.addButton(btn_motion_matching, 4)
         self.sidebar_group.addButton(btn_motion_capture, 5)
         self.sidebar_group.addButton(btn_tools, 6)
+        self.sidebar_group.addButton(btn_library, 7)
         self.sidebar_group.idClicked.connect(self._on_sidebar_routed)
+
+        self.btn_library_sidebar = btn_library
 
         # Space navigation buttons evenly to fill available height
         layout.addWidget(btn_home)
@@ -632,6 +669,8 @@ class LauncherUISetupMixin:
         layout.addWidget(btn_motion_capture)
         layout.addStretch(1)
         layout.addWidget(btn_tools)
+        layout.addStretch(1)
+        layout.addWidget(btn_library)
         layout.addStretch(3)  # larger gap before bottom group
         layout.addWidget(btn_settings)
 
@@ -642,7 +681,9 @@ class LauncherUISetupMixin:
         QWidget.setTabOrder(btn_biomechanics, btn_simulation)
         QWidget.setTabOrder(btn_simulation, btn_motion_matching)
         QWidget.setTabOrder(btn_motion_matching, btn_motion_capture)
-        QWidget.setTabOrder(btn_tools, btn_settings)
+        QWidget.setTabOrder(btn_motion_capture, btn_tools)
+        QWidget.setTabOrder(btn_tools, btn_library)
+        QWidget.setTabOrder(btn_library, btn_settings)
 
         scroll_area = QScrollArea()
         scroll_area.setWidget(sidebar)
@@ -668,6 +709,9 @@ class LauncherUISetupMixin:
         1  Physics Engines
         2  Biomechanics
         """
+        if button_id == 7:
+            self._open_library_tab()
+            return
         if not hasattr(self, "layout_manager"):
             return
 

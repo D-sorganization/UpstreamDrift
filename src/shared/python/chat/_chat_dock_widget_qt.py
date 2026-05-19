@@ -54,6 +54,7 @@ def _get_theme_colors(theme_provider: Any = None) -> dict[str, str]:
 
 
 _DEFAULT_SERVER = "ws://127.0.0.1:8000"
+_CONNECT_TIMEOUT_MS = 7000
 
 
 def _session_file_path(app_name: str) -> Path:
@@ -208,6 +209,9 @@ class ChatDockWidget(QDockWidget):
         self._reconnect_timer = QTimer(self)
         self._reconnect_timer.setSingleShot(True)
         self._reconnect_timer.timeout.connect(self._connect)
+        self._connect_timeout_timer = QTimer(self)
+        self._connect_timeout_timer.setSingleShot(True)
+        self._connect_timeout_timer.timeout.connect(self._on_connect_timeout)
 
         # Resolve session ID: explicit > class-level > file > "new"
         if session_id:
@@ -311,14 +315,19 @@ class ChatDockWidget(QDockWidget):
         self._socket.connected.connect(self._on_connected)
         self._socket.disconnected.connect(self._on_disconnected)
         self._socket.textMessageReceived.connect(self._on_message)
+        self._socket.errorOccurred.connect(self._on_socket_error)
 
         sid = ChatDockWidget._shared_session_id or "new"
         path = self._ws_path_template.replace("{session_id}", sid)
         url = QUrl(f"{self._server_url}{path}")
         self._status_label.setText("Connecting...")
+        self._status_label.setStyleSheet("color: #d29922; font-size: 10px;")
+        self._connect_timeout_timer.start(_CONNECT_TIMEOUT_MS)
         self._socket.open(url)
 
     def _on_connected(self) -> None:
+        self._connect_timeout_timer.stop()
+        self._reconnect_timer.stop()
         self._status_label.setText("Connected")
         self._status_label.setStyleSheet("color: #3fb950; font-size: 10px;")
         # Tools issue #2547 / PR #2566: ask the server for the current
@@ -330,6 +339,30 @@ class ChatDockWidget(QDockWidget):
         # watch ``index_status_changed`` for progress / completion.
         if self._auto_index_on_open:
             self.index_codebase()
+
+    def _schedule_reconnect(self) -> None:
+        """Schedule one reconnect attempt without leaving stale connecting state."""
+        if not self._reconnect_timer.isActive():
+            self._reconnect_timer.start(3000)
+
+    def _on_connect_timeout(self) -> None:
+        """Surface a stalled provider connection and retry later."""
+        self._status_label.setText("Connection timed out - retrying in 3s...")
+        self._status_label.setStyleSheet("color: #f85149; font-size: 10px;")
+        self._is_streaming = False
+        self._send_btn.setEnabled(True)
+        if self._socket is not None:
+            self._socket.abort()
+        self._schedule_reconnect()
+
+    def _on_socket_error(self, *_args: Any) -> None:
+        """Surface WebSocket errors instead of leaving the dock as Connecting."""
+        self._connect_timeout_timer.stop()
+        self._status_label.setText("Connection failed - retrying in 3s...")
+        self._status_label.setStyleSheet("color: #f85149; font-size: 10px;")
+        self._is_streaming = False
+        self._send_btn.setEnabled(True)
+        self._schedule_reconnect()
 
     def refresh_models(self) -> None:
         """Ask the server for the current chat-model list.
@@ -351,12 +384,13 @@ class ChatDockWidget(QDockWidget):
         self._send_ws({"action": "index_codebase"})
 
     def _on_disconnected(self) -> None:
+        self._connect_timeout_timer.stop()
         self._status_label.setText("Disconnected - retrying in 3s...")
         self._status_label.setStyleSheet("color: #f85149; font-size: 10px;")
         self._is_streaming = False
         self._send_btn.setEnabled(True)
         # Auto-reconnect
-        self._reconnect_timer.start(3000)
+        self._schedule_reconnect()
 
     def _on_message(self, raw: str) -> None:
         """Handle incoming WebSocket message."""
@@ -513,6 +547,7 @@ class ChatDockWidget(QDockWidget):
     def closeEvent(self, event: Any) -> None:
         """Clean up WebSocket on close."""
         self._reconnect_timer.stop()
+        self._connect_timeout_timer.stop()
         if self._socket:
             self._socket.close()
         super().closeEvent(event)

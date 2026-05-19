@@ -6,6 +6,7 @@ from pathlib import Path  # noqa: E402
 from unittest.mock import MagicMock, mock_open, patch  # noqa: E402
 
 import pytest  # noqa: E402
+from PyQt6.QtWidgets import QFrame, QGridLayout, QLabel, QWidget  # noqa: E402
 from src.launchers.launcher_layout_manager import (  # noqa: E402
     LayoutConfig,
     LayoutManager,
@@ -322,6 +323,84 @@ def test_rebuild_grid_existing_card(layout_manager) -> None:
         assert grid_layout.addWidget.call_count == 2
         # Check that the card was added at row 1, col 0
         grid_layout.addWidget.assert_any_call(mock_card, 1, 0)
+        mock_card.show.assert_called()
+
+
+def test_rebuild_grid_hides_reusable_cards_before_detaching(layout_manager) -> None:
+    """Search/filter rebuilds must not briefly turn visible cards into windows."""
+    grid_layout = MagicMock()
+    grid_layout.count.side_effect = [1, 0]
+
+    existing_card = MagicMock()
+    mock_item = MagicMock()
+    mock_item.widget.return_value = existing_card
+    grid_layout.takeAt.return_value = mock_item
+
+    layout_manager.model_cards["model_1"] = existing_card
+    layout_manager.model_order = ["model_1"]
+
+    layout_manager.rebuild_grid(grid_layout)
+
+    existing_card.hide.assert_called_once()
+    existing_card.setParent.assert_called_once_with(None)
+    existing_card.deleteLater.assert_not_called()
+    existing_card.show.assert_called()
+
+
+def test_rebuild_grid_deletes_transient_headers_when_clearing(layout_manager) -> None:
+    """Section headers are not reusable cards and should not leak across rebuilds."""
+    grid_layout = MagicMock()
+    grid_layout.count.side_effect = [1, 0]
+
+    old_header = MagicMock()
+    mock_item = MagicMock()
+    mock_item.widget.return_value = old_header
+    grid_layout.takeAt.return_value = mock_item
+
+    layout_manager.model_order = []
+    layout_manager.rebuild_grid(grid_layout)
+
+    old_header.hide.assert_not_called()
+    old_header.deleteLater.assert_called_once()
+    old_header.setParent.assert_called_once_with(None)
+
+
+def test_rebuild_grid_keeps_filtered_cards_hidden_not_floating(
+    qapp, available_models, get_model_func
+) -> None:
+    """A search filter must not leave detached tile widgets visibly floating."""
+    container = QWidget()
+    grid_layout = QGridLayout(container)
+
+    created_cards: list[QFrame] = []
+
+    def create_card(model: ModelSpec, **_kwargs) -> QFrame:
+        card = QFrame()
+        card.setObjectName(f"card-{model.id}")
+        created_cards.append(card)
+        return card
+
+    manager = LayoutManager(
+        config_file=Path("/fake/config.json"),
+        available_models=available_models,
+        get_model_func=get_model_func,
+        create_card_func=create_card,
+        create_header_func=lambda name: QLabel(name),
+    )
+    manager.model_order = ["model_1"]
+    container.show()
+
+    manager.rebuild_grid(grid_layout)
+    card = created_cards[0]
+    assert card.parentWidget() is container
+    assert card.isVisible()
+
+    manager.update_search_filter("does-not-match")
+    manager.rebuild_grid(grid_layout)
+
+    assert card.parentWidget() is None
+    assert not card.isVisible()
+    container.deleteLater()
 
 
 def test_rebuild_grid_multiple_columns(layout_manager, available_models) -> None:

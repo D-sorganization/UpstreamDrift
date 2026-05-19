@@ -17,10 +17,10 @@ REPO_ROOT = Path(__file__).resolve().parents[5 if "tests" in __file__ else 4]
 # in UpstreamDrift is a lazy import shim; the canonical Tools content lives in
 # ``_chat_dock_widget_qt.py``.
 TOOLS_BASELINE_HASHES: dict[str, str] = {
-    "src/shared/python/chat/_chat_dock_widget_qt.py": "32a123174f93eb3ee877a21c489286707784e6927da6040f2b9eeff230a8ff12",
-    "src/shared/python/chat/models.py": "efba02eab03e4b74cc7511fa45595b790379a2ddbc0f95fa54f9f67f91ba94e8",
+    "src/shared/python/chat/_chat_dock_widget_qt.py": "a5b5689b1e2cd75c20bee9f459de815a85b482fa0410200468afc09cb8f3dfdc",
+    "src/shared/python/chat/models.py": "4be2df1e9aee66c849efa6de9930d058eba4c0a0efe31528768850da33ce4838",
     "src/shared/python/chat/tests/__init__.py": "5a0bba6299ce217de8cbfc2e20a354ccf479e8d45152f69ad2543d9183d07812",
-    "src/shared/python/chat/tests/test_chat.py": "e7ed8d44073b8fe2015aa006218d6c1b717b52e057e51f5985a78e6177254c30",
+    "src/shared/python/chat/tests/test_chat.py": "cd1c1c21570262bbafa19e6217d4cff07fe073051423c031aa17f3ea051881c7",
 }
 
 

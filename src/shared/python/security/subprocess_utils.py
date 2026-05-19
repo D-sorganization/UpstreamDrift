@@ -22,6 +22,7 @@ Usage:
 from __future__ import annotations
 
 import contextlib
+import os
 import subprocess
 import threading
 import time
@@ -37,6 +38,13 @@ logger = get_logger(__name__)
 # This ensures long-running processes don't hang indefinitely while allowing
 # reasonable time for complex operations like model loading or simulation runs.
 DEFAULT_SUBPROCESS_TIMEOUT: float = 300.0
+
+
+def _hidden_window_kwargs() -> dict[str, int]:
+    """Return Windows-only flags for invisible background processes."""
+    if os.name != "nt":
+        return {}
+    return {"creationflags": getattr(subprocess, "CREATE_NO_WINDOW", 0x08000000)}
 
 
 @log_errors("Command execution failed", reraise=False, default_return=None)
@@ -142,6 +150,7 @@ class ProcessManager:
                     env=env,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
+                    **_hidden_window_kwargs(),
                 )
 
                 self.processes[name] = process
@@ -334,6 +343,7 @@ class CommandRunner:
                 env=self.env,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
+                **_hidden_window_kwargs(),
             )
 
             return process

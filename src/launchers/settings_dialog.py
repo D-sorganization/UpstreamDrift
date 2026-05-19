@@ -17,6 +17,7 @@ from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
     QDialog,
+    QDialogButtonBox,
     QGroupBox,
     QHBoxLayout,
     QLabel,
@@ -41,11 +42,24 @@ TAB_LAYOUT = 0
 TAB_CONFIG = 1
 TAB_DIAGNOSTICS = 2
 TAB_MCP_SERVERS = 3
+TAB_APPEARANCE = 4
+TAB_STARTUP = 5
+TAB_NOTIFICATIONS = 6
+TAB_PERFORMANCE = 7
 
 
 def validate_tab_index(tab_index: int) -> int:
     """Validate SettingsDialog startup tab index."""
-    valid_indexes = {TAB_LAYOUT, TAB_CONFIG, TAB_DIAGNOSTICS, TAB_MCP_SERVERS}
+    valid_indexes = {
+        TAB_LAYOUT,
+        TAB_CONFIG,
+        TAB_DIAGNOSTICS,
+        TAB_MCP_SERVERS,
+        TAB_APPEARANCE,
+        TAB_STARTUP,
+        TAB_NOTIFICATIONS,
+        TAB_PERFORMANCE,
+    }
     if tab_index not in valid_indexes:
         raise ValueError(
             f"Invalid tab index {tab_index}; expected one of {sorted(valid_indexes)}"
@@ -74,6 +88,10 @@ class SettingsWidget(QWidget):
     TAB_CONFIG = TAB_CONFIG
     TAB_DIAGNOSTICS = TAB_DIAGNOSTICS
     TAB_MCP_SERVERS = TAB_MCP_SERVERS
+    TAB_APPEARANCE = TAB_APPEARANCE
+    TAB_STARTUP = TAB_STARTUP
+    TAB_NOTIFICATIONS = TAB_NOTIFICATIONS
+    TAB_PERFORMANCE = TAB_PERFORMANCE
 
     def __init__(
         self,
@@ -124,9 +142,7 @@ class SettingsWidget(QWidget):
         try:
             from src.shared.python.ui.preferences_dialog import PreferencesDialog
 
-            self._prefs_dialog = PreferencesDialog(
-                self._launcher if self._launcher else self
-            )
+            self._prefs_dialog = PreferencesDialog(self._launcher or self)
             self.tabs.addTab(self._prefs_dialog._create_appearance_tab(), "Appearance")
             self.tabs.addTab(self._prefs_dialog._create_startup_tab(), "Startup")
             self.tabs.addTab(
@@ -916,3 +932,39 @@ class SettingsWidget(QWidget):
         self._diag_browser.setHtml(
             f"<p style='color:#f85149;'>Error running diagnostics: {error_msg}</p>"
         )
+
+
+class SettingsDialog(QDialog):
+    """Backward-compatible dialog wrapper around the embedded SettingsWidget."""
+
+    reset_layout_requested = pyqtSignal()
+
+    def __init__(
+        self,
+        parent: QWidget | None = None,
+        diagnostics_data: dict[str, Any] | None = None,
+        initial_tab: int = 0,
+        launcher: Any | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("Settings")
+        self.resize(850, 650)
+
+        layout = QVBoxLayout(self)
+        self.widget = SettingsWidget(
+            parent=self,
+            diagnostics_data=diagnostics_data,
+            initial_tab=initial_tab,
+            launcher=launcher if launcher is not None else parent,
+        )
+        self.widget.reset_layout_requested.connect(self.reset_layout_requested.emit)
+        layout.addWidget(self.widget)
+
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+    @property
+    def tabs(self) -> Any:
+        """Expose the inner tab widget for legacy tests and integrations."""
+        return self.widget.tabs

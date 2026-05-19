@@ -1330,6 +1330,7 @@ def main() -> None:
     def on_startup_progress(msg: str, percent: int) -> None:
         """Forward startup progress."""
         logger.info(f"Startup progress: {percent}% - {msg}")
+        splash.show_message(msg, percent)
 
     def on_startup_error(error_msg: str) -> None:
         """Handle startup failure."""

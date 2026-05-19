@@ -460,14 +460,21 @@ class LayoutManager:
         Args:
             grid_layout: The Qt grid layout to populate.
         """
-        # Clean current layout
+        # Clean current layout. Reusable model cards must be hidden before
+        # detaching: on Qt, a visible parentless widget becomes a top-level
+        # window, which made search/filter rebuilds flash every tile onscreen.
         if grid_layout is None:
             raise ValueError("grid_layout must be provided")
+        reusable_card_ids = {id(card) for card in self.model_cards.values()}
         while grid_layout.count():
             item = grid_layout.takeAt(0)
             if item:
                 widget = item.widget()
                 if widget:
+                    if id(widget) in reusable_card_ids:
+                        widget.hide()
+                    else:
+                        widget.deleteLater()
                     widget.setParent(None)
 
         scale, base_cols, show_desc, is_list = view_mode_settings(
@@ -540,9 +547,11 @@ class LayoutManager:
                 if is_list:
                     # Each card occupies a full row, one card per row.
                     grid_layout.addWidget(widget, row, 0, 1, 1)
+                    widget.show()
                     row += 1
                 else:
                     grid_layout.addWidget(widget, row, col)
+                    widget.show()
                     col += 1
                     if col >= columns:
                         col = 0
