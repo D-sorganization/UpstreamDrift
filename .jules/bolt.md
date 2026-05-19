@@ -60,3 +60,7 @@
 ## 2026-05-18 - Optimize element-wise sum of squares using vdot
 **Learning:** `np.sum(a * b**2)` allocates a temporary array in memory. When multiplying and squaring, `np.vdot(a, b * b)` utilizes optimized C logic and avoids unnecessary intermediate array allocations, speeding up operations in calculation-heavy functions.
 **Action:** Replace `np.sum(inertia * ang_vel**2)` with `np.vdot(inertia, ang_vel * ang_vel)` when calculating rotational kinetic energy across body segments.
+
+## 2026-05-19 - Optimize generic element-wise norm for small vectors
+**Learning:** Element-wise norm computation or generic `np.linalg.norm(..., axis=None)` creates temporary arrays and runs via python layer handling. For very small native tuples or 1D arrays like normal vectors, standard `math.hypot(*v)` is substantially faster than `math.hypot(*np.ravel(v))` and extremely faster than `np.linalg.norm`.
+**Action:** Always prefer `math.hypot(*v)` directly rather than applying `np.ravel()` first on 1D flat structures when optimizing tiny vectors for normalisations.
