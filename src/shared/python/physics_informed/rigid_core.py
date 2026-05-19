@@ -142,9 +142,9 @@ class RigidCore:
         tau = pin.rnea(self._model, self._data, q_arr, dq_arr, ddq_arr)
         result: np.ndarray = np.array(tau, dtype=np.float64)
 
-        assert result.shape == (
-            self.nv,
-        ), f"Postcondition violated: expected shape ({self.nv},), got {result.shape}"
+        assert result.shape == (self.nv,), (
+            f"Postcondition violated: expected shape ({self.nv},), got {result.shape}"
+        )
         return result
 
     # ------------------------------------------------------------------

@@ -76,7 +76,7 @@ Enhance the main GUI (Unified Launcher) to allow running interfaces (like the Mu
 - "Detach" / "Attach" button on the window title bars or toolbar.
 - Window state persists or defaults to user preference.
 
-**Feasibility:** Medium. Requires refactoring `GolfLauncher` to manage `QDockWidget` vs `QMainWindow` instances dynamically.
+**Feasibility:** Medium. Requires refactoring `UpstreamDriftLauncher` to manage `QDockWidget` vs `QMainWindow` instances dynamically.
 
 ## 5. Screen Overlay & Controls [DONE]
 
@@ -145,7 +145,7 @@ Refactor the main launcher grid to display exactly 8 tiles in two rows of 4.
 8. Model Explorer (URDF Gen)
 
 - Hide or merge other items (e.g., Shot Tracer, individual Matlab models, Pendulum).
-- Update `src/config/models.yaml` and `golf_launcher.py`.
+- Update `src/config/models.yaml` and `upstream_drift_launcher.py`.
 
 **Acceptance Criteria:**
 

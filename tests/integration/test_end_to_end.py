@@ -59,8 +59,8 @@ class TestLauncherIntegration:
         # Import inside the test to avoid circular dependencies
         from src.launchers.unified_launcher import UnifiedLauncher
 
-        # Patch GolfLauncher to avoid instantiation issues (StopIteration from side_effects)
-        with patch("src.launchers.golf_launcher.GolfLauncher") as _:
+        # Patch UpstreamDriftLauncher to avoid instantiation issues (StopIteration from side_effects)
+        with patch("src.launchers.upstream_drift_launcher.UpstreamDriftLauncher") as _:
             launcher = UnifiedLauncher()
 
             # Should not raise exception

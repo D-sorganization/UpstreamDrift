@@ -41,7 +41,7 @@ These could be vectorized with `np.vectorize` or meshgrid.
 **3. Launcher UI pass duplication (MINOR)**
 
 `src/launchers/unified_launcher.py` has 7 bare `pass` and several try/except patterns
-that repeat across `launcher_dialogs.py`, `settings_dialog.py`, `golf_launcher.py`.
+that repeat across `launcher_dialogs.py`, `settings_dialog.py`, `upstream_drift_launcher.py`.
 
 ---
 

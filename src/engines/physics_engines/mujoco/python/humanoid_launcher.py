@@ -20,14 +20,21 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+
 try:
     from humanoid_launcher_analysis import AnalysisMixin
     from humanoid_launcher_sim import SimulationMixin
     from humanoid_launcher_ui import UISetupMixin
 except ImportError:
-    from src.engines.physics_engines.mujoco.python.humanoid_launcher_analysis import AnalysisMixin
-    from src.engines.physics_engines.mujoco.python.humanoid_launcher_sim import SimulationMixin
-    from src.engines.physics_engines.mujoco.python.humanoid_launcher_ui import UISetupMixin
+    from src.engines.physics_engines.mujoco.python.humanoid_launcher_analysis import (
+        AnalysisMixin,
+    )
+    from src.engines.physics_engines.mujoco.python.humanoid_launcher_sim import (
+        SimulationMixin,
+    )
+    from src.engines.physics_engines.mujoco.python.humanoid_launcher_ui import (
+        UISetupMixin,
+    )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QPalette
 from PyQt6.QtWidgets import (

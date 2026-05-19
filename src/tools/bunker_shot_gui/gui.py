@@ -88,8 +88,7 @@ class BunkerShotWidget(QWidget):
         # Run
         self._run_btn = QPushButton("Simulate Impact")
         self._run_btn.setStyleSheet(
-            "background-color: #D2B48C; color: black; "
-            "font-weight: bold; padding: 12px;"
+            "background-color: #D2B48C; color: black; font-weight: bold; padding: 12px;"
         )
         self._run_btn.clicked.connect(self._run_simulation)
         left_layout.addWidget(self._run_btn)
@@ -160,9 +159,9 @@ class BunkerShotWidget(QWidget):
             f"{'=' * 40}\n"
             f"Club Velocity: {v:.1f} m/s\n"
             f"Attack Angle:  {angle:.1f}°\n"
-            f"Entry Depth:   {depth*100:.1f} cm\n"
+            f"Entry Depth:   {depth * 100:.1f} cm\n"
             f"Est. Force:    {impact_force:.1f} N\n\n"
-            f"Displaced sand particles: ~{num_particles*10}\n"
+            f"Displaced sand particles: ~{num_particles * 10}\n"
             f"Chrono DEM simulation mock completed."
         )
 

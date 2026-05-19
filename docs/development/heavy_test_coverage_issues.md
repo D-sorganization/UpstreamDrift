@@ -19,7 +19,7 @@ in the headless (Xvfb) environment.
 ### Acceptance Criteria
 
 - [ ] Test that `QApplication` can be created in Xvfb
-- [ ] Test that `GolfLauncher` main window instantiates and shows (headless)
+- [ ] Test that `UpstreamDriftLauncher` main window instantiates and shows (headless)
 - [ ] Test that theme system applies dark/light themes without error
 - [ ] Test that `PendulumSimulator` main window opens and renders
 - [ ] Test that `ModelExplorer` main window opens

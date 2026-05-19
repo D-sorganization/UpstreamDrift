@@ -87,7 +87,7 @@ pip install -r requirements.txt
 python engines/physics_engines/drake/python/golf_swing_launcher.py
 
 # Or use unified launcher
-python launchers/golf_launcher.py --engine drake
+python launchers/upstream_drift_launcher.py --engine drake
 ```
 
 ### Basic Python Usage

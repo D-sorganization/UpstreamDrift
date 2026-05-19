@@ -124,9 +124,9 @@ def test_joint_dict_snapshot_decouples_from_caller() -> None:
 
 def test_frozen_attribute_assignment_blocked() -> None:
     pose = canonical_zero_pose()
-    with pytest.raises(
-        Exception
-    ):  # noqa: B017 — dataclasses raises FrozenInstanceError
+    from dataclasses import FrozenInstanceError
+
+    with pytest.raises(FrozenInstanceError):
         pose.convention_tag = "x"  # type: ignore[misc]
 
 

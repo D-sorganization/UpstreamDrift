@@ -25,7 +25,7 @@ OpenSim is an open-source software platform for modeling, simulating, and analyz
 ├──────────────────────────────────────────────────────────────┤
 │  GUI Layer (PyQt6)                                            │
 │  ┌─────────────────┐  ┌─────────────────┐                    │
-│  │ opensim_gui.py  │  │ golf_launcher   │                    │
+│  │ opensim_gui.py  │  │ upstream_drift_launcher   │                    │
 │  │ - Load Model    │  │ - Engine Select │                    │
 │  │ - Run Simulation│  │ - Status Badge  │                    │
 │  │ - View Results  │  │ - Help System   │                    │

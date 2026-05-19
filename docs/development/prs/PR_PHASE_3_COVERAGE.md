@@ -7,7 +7,7 @@ This PR completes Phase 3 of the Improvement Roadmap, focusing on expanding test
 ## Key Changes
 
 1.  **Launcher Integration Tests**:
-    - Added `tests/integration/test_golf_launcher_integration.py`.
+    - Added `tests/integration/test_upstream_drift_launcher_integration.py`.
     - Validates full configuration lifecycle: loading models from registry (`model_cards`), selecting models, and verifying path resolution.
     - Tests failure handling for missing files.
 2.  **Engine Manager Refactor**:
@@ -19,7 +19,7 @@ This PR completes Phase 3 of the Improvement Roadmap, focusing on expanding test
 
 ## Verification
 
-- `pytest tests/integration/test_golf_launcher_integration.py`: **PASSED**
+- `pytest tests/integration/test_upstream_drift_launcher_integration.py`: **PASSED**
 - `pytest tests/unit/test_model_registry.py`: **PASSED**
 - `ruff check .`: **PASSED**
 - `mypy shared/python/`: **PASSED** (checked implicitly in previous runs)

@@ -17,7 +17,7 @@ This document serves as the central hub for learning how to use the application.
 
 Use the integrated Python-based launcher to access different components of the suite:
 
-1. **Launch the application** via `python src/launchers/golf_launcher.py`.
+1. **Launch the application** via `python src/launchers/upstream_drift_launcher.py`.
 2. **Select a Module** from the main sidebar.
 3. **Use the Sidekick AI** for contextual help by clicking the chat icon in the bottom right.
 

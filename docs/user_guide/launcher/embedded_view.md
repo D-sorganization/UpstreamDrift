@@ -1,6 +1,6 @@
 # Embedded View — Tabs, Docks, and the In-Launcher Tool Host
 
-Until recently, every tile in the GolfLauncher opened its tool in a
+Until recently, every tile in the UpstreamDriftLauncher opened its tool in a
 separate top-level window. With the launcher composability work
 (EPIC [#4993](https://github.com/D-sorganization/UpstreamDrift/issues/4993))
 you can now host tools as tabs and dock panels **inside** the

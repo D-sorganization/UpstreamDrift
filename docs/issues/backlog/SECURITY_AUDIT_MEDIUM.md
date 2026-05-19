@@ -37,7 +37,7 @@ The following medium severity security issues were identified during the automat
 - `engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_headless_gui.py`: Line 32
 - `engines/physics_engines/mujoco/docker/gui/deepmind_control_suite_MuJoCo_GUI.py`: Line 1106
 - `engines/physics_engines/mujoco/python/humanoid_launcher.py`: Line 841
-- `launchers/golf_launcher.py`: Line 2892
+- `launchers/upstream_drift_launcher.py`: Line 2892
 - `tests/integration/test_engine_manager_coverage.py`: Lines 32, 35
 - `tests/integration/test_phase1_security_integration.py`: Line 80
 - `tests/unit/test_common_utils.py`: Lines 24, 30, 36, 39, 44

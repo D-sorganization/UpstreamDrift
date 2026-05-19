@@ -49,7 +49,7 @@
   6. Matlab Models (Unified)
   7. Motion Capture (Unified)
   8. Model Explorer
-- Updated `golf_launcher.py` to enforce this 2x4 grid layout.
+- Updated `upstream_drift_launcher.py` to enforce this 2x4 grid layout.
 
 ### ✅ 9. Repository Cleanup & Professionalism
 
@@ -83,7 +83,7 @@
 **Status**: DONE
 
 - Created `src/shared/python/ui/overlay.py` generic overlay widget.
-- Integrated overlay into `GolfLauncher`.
+- Integrated overlay into `UpstreamDriftLauncher`.
 - Added toggle button in top bar.
 
 ## Pending Items

@@ -99,7 +99,7 @@ class MockQVBoxLayout:
 @pytest.fixture
 def mocked_launcher_module() -> Generator[types.ModuleType, None, None]:
     """
-    Import golf_launcher with mocked Qt modules.
+    Import upstream_drift_launcher with mocked Qt modules.
     This fixture ensures that the mocks don't pollute the global sys.modules,
     allowing other tests to run with real Qt modules.
     """
@@ -128,29 +128,29 @@ def mocked_launcher_module() -> Generator[types.ModuleType, None, None]:
 
     # Patch sys.modules
     with patch.dict(sys.modules, mock_modules):
-        # Remove launchers.golf_launcher and its dependencies from sys.modules
+        # Remove launchers.upstream_drift_launcher and its dependencies from sys.modules
         # to ensure it gets re-imported using our mocks
         for mod_name in list(sys.modules.keys()):
-            if mod_name.startswith("src.launchers.golf_launcher"):
+            if mod_name.startswith("src.launchers.upstream_drift_launcher"):
                 del sys.modules[mod_name]
 
         try:
             # Import the module
-            import src.launchers.golf_launcher
+            import src.launchers.upstream_drift_launcher
 
-            yield src.launchers.golf_launcher
+            yield src.launchers.upstream_drift_launcher
         except Exception as exc:  # noqa: BLE001
-            pytest.skip(f"golf_launcher import failed under mocked Qt: {exc}")
+            pytest.skip(f"upstream_drift_launcher import failed under mocked Qt: {exc}")
         finally:
             # Cleanup: Remove the module from sys.modules so subsequent tests
             # import the clean/real version
             for mod_name in list(sys.modules.keys()):
-                if mod_name.startswith("src.launchers.golf_launcher"):
+                if mod_name.startswith("src.launchers.upstream_drift_launcher"):
                     del sys.modules[mod_name]
 
 
 class TestDockerThreads:
-    """Test Docker-related threads in golf_launcher."""
+    """Test Docker-related threads in upstream_drift_launcher."""
 
     @patch("subprocess.run")
     def test_docker_check_thread_success(

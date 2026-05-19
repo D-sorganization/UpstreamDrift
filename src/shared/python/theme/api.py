@@ -180,9 +180,7 @@ def _register_custom_endpoints(router: APIRouter, theme_manager: Any) -> None:
         )
 
 
-def _register_active_and_list_endpoints(
-    router: APIRouter, theme_manager: Any
-) -> None:  # noqa: C901
+def _register_active_and_list_endpoints(router: APIRouter, theme_manager: Any) -> None:  # noqa: C901
     """Register active theme and full listing endpoints."""
 
     if not (router is not None):

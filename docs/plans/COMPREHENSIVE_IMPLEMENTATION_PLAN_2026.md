@@ -117,7 +117,7 @@ with open(filepath, "rb") as f:
 
 #### Subprocess Security Hardening (Priority: P1)
 
-**Files:** `launchers/golf_launcher.py`, multiple locations
+**Files:** `launchers/upstream_drift_launcher.py`, multiple locations
 
 **Tasks:**
 

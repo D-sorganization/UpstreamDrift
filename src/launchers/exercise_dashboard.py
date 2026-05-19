@@ -84,11 +84,13 @@ class ExerciseDashboard(QMainWindow):
             self.layout.addWidget(self._current_widget)
 
 
-def get_dockable_ui() -> QtWidgets.QMainWindow:
+def get_dockable_ui() -> QMainWindow:
     """Return the main window instance for docking in the unified launcher."""
     import os
+
     exercise = os.environ.get("BIOMECH_EXERCISE", "gait")
     return ExerciseDashboard(exercise)
+
 
 def main() -> None:
     import argparse

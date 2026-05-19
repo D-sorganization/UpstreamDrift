@@ -75,12 +75,12 @@ def test_example_screw_theory():
 
 
 def test_golf_suite_launcher_init():
-    """Test GolfLauncher initialization."""
+    """Test UpstreamDriftLauncher initialization."""
     from PyQt6.QtWidgets import QApplication
     from src.engines.physics_engines.mujoco.python import golf_suite_launcher
 
     app = QApplication.instance() or QApplication(sys.argv)
-    launcher = golf_suite_launcher.GolfLauncher()
+    launcher = golf_suite_launcher.UpstreamDriftLauncher()
 
     assert launcher.mujoco_path.name == "advanced_gui.py"
     assert hasattr(launcher, "btn_mujoco")
@@ -89,12 +89,12 @@ def test_golf_suite_launcher_init():
 
 
 def test_golf_suite_launcher_methods():
-    """Test GolfLauncher launch methods."""
+    """Test UpstreamDriftLauncher launch methods."""
     from PyQt6.QtWidgets import QApplication
     from src.engines.physics_engines.mujoco.python import golf_suite_launcher
 
     app = QApplication.instance() or QApplication(sys.argv)
-    launcher = golf_suite_launcher.GolfLauncher()
+    launcher = golf_suite_launcher.UpstreamDriftLauncher()
 
     # Test generic launch script
     with patch("subprocess.Popen") as mock_popen:

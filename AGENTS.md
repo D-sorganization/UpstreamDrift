@@ -261,7 +261,7 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 ### Launcher base
 
 - `src/launchers/base.BaseLauncher` — `QMainWindow` subclass for
-  **grid-of-tiles launcher windows** (the main GolfLauncher, sub-
+  **grid-of-tiles launcher windows** (the main UpstreamDriftLauncher, sub-
   launchers showing a card grid). **Not** for single-purpose tool
   windows; those should be standalone `QMainWindow` subclasses
   registered as tiles in `src/config/models.yaml`.
@@ -414,7 +414,7 @@ which redirect to the new `src/tools/starting_pose_matcher/` package.
 
 ## D. Tile-launcher contract
 
-The main GolfLauncher reads `src/config/models.yaml` and renders one
+The main UpstreamDriftLauncher reads `src/config/models.yaml` and renders one
 tile per entry. A tile entry needs:
 
 ```yaml

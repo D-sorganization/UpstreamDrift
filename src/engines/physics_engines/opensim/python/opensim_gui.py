@@ -540,9 +540,10 @@ For more help, see the documentation in docs/ folder.
         self.result = None
 
 
-def get_dockable_ui() -> QtWidgets.QMainWindow:
+def get_dockable_ui() -> QMainWindow:
     """Return the main window instance for docking in the unified launcher."""
     return OpenSimGolfGUI()
+
 
 def main() -> None:
     """Launch the OpenSim Golf GUI."""

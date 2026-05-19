@@ -480,8 +480,10 @@ def _clubtarget_to_dataframe(target: ClubTarget) -> pd.DataFrame:
     df = pd.DataFrame(rows)
     pos_cols = ["mid_X", "mid_Y", "mid_Z", "club_X", "club_Y", "club_Z"]
     # Optimize norm calculation along axis using einsum
-    diff = df[["club_X", "club_Y", "club_Z"]].to_numpy(dtype=float) - df[["mid_X", "mid_Y", "mid_Z"]].to_numpy(dtype=float)
-    shaft = np.sqrt(np.einsum('ij,ij->i', diff, diff))
+    diff = df[["club_X", "club_Y", "club_Z"]].to_numpy(dtype=float) - df[
+        ["mid_X", "mid_Y", "mid_Z"]
+    ].to_numpy(dtype=float)
+    shaft = np.sqrt(np.einsum("ij,ij->i", diff, diff))
     finite = np.isfinite(shaft) & (shaft > 1e-6)
     if finite.any() and float(np.median(shaft[finite])) > 1.4:
         # Wiffle workbook positions are centimetres. The legacy parser used by

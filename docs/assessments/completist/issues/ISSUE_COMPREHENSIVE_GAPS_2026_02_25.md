@@ -153,8 +153,8 @@ Widespread use of placeholder tests reduces confidence in system reliability.
 
 - **Observation:** A significant number of test files contain `pass` blocks instead of assertions, effectively testing nothing.
 - **Critical Examples:**
-  - `tests/integration/test_golf_launcher_integration.py`: Contains numerous `pass` blocks for key integration scenarios.
-  - `tests/unit/test_golf_launcher_logic.py`: Contains `pass` blocks for logic verification.
+  - `tests/integration/test_upstream_drift_launcher_integration.py`: Contains numerous `pass` blocks for key integration scenarios.
+  - `tests/unit/test_upstream_drift_launcher_logic.py`: Contains `pass` blocks for logic verification.
   - `tests/unit/engines/simscape/3d/test_quality_check.py`: Contains `pass` blocks and `NotImplementedError` in strings.
   - `tests/deployment/test_safety.py`: Safety tests contain `pass` blocks.
 - **Impact:** False sense of security; "passing" tests do not guarantee functional code. This is a critical quality assurance gap.

@@ -21,7 +21,9 @@ from pathlib import Path
 
 import pytest
 
-mujoco = pytest.importorskip("mujoco", reason="mujoco not installed — skipping MPM driver tests")
+mujoco = pytest.importorskip(
+    "mujoco", reason="mujoco not installed — skipping MPM driver tests"
+)
 
 import numpy as np  # noqa: E402
 

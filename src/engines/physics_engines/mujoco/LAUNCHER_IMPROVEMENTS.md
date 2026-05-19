@@ -48,7 +48,7 @@
 
 ### Repository Launcher Enhancements
 
-Both `golf_launcher.py` and `golf_suite_launcher.py` now have:
+Both `upstream_drift_launcher.py` and `golf_suite_launcher.py` now have:
 
 1. **Simulation Log Areas**
 
@@ -106,7 +106,7 @@ Both `golf_launcher.py` and `golf_suite_launcher.py` now have:
 
 - `MuJoCo_Golf_Swing_Model/Dockerfile` - Added defusedxml dependency
 - `MuJoCo_Golf_Swing_Model/docker/gui/deepmind_control_suite_MuJoCo_GUI.py` - Added logging and rebuild features
-- `Repository_Management/launchers/golf_launcher.py` - Enhanced logging
+- `Repository_Management/launchers/upstream_drift_launcher.py` - Enhanced logging
 - `Repository_Management/launchers/golf_suite_launcher.py` - Enhanced logging
 
 ### Files Created:
