@@ -6,6 +6,8 @@ The Pinocchio physics engine import is deferred to ``main()`` to ensure strict
 lazy-loading: importing this module does not trigger the Pinocchio dependency chain.
 """
 
+from typing import Any, cast
+
 from src.shared.python.dashboard.launcher import launch_dashboard
 from src.shared.python.dashboard.window import UnifiedDashboardWindow
 
@@ -18,7 +20,7 @@ class PinocchioDashboard(UnifiedDashboardWindow):
             PinocchioPhysicsEngine,
         )
 
-        engine = PinocchioPhysicsEngine()
+        engine = cast(Any, PinocchioPhysicsEngine)()
         title = "Pinocchio Golf Analysis Dashboard"
         if exercise_filter:
             title += f" - {exercise_filter.title()}"
@@ -48,7 +50,7 @@ def main() -> None:
     )
 
     launch_dashboard(
-        engine_class=PinocchioPhysicsEngine,
+        engine_class=cast(Any, PinocchioPhysicsEngine),
         title="Pinocchio Golf Analysis Dashboard",
     )
 

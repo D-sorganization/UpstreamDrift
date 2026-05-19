@@ -5,7 +5,7 @@ from collections.abc import Generator  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
-from PyQt6.QtWidgets import QMessageBox  # noqa: E402
+from PyQt6.QtWidgets import QDialog  # noqa: E402
 from src.launchers.upstream_drift_launcher import (  # noqa: E402
     UpstreamDriftLauncher,
     main,
@@ -30,6 +30,17 @@ def patch_launcher_ui() -> Generator[None, None, None]:
         patch("src.launchers.upstream_drift_launcher.QTimer"),
     ):
         yield
+
+
+def test_onboarding_is_skipped_in_non_interactive_runs(monkeypatch) -> None:
+    monkeypatch.setenv("UPSTREAMDRIFT_DISABLE_ONBOARDING", "1")
+
+    with patch(
+        "src.launchers.onboarding_dialog.show_onboarding_if_needed"
+    ) as mock_show:
+        UpstreamDriftLauncher._show_onboarding_if_needed(MagicMock())
+
+    mock_show.assert_not_called()
 
 
 def test_init_without_results(qapp) -> None:
@@ -146,19 +157,21 @@ def test_launch_model_direct(qapp) -> None:
 
 
 def test_center_window(qapp) -> None:
-    from PyQt6.QtCore import QPoint
+    from PyQt6.QtCore import QRect
 
     with patch_launcher_ui():
         launcher = UpstreamDriftLauncher()
         mock_screen = MagicMock()
-        mock_geom = MagicMock()
-        mock_geom.center.return_value = QPoint(0, 0)
-        mock_screen.availableGeometry.return_value = mock_geom
-        # To avoid type error when move is called with MagicMock
-        launcher.move = MagicMock()
-        launcher.screen = MagicMock(return_value=mock_screen)
-        launcher.center_window()
-        launcher.move.assert_called_once()
+        mock_screen.availableGeometry.return_value = QRect(0, 0, 1920, 1080)
+        launcher.setGeometry = MagicMock()
+
+        with patch(
+            "src.launchers.upstream_drift_launcher.QApplication.primaryScreen",
+            return_value=mock_screen,
+        ):
+            launcher.center_window()
+
+        launcher.setGeometry.assert_called_once()
 
 
 def test_load_layout_empty(qapp) -> None:
@@ -213,8 +226,8 @@ def test_select_model(qapp) -> None:
 
         launcher.select_model("m1")
         assert launcher.selected_model == "m1"
-        card_m1.setStyleSheet.assert_called()
-        card_m2.setStyleSheet.assert_called()
+        card_m1.set_selected.assert_called_once_with(True)
+        card_m2.set_selected.assert_called_once_with(False)
         launcher.update_launch_button.assert_called_once_with("Test Model")
         launcher.context_help.update_context.assert_called_with("m1")
 
@@ -301,9 +314,10 @@ def test_menu_toggles(qapp) -> None:
         launcher = UpstreamDriftLauncher()
         launcher.toggle_layout_mode = MagicMock()
         launcher.context_help = MagicMock()
+        launcher.btn_modify_layout = MagicMock()
 
         launcher._toggle_layout_mode_from_menu(True)
-        assert launcher.btn_modify_layout.isChecked()
+        launcher.btn_modify_layout.setChecked.assert_called_once_with(True)
         launcher.toggle_layout_mode.assert_called_with(True)
 
         launcher._toggle_context_help(True)
@@ -345,9 +359,9 @@ def test_on_cleanup_finished_updates_running_processes(qapp):
         assert "p2" in launcher.running_processes
 
 
-@patch("src.launchers.upstream_drift_launcher.QMessageBox.question")
+@patch("src.launchers.launcher_dialogs.ThemedModalDialog")
 @patch("src.launchers.upstream_drift_launcher.kill_process_tree")
-def test_close_event(mock_kill, mock_question, qapp) -> None:
+def test_close_event(mock_kill, mock_dialog_cls, qapp) -> None:
     with patch_launcher_ui():
         launcher = UpstreamDriftLauncher()
         # Disconnect cleanups to prevent PyQt crashes with mocks
@@ -367,7 +381,7 @@ def test_close_event(mock_kill, mock_question, qapp) -> None:
         proc = MagicMock()
         proc.poll.return_value = None
         launcher.running_processes = {"p1": proc}
-        mock_question.return_value = QMessageBox.StandardButton.Yes
+        mock_dialog_cls.return_value.exec.return_value = QDialog.DialogCode.Accepted
         mock_kill.return_value = True
 
         event = QCloseEvent()
@@ -375,7 +389,7 @@ def test_close_event(mock_kill, mock_question, qapp) -> None:
         mock_kill.assert_called()
 
         # Click No
-        mock_question.return_value = QMessageBox.StandardButton.No
+        mock_dialog_cls.return_value.exec.return_value = QDialog.DialogCode.Rejected
         event = QCloseEvent()
         launcher.closeEvent(event)
         assert not event.isAccepted()
