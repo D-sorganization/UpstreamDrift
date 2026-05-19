@@ -6,32 +6,28 @@ metadata extraction, SQLite indexing, and NotebookLM-style AI integration.
 
 from __future__ import annotations
 
-import os
 import sqlite3
+from html import escape
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from PyQt6.QtCore import Qt, QUrl, pyqtSignal, QDateTime
+from PyQt6.QtCore import QDateTime, Qt
 from PyQt6.QtWidgets import (
-    QDialog,
     QFileDialog,
-    QFrame,
     QHBoxLayout,
     QHeaderView,
     QLabel,
     QLineEdit,
-    QMessageBox,
     QPushButton,
     QSplitter,
     QTableWidget,
     QTableWidgetItem,
     QTextBrowser,
-    QTreeWidget,
-    QTreeWidgetItem,
     QVBoxLayout,
     QWidget,
 )
 
+from src.launchers.startup import _get_theme_colors
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.theme.style_constants import Styles
 
@@ -47,13 +43,17 @@ DB_PATH = LIBRARY_DIR / "library_index.db"
 class LibraryManager:
     """Handles file operations and SQLite indexing for the library."""
 
-    def __init__(self) -> None:
-        LIBRARY_DIR.mkdir(parents=True, exist_ok=True)
+    def __init__(self, db_path: Path = DB_PATH) -> None:
+        if db_path is None:
+            raise ValueError("db_path must be provided")
+        self.db_path = db_path
+        self.library_dir = db_path.parent
+        self.library_dir.mkdir(parents=True, exist_ok=True)
         self._init_db()
 
     def _init_db(self) -> None:
         """Initialize the SQLite database schema."""
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
                 """
@@ -77,7 +77,7 @@ class LibraryManager:
             return None
 
         # Determine target path
-        target_path = LIBRARY_DIR / source_path.name
+        target_path = self.library_dir / source_path.name
         if not target_path.exists():
             try:
                 import shutil
@@ -120,7 +120,7 @@ class LibraryManager:
 
         # Index in DB
         try:
-            with sqlite3.connect(DB_PATH) as conn:
+            with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute(
                     """
@@ -146,7 +146,7 @@ class LibraryManager:
         """Retrieve all indexed documents."""
         docs = []
         try:
-            with sqlite3.connect(DB_PATH) as conn:
+            with sqlite3.connect(self.db_path) as conn:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.cursor()
                 cursor.execute("SELECT * FROM documents ORDER BY added_date DESC")
@@ -160,27 +160,36 @@ class LibraryManager:
 class LibraryWidget(QWidget):
     """Main library tab widget."""
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(
+        self,
+        parent: QWidget | None = None,
+        manager: LibraryManager | None = None,
+    ) -> None:
         super().__init__(parent)
-        self.manager = LibraryManager()
+        self.manager = manager or LibraryManager()
         self._setup_ui()
         self._load_documents()
 
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
+        layout.setContentsMargins(
+            Styles.MARGIN_PAGE,
+            Styles.MARGIN_PAGE,
+            Styles.MARGIN_PAGE,
+            Styles.MARGIN_PAGE,
+        )
+        layout.setSpacing(Styles.SPACING_MD)
+        self.setObjectName("LibraryWidget")
 
         # Toolbar
         toolbar = QWidget()
-        toolbar.setStyleSheet(
-            "background-color: #1e1e1e; border-bottom: 1px solid #3d3d3d;"
-        )
+        toolbar.setObjectName("LibraryToolbar")
         toolbar_layout = QHBoxLayout(toolbar)
-        toolbar_layout.setContentsMargins(12, 8, 12, 8)
+        toolbar_layout.setContentsMargins(0, 0, 0, 0)
+        toolbar_layout.setSpacing(Styles.SPACING_MD)
 
         lbl_title = QLabel("Research Library")
-        lbl_title.setStyleSheet("font-size: 16px; font-weight: bold; color: #e1e1e1;")
+        lbl_title.setObjectName("LibraryTitle")
         toolbar_layout.addWidget(lbl_title)
 
         toolbar_layout.addStretch()
@@ -202,13 +211,18 @@ class LibraryWidget(QWidget):
         # Main Splitter
         splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.setHandleWidth(4)
+        splitter.setChildrenCollapsible(False)
+        splitter.setObjectName("LibrarySplitter")
 
         # Left panel: Document List
         list_container = QWidget()
+        list_container.setObjectName("LibraryListPane")
         list_layout = QVBoxLayout(list_container)
         list_layout.setContentsMargins(0, 0, 0, 0)
+        list_layout.setSpacing(Styles.SPACING_SM)
 
         self.table = QTableWidget()
+        self.table.setObjectName("LibraryTable")
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(["Title", "Author", "Year", "Topic"])
         self.table.horizontalHeader().setSectionResizeMode(
@@ -224,10 +238,13 @@ class LibraryWidget(QWidget):
 
         # Right panel: Preview and AI Query
         preview_container = QWidget()
+        preview_container.setObjectName("LibraryPreviewPane")
         preview_layout = QVBoxLayout(preview_container)
         preview_layout.setContentsMargins(0, 0, 0, 0)
+        preview_layout.setSpacing(Styles.SPACING_MD)
 
         self.preview_browser = QTextBrowser()
+        self.preview_browser.setObjectName("LibraryPreview")
         self.preview_browser.setPlaceholderText(
             "Select a document to view metadata and query via NotebookLM..."
         )
@@ -235,10 +252,17 @@ class LibraryWidget(QWidget):
 
         # AI Chat placeholder
         ai_panel = QWidget()
+        ai_panel.setObjectName("LibraryChatPanel")
         ai_layout = QVBoxLayout(ai_panel)
-        ai_layout.setContentsMargins(12, 12, 12, 12)
-        lbl_ai = QLabel("Notebook LM (Chat with Document)")
-        lbl_ai.setStyleSheet("font-weight: bold;")
+        ai_layout.setContentsMargins(
+            Styles.SPACING_MD,
+            Styles.SPACING_MD,
+            Styles.SPACING_MD,
+            Styles.SPACING_MD,
+        )
+        ai_layout.setSpacing(Styles.SPACING_SM)
+        lbl_ai = QLabel("Document Chat")
+        lbl_ai.setObjectName("LibraryChatTitle")
         ai_layout.addWidget(lbl_ai)
 
         self.chat_input = QLineEdit()
@@ -253,6 +277,71 @@ class LibraryWidget(QWidget):
         splitter.setSizes([400, 600])
 
         layout.addWidget(splitter)
+        self._apply_theme()
+
+    def _apply_theme(self) -> None:
+        """Apply the launcher theme to the Library tab."""
+        colors = _get_theme_colors()
+
+        def color(attr: str, fallback: str) -> str:
+            if isinstance(colors, dict):
+                return str(colors.get(attr, fallback))
+            return str(getattr(colors, attr, fallback))
+
+        bg = color("surface_primary", "#1f2329")
+        panel = color("surface_secondary", "#252a31")
+        elevated = color("surface_tertiary", "#2c333c")
+        border = color("border_default", "#3a414a")
+        text = color("text_primary", "#f0f3f6")
+        muted = color("text_secondary", "#a8b0bb")
+        accent = color("accent_primary", "#58a6ff")
+
+        self.setStyleSheet(f"""
+            QWidget#LibraryWidget {{
+                background: {bg};
+                color: {text};
+            }}
+            QWidget#LibraryToolbar {{
+                background: transparent;
+                border: none;
+            }}
+            QLabel#LibraryTitle {{
+                color: {text};
+                font-size: 18px;
+                font-weight: 700;
+            }}
+            QTableWidget#LibraryTable, QTextBrowser#LibraryPreview {{
+                background: {panel};
+                color: {text};
+                border: 1px solid {border};
+                border-radius: 8px;
+                selection-background-color: {accent};
+            }}
+            QWidget#LibraryChatPanel {{
+                background: {elevated};
+                border: 1px solid {border};
+                border-radius: 8px;
+            }}
+            QLabel#LibraryChatTitle {{
+                color: {muted};
+                font-weight: 700;
+            }}
+            QLineEdit {{
+                background: {panel};
+                color: {text};
+                border: 1px solid {border};
+                border-radius: 6px;
+                padding: 6px 8px;
+            }}
+            QPushButton {{
+                background: {accent};
+                color: #0b1117;
+                border: none;
+                border-radius: 6px;
+                padding: 7px 10px;
+                font-weight: 700;
+            }}
+        """)
 
     def _load_documents(self, filter_text: str = "") -> None:
         self.table.setRowCount(0)
@@ -331,11 +420,11 @@ class LibraryWidget(QWidget):
             return
 
         html = f"""
-        <h2>{doc["title"]}</h2>
-        <p><b>Author:</b> {doc["author"]}</p>
-        <p><b>Year:</b> {doc["year"]}</p>
-        <p><b>Topic:</b> {doc["topic"]}</p>
-        <p><b>File:</b> {doc["file_name"]}</p>
+        <h2>{escape(str(doc["title"]))}</h2>
+        <p><b>Author:</b> {escape(str(doc["author"]))}</p>
+        <p><b>Year:</b> {escape(str(doc["year"]))}</p>
+        <p><b>Topic:</b> {escape(str(doc["topic"]))}</p>
+        <p><b>File:</b> {escape(str(doc["file_name"]))}</p>
         <hr>
         <p><i>Document preview will be rendered here. Full PDF viewing requires integration with a PDF renderer or WebView.</i></p>
         """
@@ -359,7 +448,9 @@ class LibraryWidget(QWidget):
         self.chat_input.clear()
 
         # Append user query to browser
-        self.preview_browser.append(f"<br><b style='color: #0A84FF;'>You:</b> {query}")
+        self.preview_browser.append(
+            f"<br><b style='color: #0A84FF;'>You:</b> {escape(query)}"
+        )
 
         # Determine if we can extract context
         context_text = ""
@@ -384,7 +475,10 @@ class LibraryWidget(QWidget):
 
         # Here we would normally call the Sidekick LLM backend or an OpenAI endpoint
         # For Phase 3, we format the prompt and simulate ingestion logic.
-        prompt = f"Context from document '{doc['title']}':\n{context_text[:2000]}...\n\nQuestion: {query}\n\nAnswer:"
+        prompt = (
+            f"Context from document '{doc['title']}':\n"
+            f"{context_text[:2000]}...\n\nQuestion: {query}\n\nAnswer:"
+        )
         logger.info(f"Dispatching to Notebook LM backend: {prompt[:100]}...")
 
         # Simulate response

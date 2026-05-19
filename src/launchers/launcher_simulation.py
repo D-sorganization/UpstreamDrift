@@ -112,6 +112,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 timeout=10,
                 cwd=str(REPOS_ROOT),
                 env=self._get_subprocess_env(),
+                creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
             )
             output = result.stdout.strip()
             if output == "OK":
