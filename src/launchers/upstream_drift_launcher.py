@@ -18,6 +18,7 @@ This module composes focused mixin classes into the UpstreamDriftLauncher:
 """
 
 import contextlib
+import os
 import sys
 from typing import Any, cast
 
@@ -355,12 +356,23 @@ class UpstreamDriftLauncher(
 
     def _show_onboarding_if_needed(self) -> None:
         """Show first-run onboarding dialog if this is a new user."""
+        if self._should_skip_onboarding():
+            logger.debug("Skipping onboarding dialog in non-interactive test mode")
+            return
         try:
             from src.launchers.onboarding_dialog import show_onboarding_if_needed
 
             show_onboarding_if_needed(self)
         except ImportError as e:
             logger.debug(f"Onboarding dialog not available: {e}")
+
+    @staticmethod
+    def _should_skip_onboarding() -> bool:
+        """Return true when modal onboarding would block a non-interactive run."""
+        return (
+            os.environ.get("UPSTREAMDRIFT_DISABLE_ONBOARDING") == "1"
+            or "PYTEST_CURRENT_TEST" in os.environ
+        )
 
     def _install_sidekick_sidebar(self) -> None:
         """Embed the Sidekick multitab sidebar as a third splitter pane.

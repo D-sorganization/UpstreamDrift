@@ -7,6 +7,8 @@ The MuJoCo physics engine import is deferred to ``main()`` to ensure strict
 lazy-loading: importing this module does not trigger the MuJoCo dependency chain.
 """
 
+from typing import Any, cast
+
 from src.shared.python.dashboard.launcher import launch_dashboard
 from src.shared.python.dashboard.window import UnifiedDashboardWindow
 
@@ -19,7 +21,7 @@ class MuJoCoDashboard(UnifiedDashboardWindow):
             MuJoCoPhysicsEngine,
         )
 
-        engine = MuJoCoPhysicsEngine()
+        engine = cast(Any, MuJoCoPhysicsEngine)()
         title = "MuJoCo Golf Analysis Dashboard (Unified)"
         if exercise_filter:
             title += f" - {exercise_filter.title()}"
@@ -50,7 +52,7 @@ def main() -> None:
     )
 
     launch_dashboard(
-        engine_class=MuJoCoPhysicsEngine,
+        engine_class=cast(Any, MuJoCoPhysicsEngine),
         title="MuJoCo Golf Analysis Dashboard (Unified)",
     )
 

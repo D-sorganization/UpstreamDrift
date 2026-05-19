@@ -52,6 +52,7 @@ navigation should start with the rendered documentation URL.
 | `references/`           | @research-team        | stable    | External references, source maps, and supporting research material.                                           |
 | `review_archive/`       | @quality-team         | archived  | Older review records retained until consolidated into `reviews/archive/`.                                     |
 | `reviews/`              | @quality-team         | stable    | Current review records, remediation notes, and quality findings.                                              |
+| `sidekick/`             | @ui-team              | stable    | Sidekick launcher sidebar, chat/provider integration, tools library, and workspace UX guidance.               |
 | `specs/`                | @architecture-team    | stable    | Specifications that expand or support the root `SPEC.md` contract.                                            |
 | `sphinx/`               | @docs-team            | stable    | Sphinx source and generated artifacts for the rendered documentation site.                                    |
 | `status/`               | @maintainers          | draft     | Repository status snapshots and rolling state-of-the-fleet notes.                                             |
