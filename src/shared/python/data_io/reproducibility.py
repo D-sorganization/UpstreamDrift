@@ -73,8 +73,10 @@ def set_seeds(seed: int = DEFAULT_SEED, *, validate: bool = True) -> None:
 
     # PyTorch seeds if available
     from src.shared.python.engine_core.engine_availability import is_engine_available
+
     if is_engine_available("pytorch"):
         import torch
+
         torch.manual_seed(seed)
         if torch.cuda.is_available():
             torch.cuda.manual_seed(seed)
@@ -157,8 +159,10 @@ def ensure_reproducibility(seed: int = DEFAULT_SEED) -> None:
 
     # Additional PyTorch reproducibility settings
     from src.shared.python.engine_core.engine_availability import is_engine_available
+
     if is_engine_available("pytorch"):
         import torch
+
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
         logger.debug("PyTorch CUDA deterministic mode enabled")

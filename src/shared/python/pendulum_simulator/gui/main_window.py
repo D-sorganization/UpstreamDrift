@@ -614,6 +614,7 @@ class MainWindow(QMainWindow):
         self._golfer_panel.save_layout()
         super().closeEvent(event)  # type: ignore[arg-type]
 
+
 def get_dockable_ui() -> MainWindow:
     """Return the main window instance for docking in the unified launcher."""
     return MainWindow()

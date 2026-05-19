@@ -68,9 +68,9 @@ def test_cross_engine_dashboard_tile_exists() -> None:
     """
     tiles = _load_manifest_tiles()
     ids = [t["id"] for t in tiles]
-    assert (
-        "cross_engine_dashboard" in ids
-    ), f"Tile 'cross_engine_dashboard' not found. Present tiles: {ids}"
+    assert "cross_engine_dashboard" in ids, (
+        f"Tile 'cross_engine_dashboard' not found. Present tiles: {ids}"
+    )
 
 
 def test_cross_engine_dashboard_category_is_simulation() -> None:
@@ -81,9 +81,9 @@ def test_cross_engine_dashboard_category_is_simulation() -> None:
     tiles = _load_manifest_tiles()
     tile = next((t for t in tiles if t["id"] == "cross_engine_dashboard"), None)
     assert tile is not None, "Tile 'cross_engine_dashboard' not found in manifest"
-    assert (
-        tile["category"] == "simulation"
-    ), f"Expected category 'simulation', got '{tile['category']}'"
+    assert tile["category"] == "simulation", (
+        f"Expected category 'simulation', got '{tile['category']}'"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -98,9 +98,9 @@ def test_exercise_dashboard_tile_exists() -> None:
     """
     tiles = _load_manifest_tiles()
     ids = [t["id"] for t in tiles]
-    assert (
-        "exercise_dashboard" in ids
-    ), f"Tile 'exercise_dashboard' not found. Present tiles: {ids}"
+    assert "exercise_dashboard" in ids, (
+        f"Tile 'exercise_dashboard' not found. Present tiles: {ids}"
+    )
 
 
 def test_exercise_dashboard_category_is_biomechanics() -> None:
@@ -111,9 +111,9 @@ def test_exercise_dashboard_category_is_biomechanics() -> None:
     tiles = _load_manifest_tiles()
     tile = next((t for t in tiles if t["id"] == "exercise_dashboard"), None)
     assert tile is not None, "Tile 'exercise_dashboard' not found in manifest"
-    assert (
-        tile["category"] == "biomechanics"
-    ), f"Expected category 'biomechanics', got '{tile['category']}'"
+    assert tile["category"] == "biomechanics", (
+        f"Expected category 'biomechanics', got '{tile['category']}'"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -128,9 +128,9 @@ def test_golf_simulation_suite_tile_exists() -> None:
     """
     tiles = _load_manifest_tiles()
     ids = [t["id"] for t in tiles]
-    assert (
-        "golf_simulation_suite" in ids
-    ), f"Tile 'golf_simulation_suite' not found. Present tiles: {ids}"
+    assert "golf_simulation_suite" in ids, (
+        f"Tile 'golf_simulation_suite' not found. Present tiles: {ids}"
+    )
 
 
 def test_golf_simulation_suite_category_is_simulation() -> None:
@@ -141,9 +141,9 @@ def test_golf_simulation_suite_category_is_simulation() -> None:
     tiles = _load_manifest_tiles()
     tile = next((t for t in tiles if t["id"] == "golf_simulation_suite"), None)
     assert tile is not None, "Tile 'golf_simulation_suite' not found in manifest"
-    assert (
-        tile["category"] == "simulation"
-    ), f"Expected category 'simulation', got '{tile['category']}'"
+    assert tile["category"] == "simulation", (
+        f"Expected category 'simulation', got '{tile['category']}'"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -159,9 +159,9 @@ def test_putting_green_category_is_simulation() -> None:
     tiles = _load_manifest_tiles()
     tile = next((t for t in tiles if t["id"] == "putting_green"), None)
     assert tile is not None, "Tile 'putting_green' not found in manifest"
-    assert (
-        tile["category"] == "simulation"
-    ), f"Expected category 'simulation', got '{tile['category']}'"
+    assert tile["category"] == "simulation", (
+        f"Expected category 'simulation', got '{tile['category']}'"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -174,6 +174,6 @@ def test_motion_target_preview_category_is_motion_matching() -> None:
     tiles = _load_manifest_tiles()
     tile = next((t for t in tiles if t["id"] == "motion_target_preview"), None)
     assert tile is not None, "Tile 'motion_target_preview' not found in manifest"
-    assert (
-        tile["category"] == "motion_matching"
-    ), f"Expected category 'motion_matching', got '{tile['category']}'"
+    assert tile["category"] == "motion_matching", (
+        f"Expected category 'motion_matching', got '{tile['category']}'"
+    )

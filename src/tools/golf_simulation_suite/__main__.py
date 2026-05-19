@@ -81,6 +81,7 @@ def get_dockable_ui() -> QMainWindow:
     """Return the main window instance for docking in the unified launcher."""
     return GolfSimulationWindow()
 
+
 def main():
     logging.basicConfig(level=logging.INFO)
     app = QApplication.instance() or QApplication(sys.argv)

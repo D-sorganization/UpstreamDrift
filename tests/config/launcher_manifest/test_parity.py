@@ -144,12 +144,12 @@ class TestParity:
             tile = manifest.get_tile(tile_id)
             assert tile is not None, f"Missing shared Tools tile: {tile_id}"
             assert tile.provider == "tools", f"{tile_id} must declare Tools as provider"
-            assert (
-                tile.source_root == "../Tools"
-            ), f"{tile_id} must resolve from the sibling Tools repo"
-            assert not tile.path.startswith(
-                "src/tools/"
-            ), f"{tile_id} must not point at UpstreamDrift-local tool source"
+            assert tile.source_root == "../Tools", (
+                f"{tile_id} must resolve from the sibling Tools repo"
+            )
+            assert not tile.path.startswith("src/tools/"), (
+                f"{tile_id} must not point at UpstreamDrift-local tool source"
+            )
 
     def test_manifest_serializes_for_api(self, manifest: LauncherManifest) -> None:
         """Manifest can be serialized to JSON for the API endpoint."""
@@ -157,9 +157,9 @@ class TestParity:
         # Should be JSON-serializable
         json_str = json.dumps(data)
         parsed = json.loads(json_str)
-        assert len(parsed["tiles"]) == len(
-            manifest.visible_tiles
-        ), "Assertion failed: len(parsed[tiles]) == len(manifest.visible_tiles)"
+        assert len(parsed["tiles"]) == len(manifest.visible_tiles), (
+            "Assertion failed: len(parsed[tiles]) == len(manifest.visible_tiles)"
+        )
 
 
 # =============================================================================

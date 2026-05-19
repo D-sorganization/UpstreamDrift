@@ -35,8 +35,12 @@ def patch_launcher_ui() -> Generator[None, None, None]:
 def test_init_without_results(qapp) -> None:
     with (
         patch_launcher_ui(),
-        patch("src.launchers.upstream_drift_launcher._lazy_load_model_registry") as mock_reg,
-        patch("src.launchers.upstream_drift_launcher._lazy_load_engine_manager") as mock_eng,
+        patch(
+            "src.launchers.upstream_drift_launcher._lazy_load_model_registry"
+        ) as mock_reg,
+        patch(
+            "src.launchers.upstream_drift_launcher._lazy_load_engine_manager"
+        ) as mock_eng,
     ):
         mock_reg.return_value = MagicMock()
         mock_eng.return_value = (MagicMock(), MagicMock())

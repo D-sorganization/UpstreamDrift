@@ -113,8 +113,7 @@ class PuttingGreenWidget(QWidget):
         # Run
         self._run_btn = QPushButton("Simulate Putt")
         self._run_btn.setStyleSheet(
-            "background-color: #2E7D32; color: white; "
-            "font-weight: bold; padding: 12px;"
+            "background-color: #2E7D32; color: white; font-weight: bold; padding: 12px;"
         )
         self._run_btn.clicked.connect(self._run_simulation)
         left_layout.addWidget(self._run_btn)

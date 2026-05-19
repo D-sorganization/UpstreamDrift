@@ -37,7 +37,9 @@ def test_mainloop(launcher):
     try:
         # Use patch.dict to avoid importing the real upstream_drift_launcher.py, which has
         # top-level PyQt6 imports that crash xdist workers in subprocess context.
-        with patch.dict(sys.modules, {"src.launchers.upstream_drift_launcher": mock_module}):
+        with patch.dict(
+            sys.modules, {"src.launchers.upstream_drift_launcher": mock_module}
+        ):
             launcher.mainloop()
             mock_module.main.assert_called_once()
     finally:
@@ -90,7 +92,9 @@ def test_cli_launch():
     # top-level PyQt6 imports that crash xdist workers in subprocess context.
     mock_module = MagicMock()
     mock_module.main.return_value = 0
-    with patch.dict(sys.modules, {"src.launchers.upstream_drift_launcher": mock_module}):
+    with patch.dict(
+        sys.modules, {"src.launchers.upstream_drift_launcher": mock_module}
+    ):
         from src.launchers.unified_launcher import launch
 
         launch()

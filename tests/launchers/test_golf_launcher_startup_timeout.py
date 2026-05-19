@@ -27,7 +27,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.launchers import upstream_drift_launcher
-from src.launchers.upstream_drift_launcher import STARTUP_TIMEOUT_SEC, UpstreamDriftLauncher
+from src.launchers.upstream_drift_launcher import (
+    STARTUP_TIMEOUT_SEC,
+    UpstreamDriftLauncher,
+)
 from src.launchers.ui_components import StartupResults
 
 
@@ -131,9 +134,9 @@ def test_loading_mode_emits_diagnostic_log(qapp, caplog) -> None:
         UpstreamDriftLauncher(loading=True)
 
     messages = [r.getMessage().lower() for r in caplog.records]
-    assert any(
-        "startup" in m and ("wait" in m or "timeout" in m) for m in messages
-    ), f"Expected a log mentioning startup wait/timeout; got {messages}"
+    assert any("startup" in m and ("wait" in m or "timeout" in m) for m in messages), (
+        f"Expected a log mentioning startup wait/timeout; got {messages}"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -171,8 +174,12 @@ def test_handle_startup_timeout_is_idempotent_after_success(qapp) -> None:
     """If ``update_startup_results`` already fired, timeout is a no-op."""
     with (
         _patch_launcher_ui(),
-        patch("src.launchers.upstream_drift_launcher._lazy_load_model_registry") as mock_reg,
-        patch("src.launchers.upstream_drift_launcher._lazy_load_engine_manager") as mock_eng,
+        patch(
+            "src.launchers.upstream_drift_launcher._lazy_load_model_registry"
+        ) as mock_reg,
+        patch(
+            "src.launchers.upstream_drift_launcher._lazy_load_engine_manager"
+        ) as mock_eng,
         patch("src.launchers.upstream_drift_launcher.QTimer"),
     ):
         mock_reg.return_value = MagicMock()

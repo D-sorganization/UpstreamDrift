@@ -47,7 +47,9 @@ def ui_setup(qapp):
     """
     from PyQt6.QtWidgets import QApplication, QMainWindow
 
-    from src.launchers.upstream_drift_launcher import UpstreamDriftLauncher as _RealLauncher
+    from src.launchers.upstream_drift_launcher import (
+        UpstreamDriftLauncher as _RealLauncher,
+    )
     from src.launchers.launcher_ui_setup import LauncherUISetupMixin
 
     class _DummyLayoutManager:

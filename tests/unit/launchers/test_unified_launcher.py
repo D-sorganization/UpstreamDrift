@@ -34,7 +34,9 @@ def mock_qapp() -> Generator[MagicMock, None, None]:
 
 
 @pytest.fixture
-def mock_upstream_drift_launcher(mock_upstream_drift_launcher_module: MagicMock) -> MagicMock:
+def mock_upstream_drift_launcher(
+    mock_upstream_drift_launcher_module: MagicMock,
+) -> MagicMock:
     """Mock golf launcher."""
     mock_module = mock_upstream_drift_launcher_module
     mock_cls = mock_module.UpstreamDriftLauncher
@@ -55,7 +57,9 @@ def test_init_no_pyqt() -> None:
         UnifiedLauncher()
 
 
-def test_mainloop(mock_qapp, mock_upstream_drift_launcher, mock_upstream_drift_launcher_module) -> None:
+def test_mainloop(
+    mock_qapp, mock_upstream_drift_launcher, mock_upstream_drift_launcher_module
+) -> None:
     launcher = UnifiedLauncher()
     mock_qapp.exec.return_value = 0
 

@@ -245,7 +245,9 @@ models:
         )
 
         if is_ci:
-            pytest.skip("UpstreamDriftLauncher construction unreliable in CI (mock/real Qt mix)")
+            pytest.skip(
+                "UpstreamDriftLauncher construction unreliable in CI (mock/real Qt mix)"
+            )
 
         # Mock AIAssistantPanel before importing to prevent Qt crashes
         # Clear modules first so patches take effect
@@ -324,7 +326,9 @@ models:
                 patch(
                     "src.shared.python.config.model_registry.ModelRegistry"
                 ) as MockRegistry,
-                patch("src.launchers.upstream_drift_launcher.ASSETS_DIR", new=temp_path),
+                patch(
+                    "src.launchers.upstream_drift_launcher.ASSETS_DIR", new=temp_path
+                ),
             ):
                 MockRegistry.return_value = temp_registry
 

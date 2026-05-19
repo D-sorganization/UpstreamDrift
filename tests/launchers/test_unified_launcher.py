@@ -18,7 +18,10 @@ from src.launchers.unified_launcher import (  # noqa: E402
 @pytest.fixture
 def clean_sys_modules() -> Generator[None, None, None]:
     """Remove specific modules from sys.modules."""
-    modules_to_remove = ["launchers.unified_launcher", "launchers.upstream_drift_launcher"]
+    modules_to_remove = [
+        "launchers.unified_launcher",
+        "launchers.upstream_drift_launcher",
+    ]
     for mod in modules_to_remove:
         if mod in sys.modules:
             del sys.modules[mod]
@@ -91,7 +94,8 @@ def test_get_golf_main_relative_success(clean_sys_modules) -> None:
     with (
         patch("src.launchers.unified_launcher.golf_main", create=True) as mock_main,
         patch.dict(
-            "sys.modules", {"src.launchers.upstream_drift_launcher": MagicMock(main=mock_main)}
+            "sys.modules",
+            {"src.launchers.upstream_drift_launcher": MagicMock(main=mock_main)},
         ),
     ):
         main_func = _get_golf_main()

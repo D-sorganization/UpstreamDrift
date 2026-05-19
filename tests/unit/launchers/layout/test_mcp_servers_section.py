@@ -11,9 +11,7 @@ from src.launchers.mcp_config_writer import McpServerConfig
 from src.launchers.preferences.mcp_servers_section import McpServersSection
 
 
-def test_section_build_widget_empty_file(
-    qt_real, qapp, tmp_path: Path
-) -> None:  # noqa: ARG001
+def test_section_build_widget_empty_file(qt_real, qapp, tmp_path: Path) -> None:  # noqa: ARG001
     """A missing config file renders an empty table without errors."""
     target = tmp_path / "mcp_servers.json"
     section = McpServersSection(config_path=target)
@@ -22,9 +20,7 @@ def test_section_build_widget_empty_file(
     assert section.servers == []
 
 
-def test_section_loads_existing_config(
-    qt_real, qapp, tmp_path: Path
-) -> None:  # noqa: ARG001
+def test_section_loads_existing_config(qt_real, qapp, tmp_path: Path) -> None:  # noqa: ARG001
     target = tmp_path / "mcp_servers.json"
     target.write_text(
         json.dumps(
@@ -76,9 +72,7 @@ def test_persist_writes_json(qt_real, qapp, tmp_path: Path) -> None:  # noqa: AR
     assert any(s["name"] == "persisted" for s in data["servers"])
 
 
-def test_add_server_rejects_non_model(
-    qt_real, qapp, tmp_path: Path
-) -> None:  # noqa: ARG001
+def test_add_server_rejects_non_model(qt_real, qapp, tmp_path: Path) -> None:  # noqa: ARG001
     target = tmp_path / "mcp_servers.json"
     section = McpServersSection(config_path=target)
     section.build_widget()

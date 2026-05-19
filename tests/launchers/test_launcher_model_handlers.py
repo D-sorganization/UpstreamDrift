@@ -115,7 +115,7 @@ def test_module_handler_get_dockable_ui() -> None:
         mock_module = MagicMock()
         mock_module.get_dockable_ui.return_value = "widget"
         mock_import.return_value = mock_module
-        
+
         assert handler.get_dockable_ui("model", Path("/repo")) == "widget"
         mock_import.assert_called_once_with("my_module")
 
@@ -124,22 +124,24 @@ def test_module_handler_get_dockable_ui() -> None:
         mock_module = MagicMock()
         del mock_module.get_dockable_ui
         mock_import.return_value = mock_module
-        
+
         assert handler.get_dockable_ui("model", Path("/repo")) is None
 
 
 def test_script_handler_get_dockable_ui() -> None:
     handler = ScriptHandler({"type1"}, "script.py", "Script")
-    
-    with patch("importlib.util.spec_from_file_location") as mock_spec, \
-         patch("importlib.util.module_from_spec") as mock_mod_from_spec:
+
+    with (
+        patch("importlib.util.spec_from_file_location") as mock_spec,
+        patch("importlib.util.module_from_spec") as mock_mod_from_spec,
+    ):
         mock_module = MagicMock()
         mock_module.get_dockable_ui.return_value = "widget"
         mock_mod_from_spec.return_value = mock_module
-        
+
         mock_spec_obj = MagicMock()
         mock_spec.return_value = mock_spec_obj
-        
+
         assert handler.get_dockable_ui("model", Path("/repo")) == "widget"
         mock_module.get_dockable_ui.assert_called_once()
         mock_spec_obj.loader.exec_module.assert_called_once_with(mock_module)
