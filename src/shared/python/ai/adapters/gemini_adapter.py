@@ -61,7 +61,8 @@ class GeminiAdapter(BaseAgentAdapter):
         self._model = GenerativeModel(self._model_name)
 
     @precondition(
-        lambda message: bool(message.strip()), "message must not be empty or blank"
+        lambda message, context: bool(message.strip()) or (context is not None and bool(context.messages)),
+        "message must not be empty unless context has messages",
     )
     def send_message(
         self,
@@ -71,8 +72,8 @@ class GeminiAdapter(BaseAgentAdapter):
     ) -> AgentResponse:
         """Send a message to Gemini."""
         try:
-            chat = self._build_chat_session(context)
-            response = chat.send_message(message)
+            chat, effective_message = self._build_chat_session(context, message)
+            response = chat.send_message(effective_message)
             return AgentResponse(content=response.text)
         except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Gemini API error: {e}")
@@ -86,9 +87,9 @@ class GeminiAdapter(BaseAgentAdapter):
     ) -> Iterator[AgentChunk]:
         """Stream response from Gemini."""
         try:
-            chat = self._build_chat_session(context)
+            chat, effective_message = self._build_chat_session(context, message)
             response: Iterator[GenerateContentResponse] = chat.send_message(
-                message, stream=True
+                effective_message, stream=True
             )
 
             for chunk in response:
@@ -184,15 +185,26 @@ class GeminiAdapter(BaseAgentAdapter):
             available_levels=[ThinkingLevel.OFF],
         )
 
-    def _build_chat_session(self, context: ConversationContext) -> Any:
+    def _build_chat_session(
+        self, context: ConversationContext, current_message: str
+    ) -> tuple[Any, str]:
         """Build a chat session with history."""
         if not (context is not None):
             raise ValueError("context must be provided")
-        if not (context is not None):
-            raise ValueError("context must be provided")
         history = []
-        for msg in context.messages:
+        msg_list = list(context.messages)
+
+        effective_message = current_message
+        if not effective_message.strip() and msg_list:
+            for i in range(len(msg_list) - 1, -1, -1):
+                if msg_list[i].role == "user":
+                    effective_message = msg_list[i].content
+                    msg_list.pop(i)
+                    break
+
+        for msg in msg_list:
             role = "user" if msg.role == "user" else "model"
             history.append({"role": role, "parts": [msg.content]})
 
-        return self._model.start_chat(history=history)  # type: ignore[arg-type]
+        chat = self._model.start_chat(history=history)  # type: ignore[arg-type]
+        return chat, effective_message

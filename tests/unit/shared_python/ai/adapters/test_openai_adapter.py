@@ -188,6 +188,23 @@ def test_openai_adapter_format_messages(adapter) -> None:
     assert formatted[4]["content"] == "how are you?"
 
 
+def test_openai_adapter_format_messages_empty_current_message(adapter) -> None:
+    """Test that format_messages does not append an empty user message when current_message is empty."""
+    ctx = ConversationContext()
+    ctx.user_expertise = ExpertiseLevel.EXPERT
+    ctx.messages = [
+        Message(role="user", content="hello"),
+    ]
+
+    formatted = adapter._format_messages(ctx, "")
+
+    # Should only contain system and the user message from history.
+    assert len(formatted) == 2
+    assert formatted[0]["role"] == "system"
+    assert formatted[1]["role"] == "user"
+    assert formatted[1]["content"] == "hello"
+
+
 @patch("src.shared.python.ai.adapters.openai_adapter.OpenAIAdapter._get_client")
 def test_openai_adapter_send_message_success(mock_get_client, adapter) -> None:
     """Test send_message success path."""

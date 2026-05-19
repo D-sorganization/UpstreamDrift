@@ -204,6 +204,23 @@ def test_anthropic_adapter_format_messages(adapter) -> None:
     assert formatted[2]["content"][1]["text"] == "how are you?"
 
 
+def test_anthropic_adapter_format_messages_empty_current_message(adapter) -> None:
+    """Test that format_messages does not append an empty user message when current_message is empty."""
+    ctx = ConversationContext()
+    ctx.user_expertise = ExpertiseLevel.EXPERT
+    ctx.messages = [
+        Message(role="user", content="hello"),
+    ]
+
+    formatted = adapter._format_messages(ctx, "")
+
+    # Should only contain the user message from history.
+    # (Anthropic adapter doesn't prepend system message to messages; system is passed separately).
+    assert len(formatted) == 1
+    assert formatted[0]["role"] == "user"
+    assert formatted[0]["content"] == "hello"
+
+
 @patch("src.shared.python.ai.adapters.anthropic_adapter.AnthropicAdapter._get_client")
 def test_anthropic_adapter_send_message_success(mock_get_client, adapter) -> None:
     """Test send_message success."""

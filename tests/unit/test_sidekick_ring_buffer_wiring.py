@@ -66,9 +66,9 @@ class TestDiagnosticsRingBufferIntegration:
             if isinstance(ev.get("payload"), dict)
         }
         # Events should contain check names
-        assert check_names, (
-            "Ring-buffer events should contain 'check' fields with check names."
-        )
+        assert (
+            check_names
+        ), "Ring-buffer events should contain 'check' fields with check names."
 
     def test_single_check_populates_ring_buffer(self) -> None:
         """A single check (check_python_environment) emits one ring-buffer event."""
@@ -81,9 +81,9 @@ class TestDiagnosticsRingBufferIntegration:
         diag.check_python_environment()
 
         ctx = chat_context.get_chat_context()
-        assert ctx["count"] >= 1, (
-            "check_python_environment() must emit at least one ring-buffer event."
-        )
+        assert (
+            ctx["count"] >= 1
+        ), "check_python_environment() must emit at least one ring-buffer event."
         first_event = ctx["events"][0]
         assert first_event.get("category") == "diagnostic"
         payload = first_event.get("payload", {})
@@ -140,6 +140,7 @@ class TestAssistantPanelToolsWiring:
         """_process_message must pass non-empty tool declarations to StreamWorker."""
         try:
             import src.shared.python.ai.gui.assistant_panel as ap_mod
+            import src.shared.python.ai.gui.assistant.panel as ap_panel
         except ImportError as exc:
             pytest.skip(f"assistant_panel unavailable: {exc}")
 
@@ -179,21 +180,23 @@ class TestAssistantPanelToolsWiring:
 
         # Patch StreamWorker, get_global_registry, and all Qt widget constructors
         with (
-            patch.object(ap_mod, "StreamWorker", _WorkerStub),
-            patch.object(ap_mod, "get_global_registry", return_value=registry),
-            patch.object(ap_mod.AIAssistantPanel, "_setup_ui", lambda self: None),
-            patch.object(ap_mod.AIAssistantPanel, "_load_history", lambda self: None),
+            patch.object(ap_panel, "StreamWorker", _WorkerStub),
+            patch.object(ap_panel, "get_global_registry", return_value=registry),
+            patch.object(ap_panel.AIAssistantPanel, "_setup_ui", lambda self: None),
+            patch.object(ap_panel.AIAssistantPanel, "_load_history", lambda self: None),
             patch.object(
-                ap_mod.AIAssistantPanel, "_restore_ui_messages", lambda self: None
+                ap_panel.AIAssistantPanel, "_restore_ui_messages", lambda self: None
             ),
-            patch.object(ap_mod.AIAssistantPanel, "_init_tools", lambda self: None),
+            patch.object(ap_panel.AIAssistantPanel, "_init_tools", lambda self: None),
             patch("src.shared.python.ai.rag.simple_rag.SimpleRAGStore"),
-            patch.object(ap_mod.AIAssistantPanel, "_add_message", return_value=None),
-            patch.object(ap_mod.AIAssistantPanel, "_set_status", lambda self, s: None),
+            patch.object(ap_panel.AIAssistantPanel, "_add_message", return_value=None),
+            patch.object(
+                ap_panel.AIAssistantPanel, "_set_status", lambda self, s: None
+            ),
         ):
             from src.shared.python.ai.types import ConversationContext
 
-            panel = ap_mod.AIAssistantPanel.__new__(ap_mod.AIAssistantPanel)
+            panel = ap_panel.AIAssistantPanel.__new__(ap_panel.AIAssistantPanel)
             panel._adapter = _adapter_stub
             panel._tools_registry = registry
             panel._context = ConversationContext()
@@ -213,6 +216,7 @@ class TestAssistantPanelToolsWiring:
         """Tool declarations passed to StreamWorker have name and description."""
         try:
             import src.shared.python.ai.gui.assistant_panel as ap_mod
+            import src.shared.python.ai.gui.assistant.panel as ap_panel
         except ImportError as exc:
             pytest.skip(f"assistant_panel unavailable: {exc}")
 
@@ -249,21 +253,23 @@ class TestAssistantPanelToolsWiring:
             error = MagicMock()
 
         with (
-            patch.object(ap_mod, "StreamWorker", _WorkerStub),
-            patch.object(ap_mod, "get_global_registry", return_value=registry),
-            patch.object(ap_mod.AIAssistantPanel, "_setup_ui", lambda self: None),
-            patch.object(ap_mod.AIAssistantPanel, "_load_history", lambda self: None),
+            patch.object(ap_panel, "StreamWorker", _WorkerStub),
+            patch.object(ap_panel, "get_global_registry", return_value=registry),
+            patch.object(ap_panel.AIAssistantPanel, "_setup_ui", lambda self: None),
+            patch.object(ap_panel.AIAssistantPanel, "_load_history", lambda self: None),
             patch.object(
-                ap_mod.AIAssistantPanel, "_restore_ui_messages", lambda self: None
+                ap_panel.AIAssistantPanel, "_restore_ui_messages", lambda self: None
             ),
-            patch.object(ap_mod.AIAssistantPanel, "_init_tools", lambda self: None),
+            patch.object(ap_panel.AIAssistantPanel, "_init_tools", lambda self: None),
             patch("src.shared.python.ai.rag.simple_rag.SimpleRAGStore"),
-            patch.object(ap_mod.AIAssistantPanel, "_add_message", return_value=None),
-            patch.object(ap_mod.AIAssistantPanel, "_set_status", lambda self, s: None),
+            patch.object(ap_panel.AIAssistantPanel, "_add_message", return_value=None),
+            patch.object(
+                ap_panel.AIAssistantPanel, "_set_status", lambda self, s: None
+            ),
         ):
             from src.shared.python.ai.types import ConversationContext
 
-            panel = ap_mod.AIAssistantPanel.__new__(ap_mod.AIAssistantPanel)
+            panel = ap_panel.AIAssistantPanel.__new__(ap_panel.AIAssistantPanel)
             panel._adapter = MagicMock()
             panel._tools_registry = registry
             panel._context = ConversationContext()
