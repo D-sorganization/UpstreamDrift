@@ -171,38 +171,44 @@ class DraggableModelCard(QFrame):
 
         self.is_selected = False
         c = _get_theme_colors()
+
+        def _color(c_obj: Any, ns_key: str, dict_key: str, default: str) -> str:
+            if isinstance(c_obj, dict):
+                return c_obj.get(dict_key, default)
+            return getattr(c_obj, ns_key, getattr(c_obj, dict_key, default))
+
         self._base_style = f"""
             #ModelCard {{
-                background-color: {getattr(c, "surface_hover", "#2d2d2d")};
-                border: 1px solid {getattr(c, "border_light", "#444444")};
+                background-color: {_color(c, "surface_hover", "group_bg", "#2d2d2d")};
+                border: 1px solid {_color(c, "border_light", "border", "#444444")};
                 border-radius: 16px;
             }}
             #ModelCard:hover {{
-                background-color: {getattr(c, "surface_active", "#3a3a3a")};
-                border: 1px solid {getattr(c, "border_strong", "#666666")};
+                background-color: {_color(c, "surface_active", "input_bg", "#3a3a3a")};
+                border: 1px solid {_color(c, "border_strong", "focus", "#666666")};
             }}
             #CardName {{
-                color: {getattr(c, "text_primary", "#ffffff")};
+                color: {_color(c, "text_primary", "text", "#ffffff")};
             }}
             #CardDescription {{
-                color: {getattr(c, "text_secondary", "#aaaaaa")};
+                color: {_color(c, "text_secondary", "text_secondary", "#aaaaaa")};
             }}
         """
         self._selected_style = f"""
             #ModelCard {{
-                background-color: {getattr(c, "accent_muted", "#1a3a5a")};
-                border: 2px solid {getattr(c, "accent_primary", "#0a84ff")};
+                background-color: {_color(c, "accent_muted", "title_bg", "#1a3a5a")};
+                border: 2px solid {_color(c, "accent_primary", "accent", "#0a84ff")};
                 border-radius: 16px;
             }}
             #ModelCard:hover {{
-                background-color: {getattr(c, "accent_muted", "#1a3a5a")};
-                border: 2px solid {getattr(c, "accent_hover", "#409cff")};
+                background-color: {_color(c, "accent_muted", "table_alt", "#1a3a5a")};
+                border: 2px solid {_color(c, "accent_hover", "focus", "#409cff")};
             }}
             #CardName {{
-                color: {getattr(c, "text_primary", "#ffffff")};
+                color: {_color(c, "text_primary", "text", "#ffffff")};
             }}
             #CardDescription {{
-                color: {getattr(c, "text_secondary", "#aaaaaa")};
+                color: {_color(c, "text_secondary", "text_secondary", "#aaaaaa")};
             }}
         """
         # Glassmorphism styling - enhanced with translucent backgrounds and background-blur effect

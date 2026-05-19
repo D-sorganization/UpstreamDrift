@@ -126,8 +126,8 @@ def test_ollama_adapter_validate_connection_success(mock_get_client, adapter) ->
 
 
 @patch("src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter._get_client")
-def test_validate_connection_missing_model(mock_get_client, adapter) -> None:
-    """Test connection validation where model is missing."""
+def test_validate_connection_missing_model_falls_back(mock_get_client, adapter) -> None:
+    """Test connection validation falls back when the saved model is missing."""
     mock_client = MagicMock()
     mock_response = MagicMock()
     mock_response.status_code = 200
@@ -136,8 +136,9 @@ def test_validate_connection_missing_model(mock_get_client, adapter) -> None:
     mock_get_client.return_value = mock_client
 
     success, msg = adapter.validate_connection()
-    assert success is False
-    assert "Model 'llama3.1:8b' not found" in msg
+    assert success is True
+    assert "using 'mistral:latest'" in msg
+    assert adapter._model == "mistral:latest"
 
 
 @patch("src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter._get_client")

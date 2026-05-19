@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from unittest.mock import MagicMock, patch
 
 import pytest
 from src.shared.python.security.subprocess_utils import (
@@ -102,6 +103,16 @@ class TestProcessManagerStart:
         result = pm.start("bad", ["__this_does_not_exist_xyz__"])
         assert result is False
 
+    @patch("src.shared.python.security.subprocess_utils.subprocess.Popen")
+    def test_start_hides_windows_by_default_on_windows(self, mock_popen) -> None:
+        mock_popen.return_value = MagicMock()
+        pm = ProcessManager()
+
+        with patch("src.shared.python.security.subprocess_utils.os.name", "nt"):
+            assert pm.start("probe", self._LONG_CMD) is True
+
+        assert mock_popen.call_args.kwargs["creationflags"] == 0x08000000
+
     def test_stop_returns_true(self) -> None:
         pm = ProcessManager()
         pm.start("py", self._LONG_CMD)
@@ -155,6 +166,16 @@ class TestCommandRunner:
         runner = CommandRunner()
         result = runner.run_async(["__does_not_exist_xyz__"])
         assert result is None
+
+    @patch("src.shared.python.security.subprocess_utils.subprocess.Popen")
+    def test_run_async_hides_windows_by_default_on_windows(self, mock_popen) -> None:
+        mock_popen.return_value = MagicMock()
+        runner = CommandRunner()
+
+        with patch("src.shared.python.security.subprocess_utils.os.name", "nt"):
+            assert runner.run_async([sys.executable, "--version"]) is not None
+
+        assert mock_popen.call_args.kwargs["creationflags"] == 0x08000000
 
     def test_cwd_set_on_runner(self) -> None:
         runner = CommandRunner(cwd="/tmp")

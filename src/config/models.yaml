@@ -85,7 +85,7 @@ models:
     engine_type: "golf_simulation"
     launcher:
       category: "simulation"
-      logo: "assets/golf_simulation.png"
+      logo: "assets/golf_logo.png"
       status: "ready"
       default_launch: "tab"
 
@@ -118,7 +118,7 @@ models:
     path: "src/shared/python/pendulum_simulator/__main__.py"
     launcher:
       category: "simulation"
-      logo: "assets/pendulum_icon.png"
+      logo: "pendulum.svg"
       status: "ready"
       default_launch: "tab"
 
@@ -129,7 +129,7 @@ models:
     path: "src/launchers/_shot_tracer_gui.py"
     launcher:
       category: "simulation"
-      logo: "assets/golf_simulation.png"
+      logo: "assets/golf_logo.png"
       status: "ready"
       default_launch: "tab"
 
@@ -140,7 +140,18 @@ models:
     path: "src/launchers/cross_engine_dashboard.py"
     launcher:
       category: "simulation"
-      logo: "assets/cross_engine.png"
+      logo: "cross_engine.svg"
+      status: "ready"
+      default_launch: "tab"
+
+  - id: "terrain_engine"
+    name: "Terrain Engine"
+    description: "Topography presets and surface queries for terrain-aware ball physics"
+    type: "special_app"
+    path: "src/tools/terrain_engine/gui.py"
+    launcher:
+      category: "simulation"
+      logo: "assets/putting_green_modern.png"
       status: "ready"
       default_launch: "tab"
 
@@ -151,7 +162,7 @@ models:
     path: "src/tools/golf_environment/gui.py"
     launcher:
       category: "simulation"
-      logo: "assets/golf_simulation.png"
+      logo: "assets/putting_green_modern.png"
       status: "ready"
       default_launch: "tab"
 
@@ -162,7 +173,7 @@ models:
     path: "src/tools/bunker_shot_gui/gui.py"
     launcher:
       category: "simulation"
-      logo: "assets/sand.png"
+      logo: "bunkershot3d.svg"
       status: "experimental"
       default_launch: "tab"
 
@@ -173,7 +184,7 @@ models:
     path: "src/tools/swing_flight_pipeline/gui.py"
     launcher:
       category: "simulation"
-      logo: "assets/golf_simulation.png"
+      logo: "assets/golf_logo.png"
       status: "ready"
       default_launch: "tab"
 
@@ -184,7 +195,7 @@ models:
     path: "src/tools/ball_flight_gui/gui.py"
     launcher:
       category: "simulation"
-      logo: "assets/golf_simulation.png"
+      logo: "assets/golf_logo.png"
       status: "ready"
       default_launch: "tab"
 
@@ -406,7 +417,7 @@ models:
     exercise: "gait"
     launcher:
       category: "biomechanics"
-      logo: "assets/biomech_gait.png"
+      logo: "biomechanics.svg"
       status: "ready"
       default_launch: "tab"
 
@@ -417,7 +428,7 @@ models:
     exercise: "sit_to_stand"
     launcher:
       category: "biomechanics"
-      logo: "assets/biomech_sit_stand.png"
+      logo: "biomechanics.svg"
       status: "ready"
       default_launch: "tab"
 
@@ -448,6 +459,7 @@ models:
     mode: "pure_rigid"
     launcher:
       category: "biomechanics"
+      logo: "pinocchio.svg"
       status: "experimental"
 
   - id: "pinn_hybrid"
@@ -457,4 +469,5 @@ models:
     mode: "pinn_hybrid"
     launcher:
       category: "biomechanics"
+      logo: "pinocchio.svg"
       status: "experimental"

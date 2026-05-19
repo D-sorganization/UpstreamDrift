@@ -9,7 +9,7 @@ import pytest  # noqa: E402
 from PyQt6.QtGui import QFont, QPainter  # noqa: E402
 from src.launchers.startup import (  # noqa: E402
     AsyncStartupWorker,
-    GolfSplashScreen,
+    SplashScreen,
     StartupResults,
     _fallback_qfont,
     _get_theme_colors,
@@ -113,12 +113,12 @@ def test_startup_results_from_dict_empty() -> None:
     assert res.startup_time_ms == 0
 
 
-# ==== GolfSplashScreen Tests ====
+# ==== SplashScreen Tests ====
 
 
 def test_splash_screen_init_theme_unavailable(mock_theme_unavailable, qapp) -> None:
     with patch("src.launchers.startup.Path.exists", return_value=False):
-        splash = GolfSplashScreen()
+        splash = SplashScreen()
         assert splash.loading_message == "Initializing UpstreamDrift..."
         assert splash.progress == 0
         assert splash.logo_pixmap is None
@@ -127,17 +127,17 @@ def test_splash_screen_init_theme_unavailable(mock_theme_unavailable, qapp) -> N
 def test_splash_screen_init_theme_available(mock_theme_available, qapp) -> None:
     # Pass a valid path so it tries to load, but it won't exist so isNull will be True
     with patch("src.launchers.startup.Path.exists", return_value=False):
-        splash = GolfSplashScreen()
+        splash = SplashScreen()
         assert splash.loading_message == "Initializing UpstreamDrift..."
 
 
 def test_splash_screen_resolve_theme_colors(mock_theme_available) -> None:
-    res = GolfSplashScreen._resolve_theme_colors()
+    res = SplashScreen._resolve_theme_colors()
     assert res == ("1", "2", "3", "4", "5")
 
 
 def test_splash_screen_resolve_theme_colors_fallback(mock_theme_unavailable) -> None:
-    res = GolfSplashScreen._resolve_theme_colors()
+    res = SplashScreen._resolve_theme_colors()
     assert res == ("#FFFFFF", "#A0A0A0", "#0A84FF", "#2D2D2D", "#666666")
 
 
@@ -151,7 +151,7 @@ def test_fallback_qfont_uses_standardized_stack() -> None:
 
 
 def test_drawContents(mock_theme_available, qapp) -> None:
-    splash = GolfSplashScreen()
+    splash = SplashScreen()
     splash.logo_pixmap = None
     splash.progress = 50
     splash.loading_message = "msg"
@@ -177,14 +177,14 @@ def test_drawContents(mock_theme_available, qapp) -> None:
 
 
 def test_drawContents_none(qapp) -> None:
-    splash = GolfSplashScreen()
+    splash = SplashScreen()
     # Shouldn"t throw when painter is None
     splash.drawContents(None)
 
 
 @patch("src.launchers.startup.QApplication.processEvents")
 def test_splash_show_message(mock_process_events, qapp) -> None:
-    splash = GolfSplashScreen()
+    splash = SplashScreen()
     splash.showMessage = MagicMock()
     splash.repaint = MagicMock()
 

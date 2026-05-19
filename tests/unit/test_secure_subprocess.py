@@ -104,6 +104,39 @@ class TestSecureSubprocess(unittest.TestCase):
         self.assertEqual(result, mock_process)
         mock_popen.assert_called_once()
 
+    @patch("src.shared.python.security.secure_subprocess.subprocess.Popen")
+    def test_secure_popen_hides_windows_by_default_on_windows(self, mock_popen) -> None:
+        """Background Python probes must not flash console windows on Windows."""
+        mock_process = MagicMock()
+        mock_popen.return_value = mock_process
+
+        with patch("src.shared.python.security.secure_subprocess.os.name", "nt"):
+            secure_popen(
+                [sys.executable, str(self.test_script)],
+                cwd=str(self.suite_root),
+                suite_root=self.suite_root,
+            )
+
+        kwargs = mock_popen.call_args.kwargs
+        self.assertEqual(kwargs["creationflags"], 0x08000000)
+
+    @patch("src.shared.python.security.secure_subprocess.subprocess.Popen")
+    def test_secure_popen_preserves_explicit_creationflags(self, mock_popen) -> None:
+        """Interactive launch paths can still request their own console flags."""
+        mock_process = MagicMock()
+        mock_popen.return_value = mock_process
+
+        with patch("src.shared.python.security.secure_subprocess.os.name", "nt"):
+            secure_popen(
+                [sys.executable, str(self.test_script)],
+                cwd=str(self.suite_root),
+                suite_root=self.suite_root,
+                creationflags=0x10,
+            )
+
+        kwargs = mock_popen.call_args.kwargs
+        self.assertEqual(kwargs["creationflags"], 0x10)
+
     def test_secure_popen_empty_command(self) -> None:
         """Test secure_popen with empty command."""
         with self.assertRaises(SecureSubprocessError):
@@ -126,6 +159,18 @@ class TestSecureSubprocess(unittest.TestCase):
 
         self.assertEqual(result, mock_result)
         mock_run.assert_called_once()
+
+    @patch("src.shared.python.security.secure_subprocess.subprocess.run")
+    def test_secure_run_hides_windows_by_default_on_windows(self, mock_run) -> None:
+        """Synchronous probes such as Docker checks should also stay hidden."""
+        mock_result = MagicMock()
+        mock_run.return_value = mock_result
+
+        with patch("src.shared.python.security.secure_subprocess.os.name", "nt"):
+            secure_run(["python", "--version"], timeout=5.0)
+
+        kwargs = mock_run.call_args.kwargs
+        self.assertEqual(kwargs["creationflags"], 0x08000000)
 
     def test_secure_run_disallowed_executable(self) -> None:
         """Test secure_run with disallowed executable."""

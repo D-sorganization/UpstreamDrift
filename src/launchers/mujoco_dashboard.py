@@ -45,15 +45,14 @@ class MuJoCoDashboard(UnifiedDashboardWindow):
 
 def main() -> None:
     """Main entry point."""
-    from src.shared.python.logging_pkg.logging_config import configure_gui_logging
-    from src.shared.python.ui.qt.utils import get_qapp
-    import sys
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+        MuJoCoPhysicsEngine,
+    )
 
-    configure_gui_logging()
-    app = get_qapp()
-    window = MuJoCoDashboard()
-    window.show()
-    sys.exit(app.exec())
+    launch_dashboard(
+        engine_class=MuJoCoPhysicsEngine,
+        title="MuJoCo Golf Analysis Dashboard (Unified)",
+    )
 
 
 if __name__ == "__main__":

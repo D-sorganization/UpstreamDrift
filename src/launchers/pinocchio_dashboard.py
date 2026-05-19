@@ -43,15 +43,14 @@ class PinocchioDashboard(UnifiedDashboardWindow):
 
 def main() -> None:
     """Main entry point."""
-    from src.shared.python.logging_pkg.logging_config import configure_gui_logging
-    from src.shared.python.ui.qt.utils import get_qapp
-    import sys
+    from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+        PinocchioPhysicsEngine,
+    )
 
-    configure_gui_logging()
-    app = get_qapp()
-    window = PinocchioDashboard()
-    window.show()
-    sys.exit(app.exec())
+    launch_dashboard(
+        engine_class=PinocchioPhysicsEngine,
+        title="Pinocchio Golf Analysis Dashboard",
+    )
 
 
 if __name__ == "__main__":

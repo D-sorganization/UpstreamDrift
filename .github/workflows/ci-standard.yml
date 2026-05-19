@@ -95,7 +95,7 @@ jobs:
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: |
             pyproject.toml
             requirements*.txt
@@ -463,7 +463,7 @@ jobs:
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: |
             pyproject.toml
             requirements*.txt
@@ -507,7 +507,7 @@ jobs:
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.12"
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: |
             pyproject.toml
             requirements*.txt
@@ -598,7 +598,7 @@ jobs:
         if: steps.core-test-changes.outputs.skip != 'true'
         with:
           python-version: ${{ matrix.python }}
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: |
             pyproject.toml
             requirements*.txt
@@ -856,7 +856,7 @@ jobs:
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: |
             pyproject.toml
             requirements*.txt
@@ -954,7 +954,7 @@ jobs:
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: |
             pyproject.toml
             requirements*.txt
@@ -1065,7 +1065,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - uses: matlab-actions/setup-matlab@a0180c939fb1a28de13f44f7b778b912384ced1f
-      - uses: matlab-actions/run-command@2970c890bd6dfbc8ba4d640879c4c496dec4e426
+      - uses: matlab-actions/run-command@fa5ca534870f0f484e70f0c0006589eb4bfb7e67
         with:
           command: |
             addpath('matlab');
@@ -1086,7 +1086,7 @@ jobs:
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: |
             pyproject.toml
             requirements*.txt
@@ -1197,7 +1197,7 @@ jobs:
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.12"
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: |
             pyproject.toml
             requirements*.txt
@@ -1367,7 +1367,7 @@ jobs:
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: |
             pyproject.toml
             requirements*.txt
