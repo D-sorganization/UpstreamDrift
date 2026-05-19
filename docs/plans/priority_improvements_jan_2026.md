@@ -80,7 +80,7 @@ Based on the comprehensive adversarial review, here are the prioritized improvem
 **Files with highest debt:**
 
 - `launch_golf_suite.py` (10+ instances)
-- `launchers/golf_launcher.py` (6+ instances)
+- `launchers/upstream_drift_launcher.py` (6+ instances)
 - `validate_phase1_upgrades.py` (6+ instances)
 
 ### 6. Enable Security Scanning (Effort: 1 day)
@@ -144,9 +144,9 @@ class EditCommand(QUndoCommand):
 
 **Target methods (>70 lines):**
 
-- `golf_launcher.py:_launch_docker_container()` → Extract Docker logic
-- `golf_launcher.py:init_ui()` → Split into component setup methods
-- `golf_launcher.py:apply_styles()` → Move to external stylesheet
+- `upstream_drift_launcher.py:_launch_docker_container()` → Extract Docker logic
+- `upstream_drift_launcher.py:init_ui()` → Split into component setup methods
+- `upstream_drift_launcher.py:apply_styles()` → Move to external stylesheet
 
 ---
 

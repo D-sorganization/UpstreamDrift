@@ -466,6 +466,7 @@ def get_dockable_ui() -> QtWidgets.QMainWindow:
     """Return the main window instance for docking in the unified launcher."""
     return C3DViewerMainWindow()
 
+
 def main() -> None:
     """Launch the C3D motion analysis viewer application."""
     app = QtWidgets.QApplication(sys.argv)

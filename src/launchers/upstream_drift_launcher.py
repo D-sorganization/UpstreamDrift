@@ -17,25 +17,19 @@ This module composes focused mixin classes into the UpstreamDriftLauncher:
 - LauncherDialogsMixin: Dialogs, settings, keyboard shortcuts, toast
 """
 
-print("[DIAG] Loading upstream_drift_launcher module...")
-
 import contextlib
 import sys
 from typing import Any
 
-print("[DIAG] Importing PyQt6...")
 from PyQt6.QtCore import QEventLoop, QObject, QRunnable, QThreadPool, QTimer, pyqtSignal
 from PyQt6.QtGui import QCloseEvent, QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox
 from PyQt6.QtCore import QEvent, Qt, QRect
 
-print("[DIAG] Importing docker_manager...")
 from src.launchers.docker_manager import DockerLauncher
 
-print("[DIAG] Importing embedded_tool_bootstrap...")
 from src.launchers.embedded_tool_bootstrap import bootstrap_embeddable_tools
 
-print("[DIAG] Importing launcher_constants...")
 from src.launchers.launcher_constants import (
     CONFIG_DIR,
     DOCKER_STAGES,
@@ -47,7 +41,6 @@ from src.launchers.launcher_constants import (
     logger,
 )
 
-print("[DIAG] Importing launcher mixins...")
 from src.launchers.launcher_dialogs import LauncherDialogsMixin
 from src.launchers.launcher_layout_manager import (
     LayoutManager,
@@ -59,7 +52,6 @@ from src.launchers.launcher_simulation import LauncherSimulationMixin
 from src.launchers.launcher_theme import LauncherThemeMixin
 from src.launchers.launcher_ui_setup import LauncherUISetupMixin
 
-print("[DIAG] Importing ui_components...")
 from src.launchers.ui_components import (
     ASSETS_DIR,
     AsyncStartupWorker,
@@ -68,8 +60,6 @@ from src.launchers.ui_components import (
     SplashScreen,
     StartupResults,
 )
-
-print("[DIAG] Imports complete!")
 
 
 class FramelessResizeFilter(QObject):
@@ -1241,10 +1231,7 @@ def _install_global_ui_zoom(app: QApplication) -> None:
 
 def main() -> None:
     """Application entry point."""
-    print("[DIAG] Starting main()")
     import traceback
-
-    print("[DIAG] Imported traceback")
 
     def excepthook(exc_type, exc_value, exc_tb):
         from PyQt6.QtWidgets import QMessageBox
@@ -1280,13 +1267,9 @@ def main() -> None:
                 "ctypes not available; skipping Windows AppUserModelID assignment"
             )
 
-    print("[DIAG] Creating QApplication")
     app = QApplication(sys.argv)
-    print("[DIAG] Setting style")
     app.setStyle("Fusion")
-    print("[DIAG] Installing global UI zoom")
     _install_global_ui_zoom(app)
-    print("[DIAG] Checking assets")
 
     # Set global application icon
     icon_path = ASSETS_DIR / "golf_logo.ico"
@@ -1317,17 +1300,12 @@ def main() -> None:
     except ImportError as e:
         logger.debug(f"Zoom support not available: {e}")
 
-    print("[DIAG] Creating SplashScreen")
     splash = SplashScreen()
     splash.show()
-    print("[DIAG] Creating AsyncStartupWorker")
     worker = AsyncStartupWorker(REPOS_ROOT)
 
-    print("[DIAG] Creating UpstreamDriftLauncher")
     main_window = UpstreamDriftLauncher(loading=True)
-    print("[DIAG] Showing UpstreamDriftLauncher")
     main_window.show()
-    print("[DIAG] Showing UpstreamDriftLauncher completed")
 
     def on_startup_finished(results: StartupResults) -> None:
         """Create and display the main window after startup completes."""

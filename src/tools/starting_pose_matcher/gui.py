@@ -31,7 +31,7 @@ Run::
 
     python -m src.tools.starting_pose_matcher
 
-Or, from the GolfLauncher tile (registered in ``src/config/models.yaml``).
+Or, from the UpstreamDriftLauncher tile (registered in ``src/config/models.yaml``).
 
 Subtask 5 / #4998 of EPIC #4993 split the original ~3.1k-line module
 into the embeddable :class:`MainWidget` (in :mod:`gui_main_widget`)
@@ -109,9 +109,10 @@ class StartingPoseMatcher(QMainWindow):
 # --------------------------------------------------------------------------- #
 
 
-def get_dockable_ui() -> QtWidgets.QMainWindow:
+def get_dockable_ui() -> QMainWindow:
     """Return the main window instance for docking in the unified launcher."""
     return StartingPoseMatcher()
+
 
 def main() -> int:
     app = QApplication.instance() or QApplication(sys.argv)

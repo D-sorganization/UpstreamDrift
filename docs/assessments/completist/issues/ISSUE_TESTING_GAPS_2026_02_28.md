@@ -15,7 +15,7 @@ These files contain tests that are completely skipped or empty, providing a fals
 
 ### Integration Tests
 
-- `tests/integration/test_golf_launcher_integration.py`: Contains numerous `pass` blocks for key integration scenarios, particularly mocking UI events.
+- `tests/integration/test_upstream_drift_launcher_integration.py`: Contains numerous `pass` blocks for key integration scenarios, particularly mocking UI events.
 - `tests/integration/test_c3d_workflow.py`
 - `tests/integration/test_conservation_laws.py`
 - `tests/integration/test_engine_integration.py`
@@ -24,7 +24,7 @@ These files contain tests that are completely skipped or empty, providing a fals
 
 ### Unit Tests
 
-- `tests/unit/test_golf_launcher_logic.py`: Contains multiple `pass` blocks testing core logic.
+- `tests/unit/test_upstream_drift_launcher_logic.py`: Contains multiple `pass` blocks testing core logic.
 - `tests/unit/test_golf_suite_launcher.py`: Almost entirely consists of `pass` blocks.
 - `tests/unit/engines/simscape/3d/test_quality_check.py`
 - `tests/unit/engines/test_plugin_registry.py`
@@ -37,11 +37,11 @@ These files contain tests that are completely skipped or empty, providing a fals
 
 ## Impact
 
-The presence of "passing" tests that contain no assertions completely invalidates CI runs for those components. This introduces significant risk of regressions going unnoticed and severely impacts the reliability of the system, particularly when testing critical components like `test_safety.py` and `test_golf_launcher_logic.py`.
+The presence of "passing" tests that contain no assertions completely invalidates CI runs for those components. This introduces significant risk of regressions going unnoticed and severely impacts the reliability of the system, particularly when testing critical components like `test_safety.py` and `test_upstream_drift_launcher_logic.py`.
 
 ## Recommendations
 
 1.  **Immediate Priority:** Replace `pass` blocks in `tests/deployment/test_safety.py` with actual safety boundary assertions.
 2.  **Immediate Priority:** Fail or properly mark as `@pytest.mark.skip` any tests that are currently empty.
-3.  **High Priority:** Implement actual assertions in the launcher and logic unit tests (`test_golf_launcher_logic.py`, `test_golf_suite_launcher.py`).
+3.  **High Priority:** Implement actual assertions in the launcher and logic unit tests (`test_upstream_drift_launcher_logic.py`, `test_golf_suite_launcher.py`).
 4.  **Medium Priority:** Replace extensive UI mocking in integration tests with functional validation or formalize the testing boundaries to prevent false confidence.

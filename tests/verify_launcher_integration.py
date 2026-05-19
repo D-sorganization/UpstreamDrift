@@ -16,10 +16,10 @@ def verify_launcher_init() -> bool | None:
 
     # Try to import and init the launcher
     try:
-        from src.launchers.golf_launcher import GolfLauncher
+        from src.launchers.upstream_drift_launcher import UpstreamDriftLauncher
 
         # We don't want to actually show it or start the event loop
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
 
         # Check if tabs exist
         if hasattr(launcher, "main_tabs"):

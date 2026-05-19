@@ -18,7 +18,7 @@ Design rationale:
 * DbC: the invariant "exactly one chat surface" is a contract the
   launcher exports to its users; the assertions here document and
   enforce it.
-* LOD: these tests query only ``GolfLauncher`` and ``launcher_ui_setup``
+* LOD: these tests query only ``UpstreamDriftLauncher`` and ``launcher_ui_setup``
   module attributes; they do not chain through Sidekick internals.
 * DRY: a single ``_source_contents`` helper is reused.
 """

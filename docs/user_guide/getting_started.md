@@ -5,7 +5,7 @@
 The easiest way to explore the suite is using the Python-based unified launcher.
 
 ```bash
-python launchers/golf_launcher.py
+python launchers/upstream_drift_launcher.py
 ```
 
 This will open a graphical interface allowing you to:

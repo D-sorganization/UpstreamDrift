@@ -110,7 +110,7 @@ class MockQFrame(MockQWidget):
 
 @pytest.fixture
 def mocked_launcher_module() -> Generator[types.ModuleType, None, None]:
-    """Import golf_launcher with mocked Qt modules."""
+    """Import upstream_drift_launcher with mocked Qt modules."""
     mock_qt_core = MagicMock()
     mock_qt_core.Qt = MagicMock()
     mock_qt_core.QPoint = MagicMock()
@@ -142,8 +142,8 @@ def mocked_launcher_module() -> Generator[types.ModuleType, None, None]:
     }
 
     with patch.dict(sys.modules, mock_modules):
-        if "src.launchers.golf_launcher" in sys.modules:
-            del sys.modules["src.launchers.golf_launcher"]
-        import src.launchers.golf_launcher
+        if "src.launchers.upstream_drift_launcher" in sys.modules:
+            del sys.modules["src.launchers.upstream_drift_launcher"]
+        import src.launchers.upstream_drift_launcher
 
-        yield src.launchers.golf_launcher
+        yield src.launchers.upstream_drift_launcher

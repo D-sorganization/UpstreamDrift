@@ -18,7 +18,7 @@ class TestUIFeatureParity:
     @pytest.fixture
     def pyqt_launcher_path(self) -> Path:
         """Path to PyQt6 launcher."""
-        return Path("src/launchers/golf_launcher.py")
+        return Path("src/launchers/upstream_drift_launcher.py")
 
     @pytest.fixture
     def react_app_path(self) -> Path:
@@ -58,7 +58,7 @@ class TestUIFeatureParity:
         assert react_controls.exists(), "SimulationControls missing from React UI"
 
         # PyQt controls should be in launcher
-        pyqt_launcher = Path("src/launchers/golf_launcher.py")
+        pyqt_launcher = Path("src/launchers/upstream_drift_launcher.py")
         if pyqt_launcher.exists():
             content = pyqt_launcher.read_text()
             has_controls = any(

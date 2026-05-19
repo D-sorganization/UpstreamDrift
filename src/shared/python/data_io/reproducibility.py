@@ -25,14 +25,10 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from src.shared.python.engine_core.engine_availability import PYTORCH_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
     pass
-
-if PYTORCH_AVAILABLE:
-    import torch
 
 logger = get_logger(__name__)
 
@@ -76,7 +72,11 @@ def set_seeds(seed: int = DEFAULT_SEED, *, validate: bool = True) -> None:
     np.random.default_rng(seed)  # New API
 
     # PyTorch seeds if available
-    if PYTORCH_AVAILABLE:
+    from src.shared.python.engine_core.engine_availability import is_engine_available
+
+    if is_engine_available("pytorch"):
+        import torch
+
         torch.manual_seed(seed)
         if torch.cuda.is_available():
             torch.cuda.manual_seed(seed)
@@ -158,7 +158,11 @@ def ensure_reproducibility(seed: int = DEFAULT_SEED) -> None:
     set_seeds(seed)
 
     # Additional PyTorch reproducibility settings
-    if PYTORCH_AVAILABLE:
+    from src.shared.python.engine_core.engine_availability import is_engine_available
+
+    if is_engine_available("pytorch"):
+        import torch
+
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
         logger.debug("PyTorch CUDA deterministic mode enabled")

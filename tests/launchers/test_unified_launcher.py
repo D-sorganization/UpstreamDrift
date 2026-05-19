@@ -18,7 +18,10 @@ from src.launchers.unified_launcher import (  # noqa: E402
 @pytest.fixture
 def clean_sys_modules() -> Generator[None, None, None]:
     """Remove specific modules from sys.modules."""
-    modules_to_remove = ["launchers.unified_launcher", "launchers.golf_launcher"]
+    modules_to_remove = [
+        "launchers.unified_launcher",
+        "launchers.upstream_drift_launcher",
+    ]
     for mod in modules_to_remove:
         if mod in sys.modules:
             del sys.modules[mod]
@@ -53,7 +56,7 @@ def test_get_golf_main_prefer_legacy(clean_sys_modules) -> None:
         pass
 
     legacy_mock.main = fake_main
-    sys.modules["launchers.golf_launcher"] = legacy_mock
+    sys.modules["launchers.upstream_drift_launcher"] = legacy_mock
 
     main_func = _get_golf_main(prefer_legacy=True)
     assert main_func is fake_main
@@ -72,7 +75,7 @@ def test_get_golf_main_absolute_import() -> None:
     mock_module.main = fake_main
 
     def mock_import(name, *args, **kwargs) -> Any:
-        if "golf_launcher" in name and not name.startswith("launchers"):
+        if "upstream_drift_launcher" in name and not name.startswith("launchers"):
             raise ImportError("fake")
         return orig_import(name, *args, **kwargs)
 
@@ -91,7 +94,8 @@ def test_get_golf_main_relative_success(clean_sys_modules) -> None:
     with (
         patch("src.launchers.unified_launcher.golf_main", create=True) as mock_main,
         patch.dict(
-            "sys.modules", {"src.launchers.golf_launcher": MagicMock(main=mock_main)}
+            "sys.modules",
+            {"src.launchers.upstream_drift_launcher": MagicMock(main=mock_main)},
         ),
     ):
         main_func = _get_golf_main()
@@ -104,7 +108,7 @@ def test_get_golf_main_all_imports_fail(clean_sys_modules) -> None:
     orig_import = builtins.__import__
 
     def mock_import(name, *args, **kwargs) -> Any:
-        if "golf_launcher" in name:
+        if "upstream_drift_launcher" in name:
             raise ImportError("fake")
         return orig_import(name, *args, **kwargs)
 
@@ -128,7 +132,7 @@ def test_get_golf_main_legacy_no_main() -> None:
     orig_import = builtins.__import__
 
     def mock_import(name, *args, **kwargs) -> Any:
-        if "golf_launcher" in name and not name.startswith("launchers"):
+        if "upstream_drift_launcher" in name and not name.startswith("launchers"):
             raise ImportError("fake")
         return orig_import(name, *args, **kwargs)
 
@@ -141,7 +145,7 @@ def test_get_golf_main_legacy_no_main() -> None:
             "src.launchers.unified_launcher.importlib.import_module",
             return_value=mock_module,
         ),
-        patch.dict("sys.modules", {"launchers.golf_launcher": legacy_mock}),
+        patch.dict("sys.modules", {"launchers.upstream_drift_launcher": legacy_mock}),
     ):
         main_func = _get_golf_main(prefer_legacy=True)
         assert main_func == "fallback"
@@ -154,14 +158,14 @@ def test_get_golf_main_module_no_main() -> None:
 
     # We make the *relative* import fail, jumping to the absolute import
     def mock_import(name, *args, **kwargs) -> Any:
-        if "golf_launcher" in name and not name.startswith("launchers"):
+        if "upstream_drift_launcher" in name and not name.startswith("launchers"):
             raise ImportError("fake")
         return orig_import(name, *args, **kwargs)
 
     # The absolute import succeeds but the module has no `main`
     mock_mod = MagicMock()
     del mock_mod.main
-    mock_mod.__name__ = "launchers.golf_launcher"
+    mock_mod.__name__ = "launchers.upstream_drift_launcher"
 
     with (
         patch("builtins.__import__", side_effect=mock_import),

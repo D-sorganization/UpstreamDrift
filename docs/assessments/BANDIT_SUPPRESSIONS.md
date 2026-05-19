@@ -22,7 +22,7 @@ This document tracks all Bandit security findings that have been reviewed and su
 
 - `src/engines/physics_engines/mujoco/docker/gui/deepmind_control_suite_MuJoCo_GUI.py:1106`
 - `src/engines/physics_engines/mujoco/python/humanoid_launcher.py:939`
-- `src/launchers/_archive/golf_launcher_pre_refactor_ce85e6ec.py:2905`
+- `src/launchers/_archive/upstream_drift_launcher_pre_refactor_ce85e6ec.py:2905`
 
 **Justification:** These paths are Docker volume mounts for X11 forwarding. This is the standard, required path for Unix domain sockets used by X11. Not a security risk as:
 

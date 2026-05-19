@@ -454,7 +454,7 @@ def _matches_protected(name: str) -> bool:
 def _protect_engine_modules() -> Generator[None, None, None]:
     """Prevent engine module state corruption from leaking between tests.
 
-    Several tests instantiate ``EngineManager`` or ``GolfLauncher`` which
+    Several tests instantiate ``EngineManager`` or ``UpstreamDriftLauncher`` which
     trigger engine probes that import pinocchio/drake.  The probes can corrupt
     C extension module state or leave MagicMock objects in ``sys.modules``.
     Subsequent tests then fail with ``NameError`` or ``TypeError``.

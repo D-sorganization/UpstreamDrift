@@ -111,8 +111,7 @@ class SwingFlightWidget(QWidget):
         # Run button
         self._run_btn = QPushButton("Run Full Pipeline")
         self._run_btn.setStyleSheet(
-            "background-color: #4CAF50; color: white; "
-            "font-weight: bold; padding: 12px;"
+            "background-color: #4CAF50; color: white; font-weight: bold; padding: 12px;"
         )
         self._run_btn.clicked.connect(self._run_pipeline)
         left_layout.addWidget(self._run_btn)

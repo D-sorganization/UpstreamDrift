@@ -73,9 +73,9 @@ def _extract_ts_object(source: str, identifier: str) -> dict[str, str]:
 @pytest.fixture(scope="module")
 def theme_client_source() -> str:
     """Read the TypeScript theme client as text."""
-    assert (
-        THEME_CLIENT_PATH.exists()
-    ), f"themeClient.ts not found at {THEME_CLIENT_PATH}"
+    assert THEME_CLIENT_PATH.exists(), (
+        f"themeClient.ts not found at {THEME_CLIENT_PATH}"
+    )
     return THEME_CLIENT_PATH.read_text(encoding="utf-8")
 
 
@@ -117,9 +117,9 @@ def test_fallback_color_tokens_parity_between_python_and_typescript(
         for key in ts_keys
         if py_defaults[key] != ts_fallback[key]
     }
-    assert (
-        not drift
-    ), f"Sidekick fallback color values drift between Python and TypeScript: {drift}"
+    assert not drift, (
+        f"Sidekick fallback color values drift between Python and TypeScript: {drift}"
+    )
 
 
 def test_python_color_keys_match_color_token_map(theme_client_source: str) -> None:
@@ -130,9 +130,9 @@ def test_python_color_keys_match_color_token_map(theme_client_source: str) -> No
     py_color_tokens = set(COLOR_TOKEN_MAP.keys())
 
     missing_py = py_color_tokens - set(DEFAULT_SIDEKICK_TOKENS.keys())
-    assert (
-        not missing_py
-    ), f"COLOR_TOKEN_MAP tokens missing from DEFAULT_SIDEKICK_TOKENS: {missing_py}"
+    assert not missing_py, (
+        f"COLOR_TOKEN_MAP tokens missing from DEFAULT_SIDEKICK_TOKENS: {missing_py}"
+    )
 
     missing_ts = py_color_tokens - set(ts_fallback.keys())
     assert not missing_ts, (

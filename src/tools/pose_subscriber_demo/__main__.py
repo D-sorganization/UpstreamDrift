@@ -24,6 +24,7 @@ def get_dockable_ui() -> QtWidgets.QMainWindow:
     win.resize(640, 640)
     return win
 
+
 def main(argv: list[str] | None = None) -> int:
     """Entry point used by ``python -m src.tools.pose_subscriber_demo``."""
     if argv is None:

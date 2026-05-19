@@ -17,10 +17,10 @@ def mock_pyqt6_available() -> Generator[None, None, None]:
 
 
 @pytest.fixture(autouse=True)
-def mock_golf_launcher_module() -> Generator[MagicMock, None, None]:
-    """Mock golf_launcher module."""
+def mock_upstream_drift_launcher_module() -> Generator[MagicMock, None, None]:
+    """Mock upstream_drift_launcher module."""
     mock_mod = MagicMock()
-    with patch.dict(sys.modules, {"src.launchers.golf_launcher": mock_mod}):
+    with patch.dict(sys.modules, {"src.launchers.upstream_drift_launcher": mock_mod}):
         yield mock_mod
 
 
@@ -34,15 +34,17 @@ def mock_qapp() -> Generator[MagicMock, None, None]:
 
 
 @pytest.fixture
-def mock_golf_launcher(mock_golf_launcher_module: MagicMock) -> MagicMock:
+def mock_upstream_drift_launcher(
+    mock_upstream_drift_launcher_module: MagicMock,
+) -> MagicMock:
     """Mock golf launcher."""
-    mock_module = mock_golf_launcher_module
-    mock_cls = mock_module.GolfLauncher
+    mock_module = mock_upstream_drift_launcher_module
+    mock_cls = mock_module.UpstreamDriftLauncher
     mock_instance = mock_cls.return_value
     return mock_instance
 
 
-def test_unified_launcher_init(mock_qapp, mock_golf_launcher) -> None:
+def test_unified_launcher_init(mock_qapp, mock_upstream_drift_launcher) -> None:
     launcher = UnifiedLauncher()
     assert launcher is not None
 
@@ -55,19 +57,21 @@ def test_init_no_pyqt() -> None:
         UnifiedLauncher()
 
 
-def test_mainloop(mock_qapp, mock_golf_launcher, mock_golf_launcher_module) -> None:
+def test_mainloop(
+    mock_qapp, mock_upstream_drift_launcher, mock_upstream_drift_launcher_module
+) -> None:
     launcher = UnifiedLauncher()
     mock_qapp.exec.return_value = 0
 
     with patch(
         "src.launchers.unified_launcher._get_golf_main",
-        return_value=mock_golf_launcher_module.main,
+        return_value=mock_upstream_drift_launcher_module.main,
     ):
         launcher.mainloop()
 
-    # mainloop now delegates to golf_launcher.main which calls sys.exit
+    # mainloop now delegates to upstream_drift_launcher.main which calls sys.exit
     # Since we mocked it, the main function should be called.
-    mock_golf_launcher_module.main.assert_called_once()
+    mock_upstream_drift_launcher_module.main.assert_called_once()
 
 
 def test_launch_function() -> None:
@@ -81,7 +85,7 @@ def test_launch_function() -> None:
 def test_show_status(capsys) -> None:
     with (
         patch("src.launchers.unified_launcher.QApplication"),
-        patch("src.launchers.golf_launcher.GolfLauncher"),
+        patch("src.launchers.upstream_drift_launcher.UpstreamDriftLauncher"),
     ):
         launcher = UnifiedLauncher()
 
@@ -110,7 +114,7 @@ def test_show_status(capsys) -> None:
 def test_get_version() -> None:
     with (
         patch("src.launchers.unified_launcher.QApplication"),
-        patch("src.launchers.golf_launcher.GolfLauncher"),
+        patch("src.launchers.upstream_drift_launcher.UpstreamDriftLauncher"),
     ):
         launcher = UnifiedLauncher()
 

@@ -33,7 +33,7 @@ The repository was identified to have significant "God Function" clusters and pe
 
 - [x] Extract Docker environment management into `src/launchers/docker_manager.py`.
 - [x] Extract modular UI components (e.g., `DraggableModelCard`) into `src/launchers/ui_components.py`.
-- [ ] Further decompose the main `GolfLauncher` class (current size: ~2000 lines).
+- [ ] Further decompose the main `UpstreamDriftLauncher` class (current size: ~2000 lines).
 
 ## Impact Metrics (as of Jan 24)
 

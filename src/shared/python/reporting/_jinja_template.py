@@ -146,7 +146,5 @@ class JinjaReportTemplate:
             isinstance(result, str) and bool(result),
             "render postcondition: result must be a non-empty string",
         )
-        logger.debug(
-            "jinja_report_template_rendered report_type=%s", self._report_type
-        )
+        logger.debug("jinja_report_template_rendered report_type=%s", self._report_type)
         return result

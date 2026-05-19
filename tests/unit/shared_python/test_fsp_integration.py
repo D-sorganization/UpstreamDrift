@@ -202,9 +202,9 @@ class TestComputeSwingFsp:
             for i in range(100)
         ]
         result = compute_swing_fsp(frames)
-        assert (
-            abs(result.slope_deg) < 5.0
-        ), f"planar swing slope should be near 0, got {result.slope_deg}"
+        assert abs(result.slope_deg) < 5.0, (
+            f"planar swing slope should be near 0, got {result.slope_deg}"
+        )
 
     def test_deviations_dtype(self) -> None:
         frames = make_synthetic_frames()
@@ -215,6 +215,6 @@ class TestComputeSwingFsp:
     def test_slope_in_valid_range(self) -> None:
         frames = make_synthetic_frames()
         result = compute_swing_fsp(frames)
-        assert (
-            0.0 <= result.slope_deg <= 90.0
-        ), f"slope should be in [0, 90], got {result.slope_deg}"
+        assert 0.0 <= result.slope_deg <= 90.0, (
+            f"slope should be in [0, 90], got {result.slope_deg}"
+        )

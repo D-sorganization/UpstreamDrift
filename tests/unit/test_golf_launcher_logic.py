@@ -1,5 +1,5 @@
 """
-Unit tests for GolfLauncher GUI logic (Model selection, Launching).
+Unit tests for UpstreamDriftLauncher GUI logic (Model selection, Launching).
 """
 
 from pathlib import Path
@@ -9,21 +9,21 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
-class TestGolfLauncherLogic:
+class TestUpstreamDriftLauncherLogic:
     @pytest.fixture(autouse=True)
     def mock_process_manager(self):
-        with patch("src.launchers.golf_launcher.ProcessManager") as mock_pm:
+        with patch("src.launchers.upstream_drift_launcher.ProcessManager") as mock_pm:
             mock_pm.return_value.running_processes = {}
             yield mock_pm
 
-    @patch("src.launchers.golf_launcher.DockerCheckThread")
-    def test_golf_launcher_logic_initialization(self, mock_thread, qtbot):
-        from src.launchers.golf_launcher import GolfLauncher
+    @patch("src.launchers.upstream_drift_launcher.DockerCheckThread")
+    def test_upstream_drift_launcher_logic_initialization(self, mock_thread, qtbot):
+        from src.launchers.upstream_drift_launcher import UpstreamDriftLauncher
 
         thread_instance = mock_thread.return_value
         thread_instance.result = MagicMock()
 
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         qtbot.addWidget(launcher)
 
         launcher.engine_manager = MagicMock()
@@ -41,11 +41,11 @@ class TestGolfLauncherLogic:
             "Assertion failed: hasattr(launcher, btn_launch)"
         )
 
-    @patch("src.launchers.golf_launcher.DockerCheckThread")
+    @patch("src.launchers.upstream_drift_launcher.DockerCheckThread")
     def test_model_selection_updates_ui(self, mock_thread, qtbot):
-        from src.launchers.golf_launcher import GolfLauncher
+        from src.launchers.upstream_drift_launcher import UpstreamDriftLauncher
 
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         qtbot.addWidget(launcher)
 
         mock_model = SimpleNamespace(
@@ -85,11 +85,11 @@ class TestGolfLauncherLogic:
             "Assertion failed: mock_model.name.upper() in launcher.btn_launch.text().upper()"
         )
 
-    @patch("src.launchers.golf_launcher.DockerCheckThread")
+    @patch("src.launchers.upstream_drift_launcher.DockerCheckThread")
     def test_launch_simulation_constructs_command(self, mock_thread, qtbot):
-        from src.launchers.golf_launcher import GolfLauncher
+        from src.launchers.upstream_drift_launcher import UpstreamDriftLauncher
 
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         qtbot.addWidget(launcher)
 
         mock_model = SimpleNamespace(
@@ -132,11 +132,11 @@ class TestGolfLauncherLogic:
             "Assertion failed: kwargs[model_name] == Test Model"
         )
 
-    @patch("src.launchers.golf_launcher.DockerCheckThread")
+    @patch("src.launchers.upstream_drift_launcher.DockerCheckThread")
     def test_launch_generic_mjcf(self, mock_thread, qtbot):
-        from src.launchers.golf_launcher import GolfLauncher
+        from src.launchers.upstream_drift_launcher import UpstreamDriftLauncher
 
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         qtbot.addWidget(launcher)
 
         mock_model = SimpleNamespace(
@@ -180,11 +180,11 @@ class TestGolfLauncherLogic:
             mock_mujoco.MjModel.from_xml_path.assert_called_once()
             mock_mujoco.viewer.launch.assert_called_once()
 
-    @patch("src.launchers.golf_launcher.DockerCheckThread")
+    @patch("src.launchers.upstream_drift_launcher.DockerCheckThread")
     def test_launch_matlab_suite(self, mock_thread, qtbot):
-        from src.launchers.golf_launcher import GolfLauncher
+        from src.launchers.upstream_drift_launcher import UpstreamDriftLauncher
 
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         qtbot.addWidget(launcher)
 
         mock_model = SimpleNamespace(

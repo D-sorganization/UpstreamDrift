@@ -98,7 +98,7 @@ except Exception as e:
 
 ### 3. UI timer blocks on subprocess I/O
 
-**Location:** `src/launchers/golf_launcher.py:130-132, 593-605`
+**Location:** `src/launchers/upstream_drift_launcher.py:130-132, 593-605`
 **Severity:** HIGH
 **Status:** FIXED
 
@@ -131,7 +131,7 @@ class ProcessCleanupWorker(QRunnable):
                     finished.append(key)
         self.cleanup_signal.emit(finished)
 
-# In GolfLauncher.__init__:
+# In UpstreamDriftLauncher.__init__:
 self.cleanup_timer = QTimer(self)
 self.cleanup_timer.timeout.connect(self._schedule_cleanup)
 self.cleanup_timer.start(10000)

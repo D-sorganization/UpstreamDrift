@@ -1,4 +1,4 @@
-"""Tests for golf_launcher.py."""
+"""Tests for upstream_drift_launcher.py."""
 
 import contextlib  # noqa: E402
 from collections.abc import Generator  # noqa: E402
@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
 from PyQt6.QtWidgets import QMessageBox  # noqa: E402
-from src.launchers.golf_launcher import (  # noqa: E402
-    GolfLauncher,
+from src.launchers.upstream_drift_launcher import (  # noqa: E402
+    UpstreamDriftLauncher,
     main,
 )
 from src.launchers.ui_components import StartupResults  # noqa: E402
@@ -26,8 +26,8 @@ def startup_results() -> StartupResults:
 @contextlib.contextmanager
 def patch_launcher_ui() -> Generator[None, None, None]:
     with (
-        patch("src.launchers.golf_launcher.DockerCheckThread"),
-        patch("src.launchers.golf_launcher.QTimer"),
+        patch("src.launchers.upstream_drift_launcher.DockerCheckThread"),
+        patch("src.launchers.upstream_drift_launcher.QTimer"),
     ):
         yield
 
@@ -35,12 +35,16 @@ def patch_launcher_ui() -> Generator[None, None, None]:
 def test_init_without_results(qapp) -> None:
     with (
         patch_launcher_ui(),
-        patch("src.launchers.golf_launcher._lazy_load_model_registry") as mock_reg,
-        patch("src.launchers.golf_launcher._lazy_load_engine_manager") as mock_eng,
+        patch(
+            "src.launchers.upstream_drift_launcher._lazy_load_model_registry"
+        ) as mock_reg,
+        patch(
+            "src.launchers.upstream_drift_launcher._lazy_load_engine_manager"
+        ) as mock_eng,
     ):
         mock_reg.return_value = MagicMock()
         mock_eng.return_value = (MagicMock(), MagicMock())
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         assert launcher._startup_time_ms == 0
         assert launcher.docker_available is False
         mock_reg.assert_called_once()
@@ -49,7 +53,7 @@ def test_init_without_results(qapp) -> None:
 
 def test_init_with_results(qapp, startup_results) -> None:
     with patch_launcher_ui():
-        launcher = GolfLauncher(startup_results)
+        launcher = UpstreamDriftLauncher(startup_results)
         assert launcher._startup_time_ms == 100
         assert launcher.docker_available is True
         assert launcher.registry == startup_results.registry
@@ -59,25 +63,25 @@ def test_init_with_results(qapp, startup_results) -> None:
 def test_load_window_icon(qapp) -> None:
     with patch_launcher_ui():
         # Do not mock QIcon. Just instantiate and test it doesn't crash.
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         assert launcher.windowIcon() is not None
 
 
 def test_init_registry_exception(qapp) -> None:
     with patch(
-        "src.launchers.golf_launcher._lazy_load_model_registry",
+        "src.launchers.upstream_drift_launcher._lazy_load_model_registry",
         side_effect=ImportError("test"),
     ):
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         assert launcher.registry is None
 
 
 def test_init_engine_manager_exception(qapp) -> None:
     with patch(
-        "src.launchers.golf_launcher._lazy_load_engine_manager",
+        "src.launchers.upstream_drift_launcher._lazy_load_engine_manager",
         side_effect=RuntimeError("test"),
     ):
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         assert launcher.engine_manager is None
 
 
@@ -86,14 +90,14 @@ def test_build_available_models(qapp, startup_results) -> None:
     model2 = MagicMock(id="m2", type="utility")
     startup_results.registry.get_all_models.return_value = [model1, model2]
 
-    launcher = GolfLauncher(startup_results)
+    launcher = UpstreamDriftLauncher(startup_results)
     assert "m1" in launcher.available_models
     assert "m2" in launcher.special_app_lookup
 
 
 def test_get_model(qapp) -> None:
     with patch_launcher_ui():
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         launcher.available_models["m1"] = "Model1"
         assert launcher._get_model("m1") == "Model1"
 
@@ -107,7 +111,7 @@ def test_get_model(qapp) -> None:
 
 def test_layout_management(qapp) -> None:
     with patch_launcher_ui():
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         launcher.layout_manager = MagicMock()
 
         launcher._save_layout()
@@ -133,7 +137,7 @@ def test_layout_management(qapp) -> None:
 
 def test_launch_model_direct(qapp) -> None:
     with patch_launcher_ui():
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         launcher.select_model = MagicMock()
         launcher.launch_simulation = MagicMock()
         launcher.launch_model_direct("m1")
@@ -145,7 +149,7 @@ def test_center_window(qapp) -> None:
     from PyQt6.QtCore import QPoint
 
     with patch_launcher_ui():
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         mock_screen = MagicMock()
         mock_geom = MagicMock()
         mock_geom.center.return_value = QPoint(0, 0)
@@ -159,7 +163,7 @@ def test_center_window(qapp) -> None:
 
 def test_load_layout_empty(qapp) -> None:
     with patch_launcher_ui():
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         launcher.layout_manager = MagicMock()
         launcher.layout_manager.load_layout.return_value = None
         launcher._rebuild_grid = MagicMock()
@@ -169,7 +173,7 @@ def test_load_layout_empty(qapp) -> None:
 
 def test_load_layout_with_data(qapp) -> None:
     with patch_launcher_ui():
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         launcher.layout_manager = MagicMock()
         layout_data = {
             "window_geometry": {"x": 10, "y": 10, "width": 800, "height": 600},
@@ -194,7 +198,7 @@ def test_load_layout_with_data(qapp) -> None:
 
 def test_select_model(qapp) -> None:
     with patch_launcher_ui():
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         card_m1 = MagicMock()
         card_m2 = MagicMock()
         launcher.model_cards = {"m1": card_m1, "m2": card_m2}
@@ -217,7 +221,7 @@ def test_select_model(qapp) -> None:
 
 def test_update_launch_button(qapp) -> None:
     with patch_launcher_ui():
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
 
         # None selected
         launcher.selected_model = None
@@ -243,7 +247,7 @@ def test_update_launch_button(qapp) -> None:
         assert "Launch M1 >" in launcher.btn_launch.text()
 
 
-@patch("src.launchers.golf_launcher._lazy_load_engine_manager")
+@patch("src.launchers.upstream_drift_launcher._lazy_load_engine_manager")
 def test_get_engine_type(mock_lazy_em, qapp) -> None:
     with patch_launcher_ui():
         EngineType = MagicMock()
@@ -256,7 +260,7 @@ def test_get_engine_type(mock_lazy_em, qapp) -> None:
         mock_em = MagicMock()
         mock_lazy_em.return_value = (mock_em, EngineType)
 
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         assert launcher._get_engine_type("mujoco") == "mujoco_enum"
         assert launcher._get_engine_type("drake") == "drake_enum"
         assert launcher._get_engine_type("pinocchio") == "pinocchio_enum"
@@ -267,7 +271,7 @@ def test_get_engine_type(mock_lazy_em, qapp) -> None:
 
 def test_docker_status(qapp) -> None:
     with patch_launcher_ui():
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         launcher.update_launch_button = MagicMock()
 
         launcher._apply_docker_status(True)
@@ -281,7 +285,7 @@ def test_check_docker(qapp) -> None:
     # patch_launcher_ui already mocks DockerCheckThread, so we don't need a separate patch block.
     # However we can just grab it off the launcher to assert on it.
     with patch_launcher_ui():
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         # _init_ automatically calls check_docker and starts it.
         # It was mocked globally as DockerCheckThread, let's reset it and test check_docker manually.
         launcher.docker_checker.reset_mock()
@@ -294,7 +298,7 @@ def test_check_docker(qapp) -> None:
 
 def test_menu_toggles(qapp) -> None:
     with patch_launcher_ui():
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         launcher.toggle_layout_mode = MagicMock()
         launcher.context_help = MagicMock()
 
@@ -310,7 +314,7 @@ def test_menu_toggles(qapp) -> None:
 
 def test_cleanup_processes(qapp) -> None:
     with patch_launcher_ui():
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         proc1 = MagicMock()
         proc1.poll.return_value = 0  # Finished
         proc2 = MagicMock()
@@ -329,7 +333,7 @@ def test_cleanup_processes(qapp) -> None:
 
 def test_on_cleanup_finished_updates_running_processes(qapp):
     with patch_launcher_ui():
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         launcher.running_processes = {
             "p1": MagicMock(),
             "p2": MagicMock(),
@@ -341,11 +345,11 @@ def test_on_cleanup_finished_updates_running_processes(qapp):
         assert "p2" in launcher.running_processes
 
 
-@patch("src.launchers.golf_launcher.QMessageBox.question")
-@patch("src.launchers.golf_launcher.kill_process_tree")
+@patch("src.launchers.upstream_drift_launcher.QMessageBox.question")
+@patch("src.launchers.upstream_drift_launcher.kill_process_tree")
 def test_close_event(mock_kill, mock_question, qapp) -> None:
     with patch_launcher_ui():
-        launcher = GolfLauncher()
+        launcher = UpstreamDriftLauncher()
         # Disconnect cleanups to prevent PyQt crashes with mocks
         launcher.docker_checker = None
         launcher.cleanup_timer = None
@@ -377,11 +381,11 @@ def test_close_event(mock_kill, mock_question, qapp) -> None:
         assert not event.isAccepted()
 
 
-@patch("src.launchers.golf_launcher.QApplication")
-@patch("src.launchers.golf_launcher.AsyncStartupWorker")
-@patch("src.launchers.golf_launcher.sys.exit")
-def test_golf_launcher_main(mock_exit, mock_worker, mock_app) -> None:
-    with patch("src.launchers.golf_launcher.GolfSplashScreen"):
+@patch("src.launchers.upstream_drift_launcher.QApplication")
+@patch("src.launchers.upstream_drift_launcher.AsyncStartupWorker")
+@patch("src.launchers.upstream_drift_launcher.sys.exit")
+def test_upstream_drift_launcher_main(mock_exit, mock_worker, mock_app) -> None:
+    with patch("src.launchers.upstream_drift_launcher.GolfSplashScreen"):
         main()
         mock_app.assert_called()
         mock_worker.assert_called()

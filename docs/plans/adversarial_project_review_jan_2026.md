@@ -80,8 +80,8 @@ The Golf Modeling Suite is an ambitious, well-architected platform that consolid
 | No secrets scanning in CI               | Workflows                  | HIGH   |
 | `pip-audit` runs non-blocking (`        |                            | true`) | ci-standard.yml | MEDIUM |
 | Bandit installed but not running        | CI                         | MEDIUM |
-| Hardcoded environment variables         | golf_launcher.py:2170-2175 | LOW    |
-| Mock object handling in production code | golf_launcher.py:1116-1149 | LOW    |
+| Hardcoded environment variables         | upstream_drift_launcher.py:2170-2175 | LOW    |
+| Mock object handling in production code | upstream_drift_launcher.py:1116-1149 | LOW    |
 
 ### 2.3 Reliability Gaps
 
@@ -181,7 +181,7 @@ The Golf Modeling Suite is an ambitious, well-architected platform that consolid
 | ----------------------------------------------- | ----------- | ------------------- |
 | `except Exception as e:` (broad catches)        | 40+         | 8+ files            |
 | TRACKED_TASK/TRACKED_DEFECT comments unresolved | 25+         | Various             |
-| Methods >100 lines (complexity)                 | 6+          | golf_launcher.py    |
+| Methods >100 lines (complexity)                 | 6+          | upstream_drift_launcher.py    |
 | Type suppressions (`# type: ignore`)            | 25+         | Various             |
 | Print statements (should be logging)            | 10+         | Examples, utilities |
 
@@ -208,10 +208,10 @@ The Golf Modeling Suite is an ambitious, well-architected platform that consolid
 
 | File                  | Method                       | Lines | Action Required    |
 | --------------------- | ---------------------------- | ----- | ------------------ |
-| golf_launcher.py:2110 | `_launch_docker_container()` | 103   | Refactor           |
-| golf_launcher.py:1192 | `init_ui()`                  | 128   | Extract helpers    |
-| golf_launcher.py:1734 | `apply_styles()`             | 77    | Move to stylesheet |
-| golf_launcher.py:1848 | `launch_simulation()`        | 77    | Decompose          |
+| upstream_drift_launcher.py:2110 | `_launch_docker_container()` | 103   | Refactor           |
+| upstream_drift_launcher.py:1192 | `init_ui()`                  | 128   | Extract helpers    |
+| upstream_drift_launcher.py:1734 | `apply_styles()`             | 77    | Move to stylesheet |
+| upstream_drift_launcher.py:1848 | `launch_simulation()`        | 77    | Decompose          |
 
 ---
 

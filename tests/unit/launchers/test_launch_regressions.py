@@ -196,8 +196,8 @@ class TestWindowSizing:
     """PR #2088: Window must not hardcode 1400x900 size."""
 
     def test_initial_resize_not_hardcoded_1400(self) -> None:
-        """golf_launcher.py must not hardcode resize(1400, 900)."""
-        source_path = REPO_ROOT / "src" / "launchers" / "golf_launcher.py"
+        """upstream_drift_launcher.py must not hardcode resize(1400, 900)."""
+        source_path = REPO_ROOT / "src" / "launchers" / "upstream_drift_launcher.py"
         assert source_path.exists(), f"Expected {source_path} to exist"
         source = source_path.read_text(encoding="utf-8")
         assert "self.resize(1400, 900)" not in source, (

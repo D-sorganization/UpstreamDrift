@@ -504,7 +504,7 @@ Examples:
         launch_engine_directly(args.engine)
     elif args.classic:
         # Classic PyQt6 launcher
-        from src.launchers.golf_launcher import main as classic_main
+        from src.launchers.upstream_drift_launcher import main as classic_main
         classic_main()
     elif args.api_only:
         # API server only

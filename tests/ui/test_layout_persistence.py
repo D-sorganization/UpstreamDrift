@@ -86,7 +86,7 @@ class TestLayoutPersistence(unittest.TestCase):
 
     def test_config_directory_creation(self) -> None:
         """Test that config directory is created if it doesn't exist."""
-        from src.launchers.golf_launcher import CONFIG_DIR
+        from src.launchers.upstream_drift_launcher import CONFIG_DIR
 
         # The constant should point to a valid path structure
         self.assertIsInstance(CONFIG_DIR, Path)

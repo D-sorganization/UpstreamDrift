@@ -221,7 +221,7 @@ Non-intrusive overlay notifications for launch events, errors, and status update
 UpstreamDrift/
 ├── src/
 │   ├── launchers/           # PyQt6 launcher application
-│   │   ├── golf_launcher.py         # Main window (QMainWindow + mixins)
+│   │   ├── upstream_drift_launcher.py         # Main window (QMainWindow + mixins)
 │   │   ├── launcher_ui_setup.py     # UI construction mixin
 │   │   ├── launcher_theme.py        # Theme management mixin
 │   │   ├── launcher_simulation.py   # Simulation launch mixin

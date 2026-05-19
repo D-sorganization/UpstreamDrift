@@ -16,7 +16,7 @@ workspace.
 python -m src.tools.starting_pose_matcher
 ```
 
-Or from the **Starting-Pose Matcher** tile in the GolfLauncher (registered
+Or from the **Starting-Pose Matcher** tile in the UpstreamDriftLauncher (registered
 in `src/config/models.yaml`).
 
 Requires the `gui-tools` extra:

@@ -20,7 +20,7 @@ This review analyzes function design throughout the UpstreamDrift codebase again
 
 While the codebase is functional and well-organized at the module level, there are significant Clean Code violations at the function level, particularly in:
 
-- GUI/Launcher code (`golf_launcher.py`)
+- GUI/Launcher code (`upstream_drift_launcher.py`)
 - Statistical analysis (`statistical_analysis.py`)
 - Text editor validation (`text_editor.py`)
 
@@ -34,10 +34,10 @@ While the codebase is functional and well-organized at the module level, there a
 
 | File                                               | Function                           | Lines | Issue                                                                                           |
 | -------------------------------------------------- | ---------------------------------- | ----- | ----------------------------------------------------------------------------------------------- |
-| `src/launchers/golf_launcher.py`                   | `_setup_top_bar()`                 | ~180  | Creates entire toolbar with 20+ widgets; mixes widget creation, styling, and signal connections |
-| `src/launchers/golf_launcher.py`                   | `__init__()`                       | ~112  | God constructor - handles icon loading, registry setup, UI init, Docker checks, timers          |
-| `src/launchers/golf_launcher.py`                   | `launch_simulation()`              | ~120  | Routes to 5+ different launch paths; mixes routing logic with execution                         |
-| `src/launchers/golf_launcher.py`                   | `_center_window()` (lines 676-731) | ~56   | Excessive defensive programming for mock handling                                               |
+| `src/launchers/upstream_drift_launcher.py`                   | `_setup_top_bar()`                 | ~180  | Creates entire toolbar with 20+ widgets; mixes widget creation, styling, and signal connections |
+| `src/launchers/upstream_drift_launcher.py`                   | `__init__()`                       | ~112  | God constructor - handles icon loading, registry setup, UI init, Docker checks, timers          |
+| `src/launchers/upstream_drift_launcher.py`                   | `launch_simulation()`              | ~120  | Routes to 5+ different launch paths; mixes routing logic with execution                         |
+| `src/launchers/upstream_drift_launcher.py`                   | `_center_window()` (lines 676-731) | ~56   | Excessive defensive programming for mock handling                                               |
 | `src/tools/model_generation/editor/text_editor.py` | `_validate_urdf()`                 | ~250  | Validates links, joints, relationships, limits all in one function                              |
 | `src/shared/python/statistical_analysis.py`        | `compute_swing_profile()`          | ~122  | Computes 5 different scores in one function                                                     |
 | `src/shared/python/statistical_analysis.py`        | `estimate_lyapunov_exponent()`     | ~125  | Combines phase space reconstruction, neighbor finding, divergence tracking                      |
@@ -46,14 +46,14 @@ While the codebase is functional and well-organized at the module level, there a
 
 | File                                      | Function              | Lines | Issue                                                                     |
 | ----------------------------------------- | --------------------- | ----- | ------------------------------------------------------------------------- |
-| `src/launchers/golf_launcher.py`          | `_load_layout()`      | ~65   | Mixes file I/O, JSON parsing, validation, UI restoration                  |
-| `src/launchers/golf_launcher.py`          | `closeEvent()`        | ~60   | Handles confirmation, timer cleanup, thread cleanup, process termination  |
-| `src/launchers/golf_launcher.py`          | `open_diagnostics()`  | ~78   | Builds runtime state, creates dialog, handles button response             |
+| `src/launchers/upstream_drift_launcher.py`          | `_load_layout()`      | ~65   | Mixes file I/O, JSON parsing, validation, UI restoration                  |
+| `src/launchers/upstream_drift_launcher.py`          | `closeEvent()`        | ~60   | Handles confirmation, timer cleanup, thread cleanup, process termination  |
+| `src/launchers/upstream_drift_launcher.py`          | `open_diagnostics()`  | ~78   | Builds runtime state, creates dialog, handles button response             |
 | `src/shared/python/ai/workflow_engine.py` | `execute_next_step()` | ~117  | Condition check, tool execution, validation, state update, error handling |
 
 ### 2. Functions with Multiple Responsibilities
 
-#### `golf_launcher.py::__init__()` (lines 167-279)
+#### `upstream_drift_launcher.py::__init__()` (lines 167-279)
 
 **Responsibilities violated:**
 
@@ -81,7 +81,7 @@ def __init__(self, startup_results: StartupResults | None = None):
     self._finalize_startup(startup_results)
 ```
 
-#### `golf_launcher.py::launch_simulation()` (lines 1806-1926)
+#### `upstream_drift_launcher.py::launch_simulation()` (lines 1806-1926)
 
 **Responsibilities violated:**
 
@@ -171,7 +171,7 @@ def __init__(self, data: SwingData):
 | ------------------------- | ------------------------ | --------- | ------------------------------------------------------- |
 | `text_editor.py`          | `_validate_urdf()`       | 6+        | Nested loops and conditionals for joint/link validation |
 | `statistical_analysis.py` | `compute_rqa_metrics()`  | 5         | Nested loops for diagonal/vertical line extraction      |
-| `golf_launcher.py`        | `_on_wsl_mode_changed()` | 4         | Try-except within if-else with nested conditions        |
+| `upstream_drift_launcher.py`        | `_on_wsl_mode_changed()` | 4         | Try-except within if-else with nested conditions        |
 
 **Example - `_validate_urdf()` nesting:**
 
@@ -192,9 +192,9 @@ for joint_elem in root.findall("joint"):       # Level 1
 
 | File                      | Function                    | Side Effects                                                                                             |
 | ------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `golf_launcher.py`        | `select_model()`            | Updates `selected_model`, changes card styling, updates context help, modifies launch button             |
-| `golf_launcher.py`        | `_on_docker_mode_changed()` | Modifies WSL checkbox, shows dialogs, updates execution status, shows toasts, updates launch button      |
-| `golf_launcher.py`        | `_apply_model_selection()`  | Modifies model_order, syncs cards, rebuilds grid, saves layout, updates selection, updates launch button |
+| `upstream_drift_launcher.py`        | `select_model()`            | Updates `selected_model`, changes card styling, updates context help, modifies launch button             |
+| `upstream_drift_launcher.py`        | `_on_docker_mode_changed()` | Modifies WSL checkbox, shows dialogs, updates execution status, shows toasts, updates launch button      |
+| `upstream_drift_launcher.py`        | `_apply_model_selection()`  | Modifies model_order, syncs cards, rebuilds grid, saves layout, updates selection, updates launch button |
 | `statistical_analysis.py` | `compute_work_metrics()`    | Writes to `_work_metrics_cache`                                                                          |
 
 ### 6. Good Examples (Well-Designed Functions)
@@ -231,7 +231,7 @@ def _validate_xml(self) -> list[ValidationMessage]:  # ~30 lines
 
 ### Pattern 1: God Class Anti-Pattern
 
-`GolfLauncher` (2200+ lines, 60+ methods) handles:
+`UpstreamDriftLauncher` (2200+ lines, 60+ methods) handles:
 
 - UI management
 - Process lifecycle
@@ -301,7 +301,7 @@ class StatisticalAnalyzer:
 
 ### High Priority (Address First)
 
-1. **Refactor `GolfLauncher.__init__()`** - Extract to 5-6 focused initialization methods
+1. **Refactor `UpstreamDriftLauncher.__init__()`** - Extract to 5-6 focused initialization methods
 2. **Refactor `launch_simulation()`** - Implement Strategy pattern for different launch types
 3. **Refactor `_validate_urdf()`** - Extract to separate validator classes
 4. **Extract `_setup_top_bar()`** - Create separate widget creation methods
@@ -324,7 +324,7 @@ class StatisticalAnalyzer:
 
 The codebase demonstrates good high-level organization (modular directories, clear naming, type hints throughout) but has accumulated technical debt at the function level. The most critical areas for improvement are:
 
-1. **GUI code** - `golf_launcher.py` needs significant refactoring
+1. **GUI code** - `upstream_drift_launcher.py` needs significant refactoring
 2. **Validation logic** - Extract to separate validator classes
 3. **Statistical analysis** - Consider composition over mixins
 

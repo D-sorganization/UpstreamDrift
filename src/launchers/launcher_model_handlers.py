@@ -88,6 +88,7 @@ class ModuleHandler:
     def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
         """Try to load the module and get its dockable UI widget."""
         import importlib
+
         try:
             module = importlib.import_module(self.module_name)
             if hasattr(module, "get_dockable_ui"):
@@ -149,17 +150,21 @@ class ScriptHandler:
         script_path = repo_path / self._script_path
         if not script_path.exists():
             return None
-        
+
         import importlib.util
         import sys
-        
+
         # Add repo_path to sys.path temporarily to resolve imports
         original_sys_path = sys.path.copy()
         if str(repo_path) not in sys.path:
             sys.path.insert(0, str(repo_path))
-            
+
         try:
-            module_name = self._script_path.replace("/", "_").replace("\\", "_").replace(".py", "")
+            module_name = (
+                self._script_path.replace("/", "_")
+                .replace("\\", "_")
+                .replace(".py", "")
+            )
             spec = importlib.util.spec_from_file_location(module_name, str(script_path))
             if spec and spec.loader:
                 module = importlib.util.module_from_spec(spec)
@@ -244,27 +249,32 @@ class SpecialAppHandler:
             adapter_script = repo_path / mod_path
             if adapter_script.exists():
                 import importlib.util
+
                 try:
-                    spec = importlib.util.spec_from_file_location("embed_adapter", str(adapter_script))
+                    spec = importlib.util.spec_from_file_location(
+                        "embed_adapter", str(adapter_script)
+                    )
                     if spec and spec.loader:
                         module = importlib.util.module_from_spec(spec)
                         spec.loader.exec_module(module)
                         if hasattr(module, func_name):
                             return getattr(module, func_name)()
                 except Exception as e:
-                    logger.warning("Failed to load embed_adapter %s: %s", embed_adapter, e)
+                    logger.warning(
+                        "Failed to load embed_adapter %s: %s", embed_adapter, e
+                    )
 
         model_path = getattr(model, "path", None) or ""
         if not model_path:
             return None
-            
+
         script_path = resolve_model_artifact_path(model, repo_path)
         if not script_path.exists():
             return None
-            
+
         import importlib.util
         import sys
-        
+
         original_sys_path = sys.path.copy()
         try:
             # Inject paths
@@ -274,7 +284,7 @@ class SpecialAppHandler:
             for p in paths:
                 if str(p) not in sys.path:
                     sys.path.insert(0, str(p))
-                    
+
             module_name = str(script_path.name).replace(".py", "")
             spec = importlib.util.spec_from_file_location(module_name, str(script_path))
             if spec and spec.loader:

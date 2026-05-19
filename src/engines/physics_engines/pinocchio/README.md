@@ -89,7 +89,7 @@ print(f"PINK version: {pink.__version__}")
 python engines/physics_engines/pinocchio/python/golf_swing_launcher.py
 
 # Or use unified launcher
-python launchers/golf_launcher.py --engine pinocchio
+python launchers/upstream_drift_launcher.py --engine pinocchio
 ```
 
 ### Python API
