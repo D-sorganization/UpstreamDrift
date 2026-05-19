@@ -28,7 +28,7 @@ from .io import BunkerShotResultReader, BunkerShotResultWriter
 # Kinematics
 from .kinematics import (
     CoSimulator,
-    MockDoublePendulum,
+    CoupledDoublePendulum,
     SwingTrajectory,
     generate_reference_trajectory,
 )
@@ -48,7 +48,7 @@ __all__: list[str] = [
     "DrainedShearCellExperiment",
     "LiggghtsDriver",
     "MPMDriver",
-    "MockDoublePendulum",
+    "CoupledDoublePendulum",
     "SwingTrajectory",
     "WrenchTrace",
     "__version__",
