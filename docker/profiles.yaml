@@ -1,0 +1,55 @@
+# Docker build profile catalog.
+#
+# Each profile names a feature set and a max image-size budget. The
+# feature list resolves through the same canonical feature registry
+# that the runtime probes use
+# (src/shared/python/feature_registry/features.py), so there is one
+# source of truth: a feature listed here MUST exist there.
+#
+# Consumers:
+#   - scripts/docker/install_features.py       (translates profile → pip args)
+#   - Dockerfile                                (selects FEATURES build-arg)
+#   - docker-compose.profiles.yml               (one service per profile)
+#   - src/launchers/launcher_constants.py       (UI dropdown of profiles)
+#   - .github/workflows/docker-size-gates.yml   (per-profile size budgets)
+#
+# The "extends" key composes profiles by feature-set union; cycles
+# are rejected by install_features.py.
+
+version: 1
+
+profiles:
+  slim:
+    description: API + pure-Python pendulum models. Smallest viable image.
+    features: [api, pendulum]
+    max_size_mb: 900
+
+  standard:
+    description: Default research build — API + MuJoCo + Pinocchio.
+    extends: slim
+    features: [mujoco, pinocchio]
+    max_size_mb: 2200
+
+  research:
+    description: Standard plus Drake and MediaPipe pose backends.
+    extends: standard
+    features: [drake, pose-mediapipe]
+    max_size_mb: 3500
+
+  biomech:
+    description: Standard plus OpenSim and MyoSuite (experimental tier).
+    extends: standard
+    features: [opensim, myosuite]
+    max_size_mb: 4800
+
+  full:
+    description: Every CPU-only feature. Heaviest non-GPU build.
+    extends: biomech
+    features: [drake, pose-mediapipe, chrono]
+    max_size_mb: 6000
+
+  gpu-training:
+    description: Full plus PyTorch (CUDA 12.4) and the RL stack.
+    extends: full
+    features: [torch-cuda, rl-stack]
+    max_size_mb: 9500
