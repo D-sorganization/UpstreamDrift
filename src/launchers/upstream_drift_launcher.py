@@ -886,6 +886,12 @@ class UpstreamDriftLauncher(
             self._rebuild_grid()
             return
 
+        # Restore view mode checkmark
+        if hasattr(self, "_viewmode_actions"):
+            act = self._viewmode_actions.get(self.layout_manager.current_view_mode)
+            if act:
+                act.setChecked(True)
+
         self.model_order = self.layout_manager.model_order
         self._sync_model_cards()
 

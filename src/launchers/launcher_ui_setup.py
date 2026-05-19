@@ -340,6 +340,22 @@ class LauncherUISetupMixin:
             0, self.workspace_tabs.tabBar().ButtonPosition.LeftSide, None
         )
 
+        # Add Library Tab
+        try:
+            from src.launchers.library_widget import LibraryWidget
+
+            self.library_widget = LibraryWidget(self)
+            self.workspace_tabs.addTab(self.library_widget, "Library")
+            # Prevent closing the Library tab
+            self.workspace_tabs.tabBar().setTabButton(
+                1, self.workspace_tabs.tabBar().ButtonPosition.RightSide, None
+            )
+            self.workspace_tabs.tabBar().setTabButton(
+                1, self.workspace_tabs.tabBar().ButtonPosition.LeftSide, None
+            )
+        except ImportError as e:
+            logger.warning(f"Could not load Library tab: {e}")
+
         content_layout.addWidget(self.workspace_tabs, 1)
 
         main_layout.addWidget(content_container)

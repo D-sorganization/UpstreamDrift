@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.sql import text
 
-from src.api.auth.models import Base
+# Base imported locally in create_tables to avoid circular import
 
 # Database configuration
 DATABASE_URL = os.getenv(
@@ -41,6 +41,8 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def create_tables() -> None:
     """Create all database tables."""
+    from src.api.auth.models import Base
+
     Base.metadata.create_all(bind=engine)
 
 
