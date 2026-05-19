@@ -173,7 +173,8 @@ class PowerFlowAnalyzer:
             inertia = body.inertia
 
             ke_linear = 0.5 * mass * np.dot(com_vel, com_vel)
-            ke_rotational = 0.5 * np.sum(inertia * ang_vel**2)
+            # ⚡ Bolt: np.vdot avoids temporary allocations for element-wise squares
+            ke_rotational = 0.5 * np.vdot(inertia, ang_vel * ang_vel)
             segment_ke[i] = ke_linear + ke_rotational
 
             com_pos_world = self._data.xpos[i]
