@@ -1,4 +1,4 @@
-"""Tests for SettingsDialog."""
+"""Tests for SettingsWidget."""
 
 import time  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
@@ -10,7 +10,7 @@ from src.launchers.settings_dialog import (  # noqa: E402
     TAB_DIAGNOSTICS,
     TAB_LAYOUT,
     TAB_MCP_SERVERS,
-    SettingsDialog,
+    SettingsWidget,
     validate_tab_index,
 )
 
@@ -57,7 +57,7 @@ def parent_launcher(qapp) -> QWidget:
 
 def test_settings_dialog_init(parent_launcher, qapp) -> None:
     data = {"summary": {"status": "healthy"}}
-    dialog = SettingsDialog(
+    dialog = SettingsWidget(
         parent=parent_launcher, diagnostics_data=data, initial_tab=TAB_CONFIG
     )
 
@@ -71,7 +71,7 @@ def test_settings_dialog_init(parent_launcher, qapp) -> None:
 
 
 def test_on_reset_layout(parent_launcher, qapp) -> None:
-    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_LAYOUT)
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_LAYOUT)
 
     mock_slot = MagicMock()
     dialog.reset_layout_requested.connect(mock_slot)
@@ -82,7 +82,7 @@ def test_on_reset_layout(parent_launcher, qapp) -> None:
 
 @patch("src.launchers.settings_dialog.DockerBuildThread")
 def test_start_build(mock_thread_class, parent_launcher, qapp) -> None:
-    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
 
     mock_thread = MagicMock()
     mock_thread_class.return_value = mock_thread
@@ -96,7 +96,7 @@ def test_start_build(mock_thread_class, parent_launcher, qapp) -> None:
 
 
 def test_on_build_finished(parent_launcher, qapp) -> None:
-    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
     dialog._build_start_time = 0
     dialog._build_timer_id = 123
     dialog.killTimer = MagicMock()
@@ -113,7 +113,7 @@ def test_on_build_finished(parent_launcher, qapp) -> None:
 
 
 def test_cancel_build(parent_launcher, qapp) -> None:
-    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
     dialog.build_thread = MagicMock()
     dialog.build_thread.isRunning.return_value = True
     dialog._build_timer_id = 123
@@ -134,13 +134,13 @@ def test_cancel_build(parent_launcher, qapp) -> None:
 def test_load_app_log_success(mock_exists, parent_launcher, qapp) -> None:
     log_content = "Line 1\nLine 2\n"
     with patch("pathlib.Path.read_text", return_value=log_content):
-        dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_DIAGNOSTICS)
+        dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_DIAGNOSTICS)
         assert dialog._log_viewer.toPlainText() == "Line 1\nLine 2"
 
 
 @patch("pathlib.Path.exists", return_value=False)
 def test_load_app_log_fail(mock_exists, parent_launcher, qapp) -> None:
-    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_DIAGNOSTICS)
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_DIAGNOSTICS)
     assert "No log file found" in dialog._log_viewer.toPlainText()
 
 
@@ -148,7 +148,7 @@ def test_load_app_log_fail(mock_exists, parent_launcher, qapp) -> None:
 def test_load_process_log_success(mock_exists, parent_launcher, qapp) -> None:
     log_content = "Process Line 1\nProcess Line 2\n"
     with patch("pathlib.Path.read_text", return_value=log_content):
-        dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_DIAGNOSTICS)
+        dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_DIAGNOSTICS)
         assert dialog._proc_log_viewer.toPlainText() == "Process Line 1\nProcess Line 2"
 
 
@@ -158,7 +158,7 @@ def test_refresh_diagnostics(mock_diag_class, parent_launcher, qapp) -> None:
     mock_diag.run_all_checks.return_value = {"summary": {"status": "degraded"}}
     mock_diag_class.return_value = mock_diag
 
-    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_DIAGNOSTICS)
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_DIAGNOSTICS)
 
     dialog._refresh_diagnostics()
 
@@ -167,7 +167,7 @@ def test_refresh_diagnostics(mock_diag_class, parent_launcher, qapp) -> None:
 
 
 def test_timer_event(parent_launcher, qapp) -> None:
-    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
     dialog._build_start_time = time.monotonic() - 5
 
     dialog.timerEvent(None)
@@ -179,7 +179,7 @@ def test_timer_event(parent_launcher, qapp) -> None:
 
 def test_settings_dialog_no_launcher() -> None:
     # Test initialization without a parent launcher to cover the 'if launcher' conditions
-    dialog = SettingsDialog(parent=None, initial_tab=TAB_CONFIG)
+    dialog = SettingsWidget(parent=None, initial_tab=TAB_CONFIG)
     assert dialog.parent() is None
 
     # Test diagnostics refresh without a launcher parent
@@ -238,7 +238,7 @@ def test_settings_dialog_no_launcher() -> None:
 
 
 def test_load_logs_exceptions(parent_launcher, qapp) -> None:
-    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_DIAGNOSTICS)
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_DIAGNOSTICS)
 
     # Refresh all logs triggers both loading functions
     with (
@@ -252,7 +252,7 @@ def test_load_logs_exceptions(parent_launcher, qapp) -> None:
 
 
 def test_on_build_log(parent_launcher, qapp) -> None:
-    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
 
     # Should update the text and cursor
     dialog._on_build_log("Step 1/2")
@@ -264,7 +264,7 @@ def test_on_build_log(parent_launcher, qapp) -> None:
 
 
 def test_on_build_finished_no_timer(parent_launcher, qapp) -> None:
-    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
     dialog._build_start_time = 0
     # Timer not set
     if hasattr(dialog, "_build_timer_id"):
@@ -275,7 +275,7 @@ def test_on_build_finished_no_timer(parent_launcher, qapp) -> None:
 
 
 def test_cancel_build_no_timer(parent_launcher, qapp) -> None:
-    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
     dialog.build_thread = MagicMock()
     dialog.build_thread.isRunning.return_value = True
 
@@ -288,7 +288,7 @@ def test_cancel_build_no_timer(parent_launcher, qapp) -> None:
 
 
 def test_cancel_build_not_running(parent_launcher, qapp) -> None:
-    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
     dialog.build_thread = MagicMock()
     dialog.build_thread.isRunning.return_value = False
 
@@ -298,7 +298,7 @@ def test_cancel_build_not_running(parent_launcher, qapp) -> None:
 
 
 def test_timer_event_no_start_time(parent_launcher, qapp) -> None:
-    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
     if hasattr(dialog, "_build_start_time"):
         del dialog._build_start_time
 
@@ -311,7 +311,7 @@ def test_timer_event_no_start_time(parent_launcher, qapp) -> None:
 
 def test_layout_tab_view_mode_combo_populated(parent_launcher, qapp) -> None:
     """#5730: ViewMode combo must be populated (import from correct module)."""
-    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_LAYOUT)
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_LAYOUT)
     # If the import is broken the combo stays empty (count == 0)
     assert dialog.combo_view_mode.count() > 0, (
         "combo_view_mode has no items — ViewMode import failed (check #5730)"
@@ -337,7 +337,7 @@ def test_layout_tab_zoom_slider_calls_on_zoom_slider_changed(
     if hasattr(parent_launcher, "_zoom_slider_changed"):
         del parent_launcher._zoom_slider_changed
 
-    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_LAYOUT)
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_LAYOUT)
 
     # Simulate slider movement
     dialog.zoom_slider.setValue(75)

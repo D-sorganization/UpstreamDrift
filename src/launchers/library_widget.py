@@ -174,15 +174,13 @@ class LibraryWidget(QWidget):
         # Toolbar
         toolbar = QWidget()
         toolbar.setStyleSheet(
-            f"background-color: {Styles.COLOR_PANEL_BG}; border-bottom: 1px solid {Styles.COLOR_BORDER};"
+            "background-color: #1e1e1e; border-bottom: 1px solid #3d3d3d;"
         )
         toolbar_layout = QHBoxLayout(toolbar)
         toolbar_layout.setContentsMargins(12, 8, 12, 8)
 
         lbl_title = QLabel("Research Library")
-        lbl_title.setStyleSheet(
-            f"font-size: 16px; font-weight: bold; color: {Styles.COLOR_TEXT_PRIMARY};"
-        )
+        lbl_title.setStyleSheet("font-size: 16px; font-weight: bold; color: #e1e1e1;")
         toolbar_layout.addWidget(lbl_title)
 
         toolbar_layout.addStretch()
@@ -361,9 +359,7 @@ class LibraryWidget(QWidget):
         self.chat_input.clear()
 
         # Append user query to browser
-        self.preview_browser.append(
-            f"<br><b style='color: {Styles.COLOR_ACCENT};'>You:</b> {query}"
-        )
+        self.preview_browser.append(f"<br><b style='color: #0A84FF;'>You:</b> {query}")
 
         # Determine if we can extract context
         context_text = ""
