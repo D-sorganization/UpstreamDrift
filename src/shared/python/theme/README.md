@@ -6,7 +6,7 @@ D-sorganization repository fleet.
 ## Features
 
 - **13 built-in themes**: Light, Dark, Slate Gray, Ocean Blue, Forest Green,
-  Monokai, Dracula, One Dark, Gitpod Dark, MS Word, MS Excel, Legal Pad,
+  Neon Warm Dark, Vampire Dark, Frost Dark, Teal Dark, Office Blue, Office Green, Sandstone Yellow,
   High Contrast
 - **Custom themes** with QSettings persistence
 - **Theme inheritance** for docked/embedded sub-applications
@@ -50,7 +50,7 @@ class MyWindow(ThemedWindowMixin, QMainWindow):
 from shared.python.theme import ThemeManager
 
 manager = ThemeManager.instance()
-manager.change_theme("Dracula")
+manager.change_theme("Vampire Dark")
 colors = manager.get_current_colors()   # dict[str, str]
 ```
 

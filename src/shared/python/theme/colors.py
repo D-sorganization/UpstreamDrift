@@ -133,7 +133,7 @@ _HARDCODED_BUILTIN_THEMES: dict[str, dict[str, str]] = {
         "border": "#ced4da",
         "text": "#212529",
         "text_secondary": "#495057",
-        "label": "#6c757d",
+        "label": "#666e76",
         "focus": "#80bdff",
         "input_bg": "#ffffff",
         "accent": "#5a8fc4",
@@ -220,13 +220,13 @@ _HARDCODED_BUILTIN_THEMES: dict[str, dict[str, str]] = {
     # ------------------------------------------------------------------
     # Editor/IDE Themes
     # ------------------------------------------------------------------
-    "Monokai": {
-        "name": "Monokai",
+    "Neon Warm Dark": {
+        "name": "Neon Warm Dark",
         "bg": "#272822",
         "group_bg": "#3e3d32",
         "border": "#75715e",
         "text": "#f8f8f2",
-        "text_secondary": "#ae81ff",
+        "text_secondary": "#be98ff",
         "label": "#e6db74",
         "focus": "#a6e22e",
         "input_bg": "#171814",
@@ -237,8 +237,8 @@ _HARDCODED_BUILTIN_THEMES: dict[str, dict[str, str]] = {
         "table_alt": "#272822",
         "button_hover": "#e6db74",
     },
-    "Dracula": {
-        "name": "Dracula",
+    "Vampire Dark": {
+        "name": "Vampire Dark",
         "bg": "#282a36",
         "group_bg": "#343746",
         "border": "#6272a4",
@@ -254,8 +254,8 @@ _HARDCODED_BUILTIN_THEMES: dict[str, dict[str, str]] = {
         "table_alt": "#282a36",
         "button_hover": "#ff79c6",
     },
-    "One Dark": {
-        "name": "One Dark",
+    "Frost Dark": {
+        "name": "Frost Dark",
         "bg": "#282c34",
         "group_bg": "#30363f",
         "border": "#5c6370",
@@ -271,8 +271,8 @@ _HARDCODED_BUILTIN_THEMES: dict[str, dict[str, str]] = {
         "table_alt": "#282c34",
         "button_hover": "#c678dd",
     },
-    "Gitpod Dark": {
-        "name": "Gitpod Dark",
+    "Teal Dark": {
+        "name": "Teal Dark",
         "bg": "#0d1117",
         "group_bg": "#161b22",
         "border": "#30363d",
@@ -291,8 +291,8 @@ _HARDCODED_BUILTIN_THEMES: dict[str, dict[str, str]] = {
     # ------------------------------------------------------------------
     # Office/Productivity Themes
     # ------------------------------------------------------------------
-    "MS Word": {
-        "name": "MS Word",
+    "Office Blue": {
+        "name": "Office Blue",
         "bg": "#ffffff",
         "group_bg": "#f3f3f3",
         "border": "#d1d1d1",
@@ -308,8 +308,8 @@ _HARDCODED_BUILTIN_THEMES: dict[str, dict[str, str]] = {
         "table_alt": "#f9f9f9",
         "button_hover": "#1e3f6f",
     },
-    "MS Excel": {
-        "name": "MS Excel",
+    "Office Green": {
+        "name": "Office Green",
         "bg": "#ffffff",
         "group_bg": "#f3f3f3",
         "border": "#d1d1d1",
@@ -325,8 +325,8 @@ _HARDCODED_BUILTIN_THEMES: dict[str, dict[str, str]] = {
         "table_alt": "#f0f7ec",
         "button_hover": "#185c37",
     },
-    "Legal Pad": {
-        "name": "Legal Pad",
+    "Sandstone Yellow": {
+        "name": "Sandstone Yellow",
         "bg": "#ffffc0",
         "group_bg": "#fff8a8",
         "border": "#d4c97a",

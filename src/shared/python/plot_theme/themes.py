@@ -292,9 +292,9 @@ CATPPUCCIN_LATTE = PlotTheme(
     heatmap_cmap="plasma",
 )
 
-# Dracula - Dark theme
-DRACULA = PlotTheme(
-    name="Dracula",
+# Vampire Dark - Dark theme
+VAMPIRE_DARK = PlotTheme(
+    name="Vampire Dark",
     description="Dark theme with vibrant colors",
     figure_facecolor="#282a36",
     axes_facecolor="#21222c",
@@ -388,9 +388,9 @@ SOLARIZED_LIGHT = PlotTheme(
     heatmap_cmap="plasma",
 )
 
-# One Dark
-ONE_DARK = PlotTheme(
-    name="One Dark",
+# Frost Dark
+FROST_DARK = PlotTheme(
+    name="Frost Dark",
     description="Atom One Dark inspired theme",
     figure_facecolor="#282c34",
     axes_facecolor="#21252b",
@@ -541,11 +541,11 @@ PLOT_THEMES: dict[str, PlotTheme] = {
     "scientific_violet_dark": SCIENTIFIC_VIOLET_DARK,
     "catppuccin_mocha": CATPPUCCIN_MOCHA,
     "catppuccin_latte": CATPPUCCIN_LATTE,
-    "dracula": DRACULA,
+    "vampire_dark": VAMPIRE_DARK,
     "nord": NORD,
     "solarized_dark": SOLARIZED_DARK,
     "solarized_light": SOLARIZED_LIGHT,
-    "one_dark": ONE_DARK,
+    "frost_dark": FROST_DARK,
     "gruvbox_dark": GRUVBOX_DARK,
     "material_dark": MATERIAL_DARK,
     "tokyo_night": TOKYO_NIGHT,

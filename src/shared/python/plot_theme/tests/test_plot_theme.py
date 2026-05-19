@@ -126,11 +126,11 @@ class TestPredefinedThemes:
             "scientific_violet_dark",
             "catppuccin_mocha",
             "catppuccin_latte",
-            "dracula",
+            "vampire_dark",
             "nord",
             "solarized_dark",
             "solarized_light",
-            "one_dark",
+            "frost_dark",
             "gruvbox_dark",
             "material_dark",
             "tokyo_night",
@@ -279,9 +279,9 @@ class TestPlotThemeManager:
     def test_set_theme_changes_current(self):
         m = self._make_manager()
         with patch.object(m, "_save_theme"):
-            m.set_theme("dracula")
-        assert m.current_theme_name == "dracula"
-        assert m.current_theme.name == "Dracula"
+            m.set_theme("vampire_dark")
+        assert m.current_theme_name == "vampire_dark"
+        assert m.current_theme.name == "Vampire Dark"
 
     def test_set_theme_without_saving(self):
         m = self._make_manager()
@@ -300,9 +300,9 @@ class TestPlotThemeManager:
         called_with = []
         m.add_theme_change_callback(lambda t: called_with.append(t))
         with patch.object(m, "_save_theme"):
-            m.set_theme("dracula")
+            m.set_theme("vampire_dark")
         assert len(called_with) == 1
-        assert called_with[0].name == "Dracula"
+        assert called_with[0].name == "Vampire Dark"
 
     def test_set_theme_swallows_callback_errors(self):
         m = self._make_manager()
@@ -321,7 +321,7 @@ class TestPlotThemeManager:
         m.add_theme_change_callback(cb)
         m.remove_theme_change_callback(cb)
         with patch.object(m, "_save_theme"):
-            m.set_theme("dracula")
+            m.set_theme("vampire_dark")
         cb.assert_not_called()
 
     def test_add_callback_deduplicates(self):
@@ -330,7 +330,7 @@ class TestPlotThemeManager:
         m.add_theme_change_callback(cb)
         m.add_theme_change_callback(cb)  # second add should be ignored
         with patch.object(m, "_save_theme"):
-            m.set_theme("dracula")
+            m.set_theme("vampire_dark")
         assert cb.call_count == 1
 
     def test_remove_nonexistent_callback_safe(self):
@@ -423,7 +423,7 @@ class TestPlotThemeManager:
     def test_load_saved_theme_via_qsettings(self):
         """QSettings path: saved theme loaded if it exists in registry."""
         mock_settings = MagicMock()
-        mock_settings.value.return_value = "dracula"
+        mock_settings.value.return_value = "vampire_dark"
         with (
             patch.dict(
                 "sys.modules", {"PyQt6": MagicMock(), "PyQt6.QtCore": MagicMock()}
@@ -545,7 +545,7 @@ class TestIntegration함수:
         mock_ax = MagicMock()
         mock_ax.spines.values.return_value = []
         with self._make_manager_patch():
-            style_axis(mock_ax, theme_name="dracula")
+            style_axis(mock_ax, theme_name="vampire_dark")
         mock_ax.set_facecolor.assert_called_once()
 
     def test_get_theme_colors_current_theme(self):
@@ -561,7 +561,7 @@ class TestIntegration함수:
         from plot_theme.integration import get_theme_colors
 
         with self._make_manager_patch():
-            colors = get_theme_colors("dracula")
+            colors = get_theme_colors("vampire_dark")
         assert colors["primary"] == "#bd93f9"
 
     def test_plot_theme_mixin_setup(self):
