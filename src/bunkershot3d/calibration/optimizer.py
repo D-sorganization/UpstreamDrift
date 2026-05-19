@@ -3,7 +3,7 @@ Optimization loop for calibrating backend parameters to bulk properties.
 """
 
 import numpy as np
-from scipy.optimize import minimize
+from scipy.optimize import differential_evolution
 from typing import Any
 from collections.abc import Callable
 
@@ -49,16 +49,16 @@ class CalibrationOptimizer:
         raise ValueError("Experiment does not define known target properties.")
 
     def optimize(self) -> dict[str, float]:
-        """Run Nelder-Mead optimization to find the best contact parameters."""
-        # Initial guess: standard sand values
-        x0 = np.array([0.5, 0.3])
-
-        # Nelder-Mead is gradient-free, ideal for noisy granular simulations
-        res = minimize(
+        bounds = [(0.01, 1.0), (0.01, 1.0)]
+        
+        # differential_evolution is a stochastic population-based method suitable for noisy granular simulations
+        res = differential_evolution(
             self._objective,
-            x0,
-            method="Nelder-Mead",
-            options={"xatol": 0.01, "fatol": 0.1, "maxiter": 50},
+            bounds,
+            strategy='best1bin',
+            maxiter=50,
+            popsize=5,
+            tol=0.01,
         )
 
         best_fric, best_rest = res.x
