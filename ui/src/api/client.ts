@@ -232,6 +232,13 @@ export function useSimulation(engineType: string) {
     }
   }, []);
 
+  const setSpeed = useCallback((speed: number) => {
+    const ws = wsRef.current;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ action: 'set_speed', factor: speed, speed }));
+    }
+  }, []);
+
   // Track mounted state and cleanup on unmount
   useEffect(() => {
     isMountedRef.current = true;
@@ -254,6 +261,7 @@ export function useSimulation(engineType: string) {
     start,
     stop,
     pause,
-    resume
+    resume,
+    setSpeed
   };
 }
