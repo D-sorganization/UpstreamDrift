@@ -179,36 +179,36 @@ class DraggableModelCard(QFrame):
 
         self._base_style = f"""
             #ModelCard {{
-                background-color: {_color(c, "surface_primary", "input_bg", "#ffffff")};
-                border: 1px solid {_color(c, "border_light", "border", "#cccccc")};
+                background-color: {_color(c, "surface_hover", "group_bg", "#2d2d2d")};
+                border: 1px solid {_color(c, "border_light", "border", "#444444")};
                 border-radius: 16px;
             }}
             #ModelCard:hover {{
-                background-color: {_color(c, "surface_hover", "group_bg", "#f0f0f0")};
-                border: 1px solid {_color(c, "border_strong", "focus", "#999999")};
+                background-color: {_color(c, "surface_active", "input_bg", "#3a3a3a")};
+                border: 1px solid {_color(c, "border_strong", "focus", "#666666")};
             }}
             #CardName {{
-                color: {_color(c, "text_primary", "text", "#000000")};
+                color: {_color(c, "text_primary", "text", "#ffffff")};
             }}
             #CardDescription {{
-                color: {_color(c, "text_secondary", "text_secondary", "#555555")};
+                color: {_color(c, "text_secondary", "text_secondary", "#aaaaaa")};
             }}
         """
         self._selected_style = f"""
             #ModelCard {{
-                background-color: {_color(c, "accent_muted", "title_bg", "#e0f0ff")};
-                border: 2px solid {_color(c, "accent_primary", "accent", "#0078d7")};
+                background-color: {_color(c, "accent_muted", "title_bg", "#1a3a5a")};
+                border: 2px solid {_color(c, "accent_primary", "accent", "#0a84ff")};
                 border-radius: 16px;
             }}
             #ModelCard:hover {{
-                background-color: {_color(c, "accent_muted", "table_alt", "#d0e8ff")};
-                border: 2px solid {_color(c, "accent_hover", "focus", "#005a9e")};
+                background-color: {_color(c, "accent_muted", "table_alt", "#1a3a5a")};
+                border: 2px solid {_color(c, "accent_hover", "focus", "#409cff")};
             }}
             #CardName {{
-                color: {_color(c, "text_primary", "text", "#000000")};
+                color: {_color(c, "text_primary", "text", "#ffffff")};
             }}
             #CardDescription {{
-                color: {_color(c, "text_secondary", "text_secondary", "#555555")};
+                color: {_color(c, "text_secondary", "text_secondary", "#aaaaaa")};
             }}
         """
         # Glassmorphism styling - enhanced with translucent backgrounds and background-blur effect

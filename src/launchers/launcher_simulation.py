@@ -224,7 +224,8 @@ except (RuntimeError, TypeError, AttributeError) as e:
         handler = self.model_handler_registry.get_handler(model.type)
         if handler:
             # Unified Architecture: Check if handler supports docking
-            if hasattr(handler, "get_dockable_ui"):
+            dockable_factory = getattr(type(handler), "get_dockable_ui", None)
+            if callable(dockable_factory):
                 try:
                     ui_widget = handler.get_dockable_ui(model, REPOS_ROOT)
                     if ui_widget:
