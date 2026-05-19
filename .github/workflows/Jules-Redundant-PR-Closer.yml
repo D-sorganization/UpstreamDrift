@@ -51,7 +51,7 @@ permissions:
 
 concurrency:
   group: jules-redundant-pr-closer-${{ github.repository }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   close-redundant:

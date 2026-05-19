@@ -10,6 +10,10 @@ permissions:
   issues: write
   security-events: write
 
+concurrency:
+  group: security-osv-monitor-${{ github.repository }}
+  cancel-in-progress: true
+
 jobs:
   osv-monitor:
     timeout-minutes: 30
