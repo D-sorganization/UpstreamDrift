@@ -9,7 +9,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from src.shared.python.core.contracts import ContractChecker
-from src.shared.python.data_io.common_utils import GolfModelingError
+from src.shared.python.core.exceptions import GolfModelingError
 
 
 @dataclass
