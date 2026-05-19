@@ -135,6 +135,12 @@ class TestJinjaReportTemplateRendering:
         result = tpl.render({"chs": 108.5})
         assert "108.5" in result
 
+    def test_render_escapes_html_context(self):
+        tpl = JinjaReportTemplate("test", "Notes: {{ notes }}")
+        result = tpl.render({"notes": "<script>alert(1)</script>"})
+        assert "<script>" not in result
+        assert "&lt;script&gt;" in result
+
 
 # ===========================================================================
 # AgenticSummaryGenerator tests

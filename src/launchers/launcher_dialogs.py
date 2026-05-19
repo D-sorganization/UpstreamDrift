@@ -541,7 +541,9 @@ class ThemedModalDialog(QDialog):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         self.setProperty("class", "themed-modal")
-        self.style().polish(self)
+        style = self.style()
+        if style is not None:
+            style.polish(self)
 
         layout = QVBoxLayout(self)
 
@@ -578,12 +580,16 @@ class ThemedModalDialog(QDialog):
 
         self.btn_yes = QPushButton("Yes")
         self.btn_yes.setProperty("class", "primary")
-        self.btn_yes.style().polish(self.btn_yes)
+        yes_style = self.btn_yes.style()
+        if yes_style is not None:
+            yes_style.polish(self.btn_yes)
         self.btn_yes.clicked.connect(self.accept)
 
         self.btn_no = QPushButton("No")
         self.btn_no.setProperty("class", "secondary")
-        self.btn_no.style().polish(self.btn_no)
+        no_style = self.btn_no.style()
+        if no_style is not None:
+            no_style.polish(self.btn_no)
         self.btn_no.clicked.connect(self.reject)
 
         btn_layout.addWidget(self.btn_no)

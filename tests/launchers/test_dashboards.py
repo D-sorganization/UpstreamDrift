@@ -21,10 +21,7 @@ def test_mujoco_dashboard_main() -> None:
 
 def test_pinocchio_dashboard_main() -> None:
     pytest.importorskip("pinocchio")
-    with (
-        patch("src.launchers.pinocchio_dashboard.PinocchioPhysicsEngine"),
-        patch("src.launchers.pinocchio_dashboard.launch_dashboard") as mock_launch,
-    ):
+    with patch("src.launchers.pinocchio_dashboard.launch_dashboard") as mock_launch:
         pinocchio_main()
         mock_launch.assert_called_once()
         _, kwargs = mock_launch.call_args

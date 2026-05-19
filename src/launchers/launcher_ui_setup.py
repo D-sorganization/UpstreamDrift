@@ -327,18 +327,17 @@ class LauncherUISetupMixin:
             if index > 0:
                 widget = self.workspace_tabs.widget(index)
                 self.workspace_tabs.removeTab(index)
-                widget.deleteLater()
+                if widget is not None:
+                    widget.deleteLater()
 
         self.workspace_tabs.tabCloseRequested.connect(_on_tab_close_requested)
 
         self.workspace_tabs.addTab(self.content_splitter, "Home")
         # Prevent closing the Home tab
-        self.workspace_tabs.tabBar().setTabButton(
-            0, self.workspace_tabs.tabBar().ButtonPosition.RightSide, None
-        )
-        self.workspace_tabs.tabBar().setTabButton(
-            0, self.workspace_tabs.tabBar().ButtonPosition.LeftSide, None
-        )
+        tab_bar = self.workspace_tabs.tabBar()
+        if tab_bar is not None:
+            tab_bar.setTabButton(0, tab_bar.ButtonPosition.RightSide, None)
+            tab_bar.setTabButton(0, tab_bar.ButtonPosition.LeftSide, None)
 
         self.library_widget = None
         self.library_window = None
@@ -408,11 +407,11 @@ class LauncherUISetupMixin:
 
     def popout_widget(self, widget: QWidget, title: str) -> None:
         """Pop out a submodule widget into a separate window."""
-        if not hasattr(self, "_popped_out_windows"):
-            self._popped_out_windows = []
-
-        from PyQt6.QtWidgets import QDialog, QVBoxLayout
         from PyQt6.QtCore import Qt
+        from PyQt6.QtWidgets import QDialog, QVBoxLayout
+
+        if not hasattr(self, "_popped_out_windows"):
+            self._popped_out_windows: list[QDialog] = []
 
         # We use a non-modal dialog to allow it to float freely
         win = QDialog(self, Qt.WindowType.Window)

@@ -225,9 +225,9 @@ class LibraryWidget(QWidget):
         self.table.setObjectName("LibraryTable")
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(["Title", "Author", "Year", "Topic"])
-        self.table.horizontalHeader().setSectionResizeMode(
-            0, QHeaderView.ResizeMode.Stretch
-        )
+        header = self.table.horizontalHeader()
+        if header is not None:
+            header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
@@ -415,7 +415,11 @@ class LibraryWidget(QWidget):
             return
 
         # First column has the data
-        doc = self.table.item(selected[0].row(), 0).data(Qt.ItemDataRole.UserRole)
+        item = self.table.item(selected[0].row(), 0)
+        if item is None:
+            return
+
+        doc = item.data(Qt.ItemDataRole.UserRole)
         if not doc:
             return
 
@@ -441,7 +445,14 @@ class LibraryWidget(QWidget):
         if not selected:
             return
 
-        doc = self.table.item(selected[0].row(), 0).data(Qt.ItemDataRole.UserRole)
+        item = self.table.item(selected[0].row(), 0)
+        if item is None:
+            return
+
+        doc = item.data(Qt.ItemDataRole.UserRole)
+        if not doc:
+            return
+
         file_path = Path(doc["file_path"])
 
         # Clear input

@@ -21,6 +21,7 @@ from PyQt6.QtWidgets import (
     QGroupBox,
     QHBoxLayout,
     QLabel,
+    QMainWindow,
     QPushButton,
     QTextBrowser,
     QTextEdit,
@@ -142,7 +143,10 @@ class SettingsWidget(QWidget):
         try:
             from src.shared.python.ui.preferences_dialog import PreferencesDialog
 
-            self._prefs_dialog = PreferencesDialog(self._launcher or self)
+            prefs_parent = (
+                self._launcher if isinstance(self._launcher, QMainWindow) else None
+            )
+            self._prefs_dialog = PreferencesDialog(prefs_parent)
             self.tabs.addTab(self._prefs_dialog._create_appearance_tab(), "Appearance")
             self.tabs.addTab(self._prefs_dialog._create_startup_tab(), "Startup")
             self.tabs.addTab(

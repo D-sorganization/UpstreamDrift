@@ -19,7 +19,7 @@ This module composes focused mixin classes into the UpstreamDriftLauncher:
 
 import contextlib
 import sys
-from typing import Any
+from typing import Any, cast
 
 from PyQt6.QtCore import QEventLoop, QObject, QRunnable, QThreadPool, QTimer, pyqtSignal
 from PyQt6.QtGui import QCloseEvent, QIcon
@@ -63,15 +63,18 @@ from src.launchers.ui_components import (
 
 
 class FramelessResizeFilter(QObject):
-    def __init__(self, window):
+    def __init__(self, window: QMainWindow) -> None:
         super().__init__(window)
         self.window = window
         self._resizing = False
         self._resize_edge = 0
         self._start_pos = None
-        self._start_geo = None
+        self._start_geo: QRect | None = None
 
-    def eventFilter(self, obj, event):
+    def eventFilter(self, obj: QObject | None, event: QEvent | None) -> bool:
+        if event is None:
+            return False
+        typed_event = cast(Any, event)
         if event.type() in (
             QEvent.Type.MouseMove,
             QEvent.Type.MouseButtonPress,
@@ -113,7 +116,7 @@ class FramelessResizeFilter(QObject):
                     if edge != 0:
                         if (
                             event.type() == QEvent.Type.MouseButtonPress
-                            and event.button() == Qt.MouseButton.LeftButton
+                            and typed_event.button() == Qt.MouseButton.LeftButton
                         ):
                             self._resizing = True
                             self._resize_edge = edge
@@ -138,6 +141,8 @@ class FramelessResizeFilter(QObject):
                             self.window.setCursor(Qt.CursorShape.ArrowCursor)
             else:
                 if event.type() == QEvent.Type.MouseMove:
+                    if self._start_geo is None:
+                        return False
                     delta = gpos - self._start_pos
                     rect = QRect(self._start_geo)
                     if self._resize_edge in (10, 13, 16):
@@ -249,7 +254,9 @@ class UpstreamDriftLauncher(
 
         # Enable app-level mouse tracking filter for frameless resizing
         self._resize_filter = FramelessResizeFilter(self)
-        QApplication.instance().installEventFilter(self._resize_filter)
+        app = QApplication.instance()
+        if app is not None:
+            app.installEventFilter(self._resize_filter)
 
         # Size to 80% of screen, capped at 1400x900
         screen = QApplication.primaryScreen()
@@ -572,7 +579,7 @@ class UpstreamDriftLauncher(
 
             c = _theme.get_current_colors()  # type: ignore[attr-defined]
         except (ImportError, AttributeError):
-            from src.shared.python.theme import DARK_THEME as c  # type: ignore[assignment]
+            from src.shared.python.theme import DARK_THEME as c  # type: ignore[assignment,no-redef]
 
         lbl = QLabel(title)
         lbl.setFont(get_display_font(size=14, weight=Weights.BOLD))
@@ -706,12 +713,13 @@ class UpstreamDriftLauncher(
         if getattr(self, "loading", False):
             while self.grid_layout.count():
                 item = self.grid_layout.takeAt(0)
-                if item.widget():
-                    item.widget().deleteLater()
+                widget = item.widget() if item is not None else None
+                if widget is not None:
+                    widget.deleteLater()
 
             _SkeletonCard: Any = None
             with contextlib.suppress(ImportError):
-                from src.launchers.model_card import SkeletonCard as _SkeletonCard
+                from src.launchers.model_card import SkeletonCard as _SkeletonCard  # type: ignore[no-redef]
 
             if _SkeletonCard is not None:
                 for i in range(8):
@@ -764,12 +772,14 @@ class UpstreamDriftLauncher(
         if sidebar is None:
             # Try the tools-sidebar integration hook if present
             try:
-                from src.shared.python.gui_launcher.tools_sidebar_integration import (
-                    get_active_sidebar,
-                )
+                from src.shared.python.gui_launcher import tools_sidebar_integration
 
-                sidebar = get_active_sidebar()
-            except (ImportError, AttributeError):
+                get_active_sidebar = getattr(
+                    tools_sidebar_integration, "get_active_sidebar", None
+                )
+                if callable(get_active_sidebar):
+                    sidebar = get_active_sidebar()
+            except ImportError:
                 pass
 
         if sidebar is None:
@@ -777,16 +787,17 @@ class UpstreamDriftLauncher(
             return
 
         registry = getattr(sidebar, "registry", None)
-        if not hasattr(registry, "set_variable"):
+        set_variable = getattr(registry, "set_variable", None)
+        if not callable(set_variable):
             logger.debug(
-                "sidebar.registry has no set_variable method; workspace seed skipped"
+                "sidebar.registry has no callable set_variable; workspace seed skipped"
             )
             return
 
         if self.engine_manager is not None:
-            registry.set_variable("engine_manager", self.engine_manager)
+            set_variable("engine_manager", self.engine_manager)
         if self.registry is not None:
-            registry.set_variable("model_registry", self.registry)
+            set_variable("model_registry", self.registry)
         logger.info("Sidekick workspace seeded with engine_manager and model_registry")
 
     def create_model_card(self, model: Any) -> None:
@@ -960,7 +971,7 @@ class UpstreamDriftLauncher(
 
             c = _theme.get_current_colors()  # type: ignore[attr-defined]
         except (ImportError, AttributeError):
-            from src.shared.python.theme import DARK_THEME as c  # type: ignore[assignment]
+            from src.shared.python.theme import DARK_THEME as c  # type: ignore[assignment,no-redef]
 
         for mid, card in self.model_cards.items():
             if hasattr(card, "set_selected"):
@@ -994,8 +1005,10 @@ class UpstreamDriftLauncher(
             self.update_launch_button(model.name)
 
             # Update Help Context
-            if hasattr(self, "context_help"):
-                self.context_help.update_context(model_id)
+            context_help = getattr(self, "context_help", None)
+            update_context = getattr(context_help, "update_context", None)
+            if callable(update_context):
+                update_context(model_id)
 
     def update_launch_button(self, model_name: str | None = None) -> None:
         """Update the launch button state."""
@@ -1004,7 +1017,7 @@ class UpstreamDriftLauncher(
 
             c = _theme.get_current_colors()  # type: ignore[attr-defined]
         except (ImportError, AttributeError):
-            from src.shared.python.theme import DARK_THEME as c  # type: ignore[assignment]
+            from src.shared.python.theme import DARK_THEME as c  # type: ignore[assignment,no-redef]
 
         if not self.selected_model:
             self.btn_launch.setText("Select a Model")
@@ -1130,7 +1143,9 @@ class UpstreamDriftLauncher(
             self.running_processes, self.process_manager._process_lock
         )
         worker.signals.finished.connect(self._on_cleanup_finished)
-        QThreadPool.globalInstance().start(worker)
+        thread_pool = QThreadPool.globalInstance()
+        if thread_pool is not None:
+            thread_pool.start(worker)
 
     def _on_cleanup_finished(self, finished_keys: list[str]) -> None:
         """Handle cleanup completion from worker thread."""

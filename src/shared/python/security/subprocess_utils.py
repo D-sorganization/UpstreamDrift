@@ -27,6 +27,7 @@ import subprocess
 import threading
 import time
 from pathlib import Path
+from typing import Any
 
 from src.shared.python.core.error_decorators import log_errors
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -40,7 +41,7 @@ logger = get_logger(__name__)
 DEFAULT_SUBPROCESS_TIMEOUT: float = 300.0
 
 
-def _hidden_window_kwargs() -> dict[str, int]:
+def _hidden_window_kwargs() -> dict[str, Any]:
     """Return Windows-only flags for invisible background processes."""
     if os.name != "nt":
         return {}
