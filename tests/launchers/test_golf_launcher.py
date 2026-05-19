@@ -384,9 +384,30 @@ def test_close_event(mock_kill, mock_question, qapp) -> None:
 @patch("src.launchers.upstream_drift_launcher.QApplication")
 @patch("src.launchers.upstream_drift_launcher.AsyncStartupWorker")
 @patch("src.launchers.upstream_drift_launcher.sys.exit")
-def test_upstream_drift_launcher_main(mock_exit, mock_worker, mock_app) -> None:
-    with patch("src.launchers.upstream_drift_launcher.GolfSplashScreen"):
+@patch("src.launchers.upstream_drift_launcher._install_global_ui_zoom")
+@patch("src.launchers.upstream_drift_launcher.SplashScreen")
+@patch("src.launchers.upstream_drift_launcher.UpstreamDriftLauncher")
+def test_upstream_drift_launcher_main(
+    _mock_launcher,
+    mock_splash_cls,
+    _mock_zoom,
+    mock_exit,
+    mock_worker,
+    mock_app,
+) -> None:
+    mock_app.return_value.exec.return_value = 0
+    mock_splash = mock_splash_cls.return_value
+    mock_worker_instance = mock_worker.return_value
+
+    with (
+        patch("src.launchers.upstream_drift_launcher.QIcon"),
+        patch("src.launchers.upstream_drift_launcher.ASSETS_DIR"),
+    ):
         main()
         mock_app.assert_called()
         mock_worker.assert_called()
         mock_exit.assert_called()
+
+    progress_callback = mock_worker_instance.progress_signal.connect.call_args[0][0]
+    progress_callback("Loading model registry...", 10)
+    mock_splash.show_message.assert_called_once_with("Loading model registry...", 10)

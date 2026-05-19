@@ -43,7 +43,7 @@ class _Renderer:
             import jinja2  # lazy import — not always available
 
             self._template = jinja2.Environment(
-                autoescape=False,
+                autoescape=True,
                 undefined=jinja2.Undefined,
                 keep_trailing_newline=True,
             ).from_string(template_text)

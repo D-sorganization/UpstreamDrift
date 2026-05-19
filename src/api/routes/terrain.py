@@ -20,16 +20,18 @@ from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
 from src.api.middleware.error_handler import handle_api_errors
-from src.shared.python.core.contracts import postcondition, precondition
+from src.shared.python.core.contracts import precondition
 from src.shared.python.physics.terrain import (
     MATERIALS,
     TERRAIN_MATERIAL_MAP,
-    ElevationMap,
     Terrain,
-    TerrainPatch,
-    TerrainRegion,
     TerrainType,
     create_flat_terrain,
+)
+from src.shared.python.physics.terrain_presets import (
+    ENVIRONMENT_PRESETS as SHARED_ENVIRONMENT_PRESETS,
+    build_environment_preset,
+    get_environment_preset_names,
 )
 
 logger = logging.getLogger(__name__)
@@ -120,223 +122,6 @@ def _get_active_terrain() -> Terrain:
 
 
 # ──────────────────────────────────────────────────────────────
-#  Environment Presets
-# ──────────────────────────────────────────────────────────────
-
-ENVIRONMENT_PRESETS: dict[str, dict[str, Any]] = {
-    "putting_green": {
-        "description": "Close-range putting green with detailed surface (1–30 ft)",
-        "width": 10.0,
-        "length": 15.0,
-        "terrain_types": ["green", "fringe"],
-        "builder": "_build_putting_green",
-    },
-    "fairway": {
-        "description": "Medium-range fairway with gentle slopes (50–200 yards)",
-        "width": 50.0,
-        "length": 200.0,
-        "terrain_types": ["fairway", "rough", "bunker"],
-        "builder": "_build_fairway",
-    },
-    "driving_range": {
-        "description": "Long-range practice environment (100–300+ yards)",
-        "width": 80.0,
-        "length": 300.0,
-        "terrain_types": ["tee", "fairway", "rough"],
-        "builder": "_build_driving_range",
-    },
-    "bunker": {
-        "description": "Sand bunker practice area with varied lip heights",
-        "width": 20.0,
-        "length": 20.0,
-        "terrain_types": ["bunker", "green", "fringe"],
-        "builder": "_build_bunker",
-    },
-    "rough": {
-        "description": "Thick rough practice area with high grass",
-        "width": 30.0,
-        "length": 40.0,
-        "terrain_types": ["rough", "fairway"],
-        "builder": "_build_rough",
-    },
-    "full_hole": {
-        "description": "Complete golf hole from tee to green (par 4, ~370 yards)",
-        "width": 60.0,
-        "length": 340.0,
-        "terrain_types": ["tee", "fairway", "rough", "bunker", "fringe", "green"],
-        "builder": "_build_full_hole",
-    },
-}
-
-
-@precondition(
-    lambda width, length, slope, direction: width > 0 and length > 0,
-    "Terrain width and length must be positive",
-)
-@postcondition(
-    lambda result: result is not None and result.name is not None,
-    "Built terrain must have a valid name",
-)
-def _build_putting_green(
-    width: float, length: float, slope: float, direction: float
-) -> Terrain:
-    """Build a putting green environment."""
-    if not (width is not None):
-        raise ValueError("width must be provided")
-    elevation = ElevationMap.sloped(
-        width=width,
-        length=length,
-        resolution=0.1,
-        slope_angle_deg=slope if slope != 0 else 1.5,
-        slope_direction_deg=direction,
-    )
-    patches = [
-        TerrainPatch(TerrainType.GREEN, 0, width, 0, length),
-        TerrainPatch(TerrainType.FRINGE, 0, width, 0, 1.0),
-        TerrainPatch(TerrainType.FRINGE, 0, width, length - 1.0, length),
-    ]
-    return Terrain(name="putting_green", elevation=elevation, patches=patches)
-
-
-def _build_fairway(
-    width: float, length: float, slope: float, direction: float
-) -> Terrain:
-    """Build a fairway environment."""
-    if not (width is not None):
-        raise ValueError("width must be provided")
-    elevation = ElevationMap.sloped(
-        width=width,
-        length=length,
-        resolution=1.0,
-        slope_angle_deg=slope if slope != 0 else 0.5,
-        slope_direction_deg=direction,
-    )
-    patches = [
-        TerrainPatch(TerrainType.FAIRWAY, 5, width - 5, 0, length),
-        TerrainPatch(TerrainType.ROUGH, 0, 5, 0, length),
-        TerrainPatch(TerrainType.ROUGH, width - 5, width, 0, length),
-    ]
-    regions = [
-        TerrainRegion.circle(TerrainType.BUNKER, width / 2 + 8, length * 0.6, 5.0),
-        TerrainRegion.circle(TerrainType.BUNKER, width / 2 - 10, length * 0.75, 4.0),
-    ]
-    return Terrain(
-        name="fairway",
-        elevation=elevation,
-        patches=patches,
-        regions=regions,
-    )
-
-
-def _build_driving_range(
-    width: float, length: float, slope: float, direction: float
-) -> Terrain:
-    """Build a driving range environment."""
-    if not (width is not None):
-        raise ValueError("width must be provided")
-    elevation = ElevationMap.flat(width=width, length=length, resolution=2.0)
-    patches = [
-        TerrainPatch(TerrainType.TEE, 0, width, 0, 5.0),
-        TerrainPatch(TerrainType.FAIRWAY, 0, width, 5, length),
-        TerrainPatch(TerrainType.ROUGH, 0, 5, 5, length),
-        TerrainPatch(TerrainType.ROUGH, width - 5, width, 5, length),
-    ]
-    return Terrain(name="driving_range", elevation=elevation, patches=patches)
-
-
-def _build_bunker(
-    width: float, length: float, slope: float, direction: float
-) -> Terrain:
-    """Build a bunker practice environment."""
-    if not (width is not None):
-        raise ValueError("width must be provided")
-    elevation = ElevationMap.flat(width=width, length=length, resolution=0.5)
-    patches = [
-        TerrainPatch(TerrainType.GREEN, 0, width, length / 2, length),
-        TerrainPatch(TerrainType.FRINGE, 0, width, length / 2 - 2, length / 2),
-    ]
-    regions = [
-        TerrainRegion.circle(TerrainType.BUNKER, width / 2, length / 4, 6.0),
-    ]
-    return Terrain(
-        name="bunker",
-        elevation=elevation,
-        patches=patches,
-        regions=regions,
-        default_type=TerrainType.ROUGH,
-    )
-
-
-def _build_rough(
-    width: float, length: float, slope: float, direction: float
-) -> Terrain:
-    """Build a rough practice environment."""
-    if not (width is not None):
-        raise ValueError("width must be provided")
-    elevation = ElevationMap.sloped(
-        width=width,
-        length=length,
-        resolution=0.5,
-        slope_angle_deg=slope if slope != 0 else 2.0,
-        slope_direction_deg=direction,
-    )
-    patches = [
-        TerrainPatch(TerrainType.ROUGH, 0, width, 0, length * 0.7),
-        TerrainPatch(TerrainType.FAIRWAY, 5, width - 5, length * 0.7, length),
-    ]
-    return Terrain(
-        name="rough",
-        elevation=elevation,
-        patches=patches,
-        default_type=TerrainType.ROUGH,
-    )
-
-
-def _build_full_hole(
-    width: float, length: float, slope: float, direction: float
-) -> Terrain:
-    """Build a complete golf hole (par 4)."""
-    if not (width is not None):
-        raise ValueError("width must be provided")
-    elevation = ElevationMap.sloped(
-        width=width,
-        length=length,
-        resolution=2.0,
-        slope_angle_deg=slope if slope != 0 else 0.3,
-        slope_direction_deg=direction,
-    )
-    patches = [
-        TerrainPatch(TerrainType.TEE, 20, 40, 0, 10),
-        TerrainPatch(TerrainType.FAIRWAY, 10, 50, 10, length - 20),
-        TerrainPatch(TerrainType.ROUGH, 0, 10, 10, length - 20),
-        TerrainPatch(TerrainType.ROUGH, 50, width, 10, length - 20),
-    ]
-    regions = [
-        TerrainRegion.circle(TerrainType.GREEN, width / 2, length - 12, 8.0),
-        TerrainRegion.circle(TerrainType.FRINGE, width / 2, length - 12, 10.0),
-        TerrainRegion.circle(TerrainType.BUNKER, width / 2 + 12, length - 15, 4.0),
-        TerrainRegion.circle(TerrainType.BUNKER, width / 2 - 8, length - 8, 3.0),
-    ]
-    return Terrain(
-        name="full_hole",
-        elevation=elevation,
-        patches=patches,
-        regions=regions,
-        default_type=TerrainType.ROUGH,
-    )
-
-
-_BUILDERS = {
-    "putting_green": _build_putting_green,
-    "fairway": _build_fairway,
-    "driving_range": _build_driving_range,
-    "bunker": _build_bunker,
-    "rough": _build_rough,
-    "full_hole": _build_full_hole,
-}
-
-
-# ──────────────────────────────────────────────────────────────
 #  Routes
 # ──────────────────────────────────────────────────────────────
 
@@ -353,7 +138,7 @@ async def list_presets() -> list[EnvironmentPreset]:
             width_m=info["width"],
             length_m=info["length"],
         )
-        for name, info in ENVIRONMENT_PRESETS.items()
+        for name, info in SHARED_ENVIRONMENT_PRESETS.items()
     ]
 
 
@@ -370,20 +155,23 @@ async def list_presets() -> list[EnvironmentPreset]:
 async def load_environment(request: CreateEnvironmentRequest) -> dict[str, Any]:
     """Load an environment preset as the active terrain."""
     preset_name = request.preset.lower().strip()
-    if preset_name not in _BUILDERS:
+    if preset_name not in SHARED_ENVIRONMENT_PRESETS:
         return {
             "success": False,
             "error": f"Unknown preset '{request.preset}'. "
-            f"Available: {sorted(_BUILDERS.keys())}",
+            f"Available: {get_environment_preset_names()}",
         }
 
-    preset_info = ENVIRONMENT_PRESETS[preset_name]
+    preset_info = SHARED_ENVIRONMENT_PRESETS[preset_name]
     width = request.width or preset_info["width"]
     length = request.length or preset_info["length"]
 
-    builder = _BUILDERS[preset_name]
-    _terrain_state["active"] = builder(
-        width, length, request.slope_angle_deg, request.slope_direction_deg
+    _terrain_state["active"] = build_environment_preset(
+        preset_name,
+        width=width,
+        length=length,
+        slope=request.slope_angle_deg,
+        direction=request.slope_direction_deg,
     )
 
     terrain = _terrain_state["active"]

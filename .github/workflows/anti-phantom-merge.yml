@@ -225,7 +225,7 @@ jobs:
                 fi
               done
               if [ -z "$MATCH" ]; then
-                paths_summary=$(echo "$ISSUE_PATHS" | head -5 | sed 's/^/    /')
+                paths_summary=$(printf '%s\n' "$ISSUE_PATHS" | sed -n '1,5s/^/    /p')
                 fail "3 (closes-issue path mismatch)" "PR closes issue #$n, but the diff touches **none** of the paths referenced in that issue's body:
           \`\`\`
           $paths_summary
@@ -238,7 +238,7 @@ jobs:
           # -------- Rule 4 — bot-only commits --------
           COMMITS=$(git log --format='%H|%an|%s' "$MERGE_BASE..$HEAD_SHA" || true)
           if [ -n "$COMMITS" ]; then
-            LAST_LINE=$(echo "$COMMITS" | head -1)
+            LAST_LINE=$(printf '%s\n' "$COMMITS" | sed -n '1p')
             LAST_AUTHOR=$(echo "$LAST_LINE" | cut -d'|' -f2)
             LAST_SUBJECT=$(echo "$LAST_LINE" | cut -d'|' -f3-)
             AUTHOR_COMMITS=$(echo "$COMMITS" | grep -v '|github-actions\[bot\]|' || true)

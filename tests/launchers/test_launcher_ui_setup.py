@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QToolButton,
     QVBoxLayout,
+    QWidget,
 )  # noqa: E402
 from src.launchers.launcher_ui_setup import LauncherUISetupMixin  # noqa: E402
 
@@ -84,6 +85,45 @@ def test_setup_global_sidebar_uses_icon_navigation(launcher) -> None:
         assert not button.icon().isNull()
         if isinstance(buttons, list) and len(buttons) > 0:
             assert button.accessibleName() in button_names
+
+
+def test_library_is_sidebar_button_not_startup_tab(launcher) -> None:
+    launcher.init_ui()
+
+    assert launcher.workspace_tabs.count() == 1
+    assert launcher.workspace_tabs.tabText(0) == "Home"
+    assert launcher.library_widget is None
+    assert launcher.btn_library_sidebar.accessibleName() == "Library"
+    assert not launcher.btn_library_sidebar.icon().isNull()
+
+
+def test_library_sidebar_route_opens_single_workspace_tab(launcher) -> None:
+    launcher.init_ui()
+
+    with patch("src.launchers.library_widget.LibraryWidget", side_effect=QWidget):
+        launcher._on_sidebar_routed(7)
+        first_widget = launcher.library_widget
+        launcher._on_sidebar_routed(7)
+
+    assert first_widget is launcher.library_widget
+    assert launcher.workspace_tabs.count() == 2
+    assert launcher.workspace_tabs.tabText(1) == "Library"
+    assert launcher.workspace_tabs.currentWidget() is first_widget
+
+
+def test_library_can_pop_out_from_workspace_tab(launcher) -> None:
+    launcher.init_ui()
+
+    with patch("src.launchers.library_widget.LibraryWidget", side_effect=QWidget):
+        launcher._open_library_tab()
+    widget = launcher.library_widget
+    assert launcher.workspace_tabs.indexOf(widget) >= 0
+
+    with patch.object(launcher, "popout_widget") as mock_popout:
+        launcher._popout_library()
+
+    assert launcher.workspace_tabs.indexOf(widget) == -1
+    mock_popout.assert_called_once_with(widget, "Library")
 
 
 @patch("src.launchers.launcher_constants.HELP_SYSTEM_AVAILABLE", True)

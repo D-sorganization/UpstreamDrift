@@ -230,7 +230,7 @@ def _import_sidebar_module() -> Any | None:
     vendor_root = Path(__file__).resolve().parent.parent.parent.parent
 
     # Try checking out sibling Tools repository first, so user's active local development in Tools takes priority
-    sibling_tools = vendor_root.parent / "Tools"
+    sibling_tools = vendor_root.parent.parent / "Tools"
     if sibling_tools.is_dir():
         sibling_src = str(sibling_tools / "src")
         sibling_python = str(sibling_tools / "src" / "shared" / "python")

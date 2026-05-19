@@ -354,6 +354,12 @@ class Styles:
     SPACING_LG: int = 20
     """Large spacing value (px) for layout setSpacing calls."""
 
+    SPACING_MD: int = 12
+    """Medium spacing value (px) for dense tool layouts."""
+
+    SPACING_SM: int = 8
+    """Small spacing value (px) for nested panel layouts."""
+
     MARGIN_PAGE: int = 30
     """Page-level margin (px) for content layout setContentsMargins calls."""
 

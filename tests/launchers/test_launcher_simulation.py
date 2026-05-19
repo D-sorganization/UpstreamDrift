@@ -1,5 +1,6 @@
 """Tests for launcher_simulation.py."""
 
+import os  # noqa: E402
 import sys  # noqa: E402
 from pathlib import Path  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
@@ -60,6 +61,8 @@ def test_check_module_dependencies(mock_run, launcher) -> None:
     mock_run.return_value.stdout = "OK"
     success, err = launcher._check_module_dependencies("mjcf")
     assert success is True
+    expected_flags = 0 if os.name != "nt" else 0x08000000
+    assert mock_run.call_args.kwargs["creationflags"] == expected_flags
 
     mock_run.return_value.stdout = "ImportError: no module"
     success, err = launcher._check_module_dependencies("mjcf")

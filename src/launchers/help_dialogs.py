@@ -96,12 +96,37 @@ class LayoutManagerDialog(QDialog):
 
         layout.addWidget(self.list_widget)
 
+        from PyQt6.QtWidgets import QHBoxLayout
+
+        selection_layout = QHBoxLayout()
+        btn_select_all = QPushButton("Select All")
+        btn_deselect_all = QPushButton("Deselect All")
+
+        btn_select_all.clicked.connect(
+            lambda: self._set_all_states(Qt.CheckState.Checked)
+        )
+        btn_deselect_all.clicked.connect(
+            lambda: self._set_all_states(Qt.CheckState.Unchecked)
+        )
+
+        selection_layout.addWidget(btn_select_all)
+        selection_layout.addWidget(btn_deselect_all)
+        selection_layout.addStretch()
+        layout.addLayout(selection_layout)
+
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         )
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
+
+    def _set_all_states(self, state: Qt.CheckState) -> None:
+        """Set the check state for all items."""
+        for i in range(self.list_widget.count()):
+            item = self.list_widget.item(i)
+            if item:
+                item.setCheckState(state)
 
     def selected_ids(self) -> list[str]:
         """Return IDs of all checked models."""

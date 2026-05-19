@@ -6,6 +6,7 @@ command injection and other security vulnerabilities.
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -49,6 +50,13 @@ ALLOWED_EXECUTABLES = [
 
 class SecureSubprocessError(Exception):
     """Exception raised for subprocess security violations."""
+
+
+def _apply_hidden_window_default(kwargs: dict[str, Any]) -> None:
+    """Hide background subprocess console windows on Windows by default."""
+    if os.name != "nt" or "creationflags" in kwargs:
+        return
+    kwargs["creationflags"] = getattr(subprocess, "CREATE_NO_WINDOW", 0x08000000)
 
 
 def validate_script_path(script_path: Path, suite_root: Path) -> None:
@@ -181,6 +189,7 @@ def secure_popen(  # noqa: C901
                 )
 
     logger.info(f"Launching secure subprocess: {' '.join(validated_cmd)}")
+    _apply_hidden_window_default(kwargs)
 
     try:
         return subprocess.Popen(validated_cmd, cwd=cwd, **kwargs)
@@ -253,6 +262,7 @@ def secure_run(  # noqa: C901
                 )
 
     logger.info(f"Running secure subprocess: {' '.join(validated_cmd)}")
+    _apply_hidden_window_default(kwargs)
 
     try:
         return subprocess.run(validated_cmd, cwd=cwd, timeout=timeout, **kwargs)

@@ -35,7 +35,7 @@ from src.launchers.model_card import (
 )
 
 # ── Settings dialog ─────────────────────────────────────────────────
-from src.launchers.settings_dialog import SettingsDialog
+from src.launchers.settings_dialog import SettingsDialog, SettingsWidget
 
 # ── Startup components ──────────────────────────────────────────────
 from src.launchers.startup import (
@@ -63,6 +63,7 @@ __all__ = [
     "DockerCheckThread",
     "EnvironmentDialog",
     "SettingsDialog",
+    "SettingsWidget",
     "HelpDialog",
     "LayoutManagerDialog",
     "ContextHelpDock",
