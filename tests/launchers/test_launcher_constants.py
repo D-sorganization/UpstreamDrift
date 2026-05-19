@@ -1,23 +1,66 @@
 import importlib  # noqa: E402
+from pathlib import Path
 from typing import Any  # noqa: E402
 from unittest.mock import patch  # noqa: E402
 
 import pytest  # noqa: E402
 from src.launchers.launcher_constants import (  # noqa: E402
+    DOCKER_STAGES,
     _lazy_imports,
     _lazy_load_engine_manager,
     _lazy_load_model_registry,
+    _load_docker_profiles,
     validate_docker_stage,
 )
 
 
-def test_validate_docker_stage() -> None:
-    """Test Docker stage validation."""
-    assert validate_docker_stage("all") == "all"
-    assert validate_docker_stage("mujoco") == "mujoco"
+def test_validate_docker_stage_profiles_yaml() -> None:
+    """DOCKER_STAGES is populated from docker/profiles.yaml (Phase 2.a)."""
+    # The canonical profiles defined in docker/profiles.yaml.
+    expected = {"slim", "standard", "research", "biomech", "full", "gpu-training"}
+    assert expected.issubset(set(DOCKER_STAGES)), (
+        f"Expected profiles {expected - set(DOCKER_STAGES)} missing from DOCKER_STAGES"
+    )
 
+
+def test_validate_docker_stage_accepts_profile() -> None:
+    """validate_docker_stage accepts every profile listed in DOCKER_STAGES."""
+    for profile in DOCKER_STAGES:
+        assert validate_docker_stage(profile) == profile
+
+
+def test_validate_docker_stage_rejects_unknown() -> None:
+    """validate_docker_stage rejects unknown profile names."""
     with pytest.raises(ValueError, match="Invalid Docker stage 'invalid'"):
         validate_docker_stage("invalid")
+
+
+def test_load_docker_profiles_fallback(tmp_path: Path) -> None:
+    """_load_docker_profiles falls back to the legacy list when YAML is missing."""
+    import src.launchers.launcher_constants as lc
+
+    with patch.object(lc, "REPOS_ROOT", tmp_path):
+        profiles = lc._load_docker_profiles()
+
+    assert "slim" in profiles
+    assert "standard" in profiles
+    assert len(profiles) > 0
+
+
+def test_load_docker_profiles_parses_yaml(tmp_path: Path) -> None:
+    """_load_docker_profiles reads profile names from a minimal YAML."""
+    (tmp_path / "docker").mkdir()
+    (tmp_path / "docker" / "profiles.yaml").write_text(
+        "version: 1\nprofiles:\n  alpha:\n    description: Test A\n  beta:\n    description: Test B\n",
+        encoding="utf-8",
+    )
+
+    import src.launchers.launcher_constants as lc
+
+    with patch.object(lc, "REPOS_ROOT", tmp_path):
+        profiles = lc._load_docker_profiles()
+
+    assert profiles == ("alpha", "beta")
 
 
 def test_lazy_load_engine_manager() -> None:
