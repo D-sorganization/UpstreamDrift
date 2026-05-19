@@ -89,15 +89,33 @@ class LibraryManager:
 
         # Extract basic metadata
         title = source_path.stem
-        # In a full implementation, we would use the pypdf layer here.
+        author = "Unknown"
+        year = QDateTime.currentDateTime().toString("yyyy")
+        topic = "General"
+
+        # Attempt PDF metadata extraction
+        if source_path.suffix.lower() == ".pdf":
+            try:
+                from pypdf import PdfReader
+
+                reader = PdfReader(str(source_path))
+                info = reader.metadata
+                if info:
+                    if info.title:
+                        title = info.title
+                    if info.author:
+                        author = info.author
+                    # Could attempt to parse creation date for year, but keeping simple for now
+            except Exception as e:
+                logger.debug(f"Could not extract metadata from {source_path}: {e}")
 
         doc_data = {
             "file_name": target_path.name,
             "file_path": str(target_path),
             "title": title,
-            "author": "Unknown",
-            "year": QDateTime.currentDateTime().toString("yyyy"),
-            "topic": "General",
+            "author": author,
+            "year": year,
+            "topic": topic,
         }
 
         # Index in DB
@@ -228,6 +246,7 @@ class LibraryWidget(QWidget):
         self.chat_input = QLineEdit()
         self.chat_input.setPlaceholderText("Ask a question about this document...")
         self.chat_input.setEnabled(False)
+        self.chat_input.returnPressed.connect(self._on_chat_return_pressed)
         ai_layout.addWidget(self.chat_input)
 
         preview_layout.addWidget(ai_panel, stretch=1)
@@ -241,15 +260,43 @@ class LibraryWidget(QWidget):
         self.table.setRowCount(0)
         docs = self.manager.get_all_documents()
 
-        # Filter docs
+        # Advanced boolean filtering
         if filter_text:
-            filter_text = filter_text.lower()
-            docs = [
-                d
-                for d in docs
-                if filter_text in d["title"].lower()
-                or filter_text in d["author"].lower()
-            ]
+            import shlex
+
+            try:
+                # Basic tokenization
+                tokens = shlex.split(filter_text.lower())
+            except ValueError:
+                # Fallback if quotes are unbalanced
+                tokens = filter_text.lower().split()
+
+            filtered_docs = []
+            for d in docs:
+                searchable_text = (
+                    f"{d['title']} {d['author']} {d['year']} {d['topic']}".lower()
+                )
+
+                # Default to AND logic for all terms
+                match = True
+                for token in tokens:
+                    if token.startswith("-"):
+                        # NOT logic
+                        exclude_term = token[1:]
+                        if exclude_term and exclude_term in searchable_text:
+                            match = False
+                            break
+                    elif token == "or" or token == "and":
+                        continue  # Simple skip for literal keywords
+                    else:
+                        # AND logic
+                        if token not in searchable_text:
+                            match = False
+                            break
+
+                if match:
+                    filtered_docs.append(d)
+            docs = filtered_docs
 
         for row, doc in enumerate(docs):
             self.table.insertRow(row)
@@ -296,3 +343,55 @@ class LibraryWidget(QWidget):
         """
         self.preview_browser.setHtml(html)
         self.chat_input.setEnabled(True)
+
+    def _on_chat_return_pressed(self) -> None:
+        """Handle chat queries for the Notebook LM integration."""
+        query = self.chat_input.text().strip()
+        if not query:
+            return
+
+        selected = self.table.selectedItems()
+        if not selected:
+            return
+
+        doc = self.table.item(selected[0].row(), 0).data(Qt.ItemDataRole.UserRole)
+        file_path = Path(doc["file_path"])
+
+        # Clear input
+        self.chat_input.clear()
+
+        # Append user query to browser
+        self.preview_browser.append(
+            f"<br><b style='color: {Styles.COLOR_ACCENT};'>You:</b> {query}"
+        )
+
+        # Determine if we can extract context
+        context_text = ""
+        if file_path.suffix.lower() == ".pdf":
+            try:
+                from pypdf import PdfReader
+
+                reader = PdfReader(str(file_path))
+                # Extract first 3 pages as context limit for safety
+                for i in range(min(3, len(reader.pages))):
+                    page_text = reader.pages[i].extract_text()
+                    if page_text:
+                        context_text += page_text + "\n"
+            except Exception as e:
+                logger.error(f"Failed to extract text for Notebook LM: {e}")
+
+        if not context_text:
+            self.preview_browser.append(
+                "<b style='color: #f85149;'>Notebook LM:</b> I'm sorry, I couldn't extract readable text from this document to answer your question."
+            )
+            return
+
+        # Here we would normally call the Sidekick LLM backend or an OpenAI endpoint
+        # For Phase 3, we format the prompt and simulate ingestion logic.
+        prompt = f"Context from document '{doc['title']}':\n{context_text[:2000]}...\n\nQuestion: {query}\n\nAnswer:"
+        logger.info(f"Dispatching to Notebook LM backend: {prompt[:100]}...")
+
+        # Simulate response
+        self.preview_browser.append(
+            "<b style='color: #2da44e;'>Notebook LM:</b> I have received your question and processed the document context. [Backend RAG integration pending in Sidekick WebSocket channel]"
+        )
