@@ -201,7 +201,7 @@ class PuttingGreenWidget(QWidget):
             )
 
             config = SimulationConfig()
-            sim = PuttingGreenSimulator(config)
+            sim = PuttingGreenSimulator(config)  # type: ignore[arg-type]
 
             speed = self._speed_spin.value()
             aim = self._aim_spin.value()
