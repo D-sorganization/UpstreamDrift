@@ -20,7 +20,7 @@ def cleanup_imports() -> Generator[None, None, None]:
     """Clean up imports after tests to prevent mock leakage."""
     yield
     sys.modules.pop("src.launchers.golf_suite_launcher", None)
-    sys.modules.pop("src.launchers.golf_launcher", None)
+    sys.modules.pop("src.launchers.upstream_drift_launcher", None)
 
 
 # Create mocks for PyQt6 modules
@@ -223,12 +223,12 @@ def launcher_app() -> Any:
     """Fixture to create the launcher instance."""
     # Ensure PYQT6_AVAILABLE is True for logic testing
     golf_suite_launcher.PYQT6_AVAILABLE = True
-    app = golf_suite_launcher.GolfLauncher()
+    app = golf_suite_launcher.UpstreamDriftLauncher()
     return app
 
 
 class TestGolfSuiteLauncher:
-    """Test suite for GolfLauncher."""
+    """Test suite for UpstreamDriftLauncher."""
 
     def test_golf_suite_launcher_initialization(self, launcher_app) -> None:
         """Test UI initialization."""
@@ -341,9 +341,9 @@ class TestGolfSuiteLauncher:
     def test_main_function(self, launcher_app) -> None:
         """Test main entry point."""
         # Use manual patching to ensure we modify the *reloaded* module object
-        original_launcher = golf_suite_launcher.GolfLauncher
+        original_launcher = golf_suite_launcher.UpstreamDriftLauncher
         mock_launcher = MagicMock(spec=["show", "resize", "setWindowTitle"])
-        golf_suite_launcher.GolfLauncher = mock_launcher  # type: ignore[misc]
+        golf_suite_launcher.UpstreamDriftLauncher = mock_launcher  # type: ignore[misc]
 
         # Use the already mocked QApplication from module setup
         app = mock_widgets.QApplication.return_value
@@ -362,4 +362,4 @@ class TestGolfSuiteLauncher:
             mock_exit.assert_called()
 
         # Restore
-        golf_suite_launcher.GolfLauncher = original_launcher  # type: ignore[misc]
+        golf_suite_launcher.UpstreamDriftLauncher = original_launcher  # type: ignore[misc]

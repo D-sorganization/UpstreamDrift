@@ -107,7 +107,7 @@ meshcat: OK
 1. Launch the Golf Modeling Suite on Windows:
 
    ```powershell
-   py -3.12 src/launchers/golf_launcher.py
+   py -3.12 src/launchers/upstream_drift_launcher.py
    ```
 
 2. Check the **WSL** checkbox in the top toolbar
@@ -145,7 +145,7 @@ export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
 export PYTHONPATH="/mnt/c/Users/diete/Repositories/Golf_Modeling_Suite"
 cd /mnt/c/Users/diete/Repositories/Golf_Modeling_Suite
 
-python src/launchers/golf_launcher.py
+python src/launchers/upstream_drift_launcher.py
 ```
 
 ## Visualization

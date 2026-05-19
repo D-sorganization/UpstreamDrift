@@ -4,7 +4,7 @@ This diagram illustrates how the `Launcher` initializes and loads physics engine
 
 ```mermaid
 graph TD
-    User[User] -->|Select Model| Launcher[GolfLauncher]
+    User[User] -->|Select Model| Launcher[UpstreamDriftLauncher]
     Launcher -->|Registry Lookup| Reg[ModelRegistry]
     Reg -->|Return ModelSpec| Launcher
 

@@ -2,7 +2,7 @@
 
 The pre-existing ``tests/launchers/test_golf_suite_launcher.py`` mocks out
 all of ``QtWidgets`` so production code never actually runs.  This file
-instantiates the real ``GolfLauncher`` against the offscreen Qt platform
+instantiates the real ``UpstreamDriftLauncher`` against the offscreen Qt platform
 to exercise the UI scaffold (``_setup_ui``, ``_setup_engine_buttons``,
 ``_setup_shot_tracer_section``, ``_setup_log_area``), the log
 helpers, and the ``_launch_script`` happy / sad paths.
@@ -24,7 +24,7 @@ from src.launchers import golf_suite_launcher as gsl
 def real_launcher(qapp):
     if not gsl.PYQT6_AVAILABLE:
         pytest.skip("PyQt6 unavailable")
-    win = gsl.GolfLauncher()
+    win = gsl.UpstreamDriftLauncher()
     yield win
     win.deleteLater()
 

@@ -13,9 +13,7 @@ def test_jupyter_section_build_widget(qt_real, qapp) -> None:  # noqa: ARG001
     assert widget.objectName() == "prefs_section_jupyter"
 
 
-def test_jupyter_section_unavailable_path(
-    qt_real, qapp, monkeypatch
-) -> None:  # noqa: ARG001
+def test_jupyter_section_unavailable_path(qt_real, qapp, monkeypatch) -> None:  # noqa: ARG001
     """When nbformat is unavailable the section renders an info label."""
     import src.launchers.preferences.jupyter_section as mod
 
@@ -28,9 +26,7 @@ def test_jupyter_section_unavailable_path(
     assert section._kernel_edit is None
 
 
-def test_jupyter_section_available_persists(
-    qt_real, qapp, monkeypatch
-) -> None:  # noqa: ARG001
+def test_jupyter_section_available_persists(qt_real, qapp, monkeypatch) -> None:  # noqa: ARG001
     """Editing the directory line edit persists via set_notebook_dir."""
     import src.launchers.preferences.jupyter_section as mod
 
@@ -47,9 +43,7 @@ def test_jupyter_section_available_persists(
     assert captured and captured[-1] == "/var/tmp/notebooks"
 
 
-def test_jupyter_section_kernel_persistence(
-    qt_real, qapp, monkeypatch
-) -> None:  # noqa: ARG001
+def test_jupyter_section_kernel_persistence(qt_real, qapp, monkeypatch) -> None:  # noqa: ARG001
     import src.launchers.preferences.jupyter_section as mod
 
     monkeypatch.setattr(mod, "is_feature_available", lambda _id: True)
@@ -66,9 +60,7 @@ def test_jupyter_section_kernel_persistence(
 
 
 @pytest.mark.parametrize("available", [True, False])
-def test_jupyter_section_reports_availability(
-    qapp, monkeypatch, available
-) -> None:  # noqa: ARG001
+def test_jupyter_section_reports_availability(qapp, monkeypatch, available) -> None:  # noqa: ARG001
     import src.launchers.preferences.jupyter_section as mod
 
     monkeypatch.setattr(mod, "is_feature_available", lambda _id: available)

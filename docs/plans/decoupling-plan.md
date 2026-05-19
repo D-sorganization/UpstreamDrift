@@ -158,7 +158,7 @@ This creates two coupling paths - one through FastAPI's dependency injection and
 
 | File                                                                        | Lines | Problem                                                                                    |
 | --------------------------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------ |
-| `launchers/golf_launcher.py`                                                | 2,557 | Monolithic launcher combining UI, process management, engine discovery, Docker integration |
+| `launchers/upstream_drift_launcher.py`                                                | 2,557 | Monolithic launcher combining UI, process management, engine discovery, Docker integration |
 | `shared/python/statistical_analysis.py`                                     | 2,236 | Mixin aggregator importing 6+ analysis submodules, re-exporting everything                 |
 | `engines/drake/python/src/drake_gui_app.py`                                 | 2,050 | GUI + physics + plotting in one file                                                       |
 | `engines/pinocchio/python/pinocchio_golf/gui.py`                            | 1,904 | Same pattern                                                                               |
@@ -248,7 +248,7 @@ This creates two coupling paths - one through FastAPI's dependency injection and
 
 | Step | Action                                                                             | Estimated Impact               |
 | ---- | ---------------------------------------------------------------------------------- | ------------------------------ |
-| 4.1  | Split `golf_launcher.py` into: launcher core, engine panel, docker panel, settings | 4 new files from 1             |
+| 4.1  | Split `upstream_drift_launcher.py` into: launcher core, engine panel, docker panel, settings | 4 new files from 1             |
 | 4.2  | Split `ui_components.py` into: cards, dialogs, workers, splash                     | 4 new files from 1             |
 | 4.3  | Split each engine GUI into: tabs/, controls/, renderer/                            | ~3 files per engine            |
 | 4.4  | Move glossary data to JSON files                                                   | 2 Python files -> 2 JSON files |

@@ -135,16 +135,16 @@ EOF
 
 # Issue 3: High - God module refactoring
 create_issue_3() {
-    local title="[Refactor] Break up golf_launcher.py god module (2,539 LOC)"
+    local title="[Refactor] Break up upstream_drift_launcher.py god module (2,539 LOC)"
     local labels="refactoring,maintainability,python"
     local body=$(cat <<'EOF'
 ## Summary
 
-The golf_launcher.py file at 2,539 lines of code is a "god module" that handles too many responsibilities, violating the Single Responsibility Principle.
+The upstream_drift_launcher.py file at 2,539 lines of code is a "god module" that handles too many responsibilities, violating the Single Responsibility Principle.
 
 ## Location
 
-- **File:** `src/launchers/golf_launcher.py`
+- **File:** `src/launchers/upstream_drift_launcher.py`
 - **Size:** 2,539 LOC
 
 ## Current Responsibilities (Mixed Concerns)
@@ -179,7 +179,7 @@ Extract into focused modules:
 Use **Strangler Fig Pattern**:
 1. Extract one component at a time
 2. Create new module with extracted code
-3. Import from new module in golf_launcher.py
+3. Import from new module in upstream_drift_launcher.py
 4. Maintain backward compatibility during transition
 5. Add tests for each extracted component
 

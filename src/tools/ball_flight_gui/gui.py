@@ -139,8 +139,7 @@ class BallFlightWidget(QWidget):
         # Run
         self._run_btn = QPushButton("Simulate Flight")
         self._run_btn.setStyleSheet(
-            "background-color: #1565C0; color: white; "
-            "font-weight: bold; padding: 12px;"
+            "background-color: #1565C0; color: white; font-weight: bold; padding: 12px;"
         )
         self._run_btn.clicked.connect(self._run_simulation)
         left_layout.addWidget(self._run_btn)
@@ -289,7 +288,7 @@ class BallFlightWindow(QMainWindow):
         status = QStatusBar()
         self.setStatusBar(status)
         status.showMessage(
-            "Forces: Drag + Magnus + Gravity + Wind | " "Configure and run simulation"
+            "Forces: Drag + Magnus + Gravity + Wind | Configure and run simulation"
         )
 
     def closeEvent(self, event: Any) -> None:

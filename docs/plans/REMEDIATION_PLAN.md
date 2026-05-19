@@ -31,7 +31,7 @@ This document tracks the progress of addressing the findings from the Adversaria
   - [x] Generate API docs (`docs/sphinx/`).
 - [x] **P1: Security Disarmament**
   - [x] Remove Pickle from `output_manager.py`.
-  - [x] Guard `subprocess` in `golf_launcher.py`.
+  - [x] Guard `subprocess` in `upstream_drift_launcher.py`.
 - [x] **P1: Testing Infrastructure**
   - [x] Fix GUI Test skipping (`test_drag_drop_functionality`).
   - [x] Fix XML parsing in Optimization tests (`float` cast).

@@ -203,6 +203,7 @@ class MainWindow(QMainWindow):
         finally:
             super().closeEvent(event)
 
+
 def get_dockable_ui() -> MainWindow:
     """Return the main window instance for docking in the unified launcher."""
     return MainWindow()

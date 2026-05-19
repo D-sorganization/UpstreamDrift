@@ -173,36 +173,36 @@ class DraggableModelCard(QFrame):
         c = _get_theme_colors()
         self._base_style = f"""
             #ModelCard {{
-                background-color: {c.surface_hover};
-                border: 1px solid {c.border_light};
+                background-color: {getattr(c, "surface_hover", "#2d2d2d")};
+                border: 1px solid {getattr(c, "border_light", "#444444")};
                 border-radius: 16px;
             }}
             #ModelCard:hover {{
-                background-color: {c.surface_active};
-                border: 1px solid {c.border_strong};
+                background-color: {getattr(c, "surface_active", "#3a3a3a")};
+                border: 1px solid {getattr(c, "border_strong", "#666666")};
             }}
             #CardName {{
-                color: {c.text_primary};
+                color: {getattr(c, "text_primary", "#ffffff")};
             }}
             #CardDescription {{
-                color: {c.text_secondary};
+                color: {getattr(c, "text_secondary", "#aaaaaa")};
             }}
         """
         self._selected_style = f"""
             #ModelCard {{
-                background-color: {c.accent_muted};
-                border: 2px solid {c.accent_primary};
+                background-color: {getattr(c, "accent_muted", "#1a3a5a")};
+                border: 2px solid {getattr(c, "accent_primary", "#0a84ff")};
                 border-radius: 16px;
             }}
             #ModelCard:hover {{
-                background-color: {c.accent_muted};
-                border: 2px solid {c.accent_hover};
+                background-color: {getattr(c, "accent_muted", "#1a3a5a")};
+                border: 2px solid {getattr(c, "accent_hover", "#409cff")};
             }}
             #CardName {{
-                color: {c.text_primary};
+                color: {getattr(c, "text_primary", "#ffffff")};
             }}
             #CardDescription {{
-                color: {c.text_secondary};
+                color: {getattr(c, "text_secondary", "#aaaaaa")};
             }}
         """
         # Glassmorphism styling - enhanced with translucent backgrounds and background-blur effect

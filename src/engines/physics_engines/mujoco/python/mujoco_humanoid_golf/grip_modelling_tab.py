@@ -204,6 +204,7 @@ class GripModellingTab(QtWidgets.QWidget):
             # Change directory to scene file location so relative assets (meshdir) work
             current_dir = os.getcwd()
             os.chdir(scene_path.parent)
+
             try:
                 self.sim_widget.load_model_from_xml(xml_content)
             finally:
@@ -312,19 +313,18 @@ class GripModellingTab(QtWidgets.QWidget):
         """Inline hand XML includes and inject extracted bodies into worldbody."""
         if not (xml_content is not None):
             raise ValueError("xml_content must be provided")
-        if not (xml_content is not None):
-            raise ValueError("xml_content must be provided")
         extracted_bodies: list[str] = []
+        extracted_post_bodies: list[str] = []
 
-        def extract_worldbody_content(filename: str, body_pattern: str) -> str:
-            """Extract worldbody XML content from a hand model file."""
-            if not (filename is not None):
-                raise ValueError("filename must be provided")
+        def extract_sections(filename: str, body_pattern: str) -> str:
+            """Extract worldbody and post-worldbody XML content from a hand model."""
             if not (filename is not None):
                 raise ValueError("filename must be provided")
             content = self._get_hand_content(
                 folder_path, filename, body_pattern, is_both
             )  # noqa: E501
+
+            # Extract worldbody
             bodies_match = re.search(
                 r"<worldbody[^>]*>(.*?)</worldbody>", content, re.DOTALL
             )  # noqa: E501
@@ -333,11 +333,23 @@ class GripModellingTab(QtWidgets.QWidget):
                 content = re.sub(
                     r"<worldbody[^>]*>.*?</worldbody>", "", content, flags=re.DOTALL
                 )  # noqa: E501
+
+            # Extract post-worldbody elements to prevent out-of-order XML crashes
+            for tag in ["contact", "tendon", "actuator", "equality"]:
+                tag_match = re.search(f"<{tag}[^>]*>(.*?)</{tag}>", content, re.DOTALL)
+                if tag_match:
+                    extracted_post_bodies.append(
+                        f"<{tag}>\n{tag_match.group(1)}\n</{tag}>"
+                    )
+                    content = re.sub(
+                        f"<{tag}[^>]*>.*?</{tag}>", "", content, flags=re.DOTALL
+                    )
+
             return content
 
         if is_both:
-            right_defs = extract_worldbody_content("right_hand.xml", "rh_forearm")
-            left_defs = extract_worldbody_content("left_hand.xml", "lh_forearm")
+            right_defs = extract_sections("right_hand.xml", "rh_forearm")
+            left_defs = extract_sections("left_hand.xml", "lh_forearm")
 
             xml_content = re.sub(
                 r'<include[^>]*file="right_hand.xml"[^>]*/>', right_defs, xml_content
@@ -351,7 +363,7 @@ class GripModellingTab(QtWidgets.QWidget):
                 if "allegro" in str(folder_path).lower():
                     target_body = "right_hand"
 
-                defs = extract_worldbody_content("right_hand.xml", target_body)
+                defs = extract_sections("right_hand.xml", target_body)
                 xml_content = re.sub(
                     r'<include[^>]*file="right_hand.xml"[^>]*/>',
                     defs,
@@ -359,10 +371,10 @@ class GripModellingTab(QtWidgets.QWidget):
                 )
             elif 'file="left_hand.xml"' in xml_content:
                 target_body = "lh_forearm"
-                if "allegro" in str(folder_path):
+                if "allegro" in str(folder_path).lower():
                     target_body = "left_hand"
 
-                defs = extract_worldbody_content("left_hand.xml", target_body)
+                defs = extract_sections("left_hand.xml", target_body)
                 xml_content = re.sub(
                     r'<include[^>]*file="left_hand.xml"[^>]*/>',
                     defs,
@@ -375,6 +387,14 @@ class GripModellingTab(QtWidgets.QWidget):
             xml_content = re.sub(
                 r"(<worldbody[^>]*>)", r"\1\n" + bodies_str, xml_content, count=1
             )  # noqa: E501
+
+        # Append post-worldbody elements to the end of the file
+        if extracted_post_bodies:
+            post_str = "\n".join(extracted_post_bodies) + "\n"
+            if "</mujoco>" in xml_content:
+                xml_content = xml_content.replace("</mujoco>", post_str + "</mujoco>")
+            else:
+                xml_content += post_str
 
         return xml_content
 

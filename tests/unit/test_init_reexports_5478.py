@@ -33,9 +33,9 @@ def test_config_exposes_get_setting() -> None:
     """
     import src.shared.python.config as cfg
 
-    assert hasattr(
-        cfg, "get_setting"
-    ), "src.shared.python.config is missing get_setting (issue #5478)"
+    assert hasattr(cfg, "get_setting"), (
+        "src.shared.python.config is missing get_setting (issue #5478)"
+    )
     assert callable(cfg.get_setting), "get_setting must be callable"
 
 
@@ -45,9 +45,9 @@ def test_config_exposes_load_save_settings() -> None:
     import src.shared.python.config as cfg
 
     for name in ("load_settings", "save_settings"):
-        assert hasattr(
-            cfg, name
-        ), f"src.shared.python.config is missing {name!r} (issue #5478)"
+        assert hasattr(cfg, name), (
+            f"src.shared.python.config is missing {name!r} (issue #5478)"
+        )
         assert callable(getattr(cfg, name)), f"{name} must be callable"
 
 
@@ -61,6 +61,6 @@ def test_data_io_exposes_provenance_symbols() -> None:
     import src.shared.python.data_io as dio
 
     for name in ("ProvenanceInfo", "add_provenance_header_file"):
-        assert hasattr(
-            dio, name
-        ), f"src.shared.python.data_io is missing {name!r} (issue #5478)"
+        assert hasattr(dio, name), (
+            f"src.shared.python.data_io is missing {name!r} (issue #5478)"
+        )

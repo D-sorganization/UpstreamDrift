@@ -46,7 +46,7 @@ $issues = @(
     },
     @{
         Title = "Phase 3.3: Launcher Configuration Abstraction"
-        Body = "**Problem:** `golf_launcher.py` contains hardcoded paths and mixed concerns.`n`n**Action:** Move model definitions to `config/models.yaml` and create a `ModelRegistry` class to handle loading."
+        Body = "**Problem:** `upstream_drift_launcher.py` contains hardcoded paths and mixed concerns.`n`n**Action:** Move model definitions to `config/models.yaml` and create a `ModelRegistry` class to handle loading."
         Labels = "refactor,size/M"
     },
     @{
@@ -56,7 +56,7 @@ $issues = @(
     },
     @{
         Title = "Phase 4.2: Lazy Import Implementation"
-        Body = "**Problem:** `golf_launcher.py` imports heavy PyQt6 modules at the top level, slowing down CLI response.`n`n**Action:** Move imports inside functions where possible to speed up CLI response time."
+        Body = "**Problem:** `upstream_drift_launcher.py` imports heavy PyQt6 modules at the top level, slowing down CLI response.`n`n**Action:** Move imports inside functions where possible to speed up CLI response time."
         Labels = "enhancement,size/S"
     }
 )

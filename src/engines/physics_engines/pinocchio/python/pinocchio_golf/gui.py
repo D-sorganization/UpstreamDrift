@@ -442,6 +442,7 @@ def get_dockable_ui() -> QtWidgets.QMainWindow:
     """Return the main window instance for docking in the unified launcher."""
     return PinocchioGUI()
 
+
 def main() -> None:
     """Main entry point for the GUI application."""
     app = QtWidgets.QApplication(sys.argv)

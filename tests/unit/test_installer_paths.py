@@ -80,13 +80,13 @@ class TestWindowsInstallerPaths:
         return Path("installer/windows/setup.py").read_text()
 
     def test_launcher_script_path_includes_src(self) -> None:
-        """The golf_launcher.py script path must include 'src/'."""
+        """The upstream_drift_launcher.py script path must include 'src/'."""
         source = self._read_installer_source()
-        # Find lines that reference golf_launcher.py
+        # Find lines that reference upstream_drift_launcher.py
         for line in source.splitlines():
-            if "golf_launcher.py" in line:
+            if "upstream_drift_launcher.py" in line:
                 assert '"src"' in line or "'src'" in line or "src" in line, (
-                    f"golf_launcher.py path missing 'src': {line.strip()}"
+                    f"upstream_drift_launcher.py path missing 'src': {line.strip()}"
                 )
 
     def test_api_server_path_includes_src(self) -> None:

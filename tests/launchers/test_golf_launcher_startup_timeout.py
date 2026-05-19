@@ -1,6 +1,6 @@
-"""Tests for the startup-timeout safety net in GolfLauncher (issue #5490).
+"""Tests for the startup-timeout safety net in UpstreamDriftLauncher (issue #5490).
 
-When ``GolfLauncher`` is constructed with ``loading=True`` it waits for
+When ``UpstreamDriftLauncher`` is constructed with ``loading=True`` it waits for
 ``update_startup_results`` to fire and replace the skeleton UI.  Prior to
 issue #5490 the launcher silently spun forever if the async worker crashed
 before calling that method, leaving the user staring at an empty grid.
@@ -26,29 +26,32 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.launchers import golf_launcher
-from src.launchers.golf_launcher import STARTUP_TIMEOUT_SEC, GolfLauncher
+from src.launchers import upstream_drift_launcher
+from src.launchers.upstream_drift_launcher import (
+    STARTUP_TIMEOUT_SEC,
+    UpstreamDriftLauncher,
+)
 from src.launchers.ui_components import StartupResults
 
 
 @contextlib.contextmanager
 def _patch_launcher_ui() -> Generator[None, None, None]:
-    """Mirror the patches used by ``test_golf_launcher.py``.
+    """Mirror the patches used by ``test_upstream_drift_launcher.py``.
 
     We deliberately do NOT patch ``QTimer`` at the module level here — the
     tests in this file want to observe ``QTimer.singleShot`` arguments
     directly.
     """
-    with patch("src.launchers.golf_launcher.DockerCheckThread"):
+    with patch("src.launchers.upstream_drift_launcher.DockerCheckThread"):
         yield
 
 
-def _golf_launcher_importable() -> bool:
-    """Return True iff ``GolfLauncher()`` can construct under current mocks.
+def _upstream_drift_launcher_importable() -> bool:
+    """Return True iff ``UpstreamDriftLauncher()`` can construct under current mocks.
 
     Some local environments (e.g. Python 3.14 + the ``conftest.py`` Qt
     mocks) lack the ``QApplication.primaryScreen`` shim needed for
-    ``GolfLauncher.__init__`` to run.  CI uses a real PyQt6, so the tests
+    ``UpstreamDriftLauncher.__init__`` to run.  CI uses a real PyQt6, so the tests
     pass there.  We skip locally when the test harness clearly can't
     construct the widget at all.
     """
@@ -61,7 +64,7 @@ def _golf_launcher_importable() -> bool:
 
 
 _REQUIRES_REAL_QT = pytest.mark.skipif(
-    not _golf_launcher_importable(),
+    not _upstream_drift_launcher_importable(),
     reason="Local Qt mocks lack QApplication.primaryScreen; runs in CI.",
 )
 
@@ -96,9 +99,9 @@ def test_loading_mode_schedules_timeout_via_qtimer(qapp) -> None:
     """``loading=True`` must arm a ``QTimer.singleShot`` for the timeout."""
     with (
         _patch_launcher_ui(),
-        patch("src.launchers.golf_launcher.QTimer") as mock_qtimer,
+        patch("src.launchers.upstream_drift_launcher.QTimer") as mock_qtimer,
     ):
-        launcher = GolfLauncher(loading=True)
+        launcher = UpstreamDriftLauncher(loading=True)
 
         # At least one ``singleShot`` call must be the timeout arming.
         assert mock_qtimer.singleShot.called
@@ -123,17 +126,17 @@ def test_loading_mode_schedules_timeout_via_qtimer(qapp) -> None:
 @_REQUIRES_REAL_QT
 def test_loading_mode_emits_diagnostic_log(qapp, caplog) -> None:
     """Entering the wait state must emit an informational log line."""
-    caplog.set_level(logging.INFO, logger=golf_launcher.logger.name)
+    caplog.set_level(logging.INFO, logger=upstream_drift_launcher.logger.name)
     with (
         _patch_launcher_ui(),
-        patch("src.launchers.golf_launcher.QTimer"),
+        patch("src.launchers.upstream_drift_launcher.QTimer"),
     ):
-        GolfLauncher(loading=True)
+        UpstreamDriftLauncher(loading=True)
 
     messages = [r.getMessage().lower() for r in caplog.records]
-    assert any(
-        "startup" in m and ("wait" in m or "timeout" in m) for m in messages
-    ), f"Expected a log mentioning startup wait/timeout; got {messages}"
+    assert any("startup" in m and ("wait" in m or "timeout" in m) for m in messages), (
+        f"Expected a log mentioning startup wait/timeout; got {messages}"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -146,9 +149,9 @@ def test_handle_startup_timeout_clears_loading_and_surfaces_error(qapp) -> None:
     """The timeout handler must clear ``loading`` and notify the user."""
     with (
         _patch_launcher_ui(),
-        patch("src.launchers.golf_launcher.QTimer"),
+        patch("src.launchers.upstream_drift_launcher.QTimer"),
     ):
-        launcher = GolfLauncher(loading=True)
+        launcher = UpstreamDriftLauncher(loading=True)
         assert launcher.loading is True
 
         with patch.object(launcher, "show_toast") as mock_toast:
@@ -171,14 +174,18 @@ def test_handle_startup_timeout_is_idempotent_after_success(qapp) -> None:
     """If ``update_startup_results`` already fired, timeout is a no-op."""
     with (
         _patch_launcher_ui(),
-        patch("src.launchers.golf_launcher._lazy_load_model_registry") as mock_reg,
-        patch("src.launchers.golf_launcher._lazy_load_engine_manager") as mock_eng,
-        patch("src.launchers.golf_launcher.QTimer"),
+        patch(
+            "src.launchers.upstream_drift_launcher._lazy_load_model_registry"
+        ) as mock_reg,
+        patch(
+            "src.launchers.upstream_drift_launcher._lazy_load_engine_manager"
+        ) as mock_eng,
+        patch("src.launchers.upstream_drift_launcher.QTimer"),
     ):
         mock_reg.return_value = MagicMock()
         mock_eng.return_value = (MagicMock(), MagicMock())
 
-        launcher = GolfLauncher(loading=True)
+        launcher = UpstreamDriftLauncher(loading=True)
         # Simulate successful async startup completing before timeout.
         launcher.update_startup_results(_make_startup_results())
         assert launcher.loading is False
@@ -195,9 +202,9 @@ def test_handle_startup_timeout_safe_without_toast_manager(qapp) -> None:
     """Timeout handler must not crash if ``toast_manager`` isn't ready."""
     with (
         _patch_launcher_ui(),
-        patch("src.launchers.golf_launcher.QTimer"),
+        patch("src.launchers.upstream_drift_launcher.QTimer"),
     ):
-        launcher = GolfLauncher(loading=True)
+        launcher = UpstreamDriftLauncher(loading=True)
         launcher.toast_manager = None
         # Must not raise even if the toast subsystem is unavailable.
         launcher._handle_startup_timeout()
@@ -211,8 +218,8 @@ def test_handle_startup_timeout_safe_without_toast_manager(qapp) -> None:
 
 def test_create_model_card_is_removed() -> None:
     """The dead placeholder ``create_model_card`` must be gone (issue #5490)."""
-    assert not hasattr(GolfLauncher, "create_model_card"), (
-        "GolfLauncher.create_model_card was an unused empty placeholder and "
+    assert not hasattr(UpstreamDriftLauncher, "create_model_card"), (
+        "UpstreamDriftLauncher.create_model_card was an unused empty placeholder and "
         "should have been removed as part of issue #5490."
     )
 
@@ -240,9 +247,9 @@ class _FakeLauncher:
 
 def test_handler_logic_clears_loading_when_still_loading(caplog) -> None:
     fake = _FakeLauncher(loading=True, toast_manager=object())
-    caplog.set_level(logging.ERROR, logger=golf_launcher.logger.name)
+    caplog.set_level(logging.ERROR, logger=upstream_drift_launcher.logger.name)
 
-    GolfLauncher._handle_startup_timeout(fake)  # type: ignore[arg-type]
+    UpstreamDriftLauncher._handle_startup_timeout(fake)  # type: ignore[arg-type]
 
     assert fake.loading is False
     assert len(fake.toast_calls) == 1
@@ -255,7 +262,7 @@ def test_handler_logic_clears_loading_when_still_loading(caplog) -> None:
 def test_handler_logic_noop_when_already_loaded() -> None:
     fake = _FakeLauncher(loading=False, toast_manager=object())
 
-    GolfLauncher._handle_startup_timeout(fake)  # type: ignore[arg-type]
+    UpstreamDriftLauncher._handle_startup_timeout(fake)  # type: ignore[arg-type]
 
     assert fake.loading is False
     assert fake.toast_calls == []
@@ -264,7 +271,7 @@ def test_handler_logic_noop_when_already_loaded() -> None:
 def test_handler_logic_safe_without_toast_manager() -> None:
     fake = _FakeLauncher(loading=True, toast_manager=None)
 
-    GolfLauncher._handle_startup_timeout(fake)  # type: ignore[arg-type]
+    UpstreamDriftLauncher._handle_startup_timeout(fake)  # type: ignore[arg-type]
 
     assert fake.loading is False
     assert fake.toast_calls == []

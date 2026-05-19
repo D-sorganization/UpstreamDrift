@@ -206,8 +206,8 @@ class TestLauncherIntegration(unittest.TestCase):
         # launch_engine_directly should now be imported from launcher_factory
         self.assertIn("from src.shared.python.launcher_factory", content)
 
-    @patch("src.launchers.golf_launcher.GolfLauncher")
-    def test_unified_launcher_import(self, mock_golf_launcher: Mock) -> None:
+    @patch("src.launchers.upstream_drift_launcher.UpstreamDriftLauncher")
+    def test_unified_launcher_import(self, mock_upstream_drift_launcher: Mock) -> None:
         """Test that unified launcher can be imported."""
         try:
             from src.launchers.unified_launcher import UnifiedLauncher

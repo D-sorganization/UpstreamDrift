@@ -90,7 +90,7 @@ UpstreamDrift/
 │   │       ├── twodof_pendulum.py
 │   │       └── biomechanical_pendulum.py
 │   ├── launchers/                  # GUI/CLI entry points
-│   │   ├── golf_launcher.py        # PyQt6 professional GUI (main entrypoint)
+│   │   ├── upstream_drift_launcher.py        # PyQt6 professional GUI (main entrypoint)
 │   │   ├── golf_suite_launcher.py  # Multi-engine suite launcher
 │   │   ├── unified_launcher.py     # Unified launcher interface
 │   │   └── cli_launcher.py         # Command-line interface
@@ -158,7 +158,7 @@ UpstreamDrift/
 | MyoSuite Engine Adapter  | `src/engines/physics_engines/myosuite/`  | Experimental MyoSuite integration for detailed muscle physiology simulation                 |
 | Pendulum Models          | `src/engines/physics_engines/pendulum/`  | Educational simplified models for learning and quick prototyping                            |
 | FastAPI Backend          | `src/api/`                               | REST API exposing simulation, IK/ID, trajectory optimization, and control endpoints         |
-| PyQt6 GUI                | `src/launchers/golf_launcher.py`         | Professional interactive GUI with real-time 3D visualization                                |
+| PyQt6 GUI                | `src/launchers/upstream_drift_launcher.py`         | Professional interactive GUI with real-time 3D visualization                                |
 | Sidekick (AI assistant)  | PyQt: `src/shared/python/ai/gui/assistant_panel.py` · React: `ui/src/components/ui/ChatPanel.tsx` · Adapter: `src/tools/sidekick/_embed_adapter.py` | In-app AI chat surface with streaming, RAG, session history, and agentic tool dispatch. Design tokens: `src/shared/python/theme/sidekick_tokens.py`. See `docs/sidekick/README.md`. |
 | Tauri Desktop App        | `ui/`                                    | Cross-platform desktop application wrapper (Windows, macOS, Linux)                          |
 | Rust Physics Kernels     | `rust_core/upstream-physics/`            | High-performance compiled physics routines for critical paths, including initial flexible shaft FEM element primitives |

@@ -2,7 +2,7 @@
 
 ## Scope and approach
 
-- Reviewed the launcher entry points (`launch_golf_suite.py`, `launchers/golf_launcher.py`, and the PyQt local launcher) and the first-hop experience into MuJoCo, Drake, Pinocchio, OpenSim, MyoSim, OpenPose, MATLAB/Simscape, URDF Generator, and the C3D Viewer.
+- Reviewed the launcher entry points (`launch_golf_suite.py`, `launchers/upstream_drift_launcher.py`, and the PyQt local launcher) and the first-hop experience into MuJoCo, Drake, Pinocchio, OpenSim, MyoSim, OpenPose, MATLAB/Simscape, URDF Generator, and the C3D Viewer.
 - Evaluated whether each engine presents a modern GUI with documented controls for methods, force/torque configuration, graphics manipulation, and joint load visualization.
 
 ## Overall launcher experience
@@ -31,31 +31,31 @@
 ### OpenSim
 
 - Implementation placeholder: The OpenSim Golf engine falls back to an internal demo with hard-coded torques and throws `NotImplementedError` for the real OpenSim path, so no GUI affordances or documentation exist for switching methods or viewing joint loads. 【F:engines/physics_engines/opensim/python/opensim_golf/core.py†L33-L159】
-- Launcher visibility: The Docker launcher surfaces an “OpenSim Golf” tile but provides no help text or pathway to configure force/torque inputs or select OpenSim models before launch. 【F:launchers/golf_launcher.py†L88-L99】【F:launchers/golf_launcher.py†L919-L963】
+- Launcher visibility: The Docker launcher surfaces an “OpenSim Golf” tile but provides no help text or pathway to configure force/torque inputs or select OpenSim models before launch. 【F:launchers/upstream_drift_launcher.py†L88-L99】【F:launchers/upstream_drift_launcher.py†L919-L963】
 
 ### MyoSim Suite (Golf Suite)
 
 - Headless integration: The MyoSim engine is loaded like other physics engines but lacks a GUI module or documentation on changing control strategies, visualizing torques, or interacting with graphics. 【F:shared/python/engine_manager.py†L332-L355】【F:shared/python/engine_probes.py†L546-L600】
-- Launcher gap: The tile exists in the Docker launcher without any accompanying description or link to help, leaving users unaware of available controls or force/torque visualization options. 【F:launchers/golf_launcher.py†L88-L99】
+- Launcher gap: The tile exists in the Docker launcher without any accompanying description or link to help, leaving users unaware of available controls or force/torque visualization options. 【F:launchers/upstream_drift_launcher.py†L88-L99】
 
 ### OpenPose
 
 - Analysis-only wrapper: The OpenPose estimator is a headless wrapper with no GUI; there are no documented controls for adjusting methods, viewing forces/torques, or connecting results to simulation graphics from the launcher. 【F:shared/python/pose_estimation/openpose_estimator.py†L1-L157】
-- Launcher tile without guidance: An “OpenPose Analysis” entry is listed in the launcher assets, but the UI provides no explanation of its capabilities, required models, or how to route outputs into downstream force/torque displays. 【F:launchers/golf_launcher.py†L88-L99】
+- Launcher tile without guidance: An “OpenPose Analysis” entry is listed in the launcher assets, but the UI provides no explanation of its capabilities, required models, or how to route outputs into downstream force/torque displays. 【F:launchers/upstream_drift_launcher.py†L88-L99】
 
 ### MATLAB / Simscape models
 
-- Model availability without GUI entry: Documentation exists for MATLAB engine usage, but the launcher does not expose buttons or help to start Simscape GUIs, pass forces/torques, or toggle visualization of joint loads. 【F:docs/engines/matlab.md†L1-L36】【F:launchers/golf_launcher.py†L88-L99】
-- Help disconnect: The documented startup flow (manual MATLAB engine start) is not reflected in the launcher UI, leaving users without integrated guidance for configuring methods or graphics. 【F:docs/engines/matlab.md†L12-L36】【F:launchers/golf_launcher.py†L919-L963】
+- Model availability without GUI entry: Documentation exists for MATLAB engine usage, but the launcher does not expose buttons or help to start Simscape GUIs, pass forces/torques, or toggle visualization of joint loads. 【F:docs/engines/matlab.md†L1-L36】【F:launchers/upstream_drift_launcher.py†L88-L99】
+- Help disconnect: The documented startup flow (manual MATLAB engine start) is not reflected in the launcher UI, leaving users without integrated guidance for configuring methods or graphics. 【F:docs/engines/matlab.md†L12-L36】【F:launchers/upstream_drift_launcher.py†L919-L963】
 
 ### URDF Generator
 
-- Strengths: Dedicated PyQt GUI with documented workflow for building and exporting URDFs, including segment-level configuration and planned 3D visualization; launcher integration can start the tool directly. 【F:tools/urdf_generator/README.md†L1-L156】【F:launchers/golf_launcher.py†L919-L994】【F:launchers/golf_launcher.py†L1158-L1192】
+- Strengths: Dedicated PyQt GUI with documented workflow for building and exporting URDFs, including segment-level configuration and planned 3D visualization; launcher integration can start the tool directly. 【F:tools/urdf_generator/README.md†L1-L156】【F:launchers/upstream_drift_launcher.py†L919-L994】【F:launchers/upstream_drift_launcher.py†L1158-L1192】
 - Gaps: No launcher-side description of how URDF outputs map into engine control/visualization defaults or how to pipe force/torque presets into exported models before opening other engines.
 
 ### C3D Viewer
 
-- Strengths: Full-featured PyQt GUI for loading C3D files with metadata, plots, and 3D marker visualization, launched directly from the Docker launcher. 【F:engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py†L1-L200】【F:launchers/golf_launcher.py†L919-L994】【F:launchers/golf_launcher.py†L1199-L1257】
+- Strengths: Full-featured PyQt GUI for loading C3D files with metadata, plots, and 3D marker visualization, launched directly from the Docker launcher. 【F:engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py†L1-L200】【F:launchers/upstream_drift_launcher.py†L919-L994】【F:launchers/upstream_drift_launcher.py†L1199-L1257】
 - Gaps: The launcher provides no contextual help about file requirements, force/torque visualization capabilities, or how to stream outputs into engine visualizations.
 
 ## Recommendations
