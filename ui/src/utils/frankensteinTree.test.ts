@@ -119,6 +119,111 @@ describe('Frankenstein URDF Tree Operations', () => {
     expect(movedTgtJoint?.parent_id).toBe('src_root');
   });
 
+  it('remaps swapped subtree ids when the destination already uses them', () => {
+    const overlappingSourceTree: URDFTreeNode[] = [
+      {
+        id: 'src_root',
+        name: 'src_root',
+        node_type: 'root',
+        parent_id: null,
+        children: ['src_joint_1', 'shared_link'],
+        properties: {},
+      },
+      {
+        id: 'src_joint_1',
+        name: 'src_joint_1',
+        node_type: 'joint',
+        parent_id: 'src_root',
+        children: ['src_link_1'],
+        properties: {},
+      },
+      {
+        id: 'src_link_1',
+        name: 'src_link_1',
+        node_type: 'link',
+        parent_id: 'src_joint_1',
+        children: [],
+        properties: {},
+      },
+      {
+        id: 'shared_link',
+        name: 'shared_link',
+        node_type: 'link',
+        parent_id: 'src_root',
+        children: [],
+        properties: {},
+      },
+    ];
+
+    const overlappingTargetTree: URDFTreeNode[] = [
+      {
+        id: 'tgt_root',
+        name: 'tgt_root',
+        node_type: 'root',
+        parent_id: null,
+        children: ['tgt_joint_1', 'src_link_1'],
+        properties: {},
+      },
+      {
+        id: 'tgt_joint_1',
+        name: 'tgt_joint_1',
+        node_type: 'joint',
+        parent_id: 'tgt_root',
+        children: ['shared_link'],
+        properties: {},
+      },
+      {
+        id: 'shared_link',
+        name: 'shared_link',
+        node_type: 'link',
+        parent_id: 'tgt_joint_1',
+        children: [],
+        properties: {},
+      },
+      {
+        id: 'src_link_1',
+        name: 'src_link_1',
+        node_type: 'link',
+        parent_id: 'tgt_root',
+        children: [],
+        properties: {},
+      },
+    ];
+
+    const { sourceTree: newSrc, targetTree: newTgt } = swapSubtrees(
+      overlappingSourceTree,
+      overlappingTargetTree,
+      'src_joint_1',
+      'tgt_joint_1',
+    );
+
+    expect(new Set(newSrc.map((n) => n.id)).size).toBe(newSrc.length);
+    expect(new Set(newTgt.map((n) => n.id)).size).toBe(newTgt.length);
+
+    const remappedIntoSource = newSrc.find(
+      (n) => n.parent_id === 'src_root' && n.id !== 'shared_link',
+    );
+    expect(remappedIntoSource).toBeDefined();
+    expect(remappedIntoSource?.children).toHaveLength(1);
+    expect(remappedIntoSource?.children[0]).not.toBe('shared_link');
+
+    const remappedChildIntoSource = newSrc.find(
+      (n) => n.parent_id === remappedIntoSource?.id,
+    );
+    expect(remappedChildIntoSource?.id).not.toBe('shared_link');
+
+    const remappedIntoTarget = newTgt.find(
+      (n) => n.parent_id === 'tgt_root' && n.id !== 'src_link_1',
+    );
+    expect(remappedIntoTarget).toBeDefined();
+    expect(remappedIntoTarget?.children[0]).not.toBe('src_link_1');
+
+    const remappedChildIntoTarget = newTgt.find(
+      (n) => n.parent_id === remappedIntoTarget?.id,
+    );
+    expect(remappedChildIntoTarget?.id).not.toBe('src_link_1');
+  });
+
   it('should merge all nodes from source into target under target parent', () => {
     const result = mergeTrees(sourceTree, targetTree, 'tgt_link_1');
 

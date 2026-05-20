@@ -2,6 +2,7 @@
 
 import asyncio
 import contextlib
+import time
 from typing import Any
 
 import numpy as np
@@ -12,6 +13,7 @@ from src.shared.python.core.contracts import require
 from src.shared.python.engine_core.engine_registry import EngineType
 
 router = APIRouter()
+_DEFAULT_SPEED_FACTOR = 1.0
 
 
 def _engine_type_from_str(name: str) -> EngineType:
@@ -70,6 +72,42 @@ def _engine_state_to_dict(engine: object) -> dict[str, Any]:
         "q": q.tolist() if isinstance(q, np.ndarray) else list(q),
         "v": v.tolist() if isinstance(v, np.ndarray) else list(v),
     }
+
+
+def _get_simulation_speed_factor(
+    websocket: WebSocket,
+    config: dict[str, Any],
+) -> float:
+    """Return the current simulation speed factor from shared app state."""
+    app_state = getattr(getattr(websocket, "app", None), "state", None)
+    simulation_service = getattr(app_state, "simulation_service", None)
+    stats = getattr(simulation_service, "stats", None)
+    speed_factor = getattr(stats, "speed_factor", config.get("speed_factor"))
+    if not isinstance(speed_factor, (int, float)) or speed_factor <= 0:
+        return _DEFAULT_SPEED_FACTOR
+    return float(speed_factor)
+
+
+def _compute_real_time_sleep_delay(
+    timestep: float,
+    speed_factor: float,
+    step_elapsed: float,
+) -> float:
+    """Return the remaining real-time pacing delay for the current step."""
+    target_step_time = timestep / speed_factor
+    return max(0.0, target_step_time - step_elapsed)
+
+
+def _reset_simulation_stats(websocket: WebSocket, config: dict[str, Any]) -> None:
+    """Reset shared simulation stats for a new WebSocket simulation run."""
+    app_state = getattr(getattr(websocket, "app", None), "state", None)
+    simulation_service = getattr(app_state, "simulation_service", None)
+    stats = getattr(simulation_service, "stats", None)
+    if stats is None:
+        return
+    stats.start_time = time.time()
+    stats.frame_count = 0
+    stats.speed_factor = _get_simulation_speed_factor(websocket, config)
 
 
 class SimulationFrame(BaseModel):
@@ -187,8 +225,13 @@ async def _run_simulation_loop(
     target_fps = 60
     steps_per_second = 1.0 / timestep
     frame_skip = max(1, int(steps_per_second / target_fps))
+    loop = asyncio.get_running_loop()
+    app_state = getattr(getattr(websocket, "app", None), "state", None)
+    simulation_service = getattr(app_state, "simulation_service", None)
+    stats = getattr(simulation_service, "stats", None)
 
     while time_elapsed < duration:
+        step_started_at = loop.time()
         command = await _handle_client_commands(websocket)
         if command == "stop":
             break
@@ -203,6 +246,8 @@ async def _run_simulation_loop(
 
         time_elapsed += timestep
         frame += 1
+        if stats is not None:
+            stats.frame_count = frame
 
         # Send frame data (throttle to ~60fps for UI)
         if frame % frame_skip == 0:
@@ -230,6 +275,15 @@ async def _run_simulation_loop(
                 }
 
             await websocket.send_json(frame_data)
+
+        speed_factor = _get_simulation_speed_factor(websocket, config)
+        delay = _compute_real_time_sleep_delay(
+            timestep,
+            speed_factor,
+            loop.time() - step_started_at,
+        )
+        if delay > 0:
+            await asyncio.sleep(delay)
 
     return frame, time_elapsed
 
@@ -263,6 +317,7 @@ async def simulation_stream(
             return
 
         config = start_msg.get("config", {})
+        _reset_simulation_stats(websocket, config)
 
         # Load engine
         engine = await _load_simulation_engine(engine_manager, engine_type, websocket)

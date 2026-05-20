@@ -20,6 +20,47 @@ export interface TreeDiff {
   }>;
 }
 
+function createUniqueSwapId(baseId: string, usedIds: Set<string>): string {
+  let newId = baseId;
+  let counter = 1;
+  while (usedIds.has(newId)) {
+    newId = `${baseId}_swap_${counter}`;
+    counter++;
+  }
+  usedIds.add(newId);
+  return newId;
+}
+
+function remapSubtreeForDestination(
+  subtreeNodes: URDFTreeNode[],
+  destinationNodes: URDFTreeNode[],
+  rootNodeId: string,
+  destinationParentId: string | null,
+): { nodes: URDFTreeNode[]; rootId: string } {
+  const usedIds = new Set(destinationNodes.map((node) => node.id));
+  const idMap = new Map<string, string>();
+
+  for (const node of subtreeNodes) {
+    idMap.set(node.id, createUniqueSwapId(node.id, usedIds));
+  }
+
+  return {
+    rootId: idMap.get(rootNodeId)!,
+    nodes: subtreeNodes.map((node) => ({
+      ...node,
+      id: idMap.get(node.id)!,
+      parent_id:
+        node.id === rootNodeId
+          ? destinationParentId
+          : node.parent_id
+            ? idMap.get(node.parent_id)!
+            : null,
+      children: node.children.map((childId) => idMap.get(childId)!),
+      properties: { ...node.properties },
+    })),
+  };
+}
+
 /**
  * Copies a single component from the source tree (without children)
  * and inserts it under targetParentId in targetTree.
@@ -180,6 +221,18 @@ export function swapSubtrees(
 
   const targetSubtreeNodes = targetTree.filter((n) => targetSubtreeIds.has(n.id));
   const targetRemainingNodes = targetTree.filter((n) => !targetSubtreeIds.has(n.id));
+  const remappedTargetSubtree = remapSubtreeForDestination(
+    targetSubtreeNodes,
+    sourceRemainingNodes,
+    targetNodeId,
+    sourceParentId,
+  );
+  const remappedSourceSubtree = remapSubtreeForDestination(
+    sourceSubtreeNodes,
+    targetRemainingNodes,
+    sourceNodeId,
+    targetParentId,
+  );
 
   // Map and modify trees
   const newSourceTree = [
@@ -187,17 +240,14 @@ export function swapSubtrees(
       if (n.id === sourceParentId) {
         return {
           ...n,
-          children: n.children.map((cid) => (cid === sourceNodeId ? targetNodeId : cid)),
+          children: n.children.map((cid) => (
+            cid === sourceNodeId ? remappedTargetSubtree.rootId : cid
+          )),
         };
       }
       return n;
     }),
-    ...targetSubtreeNodes.map((n) => {
-      if (n.id === targetNodeId) {
-        return { ...n, parent_id: sourceParentId };
-      }
-      return n;
-    }),
+    ...remappedTargetSubtree.nodes,
   ];
 
   const newTargetTree = [
@@ -205,17 +255,14 @@ export function swapSubtrees(
       if (n.id === targetParentId) {
         return {
           ...n,
-          children: n.children.map((cid) => (cid === targetNodeId ? sourceNodeId : cid)),
+          children: n.children.map((cid) => (
+            cid === targetNodeId ? remappedSourceSubtree.rootId : cid
+          )),
         };
       }
       return n;
     }),
-    ...sourceSubtreeNodes.map((n) => {
-      if (n.id === sourceNodeId) {
-        return { ...n, parent_id: targetParentId };
-      }
-      return n;
-    }),
+    ...remappedSourceSubtree.nodes,
   ];
 
   return {

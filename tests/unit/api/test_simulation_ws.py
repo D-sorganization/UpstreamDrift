@@ -21,8 +21,10 @@ import numpy as np
 import pytest
 from src.api.routes.simulation_ws import (
     _apply_initial_state,
+    _compute_real_time_sleep_delay,
     _engine_state_to_dict,
     _engine_type_from_str,
+    _get_simulation_speed_factor,
 )
 from src.shared.python.engine_core.engine_registry import EngineType
 
@@ -168,3 +170,62 @@ class TestEngineStateToDict:
         )
         result = _engine_state_to_dict(engine)
         json.dumps(result)  # must not raise
+
+
+class _Stats:
+    def __init__(self, speed_factor: float) -> None:
+        self.speed_factor = speed_factor
+
+
+class _SimulationService:
+    def __init__(self, speed_factor: float) -> None:
+        self.stats = _Stats(speed_factor)
+
+
+class _AppState:
+    def __init__(self, speed_factor: float | None = None) -> None:
+        if speed_factor is not None:
+            self.simulation_service = _SimulationService(speed_factor)
+
+
+class _App:
+    def __init__(self, speed_factor: float | None = None) -> None:
+        self.state = _AppState(speed_factor)
+
+
+class _WebSocket:
+    def __init__(self, speed_factor: float | None = None) -> None:
+        self.app = _App(speed_factor)
+
+
+class TestSimulationSpeedFactor:
+    """Simulation WebSocket loop must read speed from shared service state."""
+
+    def test_uses_service_speed_factor_when_available(self) -> None:
+        websocket = _WebSocket(speed_factor=2.5)
+        assert _get_simulation_speed_factor(websocket, {}) == pytest.approx(2.5)
+
+    def test_falls_back_to_config_when_service_missing(self) -> None:
+        websocket = _WebSocket()
+        assert _get_simulation_speed_factor(
+            websocket, {"speed_factor": 1.5}
+        ) == pytest.approx(1.5)
+
+    def test_invalid_speed_falls_back_to_default(self) -> None:
+        websocket = _WebSocket(speed_factor=0.0)
+        assert _get_simulation_speed_factor(websocket, {}) == pytest.approx(1.0)
+
+
+class TestRealTimeSleepDelay:
+    """Real-time pacing must scale inverse to requested simulation speed."""
+
+    def test_returns_remaining_delay_at_default_speed(self) -> None:
+        assert _compute_real_time_sleep_delay(0.002, 1.0, 0.0005) == pytest.approx(
+            0.0015
+        )
+
+    def test_scales_delay_for_faster_speed(self) -> None:
+        assert _compute_real_time_sleep_delay(0.002, 2.0, 0.0) == pytest.approx(0.001)
+
+    def test_never_returns_negative_delay(self) -> None:
+        assert _compute_real_time_sleep_delay(0.002, 2.0, 0.01) == pytest.approx(0.0)
