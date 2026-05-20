@@ -174,9 +174,9 @@ def test_diagnostics_export_markdown_format() -> None:
     ]
     output = copy_diagnostics(records)
 
-    assert output.startswith(
-        "# Integration Health"
-    ), f"Expected markdown header, got: {output[:60]!r}"
+    assert output.startswith("# Integration Health"), (
+        f"Expected markdown header, got: {output[:60]!r}"
+    )
 
 
 # ---------------------------------------------------------------------------

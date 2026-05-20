@@ -167,9 +167,9 @@ class TestPredefinedThemes:
 
         for key, theme in PLOT_THEMES.items():
             params = theme.to_rcparams()
-            assert (
-                "figure.facecolor" in params
-            ), f"Theme '{key}' missing figure.facecolor"
+            assert "figure.facecolor" in params, (
+                f"Theme '{key}' missing figure.facecolor"
+            )
 
 
 # ──────────────────────────────────────────────────────────────────────────────

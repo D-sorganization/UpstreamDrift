@@ -24,9 +24,7 @@ class SimulationStreamer:
         Args:
             server: Streaming server instance.
         """
-        if not (server is not None):
-            raise ValueError("server must be provided")
-        if not (server is not None):
+        if server is None:
             raise ValueError("server must be provided")
         self.server = server
         self._frame_number = 0
@@ -38,9 +36,7 @@ class SimulationStreamer:
         Args:
             frame: Frame to send.
         """
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
-        if not (frame is not None):
+        if frame is None:
             raise ValueError("frame must be provided")
         await self.server.broadcast(frame)
         self._frame_number = frame.frame_number + 1
@@ -63,9 +59,7 @@ class SimulationStreamer:
             forces: Optional list of force vectors.
             metrics: Optional swing metrics.
         """
-        if not (joints is not None):
-            raise ValueError("joints must be provided")
-        if not (joints is not None):
+        if joints is None:
             raise ValueError("joints must be provided")
         from src.unreal_integration.data_models import JointState
 

@@ -33,9 +33,7 @@ class InsertSegmentDialog(QDialog):
         parent: QWidget | None = None,
     ) -> None:
         """Initialize the dialog."""
-        if not (tree is not None):
-            raise ValueError("tree must be provided")
-        if not (tree is not None):
+        if tree is None:
             raise ValueError("tree must be provided")
         super().__init__(parent)
         self.tree = tree
@@ -61,9 +59,7 @@ class InsertSegmentDialog(QDialog):
     def _create_insertion_group(
         self, tree: KinematicTree, insert_after: str | None
     ) -> QGroupBox:
-        if not (tree is not None):
-            raise ValueError("tree must be provided")
-        if not (tree is not None):
+        if tree is None:
             raise ValueError("tree must be provided")
         insertion_group = QGroupBox("Insertion Point")
         insertion_layout = QFormLayout(insertion_group)
@@ -129,9 +125,7 @@ class InsertSegmentDialog(QDialog):
         return joint_group
 
     def _create_reparent_group(self, tree: KinematicTree) -> QGroupBox:
-        if not (tree is not None):
-            raise ValueError("tree must be provided")
-        if not (tree is not None):
+        if tree is None:
             raise ValueError("tree must be provided")
         reparent_group = QGroupBox("Re-parent Children")
         reparent_layout = QVBoxLayout(reparent_group)
@@ -162,9 +156,7 @@ class InsertSegmentDialog(QDialog):
 
     def _update_reparent_list(self, parent_name: str) -> None:
         """Update the reparent list when parent selection changes."""
-        if not (parent_name is not None):
-            raise ValueError("parent_name must be provided")
-        if not (parent_name is not None):
+        if parent_name is None:
             raise ValueError("parent_name must be provided")
         if self.reparent_list is None:
             return

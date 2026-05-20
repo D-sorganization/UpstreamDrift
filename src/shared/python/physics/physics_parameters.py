@@ -322,9 +322,7 @@ class PhysicsParameterRegistry:
         Returns:
             Tuple of (success, error_message)
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         param = self.parameters.get(name)
         if param is None:
@@ -384,9 +382,7 @@ class PhysicsParameterRegistry:
         Returns:
             Number of parameters imported
         """
-        if not (filepath is not None):
-            raise ValueError("filepath must be provided")
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         with open(filepath) as f:
             data = json.load(f)

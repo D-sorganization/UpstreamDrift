@@ -27,9 +27,7 @@ class FrameBuffer:
         Args:
             max_size: Maximum number of frames to store.
         """
-        if not (max_size is not None):
-            raise ValueError("max_size must be provided")
-        if not (max_size is not None):
+        if max_size is None:
             raise ValueError("max_size must be provided")
         if max_size <= 0:
             raise ValueError(f"max_size must be positive, got {max_size}")
@@ -68,9 +66,7 @@ class FrameBuffer:
         Returns:
             True if frame was added (oldest may have been dropped).
         """
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
-        if not (frame is not None):
+        if frame is None:
             raise ValueError("frame must be provided")
         self._buffer.append(frame)
         return True

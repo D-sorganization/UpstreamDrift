@@ -15,9 +15,7 @@ class _PlaybackMixin:
     engine: Any
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray]:
-        if not (field_name is not None):
-            raise ValueError("field_name must be provided")
-        if not (field_name is not None):
+        if field_name is None:
             raise ValueError("field_name must be provided")
         if field_name not in self.data:
             return np.array([]), np.array([])
@@ -38,9 +36,7 @@ class _PlaybackMixin:
     def get_induced_acceleration_series(
         self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
-        if not (source_name is not None):
-            raise ValueError("source_name must be provided")
-        if not (source_name is not None):
+        if source_name is None:
             raise ValueError("source_name must be provided")
         if source_name not in self.data["induced_accelerations"]:
             logger.warning(
@@ -60,9 +56,7 @@ class _PlaybackMixin:
         return result
 
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
-        if not (cf_name is not None):
-            raise ValueError("cf_name must be provided")
-        if not (cf_name is not None):
+        if cf_name is None:
             raise ValueError("cf_name must be provided")
         if cf_name not in self.data["counterfactuals"]:
             return np.array([]), np.array([])

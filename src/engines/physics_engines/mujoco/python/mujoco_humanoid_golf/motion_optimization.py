@@ -508,9 +508,7 @@ class SwingOptimizer:
         Returns:
             OptimizationResult with speed-optimized trajectory
         """
-        if not (target_speed is not None):
-            raise ValueError("target_speed must be provided")
-        if not (target_speed is not None):
+        if target_speed is None:
             raise ValueError("target_speed must be provided")
         objectives = OptimizationObjectives(
             maximize_club_speed=True,
@@ -540,9 +538,7 @@ class SwingOptimizer:
         Returns:
             OptimizationResult with accuracy-optimized trajectory
         """
-        if not (target_position is not None):
-            raise ValueError("target_position must be provided")
-        if not (target_position is not None):
+        if target_position is None:
             raise ValueError("target_position must be provided")
         objectives = OptimizationObjectives(
             maximize_club_speed=True,
@@ -576,9 +572,7 @@ class SwingOptimizer:
         Returns:
             List of OptimizationResult for different swings
         """
-        if not (num_swings is not None):
-            raise ValueError("num_swings must be provided")
-        if not (num_swings is not None):
+        if num_swings is None:
             raise ValueError("num_swings must be provided")
         swings = []
 

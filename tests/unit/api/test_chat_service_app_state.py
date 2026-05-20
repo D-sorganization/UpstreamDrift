@@ -145,9 +145,9 @@ class TestStateContextInjection:
         state_messages = [
             m for m in system_messages if "application state" in m.content.lower()
         ]
-        assert (
-            state_messages
-        ), "Expected at least one 'application state' system message"
+        assert state_messages, (
+            "Expected at least one 'application state' system message"
+        )
 
     def test_state_context_includes_events_key(self, tmp_path) -> None:
         """Injected state JSON contains the 'events' key."""

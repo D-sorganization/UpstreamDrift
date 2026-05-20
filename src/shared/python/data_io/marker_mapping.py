@@ -100,9 +100,7 @@ class MarkerToModelMapper:
         Args:
             model: MuJoCo model
         """
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
         self._mappings: dict[str, list[MarkerMapping]] = {}
@@ -118,9 +116,7 @@ class MarkerToModelMapper:
         Args:
             mapping: Marker-to-body mapping
         """
-        if not (mapping is not None):
-            raise ValueError("mapping must be provided")
-        if not (mapping is not None):
+        if mapping is None:
             raise ValueError("mapping must be provided")
         if mapping.body_name not in self._mappings:
             self._mappings[mapping.body_name] = []
@@ -161,9 +157,7 @@ class MarkerToModelMapper:
         Returns:
             RegistrationResult with transformation and diagnostics
         """
-        if not (body_name is not None):
-            raise ValueError("body_name must be provided")
-        if not (body_name is not None):
+        if body_name is None:
             raise ValueError("body_name must be provided")
         if body_name not in self._mappings:
             return self._failed_registration()
@@ -213,9 +207,7 @@ class MarkerToModelMapper:
         Returns:
             Tuple of (inlier_mask, transformation, residuals).
         """
-        if not (mappings is not None):
-            raise ValueError("mappings must be provided")
-        if not (mappings is not None):
+        if mappings is None:
             raise ValueError("mappings must be provided")
         inlier_mask = np.ones(len(marker_positions), dtype=bool)
         transformation = np.eye(4)
@@ -262,9 +254,7 @@ class MarkerToModelMapper:
         inlier_observed: np.ndarray,
     ) -> RegistrationResult:
         """Compute final metrics and build a successful RegistrationResult."""
-        if not (inlier_mask is not None):
-            raise ValueError("inlier_mask must be provided")
-        if not (inlier_mask is not None):
+        if inlier_mask is None:
             raise ValueError("inlier_mask must be provided")
         final_residuals = residuals[inlier_mask]
         rms = (
@@ -313,9 +303,7 @@ class MarkerToModelMapper:
             4×4 SE(3) transformation matrix
         """
         # Center point clouds
-        if not (source_points is not None):
-            raise ValueError("source_points must be provided")
-        if not (source_points is not None):
+        if source_points is None:
             raise ValueError("source_points must be provided")
         source_center = np.mean(source_points, axis=0)
         target_center = np.mean(target_points, axis=0)
@@ -359,9 +347,7 @@ class MarkerToModelMapper:
             Transformed points [N × 3]
         """
         # Convert to homogeneous coordinates
-        if not (transformation is not None):
-            raise ValueError("transformation must be provided")
-        if not (transformation is not None):
+        if transformation is None:
             raise ValueError("transformation must be provided")
         points_h = np.hstack([points, np.ones((len(points), 1))])
 
@@ -381,9 +367,7 @@ class MarkerToModelMapper:
             result: Registration result
             marker_names: Optional marker names for labeling
         """
-        if not (result is not None):
-            raise ValueError("result must be provided")
-        if not (result is not None):
+        if result is None:
             raise ValueError("result must be provided")
         try:
             import matplotlib.pyplot as plt

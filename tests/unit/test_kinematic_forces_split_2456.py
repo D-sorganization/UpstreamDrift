@@ -36,16 +36,16 @@ class TestKinematicForcesFileSizes:
     @pytest.mark.unit
     def test_kinematic_forces_split_2456_coordinator_loc(self) -> None:
         loc = _count_lines(KF_DIR / "kinematic_forces.py")
-        assert (
-            loc <= LOC_BUDGET_COORDINATOR
-        ), f"kinematic_forces.py has {loc} LOC; budget {LOC_BUDGET_COORDINATOR}"
+        assert loc <= LOC_BUDGET_COORDINATOR, (
+            f"kinematic_forces.py has {loc} LOC; budget {LOC_BUDGET_COORDINATOR}"
+        )
 
     @pytest.mark.unit
     def test_data_module_loc(self) -> None:
         loc = _count_lines(KF_DIR / "_kinematic_force_data.py")
-        assert (
-            loc <= LOC_BUDGET_DATA
-        ), f"_kinematic_force_data.py has {loc} LOC; budget {LOC_BUDGET_DATA}"
+        assert loc <= LOC_BUDGET_DATA, (
+            f"_kinematic_force_data.py has {loc} LOC; budget {LOC_BUDGET_DATA}"
+        )
 
 
 @pytest.mark.skipif(not _mujoco_available, reason="mujoco not installed")

@@ -70,9 +70,7 @@ def create_shaft_model(
     Returns:
         Initialized shaft model
     """
-    if not (model_type is not None):
-        raise ValueError("model_type must be provided")
-    if not (model_type is not None):
+    if model_type is None:
         raise ValueError("model_type must be provided")
     if properties is None:
         properties = create_standard_shaft()

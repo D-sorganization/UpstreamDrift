@@ -29,17 +29,17 @@ class TestUpstreamDriftLauncherLogic:
         launcher.engine_manager = MagicMock()
         launcher.btn_launch.setEnabled(False)
 
-        assert (
-            "UpstreamDrift" in launcher.windowTitle()
-        ), "Assertion failed: UpstreamDrift in launcher.windowTitle()"
+        assert "UpstreamDrift" in launcher.windowTitle(), (
+            "Assertion failed: UpstreamDrift in launcher.windowTitle()"
+        )
         mock_thread.return_value.start.assert_called_once()
 
-        assert hasattr(
-            launcher, "grid_layout"
-        ), "Assertion failed: hasattr(launcher, grid_layout)"
-        assert hasattr(
-            launcher, "btn_launch"
-        ), "Assertion failed: hasattr(launcher, btn_launch)"
+        assert hasattr(launcher, "grid_layout"), (
+            "Assertion failed: hasattr(launcher, grid_layout)"
+        )
+        assert hasattr(launcher, "btn_launch"), (
+            "Assertion failed: hasattr(launcher, btn_launch)"
+        )
 
     @patch("src.launchers.upstream_drift_launcher.DockerCheckThread")
     def test_model_selection_updates_ui(self, mock_thread, qtbot):
@@ -60,14 +60,14 @@ class TestUpstreamDriftLauncherLogic:
         launcher.engine_manager = MagicMock()
         launcher.btn_launch.setEnabled(False)
 
-        assert (
-            launcher.btn_launch.isEnabled() is False
-        ), "Assertion failed: launcher.btn_launch.isEnabled() is False"
+        assert launcher.btn_launch.isEnabled() is False, (
+            "Assertion failed: launcher.btn_launch.isEnabled() is False"
+        )
 
         launcher.on_docker_check_complete(True)
-        assert (
-            launcher.docker_available is True
-        ), "Assertion failed: launcher.docker_available is True"
+        assert launcher.docker_available is True, (
+            "Assertion failed: launcher.docker_available is True"
+        )
 
         launcher.selected_model = None
         launcher.btn_launch.setEnabled(False)
@@ -75,15 +75,15 @@ class TestUpstreamDriftLauncherLogic:
 
         launcher.select_model("test_model")
 
-        assert (
-            launcher.selected_model == "test_model"
-        ), "Assertion failed: launcher.selected_model == test_model"
-        assert (
-            launcher.btn_launch.isEnabled() is True
-        ), "Assertion failed: launcher.btn_launch.isEnabled() is True"
-        assert (
-            mock_model.name.upper() in launcher.btn_launch.text().upper()
-        ), "Assertion failed: mock_model.name.upper() in launcher.btn_launch.text().upper()"
+        assert launcher.selected_model == "test_model", (
+            "Assertion failed: launcher.selected_model == test_model"
+        )
+        assert launcher.btn_launch.isEnabled() is True, (
+            "Assertion failed: launcher.btn_launch.isEnabled() is True"
+        )
+        assert mock_model.name.upper() in launcher.btn_launch.text().upper(), (
+            "Assertion failed: mock_model.name.upper() in launcher.btn_launch.text().upper()"
+        )
 
     @patch("src.launchers.upstream_drift_launcher.DockerCheckThread")
     def test_launch_simulation_constructs_command(self, mock_thread, qtbot):
@@ -125,12 +125,12 @@ class TestUpstreamDriftLauncherLogic:
 
         launcher.docker_launcher.launch_container.assert_called_once()
         args, kwargs = launcher.docker_launcher.launch_container.call_args
-        assert (
-            kwargs["model_type"] == "docker"
-        ), "Assertion failed: kwargs[model_type] == docker"
-        assert (
-            kwargs["model_name"] == "Test Model"
-        ), "Assertion failed: kwargs[model_name] == Test Model"
+        assert kwargs["model_type"] == "docker", (
+            "Assertion failed: kwargs[model_type] == docker"
+        )
+        assert kwargs["model_name"] == "Test Model", (
+            "Assertion failed: kwargs[model_name] == Test Model"
+        )
 
     @patch("src.launchers.upstream_drift_launcher.DockerCheckThread")
     def test_launch_generic_mjcf(self, mock_thread, qtbot):

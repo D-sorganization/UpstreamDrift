@@ -30,9 +30,9 @@ def test_config_dir_ends_with_launcher() -> None:
     """CONFIG_DIR must end with 'launcher' for compatibility with existing code."""
     from src.launchers.launcher_constants import CONFIG_DIR
 
-    assert str(CONFIG_DIR).endswith(
-        "launcher"
-    ), f"CONFIG_DIR should end with 'launcher', got: {CONFIG_DIR}"
+    assert str(CONFIG_DIR).endswith("launcher"), (
+        f"CONFIG_DIR should end with 'launcher', got: {CONFIG_DIR}"
+    )
 
 
 def test_config_dir_is_platform_appropriate() -> None:
@@ -55,27 +55,27 @@ def test_layout_config_file_under_config_dir() -> None:
     """DbC postcondition: LAYOUT_CONFIG_FILE must be under CONFIG_DIR."""
     from src.launchers.launcher_constants import CONFIG_DIR, LAYOUT_CONFIG_FILE
 
-    assert str(LAYOUT_CONFIG_FILE).startswith(
-        str(CONFIG_DIR)
-    ), f"LAYOUT_CONFIG_FILE ({LAYOUT_CONFIG_FILE}) must be under CONFIG_DIR ({CONFIG_DIR})"
+    assert str(LAYOUT_CONFIG_FILE).startswith(str(CONFIG_DIR)), (
+        f"LAYOUT_CONFIG_FILE ({LAYOUT_CONFIG_FILE}) must be under CONFIG_DIR ({CONFIG_DIR})"
+    )
 
 
 def test_config_dir_is_path_instance() -> None:
     """CONFIG_DIR must be a pathlib.Path instance."""
     from src.launchers.launcher_constants import CONFIG_DIR
 
-    assert isinstance(
-        CONFIG_DIR, Path
-    ), f"CONFIG_DIR must be Path, got {type(CONFIG_DIR)}"
+    assert isinstance(CONFIG_DIR, Path), (
+        f"CONFIG_DIR must be Path, got {type(CONFIG_DIR)}"
+    )
 
 
 def test_layout_config_file_is_path_instance() -> None:
     """LAYOUT_CONFIG_FILE must be a pathlib.Path instance."""
     from src.launchers.launcher_constants import LAYOUT_CONFIG_FILE
 
-    assert isinstance(
-        LAYOUT_CONFIG_FILE, Path
-    ), f"LAYOUT_CONFIG_FILE must be Path, got {type(LAYOUT_CONFIG_FILE)}"
+    assert isinstance(LAYOUT_CONFIG_FILE, Path), (
+        f"LAYOUT_CONFIG_FILE must be Path, got {type(LAYOUT_CONFIG_FILE)}"
+    )
 
 
 def test_config_dir_uses_app_name_upstream_drift() -> None:
@@ -129,7 +129,7 @@ def test_platformdirs_user_config_dir_callable() -> None:
 
     platformdirs = importlib.import_module("platformdirs")
     result = platformdirs.user_config_dir("upstream-drift")
-    assert isinstance(
-        result, str
-    ), f"user_config_dir must return str, got {type(result)}"
+    assert isinstance(result, str), (
+        f"user_config_dir must return str, got {type(result)}"
+    )
     assert result.strip(), "user_config_dir must return a non-empty path"

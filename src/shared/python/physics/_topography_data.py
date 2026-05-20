@@ -59,9 +59,7 @@ class TopographyData(_TopographyIOMixin):
             smooth: Whether to smooth the heightmap
             smooth_sigma: Gaussian smoothing sigma
         """
-        if not (heightmap is not None):
-            raise ValueError("heightmap must be provided")
-        if not (heightmap is not None):
+        if heightmap is None:
             raise ValueError("heightmap must be provided")
         if smooth:
             heightmap = ndimage.gaussian_filter(heightmap, sigma=smooth_sigma)
@@ -93,9 +91,7 @@ class TopographyData(_TopographyIOMixin):
         Args:
             points: List of ElevationPoint objects
         """
-        if not (points is not None):
-            raise ValueError("points must be provided")
-        if not (points is not None):
+        if points is None:
             raise ValueError("points must be provided")
         self._contour_points = points
 
@@ -136,9 +132,7 @@ class TopographyData(_TopographyIOMixin):
         Returns:
             Elevation [m]
         """
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         if not self._is_loaded or self._interpolator is None:
             return 0.0
@@ -167,9 +161,7 @@ class TopographyData(_TopographyIOMixin):
         Returns:
             [dz/dx, dz/dy] gradient vector
         """
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         pos = position[:2]
 
@@ -194,9 +186,7 @@ class TopographyData(_TopographyIOMixin):
         Returns:
             [nx, ny, nz] unit normal vector
         """
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         gradient = self.get_gradient_at(position)
 
@@ -228,9 +218,7 @@ class TopographyData(_TopographyIOMixin):
         Returns:
             Array of shape (ny, nx) with elevations
         """
-        if not (nx is not None):
-            raise ValueError("nx must be provided")
-        if not (nx is not None):
+        if nx is None:
             raise ValueError("nx must be provided")
         if not self._is_loaded or self._interpolator is None:
             return np.zeros((ny, nx))

@@ -86,9 +86,9 @@ class TestFloatingBase:
     def test_dof_count_matches_spec(self, golfer_with_floating_base) -> None:
         """6 base DOFs + 23 internal DOFs = 29; nq = 30 (quaternion adds w)."""
         _pin, model, _data = golfer_with_floating_base
-        assert (
-            model.nv == 29
-        ), f"Expected nv=29 (6 base + 23 internal), got nv={model.nv}"
+        assert model.nv == 29, (
+            f"Expected nv=29 (6 base + 23 internal), got nv={model.nv}"
+        )
         assert model.nq == 30, f"Expected nq=30 (29 + quaternion w), got nq={model.nq}"
 
     def test_ik_urdf_floating_base(self, golfer_ik_with_floating_base) -> None:
@@ -152,9 +152,9 @@ class TestMidHandsFrame:
 
         # mid_hands y must lie between the two hand y coordinates.
         y_lo, y_hi = sorted([p_left[1], p_right[1]])
-        assert (
-            y_lo - 1e-6 <= p_mid[1] <= y_hi + 1e-6
-        ), f"mid_hands.y={p_mid[1]} not between hand y range [{y_lo}, {y_hi}]"
+        assert y_lo - 1e-6 <= p_mid[1] <= y_hi + 1e-6, (
+            f"mid_hands.y={p_mid[1]} not between hand y range [{y_lo}, {y_hi}]"
+        )
 
 
 class TestClubAttachment:

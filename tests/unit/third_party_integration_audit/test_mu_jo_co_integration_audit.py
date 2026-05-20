@@ -59,9 +59,9 @@ class TestMuJoCoIntegrationAudit:
         conftest_path = Path(__file__).parent.parent.parent / "conftest.py"
         if conftest_path.exists():
             content = conftest_path.read_text(encoding="utf-8")
-            assert (
-                "mujoco" in content
-            ), "conftest.py should import mujoco early to avoid DLL conflicts"
+            assert "mujoco" in content, (
+                "conftest.py should import mujoco early to avoid DLL conflicts"
+            )
 
     @skip_if_unavailable("mujoco")
     def test_mujoco_gl_environment(self) -> None:
@@ -71,9 +71,9 @@ class TestMuJoCoIntegrationAudit:
 
         if sys.platform == "win32":
             gl = os.environ.get("MUJOCO_GL", "")
-            assert (
-                gl != "egl"
-            ), "MUJOCO_GL=egl is invalid on Windows; use osmesa or glfw"
+            assert gl != "egl", (
+                "MUJOCO_GL=egl is invalid on Windows; use osmesa or glfw"
+            )
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

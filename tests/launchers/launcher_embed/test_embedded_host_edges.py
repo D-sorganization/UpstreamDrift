@@ -191,9 +191,7 @@ class TestHostConstruction:
 
 
 class TestOpenTabErrors:
-    def test_create_main_widget_returning_none_raises(
-        self, host
-    ) -> None:  # noqa: ANN001
+    def test_create_main_widget_returning_none_raises(self, host) -> None:  # noqa: ANN001
         tool = _Tool("nonewidget", widget_factory=lambda p: None)
         register_embeddable_tool(tool)
         with pytest.raises(ValueError, match="returned None"):
@@ -441,9 +439,7 @@ class TestCloseDockMissing:
 
 
 class TestFocusModeNoTabBar:
-    def test_set_focus_mode_when_tab_bar_none(
-        self, host, monkeypatch
-    ) -> None:  # noqa: ANN001
+    def test_set_focus_mode_when_tab_bar_none(self, host, monkeypatch) -> None:  # noqa: ANN001
         # Force tabBar() to return None to cover the early-return branch.
         monkeypatch.setattr(host.tab_widget, "tabBar", lambda: None)
         host.set_focus_mode(True)
@@ -463,9 +459,7 @@ class TestRestoreStateSkipsUnknown:
             host.restore_state({"tabs": ["missing_tab"], "docks": {}})
         assert host.active_tool_ids() == set()
 
-    def test_unknown_dock_logged_and_skipped(
-        self, host, caplog
-    ) -> None:  # noqa: ANN001
+    def test_unknown_dock_logged_and_skipped(self, host, caplog) -> None:  # noqa: ANN001
         with caplog.at_level("WARNING"):
             host.restore_state(
                 {

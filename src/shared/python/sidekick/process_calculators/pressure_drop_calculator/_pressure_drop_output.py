@@ -204,9 +204,7 @@ def _print_warnings_and_recommendations(  # noqa: C901
     results: dict[str, Any], show_recommendations: bool
 ) -> None:
     """Log warnings and engineering recommendations."""
-    if not (results is not None):
-        raise ValueError("results must be provided")
-    if not (results is not None):
+    if results is None:
         raise ValueError("results must be provided")
     if results.get("warnings"):
         warnings = results["warnings"]
@@ -245,9 +243,7 @@ def print_results(
         title: Title for the output
         show_recommendations: Whether to show engineering recommendations
     """
-    if not (results is not None):
-        raise ValueError("results must be provided")
-    if not (results is not None):
+    if results is None:
         raise ValueError("results must be provided")
     logger.info("\n" + "═" * 80)
     logger.info(f"  {title}  ".center(80, "═"))

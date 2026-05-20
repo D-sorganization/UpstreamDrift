@@ -74,9 +74,9 @@ class TestPendulumPutterModelPhysics:
 
         for link in result.links:
             if link.inertia.mass > 1e-6:  # Skip negligible mass links
-                assert (
-                    link.inertia.is_positive_definite()
-                ), f"Link {link.name} has non-positive-definite inertia"
+                assert link.inertia.is_positive_definite(), (
+                    f"Link {link.name} has non-positive-definite inertia"
+                )
 
     def test_pendulum_joint_has_appropriate_limits(self) -> None:
         """Pendulum joint should have reasonable angle limits."""

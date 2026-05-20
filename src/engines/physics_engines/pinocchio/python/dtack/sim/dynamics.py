@@ -20,9 +20,7 @@ class DynamicsEngine:
             model: Pinocchio model
             data: Pinocchio data
         """
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
         self.data = data
@@ -44,9 +42,7 @@ class DynamicsEngine:
         Returns:
             Joint acceleration 'a'
         """
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         if f_ext is None:
             result = pin.aba(self.model, self.data, q, v, tau)
@@ -61,9 +57,7 @@ class DynamicsEngine:
 
         Returns: tau (torque)
         """
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         if f_ext is None:
             result = pin.rnea(self.model, self.data, q, v, a)
@@ -82,9 +76,7 @@ class DynamicsEngine:
         Returns:
             (q_next, v_next)
         """
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         tau_zero = np.zeros(self.model.nv)
         a = self.forward_dynamics(q, v, tau_zero, f_ext=f_ext)
@@ -105,9 +97,7 @@ class DynamicsEngine:
         Returns:
             (q_next, v_next) starting from v=0
         """
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         v_zero = np.zeros(self.model.nv)
         a = self.forward_dynamics(q, v_zero, tau, f_ext=f_ext)
@@ -132,9 +122,7 @@ class DynamicsEngine:
             Induced acceleration vector
         """
         # Compute Mass Matrix Inverse
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         pin.computeMinverse(self.model, self.data, q)
         M_inv = self.data.Minv

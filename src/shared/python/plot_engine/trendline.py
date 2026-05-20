@@ -76,9 +76,7 @@ def compute_trendline(
 
 def _r_squared(y: np.ndarray, y_pred: np.ndarray) -> float:
     """Compute R-squared (coefficient of determination)."""
-    if not (y is not None):
-        raise ValueError("y must be provided")
-    if not (y is not None):
+    if y is None:
         raise ValueError("y must be provided")
     # ⚡ Bolt: np.vdot is ~3-4x faster than np.sum(x**2) by avoiding temporary array allocation
     diff_res = y - y_pred
@@ -90,9 +88,7 @@ def _r_squared(y: np.ndarray, y_pred: np.ndarray) -> float:
 
 def _linear(x: np.ndarray, y: np.ndarray, x_pred: np.ndarray) -> TrendlineResult:
     """Linear trendline: y = mx + b."""
-    if not (x is not None):
-        raise ValueError("x must be provided")
-    if not (x is not None):
+    if x is None:
         raise ValueError("x must be provided")
     coeffs = np.polyfit(x, y, 1)
     m, b = coeffs
@@ -117,9 +113,7 @@ def _polynomial(
     x: np.ndarray, y: np.ndarray, x_pred: np.ndarray, degree: int
 ) -> TrendlineResult:
     """Polynomial trendline: y = a_n*x^n + ... + a_1*x + a_0."""
-    if not (x is not None):
-        raise ValueError("x must be provided")
-    if not (x is not None):
+    if x is None:
         raise ValueError("x must be provided")
     degree = min(degree, len(x) - 1)
     coeffs = np.polyfit(x, y, degree)

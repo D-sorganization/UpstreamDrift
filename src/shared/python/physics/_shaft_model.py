@@ -46,9 +46,7 @@ class RigidShaftModel(ShaftModel):
 
     def initialize(self, properties: ShaftProperties) -> None:
         """Initialize with shaft properties."""
-        if not (properties is not None):
-            raise ValueError("properties must be provided")
-        if not (properties is not None):
+        if properties is None:
             raise ValueError("properties must be provided")
         self.properties = properties
         self.n_stations = len(properties.station_positions)
@@ -71,9 +69,7 @@ class RigidShaftModel(ShaftModel):
 
     def step(self, dt: float) -> ShaftState:
         """Return unchanged state."""
-        if not (dt is not None):
-            raise ValueError("dt must be provided")
-        if not (dt is not None):
+        if dt is None:
             raise ValueError("dt must be provided")
         return self.get_state()
 
@@ -91,9 +87,7 @@ class ModalShaftModel(ShaftModel):
         Args:
             n_modes: Number of bending modes to include
         """
-        if not (n_modes is not None):
-            raise ValueError("n_modes must be provided")
-        if not (n_modes is not None):
+        if n_modes is None:
             raise ValueError("n_modes must be provided")
         self.n_modes = n_modes
         self.properties: ShaftProperties | None = None
@@ -108,9 +102,7 @@ class ModalShaftModel(ShaftModel):
 
         Uses approximate analytical mode shapes for cantilevered beam.
         """
-        if not (properties is not None):
-            raise ValueError("properties must be provided")
-        if not (properties is not None):
+        if properties is None:
             raise ValueError("properties must be provided")
         self.properties = properties
         self.n_stations = len(properties.station_positions)
@@ -188,9 +180,7 @@ class ModalShaftModel(ShaftModel):
         moment: np.ndarray | None = None,
     ) -> None:
         """Apply modal forces from physical load."""
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         if not self.modes or self.properties is None:
             return
@@ -214,9 +204,7 @@ class ModalShaftModel(ShaftModel):
 
     def step(self, dt: float) -> ShaftState:
         """Advance modal coordinates by dt."""
-        if not (dt is not None):
-            raise ValueError("dt must be provided")
-        if not (dt is not None):
+        if dt is None:
             raise ValueError("dt must be provided")
         self.time += dt
 

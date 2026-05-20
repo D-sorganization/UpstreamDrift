@@ -56,9 +56,7 @@ def _validate_flow_params(
     errors: list[str],
 ) -> None:
     """Validate flow rate value and unit."""
-    if not (errors is not None):
-        raise ValueError("errors must be provided")
-    if not (errors is not None):
+    if errors is None:
         raise ValueError("errors must be provided")
     if flow_rate is not None:
         if flow_rate <= 0:
@@ -88,9 +86,7 @@ def _validate_conditions(
     warnings: list[str],
 ) -> None:
     """Validate pressure and temperature values."""
-    if not (errors is not None):
-        raise ValueError("errors must be provided")
-    if not (errors is not None):
+    if errors is None:
         raise ValueError("errors must be provided")
     if pressure is not None:
         if pressure <= 0:
@@ -120,9 +116,7 @@ def _validate_composition_and_fittings(
     warnings: list[str],
 ) -> None:
     """Validate gas composition and fitting specifications."""
-    if not (errors is not None):
-        raise ValueError("errors must be provided")
-    if not (errors is not None):
+    if errors is None:
         raise ValueError("errors must be provided")
     if gas_composition:
         total = sum(gas_composition.values())
@@ -153,9 +147,7 @@ def _log_validation_report(
     is_valid: bool, errors: list[str], warnings: list[str]
 ) -> None:
     """Log a formatted validation report."""
-    if not (is_valid is not None):
-        raise ValueError("is_valid must be provided")
-    if not (is_valid is not None):
+    if is_valid is None:
         raise ValueError("is_valid must be provided")
     logger.info(
         "\n╔═══════════════════════════════════════════════════════════════════╗"

@@ -31,9 +31,7 @@ class BehaviorCloning(ImitationLearner):
         device: str = "cpu",
     ) -> None:
         """Initialize behavior cloning learner."""
-        if not (observation_dim is not None):
-            raise ValueError("observation_dim must be provided")
-        if not (observation_dim is not None):
+        if observation_dim is None:
             raise ValueError("observation_dim must be provided")
         super().__init__(observation_dim, action_dim, config, device)
         self._build_policy()
@@ -74,9 +72,7 @@ class BehaviorCloning(ImitationLearner):
         Returns:
             Predicted actions.
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         for i, layer in enumerate(self._policy):
             x = x @ layer["W"] + layer["b"]
@@ -99,9 +95,7 @@ class BehaviorCloning(ImitationLearner):
         Returns:
             Mean squared error loss.
         """
-        if not (observations is not None):
-            raise ValueError("observations must be provided")
-        if not (observations is not None):
+        if observations is None:
             raise ValueError("observations must be provided")
         predictions = self._forward(observations)
         diff = predictions - actions
@@ -122,9 +116,7 @@ class BehaviorCloning(ImitationLearner):
         Returns:
             List of gradient dictionaries for each layer.
         """
-        if not (observations is not None):
-            raise ValueError("observations must be provided")
-        if not (observations is not None):
+        if observations is None:
             raise ValueError("observations must be provided")
         batch_size = len(observations)
 
@@ -171,9 +163,7 @@ class BehaviorCloning(ImitationLearner):
             Training history.
         """
         # Get training data
-        if not (dataset is not None):
-            raise ValueError("dataset must be provided")
-        if not (dataset is not None):
+        if dataset is None:
             raise ValueError("dataset must be provided")
         observations, actions = dataset.to_state_action_pairs()
 
@@ -248,9 +238,7 @@ class BehaviorCloning(ImitationLearner):
         Returns:
             Predicted action.
         """
-        if not (observation is not None):
-            raise ValueError("observation must be provided")
-        if not (observation is not None):
+        if observation is None:
             raise ValueError("observation must be provided")
         if observation.ndim == 1:
             observation = observation.reshape(1, -1)
@@ -268,9 +256,7 @@ class BehaviorCloning(ImitationLearner):
         Args:
             path: Path to save file.
         """
-        if not (path is not None):
-            raise ValueError("path must be provided")
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         path = Path(path)
 
@@ -301,9 +287,7 @@ class BehaviorCloning(ImitationLearner):
         Args:
             path: Path to load file.
         """
-        if not (path is not None):
-            raise ValueError("path must be provided")
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         path = Path(path)
 

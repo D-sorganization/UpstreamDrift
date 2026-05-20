@@ -33,9 +33,7 @@ class MotionCaptureLoader:
         Returns:
             MotionCaptureSequence
         """
-        if not (filepath is not None):
-            raise ValueError("filepath must be provided")
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         data = np.loadtxt(filepath, delimiter=",", skiprows=1)
 

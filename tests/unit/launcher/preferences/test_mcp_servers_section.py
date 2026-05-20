@@ -221,9 +221,9 @@ class TestEnvVarPlaceholders:
         cfg.add_server(entry)
         stored_env = cfg.servers[0]["env"]
         for key, val in stored_env.items():
-            assert val.startswith("${") and val.endswith(
-                "}"
-            ), f"env var {key!r} stored as raw value {val!r} — must be a placeholder"
+            assert val.startswith("${") and val.endswith("}"), (
+                f"env var {key!r} stored as raw value {val!r} — must be a placeholder"
+            )
 
     def test_add_server_raises_on_raw_secret_in_env(self) -> None:
         """add_server() raises ValueError if an env value is not a placeholder."""

@@ -89,9 +89,7 @@ class GreenSurface(
             height: Height of putting surface [m]
             turf: Turf properties (defaults to standard)
         """
-        if not (width is not None):
-            raise ValueError("width must be provided")
-        if not (width is not None):
+        if width is None:
             raise ValueError("width must be provided")
         self.width = width
         self.height = height
@@ -128,9 +126,7 @@ class GreenSurface(
         Returns:
             True if ball is holed
         """
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         arr = np.asarray(position[:2] - self._hole_position, dtype=float).reshape(-1)
         distance = 0.0 if arr.size == 0 else math.hypot(*arr)
@@ -150,9 +146,7 @@ class GreenSurface(
 
     def is_on_green(self, position: np.ndarray) -> bool:
         """Check if position is on the green surface."""
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         x, y = position[:2]
         return 0 <= x <= self.width and 0 <= y <= self.height

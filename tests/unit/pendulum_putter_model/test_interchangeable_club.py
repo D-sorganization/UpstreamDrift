@@ -62,9 +62,9 @@ class TestInterchangeableClub:
         builder = PendulumPutterModelBuilder(include_club=False)
         result = builder.build()
 
-        assert (
-            result.solver_status == "success"
-        ), "Assertion failed: result.solver_status == success"
+        assert result.solver_status == "success", (
+            "Assertion failed: result.solver_status == success"
+        )
 
         # Should end with club_mount
         club_mount = result.get_link("club_mount")
@@ -86,9 +86,9 @@ class TestInterchangeableClub:
         builder = PendulumPutterModelBuilder(club_config=custom_club)
         result = builder.build()
 
-        assert (
-            result.solver_status == "success"
-        ), "Assertion failed: result.solver_status == success"
+        assert result.solver_status == "success", (
+            "Assertion failed: result.solver_status == success"
+        )
 
 
 if __name__ == "__main__":

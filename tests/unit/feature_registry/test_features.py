@@ -69,9 +69,9 @@ def test_dependencies_reference_known_features() -> None:
     known = {f.name for f in FEATURES}
     for feature in FEATURES:
         for dep in feature.depends_on:
-            assert (
-                dep in known
-            ), f"Feature {feature.name!r} depends on {dep!r} which is not registered"
+            assert dep in known, (
+                f"Feature {feature.name!r} depends on {dep!r} which is not registered"
+            )
 
 
 def test_pip_extra_features_are_listed_in_pyproject() -> None:
