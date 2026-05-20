@@ -18,7 +18,6 @@ import pytest
 
 from src.shared.python.realtime import ws_pubsub as ws_mod
 
-
 # ----------------------------- helpers ----------------------------------------
 
 

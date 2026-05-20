@@ -158,9 +158,9 @@ class TestURDFXMLWellFormedness:
         builder.add_link(link)
         result = builder.build()
 
-        assert result.solver_status == "success", (
-            f"Build failed: {result.error_message}"
-        )
+        assert (
+            result.solver_status == "success"
+        ), f"Build failed: {result.error_message}"
         assert result.urdf_xml is not None
 
         # Must be parseable XML

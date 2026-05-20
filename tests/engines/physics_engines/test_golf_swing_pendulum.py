@@ -21,6 +21,12 @@ def engine() -> GolfSwingPendulumEngine:
     return GolfSwingPendulumEngine()
 
 
+@pytest.fixture
+def uninitialized_engine(engine: GolfSwingPendulumEngine) -> GolfSwingPendulumEngine:
+    engine._is_initialized = False
+    return engine
+
+
 class TestConstruction:
     def test_engine_type(self, engine: GolfSwingPendulumEngine) -> None:
         assert engine.engine_type == "golf_swing_pendulum"
@@ -92,57 +98,82 @@ class TestStateAndControl:
 class TestUninitDefaults:
     """When Tools vendor isn't available, engine returns defaults."""
 
-    def test_mass_matrix_identity(self, engine: GolfSwingPendulumEngine) -> None:
-        assert np.allclose(engine.compute_mass_matrix(), np.eye(2))
+    def test_mass_matrix_identity(
+        self, uninitialized_engine: GolfSwingPendulumEngine
+    ) -> None:
+        assert np.allclose(uninitialized_engine.compute_mass_matrix(), np.eye(2))
 
-    def test_bias_forces_zero(self, engine: GolfSwingPendulumEngine) -> None:
-        assert np.allclose(engine.compute_bias_forces(), [0.0, 0.0])
+    def test_bias_forces_zero(
+        self, uninitialized_engine: GolfSwingPendulumEngine
+    ) -> None:
+        assert np.allclose(uninitialized_engine.compute_bias_forces(), [0.0, 0.0])
 
-    def test_gravity_zero(self, engine: GolfSwingPendulumEngine) -> None:
-        assert np.allclose(engine.compute_gravity_forces(), [0.0, 0.0])
+    def test_gravity_zero(self, uninitialized_engine: GolfSwingPendulumEngine) -> None:
+        assert np.allclose(uninitialized_engine.compute_gravity_forces(), [0.0, 0.0])
 
-    def test_inverse_dynamics_zero(self, engine: GolfSwingPendulumEngine) -> None:
-        out = engine.compute_inverse_dynamics(np.array([1.0, 2.0]))
+    def test_inverse_dynamics_zero(
+        self, uninitialized_engine: GolfSwingPendulumEngine
+    ) -> None:
+        out = uninitialized_engine.compute_inverse_dynamics(np.array([1.0, 2.0]))
         assert np.allclose(out, [0.0, 0.0])
 
-    def test_drift_acceleration_zero(self, engine: GolfSwingPendulumEngine) -> None:
-        assert np.allclose(engine.compute_drift_acceleration(), [0.0, 0.0])
-
-    def test_control_acceleration_zero(self, engine: GolfSwingPendulumEngine) -> None:
+    def test_drift_acceleration_zero(
+        self, uninitialized_engine: GolfSwingPendulumEngine
+    ) -> None:
         assert np.allclose(
-            engine.compute_control_acceleration(np.array([1.0, 2.0])), [0.0, 0.0]
+            uninitialized_engine.compute_drift_acceleration(), [0.0, 0.0]
         )
 
-    def test_compute_jacobian_uninit_returns_none(
-        self, engine: GolfSwingPendulumEngine
+    def test_control_acceleration_zero(
+        self, uninitialized_engine: GolfSwingPendulumEngine
     ) -> None:
-        assert engine.compute_jacobian("tip") is None
-
-    def test_ztcf_zero(self, engine: GolfSwingPendulumEngine) -> None:
         assert np.allclose(
-            engine.compute_ztcf(np.array([0.1, 0.2]), np.array([0.0, 0.0])),
+            uninitialized_engine.compute_control_acceleration(np.array([1.0, 2.0])),
             [0.0, 0.0],
         )
 
-    def test_zvcf_zero(self, engine: GolfSwingPendulumEngine) -> None:
-        assert np.allclose(engine.compute_zvcf(np.array([0.1, 0.2])), [0.0, 0.0])
+    def test_compute_jacobian_uninit_returns_none(
+        self, uninitialized_engine: GolfSwingPendulumEngine
+    ) -> None:
+        assert uninitialized_engine.compute_jacobian("tip") is None
 
-    def test_forward_kinematics_default(self, engine: GolfSwingPendulumEngine) -> None:
-        out = engine.forward_kinematics()
+    def test_ztcf_zero(self, uninitialized_engine: GolfSwingPendulumEngine) -> None:
+        assert np.allclose(
+            uninitialized_engine.compute_ztcf(
+                np.array([0.1, 0.2]), np.array([0.0, 0.0])
+            ),
+            [0.0, 0.0],
+        )
+
+    def test_zvcf_zero(self, uninitialized_engine: GolfSwingPendulumEngine) -> None:
+        assert np.allclose(
+            uninitialized_engine.compute_zvcf(np.array([0.1, 0.2])), [0.0, 0.0]
+        )
+
+    def test_forward_kinematics_default(
+        self, uninitialized_engine: GolfSwingPendulumEngine
+    ) -> None:
+        out = uninitialized_engine.forward_kinematics()
         assert out == {
             "shoulder": (0.0, 0.0),
             "wrist": (0.0, 0.0),
             "tip": (0.0, 0.0),
         }
 
-    def test_clubhead_speed_zero(self, engine: GolfSwingPendulumEngine) -> None:
-        assert engine.clubhead_speed() == 0.0
+    def test_clubhead_speed_zero(
+        self, uninitialized_engine: GolfSwingPendulumEngine
+    ) -> None:
+        assert uninitialized_engine.clubhead_speed() == 0.0
 
-    def test_total_energy_zero(self, engine: GolfSwingPendulumEngine) -> None:
-        assert engine.total_energy() == 0.0
+    def test_total_energy_zero(
+        self, uninitialized_engine: GolfSwingPendulumEngine
+    ) -> None:
+        assert uninitialized_engine.total_energy() == 0.0
 
-    def test_step_uninit_warns_no_raise(self, engine: GolfSwingPendulumEngine) -> None:
-        engine.step(0.01)  # should warn but not raise
+    def test_step_uninit_warns_no_raise(
+        self, uninitialized_engine: GolfSwingPendulumEngine
+    ) -> None:
+        uninitialized_engine.step(0.01)  # should warn but not raise
 
 
 class TestArgValidation:

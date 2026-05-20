@@ -234,7 +234,9 @@ class ChatService:
         lambda self, session_id: session_id is not None and len(session_id) > 0,
         "Session ID must be a non-empty string",
     )
-    async def stream_response(self, session_id: str) -> AsyncIterator[Any]:  # noqa: C901
+    async def stream_response(
+        self, session_id: str
+    ) -> AsyncIterator[Any]:  # noqa: C901
         """Stream AI response chunks for the latest user message.
 
         Runs the synchronous adapter in a thread pool executor.

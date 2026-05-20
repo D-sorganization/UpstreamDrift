@@ -83,9 +83,9 @@ def test_every_segment_inertia_has_positive_eigenvalues(
     record, _ = pipeline_run
     for name, props in record.segments:
         eigs = np.linalg.eigvalsh(np.asarray(props.inertia_tensor))
-        assert np.all(eigs > 0), (
-            f"non-positive eigenvalues on segment {name}: {eigs.tolist()}"
-        )
+        assert np.all(
+            eigs > 0
+        ), f"non-positive eigenvalues on segment {name}: {eigs.tolist()}"
 
 
 @pytest.mark.parametrize("engine", sorted(_EXPECTED_OUTPUT_FILES))

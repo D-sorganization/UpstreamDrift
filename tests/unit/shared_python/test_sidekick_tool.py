@@ -46,9 +46,9 @@ def test_sidekick_tool_is_embeddable() -> None:
     """SidekickTool satisfies the EmbeddableTool runtime-checkable Protocol."""
     SidekickTool = _import_sidekick_tool()
     tool = SidekickTool()
-    assert isinstance(tool, EmbeddableTool), (
-        "SidekickTool must satisfy the EmbeddableTool structural Protocol"
-    )
+    assert isinstance(
+        tool, EmbeddableTool
+    ), "SidekickTool must satisfy the EmbeddableTool structural Protocol"
     assert tool.tool_id == "chat_assistant"
 
 
@@ -89,18 +89,18 @@ def test_models_yaml_has_chat_assistant_entry() -> None:
 
     models = data.get("models", [])
     entry = next((m for m in models if m.get("id") == "chat_assistant"), None)
-    assert entry is not None, (
-        "models.yaml must contain an entry with id='chat_assistant'"
-    )
+    assert (
+        entry is not None
+    ), "models.yaml must contain an entry with id='chat_assistant'"
 
     assert entry.get("type") == "chat_assistant"
     assert "name" in entry
     assert "description" in entry
 
     launcher = entry.get("launcher", {})
-    assert launcher.get("category") == "assistant", (
-        "launcher.category must be 'assistant'"
-    )
+    assert (
+        launcher.get("category") == "assistant"
+    ), "launcher.category must be 'assistant'"
     assert "status" in launcher
 
 

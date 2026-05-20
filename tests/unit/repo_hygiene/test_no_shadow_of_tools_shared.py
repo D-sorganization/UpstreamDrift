@@ -75,14 +75,14 @@ def _load_allow_list() -> dict[str, dict[str, Any]]:
     )
     raw = yaml.safe_load(_ALLOW_LIST_PATH.read_text(encoding="utf-8")) or {}
     shadows = raw.get("shadows") or {}
-    assert isinstance(shadows, dict), (
-        f"shadow_modules.yaml: 'shadows' must be a mapping, got {type(shadows)!r}"
-    )
+    assert isinstance(
+        shadows, dict
+    ), f"shadow_modules.yaml: 'shadows' must be a mapping, got {type(shadows)!r}"
 
     for name, entry in shadows.items():
-        assert isinstance(entry, dict), (
-            f"shadow_modules.yaml entry {name!r}: must be a mapping, got {type(entry)!r}"
-        )
+        assert isinstance(
+            entry, dict
+        ), f"shadow_modules.yaml entry {name!r}: must be a mapping, got {type(entry)!r}"
         issue = entry.get("tracking_issue")
         sunset = entry.get("sunset_date")
         assert isinstance(issue, int) and issue > 0, (
@@ -126,14 +126,12 @@ def test_load_allow_list_rejects_expired_sunset_date() -> None:
     import importlib
     import sys
 
-    expired_yaml = textwrap.dedent(
-        """\
+    expired_yaml = textwrap.dedent("""\
         shadows:
           some_module:
             tracking_issue: 9999
             sunset_date: "2000-01-01"
-        """
-    )
+        """)
 
     with tempfile.NamedTemporaryFile(
         mode="w", suffix=".yaml", delete=False, encoding="utf-8"

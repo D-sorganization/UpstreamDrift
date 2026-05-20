@@ -55,9 +55,9 @@ class TestFindOptimalSynergies:
         assert result.n_synergies == 2, "Assertion failed: result.n_synergies == 2"
 
         # Should warn that threshold not met
-        assert "threshold not met" in caplog.text.lower() or result.vaf >= 0.99, (
-            "Assertion failed: threshold not met in caplog.text.lower() or result.vaf >= 0.99"
-        )
+        assert (
+            "threshold not met" in caplog.text.lower() or result.vaf >= 0.99
+        ), "Assertion failed: threshold not met in caplog.text.lower() or result.vaf >= 0.99"
 
     def test_respects_max_synergies_limit(self) -> None:
         """Test that method respects max_synergies limit."""
@@ -97,9 +97,9 @@ class TestFindOptimalSynergies:
         )
 
         # Lower threshold should require fewer (or equal) synergies
-        assert result_low.n_synergies <= result_high.n_synergies, (
-            "Assertion failed: result_low.n_synergies <= result_high.n_synergies"
-        )
+        assert (
+            result_low.n_synergies <= result_high.n_synergies
+        ), "Assertion failed: result_low.n_synergies <= result_high.n_synergies"
 
     def test_threshold_of_one_uses_all_muscles(self) -> None:
         """Test that VAF threshold of 1.0 tries to use all muscles."""
@@ -120,9 +120,9 @@ class TestFindOptimalSynergies:
         analyzer = MuscleSynergyAnalyzer(data)
         result = analyzer.find_optimal_synergies(max_synergies=5, vaf_threshold=0.80)
 
-        assert isinstance(result, SynergyResult), (
-            "Assertion failed: isinstance(result, SynergyResult)"
-        )
+        assert isinstance(
+            result, SynergyResult
+        ), "Assertion failed: isinstance(result, SynergyResult)"
         assert result.n_synergies >= 1, "Assertion failed: result.n_synergies >= 1"
 
     def test_invalid_limit_raises_error(self) -> None:

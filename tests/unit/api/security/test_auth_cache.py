@@ -40,7 +40,9 @@ class TestAuthCache:
             from src.api.auth.security import AuthCache
 
             cache = AuthCache()
-            api_key = "gms_test_key_12345"  # nosec B105 - test fixture, not a real credential
+            api_key = (
+                "gms_test_key_12345"  # nosec B105 - test fixture, not a real credential
+            )
             user_id = 42
 
             cache.set(api_key, user_id)

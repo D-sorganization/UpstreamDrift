@@ -60,9 +60,9 @@ class TestCheckpointReplay:
 
         # Position should be back to original
         pos_restored = sim.get_ball_position()
-        assert np.isclose(pos_restored[0], 5.0, atol=0.01), (
-            "Assertion failed: np.isclose(pos_restored[0], 5.0, atol=0.01)"
-        )
+        assert np.isclose(
+            pos_restored[0], 5.0, atol=0.01
+        ), "Assertion failed: np.isclose(pos_restored[0], 5.0, atol=0.01)"
 
     def test_deterministic_replay(self) -> None:
         """Test that simulation is deterministic (same inputs = same outputs)."""
@@ -87,9 +87,9 @@ class TestCheckpointReplay:
         result2 = sim2.simulate_putt(stroke)
 
         # Results should be identical
-        assert np.allclose(result1.final_position, result2.final_position), (
-            "Assertion failed: np.allclose(result1.final_position, result2.final_position)"
-        )
-        assert np.allclose(result1.positions, result2.positions), (
-            "Assertion failed: np.allclose(result1.positions, result2.positions)"
-        )
+        assert np.allclose(
+            result1.final_position, result2.final_position
+        ), "Assertion failed: np.allclose(result1.final_position, result2.final_position)"
+        assert np.allclose(
+            result1.positions, result2.positions
+        ), "Assertion failed: np.allclose(result1.positions, result2.positions)"

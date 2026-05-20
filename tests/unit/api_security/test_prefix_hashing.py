@@ -66,22 +66,22 @@ class TestPrefixHashing:
         hash1 = compute_prefix_hash(prefix)
 
         # Same prefix should give same hash
-        assert hash1 == compute_prefix_hash(prefix), (
-            "Assertion failed: hash1 == compute_prefix_hash(prefix)"
-        )
+        assert hash1 == compute_prefix_hash(
+            prefix
+        ), "Assertion failed: hash1 == compute_prefix_hash(prefix)"
 
         # Different prefix should give different hash
-        assert hash1 != compute_prefix_hash("12345678"), (
-            "Assertion failed: hash1 != compute_prefix_hash(12345678)"
-        )
+        assert hash1 != compute_prefix_hash(
+            "12345678"
+        ), "Assertion failed: hash1 != compute_prefix_hash(12345678)"
 
         # Verify format (SHA256 hex digest)
         assert len(hash1) == 64, "Assertion failed: len(hash1) == 64"
         import re
 
-        assert re.match(r"^[0-9a-f]{64}$", hash1), (
-            "Assertion failed: re.match(r^[0-9a-f]{64}$, hash1)"
-        )
+        assert re.match(
+            r"^[0-9a-f]{64}$", hash1
+        ), "Assertion failed: re.match(r^[0-9a-f]{64}$, hash1)"
 
 
 if __name__ == "__main__":

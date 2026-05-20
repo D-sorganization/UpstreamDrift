@@ -47,15 +47,15 @@ class TestContactState:
         assert contact.body_b == "ground", "Assertion failed: contact.body_b == ground"
         assert_allclose(contact.position, [0, 0, 0])
         assert_allclose(contact.normal, [0, 0, 1])
-        assert contact.penetration == 0.001, (
-            "Assertion failed: contact.penetration == 0.001"
-        )
-        assert contact.normal_force == 100.0, (
-            "Assertion failed: contact.normal_force == 100.0"
-        )
-        assert contact.friction_coefficient == 0.5, (
-            "Assertion failed: contact.friction_coefficient == 0.5"
-        )
+        assert (
+            contact.penetration == 0.001
+        ), "Assertion failed: contact.penetration == 0.001"
+        assert (
+            contact.normal_force == 100.0
+        ), "Assertion failed: contact.normal_force == 100.0"
+        assert (
+            contact.friction_coefficient == 0.5
+        ), "Assertion failed: contact.friction_coefficient == 0.5"
         assert contact.is_active is True, "Assertion failed: contact.is_active is True"
 
     def test_normal_is_normalized(self) -> None:
@@ -137,9 +137,9 @@ class TestContactState:
             friction_force=np.array([10.0, 0.0, 0.0]),
             friction_coefficient=0.5,  # Limit is 50 N
         )
-        assert contact_not_sliding.is_sliding() is False, (
-            "Assertion failed: contact_not_sliding.is_sliding() is False"
-        )
+        assert (
+            contact_not_sliding.is_sliding() is False
+        ), "Assertion failed: contact_not_sliding.is_sliding() is False"
 
         # Contact at friction limit
         contact_sliding = ContactState(
@@ -152,9 +152,9 @@ class TestContactState:
             friction_force=np.array([50.0, 0.0, 0.0]),
             friction_coefficient=0.5,
         )
-        assert contact_sliding.is_sliding() is True, (
-            "Assertion failed: contact_sliding.is_sliding() is True"
-        )
+        assert (
+            contact_sliding.is_sliding() is True
+        ), "Assertion failed: contact_sliding.is_sliding() is True"
 
     def test_with_force_creates_new_contact(self) -> None:
         """Test with_force creates new ContactState."""
@@ -173,19 +173,19 @@ class TestContactState:
         )
 
         # Original unchanged
-        assert original.normal_force == 100.0, (
-            "Assertion failed: original.normal_force == 100.0"
-        )
+        assert (
+            original.normal_force == 100.0
+        ), "Assertion failed: original.normal_force == 100.0"
         assert_allclose(original.friction_force, [0, 0, 0])
 
         # New contact has updated forces
-        assert new_contact.normal_force == 200.0, (
-            "Assertion failed: new_contact.normal_force == 200.0"
-        )
+        assert (
+            new_contact.normal_force == 200.0
+        ), "Assertion failed: new_contact.normal_force == 200.0"
         assert_allclose(new_contact.friction_force, [10, 0, 0])
 
         # Other fields preserved
-        assert new_contact.contact_id == 0, (
-            "Assertion failed: new_contact.contact_id == 0"
-        )
+        assert (
+            new_contact.contact_id == 0
+        ), "Assertion failed: new_contact.contact_id == 0"
         assert_allclose(new_contact.position, [1, 2, 3])

@@ -35,8 +35,7 @@ class CoupledDoublePendulum:
             return self.external_tau2
 
         self.dynamics = DoublePendulumDynamics(
-            parameters=self.params,
-            forcing_functions=(tau1_fn, tau2_fn)
+            parameters=self.params, forcing_functions=(tau1_fn, tau2_fn)
         )
 
     def step(self, dt: float, external_wrench: tuple[np.ndarray, np.ndarray]) -> None:
@@ -93,6 +92,7 @@ class CoupledDoublePendulum:
         avel = np.array([0.0, omega1 + omega2, 0.0])
 
         return pos, quat, lvel, avel
+
 
 class CoSimulator:
     """Manages the explicit co-simulation between Granular Backend and Double Pendulum."""

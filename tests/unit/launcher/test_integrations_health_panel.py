@@ -105,9 +105,10 @@ def test_aggregate_api_adapters_present_when_env_var_set() -> None:
         records = aggregate_api_adapters()
 
     anthropic_rec = next(r for r in records if r.name == "anthropic")
-    assert anthropic_rec.status in ("healthy", "configured"), (
-        f"Expected 'healthy' or 'configured', got '{anthropic_rec.status}'"
-    )
+    assert anthropic_rec.status in (
+        "healthy",
+        "configured",
+    ), f"Expected 'healthy' or 'configured', got '{anthropic_rec.status}'"
 
 
 # ---------------------------------------------------------------------------
@@ -173,9 +174,9 @@ def test_diagnostics_export_markdown_format() -> None:
     ]
     output = copy_diagnostics(records)
 
-    assert output.startswith("# Integration Health"), (
-        f"Expected markdown header, got: {output[:60]!r}"
-    )
+    assert output.startswith(
+        "# Integration Health"
+    ), f"Expected markdown header, got: {output[:60]!r}"
 
 
 # ---------------------------------------------------------------------------

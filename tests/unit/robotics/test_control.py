@@ -684,12 +684,12 @@ class TestIssue2501NullspaceAndTorqueLimits:
 
         assert solution.solver_status == "success"
         assert solution.x is not None
-        assert np.all(solution.x >= x_lb - 1e-9), (
-            f"x={solution.x} violates lb={x_lb}: NullspaceQPSolver must clamp to bounds"
-        )
-        assert np.all(solution.x <= x_ub + 1e-9), (
-            f"x={solution.x} violates ub={x_ub}: NullspaceQPSolver must clamp to bounds"
-        )
+        assert np.all(
+            solution.x >= x_lb - 1e-9
+        ), f"x={solution.x} violates lb={x_lb}: NullspaceQPSolver must clamp to bounds"
+        assert np.all(
+            solution.x <= x_ub + 1e-9
+        ), f"x={solution.x} violates ub={x_ub}: NullspaceQPSolver must clamp to bounds"
 
     def test_torque_limits_enforced_in_wbc_solution(self) -> None:
         """WBC with torque_limits set must clip joint_torques to those limits."""

@@ -65,9 +65,9 @@ def test_chat_context_all_contains_record_event():
     """chat_context.__all__ must include the primary public helper (issue #5506b)."""
     from src.shared.python.ai import chat_context
 
-    assert "record_event" in chat_context.__all__, (
-        "'record_event' must appear in chat_context.__all__"
-    )
+    assert (
+        "record_event" in chat_context.__all__
+    ), "'record_event' must appear in chat_context.__all__"
 
 
 # ---------------------------------------------------------------------------
@@ -108,9 +108,9 @@ def test_check_tools_sidebar_not_installed_returns_info():
         else:
             sys.modules[_SIDEBAR_INTEGRATION] = prev
 
-    assert result.status == "info", (
-        f"Expected 'info' when Tools sidebar absent, got '{result.status}'"
-    )
+    assert (
+        result.status == "info"
+    ), f"Expected 'info' when Tools sidebar absent, got '{result.status}'"
 
 
 def test_check_tools_sidebar_import_error_returns_warning():
@@ -136,9 +136,9 @@ def test_check_tools_sidebar_import_error_returns_warning():
         else:
             sys.modules[_SIDEBAR_INTEGRATION] = prev
 
-    assert result.status == "warning", (
-        f"Expected 'warning' on ImportError, got '{result.status}'"
-    )
+    assert (
+        result.status == "warning"
+    ), f"Expected 'warning' on ImportError, got '{result.status}'"
 
 
 def test_check_tools_sidebar_available_returns_pass():
@@ -155,9 +155,9 @@ def test_check_tools_sidebar_available_returns_pass():
         else:
             sys.modules[_SIDEBAR_INTEGRATION] = prev
 
-    assert result.status == "pass", (
-        f"Expected 'pass' when Tools sidebar available, got '{result.status}'"
-    )
+    assert (
+        result.status == "pass"
+    ), f"Expected 'pass' when Tools sidebar available, got '{result.status}'"
 
 
 # ---------------------------------------------------------------------------
@@ -170,9 +170,9 @@ def test_chat_panel_tsx_aria_relevant_additions():
     tsx_path = _REPO_ROOT / "ui" / "src" / "components" / "ui" / "ChatPanel.tsx"
     assert tsx_path.exists(), f"File not found: {tsx_path}"
     source = tsx_path.read_text(encoding="utf-8")
-    assert 'aria-relevant="additions"' in source, (
-        'ChatPanel.tsx messages div is missing aria-relevant="additions"'
-    )
+    assert (
+        'aria-relevant="additions"' in source
+    ), 'ChatPanel.tsx messages div is missing aria-relevant="additions"'
 
 
 def test_chat_panel_tsx_aria_atomic_false():
@@ -180,6 +180,6 @@ def test_chat_panel_tsx_aria_atomic_false():
     tsx_path = _REPO_ROOT / "ui" / "src" / "components" / "ui" / "ChatPanel.tsx"
     assert tsx_path.exists(), f"File not found: {tsx_path}"
     source = tsx_path.read_text(encoding="utf-8")
-    assert 'aria-atomic="false"' in source, (
-        'ChatPanel.tsx messages div is missing aria-atomic="false"'
-    )
+    assert (
+        'aria-atomic="false"' in source
+    ), 'ChatPanel.tsx messages div is missing aria-atomic="false"'

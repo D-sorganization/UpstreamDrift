@@ -15,7 +15,6 @@ from src.engines.common.state import (
 )
 from src.shared.python.core.contracts import StateError
 
-
 # ---------------------------------------------------------------------------
 # SimulationState
 # ---------------------------------------------------------------------------

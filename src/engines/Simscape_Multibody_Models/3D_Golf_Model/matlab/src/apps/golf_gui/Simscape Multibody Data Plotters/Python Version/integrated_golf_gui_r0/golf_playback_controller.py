@@ -217,7 +217,9 @@ class SmoothPlaybackController(QObject):
         return self._lerp_frame_data(frame_low, frame_high, t)
 
     @staticmethod
-    def _lerp_frame_data(frame_a: FrameData, frame_b: FrameData, t: float) -> FrameData:  # noqa: C901
+    def _lerp_frame_data(
+        frame_a: FrameData, frame_b: FrameData, t: float
+    ) -> FrameData:  # noqa: C901
         """Linear interpolation between two frames.
 
         Args:

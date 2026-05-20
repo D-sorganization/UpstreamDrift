@@ -150,7 +150,9 @@ def get_github_sha(api_url: str) -> str:
         req = urllib.request.Request(
             api_url, headers={"Accept": "application/vnd.github.v3+json"}
         )
-        with urllib.request.urlopen(req, timeout=10) as resp:  # noqa: S310  # nosec B310 - GitHub API URL from trusted constant api_url
+        with urllib.request.urlopen(
+            req, timeout=10
+        ) as resp:  # noqa: S310  # nosec B310 - GitHub API URL from trusted constant api_url
             data = json.loads(resp.read())
             return str(data.get("sha", "<no-sha>"))
     except Exception as exc:  # noqa: BLE001
