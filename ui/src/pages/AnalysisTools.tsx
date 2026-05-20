@@ -13,6 +13,14 @@ export type {
   StatisticsSummary,
 } from '@/api/useAnalysisTools';
 
+// Re-export API types so test files can import them from this module.
+export type {
+  MetricInfo,
+  StatisticsSummary,
+  ExportResult,
+  AnalysisLoadState,
+} from '@/api/useAnalysisTools';
+
 /**
  * AnalysisToolsPage - Full analysis tools page.
  */

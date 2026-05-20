@@ -17,6 +17,16 @@ export type {
   TerrainTypeInfo,
 } from '@/api/useTerrain';
 
+// Re-export API types so test files can import them from this module.
+export type {
+  TerrainPreset,
+  TerrainMaterial,
+  TerrainTypeInfo,
+  TerrainProperties,
+  ActiveTerrain,
+  TerrainLoadState,
+} from '@/api/useTerrain';
+
 /**
  * TerrainPage - Full terrain engine tool page.
  */
