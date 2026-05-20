@@ -1,7 +1,9 @@
 self-hosted-runner:
   labels:
     - d-sorg-fleet-4core
+    - d-sorg-fleet
     - ubuntu-latest
     - ubuntu-22.04
     - ubuntu-24.04
-config-variables: []
+config-variables:
+  - REPOSITORY_MANAGEMENT_REPOSITORY
