@@ -198,23 +198,25 @@ class KinematicTree:
         if common_ancestor is None:
             return []
 
-        # Build path
-        chain = []
+        # Build path: from_link -> ... -> common_ancestor -> ... -> to_link.
+        # from_path / to_path are ordered root -> self, so we walk from_path in
+        # reverse (self up to common ancestor) and to_path forward starting
+        # just after the common ancestor.
+        chain: list[ChainNode] = []
 
-        # From from_link to common ancestor
-        for node in from_path:
+        for node in reversed(from_path):
             chain.append(node)
             if node.name == common_ancestor.name:
                 break
 
-        # From common ancestor to to_link (reversed)
-        to_chain = []
-        for node in to_path:
-            if node.name == common_ancestor.name:
-                break
-            to_chain.append(node)
+        # Find index of common ancestor in to_path and append nodes after it
+        ancestor_idx = next(
+            (i for i, n in enumerate(to_path) if n.name == common_ancestor.name),
+            -1,
+        )
+        if ancestor_idx >= 0:
+            chain.extend(to_path[ancestor_idx + 1 :])
 
-        chain.extend(reversed(to_chain))
         return chain
 
     def get_all_chains(self) -> list[list[ChainNode]]:
