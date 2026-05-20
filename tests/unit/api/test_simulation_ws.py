@@ -15,6 +15,7 @@ httpx. Integration tests (TestClient) are skipped when httpx is not installed.
 from __future__ import annotations
 
 import json
+from typing import Any
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -25,6 +26,8 @@ from src.api.routes.simulation_ws import (
     _engine_state_to_dict,
     _engine_type_from_str,
     _get_simulation_speed_factor,
+    _handle_client_commands,
+    _wait_for_resume_or_stop,
 )
 from src.shared.python.engine_core.engine_registry import EngineType
 
@@ -202,17 +205,17 @@ class TestSimulationSpeedFactor:
     """Simulation WebSocket loop must read speed from shared service state."""
 
     def test_uses_service_speed_factor_when_available(self) -> None:
-        websocket = _WebSocket(speed_factor=2.5)
+        websocket: Any = _WebSocket(speed_factor=2.5)
         assert _get_simulation_speed_factor(websocket, {}) == pytest.approx(2.5)
 
     def test_falls_back_to_config_when_service_missing(self) -> None:
-        websocket = _WebSocket()
+        websocket: Any = _WebSocket()
         assert _get_simulation_speed_factor(
             websocket, {"speed_factor": 1.5}
         ) == pytest.approx(1.5)
 
     def test_invalid_speed_falls_back_to_default(self) -> None:
-        websocket = _WebSocket(speed_factor=0.0)
+        websocket: Any = _WebSocket(speed_factor=0.0)
         assert _get_simulation_speed_factor(websocket, {}) == pytest.approx(1.0)
 
 
@@ -229,3 +232,55 @@ class TestRealTimeSleepDelay:
 
     def test_never_returns_negative_delay(self) -> None:
         assert _compute_real_time_sleep_delay(0.002, 2.0, 0.01) == pytest.approx(0.0)
+
+
+class TestClientCommandHandling:
+    """_handle_client_commands and _wait_for_resume_or_stop must update config/stats on set_speed."""
+
+    @pytest.mark.anyio
+    async def test_handle_client_commands_set_speed(self) -> None:
+        websocket: Any = _WebSocket(speed_factor=1.0)
+
+        async def mock_receive_json() -> dict[str, Any]:
+            return {"action": "set_speed", "speed_factor": 4.5}
+
+        websocket.receive_json = mock_receive_json
+
+        config = {"speed_factor": 1.0}
+        command = await _handle_client_commands(websocket, config)
+
+        assert command == "continue"
+        assert config["speed_factor"] == pytest.approx(4.5)
+        assert (
+            websocket.app.state.simulation_service.stats.speed_factor
+            == pytest.approx(4.5)
+        )
+
+    @pytest.mark.anyio
+    async def test_wait_for_resume_or_stop_set_speed(self) -> None:
+        websocket: Any = _WebSocket(speed_factor=1.0)
+
+        messages: list[dict[str, Any]] = [
+            {"action": "set_speed", "speed_factor": 3.0},
+            {"action": "resume"},
+        ]
+
+        async def mock_receive_json() -> dict[str, Any]:
+            return messages.pop(0)
+
+        websocket.receive_json = mock_receive_json
+
+        async def mock_send_json(data: Any) -> None:
+            pass
+
+        websocket.send_json = mock_send_json
+
+        config = {"speed_factor": 1.0}
+        stopped = await _wait_for_resume_or_stop(websocket, config)
+
+        assert not stopped
+        assert config["speed_factor"] == pytest.approx(3.0)
+        assert (
+            websocket.app.state.simulation_service.stats.speed_factor
+            == pytest.approx(3.0)
+        )

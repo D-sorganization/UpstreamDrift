@@ -158,28 +158,41 @@ async def _load_simulation_engine(
 
 async def _handle_client_commands(
     websocket: WebSocket,
+    config: dict[str, Any],
 ) -> str:
-    """Check for client commands (stop/pause) with a short timeout.
+    """Check for client commands (stop/pause/set_speed) with a short timeout.
 
     Returns:
         One of "continue", "stop", or "pause".
     """
     try:
         msg = await asyncio.wait_for(websocket.receive_json(), timeout=0.001)
-        if msg.get("action") == "stop":
+        action = msg.get("action")
+        if action == "stop":
             return "stop"
-        if msg.get("action") == "pause":
+        if action == "pause":
             return "pause"
+        if action == "set_speed":
+            speed_factor = msg.get("speed_factor", 1.0)
+            config["speed_factor"] = float(speed_factor)
+            app_state = getattr(getattr(websocket, "app", None), "state", None)
+            simulation_service = getattr(app_state, "simulation_service", None)
+            stats = getattr(simulation_service, "stats", None)
+            if stats is not None:
+                stats.speed_factor = float(speed_factor)
     except TimeoutError:
         pass  # No message, continue simulation
     return "continue"
 
 
-async def _wait_for_resume_or_stop(websocket: WebSocket) -> bool:
+async def _wait_for_resume_or_stop(
+    websocket: WebSocket, config: dict[str, Any]
+) -> bool:
     """Wait while paused for a resume or stop command.
 
     Args:
         websocket: The active WebSocket connection.
+        config: Simulation configuration dict.
 
     Returns:
         True if the simulation should stop, False if it should resume.
@@ -187,10 +200,19 @@ async def _wait_for_resume_or_stop(websocket: WebSocket) -> bool:
     await websocket.send_json({"status": "paused"})
     while True:
         msg = await websocket.receive_json()
-        if msg.get("action") == "resume":
+        action = msg.get("action")
+        if action == "resume":
             return False
-        if msg.get("action") == "stop":
+        if action == "stop":
             return True
+        if action == "set_speed":
+            speed_factor = msg.get("speed_factor", 1.0)
+            config["speed_factor"] = float(speed_factor)
+            app_state = getattr(getattr(websocket, "app", None), "state", None)
+            simulation_service = getattr(app_state, "simulation_service", None)
+            stats = getattr(simulation_service, "stats", None)
+            if stats is not None:
+                stats.speed_factor = float(speed_factor)
 
 
 async def _run_simulation_loop(
@@ -232,11 +254,11 @@ async def _run_simulation_loop(
 
     while time_elapsed < duration:
         step_started_at = loop.time()
-        command = await _handle_client_commands(websocket)
+        command = await _handle_client_commands(websocket, config)
         if command == "stop":
             break
         if command == "pause":
-            stopped = await _wait_for_resume_or_stop(websocket)
+            stopped = await _wait_for_resume_or_stop(websocket, config)
             if stopped:
                 break
 
