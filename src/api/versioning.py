@@ -22,6 +22,10 @@ import re
 from functools import lru_cache
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from fastapi import APIRouter
 
 try:
     import tomllib
@@ -111,7 +115,7 @@ def make_versioned_router(
     *,
     deprecated: bool = False,
     sunset: str | None = None,
-):
+) -> APIRouter:
     """Create a versioned ``APIRouter`` with optional deprecation headers.
 
     Args:
@@ -155,6 +159,15 @@ def make_versioned_router(
         response.headers["Deprecation"] = "true"
         if normalized_sunset is not None:
             response.headers["Sunset"] = normalized_sunset
+
+    # The module uses ``from __future__ import annotations`` so the
+    # ``response: Response`` hint above is a string at runtime. FastAPI
+    # inspects ``__annotations__`` to recognise the special ``Response``
+    # parameter; without a live class object it would mis-classify the
+    # parameter as a query field and reject the request with HTTP 422.
+    # Pin the annotation to the actual class so the dependency injector
+    # passes the live ``Response`` instance.
+    _deprecation_headers.__annotations__ = {"response": Response, "return": None}
 
     dependencies: list = []
     if deprecated:
