@@ -21,6 +21,27 @@ if TYPE_CHECKING:
     from PyQt6.QtWidgets import QDialog, QWidget
 
 
+def _shared_dashboard_widget_class() -> Any | None:
+    """Return the shared Tools dashboard widget class when available."""
+    try:
+        from src.shared.python.ai.mcp.widgets import IntegrationsHealthDashboardWidget
+    except ImportError:
+        return None
+    return IntegrationsHealthDashboardWidget
+
+
+def _make_fallback_dashboard_widget(
+    *, status_provider: Any | None = None, auto_refresh: bool = False
+) -> Any:
+    """Build the launcher-owned fallback panel for stale/missing Tools widgets."""
+    from src.launchers.integrations_health_panel import IntegrationsHealthPanel
+
+    return IntegrationsHealthPanel(
+        status_provider=status_provider,
+        auto_refresh=auto_refresh,
+    )
+
+
 def open_integrations_health_window(parent: QWidget | None = None) -> QDialog:
     """Open the integrations health dashboard as a modeless dialog.
 
@@ -33,13 +54,16 @@ def open_integrations_health_window(parent: QWidget | None = None) -> QDialog:
     """
     from PyQt6.QtWidgets import QDialog, QVBoxLayout
 
-    from src.shared.python.ai.mcp.widgets import IntegrationsHealthDashboardWidget
-
     dialog = QDialog(parent)
     dialog.setWindowTitle("Integrations Health")
     dialog.resize(720, 360)
 
-    widget = IntegrationsHealthDashboardWidget(parent=dialog)
+    dashboard_class = _shared_dashboard_widget_class()
+    if dashboard_class is None:
+        widget = _make_fallback_dashboard_widget()
+        widget.setParent(dialog)
+    else:
+        widget = dashboard_class(parent=dialog)
     layout = QVBoxLayout(dialog)
     layout.addWidget(widget)
     widget.refresh()  # populate initial rows
@@ -66,11 +90,13 @@ def make_dashboard_widget(
     Returns:
         Constructed :class:`IntegrationsHealthDashboardWidget`.
     """
-    from src.shared.python.ai.mcp.widgets import IntegrationsHealthDashboardWidget
-
-    return IntegrationsHealthDashboardWidget(
-        status_provider=status_provider, auto_refresh=auto_refresh
-    )
+    dashboard_class = _shared_dashboard_widget_class()
+    if dashboard_class is None:
+        return _make_fallback_dashboard_widget(
+            status_provider=status_provider,
+            auto_refresh=auto_refresh,
+        )
+    return dashboard_class(status_provider=status_provider, auto_refresh=auto_refresh)
 
 
 __all__ = ["make_dashboard_widget", "open_integrations_health_window"]
