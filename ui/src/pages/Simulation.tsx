@@ -45,6 +45,7 @@ export function SimulationPage() {
   // ── Local state (component-specific) ──────────────────────────────────
   const { showSuccess, showError, showInfo } = useToast();
   const [forceVectors, setForceVectors] = useState<ForceVector3D[]>([]);
+  const [speedFactor, setSpeedFactor] = useState<number>(1.0);
 
   // Only connect to the simulation when an engine is selected AND loaded
   const activeEngine = effectiveEngine || 'mujoco';
@@ -58,7 +59,13 @@ export function SimulationPage() {
     stop,
     pause,
     resume,
+    setSpeed,
   } = useSimulation(activeEngine);
+
+  const handleSpeedChange = useCallback((value: number) => {
+    setSpeedFactor(value);
+    setSpeed(value);
+  }, [setSpeed]);
 
   // ── Event handlers ────────────────────────────────────────────────────
 
@@ -96,6 +103,7 @@ export function SimulationPage() {
       showError('Please load and select an engine first');
       return;
     }
+    setSpeedFactor(1.0);
     start({
       duration: parameters.duration,
       timestep: parameters.timestep,
@@ -172,6 +180,30 @@ export function SimulationPage() {
         <div className="mb-6 border-t border-gray-700 pt-4">
           <ActuatorPanel isRunning={isRunning} />
         </div>
+
+        {/* Speed Factor Control */}
+        {isRunning && (
+          <div className="mb-4 border-t border-gray-700 pt-4">
+            <label htmlFor="speed-factor" className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+              Speed Factor ({speedFactor.toFixed(1)}x)
+            </label>
+            <input
+              id="speed-factor"
+              type="range"
+              min="0.1"
+              max="5.0"
+              step="0.1"
+              value={speedFactor}
+              onChange={(e) => handleSpeedChange(parseFloat(e.target.value))}
+              className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+            />
+            <div className="flex justify-between text-[10px] text-gray-500 mt-1">
+              <span>0.1x</span>
+              <span>1.0x (Real-time)</span>
+              <span>5.0x</span>
+            </div>
+          </div>
+        )}
 
         <div className="mt-auto pt-6 border-t border-gray-700">
           <SimulationControls

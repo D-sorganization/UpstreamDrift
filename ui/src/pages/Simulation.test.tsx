@@ -18,6 +18,7 @@ const mockSimulation = {
   stop: vi.fn(),
   pause: vi.fn(),
   resume: vi.fn(),
+  setSpeed: vi.fn(),
 };
 
 vi.mock('@/api/client', () => ({
@@ -94,6 +95,7 @@ describe('SimulationPage', () => {
       stop: vi.fn(),
       pause: vi.fn(),
       resume: vi.fn(),
+      setSpeed: vi.fn(),
     });
   });
 
@@ -345,6 +347,32 @@ describe('SimulationPage', () => {
       fireEvent.click(screen.getByRole('button', { name: /start simulation/i }));
 
       expect(useSimulationStore.getState().hasRun).toBe(true);
+    });
+  });
+
+  describe('speed control slider', () => {
+    beforeEach(() => {
+      useEngineStore.setState((state) => ({
+        engines: state.engines.map((e: ManagedEngine) =>
+          e.name === 'mujoco'
+            ? { ...e, loadState: 'loaded' as const }
+            : e
+        ),
+        selectedEngine: 'mujoco',
+      }));
+      Object.assign(mockSimulation, { isRunning: true });
+    });
+
+    it('renders speed factor slider when running', () => {
+      render(<SimulationPage />, { wrapper: createWrapper() });
+      expect(screen.getByLabelText(/speed factor/i)).toBeInTheDocument();
+    });
+
+    it('calls setSpeed when slider value changes', () => {
+      render(<SimulationPage />, { wrapper: createWrapper() });
+      const slider = screen.getByLabelText(/speed factor/i);
+      fireEvent.change(slider, { target: { value: '2.5' } });
+      expect(mockSimulation.setSpeed).toHaveBeenCalledWith(2.5);
     });
   });
 });

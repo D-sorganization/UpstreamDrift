@@ -30,7 +30,7 @@ class TestGetTheme:
 
     def test_different_themes(self) -> None:
         t1 = get_theme("nord")
-        t2 = get_theme("dracula")
+        t2 = get_theme("vampire_dark")
         assert t1 is not t2
 
     def test_invalid_theme_raises(self) -> None:

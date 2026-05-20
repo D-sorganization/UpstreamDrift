@@ -328,6 +328,8 @@ class ProviderConfigWidget(QWidget):
 
     key_changed = pyqtSignal(str)  # Emits new key value
     models_refreshed = pyqtSignal(list)  # Emits list of available models
+    connection_tested = pyqtSignal(bool, str)  # Emits (success, message)
+    _models_fetched = pyqtSignal(list, str)  # Emits (models, error_msg)
 
     def __init__(
         self,
@@ -347,6 +349,8 @@ class ProviderConfigWidget(QWidget):
         super().__init__(parent)
         self._provider = provider
         self._info = PROVIDER_INFO[provider]
+        self.connection_tested.connect(self._on_connection_tested)
+        self._models_fetched.connect(self._on_models_fetched)
         self._setup_ui()
         self._load_current_key()
 
@@ -479,28 +483,38 @@ class ProviderConfigWidget(QWidget):
         return "System keyring"
 
     def _test_ollama_connection(self) -> None:
-        """Test connection to Ollama server."""
+        """Test connection to Ollama server in a background thread."""
+        self._test_btn.setEnabled(False)
+        self._refresh_models_btn.setEnabled(False)
         self._status_label.setText("Testing connection...")
         self._status_label.setStyleSheet(Styles.COLOR_RESET)
 
-        try:
-            from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
+        def _run() -> None:
+            try:
+                from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
 
-            host = self._host_input.text().strip()
-            adapter = OllamaAdapter(host=host)
-            success, message = adapter.validate_connection()
+                host = self._host_input.text().strip()
+                adapter = OllamaAdapter(host=host)
+                success, message = adapter.validate_connection()
+                self.connection_tested.emit(success, message)
+            except Exception as e:
+                self.connection_tested.emit(False, str(e))
 
-            if success:
-                self._status_label.setText(f"✓ {message}")
-                self._status_label.setStyleSheet(Styles.COLOR_GREEN)
-                # Also refresh models on successful connection
-                self._refresh_ollama_models()
-            else:
-                self._status_label.setText(f"✗ {message}")
-                self._status_label.setStyleSheet(Styles.COLOR_RED)
+        import threading
 
-        except ImportError as e:
-            self._status_label.setText(f"✗ Error: {e}")
+        threading.Thread(target=_run, daemon=True).start()
+
+    def _on_connection_tested(self, success: bool, message: str) -> None:
+        """Handle connection test results on the main thread."""
+        self._test_btn.setEnabled(True)
+        self._refresh_models_btn.setEnabled(True)
+        if success:
+            self._status_label.setText(f"✓ {message}")
+            self._status_label.setStyleSheet(Styles.COLOR_GREEN)
+            # Also refresh models on successful connection
+            self._refresh_ollama_models()
+        else:
+            self._status_label.setText(f"✗ {message}")
             self._status_label.setStyleSheet(Styles.COLOR_RED)
 
     def showEvent(self, event: Any) -> None:
@@ -511,38 +525,50 @@ class ProviderConfigWidget(QWidget):
             QTimer.singleShot(100, self._refresh_ollama_models)
 
     def _refresh_ollama_models(self) -> None:
-        """Refresh the list of available Ollama models."""
-        self._status_label.setText("Fetching available models...")
-        self._status_label.setStyleSheet(Styles.COLOR_RESET)
+        """Refresh the list of available Ollama models in a background thread."""
+        self._test_btn.setEnabled(False)
+        self._refresh_models_btn.setEnabled(False)
+        self._model_count_label.setText("Fetching available models...")
+        self._model_count_label.setStyleSheet(Styles.COLOR_RESET)
 
-        try:
-            from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
+        def _run() -> None:
+            try:
+                from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
 
-            host = self._host_input.text().strip()
-            adapter = OllamaAdapter(host=host)
-            models = adapter.list_available_models()
+                host = self._host_input.text().strip()
+                adapter = OllamaAdapter(host=host)
+                models = adapter.list_available_models()
+                self._models_fetched.emit(models, "")
+            except Exception as e:
+                self._models_fetched.emit([], str(e))
 
-            if models:
-                self._model_count_label.setText(
-                    f"✓ Found {len(models)} model(s): {', '.join(models[:5])}"
-                )
-                if len(models) > 5:
-                    self._model_count_label.setText(
-                        f"✓ Found {len(models)} model(s): {', '.join(models[:5])}..."
-                    )
-                self._model_count_label.setStyleSheet(Styles.COLOR_GREEN)
-                # Emit signal to update parent dialog's model combo
-                self.models_refreshed.emit(models)
-            else:
-                self._model_count_label.setText(
-                    "⚠ No models found. Pull one with: ollama pull llama3.1:8b"
-                )
-                self._model_count_label.setStyleSheet(Styles.COLOR_ORANGE)
-                self.models_refreshed.emit([])
+        import threading
 
-        except Exception as e:
-            self._model_count_label.setText(f"✗ Failed to fetch models: {e}")
+        threading.Thread(target=_run, daemon=True).start()
+
+    def _on_models_fetched(self, models: list[str], error: str) -> None:
+        """Handle model fetch results on the main thread."""
+        self._test_btn.setEnabled(True)
+        self._refresh_models_btn.setEnabled(True)
+        if error:
+            self._model_count_label.setText(f"✗ Failed to fetch models: {error}")
             self._model_count_label.setStyleSheet(Styles.COLOR_RED)
+            self.models_refreshed.emit([])
+        elif models:
+            self._model_count_label.setText(
+                f"✓ Found {len(models)} model(s): {', '.join(models[:5])}"
+            )
+            if len(models) > 5:
+                self._model_count_label.setText(
+                    f"✓ Found {len(models)} model(s): {', '.join(models[:5])}..."
+                )
+            self._model_count_label.setStyleSheet(Styles.COLOR_GREEN)
+            self.models_refreshed.emit(models)
+        else:
+            self._model_count_label.setText(
+                "⚠ No models found. Pull one with: ollama pull llama3.1:8b"
+            )
+            self._model_count_label.setStyleSheet(Styles.COLOR_ORANGE)
             self.models_refreshed.emit([])
 
     def get_host(self) -> str:

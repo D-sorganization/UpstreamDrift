@@ -232,6 +232,20 @@ export function useSimulation(engineType: string) {
     }
   }, []);
 
+  const setSpeed = useCallback((speed: number) => {
+    void fetch('/api/simulation/speed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ speed_factor: speed }),
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to set simulation speed to ${speed}x`);
+      }
+    }).catch((error) => {
+      console.error('Failed to update simulation speed:', error);
+    });
+  }, []);
+
   // Track mounted state and cleanup on unmount
   useEffect(() => {
     isMountedRef.current = true;
@@ -254,6 +268,7 @@ export function useSimulation(engineType: string) {
     start,
     stop,
     pause,
-    resume
+    resume,
+    setSpeed
   };
 }

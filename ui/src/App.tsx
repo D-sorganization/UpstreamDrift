@@ -10,6 +10,7 @@ import { ChatPage } from './pages/Chat';
 import { TerrainPage } from './pages/Terrain';
 import { DatasetGeneratorPage } from './pages/DatasetGenerator';
 import { AnalysisToolsPage } from './pages/AnalysisTools';
+import { CharacterBuilderPage } from './pages/CharacterBuilder';
 import { ToastProvider } from './components/ui/Toast';
 import { DiagnosticsPanel } from './components/ui/DiagnosticsPanel';
 import { HelpPanel } from './components/ui/HelpPanel';
@@ -34,6 +35,7 @@ function App() {
           <Route path="/tools/terrain" element={<TerrainPage />} />
           <Route path="/tools/dataset" element={<DatasetGeneratorPage />} />
           <Route path="/tools/analysis" element={<AnalysisToolsPage />} />
+          <Route path="/tools/character-builder" element={<CharacterBuilderPage />} />
           {/* Chat (#3505): wires chat_ws backend into the UI */}
           <Route path="/chat" element={<ChatPage />} />
         </Routes>

@@ -332,7 +332,7 @@ class OllamaAdapter(BaseAgentAdapter):
             client = self._get_client()
 
             # Check if Ollama is running
-            response = client.get(f"{self._host}/api/tags")
+            response = client.get(f"{self._host}/api/tags", timeout=5.0)
 
             if response.status_code != 200:
                 return False, f"Ollama returned status {response.status_code}"
@@ -475,12 +475,13 @@ class OllamaAdapter(BaseAgentAdapter):
         )
 
         # Add current message
-        messages.append(
-            {
-                "role": "user",
-                "content": current_message,
-            }
-        )
+        if current_message.strip():
+            messages.append(
+                {
+                    "role": "user",
+                    "content": current_message,
+                }
+            )
 
         return messages
 
@@ -543,7 +544,7 @@ class OllamaAdapter(BaseAgentAdapter):
         """
         try:
             client = self._get_client()
-            response = client.get(f"{self._host}/api/tags")
+            response = client.get(f"{self._host}/api/tags", timeout=5.0)
             response.raise_for_status()
 
             data = response.json()

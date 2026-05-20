@@ -17,10 +17,10 @@ Usage:
     )
 
     # Get available fleet themes
-    names = get_fleet_theme_names()  # ['Light', 'Dark', 'Monokai', ...]
+    names = get_fleet_theme_names()  # ['Light', 'Dark', 'Neon Warm Dark', ...]
 
     # Convert a fleet theme to ThemeColors
-    colors = fleet_to_theme_colors("Dracula")
+    colors = fleet_to_theme_colors("Vampire Dark")
 """
 
 from __future__ import annotations
@@ -257,7 +257,7 @@ def fleet_to_theme_colors(theme_name: str) -> ThemeColors:
     bg_deep, bg_base, bg_surface, etc.).
 
     Args:
-        theme_name: Name of the fleet theme (e.g., "Light", "Dark", "Dracula")
+        theme_name: Name of the fleet theme (e.g., "Light", "Dark", "Vampire Dark")
 
     Returns:
         ThemeColors dataclass instance

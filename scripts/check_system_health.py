@@ -133,7 +133,7 @@ def main() -> None:
     # Check for critical launcher files (paths relative to repo root)
     # Note: Script is in scripts/, so we need to go up one level to repo root
     files = [
-        "src/launchers/golf_launcher.py",
+        "src/launchers/upstream_drift_launcher.py",
         "src/engines/physics_engines/mujoco/python/humanoid_launcher.py",
     ]
 

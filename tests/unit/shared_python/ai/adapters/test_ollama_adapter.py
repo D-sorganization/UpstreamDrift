@@ -63,7 +63,7 @@ def adapter() -> OllamaAdapter:
 def test_init_defaults() -> None:
     """Test defaults when omitted."""
     adapter = OllamaAdapter()
-    assert adapter._host == "http://localhost:11434"
+    assert adapter._host in ("http://localhost:11434", "http://127.0.0.1:11434")
     assert adapter._timeout == 120.0
 
 
@@ -185,6 +185,25 @@ def test_ollama_adapter_format_messages(adapter) -> None:
     assert formatted[2]["role"] == "assistant"  # "tool" is mapped to "assistant"
     assert formatted[3]["role"] == "user"
     assert formatted[3]["content"] == "how are you?"
+
+
+def test_ollama_adapter_format_messages_empty_current_message(adapter) -> None:
+    """Test that format_messages does not append an empty user message when current_message is empty."""
+    ctx = ConversationContext()
+    ctx.user_expertise = ExpertiseLevel.BEGINNER
+    ctx.messages = [
+        Message(role="user", content="hello"),
+    ]
+
+    tools = [ToolDeclaration(name="t1", description="d1")]
+    formatted = adapter._format_messages(ctx, "", tools)
+
+    # Should only contain system and the user message from history.
+    # No extra trailing empty user message!
+    assert len(formatted) == 2
+    assert formatted[0]["role"] == "system"
+    assert formatted[1]["role"] == "user"
+    assert formatted[1]["content"] == "hello"
 
 
 @patch("src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter._get_client")

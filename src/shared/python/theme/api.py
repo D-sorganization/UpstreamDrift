@@ -90,6 +90,11 @@ class ThemeOperationResponse(BaseModel):
     message: str
     theme_name: str | None = None
 
+    @property
+    def solver_status(self) -> str:
+        """Return 'success' or 'failed' based on success flag."""
+        return "success" if self.success else "failed"
+
 
 # ---------------------------------------------------------------------------
 # Router factory

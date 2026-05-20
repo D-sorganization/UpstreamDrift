@@ -112,6 +112,7 @@ describe('useSimulation hook', () => {
       expect(typeof result.current.stop).toBe('function');
       expect(typeof result.current.pause).toBe('function');
       expect(typeof result.current.resume).toBe('function');
+      expect(typeof result.current.setSpeed).toBe('function');
     });
   });
 
@@ -437,6 +438,43 @@ describe('useSimulation hook', () => {
 
       // Should not throw
       expect(result.current.isPaused).toBe(false);
+    });
+  });
+
+  describe('speed control', () => {
+    it('posts speed changes to the supported simulation speed endpoint', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            speed_factor: 2.5,
+            status: 'Speed set to 2.5x',
+          }),
+      });
+
+      const { result } = renderHook(() => useSimulation('mujoco'));
+
+      act(() => {
+        result.current.start();
+      });
+
+      const ws = MockWebSocket.getLastInstance()!;
+      act(() => {
+        ws.simulateOpen();
+      });
+
+      await act(async () => {
+        result.current.setSpeed(2.5);
+        await Promise.resolve();
+      });
+
+      expect(global.fetch).toHaveBeenCalledWith('/api/simulation/speed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ speed_factor: 2.5 }),
+      });
+      expect(ws.sentMessages).toHaveLength(1);
+      expect(JSON.parse(ws.sentMessages[0]).action).toBe('start');
     });
   });
 
