@@ -124,7 +124,7 @@ def grep_count(
         raise ValueError("root must be provided")
     count = 0
     regex = re.compile(pattern)
-    excluded = {part for part in exclude_parts if part}
+    excluded = {part for part in (exclude_parts or []) if part}
     for p in root.glob(file_pattern):
         if not p.is_file():
             continue
@@ -144,9 +144,7 @@ def grep_count(
     return count
 
 
-def classify_assessment_category(
-    source_name: str, description: str = ""
-) -> str:  # noqa: C901
+def classify_assessment_category(source_name: str, description: str = "") -> str:  # noqa: C901
     """Classify an assessment finding into a standard category name.
 
     Args:
