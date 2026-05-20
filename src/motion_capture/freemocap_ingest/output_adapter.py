@@ -198,7 +198,7 @@ class FreeMoCapOutputAdapter:
 
             # Parse header to find landmark columns
             # Format: frame_num, timestamp, nose_x, nose_y, nose_z, nose_conf, ...
-            landmark_data = {}
+            landmark_data: dict[str, dict[str, int]] = {}
             for i, col in enumerate(header[2:], start=2):
                 parts = col.rsplit("_", 1)
                 if len(parts) == 2:
@@ -221,7 +221,11 @@ class FreeMoCapOutputAdapter:
                         x = float(row[coords.get("x", 0)])
                         y = float(row[coords.get("y", 0)])
                         z = float(row[coords.get("z", 0)])
-                        conf = float(row.get(coords.get("conf"), len(row) - 1))
+                        conf_idx = coords.get("conf")
+                        if conf_idx is not None and conf_idx < len(row):
+                            conf = float(row[conf_idx])
+                        else:
+                            conf = 1.0
                         visible = conf > 0.5
                     except (ValueError, IndexError):
                         continue
