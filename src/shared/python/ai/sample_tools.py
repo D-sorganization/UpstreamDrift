@@ -1,6 +1,6 @@
 # ARCHITECTURE_DEBT:
-# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
-# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+# This module historically exceeds standard length metrics and accumulates excessive
+# domain responsibility. It requires domain-aware structural extraction.
 
 """Sample tools for AI integration with Golf Suite.
 
@@ -37,7 +37,7 @@ def _get_education_system() -> EducationSystem:
         _education_holder["instance"] = EducationSystem()
 
     system = _education_holder["instance"]
-    if not (system is not None):  # Ensure it is not None for mypy
+    if system is None:  # Ensure it is not None for mypy
         raise ValueError("DbC Blocked: Precondition failed.")
     return system
 
@@ -55,7 +55,16 @@ def register_golf_suite_tools(registry: ToolRegistry) -> None:
     _register_agent_control_tools(registry)
     _register_cli_tools(registry)
     _register_codemap_tools_proxy(registry)
-    _register_sidekick_analytics_tools_proxy(registry)
+
+    # Register sidekick analytics tools
+    try:
+        from src.shared.python.ai.tools.sidekick_analytics import (
+            register_sidekick_analytics_tools,
+        )
+        register_sidekick_analytics_tools(registry)
+    except ImportError as e:
+        logger.warning("Could not register sidekick analytics tools: %s", e)
+
     logger.info("Registered Golf Suite tools")
 
 
@@ -262,6 +271,8 @@ def _register_inverse_dynamics_tool(registry: ToolRegistry) -> None:
         """
         if file_path is None:
             raise ValueError("file_path must be provided")
+        if file_path is None:
+            raise ValueError("file_path must be provided")
         valid_engines = ["mujoco", "drake", "pinocchio"]
         if engine.lower() not in valid_engines:
             return {
@@ -316,6 +327,8 @@ def _register_interpret_torques_tool(registry: ToolRegistry) -> None:
         # Typical ranges for golf swing (approximate)
         if shoulder_torque is None:
             raise ValueError("shoulder_torque must be provided")
+        if shoulder_torque is None:
+            raise ValueError("shoulder_torque must be provided")
         ranges = {
             "shoulder": {"low": 40, "typical": 80, "high": 150, "unit": "N·m"},
             "hip": {"low": 60, "typical": 120, "high": 200, "unit": "N·m"},
@@ -324,6 +337,8 @@ def _register_interpret_torques_tool(registry: ToolRegistry) -> None:
 
         def classify(value: float, range_info: dict[str, Any]) -> str:
             """Classify a torque value relative to its typical range."""
+            if value is None:
+                raise ValueError("value must be provided")
             if value is None:
                 raise ValueError("value must be provided")
             if value < range_info["low"]:
@@ -336,7 +351,9 @@ def _register_interpret_torques_tool(registry: ToolRegistry) -> None:
             "shoulder": {
                 "value": shoulder_torque,
                 "classification": classify(shoulder_torque, ranges["shoulder"]),
-                "typical_range": f"{ranges['shoulder']['low']}-{ranges['shoulder']['high']} N·m",
+                "typical_range": (
+                    f"{ranges['shoulder']['low']}-{ranges['shoulder']['high']} N·m"
+                ),
             },
             "hip": {
                 "value": hip_torque,
@@ -346,7 +363,9 @@ def _register_interpret_torques_tool(registry: ToolRegistry) -> None:
             "wrist": {
                 "value": wrist_torque,
                 "classification": classify(wrist_torque, ranges["wrist"]),
-                "typical_range": f"{ranges['wrist']['low']}-{ranges['wrist']['high']} N·m",
+                "typical_range": (
+                    f"{ranges['wrist']['low']}-{ranges['wrist']['high']} N·m"
+                ),
             },
             "message": (
                 "Torque values have been classified based on typical ranges "
@@ -384,6 +403,8 @@ def _register_explain_concept_tool(registry: ToolRegistry) -> None:
         Returns:
             Explanation at appropriate level.
         """
+        if term is None:
+            raise ValueError("term must be provided")
         if term is None:
             raise ValueError("term must be provided")
         edu = _get_education_system()
@@ -627,7 +648,7 @@ def _register_agent_control_tools(registry: ToolRegistry) -> None:
             create_agent_tools_for_registry,
         )
 
-        controller = AgentController()
+        AgentController()
         tools = create_agent_tools_for_registry()
 
         for tool_def in tools:
@@ -652,7 +673,7 @@ def _register_cli_tools(registry: ToolRegistry) -> None:
             create_cli_tools_for_registry,
         )
 
-        manager = CLIToolManager()
+        CLIToolManager()
         tools = create_cli_tools_for_registry()
 
         for tool_def in tools:
@@ -677,15 +698,3 @@ def _register_codemap_tools_proxy(registry: ToolRegistry) -> None:
         register_codemap_tools(registry)
     except ImportError as e:
         logger.warning("Could not register codemap tools: %s", e)
-
-
-def _register_sidekick_analytics_tools_proxy(registry: ToolRegistry) -> None:
-    """Register Sidekick analytics tools (issue #5464) if available."""
-    try:
-        from src.shared.python.ai.tools.sidekick_analytics import (
-            register_sidekick_analytics_tools,
-        )
-
-        register_sidekick_analytics_tools(registry)
-    except ImportError as e:
-        logger.warning("Could not register Sidekick analytics tools: %s", e)

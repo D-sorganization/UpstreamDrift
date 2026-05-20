@@ -1,0 +1,67 @@
+"""Providers tab (provider/model picker + per-provider config) — Tools #2762."""
+
+from __future__ import annotations
+
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QFormLayout,
+    QGroupBox,
+    QLabel,
+    QVBoxLayout,
+    QWidget,
+)
+
+from src.shared.python.ai.gui._provider_config_registry import ProviderConfigRegistry
+from src.shared.python.ai.gui._provider_registry_data import (
+    AIProvider,
+    populate_provider_combo,
+)
+
+
+class ProvidersTab(QWidget):
+    """Provider selector, model selector, and per-provider config area."""
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.provider_configs: dict[AIProvider, QWidget] = {}
+        self._build()
+
+    def _build(self) -> None:
+        layout = QVBoxLayout(self)
+
+        provider_group = QGroupBox("Select AI Provider")
+        provider_layout = QVBoxLayout(provider_group)
+
+        self.provider_combo = QComboBox()
+        populate_provider_combo(self.provider_combo)
+        provider_layout.addWidget(self.provider_combo)
+
+        cost_label = QLabel(
+            "<b>💡 Tip:</b> Local models (like Ollama) are completely FREE "
+            "and run locally. Cloud models may incur usage costs."
+        )
+        cost_label.setWordWrap(True)
+        provider_layout.addWidget(cost_label)
+        layout.addWidget(provider_group)
+
+        model_group = QGroupBox("Model")
+        model_layout = QFormLayout(model_group)
+        self.model_combo = QComboBox()
+        model_layout.addRow("Model:", self.model_combo)
+        layout.addWidget(model_group)
+
+        config_group = QGroupBox("Configuration")
+        config_layout = QVBoxLayout(config_group)
+        for provider in AIProvider:
+            try:
+                widget = ProviderConfigRegistry.get_widget(provider)
+            except KeyError:
+                continue
+            widget.hide()
+            self.provider_configs[provider] = widget
+            config_layout.addWidget(widget)
+        layout.addWidget(config_group)
+        layout.addStretch()
+
+
+__all__ = ["ProvidersTab"]

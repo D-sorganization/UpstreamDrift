@@ -196,6 +196,8 @@ class WorkflowExecution:
         """
         if step_id is None:
             raise ValueError("step_id must be provided")
+        if step_id is None:
+            raise ValueError("step_id must be provided")
         for result in self.step_results:
             if result.step_id == step_id:
                 return result
@@ -224,6 +226,8 @@ class WorkflowEngine:
         """
         if tool_registry is None:
             raise ValueError("tool_registry must be provided")
+        if tool_registry is None:
+            raise ValueError("tool_registry must be provided")
         self._tool_registry = tool_registry
         self._workflows: dict[str, Workflow] = {}
         self._executions: dict[str, WorkflowExecution] = {}
@@ -236,6 +240,8 @@ class WorkflowEngine:
         Args:
             workflow: Workflow to register.
         """
+        if workflow is None:
+            raise ValueError("workflow must be provided")
         if workflow is None:
             raise ValueError("workflow must be provided")
         self._workflows[workflow.id] = workflow
@@ -264,6 +270,8 @@ class WorkflowEngine:
         Returns:
             List of matching workflows.
         """
+        if max_expertise is None:
+            raise ValueError("max_expertise must be provided")
         if max_expertise is None:
             raise ValueError("max_expertise must be provided")
         workflows = list(self._workflows.values())
@@ -332,6 +340,8 @@ class WorkflowEngine:
         """
         if execution is None:
             raise ValueError("execution must be provided")
+        if execution is None:
+            raise ValueError("execution must be provided")
         workflow = self.get_workflow(execution.workflow_id)
         if workflow is None:
             return True
@@ -350,6 +360,8 @@ class WorkflowEngine:
         Returns:
             Current WorkflowStep, or None if complete.
         """
+        if execution is None:
+            raise ValueError("execution must be provided")
         if execution is None:
             raise ValueError("execution must be provided")
         workflow = self.get_workflow(execution.workflow_id)
@@ -427,6 +439,8 @@ class WorkflowEngine:
     ) -> StepResult | None:
         if step is None:
             raise ValueError("step must be provided")
+        if step is None:
+            raise ValueError("step must be provided")
         import time
 
         if step.condition is not None:
@@ -451,6 +465,8 @@ class WorkflowEngine:
         execution: WorkflowExecution,
         start_time: float,
     ) -> tuple[ToolResult | None, StepResult | None]:
+        if step is None:
+            raise ValueError("step must be provided")
         if step is None:
             raise ValueError("step must be provided")
         import time
@@ -494,6 +510,8 @@ class WorkflowEngine:
     ) -> StepResult | None:
         if step is None:
             raise ValueError("step must be provided")
+        if step is None:
+            raise ValueError("step must be provided")
         import time
 
         if step.validation is not None:
@@ -523,6 +541,8 @@ class WorkflowEngine:
         tool_result: ToolResult | None,
         start_time: float,
     ) -> StepResult:
+        if step is None:
+            raise ValueError("step must be provided")
         if step is None:
             raise ValueError("step must be provided")
         import time
@@ -564,6 +584,8 @@ class WorkflowEngine:
         """
         if execution is None:
             raise ValueError("execution must be provided")
+        if execution is None:
+            raise ValueError("execution must be provided")
         if step.on_failure == RecoveryStrategy.ABORT:
             execution.status = StepStatus.FAILED
             logger.error(
@@ -588,6 +610,8 @@ class WorkflowEngine:
         Returns:
             Progress information dictionary.
         """
+        if execution is None:
+            raise ValueError("execution must be provided")
         if execution is None:
             raise ValueError("execution must be provided")
         workflow = self.get_workflow(execution.workflow_id)
@@ -625,6 +649,8 @@ class WorkflowEngine:
         Returns:
             Educational content string.
         """
+        if step is None:
+            raise ValueError("step must be provided")
         if step is None:
             raise ValueError("step must be provided")
         level_key = expertise_level.name.lower()

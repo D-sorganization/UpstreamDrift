@@ -1,0 +1,157 @@
+"""Message display controller for the AI assistant.
+
+Owns the scrollable message area widget and message-widget lifecycle.
+The owning panel hands ``ConversationContext`` data in/out via simple
+calls; this controller does not know about adapters or settings.
+"""
+
+from __future__ import annotations
+
+from datetime import datetime
+from typing import Any
+
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtWidgets import QScrollArea, QVBoxLayout, QWidget
+
+from src.shared.python.ai.gui.assistant_widgets import MessageWidget
+from src.shared.python.theme.style_constants import Styles
+
+
+class MessageDisplayController(QWidget):
+    """Wraps the QScrollArea + message-list QVBoxLayout used by the panel."""
+
+    message_added = pyqtSignal(object)  # MessageWidget
+
+    def __init__(self, parent: Any = None) -> None:
+        super().__init__(parent)
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setSpacing(0)
+
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        self.scroll_area.setStyleSheet(
+            """
+            QScrollArea {
+                background-color: #1e1e1e;
+                border: none;
+            }
+            QScrollBar:vertical {
+                background: #1e1e1e;
+                width: 10px;
+                margin: 0px 0px 0px 0px;
+            }
+            QScrollBar::handle:vertical {
+                background: #424242;
+                min-height: 20px;
+                border-radius: 5px;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                background: none;
+            }
+            """
+        )
+
+        self.message_container = QWidget()
+        self.message_container.setStyleSheet(Styles.CONTAINER_DARK)
+        self.message_layout = QVBoxLayout(self.message_container)
+        self.message_layout.setContentsMargins(8, 8, 8, 8)
+        self.message_layout.setSpacing(8)
+        self.message_layout.addStretch()
+
+        self.scroll_area.setWidget(self.message_container)
+        outer.addWidget(self.scroll_area)
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+    def add_message(
+        self,
+        role: str,
+        content: str,
+        timestamp: datetime | None = None,
+    ) -> MessageWidget:
+        """Append a message bubble to the conversation."""
+        if role is None:
+            raise ValueError("role must be provided")
+        idx = self.message_layout.count() - 1  # insert before stretch
+        widget = MessageWidget(role, content, timestamp)
+        self.message_layout.insertWidget(idx, widget)
+        self.scroll_to_bottom()
+        self.message_added.emit(widget)
+        return widget
+
+    def add_system_message(self, content: str) -> MessageWidget:
+        return self.add_message("system", content)
+
+    def restore_from_context(self, context: Any) -> None:
+        """Repaint message widgets from ``context.messages``."""
+        for msg in context.messages:
+            if msg.role != "system":
+                self.add_message(msg.role, msg.content, msg.timestamp)
+
+    def clear_messages(self) -> None:
+        """Remove every message widget; the trailing stretch stays."""
+        while self.message_layout.count() > 1:
+            item = self.message_layout.takeAt(0)
+            if item is None:
+                continue
+            widget = item.widget()
+            if widget is None:
+                continue
+            if isinstance(widget, MessageWidget):
+                self._safely_disconnect_message_widget(widget)
+            widget.deleteLater()
+
+    @staticmethod
+    def _safely_disconnect_message_widget(widget: MessageWidget) -> None:
+        try:
+            doc = widget._content_label.document()
+            if doc is not None:
+                doc.contentsChanged.disconnect(widget._adjust_height)
+        except (TypeError, RuntimeError, AttributeError):
+            pass
+
+    def scroll_to_bottom(self) -> None:
+        scrollbar = self.scroll_area.verticalScrollBar()
+        if scrollbar is not None:
+            scrollbar.setValue(scrollbar.maximum())
+
+    def apply_theme(self, colors: dict) -> None:
+        bg_primary = colors["bg_primary"]
+        border = colors["border"]
+        self.message_container.setStyleSheet(f"background-color: {bg_primary};")
+        self.scroll_area.setStyleSheet(
+            f"""
+            QScrollArea {{
+                background-color: {bg_primary};
+                border: none;
+            }}
+            QScrollBar:vertical {{
+                background: {bg_primary};
+                width: 10px;
+                margin: 0px 0px 0px 0px;
+            }}
+            QScrollBar::handle:vertical {{
+                background: {border};
+                min-height: 20px;
+                border-radius: 5px;
+            }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+                background: none;
+            }}
+            """
+        )
+        self.refresh_theme()
+
+    def refresh_theme(self) -> None:
+        for i in range(self.message_layout.count()):
+            item = self.message_layout.itemAt(i)
+            if item is None:
+                continue
+            w = item.widget()
+            if isinstance(w, MessageWidget):
+                w.refresh_theme()

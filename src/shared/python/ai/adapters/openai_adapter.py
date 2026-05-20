@@ -33,20 +33,14 @@ from src.shared.python.ai.config import (
     get_openai_timeout,
 )
 from src.shared.python.ai.exceptions import (
-    AIConnectionError,
     AIProviderError,
-    AIRateLimitError,
-    AITimeoutError,
 )
 from src.shared.python.ai.types import (
     AgentChunk,
     AgentResponse,
-    ChatModelInfo,
     ConversationContext,
     ProviderCapabilities,
     ProviderCapability,
-    ThinkingCapabilities,
-    ThinkingLevel,
     ToolCall,
 )
 from src.shared.python.contracts import precondition
@@ -112,6 +106,8 @@ class OpenAIAdapter(BaseAgentAdapter):
         """
         if api_key is None:
             raise ValueError("api_key must be provided")
+        if api_key is None:
+            raise ValueError("api_key must be provided")
         self._api_key = api_key
         self._model = model or get_openai_model()
         self._timeout = timeout if timeout is not None else get_openai_timeout()
@@ -174,6 +170,8 @@ class OpenAIAdapter(BaseAgentAdapter):
         """
         if message is None:
             raise ValueError("message must be provided")
+        if message is None:
+            raise ValueError("message must be provided")
         client = self._get_client()
 
         # Format messages
@@ -212,6 +210,8 @@ class OpenAIAdapter(BaseAgentAdapter):
         Yields:
             AgentChunk instances as they arrive.
         """
+        if message is None:
+            raise ValueError("message must be provided")
         if message is None:
             raise ValueError("message must be provided")
         client = self._get_client()
@@ -296,6 +296,68 @@ class OpenAIAdapter(BaseAgentAdapter):
             provider_name="openai",
         )
 
+    # ------------------------------------------------------------------ #
+    # Tools issue #2871: provider catalogue + reasoning capabilities
+    # ------------------------------------------------------------------ #
+
+    _STATIC_MODELS: tuple[str, ...] = (
+        "gpt-4-turbo",
+        "gpt-4o",
+        "gpt-4o-mini",
+        "gpt-4",
+        "gpt-3.5-turbo",
+        "o1-preview",
+        "o1-mini",
+        "o3-mini",
+    )
+
+    def list_models(self) -> list[ChatModelInfo]:
+        """Return OpenAI model info; falls back to a static catalogue."""
+        from src.shared.python.ai.types import ChatModelInfo
+
+        ids: list[str] = []
+        try:
+            client = self._get_client()
+            response = client.models.list()
+            data = getattr(response, "data", None) or []
+            ids = [
+                getattr(entry, "id", None)
+                for entry in data
+                if getattr(entry, "id", None)
+            ]
+            ids = [str(model_id) for model_id in ids if str(model_id).strip()]
+        except Exception:  # noqa: BLE001 - any provider failure → fallback
+            logger.debug(
+                "OpenAI list_models live probe failed; using static catalogue",
+                exc_info=True,
+            )
+
+        if not ids:
+            ids = list(self._STATIC_MODELS)
+
+        return [
+            ChatModelInfo(
+                name=model_id,
+                provider="openai",
+                display_name=model_id,
+                id=model_id,
+            )
+            for model_id in ids
+        ]
+
+    def thinking_capabilities(self) -> Any:
+        """Return reasoning-budget levels for the current OpenAI model."""
+        from src.shared.python.chat.models import (
+            make_full_thinking_capabilities,
+            make_none_only_capabilities,
+        )
+
+        model = (self._model or "").lower()
+        # o1 / o3 reasoning series support reasoning effort levels.
+        if model.startswith(("o1", "o3")):
+            return make_full_thinking_capabilities(provider="openai")
+        return make_none_only_capabilities(provider="openai")
+
     def validate_connection(self) -> tuple[bool, str]:
         """Test connection to OpenAI.
 
@@ -331,73 +393,6 @@ class OpenAIAdapter(BaseAgentAdapter):
                 return False, "Rate limited. Try again later."
             return False, f"Connection error: {e}"
 
-    def list_models(self) -> list[ChatModelInfo]:
-        """Return available OpenAI models (static list).
-
-        Returns a curated static list so no API call is required.
-        Models with reasoning support (o-series) are flagged appropriately.
-
-        Returns:
-            List of ChatModelInfo entries for OpenAI.
-        """
-        return [
-            ChatModelInfo(
-                model_id="gpt-4o",
-                display_name="GPT-4o",
-                context_window=128_000,
-                supports_thinking=False,
-            ),
-            ChatModelInfo(
-                model_id="gpt-4o-mini",
-                display_name="GPT-4o Mini",
-                context_window=128_000,
-                supports_thinking=False,
-            ),
-            ChatModelInfo(
-                model_id="gpt-4-turbo",
-                display_name="GPT-4 Turbo",
-                context_window=128_000,
-                supports_thinking=False,
-            ),
-            ChatModelInfo(
-                model_id="o1",
-                display_name="o1",
-                context_window=200_000,
-                supports_thinking=True,
-            ),
-            ChatModelInfo(
-                model_id="o3-mini",
-                display_name="o3-mini",
-                context_window=200_000,
-                supports_thinking=True,
-            ),
-        ]
-
-    def thinking_capabilities(self) -> ThinkingCapabilities:
-        """Return thinking capabilities for the current OpenAI model.
-
-        o-series models support reasoning_effort (low/medium/high).
-
-        Returns:
-            ThinkingCapabilities reflecting whether the model is an o-series.
-        """
-        _thinking_models = {"o1", "o1-mini", "o1-preview", "o3", "o3-mini", "o4-mini"}
-        is_thinking = any(self._model.startswith(m) for m in _thinking_models)
-        if is_thinking:
-            return ThinkingCapabilities(
-                supports_levels=True,
-                available_levels=[
-                    ThinkingLevel.OFF,
-                    ThinkingLevel.LOW,
-                    ThinkingLevel.MEDIUM,
-                    ThinkingLevel.HIGH,
-                ],
-            )
-        return ThinkingCapabilities(
-            supports_levels=False,
-            available_levels=[ThinkingLevel.OFF],
-        )
-
     def _format_messages(
         self,
         context: ConversationContext,
@@ -412,6 +407,8 @@ class OpenAIAdapter(BaseAgentAdapter):
         Returns:
             List of message dicts for OpenAI.
         """
+        if context is None:
+            raise ValueError("context must be provided")
         if context is None:
             raise ValueError("context must be provided")
         messages: list[dict[str, Any]] = []
@@ -452,13 +449,12 @@ class OpenAIAdapter(BaseAgentAdapter):
             messages.append(formatted)
 
         # Add current message
-        if current_message.strip():
-            messages.append(
-                {
-                    "role": "user",
-                    "content": current_message,
-                }
-            )
+        messages.append(
+            {
+                "role": "user",
+                "content": current_message,
+            }
+        )
 
         return messages
 
@@ -473,7 +469,10 @@ class OpenAIAdapter(BaseAgentAdapter):
         """
         if context is None:
             raise ValueError("context must be provided")
+        if context is None:
+            raise ValueError("context must be provided")
         expertise = context.user_expertise.name.lower()
+        context_instructions = self.build_context_instruction_section(context)
 
         return (
             f"You are an AI assistant for the Golf Modeling Suite, a research-grade "
@@ -485,6 +484,7 @@ class OpenAIAdapter(BaseAgentAdapter):
             f"- Computing inverse dynamics and joint torques\n"
             f"- Performing drift-control decomposition\n"
             f"- Generating visualizations and reports\n\n"
+            f"{context_instructions}\n\n"
             f"Guidelines:\n"
             f"1. Use tools to perform analyses - never make up numerical results\n"
             f"2. Explain concepts at the {expertise} level\n"
@@ -530,14 +530,15 @@ class OpenAIAdapter(BaseAgentAdapter):
                     )
                 )
 
-        # Extract usage
-        usage: dict[str, int] = {}
+        # Extract usage and normalize to canonical keys (issue #2763)
+        raw_usage: dict[str, int] = {}
         if response.usage:
-            usage = {
+            raw_usage = {
                 "prompt_tokens": response.usage.prompt_tokens,
                 "completion_tokens": response.usage.completion_tokens,
                 "total_tokens": response.usage.total_tokens,
             }
+        usage = self._normalize_token_counts(raw_usage)
 
         return AgentResponse(
             content=content,
@@ -553,38 +554,15 @@ class OpenAIAdapter(BaseAgentAdapter):
     def _handle_error(self, error: Exception) -> AgentResponse:
         """Handle OpenAI API errors.
 
+        Delegates to :meth:`~BaseAgentAdapter._classify_error` for the
+        shared string-scan classification logic.
+
         Args:
             error: The exception that occurred.
 
         Raises:
             Appropriate AIError subclass.
         """
-        error_str = str(error).lower()
-
-        # Rate limit
-        if "rate limit" in error_str or "429" in error_str:
-            raise AIRateLimitError(
-                "OpenAI rate limit exceeded. Please wait and retry.",
-                provider="openai",
-            ) from error
-
-        # Timeout
-        if "timeout" in error_str:
-            raise AITimeoutError(
-                f"OpenAI request timed out after {self._timeout}s",
-                provider="openai",
-                timeout=self._timeout,
-            ) from error
-
-        # Connection
-        if "connection" in error_str or "network" in error_str:
-            raise AIConnectionError(
-                "Cannot connect to OpenAI. Check your network.",
-                provider="openai",
-            ) from error
-
-        # Generic
-        raise AIProviderError(
-            f"OpenAI error: {error}",
-            provider="openai",
+        raise self._classify_error(
+            error, provider="openai", timeout=self._timeout
         ) from error

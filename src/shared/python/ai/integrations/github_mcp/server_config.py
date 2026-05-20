@@ -1,0 +1,75 @@
+"""Construct a validated :class:`McpServerConfig` for the GitHub MCP server.
+
+The official server is published as the npm package
+``@modelcontextprotocol/server-github`` and is launched via
+``npx -y @modelcontextprotocol/server-github``. Authentication is delegated
+to the server subprocess via the ``GITHUB_PERSONAL_ACCESS_TOKEN`` env var.
+
+DbC:
+
+* :func:`build_github_mcp_config` requires a non-empty token. Empty or
+  whitespace-only tokens raise :class:`ValueError` — they would only fail
+  later inside the subprocess with an opaque "401 unauthorized" message,
+  so we catch the misconfiguration at construction time.
+
+DRY:
+
+* The npm package name, the env var, and the default server name live here
+  as module-level constants so every consumer (tool descriptors, discovery,
+  integration helper, future preset catalogue) references the same source
+  of truth.
+"""
+
+from __future__ import annotations
+
+from src.shared.python.ai.mcp.contracts import McpServerConfig, McpTransport
+
+#: Default server name used when adding this server to an :class:`McpClientPool`.
+GITHUB_MCP_SERVER_NAME = "github"
+
+#: Env var the official server reads for authentication.
+GITHUB_MCP_TOKEN_ENV_VAR = "GITHUB_PERSONAL_ACCESS_TOKEN"
+
+#: npm package id launched via ``npx``.
+GITHUB_MCP_PACKAGE = "@modelcontextprotocol/server-github"
+
+
+def build_github_mcp_config(
+    token: str | None,
+    *,
+    name: str = GITHUB_MCP_SERVER_NAME,
+    extra_env: dict[str, str] | None = None,
+) -> McpServerConfig:
+    """Build an :class:`McpServerConfig` wired for the official GitHub MCP server.
+
+    Args:
+        token: A GitHub Personal Access Token (or fine-grained token). Must
+            be a non-empty, non-whitespace string. Required.
+        name: Server name used for namespacing tools as ``<name>:<tool>``.
+            Defaults to ``"github"``. Override when configuring multiple
+            GitHub accounts (e.g. ``"github-personal"``, ``"github-work"``).
+        extra_env: Additional env vars to pass to the subprocess (for
+            example ``GITHUB_API_URL`` for GitHub Enterprise). The explicit
+            ``token`` argument always wins over a colliding entry here.
+
+    Returns:
+        A fully-validated, ready-to-register :class:`McpServerConfig`.
+
+    Raises:
+        ValueError: If ``token`` is ``None``, empty, or whitespace-only.
+    """
+    if token is None or not token.strip():
+        raise ValueError("GitHub token required")
+
+    env: dict[str, str] = dict(extra_env or {})
+    # The explicit token wins over extra_env collisions — this is the
+    # single source of truth for the credential.
+    env[GITHUB_MCP_TOKEN_ENV_VAR] = token
+
+    return McpServerConfig(
+        name=name,
+        transport=McpTransport.STDIO,
+        command="npx",
+        args=["-y", GITHUB_MCP_PACKAGE],
+        env=env,
+    )

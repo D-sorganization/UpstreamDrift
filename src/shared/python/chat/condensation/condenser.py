@@ -1,0 +1,110 @@
+"""Top-level :class:`Condenser` orchestrator (Tools issue #2736).
+
+Validates the request, dispatches to a strategy from
+:data:`STRATEGY_REGISTRY`, and produces a :class:`CondensationResult`
+describing what changed. The input session is never mutated.
+"""
+
+from __future__ import annotations
+
+from chat.service_base import ChatSession
+
+from .contracts import CondensationRequest, CondensationResult
+from .strategy import STRATEGY_REGISTRY
+from .tokens import estimate_tokens
+
+
+def _session_tokens(session: ChatSession) -> int:
+    return sum(estimate_tokens(m.content) for m in session.messages)
+
+
+def _count_anchors(session: ChatSession) -> int:
+    return sum(
+        1
+        for m in session.messages
+        if m.metadata.get("pin") is True
+        or m.metadata.get("condensation_anchor") is True
+    )
+
+
+class Condenser:
+    """Apply a :class:`CondensationStrategy` to a :class:`ChatSession`.
+
+    The orchestrator owns the strategy registry but never mutates the
+    input session -- it builds a condensed copy and computes diagnostics
+    against the pre- / post-condensation token counts.
+    """
+
+    def condense(
+        self,
+        session: ChatSession,
+        request: CondensationRequest,
+    ) -> CondensationResult:
+        """Run condensation and return a result summary.
+
+        Pre:
+            ``session.message_count > 0`` -- :class:`ValueError` otherwise.
+            ``request.strategy`` is registered -- :class:`ValueError`
+            otherwise.
+        Post:
+            Returned ``condensed_message_count >= 1``.
+            ``session`` is unchanged (identity and contents).
+        """
+        if session.message_count == 0:
+            raise ValueError("Cannot condense an empty chat session")
+        strategy_cls = STRATEGY_REGISTRY.get(request.strategy)
+        if strategy_cls is None:
+            raise ValueError(
+                f"Unknown condensation strategy {request.strategy!r}; "
+                f"expected one of {sorted(STRATEGY_REGISTRY)!r}"
+            )
+        original_count = session.message_count
+        original_tokens = _session_tokens(session)
+
+        strategy = strategy_cls()
+        condensed = strategy.apply(session, request)
+
+        condensed_tokens = _session_tokens(condensed)
+        removed = max(0, original_tokens - condensed_tokens)
+
+        result = CondensationResult(
+            original_message_count=original_count,
+            condensed_message_count=condensed.message_count,
+            removed_tokens_estimate=removed,
+            preserved_anchors=_count_anchors(condensed),
+        )
+
+        assert result.condensed_message_count >= 1, (
+            "Condenser postcondition violated: must preserve at least one message"
+        )
+        return result
+
+    def condense_to_session(
+        self,
+        session: ChatSession,
+        request: CondensationRequest,
+    ) -> tuple[ChatSession, CondensationResult]:
+        """Return the condensed :class:`ChatSession` *and* the result.
+
+        Convenience overload for callers (the GUI) that need the new
+        session rather than just diagnostics.
+        """
+        if session.message_count == 0:
+            raise ValueError("Cannot condense an empty chat session")
+        strategy_cls = STRATEGY_REGISTRY.get(request.strategy)
+        if strategy_cls is None:
+            raise ValueError(f"Unknown condensation strategy {request.strategy!r}")
+        original_count = session.message_count
+        original_tokens = _session_tokens(session)
+        condensed = strategy_cls().apply(session, request)
+        condensed_tokens = _session_tokens(condensed)
+        result = CondensationResult(
+            original_message_count=original_count,
+            condensed_message_count=condensed.message_count,
+            removed_tokens_estimate=max(0, original_tokens - condensed_tokens),
+            preserved_anchors=_count_anchors(condensed),
+        )
+        return condensed, result
+
+
+__all__ = ["Condenser"]

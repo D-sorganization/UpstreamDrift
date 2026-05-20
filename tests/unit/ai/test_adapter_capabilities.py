@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.shared.python.ai.types import (
+from src.shared.python.chat.models import (
     ChatModelInfo,
     ThinkingCapabilities,
     ThinkingLevel,

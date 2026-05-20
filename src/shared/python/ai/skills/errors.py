@@ -1,0 +1,33 @@
+"""Error hierarchy for the ``ai.skills`` package.
+
+Tools #2737. See package docstring for the contract these errors enforce.
+"""
+
+from __future__ import annotations
+
+
+class SkillError(Exception):
+    """Base class for all skill-related errors."""
+
+
+class SkillNotFoundError(SkillError, KeyError):
+    """Raised when a skill id is requested but not present in the registry."""
+
+    def __str__(self) -> str:  # pragma: no cover - trivial
+        return self.args[0] if self.args else ""
+
+
+class SkillPreconditionError(SkillError, ValueError):
+    """Raised by :meth:`Skill.validate_preconditions` on invalid inputs."""
+
+
+class SkillPostconditionError(SkillError, ValueError):
+    """Raised by :meth:`Skill.validate_postconditions` on invalid outputs."""
+
+
+class SkillTimeoutError(SkillError, TimeoutError):
+    """Raised when a skill exceeds its invocation timeout."""
+
+
+class SkillExecutionError(SkillError):
+    """Raised when a skill body raises a non-contract error."""

@@ -21,7 +21,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_drake_constants_and_classes_importable():
-    from src.tools.starting_pose_matcher.providers import drake
+    from src.tools.starting_pose_matcher.skeleton_extractors import drake
 
     assert hasattr(drake, "DRAKE_TO_MATCHER_VOCAB")
     assert hasattr(drake, "MATCHER_TO_DRAKE")
@@ -30,7 +30,7 @@ def test_drake_constants_and_classes_importable():
 
 
 def test_drake_provider_with_neither_raises_provider_error():
-    from src.tools.starting_pose_matcher.providers.drake import (
+    from src.tools.starting_pose_matcher.skeleton_extractors.drake import (
         DrakeNotAvailableError,
         DrakeProviderError,
         DrakeSkeletonProvider,
@@ -43,7 +43,7 @@ def test_drake_provider_with_neither_raises_provider_error():
 
 
 def test_drake_create_provider_factory():
-    from src.tools.starting_pose_matcher.providers import drake
+    from src.tools.starting_pose_matcher.skeleton_extractors import drake
 
     # The factory is a thin wrapper — ensure it forwards to the constructor.
     with pytest.raises((drake.DrakeNotAvailableError, drake.DrakeProviderError)):
@@ -56,14 +56,14 @@ def test_drake_create_provider_factory():
 
 
 def test_opensim_constants_and_classes_importable():
-    from src.tools.starting_pose_matcher.providers import opensim
+    from src.tools.starting_pose_matcher.skeleton_extractors import opensim
 
     assert hasattr(opensim, "OPENSIM_TO_MATCHER_VOCAB")
     assert opensim.MATCHER_TO_OPENSIM["ls"] == "left_shoulder"
 
 
 def test_opensim_provider_with_neither_raises():
-    from src.tools.starting_pose_matcher.providers.opensim import (
+    from src.tools.starting_pose_matcher.skeleton_extractors.opensim import (
         OpenSimNotAvailableError,
         OpenSimProviderError,
         OpenSimSkeletonProvider,
@@ -74,11 +74,9 @@ def test_opensim_provider_with_neither_raises():
 
 
 def test_opensim_create_provider_factory():
-    from src.tools.starting_pose_matcher.providers import opensim
+    from src.tools.starting_pose_matcher.skeleton_extractors import opensim
 
-    with pytest.raises(
-        (opensim.OpenSimNotAvailableError, opensim.OpenSimProviderError)
-    ):
+    with pytest.raises((opensim.OpenSimNotAvailableError, opensim.OpenSimProviderError)):
         opensim.create_provider(model_path=None, model_xml=None)
 
 
@@ -88,7 +86,7 @@ def test_opensim_create_provider_factory():
 
 
 def test_mujoco_constants_and_classes_importable():
-    from src.tools.starting_pose_matcher.providers import mujoco
+    from src.tools.starting_pose_matcher.skeleton_extractors import mujoco
 
     assert hasattr(mujoco, "MUJOCO_TO_MATCHER_VOCAB")
     # "hip" in matcher vocab maps to either "hip" or "pelvis" in MuJoCo —
@@ -97,7 +95,7 @@ def test_mujoco_constants_and_classes_importable():
 
 
 def test_mujoco_provider_with_neither_raises():
-    from src.tools.starting_pose_matcher.providers.mujoco import (
+    from src.tools.starting_pose_matcher.skeleton_extractors.mujoco import (
         MuJoCoNotAvailableError,
         MuJoCoProviderError,
         MuJoCoSkeletonProvider,
@@ -108,7 +106,7 @@ def test_mujoco_provider_with_neither_raises():
 
 
 def test_mujoco_create_provider_factory():
-    from src.tools.starting_pose_matcher.providers import mujoco
+    from src.tools.starting_pose_matcher.skeleton_extractors import mujoco
 
     with pytest.raises((mujoco.MuJoCoNotAvailableError, mujoco.MuJoCoProviderError)):
         mujoco.create_provider(model_path=None, model_xml=None)
@@ -120,14 +118,14 @@ def test_mujoco_create_provider_factory():
 
 
 def test_pinocchio_constants_and_classes_importable():
-    from src.tools.starting_pose_matcher.providers import pinocchio
+    from src.tools.starting_pose_matcher.skeleton_extractors import pinocchio
 
     assert hasattr(pinocchio, "PINOCCHIO_TO_MATCHER_VOCAB")
     assert pinocchio.MATCHER_TO_PINOCCHIO["mp"] == "midpoint"
 
 
 def test_pinocchio_provider_without_path_raises():
-    from src.tools.starting_pose_matcher.providers.pinocchio import (
+    from src.tools.starting_pose_matcher.skeleton_extractors.pinocchio import (
         PinocchioNotAvailableError,
         PinocchioProviderError,
         PinocchioSkeletonProvider,
@@ -138,11 +136,9 @@ def test_pinocchio_provider_without_path_raises():
 
 
 def test_pinocchio_create_provider_factory_with_no_path():
-    from src.tools.starting_pose_matcher.providers import pinocchio
+    from src.tools.starting_pose_matcher.skeleton_extractors import pinocchio
 
-    with pytest.raises(
-        (pinocchio.PinocchioNotAvailableError, pinocchio.PinocchioProviderError)
-    ):
+    with pytest.raises((pinocchio.PinocchioNotAvailableError, pinocchio.PinocchioProviderError)):
         pinocchio.create_provider(urdf_path=None)  # type: ignore[arg-type]
 
 
@@ -170,10 +166,10 @@ REQUIRED_VOCAB = [
 @pytest.mark.parametrize(
     "module_name",
     [
-        "src.tools.starting_pose_matcher.providers.drake",
-        "src.tools.starting_pose_matcher.providers.mujoco",
-        "src.tools.starting_pose_matcher.providers.opensim",
-        "src.tools.starting_pose_matcher.providers.pinocchio",
+        "src.tools.starting_pose_matcher.skeleton_extractors.drake",
+        "src.tools.starting_pose_matcher.skeleton_extractors.mujoco",
+        "src.tools.starting_pose_matcher.skeleton_extractors.opensim",
+        "src.tools.starting_pose_matcher.skeleton_extractors.pinocchio",
     ],
 )
 def test_provider_vocabulary_is_complete(module_name: str):
@@ -184,6 +180,4 @@ def test_provider_vocabulary_is_complete(module_name: str):
         getattr(mod, name) for name in dir(mod) if name.startswith("MATCHER_TO_")
     )
     for vocab in REQUIRED_VOCAB:
-        assert vocab in matcher_to_engine, (
-            f"{module_name}: missing vocabulary mapping for {vocab}"
-        )
+        assert vocab in matcher_to_engine, f"{module_name}: missing vocabulary mapping for {vocab}"

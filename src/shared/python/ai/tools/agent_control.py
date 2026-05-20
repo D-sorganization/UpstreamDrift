@@ -98,7 +98,8 @@ class AgentController:
         """Start a physics engine.
 
         Args:
-            engine_name: Name of engine to start (mujoco, drake, pinocchio, opensim, myosim).
+            engine_name: Name of engine to start (mujoco, drake, pinocchio,
+                opensim, myosim).
 
         Returns:
             AgentActionResult with start outcome.
@@ -636,7 +637,9 @@ def create_agent_tools_for_registry() -> list[dict[str, Any]]:
     return [
         {
             "name": "start_engine",
-            "description": "Start a physics engine (mujoco, drake, pinocchio, opensim, myosim)",
+            "description": (
+                "Start a physics engine (mujoco, drake, pinocchio, opensim, myosim)"
+            ),
             "handler": controller.start_engine,
             "parameters": [
                 {
@@ -720,7 +723,10 @@ def create_agent_tools_for_registry() -> list[dict[str, Any]]:
         },
         {
             "name": "get_system_status",
-            "description": "Get the current system status including running engines and loaded models",
+            "description": (
+                "Get the current system status including running engines and "
+                "loaded models"
+            ),
             "handler": controller.get_system_status,
             "parameters": [],
         },

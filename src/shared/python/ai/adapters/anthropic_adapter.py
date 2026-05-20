@@ -32,20 +32,14 @@ from src.shared.python.ai.config import (
     get_anthropic_timeout,
 )
 from src.shared.python.ai.exceptions import (
-    AIConnectionError,
     AIProviderError,
-    AIRateLimitError,
-    AITimeoutError,
 )
 from src.shared.python.ai.types import (
     AgentChunk,
     AgentResponse,
-    ChatModelInfo,
     ConversationContext,
     ProviderCapabilities,
     ProviderCapability,
-    ThinkingCapabilities,
-    ThinkingLevel,
     ToolCall,
 )
 from src.shared.python.contracts import precondition
@@ -106,6 +100,8 @@ class AnthropicAdapter(BaseAgentAdapter):
         """
         if api_key is None:
             raise ValueError("api_key must be provided")
+        if api_key is None:
+            raise ValueError("api_key must be provided")
         self._api_key = api_key
         self._model = model or get_anthropic_model()
         self._timeout = timeout if timeout is not None else get_anthropic_timeout()
@@ -159,6 +155,8 @@ class AnthropicAdapter(BaseAgentAdapter):
         """
         if message is None:
             raise ValueError("message must be provided")
+        if message is None:
+            raise ValueError("message must be provided")
         client = self._get_client()
 
         # Format messages
@@ -200,6 +198,8 @@ class AnthropicAdapter(BaseAgentAdapter):
         Yields:
             AgentChunk instances as they arrive.
         """
+        if message is None:
+            raise ValueError("message must be provided")
         if message is None:
             raise ValueError("message must be provided")
         client = self._get_client()
@@ -266,6 +266,67 @@ class AnthropicAdapter(BaseAgentAdapter):
             provider_name="anthropic",
         )
 
+    # ------------------------------------------------------------------ #
+    # Tools issue #2871: provider catalogue + reasoning capabilities
+    # ------------------------------------------------------------------ #
+
+    # Static fallback catalogue used when the live API is unreachable.
+    _STATIC_MODELS: tuple[str, ...] = (
+        "claude-3-5-sonnet-20240620",
+        "claude-3-opus-20240229",
+        "claude-3-sonnet-20240229",
+        "claude-3-haiku-20240307",
+    )
+
+    def list_models(self) -> list[ChatModelInfo]:
+        """Return Anthropic model info; falls back to a static catalogue."""
+        from src.shared.python.ai.types import ChatModelInfo
+
+        ids: list[str] = []
+        try:
+            client = self._get_client()
+            response = client.models.list()
+            data = getattr(response, "data", None) or []
+            ids = [
+                getattr(entry, "id", None)
+                for entry in data
+                if getattr(entry, "id", None)
+            ]
+            ids = [str(model_id) for model_id in ids if str(model_id).strip()]
+        except Exception:  # noqa: BLE001 - any provider failure → fallback
+            logger.debug(
+                "Anthropic list_models live probe failed; using static catalogue",
+                exc_info=True,
+            )
+
+        if not ids:
+            ids = list(self._STATIC_MODELS)
+
+        return [
+            ChatModelInfo(
+                name=model_id,
+                provider="anthropic",
+                display_name=model_id,
+                id=model_id,
+            )
+            for model_id in ids
+        ]
+
+    def thinking_capabilities(self) -> Any:
+        """Return reasoning-budget levels for the current Anthropic model."""
+        # Local imports to avoid the chat package depending on adapters at
+        # module-import time.
+        from src.shared.python.chat.models import (
+            make_full_thinking_capabilities,
+            make_none_only_capabilities,
+        )
+
+        model = (self._model or "").lower()
+        # Claude 3.5/3 Sonnet + Opus support extended thinking budgets.
+        if "sonnet" in model or "opus" in model:
+            return make_full_thinking_capabilities(provider="anthropic")
+        return make_none_only_capabilities(provider="anthropic")
+
     def validate_connection(self) -> tuple[bool, str]:
         """Test connection to Anthropic.
 
@@ -299,73 +360,6 @@ class AnthropicAdapter(BaseAgentAdapter):
                 return False, "Rate limited. Try again later."
             return False, f"Connection error: {e}"
 
-    def list_models(self) -> list[ChatModelInfo]:
-        """Return available Anthropic Claude models (static curated list).
-
-        Returns:
-            List of ChatModelInfo entries, newest models first.
-        """
-        return [
-            ChatModelInfo(
-                model_id="claude-sonnet-4-6",
-                display_name="Claude Sonnet 4.6",
-                context_window=200_000,
-                supports_thinking=True,
-            ),
-            ChatModelInfo(
-                model_id="claude-3-5-sonnet-20241022",
-                display_name="Claude 3.5 Sonnet",
-                context_window=200_000,
-                supports_thinking=True,
-            ),
-            ChatModelInfo(
-                model_id="claude-3-5-haiku-20241022",
-                display_name="Claude 3.5 Haiku",
-                context_window=200_000,
-                supports_thinking=False,
-            ),
-            ChatModelInfo(
-                model_id="claude-3-opus-20240229",
-                display_name="Claude 3 Opus",
-                context_window=200_000,
-                supports_thinking=False,
-            ),
-            ChatModelInfo(
-                model_id="claude-3-haiku-20240307",
-                display_name="Claude 3 Haiku",
-                context_window=200_000,
-                supports_thinking=False,
-            ),
-        ]
-
-    def thinking_capabilities(self) -> ThinkingCapabilities:
-        """Return extended-thinking capabilities for this Anthropic model.
-
-        Claude 3.5 Sonnet and newer support extended thinking with a
-        token budget.
-
-        Returns:
-            ThinkingCapabilities reflecting Anthropic's extended thinking support.
-        """
-        # All Claude 3+ models can use extended thinking via budget_tokens
-        _thinking_prefixes = ("claude-3", "claude-sonnet", "claude-opus")
-        supports = any(self._model.startswith(p) for p in _thinking_prefixes)
-        if supports:
-            return ThinkingCapabilities(
-                supports_levels=True,
-                available_levels=[
-                    ThinkingLevel.OFF,
-                    ThinkingLevel.LOW,
-                    ThinkingLevel.MEDIUM,
-                    ThinkingLevel.HIGH,
-                    ThinkingLevel.BUDGET,
-                ],
-            )
-        return ThinkingCapabilities(
-            supports_levels=False,
-            available_levels=[ThinkingLevel.OFF],
-        )
-
     def _format_messages(
         self,
         context: ConversationContext,
@@ -382,6 +376,8 @@ class AnthropicAdapter(BaseAgentAdapter):
         Returns:
             List of message dicts for Anthropic.
         """
+        if context is None:
+            raise ValueError("context must be provided")
         if context is None:
             raise ValueError("context must be provided")
         messages: list[dict[str, Any]] = []
@@ -429,13 +425,12 @@ class AnthropicAdapter(BaseAgentAdapter):
             )
 
         # Add current message
-        if current_message.strip():
-            messages.append(
-                {
-                    "role": "user",
-                    "content": current_message,
-                }
-            )
+        messages.append(
+            {
+                "role": "user",
+                "content": current_message,
+            }
+        )
 
         # Ensure alternating roles (Anthropic requirement)
         messages = self._ensure_alternating_roles(messages)
@@ -456,6 +451,8 @@ class AnthropicAdapter(BaseAgentAdapter):
         Returns:
             Messages with alternating roles.
         """
+        if messages is None:
+            raise ValueError("messages must be provided")
         if messages is None:
             raise ValueError("messages must be provided")
         if not messages:
@@ -502,11 +499,15 @@ class AnthropicAdapter(BaseAgentAdapter):
         """
         if context is None:
             raise ValueError("context must be provided")
+        if context is None:
+            raise ValueError("context must be provided")
         expertise = context.user_expertise.name.lower()
+        context_instructions = self.build_context_instruction_section(context)
 
         return (
             f"You are Claude, an AI assistant for the Golf Modeling Suite, a "
-            f"research-grade biomechanics simulation platform for analyzing golf swings.\n\n"
+            f"research-grade biomechanics simulation platform for analyzing "
+            f"golf swings.\n\n"
             f"Current user expertise level: {expertise}\n\n"
             f"Your capabilities include:\n"
             f"- Analyzing C3D motion capture data\n"
@@ -514,6 +515,7 @@ class AnthropicAdapter(BaseAgentAdapter):
             f"- Computing inverse dynamics and joint torques\n"
             f"- Performing drift-control decomposition\n"
             f"- Generating visualizations and reports\n\n"
+            f"{context_instructions}\n\n"
             f"Guidelines:\n"
             f"1. Use tools to perform analyses - never fabricate numerical results\n"
             f"2. Explain concepts at the {expertise} level\n"
@@ -550,13 +552,14 @@ class AnthropicAdapter(BaseAgentAdapter):
 
         content = "\n".join(content_parts)
 
-        # Extract usage
-        usage: dict[str, int] = {}
+        # Extract usage and normalize to canonical keys (issue #2763)
+        raw_usage: dict[str, int] = {}
         if hasattr(response, "usage"):
-            usage = {
+            raw_usage = {
                 "input_tokens": response.usage.input_tokens,
                 "output_tokens": response.usage.output_tokens,
             }
+        usage = self._normalize_token_counts(raw_usage)
 
         return AgentResponse(
             content=content,
@@ -572,38 +575,15 @@ class AnthropicAdapter(BaseAgentAdapter):
     def _handle_error(self, error: Exception) -> AgentResponse:
         """Handle Anthropic API errors.
 
+        Delegates to :meth:`~BaseAgentAdapter._classify_error` for the
+        shared string-scan classification logic.
+
         Args:
             error: The exception that occurred.
 
         Raises:
             Appropriate AIError subclass.
         """
-        error_str = str(error).lower()
-
-        # Rate limit
-        if "rate limit" in error_str or "429" in error_str:
-            raise AIRateLimitError(
-                "Anthropic rate limit exceeded. Please wait and retry.",
-                provider="anthropic",
-            ) from error
-
-        # Timeout
-        if "timeout" in error_str:
-            raise AITimeoutError(
-                f"Anthropic request timed out after {self._timeout}s",
-                provider="anthropic",
-                timeout=self._timeout,
-            ) from error
-
-        # Connection
-        if "connection" in error_str or "network" in error_str:
-            raise AIConnectionError(
-                "Cannot connect to Anthropic. Check your network.",
-                provider="anthropic",
-            ) from error
-
-        # Generic
-        raise AIProviderError(
-            f"Anthropic error: {error}",
-            provider="anthropic",
+        raise self._classify_error(
+            error, provider="anthropic", timeout=self._timeout
         ) from error

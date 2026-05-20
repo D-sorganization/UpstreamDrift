@@ -1,0 +1,87 @@
+"""Plain-text exporter (Tools issue #2735).
+
+Same structure as the Markdown exporter but with markdown sigils stripped
+(``*``, `` ` ``, leading ``#``, etc.) so the output reads cleanly in any
+terminal or text editor.
+"""
+
+from __future__ import annotations
+
+import re
+from datetime import datetime
+from pathlib import Path
+
+from chat.service_base import ChatSession
+
+from .contracts import ChatExportRequest, ChatExportResult
+from .secret_redactor import SecretRedactor
+
+# Order: fenced blocks first (drop the fences and language hint, keep
+# inner code), inline code/bold/italic, then leading heading markers.
+_FENCED_BLOCK = re.compile(r"```[^\n]*\n(.*?)```", re.DOTALL)
+_INLINE_CODE = re.compile(r"`([^`]+)`")
+_BOLD = re.compile(r"\*\*([^*]+)\*\*")
+_ITALIC = re.compile(r"(?<!\*)\*([^*]+)\*(?!\*)")
+# Strip leading "#" markers anywhere they appear with a following space.
+# Tests expect "# heading" inside a message body to become "heading".
+_HEADING = re.compile(r"(^|\s)#+\s+", re.MULTILINE)
+
+
+def _strip_markdown(text: str) -> str:
+    out = _FENCED_BLOCK.sub(lambda m: m.group(1), text)
+    out = _INLINE_CODE.sub(lambda m: m.group(1), out)
+    out = _BOLD.sub(lambda m: m.group(1), out)
+    out = _ITALIC.sub(lambda m: m.group(1), out)
+    out = _HEADING.sub(lambda m: m.group(1) or "", out)
+    return out
+
+
+def _format_timestamp(ts: float) -> str:
+    try:
+        return datetime.fromtimestamp(ts).isoformat(timespec="seconds")
+    except (OverflowError, OSError, ValueError):
+        return str(ts)
+
+
+class TextExporter:
+    """Render a :class:`ChatSession` as a flat plain-text document."""
+
+    def export(
+        self, session: ChatSession, request: ChatExportRequest
+    ) -> ChatExportResult:
+        if session.message_count == 0:
+            raise ValueError("Cannot export an empty chat session")
+
+        messages = list(session.messages)
+        if request.redact_secrets:
+            redactor = SecretRedactor()
+            messages = [redactor.redact_message(m) for m in messages]
+
+        lines: list[str] = []
+        if request.include_metadata:
+            lines.append(f"session_id: {session.session_id}")
+            lines.append(f"message_count: {session.message_count}")
+            for k, v in session.metadata.items():
+                lines.append(f"{k}: {v}")
+            lines.append("")
+
+        for msg in messages:
+            ts = _format_timestamp(msg.timestamp)
+            lines.append(f"[{msg.role} {ts}]")
+            lines.append(_strip_markdown(msg.content))
+            lines.append("")
+
+        text = "\n".join(lines)
+
+        out_path = Path(request.output_path)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(text, encoding="utf-8")
+
+        return ChatExportResult(
+            path=request.output_path,
+            byte_count=out_path.stat().st_size,
+            message_count=len(messages),
+        )
+
+
+__all__ = ["TextExporter"]

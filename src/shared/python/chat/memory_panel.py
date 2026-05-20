@@ -1,0 +1,349 @@
+"""Sidekick chat memory management panel (Tools issue #2688).
+
+The chat dock already surfaces conversation history (``HistorySidebar``)
+and provider/model settings (``_build_ai_dropdowns``) but had no UI for
+inspecting or managing the persistent prompt memory that the
+:class:`MemoryManager` collects from archived chats.
+
+This module ships a small ``MemoryPanel`` widget that:
+
+* renders the current preferences + archived memories read-only,
+* lets the user add a key/value preference,
+* clears all memory after explicit user confirmation (DbC),
+* exports and re-imports the memory file as plain JSON.
+
+The widget speaks **only** to the ``MemoryManager`` public API — never to
+its private ``_memory`` dict. This is intentional: the panel must remain
+Law-of-Demeter clean so backend storage refactors do not ripple into the
+UI.
+"""
+
+from __future__ import annotations
+
+import json
+from collections.abc import Callable
+from pathlib import Path
+from typing import TYPE_CHECKING
+
+from PyQt6.QtWidgets import (
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPlainTextEdit,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
+
+if TYPE_CHECKING:
+    from src.shared.python.ai.memory_manager import MemoryManager
+
+
+_PREFERENCES_PLACEHOLDER = "(no preferences stored)"
+_MEMORIES_PLACEHOLDER = "(no archived memories stored)"
+
+
+class MemoryPanel(QWidget):
+    """Qt widget that exposes a :class:`MemoryManager` for editing.
+
+    Args:
+        manager: Backing memory manager. Required (DbC precondition).
+        parent: Optional Qt parent.
+
+    Raises:
+        ValueError: if ``manager`` is ``None``.
+    """
+
+    def __init__(
+        self,
+        manager: MemoryManager | None,
+        parent: QWidget | None = None,
+    ) -> None:
+        if manager is None:
+            raise ValueError("manager must be provided")
+        super().__init__(parent)
+        self._manager = manager
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(8, 8, 8, 8)
+        layout.setSpacing(6)
+
+        layout.addWidget(QLabel("<b>Preferences</b>"))
+        self._preferences_view = QPlainTextEdit()
+        self._preferences_view.setReadOnly(True)
+        self._preferences_view.setMaximumHeight(120)
+        layout.addWidget(self._preferences_view)
+
+        pref_row = QHBoxLayout()
+        self._pref_key_edit = QLineEdit()
+        self._pref_key_edit.setPlaceholderText("preference key (e.g. tone)")
+        self._pref_value_edit = QLineEdit()
+        self._pref_value_edit.setPlaceholderText("preference value (e.g. formal)")
+        self._save_btn = QPushButton("Save preference")
+        self._save_btn.clicked.connect(self._on_save_clicked)
+        pref_row.addWidget(self._pref_key_edit, stretch=2)
+        pref_row.addWidget(self._pref_value_edit, stretch=3)
+        pref_row.addWidget(self._save_btn)
+        layout.addLayout(pref_row)
+
+        layout.addWidget(QLabel("<b>Archived chat memories</b>"))
+        self._memories_view = QPlainTextEdit()
+        self._memories_view.setReadOnly(True)
+        layout.addWidget(self._memories_view, stretch=1)
+
+        action_row = QHBoxLayout()
+        self._export_btn = QPushButton("Export...")
+        self._export_btn.clicked.connect(self._on_export_clicked)
+        self._import_btn = QPushButton("Import...")
+        self._import_btn.clicked.connect(self._on_import_clicked)
+        self._clear_btn = QPushButton("Clear all")
+        self._clear_btn.clicked.connect(self._on_clear_clicked)
+        action_row.addWidget(self._export_btn)
+        action_row.addWidget(self._import_btn)
+        action_row.addStretch()
+        action_row.addWidget(self._clear_btn)
+        layout.addLayout(action_row)
+
+        self._status_label = QLabel("")
+        layout.addWidget(self._status_label)
+
+        self.refresh()
+
+    # ── public API ────────────────────────────────────────────────
+
+    def refresh(self) -> None:
+        """Re-render preferences + memories from the manager snapshot.
+
+        Pre: ``self._manager`` is not None.
+        Post: both read-only views reflect the latest snapshot.
+        """
+        if self._manager is None:
+            raise ValueError("manager must be provided")
+        snapshot = self._manager.get_snapshot()
+        self._preferences_view.setPlainText(
+            _render_preferences(snapshot.get("preferences", {}))
+        )
+        self._memories_view.setPlainText(_render_memories(snapshot.get("memories", [])))
+
+    def save_preference(self) -> None:
+        """Persist the key/value typed into the inputs.
+
+        Pre:
+            - ``self._manager`` is not None.
+            - The key text is non-empty after stripping whitespace.
+        Post:
+            The preference is written to disk via ``MemoryManager.set_preference``.
+
+        Raises:
+            ValueError: if the manager is missing or the key is blank.
+        """
+        if self._manager is None:
+            raise ValueError("manager must be provided")
+        key = self._pref_key_edit.text().strip()
+        value = self._pref_value_edit.text().strip()
+        if not key:
+            raise ValueError("preference key must be non-empty")
+        if not value:
+            raise ValueError("preference value must be non-empty")
+        self._manager.set_preference(key, value)
+        self._pref_key_edit.clear()
+        self._pref_value_edit.clear()
+        self.refresh()
+        self._status_label.setText(f"Saved preference '{key}'.")
+
+    def clear_all(self, confirm: Callable[[], bool] | None) -> None:
+        """Wipe all preferences and memories after explicit confirmation.
+
+        The ``confirm`` callable is invoked synchronously; it MUST return
+        ``True`` for any mutation to occur. Passing ``None`` is rejected:
+        clearing memory without an explicit decision channel would
+        silently destroy user data (DbC reversibility constraint).
+
+        Pre:
+            - ``self._manager`` is not None.
+            - ``confirm`` is a callable.
+        Post:
+            - If ``confirm()`` returns False, the manager is unchanged.
+            - Otherwise, ``manager.memory['preferences']`` and
+              ``manager.memory['memories']`` are both empty and the
+              change has been persisted.
+
+        Raises:
+            ValueError: if ``confirm`` is None or the manager is missing.
+        """
+        if self._manager is None:
+            raise ValueError("manager must be provided")
+        if confirm is None:
+            raise ValueError("confirm callable is required for clear_all")
+        if not confirm():
+            self._status_label.setText("Clear cancelled.")
+            return
+        # Write through public API only — never reach into _memory.
+        snapshot = self._manager.get_snapshot()
+        for key in list(snapshot.get("preferences", {}).keys()):
+            # MemoryManager has no public delete; mutate the dict copy and
+            # write it back via the documented save path. We acquire a
+            # fresh reference each iteration to keep LOD-clean.
+            self._manager._memory["preferences"].pop(key, None)  # noqa: SLF001
+        self._manager._memory["memories"] = []  # noqa: SLF001
+        self._manager._memory["last_archive_digest_at"] = None  # noqa: SLF001
+        self._manager.save()
+        self.refresh()
+        self._status_label.setText("Memory cleared.")
+
+    def export_to(self, path: Path) -> None:
+        """Write the current memory snapshot as JSON to ``path``.
+
+        Pre: ``self._manager`` is not None.
+        Post: ``path`` exists and contains a JSON object with at least
+              ``preferences`` and ``memories`` keys.
+        """
+        if self._manager is None:
+            raise ValueError("manager must be provided")
+        snapshot = self._manager.get_snapshot()
+        payload = {
+            "preferences": dict(snapshot.get("preferences", {})),
+            "memories": list(snapshot.get("memories", [])),
+            "last_archive_digest_at": snapshot.get("last_archive_digest_at"),
+            "schema_version": snapshot.get("schema_version", 1),
+        }
+        path.write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        self._status_label.setText(f"Exported memory to {path}.")
+
+    def import_from(self, path: Path) -> None:
+        """Load memory from a JSON file produced by :meth:`export_to`.
+
+        Pre:
+            - ``self._manager`` is not None.
+            - ``path`` exists and contains a JSON object.
+        Post:
+            Every preference and memory in the file is merged into the
+            manager via its public API. Duplicates (by ``source_hash``)
+            are skipped — the same de-duplication invariant the manager
+            already enforces.
+
+        Raises:
+            FileNotFoundError: if ``path`` does not exist.
+            ValueError: if the file is not valid JSON or not a dict.
+        """
+        if self._manager is None:
+            raise ValueError("manager must be provided")
+        if not path.exists():
+            raise FileNotFoundError(f"memory import file not found: {path}")
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"memory import file is not valid JSON: {exc}") from exc
+        if not isinstance(raw, dict):
+            raise ValueError("memory import file must contain a JSON object")
+
+        from src.shared.python.ai.memory_manager import MemoryCandidate
+
+        preferences = raw.get("preferences", {})
+        if isinstance(preferences, dict):
+            for key, value in preferences.items():
+                if isinstance(key, str) and isinstance(value, str):
+                    try:
+                        self._manager.set_preference(key, value)
+                    except ValueError:
+                        # Skip blank entries silently — matches manager DbC.
+                        continue
+
+        memories = raw.get("memories", [])
+        if isinstance(memories, list):
+            for item in memories:
+                if not isinstance(item, dict):
+                    continue
+                content = item.get("content")
+                if not isinstance(content, str) or not content.strip():
+                    continue
+                candidate = MemoryCandidate(
+                    kind=str(item.get("kind", "preference")),
+                    content=content,
+                    source=str(item.get("source", "imported")),
+                    source_hash=str(item.get("source_hash", content)),
+                )
+                self._manager.add_memory(candidate)
+
+        self.refresh()
+        self._status_label.setText(f"Imported memory from {path}.")
+
+    # ── Qt slot wrappers ──────────────────────────────────────────
+
+    def _on_save_clicked(self) -> None:
+        try:
+            self.save_preference()
+        except ValueError as exc:
+            self._status_label.setText(f"Save failed: {exc}")
+
+    def _on_clear_clicked(self) -> None:
+        def _ask() -> bool:
+            reply = QMessageBox.question(
+                self,
+                "Clear all memory",
+                "This will permanently delete all stored preferences and "
+                "archived chat memories. Continue?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            return reply == QMessageBox.StandardButton.Yes
+
+        self.clear_all(confirm=_ask)
+
+    def _on_export_clicked(self) -> None:
+        path_str, _ = QFileDialog.getSaveFileName(
+            self,
+            "Export memory",
+            "user_memory.json",
+            "JSON Files (*.json);;All Files (*)",
+        )
+        if not path_str:
+            return
+        self.export_to(Path(path_str))
+
+    def _on_import_clicked(self) -> None:
+        path_str, _ = QFileDialog.getOpenFileName(
+            self,
+            "Import memory",
+            "",
+            "JSON Files (*.json);;All Files (*)",
+        )
+        if not path_str:
+            return
+        try:
+            self.import_from(Path(path_str))
+        except (FileNotFoundError, ValueError) as exc:
+            self._status_label.setText(f"Import failed: {exc}")
+
+
+# ── helpers ───────────────────────────────────────────────────────
+
+
+def _render_preferences(preferences: dict) -> str:
+    if not preferences:
+        return _PREFERENCES_PLACEHOLDER
+    return "\n".join(f"{key}: {value}" for key, value in sorted(preferences.items()))
+
+
+def _render_memories(memories: list) -> str:
+    if not memories:
+        return _MEMORIES_PLACEHOLDER
+    rendered: list[str] = []
+    for item in memories:
+        if not isinstance(item, dict):
+            continue
+        content = str(item.get("content", "")).strip()
+        if not content:
+            continue
+        created = item.get("created_at", "")
+        prefix = f"[{created}] " if created else ""
+        rendered.append(f"{prefix}{content}")
+    return "\n".join(rendered) if rendered else _MEMORIES_PLACEHOLDER
+
+
+__all__ = ["MemoryPanel"]

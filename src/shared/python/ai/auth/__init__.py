@@ -2,10 +2,10 @@
 
 from src.shared.python.ai.auth.authentication import (
     AuthManager,
+    AuthToken,
     FeatureGate,
     SubscriptionTier,
     UserProfile,
-    AuthToken,
     get_auth_manager,
 )
 

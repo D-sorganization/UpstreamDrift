@@ -168,6 +168,8 @@ class Tool:
         """
         if arguments is None:
             raise ValueError("arguments must be provided")
+        if arguments is None:
+            raise ValueError("arguments must be provided")
         errors: list[str] = []
 
         # Check required parameters
@@ -204,6 +206,8 @@ class Tool:
         Returns:
             ToolResult with execution outcome.
         """
+        if arguments is None:
+            raise ValueError("arguments must be provided")
         if arguments is None:
             raise ValueError("arguments must be provided")
         import time
@@ -290,6 +294,8 @@ class ToolRegistry:
 
         if name is None:
             raise ValueError("name must be provided")
+        if name is None:
+            raise ValueError("name must be provided")
 
         def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
             """Register the decorated function as a tool in the registry."""
@@ -321,6 +327,8 @@ class ToolRegistry:
         """
         if tool is None:
             raise ValueError("tool must be provided")
+        if tool is None:
+            raise ValueError("tool must be provided")
         self._tools[tool.name] = tool
         logger.debug("Registered tool: %s", tool.name)
 
@@ -335,6 +343,8 @@ class ToolRegistry:
         Returns:
             List of ToolParameter definitions.
         """
+        if func is None:
+            raise ValueError("func must be provided")
         if func is None:
             raise ValueError("func must be provided")
         parameters: list[ToolParameter] = []
@@ -388,6 +398,8 @@ class ToolRegistry:
         """
         if python_type is None:
             raise ValueError("python_type must be provided")
+        if python_type is None:
+            raise ValueError("python_type must be provided")
         type_mapping = {
             str: "string",
             int: "integer",
@@ -437,6 +449,8 @@ class ToolRegistry:
         """
         if max_expertise is None:
             raise ValueError("max_expertise must be provided")
+        if max_expertise is None:
+            raise ValueError("max_expertise must be provided")
         tools = list(self._tools.values())
 
         if category is not None:
@@ -460,6 +474,8 @@ class ToolRegistry:
         Returns:
             List of tool definitions in provider format.
         """
+        if provider_format is None:
+            raise ValueError("provider_format must be provided")
         if provider_format is None:
             raise ValueError("provider_format must be provided")
         tools = self.list_tools(max_expertise=max_expertise)
@@ -491,6 +507,8 @@ class ToolRegistry:
         """
         if name is None:
             raise ValueError("name must be provided")
+        if name is None:
+            raise ValueError("name must be provided")
         tool = self.get_tool(name)
         if tool is None:
             raise ToolExecutionError(
@@ -511,6 +529,62 @@ class ToolRegistry:
         """Check if a tool is registered."""
         return name in self._tools
 
+    async def refresh(self, mcp_pool: Any | None = None) -> int:
+        """Re-query an ``McpClientPool`` and merge MCP-tagged tools.
+
+        External callers should always go through ``mcp_pool.refresh_all()``
+        rather than reaching into the pool's internal client list (LOD).
+        MCP-sourced tools are stored under their namespaced name
+        (``server:tool``) so they cannot collide with locally registered
+        tools.
+
+        Args:
+            mcp_pool: An ``McpClientPool`` (or compatible) instance. Pass
+                ``None`` to clear previously merged MCP tools without
+                re-importing.
+
+        Returns:
+            Number of MCP tools merged into this registry.
+        """
+        # Drop any previously merged MCP tools so refresh is idempotent.
+        existing_mcp = [
+            name
+            for name, tool in self._tools.items()
+            if getattr(tool, "_mcp_source", None) is not None
+        ]
+        for name in existing_mcp:
+            del self._tools[name]
+        if mcp_pool is None:
+            return 0
+        merged = await mcp_pool.refresh_all()
+        count = 0
+        for entry in merged:
+            namespaced = entry["namespaced_name"]
+            tool = Tool(
+                name=namespaced,
+                description=entry.get("description", ""),
+                handler=_unsupported_local_handler,
+            )
+            tool._mcp_source = entry.get("source")  # type: ignore[attr-defined]
+            self._tools[namespaced] = tool
+            count += 1
+        logger.info("Merged %d MCP tools into registry", count)
+        return count
+
+
+def _unsupported_local_handler(*_args: Any, **_kwargs: Any) -> ToolResult:
+    """Placeholder handler for MCP-sourced tools.
+
+    MCP tools must be dispatched through the pool (``pool.call_tool``),
+    not via the local ``ToolRegistry.execute`` path. Calling this raises
+    so misuse is loud.
+    """
+    raise ToolExecutionError(
+        "MCP-sourced tools must be invoked via McpClientPool.call_tool, "
+        "not ToolRegistry.execute",
+        tool_name="<mcp>",
+    )
+
 
 # Singleton holder (avoids 'global' keyword)
 _registry_holder: dict[str, ToolRegistry | None] = {"instance": None}
@@ -526,6 +600,6 @@ def get_global_registry() -> ToolRegistry:
         _registry_holder["instance"] = ToolRegistry()
 
     registry = _registry_holder["instance"]
-    if not (registry is not None):  # Ensure it is not None for mypy
+    if registry is None:  # Ensure it is not None for mypy
         raise ValueError("DbC Blocked: Precondition failed.")
     return registry

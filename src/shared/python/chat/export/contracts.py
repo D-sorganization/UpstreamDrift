@@ -1,0 +1,70 @@
+"""Contracts for chat export (Tools issue #2735).
+
+Pure-Python value objects used by every exporter. They are intentionally
+free of Qt or filesystem side effects so they can be constructed from any
+caller (CLI, REST, or the GUI dock widget).
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+ExportFormat = Literal["markdown", "text", "html"]
+
+
+@dataclass(frozen=True)
+class ChatExportRequest:
+    """Request to export a chat session.
+
+    Attributes:
+        session_id: Identifier of the session to export.
+        format: Output format. One of ``"markdown"``, ``"text"``, ``"html"``.
+        output_path: Destination file path on disk.
+        include_metadata: When ``True``, prepend a session metadata block.
+        redact_secrets: When ``True``, run each message through the secret
+            redactor before writing.
+
+    Contract:
+        Pre: ``session_id`` is a non-empty string.
+        Pre: ``output_path`` is a non-empty string.
+        Pre: ``format`` is one of the allowed literal values.
+    """
+
+    session_id: str
+    format: ExportFormat
+    output_path: str
+    include_metadata: bool = False
+    redact_secrets: bool = False
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.session_id, str) or not self.session_id.strip():
+            raise ValueError("ChatExportRequest.session_id must be non-empty")
+        if not isinstance(self.output_path, str) or not self.output_path.strip():
+            raise ValueError("ChatExportRequest.output_path must be non-empty")
+        if self.format not in ("markdown", "text", "html"):
+            raise ValueError(
+                "ChatExportRequest.format must be one of "
+                f"{('markdown', 'text', 'html')!r}, got {self.format!r}"
+            )
+
+
+@dataclass(frozen=True)
+class ChatExportResult:
+    """Result of a successful export.
+
+    Attributes:
+        path: Absolute or as-given path written to disk.
+        byte_count: Size of the written file in bytes.
+        message_count: Number of messages serialised.
+    """
+
+    path: str
+    byte_count: int
+    message_count: int
+
+    def __post_init__(self) -> None:
+        if self.byte_count < 0:
+            raise ValueError("byte_count must be non-negative")
+        if self.message_count < 0:
+            raise ValueError("message_count must be non-negative")

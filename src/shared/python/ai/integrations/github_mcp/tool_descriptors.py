@@ -1,0 +1,102 @@
+"""Declarative descriptors for the GitHub MCP server's tool surface.
+
+These descriptors are the **single source of truth** (DRY) for what the
+Sidekick UI and tool registry should expect from the GitHub MCP server.
+The actual tool list is verified at runtime when the server connects —
+this list is what callers can rely on without having to spawn the
+subprocess to find out.
+
+Each descriptor carries a ``requires_confirmation`` flag. The chat tool
+registry / UI uses this to gate write operations behind an explicit user
+confirmation, matching how Claude Desktop / Cline handle MCP write tools.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True, slots=True)
+class GitHubMcpToolDescriptor:
+    """A tool the GitHub MCP server is expected to expose.
+
+    Attributes:
+        name: Tool name as advertised by the MCP server (un-namespaced).
+            The pool prefixes this with ``<server>:`` at aggregation time.
+        description: Short, operator-facing description.
+        requires_confirmation: ``True`` for mutating operations (issue
+            creation, PR merge, comment posting). The chat UI must prompt
+            the user before invoking these.
+    """
+
+    name: str
+    description: str
+    requires_confirmation: bool = False
+
+
+GITHUB_MCP_TOOL_DESCRIPTORS: tuple[GitHubMcpToolDescriptor, ...] = (
+    # ---- Read tools ----
+    GitHubMcpToolDescriptor(
+        name="list_repos",
+        description="List repositories accessible to the authenticated user.",
+    ),
+    GitHubMcpToolDescriptor(
+        name="list_issues",
+        description="List issues in a repository, with optional filters.",
+    ),
+    GitHubMcpToolDescriptor(
+        name="list_prs",
+        description="List pull requests in a repository, with optional filters.",
+    ),
+    GitHubMcpToolDescriptor(
+        name="get_issue",
+        description="Fetch a single issue by number, including body and metadata.",
+    ),
+    GitHubMcpToolDescriptor(
+        name="get_pr_diff",
+        description="Fetch the unified diff for a pull request.",
+    ),
+    GitHubMcpToolDescriptor(
+        name="search_code",
+        description="Search code across repositories using GitHub code search.",
+    ),
+    GitHubMcpToolDescriptor(
+        name="search_issues",
+        description="Search issues and pull requests across repositories.",
+    ),
+    # ---- Write tools (confirmation-gated) ----
+    GitHubMcpToolDescriptor(
+        name="create_issue",
+        description="Create a new issue in a repository.",
+        requires_confirmation=True,
+    ),
+    GitHubMcpToolDescriptor(
+        name="add_comment",
+        description="Post a comment on an existing issue or pull request.",
+        requires_confirmation=True,
+    ),
+    GitHubMcpToolDescriptor(
+        name="merge_pr",
+        description="Merge a pull request (merge / squash / rebase strategy).",
+        requires_confirmation=True,
+    ),
+)
+
+
+_DESCRIPTOR_BY_NAME: dict[str, GitHubMcpToolDescriptor] = {
+    descriptor.name: descriptor for descriptor in GITHUB_MCP_TOOL_DESCRIPTORS
+}
+
+
+def get_tool_descriptor(name: str) -> GitHubMcpToolDescriptor | None:
+    """Return the descriptor for ``name`` or ``None`` if unknown."""
+    return _DESCRIPTOR_BY_NAME.get(name)
+
+
+def write_tool_names() -> tuple[str, ...]:
+    """Return the names of tools that require confirmation before invocation."""
+    return tuple(
+        descriptor.name
+        for descriptor in GITHUB_MCP_TOOL_DESCRIPTORS
+        if descriptor.requires_confirmation
+    )

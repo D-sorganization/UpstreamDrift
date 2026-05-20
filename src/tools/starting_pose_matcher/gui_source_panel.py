@@ -71,6 +71,7 @@ def _safe_load_body_target(
     *,
     opts: AlignOptions,
     impact_source: ClubTarget | None,
+    marker_set: Any = None,
 ) -> Any:
     """Best-effort import of ``load_body_target``.
 
@@ -87,7 +88,9 @@ def _safe_load_body_target(
             "Body-marker loader not available in this build. "
             "It will be enabled when issues #4477 / #4478 land."
         ) from exc
-    return load_body_target(Path(path), opts=opts, impact_source=impact_source)
+    return load_body_target(
+        Path(path), opts=opts, impact_source=impact_source, marker_set=marker_set
+    )
 
 
 def _safe_extract_ball_impact(club: ClubTarget) -> Any:
@@ -283,9 +286,7 @@ class DataSourcesPanel(QGroupBox):
             align=AlignOptionsBlock(
                 sample_rate_hz=float(self.spin_sample_rate.value()),
                 simulation_time_s=float(self.spin_duration.value()),
-                time_alignment=(
-                    "impact" if self.rb_align_impact.isChecked() else "address"
-                ),
+                time_alignment=("impact" if self.rb_align_impact.isChecked() else "address"),
             ),
         )
 
@@ -305,9 +306,7 @@ class DataSourcesPanel(QGroupBox):
         b = block or default_data_sources()
         self.cb_club.setChecked(b.club.enabled)
         self._club_path = b.club.file_path
-        self.lbl_club_path.setText(
-            Path(b.club.file_path).name if b.club.file_path else "(no file)"
-        )
+        self.lbl_club_path.setText(Path(b.club.file_path).name if b.club.file_path else "(no file)")
         if b.club.include_ball:
             self.rb_club_ball.setChecked(True)
         else:
@@ -315,9 +314,7 @@ class DataSourcesPanel(QGroupBox):
 
         self.cb_body.setChecked(b.body.enabled)
         self._body_path = b.body.file_path
-        self.lbl_body_path.setText(
-            Path(b.body.file_path).name if b.body.file_path else "(no file)"
-        )
+        self.lbl_body_path.setText(Path(b.body.file_path).name if b.body.file_path else "(no file)")
         idx = self.combo_marker_set.findText(b.body.marker_set)
         if idx >= 0:
             self.combo_marker_set.setCurrentIndex(idx)
@@ -337,9 +334,9 @@ class DataSourcesPanel(QGroupBox):
     def _on_body_enabled(self, _checked: bool) -> None:
         self._emit_targets()
 
-    def _on_club_mode_changed(self, _checked: bool) -> None:
+    def _on_club_mode_changed(self, checked: bool) -> None:
         # Only react on the "becomes-checked" transition to avoid double-fires.
-        if not (self.rb_club_only.isChecked() or self.rb_club_ball.isChecked()):
+        if not checked:
             return
         self._emit_targets()
 

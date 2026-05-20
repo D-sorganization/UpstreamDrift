@@ -206,9 +206,7 @@ def canonical_pose_rad() -> CanonicalPose:
 
     return CanonicalPose(
         pelvis_translation_m=np.array([0.0, 0.0, 1.0], dtype=np.float64),
-        pelvis_rotation_xyz_deg=np.array(
-            [0.0, 0.0, np.rad2deg(45.0)], dtype=np.float64
-        ),
+        pelvis_rotation_xyz_deg=np.array([0.0, 0.0, np.rad2deg(45.0)], dtype=np.float64),
         joint_angles_deg={
             "TorsoStartPosition": np.rad2deg(30.0),
             "SpineStartPositionX": np.rad2deg(15.0),
@@ -345,9 +343,9 @@ def sample_skeleton_points() -> dict[str, tuple[float, float, float]]:
 _original_importorskip = pytest.importorskip
 
 
-def _safe_importorskip(modname, minversion=None, reason=None):
+def _safe_importorskip(modname, minversion=None, reason=None, **kwargs):
     try:
-        return _original_importorskip(modname, minversion, reason)
+        return _original_importorskip(modname, minversion=minversion, reason=reason, **kwargs)
     except OSError as e:
         if "WinError" in str(e):
             pytest.skip(f"Skipping {modname} due to OSError: {e}")
