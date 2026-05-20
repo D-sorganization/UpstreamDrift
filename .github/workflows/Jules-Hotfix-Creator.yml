@@ -58,7 +58,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
-          ref: ${{ steps.branch.outputs.failed_branch }}
+          ref: ${{ inputs.failed_branch }}
           fetch-depth: 0
 
       - name: Validate Jules API Key
@@ -101,9 +101,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           TARGET_RUN_ID: ${{ inputs.run_id }}
+          FAILED_BRANCH: ${{ inputs.failed_branch }}
         run: |
           HOTFIX_BRANCH="${{ steps.hotfix.outputs.branch }}"
-          FAILED_BRANCH="${{ steps.branch.outputs.failed_branch }}"
           gh run view $TARGET_RUN_ID --log-failed > logs.txt
 
           LOG_CONTENT=$(cat logs.txt)
@@ -125,9 +125,9 @@ jobs:
         if: steps.jules.outputs.enabled == 'true'
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+          FAILED_BRANCH: ${{ inputs.failed_branch }}
         run: |
           HOTFIX_BRANCH="${{ steps.hotfix.outputs.branch }}"
-          FAILED_BRANCH="${{ steps.branch.outputs.failed_branch }}"
 
           gh pr create \
             --base "$FAILED_BRANCH" \

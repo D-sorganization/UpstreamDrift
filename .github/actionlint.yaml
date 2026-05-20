@@ -6,4 +6,5 @@ self-hosted-runner:
     - ubuntu-22.04
     - ubuntu-24.04
 config-variables:
+  - JULES_ENABLED
   - REPOSITORY_MANAGEMENT_REPOSITORY
