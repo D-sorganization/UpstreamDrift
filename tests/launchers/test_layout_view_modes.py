@@ -203,7 +203,7 @@ def test_view_mode_from_string_backward_compat(
     ``ViewMode.LIST_LARGE`` rather than raising.
     """
     result = _view_mode_from_string(raw_name)
-    assert result == expected_mode, (
-        f"_view_mode_from_string({raw_name!r}) → {result!r}, expected {expected_mode!r}"
-    )
+    assert (
+        result == expected_mode
+    ), f"_view_mode_from_string({raw_name!r}) → {result!r}, expected {expected_mode!r}"
     assert isinstance(result, ViewMode)

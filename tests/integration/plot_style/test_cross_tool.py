@@ -180,15 +180,15 @@ def test_three_renderers_produce_identical_output(tmp_path: Path) -> None:
     rms_vd = _rms_normalised(viewer, dashboard)
     rms_md = _rms_normalised(matcher, dashboard)
 
-    assert rms_vm < RMS_TOLERANCE_FRAC, (
-        f"viewer vs matcher RMS {rms_vm:.4f} exceeds {RMS_TOLERANCE_FRAC:.4f}"
-    )
-    assert rms_vd < RMS_TOLERANCE_FRAC, (
-        f"viewer vs dashboard RMS {rms_vd:.4f} exceeds {RMS_TOLERANCE_FRAC:.4f}"
-    )
-    assert rms_md < RMS_TOLERANCE_FRAC, (
-        f"matcher vs dashboard RMS {rms_md:.4f} exceeds {RMS_TOLERANCE_FRAC:.4f}"
-    )
+    assert (
+        rms_vm < RMS_TOLERANCE_FRAC
+    ), f"viewer vs matcher RMS {rms_vm:.4f} exceeds {RMS_TOLERANCE_FRAC:.4f}"
+    assert (
+        rms_vd < RMS_TOLERANCE_FRAC
+    ), f"viewer vs dashboard RMS {rms_vd:.4f} exceeds {RMS_TOLERANCE_FRAC:.4f}"
+    assert (
+        rms_md < RMS_TOLERANCE_FRAC
+    ), f"matcher vs dashboard RMS {rms_md:.4f} exceeds {RMS_TOLERANCE_FRAC:.4f}"
 
 
 def test_every_builtin_preset_renders_via_matplotlib() -> None:

@@ -157,9 +157,9 @@ class TestAIPMethodsExceptionLogging:
         warning_messages = [
             r.message for r in caplog.records if r.levelno >= logging.WARNING
         ]
-        assert len(warning_messages) > 0, (
-            "Expected a warning log from _simulation_status, got none"
-        )
+        assert (
+            len(warning_messages) > 0
+        ), "Expected a warning log from _simulation_status, got none"
 
     def test_model_query_failure_logs_warning(
         self, caplog: pytest.LogCaptureFixture
@@ -181,9 +181,9 @@ class TestAIPMethodsExceptionLogging:
         warning_messages = [
             r.message for r in caplog.records if r.levelno >= logging.WARNING
         ]
-        assert len(warning_messages) > 0, (
-            "Expected a warning log from _model_query, got none"
-        )
+        assert (
+            len(warning_messages) > 0
+        ), "Expected a warning log from _model_query, got none"
 
     def test_analysis_metrics_failure_logs_warning(
         self, caplog: pytest.LogCaptureFixture
@@ -204,9 +204,9 @@ class TestAIPMethodsExceptionLogging:
         warning_messages = [
             r.message for r in caplog.records if r.levelno >= logging.WARNING
         ]
-        assert len(warning_messages) > 0, (
-            "Expected a warning log from _analysis_metrics, got none"
-        )
+        assert (
+            len(warning_messages) > 0
+        ), "Expected a warning log from _analysis_metrics, got none"
 
 
 class TestPhysicsRouteExceptionLogging:
@@ -229,9 +229,9 @@ class TestPhysicsRouteExceptionLogging:
         warning_messages = [
             r.message for r in caplog.records if r.levelno >= logging.WARNING
         ]
-        assert any("gravity" in m for m in warning_messages), (
-            f"Expected gravity warning, got: {warning_messages}"
-        )
+        assert any(
+            "gravity" in m for m in warning_messages
+        ), f"Expected gravity warning, got: {warning_messages}"
 
 
 class TestDataExplorerExceptionLogging:
@@ -288,9 +288,9 @@ class TestDatasetRouteExceptionLogging:
         warning_messages = [
             r.message for r in caplog.records if r.levelno >= logging.WARNING
         ]
-        assert any("phase" in m.lower() for m in warning_messages), (
-            f"Expected phase-detection warning, got: {warning_messages}"
-        )
+        assert any(
+            "phase" in m.lower() for m in warning_messages
+        ), f"Expected phase-detection warning, got: {warning_messages}"
 
 
 class TestDiagnosticsExceptionLogging:

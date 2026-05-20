@@ -50,9 +50,9 @@ class TestPendulumPhysicsAnalytical:
         assert pendulum_arm is not None, "Assertion failed: pendulum_arm is not None"
 
         # Basic sanity check - mass should allow pendulum motion
-        assert pendulum_arm.inertia.mass > 0, (
-            "Assertion failed: pendulum_arm.inertia.mass > 0"
-        )
+        assert (
+            pendulum_arm.inertia.mass > 0
+        ), "Assertion failed: pendulum_arm.inertia.mass > 0"
 
 
 if __name__ == "__main__":

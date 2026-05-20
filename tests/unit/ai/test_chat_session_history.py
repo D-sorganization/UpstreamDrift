@@ -20,7 +20,6 @@ import pytest
 
 from src.shared.python.ai.types import ConversationContext
 
-
 # ── Helpers ───────────────────────────────────────────────────────────
 
 

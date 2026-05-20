@@ -20,7 +20,6 @@ from src.shared.python.feature_registry import (
 from src.shared.python.feature_registry import probes as probes_mod
 from src.shared.python.feature_registry.probes import ProbeOutcome
 
-
 pytestmark = pytest.mark.unit
 
 

@@ -10,7 +10,6 @@ from PyQt6.QtCore import QUrl
 
 from src.shared.python.ui.qt.widgets.document_reader import DocumentReaderWidget
 
-
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
 

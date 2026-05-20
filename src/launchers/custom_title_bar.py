@@ -260,7 +260,9 @@ class CustomTitleBar(QWidget):
                     - self.window().frameGeometry().topLeft()
                 )
                 return False  # Let the event propagate or at least don't eat it so mouse grab works
-        elif event.type() == event.Type.MouseMove:  # noqa: SIM102 (separated for symmetry with the press branch above)
+        elif (
+            event.type() == event.Type.MouseMove
+        ):  # noqa: SIM102 (separated for symmetry with the press branch above)
             if event.buttons() & Qt.MouseButton.LeftButton:
                 if isinstance(obj, QToolButton):
                     return False

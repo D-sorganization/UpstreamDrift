@@ -16,7 +16,6 @@ from src.shared.python.gui_launcher.ud_tool_catalog import (
     get_ud_tool_catalog,
 )
 
-
 # ── UDToolEntry unit tests ────────────────────────────────────────────
 
 
@@ -100,9 +99,9 @@ class TestUDToolCatalog:
 
     def test_all_tools_have_valid_category(self) -> None:
         for tool in UDToolCatalog().all_tools():
-            assert tool.category in VALID_CATEGORIES, (
-                f"Tool '{tool.tool_id}' has unknown category '{tool.category}'"
-            )
+            assert (
+                tool.category in VALID_CATEGORIES
+            ), f"Tool '{tool.tool_id}' has unknown category '{tool.category}'"
 
     def test_all_tools_have_non_empty_command(self) -> None:
         for tool in UDToolCatalog().all_tools():
@@ -111,9 +110,9 @@ class TestUDToolCatalog:
     def test_hidden_tools_have_documented_reason(self) -> None:
         for tool in UDToolCatalog().all_tools():
             if tool.is_hidden:
-                assert tool.hidden_reason, (
-                    f"Hidden tool '{tool.tool_id}' must document reason"
-                )
+                assert (
+                    tool.hidden_reason
+                ), f"Hidden tool '{tool.tool_id}' must document reason"
 
     def test_no_duplicate_tool_ids(self) -> None:
         tools = UDToolCatalog().all_tools()
@@ -208,9 +207,9 @@ class TestValidCategories:
             "Visualization",
             "Developer Tools",
         }
-        assert required.issubset(VALID_CATEGORIES), (
-            f"Missing categories: {required - VALID_CATEGORIES}"
-        )
+        assert required.issubset(
+            VALID_CATEGORIES
+        ), f"Missing categories: {required - VALID_CATEGORIES}"
 
     def test_categories_are_non_empty_strings(self) -> None:
         for cat in VALID_CATEGORIES:

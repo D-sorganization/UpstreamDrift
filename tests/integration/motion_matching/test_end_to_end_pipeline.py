@@ -119,9 +119,9 @@ def test_full_pipeline_synthetic_target(
     # Loss is finite, non-negative, and below a deliberately loose smoke threshold.
     assert np.isfinite(result.final_loss)
     assert result.final_loss >= 0.0
-    assert result.final_loss < 100.0, (
-        f"smoke threshold breached: final_loss={result.final_loss}"
-    )
+    assert (
+        result.final_loss < 100.0
+    ), f"smoke threshold breached: final_loss={result.final_loss}"
     # History matches the configured restart/iteration grid.
     assert result.history["loss"].shape == (
         opts.n_starts,

@@ -14,7 +14,6 @@ import pytest
 from src.shared.python.feature_registry import install_feature
 from src.shared.python.feature_registry import installer as installer_mod
 
-
 pytestmark = pytest.mark.unit
 
 

@@ -158,9 +158,9 @@ def test_gradients_flow_through_full_model() -> None:
     missing = [n for n, g in named_grads if g is None]
     assert not missing, f"parameters with None grad: {missing}"
     nonzero = sum(1 for _, g in named_grads if float(g.abs().sum()) > 0)
-    assert nonzero == len(named_grads), (
-        f"only {nonzero}/{len(named_grads)} parameters got non-zero gradients"
-    )
+    assert nonzero == len(
+        named_grads
+    ), f"only {nonzero}/{len(named_grads)} parameters got non-zero gradients"
 
 
 # ---- output respects coefficient bounds -----------------------------------
@@ -206,9 +206,9 @@ def test_output_with_unit_factor_within_physical_bounds() -> None:
 def test_parameter_count_in_documented_range() -> None:
     model = InverseRegressor()
     n = parameter_count(model)
-    assert 1_000_000 <= n <= 4_000_000, (
-        f"parameter count {n:,} outside the 1-4 M budget"
-    )
+    assert (
+        1_000_000 <= n <= 4_000_000
+    ), f"parameter count {n:,} outside the 1-4 M budget"
 
 
 # ---- config validation ----------------------------------------------------

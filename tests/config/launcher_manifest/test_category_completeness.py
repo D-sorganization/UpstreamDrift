@@ -66,9 +66,9 @@ class TestCategoryCompleteness:
             visible_tiles = manifest.get_tiles_by_category(category)
             if all_tiles and not visible_tiles:
                 empty_visible.append(category)
-        assert not empty_visible, (
-            f"Categories with only hidden tiles: {', '.join(empty_visible)}"
-        )
+        assert (
+            not empty_visible
+        ), f"Categories with only hidden tiles: {', '.join(empty_visible)}"
 
     def test_no_category_is_completely_empty(self, manifest: LauncherManifest) -> None:
         """Physics engine and tool categories must have at least one tile."""
@@ -124,9 +124,9 @@ class TestTileFieldValidation:
     def test_all_tiles_have_valid_category(self, manifest: LauncherManifest) -> None:
         """Every tile category must be one of the canonical categories."""
         for tile in manifest.tiles:
-            assert tile.category in LAUNCHER_CATEGORIES, (
-                f"Tile {tile.id!r} has invalid category: {tile.category!r}"
-            )
+            assert (
+                tile.category in LAUNCHER_CATEGORIES
+            ), f"Tile {tile.id!r} has invalid category: {tile.category!r}"
 
 
 # =============================================================================
@@ -174,9 +174,9 @@ class TestHiddenTileValidation:
         for tile in manifest_json["tiles"]:
             if tile.get("hidden", False) and not tile.get("hidden_reason"):
                 hidden_without_reason.append(tile["id"])
-        assert not hidden_without_reason, (
-            f"Hidden tiles missing 'hidden_reason': {', '.join(hidden_without_reason)}"
-        )
+        assert (
+            not hidden_without_reason
+        ), f"Hidden tiles missing 'hidden_reason': {', '.join(hidden_without_reason)}"
 
 
 # =============================================================================
@@ -197,9 +197,9 @@ class TestHandlerCoverage:
             handler = registry.get_handler(tile.type)
             if handler is None:
                 missing.append(f"{tile.id!r} (type={tile.type!r})")
-        assert not missing, (
-            f"Tiles with no handler in ModelHandlerRegistry: {', '.join(missing)}"
-        )
+        assert (
+            not missing
+        ), f"Tiles with no handler in ModelHandlerRegistry: {', '.join(missing)}"
 
     def test_handler_can_handle_returns_true_for_manifest_types(
         self, manifest: LauncherManifest, registry: ModelHandlerRegistry
