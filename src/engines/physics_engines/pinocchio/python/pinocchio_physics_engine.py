@@ -271,6 +271,10 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         pin.computeJointJacobians(self.model, self.data, self.q)
         pin.updateFramePlacements(self.model, self.data)
 
+    def get_time(self) -> float:
+        """Get the current simulation time."""
+        return self.time
+
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
         """Get the current state (positions, velocities)."""
         return self.q.copy(), self.v.copy()
