@@ -339,9 +339,9 @@ def test_layout_tab_view_mode_combo_populated(parent_launcher, qapp) -> None:
     """#5730: ViewMode combo must be populated (import from correct module)."""
     dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_LAYOUT)
     # If the import is broken the combo stays empty (count == 0)
-    assert dialog.combo_view_mode.count() > 0, (
-        "combo_view_mode has no items — ViewMode import failed (check #5730)"
-    )
+    assert (
+        dialog.combo_view_mode.count() > 0
+    ), "combo_view_mode has no items — ViewMode import failed (check #5730)"
 
 
 def test_layout_tab_zoom_slider_calls_on_zoom_slider_changed(

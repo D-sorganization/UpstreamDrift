@@ -53,9 +53,9 @@ def test_theta_alias_returns_theta_optimal_and_warns() -> None:
         observed = result.theta
 
     np.testing.assert_array_equal(observed, expected)
-    assert any(issubclass(w.category, DeprecationWarning) for w in caught), (
-        "Expected DeprecationWarning when accessing the legacy `theta` alias"
-    )
+    assert any(
+        issubclass(w.category, DeprecationWarning) for w in caught
+    ), "Expected DeprecationWarning when accessing the legacy `theta` alias"
 
 
 def test_mujoco_version_alias_returns_engine_version_and_warns() -> None:
@@ -67,6 +67,6 @@ def test_mujoco_version_alias_returns_engine_version_and_warns() -> None:
         observed = result.mujoco_version
 
     assert observed == "3.2.1"
-    assert any(issubclass(w.category, DeprecationWarning) for w in caught), (
-        "Expected DeprecationWarning when accessing the legacy `mujoco_version` alias"
-    )
+    assert any(
+        issubclass(w.category, DeprecationWarning) for w in caught
+    ), "Expected DeprecationWarning when accessing the legacy `mujoco_version` alias"

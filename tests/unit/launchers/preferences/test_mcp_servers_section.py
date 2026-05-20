@@ -28,7 +28,9 @@ pytest.importorskip(
 
 from PyQt6.QtWidgets import QApplication  # noqa: E402
 
-from src.launchers.preferences.mcp_servers_section import McpServersSection  # noqa: E402
+from src.launchers.preferences.mcp_servers_section import (
+    McpServersSection,
+)  # noqa: E402
 
 
 @pytest.fixture(scope="module")

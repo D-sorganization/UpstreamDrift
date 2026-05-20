@@ -41,16 +41,16 @@ class TestTextEditorFileSizes:
     @pytest.mark.unit
     def test_text_editor_split_2456_models_loc(self) -> None:
         loc = _count_lines(EDITOR_DIR / "_text_editor_models.py")
-        assert loc <= LOC_BUDGET, (
-            f"_text_editor_models.py has {loc} LOC; budget {LOC_BUDGET}"
-        )
+        assert (
+            loc <= LOC_BUDGET
+        ), f"_text_editor_models.py has {loc} LOC; budget {LOC_BUDGET}"
 
     @pytest.mark.unit
     def test_validation_loc(self) -> None:
         loc = _count_lines(EDITOR_DIR / "_text_editor_validation.py")
-        assert loc <= LOC_BUDGET, (
-            f"_text_editor_validation.py has {loc} LOC; budget {LOC_BUDGET}"
-        )
+        assert (
+            loc <= LOC_BUDGET
+        ), f"_text_editor_validation.py has {loc} LOC; budget {LOC_BUDGET}"
 
 
 class TestTextEditorPublicAPI:

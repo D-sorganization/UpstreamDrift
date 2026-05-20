@@ -51,9 +51,9 @@ class TestPendulumAnalytical:
 
         np.testing.assert_allclose(M, M.T, atol=1e-12)
         eigenvalues = np.linalg.eigvalsh(M)
-        assert all(ev > 0 for ev in eigenvalues), (
-            f"M not positive definite: eigs={eigenvalues}"
-        )
+        assert all(
+            ev > 0 for ev in eigenvalues
+        ), f"M not positive definite: eigs={eigenvalues}"
 
     def test_mass_matrix_varies_with_configuration(self) -> None:
         """Mass matrix should change with joint angles (coupled inertia)."""
@@ -121,9 +121,9 @@ class TestPendulumAnalytical:
         engine.step(0.01)
         q1, _ = engine.get_state()
 
-        assert not np.allclose(q0, q1, atol=1e-10), (
-            "Assertion failed: not np.allclose(q0, q1, atol=1e-10)"
-        )
+        assert not np.allclose(
+            q0, q1, atol=1e-10
+        ), "Assertion failed: not np.allclose(q0, q1, atol=1e-10)"
 
     def test_checkpoint_restore_consistency(self) -> None:
         """Save and restore checkpoint should preserve state exactly."""

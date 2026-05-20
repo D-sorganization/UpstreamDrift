@@ -70,18 +70,18 @@ class TestLayoutHierarchy:
     def test_title_bar_is_first_child_of_outer_vbox(self, ui_setup) -> None:
         widgets = _ordered_widgets(_outer_vbox(ui_setup))
         assert widgets, "outer_vbox must have at least one child widget"
-        assert isinstance(widgets[0], CustomTitleBar), (
-            f"expected CustomTitleBar first; got {type(widgets[0]).__name__}"
-        )
+        assert isinstance(
+            widgets[0], CustomTitleBar
+        ), f"expected CustomTitleBar first; got {type(widgets[0]).__name__}"
 
     def test_menu_bar_is_second_child_below_title_bar(self, ui_setup) -> None:
         widgets = _ordered_widgets(_outer_vbox(ui_setup))
-        assert len(widgets) >= 2, (
-            "outer_vbox must contain title bar, menu bar, and splitter"
-        )
-        assert isinstance(widgets[1], QMenuBar), (
-            f"expected QMenuBar second; got {type(widgets[1]).__name__}"
-        )
+        assert (
+            len(widgets) >= 2
+        ), "outer_vbox must contain title bar, menu bar, and splitter"
+        assert isinstance(
+            widgets[1], QMenuBar
+        ), f"expected QMenuBar second; got {type(widgets[1]).__name__}"
 
     def test_setmenubar_is_not_called_in_frameless_mode(self, ui_setup) -> None:
         """``QMainWindow.setMenuBar`` reserves the native top strip.
@@ -103,13 +103,13 @@ class TestLayoutHierarchy:
         )
         # And the menu bar attribute must point to a widget that lives in
         # the central layout, not on the main window directly.
-        assert hasattr(ui_setup, "menu_bar"), (
-            "init_ui must expose self.menu_bar as a QMenuBar in outer_vbox"
-        )
+        assert hasattr(
+            ui_setup, "menu_bar"
+        ), "init_ui must expose self.menu_bar as a QMenuBar in outer_vbox"
         widgets = _ordered_widgets(_outer_vbox(ui_setup))
-        assert ui_setup.menu_bar in widgets, (
-            "self.menu_bar must be a direct child of outer_vbox"
-        )
+        assert (
+            ui_setup.menu_bar in widgets
+        ), "self.menu_bar must be a direct child of outer_vbox"
 
     def test_splitter_comes_after_menu_bar(self, ui_setup) -> None:
         widgets = _ordered_widgets(_outer_vbox(ui_setup))
@@ -120,6 +120,6 @@ class TestLayoutHierarchy:
         menubar_indices = [i for i, w in enumerate(widgets) if isinstance(w, QMenuBar)]
         assert splitter_indices, "expected at least one QSplitter in outer_vbox"
         assert menubar_indices, "expected a QMenuBar in outer_vbox"
-        assert min(splitter_indices) > max(menubar_indices), (
-            "the main QSplitter must come below the menu bar"
-        )
+        assert min(splitter_indices) > max(
+            menubar_indices
+        ), "the main QSplitter must come below the menu bar"

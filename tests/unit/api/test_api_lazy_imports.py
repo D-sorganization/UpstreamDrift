@@ -26,7 +26,6 @@ from unittest import mock
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -99,9 +98,9 @@ class TestImportWithoutSQLAlchemy:
                 versioning = importlib.import_module("src.api.versioning")
                 assert isinstance(versioning, ModuleType)
                 # Sanity-check: versioning exposes at least one public symbol
-                assert hasattr(versioning, "__file__"), (
-                    "versioning module has no __file__"
-                )
+                assert hasattr(
+                    versioning, "__file__"
+                ), "versioning module has no __file__"
         finally:
             _restore_api_modules(saved)
 

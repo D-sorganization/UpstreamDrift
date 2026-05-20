@@ -61,13 +61,13 @@ def test_runtime_mode_help_button_click_opens_dialog(qt_app) -> None:
         btn = make_runtime_mode_help_button()
         btn.click()
 
-        assert mock_msgbox_cls.called, (
-            "clicking the button must construct a QMessageBox"
-        )
+        assert (
+            mock_msgbox_cls.called
+        ), "clicking the button must construct a QMessageBox"
         # Find the title set on the message box.
         title_calls = [
             call_args.args[0] for call_args in instance.setWindowTitle.call_args_list
         ]
-        assert any("Engine Runtime" in t for t in title_calls), (
-            f"expected 'Engine Runtime' in dialog title; got {title_calls!r}"
-        )
+        assert any(
+            "Engine Runtime" in t for t in title_calls
+        ), f"expected 'Engine Runtime' in dialog title; got {title_calls!r}"

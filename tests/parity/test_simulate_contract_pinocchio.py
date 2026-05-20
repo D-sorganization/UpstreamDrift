@@ -119,9 +119,9 @@ def test_zero_theta_runs_and_is_nontrivial() -> None:
     assert np.all(np.isfinite(out.q))
     assert np.all(np.isfinite(out.qd))
     # Gravity must move at least one DOF over 50 ms.
-    assert not np.allclose(out.q[-1], out.q[0]), (
-        "zero-torque rollout did not move at all"
-    )
+    assert not np.allclose(
+        out.q[-1], out.q[0]
+    ), "zero-torque rollout did not move at all"
 
 
 # --------------------------------------------------------------------------- #

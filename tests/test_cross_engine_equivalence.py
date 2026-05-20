@@ -208,13 +208,13 @@ def _coerce_simout(
         """Return the final time-step row, defending against (N,k) or (k,) shapes."""
         a = np.asarray(arr, dtype=float)
         if a.ndim == 1:
-            assert a.shape == (n,), (
-                f"{engine}/{pose_name}: expected ({n},), got {a.shape}"
-            )
+            assert a.shape == (
+                n,
+            ), f"{engine}/{pose_name}: expected ({n},), got {a.shape}"
             return a
-        assert a.ndim == 2 and a.shape[1] == n, (
-            f"{engine}/{pose_name}: expected (N,{n}), got {a.shape}"
-        )
+        assert (
+            a.ndim == 2 and a.shape[1] == n
+        ), f"{engine}/{pose_name}: expected (N,{n}), got {a.shape}"
         return a[-1]
 
     def _get(name: str) -> Any:
@@ -231,9 +231,9 @@ def _coerce_simout(
 
     # Postcondition: every quaternion is finite and non-degenerate.
     qn = float(np.linalg.norm(grip_quat))
-    assert np.isfinite(qn) and qn > 1e-6, (
-        f"{engine}/{pose_name}: degenerate grip_quat with norm {qn}"
-    )
+    assert (
+        np.isfinite(qn) and qn > 1e-6
+    ), f"{engine}/{pose_name}: degenerate grip_quat with norm {qn}"
     grip_quat = grip_quat / qn  # normalise so quaternion-distance is well-defined
 
     return EngineSimResult(

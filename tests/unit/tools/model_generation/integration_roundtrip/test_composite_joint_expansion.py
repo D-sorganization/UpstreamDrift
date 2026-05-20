@@ -84,9 +84,9 @@ class TestCompositeJointExpansion:
             current = parents[current]
             if current in visited:
                 break  # Avoid infinite loop
-        assert current == "base", (
-            f"Arm's ancestor chain does not reach 'base': ended at '{current}'"
-        )
+        assert (
+            current == "base"
+        ), f"Arm's ancestor chain does not reach 'base': ended at '{current}'"
 
     def test_gimbal_joint_expands_to_three_revolute(self) -> None:
         """A gimbal joint should expand to 3 revolute joints + 2 intermediate links."""

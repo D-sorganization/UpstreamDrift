@@ -292,8 +292,7 @@ class BodyLibraryShapesLayer(_LayerBase):
         # tear-down + ``set_visible`` paths see them like any other
         # layer's artists.
         self._artists = [
-            entry.artist
-            for entry in renderer._entries.values()  # noqa: SLF001
+            entry.artist for entry in renderer._entries.values()  # noqa: SLF001
         ]
         for art in self._artists:
             art.set_visible(self._visible)

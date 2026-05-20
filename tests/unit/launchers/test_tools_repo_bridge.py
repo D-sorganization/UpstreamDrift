@@ -19,7 +19,6 @@ from src.shared.python.gui_launcher.tools_repo_bridge import (
     load_tools_from_repo,
 )
 
-
 # ── Fixtures ─────────────────────────────────────────────────────────
 
 

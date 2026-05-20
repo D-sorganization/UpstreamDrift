@@ -134,8 +134,8 @@ class TestIssue2474MeshGeneratorScriptAndSegments:
             result = SMPLXMeshGenerator.validate_vertex_ranges(
                 SMPLXMeshGenerator.SMPLX_EXPECTED_VERTEX_COUNT
             )
-            assert result is False, (
-                "validate_vertex_ranges must return False when segments overlap"
-            )
+            assert (
+                result is False
+            ), "validate_vertex_ranges must return False when segments overlap"
         finally:
             SMPLXMeshGenerator.SMPLX_SEGMENT_VERTEX_RANGES = original

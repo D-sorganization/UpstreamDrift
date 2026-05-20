@@ -112,6 +112,6 @@ class TestTopographyLoading:
 
         assert sim.green.width == 25.0, "Assertion failed: sim.green.width == 25.0"
         assert sim.green.height == 30.0, "Assertion failed: sim.green.height == 30.0"
-        assert np.allclose(sim.green.hole_position, [20.0, 15.0]), (
-            "Assertion failed: np.allclose(sim.green.hole_position, [20.0, 15.0])"
-        )
+        assert np.allclose(
+            sim.green.hole_position, [20.0, 15.0]
+        ), "Assertion failed: np.allclose(sim.green.hole_position, [20.0, 15.0])"

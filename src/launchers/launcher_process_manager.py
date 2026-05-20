@@ -76,9 +76,9 @@ if sys.platform == "win32":
             _job,
             win32job.JobObjectExtendedLimitInformation,
         )
-        _info["BasicLimitInformation"]["LimitFlags"] = (
-            win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
-        )
+        _info["BasicLimitInformation"][
+            "LimitFlags"
+        ] = win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
         win32job.SetInformationJobObject(
             _job,
             win32job.JobObjectExtendedLimitInformation,

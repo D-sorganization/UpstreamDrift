@@ -321,7 +321,9 @@ def export_to_matlab(
             logger.error(f"Failed to export to MATLAB: {outcome.error}")
         return _return_export_result(outcome, return_outcome)
 
-    except Exception as e:  # noqa: BLE001  # broad-catch intentional: any I/O error returns False
+    except (
+        Exception
+    ) as e:  # noqa: BLE001  # broad-catch intentional: any I/O error returns False
         logger.error(f"Failed to export to MATLAB: {e}")
         outcome = ExportOutcome(success=False, path=Path(output_path), error=str(e))
         return _return_export_result(outcome, return_outcome)
@@ -378,7 +380,9 @@ def export_to_hdf5(
             logger.error(f"Failed to export to HDF5: {outcome.error}")
         return _return_export_result(outcome, return_outcome)
 
-    except Exception as e:  # noqa: BLE001  # broad-catch intentional: any I/O error returns False
+    except (
+        Exception
+    ) as e:  # noqa: BLE001  # broad-catch intentional: any I/O error returns False
         logger.error(f"Failed to export to HDF5: {e}")
         outcome = ExportOutcome(success=False, path=Path(output_path), error=str(e))
         return _return_export_result(outcome, return_outcome)
@@ -414,25 +418,15 @@ class CaptureExportData:
 
 
 @precondition(  # fmt: skip
-    lambda output_path,
-    times,
-    joint_positions,
-    joint_names,
-    forces=None,
-    moments=None,
-    frame_rate=60.0,
-    units=None: (output_path is not None and len(output_path) > 0),
+    lambda output_path, times, joint_positions, joint_names, forces=None, moments=None, frame_rate=60.0, units=None: (
+        output_path is not None and len(output_path) > 0
+    ),
     "Output path must be a non-empty string",
 )
 @precondition(  # fmt: skip
-    lambda output_path,
-    times,
-    joint_positions,
-    joint_names,
-    forces=None,
-    moments=None,
-    frame_rate=60.0,
-    units=None: (frame_rate > 0),
+    lambda output_path, times, joint_positions, joint_names, forces=None, moments=None, frame_rate=60.0, units=None: (
+        frame_rate > 0
+    ),
     "Frame rate must be positive",
 )
 def export_to_c3d(

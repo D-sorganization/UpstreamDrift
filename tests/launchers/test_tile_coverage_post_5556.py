@@ -162,6 +162,6 @@ class TestAuditTileFields:
         for tile in self._get_audit_tiles(manifest_data):
             if not tile.get("path") and not tile.get("web_route"):
                 missing.append(tile["id"])
-        assert not missing, (
-            f"Audit tiles with neither 'path' nor 'web_route': {missing}"
-        )
+        assert (
+            not missing
+        ), f"Audit tiles with neither 'path' nor 'web_route': {missing}"
