@@ -124,7 +124,14 @@ class ModelCache:
                     if entry.local_path.exists():
                         self._entries[entry.model_id] = entry
                 logger.debug(f"Loaded {len(self._entries)} cached models")
-            except (PermissionError, OSError) as e:
+            except (
+                PermissionError,
+                OSError,
+                ValueError,
+                KeyError,
+                json.JSONDecodeError,
+                TypeError,
+            ) as e:
                 logger.warning(f"Failed to load cache index: {e}")
 
     def _save_index(self) -> None:
