@@ -259,6 +259,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      actions: read
+      checks: read
     secrets: inherit
 
   call-hotfix-creator:
@@ -271,6 +273,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      actions: write
     secrets: inherit
 
   call-scribe:
@@ -298,14 +301,19 @@ jobs:
     needs: triage
     if: needs.triage.outputs.target == 'archivist'
     uses: ./.github/workflows/Jules-Archivist.yml
-    # Archivist is read-only - no write permissions needed
+    permissions:
+      contents: write
+      pull-requests: read
     secrets: inherit
 
   call-sentinel:
     needs: triage
     if: needs.triage.outputs.target == 'sentinel'
     uses: ./.github/workflows/Jules-Sentinel.yml
-    # Sentinel is read-only security scanner
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
     secrets: inherit
 
   call-code-quality-reviewer:
@@ -315,6 +323,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      issues: write
     secrets: inherit
 
   call-assessment-generator:
@@ -324,6 +333,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      issues: write
     secrets: inherit
 
   call-issue-resolver:
@@ -343,6 +353,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      issues: write
     secrets: inherit
 
   call-documentation-auditor:
@@ -352,6 +363,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      issues: write
     secrets: inherit
 
   call-pr-compiler:
