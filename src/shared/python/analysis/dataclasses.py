@@ -288,10 +288,8 @@ def validate_timing_cross_engine(
     Returns:
         Dictionary with ``passed`` bool and ``max_diff_s`` float.
     """
-    if not (times_a is not None):
-        raise ValueError("times_a must be provided")
-    if not (times_a is not None):
-        raise ValueError("times_a must be provided")
+    if times_a is None or times_b is None:
+        raise ValueError("times_a and times_b must be provided")
     if len(times_a) != len(times_b):
         return {"passed": False, "max_diff_s": float("inf")}
 
@@ -315,10 +313,8 @@ def validate_angle_cross_engine(
     Returns:
         Dictionary with ``passed`` bool and ``max_diff_deg`` float.
     """
-    if not (angles_a is not None):
-        raise ValueError("angles_a must be provided")
-    if not (angles_a is not None):
-        raise ValueError("angles_a must be provided")
+    if angles_a is None or angles_b is None:
+        raise ValueError("angles_a and angles_b must be provided")
     a = np.asarray(angles_a)
     b = np.asarray(angles_b)
     if a.shape != b.shape:
