@@ -286,4 +286,3 @@ if __name__ == "__main__":
     w = SwingFlightWindow()
     w.show()
     sys.exit(app.exec())
-"""Swing-to-Flight Pipeline GUI."""
