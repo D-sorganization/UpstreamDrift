@@ -167,9 +167,17 @@ class TestBackoffSleeper:
 # ----------------------------- port_in_use ------------------------------------
 
 
-def test_port_in_use_returns_false_for_unused_port() -> None:
-    # Port 1 is reserved and unlikely to be listening on localhost
-    assert ws_mod._port_in_use("127.0.0.1", 1) is False
+def test_port_in_use_deterministic() -> None:
+    import socket
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("127.0.0.1", 0))
+        s.listen(1)
+        port = s.getsockname()[1]
+        assert ws_mod._port_in_use("127.0.0.1", port) is True
+
+    # After closing, the port should be free
+    assert ws_mod._port_in_use("127.0.0.1", port) is False
 
 
 # ----------------------------- WSPubSub (rust) --------------------------------
