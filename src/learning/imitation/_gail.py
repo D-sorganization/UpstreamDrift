@@ -32,9 +32,7 @@ class GAIL(ImitationLearner):
         device: str = "cpu",
     ) -> None:
         """Initialize GAIL learner."""
-        if not (observation_dim is not None):
-            raise ValueError("observation_dim must be provided")
-        if not (observation_dim is not None):
+        if observation_dim is None:
             raise ValueError("observation_dim must be provided")
         super().__init__(observation_dim, action_dim, config, device)
         self._policy: list[dict[str, NDArray[np.floating]]] = []
@@ -87,9 +85,7 @@ class GAIL(ImitationLearner):
 
     def _forward_policy(self, x: NDArray[np.floating]) -> NDArray[np.floating]:
         """Forward pass through policy network."""
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         for i, layer in enumerate(self._policy):
             x = x @ layer["W"] + layer["b"]
@@ -101,9 +97,7 @@ class GAIL(ImitationLearner):
         self, state: NDArray[np.floating], action: NDArray[np.floating]
     ) -> NDArray[np.floating]:
         """Forward pass through discriminator."""
-        if not (state is not None):
-            raise ValueError("state must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         x = np.concatenate([state, action], axis=-1)
         for i, layer in enumerate(self._discriminator):
@@ -132,9 +126,7 @@ class GAIL(ImitationLearner):
             Training history.
         """
         # Get expert data
-        if not (dataset is not None):
-            raise ValueError("dataset must be provided")
-        if not (dataset is not None):
+        if dataset is None:
             raise ValueError("dataset must be provided")
         expert_states, expert_actions = dataset.to_state_action_pairs()
 
@@ -194,9 +186,7 @@ class GAIL(ImitationLearner):
         Returns:
             Predicted action.
         """
-        if not (observation is not None):
-            raise ValueError("observation must be provided")
-        if not (observation is not None):
+        if observation is None:
             raise ValueError("observation must be provided")
         if observation.ndim == 1:
             observation = observation.reshape(1, -1)
@@ -225,9 +215,7 @@ class GAIL(ImitationLearner):
         Returns:
             GAIL reward value.
         """
-        if not (state is not None):
-            raise ValueError("state must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         if state.ndim == 1:
             state = state.reshape(1, -1)
@@ -240,9 +228,7 @@ class GAIL(ImitationLearner):
 
     def save(self, path: str | Path) -> None:
         """Save GAIL networks."""
-        if not (path is not None):
-            raise ValueError("path must be provided")
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         path = Path(path)
 
@@ -265,9 +251,7 @@ class GAIL(ImitationLearner):
 
     def load(self, path: str | Path) -> None:
         """Load GAIL networks."""
-        if not (path is not None):
-            raise ValueError("path must be provided")
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         path = Path(path)
 

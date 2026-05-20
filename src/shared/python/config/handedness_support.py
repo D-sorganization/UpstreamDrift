@@ -118,9 +118,7 @@ def mirror_position(
     Returns:
         Mirrored position vector
     """
-    if not (position is not None):
-        raise ValueError("position must be provided")
-    if not (position is not None):
+    if position is None:
         raise ValueError("position must be provided")
     if transform is None:
         transform = create_mirror_transform()
@@ -144,9 +142,7 @@ def mirror_velocity(
     Returns:
         Mirrored velocity vector
     """
-    if not (velocity is not None):
-        raise ValueError("velocity must be provided")
-    if not (velocity is not None):
+    if velocity is None:
         raise ValueError("velocity must be provided")
     if transform is None:
         transform = create_mirror_transform()
@@ -174,9 +170,7 @@ def mirror_rotation_matrix(
     Returns:
         Mirrored rotation matrix (3, 3)
     """
-    if not (rotation is not None):
-        raise ValueError("rotation must be provided")
-    if not (rotation is not None):
+    if rotation is None:
         raise ValueError("rotation must be provided")
     if transform is None:
         transform = create_mirror_transform()
@@ -204,9 +198,7 @@ def mirror_angular_velocity(
     Returns:
         Mirrored angular velocity
     """
-    if not (omega is not None):
-        raise ValueError("omega must be provided")
-    if not (omega is not None):
+    if omega is None:
         raise ValueError("omega must be provided")
     if transform is None:
         transform = create_mirror_transform()
@@ -247,9 +239,7 @@ def mirror_joint_configuration(
     Returns:
         Mirrored joint configuration
     """
-    if not (q is not None):
-        raise ValueError("q must be provided")
-    if not (q is not None):
+    if q is None:
         raise ValueError("q must be provided")
     q_mirrored = q.copy()
 
@@ -288,9 +278,7 @@ def mirror_trajectory(
     Returns:
         Dictionary with mirrored trajectories
     """
-    if not (positions is not None):
-        raise ValueError("positions must be provided")
-    if not (positions is not None):
+    if positions is None:
         raise ValueError("positions must be provided")
     transform = create_mirror_transform()
 
@@ -371,9 +359,7 @@ def validate_mirror_trajectory(
         Dictionary with validation results
     """
     # Check coordinate transformations
-    if not (original_positions is not None):
-        raise ValueError("original_positions must be provided")
-    if not (original_positions is not None):
+    if original_positions is None:
         raise ValueError("original_positions must be provided")
     y_flipped = np.allclose(original_positions[:, 1], -mirrored_positions[:, 1])
     x_preserved = np.allclose(original_positions[:, 0], mirrored_positions[:, 0])
@@ -422,9 +408,7 @@ def validate_energy_conservation(
     Returns:
         Dictionary with validation results
     """
-    if not (original_velocities is not None):
-        raise ValueError("original_velocities must be provided")
-    if not (original_velocities is not None):
+    if original_velocities is None:
         raise ValueError("original_velocities must be provided")
     if masses is None:
         masses = np.ones(len(original_velocities))
@@ -477,9 +461,7 @@ class HandednessConverter:
         Args:
             source_handedness: The handedness of the source model
         """
-        if not (source_handedness is not None):
-            raise ValueError("source_handedness must be provided")
-        if not (source_handedness is not None):
+        if source_handedness is None:
             raise ValueError("source_handedness must be provided")
         self.source_handedness = source_handedness
         self.transform = create_mirror_transform()
@@ -504,9 +486,7 @@ class HandednessConverter:
         Returns:
             Dictionary with converted trajectories
         """
-        if not (target_handedness is not None):
-            raise ValueError("target_handedness must be provided")
-        if not (target_handedness is not None):
+        if target_handedness is None:
             raise ValueError("target_handedness must be provided")
         if target_handedness == self.source_handedness:
             # No conversion needed

@@ -61,9 +61,7 @@ class DynamicsMixin:
     @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Inverse dynamics torques must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
-        if not (qacc is not None):
-            raise ValueError("qacc must be provided")
-        if not (qacc is not None):
+        if qacc is None:
             raise ValueError("qacc must be provided")
         if not self.sim:
             return np.array([])
@@ -80,9 +78,7 @@ class DynamicsMixin:
             return np.array([])
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
-        if not (body_name is not None):
-            raise ValueError("body_name must be provided")
-        if not (body_name is not None):
+        if body_name is None:
             raise ValueError("body_name must be provided")
         if not self.sim:
             return None

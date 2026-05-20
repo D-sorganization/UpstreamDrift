@@ -32,9 +32,7 @@ def simulate_with_feedback(
     Returns:
         Dictionary with result and feedback
     """
-    if not (stroke_params is not None):
-        raise ValueError("stroke_params must be provided")
-    if not (stroke_params is not None):
+    if stroke_params is None:
         raise ValueError("stroke_params must be provided")
     result = sim.simulate_putt(stroke_params)
 
@@ -86,9 +84,7 @@ def simulate_scatter(
     Returns:
         List of simulation results
     """
-    if not (start_position is not None):
-        raise ValueError("start_position must be provided")
-    if not (start_position is not None):
+    if start_position is None:
         raise ValueError("start_position must be provided")
     results = []
     rng = rng or sim._rng
@@ -132,9 +128,7 @@ def compute_aim_line(
     Returns:
         Dictionary with aim information
     """
-    if not (ball_position is not None):
-        raise ValueError("ball_position must be provided")
-    if not (ball_position is not None):
+    if ball_position is None:
         raise ValueError("ball_position must be provided")
     target = sim.green.hole_position
 
@@ -175,9 +169,7 @@ def read_green(
     Returns:
         Green reading with slopes and recommendations
     """
-    if not (ball_position is not None):
-        raise ValueError("ball_position must be provided")
-    if not (ball_position is not None):
+    if ball_position is None:
         raise ValueError("ball_position must be provided")
     reading = sim.green.read_putt_line(ball_position, target)
     break_info = sim.green.calculate_break(ball_position, target)

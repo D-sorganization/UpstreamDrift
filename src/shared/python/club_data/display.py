@@ -72,9 +72,7 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
         layout.addStretch(1)
 
     def _create_load_buttons(self, layout: QtWidgets.QVBoxLayout) -> None:
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        if not (layout is not None):
+        if layout is None:
             raise ValueError("layout must be provided")
         load_layout = QtWidgets.QHBoxLayout()
         self.btn_load_clubs = QtWidgets.QPushButton("Load Club Data")
@@ -89,9 +87,7 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
         layout.addLayout(load_layout)
 
     def _create_club_selection_group(self, layout: QtWidgets.QVBoxLayout) -> None:
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        if not (layout is not None):
+        if layout is None:
             raise ValueError("layout must be provided")
         club_group = QtWidgets.QGroupBox("Club Selection")
         club_layout = QtWidgets.QVBoxLayout(club_group)
@@ -114,9 +110,7 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
         layout.addWidget(club_group)
 
     def _create_player_selection_group(self, layout: QtWidgets.QVBoxLayout) -> None:
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        if not (layout is not None):
+        if layout is None:
             raise ValueError("layout must be provided")
         player_group = QtWidgets.QGroupBox("Target Player Data")
         player_layout = QtWidgets.QVBoxLayout(player_group)
@@ -129,9 +123,7 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
         layout.addWidget(player_group)
 
     def _create_club_specs_group(self, layout: QtWidgets.QVBoxLayout) -> None:
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        if not (layout is not None):
+        if layout is None:
             raise ValueError("layout must be provided")
         spec_group = QtWidgets.QGroupBox("Club Specifications")
         spec_layout = QtWidgets.QFormLayout(spec_group)
@@ -153,9 +145,7 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
         layout.addWidget(spec_group)
 
     def _create_target_metrics_group(self, layout: QtWidgets.QVBoxLayout) -> None:
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        if not (layout is not None):
+        if layout is None:
             raise ValueError("layout must be provided")
         metrics_group = QtWidgets.QGroupBox("Target Metrics")
         metrics_layout = QtWidgets.QFormLayout(metrics_group)
@@ -175,9 +165,7 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
         layout.addWidget(metrics_group)
 
     def _create_target_overlay_group(self, layout: QtWidgets.QVBoxLayout) -> None:
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        if not (layout is not None):
+        if layout is None:
             raise ValueError("layout must be provided")
         overlay_group = QtWidgets.QGroupBox("Target Overlay")
         overlay_layout = QtWidgets.QVBoxLayout(overlay_group)
@@ -222,9 +210,7 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
 
     def load_clubs(self, clubs: list[ClubSpecification]) -> None:
         """Load club specifications into the widget."""
-        if not (clubs is not None):
-            raise ValueError("clubs must be provided")
-        if not (clubs is not None):
+        if clubs is None:
             raise ValueError("clubs must be provided")
         self._clubs = clubs
         self._filter_clubs()
@@ -232,9 +218,7 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
 
     def load_players(self, players: list[ProPlayerData]) -> None:
         """Load player data into the widget."""
-        if not (players is not None):
-            raise ValueError("players must be provided")
-        if not (players is not None):
+        if players is None:
             raise ValueError("players must be provided")
         self._players = players
         self.list_players.clear()
@@ -451,9 +435,7 @@ class ClubTargetOverlay(ABC):
         Returns:
             (N, 3) array of positions or None if no trajectory data
         """
-        if not (num_points is not None):
-            raise ValueError("num_points must be provided")
-        if not (num_points is not None):
+        if num_points is None:
             raise ValueError("num_points must be provided")
         if self._player is None or not self._player.has_trajectory_data():
             return None

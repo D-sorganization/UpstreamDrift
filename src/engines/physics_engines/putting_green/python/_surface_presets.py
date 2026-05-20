@@ -37,9 +37,7 @@ class SurfacePresetsMixin:
         Returns:
             GreenSurface instance
         """
-        if not (heightmap is not None):
-            raise ValueError("heightmap must be provided")
-        if not (heightmap is not None):
+        if heightmap is None:
             raise ValueError("heightmap must be provided")
         green = cls(width=width, height=height, turf=turf)  # type: ignore[call-arg]
         green.set_heightmap(heightmap)  # type: ignore[attr-defined]

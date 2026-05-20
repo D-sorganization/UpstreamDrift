@@ -21,9 +21,7 @@ class AdvancedController(OperationalSpaceControlMixin):
             model: MuJoCo model
             data: MuJoCo data
         """
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
         self.data = data
@@ -55,9 +53,7 @@ class AdvancedController(OperationalSpaceControlMixin):
 
     def _find_body_id(self, name_pattern: str) -> int | None:
         """Find body ID by name pattern."""
-        if not (name_pattern is not None):
-            raise ValueError("name_pattern must be provided")
-        if not (name_pattern is not None):
+        if name_pattern is None:
             raise ValueError("name_pattern must be provided")
         for i in range(self.model.nbody):
             body_name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, i)

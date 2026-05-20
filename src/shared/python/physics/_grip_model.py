@@ -33,9 +33,7 @@ class GripContactModel:
         body_names: list[str],
         timestamp: float,
     ) -> GripContactState:
-        if not (contact_positions is not None):
-            raise ValueError("contact_positions must be provided")
-        if not (contact_positions is not None):
+        if contact_positions is None:
             raise ValueError("contact_positions must be provided")
         n_contacts = len(contact_positions)
 
@@ -91,9 +89,7 @@ class GripContactModel:
         club_weight: float,
         gravity_direction: np.ndarray = np.array([0.0, 0.0, -1.0]),
     ) -> dict[str, bool | float]:
-        if not (club_weight is not None):
-            raise ValueError("club_weight must be provided")
-        if not (club_weight is not None):
+        if club_weight is None:
             raise ValueError("club_weight must be provided")
         if self.current_state is None:
             return {"equilibrium": False, "support_ratio": 0.0}

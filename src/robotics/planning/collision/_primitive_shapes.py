@@ -37,9 +37,7 @@ class Sphere(GeometricPrimitive):
 
     def contains_point(self, point: np.ndarray) -> bool:
         """Check if point is inside sphere."""
-        if not (point is not None):
-            raise ValueError("point must be provided")
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         point = np.asarray(point)
         diff = np.ravel(point - self.center)
@@ -47,9 +45,7 @@ class Sphere(GeometricPrimitive):
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
-        if not (direction is not None):
-            raise ValueError("direction must be provided")
-        if not (direction is not None):
+        if direction is None:
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
         norm = math.hypot(*np.ravel(direction))
@@ -114,9 +110,7 @@ class Box(GeometricPrimitive):
 
     def contains_point(self, point: np.ndarray) -> bool:
         """Check if point is inside box."""
-        if not (point is not None):
-            raise ValueError("point must be provided")
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         point = np.asarray(point)
         # Transform to local frame
@@ -125,9 +119,7 @@ class Box(GeometricPrimitive):
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
-        if not (direction is not None):
-            raise ValueError("direction must be provided")
-        if not (direction is not None):
+        if direction is None:
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
         # Transform direction to local frame
@@ -200,9 +192,7 @@ class Capsule(GeometricPrimitive):
 
     def _closest_point_on_segment(self, point: np.ndarray) -> np.ndarray:
         """Get closest point on capsule's central line segment."""
-        if not (point is not None):
-            raise ValueError("point must be provided")
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         ab = self.point_b - self.point_a
         t = np.dot(point - self.point_a, ab) / (np.dot(ab, ab) + 1e-10)
@@ -211,9 +201,7 @@ class Capsule(GeometricPrimitive):
 
     def contains_point(self, point: np.ndarray) -> bool:
         """Check if point is inside capsule."""
-        if not (point is not None):
-            raise ValueError("point must be provided")
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         point = np.asarray(point)
         closest = self._closest_point_on_segment(point)
@@ -222,9 +210,7 @@ class Capsule(GeometricPrimitive):
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
-        if not (direction is not None):
-            raise ValueError("direction must be provided")
-        if not (direction is not None):
+        if direction is None:
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
         norm = math.hypot(*np.ravel(direction))
@@ -304,9 +290,7 @@ class Cylinder(GeometricPrimitive):
 
     def contains_point(self, point: np.ndarray) -> bool:
         """Check if point is inside cylinder."""
-        if not (point is not None):
-            raise ValueError("point must be provided")
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         point = np.asarray(point)
         # Project onto axis
@@ -323,9 +307,7 @@ class Cylinder(GeometricPrimitive):
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
-        if not (direction is not None):
-            raise ValueError("direction must be provided")
-        if not (direction is not None):
+        if direction is None:
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
         norm = math.hypot(*np.ravel(direction))
@@ -392,9 +374,7 @@ class ConvexHull(GeometricPrimitive):
         Uses a simple heuristic - point should be on the "inside"
         of all faces. For exact test, use proper convex hull algorithm.
         """
-        if not (point is not None):
-            raise ValueError("point must be provided")
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         point = np.asarray(point)
         # Simple heuristic: point is inside if closer to center than
@@ -411,9 +391,7 @@ class ConvexHull(GeometricPrimitive):
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
-        if not (direction is not None):
-            raise ValueError("direction must be provided")
-        if not (direction is not None):
+        if direction is None:
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
         # Find vertex with maximum dot product

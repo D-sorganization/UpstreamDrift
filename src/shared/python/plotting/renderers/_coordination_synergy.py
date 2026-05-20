@@ -15,9 +15,7 @@ class CoordinationSynergyMixin(BaseRenderer):
         synergy_result: Any,
     ) -> None:
         """Plot extracted muscle synergies (Weights and Activations)."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         if not hasattr(synergy_result, "weights") or not hasattr(
             synergy_result, "activations"
@@ -96,9 +94,7 @@ class CoordinationSynergyMixin(BaseRenderer):
         data_type: str = "velocity",
     ) -> None:
         """Plot correlation matrix between joints."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         if data_type == "position":
             _, data = self.data.get_series("joint_positions")
@@ -162,9 +158,7 @@ class CoordinationSynergyMixin(BaseRenderer):
         window_size: int = 20,
     ) -> None:
         """Plot Rolling Correlation between two joint velocities."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         try:
             from src.shared.python.validation_pkg.statistical_analysis import (
@@ -233,9 +227,7 @@ class CoordinationSynergyMixin(BaseRenderer):
         dim2: int = 1,
     ) -> None:
         """Plot trajectory in synergy space (Activation 1 vs Activation 2)."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         if not hasattr(synergy_result, "activations"):
             ax = fig.add_subplot(111)
@@ -278,9 +270,7 @@ class CoordinationSynergyMixin(BaseRenderer):
         modes_to_plot: int = 3,
     ) -> None:
         """Plot PCA/Principal Movements analysis results."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         gs = fig.add_gridspec(2, 1, height_ratios=[1, 2], hspace=0.3)
 

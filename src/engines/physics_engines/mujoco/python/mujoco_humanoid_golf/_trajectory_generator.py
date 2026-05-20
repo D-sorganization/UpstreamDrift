@@ -30,9 +30,7 @@ class TrajectoryGenerator:
             Tuple of (positions, velocities, accelerations)
             Each is [num_steps x n]
         """
-        if not (start is not None):
-            raise ValueError("start must be provided")
-        if not (start is not None):
+        if start is None:
             raise ValueError("start must be provided")
         num_steps = int(duration / dt)
         t = np.linspace(0, duration, num_steps)
@@ -74,9 +72,7 @@ class TrajectoryGenerator:
             Tuple of (positions, velocities, accelerations)
         """
         # Simplified: use minimum jerk between consecutive waypoints
-        if not (waypoints is not None):
-            raise ValueError("waypoints must be provided")
-        if not (waypoints is not None):
+        if waypoints is None:
             raise ValueError("waypoints must be provided")
         all_positions = []
         all_velocities = []

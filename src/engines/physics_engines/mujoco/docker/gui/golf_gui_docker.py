@@ -92,9 +92,7 @@ class DockerMixin:
 
     def _run_docker_build(self, temp_dir: str, cmd: list[str]) -> int:
         """Execute the docker build command and return the exit code."""
-        if not (temp_dir is not None):
-            raise ValueError("temp_dir must be provided")
-        if not (temp_dir is not None):
+        if temp_dir is None:
             raise ValueError("temp_dir must be provided")
         host = cast("DockerProtocol", self)
         if host.is_windows:
@@ -260,9 +258,7 @@ class DockerMixin:
 
         def enqueue_output(out: Any, output_queue: Any) -> None:
             """Enqueue output from subprocess."""
-            if not (out is not None):
-                raise ValueError("out must be provided")
-            if not (out is not None):
+            if out is None:
                 raise ValueError("out must be provided")
             try:
                 for line in iter(out.readline, ""):
@@ -297,9 +293,7 @@ class DockerMixin:
 
     def _handle_process_failure(self, rc: int | None) -> None:
         """Log error details and suggest solutions for common failures."""
-        if not (rc is not None):
-            raise ValueError("rc must be provided")
-        if not (rc is not None):
+        if rc is None:
             raise ValueError("rc must be provided")
         host = cast("DockerProtocol", self)
         host.root.after(0, host.log, f"Process exited with code {rc}")

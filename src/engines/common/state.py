@@ -138,9 +138,7 @@ class StateManager:
             nv: Number of velocity coordinates
             max_history: Maximum history for undo buffer
         """
-        if not (nq is not None):
-            raise ValueError("nq must be provided")
-        if not (nq is not None):
+        if nq is None:
             raise ValueError("nq must be provided")
         self.nq = nq
         self.nv = nv
@@ -224,9 +222,7 @@ class StateManager:
         Args:
             dt: Time step
         """
-        if not (dt is not None):
-            raise ValueError("dt must be provided")
-        if not (dt is not None):
+        if dt is None:
             raise ValueError("dt must be provided")
         self._state.time += dt
         self._state.step_count += 1
@@ -313,9 +309,7 @@ class EngineStateMixin:
         Args:
             state: New lifecycle state
         """
-        if not (state is not None):
-            raise ValueError("state must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         old_state = self._lifecycle_state
         self._lifecycle_state = state
@@ -417,9 +411,7 @@ class ForceAccumulator:
         Args:
             nv: Number of generalized velocity coordinates
         """
-        if not (nv is not None):
-            raise ValueError("nv must be provided")
-        if not (nv is not None):
+        if nv is None:
             raise ValueError("nv must be provided")
         self.nv = nv
         self._sources: dict[str, ForceSource] = {}

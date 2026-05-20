@@ -83,9 +83,7 @@ class _AnalysisMixin:
     def compute_grf_and_wrench_analysis(
         self, impact_time: float | None = None, fsp_window_ms: float = 100.0
     ) -> dict[str, Any]:
-        if not (fsp_window_ms is not None):
-            raise ValueError("fsp_window_ms must be provided")
-        if not (fsp_window_ms is not None):
+        if fsp_window_ms is None:
             raise ValueError("fsp_window_ms must be provided")
         if not self._buffers_initialized or self.current_idx == 0:
             logger.warning("No data recorded for GRF/wrench analysis")
@@ -124,9 +122,7 @@ class _AnalysisMixin:
         moments: np.ndarray,
         cops: np.ndarray,
     ) -> Any:
-        if not (times is not None):
-            raise ValueError("times must be provided")
-        if not (times is not None):
+        if times is None:
             raise ValueError("times must be provided")
         from src.shared.python.physics.ground_reaction_forces import (
             FootSide,
@@ -158,9 +154,7 @@ class _AnalysisMixin:
         forces: np.ndarray,
         n: int,
     ) -> float:
-        if not (times is not None):
-            raise ValueError("times must be provided")
-        if not (times is not None):
+        if times is None:
             raise ValueError("times must be provided")
         if impact_time is not None:
             return impact_time
@@ -176,9 +170,7 @@ class _AnalysisMixin:
         fsp_window_ms: float,
         n: int,
     ) -> Any:
-        if not (times is not None):
-            raise ValueError("times must be provided")
-        if not (times is not None):
+        if times is None:
             raise ValueError("times must be provided")
         from src.shared.python.spatial_algebra.reference_frames import (
             fit_functional_swing_plane,
@@ -201,9 +193,7 @@ class _AnalysisMixin:
         fsp: Any,
         n: int,
     ) -> dict[str, np.ndarray]:
-        if not (forces is not None):
-            raise ValueError("forces must be provided")
-        if not (forces is not None):
+        if forces is None:
             raise ValueError("forces must be provided")
         from src.shared.python.spatial_algebra.reference_frames import (
             ReferenceFrame,
@@ -252,9 +242,7 @@ class _AnalysisMixin:
         fsp: Any,
         wrench_arrays: dict[str, np.ndarray],
     ) -> dict[str, Any]:
-        if not (wrench_arrays is not None):
-            raise ValueError("wrench_arrays must be provided")
-        if not (wrench_arrays is not None):
+        if wrench_arrays is None:
             raise ValueError("wrench_arrays must be provided")
         result: dict[str, Any] = {
             "grf_analysis": {},

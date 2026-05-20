@@ -45,9 +45,7 @@ class MuscleInterfaceMixin:
             return None
 
     def set_muscle_activations(self, activations: dict[str, float]) -> None:
-        if not (activations is not None):
-            raise ValueError("activations must be provided")
-        if not (activations is not None):
+        if activations is None:
             raise ValueError("activations must be provided")
         analyzer = self.get_muscle_analyzer()
 

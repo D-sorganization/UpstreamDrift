@@ -201,9 +201,7 @@ class TurfProperties:
         Returns:
             Multiplier for friction adjustment (-1 to +1)
         """
-        if not (velocity_direction is not None):
-            raise ValueError("velocity_direction must be provided")
-        if not (velocity_direction is not None):
+        if velocity_direction is None:
             raise ValueError("velocity_direction must be provided")
         v_mag = math.hypot(*velocity_direction)
         if v_mag < 1e-10:
@@ -225,9 +223,7 @@ class TurfProperties:
         Returns:
             Deceleration vector [m/s²] (opposing motion)
         """
-        if not (velocity is not None):
-            raise ValueError("velocity must be provided")
-        if not (velocity is not None):
+        if velocity is None:
             raise ValueError("velocity must be provided")
         speed = math.hypot(*velocity)
         if speed < 1e-10:

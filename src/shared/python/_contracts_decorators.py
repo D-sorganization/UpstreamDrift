@@ -32,9 +32,7 @@ def _evaluate_precondition(
         ContractEvaluationError: If the condition cannot be evaluated due to
             signature mismatches, type errors, or other evaluation failures.
     """
-    if not (condition is not None):
-        raise ValueError("condition must be provided")
-    if not (condition is not None):
+    if condition is None:
         raise ValueError("condition must be provided")
 
     # Try name-based binding first
@@ -74,9 +72,7 @@ def precondition(
     decorated function, or a subset matched by parameter name.
     """
 
-    if not (condition is not None):
-        raise ValueError("condition must be provided")
-    if not (condition is not None):
+    if condition is None:
         raise ValueError("condition must be provided")
 
     def decorator(func: F) -> F:
@@ -103,9 +99,7 @@ def postcondition(
 ) -> Callable[[F], F]:
     """Decorator to enforce a postcondition on a function's return value."""
 
-    if not (condition is not None):
-        raise ValueError("condition must be provided")
-    if not (condition is not None):
+    if condition is None:
         raise ValueError("condition must be provided")
 
     def decorator(func: F) -> F:
@@ -166,9 +160,7 @@ def contract(
             return x ** 0.5
     """
 
-    if not (pre_msg is not None):
-        raise ValueError("pre_msg must be provided")
-    if not (pre_msg is not None):
+    if pre_msg is None:
         raise ValueError("pre_msg must be provided")
 
     def decorator(func: F) -> F:
@@ -218,9 +210,7 @@ def _wrap_method_with_invariant(
 ) -> Callable[..., Any]:
     """Wrap a single method to check the class invariant after execution."""
 
-    if not (orig_method is not None):
-        raise ValueError("orig_method must be provided")
-    if not (orig_method is not None):
+    if orig_method is None:
         raise ValueError("orig_method must be provided")
 
     @functools.wraps(orig_method)
@@ -255,9 +245,7 @@ def class_invariant(
                 self.count -= 1
     """
 
-    if not (condition is not None):
-        raise ValueError("condition must be provided")
-    if not (condition is not None):
+    if condition is None:
         raise ValueError("condition must be provided")
 
     def class_decorator(cls: type) -> type:

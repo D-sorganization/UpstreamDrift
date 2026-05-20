@@ -25,9 +25,7 @@ class ContractViolationError(ValueError):
         function_name: str | None = None,
         details: dict[str, Any] | None = None,
     ) -> None:
-        if not (contract_type is not None):
-            raise ValueError("contract_type must be provided")
-        if not (contract_type is not None):
+        if contract_type is None:
             raise ValueError("contract_type must be provided")
         self.contract_type = contract_type
         self.function_name = function_name
@@ -54,9 +52,7 @@ class PreconditionError(ContractViolationError):
         parameter: str | None = None,
         value: Any = None,
     ) -> None:
-        if not (message is not None):
-            raise ValueError("message must be provided")
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         details = {}
         if parameter:
@@ -83,9 +79,7 @@ class PostconditionError(ContractViolationError):
         function_name: str | None = None,
         result: Any = None,
     ) -> None:
-        if not (message is not None):
-            raise ValueError("message must be provided")
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         details: dict[str, Any] = {}
         if result is not None:
@@ -114,9 +108,7 @@ class InvariantError(ContractViolationError):
         class_name: str | None = None,
         method_name: str | None = None,
     ) -> None:
-        if not (message is not None):
-            raise ValueError("message must be provided")
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         details = {}
         if class_name:
@@ -144,9 +136,7 @@ class StateError(ContractViolationError):
         required_state: str | None = None,
         operation: str | None = None,
     ) -> None:
-        if not (message is not None):
-            raise ValueError("message must be provided")
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         details = {}
         if current_state:

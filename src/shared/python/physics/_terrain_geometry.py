@@ -18,9 +18,7 @@ class TerrainGeometryGenerator:
         Args:
             terrain: Terrain configuration
         """
-        if not (terrain is not None):
-            raise ValueError("terrain must be provided")
-        if not (terrain is not None):
+        if terrain is None:
             raise ValueError("terrain must be provided")
         self.terrain = terrain
 
@@ -93,9 +91,7 @@ class TerrainGeometryGenerator:
         Returns:
             XML string for inclusion in MuJoCo model
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         elev = self.terrain.elevation
         n_rows, n_cols = elev.data.shape
@@ -135,9 +131,7 @@ class TerrainGeometryGenerator:
         Returns:
             URDF XML snippet
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         elev = self.terrain.elevation
         h_max = float(elev.data.max())

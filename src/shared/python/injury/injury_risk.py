@@ -232,14 +232,10 @@ class InjuryRiskScorer:
             compression_score + shear_score + x_factor_score
         ) / 3
 
-    def _score_joint_risks(
-        self, joint_results: dict, report: InjuryRiskReport
-    ) -> None:  # noqa: C901
+    def _score_joint_risks(self, joint_results: dict, report: InjuryRiskReport) -> None:  # noqa: C901
         """Score joint-related risk factors."""
         # Hip risks
-        if not (joint_results is not None):
-            raise ValueError("joint_results must be provided")
-        if not (joint_results is not None):
+        if joint_results is None:
             raise ValueError("joint_results must be provided")
         hip_scores = []
         for name, result in joint_results.items():
@@ -321,9 +317,7 @@ class InjuryRiskScorer:
     ) -> None:
         """Score technique-related risk factors."""
         # Kinematic sequence timing
-        if not (swing_metrics is not None):
-            raise ValueError("swing_metrics must be provided")
-        if not (swing_metrics is not None):
+        if swing_metrics is None:
             raise ValueError("swing_metrics must be provided")
         if "sequence_timing_error" in swing_metrics:
             error = swing_metrics["sequence_timing_error"]
@@ -383,9 +377,7 @@ class InjuryRiskScorer:
     ) -> None:
         """Score training load-related risk factors."""
         # Acute:Chronic Workload Ratio
-        if not (training_load is not None):
-            raise ValueError("training_load must be provided")
-        if not (training_load is not None):
+        if training_load is None:
             raise ValueError("training_load must be provided")
         if "acwr" in training_load:
             acwr = training_load["acwr"]
@@ -428,9 +420,7 @@ class InjuryRiskScorer:
 
     def _value_to_score(self, value: float, safe: float, high: float) -> float:
         """Convert a value to a 0-100 risk score."""
-        if not (value is not None):
-            raise ValueError("value must be provided")
-        if not (value is not None):
+        if value is None:
             raise ValueError("value must be provided")
         if value <= safe:
             return 0
@@ -441,9 +431,7 @@ class InjuryRiskScorer:
     def _compute_overall_scores(self, report: InjuryRiskReport) -> None:
         """Compute overall risk scores from individual factors."""
         # Acute risk from biomechanical loading
-        if not (report is not None):
-            raise ValueError("report must be provided")
-        if not (report is not None):
+        if report is None:
             raise ValueError("report must be provided")
         if report.region_scores:
             weighted_scores = [
@@ -481,9 +469,7 @@ class InjuryRiskScorer:
 
     def _generate_recommendations(self, report: InjuryRiskReport) -> None:  # noqa: C901
         """Generate actionable recommendations based on risk factors."""
-        if not (report is not None):
-            raise ValueError("report must be provided")
-        if not (report is not None):
+        if report is None:
             raise ValueError("report must be provided")
         recommendations = []
 

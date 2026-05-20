@@ -85,9 +85,7 @@ class ImpactRecorder:
         Returns:
             Recorded ImpactEvent
         """
-        if not (timestamp is not None):
-            raise ValueError("timestamp must be provided")
-        if not (timestamp is not None):
+        if timestamp is None:
             raise ValueError("timestamp must be provided")
         energy_balance = validate_energy_balance(pre_state, post_state, params)
 
@@ -193,9 +191,7 @@ class ImpactSolverAPI:
             model_type: Type of impact model to use
             params: Impact parameters (uses defaults if None)
         """
-        if not (model_type is not None):
-            raise ValueError("model_type must be provided")
-        if not (model_type is not None):
+        if model_type is None:
             raise ValueError("model_type must be provided")
         self.model_type = model_type
         self.model = create_impact_model(model_type)
@@ -203,15 +199,25 @@ class ImpactSolverAPI:
         self.recorder = ImpactRecorder()
 
     @precondition(
-        lambda self, timestamp, clubhead_velocity, clubhead_orientation, ball_velocity=None, ball_angular_velocity=None, clubhead_mass=0.200, record=True: (
-            clubhead_mass > 0
-        ),
+        lambda self,
+        timestamp,
+        clubhead_velocity,
+        clubhead_orientation,
+        ball_velocity=None,
+        ball_angular_velocity=None,
+        clubhead_mass=0.200,
+        record=True: (clubhead_mass > 0),
         "Clubhead mass must be positive",
     )
     @precondition(
-        lambda self, timestamp, clubhead_velocity, clubhead_orientation, ball_velocity=None, ball_angular_velocity=None, clubhead_mass=0.200, record=True: (
-            timestamp >= 0
-        ),
+        lambda self,
+        timestamp,
+        clubhead_velocity,
+        clubhead_orientation,
+        ball_velocity=None,
+        ball_angular_velocity=None,
+        clubhead_mass=0.200,
+        record=True: (timestamp >= 0),
         "Timestamp must be non-negative",
     )
     def solve_impact(
@@ -240,9 +246,7 @@ class ImpactSolverAPI:
         Returns:
             Post-impact state
         """
-        if not (timestamp is not None):
-            raise ValueError("timestamp must be provided")
-        if not (timestamp is not None):
+        if timestamp is None:
             raise ValueError("timestamp must be provided")
         if ball_velocity is None:
             ball_velocity = np.zeros(3)
@@ -293,9 +297,7 @@ class ImpactSolverAPI:
             Post-impact state with gear effect spin added
         """
         # Solve base impact
-        if not (timestamp is not None):
-            raise ValueError("timestamp must be provided")
-        if not (timestamp is not None):
+        if timestamp is None:
             raise ValueError("timestamp must be provided")
         post_state = self.solve_impact(
             timestamp,
@@ -400,9 +402,7 @@ class ImpactSolverAPI:
         Returns:
             Validation result with pass/fail and details
         """
-        if not (tolerance is not None):
-            raise ValueError("tolerance must be provided")
-        if not (tolerance is not None):
+        if tolerance is None:
             raise ValueError("tolerance must be provided")
         if not self.recorder.events:
             return {"valid": False, "error": "No impacts recorded"}
@@ -452,9 +452,7 @@ class ImpactSolverAPI:
         Returns:
             Validation result with pass/fail and details
         """
-        if not (max_spin_rpm is not None):
-            raise ValueError("max_spin_rpm must be provided")
-        if not (max_spin_rpm is not None):
+        if max_spin_rpm is None:
             raise ValueError("max_spin_rpm must be provided")
         if not self.recorder.events:
             return {"valid": False, "error": "No impacts recorded"}

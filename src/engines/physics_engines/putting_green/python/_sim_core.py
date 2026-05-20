@@ -89,9 +89,7 @@ class PuttingGreenSimulator:
             rng: Optional numpy random generator for deterministic scatter
             random_seed: Seed for deterministic randomness (used if rng is None)
         """
-        if not (random_seed is not None):
-            raise ValueError("random_seed must be provided")
-        if not (random_seed is not None):
+        if random_seed is None:
             raise ValueError("random_seed must be provided")
         self.config = config or SimulationConfig()
         self.green = green or GreenSurface(
@@ -248,18 +246,14 @@ class PuttingGreenSimulator:
 
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
         """Set current state."""
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         self._ball_state.position = np.array(q)
         self._ball_state.velocity = np.array(v)
 
     def set_control(self, u: np.ndarray) -> None:
         """Apply control input (force on ball)."""
-        if not (u is not None):
-            raise ValueError("u must be provided")
-        if not (u is not None):
+        if u is None:
             raise ValueError("u must be provided")
         accel = u / self.ball_mass
         self._ball_state.velocity += accel * self.config.timestep
@@ -298,9 +292,7 @@ class PuttingGreenSimulator:
         Returns:
             SimulationResult with trajectory and outcome
         """
-        if not (stroke_params is not None):
-            raise ValueError("stroke_params must be provided")
-        if not (stroke_params is not None):
+        if stroke_params is None:
             raise ValueError("stroke_params must be provided")
         if ball_position is not None:
             self.set_ball_position(ball_position)
@@ -419,9 +411,7 @@ class PuttingGreenSimulator:
             speed: Wind speed [m/s]
             direction: Wind direction (unit vector)
         """
-        if not (speed is not None):
-            raise ValueError("speed must be provided")
-        if not (speed is not None):
+        if speed is None:
             raise ValueError("speed must be provided")
         self._wind_speed = speed
         mag = math.hypot(*direction)

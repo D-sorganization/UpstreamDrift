@@ -33,9 +33,7 @@ def load_from_path(sim: PuttingGreenSimulator, path: str) -> None:
         sim: The simulator instance
         path: Path to configuration file
     """
-    if not (path is not None):
-        raise ValueError("path must be provided")
-    if not (path is not None):
+    if path is None:
         raise ValueError("path must be provided")
     filepath = Path(path)
 
@@ -55,9 +53,7 @@ def load_from_string(
         content: Configuration content
         extension: Format hint (e.g., "json")
     """
-    if not (content is not None):
-        raise ValueError("content must be provided")
-    if not (content is not None):
+    if content is None:
         raise ValueError("content must be provided")
     data = json.loads(content)
     load_from_data(sim, data)
@@ -65,9 +61,7 @@ def load_from_string(
 
 def load_from_data(sim: PuttingGreenSimulator, data: dict[str, Any]) -> None:
     """Load configuration from dictionary."""
-    if not (data is not None):
-        raise ValueError("data must be provided")
-    if not (data is not None):
+    if data is None:
         raise ValueError("data must be provided")
     if "green" in data:
         green_data = data["green"]
@@ -122,9 +116,7 @@ def load_topographical_data(
         width: Physical width [m] (uses current if None)
         height: Physical height [m] (uses current if None)
     """
-    if not (path is not None):
-        raise ValueError("path must be provided")
-    if not (path is not None):
+    if path is None:
         raise ValueError("path must be provided")
     filepath = Path(path)
     suffix = filepath.suffix.lower()

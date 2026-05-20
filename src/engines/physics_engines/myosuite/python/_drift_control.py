@@ -44,9 +44,7 @@ class DriftControlMixin:
     @precondition(lambda self, tau: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Control acceleration must contain finite values")
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
-        if not (tau is not None):
-            raise ValueError("tau must be provided")
-        if not (tau is not None):
+        if tau is None:
             raise ValueError("tau must be provided")
         if not self.sim:
             logger.warning("Simulation not initialized")
@@ -64,9 +62,7 @@ class DriftControlMixin:
             return np.zeros_like(tau)
 
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         if not self.sim:
             return np.array([])
@@ -87,9 +83,7 @@ class DriftControlMixin:
             return np.array([])
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         if not self.sim:
             return np.array([])

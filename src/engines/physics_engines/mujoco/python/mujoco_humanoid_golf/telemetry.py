@@ -67,9 +67,7 @@ class TelemetryRecorder:
 
     def __init__(self, model: mujoco.MjModel) -> None:
         """Initialize the telemetry recorder."""
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
         self.samples: list[SimulationSample] = []
@@ -127,9 +125,7 @@ class TelemetryRecorder:
         joint_transmission_types: set[int],
     ) -> bool:
         """Check if actuator targets a joint."""
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         transmission_type = model.actuator_trntype[actuator_id]
         if transmission_type not in joint_transmission_types:
@@ -163,9 +159,7 @@ class TelemetryRecorder:
     def record_step(self, data: mujoco.MjData) -> None:
         """Capture telemetry for the current simulation state."""
 
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         actuator_torques = self._extract_actuator_torques(data)
         constraint_torques = self._extract_constraint_torques(data)
@@ -208,9 +202,7 @@ class TelemetryRecorder:
 
     def _extract_actuator_torques(self, data: mujoco.MjData) -> dict[str, float]:
         """Docstring for _extract_actuator_torques."""
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         actuator_torques: dict[str, float] = {}
         for actuator_id, dof_index in self._actuator_dof_map.items():
@@ -227,9 +219,7 @@ class TelemetryRecorder:
 
     def _extract_constraint_torques(self, data: mujoco.MjData) -> dict[str, float]:
         """Docstring for _extract_constraint_torques."""
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         constraint_torques: dict[str, float] = {}
         for joint_id, joint_name in enumerate(self._joint_names):
@@ -239,9 +229,7 @@ class TelemetryRecorder:
 
     def _extract_body_forces(self, data: mujoco.MjData) -> dict[str, np.ndarray]:
         """Docstring for _extract_body_forces."""
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         forces: dict[str, np.ndarray] = {}
         reshaped = data.cfrc_ext.reshape(-1, 6)
@@ -294,9 +282,7 @@ def export_telemetry_json(filename: str, data_dict: dict[str, Any]) -> bool:
         return False
 
 
-def export_telemetry_csv(
-    filename: str, data_dict: dict[str, Any]
-) -> bool:  # noqa: C901
+def export_telemetry_csv(filename: str, data_dict: dict[str, Any]) -> bool:  # noqa: C901
     """Export telemetry data to CSV."""
     try:
         # Filter for array-like data

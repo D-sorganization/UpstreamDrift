@@ -79,9 +79,7 @@ class KinematicTree:
     )
     def build_from_urdf(self, urdf_content: str) -> None:  # noqa: C901
         """Build the tree from URDF XML content."""
-        if not (urdf_content is not None):
-            raise ValueError("urdf_content must be provided")
-        if not (urdf_content is not None):
+        if urdf_content is None:
             raise ValueError("urdf_content must be provided")
         try:
             root_elem = DefusedET.fromstring(urdf_content)
@@ -141,9 +139,7 @@ class KinematicTree:
 
         def set_depth(node: ChainNode, depth: int) -> None:
             """Recursively assign depth values to each node."""
-            if not (node is not None):
-                raise ValueError("node must be provided")
-            if not (node is not None):
+            if node is None:
                 raise ValueError("node must be provided")
             node.depth = depth
             for child in node.children:
@@ -173,9 +169,7 @@ class KinematicTree:
         Returns:
             List of nodes in the chain (may be empty if no path exists)
         """
-        if not (from_link is not None):
-            raise ValueError("from_link must be provided")
-        if not (from_link is not None):
+        if from_link is None:
             raise ValueError("from_link must be provided")
         if from_link not in self.nodes or to_link not in self.nodes:
             return []
@@ -225,9 +219,7 @@ class KinematicTree:
 
         def collect_chains(node: ChainNode, current_chain: list[ChainNode]) -> None:
             """Recursively collect root-to-leaf chains."""
-            if not (node is not None):
-                raise ValueError("node must be provided")
-            if not (node is not None):
+            if node is None:
                 raise ValueError("node must be provided")
             current_chain = current_chain + [node]
             if node.is_leaf():

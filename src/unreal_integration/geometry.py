@@ -97,9 +97,7 @@ class Vector3:
         Returns:
             New Vector3 instance.
         """
-        if not (d is not None):
-            raise ValueError("d must be provided")
-        if not (d is not None):
+        if d is None:
             raise ValueError("d must be provided")
         v = cls(x=float(d["x"]), y=float(d["y"]), z=float(d["z"]))
         if validate:
@@ -115,9 +113,7 @@ class Vector3:
         cls, x: float = 0.0, y: float = 0.0, z: float = 0.0, validate: bool = False
     ) -> Vector3:
         """Create new Vector3 with optional validation."""
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         instance = object.__new__(cls)
         return instance
@@ -133,9 +129,7 @@ class Vector3:
             z: Z component.
             validate: If True, validate values are finite.
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         self.x = float(x)
         self.y = float(y)
@@ -283,9 +277,7 @@ class Quaternion:
         validate: bool = False,
     ) -> Quaternion:
         """Create new Quaternion."""
-        if not (w is not None):
-            raise ValueError("w must be provided")
-        if not (w is not None):
+        if w is None:
             raise ValueError("w must be provided")
         instance = object.__new__(cls)
         return instance
@@ -307,9 +299,7 @@ class Quaternion:
             z: Z component of vector part.
             validate: If True, normalize the quaternion.
         """
-        if not (w is not None):
-            raise ValueError("w must be provided")
-        if not (w is not None):
+        if w is None:
             raise ValueError("w must be provided")
         self.w = float(w)
         self.x = float(x)
@@ -349,9 +339,7 @@ class Quaternion:
         Returns:
             New Quaternion representing the rotation.
         """
-        if not (roll is not None):
-            raise ValueError("roll must be provided")
-        if not (roll is not None):
+        if roll is None:
             raise ValueError("roll must be provided")
         cy = math.cos(yaw * 0.5)
         sy = math.sin(yaw * 0.5)
@@ -381,9 +369,7 @@ class Quaternion:
         Returns:
             New Quaternion instance.
         """
-        if not (d is not None):
-            raise ValueError("d must be provided")
-        if not (d is not None):
+        if d is None:
             raise ValueError("d must be provided")
         return cls(
             w=float(d["w"]),

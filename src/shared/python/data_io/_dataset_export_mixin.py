@@ -36,9 +36,7 @@ class _DatasetExportMixin:
         Raises:
             ImportError: If h5py is not available.
         """
-        if not (dataset is not None):
-            raise ValueError("dataset must be provided")
-        if not (dataset is not None):
+        if dataset is None:
             raise ValueError("dataset must be provided")
         try:
             import h5py
@@ -65,9 +63,7 @@ class _DatasetExportMixin:
     @staticmethod
     def _write_hdf5_metadata(f: Any, dataset: TrainingDataset) -> None:
         """Write dataset-level metadata to an HDF5 file."""
-        if not (dataset is not None):
-            raise ValueError("dataset must be provided")
-        if not (dataset is not None):
+        if dataset is None:
             raise ValueError("dataset must be provided")
         meta = f.create_group("metadata")
         meta.attrs["model_name"] = dataset.model_name
@@ -88,9 +84,7 @@ class _DatasetExportMixin:
     @staticmethod
     def _write_hdf5_sample(samples_grp: Any, sample: SimulationSample) -> None:
         """Write a single sample's data to an HDF5 samples group."""
-        if not (sample is not None):
-            raise ValueError("sample must be provided")
-        if not (sample is not None):
+        if sample is None:
             raise ValueError("sample must be provided")
         s_grp = samples_grp.create_group(f"sample_{sample.sample_id:06d}")
         s_grp.create_dataset("times", data=sample.times, compression="gzip")
@@ -132,9 +126,7 @@ class _DatasetExportMixin:
         Returns:
             Path to the created SQLite database.
         """
-        if not (dataset is not None):
-            raise ValueError("dataset must be provided")
-        if not (dataset is not None):
+        if dataset is None:
             raise ValueError("dataset must be provided")
         output_path = Path(output_path)
         if not output_path.suffix:
@@ -194,9 +186,7 @@ class _DatasetExportMixin:
         cursor: sqlite3.Cursor, dataset: TrainingDataset
     ) -> None:
         """Insert dataset-level metadata into the SQLite database."""
-        if not (cursor is not None):
-            raise ValueError("cursor must be provided")
-        if not (cursor is not None):
+        if cursor is None:
             raise ValueError("cursor must be provided")
         meta_items = [
             ("model_name", dataset.model_name),
@@ -217,9 +207,7 @@ class _DatasetExportMixin:
     @staticmethod
     def _insert_sqlite_sample(cursor: sqlite3.Cursor, sample: SimulationSample) -> None:
         """Insert a single sample and its frames into the SQLite database."""
-        if not (cursor is not None):
-            raise ValueError("cursor must be provided")
-        if not (cursor is not None):
+        if cursor is None:
             raise ValueError("cursor must be provided")
         n_steps = len(sample.times)
         n_q = sample.positions.shape[1] if sample.positions.ndim > 1 else 0
@@ -269,9 +257,7 @@ class _DatasetExportMixin:
         Returns:
             Path to the output directory.
         """
-        if not (dataset is not None):
-            raise ValueError("dataset must be provided")
-        if not (dataset is not None):
+        if dataset is None:
             raise ValueError("dataset must be provided")
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)

@@ -31,9 +31,7 @@ class MotionPrimitiveLibrary:
             trajectory: Joint trajectory
             metadata: Additional metadata
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         self.primitives[name] = trajectory
         self.metadata[name] = metadata if metadata is not None else {}
@@ -63,9 +61,7 @@ class MotionPrimitiveLibrary:
         Returns:
             Blended trajectory
         """
-        if not (names is not None):
-            raise ValueError("names must be provided")
-        if not (names is not None):
+        if names is None:
             raise ValueError("names must be provided")
         if weights is None:
             weights = np.ones(len(names)) / len(names)
@@ -92,9 +88,7 @@ class MotionPrimitiveLibrary:
         Args:
             filename: Output filename (.npz)
         """
-        if not (filename is not None):
-            raise ValueError("filename must be provided")
-        if not (filename is not None):
+        if filename is None:
             raise ValueError("filename must be provided")
         metadata_str = json.dumps(self.metadata)
         save_dict: dict[str, Any] = dict(self.primitives)
@@ -107,9 +101,7 @@ class MotionPrimitiveLibrary:
         Args:
             filename: Input filename (.npz)
         """
-        if not (filename is not None):
-            raise ValueError("filename must be provided")
-        if not (filename is not None):
+        if filename is None:
             raise ValueError("filename must be provided")
         data = np.load(filename, allow_pickle=False)
 

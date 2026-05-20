@@ -21,9 +21,7 @@ def create_flat_terrain(
     Returns:
         TopographyData with flat surface
     """
-    if not (width is not None):
-        raise ValueError("width must be provided")
-    if not (width is not None):
+    if width is None:
         raise ValueError("width must be provided")
     topo = TopographyData(
         bounds=TopographyBounds(min_x=0, max_x=width, min_y=0, max_y=height)
@@ -52,9 +50,7 @@ def create_sloped_terrain(
     Returns:
         TopographyData with sloped surface
     """
-    if not (width is not None):
-        raise ValueError("width must be provided")
-    if not (width is not None):
+    if width is None:
         raise ValueError("width must be provided")
     topo = TopographyData(
         bounds=TopographyBounds(min_x=0, max_x=width, min_y=0, max_y=height)
@@ -92,9 +88,7 @@ def create_undulating_terrain(
     Returns:
         TopographyData with undulating surface
     """
-    if not (width is not None):
-        raise ValueError("width must be provided")
-    if not (width is not None):
+    if width is None:
         raise ValueError("width must be provided")
     topo = TopographyData(
         bounds=TopographyBounds(min_x=0, max_x=width, min_y=0, max_y=height)

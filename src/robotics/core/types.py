@@ -170,9 +170,7 @@ class ContactState:
         Returns:
             True if friction force magnitude equals friction limit.
         """
-        if not (tolerance is not None):
-            raise ValueError("tolerance must be provided")
-        if not (tolerance is not None):
+        if tolerance is None:
             raise ValueError("tolerance must be provided")
         friction_limit = self.friction_coefficient * self.normal_force
         friction_mag = float(math.hypot(*self.friction_force))

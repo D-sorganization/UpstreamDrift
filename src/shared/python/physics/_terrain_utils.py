@@ -29,9 +29,7 @@ def apply_terrain_to_engine(
         x: X position (meters)
         y: Y position (meters)
     """
-    if not (terrain is not None):
-        raise ValueError("terrain must be provided")
-    if not (terrain is not None):
+    if terrain is None:
         raise ValueError("terrain must be provided")
     height = terrain.get_elevation(x, y)
     material = terrain.get_material(x, y)
@@ -61,9 +59,7 @@ def validate_terrain(  # noqa: C901
     Returns:
         List of error/warning messages (empty if valid)
     """
-    if not (terrain is not None):
-        raise ValueError("terrain must be provided")
-    if not (terrain is not None):
+    if terrain is None:
         raise ValueError("terrain must be provided")
     messages = []
 

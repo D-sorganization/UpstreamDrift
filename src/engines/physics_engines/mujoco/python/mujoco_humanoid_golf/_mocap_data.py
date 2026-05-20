@@ -48,9 +48,7 @@ class MotionCaptureSequence:
         Returns:
             Tuple of (times [N], positions [N x 3])
         """
-        if not (marker_name is not None):
-            raise ValueError("marker_name must be provided")
-        if not (marker_name is not None):
+        if marker_name is None:
             raise ValueError("marker_name must be provided")
         times = []
         positions = []

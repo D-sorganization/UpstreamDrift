@@ -36,9 +36,7 @@ class SurfaceGeometryMixin:
         Args:
             points: List of ContourPoint objects
         """
-        if not (points is not None):
-            raise ValueError("points must be provided")
-        if not (points is not None):
+        if points is None:
             raise ValueError("points must be provided")
         self._contour_points = points
         self._build_contour_interpolator()
@@ -79,9 +77,7 @@ class SurfaceGeometryMixin:
             smooth: Whether to smooth the heightmap
             smooth_sigma: Gaussian smoothing sigma
         """
-        if not (heightmap is not None):
-            raise ValueError("heightmap must be provided")
-        if not (heightmap is not None):
+        if heightmap is None:
             raise ValueError("heightmap must be provided")
         if smooth:
             heightmap = ndimage.gaussian_filter(heightmap, sigma=smooth_sigma)
@@ -110,9 +106,7 @@ class SurfaceGeometryMixin:
         Returns:
             Elevation at position [m]
         """
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         pos = np.clip(position[:2], [0, 0], [self.width, self.height])  # type: ignore[attr-defined]
 
@@ -149,9 +143,7 @@ class SurfaceGeometryMixin:
         Returns:
             [dz/dx, dz/dy] gradient vector
         """
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         pos = position[:2]
 
@@ -179,9 +171,7 @@ class SurfaceGeometryMixin:
         Returns:
             [slope_x, slope_y] slope vector (gradient)
         """
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         pos = position[:2]
         total_slope = np.zeros(2)
@@ -211,9 +201,7 @@ class SurfaceGeometryMixin:
         Returns:
             [ax, ay] gravitational acceleration [m/s²]
         """
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         slope = self.get_slope_at(position)
         # Acceleration is proportional to slope and points downhill
@@ -267,9 +255,7 @@ class SurfaceGeometryMixin:
 
     def _ridge_elevation(self, position: np.ndarray, ridge: dict[str, Any]) -> float:
         """Compute elevation contribution from a ridge."""
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         start = ridge["start"]
         end = ridge["end"]
@@ -306,9 +292,7 @@ class SurfaceGeometryMixin:
         self, position: np.ndarray, depression: dict[str, Any]
     ) -> float:
         """Compute elevation contribution from a depression."""
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         center = depression["center"]
         radius = depression["radius"]

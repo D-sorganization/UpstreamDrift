@@ -9,9 +9,7 @@ class HeatingValueMixin:
         to_unit: str,
         gas_density_stp: float | None = None,
     ) -> float:
-        if not (value is not None):
-            raise ValueError("value must be provided")
-        if not (value is not None):
+        if value is None:
             raise ValueError("value must be provided")
         if gas_density_stp is not None:
             self._require_positive_finite(gas_density_stp, "Gas density")  # type: ignore[attr-defined]

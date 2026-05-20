@@ -27,9 +27,7 @@ class MotionRetargeting:
             data: MuJoCo data
             marker_set: Marker set configuration
         """
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
         self.data = data
@@ -66,9 +64,7 @@ class MotionRetargeting:
         Returns:
             Tuple of (times [N], joint_trajectories [N x nv], success_flags [N])
         """
-        if not (mocap_sequence is not None):
-            raise ValueError("mocap_sequence must be provided")
-        if not (mocap_sequence is not None):
+        if mocap_sequence is None:
             raise ValueError("mocap_sequence must be provided")
         if use_markers is None:
             use_markers = list(self.marker_to_body_id.keys())
@@ -116,9 +112,7 @@ class MotionRetargeting:
             Tuple of (joint_config, success)
         """
         # Multi-target IK: minimize error to all marker positions
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
-        if not (frame is not None):
+        if frame is None:
             raise ValueError("frame must be provided")
         q = q_init.copy()
 
@@ -193,9 +187,7 @@ class MotionRetargeting:
         Returns:
             Dictionary of marker_name -> error (m)
         """
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
-        if not (frame is not None):
+        if frame is None:
             raise ValueError("frame must be provided")
         self.data.qpos[:] = q
         mujoco.mj_forward(self.model, self.data)

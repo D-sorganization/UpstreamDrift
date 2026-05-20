@@ -20,9 +20,7 @@ def _build_markers(df_points: Any, marker_names: list[str]) -> dict[str, MarkerD
     Returns:
         Dictionary mapping marker names to MarkerData.
     """
-    if not (df_points is not None):
-        raise ValueError("df_points must be provided")
-    if not (df_points is not None):
+    if df_points is None:
         raise ValueError("df_points must be provided")
     markers: dict[str, MarkerData] = {}
     if not df_points.empty:
@@ -50,9 +48,7 @@ def _build_analog(df_analog: Any, metadata_obj: Any) -> dict[str, AnalogData]:
     Returns:
         Dictionary mapping channel names to AnalogData.
     """
-    if not (df_analog is not None):
-        raise ValueError("df_analog must be provided")
-    if not (df_analog is not None):
+    if df_analog is None:
         raise ValueError("df_analog must be provided")
     analog: dict[str, AnalogData] = {}
     units_map = dict(
@@ -77,9 +73,7 @@ def _build_metadata_ui(filepath: str, metadata_obj: Any) -> dict[str, str]:
     Returns:
         Dictionary of display-friendly metadata key-value pairs.
     """
-    if not (filepath is not None):
-        raise ValueError("filepath must be provided")
-    if not (filepath is not None):
+    if filepath is None:
         raise ValueError("filepath must be provided")
     metadata_ui = {
         "File": os.path.basename(filepath),

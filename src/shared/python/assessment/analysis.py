@@ -118,9 +118,7 @@ def grep_count(
     exclude_parts: list[str] | None = None,
 ) -> int:
     """Count files where a regex pattern is found."""
-    if not (root is not None):
-        raise ValueError("root must be provided")
-    if not (root is not None):
+    if root is None:
         raise ValueError("root must be provided")
     count = 0
     regex = re.compile(pattern)
@@ -144,9 +142,7 @@ def grep_count(
     return count
 
 
-def classify_assessment_category(
-    source_name: str, description: str = ""
-) -> str:  # noqa: C901
+def classify_assessment_category(source_name: str, description: str = "") -> str:  # noqa: C901
     """Classify an assessment finding into a standard category name.
 
     Args:
@@ -156,9 +152,7 @@ def classify_assessment_category(
     Returns:
         A standardized category name.
     """
-    if not (source_name is not None):
-        raise ValueError("source_name must be provided")
-    if not (source_name is not None):
+    if source_name is None:
         raise ValueError("source_name must be provided")
     text = (source_name + " " + description).lower()
 
