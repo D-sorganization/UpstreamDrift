@@ -201,7 +201,10 @@ class PuttingGreenWidget(QWidget):
             )
 
             config = SimulationConfig()
-            sim = PuttingGreenSimulator(config)  # type: ignore[arg-type]
+            # NOTE: `config` is a keyword argument; the first positional slot
+            # is `green` (see PuttingGreenSimulator signature).
+            sim = PuttingGreenSimulator(config=config)
+            _ = sim  # reserved for future physics integration
 
             speed = self._speed_spin.value()
             aim = self._aim_spin.value()
@@ -242,9 +245,12 @@ class PuttingGreenWidget(QWidget):
             slope_rad = np.radians(self._slope_spin.value())
             Z = X * np.tan(slope_rad) + 0.1 * np.sin(X * 0.5) * np.cos(Y * 0.5)
 
-            # Recalculate ball Z to stick to terrain
-            z_traj = np.interp(
-                x, xx, xx * np.tan(slope_rad) + 0.1 * np.sin(x * 0.5) * np.cos(y * 0.5)
+            # Recalculate ball Z to stick to terrain. ``np.interp`` requires
+            # its second and third arguments to share a shape, so build the
+            # terrain-height lookup along the ``xx`` axis only.
+            xx_heights = xx * np.tan(slope_rad)
+            z_traj = np.interp(x, xx, xx_heights) + 0.1 * np.sin(x * 0.5) * np.cos(
+                y * 0.5
             )
 
             self._results_text.setPlainText(
