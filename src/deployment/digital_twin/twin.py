@@ -90,8 +90,6 @@ class DigitalTwin:
         """
         if not (sim_engine is not None):
             raise ValueError("sim_engine must be provided")
-        if not (sim_engine is not None):
-            raise ValueError("sim_engine must be provided")
         self.sim = sim_engine
         self.real = real_interface
         self._sync_error = 0.0
@@ -161,8 +159,6 @@ class DigitalTwin:
         Returns:
             Predicted state trajectory (n_steps+1, n_states).
         """
-        if not (horizon is not None):
-            raise ValueError("horizon must be provided")
         if not (horizon is not None):
             raise ValueError("horizon must be provided")
         n_steps = int(horizon / dt)
