@@ -8,6 +8,14 @@
 import { useState, useCallback } from 'react';
 import { useTerrain } from '@/api/useTerrain';
 import type { TerrainPreset, TerrainMaterial, TerrainTypeInfo } from '@/api/useTerrain';
+export type {
+  ActiveTerrain,
+  TerrainLoadState,
+  TerrainMaterial,
+  TerrainPreset,
+  TerrainProperties,
+  TerrainTypeInfo,
+} from '@/api/useTerrain';
 
 /**
  * TerrainPage - Full terrain engine tool page.

@@ -12,6 +12,7 @@ import { useRef, useMemo, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Grid, Environment, TransformControls } from '@react-three/drei';
 import * as THREE from 'three';
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import type { SimulationFrame } from '@/api/client';
 import { URDFViewer } from './URDFViewer';
 import type { URDFModel } from './URDFViewer';
@@ -42,12 +43,6 @@ interface Props {
   onGizmoDrag?: (bodyName: string, position: number[], rotation: number[]) => void;
 }
 
-interface OrbitControlsLike {
-  target: THREE.Vector3;
-  object: THREE.Camera;
-  update: () => void;
-}
-
 /**
  * CameraController updates OrbitControls target to follow the golfer's root position in Follow Mode.
  */
@@ -58,7 +53,7 @@ function CameraController({
 }: {
   followMode: boolean;
   rootRef: React.RefObject<THREE.Group | null>;
-  orbitRef: React.RefObject<OrbitControlsLike | null>;
+  orbitRef: React.RefObject<OrbitControlsImpl | null>;
 }) {
   useFrame(() => {
     if (!followMode || !rootRef.current || !orbitRef.current) return;
@@ -87,7 +82,7 @@ export function Scene3D({
   forceOverlays,
   onGizmoDrag,
 }: Props) {
-  const orbitRef = useRef<OrbitControlsLike | null>(null);
+  const orbitRef = useRef<OrbitControlsImpl | null>(null);
   const rootRef = useRef<THREE.Group>(null);
 
   // Interaction State

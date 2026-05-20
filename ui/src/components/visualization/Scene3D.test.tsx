@@ -17,7 +17,7 @@ vi.mock('@react-three/fiber', () => ({
 
 // Mock react-three/drei
 vi.mock('@react-three/drei', () => ({
-  OrbitControls: vi.fn(({ ref }: { ref: React.Ref<unknown> }) => <div data-testid="orbit-controls-mock" ref={ref} />),
+  OrbitControls: vi.fn(({ ref }: { ref: React.Ref<HTMLDivElement> }) => <div data-testid="orbit-controls-mock" ref={ref} />),
   Grid: () => <div data-testid="grid-mock" />,
   Environment: () => <div data-testid="environment-mock" />,
   Line: ({ points }: { points: number[][] }) => (
