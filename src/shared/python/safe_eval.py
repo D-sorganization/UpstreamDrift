@@ -24,7 +24,8 @@ from __future__ import annotations
 import ast
 import math
 import operator
-from typing import Any
+from collections.abc import Callable, Sequence
+from typing import Any, cast
 
 import numpy as np
 
@@ -214,7 +215,7 @@ def validate_expression(
     return tree
 
 
-_OPERATORS = {
+_OPERATORS: dict[type[ast.AST], Callable[..., Any]] = {
     ast.Add: operator.add,
     ast.Sub: operator.sub,
     ast.Mult: operator.mul,
@@ -245,7 +246,7 @@ _OPERATORS = {
 }
 
 
-def _eval_sequence(nodes: list[ast.AST], namespace: dict[str, Any]) -> list[Any]:
+def _eval_sequence(nodes: Sequence[ast.AST], namespace: dict[str, Any]) -> list[Any]:
     return [_eval_ast(node, namespace) for node in nodes]
 
 
@@ -317,7 +318,7 @@ def _eval_ast(node: ast.AST, namespace: dict[str, Any]) -> Any:  # noqa: C901
         slice_val = _eval_ast(node.slice, namespace)
         return value[slice_val]
     if isinstance(node, ast.Index):  # Python 3.8 compat
-        return _eval_ast(node.value, namespace)
+        return _eval_ast(cast(ast.AST, node).value, namespace)  # type: ignore[attr-defined]
     if isinstance(node, ast.Slice):
         return _eval_slice(node, namespace)
     if isinstance(node, ast.List):
@@ -355,10 +356,10 @@ def safe_eval(
     Any
         Result of the expression evaluation.
     """
-    if not (expression is not None):
+    if expression is None:
         raise ValueError("expression must be provided")
-    if not (expression is not None):
-        raise ValueError("expression must be provided")
+    if not isinstance(namespace, dict):
+        raise TypeError("namespace must be a dict")
     if allowed_names is None:
         allowed_names = set(namespace.keys())
 
@@ -384,9 +385,7 @@ def safe_eval_math(
         If True, use numpy math functions (array-safe).  Otherwise use
         scalar ``math`` module functions.
     """
-    if not (expression is not None):
-        raise ValueError("expression must be provided")
-    if not (expression is not None):
+    if expression is None:
         raise ValueError("expression must be provided")
     base = dict(NUMPY_MATH_NAMESPACE if use_numpy else SCALAR_MATH_NAMESPACE)
     if variables:

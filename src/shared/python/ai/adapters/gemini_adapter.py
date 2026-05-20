@@ -61,9 +61,7 @@ class GeminiAdapter(BaseAgentAdapter):
         self._model = GenerativeModel(self._model_name)
 
     @precondition(
-        lambda message, context: (
-            bool(message.strip()) or (context is not None and bool(context.messages))
-        ),
+        lambda message, context: bool(message.strip()) or (context is not None and bool(context.messages)),
         "message must not be empty unless context has messages",
     )
     def send_message(

@@ -126,14 +126,10 @@ def build_executable_specs(
     profile: PackagingProfile,
 ) -> tuple[ExecutableSpec, ...]:
     """Build executable metadata for the selected packaging profile."""
-    icon_path = str(
-        project_root / "src" / "launchers" / "assets" / "golf_robot_icon.ico"
-    )
+    icon_path = str(project_root / "src" / "launchers" / "assets" / "golf_robot_icon.ico")
     executables = [
         ExecutableSpec(
-            script=str(
-                project_root / "src" / "launchers" / "upstream_drift_launcher.py"
-            ),
+            script=str(project_root / "src" / "launchers" / "upstream_drift_launcher.py"),
             base="Win32GUI",
             target_name="GolfModelingSuite.exe",
             icon=icon_path,
@@ -186,9 +182,7 @@ def build_setup_configuration(
         "upgrade_code": "{12345678-1234-5678-9012-123456789012}",
         "add_to_path": True,
         "initial_target_dir": rf"[ProgramFilesFolder]\UpstreamDrift\{profile.profile_id}",
-        "install_icon": str(
-            project_root / "src" / "launchers" / "assets" / "golf_robot_icon.ico"
-        ),
+        "install_icon": str(project_root / "src" / "launchers" / "assets" / "golf_robot_icon.ico"),
         "summary_data": {
             "author": "UpstreamDrift Team",
             "comments": profile.description,
