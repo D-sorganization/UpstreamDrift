@@ -21,6 +21,10 @@ DbC summary
 from __future__ import annotations
 
 import json
+import importlib
+import importlib.util
+import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -57,23 +61,140 @@ class _ConversationService(Protocol):
     def load_as_context(self, conversation_id: str) -> dict[str, Any] | None: ...
 
 
+@dataclass(frozen=True)
+class _MissingConversationService:
+    """Diagnostic placeholder for discovered shared chat capability.
+
+    The shared Tools chat package can provide condensation helpers without
+    providing a standalone conversation-history service. Keep that distinction
+    explicit so the launcher does not silently pretend history persistence is
+    wired.
+    """
+
+    reason: str
+    condensation_available: bool = False
+
+    def list(self, archived: bool = False) -> list[dict[str, Any]]:
+        raise RuntimeError(self.reason)
+
+    def search(self, query: str) -> list[dict[str, Any]]:
+        raise RuntimeError(self.reason)
+
+    def archive(self, conversation_id: str) -> None:
+        raise RuntimeError(self.reason)
+
+    def unarchive(self, conversation_id: str) -> None:
+        raise RuntimeError(self.reason)
+
+    def delete(self, conversation_id: str) -> None:
+        raise RuntimeError(self.reason)
+
+    def export(self, conversation_id: str, path: str) -> None:
+        raise RuntimeError(self.reason)
+
+    def load_as_context(self, conversation_id: str) -> dict[str, Any] | None:
+        raise RuntimeError(self.reason)
+
+    def condense_to_memory(self, conversation_ids: list[str]) -> dict[str, Any]:
+        return {
+            "status": "unavailable",
+            "requested": len(conversation_ids),
+            "processed": 0,
+            "inserted": 0,
+            "missing": list(conversation_ids),
+            "message": self.reason,
+        }
+
+
 def _default_memory_path() -> Path:
     """Return the canonical on-disk location for ``user_memory.json``."""
     return Path.home() / ".golf_modeling_suite" / "user_memory.json"
 
 
-def _load_sidekick_conversation_service() -> Any | None:
-    """Best-effort lazy import of the Sidekick conversation service.
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[3]
 
-    Returns ``None`` when Sidekick is not yet vendored/installed so the
-    launcher can boot in development environments without the submodule.
-    """
-    try:
-        from sidekick.chat import conversation as _conv  # type: ignore[import-not-found]
 
-        return _conv
-    except Exception:  # noqa: BLE001 — any import-time failure must not crash UI
+def _candidate_shared_python_roots() -> tuple[Path, ...]:
+    root = _repo_root()
+    return (
+        root / "vendor" / "ud-tools" / "src" / "shared" / "python",
+        root / "src" / "shared" / "python",
+    )
+
+
+def _load_module_from_root(module_name: str, root: Path) -> Any | None:
+    module_path = root.joinpath(*module_name.split("."))
+    file_path = module_path.with_suffix(".py")
+    if not file_path.exists():
+        file_path = module_path / "__init__.py"
+    if not file_path.exists():
         return None
+
+    spec_name = f"_upstream_drift_tools_probe_{module_name.replace('.', '_')}"
+    spec = importlib.util.spec_from_file_location(spec_name, file_path)
+    if spec is None or spec.loader is None:
+        return None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec_name] = module
+    try:
+        spec.loader.exec_module(module)
+    except Exception:
+        sys.modules.pop(spec_name, None)
+        raise
+    return module
+
+
+def _resolve_conversation_service(module: Any) -> Any | None:
+    for attr_name in ("conversation_service", "service", "SERVICE"):
+        service = getattr(module, attr_name, None)
+        if service is not None:
+            return service
+    factory = getattr(module, "get_conversation_service", None)
+    if callable(factory):
+        return factory()
+    return module
+
+
+def _load_sidekick_conversation_service() -> Any | None:
+    """Best-effort lazy import of the shared chat conversation service.
+
+    Returns ``None`` when no chat package is available. If the vendored
+    Tools package exposes shared chat condensation but no standalone
+    history service, returns a diagnostic placeholder instead of silently
+    pointing at the removed ``sidekick.chat.conversation`` path.
+    """
+    for root in _candidate_shared_python_roots():
+        for module_name in ("chat.conversation", "chat.history_service"):
+            try:
+                module = _load_module_from_root(module_name, root)
+            except Exception:  # noqa: BLE001
+                module = None
+            if module is not None:
+                return _resolve_conversation_service(module)
+
+        try:
+            service_base = _load_module_from_root("chat.service_base", root)
+        except Exception:  # noqa: BLE001
+            service_base = None
+        chat_service_base = getattr(service_base, "ChatServiceBase", None)
+        if callable(getattr(chat_service_base, "condense_to_memory", None)):
+            return _MissingConversationService(
+                reason=(
+                    "Shared Tools chat condensation support is installed, but "
+                    "the launcher has no concrete chat history service. Inject "
+                    "a service implementing list/search/archive/export/"
+                    "load_as_context and condense_to_memory."
+                ),
+                condensation_available=True,
+            )
+
+    for module_name in ("chat.conversation", "sidekick.chat.conversation"):
+        try:
+            return _resolve_conversation_service(importlib.import_module(module_name))
+        except Exception:  # noqa: BLE001 — import-time failures must not crash UI
+            continue
+    return None
 
 
 class HistoryServiceAdapter:
@@ -88,10 +209,11 @@ class HistoryServiceAdapter:
     service:
         The Sidekick conversation service (or any object satisfying
         :class:`_ConversationService`). When ``None``, the adapter
-        attempts to import ``sidekick.chat.conversation`` lazily; if
-        that import also fails the constructor still succeeds but every
-        delegating call raises ``RuntimeError`` to signal the missing
-        backend to the caller.
+        attempts to discover a shared chat conversation service lazily.
+        If no concrete history service is available, the constructor
+        still succeeds but delegating calls raise ``RuntimeError`` with a
+        diagnostic that distinguishes missing persistence wiring from
+        missing Tools condensation support.
     memory_path:
         Override location of the ``user_memory.json`` document. Defaults
         to ``~/.golf_modeling_suite/user_memory.json``.
@@ -120,11 +242,15 @@ class HistoryServiceAdapter:
 
     def has_service(self) -> bool:
         """Return ``True`` when a Sidekick conversation service is wired."""
-        return self._service is not None
+        return self._service is not None and not isinstance(
+            self._service, _MissingConversationService
+        )
 
     def has_condensation_api(self) -> bool:
         """Return whether the active Sidekick service can condense memory."""
-        return callable(getattr(self._service, "condense_to_memory", None))
+        return self.has_service() and callable(
+            getattr(self._service, "condense_to_memory", None)
+        )
 
     def _require_service(self) -> Any:
         if self._service is None:
@@ -133,6 +259,8 @@ class HistoryServiceAdapter:
                 "(install/update the sidekick package or run UD with "
                 "the vendor/ud-tools submodule checked out)."
             )
+        if isinstance(self._service, _MissingConversationService):
+            raise RuntimeError(self._service.reason)
         return self._service
 
     # ------------------------------------------------------------------
@@ -233,25 +361,27 @@ class HistoryServiceAdapter:
             self._memory_path.unlink()
 
     # ------------------------------------------------------------------
-    # Optional Tools #2736 condensation API (with graceful fallback)
+    # Optional shared chat condensation API (with graceful fallback)
     # ------------------------------------------------------------------
 
     def condense_to_memory(self, conversation_ids: list[str]) -> dict[str, Any]:
         """Ask the Sidekick condenser to merge old conversations into
         the structured memory document.
 
-        Falls back to a deterministic stub response when the Sidekick
-        condensation API (Tools #2736) is not yet wired so the launcher
-        can ship the UI ahead of the backend.
+        Falls back to a deterministic diagnostic response when the
+        concrete Sidekick service does not expose the shared condensation
+        contract.
         """
+        if isinstance(self._service, _MissingConversationService):
+            return self._service.condense_to_memory(conversation_ids)
         condenser = getattr(self._service, "condense_to_memory", None)
         if condenser is None:
             return {
-                "status": "stub",
+                "status": "unavailable",
                 "message": (
-                    "Memory condensation API is not available in this "
-                    "Sidekick build. Update the sidekick package once "
-                    "Tools #2736 is merged."
+                    "Memory condensation is not wired for this launcher "
+                    "session. Inject a chat service that implements "
+                    "condense_to_memory."
                 ),
             }
         return condenser(conversation_ids)

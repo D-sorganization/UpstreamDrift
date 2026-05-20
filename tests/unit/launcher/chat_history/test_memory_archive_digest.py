@@ -112,5 +112,6 @@ def test_digest_is_gated_when_condenser_is_unavailable(qapp) -> None:
     panel.archive_digest()
 
     assert panel.last_digest_status() == "unavailable"
+    assert "Tools #2736" not in panel._digest_btn.toolTip()  # noqa: SLF001
     a.list_archived.assert_not_called()
     a.condense_to_memory.assert_not_called()

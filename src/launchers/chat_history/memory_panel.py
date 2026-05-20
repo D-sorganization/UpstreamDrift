@@ -192,8 +192,8 @@ class MemoryPanel(QWidget):
             QMessageBox.information(
                 self,
                 "Memory digest",
-                "Memory condensation API is not yet available in this "
-                "Sidekick build. Try again after Tools #2736 ships.",
+                "Memory condensation is not wired for this launcher session. "
+                "Inject a chat service with condense_to_memory and try again.",
             )
 
     def _adapter_can_condense(self) -> bool:
