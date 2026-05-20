@@ -236,13 +236,13 @@ class Vector3:
 
     def __eq__(self, other: object) -> bool:
         """Check equality with another vector."""
-        if not (other is not None):
-            raise ValueError("other must be provided")
-        if not (other is not None):
-            raise ValueError("other must be provided")
         if not isinstance(other, Vector3):
             return NotImplemented
         return self.x == other.x and self.y == other.y and self.z == other.z
+
+    def __hash__(self) -> int:
+        """Hash based on components for use in sets/dict keys."""
+        return hash((self.x, self.y, self.z))
 
     def __repr__(self) -> str:
         """String representation."""
