@@ -63,9 +63,9 @@ class UIBuildHook(BuildHookInterface):
 
     def initialize(self, version: str, build_data: dict) -> None:
         """Initialize build hook."""
-        if not (version):
+        if not version:
             raise ValueError("Version parameter must not be empty")
-        if not (build_data is not None):
+        if build_data is None:
             raise ValueError("Build data dictionary must be provided")
 
         dist_dir = self._dist_dir

@@ -69,9 +69,7 @@ MAGIC_NUMBERS = [
 
 def is_legitimate_pass_context(lines: list[str], line_num: int) -> bool:  # noqa: C901
     """Check if a pass statement is in a legitimate context."""
-    if not (lines is not None):
-        raise ValueError("lines must be provided")
-    if not (lines is not None):
+    if lines is None:
         raise ValueError("lines must be provided")
     from src.shared.python.contracts import require
 
@@ -125,9 +123,7 @@ def check_banned_patterns(
     filepath: Path,
 ) -> list[tuple[int, str, str]]:
     """Check for banned patterns in lines."""
-    if not (lines is not None):
-        raise ValueError("lines must be provided")
-    if not (lines is not None):
+    if lines is None:
         raise ValueError("lines must be provided")
     from src.shared.python.contracts import require
 
@@ -169,9 +165,7 @@ def check_banned_patterns(
 
 def check_magic_numbers(lines: list[str], filepath: Path) -> list[tuple[int, str, str]]:
     """Check for magic numbers in lines."""
-    if not (lines is not None):
-        raise ValueError("lines must be provided")
-    if not (lines is not None):
+    if lines is None:
         raise ValueError("lines must be provided")
     from src.shared.python.contracts import require
 
@@ -199,9 +193,7 @@ def check_magic_numbers(lines: list[str], filepath: Path) -> list[tuple[int, str
 
 def check_ast_issues(content: str, filepath: Path) -> list[tuple[int, str, str]]:
     """Check AST for quality issues."""
-    if not (content is not None):
-        raise ValueError("content must be provided")
-    if not (content is not None):
+    if content is None:
         raise ValueError("content must be provided")
     from src.shared.python.contracts import require
 
