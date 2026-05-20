@@ -160,7 +160,7 @@ class StandardModelManager:
             logger.info("Standard humanoid model downloaded successfully")
             return True
 
-        except ImportError as e:
+        except (ImportError, OSError, ValueError) as e:
             logger.error(f"Failed to download standard humanoid model: {e}")
             return False
 
@@ -170,9 +170,7 @@ class StandardModelManager:
         In production, this would download actual STL files from human-gazebo.
         """
         # Create basic temporary STL files
-        if not (mesh_dir is not None):
-            raise ValueError("mesh_dir must be provided")
-        if not (mesh_dir is not None):
+        if mesh_dir is None:
             raise ValueError("mesh_dir must be provided")
         temporary_meshes = [
             "head.stl",
@@ -222,9 +220,7 @@ class StandardModelManager:
 
     def _generate_golf_club_urdf(self, club_type: str, output_path: Path) -> None:
         """Generate golf club URDF file."""
-        if not (club_type is not None):
-            raise ValueError("club_type must be provided")
-        if not (club_type is not None):
+        if club_type is None:
             raise ValueError("club_type must be provided")
         club_config: dict[str, Any] = self.config["golf_clubs"][club_type]
 
@@ -328,9 +324,7 @@ class StandardModelManager:
         Returns:
             Dictionary mapping engine names to compatibility status
         """
-        if not (urdf_path is not None):
-            raise ValueError("urdf_path must be provided")
-        if not (urdf_path is not None):
+        if urdf_path is None:
             raise ValueError("urdf_path must be provided")
         results = {}
 
@@ -341,7 +335,7 @@ class StandardModelManager:
             # Convert URDF to MJCF and test loading
             mujoco.MjModel.from_xml_path(str(urdf_path))
             results["mujoco"] = True
-        except ImportError as e:
+        except (ImportError, AttributeError, RuntimeError, ValueError, OSError) as e:
             logger.warning(f"MuJoCo compatibility issue: {e}")
             results["mujoco"] = False
 
@@ -355,7 +349,7 @@ class StandardModelManager:
             parser.AddModelFromFile(str(urdf_path))  # type: ignore[attr-defined]  # pydrake deprecated alias, still works at runtime
             plant.Finalize()
             results["drake"] = True
-        except ImportError as e:
+        except (ImportError, AttributeError, RuntimeError, ValueError, OSError) as e:
             logger.warning(f"Drake compatibility issue: {e}")
             results["drake"] = False
 
@@ -365,7 +359,7 @@ class StandardModelManager:
 
             pin.buildModelFromUrdf(str(urdf_path))
             results["pinocchio"] = True
-        except ImportError as e:
+        except (ImportError, AttributeError, RuntimeError, ValueError, OSError) as e:
             logger.warning(f"Pinocchio compatibility issue: {e}")
             results["pinocchio"] = False
 

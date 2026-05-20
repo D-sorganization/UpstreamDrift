@@ -134,9 +134,9 @@ def test_setup_top_bar_with_help(mock_register, launcher) -> None:
         assert isinstance(top_bar, QHBoxLayout)
         assert mock_register.call_count >= 4
         # btn_ai was removed in #5620; AI now lives in the sidebar as btn_ai_sidebar.
-        assert not hasattr(launcher, "btn_ai"), (
-            "btn_ai must not exist after #5620 deprecated-chat sweep"
-        )
+        assert not hasattr(
+            launcher, "btn_ai"
+        ), "btn_ai must not exist after #5620 deprecated-chat sweep"
 
 
 def test_setup_grid_area(launcher) -> None:
@@ -219,13 +219,13 @@ def test_sidebar_ai_button_absent_when_ai_unavailable(launcher) -> None:
     # Building the sidebar must not raise AttributeError for any deleted method.
     launcher._setup_global_sidebar()
     # btn_ai_sidebar must NOT be set when AI_AVAILABLE is False
-    assert "btn_ai_sidebar" not in launcher.__dict__, (
-        "btn_ai_sidebar must not be created in the sidebar when AI_AVAILABLE is False"
-    )
+    assert (
+        "btn_ai_sidebar" not in launcher.__dict__
+    ), "btn_ai_sidebar must not be created in the sidebar when AI_AVAILABLE is False"
     # btn_ai (old top-bar button) must never be set at all
-    assert "btn_ai" not in launcher.__dict__, (
-        "btn_ai must not exist after #5620 deprecated-chat sweep"
-    )
+    assert (
+        "btn_ai" not in launcher.__dict__
+    ), "btn_ai must not exist after #5620 deprecated-chat sweep"
 
 
 @patch("src.launchers.launcher_constants.AI_AVAILABLE", True)
@@ -241,9 +241,9 @@ def test_sidebar_ai_button_present_when_ai_available(launcher) -> None:
     # _setup_global_sidebar must complete without AttributeError when AI is on
     launcher._setup_global_sidebar()
     # btn_ai (old top-bar button) must never exist after #5620
-    assert "btn_ai" not in launcher.__dict__, (
-        "Deprecated btn_ai top-bar button must not exist after #5620"
-    )
+    assert (
+        "btn_ai" not in launcher.__dict__
+    ), "Deprecated btn_ai top-bar button must not exist after #5620"
 
 
 def test_no_setup_ai_panel_method() -> None:
@@ -256,9 +256,9 @@ def test_no_setup_ai_panel_method() -> None:
     permissive ``__getattr__`` does not mask the absence of the method.
     """
     mro_attrs = {name for cls in LauncherUISetupMixin.__mro__ for name in vars(cls)}
-    assert "_setup_ai_panel" not in mro_attrs, (
-        "_setup_ai_panel was deleted in #5620 and must not be re-introduced"
-    )
+    assert (
+        "_setup_ai_panel" not in mro_attrs
+    ), "_setup_ai_panel was deleted in #5620 and must not be re-introduced"
 
 
 def test_no_sync_chat_session_method() -> None:
@@ -268,9 +268,9 @@ def test_no_sync_chat_session_method() -> None:
     via the shared active_chat_session.txt file.
     """
     mro_attrs = {name for cls in LauncherUISetupMixin.__mro__ for name in vars(cls)}
-    assert "_sync_chat_session" not in mro_attrs, (
-        "_sync_chat_session was deleted in #5620 and must not be re-introduced"
-    )
+    assert (
+        "_sync_chat_session" not in mro_attrs
+    ), "_sync_chat_session was deleted in #5620 and must not be re-introduced"
 
 
 def test_init_overlay(launcher) -> None:
@@ -434,9 +434,9 @@ def test_search_input_is_auto_complete_line_edit(launcher) -> None:
         launcher.search_input,
         AutoCompleteLineEdit,
     ), "search_input must be AutoCompleteLineEdit, not bare QLineEdit"
-    assert len(launcher.search_input.completer_words) > 0, (
-        "AutoCompleteLineEdit vocabulary must be non-empty after construction"
-    )
+    assert (
+        len(launcher.search_input.completer_words) > 0
+    ), "AutoCompleteLineEdit vocabulary must be non-empty after construction"
 
 
 @pytest.mark.unit

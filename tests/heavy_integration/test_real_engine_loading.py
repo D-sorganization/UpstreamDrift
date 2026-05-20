@@ -83,9 +83,9 @@ class TestEngineManagerIntegration:
             # If status says available, path must exist
             status = manager.get_engine_status(engine_type)
             if status == EngineStatus.AVAILABLE or status == EngineStatus.LOADED:
-                assert path.exists(), (
-                    f"{engine_type} marked as {status} but path doesn't exist"
-                )
+                assert (
+                    path.exists()
+                ), f"{engine_type} marked as {status} but path doesn't exist"
 
 
 pytestmark = pytest.mark.live_simulation

@@ -22,7 +22,6 @@ import pytest
 
 from src.shared.python.simulation_store import SimulationDataStore
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------

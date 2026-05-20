@@ -75,9 +75,7 @@ class PinocchioWrapper:
             ImportError: If Pinocchio is not installed
         """
         if not PINOCCHIO_AVAILABLE:
-            msg = (
-                "Pinocchio is required but not installed. Install with: pip install pin"  # noqa: E501
-            )
+            msg = "Pinocchio is required but not installed. Install with: pip install pin"  # noqa: E501
             raise ImportError(msg)
 
         self.model = model

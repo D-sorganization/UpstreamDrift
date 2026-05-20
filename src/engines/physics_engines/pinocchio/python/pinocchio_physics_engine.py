@@ -271,6 +271,10 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         pin.computeJointJacobians(self.model, self.data, self.q)
         pin.updateFramePlacements(self.model, self.data)
 
+    def get_time(self) -> float:
+        """Get the current simulation time."""
+        return self.time
+
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
         """Get the current state (positions, velocities)."""
         return self.q.copy(), self.v.copy()
@@ -488,3 +492,57 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         Returns empty dict for parity with unconfigured MuJoCo models.
         """
         return {}
+
+    # -------- PhysicsEngine protocol implementations (CRBA-based) --------
+
+    @postcondition(check_finite, "Mass matrix must contain finite values")
+    def compute_mass_matrix(self) -> np.ndarray:
+        """Compute the joint-space mass matrix M(q) via CRBA.
+
+        Returns an empty array when no model has been loaded so callers can
+        degrade gracefully.
+        """
+        if self.model is None or self.data is None:
+            return np.array([])
+        M = pin.crba(self.model, self.data, self.q)
+        # CRBA fills only the upper triangle; symmetrise for downstream callers.
+        M_arr = np.asarray(M)
+        M_full = np.triu(M_arr) + np.triu(M_arr, 1).T
+        return cast(np.ndarray, M_full)
+
+    @postcondition(check_finite, "Bias forces must contain finite values")
+    def compute_bias_forces(self) -> np.ndarray:
+        """Compute bias forces C(q,v)v + g(q) via RNEA with zero acceleration."""
+        if self.model is None or self.data is None:
+            return np.array([])
+        zero_acc = np.zeros(self.model.nv)
+        nle = pin.rnea(self.model, self.data, self.q, self.v, zero_acc)
+        return cast(np.ndarray, np.asarray(nle).copy())
+
+    @postcondition(check_finite, "Gravity forces must contain finite values")
+    def compute_gravity_forces(self) -> np.ndarray:
+        """Compute generalised gravity forces g(q) via RNEA at v=a=0."""
+        if self.model is None or self.data is None:
+            return np.array([])
+        zero_v = np.zeros(self.model.nv)
+        zero_a = np.zeros(self.model.nv)
+        g = pin.rnea(self.model, self.data, self.q, zero_v, zero_a)
+        return cast(np.ndarray, np.asarray(g).copy())
+
+    def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        """Zero-Torque Counterfactual: passive acceleration at (q, v).
+
+        Restores the engine's stored (q, v) before returning so the engine
+        state is untouched.
+        """
+        if not (q is not None):
+            raise ValueError("q must be provided")
+        if not (v is not None):
+            raise ValueError("v must be provided")
+        if self.model is None or self.data is None:
+            return np.array([])
+        q_arr = self._require_vector("q", q, self.model.nq)
+        v_arr = self._require_vector("v", v, self.model.nv)
+        tau_zero = np.zeros(self.model.nv)
+        a_ztcf = pin.aba(self.model, self.data, q_arr, v_arr, tau_zero)
+        return cast(np.ndarray, np.asarray(a_ztcf).copy())

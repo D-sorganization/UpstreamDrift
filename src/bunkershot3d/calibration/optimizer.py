@@ -50,12 +50,12 @@ class CalibrationOptimizer:
 
     def optimize(self) -> dict[str, float]:
         bounds = [(0.01, 1.0), (0.01, 1.0)]
-        
+
         # differential_evolution is a stochastic population-based method suitable for noisy granular simulations
         res = differential_evolution(
             self._objective,
             bounds,
-            strategy='best1bin',
+            strategy="best1bin",
             maxiter=50,
             popsize=5,
             tol=0.01,

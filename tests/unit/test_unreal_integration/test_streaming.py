@@ -509,9 +509,9 @@ class TestServerBindsRealSocket:
         assert server.state == StreamingState.STOPPED
         await server.start()
         try:
-            assert server.state == StreamingState.RUNNING, (
-                "Server is not RUNNING after start()"
-            )
+            assert (
+                server.state == StreamingState.RUNNING
+            ), "Server is not RUNNING after start()"
         finally:
             await server.stop()
 
@@ -552,8 +552,8 @@ class TestServerBindsRealSocket:
         try:
             with pytest.raises((RuntimeError, OSError)):
                 await server.start()
-            assert server.state == StreamingState.ERROR, (
-                "Server must be in ERROR state when binding fails"
-            )
+            assert (
+                server.state == StreamingState.ERROR
+            ), "Server must be in ERROR state when binding fails"
         finally:
             sock.close()

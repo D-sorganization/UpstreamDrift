@@ -277,9 +277,9 @@ class TestSimulateWithCoefficientsSmoke:
             for j in range(n_joints_expected):
                 expected_tau = controller.tau_at(t, j)
                 # Allow some numerical tolerance due to integration errors
-                assert np.isclose(result.tau[i, j], expected_tau, atol=1e-4), (
-                    f"tau mismatch at t={t}, joint={j}"
-                )
+                assert np.isclose(
+                    result.tau[i, j], expected_tau, atol=1e-4
+                ), f"tau mismatch at t={t}, joint={j}"
 
     def test_solver_status_success(self) -> None:
         """Solver status is 'success' for nominal inputs."""

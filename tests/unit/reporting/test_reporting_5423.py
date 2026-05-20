@@ -22,7 +22,6 @@ from src.shared.python.reporting import (
 from src.shared.python.reporting._agentic_summary import AIClient
 from src.shared.python.simulation_store import SimulationDataStore
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -251,9 +250,9 @@ class TestGlobalReportRegistry:
 
     def test_all_values_are_report_templates(self):
         for key, value in GLOBAL_REPORT_REGISTRY.items():
-            assert isinstance(value, JinjaReportTemplate), (
-                f"Entry {key!r} is not a JinjaReportTemplate"
-            )
+            assert isinstance(
+                value, JinjaReportTemplate
+            ), f"Entry {key!r} is not a JinjaReportTemplate"
 
     def test_report_type_matches_key(self):
         for key, tpl in GLOBAL_REPORT_REGISTRY.items():

@@ -52,14 +52,14 @@ class TestContactManagerIntegration:
         assert len(hull) == 4, "Assertion failed: len(hull) == 4"
 
         # Center should be inside
-        assert _point_in_polygon(np.array([0, 0]), hull) is True, (
-            "Assertion failed: _point_in_polygon(np.array([0, 0]), hull) is True"
-        )
+        assert (
+            _point_in_polygon(np.array([0, 0]), hull) is True
+        ), "Assertion failed: _point_in_polygon(np.array([0, 0]), hull) is True"
 
         # Point outside should return False
-        assert _point_in_polygon(np.array([0.5, 0.5]), hull) is False, (
-            "Assertion failed: _point_in_polygon(np.array([0.5, 0.5]), hull) is False"
-        )
+        assert (
+            _point_in_polygon(np.array([0.5, 0.5]), hull) is False
+        ), "Assertion failed: _point_in_polygon(np.array([0.5, 0.5]), hull) is False"
 
     def test_point_in_triangle(self) -> None:
         """Test point in polygon for triangle."""
@@ -74,14 +74,14 @@ class TestContactManagerIntegration:
         )
 
         # Inside
-        assert _point_in_polygon(np.array([0.5, 0.3]), triangle) is True, (
-            "Assertion failed: _point_in_polygon(np.array([0.5, 0.3]), triangle) is True"
-        )
+        assert (
+            _point_in_polygon(np.array([0.5, 0.3]), triangle) is True
+        ), "Assertion failed: _point_in_polygon(np.array([0.5, 0.3]), triangle) is True"
 
         # Outside
-        assert _point_in_polygon(np.array([1.5, 0.5]), triangle) is False, (
-            "Assertion failed: _point_in_polygon(np.array([1.5, 0.5]), triangle) is False"
-        )
+        assert (
+            _point_in_polygon(np.array([1.5, 0.5]), triangle) is False
+        ), "Assertion failed: _point_in_polygon(np.array([1.5, 0.5]), triangle) is False"
 
         # On edge (may be inside or outside depending on implementation)
         # Just verify it doesn't crash

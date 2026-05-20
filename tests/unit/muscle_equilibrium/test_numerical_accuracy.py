@@ -56,9 +56,9 @@ class TestNumericalAccuracy:
 
         # Residual should be much smaller than typical forces
         tolerance_N = 1.0  # 1 N tolerance
-        assert abs(residual) < tolerance_N, (
-            f"Residual {residual:.6f} N exceeds tolerance {tolerance_N} N"
-        )
+        assert (
+            abs(residual) < tolerance_N
+        ), f"Residual {residual:.6f} N exceeds tolerance {tolerance_N} N"
 
     def test_repeated_solves_give_consistent_results(self, standard_muscle) -> None:
         """Test that solving the same problem multiple times gives consistent results."""

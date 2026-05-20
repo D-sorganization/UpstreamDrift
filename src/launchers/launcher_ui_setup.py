@@ -746,9 +746,9 @@ class LauncherUISetupMixin:
         """
         menubar = QMenuBar(self)
         # Postcondition (DbC): a non-null QMenuBar is returned.
-        assert menubar is not None, (
-            "QMenuBar construction returned None — should be impossible"
-        )
+        assert (
+            menubar is not None
+        ), "QMenuBar construction returned None — should be impossible"
 
         self._setup_file_menu(menubar)
         self._setup_view_menu(menubar)

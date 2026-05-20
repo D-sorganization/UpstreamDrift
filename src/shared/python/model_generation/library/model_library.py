@@ -305,5 +305,7 @@ class ModelLibrary:
         cache_dir.mkdir(parents=True, exist_ok=True)
         dest = cache_dir / Path(entry.source_url).name
 
-        urllib.request.urlretrieve(entry.source_url, dest)  # nosec B310 - scheme validated
+        urllib.request.urlretrieve(
+            entry.source_url, dest
+        )  # nosec B310 - scheme validated
         return dest

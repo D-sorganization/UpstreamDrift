@@ -170,9 +170,9 @@ class TestLinkJointHierarchyConsistency:
         builder.add_joint(joint)
         result = builder.build()
 
-        assert result.solver_status == "success", (
-            f"Build failed: {result.error_message}"
-        )
+        assert (
+            result.solver_status == "success"
+        ), f"Build failed: {result.error_message}"
         assert result.urdf_xml is not None
 
         root = DefusedET.fromstring(result.urdf_xml)

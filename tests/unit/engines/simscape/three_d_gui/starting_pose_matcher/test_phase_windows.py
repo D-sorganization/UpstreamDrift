@@ -106,9 +106,9 @@ class TestPhaseWindows:
             "manual",
         ):
             assert key in core.PHASE_KEYS, f"Phase key {key!r} missing from PHASE_KEYS"
-            assert key in core.PHASE_BOUNDS, (
-                f"Phase key {key!r} missing from PHASE_BOUNDS"
-            )
+            assert (
+                key in core.PHASE_BOUNDS
+            ), f"Phase key {key!r} missing from PHASE_BOUNDS"
 
     def test_default_phase_key_exists(self, core):
         assert core.DEFAULT_PHASE in core.PHASE_KEYS
@@ -119,9 +119,9 @@ class TestPhaseWindows:
             for end in (a, b):
                 if end is None or end == "manual":
                     continue
-                assert end in core.EVENT_KEYS, (
-                    f"Phase {key!r} references unknown event {end!r}"
-                )
+                assert (
+                    end in core.EVENT_KEYS
+                ), f"Phase {key!r} references unknown event {end!r}"
 
 
 # --------------------------------------------------------------------------- #

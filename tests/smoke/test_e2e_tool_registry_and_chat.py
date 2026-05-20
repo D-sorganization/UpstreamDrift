@@ -81,9 +81,9 @@ class TestToolRegistryDiscovery:
     def test_golf_suite_registration_produces_tools(self) -> None:
         """register_golf_suite_tools must register at least one tool."""
         registry = _build_golf_suite_registry()
-        assert len(registry) > 0, (
-            "register_golf_suite_tools registered 0 tools — contract validation failure"
-        )
+        assert (
+            len(registry) > 0
+        ), "register_golf_suite_tools registered 0 tools — contract validation failure"
 
     def test_expected_core_tools_are_present(self) -> None:
         """Core tools expected by the chat system must be registered."""
@@ -112,9 +112,9 @@ class TestToolRegistryDiscovery:
             for tool in registry.list_tools()
             if not tool.description or not tool.description.strip()
         ]
-        assert not empty_desc, (
-            f"Tools missing descriptions (contract validation): {empty_desc}"
-        )
+        assert (
+            not empty_desc
+        ), f"Tools missing descriptions (contract validation): {empty_desc}"
 
     def test_tools_have_callable_handlers(self) -> None:
         """Every registered tool must have a callable handler."""
@@ -122,9 +122,9 @@ class TestToolRegistryDiscovery:
         non_callable = [
             tool.name for tool in registry.list_tools() if not callable(tool.handler)
         ]
-        assert not non_callable, (
-            f"Tools with non-callable handlers (contract validation): {non_callable}"
-        )
+        assert (
+            not non_callable
+        ), f"Tools with non-callable handlers (contract validation): {non_callable}"
 
     def test_expected_categories_present(self) -> None:
         """At least ANALYSIS, DATA_LOADING, EDUCATIONAL categories must exist."""
@@ -138,9 +138,9 @@ class TestToolRegistryDiscovery:
             ToolCategory.EDUCATIONAL,
         }
         missing = expected_categories - category_set
-        assert not missing, (
-            f"Missing expected tool categories: {missing}\nFound: {category_set}"
-        )
+        assert (
+            not missing
+        ), f"Missing expected tool categories: {missing}\nFound: {category_set}"
 
     def test_list_tools_by_category_filters_correctly(self) -> None:
         """list_tools(category=X) must return only tools in that category."""
@@ -148,9 +148,9 @@ class TestToolRegistryDiscovery:
         from src.shared.python.ai.tool_registry import ToolCategory
 
         educational = registry.list_tools(category=ToolCategory.EDUCATIONAL)
-        assert all(t.category == ToolCategory.EDUCATIONAL for t in educational), (
-            "list_tools category filter returned tools from wrong categories"
-        )
+        assert all(
+            t.category == ToolCategory.EDUCATIONAL for t in educational
+        ), "list_tools category filter returned tools from wrong categories"
 
     def test_tools_in_schema_format_are_valid(self) -> None:
         """get_tools_for_provider must return non-empty list with 'name' keys."""
@@ -159,14 +159,14 @@ class TestToolRegistryDiscovery:
         assert isinstance(tools_json, list)
         assert len(tools_json) > 0
         for entry in tools_json:
-            assert "function" in entry, (
-                f"OpenAI format missing 'function' key: {list(entry.keys())}"
-            )
+            assert (
+                "function" in entry
+            ), f"OpenAI format missing 'function' key: {list(entry.keys())}"
             func = entry["function"]
             assert "name" in func, "OpenAI function definition missing 'name'"
-            assert "description" in func, (
-                "OpenAI function definition missing 'description'"
-            )
+            assert (
+                "description" in func
+            ), "OpenAI function definition missing 'description'"
 
     def test_sidekick_analytics_tool_registered(self) -> None:
         """The Sidekick summarize_simulation_run tool must appear in the registry."""
@@ -223,9 +223,9 @@ class TestChatSystemToolAvailability:
         response_text = "\n".join(response_lines)
 
         assert response_text, "Tool list is empty — cannot answer discovery query"
-        assert "summarize_simulation_run" in response_text, (
-            "'summarize_simulation_run' not in tool list response"
-        )
+        assert (
+            "summarize_simulation_run" in response_text
+        ), "'summarize_simulation_run' not in tool list response"
 
     def test_tool_bridge_importable(self) -> None:
         """ChatToolBridge must be importable for chat-to-registry wiring."""
@@ -307,7 +307,7 @@ class TestLauncherManifestFeatureDiscovery:
             pytest.skip("No tools registered")
 
         first_tool_name = tools[0].name
-        assert first_tool_name in registry, (
-            f"__contains__ returned False for registered tool '{first_tool_name}'"
-        )
+        assert (
+            first_tool_name in registry
+        ), f"__contains__ returned False for registered tool '{first_tool_name}'"
         assert "definitely_not_a_tool_xyzzy" not in registry

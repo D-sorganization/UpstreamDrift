@@ -18,9 +18,9 @@ def test_validate_docker_stage_profiles_yaml() -> None:
     """DOCKER_STAGES is populated from docker/profiles.yaml (Phase 2.a)."""
     # The canonical profiles defined in docker/profiles.yaml.
     expected = {"slim", "standard", "research", "biomech", "full", "gpu-training"}
-    assert expected.issubset(set(DOCKER_STAGES)), (
-        f"Expected profiles {expected - set(DOCKER_STAGES)} missing from DOCKER_STAGES"
-    )
+    assert expected.issubset(
+        set(DOCKER_STAGES)
+    ), f"Expected profiles {expected - set(DOCKER_STAGES)} missing from DOCKER_STAGES"
 
 
 def test_validate_docker_stage_accepts_profile() -> None:

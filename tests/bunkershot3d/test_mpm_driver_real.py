@@ -30,7 +30,6 @@ import numpy as np  # noqa: E402
 from bunkershot3d.backends.mpm.driver import MPMDriver  # noqa: E402
 from bunkershot3d.io.schema import BunkerShotResultReader  # noqa: E402
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------

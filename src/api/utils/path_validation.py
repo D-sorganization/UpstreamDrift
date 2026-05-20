@@ -57,8 +57,15 @@ def validate_model_path(model_path: str) -> str:
             detail="Invalid path format",
         ) from exc
 
-    # Check both POSIX and Windows-style absolute paths
-    if user_path.is_absolute() or (len(model_path) >= 2 and model_path[1] == ":"):
+    # Check both POSIX and Windows-style absolute paths. Path.is_absolute()
+    # on Windows returns False for POSIX-style leading-slash paths such as
+    # "/etc/passwd", so we also reject any path that begins with "/" or "\\"
+    # to defend against path-traversal regardless of host OS.
+    if (
+        user_path.is_absolute()
+        or (len(model_path) >= 2 and model_path[1] == ":")
+        or model_path.startswith(("/", "\\"))
+    ):
         raise HTTPException(
             status_code=400,
             detail="Invalid path: absolute paths are not allowed",

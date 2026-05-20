@@ -107,6 +107,6 @@ class TestIssue2502TempFileHandling:
                 renderer.load_urdf_file(str(urdf_file))
 
         assert len(captured_names) == 1
-        assert captured_names[0] != "_temp_fixed_model.urdf", (
-            f"Expected a unique temp name; got {captured_names[0]!r}"
-        )
+        assert (
+            captured_names[0] != "_temp_fixed_model.urdf"
+        ), f"Expected a unique temp name; got {captured_names[0]!r}"

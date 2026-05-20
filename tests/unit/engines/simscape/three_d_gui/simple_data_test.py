@@ -91,7 +91,9 @@ def check_signal_bus_structure() -> bool:
                         )
 
                     return True
-                logger.info("⚠️  This appears to be traditional logging (fewer columns)")
+                logger.info(
+                    "⚠️  This appears to be traditional logging (fewer columns)"
+                )
                 return False
 
         return False
@@ -137,7 +139,9 @@ def check_required_signals() -> bool:
                     if dataset.shape[1] >= 6:  # At least 6 signals for positions
                         logger.info(f"    ✅ {name} has sufficient signals for GUI")
                     else:
-                        logger.warning(f"    ⚠️  {name} may be missing required signals")
+                        logger.warning(
+                            f"    ⚠️  {name} may be missing required signals"
+                        )
 
         return True
 

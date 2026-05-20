@@ -124,7 +124,7 @@ def grep_count(
         raise ValueError("root must be provided")
     count = 0
     regex = re.compile(pattern)
-    excluded = {part for part in exclude_parts if part}
+    excluded = {part for part in (exclude_parts or []) if part}
     for p in root.glob(file_pattern):
         if not p.is_file():
             continue

@@ -69,14 +69,14 @@ class TestBcryptAPIKeyVerification:
         key_hash = bcrypt_lib.hashpw(api_key.encode("utf-8"), salt).decode("utf-8")
 
         # Verify the hash is bcrypt format (starts with $2b$)
-        assert key_hash.startswith(("$2b$", "$2a$")), (
-            "Assertion failed: key_hash.startswith(($2b$, $2a$))"
-        )
+        assert key_hash.startswith(
+            ("$2b$", "$2a$")
+        ), "Assertion failed: key_hash.startswith(($2b$, $2a$))"
 
         # Verify the key can be verified
-        assert bcrypt_lib.checkpw(api_key.encode("utf-8"), key_hash.encode("utf-8")), (
-            "Assertion failed: bcrypt_lib.checkpw(api_key.encode(utf-8), key_hash.encode(utf-8))"
-        )
+        assert bcrypt_lib.checkpw(
+            api_key.encode("utf-8"), key_hash.encode("utf-8")
+        ), "Assertion failed: bcrypt_lib.checkpw(api_key.encode(utf-8), key_hash.encode(utf-8))"
 
         # Verify a different key fails
         wrong_key = f"gms_{secrets.token_urlsafe(32)}"
@@ -119,9 +119,9 @@ class TestBcryptAPIKeyVerification:
         """Test that API keys must have gms_ prefix."""
         # Valid format
         valid_key = f"gms_{secrets.token_urlsafe(32)}"
-        assert valid_key.startswith("gms_"), (
-            "Assertion failed: valid_key.startswith(gms_)"
-        )
+        assert valid_key.startswith(
+            "gms_"
+        ), "Assertion failed: valid_key.startswith(gms_)"
 
         # Invalid formats (should be rejected)
         invalid_keys = [
@@ -132,9 +132,9 @@ class TestBcryptAPIKeyVerification:
         ]
 
         for invalid_key in invalid_keys:
-            assert not invalid_key.startswith("gms_") or len(invalid_key) <= 4, (
-                "Assertion failed: not invalid_key.startswith(gms_) or len(invalid_key) <= 4"
-            )
+            assert (
+                not invalid_key.startswith("gms_") or len(invalid_key) <= 4
+            ), "Assertion failed: not invalid_key.startswith(gms_) or len(invalid_key) <= 4"
 
     @requires_bcrypt
     def test_bcrypt_cost_factor(self) -> None:
@@ -197,9 +197,9 @@ class TestBcryptAPIKeyVerification:
         with pytest.raises(HTTPException) as exc_info:
             await get_current_user_from_api_key(wrong_credentials, mock_db)
 
-        assert exc_info.value.status_code == 401, (
-            "Assertion failed: exc_info.value.status_code == 401"
-        )
+        assert (
+            exc_info.value.status_code == 401
+        ), "Assertion failed: exc_info.value.status_code == 401"
 
     async def test_create_api_key_persists_prefix_hash(self) -> None:
         """Created API key records should persist the lookup prefix hash."""
@@ -231,16 +231,16 @@ class TestBcryptAPIKeyVerification:
             response = await create_api_key(api_key_data, current_user, mock_db)
 
         saved_record = mock_db.add.call_args.args[0]
-        assert isinstance(saved_record, APIKey), (
-            "Assertion failed: isinstance(saved_record, APIKey)"
-        )
-        assert saved_record.key_prefix == compute_prefix_hash("abcdefgh"), (
-            "Assertion failed: saved_record.key_prefix == compute_prefix_hash(abcdefgh)"
-        )
+        assert isinstance(
+            saved_record, APIKey
+        ), "Assertion failed: isinstance(saved_record, APIKey)"
+        assert saved_record.key_prefix == compute_prefix_hash(
+            "abcdefgh"
+        ), "Assertion failed: saved_record.key_prefix == compute_prefix_hash(abcdefgh)"
         assert response is fake_response, "Assertion failed: response is fake_response"
-        assert response.key == generated_api_key, (
-            "Assertion failed: response.key == generated_api_key"
-        )
+        assert (
+            response.key == generated_api_key
+        ), "Assertion failed: response.key == generated_api_key"
 
 
 class TestTimezoneAwareJWT:
@@ -265,9 +265,9 @@ class TestTimezoneAwareJWT:
 
         # The exp should be a timestamp (Unix epoch)
         exp_timestamp = payload["exp"]
-        assert isinstance(exp_timestamp, int | float), (
-            "Assertion failed: isinstance(exp_timestamp, int | float)"
-        )
+        assert isinstance(
+            exp_timestamp, int | float
+        ), "Assertion failed: isinstance(exp_timestamp, int | float)"
 
         # Convert to datetime and verify it's in the future
         exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=UTC)
@@ -291,9 +291,9 @@ class TestTimezoneAwareJWT:
         )
 
         # Verify token type
-        assert payload.get("type") == "refresh", (
-            "Assertion failed: payload.get(type) == refresh"
-        )
+        assert (
+            payload.get("type") == "refresh"
+        ), "Assertion failed: payload.get(type) == refresh"
 
         # Check expiration is timezone-aware
         exp_timestamp = payload["exp"]
@@ -301,9 +301,9 @@ class TestTimezoneAwareJWT:
         now = datetime.now(UTC)
 
         assert exp_datetime > now, "Assertion failed: exp_datetime > now"
-        assert exp_datetime.tzinfo is not None, (
-            "Assertion failed: exp_datetime.tzinfo is not None"
-        )
+        assert (
+            exp_datetime.tzinfo is not None
+        ), "Assertion failed: exp_datetime.tzinfo is not None"
 
     def test_no_deprecated_datetime_utcnow(self) -> None:
         """Test that code doesn't use deprecated datetime.utcnow()."""
@@ -329,23 +329,25 @@ class TestPasswordSecurity:
         """Test that passwords are hashed with bcrypt."""
         security_manager = SecurityManager()
 
-        password = "test_password_123!@#"  # nosec B105 - test fixture, not a real credential
+        password = (
+            "test_password_123!@#"  # nosec B105 - test fixture, not a real credential
+        )
         hashed = security_manager.hash_password(password)
 
         # Verify bcrypt format
-        assert hashed.startswith(("$2b$", "$2a$")), (
-            "Assertion failed: hashed.startswith(($2b$, $2a$))"
-        )
+        assert hashed.startswith(
+            ("$2b$", "$2a$")
+        ), "Assertion failed: hashed.startswith(($2b$, $2a$))"
 
         # Verify password can be verified
-        assert security_manager.verify_password(password, hashed), (
-            "Assertion failed: security_manager.verify_password(password, hashed)"
-        )
+        assert security_manager.verify_password(
+            password, hashed
+        ), "Assertion failed: security_manager.verify_password(password, hashed)"
 
         # Verify wrong password fails
-        assert not security_manager.verify_password("wrong_password", hashed), (
-            "Assertion failed: not security_manager.verify_password(wrong_password, hashed)"
-        )
+        assert not security_manager.verify_password(
+            "wrong_password", hashed
+        ), "Assertion failed: not security_manager.verify_password(wrong_password, hashed)"
 
     def test_password_not_logged(self) -> None:
         """Test that passwords are never logged in plaintext."""
@@ -390,22 +392,22 @@ class TestPasswordSecurity:
 
             # Check that no password appears in plaintext
             # Should have warning about no password set
-            assert "GOLF_ADMIN_PASSWORD" in log_output, (
-                "Assertion failed: GOLF_ADMIN_PASSWORD in log_output"
-            )
+            assert (
+                "GOLF_ADMIN_PASSWORD" in log_output
+            ), "Assertion failed: GOLF_ADMIN_PASSWORD in log_output"
 
             # Should NOT have "password: " or similar plaintext password
-            assert "Temporary admin password:" not in log_output, (
-                "Assertion failed: Temporary admin password: not in log_output"
-            )
-            assert "Temporary password:" not in log_output, (
-                "Assertion failed: Temporary password: not in log_output"
-            )
+            assert (
+                "Temporary admin password:" not in log_output
+            ), "Assertion failed: Temporary admin password: not in log_output"
+            assert (
+                "Temporary password:" not in log_output
+            ), "Assertion failed: Temporary password: not in log_output"
 
             # Should have instructions instead
-            assert "randomly generated password" in log_output.lower(), (
-                "Assertion failed: randomly generated password in log_output.lower()"
-            )
+            assert (
+                "randomly generated password" in log_output.lower()
+            ), "Assertion failed: randomly generated password in log_output.lower()"
 
         finally:
             logger.removeHandler(handler)
@@ -450,9 +452,9 @@ class TestSecretKeyValidation:
             importlib.reload(security)
 
             # Check it uses the environment variable
-            assert security.SECRET_KEY == "x" * 64, (
-                "Assertion failed: security.SECRET_KEY == x * 64"
-            )
+            assert (
+                security.SECRET_KEY == "x" * 64
+            ), "Assertion failed: security.SECRET_KEY == x * 64"
 
         # Restore original state (reload without env var)
         importlib.reload(security)
@@ -482,12 +484,12 @@ class TestSecurityBestPractices:
         ]
 
         for pattern in suspicious_patterns:
-            assert pattern not in security_source.lower(), (
-                f"Found suspicious pattern in security.py: {pattern}"
-            )
-            assert pattern not in dependencies_source.lower(), (
-                f"Found suspicious pattern in dependencies.py: {pattern}"
-            )
+            assert (
+                pattern not in security_source.lower()
+            ), f"Found suspicious pattern in security.py: {pattern}"
+            assert (
+                pattern not in dependencies_source.lower()
+            ), f"Found suspicious pattern in dependencies.py: {pattern}"
 
     def test_secure_random_generation(self) -> None:
         """Test that secrets module is used for random generation."""
@@ -543,22 +545,22 @@ class TestPrefixHashing:
         hash1 = compute_prefix_hash(prefix)
 
         # Same prefix should give same hash
-        assert hash1 == compute_prefix_hash(prefix), (
-            "Assertion failed: hash1 == compute_prefix_hash(prefix)"
-        )
+        assert hash1 == compute_prefix_hash(
+            prefix
+        ), "Assertion failed: hash1 == compute_prefix_hash(prefix)"
 
         # Different prefix should give different hash
-        assert hash1 != compute_prefix_hash("12345678"), (
-            "Assertion failed: hash1 != compute_prefix_hash(12345678)"
-        )
+        assert hash1 != compute_prefix_hash(
+            "12345678"
+        ), "Assertion failed: hash1 != compute_prefix_hash(12345678)"
 
         # Verify format (SHA256 hex digest)
         assert len(hash1) == 64, "Assertion failed: len(hash1) == 64"
         import re
 
-        assert re.match(r"^[0-9a-f]{64}$", hash1), (
-            "Assertion failed: re.match(r^[0-9a-f]{64}$, hash1)"
-        )
+        assert re.match(
+            r"^[0-9a-f]{64}$", hash1
+        ), "Assertion failed: re.match(r^[0-9a-f]{64}$, hash1)"
 
 
 if __name__ == "__main__":

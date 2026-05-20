@@ -108,9 +108,9 @@ class TestSidekickEmbedding:
         floating_docks = [
             w for w in top_level if isinstance(w, QDockWidget) and w.isFloating()
         ]
-        assert not floating_docks, (
-            f"unexpected floating QDockWidget(s): {floating_docks!r}"
-        )
+        assert (
+            not floating_docks
+        ), f"unexpected floating QDockWidget(s): {floating_docks!r}"
 
     def test_main_splitter_has_three_panes(self, ui_setup_with_sidekick) -> None:
         _ui, splitter, _calls = ui_setup_with_sidekick

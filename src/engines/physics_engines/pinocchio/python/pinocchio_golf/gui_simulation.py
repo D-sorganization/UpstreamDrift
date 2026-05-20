@@ -235,7 +235,9 @@ class SimulationMixin:
 
         return induced, counterfactuals
 
-    def _compute_specific_sources(self: Any, induced: dict[str, np.ndarray]) -> None:  # noqa: C901
+    def _compute_specific_sources(
+        self: Any, induced: dict[str, np.ndarray]
+    ) -> None:  # noqa: C901
         """Compute induced accelerations for specific actuator sources."""
         if not (self.analyzer is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
