@@ -46,6 +46,18 @@ jobs:
     runs-on: d-sorg-fleet
     timeout-minutes: 5
     steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Run GitHub Actions pinning guard
         shell: bash
@@ -56,6 +68,18 @@ jobs:
     runs-on: d-sorg-fleet
     timeout-minutes: 5
     steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Run workflow inventory guard
         shell: bash
@@ -66,6 +90,18 @@ jobs:
     runs-on: d-sorg-fleet
     timeout-minutes: 5
     steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Run URDF layering guard
         shell: bash
@@ -89,6 +125,18 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 45
     steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
@@ -459,6 +507,18 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 15
     steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
@@ -503,6 +563,18 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 15
     steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
@@ -541,6 +613,18 @@ jobs:
       matrix:
         python: ["3.10", "3.11", "3.12"]
     steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Check for core test relevant changes
@@ -852,6 +936,18 @@ jobs:
           --health-timeout 5s
           --health-retries 24
     steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
@@ -911,6 +1007,18 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
     steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Checkout Tools Hub
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
@@ -1001,6 +1109,18 @@ jobs:
       run:
         working-directory: ./ui
     steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Check for frontend changes
@@ -1062,6 +1182,18 @@ jobs:
     if: false # DISABLED - Requires MATLAB license not available in CI
     continue-on-error: true
     steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - uses: matlab-actions/setup-matlab@a0180c939fb1a28de13f44f7b778b912384ced1f
@@ -1082,6 +1214,18 @@ jobs:
     timeout-minutes: 15
     if: false # DISABLED - No Arduino components in this project
     steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
@@ -1135,6 +1279,18 @@ jobs:
         # uniformly across all three OSes.
         shell: bash
     steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
@@ -1334,6 +1490,18 @@ jobs:
     runs-on: d-sorg-fleet
     timeout-minutes: 15
     steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
