@@ -148,9 +148,7 @@ class LineNumberArea(QWidget):
 
     def __init__(self, editor: URDFCodeEditor) -> None:
         """Initialize the line number area."""
-        if not (editor is not None):
-            raise ValueError("editor must be provided")
-        if not (editor is not None):
+        if editor is None:
             raise ValueError("editor must be provided")
         super().__init__(editor)
         self.editor = editor
@@ -301,9 +299,7 @@ class URDFCodeEditor(QPlainTextEdit):
 
     def update_line_number_area(self, rect: QRect, dy: int) -> None:
         """Update the line number area when scrolling."""
-        if not (rect is not None):
-            raise ValueError("rect must be provided")
-        if not (rect is not None):
+        if rect is None:
             raise ValueError("rect must be provided")
         if dy:
             self.line_number_area.scroll(0, dy)
@@ -401,9 +397,7 @@ class URDFCodeEditor(QPlainTextEdit):
 
     def insert_completion(self, completion: str) -> None:
         """Insert the selected completion."""
-        if not (completion is not None):
-            raise ValueError("completion must be provided")
-        if not (completion is not None):
+        if completion is None:
             raise ValueError("completion must be provided")
         cursor = self.textCursor()
         extra = len(completion) - len(self.completer.completionPrefix())
@@ -526,9 +520,7 @@ class URDFCodeEditor(QPlainTextEdit):
 
     def set_content(self, content: str) -> None:
         """Set the editor content."""
-        if not (content is not None):
-            raise ValueError("content must be provided")
-        if not (content is not None):
+        if content is None:
             raise ValueError("content must be provided")
         self.setPlainText(content)
 
@@ -538,9 +530,7 @@ class URDFCodeEditor(QPlainTextEdit):
 
     def go_to_line(self, line: int) -> None:
         """Move cursor to a specific line."""
-        if not (line is not None):
-            raise ValueError("line must be provided")
-        if not (line is not None):
+        if line is None:
             raise ValueError("line must be provided")
         doc = self.document()
         if doc is None:
@@ -561,9 +551,7 @@ class URDFCodeEditor(QPlainTextEdit):
         Returns:
             True if found
         """
-        if not (text is not None):
-            raise ValueError("text must be provided")
-        if not (text is not None):
+        if text is None:
             raise ValueError("text must be provided")
         flags = QTextDocument.FindFlag(0)
         if case_sensitive:
@@ -584,9 +572,7 @@ class URDFCodeEditor(QPlainTextEdit):
         Returns:
             Number of replacements made
         """
-        if not (find is not None):
-            raise ValueError("find must be provided")
-        if not (find is not None):
+        if find is None:
             raise ValueError("find must be provided")
         count = 0
         content = self.toPlainText()
@@ -699,9 +685,7 @@ class URDFCodeEditorWidget(QWidget):
 
     def _show_errors(self, errors: list[str]) -> None:
         """Display validation errors."""
-        if not (errors is not None):
-            raise ValueError("errors must be provided")
-        if not (errors is not None):
+        if errors is None:
             raise ValueError("errors must be provided")
         html = '<span style="color: red;">Validation errors:</span><br>'
         for error in errors:
@@ -742,9 +726,7 @@ class URDFCodeEditorWidget(QWidget):
 
     def set_content(self, content: str, file_path: str | None = None) -> None:
         """Set editor content."""
-        if not (content is not None):
-            raise ValueError("content must be provided")
-        if not (content is not None):
+        if content is None:
             raise ValueError("content must be provided")
         self.editor.set_content(content)
         self._current_file = file_path
@@ -761,9 +743,7 @@ class FindReplaceDialog(QDialog):
 
     def __init__(self, editor: URDFCodeEditor, parent: QWidget | None = None) -> None:
         """Initialize the dialog."""
-        if not (editor is not None):
-            raise ValueError("editor must be provided")
-        if not (editor is not None):
+        if editor is None:
             raise ValueError("editor must be provided")
         super().__init__(parent)
         self.editor = editor

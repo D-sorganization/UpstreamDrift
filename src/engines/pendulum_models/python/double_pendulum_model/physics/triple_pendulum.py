@@ -133,9 +133,7 @@ def _calc_mass_matrix(
     I3: float,
     g: float,
 ) -> np.ndarray:
-    if not (theta1 is not None):
-        raise ValueError("theta1 must be provided")
-    if not (theta1 is not None):
+    if theta1 is None:
         raise ValueError("theta1 must be provided")
     mass = np.zeros((3, 3))
     mass[0, 0] = (
@@ -216,9 +214,7 @@ def _calc_bias_vector(
     I3: float,
     g: float,
 ) -> np.ndarray:
-    if not (theta1 is not None):
-        raise ValueError("theta1 must be provided")
-    if not (theta1 is not None):
+    if theta1 is None:
         raise ValueError("theta1 must be provided")
     bias = np.zeros((3,))
     bias[0] = (
@@ -284,9 +280,7 @@ def _calc_gravity_vector(
     I3: float,
     g: float,
 ) -> np.ndarray:
-    if not (theta1 is not None):
-        raise ValueError("theta1 must be provided")
-    if not (theta1 is not None):
+    if theta1 is None:
         raise ValueError("theta1 must be provided")
     gravity = np.zeros((3,))
     gravity[0] = (

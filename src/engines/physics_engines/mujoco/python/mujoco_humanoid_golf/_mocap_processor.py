@@ -27,9 +27,7 @@ class MotionCaptureProcessor:
             Filtered positions [N x 3] or [N x nv]
         """
         # Design filter
-        if not (times is not None):
-            raise ValueError("times must be provided")
-        if not (times is not None):
+        if times is None:
             raise ValueError("times must be provided")
         nyquist = sampling_rate / 2.0
         normalized_cutoff = cutoff_frequency / nyquist
@@ -58,9 +56,7 @@ class MotionCaptureProcessor:
         Returns:
             Velocities [N x d]
         """
-        if not (times is not None):
-            raise ValueError("times must be provided")
-        if not (times is not None):
+        if times is None:
             raise ValueError("times must be provided")
         if method == "finite_difference":
             # Central differences
@@ -96,9 +92,7 @@ class MotionCaptureProcessor:
         Returns:
             Accelerations [N x d]
         """
-        if not (times is not None):
-            raise ValueError("times must be provided")
-        if not (times is not None):
+        if times is None:
             raise ValueError("times must be provided")
         if method == "finite_difference":
             accelerations = np.zeros_like(velocities)
@@ -136,9 +130,7 @@ class MotionCaptureProcessor:
         Returns:
             Resampled trajectory [M x d]
         """
-        if not (times is not None):
-            raise ValueError("times must be provided")
-        if not (times is not None):
+        if times is None:
             raise ValueError("times must be provided")
         resampled = np.zeros((len(new_times), trajectory.shape[1]))
 
@@ -171,9 +163,7 @@ class MotionCaptureProcessor:
             Tuple of (normalized_times [M], normalized_trajectory [M x d])
         """
         # Normalize time to [0, 1]
-        if not (times is not None):
-            raise ValueError("times must be provided")
-        if not (times is not None):
+        if times is None:
             raise ValueError("times must be provided")
         normalized_times = np.linspace(0, 1, num_samples)
 

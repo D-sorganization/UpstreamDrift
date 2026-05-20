@@ -83,9 +83,9 @@ def test_all_engines_reexport_canonical_fitresult() -> None:
     fails immediately.
     """
     for name, cls in _all_engine_fitresult_classes():
-        assert (
-            cls is CanonicalFitResult
-        ), f"{name}.FitResult must be CanonicalFitResult, got {cls!r}"
+        assert cls is CanonicalFitResult, (
+            f"{name}.FitResult must be CanonicalFitResult, got {cls!r}"
+        )
 
 
 @pytest.mark.unit

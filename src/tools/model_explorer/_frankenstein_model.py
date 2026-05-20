@@ -28,9 +28,7 @@ class URDFModel:
     @classmethod
     def from_file(cls, file_path: Path) -> URDFModel:
         """Load a URDF model from file."""
-        if not (file_path is not None):
-            raise ValueError("file_path must be provided")
-        if not (file_path is not None):
+        if file_path is None:
             raise ValueError("file_path must be provided")
         tree = DefusedET.parse(file_path)
         root = tree.getroot()
@@ -39,9 +37,7 @@ class URDFModel:
     @classmethod
     def from_element(cls, root: ET.Element, file_path: Path | None = None) -> URDFModel:
         """Create model from XML element."""
-        if not (root is not None):
-            raise ValueError("root must be provided")
-        if not (root is not None):
+        if root is None:
             raise ValueError("root must be provided")
         robot_name = root.get("name", "unnamed_robot")
 
@@ -115,9 +111,7 @@ class URDFModel:
         Returns:
             The name used for the link
         """
-        if not (link is not None):
-            raise ValueError("link must be provided")
-        if not (link is not None):
+        if link is None:
             raise ValueError("link must be provided")
         link_copy = copy.deepcopy(link)
         name = new_name or link_copy.get("name") or "unnamed_link"
@@ -150,9 +144,7 @@ class URDFModel:
         Returns:
             The name used for the joint
         """
-        if not (joint is not None):
-            raise ValueError("joint must be provided")
-        if not (joint is not None):
+        if joint is None:
             raise ValueError("joint must be provided")
         joint_copy = copy.deepcopy(joint)
         name = new_name or joint_copy.get("name") or "unnamed_joint"
@@ -186,9 +178,7 @@ class URDFModel:
 
     def add_material(self, material: ET.Element) -> str:
         """Add a material to the model."""
-        if not (material is not None):
-            raise ValueError("material must be provided")
-        if not (material is not None):
+        if material is None:
             raise ValueError("material must be provided")
         material_copy = copy.deepcopy(material)
         name = material_copy.get("name", "unnamed_material")
@@ -201,9 +191,7 @@ class URDFModel:
 
     def remove_link(self, name: str) -> bool:
         """Remove a link and its connected joints."""
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if name not in self.links:
             return False
@@ -228,9 +216,7 @@ class URDFModel:
 
     def remove_joint(self, name: str) -> bool:
         """Remove a joint."""
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if name not in self.joints:
             return False

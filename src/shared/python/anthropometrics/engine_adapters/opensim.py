@@ -21,7 +21,7 @@ ingestion.
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET  # noqa: S314  # Security: defusedxml prevents XML attacks
 from pathlib import Path
 
 import numpy as np
@@ -69,9 +69,9 @@ class OpenSimAdapter:
             body = ET.SubElement(objects, "Body", {"name": seg_name})
             ET.SubElement(body, "mass").text = _FLOAT_FMT(float(props.mass_kg))
             cx, cy, cz = (float(v) for v in props.com_xyz_m.tolist())
-            ET.SubElement(body, "mass_center").text = (
-                f"{_FLOAT_FMT(cx)} {_FLOAT_FMT(cy)} {_FLOAT_FMT(cz)}"
-            )
+            ET.SubElement(
+                body, "mass_center"
+            ).text = f"{_FLOAT_FMT(cx)} {_FLOAT_FMT(cy)} {_FLOAT_FMT(cz)}"
             t = props.inertia_tensor
             ET.SubElement(body, "inertia").text = " ".join(
                 _FLOAT_FMT(float(v))

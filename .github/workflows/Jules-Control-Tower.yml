@@ -256,11 +256,11 @@ jobs:
     with:
       run_id: ${{ format('{0}', (github.event.workflow_run && github.event.workflow_run.id)) }}
       branch: ${{ (github.event.workflow_run && github.event.workflow_run.head_branch) || '' }}
-      # Branch quarantine: all agent changes go to prefixed branches
-      target_branch: ${{ format('{0}{1}', env.AGENT_BRANCH_PREFIX, (github.event.workflow_run && github.event.workflow_run.head_branch) || 'main') }}
     permissions:
       contents: write
       pull-requests: write
+      actions: read
+      checks: read
     secrets: inherit
 
   call-hotfix-creator:
@@ -270,19 +270,16 @@ jobs:
     with:
       run_id: ${{ format('{0}', (github.event.workflow_run && github.event.workflow_run.id)) }}
       failed_branch: ${{ (github.event.workflow_run && github.event.workflow_run.head_branch) || '' }}
-      target_branch: ${{ format('{0}hotfix/{1}', env.AGENT_BRANCH_PREFIX, (github.event.workflow_run && github.event.workflow_run.head_branch) || 'main') }}
     permissions:
       contents: write
       pull-requests: write
+      actions: write
     secrets: inherit
 
   call-scribe:
     needs: triage
     if: needs.triage.outputs.target == 'doc-scribe'
     uses: ./.github/workflows/Jules-Documentation-Scribe.yml
-    with:
-      # Documentation writes restricted to docs/ path only
-      allowed_paths: "docs/"
     permissions:
       contents: write
       pull-requests: write
@@ -292,8 +289,6 @@ jobs:
     needs: triage
     if: needs.triage.outputs.target == 'test-generator'
     uses: ./.github/workflows/Jules-Test-Generator.yml
-    with:
-      target_branch: ${{ format('{0}tests/{1}', env.AGENT_BRANCH_PREFIX, github.head_ref || 'main') }}
     permissions:
       contents: write
       pull-requests: write
@@ -306,47 +301,45 @@ jobs:
     needs: triage
     if: needs.triage.outputs.target == 'archivist'
     uses: ./.github/workflows/Jules-Archivist.yml
-    # Archivist is read-only - no write permissions needed
+    permissions:
+      contents: write
+      pull-requests: read
     secrets: inherit
 
   call-sentinel:
     needs: triage
     if: needs.triage.outputs.target == 'sentinel'
     uses: ./.github/workflows/Jules-Sentinel.yml
-    # Sentinel is read-only security scanner
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
     secrets: inherit
 
   call-code-quality-reviewer:
     needs: triage
     if: needs.triage.outputs.target == 'code-quality-reviewer'
     uses: ./.github/workflows/Jules-Code-Quality-Reviewer.yml
-    with:
-      target_branch: ${{ format('{0}cq-review/{1}', env.AGENT_BRANCH_PREFIX, github.head_ref || 'main') }}
     permissions:
       contents: write
       pull-requests: write
+      issues: write
     secrets: inherit
 
   call-assessment-generator:
     needs: triage
     if: needs.triage.outputs.target == 'assessment-generator'
     uses: ./.github/workflows/Jules-Assessment-Generator.yml
-    with:
-      # Assessments only write to docs/assessments/
-      allowed_paths: "docs/assessments/,runner-dashboard/assessments/"
     permissions:
       contents: write
       pull-requests: write
+      issues: write
     secrets: inherit
 
   call-issue-resolver:
     needs: triage
     if: needs.triage.outputs.target == 'issue-resolver'
     uses: ./.github/workflows/Jules-Issue-Resolver.yml
-    with:
-      target_branch: ${{ format('{0}fix/', env.AGENT_BRANCH_PREFIX) }}${{ github.event.issue.number || 'unknown' }}-${{ github.event.issue.title || 'issue' }}
-      # Path restrictions enforced by worker
-      allowed_paths: ${{ env.AGENT_ALLOWED_PATHS }}
     permissions:
       contents: write
       pull-requests: write
@@ -357,31 +350,26 @@ jobs:
     needs: triage
     if: needs.triage.outputs.target == 'completist'
     uses: ./.github/workflows/Jules-Completist.yml
-    with:
-      target_branch: ${{ format('{0}completist/{1}', env.AGENT_BRANCH_PREFIX, github.head_ref || 'main') }}
     permissions:
       contents: write
       pull-requests: write
+      issues: write
     secrets: inherit
 
   call-documentation-auditor:
     needs: triage
     if: needs.triage.outputs.target == 'documentation-auditor'
     uses: ./.github/workflows/Jules-Documentation-Auditor.yml
-    with:
-      # Documentation changes restricted to docs/ and README files
-      allowed_paths: "docs/,README*.md,CONTRIBUTING.md,CHANGELOG.md"
     permissions:
       contents: write
       pull-requests: write
+      issues: write
     secrets: inherit
 
   call-pr-compiler:
     needs: triage
     if: needs.triage.outputs.target == 'pr-compiler'
     uses: ./.github/workflows/Jules-PR-Compiler.yml
-    with:
-      target_branch: ${{ format('{0}pr-compile/{1}', env.AGENT_BRANCH_PREFIX, github.head_ref || 'main') }}
     permissions:
       contents: write
       pull-requests: write

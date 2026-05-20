@@ -100,7 +100,7 @@ class DrakeSkeletonProvider:
         # Load model
         if model_xml is not None:
             from pydrake.multibody.parser import Parser
-            import xml.etree.ElementTree as ET
+            import defusedxml.ElementTree as ET  # noqa: S314  # Security: defusedxml prevents XML attacks
 
             parser = Parser(self.plant)
             # Detect SDF vs URDF by parsing the XML root tag

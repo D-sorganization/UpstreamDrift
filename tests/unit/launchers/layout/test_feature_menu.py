@@ -100,9 +100,7 @@ def test_register_feature_menu_creates_actions(qt_real, qapp) -> None:  # noqa: 
         )
 
 
-def test_auto_hide_jupyter_when_unavailable(
-    qt_real, qapp, monkeypatch
-) -> None:  # noqa: ARG001
+def test_auto_hide_jupyter_when_unavailable(qt_real, qapp, monkeypatch) -> None:  # noqa: ARG001
     """Jupyter entry is omitted when nbformat is unavailable."""
     from PyQt6.QtWidgets import QMainWindow
 

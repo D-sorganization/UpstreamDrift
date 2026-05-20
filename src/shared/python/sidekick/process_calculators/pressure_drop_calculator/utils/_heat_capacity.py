@@ -25,9 +25,7 @@ def calculate_ideal_gas_cp(component: str, temperature: float) -> float:
     Reference:
         NIST Chemistry WebBook, Shomate Equation
     """
-    if not (component is not None):
-        raise ValueError("component must be provided")
-    if not (component is not None):
+    if component is None:
         raise ValueError("component must be provided")
     if component not in GAS_DATABASE:
         logger.warning(f"Component '{component}' not in database, using Air Cp")
@@ -56,9 +54,7 @@ def calculate_mixture_cp(composition: dict[str, float], temperature: float) -> f
     Returns:
         Mixture Cp in J/(mol·K)
     """
-    if not (composition is not None):
-        raise ValueError("composition must be provided")
-    if not (composition is not None):
+    if composition is None:
         raise ValueError("composition must be provided")
     cp_mix = 0.0
 
@@ -97,9 +93,7 @@ def calculate_heat_capacity_ratio(
     Reference:
         Ideal gas relations: Cp - Cv = R (universal gas constant per mole)
     """
-    if not (composition is not None):
-        raise ValueError("composition must be provided")
-    if not (composition is not None):
+    if composition is None:
         raise ValueError("composition must be provided")
     R_GAS = R_UNIVERSAL_J_MOL_K  # J/(mol·K)
 
@@ -145,9 +139,7 @@ def calculate_speed_of_sound(
     Reference:
         Ideal gas isentropic speed of sound formula
     """
-    if not (composition is not None):
-        raise ValueError("composition must be provided")
-    if not (composition is not None):
+    if composition is None:
         raise ValueError("composition must be provided")
     if molecular_weight is None:
         from ._mixture_properties import calculate_mixture_molecular_weight

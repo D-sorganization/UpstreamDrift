@@ -45,9 +45,9 @@ def test_marker_sets_are_non_empty(marker_set: MarkerSet) -> None:
 def test_marker_to_segment_keys_subset_of_markers(marker_set: MarkerSet) -> None:
     """Every key in marker_to_segment should be a real marker name."""
     for marker_name in marker_set.marker_to_segment:
-        assert (
-            marker_name in marker_set.markers
-        ), f"{marker_name} maps to segment but is not in markers list"
+        assert marker_name in marker_set.markers, (
+            f"{marker_name} maps to segment but is not in markers list"
+        )
 
 
 @pytest.mark.parametrize(

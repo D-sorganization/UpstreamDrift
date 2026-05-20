@@ -252,25 +252,27 @@ class CustomTitleBar(QWidget):
 
     def eventFilter(self, obj, event):
         if event.type() == event.Type.MouseButtonPress:
-            if event.button() == Qt.MouseButton.LeftButton:
-                if isinstance(obj, QToolButton):
-                    return False
-                self.drag_position = (
-                    event.globalPosition().toPoint()
-                    - self.window().frameGeometry().topLeft()
-                )
-                return False  # Let the event propagate or at least don't eat it so mouse grab works
-        elif (
-            event.type() == event.Type.MouseMove
-        ):  # noqa: SIM102 (separated for symmetry with the press branch above)
-            if event.buttons() & Qt.MouseButton.LeftButton:
-                if isinstance(obj, QToolButton):
-                    return False
+            if event.button() != Qt.MouseButton.LeftButton:
+                return super().eventFilter(obj, event)
+            if isinstance(obj, QToolButton):
+                return False
+            self.drag_position = (
+                event.globalPosition().toPoint()
+                - self.window().frameGeometry().topLeft()
+            )
+            return False  # Let the event propagate or at least don't eat it so mouse grab works
 
-                target = event.globalPosition().toPoint() - self.drag_position
-                target = clamp_to_visible_screen(target)
-                self.move_requested.emit(target)
-                return True
+        if event.type() == event.Type.MouseMove:
+            if not (event.buttons() & Qt.MouseButton.LeftButton):
+                return super().eventFilter(obj, event)
+            if isinstance(obj, QToolButton):
+                return False
+
+            target = event.globalPosition().toPoint() - self.drag_position
+            target = clamp_to_visible_screen(target)
+            self.move_requested.emit(target)
+            return True
+
         return super().eventFilter(obj, event)
 
     def mousePressEvent(self, event: QMouseEvent):

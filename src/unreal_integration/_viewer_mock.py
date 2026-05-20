@@ -47,9 +47,7 @@ class MockBackend(ViewerBackend):
         scale: float = 1.0,
     ) -> str:
         """Add mesh to mock scene."""
-        if not (mesh is not None):
-            raise ValueError("mesh must be provided")
-        if not (mesh is not None):
+        if mesh is None:
             raise ValueError("mesh must be provided")
         if name is None:
             name = f"mock_mesh_{len(self._objects)}"
@@ -80,9 +78,7 @@ class MockBackend(ViewerBackend):
 
     def remove_object(self, name: str) -> bool:
         """Remove mock object."""
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if name in self._objects:
             del self._objects[name]

@@ -56,9 +56,7 @@ class GenericPhysicsRecorder(
             max_samples: Maximum allocation size for buffers.
             initial_capacity: Initial buffer size (grows dynamically).
         """
-        if not (engine is not None):
-            raise ValueError("engine must be provided")
-        if not (engine is not None):
+        if engine is None:
             raise ValueError("engine must be provided")
         self.engine = engine
         self.max_samples = max_samples
@@ -81,9 +79,7 @@ class GenericPhysicsRecorder(
         self._reset_buffers()
 
     def set_analysis_config(self, config: dict[str, Any]) -> None:
-        if not (config is not None):
-            raise ValueError("config must be provided")
-        if not (config is not None):
+        if config is None:
             raise ValueError("config must be provided")
         self.analysis_config.update(config)
         logger.info(f"Recorder analysis config updated: {self.analysis_config}")

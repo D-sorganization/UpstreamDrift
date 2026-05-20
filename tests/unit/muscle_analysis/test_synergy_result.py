@@ -36,17 +36,17 @@ class TestSynergyResult:
         )
 
         assert result.weights is weights, "Assertion failed: result.weights is weights"
-        assert (
-            result.activations is activations
-        ), "Assertion failed: result.activations is activations"
-        assert (
-            result.reconstructed is reconstructed
-        ), "Assertion failed: result.reconstructed is reconstructed"
+        assert result.activations is activations, (
+            "Assertion failed: result.activations is activations"
+        )
+        assert result.reconstructed is reconstructed, (
+            "Assertion failed: result.reconstructed is reconstructed"
+        )
         assert result.vaf == 0.92, "Assertion failed: result.vaf == 0.92"
         assert result.n_synergies == 3, "Assertion failed: result.n_synergies == 3"
-        assert (
-            result.muscle_names is None
-        ), "Assertion failed: result.muscle_names is None"
+        assert result.muscle_names is None, (
+            "Assertion failed: result.muscle_names is None"
+        )
 
     def test_with_muscle_names(self) -> None:
         """Test SynergyResult with muscle names."""
@@ -64,9 +64,9 @@ class TestSynergyResult:
             muscle_names=muscle_names,
         )
 
-        assert (
-            result.muscle_names == muscle_names
-        ), "Assertion failed: result.muscle_names == muscle_names"
+        assert result.muscle_names == muscle_names, (
+            "Assertion failed: result.muscle_names == muscle_names"
+        )
 
     def test_matrix_shapes_consistency(self) -> None:
         """Test that matrix shapes are consistent."""

@@ -88,9 +88,12 @@ class TestGraspAnalysis:
     def test_grasp_matrix_shape(self, simple_grasp: list[ContactState]) -> None:
         """Test grasp matrix has correct shape."""
         G = compute_grasp_matrix(simple_grasp)
-        assert G.shape == (
-            6,
-            6,
+        assert (
+            G.shape
+            == (
+                6,
+                6,
+            )
         )  # 6 wrench dims, 2 contacts * 3 force dims, "Assertion failed: G.shape == (6, 6)  # 6 wrench dims, 2 contacts * 3 force dims"
 
     def test_grasp_matrix_with_object_frame(
@@ -110,12 +113,12 @@ class TestGraspAnalysis:
 
         # The result depends on the solver availability and algorithm
         # At minimum, verify it returns valid types
-        assert isinstance(
-            has_closure, bool
-        ), "Assertion failed: isinstance(has_closure, bool)"
-        assert isinstance(
-            quality, float
-        ), "Assertion failed: isinstance(quality, float)"
+        assert isinstance(has_closure, bool), (
+            "Assertion failed: isinstance(has_closure, bool)"
+        )
+        assert isinstance(quality, float), (
+            "Assertion failed: isinstance(quality, float)"
+        )
         assert quality >= 0, "Assertion failed: quality >= 0"
 
         # Note: A proper two-finger opposing grasp with friction
@@ -129,12 +132,12 @@ class TestGraspAnalysis:
         has_closure, quality = check_force_closure(three_finger_grasp)
 
         # Verify valid return types
-        assert isinstance(
-            has_closure, bool
-        ), "Assertion failed: isinstance(has_closure, bool)"
-        assert isinstance(
-            quality, float
-        ), "Assertion failed: isinstance(quality, float)"
+        assert isinstance(has_closure, bool), (
+            "Assertion failed: isinstance(has_closure, bool)"
+        )
+        assert isinstance(quality, float), (
+            "Assertion failed: isinstance(quality, float)"
+        )
         assert quality >= 0, "Assertion failed: quality >= 0"
 
         # A symmetric three-finger grasp is well-suited for force closure

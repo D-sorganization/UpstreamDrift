@@ -35,9 +35,7 @@ class ImpedanceParameters:
             Tuple of (K_matrix, D_matrix, M_matrix)
         """
         # Stiffness
-        if not (dim is not None):
-            raise ValueError("dim must be provided")
-        if not (dim is not None):
+        if dim is None:
             raise ValueError("dim must be provided")
         k_matrix = (
             np.diag(self.stiffness) if self.stiffness.ndim == 1 else self.stiffness

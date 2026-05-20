@@ -27,9 +27,7 @@ def get_checkpoint(sim: PuttingGreenSimulator) -> StateCheckpoint:
 
 def restore_checkpoint(sim: PuttingGreenSimulator, checkpoint: StateCheckpoint) -> None:
     """Restore state from checkpoint."""
-    if not (checkpoint is not None):
-        raise ValueError("checkpoint must be provided")
-    if not (checkpoint is not None):
+    if checkpoint is None:
         raise ValueError("checkpoint must be provided")
     sim._ball_state.position = checkpoint.get_q()
     sim._ball_state.velocity = checkpoint.get_v()

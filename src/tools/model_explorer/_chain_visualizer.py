@@ -37,9 +37,7 @@ class ChainVisualizer(QGraphicsView):
 
     def set_tree(self, tree: KinematicTree) -> None:
         """Set the kinematic tree to visualize."""
-        if not (tree is not None):
-            raise ValueError("tree must be provided")
-        if not (tree is not None):
+        if tree is None:
             raise ValueError("tree must be provided")
         self.tree = tree
         self._render_tree()
@@ -112,9 +110,7 @@ class ChainVisualizer(QGraphicsView):
 
     def _draw_node(self, node: ChainNode, x: float, y: float) -> None:
         """Draw a single node."""
-        if not (node is not None):
-            raise ValueError("node must be provided")
-        if not (node is not None):
+        if node is None:
             raise ValueError("node must be provided")
         r = self.node_radius
 

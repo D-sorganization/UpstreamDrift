@@ -71,9 +71,7 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         is delegated to the native Rust implementation for performance.
         Otherwise, falls back to the Python/Numba implementation.
         """
-        if not (launch is not None):
-            raise ValueError("launch must be provided")
-        if not (launch is not None):
+        if launch is None:
             raise ValueError("launch must be provided")
         from src.shared.python.physics.rust_kernel import is_rust_available
 
@@ -143,9 +141,7 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         self, rust_result: Any, launch: LaunchConditions
     ) -> list[TrajectoryPoint]:
         """Convert a Rust BallTrajectoryResult to a list of TrajectoryPoint objects."""
-        if not (launch is not None):
-            raise ValueError("launch must be provided")
-        if not (launch is not None):
+        if launch is None:
             raise ValueError("launch must be provided")
         points = []
         for p in rust_result.get_points():
@@ -179,9 +175,7 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         self, vel: np.ndarray, launch: LaunchConditions
     ) -> dict[str, np.ndarray]:
         """Calculate forces on the ball (supports vectorized input)."""
-        if not (vel is not None):
-            raise ValueError("vel must be provided")
-        if not (vel is not None):
+        if vel is None:
             raise ValueError("vel must be provided")
         is_batch = vel.ndim > 1
         omega = launch.spin_rate * 2 * np.pi / 60
@@ -204,9 +198,7 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         spin_axis: np.ndarray,
     ) -> tuple[np.ndarray, np.ndarray]:
         """Vectorized force calculation for batch velocity arrays (3, N)."""
-        if not (vel is not None):
-            raise ValueError("vel must be provided")
-        if not (vel is not None):
+        if vel is None:
             raise ValueError("vel must be provided")
         wind = (
             self.environment.wind_velocity.reshape(3, 1)
@@ -257,9 +249,7 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         launch: LaunchConditions,
     ) -> tuple[np.ndarray, np.ndarray]:
         """Scalar force calculation for a single velocity vector (3,)."""
-        if not (vel is not None):
-            raise ValueError("vel must be provided")
-        if not (vel is not None):
+        if vel is None:
             raise ValueError("vel must be provided")
         rel_vel = vel - self.environment.wind_velocity
         speed = float(np.linalg.norm(rel_vel))

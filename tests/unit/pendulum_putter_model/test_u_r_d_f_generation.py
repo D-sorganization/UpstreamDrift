@@ -45,9 +45,9 @@ class TestURDFGeneration:
         # Should parse as valid XML
         root = ET.fromstring(result.urdf_xml)
         assert root.tag == "robot", "Assertion failed: root.tag == robot"
-        assert (
-            root.attrib["name"] == "pendulum_putter"
-        ), "Assertion failed: root.attrib[name] == pendulum_putter"
+        assert root.attrib["name"] == "pendulum_putter", (
+            "Assertion failed: root.attrib[name] == pendulum_putter"
+        )
 
     def test_urdf_has_all_required_elements(self) -> None:
         """URDF should have all required elements for physics engines."""
@@ -74,9 +74,9 @@ class TestURDFGeneration:
             if link.attrib["name"] != "world":
                 # Should have inertial (except world)
                 inertial = link.find("inertial")
-                assert (
-                    inertial is not None
-                ), f"Link {link.attrib['name']} missing inertial"
+                assert inertial is not None, (
+                    f"Link {link.attrib['name']} missing inertial"
+                )
 
     def test_can_save_to_file(self, tmp_path: Path) -> None:
         """Should be able to save URDF to file."""
@@ -92,9 +92,9 @@ class TestURDFGeneration:
         assert output_path.exists(), "Assertion failed: output_path.exists()"
         content = output_path.read_text()
         assert "<robot" in content, "Assertion failed: <robot in content"
-        assert (
-            "pendulum_putter" in content
-        ), "Assertion failed: pendulum_putter in content"
+        assert "pendulum_putter" in content, (
+            "Assertion failed: pendulum_putter in content"
+        )
 
 
 if __name__ == "__main__":

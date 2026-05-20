@@ -70,9 +70,7 @@ class EngineProbe:
             engine_name: Name of the engine
             suite_root: Root directory of the suite
         """
-        if not (engine_name is not None):
-            raise ValueError("engine_name must be provided")
-        if not (engine_name is not None):
+        if engine_name is None:
             raise ValueError("engine_name must be provided")
         self.engine_name = engine_name
         self.suite_root = suite_root
@@ -104,9 +102,7 @@ class MuJoCoProbe(EngineProbe):
 
     def __init__(self, suite_root: Path) -> None:
         """Initialize MuJoCo probe."""
-        if not (suite_root is not None):
-            raise ValueError("suite_root must be provided")
-        if not (suite_root is not None):
+        if suite_root is None:
             raise ValueError("suite_root must be provided")
         super().__init__("MuJoCo", suite_root)
 
@@ -201,9 +197,7 @@ class DrakeProbe(EngineProbe):
 
     def __init__(self, suite_root: Path) -> None:
         """Initialize Drake probe."""
-        if not (suite_root is not None):
-            raise ValueError("suite_root must be provided")
-        if not (suite_root is not None):
+        if suite_root is None:
             raise ValueError("suite_root must be provided")
         super().__init__("Drake", suite_root)
 
@@ -326,9 +320,7 @@ class PinocchioProbe(EngineProbe):
 
     def __init__(self, suite_root: Path) -> None:
         """Initialize Pinocchio probe."""
-        if not (suite_root is not None):
-            raise ValueError("suite_root must be provided")
-        if not (suite_root is not None):
+        if suite_root is None:
             raise ValueError("suite_root must be provided")
         super().__init__("Pinocchio", suite_root)
 
@@ -405,9 +397,7 @@ class PendulumProbe(EngineProbe):
 
     def __init__(self, suite_root: Path) -> None:
         """Initialize Pendulum probe."""
-        if not (suite_root is not None):
-            raise ValueError("suite_root must be provided")
-        if not (suite_root is not None):
+        if suite_root is None:
             raise ValueError("suite_root must be provided")
         super().__init__("Pendulum", suite_root)
 
@@ -469,9 +459,7 @@ class MatlabProbe(EngineProbe):
             suite_root: Root directory of the suite
             is_3d: Whether to probe for 3D model (default: 2D)
         """
-        if not (suite_root is not None):
-            raise ValueError("suite_root must be provided")
-        if not (suite_root is not None):
+        if suite_root is None:
             raise ValueError("suite_root must be provided")
         name = "MATLAB 3D" if is_3d else "MATLAB 2D"
         super().__init__(name, suite_root)
@@ -542,9 +530,7 @@ class OpenSimProbe(EngineProbe):
 
     def __init__(self, suite_root: Path) -> None:
         """Initialize OpenSim probe."""
-        if not (suite_root is not None):
-            raise ValueError("suite_root must be provided")
-        if not (suite_root is not None):
+        if suite_root is None:
             raise ValueError("suite_root must be provided")
         super().__init__("OpenSim", suite_root)
 
@@ -612,9 +598,7 @@ class MyoSimProbe(EngineProbe):
 
     def __init__(self, suite_root: Path) -> None:
         """Initialize MyoSim probe."""
-        if not (suite_root is not None):
-            raise ValueError("suite_root must be provided")
-        if not (suite_root is not None):
+        if suite_root is None:
             raise ValueError("suite_root must be provided")
         super().__init__("MyoSim", suite_root)
 
@@ -675,9 +659,7 @@ class OpenPoseProbe(EngineProbe):
 
     def __init__(self, suite_root: Path) -> None:
         """Initialize OpenPose probe."""
-        if not (suite_root is not None):
-            raise ValueError("suite_root must be provided")
-        if not (suite_root is not None):
+        if suite_root is None:
             raise ValueError("suite_root must be provided")
         super().__init__("OpenPose", suite_root)
 

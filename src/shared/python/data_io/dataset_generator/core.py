@@ -90,9 +90,7 @@ class DatasetGenerator(_DatasetExportMixin):
             ValueError: If engine has no model loaded.
         """
 
-        if not (engine is not None):
-            raise ValueError("engine must be provided")
-        if not (engine is not None):
+        if engine is None:
             raise ValueError("engine must be provided")
         self.engine = engine
         self._original_state: tuple[np.ndarray, np.ndarray] | None = None
@@ -131,9 +129,7 @@ class DatasetGenerator(_DatasetExportMixin):
             RuntimeError: If simulation fails for all samples.
         """
 
-        if not (config is not None):
-            raise ValueError("config must be provided")
-        if not (config is not None):
+        if config is None:
             raise ValueError("config must be provided")
         rng = np.random.default_rng(config.seed)
 
@@ -403,9 +399,7 @@ class DatasetGenerator(_DatasetExportMixin):
             buffers: Pre-allocated recording buffers (modified in-place).
         """
 
-        if not (config is not None):
-            raise ValueError("config must be provided")
-        if not (config is not None):
+        if config is None:
             raise ValueError("config must be provided")
         if config.record_mass_matrix and buffers["mass_matrices"] is not None:
             with contextlib.suppress(ValueError, RuntimeError, AttributeError):
@@ -467,9 +461,7 @@ class DatasetGenerator(_DatasetExportMixin):
             Tuple of (initial_positions, initial_velocities).
         """
 
-        if not (config is not None):
-            raise ValueError("config must be provided")
-        if not (config is not None):
+        if config is None:
             raise ValueError("config must be provided")
         if config.vary_initial_positions and config.position_ranges:
             q0 = np.zeros(n_q)

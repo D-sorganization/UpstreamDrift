@@ -104,9 +104,9 @@ def test_predicts_training_trial_within_2mm(tmp_path: Path) -> None:
     # The loss should have dropped by at least an order of magnitude.
     initial = result.curves.train_loss[0]
     final = result.curves.train_loss[-1]
-    assert (
-        final < 0.1 * initial
-    ), f"surrogate failed to overfit: initial={initial:.4f} final={final:.4f}"
+    assert final < 0.1 * initial, (
+        f"surrogate failed to overfit: initial={initial:.4f} final={final:.4f}"
+    )
 
 
 @pytest.mark.unit
@@ -148,6 +148,6 @@ def test_surrogate_held_out_rmse_under_5mm(tmp_path: Path) -> None:
     result = train_surrogate(ds, cfg)
     final_rmse = result.curves.val_clubhead_rmse_m[-1]
     assert np.isfinite(final_rmse)
-    assert (
-        final_rmse < 5.0e-3
-    ), f"held-out clubhead RMSE {final_rmse * 1000:.2f} mm exceeds 5 mm"
+    assert final_rmse < 5.0e-3, (
+        f"held-out clubhead RMSE {final_rmse * 1000:.2f} mm exceeds 5 mm"
+    )

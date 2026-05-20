@@ -171,9 +171,7 @@ class UnrealBridgeBackend(ViewerBackend):
         scale: float = 1.0,
     ) -> str:
         """Add mesh to tracked objects."""
-        if not (mesh is not None):
-            raise ValueError("mesh must be provided")
-        if not (mesh is not None):
+        if mesh is None:
             raise ValueError("mesh must be provided")
         if not self._is_initialized:
             raise RuntimeError("Backend not initialized")
@@ -215,9 +213,7 @@ class UnrealBridgeBackend(ViewerBackend):
 
     def remove_object(self, name: str) -> bool:
         """Remove object."""
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if not self._is_initialized:
             return False

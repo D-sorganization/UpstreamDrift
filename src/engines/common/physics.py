@@ -180,9 +180,7 @@ class AerodynamicsCalculator:
         Returns:
             Tuple of (drag, lift, magnus) force vectors [N]
         """
-        if not (velocity is not None):
-            raise ValueError("velocity must be provided")
-        if not (velocity is not None):
+        if velocity is None:
             raise ValueError("velocity must be provided")
         drag = self.compute_drag(velocity)
         lift = self.compute_lift(velocity, spin)
@@ -201,9 +199,7 @@ class AerodynamicsCalculator:
         Returns:
             Drag force vector [N] (opposes velocity)
         """
-        if not (velocity is not None):
-            raise ValueError("velocity must be provided")
-        if not (velocity is not None):
+        if velocity is None:
             raise ValueError("velocity must be provided")
         speed = float(math.hypot(*velocity))
         if speed < 1e-6:
@@ -231,9 +227,7 @@ class AerodynamicsCalculator:
         Returns:
             Lift force vector [N]
         """
-        if not (velocity is not None):
-            raise ValueError("velocity must be provided")
-        if not (velocity is not None):
+        if velocity is None:
             raise ValueError("velocity must be provided")
         speed = float(math.hypot(*velocity))
         if speed < 1e-6:
@@ -278,9 +272,7 @@ class AerodynamicsCalculator:
         Returns:
             Magnus force vector [N]
         """
-        if not (velocity is not None):
-            raise ValueError("velocity must be provided")
-        if not (velocity is not None):
+        if velocity is None:
             raise ValueError("velocity must be provided")
         speed = float(math.hypot(*velocity))
         spin_vec = np.asarray(spin, dtype=float).reshape(-1)
@@ -319,9 +311,7 @@ class AerodynamicsCalculator:
         Returns:
             Drag coefficient (dimensionless)
         """
-        if not (speed is not None):
-            raise ValueError("speed must be provided")
-        if not (speed is not None):
+        if speed is None:
             raise ValueError("speed must be provided")
         speed = float(speed)
         # Reynolds number
@@ -346,9 +336,7 @@ class AerodynamicsCalculator:
         Returns:
             Lift coefficient (dimensionless)
         """
-        if not (spin_ratio is not None):
-            raise ValueError("spin_ratio must be provided")
-        if not (spin_ratio is not None):
+        if spin_ratio is None:
             raise ValueError("spin_ratio must be provided")
         spin_ratio = float(spin_ratio)
         # Empirical relationship (Smits & Ogg)
@@ -365,9 +353,7 @@ class AerodynamicsCalculator:
         Returns:
             Magnus coefficient (dimensionless)
         """
-        if not (spin_param is not None):
-            raise ValueError("spin_param must be provided")
-        if not (spin_param is not None):
+        if spin_param is None:
             raise ValueError("spin_param must be provided")
         spin_param = float(spin_param)
         # Robins-Magnus effect coefficient
@@ -384,9 +370,7 @@ class AerodynamicsCalculator:
         Returns:
             Spin ratio = ωR/v
         """
-        if not (speed is not None):
-            raise ValueError("speed must be provided")
-        if not (speed is not None):
+        if speed is None:
             raise ValueError("speed must be provided")
         speed = float(speed)
         # ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm for 3D vectors
@@ -452,9 +436,7 @@ class BallPhysics:
             Total force vector [N]
         """
         # Gravity
-        if not (velocity is not None):
-            raise ValueError("velocity must be provided")
-        if not (velocity is not None):
+        if velocity is None:
             raise ValueError("velocity must be provided")
         F_gravity = self.ball.mass * self.gravity
 
@@ -484,9 +466,7 @@ class BallPhysics:
         Returns:
             Updated spin after decay [rad/s]
         """
-        if not (spin is not None):
-            raise ValueError("spin must be provided")
-        if not (spin is not None):
+        if spin is None:
             raise ValueError("spin must be provided")
         decay_factor = np.exp(-self.ball.spin_decay_rate * dt)
         return spin * decay_factor
@@ -528,9 +508,7 @@ class BallPhysics:
             Tuple of (new_position, new_velocity, new_spin)
         """
         # Compute forces
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         force = self.compute_total_force(velocity, spin)
         acceleration = force / self.ball.mass

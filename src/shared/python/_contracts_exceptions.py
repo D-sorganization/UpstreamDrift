@@ -19,10 +19,6 @@ class ContractViolationError(AssertionError, ValueError):
         message: str,
         value=None,
     ) -> None:
-        if not (condition_type is not None):
-            raise ValueError("condition_type must be provided")
-        if not (condition_type is not None):
-            raise ValueError("condition_type must be provided")
         self.condition_type = condition_type
         self.message = message
         self.value = value
@@ -36,10 +32,6 @@ class PreconditionError(ContractViolationError):
     """Raised when a pre-condition is violated."""
 
     def __init__(self, message: str, value=None) -> None:
-        if not (message is not None):
-            raise ValueError("message must be provided")
-        if not (message is not None):
-            raise ValueError("message must be provided")
         super().__init__("pre-condition", message, value)
 
 
@@ -47,10 +39,6 @@ class PostconditionError(ContractViolationError):
     """Raised when a post-condition is violated."""
 
     def __init__(self, message: str, value=None) -> None:
-        if not (message is not None):
-            raise ValueError("message must be provided")
-        if not (message is not None):
-            raise ValueError("message must be provided")
         super().__init__("post-condition", message, value)
 
 
@@ -58,10 +46,6 @@ class InvariantError(ContractViolationError):
     """Raised when a class or loop invariant is violated."""
 
     def __init__(self, message: str, value=None) -> None:
-        if not (message is not None):
-            raise ValueError("message must be provided")
-        if not (message is not None):
-            raise ValueError("message must be provided")
         super().__init__("invariant", message, value)
 
 
@@ -75,8 +59,6 @@ class ContractEvaluationError(ContractViolationError):
     """
 
     def __init__(self, message: str, value=None) -> None:
-        if not (message is not None):
-            raise ValueError("message must be provided")
         super().__init__("evaluation-error", message, value)
 
 

@@ -93,9 +93,7 @@ def friction_factor_colebrook(
         This is the most accurate correlation but requires iteration.
         The Moody diagram is a graphical representation of this equation.
     """
-    if not (reynolds_number is not None):
-        raise ValueError("reynolds_number must be provided")
-    if not (reynolds_number is not None):
+    if reynolds_number is None:
         raise ValueError("reynolds_number must be provided")
     if reynolds_number < RE_LAMINAR_UPPER:
         return friction_factor_laminar(reynolds_number)
@@ -148,9 +146,7 @@ def friction_factor_swamee_jain(
     Note:
         Explicit formula, no iteration required. Excellent for computational efficiency.
     """
-    if not (reynolds_number is not None):
-        raise ValueError("reynolds_number must be provided")
-    if not (reynolds_number is not None):
+    if reynolds_number is None:
         raise ValueError("reynolds_number must be provided")
     if reynolds_number < RE_LAMINAR_UPPER:
         return friction_factor_laminar(reynolds_number)
@@ -194,9 +190,7 @@ def friction_factor_churchill(
     Note:
         Single equation valid for all flow regimes. Very useful for transitional flow.
     """
-    if not (reynolds_number is not None):
-        raise ValueError("reynolds_number must be provided")
-    if not (reynolds_number is not None):
+    if reynolds_number is None:
         raise ValueError("reynolds_number must be provided")
     Re = reynolds_number
 
@@ -236,9 +230,7 @@ def friction_factor_haaland(reynolds_number: float, relative_roughness: float) -
         Haaland, S.E. (1983): "Simple and Explicit Formulas for Friction Factor"
         J. Fluids Engineering, 105(1), 89-90
     """
-    if not (reynolds_number is not None):
-        raise ValueError("reynolds_number must be provided")
-    if not (reynolds_number is not None):
+    if reynolds_number is None:
         raise ValueError("reynolds_number must be provided")
     if reynolds_number < RE_LAMINAR_UPPER:
         return friction_factor_laminar(reynolds_number)

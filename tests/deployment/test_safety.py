@@ -240,9 +240,9 @@ class TestIssue2477EStopPositionMode:
         )
         safe = monitor.compute_safe_command(cmd, state)
 
-        assert (
-            safe.position_targets is not None
-        ), "position_targets should be frozen to current position on E-stop"
+        assert safe.position_targets is not None, (
+            "position_targets should be frozen to current position on E-stop"
+        )
         np.testing.assert_array_almost_equal(
             safe.position_targets,
             state.joint_positions,

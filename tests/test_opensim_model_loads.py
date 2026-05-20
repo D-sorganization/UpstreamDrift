@@ -131,9 +131,9 @@ def test_one_actuator_per_coordinate(model_xml: ET.Element) -> None:
         f"Expected {len(coord_names)} CoordinateActuators (one per coord), "
         f"found {len(actuator_targets)}."
     )
-    assert set(actuator_targets) == set(
-        coord_names
-    ), "Mismatch between CoordinateActuator targets and coordinate names."
+    assert set(actuator_targets) == set(coord_names), (
+        "Mismatch between CoordinateActuator targets and coordinate names."
+    )
 
 
 def test_known_simscape_chain_coordinates_present(model_xml: ET.Element) -> None:

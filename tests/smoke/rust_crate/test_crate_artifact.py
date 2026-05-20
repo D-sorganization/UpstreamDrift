@@ -25,6 +25,6 @@ def test_crate_artifact_metadata_is_valid() -> None:
     )
     metadata = json.loads(result.stdout)
     assert "packages" in metadata, "Cargo metadata should contain a 'packages' key"
-    assert (
-        len(metadata["packages"]) > 0
-    ), "Cargo metadata should list at least one package"
+    assert len(metadata["packages"]) > 0, (
+        "Cargo metadata should list at least one package"
+    )

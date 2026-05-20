@@ -11,9 +11,7 @@ class ConcentrationMixin:
         pressure: float = 101.325,
         molecular_weight: float | None = None,
     ) -> float:
-        if not (value is not None):
-            raise ValueError("value must be provided")
-        if not (value is not None):
+        if value is None:
             raise ValueError("value must be provided")
         self._validate_tar_inputs(temperature, pressure)
         from_key = from_unit.lower()

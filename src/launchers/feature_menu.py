@@ -316,7 +316,7 @@ def register_feature_menu(
         # *omitted* entirely from the menu when its probe fails — the
         # task plan calls this out explicitly. Always-available
         # entries are always shown.
-        if not available and entry.availability_probe is _nbformat_available:
+        if not available and entry.feature_id == "jupyter":
             logger.debug(
                 "feature_menu: hiding %s entry (probe reports unavailable)",
                 entry.feature_id,

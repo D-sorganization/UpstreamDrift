@@ -20,9 +20,9 @@ class TestSelfCollisionExclusions:
         tree = ET.fromstring(urdf_xml)
         gazebo_elements = tree.findall(".//gazebo")
 
-        assert (
-            len(gazebo_elements) > 0
-        ), "URDF should contain at least one <gazebo> element with disable_collisions"
+        assert len(gazebo_elements) > 0, (
+            "URDF should contain at least one <gazebo> element with disable_collisions"
+        )
 
     def test_disable_collisions_have_required_attributes(self) -> None:
         """Each disable_collisions element should have link1 and link2 attributes."""
@@ -69,9 +69,9 @@ class TestSelfCollisionExclusions:
 
         # All joint pairs should be excluded
         missing = joint_pairs - excluded_pairs
-        assert (
-            len(missing) == 0
-        ), f"Parent-child pairs missing from exclusions: {missing}"
+        assert len(missing) == 0, (
+            f"Parent-child pairs missing from exclusions: {missing}"
+        )
 
     @pytest.mark.parametrize("preset", list_available_presets()[:5])
     def test_all_presets_have_collision_exclusions(self, preset: str) -> None:
@@ -83,9 +83,9 @@ class TestSelfCollisionExclusions:
         tree = ET.fromstring(urdf_xml)
         gazebo_elements = tree.findall(".//gazebo")
 
-        assert (
-            len(gazebo_elements) > 0
-        ), f"URDF for preset '{preset}' should contain gazebo disable_collisions"
+        assert len(gazebo_elements) > 0, (
+            f"URDF for preset '{preset}' should contain gazebo disable_collisions"
+        )
 
     def test_exclusion_count_reasonable(self) -> None:
         """Number of exclusions should be reasonable (at least number of joints)."""

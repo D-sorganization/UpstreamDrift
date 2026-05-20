@@ -40,30 +40,30 @@ class TestEquationsPopupFileSizes:
     @pytest.mark.unit
     def test_equations_popup_split_2456_coordinator_loc(self) -> None:
         loc = _count_lines(GUI_DIR / "equations_popup.py")
-        assert (
-            loc <= LOC_BUDGET
-        ), f"equations_popup.py has {loc} LOC; budget {LOC_BUDGET}"
+        assert loc <= LOC_BUDGET, (
+            f"equations_popup.py has {loc} LOC; budget {LOC_BUDGET}"
+        )
 
     @pytest.mark.unit
     def test_css_loc(self) -> None:
         loc = _count_lines(GUI_DIR / "_equations_popup_css.py")
-        assert (
-            loc <= LOC_BUDGET
-        ), f"_equations_popup_css.py has {loc} LOC; budget {LOC_BUDGET}"
+        assert loc <= LOC_BUDGET, (
+            f"_equations_popup_css.py has {loc} LOC; budget {LOC_BUDGET}"
+        )
 
     @pytest.mark.unit
     def test_dynamics_html_loc(self) -> None:
         loc = _count_lines(GUI_DIR / "_equations_popup_dynamics_html.py")
-        assert (
-            loc <= LOC_BUDGET
-        ), f"_equations_popup_dynamics_html.py has {loc} LOC; budget {LOC_BUDGET}"
+        assert loc <= LOC_BUDGET, (
+            f"_equations_popup_dynamics_html.py has {loc} LOC; budget {LOC_BUDGET}"
+        )
 
     @pytest.mark.unit
     def test_jacobians_html_loc(self) -> None:
         loc = _count_lines(GUI_DIR / "_equations_popup_jacobians_html.py")
-        assert (
-            loc <= LOC_BUDGET
-        ), f"_equations_popup_jacobians_html.py has {loc} LOC; budget {LOC_BUDGET}"
+        assert loc <= LOC_BUDGET, (
+            f"_equations_popup_jacobians_html.py has {loc} LOC; budget {LOC_BUDGET}"
+        )
 
 
 class TestEquationsPopupPublicAPI:

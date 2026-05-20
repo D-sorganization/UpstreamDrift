@@ -108,9 +108,9 @@ class TestWebRouteFieldRoundTrip:
             "web_route": "/tools/test",
         }
         tile = LauncherTile.from_dict(data)
-        assert (
-            tile.web_route == "/tools/test"
-        ), "Assertion failed: tile.web_route == /tools/test"
+        assert tile.web_route == "/tools/test", (
+            "Assertion failed: tile.web_route == /tools/test"
+        )
 
     def test_to_dict_includes_web_route(self) -> None:
         """to_dict() must serialize web_route so it survives a round-trip."""
@@ -128,9 +128,9 @@ class TestWebRouteFieldRoundTrip:
         tile = LauncherTile.from_dict(data)
         serialized = tile.to_dict()
         assert "web_route" in serialized, "Assertion failed: web_route in serialized"
-        assert (
-            serialized["web_route"] == "/tools/test"
-        ), "Assertion failed: serialized[web_route] == /tools/test"
+        assert serialized["web_route"] == "/tools/test", (
+            "Assertion failed: serialized[web_route] == /tools/test"
+        )
 
     def test_web_route_none_by_default(self) -> None:
         """web_route defaults to None when absent from the manifest dict."""
@@ -160,6 +160,6 @@ class TestWebRouteFieldRoundTrip:
         }
         tile = LauncherTile.from_dict(data)
         serialized = tile.to_dict()
-        assert (
-            "web_route" not in serialized
-        ), "Assertion failed: web_route not in serialized"
+        assert "web_route" not in serialized, (
+            "Assertion failed: web_route not in serialized"
+        )

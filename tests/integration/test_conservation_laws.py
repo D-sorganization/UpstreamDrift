@@ -188,9 +188,9 @@ class TestIndexedAccelerationClosure:
         logger.info(f"Residual: {residual}")
 
         TOLERANCE_CLOSURE = 1e-6  # [rad/s²] per Guideline M2
-        assert np.all(
-            residual < TOLERANCE_CLOSURE
-        ), f"Superposition failed: residual {residual} > {TOLERANCE_CLOSURE}"
+        assert np.all(residual < TOLERANCE_CLOSURE), (
+            f"Superposition failed: residual {residual} > {TOLERANCE_CLOSURE}"
+        )
 
     @pytest.mark.skipif(not _check_mujoco_available(), reason="MuJoCo not installed")
     def test_ztcf_equals_drift(self) -> None:
@@ -273,6 +273,6 @@ class TestIndexedAccelerationClosure:
 
         # Also verify physics makes sense: should be negative (restoring force)
         # when theta > 0 (pendulum displaced counter-clockwise)
-        assert (
-            qacc_zvcf < 0
-        ), f"Acceleration should be negative (restoring), got {qacc_zvcf:.4f}"
+        assert qacc_zvcf < 0, (
+            f"Acceleration should be negative (restoring), got {qacc_zvcf:.4f}"
+        )

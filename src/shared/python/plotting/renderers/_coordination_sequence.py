@@ -16,9 +16,7 @@ class CoordinationSequenceMixin(BaseRenderer):
         max_lag: float = 0.5,
     ) -> None:
         """Plot time lag matrix between joints."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         try:
             from src.shared.python.validation_pkg.statistical_analysis import (
@@ -81,9 +79,7 @@ class CoordinationSequenceMixin(BaseRenderer):
         analyzer_result: Any | None = None,
     ) -> None:
         """Plot kinematic sequence (normalized velocities)."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         times, velocities = self.data.get_series("joint_velocities")
         velocities = np.asarray(velocities)
@@ -164,9 +160,7 @@ class CoordinationSequenceMixin(BaseRenderer):
         impact_time: float | None = None,
     ) -> None:
         """Plot kinematic sequence as a Gantt-style bar chart of peak times."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         times, velocities = self.data.get_series("joint_velocities")
         velocities = np.asarray(velocities)
@@ -241,9 +235,7 @@ class CoordinationSequenceMixin(BaseRenderer):
         hip_idx: int,
     ) -> None:
         """Plot X-Factor Cycle (Stretch-Shortening Cycle)."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         times, positions = self.data.get_series("joint_positions")
         positions = np.asarray(positions)

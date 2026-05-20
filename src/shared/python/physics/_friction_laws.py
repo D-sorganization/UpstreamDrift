@@ -14,9 +14,7 @@ def check_friction_cone(
     tangent_force: np.ndarray,
     friction_coefficient: float,
 ) -> bool:
-    if not (normal_force is not None):
-        raise ValueError("normal_force must be provided")
-    if not (normal_force is not None):
+    if normal_force is None:
         raise ValueError("normal_force must be provided")
     tangent_magnitude = np.linalg.norm(tangent_force)
     max_tangent = friction_coefficient * abs(normal_force)
@@ -36,9 +34,7 @@ def decompose_contact_force(
     contact_force: np.ndarray,
     contact_normal: np.ndarray,
 ) -> tuple[float, np.ndarray]:
-    if not (contact_force is not None):
-        raise ValueError("contact_force must be provided")
-    if not (contact_force is not None):
+    if contact_force is None:
         raise ValueError("contact_force must be provided")
     normal_force = float(np.dot(contact_force, contact_normal))
     tangent_force = contact_force - normal_force * contact_normal
@@ -51,9 +47,7 @@ def classify_contact_state(
     slip_velocity: np.ndarray,
     params: GripParameters,
 ) -> ContactState:
-    if not (normal_force is not None):
-        raise ValueError("normal_force must be provided")
-    if not (normal_force is not None):
+    if normal_force is None:
         raise ValueError("normal_force must be provided")
     if normal_force <= 0:
         return ContactState.NO_CONTACT

@@ -20,9 +20,7 @@ class GasFlowMixin:
         gas_type: str = "air",
         standard_condition: StandardCondition = StandardCondition.SCFM_60F,
     ) -> float:
-        if not (value is not None):
-            raise ValueError("value must be provided")
-        if not (value is not None):
+        if value is None:
             raise ValueError("value must be provided")
         gas_props = GAS_DATABASE.get(gas_type.lower(), GAS_DATABASE["air"])
         self._ensure_acfm_inputs(from_unit, to_unit, temperature, pressure)
@@ -135,9 +133,7 @@ class GasFlowMixin:
         standard_condition: StandardCondition = StandardCondition.SCFM_60F,
         compressibility_factor: float = 1.0,
     ) -> float:
-        if not (value is not None):
-            raise ValueError("value must be provided")
-        if not (value is not None):
+        if value is None:
             raise ValueError("value must be provided")
         std_temp, std_pressure_pa, _ = standard_condition.value
         temperature = actual_temp_K or std_temp
@@ -171,9 +167,7 @@ class GasFlowMixin:
         temperature: float,
         pressure: float,
     ) -> float:
-        if not (gas_type is not None):
-            raise ValueError("gas_type must be provided")
-        if not (gas_type is not None):
+        if gas_type is None:
             raise ValueError("gas_type must be provided")
         self._require_positive_finite(temperature, "temperature")  # type: ignore[attr-defined]
         self._require_positive_finite(pressure, "pressure")  # type: ignore[attr-defined]

@@ -34,9 +34,7 @@ except ImportError:
 
 def _antoine_equation(temperature_c: float) -> float:
     """Antoine equation for water vapor pressure (valid 1-100°C)"""
-    if not (temperature_c is not None):
-        raise ValueError("temperature_c must be provided")
-    if not (temperature_c is not None):
+    if temperature_c is None:
         raise ValueError("temperature_c must be provided")
     log_p_mmhg = ANTOINE_A - ANTOINE_B / (ANTOINE_C_CELSIUS + temperature_c)
     p_mmhg = 10**log_p_mmhg
@@ -47,9 +45,7 @@ def _buck_equation(temperature_c: float) -> float:
     """
     Buck equation for water vapor pressure (improved accuracy).
     """
-    if not (temperature_c is not None):
-        raise ValueError("temperature_c must be provided")
-    if not (temperature_c is not None):
+    if temperature_c is None:
         raise ValueError("temperature_c must be provided")
     a_kpa = BUCK_A / MBAR_TO_KPA_FACTOR
     p_kpa = a_kpa * np.exp(
@@ -60,9 +56,7 @@ def _buck_equation(temperature_c: float) -> float:
 
 def _iapws_equation(temperature_c: float) -> float:
     """IAPWS-IF97 formulation for high-accuracy vapor pressure"""
-    if not (temperature_c is not None):
-        raise ValueError("temperature_c must be provided")
-    if not (temperature_c is not None):
+    if temperature_c is None:
         raise ValueError("temperature_c must be provided")
     if _COOLPROP_AVAILABLE:
         try:

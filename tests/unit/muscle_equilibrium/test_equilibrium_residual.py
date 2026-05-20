@@ -58,9 +58,9 @@ class TestEquilibriumResidual:
         residual = solver._equilibrium_residual(l_CE, l_MT, activation, v_CE=0.0)
 
         # Residual should be very close to zero
-        assert (
-            abs(residual) < 1.0
-        ), f"Residual should be near zero, got {residual:.6f} N"
+        assert abs(residual) < 1.0, (
+            f"Residual should be near zero, got {residual:.6f} N"
+        )
 
     def test_residual_changes_sign_across_equilibrium(self, standard_muscle) -> None:
         """Test that residual changes sign across equilibrium point."""
@@ -83,9 +83,9 @@ class TestEquilibriumResidual:
 
         # Residuals should have opposite signs
         # Note: exact sign depends on force-length curves, but they should differ
-        assert (
-            residual_short * residual_long < 0
-        ), "Residuals should have opposite signs across equilibrium"
+        assert residual_short * residual_long < 0, (
+            "Residuals should have opposite signs across equilibrium"
+        )
 
     def test_residual_with_pennation(self, pennated_muscle) -> None:
         """Test residual calculation with pennated muscle."""

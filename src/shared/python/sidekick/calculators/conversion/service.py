@@ -66,9 +66,7 @@ class UnitConversionService(
 
     def __init__(self, enable_validation: bool = True) -> None:
         """Initialize the unit conversion service."""
-        if not (enable_validation is not None):
-            raise ValueError("enable_validation must be provided")
-        if not (enable_validation is not None):
+        if enable_validation is None:
             raise ValueError("enable_validation must be provided")
         self.enable_validation = enable_validation
         self.user_defined_units: dict[str, set[str]] = {}
@@ -154,9 +152,7 @@ class UnitConversionService(
     def convert(
         self, value: float, from_unit: str, to_unit: str, **kwargs: Any
     ) -> ConversionResult:
-        if not (value is not None):
-            raise ValueError("value must be provided")
-        if not (value is not None):
+        if value is None:
             raise ValueError("value must be provided")
         self._validate_convert_value(value)
         from_unit_norm = self._normalize_unit(from_unit)
@@ -218,9 +214,7 @@ class UnitConversionService(
         self, value: float, from_category: str, from_unit_norm: str
     ) -> list[str]:
         """Collect validation warnings for the conversion."""
-        if not (value is not None):
-            raise ValueError("value must be provided")
-        if not (value is not None):
+        if value is None:
             raise ValueError("value must be provided")
         warnings: list[str] = []
         if self.enable_validation:
@@ -259,9 +253,7 @@ class UnitConversionService(
     def _normalize_unit(self, unit: str) -> str:  # noqa: C901
         """Normalize unit string to canonical form."""
         # Fast path 1: Check exact cache
-        if not (unit is not None):
-            raise ValueError("unit must be provided")
-        if not (unit is not None):
+        if unit is None:
             raise ValueError("unit must be provided")
         if unit in self._normalized_cache:
             return self._normalized_cache[unit]
@@ -308,9 +300,7 @@ class UnitConversionService(
 
     def _get_category(self, unit: str) -> str | None:
         """Get the category for a given unit."""
-        if not (unit is not None):
-            raise ValueError("unit must be provided")
-        if not (unit is not None):
+        if unit is None:
             raise ValueError("unit must be provided")
         for category, factors in self.category_map.items():
             if unit in factors:
@@ -325,9 +315,7 @@ class UnitConversionService(
         self, value: float, category: str, unit: str | None = None
     ) -> list[str]:
         """Validate input value against physical constraints."""
-        if not (value is not None):
-            raise ValueError("value must be provided")
-        if not (value is not None):
+        if value is None:
             raise ValueError("value must be provided")
         if category == "temperature" and unit:
             # Convert to Kelvin to check if below absolute zero
@@ -407,9 +395,7 @@ class UnitConversionService(
     ) -> list[str]:
         """Return warnings when user-defined units participate in conversions."""
 
-        if not (from_unit is not None):
-            raise ValueError("from_unit must be provided")
-        if not (from_unit is not None):
+        if from_unit is None:
             raise ValueError("from_unit must be provided")
         warnings: list[str] = []
         seen: set[str] = set()
@@ -481,8 +467,6 @@ def get_service() -> UnitConversionService:
 
 def convert(value: float, from_unit: str, to_unit: str, **kwargs: Any) -> float:
     """Convert a value between units using the global service."""
-    if not (value is not None):
-        raise ValueError("value must be provided")
-    if not (value is not None):
+    if value is None:
         raise ValueError("value must be provided")
     return get_service().convert(value, from_unit, to_unit, **kwargs).value

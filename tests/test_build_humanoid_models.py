@@ -219,6 +219,6 @@ def test_engine_all_runs_every_engine() -> None:
     combined = proc.stdout + proc.stderr
     # Each engine name must appear in the combined output.
     for name in ("drake", "pinocchio", "mujoco", "opensim"):
-        assert (
-            name in combined
-        ), f"engine '{name}' missing from combined output: {combined!r}"
+        assert name in combined, (
+            f"engine '{name}' missing from combined output: {combined!r}"
+        )

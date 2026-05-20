@@ -145,9 +145,7 @@ class TestSecureSubprocess(unittest.TestCase):
     def test_secure_popen_shell_not_allowed(self) -> None:
         """Test that shell=True is rejected."""
         with self.assertRaises(SecureSubprocessError):
-            secure_popen(
-                ["echo", "test"], shell=True, suite_root=self.suite_root
-            )  # nosec B604
+            secure_popen(["echo", "test"], shell=True, suite_root=self.suite_root)  # nosec B604
 
     @patch("src.shared.python.security.secure_subprocess.subprocess.run")
     def test_secure_run_valid_command(self, mock_run) -> None:

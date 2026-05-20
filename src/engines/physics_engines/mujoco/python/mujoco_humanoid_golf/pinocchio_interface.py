@@ -75,7 +75,9 @@ class PinocchioWrapper:
             ImportError: If Pinocchio is not installed
         """
         if not PINOCCHIO_AVAILABLE:
-            msg = "Pinocchio is required but not installed. Install with: pip install pin"  # noqa: E501
+            msg = (
+                "Pinocchio is required but not installed. Install with: pip install pin"  # noqa: E501
+            )
             raise ImportError(msg)
 
         self.model = model
@@ -168,9 +170,7 @@ class PinocchioWrapper:
 
         Handles quaternion conventions (MuJoCo: w,x,y,z vs Pinocchio: x,y,z,w).
         """
-        if not (q_mj is not None):
-            raise ValueError("q_mj must be provided")
-        if not (q_mj is not None):
+        if q_mj is None:
             raise ValueError("q_mj must be provided")
         q_pin = q_mj.copy()
 
@@ -231,9 +231,7 @@ class PinocchioWrapper:
 
         Handles quaternion conventions (Pinocchio: x,y,z,w vs MuJoCo: w,x,y,z).
         """
-        if not (q_pin is not None):
-            raise ValueError("q_pin must be provided")
-        if not (q_pin is not None):
+        if q_pin is None:
             raise ValueError("q_pin must be provided")
         q_mj = q_pin.copy()
 

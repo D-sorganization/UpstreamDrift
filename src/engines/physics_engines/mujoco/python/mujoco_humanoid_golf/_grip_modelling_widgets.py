@@ -43,9 +43,7 @@ class PressureVisualizationWidget(QtWidgets.QWidget):
         Args:
             data: New pressure visualization data
         """
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         self.pressure_data = data
         self.update()
@@ -57,9 +55,7 @@ class PressureVisualizationWidget(QtWidgets.QWidget):
 
     def _get_color_for_value(self, normalized_value: float) -> QtGui.QColor:
         """Get color from gradient for normalized value [0, 1]."""
-        if not (normalized_value is not None):
-            raise ValueError("normalized_value must be provided")
-        if not (normalized_value is not None):
+        if normalized_value is None:
             raise ValueError("normalized_value must be provided")
         normalized_value = max(0.0, min(1.0, normalized_value))
 
@@ -188,9 +184,7 @@ class ContactMetricsWidget(QtWidgets.QWidget):
         equilibrium: bool,
     ) -> None:
         """Update displayed metrics."""
-        if not (normal_force is not None):
-            raise ValueError("normal_force must be provided")
-        if not (normal_force is not None):
+        if normal_force is None:
             raise ValueError("normal_force must be provided")
         self.lbl_normal_force.setText(f"{normal_force:.1f} N")
         self.lbl_tangent_force.setText(f"{tangent_force:.1f} N")

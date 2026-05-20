@@ -11,6 +11,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+import src.launchers.chat_history.chat_history_service as service_module
 from src.launchers.chat_history.chat_history_service import (
     HistoryServiceAdapter,
 )
@@ -18,7 +19,7 @@ from src.launchers.chat_history.chat_history_service import (
 
 @pytest.fixture
 def fake_service() -> MagicMock:
-    """Return a MagicMock standing in for sidekick.chat.conversation."""
+    """Return a MagicMock standing in for the launcher chat-history service."""
     svc = MagicMock()
     svc.list.return_value = [
         {"id": "c1", "title": "First", "archived": False, "timestamp": ""},
@@ -133,7 +134,7 @@ def test_condense_to_memory_uses_condenser_when_available(
     assert result == {"summary": "ok"}
 
 
-def test_condense_to_memory_falls_back_when_unavailable() -> None:
+def test_condense_to_memory_reports_unwired_service() -> None:
     svc = MagicMock(
         spec=[
             "list",
@@ -147,8 +148,59 @@ def test_condense_to_memory_falls_back_when_unavailable() -> None:
     )
     adapter = HistoryServiceAdapter(service=svc)
     result = adapter.condense_to_memory(["c1"])
-    assert result["status"] == "stub"
-    assert "not available" in result["message"]
+    assert result["status"] == "unavailable"
+    assert "not wired" in result["message"]
+    assert "Tools #2736" not in result["message"]
+
+
+def test_loader_discovers_shared_chat_conversation_module(
+    tmp_path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    chat_dir = tmp_path / "chat"
+    chat_dir.mkdir()
+    (chat_dir / "conversation.py").write_text(
+        'SERVICE = "shared-conversation-service"\n',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        service_module,
+        "_candidate_shared_python_roots",
+        lambda: (tmp_path,),
+    )
+
+    service = service_module._load_sidekick_conversation_service()
+
+    assert service == "shared-conversation-service"
+
+
+def test_loader_reports_shared_tools_condensation_without_history_service(
+    tmp_path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    chat_dir = tmp_path / "chat"
+    chat_dir.mkdir()
+    (chat_dir / "service_base.py").write_text(
+        "class ChatServiceBase:\n"
+        "    def condense_to_memory(self, conversation_ids):\n"
+        "        return {}\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        service_module,
+        "_candidate_shared_python_roots",
+        lambda: (tmp_path,),
+    )
+
+    service = service_module._load_sidekick_conversation_service()
+    adapter = HistoryServiceAdapter(service=service)
+    result = adapter.condense_to_memory(["c1"])
+
+    assert service is not None
+    assert not adapter.has_service()
+    assert not adapter.has_condensation_api()
+    assert result["status"] == "unavailable"
+    assert "concrete chat history service" in result["message"]
+    assert "sidekick.chat.conversation" not in result["message"]
+    assert "Tools #2736" not in result["message"]
 
 
 def test_load_memory_reads_user_memory_file(tmp_path) -> None:

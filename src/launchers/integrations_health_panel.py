@@ -14,7 +14,9 @@ for clients, MCP, CLI, API.
 
 from __future__ import annotations
 
-from PyQt6.QtCore import Qt
+from collections.abc import Callable
+
+from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtGui import QClipboard, QColor
 from PyQt6.QtWidgets import (
     QApplication,
@@ -65,11 +67,24 @@ class IntegrationsHealthPanel(QWidget):
         panel.show()
     """
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(
+        self,
+        parent: QWidget | None = None,
+        *,
+        status_provider: Callable[[], list[IntegrationRecord]] | None = None,
+        auto_refresh: bool = False,
+    ) -> None:
         super().__init__(parent)
         self._records: list[IntegrationRecord] = []
+        self._status_provider = status_provider or collect_all
+        self._refresh_timer: QTimer | None = None
         self._build_ui()
         self.refresh()
+        if auto_refresh:
+            self._refresh_timer = QTimer(self)
+            self._refresh_timer.setInterval(30_000)
+            self._refresh_timer.timeout.connect(self.refresh)
+            self._refresh_timer.start()
 
     # ------------------------------------------------------------------
     # UI construction
@@ -131,7 +146,7 @@ class IntegrationsHealthPanel(QWidget):
         QApplication.processEvents()
 
         try:
-            self._records = collect_all()
+            self._records = self._status_provider()
         except Exception as exc:  # noqa: BLE001
             logger.warning("collect_all raised unexpectedly: %s", exc)
             self._records = []

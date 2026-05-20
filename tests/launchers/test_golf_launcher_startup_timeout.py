@@ -134,9 +134,9 @@ def test_loading_mode_emits_diagnostic_log(qapp, caplog) -> None:
         UpstreamDriftLauncher(loading=True)
 
     messages = [r.getMessage().lower() for r in caplog.records]
-    assert any(
-        "startup" in m and ("wait" in m or "timeout" in m) for m in messages
-    ), f"Expected a log mentioning startup wait/timeout; got {messages}"
+    assert any("startup" in m and ("wait" in m or "timeout" in m) for m in messages), (
+        f"Expected a log mentioning startup wait/timeout; got {messages}"
+    )
 
 
 # ---------------------------------------------------------------------------

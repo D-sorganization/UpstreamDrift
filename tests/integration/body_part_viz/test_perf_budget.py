@@ -123,9 +123,9 @@ def test_perf_26_cylinders_60fps(fig_ax) -> None:
 
     mean_ms = _measure_mean_frame_ms(renderer, handles)
     budget = 16.0 * SCALE
-    assert (
-        mean_ms <= budget
-    ), f"26 cylinders mean per-frame {mean_ms:.2f} ms exceeds {budget:.2f} ms budget"
+    assert mean_ms <= budget, (
+        f"26 cylinders mean per-frame {mean_ms:.2f} ms exceeds {budget:.2f} ms budget"
+    )
 
 
 @pytest.mark.benchmark
@@ -146,6 +146,6 @@ def test_perf_26_library_meshes_30fps(fig_ax) -> None:
 
     mean_ms = _measure_mean_frame_ms(renderer, handles)
     budget = 33.0 * SCALE
-    assert (
-        mean_ms <= budget
-    ), f"26 meshes mean per-frame {mean_ms:.2f} ms exceeds {budget:.2f} ms budget"
+    assert mean_ms <= budget, (
+        f"26 meshes mean per-frame {mean_ms:.2f} ms exceeds {budget:.2f} ms budget"
+    )

@@ -83,7 +83,7 @@ class TestGreenReading:
 
         assert "positions" in reading, "Assertion failed: positions in reading"
         assert "slopes" in reading, "Assertion failed: slopes in reading"
-        assert (
-            "recommended_speed" in reading
-        ), "Assertion failed: recommended_speed in reading"
+        assert "recommended_speed" in reading, (
+            "Assertion failed: recommended_speed in reading"
+        )
         assert reading["distance"] > 0, "Assertion failed: reading[distance] > 0"
