@@ -15,6 +15,7 @@ pytestmark = skip_if_unavailable("pinocchio")
 _PIN_MODEL_SPEC = [
     "nv",
     "nq",
+    "name",
     "existBodyName",
     "existFrame",
     "getFrameId",
@@ -94,6 +95,7 @@ def test_pinocchio_physics_engine_load_from_path(
     mock_model = MagicMock(spec=_PIN_MODEL_SPEC)
     mock_model.nq = 1
     mock_model.nv = 1
+    mock_model.name = "test_model"
     mock_pin.buildModelFromUrdf.return_value = mock_model
     mock_pin.neutral.return_value = np.array([0.0])
 
@@ -112,6 +114,7 @@ def test_pinocchio_physics_engine_load_from_string(mock_pin: Any, engine: Any) -
     mock_model = MagicMock(spec=_PIN_MODEL_SPEC)
     mock_model.nv = 2
     mock_model.nq = 2
+    mock_model.name = "StringLoadedModel"
     mock_pin.buildModelFromXML.return_value = mock_model
     mock_pin.neutral.return_value = np.zeros(2)
 
@@ -153,6 +156,7 @@ def test_pinocchio_physics_engine_compute_mass_matrix(engine: Any) -> None:
     with patch(
         "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine.pin"
     ) as mock_pin:
+        mock_pin.crba.return_value = engine.data.M
         M = engine.compute_mass_matrix()
 
         mock_pin.crba.assert_called_once()
@@ -165,6 +169,7 @@ def test_pinocchio_physics_engine_compute_jacobian(engine: Any) -> None:
     engine.model = MagicMock(spec=_PIN_MODEL_SPEC)
     engine.data = MagicMock(spec=_PIN_DATA_SPEC)
     engine.model.existBodyName.return_value = True
+    engine.model.existFrame.return_value = True
     engine.model.getFrameId.return_value = 1
 
     with patch(
@@ -183,3 +188,57 @@ def test_pinocchio_physics_engine_compute_jacobian(engine: Any) -> None:
         assert "angular" in J
         np.testing.assert_array_equal(J["linear"], mock_J[:3, :])
         np.testing.assert_array_equal(J["angular"], mock_J[3:, :])
+
+
+def test_pinocchio_physics_engine_get_time(engine: Any) -> None:
+    engine.time = 4.2
+    assert engine.get_time() == 4.2
+
+
+def test_pinocchio_physics_engine_compute_bias_forces(engine: Any) -> None:
+    engine.model = MagicMock(spec=_PIN_MODEL_SPEC)
+    engine.model.nv = 2
+    engine.data = MagicMock(spec=_PIN_DATA_SPEC)
+    engine.q = np.array([0.1, 0.2])
+    engine.v = np.array([0.3, 0.4])
+
+    with patch(
+        "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine.pin"
+    ) as mock_pin:
+        mock_pin.rnea.return_value = np.array([1.5, 2.5])
+        bias = engine.compute_bias_forces()
+        mock_pin.rnea.assert_called_once()
+        np.testing.assert_array_equal(bias, np.array([1.5, 2.5]))
+
+
+def test_pinocchio_physics_engine_compute_gravity_forces(engine: Any) -> None:
+    engine.model = MagicMock(spec=_PIN_MODEL_SPEC)
+    engine.model.nv = 2
+    engine.data = MagicMock(spec=_PIN_DATA_SPEC)
+    engine.q = np.array([0.1, 0.2])
+
+    with patch(
+        "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine.pin"
+    ) as mock_pin:
+        mock_pin.rnea.return_value = np.array([0.5, -0.5])
+        gravity = engine.compute_gravity_forces()
+        mock_pin.rnea.assert_called_once()
+        np.testing.assert_array_equal(gravity, np.array([0.5, -0.5]))
+
+
+def test_pinocchio_physics_engine_compute_ztcf(engine: Any) -> None:
+    engine.model = MagicMock(spec=_PIN_MODEL_SPEC)
+    engine.model.nq = 2
+    engine.model.nv = 2
+    engine.data = MagicMock(spec=_PIN_DATA_SPEC)
+
+    q = np.array([0.1, 0.2])
+    v = np.array([0.3, 0.4])
+
+    with patch(
+        "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine.pin"
+    ) as mock_pin:
+        mock_pin.aba.return_value = np.array([9.8, 4.9])
+        a_ztcf = engine.compute_ztcf(q, v)
+        mock_pin.aba.assert_called_once()
+        np.testing.assert_array_equal(a_ztcf, np.array([9.8, 4.9]))
