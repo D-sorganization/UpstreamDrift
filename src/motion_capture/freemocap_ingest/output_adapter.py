@@ -198,7 +198,7 @@ class FreeMoCapOutputAdapter:
 
             # Parse header to find landmark columns
             # Format: frame_num, timestamp, nose_x, nose_y, nose_z, nose_conf, ...
-            landmark_data = {}
+            landmark_data: dict[str, dict[str, int]] = {}
             for i, col in enumerate(header[2:], start=2):
                 parts = col.rsplit("_", 1)
                 if len(parts) == 2:
