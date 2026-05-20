@@ -65,10 +65,18 @@ class AirProperties:
             AirProperties at the specified altitude
         """
         # International Standard Atmosphere model
-        if not (altitude_m is not None):
+        if altitude_m is None:
             raise ValueError("altitude_m must be provided")
-        if not (altitude_m is not None):
-            raise ValueError("altitude_m must be provided")
+        if not isinstance(altitude_m, (int, float)):
+            raise TypeError("altitude_m must be a number")
+        if (
+            altitude_m < MIN_VALID_ALTITUDE_M
+            or altitude_m > MAX_VALID_TROPOSPHERE_ALTITUDE_M
+        ):
+            raise ValueError(
+                f"altitude_m={altitude_m} outside ISA troposphere range "
+                f"[{MIN_VALID_ALTITUDE_M}, {MAX_VALID_TROPOSPHERE_ALTITUDE_M}] m"
+            )
         T0 = 288.15  # K
         P0 = 101325.0  # Pa
         L = 0.0065  # Temperature lapse rate [K/m]
