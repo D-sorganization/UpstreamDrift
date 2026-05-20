@@ -14,6 +14,7 @@
 # Merge conflict artifacts
 *.ours
 *.theirs
+.merge_file_*
 
 # Python
 __pycache__/
