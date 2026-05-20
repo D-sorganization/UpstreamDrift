@@ -122,6 +122,10 @@ class HistoryServiceAdapter:
         """Return ``True`` when a Sidekick conversation service is wired."""
         return self._service is not None
 
+    def has_condensation_api(self) -> bool:
+        """Return whether the active Sidekick service can condense memory."""
+        return callable(getattr(self._service, "condense_to_memory", None))
+
     def _require_service(self) -> Any:
         if self._service is None:
             raise RuntimeError(

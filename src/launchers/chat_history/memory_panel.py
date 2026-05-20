@@ -73,6 +73,8 @@ class MemoryPanel(QWidget):
         digest_btn = QPushButton("Archive digest")
         digest_btn.setToolTip("Condense archived conversations into memory entries")
         digest_btn.clicked.connect(self._on_digest_clicked)
+        self._digest_btn = digest_btn
+        self._refresh_digest_button_state()
         buttons.addWidget(digest_btn)
 
         buttons.addStretch()
@@ -120,6 +122,9 @@ class MemoryPanel(QWidget):
 
     def archive_digest(self) -> None:
         """Condense archived conversations into the memory document."""
+        if not self._adapter_can_condense():
+            self._last_digest_status = "unavailable"
+            return
         try:
             archived = self._adapter.list_archived()
         except RuntimeError:
@@ -176,12 +181,31 @@ class MemoryPanel(QWidget):
     def _on_digest_clicked(self) -> None:
         self.archive_digest()
         status = self._last_digest_status or "unknown"
+        if status == "unavailable":
+            QMessageBox.information(
+                self,
+                "Memory digest",
+                "Memory condensation is not available in this Sidekick build.",
+            )
+            return
         if status == "stub":
             QMessageBox.information(
                 self,
                 "Memory digest",
                 "Memory condensation API is not yet available in this "
                 "Sidekick build. Try again after Tools #2736 ships.",
+            )
+
+    def _adapter_can_condense(self) -> bool:
+        capability = getattr(self._adapter, "has_condensation_api", None)
+        return bool(capability()) if callable(capability) else True
+
+    def _refresh_digest_button_state(self) -> None:
+        can_condense = self._adapter_can_condense()
+        self._digest_btn.setEnabled(can_condense)
+        if not can_condense:
+            self._digest_btn.setToolTip(
+                "Memory condensation is not available in this Sidekick build"
             )
 
 
