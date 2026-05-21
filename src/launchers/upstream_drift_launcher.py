@@ -374,37 +374,17 @@ class UpstreamDriftLauncher(
             or "PYTEST_CURRENT_TEST" in os.environ
         )
 
-    def _install_sidekick_sidebar(self) -> None:
-        """Embed the Sidekick multitab sidebar as a third splitter pane.
-
-        Issue #5624: on a ``FramelessWindowHint`` + ``WA_TranslucentBackground``
-        main window, ``QMainWindow.addDockWidget`` defaults its dock to a
-        free-floating top-level window because dock geometry calculations
-        depend on the native OS window frame that the frameless hint
-        removes.  Embedding the bare ``UnifiedToolsSidebar`` widget into
-        the existing ``main_layout`` ``QSplitter`` (built by
-        ``LauncherUISetupMixin.init_ui``) keeps Sidekick inside the
-        launcher window as the rightmost pane.
-
-        The Sidekick package (Files, Workspace, Chat, Terminal, Calculator,
-        Data Explorer, Notes, Reporting, Units, Rotation Converter, etc.)
-        is vendored at ``vendor/ud-tools/src/shared/python/sidekick``.
-        Failure to install is non-fatal — the launcher remains usable
-        with just the tile grid.
-        """
-        logger.info("Initializing _install_sidekick_sidebar")
+    def _get_sidekick_module(self) -> Any | None:
+        """Import the Sidekick sidebar module, trying multiple fallback paths."""
         try:
             from src.shared.python.gui_launcher.tools_sidebar_integration import (
                 _import_sidebar_module,
             )
         except ImportError as e:
             logger.debug("Sidekick integration shim not importable: %s", e)
-            return
+            return None
 
         module = _import_sidebar_module()
-
-        # Fallback: direct import when the candidate list fails due to
-        # sys.path state differences in async-startup mode.
         if module is None:
             import importlib
             import sys as _sys
@@ -437,14 +417,14 @@ class UpstreamDriftLauncher(
                     break
                 except ImportError:
                     continue
+        return module
 
+    def _create_sidekick_sidebar_widget(self, module: Any) -> Any | None:
+        """Invoke the factory to create the sidekick sidebar widget."""
         if module is None:
             logger.warning("Sidekick sidebar not installed: shared module unavailable")
-            return
+            return None
 
-        # The shared factory ``create_tools_sidebar`` returns the bare
-        # ``UnifiedToolsSidebar`` widget without dock wrapping — exactly
-        # what the frameless launcher needs.
         factory = getattr(module, "create_tools_sidebar", None)
         if factory is None:
             logger.warning(
@@ -452,25 +432,23 @@ class UpstreamDriftLauncher(
                 "from %s",
                 getattr(module, "__name__", "<unknown>"),
             )
-            return
+            return None
 
-        # Tools-side ``create_tools_sidebar`` accepts ``parent`` and
-        # optional ``project_root``; the in-repo stub accepts only
-        # ``parent``.  Try the full signature, fall back to bare parent.
         try:
-            sidebar_widget = factory(parent=self, project_root=str(REPOS_ROOT))
+            return factory(parent=self, project_root=str(REPOS_ROOT))
         except TypeError:
             try:
-                sidebar_widget = factory(parent=self)
-            except Exception as exc:  # noqa: BLE001 - best-effort install
+                return factory(parent=self)
+            except (RuntimeError, ValueError) as exc:
                 logger.warning("Sidekick factory call failed: %s", exc)
-                return
-        except Exception as exc:  # noqa: BLE001
+                return None
+        except (RuntimeError, ValueError) as exc:
             logger.warning("Sidekick factory call failed: %s", exc)
-            return
+            return None
 
+    def _embed_sidekick_sidebar_widget(self, sidebar_widget: Any) -> None:
+        """Embed the created sidebar widget into the main layout."""
         if sidebar_widget is None:
-            logger.warning("Sidekick sidebar not installed: factory returned None")
             return
 
         main_layout = getattr(self, "main_layout", None)
@@ -481,22 +459,22 @@ class UpstreamDriftLauncher(
             )
             return
 
-        # Add as the third pane (after the global sidebar and the
-        # content container).  Give it a small initial weight.
         main_layout.addWidget(sidebar_widget)
         if hasattr(main_layout, "setStretchFactor"):
-            with contextlib.suppress(Exception):
+            with contextlib.suppress(RuntimeError, ValueError, TypeError):
                 main_layout.setStretchFactor(main_layout.count() - 1, 2)
 
         self.sidekick_sidebar = sidebar_widget
-        # The sidebar is installed after the window is already visible
-        # (deferred via QTimer), so apply splitter sizes immediately.
         self._apply_sidekick_splitter_sizes()
 
-        logger.info(
-            "Sidekick sidebar embedded in main splitter from %s",
-            getattr(module, "__name__", "<unknown>"),
-        )
+        logger.info("Sidekick sidebar embedded in main splitter")
+
+    def _install_sidekick_sidebar(self) -> None:
+        """Embed the Sidekick multitab sidebar as a third splitter pane."""
+        logger.info("Initializing _install_sidekick_sidebar")
+        module = self._get_sidekick_module()
+        widget = self._create_sidekick_sidebar_widget(module)
+        self._embed_sidekick_sidebar_widget(widget)
 
     def _load_window_icon(self) -> None:
         icon_candidates = [
@@ -1179,8 +1157,8 @@ class UpstreamDriftLauncher(
         ]
         self._on_cleanup_finished(finished_keys)
 
-    def closeEvent(self, event: QCloseEvent | None) -> None:  # noqa: C901
-        """Handle window close event to save layout."""
+    def _confirm_exit_if_running_processes(self, event: QCloseEvent | None) -> bool:
+        """Return True if it's safe to exit (user confirms or no processes running)."""
         running_names = [
             k for k, p in self.running_processes.items() if p.poll() is None
         ]
@@ -1213,10 +1191,11 @@ class UpstreamDriftLauncher(
             if reply == QDialog.DialogCode.Rejected:
                 if event:
                     event.ignore()
-                return
+                return False
+        return True
 
-        self._save_layout()
-
+    def _save_settings_on_close(self) -> None:
+        """Save user preferences before closing."""
         from PyQt6.QtCore import QSettings
 
         settings = QSettings("UpstreamDrift", "Launcher")
@@ -1229,13 +1208,13 @@ class UpstreamDriftLauncher(
         if hasattr(self, "chk_wsl"):
             settings.setValue("chk_wsl", self.chk_wsl.isChecked())
 
-        # Stop cleanup timer
+    def _stop_background_threads(self) -> None:
+        """Stop background timers and threads cleanly."""
         if hasattr(self, "cleanup_timer") and self.cleanup_timer is not None:
             self.cleanup_timer.stop()
             self.cleanup_timer.deleteLater()
             self.cleanup_timer = None  # type: ignore[assignment]
 
-        # Clean up docker checker thread
         if hasattr(self, "docker_checker") and self.docker_checker is not None:
             with contextlib.suppress(TypeError, RuntimeError):
                 self.docker_checker.result.disconnect(self.on_docker_check_complete)
@@ -1243,7 +1222,8 @@ class UpstreamDriftLauncher(
                 self.docker_checker.wait(1000)
             self.docker_checker = None
 
-        # Terminate running processes
+    def _terminate_all_processes(self) -> None:
+        """Terminate all remaining child processes."""
         for key, process in list(self.running_processes.items()):
             if process.poll() is None:
                 logger.info(f"Terminating child process: {key}")
@@ -1252,6 +1232,16 @@ class UpstreamDriftLauncher(
                         process.terminate()
                 except (RuntimeError, ValueError, OSError) as e:
                     logger.error(f"Failed to terminate {key}: {e}")
+
+    def closeEvent(self, event: QCloseEvent | None) -> None:
+        """Handle window close event to save layout and cleanup."""
+        if not self._confirm_exit_if_running_processes(event):
+            return
+
+        self._save_layout()
+        self._save_settings_on_close()
+        self._stop_background_threads()
+        self._terminate_all_processes()
 
         super().closeEvent(event)
 
@@ -1316,7 +1306,7 @@ def main() -> None:
         try:
             with open(qss_path) as f:
                 app.setStyleSheet(f.read())
-        except Exception as e:
+        except (OSError, RuntimeError, ValueError) as e:
             logger.warning(f"Could not load QSS: {e}")
 
     try:
@@ -1346,7 +1336,7 @@ def main() -> None:
         try:
             main_window.update_startup_results(results)
             splash.finish(main_window)
-        except Exception as e:  # noqa: BLE001
+        except (RuntimeError, ValueError, TypeError) as e:
             import traceback
 
             traceback.print_exc()
