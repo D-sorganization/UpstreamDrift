@@ -1572,13 +1572,31 @@ jobs:
 
   ci-complete:
     name: CI Complete
-    needs: [alembic-postgres-round-trip, arduino-build, core-only-install, dependency-consistency, frontend-tests, local-only-workflows, matlab-tests, pick-runner, pinned-actions, quality-gate, rust-quality-gate, rust-quickstart, shared-tools-consumer-contracts, tests, urdf-layering, workflow-inventory]
-    runs-on: ubuntu-latest
+    needs:
+      [
+        alembic-postgres-round-trip,
+        arduino-build,
+        core-only-install,
+        dependency-consistency,
+        frontend-tests,
+        local-only-workflows,
+        matlab-tests,
+        pick-runner,
+        pinned-actions,
+        quality-gate,
+        rust-quality-gate,
+        rust-quickstart,
+        shared-tools-consumer-contracts,
+        tests,
+        urdf-layering,
+        workflow-inventory,
+      ]
+    runs-on: d-sorg-fleet
     if: always()
     steps:
       - name: Verify all jobs succeeded
         run: |
-          if [ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" = "true" ]; then
+          if [ "${{ contains(needs.*.result, 'failure') ||                     contains(needs.*.result, 'cancelled') }}" = "true" ]; then
             echo "One or more required jobs failed or were cancelled."
             exit 1
           fi
