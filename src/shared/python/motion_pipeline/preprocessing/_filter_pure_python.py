@@ -77,9 +77,7 @@ def _filter_keypoints(
     if filter_type == FilterType.BUTTERWORTH:
         filtered = _butterworth_filter(data, cutoff, order, fps)
     elif filter_type == FilterType.SAVITZKY_GOLAY:
-        filtered = _savgol_filter(
-            data, window_length=min(11, len(seq.frames)), polyorder=2
-        )
+        filtered = _savgol_filter(data, window_length=min(11, len(seq.frames)), polyorder=2)
     elif filter_type == FilterType.MEDIAN:
         filtered = _median_filter(data, kernel_size=3)
     elif filter_type == FilterType.GAUSSIAN:
@@ -122,9 +120,7 @@ def _filter_markers(
     if filter_type == FilterType.BUTTERWORTH:
         filtered = _butterworth_filter(data, cutoff, order, fps)
     elif filter_type == FilterType.SAVITZKY_GOLAY:
-        filtered = _savgol_filter(
-            data, window_length=min(11, len(traj.frames)), polyorder=2
-        )
+        filtered = _savgol_filter(data, window_length=min(11, len(traj.frames)), polyorder=2)
     elif filter_type == FilterType.MEDIAN:
         filtered = _median_filter(data, kernel_size=3)
     elif filter_type == FilterType.GAUSSIAN:
@@ -319,9 +315,7 @@ def _savgol_filter(
         filtered = np.zeros_like(data)
         for i in range(data.shape[1]):
             for j in range(data.shape[2]):
-                filtered[:, i, j] = savgol_filter(
-                    data[:, i, j], window_length, polyorder
-                )
+                filtered[:, i, j] = savgol_filter(data[:, i, j], window_length, polyorder)
 
         return filtered
     except ImportError:
@@ -371,9 +365,7 @@ def _moving_average(
     filtered = np.zeros_like(data)
     for i in range(data.shape[1]):
         for j in range(data.shape[2]):
-            filtered[:, i, j] = np.convolve(
-                data[:, i, j], np.ones(window) / window, mode="same"
-            )
+            filtered[:, i, j] = np.convolve(data[:, i, j], np.ones(window) / window, mode="same")
 
     return filtered
 
@@ -387,20 +379,15 @@ def _kalman_filter(
     process_noise: float = 0.01,
     measurement_noise: float = 0.1,
 ) -> np.ndarray:
-    """Apply a 1D random-walk Kalman smoother to each marker/keypoint coord.
+    """Apply a 1D random-walk Kalman smoother (RTS) to each marker/keypoint coord.
 
-    Reuses the ``signal_toolkit.signal_processing.KalmanFilter`` class
-    (per the motion-pipeline DRY rule) configured as a per-coordinate
-    1D random-walk model. Each scalar time series ``data[:, i, j]`` is
-    filtered independently with:
+    Uses a forward-pass Kalman filter followed by a backward-pass RTS smoother.
+    This eliminates the forward-pass transient and gives optimal smoothing for
+    offline (batch) mocap data where all frames are available.
 
-    - state dim = 1, measurement dim = 1
-    - F = [[1]] (random walk), H = [[1]] (direct observation)
-    - Q = process_noise, R = measurement_noise
-    - Initial state seeded from the first sample, P = 1.0.
-
-    Defaults of Q=0.01, R=0.1 give modest smoothing suited to mocap
-    output where the measurement noise dominates short-term dynamics.
+    The steady-state P initialization avoids the long high-gain transient that
+    would otherwise reduce smoothing quality for the first 20–30 frames when
+    starting with P=1.0.
 
     Args:
         data: Array of shape (n_frames, n_points, n_dims).
@@ -408,45 +395,57 @@ def _kalman_filter(
         measurement_noise: Scalar measurement-noise variance R.
 
     Returns:
-        Filtered array of identical shape.
+        Smoothed array of identical shape.
     """
     if data.size == 0:
         return data
 
-    try:
-        from ...signal_toolkit.signal_processing import KalmanFilter
-    except ImportError:
-        # Fallback: simple exponentially-weighted smoother if signal_toolkit
-        # cannot be imported (preserves the silent-failure-fix postcondition
-        # that input != output for noisy series, while degrading gracefully).
-        return _ewma(data, alpha=0.5)
+    q = float(process_noise)
+    r = float(measurement_noise)
 
-    F = np.array([[1.0]])
-    H = np.array([[1.0]])
-    Q = np.array([[float(process_noise)]])
-    R = np.array([[float(measurement_noise)]])
+    # Steady-state P for a random-walk model solves the DARE:
+    #   P_ss = P_ss * r / (P_ss + r) + q
+    # Positive root: P_ss = 0.5 * (q + sqrt(q^2 + 4*q*r))
+    p_steady = 0.5 * (q + np.sqrt(q**2 + 4.0 * q * r))
 
     filtered = np.zeros_like(data)
     n_frames = data.shape[0]
+
     for i in range(data.shape[1]):
         for j in range(data.shape[2]):
             series = data[:, i, j]
-            kf = KalmanFilter(
-                dim_x=1,
-                dim_z=1,
-                F=F,
-                H=H,
-                Q=Q,
-                R=R,
-                P=np.array([[1.0]]),
-                x=np.array([float(series[0])]),
-            )
-            out = np.empty(n_frames, dtype=float)
+
+            # --- Forward pass ---
+            x_fwd = np.empty(n_frames)
+            p_fwd = np.empty(n_frames)
+
+            p = p_steady
+            x = float(series[0])
+
             for t in range(n_frames):
-                kf.predict()
-                kf.update(np.array([float(series[t])]))
-                out[t] = float(kf.x[0])
-            filtered[:, i, j] = out
+                # Predict (random-walk: x_k = x_{k-1}, P_k = P_{k-1} + Q)
+                p_pred = p + q
+                # Update (Kalman gain and correction)
+                k_gain = p_pred / (p_pred + r)
+                x = x + k_gain * (series[t] - x)
+                p = (1.0 - k_gain) * p_pred
+                x_fwd[t] = x
+                p_fwd[t] = p
+
+            # --- Backward RTS smoother pass ---
+            smoothed = np.empty(n_frames)
+            smoothed[-1] = x_fwd[-1]
+            p_s = p_fwd[-1]
+
+            for t in range(n_frames - 2, -1, -1):
+                # Predicted covariance at t+1 (using forward filter's P at t)
+                p_pred = p_fwd[t] + q
+                # RTS smoother gain
+                g_s = p_fwd[t] / p_pred
+                smoothed[t] = x_fwd[t] + g_s * (smoothed[t + 1] - x_fwd[t])
+                p_s = p_fwd[t] + g_s**2 * (p_s - p_pred)
+
+            filtered[:, i, j] = smoothed
 
     return filtered
 
