@@ -84,3 +84,59 @@ def test_resample_marker_trajectory_id_preserved() -> None:
     traj = make_marker_trajectory(num_frames=10, fps=30.0)
     out = resample(traj, target_fps=60.0)
     assert out.id == traj.id
+
+
+def test_pure_python_resample_parity() -> None:
+    from src.shared.python.motion_pipeline.preprocessing._resample_pure_python import (
+        resample as pure_resample,
+    )
+
+    # Test standard parity
+    seq = make_keypoint_sequence(num_frames=30, num_kp=1, fps=30.0)
+    out = pure_resample(seq, target_fps=120.0, source_fps=30.0)
+    assert out.num_frames > 30
+    assert out.metadata.get("resampled") is True
+
+    traj = make_marker_trajectory(num_frames=30, fps=60.0)
+    out_traj = pure_resample(traj, target_fps=120.0, source_fps=60.0)
+    assert out_traj.num_frames > 30
+
+    # Test error condition
+    with pytest.raises(ValueError, match="Unsupported"):
+        pure_resample("invalid", target_fps=60.0)  # type: ignore[arg-type]
+
+    # Test short inputs (len < 2)
+    short_seq = make_keypoint_sequence(num_frames=1, num_kp=1, fps=30.0)
+    assert pure_resample(short_seq, target_fps=120.0) is short_seq
+
+    short_traj = make_marker_trajectory(num_frames=1, fps=60.0)
+    assert pure_resample(short_traj, target_fps=120.0) is short_traj
+
+
+def test_resample_estimate_fps_edge_cases() -> None:
+    from src.shared.python.motion_pipeline.preprocessing.resample import _estimate_fps
+    from src.shared.python.motion_pipeline.preprocessing._resample_pure_python import (
+        _estimate_fps as pure_estimate_fps,
+    )
+    from src.shared.python.motion_pipeline.contracts import KeypointFrame
+
+    # dt <= 0
+    frames_bad = [
+        KeypointFrame.model_construct(
+            timestamp=1.0, keypoints=[], schema_name="custom", frame_index=0
+        ),
+        KeypointFrame.model_construct(
+            timestamp=0.5, keypoints=[], schema_name="custom", frame_index=1
+        ),
+    ]
+    assert _estimate_fps(frames_bad) == 30.0
+    assert pure_estimate_fps(frames_bad) == 30.0
+
+    # len < 2
+    frames_short = [
+        KeypointFrame.model_construct(
+            timestamp=1.0, keypoints=[], schema_name="custom", frame_index=0
+        ),
+    ]
+    assert _estimate_fps(frames_short) == 30.0
+    assert pure_estimate_fps(frames_short) == 30.0
