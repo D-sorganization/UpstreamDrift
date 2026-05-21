@@ -76,6 +76,13 @@ class MainWidget(QtWidgets.QWidget):
         # Backwards-compatible alias for any existing test references.
         self.action_export_csv = self.action_export_markers
 
+        self.action_export_animation = QtGui.QAction("E&xport animation…", self)
+        self.action_export_animation.setStatusTip(
+            "Export a headless MP4 animation of the skeleton"
+        )
+        self.action_export_animation.triggered.connect(self._export_animation_dialog)
+        self.action_export_animation.setEnabled(False)
+
         self.action_about = QtGui.QAction("&About", self)
         self.action_about.triggered.connect(self.show_about_dialog)
 
@@ -261,6 +268,7 @@ class MainWidget(QtWidgets.QWidget):
         self.analysis_tab.update_from_model(self.model)
         self.force_plot_tab.update_from_model(self.model)
         self.action_export_markers.setEnabled(True)
+        self.action_export_animation.setEnabled(True)
 
     def _export_markers_dialog(self) -> None:
         """Open the selective marker-export dialog."""
@@ -292,6 +300,46 @@ class MainWidget(QtWidgets.QWidget):
             )
             return
         self._status_message(f"Exported markers to {os.path.basename(str(written))}")
+
+    def _export_animation_dialog(self) -> None:
+        """Open the animation-export dialog."""
+        if self.model is None:
+            QtWidgets.QMessageBox.information(
+                self, "Export animation", "No file loaded."
+            )
+            return
+
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self,
+            "Export MP4 Animation",
+            "",
+            "MP4 files (*.mp4);;All files (*.*)",
+        )
+        if not path:
+            return
+
+        from .services.c3d_animation_export import export_animation
+
+        QtWidgets.QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        self._status_message(
+            f"Exporting animation to {os.path.basename(path)}... (may take a moment)"
+        )
+
+        try:
+            result = export_animation(self.model, path)
+            self._status_message(
+                f"Exported {result.frame_count} frames to {os.path.basename(path)}"
+            )
+            QtWidgets.QMessageBox.information(
+                self, "Export success", f"Animation exported to:\n{path}"
+            )
+        except (OSError, ValueError, ImportError) as e:
+            QtWidgets.QMessageBox.warning(
+                self, "Export failed", f"Could not export animation:\n{e}"
+            )
+            self._status_message("Animation export failed.")
+        finally:
+            QtWidgets.QApplication.restoreOverrideCursor()
 
 
 # ---------------------------------------------------------------------------
@@ -349,6 +397,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         if self._file_menu is not None:
             self._file_menu.addAction(self._main_widget.action_open)
             self._file_menu.addAction(self._main_widget.action_export_markers)
+            self._file_menu.addAction(self._main_widget.action_export_animation)
 
         help_menu = menubar.addMenu("&Help")
         if help_menu is not None:
@@ -412,6 +461,10 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         return self._main_widget.action_export_csv
 
     @property
+    def action_export_animation(self) -> QtGui.QAction:
+        return self._main_widget.action_export_animation
+
+    @property
     def action_about(self) -> QtGui.QAction:
         return self._main_widget.action_about
 
@@ -460,6 +513,9 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
 
     def _export_markers_dialog(self) -> None:
         self._main_widget._export_markers_dialog()
+
+    def _export_animation_dialog(self) -> None:
+        self._main_widget._export_animation_dialog()
 
 
 def get_dockable_ui() -> QtWidgets.QMainWindow:

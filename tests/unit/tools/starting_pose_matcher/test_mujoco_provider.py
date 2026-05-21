@@ -59,13 +59,17 @@ def test_mujoco_not_available_error():
 
     # Try to create provider without a valid model path
     # This should raise an error (either MuJoCoNotAvailableError or MuJoCoProviderError)
-    with pytest.raises((MuJoCoNotAvailableError, MuJoCoProviderError, MuJoCoProviderError)):
+    with pytest.raises(
+        (MuJoCoNotAvailableError, MuJoCoProviderError, MuJoCoProviderError)
+    ):
         MuJoCoSkeletonProvider(model_path=None, model_xml=None)
 
 
 def test_mujoco_provider_create_provider_function():
     """Test that create_provider function exists and has correct signature."""
-    from src.tools.starting_pose_matcher.skeleton_extractors.mujoco import create_provider
+    from src.tools.starting_pose_matcher.skeleton_extractors.mujoco import (
+        create_provider,
+    )
 
     # Check function signature
     import inspect

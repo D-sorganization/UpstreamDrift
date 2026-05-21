@@ -13,7 +13,6 @@ from src.robotics.control.whole_body.wbc_controller import (
     WholeBodyController,
 )
 
-
 N_V = 4
 
 

@@ -277,7 +277,7 @@ class GeminiAdapter(BaseAgentAdapter):
         "gemini-1.0-pro",
     )
 
-    def list_models(self) -> list[ChatModelInfo]:
+    def list_models(self) -> list[ChatModelInfo]:  # noqa: F821
         """Return Gemini model info; falls back to a static catalogue.
 
         The ``google-generativeai`` SDK exposes ``genai.list_models()``

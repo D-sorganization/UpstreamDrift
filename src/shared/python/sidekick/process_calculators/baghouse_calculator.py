@@ -63,7 +63,7 @@ except ImportError:
         assert value is not None, "value must be provided"
         if from_unit == "K" and to_unit == "C":
             return float(value - CELSIUS_TO_KELVIN_OFFSET)
-        elif from_unit == "C" and to_unit == "K":
+        if from_unit == "C" and to_unit == "K":
             return float(value + CELSIUS_TO_KELVIN_OFFSET)
         return value
 

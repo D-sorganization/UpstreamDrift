@@ -30,14 +30,12 @@ class InputArea(QFrame):
 
     def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
-        self.setStyleSheet(
-            """
+        self.setStyleSheet("""
             QFrame {
                 background-color: #1e1e1e;
                 border-top: 1px solid #3c3c3c;
             }
-            """
-        )
+            """)
         layout = QVBoxLayout(self)
 
         self.input_edit = ChatInput()
@@ -45,8 +43,7 @@ class InputArea(QFrame):
             "Type your message here... (Enter to send, Shift+Enter for new line)"
         )
         self.input_edit.setMaximumHeight(100)
-        self.input_edit.setStyleSheet(
-            """
+        self.input_edit.setStyleSheet("""
             QPlainTextEdit {
                 background-color: #252526;
                 color: #e0e0e0;
@@ -55,8 +52,7 @@ class InputArea(QFrame):
                 padding: 8px;
             }
             QPlainTextEdit:focus { border: 1px solid #FF8800; }
-            """
-        )
+            """)
         self.input_edit.submit_requested.connect(self._emit_send)
         layout.addWidget(self.input_edit)
 
@@ -68,8 +64,7 @@ class InputArea(QFrame):
 
         self.send_btn = QPushButton("Send")
         self.send_btn.clicked.connect(self._emit_send)
-        self.send_btn.setStyleSheet(
-            """
+        self.send_btn.setStyleSheet("""
             QPushButton {
                 background-color: #FF8800;
                 color: black;
@@ -83,8 +78,7 @@ class InputArea(QFrame):
                 background-color: #444444;
                 color: #888888;
             }
-            """
-        )
+            """)
         button_layout.addWidget(self.send_btn)
         layout.addLayout(button_layout)
 
@@ -119,8 +113,7 @@ class InputArea(QFrame):
             f"QFrame {{ background-color: {bg_primary}; "
             f"border-top: 1px solid {border}; }}"
         )
-        self.input_edit.setStyleSheet(
-            f"""
+        self.input_edit.setStyleSheet(f"""
             QPlainTextEdit {{
                 background-color: {bg_alt};
                 color: {text_primary};
@@ -129,10 +122,8 @@ class InputArea(QFrame):
                 padding: 8px;
             }}
             QPlainTextEdit:focus {{ border: 1px solid {accent}; }}
-            """
-        )
-        self.send_btn.setStyleSheet(
-            f"""
+            """)
+        self.send_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: {accent};
                 color: black;
@@ -146,6 +137,5 @@ class InputArea(QFrame):
                 background-color: {border};
                 color: {text_muted};
             }}
-            """
-        )
+            """)
         self.expertise_label.setStyleSheet(f"color: {text_muted};")

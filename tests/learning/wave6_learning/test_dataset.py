@@ -29,9 +29,9 @@ def _make_demo(
         joint_velocities=np.ones((n_frames, n_joints)),
         actions=np.full((n_frames, n_joints), 0.5) if with_actions else None,
         end_effector_poses=np.zeros((n_frames, 7)) if with_ee else None,
-        contact_states=[[{"link": "f"}] for _ in range(n_frames)]
-        if with_contact
-        else None,
+        contact_states=(
+            [[{"link": "f"}] for _ in range(n_frames)] if with_contact else None
+        ),
         task_id=task_id,
         success=success,
     )

@@ -19,7 +19,6 @@ from src.shared.python.motion_matching.loaders.c3d_body import (
     default_anatomical_marker_set,
 )
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DRIVER_C3D = REPO_ROOT / "data" / "C3D_TA_Driver.c3d"
 

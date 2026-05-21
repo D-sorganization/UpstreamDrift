@@ -48,7 +48,6 @@ src/engines/Simscape_Multibody_Models/
 # Test and dev files not needed in image
 tests/
 conftest.py
-build_hooks.py
 requirements-dev.lock
 
 # Data and logs

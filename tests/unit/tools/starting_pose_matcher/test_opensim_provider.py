@@ -59,13 +59,17 @@ def test_opensim_not_available_error():
 
     # Try to create provider without a valid model path
     # This should raise an error (either OpenSimNotAvailableError or OpenSimProviderError)
-    with pytest.raises((OpenSimNotAvailableError, OpenSimProviderError, OpenSimProviderError)):
+    with pytest.raises(
+        (OpenSimNotAvailableError, OpenSimProviderError, OpenSimProviderError)
+    ):
         OpenSimSkeletonProvider(model_path=None, model_xml=None)
 
 
 def test_opensim_provider_create_provider_function():
     """Test that create_provider function exists and has correct signature."""
-    from src.tools.starting_pose_matcher.skeleton_extractors.opensim import create_provider
+    from src.tools.starting_pose_matcher.skeleton_extractors.opensim import (
+        create_provider,
+    )
 
     # Check function signature
     import inspect

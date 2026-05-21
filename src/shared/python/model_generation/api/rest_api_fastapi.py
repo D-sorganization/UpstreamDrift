@@ -62,12 +62,11 @@ class FastAPIAdapter:
                             media_type=response.content_type,
                             headers=response.headers,
                         )
-                    else:
-                        return JSONResponse(
-                            content=response.body,
-                            status_code=response.status_code,
-                            headers=response.headers,
-                        )
+                    return JSONResponse(
+                        content=response.body,
+                        status_code=response.status_code,
+                        headers=response.headers,
+                    )
 
                 return handler
 

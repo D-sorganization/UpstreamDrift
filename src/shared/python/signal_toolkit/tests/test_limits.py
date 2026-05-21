@@ -368,11 +368,11 @@ class TestVisualizeSaturationCurves:
 
     def test_each_curve_has_correct_shape(self):
         curves = visualize_saturation_curves(-1.0, 1.0, 1.0, 200)
-        for _mode, (x, y) in curves.items():
+        for x, y in curves.values():
             assert len(x) == 200
             assert len(y) == 200
 
     def test_values_within_bounds(self):
         curves = visualize_saturation_curves(-2.0, 2.0, 1.0, 100)
-        for _mode, (_x, y) in curves.items():
+        for _x, y in curves.values():
             assert np.all(y >= -2.0) and np.all(y <= 2.0)

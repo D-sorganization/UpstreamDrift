@@ -166,7 +166,7 @@ class ClaudeCodeAdapter(BaseAgentAdapter):
     def capabilities(self) -> ProviderCapabilities:
         return self._capabilities
 
-    def list_models(self) -> list[ChatModelInfo]:
+    def list_models(self) -> list[ChatModelInfo]:  # noqa: F821
         """Return the documented model catalogue.
 
         The Claude Code CLI does not expose a model listing endpoint, so this

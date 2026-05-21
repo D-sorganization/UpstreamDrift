@@ -285,7 +285,12 @@ def _linear_interp_markers(
         new_markers = dict(frame.markers)
 
         for name, marker in frame.markers.items():
-            if marker.occluded and after and name in before.markers and name in after.markers:
+            if (
+                marker.occluded
+                and after
+                and name in before.markers
+                and name in after.markers
+            ):
                 t = (i - start + 1) / (end - start + 2)
                 m_before = before.markers[name]
                 m_after = after.markers[name]
@@ -540,7 +545,9 @@ def _pca_reconstruct_markers_python(
     # Need at least a couple visible rows to build a basis. Otherwise fall
     # back entirely to linear interpolation.
     if n_visible < 2:
-        return _fill_gaps_markers(list(frames), gap_indices, GapFillStrategy.LINEAR, max_gap)
+        return _fill_gaps_markers(
+            list(frames), gap_indices, GapFillStrategy.LINEAR, max_gap
+        )
 
     M_visible = M[fully_visible_rows]
 
@@ -552,19 +559,25 @@ def _pca_reconstruct_markers_python(
     try:
         _, S, Vt = np.linalg.svd(Mc, full_matrices=False)
     except np.linalg.LinAlgError:
-        return _fill_gaps_markers(list(frames), gap_indices, GapFillStrategy.LINEAR, max_gap)
+        return _fill_gaps_markers(
+            list(frames), gap_indices, GapFillStrategy.LINEAR, max_gap
+        )
 
     # Truncate to rank k using a relative threshold (1 % of the largest singular
     # value). A pure machine-epsilon cut-off includes near-zero noise components
     # in k, which causes the lstsq minimum-norm solution to produce zero for the
     # occluded marker instead of the correct PCA-projected value.
     if S.size == 0 or S.max() == 0.0:
-        return _fill_gaps_markers(list(frames), gap_indices, GapFillStrategy.LINEAR, max_gap)
+        return _fill_gaps_markers(
+            list(frames), gap_indices, GapFillStrategy.LINEAR, max_gap
+        )
     relative_threshold = 0.01 * float(S.max())
     effective_rank = int((relative_threshold < S).sum())
 
     if effective_rank == 0:
-        return _fill_gaps_markers(list(frames), gap_indices, GapFillStrategy.LINEAR, max_gap)
+        return _fill_gaps_markers(
+            list(frames), gap_indices, GapFillStrategy.LINEAR, max_gap
+        )
     k = min(6, effective_rank) if rank is None else min(rank, effective_rank)
     V_k = Vt[:k].T  # (n_dims, k)
 

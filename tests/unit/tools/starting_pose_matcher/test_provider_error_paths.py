@@ -76,7 +76,9 @@ def test_opensim_provider_with_neither_raises():
 def test_opensim_create_provider_factory():
     from src.tools.starting_pose_matcher.skeleton_extractors import opensim
 
-    with pytest.raises((opensim.OpenSimNotAvailableError, opensim.OpenSimProviderError)):
+    with pytest.raises(
+        (opensim.OpenSimNotAvailableError, opensim.OpenSimProviderError)
+    ):
         opensim.create_provider(model_path=None, model_xml=None)
 
 
@@ -138,7 +140,9 @@ def test_pinocchio_provider_without_path_raises():
 def test_pinocchio_create_provider_factory_with_no_path():
     from src.tools.starting_pose_matcher.skeleton_extractors import pinocchio
 
-    with pytest.raises((pinocchio.PinocchioNotAvailableError, pinocchio.PinocchioProviderError)):
+    with pytest.raises(
+        (pinocchio.PinocchioNotAvailableError, pinocchio.PinocchioProviderError)
+    ):
         pinocchio.create_provider(urdf_path=None)  # type: ignore[arg-type]
 
 
@@ -180,4 +184,6 @@ def test_provider_vocabulary_is_complete(module_name: str):
         getattr(mod, name) for name in dir(mod) if name.startswith("MATCHER_TO_")
     )
     for vocab in REQUIRED_VOCAB:
-        assert vocab in matcher_to_engine, f"{module_name}: missing vocabulary mapping for {vocab}"
+        assert vocab in matcher_to_engine, (
+            f"{module_name}: missing vocabulary mapping for {vocab}"
+        )

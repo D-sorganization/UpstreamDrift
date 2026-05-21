@@ -6,7 +6,6 @@ import pytest
 
 from theme import colors
 
-
 # ── is_valid_hex_color ─────────────────────────────────────────────────────
 
 

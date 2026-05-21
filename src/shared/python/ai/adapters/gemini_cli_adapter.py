@@ -154,7 +154,7 @@ class GeminiCliAdapter(BaseAgentAdapter):
     def capabilities(self) -> ProviderCapabilities:
         return self._capabilities
 
-    def list_models(self) -> list[ChatModelInfo]:
+    def list_models(self) -> list[ChatModelInfo]:  # noqa: F821
         """Return the documented model catalogue. Always non-empty."""
         from src.shared.python.ai.types import ChatModelInfo
 

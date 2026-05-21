@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.174                                            |
-| **Last Spec Update**    | 2026-05-15                                         |
+| **Spec Version**        | 1.0.175                                            |
+| **Last Spec Update**    | 2026-05-21                                         |
 
 ## 2. Purpose & Mission
 
@@ -67,6 +67,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 - Not a replacement for domain-specific tools (OpenSim for clinical analysis, MATLAB for controls research)
 
 ## 4. Architecture Overview
+
+### Recent Spec Updates
+
+- **2026-05-21** - Added C3D viewer animation export through the canonical body-target video pipeline and stabilized self-hosted CI SciPy pinning for the core and shared-contract lanes.
 
 ### System Context
 

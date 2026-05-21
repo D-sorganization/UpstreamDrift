@@ -95,9 +95,11 @@ async def test_start_twice_raises(cfg: StreamingConfig) -> None:
 async def test_start_bind_failure_sets_error_state() -> None:
     # Negative port → OSError → wrapped in RuntimeError
     s = UnrealStreamingServer(
-        config=StreamingConfig(host="127.0.0.1", port=70001)
-        if False
-        else StreamingConfig(host="127.0.0.1", port=0)
+        config=(
+            StreamingConfig(host="127.0.0.1", port=70001)
+            if False
+            else StreamingConfig(host="127.0.0.1", port=0)
+        )
     )
     # Force OSError by replacing asyncio.start_server
     import src.unreal_integration._streaming_server as srv_mod

@@ -343,11 +343,7 @@ class ShellTool(CLIToolBase):
                 return False
 
             # Verify no token is a dangerous command
-            for token in tokens:
-                if token in dangerous:
-                    return False
-
-            return True
+            return all(token not in dangerous for token in tokens)
         except ValueError:
             # e.g., missing closing quote
             return False

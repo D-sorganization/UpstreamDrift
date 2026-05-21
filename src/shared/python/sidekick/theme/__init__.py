@@ -32,8 +32,6 @@ logger = logging.getLogger(__name__)
 # When installed via pip (editable or not), setuptools already
 # includes the search paths, but we guard against edge cases.
 _shared_python_dir = Path(__file__).resolve().parent.parent.parent
-if str(_shared_python_dir) not in sys.path:
-    sys.path.insert(0, str(_shared_python_dir))
 
 # Dynamically import and re-export everything from shared.python.theme
 try:

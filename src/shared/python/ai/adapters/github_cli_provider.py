@@ -517,7 +517,7 @@ class GitHubCliProvider(BaseAgentAdapter):
             provider_name="github-cli",
         )
 
-    def list_models(self) -> list[ChatModelInfo]:
+    def list_models(self) -> list[ChatModelInfo]:  # noqa: F821
         """``gh`` exposes a single virtual "model"."""
         from src.shared.python.ai.types import ChatModelInfo
 

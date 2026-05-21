@@ -78,12 +78,11 @@ def get_roughness(material: str, unit: str = "m") -> float:
 
     if unit == "m":
         return roughness_mm / 1000.0
-    elif unit == "mm":
+    if unit == "mm":
         return roughness_mm
-    elif unit == "ft":
+    if unit == "ft":
         return roughness_ft
-    else:
-        raise ValueError(f"Unit '{unit}' not recognized. Use 'm', 'mm', or 'ft'")
+    raise ValueError(f"Unit '{unit}' not recognized. Use 'm', 'mm', or 'ft'")
 
 
 # ============================================================================
@@ -331,7 +330,7 @@ def get_pipe_spec(
 def list_available_sizes() -> list[str]:
     """List all available nominal pipe sizes."""
     sizes = sorted(
-        set(nps for nps, _ in STEEL_PIPE_DIMENSIONS.keys()),
+        {nps for nps, _ in STEEL_PIPE_DIMENSIONS.keys()},
         key=lambda x: float(x.replace("/", ".")) if "/" in x else float(x),
     )
     return sizes

@@ -105,7 +105,9 @@ class Calibration(BaseModel):
         default="meters", description="Unit system for 3D coordinates"
     )
     source_fps: float = Field(..., description="Source capture frame rate (Hz)", gt=0)
-    world_up_axis: UpAxis = Field(default="+Y", description="World coordinate system up axis")
+    world_up_axis: UpAxis = Field(
+        default="+Y", description="World coordinate system up axis"
+    )
     calibrated_at: datetime = Field(
         default_factory=datetime.now, description="Calibration timestamp"
     )
@@ -138,7 +140,9 @@ class Keypoint(BaseModel):
     x: float = Field(..., description="X coordinate (pixels or normalized)")
     y: float = Field(..., description="Y coordinate (pixels or normalized)")
     z: float | None = Field(default=None, description="Z coordinate (if 3D)")
-    confidence: float = Field(default=1.0, description="Confidence score [0, 1]", ge=0, le=1)
+    confidence: float = Field(
+        default=1.0, description="Confidence score [0, 1]", ge=0, le=1
+    )
     name: str | None = Field(default=None, description="Keypoint name (e.g., 'nose')")
 
     @field_validator("x", "y", "z")
@@ -155,7 +159,9 @@ class KeypointFrame(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     timestamp: float = Field(..., description="Frame timestamp (seconds)", ge=0)
-    keypoints: list[Keypoint] = Field(..., description="List of keypoints", min_length=1)
+    keypoints: list[Keypoint] = Field(
+        ..., description="List of keypoints", min_length=1
+    )
     schema_name: SchemaName = Field(..., description="Keypoint schema used")
     frame_index: int | None = Field(default=None, description="Frame index in sequence")
 
@@ -186,8 +192,12 @@ class KeypointSequence(BaseModel):
     frames: list[KeypointFrame] = Field(
         ..., description="Sequence of keypoint frames", min_length=1
     )
-    calibration: Calibration | None = Field(default=None, description="Associated calibration data")
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    calibration: Calibration | None = Field(
+        default=None, description="Associated calibration data"
+    )
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
 
     @model_validator(mode="after")
     def check_monotonic_timestamps(self) -> KeypointSequence:
@@ -232,7 +242,9 @@ class Marker(BaseModel):
     x: float = Field(..., description="X position (meters)")
     y: float = Field(..., description="Y position (meters)")
     z: float = Field(..., description="Z position (meters)")
-    residual: float | None = Field(default=None, description="Residual error (mm)", ge=0)
+    residual: float | None = Field(
+        default=None, description="Residual error (mm)", ge=0
+    )
     occluded: bool = Field(default=False, description="Marker is occluded")
 
     @field_validator("x", "y", "z", "residual")
@@ -276,10 +288,16 @@ class MarkerTrajectory(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     id: str = Field(..., description="Unique trajectory identifier")
-    frames: list[MarkerFrame] = Field(..., description="Sequence of marker frames", min_length=1)
-    calibration: Calibration | None = Field(default=None, description="Associated calibration data")
+    frames: list[MarkerFrame] = Field(
+        ..., description="Sequence of marker frames", min_length=1
+    )
+    calibration: Calibration | None = Field(
+        default=None, description="Associated calibration data"
+    )
     subject_id: str | None = Field(default=None, description="Subject identifier")
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
 
     @model_validator(mode="after")
     def check_monotonic_timestamps(self) -> MarkerTrajectory:
@@ -340,7 +358,11 @@ class JointLimit(BaseModel):
 
     @model_validator(mode="after")
     def check_limit_order(self) -> JointLimit:
-        if self.lower is not None and self.upper is not None and self.lower > self.upper:
+        if (
+            self.lower is not None
+            and self.upper is not None
+            and self.lower > self.upper
+        ):
             raise ValueError("Lower limit must be <= upper limit")
         return self
 
@@ -388,7 +410,9 @@ class JointDef(BaseModel):
     def _invariant_axes_match_limits(self) -> JointDef:
         """Number of axes should match number of limits (if limits provided)."""
         if self.limits and len(self.axes) != len(self.limits):
-            raise ValueError("axes_match_limits: number of axes must equal number of limits")
+            raise ValueError(
+                "axes_match_limits: number of axes must equal number of limits"
+            )
         return self
 
 
@@ -404,7 +428,9 @@ class SkeletonRig(BaseModel):
     root_joint: str = Field(..., description="Root joint name")
     up_axis: UpAxis = Field(default="+Y", description="Skeleton up axis")
     scale: float = Field(default=1.0, description="Global scale factor", gt=0)
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
 
     @model_validator(mode="after")
     def check_root_exists(self) -> SkeletonRig:
@@ -422,7 +448,9 @@ class SkeletonRig(BaseModel):
                     raise ValueError(f"Joint {joint_name} has invalid child {child}")
             # Check parent references valid joint
             if joint.parent is not None and joint.parent not in self.joints:
-                raise ValueError(f"Joint {joint_name} has invalid parent {joint.parent}")
+                raise ValueError(
+                    f"Joint {joint_name} has invalid parent {joint.parent}"
+                )
         return self
 
     @property
@@ -484,7 +512,9 @@ class JointStateFrame(BaseModel):
         if self.qddot is not None:
             lengths.append(len(self.qddot))
         if len(set(lengths)) != 1:
-            raise ValueError("matching_dimensions: q, qdot, qddot must have identical length")
+            raise ValueError(
+                "matching_dimensions: q, qdot, qddot must have identical length"
+            )
         return self
 
     @property
@@ -499,8 +529,12 @@ class JointTrajectory(BaseModel):
 
     id: str = Field(..., description="Unique trajectory identifier")
     skeleton: SkeletonRig = Field(..., description="Associated skeleton rig")
-    frames: list[JointStateFrame] = Field(..., description="Sequence of joint states", min_length=1)
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    frames: list[JointStateFrame] = Field(
+        ..., description="Sequence of joint states", min_length=1
+    )
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
 
     @model_validator(mode="after")
     def check_monotonic_timestamps(self) -> JointTrajectory:
@@ -515,7 +549,9 @@ class JointTrajectory(BaseModel):
         expected_dofs = self.skeleton.num_dofs
         for frame in self.frames:
             if frame.num_dofs != expected_dofs:
-                raise ValueError(f"Frame has {frame.num_dofs} DOFs, expected {expected_dofs}")
+                raise ValueError(
+                    f"Frame has {frame.num_dofs} DOFs, expected {expected_dofs}"
+                )
         return self
 
     @property
@@ -555,8 +591,12 @@ class MotionTrajectory(BaseModel):
         default_factory=dict,
         description="Source data provenance (file paths, capture system, etc.)",
     )
-    created_at: datetime = Field(default_factory=datetime.now, description="Creation timestamp")
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    created_at: datetime = Field(
+        default_factory=datetime.now, description="Creation timestamp"
+    )
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
 
     @model_validator(mode="after")
     def check_trajectory_skeleton_match(self) -> MotionTrajectory:
@@ -613,7 +653,9 @@ class MotionMatchingRequest(BaseModel):
             or self.target_keypoints is not None
         )
         if not has_target:
-            raise ValueError("Must specify at least one target (trajectory, markers, or keypoints)")
+            raise ValueError(
+                "Must specify at least one target (trajectory, markers, or keypoints)"
+            )
         return self
 
 
@@ -651,8 +693,12 @@ class TorqueTrajectory(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True, frozen=True)
 
     frames: list[TorqueFrame] = Field(..., description="Per-frame torques")
-    rig_joint_names: list[str] = Field(..., description="Joint names corresponding to tau entries")
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    rig_joint_names: list[str] = Field(
+        ..., description="Joint names corresponding to tau entries"
+    )
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
 
     @model_validator(mode="after")
     def _invariant_consistent(self) -> TorqueTrajectory:
@@ -661,7 +707,9 @@ class TorqueTrajectory(BaseModel):
         n = len(self.rig_joint_names)
         for i, f in enumerate(self.frames):
             if len(f.tau) != n:
-                raise ValueError(f"frame {i} tau length {len(f.tau)} != rig_joint_names length {n}")
+                raise ValueError(
+                    f"frame {i} tau length {len(f.tau)} != rig_joint_names length {n}"
+                )
         ts = [f.timestamp for f in self.frames]
         if any(b <= a for a, b in zip(ts, ts[1:], strict=False)):
             raise ValueError("timestamps must be strictly monotonic")
@@ -710,11 +758,15 @@ class MuscleActivationTrajectory(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True, frozen=True)
 
-    frames: list[MuscleActivationFrame] = Field(..., description="Per-frame activations")
+    frames: list[MuscleActivationFrame] = Field(
+        ..., description="Per-frame activations"
+    )
     muscle_names: list[str] = Field(
         ..., description="Muscle names corresponding to activation entries"
     )
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
 
     @model_validator(mode="after")
     def _invariant_consistent(self) -> MuscleActivationTrajectory:
@@ -772,9 +824,13 @@ class MotionMatchingResult(BaseModel):
         description="Error metrics (RMSE, max error, etc.)",
     )
     iterations: int | None = Field(default=None, description="Solver iterations")
-    solve_time: float | None = Field(default=None, description="Solve time (seconds)", ge=0)
+    solve_time: float | None = Field(
+        default=None, description="Solve time (seconds)", ge=0
+    )
     message: str | None = Field(default=None, description="Status message")
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
     schema_version: int = Field(
         default=MOTION_MATCHING_RESULT_SCHEMA_VERSION,
         description=(
@@ -822,7 +878,10 @@ class MotionMatchingResult(BaseModel):
         without a payload still load. Newly-created results default to
         the current schema version and are checked strictly.
         """
-        if self.success and self.schema_version >= MOTION_MATCHING_RESULT_SCHEMA_VERSION:
+        if (
+            self.success
+            and self.schema_version >= MOTION_MATCHING_RESULT_SCHEMA_VERSION
+        ):
             has_payload = (
                 self.matched_trajectory is not None
                 or self.torques is not None

@@ -133,7 +133,7 @@ class TestValidateLauncherConfig:
 
 class TestLaunchApp:
     def _cfg(self, **overrides) -> LauncherConfig:
-        kwargs = dict(app_module="my.app", window_title="Test App")
+        kwargs = {"app_module": "my.app", "window_title": "Test App"}
         kwargs.update(overrides)
         return LauncherConfig(**kwargs)
 

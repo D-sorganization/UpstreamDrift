@@ -168,3 +168,58 @@ def _label_placeholder(parent: Any, text: str) -> Any:
         return QLabel(text, parent)
     except Exception:  # noqa: BLE001
         return None
+
+
+def build_default_tab_definitions(sidebar: Any, cls: Any) -> list[Any]:
+    return []
+
+
+def refresh_workspace_list(sidebar: Any) -> None:
+    pass
+
+
+def set_project_explorer_root(widget: Any, root: Any) -> None:
+    pass
+
+
+class WorkspaceTableWidget:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        pass
+
+
+def build_calculator_plot_tab(sidebar: Any) -> Any:
+    return None
+
+
+def build_file_explorer_tab(sidebar: Any) -> Any:
+    return None
+
+
+def build_function_generator_tab(sidebar: Any) -> Any:
+    return None
+
+
+def build_jupyter_tab(sidebar: Any) -> Any:
+    return None
+
+
+def build_notes_tab(sidebar: Any) -> Any:
+    return None
+
+
+def build_rotation_converter_tab(sidebar: Any) -> Any:
+    return None
+
+
+def build_terminal_tab(sidebar: Any) -> Any:
+    return None
+
+
+def build_unit_converter_tab(sidebar: Any) -> Any:
+    return None
+
+
+def placeholder(sidebar: Any, text: str) -> Any:
+    return None
+
+    return []

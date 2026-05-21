@@ -197,18 +197,19 @@ class TestWGSReactorWidget:
         widget.catalyst_combo = mock_combo
 
         # Mock values directly since spinning up full Qt event cycle isn't necessary
-        with patch.object(
-            widget.engine,
-            "calculate_equilibrium_composition",
-            return_value={
-                "conversion": 50.0,
-                "equilibrium_constant": 10.0,
-                "h2_co_ratio": 2.0,
-                "heat_released": 100.0,
-                "composition": {"H2": 50.0},
-            },
-        ):
-            with patch.object(
+        with (
+            patch.object(
+                widget.engine,
+                "calculate_equilibrium_composition",
+                return_value={
+                    "conversion": 50.0,
+                    "equilibrium_constant": 10.0,
+                    "h2_co_ratio": 2.0,
+                    "heat_released": 100.0,
+                    "composition": {"H2": 50.0},
+                },
+            ),
+            patch.object(
                 widget.engine,
                 "size_wgs_reactor",
                 return_value={
@@ -219,12 +220,13 @@ class TestWGSReactorWidget:
                     "heat_duty": 500.0,
                     "ghsv": 3000,
                 },
-            ):
-                with patch.object(widget, "create_plots"):
-                    # Execute
-                    widget.calculate()
-                    # Verify text edit has output
-                    assert len(widget.results_text.toPlainText()) > 10
+            ),
+            patch.object(widget, "create_plots"),
+        ):
+            # Execute
+            widget.calculate()
+            # Verify text edit has output
+            assert len(widget.results_text.toPlainText()) > 10
 
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     def test_widget_calculate_error(self, qtbot) -> Any:
@@ -235,14 +237,16 @@ class TestWGSReactorWidget:
         widget = WGSReactorCalculatorWidget()
         widget.show()
         qtbot.waitExposed(widget)
-        with patch.object(
-            widget.engine,
-            "calculate_equilibrium_composition",
-            side_effect=ValueError("Test Error"),
+        with (
+            patch.object(
+                widget.engine,
+                "calculate_equilibrium_composition",
+                side_effect=ValueError("Test Error"),
+            ),
+            patch("PyQt6.QtWidgets.QMessageBox.critical") as mock_msg,
         ):
-            with patch("PyQt6.QtWidgets.QMessageBox.critical") as mock_msg:
-                widget.calculate()
-                mock_msg.assert_called_once()
+            widget.calculate()
+            mock_msg.assert_called_once()
 
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     def test_widget_create_plots(self, qtbot) -> Any:

@@ -13,7 +13,6 @@ import pytest
 
 from src.shared.python import cli_utils
 
-
 # ── Parser builders ─────────────────────────────────────────────────────
 
 

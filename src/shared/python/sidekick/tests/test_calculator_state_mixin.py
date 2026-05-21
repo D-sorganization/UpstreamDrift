@@ -300,7 +300,7 @@ def test_show_menus(qapp) -> None:
 def test_copy_selected_text_focused(qapp) -> None:
     calc = MockCalculator()
     text = QTextEdit("focused text")
-    with patch.object(calc, "focusWidget", return_value=text):
+    with patch.object(calc, "focusWidget", return_value=text):  # noqa: SIM117
         with patch.object(calc, "copy_to_clipboard") as mock_copy:
             calc.copy_selected_text()
             mock_copy.assert_called_with("focused text")
@@ -313,7 +313,7 @@ def test_copy_selected_text_unfocused(qapp) -> None:
 
     # text.hasFocus() typically false normally unless actively rendering/selected
     # mock it
-    with patch.object(text, "hasFocus", return_value=True):
+    with patch.object(text, "hasFocus", return_value=True):  # noqa: SIM117
         with patch.object(calc, "focusWidget", return_value=None):
             with patch.object(calc, "copy_to_clipboard") as mock_copy:
                 calc.copy_selected_text()
@@ -337,15 +337,17 @@ def test_restore_splitter_state_with_load(qapp) -> None:
     calc = MockCalculator("MyCalc2")
     splitter = QSplitter(Qt.Orientation.Horizontal)
 
-    with patch.object(
-        calc,
-        "load_calculator_state",
-        return_value={"splitter_states": {"s1": {"sizes": [11, 22]}}},
+    with (
+        patch.object(
+            calc,
+            "load_calculator_state",
+            return_value={"splitter_states": {"s1": {"sizes": [11, 22]}}},
+        ),
+        patch.object(splitter, "setSizes") as mock_set,
     ):
-        with patch.object(splitter, "setSizes") as mock_set:
-            calc.register_splitter(splitter, "s1")
-            # register_splitter calls restore_splitter_state implicitly
-            mock_set.assert_called_with([11, 22])
+        calc.register_splitter(splitter, "s1")
+        # register_splitter calls restore_splitter_state implicitly
+        mock_set.assert_called_with([11, 22])
 
 
 def test_set_calculator_state_geometry(qapp) -> None:
@@ -479,7 +481,7 @@ def test_exceptions_coverage(qapp) -> None:
     # pass something that throws RuntimeError when checked type
     class BadWidget:
         def __class__(self) -> Any:
-            raise RuntimeError()
+            raise RuntimeError
 
     calc.get_text_from_widget(BadWidget())
 

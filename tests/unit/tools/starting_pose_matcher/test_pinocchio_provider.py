@@ -67,7 +67,9 @@ def test_pinocchio_not_available_error():
 
 def test_pinocchio_provider_create_provider_function():
     """Test that create_provider function exists and has correct signature."""
-    from src.tools.starting_pose_matcher.skeleton_extractors.pinocchio import create_provider
+    from src.tools.starting_pose_matcher.skeleton_extractors.pinocchio import (
+        create_provider,
+    )
 
     # Check function signature
     import inspect

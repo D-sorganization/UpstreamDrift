@@ -21,14 +21,8 @@ _VENDOR_ST = (
     _REPO_ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python" / "signal_toolkit"
 )
 
-# Extend __path__ so submodule imports (e.g. .calculus) resolve to vendor files
-if _VENDOR_ST.exists():
+if _VENDOR_ST.is_dir():
     _vendor_st_str = str(_VENDOR_ST)
     if _vendor_st_str not in __path__:
         __path__.append(_vendor_st_str)
-
-# Also ensure the vendor path itself is on sys.path so signal_toolkit's own
-# __init__.py can import its dependencies via relative imports.
-_VENDOR_PYTHON = str(_REPO_ROOT / "vendor" / "ud-tools")
-if _VENDOR_PYTHON not in sys.path:
-    sys.path.insert(0, _VENDOR_PYTHON)
+sys.modules.setdefault("signal_toolkit", sys.modules[__name__])

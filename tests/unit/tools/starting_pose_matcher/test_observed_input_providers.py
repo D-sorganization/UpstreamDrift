@@ -36,7 +36,9 @@ def test_openpose_provider_error_no_data():
 
 def test_openpose_parse_json_fixture():
     """Test parsing OpenPose JSON fixture."""
-    from src.tools.starting_pose_matcher.skeleton_extractors.openpose import OpenPoseProvider
+    from src.tools.starting_pose_matcher.skeleton_extractors.openpose import (
+        OpenPoseProvider,
+    )
 
     # Create minimal OpenPose JSON fixture
     fixture = {
@@ -128,7 +130,9 @@ def test_openpose_parse_json_fixture():
 
 def test_openpose_get_skeleton():
     """Test getting skeleton from OpenPose provider."""
-    from src.tools.starting_pose_matcher.skeleton_extractors.openpose import OpenPoseProvider
+    from src.tools.starting_pose_matcher.skeleton_extractors.openpose import (
+        OpenPoseProvider,
+    )
 
     fixture = {
         "people": [
@@ -208,7 +212,9 @@ def test_openpose_get_skeleton():
 
 def test_openpose_confidence_thresholding():
     """Test that confidence thresholding works correctly."""
-    from src.tools.starting_pose_matcher.skeleton_extractors.openpose import OpenPoseProvider
+    from src.tools.starting_pose_matcher.skeleton_extractors.openpose import (
+        OpenPoseProvider,
+    )
 
     fixture = {
         "people": [
@@ -289,7 +295,9 @@ def test_openpose_confidence_thresholding():
 
 def test_openpose_missing_keypoints():
     """Test that missing keypoints are reported correctly."""
-    from src.tools.starting_pose_matcher.skeleton_extractors.openpose import OpenPoseProvider
+    from src.tools.starting_pose_matcher.skeleton_extractors.openpose import (
+        OpenPoseProvider,
+    )
 
     fixture = {
         "people": [
@@ -363,7 +371,9 @@ def test_openpose_missing_keypoints():
 
 def test_openpose_create_provider():
     """Test create_provider function."""
-    from src.tools.starting_pose_matcher.skeleton_extractors.openpose import create_provider
+    from src.tools.starting_pose_matcher.skeleton_extractors.openpose import (
+        create_provider,
+    )
 
     fixture = {"people": [{"pose_keypoints_2d": []}]}
     provider = create_provider(json_data=fixture, confidence_threshold=0.5)
@@ -415,7 +425,9 @@ class MockLandmark:
 
 def test_mediapipe_parse_landmarks():
     """Test parsing MediaPipe landmarks."""
-    from src.tools.starting_pose_matcher.skeleton_extractors.mediapipe import MediaPipeProvider
+    from src.tools.starting_pose_matcher.skeleton_extractors.mediapipe import (
+        MediaPipeProvider,
+    )
 
     # Create mock landmarks for all 33 MediaPipe Pose landmarks
     landmarks = [MockLandmark(0.5, 0.5, 0.0, 0.9, 0.9) for _ in range(33)]
@@ -428,7 +440,9 @@ def test_mediapipe_parse_landmarks():
 
 def test_mediapipe_get_skeleton():
     """Test getting skeleton from MediaPipe provider."""
-    from src.tools.starting_pose_matcher.skeleton_extractors.mediapipe import MediaPipeProvider
+    from src.tools.starting_pose_matcher.skeleton_extractors.mediapipe import (
+        MediaPipeProvider,
+    )
 
     # Create mock landmarks
     landmarks = [MockLandmark(0.5, 0.5, 0.0, 0.9, 0.9) for _ in range(33)]
@@ -448,7 +462,9 @@ def test_mediapipe_get_skeleton():
 
 def test_mediapipe_visibility_thresholding():
     """Test that visibility thresholding works correctly."""
-    from src.tools.starting_pose_matcher.skeleton_extractors.mediapipe import MediaPipeProvider
+    from src.tools.starting_pose_matcher.skeleton_extractors.mediapipe import (
+        MediaPipeProvider,
+    )
 
     # Create mock landmarks with varying visibility
     landmarks = []
@@ -468,7 +484,9 @@ def test_mediapipe_visibility_thresholding():
 
 def test_mediapipe_missing_landmarks():
     """Test that missing landmarks are reported correctly."""
-    from src.tools.starting_pose_matcher.skeleton_extractors.mediapipe import MediaPipeProvider
+    from src.tools.starting_pose_matcher.skeleton_extractors.mediapipe import (
+        MediaPipeProvider,
+    )
 
     # Create mock landmarks
     landmarks = [MockLandmark(0.5, 0.5, 0.0, 0.9, 0.9) for _ in range(33)]
@@ -482,7 +500,9 @@ def test_mediapipe_missing_landmarks():
 
 def test_mediapipe_create_provider():
     """Test create_provider function."""
-    from src.tools.starting_pose_matcher.skeleton_extractors.mediapipe import create_provider
+    from src.tools.starting_pose_matcher.skeleton_extractors.mediapipe import (
+        create_provider,
+    )
 
     landmarks = [MockLandmark() for _ in range(33)]
     provider = create_provider(landmarks_data=[landmarks], visibility_threshold=0.7)
@@ -497,15 +517,23 @@ def test_mediapipe_create_provider():
 
 def test_observed_input_providers_distinct_from_physics():
     """Test that observed-input providers are distinct from physics providers."""
-    from src.tools.starting_pose_matcher.skeleton_extractors.openpose import OpenPoseProvider
-    from src.tools.starting_pose_matcher.skeleton_extractors.mediapipe import MediaPipeProvider
+    from src.tools.starting_pose_matcher.skeleton_extractors.openpose import (
+        OpenPoseProvider,
+    )
+    from src.tools.starting_pose_matcher.skeleton_extractors.mediapipe import (
+        MediaPipeProvider,
+    )
 
     # Verify these are different classes
     assert OpenPoseProvider is not MediaPipeProvider
 
     # Verify they have different source identifiers
-    from src.tools.starting_pose_matcher.skeleton_extractors.openpose import KeypointObservation
-    from src.tools.starting_pose_matcher.skeleton_extractors.mediapipe import LandmarkObservation
+    from src.tools.starting_pose_matcher.skeleton_extractors.openpose import (
+        KeypointObservation,
+    )
+    from src.tools.starting_pose_matcher.skeleton_extractors.mediapipe import (
+        LandmarkObservation,
+    )
 
     obs = KeypointObservation(name="test")
     assert obs.source == "openpose"

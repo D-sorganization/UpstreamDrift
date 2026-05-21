@@ -6,7 +6,6 @@ from pathlib import Path
 
 import pytest
 
-
 CANONICAL_YAML = """
 bunker_bed:
   domain:

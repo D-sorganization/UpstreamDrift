@@ -44,7 +44,7 @@ def _build_override_mapping(
     override: dict[str, float] = {}
     for name, value in zip(parameter_names, values, strict=False):
         if name in {"Temperature", "O2/Feed Ratio", "Steam/Feed Ratio", "Pressure"}:
-            override[name] = value
+            override[name] = value  # noqa: PERF403
     return override
 
 
@@ -441,12 +441,11 @@ def find_optimal_on_surface(
 
     if method == "Grid Search":
         return _run_grid_search(interpolator, bounds, callback)
-    elif method == "L-BFGS-B":
+    if method == "L-BFGS-B":
         return _run_lbfgsb(objective, bounds, callback)
-    elif method == "Differential Evolution":
+    if method == "Differential Evolution":
         return _run_differential_evolution(objective, bounds, callback)
-    else:
-        raise ValueError(f"Unknown optimization method: {method}")
+    raise ValueError(f"Unknown optimization method: {method}")
 
 
 def _run_grid_search(interpolator: Any, bounds: Any, callback: Any) -> dict:

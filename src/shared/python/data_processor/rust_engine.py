@@ -224,10 +224,7 @@ def preview(
         return pd.DataFrame(rows, columns=list(columns) if columns else None)
 
     # ── pandas fallback ──────────────────────────────────────────────────────
-    if fmt == "csv":
-        df = pd.read_csv(p, nrows=nrows)
-    else:
-        df = pd.read_parquet(p).head(nrows)
+    df = pd.read_csv(p, nrows=nrows) if fmt == "csv" else pd.read_parquet(p).head(nrows)
 
     return _select_columns(df, columns)
 
@@ -272,10 +269,7 @@ def convert(
     # ── pandas fallback ──────────────────────────────────────────────────────
     src_fmt = _detect_format(p_src)
 
-    if src_fmt == "csv":
-        df = pd.read_csv(p_src)
-    else:
-        df = pd.read_parquet(p_src)
+    df = pd.read_csv(p_src) if src_fmt == "csv" else pd.read_parquet(p_src)
 
     Path(p_dst).parent.mkdir(parents=True, exist_ok=True)
 
@@ -401,10 +395,7 @@ def filter_export(
             pass
 
     # ── pandas fallback ──────────────────────────────────────────────────────
-    if fmt == "csv":
-        df = pd.read_csv(p)
-    else:
-        df = pd.read_parquet(p)
+    df = pd.read_csv(p) if fmt == "csv" else pd.read_parquet(p)
 
     df = _select_columns(df, columns)
     filtered = df.query(predicate)

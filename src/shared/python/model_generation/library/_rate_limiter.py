@@ -28,8 +28,6 @@ RATE_LIMIT_LIMIT_HEADER = "X-RateLimit-Limit"
 class RateLimitError(Exception):
     """Raised when rate limit is exceeded and retries exhausted."""
 
-    pass
-
 
 def extract_rate_limit_info(response: Any) -> dict[str, int | None]:
     """Extract rate-limit information from response headers.
@@ -145,13 +143,11 @@ def make_request_with_backoff(
                     backoff *= 2  # Exponential backoff
                     last_error = e
                     continue
-                else:
-                    raise RateLimitError(
-                        f"Rate limit exceeded after {max_retries} attempts"
-                    ) from e
-            else:
-                # Other HTTP errors - don't retry
-                raise
+                raise RateLimitError(
+                    f"Rate limit exceeded after {max_retries} attempts"
+                ) from e
+            # Other HTTP errors - don't retry
+            raise
 
         except (urllib.error.URLError, OSError) as e:
             # Network errors - retry with backoff
@@ -165,8 +161,7 @@ def make_request_with_backoff(
                 backoff *= 2
                 last_error = e
                 continue
-            else:
-                raise
+            raise
 
     # Should not reach here, but raise last error if we do
     if last_error:

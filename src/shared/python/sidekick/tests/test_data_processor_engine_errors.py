@@ -67,12 +67,14 @@ class TestLoadFileErrorPath:
         from upstream_drift_tools.data_processing.exceptions import FileIOError
 
         engine = DataProcessorEngine()
-        with patch(
-            "upstream_drift_tools.data_processing.core.DataReader.read_file",
-            side_effect=ValueError("unsupported format"),
+        with (
+            patch(
+                "upstream_drift_tools.data_processing.core.DataReader.read_file",
+                side_effect=ValueError("unsupported format"),
+            ),
+            pytest.raises((FileIOError, ValueError)),
         ):
-            with pytest.raises((FileIOError, ValueError)):
-                engine.load_file("/tmp/bad.xyz")  # nosec B108
+            engine.load_file("/tmp/bad.xyz")  # nosec B108
 
     def test_load_file_empty_path_raises(self):
         from upstream_drift_tools.data_processing.core import DataProcessorEngine
@@ -138,7 +140,7 @@ class TestTransformColumnErrorPath:
 
         engine = _engine_with_data()
         # Patching np.log to raise TypeError to trigger lines 337-339
-        with patch("numpy.log", side_effect=TypeError("type error")):
+        with patch("numpy.log", side_effect=TypeError("type error")):  # noqa: SIM117
             with pytest.raises(TransformationError, match="type error"):
                 engine.transform_column("x", "log")
 
@@ -155,12 +157,14 @@ class TestSmoothColumnErrorPath:
 
         engine = _engine_with_data()
         # Patch rolling().mean() to raise ValueError
-        with patch(
-            "pandas.core.window.rolling.Rolling.mean",
-            side_effect=ValueError("bad window"),
+        with (
+            patch(
+                "pandas.core.window.rolling.Rolling.mean",
+                side_effect=ValueError("bad window"),
+            ),
+            pytest.raises(TransformationError),
         ):
-            with pytest.raises(TransformationError):
-                engine.smooth_column("x", "moving_average", window=5)
+            engine.smooth_column("x", "moving_average", window=5)
 
 
 # ---------------------------------------------------------------------------

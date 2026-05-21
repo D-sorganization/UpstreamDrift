@@ -53,40 +53,42 @@ def test_setup_state_management(qapp) -> None:
 
 
 def test_open_file_success(empty_widget) -> None:
-    with patch(
-        "PyQt6.QtWidgets.QFileDialog.getOpenFileName", return_value=("test.csv", "")
+    with (
+        patch(
+            "PyQt6.QtWidgets.QFileDialog.getOpenFileName", return_value=("test.csv", "")
+        ),
+        patch.object(empty_widget.engine, "load_file") as mock_load,
     ):
-        with patch.object(empty_widget.engine, "load_file") as mock_load:
-            res = MagicMock()
-            res.success = True
-            mock_load.return_value = res
+        res = MagicMock()
+        res.success = True
+        mock_load.return_value = res
 
-            with patch.object(empty_widget, "_update_table") as mock_upd:
-                empty_widget.open_file()
-                assert empty_widget.current_file == "test.csv"
-                assert mock_upd.call_count >= 1
-                assert "Loaded" in empty_widget.status_label.text()
+        with patch.object(empty_widget, "_update_table") as mock_upd:
+            empty_widget.open_file()
+            assert empty_widget.current_file == "test.csv"
+            assert mock_upd.call_count >= 1
+            assert "Loaded" in empty_widget.status_label.text()
 
 
 def test_open_file_failure(empty_widget) -> None:
-    with patch(
-        "PyQt6.QtWidgets.QFileDialog.getOpenFileName", return_value=("test.csv", "")
+    with (
+        patch(
+            "PyQt6.QtWidgets.QFileDialog.getOpenFileName", return_value=("test.csv", "")
+        ),
+        patch.object(empty_widget.engine, "load_file") as mock_load,
     ):
-        with patch.object(empty_widget.engine, "load_file") as mock_load:
-            res = MagicMock()
-            res.success = False
-            res.message = "Failed to load"
-            mock_load.return_value = res
+        res = MagicMock()
+        res.success = False
+        res.message = "Failed to load"
+        mock_load.return_value = res
 
-            with patch("PyQt6.QtWidgets.QMessageBox.warning") as mock_warn:
-                empty_widget.open_file()
-                mock_warn.assert_called_once_with(
-                    empty_widget, "Error", "Failed to load"
-                )
+        with patch("PyQt6.QtWidgets.QMessageBox.warning") as mock_warn:
+            empty_widget.open_file()
+            mock_warn.assert_called_once_with(empty_widget, "Error", "Failed to load")
 
 
 def test_open_file_cancel(empty_widget) -> None:
-    with patch("PyQt6.QtWidgets.QFileDialog.getOpenFileName", return_value=("", "")):
+    with patch("PyQt6.QtWidgets.QFileDialog.getOpenFileName", return_value=("", "")):  # noqa: SIM117
         with patch.object(empty_widget.engine, "load_file") as mock_load:
             empty_widget.open_file()
             mock_load.assert_not_called()
@@ -131,17 +133,19 @@ def test_save_file_no_file(populated_widget) -> None:
 
 
 def test_export_file(populated_widget) -> None:
-    with patch(
-        "PyQt6.QtWidgets.QFileDialog.getSaveFileName", return_value=("out.csv", "")
+    with (
+        patch(
+            "PyQt6.QtWidgets.QFileDialog.getSaveFileName", return_value=("out.csv", "")
+        ),
+        patch.object(populated_widget.engine, "export_data") as mock_exp,
     ):
-        with patch.object(populated_widget.engine, "export_data") as mock_exp:
-            res = MagicMock()
-            res.success = True
-            mock_exp.return_value = res
+        res = MagicMock()
+        res.success = True
+        mock_exp.return_value = res
 
-            populated_widget.export_file()
-            mock_exp.assert_called_once_with("out.csv")
-            assert populated_widget.status_label.text() == "Exported"
+        populated_widget.export_file()
+        mock_exp.assert_called_once_with("out.csv")
+        assert populated_widget.status_label.text() == "Exported"
 
 
 def test_undo_redo_reset(populated_widget) -> None:

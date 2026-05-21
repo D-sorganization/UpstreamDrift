@@ -25,7 +25,6 @@ from src.tools.freemocap_sidecar.run_freemocap import (
     run_freemocap_sidecar,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers / stub artifacts
 # ---------------------------------------------------------------------------

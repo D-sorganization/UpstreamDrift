@@ -70,9 +70,7 @@ class TabSettingsMixin:
         values: dict[str, Any],
     ) -> dict[str, Any]:
         """Persist settings for a known tab instance."""
-        updated: dict[str, Any] = self._settings_store.update_settings(
-            tab_id, values
-        )
+        updated: dict[str, Any] = self._settings_store.update_settings(tab_id, values)
         self._state.tab_settings = self._settings_store.raw_settings()
         self._emit_context()
         return updated

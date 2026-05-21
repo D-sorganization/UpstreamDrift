@@ -183,8 +183,6 @@ class PressureDropResponseV2(StandardResponse[PressureDropDataV2]):
         }
     """
 
-    pass
-
 
 # Legacy aliases for backward compatibility
 PressureDropRequest = PressureDropRequestV2
