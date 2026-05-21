@@ -1,0 +1,127 @@
+"""Primitive shape mesh generator for humanoid character builder.
+
+Internal submodule extracted from mesh_generator.py to keep file size
+within the line budget. Import via ``mesh_generator`` (the public module).
+"""
+
+from __future__ import annotations
+
+import logging
+from pathlib import Path
+from typing import Any
+
+from humanoid_character_builder.core.body_parameters import BodyParameters
+
+from ._mesh_types import GeneratedMeshResult, MeshGeneratorInterface
+
+logger = logging.getLogger(__name__)
+
+
+class PrimitiveMeshGenerator(MeshGeneratorInterface):
+    """
+    Generate primitive shape meshes (built-in, no external dependencies).
+
+    This is the fallback generator that creates simple geometric shapes
+    for each body segment.
+    """
+
+    @property
+    def backend_name(self) -> str:
+        return "primitive"
+
+    @property
+    def is_available(self) -> bool:
+        try:
+            import trimesh  # noqa: F401
+
+            return True
+        except ImportError:
+            return False
+
+    def generate(
+        self,
+        params: BodyParameters,
+        output_dir: Path,
+        **kwargs: Any,
+    ) -> GeneratedMeshResult:
+        """Generate primitive meshes for body segments."""
+        assert params is not None, "params must be provided"
+        if not self.is_available:
+            return GeneratedMeshResult(
+                success=False,
+                error_message="trimesh not available for primitive mesh generation",
+            )
+
+        import trimesh
+        from humanoid_character_builder.core.anthropometry import (
+            estimate_segment_dimensions,
+        )
+        from humanoid_character_builder.core.segment_definitions import (
+            HUMANOID_SEGMENTS,
+            GeometryType,
+        )
+
+        output_dir = Path(output_dir)
+        visual_dir = output_dir / "visual"
+        collision_dir = output_dir / "collision"
+        visual_dir.mkdir(parents=True, exist_ok=True)
+        collision_dir.mkdir(parents=True, exist_ok=True)
+
+        mesh_paths = {}
+        collision_paths = {}
+
+        gender_factor = params.get_effective_gender_factor()
+        dimensions = estimate_segment_dimensions(params.height_m, gender_factor)
+
+        for segment_name, segment_def in HUMANOID_SEGMENTS.items():
+            try:
+                dims = dimensions.get(
+                    segment_name, {"length": 0.1, "width": 0.05, "depth": 0.05}
+                )
+                length = dims["length"]
+                width = dims["width"]
+                depth = dims["depth"]
+
+                geom_type = segment_def.visual_geometry.geometry_type
+
+                if geom_type == GeometryType.SPHERE:
+                    mesh = trimesh.creation.icosphere(radius=length / 2, subdivisions=2)
+                elif geom_type == GeometryType.CYLINDER:
+                    radius = (width + depth) / 4
+                    mesh = trimesh.creation.cylinder(
+                        radius=radius, height=length, sections=16
+                    )
+                elif geom_type == GeometryType.CAPSULE:
+                    radius = (width + depth) / 4
+                    cyl_height = max(0.01, length - 2 * radius)
+                    mesh = trimesh.creation.capsule(
+                        radius=radius, height=cyl_height, count=[8, 8]
+                    )
+                else:  # BOX or default
+                    mesh = trimesh.creation.box(extents=(width, depth, length))
+
+                visual_path = visual_dir / f"{segment_name}.stl"
+                mesh.export(str(visual_path))
+                mesh_paths[segment_name] = visual_path
+
+                collision_mesh = mesh.convex_hull
+                collision_path = collision_dir / f"{segment_name}.stl"
+                collision_mesh.export(str(collision_path))
+                collision_paths[segment_name] = collision_path
+
+            except (ValueError, ZeroDivisionError, OverflowError, TypeError) as e:
+                logger.warning(f"Failed to generate mesh for {segment_name}: {e}")
+
+        return GeneratedMeshResult(
+            success=len(mesh_paths) > 0,
+            mesh_paths=mesh_paths,
+            collision_paths=collision_paths,
+            metadata={"backend": "primitive"},
+        )
+
+    def get_supported_segments(self) -> list[str]:
+        from humanoid_character_builder.core.segment_definitions import (
+            HUMANOID_SEGMENTS,
+        )
+
+        return list(HUMANOID_SEGMENTS.keys())

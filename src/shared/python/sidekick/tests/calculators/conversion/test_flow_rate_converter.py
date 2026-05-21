@@ -1,0 +1,427 @@
+"""Tests for flow_rate_converter.py — comprehensive coverage.
+
+Targets: 15% → ~100% coverage
+"""
+
+from __future__ import annotations
+
+import pytest
+from upstream_drift_tools.calculators.conversion.flow_rate_converter import (
+    MASS_FLOW_CONVERSIONS,
+    STANDARD_CONDITIONS,
+    _from_kg_per_s,
+    _is_actual_volumetric_unit,
+    _is_standard_volumetric_unit,
+    _normalize_prefixed_volume_unit,
+    _require_finite,
+    _require_known_standard,
+    _require_known_unit,
+    _require_positive_finite,
+    _standard_density,
+    _volume_unit_to_m3_per_s,
+    acfm_to_scfm,
+    convert_flow_rate_to_mass,
+    mass_to_mass,
+    mass_to_molar,
+    mass_to_standard_volumetric,
+    mass_to_volumetric_actual,
+    molar_to_mass,
+    molar_to_molar,
+    scfm_to_acfm,
+    standard_volumetric_to_mass,
+    volumetric_actual_to_mass,
+)
+
+# ---------------------------------------------------------------------------
+# Helper validators
+# ---------------------------------------------------------------------------
+
+
+class TestRequireFinite:
+    def test_finite_value_passes(self):
+        _require_finite(1.0, "x")  # should not raise
+
+    def test_inf_raises(self):
+        with pytest.raises(ValueError, match="finite"):
+            _require_finite(float("inf"), "x")
+
+    def test_nan_raises(self):
+        with pytest.raises(ValueError, match="finite"):
+            _require_finite(float("nan"), "x")
+
+
+class TestRequirePositiveFinite:
+    def test_positive_passes(self):
+        _require_positive_finite(1.0, "x")
+
+    def test_zero_raises(self):
+        with pytest.raises(ValueError, match="positive and finite"):
+            _require_positive_finite(0.0, "x")
+
+    def test_negative_raises(self):
+        with pytest.raises(ValueError, match="positive and finite"):
+            _require_positive_finite(-5.0, "x")
+
+
+class TestRequireKnownUnit:
+    def test_known_unit_passes(self):
+        _require_known_unit("kg/s", MASS_FLOW_CONVERSIONS, "mass flow")
+
+    def test_unknown_unit_raises(self):
+        with pytest.raises(ValueError, match="Unknown mass flow unit"):
+            _require_known_unit("ton/s", MASS_FLOW_CONVERSIONS, "mass flow")
+
+
+class TestRequireKnownStandard:
+    def test_known_standard_passes(self):
+        _require_known_standard("STP")
+        _require_known_standard("SCFM")
+
+    def test_unknown_standard_raises(self):
+        with pytest.raises(ValueError, match="Unknown standard condition"):
+            _require_known_standard("BLARG")
+
+
+class TestNormalizePrefix:
+    def test_n_prefix_resolved(self):
+        result = _normalize_prefixed_volume_unit("Nm3/h")
+        assert result == "m3/h"  # N prefix stripped
+
+    def test_s_prefix_resolved(self):
+        result = _normalize_prefixed_volume_unit("Sm3/h")
+        assert result == "m3/h"
+
+    def test_unknown_prefix_unchanged(self):
+        result = _normalize_prefixed_volume_unit("m3/h")
+        assert result == "m3/h"
+
+    def test_n_prefix_unknown_base_unchanged(self):
+        result = _normalize_prefixed_volume_unit("Ngarbage/s")
+        assert result == "Ngarbage/s"
+
+
+class TestVolumeUnitToM3PerS:
+    def test_m3_per_s(self):
+        assert abs(_volume_unit_to_m3_per_s("m3/s") - 1.0) < 1e-12
+
+    def test_cfm(self):
+        # 1 CFM = 0.0283168 / 60 m³/s
+        assert abs(_volume_unit_to_m3_per_s("CFM") - 0.0283168 / 60.0) < 1e-10
+
+    def test_unknown_unit_raises(self):
+        with pytest.raises(ValueError, match="volumetric flow"):
+            _volume_unit_to_m3_per_s("unknown_unit")
+
+
+# ---------------------------------------------------------------------------
+# mass_to_mass
+# ---------------------------------------------------------------------------
+
+
+class TestMassToMass:
+    def test_kg_h_to_lb_hr(self):
+        # 1 kg/h → lb/hr: 1 × (1/3600) / (0.453592/3600) = 1/0.453592 ≈ 2.2046
+        result = mass_to_mass(1.0, "kg/h", "lb/hr")
+        assert abs(result - 1.0 / 0.453592) < 0.001
+
+    def test_kg_s_to_kg_s_identity(self):
+        result = mass_to_mass(5.0, "kg/s", "kg/s")
+        assert abs(result - 5.0) < 1e-10
+
+    def test_lb_hr_to_kg_h(self):
+        result = mass_to_mass(2.2046, "lb/hr", "kg/h")
+        assert abs(result - 0.99999) < 0.001
+
+    def test_inf_raises(self):
+        with pytest.raises(ValueError, match="finite"):
+            mass_to_mass(float("inf"), "kg/s", "kg/h")
+
+    def test_unknown_from_unit_raises(self):
+        with pytest.raises(ValueError, match="Unknown mass flow unit"):
+            mass_to_mass(1.0, "bad_unit", "kg/s")
+
+    def test_unknown_to_unit_raises(self):
+        with pytest.raises(ValueError, match="Unknown mass flow unit"):
+            mass_to_mass(1.0, "kg/s", "bad_unit")
+
+
+# ---------------------------------------------------------------------------
+# molar_to_molar
+# ---------------------------------------------------------------------------
+
+
+class TestMolarToMolar:
+    def test_kmol_h_to_mol_s(self):
+        # 1 kmol/h = 1000 mol / 3600 s ≈ 0.27778 mol/s
+        result = molar_to_molar(1.0, "kmol/h", "mol/s")
+        assert abs(result - 1000.0 / 3600.0) < 1e-6
+
+    def test_identity(self):
+        result = molar_to_molar(10.0, "mol/s", "mol/s")
+        assert abs(result - 10.0) < 1e-10
+
+    def test_inf_raises(self):
+        with pytest.raises(ValueError, match="finite"):
+            molar_to_molar(float("inf"), "mol/s", "kmol/h")
+
+    def test_unknown_from_unit_raises(self):
+        with pytest.raises(ValueError, match="Unknown molar flow unit"):
+            molar_to_molar(1.0, "bad_mol/s", "mol/s")
+
+    def test_unknown_to_unit_raises(self):
+        with pytest.raises(ValueError, match="Unknown molar flow unit"):
+            molar_to_molar(1.0, "mol/s", "bad_mol/s")
+
+
+# ---------------------------------------------------------------------------
+# mass_to_molar
+# ---------------------------------------------------------------------------
+
+
+class TestMassToMolar:
+    def test_air_100_kg_h_to_kmol_h(self):
+        # Air MW = 29 kg/kmol; 100 kg/h → 100/29 ≈ 3.448 kmol/h
+        result = mass_to_molar(100.0, "kg/h", 29.0, "kmol/h")
+        assert abs(result - 100.0 / 29.0) < 0.001
+
+    def test_non_positive_mw_raises(self):
+        with pytest.raises(ValueError):
+            mass_to_molar(1.0, "kg/s", 0.0, "mol/s")
+
+    def test_unknown_mass_unit_raises(self):
+        with pytest.raises(ValueError, match="mass flow"):
+            mass_to_molar(1.0, "bad_mass", 29.0, "mol/s")
+
+    def test_unknown_molar_unit_raises(self):
+        with pytest.raises(ValueError, match="molar flow"):
+            mass_to_molar(1.0, "kg/s", 29.0, "bad_mol/s")
+
+
+# ---------------------------------------------------------------------------
+# molar_to_mass
+# ---------------------------------------------------------------------------
+
+
+class TestMolarToMass:
+    def test_co2_10_kmol_h_to_kg_h(self):
+        # CO2 MW = 44 kg/kmol; 10 kmol/h = 440 kg/h
+        result = molar_to_mass(10.0, "kmol/h", 44.0, "kg/h")
+        assert abs(result - 440.0) < 0.1
+
+    def test_roundtrip_mass_molar_mass(self):
+        molar = mass_to_molar(100.0, "kg/h", 29.0, "kmol/h")
+        mass_back = molar_to_mass(molar, "kmol/h", 29.0, "kg/h")
+        assert abs(mass_back - 100.0) < 1e-6
+
+    def test_non_positive_mw_raises(self):
+        with pytest.raises(ValueError):
+            molar_to_mass(1.0, "mol/s", -1.0, "kg/s")
+
+
+# ---------------------------------------------------------------------------
+# volumetric_actual_to_mass
+# ---------------------------------------------------------------------------
+
+
+class TestVolumetricActualToMass:
+    def test_1000_m3_h_at_1p2_density(self):
+        # 1000 m³/h × 1.2 kg/m³ = 1200 kg/h
+        result = volumetric_actual_to_mass(1000.0, "m3/h", 1.2, "kg/h")
+        assert abs(result - 1200.0) < 0.01
+
+    def test_cfm_to_kg_h(self):
+        result = volumetric_actual_to_mass(1000.0, "CFM", 1.2, "kg/h")
+        assert result > 0
+
+    def test_non_positive_density_raises(self):
+        with pytest.raises(ValueError, match="positive"):
+            volumetric_actual_to_mass(1.0, "m3/h", 0.0, "kg/h")
+
+    def test_unknown_vol_unit_raises(self):
+        with pytest.raises(ValueError, match="volumetric flow"):
+            volumetric_actual_to_mass(1.0, "barrels/min", 1.2, "kg/h")
+
+
+# ---------------------------------------------------------------------------
+# mass_to_volumetric_actual
+# ---------------------------------------------------------------------------
+
+
+class TestMassToVolumetricActual:
+    def test_100_kg_h_at_1p2(self):
+        # 100 kg/h / 1.2 kg/m³ ≈ 83.33 m³/h
+        result = mass_to_volumetric_actual(100.0, "kg/h", 1.2, "m3/h")
+        assert abs(result - 100.0 / 1.2) < 0.01
+
+    def test_roundtrip(self):
+        mass_result = volumetric_actual_to_mass(1000.0, "m3/h", 1.2, "kg/h")
+        vol_back = mass_to_volumetric_actual(mass_result, "kg/h", 1.2, "m3/h")
+        assert abs(vol_back - 1000.0) < 1e-6
+
+
+# ---------------------------------------------------------------------------
+# standard_volumetric_to_mass
+# ---------------------------------------------------------------------------
+
+
+class TestStandardVolumetricToMass:
+    def test_1000_ft3_min_air_stp(self):
+        # 1000 ft³/min of air (MW=29) at SCFM standard
+        result = standard_volumetric_to_mass(1000.0, "ft3/min", 29.0, "SCFM", "kg/s")
+        assert result > 0
+
+    def test_nm3_h_air(self):
+        # 1000 m³/h at STP using NTP standard
+        result = standard_volumetric_to_mass(1000.0, "m3/h", 29.0, "NTP", "kg/h")
+        assert result > 0
+
+    def test_unknown_standard_raises(self):
+        with pytest.raises(ValueError, match="Unknown standard condition"):
+            standard_volumetric_to_mass(100.0, "m3/h", 29.0, "UNKNOWN", "kg/s")
+
+
+# ---------------------------------------------------------------------------
+# mass_to_standard_volumetric
+# ---------------------------------------------------------------------------
+
+
+class TestMassToStandardVolumetric:
+    def test_100_kg_h_ch4_stp(self):
+        # CH4 MW = 16 kg/kmol
+        result = mass_to_standard_volumetric(100.0, "kg/h", 16.0, "STP", "m3/h")
+        assert result > 0
+
+    def test_roundtrip(self):
+        # Convert mass → std vol → mass, should match
+        m_dot = 100.0
+        q_std = mass_to_standard_volumetric(m_dot, "kg/h", 29.0, "STP", "m3/h")
+        m_back = standard_volumetric_to_mass(q_std, "m3/h", 29.0, "STP", "kg/h")
+        assert abs(m_back - m_dot) < 0.01
+
+    def test_unknown_standard_raises(self):
+        with pytest.raises(ValueError, match="Unknown standard condition"):
+            mass_to_standard_volumetric(1.0, "kg/s", 29.0, "FAKE_STD", "m3/h")
+
+
+# ---------------------------------------------------------------------------
+# scfm_to_acfm / acfm_to_scfm
+# ---------------------------------------------------------------------------
+
+
+class TestScfmAcfm:
+    def test_scfm_to_acfm_at_standard_conditions(self):
+        T_std = STANDARD_CONDITIONS["SCFM"][0]
+        P_std = STANDARD_CONDITIONS["SCFM"][1]
+        # At exact standard conditions, ACFM == SCFM
+        result = scfm_to_acfm(1000.0, T_std, P_std, "SCFM")
+        assert abs(result - 1000.0) < 0.01
+
+    def test_scfm_to_acfm_higher_temp(self):
+        # Higher actual temp → larger ACFM
+        acfm = scfm_to_acfm(1000.0, 600.0, 101325.0, "SCFM")
+        assert acfm > 1000.0
+
+    def test_acfm_to_scfm_roundtrip(self):
+        acfm = scfm_to_acfm(1000.0, 400.0, 200000.0, "SCFM")
+        scfm_back = acfm_to_scfm(acfm, 400.0, 200000.0, "SCFM")
+        assert abs(scfm_back - 1000.0) < 0.01
+
+    def test_non_positive_temp_raises(self):
+        with pytest.raises(ValueError, match="positive"):
+            scfm_to_acfm(1000.0, -10.0, 101325.0)
+
+    def test_non_positive_pressure_raises(self):
+        with pytest.raises(ValueError, match="positive"):
+            acfm_to_scfm(1000.0, 300.0, 0.0)
+
+    def test_unknown_standard_raises(self):
+        with pytest.raises(ValueError, match="Unknown standard condition"):
+            scfm_to_acfm(100.0, 300.0, 101325.0, "INVALID")
+
+
+# ---------------------------------------------------------------------------
+# convert_flow_rate_to_mass
+# ---------------------------------------------------------------------------
+
+
+class TestConvertFlowRateToMass:
+    def test_mass_unit(self):
+        result = convert_flow_rate_to_mass(1.0, "kg/s", 29.0)
+        assert abs(result - 1.0) < 1e-10
+
+    def test_molar_unit(self):
+        # 1 kmol/s of air (MW=29) = 29 kg/s
+        result = convert_flow_rate_to_mass(1.0, "kmol/s", 29.0)
+        assert abs(result - 29.0) < 0.001
+
+    def test_standard_volumetric_unit(self):
+        # SCFM → kg/s
+        result = convert_flow_rate_to_mass(1.0, "SCFM", 29.0, standard="SCFM")
+        assert result > 0
+
+    def test_actual_volumetric_unit_with_density(self):
+        # CFM with density → kg/s
+        result = convert_flow_rate_to_mass(1.0, "CFM", 29.0, density=1.2)
+        assert result > 0
+
+    def test_actual_volumetric_without_density_raises(self):
+        """Lines 605-608: density None → ValueError."""
+        with pytest.raises(ValueError, match="Density required"):
+            convert_flow_rate_to_mass(1.0, "CFM", 29.0)
+
+    def test_unknown_unit_raises(self):
+        """Line 610: unknown unit → ValueError."""
+        with pytest.raises(ValueError, match="Unknown or unsupported"):
+            convert_flow_rate_to_mass(1.0, "weird_unit", 29.0)
+
+    def test_inf_value_raises(self):
+        with pytest.raises(ValueError, match="finite"):
+            convert_flow_rate_to_mass(float("inf"), "kg/s", 29.0)
+
+
+# ---------------------------------------------------------------------------
+# _is_standard_volumetric_unit / _is_actual_volumetric_unit
+# ---------------------------------------------------------------------------
+
+
+class TestUnitClassifiers:
+    def test_scfm_is_standard(self):
+        assert _is_standard_volumetric_unit("SCFM") is True
+
+    def test_nm3_h_is_standard(self):
+        assert _is_standard_volumetric_unit("Nm3/h") is True
+
+    def test_cfm_is_actual(self):
+        assert _is_actual_volumetric_unit("CFM") is True
+
+    def test_acfm_is_actual(self):
+        assert _is_actual_volumetric_unit("ACFM") is True
+
+    def test_m3_h_is_actual(self):
+        assert _is_actual_volumetric_unit("m3/h") is True
+
+    def test_kg_s_is_neither(self):
+        assert _is_standard_volumetric_unit("kg/s") is False
+        assert _is_actual_volumetric_unit("kg/s") is False
+
+
+# ---------------------------------------------------------------------------
+# _standard_density / _from_kg_per_s
+# ---------------------------------------------------------------------------
+
+
+class TestInternalHelpers:
+    def test_standard_density_stp_air(self):
+        # Air at STP: P=101325 Pa, MW=29 kg/kmol, T=273.15 K
+        # ρ = (101325 × 29) / (8314.46 × 273.15) ≈ 1.293 kg/m³
+        rho = _standard_density(101325.0, 29.0, 273.15)
+        assert abs(rho - 1.293) < 0.01
+
+    def test_from_kg_per_s_identity(self):
+        result = _from_kg_per_s(1.0, "kg/s")
+        assert abs(result - 1.0) < 1e-12
+
+    def test_from_kg_per_s_to_kg_h(self):
+        # 1 kg/s = 3600 kg/h
+        result = _from_kg_per_s(1.0, "kg/h")
+        assert abs(result - 3600.0) < 1e-6

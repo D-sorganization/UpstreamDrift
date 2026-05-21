@@ -1,0 +1,87 @@
+"""Small Qt binding shim for tools sidebar widgets."""
+
+from __future__ import annotations
+
+import importlib
+import sys
+from typing import Any
+
+QT_API: str
+QtCore: Any
+QtGui: Any
+QtWidgets: Any
+Signal: Any
+FileSystemModel: Any
+
+_BINDING_IMPORT_ORDER = ("PyQt6", "PySide6", "PyQt5", "PySide2")
+
+
+def _binding_candidates() -> tuple[str, ...]:
+    loaded = tuple(
+        binding
+        for binding in _BINDING_IMPORT_ORDER
+        if binding in sys.modules or f"{binding}.QtCore" in sys.modules
+    )
+    return loaded + tuple(
+        binding for binding in _BINDING_IMPORT_ORDER if binding not in loaded
+    )
+
+
+def _load_binding(binding: str) -> tuple[Any, Any, Any, Any]:
+    qt_core = importlib.import_module(f"{binding}.QtCore")
+    qt_gui = importlib.import_module(f"{binding}.QtGui")
+    qt_widgets = importlib.import_module(f"{binding}.QtWidgets")
+    signal = qt_core.Signal if hasattr(qt_core, "Signal") else qt_core.pyqtSignal
+    return qt_core, qt_gui, qt_widgets, signal
+
+
+for _binding_name in _binding_candidates():  # pragma: no branch - exits on import
+    try:  # pragma: no cover - exercised only when the binding is installed
+        QtCore, QtGui, QtWidgets, Signal = _load_binding(_binding_name)
+        QT_API = _binding_name
+        FileSystemModel = (
+            QtWidgets.QFileSystemModel
+            if hasattr(QtWidgets, "QFileSystemModel")
+            else QtGui.QFileSystemModel
+        )
+        break
+    except ImportError:
+        continue
+else:  # pragma: no cover - depends on local optional deps
+    raise ImportError("No supported Qt binding found for tools sidebar")
+
+__all__ = [
+    "QT_API",
+    "QtCore",
+    "QtGui",
+    "QtWidgets",
+    "FileSystemModel",
+    "Signal",
+    "all_sidebar_dock_features",
+    "dock_area",
+]
+
+
+def dock_area(name: str) -> Any:
+    """Return a Qt dock area enum for ``left`` or ``right``."""
+    key = "LeftDockWidgetArea" if name == "left" else "RightDockWidgetArea"
+    area_type = getattr(QtCore.Qt, "DockWidgetArea", None)
+    if area_type is not None:
+        return getattr(area_type, key)
+    return getattr(QtCore.Qt, key)
+
+
+def all_sidebar_dock_features() -> Any:
+    """Return movable, closable, floatable dock widget feature flags."""
+    feature_type = getattr(QtWidgets.QDockWidget, "DockWidgetFeature", None)
+    if feature_type is not None:
+        return (
+            feature_type.DockWidgetClosable
+            | feature_type.DockWidgetMovable
+            | feature_type.DockWidgetFloatable
+        )
+    return (
+        QtWidgets.QDockWidget.DockWidgetClosable
+        | QtWidgets.QDockWidget.DockWidgetMovable
+        | QtWidgets.QDockWidget.DockWidgetFloatable
+    )

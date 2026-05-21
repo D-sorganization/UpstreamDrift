@@ -1,0 +1,67 @@
+"""Tab context-menu construction for the Sidekick sidebar."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from .help_content import SIDEBAR_CONTEXT_ACTIONS
+from .qt_compat import QtWidgets
+
+
+def _add_action(
+    menu: QtWidgets.QMenu,
+    action_id: str,
+    callback: Any,
+) -> QtWidgets.QAction:
+    metadata = SIDEBAR_CONTEXT_ACTIONS[action_id]
+    action = menu.addAction(metadata.label)
+    action.setToolTip(metadata.tooltip)
+    action.setStatusTip(metadata.status_tip)
+    action.triggered.connect(callback)
+    return action
+
+
+def build_tab_context_menu(sidebar: Any, tab_id: str) -> QtWidgets.QMenu:
+    """Build the reusable context menu for one stable tab id."""
+    definition = sidebar.get_tab_definition(tab_id)
+
+    menu = QtWidgets.QMenu(sidebar)
+
+    move_menu = menu.addMenu("Move Sidebar")
+    _add_action(move_menu, "move_left", lambda: sidebar.set_dock_area("left"))
+    _add_action(move_menu, "move_right", lambda: sidebar.set_dock_area("right"))
+
+    menu.addSeparator()
+
+    if definition and definition.popout_enabled:
+        _add_action(menu, "pop_out", lambda: sidebar.pop_out_tab(tab_id))
+
+    if definition and definition.duplicate_enabled:
+        _add_action(menu, "duplicate", lambda: sidebar.duplicate_tab(tab_id))
+
+    _add_action(menu, "rename", lambda: sidebar.prompt_rename_tab(tab_id))
+    if sidebar.get_tab_display_name(tab_id) is not None:
+        _add_action(menu, "reset_name", lambda: sidebar.reset_tab_display_name(tab_id))
+    if definition and definition.help_metadata:
+        _add_action(menu, "help", lambda: sidebar.show_tab_help(tab_id))
+
+    menu.addSeparator()
+
+    _add_action(menu, "close", lambda: sidebar.set_tab_visible(tab_id, False))
+
+    menu.addSeparator()
+
+    _add_action(menu, "minimize", lambda: sidebar.set_minimized(True))
+
+    return menu
+
+
+def show_tab_context_menu(sidebar: Any, pos: Any) -> None:
+    """Show the context menu for a Sidekick tab bar position."""
+    index = sidebar.tabs.tabBar().tabAt(pos)
+    tab_id = sidebar.get_tab_id_at(index)
+    if tab_id is None:
+        return
+
+    menu = build_tab_context_menu(sidebar, tab_id)
+    menu.exec(sidebar.tabs.tabBar().mapToGlobal(pos))

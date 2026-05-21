@@ -1,0 +1,110 @@
+"""Convenience functions for ``model_generation``.
+
+Extracted from ``__init__.py`` (issue #1696) to keep the package entry-point
+below 120 lines.  These functions use lazy internal imports so that heavy
+dependencies (parametric_builder, etc.) are not loaded until called.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
+from model_generation.core.constants import (
+    DEFAULT_HEIGHT_M,
+    DEFAULT_MASS_KG,
+)
+
+if TYPE_CHECKING:
+    pass
+
+# Preset configurations shared by both convenience functions.
+_PRESETS: dict[str, dict[str, Any]] = {
+    "athletic": {"gender_factor": 0.7, "shoulder_width_factor": 1.1},
+    "average": {"gender_factor": 0.5},
+    "heavy": {"gender_factor": 0.5, "hip_width_factor": 1.15},
+    "lean": {"gender_factor": 0.5, "shoulder_width_factor": 0.95},
+}
+
+
+def quick_urdf(
+    height_m: float = DEFAULT_HEIGHT_M,
+    mass_kg: float = DEFAULT_MASS_KG,
+    preset: str | None = None,
+    robot_name: str = "humanoid",
+) -> str:
+    """Generate a humanoid URDF quickly with minimal configuration.
+
+    Args:
+        height_m: Height in meters
+        mass_kg: Mass in kg
+        preset: Optional preset name (athletic, average, heavy, lean)
+        robot_name: Name for the robot element
+
+    Returns:
+        URDF XML string
+
+    Example:
+        urdf = quick_urdf(height_m=1.85, preset="athletic")
+    """
+    from model_generation.builders.parametric_builder import ParametricBuilder
+
+    builder = ParametricBuilder(robot_name)
+
+    if preset:
+        preset_config = _PRESETS.get(preset.lower(), {})
+        builder.set_parameters(height_m=height_m, mass_kg=mass_kg, **preset_config)
+    else:
+        builder.set_parameters(height_m=height_m, mass_kg=mass_kg)
+
+    builder.add_humanoid_segments()
+    result = builder.build()
+
+    if not result.success:
+        raise ValueError(f"Failed to generate URDF: {result.error_message}")
+
+    return str(result.urdf_xml)
+
+
+def quick_build(
+    height_m: float = DEFAULT_HEIGHT_M,
+    mass_kg: float = DEFAULT_MASS_KG,
+    preset: str | None = None,
+    output_path: str | None = None,
+) -> Any:
+    """Build a humanoid model quickly with minimal configuration.
+
+    Args:
+        height_m: Height in meters
+        mass_kg: Mass in kg
+        preset: Optional preset name
+        output_path: Optional path to save URDF
+
+    Returns:
+        BuildResult with URDF and metadata
+
+    Example:
+        result = quick_build(height_m=1.80, output_path="./humanoid.urdf")
+    """
+    assert height_m is not None, "height_m must be provided"
+    from pathlib import Path
+
+    from model_generation.builders.parametric_builder import ParametricBuilder
+
+    builder = ParametricBuilder("humanoid")
+
+    if preset:
+        preset_config = _PRESETS.get(preset.lower(), {})
+        builder.set_parameters(height_m=height_m, mass_kg=mass_kg, **preset_config)
+    else:
+        builder.set_parameters(height_m=height_m, mass_kg=mass_kg)
+
+    builder.add_humanoid_segments()
+    result = builder.build()
+
+    if output_path and result.success:
+        path = Path(output_path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(result.urdf_xml)
+        result.output_path = path
+
+    return result

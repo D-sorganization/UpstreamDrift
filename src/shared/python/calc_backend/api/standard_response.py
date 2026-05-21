@@ -1,0 +1,229 @@
+"""Standardized API response wrapper and error handling.
+
+Provides a consistent response format across all calculator endpoints:
+- status: "success" or "error"
+- data: calculation results (or None on error)
+- error: error details (or None on success)
+- metadata: request tracking and performance metadata
+"""
+
+from __future__ import annotations
+
+import logging
+import time
+import uuid
+from datetime import UTC
+from enum import Enum
+from typing import Any, Generic, TypeVar
+
+from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
+
+T = TypeVar("T")
+
+
+class ErrorCode(str, Enum):
+    """Standard error codes for API responses."""
+
+    INVALID_INPUT = "INVALID_INPUT"
+    """Input validation failed (type error, missing field, out of range)."""
+
+    NOT_FOUND = "NOT_FOUND"
+    """Requested resource not found."""
+
+    SERVER_ERROR = "SERVER_ERROR"
+    """Unexpected server-side error."""
+
+    CALCULATION_ERROR = "CALCULATION_ERROR"
+    """Calculation failed (e.g. overflow, division by zero, convergence issue)."""
+
+    CONSTRAINT_VIOLATION = "CONSTRAINT_VIOLATION"
+    """Input violates domain constraints (e.g. negative pressure)."""
+
+
+class ErrorDetail(BaseModel):
+    """Error response details.
+
+    Attributes:
+        code: Machine-readable error code (ErrorCode enum).
+        message: Human-readable error message.
+        details: Optional detailed information (e.g. which field failed validation).
+    """
+
+    code: ErrorCode = Field(description="Machine-readable error code")
+    message: str = Field(description="Human-readable error message")
+    details: str | None = Field(default=None, description="Additional error context")
+
+
+class ResponseMetadata(BaseModel):
+    """Response metadata for tracking and observability.
+
+    Attributes:
+        request_id: Unique request identifier (UUID v4).
+        processing_time_ms: Server processing time in milliseconds.
+        timestamp_utc: ISO 8601 timestamp when response was generated.
+        api_version: API version of the response format (e.g. "v1").
+    """
+
+    request_id: str = Field(description="Unique request identifier")
+    processing_time_ms: float = Field(description="Processing time in milliseconds")
+    timestamp_utc: str = Field(description="ISO 8601 response timestamp")
+    api_version: str = Field(default="v1", description="API version")
+
+
+class StandardResponse(BaseModel, Generic[T]):
+    """Standardized API response wrapper.
+
+    All API endpoints should return this format to provide consistent error
+    handling, request tracking, and observability.
+
+    Attributes:
+        status: "success" if calculation succeeded, "error" otherwise.
+        data: Calculation results (None on error).
+        error: Error details (None on success).
+        metadata: Request ID, processing time, and timestamps.
+
+    Examples:
+        Success response:
+        {
+            "status": "success",
+            "data": {"pressure_drop_pa": 1023.4, "velocity": 45.2},
+            "error": null,
+            "metadata": {
+                "request_id": "550e8400-e29b-41d4-a716-446655440000",
+                "processing_time_ms": 125.5,
+                "timestamp_utc": "2026-04-30T12:34:56Z",
+                "api_version": "v1"
+            }
+        }
+
+        Error response:
+        {
+            "status": "error",
+            "data": null,
+            "error": {
+                "code": "INVALID_INPUT",
+                "message": "pipe_diameter_m must be positive",
+                "details": "Field: pipe_diameter_m, Value: -0.1"
+            },
+            "metadata": {
+                "request_id": "550e8400-e29b-41d4-a716-446655440001",
+                "processing_time_ms": 5.2,
+                "timestamp_utc": "2026-04-30T12:34:56Z",
+                "api_version": "v1"
+            }
+        }
+    """
+
+    status: str = Field(
+        description='Response status: "success" or "error"',
+        pattern="^(success|error)$",
+    )
+    data: T | None = Field(default=None, description="Calculation result or None")
+    error: ErrorDetail | None = Field(default=None, description="Error details")
+    metadata: ResponseMetadata = Field(description="Response metadata")
+
+    def model_validate(self, obj: Any) -> StandardResponse[T]:
+        """Override to support Generic type parameter."""
+        return super().model_validate(obj)
+
+
+class StandardResponseBuilder:
+    """Builder for creating StandardResponse instances with tracking metadata.
+
+    Tracks request start time automatically and computes processing_time_ms
+    on success() or error() calls.
+
+    Example:
+        builder = StandardResponseBuilder()
+        try:
+            result = some_calculation()
+            return builder.success(data=result)
+        except ValueError as exc:
+            return builder.error(
+                code=ErrorCode.INVALID_INPUT,
+                message=str(exc),
+            )
+    """
+
+    def __init__(self) -> None:
+        """Initialize builder with request tracking."""
+        self._request_id = str(uuid.uuid4())
+        self._start_time = time.time()
+
+    def success(
+        self,
+        data: Any,
+        api_version: str = "v1",
+    ) -> StandardResponse[Any]:
+        """Build success response.
+
+        Args:
+            data: Calculation result to include in response.
+            api_version: API version (default "v1").
+
+        Returns:
+            StandardResponse with status="success" and data populated.
+        """
+        processing_time_ms = (time.time() - self._start_time) * 1000
+        metadata = ResponseMetadata(
+            request_id=self._request_id,
+            processing_time_ms=round(processing_time_ms, 2),
+            timestamp_utc=_get_utc_timestamp(),
+            api_version=api_version,
+        )
+        return StandardResponse(
+            status="success",
+            data=data,
+            error=None,
+            metadata=metadata,
+        )
+
+    def error(
+        self,
+        code: ErrorCode,
+        message: str,
+        details: str | None = None,
+        api_version: str = "v1",
+    ) -> StandardResponse[Any]:
+        """Build error response.
+
+        Args:
+            code: ErrorCode enum value.
+            message: Human-readable error message.
+            details: Optional additional error context.
+            api_version: API version (default "v1").
+
+        Returns:
+            StandardResponse with status="error" and error details populated.
+        """
+        processing_time_ms = (time.time() - self._start_time) * 1000
+        metadata = ResponseMetadata(
+            request_id=self._request_id,
+            processing_time_ms=round(processing_time_ms, 2),
+            timestamp_utc=_get_utc_timestamp(),
+            api_version=api_version,
+        )
+        error_detail = ErrorDetail(
+            code=code,
+            message=message,
+            details=details,
+        )
+        return StandardResponse(
+            status="error",
+            data=None,
+            error=error_detail,
+            metadata=metadata,
+        )
+
+
+def _get_utc_timestamp() -> str:
+    """Get current UTC timestamp in ISO 8601 format.
+
+    Returns:
+        ISO 8601 formatted timestamp string (e.g. "2026-04-30T12:34:56Z").
+    """
+    from datetime import datetime
+
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")

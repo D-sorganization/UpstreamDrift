@@ -10,10 +10,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-pytest.importorskip("PyQt6.QtCore", exc_type=ImportError)
-
-
 
 class TestVoiceInputManagerAvailability:
     def test_available_when_sr_importable(self):
