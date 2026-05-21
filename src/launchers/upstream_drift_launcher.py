@@ -220,6 +220,88 @@ class ProcessCleanupWorker(QRunnable):
         self.signals.finished.emit(finished_keys)
 
 
+class LauncherOrchestrator:
+    """Domain logic coordinator for the UpstreamDrift launcher.
+
+    Manages the ModelRegistry, EngineManager, and Docker health status,
+    keeping these domain responsibilities separated from the Qt UI.
+    """
+
+    def __init__(self) -> None:
+        self.registry = None
+        self.engine_manager = None
+        self.docker_available = False
+        self.available_models = {}
+        self.special_app_lookup = {}
+
+    def initialize_from_results(self, startup_results: "StartupResults | None") -> None:
+        """Initialize domain state from async startup results."""
+        self.docker_available = (
+            startup_results.docker_available if startup_results else False
+        )
+        self.init_registry(startup_results)
+        self.init_engine_manager(startup_results)
+        self.build_available_models()
+
+    def init_registry(self, startup_results: "StartupResults | None") -> None:
+        if startup_results and startup_results.registry is not None:
+            self.registry = startup_results.registry
+            logger.info("Using pre-loaded model registry from async startup")
+        else:
+            try:
+                MR = _lazy_load_model_registry()
+                self.registry = MR(REPOS_ROOT / "src/config/models.yaml")
+            except ImportError as e:
+                logger.error("Failed to load ModelRegistry: %s", e)
+                self.registry = None
+
+    def init_engine_manager(self, startup_results: "StartupResults | None") -> None:
+        if startup_results and startup_results.engine_manager is not None:
+            self.engine_manager = startup_results.engine_manager
+            logger.info("Using pre-loaded engine manager from async startup")
+        else:
+            try:
+                EM, _ = _lazy_load_engine_manager()
+                self.engine_manager = EM(REPOS_ROOT)
+            except (RuntimeError, ValueError, OSError) as e:
+                logger.warning(f"Failed to initialize EngineManager: {e}")
+                self.engine_manager = None
+
+    def build_available_models(self) -> None:
+        """Collect all known models and auxiliary applications."""
+        logger.debug("Building available models from registry...")
+        self.available_models.clear()
+        self.special_app_lookup.clear()
+
+        if self.registry:
+            all_models = self.registry.get_all_models()
+            logger.info(f"Registry returned {len(all_models)} models")
+
+            for model in all_models:
+                self.available_models[model.id] = model
+                logger.debug(f"  Added model: {model.id} ({model.name})")
+                if model.type in ("special_app", "utility", "matlab_app"):
+                    self.special_app_lookup[model.id] = model
+
+            logger.info(
+                f"Built available_models with {len(self.available_models)} entries"
+            )
+        else:
+            logger.warning("No registry available - no models will be loaded")
+
+    def get_model(self, model_id: str) -> "Any | None":
+        """Retrieve a model or application by ID."""
+        if model_id is None:
+            raise ValueError("model_id must be provided")
+        if model_id in self.available_models:
+            return self.available_models[model_id]
+
+        if self.registry:
+            return self.registry.get_model(model_id)
+
+        return None
+
+
 class UpstreamDriftLauncher(
     LauncherUISetupMixin,
     LauncherThemeMixin,
@@ -246,6 +328,7 @@ class UpstreamDriftLauncher(
         from PyQt6.QtCore import Qt
 
         self.loading = loading
+        self.orchestrator = LauncherOrchestrator()
         self.setWindowTitle("UpstreamDrift")
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowMinimizeButtonHint
@@ -279,9 +362,7 @@ class UpstreamDriftLauncher(
         self._init_managers()
         # Skip heavy initialization in loading mode; async worker will provide results
         if not self.loading:
-            self._init_registry(startup_results)
-            self._init_engine_manager(startup_results)
-            self._build_available_models()
+            pass  # Orchestrator already initialized from results in _init_state
 
         self._init_layout_manager()
 
@@ -511,22 +592,13 @@ class UpstreamDriftLauncher(
         logger.warning("No icon files found")
 
     def _init_state(self, startup_results: StartupResults | None) -> None:
-        self.docker_available = (
-            startup_results.docker_available if startup_results else False
-        )
         self.docker_checker: DockerCheckThread | None = None
         self.selected_model: str | None = None
         self.model_cards: dict[str, Any] = {}
         self.model_order: list[str] = []
         self.layout_edit_mode = False
-        self.available_models: dict[str, Any] = {}
-        self.special_app_lookup: dict[str, Any] = {}
         self.current_filter_text = ""
-        # Initialize registry and engine_manager to None to preserve invariant
-        # that these attributes always exist (required by Settings dialog etc.)
-        # They will be populated by _init_registry() or update_startup_results()
-        self.registry: Any = None
-        self.engine_manager: Any = None
+        self.orchestrator.initialize_from_results(startup_results)
 
     def _init_managers(self) -> None:
         self._setup_process_console()
@@ -556,31 +628,6 @@ class UpstreamDriftLauncher(
             cwd=cwd,
         )
 
-    def _init_registry(self, startup_results: StartupResults | None) -> None:
-        if startup_results and startup_results.registry is not None:
-            self.registry = startup_results.registry
-            logger.info("Using pre-loaded model registry from async startup")
-        else:
-            try:
-                MR = _lazy_load_model_registry()
-                self.registry = MR(REPOS_ROOT / "src/config/models.yaml")
-            except ImportError as e:
-                # Lazy import may fail when optional dependencies are missing.
-                logger.error("Failed to load ModelRegistry: %s", e)
-                self.registry = None
-
-    def _init_engine_manager(self, startup_results: StartupResults | None) -> None:
-        if startup_results and startup_results.engine_manager is not None:
-            self.engine_manager = startup_results.engine_manager
-            logger.info("Using pre-loaded engine manager from async startup")
-        else:
-            try:
-                EM, _ = _lazy_load_engine_manager()
-                self.engine_manager = EM(REPOS_ROOT)
-            except (RuntimeError, ValueError, OSError) as e:
-                logger.warning(f"Failed to initialize EngineManager: {e}")
-                self.engine_manager = None
-
     def _create_category_header(self, title: str) -> Any:
         from PyQt6.QtWidgets import QLabel
 
@@ -609,8 +656,8 @@ class UpstreamDriftLauncher(
     def _init_layout_manager(self) -> None:
         self.layout_manager = LayoutManager(
             config_file=LAYOUT_CONFIG_FILE,
-            available_models=self.available_models,
-            get_model_func=self._get_model,
+            available_models=self.orchestrator.available_models,
+            get_model_func=self.orchestrator.get_model,
             create_card_func=lambda model, **kwargs: DraggableModelCard(
                 model, self, **kwargs
             ),
@@ -621,45 +668,11 @@ class UpstreamDriftLauncher(
 
     # -- Model management methods --
 
-    def _build_available_models(self) -> None:
-        """Collect all known models and auxiliary applications."""
-        logger.debug("Building available models from registry...")
-
-        if self.registry:
-            all_models = self.registry.get_all_models()
-            logger.info(f"Registry returned {len(all_models)} models")
-
-            for model in all_models:
-                self.available_models[model.id] = model
-                logger.debug(f"  Added model: {model.id} ({model.name})")
-                if model.type in ("special_app", "utility", "matlab_app"):
-                    self.special_app_lookup[model.id] = model
-
-            logger.info(
-                f"Built available_models with {len(self.available_models)} entries"
-            )
-        else:
-            logger.warning("No registry available - no models will be loaded")
-
     def _initialize_model_order(self) -> None:
         """Set a sensible default grid ordering."""
         logger.debug("Initializing model order...")
         self.layout_manager.initialize_model_order()
         self.model_order = self.layout_manager.model_order
-
-    def _get_model(self, model_id: str) -> Any | None:
-        """Retrieve a model or application by ID."""
-        if model_id is None:
-            raise ValueError("model_id must be provided")
-        if model_id in self.available_models:
-            return self.available_models[model_id]
-
-        if self.registry:
-            return self.registry.get_model(model_id)
-
-        return None
-
-    # -- Layout management --
 
     def _save_layout(self) -> None:
         """Save the current model layout to configuration file."""
@@ -746,10 +759,8 @@ class UpstreamDriftLauncher(
         """Transition from loading skeleton to full application."""
         self.loading = False
         self._startup_time_ms = results.startup_time_ms
-        self._init_registry(results)
-        self._init_engine_manager(results)
-        self._build_available_models()
-        self.layout_manager.available_models = self.available_models
+        self.orchestrator.initialize_from_results(results)
+        self.layout_manager.available_models = self.orchestrator.available_models
         self._initialize_model_order()
         self._apply_docker_status(results.docker_available)
         self._load_layout()
@@ -806,10 +817,10 @@ class UpstreamDriftLauncher(
             )
             return
 
-        if self.engine_manager is not None:
-            set_variable("engine_manager", self.engine_manager)
-        if self.registry is not None:
-            set_variable("model_registry", self.registry)
+        if self.orchestrator.engine_manager is not None:
+            set_variable("engine_manager", self.orchestrator.engine_manager)
+        if self.orchestrator.registry is not None:
+            set_variable("model_registry", self.orchestrator.registry)
         logger.info("Sidekick workspace seeded with engine_manager and model_registry")
 
     def create_model_card(self, model: Any) -> None:
@@ -946,9 +957,11 @@ class UpstreamDriftLauncher(
         if hasattr(self, "chk_gpu"):
             self.chk_gpu.setChecked(options.get("gpu_acceleration", False))
         if hasattr(self, "chk_docker"):
-            # If "docker_mode" is not in options, default to self.docker_available
-            saved_docker = options.get("docker_mode", self.docker_available)
-            if saved_docker and self.docker_available:
+            # If "docker_mode" is not in options, default to self.orchestrator.docker_available
+            saved_docker = options.get(
+                "docker_mode", self.orchestrator.docker_available
+            )
+            if saved_docker and self.orchestrator.docker_available:
                 self.chk_docker.setChecked(True)
             else:
                 self.chk_docker.setChecked(False)
@@ -1012,7 +1025,7 @@ class UpstreamDriftLauncher(
                         """)
 
         # Update launch button
-        model = self._get_model(model_id)
+        model = self.orchestrator.get_model(model_id)
         if model:
             self.update_launch_button(model.name)
 
@@ -1044,13 +1057,13 @@ class UpstreamDriftLauncher(
             return
 
         name = model_name or self.selected_model
-        model = self._get_model(self.selected_model)
+        model = self.orchestrator.get_model(self.selected_model)
 
         # Check Docker dependency
         if (
             model
             and getattr(model, "requires_docker", False)
-            and not self.docker_available
+            and not self.orchestrator.docker_available
         ):
             self.btn_launch.setText("! Docker Required")
             self.btn_launch.setStyleSheet(f"""
@@ -1102,7 +1115,7 @@ class UpstreamDriftLauncher(
         """Apply Docker availability status to UI."""
         if available is None:
             raise ValueError("available must be provided")
-        self.docker_available = available
+        self.orchestrator.docker_available = available
         if available:
             self.lbl_status.setText("System Ready")
             self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS_BOLD)
