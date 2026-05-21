@@ -10,6 +10,7 @@ from src.shared.python.plot_style import (
     DataChannel,
     DataDrivenColor,
     MarkerRenderer,
+    MarkerShapeRenderer,
     MarkerStyle,
     PaletteColor,
     StaticColor,
@@ -78,6 +79,25 @@ class _StubResolver:
         return out2
 
 
+class _StubShapeRenderer:
+    """Minimal MarkerShapeRenderer-conforming stub for runtime checks."""
+
+    shape_id = "stub-shape"
+
+    def mesh(self, style: MarkerStyle) -> tuple[np.ndarray, np.ndarray]:
+        scale = style.size_px / 2.0
+        vertices = np.array(
+            [
+                [0.0, 0.0, scale],
+                [scale, 0.0, 0.0],
+                [0.0, scale, 0.0],
+            ],
+            dtype=np.float64,
+        )
+        faces = np.array([[0, 1, 2]], dtype=np.int64)
+        return vertices, faces
+
+
 def test_marker_renderer_runtime_checkable() -> None:
     stub = _StubRenderer()
     assert isinstance(stub, MarkerRenderer)
@@ -86,6 +106,11 @@ def test_marker_renderer_runtime_checkable() -> None:
 def test_color_resolver_runtime_checkable() -> None:
     stub = _StubResolver()
     assert isinstance(stub, ColorResolver)
+
+
+def test_marker_shape_renderer_runtime_checkable() -> None:
+    stub = _StubShapeRenderer()
+    assert isinstance(stub, MarkerShapeRenderer)
 
 
 def test_marker_renderer_stub_round_trip() -> None:
@@ -128,6 +153,16 @@ def test_color_resolver_resolves_data_driven_2d_array() -> None:
     assert arr.shape == (2, 2, 4)
 
 
+def test_marker_shape_renderer_stub_mesh_contract() -> None:
+    stub = _StubShapeRenderer()
+    vertices, faces = stub.mesh(MarkerStyle(size_px=12.0))
+    assert stub.shape_id == "stub-shape"
+    assert vertices.dtype == np.float64
+    assert vertices.shape == (3, 3)
+    assert faces.dtype == np.int64
+    assert faces.tolist() == [[0, 1, 2]]
+
+
 def test_non_conforming_object_is_not_renderer() -> None:
     class _NotARenderer:
         pass
@@ -140,3 +175,11 @@ def test_non_conforming_object_is_not_resolver() -> None:
         pass
 
     assert not isinstance(_NotAResolver(), ColorResolver)
+
+
+def test_non_conforming_object_is_not_shape_renderer() -> None:
+    class _NotAShapeRenderer:
+        def mesh(self, style: MarkerStyle) -> tuple[np.ndarray, np.ndarray]:
+            return np.zeros((0, 3)), np.zeros((0, 3), dtype=np.int64)
+
+    assert not isinstance(_NotAShapeRenderer(), MarkerShapeRenderer)
