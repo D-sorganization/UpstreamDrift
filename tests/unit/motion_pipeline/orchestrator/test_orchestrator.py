@@ -69,13 +69,6 @@ def test_motion_pipeline_get_version_returns_string() -> None:
     assert len(v) > 0
 
 
-@pytest.mark.xfail(
-    strict=False,
-    reason=(
-        "_fire_hooks instantiates HookPayload, which is a typing.Protocol "
-        "and raises TypeError. Production bug — issue to file separately."
-    ),
-)
 def test_motion_pipeline_fire_hooks_emits_payload() -> None:
     p = MotionPipeline(make_minimal_config())
     received = []

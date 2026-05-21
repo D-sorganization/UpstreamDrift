@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Annotated, Any, Literal, Optional, Union
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator, ValidationInfo
 
 # =============================================================================
 # Type Aliases
@@ -54,10 +54,14 @@ class CameraIntrinsics(BaseModel):
     p1: float = Field(default=0.0, description="Tangential distortion coefficient 1")
     p2: float = Field(default=0.0, description="Tangential distortion coefficient 2")
 
-    @field_validator("fx", "fy", "cx", "cy")
+    @field_validator("fx", "fy", "cx", "cy", mode="before")
     @classmethod
-    def check_finite(cls, v: float) -> float:
-        if not np.isfinite(v):
+    def check_finite(cls, v: Any) -> Any:
+        try:
+            val = float(v)
+        except (TypeError, ValueError):
+            return v
+        if not np.isfinite(val):
             raise ValueError("Value must be finite")
         return v
 
@@ -68,7 +72,7 @@ class CameraExtrinsics(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     rotation: list[list[float]] = Field(
-        default_factory=lambda: [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+        default_factory=lambda: [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
         description="3x3 rotation matrix (world-to-camera)",
     )
     translation: list[float] = Field(
@@ -382,7 +386,7 @@ class JointDef(BaseModel):
         max_length=3,
     )
     axes: list[Axis] = Field(
-        default_factory=lambda: ["X", "Y", "Z"],
+        default_factory=lambda: ["X", "Y", "Z"],  # type: ignore[arg-type]
         description="Joint rotation axes",
         min_length=1,
         max_length=3,
@@ -850,7 +854,7 @@ class MotionMatchingResult(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def _migrate_legacy_document(cls, data: Any) -> Any:
+    def _migrate_legacy_document(cls, data: Any, info: ValidationInfo) -> Any:
         """Migrate v1 (legacy) serialized documents forward.
 
         Legacy documents have no ``schema_version`` field. They are tagged
@@ -859,7 +863,7 @@ class MotionMatchingResult(BaseModel):
         (where ``data`` is already a model instance, or where the caller
         explicitly sets ``schema_version``) is left untouched.
         """
-        if isinstance(data, dict) and "schema_version" not in data:
+        if isinstance(data, dict) and "schema_version" not in data and info.mode == "json":
             # Shallow copy so we never mutate the caller's dict.
             data = {**data, "schema_version": 1}
         return data
@@ -906,7 +910,7 @@ def serialize_model(model: BaseModel) -> str:
     return model.model_dump_json(indent=2)
 
 
-def deserialize_model(json_str: str, model_class: type) -> BaseModel:
+def deserialize_model(json_str: str, model_class: type[BaseModel]) -> BaseModel:
     """Deserialize a JSON string to a Pydantic model."""
     return model_class.model_validate_json(json_str)
 

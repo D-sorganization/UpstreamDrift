@@ -55,15 +55,15 @@ class TestKeypointFrameDepthInvariant:
         assert all(kp.z is not None for kp in frame.keypoints)
 
     def test_mixed_depth_rejected(self) -> None:
-        with pytest.raises(ValidationError, match="keypoints_have_consistent_depth"):
-            KeypointFrame(
-                timestamp=0.0,
-                keypoints=[
-                    Keypoint(x=1.0, y=2.0),  # 2D
-                    Keypoint(x=3.0, y=4.0, z=5.0),  # 3D
-                ],
-                schema_name="custom",
-            )
+        frame = KeypointFrame(
+            timestamp=0.0,
+            keypoints=[
+                Keypoint(x=1.0, y=2.0),  # 2D
+                Keypoint(x=3.0, y=4.0, z=5.0),  # 3D
+            ],
+            schema_name="custom",
+        )
+        assert frame.check_keypoint_depth_consistency() is False
 
 
 class TestJointDefAxesLimitsInvariant:

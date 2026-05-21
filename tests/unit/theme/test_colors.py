@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from src.shared.python.theme.colors import (
     THEME_COLOR_KEYS,
+    Colors,
     get_rgba,
     is_dark_theme,
     is_valid_hex_color,
@@ -84,3 +85,15 @@ class TestIsDarkTheme:
     def test_colors_returns_bool(self) -> None:
         result = is_dark_theme("dark")
         assert isinstance(result, bool)
+
+
+class TestColorsClass:
+    def test_colors_attributes_exist(self) -> None:
+        assert hasattr(Colors, "BG_BASE")
+        assert Colors.BG_BASE == "#1a1d23"
+        assert hasattr(Colors, "PRIMARY")
+        assert Colors.PRIMARY == "#4a7ba7"
+        assert hasattr(Colors, "PRIMARY_HOVER")
+        assert Colors.PRIMARY_HOVER == "#5a8fc4"
+        assert hasattr(Colors, "SUCCESS")
+        assert Colors.SUCCESS == "#30d158"

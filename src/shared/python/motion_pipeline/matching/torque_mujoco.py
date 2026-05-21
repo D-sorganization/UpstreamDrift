@@ -54,7 +54,7 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
     with residual force logging.
     """
 
-    backend_type = MatchingBackendType.TORQUE_TRACKING
+    backend_type = MatchingBackendType.TORQUE_MUJOCO
 
     def __init__(self, cost_weights: CostWeights | None = None):
         """
@@ -76,9 +76,7 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
 
                 # Check dimensional parity
                 if (
-                    len(q_row) == model.nq
-                    and len(v_row) == model.nv
-                    and len(a_row) == model.nv
+                    len(q_row) == model.nq and len(v_row) == model.nv and len(a_row) == model.nv
                 ):  # type: ignore
                     data.qpos[:] = q_row  # type: ignore
                     data.qvel[:] = v_row  # type: ignore
@@ -163,8 +161,8 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
         t_start = time.perf_counter()
 
         # Extract finite difference kinematics using the same utility
-        times, q_all, qdot_all, qddot_all = (
-            PinocchioInverseDynMatchingSolver._finite_difference(reference)
+        times, q_all, qdot_all, qddot_all = PinocchioInverseDynMatchingSolver._finite_difference(
+            reference
         )
         n_frames, n_dof = q_all.shape
 
@@ -183,26 +181,19 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
 
         if _use_rust_outer_loop():
             try:
-                tau_all = self._compute_tau_rust(
-                    times, q_all, qdot_all, qddot_all, callback
-                )
+                tau_all = self._compute_tau_rust(times, q_all, qdot_all, qddot_all, callback)
             except Exception as exc:
                 logger.warning(
                     "upstream_pinocchio_id rust path failed (%s); "
                     "falling back to pure-Python MuJoCo outer loop",
                     exc,
                 )
-                tau_all = self._compute_tau_python(
-                    times, q_all, qdot_all, qddot_all, callback
-                )
+                tau_all = self._compute_tau_python(times, q_all, qdot_all, qddot_all, callback)
         else:
-            tau_all = self._compute_tau_python(
-                times, q_all, qdot_all, qddot_all, callback
-            )
+            tau_all = self._compute_tau_python(times, q_all, qdot_all, qddot_all, callback)
 
         torque_frames = [
-            TorqueFrame(timestamp=float(t), tau=tau_all[i].tolist())
-            for i, t in enumerate(times)
+            TorqueFrame(timestamp=float(t), tau=tau_all[i].tolist()) for i, t in enumerate(times)
         ]
 
         rig_joint_names: list[str] = []

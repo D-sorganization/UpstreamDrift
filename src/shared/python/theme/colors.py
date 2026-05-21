@@ -72,9 +72,7 @@ def _load_themes_from_json() -> dict[str, dict[str, str]] | None:
     Returns:
         Dictionary of theme definitions, or None if JSON not available.
     """
-    json_path = (
-        Path(__file__).parent.parent.parent / "theme-definitions" / "themes.json"
-    )
+    json_path = Path(__file__).parent.parent.parent / "theme-definitions" / "themes.json"
     if not json_path.exists():
         return None
 
@@ -101,9 +99,7 @@ def _load_themes_from_json() -> dict[str, dict[str, str]] | None:
 
 def _load_chart_colors_from_json() -> list[str] | None:
     """Load chart colors from themes.json."""
-    json_path = (
-        Path(__file__).parent.parent.parent / "theme-definitions" / "themes.json"
-    )
+    json_path = Path(__file__).parent.parent.parent / "theme-definitions" / "themes.json"
     if not json_path.exists():
         return None
 
@@ -383,9 +379,7 @@ _HARDCODED_CHART_COLORS: list[str] = [
 ]
 
 # Load from JSON if available, otherwise use hardcoded definitions
-BUILTIN_THEMES: dict[str, dict[str, str]] = (
-    _load_themes_from_json() or _HARDCODED_BUILTIN_THEMES
-)
+BUILTIN_THEMES: dict[str, dict[str, str]] = _load_themes_from_json() or _HARDCODED_BUILTIN_THEMES
 CHART_COLORS: list[str] = _load_chart_colors_from_json() or _HARDCODED_CHART_COLORS
 
 
@@ -547,9 +541,32 @@ def is_dark_theme(theme_name: str) -> bool:
     return False
 
 
+class Colors:
+    """Convenience color constants mapping to the default dark theme colors."""
+
+    BG_BASE: str = "#1a1d23"
+    BORDER_DEFAULT: str = "#3a3f4a"
+    BG_SURFACE: str = "#24272e"
+    TEXT_SECONDARY: str = "#c9d1d9"
+    TEXT_PRIMARY: str = "#e1e4e8"
+    GRID_LINE: str = "#3a3f4a"
+    TICK_COLOR: str = "#8b949e"
+    TEXT_TERTIARY: str = "#8b949e"
+    BG_ELEVATED: str = "#2d3748"
+    BORDER_SUBTLE: str = "#3a3f4a"
+    BG_DEEP: str = "#0d1117"
+    TEXT_QUATERNARY: str = "#666666"
+    PRIMARY: str = "#4a7ba7"
+    PRIMARY_HOVER: str = "#5a8fc4"
+    SUCCESS: str = "#30d158"
+    ERROR: str = "#ff375f"
+    WARNING: str = "#d29922"
+
+
 __all__ = [
     "BUILTIN_THEMES",
     "CHART_COLORS",
+    "Colors",
     "SEMANTIC_COLOR_KEYS",
     "THEME_COLOR_KEYS",
     "get_matplotlib_colors",
