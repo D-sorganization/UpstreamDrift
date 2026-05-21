@@ -57,7 +57,8 @@ def canonicalize_rotation(rot: np.ndarray) -> np.ndarray:
     if not isinstance(rot, np.ndarray) or rot.shape[-1] != 4:
         raise ValueError("Rotation must be a numpy array with last dimension 4.")
 
-    norm = np.linalg.norm(rot, axis=-1, keepdims=True)
+    # ⚡ Bolt: Optimize norm calculation along axis using einsum
+    norm = np.sqrt(np.einsum("...i,...i->...", rot, rot))[..., np.newaxis]
     # Avoid division by zero
     norm = np.where(norm == 0, 1.0, norm)
     q: np.ndarray = rot / norm
