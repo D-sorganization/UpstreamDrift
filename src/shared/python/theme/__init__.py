@@ -39,6 +39,7 @@ from types import SimpleNamespace as _NS
 from .colors import (
     BUILTIN_THEMES,
     CHART_COLORS,
+    Colors,
     SEMANTIC_COLOR_KEYS,
     THEME_COLOR_KEYS,
     get_matplotlib_colors,
@@ -54,6 +55,13 @@ from .sidekick_tokens import (
     sidekick_tokens_from_theme,
 )
 from .stylesheets import generate_minimal_stylesheet, generate_stylesheet
+from .typography import (
+    Sizes,
+    Weights,
+    get_display_font,
+    get_mono_font,
+    get_qfont,
+)
 
 # Convenience fallback: a ThemeColors-compatible dark theme.
 # Used by launcher code as a safe default when PyQt6 ThemeManager is unavailable.
@@ -234,6 +242,7 @@ __all__ = [
     "is_dark_theme",
     "is_valid_hex_color",
     "normalise_hex_color",
+    "Colors",
     "configure_form_layout_for_readability",
     "derive_text_candidates",
     "install_application_zoom",
@@ -241,6 +250,12 @@ __all__ = [
     "scale_px",
     "set_text_minimum_width",
     "wrap_in_scroll_area",
+    # Typography utilities
+    "Sizes",
+    "Weights",
+    "get_display_font",
+    "get_mono_font",
+    "get_qfont",
     # Sidekick design-token adapter
     "REQUIRED_SIDEKICK_TOKENS",
     "get_current_sidekick_tokens",
