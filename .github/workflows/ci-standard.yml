@@ -626,7 +626,6 @@ jobs:
             fi
           fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-
       - name: Check for core test relevant changes
         id: core-test-changes
         shell: bash
@@ -710,7 +709,7 @@ jobs:
           python -m ensurepip --upgrade || true
           "$python" -m pip install -e ".[dev,gui-test]"
           python -m ensurepip --upgrade || true
-          "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
+          "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1"
 
       - name: Document Native Engine Coverage In Core Lane
         if: steps.core-test-changes.outputs.skip != 'true'
@@ -1087,7 +1086,7 @@ jobs:
           python -m ensurepip --upgrade || true
           "$python" -m pip install -e ".[dev,gui-test]"
           python -m ensurepip --upgrade || true
-          "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
+          "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1"
       - name: Run Shared Tools Consumer Contracts
         env:
           QT_QPA_PLATFORM: offscreen
@@ -1122,7 +1121,6 @@ jobs:
             fi
           fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-
       - name: Check for frontend changes
         id: frontend-changes
         working-directory: .
@@ -1195,7 +1193,6 @@ jobs:
             fi
           fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-
       - uses: matlab-actions/setup-matlab@a0180c939fb1a28de13f44f7b778b912384ced1f
       - uses: matlab-actions/run-command@fa5ca534870f0f484e70f0c0006589eb4bfb7e67
         with:
