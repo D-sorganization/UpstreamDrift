@@ -1,0 +1,252 @@
+"""Project-scoped file explorer widget for the unified tools sidebar."""
+
+from __future__ import annotations
+
+import os
+import sys
+from pathlib import Path
+from typing import Protocol
+
+from .design_tokens import (
+    SIDEKICK_PROJECT_EXPLORER_OBJECT_NAME,
+    SIDEKICK_PROJECT_TREE_OBJECT_NAME,
+)
+from .file_navigation import (
+    CommonLocationsProvider,
+    FileNavigationController,
+)
+from .qt_compat import FileSystemModel, QtCore, QtWidgets, Signal
+
+
+class DefaultProgramLauncher(Protocol):
+    """Launch files through the operating system default application."""
+
+    def open_file(self, path: Path) -> None:
+        """Open ``path`` with the operating system default application."""
+
+
+class WindowsDefaultProgramLauncher:
+    """Default launcher for Windows file associations."""
+
+    def open_file(self, path: Path) -> None:
+        """Open ``path`` with the Windows default application."""
+        if sys.platform != "win32":
+            raise RuntimeError(
+                "Opening with the default program is unavailable on this platform."
+            )
+        os.startfile(str(path))  # type: ignore[attr-defined]
+
+
+class ProjectFileExplorer(QtWidgets.QWidget):
+    """Read-only project file explorer with an open-file signal."""
+
+    file_open_requested = Signal(str)
+    default_open_failed = Signal(str, str)
+
+    def __init__(
+        self,
+        project_root: str | Path | None = None,
+        default_program_launcher: DefaultProgramLauncher | None = None,
+        allow_outside_project: bool = False,
+        common_locations_provider: CommonLocationsProvider | None = None,
+        persisted_path: str | Path | None = None,
+        parent: QtWidgets.QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self.setObjectName(SIDEKICK_PROJECT_EXPLORER_OBJECT_NAME)
+        self._project_root = Path.cwd()
+        self._allow_outside_project = allow_outside_project
+        self._common_locations_provider = common_locations_provider
+        self._persisted_path = persisted_path
+        self._navigation = FileNavigationController(
+            project_root or Path.cwd(),
+            allow_outside_project=allow_outside_project,
+            persisted_path=persisted_path,
+            common_locations_provider=common_locations_provider,
+        )
+        self._default_program_launcher = (
+            default_program_launcher or WindowsDefaultProgramLauncher()
+        )
+        self._model = FileSystemModel(self)
+        self._model.setReadOnly(True)
+        self._back_button = QtWidgets.QPushButton("Back", self)
+        self._forward_button = QtWidgets.QPushButton("Forward", self)
+        self._up_button = QtWidgets.QPushButton("Up", self)
+        self._location_label = QtWidgets.QLabel(self)
+        self._common_locations = QtWidgets.QListWidget(self)
+        self._tree = QtWidgets.QTreeView(self)
+        self._tree.setObjectName(SIDEKICK_PROJECT_TREE_OBJECT_NAME)
+        self._tree.setModel(self._model)
+        self._tree.doubleClicked.connect(self._open_index)
+        self._tree.setContextMenuPolicy(_custom_context_menu_policy())
+        self._tree.customContextMenuRequested.connect(self._show_context_menu)
+        self._back_button.clicked.connect(self._go_back)
+        self._forward_button.clicked.connect(self._go_forward)
+        self._up_button.clicked.connect(self._go_up)
+        self._common_locations.itemActivated.connect(self._go_to_common_location)
+
+        self._quick_access_label = QtWidgets.QLabel("Quick Access", self)
+        self._quick_access_label.setStyleSheet("font-weight: bold; margin-bottom: 4px;")
+
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        nav_layout = QtWidgets.QHBoxLayout()
+        nav_layout.addWidget(self._back_button)
+        nav_layout.addWidget(self._forward_button)
+        nav_layout.addWidget(self._up_button)
+        nav_layout.addWidget(self._location_label, 1)
+        layout.addLayout(nav_layout)
+
+        content_layout = QtWidgets.QSplitter(QtCore.Qt.Orientation.Vertical, self)
+
+        top_widget = QtWidgets.QWidget()
+        top_layout = QtWidgets.QVBoxLayout(top_widget)
+        top_layout.setContentsMargins(0, 0, 0, 0)
+        top_layout.addWidget(self._quick_access_label)
+        top_layout.addWidget(self._common_locations)
+
+        content_layout.addWidget(top_widget)
+        content_layout.addWidget(self._tree)
+        content_layout.setStretchFactor(0, 1)
+        content_layout.setStretchFactor(1, 3)
+        layout.addWidget(content_layout)
+
+        self.set_project_root(project_root or Path.cwd())
+
+    @property
+    def project_root(self) -> Path:
+        """Return the scoped project root."""
+        return self._project_root
+
+    def set_project_root(self, project_root: str | Path) -> None:
+        """Scope the explorer to ``project_root``."""
+        self._navigation = FileNavigationController(
+            project_root,
+            allow_outside_project=self._allow_outside_project,
+            persisted_path=self._persisted_path,
+            common_locations_provider=self._common_locations_provider,
+        )
+        root = self._navigation.project_root
+        self._project_root = root
+        self._tree.setColumnWidth(0, 240)
+        for column in range(1, self._model.columnCount()):
+            self._tree.hideColumn(column)
+        self._refresh_common_locations()
+        self._apply_navigation_state()
+
+    def _open_index(self, index: QtCore.QModelIndex) -> None:
+        path = self._path_for_index(index)
+        if path is not None and path.is_dir() and self._navigation.navigate_to(path):
+            self._apply_navigation_state()
+            return
+        if path is not None and self._can_open_file(path):
+            self.file_open_requested.emit(str(path))
+
+    def _go_back(self) -> None:
+        if self._navigation.back():
+            self._apply_navigation_state()
+
+    def _go_forward(self) -> None:
+        if self._navigation.forward():
+            self._apply_navigation_state()
+
+    def _go_up(self) -> None:
+        if self._navigation.up():
+            self._apply_navigation_state()
+
+    def _go_to_common_location(self, item: QtWidgets.QListWidgetItem) -> None:
+        path = item.data(_user_role())
+        if path is not None and self._navigation.navigate_to(Path(path)):
+            self._apply_navigation_state()
+
+    def _apply_navigation_state(self) -> None:
+        state = self._navigation.state()
+        root_index = self._model.setRootPath(str(state.current_path))
+        self._tree.setRootIndex(root_index)
+        self._location_label.setText(str(state.current_path))
+        self._back_button.setEnabled(state.can_go_back)
+        self._forward_button.setEnabled(state.can_go_forward)
+        self._up_button.setEnabled(state.can_go_up)
+
+    def _refresh_common_locations(self) -> None:
+        self._common_locations.clear()
+        for location in self._navigation.common_locations():
+            item = QtWidgets.QListWidgetItem(location.label)
+            item.setData(_user_role(), str(location.path))
+            self._common_locations.addItem(item)
+
+    def _show_context_menu(self, pos: QtCore.QPoint) -> None:
+        menu = self._context_menu_for_index(self._tree.indexAt(pos))
+        if menu is not None:
+            menu.exec(self._tree.viewport().mapToGlobal(pos))
+
+    def _context_menu_for_index(
+        self, index: QtCore.QModelIndex
+    ) -> QtWidgets.QMenu | None:
+        path = self._path_for_index(index)
+        if path is None:
+            return None
+
+        menu = QtWidgets.QMenu(self)
+        if path.is_dir():
+            menu.addAction("Add to Quick Access").triggered.connect(
+                lambda: self._add_to_quick_access(path)
+            )
+        if self._can_open_file(path):
+            menu.addAction("Open with Default Program").triggered.connect(
+                lambda: self._open_with_default_program(index)
+            )
+
+        if menu.isEmpty():
+            return None
+        return menu
+
+    def _add_to_quick_access(self, path: Path) -> None:
+        item = QtWidgets.QListWidgetItem(path.name)
+        item.setData(_user_role(), str(path))
+        self._common_locations.addItem(item)
+
+    def _open_with_default_program(self, index: QtCore.QModelIndex) -> None:
+        path = self._path_for_index(index)
+        if path is None or not self._can_open_file(path):
+            return
+
+        try:
+            self._default_program_launcher.open_file(path)
+        except (OSError, RuntimeError) as exc:
+            message = str(exc)
+            self.default_open_failed.emit(str(path), message)
+            QtWidgets.QMessageBox.warning(
+                self,
+                "Open with Default Program Failed",
+                message,
+            )
+
+    def _path_for_index(self, index: QtCore.QModelIndex) -> Path | None:
+        if not index.isValid():
+            return None
+        return Path(self._model.filePath(index)).resolve()
+
+    def _can_open_file(self, path: Path) -> bool:
+        return path.is_file() and self._is_within_project(path)
+
+    def _is_within_project(self, path: Path) -> bool:
+        try:
+            path.resolve().relative_to(self._project_root)
+        except ValueError:
+            return False
+        return True
+
+
+def _custom_context_menu_policy() -> QtCore.Qt.ContextMenuPolicy:
+    policy_type = getattr(QtCore.Qt, "ContextMenuPolicy", None)
+    if policy_type is not None:
+        return policy_type.CustomContextMenu
+    return QtCore.Qt.CustomContextMenu
+
+
+def _user_role() -> int:
+    item_data_role = getattr(QtCore.Qt, "ItemDataRole", None)
+    if item_data_role is not None:
+        return item_data_role.UserRole
+    return QtCore.Qt.UserRole

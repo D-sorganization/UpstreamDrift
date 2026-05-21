@@ -1,0 +1,171 @@
+# ruff: noqa: E501
+"""Adaptive filter implementations for signal_toolkit.
+
+The LMS and RLS loops dispatch to the native Rust kernel in ``tools_core``
+(``tools_core.signal.lms_filter`` / ``rls_filter``) when the wheel is
+available, eliminating per-sample GIL crossings and unlocking real-time
+biomechanical signal filtering (issue #2574). Falls back to pure NumPy for
+environments where the wheel has not been built yet.
+"""
+
+from __future__ import annotations
+
+import logging
+
+import numpy as np
+
+from .core import Signal
+
+logger = logging.getLogger(__name__)
+
+# ── Try importing native Rust adaptive-filter kernels ────────────────────────
+
+_rust_lms: object | None = None
+_rust_rls: object | None = None
+
+try:
+    from tools_core import signal as _tc_signal  # type: ignore[import]
+
+    _rust_lms = getattr(_tc_signal, "lms_filter", None)
+    _rust_rls = getattr(_tc_signal, "rls_filter", None)
+    if _rust_lms is not None and _rust_rls is not None:
+        logger.debug("tools_core: Rust LMS/RLS kernels active")
+    else:
+        logger.debug("tools_core: lms/rls_filter missing; Python fallback")
+except ImportError:
+    logger.warning(
+        "adaptive_filter: tools_core wheel not available; using pure-Python path. "
+        "See docs/development/rust_distribution.md"
+    )
+
+
+class AdaptiveFilter:
+    """Adaptive filter implementations (LMS, RLS).
+
+    Both ``lms`` and ``rls`` prefer the Rust kernel from ``tools_core`` when
+    available (no per-sample GIL crossings). Pure-NumPy is used as a fallback.
+    """
+
+    @staticmethod
+    def lms(
+        signal: Signal,
+        reference: Signal,
+        order: int = 10,
+        step_size: float = 0.01,
+    ) -> tuple[Signal, Signal]:
+        """Apply Least Mean Squares (LMS) adaptive filter.
+
+        Args:
+            signal: Input signal.
+            reference: Desired (reference) signal.
+            order: Filter order (number of taps).
+            step_size: LMS convergence step size µ.
+
+        Returns:
+            Tuple of (filtered_signal, error_signal).
+        """
+        if signal is None:
+            raise ValueError("signal must be provided")
+        n = len(signal.values)
+        x = signal.values
+        d = reference.values
+
+        if _rust_lms is not None:
+            import numpy as _np  # already imported at top, but guard for type checkers
+
+            x_arr = _np.asarray(x, dtype=np.float64)
+            d_arr = _np.asarray(d, dtype=np.float64)
+            y_arr, e_arr = _rust_lms(x_arr, d_arr, order=order, step_size=step_size)  # type: ignore[call-arg]
+            y: np.ndarray = np.asarray(y_arr, dtype=np.float64)
+            e: np.ndarray = np.asarray(e_arr, dtype=np.float64)
+        else:
+            # Pure NumPy fallback
+            w = np.zeros(order)
+            y = np.zeros(n)
+            e = np.zeros(n)
+            for i in range(order, n):
+                x_window = x[i - order : i][::-1]
+                y[i] = np.dot(w, x_window)
+                e[i] = d[i] - y[i]
+                w += step_size * e[i] * x_window
+
+        filtered = Signal(
+            time=signal.time,
+            values=y,
+            name=f"{signal.name}_lms",
+            units=signal.units,
+        )
+        error = Signal(
+            time=signal.time,
+            values=e,
+            name=f"{signal.name}_lms_error",
+            units=signal.units,
+        )
+        return filtered, error
+
+    @staticmethod
+    def rls(
+        signal: Signal,
+        reference: Signal,
+        order: int = 10,
+        forgetting_factor: float = 0.99,
+        delta: float = 0.01,
+    ) -> tuple[Signal, Signal]:
+        """Apply Recursive Least Squares (RLS) adaptive filter.
+
+        Args:
+            signal: Input signal.
+            reference: Desired (reference) signal.
+            order: Filter order (number of taps).
+            forgetting_factor: Exponential weighting factor λ ∈ (0, 1].
+            delta: Initial diagonal loading 1/δ for the inverse correlation matrix.
+
+        Returns:
+            Tuple of (filtered_signal, error_signal).
+        """
+        if signal is None:
+            raise ValueError("signal must be provided")
+        n = len(signal.values)
+        x = signal.values
+        d = reference.values
+
+        if _rust_rls is not None:
+            x_arr = np.asarray(x, dtype=np.float64)
+            d_arr = np.asarray(d, dtype=np.float64)
+            y_arr, e_arr = _rust_rls(  # type: ignore[call-arg]
+                x_arr,
+                d_arr,
+                order=order,
+                forgetting_factor=forgetting_factor,
+                delta=delta,
+            )
+            y = np.asarray(y_arr, dtype=np.float64)
+            e = np.asarray(e_arr, dtype=np.float64)
+        else:
+            # Pure NumPy fallback
+            w = np.zeros(order)
+            P = np.eye(order) / delta
+            y = np.zeros(n)
+            e = np.zeros(n)
+            lam = forgetting_factor
+            for i in range(order, n):
+                x_window = x[i - order : i][::-1].reshape(-1, 1)
+                y[i] = np.dot(w, x_window.flatten())
+                e[i] = d[i] - y[i]
+                k = P @ x_window / (lam + x_window.T @ P @ x_window)
+                P = (P - k @ x_window.T @ P) / lam
+                w += k.flatten() * e[i]
+
+        filtered = Signal(
+            time=signal.time,
+            values=y,
+            name=f"{signal.name}_rls",
+            units=signal.units,
+        )
+        error = Signal(
+            time=signal.time,
+            values=e,
+            name=f"{signal.name}_rls_error",
+            units=signal.units,
+        )
+        return filtered, error

@@ -1,0 +1,70 @@
+import pytest
+from upstream_drift_tools.process_calculators.flare_calculator import (
+    FlareCalculator,
+    FlareDesign,
+)
+
+
+@pytest.fixture
+def flare_calc() -> FlareCalculator:
+    return FlareCalculator()
+
+
+def test_calculate_flare_size(flare_calc: FlareCalculator) -> None:
+    # Test valid input
+    design = flare_calc.calculate_flare_size(
+        total_flow=10000.0,
+        gas_composition={"CH4": 0.8, "C2H6": 0.2},
+        temperature=300.0,
+        pressure=1.01325,
+    )
+
+    assert isinstance(design, FlareDesign)
+    assert design.height >= 10.0  # FLARE_MIN_HEIGHT
+    assert design.diameter > 0.0
+    assert design.exit_velocity > 0.0
+    assert design.heat_release > 0.0
+    assert design.radiation_intensity > 0.0
+
+
+def test_calculate_flare_size_invalid(flare_calc: FlareCalculator) -> None:
+    with pytest.raises(AssertionError):
+        flare_calc.calculate_flare_size(0, {"CH4": 1}, 300, 1)
+
+    with pytest.raises(AssertionError):
+        flare_calc.calculate_flare_size(100, {}, 300, 1)
+
+
+def test_calculate_radiation_zones(flare_calc: FlareCalculator) -> None:
+    design = FlareDesign(
+        height=50.0,
+        diameter=1.0,
+        exit_velocity=150.0,
+        heat_release=50000.0,
+        radiation_intensity=1.58,
+    )
+    zones = flare_calc.calculate_radiation_zones(design)
+    assert "lethal" in zones
+    assert "damage" in zones
+    assert "safe" in zones
+    assert "comfort" in zones
+
+    assert zones["safe"] > zones["lethal"]
+
+
+def test_calculate_combustion_efficiency(flare_calc: FlareCalculator) -> None:
+    # Baseline efficiency
+    eff = flare_calc.calculate_combustion_efficiency({"CH4": 1.0}, 400.0, 1.0)
+    assert eff > 0.0
+
+    # Cold temperature penalty
+    eff_cold = flare_calc.calculate_combustion_efficiency({"CH4": 1.0}, 200.0, 1.0)
+    assert eff_cold < eff
+
+    # H2 boost
+    eff_h2 = flare_calc.calculate_combustion_efficiency({"H2": 1.0}, 400.0, 1.0)
+    assert eff_h2 > eff
+
+    # CO penalty
+    eff_co = flare_calc.calculate_combustion_efficiency({"CO": 1.0}, 400.0, 1.0)
+    assert eff_co < eff

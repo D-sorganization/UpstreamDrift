@@ -1,0 +1,182 @@
+"""Custom dock title bar for the Sidekick sidebar (issue #2881).
+
+Replaces the default ``QDockWidget`` title bar with a compact widget that
+exposes:
+
+- A small "×" close button (``sidekick-close``) — hides the dock.
+  Tooltip: "Close Sidekick (Ctrl+B to reopen)".
+- A small "—" collapse button (``sidekick-collapse``) — collapses the dock to
+  an icon-strip without fully hiding it.
+- The dock title label.
+
+The DRY factory :func:`_make_dock_chrome_button` produces both buttons so
+the icon / sizing / styling is guaranteed consistent.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+
+from .qt_compat import QtWidgets
+
+
+def _make_dock_chrome_button(
+    icon_name: str,
+    tooltip: str,
+    on_click: Callable[[], None],
+    *,
+    parent: QtWidgets.QWidget | None = None,
+) -> QtWidgets.QPushButton:
+    """DRY factory for dock-chrome icon buttons (close / collapse / re-dock).
+
+    Args:
+        icon_name: The text label shown on the button (e.g. ``"×"`` or
+            ``"—"``).  Also used as the ``objectName`` via the mapping
+            maintained in this module so tests can locate the button with
+            ``findChild``.
+        tooltip: Full tooltip string shown on hover.
+        on_click: Zero-argument callable wired to the ``clicked`` signal.
+        parent: Optional Qt parent widget.
+
+    Returns:
+        A styled :class:`QPushButton` ready to be added to a layout.
+
+    Raises:
+        ValueError: If ``icon_name`` or ``tooltip`` is empty / whitespace.
+        TypeError: If ``on_click`` is not callable.
+    """
+    if not isinstance(icon_name, str) or not icon_name.strip():
+        raise ValueError("_make_dock_chrome_button: icon_name must be non-empty")
+    if not isinstance(tooltip, str) or not tooltip.strip():
+        raise ValueError("_make_dock_chrome_button: tooltip must be non-empty")
+    if not callable(on_click):
+        raise TypeError("_make_dock_chrome_button: on_click must be callable")
+
+    btn = QtWidgets.QPushButton(icon_name, parent)
+    btn.setToolTip(tooltip)
+    btn.setFixedSize(18, 18)
+    btn.setFlat(True)
+    btn.setStyleSheet(
+        "QPushButton {"
+        "  background: transparent;"
+        "  color: #aaa;"
+        "  border: none;"
+        "  font-size: 12px;"
+        "  font-weight: bold;"
+        "  padding: 0;"
+        "}"
+        "QPushButton:hover {"
+        "  color: #fff;"
+        "  background: rgba(255,255,255,0.12);"
+        "  border-radius: 3px;"
+        "}"
+    )
+    btn.clicked.connect(on_click)
+    return btn
+
+
+# ── Object-name constants (used by tests + accessibility) ─────────────────────
+
+_CLOSE_OBJECT_NAME = "sidekick-close"
+_COLLAPSE_OBJECT_NAME = "sidekick-collapse"
+_REDOCK_OBJECT_NAME = "sidekick-redock"
+
+
+class SidekickDockTitleBar(QtWidgets.QWidget):
+    """Compact custom title bar for the Sidekick dock widget.
+
+    Replaces the default ``QDockWidget`` chrome with a slim bar that shows
+    the sidebar's title plus close (×) and collapse (—) action buttons.
+
+    Args:
+        title: Text shown in the title label.
+        on_close: Callback invoked when the close button is clicked.
+        on_collapse: Callback invoked when the collapse button is clicked.
+        parent: Optional Qt parent.
+
+    Raises:
+        TypeError: If ``on_close`` or ``on_collapse`` is not callable.
+    """
+
+    def __init__(
+        self,
+        title: str = "Tools",
+        *,
+        on_close: Callable[[], None],
+        on_collapse: Callable[[], None],
+        parent: QtWidgets.QWidget | None = None,
+    ) -> None:
+        if not callable(on_close):
+            raise TypeError("on_close must be callable")
+        if not callable(on_collapse):
+            raise TypeError("on_collapse must be callable")
+        super().__init__(parent)
+        self.setObjectName("SidekickDockTitleBar")
+
+        layout = QtWidgets.QHBoxLayout(self)
+        layout.setContentsMargins(4, 2, 4, 2)
+        layout.setSpacing(2)
+
+        title_label = QtWidgets.QLabel(title, self)
+        title_label.setObjectName("SidekickDockTitleLabel")
+        title_label.setStyleSheet(
+            "QLabel {  font-size: 11px;  font-weight: bold;  color: #ccc;}"
+        )
+        layout.addWidget(title_label, stretch=1)
+
+        # DRY: both buttons share the same factory ────────────────────────────
+        collapse_btn = _make_dock_chrome_button(
+            "—",
+            "Collapse Sidekick (Ctrl+Shift+B)",
+            on_collapse,
+            parent=self,
+        )
+        collapse_btn.setObjectName(_COLLAPSE_OBJECT_NAME)
+        layout.addWidget(collapse_btn)
+
+        close_btn = _make_dock_chrome_button(
+            "×",
+            "Close Sidekick (Ctrl+B to reopen)",
+            on_close,
+            parent=self,
+        )
+        close_btn.setObjectName(_CLOSE_OBJECT_NAME)
+        layout.addWidget(close_btn)
+
+        self.setStyleSheet(
+            "SidekickDockTitleBar {"
+            "  background: #2a2a2a;"
+            "  border-bottom: 1px solid #444;"
+            "}"
+        )
+
+
+def make_redock_button(
+    on_redock: Callable[[], None],
+    *,
+    parent: QtWidgets.QWidget | None = None,
+) -> QtWidgets.QPushButton:
+    """Create a "Re-dock" button for popped-out floating windows.
+
+    Args:
+        on_redock: Callback invoked when the button is clicked.
+        parent: Optional Qt parent.
+
+    Returns:
+        A :class:`QPushButton` with ``objectName`` ``"sidekick-redock"``.
+
+    Raises:
+        TypeError: If ``on_redock`` is not callable.
+    """
+    if not callable(on_redock):
+        raise TypeError("make_redock_button: on_redock must be callable")
+
+    btn = _make_dock_chrome_button(
+        "⬇ Re-dock",
+        "Return this tab to the Sidekick dock",
+        on_redock,
+        parent=parent,
+    )
+    btn.setObjectName(_REDOCK_OBJECT_NAME)
+    btn.setFixedSize(80, 24)  # wider than icon-only buttons
+    return btn

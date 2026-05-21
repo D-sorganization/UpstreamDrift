@@ -1,0 +1,131 @@
+"""Parity tests for the Rust-accelerated bilateral filter.
+
+Tracked task: GH issue #2569 — Migrate Signal Processing Toolkit to
+``tools-core`` Rust. This file is the canonical Python-side parity guard
+for :mod:`signal_toolkit.bilateral_rust`. It generates a deterministic
+synthetic signal, runs both the pure-Python reference
+(:func:`signal_toolkit.filters.apply_bilateral_filter`) and the Rust
+binding, and asserts per-element equality within a tight floating-point
+tolerance (``1e-10`` absolute) — DSP is deterministic, the only
+expected differences come from the order of summation inside the
+weighted-average loop.
+
+The test is skipped automatically when the ``tools_core`` Rust wheel is
+not installed on the test runner (e.g. macOS/Windows wheels not yet
+shipped — see ``CLAUDE.md`` "CI matrix" notes); this preserves green CI
+on platforms where the binding is unavailable while still gating the
+Linux runs that matter for the downstream UpstreamDrift /
+Gasification_Model integrations.
+"""
+
+from __future__ import annotations
+
+import numpy as np
+import pytest
+from signal_toolkit.core import Signal
+from signal_toolkit.filters import apply_bilateral_filter
+
+pytest.importorskip(
+    "tools_core",
+    reason="Rust tools_core wheel not installed on this interpreter",
+)
+# Imported after the skip so that machines without the Rust wheel can still
+# collect this file without ModuleNotFoundError on the import line.
+from signal_toolkit.bilateral_rust import apply_bilateral_filter_rust  # noqa: E402
+
+# DSP is deterministic. The Rust loop accumulates in the same order as the
+# Python reference, so per-element absolute error stays inside double-
+# precision rounding.
+_PARITY_TOL = 1e-10
+
+
+def _make_signal(n: int, seed: int = 42) -> Signal:
+    """Deterministic synthetic test signal."""
+    rng = np.random.default_rng(seed)
+    t = np.linspace(0.0, 1.0, n, dtype=np.float64)
+    values = rng.normal(0.0, 1.0, n).astype(np.float64)
+    return Signal(time=t, values=values, name="parity", units="au")
+
+
+@pytest.mark.parity
+@pytest.mark.unit
+def test_bilateral_filter_rust_matches_python_default_params() -> None:
+    """Default args (window=5, sigma_space=1.0, sigma_intensity=0.1)."""
+    sig = _make_signal(16384)
+
+    py_out = apply_bilateral_filter(sig).values
+    rust_out = apply_bilateral_filter_rust(sig).values
+
+    diff = np.abs(py_out - rust_out)
+    assert diff.max() < _PARITY_TOL, (
+        f"per-element max diff {diff.max():.3e} exceeds tolerance "
+        f"{_PARITY_TOL:.0e} (mean diff {diff.mean():.3e})"
+    )
+
+
+@pytest.mark.parity
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("window_size", "sigma_space", "sigma_intensity"),
+    [
+        (3, 0.5, 0.05),
+        (7, 2.0, 0.2),
+        (11, 1.5, 1.0),  # noisy regime, larger intensity sigma
+        (4, 1.0, 0.1),  # even window — exercises the half = window // 2 path
+    ],
+)
+def test_bilateral_filter_rust_matches_python_param_sweep(
+    window_size: int,
+    sigma_space: float,
+    sigma_intensity: float,
+) -> None:
+    """Parity holds across a representative parameter sweep."""
+    sig = _make_signal(4096)
+
+    py_out = apply_bilateral_filter(
+        sig,
+        window_size=window_size,
+        sigma_space=sigma_space,
+        sigma_intensity=sigma_intensity,
+    ).values
+    rust_out = apply_bilateral_filter_rust(
+        sig,
+        window_size=window_size,
+        sigma_space=sigma_space,
+        sigma_intensity=sigma_intensity,
+    ).values
+
+    diff = np.abs(py_out - rust_out)
+    assert diff.max() < _PARITY_TOL, (
+        f"params ({window_size},{sigma_space},{sigma_intensity}): "
+        f"max diff {diff.max():.3e} > {_PARITY_TOL:.0e}"
+    )
+
+
+@pytest.mark.parity
+@pytest.mark.unit
+def test_bilateral_filter_rust_preserves_signal_metadata() -> None:
+    """Returned Signal carries the expected metadata keys."""
+    sig = Signal(
+        time=np.linspace(0, 1, 32),
+        values=np.zeros(32),
+        name="meta",
+        units="m/s",
+        metadata={"source": "test"},
+    )
+    out = apply_bilateral_filter_rust(sig, window_size=5)
+    assert out.name == "meta_bilateral"
+    assert out.units == "m/s"
+    assert out.metadata["filter"] == "bilateral"
+    assert out.metadata["backend"] == "rust"
+    assert out.metadata["source"] == "test"
+
+
+@pytest.mark.unit
+def test_bilateral_filter_rust_rejects_invalid_sigma() -> None:
+    """Negative or zero sigmas raise ValueError before crossing FFI."""
+    sig = _make_signal(64)
+    with pytest.raises(ValueError, match="sigma_space"):
+        apply_bilateral_filter_rust(sig, sigma_space=0.0)
+    with pytest.raises(ValueError, match="sigma_intensity"):
+        apply_bilateral_filter_rust(sig, sigma_intensity=-0.1)

@@ -41,9 +41,7 @@ FORBIDDEN_PREFIXES = tuple(f"src.{r}." for r in _FORBIDDEN_ROOTS) + tuple(
     f"{r}." for r in _FORBIDDEN_ROOTS
 )
 # Exact-name guards so ``import src.engines`` (no dot) is also caught.
-FORBIDDEN_EXACT = frozenset(
-    {f"src.{r}" for r in _FORBIDDEN_ROOTS} | set(_FORBIDDEN_ROOTS)
-)
+FORBIDDEN_EXACT = frozenset({f"src.{r}" for r in _FORBIDDEN_ROOTS} | set(_FORBIDDEN_ROOTS))
 
 # Files exempt from the broader LoD sweep because their entire purpose is
 # to bind to a backing engine.
@@ -64,9 +62,12 @@ EXEMPT_RELATIVE_PATHS = frozenset(
 def _collect_imports(file_path: Path) -> list[tuple[int, str]]:
     """Return ``[(lineno, module_name), ...]`` for every Import/ImportFrom.
 
-    For ``ImportFrom`` nodes, both the module name and each imported symbol
-    are recorded. This catches patterns like ``from src import engines`` where
-    the forbidden root appears as an imported name rather than in the module.
+    For ``ImportFrom`` nodes, the module name is always recorded. Imported
+    symbol names are ALSO recorded only when the module is a top-level source
+    namespace (``src.*`` or ``shared.*``). This catches patterns like
+    ``from src import engines`` where the forbidden root appears as an imported
+    name rather than in the module path, without false-positives on normal
+    ``from pydantic import BaseModel`` or ``from typing import Any`` imports.
     """
     tree = ast.parse(file_path.read_text(encoding="utf-8"), filename=str(file_path))
     out: list[tuple[int, str]] = []
@@ -80,9 +81,14 @@ def _collect_imports(file_path: Path) -> list[tuple[int, str]]:
                 continue
             # Record the module itself
             out.append((node.lineno, node.module))
-            # Also record imported names to catch ``from src import engines``
-            for alias in node.names:
-                out.append((node.lineno, alias.name))
+            # Only record imported symbol names when the module is a source
+            # namespace — to catch ``from src import engines`` patterns.
+            # Do NOT record names from stdlib/pydantic/numpy imports; those
+            # symbol names (BaseModel, Field, Any, …) are not modules and
+            # should not be checked against the forbidden-module list.
+            if node.module.startswith(("src.", "shared.")):
+                for alias in node.names:
+                    out.append((node.lineno, alias.name))
     return out
 
 

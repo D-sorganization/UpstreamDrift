@@ -1,0 +1,64 @@
+import numpy as np
+import pytest
+from upstream_drift_tools.process_calculators.optimization import (
+    _build_override_mapping,
+    find_optimal_on_surface,
+)
+
+
+def test_build_override_mapping() -> None:
+    res = _build_override_mapping(
+        ["Temperature", "Pressure", "Unknown"], [100.0, 50.0, 10.0]
+    )
+    assert "Temperature" in res
+    assert "Pressure" in res
+    assert "Unknown" not in res
+    assert res["Temperature"] == 100.0
+    assert res["Pressure"] == 50.0
+
+
+def test_find_optimal_on_surface_grid() -> None:
+    x_grid = np.linspace(0, 10, 11)
+    y_grid = np.linspace(0, 10, 11)
+
+    # Peak at (5, 5)
+    X, Y = np.meshgrid(x_grid, y_grid, indexing="ij")
+    Z = -((X - 5) ** 2 + (Y - 5) ** 2) + 100
+
+    # Grid Search
+    res_grid = find_optimal_on_surface(x_grid, y_grid, Z, method="Grid Search")
+    assert res_grid["success"]
+    assert res_grid["optimal_x"] == pytest.approx(5.0, abs=1.0)
+    assert res_grid["optimal_y"] == pytest.approx(5.0, abs=1.0)
+    assert res_grid["optimal_z"] > 90.0
+
+
+def test_find_optimal_on_surface_lbfgsb() -> None:
+    x_grid = np.linspace(0, 10, 11)
+    y_grid = np.linspace(0, 10, 11)
+    X, Y = np.meshgrid(x_grid, y_grid, indexing="ij")
+    Z = -((X - 5) ** 2 + (Y - 5) ** 2) + 100
+
+    res = find_optimal_on_surface(x_grid, y_grid, Z, method="L-BFGS-B")
+    assert res["optimal_x"] == pytest.approx(5.0, abs=1.0)
+    assert res["optimal_y"] == pytest.approx(5.0, abs=1.0)
+
+
+def test_find_optimal_on_surface_diff_evo() -> None:
+    x_grid = np.linspace(0, 10, 11)
+    y_grid = np.linspace(0, 10, 11)
+    X, Y = np.meshgrid(x_grid, y_grid, indexing="ij")
+    Z = -((X - 5) ** 2 + (Y - 5) ** 2) + 100
+
+    res = find_optimal_on_surface(x_grid, y_grid, Z, method="Differential Evolution")
+    assert res["success"]
+    assert res["optimal_x"] == pytest.approx(5.0, abs=0.5)
+    assert res["optimal_y"] == pytest.approx(5.0, abs=0.5)
+
+
+def test_find_optimal_invalid_method() -> None:
+    x_grid = np.array([0, 1])
+    y_grid = np.array([0, 1])
+    Z = np.array([[0, 0], [0, 0]])
+    with pytest.raises(ValueError, match="Unknown optimization method: InvalidMethod"):
+        find_optimal_on_surface(x_grid, y_grid, Z, method="InvalidMethod")

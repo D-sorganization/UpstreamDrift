@@ -1,0 +1,239 @@
+"""Sidekick calculator plot request contracts.
+
+This module intentionally avoids Qt and renderer imports. It converts validated
+calculator/workspace requests into the shared ``plot_engine`` PlotSpec contract.
+"""
+
+from __future__ import annotations
+
+import importlib
+import math
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any
+
+from .registry import WorkspaceRegistry
+
+CALCULATOR_PLOT_TAB_ID = "calculator_plot"
+
+_DEFAULT_MAX_POINTS = 1000
+_MAX_CONFIG_POINTS = 100_000
+_SAFE_EXPRESSION_NAMES: Mapping[str, Any] = {
+    name: getattr(math, name)
+    for name in (
+        "acos",
+        "asin",
+        "atan",
+        "ceil",
+        "cos",
+        "cosh",
+        "degrees",
+        "e",
+        "exp",
+        "fabs",
+        "floor",
+        "log",
+        "log10",
+        "pi",
+        "pow",
+        "radians",
+        "sin",
+        "sinh",
+        "sqrt",
+        "tan",
+        "tanh",
+    )
+}
+
+
+class CalculatorPlotSource(str, Enum):
+    """Supported calculator plot request sources."""
+
+    WORKSPACE_XY = "workspace_xy"
+    WORKSPACE_RESULT = "workspace_result"
+    EXPRESSION_RANGE = "expression_range"
+
+
+@dataclass(frozen=True)
+class CalculatorPlotTabConfig:
+    """Serializable plotting tab settings without large data blobs."""
+
+    theme: str = "inherit"
+    max_points: int = _DEFAULT_MAX_POINTS
+
+    def __post_init__(self) -> None:
+        if not self.theme.strip():
+            raise ValueError("theme must be non-empty")
+        if self.max_points < 2 or self.max_points > _MAX_CONFIG_POINTS:
+            raise ValueError("max_points must be between 2 and 100000")
+
+    def to_dict(self) -> dict[str, int | str]:
+        """Return JSON-safe tab configuration."""
+        return {"theme": self.theme, "max_points": self.max_points}
+
+
+@dataclass(frozen=True)
+class CalculatorPlotRequest:
+    """Validated request for plotting calculator/workspace data."""
+
+    source: CalculatorPlotSource
+    x_ref: str | None = None
+    y_ref: str | None = None
+    expression: str | None = None
+    x_min: float | None = None
+    x_max: float | None = None
+    points: int | None = None
+    title: str | None = None
+    config: CalculatorPlotTabConfig = field(default_factory=CalculatorPlotTabConfig)
+
+    def serializable_config(self) -> dict[str, Any]:
+        """Return persisted config with references, never array payloads."""
+        refs = {
+            key: value
+            for key, value in {"x": self.x_ref, "y": self.y_ref}.items()
+            if value
+        }
+        return {
+            **self.config.to_dict(),
+            "source": self.source.value,
+            "data_refs": refs,
+            "expression": self.expression or "",
+            "range": {
+                "x_min": self.x_min,
+                "x_max": self.x_max,
+                "points": self.points,
+            },
+        }
+
+
+def build_calculator_plot_spec(
+    request: CalculatorPlotRequest,
+    registry: WorkspaceRegistry,
+) -> Any:
+    """Build a shared PlotSpec from a validated calculator plot request."""
+    if request is None:
+        raise ValueError("request must be provided")
+    if registry is None:
+        raise ValueError("registry must be provided")
+    if request.source == CalculatorPlotSource.WORKSPACE_XY:
+        x_values = _workspace_numeric_series(registry, request.x_ref, "x_ref")
+        y_values = _workspace_numeric_series(registry, request.y_ref, "y_ref")
+        return _xy_plot_spec(request, x_values, y_values)
+    if request.source == CalculatorPlotSource.WORKSPACE_RESULT:
+        ref = request.y_ref or "calculator_result"
+        y_values = _workspace_numeric_series(registry, ref, "y_ref")
+        x_values = [float(index) for index in range(len(y_values))]
+        return _xy_plot_spec(request, x_values, y_values)
+    if request.source == CalculatorPlotSource.EXPRESSION_RANGE:
+        return _expression_plot_spec(request)
+    raise ValueError(f"Unsupported calculator plot source: {request.source}")
+
+
+def _xy_plot_spec(
+    request: CalculatorPlotRequest,
+    x_values: list[float],
+    y_values: list[float],
+) -> Any:
+    if len(x_values) != len(y_values):
+        raise ValueError("x and y arrays must have the same length")
+    if len(x_values) < 2:
+        raise ValueError("plot data must contain at least two points")
+    sampled_x, sampled_y = _sample_xy(x_values, y_values, request.config.max_points)
+    series_name = request.y_ref or request.expression or "calculator_result"
+    specs = importlib.import_module("plot_engine.specs")
+    return specs.PlotSpec(
+        title=request.title or series_name,
+        series=[specs.SeriesData(name=series_name, x=sampled_x, y=sampled_y)],
+        x_axis=specs.AxisSpec(label=request.x_ref or "index"),
+        y_axis=specs.AxisSpec(label=request.y_ref or "value"),
+        legend=specs.LegendSpec(visible=True),
+    )
+
+
+def _expression_plot_spec(request: CalculatorPlotRequest) -> Any:
+    expression = (request.expression or "").strip()
+    if not expression:
+        raise ValueError("expression must be provided")
+    x_min = float(0 if request.x_min is None else request.x_min)
+    x_max = float(1 if request.x_max is None else request.x_max)
+    if x_max <= x_min:
+        raise ValueError("x_max must be greater than x_min")
+    points = int(request.points or request.config.max_points)
+    if points < 2:
+        raise ValueError("points must be at least 2")
+    x_values = _linspace(x_min, x_max, min(points, request.config.max_points))
+    y_values = [_evaluate_expression(expression, x_value) for x_value in x_values]
+    return _xy_plot_spec(
+        CalculatorPlotRequest(
+            source=request.source,
+            expression=expression,
+            title=request.title or expression,
+            config=request.config,
+        ),
+        x_values,
+        y_values,
+    )
+
+
+def _workspace_numeric_series(
+    registry: WorkspaceRegistry,
+    name: str | None,
+    field_name: str,
+) -> list[float]:
+    if not name:
+        raise ValueError(f"{field_name} must be provided")
+    value = registry.get(name)
+    if value is None:
+        raise ValueError(f"Workspace variable not found: {name}")
+    return _numeric_series(value, field_name)
+
+
+def _numeric_series(value: Any, field_name: str) -> list[float]:
+    if isinstance(value, str | bytes):
+        raise ValueError(f"{field_name} must reference numeric sequence data")
+    if _is_scalar_number(value):
+        return [float(value)]
+    if not isinstance(value, Sequence):
+        raise ValueError(f"{field_name} must reference numeric sequence data")
+    result: list[float] = []
+    for item in value:
+        if not _is_scalar_number(item):
+            raise ValueError(f"{field_name} contains non-numeric plot data")
+        result.append(float(item))
+    return result
+
+
+def _sample_xy(
+    x_values: list[float],
+    y_values: list[float],
+    max_points: int,
+) -> tuple[list[float], list[float]]:
+    if len(x_values) <= max_points:
+        return x_values, y_values
+    step = math.ceil(len(x_values) / max_points)
+    return x_values[::step][:max_points], y_values[::step][:max_points]
+
+
+def _linspace(x_min: float, x_max: float, points: int) -> list[float]:
+    step = (x_max - x_min) / (points - 1)
+    return [x_min + step * index for index in range(points)]
+
+
+def _evaluate_expression(expression: str, x_value: float) -> float:
+    namespace = {**_SAFE_EXPRESSION_NAMES, "x": x_value}
+    try:
+        value = eval(  # nosec B307 - restricted calculator expression namespace
+            expression,
+            {"__builtins__": {}},
+            namespace,
+        )
+    except Exception as exc:  # noqa: BLE001 - user-facing expression validation
+        raise ValueError(f"Invalid plot expression: {exc}") from exc
+    if not _is_scalar_number(value):
+        raise ValueError("expression must evaluate to a numeric scalar")
+    return float(value)
+
+
+def _is_scalar_number(value: Any) -> bool:
+    return isinstance(value, int | float) and not isinstance(value, bool)

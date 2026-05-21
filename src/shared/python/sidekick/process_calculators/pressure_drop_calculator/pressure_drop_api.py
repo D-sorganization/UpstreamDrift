@@ -1,0 +1,211 @@
+"""Public calculation facade helpers for pressure drop calculations."""
+
+from __future__ import annotations
+
+import logging
+from typing import Any, cast
+
+from .engine.pressure_drop_calculation_engine import PressureDropCalculationEngine
+from .models.pressure_drop_data_models import (
+    GasComposition,
+    PipeFitting,
+    PressureDropInputs,
+)
+from .pressure_drop_results import _format_results as format_results
+from .pressure_drop_units import _convert_pressure as convert_pressure
+from .pressure_drop_units import _convert_temperature as convert_temperature
+from .utils.fitting_loss_coefficients import FITTING_K_FACTORS
+from .utils.flow_rate_converter import convert_flow_rate_to_mass
+from .utils.gas_properties import calculate_mixture_molecular_weight
+from .utils.pipe_database import get_pipe_spec, get_roughness
+
+logger = logging.getLogger(__name__)
+
+
+def calculate_pressure_drop(
+    pipe_size: str | None = None,
+    pipe_schedule: str | None = None,
+    pipe_diameter: float | None = None,
+    pipe_length: float = 100.0,
+    pipe_material: str = "Commercial Steel",
+    pipe_roughness: float | None = None,
+    elevation_change: float = 0.0,
+    flow_rate: float = 1000.0,
+    flow_unit: str = "kg/h",
+    pressure: float = 1.0,
+    pressure_unit: str = "bar",
+    temperature: float = 288.15,
+    temperature_unit: str = "K",
+    gas_composition: dict[str, float] | None = None,
+    fittings: list[dict[str, str | int | float]] | None = None,
+    friction_method: str = "colebrook",
+    compressibility_correction: bool = True,
+    standard_condition: str = "STP",
+) -> dict[str, Any]:
+    """Calculate pressure drop with flexible unit inputs."""
+    temp_k = convert_temperature(temperature, temperature_unit, "K")
+    pressure_pa = convert_pressure(pressure, pressure_unit, "Pa")
+    diameter_m, roughness_m = resolve_pipe_geometry(
+        pipe_size, pipe_schedule, pipe_diameter, pipe_material, pipe_roughness
+    )
+    composition, mass_flow_kg_s = resolve_gas_and_flow(
+        flow_rate,
+        flow_unit,
+        gas_composition,
+        temp_k,
+        pressure_pa,
+        compressibility_correction,
+        standard_condition,
+    )
+    inputs = PressureDropInputs(
+        pipe_diameter=diameter_m,
+        pipe_length=pipe_length,
+        pipe_roughness=roughness_m,
+        elevation_change=elevation_change,
+        mass_flow_rate=mass_flow_kg_s,
+        inlet_pressure=pressure_pa,
+        inlet_temperature=temp_k,
+        gas_composition=composition,
+        fittings=build_fitting_list(fittings),
+        compressibility_correction=compressibility_correction,
+        friction_method=friction_method,
+    )
+    engine = PressureDropCalculationEngine()
+    return cast(dict[str, Any], format_results(engine.calculate(inputs)))
+
+
+def calculate_pressure_drop_custom_gas(
+    pipe_diameter: float,
+    pipe_length: float,
+    gas_composition: dict[str, float],
+    flow_rate: float,
+    flow_unit: str,
+    pressure: float,
+    temperature: float,
+    pipe_roughness: float = 0.000045,
+    elevation_change: float = 0.0,
+    fittings: list[dict[str, Any]] | None = None,
+    friction_method: str = "colebrook",
+) -> dict[str, Any]:
+    """Simplified API for custom gas composition."""
+    return calculate_pressure_drop(
+        pipe_diameter=pipe_diameter,
+        pipe_length=pipe_length,
+        pipe_roughness=pipe_roughness,
+        elevation_change=elevation_change,
+        flow_rate=flow_rate,
+        flow_unit=flow_unit,
+        pressure=pressure,
+        pressure_unit="bar",
+        temperature=temperature,
+        temperature_unit="K",
+        gas_composition=gas_composition,
+        fittings=fittings,
+        friction_method=friction_method,
+    )
+
+
+def calculate_pressure_drop_syngas(
+    pipe_size: str,
+    pipe_schedule: str,
+    pipe_length: float,
+    flow_rate: float,
+    flow_unit: str,
+    pressure: float,
+    temperature: float,
+    H2_fraction: float = 0.30,
+    CO_fraction: float = 0.40,
+    CO2_fraction: float = 0.15,
+    N2_fraction: float = 0.10,
+    CH4_fraction: float = 0.05,
+    **kwargs: Any,
+) -> dict[str, Any]:
+    """Convenience function for typical syngas calculations."""
+    syngas = {
+        "H2": H2_fraction,
+        "CO": CO_fraction,
+        "CO2": CO2_fraction,
+        "N2": N2_fraction,
+        "CH4": CH4_fraction,
+    }
+    return calculate_pressure_drop(
+        pipe_size=pipe_size,
+        pipe_schedule=pipe_schedule,
+        pipe_length=pipe_length,
+        flow_rate=flow_rate,
+        flow_unit=flow_unit,
+        pressure=pressure,
+        temperature=temperature,
+        gas_composition=syngas,
+        **kwargs,
+    )
+
+
+def resolve_pipe_geometry(
+    pipe_size: str | None,
+    pipe_schedule: str | None,
+    pipe_diameter: float | None,
+    pipe_material: str,
+    pipe_roughness: float | None,
+) -> tuple[float, float]:
+    """Resolve pipe diameter and roughness from user-supplied parameters."""
+    if pipe_diameter is None:
+        if pipe_size is None or pipe_schedule is None:
+            raise ValueError(
+                "Either provide pipe_diameter or both pipe_size and pipe_schedule"
+            )
+        pipe_spec = get_pipe_spec(pipe_size, pipe_schedule, pipe_material)
+        pipe_diameter = pipe_spec.get_id_meters()
+    roughness = (
+        pipe_roughness
+        if pipe_roughness is not None
+        else get_roughness(pipe_material, "m")
+    )
+    return pipe_diameter, roughness
+
+
+def resolve_gas_and_flow(
+    flow_rate: float,
+    flow_unit: str,
+    gas_composition: dict[str, float] | None,
+    temp_k: float,
+    pressure_pa: float,
+    compressibility_correction: bool,
+    standard_condition: str,
+) -> tuple[GasComposition, float]:
+    """Normalize gas composition and convert flow rate to kg/s."""
+    if gas_composition is None:
+        gas_composition = {"Air": 1.0}
+        logger.info("Using default gas composition: Air")
+    composition = GasComposition(components=gas_composition)
+    composition.normalize()
+    molecular_weight = calculate_mixture_molecular_weight(composition.components)
+    mass_flow_kg_s = convert_flow_rate_to_mass(
+        flow_rate,
+        flow_unit,
+        molecular_weight,
+        temperature=temp_k,
+        pressure=pressure_pa,
+        standard=standard_condition,
+    )
+    return composition, mass_flow_kg_s
+
+
+def build_fitting_list(
+    fittings: list[dict[str, str | int | float]] | None,
+) -> list[PipeFitting]:
+    """Convert raw fitting dicts into PipeFitting objects."""
+    fitting_list: list[PipeFitting] = []
+    if fittings:
+        for fitting_dict in fittings:
+            fitting_type = str(fitting_dict.get("type", ""))
+            quantity = int(fitting_dict.get("quantity", 1))
+            k_factor = float(
+                fitting_dict.get("k_factor", FITTING_K_FACTORS.get(fitting_type, 0.0))
+            )
+            fitting_list.append(
+                PipeFitting(
+                    fitting_type=fitting_type, quantity=quantity, k_factor=k_factor
+                )
+            )
+    return fitting_list

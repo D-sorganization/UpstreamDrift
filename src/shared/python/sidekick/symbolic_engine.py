@@ -1,0 +1,347 @@
+"""Symbolic math engine for the Sidekick calculator tab (issue #2934).
+
+Wraps SymPy to provide a clean, DbC-enforced interface for symbolic
+operations: solve, diff, integrate, simplify, and expand.  Results are
+returned as plain Python objects so callers do not need to import SymPy
+directly.
+
+Dependency
+----------
+Requires ``sympy`` (declared in ``pyproject.toml`` ``[all]`` and ``signal``
+optional-dependency groups).  Import-guarded so the module can be collected
+by pytest in headless environments where SymPy is absent.
+
+Design
+------
+- **DbC**: every public function validates its inputs and raises ``TypeError``
+  or ``ValueError`` on violation.
+- **LOD**: no method chains deeper than two levels; SymPy objects are
+  unwrapped before returning.
+- **DRY**: the internal ``_parse`` helper centralises expression parsing so
+  each operation does not repeat the try/except.
+"""
+
+from __future__ import annotations
+
+import logging
+from typing import Any
+
+log = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Optional SymPy import — module is importable even without sympy installed.
+# ---------------------------------------------------------------------------
+
+try:
+    from sympy import (
+        Symbol,
+        diff,
+        expand,
+        integrate,
+        latex,
+        simplify,
+        solve,
+        sympify,
+    )
+
+    _SYMPY_AVAILABLE = True
+except ImportError:
+    _SYMPY_AVAILABLE = False
+
+
+class SymbolicEngineError(RuntimeError):
+    """Raised when a symbolic operation fails."""
+
+
+def _require_sympy() -> None:
+    """Raise :class:`SymbolicEngineError` if SymPy is not installed.
+
+    Precondition: ``_SYMPY_AVAILABLE`` must be ``True``.
+    """
+    if not _SYMPY_AVAILABLE:
+        raise SymbolicEngineError(
+            "sympy is not installed; install it with: pip install sympy"
+        )
+
+
+def _parse(expr_str: str) -> Any:
+    """Parse *expr_str* into a SymPy expression via ``sympify``.
+
+    Args:
+        expr_str: A string representation of a mathematical expression
+            (e.g. ``"x**2 - 4"``).
+
+    Returns:
+        A SymPy expression object.
+
+    Raises:
+        TypeError: If *expr_str* is not a string.
+        ValueError: If *expr_str* is empty or cannot be parsed.
+        SymbolicEngineError: If SymPy is not installed.
+    """
+    _require_sympy()
+    if not isinstance(expr_str, str):
+        raise TypeError(f"expr_str must be str, got {type(expr_str).__name__!r}")
+    if not expr_str.strip():
+        raise ValueError("expr_str must not be empty")
+    try:
+        return sympify(expr_str, evaluate=True)
+    except Exception as exc:
+        raise ValueError(f"Cannot parse expression {expr_str!r}: {exc}") from exc
+
+
+def _parse_symbol(sym: str) -> Any:
+    """Return a SymPy :class:`Symbol` for *sym*.
+
+    Args:
+        sym: The variable name string (e.g. ``"x"``).
+
+    Returns:
+        A SymPy ``Symbol``.
+
+    Raises:
+        TypeError: If *sym* is not a string.
+        ValueError: If *sym* is empty.
+        SymbolicEngineError: If SymPy is not installed.
+    """
+    _require_sympy()
+    if not isinstance(sym, str):
+        raise TypeError(f"symbol must be str, got {type(sym).__name__!r}")
+    if not sym.strip():
+        raise ValueError("symbol must not be empty")
+    return Symbol(sym.strip())
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+
+def symbolic_solve(expr_str: str, symbol: str = "x") -> list[str]:
+    """Solve *expr_str* == 0 for *symbol*.
+
+    Args:
+        expr_str: Expression string (e.g. ``"x**2 - 4"``).
+        symbol: Variable to solve for (default ``"x"``).
+
+    Returns:
+        A list of solution strings (e.g. ``["2", "-2"]``).
+
+    Raises:
+        TypeError: If either argument is not a string.
+        ValueError: If either argument is empty or unparseable.
+        SymbolicEngineError: If SymPy is not installed.
+
+    Example::
+
+        >>> symbolic_solve("x**2 - 4", "x")
+        ['-2', '2']
+    """
+    expr = _parse(expr_str)
+    sym = _parse_symbol(symbol)
+    try:
+        solutions = solve(expr, sym)
+    except Exception as exc:
+        raise SymbolicEngineError(
+            f"solve({expr_str!r}, {symbol!r}) failed: {exc}"
+        ) from exc
+    result: list[str] = [str(s) for s in solutions]
+    log.debug("symbolic_solve(%r, %r) → %r", expr_str, symbol, result)
+    return result
+
+
+def symbolic_diff(expr_str: str, symbol: str = "x", order: int = 1) -> str:
+    """Differentiate *expr_str* with respect to *symbol* *order* times.
+
+    Args:
+        expr_str: Expression string (e.g. ``"x**3"``).
+        symbol: Variable of differentiation (default ``"x"``).
+        order: Order of differentiation (default ``1``).
+
+    Returns:
+        String representation of the derivative.
+
+    Raises:
+        TypeError: If *expr_str* or *symbol* is not a string, or *order* is
+            not an integer.
+        ValueError: If *expr_str* or *symbol* is empty, or *order* < 1.
+        SymbolicEngineError: If SymPy is not installed or differentiation
+            fails.
+
+    Example::
+
+        >>> symbolic_diff("x**3", "x")
+        '3*x**2'
+    """
+    if not isinstance(order, int):
+        raise TypeError(f"order must be int, got {type(order).__name__!r}")
+    if order < 1:
+        raise ValueError(f"order must be >= 1, got {order!r}")
+    expr = _parse(expr_str)
+    sym = _parse_symbol(symbol)
+    try:
+        result_expr = diff(expr, sym, order)
+    except Exception as exc:
+        raise SymbolicEngineError(
+            f"diff({expr_str!r}, {symbol!r}, {order}) failed: {exc}"
+        ) from exc
+    result: str = str(result_expr)
+    log.debug("symbolic_diff(%r, %r, %r) → %r", expr_str, symbol, order, result)
+    return result
+
+
+def symbolic_integrate(
+    expr_str: str,
+    symbol: str = "x",
+    *,
+    lower: str | None = None,
+    upper: str | None = None,
+) -> str:
+    """Integrate *expr_str* with respect to *symbol*.
+
+    Args:
+        expr_str: Expression string (e.g. ``"x**2"``).
+        symbol: Variable of integration (default ``"x"``).
+        lower: Lower bound string for definite integration (optional).
+        upper: Upper bound string for definite integration (optional).
+
+    Returns:
+        String representation of the integral.
+
+    Raises:
+        TypeError: If *expr_str* or *symbol* is not a string.
+        ValueError: If *expr_str* or *symbol* is empty, or exactly one of
+            *lower*/*upper* is provided.
+        SymbolicEngineError: If SymPy is not installed or integration fails.
+
+    Example::
+
+        >>> symbolic_integrate("x**2", "x")
+        'x**3/3'
+        >>> symbolic_integrate("x**2", "x", lower="0", upper="1")
+        '1/3'
+    """
+    if (lower is None) != (upper is None):
+        raise ValueError(
+            "Both lower and upper bounds must be provided for definite integration, "
+            "or neither for indefinite integration."
+        )
+    expr = _parse(expr_str)
+    sym = _parse_symbol(symbol)
+    try:
+        if lower is None:
+            result_expr = integrate(expr, sym)
+        else:
+            lo = _parse(lower)
+            hi = _parse(upper)  # type: ignore[arg-type]
+            result_expr = integrate(expr, (sym, lo, hi))
+    except Exception as exc:
+        raise SymbolicEngineError(
+            f"integrate({expr_str!r}, {symbol!r}) failed: {exc}"
+        ) from exc
+    result: str = str(result_expr)
+    log.debug("symbolic_integrate(%r, %r) → %r", expr_str, symbol, result)
+    return result
+
+
+def symbolic_simplify(expr_str: str) -> str:
+    """Simplify *expr_str*.
+
+    Args:
+        expr_str: Expression string (e.g. ``"sin(x)**2 + cos(x)**2"``).
+
+    Returns:
+        String representation of the simplified expression.
+
+    Raises:
+        TypeError: If *expr_str* is not a string.
+        ValueError: If *expr_str* is empty or unparseable.
+        SymbolicEngineError: If SymPy is not installed or simplification fails.
+
+    Example::
+
+        >>> symbolic_simplify("sin(x)**2 + cos(x)**2")
+        '1'
+    """
+    expr = _parse(expr_str)
+    try:
+        result_expr = simplify(expr)
+    except Exception as exc:
+        raise SymbolicEngineError(f"simplify({expr_str!r}) failed: {exc}") from exc
+    result: str = str(result_expr)
+    log.debug("symbolic_simplify(%r) → %r", expr_str, result)
+    return result
+
+
+def symbolic_expand(expr_str: str) -> str:
+    """Expand *expr_str*.
+
+    Args:
+        expr_str: Expression string (e.g. ``"(x + 1)**3"``).
+
+    Returns:
+        String representation of the expanded expression.
+
+    Raises:
+        TypeError: If *expr_str* is not a string.
+        ValueError: If *expr_str* is empty or unparseable.
+        SymbolicEngineError: If SymPy is not installed or expansion fails.
+
+    Example::
+
+        >>> symbolic_expand("(x + 1)**3")
+        'x**3 + 3*x**2 + 3*x + 1'
+    """
+    expr = _parse(expr_str)
+    try:
+        result_expr = expand(expr)
+    except Exception as exc:
+        raise SymbolicEngineError(f"expand({expr_str!r}) failed: {exc}") from exc
+    result: str = str(result_expr)
+    log.debug("symbolic_expand(%r) → %r", expr_str, result)
+    return result
+
+
+def symbolic_to_latex(expr_str: str) -> str:
+    """Render *expr_str* as a LaTeX string.
+
+    Args:
+        expr_str: Expression string (e.g. ``"x**2 / (x + 1)"``).
+
+    Returns:
+        A LaTeX representation suitable for embedding in ``$...$`` math mode.
+
+    Raises:
+        TypeError: If *expr_str* is not a string.
+        ValueError: If *expr_str* is empty or unparseable.
+        SymbolicEngineError: If SymPy is not installed.
+
+    Example::
+
+        >>> symbolic_to_latex("x**2")
+        'x^{2}'
+    """
+    expr = _parse(expr_str)
+    result: str = latex(expr)
+    log.debug("symbolic_to_latex(%r) → %r", expr_str, result)
+    return result
+
+
+def is_sympy_available() -> bool:
+    """Return ``True`` when SymPy is importable.
+
+    Safe to call without installing SymPy.
+    """
+    return _SYMPY_AVAILABLE
+
+
+__all__ = [
+    "SymbolicEngineError",
+    "is_sympy_available",
+    "symbolic_diff",
+    "symbolic_expand",
+    "symbolic_integrate",
+    "symbolic_simplify",
+    "symbolic_solve",
+    "symbolic_to_latex",
+]
