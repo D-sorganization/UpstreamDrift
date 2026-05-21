@@ -19,6 +19,14 @@ class TestC3DSimscapePreview(unittest.TestCase):
         with self.assertRaises(ValueError):
             canonicalize_rotation(np.array([1.0, 0.0, 0.0]))
 
+    def test_canonicalize_rotation_upcasts_integer_inputs(self) -> None:
+        q = np.array([200, 200, 200, 200], dtype=np.int16)
+
+        q_norm = canonicalize_rotation(q)
+
+        np.testing.assert_allclose(q_norm, np.full(4, 0.5))
+        self.assertTrue(np.issubdtype(q_norm.dtype, np.floating))
+
     def test_match_motion_no_matlab(self) -> None:
         # Should return fallback diagnostics without failing
         markers = {"TEST": np.zeros((3, 10))}
