@@ -145,7 +145,7 @@ def _probe_chrono(_suite_root: Path) -> ProbeOutcome:
 
 
 def _probe_lower_body_model(suite_root: Path) -> ProbeOutcome:
-    source_root = suite_root / "vendor" / "ud-tools" / "src" / "lower_body_model"
+    source_root = suite_root / "src" / "engines" / "lower_body_model"
     required = (
         "builder.py",
         "simulator.py",
@@ -159,7 +159,7 @@ def _probe_lower_body_model(suite_root: Path) -> ProbeOutcome:
             available=False,
             version=None,
             message=(
-                "Lower Body Model source is incomplete under vendor/ud-tools; "
+                "Lower Body Model source is incomplete under src/engines; "
                 f"missing: {', '.join(missing)}"
             ),
             missing=missing,
@@ -167,7 +167,7 @@ def _probe_lower_body_model(suite_root: Path) -> ProbeOutcome:
     return ProbeOutcome(
         available=True,
         version=None,
-        message="Vendored Tools lower-body model source is available",
+        message="Lower Body Model source is available",
     )
 
 
