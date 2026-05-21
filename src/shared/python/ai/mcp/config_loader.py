@@ -426,13 +426,9 @@ def is_preset_installed(preset_id: str) -> bool:
         return False
 
     try:
+        npm_cmd = "npm.cmd" if sys.platform == "win32" else "npm"
         result = subprocess.run(  # noqa: S603 - trusted args
-            args=[
-                "npm.cmd" if sys.platform == "win32" else "npm",
-                "view",
-                package,
-                "version",
-            ],
+            [npm_cmd, "view", package, "version"],
             capture_output=True,
             text=True,
             timeout=15,
