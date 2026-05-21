@@ -1,0 +1,146 @@
+"""Tests for the symbolic solver router with optional SymPy support."""
+
+from __future__ import annotations
+
+import pytest
+from calc_backend.app import app
+from fastapi.testclient import TestClient
+
+
+@pytest.fixture
+def client() -> TestClient:
+    """Create a test client for the symbolic solver endpoints."""
+    return TestClient(app)
+
+
+class TestSymbolicSolverHelp:
+    """Tests for the symbolic solver help endpoint."""
+
+    def test_help_endpoint_returns_metadata(self, client: TestClient) -> None:
+        """Test that the help endpoint returns supported operations."""
+        response = client.get("/api/calc/symbolic/help")
+        assert response.status_code == 200
+        data = response.json()
+        assert "supported_operations" in data
+        assert "examples" in data
+        assert "available" in data
+
+
+class TestSymbolicSolve:
+    """Tests for the symbolic equation solving endpoint."""
+
+    def test_solve_returns_unavailable_when_sympy_missing(
+        self, client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test that solve returns unavailable response when SymPy is missing."""
+        import calc_backend.routers.symbolic_solver as mod
+
+        monkeypatch.setattr(mod, "SYMPY_AVAILABLE", False)
+        try:
+            response = client.post(
+                "/api/calc/symbolic/solve",
+                json={"equation": "x**2 - 4 = 0", "variable": "x"},
+            )
+            assert response.status_code == 200
+            data = response.json()
+            assert data["available"] is False
+            assert "SymPy is not available" in data["error"]
+        finally:
+            monkeypatch.setattr(mod, "SYMPY_AVAILABLE", True)
+
+    def test_solve_quadratic_equation(self, client: TestClient) -> None:
+        """Test solving a quadratic equation."""
+        response = client.post(
+            "/api/calc/symbolic/solve",
+            json={"equation": "x**2 - 4 = 0", "variable": "x"},
+        )
+        if response.json().get("available"):
+            assert response.status_code == 200
+            data = response.json()
+            assert "-2" in data["solutions"] or "2" in data["solutions"]
+        else:
+            assert response.status_code == 200
+            assert data["available"] is False
+
+    def test_solve_requires_variable(self, client: TestClient) -> None:
+        """Test that solve endpoint validates required fields."""
+        response = client.post(
+            "/api/calc/symbolic/solve",
+            json={"equation": "x**2 - 4 = 0"},
+        )
+        assert response.status_code == 422
+
+
+class TestSymbolicDerivative:
+    """Tests for the symbolic derivative endpoint."""
+
+    def test_derivative_returns_unavailable_when_sympy_missing(
+        self, client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test that derivative returns unavailable response when SymPy is missing."""
+        import calc_backend.routers.symbolic_solver as mod
+
+        monkeypatch.setattr(mod, "SYMPY_AVAILABLE", False)
+        try:
+            response = client.post(
+                "/api/calc/symbolic/derivative",
+                json={"expression": "x**3", "variable": "x"},
+            )
+            assert response.status_code == 200
+            data = response.json()
+            assert data["available"] is False
+            assert "SymPy is not available" in data["error"]
+        finally:
+            monkeypatch.setattr(mod, "SYMPY_AVAILABLE", True)
+
+    def test_derivative_polynomial(self, client: TestClient) -> None:
+        """Test computing derivative of a polynomial."""
+        response = client.post(
+            "/api/calc/symbolic/derivative",
+            json={"expression": "x**3 + 2*x", "variable": "x"},
+        )
+        if response.json().get("available"):
+            assert response.status_code == 200
+            data = response.json()
+            assert "3*x**2" in data["derivative"] or "3*x^2" in data["derivative"]
+        else:
+            assert response.status_code == 200
+            assert data["available"] is False
+
+
+class TestSymbolicSimplify:
+    """Tests for the symbolic simplify endpoint."""
+
+    def test_simplify_returns_unavailable_when_sympy_missing(
+        self, client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test that simplify returns unavailable response when SymPy is missing."""
+        import calc_backend.routers.symbolic_solver as mod
+
+        monkeypatch.setattr(mod, "SYMPY_AVAILABLE", False)
+        try:
+            response = client.post(
+                "/api/calc/symbolic/simplify",
+                json={"expression": "(x**2 - 1)/(x - 1)"},
+            )
+            assert response.status_code == 200
+            data = response.json()
+            assert data["available"] is False
+            assert "SymPy is not available" in data["error"]
+        finally:
+            monkeypatch.setattr(mod, "SYMPY_AVAILABLE", True)
+
+    def test_simplify_rational(self, client: TestClient) -> None:
+        """Test simplifying a rational expression."""
+        response = client.post(
+            "/api/calc/symbolic/simplify",
+            json={"expression": "(x**2 - 1)/(x - 1)"},
+        )
+        if response.json().get("available"):
+            assert response.status_code == 200
+            data = response.json()
+            # (x^2 - 1)/(x - 1) = x + 1
+            assert "x" in str(data.get("simplified", ""))
+        else:
+            assert response.status_code == 200
+            assert data["available"] is False

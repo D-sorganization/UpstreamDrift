@@ -1,0 +1,27 @@
+"""Tab definition contract for the Sidekick sidebar."""
+
+from __future__ import annotations
+
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+from .qt_compat import QtWidgets
+from .settings import SidebarTabSettingsDescriptor
+
+if TYPE_CHECKING:
+    from .sidebar import UnifiedToolsSidebar
+
+
+@dataclass(frozen=True)
+class SidebarTabDefinition:
+    """Configurable Sidekick tab contract."""
+
+    tab_id: str
+    title: str
+    factory: Callable[[UnifiedToolsSidebar], QtWidgets.QWidget]
+    visible: bool = True
+    popout_enabled: bool = True
+    duplicate_enabled: bool = False
+    help_metadata: Mapping[str, str] = field(default_factory=dict)
+    settings: SidebarTabSettingsDescriptor | None = None

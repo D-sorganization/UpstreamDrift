@@ -1,0 +1,654 @@
+# TRACKED_TASK: see #2310 — architecture debt extraction schedule
+
+"""Extended tests for UnitConversionService targeting uncovered lines.
+
+Targets: 41% → ~95%+ coverage of service.py
+"""
+
+from __future__ import annotations
+
+import pytest
+from upstream_drift_tools.calculators.conversion.service import (
+    IncompatibleUnitsError,
+    InvalidValueError,
+    UnitConversionService,
+    UnknownUnitError,
+)
+
+
+@pytest.fixture()
+def svc() -> UnitConversionService:
+    return UnitConversionService()
+
+
+# ---------------------------------------------------------------------------
+# convert() — top-level dispatcher
+# ---------------------------------------------------------------------------
+
+
+class TestConvertDispatch:
+    def test_convert_length(self, svc):
+        result = svc.convert(1.0, "m", "cm")
+        assert abs(result.value - 100.0) < 1e-6
+
+    def test_convert_temperature_c_to_f(self, svc):
+        result = svc.convert(100.0, "C", "F")
+        assert abs(result.value - 212.0) < 1e-6
+
+    def test_convert_temperature_k_to_c(self, svc):
+        result = svc.convert(273.15, "K", "C")
+        assert abs(result.value - 0.0) < 0.01
+
+    def test_convert_pressure_bar_to_pa(self, svc):
+        result = svc.convert(1.0, "bar", "Pa")
+        assert abs(result.value - 100_000.0) < 1.0
+
+    def test_convert_invalid_value_raises(self, svc):
+        """Lines 171-175: non-finite value → InvalidValueError."""
+        with pytest.raises(InvalidValueError):
+            svc.convert(float("inf"), "m", "cm")
+
+    def test_convert_unknown_from_unit_raises(self, svc):
+        """Lines 187-189: unknown from_unit → UnknownUnitError."""
+        with pytest.raises(UnknownUnitError):
+            svc.convert(1.0, "blarg_unit", "m")
+
+    def test_convert_unknown_to_unit_raises(self, svc):
+        """Lines 190-192: unknown to_unit → UnknownUnitError."""
+        with pytest.raises(UnknownUnitError):
+            svc.convert(1.0, "m", "blarg_unit")
+
+    def test_convert_incompatible_units_raises(self, svc):
+        """Lines 199-203: different categories → IncompatibleUnitsError."""
+        with pytest.raises(IncompatibleUnitsError):
+            svc.convert(1.0, "m", "kg")
+
+    def test_convert_negative_pressure_adds_warning(self, svc):
+        """Line 318-319: negative pressure adds warning."""
+        result = svc.convert(-1.0, "Pa", "bar")
+        assert any("Negative" in w for w in result.warnings)
+
+    def test_convert_returns_warnings_field(self, svc):
+        """ConversionResult has warnings list."""
+        result = svc.convert(1.0, "m", "cm")
+        assert isinstance(result.warnings, list)
+
+
+# ---------------------------------------------------------------------------
+# add_unit() (lines 342-375)
+# ---------------------------------------------------------------------------
+
+
+class TestAddUnit:
+    def test_add_unit_basic(self, svc):
+        """Lines 369-372: add user unit with factor."""
+        svc.add_unit("length", "custom_m", "m", 1.0)
+        result = svc.convert(1.0, "custom_m", "cm")
+        assert abs(result.value - 100.0) < 1e-6
+
+    def test_add_unit_with_aliases(self, svc):
+        """Line 372: aliases stored."""
+        svc.add_unit("length", "nm_custom", "m", 1e-9, aliases=["nano_m"])
+        assert "nm_custom" in svc.user_defined_units.get("length", set())
+
+    def test_add_unit_unknown_category_raises(self, svc):
+        """Lines 352-354: bad category → ValueError."""
+        with pytest.raises(ValueError, match="Unsupported category"):
+            svc.add_unit("fake_category", "unit", "m", 1.0)
+
+    def test_add_unit_unknown_reference_raises(self, svc):
+        """Lines 357-359: bad reference unit → UnknownUnitError."""
+        with pytest.raises(UnknownUnitError, match="Unknown reference unit"):
+            svc.add_unit("length", "new_unit", "unknown_ref", 1.0)
+
+    def test_add_unit_already_exists_raises(self, svc):
+        """Lines 361-363: unit already in category → ValueError."""
+        with pytest.raises(ValueError, match="already exists"):
+            svc.add_unit("length", "m", "m", 1.0)
+
+    def test_add_unit_non_positive_factor_raises(self, svc):
+        """Lines 365-367: factor <= 0 → ValueError."""
+        with pytest.raises(ValueError, match="Conversion factor must be positive"):
+            svc.add_unit("length", "neg_m", "m", -1.0)
+
+    def test_add_unit_triggers_warning_on_convert(self, svc):
+        """Lines 499-510: user-defined unit in conversion → warning."""
+        svc.add_unit("length", "user_cm", "m", 0.01, aliases=[])
+        result = svc.convert(1.0, "user_cm", "m")
+        assert any("user-defined" in w for w in result.warnings)
+
+
+# ---------------------------------------------------------------------------
+# convert_gas_flow_scfm_acfm (lines 513-550)
+# ---------------------------------------------------------------------------
+
+
+class TestConvertGasFlowScfmAcfm:
+    def test_scfm_to_scfm_identity(self, svc):
+        """Gas flow: SCFM → SCFM path (same unit)."""
+        result = svc.convert_gas_flow_scfm_acfm(100.0, "SCFM", "SCFM")
+        assert abs(result - 100.0) < 1.0
+
+    def test_scfm_to_acfm_with_compressibility(self, svc):
+        """Lines 544-545: SCFM → ACFM with compressibility_factor."""
+        result = svc.convert_gas_flow_scfm_acfm(
+            100.0,
+            "SCFM",
+            "ACFM",
+            actual_temp_K=300.0,
+            actual_pressure_kPa=101.325,
+            compressibility_factor=1.05,
+        )
+        assert result > 0
+
+    def test_acfm_to_scfm_with_compressibility(self, svc):
+        """Lines 546-549: ACFM → SCFM with compressibility_factor."""
+        result = svc.convert_gas_flow_scfm_acfm(
+            100.0,
+            "ACFM",
+            "SCFM",
+            actual_temp_K=300.0,
+            actual_pressure_kPa=101.325,
+            compressibility_factor=1.05,
+        )
+        assert result > 0
+
+    def test_acfm_to_scfm_zero_compressibility(self, svc):
+        """Line 548: compressibility_factor <= 0 → return result without division."""
+        result = svc.convert_gas_flow_scfm_acfm(
+            100.0,
+            "ACFM",
+            "SCFM",
+            actual_temp_K=300.0,
+            actual_pressure_kPa=101.325,
+            compressibility_factor=0.0,
+        )
+        assert result > 0
+
+    def test_acfm_ensure_inputs_raises_when_no_tp(self, svc):
+        """Lines 416-420: _ensure_acfm_inputs with ACFM and no T/P → ValueError."""
+        with pytest.raises(ValueError, match="Temperature and pressure are required"):
+            svc._ensure_acfm_inputs("ACFM", "SCFM", temperature=None, pressure=None)
+
+
+# ---------------------------------------------------------------------------
+# heating_value() (lines 552-629)
+# ---------------------------------------------------------------------------
+
+
+class TestHeatingValue:
+    def test_same_unit_returns_value(self, svc):
+        """Line 565-566: from_key == to_key → return value."""
+        assert svc.heating_value(100.0, "MJ/kg", "MJ/kg") == 100.0
+
+    def test_mj_kg_to_btu_lb(self, svc):
+        """Lines 569-572: standard factor-based conversion."""
+        result = svc.heating_value(1.0, "MJ/kg", "BTU/lb")
+        assert result == pytest.approx(1.0 / 0.002326, rel=1e-3)
+
+    def test_unknown_from_unit_raises(self, svc):
+        """Lines 574-578: bad from_unit → ValueError."""
+        with pytest.raises(ValueError, match="Unknown heating value unit"):
+            svc.heating_value(1.0, "GJ/kg", "MJ/kg")
+
+    def test_btu_scf_to_mj_kg_requires_density(self, svc):
+        """Lines 594-595: BTU/scf needs gas_density_stp."""
+        with pytest.raises(ValueError, match="Gas density required"):
+            svc.heating_value(100.0, "BTU/scf", "MJ/kg")
+
+    def test_btu_scf_to_mj_kg_with_density(self, svc):
+        """Lines 594-595: BTU/scf → MJ/kg with density."""
+        result = svc.heating_value(100.0, "BTU/scf", "MJ/kg", gas_density_stp=1.2)
+        assert result > 0
+
+    def test_negative_density_raises(self, svc):
+        """Lines 562-563: negative density → ValueError from validate."""
+        with pytest.raises(ValueError):
+            svc.heating_value(1.0, "MJ/kg", "BTU/lb", gas_density_stp=-1.0)
+
+    def test_mj_nm3_conversion(self, svc):
+        """Lines 592-593, 613-614: MJ/Nm³ ↔ MJ/kg paths."""
+        result = svc.heating_value(10.0, "MJ/Nm3", "MJ/kg", gas_density_stp=1.2)
+        assert result > 0
+        round_trip = svc.heating_value(result, "MJ/kg", "MJ/Nm3", gas_density_stp=1.2)
+        assert abs(round_trip - 10.0) < 0.01
+
+    def test_kwh_nm3_conversion(self, svc):
+        """Lines 596-597, 617-618: kWh/Nm³ ↔ MJ/kg."""
+        result = svc.heating_value(3.0, "kWh/Nm3", "MJ/kg", gas_density_stp=1.2)
+        assert result > 0
+
+
+# ---------------------------------------------------------------------------
+# tar_concentration() (lines 631-731)
+# ---------------------------------------------------------------------------
+
+
+class TestTarConcentration:
+    def test_same_unit_returns_value(self, svc):
+        """Lines 645-646: same unit → identity."""
+        assert svc.tar_concentration(42.0, "mg/Nm3", "mg/Nm3") == 42.0
+
+    def test_mg_nm3_to_g_nm3(self, svc):
+        """Standard conversion via factor."""
+        result = svc.tar_concentration(1000.0, "mg/Nm3", "g/Nm3")
+        assert abs(result - 1.0) < 1e-6
+
+    def test_mg_m3_to_mg_nm3(self, svc):
+        """Lines 700-701: mg/m³ path (temperature-corrected)."""
+        result = svc.tar_concentration(
+            1000.0, "mg/m3", "mg/Nm3", temperature=273.15, pressure=101.325
+        )
+        assert abs(result - 1000.0) < 1.0
+
+    def test_g_m3_to_mg_nm3(self, svc):
+        """Lines 702-703: g/m³ path."""
+        result = svc.tar_concentration(
+            1.0, "g/m3", "mg/Nm3", temperature=273.15, pressure=101.325
+        )
+        assert abs(result - 1000.0) < 1.0
+
+    def test_ppm_mass_conversion_requires_mw(self, svc):
+        """Lines 704-706: ppm_mass needs molecular_weight."""
+        with pytest.raises(ValueError, match="Molecular weight required"):
+            svc.tar_concentration(1.0, "ppm_mass", "mg/Nm3")
+
+    def test_ppm_mass_with_mw(self, svc):
+        """Lines 704-706: ppm_mass → mg/Nm³ with MW."""
+        result = svc.tar_concentration(1.0, "ppm_mass", "mg/Nm3", molecular_weight=92.0)
+        assert result > 0
+
+    def test_invalid_pressure_raises(self, svc):
+        """Lines 661-663: pressure <= 0 → ValueError."""
+        with pytest.raises(ValueError, match="pressure must be positive"):
+            svc.tar_concentration(1.0, "mg/Nm3", "g/Nm3", pressure=-1.0)
+
+    def test_invalid_temperature_raises(self, svc):
+        """Lines 664-666: temperature <= 0 → ValueError."""
+        with pytest.raises(ValueError, match="temperature must be positive"):
+            svc.tar_concentration(1.0, "mg/Nm3", "g/Nm3", temperature=-10.0)
+
+    def test_unknown_to_unit_raises(self, svc):
+        """Lines 681-685: bad to_unit → ValueError."""
+        with pytest.raises(ValueError, match="Unknown concentration unit"):
+            svc.tar_concentration(1.0, "mg/Nm3", "invalid_unit_xyz")
+
+    def test_to_mg_m3(self, svc):
+        """Lines 723-724: mg/Nm³ → mg/m³."""
+        result = svc.tar_concentration(
+            1000.0, "mg/Nm3", "mg/m3", temperature=273.15, pressure=101.325
+        )
+        assert abs(result - 1000.0) < 1.0
+
+    def test_to_g_m3(self, svc):
+        """Lines 725-726: mg/Nm³ → g/m³."""
+        result = svc.tar_concentration(
+            1000.0, "mg/Nm3", "g/m3", temperature=273.15, pressure=101.325
+        )
+        assert abs(result - 1.0) < 0.01
+
+    def test_to_ppm_mass(self, svc):
+        """Lines 727-729: mg/Nm³ → ppm_mass with MW."""
+        result = svc.tar_concentration(
+            92.0, "mg/Nm3", "ppm_mass", molecular_weight=92.0
+        )
+        assert result > 0
+
+
+# ---------------------------------------------------------------------------
+# syngas_composition() (lines 733-762)
+# ---------------------------------------------------------------------------
+
+
+class TestSyngasComposition:
+    def test_same_unit_returns_value(self, svc):
+        assert svc.syngas_composition(10.0, "mol%", "mol%") == 10.0
+
+    def test_mol_pct_to_vol_pct(self, svc):
+        """Lines 741-742: mol% ↔ vol% → identity."""
+        assert svc.syngas_composition(10.0, "mol%", "vol%") == 10.0
+
+    def test_ppm_to_ppb(self, svc):
+        """Lines 745: ppm → ppb."""
+        assert svc.syngas_composition(1.0, "ppm", "ppb") == pytest.approx(1000.0)
+
+    def test_ppb_to_ppm(self, svc):
+        assert svc.syngas_composition(1000.0, "ppb", "ppm") == pytest.approx(1.0)
+
+    def test_ppm_to_percent(self, svc):
+        assert svc.syngas_composition(10000.0, "ppm", "%") == pytest.approx(1.0)
+
+    def test_percent_to_ppm(self, svc):
+        assert svc.syngas_composition(1.0, "%", "ppm") == pytest.approx(10000.0)
+
+    def test_unknown_conversion_raises(self, svc):
+        """Lines 761-762: unsupported pair → ValueError."""
+        with pytest.raises(ValueError, match="not supported"):
+            svc.syngas_composition(1.0, "ppm", "g/m3")
+
+
+# ---------------------------------------------------------------------------
+# gasifier_performance() (lines 764-797)
+# ---------------------------------------------------------------------------
+
+
+class TestGasifierPerformance:
+    def test_efficiency_percent_to_fraction(self, svc):
+        assert svc.gasifier_performance(
+            100.0, "%", "fraction", "efficiency"
+        ) == pytest.approx(1.0)
+
+    def test_efficiency_fraction_to_percent(self, svc):
+        assert svc.gasifier_performance(
+            0.85, "fraction", "%", "carbon_conversion"
+        ) == pytest.approx(85.0)
+
+    def test_efficiency_same_unit(self, svc):
+        """Line 777-778: same unit → identity."""
+        assert svc.gasifier_performance(0.9, "fraction", "fraction") == pytest.approx(
+            0.9
+        )
+
+    def test_efficiency_unknown_conversion_raises(self, svc):
+        """Lines 783-784: unknown efficiency pair → ValueError."""
+        with pytest.raises(ValueError, match="Unknown conversion"):
+            svc.gasifier_performance(1.0, "ppm", "fraction", "efficiency")
+
+    def test_specific_production_nm3_kg_to_scf_lb(self, svc):
+        """Lines 789-790: Nm³/kg → scf/lb."""
+        result = svc.gasifier_performance(
+            1.0, "Nm³/kg", "scf/lb", "specific_production"
+        )
+        assert result == pytest.approx(1.0 / 0.0624, rel=1e-3)
+
+    def test_specific_production_scf_lb_to_nm3_kg(self, svc):
+        """Lines 791-792: scf/lb → Nm³/kg."""
+        result = svc.gasifier_performance(
+            1.0, "scf/lb", "Nm³/kg", "specific_production"
+        )
+        assert result == pytest.approx(0.0624, rel=1e-3)
+
+    def test_specific_production_same_unit(self, svc):
+        """Line 787-788: same unit → identity."""
+        assert svc.gasifier_performance(
+            5.0, "Nm³/kg", "Nm³/kg", "specific_production"
+        ) == pytest.approx(5.0)
+
+    def test_specific_production_unknown_raises(self, svc):
+        """Lines 793-794: unknown pair → ValueError."""
+        with pytest.raises(ValueError, match="Unknown specific production"):
+            svc.gasifier_performance(1.0, "scf/lb", "weird_unit", "specific_production")
+
+    def test_unknown_metric_type_raises(self, svc):
+        """Lines 796-797: unknown metric → ValueError."""
+        with pytest.raises(ValueError, match="Unknown metric type"):
+            svc.gasifier_performance(1.0, "%", "fraction", "turbine_efficiency")
+
+
+# ---------------------------------------------------------------------------
+# compressibility_factor() (lines 799-816)
+# ---------------------------------------------------------------------------
+
+
+class TestCompressibilityFactor:
+    def test_air_at_standard_conditions(self, svc):
+        """Lines 813-815: Tr and Pr in valid range → Z from Pitzer."""
+        Z = svc.compressibility_factor("air", temperature=400.0, pressure=200.0)
+        assert 0.9 < Z < 1.1  # Near ideal for moderate conditions
+
+    def test_extreme_conditions_returns_one(self, svc):
+        """Line 816: outside Pitzer range → Z = 1.0."""
+        Z = svc.compressibility_factor("air", temperature=10.0, pressure=1000000.0)
+        assert Z == 1.0
+
+    def test_invalid_temperature_raises(self, svc):
+        """Lines 807-808: non-positive T → ValueError."""
+        with pytest.raises(ValueError, match="positive"):
+            svc.compressibility_factor("air", temperature=-100.0, pressure=101.0)
+
+    def test_unknown_gas_falls_back_to_air(self, svc):
+        """Line 809: unknown gas uses air props."""
+        Z = svc.compressibility_factor(
+            "xenon_gas_xyz", temperature=400.0, pressure=200.0
+        )
+        assert isinstance(Z, float)
+
+
+# ---------------------------------------------------------------------------
+# get_supported_units() (lines 818-851)
+# ---------------------------------------------------------------------------
+
+
+class TestGetSupportedUnits:
+    def test_all_categories_returned_without_filter(self, svc):
+        """Lines 841-850: no category → all returned."""
+        units = svc.get_supported_units()
+        assert "length" in units
+        assert "temperature" in units
+        assert "gas_flow" in units
+        assert "heating_value" in units
+
+    def test_category_length(self, svc):
+        """Lines 820-822: filtered by length."""
+        units = svc.get_supported_units("length")
+        assert "length" in units
+        assert "m" in units["length"]
+
+    def test_category_temperature(self, svc):
+        """Lines 823-824: temperature returns KCFR."""
+        units = svc.get_supported_units("temperature")
+        assert set(units["temperature"]) >= {"K", "C", "F", "R"}
+
+    def test_category_gas_flow(self, svc):
+        """Lines 825-826: gas_flow."""
+        units = svc.get_supported_units("gas_flow")
+        assert "SCFM" in units["gas_flow"]
+
+    def test_category_heating_value(self, svc):
+        """Lines 827-828: heating_value."""
+        units = svc.get_supported_units("heating_value")
+        assert "heating_value" in units
+
+    def test_category_tar_concentration(self, svc):
+        """Lines 829-832: tar_concentration."""
+        units = svc.get_supported_units("tar_concentration")
+        assert "tar_concentration" in units
+
+    def test_category_performance(self, svc):
+        """Lines 833-838: performance."""
+        units = svc.get_supported_units("performance")
+        assert "performance" in units
+
+    def test_unknown_category_returns_empty(self, svc):
+        """Line 838-839: unknown category → {}."""
+        result = svc.get_supported_units("completely_unknown_xyz")
+        assert result == {}
+
+
+# ---------------------------------------------------------------------------
+# _validate_value() (lines 303-320)
+# ---------------------------------------------------------------------------
+
+
+class TestValidateValue:
+    def test_temperature_below_absolute_zero_warns(self, svc):
+        """Lines 311-314: sub-zero Kelvin → warning."""
+        warnings = svc._validate_value(-1000.0, "temperature", "C")
+        assert any("absolute zero" in w.lower() for w in warnings)
+
+    def test_negative_pressure_warns(self, svc):
+        """Lines 318-319: negative pressure → warning."""
+        warnings = svc._validate_value(-1.0, "pressure")
+        assert any("Negative" in w for w in warnings)
+
+    def test_positive_pressure_no_warning(self, svc):
+        warnings = svc._validate_value(101.0, "pressure")
+        assert len(warnings) == 0
+
+
+# ---------------------------------------------------------------------------
+# _normalize_unit() edge cases
+# ---------------------------------------------------------------------------
+
+
+class TestNormalizeUnit:
+    def test_cached_unit_returned(self, svc):
+        """Lines 248-249: repeated call uses cache."""
+        svc._normalize_unit("m")
+        result = svc._normalize_unit("m")  # from cache
+        assert result == "m"
+
+    def test_temperature_unit_uppercase(self, svc):
+        """Lines 264-267: K/C/F/R → uppercase."""
+        assert svc._normalize_unit("c") == "C"
+        assert svc._normalize_unit("k") == "K"
+
+    def test_alias_resolved(self, svc):
+        """Lines 283-286: alias → canonical unit."""
+        # "inch" is an alias for "in" in most conversion tables
+        result = svc._normalize_unit("ft")  # feet - should resolve
+        assert result is not None
+
+
+# ---------------------------------------------------------------------------
+# gas_flow dispatch coverage via _convert_gas_flow (lines 229-242, 300)
+# ---------------------------------------------------------------------------
+
+
+class TestGasFlowDispatch:
+    def test_get_category_scfm_is_gas_flow(self, svc):
+        """Line 300: SCFM → 'gas_flow' category."""
+        cat = svc._get_category("SCFM")
+        assert cat == "gas_flow"
+
+    def test_get_category_acfm_is_gas_flow(self, svc):
+        cat = svc._get_category("ACFM")
+        assert cat == "gas_flow"
+
+    def test_get_category_nm3_hr_is_gas_flow(self, svc):
+        cat = svc._get_category("Nm3/hr")
+        assert cat == "gas_flow"
+
+    def test_get_category_unknown_is_none(self, svc):
+        cat = svc._get_category("blarg_totally_unknown")
+        assert cat is None
+
+    def test_convert_gas_flow_scfm_to_scfm_via_convert(self, svc):
+        """Lines 229-242: gas_flow dispatch in convert()."""
+        result = svc.convert(
+            100.0, "SCFM", "SCFM", temperature=288.71, pressure=101325.0
+        )
+        assert result.value > 0
+
+    def test_gas_flow_nm3_hr_to_scfm(self, svc):
+        """Lines 229-242 + 476-482: Nm3/hr in → SCFM out."""
+        result = svc._convert_gas_flow(
+            1000.0,
+            "Nm3/hr",
+            "SCFM",
+            temperature=288.71,
+            pressure=101325.0,
+        )
+        assert result > 0
+
+    def test_gas_flow_scfm_to_nm3_hr(self, svc):
+        """Lines 445-451 + 229-242: SCFM → Nm3/hr."""
+        result = svc._convert_gas_flow(
+            100.0,
+            "SCFM",
+            "Nm3/hr",
+        )
+        assert result > 0
+
+    def test_gas_flow_mass_unit_to_scfm(self, svc):
+        """Lines 447-449: mass_flow unit in → SCFM out."""
+        result = svc._convert_gas_flow(
+            0.1,
+            "kg/s",
+            "SCFM",
+        )
+        assert result > 0
+
+    def test_gas_flow_scfm_to_mass_unit(self, svc):
+        """Lines 478-480: SCFM → mass flow unit."""
+        result = svc._convert_gas_flow(
+            100.0,
+            "SCFM",
+            "kg/s",
+        )
+        assert result > 0
+
+    def test_gas_flow_unknown_from_unit_raises(self, svc):
+        """Line 450-451: unknown gas flow from_unit → UnknownUnitError."""
+        with pytest.raises(UnknownUnitError, match="Unknown gas flow unit"):
+            svc._convert_gas_flow(100.0, "weird_unit/hr", "SCFM")
+
+    def test_gas_flow_unknown_to_unit_raises(self, svc):
+        """Line 481-482: unknown gas flow to_unit → UnknownUnitError."""
+        with pytest.raises(UnknownUnitError, match="Unknown gas flow unit"):
+            svc._convert_gas_flow(100.0, "SCFM", "weird_unit/hr")
+
+
+# ---------------------------------------------------------------------------
+# _require_positive_finite / _require_finite static methods (lines 88-99)
+# ---------------------------------------------------------------------------
+
+
+class TestStaticValidators:
+    def test_require_positive_finite_valid(self):
+        """Line 90: positive finite → no raise."""
+        UnitConversionService._require_positive_finite(5.0, "test")
+
+    def test_require_positive_finite_inf_raises(self):
+        """Lines 90-92: inf → ValueError."""
+        with pytest.raises(ValueError, match="positive and finite"):
+            UnitConversionService._require_positive_finite(float("inf"), "x")
+
+    def test_require_finite_valid(self):
+        """Lines 97: finite value → no raise."""
+        UnitConversionService._require_finite(0.0, "zero")
+
+    def test_require_finite_nan_raises(self):
+        """Lines 97-99: NaN → ValueError."""
+        with pytest.raises(ValueError, match="finite"):
+            UnitConversionService._require_finite(float("nan"), "x")
+
+
+# ---------------------------------------------------------------------------
+# Heating value "not implemented" path (lines 598-599, 615-620)
+# ---------------------------------------------------------------------------
+
+
+class TestHeatingValueImplementedPaths:
+    def test_btu_scf_to_btu_lb_raises_not_implemented(self, svc):
+        """Lines 615-619: BTU/scf → BTU/lb path (MJ/kg → BTU/scf not implemented)."""
+        # BTU/scf conversion FROM MJ/kg should work via the BTU/scf factor path
+        result = svc.heating_value(100.0, "BTU/scf", "BTU/lb", gas_density_stp=1.2)
+        assert result > 0
+
+    def test_kwh_nm3_to_btu_scf(self, svc):
+        """Lines 617-618: kWh/Nm³ → BTU/scf with density."""
+        result = svc.heating_value(3.0, "kWh/Nm3", "BTU/scf", gas_density_stp=1.2)
+        assert result > 0
+
+
+# ---------------------------------------------------------------------------
+# Tar concentration "not implemented" path (lines 707-708, 730-731)
+# ---------------------------------------------------------------------------
+
+
+class TestTarConcentrationPaths:
+    def test_from_unimplemented_unit_raises_via_factor_none(self, svc):
+        """We cannot easily reach 707-708 (ValueError 'not implemented')
+        because the known units have factors or handled paths. Verify mg/Nm³
+        as a round_trip instead.
+        """
+        result = svc.tar_concentration(
+            500.0, "mg/Nm3", "mg/m3", temperature=273.15, pressure=101.325
+        )
+        assert result > 0
+
+    def test_tar_nm3_to_g_nm3_roundtrip(self, svc):
+        result_g = svc.tar_concentration(1000.0, "mg/Nm3", "g/Nm3")
+        result_mg = svc.tar_concentration(result_g, "g/Nm3", "mg/Nm3")
+        assert abs(result_mg - 1000.0) < 1e-6

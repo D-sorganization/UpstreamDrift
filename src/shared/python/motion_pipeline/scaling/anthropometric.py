@@ -102,8 +102,7 @@ def _get_reference_segment_lengths(
     rig: SkeletonRig,
     marker_map: MarkerMap,
 ) -> dict[str, float]:
-    """
-    Get reference segment lengths from the generic skeleton rig.
+    """Get reference segment lengths from the generic skeleton rig.
 
     Uses Dempster / de Leva anthropometric regression based on
     total height and segment proportions.
@@ -113,7 +112,7 @@ def _get_reference_segment_lengths(
         marker_map: Marker to segment mapping
 
     Returns:
-        Dict mapping segment pair to reference length
+        Dict mapping 'proximal-distal' pair key to reference length
     """
     # Default anthropometric proportions (de Leva 1996)
     # These are normalized to total height
@@ -135,34 +134,35 @@ def _get_reference_segment_lengths(
     # Assume reference height of 1.75m
     reference_height = 1.75
 
+    # Marker name → anatomical segment name mapping
+    segment_mapping = {
+        "rasi": "pelvis",
+        "lasi": "pelvis",
+        "rthi": "right_thigh",
+        "lkne": "left_thigh",
+        "rthigh": "right_thigh",
+        "lthigh": "left_thigh",
+        "rkne": "right_shank",
+        "lknee": "left_shank",
+        "rank": "right_shank",
+        "lank": "left_shank",
+        "rupa": "right_upper_arm",
+        "lupa": "left_upper_arm",
+        "relb": "right_forearm",
+        "lelb": "left_forearm",
+        "rwra": "right_forearm",
+        "lwra": "left_forearm",
+    }
+
     reference_lengths = {}
-    for pair_name, _ in marker_map.segment_pairs:
-        # Extract segment name from pair
-        segment = pair_name.split("-")[0].lower()
+    for proximal, distal in marker_map.segment_pairs:
+        # Build the same compound key that _compute_average_segment_lengths uses.
+        pair_key = f"{proximal}-{distal}"
 
-        # Map common marker pair names to segment names
-        segment_mapping = {
-            "rasi": "pelvis",
-            "lasi": "pelvis",
-            "rthi": "right_thigh",
-            "lkne": "left_knee",
-            "rthigh": "right_thigh",
-            "lthigh": "left_thigh",
-            "rkne": "right_knee",
-            "lknee": "left_knee",
-            "rank": "right_ankle",
-            "lank": "left_ankle",
-            "rupa": "right_upper_arm",
-            "lupa": "left_upper_arm",
-            "relb": "right_elbow",
-            "lelb": "left_elbow",
-            "rwra": "right_wrist",
-            "lwra": "left_wrist",
-        }
-
-        # Try to find segment proportion
+        # Map the proximal marker to an anatomical segment.
+        segment = segment_mapping.get(proximal.lower(), proximal.lower())
         proportion = SEGMENT_PROPORTIONS.get(segment, 0.15)
-        reference_lengths[pair_name] = proportion * reference_height
+        reference_lengths[pair_key] = proportion * reference_height
 
     return reference_lengths
 

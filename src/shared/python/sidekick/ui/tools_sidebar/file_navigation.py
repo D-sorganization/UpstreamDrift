@@ -1,0 +1,180 @@
+"""Backend navigation contract for the Sidekick file explorer."""
+
+from __future__ import annotations
+
+import string
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Protocol
+
+
+@dataclass(frozen=True)
+class CommonLocation:
+    """A normalized file-explorer jump target."""
+
+    label: str
+    path: Path
+    kind: str = "folder"
+
+
+@dataclass(frozen=True)
+class FileNavigationState:
+    """Serializable navigation state for UI button enablement."""
+
+    current_path: Path
+    can_go_back: bool
+    can_go_forward: bool
+    can_go_up: bool
+
+
+class CommonLocationsProvider(Protocol):
+    """Discover common file explorer locations without requiring Qt."""
+
+    def locations(self, project_root: Path) -> list[CommonLocation]:
+        """Return possible jump locations for ``project_root``."""
+
+
+class DefaultCommonLocationsProvider:
+    """Discover non-blocking common locations from local platform conventions."""
+
+    def locations(self, project_root: Path) -> list[CommonLocation]:
+        """Return project, user folders, and Windows drives when available."""
+        home = Path.home()
+        entries = [
+            CommonLocation("Project", project_root, "project"),
+            CommonLocation("Home", home, "home"),
+            CommonLocation("Desktop", home / "Desktop"),
+            CommonLocation("Documents", home / "Documents"),
+            CommonLocation("Downloads", home / "Downloads"),
+        ]
+        if sys.platform == "win32":
+            entries.extend(_windows_drive_locations())
+        return entries
+
+
+class FileNavigationController:
+    """Normalize file-explorer path changes and history outside Qt widgets."""
+
+    def __init__(
+        self,
+        project_root: str | Path,
+        *,
+        allow_outside_project: bool = False,
+        current_path: str | Path | None = None,
+        persisted_path: str | Path | None = None,
+        common_locations_provider: CommonLocationsProvider | None = None,
+    ) -> None:
+        root = _normalize_path(project_root)
+        if not root.is_dir():
+            raise ValueError(f"Project root is not a directory: {root}")
+        self._project_root = root
+        self._allow_outside_project = allow_outside_project
+        self._common_locations_provider = (
+            common_locations_provider or DefaultCommonLocationsProvider()
+        )
+        self._back_stack: list[Path] = []
+        self._forward_stack: list[Path] = []
+        self._current_path = root
+        start_path = current_path if current_path is not None else persisted_path
+        if start_path is not None:
+            self.navigate_to(start_path, record_history=False)
+
+    @property
+    def project_root(self) -> Path:
+        """Return the normalized project boundary."""
+        return self._project_root
+
+    @property
+    def current_path(self) -> Path:
+        """Return the normalized current directory."""
+        return self._current_path
+
+    def state(self) -> FileNavigationState:
+        """Return current path plus predictable control enablement flags."""
+        return FileNavigationState(
+            current_path=self._current_path,
+            can_go_back=bool(self._back_stack),
+            can_go_forward=bool(self._forward_stack),
+            can_go_up=self._can_go_up(),
+        )
+
+    def common_locations(self) -> list[CommonLocation]:
+        """Return existing, policy-allowed common locations with normalized paths."""
+        locations: list[CommonLocation] = []
+        seen: set[Path] = set()
+        for location in self._common_locations_provider.locations(self._project_root):
+            path = _normalize_path(location.path)
+            if path in seen or not self._can_navigate_to(path):
+                continue
+            seen.add(path)
+            locations.append(
+                CommonLocation(label=location.label, path=path, kind=location.kind)
+            )
+        return locations
+
+    def navigate_to(self, path: str | Path, *, record_history: bool = True) -> bool:
+        """Navigate to ``path`` when it exists and satisfies host containment."""
+        target = _normalize_path(path)
+        if not self._can_navigate_to(target):
+            return False
+        if target == self._current_path:
+            return True
+        if record_history:
+            self._back_stack.append(self._current_path)
+            self._forward_stack.clear()
+        self._current_path = target
+        return True
+
+    def back(self) -> bool:
+        """Move to the previous path when history is available."""
+        if not self._back_stack:
+            return False
+        self._forward_stack.append(self._current_path)
+        self._current_path = self._back_stack.pop()
+        return True
+
+    def forward(self) -> bool:
+        """Move to the next path when history is available."""
+        if not self._forward_stack:
+            return False
+        self._back_stack.append(self._current_path)
+        self._current_path = self._forward_stack.pop()
+        return True
+
+    def up(self) -> bool:
+        """Navigate to the parent directory without crossing the host boundary."""
+        parent = self._current_path.parent
+        if parent == self._current_path:
+            return False
+        return self.navigate_to(parent)
+
+    def _can_go_up(self) -> bool:
+        parent = self._current_path.parent
+        return parent != self._current_path and self._can_navigate_to(parent)
+
+    def _can_navigate_to(self, path: Path) -> bool:
+        if not path.is_dir():
+            return False
+        return self._allow_outside_project or _is_relative_to(path, self._project_root)
+
+
+def _normalize_path(path: str | Path) -> Path:
+    return Path(path).expanduser().resolve()
+
+
+def _is_relative_to(path: Path, parent: Path) -> bool:
+    try:
+        path.relative_to(parent)
+    except ValueError:
+        return False
+    return True
+
+
+def _windows_drive_locations() -> list[CommonLocation]:
+    locations: list[CommonLocation] = []
+    for letter in string.ascii_uppercase:
+        path = Path(f"{letter}:\\")
+        if path.exists():
+            locations.append(CommonLocation(f"{letter}:", path, "drive"))
+    return locations

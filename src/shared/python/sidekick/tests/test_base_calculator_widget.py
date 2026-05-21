@@ -1,0 +1,73 @@
+from __future__ import annotations
+
+from typing import Any
+from unittest.mock import patch
+
+import pytest
+
+pytest.importorskip("PyQt6", reason="PyQt6 not installed")
+pytest.importorskip("pytestqt", reason="pytest-qt required for widget tests")
+
+from PyQt6.QtGui import QCloseEvent
+from upstream_drift_tools.ui.widgets.base_calculator_widget import (
+    BaseCalculatorWidget,
+    BaseCalculatorWindow,
+)
+
+
+def test_base_calculator_widget_init(qapp) -> Any:
+    widget = BaseCalculatorWidget("TestCalcWidget")
+    assert widget.calculator_name == "TestCalcWidget"
+    assert widget.parent() is None
+
+
+@patch("PyQt6.QtWidgets.QMessageBox.critical")
+def test_base_calculator_widget_show_error(mock_critical, qapp) -> Any:
+    widget = BaseCalculatorWidget("TestCalcWidget")
+    widget.show_error("ErrorTitle", "ErrorMsg")
+    mock_critical.assert_called_once_with(widget, "ErrorTitle", "ErrorMsg")
+
+
+@patch("PyQt6.QtWidgets.QMessageBox.information")
+def test_base_calculator_widget_show_info(mock_info, qapp) -> Any:
+    widget = BaseCalculatorWidget("TestCalcWidget")
+    widget.show_info("InfoTitle", "InfoMsg")
+    mock_info.assert_called_once_with(widget, "InfoTitle", "InfoMsg")
+
+
+def test_base_calculator_window_init(qapp) -> Any:
+    # Missing calculator name should raise AssertionError
+    with pytest.raises(AssertionError):
+        BaseCalculatorWindow(calculator_name=None)  # type: ignore[attr-defined]
+
+    window = BaseCalculatorWindow(
+        calculator_name="TestWindow", window_title="MyTitle", min_size=(400, 300)
+    )
+    assert window.calculator_name == "TestWindow"
+    assert window.windowTitle() == "MyTitle"
+    assert window.minimumSize().width() == 400
+    assert window.minimumSize().height() == 300
+    assert window.central_widget is not None
+    assert window.main_layout is not None
+
+
+@patch("PyQt6.QtWidgets.QMessageBox.critical")
+def test_base_calculator_window_show_error(mock_critical, qapp) -> Any:
+    window = BaseCalculatorWindow("TestWindow")
+    window.show_error("ErrTitle", "ErrMsg")
+    mock_critical.assert_called_once_with(window, "ErrTitle", "ErrMsg")
+
+
+@patch("PyQt6.QtWidgets.QMessageBox.information")
+def test_base_calculator_window_show_info(mock_info, qapp) -> Any:
+    window = BaseCalculatorWindow("TestWindow")
+    window.show_info("InfTitle", "InfMsg")
+    mock_info.assert_called_once_with(window, "InfTitle", "InfMsg")
+
+
+@patch.object(BaseCalculatorWindow, "handle_close_event")
+def test_base_calculator_window_close_event(mock_handle_close, qapp) -> Any:
+    window = BaseCalculatorWindow("TestWindow")
+    event = QCloseEvent()
+    window.closeEvent(event)
+    mock_handle_close.assert_called_once_with(event)

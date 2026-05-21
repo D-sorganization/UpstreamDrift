@@ -1,0 +1,282 @@
+"""Hypothesis property-based tests for Python calculators (#1091).
+
+These tests verify fundamental physical invariants hold across random inputs,
+catching edge cases that parametrized tests would miss.
+
+Design by Contract
+------------------
+- Vapor pressure must be non-negative for valid temperatures.
+- Vapor pressure must be monotonically increasing with temperature.
+- SyngasComposition.normalize() must preserve non-negativity and sum to 1.
+- Water mole fraction must be in [0, 1].
+"""
+
+from __future__ import annotations
+
+import math
+
+import pytest
+
+hypothesis = pytest.importorskip("hypothesis", reason="hypothesis not installed")
+from hypothesis import HealthCheck, given, settings
+from hypothesis import strategies as st
+
+# Module-level cached calculator to avoid re-initializing the slow
+# interpolation table on every Hypothesis example.
+_CALC = None
+
+
+def _get_calc():
+    """Return a module-level SyngasWaterCalculator instance (cached)."""
+    global _CALC
+    if _CALC is None:
+        from upstream_drift_tools.process_calculators.syngas_water_calculator import (
+            SyngasWaterCalculator,
+        )
+
+        _CALC = SyngasWaterCalculator()
+    return _CALC
+
+
+# Shared settings: generous deadline + suppress slow-init health check
+_HYP = settings(
+    max_examples=100,
+    deadline=30_000,
+    suppress_health_check=[HealthCheck.too_slow],
+)
+
+
+# ---------------------------------------------------------------------------
+# SyngasComposition property tests
+# ---------------------------------------------------------------------------
+
+
+class TestSyngasCompositionProperties:
+    """Property-based tests for SyngasComposition invariants."""
+
+    @given(
+        h2=st.floats(min_value=0.0, max_value=1.0),
+        co=st.floats(min_value=0.0, max_value=1.0),
+        co2=st.floats(min_value=0.0, max_value=1.0),
+        ch4=st.floats(min_value=0.0, max_value=1.0),
+        n2=st.floats(min_value=0.0, max_value=1.0),
+    )
+    @_HYP
+    def test_normalize_sums_to_one(
+        self,
+        h2: float,
+        co: float,
+        co2: float,
+        ch4: float,
+        n2: float,
+    ) -> None:
+        """Normalized composition must sum to exactly 1.0."""
+        from upstream_drift_tools.process_calculators.syngas_water_calculator import (
+            SyngasComposition,
+        )
+
+        comp = SyngasComposition(h2=h2, co=co, co2=co2, ch4=ch4, n2=n2)
+        if comp.total > 0:
+            normed = comp.normalize()
+            assert normed.total == pytest.approx(1.0, abs=1e-10)
+
+    @given(
+        h2=st.floats(min_value=0.0, max_value=1.0),
+        co=st.floats(min_value=0.0, max_value=1.0),
+    )
+    @_HYP
+    def test_normalize_preserves_nonnegativity(self, h2: float, co: float) -> None:
+        """All fractions remain non-negative after normalization."""
+        from upstream_drift_tools.process_calculators.syngas_water_calculator import (
+            SyngasComposition,
+        )
+
+        comp = SyngasComposition(h2=h2, co=co)
+        if comp.total > 0:
+            normed = comp.normalize()
+            assert normed.h2 >= 0.0
+            assert normed.co >= 0.0
+
+    @given(
+        h2=st.floats(min_value=0.0, max_value=1.0),
+        co=st.floats(min_value=0.0, max_value=1.0),
+    )
+    @_HYP
+    def test_to_dict_round_trip(self, h2: float, co: float) -> None:
+        """to_dict() contains all expected species keys."""
+        from upstream_drift_tools.process_calculators.syngas_water_calculator import (
+            SyngasComposition,
+        )
+
+        comp = SyngasComposition(h2=h2, co=co)
+        d = comp.to_dict()
+        assert "H2" in d
+        assert "CO" in d
+        assert d["H2"] == pytest.approx(h2)
+        assert d["CO"] == pytest.approx(co)
+
+
+# ---------------------------------------------------------------------------
+# Vapor pressure invariant tests
+# ---------------------------------------------------------------------------
+
+
+class TestVaporPressureProperties:
+    """Property-based tests for vapor pressure physical invariants."""
+
+    @given(temp_c=st.floats(min_value=-20.0, max_value=100.0))
+    @_HYP
+    def test_buck_vapor_pressure_nonnegative(self, temp_c: float) -> None:
+        """Buck equation must return non-negative vapor pressure."""
+
+        calc = _get_calc()
+        p, _ = calc.calculate_vapor_pressure(temp_c, method="buck")
+        assert p >= 0.0, f"Negative vapor pressure {p} at {temp_c}°C"
+        assert math.isfinite(p), f"Non-finite vapor pressure at {temp_c}°C"
+
+    @given(temp_c=st.floats(min_value=0.0, max_value=100.0))
+    @_HYP
+    def test_magnus_vapor_pressure_nonnegative(self, temp_c: float) -> None:
+        """Magnus equation must return non-negative vapor pressure."""
+
+        calc = _get_calc()
+        p, _ = calc.calculate_vapor_pressure(temp_c, method="magnus")
+        assert p >= 0.0
+        assert math.isfinite(p)
+
+    @given(temp_c=st.floats(min_value=-40.0, max_value=200.0))
+    @_HYP
+    def test_antoine_vapor_pressure_nonnegative(self, temp_c: float) -> None:
+        """Antoine equation must return non-negative vapor pressure."""
+
+        calc = _get_calc()
+        p, _ = calc.calculate_vapor_pressure(temp_c, method="antoine")
+        assert p >= 0.0
+        assert math.isfinite(p)
+
+    @given(
+        t1=st.floats(min_value=0.0, max_value=80.0),
+        delta=st.floats(min_value=0.1, max_value=20.0),
+    )
+    @_HYP
+    def test_vapor_pressure_monotonically_increasing(
+        self, t1: float, delta: float
+    ) -> None:
+        """Vapor pressure must increase with temperature (Clausius-Clapeyron)."""
+
+        t2 = t1 + delta
+        calc = _get_calc()
+        p1, _ = calc.calculate_vapor_pressure(t1, method="buck")
+        p2, _ = calc.calculate_vapor_pressure(t2, method="buck")
+        assert p2 > p1, f"VP not increasing: P({t1})={p1}, P({t2})={p2}"
+
+
+# ---------------------------------------------------------------------------
+# Water content invariant tests
+# ---------------------------------------------------------------------------
+
+
+class TestWaterContentProperties:
+    """Property-based tests for water content calculations."""
+
+    @given(
+        temp_c=st.floats(min_value=0.0, max_value=80.0),
+        pressure_bar=st.floats(min_value=0.5, max_value=50.0),
+    )
+    @_HYP
+    def test_mole_fraction_in_unit_interval(
+        self, temp_c: float, pressure_bar: float
+    ) -> None:
+        """Water mole fraction must be in [0, 1]."""
+
+        calc = _get_calc()
+        result = calc.calculate_water_content(temp_c, pressure_bar)
+        assert 0.0 <= result.mole_fraction_water <= 1.0
+
+    @given(
+        temp_c=st.floats(min_value=0.0, max_value=80.0),
+        pressure_bar=st.floats(min_value=0.5, max_value=50.0),
+    )
+    @_HYP
+    def test_mass_fraction_in_unit_interval(
+        self, temp_c: float, pressure_bar: float
+    ) -> None:
+        """Water mass fraction must be in [0, 1]."""
+
+        calc = _get_calc()
+        result = calc.calculate_water_content(temp_c, pressure_bar)
+        assert 0.0 <= result.mass_fraction_water <= 1.0
+
+    @given(
+        temp_c=st.floats(min_value=0.0, max_value=80.0),
+        pressure_bar=st.floats(min_value=0.5, max_value=50.0),
+    )
+    @_HYP
+    def test_ppmv_consistent_with_mole_fraction(
+        self, temp_c: float, pressure_bar: float
+    ) -> None:
+        """ppmv must equal mole_fraction * 1e6."""
+
+        calc = _get_calc()
+        result = calc.calculate_water_content(temp_c, pressure_bar)
+        expected_ppmv = result.mole_fraction_water * 1e6
+        assert result.water_content_ppmv == pytest.approx(expected_ppmv, rel=1e-10)
+
+    @given(
+        t1=st.floats(min_value=5.0, max_value=60.0),
+        delta=st.floats(min_value=1.0, max_value=20.0),
+    )
+    @_HYP
+    def test_higher_temp_means_more_water(self, t1: float, delta: float) -> None:
+        """At constant pressure, higher T → more water content."""
+
+        t2 = t1 + delta
+        calc = _get_calc()
+        r1 = calc.calculate_water_content(t1, 1.0)
+        r2 = calc.calculate_water_content(t2, 1.0)
+        assert r2.mole_fraction_water > r1.mole_fraction_water
+
+    @given(
+        p1=st.floats(min_value=1.0, max_value=20.0),
+        delta=st.floats(min_value=0.5, max_value=10.0),
+    )
+    @_HYP
+    def test_higher_pressure_means_less_water_fraction(
+        self, p1: float, delta: float
+    ) -> None:
+        """At constant T, higher pressure → lower mole fraction (Dalton's law)."""
+
+        p2 = p1 + delta
+        calc = _get_calc()
+        r1 = calc.calculate_water_content(40.0, p1)
+        r2 = calc.calculate_water_content(40.0, p2)
+        assert r2.mole_fraction_water < r1.mole_fraction_water
+
+
+# ---------------------------------------------------------------------------
+# Condensation risk property tests
+# ---------------------------------------------------------------------------
+
+
+class TestCondensationRiskProperties:
+    """Property-based tests for condensation risk assessment."""
+
+    @given(
+        temp_c=st.floats(min_value=0.0, max_value=80.0),
+        pressure_bar=st.floats(min_value=0.5, max_value=10.0),
+    )
+    @_HYP
+    def test_risk_level_consistency(self, temp_c: float, pressure_bar: float) -> None:
+        """Risk level must be one of the expected values."""
+        from upstream_drift_tools.process_calculators.syngas_water_calculator import (
+            estimate_condensation_risk,
+        )
+
+        result = estimate_condensation_risk(temp_c, pressure_bar)
+        valid_levels = {
+            "Low",
+            "Medium",
+            "High",
+            "Critical - Condensation occurring",
+        }
+        assert result["condensation_risk"] in valid_levels

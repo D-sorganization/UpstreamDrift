@@ -110,9 +110,7 @@ def sample_skeleton() -> SkeletonRig:
                 children=["neck"],
                 tpose_offset=[0, 0.1, 0],
             ),
-            "neck": JointDef(
-                name="neck", parent="spine", children=[], tpose_offset=[0, 0.15, 0]
-            ),
+            "neck": JointDef(name="neck", parent="spine", children=[], tpose_offset=[0, 0.15, 0]),
         },
         root_joint="pelvis",
         up_axis="+Y",
@@ -123,15 +121,9 @@ def sample_skeleton() -> SkeletonRig:
 def sample_joint_trajectory(sample_skeleton: SkeletonRig) -> JointTrajectory:
     """Create a sample joint trajectory."""
     frames = [
-        JointStateFrame(
-            timestamp=0.0, q=[0.0] * sample_skeleton.num_dofs, frame_index=0
-        ),
-        JointStateFrame(
-            timestamp=0.033, q=[0.1] * sample_skeleton.num_dofs, frame_index=1
-        ),
-        JointStateFrame(
-            timestamp=0.066, q=[0.2] * sample_skeleton.num_dofs, frame_index=2
-        ),
+        JointStateFrame(timestamp=0.0, q=[0.0] * sample_skeleton.num_dofs, frame_index=0),
+        JointStateFrame(timestamp=0.033, q=[0.1] * sample_skeleton.num_dofs, frame_index=1),
+        JointStateFrame(timestamp=0.066, q=[0.2] * sample_skeleton.num_dofs, frame_index=2),
     ]
     return JointTrajectory(id="traj_001", skeleton=sample_skeleton, frames=frames)
 
@@ -221,9 +213,7 @@ class TestCameraExtrinsics:
     def test_invalid_translation_shape(self):
         """Test that invalid translation shape raises error."""
         with pytest.raises(ValueError, match="length 3"):
-            CameraExtrinsics(
-                rotation=[[1, 0, 0], [0, 1, 0], [0, 0, 1]], translation=[0, 0]
-            )
+            CameraExtrinsics(rotation=[[1, 0, 0], [0, 1, 0], [0, 0, 1]], translation=[0, 0])
 
 
 class TestCalibration:
@@ -439,14 +429,24 @@ class TestKeypointSequence:
         assert seq.duration == 0.033
 
     def test_non_monotonic_timestamps(self, sample_keypoint_frame: KeypointFrame):
-        """Test that non-monotonic timestamps raise error."""
+        """Test that non-monotonic timestamps raise error.
+
+        Uses three frames where the third comes before the second so that each frame
+        is individually valid (timestamp >= 0 satisfied) but the sequence is not
+        monotonically increasing.
+        """
         frame2 = KeypointFrame(
-            timestamp=-0.01,
+            timestamp=0.1,
             keypoints=[Keypoint(x=105.0, y=205.0)],
             schema_name="BODY_25",
         )
+        frame3 = KeypointFrame(
+            timestamp=0.05,  # earlier than frame2 — violates monotonicity
+            keypoints=[Keypoint(x=107.0, y=207.0)],
+            schema_name="BODY_25",
+        )
         with pytest.raises(ValueError, match="monotonically increasing"):
-            KeypointSequence(id="seq_001", frames=[sample_keypoint_frame, frame2])
+            KeypointSequence(id="seq_001", frames=[sample_keypoint_frame, frame2, frame3])
 
     def test_consistent_schema(self, sample_keypoint_frame: KeypointFrame):
         """Test consistent schema across frames."""
@@ -618,9 +618,7 @@ class TestJointTrajectory:
         """Test DOF consistency validation."""
         frames = [
             JointStateFrame(timestamp=0.0, q=[0.0] * sample_skeleton.num_dofs),
-            JointStateFrame(
-                timestamp=0.033, q=[0.0] * (sample_skeleton.num_dofs + 1)
-            ),  # Wrong DOF
+            JointStateFrame(timestamp=0.033, q=[0.0] * (sample_skeleton.num_dofs + 1)),  # Wrong DOF
         ]
         with pytest.raises(ValueError, match="DOFs"):
             JointTrajectory(id="traj_001", skeleton=sample_skeleton, frames=frames)

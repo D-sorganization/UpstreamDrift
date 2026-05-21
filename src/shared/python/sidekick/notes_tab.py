@@ -1,0 +1,418 @@
+"""Visual markdown notes tab for the Sidekick sidebar (issue #2931).
+
+Provides a card-based notes UI with:
+
+- A scrollable grid of colored note cards
+- Per-card color picker (via :class:`~PyQt6.QtWidgets.QColorDialog`)
+- Markdown rendering in the card preview (CommonMark via ``mistune``)
+- Persistence across sessions via :class:`~sidekick.notes_store.SidekickNotesStore`
+
+Design
+------
+- **DbC**: every public method validates its inputs.
+- **LOD**: the tab only talks to :class:`SidekickNotesStore`; it does not
+  reach into ``NoteCardStore`` directly.
+- **DRY**: card widget creation is delegated to :func:`_make_note_card_widget`.
+
+Dependencies
+------------
+- PyQt6 (required; module raises ``ImportError`` if missing)
+- mistune >= 3.0 (optional; falls back to plain-text when absent)
+"""
+
+from __future__ import annotations
+
+import logging
+from pathlib import Path
+from typing import Any
+
+log = logging.getLogger(__name__)
+
+try:
+    from PyQt6.QtCore import Qt, pyqtSignal
+    from PyQt6.QtGui import QColor, QFont
+    from PyQt6.QtWidgets import (
+        QColorDialog,
+        QDialog,
+        QDialogButtonBox,
+        QHBoxLayout,
+        QLabel,
+        QLineEdit,
+        QPlainTextEdit,
+        QPushButton,
+        QScrollArea,
+        QSizePolicy,
+        QTextEdit,
+        QVBoxLayout,
+        QWidget,
+    )
+
+    _QT_AVAILABLE = True
+except ImportError:
+    _QT_AVAILABLE = False
+
+try:
+    import mistune
+
+    _MISTUNE_AVAILABLE = True
+except ImportError:
+    _MISTUNE_AVAILABLE = False
+
+from notes.models import (  # noqa: E402
+    DEFAULT_NOTE_COLOR,
+    NoteCard,
+)
+
+from .notes_store import SidekickNotesStore  # noqa: E402
+
+_CARD_MIN_WIDTH = 220
+_CARD_MAX_WIDTH = 340
+_CARD_MIN_HEIGHT = 160
+
+
+def _render_markdown(text: str) -> str:
+    """Render *text* as HTML via mistune, or fall back to plain text.
+
+    Args:
+        text: Markdown source.
+
+    Returns:
+        HTML string, or escaped plain text when mistune is unavailable.
+    """
+    if _MISTUNE_AVAILABLE:
+        # mistune.create_markdown returns a callable; cast to str for mypy
+        md = mistune.create_markdown(plugins=["strikethrough", "table"])
+        return str(md(text))
+    # Minimal plain-text fallback
+    return f"<pre>{text}</pre>"
+
+
+def _color_button_style(color: str) -> str:
+    """Return a QSS stylesheet string for a color swatch button."""
+    return (
+        f"QPushButton {{ background: {color}; border: 1px solid #aaa;"
+        f" border-radius: 4px; min-width: 20px; max-width: 20px;"
+        f" min-height: 20px; max-height: 20px; }}"
+    )
+
+
+def _make_note_card_widget(
+    card: NoteCard,
+    on_edit: Any,
+    on_delete: Any,
+    on_color_change: Any,
+    parent: QWidget | None = None,
+) -> QWidget:
+    """Create a single visual note card widget.
+
+    Args:
+        card: The :class:`~notes.models.NoteCard` to display.
+        on_edit: Callable ``(note_id: str) -> None`` invoked when Edit is clicked.
+        on_delete: Callable ``(note_id: str) -> None`` invoked when Delete is clicked.
+        on_color_change: Callable ``(note_id: str, color: str) -> None`` invoked
+            when the color swatch is clicked and a new color is picked.
+        parent: Optional Qt parent.
+
+    Returns:
+        A :class:`~PyQt6.QtWidgets.QWidget` representing the note card.
+    """
+    frame = QWidget(parent)
+    frame.setObjectName(f"NoteCard_{card.note_id}")
+    frame.setMinimumSize(_CARD_MIN_WIDTH, _CARD_MIN_HEIGHT)
+    frame.setMaximumWidth(_CARD_MAX_WIDTH)
+    frame.setSizePolicy(
+        QSizePolicy.Policy.Preferred,
+        QSizePolicy.Policy.Minimum,
+    )
+    frame.setStyleSheet(
+        f"QWidget#NoteCard_{card.note_id} {{"
+        f"  background: {card.color};"
+        f"  border: 1px solid #ccc;"
+        f"  border-radius: 6px;"
+        f"  padding: 6px;"
+        f"}}"
+    )
+
+    layout = QVBoxLayout(frame)
+    layout.setContentsMargins(8, 6, 8, 6)
+    layout.setSpacing(4)
+
+    # ── Title row ───────────────────────────────────────────────────────
+    header = QHBoxLayout()
+
+    title_label = QLabel(card.title, frame)
+    title_label.setObjectName(f"NoteCardTitle_{card.note_id}")
+    title_label.setFont(_bold_font(11))
+    title_label.setWordWrap(True)
+    header.addWidget(title_label, stretch=1)
+
+    # Color swatch
+    color_btn = QPushButton(frame)
+    color_btn.setObjectName(f"NoteCardColor_{card.note_id}")
+    color_btn.setStyleSheet(_color_button_style(card.color))
+    color_btn.setToolTip("Change card color")
+    color_btn.clicked.connect(lambda: on_color_change(card.note_id))
+    header.addWidget(color_btn)
+
+    layout.addLayout(header)
+
+    # ── Markdown body preview ────────────────────────────────────────────
+    body_view = QTextEdit(frame)
+    body_view.setObjectName(f"NoteCardBody_{card.note_id}")
+    body_view.setReadOnly(True)
+    body_view.setHtml(_render_markdown(card.markdown_body))
+    body_view.setMaximumHeight(120)
+    body_view.setStyleSheet("QTextEdit { background: transparent; border: none; }")
+    layout.addWidget(body_view, stretch=1)
+
+    # ── Action row ───────────────────────────────────────────────────────
+    actions = QHBoxLayout()
+
+    edit_btn = QPushButton("Edit", frame)
+    edit_btn.setObjectName(f"NoteCardEdit_{card.note_id}")
+    edit_btn.clicked.connect(lambda: on_edit(card.note_id))
+    actions.addWidget(edit_btn)
+
+    delete_btn = QPushButton("Delete", frame)
+    delete_btn.setObjectName(f"NoteCardDelete_{card.note_id}")
+    delete_btn.clicked.connect(lambda: on_delete(card.note_id))
+    actions.addWidget(delete_btn)
+
+    layout.addLayout(actions)
+
+    return frame
+
+
+def _bold_font(size: int) -> QFont:
+    font = QFont()
+    font.setBold(True)
+    font.setPointSize(size)
+    return font
+
+
+class _NoteEditDialog(QDialog):
+    """Modal dialog for creating / editing a note card.
+
+    Args:
+        card: Existing card to edit, or ``None`` to create a new one.
+        parent: Optional Qt parent.
+    """
+
+    def __init__(
+        self,
+        card: NoteCard | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self.setObjectName("NoteEditDialog")
+        self.setWindowTitle("Edit Note" if card else "New Note")
+        self.setMinimumSize(480, 360)
+
+        layout = QVBoxLayout(self)
+
+        title_row = QHBoxLayout()
+        title_row.addWidget(QLabel("Title:", self))
+        self._title_edit = QLineEdit(card.title if card else "", self)
+        self._title_edit.setObjectName("NoteEditTitle")
+        title_row.addWidget(self._title_edit, stretch=1)
+        layout.addLayout(title_row)
+
+        layout.addWidget(QLabel("Body (Markdown):", self))
+        self._body_edit = QPlainTextEdit(card.markdown_body if card else "", self)
+        self._body_edit.setObjectName("NoteEditBody")
+        layout.addWidget(self._body_edit, stretch=1)
+
+        # Color picker row
+        color_row = QHBoxLayout()
+        self._color: str = card.color if card else DEFAULT_NOTE_COLOR
+        color_row.addWidget(QLabel("Card color:", self))
+        self._color_preview = QPushButton(self)
+        self._color_preview.setObjectName("NoteEditColorSwatch")
+        self._color_preview.setStyleSheet(_color_button_style(self._color))
+        self._color_preview.setFixedSize(28, 28)
+        self._color_preview.clicked.connect(self._pick_color)
+        color_row.addWidget(self._color_preview)
+        color_row.addStretch()
+        layout.addLayout(color_row)
+
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel,
+            parent=self,
+        )
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+    def _pick_color(self) -> None:
+        initial = QColor(self._color)
+        picked = QColorDialog.getColor(initial, self, "Pick note color")
+        if picked.isValid():
+            self._color = picked.name()
+            self._color_preview.setStyleSheet(_color_button_style(self._color))
+
+    @property
+    def title_text(self) -> str:
+        return self._title_edit.text().strip()
+
+    @property
+    def body_text(self) -> str:
+        return self._body_edit.toPlainText()
+
+    @property
+    def color(self) -> str:
+        return self._color
+
+
+class NotesTab(QWidget):
+    """Sidekick notes tab with markdown note cards and color pickers.
+
+    Persists notes via :class:`~sidekick.notes_store.SidekickNotesStore`.
+
+    Args:
+        project_root: Root directory for persisting notes.
+        parent: Optional Qt parent widget.
+
+    Raises:
+        TypeError: If *project_root* is ``None``.
+        ValueError: If *project_root* does not exist or is not a directory.
+
+    Signals:
+        notes_changed: Emitted whenever notes are created, updated, or deleted.
+    """
+
+    notes_changed = pyqtSignal()
+
+    def __init__(
+        self,
+        project_root: Path | str,
+        parent: QWidget | None = None,
+    ) -> None:
+        if project_root is None:
+            raise TypeError("project_root must be provided")
+        super().__init__(parent)
+        self.setObjectName("SidekickNotesTab")
+
+        self._store = SidekickNotesStore(project_root)
+        self._build_ui()
+        self.refresh()
+
+    def _build_ui(self) -> None:
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(4, 4, 4, 4)
+        layout.setSpacing(4)
+
+        # ── Toolbar ───────────────────────────────────────────────────────
+        toolbar = QHBoxLayout()
+        new_btn = QPushButton("+ New Note", self)
+        new_btn.setObjectName("NotesTabNewButton")
+        new_btn.clicked.connect(self._on_new_note)
+        toolbar.addWidget(new_btn)
+        toolbar.addStretch()
+        layout.addLayout(toolbar)
+
+        # ── Scrollable card grid ─────────────────────────────────────────
+        self._scroll = QScrollArea(self)
+        self._scroll.setObjectName("NotesTabScrollArea")
+        self._scroll.setWidgetResizable(True)
+        self._scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+        self._card_container = QWidget(self._scroll)
+        self._card_container.setObjectName("NotesCardContainer")
+        self._card_layout = QVBoxLayout(self._card_container)
+        self._card_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self._scroll.setWidget(self._card_container)
+
+        layout.addWidget(self._scroll, stretch=1)
+
+    def refresh(self) -> None:
+        """Reload all notes from the store and rebuild the card grid."""
+        # Clear existing cards
+        while self._card_layout.count():
+            item = self._card_layout.takeAt(0)
+            if item:
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
+
+        cards = self._store.list_notes()
+        for card in cards:
+            widget = _make_note_card_widget(
+                card,
+                on_edit=self._on_edit_note,
+                on_delete=self._on_delete_note,
+                on_color_change=self._on_change_color,
+                parent=self._card_container,
+            )
+            self._card_layout.addWidget(widget)
+
+        if not cards:
+            empty_label = QLabel(
+                "No notes yet. Click '+ New Note' to create one.", self
+            )
+            empty_label.setObjectName("NotesTabEmptyLabel")
+            empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self._card_layout.addWidget(empty_label)
+
+        log.debug("NotesTab refreshed with %d cards", len(cards))
+
+    def _on_new_note(self) -> None:
+        dialog = _NoteEditDialog(parent=self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            title = dialog.title_text
+            if title:
+                self._store.create_note(title, dialog.body_text, color=dialog.color)
+                self.refresh()
+                self.notes_changed.emit()
+
+    def _on_edit_note(self, note_id: str) -> None:
+        card = self._store.load_note(note_id)
+        if card is None:
+            log.warning("Cannot edit: note %r not found", note_id)
+            return
+        dialog = _NoteEditDialog(card=card, parent=self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            title = dialog.title_text
+            if title:
+                self._store.update_note(
+                    note_id,
+                    title=title,
+                    body=dialog.body_text,
+                    color=dialog.color,
+                )
+                self.refresh()
+                self.notes_changed.emit()
+
+    def _on_delete_note(self, note_id: str) -> None:
+        deleted = self._store.delete_note(note_id)
+        if deleted:
+            self.refresh()
+            self.notes_changed.emit()
+        else:
+            log.warning("Cannot delete: note %r not found", note_id)
+
+    def _on_change_color(self, note_id: str) -> None:
+        card = self._store.load_note(note_id)
+        if card is None:
+            return
+        initial = QColor(card.color)
+        picked = QColorDialog.getColor(initial, self, "Pick note color")
+        if picked.isValid():
+            self._store.update_note(
+                note_id,
+                title=card.title,
+                body=card.markdown_body,
+                color=picked.name(),
+            )
+            self.refresh()
+            self.notes_changed.emit()
+
+    # ------------------------------------------------------------------
+    # Public helpers for testing
+    # ------------------------------------------------------------------
+
+    def note_ids(self) -> list[str]:
+        """Return the IDs of all currently displayed note cards."""
+        return [card.note_id for card in self._store.list_notes()]
+
+
+__all__ = ["NotesTab"]

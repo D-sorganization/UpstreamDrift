@@ -15,7 +15,36 @@ from src.shared.python.motion_pipeline.matching.inverse_dyn_pinocchio import (
     PinocchioInverseDynMatchingSolver,
 )
 
-pin = pytest.importorskip("pinocchio")
+
+def _require_real_pinocchio() -> None:
+    """Skip the module if pinocchio is absent or replaced with a MagicMock.
+
+    ``pytest.importorskip`` alone is insufficient: the ``_protect_engine_modules``
+    autouse fixture may restore a ``MagicMock`` for ``pinocchio`` in ``sys.modules``
+    (from a prior test that mocked the engine probe).  When that happens
+    ``importorskip`` happily returns the mock — and subsequent ``pin.Model().nq``
+    calls return nested ``MagicMock`` objects rather than integers, causing the
+    solver's DOF-consistency check to raise ``ValueError``.
+
+    This helper additionally verifies that the imported module is the real
+    Pinocchio C extension by checking that ``pin.Model().nq`` is an ``int``.
+    """
+    pin = pytest.importorskip("pinocchio")
+    try:
+        model = pin.Model()
+        if not isinstance(model.nq, int):
+            pytest.skip(
+                "pinocchio in sys.modules is a MagicMock — real library absent",
+                allow_module_level=True,
+            )
+    except Exception as exc:
+        pytest.skip(
+            f"pinocchio appears to be mocked or broken: {exc}",
+            allow_module_level=True,
+        )
+
+
+_require_real_pinocchio()
 
 
 def _pendulum_rig() -> SkeletonRig:

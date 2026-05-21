@@ -1,0 +1,191 @@
+from __future__ import annotations
+
+from typing import Any
+from unittest.mock import MagicMock, patch
+
+import pytest
+from PyQt6.QtCore import QSettings
+from upstream_drift_tools.calculators.conversion.service import ConversionResult
+from upstream_drift_tools.ui.widgets.unit_converter_widget import (
+    CaseInsensitiveCompleter,
+    ConversionRow,
+    UnitConverterWidget,
+    create_unit_converter,
+)
+
+
+def test_conversion_row() -> None:
+    row = ConversionRow("id1", "m", "km", "1000", "1", True)
+    d = row.to_dict()
+    assert d["row_id"] == "id1"
+    assert d["from_unit"] == "m"
+    assert d["to_unit"] == "km"
+    assert d["is_saved"] is True
+
+    r2 = ConversionRow.from_dict(d)
+    assert r2.row_id == "id1"
+    assert r2.from_unit == "m"
+    assert r2.to_unit == "km"
+    assert r2.is_saved is True
+
+    row.update_last_used()
+    assert row.last_used != d["last_used"]
+
+
+def test_case_insensitive_completer() -> None:
+    comp = CaseInsensitiveCompleter(["m", "km", "cm"])
+
+    comp.updateModel(["A", "B"])
+    assert comp.splitPath("A") == ["A"]
+    assert comp.splitPath(None) == []
+
+
+@pytest.fixture
+def clean_settings() -> Any:
+    settings = QSettings("UpstreamDriftTools", "UnitConverter_Test")
+    settings.clear()
+    with patch(
+        "upstream_drift_tools.ui.widgets.unit_converter_widget.QSettings",
+        return_value=settings,
+    ):
+        yield settings
+
+
+@pytest.fixture
+def mock_converter(monkeypatch) -> Any:
+    mock = MagicMock()
+    mock.get_supported_units.return_value = {"length": ["m", "km"], "temp": ["°C"]}
+    mock._get_category.return_value = "length"
+    mock._normalize_unit.side_effect = lambda x: x
+
+    def mock_conv(val, f, t) -> Any:
+        if f == "m" and t == "km":
+            return ConversionResult(val / 1000, f, t)
+        if f == "km" and t == "m":
+            return ConversionResult(val * 1000, f, t)
+        return ConversionResult(val, f, t)  # Fallback
+
+    mock.convert.side_effect = mock_conv
+
+    with patch(
+        "upstream_drift_tools.ui.widgets.unit_converter_widget.get_service",
+        return_value=mock,
+    ):
+        yield mock
+
+
+def test_unit_converter_init(qapp, clean_settings, mock_converter) -> None:
+    widget = UnitConverterWidget()
+    assert len(widget.rows) == 6
+    assert len(widget.recent_widgets) == 3
+    assert len(widget.saved_widgets) == 3
+
+    # Check factory
+    w2 = create_unit_converter()
+    assert isinstance(w2, UnitConverterWidget)
+
+
+def test_unit_converter_value_changed(qapp, clean_settings, mock_converter) -> None:
+    widget = UnitConverterWidget()
+    w0 = widget.recent_widgets[0]
+
+    w0.from_unit.setCurrentText("m")
+    w0.to_unit.setCurrentText("km")
+    w0.from_value.setText("2000")
+
+    assert widget.pending_conversion == (0, "from")
+
+    # simulate timeout
+    widget._perform_debounced_conversion()
+    assert w0.to_value.text() == "2"
+
+
+def test_unit_converter_unit_changed(qapp, clean_settings, mock_converter) -> None:
+    widget = UnitConverterWidget()
+    w0 = widget.recent_widgets[0]
+
+    w0.from_value.setText("1")
+    w0.to_unit.setCurrentText("m")
+
+    w0.from_unit.setCurrentText("km")  # triggers _on_unit_changed
+
+    assert widget.rows[0].from_unit == "km"
+    assert w0.to_value.text() == "1000"
+
+
+def test_unit_converter_swap(qapp, clean_settings, mock_converter) -> None:
+    widget = UnitConverterWidget()
+    w0 = widget.recent_widgets[0]
+    w0.from_unit.setCurrentText("m")
+    w0.from_value.setText("2000")
+    w0.to_unit.setCurrentText("km")
+    w0.to_value.setText("2")
+
+    widget._swap_values(0)
+    assert w0.from_unit.currentText() == "km"
+    assert w0.to_unit.currentText() == "m"
+    # m -> km to km -> m, 2 km -> 2000 m
+    assert w0.from_value.text() == "2"
+    assert w0.to_value.text() == "2000"
+
+
+def test_unit_converter_save_delete(qapp, clean_settings, mock_converter) -> None:
+    widget = UnitConverterWidget()
+    widget.rows[0].update_last_used()  # assure it's most recent
+    row_id = widget.rows[0].row_id
+    widget._save_conversion(0)  # save first recent
+
+    # find its new index
+    idx = next(i for i, r in enumerate(widget.rows) if r.row_id == row_id)
+    assert widget.rows[idx].is_saved is True
+
+    widget.rows[idx].update_last_used()  # assure it stays recent after un-save
+    widget._delete_saved_conversion(idx)
+    idx2 = next(i for i, r in enumerate(widget.rows) if r.row_id == row_id)
+    assert widget.rows[idx2].is_saved is False
+
+
+def test_unit_converter_copy(qapp, clean_settings, mock_converter) -> None:
+    widget = UnitConverterWidget()
+    w0 = widget.recent_widgets[0]
+    w0.to_value.setText("42")
+
+    widget._copy_result(0)
+    # the cb should have 42
+    import PyQt6.QtWidgets as qt
+
+    cb = qt.QApplication.clipboard()
+    assert cb.text() == "42"
+
+
+def test_unit_converter_load_corrupt(qapp, clean_settings, mock_converter) -> None:
+    clean_settings.setValue("recent_conversions", "{[")  # invalid
+    widget = UnitConverterWidget()
+    assert len(widget.rows) == 6  # defaults
+
+
+def test_unit_converter_incompatible(qapp, clean_settings, mock_converter) -> None:
+    widget = UnitConverterWidget()
+    # If mock_converter._get_category raises exception
+    mock_converter._get_category.side_effect = RuntimeError("Err")
+    units = widget._get_compatible_units("m")
+    assert set(units) == {"°C", "km", "m"}  # all units
+    mock_converter._get_category.side_effect = None
+
+
+def test_convert_row_invalid_val(qapp, clean_settings, mock_converter) -> None:
+    widget = UnitConverterWidget()
+    w0 = widget.recent_widgets[0]
+    w0.from_unit.setCurrentText("m")
+    w0.to_unit.setCurrentText("km")
+    w0.from_value.setText("abc")  # will fail float()
+    # shouldn't crash
+    widget._convert_row(0, "from")
+
+    # direction 'to'
+    w0.to_value.setText("def")
+    widget._convert_row(0, "to")
+
+    # empty units
+    w0.from_unit.setCurrentText("")
+    widget._convert_row(0, "from")
