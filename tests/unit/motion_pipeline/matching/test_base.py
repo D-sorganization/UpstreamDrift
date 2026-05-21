@@ -62,10 +62,15 @@ def test_make_matching_solver_returns_protocol(backend: MatchingBackendType) -> 
     assert hasattr(solver, "match")
 
 
-def test_make_matching_solver_pinocchio_inverse_dyn_module_missing() -> None:
-    """The inverse_dyn_pinocchio module is not present in the source tree."""
-    with pytest.raises((ImportError, ModuleNotFoundError)):
-        make_matching_solver(MatchingBackendType.INVERSE_DYN_PINOCCHIO)
+def test_make_matching_solver_pinocchio_inverse_dyn_returns_solver() -> None:
+    """The inverse_dyn_pinocchio module exists and make_matching_solver returns a solver.
+
+    This test was originally written when the pinocchio module was absent from the
+    source tree. The module has since been written; the test now verifies it returns a
+    solver that implements the expected `match` interface.
+    """
+    solver = make_matching_solver(MatchingBackendType.INVERSE_DYN_PINOCCHIO)
+    assert hasattr(solver, "match")
 
 
 def test_motion_matching_request_post_init_sets_horizon() -> None:
@@ -119,9 +124,7 @@ def test_base_solver_residual_report_keys() -> None:
     s = _Dummy()
     ref = make_pendulum_reference_trajectory(num_frames=5)
     report = s._compute_residual_report(ref, ref)
-    assert {"mean_residual", "max_residual", "std_residual", "num_frames"} <= set(
-        report.keys()
-    )
+    assert {"mean_residual", "max_residual", "std_residual", "num_frames"} <= set(report.keys())
     assert report["mean_residual"] >= 0.0
 
 
@@ -137,9 +140,14 @@ def test_base_solver_validate_result_rejects_nan() -> None:
 
     s = _Dummy()
     rig = make_simple_rig(num_joints=1)
-    bad = JointTrajectory(
+    # Use model_construct to bypass Pydantic's finite-value validator so we can
+    # test that _validate_result itself detects the NaN in an already-constructed
+    # trajectory (e.g. one produced by a solver that doesn't guard its outputs).
+    bad_frame = JointStateFrame.model_construct(timestamp=0.0, q=[float("nan")])
+    bad = JointTrajectory.model_construct(
         id="bad",
         skeleton=rig,
-        frames=[JointStateFrame(timestamp=0.0, q=[float("nan")])],
+        frames=[bad_frame],
+        metadata={},
     )
     assert s._validate_result(bad) is False

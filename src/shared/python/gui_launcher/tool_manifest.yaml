@@ -1,0 +1,370 @@
+# Tool registration manifest for the Tools platform.
+#
+# This is the single source of truth for GUI tool registration.
+# Each entry mirrors the GUI_INFO dict previously duplicated across 20
+# individual gui_registration.py files.
+#
+# Schema (per tool):
+#   tool_name:   snake_case unique identifier (required)
+#   name:        human-readable display name (required)
+#   description: short description (required)
+#   category:    grouping label (required)
+#   icon:        icon name hint (optional)
+#   pyqt6:       PyQt6 surface config (optional)
+#     module:        dotted module path to the main window
+#     class:         main window class name
+#     dependencies:  list of required packages
+#     settings_app:  QSettings application name
+#     min_size:      [width, height] minimum window size (optional)
+#   web:           web surface config (optional)
+#     port:            development server port
+#     auto_open_browser: whether to open browser automatically
+#   engine:        backend engine config (optional)
+#     module:        dotted module path to the engine
+#     class:         engine class name
+#
+# Closes #1863
+
+tools:
+  - tool_name: c3d_viewer
+    name: C3D Motion Capture Viewer
+    description: View and analyze C3D motion capture files
+    category: Biomechanics
+    icon: body
+    pyqt6:
+      module: c3d_viewer.ui.pyqt6.main_window
+      class: C3DViewerWindow
+      dependencies:
+        - PyQt6
+      settings_app: C3DViewer
+
+  - tool_name: data_processor
+    name: Data Processor
+    description: Signal processing and time-series data analysis tool
+    category: Data Processing
+    icon: chart
+    pyqt6:
+      module: data_processor.ui.pyqt6.main_window
+      class: DataProcessorMainWindow
+      dependencies:
+        - PyQt6
+        - pandas
+        - numpy
+      settings_app: DataProcessor
+    web:
+      port: 3000
+      auto_open_browser: true
+
+  - tool_name: pdf_renamer
+    name: PDF Renamer
+    description: Intelligent PDF File Renaming Tool
+    category: Development Tools
+    icon: pdf
+    pyqt6:
+      module: pdf_renamer.gui
+      class: PDFRenamer
+      dependencies:
+        - PyQt6
+        - pdfplumber
+
+  - tool_name: financial_calculator
+    name: Financial Calculator
+    description: Comprehensive financial modeling for plant operations
+    category: Process Simulation
+    icon: calculator
+    pyqt6:
+      module: financial_calculator.ui.pyqt6.main_window
+      class: FinancialCalculatorMainWindow
+      dependencies:
+        - PyQt6
+        - numpy
+      settings_app: FinancialCalculator
+    engine:
+      module: upstream_drift_tools.process_calculators.financial_calculator
+      class: FinancialModelCalculator
+    web:
+      port: 5173
+      auto_open_browser: false
+
+  - tool_name: flow_rate_converter
+    name: Flow Rate Converter
+    description: Convert between mass, molar, and volumetric flow rate units
+    category: Utilities
+    icon: exchange
+    pyqt6:
+      module: flow_rate_converter.ui.pyqt6.main_window
+      class: FlowRateConverterWindow
+      dependencies:
+        - PyQt6
+      settings_app: FlowRateConverter
+
+  - tool_name: folder_packer_pro
+    name: Folder Packer Pro
+    description: Professional Project Archiving and Distribution Tool
+    category: Development Tools
+    icon: package
+    pyqt6:
+      module: folder_packer_pro.app
+      class: FolderPackerPro
+      dependencies:
+        - tkinter
+        - cryptography
+
+  - tool_name: folder_tool
+    name: Folder Tool (Utility)
+    description: Directory Management Utility
+    category: Development Tools
+    icon: folder
+    pyqt6:
+      module: Folders_Tool_r0
+      class: FolderTool
+      dependencies:
+        - tkinter
+
+  - tool_name: function_generator
+    name: Function Generator
+    description: Generate and visualize various waveforms (sine, square, triangle, etc.)
+    category: Signal Processing
+    icon: wave
+    pyqt6:
+      module: function_generator.python.function_generator.ui.pyqt6.main_window
+      class: FunctionGeneratorWidget
+      dependencies:
+        - PyQt6
+        - matplotlib
+        - numpy
+      settings_app: FunctionGenerator
+      min_size: [1200, 700]
+    web:
+      port: 5174
+      auto_open_browser: true
+
+  - tool_name: humanoid_builder_gui
+    name: Humanoid Character Builder
+    description: Build parametric humanoid characters with anthropometric calculations
+    category: Robotics
+    icon: person
+    pyqt6:
+      module: humanoid_builder_gui.ui.pyqt6.main_window
+      class: HumanoidBuilderWindow
+      dependencies:
+        - PyQt6
+      settings_app: HumanoidBuilder
+
+  - tool_name: inertia_calculator
+    name: Inertia Calculator
+    description: Calculate and validate inertia tensors for rigid bodies
+    category: Robotics
+    icon: cube
+    pyqt6:
+      module: inertia_calculator.ui.pyqt6.main_window
+      class: InertiaCalculatorWindow
+      dependencies:
+        - PyQt6
+        - numpy
+      settings_app: InertiaCalculator
+
+  - tool_name: lower_body_model
+    name: Lower Body Model
+    description: Simulate and inspect lower-body MuJoCo kinematics and controls
+    category: Biomechanics
+    icon: accessibility
+    pyqt6:
+      module: lower_body_model.launch_pyqt6
+      class: ControlPanel
+      dependencies:
+        - PyQt6
+        - mujoco
+        - numpy
+      settings_app: LowerBodyModel
+
+  - tool_name: multi_param_analysis
+    name: Multi-Parameter Analysis
+    description: Run multi-parameter sensitivity analysis with grid evaluation
+    category: Analysis
+    icon: grid
+    pyqt6:
+      module: multi_param_analysis.ui.pyqt6.main_window
+      class: MultiParamAnalysisWindow
+      dependencies:
+        - PyQt6
+        - numpy
+      settings_app: MultiParamAnalysis
+
+  - tool_name: ode_solver
+    name: ODE Solver
+    description: Solve systems of ordinary differential equations symbolically
+    category: Mathematics
+    icon: function
+    pyqt6:
+      module: ode_solver.ui.pyqt6.main_window
+      class: ODESolverWindow
+      dependencies:
+        - PyQt6
+        - numpy
+        - scipy
+        - sympy
+      settings_app: ODESolver
+
+  - tool_name: optimizer_gui
+    name: Adam Optimizer
+    description: Configure and run Adam-based optimization
+    category: Optimization
+    icon: chart-line
+    pyqt6:
+      module: optimizer_gui.ui.pyqt6.main_window
+      class: OptimizerWindow
+      dependencies:
+        - PyQt6
+        - numpy
+      settings_app: OptimizerGui
+
+  - tool_name: pid_generator
+    name: P&ID Generator
+    description: Generate P&ID drawings from YAML specifications (DXF + SVG output)
+    category: Engineering Drafting
+    icon: drafting
+    pyqt6:
+      module: pid_generator.ui.pyqt6.main_window
+      class: PIDGeneratorMainWindow
+      dependencies:
+        - ezdxf
+        - PyQt6
+      settings_app: PIDGenerator
+      min_size: [800, 600]
+
+  - tool_name: pressure_drop_calculator
+    name: Pressure Drop Calculator
+    description: Pipe flow pressure drop analysis with multiple friction methods
+    category: Process Simulation
+    icon: pipe
+    pyqt6:
+      module: >-
+        pressure_drop_calculator.python.pressure_drop_calculator.ui.pyqt6.main_window
+      class: PressureDropCalculatorWidget
+      dependencies:
+        - PyQt6
+        - matplotlib
+      settings_app: PressureDropCalculator
+      min_size: [1100, 700]
+    web:
+      port: 5175
+      auto_open_browser: true
+
+  - tool_name: rotation_converter
+    name: Rotation Converter
+    description: >-
+      Comprehensive rotation and rigid-body transform converter with
+      interactive 3D visualization. Supports quaternions, Euler angles,
+      rotation matrices, axis-angle, SE(3), twists, screw axes, and
+      frame-aware transforms.
+    category: Robotics
+    icon: rotate
+    pyqt6:
+      module: rotation_converter.ui.pyqt6.main_window
+      class: RotationConverterMainWindow
+      dependencies:
+        - PyQt6
+        - matplotlib
+      settings_app: RotationConverter
+      min_size: [1200, 800]
+    web:
+      port: 5192
+      auto_open_browser: true
+
+  - tool_name: signal_processing_studio
+    name: Signal Processing Studio
+    description: >-
+      Unified signal processing: waveform generation, analysis, filtering,
+      curve fitting
+    category: Signal Processing
+    icon: signal
+    pyqt6:
+      module: signal_processing_studio.main_window
+      class: SignalProcessingStudioWindow
+      dependencies:
+        - PyQt6
+        - matplotlib
+        - numpy
+        - scipy
+        - sympy
+      settings_app: SignalProcessingStudio
+
+  - tool_name: steam_engine_calculator
+    name: Steam Engine Calculator
+    description: Calculate thermodynamic properties of steam/water
+    category: Thermodynamics
+    icon: steam
+    pyqt6:
+      module: steam_engine_calculator.ui.pyqt6.main_window
+      class: SteamEngineCalculatorWindow
+      dependencies:
+        - PyQt6
+        - numpy
+      settings_app: SteamEngineCalculator
+
+  - tool_name: urdf_builder_gui
+    name: Parametric URDF Builder
+    description: Generate parametric URDF models for robotics applications
+    category: Robotics
+    icon: robot
+    pyqt6:
+      module: urdf_builder_gui.ui.pyqt6.main_window
+      class: URDFBuilderWindow
+      dependencies:
+        - PyQt6
+      settings_app: URDFBuilder
+
+  - tool_name: vessel_drafter
+    name: Vessel Drafter
+    description: Refractory vessel design with STEP, STL, BREP, and GLTF export
+    category: Process Simulation
+    icon: vessel
+    pyqt6:
+      module: vessel_drafter.gui.vessel_drafter_window
+      class: VesselDrafterWindow
+      dependencies:
+        - PyQt6
+        - numpy
+        - matplotlib
+        - build123d
+      settings_app: VesselDrafter
+      min_size: [1400, 900]
+
+  - tool_name: video_analyzer
+    name: Video Analyzer
+    description: Video-based motion analysis with pose tracking
+    category: Motion Capture
+    icon: video
+    pyqt6:
+      module: video_analyzer.launch_video_analyzer
+      class: main
+      dependencies:
+        - PyQt6
+        - cv2
+        - mediapipe
+      settings_app: VideoAnalyzer
+
+  - tool_name: video_processor
+    name: Video Processor
+    description: Video file format conversion, frame extraction, and media analysis
+    category: Media Processing
+    icon: video
+    web:
+      path: apps/web
+      port: 3001
+      auto_open_browser: true
+
+  - tool_name: data_explorer
+    name: Data Explorer
+    description: Import, filter, and visualise simulation datasets
+    category: Analysis
+    icon: table
+    pyqt6:
+      module: data_explorer.gui
+      class: DataExplorerWindow
+      dependencies:
+        - PyQt6
+        - pandas
+        - numpy
+      settings_app: DataExplorer

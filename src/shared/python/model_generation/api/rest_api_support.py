@@ -1,0 +1,123 @@
+"""Shared helpers for model_generation API route handlers."""
+
+from __future__ import annotations
+
+import tempfile
+from collections.abc import Iterator
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Any
+
+from model_generation.api.rest_api_contracts import APIRequest, APIResponse
+
+MAX_MESH_UPLOAD_BYTES = 10 * 1024 * 1024
+ALLOWED_MESH_SUFFIXES = {".stl", ".obj", ".ply", ".off", ".dae", ".glb", ".gltf"}
+
+
+def ensure_request(request: APIRequest | None) -> APIRequest:
+    """Validate that a framework-neutral request object is present."""
+    if request is None:
+        raise ValueError("request must be provided")
+    return request
+
+
+def request_body(request: APIRequest) -> dict[str, Any]:
+    """Return a mutable request-body mapping, defaulting to an empty dict."""
+    ensure_request(request)
+    return request.body or {}
+
+
+def request_file_text(
+    request: APIRequest,
+    *,
+    file_key: str = "file",
+    encoding: str = "utf-8",
+) -> str | None:
+    """Decode uploaded file content as text when present."""
+    uploaded_file = ensure_request(request).files.get(file_key)
+    if uploaded_file is None:
+        return None
+    decoded: str = uploaded_file.decode(encoding, errors="ignore")
+    return decoded
+
+
+def request_content(
+    request: APIRequest,
+    *,
+    body_key: str = "content",
+    file_key: str = "file",
+) -> str | None:
+    """Read content from the JSON body first, then from the uploaded file."""
+    body = request_body(request)
+    body_content = body.get(body_key)
+    return (
+        body_content if body_content else request_file_text(request, file_key=file_key)
+    )
+
+
+def download_requested(request: APIRequest) -> bool:
+    """Return whether the caller requested a file download response."""
+    requested: bool = ensure_request(request).query_params.get("download") == "true"
+    return requested
+
+
+def maybe_file_response(
+    request: APIRequest,
+    *,
+    content: str | bytes,
+    filename: str,
+    payload: dict[str, Any],
+    content_type: str = "application/xml",
+) -> APIResponse:
+    """Return either a file response or a JSON payload based on query params."""
+    if download_requested(request):
+        return APIResponse.file(content, filename, content_type=content_type)
+    return APIResponse.ok(payload)
+
+
+@contextmanager
+def temporary_payload_file(
+    *,
+    payload: str | bytes,
+    suffix: str,
+    text_mode: bool = False,
+) -> Iterator[Path]:
+    """Persist payload content to a temporary file and remove it afterward."""
+    mode = "w" if text_mode else "wb"
+    with tempfile.NamedTemporaryFile(mode=mode, suffix=suffix, delete=False) as handle:
+        handle.write(payload)
+        temp_path = Path(handle.name)
+    try:
+        yield temp_path
+    finally:
+        temp_path.unlink(missing_ok=True)
+
+
+def validate_mesh_upload(
+    *,
+    payload: bytes,
+    filename: str | None = None,
+) -> None:
+    """Validate mesh upload metadata and size before parser handoff."""
+    if not payload:
+        raise ValueError("Mesh file is empty")
+    if len(payload) > MAX_MESH_UPLOAD_BYTES:
+        raise ValueError(
+            f"Mesh file exceeds {MAX_MESH_UPLOAD_BYTES // (1024 * 1024)} MiB limit"
+        )
+    if filename:
+        suffix = Path(filename).suffix.lower()
+        if suffix not in ALLOWED_MESH_SUFFIXES:
+            raise ValueError(f"Unsupported mesh file type: {suffix}")
+
+
+def inertia_payload(inertia: Any) -> dict[str, float]:
+    """Serialize inertia-like objects into API response primitives."""
+    return {
+        "ixx": inertia.ixx,
+        "iyy": inertia.iyy,
+        "izz": inertia.izz,
+        "ixy": inertia.ixy,
+        "ixz": inertia.ixz,
+        "iyz": inertia.iyz,
+    }

@@ -1,0 +1,61 @@
+"""Immutable data model for Jupyter notebooks rendered in Sidekick.
+
+This module has no Qt dependency. It models the subset of the nbformat
+schema that Phase 1 of the Sidekick Jupyter tab consumes (markdown,
+code, and raw cells plus minimal output records). The model is the
+boundary the Qt widget reads from, so widgets never reach into raw
+nbformat structures (Law of Demeter).
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Literal
+
+
+@dataclass(frozen=True, slots=True)
+class CellOutput:
+    """A single text/plain output rendered inside a code cell.
+
+    Phase 1 only renders text outputs (stream + plain text result).
+    Rich outputs (HTML, images, widgets) are not modeled yet; they
+    are surfaced as placeholders by the widget layer.
+    """
+
+    text: str
+    output_type: str = "stream"
+
+
+@dataclass(frozen=True, slots=True)
+class MarkdownCell:
+    """A markdown cell."""
+
+    source: str
+    cell_type: Literal["markdown"] = "markdown"
+
+
+@dataclass(frozen=True, slots=True)
+class CodeCell:
+    """A code cell with zero or more recorded outputs."""
+
+    source: str
+    outputs: tuple[CellOutput, ...] = ()
+    cell_type: Literal["code"] = "code"
+
+
+@dataclass(frozen=True, slots=True)
+class RawCell:
+    """A raw cell (passthrough text)."""
+
+    source: str
+    cell_type: Literal["raw"] = "raw"
+
+
+NotebookCell = MarkdownCell | CodeCell | RawCell
+
+
+@dataclass(frozen=True, slots=True)
+class NotebookDocument:
+    """An immutable in-memory representation of a parsed notebook."""
+
+    cells: tuple[NotebookCell, ...] = field(default_factory=tuple)

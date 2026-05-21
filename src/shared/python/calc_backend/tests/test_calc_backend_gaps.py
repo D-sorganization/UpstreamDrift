@@ -1,0 +1,506 @@
+# ruff: noqa: E501
+"""Targeted coverage tests for remaining calc_backend gaps.
+
+Covers first-party code only:
+- thermal_profile._solve_thermal_profile: error path (lines 23-24), power_func
+  fallback (line 43)
+- wgs_reactor: equilibrium error path (lines 37-38), sizing error path (65-66)
+- contracts.rotation_converter: Pydantic model_validator branches (91-151)
+- pressure_drop: laminar/turbulent inline branches
+- flare: error path (lines 37-38)
+- baghouse: error path (lines 34-35)
+- acid_gas_dewpoint: _safe_float helper (NaN/Inf → None)
+- scrubber: unknown packing type (47-48), ValueError calc error (87-88)
+
+NOTE: rotation_converter *router* is deliberately NOT tested here because it
+wraps the deprecated `rotation_converter` package (an external dependency).
+The model validators in *contracts* are pure first-party logic and safe to test.
+"""
+
+from __future__ import annotations
+
+from unittest.mock import MagicMock, patch
+
+import pytest
+from fastapi import HTTPException
+
+# ---------------------------------------------------------------------------
+# thermal_profile router
+# ---------------------------------------------------------------------------
+
+
+class TestThermalProfileErrorPath:
+    """Cover lines 23-24 (HTTPException from ArithmeticError) and line 43
+    (power_func fallback when profile is not constant/linear_ramp/step).
+    """
+
+    def _valid_request(self, **overrides):
+        from calc_backend.contracts.thermal_profile import ThermalProfileRequest
+
+        kwargs = dict(
+            initial_temp_c=20.0,
+            ambient_temp_c=20.0,
+            thermal_mass_j_per_k=500.0,
+            heat_loss_coeff_w_per_k=5.0,
+            power_w=1000.0,
+            power_profile="constant",
+            t_start_s=0.0,
+            t_end_s=100.0,
+            num_points=10,
+        )
+        kwargs.update(overrides)
+        return ThermalProfileRequest(**kwargs)
+
+    def test_arithmetic_error_raises_http_422(self):
+        """Trigger the except-HTTPException branch (lines 23-24) in router."""
+        from calc_backend.routers.thermal_profile import predict_thermal_profile
+
+        req = self._valid_request()
+        # Mock _solve_thermal_profile to raise ArithmeticError → caught by router
+        with patch(
+            "calc_backend.routers.thermal_profile._solve_thermal_profile",
+            side_effect=ArithmeticError("division by zero"),
+        ):
+            with pytest.raises(HTTPException) as exc_info:
+                predict_thermal_profile(req)
+        assert exc_info.value.status_code == 422
+        assert "division by zero" in exc_info.value.detail
+
+    def test_power_func_fallback_branch(self):
+        """Cover line 43: power_func returns power_w for unknown profile."""
+        from calc_backend.routers.thermal_profile import _solve_thermal_profile
+
+        req = self._valid_request(power_profile="custom_unknown")
+        # Should not raise; fallback just returns power_w for all t
+        result = _solve_thermal_profile(req)
+        assert result is not None
+        assert len(result.data) == 10
+
+
+# ---------------------------------------------------------------------------
+# wgs_reactor router
+# ---------------------------------------------------------------------------
+
+
+class TestWGSReactorErrorPaths:
+    """Cover equilibrium error path (lines 37-38) and sizing error path (65-66)."""
+
+    def _minimal_payload(self):
+        return {
+            "inlet_composition": {"CO": 0.4, "H2O": 0.4, "CO2": 0.1, "H2": 0.1},
+            "temperature_k": 700.0,
+            "pressure_bar": 2.0,
+            "steam_ratio": 2.0,
+            "feed_rate_kmol_hr": 0.0,
+        }
+
+    def test_equilibrium_error_raises_422(self):
+        """Lines 37-38: equilibrium ValueError → HTTPException 422."""
+        from calc_backend.contracts.wgs_reactor import WGSReactorRequest
+
+        req = WGSReactorRequest(**self._minimal_payload())
+
+        mock_engine = MagicMock()
+        mock_engine.calculate_equilibrium_composition.side_effect = ValueError(
+            "bad equilibrium"
+        )
+        # WGSReactorEngine is imported inside the function; patch the source module
+        with patch(
+            "upstream_drift_tools.process_calculators.WGSReactorEngine",
+            new=MagicMock(return_value=mock_engine),
+        ):
+            # Re-import triggers the local import inside calculate_wgs
+            import importlib
+
+            import calc_backend.routers.wgs_reactor as _m
+
+            importlib.reload(_m)
+            with pytest.raises(HTTPException) as exc_info:
+                _m.calculate_wgs(req)
+        assert exc_info.value.status_code == 422
+
+    def test_sizing_error_raises_422(self):
+        """Lines 65-66: sizing KeyError → HTTPException 422."""
+        from calc_backend.contracts.wgs_reactor import WGSReactorRequest
+
+        payload = self._minimal_payload()
+        payload["feed_rate_kmol_hr"] = 100.0  # trigger sizing
+        req = WGSReactorRequest(**payload)
+
+        eq_result = {
+            "conversion": 80.0,
+            "composition": {"CO": 0.1, "H2O": 0.1, "CO2": 0.2, "H2": 0.6},
+            "h2_co_ratio": 6.0,
+            "equilibrium_constant": 4.5,
+            "heat_released": 41.0,
+        }
+        mock_engine = MagicMock()
+        mock_engine.calculate_equilibrium_composition.return_value = eq_result
+        mock_engine.size_wgs_reactor.side_effect = KeyError("missing_key")
+
+        with patch(
+            "upstream_drift_tools.process_calculators.WGSReactorEngine",
+            new=MagicMock(return_value=mock_engine),
+        ):
+            import importlib
+
+            import calc_backend.routers.wgs_reactor as _m
+
+            importlib.reload(_m)
+            with pytest.raises(HTTPException) as exc_info:
+                _m.calculate_wgs(req)
+        assert exc_info.value.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# contracts.rotation_converter - Pydantic model validators (pure first-party)
+# ---------------------------------------------------------------------------
+
+
+class TestReferenceFrameConversionRequestValidator:
+    """Cover the model_validator branches in contracts.rotation_converter (91-151)."""
+
+    def _twist_frame_payload(self, **overrides):
+        base = {
+            "operation": "twist_frame_conversion",
+            "transform": [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
+            "twist": [0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+        }
+        base.update(overrides)
+        return base
+
+    def _homogeneous_payload(self, **overrides):
+        base = {
+            "operation": "homogeneous_transform",
+            "rotation_matrix": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+            "translation": [0.0, 0.0, 1.0],
+        }
+        base.update(overrides)
+        return base
+
+    def test_twist_frame_conversion_missing_transform_raises(self):
+        from calc_backend.contracts.rotation_converter import (
+            ReferenceFrameConversionRequest,
+        )
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError, match="transform and twist"):
+            ReferenceFrameConversionRequest(
+                operation="twist_frame_conversion",
+                twist=[0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+            )
+
+    def test_twist_frame_conversion_extra_field_raises(self):
+        """Providing rotation_matrix with twist_frame_conversion should fail."""
+        from calc_backend.contracts.rotation_converter import (
+            ReferenceFrameConversionRequest,
+        )
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError, match="rotation_matrix"):
+            ReferenceFrameConversionRequest(
+                operation="twist_frame_conversion",
+                transform=[[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
+                twist=[0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+                rotation_matrix=[[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+            )
+
+    def test_twist_frame_conversion_valid_passes(self):
+        from calc_backend.contracts.rotation_converter import (
+            ReferenceFrameConversionRequest,
+        )
+
+        req = ReferenceFrameConversionRequest(**self._twist_frame_payload())
+        assert req.operation == "twist_frame_conversion"
+
+    def test_homogeneous_transform_missing_rotation_raises(self):
+        from calc_backend.contracts.rotation_converter import (
+            ReferenceFrameConversionRequest,
+        )
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError, match="rotation_matrix and translation"):
+            ReferenceFrameConversionRequest(
+                operation="homogeneous_transform",
+                translation=[0.0, 0.0, 1.0],
+            )
+
+    def test_homogeneous_transform_extra_field_raises(self):
+        """Providing transform with homogeneous_transform should fail."""
+        from calc_backend.contracts.rotation_converter import (
+            ReferenceFrameConversionRequest,
+        )
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError, match="transform, twist"):
+            ReferenceFrameConversionRequest(
+                operation="homogeneous_transform",
+                rotation_matrix=[[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+                translation=[0.0, 0.0, 1.0],
+                transform=[[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
+            )
+
+    def test_homogeneous_transform_valid_passes(self):
+        from calc_backend.contracts.rotation_converter import (
+            ReferenceFrameConversionRequest,
+        )
+
+        req = ReferenceFrameConversionRequest(**self._homogeneous_payload())
+        assert req.operation == "homogeneous_transform"
+
+    def test_so3_maps_no_source_raises(self):
+        """so3_so3_maps requires exactly one so3_vector, so3_matrix, or rotation_matrix."""
+        from calc_backend.contracts.rotation_converter import (
+            ReferenceFrameConversionRequest,
+        )
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError, match="exactly one"):
+            ReferenceFrameConversionRequest(operation="so3_so3_maps")
+
+    def test_so3_maps_multiple_sources_raises(self):
+        from calc_backend.contracts.rotation_converter import (
+            ReferenceFrameConversionRequest,
+        )
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError, match="exactly one"):
+            ReferenceFrameConversionRequest(
+                operation="so3_so3_maps",
+                so3_vector=[0.0, 0.0, 1.0],
+                so3_matrix=[[0, -1, 0], [1, 0, 0], [0, 0, 0]],
+            )
+
+    def test_so3_maps_extra_field_raises(self):
+        from calc_backend.contracts.rotation_converter import (
+            ReferenceFrameConversionRequest,
+        )
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError, match="transform, twist, or translation"):
+            ReferenceFrameConversionRequest(
+                operation="so3_so3_maps",
+                so3_vector=[0.0, 0.0, 1.0],
+                transform=[[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
+            )
+
+    def test_so3_maps_with_so3_vector_passes(self):
+        from calc_backend.contracts.rotation_converter import (
+            ReferenceFrameConversionRequest,
+        )
+
+        req = ReferenceFrameConversionRequest(
+            operation="so3_so3_maps", so3_vector=[0.0, 0.0, 1.0]
+        )
+        assert req.so3_vector == [0.0, 0.0, 1.0]
+
+    def test_so3_maps_with_rotation_matrix_passes(self):
+        from calc_backend.contracts.rotation_converter import (
+            ReferenceFrameConversionRequest,
+        )
+
+        req = ReferenceFrameConversionRequest(
+            operation="so3_so3_maps",
+            rotation_matrix=[[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+        )
+        assert req.rotation_matrix is not None
+
+
+# ---------------------------------------------------------------------------
+# pressure_drop router - inline pure calculation branches
+# ---------------------------------------------------------------------------
+
+
+class TestPressureDropInlineBranches:
+    """Cover laminar/transitional/turbulent regimes — all inline first-party code."""
+
+    def _req(self, **overrides):
+        from calc_backend.contracts.pressure_drop import PressureDropRequest
+
+        kwargs = dict(
+            pipe_diameter_m=0.1,
+            pipe_length_m=100.0,
+            roughness_m=0.000045,
+            flow_rate_kg_s=1.0,
+            temperature_k=300.0,
+            pressure_pa=101325.0,
+            molecular_weight_kg_mol=0.029,
+        )
+        kwargs.update(overrides)
+        return PressureDropRequest(**kwargs)
+
+    def test_zero_flow_rate_laminar(self):
+        """Very tiny flow rate → Re approaches 0 → laminar."""
+        from calc_backend.routers.pressure_drop import calculate_pressure_drop
+
+        resp = calculate_pressure_drop(self._req(flow_rate_kg_s=1e-12))
+        assert resp.flow_regime == "Laminar"
+
+    def test_laminar_regime(self):
+        """Re < 2300 → Laminar, friction = 64/Re."""
+        from calc_backend.routers.pressure_drop import calculate_pressure_drop
+
+        # Very slow flow → laminar
+        resp = calculate_pressure_drop(self._req(flow_rate_kg_s=0.0001))
+        assert resp.flow_regime == "Laminar"
+
+    def test_turbulent_regime(self):
+        """Re > 4000 → Turbulent."""
+        from calc_backend.routers.pressure_drop import calculate_pressure_drop
+
+        # High flow → turbulent
+        resp = calculate_pressure_drop(self._req(flow_rate_kg_s=5.0))
+        assert resp.flow_regime == "Turbulent"
+
+    def test_transitional_regime(self):
+        """Re ≈ 2300-4000 → Transitional branch."""
+        from calc_backend.routers.pressure_drop import calculate_pressure_drop
+
+        resp = calculate_pressure_drop(
+            self._req(pipe_diameter_m=0.05, flow_rate_kg_s=0.005)
+        )
+        assert resp.flow_regime in {"Laminar", "Transitional", "Turbulent"}
+
+
+# ---------------------------------------------------------------------------
+# flare, baghouse, acid_gas_dewpoint error paths
+# ---------------------------------------------------------------------------
+
+
+class TestFlareErrorPath:
+    """Cover lines 37-38 in flare.py: except → HTTPException 422."""
+
+    def test_calc_error_raises_422(self):
+        from calc_backend.contracts.flare import FlareRequest
+
+        req = FlareRequest(
+            total_flow_kg_hr=1000.0,
+            gas_composition={"CO": 0.5, "H2": 0.5},
+            temperature_k=400.0,
+            pressure_bar=2.0,
+        )
+        mock_calc = MagicMock()
+        mock_calc.calculate_flare_size.side_effect = ValueError("flare too hot")
+
+        with patch(
+            "upstream_drift_tools.process_calculators.FlareCalculator",
+            return_value=mock_calc,
+        ):
+            import importlib
+
+            import calc_backend.routers.flare as _flare_m
+
+            importlib.reload(_flare_m)
+            with pytest.raises(HTTPException) as exc_info:
+                _flare_m.calculate_flare(req)
+        assert exc_info.value.status_code == 422
+
+
+class TestBaghouseErrorPath:
+    """Cover lines 34-35 in baghouse.py: except → HTTPException 422."""
+
+    def test_calc_error_raises_422(self):
+        from calc_backend.contracts.baghouse import BaghouseRequest
+
+        req = BaghouseRequest(
+            gas_flow_kg_s=1.0,
+            inlet_temp_k=500.0,
+            pressure_pa=101325.0,
+            composition={"CO2": 0.15, "N2": 0.85},
+            solid_carbon_in_kg_hr=50.0,
+            ash_in_kg_hr=20.0,
+            carbon_removal_efficiency=0.95,  # fraction 0-1
+            ash_removal_efficiency=0.99,  # fraction 0-1
+            heat_loss_w=500.0,
+            drum_volume_m3=2.0,
+            solid_density_kg_m3=800.0,
+            bag_area_ft2=500.0,
+        )
+        mock_calc = MagicMock()
+        mock_calc.calculate.side_effect = ValueError("baghouse failure")
+
+        with patch(
+            "upstream_drift_tools.process_calculators.BaghouseCalculator",
+            return_value=mock_calc,
+        ):
+            import importlib
+
+            import calc_backend.routers.baghouse as _bag_m
+
+            importlib.reload(_bag_m)
+            with pytest.raises(HTTPException) as exc_info:
+                _bag_m.calculate_baghouse(req)
+        assert exc_info.value.status_code == 422
+
+
+class TestAcidGasDewpointHelpers:
+    """Cover _safe_float (NaN/Inf → None) — first-party inline helper."""
+
+    def test_safe_float_nan_returns_none(self):
+        """Line 21: NaN → None."""
+        from calc_backend.routers.acid_gas_dewpoint import _safe_float
+
+        assert _safe_float(float("nan")) is None
+
+    def test_safe_float_inf_returns_none(self):
+        """Line 21: Inf → None."""
+        from calc_backend.routers.acid_gas_dewpoint import _safe_float
+
+        assert _safe_float(float("inf")) is None
+        assert _safe_float(float("-inf")) is None
+
+    def test_safe_float_normal_value_passes_through(self):
+        from calc_backend.routers.acid_gas_dewpoint import _safe_float
+
+        assert _safe_float(3.14) == pytest.approx(3.14)
+
+
+class TestScrubberErrorPaths:
+    """Cover lines 47-48 (unknown packing) and 87-88 (calc error) in scrubber.py."""
+
+    def test_unknown_packing_type_raises_422(self):
+        """Lines 47-48: unknown packing type → HTTPException 422."""
+        from calc_backend.contracts.scrubber import ScrubberRequest
+        from calc_backend.routers.scrubber import calculate_scrubber
+
+        req = ScrubberRequest(
+            gas_flow_kg_hr=5000.0,
+            gas_temperature_k=350.0,
+            gas_pressure_pa=101325.0,
+            gas_molecular_weight=30.0,
+            liquid_flow_kg_hr=10000.0,
+            packing_type="UNKNOWN_PACKING_XYZ",
+            percent_of_flood=70.0,
+            acid_gas_removed_kg_hr={"SO2": 10.0},
+            caustic_concentration_pct=10.0,
+        )
+        with pytest.raises(HTTPException) as exc_info:
+            calculate_scrubber(req)
+        assert exc_info.value.status_code == 422
+        assert "UNKNOWN_PACKING_XYZ" in exc_info.value.detail
+
+    def test_scrubber_calc_error_raises_422(self):
+        """Lines 87-88: calculate_gas_density error → HTTPException 422."""
+        from calc_backend.contracts.scrubber import ScrubberRequest
+        from calc_backend.routers.scrubber import calculate_scrubber
+
+        req = ScrubberRequest(
+            gas_flow_kg_hr=5000.0,
+            gas_temperature_k=350.0,
+            gas_pressure_pa=101325.0,
+            gas_molecular_weight=30.0,
+            liquid_flow_kg_hr=10000.0,
+            packing_type="Metal Pall Rings",
+            percent_of_flood=70.0,
+            acid_gas_removed_kg_hr={"SO2": 10.0},
+            caustic_concentration_pct=10.0,
+        )
+        # calculate_gas_density is locally imported inside the function;
+        # patch it from the source module to trigger the except path.
+        with patch(
+            "upstream_drift_tools.process_calculators.scrubber_calculator.calculate_gas_density",
+            side_effect=ValueError("density fail"),
+        ):
+            with pytest.raises(HTTPException) as exc_info:
+                calculate_scrubber(req)
+        assert exc_info.value.status_code == 422

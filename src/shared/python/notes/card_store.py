@@ -1,0 +1,266 @@
+"""Markdown note-card storage with reversible deletion."""
+
+from __future__ import annotations
+
+import datetime as dt
+import json
+import shutil
+from pathlib import Path
+from uuid import uuid4
+
+from .models import DEFAULT_NOTE_COLOR, NoteCard, NotesBoardSettings, RecycledNoteItem
+
+UTC = getattr(dt, "UTC", dt.timezone.utc)  # noqa: UP017
+META_START = "<!-- notes-card-meta"
+META_END = "-->"
+
+
+class NoteCardStore:
+    """Persist visual markdown note cards below a project directory."""
+
+    def __init__(
+        self,
+        project_dir: Path | str,
+        notes_dirname: str = "project.notes",
+        legacy_notes_filename: str = "project.notes.txt",
+        recycle_bin_dirname: str = ".notes_recycle_bin",
+    ) -> None:
+        self.project_dir = Path(project_dir)
+        if not self.project_dir.exists() or not self.project_dir.is_dir():
+            raise ValueError("project_dir must exist and be a directory")
+        self.notes_dir = self.project_dir / notes_dirname
+        self.settings_path = self.notes_dir / "board.json"
+        self.legacy_notes_path = self.project_dir / legacy_notes_filename
+        self.recycle_bin_dir = self.project_dir / recycle_bin_dirname
+        self.recycle_index_path = self.recycle_bin_dir / "index.json"
+
+    def create_note(
+        self,
+        title: str,
+        markdown_body: str,
+        *,
+        color: str = DEFAULT_NOTE_COLOR,
+        tags: tuple[str, ...] = (),
+    ) -> NoteCard:
+        """Create and persist a note with generated stable path-safe ID."""
+        now = _timestamp()
+        card = NoteCard(
+            note_id=_new_note_id(),
+            title=title,
+            markdown_body=markdown_body,
+            color=color,
+            created_at=now,
+            updated_at=now,
+            tags=tags,
+        )
+        return self.save_note(card)
+
+    def save_note(self, card: NoteCard) -> NoteCard:
+        """Persist an existing note card as a markdown file."""
+        if card is None:
+            raise ValueError("card must be provided")
+        self.notes_dir.mkdir(parents=True, exist_ok=True)
+        self._note_path(card.note_id).write_text(_card_to_markdown(card), "utf-8")
+        return card
+
+    def update_note(
+        self,
+        note_id: str,
+        *,
+        title: str,
+        markdown_body: str,
+        color: str = DEFAULT_NOTE_COLOR,
+        tags: tuple[str, ...] = (),
+    ) -> NoteCard:
+        """Update an existing note while preserving its ID and created timestamp."""
+        existing = self.load_note(note_id)
+        if existing is None:
+            raise FileNotFoundError("note card does not exist")
+        return self.save_note(
+            NoteCard(
+                note_id=existing.note_id,
+                title=title,
+                markdown_body=markdown_body,
+                color=color,
+                created_at=existing.created_at,
+                updated_at=_timestamp(),
+                tags=tags,
+            )
+        )
+
+    def load_note(self, note_id: str) -> NoteCard | None:
+        """Load one card by ID, or return None when it does not exist."""
+        path = self._note_path(note_id)
+        if not path.exists():
+            return None
+        return _card_from_markdown(path.read_text("utf-8"))
+
+    def list_notes(self) -> list[NoteCard]:
+        """Return all cards sorted by newest update first."""
+        if not self.notes_dir.exists():
+            return []
+        cards = [
+            _card_from_markdown(path.read_text("utf-8"))
+            for path in self.notes_dir.glob("*.md")
+            if path.is_file()
+        ]
+        return sorted(cards, key=lambda card: card.updated_at, reverse=True)
+
+    def delete_note(
+        self,
+        note_id: str,
+        reason: str = "manual_delete",
+    ) -> RecycledNoteItem:
+        """Move a note markdown file to the recycle bin."""
+        path = self._note_path(note_id)
+        if not path.exists():
+            raise FileNotFoundError("note card does not exist")
+        timestamp = _timestamp(compact=True)
+        item_id = f"{timestamp}_{note_id}"
+        self.recycle_bin_dir.mkdir(parents=True, exist_ok=True)
+        recycle_path = self.recycle_bin_dir / f"{item_id}.md"
+        shutil.move(str(path), str(recycle_path))
+        item = RecycledNoteItem(
+            item_id=item_id,
+            reason=reason,
+            path=str(recycle_path),
+            original_path=str(path),
+            deleted_at=timestamp,
+        )
+        self._append_index(item)
+        return item
+
+    def restore_note(self, item_id: str) -> NoteCard | None:
+        """Restore one recycled markdown note and return the loaded card."""
+        item = self._find_item(item_id)
+        if item is None:
+            return None
+        source = Path(item.path)
+        if not source.exists():
+            return None
+        target = Path(item.original_path)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(source), str(target))
+        self._remove_index(item_id)
+        return _card_from_markdown(target.read_text("utf-8"))
+
+    def latest_recycled_id(self) -> str | None:
+        """Return the newest recycled markdown note id when one exists."""
+        items = [
+            item for item in self._read_index() if item.path.lower().endswith(".md")
+        ]
+        items.sort(key=lambda item: item.deleted_at, reverse=True)
+        return items[0].item_id if items else None
+
+    def load_settings(self) -> NotesBoardSettings:
+        """Load persisted board settings or defaults."""
+        if not self.settings_path.exists():
+            return NotesBoardSettings()
+        data = json.loads(self.settings_path.read_text("utf-8"))
+        return NotesBoardSettings(**data)
+
+    def save_settings(self, settings: NotesBoardSettings) -> NotesBoardSettings:
+        """Persist board visual settings."""
+        if settings is None:
+            raise ValueError("settings must be provided")
+        self.notes_dir.mkdir(parents=True, exist_ok=True)
+        self.settings_path.write_text(json.dumps(settings.__dict__, indent=2), "utf-8")
+        return settings
+
+    def migrate_legacy_text_note(self) -> NoteCard | None:
+        """Create one markdown card from project.notes.txt when no cards exist."""
+        if self.list_notes() or not self.legacy_notes_path.exists():
+            return None
+        body = self.legacy_notes_path.read_text("utf-8")
+        if not body:
+            return None
+        return self.create_note("Project Notes", body)
+
+    def _note_path(self, note_id: str) -> Path:
+        note = NoteCard(
+            note_id=note_id,
+            title="validation",
+            markdown_body="",
+            created_at="",
+            updated_at="",
+        )
+        return self.notes_dir / f"{note.note_id}.md"
+
+    def _read_index(self) -> list[RecycledNoteItem]:
+        if not self.recycle_index_path.exists():
+            return []
+        return [
+            RecycledNoteItem(**item)
+            for item in json.loads(self.recycle_index_path.read_text("utf-8"))
+        ]
+
+    def _write_index(self, items: list[RecycledNoteItem]) -> None:
+        self.recycle_bin_dir.mkdir(parents=True, exist_ok=True)
+        self.recycle_index_path.write_text(
+            json.dumps([item.__dict__ for item in items], indent=2),
+            "utf-8",
+        )
+
+    def _append_index(self, item: RecycledNoteItem) -> None:
+        items = self._read_index()
+        items.append(item)
+        self._write_index(items)
+
+    def _find_item(self, item_id: str) -> RecycledNoteItem | None:
+        if not item_id or not item_id.strip():
+            raise ValueError("item_id cannot be empty")
+        for item in self._read_index():
+            if item.item_id == item_id:
+                return item
+        return None
+
+    def _remove_index(self, item_id: str) -> None:
+        self._write_index(
+            [item for item in self._read_index() if item.item_id != item_id]
+        )
+
+
+def _card_to_markdown(card: NoteCard) -> str:
+    metadata = {
+        "id": card.note_id,
+        "title": card.title,
+        "color": card.color,
+        "created_at": card.created_at,
+        "updated_at": card.updated_at,
+        "tags": list(card.tags),
+    }
+    return (
+        f"{META_START}\n"
+        f"{json.dumps(metadata, sort_keys=True)}\n"
+        f"{META_END}\n\n"
+        f"{card.markdown_body}"
+    )
+
+
+def _card_from_markdown(text: str) -> NoteCard:
+    if not text.startswith(META_START):
+        raise ValueError("note markdown is missing metadata")
+    metadata_text, _, body = text.partition(f"\n{META_END}\n\n")
+    if not body and not text.endswith(f"\n{META_END}\n\n"):
+        raise ValueError("note markdown metadata is not closed")
+    metadata = json.loads(metadata_text.removeprefix(META_START).strip())
+    return NoteCard(
+        note_id=metadata["id"],
+        title=metadata.get("title", ""),
+        markdown_body=body,
+        color=metadata.get("color", DEFAULT_NOTE_COLOR),
+        created_at=metadata.get("created_at", ""),
+        updated_at=metadata.get("updated_at", ""),
+        tags=tuple(metadata.get("tags", ())),
+    )
+
+
+def _timestamp(*, compact: bool = False) -> str:
+    now = dt.datetime.now(tz=UTC)
+    if compact:
+        return now.strftime("%Y%m%dT%H%M%SZ")
+    return now.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _new_note_id() -> str:
+    return f"note_{uuid4().hex[:16]}"

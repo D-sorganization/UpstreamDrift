@@ -1,0 +1,325 @@
+"""Tests for standardized API response wrapper and error handling."""
+
+from __future__ import annotations
+
+import json
+import re
+from unittest.mock import patch
+
+import pytest
+
+from .standard_response import (
+    ErrorCode,
+    ErrorDetail,
+    ResponseMetadata,
+    StandardResponse,
+    StandardResponseBuilder,
+)
+
+
+class TestErrorCode:
+    """Tests for ErrorCode enum."""
+
+    def test_error_codes_are_strings(self) -> None:
+        """Verify error codes are string enum values."""
+        assert isinstance(ErrorCode.INVALID_INPUT, str)
+        assert ErrorCode.INVALID_INPUT == "INVALID_INPUT"
+        assert ErrorCode.SERVER_ERROR == "SERVER_ERROR"
+
+    def test_all_error_codes_present(self) -> None:
+        """Verify all expected error codes exist."""
+        codes = {code.value for code in ErrorCode}
+        assert "INVALID_INPUT" in codes
+        assert "NOT_FOUND" in codes
+        assert "SERVER_ERROR" in codes
+        assert "CALCULATION_ERROR" in codes
+        assert "CONSTRAINT_VIOLATION" in codes
+
+
+class TestErrorDetail:
+    """Tests for ErrorDetail model."""
+
+    def test_error_detail_creation(self) -> None:
+        """Create an error detail with code and message."""
+        error = ErrorDetail(
+            code=ErrorCode.INVALID_INPUT,
+            message="pipe_diameter_m must be positive",
+        )
+        assert error.code == ErrorCode.INVALID_INPUT
+        assert error.message == "pipe_diameter_m must be positive"
+        assert error.details is None
+
+    def test_error_detail_with_details(self) -> None:
+        """Create error detail with additional context."""
+        error = ErrorDetail(
+            code=ErrorCode.CONSTRAINT_VIOLATION,
+            message="Input violates domain constraints",
+            details="Field: pipe_diameter_m, Value: -0.1",
+        )
+        assert error.details == "Field: pipe_diameter_m, Value: -0.1"
+
+    def test_error_detail_serialization(self) -> None:
+        """Verify error detail serializes to JSON correctly."""
+        error = ErrorDetail(
+            code=ErrorCode.INVALID_INPUT,
+            message="Validation failed",
+            details="Additional info",
+        )
+        data = error.model_dump()
+        assert data["code"] == "INVALID_INPUT"
+        assert data["message"] == "Validation failed"
+        assert data["details"] == "Additional info"
+
+
+class TestResponseMetadata:
+    """Tests for ResponseMetadata model."""
+
+    def test_metadata_creation(self) -> None:
+        """Create response metadata."""
+        metadata = ResponseMetadata(
+            request_id="550e8400-e29b-41d4-a716-446655440000",
+            processing_time_ms=125.5,
+            timestamp_utc="2026-04-30T12:34:56Z",
+        )
+        assert metadata.request_id == "550e8400-e29b-41d4-a716-446655440000"
+        assert metadata.processing_time_ms == 125.5
+        assert metadata.api_version == "v1"
+
+    def test_metadata_custom_api_version(self) -> None:
+        """Create metadata with custom API version."""
+        metadata = ResponseMetadata(
+            request_id="test-id",
+            processing_time_ms=10.0,
+            timestamp_utc="2026-04-30T12:34:56Z",
+            api_version="v2",
+        )
+        assert metadata.api_version == "v2"
+
+    def test_metadata_timestamp_format(self) -> None:
+        """Verify timestamp follows ISO 8601 format."""
+        metadata = ResponseMetadata(
+            request_id="test-id",
+            processing_time_ms=10.0,
+            timestamp_utc="2026-04-30T12:34:56Z",
+        )
+        iso_pattern = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$"
+        assert re.match(iso_pattern, metadata.timestamp_utc)
+
+
+class TestStandardResponse:
+    """Tests for StandardResponse wrapper."""
+
+    def test_success_response_creation(self) -> None:
+        """Create a success response."""
+        data = {"pressure_drop_pa": 1023.4, "velocity": 45.2}
+        metadata = ResponseMetadata(
+            request_id="test-id",
+            processing_time_ms=125.5,
+            timestamp_utc="2026-04-30T12:34:56Z",
+        )
+        response = StandardResponse(
+            status="success",
+            data=data,
+            error=None,
+            metadata=metadata,
+        )
+        assert response.status == "success"
+        assert response.data == data
+        assert response.error is None
+        assert response.metadata.request_id == "test-id"
+
+    def test_error_response_creation(self) -> None:
+        """Create an error response."""
+        error = ErrorDetail(
+            code=ErrorCode.INVALID_INPUT,
+            message="pipe_diameter_m must be positive",
+        )
+        metadata = ResponseMetadata(
+            request_id="test-id",
+            processing_time_ms=5.2,
+            timestamp_utc="2026-04-30T12:34:56Z",
+        )
+        response = StandardResponse(
+            status="error",
+            data=None,
+            error=error,
+            metadata=metadata,
+        )
+        assert response.status == "error"
+        assert response.data is None
+        assert response.error.code == ErrorCode.INVALID_INPUT
+
+    def test_response_json_serialization(self) -> None:
+        """Verify response serializes to JSON correctly."""
+        data = {"result": 42}
+        metadata = ResponseMetadata(
+            request_id="test-id",
+            processing_time_ms=10.0,
+            timestamp_utc="2026-04-30T12:34:56Z",
+        )
+        response = StandardResponse(
+            status="success",
+            data=data,
+            error=None,
+            metadata=metadata,
+        )
+        json_str = response.model_dump_json()
+        parsed = json.loads(json_str)
+        assert parsed["status"] == "success"
+        assert parsed["data"] == data
+        assert parsed["error"] is None
+
+    def test_status_validation(self) -> None:
+        """Verify status must be 'success' or 'error'."""
+        metadata = ResponseMetadata(
+            request_id="test-id",
+            processing_time_ms=10.0,
+            timestamp_utc="2026-04-30T12:34:56Z",
+        )
+        with pytest.raises(ValueError):
+            StandardResponse(
+                status="pending",  # Invalid
+                data=None,
+                error=None,
+                metadata=metadata,
+            )
+
+
+class TestStandardResponseBuilder:
+    """Tests for StandardResponseBuilder."""
+
+    def test_builder_success_response(self) -> None:
+        """Build a success response."""
+        builder = StandardResponseBuilder()
+        data = {"pressure_drop_pa": 1023.4}
+        response = builder.success(data=data)
+
+        assert response.status == "success"
+        assert response.data == data
+        assert response.error is None
+        assert response.metadata.request_id is not None
+        assert response.metadata.processing_time_ms >= 0
+
+    def test_builder_error_response(self) -> None:
+        """Build an error response."""
+        builder = StandardResponseBuilder()
+        response = builder.error(
+            code=ErrorCode.INVALID_INPUT,
+            message="Invalid input provided",
+            details="Field: pipe_diameter_m",
+        )
+
+        assert response.status == "error"
+        assert response.data is None
+        assert response.error.code == ErrorCode.INVALID_INPUT
+        assert response.error.message == "Invalid input provided"
+        assert response.error.details == "Field: pipe_diameter_m"
+
+    def test_builder_request_id_consistent(self) -> None:
+        """Verify request_id is consistent for builder instance."""
+        builder = StandardResponseBuilder()
+        success_response = builder.success(data={"test": 1})
+        error_response = builder.error(
+            code=ErrorCode.SERVER_ERROR,
+            message="Test error",
+        )
+
+        # Both responses from same builder should have same request_id
+        assert (
+            success_response.metadata.request_id == error_response.metadata.request_id
+        )
+
+    def test_builder_processing_time_recorded(self) -> None:
+        """Verify processing time is computed."""
+        with patch("time.time", side_effect=[100.0, 100.125]):  # 125ms
+            builder = StandardResponseBuilder()
+            response = builder.success(data={"test": 1})
+
+        assert response.metadata.processing_time_ms == 125.0
+
+    def test_builder_custom_api_version(self) -> None:
+        """Build response with custom API version."""
+        builder = StandardResponseBuilder()
+        response = builder.success(data={"test": 1}, api_version="v2")
+        assert response.metadata.api_version == "v2"
+
+    def test_builder_different_instances_different_ids(self) -> None:
+        """Verify different builder instances have different request IDs."""
+        builder1 = StandardResponseBuilder()
+        builder2 = StandardResponseBuilder()
+
+        response1 = builder1.success(data={"test": 1})
+        response2 = builder2.success(data={"test": 1})
+
+        assert response1.metadata.request_id != response2.metadata.request_id
+
+    def test_builder_timestamp_format(self) -> None:
+        """Verify timestamp format is ISO 8601."""
+        builder = StandardResponseBuilder()
+        response = builder.success(data={"test": 1})
+
+        iso_pattern = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$"
+        assert re.match(iso_pattern, response.metadata.timestamp_utc)
+
+
+class TestStandardResponseIntegration:
+    """Integration tests for standard response workflow."""
+
+    def test_pressure_drop_success_scenario(self) -> None:
+        """Test success scenario with pressure drop calculation data."""
+        builder = StandardResponseBuilder()
+        calc_result = {
+            "pressure_drop_pa": 1023.4,
+            "reynolds_number": 50000.0,
+            "friction_factor": 0.015,
+            "velocity_m_s": 45.2,
+            "flow_regime": "Turbulent",
+            "density_kg_m3": 1.225,
+            "viscosity_pa_s": 1.8e-5,
+        }
+        response = builder.success(data=calc_result)
+
+        assert response.status == "success"
+        assert response.data["pressure_drop_pa"] == 1023.4
+        assert response.error is None
+        assert response.metadata.request_id is not None
+
+    def test_pressure_drop_error_scenario(self) -> None:
+        """Test error scenario for invalid pressure drop input."""
+        builder = StandardResponseBuilder()
+        response = builder.error(
+            code=ErrorCode.CONSTRAINT_VIOLATION,
+            message="pipe_diameter_m must be positive",
+            details="Received value: -0.1",
+        )
+
+        assert response.status == "error"
+        assert response.data is None
+        assert response.error.code == ErrorCode.CONSTRAINT_VIOLATION
+        assert "pipe_diameter_m" in response.error.message
+
+    def test_response_can_be_converted_to_fastapi_dict(self) -> None:
+        """Verify response can be used with FastAPI model_dump."""
+        builder = StandardResponseBuilder()
+        response = builder.success(data={"test": 42})
+
+        # FastAPI calls model_dump() or model_dump_json()
+        dumped = response.model_dump()
+        assert dumped["status"] == "success"
+        assert dumped["data"]["test"] == 42
+        assert "metadata" in dumped
+        assert dumped["error"] is None
+
+    def test_error_codes_cover_all_scenarios(self) -> None:
+        """Verify error codes exist for expected failure modes."""
+        scenarios = [
+            (ErrorCode.INVALID_INPUT, "Wrong type or missing field"),
+            (ErrorCode.CONSTRAINT_VIOLATION, "Value out of range"),
+            (ErrorCode.CALCULATION_ERROR, "Division by zero"),
+            (ErrorCode.SERVER_ERROR, "Unexpected exception"),
+        ]
+
+        for code, scenario_desc in scenarios:
+            builder = StandardResponseBuilder()
+            response = builder.error(code=code, message=scenario_desc)
+            assert response.error.code == code
