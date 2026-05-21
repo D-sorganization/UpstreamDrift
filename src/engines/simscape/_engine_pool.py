@@ -62,7 +62,7 @@ def is_matlab_available() -> bool:
     try:
         import importlib.util
 
-        return importlib.util.find_spec("matlab") is not None
+        return importlib.util.find_spec("matlab.engine") is not None
     except (ImportError, ValueError):  # pragma: no cover - defensive
         return False
 

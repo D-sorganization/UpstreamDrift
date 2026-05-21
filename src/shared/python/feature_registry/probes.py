@@ -144,6 +144,33 @@ def _probe_chrono(_suite_root: Path) -> ProbeOutcome:
         )
 
 
+def _probe_lower_body_model(suite_root: Path) -> ProbeOutcome:
+    source_root = suite_root / "vendor" / "ud-tools" / "src" / "lower_body_model"
+    required = (
+        "builder.py",
+        "simulator.py",
+        "hip_rotation.py",
+        "launch_pyqt6.py",
+        "SPEC.md",
+    )
+    missing = tuple(name for name in required if not (source_root / name).exists())
+    if missing:
+        return ProbeOutcome(
+            available=False,
+            version=None,
+            message=(
+                "Lower Body Model source is incomplete under vendor/ud-tools; "
+                f"missing: {', '.join(missing)}"
+            ),
+            missing=missing,
+        )
+    return ProbeOutcome(
+        available=True,
+        version=None,
+        message="Vendored Tools lower-body model source is available",
+    )
+
+
 def _probe_torch(_suite_root: Path) -> ProbeOutcome:
     try:
         import torch  # type: ignore[import-untyped]
@@ -208,6 +235,7 @@ PROBES: dict[str, ProbeCallable] = {
     "openpose": _probe_openpose,
     "mediapipe": _probe_mediapipe,
     "chrono": _probe_chrono,
+    "lower_body_model": _probe_lower_body_model,
     "torch": _probe_torch,
     "rl": _probe_rl,
 }

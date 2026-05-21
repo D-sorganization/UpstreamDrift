@@ -27,7 +27,7 @@ from sidekick.lab.bio._c3d_models import (
     SCHEMA_VERSION,
     C3DEvent,
 )
-from tests.unit.sidekick.lab.bio._synthetic import _synthetic_c3d_dict
+from ._synthetic import _synthetic_c3d_dict
 
 # ----- load_c3d --------------------------------------------------------------
 

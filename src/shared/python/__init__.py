@@ -38,6 +38,7 @@ __all__ = [
     "SUITE_ROOT",
     "OUTPUT_ROOT",
     "biomechanics",
+    "calc_backend",
     "chat",
     "humanoid_character_builder",
     "model_generation",
@@ -50,6 +51,7 @@ __all__ = [
 
 _LAZY_SUBPACKAGES = {
     "biomechanics",
+    "calc_backend",
     "chat",
     "humanoid_character_builder",
     "model_generation",
