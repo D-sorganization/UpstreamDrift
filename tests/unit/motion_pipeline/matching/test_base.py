@@ -102,7 +102,8 @@ def test_motion_matching_result_to_contract_round_trip() -> None:
     assert isinstance(contract, ContractMotionMatchingResult)
     assert contract.request_id == "r1"
     assert contract.success is True
-    assert contract.matched_trajectory is ref
+    assert contract.matched_trajectory is not None
+    assert contract.matched_trajectory.trajectory is ref
 
 
 def test_base_solver_compute_rmse_zero_on_identical_trajectory() -> None:

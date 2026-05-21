@@ -17,6 +17,7 @@ from ..contracts import (
     JointTrajectory,
     MotionMatchingRequest as ContractMotionMatchingRequest,
     MotionMatchingResult as ContractMotionMatchingResult,
+    MotionTrajectory,
     MuscleActivationTrajectory,
     SkeletonRig,
     TorqueTrajectory,
@@ -118,14 +119,19 @@ class MotionMatchingResult:
     def to_contract(self) -> ContractMotionMatchingResult:
         """Convert to contract MotionMatchingResult.
 
-        ``tracked_trajectory`` is a ``JointTrajectory`` here; the contract
-        ``matched_trajectory`` is a ``MotionTrajectory``, so the conversion
-        only sets the ``torques``/``activations`` payloads and lets the
-        caller construct a ``MotionTrajectory`` if they need one.
+        Constructs a ``MotionTrajectory`` wrapper from the internal ``tracked_trajectory``.
         """
+        matched_trajectory = None
+        if self.tracked_trajectory is not None:
+            matched_trajectory = MotionTrajectory(
+                id=self.tracked_trajectory.id,
+                skeleton=self.tracked_trajectory.skeleton,
+                trajectory=self.tracked_trajectory,
+            )
         return ContractMotionMatchingResult(
             request_id=self.request_id,
             success=self.success,
+            matched_trajectory=matched_trajectory,
             torques=self.torque_trajectory,
             activations=self.activation_trajectory,
             error_metrics=self.fit_metrics or {},
@@ -208,9 +214,7 @@ class BaseMotionMatchingSolver(ABC):
             RMSE in radians
         """
         errors = []
-        for ref_frame, track_frame in zip(
-            reference.frames, tracked.frames, strict=False
-        ):
+        for ref_frame, track_frame in zip(reference.frames, tracked.frames, strict=False):
             for ref_q, track_q in zip(ref_frame.q, track_frame.q, strict=False):
                 errors.append((ref_q - track_q) ** 2)
 
@@ -233,9 +237,7 @@ class BaseMotionMatchingSolver(ABC):
         """
         # Compute residual as difference in joint angles
         residuals = []
-        for ref_frame, track_frame in zip(
-            reference.frames, tracked.frames, strict=False
-        ):
+        for ref_frame, track_frame in zip(reference.frames, tracked.frames, strict=False):
             for ref_q, track_q in zip(ref_frame.q, track_frame.q, strict=False):
                 residuals.append(abs(ref_q - track_q))
 

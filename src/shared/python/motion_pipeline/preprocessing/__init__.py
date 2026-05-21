@@ -10,6 +10,7 @@ from .filter import FilterType, apply_filter
 from .resample import resample
 from .normalize import normalize_coordinates, convert_units
 from .pipeline import PreprocessingPipeline, PreprocessingStep
+from .apply import apply_preprocessing
 
 __all__ = [
     "GapFillStrategy",
@@ -21,4 +22,5 @@ __all__ = [
     "convert_units",
     "PreprocessingPipeline",
     "PreprocessingStep",
+    "apply_preprocessing",
 ]
