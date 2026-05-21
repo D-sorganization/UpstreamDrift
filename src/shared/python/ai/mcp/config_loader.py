@@ -427,11 +427,16 @@ def is_preset_installed(preset_id: str) -> bool:
 
     try:
         result = subprocess.run(  # noqa: S603 - trusted args
-            ["npm", "view", package, "version"],
+            args=[
+                "npm.cmd" if sys.platform == "win32" else "npm",
+                "view",
+                package,
+                "version",
+            ],
             capture_output=True,
             text=True,
             timeout=15,
-            shell=sys.platform == "win32",
+            shell=False,
         )
     except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as exc:
         _LOG.debug("npm view %s failed: %s", package, exc)
