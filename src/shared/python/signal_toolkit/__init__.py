@@ -21,8 +21,8 @@ _VENDOR_ST = (
     _REPO_ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python" / "signal_toolkit"
 )
 
-if not _VENDOR_ST.is_dir():
-    raise ImportError(f"vendored signal_toolkit package not found at {_VENDOR_ST}")
-
-__path__ = [str(_VENDOR_ST)]
+if _VENDOR_ST.is_dir():
+    _vendor_st_str = str(_VENDOR_ST)
+    if _vendor_st_str not in __path__:
+        __path__.append(_vendor_st_str)
 sys.modules.setdefault("signal_toolkit", sys.modules[__name__])
