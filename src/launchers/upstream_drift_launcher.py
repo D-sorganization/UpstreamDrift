@@ -42,16 +42,16 @@ from src.launchers.launcher_constants import (
     logger,
 )
 
-from src.launchers.launcher_dialogs import LauncherDialogsMixin
+from src.launchers.launcher_dialogs import DialogsManager
 from src.launchers.launcher_layout_manager import (
     LayoutManager,
     compute_centered_geometry,
 )
 from src.launchers.launcher_model_handlers import ModelHandlerRegistry
 from src.launchers.launcher_process_manager import ProcessManager
-from src.launchers.launcher_simulation import LauncherSimulationMixin
-from src.launchers.launcher_theme import LauncherThemeMixin
-from src.launchers.launcher_ui_setup import LauncherUISetupMixin
+from src.launchers.launcher_simulation import SimulationManager
+from src.launchers.launcher_theme import ThemeManager
+from src.launchers.launcher_ui_setup import UISetupManager
 
 from src.launchers.ui_components import (
     ASSETS_DIR,
@@ -220,13 +220,7 @@ class ProcessCleanupWorker(QRunnable):
         self.signals.finished.emit(finished_keys)
 
 
-class UpstreamDriftLauncher(
-    LauncherUISetupMixin,
-    LauncherThemeMixin,
-    LauncherSimulationMixin,
-    LauncherDialogsMixin,
-    QMainWindow,
-):
+class UpstreamDriftLauncher(QMainWindow):
     """Main application window for the launcher.
 
     Composes focused mixins for UI setup, theme management,
@@ -245,6 +239,10 @@ class UpstreamDriftLauncher(
         super().__init__()
         from PyQt6.QtCore import Qt
 
+        self.ui_setup_manager = UISetupManager(self)
+        self.theme_manager = ThemeManager(self)
+        self.simulation_manager = SimulationManager(self)
+        self.dialogs_manager = DialogsManager(self)
         self.loading = loading
         self.setWindowTitle("UpstreamDrift")
         self.setWindowFlags(
@@ -288,8 +286,8 @@ class UpstreamDriftLauncher(
         if not self.loading:
             self._initialize_model_order()
 
-        self.init_ui()
-        self._apply_theme_system()
+        self.ui_setup_manager.init_ui()
+        self.theme_manager._apply_theme_system()
 
         if not self.loading:
             from PyQt6.QtCore import QTimer as _QTimer
@@ -314,7 +312,7 @@ class UpstreamDriftLauncher(
         elif startup_results:
             self._apply_docker_status(startup_results.docker_available)
         else:
-            self.check_docker()
+            self.simulation_manager.check_docker()
 
         self._load_layout()
 
@@ -324,7 +322,7 @@ class UpstreamDriftLauncher(
         self.cleanup_timer.start(10000)
 
         self.toast_manager = None
-        self._init_ui_components()
+        self.ui_setup_manager._init_ui_components()
 
         if self._startup_time_ms > 0:
             logger.info(f"Application startup completed in {self._startup_time_ms}ms")
@@ -529,7 +527,7 @@ class UpstreamDriftLauncher(
         self.engine_manager: Any = None
 
     def _init_managers(self) -> None:
-        self._setup_process_console()
+        self.ui_setup_manager._setup_process_console()
         self.process_manager = ProcessManager(
             REPOS_ROOT,
             output_callback=self._on_process_output,
@@ -855,7 +853,7 @@ class UpstreamDriftLauncher(
         # constructor wires it up after the timeout is armed, but a
         # mid-init crash could leave it ``None``.
         if getattr(self, "toast_manager", None) is not None:
-            self.show_toast(
+            self.dialogs_manager.show_toast(
                 f"Startup timed out after {STARTUP_TIMEOUT_SEC}s. "
                 "Click the refresh / retry button or restart the launcher.",
                 "error",
@@ -867,7 +865,7 @@ class UpstreamDriftLauncher(
             raise ValueError("model_id must be provided")
         self.select_model(model_id)
         QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
-        self.launch_simulation()
+        self.simulation_manager.launch_simulation()
 
     # -- Window management --
 
@@ -1134,7 +1132,7 @@ class UpstreamDriftLauncher(
         """Toggle layout edit mode from menu action."""
         if hasattr(self, "btn_modify_layout"):
             self.btn_modify_layout.setChecked(checked)
-        self.toggle_layout_mode(checked)
+        self.ui_setup_manager.toggle_layout_mode(checked)
 
     def _toggle_context_help(self, checked: bool) -> None:
         """Toggle the context help panel visibility."""

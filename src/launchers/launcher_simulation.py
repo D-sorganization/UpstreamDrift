@@ -38,7 +38,21 @@ from src.shared.python.theme.style_constants import Styles
 logger = get_logger(__name__)
 
 
-class LauncherSimulationMixin:
+class SimulationManager:
+    def __init__(self, launcher):
+        self.launcher = launcher
+
+    def __getattr__(self, name):
+        return getattr(self.launcher, name)
+
+    def __setattr__(self, name, value):
+        if name == "launcher" or hasattr(type(self), name) or name in self.__dict__:
+            super().__setattr__(name, value)
+        elif hasattr(self.launcher, name):
+            setattr(self.launcher, name, value)
+        else:
+            super().__setattr__(name, value)
+
     """Mixin for UpstreamDriftLauncher simulation launching.
 
     Provides methods for launching various simulation types,
@@ -143,7 +157,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 "- Check that you're using the correct Python environment"
             )
 
-        QMessageBox.warning(self, "Dependency Error", detailed_msg)
+        QMessageBox.warning(self.launcher, "Dependency Error", detailed_msg)
 
     def _try_launch_special_app(self, model_id: str) -> bool:
         if model_id is None:
@@ -199,7 +213,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
         if self.docker_available:
             response = QMessageBox.question(
-                self,
+                self.launcher,
                 "Local Dependencies Missing",
                 f"{deps_error}\n\n"
                 "Would you like to try launching in Docker mode instead?",
@@ -306,7 +320,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
         if model.type == "matlab_suite":
             from src.launchers.matlab_suite_dialog import MatlabSuiteDialog
 
-            dialog = MatlabSuiteDialog(self)
+            dialog = MatlabSuiteDialog(self.launcher)
             dialog.exec()
             return
 
@@ -381,7 +395,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
             # Auto-start VcXsrv on Windows for GUI support
             if os.name == "nt" and not start_vcxsrv():
                 response = QMessageBox.question(
-                    self,
+                    self.launcher,
                     "X Server Not Available",
                     "VcXsrv X server is not running and could not be started.\n\n"
                     "Docker GUI apps require an X server.\n\n"
@@ -395,7 +409,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
             # Check if Docker image exists
             if not self.docker_launcher.check_image_exists():
                 QMessageBox.warning(
-                    self,
+                    self.launcher,
                     "Docker Image Not Found",
                     f"The Docker image '{self.docker_launcher.image_name}' is not available.\n\n"
                     "Build it first using:\n"
@@ -424,7 +438,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 self.lbl_status.setText("* Docker Error")
                 self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
                 QMessageBox.critical(
-                    self,
+                    self.launcher,
                     "Docker Launch Error",
                     f"Failed to launch {model.name} in Docker",
                 )
@@ -432,7 +446,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
         except (ValueError, RuntimeError) as e:
             logger.error(f"Failed to launch Docker container: {e}")
             QMessageBox.critical(
-                self,
+                self.launcher,
                 "Docker Launch Error",
                 f"Failed to launch {model.name} in Docker:\n\n{e}",
             )
@@ -466,7 +480,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 self.show_toast(f"{name} Launched in WSL", "success")
             else:
                 QMessageBox.critical(
-                    self, "Launch Error", f"Failed to launch {name} in WSL"
+                    self.launcher, "Launch Error", f"Failed to launch {name} in WSL"
                 )
             return
 
@@ -480,7 +494,9 @@ except (RuntimeError, TypeError, AttributeError) as e:
             self.lbl_status.setText(f"* {name} Running")
             self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
         else:
-            QMessageBox.critical(self, "Launch Error", f"Failed to launch {name}")
+            QMessageBox.critical(
+                self.launcher, "Launch Error", f"Failed to launch {name}"
+            )
 
     @precondition(
         lambda self, name, module_name, cwd: name is not None and len(name.strip()) > 0,
@@ -511,7 +527,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 self.show_toast(f"{name} Launched in WSL", "success")
             else:
                 QMessageBox.critical(
-                    self, "Launch Error", f"Failed to launch {name} in WSL"
+                    self.launcher, "Launch Error", f"Failed to launch {name} in WSL"
                 )
             return
 
@@ -525,7 +541,9 @@ except (RuntimeError, TypeError, AttributeError) as e:
             self.lbl_status.setText(f"* {name} Running")
             self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
         else:
-            QMessageBox.critical(self, "Launch Error", f"Failed to launch {name}")
+            QMessageBox.critical(
+                self.launcher, "Launch Error", f"Failed to launch {name}"
+            )
 
     def _launch_urdf_generator(self) -> None:
         """Launch the URDF generator / Model Explorer application."""
