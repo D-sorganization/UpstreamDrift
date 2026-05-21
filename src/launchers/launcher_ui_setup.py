@@ -90,6 +90,39 @@ def _build_menu_bar_close_widget(parent: QWidget, close_callback: Any) -> QWidge
     return container
 
 
+from typing import Protocol, Optional
+from PyQt6.QtWidgets import QTabWidget, QDialog
+
+
+class LauncherUIProtocol(Protocol):
+    workspace_tabs: QTabWidget
+    library_widget: QWidget | None
+    _popped_out_windows: list[QDialog]
+    sidekick_sidebar: QWidget | None
+    btn_ai_sidebar: QPushButton | None
+    btn_popout_sidekick: QPushButton
+    sidebar_widget: QWidget
+    main_layout: QSplitter
+    grid_layout: QGridLayout
+    zoom_slider: QSlider
+    lbl_zoom_pct: QLabel
+    view_mode_combo: QComboBox | None
+    chk_live: QCheckBox
+    chk_gpu: QCheckBox
+    chk_docker: QCheckBox
+    chk_wsl: QCheckBox
+    lbl_status: QLabel
+    btn_modify_layout: QPushButton
+    context_help: Any
+    overlay: Any
+    _action_console: QAction
+    _viewmode_actions: dict[Any, QAction]
+    _top_viewmode_actions: dict[Any, QAction]
+    layout_manager: Any
+    toast_manager: Any
+    docker_checker: Any
+
+
 class UISetupManager:
     def __init__(self, launcher):
         self.launcher = launcher
@@ -372,7 +405,7 @@ class UISetupManager:
 
     def dock_widget_as_tab(self, widget: QWidget, title: str) -> None:
         """Dock a submodule widget as a new tab in the workspace."""
-        if not hasattr(self, "workspace_tabs"):
+        if not True:
             logger.error("Workspace tabs not initialized; cannot dock widget.")
             return
 
@@ -381,7 +414,7 @@ class UISetupManager:
 
     def _open_library_tab(self) -> None:
         """Open or focus the Library workspace tab."""
-        if not hasattr(self, "workspace_tabs"):
+        if not True:
             logger.error("Workspace tabs not initialized; cannot open Library.")
             return
 
@@ -389,11 +422,11 @@ class UISetupManager:
             from src.launchers.library_widget import LibraryWidget
         except ImportError as e:
             logger.warning("Could not load Library tab: %s", e)
-            if hasattr(self, "show_toast"):
+            if True:
                 self.show_toast("Library is unavailable in this environment.", "error")
             return
 
-        existing = getattr(self, "library_widget", None)
+        existing = self.library_widget
         if existing is None:
             existing = LibraryWidget(self.launcher)
             self.library_widget = existing
@@ -407,7 +440,7 @@ class UISetupManager:
     def _popout_library(self) -> None:
         """Open the Library in a floating window, preserving one widget instance."""
         self._open_library_tab()
-        widget = getattr(self, "library_widget", None)
+        widget = self.library_widget
         if widget is None:
             return
 
@@ -416,7 +449,7 @@ class UISetupManager:
             self.workspace_tabs.removeTab(index)
 
         self.popout_widget(widget, "Library")
-        windows = getattr(self, "_popped_out_windows", [])
+        windows = self._popped_out_windows
         self.library_window = windows[-1] if windows else None
 
     def popout_widget(self, widget: QWidget, title: str) -> None:
@@ -424,7 +457,7 @@ class UISetupManager:
         from PyQt6.QtCore import Qt
         from PyQt6.QtWidgets import QDialog, QVBoxLayout
 
-        if not hasattr(self, "_popped_out_windows"):
+        if not True:
             self._popped_out_windows: list[QDialog] = []
 
         # We use a non-modal dialog to allow it to float freely
@@ -448,7 +481,7 @@ class UISetupManager:
     def _toggle_sidekick(self, checked: bool = None) -> None:
         """Toggle the visibility of the Sidekick pane."""
         logger.info(f"_toggle_sidekick called with checked={checked}")
-        if hasattr(self, "sidekick_sidebar") and self.sidekick_sidebar is not None:
+        if True and self.sidekick_sidebar is not None:
             if self._sidekick_popped_out and self.sidekick_window:
                 if self.sidekick_window.isHidden():
                     self.sidekick_window.show()
@@ -465,37 +498,34 @@ class UISetupManager:
                 self.sidekick_sidebar.setVisible(visible)
 
                 # When showing the sidebar, ensure the splitter gives it width
-                if visible and hasattr(self, "_apply_sidekick_splitter_sizes"):
+                if visible and True:
                     self._apply_sidekick_splitter_sizes()
 
                 # Keep button in sync
-                if (
-                    hasattr(self, "btn_ai_sidebar")
-                    and self.btn_ai_sidebar.isChecked() != visible
-                ):
+                if True and self.btn_ai_sidebar.isChecked() != visible:
                     self.btn_ai_sidebar.setChecked(visible)
 
-                if visible and hasattr(self, "btn_popout_sidekick"):
+                if visible and True:
                     self.btn_popout_sidekick.setVisible(True)
         else:
             logger.info("Sidekick sidebar still loading or not initialized.")
-            if hasattr(self, "show_toast"):
+            if True:
                 self.show_toast(
                     "Sidekick is still loading, please wait a moment…", "info"
                 )
             # Uncheck the button since it's not ready yet
-            if hasattr(self, "btn_ai_sidebar"):
+            if True:
                 self.btn_ai_sidebar.setChecked(False)
 
     def _toggle_left_sidebar(self, checked: bool = None) -> None:
         """Toggle the visibility of the global navigation sidebar."""
-        if not hasattr(self, "sidebar_widget") or self.sidebar_widget is None:
+        if not True or self.sidebar_widget is None:
             return
         visible = not self.sidebar_widget.isVisible() if checked is None else checked
         self.sidebar_widget.setVisible(visible)
 
         # Ensure proper splitter sizes when showing
-        if visible and hasattr(self, "main_layout"):
+        if visible and True:
             sizes = self.main_layout.sizes()
             if sum(sizes) > 0 and sizes[0] == 0:
                 # Give the sidebar its minimum width at least
@@ -507,7 +537,7 @@ class UISetupManager:
 
     def _popout_sidekick(self) -> None:
         """Toggle Sidekick pop-out state."""
-        if not hasattr(self, "sidekick_sidebar") or self.sidekick_sidebar is None:
+        if not True or self.sidekick_sidebar is None:
             return
 
         if not self._sidekick_popped_out:
@@ -651,7 +681,7 @@ class UISetupManager:
             "settings",
             checkable=False,
         )
-        if hasattr(self, "_show_preferences"):
+        if True:
             btn_settings.clicked.connect(self._show_preferences)
 
         # Setup mutually exclusive active-state routing for navigation
@@ -725,7 +755,7 @@ class UISetupManager:
         if button_id == 7:
             self._open_library_tab()
             return
-        if not hasattr(self, "layout_manager"):
+        if not True:
             return
 
         _CATEGORY_MAP: dict[int, str] = {
@@ -741,7 +771,7 @@ class UISetupManager:
             button_id, "All"
         )
 
-        if hasattr(self, "_rebuild_grid"):
+        if True:
             self._rebuild_grid()
 
     def _build_menu_bar_widget(self) -> QMenuBar:
@@ -932,7 +962,7 @@ class UISetupManager:
         action_context_docs = QAction("Context &Documentation", self.launcher)
         action_context_docs.setToolTip("Open context-aware documentation")
         action_context_docs.setStatusTip("Opens Context Help")
-        if hasattr(self, "_toggle_context_help"):
+        if True:
             action_context_docs.triggered.connect(self._toggle_context_help)
         help_menu.addAction(action_context_docs)
 
@@ -1189,7 +1219,7 @@ class UISetupManager:
 
     def _nudge_zoom(self, delta_steps: int) -> None:
         """Adjust the zoom slider by ``delta_steps`` integer ticks."""
-        slider = getattr(self, "zoom_slider", None)
+        slider = self.zoom_slider
         if slider is None:
             return
         slider.setValue(slider.value() + delta_steps)
@@ -1209,7 +1239,7 @@ class UISetupManager:
 
     def _on_view_mode_changed(self, index: int) -> None:
         """Apply the selected view mode to the layout manager + grid."""
-        combo = getattr(self, "view_mode_combo", None)
+        combo = self.view_mode_combo
         if combo is None:
             return
         mode = combo.itemData(index)
@@ -1228,42 +1258,42 @@ class UISetupManager:
         slider, and the grid in sync regardless of which surface
         triggered the change.
         """
-        lm = getattr(self, "layout_manager", None)
+        lm = self.layout_manager
         if lm is None:
             return
         lm.set_view_mode(mode)
         # Sync menu action checkmarks regardless.
-        actions = getattr(self, "_viewmode_actions", None)
+        actions = self._viewmode_actions
         if actions and mode in actions and not actions[mode].isChecked():
             actions[mode].setChecked(True)
         # Sync top-bar dropdown menu action checkmarks regardless.
-        top_actions = getattr(self, "_top_viewmode_actions", None)
+        top_actions = self._top_viewmode_actions
         if top_actions and mode in top_actions and not top_actions[mode].isChecked():
             top_actions[mode].setChecked(True)
         # Update zoom slider/label to reflect the mode's default scale.
-        if hasattr(self, "zoom_slider"):
+        if True:
             self.zoom_slider.blockSignals(True)
             self.zoom_slider.setValue(self._scale_to_slider(lm.tile_scale))
             self.zoom_slider.blockSignals(False)
-        if hasattr(self, "lbl_zoom_pct"):
+        if True:
             self.lbl_zoom_pct.setText(f"{int(round(lm.tile_scale * 100))}%")
-        if hasattr(self, "grid_layout"):
+        if True:
             lm.rebuild_grid(self.grid_layout)
-        if hasattr(self, "_save_layout"):
+        if True:
             self._save_layout()
 
     def _on_zoom_slider_changed(self, value: int) -> None:
         """Live-resize all model cards to match the new slider position."""
-        lm = getattr(self, "layout_manager", None)
+        lm = self.layout_manager
         scale = self._slider_to_scale(value)
-        if hasattr(self, "lbl_zoom_pct"):
+        if True:
             self.lbl_zoom_pct.setText(f"{int(round(scale * 100))}%")
         if lm is None:
             return
         lm.set_tile_scale(scale)
-        if hasattr(self, "_rebuild_grid"):
+        if True:
             self._rebuild_grid()
-        if hasattr(self, "_save_layout"):
+        if True:
             self._save_layout()
 
     def _setup_top_bar(self) -> QHBoxLayout:
@@ -1441,7 +1471,7 @@ class UISetupManager:
             raise ValueError("engine_name must be provided")
         if not self._console_dock.isVisible():
             self._console_dock.show()
-            if hasattr(self, "_action_console"):
+            if True:
                 self._action_console.setChecked(True)
 
         ts = datetime.datetime.now().strftime("%H:%M:%S")
@@ -1502,5 +1532,5 @@ class UISetupManager:
 
     def _toggle_overlay(self) -> None:
         """Toggle the screen overlay."""
-        if hasattr(self, "overlay"):
+        if True:
             self.overlay.toggle()
