@@ -3,12 +3,14 @@
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 from PyQt6.QtWidgets import QMenu, QWidget  # noqa: E402
-from src.launchers.launcher_theme import LauncherThemeMixin  # noqa: E402
+from src.launchers.launcher_theme import ThemeManager  # noqa: E402
 
 
-class DummyLauncher(QWidget, LauncherThemeMixin):
-    def __init__(self):
-        super().__init__()
+class DummyLauncher(QWidget):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.manager = ThemeManager(self)
+
         self.model_cards = {}
         self.selected_model = None
 

@@ -17,7 +17,21 @@ from src.shared.python.theme.typography import CSS_FONT_UI
 logger = get_logger(__name__)
 
 
-class LauncherThemeMixin:
+class ThemeManager:
+    def __init__(self, launcher):
+        self.launcher = launcher
+
+    def __getattr__(self, name):
+        return getattr(self.launcher, name)
+
+    def __setattr__(self, name, value):
+        if name == "launcher" or hasattr(type(self), name) or name in self.__dict__:
+            super().__setattr__(name, value)
+        elif hasattr(self.launcher, name):
+            setattr(self.launcher, name, value)
+        else:
+            super().__setattr__(name, value)
+
     """Mixin for UpstreamDriftLauncher theme management.
 
     Provides methods for applying styles, managing theme menus,
@@ -133,7 +147,7 @@ class LauncherThemeMixin:
 
             manager = ThemeManager.instance()
 
-            group = QActionGroup(self)
+            group = QActionGroup(self.launcher)
             group.setExclusive(True)
             self._theme_actions: list[QAction] = []
 
@@ -144,7 +158,7 @@ class LauncherThemeMixin:
                 "High Contrast": ThemePreset.HIGH_CONTRAST,
             }
             for name, preset in preset_map.items():
-                action = QAction(name, self)
+                action = QAction(name, self.launcher)
                 action.setCheckable(True)
                 action.setChecked(manager.get_current_theme_name() == name)
                 action.triggered.connect(
@@ -160,7 +174,7 @@ class LauncherThemeMixin:
             if extra_themes:
                 theme_menu.addSeparator()
                 for theme_name in extra_themes:
-                    action = QAction(theme_name, self)
+                    action = QAction(theme_name, self.launcher)
                     action.setCheckable(True)
                     action.setChecked(manager.get_current_theme_name() == theme_name)
                     action.triggered.connect(
@@ -175,7 +189,7 @@ class LauncherThemeMixin:
             if custom_names:
                 theme_menu.addSeparator()
                 for cname in custom_names:
-                    action = QAction(cname, self)
+                    action = QAction(cname, self.launcher)
                     action.setCheckable(True)
                     action.setChecked(manager.get_current_theme_name() == cname)
                     action.triggered.connect(
@@ -187,7 +201,7 @@ class LauncherThemeMixin:
 
             # Manage Themes dialog
             theme_menu.addSeparator()
-            manage_action = QAction("Manage Themes...", self)
+            manage_action = QAction("Manage Themes...", self.launcher)
             manage_action.triggered.connect(self._open_theme_manager_dialog)
             theme_menu.addAction(manage_action)
 
@@ -222,14 +236,14 @@ class LauncherThemeMixin:
                 return
 
             manager = get_font_manager()
-            group = QActionGroup(self)
+            group = QActionGroup(self.launcher)
             group.setExclusive(True)
 
             available_fonts = manager.get_available_fonts()
             current_font = manager.get_current_font()
 
             for font_name in available_fonts:
-                action = QAction(font_name, self)
+                action = QAction(font_name, self.launcher)
                 action.setCheckable(True)
                 action.setChecked(font_name == current_font)
                 action.triggered.connect(
@@ -268,7 +282,7 @@ class LauncherThemeMixin:
         from PyQt6.QtCore import QSettings
         from PyQt6.QtGui import QActionGroup
 
-        group = QActionGroup(self)
+        group = QActionGroup(self.launcher)
         group.setExclusive(True)
 
         settings = QSettings("UpstreamDrift", "Launcher")
@@ -291,7 +305,7 @@ class LauncherThemeMixin:
             for style_name in sorted(plt.style.available):
                 if style_name.startswith("_"):
                     continue
-                action = QAction(style_name, self)
+                action = QAction(style_name, self.launcher)
                 action.setCheckable(True)
                 action.setChecked(current_plot == style_name)
                 action.triggered.connect(

@@ -15,11 +15,11 @@ from src.shared.python.ai.cli_providers.contracts import CliProviderDescriptor
 
 
 @pytest.fixture
-def fake_panel():
+def fake_panel(qapp):
     """Build a panel object that exposes only the populator method."""
     from src.shared.python.ai.gui.assistant_panel import AIAssistantPanel
 
-    panel = AIAssistantPanel.__new__(AIAssistantPanel)
+    panel = AIAssistantPanel()
     return panel
 
 

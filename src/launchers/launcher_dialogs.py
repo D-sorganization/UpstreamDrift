@@ -37,7 +37,21 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 
-class LauncherDialogsMixin:
+class DialogsManager:
+    def __init__(self, launcher):
+        self.launcher = launcher
+
+    def __getattr__(self, name):
+        return getattr(self.launcher, name)
+
+    def __setattr__(self, name, value):
+        if name == "launcher" or hasattr(type(self), name) or name in self.__dict__:
+            super().__setattr__(name, value)
+        elif hasattr(self.launcher, name):
+            setattr(self.launcher, name, value)
+        else:
+            super().__setattr__(name, value)
+
     """Mixin for UpstreamDriftLauncher dialog and settings management.
 
     Provides methods for displaying help, about, shortcuts, preferences,
@@ -121,7 +135,7 @@ class LauncherDialogsMixin:
         if HELP_SYSTEM_AVAILABLE:
             from src.shared.python.gui_pkg.help_system import HelpDialog
 
-            dialog = HelpDialog(self, initial_topic=topic)
+            dialog = HelpDialog(self.launcher, initial_topic=topic)
             dialog.exec()
         else:
             from src.launchers.ui_components import HelpDialog as LegacyHelpDialog
@@ -138,7 +152,7 @@ class LauncherDialogsMixin:
             show_document(project_map, self)
         else:
             QMessageBox.warning(
-                self,
+                self.launcher,
                 "Project Map Not Found",
                 "The Project Map file was not found at:\n"
                 f"{project_map}\n\n"
@@ -432,7 +446,9 @@ class LauncherDialogsMixin:
 
     def open_layout_manager(self) -> None:
         """Open the layout customization dialog."""
-        dialog = LayoutManagerDialog(self.available_models, self.model_order, self)
+        dialog = LayoutManagerDialog(
+            self.available_models, self.model_order, self.launcher
+        )
         if dialog.exec():
             selected = dialog.selected_ids()
             self._apply_model_selection(selected)
@@ -471,7 +487,7 @@ class LauncherDialogsMixin:
 
             if not self.docker_available:
                 QMessageBox.warning(
-                    self,
+                    self.launcher,
                     "Docker Not Available",
                     "Docker Desktop is not running or not installed.\n\n"
                     "Please start Docker Desktop and try again.\n\n"
@@ -531,7 +547,7 @@ class LauncherDialogsMixin:
                     raise RuntimeError("Ubuntu not found in WSL")
             except (OSError, ValueError) as e:
                 QMessageBox.warning(
-                    self,
+                    self.launcher,
                     "WSL Not Available",
                     f"WSL2 with Ubuntu is not available.\n\n"
                     f"Error: {e}\n\n"
@@ -605,9 +621,9 @@ class ThemedModalDialog(QDialog):
         if style is not None:
             style.polish(self)
 
-        layout = QVBoxLayout(self)
+        layout = QVBoxLayout(self.launcher)
 
-        self.frame = QFrame(self)
+        self.frame = QFrame(self.launcher)
         self.frame.setStyleSheet(
             "QFrame { background-color: #24272e; border: 1px solid #3a3f4a; border-radius: 8px; }"
         )
@@ -618,7 +634,7 @@ class ThemedModalDialog(QDialog):
         shadow.setOffset(0, 4)
         self.frame.setGraphicsEffect(shadow)
 
-        frame_layout = QVBoxLayout(self.frame)
+        frame_layout = QVBoxLayout(self.launcher.frame)
         frame_layout.setContentsMargins(20, 20, 20, 20)
         frame_layout.setSpacing(15)
 

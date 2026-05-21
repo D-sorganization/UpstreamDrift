@@ -50,7 +50,7 @@ def ui_setup(qapp):
     from src.launchers.upstream_drift_launcher import (
         UpstreamDriftLauncher as _RealLauncher,
     )
-    from src.launchers.launcher_ui_setup import LauncherUISetupMixin
+    from src.launchers.launcher_ui_setup import UISetupManager
 
     class _DummyLayoutManager:
         tile_scale = 0.75
@@ -59,18 +59,30 @@ def ui_setup(qapp):
         def set_tile_scale(self, *_a, **_k) -> None: ...
         def rebuild_grid(self, *_a, **_k) -> None: ...
 
-    class _UIHarness(LauncherUISetupMixin, QMainWindow):  # type: ignore[misc]
-        # Re-use the production install method so #5624 tests exercise
-        # the real code path.
+    class _UIHarness(QMainWindow):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.layout_manager = _DummyLayoutManager()
+            self.docker_available = False
+            self.ui_setup_manager = UISetupManager(self)
+
+        def __getattr__(self, name):
+            # Avoid recursion if ui_setup_manager is not initialized
+            if name == "ui_setup_manager":
+                raise AttributeError
+            # Only proxy attributes that actually exist on the manager (or its class)
+            if name in self.ui_setup_manager.__dict__ or hasattr(
+                type(self.ui_setup_manager), name
+            ):
+                return getattr(self.ui_setup_manager, name)
+            raise AttributeError(f"'_UIHarness' object has no attribute '{name}'")
+
+        def init_ui(self):
+            return self.ui_setup_manager.init_ui()
+
         _install_sidekick_sidebar = _RealLauncher._install_sidekick_sidebar
         _apply_sidekick_splitter_sizes = _RealLauncher._apply_sidekick_splitter_sizes
 
-        def __init__(self) -> None:
-            super().__init__()
-            self.layout_manager = _DummyLayoutManager()
-            self.docker_available = False
-
-        # Safe no-op stubs for co-mixin handlers that init_ui wires up.
         def _show_preferences(self, *_a, **_k) -> None: ...
         def _toggle_layout_mode_from_menu(self, *_a, **_k) -> None: ...
         def _toggle_context_help(self, *_a, **_k) -> None: ...
