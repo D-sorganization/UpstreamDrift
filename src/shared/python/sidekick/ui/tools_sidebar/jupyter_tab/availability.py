@@ -1,0 +1,56 @@
+"""Detect whether Jupyter dependencies are installed for Sidekick.
+
+The Sidekick Jupyter tab renders ``nbformat``-parsed notebooks. When
+``nbformat`` is missing we substitute a placeholder widget that shows
+an actionable install hint instead of crashing the sidebar.
+"""
+
+from __future__ import annotations
+
+import importlib
+import threading
+
+_INSTALL_HINT = (
+    "Jupyter support is not installed.\n"
+    "Install with: pip install '.[jupyter]'\n"
+    "(installs nbformat and nbclient — required for Phase 2 execution.)"
+)
+
+
+class JupyterTabAvailability:
+    """Cached check for the ``nbformat`` import dependency.
+
+    ``check()`` is idempotent: the result is memoized so repeated tab
+    factory invocations do not pay the import cost more than once. The
+    cache is keyed on the Python process; tests can call
+    ``reset_cache()`` to re-evaluate.
+    """
+
+    _lock = threading.Lock()
+    _cached: tuple[bool, str] | None = None
+
+    @classmethod
+    def check(cls) -> tuple[bool, str]:
+        """Return ``(available, install_hint)``.
+
+        When ``nbformat`` imports cleanly returns ``(True, "")``. When
+        it fails returns ``(False, _INSTALL_HINT)``. Always returns
+        the same tuple within a single process between calls to
+        :meth:`reset_cache`.
+        """
+        with cls._lock:
+            if cls._cached is not None:
+                return cls._cached
+            try:
+                importlib.import_module("nbformat")
+            except ImportError:
+                cls._cached = (False, _INSTALL_HINT)
+            else:
+                cls._cached = (True, "")
+            return cls._cached
+
+    @classmethod
+    def reset_cache(cls) -> None:
+        """Clear the memoized availability result (test seam)."""
+        with cls._lock:
+            cls._cached = None

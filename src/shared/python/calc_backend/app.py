@@ -1,0 +1,174 @@
+"""Shared Calculation Backend -- FastAPI application.
+
+Provides a unified REST API wrapping all process calculators so React frontends
+and other HTTP clients can call validated Python calculation engines.
+
+Usage:
+    uvicorn calc_backend.app:app --reload --port 8010
+
+See issue #613.
+"""
+
+from __future__ import annotations
+
+import logging
+
+from cors import add_cors_middleware
+from fastapi import FastAPI, HTTPException
+
+from .health import CheckStatus, get_health_checker
+from .routers import (
+    acid_gas_dewpoint,
+    baghouse,
+    financial,
+    flare,
+    flow_rate,
+    ode_solver,
+    pressure_drop,
+    rotation_converter,
+    scrubber,
+    symbolic_solver,
+    syngas_water,
+    thermal_profile,
+    wgs_reactor,
+)
+
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# FastAPI application
+# ---------------------------------------------------------------------------
+
+app = FastAPI(
+    title="Shared Calculation Backend",
+    description=(
+        "Unified REST API for process engineering calculators.  "
+        "Auto-generated docs at /docs (Swagger UI) and /redoc."
+    ),
+    version="1.0.0",
+)
+add_cors_middleware(app)
+
+# ---------------------------------------------------------------------------
+# Include routers
+# ---------------------------------------------------------------------------
+
+app.include_router(flare.router)
+app.include_router(wgs_reactor.router)
+app.include_router(baghouse.router)
+app.include_router(scrubber.router)
+app.include_router(financial.router)
+app.include_router(acid_gas_dewpoint.router)
+app.include_router(pressure_drop.router)
+app.include_router(flow_rate.router)
+app.include_router(syngas_water.router)
+app.include_router(thermal_profile.router)
+app.include_router(ode_solver.router)
+app.include_router(rotation_converter.router)
+app.include_router(symbolic_solver.router)
+
+
+# ---------------------------------------------------------------------------
+# Health check endpoints
+# ---------------------------------------------------------------------------
+
+
+@app.get("/health")
+async def health() -> dict[str, str]:
+    """Health-check endpoint (liveness probe).
+
+    Used by Docker/Kubernetes to verify the application is running.
+    Returns HTTP 200 if responsive.
+
+    Returns:
+        {"status": "ok"} if healthy
+    """
+    return {"status": "ok"}
+
+
+@app.get("/api/health")
+async def api_health() -> dict[str, str]:
+    """API health endpoint (liveness probe).
+
+    Alternative path for containerized deployment.
+    Used by Docker HEALTHCHECK and Kubernetes liveness probes.
+
+    Returns:
+        {"status": "ok"} if healthy
+    """
+    return {"status": "ok"}
+
+
+@app.get("/api/ready")
+async def api_ready() -> dict[str, str | dict[str, object] | bool]:
+    """Readiness probe endpoint.
+
+    Verifies the application is ready to serve requests.
+    Runs comprehensive health checks on:
+    - Python runtime
+    - Required dependencies
+    - Application initialization state
+
+    Used by Kubernetes readiness probes and load balancers to determine
+    if traffic should be routed to this instance.
+
+    Returns:
+        {
+            "status": "ok" | "degraded" | "unhealthy",
+            "ready": true | false,
+            "checks": {
+                "python_runtime": {"status": "ok", "details": {...}},
+                "dependencies": {"status": "ok", "details": {...}},
+                ...
+            }
+        }
+
+    Status codes:
+        200: Ready to serve requests
+        503: Not ready (degraded or unhealthy)
+    """
+    health_checker = get_health_checker()
+    overall_status, checks = await health_checker.run_checks()
+
+    ready = overall_status == CheckStatus.OK
+
+    response = {
+        "status": overall_status.value,
+        "ready": ready,
+        "checks": checks,
+    }
+
+    # Raise HTTP 503 if not ready
+    if not ready:
+        raise HTTPException(
+            status_code=503,
+            detail=response,
+        )
+
+    return response
+
+
+@app.get("/api/calc/endpoints")
+def list_endpoints() -> dict[str, list[str]]:
+    """List all available calculator endpoints."""
+    return {
+        "calculators": [
+            "POST /api/calc/flare",
+            "POST /api/calc/wgs-reactor",
+            "POST /api/calc/baghouse",
+            "POST /api/calc/scrubber",
+            "POST /api/calc/financial",
+            "POST /api/calc/acid-gas-dewpoint",
+            "POST /api/calc/pressure-drop",
+            "POST /api/calc/flow-rate",
+            "POST /api/calc/syngas-water",
+            "POST /api/calc/thermal-profile",
+            "POST /api/calc/ode-solver",
+            "POST /api/calc/rotation-converter",
+            "POST /api/calc/rotation-converter/reference-frame",
+            "GET /api/calc/symbolic/help",
+            "POST /api/calc/symbolic/solve",
+            "POST /api/calc/symbolic/derivative",
+            "POST /api/calc/symbolic/simplify",
+        ],
+    }

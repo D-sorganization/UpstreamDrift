@@ -1,0 +1,137 @@
+"""Pydantic models for standardized pressure drop API requests/responses.
+
+This module defines validated request and response schemas for the pressure drop
+calculator endpoint, providing comprehensive documentation and type-safe validation.
+
+These models are used by the FastAPI pressure_drop router to validate inputs and
+format outputs according to the standardized API response format (see StandardResponse).
+
+Related to issue #2411 (API Standardization).
+"""
+
+from __future__ import annotations
+
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class PressureDropRequest(BaseModel):
+    """Validated request model for pressure drop calculation.
+
+    All parameters are required unless marked as optional. Field constraints
+    are enforced by Pydantic, with detailed error messages for validation failures.
+
+    Attributes:
+        pipe_diameter_m: Pipe inner diameter in meters (must be > 0).
+        pipe_length_m: Total pipe length in meters (must be > 0).
+        roughness_m: Pipe wall absolute roughness in meters (must be >= 0).
+            Defaults to 0.000045 m (typical commercial steel).
+        flow_rate_kg_s: Mass flow rate in kg/s (must be > 0).
+        temperature_k: Gas temperature in Kelvin (must be > 0).
+        pressure_pa: Gas absolute pressure in Pa (must be > 0).
+        molecular_weight_kg_mol: Gas molecular weight in kg/mol (must be > 0).
+        viscosity_pa_s: Dynamic viscosity in Pa·s. If provided, used directly.
+            If omitted, Sutherland air approximation is used. Optional, > 0.
+
+    Example:
+        >>> request = PressureDropRequest(
+        ...     pipe_diameter_m=0.1,
+        ...     pipe_length_m=100.0,
+        ...     roughness_m=0.000045,
+        ...     flow_rate_kg_s=5.0,
+        ...     temperature_k=300.0,
+        ...     pressure_pa=101325.0,
+        ...     molecular_weight_kg_mol=28.97,
+        ... )
+    """
+
+    pipe_diameter_m: float = Field(..., gt=0, description="Pipe inner diameter [m]")
+    pipe_length_m: float = Field(..., gt=0, description="Pipe length [m]")
+    roughness_m: float = Field(
+        default=0.000045,
+        ge=0,
+        description="Pipe wall roughness [m], default: 0.000045 (commercial steel)",
+    )
+    flow_rate_kg_s: float = Field(..., gt=0, description="Mass flow rate [kg/s]")
+    temperature_k: float = Field(..., gt=0, description="Gas temperature [K]")
+    pressure_pa: float = Field(..., gt=0, description="Gas absolute pressure [Pa]")
+    molecular_weight_kg_mol: float = Field(
+        ..., gt=0, description="Molecular weight [kg/mol]"
+    )
+    viscosity_pa_s: float | None = Field(
+        default=None,
+        gt=0,
+        description=(
+            "Dynamic viscosity [Pa·s]. If provided, used directly. "
+            "If omitted, Sutherland air approximation is used (air only)."
+        ),
+    )
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "pipe_diameter_m": 0.1,
+                "pipe_length_m": 100.0,
+                "roughness_m": 0.000045,
+                "flow_rate_kg_s": 5.0,
+                "temperature_k": 300.0,
+                "pressure_pa": 101325.0,
+                "molecular_weight_kg_mol": 28.97,
+                "viscosity_pa_s": None,
+            }
+        }
+    )
+
+
+class PressureDropResponse(BaseModel):
+    """Standardized response model for pressure drop calculation.
+
+    Contains all calculated output values from the Darcy-Weisbach equation
+    solver, including flow regime classification.
+
+    Attributes:
+        pressure_drop_pa: Total pressure drop along the pipe [Pa].
+        reynolds_number: Dimensionless Reynolds number (flow classification).
+        friction_factor: Dimensionless friction factor (from Colebrook-White equation).
+        velocity_m_s: Average fluid velocity through the pipe [m/s].
+        flow_regime: Text classification of flow regime
+            (one of: "Laminar", "Transitional", "Turbulent").
+        density_kg_m3: Fluid density at given conditions [kg/m³].
+        viscosity_pa_s: Dynamic viscosity used in calculation [Pa·s].
+
+    Example:
+        >>> response = PressureDropResponse(
+        ...     pressure_drop_pa=1023.4,
+        ...     reynolds_number=50000.0,
+        ...     friction_factor=0.025,
+        ...     velocity_m_s=45.2,
+        ...     flow_regime="Turbulent",
+        ...     density_kg_m3=1.177,
+        ...     viscosity_pa_s=1.86e-5,
+        ... )
+    """
+
+    pressure_drop_pa: float = Field(description="Total pressure drop [Pa]")
+    reynolds_number: float = Field(
+        description="Dimensionless Reynolds number (flow classification)"
+    )
+    friction_factor: float = Field(description="Dimensionless Darcy friction factor")
+    velocity_m_s: float = Field(description="Gas velocity [m/s]")
+    flow_regime: str = Field(
+        description="Flow regime classification: Laminar / Transitional / Turbulent"
+    )
+    density_kg_m3: float = Field(description="Fluid density [kg/m³]")
+    viscosity_pa_s: float = Field(description="Dynamic viscosity used [Pa·s]")
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "pressure_drop_pa": 1023.4,
+                "reynolds_number": 50000.0,
+                "friction_factor": 0.025,
+                "velocity_m_s": 45.2,
+                "flow_regime": "Turbulent",
+                "density_kg_m3": 1.177,
+                "viscosity_pa_s": 1.86e-5,
+            }
+        }
+    )

@@ -1,0 +1,101 @@
+"""Load notebooks from disk into the immutable Sidekick notebook model.
+
+Pure data layer: no Qt imports. Raises a typed ``NotebookLoadError`` on
+any failure so the widget layer can present a clean placeholder.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+
+from .notebook_model import (
+    CellOutput,
+    CodeCell,
+    MarkdownCell,
+    NotebookCell,
+    NotebookDocument,
+    RawCell,
+)
+
+
+class NotebookLoadError(RuntimeError):
+    """Raised when a notebook cannot be parsed into a NotebookDocument."""
+
+
+def _coerce_source(value: Any) -> str:
+    if isinstance(value, list):
+        return "".join(str(item) for item in value)
+    if value is None:
+        return ""
+    return str(value)
+
+
+def _coerce_outputs(raw_outputs: Any) -> tuple[CellOutput, ...]:
+    if not isinstance(raw_outputs, list):
+        return ()
+    collected: list[CellOutput] = []
+    for entry in raw_outputs:
+        if not isinstance(entry, dict):
+            continue
+        output_type = str(entry.get("output_type", "stream"))
+        text = ""
+        if "text" in entry:
+            text = _coerce_source(entry.get("text"))
+        elif "data" in entry and isinstance(entry["data"], dict):
+            data = entry["data"]
+            if "text/plain" in data:
+                text = _coerce_source(data.get("text/plain"))
+        collected.append(CellOutput(text=text, output_type=output_type))
+    return tuple(collected)
+
+
+def _build_cell(raw: Any) -> NotebookCell | None:
+    if not isinstance(raw, dict):
+        return None
+    cell_type = raw.get("cell_type")
+    source = _coerce_source(raw.get("source"))
+    if cell_type == "markdown":
+        return MarkdownCell(source=source)
+    if cell_type == "code":
+        return CodeCell(source=source, outputs=_coerce_outputs(raw.get("outputs")))
+    if cell_type == "raw":
+        return RawCell(source=source)
+    return None
+
+
+def load_notebook(path: Path) -> NotebookDocument:
+    """Read ``path`` and return an immutable ``NotebookDocument``.
+
+    Preconditions:
+        ``path`` must not be ``None``.
+
+    Raises:
+        ValueError: If ``path`` is ``None``.
+        NotebookLoadError: If ``path`` is missing, unreadable, malformed
+            JSON, or otherwise unparseable by nbformat.
+    """
+    if path is None:
+        raise ValueError("load_notebook requires a Path, got None")
+
+    try:
+        import nbformat
+    except ImportError as exc:  # pragma: no cover - guarded by availability
+        raise NotebookLoadError("nbformat is not installed") from exc
+
+    target = Path(path)
+    if not target.exists():
+        raise NotebookLoadError(f"Notebook not found: {target}")
+
+    try:
+        notebook = nbformat.read(str(target), as_version=4)
+    except Exception as exc:  # noqa: BLE001 - nbformat raises many subtypes
+        raise NotebookLoadError(f"Could not parse notebook {target}: {exc}") from exc
+
+    raw_cells = getattr(notebook, "cells", None) or []
+    cells: list[NotebookCell] = []
+    for raw in raw_cells:
+        cell = _build_cell(raw)
+        if cell is not None:
+            cells.append(cell)
+    return NotebookDocument(cells=tuple(cells))

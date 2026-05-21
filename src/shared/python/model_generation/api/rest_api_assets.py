@@ -1,0 +1,377 @@
+"""Inertia, library, and editor route handlers for model_generation."""
+
+from __future__ import annotations
+
+import logging
+from typing import Any
+
+from model_generation.api.rest_api_contracts import APIRequest, APIResponse
+from model_generation.api.rest_api_support import (
+    ensure_request,
+    inertia_payload,
+    maybe_file_response,
+    request_body,
+    request_content,
+    temporary_payload_file,
+    validate_mesh_upload,
+)
+
+logger = logging.getLogger(__name__)
+
+
+class AssetLibraryEditorRoutesMixin:
+    """Route handlers for inertia calculations, model library access, and editing."""
+
+    def calculate_inertia(self, request: APIRequest) -> APIResponse:
+        """Calculate inertia for a primitive shape."""
+        from model_generation.core.types import Inertia
+
+        body = request_body(ensure_request(request))
+        shape = body.get("shape")
+        if not shape:
+            return APIResponse.error("Missing 'shape' parameter")
+
+        dimensions = body.get("dimensions", [])
+        mass = body.get("mass", 1.0)
+        try:
+            inertia = self._primitive_inertia(Inertia, shape, mass, dimensions)
+        except ValueError as error:
+            return APIResponse.error(str(error))
+        except (KeyError, TypeError) as error:
+            return APIResponse.error(f"Calculation failed: {error}")
+
+        return APIResponse.ok(
+            {
+                "shape": shape,
+                "mass": mass,
+                "dimensions": dimensions,
+                "inertia": inertia_payload(inertia),
+                "is_positive_definite": inertia.is_positive_definite(),
+                "satisfies_triangle_inequality": (
+                    inertia.satisfies_triangle_inequality()
+                ),
+            }
+        )
+
+    def inertia_from_mesh(self, request: APIRequest) -> APIResponse:
+        """Calculate inertia properties from an uploaded mesh file."""
+        ensure_request(request)
+        mesh_content = request.files.get("mesh")
+        if not mesh_content:
+            return APIResponse.error("Missing mesh file")
+
+        body = request_body(request)
+        mass = body.get("mass")
+        density = body.get("density")
+        if mass is None and density is None:
+            return APIResponse.error("Must provide either 'mass' or 'density'")
+
+        try:
+            validate_mesh_upload(
+                payload=mesh_content,
+                filename=str(body.get("filename") or ""),
+            )
+        except ValueError as error:
+            return APIResponse.error(str(error), 413)
+
+        try:
+            import trimesh
+        except ImportError:
+            return APIResponse.error(
+                "trimesh library not available for mesh-based inertia calculation",
+                501,
+            )
+
+        try:
+            with temporary_payload_file(
+                payload=mesh_content, suffix=".stl"
+            ) as mesh_path:
+                mesh: Any = trimesh.load(mesh_path)
+                volume = mesh.volume
+                inertia_tensor, calculated_mass = self._mesh_inertia(
+                    mesh, mass, density
+                )
+        except (PermissionError, OSError, ValueError, TypeError) as error:
+            return APIResponse.error(f"Mesh processing failed: {error}")
+        except Exception:
+            logger.warning("Mesh parser failed", exc_info=True)
+            return APIResponse.error("Mesh processing failed")
+
+        return APIResponse.ok(
+            {
+                "mass": calculated_mass,
+                "volume": volume,
+                "center_of_mass": mesh.center_mass.tolist(),
+                "inertia": {
+                    "ixx": float(inertia_tensor[0, 0]),
+                    "iyy": float(inertia_tensor[1, 1]),
+                    "izz": float(inertia_tensor[2, 2]),
+                    "ixy": float(inertia_tensor[0, 1]),
+                    "ixz": float(inertia_tensor[0, 2]),
+                    "iyz": float(inertia_tensor[1, 2]),
+                },
+            }
+        )
+
+    def library_list_models(self, request: APIRequest) -> APIResponse:
+        """List models available from the model library."""
+        from model_generation.library import ModelLibrary
+
+        query_params = ensure_request(request).query_params
+        models = ModelLibrary().list_models(
+            category=query_params.get("category"),
+            source=query_params.get("source"),
+            search=query_params.get("search"),
+            tags=(
+                query_params.get("tags", "").split(",")
+                if query_params.get("tags")
+                else None
+            ),
+        )
+        return APIResponse.ok(
+            {
+                "count": len(models),
+                "models": [self._model_summary_payload(model) for model in models],
+            }
+        )
+
+    def library_get_model(self, request: APIRequest) -> APIResponse:
+        """Get metadata for a single library model."""
+        from model_generation.library import ModelLibrary
+
+        model_id = ensure_request(request).query_params.get("model_id")
+        if not model_id:
+            return APIResponse.error("Missing model_id")
+
+        for model in ModelLibrary().list_models():
+            if model.model_id == model_id:
+                return APIResponse.ok(
+                    {
+                        "id": model.model_id,
+                        "name": model.name,
+                        "category": model.category.value,
+                        "source": model.source.value if model.source else None,
+                        "tags": model.tags,
+                        "description": model.description,
+                        "path": str(model.urdf_path) if model.urdf_path else None,
+                    }
+                )
+        return APIResponse.not_found(f"Model not found: {model_id}")
+
+    def library_add_model(self, request: APIRequest) -> APIResponse:
+        """Add a URDF to the model library."""
+        from model_generation.library import ModelCategory, ModelLibrary
+
+        ensure_request(request)
+        body = request_body(request)
+        content = request_content(request)
+        if not content:
+            return APIResponse.error("Missing URDF content")
+
+        with temporary_payload_file(
+            payload=content, suffix=".urdf", text_mode=True
+        ) as path:
+            entry = ModelLibrary().add_local_model(
+                urdf_path=path,
+                name=body.get("name", "unnamed"),
+                category=self._model_category(
+                    ModelCategory, body.get("category", "other")
+                ),
+                tags=body.get("tags", []),
+            )
+        if not entry:
+            return APIResponse.error("Failed to add model")
+        return APIResponse.created(
+            {"id": entry.model_id, "name": entry.name, "category": entry.category.value}
+        )
+
+    def library_remove_model(self, request: APIRequest) -> APIResponse:
+        """Return the current placeholder response for model deletion."""
+        ensure_request(request)
+        if not request.query_params.get("model_id"):
+            return APIResponse.error("Missing model_id")
+        return APIResponse.error("Remove not implemented", 501)
+
+    def library_download_model(self, request: APIRequest) -> APIResponse:
+        """Download the URDF content for a stored model."""
+        from model_generation.library import ModelLibrary
+
+        model_id = ensure_request(request).query_params.get("model_id")
+        if not model_id:
+            return APIResponse.error("Missing model_id")
+
+        model = ModelLibrary().load_model(model_id)
+        if not model:
+            return APIResponse.not_found(f"Model not found: {model_id}")
+        return APIResponse.file(model.to_urdf(), f"{model.name}.urdf")
+
+    def compose_models(self, request: APIRequest) -> APIResponse:
+        """Compose a new model from source URDF fragments and edit operations."""
+        from model_generation.editor import FrankensteinEditor
+
+        body = request_body(ensure_request(request))
+        sources = body.get("sources", {})
+        if not sources:
+            return APIResponse.error("Missing 'sources' in request body")
+
+        editor = FrankensteinEditor()
+        for model_id, content in sources.items():
+            try:
+                editor.load_model(model_id, content, read_only=True)
+            except (ValueError, KeyError, OSError) as error:
+                return APIResponse.error(f"Failed to load model '{model_id}': {error}")
+
+        output_name = body.get("name", "composed_robot")
+        editor.create_model("output", output_name)
+        self._apply_editor_operations(editor, body.get("operations", []))
+        urdf_string = editor.export_model("output")
+        stats = editor.get_model_statistics("output")
+        return maybe_file_response(
+            request,
+            content=urdf_string,
+            filename=f"{output_name}.urdf",
+            payload={
+                "name": output_name,
+                "links": stats.get("link_count", 0),
+                "joints": stats.get("joint_count", 0),
+                "urdf": urdf_string,
+            },
+        )
+
+    def diff_urdfs(self, request: APIRequest) -> APIResponse:
+        """Compare two URDF documents and return a structured diff."""
+        from model_generation.editor.text_editor import URDFTextEditor
+
+        body = request_body(ensure_request(request))
+        content_a = body.get("content_a")
+        content_b = body.get("content_b")
+        if not content_a or not content_b:
+            return APIResponse.error("Missing content_a or content_b")
+
+        editor = URDFTextEditor()
+        editor.load_string(content_a)
+        diff_result = editor.get_diff_with_string(content_b)
+        return APIResponse.ok(
+            {
+                "has_changes": diff_result.has_changes,
+                "additions": diff_result.additions,
+                "deletions": diff_result.deletions,
+                "hunks": len(diff_result.hunks),
+                "unified_diff": diff_result.unified_diff,
+            }
+        )
+
+    def _primitive_inertia(
+        self,
+        inertia_type: Any,
+        shape: str,
+        mass: float,
+        dimensions: list[Any],
+    ) -> Any:
+        """Dispatch primitive inertia calculations by shape name."""
+        if shape == "box":
+            return self._require_dimensions(
+                shape,
+                dimensions,
+                3,
+                lambda: inertia_type.from_box(mass, *dimensions),
+            )
+        if shape == "cylinder":
+            return self._require_dimensions(
+                shape,
+                dimensions,
+                2,
+                lambda: inertia_type.from_cylinder(mass, dimensions[0], dimensions[1]),
+                label="radius, length",
+            )
+        if shape == "sphere":
+            return self._require_dimensions(
+                shape,
+                dimensions,
+                1,
+                lambda: inertia_type.from_sphere(mass, dimensions[0]),
+                label="radius",
+            )
+        if shape == "capsule":
+            return self._require_dimensions(
+                shape,
+                dimensions,
+                2,
+                lambda: inertia_type.from_capsule(mass, dimensions[0], dimensions[1]),
+                label="radius, length",
+            )
+        raise ValueError(f"Unknown shape: {shape}")
+
+    def _require_dimensions(
+        self,
+        shape: str,
+        dimensions: list[Any],
+        expected_count: int,
+        factory: Any,
+        *,
+        label: str | None = None,
+    ) -> Any:
+        """Validate expected primitive dimensions before calling the factory."""
+        if len(dimensions) != expected_count:
+            suffix = f" ({label})" if label else ""
+            dimension_label = "dimension" if expected_count == 1 else "dimensions"
+            raise ValueError(
+                f"{shape.capitalize()} requires "
+                f"{expected_count} {dimension_label}{suffix}"
+            )
+        return factory()
+
+    def _mesh_inertia(
+        self,
+        mesh: Any,
+        mass: float | None,
+        density: float | None,
+    ) -> tuple[Any, float]:
+        """Return the inertia tensor and effective mass for a mesh payload."""
+        if density is not None:
+            mesh.density = density
+            return mesh.moment_inertia, mesh.mass
+        if mass is None:
+            raise ValueError("Must provide either 'mass' or 'density'")
+        return mesh.moment_inertia * (mass / mesh.mass), mass
+
+    def _model_summary_payload(self, model: Any) -> dict[str, Any]:
+        """Serialize list-model results without exposing library internals."""
+        return {
+            "id": model.id,
+            "name": model.name,
+            "category": model.category.value,
+            "source": model.source.value if model.source else None,
+            "tags": model.tags,
+            "description": model.description,
+        }
+
+    def _model_category(self, category_type: Any, category_name: str) -> Any:
+        """Parse a model category, defaulting to OTHER for unknown values."""
+        try:
+            return category_type(category_name)
+        except ValueError:
+            return category_type.OTHER
+
+    def _apply_editor_operations(
+        self,
+        editor: Any,
+        operations: list[dict[str, Any]],
+    ) -> None:
+        """Apply supported edit operations to the output model."""
+        for operation in operations:
+            operation_type = operation.get("type")
+            if operation_type == "copy_subtree":
+                editor.copy_subtree(operation["source"], operation["link"])
+            elif operation_type == "paste":
+                editor.paste(
+                    "output",
+                    attach_to=operation.get("attach_to"),
+                    prefix=operation.get("prefix", ""),
+                )
+            elif operation_type == "delete_subtree":
+                editor.delete_subtree("output", operation["link"])
+            elif operation_type == "rename":
+                editor.rename_link(
+                    "output", operation["old_name"], operation["new_name"]
+                )

@@ -136,9 +136,13 @@ def _get_reference_segment_lengths(
     reference_height = 1.75
 
     reference_lengths = {}
-    for pair_name, _ in marker_map.segment_pairs:
-        # Extract segment name from pair
-        segment = pair_name.split("-")[0].lower()
+    for proximal, distal in marker_map.segment_pairs:
+        # Build the same composite key used by _compute_average_segment_lengths
+        # so that measured_lengths.get(pair_name) actually finds a match.
+        pair_name = f"{proximal}-{distal}"
+
+        # Extract segment name from the proximal marker
+        segment = proximal.lower()
 
         # Map common marker pair names to segment names
         segment_mapping = {
@@ -161,7 +165,8 @@ def _get_reference_segment_lengths(
         }
 
         # Try to find segment proportion
-        proportion = SEGMENT_PROPORTIONS.get(segment, 0.15)
+        segment_name = segment_mapping.get(segment, segment)
+        proportion = SEGMENT_PROPORTIONS.get(segment_name, 0.15)
         reference_lengths[pair_name] = proportion * reference_height
 
     return reference_lengths

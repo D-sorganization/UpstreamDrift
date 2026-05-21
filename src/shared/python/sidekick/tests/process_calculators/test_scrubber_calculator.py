@@ -1,0 +1,137 @@
+import pytest
+from upstream_drift_tools.process_calculators.scrubber_calculator import (
+    PACKING_DATABASE,
+    calculate_caustic_requirement,
+    calculate_column_diameter,
+    calculate_cooling_water_requirement,
+    calculate_flooding_velocity,
+    calculate_gas_density,
+    calculate_gas_viscosity,
+    calculate_heat_transfer_duty,
+    calculate_htu,
+    calculate_ntu_removal,
+    calculate_pressure_drop,
+    calculate_required_packed_height,
+)
+
+
+def test_calculate_gas_density() -> None:
+    rho = calculate_gas_density(
+        temperature_k=298.15, pressure_pa=101325.0, molecular_weight=28.97
+    )
+    assert rho == pytest.approx(1.18, abs=0.1)
+
+
+def test_calculate_gas_viscosity() -> None:
+    mu = calculate_gas_viscosity(temperature_k=300.0, molecular_weight=28.97)
+    assert mu > 0.0
+
+
+def test_calculate_flooding_velocity() -> None:
+    packing = PACKING_DATABASE["Ceramic Raschig Rings"]
+    # Provide valid realistic values
+    u_flood = calculate_flooding_velocity(
+        liquid_mass_flux=5.0,
+        gas_density=1.2,
+        liquid_density=1000.0,
+        packing=packing,
+        liquid_viscosity=0.001,
+    )
+    assert u_flood > 0.0
+
+
+def test_calculate_pressure_drop() -> None:
+    packing = PACKING_DATABASE["Ceramic Raschig Rings"]
+    dp = calculate_pressure_drop(
+        gas_velocity=1.0,
+        gas_density=1.2,
+        liquid_mass_flux=5.0,
+        liquid_density=1000.0,
+        packing=packing,
+        packed_height=3.0,
+    )
+    assert dp > 0.0
+
+
+def test_calculate_ntu_removal() -> None:
+    ntu = calculate_ntu_removal(0.1, 0.01)
+    assert ntu == pytest.approx(2.302, abs=0.01)
+
+    assert calculate_ntu_removal(0.0, 0.01) == 0.0
+    assert calculate_ntu_removal(0.01, 0.1) == 0.0
+
+
+def test_calculate_htu() -> None:
+    packing = PACKING_DATABASE["Ceramic Raschig Rings"]
+    htu = calculate_htu(
+        gas_mass_flux=1.0,
+        liquid_mass_flux=5.0,
+        gas_density=1.2,
+        packing=packing,
+        kla=100.0,
+    )
+    assert htu > 0.0
+
+
+def test_calculate_required_packed_height() -> None:
+    height = calculate_required_packed_height(ntu=5.0, htu=0.5, safety_factor=1.2)
+    assert height == pytest.approx(3.0)
+
+
+def test_calculate_caustic_requirement() -> None:
+    req = calculate_caustic_requirement(
+        acid_gas_removed={"HCl": 10.0, "HF": 2.0},
+        caustic_concentration=20.0,
+    )
+    assert "naoh_pure_kg_hr" in req
+    assert "naoh_solution_kg_hr" in req
+    assert req["naoh_pure_kg_hr"] > 0.0
+
+
+def test_calculate_heat_transfer_duty() -> None:
+    duty = calculate_heat_transfer_duty(
+        gas_flow_kg_hr=1000.0,
+        inlet_temp_c=150.0,
+        outlet_temp_c=50.0,
+        water_condensed_kg_hr=50.0,
+    )
+    assert duty["sensible_heat_kw"] > 0.0
+    assert duty["latent_heat_kw"] > 0.0
+    assert duty["total_heat_kw"] > 0.0
+
+
+def test_calculate_cooling_water_requirement() -> None:
+    req = calculate_cooling_water_requirement(
+        heat_duty_kw=500.0,
+        water_inlet_temp_c=25.0,
+        approach_temp_c=5.0,
+        outlet_gas_temp_c=50.0,
+    )
+    assert req["water_flow_kg_hr"] > 0.0
+    assert "warning" not in req
+
+    req_fail = calculate_cooling_water_requirement(
+        heat_duty_kw=500.0,
+        water_inlet_temp_c=60.0,
+        approach_temp_c=5.0,
+        outlet_gas_temp_c=50.0,
+    )
+    assert "warning" in req_fail
+
+
+def test_calculate_column_diameter() -> None:
+    diam = calculate_column_diameter(
+        gas_flow_kg_hr=1000.0,
+        gas_density=1.2,
+        flooding_velocity=2.0,
+        percent_of_flood=70.0,
+    )
+    assert diam["diameter_m"] > 0.0
+
+    diam_fail = calculate_column_diameter(
+        gas_flow_kg_hr=1000.0,
+        gas_density=1.2,
+        flooding_velocity=0.0,
+        percent_of_flood=70.0,
+    )
+    assert "warning" in diam_fail

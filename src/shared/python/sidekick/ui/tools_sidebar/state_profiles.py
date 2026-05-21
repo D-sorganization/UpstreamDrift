@@ -1,0 +1,126 @@
+"""Named Sidekick state profile persistence helpers."""
+
+from __future__ import annotations
+
+import json
+import re
+import shutil
+from dataclasses import dataclass
+from pathlib import Path
+
+from .state import SidebarState
+
+CLEAR_SIDEKICK_DATA_CONFIRMATION = "clear-sidekick-data"
+CLEAR_SIDEKICK_DATA_WARNING = (
+    "Clearing Sidekick data removes saved state profiles and cannot be undone."
+)
+
+_PROFILE_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._ -]{0,79}$")
+
+
+@dataclass(frozen=True, slots=True)
+class SidekickStateProfileResult:
+    """Result returned by profile save, load, and clear operations."""
+
+    ok: bool
+    message: str
+    profile_name: str | None = None
+    state: SidebarState | None = None
+    warning: str | None = None
+    path: Path | None = None
+
+
+class SidekickStateProfileStore:
+    """Persist named ``SidebarState`` snapshots under a host-provided root."""
+
+    def __init__(self, storage_root: str | Path) -> None:
+        self.storage_root = Path(storage_root).expanduser()
+        self.profiles_dir = self.storage_root / "profiles"
+
+    def save_profile(
+        self,
+        name: str,
+        state: SidebarState,
+    ) -> SidekickStateProfileResult:
+        """Save ``state`` as ``name`` after validating the path-safe name."""
+        profile_name = validate_profile_name(name)
+        target = self._profile_path(profile_name)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(state.to_dict(), indent=2), encoding="utf-8")
+        return SidekickStateProfileResult(
+            ok=True,
+            message="saved",
+            profile_name=profile_name,
+            state=state,
+            path=target,
+        )
+
+    def load_profile(self, name: str) -> SidekickStateProfileResult:
+        """Load a named profile without mutating any live sidebar instance."""
+        profile_name = validate_profile_name(name)
+        source = self._profile_path(profile_name)
+        if not source.exists():
+            return SidekickStateProfileResult(
+                ok=False,
+                message=f"Profile not found: {profile_name}",
+                profile_name=profile_name,
+                path=source,
+            )
+        try:
+            payload = json.loads(source.read_text(encoding="utf-8"))
+            if not isinstance(payload, dict):
+                raise ValueError("profile payload must be a JSON object")
+            state = SidebarState.from_dict(payload)
+        except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+            return SidekickStateProfileResult(
+                ok=False,
+                message=f"Invalid profile payload: {exc}",
+                profile_name=profile_name,
+                path=source,
+            )
+        return SidekickStateProfileResult(
+            ok=True,
+            message="loaded",
+            profile_name=profile_name,
+            state=state,
+            path=source,
+        )
+
+    def clear_data(
+        self,
+        *,
+        confirmation: str | None = None,
+    ) -> SidekickStateProfileResult:
+        """Remove Sidekick profile data only after explicit confirmation."""
+        if confirmation != CLEAR_SIDEKICK_DATA_CONFIRMATION:
+            return SidekickStateProfileResult(
+                ok=False,
+                message="Clear Sidekick data requires explicit confirmation.",
+                warning=CLEAR_SIDEKICK_DATA_WARNING,
+                path=self.storage_root,
+            )
+        if self.storage_root.exists():
+            shutil.rmtree(self.storage_root)
+        return SidekickStateProfileResult(
+            ok=True,
+            message="cleared",
+            warning=CLEAR_SIDEKICK_DATA_WARNING,
+            path=self.storage_root,
+        )
+
+    def _profile_path(self, profile_name: str) -> Path:
+        return self.profiles_dir / f"{profile_name}.json"
+
+
+def validate_profile_name(name: str) -> str:
+    """Return a normalized, path-safe profile name or raise ``ValueError``."""
+    profile_name = str(name).strip()
+    if (
+        not profile_name
+        or profile_name in {".", ".."}
+        or "/" in profile_name
+        or "\\" in profile_name
+        or not _PROFILE_NAME_RE.fullmatch(profile_name)
+    ):
+        raise ValueError("Sidekick profile names must be non-empty and path-safe.")
+    return profile_name

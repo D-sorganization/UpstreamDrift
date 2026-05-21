@@ -1,0 +1,186 @@
+"""Sidekick notes persistence facade (issue #2931).
+
+Wraps :class:`~notes.card_store.NoteCardStore` with a Sidekick-scoped
+interface so the notes tab does not reach into the ``notes`` package directly.
+
+Design
+------
+- **DbC**: preconditions checked on every public method.
+- **LOD**: only one level of delegation to ``NoteCardStore``.
+- **DRY**: all persistence logic lives in ``NoteCardStore``; this module
+  adds only the Sidekick-specific directory layout and name.
+"""
+
+from __future__ import annotations
+
+import logging
+from pathlib import Path
+from typing import cast
+
+from notes.card_store import NoteCardStore
+from notes.models import DEFAULT_NOTE_COLOR, NoteCard
+
+log = logging.getLogger(__name__)
+
+_NOTES_SUBDIR = ".sidekick_notes"
+
+
+class SidekickNotesStore:
+    """Project-scoped notes store for the Sidekick notes tab.
+
+    Persists :class:`~notes.models.NoteCard` objects under
+    ``<project_root>/.sidekick_notes/`` using :class:`~notes.card_store.NoteCardStore`.
+
+    Args:
+        project_root: Root directory of the current project.
+
+    Raises:
+        TypeError: If *project_root* is ``None``.
+        ValueError: If *project_root* does not exist or is not a directory.
+    """
+
+    def __init__(self, project_root: Path | str) -> None:
+        if project_root is None:
+            raise TypeError("project_root must be provided")
+        self._root = Path(project_root)
+        if not self._root.exists() or not self._root.is_dir():
+            raise ValueError(
+                f"project_root must exist and be a directory: {self._root!r}"
+            )
+        self._root.mkdir(parents=True, exist_ok=True)
+        # Ensure the notes sub-directory exists before constructing the store
+        notes_dir = self._root / _NOTES_SUBDIR
+        notes_dir.mkdir(parents=True, exist_ok=True)
+        self._store = NoteCardStore(
+            project_dir=self._root,
+            notes_dirname=_NOTES_SUBDIR,
+        )
+        log.debug("SidekickNotesStore initialized at %s", self._root)
+
+    # ------------------------------------------------------------------
+    # Public API (thin delegation to NoteCardStore)
+    # ------------------------------------------------------------------
+
+    def create_note(
+        self,
+        title: str,
+        body: str = "",
+        *,
+        color: str = DEFAULT_NOTE_COLOR,
+    ) -> NoteCard:
+        """Create and persist a new note card.
+
+        Args:
+            title: Human-readable note title.
+            body: Markdown body text (may be empty).
+            color: Background color as ``#RRGGBB`` hex string.
+
+        Returns:
+            The newly created :class:`~notes.models.NoteCard`.
+
+        Raises:
+            TypeError: If *title* is not a string.
+            ValueError: If *title* is empty or *color* is not a valid hex color.
+        """
+        if not isinstance(title, str):
+            raise TypeError(f"title must be str, got {type(title).__name__!r}")
+        if not title.strip():
+            raise ValueError("title must not be empty")
+        card = self._store.create_note(title=title, markdown_body=body, color=color)
+        log.debug("Created note %r (color=%r)", card.note_id, card.color)
+        return card
+
+    def update_note(
+        self,
+        note_id: str,
+        *,
+        title: str,
+        body: str,
+        color: str = DEFAULT_NOTE_COLOR,
+    ) -> NoteCard:
+        """Update an existing note card.
+
+        Args:
+            note_id: Stable identifier of the note to update.
+            title: Updated title.
+            body: Updated markdown body.
+            color: Updated background color as ``#RRGGBB`` hex string.
+
+        Returns:
+            The updated :class:`~notes.models.NoteCard`.
+
+        Raises:
+            TypeError: If *note_id* or *title* is not a string.
+            ValueError: If *note_id* or *title* is empty.
+            FileNotFoundError: If no note with *note_id* exists.
+        """
+        if not isinstance(note_id, str):
+            raise TypeError(f"note_id must be str, got {type(note_id).__name__!r}")
+        if not note_id.strip():
+            raise ValueError("note_id must not be empty")
+        if not isinstance(title, str):
+            raise TypeError(f"title must be str, got {type(title).__name__!r}")
+        if not title.strip():
+            raise ValueError("title must not be empty")
+        card = self._store.update_note(
+            note_id,
+            title=title,
+            markdown_body=body,
+            color=color,
+        )
+        log.debug("Updated note %r", note_id)
+        return card
+
+    def list_notes(self) -> list[NoteCard]:
+        """Return all notes sorted by newest update first.
+
+        Returns:
+            List of :class:`~notes.models.NoteCard` objects.
+        """
+        return cast(list[NoteCard], self._store.list_notes())
+
+    def load_note(self, note_id: str) -> NoteCard | None:
+        """Load one note by ID, or ``None`` if it does not exist.
+
+        Args:
+            note_id: Stable note identifier.
+
+        Returns:
+            :class:`~notes.models.NoteCard` or ``None``.
+
+        Raises:
+            TypeError: If *note_id* is not a string.
+            ValueError: If *note_id* is empty.
+        """
+        if not isinstance(note_id, str):
+            raise TypeError(f"note_id must be str, got {type(note_id).__name__!r}")
+        if not note_id.strip():
+            raise ValueError("note_id must not be empty")
+        return self._store.load_note(note_id)
+
+    def delete_note(self, note_id: str) -> bool:
+        """Move *note_id* to the recycle bin.
+
+        Args:
+            note_id: Stable note identifier.
+
+        Returns:
+            ``True`` when the note was found and recycled.
+
+        Raises:
+            TypeError: If *note_id* is not a string.
+            ValueError: If *note_id* is empty.
+        """
+        if not isinstance(note_id, str):
+            raise TypeError(f"note_id must be str, got {type(note_id).__name__!r}")
+        if not note_id.strip():
+            raise ValueError("note_id must not be empty")
+        try:
+            self._store.delete_note(note_id, reason="user_delete")
+            log.debug("Deleted note %r", note_id)
+            return True
+        except FileNotFoundError:
+            return False
+
+
+__all__ = ["SidekickNotesStore"]

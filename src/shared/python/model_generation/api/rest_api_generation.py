@@ -1,0 +1,232 @@
+"""Generation, conversion, validation, and parsing route handlers."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from model_generation.api.rest_api_contracts import APIRequest, APIResponse
+from model_generation.api.rest_api_support import (
+    ensure_request,
+    maybe_file_response,
+    request_body,
+    request_content,
+)
+
+
+class GenerationConversionRoutesMixin:
+    """Route handlers for model generation and file-format conversion."""
+
+    def generate_humanoid(self, request: APIRequest) -> APIResponse:
+        """Generate a humanoid URDF from high-level body parameters."""
+        from model_generation.builders.parametric_builder import ParametricBuilder
+
+        body = request_body(ensure_request(request))
+        robot_name = body.get("name", "humanoid")
+        builder = ParametricBuilder(robot_name=robot_name)
+        builder.set_parameters(
+            height_m=body.get("height", 1.7),
+            mass_kg=body.get("mass", 70.0),
+            **body.get("proportions", {}),
+        )
+        builder.add_humanoid_segments()
+        result = builder.build()
+        if not result.success:
+            return APIResponse.error(result.error_message or "Build failed")
+        return maybe_file_response(
+            request,
+            content=result.urdf_xml,
+            filename=f"{robot_name}.urdf",
+            payload={
+                "robot_name": robot_name,
+                "links": len(result.links),
+                "joints": len(result.joints),
+                "urdf": result.urdf_xml,
+            },
+        )
+
+    def generate_from_params(self, request: APIRequest) -> APIResponse:
+        """Generate a URDF from explicit link and joint definitions."""
+        from model_generation.builders.manual_builder import ManualBuilder
+        from model_generation.core.types import Joint, Link
+
+        body = request_body(ensure_request(request))
+        if "links" not in body:
+            return APIResponse.error("Missing 'links' in request body")
+
+        robot_name = body.get("name", "robot")
+        builder = ManualBuilder(robot_name=robot_name)
+        for link_data in body.get("links", []):
+            builder.add_link(Link.from_dict(link_data))
+        for joint_data in body.get("joints", []):
+            builder.add_joint(Joint.from_dict(joint_data))
+        result = builder.build()
+        if not result.success:
+            return APIResponse.error(result.error_message or "Build failed")
+        return maybe_file_response(
+            request,
+            content=result.urdf_xml,
+            filename=f"{robot_name}.urdf",
+            payload={
+                "robot_name": robot_name,
+                "links": len(result.links),
+                "joints": len(result.joints),
+                "urdf": result.urdf_xml,
+            },
+        )
+
+    def convert_simscape_to_urdf(self, request: APIRequest) -> APIResponse:
+        """Convert SimScape model content into URDF."""
+        from model_generation.converters.simscape import (
+            ConversionConfig,
+            SimscapeToURDFConverter,
+        )
+
+        ensure_request(request)
+        body = request_body(request)
+        content = request_content(request)
+        if not content:
+            return APIResponse.error("Missing model content or file")
+
+        format_type = body.get("format", "mdl")
+        if request.files.get("file") and (
+            content.strip().startswith("<?xml") or content.strip().startswith("<")
+        ):
+            format_type = "xml"
+
+        converter = SimscapeToURDFConverter(
+            ConversionConfig(robot_name=body.get("robot_name", "converted_robot"))
+        )
+        result = converter.convert_string(content, format_type)
+        if not result.success:
+            return APIResponse.error("; ".join(result.errors), status_code=422)
+        return maybe_file_response(
+            request,
+            content=result.urdf_string,
+            filename=f"{result.robot_name}.urdf",
+            payload={
+                "success": True,
+                "robot_name": result.robot_name,
+                "links": len(result.links),
+                "joints": len(result.joints),
+                "warnings": result.warnings,
+                "urdf": result.urdf_string,
+            },
+        )
+
+    def convert_mjcf_to_urdf(self, request: APIRequest) -> APIResponse:
+        """Convert MJCF content into URDF."""
+        from model_generation.converters.mjcf_converter import MJCFConverter
+
+        ensure_request(request)
+        body = request_body(request)
+        content = request_content(request)
+        if not content:
+            return APIResponse.error("Missing MJCF content")
+
+        try:
+            urdf_string = MJCFConverter().mjcf_to_urdf(content)
+        except (ValueError, KeyError, OSError) as error:
+            return APIResponse.error(f"Conversion failed: {error}", 422)
+
+        robot_name = body.get("robot_name", "converted")
+        return maybe_file_response(
+            request,
+            content=urdf_string,
+            filename=f"{robot_name}.urdf",
+            payload={"urdf": urdf_string},
+        )
+
+    def convert_urdf_to_mjcf(self, request: APIRequest) -> APIResponse:
+        """Convert URDF content into MJCF."""
+        from model_generation.converters.mjcf_converter import MJCFConverter
+
+        ensure_request(request)
+        body = request_body(request)
+        content = request_content(request)
+        if not content:
+            return APIResponse.error("Missing URDF content")
+
+        try:
+            mjcf_string = MJCFConverter().urdf_to_mjcf(content)
+        except (ValueError, KeyError, OSError) as error:
+            return APIResponse.error(f"Conversion failed: {error}", 422)
+
+        robot_name = body.get("robot_name", "converted")
+        return maybe_file_response(
+            request,
+            content=mjcf_string,
+            filename=f"{robot_name}.xml",
+            content_type="application/xml",
+            payload={"mjcf": mjcf_string},
+        )
+
+    def validate_urdf(self, request: APIRequest) -> APIResponse:
+        """Validate URDF content and return structured validation messages."""
+        from model_generation.editor.text_editor import (
+            URDFTextEditor,
+            ValidationSeverity,
+        )
+
+        ensure_request(request)
+        content = request_content(request)
+        if not content:
+            return APIResponse.error("Missing URDF content")
+
+        editor = URDFTextEditor()
+        editor.load_string(content)
+        messages = editor.validate()
+        error_count = sum(
+            1 for message in messages if message.severity == ValidationSeverity.ERROR
+        )
+        warning_count = sum(
+            1 for message in messages if message.severity == ValidationSeverity.WARNING
+        )
+        return APIResponse.ok(
+            {
+                "valid": error_count == 0,
+                "error_count": error_count,
+                "warning_count": warning_count,
+                "messages": [
+                    self._validation_message_payload(message) for message in messages
+                ],
+            }
+        )
+
+    def parse_urdf(self, request: APIRequest) -> APIResponse:
+        """Parse URDF content and return a serializable model structure."""
+        from model_generation.converters.urdf_parser import URDFParser
+
+        ensure_request(request)
+        content = request_content(request)
+        if not content:
+            return APIResponse.error("Missing URDF content")
+
+        try:
+            model = URDFParser().parse(content)
+        except (ValueError, KeyError, OSError) as error:
+            return APIResponse.error(f"Parse failed: {error}", 422)
+
+        root = model.get_root_link()
+        return APIResponse.ok(
+            {
+                "name": model.name,
+                "root_link": root.name if root else None,
+                "links": [link.to_dict() for link in model.links],
+                "joints": [joint.to_dict() for joint in model.joints],
+                "materials": {
+                    name: material.to_dict()
+                    for name, material in model.materials.items()
+                },
+                "warnings": model.warnings,
+            }
+        )
+
+    def _validation_message_payload(self, message: Any) -> dict[str, Any]:
+        """Serialize text-editor validation messages."""
+        return {
+            "severity": message.severity.value,
+            "line": message.line,
+            "column": message.column,
+            "message": message.message,
+            "element": message.element,
+        }

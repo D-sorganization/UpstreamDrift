@@ -1,0 +1,119 @@
+"""WorkspaceBridge — Phase 3 (Tools #2877).
+
+Bridges Sidekick workspace variables into a Jupyter kernel environment by
+filtering the variable dict to only JSON-serializable values and then
+delegating to the session model's
+:meth:`~.notebook_session.NotebookSessionModel.set_kernel_environment`.
+
+No Qt imports.  This module is pure-Python and can be unit-tested headlessly.
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+from typing import Any
+
+from .notebook_session import NotebookSessionModel
+
+logger = logging.getLogger(__name__)
+
+
+class WorkspaceBridge:
+    """Bridges Sidekick workspace variables into a Jupyter kernel environment.
+
+    Filters the workspace dict to only variables that are JSON-serializable
+    (primitives, lists, and dicts of primitives) before passing them to
+    :meth:`~.notebook_session.NotebookSessionModel.set_kernel_environment`.
+    This prevents un-picklable objects (Qt widgets, lambdas, custom classes)
+    from reaching the kernel injection layer.
+
+    Args:
+        session_model: The :class:`~.notebook_session.NotebookSessionModel`
+            that owns the kernel environment.  Must not be ``None`` (DbC).
+
+    Raises:
+        ValueError: If *session_model* is ``None``.
+    """
+
+    def __init__(self, session_model: NotebookSessionModel) -> None:
+        if session_model is None:
+            raise ValueError(
+                "session_model must not be None; provide a NotebookSessionModel"
+            )
+        self._session_model = session_model
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    def export_variables(self, workspace: dict[str, Any]) -> dict[str, Any]:
+        """Return a filtered subset of workspace vars suitable for kernel injection.
+
+        Only exports variables that are JSON-serializable.  Non-serializable
+        values (lambdas, Qt widgets, arbitrary objects) are silently excluded.
+        The returned dict is a new object — the input is never mutated.
+
+        Args:
+            workspace: A ``{name: value}`` mapping of Sidekick workspace
+                variables.  Must be a ``dict`` (DbC).
+
+        Returns:
+            A new dict containing only the JSON-serializable entries from
+            *workspace*.
+
+        Raises:
+            TypeError: If *workspace* is not a dict.
+        """
+        if not isinstance(workspace, dict):
+            raise TypeError(f"workspace must be a dict, got {type(workspace).__name__}")
+
+        result: dict[str, Any] = {}
+        for name, value in workspace.items():
+            if _is_json_serializable(value):
+                result[name] = value
+            else:
+                logger.debug(
+                    "Skipping non-serializable variable %r (%s)",
+                    name,
+                    type(value).__name__,
+                )
+        return result
+
+    def apply_to_kernel_environment(self, workspace: dict[str, Any]) -> None:
+        """Export workspace variables and inject them into the session model.
+
+        Calls :meth:`export_variables` to filter the workspace, then passes
+        the result to
+        :meth:`~.notebook_session.NotebookSessionModel.set_kernel_environment`.
+
+        Args:
+            workspace: A ``{name: value}`` mapping of Sidekick workspace
+                variables.
+
+        Raises:
+            TypeError: If *workspace* is not a dict (propagated from
+                :meth:`export_variables`).
+        """
+        exported = self.export_variables(workspace)
+        self._session_model.set_kernel_environment(exported)
+        logger.debug("Applied %d variable(s) to kernel environment", len(exported))
+
+
+# ---------------------------------------------------------------------------
+# Internal helpers
+# ---------------------------------------------------------------------------
+
+
+def _is_json_serializable(value: Any) -> bool:
+    """Return ``True`` if *value* can be round-tripped through ``json.dumps``.
+
+    Uses a try/except on :func:`json.dumps` as the definitive test rather than
+    isinstance checks so that any JSON-compatible custom type is accepted
+    automatically.
+    """
+    try:
+        json.dumps(value)
+        return True
+    except (TypeError, ValueError):
+        return False
