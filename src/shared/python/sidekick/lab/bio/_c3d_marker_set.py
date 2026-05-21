@@ -32,6 +32,7 @@ class MarkerSet(str, Enum):
     PLUG_IN_GAIT_41 = "Plug-in-Gait-41"
     IOR = "IOR"
     GOLF_CLUSTER = "GolfCluster"
+    GOLF_TOUR_AVERAGE_BODY = "GolfTourAverageBody"
     UNKNOWN = "Unknown"
 
 
@@ -157,6 +158,41 @@ _SIGNATURES: tuple[_MarkerSetSignature, ...] = (
             "ClubButt",
         ),
         min_required_hits=0,
+    ),
+    _MarkerSetSignature(
+        marker_set=MarkerSet.GOLF_TOUR_AVERAGE_BODY,
+        name_aliases=("Tour Average", "TourAverage", "GolfTourAverage"),
+        required=(
+            "WaistLeft",
+            "WaistRight",
+            "WaistLBack",
+            "WaistRBack",
+            "BackTop",
+            "BackLeft",
+            "BackRight",
+            "HeadTop",
+            "HeadFront",
+            "HeadSide",
+            "LShoulderTop",
+            "LShoulderBack",
+            "LElbowOut",
+            "LUArmHigh",
+            "LWristTop",
+            "RShoulderTop",
+            "RShoulderBack",
+            "RElbowOut",
+            "RUArmHigh",
+            "RWristTop",
+            "LKneeOut",
+            "LToeIn",
+            "LToeOut",
+            "LAnkleOut",
+            "RKneeOut",
+            "RToeIn",
+            "RToeOut",
+            "RAnkleOut",
+        ),
+        min_required_hits=24,
     ),
 )
 

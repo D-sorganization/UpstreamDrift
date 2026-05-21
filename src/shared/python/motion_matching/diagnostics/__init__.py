@@ -29,6 +29,11 @@ from .clubhead_trace import (
     plot_setup_pose_skeletons,
     plot_speed_comparison,
 )
+from .body_target_video import (
+    BodyTargetVideoResult,
+    save_body_target_video,
+    save_c3d_body_video,
+)
 from .forward_kinematics import (
     SegmentLengths,
     SkeletonPose,
@@ -50,6 +55,7 @@ from .reference_pose import (
 
 __all__ = [
     "InitialStateDiffReport",
+    "BodyTargetVideoResult",
     "REFERENCE_GOLFER_FIELDS",
     "SegmentLengths",
     "SkeletonPose",
@@ -67,5 +73,7 @@ __all__ = [
     "plot_skeleton_overlay",
     "plot_speed_comparison",
     "reference_golfer_setup",
+    "save_body_target_video",
+    "save_c3d_body_video",
     "summarize_for_pr_comment",
 ]

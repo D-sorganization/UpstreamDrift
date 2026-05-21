@@ -74,6 +74,14 @@ def test_dependencies_reference_known_features() -> None:
             )
 
 
+def test_lower_body_model_feature_is_registered() -> None:
+    feature = get_feature("lower-body-model")
+    assert feature.display_name == "Lower Body Model"
+    assert feature.probe_key == "lower_body_model"
+    assert feature.docker_stage == "mujoco"
+    assert feature.depends_on == ("mujoco",)
+
+
 def test_pip_extra_features_are_listed_in_pyproject() -> None:
     """Smoke check: every ``pip_extra`` should match an entry in pyproject."""
     pyproject = (

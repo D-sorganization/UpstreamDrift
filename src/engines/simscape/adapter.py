@@ -139,13 +139,19 @@ class SimscapeAdapter:
     """
 
     @precondition(
-        lambda self, rng_seed=42, cache_enabled=True, cache_max_entries=1024, startup_timeout_s=60.0: (
-            isinstance(rng_seed, int) and rng_seed >= 0
-        ),
+        lambda self,
+        rng_seed=42,
+        cache_enabled=True,
+        cache_max_entries=1024,
+        startup_timeout_s=60.0: (isinstance(rng_seed, int) and rng_seed >= 0),
         "rng_seed must be a non-negative int",
     )
     @precondition(
-        lambda self, rng_seed=42, cache_enabled=True, cache_max_entries=1024, startup_timeout_s=60.0: (
+        lambda self,
+        rng_seed=42,
+        cache_enabled=True,
+        cache_max_entries=1024,
+        startup_timeout_s=60.0: (
             isinstance(cache_max_entries, int) and cache_max_entries >= 0
         ),
         "cache_max_entries must be a non-negative int",
@@ -1125,6 +1131,6 @@ def _matlab_engine_available() -> bool:
     try:
         import importlib.util
 
-        return importlib.util.find_spec("matlab") is not None
+        return importlib.util.find_spec("matlab.engine") is not None
     except (ImportError, ValueError):  # pragma: no cover - defensive
         return False

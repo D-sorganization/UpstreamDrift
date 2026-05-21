@@ -15,8 +15,10 @@ import numpy as np
 import pandas as pd
 import pytest
 from sidekick.lab.bio import _c3d_io as io_mod
+from sidekick.lab.bio._c3d_marker_set import MarkerSet
 from sidekick.lab.bio.c3d_reader import C3DDataReader
-from tests.unit.sidekick.lab.bio._synthetic import _synthetic_c3d_dict
+
+from ._synthetic import _synthetic_c3d_dict
 
 REAL_C3D = Path(__file__).resolve().parents[5] / "data" / "C3D_TA_Driver.c3d"
 
@@ -236,3 +238,26 @@ def test_load_goes_through_ezc3d(tmp_path: Path) -> None:
 
 
 # ----- real-file sanity (skip if absent) ------------------------------------
+
+
+def test_real_tour_average_driver_reader_sanity() -> None:
+    if not REAL_C3D.exists():
+        pytest.skip(f"missing fixture: {REAL_C3D}")
+
+    reader = C3DDataReader(REAL_C3D)
+    metadata = reader.get_metadata()
+    points = reader.points_dataframe()
+
+    assert metadata.marker_count == 38
+    assert metadata.frame_count == 654
+    assert metadata.frame_rate == pytest.approx(360.0)
+    assert metadata.units == "m"
+    assert metadata.duration == pytest.approx(654 / 360.0)
+    assert metadata.analog_count == 0
+    assert metadata.force_plates == ()
+    assert metadata.events == []
+    assert metadata.marker_set is MarkerSet.GOLF_TOUR_AVERAGE_BODY
+    assert {"WaistLeft", "BackTop", "HeadTop", "LWristTop", "RAnkleOut"}.issubset(
+        set(metadata.marker_labels)
+    )
+    assert points.shape == (38 * 654, 7)

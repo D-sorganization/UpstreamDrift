@@ -23,7 +23,7 @@ from sidekick.lab.bio._c3d_markers import (
     validate_marker_positions,
 )
 from sidekick.lab.bio._c3d_models import C3DMetadata
-from tests.unit.sidekick.lab.bio._synthetic import _synthetic_c3d_dict
+from ._synthetic import _synthetic_c3d_dict
 
 WARNING_LOGGER = "sidekick.lab.bio._c3d_markers"
 

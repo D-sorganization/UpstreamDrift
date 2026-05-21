@@ -75,6 +75,47 @@ GOLF_CLUSTER_LABELS = [
     "M4",
 ]
 
+TOUR_AVERAGE_BODY_LABELS = [
+    "Marker_0:0:0",
+    "WaistLeft",
+    "WaistRight",
+    "WaistLBack",
+    "WaistRBack",
+    "BackTop",
+    "BackLeft",
+    "BackRight",
+    "HeadTop",
+    "HeadFront",
+    "HeadSide",
+    "LShoulderTop",
+    "LShoulderBack",
+    "LElbowOut",
+    "LUArmHigh",
+    "LWristTop",
+    "RShoulderTop",
+    "RShoulderBack",
+    "RElbowOut",
+    "RUArmHigh",
+    "RWristTop",
+    "LKneeOut",
+    "LToeIn",
+    "LToeOut",
+    "LAnkleOut",
+    "RKneeOut",
+    "RToeIn",
+    "RToeOut",
+    "RAnkleOut",
+    "Marker_2:2:1",
+    "Marker_2:2:2",
+    "Marker_2:2:3",
+    "Marker_3:3:1",
+    "Marker_3:3:2",
+    "Marker_3:3:3",
+    "Uname*36",
+    "Uname*37",
+    "Uname*38",
+]
+
 
 def test_detect_marker_set_returns_unknown_for_empty_labels() -> None:
     """No labels and no parameters means UNKNOWN."""
@@ -99,6 +140,14 @@ def test_detect_marker_set_ior_by_labels() -> None:
 def test_detect_marker_set_golf_cluster_by_labels() -> None:
     """Files containing both grip and clubhead markers map to GOLF_CLUSTER."""
     assert detect_marker_set(GOLF_CLUSTER_LABELS, {}) is MarkerSet.GOLF_CLUSTER
+
+
+def test_detect_marker_set_tour_average_body_by_labels() -> None:
+    """Tour-average body marker labels classify without an explicit override."""
+    assert (
+        detect_marker_set(TOUR_AVERAGE_BODY_LABELS, {})
+        is MarkerSet.GOLF_TOUR_AVERAGE_BODY
+    )
 
 
 def test_detect_marker_set_name_overrides_labels() -> None:

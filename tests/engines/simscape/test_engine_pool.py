@@ -27,7 +27,7 @@ def test_is_matlab_available_force_no_env(monkeypatch: pytest.MonkeyPatch) -> No
     assert _engine_pool.is_matlab_available() is False
 
 
-def test_is_matlab_available_true_when_module_present(
+def test_is_matlab_available_false_when_only_top_level_module_present(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.delenv("UD_SIMSCAPE_FORCE_NO_MATLAB", raising=False)
@@ -36,6 +36,18 @@ def test_is_matlab_available_true_when_module_present(
     fake_matlab = MagicMock()
     fake_matlab.__spec__ = importlib.machinery.ModuleSpec("matlab", loader=None)
     with patch.dict(sys.modules, {"matlab": fake_matlab}):
+        assert _engine_pool.is_matlab_available() is False
+
+
+def test_is_matlab_available_true_when_engine_module_present(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("UD_SIMSCAPE_FORCE_NO_MATLAB", raising=False)
+    fake_matlab, fake_engine_mod = _install_fake_matlab()
+    with patch.dict(
+        sys.modules,
+        {"matlab": fake_matlab, "matlab.engine": fake_engine_mod},
+    ):
         assert _engine_pool.is_matlab_available() is True
 
 

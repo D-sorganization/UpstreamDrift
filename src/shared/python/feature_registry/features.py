@@ -184,6 +184,22 @@ FEATURES: tuple[Feature, ...] = (
         approx_size_mb=600,
         tier="experimental",
     ),
+    Feature(
+        name="lower-body-model",
+        display_name="Lower Body Model",
+        description=(
+            "Vendored Tools lower-body MuJoCo model for golf stance and hip-rotation "
+            "experiments."
+        ),
+        probe_key="lower_body_model",
+        install_channel="pip",
+        install_command="pip install 'mujoco>=3.2.3,<4.0.0'",
+        pip_extra=None,
+        docker_stage="mujoco",
+        approx_size_mb=0,
+        tier="experimental",
+        depends_on=("mujoco",),
+    ),
     # ---- Pose estimation backends ---------------------------------------
     Feature(
         name="pose-mediapipe",
