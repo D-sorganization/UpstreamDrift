@@ -1592,6 +1592,7 @@ jobs:
         workflow-inventory,
       ]
     runs-on: d-sorg-fleet
+    timeout-minutes: 5
     if: always()
     steps:
       - name: Verify all jobs succeeded
