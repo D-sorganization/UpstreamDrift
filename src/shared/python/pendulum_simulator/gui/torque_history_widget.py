@@ -53,17 +53,6 @@ try:
     import sys
     from pathlib import Path
 
-    _shared_root = None
-    _p = Path(__file__).resolve().parent
-    for _ in range(10):
-        _candidate = _p / "shared" / "python"
-        if _candidate.exists():
-            _shared_root = _candidate
-            break
-        _p = _p.parent
-    if _shared_root is not None and str(_shared_root) not in sys.path:
-        sys.path.insert(0, str(_shared_root))
-
     from plot_theme.manager import (
         get_plot_theme_manager as _shared_get_plot_theme_manager,
     )

@@ -32,15 +32,15 @@ def __getattr__(name: str) -> Any:
         from src.shared.python.ai.gui.assistant_panel import AIAssistantPanel
 
         return AIAssistantPanel
-    elif name == "AISettings":
+    if name == "AISettings":
         from src.shared.python.ai._settings_model import AISettings
 
         return AISettings
-    elif name == "AIProvider":
+    if name == "AIProvider":
         from src.shared.python.ai.gui._provider_registry_data import AIProvider
 
         return AIProvider
-    elif name in ("AISettingsDialog", "get_api_key", "set_api_key", "delete_api_key"):
+    if name in ("AISettingsDialog", "get_api_key", "set_api_key", "delete_api_key"):
         import src.shared.python.ai.gui.settings_dialog as sd
 
         return getattr(sd, name)
