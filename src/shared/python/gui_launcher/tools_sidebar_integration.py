@@ -230,24 +230,18 @@ def _import_sidebar_module() -> Any | None:
     vendor_root = Path(__file__).resolve().parent.parent.parent.parent
 
     # Try checking out sibling Tools repository first, so user's active local development in Tools takes priority
+    # sys.path mutations removed by issue #5873. We now rely on explicit shims (e.g., sidekick).
     sibling_tools = vendor_root.parent.parent / "Tools"
     if sibling_tools.is_dir():
         sibling_src = str(sibling_tools / "src")
         sibling_python = str(sibling_tools / "src" / "shared" / "python")
-        if sibling_src not in sys.path:
-            sys.path.insert(0, sibling_src)
-        if sibling_python not in sys.path:
-            sys.path.insert(0, sibling_python)
 
     # Fall back to vendored ud-tools
+    # sys.path mutations removed by issue #5873. We now rely on explicit shims (e.g., sidekick).
     vendor_src_path = str(vendor_root / "vendor" / "ud-tools" / "src")
     vendor_python_path = str(
         vendor_root / "vendor" / "ud-tools" / "src" / "shared" / "python"
     )
-    if vendor_src_path not in sys.path:
-        sys.path.insert(0, vendor_src_path)
-    if vendor_python_path not in sys.path:
-        sys.path.insert(0, vendor_python_path)
 
     for module_name in _SIDEBAR_MODULE_CANDIDATES:
         try:

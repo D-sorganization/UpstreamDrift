@@ -58,45 +58,16 @@ ThemeManagerDialog: Any = None
 create_theme_menu: Any = None
 
 
-def _find_sibling_package(marker_path: str) -> Path | None:
-    """Walk up from this file to find a sibling package directory.
-
-    Searches up to 10 parent levels for the given relative path.
-    Returns the parent directory containing the marker, or None.
-
-    Design by Contract
-    ------------------
-    Pre:  marker_path is a non-empty relative path string.
-    Post: returns a valid directory Path or None.
-    """
-    if not (marker_path):
-        raise ValueError("marker_path must be non-empty")
-    p = Path(__file__).resolve().parent
-    for _ in range(10):
-        candidate = p / marker_path
-        if candidate.exists():
-            return p
-        p = p.parent
-    return None
-
-
 try:
-    _src_root = _find_sibling_package("shared/python")
-    if _src_root is not None:
-        _shared_root = _src_root / "shared" / "python"
-        if str(_shared_root) not in sys.path:
-            sys.path.insert(0, str(_shared_root))
-        from theme import ThemeManager as _ThemeManager
-        from theme import ThemeManagerDialog as _ThemeManagerDialog
-        from theme import create_theme_menu as _create_theme_menu
+    from theme import ThemeManager as _ThemeManager
+    from theme import ThemeManagerDialog as _ThemeManagerDialog
+    from theme import create_theme_menu as _create_theme_menu
 
-        ThemeManager = _ThemeManager
-        ThemeManagerDialog = _ThemeManagerDialog
-        create_theme_menu = _create_theme_menu
-        _THEME_AVAILABLE = True
-        logger.info("ThemeManager loaded successfully")
-    else:
-        logger.info("ThemeManager not available; using default theme")
+    ThemeManager = _ThemeManager
+    ThemeManagerDialog = _ThemeManagerDialog
+    create_theme_menu = _create_theme_menu
+    _THEME_AVAILABLE = True
+    logger.info("ThemeManager loaded successfully")
 except ImportError:
     logger.info("ThemeManager not available; using default theme")
 
