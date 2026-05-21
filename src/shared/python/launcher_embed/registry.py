@@ -1,9 +1,8 @@
 """Process-wide registry of embeddable tools.
 
 The registry is a simple ``dict[str, EmbeddableTool]`` keyed by
-``tool_id``. Registration enforces non-empty ids and rejects duplicates;
-this matches the design-by-contract style used elsewhere in the codebase
-(public functions raise :class:`ValueError` on contract violations).
+``tool_id``. Registration enforces non-empty ids and is idempotent for
+duplicates so repeat imports of adapter modules remain safe.
 
 The :func:`unregister_embeddable_tool` helper is intended primarily for
 test fixtures that need to clear state between tests.
@@ -36,11 +35,11 @@ def register_embeddable_tool(tool: EmbeddableTool) -> None:
 
     Args:
         tool: The tool to register. Must expose a non-empty ``tool_id``
-            string and must not already be registered.
+            string. If the id is already registered, the existing entry
+            is preserved.
 
     Raises:
-        ValueError: If ``tool.tool_id`` is empty or whitespace-only, or
-            if a tool with the same id is already registered.
+        ValueError: If ``tool.tool_id`` is empty or whitespace-only.
     """
     tool_id = getattr(tool, "tool_id", "")
     # DbC: id must be a non-empty, non-whitespace string.
@@ -49,9 +48,7 @@ def register_embeddable_tool(tool: EmbeddableTool) -> None:
             "register_embeddable_tool: tool.tool_id must be a non-empty string"
         )
     if tool_id in EMBEDDABLE_TOOL_REGISTRY:
-        raise ValueError(
-            f"register_embeddable_tool: tool_id {tool_id!r} is already registered"
-        )
+        return
     EMBEDDABLE_TOOL_REGISTRY[tool_id] = tool
 
 
