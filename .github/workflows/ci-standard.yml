@@ -626,7 +626,6 @@ jobs:
             fi
           fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-
       - name: Check for core test relevant changes
         id: core-test-changes
         shell: bash
@@ -1122,7 +1121,6 @@ jobs:
             fi
           fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-
       - name: Check for frontend changes
         id: frontend-changes
         working-directory: .
@@ -1195,7 +1193,6 @@ jobs:
             fi
           fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-
       - uses: matlab-actions/setup-matlab@a0180c939fb1a28de13f44f7b778b912384ced1f
       - uses: matlab-actions/run-command@fa5ca534870f0f484e70f0c0006589eb4bfb7e67
         with:
@@ -1426,7 +1423,7 @@ jobs:
           source "$RUNNER_TEMP/rust-venv/bin/activate"
           python -m ensurepip --upgrade || true
           python -m pip install --upgrade pip maturin
-          for crate in rust_core/upstream-physics rust_core/upstream-mocap-preproc rust_core/upstream-muscle rust_core/upstream-motion-matching rust_core/ai_backend; do
+          for crate in rust_core/upstream-physics rust_core/upstream-mocap-preproc rust_core/upstream-mocap-io rust_core/upstream-muscle rust_core/upstream-motion-matching rust_core/ai_backend; do
             (cd "$crate" && python -m maturin build --interpreter python --features python --release)
           done
           echo "Wheels built successfully"
