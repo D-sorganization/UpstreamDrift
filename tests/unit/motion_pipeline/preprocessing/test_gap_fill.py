@@ -224,3 +224,90 @@ def test_gap_fill_pca_edge_cases() -> None:
     assert isinstance(out_no_visible, MarkerTrajectory)
     # Reconstructed using linear fallback because PCA was underdetermined for frames [3, 4]
     assert out_no_visible.frames[3].markers["M1"].occluded is False
+
+
+def test_pure_python_gap_fill() -> None:
+    from src.shared.python.motion_pipeline.preprocessing._gap_fill_pure_python import (
+        gap_fill as pure_gap_fill,
+        GapFillStrategy as PureGapFillStrategy,
+    )
+    from src.shared.python.motion_pipeline.contracts import Marker, MarkerFrame, MarkerTrajectory
+
+    # Test linear on keypoint sequence
+    seq = make_low_confidence_keypoint_sequence(num_frames=20, low_conf_range=(5, 8))
+    out = pure_gap_fill(seq, strategy=PureGapFillStrategy.LINEAR, max_gap=10)
+    assert out.metadata.get("gap_filled") is True
+
+    # Test nearest on keypoints
+    seq_near = make_low_confidence_keypoint_sequence(num_frames=15, low_conf_range=(5, 7))
+    out_near = pure_gap_fill(seq_near, strategy=PureGapFillStrategy.NEAREST, max_gap=10)
+    assert out_near.metadata.get("gap_filled") is True
+
+    # Test linear on markers
+    traj = make_marker_trajectory_with_occlusion(num_frames=20, occluded_range=(5, 8))
+    out_traj = pure_gap_fill(traj, strategy=PureGapFillStrategy.LINEAR, max_gap=10)
+    assert out_traj.metadata.get("gap_filled") is True
+
+    # Test nearest on markers
+    traj_near = make_marker_trajectory_with_occlusion(num_frames=20, occluded_range=(5, 7))
+    out_traj_near = pure_gap_fill(traj_near, strategy=PureGapFillStrategy.NEAREST, max_gap=10)
+    assert out_traj_near.metadata.get("gap_filled") is True
+
+    # Test cubic fallback to linear
+    out_cubic = pure_gap_fill(seq_near, strategy=PureGapFillStrategy.CUBIC, max_gap=10)
+    assert out_cubic.metadata.get("gap_filled") is True
+
+    # Test unsupported type
+    with pytest.raises(ValueError, match="Unsupported"):
+        pure_gap_fill("invalid", strategy=PureGapFillStrategy.LINEAR)  # type: ignore[arg-type]
+
+    # Test empty or short sequences (length < 2)
+    short_seq = make_keypoint_sequence(num_frames=1, num_kp=2)
+    assert pure_gap_fill(short_seq) is short_seq
+
+    short_traj = make_marker_trajectory(num_frames=1)
+    assert pure_gap_fill(short_traj) is short_traj
+
+    # Test PCA on keypoints (falls back to linear)
+    out_kp_pca = pure_gap_fill(seq, strategy=PureGapFillStrategy.PCA, max_gap=10)
+    assert out_kp_pca.metadata.get("gap_filled") is True
+
+    # Test PCA on marker trajectory
+    frames = []
+    for i in range(15):
+        occ = 5 <= i <= 7
+        m1 = Marker(name="M1", x=float(i) * 0.1, y=0.0, z=0.0, occluded=occ)
+        m2 = Marker(name="M2", x=float(i) * 0.2, y=1.0, z=0.0, occluded=False)
+        m3 = Marker(name="M3", x=float(i) * -0.05, y=0.0, z=0.5, occluded=False)
+        frames.append(
+            MarkerFrame(timestamp=i / 30.0, markers={"M1": m1, "M2": m2, "M3": m3}, frame_index=i)
+        )
+    traj_pca = MarkerTrajectory(id="traj_pca", frames=frames)
+    out_pca = pure_gap_fill(traj_pca, strategy=PureGapFillStrategy.PCA, max_gap=10)
+    assert out_pca.metadata.get("strategy") == "pca"
+
+    # Test PCA underdetermined fallback (fewer than 2 visible frames)
+    frames_no_visible = []
+    for i in range(10):
+        occ = 3 <= i <= 4
+        m1 = Marker(name="M1", x=float(i) * 0.1, y=0.0, z=0.0, occluded=occ)
+        m2 = Marker(name="M2", x=float(i) * 0.2, y=1.0, z=0.0, occluded=occ)
+        frames_no_visible.append(
+            MarkerFrame(timestamp=i / 30.0, markers={"M1": m1, "M2": m2}, frame_index=i)
+        )
+    traj_no_visible = MarkerTrajectory(id="traj_no_visible", frames=frames_no_visible)
+    out_no_visible = pure_gap_fill(traj_no_visible, strategy=PureGapFillStrategy.PCA, max_gap=10)
+    assert out_no_visible.metadata.get("gap_filled") is True
+
+    # Test PCA rank-deficient fallback
+    from unittest.mock import patch
+    import numpy as np
+
+    with patch("numpy.linalg.svd", side_effect=np.linalg.LinAlgError):
+        out_svd_error = pure_gap_fill(traj_pca, strategy=PureGapFillStrategy.PCA, max_gap=10)
+        assert out_svd_error.metadata.get("strategy") == "pca"  # fell back to linear inside
+
+    # Test PCA with SVD zero/empty singular values
+    with patch("numpy.linalg.svd", return_value=(None, np.array([]), None)):
+        out_zero_s = pure_gap_fill(traj_pca, strategy=PureGapFillStrategy.PCA, max_gap=10)
+        assert out_zero_s.metadata.get("strategy") == "pca"

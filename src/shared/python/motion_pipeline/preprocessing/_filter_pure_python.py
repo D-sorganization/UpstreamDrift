@@ -94,7 +94,11 @@ def _filter_keypoints(
         id=seq.id,
         frames=filtered_frames,
         calibration=seq.calibration,
-        metadata={**seq.metadata, "filtered": True, "filter_type": filter_type.value},
+        metadata={
+            **seq.metadata,
+            "filtered": True,
+            "filter_type": filter_type.value if hasattr(filter_type, "value") else str(filter_type),
+        },
     )
 
 
@@ -138,7 +142,11 @@ def _filter_markers(
         frames=filtered_frames,
         calibration=traj.calibration,
         subject_id=traj.subject_id,
-        metadata={**traj.metadata, "filtered": True, "filter_type": filter_type.value},
+        metadata={
+            **traj.metadata,
+            "filtered": True,
+            "filter_type": filter_type.value if hasattr(filter_type, "value") else str(filter_type),
+        },
     )
 
 
