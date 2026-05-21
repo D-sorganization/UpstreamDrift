@@ -430,9 +430,9 @@ def _kalman_filter_python(
     r = float(measurement_noise)
 
     # Steady-state P for a random-walk model solves the DARE:
-    #   P_ss = P_ss * r / (P_ss + r) + q
-    # Positive root: P_ss = 0.5 * (q + sqrt(q^2 + 4*q*r))
-    p_steady = 0.5 * (q + np.sqrt(q**2 + 4.0 * q * r))
+    #   P_ss = (P_ss + q) * r / (P_ss + q + r)
+    # Positive root: P_ss = 0.5 * (-q + np.sqrt(q**2 + 4.0 * q * r))
+    p_steady = 0.5 * (-q + np.sqrt(q**2 + 4.0 * q * r))
 
     filtered = np.zeros_like(data)
     n_frames = data.shape[0]

@@ -13,12 +13,15 @@ logger = logging.getLogger(__name__)
 def export_animation(
     model: C3DDataModel,
     output_path: Path | str,
-    fps: float = 30.0,
+    fps: float | None = None,
     width: int = 960,
     height: int = 720,
     **kwargs,
 ):
     """Export the currently loaded C3D file to an MP4 video."""
+    if fps is None:
+        fps = model.point_rate if model.point_rate > 0 else 30.0
+
     if not model.filepath:
         raise ValueError("Cannot export animation: model has no loaded C3D file path")
 
