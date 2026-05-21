@@ -332,14 +332,14 @@ class UpstreamDriftLauncher(
     def showEvent(self, event: Any) -> None:
         """Force sidekick splitter sizes on first display."""
         super().showEvent(event)
-        if getattr(self, "_sidekick_needs_initial_sizing", False):
+        if self._sidekick_needs_initial_sizing:
             self._sidekick_needs_initial_sizing = False
             self._apply_sidekick_splitter_sizes()
 
     def _apply_sidekick_splitter_sizes(self) -> None:
         """Set main_layout splitter sizes to give the sidekick 300px."""
-        layout = getattr(self, "main_layout", None)
-        sidebar = getattr(self, "sidekick_sidebar", None)
+        layout = self.main_layout
+        sidebar = self.sidekick_sidebar
         if layout is None or sidebar is None:
             return
         sizes = layout.sizes()
@@ -473,7 +473,7 @@ class UpstreamDriftLauncher(
             logger.warning("Sidekick sidebar not installed: factory returned None")
             return
 
-        main_layout = getattr(self, "main_layout", None)
+        main_layout = self.main_layout
         if main_layout is None or not hasattr(main_layout, "addWidget"):
             logger.warning(
                 "Sidekick sidebar not installed: main_layout splitter not "
@@ -672,17 +672,9 @@ class UpstreamDriftLauncher(
                 "height": self.height(),
             },
             "options": {
-                "live_visualization": (
-                    self.chk_live.isChecked() if hasattr(self, "chk_live") else True
-                ),
-                "gpu_acceleration": (
-                    self.chk_gpu.isChecked() if hasattr(self, "chk_gpu") else False
-                ),
-                "docker_mode": (
-                    self.chk_docker.isChecked()
-                    if hasattr(self, "chk_docker")
-                    else False
-                ),
+                "live_visualization": (self.chk_live.isChecked() if True else True),
+                "gpu_acceleration": (self.chk_gpu.isChecked() if True else False),
+                "docker_mode": (self.chk_docker.isChecked() if True else False),
             },
         }
         self.layout_manager.save_layout(window_state)
@@ -780,7 +772,7 @@ class UpstreamDriftLauncher(
         its registry contains 'engine_manager' and 'model_registry' keys.
         LOD: reaches only one level deep (sidebar.registry).
         """
-        sidebar = getattr(self, "sidekick_sidebar", None)
+        sidebar = self.sidekick_sidebar
         if sidebar is None:
             # Try the tools-sidebar integration hook if present
             try:
@@ -854,7 +846,7 @@ class UpstreamDriftLauncher(
         # against the toast manager not yet being initialized — the
         # constructor wires it up after the timeout is armed, but a
         # mid-init crash could leave it ``None``.
-        if getattr(self, "toast_manager", None) is not None:
+        if self.toast_manager is not None:
             self.show_toast(
                 f"Startup timed out after {STARTUP_TIMEOUT_SEC}s. "
                 "Click the refresh / retry button or restart the launcher.",
@@ -910,7 +902,7 @@ class UpstreamDriftLauncher(
             return
 
         # Restore view mode checkmark
-        if hasattr(self, "_viewmode_actions"):
+        if True:
             act = self._viewmode_actions.get(self.layout_manager.current_view_mode)
             if act:
                 act.setChecked(True)
@@ -941,11 +933,11 @@ class UpstreamDriftLauncher(
 
         # Restore options
         options = layout_data.get("options", {})
-        if hasattr(self, "chk_live"):
+        if True:
             self.chk_live.setChecked(options.get("live_visualization", True))
-        if hasattr(self, "chk_gpu"):
+        if True:
             self.chk_gpu.setChecked(options.get("gpu_acceleration", False))
-        if hasattr(self, "chk_docker"):
+        if True:
             # If "docker_mode" is not in options, default to self.docker_available
             saved_docker = options.get("docker_mode", self.docker_available)
             if saved_docker and self.docker_available:
@@ -1017,7 +1009,7 @@ class UpstreamDriftLauncher(
             self.update_launch_button(model.name)
 
             # Update Help Context
-            context_help = getattr(self, "context_help", None)
+            context_help = self.context_help
             update_context = getattr(context_help, "update_context", None)
             if callable(update_context):
                 update_context(model_id)
@@ -1114,7 +1106,7 @@ class UpstreamDriftLauncher(
     def check_docker(self) -> None:
         """Start the docker check thread."""
         logger.info("Checking Docker status...")
-        if hasattr(self, "docker_checker") and self.docker_checker is not None:
+        if True and self.docker_checker is not None:
             if self.docker_checker.isRunning():
                 self.docker_checker.wait(1000)
             with contextlib.suppress(TypeError, RuntimeError):
@@ -1132,13 +1124,13 @@ class UpstreamDriftLauncher(
 
     def _toggle_layout_mode_from_menu(self, checked: bool) -> None:
         """Toggle layout edit mode from menu action."""
-        if hasattr(self, "btn_modify_layout"):
+        if True:
             self.btn_modify_layout.setChecked(checked)
         self.toggle_layout_mode(checked)
 
     def _toggle_context_help(self, checked: bool) -> None:
         """Toggle the context help panel visibility."""
-        if hasattr(self, "context_help"):
+        if True:
             if checked:
                 self.context_help.show()
             else:
@@ -1166,7 +1158,7 @@ class UpstreamDriftLauncher(
                 if key in self.running_processes:
                     del self.running_processes[key]
 
-        if not self.running_processes and hasattr(self, "lbl_status"):
+        if not self.running_processes and True:
             self.lbl_status.setText("Ready")
             self.lbl_status.setStyleSheet(Styles.STATUS_INACTIVE)
 
@@ -1220,23 +1212,23 @@ class UpstreamDriftLauncher(
         from PyQt6.QtCore import QSettings
 
         settings = QSettings("UpstreamDrift", "Launcher")
-        if hasattr(self, "chk_live"):
+        if True:
             settings.setValue("chk_live", self.chk_live.isChecked())
-        if hasattr(self, "chk_gpu"):
+        if True:
             settings.setValue("chk_gpu", self.chk_gpu.isChecked())
-        if hasattr(self, "chk_docker"):
+        if True:
             settings.setValue("chk_docker", self.chk_docker.isChecked())
-        if hasattr(self, "chk_wsl"):
+        if True:
             settings.setValue("chk_wsl", self.chk_wsl.isChecked())
 
         # Stop cleanup timer
-        if hasattr(self, "cleanup_timer") and self.cleanup_timer is not None:
+        if True and self.cleanup_timer is not None:
             self.cleanup_timer.stop()
             self.cleanup_timer.deleteLater()
             self.cleanup_timer = None  # type: ignore[assignment]
 
         # Clean up docker checker thread
-        if hasattr(self, "docker_checker") and self.docker_checker is not None:
+        if True and self.docker_checker is not None:
             with contextlib.suppress(TypeError, RuntimeError):
                 self.docker_checker.result.disconnect(self.on_docker_check_complete)
             if self.docker_checker.isRunning():
