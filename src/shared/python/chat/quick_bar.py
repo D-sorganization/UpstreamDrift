@@ -24,15 +24,30 @@ import json
 import logging
 from typing import Any
 
+from ._quick_bar_theme import (
+    ThemeProviderProtocol,
+    _build_system_theme_provider,
+    _FallbackThemeProvider,
+    _resolve_colors,
+)
+
 logger = logging.getLogger(__name__)
 
-# ── Lazy Qt imports ─────────────────────────────────────────────────
+# Re-export so callers can do ``from chat.quick_bar import ThemeProviderProtocol``.
+__all__ = [
+    "ChatLauncherMixin",
+    "ChatQuickBar",
+    "ThemeProviderProtocol",
+    "_FallbackThemeProvider",
+    "_resolve_colors",
+]
+
+# -- Lazy Qt imports ---------------------------------------------------------
 
 try:
     from PyQt6.QtCore import Qt, QTimer, QUrl, pyqtSignal
     from PyQt6.QtWebSockets import QWebSocket
     from PyQt6.QtWidgets import (
-        QDockWidget,
         QFrame,
         QHBoxLayout,
         QLabel,
@@ -40,7 +55,6 @@ try:
         QMainWindow,
         QPushButton,
         QToolBar,
-        QVBoxLayout,
         QWidget,
     )
 
@@ -71,6 +85,9 @@ class ChatQuickBar(QFrame if _QT_AVAILABLE else object):  # type: ignore[misc]
     Args:
         app_context: Application context (e.g., "gasification").
         server_url: Chat server WebSocket URL.
+        theme_provider: Optional theme provider implementing
+            :class:`ThemeProviderProtocol`. When *None* the widget tries the
+            installed theme manager and falls back to built-in dark defaults.
         parent: Parent widget.
     """
 
@@ -82,10 +99,12 @@ class ChatQuickBar(QFrame if _QT_AVAILABLE else object):  # type: ignore[misc]
         self,
         app_context: str = "assistant",
         server_url: str = "ws://127.0.0.1:8000",
-        parent: QWidget | None = None,  # type: ignore[assignment]
+        theme_provider: ThemeProviderProtocol | None = None,
+        parent: QWidget | None = None,
     ) -> None:
         _require_qt()
-        super().__init__(parent)  # type: ignore[call-arg]
+        super().__init__(parent)
+        self.setObjectName("QuickBarChatWidget")
 
         self._app_context = app_context
         self._server_url = server_url.rstrip("/")
@@ -93,17 +112,27 @@ class ChatQuickBar(QFrame if _QT_AVAILABLE else object):  # type: ignore[misc]
         self._is_waiting = False
         self._response_buffer = ""
 
+        if theme_provider is None:
+            self._theme: ThemeProviderProtocol = _build_system_theme_provider()
+        else:
+            self._theme = theme_provider
+
         self._setup_ui()
         QTimer.singleShot(1000, self._connect_ws)
 
+    def _get_colors(self) -> dict[str, str]:
+        """Resolve theme colors via the stored provider."""
+        return _resolve_colors(self._theme)
+
     def _setup_ui(self) -> None:
         """Build the compact quick-bar UI."""
+        c = self._get_colors()
         layout = QHBoxLayout(self)
         layout.setContentsMargins(4, 2, 4, 2)
         layout.setSpacing(4)
 
         # Robot icon label
-        icon_label = QLabel("🤖")
+        icon_label = QLabel("\U0001f916")
         icon_label.setStyleSheet("font-size: 14px;")
         layout.addWidget(icon_label)
 
@@ -112,14 +141,14 @@ class ChatQuickBar(QFrame if _QT_AVAILABLE else object):  # type: ignore[misc]
         self._input.setPlaceholderText("Ask AI...")
         self._input.setMinimumWidth(200)
         self._input.setStyleSheet(
-            "QLineEdit {"
-            "  background-color: #2d2d2d; color: #e0e0e0;"
-            "  border: 1px solid #555; border-radius: 4px;"
-            "  font-size: 12px; padding: 4px 8px;"
-            "}"
-            "QLineEdit:focus {"
-            "  border-color: #FF8800;"
-            "}"
+            f"QLineEdit {{"
+            f"  background-color: {c['input_bg']}; color: {c['text']};"
+            f"  border: 1px solid {c['border']}; border-radius: 4px;"
+            f"  font-size: 12px; padding: 4px 8px;"
+            f"}}"
+            f"QLineEdit:focus {{"
+            f"  border-color: {c['accent']};"
+            f"}}"
         )
         self._input.returnPressed.connect(self._on_send)
         layout.addWidget(self._input, stretch=1)
@@ -128,13 +157,16 @@ class ChatQuickBar(QFrame if _QT_AVAILABLE else object):  # type: ignore[misc]
         self._send_btn = QPushButton("Send")
         self._send_btn.setFixedWidth(50)
         self._send_btn.setStyleSheet(
-            "QPushButton {"
-            "  background-color: #FF8800; color: black;"
-            "  border-radius: 4px; font-weight: bold;"
-            "  font-size: 11px; padding: 4px;"
-            "}"
-            "QPushButton:hover { background-color: #ffaa33; }"
-            "QPushButton:disabled { background-color: #555; color: #888; }"
+            f"QPushButton {{"
+            f"  background-color: {c['accent']}; color: black;"
+            f"  border-radius: 4px; font-weight: bold;"
+            f"  font-size: 11px; padding: 4px;"
+            f"}}"
+            f"QPushButton:hover {{ background-color: {c['accent_hover']}; }}"
+            f"QPushButton:disabled {{"
+            f"  background-color: {c['disabled_bg']};"
+            f"  color: {c['disabled_fg']};"
+            f"}}"
         )
         self._send_btn.clicked.connect(self._on_send)
         layout.addWidget(self._send_btn)
@@ -144,11 +176,11 @@ class ChatQuickBar(QFrame if _QT_AVAILABLE else object):  # type: ignore[misc]
         self._expand_btn.setFixedWidth(28)
         self._expand_btn.setToolTip("Open full chat panel")
         self._expand_btn.setStyleSheet(
-            "QPushButton {"
-            "  background-color: #3c3c3c; color: #e0e0e0;"
-            "  border-radius: 4px; font-size: 10px; padding: 4px;"
-            "}"
-            "QPushButton:hover { background-color: #4c4c4c; }"
+            f"QPushButton {{"
+            f"  background-color: {c['button_bg']}; color: {c['text']};"
+            f"  border-radius: 4px; font-size: 10px; padding: 4px;"
+            f"}}"
+            f"QPushButton:hover {{ background-color: {c['button_hover']}; }}"
         )
         self._expand_btn.clicked.connect(self.expand_requested.emit)
         layout.addWidget(self._expand_btn)
@@ -157,19 +189,65 @@ class ChatQuickBar(QFrame if _QT_AVAILABLE else object):  # type: ignore[misc]
         self._status = QLabel("●")
         self._status.setFixedWidth(14)
         self._status.setToolTip("Disconnected")
-        self._status.setStyleSheet("color: #666; font-size: 10px;")
+        self._status.setStyleSheet(f"color: {c['muted']}; font-size: 10px;")
         layout.addWidget(self._status)
 
         # Frame styling
         self.setStyleSheet(
-            "ChatQuickBar {"
-            "  background-color: #252526;"
-            "  border: 1px solid #3c3c3c;"
-            "  border-radius: 6px;"
-            "}"
+            f"ChatQuickBar {{"
+            f"  background-color: {c['bg']};"
+            f"  border: 1px solid {c['border']};"
+            f"  border-radius: 6px;"
+            f"}}"
         )
 
-    # ── WebSocket ────────────────────────────────────────────────────
+    def apply_theme(self) -> None:
+        """Re-apply the current theme to all child widgets.
+
+        Call this whenever the application theme changes so the quick-bar
+        stays in visual sync with the dock widget.
+        """
+        c = self._get_colors()
+
+        self._input.setStyleSheet(
+            f"QLineEdit {{"
+            f"  background-color: {c['input_bg']}; color: {c['text']};"
+            f"  border: 1px solid {c['border']}; border-radius: 4px;"
+            f"  font-size: 12px; padding: 4px 8px;"
+            f"}}"
+            f"QLineEdit:focus {{"
+            f"  border-color: {c['accent']};"
+            f"}}"
+        )
+        self._send_btn.setStyleSheet(
+            f"QPushButton {{"
+            f"  background-color: {c['accent']}; color: black;"
+            f"  border-radius: 4px; font-weight: bold;"
+            f"  font-size: 11px; padding: 4px;"
+            f"}}"
+            f"QPushButton:hover {{ background-color: {c['accent_hover']}; }}"
+            f"QPushButton:disabled {{"
+            f"  background-color: {c['disabled_bg']};"
+            f"  color: {c['disabled_fg']};"
+            f"}}"
+        )
+        self._expand_btn.setStyleSheet(
+            f"QPushButton {{"
+            f"  background-color: {c['button_bg']}; color: {c['text']};"
+            f"  border-radius: 4px; font-size: 10px; padding: 4px;"
+            f"}}"
+            f"QPushButton:hover {{ background-color: {c['button_hover']}; }}"
+        )
+        self._status.setStyleSheet(f"color: {c['muted']}; font-size: 10px;")
+        self.setStyleSheet(
+            f"ChatQuickBar {{"
+            f"  background-color: {c['bg']};"
+            f"  border: 1px solid {c['border']};"
+            f"  border-radius: 6px;"
+            f"}}"
+        )
+
+    # -- WebSocket -----------------------------------------------------------
 
     def _connect_ws(self) -> None:
         """Connect to the chat WebSocket."""
@@ -187,12 +265,14 @@ class ChatQuickBar(QFrame if _QT_AVAILABLE else object):  # type: ignore[misc]
 
     def _on_ws_connected(self) -> None:
         """Handle WebSocket connection."""
-        self._status.setStyleSheet("color: #4ec9b0; font-size: 10px;")
+        c = self._get_colors()
+        self._status.setStyleSheet(f"color: {c['focus']}; font-size: 10px;")
         self._status.setToolTip("Connected")
 
     def _on_ws_disconnected(self) -> None:
         """Handle WebSocket disconnection."""
-        self._status.setStyleSheet("color: #666; font-size: 10px;")
+        c = self._get_colors()
+        self._status.setStyleSheet(f"color: {c['muted']}; font-size: 10px;")
         self._status.setToolTip("Disconnected")
         self._is_waiting = False
         self._send_btn.setEnabled(True)
@@ -230,7 +310,7 @@ class ChatQuickBar(QFrame if _QT_AVAILABLE else object):  # type: ignore[misc]
             detail = data.get("detail", "Error")
             self._input.setPlaceholderText(f"Error: {detail}")
 
-    # ── Actions ──────────────────────────────────────────────────────
+    # -- Actions -------------------------------------------------------------
 
     def _on_send(self) -> None:
         """Send user query."""
@@ -261,7 +341,7 @@ class ChatQuickBar(QFrame if _QT_AVAILABLE else object):  # type: ignore[misc]
         self._input.selectAll()
 
 
-# ── Mixin for easy MainWindow integration ────────────────────────────
+# -- Mixin for easy MainWindow integration -----------------------------------
 
 
 class ChatLauncherMixin:
@@ -284,6 +364,7 @@ class ChatLauncherMixin:
         app_name: str = "shared",
         server_url: str = "ws://127.0.0.1:8000",
         auto_show_dock: bool = False,
+        theme_provider: ThemeProviderProtocol | None = None,
     ) -> None:
         """Initialize the chat integration.
 
@@ -295,6 +376,7 @@ class ChatLauncherMixin:
             app_name: Application name for session file path.
             server_url: Chat server WebSocket URL.
             auto_show_dock: If True, show dock widget on startup.
+            theme_provider: Optional theme provider for color resolution.
         """
         _require_qt()
 
@@ -305,6 +387,7 @@ class ChatLauncherMixin:
         self._chat_quick_bar = ChatQuickBar(
             app_context=app_context,
             server_url=server_url,
+            theme_provider=theme_provider,
         )
         self._chat_quick_bar.expand_requested.connect(
             lambda: self._toggle_chat_dock(app_context, app_name, server_url)
@@ -342,8 +425,9 @@ class ChatLauncherMixin:
             return
 
         # Lazy import to avoid circular deps
-        from chat.chat_dock_widget import ChatDockWidget
         import typing
+
+        from chat.chat_dock_widget import ChatDockWidget
 
         main_window = typing.cast(QMainWindow, self)
 

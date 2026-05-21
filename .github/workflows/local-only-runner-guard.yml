@@ -87,6 +87,7 @@ jobs:
                                   values.append(item["os"])
               return values
 
+          fleet_expression_hint = "$" + "{{ needs.pick-runner.outputs.runner }}"
           violations: list[str] = []
           wf_dir = Path(".github/workflows")
           if not wf_dir.is_dir():
@@ -116,7 +117,7 @@ jobs:
                       continue
                   values = collect_runs_on(job)
                   if not values:
-                      # Could be an expression like ${{ needs.pick-runner.outputs.runner }};
+                      # Could be a pick-runner expression;
                       # treat the raw expression text as the value to inspect.
                       raw = job.get("runs-on")
                       if isinstance(raw, str):
@@ -129,7 +130,7 @@ jobs:
                       if HOSTED.match(v_clean):
                           violations.append(
                               f"{wf.name}::{job_id}: runs-on '{v_clean}' is a hosted runner; "
-                              f"route to d-sorg-fleet (or `${{{{ needs.pick-runner.outputs.runner }}}}`)."
+                              f"route to d-sorg-fleet (or `{fleet_expression_hint}`)."
                           )
 
           if violations:

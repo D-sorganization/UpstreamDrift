@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 """Shared WebSocket router factory for AI chat streaming.
 
 Creates a FastAPI APIRouter with the standard chat WebSocket protocol
@@ -30,12 +31,38 @@ This module has ZERO application-specific imports.
 from __future__ import annotations
 
 import contextlib
+import importlib
+import importlib.util
 import logging
+import sys
+from datetime import UTC
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
+from pydantic import ValidationError
+
+from .terminal_contracts import TerminalAgentSessionRequest, TerminalRegistryError
+from .terminal_runtime import TerminalRuntimeError
 
 logger = logging.getLogger(__name__)
+
+# Load ai.exceptions directly to avoid triggering ai/__init__.py (which may
+# contain broken absolute imports in some deployment contexts).  Falls back to
+# a never-raised sentinel so the except-tuple is always syntactically valid.
+try:
+    if "ai.exceptions" not in sys.modules:
+        _exc_file = Path(__file__).parent.parent / "ai" / "exceptions.py"
+        _spec = importlib.util.spec_from_file_location("ai.exceptions", _exc_file)
+        if _spec and _spec.loader:
+            _mod = importlib.util.module_from_spec(_spec)
+            sys.modules["ai.exceptions"] = _mod
+            _spec.loader.exec_module(_mod)
+    AIProviderError: type[Exception] = sys.modules["ai.exceptions"].AIProviderError
+except Exception:  # noqa: BLE001
+    # Graceful degradation: sentinel class that is never instantiated.
+    class AIProviderError(Exception):  # type: ignore[no-redef]
+        """Sentinel used when ai.exceptions is unavailable."""
 
 
 def create_chat_router(
@@ -103,17 +130,21 @@ def create_chat_router(
                         continue
 
                     # Stream response chunks
-                    async for chunk in chat_service.stream_response(session_id):
-                        if isinstance(chunk, dict):
-                            await websocket.send_json(chunk)
-                        else:
-                            await websocket.send_json(
-                                {"type": "chunk", "content": str(chunk)}
-                            )
+                    try:
+                        async for chunk in chat_service.stream_response(session_id):
+                            if isinstance(chunk, dict):
+                                await websocket.send_json(chunk)
+                            else:
+                                await websocket.send_json(
+                                    {"type": "chunk", "content": str(chunk)}
+                                )
 
-                    await websocket.send_json(
-                        {"type": "complete", "session_id": session_id}
-                    )
+                        await websocket.send_json(
+                            {"type": "complete", "session_id": session_id}
+                        )
+                    except Exception as e:
+                        logger.error("Error during streaming response: %s", e)
+                        await websocket.send_json({"type": "error", "detail": str(e)})
 
                 elif action == "history":
                     messages = chat_service.get_session_history(session_id)
@@ -125,6 +156,212 @@ def create_chat_router(
                     await websocket.send_json(
                         {"type": "session_created", "session_id": session_id}
                     )
+
+                elif action == "terminal_start":
+                    await _handle_terminal_start(websocket, msg)
+
+                elif action == "terminal_input":
+                    await _handle_terminal_input(websocket, msg)
+
+                elif action == "terminal_resize":
+                    await _handle_terminal_resize(websocket, msg)
+
+                elif action == "terminal_stop":
+                    await _handle_terminal_stop(websocket, msg)
+
+                elif action == "terminal_events":
+                    await _handle_terminal_events(websocket, msg)
+
+                elif action == "condense":
+                    try:
+                        await chat_service.condense_session(session_id)
+                        await websocket.send_json(
+                            {
+                                "type": "history",
+                                "messages": chat_service.get_session_history(
+                                    session_id
+                                ),
+                            }
+                        )
+                    except (
+                        AIProviderError,
+                        ValueError,
+                        ConnectionError,
+                        TimeoutError,
+                    ) as exc:
+                        logger.warning(
+                            "Condense failed for session=%s: %s", session_id, exc
+                        )
+                        await websocket.send_json({"type": "error", "detail": str(exc)})
+                    except Exception:
+                        logger.exception(
+                            "Unexpected error condensing session=%s", session_id
+                        )
+                        await websocket.send_json(
+                            {"type": "error", "detail": "Internal server error"}
+                        )
+                        # Do not re-raise inside WS handler since it would close the
+                        # connection abruptly, but DO log full traceback so monitoring
+                        # sees it.
+
+                elif action == "skill_invoke":
+                    skill_id = msg.get("skill_id")
+                    if not skill_id:
+                        await websocket.send_json(
+                            {"type": "error", "detail": "Missing skill_id"}
+                        )
+                        continue
+                    try:
+                        await chat_service.execute_skill(session_id, skill_id)
+                        await websocket.send_json(
+                            {
+                                "type": "history",
+                                "messages": chat_service.get_session_history(
+                                    session_id
+                                ),
+                            }
+                        )
+                    except (
+                        AIProviderError,
+                        ValueError,
+                        ConnectionError,
+                        TimeoutError,
+                    ) as exc:
+                        logger.warning(
+                            "Skill invoke failed for session=%s skill=%s: %s",
+                            session_id,
+                            skill_id,
+                            exc,
+                        )
+                        await websocket.send_json({"type": "error", "detail": str(exc)})
+                    except Exception:
+                        logger.exception(
+                            "Unexpected error invoking skill=%s session=%s",
+                            skill_id,
+                            session_id,
+                        )
+                        await websocket.send_json(
+                            {"type": "error", "detail": "Internal server error"}
+                        )
+                        # Do not re-raise inside WS handler since it would close the
+                        # connection abruptly, but DO log full traceback so monitoring
+                        # sees it.
+
+                elif action == "request_review":
+                    provider = msg.get("provider")
+                    if not provider:
+                        await websocket.send_json(
+                            {"type": "error", "detail": "Missing provider"}
+                        )
+                        continue
+                    try:
+                        new_session_id = await chat_service.request_review(
+                            session_id, provider
+                        )
+                        await websocket.send_json(
+                            {
+                                "type": "review_started",
+                                "new_session_id": new_session_id,
+                            }
+                        )
+                    except (
+                        AIProviderError,
+                        ValueError,
+                        ConnectionError,
+                        TimeoutError,
+                    ) as exc:
+                        logger.warning(
+                            "Review request failed for session=%s provider=%s: %s",
+                            session_id,
+                            provider,
+                            exc,
+                        )
+                        await websocket.send_json({"type": "error", "detail": str(exc)})
+                    except Exception:
+                        logger.exception(
+                            "Unexpected error requesting review session=%s provider=%s",
+                            session_id,
+                            provider,
+                        )
+                        await websocket.send_json(
+                            {"type": "error", "detail": "Internal server error"}
+                        )
+                        # Do not re-raise inside WS handler since it would close the
+                        # connection abruptly, but DO log full traceback so monitoring
+                        # sees it.
+
+                elif action == "refresh_models":
+                    try:
+                        models = await chat_service.refresh_models()
+                        from datetime import datetime
+
+                        await websocket.send_json(
+                            {
+                                "type": "model_list",
+                                "models": models,
+                                "refreshed_at": datetime.now(UTC).isoformat(),
+                            }
+                        )
+                    except NotImplementedError as exc:
+                        logger.warning("refresh_models not implemented: %s", exc)
+                        await websocket.send_json(
+                            {
+                                "type": "error",
+                                "detail": (
+                                    "refresh_models not supported by this service"
+                                ),
+                            }
+                        )
+                    except (
+                        AIProviderError,
+                        ValueError,
+                        ConnectionError,
+                        TimeoutError,
+                    ) as exc:
+                        logger.warning("Refresh models failed: %s", exc)
+                        await websocket.send_json({"type": "error", "detail": str(exc)})
+                    except Exception:
+                        logger.exception("Unexpected error refreshing models")
+                        await websocket.send_json(
+                            {"type": "error", "detail": "Internal server error"}
+                        )
+
+                elif action == "index_codebase":
+                    # Tools issue #2751: the dock widget sends this action
+                    # without a root_path (it expects the server to use the
+                    # process cwd).  Fall back to os.getcwd() so the action
+                    # works out of the box.
+                    import os as _os
+
+                    root_path = msg.get("root_path") or _os.getcwd()
+                    try:
+                        status = await chat_service.index_codebase(root_path)
+                        await websocket.send_json({"type": "index_status", **status})
+                    except NotImplementedError as exc:
+                        logger.warning("index_codebase not implemented: %s", exc)
+                        await websocket.send_json(
+                            {
+                                "type": "error",
+                                "detail": (
+                                    "index_codebase not supported by this service"
+                                ),
+                            }
+                        )
+                    except (
+                        AIProviderError,
+                        ValueError,
+                        ConnectionError,
+                        TimeoutError,
+                    ) as exc:
+                        logger.warning(
+                            "Indexing failed for root=%s: %s", root_path, exc
+                        )
+                        await websocket.send_json({"type": "error", "detail": str(exc)})
+                    except Exception:
+                        logger.exception("Unexpected error indexing root=%s", root_path)
+                        await websocket.send_json(
+                            {"type": "error", "detail": "Internal server error"}
+                        )
 
                 else:
                     await websocket.send_json(
@@ -157,3 +394,81 @@ def create_chat_router(
         return {"session_id": session_id, "messages": messages}
 
     return router
+
+
+def _terminal_runtime(websocket: WebSocket) -> Any:
+    runtime = getattr(websocket.app.state, "terminal_runtime", None)
+    if runtime is None:
+        raise TerminalRuntimeError("Terminal runtime is not configured")
+    return runtime
+
+
+async def _handle_terminal_start(websocket: WebSocket, msg: dict[str, Any]) -> None:
+    try:
+        request = TerminalAgentSessionRequest(
+            app_context=msg.get("app_context") or "unknown",
+            project_root=msg.get("project_root", ""),
+            shell_id=msg.get("shell_id", ""),
+            provider_id=msg.get("provider_id", ""),
+            session_id=msg.get("terminal_session_id"),
+            provider_args=msg.get("provider_args") or [],
+        )
+        info = _terminal_runtime(websocket).start(request)
+    except (ValidationError, TerminalRegistryError, TerminalRuntimeError) as exc:
+        await websocket.send_json({"type": "error", "detail": str(exc)})
+        return
+    await websocket.send_json(
+        {"type": "terminal_session", "session": info.model_dump(mode="json")}
+    )
+
+
+async def _handle_terminal_input(websocket: WebSocket, msg: dict[str, Any]) -> None:
+    terminal_session_id = msg.get("terminal_session_id", "")
+    text = msg.get("text", "")
+    try:
+        _terminal_runtime(websocket).write(terminal_session_id, text)
+    except TerminalRuntimeError as exc:
+        await websocket.send_json({"type": "error", "detail": str(exc)})
+        return
+    await websocket.send_json({"type": "terminal_ack", "action": "terminal_input"})
+
+
+async def _handle_terminal_resize(websocket: WebSocket, msg: dict[str, Any]) -> None:
+    terminal_session_id = msg.get("terminal_session_id", "")
+    try:
+        _terminal_runtime(websocket).resize(
+            terminal_session_id,
+            columns=int(msg.get("columns", 0)),
+            rows=int(msg.get("rows", 0)),
+        )
+    except (TypeError, ValueError, TerminalRuntimeError) as exc:
+        await websocket.send_json({"type": "error", "detail": str(exc)})
+        return
+    await websocket.send_json({"type": "terminal_ack", "action": "terminal_resize"})
+
+
+async def _handle_terminal_stop(websocket: WebSocket, msg: dict[str, Any]) -> None:
+    terminal_session_id = msg.get("terminal_session_id", "")
+    try:
+        info = _terminal_runtime(websocket).stop(terminal_session_id)
+    except TerminalRuntimeError as exc:
+        await websocket.send_json({"type": "error", "detail": str(exc)})
+        return
+    await websocket.send_json(
+        {"type": "terminal_session", "session": info.model_dump(mode="json")}
+    )
+
+
+async def _handle_terminal_events(websocket: WebSocket, msg: dict[str, Any]) -> None:
+    terminal_session_id = msg.get("terminal_session_id", "")
+    try:
+        events = _terminal_runtime(websocket).drain_events(terminal_session_id)
+    except TerminalRuntimeError as exc:
+        await websocket.send_json({"type": "error", "detail": str(exc)})
+        return
+    await websocket.send_json(
+        {
+            "type": "terminal_events",
+            "events": [event.model_dump(mode="json") for event in events],
+        }
+    )

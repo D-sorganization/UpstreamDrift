@@ -22,9 +22,7 @@ class SurfaceIOMixin:
         Args:
             filepath: Path to data file
         """
-        if not (filepath is not None):
-            raise ValueError("filepath must be provided")
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         filepath = Path(filepath)
         suffix = filepath.suffix.lower()
@@ -47,9 +45,7 @@ class SurfaceIOMixin:
 
     def _load_csv_topography(self, filepath: Path) -> None:
         """Load topography from CSV file."""
-        if not (filepath is not None):
-            raise ValueError("filepath must be provided")
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         import csv
 
@@ -71,9 +67,7 @@ class SurfaceIOMixin:
 
     def _load_json_topography(self, filepath: Path) -> None:
         """Load topography from JSON file."""
-        if not (filepath is not None):
-            raise ValueError("filepath must be provided")
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         import json
 
@@ -110,9 +104,7 @@ class SurfaceIOMixin:
 
     def _load_geotiff_topography(self, filepath: Path) -> None:
         """Load topography from GeoTIFF file."""
-        if not (filepath is not None):
-            raise ValueError("filepath must be provided")
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         try:
             import rasterio  # type: ignore[import-untyped]

@@ -143,9 +143,7 @@ class RigidBodyImpactModel(ImpactModel):
         # Known limitation: this uses a simplified scalar effective mass model.
         # It ignores the full 3D inertia tensor and the direction of the impact force.
         # Should be replaced with J = (1/m + r x (I^-1 * (r x n)))^-1 * (1 + e) * v_rel
-        if not (pre_state is not None):
-            raise ValueError("pre_state must be provided")
-        if not (pre_state is not None):
+        if pre_state is None:
             raise ValueError("pre_state must be provided")
         m_club = pre_state.clubhead_mass
         club_moi = pre_state.clubhead_moi
@@ -170,9 +168,7 @@ class RigidBodyImpactModel(ImpactModel):
         m_club_effective: float,
         cor: float,
     ) -> tuple[float, float]:
-        if not (v_rel is not None):
-            raise ValueError("v_rel must be provided")
-        if not (v_rel is not None):
+        if v_rel is None:
             raise ValueError("v_rel must be provided")
         v_approach = np.dot(v_rel, n)
         m_eff = (GOLF_BALL_MASS_KG * m_club_effective) / (
@@ -190,9 +186,7 @@ class RigidBodyImpactModel(ImpactModel):
         j: float,
         friction_coefficient: float,
     ) -> np.ndarray:
-        if not (pre_state is not None):
-            raise ValueError("pre_state must be provided")
-        if not (pre_state is not None):
+        if pre_state is None:
             raise ValueError("pre_state must be provided")
         v_tangent = v_rel - v_approach * n
         tangent_mag = (
@@ -220,9 +214,7 @@ class RigidBodyImpactModel(ImpactModel):
         pre_ball_velocity: np.ndarray,
         post_ball_velocity: np.ndarray,
     ) -> float:
-        if not (pre_ball_velocity is not None):
-            raise ValueError("pre_ball_velocity must be provided")
-        if not (pre_ball_velocity is not None):
+        if pre_ball_velocity is None:
             raise ValueError("pre_ball_velocity must be provided")
         ke_pre = 0.5 * GOLF_BALL_MASS_KG * np.dot(pre_ball_velocity, pre_ball_velocity)
         ke_post = (
@@ -264,9 +256,7 @@ class RigidBodyImpactModel(ImpactModel):
         Returns:
             Post-impact state
         """
-        if not (pre_state is not None):
-            raise ValueError("pre_state must be provided")
-        if not (pre_state is not None):
+        if pre_state is None:
             raise ValueError("pre_state must be provided")
         m_club_effective = self._compute_effective_club_mass(pre_state)
 
@@ -348,9 +338,7 @@ class SpringDamperImpactModel(ImpactModel):
                 Smaller values increase stability but decrease performance.
                 Typical range: 1e-8 to 1e-6 s.
         """
-        if not (dt is not None):
-            raise ValueError("dt must be provided")
-        if not (dt is not None):
+        if dt is None:
             raise ValueError("dt must be provided")
         self.dt = dt
 
@@ -379,9 +367,7 @@ class SpringDamperImpactModel(ImpactModel):
         Returns:
             Post-impact state
         """
-        if not (pre_state is not None):
-            raise ValueError("pre_state must be provided")
-        if not (pre_state is not None):
+        if pre_state is None:
             raise ValueError("pre_state must be provided")
         m_ball = GOLF_BALL_MASS_KG
         m_club = pre_state.clubhead_mass
@@ -496,9 +482,7 @@ class FiniteTimeImpactModel(ImpactModel):
         """
         # For finite-time model, we use the rigid body result
         # but report the specified contact duration
-        if not (pre_state is not None):
-            raise ValueError("pre_state must be provided")
-        if not (pre_state is not None):
+        if pre_state is None:
             raise ValueError("pre_state must be provided")
         rigid_model = RigidBodyImpactModel()
         result = rigid_model.solve(pre_state, params)
@@ -516,12 +500,9 @@ class FiniteTimeImpactModel(ImpactModel):
 
 
 @precondition(
-    lambda impact_offset,
-    clubhead_velocity,
-    clubface_normal,
-    gear_factor=0.5,
-    h_scale=100.0,
-    v_scale=50.0: (0 <= gear_factor <= 1),
+    lambda impact_offset, clubhead_velocity, clubface_normal, gear_factor=0.5, h_scale=100.0, v_scale=50.0: (
+        0 <= gear_factor <= 1
+    ),
     "Gear effect factor must be between 0 and 1",
 )
 def compute_gear_effect_spin(
@@ -551,9 +532,7 @@ def compute_gear_effect_spin(
     """
     # Horizontal offset creates hook/slice spin (vertical axis)
     # Vertical offset creates topspin/backspin
-    if not (impact_offset is not None):
-        raise ValueError("impact_offset must be provided")
-    if not (impact_offset is not None):
+    if impact_offset is None:
         raise ValueError("impact_offset must be provided")
     h_offset = impact_offset[0]  # + = toe side
     v_offset = impact_offset[1]  # + = high on face
@@ -610,9 +589,7 @@ def validate_energy_balance(
     Returns:
         Dictionary with energy analysis results
     """
-    if not (pre_state is not None):
-        raise ValueError("pre_state must be provided")
-    if not (pre_state is not None):
+    if pre_state is None:
         raise ValueError("pre_state must be provided")
     m_ball = GOLF_BALL_MASS_KG
     m_club = pre_state.clubhead_mass

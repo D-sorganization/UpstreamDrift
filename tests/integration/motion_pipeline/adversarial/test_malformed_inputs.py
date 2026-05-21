@@ -85,7 +85,9 @@ def test_truncated_trc_header_only(tmp_path: Path) -> None:
 def test_csv_content_with_bvh_extension(tmp_path: Path) -> None:
     """CSV bytes given a .bvh extension must not silently parse."""
     p = _write(tmp_path, "evil.bvh", b"a,b,c\n1,2,3\n4,5,6\n")
-    with pytest.raises(Exception):  # noqa: B017 - any exception is acceptable; no-crash is the test
+    with pytest.raises(  # noqa: B017
+        Exception
+    ):
         load_any(p)
 
 

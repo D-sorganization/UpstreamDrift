@@ -304,9 +304,7 @@ def add_provenance_to_csv(
         >>> add_provenance_to_csv('results.csv', parameters={"dt": 0.001})
     """
     # Capture provenance if not provided
-    if not (filepath is not None):
-        raise ValueError("filepath must be provided")
-    if not (filepath is not None):
+    if filepath is None:
         raise ValueError("filepath must be provided")
     if provenance is None:
         provenance = ProvenanceInfo.capture(

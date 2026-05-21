@@ -36,9 +36,7 @@ class SimulationMixin:
     """
 
     def _toggle_run(self: Any, checked: bool = False) -> None:  # noqa: FBT001, FBT002
-        if not (checked is not None):
-            raise ValueError("checked must be provided")
-        if not (checked is not None):
+        if checked is None:
             raise ValueError("checked must be provided")
         self.is_running = not self.is_running
         self.btn_run.setText(
@@ -212,9 +210,7 @@ class SimulationMixin:
         Returns:
             Tuple of (induced_accelerations, counterfactuals), each may be None.
         """
-        if not (tau is not None):
-            raise ValueError("tau must be provided")
-        if not (tau is not None):
+        if tau is None:
             raise ValueError("tau must be provided")
         induced = None
         counterfactuals = None

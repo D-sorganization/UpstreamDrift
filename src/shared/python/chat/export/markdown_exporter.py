@@ -1,0 +1,96 @@
+"""Markdown exporter (Tools issue #2735).
+
+Each message is rendered as a ``## {role} - {timestamp}`` block. Code
+fences in user content are preserved verbatim with their language hint.
+Tool-call messages are rendered as collapsible ``<details>`` sections so
+they don't dominate visual review of the thread.
+"""
+
+from __future__ import annotations
+
+from datetime import datetime
+from pathlib import Path
+
+from chat.service_base import ChatMessage, ChatSession
+
+from .contracts import ChatExportRequest, ChatExportResult
+from .secret_redactor import SecretRedactor
+
+
+def _format_timestamp(ts: float) -> str:
+    try:
+        return datetime.fromtimestamp(ts).isoformat(timespec="seconds")
+    except (OverflowError, OSError, ValueError):
+        return str(ts)
+
+
+def _render_tool_call(message: ChatMessage) -> str:
+    tool_name = message.metadata.get("tool_name", "tool")
+    call_id = message.tool_call_id or ""
+    summary = f"Tool call: {tool_name}"
+    if call_id:
+        summary = f"{summary} ({call_id})"
+    return (
+        f"<details>\n<summary>{summary}</summary>\n\n{message.content}\n\n</details>\n"
+    )
+
+
+def _render_message(message: ChatMessage) -> str:
+    role = message.role
+    ts = _format_timestamp(message.timestamp)
+    if role == "tool":
+        return f"## {role} - {ts}\n\n{_render_tool_call(message)}\n"
+    return f"## {role} - {ts}\n\n{message.content}\n"
+
+
+def _render_metadata(session: ChatSession) -> str:
+    lines = [
+        "<!-- chat session metadata -->",
+        f"- session_id: {session.session_id}",
+        f"- message_count: {session.message_count}",
+    ]
+    for k, v in session.metadata.items():
+        lines.append(f"- {k}: {v}")
+    return "\n".join(lines) + "\n\n"
+
+
+class MarkdownExporter:
+    """Render a :class:`ChatSession` as a portable Markdown document."""
+
+    def export(
+        self, session: ChatSession, request: ChatExportRequest
+    ) -> ChatExportResult:
+        """Write the session to ``request.output_path`` and return a result.
+
+        Pre:
+            ``session.message_count > 0`` (raises :class:`ValueError`).
+        Post:
+            File at ``request.output_path`` exists and contains every
+            message; returned ``message_count`` equals the input count.
+        """
+        if session.message_count == 0:
+            raise ValueError("Cannot export an empty chat session")
+
+        messages = list(session.messages)
+        if request.redact_secrets:
+            redactor = SecretRedactor()
+            messages = [redactor.redact_message(m) for m in messages]
+
+        parts: list[str] = []
+        if request.include_metadata:
+            parts.append(_render_metadata(session))
+        parts.extend(_render_message(m) for m in messages)
+        text = "\n".join(parts)
+
+        out_path = Path(request.output_path)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(text, encoding="utf-8")
+
+        return ChatExportResult(
+            path=request.output_path,
+            byte_count=out_path.stat().st_size,
+            message_count=len(messages),
+        )
+
+
+__all__ = ["MarkdownExporter"]

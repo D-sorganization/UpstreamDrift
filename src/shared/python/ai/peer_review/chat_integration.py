@@ -1,0 +1,73 @@
+"""Chat integration glue for the peer-review subsystem (Tools #2738).
+
+This file is the ONLY one in the package that touches the chat surface.
+All other modules stay pure (Orthogonality). The chat surface itself is
+duck-typed: any object exposing an async ``emit_review_verdict`` method
+will receive verdicts as they arrive. Callers without that hook still get
+the final :class:`PeerReviewResult`.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+from .contracts import (
+    PeerReviewResult,
+    ReviewRequest,
+    ReviewSubject,
+    ReviewVerdict,
+    SubjectKind,
+)
+from .coordinator import ReviewCoordinator
+
+
+async def request_peer_review(
+    *,
+    session: Any,
+    message_id: str,
+    criteria: list[str],
+    requester_agent_id: str,
+    coordinator: ReviewCoordinator,
+    subject_content: str = "",
+    subject_kind: SubjectKind = "message",
+    deadline_seconds: float = 30.0,
+) -> PeerReviewResult:
+    """Run a peer review for the given chat message and stream verdicts.
+
+    ``session`` is duck-typed: if it has an async ``emit_review_verdict``
+    method, each :class:`ReviewVerdict` is forwarded as it arrives so
+    the chat dock can render it incrementally. The fully-aggregated
+    :class:`PeerReviewResult` is always returned synchronously after the
+    coordinator finishes (success or contractual error).
+
+    DbC: ``criteria`` must be non-empty. The Pydantic model enforces this
+    too; we keep an explicit check here so the error surfaces with a
+    chat-friendly message instead of a Pydantic stack trace.
+    """
+    if not criteria:
+        raise ValueError("request_peer_review: 'criteria' must be non-empty")
+
+    request = ReviewRequest(
+        subject_kind=subject_kind,
+        subject_id=message_id,
+        requester_agent_id=requester_agent_id,
+        criteria_set=list(criteria),
+        deadline_seconds=deadline_seconds,
+    )
+    subject = ReviewSubject(
+        kind=subject_kind,
+        subject_id=message_id,
+        content=subject_content,
+    )
+
+    emit = getattr(session, "emit_review_verdict", None)
+
+    async def _on_verdict(verdict: ReviewVerdict) -> None:
+        if emit is not None:
+            await emit(verdict)
+
+    on_verdict = _on_verdict if emit is not None else None
+    return await coordinator.run_review(request, subject, on_verdict=on_verdict)
+
+
+__all__ = ["request_peer_review"]

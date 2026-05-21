@@ -53,9 +53,7 @@ class MuscleGroup:
         Args:
             name: Group name (e.g., "Elbow Flexors")
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         self.name = name
         self.muscles: dict[str, HillMuscleModel] = {}
@@ -78,9 +76,7 @@ class MuscleGroup:
             muscle: HillMuscleModel instance
             moment_arm: Moment arm [m] (+ for flexion, - for extension)
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         require(bool(name), "muscle name must be non-empty", name)
         require(moment_arm != 0.0, "moment_arm must be non-zero", moment_arm)
@@ -114,9 +110,7 @@ class MuscleGroup:
         Returns:
             Net joint torque [N·m]
         """
-        if not (activations is not None):
-            raise ValueError("activations must be provided")
-        if not (activations is not None):
+        if activations is None:
             raise ValueError("activations must be provided")
         for mname, act_val in activations.items():
             require(
@@ -175,9 +169,7 @@ class AntagonistPair:
             agonist: MuscleGroup for positive torque (Flexors)
             antagonist: MuscleGroup for negative torque (Extensors)
         """
-        if not (agonist is not None):
-            raise ValueError("agonist must be provided")
-        if not (agonist is not None):
+        if agonist is None:
             raise ValueError("agonist must be provided")
         self.agonist = agonist
         self.antagonist = antagonist
@@ -211,9 +203,7 @@ class AntagonistPair:
         Returns:
             Net torque [N·m]
         """
-        if not (agonist_activations is not None):
-            raise ValueError("agonist_activations must be provided")
-        if not (agonist_activations is not None):
+        if agonist_activations is None:
             raise ValueError("agonist_activations must be provided")
 
         if self._rust_backend is not None:

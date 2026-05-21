@@ -6,70 +6,90 @@ import numpy as np
 from typing import Any
 
 
-class MockDoublePendulum:
-    """Mock interface to the AffineDrift double-pendulum for testing coupling."""
+import math
+from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+    DoublePendulumDynamics,
+    DoublePendulumState,
+    DoublePendulumParameters,
+)
+
+
+class CoupledDoublePendulum:
+    """Interface to the AffineDrift double-pendulum for co-simulation."""
 
     def __init__(self) -> None:
         self.time = 0.0
         self.dt = 0.001
-        self.theta1 = 0.0
-        self.theta2 = 0.0
-        self.omega1 = 10.0  # rad/s
-        self.omega2 = 15.0  # rad/s
+        self.state = DoublePendulumState(
+            theta1=0.0, theta2=0.0, omega1=10.0, omega2=15.0
+        )
+        self.params = DoublePendulumParameters.default()
 
-        # Mock arm lengths
-        self.l1 = 1.0
-        self.l2 = 1.0
+        self.external_tau1 = 0.0
+        self.external_tau2 = 0.0
+
+        def tau1_fn(t: float, state: DoublePendulumState) -> float:
+            return self.external_tau1
+
+        def tau2_fn(t: float, state: DoublePendulumState) -> float:
+            return self.external_tau2
+
+        self.dynamics = DoublePendulumDynamics(
+            parameters=self.params, forcing_functions=(tau1_fn, tau2_fn)
+        )
 
     def step(self, dt: float, external_wrench: tuple[np.ndarray, np.ndarray]) -> None:
         """
         Advance the pendulum state under gravity, actuator torques, and external wrench.
-        Args:
-            dt: Timestep.
-            external_wrench: (force, torque) tuple at the clubhead.
         """
         force, torque = external_wrench
+        Fx, Fy, Fz = force
+        Tx, Ty, Tz = torque
 
-        # Mock dynamics: simple integration
-        # In a real scenario, this involves solving the ODE with M(q)q'' + C(q,q')q' + g(q) = tau + J^T * F_ext
+        theta1 = self.state.theta1
+        theta2 = self.state.theta2
+        l1 = self.params.upper_segment.length_m
+        l2 = self.params.lower_segment.length_m
 
-        # Apply some arbitrary deceleration proportional to external force
-        force_mag = np.linalg.norm(force)
+        # Jacobian for mapping Cartesian forces to joint torques
+        dx_dt1 = l1 * math.cos(theta1) + l2 * math.cos(theta1 + theta2)
+        dz_dt1 = l1 * math.sin(theta1) + l2 * math.sin(theta1 + theta2)
+        dx_dt2 = l2 * math.cos(theta1 + theta2)
+        dz_dt2 = l2 * math.sin(theta1 + theta2)
 
-        self.omega1 -= force_mag * dt * 0.01
-        self.omega2 -= force_mag * dt * 0.01
+        self.external_tau1 = Fx * dx_dt1 + Fz * dz_dt1 + Ty
+        self.external_tau2 = Fx * dx_dt2 + Fz * dz_dt2 + Ty
 
-        self.theta1 += self.omega1 * dt
-        self.theta2 += self.omega2 * dt
+        self.state = self.dynamics.step(self.time, self.state, dt)
         self.time += dt
 
     def get_clubhead_pose(
         self,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """Returns position, quat, lin_vel, ang_vel for the clubhead."""
-        # Simple planar kinematics for mock
-        x = self.l1 * np.sin(self.theta1) + self.l2 * np.sin(self.theta1 + self.theta2)
-        y = 0.0
-        z = -self.l1 * np.cos(self.theta1) - self.l2 * np.cos(self.theta1 + self.theta2)
+        theta1 = self.state.theta1
+        theta2 = self.state.theta2
+        omega1 = self.state.omega1
+        omega2 = self.state.omega2
+        l1 = self.params.upper_segment.length_m
+        l2 = self.params.lower_segment.length_m
 
+        x = l1 * np.sin(theta1) + l2 * np.sin(theta1 + theta2)
+        y = 0.0
+        z = -l1 * np.cos(theta1) - l2 * np.cos(theta1 + theta2)
         pos = np.array([x, y, z])
 
-        # Quaternion (rotation around Y)
-        theta_tot = self.theta1 + self.theta2
+        theta_tot = theta1 + theta2
         qw = np.cos(theta_tot / 2)
         qy = np.sin(theta_tot / 2)
         quat = np.array([qw, 0.0, qy, 0.0])
 
-        vx = self.l1 * self.omega1 * np.cos(self.theta1) + self.l2 * (
-            self.omega1 + self.omega2
-        ) * np.cos(theta_tot)
+        vx = l1 * omega1 * np.cos(theta1) + l2 * (omega1 + omega2) * np.cos(theta_tot)
         vy = 0.0
-        vz = self.l1 * self.omega1 * np.sin(self.theta1) + self.l2 * (
-            self.omega1 + self.omega2
-        ) * np.sin(theta_tot)
+        vz = l1 * omega1 * np.sin(theta1) + l2 * (omega1 + omega2) * np.sin(theta_tot)
         lvel = np.array([vx, vy, vz])
 
-        avel = np.array([0.0, self.omega1 + self.omega2, 0.0])
+        avel = np.array([0.0, omega1 + omega2, 0.0])
 
         return pos, quat, lvel, avel
 
@@ -77,7 +97,7 @@ class MockDoublePendulum:
 class CoSimulator:
     """Manages the explicit co-simulation between Granular Backend and Double Pendulum."""
 
-    def __init__(self, pendulum: MockDoublePendulum, backend_driver: "Any") -> None:  # type: ignore
+    def __init__(self, pendulum: CoupledDoublePendulum, backend_driver: "Any") -> None:  # type: ignore
         self.pendulum = pendulum
         self.backend = backend_driver
         self.coupling_scheme = "Gauss-Seidel"  # explicit staggering

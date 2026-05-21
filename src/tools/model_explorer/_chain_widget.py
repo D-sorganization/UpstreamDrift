@@ -128,9 +128,7 @@ class ChainManipulationWidget(QWidget):
     )
     def load_urdf(self, content: str) -> None:
         """Load URDF content and build the kinematic tree."""
-        if not (content is not None):
-            raise ValueError("content must be provided")
-        if not (content is not None):
+        if content is None:
             raise ValueError("content must be provided")
         self.urdf_content = content
         self.tree.build_from_urdf(content)
@@ -164,9 +162,7 @@ class ChainManipulationWidget(QWidget):
 
     def _on_node_selected(self, name: str) -> None:
         """Handle node selection."""
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         self.selected_node = name
         node = self.tree.nodes.get(name)
@@ -205,9 +201,7 @@ class ChainManipulationWidget(QWidget):
 
     def _insert_segment(self, config: dict[str, Any]) -> None:  # noqa: C901
         """Insert a new segment into the URDF."""
-        if not (config is not None):
-            raise ValueError("config must be provided")
-        if not (config is not None):
+        if config is None:
             raise ValueError("config must be provided")
         try:
             root = DefusedET.fromstring(self.urdf_content)

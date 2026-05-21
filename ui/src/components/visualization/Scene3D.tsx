@@ -5,28 +5,20 @@
  * hardcoded capsule/sphere geometry. Supports joint angle animation,
  * club trajectory trails, and force/torque overlays.
  *
- * See issue #1201
+ * See issue #1201, #1199
  */
 
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Grid, Environment, Line } from '@react-three/drei';
+import { OrbitControls, Grid, Environment, TransformControls } from '@react-three/drei';
 import * as THREE from 'three';
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import type { SimulationFrame } from '@/api/client';
 import { URDFViewer } from './URDFViewer';
 import type { URDFModel } from './URDFViewer';
-
-interface Props {
-  engine: string;
-  frame: SimulationFrame | null;
-  frames?: SimulationFrame[];
-  /** Optional URDF model to render instead of hardcoded geometry. See issue #1201 */
-  urdfModel?: URDFModel | null;
-  /** Whether to show joint axes on the URDF model */
-  showJointAxes?: boolean;
-  /** Force vectors to display as overlays. See issue #1179 */
-  forceOverlays?: ForceOverlay[];
-}
+import { GolferModel, ClubTrajectory } from './GolferModel';
+import { ForceOverlay as ForceOverlayComponent } from './ForceOverlay';
+import type { ForceVector3D } from './ForceOverlay';
 
 /** Force/torque overlay data for visualization. See issue #1179 */
 export interface ForceOverlay {
@@ -37,258 +29,299 @@ export interface ForceOverlay {
   label?: string;
 }
 
-// Store trajectory history for trail visualization
-const MAX_TRAIL_POINTS = 100;
-
-function GolferModel({ frame }: { frame: SimulationFrame | null }) {
-  const groupRef = useRef<THREE.Group>(null);
-  const torsoRef = useRef<THREE.Mesh>(null);
-  const leftArmRef = useRef<THREE.Mesh>(null);
-  const rightArmRef = useRef<THREE.Mesh>(null);
-  const clubRef = useRef<THREE.Group>(null);
-
-  // Update pose from simulation frame
-  useFrame(() => {
-    if (!groupRef.current) return;
-
-    // Get animation data from frame
-    const time = frame?.time ?? 0;
-    const jointAngles = frame?.analysis?.joint_angles;
-
-    if (jointAngles && jointAngles.length >= 4) {
-      // Apply joint angles from simulation
-      if (torsoRef.current) {
-        torsoRef.current.rotation.y = jointAngles[0] || 0;
-      }
-      if (leftArmRef.current) {
-        leftArmRef.current.rotation.z = jointAngles[1] || 0;
-      }
-      if (rightArmRef.current) {
-        rightArmRef.current.rotation.z = -(jointAngles[2] || 0);
-      }
-      if (clubRef.current) {
-        clubRef.current.rotation.x = jointAngles[3] || 0;
-      }
-    } else if (frame) {
-      // Default animation based on time if no joint angles
-      const swingPhase = Math.sin(time * 2) * 0.5;
-
-      if (torsoRef.current) {
-        torsoRef.current.rotation.y = swingPhase * 0.8;
-      }
-      if (leftArmRef.current) {
-        leftArmRef.current.rotation.z = -0.3 + swingPhase * 0.5;
-      }
-      if (rightArmRef.current) {
-        rightArmRef.current.rotation.z = 0.3 - swingPhase * 0.5;
-      }
-      if (clubRef.current) {
-        clubRef.current.rotation.x = swingPhase * 1.5;
-      }
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      {/* Torso */}
-      <mesh ref={torsoRef} position={[0, 1, 0]}>
-        <capsuleGeometry args={[0.15, 0.6, 8, 16]} />
-        <meshStandardMaterial color="#4a90d9" />
-
-        {/* Head (child of torso) */}
-        <mesh position={[0, 0.52, 0]}>
-          <sphereGeometry args={[0.12]} />
-          <meshStandardMaterial color="#e5e7eb" />
-        </mesh>
-
-        {/* Left Arm */}
-        <mesh ref={leftArmRef} position={[-0.25, 0.2, 0]} rotation={[0, 0, -0.3]}>
-          <capsuleGeometry args={[0.05, 0.4, 4, 8]} />
-          <meshStandardMaterial color="#4a90d9" />
-        </mesh>
-
-        {/* Right Arm with Club */}
-        <mesh ref={rightArmRef} position={[0.25, 0.2, 0]} rotation={[0, 0, 0.3]}>
-          <capsuleGeometry args={[0.05, 0.4, 4, 8]} />
-          <meshStandardMaterial color="#4a90d9" />
-
-          {/* Club Group */}
-          <group ref={clubRef} position={[0, -0.3, 0]}>
-            {/* Club Shaft */}
-            <mesh position={[0, -0.4, 0]}>
-              <cylinderGeometry args={[0.015, 0.015, 0.8, 8]} />
-              <meshStandardMaterial color="#666666" />
-            </mesh>
-            {/* Club Head */}
-            <mesh position={[0, -0.85, 0]} rotation={[0.3, 0, 0]}>
-              <boxGeometry args={[0.1, 0.03, 0.08]} />
-              <meshStandardMaterial color="#333333" />
-            </mesh>
-          </group>
-        </mesh>
-      </mesh>
-
-      {/* Legs (static for now) */}
-      <mesh position={[-0.1, 0.3, 0]}>
-        <capsuleGeometry args={[0.06, 0.5, 4, 8]} />
-        <meshStandardMaterial color="#2d3748" />
-      </mesh>
-      <mesh position={[0.1, 0.3, 0]}>
-        <capsuleGeometry args={[0.06, 0.5, 4, 8]} />
-        <meshStandardMaterial color="#2d3748" />
-      </mesh>
-    </group>
-  );
-}
-
-function ClubTrajectory({ frames }: { frames?: SimulationFrame[] }) {
-  // Build trajectory trail from frame history
-  const points = useMemo(() => {
-    if (!frames || frames.length < 2) return [];
-
-    // Get club head positions from recent frames
-    const trailPoints: [number, number, number][] = [];
-    const recentFrames = frames.slice(-MAX_TRAIL_POINTS);
-
-    for (const f of recentFrames) {
-      // Calculate approximate club head position based on swing animation
-      const time = f.time;
-      const swingPhase = Math.sin(time * 2) * 0.5;
-
-      // Club head traces an arc
-      const x = 0.25 + Math.sin(swingPhase * 2) * 0.8;
-      const y = 0.5 + Math.cos(swingPhase * 2) * 0.3;
-      const z = Math.sin(swingPhase) * 0.3;
-
-      trailPoints.push([x, y, z]);
-    }
-
-    return trailPoints;
-  }, [frames]);
-
-  if (points.length < 2) return null;
-
-  return (
-    <Line
-      points={points}
-      color="#ffcc00"
-      lineWidth={2}
-    />
-  );
+interface Props {
+  engine: string;
+  frame: SimulationFrame | null;
+  frames?: SimulationFrame[];
+  /** Optional URDF model to render instead of hardcoded geometry. See issue #1201 */
+  urdfModel?: URDFModel | null;
+  /** Whether to show joint axes on the URDF model */
+  showJointAxes?: boolean;
+  /** Force vectors to display as overlays. See issue #1179 */
+  forceOverlays?: (ForceOverlay | ForceVector3D)[];
+  /** Callback when gizmo is dragged to send position/rotation changes */
+  onGizmoDrag?: (bodyName: string, position: number[], rotation: number[]) => void;
 }
 
 /**
- * ForceArrow renders a single force/torque vector as an arrow.
- * See issue #1179
+ * CameraController updates OrbitControls target to follow the golfer's root position in Follow Mode.
  */
-function ForceArrow({ overlay }: { overlay: ForceOverlay }) {
-  const arrowRef = useRef<THREE.Group>(null);
-  const color = overlay.color ?? '#ff4444';
-  const scale = Math.min(overlay.magnitude * 0.01, 2.0); // Scale arrow length
+function CameraController({
+  followMode,
+  rootRef,
+  orbitRef,
+}: {
+  followMode: boolean;
+  rootRef: React.RefObject<THREE.Group | null>;
+  orbitRef: React.RefObject<OrbitControlsImpl | null>;
+}) {
+  useFrame(() => {
+    if (!followMode || !rootRef.current || !orbitRef.current) return;
 
-  const direction = useMemo(() => {
-    const dir = new THREE.Vector3(...overlay.direction).normalize();
-    return dir;
-  }, [overlay.direction]);
+    const controls = orbitRef.current;
+    const worldPosition = new THREE.Vector3();
+    rootRef.current.getWorldPosition(worldPosition);
 
-  return (
-    <group ref={arrowRef} position={overlay.origin}>
-      {/* Arrow shaft */}
-      <mesh
-        position={direction.clone().multiplyScalar(scale * 0.5).toArray() as [number, number, number]}
-        quaternion={new THREE.Quaternion().setFromUnitVectors(
-          new THREE.Vector3(0, 1, 0),
-          direction,
-        )}
-      >
-        <cylinderGeometry args={[0.01, 0.01, scale, 8]} />
-        <meshStandardMaterial color={color} />
-      </mesh>
-      {/* Arrow head */}
-      <mesh
-        position={direction.clone().multiplyScalar(scale).toArray() as [number, number, number]}
-        quaternion={new THREE.Quaternion().setFromUnitVectors(
-          new THREE.Vector3(0, 1, 0),
-          direction,
-        )}
-      >
-        <coneGeometry args={[0.03, 0.08, 8]} />
-        <meshStandardMaterial color={color} />
-      </mesh>
-    </group>
-  );
+    // Shift camera by the target translation delta to track target smoothly
+    const targetDelta = worldPosition.clone().sub(controls.target);
+    controls.object.position.add(targetDelta);
+
+    controls.target.copy(worldPosition);
+    controls.update();
+  });
+
+  return null;
 }
 
 export function Scene3D({
-  // Note: engine prop reserved for future engine-specific rendering.
   engine: _engine, // eslint-disable-line @typescript-eslint/no-unused-vars
   frame,
   frames,
   urdfModel,
   showJointAxes = false,
   forceOverlays,
+  onGizmoDrag,
 }: Props) {
+  const orbitRef = useRef<OrbitControlsImpl | null>(null);
+  const rootRef = useRef<THREE.Group>(null);
+
+  // Interaction State
+  const [selectedBodyName, setSelectedBodyName] = useState<string | null>(null);
+  const [selectedObject, setSelectedObject] = useState<THREE.Object3D | null>(null);
+  const [transformMode, setTransformMode] = useState<'translate' | 'rotate'>('translate');
+  const [followMode, setFollowMode] = useState<boolean>(false);
+
+  // Map input force overlays to standard ForceVector3D format
+  const mappedVectors = useMemo(() => {
+    if (!forceOverlays) return [];
+    return forceOverlays.map((fo) => {
+      if ('force_type' in fo && Array.isArray(fo.color)) {
+        return fo as ForceVector3D;
+      }
+      let parsedColor: [number, number, number, number] = [1, 0, 0, 1];
+      if (typeof fo.color === 'string') {
+        const temp = new THREE.Color(fo.color);
+        parsedColor = [temp.r, temp.g, temp.b, 1];
+      }
+      return {
+        body_name: 'unknown',
+        force_type: 'contact',
+        origin: fo.origin,
+        direction: fo.direction,
+        magnitude: fo.magnitude,
+        color: parsedColor,
+        label: fo.label || null,
+      } as ForceVector3D;
+    });
+  }, [forceOverlays]);
+
+  // Handle camera presets
+  const handleCameraPreset = (preset: 'front' | 'side' | 'top') => {
+    setFollowMode(false);
+    if (!orbitRef.current) return;
+
+    const controls = orbitRef.current;
+    const camera = controls.object;
+    const target = new THREE.Vector3(0, 1.0, 0);
+
+    controls.target.copy(target);
+
+    if (preset === 'front') {
+      camera.position.set(0, 1.2, 3);
+      camera.up.set(0, 1, 0);
+    } else if (preset === 'side') {
+      camera.position.set(3, 1.2, 0);
+      camera.up.set(0, 1, 0);
+    } else if (preset === 'top') {
+      camera.position.set(0, 4, 0);
+      camera.up.set(0, 0, -1);
+    }
+
+    controls.update();
+  };
+
+  const handleGizmoChange = () => {
+    if (!selectedObject || !onGizmoDrag) return;
+    const position = selectedObject.position.toArray();
+    const rotation = selectedObject.rotation.toArray().slice(0, 3) as [number, number, number];
+    onGizmoDrag(selectedBodyName || selectedObject.name || 'unknown', position, rotation);
+  };
+
+  // Determine whether to use URDF model or fallback
+  const useURDF = urdfModel != null && urdfModel.links.length > 0;
+
   // Build joint angles from frame for URDF model
   const urdfJointAngles = useMemo(() => {
     if (!frame?.analysis?.joint_angles) return undefined;
     return frame.analysis.joint_angles;
   }, [frame]);
 
-  // Determine whether to use URDF model or fallback
-  const useURDF = urdfModel != null && urdfModel.links.length > 0;
-
   return (
     <div
       role="img"
       aria-label="3D golf swing simulation visualization. Use mouse to rotate view, scroll to zoom."
       tabIndex={0}
-      className="w-full h-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+      className="relative w-full h-full focus:outline-none focus:ring-2 focus:ring-blue-400"
     >
-    <Canvas
-      camera={{ position: [3, 2, 3], fov: 50 }}
-      className="bg-gray-900 w-full h-full"
-    >
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[10, 10, 5]} intensity={1} />
+      <Canvas
+        camera={{ position: [3, 2, 3], fov: 50 }}
+        className="bg-gray-900 w-full h-full"
+        onClick={() => {
+          // Deselect on clicking empty background
+          if (selectedObject) {
+            setSelectedObject(null);
+            setSelectedBodyName(null);
+          }
+        }}
+      >
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[10, 10, 5]} intensity={1} />
 
-      <OrbitControls
-        enableDamping
-        dampingFactor={0.05}
-        minDistance={1}
-        maxDistance={10}
-      />
-
-      <Grid
-        infiniteGrid
-        cellSize={0.5}
-        cellThickness={0.5}
-        sectionSize={2}
-        sectionThickness={1}
-        fadeDistance={30}
-      />
-
-      {/* See issue #1201: Use URDF model when available, fallback to capsule geometry */}
-      {useURDF ? (
-        <URDFViewer
-          model={urdfModel}
-          jointAngles={urdfJointAngles}
-          showAxes={showJointAxes}
+        <OrbitControls
+          ref={orbitRef}
+          enableDamping
+          dampingFactor={0.05}
+          minDistance={1}
+          maxDistance={10}
         />
-      ) : (
-        <GolferModel frame={frame} />
-      )}
-      <ClubTrajectory frames={frames} />
 
-      {/* See issue #1179: Force/torque overlays */}
-      {forceOverlays?.map((overlay, idx) => (
-        <ForceArrow key={idx} overlay={overlay} />
-      ))}
+        <CameraController
+          followMode={followMode}
+          rootRef={rootRef}
+          orbitRef={orbitRef}
+        />
 
-      {/* Add axes for reference */}
-      <axesHelper args={[1]} />
+        <Grid
+          infiniteGrid
+          cellSize={0.5}
+          cellThickness={0.5}
+          sectionSize={2}
+          sectionThickness={1}
+          fadeDistance={30}
+        />
 
-      <Environment preset="studio" />
-    </Canvas>
+        {/* Selected Link Gizmo Controls */}
+        {selectedObject && (
+          <TransformControls
+            object={selectedObject}
+            mode={transformMode}
+            onObjectChange={handleGizmoChange}
+          />
+        )}
+
+        {/* See issue #1201: Use URDF model when available, fallback to capsule geometry */}
+        <group
+          onClick={(e) => {
+            e.stopPropagation();
+            let current: THREE.Object3D | null = e.object;
+            while (current && current.parent) {
+              if (current.name) {
+                setSelectedObject(current);
+                setSelectedBodyName(current.name);
+                break;
+              }
+              current = current.parent;
+            }
+          }}
+        >
+          {useURDF ? (
+            <URDFViewer
+              model={urdfModel}
+              jointAngles={urdfJointAngles}
+              showAxes={showJointAxes}
+              selectedBodyName={selectedBodyName}
+              onSelectBody={(name) => {
+                setSelectedBodyName(name);
+                // The parent group click event will capture the object ref
+              }}
+              rootRef={rootRef}
+            />
+          ) : (
+            <GolferModel
+              frame={frame}
+              rootRef={rootRef}
+              selectedBodyName={selectedBodyName}
+              onSelectBody={(name) => {
+                setSelectedBodyName(name);
+              }}
+            />
+          )}
+        </group>
+
+        <ClubTrajectory frames={frames} />
+
+        {/* See issue #1179, #1199: Force/torque overlays */}
+        <ForceOverlayComponent vectors={mappedVectors} />
+
+        <axesHelper args={[1]} />
+        <Environment preset="studio" />
+      </Canvas>
+
+      {/* Floating Interactive Controls Panel */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 bg-black/75 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 shadow-xl z-20">
+        {/* Camera Views */}
+        <div className="flex items-center gap-1 border-r border-white/10 pr-2">
+          <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mr-1">View</span>
+          <button
+            onClick={() => handleCameraPreset('front')}
+            className="px-2 py-1 text-xs text-gray-300 hover:text-white rounded hover:bg-white/10 transition-colors"
+          >
+            Front
+          </button>
+          <button
+            onClick={() => handleCameraPreset('side')}
+            className="px-2 py-1 text-xs text-gray-300 hover:text-white rounded hover:bg-white/10 transition-colors"
+          >
+            Side
+          </button>
+          <button
+            onClick={() => handleCameraPreset('top')}
+            className="px-2 py-1 text-xs text-gray-300 hover:text-white rounded hover:bg-white/10 transition-colors"
+          >
+            Top
+          </button>
+          <button
+            onClick={() => setFollowMode(!followMode)}
+            className={`px-2 py-1 text-xs rounded transition-colors ${
+              followMode ? 'bg-blue-600 text-white font-semibold' : 'text-gray-300 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            Follow
+          </button>
+        </div>
+
+        {/* Transform Gizmo Controls */}
+        <div className="flex items-center gap-1">
+          <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mr-1">Gizmo</span>
+          <button
+            onClick={() => setTransformMode('translate')}
+            className={`px-2 py-1 text-xs rounded transition-colors ${
+              transformMode === 'translate' ? 'bg-blue-600 text-white font-semibold' : 'text-gray-300 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            Translate
+          </button>
+          <button
+            onClick={() => setTransformMode('rotate')}
+            className={`px-2 py-1 text-xs rounded transition-colors ${
+              transformMode === 'rotate' ? 'bg-blue-600 text-white font-semibold' : 'text-gray-300 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            Rotate
+          </button>
+          {selectedObject && (
+            <button
+              onClick={() => {
+                setSelectedObject(null);
+                setSelectedBodyName(null);
+              }}
+              className="px-2 py-1 text-xs text-red-400 hover:text-red-300 rounded hover:bg-white/10 transition-colors ml-1"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

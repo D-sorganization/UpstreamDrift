@@ -167,11 +167,68 @@ def scaled_padding_px(scale: float) -> int:
     return max(2, int(round(TILE_BASE_PADDING_PX * validate_tile_scale(scale))))
 
 
-DOCKER_STAGES: tuple[str, ...] = ("all", "mujoco", "pinocchio", "drake", "base")
+def _load_docker_profiles() -> tuple[str, ...]:
+    """Load Docker profile names from docker/profiles.yaml.
+
+    Falls back to a legacy hard-coded tuple if the YAML cannot be read so
+    that the launcher stays functional in environments where the repo root
+    is not accessible (e.g. a sandboxed test without the full tree).
+
+    DbC postcondition: returned tuple is non-empty and contains only strings.
+    """
+    _legacy = ("slim", "standard", "research", "biomech", "full", "gpu-training")
+    profiles_path = REPOS_ROOT / "docker" / "profiles.yaml"
+    try:
+        text = profiles_path.read_text(encoding="utf-8")
+    except OSError:
+        logger.debug(
+            "docker/profiles.yaml not found at %s; using legacy profile list",
+            profiles_path,
+        )
+        return _legacy
+
+    names: list[str] = []
+    in_profiles = False
+    for raw in text.splitlines():
+        stripped = raw.lstrip()
+        indent = len(raw) - len(stripped)
+        if indent == 0 and stripped.startswith("profiles:"):
+            in_profiles = True
+            continue
+        if in_profiles and indent == 2 and stripped.endswith(":"):
+            name = stripped.rstrip(":")
+            if name and not name.startswith("#"):
+                names.append(name)
+
+    if not names:
+        logger.warning(
+            "No profiles found in %s; using legacy profile list", profiles_path
+        )
+        return _legacy
+
+    result = tuple(names)
+    assert all(isinstance(n, str) for n in result), "All profile names must be strings"
+    return result
+
+
+DOCKER_STAGES: tuple[str, ...] = _load_docker_profiles()
 
 
 def validate_docker_stage(stage: str) -> str:
-    """Validate Docker build stage names used by launcher components."""
+    """Validate Docker profile names used by launcher components.
+
+    Accepts any profile name declared in docker/profiles.yaml (loaded at
+    module import time via :func:`_load_docker_profiles`).
+
+    Args:
+        stage: The profile/stage string to validate.
+
+    Returns:
+        The validated stage string (unchanged).
+
+    Raises:
+        ValueError: If *stage* is not a known Docker profile.
+    """
     if stage not in DOCKER_STAGES:
         allowed = ", ".join(DOCKER_STAGES)
         raise ValueError(f"Invalid Docker stage '{stage}'. Expected one of: {allowed}")

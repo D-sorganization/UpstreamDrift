@@ -6,6 +6,20 @@
 import { useState, useCallback } from 'react';
 import { useAnalysisTools } from '@/api/useAnalysisTools';
 import type { MetricInfo } from '@/api/useAnalysisTools';
+export type {
+  AnalysisLoadState,
+  ExportResult,
+  MetricInfo,
+  StatisticsSummary,
+} from '@/api/useAnalysisTools';
+
+// Re-export API types so test files can import them from this module.
+export type {
+  MetricInfo,
+  StatisticsSummary,
+  ExportResult,
+  AnalysisLoadState,
+} from '@/api/useAnalysisTools';
 
 /**
  * AnalysisToolsPage - Full analysis tools page.

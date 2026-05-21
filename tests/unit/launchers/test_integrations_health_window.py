@@ -8,15 +8,13 @@ QDialog. Most behaviour is exercised by the Tools-side widget tests.
 
 from __future__ import annotations
 
+import os
+
 import pytest
 
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
 pytest.importorskip("PyQt6.QtWidgets")
-# Until Tools PR #2914 merges and the vendor submodule is bumped, the
-# shared widget package may not be importable in CI.
-pytest.importorskip(
-    "src.shared.python.ai.mcp.widgets",
-    reason="Pending Tools PR #2914 / vendor bump",
-)
 
 from PyQt6.QtWidgets import QApplication, QDialog, QWidget  # noqa: E402
 
@@ -40,7 +38,11 @@ class TestMakeDashboardWidget:
         widget = make_dashboard_widget(status_provider=list)
         assert isinstance(widget, QWidget)
 
-    def test_uses_injected_provider(self, qapp: QApplication) -> None:
+    def test_uses_injected_provider(self, qapp: QApplication, monkeypatch) -> None:
+        monkeypatch.setattr(
+            "src.launchers.integrations_health_window._shared_dashboard_widget_class",
+            lambda: None,
+        )
         calls: list[int] = []
 
         def provider() -> list:
@@ -50,6 +52,19 @@ class TestMakeDashboardWidget:
         widget = make_dashboard_widget(status_provider=provider)
         widget.refresh()
         assert calls  # provider was called
+
+    def test_falls_back_when_shared_widget_is_unavailable(
+        self, qapp: QApplication, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(
+            "src.launchers.integrations_health_window._shared_dashboard_widget_class",
+            lambda: None,
+        )
+        from src.launchers.integrations_health_panel import IntegrationsHealthPanel
+
+        widget = make_dashboard_widget(status_provider=list)
+
+        assert isinstance(widget, IntegrationsHealthPanel)
 
 
 @pytest.mark.unit
@@ -63,4 +78,18 @@ class TestOpenIntegrationsHealthWindow:
     def test_dialog_has_title(self, qapp: QApplication) -> None:
         dialog = open_integrations_health_window()
         assert "Integrations" in dialog.windowTitle()
+        dialog.close()
+
+    def test_dialog_uses_fallback_panel_when_shared_widget_is_unavailable(
+        self, qapp: QApplication, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(
+            "src.launchers.integrations_health_window._shared_dashboard_widget_class",
+            lambda: None,
+        )
+        from src.launchers.integrations_health_panel import IntegrationsHealthPanel
+
+        dialog = open_integrations_health_window()
+
+        assert dialog.findChild(IntegrationsHealthPanel) is not None
         dialog.close()

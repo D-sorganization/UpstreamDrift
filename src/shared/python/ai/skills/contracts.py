@@ -1,0 +1,75 @@
+"""Pydantic contracts for the ``ai.skills`` package (Tools #2737).
+
+These models form the boundary between callers and the skill runtime. They
+are deliberately small and validation-heavy so that misuse fails loudly at
+the boundary instead of inside a skill body (Design-by-Contract).
+"""
+
+from __future__ import annotations
+
+import uuid
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+
+def _default_request_id() -> str:
+    return uuid.uuid4().hex
+
+
+class SkillDescriptor(BaseModel):
+    """Static description of a skill — id, version, IO schema, contract names.
+
+    The ``preconditions`` and ``postconditions`` fields hold human-readable
+    predicate names that the skill body and runner cross-check. Storing them
+    on the descriptor (rather than only in code) keeps the contract visible
+    to GUI registries and audit logs.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str = Field(..., min_length=1)
+    name: str = Field(..., min_length=1)
+    version: str = Field(..., min_length=1)
+    description: str
+    inputs: dict[str, str] = Field(default_factory=dict)
+    outputs: dict[str, str] = Field(default_factory=dict)
+    preconditions: list[str] = Field(default_factory=list)
+    postconditions: list[str] = Field(default_factory=list)
+
+    @field_validator("id", "name", "version")
+    @classmethod
+    def _strip_required(cls, value: str) -> str:
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError("must be non-empty")
+        return stripped
+
+
+class SkillInvocation(BaseModel):
+    """A single request to execute a skill."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    skill_id: str = Field(..., min_length=1)
+    args: dict[str, Any] = Field(default_factory=dict)
+    request_id: str = Field(default_factory=_default_request_id)
+    timeout_s: float = Field(default=30.0, gt=0.0)
+
+
+class SkillResult(BaseModel):
+    """Outcome of a skill invocation.
+
+    ``audit_trail`` is an ordered list of small dict events; downstream
+    audit sinks treat each entry as opaque but display ``kind`` and
+    ``message``.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    request_id: str
+    success: bool
+    value: dict[str, Any] | None = None
+    error: str | None = None
+    elapsed_ms: float = Field(ge=0.0)
+    audit_trail: list[dict[str, Any]] = Field(default_factory=list)

@@ -20,6 +20,7 @@ This module composes focused mixin classes into the UpstreamDriftLauncher:
 import contextlib
 import os
 import sys
+import time
 from typing import Any, cast
 
 from PyQt6.QtCore import QEventLoop, QObject, QRunnable, QThreadPool, QTimer, pyqtSignal
@@ -50,6 +51,10 @@ from src.launchers.launcher_layout_manager import (
 from src.launchers.launcher_model_handlers import ModelHandlerRegistry
 from src.launchers.launcher_process_manager import ProcessManager
 from src.launchers.launcher_simulation import LauncherSimulationMixin
+from src.launchers.sidekick_readiness import (
+    check_sidekick_api_readiness,
+    readiness_detail_for_log,
+)
 from src.launchers.launcher_theme import LauncherThemeMixin
 from src.launchers.launcher_ui_setup import LauncherUISetupMixin
 
@@ -191,6 +196,9 @@ STARTUP_TIMEOUT_SEC: int = 30
 assert STARTUP_TIMEOUT_SEC > 0, (
     "STARTUP_TIMEOUT_SEC must be > 0 to schedule a recovery timer"
 )
+
+SIDEKICK_API_READY_TIMEOUT_SEC: float = 15.0
+SIDEKICK_API_READY_RETRY_MS: int = 500
 
 
 class ProcessCleanupWorkerSignals(QObject):
@@ -518,6 +526,8 @@ class UpstreamDriftLauncher(
         self.selected_model: str | None = None
         self.model_cards: dict[str, Any] = {}
         self.model_order: list[str] = []
+        self.background_api_process: Any | None = None
+        self._sidekick_api_wait_started_at: float | None = None
         self.layout_edit_mode = False
         self.available_models: dict[str, Any] = {}
         self.special_app_lookup: dict[str, Any] = {}
@@ -550,7 +560,7 @@ class UpstreamDriftLauncher(
             else REPOS_ROOT
         )
 
-        self.process_manager.launch_module(
+        self.background_api_process = self.process_manager.launch_module(
             name="background_api_server",
             module_name="src.api.server",
             cwd=cwd,
@@ -756,8 +766,47 @@ class UpstreamDriftLauncher(
 
     def _install_sidekick_sidebar_deferred(self) -> None:
         """Deferred Sidekick installation to prevent startup freeze."""
+        if not self._sidekick_api_ready_for_sidebar():
+            return
         self._install_sidekick_sidebar()
         self._seed_sidekick_workspace()
+
+    def _sidekick_api_ready_for_sidebar(self) -> bool:
+        """Gate Sidekick chat/sidebar installation on API readiness."""
+        readiness = check_sidekick_api_readiness()
+        if readiness.ready:
+            self._sidekick_api_wait_started_at = None
+            return True
+
+        now = time.monotonic()
+        if self._sidekick_api_wait_started_at is None:
+            self._sidekick_api_wait_started_at = now
+
+        elapsed = now - self._sidekick_api_wait_started_at
+        process = getattr(self, "background_api_process", None)
+        process_running = process is not None and process.poll() is None
+        if elapsed < SIDEKICK_API_READY_TIMEOUT_SEC and process_running:
+            logger.info(
+                "Waiting for Sidekick API readiness before installing sidebar: %s",
+                readiness_detail_for_log(readiness),
+            )
+            QTimer.singleShot(
+                SIDEKICK_API_READY_RETRY_MS, self._install_sidekick_sidebar_deferred
+            )
+            return False
+
+        logger.warning(
+            "Sidekick sidebar not installed because API readiness failed: %s",
+            readiness_detail_for_log(readiness),
+        )
+        show_toast = getattr(self, "show_toast", None)
+        if callable(show_toast):
+            show_toast(
+                "Sidekick chat is waiting on the background API. "
+                f"Readiness check failed at {readiness.url}.",
+                "warning",
+            )
+        return False
 
     def _seed_sidekick_workspace(self) -> None:
         """Push launcher state into any active Sidekick workspace registry.

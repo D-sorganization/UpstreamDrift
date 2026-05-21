@@ -49,7 +49,7 @@
         "border": "#ced4da",
         "text": "#212529",
         "text_secondary": "#495057",
-        "label": "#6c757d",
+        "label": "#666e76",
         "focus": "#80bdff",
         "input_bg": "#ffffff",
         "accent": "#5a8fc4",
@@ -194,8 +194,8 @@
         "selection_text": "#ffffff"
       }
     },
-    "monokai": {
-      "name": "Monokai",
+    "neon-warm-dark": {
+      "name": "Neon Warm Dark",
       "category": "editor",
       "isDark": true,
       "colors": {
@@ -203,7 +203,7 @@
         "group_bg": "#3e3d32",
         "border": "#75715e",
         "text": "#f8f8f2",
-        "text_secondary": "#ae81ff",
+        "text_secondary": "#be98ff",
         "label": "#e6db74",
         "focus": "#a6e22e",
         "input_bg": "#171814",
@@ -220,13 +220,13 @@
         "error": "#f92672",
         "info": "#66d9ef",
         "link": "#66d9ef",
-        "link_hover": "#ae81ff",
+        "link_hover": "#be98ff",
         "selection_bg": "#49483e",
         "selection_text": "#f8f8f2"
       }
     },
-    "dracula": {
-      "name": "Dracula",
+    "vampire-dark": {
+      "name": "Vampire Dark",
       "category": "editor",
       "isDark": true,
       "colors": {
@@ -256,8 +256,8 @@
         "selection_text": "#f8f8f2"
       }
     },
-    "one-dark": {
-      "name": "One Dark",
+    "frost-dark": {
+      "name": "Frost Dark",
       "category": "editor",
       "isDark": true,
       "colors": {
@@ -287,8 +287,8 @@
         "selection_text": "#abb2bf"
       }
     },
-    "gitpod-dark": {
-      "name": "Gitpod Dark",
+    "teal-dark": {
+      "name": "Teal Dark",
       "category": "editor",
       "isDark": true,
       "colors": {
@@ -318,8 +318,8 @@
         "selection_text": "#e6edf3"
       }
     },
-    "ms-word": {
-      "name": "MS Word",
+    "office-blue": {
+      "name": "Office Blue",
       "category": "office",
       "isDark": false,
       "colors": {
@@ -349,8 +349,8 @@
         "selection_text": "#ffffff"
       }
     },
-    "ms-excel": {
-      "name": "MS Excel",
+    "office-green": {
+      "name": "Office Green",
       "category": "office",
       "isDark": false,
       "colors": {
@@ -380,8 +380,8 @@
         "selection_text": "#ffffff"
       }
     },
-    "legal-pad": {
-      "name": "Legal Pad",
+    "sandstone-yellow": {
+      "name": "Sandstone Yellow",
       "category": "office",
       "isDark": false,
       "colors": {

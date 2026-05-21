@@ -1,0 +1,439 @@
+"""Claude-Desktop-compatible MCP server config loader.
+
+The on-disk format follows Claude Desktop's ``mcp_servers.json``:
+
+.. code-block:: json
+
+    {
+      "mcpServers": {
+        "notebooklm": {
+          "command": "python",
+          "args": ["-m", "notebooklm_mcp"],
+          "env": {"API_KEY": "${MY_API_KEY}"}
+        },
+        "remote": {
+          "transport": "http",
+          "url": "https://example.com/mcp"
+        }
+      }
+    }
+
+Behaviour:
+    * ``${ENV_VAR}`` placeholders inside ``env`` values are expanded from the
+      current process environment. Unresolved placeholders are left intact
+      and a WARNING is logged so the operator can fix the missing var.
+    * Invalid entries (Pydantic validation error, unsupported transport,
+      missing required field) are skipped with a WARNING — they do *not*
+      bring down the rest of the configuration.
+    * Missing or malformed config files return an empty list rather than
+      raising, so the caller can degrade gracefully when MCP is unconfigured.
+"""
+
+from __future__ import annotations
+
+import importlib
+import json
+import logging
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any, Literal
+
+from pydantic import ValidationError
+
+from src.shared.python.ai.mcp.contracts import McpServerConfig
+
+_LOG = logging.getLogger(__name__)
+_ENV_PATTERN = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
+DEFAULT_CONFIG_PATH = Path.home() / ".upstreamdrift" / "mcp_servers.json"
+
+MergeStrategy = Literal["skip_existing", "overwrite", "prefix_imported"]
+_VALID_STRATEGIES: tuple[MergeStrategy, ...] = (
+    "skip_existing",
+    "overwrite",
+    "prefix_imported",
+)
+
+
+def expand_env_vars(value: str) -> str:
+    """Expand ``${ENV_VAR}`` placeholders. Unset vars are left as-is."""
+
+    def _replace(match: re.Match[str]) -> str:
+        var_name = match.group(1)
+        env_value = os.environ.get(var_name)
+        if env_value is None:
+            _LOG.warning("MCP config: environment variable %s is not set", var_name)
+            return match.group(0)
+        return env_value
+
+    return _ENV_PATTERN.sub(_replace, value)
+
+
+def _expand_env_map(env: dict[str, Any]) -> dict[str, str]:
+    expanded: dict[str, str] = {}
+    for key, raw in env.items():
+        if not isinstance(raw, str):
+            _LOG.warning("MCP config: non-string env value for %s; coercing", key)
+        expanded[key] = expand_env_vars(str(raw))
+    return expanded
+
+
+def parse_mcp_servers(raw: dict[str, Any]) -> list[McpServerConfig]:
+    """Parse the deserialized JSON config dict into validated configs."""
+    servers = raw.get("mcpServers") or {}
+    if not isinstance(servers, dict):
+        _LOG.warning("MCP config: 'mcpServers' is not a JSON object; ignoring")
+        return []
+    configs: list[McpServerConfig] = []
+    for name, entry in servers.items():
+        if not isinstance(entry, dict):
+            _LOG.warning("MCP config: entry %r is not a JSON object; skipping", name)
+            continue
+        try:
+            entry_env = entry.get("env", {})
+            if not isinstance(entry_env, dict):
+                _LOG.warning(
+                    "MCP config: %s 'env' is not a JSON object; skipping",
+                    name,
+                )
+                continue
+            expanded_env = _expand_env_map(entry_env)
+            config = McpServerConfig(
+                name=name,
+                transport=entry.get("transport", "stdio"),
+                command=entry.get("command"),
+                args=list(entry.get("args", [])),
+                env=expanded_env,
+                url=entry.get("url"),
+                timeout_seconds=float(entry.get("timeoutSeconds", 30.0)),
+            )
+        except (ValidationError, ValueError, TypeError) as exc:
+            _LOG.warning("MCP config: skipping invalid entry %r: %s", name, exc)
+            continue
+        configs.append(config)
+    return configs
+
+
+def load_mcp_servers(path: Path | None = None) -> list[McpServerConfig]:
+    """Load and validate the MCP servers configuration file.
+
+    Args:
+        path: Path to the JSON config file. Defaults to
+            ``~/.upstreamdrift/mcp_servers.json``.
+
+    Returns:
+        List of validated configs. Empty list if the file is missing or
+        malformed (logged at WARNING).
+    """
+    target = path or DEFAULT_CONFIG_PATH
+    if not target.exists():
+        _LOG.debug("MCP config file %s does not exist; using empty config", target)
+        return []
+    try:
+        raw_text = target.read_text(encoding="utf-8")
+        raw_data = json.loads(raw_text)
+    except (OSError, json.JSONDecodeError) as exc:
+        _LOG.warning("MCP config: failed to read %s: %s", target, exc)
+        return []
+    if not isinstance(raw_data, dict):
+        _LOG.warning("MCP config: top-level JSON is not an object; ignoring")
+        return []
+    return parse_mcp_servers(raw_data)
+
+
+# ---------------------------------------------------------------------------
+# Claude-Desktop discovery + merge
+# ---------------------------------------------------------------------------
+
+
+def _claude_desktop_candidate_paths() -> list[Path]:
+    """Standard locations Claude Desktop uses for ``claude_desktop_config.json``.
+
+    Order: Windows (APPDATA), macOS (~/Library/Application Support),
+    Linux (~/.config). All three are checked regardless of host OS so a
+    cross-platform dev workflow Just Works.
+    """
+    home = Path.home()
+    candidates: list[Path] = []
+    # Windows
+    appdata = os.environ.get("APPDATA")
+    if appdata:
+        candidates.append(Path(appdata) / "Claude" / "claude_desktop_config.json")
+    # macOS
+    candidates.append(
+        home
+        / "Library"
+        / "Application Support"
+        / "Claude"
+        / "claude_desktop_config.json"
+    )
+    # Linux
+    candidates.append(home / ".config" / "Claude" / "claude_desktop_config.json")
+    return candidates
+
+
+def discover_claude_desktop_config() -> Path | None:
+    """Locate the user's Claude Desktop config file, if any.
+
+    Returns:
+        Absolute path to the first existing config file from the standard
+        locations, or ``None`` if none exists.
+    """
+    for path in _claude_desktop_candidate_paths():
+        if path.exists() and path.is_file():
+            return path
+    return None
+
+
+def _read_json_dict(path: Path) -> dict[str, Any]:
+    """Read a JSON file and return its top-level dict (or empty)."""
+    if not path.exists():
+        return {}
+    try:
+        text = path.read_text(encoding="utf-8")
+        data = json.loads(text)
+    except (OSError, json.JSONDecodeError) as exc:
+        _LOG.warning("MCP config: failed to read %s: %s", path, exc)
+        return {}
+    if not isinstance(data, dict):
+        _LOG.warning("MCP config: %s is not a JSON object; ignoring", path)
+        return {}
+    return data
+
+
+def _entry_round_trips(name: str, entry: dict[str, Any]) -> bool:
+    """Return True iff ``entry`` validates as an :class:`McpServerConfig`."""
+    if not isinstance(entry, dict):
+        return False
+    parsed = parse_mcp_servers({"mcpServers": {name: entry}})
+    return len(parsed) == 1
+
+
+def merge_external_config(
+    target: Path,
+    source: Path,
+    *,
+    strategy: MergeStrategy = "skip_existing",
+) -> int:
+    """Merge ``source`` (e.g. a Claude Desktop config) into ``target``.
+
+    Args:
+        target: Absolute path to the Sidekick ``mcp_servers.json``. The file
+            is created if it does not exist. Its parent directory is created
+            as needed.
+        source: Absolute path to the external config to import.
+        strategy:
+            * ``"skip_existing"`` — entries already present in ``target`` are
+              left untouched; only new names are added.
+            * ``"overwrite"`` — every valid source entry replaces the target's
+              entry of the same name.
+            * ``"prefix_imported"`` — conflicting source entries are renamed
+              to ``imported_<name>`` so both versions coexist.
+
+    Returns:
+        The number of entries actually written/added (not counting skipped
+        duplicates or invalid entries).
+
+    Raises:
+        ValueError: ``target`` or ``source`` is not absolute, or ``strategy``
+            is unknown.
+        FileNotFoundError: ``source`` does not exist.
+    """
+    if not target.is_absolute():
+        raise ValueError(f"target must be an absolute path, got {target!r}")
+    if not source.is_absolute():
+        raise ValueError(f"source must be an absolute path, got {source!r}")
+    if strategy not in _VALID_STRATEGIES:
+        raise ValueError(
+            f"unknown merge strategy {strategy!r}; expected one of {_VALID_STRATEGIES}"
+        )
+    if not source.exists():
+        raise FileNotFoundError(f"source config does not exist: {source}")
+
+    source_data = _read_json_dict(source)
+    source_servers = source_data.get("mcpServers", {})
+    if not isinstance(source_servers, dict):
+        _LOG.warning(
+            "MCP import: source 'mcpServers' is not a JSON object; nothing to merge"
+        )
+        return 0
+
+    target_data = _read_json_dict(target)
+    target_servers_raw = target_data.get("mcpServers", {})
+    target_servers: dict[str, Any] = (
+        dict(target_servers_raw) if isinstance(target_servers_raw, dict) else {}
+    )
+
+    added = 0
+    for name, entry in source_servers.items():
+        if not _entry_round_trips(name, entry):
+            _LOG.warning("MCP import: skipping invalid source entry %r", name)
+            continue
+        if name in target_servers:
+            if strategy == "skip_existing":
+                _LOG.info("MCP import: %r already exists in target; skipping", name)
+                continue
+            if strategy == "overwrite":
+                target_servers[name] = entry
+                added += 1
+                continue
+            if strategy == "prefix_imported":
+                new_name = f"imported_{name}"
+                # Ensure no collision on the prefixed name either.
+                suffix = 2
+                while new_name in target_servers:
+                    new_name = f"imported_{name}_{suffix}"
+                    suffix += 1
+                target_servers[new_name] = entry
+                added += 1
+                continue
+        else:
+            target_servers[name] = entry
+            added += 1
+
+    target_data["mcpServers"] = target_servers
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        json.dumps(target_data, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+    return added
+
+
+# ---------------------------------------------------------------------------
+# Preset application + install probes
+# ---------------------------------------------------------------------------
+
+
+def apply_preset_to_config(
+    preset_id: str,
+    target: Path,
+    *,
+    name: str | None = None,
+    env: dict[str, str] | None = None,
+    command: str | None = None,
+    args: list[str] | None = None,
+) -> McpServerConfig:
+    """Apply a preset and persist it to ``target``.
+
+    This is the LOD-friendly entry point: callers say "add the ``github``
+    preset to my config" without reaching into ``MCP_SERVER_PRESETS``
+    themselves.
+
+    Args:
+        preset_id: Key into the preset catalogue.
+        target: Absolute path to ``mcp_servers.json`` (created as needed).
+        name: Optional override for the entry name.
+        env: User-supplied env values (replaces ``${VAR}`` placeholders).
+        command: Optional command override.
+        args: Optional args override.
+
+    Returns:
+        The :class:`McpServerConfig` that was written to disk.
+
+    Raises:
+        KeyError: ``preset_id`` is not in the catalogue.
+        ValueError: ``target`` is not absolute.
+    """
+    # Lazy import to avoid circular dependency at module load.
+    from src.shared.python.ai.mcp.presets import apply_preset
+
+    if not target.is_absolute():
+        raise ValueError(f"target must be an absolute path, got {target!r}")
+    cfg = apply_preset(
+        preset_id,
+        name=name,
+        env=env,
+        command=command,
+        args=args,
+        validate_env=False,
+    )
+    target_data = _read_json_dict(target)
+    target_servers = target_data.get("mcpServers", {})
+    if not isinstance(target_servers, dict):
+        target_servers = {}
+    entry: dict[str, Any] = {
+        "transport": cfg.transport.value,
+        "args": list(cfg.args),
+        "env": dict(cfg.env),
+        "timeoutSeconds": cfg.timeout_seconds,
+    }
+    if cfg.command is not None:
+        entry["command"] = cfg.command
+    if cfg.url is not None:
+        entry["url"] = cfg.url
+    target_servers[cfg.name] = entry
+    target_data["mcpServers"] = target_servers
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        json.dumps(target_data, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+    return cfg
+
+
+def _preset_npm_package(preset_id: str) -> str | None:
+    """Return the npm package name an npx-launched preset depends on, if any."""
+    from src.shared.python.ai.mcp.presets import MCP_SERVER_PRESETS
+
+    if preset_id not in MCP_SERVER_PRESETS:
+        return None
+    preset = MCP_SERVER_PRESETS[preset_id]
+    if preset.config.command != "npx":
+        return None
+    # ``npx -y <package> ...`` — the package is the first non-flag arg.
+    for arg in preset.config.args:
+        if arg.startswith("-"):
+            continue
+        return arg
+    return None
+
+
+def is_preset_installed(preset_id: str) -> bool:
+    """Probe whether a preset's runtime dependencies are available locally.
+
+    Heuristics:
+        * For ``notebooklm`` (in-tree Python shim): try to import the module.
+        * For npx-launched presets: ``npm view <pkg> version`` — if the
+          package is reachable on the registry, ``npx -y`` will succeed.
+        * Other commands (uvx, python, local binaries): conservatively
+          return False since we can't reliably probe them without running.
+
+    Args:
+        preset_id: Key into the preset catalogue.
+
+    Returns:
+        ``True`` if we have positive evidence the preset can run;
+        ``False`` otherwise (including unknown preset IDs).
+    """
+    from src.shared.python.ai.mcp.presets import MCP_SERVER_PRESETS
+
+    if preset_id not in MCP_SERVER_PRESETS:
+        return False
+
+    # In-tree Python shim — importable iff its module is on sys.path.
+    if preset_id == "notebooklm":
+        try:
+            importlib.import_module("src.shared.python.ai.mcp.notebooklm_server")
+        except ImportError:
+            return False
+        return True
+
+    package = _preset_npm_package(preset_id)
+    if package is None:
+        return False
+
+    try:
+        result = subprocess.run(  # noqa: S603 - trusted args
+            ["npm", "view", package, "version"],
+            capture_output=True,
+            text=True,
+            timeout=15,
+            shell=sys.platform == "win32",
+        )
+    except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as exc:
+        _LOG.debug("npm view %s failed: %s", package, exc)
+        return False
+    return result.returncode == 0 and bool(result.stdout.strip())

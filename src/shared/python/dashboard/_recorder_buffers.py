@@ -112,9 +112,7 @@ class _BuffersMixin:
                 logger.debug(f"Allocated Induced Accel buffer for source {idx}.")
 
     def _initialize_array_buffers(self, q: np.ndarray, v: np.ndarray) -> None:
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         nq = len(q)
         nv = len(v)

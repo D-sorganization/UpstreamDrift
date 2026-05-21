@@ -1,0 +1,196 @@
+"""``AISettings`` dataclass and persistence (extracted from gui/settings_dialog).
+
+The dataclass itself is headless-safe — instantiation does not require Qt.
+Only :meth:`AISettings.save` and :meth:`AISettings.load` import
+``PyQt6.QtCore.QSettings`` (lazy import). Tools issue #2762.
+
+Also exposes :meth:`AISettings.to_dict` / :meth:`from_dict` for JSON
+round-trips in tests that don't want to touch QSettings at all.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Any, cast
+
+from src.shared.python.ai.access_policy import ChatAccessMode, coerce_access_mode
+from src.shared.python.ai.config import (
+    DEFAULT_OLLAMA_HOST,
+    DEFAULT_OLLAMA_MODEL,
+    KEY_ACCESS_MODE,
+    KEY_AUTO_INDEX_ON_OPEN,
+    KEY_CHAT_MODE,
+    KEY_EXPERTISE,
+    KEY_MODEL,
+    KEY_OLLAMA_HOST,
+    KEY_PROVIDER,
+    KEY_RAG_ENABLED,
+    KEY_RESPONSE_STYLE,
+    KEY_STREAMING,
+    SETTINGS_APP,
+    SETTINGS_ORG,
+    get_ollama_host,
+)
+from src.shared.python.ai.gui._provider_registry_data import AIProvider
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
+
+
+def _resolve_qsettings():  # noqa: ANN202
+    """Resolve ``QSettings`` honouring monkeypatches on ``settings_dialog``.
+
+    Tools tests historically patch ``settings_dialog.QSettings`` to inject a
+    fake. We honour that patch first so the dataclass move from #2762 stays
+    backward-compatible. Falls back to the real PyQt6 import.
+    """
+    import sys
+
+    sd = sys.modules.get("src.shared.python.ai.gui.settings_dialog")
+    if sd is not None and hasattr(sd, "QSettings"):
+        return sd.QSettings
+    from PyQt6.QtCore import QSettings
+
+    return QSettings
+
+
+@dataclass
+class AISettings:
+    """AI configuration settings.
+
+    Headless-safe — the dataclass and ``to_dict``/``from_dict`` round-trip
+    require no Qt installation. Persistence (``save``/``load``) imports
+    ``PyQt6.QtCore.QSettings`` lazily.
+
+    Attributes:
+        provider: Selected AI provider.
+        model: Model name for the provider.
+        expertise_level: DEPRECATED legacy verbosity (Tools #2552).
+        response_style: ``"concise"`` | ``"standard"`` | ``"detailed"``.
+        chat_mode: Inline chat access mode.
+        ollama_host: Ollama server URL.
+        streaming_enabled: Stream responses.
+        rag_enabled: RAG codebase awareness.
+        auto_index_on_open: Rebuild codemap on chat open (Tools #2549).
+        access_mode: Chat repo/tool access mode.
+        api_keys: In-memory keys (not persisted; see keyring helpers).
+    """
+
+    provider: AIProvider = AIProvider.OLLAMA
+    model: str = DEFAULT_OLLAMA_MODEL
+    expertise_level: int = 1
+    response_style: str = "standard"
+    chat_mode: str = "ask"
+    ollama_host: str = DEFAULT_OLLAMA_HOST
+    streaming_enabled: bool = True
+    rag_enabled: bool = True
+    auto_index_on_open: bool = False
+    access_mode: ChatAccessMode = ChatAccessMode.NO_REPO_ACCESS
+    api_keys: dict[AIProvider, str] = field(default_factory=dict)
+
+    # ------------------------------------------------------------------ #
+    # Headless serialisation — no Qt needed.                              #
+    # ------------------------------------------------------------------ #
+
+    def to_dict(self) -> dict[str, object]:
+        """Serialise to a JSON-compatible dict."""
+        self.access_mode = coerce_access_mode(self.access_mode)
+        return {
+            "provider": self.provider.name,
+            "model": self.model,
+            "expertise_level": int(self.expertise_level),
+            "response_style": self.response_style,
+            "chat_mode": self.chat_mode,
+            "ollama_host": self.ollama_host,
+            "streaming_enabled": bool(self.streaming_enabled),
+            "rag_enabled": bool(self.rag_enabled),
+            "auto_index_on_open": bool(self.auto_index_on_open),
+            "access_mode": self.access_mode.value,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, object]) -> AISettings:
+        """Construct from a :meth:`to_dict` payload."""
+        provider_name = str(data.get("provider", "OLLAMA"))
+        try:
+            provider = AIProvider[provider_name]
+        except KeyError:
+            provider = AIProvider.OLLAMA
+
+        response_style = str(data.get("response_style", "standard")).lower()
+        if response_style not in {"concise", "standard", "detailed"}:
+            response_style = "standard"
+        chat_mode = str(data.get("chat_mode", "ask")).lower()
+        if chat_mode not in {"ask", "diagnose", "agent"}:
+            chat_mode = "ask"
+
+        return cls(
+            provider=provider,
+            model=str(data.get("model", DEFAULT_OLLAMA_MODEL)),
+            expertise_level=int(data.get("expertise_level", 1) or 1),
+            response_style=response_style,
+            chat_mode=chat_mode,
+            ollama_host=str(data.get("ollama_host", DEFAULT_OLLAMA_HOST)),
+            streaming_enabled=bool(data.get("streaming_enabled", True)),
+            rag_enabled=bool(data.get("rag_enabled", True)),
+            auto_index_on_open=bool(data.get("auto_index_on_open", False)),
+            access_mode=coerce_access_mode(cast(Any, data.get("access_mode"))),
+        )
+
+    # ------------------------------------------------------------------ #
+    # Qt-backed persistence.                                              #
+    # ------------------------------------------------------------------ #
+
+    def save(self) -> None:
+        """Save settings to QSettings storage."""
+        QSettings = _resolve_qsettings()  # noqa: N806
+
+        settings = QSettings(SETTINGS_ORG, SETTINGS_APP)
+        settings.setValue(KEY_PROVIDER, self.provider.name)
+        settings.setValue(KEY_MODEL, self.model)
+        settings.setValue(KEY_EXPERTISE, self.expertise_level)
+        settings.setValue(KEY_RESPONSE_STYLE, self.response_style)
+        settings.setValue(KEY_CHAT_MODE, self.chat_mode)
+        settings.setValue(KEY_OLLAMA_HOST, self.ollama_host)
+        settings.setValue(KEY_STREAMING, self.streaming_enabled)
+        settings.setValue(KEY_RAG_ENABLED, self.rag_enabled)
+        settings.setValue(KEY_AUTO_INDEX_ON_OPEN, self.auto_index_on_open)
+        self.access_mode = coerce_access_mode(self.access_mode)
+        settings.setValue(KEY_ACCESS_MODE, self.access_mode.value)
+        logger.info("Saved AI settings: provider=%s", self.provider.name)
+
+    @classmethod
+    def load(cls) -> AISettings:
+        """Load settings from QSettings storage."""
+        QSettings = _resolve_qsettings()  # noqa: N806
+
+        settings = QSettings(SETTINGS_ORG, SETTINGS_APP)
+
+        provider_name = settings.value(KEY_PROVIDER, "OLLAMA")
+        try:
+            provider = AIProvider[provider_name]
+        except KeyError:
+            provider = AIProvider.OLLAMA
+
+        default_host = get_ollama_host()
+        response_style = str(settings.value(KEY_RESPONSE_STYLE, "standard")).lower()
+        if response_style not in {"concise", "standard", "detailed"}:
+            response_style = "standard"
+        chat_mode = str(settings.value(KEY_CHAT_MODE, "ask")).lower()
+        if chat_mode not in {"ask", "diagnose", "agent"}:
+            chat_mode = "ask"
+        return cls(
+            provider=provider,
+            model=settings.value(KEY_MODEL, DEFAULT_OLLAMA_MODEL),
+            expertise_level=int(settings.value(KEY_EXPERTISE, 1)),
+            response_style=response_style,
+            chat_mode=chat_mode,
+            ollama_host=settings.value(KEY_OLLAMA_HOST, default_host),
+            streaming_enabled=settings.value(KEY_STREAMING, True, type=bool),
+            rag_enabled=settings.value(KEY_RAG_ENABLED, True, type=bool),
+            auto_index_on_open=settings.value(KEY_AUTO_INDEX_ON_OPEN, False, type=bool),
+            access_mode=coerce_access_mode(settings.value(KEY_ACCESS_MODE, None)),
+        )
+
+
+__all__ = ["AISettings"]

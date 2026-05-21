@@ -126,14 +126,12 @@ def test_load_allow_list_rejects_expired_sunset_date() -> None:
     import importlib
     import sys
 
-    expired_yaml = textwrap.dedent(
-        """\
+    expired_yaml = textwrap.dedent("""\
         shadows:
           some_module:
             tracking_issue: 9999
             sunset_date: "2000-01-01"
-        """
-    )
+        """)
 
     with tempfile.NamedTemporaryFile(
         mode="w", suffix=".yaml", delete=False, encoding="utf-8"

@@ -1,0 +1,261 @@
+"""Tests for explicit AI chat access-mode policy."""
+
+from __future__ import annotations
+
+import sys
+import types
+from pathlib import Path
+from unittest.mock import MagicMock
+
+import pytest
+
+REPO_ROOT = Path(__file__).resolve().parents[5]
+src_module = sys.modules.get("src")
+existing_src_paths = list(getattr(src_module, "__path__", [])) if src_module else []
+if str(REPO_ROOT / "src") not in existing_src_paths:
+    existing_src_paths.insert(0, str(REPO_ROOT / "src"))
+local_src = src_module or types.ModuleType("src")
+local_src.__path__ = existing_src_paths
+sys.modules["src"] = local_src
+
+upstream_src = next(
+    (Path(path) for path in existing_src_paths if "UpstreamDrift" in str(path)),
+    None,
+)
+if upstream_src is None:
+    candidate = REPO_ROOT.parent / "UpstreamDrift" / "src"
+    if candidate.exists():
+        upstream_src = candidate
+shared_module = types.ModuleType("src.shared")
+shared_module.__path__ = [str(REPO_ROOT / "src" / "shared")]
+if upstream_src is not None:
+    shared_module.__path__.append(str(upstream_src / "shared"))
+sys.modules["src.shared"] = shared_module
+
+shared_python_module = types.ModuleType("src.shared.python")
+shared_python_module.__path__ = [str(REPO_ROOT / "src" / "shared" / "python")]
+if upstream_src is not None:
+    shared_python_module.__path__.append(str(upstream_src / "shared" / "python"))
+sys.modules["src.shared.python"] = shared_python_module
+
+from src.shared.python.ai.access_policy import (
+    READ_ONLY_REPO_TOOL_NAMES,
+    ChatAccessMode,
+    allowed_tools_for_access_mode,
+)
+from src.shared.python.ai.gui import settings_dialog
+from src.shared.python.ai.gui.settings_dialog import AISettings
+from src.shared.python.ai.tool_registry import ToolCategory, ToolRegistry
+from src.shared.python.ai.tools.codemap_tools import CODEMAP_TOOL_NAMES
+
+
+def _registry_with_policy_tools() -> ToolRegistry:
+    registry = ToolRegistry()
+
+    @registry.register("read_file", "Read a file", category=ToolCategory.CONFIGURATION)
+    def read_file(file_path: str) -> str:
+        return file_path
+
+    @registry.register(
+        "list_directory", "List a directory", category=ToolCategory.CONFIGURATION
+    )
+    def list_directory(directory_path: str = ".") -> str:
+        return directory_path
+
+    @registry.register(
+        "search_knowledge_base",
+        "Search RAG",
+        category=ToolCategory.ANALYSIS,
+    )
+    def search_knowledge_base(query: str) -> str:
+        return query
+
+    @registry.register("search_code", "Search code", category=ToolCategory.ANALYSIS)
+    def search_code(query: str) -> str:
+        return query
+
+    @registry.register(
+        "codex_cli",
+        "Run an agent CLI",
+        category=ToolCategory.CONFIGURATION,
+        requires_confirmation=True,
+    )
+    def codex_cli(command: str) -> str:
+        return command
+
+    return registry
+
+
+def _tool_names(registry: ToolRegistry, mode: ChatAccessMode) -> set[str]:
+    return {
+        tool.name
+        for tool in allowed_tools_for_access_mode(
+            registry,
+            mode,
+            rag_enabled=True,
+        )
+    }
+
+
+def test_no_repo_access_exposes_no_tools() -> None:
+    registry = _registry_with_policy_tools()
+
+    assert _tool_names(registry, ChatAccessMode.NO_REPO_ACCESS) == set()
+
+
+def test_read_only_access_exposes_only_repo_diagnostics_tools() -> None:
+    registry = _registry_with_policy_tools()
+
+    names = _tool_names(registry, ChatAccessMode.READ_ONLY_DIAGNOSTICS)
+
+    assert names <= READ_ONLY_REPO_TOOL_NAMES
+    expected = {"read_file", "list_directory", "search_knowledge_base", "search_code"}
+    assert expected <= names
+    assert "codex_cli" not in names
+
+
+def test_read_only_access_respects_rag_disabled() -> None:
+    registry = _registry_with_policy_tools()
+
+    names = {
+        tool.name
+        for tool in allowed_tools_for_access_mode(
+            registry,
+            ChatAccessMode.READ_ONLY_DIAGNOSTICS,
+            rag_enabled=False,
+        )
+    }
+
+    assert "read_file" in names
+    assert "list_directory" in names
+    assert "search_knowledge_base" not in names
+    assert not (set(CODEMAP_TOOL_NAMES) & names)
+
+
+def test_agent_tools_access_exposes_broader_registry() -> None:
+    registry = _registry_with_policy_tools()
+
+    names = _tool_names(registry, ChatAccessMode.AGENT_TOOLS)
+
+    assert "codex_cli" in names
+
+
+def test_access_mode_persists_in_ai_settings(monkeypatch: pytest.MonkeyPatch) -> None:
+    store: dict[str, object] = {}
+
+    class FakeQSettings:
+        def __init__(self, _org: str, _app: str) -> None:
+            pass
+
+        def setValue(self, key: str, value: object) -> None:  # noqa: N802
+            store[key] = value
+
+        def value(
+            self,
+            key: str,
+            default: object = None,
+            *,
+            type: object | None = None,
+        ) -> object:
+            return store.get(key, default)
+
+    monkeypatch.setattr(settings_dialog, "QSettings", FakeQSettings)
+
+    AISettings(access_mode=ChatAccessMode.READ_ONLY_DIAGNOSTICS).save()
+
+    loaded = AISettings.load()
+    assert loaded.access_mode == ChatAccessMode.READ_ONLY_DIAGNOSTICS
+
+
+pytest.importorskip("PyQt6.QtWidgets", reason="PyQt6 widgets required")
+pytest.importorskip("pytestqt", reason="pytest-qt required for widget tests")
+
+
+class _SignalStub:
+    def connect(self, _slot: object) -> None:
+        pass
+
+
+class _SessionManagerStub:
+    session_loaded = _SignalStub()
+    sessions_updated = _SignalStub()
+
+    def list_sessions(self) -> list[dict[str, object]]:
+        return []
+
+    def load_session(self, _session_id: str) -> object | None:
+        return None
+
+    def save_session(self, _context: object) -> None:
+        pass
+
+    def archive_session(self, _session_id: str, _archived: bool) -> None:
+        pass
+
+    def delete_session(self, _session_id: str) -> None:
+        pass
+
+
+class _WorkerStub:
+    created_tools: list[list[dict[str, object]]] = []
+
+    def __init__(
+        self,
+        _adapter: object,
+        _message: str,
+        _context: object,
+        tools: list[dict[str, object]],
+    ) -> None:
+        self.chunk_received = _SignalStub()
+        self.finished = _SignalStub()
+        self.error = _SignalStub()
+        self.created_tools.append(tools)
+
+    def start(self) -> None:
+        pass
+
+
+def _declaration_names(tools: list[dict[str, object]]) -> set[str]:
+    names: set[str] = set()
+    for tool in tools:
+        function = tool.get("function")
+        if isinstance(function, dict) and isinstance(function.get("name"), str):
+            names.add(function["name"])
+        elif isinstance(tool.get("name"), str):
+            names.add(str(tool["name"]))
+    return names
+
+
+def test_process_message_passes_mode_filtered_tools(
+    qtbot: object,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.shared.python.ai.gui import assistant_panel
+    from src.shared.python.ai.gui.assistant_panel import AIAssistantPanel
+
+    monkeypatch.setattr(assistant_panel, "StreamWorker", _WorkerStub)
+    monkeypatch.setattr(assistant_panel, "ChatSessionManager", _SessionManagerStub)
+    _WorkerStub.created_tools = []
+
+    panel = AIAssistantPanel()
+    qtbot.addWidget(panel)
+    panel.set_adapter(MagicMock())
+
+    panel._access_mode = ChatAccessMode.NO_REPO_ACCESS
+    panel._process_message("hello")
+
+    panel._access_mode = ChatAccessMode.READ_ONLY_DIAGNOSTICS
+    panel._process_message("hello")
+
+    panel._access_mode = ChatAccessMode.AGENT_TOOLS
+    panel._process_message("hello")
+
+    no_access, read_only, agent_tools = map(
+        _declaration_names,
+        _WorkerStub.created_tools,
+    )
+    assert no_access == set()
+    assert read_only <= READ_ONLY_REPO_TOOL_NAMES
+    assert "codex_cli" not in read_only
+    assert "read_file" in read_only
+    assert "codex_cli" in agent_tools

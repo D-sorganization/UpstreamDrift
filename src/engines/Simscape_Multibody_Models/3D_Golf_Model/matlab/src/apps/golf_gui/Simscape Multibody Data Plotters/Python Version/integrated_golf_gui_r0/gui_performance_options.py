@@ -17,9 +17,7 @@ class PerformanceOptionsDialog:
     """Dialog for configuring simulation performance options"""
 
     def __init__(self, parent: tk.Tk) -> None:
-        if not (parent is not None):
-            raise ValueError("parent must be provided")
-        if not (parent is not None):
+        if parent is None:
             raise ValueError("parent must be provided")
         self.parent = parent
         self.result = None

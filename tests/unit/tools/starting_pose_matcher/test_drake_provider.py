@@ -6,7 +6,7 @@ import pytest
 # Test that the provider can be imported even without Drake installed
 def test_import_without_drake():
     """Test that importing the module doesn't break without Drake."""
-    from src.tools.starting_pose_matcher.providers import drake
+    from src.tools.starting_pose_matcher.skeleton_extractors import drake
 
     # These should be importable without Drake
     assert hasattr(drake, "DrakeNotAvailableError")
@@ -19,7 +19,7 @@ def test_import_without_drake():
 
 def test_drake_provider_vocabulary_mapping():
     """Test that the vocabulary mapping is correct."""
-    from src.tools.starting_pose_matcher.providers.drake import (
+    from src.tools.starting_pose_matcher.skeleton_extractors.drake import (
         DRAKE_TO_MATCHER_VOCAB,
         MATCHER_TO_DRAKE,
     )
@@ -51,7 +51,7 @@ def test_drake_provider_vocabulary_mapping():
 
 def test_drake_not_available_error():
     """Test that DrakeNotAvailableError is raised when Drake is not installed."""
-    from src.tools.starting_pose_matcher.providers.drake import (
+    from src.tools.starting_pose_matcher.skeleton_extractors.drake import (
         DrakeNotAvailableError,
         DrakeProviderError,
         DrakeSkeletonProvider,
@@ -59,15 +59,13 @@ def test_drake_not_available_error():
 
     # Try to create provider without a valid model path
     # This should raise an error (either DrakeNotAvailableError or DrakeProviderError)
-    with pytest.raises(
-        (DrakeNotAvailableError, DrakeProviderError, DrakeProviderError)
-    ):
+    with pytest.raises((DrakeNotAvailableError, DrakeProviderError, DrakeProviderError)):
         DrakeSkeletonProvider(model_path=None, model_xml=None)
 
 
 def test_drake_provider_create_provider_function():
     """Test that create_provider function exists and has correct signature."""
-    from src.tools.starting_pose_matcher.providers.drake import create_provider
+    from src.tools.starting_pose_matcher.skeleton_extractors.drake import create_provider
 
     # Check function signature
     import inspect

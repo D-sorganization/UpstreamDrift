@@ -79,9 +79,7 @@ class KinematicTree:
     )
     def build_from_urdf(self, urdf_content: str) -> None:  # noqa: C901
         """Build the tree from URDF XML content."""
-        if not (urdf_content is not None):
-            raise ValueError("urdf_content must be provided")
-        if not (urdf_content is not None):
+        if urdf_content is None:
             raise ValueError("urdf_content must be provided")
         try:
             root_elem = DefusedET.fromstring(urdf_content)
@@ -141,9 +139,7 @@ class KinematicTree:
 
         def set_depth(node: ChainNode, depth: int) -> None:
             """Recursively assign depth values to each node."""
-            if not (node is not None):
-                raise ValueError("node must be provided")
-            if not (node is not None):
+            if node is None:
                 raise ValueError("node must be provided")
             node.depth = depth
             for child in node.children:
@@ -173,9 +169,7 @@ class KinematicTree:
         Returns:
             List of nodes in the chain (may be empty if no path exists)
         """
-        if not (from_link is not None):
-            raise ValueError("from_link must be provided")
-        if not (from_link is not None):
+        if from_link is None:
             raise ValueError("from_link must be provided")
         if from_link not in self.nodes or to_link not in self.nodes:
             return []
@@ -198,23 +192,25 @@ class KinematicTree:
         if common_ancestor is None:
             return []
 
-        # Build path
-        chain = []
+        # Build path: from_link -> ... -> common_ancestor -> ... -> to_link.
+        # from_path / to_path are ordered root -> self, so we walk from_path in
+        # reverse (self up to common ancestor) and to_path forward starting
+        # just after the common ancestor.
+        chain: list[ChainNode] = []
 
-        # From from_link to common ancestor
-        for node in from_path:
+        for node in reversed(from_path):
             chain.append(node)
             if node.name == common_ancestor.name:
                 break
 
-        # From common ancestor to to_link (reversed)
-        to_chain = []
-        for node in to_path:
-            if node.name == common_ancestor.name:
-                break
-            to_chain.append(node)
+        # Find index of common ancestor in to_path and append nodes after it
+        ancestor_idx = next(
+            (i for i, n in enumerate(to_path) if n.name == common_ancestor.name),
+            -1,
+        )
+        if ancestor_idx >= 0:
+            chain.extend(to_path[ancestor_idx + 1 :])
 
-        chain.extend(reversed(to_chain))
         return chain
 
     def get_all_chains(self) -> list[list[ChainNode]]:
@@ -223,9 +219,7 @@ class KinematicTree:
 
         def collect_chains(node: ChainNode, current_chain: list[ChainNode]) -> None:
             """Recursively collect root-to-leaf chains."""
-            if not (node is not None):
-                raise ValueError("node must be provided")
-            if not (node is not None):
+            if node is None:
                 raise ValueError("node must be provided")
             current_chain = current_chain + [node]
             if node.is_leaf():

@@ -85,9 +85,7 @@ class TerrainAwareEngine:
             stiffness: Contact stiffness (N/m)
             damping: Contact damping (N*s/m)
         """
-        if not (stiffness is not None):
-            raise ValueError("stiffness must be provided")
-        if not (stiffness is not None):
+        if stiffness is None:
             raise ValueError("stiffness must be provided")
         self.terrain: Terrain | None = terrain
         self.default_stiffness = stiffness
@@ -99,9 +97,7 @@ class TerrainAwareEngine:
         Args:
             terrain: Terrain configuration
         """
-        if not (terrain is not None):
-            raise ValueError("terrain must be provided")
-        if not (terrain is not None):
+        if terrain is None:
             raise ValueError("terrain must be provided")
         self.terrain = terrain
         logger.info(f"Terrain set: {terrain.name}")
@@ -116,9 +112,7 @@ class TerrainAwareEngine:
         Returns:
             Ground height (meters)
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self.terrain is None:
             return 0.0
@@ -135,9 +129,7 @@ class TerrainAwareEngine:
         Returns:
             Unit normal vector (3,)
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self.terrain is None:
             return np.array([0.0, 0.0, 1.0])
@@ -157,9 +149,7 @@ class TerrainAwareEngine:
         Returns:
             Friction coefficient
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self.terrain is None:
             return 0.5
@@ -177,9 +167,7 @@ class TerrainAwareEngine:
         Returns:
             Coefficient of restitution
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self.terrain is None:
             return 0.6
@@ -197,9 +185,7 @@ class TerrainAwareEngine:
         Returns:
             Dictionary of terrain properties
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self.terrain is None:
             return {

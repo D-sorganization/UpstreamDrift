@@ -71,6 +71,18 @@ jobs:
         python: ["3.11"]
 
     steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Reject Raw Merge Conflict Markers

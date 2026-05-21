@@ -21,9 +21,7 @@ class CoordinationPhaseMixin(BaseRenderer):
         ax: Axes | None = None,
     ) -> None:
         """Plot Coupling Angle time series (Vector Coding)."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         times, _ = self.data.get_series("joint_positions")
 
@@ -71,9 +69,7 @@ class CoordinationPhaseMixin(BaseRenderer):
         title: str | None = None,
     ) -> None:
         """Plot coordination patterns as a color-coded strip over time."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         times, _ = self.data.get_series("joint_positions")
 
@@ -154,9 +150,7 @@ class CoordinationPhaseMixin(BaseRenderer):
         title: str | None = None,
     ) -> None:
         """Plot Continuous Relative Phase (CRP) time series."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         times, _ = self.data.get_series("joint_positions")
 

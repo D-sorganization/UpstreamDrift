@@ -97,10 +97,8 @@ except ImportError:
         Yields:
             None
         """
-        if not (operation_name is not None):
-            raise ValueError("operation_name must be provided")
-        if not (operation_name is not None):
-            raise ValueError("operation_name must be provided")
+        if not operation_name:
+            raise ValueError("operation_name must be a non-empty string")
         logr = logger_obj or get_logger(__name__)
         start_time = time.perf_counter()
         try:

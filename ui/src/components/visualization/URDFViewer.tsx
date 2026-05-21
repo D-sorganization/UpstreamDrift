@@ -54,6 +54,10 @@ interface URDFViewerProps {
   opacity?: number;
   /** Whether to show joint axes */
   showAxes?: boolean;
+  /** Selected body/link name */
+  selectedBodyName?: string | null;
+  /** Callback for when a body/link is clicked */
+  onSelectBody?: (name: string | null) => void;
 }
 
 /** Helper to create a Three.js Euler from RPY angles. */
@@ -64,10 +68,18 @@ function rpyToEuler(rpy: [number, number, number]): THREE.Euler {
 /**
  * Renders a single URDF link geometry as a Three.js mesh.
  */
-function LinkMesh({ link }: { link: URDFLinkGeometry }) {
+function LinkMesh({
+  link,
+  isSelected,
+  onClick,
+}: {
+  link: URDFLinkGeometry;
+  isSelected: boolean;
+  onClick?: (e: { stopPropagation: () => void }) => void;
+}) {
   const color = useMemo(
-    () => new THREE.Color(link.color[0], link.color[1], link.color[2]),
-    [link.color],
+    () => (isSelected ? new THREE.Color('#ffcc00') : new THREE.Color(link.color[0], link.color[1], link.color[2])),
+    [link.color, isSelected],
   );
   const opacity = link.color[3] ?? 1.0;
   const position = useMemo(
@@ -112,12 +124,13 @@ function LinkMesh({ link }: { link: URDFLinkGeometry }) {
   }, [link.geometry_type, link.dimensions]);
 
   return (
-    <mesh position={position} rotation={rotation}>
+    <mesh position={position} rotation={rotation} name={link.link_name} onClick={onClick}>
       {geometry}
       <meshStandardMaterial
         color={color}
         opacity={opacity}
         transparent={opacity < 1.0}
+        emissive={isSelected ? new THREE.Color('#332200') : new THREE.Color(0, 0, 0)}
       />
     </mesh>
   );
@@ -135,12 +148,16 @@ function KinematicChain({
   joints,
   jointAngles,
   showAxes,
+  selectedBodyName,
+  onSelectBody,
 }: {
   linkName: string;
   links: Map<string, URDFLinkGeometry>;
   joints: URDFJointDescriptor[];
   jointAngles: Map<string, number>;
   showAxes: boolean;
+  selectedBodyName?: string | null;
+  onSelectBody?: (name: string | null) => void;
 }) {
   const link = links.get(linkName);
 
@@ -181,7 +198,16 @@ function KinematicChain({
   return (
     <group>
       {/* Render this link's geometry */}
-      {link && <LinkMesh link={link} />}
+      {link && (
+        <LinkMesh
+          link={link}
+          isSelected={selectedBodyName === linkName}
+          onClick={onSelectBody ? (e) => {
+            e.stopPropagation();
+            onSelectBody(link.link_name);
+          } : undefined}
+        />
+      )}
 
       {/* Render child joints and their subtrees */}
       {childJoints.map((joint) => (
@@ -202,6 +228,8 @@ function KinematicChain({
             joints={joints}
             jointAngles={jointAngles}
             showAxes={showAxes}
+            selectedBodyName={selectedBodyName}
+            onSelectBody={onSelectBody}
           />
         </group>
       ))}
@@ -222,7 +250,10 @@ export function URDFViewer({
   // opacity reserved for future group-level transparency. See issue #1201
   opacity: _opacity = 1.0, // eslint-disable-line @typescript-eslint/no-unused-vars
   showAxes = false,
-}: URDFViewerProps) {
+  selectedBodyName,
+  onSelectBody,
+  rootRef,
+}: URDFViewerProps & { rootRef?: React.RefObject<THREE.Group | null> }) {
   // Build lookup maps
   const linkMap = useMemo(() => {
     const map = new Map<string, URDFLinkGeometry>();
@@ -259,13 +290,15 @@ export function URDFViewer({
   }
 
   return (
-    <group>
+    <group ref={rootRef}>
       <KinematicChain
         linkName={model.root_link}
         links={linkMap}
         joints={model.joints}
         jointAngles={jointAngleMap}
         showAxes={showAxes}
+        selectedBodyName={selectedBodyName}
+        onSelectBody={onSelectBody}
       />
     </group>
   );

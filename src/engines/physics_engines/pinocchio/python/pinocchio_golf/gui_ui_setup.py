@@ -76,9 +76,7 @@ class UISetupMixin:
 
     def _setup_toolbar(self: Any, layout: QtWidgets.QVBoxLayout) -> None:
         """Build the top bar with model selector, load button, and mode selector."""
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        if not (layout is not None):
+        if layout is None:
             raise ValueError("layout must be provided")
         top_layout = QtWidgets.QHBoxLayout()
 
@@ -128,9 +126,7 @@ class UISetupMixin:
         self: Any, sim_layout: QtWidgets.QVBoxLayout
     ) -> None:  # noqa: E501
         """Build the visualization group box."""
-        if not (sim_layout is not None):
-            raise ValueError("sim_layout must be provided")
-        if not (sim_layout is not None):
+        if sim_layout is None:
             raise ValueError("sim_layout must be provided")
         vis_group = QtWidgets.QGroupBox("Visualization")
         vis_layout = QtWidgets.QVBoxLayout()
@@ -161,9 +157,7 @@ class UISetupMixin:
 
     def _setup_overlay_checkboxes(self: Any, vis_layout: QtWidgets.QVBoxLayout) -> None:
         """Build the frame/COM/force/torque overlay checkboxes."""
-        if not (vis_layout is not None):
-            raise ValueError("vis_layout must be provided")
-        if not (vis_layout is not None):
+        if vis_layout is None:
             raise ValueError("vis_layout must be provided")
         chk_layout = QtWidgets.QHBoxLayout()
         self.chk_frames = QtWidgets.QCheckBox("Show Frames")
@@ -185,9 +179,7 @@ class UISetupMixin:
 
     def _setup_ellipsoid_controls(self: Any, vis_layout: QtWidgets.QVBoxLayout) -> None:
         """Build the manipulability ellipsoid toggles and body selection grid."""
-        if not (vis_layout is not None):
-            raise ValueError("vis_layout must be provided")
-        if not (vis_layout is not None):
+        if vis_layout is None:
             raise ValueError("vis_layout must be provided")
         ellip_group = QtWidgets.QGroupBox("Manipulability Analysis")
         ellip_layout = QtWidgets.QVBoxLayout()
@@ -215,9 +207,7 @@ class UISetupMixin:
 
     def _setup_advanced_vectors(self: Any, vis_layout: QtWidgets.QVBoxLayout) -> None:
         """Build the induced acceleration and counterfactual vector controls."""
-        if not (vis_layout is not None):
-            raise ValueError("vis_layout must be provided")
-        if not (vis_layout is not None):
+        if vis_layout is None:
             raise ValueError("vis_layout must be provided")
         adv_vec_layout = QtWidgets.QHBoxLayout()
         self.chk_induced = QtWidgets.QCheckBox("Induced Accel")
@@ -251,9 +241,7 @@ class UISetupMixin:
 
     def _setup_vector_scales(self: Any, vis_layout: QtWidgets.QVBoxLayout) -> None:
         """Build the force and torque scale spinboxes."""
-        if not (vis_layout is not None):
-            raise ValueError("vis_layout must be provided")
-        if not (vis_layout is not None):
+        if vis_layout is None:
             raise ValueError("vis_layout must be provided")
         scale_layout = QtWidgets.QHBoxLayout()
         self.spin_force_scale = QtWidgets.QDoubleSpinBox()
@@ -277,9 +265,7 @@ class UISetupMixin:
         self: Any, sim_layout: QtWidgets.QVBoxLayout
     ) -> None:  # noqa: E501
         """Build the matrix analysis group box."""
-        if not (sim_layout is not None):
-            raise ValueError("sim_layout must be provided")
-        if not (sim_layout is not None):
+        if sim_layout is None:
             raise ValueError("sim_layout must be provided")
         matrix_group = QtWidgets.QGroupBox("Matrix Analysis")
         matrix_layout = QtWidgets.QFormLayout(matrix_group)
@@ -364,9 +350,7 @@ class UISetupMixin:
             self._add_joint_control_widget(i)
 
     def _add_joint_control_widget(self: Any, i: int) -> None:
-        if not (i is not None):
-            raise ValueError("i must be provided")
-        if not (i is not None):
+        if i is None:
             raise ValueError("i must be provided")
         if self.model is None:
             return
@@ -445,9 +429,7 @@ class UISetupMixin:
     def _on_slider(
         self: Any, val: int, spin: QtWidgets.QDoubleSpinBox, idx: int
     ) -> None:
-        if not (val is not None):
-            raise ValueError("val must be provided")
-        if not (val is not None):
+        if val is None:
             raise ValueError("val must be provided")
         angle = val / SLIDER_SCALE
         with SignalBlocker(spin):
@@ -487,9 +469,7 @@ class UISetupMixin:
 
     def _on_model_combo_changed(self: Any, index: int) -> None:
         """Handle model selection."""
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        if not (index is not None):
+        if index is None:
             raise ValueError("index must be provided")
         if index < 0 or index >= len(self.available_models):
             return

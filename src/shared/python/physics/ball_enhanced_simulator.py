@@ -169,9 +169,7 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
             List of TrajectoryPoint objects representing the flight path
         """
         # Convert launch conditions to initial state
-        if not (launch is not None):
-            raise ValueError("launch must be provided")
-        if not (launch is not None):
+        if launch is None:
             raise ValueError("launch must be provided")
         v0 = launch.velocity
         ca, sa = np.cos(launch.azimuth_angle), np.sin(launch.azimuth_angle)
@@ -268,18 +266,14 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
             Tuple of (new_position, new_velocity, spin)
         """
 
-        if not (pos is not None):
-            raise ValueError("pos must be provided")
-        if not (pos is not None):
+        if pos is None:
             raise ValueError("pos must be provided")
 
         def derivatives(
             p: np.ndarray, v: np.ndarray, time: float
         ) -> tuple[np.ndarray, np.ndarray]:
             """Compute velocity and acceleration derivatives for RK4 integration."""
-            if not (p is not None):
-                raise ValueError("p must be provided")
-            if not (p is not None):
+            if p is None:
                 raise ValueError("p must be provided")
             self._update_air_density_for_position(p)
             aero_forces = self._aero_engine.compute_forces(v, spin, t=time, position=p)
@@ -350,9 +344,7 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
         Returns:
             Dictionary with 'with_aero' and 'without_aero' trajectories
         """
-        if not (launch is not None):
-            raise ValueError("launch must be provided")
-        if not (launch is not None):
+        if launch is None:
             raise ValueError("launch must be provided")
         from src.shared.python.physics.aerodynamics import AerodynamicsConfig
 
@@ -406,9 +398,7 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
         Returns:
             List of analysis dictionaries for each run
         """
-        if not (launch is not None):
-            raise ValueError("launch must be provided")
-        if not (launch is not None):
+        if launch is None:
             raise ValueError("launch must be provided")
         from src.shared.python.physics.aerodynamics import (
             AerodynamicsEngine,

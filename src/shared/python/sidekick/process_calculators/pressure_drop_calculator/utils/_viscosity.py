@@ -33,9 +33,7 @@ def calculate_pure_gas_viscosity_lucas(
         More accurate than Sutherland's law for high-temperature applications.
     """
     # Low pressure viscosity (dilute gas)
-    if not (temperature is not None):
-        raise ValueError("temperature must be provided")
-    if not (temperature is not None):
+    if temperature is None:
         raise ValueError("temperature must be provided")
     T_r = temperature / props.critical_temp
     M = props.molecular_weight
@@ -140,9 +138,7 @@ def calculate_pure_gas_viscosity_sutherland(
         O2: S = 127 K
         CO2: S = 240 K
     """
-    if not (temperature is not None):
-        raise ValueError("temperature must be provided")
-    if not (temperature is not None):
+    if temperature is None:
         raise ValueError("temperature must be provided")
     mu = mu_ref * ((temperature / T_ref) ** 1.5) * (T_ref + S) / (temperature + S)
     return float(mu)
@@ -163,9 +159,7 @@ def _compute_pure_viscosities(
     Returns:
         Dictionary of {component: viscosity_Pa_s}
     """
-    if not (composition is not None):
-        raise ValueError("composition must be provided")
-    if not (composition is not None):
+    if composition is None:
         raise ValueError("composition must be provided")
     pure_viscosities: dict[str, float] = {}
     for component in composition:
@@ -206,9 +200,7 @@ def _wilke_mixing_rule(  # noqa: C901
     Returns:
         Mixture dynamic viscosity (Pa·s)
     """
-    if not (composition is not None):
-        raise ValueError("composition must be provided")
-    if not (composition is not None):
+    if composition is None:
         raise ValueError("composition must be provided")
     components = list(composition.keys())
     component_data: dict[str, dict[str, float]] = {}
@@ -300,9 +292,7 @@ def calculate_mixture_viscosity_wilke(
         >>> mu = calculate_mixture_viscosity_wilke(comp, 800, 1e5)
         >>> print(f"Viscosity = {mu:.6f} Pa·s = {mu*1e6:.2f} µPa·s")
     """
-    if not (composition is not None):
-        raise ValueError("composition must be provided")
-    if not (composition is not None):
+    if composition is None:
         raise ValueError("composition must be provided")
     pure_viscosities = _compute_pure_viscosities(composition, temperature, pressure)
     mu_mix = _wilke_mixing_rule(composition, pure_viscosities)
@@ -325,9 +315,7 @@ def calculate_mixture_viscosity_simple(
     Returns:
         Mixture dynamic viscosity (Pa·s)
     """
-    if not (composition is not None):
-        raise ValueError("composition must be provided")
-    if not (composition is not None):
+    if composition is None:
         raise ValueError("composition must be provided")
     mu_mix = 0.0
     for component, mole_frac in composition.items():

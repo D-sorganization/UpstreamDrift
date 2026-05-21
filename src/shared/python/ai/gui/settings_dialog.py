@@ -1,555 +1,113 @@
-# ARCHITECTURE_DEBT:
-# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
-# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+"""AI Assistant Settings Dialog (slim coordinator).
 
-"""AI Assistant Settings Dialog.
+This module historically held ~1100 lines mixing the ``AISettings``
+dataclass, keyring helpers, a switch-by-enum ``ProviderConfigWidget``,
+and a 3-tab dialog. Tools issue #2762 split those concerns:
 
-Provides configuration for AI provider selection, API key management,
-and user preferences. API keys are stored securely in the OS keyring.
+* :class:`AISettings` lives in :mod:`src.shared.python.ai._settings_model`.
+* Keyring helpers live in :mod:`src.shared.python.ai.gui._api_keys` and
+  delegate where possible to ``chat.credentials.CredentialManager``.
+* Per-provider widgets are individual classes in
+  :mod:`src.shared.python.ai.gui._provider_config_widgets` and looked up
+  through :class:`ProviderConfigRegistry`.
+* Each tab is its own widget in ``_general_tab.py`` / ``_providers_tab.py``
+  / ``_rag_tab.py``.
 
-Security:
-    - API keys stored in Windows Credential Manager / macOS Keychain
-    - Keys never logged or transmitted to developers
-    - Local-only mode (Ollama) requires no keys
+The module re-exports the previous public names so downstream callers
+(UpstreamDrift, Gasification_Model, ``assistant_panel`` here) keep
+working unchanged.
 """
 
 from __future__ import annotations
 
 import contextlib
-from dataclasses import dataclass, field
-from enum import Enum, auto
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-from PyQt6.QtCore import QSettings, pyqtSignal, QTimer
+from PyQt6.QtCore import (  # noqa: F401  QSettings re-exported for monkeypatch in tests
+    QSettings,
+    pyqtSignal,
+)
 from PyQt6.QtWidgets import (
-    QCheckBox,
-    QComboBox,
     QDialog,
     QDialogButtonBox,
-    QFormLayout,
-    QGroupBox,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QMessageBox,
-    QPushButton,
     QTabWidget,
     QVBoxLayout,
     QWidget,
 )
 
+from src.shared.python.ai._settings_model import AISettings
+from src.shared.python.ai.access_policy import coerce_access_mode
 from src.shared.python.ai.config import (
     DEFAULT_OLLAMA_HOST,
     DEFAULT_OLLAMA_MODEL,
+    KEY_ACCESS_MODE,
+    KEY_AUTO_INDEX_ON_OPEN,
+    KEY_CHAT_MODE,
+    KEY_EXPERTISE,
+    KEY_MODEL,
+    KEY_OLLAMA_HOST,
+    KEY_PROVIDER,
+    KEY_RAG_ENABLED,
+    KEY_RESPONSE_STYLE,
+    KEY_STREAMING,
+    SETTINGS_APP,
+    SETTINGS_ORG,
     get_ollama_host,
 )
+from src.shared.python.ai.gui._api_keys import (
+    delete_api_key,
+    get_api_key,
+    set_api_key,
+)
+from src.shared.python.ai.gui._general_tab import GeneralPreferencesTab
+from src.shared.python.ai.gui._provider_config_registry import ProviderConfigRegistry
+from src.shared.python.ai.gui._provider_config_widgets import (
+    AnthropicConfigWidget,
+    BitnetConfigWidget,
+    ClaudeCliConfigWidget,
+    ClineConfigWidget,
+    CodexCliConfigWidget,
+    GeminiConfigWidget,
+    OllamaConfigWidget,
+    OpenAIConfigWidget,
+)
+from src.shared.python.ai.gui._provider_registry_data import (
+    BITNET_ROOT_ENV,
+    DEFAULT_CLINE_HOST,
+    PROVIDER_INFO,
+    AIProvider,
+    populate_model_combo,
+    populate_provider_combo,
+    provider_default_model,
+    provider_display_name,
+    provider_model_names,
+)
+from src.shared.python.ai.gui._providers_tab import ProvidersTab
+from src.shared.python.ai.gui._rag_tab import RagTab
+from src.shared.python.ai.mcp.gui import McpServersTab
 from src.shared.python.logging_pkg.logging_config import get_logger
-from src.shared.python.theme.style_constants import Styles
-
-if TYPE_CHECKING:
-    # Import removed to avoid circular dependency
-    pass
 
 logger = get_logger(__name__)
 
-# Settings keys
-SETTINGS_ORG = "UpstreamDrift"
-SETTINGS_APP = "AIAssistant"
-KEY_PROVIDER = "ai/provider"
-KEY_MODEL = "ai/model"
-KEY_EXPERTISE = "ai/expertise_level"  # legacy alias, see Tools #2552
-KEY_RESPONSE_STYLE = "ai/response_style"
-KEY_OLLAMA_HOST = "ai/ollama_host"
-KEY_STREAMING = "ai/streaming_enabled"
-KEY_RAG_ENABLED = "ai/rag_enabled"
-KEY_AUTO_INDEX_ON_OPEN = "ai/auto_index_on_open"
 
+# ---------------------------------------------------------------------------
+# Backward-compatibility shim.
+# Legacy code instantiated ``ProviderConfigWidget(AIProvider.OLLAMA)``. We
+# keep that constructor signature working by routing to the registry.
+# ---------------------------------------------------------------------------
+def ProviderConfigWidget(  # noqa: N802 - keep historical class-shaped name
+    provider: AIProvider,
+    parent: QWidget | None = None,
+) -> QWidget:
+    """Return the registered config widget for ``provider``.
 
-class AIProvider(Enum):
-    """Available AI providers."""
-
-    OLLAMA = auto()  # Free, local
-    OPENAI = auto()  # GPT-4
-    ANTHROPIC = auto()  # Claude
-    GEMINI = auto()  # Google Gemini
-    CLAUDE_CLI = auto()  # Anthropic's Claude Code CLI
-    CLINE_CLI = auto()  # Cline CLI
-    CODEX_CLI = auto()  # OpenAI's Codex CLI
-
-
-# Provider display info - explicitly typed for mypy
-PROVIDER_INFO: dict[AIProvider, dict[str, str | bool | list[str]]] = {
-    AIProvider.OLLAMA: {
-        "name": "Ollama",
-        "description": "Run AI locally on your computer. No API key needed.",
-        "requires_key": False,
-        "default_model": "llama3.1:8b",
-        "models": [
-            "llama3.1:8b",
-            "llama3.1:70b",
-            "mistral",
-            "codellama",
-            "opencodeinterpreter",
-            "deepseek-coder",
-            "phi3",
-        ],
-    },
-    AIProvider.OPENAI: {
-        "name": "OpenAI (GPT-4o)",
-        "description": "Cloud-based GPT-4o. Requires OpenAI API key.",
-        "requires_key": True,
-        "key_service": "upstream_drift_openai_key",
-        "default_model": "gpt-4o",
-        "models": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"],
-    },
-    AIProvider.ANTHROPIC: {
-        "name": "Anthropic (Claude 3.5)",
-        "description": "Cloud-based Claude 3.5 Sonnet. Requires Anthropic API key.",
-        "requires_key": True,
-        "key_service": "upstream_drift_anthropic_key",
-        "default_model": "claude-3-5-sonnet-20240620",
-        "models": [
-            "claude-3-5-sonnet-20241022",
-            "claude-3-5-sonnet-20240620",
-            "claude-3-5-haiku-20241022",
-            "claude-3-opus-20240229",
-            "claude-3-sonnet-20240229",
-            "claude-3-haiku-20240307",
-        ],
-    },
-    AIProvider.GEMINI: {
-        "name": "Google Gemini (1.5)",
-        "description": "Cloud-based Gemini 1.5. Requires Google API key.",
-        "requires_key": True,
-        "key_service": "upstream_drift_gemini_key",
-        "default_model": "gemini-1.5-pro",
-        "models": ["gemini-1.5-pro", "gemini-1.5-flash", "gemini-1.0-pro"],
-    },
-    AIProvider.CLAUDE_CLI: {
-        "name": "Claude CLI (Agent)",
-        "description": "Run commands via Anthropic's Claude Code CLI tool.",
-        "requires_key": False,
-        "default_model": "claude-3-5-sonnet-20241022",
-        "models": [
-            "claude-3-5-sonnet-20241022",
-            "claude-3-5-haiku-20241022",
-            "claude-3-opus-20240229",
-        ],
-    },
-    AIProvider.CLINE_CLI: {
-        "name": "Cline CLI (Agent)",
-        "description": "Run tasks locally with the Cline CLI agent.",
-        "requires_key": False,
-        "default_model": "claude-3-5-sonnet-20241022",
-        "models": ["claude-3-5-sonnet-20241022", "gpt-4o", "o1-preview"],
-    },
-    AIProvider.CODEX_CLI: {
-        "name": "Codex CLI (Agent)",
-        "description": "Use OpenAI's Codex CLI for local development.",
-        "requires_key": False,
-        "default_model": "gpt-4o",
-        "models": ["gpt-4o", "o1-preview", "o1-mini", "gpt-4-turbo"],
-    },
-}
-
-
-@dataclass
-class AISettings:
-    """AI configuration settings.
-
-    Attributes:
-        provider: Selected AI provider.
-        model: Model name for the provider.
-        expertise_level: DEPRECATED — kept for backward compatibility with
-            stored QSettings values. New code should read ``response_style``
-            (Tools issue #2552).
-        response_style: How verbose AI replies should be — one of
-            ``"concise"``, ``"standard"``, or ``"detailed"``.
-        ollama_host: Ollama server URL.
-        streaming_enabled: Whether to stream responses.
-        rag_enabled: Whether to use RAG (Codebase awareness).
-        auto_index_on_open: When True, the chat dock asks the server to
-            rebuild the codemap on connect (Tools issue #2549 / PR #2567).
-        api_keys: In-memory API keys (not persisted directly).
+    Compatibility wrapper for code (and tests) that still call this as
+    ``ProviderConfigWidget(provider)``. New code should use
+    :meth:`ProviderConfigRegistry.get_widget` directly.
     """
-
-    provider: AIProvider = AIProvider.OLLAMA
-    model: str = DEFAULT_OLLAMA_MODEL
-    expertise_level: int = 1
-    response_style: str = "standard"
-    ollama_host: str = DEFAULT_OLLAMA_HOST
-    streaming_enabled: bool = True
-    rag_enabled: bool = True
-    auto_index_on_open: bool = False
-    api_keys: dict[AIProvider, str] = field(default_factory=dict)
-
-    def save(self) -> None:
-        """Save settings to persistent storage."""
-        settings = QSettings(SETTINGS_ORG, SETTINGS_APP)
-        settings.setValue(KEY_PROVIDER, self.provider.name)
-        settings.setValue(KEY_MODEL, self.model)
-        settings.setValue(KEY_EXPERTISE, self.expertise_level)
-        settings.setValue(KEY_RESPONSE_STYLE, self.response_style)
-        settings.setValue(KEY_OLLAMA_HOST, self.ollama_host)
-        settings.setValue(KEY_STREAMING, self.streaming_enabled)
-        settings.setValue(KEY_RAG_ENABLED, self.rag_enabled)
-        settings.setValue(KEY_AUTO_INDEX_ON_OPEN, self.auto_index_on_open)
-        # Note: API keys are stored separately in keyring
-        logger.info("Saved AI settings: provider=%s", self.provider.name)
-
-    @classmethod
-    def load(cls) -> AISettings:
-        """Load settings from persistent storage."""
-        settings = QSettings(SETTINGS_ORG, SETTINGS_APP)
-
-        provider_name = settings.value(KEY_PROVIDER, "OLLAMA")
-        try:
-            provider = AIProvider[provider_name]
-        except KeyError:
-            provider = AIProvider.OLLAMA
-
-        # Use environment variable as fallback for ollama_host
-        default_host = get_ollama_host()
-        # Tools issue #2552: prefer the new ``response_style`` key but
-        # accept any legacy value persisted under the old contract.
-        response_style = str(settings.value(KEY_RESPONSE_STYLE, "standard")).lower()
-        if response_style not in {"concise", "standard", "detailed"}:
-            response_style = "standard"
-        return cls(
-            provider=provider,
-            model=settings.value(KEY_MODEL, DEFAULT_OLLAMA_MODEL),
-            expertise_level=int(settings.value(KEY_EXPERTISE, 1)),
-            response_style=response_style,
-            ollama_host=settings.value(KEY_OLLAMA_HOST, default_host),
-            streaming_enabled=settings.value(KEY_STREAMING, True, type=bool),
-            rag_enabled=settings.value(KEY_RAG_ENABLED, True, type=bool),
-            auto_index_on_open=settings.value(KEY_AUTO_INDEX_ON_OPEN, False, type=bool),
-        )
-
-
-def get_api_key(provider: AIProvider) -> str | None:
-    """Get API key from secure storage.
-
-    Args:
-        provider: Provider to get key for.
-
-    Returns:
-        API key if found, None otherwise.
-    """
-    info = PROVIDER_INFO.get(provider)
-    if not info or not info.get("requires_key"):
-        return None
-
-    service_name = info.get("key_service", "")
-    if not service_name or not isinstance(service_name, str):
-        return None
-
-    try:
-        import keyring
-
-        result = keyring.get_password(service_name, "api_key")
-        return result if isinstance(result, str) else None
-    except ImportError:
-        logger.warning("keyring package not installed for secure key storage")
-        return None
-    except (RuntimeError, TypeError, AttributeError) as e:
-        logger.warning("Failed to get API key from keyring: %s", e)
-        return None
-
-
-def set_api_key(provider: AIProvider, key: str) -> bool:
-    """Store API key in secure storage.
-
-    Args:
-        provider: Provider to set key for.
-        key: API key to store.
-
-    Returns:
-        True if successful, False otherwise.
-    """
-    if not (provider is not None):
+    if provider is None:
         raise ValueError("provider must be provided")
-    if not (provider is not None):
-        raise ValueError("provider must be provided")
-    info = PROVIDER_INFO.get(provider)
-    if not info or not info.get("requires_key"):
-        return False
-
-    service_name = info.get("key_service", "")
-    if not service_name:
-        return False
-
-    try:
-        import keyring
-
-        keyring.set_password(service_name, "api_key", key)
-        logger.info("Stored API key for %s", provider.name)
-        return True
-    except ImportError:
-        logger.warning("keyring package not installed for secure key storage")
-        return False
-    except (RuntimeError, TypeError, AttributeError) as e:
-        logger.warning("Failed to store API key: %s", e)
-        return False
-
-
-def delete_api_key(provider: AIProvider) -> bool:
-    """Delete API key from secure storage.
-
-    Args:
-        provider: Provider to delete key for.
-
-    Returns:
-        True if successful, False otherwise.
-    """
-    info = PROVIDER_INFO.get(provider)
-    if not info or not info.get("requires_key"):
-        return False
-
-    service_name = info.get("key_service", "")
-    if not service_name:
-        return False
-
-    try:
-        import keyring
-
-        keyring.delete_password(service_name, "api_key")
-        logger.info("Deleted API key for %s", provider.name)
-        return True
-    except ImportError:
-        return False
-    except (RuntimeError, TypeError, AttributeError) as e:
-        logger.warning("Failed to delete API key: %s", e)
-        return False
-
-
-class ProviderConfigWidget(QWidget):
-    """Widget for configuring a single AI provider."""
-
-    key_changed = pyqtSignal(str)  # Emits new key value
-    models_refreshed = pyqtSignal(list)  # Emits list of available models
-
-    def __init__(
-        self,
-        provider: AIProvider,
-        parent: QWidget | None = None,
-    ) -> None:
-        """Initialize provider config widget.
-
-        Args:
-            provider: The provider this widget configures.
-            parent: Parent widget.
-        """
-        if not (provider is not None):
-            raise ValueError("provider must be provided")
-        if not (provider is not None):
-            raise ValueError("provider must be provided")
-        super().__init__(parent)
-        self._provider = provider
-        self._info = PROVIDER_INFO[provider]
-        self._setup_ui()
-        self._load_current_key()
-
-    def _setup_ui(self) -> None:
-        """Set up the widget UI."""
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-
-        # Description
-        desc = self._info.get("description", "")
-        desc_label = QLabel(str(desc))
-        desc_label.setWordWrap(True)
-        layout.addWidget(desc_label)
-
-        # API Key section (if required)
-        if self._info["requires_key"]:
-            key_layout = QHBoxLayout()
-
-            self._key_input = QLineEdit()
-            self._key_input.setPlaceholderText("Enter API key...")
-            self._key_input.setEchoMode(QLineEdit.EchoMode.Password)
-            self._key_input.textChanged.connect(self._on_key_changed)
-            key_layout.addWidget(self._key_input)
-
-            self._show_key_btn = QPushButton("Show")
-            self._show_key_btn.setCheckable(True)
-            self._show_key_btn.toggled.connect(self._toggle_key_visibility)
-            key_layout.addWidget(self._show_key_btn)
-
-            self._save_key_btn = QPushButton("Save")
-            self._save_key_btn.clicked.connect(self._save_key)
-            key_layout.addWidget(self._save_key_btn)
-
-            layout.addLayout(key_layout)
-
-            # Key status
-            self._key_status = QLabel()
-            layout.addWidget(self._key_status)
-        else:
-            # Ollama host configuration
-            host_layout = QFormLayout()
-            self._host_input = QLineEdit(get_ollama_host())
-            host_layout.addRow("Ollama Host:", self._host_input)
-            layout.addLayout(host_layout)
-
-            # Test connection button
-            self._test_btn = QPushButton("Test Connection")
-            self._test_btn.clicked.connect(self._test_ollama_connection)
-            layout.addWidget(self._test_btn)
-
-            # Refresh models button
-            self._refresh_models_btn = QPushButton("🔄 Refresh Available Models")
-            self._refresh_models_btn.setToolTip(
-                "Fetch the list of installed models from your local Ollama instance"
-            )
-            self._refresh_models_btn.clicked.connect(self._refresh_ollama_models)
-            layout.addWidget(self._refresh_models_btn)
-
-            self._status_label = QLabel()
-            layout.addWidget(self._status_label)
-
-            # Model count display
-            self._model_count_label = QLabel()
-            self._model_count_label.setStyleSheet(Styles.TEXT_MUTED)
-            layout.addWidget(self._model_count_label)
-
-        layout.addStretch()
-
-    def _load_current_key(self) -> None:
-        """Load current API key from keyring."""
-        if not self._info["requires_key"]:
-            return
-
-        key = get_api_key(self._provider)
-        if key:
-            # Show masked key
-            self._key_input.setText(key)
-            self._key_status.setText("✓ API key configured")
-            self._key_status.setStyleSheet(Styles.COLOR_GREEN)
-        else:
-            self._key_status.setText("⚠ No API key configured")
-            self._key_status.setStyleSheet(Styles.COLOR_ORANGE)
-
-    def _on_key_changed(self, text: str) -> None:
-        """Handle key input changes."""
-        self.key_changed.emit(text)
-
-    def _toggle_key_visibility(self, show: bool) -> None:
-        """Toggle API key visibility."""
-        if show:
-            self._key_input.setEchoMode(QLineEdit.EchoMode.Normal)
-            self._show_key_btn.setText("Hide")
-        else:
-            self._key_input.setEchoMode(QLineEdit.EchoMode.Password)
-            self._show_key_btn.setText("Show")
-
-    def _save_key(self) -> None:
-        """Save API key to secure storage."""
-        key = self._key_input.text().strip()
-        if not key:
-            QMessageBox.warning(self, "Error", "Please enter an API key.")
-            return
-
-        if set_api_key(self._provider, key):
-            self._key_status.setText("✓ API key saved securely")
-            self._key_status.setStyleSheet(Styles.COLOR_GREEN)
-            QMessageBox.information(
-                self,
-                "Success",
-                f"API key saved to {self._get_keyring_location()}",
-            )
-        else:
-            self._key_status.setText("✗ Failed to save key")
-            self._key_status.setStyleSheet(Styles.COLOR_RED)
-            QMessageBox.warning(
-                self,
-                "Error",
-                "Failed to save API key. The keyring package may not be installed.",
-            )
-
-    def _get_keyring_location(self) -> str:
-        """Get description of where keys are stored."""
-        import platform
-
-        system = platform.system()
-        if system == "Windows":
-            return "Windows Credential Manager"
-        if system == "Darwin":
-            return "macOS Keychain"
-        return "System keyring"
-
-    def _test_ollama_connection(self) -> None:
-        """Test connection to Ollama server."""
-        self._status_label.setText("Testing connection...")
-        self._status_label.setStyleSheet(Styles.COLOR_RESET)
-
-        try:
-            from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
-
-            host = self._host_input.text().strip()
-            adapter = OllamaAdapter(host=host)
-            success, message = adapter.validate_connection()
-
-            if success:
-                self._status_label.setText(f"✓ {message}")
-                self._status_label.setStyleSheet(Styles.COLOR_GREEN)
-                # Also refresh models on successful connection
-                self._refresh_ollama_models()
-            else:
-                self._status_label.setText(f"✗ {message}")
-                self._status_label.setStyleSheet(Styles.COLOR_RED)
-
-        except ImportError as e:
-            self._status_label.setText(f"✗ Error: {e}")
-            self._status_label.setStyleSheet(Styles.COLOR_RED)
-
-    def showEvent(self, event: Any) -> None:
-        """Refresh models automatically when the widget becomes visible."""
-        super().showEvent(event)
-        if getattr(self, "_provider", None) == AIProvider.OLLAMA:
-            # Refresh models on a short delay to not block the UI from rendering
-            QTimer.singleShot(100, self._refresh_ollama_models)
-
-    def _refresh_ollama_models(self) -> None:
-        """Refresh the list of available Ollama models."""
-        self._status_label.setText("Fetching available models...")
-        self._status_label.setStyleSheet(Styles.COLOR_RESET)
-
-        try:
-            from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
-
-            host = self._host_input.text().strip()
-            adapter = OllamaAdapter(host=host)
-            models = adapter.list_available_models()
-
-            if models:
-                self._model_count_label.setText(
-                    f"✓ Found {len(models)} model(s): {', '.join(models[:5])}"
-                )
-                if len(models) > 5:
-                    self._model_count_label.setText(
-                        f"✓ Found {len(models)} model(s): {', '.join(models[:5])}..."
-                    )
-                self._model_count_label.setStyleSheet(Styles.COLOR_GREEN)
-                # Emit signal to update parent dialog's model combo
-                self.models_refreshed.emit(models)
-            else:
-                self._model_count_label.setText(
-                    "⚠ No models found. Pull one with: ollama pull llama3.1:8b"
-                )
-                self._model_count_label.setStyleSheet(Styles.COLOR_ORANGE)
-                self.models_refreshed.emit([])
-
-        except Exception as e:
-            self._model_count_label.setText(f"✗ Failed to fetch models: {e}")
-            self._model_count_label.setStyleSheet(Styles.COLOR_RED)
-            self.models_refreshed.emit([])
-
-    def get_host(self) -> str:
-        """Get Ollama host if applicable."""
-        if hasattr(self, "_host_input"):
-            return str(self._host_input.text().strip())
-        return get_ollama_host()
+    return ProviderConfigRegistry.get_widget(provider, parent)
 
 
 class AISettingsDialog(QDialog):
@@ -558,112 +116,98 @@ class AISettingsDialog(QDialog):
     settings_changed = pyqtSignal(AISettings)
     rebuild_index_requested = pyqtSignal()
 
-    def __init__(self, parent: QWidget | None = None) -> None:
-        """Initialize settings dialog.
+    _DARK_STYLESHEET = """
+        QDialog, QWidget {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+        }
+        QTabWidget::pane {
+            border: 1px solid #3c3c3c;
+            background-color: #1e1e1e;
+        }
+        QTabBar::tab {
+            background-color: #2d2d2d;
+            color: #e0e0e0;
+            padding: 8px 16px;
+            border: 1px solid #3c3c3c;
+            border-bottom: none;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+        QTabBar::tab:selected {
+            background-color: #1e1e1e;
+            border-bottom: 2px solid #FF8800;
+            font-weight: bold;
+        }
+        QGroupBox {
+            border: 1px solid #3c3c3c;
+            border-radius: 6px;
+            margin-top: 12px;
+            padding-top: 10px;
+            font-weight: bold;
+            color: #FF8800;
+        }
+        QGroupBox::title {
+            subcontrol-origin: margin;
+            subcontrol-position: top left;
+            padding: 0 4px;
+            left: 8px;
+        }
+        QLabel { color: #e0e0e0; }
+        QLineEdit, QComboBox {
+            background-color: #252526;
+            color: #e0e0e0;
+            border: 1px solid #3c3c3c;
+            border-radius: 4px;
+            padding: 4px;
+        }
+        QLineEdit:focus, QComboBox:focus { border: 1px solid #FF8800; }
+        QPushButton {
+            background-color: #0e639c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+        }
+        QPushButton:hover { background-color: #1177bb; }
+        QCheckBox { color: #e0e0e0; }
+        QDialogButtonBox QPushButton { min-width: 60px; }
+    """
 
-        Args:
-            parent: Parent widget.
-        """
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setWindowTitle("AI Assistant Settings")
         self.setMinimumSize(500, 400)
-
-        # Apply Dark Theme styling
-        self.setStyleSheet("""
-            QDialog, QWidget {
-                background-color: #1e1e1e;
-                color: #e0e0e0;
-            }
-            QTabWidget::pane {
-                border: 1px solid #3c3c3c;
-                background-color: #1e1e1e;
-            }
-            QTabBar::tab {
-                background-color: #2d2d2d;
-                color: #e0e0e0;
-                padding: 8px 16px;
-                border: 1px solid #3c3c3c;
-                border-bottom: none;
-                border-top-left-radius: 4px;
-                border-top-right-radius: 4px;
-            }
-            QTabBar::tab:selected {
-                background-color: #1e1e1e;
-                border-bottom: 2px solid #FF8800; /* Gitpod Orange Accent */
-                font-weight: bold;
-            }
-            QGroupBox {
-                border: 1px solid #3c3c3c;
-                border-radius: 6px;
-                margin-top: 12px;
-                padding-top: 10px;
-                font-weight: bold;
-                color: #FF8800; /* Orange Title */
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                subcontrol-position: top left;
-                padding: 0 4px;
-                left: 8px;
-            }
-            QLabel {
-                color: #e0e0e0;
-            }
-            QLineEdit, QComboBox {
-                background-color: #252526;
-                color: #e0e0e0;
-                border: 1px solid #3c3c3c;
-                border-radius: 4px;
-                padding: 4px;
-            }
-            QLineEdit:focus, QComboBox:focus {
-                border: 1px solid #FF8800;
-            }
-            QPushButton {
-                background-color: #0e639c; /* Blue default for buttons */
-                color: white;
-                border: none;
-                border-radius: 4px;
-                padding: 6px 12px;
-            }
-            QPushButton:hover {
-                background-color: #1177bb;
-            }
-            QCheckBox {
-                color: #e0e0e0;
-            }
-            /* Specific fix for QDialogButtonBox to look standard */
-            QDialogButtonBox QPushButton {
-                min-width: 60px;
-            }
-        """)
+        self.setStyleSheet(self._DARK_STYLESHEET)
 
         self._settings = AISettings.load()
-        self._setup_ui()
-        self._load_settings()
+        self._build_ui()
+        self._load_settings_into_ui()
 
-    def _setup_ui(self) -> None:
-        """Set up the dialog UI."""
+    # ---- construction --------------------------------------------------
+
+    def _build_ui(self) -> None:
         layout = QVBoxLayout(self)
-
-        # Create tabs
         tabs = QTabWidget()
 
-        # Provider tab
-        provider_tab = self._create_provider_tab()
-        tabs.addTab(provider_tab, "Provider")
+        self._providers_tab = ProvidersTab()
+        self._providers_tab.provider_combo.currentIndexChanged.connect(
+            self._on_provider_changed
+        )
+        tabs.addTab(self._providers_tab, "Provider")
 
-        # Preferences tab
-        prefs_tab = self._create_preferences_tab()
-        tabs.addTab(prefs_tab, "Preferences")
+        self._general_tab = GeneralPreferencesTab()
+        tabs.addTab(self._general_tab, "Preferences")
 
-        # Knowledge tab
-        knowledge_tab = self._create_knowledge_tab()
-        tabs.addTab(knowledge_tab, "Knowledge Base")
+        self._rag_tab = RagTab()
+        self._rag_tab.rebuild_index_requested.connect(self.rebuild_index_requested)
+        tabs.addTab(self._rag_tab, "Knowledge Base")
+
+        self._mcp_tab = McpServersTab()
+        tabs.addTab(self._mcp_tab, "MCP Servers")
 
         layout.addWidget(tabs)
 
-        # Button box
         button_box = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         )
@@ -671,317 +215,110 @@ class AISettingsDialog(QDialog):
         button_box.rejected.connect(self.reject)
         layout.addWidget(button_box)
 
-    def _create_provider_tab(self) -> QWidget:
-        """Create the provider configuration tab."""
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
+    # ---- settings <-> UI sync -----------------------------------------
 
-        # Provider selection
-        provider_group = QGroupBox("Select AI Provider")
-        provider_layout = QVBoxLayout(provider_group)
-
-        self._provider_combo = QComboBox()
-        for provider in AIProvider:
-            info = PROVIDER_INFO[provider]
-            name = str(info.get("name", provider.name))
-            self._provider_combo.addItem(name, provider)
-        self._provider_combo.currentIndexChanged.connect(self._on_provider_changed)
-        provider_layout.addWidget(self._provider_combo)
-
-        # Cost note
-        cost_label = QLabel(
-            "<b>💡 Tip:</b> Local models (like Ollama) are completely FREE and run locally. "
-            "Cloud models may incur usage costs."
-        )
-        cost_label.setWordWrap(True)
-        provider_layout.addWidget(cost_label)
-
-        layout.addWidget(provider_group)
-
-        # Model selection
-        model_group = QGroupBox("Model")
-        model_layout = QFormLayout(model_group)
-
-        self._model_combo = QComboBox()
-        model_layout.addRow("Model:", self._model_combo)
-
-        layout.addWidget(model_group)
-
-        # Provider-specific config
-        config_group = QGroupBox("Configuration")
-        config_layout = QVBoxLayout(config_group)
-
-        self._provider_configs: dict[AIProvider, ProviderConfigWidget] = {}
-        for provider in AIProvider:
-            config_widget = ProviderConfigWidget(provider)
-            config_widget.hide()
-            self._provider_configs[provider] = config_widget
-            config_layout.addWidget(config_widget)
-
-        layout.addWidget(config_group)
-        layout.addStretch()
-
-        return widget
-
-    def _create_preferences_tab(self) -> QWidget:
-        """Create the preferences tab."""
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-
-        # Verbosity selector. Tools issue #2552 / PR #2568 replaced the
-        # legacy 4-level ``expertise_level`` (1..4) with a 3-value
-        # ``response_style`` field (concise / standard / detailed). The
-        # combo stores the string value as itemData so the rest of the
-        # dialog can write it through to ``AISettings.response_style``.
-        expertise_group = QGroupBox("Response Verbosity")
-        expertise_layout = QVBoxLayout(expertise_group)
-
-        self._expertise_combo = QComboBox()
-        self._expertise_combo.addItem("Concise", "concise")
-        self._expertise_combo.addItem("Standard", "standard")
-        self._expertise_combo.addItem("Detailed", "detailed")
-        expertise_layout.addWidget(self._expertise_combo)
-
-        expertise_desc = QLabel(
-            "How verbose the AI's replies should be. 'Concise' favours "
-            "code and short bullet lists; 'Detailed' walks through "
-            "reasoning and trade-offs."
-        )
-        expertise_desc.setWordWrap(True)
-        expertise_layout.addWidget(expertise_desc)
-
-        layout.addWidget(expertise_group)
-
-        # Response settings
-        response_group = QGroupBox("Response Settings")
-        response_layout = QVBoxLayout(response_group)
-
-        self._streaming_check = QCheckBox("Enable streaming responses")
-        self._streaming_check.setToolTip(
-            "Show responses as they're generated (more responsive)"
-        )
-        response_layout.addWidget(self._streaming_check)
-
-        layout.addWidget(response_group)
-
-        layout.addStretch()
-        return widget
-
-    def _create_knowledge_tab(self) -> QWidget:
-        """Create the knowledge base (RAG) configuration tab."""
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-
-        # RAG Settings
-        rag_group = QGroupBox("Knowledge Base Settings")
-        rag_layout = QVBoxLayout(rag_group)
-
-        self._rag_enabled_check = QCheckBox("Enable Codebase Awareness (RAG)")
-        self._rag_enabled_check.setToolTip(
-            "Allow the AI to search your codebase and documents to answer questions."
-        )
-        rag_layout.addWidget(self._rag_enabled_check)
-
-        # Tools issue #2549 / PR #2567: ChatDockWidget can request a
-        # codemap rebuild on connect via the ``index_codebase`` action.
-        # Toggling this persists ``auto_index_on_open`` in AISettings,
-        # which the dock reads at construction time.
-        self._auto_index_check = QCheckBox("Auto-index codebase when chat opens")
-        self._auto_index_check.setToolTip(
-            "Rebuild the codemap each time the chat dock connects so the "
-            "assistant has fresh symbol/import context. Slower first open."
-        )
-        rag_layout.addWidget(self._auto_index_check)
-
-        layout.addWidget(rag_group)
-
-        # Actions
-        actions_group = QGroupBox("Actions")
-        actions_layout = QVBoxLayout(actions_group)
-
-        rebuild_btn = QPushButton("Rebuild Knowledge Index")
-        rebuild_btn.setToolTip("Scan the codebase and rebuild the search index.")
-        rebuild_btn.clicked.connect(self._on_rebuild_index)
-        actions_layout.addWidget(rebuild_btn)
-
-        info_label = QLabel(
-            "Rebuilding the index analyses your 'src' directory. "
-            "This happens locally and no code is sent to the cloud during indexing."
-        )
-        info_label.setWordWrap(True)
-        info_label.setStyleSheet(Styles.TEXT_MUTED)
-        actions_layout.addWidget(info_label)
-
-        layout.addWidget(actions_group)
-        layout.addStretch()
-
-        return widget
-
-    def _on_rebuild_index(self) -> None:
-        """Handle rebuild index button."""
-        self.rebuild_index_requested.emit()
-        QMessageBox.information(
-            self,
-            "Rebuild Started",
-            "Index rebuild started in background. The assistant will be updated shortly.",
-        )
-
-    def _load_settings(self) -> None:
-        """Load current settings into UI."""
-        # Provider
-        for i in range(self._provider_combo.count()):
-            if self._provider_combo.itemData(i) == self._settings.provider:
-                self._provider_combo.setCurrentIndex(i)
+    def _load_settings_into_ui(self) -> None:
+        # Provider combo
+        provider_combo = self._providers_tab.provider_combo
+        for i in range(provider_combo.count()):
+            if provider_combo.itemData(i) == self._settings.provider:
+                provider_combo.setCurrentIndex(i)
                 break
 
-        self._on_provider_changed(self._provider_combo.currentIndex())
+        self._on_provider_changed(provider_combo.currentIndex())
 
-        # Model
-        for i in range(self._model_combo.count()):
-            if self._model_combo.itemText(i) == self._settings.model:
-                self._model_combo.setCurrentIndex(i)
+        model_combo = self._providers_tab.model_combo
+        for i in range(model_combo.count()):
+            if model_combo.itemText(i) == self._settings.model:
+                model_combo.setCurrentIndex(i)
                 break
 
-        # Response style (Tools #2552). Combo itemData carries the
-        # string ``response_style`` value. Default to 'standard' if the
-        # persisted value is unknown.
-        target_style = (self._settings.response_style or "standard").lower()
-        for i in range(self._expertise_combo.count()):
-            if self._expertise_combo.itemData(i) == target_style:
-                self._expertise_combo.setCurrentIndex(i)
+        self._general_tab.select_response_style(self._settings.response_style)
+        self._general_tab.streaming_check.setChecked(self._settings.streaming_enabled)
+
+        self._rag_tab.rag_enabled_check.setChecked(self._settings.rag_enabled)
+        self._rag_tab.auto_index_check.setChecked(self._settings.auto_index_on_open)
+        am_combo = self._rag_tab.access_mode_combo
+        for i in range(am_combo.count()):
+            if am_combo.itemData(i) == self._settings.access_mode:
+                am_combo.setCurrentIndex(i)
                 break
-
-        # Streaming
-        self._streaming_check.setChecked(self._settings.streaming_enabled)
-
-        # RAG
-        if hasattr(self, "_rag_enabled_check"):
-            self._rag_enabled_check.setChecked(self._settings.rag_enabled)
-
-        # Auto-index on open (Tools #2549)
-        if hasattr(self, "_auto_index_check"):
-            self._auto_index_check.setChecked(self._settings.auto_index_on_open)
 
     def _on_provider_changed(self, index: int) -> None:
-        """Handle provider selection change."""
-        if not (index is not None):
+        if index is None:
             raise ValueError("index must be provided")
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        provider_data = self._provider_combo.itemData(index)
+        provider_combo = self._providers_tab.provider_combo
+        provider_data = provider_combo.itemData(index)
         if provider_data is None or not isinstance(provider_data, AIProvider):
             return
         provider: AIProvider = provider_data
 
-        # Update model combo
-        info = PROVIDER_INFO[provider]
-        self._model_combo.clear()
-        models = info.get("models", [])
-        if isinstance(models, list):
-            for model in models:
-                self._model_combo.addItem(str(model))
+        populate_model_combo(
+            self._providers_tab.model_combo, provider, self._settings.model
+        )
 
-        # Select default model
-        default_model = info.get("default_model", "")
-        if isinstance(default_model, str):
-            idx = self._model_combo.findText(default_model)
-            if idx >= 0:
-                self._model_combo.setCurrentIndex(idx)
-
-        # Show/hide provider configs
-        for p, widget in self._provider_configs.items():
+        for p, widget in self._providers_tab.provider_configs.items():
             widget.setVisible(p == provider)
 
-        # Connect models_refreshed signal for Ollama provider
         if provider == AIProvider.OLLAMA:
-            ollama_widget = self._provider_configs[AIProvider.OLLAMA]
-            # Disconnect any previous connection to avoid duplicates
-            with contextlib.suppress(TypeError):
-                ollama_widget.models_refreshed.disconnect(self._update_ollama_models)
-            ollama_widget.models_refreshed.connect(self._update_ollama_models)
+            ollama_widget = self._providers_tab.provider_configs.get(AIProvider.OLLAMA)
+            if ollama_widget is not None and hasattr(ollama_widget, "models_refreshed"):
+                with contextlib.suppress(TypeError):
+                    ollama_widget.models_refreshed.disconnect(
+                        self._update_ollama_models
+                    )
+                ollama_widget.models_refreshed.connect(self._update_ollama_models)
 
     def _accept(self) -> None:
-        """Accept dialog and save settings."""
-        # Update settings from UI
-        self._settings.provider = self._provider_combo.currentData()
-        self._settings.model = self._model_combo.currentText()
-        # Tools issue #2552: combo data is now the ``response_style``
-        # string ('concise' / 'standard' / 'detailed'). Mirror the
-        # selection back into the legacy ``expertise_level`` int so
-        # downstream consumers that still read it (e.g. assistant_panel)
-        # stay in sync until they migrate.
-        style = self._expertise_combo.currentData()
-        if isinstance(style, str):
-            self._settings.response_style = style
-            _STYLE_TO_LEGACY_LEVEL = {
-                "concise": 4,
-                "standard": 2,
-                "detailed": 1,
-            }
-            self._settings.expertise_level = _STYLE_TO_LEGACY_LEVEL.get(
+        self._settings.provider = self._providers_tab.provider_combo.currentData()
+        self._settings.model = self._providers_tab.model_combo.currentText()
+
+        style = self._general_tab.current_response_style()
+        self._settings.response_style = style
+        self._settings.expertise_level = (
+            GeneralPreferencesTab.STYLE_TO_LEGACY_LEVEL.get(
                 style, self._settings.expertise_level
             )
-        self._settings.streaming_enabled = self._streaming_check.isChecked()
-        if hasattr(self, "_rag_enabled_check"):
-            self._settings.rag_enabled = self._rag_enabled_check.isChecked()
-        if hasattr(self, "_auto_index_check"):
-            self._settings.auto_index_on_open = self._auto_index_check.isChecked()
+        )
+        self._settings.streaming_enabled = self._general_tab.streaming_check.isChecked()
+        self._settings.rag_enabled = self._rag_tab.rag_enabled_check.isChecked()
+        self._settings.auto_index_on_open = self._rag_tab.auto_index_check.isChecked()
+        self._settings.access_mode = coerce_access_mode(
+            self._rag_tab.access_mode_combo.currentData()
+        )
 
-        # Get Ollama host if applicable
         if self._settings.provider == AIProvider.OLLAMA:
-            config = self._provider_configs[AIProvider.OLLAMA]
-            self._settings.ollama_host = config.get_host()
+            ollama_widget = self._providers_tab.provider_configs.get(AIProvider.OLLAMA)
+            if ollama_widget is not None and hasattr(ollama_widget, "get_host"):
+                self._settings.ollama_host = ollama_widget.get_host()
 
-        # Save and emit
         self._settings.save()
         self.settings_changed.emit(self._settings)
         self.accept()
 
-    def get_settings(self) -> AISettings:
-        """Get current settings.
+    # ---- public helpers preserved from the legacy implementation -------
 
-        Returns:
-            Current AISettings.
-        """
+    def get_settings(self) -> AISettings:
         return self._settings
 
     def _update_ollama_models(self, models: list[str]) -> None:
-        """Update the model dropdown with freshly fetched Ollama models.
-
-        Args:
-            models: List of model names from Ollama.
-        """
         if not models:
             return
-
-        # Save current selection if possible
-        current = self._model_combo.currentText()
-
-        # Clear and repopulate
-        self._model_combo.clear()
+        model_combo = self._providers_tab.model_combo
+        current = model_combo.currentText()
+        model_combo.clear()
         for model in models:
-            self._model_combo.addItem(model)
-
-        # Restore selection or pick first
-        idx = self._model_combo.findText(current)
+            model_combo.addItem(model)
+        idx = model_combo.findText(current)
         if idx >= 0:
-            self._model_combo.setCurrentIndex(idx)
+            model_combo.setCurrentIndex(idx)
         elif models:
-            self._model_combo.setCurrentIndex(0)
+            model_combo.setCurrentIndex(0)
 
     def bind_to_chat_dock(self, chat_dock: Any) -> None:
-        """Wire the model dropdown to a ``ChatDockWidget.models_refreshed``.
+        """Wire ``chat_dock.models_refreshed`` to repopulate the model combo.
 
-        Tools issue #2547 / PR #2566 added a server-side ``refresh_models``
-        action whose response (``{"type": "model_list", ...}``) is forwarded
-        by ``ChatDockWidget`` via the ``models_refreshed`` signal. Calling
-        ``bind_to_chat_dock(dock)`` connects that signal to a handler that
-        normalises the ``ChatModelInfo`` payloads and repopulates the model
-        dropdown.
-
-        Args:
-            chat_dock: A ``ChatDockWidget`` (or any QObject exposing a
-                ``models_refreshed`` signal that emits a ``list``).
+        See Tools #2547 / PR #2566 for the signal contract.
         """
         signal = getattr(chat_dock, "models_refreshed", None)
         if signal is None or not hasattr(signal, "connect"):
@@ -991,13 +328,6 @@ class AISettingsDialog(QDialog):
         signal.connect(self._on_chat_models_refreshed)
 
     def _on_chat_models_refreshed(self, models: list[Any]) -> None:
-        """Handle a ``model_list`` payload coming from ``ChatDockWidget``.
-
-        Each entry may be a plain string (legacy / dropdown-style) or a
-        ``ChatModelInfo``-shaped dict (``{"name", "provider", ...}``).
-        Normalises both to a list of names and forwards to the existing
-        Ollama-style updater so the model dropdown repopulates.
-        """
         names: list[str] = []
         for entry in models:
             if isinstance(entry, str):
@@ -1008,3 +338,52 @@ class AISettingsDialog(QDialog):
                 if isinstance(name, str) and name:
                     names.append(name)
         self._update_ollama_models(names)
+
+
+# Public re-exports kept stable for downstream importers.
+__all__ = [
+    # constants
+    "BITNET_ROOT_ENV",
+    "DEFAULT_CLINE_HOST",
+    "DEFAULT_OLLAMA_HOST",
+    "DEFAULT_OLLAMA_MODEL",
+    "KEY_ACCESS_MODE",
+    "KEY_AUTO_INDEX_ON_OPEN",
+    "KEY_CHAT_MODE",
+    "KEY_EXPERTISE",
+    "KEY_MODEL",
+    "KEY_OLLAMA_HOST",
+    "KEY_PROVIDER",
+    "KEY_RAG_ENABLED",
+    "KEY_RESPONSE_STYLE",
+    "KEY_STREAMING",
+    "PROVIDER_INFO",
+    "SETTINGS_APP",
+    "SETTINGS_ORG",
+    # core types
+    "AIProvider",
+    "AISettings",
+    "AISettingsDialog",
+    # widgets
+    "AnthropicConfigWidget",
+    "BitnetConfigWidget",
+    "ClaudeCliConfigWidget",
+    "ClineConfigWidget",
+    "CodexCliConfigWidget",
+    "GeminiConfigWidget",
+    "OllamaConfigWidget",
+    "OpenAIConfigWidget",
+    "ProviderConfigRegistry",
+    "ProviderConfigWidget",
+    # keyring helpers
+    "delete_api_key",
+    "get_api_key",
+    "get_ollama_host",
+    "set_api_key",
+    # combo helpers
+    "populate_model_combo",
+    "populate_provider_combo",
+    "provider_default_model",
+    "provider_display_name",
+    "provider_model_names",
+]

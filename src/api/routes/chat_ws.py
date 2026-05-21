@@ -19,6 +19,7 @@ Deduplication
 
 from __future__ import annotations
 
+import asyncio
 import contextlib
 import hashlib
 import os
@@ -213,7 +214,7 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
                 # Tools issue #2547 / PR #2566: poll the configured provider
                 # for available models and ship the result over the chat
                 # socket so the dock widget can repopulate its dropdown.
-                payload = chat_service.refresh_models()
+                payload = await asyncio.to_thread(chat_service.refresh_models)
                 await websocket.send_json(
                     {
                         "type": "model_list",

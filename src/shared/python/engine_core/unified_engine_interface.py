@@ -143,9 +143,7 @@ class UnifiedEngineInterface(ContractChecker):
         Returns:
             True if club loaded successfully
         """
-        if not (club_type is not None):
-            raise ValueError("club_type must be provided")
-        if not (club_type is not None):
+        if club_type is None:
             raise ValueError("club_type must be provided")
         if not self.current_engine:
             logger.error("No active engine to load club into")
@@ -298,9 +296,7 @@ class UnifiedEngineInterface(ContractChecker):
         Returns:
             True if state set successfully
         """
-        if not (positions is not None):
-            raise ValueError("positions must be provided")
-        if not (positions is not None):
+        if positions is None:
             raise ValueError("positions must be provided")
         if not self.current_engine:
             return False
@@ -321,9 +317,7 @@ class UnifiedEngineInterface(ContractChecker):
         Returns:
             True if control applied successfully
         """
-        if not (control_inputs is not None):
-            raise ValueError("control_inputs must be provided")
-        if not (control_inputs is not None):
+        if control_inputs is None:
             raise ValueError("control_inputs must be provided")
         if not self.current_engine:
             return False
@@ -386,9 +380,7 @@ def quick_setup(
     Returns:
         Configured interface with engine and standard model loaded
     """
-    if not (engine_type is not None):
-        raise ValueError("engine_type must be provided")
-    if not (engine_type is not None):
+    if engine_type is None:
         raise ValueError("engine_type must be provided")
     interface = UnifiedEngineInterface(suite_root)
 

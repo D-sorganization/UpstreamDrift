@@ -48,9 +48,7 @@ class UISetupMixin:
 
     def _setup_toolbar(self: PinocchioGUI, layout: QtWidgets.QVBoxLayout) -> None:
         """Build the top bar with model selector, load button, and mode selector."""
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        if not (layout is not None):
+        if layout is None:
             raise ValueError("layout must be provided")
         top_layout = QtWidgets.QHBoxLayout()
 
@@ -100,9 +98,7 @@ class UISetupMixin:
         self: PinocchioGUI, sim_layout: QtWidgets.QVBoxLayout
     ) -> None:  # noqa: E501
         """Build the visualization group box."""
-        if not (sim_layout is not None):
-            raise ValueError("sim_layout must be provided")
-        if not (sim_layout is not None):
+        if sim_layout is None:
             raise ValueError("sim_layout must be provided")
         vis_group = QtWidgets.QGroupBox("Visualization")
         vis_layout = QtWidgets.QVBoxLayout()
@@ -132,9 +128,7 @@ class UISetupMixin:
         sim_layout.addWidget(vis_group)
 
     def _setup_overlay_checkboxes(self, vis_layout: QtWidgets.QVBoxLayout) -> None:
-        if not (vis_layout is not None):
-            raise ValueError("vis_layout must be provided")
-        if not (vis_layout is not None):
+        if vis_layout is None:
             raise ValueError("vis_layout must be provided")
         chk_layout = QtWidgets.QHBoxLayout()
         self.chk_frames = QtWidgets.QCheckBox("Show Frames")
@@ -156,9 +150,7 @@ class UISetupMixin:
         vis_layout.addLayout(chk_layout)
 
     def _setup_ellipsoid_controls(self, vis_layout: QtWidgets.QVBoxLayout) -> None:
-        if not (vis_layout is not None):
-            raise ValueError("vis_layout must be provided")
-        if not (vis_layout is not None):
+        if vis_layout is None:
             raise ValueError("vis_layout must be provided")
         ellip_layout = QtWidgets.QHBoxLayout()
         self.chk_mobility = QtWidgets.QCheckBox("Show Mobility Ellipsoid (Green)")
@@ -176,9 +168,7 @@ class UISetupMixin:
         vis_layout.addWidget(self.manip_body_group)
 
     def _setup_advanced_vectors(self, vis_layout: QtWidgets.QVBoxLayout) -> None:
-        if not (vis_layout is not None):
-            raise ValueError("vis_layout must be provided")
-        if not (vis_layout is not None):
+        if vis_layout is None:
             raise ValueError("vis_layout must be provided")
         vec_grid = QtWidgets.QGridLayout()
 
@@ -202,9 +192,7 @@ class UISetupMixin:
         vis_layout.addLayout(vec_grid)
 
     def _setup_vector_scales(self, vis_layout: QtWidgets.QVBoxLayout) -> None:
-        if not (vis_layout is not None):
-            raise ValueError("vis_layout must be provided")
-        if not (vis_layout is not None):
+        if vis_layout is None:
             raise ValueError("vis_layout must be provided")
         scale_layout = QtWidgets.QHBoxLayout()
         scale_layout.addWidget(QtWidgets.QLabel("Force Scale:"))
@@ -224,9 +212,7 @@ class UISetupMixin:
         vis_layout.addLayout(scale_layout)
 
     def _setup_matrix_analysis_panel(self, sim_layout: QtWidgets.QVBoxLayout) -> None:
-        if not (sim_layout is not None):
-            raise ValueError("sim_layout must be provided")
-        if not (sim_layout is not None):
+        if sim_layout is None:
             raise ValueError("sim_layout must be provided")
         matrix_group = QtWidgets.QGroupBox("Matrix Analysis")
         form_layout = QtWidgets.QFormLayout()

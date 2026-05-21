@@ -11,9 +11,8 @@ Example:
 
 from __future__ import annotations
 
-import json
+import shlex
 import subprocess
-import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -327,12 +326,31 @@ class ShellTool(CLIToolBase):
         """
         # Dangerous commands are never allowed
         dangerous = ["rm", "sudo", "chmod", "chown", "curl", "wget", "ssh"]
-        for d in dangerous:
-            if command.startswith(d + " ") or command == d:
+
+        # Prevent shell injection by blocking command separators/operators
+        shell_operators = ["&&", "||", ";", "|", ">", "<", "$", "`", "\n", "&"]
+        if any(op in command for op in shell_operators):
+            return False
+
+        try:
+            tokens = shlex.split(command)
+            if not tokens:
                 return False
 
-        # Check against allowlist
-        return any(command.startswith(allowed) for allowed in self._allowed_commands)
+            # Verify the first token is in the allowlist
+            base_cmd = tokens[0]
+            if base_cmd not in self._allowed_commands:
+                return False
+
+            # Verify no token is a dangerous command
+            for token in tokens:
+                if token in dangerous:
+                    return False
+
+            return True
+        except ValueError:
+            # e.g., missing closing quote
+            return False
 
     def execute(self, command: str, timeout: int = 60) -> CLIExecutionResult:
         """Execute a shell command.
@@ -481,7 +499,9 @@ def create_cli_tools_for_registry() -> list[dict[str, Any]]:
         tools.append(
             {
                 "name": "claude_ask",
-                "description": "Ask Claude Code CLI for code analysis or development assistance",
+                "description": (
+                    "Ask Claude Code CLI for code analysis or development assistance"
+                ),
                 "handler": manager.claude.ask,
                 "parameters": [
                     {
@@ -522,7 +542,9 @@ def create_cli_tools_for_registry() -> list[dict[str, Any]]:
         tools.append(
             {
                 "name": "shell_execute",
-                "description": "Execute a safe shell command (limited to allowed commands)",
+                "description": (
+                    "Execute a safe shell command (limited to allowed commands)"
+                ),
                 "handler": manager.shell.execute,
                 "parameters": [
                     {

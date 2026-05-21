@@ -44,9 +44,7 @@ class InverseKinematicsSolver:
             tolerance: Convergence tolerance for numerical IK
             max_iterations: Maximum iterations for numerical IK
         """
-        if not (segment_lengths is not None):
-            raise ValueError("segment_lengths must be provided")
-        if not (segment_lengths is not None):
+        if segment_lengths is None:
             raise ValueError("segment_lengths must be provided")
         self.segment_lengths = segment_lengths
         self.joint_names = joint_names
@@ -121,9 +119,7 @@ class InverseKinematicsSolver:
         Returns:
             FitResult with optimized joint angles.
         """
-        if not (target_positions is not None):
-            raise ValueError("target_positions must be provided")
-        if not (target_positions is not None):
+        if target_positions is None:
             raise ValueError("target_positions must be provided")
         n_joints = len(self.joint_names)
 
@@ -195,9 +191,7 @@ class InverseKinematicsSolver:
             End effector positions [M x 3]
         """
         # Simple planar chain for demonstration
-        if not (angles is not None):
-            raise ValueError("angles must be provided")
-        if not (angles is not None):
+        if angles is None:
             raise ValueError("angles must be provided")
         positions = []
         x, y, z = 0.0, 0.0, 0.0
@@ -245,9 +239,7 @@ class ParameterEstimator:
             anthropometric_model: Model for mass/inertia regression
                 ("dempster", "winter", "de_leva")
         """
-        if not (anthropometric_model is not None):
-            raise ValueError("anthropometric_model must be provided")
-        if not (anthropometric_model is not None):
+        if anthropometric_model is None:
             raise ValueError("anthropometric_model must be provided")
         self.anthropometric_model = anthropometric_model
         self._load_regression_coefficients()
@@ -305,9 +297,7 @@ class ParameterEstimator:
             Tuple of (mean_length, std_length) in meters.
         """
         # Compute distances for each frame
-        if not (proximal_markers is not None):
-            raise ValueError("proximal_markers must be provided")
-        if not (proximal_markers is not None):
+        if proximal_markers is None:
             raise ValueError("proximal_markers must be provided")
         diff = distal_markers - proximal_markers
         distances = row_euclidean_norm(diff)
@@ -336,9 +326,7 @@ class ParameterEstimator:
             BodySegmentParams with estimated values.
         """
         # Get regression coefficients
-        if not (segment_name is not None):
-            raise ValueError("segment_name must be provided")
-        if not (segment_name is not None):
+        if segment_name is None:
             raise ValueError("segment_name must be provided")
         if segment_name in self.coefficients:
             mass_frac, com_frac, rog_frac = self.coefficients[segment_name]
@@ -380,9 +368,7 @@ class ParameterEstimator:
         known_lengths: dict[str, float] | None,
     ) -> FitResult:
         """Estimate segment parameters using anthropometric tables only."""
-        if not (segment_names is not None):
-            raise ValueError("segment_names must be provided")
-        if not (segment_names is not None):
+        if segment_names is None:
             raise ValueError("segment_names must be provided")
         logger.warning("No marker data - using anthropometric estimates only")
         params: dict[str, Any] = {}
@@ -409,9 +395,7 @@ class ParameterEstimator:
         known_lengths: dict[str, float] | None,
     ) -> FitResult:
         """Fit segment parameters from marker position data."""
-        if not (marker_array is not None):
-            raise ValueError("marker_array must be provided")
-        if not (marker_array is not None):
+        if marker_array is None:
             raise ValueError("marker_array must be provided")
         fitted_params: dict[str, Any] = {}
         all_residuals: list[float] = []
@@ -474,9 +458,7 @@ class ParameterEstimator:
         Returns:
             FitResult with fitted parameters.
         """
-        if not (kinematic_data is not None):
-            raise ValueError("kinematic_data must be provided")
-        if not (kinematic_data is not None):
+        if kinematic_data is None:
             raise ValueError("kinematic_data must be provided")
         if not kinematic_data:
             return FitResult(

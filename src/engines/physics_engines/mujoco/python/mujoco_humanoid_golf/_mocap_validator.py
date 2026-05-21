@@ -23,9 +23,7 @@ class MotionCaptureValidator:
         Returns:
             List of (start_frame, end_frame) for gaps
         """
-        if not (mocap_sequence is not None):
-            raise ValueError("mocap_sequence must be provided")
-        if not (mocap_sequence is not None):
+        if mocap_sequence is None:
             raise ValueError("mocap_sequence must be provided")
         gaps = []
         last_frame = -1
@@ -56,9 +54,7 @@ class MotionCaptureValidator:
         Returns:
             Dictionary with velocity statistics or error message
         """
-        if not (mocap_sequence is not None):
-            raise ValueError("mocap_sequence must be provided")
-        if not (mocap_sequence is not None):
+        if mocap_sequence is None:
             raise ValueError("mocap_sequence must be provided")
         times, positions = mocap_sequence.get_marker_trajectory(marker_name)
 
@@ -92,9 +88,7 @@ class MotionCaptureValidator:
         Returns:
             Visibility statistics
         """
-        if not (mocap_sequence is not None):
-            raise ValueError("mocap_sequence must be provided")
-        if not (mocap_sequence is not None):
+        if mocap_sequence is None:
             raise ValueError("mocap_sequence must be provided")
         total_frames = len(mocap_sequence.frames)
         visible_frames = sum(

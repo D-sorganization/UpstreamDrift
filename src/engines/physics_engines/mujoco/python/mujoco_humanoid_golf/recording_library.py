@@ -41,9 +41,7 @@ class ConnectionPool:
     """
 
     def __init__(self, db_path: str) -> None:
-        if not (db_path is not None):
-            raise ValueError("db_path must be provided")
-        if not (db_path is not None):
+        if db_path is None:
             raise ValueError("db_path must be provided")
         self.db_path = db_path
         self._local = threading.local()
@@ -92,9 +90,7 @@ class RecordingLibrary:
         Args:
             library_path: Directory for recordings and database
         """
-        if not (library_path is not None):
-            raise ValueError("library_path must be provided")
-        if not (library_path is not None):
+        if library_path is None:
             raise ValueError("library_path must be provided")
         self.library_path = Path(library_path)
         self.library_path.mkdir(exist_ok=True)
@@ -312,9 +308,7 @@ class RecordingLibrary:
         Returns:
             RecordingMetadata or None if not found
         """
-        if not (recording_id is not None):
-            raise ValueError("recording_id must be provided")
-        if not (recording_id is not None):
+        if recording_id is None:
             raise ValueError("recording_id must be provided")
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -335,9 +329,7 @@ class RecordingLibrary:
         Returns:
             True if successful
         """
-        if not (metadata is not None):
-            raise ValueError("metadata must be provided")
-        if not (metadata is not None):
+        if metadata is None:
             raise ValueError("metadata must be provided")
         if metadata.id is None:
             return False
@@ -396,9 +388,7 @@ class RecordingLibrary:
         Returns:
             True if successful
         """
-        if not (recording_id is not None):
-            raise ValueError("recording_id must be provided")
-        if not (recording_id is not None):
+        if recording_id is None:
             raise ValueError("recording_id must be provided")
         if delete_file:
             metadata = self.get_recording(recording_id)
@@ -466,9 +456,7 @@ class RecordingLibrary:
         Returns:
             List of matching RecordingMetadata
         """
-        if not (min_rating is not None):
-            raise ValueError("min_rating must be provided")
-        if not (min_rating is not None):
+        if min_rating is None:
             raise ValueError("min_rating must be provided")
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -587,9 +575,7 @@ class RecordingLibrary:
         Args:
             output_file: Output JSON file path
         """
-        if not (output_file is not None):
-            raise ValueError("output_file must be provided")
-        if not (output_file is not None):
+        if output_file is None:
             raise ValueError("output_file must be provided")
         recordings = self.get_all_recordings()
         data = {
@@ -608,9 +594,7 @@ class RecordingLibrary:
             input_file: Input JSON file path
             merge: If True, merge with existing library; if False, replace
         """
-        if not (input_file is not None):
-            raise ValueError("input_file must be provided")
-        if not (input_file is not None):
+        if input_file is None:
             raise ValueError("input_file must be provided")
         with open(input_file) as f:
             data = json.load(f)
@@ -645,9 +629,7 @@ class RecordingLibrary:
             List of unique values
         """
         # Whitelist allowed fields to prevent SQL injection
-        if not (field is not None):
-            raise ValueError("field must be provided")
-        if not (field is not None):
+        if field is None:
             raise ValueError("field must be provided")
 
         query_map = {
@@ -699,9 +681,7 @@ class RecordingLibrary:
 
         SEC-006: Replaced MD5 with SHA-256 to prevent collision attacks.
         """
-        if not (file_path is not None):
-            raise ValueError("file_path must be provided")
-        if not (file_path is not None):
+        if file_path is None:
             raise ValueError("file_path must be provided")
         sha256 = hashlib.sha256()
         with open(file_path, "rb") as f:
@@ -718,9 +698,7 @@ class RecordingLibrary:
         Returns:
             Path to data file
         """
-        if not (metadata is not None):
-            raise ValueError("metadata must be provided")
-        if not (metadata is not None):
+        if metadata is None:
             raise ValueError("metadata must be provided")
         file_path = Path(metadata.filename)
         if not file_path.is_absolute():
@@ -745,9 +723,7 @@ def create_metadata_from_recording(
     Returns:
         RecordingMetadata with computed statistics
     """
-    if not (data_dict is not None):
-        raise ValueError("data_dict must be provided")
-    if not (data_dict is not None):
+    if data_dict is None:
         raise ValueError("data_dict must be provided")
     times = data_dict.get("times", [])
     duration = times[-1] - times[0] if len(times) > 1 else 0.0

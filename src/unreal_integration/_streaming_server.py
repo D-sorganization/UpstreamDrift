@@ -230,9 +230,7 @@ class UnrealStreamingServer:
         Args:
             frame: Frame to broadcast.
         """
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
-        if not (frame is not None):
+        if frame is None:
             raise ValueError("frame must be provided")
         if self._state != StreamingState.RUNNING:
             return
@@ -288,9 +286,7 @@ class UnrealStreamingServer:
         Args:
             message: Control message to handle.
         """
-        if not (message is not None):
-            raise ValueError("message must be provided")
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         if self._on_control_message:
             self._on_control_message(message)

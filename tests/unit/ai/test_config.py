@@ -28,15 +28,18 @@ from src.shared.python.ai.config import (
 
 
 class TestOllamaConfig:
-    def test_default_host(self) -> None:
+    def test_default_host(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("OLLAMA_HOST", raising=False)
         host = get_ollama_host()
         assert host == DEFAULT_OLLAMA_HOST
 
-    def test_default_model(self) -> None:
+    def test_default_model(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("OLLAMA_MODEL", raising=False)
         model = get_ollama_model()
         assert model == DEFAULT_OLLAMA_MODEL
 
-    def test_default_timeout(self) -> None:
+    def test_default_timeout(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("OLLAMA_TIMEOUT", raising=False)
         timeout = get_ollama_timeout()
         assert timeout == pytest.approx(DEFAULT_OLLAMA_TIMEOUT)
 
@@ -56,11 +59,13 @@ class TestOllamaConfig:
 
 
 class TestOpenAIConfig:
-    def test_default_model(self) -> None:
+    def test_default_model(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("OPENAI_MODEL", raising=False)
         model = get_openai_model()
         assert model == DEFAULT_OPENAI_MODEL
 
-    def test_default_timeout(self) -> None:
+    def test_default_timeout(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("OPENAI_TIMEOUT", raising=False)
         timeout = get_openai_timeout()
         assert timeout == pytest.approx(DEFAULT_OPENAI_TIMEOUT)
 
@@ -79,11 +84,13 @@ class TestOpenAIConfig:
 
 
 class TestAnthropicConfig:
-    def test_default_model(self) -> None:
+    def test_default_model(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("ANTHROPIC_MODEL", raising=False)
         model = get_anthropic_model()
         assert model == DEFAULT_ANTHROPIC_MODEL
 
-    def test_default_timeout(self) -> None:
+    def test_default_timeout(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("ANTHROPIC_TIMEOUT", raising=False)
         timeout = get_anthropic_timeout()
         assert timeout == pytest.approx(DEFAULT_ANTHROPIC_TIMEOUT)
 
@@ -98,7 +105,8 @@ class TestAnthropicConfig:
 
 
 class TestGeminiConfig:
-    def test_default_model(self) -> None:
+    def test_default_model(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("GEMINI_MODEL", raising=False)
         model = get_gemini_model()
         assert model == DEFAULT_GEMINI_MODEL
 

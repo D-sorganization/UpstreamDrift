@@ -5,18 +5,33 @@ on:
     branches: ["main"]
     paths:
       - "Dockerfile"
+      - "Dockerfile.modular"
+      - "docker/profiles.yaml"
       - "docker-compose*.yml"
+      - "scripts/docker/**"
       - "pyproject.toml"
       - "requirements*.txt"
       - "requirements.lock"
       - "requirements*.lock"
       - "src/**"
       - ".github/workflows/docker-size-gates.yml"
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "Dockerfile"
+      - "Dockerfile.modular"
+      - "docker/profiles.yaml"
+      - "docker-compose*.yml"
+      - "scripts/docker/**"
+      - ".github/workflows/docker-size-gates.yml"
   workflow_dispatch:
 
 concurrency:
   group: docker-size-gates-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
@@ -32,6 +47,8 @@ jobs:
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
           echo "runner=d-sorg-fleet" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet"
+
+  # -- Legacy monolithic image: keep passing for backward compatibility -------
   docker-smoke-and-size:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -80,3 +97,76 @@ jobs:
           docker run --rm upstream-drift:runtime python -c "import mujoco, numpy, scipy; print('Core physics stack OK')"
           docker run --rm upstream-drift:runtime python -c "import fastapi, uvicorn; print('API server stack OK')"
           docker run --rm upstream-drift:runtime python -c "import pinocchio; print('Pinocchio OK')"
+
+  # -- Phase 2: per-profile modular image size matrix ------------------------
+  #
+  # Each profile is built from Dockerfile.modular with --build-arg PROFILE=<name>
+  # and measured against the budget declared in docker/profiles.yaml.
+  # Only the "core" profiles (slim, standard, research) are gated as blocking
+  # checks. The heavier profiles (biomech, full, gpu-training) are advisory
+  # (continue-on-error: true) because their base images are expensive and
+  # not always cached on the fleet.
+  profile-size-matrix:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - profile: slim
+            max_size_mb: 800
+            advisory: false
+          - profile: standard
+            max_size_mb: 2000
+            advisory: false
+          - profile: research
+            max_size_mb: 3500
+            advisory: true   # advisory until fleet cache warms up
+          - profile: biomech
+            max_size_mb: 4800
+            advisory: true
+          - profile: full
+            max_size_mb: 6000
+            advisory: true
+    continue-on-error: ${{ matrix.advisory }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
+
+      - name: Build modular image (profile=${{ matrix.profile }})
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f
+        with:
+          context: .
+          file: ./Dockerfile.modular
+          build-args: |
+            PROFILE=${{ matrix.profile }}
+          load: true
+          tags: upstream-drift:${{ matrix.profile }}
+          cache-from: type=gha,scope=profile-${{ matrix.profile }}
+          cache-to: type=gha,scope=profile-${{ matrix.profile }},mode=max
+
+      - name: Verify size budget (profile=${{ matrix.profile }}, budget=${{ matrix.max_size_mb }} MB)
+        run: |
+          MAX_SIZE_MB=${{ matrix.max_size_mb }}
+          IMAGE_SIZE_BYTES=$(docker image inspect upstream-drift:${{ matrix.profile }} --format='{{.Size}}')
+          IMAGE_SIZE_MB=$((IMAGE_SIZE_BYTES / 1024 / 1024))
+
+          echo "Profile : ${{ matrix.profile }}"
+          echo "Size    : ${IMAGE_SIZE_MB} MB"
+          echo "Budget  : ${MAX_SIZE_MB} MB"
+
+          if [ "$IMAGE_SIZE_MB" -gt "$MAX_SIZE_MB" ]; then
+            echo "::error::profile=${{ matrix.profile }} image (${IMAGE_SIZE_MB} MB) exceeds budget (${MAX_SIZE_MB} MB)"
+            exit 1
+          else
+            echo "Size within budget."
+          fi
+
+      - name: Health check (profile=${{ matrix.profile }})
+        run: |
+          docker run --rm upstream-drift:${{ matrix.profile }} \
+            python -c "import fastapi, uvicorn; print('API stack OK for profile ${{ matrix.profile }}')"

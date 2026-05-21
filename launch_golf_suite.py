@@ -99,7 +99,7 @@ def route_launch(args: argparse.Namespace) -> None:
         category=DeprecationWarning,
         module=r".*(sidekick|upstream_drift_tools).*",
     )
-    if not (args is not None):
+    if args is None:
         raise ValueError("Parsed arguments must be provided")
     if not isinstance(args, argparse.Namespace):
         raise ValueError("args must be a Namespace object")

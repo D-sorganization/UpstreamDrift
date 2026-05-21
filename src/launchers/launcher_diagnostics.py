@@ -487,7 +487,7 @@ class LauncherDiagnostics:
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
-        except (RuntimeError, TypeError, AttributeError, ValueError) as e:
+        except Exception as e:
             details["error"] = str(e)
             result = DiagnosticResult(
                 name="launcher_provider_compatibility",

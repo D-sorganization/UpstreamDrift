@@ -1,0 +1,78 @@
+"""Contracts for thread condensation (Tools issue #2736)."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+StrategyName = Literal["keep_recent", "semantic_summary", "pinned_anchor"]
+_VALID_STRATEGIES = frozenset({"keep_recent", "semantic_summary", "pinned_anchor"})
+
+
+@dataclass(frozen=True)
+class CondensationRequest:
+    """Request to condense a chat session in place-free fashion.
+
+    Attributes:
+        session_id: Identifier of the session to condense.
+        strategy: One of ``"keep_recent"``, ``"semantic_summary"``,
+            ``"pinned_anchor"``.
+        keep_last_n: How many recent messages to preserve verbatim.
+        target_tokens: Optional soft target for total tokens after
+            condensation. ``None`` disables the budget.
+
+    Contract:
+        Pre: ``session_id`` is a non-empty string.
+        Pre: ``strategy`` is a member of ``_VALID_STRATEGIES``.
+        Pre: ``keep_last_n >= 1``.
+        Pre: ``target_tokens`` is ``None`` or ``>= 0``.
+    """
+
+    session_id: str
+    strategy: StrategyName
+    keep_last_n: int = 10
+    target_tokens: int | None = None
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.session_id, str) or not self.session_id.strip():
+            raise ValueError("CondensationRequest.session_id must be non-empty")
+        if self.strategy not in _VALID_STRATEGIES:
+            raise ValueError(
+                "CondensationRequest.strategy must be one of "
+                f"{sorted(_VALID_STRATEGIES)!r}, got {self.strategy!r}"
+            )
+        if not isinstance(self.keep_last_n, int) or self.keep_last_n < 1:
+            raise ValueError(
+                "CondensationRequest.keep_last_n must be an int >= 1, "
+                f"got {self.keep_last_n!r}"
+            )
+        if self.target_tokens is not None and self.target_tokens < 0:
+            raise ValueError("CondensationRequest.target_tokens must be >= 0 or None")
+
+
+@dataclass(frozen=True)
+class CondensationResult:
+    """Summary of a condensation pass.
+
+    Attributes:
+        original_message_count: Number of messages before condensation.
+        condensed_message_count: Number of messages after condensation.
+        removed_tokens_estimate: Heuristic count of tokens removed from
+            the conversation as a result of condensation.
+        preserved_anchors: Number of pinned/anchor messages retained.
+    """
+
+    original_message_count: int
+    condensed_message_count: int
+    removed_tokens_estimate: int
+    preserved_anchors: int
+
+    def __post_init__(self) -> None:
+        if self.original_message_count < 0:
+            raise ValueError("original_message_count must be non-negative")
+        if self.condensed_message_count < 0:
+            raise ValueError("condensed_message_count must be non-negative")
+        if self.removed_tokens_estimate < 0:
+            raise ValueError("removed_tokens_estimate must be non-negative")
+        if self.preserved_anchors < 0:
+            raise ValueError("preserved_anchors must be non-negative")

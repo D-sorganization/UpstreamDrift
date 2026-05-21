@@ -1,0 +1,328 @@
+"""Notion integration tools for Sidekick."""
+
+from __future__ import annotations
+
+import logging
+import os
+import re
+from typing import Any
+
+import httpx
+
+from src.shared.python.ai.tool_registry import ToolCategory, get_global_registry
+
+logger = logging.getLogger(__name__)
+
+_NOTION_API_BASE = "https://api.notion.com/v1"
+_NOTION_VERSION = "2022-06-28"
+
+_NOTION_API_TOKEN: str | None = None
+
+
+def set_notion_api_token(token: str) -> None:
+    """Store the Notion API token in memory for session use."""
+    global _NOTION_API_TOKEN  # noqa: PLW0603
+    _NOTION_API_TOKEN = token
+
+
+def _get_notion_headers() -> dict[str, str]:
+    """Return Notion API authentication and version headers.
+
+    Raises:
+        ValueError: If no API token is configured.
+    """
+    token = _NOTION_API_TOKEN or os.environ.get("NOTION_API_KEY")
+    if not token:
+        raise ValueError(
+            "Notion API token not configured. Call set_notion_api_token() or"
+            " set NOTION_API_KEY env var."
+        )
+    return {
+        "Authorization": f"Bearer {token}",
+        "Notion-Version": _NOTION_VERSION,
+        "Content-Type": "application/json",
+    }
+
+
+def _markdown_to_notion_blocks(markdown: str) -> list[dict[str, Any]]:
+    """Convert markdown text to Notion block objects.
+
+    Handles headings, paragraphs, bullet lists, numbered lists, and code blocks.
+
+    Args:
+        markdown: Markdown-formatted string.
+
+    Returns:
+        List of Notion block dicts suitable for the ``children`` field of a page.
+    """
+    blocks: list[dict[str, Any]] = []
+    lines = markdown.splitlines()
+    in_code_block = False
+    code_lines: list[str] = []
+    code_lang = ""
+
+    for line in lines:
+        # Code block start/end
+        if line.startswith("```"):
+            if in_code_block:
+                # Close the code block
+                blocks.append(
+                    {
+                        "object": "block",
+                        "type": "code",
+                        "code": {
+                            "rich_text": [
+                                {
+                                    "type": "text",
+                                    "text": {"content": "\n".join(code_lines)},
+                                }
+                            ],
+                            "language": code_lang or "plain text",
+                        },
+                    }
+                )
+                code_lines = []
+                code_lang = ""
+                in_code_block = False
+            else:
+                in_code_block = True
+                code_lang = line[3:].strip()
+            continue
+
+        if in_code_block:
+            code_lines.append(line)
+            continue
+
+        # Headings
+        heading_match = re.match(r"^(#{1,3})\s+(.*)", line)
+        if heading_match:
+            level = len(heading_match.group(1))
+            text = heading_match.group(2).strip()
+            heading_type = f"heading_{level}"
+            blocks.append(
+                {
+                    "object": "block",
+                    "type": heading_type,
+                    heading_type: {
+                        "rich_text": [{"type": "text", "text": {"content": text}}]
+                    },
+                }
+            )
+            continue
+
+        # Bullet list items
+        if re.match(r"^[-*]\s+", line):
+            text = re.sub(r"^[-*]\s+", "", line)
+            blocks.append(
+                {
+                    "object": "block",
+                    "type": "bulleted_list_item",
+                    "bulleted_list_item": {
+                        "rich_text": [{"type": "text", "text": {"content": text}}]
+                    },
+                }
+            )
+            continue
+
+        # Numbered list items
+        numbered_match = re.match(r"^\d+\.\s+(.*)", line)
+        if numbered_match:
+            text = numbered_match.group(1)
+            blocks.append(
+                {
+                    "object": "block",
+                    "type": "numbered_list_item",
+                    "numbered_list_item": {
+                        "rich_text": [{"type": "text", "text": {"content": text}}]
+                    },
+                }
+            )
+            continue
+
+        # Blank lines produce empty paragraph blocks (skip them)
+        if not line.strip():
+            continue
+
+        # Paragraph (default)
+        blocks.append(
+            {
+                "object": "block",
+                "type": "paragraph",
+                "paragraph": {
+                    "rich_text": [{"type": "text", "text": {"content": line}}]
+                },
+            }
+        )
+
+    # Close any unclosed code block
+    if in_code_block and code_lines:
+        blocks.append(
+            {
+                "object": "block",
+                "type": "code",
+                "code": {
+                    "rich_text": [
+                        {
+                            "type": "text",
+                            "text": {"content": "\n".join(code_lines)},
+                        }
+                    ],
+                    "language": code_lang or "plain text",
+                },
+            }
+        )
+
+    return blocks
+
+
+registry = get_global_registry()
+
+
+@registry.register(
+    "notion_push_report",
+    "Push a generated report to a Notion workspace.",
+    category=ToolCategory.ANALYSIS,
+    requires_confirmation=True,
+)
+def notion_push_report(
+    title: str, markdown_content: str, parent_page_id: str = ""
+) -> dict[str, Any]:
+    """Push markdown content as a new page in Notion.
+
+    Precondition: title must be non-empty.
+    Precondition: Notion API token must be configured.
+
+    Args:
+        title: The title of the report page.
+        markdown_content: The markdown body of the report.
+        parent_page_id: The ID of the parent Notion page. If omitted, a
+            workspace-level page is created (requires an integration with
+            workspace access).
+
+    Returns:
+        Dict with ``success``, ``page_id``, and ``url`` keys.
+
+    Raises:
+        ValueError: If title is empty or no parent_page_id is given when required.
+        RuntimeError: On HTTP errors or network failures.
+    """
+    if not title:
+        raise ValueError("title must not be empty.")
+
+    if not parent_page_id:
+        raise ValueError("parent_page_id is required for Notion page creation.")
+
+    headers = _get_notion_headers()
+    children = _markdown_to_notion_blocks(markdown_content)
+
+    body: dict[str, Any] = {
+        "parent": {"page_id": parent_page_id},
+        "properties": {"title": [{"type": "text", "text": {"content": title}}]},
+        "children": children,
+    }
+
+    try:
+        with httpx.Client(timeout=30) as client:
+            response = client.post(
+                f"{_NOTION_API_BASE}/pages",
+                headers=headers,
+                json=body,
+            )
+    except httpx.RequestError as exc:
+        raise RuntimeError(f"Notion API connection failed: {exc}") from exc
+
+    if response.status_code in (400, 401, 403):
+        raise RuntimeError(f"Notion API error {response.status_code}: {response.text}")
+
+    response.raise_for_status()
+    data = response.json()
+
+    page_id = data.get("id", "")
+    url = data.get("url", "")
+    logger.info("Notion page created: %s", url)
+    return {"success": True, "page_id": page_id, "url": url}
+
+
+@registry.register(
+    "notion_read_knowledge_base",
+    "Read an article from the Notion knowledge base.",
+    category=ToolCategory.DATA_LOADING,
+)
+def notion_read_knowledge_base(query: str) -> dict[str, Any]:
+    """Search and read knowledge base articles from Notion.
+
+    Precondition: query must be non-empty.
+    Precondition: Notion API token must be configured.
+
+    Args:
+        query: Search term for the knowledge base.
+
+    Returns:
+        Dict with ``results`` list (each item has ``id``, ``title``, ``url``),
+        ``has_more`` bool, and optionally ``next_cursor``.
+
+    Raises:
+        ValueError: If query is empty.
+        RuntimeError: On HTTP errors or network failures.
+    """
+    if not query:
+        raise ValueError("query must not be empty.")
+
+    headers = _get_notion_headers()
+    body = {
+        "query": query,
+        "filter": {"value": "page", "property": "object"},
+    }
+
+    try:
+        with httpx.Client(timeout=30) as client:
+            response = client.post(
+                f"{_NOTION_API_BASE}/search",
+                headers=headers,
+                json=body,
+            )
+    except httpx.RequestError as exc:
+        raise RuntimeError(f"Notion API connection failed: {exc}") from exc
+
+    if response.status_code in (400, 401, 403):
+        raise RuntimeError(f"Notion API error {response.status_code}: {response.text}")
+
+    response.raise_for_status()
+    data = response.json()
+
+    results = []
+    for item in data.get("results", []):
+        page_id = item.get("id", "")
+        url = item.get("url", "")
+        title = _extract_page_title(item)
+        results.append({"id": page_id, "title": title, "url": url})
+
+    has_more: bool = data.get("has_more", False)
+    output: dict[str, Any] = {"results": results, "has_more": has_more}
+    if has_more:
+        output["next_cursor"] = data.get("next_cursor")
+
+    logger.info("Notion search for %r returned %d result(s)", query, len(results))
+    return output
+
+
+def _extract_page_title(page: dict[str, Any]) -> str:
+    """Extract the plain text title from a Notion page object.
+
+    Tries ``properties.title`` then ``properties.Name`` before falling back
+    to an empty string.
+
+    Args:
+        page: A Notion page object from the search API.
+
+    Returns:
+        Plain text title string, or empty string if not found.
+    """
+    properties = page.get("properties", {})
+    for key in ("title", "Name"):
+        prop = properties.get(key)
+        if prop and isinstance(prop.get("title"), list):
+            title_list = prop["title"]
+            if title_list:
+                return str(title_list[0].get("plain_text", ""))
+    return ""

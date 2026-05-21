@@ -57,9 +57,7 @@ class ParameterRange:
         Returns:
             Sampled value within the defined range.
         """
-        if not (rng is not None):
-            raise ValueError("rng must be provided")
-        if not (rng is not None):
+        if rng is None:
             raise ValueError("rng must be provided")
         if self.distribution == "uniform":
             return float(rng.uniform(self.min_val, self.max_val))
@@ -109,9 +107,7 @@ class ControlProfile:
         Returns:
             Control array of shape (n_steps, n_actuators).
         """
-        if not (n_actuators is not None):
-            raise ValueError("n_actuators must be provided")
-        if not (n_actuators is not None):
+        if n_actuators is None:
             raise ValueError("n_actuators must be provided")
         if self.profile_type == "zero":
             return np.zeros((n_steps, n_actuators))

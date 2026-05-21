@@ -203,7 +203,7 @@ def check_api_server() -> CheckResult:
 
 def check_pyqt_launcher() -> CheckResult:
     """Check if PyQt6 launcher exists and imports work."""
-    launcher_path = Path("src/launchers/golf_launcher.py")
+    launcher_path = Path("src/launchers/upstream_drift_launcher.py")
 
     if not launcher_path.exists():
         return CheckResult(
@@ -259,7 +259,7 @@ def check_ui_feature_parity() -> CheckResult:
     issues = []
 
     # Check engine selection
-    pyqt_launcher = Path("src/launchers/golf_launcher.py")
+    pyqt_launcher = Path("src/launchers/upstream_drift_launcher.py")
     react_engine = Path("ui/src/components/simulation/EngineSelector.tsx")
 
     if pyqt_launcher.exists() and not react_engine.exists():

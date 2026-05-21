@@ -5,10 +5,6 @@ to any FastAPI-based chat WebSocket endpoint, plus Pydantic contract models
 for the chat protocol, a shared ChatServiceBase for session management,
 and a reusable WebSocket router factory.
 
-Importing this package also registers :class:`~.sidekick_tool.SidekickTool`
-with the launcher's embeddable-tool registry (guarded by
-:func:`contextlib.suppress` so headless contexts are unaffected).
-
 Usage::
 
     from chat import ChatDockWidget
@@ -20,20 +16,53 @@ Usage::
     )
     main_window.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
 """
+# mypy: disable-error-code="unused-ignore"
+# The optional-pydantic import block below uses type: ignore comments that are
+# redundant when mypy runs with --follow-imports=skip (CI) but required locally.
 
-import contextlib
+from typing import Any
 
-with contextlib.suppress(ImportError):
-    from . import sidekick_tool as _sidekick_tool  # noqa: F401
-
+from .cli_provider_availability import (
+    CliProviderEntry,
+    list_available_cli_providers,
+)
 from .service_base import ChatMessage, ChatServiceBase, ChatSession
+from .terminal_contracts import (
+    TerminalAgentEvent,
+    TerminalAgentProviderInfo,
+    TerminalAgentSessionInfo,
+    TerminalAgentSessionRequest,
+    TerminalProviderRegistry,
+    TerminalRegistryError,
+    TerminalShellInfo,
+)
+from .terminal_providers import (
+    build_default_terminal_provider_registry,
+    default_terminal_agent_providers,
+    default_terminal_shells,
+    provider_probe_commands,
+    redact_terminal_command,
+)
+from .terminal_runtime import (
+    ProcessLaunchRequest,
+    TerminalProcessAdapter,
+    TerminalRuntimeError,
+    TerminalSessionRuntime,
+)
 
 try:
     from .models import (
+        DEFAULT_RESPONSE_STYLE,
+        RESPONSE_STYLE_PROMPTS,
         ChatChunkResponse,
         ChatHistoryResponse,
+        ChatIndexStatusResponse,
         ChatMessageRequest,
+        ChatModelInfo,
+        ChatModelListResponse,
         ChatSessionInfo,
+        ResponseStyle,
+        style_prompt,
     )
 
     _PYDANTIC_AVAILABLE = True
@@ -41,17 +70,28 @@ except ImportError:
     _PYDANTIC_AVAILABLE = False
     ChatChunkResponse = None  # type: ignore[assignment, misc]
     ChatHistoryResponse = None  # type: ignore[assignment, misc]
+    ChatIndexStatusResponse = None  # type: ignore[assignment, misc]
     ChatMessageRequest = None  # type: ignore[assignment, misc]
+    ChatModelInfo = None  # type: ignore[assignment, misc]
+    ChatModelListResponse = None  # type: ignore[assignment, misc]
     ChatSessionInfo = None  # type: ignore[assignment, misc]
+    DEFAULT_RESPONSE_STYLE = "standard"
+    RESPONSE_STYLE_PROMPTS = {}
+    ResponseStyle = str  # type: ignore[assignment, misc]
+    style_prompt = None  # type: ignore[assignment, misc]
 
 _PYQT6_AVAILABLE = None
 
 
-def __getattr__(name: str):
+def __getattr__(name: str) -> Any:
     if name in {"ChatDockWidget", "ChatMessageBubble"}:
         from . import chat_dock_widget
 
         return getattr(chat_dock_widget, name)
+    if name == "VoiceInputManager":
+        from .voice_input_manager import VoiceInputManager
+
+        return VoiceInputManager
     if name == "create_chat_router":
         from .router_factory import create_chat_router
 
@@ -62,12 +102,38 @@ def __getattr__(name: str):
 __all__ = [
     "ChatDockWidget",
     "ChatMessageBubble",
+    "VoiceInputManager",
     "ChatMessageRequest",
     "ChatChunkResponse",
     "ChatSessionInfo",
     "ChatHistoryResponse",
+    "ChatModelInfo",
+    "ChatModelListResponse",
+    "ChatIndexStatusResponse",
+    "ResponseStyle",
+    "DEFAULT_RESPONSE_STYLE",
+    "RESPONSE_STYLE_PROMPTS",
+    "style_prompt",
     "ChatServiceBase",
     "ChatSession",
     "ChatMessage",
     "create_chat_router",
+    "TerminalAgentEvent",
+    "TerminalAgentProviderInfo",
+    "TerminalAgentSessionInfo",
+    "TerminalAgentSessionRequest",
+    "TerminalProviderRegistry",
+    "TerminalRegistryError",
+    "TerminalShellInfo",
+    "build_default_terminal_provider_registry",
+    "default_terminal_agent_providers",
+    "default_terminal_shells",
+    "provider_probe_commands",
+    "redact_terminal_command",
+    "ProcessLaunchRequest",
+    "TerminalProcessAdapter",
+    "TerminalRuntimeError",
+    "TerminalSessionRuntime",
+    "CliProviderEntry",
+    "list_available_cli_providers",
 ]

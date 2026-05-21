@@ -1,0 +1,165 @@
+name: Docker Profile Smoke Tests
+
+# Assert that each modular profile contains exactly its declared features
+# (positive checks) and does NOT contain features from a heavier profile
+# (negative / dep-leakage checks).
+#
+# This workflow is the Phase 2.d deliverable from the Modular Docker Builds
+# epic (issue #5768). It uses the capability registry CLI added in Phase 1
+# (src/shared/python/feature_registry/__main__.py) to probe each built image.
+#
+# Workflow inventory note: this workflow is intentionally scoped to
+# Dockerfile.modular changes and is separate from docker-size-gates.yml
+# (size budgets) to keep individual job timeouts manageable.
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "Dockerfile.modular"
+      - "docker/profiles.yaml"
+      - "scripts/docker/**"
+      - "src/shared/python/feature_registry/**"
+      - ".github/workflows/docker-smoke.yml"
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "Dockerfile.modular"
+      - "docker/profiles.yaml"
+      - "scripts/docker/**"
+      - "src/shared/python/feature_registry/**"
+      - ".github/workflows/docker-smoke.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: docker-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  pick-runner:
+    runs-on: d-sorg-fleet
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: |
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=d-sorg-fleet" >> "$GITHUB_OUTPUT"
+
+  profile-smoke:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # slim: api + pendulum only; mujoco and pinocchio must be ABSENT
+          - profile: slim
+            must_have: "api,pendulum"
+            must_not_have: "mujoco,pinocchio,drake"
+            advisory: false
+
+          # standard: slim + mujoco + pinocchio; drake must be ABSENT
+          - profile: standard
+            must_have: "api,pendulum,mujoco,pinocchio"
+            must_not_have: "drake"
+            advisory: false
+
+          # research: standard + drake + pose-mediapipe; biomech features absent
+          - profile: research
+            must_have: "api,mujoco,pinocchio,drake"
+            must_not_have: "opensim,myosuite"
+            advisory: true  # advisory while fleet cache is cold
+
+    continue-on-error: ${{ matrix.advisory }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
+
+      - name: Build modular image (profile=${{ matrix.profile }})
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f
+        with:
+          context: .
+          file: ./Dockerfile.modular
+          build-args: |
+            PROFILE=${{ matrix.profile }}
+          load: true
+          tags: upstream-drift-smoke:${{ matrix.profile }}
+          cache-from: type=gha,scope=smoke-${{ matrix.profile }}
+          cache-to: type=gha,scope=smoke-${{ matrix.profile }},mode=max
+
+      - name: Positive capability checks (profile=${{ matrix.profile }})
+        # Each feature listed in must_have must report AVAILABLE inside the image.
+        run: |
+          PROFILE="${{ matrix.profile }}"
+          MUST_HAVE="${{ matrix.must_have }}"
+          FAILED=0
+
+          IFS=',' read -ra FEATURES <<< "$MUST_HAVE"
+          for feature in "${FEATURES[@]}"; do
+            echo "Checking that '$feature' is AVAILABLE in profile '$PROFILE'..."
+            STATUS=$(docker run --rm upstream-drift-smoke:${PROFILE} \
+              python -m src.shared.python.feature_registry --check "${feature}" --json \
+              2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status','UNKNOWN'))" 2>/dev/null || echo "PROBE_ERROR")
+
+            if [ "$STATUS" = "AVAILABLE" ]; then
+              echo "  [OK] $feature -> $STATUS"
+            else
+              echo "  [FAIL] $feature -> $STATUS (expected AVAILABLE)"
+              FAILED=$((FAILED + 1))
+            fi
+          done
+
+          if [ "$FAILED" -gt 0 ]; then
+            echo "::error::$FAILED positive capability check(s) failed for profile '$PROFILE'"
+            exit 1
+          fi
+
+      - name: Negative capability checks / dep-leakage (profile=${{ matrix.profile }})
+        # Each feature listed in must_not_have must NOT report AVAILABLE.
+        # This catches accidental dep leakage between profiles.
+        run: |
+          PROFILE="${{ matrix.profile }}"
+          MUST_NOT_HAVE="${{ matrix.must_not_have }}"
+          FAILED=0
+
+          IFS=',' read -ra FEATURES <<< "$MUST_NOT_HAVE"
+          for feature in "${FEATURES[@]}"; do
+            echo "Checking that '$feature' is NOT available in profile '$PROFILE'..."
+            STATUS=$(docker run --rm upstream-drift-smoke:${PROFILE} \
+              python -m src.shared.python.feature_registry --check "${feature}" --json \
+              2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status','UNKNOWN'))" 2>/dev/null || echo "PROBE_ERROR")
+
+            if [ "$STATUS" != "AVAILABLE" ]; then
+              echo "  [OK] $feature -> $STATUS (not leaked)"
+            else
+              echo "  [FAIL] $feature -> AVAILABLE in profile '$PROFILE' — dep leakage detected!"
+              FAILED=$((FAILED + 1))
+            fi
+          done
+
+          if [ "$FAILED" -gt 0 ]; then
+            echo "::error::$FAILED dep-leakage check(s) failed for profile '$PROFILE'"
+            exit 1
+          fi
+
+      - name: Registry CLI smoke (profile=${{ matrix.profile }})
+        # Verify that the registry CLI runs without errors and returns JSON.
+        run: |
+          docker run --rm upstream-drift-smoke:${{ matrix.profile }} \
+            python -m src.shared.python.feature_registry --json \
+            | python3 -c "import sys, json; data=json.load(sys.stdin); print(f'Registry OK: {len(data)} entries')"
+
+      - name: API health (profile=${{ matrix.profile }})
+        run: |
+          docker run --rm upstream-drift-smoke:${{ matrix.profile }} \
+            python -c "import fastapi, uvicorn; print('API stack importable')"

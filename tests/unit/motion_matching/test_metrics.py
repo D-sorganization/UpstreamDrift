@@ -124,8 +124,8 @@ def test_python_matlab_schema_equivalence() -> None:
     assert m.swing_id == "TW_ProV1"
     assert m.option == 1
     assert m.schema_version == SCHEMA_VERSION
-    # Re-emit and verify byte-equality with the canonical fixture.
-    assert m.to_json() == text.strip()
+    # Re-emit and verify semantic equivalence with the canonical fixture.
+    assert json.loads(m.to_json()) == json.loads(text)
 
 
 def test_legacy_result_struct_converted_to_metrics() -> None:

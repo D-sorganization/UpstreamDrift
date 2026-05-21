@@ -32,9 +32,7 @@ class MotionCaptureTab(QWidget):
     """Tab for motion capture data visualization with smooth playback."""
 
     def __init__(self, parent: Any = None) -> None:
-        if not (parent is not None):
-            raise ValueError("parent must be provided")
-        if not (parent is not None):
+        if parent is None:
             raise ValueError("parent must be provided")
         super().__init__(parent)
         self.parent = parent
@@ -185,9 +183,7 @@ class MotionCaptureTab(QWidget):
 
     def _on_position_changed(self, position: float) -> None:
         """Update UI when playback position changes."""
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         total_frames = (
             len(self.frame_processor.time_vector) if self.frame_processor else 0
@@ -203,9 +199,7 @@ class MotionCaptureTab(QWidget):
 
     def _on_smooth_frame_updated(self, frame_data: FrameData) -> None:
         """Called on every interpolated frame update (60+ FPS!)."""
-        if not (frame_data is not None):
-            raise ValueError("frame_data must be provided")
-        if not (frame_data is not None):
+        if frame_data is None:
             raise ValueError("frame_data must be provided")
         if not self.opengl_widget.renderer:
             return
@@ -235,9 +229,7 @@ class SimulinkModelTab(QWidget):
     """Tab for Simulink model data visualization."""
 
     def __init__(self, parent: Any = None) -> None:
-        if not (parent is not None):
-            raise ValueError("parent must be provided")
-        if not (parent is not None):
+        if parent is None:
             raise ValueError("parent must be provided")
         super().__init__(parent)
         self.parent = parent
@@ -381,9 +373,7 @@ class SimulinkModelTab(QWidget):
 
     def _on_position_changed(self, position: float) -> None:
         """Update UI when playback position changes."""
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         total_frames = (
             len(self.frame_processor.time_vector) if self.frame_processor else 0
@@ -395,9 +385,7 @@ class SimulinkModelTab(QWidget):
 
     def _on_smooth_frame_updated(self, frame_data: FrameData) -> None:
         """Called on every interpolated frame update."""
-        if not (frame_data is not None):
-            raise ValueError("frame_data must be provided")
-        if not (frame_data is not None):
+        if frame_data is None:
             raise ValueError("frame_data must be provided")
         if not self.opengl_widget.renderer:
             return
@@ -426,9 +414,7 @@ class ComparisonTab(QWidget):
     """Tab for comparing motion capture vs Simulink model data."""
 
     def __init__(self, parent: Any = None) -> None:
-        if not (parent is not None):
-            raise ValueError("parent must be provided")
-        if not (parent is not None):
+        if parent is None:
             raise ValueError("parent must be provided")
         super().__init__(parent)
         self.parent = parent
@@ -557,9 +543,7 @@ class ComparisonTab(QWidget):
         self.playback_controller.seek(float(value))
 
     def _on_position_changed(self, position: float) -> None:
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         if self.frame_processor_mocap:
             total_frames = len(self.frame_processor_mocap.time_vector)
@@ -572,9 +556,7 @@ class ComparisonTab(QWidget):
 
     def _on_smooth_frame_updated(self, frame_data_mocap: FrameData) -> None:
         """Update both visualizers and metrics."""
-        if not (frame_data_mocap is not None):
-            raise ValueError("frame_data_mocap must be provided")
-        if not (frame_data_mocap is not None):
+        if frame_data_mocap is None:
             raise ValueError("frame_data_mocap must be provided")
         if not self.frame_processor_model:
             return

@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 """Drift guard for chat modules synchronized with Tools.
 The baseline hashes were captured from the matching files in the sibling
 Tools repository and should only change when that upstream source changes.
@@ -17,10 +18,10 @@ REPO_ROOT = Path(__file__).resolve().parents[5 if "tests" in __file__ else 4]
 # in UpstreamDrift is a lazy import shim; the canonical Tools content lives in
 # ``_chat_dock_widget_qt.py``.
 TOOLS_BASELINE_HASHES: dict[str, str] = {
-    "src/shared/python/chat/_chat_dock_widget_qt.py": "a5b5689b1e2cd75c20bee9f459de815a85b482fa0410200468afc09cb8f3dfdc",
-    "src/shared/python/chat/models.py": "4be2df1e9aee66c849efa6de9930d058eba4c0a0efe31528768850da33ce4838",
-    "src/shared/python/chat/tests/__init__.py": "5a0bba6299ce217de8cbfc2e20a354ccf479e8d45152f69ad2543d9183d07812",
-    "src/shared/python/chat/tests/test_chat.py": "cd1c1c21570262bbafa19e6217d4cff07fe073051423c031aa17f3ea051881c7",
+    "src/shared/python/chat/_chat_dock_widget_qt.py": "db07e10d514b827e963af6dcd4506bf981c5654fca6e8236cf5f221ef32ef643",  # noqa: E501
+    "src/shared/python/chat/models.py": "29b9abb6d16be9b284f7edeec6a86f2df5c86547db44735aad7ae05ea64ed510",  # noqa: E501
+    "src/shared/python/chat/tests/__init__.py": "5a0bba6299ce217de8cbfc2e20a354ccf479e8d45152f69ad2543d9183d07812",  # noqa: E501
+    "src/shared/python/chat/tests/test_chat.py": "e7ed8d44073b8fe2015aa006218d6c1b717b52e057e51f5985a78e6177254c30",  # noqa: E501
 }
 
 

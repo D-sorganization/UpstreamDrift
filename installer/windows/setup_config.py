@@ -126,10 +126,14 @@ def build_executable_specs(
     profile: PackagingProfile,
 ) -> tuple[ExecutableSpec, ...]:
     """Build executable metadata for the selected packaging profile."""
-    icon_path = str(project_root / "shared" / "icons" / "golf_robot.ico")
+    icon_path = str(
+        project_root / "src" / "launchers" / "assets" / "golf_robot_icon.ico"
+    )
     executables = [
         ExecutableSpec(
-            script=str(project_root / "launchers" / "golf_launcher.py"),
+            script=str(
+                project_root / "src" / "launchers" / "upstream_drift_launcher.py"
+            ),
             base="Win32GUI",
             target_name="GolfModelingSuite.exe",
             icon=icon_path,
@@ -140,7 +144,7 @@ def build_executable_specs(
     if profile.include_api_executable:
         executables.append(
             ExecutableSpec(
-                script=str(project_root / "api" / "server.py"),
+                script=str(project_root / "src" / "api" / "server.py"),
                 base="Console",
                 target_name="GolfAPI.exe",
                 icon=icon_path,
@@ -166,8 +170,8 @@ def build_setup_configuration(
         "packages": packages,
         "excludes": list(EXCLUDES),
         "include_files": [
-            (str(project_root / "shared" / "urdf"), "shared/urdf"),
-            (str(project_root / "shared" / "meshes"), "shared/meshes"),
+            (str(project_root / "src" / "shared" / "urdf"), "shared/urdf"),
+            (str(project_root / "src" / "shared" / "models"), "shared/models"),
             (str(project_root / "config"), "config"),
             (str(project_root / "docs"), "docs"),
             (str(project_root / "README.md"), "README.md"),
@@ -182,7 +186,9 @@ def build_setup_configuration(
         "upgrade_code": "{12345678-1234-5678-9012-123456789012}",
         "add_to_path": True,
         "initial_target_dir": rf"[ProgramFilesFolder]\UpstreamDrift\{profile.profile_id}",
-        "install_icon": str(project_root / "shared" / "icons" / "golf_robot.ico"),
+        "install_icon": str(
+            project_root / "src" / "launchers" / "assets" / "golf_robot_icon.ico"
+        ),
         "summary_data": {
             "author": "UpstreamDrift Team",
             "comments": profile.description,

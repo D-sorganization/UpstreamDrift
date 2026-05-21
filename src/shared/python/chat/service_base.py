@@ -5,7 +5,8 @@ interface that both UpstreamDrift and Gasification_Model extend.
 
 Design Contracts:
     - ``get_or_create_session`` postcondition: returned session is never None
-    - ``add_user_message`` precondition: session_id is non-empty, message is 1-10000 chars
+    - ``add_user_message`` precondition: session_id is non-empty,
+      message is 1-10000 chars
     - ``stream_response`` postcondition: yields at least one item or raises
 
 This module has ZERO application-specific imports.
@@ -14,7 +15,6 @@ This module has ZERO application-specific imports.
 from __future__ import annotations
 
 import abc
-import asyncio
 import logging
 import threading
 import time
@@ -264,6 +264,87 @@ class ChatServiceBase(abc.ABC):
             Response chunks (str for text, dict for tool events).
         """
         ...  # pragma: no cover
+
+    async def condense_session(self, session_id: str) -> None:
+        """Condense the session history to reduce token usage.
+
+        Default implementation logs a warning and does nothing.
+        Subclasses should override with an LLM summarization of the current
+        thread and replace the history with the condensed version.
+
+        Args:
+            session_id: Target session to condense.
+        """
+        logger.warning(
+            "condense_session not implemented for %s; override in subclass",
+            type(self).__name__,
+        )
+
+    async def execute_skill(self, session_id: str, skill_id: str) -> None:
+        """Execute a predefined skill or workflow.
+
+        Default implementation logs a warning and does nothing.
+        Subclasses should override to implement skill execution.
+
+        Args:
+            session_id: Target session.
+            skill_id: ID of the skill to execute.
+        """
+        logger.warning(
+            "execute_skill not implemented for %s; override in subclass",
+            type(self).__name__,
+        )
+
+    async def request_review(self, session_id: str, provider: str) -> str:
+        """Request a multi-agent review of the current thread.
+
+        Default implementation logs a warning and returns the original
+        session ID unchanged.  Subclasses should override to spawn a
+        dedicated review session.
+
+        Args:
+            session_id: Target session.
+            provider: The LLM provider to use for the review.
+
+        Returns:
+            The session ID of the newly created review session.
+        """
+        logger.warning(
+            "request_review not implemented for %s; override in subclass",
+            type(self).__name__,
+        )
+        return session_id
+
+    async def refresh_models(self) -> list[dict[str, Any]]:
+        """Refresh the list of available models from the provider.
+
+        Default implementation raises ``NotImplementedError``.  Subclasses
+        that wire a provider with a model-listing API (e.g. Ollama)
+        should override.  The router converts this exception into a clear
+        ``"refresh_models not supported by this service"`` error reply
+        instead of leaving the action silently broken (Tools issue #2751).
+
+        Returns:
+            List of model info dicts (matches ``ChatModelInfo``).
+        """
+        raise NotImplementedError("refresh_models must be implemented by subclass")
+
+    async def index_codebase(self, root_path: str) -> dict[str, Any]:
+        """Trigger a re-index of the codebase for RAG.
+
+        Default implementation raises ``NotImplementedError``.  Subclasses
+        that bundle an embedding/codemap pipeline should override.  The
+        router converts this exception into a clear
+        ``"index_codebase not supported by this service"`` error reply
+        instead of leaving the action silently broken (Tools issue #2751).
+
+        Args:
+            root_path: Filesystem path to the project root.
+
+        Returns:
+            Index status dict (matches ``ChatIndexStatusResponse``).
+        """
+        raise NotImplementedError("index_codebase must be implemented by subclass")
 
     # ── Hooks for subclass customization ─────────────────────────────
 

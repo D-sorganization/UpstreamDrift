@@ -130,9 +130,7 @@ class SwingOptimizer(ContractChecker):
             club: Golf club model
             config: Optimization configuration (uses defaults if not provided)
         """
-        if not (golfer is not None):
-            raise ValueError("golfer must be provided")
-        if not (golfer is not None):
+        if golfer is None:
             raise ValueError("golfer must be provided")
         self.golfer = golfer
         self.club = club
@@ -242,9 +240,7 @@ class SwingOptimizer(ContractChecker):
         callback: Callable[[int, float], None] | None,
     ) -> tuple[Any, int]:
         """Execute the scipy minimization and return raw result + iterations."""
-        if not (x0 is not None):
-            raise ValueError("x0 must be provided")
-        if not (x0 is not None):
+        if x0 is None:
             raise ValueError("x0 must be provided")
         bounds = get_bounds(self.golfer, self.config, self.joint_limits)
         constraints = build_constraints(
@@ -296,9 +292,7 @@ class SwingOptimizer(ContractChecker):
         computation_time: float,
     ) -> OptimizationResult:
         """Extract trajectory and metrics from a successful optimization."""
-        if not (iterations is not None):
-            raise ValueError("iterations must be provided")
-        if not (iterations is not None):
+        if iterations is None:
             raise ValueError("iterations must be provided")
         trajectory = vector_to_trajectory(
             result.x, self.config, self.golfer, self.club, self.system_moi
@@ -359,9 +353,7 @@ class SwingOptimizer(ContractChecker):
         Returns:
             List of OptimizationResults representing the Pareto frontier
         """
-        if not (n_points is not None):
-            raise ValueError("n_points must be provided")
-        if not (n_points is not None):
+        if n_points is None:
             raise ValueError("n_points must be provided")
         results = []
 

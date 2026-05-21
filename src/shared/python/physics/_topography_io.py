@@ -39,9 +39,7 @@ class _TopographyIOMixin:
         Returns:
             TopographyData instance
         """
-        if not (filepath is not None):
-            raise ValueError("filepath must be provided")
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         filepath = Path(filepath)
         suffix = filepath.suffix.lower()
@@ -69,9 +67,7 @@ class _TopographyIOMixin:
         self, filepath: Path, width: float | None, height: float | None
     ) -> None:
         """Load from NumPy file."""
-        if not (filepath is not None):
-            raise ValueError("filepath must be provided")
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         heightmap = np.load(filepath, allow_pickle=False)
 
@@ -91,9 +87,7 @@ class _TopographyIOMixin:
         self, filepath: Path, width: float | None, height: float | None
     ) -> None:
         """Load from CSV file with x, y, elevation columns."""
-        if not (filepath is not None):
-            raise ValueError("filepath must be provided")
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         import csv
 
@@ -121,9 +115,7 @@ class _TopographyIOMixin:
         self, filepath: Path, width: float | None, height: float | None
     ) -> None:
         """Load from JSON file."""
-        if not (filepath is not None):
-            raise ValueError("filepath must be provided")
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         with open(filepath) as f:
             data = json.load(f)
@@ -151,9 +143,7 @@ class _TopographyIOMixin:
         self, filepath: Path, width: float | None, height: float | None
     ) -> None:
         """Load from GeoTIFF file."""
-        if not (filepath is not None):
-            raise ValueError("filepath must be provided")
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         try:
             import rasterio  # type: ignore[import-untyped]
@@ -183,9 +173,7 @@ class _TopographyIOMixin:
         self, filepath: Path, width: float | None, height: float | None
     ) -> None:
         """Load from image file (grayscale as elevation)."""
-        if not (filepath is not None):
-            raise ValueError("filepath must be provided")
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         try:
             from PIL import Image  # type: ignore[import-untyped]
@@ -217,9 +205,7 @@ class _TopographyIOMixin:
             filepath: Output file path
             format: Output format ("npy", "csv", "json") - auto-detected from suffix if None
         """
-        if not (filepath is not None):
-            raise ValueError("filepath must be provided")
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         filepath = Path(filepath)
         fmt = format or filepath.suffix.lower().lstrip(".")
@@ -238,9 +224,7 @@ class _TopographyIOMixin:
 
     def _save_csv(self, filepath: Path) -> None:
         """Save to CSV file."""
-        if not (filepath is not None):
-            raise ValueError("filepath must be provided")
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         import csv
 
@@ -261,9 +245,7 @@ class _TopographyIOMixin:
 
     def _save_json(self, filepath: Path) -> None:
         """Save to JSON file."""
-        if not (filepath is not None):
-            raise ValueError("filepath must be provided")
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         heightmap = (
             self._heightmap if self._heightmap is not None else self.to_heightmap()

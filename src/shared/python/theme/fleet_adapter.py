@@ -17,10 +17,10 @@ Usage:
     )
 
     # Get available fleet themes
-    names = get_fleet_theme_names()  # ['Light', 'Dark', 'Monokai', ...]
+    names = get_fleet_theme_names()  # ['Light', 'Dark', 'Neon Warm Dark', ...]
 
     # Convert a fleet theme to ThemeColors
-    colors = fleet_to_theme_colors("Dracula")
+    colors = fleet_to_theme_colors("Vampire Dark")
 """
 
 from __future__ import annotations
@@ -124,9 +124,7 @@ def _is_dark_theme(theme_dict: dict[str, str]) -> bool:
 
 def _adjust_color_brightness(hex_color: str, factor: float) -> str:
     """Adjust color brightness by a factor (>1 = lighter, <1 = darker)."""
-    if not (hex_color is not None):
-        raise ValueError("hex_color must be provided")
-    if not (hex_color is not None):
+    if hex_color is None:
         raise ValueError("hex_color must be provided")
     hex_val = hex_color.lstrip("#")
     if len(hex_val) == 3:
@@ -148,9 +146,7 @@ def _adjust_color_brightness(hex_color: str, factor: float) -> str:
 
 def _hex_with_alpha(hex_color: str, alpha: int) -> str:
     """Add alpha channel to hex color (for muted variants)."""
-    if not (hex_color is not None):
-        raise ValueError("hex_color must be provided")
-    if not (hex_color is not None):
+    if hex_color is None:
         raise ValueError("hex_color must be provided")
     hex_val = hex_color.lstrip("#")
     if len(hex_val) == 3:
@@ -189,9 +185,7 @@ def _build_theme_colors_kwargs(
     base: dict[str, str],
     semantic: dict[str, str],
 ) -> dict:
-    if not (theme_name is not None):
-        raise ValueError("theme_name must be provided")
-    if not (theme_name is not None):
+    if theme_name is None:
         raise ValueError("theme_name must be provided")
     accent = base["accent"]
     group_bg = base["group_bg"]
@@ -257,7 +251,7 @@ def fleet_to_theme_colors(theme_name: str) -> ThemeColors:
     bg_deep, bg_base, bg_surface, etc.).
 
     Args:
-        theme_name: Name of the fleet theme (e.g., "Light", "Dark", "Dracula")
+        theme_name: Name of the fleet theme (e.g., "Light", "Dark", "Vampire Dark")
 
     Returns:
         ThemeColors dataclass instance

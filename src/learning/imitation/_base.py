@@ -74,9 +74,7 @@ class ImitationLearner(ABC):
             config: Training configuration.
             device: Compute device.
         """
-        if not (observation_dim is not None):
-            raise ValueError("observation_dim must be provided")
-        if not (observation_dim is not None):
+        if observation_dim is None:
             raise ValueError("observation_dim must be provided")
         self.observation_dim = observation_dim
         self.action_dim = action_dim
@@ -104,9 +102,7 @@ class ImitationLearner(ABC):
         Returns:
             Imitation learner instance.
         """
-        if not (observation_space is not None):
-            raise ValueError("observation_space must be provided")
-        if not (observation_space is not None):
+        if observation_space is None:
             raise ValueError("observation_space must be provided")
         obs_dim = int(np.prod(observation_space.shape))
         act_dim = int(np.prod(action_space.shape))

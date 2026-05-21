@@ -97,8 +97,8 @@ def _synthetic_body_with_pig_pair(n_frames: int = 16) -> SimpleNamespace:
 # --------------------------------------------------------------------------- #
 
 
-def test_session_schema_bumped_to_v5() -> None:
-    assert SESSION_SCHEMA_VERSION == 5
+def test_session_schema_bumped_to_v6() -> None:
+    assert SESSION_SCHEMA_VERSION == 6
 
 
 def test_body_skeleton_block_default_round_trip() -> None:
@@ -245,9 +245,7 @@ def test_library_layer_skips_missing_markers(axes_canvas) -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_scrub_in_library_mode_updates_without_error(
-    c3d_body_target, axes_canvas
-) -> None:
+def test_scrub_in_library_mode_updates_without_error(c3d_body_target, axes_canvas) -> None:
     ax, canvas = axes_canvas
     ctrl = LiveViewController(ax, canvas, body_skeleton_style="library_shapes")
     ctrl.set_target(body=c3d_body_target)
@@ -266,9 +264,7 @@ def test_scrub_in_library_mode_updates_without_error(
         assert ctrl.current_frame == f
 
 
-def test_scrub_in_lines_mode_updates_without_error(
-    c3d_body_target, axes_canvas
-) -> None:
+def test_scrub_in_lines_mode_updates_without_error(c3d_body_target, axes_canvas) -> None:
     ax, canvas = axes_canvas
     ctrl = LiveViewController(ax, canvas, body_skeleton_style="lines")
     ctrl.set_target(body=c3d_body_target)
@@ -317,7 +313,5 @@ def test_library_shapes_scrub_meets_30_fps(c3d_body_target, axes_canvas) -> None
 
     fps = n / elapsed if elapsed > 0 else float("inf")
     # Record on the test report so the operator can read the measured fps.
-    print(
-        f"\n[matcher-bpv] library-shapes scrub fps: {fps:.1f} (n={n}, elapsed={elapsed:.3f}s)"
-    )
+    print(f"\n[matcher-bpv] library-shapes scrub fps: {fps:.1f} (n={n}, elapsed={elapsed:.3f}s)")
     assert fps >= 30.0, f"library-shapes scrub fps {fps:.1f} below 30 fps target"

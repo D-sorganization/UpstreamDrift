@@ -4,7 +4,9 @@
  * See issue #1198
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { ActuatorPanel } from './ActuatorPanel';
 import type { ActuatorInfo, ActuatorPanelState } from './ActuatorPanel';
 
 describe('ActuatorPanel types', () => {
@@ -117,5 +119,175 @@ describe('ActuatorPanel types', () => {
 
     expect(state.n_actuators).toBe(0);
     expect(state.actuators).toHaveLength(0);
+  });
+});
+
+describe('ActuatorPanel React Component', () => {
+  const mockStateSmall: ActuatorPanelState = {
+    n_actuators: 3,
+    actuators: [
+      {
+        index: 0,
+        name: 'shoulder_flexion',
+        control_type: 'constant',
+        value: 0.0,
+        min_value: -3.14,
+        max_value: 3.14,
+        units: 'rad',
+        joint_type: 'revolute',
+      },
+      {
+        index: 1,
+        name: 'hip_rotation',
+        control_type: 'constant',
+        value: 0.5,
+        min_value: -3.14,
+        max_value: 3.14,
+        units: 'rad',
+        joint_type: 'revolute',
+      },
+      {
+        index: 2,
+        name: 'spine_extension',
+        control_type: 'constant',
+        value: -0.2,
+        min_value: -1.0,
+        max_value: 1.0,
+        units: 'rad',
+        joint_type: 'revolute',
+      },
+    ],
+    available_control_types: ['constant', 'polynomial', 'pd_gains'],
+    engine_name: 'mujoco',
+  };
+
+  const mockStateLarge: ActuatorPanelState = {
+    n_actuators: 22,
+    actuators: Array.from({ length: 22 }, (_, i) => {
+      let name = `joint_${i}`;
+      if (i < 8) name = `shoulder_flex_${i}`;
+      else if (i < 16) name = `hip_rot_${i}`;
+      else name = `spine_ext_${i}`;
+      return {
+        index: i,
+        name,
+        control_type: 'constant',
+        value: 0.0,
+        min_value: -3.14,
+        max_value: 3.14,
+        units: 'rad',
+        joint_type: 'revolute',
+      };
+    }),
+    available_control_types: ['constant', 'polynomial'],
+    engine_name: 'mujoco',
+  };
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    global.fetch = vi.fn();
+  });
+
+  it('renders loading state first, then loaded actuators', async () => {
+    vi.mocked(global.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockStateSmall,
+    } as Response);
+
+    render(<ActuatorPanel isRunning={false} />);
+    expect(screen.getByText(/Loading actuators.../i)).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText('shoulder_flexion')).toBeInTheDocument();
+    });
+    expect(screen.getByText('hip_rotation')).toBeInTheDocument();
+    expect(screen.getByText('spine_extension')).toBeInTheDocument();
+  });
+
+  it('toggles collapsible Polynomial Generator Panel and configures coefficients', async () => {
+    vi.mocked(global.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockStateSmall,
+    } as Response);
+
+    render(<ActuatorPanel isRunning={false} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('shoulder_flexion')).toBeInTheDocument();
+    });
+
+    // Find the toggle button/header for Polynomial Generator
+    const polyHeader = screen.getByRole('button', { name: /Polynomial Generator/i });
+    expect(polyHeader).toBeInTheDocument();
+
+    // Initially collapsed, coefficient inputs shouldn't be visible
+    expect(screen.queryByLabelText(/Coefficient 0/i)).not.toBeInTheDocument();
+
+    // Click to expand
+    fireEvent.click(polyHeader);
+    expect(screen.getByLabelText(/Coefficient 0/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Coefficient 1/i)).toBeInTheDocument();
+
+    // Change coefficient value
+    const input0 = screen.getByLabelText(/Coefficient 0/i);
+    fireEvent.change(input0, { target: { value: '2.5' } });
+    expect(input0).toHaveValue(2.5);
+
+    // Add a coefficient
+    const addBtn = screen.getByRole('button', { name: /Add Coefficient/i });
+    fireEvent.click(addBtn);
+    expect(screen.getByLabelText(/Coefficient 2/i)).toBeInTheDocument();
+
+    // Remove a coefficient
+    const removeBtns = screen.getAllByRole('button', { name: /Remove/i });
+    // Click the last remove button to remove Coefficient 2
+    fireEvent.click(removeBtns[removeBtns.length - 1]);
+    expect(screen.queryByLabelText(/Coefficient 2/i)).not.toBeInTheDocument();
+
+    // Mock the POST request for applying polynomial
+    vi.mocked(global.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ status: 'ok' }),
+    } as Response);
+
+    const applyBtn = screen.getByRole('button', { name: /Apply Polynomial/i });
+    fireEvent.click(applyBtn);
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith('/api/simulation/actuators', expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          actuator_index: 0, // Default to first actuator
+          value: 0.0,
+          control_type: 'polynomial',
+          parameters: { coefficients: [2.5, 0] },
+        }),
+      }));
+    });
+  });
+
+  it('groups and collapses segments when there are more than 20 actuators', async () => {
+    vi.mocked(global.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockStateLarge,
+    } as Response);
+
+    render(<ActuatorPanel isRunning={false} />);
+
+    await waitFor(() => {
+      // It should display the group headers instead of showing 22 individual sliders directly
+      expect(screen.getByRole('button', { name: /Upper Body \(8\)/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Lower Body \(8\)/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Core & Head \(6\)/i })).toBeInTheDocument();
+    });
+
+    // Check that we have group filters (dropdown or buttons)
+    const filterSelect = screen.getByLabelText(/Filter by region/i);
+    expect(filterSelect).toBeInTheDocument();
+
+    // Choose 'Upper Body' to filter
+    fireEvent.change(filterSelect, { target: { value: 'Upper Body' } });
+    expect(screen.queryByText(/hip_rot_/i)).not.toBeInTheDocument();
+    expect(screen.getByText('shoulder_flex_0')).toBeInTheDocument();
   });
 });

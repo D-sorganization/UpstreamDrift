@@ -63,6 +63,7 @@ _REGISTRATION_ORDER: tuple[str, ...] = (
     "auth",
     "observability",
     "core",
+    "capabilities",
     "engines",
     "simulation",
     "video",

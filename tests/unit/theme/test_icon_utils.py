@@ -29,7 +29,11 @@ def test_icon_colorizer_type_assertions():
 def test_icon_colorizer_colorize_svg_file(tmp_path, qapp):
     """Test dynamic recoloring of an external SVG file."""
     svg_file = tmp_path / "test.svg"
-    svg_file.write_text('<svg fill="none" stroke="#000"></svg>')
+    svg_file.write_text(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000">'
+        '<path d="M12 2L2 22h20L12 2z"/>'
+        "</svg>"
+    )
 
     icon = IconColorizer.colorize_svg_file(svg_file, "#ff0000")
     assert isinstance(icon, QIcon)

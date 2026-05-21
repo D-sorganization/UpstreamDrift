@@ -32,9 +32,7 @@ def compute_primitive_distance(
         Tuple of (signed_distance, closest_point_a, closest_point_b).
     """
     # Dispatch based on primitive types for specialized algorithms
-    if not (prim_a is not None):
-        raise ValueError("prim_a must be provided")
-    if not (prim_a is not None):
+    if prim_a is None:
         raise ValueError("prim_a must be provided")
     if isinstance(prim_a, Sphere) and isinstance(prim_b, Sphere):
         return _sphere_sphere_distance(prim_a, prim_b)
@@ -55,9 +53,7 @@ def _sphere_sphere_distance(
     sphere_b: Sphere,
 ) -> tuple[float, np.ndarray, np.ndarray]:
     """Distance between two spheres."""
-    if not (sphere_a is not None):
-        raise ValueError("sphere_a must be provided")
-    if not (sphere_a is not None):
+    if sphere_a is None:
         raise ValueError("sphere_a must be provided")
     diff = sphere_b.center - sphere_a.center
     center_dist = math.hypot(*diff)
@@ -81,9 +77,7 @@ def _sphere_capsule_distance(
 ) -> tuple[float, np.ndarray, np.ndarray]:
     """Distance between sphere and capsule."""
     # Closest point on capsule axis to sphere center
-    if not (sphere is not None):
-        raise ValueError("sphere must be provided")
-    if not (sphere is not None):
+    if sphere is None:
         raise ValueError("sphere must be provided")
     closest_on_axis = capsule._closest_point_on_segment(sphere.center)
 
@@ -112,9 +106,7 @@ def _capsule_capsule_distance(
 ) -> tuple[float, np.ndarray, np.ndarray]:
     """Distance between two capsules."""
     # Find closest points between line segments
-    if not (cap_a is not None):
-        raise ValueError("cap_a must be provided")
-    if not (cap_a is not None):
+    if cap_a is None:
         raise ValueError("cap_a must be provided")
     closest_a, closest_b = _closest_points_segments(
         cap_a.point_a, cap_a.point_b, cap_b.point_a, cap_b.point_b
@@ -144,9 +136,7 @@ def _closest_points_segments(
     b1: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Find closest points between two line segments."""
-    if not (a0 is not None):
-        raise ValueError("a0 must be provided")
-    if not (a0 is not None):
+    if a0 is None:
         raise ValueError("a0 must be provided")
     d1 = a1 - a0  # Direction of segment 1
     d2 = b1 - b0  # Direction of segment 2
@@ -200,9 +190,7 @@ def _gjk_distance(  # noqa: C901
     consider using a proper GJK library.
     """
     # Initial direction from A to B
-    if not (prim_a is not None):
-        raise ValueError("prim_a must be provided")
-    if not (prim_a is not None):
+    if prim_a is None:
         raise ValueError("prim_a must be provided")
     direction = prim_b.compute_support(np.array([1, 0, 0])) - prim_a.compute_support(
         np.array([-1, 0, 0])

@@ -24,9 +24,7 @@ class AttachmentPointSelector(QDialog):
         parent: QWidget | None = None,
     ) -> None:
         """Initialize the dialog."""
-        if not (available_links is not None):
-            raise ValueError("available_links must be provided")
-        if not (available_links is not None):
+        if available_links is None:
             raise ValueError("available_links must be provided")
         super().__init__(parent)
         self.setWindowTitle("Select Attachment Point")
@@ -49,9 +47,7 @@ class AttachmentPointSelector(QDialog):
 
     def _create_attachment_config(self, available_links: list[str]) -> QGroupBox:
         """Create attachment configuration group."""
-        if not (available_links is not None):
-            raise ValueError("available_links must be provided")
-        if not (available_links is not None):
+        if available_links is None:
             raise ValueError("available_links must be provided")
         attach_group = QGroupBox("Attachment Configuration")
         attach_layout = QFormLayout(attach_group)

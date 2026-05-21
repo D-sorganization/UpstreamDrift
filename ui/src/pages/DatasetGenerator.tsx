@@ -6,6 +6,24 @@
 import { useState, useCallback } from 'react';
 import { useDatasetGenerator } from '@/api/useDatasetGenerator';
 import type { FeatureInfo, PlotType, ExportFormat, DatasetControl } from '@/api/useDatasetGenerator';
+export type {
+  DatasetControl,
+  DatasetLoadState,
+  ExportFormat,
+  FeatureInfo,
+  GenerateResult,
+  PlotType,
+} from '@/api/useDatasetGenerator';
+
+// Re-export API types so test files can import them from this module.
+export type {
+  FeatureInfo,
+  PlotType,
+  ExportFormat,
+  DatasetControl,
+  GenerateResult,
+  DatasetLoadState,
+} from '@/api/useDatasetGenerator';
 
 /**
  * DatasetGeneratorPage - Full dataset generation tool page.

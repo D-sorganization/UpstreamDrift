@@ -21,7 +21,7 @@ ingestion.
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET  # noqa: S314  # Security: defusedxml prevents XML attacks
 from pathlib import Path
 
 import numpy as np

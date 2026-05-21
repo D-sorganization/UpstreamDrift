@@ -16,7 +16,6 @@ from src.shared.python.gui_launcher.ud_tool_catalog import (
     get_ud_tool_catalog,
 )
 
-
 # ── UDToolEntry unit tests ────────────────────────────────────────────
 
 

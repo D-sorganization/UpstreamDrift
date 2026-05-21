@@ -8,6 +8,24 @@
 import { useState, useCallback } from 'react';
 import { useTerrain } from '@/api/useTerrain';
 import type { TerrainPreset, TerrainMaterial, TerrainTypeInfo } from '@/api/useTerrain';
+export type {
+  ActiveTerrain,
+  TerrainLoadState,
+  TerrainMaterial,
+  TerrainPreset,
+  TerrainProperties,
+  TerrainTypeInfo,
+} from '@/api/useTerrain';
+
+// Re-export API types so test files can import them from this module.
+export type {
+  TerrainPreset,
+  TerrainMaterial,
+  TerrainTypeInfo,
+  TerrainProperties,
+  ActiveTerrain,
+  TerrainLoadState,
+} from '@/api/useTerrain';
 
 /**
  * TerrainPage - Full terrain engine tool page.

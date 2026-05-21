@@ -191,6 +191,9 @@ class LauncherDialogsMixin:
         if not tool_id:
             raise ValueError("tool_id must be non-empty")
 
+        if self._open_tab_on_sidekick_sidebar(tool_id):
+            return
+
         host = getattr(self, "embedded_host", None)
         opener = getattr(host, "open_tab", None) if host is not None else None
         if callable(opener):
@@ -211,6 +214,63 @@ class LauncherDialogsMixin:
             f"Sidekick tab '{tool_id}' is not yet wired in this build.",
             "info",
         )
+
+    def _open_tab_on_sidekick_sidebar(self, tool_id: str) -> bool:
+        """Open a Tools sidebar tab through its public tab-selection API."""
+        sidebar = getattr(self, "sidekick_sidebar", None)
+        if sidebar is None:
+            try:
+                from src.shared.python.gui_launcher import tools_sidebar_integration
+
+                get_active_sidebar = getattr(
+                    tools_sidebar_integration, "get_active_sidebar", None
+                )
+                if callable(get_active_sidebar):
+                    sidebar = get_active_sidebar()
+            except ImportError:
+                sidebar = None
+        if sidebar is None:
+            return False
+
+        set_visible = getattr(sidebar, "setVisible", None)
+        if callable(set_visible):
+            set_visible(True)
+
+        for method_name in (
+            "open_tab",
+            "set_active_tab",
+            "activate_tab",
+            "select_tab",
+            "show_tab",
+        ):
+            opener = getattr(sidebar, method_name, None)
+            if not callable(opener):
+                continue
+            try:
+                result = opener(tool_id)
+                if result is not False:
+                    return True
+            except Exception as exc:  # noqa: BLE001 - show through toast path
+                logger.warning(
+                    "sidekick_sidebar.%s(%r) failed: %s",
+                    method_name,
+                    tool_id,
+                    exc,
+                )
+                self.show_toast(f"Failed to open {tool_id} tab: {exc}", "error")
+                return True
+
+        show_hidden = getattr(sidebar, "set_tab_visible", None)
+        activate = getattr(sidebar, "set_active_tab", None)
+        if callable(show_hidden) and callable(activate):
+            try:
+                if show_hidden(tool_id, True) and activate(tool_id):
+                    return True
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("sidekick_sidebar tab activation failed: %s", exc)
+                self.show_toast(f"Failed to open {tool_id} tab: {exc}", "error")
+                return True
+        return False
 
     def open_preferences_section(self, section_id: str) -> None:
         """Open the preferences dialog focused on *section_id*.

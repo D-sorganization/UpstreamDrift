@@ -18,14 +18,22 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
+from src.shared.python.ai.exceptions import (
+    AIConnectionError,
+    AIProviderError,
+    AIRateLimitError,
+    AITimeoutError,
+)
+from src.shared.python.ai.memory_manager import (
+    build_memory_prompt_section,
+    load_agents_md,
+)
 from src.shared.python.ai.types import (
     AgentChunk,
     AgentResponse,
     ChatModelInfo,
     ConversationContext,
     ProviderCapabilities,
-    ThinkingCapabilities,
-    ThinkingLevel,
 )
 
 logger = get_logger(__name__)
@@ -185,33 +193,88 @@ class BaseAgentAdapter(ABC):
         """
         ...
 
+    # ------------------------------------------------------------------ #
+    # Provider catalogue surface for the shared chat dock dropdowns
+    # (Tools issue #2871).
+    #
+    # Concrete adapters MUST override these and SHOULD do so without
+    # performing a blocking network call when the local catalogue is
+    # sufficient. The default implementations raise NotImplementedError
+    # so a forgotten override is loud.
+    # ------------------------------------------------------------------ #
+    @abstractmethod
     def list_models(self) -> list[ChatModelInfo]:
-        """Return available models for this provider.
+        """Return a non-empty list of ChatModelInfo objects known to this adapter.
 
-        Concrete adapters should override this to query the provider API
-        or return a static list.  The default implementation returns an
-        empty list so that existing adapters continue to work without
-        modification.
-
-        Returns:
-            List of ChatModelInfo entries, at least one entry expected
-            for providers that support model enumeration.
-        """
-        return []
-
-    def thinking_capabilities(self) -> ThinkingCapabilities:
-        """Return the thinking/reasoning capabilities of the current model.
-
-        Override in concrete adapters that support extended thinking or
-        reasoning effort control.
+        Implementations may probe a live API but MUST fall back to a
+        static catalogue when the API is unreachable so unit tests and
+        offline environments can always populate the model dropdown.
 
         Returns:
-            ThinkingCapabilities indicating level support and available levels.
+            List of model identifiers; always non-empty.
         """
-        return ThinkingCapabilities(
-            supports_levels=False,
-            available_levels=[ThinkingLevel.OFF],
+        ...
+
+    @abstractmethod
+    def thinking_capabilities(self) -> Any:
+        """Return the :class:`ThinkingCapabilities` for the current model.
+
+        Returns:
+            ``ThinkingCapabilities`` describing supported reasoning
+            levels. Adapters whose models do not support reasoning return
+            a capability bundle with only the ``"none"`` level so the
+            shared chat dropdown always has at least one entry.
+        """
+        ...
+
+    # ------------------------------------------------------------------ #
+    # Token-count normalization (issue #2763)                           #
+    # ------------------------------------------------------------------ #
+    @staticmethod
+    def _normalize_token_counts(raw_usage: dict[str, int]) -> dict[str, int]:
+        """Normalize provider-specific token-count keys to a canonical set.
+
+        Each provider uses different key names for the same concepts:
+        - Anthropic: ``input_tokens``, ``output_tokens``
+        - OpenAI / Ollama: ``prompt_tokens``, ``completion_tokens``, ``total_tokens``
+        - Cline: already uses ``input_tokens`` / ``output_tokens``
+        - BitNet / Rust: return ``{}``
+
+        This method maps all variants to the canonical keys so callers never
+        need to know which provider produced a response (issue #2763).
+
+        Args:
+            raw_usage: Raw usage dict from the provider.
+
+        Returns:
+            Dict with keys ``input_tokens``, ``output_tokens``,
+            ``total_tokens`` (all ``int``).  Missing source keys default to 0.
+            ``total_tokens`` is computed as ``input + output`` when not
+            present in the raw dict.
+        """
+        if not raw_usage:
+            return {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}
+
+        # Resolve input tokens (Anthropic / Cline style vs. OpenAI / Ollama style)
+        input_tokens: int = raw_usage.get(
+            "input_tokens",
+            raw_usage.get("prompt_tokens", 0),
         )
+        # Resolve output tokens
+        output_tokens: int = raw_usage.get(
+            "output_tokens",
+            raw_usage.get("completion_tokens", 0),
+        )
+        # Prefer an explicit total; fall back to sum
+        total_tokens: int = raw_usage.get(
+            "total_tokens",
+            input_tokens + output_tokens,
+        )
+        return {
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens,
+            "total_tokens": total_tokens,
+        }
 
     def format_messages_for_provider(
         self,
@@ -230,9 +293,9 @@ class BaseAgentAdapter(ABC):
         Returns:
             List of message dictionaries for the provider.
         """
-        if not (context is not None):
+        if context is None:
             raise ValueError("context must be provided")
-        if not (context is not None):
+        if context is None:
             raise ValueError("context must be provided")
         messages: list[dict[str, Any]] = []
 
@@ -260,38 +323,149 @@ class BaseAgentAdapter(ABC):
         self,
         tools: list[ToolDeclaration],
         expertise_level: str = "beginner",
+        context: ConversationContext | None = None,
+        app_context: str = "assistant",
     ) -> str:
         """Build a system prompt including tool context.
 
-        This default implementation provides a basic system prompt.
-        Override for provider-specific or use-case-specific prompts.
+        This default implementation delegates the preamble to
+        :func:`src.shared.python.ai.system_prompts.build_system_prompt` so
+        that domain-specific branding is injected by the consuming
+        application rather than hardcoded here.  Callers that previously
+        relied on the default Golf-Modeling-Suite preamble should pass
+        ``app_context="upstream_drift"``.
 
         Args:
             tools: Available tools to describe.
             expertise_level: User's expertise level.
+            context: Optional conversation context containing project and
+                prompt-memory metadata.
+            app_context: Registry key for the consuming application
+                (e.g. ``"upstream_drift"``, ``"gasification"``).  Defaults
+                to ``"assistant"`` which produces a brand-neutral preamble.
 
         Returns:
             System prompt string.
         """
-        if not (tools is not None):
-            raise ValueError("tools must be provided")
-        if not (tools is not None):
+        if tools is None:
             raise ValueError("tools must be provided")
         tool_descriptions = "\n".join(
             f"- {tool.name}: {tool.description}" for tool in tools
         )
+        memory_section = self.build_context_instruction_section(context)
 
-        return (
-            f"You are an AI assistant for the Golf Modeling Suite, a research-grade "
-            f"biomechanics simulation platform.\n\n"
-            f"Your role is to help users analyze golf swings using advanced physics "
-            f"simulations across multiple engines (MuJoCo, Drake, Pinocchio).\n\n"
-            f"User expertise level: {expertise_level}\n\n"
-            f"Available tools:\n{tool_descriptions}\n\n"
-            f"Guidelines:\n"
-            f"1. Always validate scientific claims before presenting them\n"
-            f"2. Explain concepts at the user's expertise level\n"
-            f"3. Use tools to perform analyses rather than making up results\n"
-            f"4. Cite sources and acknowledge uncertainty\n"
-            f"5. Guide users through workflows step by step"
+        # Response style instructions (Tools #2750)
+        style = (context.response_style if context else "standard").lower()
+        style_instructions = ""
+        if style == "concise":
+            style_instructions = (
+                "Reply concisely. Prefer code, tables, and short bullet lists over "
+                "prose. Skip preamble and recap."
+            )
+        elif style == "detailed":
+            style_instructions = (
+                "Reply in detail. Walk through reasoning, name relevant trade-offs, "
+                "and include worked examples when they clarify the answer."
+            )
+        else:  # standard
+            style_instructions = (
+                "Reply at a standard level of detail. Briefly explain reasoning "
+                "where it helps the user act on the answer."
+            )
+
+        from src.shared.python.ai.system_prompts import (
+            build_system_prompt as _build_preamble,
+        )
+
+        preamble = _build_preamble(
+            app_context=app_context,
+            expertise_level=expertise_level,
+        )
+
+        parts = [preamble]
+        if style_instructions:
+            parts.append(f"Response style: {style_instructions}")
+        if memory_section:
+            parts.append(memory_section)
+        if tool_descriptions:
+            parts.append(f"Available tools:\n{tool_descriptions}")
+
+        return "\n\n".join(parts)
+
+    def build_context_instruction_section(
+        self,
+        context: ConversationContext | None,
+    ) -> str:
+        """Build repository and persisted-memory prompt context."""
+        if context is None:
+            return ""
+
+        project_root_value = context.metadata.get("project_root")
+        project_root = None
+        if isinstance(project_root_value, str) and project_root_value:
+            from pathlib import Path
+
+            project_root = Path(project_root_value)
+
+        prompt_memory = context.metadata.get("prompt_memory")
+        if not isinstance(prompt_memory, dict):
+            prompt_memory = None
+
+        return build_memory_prompt_section(
+            prompt_memory=prompt_memory,
+            agents_md=load_agents_md(project_root),
+        )
+
+    def _classify_error(
+        self,
+        error: Exception,
+        provider: str,
+        timeout: float | None = None,
+    ) -> AIProviderError:
+        """Classify an exception into the canonical AI error hierarchy.
+
+        Performs a string-scan on the exception message to determine the
+        most specific ``AIProviderError`` subclass.  Adapters call this
+        instead of replicating the classification ladder themselves.
+
+        Pre-check typed provider exceptions *before* calling this helper
+        when the provider SDK exposes them (e.g. ``anthropic.RateLimitError``).
+
+        Args:
+            error: The original exception to classify.
+            provider: Provider name string embedded in the raised error
+                (e.g. ``"anthropic"``, ``"openai"``, ``"cline"``).
+            timeout: Timeout value [s] to embed in :class:`AITimeoutError`
+                when the error is classified as a timeout.
+
+        Returns:
+            An :class:`AIProviderError` (or subclass) instance.  Callers
+            should raise this with ``raise ... from error``.
+        """
+        err_str = str(error).lower()
+
+        if any(s in err_str for s in ("rate limit", "429", "too many requests")):
+            return AIRateLimitError(
+                f"{provider} rate limit exceeded. Please wait and retry.",
+                provider=provider,
+            )
+
+        if any(s in err_str for s in ("timeout", "timed out")):
+            return AITimeoutError(
+                f"{provider} request timed out"
+                + (f" after {timeout}s" if timeout is not None else ""),
+                provider=provider,
+                timeout=timeout,
+            )
+
+        _conn_keywords = ("connection", "network", "refused", "unreachable")
+        if any(s in err_str for s in _conn_keywords):
+            return AIConnectionError(
+                f"Cannot connect to {provider}. Check your network.",
+                provider=provider,
+            )
+
+        return AIProviderError(
+            f"{provider} error: {error}",
+            provider=provider,
         )

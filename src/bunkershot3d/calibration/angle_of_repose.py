@@ -140,10 +140,10 @@ class AngleOfReposeExperiment:
         else:
             self._use_mock = use_mock
 
-        if backend not in ("mock", "mpm", "mujoco"):
+        if not self._use_mock and backend not in ("mock", "mpm", "mujoco"):
             raise BackendNotImplementedError(
                 backend,
-                feature="AngleOfReposeExperiment requires 'mpm', 'mujoco', or 'mock' backend",
+                feature="AngleOfReposeExperiment physical simulation requires 'mpm' or 'mujoco' backend",
             )
 
         self.target_angle = 32.0

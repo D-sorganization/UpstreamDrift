@@ -1,0 +1,277 @@
+"""Pure-data health query API for AI integrations.
+
+This module is intentionally Qt-free. Anything (CLI, alt-GUI, server-side
+diagnostics) can call :func:`query_integration_status` and
+:func:`list_all_integrations` and get the same per-integration health
+snapshot the dashboard widget displays.
+
+Each integration is described by a small probe function that returns
+:class:`IntegrationStatus`. Probes must never raise — they catch their
+own failures and surface them as ``ERROR``-level statuses.
+"""
+
+from __future__ import annotations
+
+import os
+import time
+from dataclasses import dataclass
+from enum import StrEnum
+from typing import Any, Protocol
+
+__all__ = [
+    "IntegrationStatus",
+    "IntegrationStatusLevel",
+    "list_all_integrations",
+    "query_integration_status",
+]
+
+
+class IntegrationStatusLevel(StrEnum):
+    """Health-level taxonomy for an integration row."""
+
+    OK = "ok"
+    DEGRADED = "degraded"
+    ERROR = "error"
+    UNCONFIGURED = "unconfigured"
+
+
+@dataclass(frozen=True)
+class IntegrationStatus:
+    """A snapshot of one integration's health.
+
+    Attributes:
+        integration_id: Stable identifier (e.g. ``"linear"``).
+        display_name: Human-facing label (e.g. ``"Linear"``).
+        level: Status bucket.
+        message: One-line human description (last error / "connected" / etc.).
+        tools_exposed: How many tools this integration currently exposes.
+        latency_ms: Last-probe latency in milliseconds (0 if unknown).
+        last_success_iso: ISO-8601 timestamp of last successful probe, if any.
+    """
+
+    integration_id: str
+    display_name: str
+    level: IntegrationStatusLevel
+    message: str = ""
+    tools_exposed: int = 0
+    latency_ms: float = 0.0
+    last_success_iso: str | None = None
+
+
+class _Pool(Protocol):
+    """Subset of :class:`McpClientPool` the dashboard needs."""
+
+    def connected_count(self) -> int: ...
+    def total_count(self) -> int: ...
+
+
+# ---------------------------------------------------------------------------
+# Probes (one per integration). Each takes no arguments and returns a status.
+# ---------------------------------------------------------------------------
+
+
+def _probe_linear() -> IntegrationStatus:
+    start = time.perf_counter()
+    token = os.environ.get("LINEAR_API_KEY")
+    if not token:
+        # Also check the module-level cached token used by linear.py.
+        try:
+            from src.shared.python.ai.integrations import linear as linear_mod
+
+            token = getattr(linear_mod, "_LINEAR_API_TOKEN", None)
+        except ImportError:
+            token = None
+    if not token:
+        return IntegrationStatus(
+            integration_id="linear",
+            display_name="Linear",
+            level=IntegrationStatusLevel.UNCONFIGURED,
+            message="LINEAR_API_KEY not set",
+        )
+    latency = (time.perf_counter() - start) * 1000
+    return IntegrationStatus(
+        integration_id="linear",
+        display_name="Linear",
+        level=IntegrationStatusLevel.OK,
+        message="token configured",
+        tools_exposed=0,
+        latency_ms=latency,
+    )
+
+
+def _probe_notion() -> IntegrationStatus:
+    start = time.perf_counter()
+    token = os.environ.get("NOTION_API_KEY") or os.environ.get("NOTION_TOKEN")
+    if not token:
+        try:
+            from src.shared.python.ai.integrations import notion as notion_mod
+
+            token = getattr(notion_mod, "_NOTION_API_TOKEN", None)
+        except ImportError:
+            token = None
+    if not token:
+        return IntegrationStatus(
+            integration_id="notion",
+            display_name="Notion",
+            level=IntegrationStatusLevel.UNCONFIGURED,
+            message="NOTION_API_KEY not set",
+        )
+    latency = (time.perf_counter() - start) * 1000
+    return IntegrationStatus(
+        integration_id="notion",
+        display_name="Notion",
+        level=IntegrationStatusLevel.OK,
+        message="token configured",
+        latency_ms=latency,
+    )
+
+
+def _probe_affine() -> IntegrationStatus:
+    start = time.perf_counter()
+    token = os.environ.get("AFFINE_API_KEY")
+    if not token:
+        try:
+            from src.shared.python.ai.integrations import affine as affine_mod
+
+            token = getattr(affine_mod, "_AFFINE_API_TOKEN", None)
+        except ImportError:
+            token = None
+    if not token:
+        return IntegrationStatus(
+            integration_id="affine",
+            display_name="AFFiNE",
+            level=IntegrationStatusLevel.UNCONFIGURED,
+            message="AFFINE_API_KEY not set",
+        )
+    latency = (time.perf_counter() - start) * 1000
+    return IntegrationStatus(
+        integration_id="affine",
+        display_name="AFFiNE",
+        level=IntegrationStatusLevel.OK,
+        message="token configured",
+        latency_ms=latency,
+    )
+
+
+def _probe_obsidian() -> IntegrationStatus:
+    start = time.perf_counter()
+    vault_path = os.environ.get("OBSIDIAN_VAULT_PATH")
+    if not vault_path:
+        try:
+            from src.shared.python.ai.integrations import obsidian as obsidian_mod
+
+            vault_path = getattr(obsidian_mod, "_VAULT_PATH", None)
+        except ImportError:
+            vault_path = None
+    if not vault_path:
+        return IntegrationStatus(
+            integration_id="obsidian",
+            display_name="Obsidian",
+            level=IntegrationStatusLevel.UNCONFIGURED,
+            message="OBSIDIAN_VAULT_PATH not set",
+        )
+    latency = (time.perf_counter() - start) * 1000
+    return IntegrationStatus(
+        integration_id="obsidian",
+        display_name="Obsidian",
+        level=IntegrationStatusLevel.OK,
+        message=f"vault: {vault_path}",
+        latency_ms=latency,
+    )
+
+
+def _probe_mcp_pool(pool: _Pool | None) -> IntegrationStatus:
+    if pool is None:
+        return IntegrationStatus(
+            integration_id="mcp-pool",
+            display_name="MCP Pool",
+            level=IntegrationStatusLevel.UNCONFIGURED,
+            message="no pool injected",
+        )
+    try:
+        connected = int(pool.connected_count())
+        total = int(pool.total_count())
+    except (AttributeError, TypeError, ValueError) as exc:
+        return IntegrationStatus(
+            integration_id="mcp-pool",
+            display_name="MCP Pool",
+            level=IntegrationStatusLevel.ERROR,
+            message=f"pool probe failed: {exc}",
+        )
+    if total == 0:
+        level = IntegrationStatusLevel.UNCONFIGURED
+        message = "no servers configured"
+    elif connected == total:
+        level = IntegrationStatusLevel.OK
+        message = f"{connected}/{total} servers connected"
+    elif connected == 0:
+        level = IntegrationStatusLevel.ERROR
+        message = f"0/{total} servers connected"
+    else:
+        level = IntegrationStatusLevel.DEGRADED
+        message = f"{connected}/{total} servers connected"
+    return IntegrationStatus(
+        integration_id="mcp-pool",
+        display_name="MCP Pool",
+        level=level,
+        message=message,
+        tools_exposed=connected,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Probe registry
+# ---------------------------------------------------------------------------
+
+_PROBES: dict[str, Any] = {
+    "linear": _probe_linear,
+    "notion": _probe_notion,
+    "affine": _probe_affine,
+    "obsidian": _probe_obsidian,
+}
+
+
+def query_integration_status(integration_id: str) -> IntegrationStatus:
+    """Probe one integration by id.
+
+    Args:
+        integration_id: Stable integration identifier.
+
+    Returns:
+        :class:`IntegrationStatus`. Unknown ids return
+        :attr:`IntegrationStatusLevel.UNCONFIGURED` rather than raising
+        so callers can render them as a row.
+
+    Raises:
+        TypeError: If *integration_id* is not a string.
+    """
+    if not isinstance(integration_id, str):
+        raise TypeError(
+            f"integration_id must be str, got {type(integration_id).__name__}"
+        )
+    probe = _PROBES.get(integration_id)
+    if probe is None:
+        return IntegrationStatus(
+            integration_id=integration_id,
+            display_name=integration_id.title(),
+            level=IntegrationStatusLevel.UNCONFIGURED,
+            message="no probe registered",
+        )
+    return probe()
+
+
+def list_all_integrations(*, mcp_pool: _Pool | None = None) -> list[IntegrationStatus]:
+    """Return the health snapshot for every known integration.
+
+    Args:
+        mcp_pool: Optional :class:`McpClientPool` for the ``mcp-pool`` row.
+            Injected because the pool is a long-lived runtime singleton
+            that we don't want to construct just to probe.
+
+    Returns:
+        List of :class:`IntegrationStatus` (alphabetical by id then with
+        ``mcp-pool`` appended).
+    """
+    rows = [query_integration_status(name) for name in sorted(_PROBES)]
+    rows.append(_probe_mcp_pool(mcp_pool))
+    return rows

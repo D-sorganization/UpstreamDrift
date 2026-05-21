@@ -11,9 +11,7 @@ def create_mujoco_grip_contacts(
     hand_body_names: list[str] | None = None,
     friction: tuple[float, float, float] = (0.8, 0.6, 0.001),
 ) -> dict:
-    if not (grip_body_name is not None):
-        raise ValueError("grip_body_name must be provided")
-    if not (grip_body_name is not None):
+    if grip_body_name is None:
         raise ValueError("grip_body_name must be provided")
     if hand_body_names is None:
         hand_body_names = ["left_hand", "right_hand"]
@@ -44,9 +42,7 @@ def create_mujoco_grip_contacts(
 
 class GripContactExporter:
     def __init__(self, model: GripContactModel) -> None:
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
         self.timesteps: list[GripContactTimestep] = []
