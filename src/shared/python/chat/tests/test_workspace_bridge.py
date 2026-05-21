@@ -146,7 +146,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 @pytest.fixture(scope="module")
 def qapp() -> Any:
-    pytest.importorskip("PyQt6.QtWidgets", exc_type=ImportError)
+    pytest.importorskip("PyQt6")
     from PyQt6.QtWidgets import QApplication
 
     app = QApplication.instance() or QApplication(sys.argv)
