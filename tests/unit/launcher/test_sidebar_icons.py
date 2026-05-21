@@ -33,7 +33,7 @@ _REQUIRED_BUTTON_LABELS = (
     "Motion Match",
     "MoCap",
     "Tools",
-    "Documentation",
+    "Library",
     "Settings",
 )
 

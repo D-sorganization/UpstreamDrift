@@ -189,7 +189,7 @@ class UISetupManager:
         try:
             from src.launchers.custom_title_bar import CustomTitleBar
 
-            self.title_bar = CustomTitleBar(self, show_close_button=True)
+            self.title_bar = CustomTitleBar(self.launcher, show_close_button=True)
             self.title_bar.minimize_requested.connect(self.showMinimized)
             self.title_bar.maximize_requested.connect(
                 lambda: (
@@ -395,7 +395,7 @@ class UISetupManager:
 
         existing = getattr(self, "library_widget", None)
         if existing is None:
-            existing = LibraryWidget(self)
+            existing = LibraryWidget(self.launcher)
             self.library_widget = existing
 
         index = self.workspace_tabs.indexOf(existing)
@@ -522,7 +522,7 @@ class UISetupManager:
             self.sidekick_window.setWindowTitle("UpstreamDrift Sidekick")
             self.sidekick_window.resize(400, 800)
 
-            layout = QVBoxLayout(self.launcher.sidekick_window)
+            layout = QVBoxLayout(self.sidekick_window)
             layout.setContentsMargins(0, 0, 0, 0)
             layout.addWidget(self.sidekick_sidebar)
 
@@ -936,7 +936,7 @@ class UISetupManager:
             action_context_docs.triggered.connect(self._toggle_context_help)
         help_menu.addAction(action_context_docs)
 
-        action_user_guide = QAction("User &Guide (online)", self)
+        action_user_guide = QAction("User &Guide (online)", self.launcher)
         action_user_guide.setToolTip(
             "Open the bundled user guide in the system browser"
         )
@@ -1005,7 +1005,7 @@ class UISetupManager:
         # back to the legacy overlay if the modal raises.
         def _open_shortcuts() -> None:
             try:
-                show_keyboard_shortcuts_modal(self)
+                show_keyboard_shortcuts_modal(self.launcher)
             except Exception:  # noqa: BLE001
                 self._show_shortcuts_overlay()
 
@@ -1028,7 +1028,7 @@ class UISetupManager:
         # if anything fails (keeps menu working in trimmed environments).
         def _open_about() -> None:
             try:
-                show_about_dialog(self)
+                show_about_dialog(self.launcher)
             except Exception:  # noqa: BLE001
                 self._show_about_dialog()
 
@@ -1067,7 +1067,7 @@ class UISetupManager:
         )
         top_bar.addWidget(self.lbl_execution_mode)
 
-        self.btn_runtime_help = make_runtime_mode_help_button(self)
+        self.btn_runtime_help = make_runtime_mode_help_button(self.launcher)
         top_bar.addWidget(self.btn_runtime_help)
 
         top_bar.addStretch()
@@ -1180,11 +1180,11 @@ class UISetupManager:
         """Add discrete view-mode dropdown and a compact, elegant zoom slider to top bar."""
 
         # Ctrl+= / Ctrl+- shortcuts adjust zoom by one step (~1.75% scale).
-        sc_in = QShortcut(QKeySequence("Ctrl+="), self)
+        sc_in = QShortcut(QKeySequence("Ctrl+="), self.launcher)
         sc_in.activated.connect(lambda: self._nudge_zoom(+5))
-        sc_in_alt = QShortcut(QKeySequence("Ctrl++"), self)
+        sc_in_alt = QShortcut(QKeySequence("Ctrl++"), self.launcher)
         sc_in_alt.activated.connect(lambda: self._nudge_zoom(+5))
-        sc_out = QShortcut(QKeySequence("Ctrl+-"), self)
+        sc_out = QShortcut(QKeySequence("Ctrl+-"), self.launcher)
         sc_out.activated.connect(lambda: self._nudge_zoom(-5))
 
     def _nudge_zoom(self, delta_steps: int) -> None:
@@ -1340,7 +1340,7 @@ class UISetupManager:
 
         if _style:
             _style.polish(self.grid_container)
-        self.grid_layout = QGridLayout(self.launcher.grid_container)
+        self.grid_layout = QGridLayout(self.grid_container)
         self.grid_layout.setSpacing(20)
         self.grid_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
@@ -1369,10 +1369,10 @@ class UISetupManager:
 
     def _setup_search_shortcuts(self) -> None:
         """Setup keyboard shortcuts for search."""
-        shortcut_search = QShortcut(QKeySequence("Ctrl+F"), self)
+        shortcut_search = QShortcut(QKeySequence("Ctrl+F"), self.launcher)
         shortcut_search.activated.connect(self._focus_search)
 
-        shortcut_escape = QShortcut(QKeySequence("Esc"), self)
+        shortcut_escape = QShortcut(QKeySequence("Esc"), self.launcher)
         shortcut_escape.activated.connect(self._clear_search)
 
     def _focus_search(self) -> None:
@@ -1422,7 +1422,7 @@ class UISetupManager:
         self._console_dock.setWindowTitle("Process Output")
         self._console_dock.resize(800, 300)
 
-        dl_layout = QVBoxLayout(self.launcher._console_dock)
+        dl_layout = QVBoxLayout(self._console_dock)
         dl_layout.setContentsMargins(0, 0, 0, 0)
         dl_layout.addWidget(console_container)
 
@@ -1477,10 +1477,10 @@ class UISetupManager:
         self.context_help.setWindowTitle("Context Help")
         self.context_help.resize(400, 800)
 
-        dl_layout = QVBoxLayout(self.launcher.context_help)
+        dl_layout = QVBoxLayout(self.context_help)
         dl_layout.setContentsMargins(0, 0, 0, 0)
 
-        help_widget = ContextHelpDock(self)
+        help_widget = ContextHelpDock(self.launcher)
         dl_layout.addWidget(help_widget)
 
         # Proxy the update_context method to the inner widget
@@ -1495,7 +1495,7 @@ class UISetupManager:
         try:
             from src.shared.python.ui.overlay import OverlayWidget
 
-            self.overlay = OverlayWidget(self)
+            self.overlay = OverlayWidget(self.launcher)
             self.overlay.hide()
         except (ImportError, TypeError):
             logger.warning("OverlayWidget could not be initialized.")

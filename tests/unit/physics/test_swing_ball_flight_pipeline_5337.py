@@ -41,7 +41,6 @@ from src.shared.python.physics.swing_ball_flight_pipeline import (
     _TrajectoryMetricsExtractor,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers / fixtures
 # ---------------------------------------------------------------------------
@@ -59,13 +58,13 @@ def _make_swing(
     engine_name: str = "mock",
 ) -> SwingState:
     return SwingState(
-        clubhead_velocity=velocity
-        if velocity is not None
-        else _FORWARD_VELOCITY.copy(),
+        clubhead_velocity=(
+            velocity if velocity is not None else _FORWARD_VELOCITY.copy()
+        ),
         clubhead_angular_velocity=_ZERO_SPIN.copy(),
-        clubhead_orientation=orientation
-        if orientation is not None
-        else _FACE_NORMAL.copy(),
+        clubhead_orientation=(
+            orientation if orientation is not None else _FACE_NORMAL.copy()
+        ),
         engine_name=engine_name,
     )
 

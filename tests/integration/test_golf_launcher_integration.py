@@ -289,7 +289,7 @@ models:
             self_arg._console_dock = MagicMock()
 
         console_patcher = patch(
-            "src.launchers.launcher_ui_setup.LauncherUISetupMixin._setup_process_console",
+            "src.launchers.launcher_ui_setup.UISetupManager._setup_process_console",
             _mock_setup_process_console,
         )
         console_patcher.start()
@@ -307,7 +307,7 @@ models:
             self_arg.search_bar = MagicMock()
 
         init_ui_patcher = patch(
-            "src.launchers.launcher_ui_setup.LauncherUISetupMixin.init_ui",
+            "src.launchers.launcher_ui_setup.UISetupManager.init_ui",
             _mock_init_ui,
         )
         init_ui_patcher.start()
@@ -316,7 +316,7 @@ models:
         # rejects UpstreamDriftLauncher (inheriting MockQMainWindow) as parent
         # when the real PyQt6.QtGui.QShortcut is cached at module scope.
         ui_components_patcher = patch(
-            "src.launchers.launcher_dialogs.LauncherDialogsMixin._init_ui_components",
+            "src.launchers.launcher_dialogs.DialogsManager._init_ui_components",
             lambda self_arg: setattr(self_arg, "toast_manager", None),
         )
         ui_components_patcher.start()

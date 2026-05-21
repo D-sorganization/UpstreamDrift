@@ -5,12 +5,14 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
 from PyQt6.QtWidgets import QMainWindow  # noqa: E402
-from src.launchers.launcher_dialogs import LauncherDialogsMixin  # noqa: E402
+from src.launchers.launcher_dialogs import DialogsManager  # noqa: E402
 
 
-class DummyLauncher(QMainWindow, LauncherDialogsMixin):
-    def __init__(self):
-        super().__init__()
+class DummyLauncher(QMainWindow):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.manager = DialogsManager(self)
+
         self.available_models = {"m1": "model1"}
         self.model_order = ["m1"]
         self.model_cards = {}

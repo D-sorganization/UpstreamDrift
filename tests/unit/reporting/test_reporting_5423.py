@@ -22,7 +22,6 @@ from src.shared.python.reporting import (
 from src.shared.python.reporting._agentic_summary import AIClient
 from src.shared.python.simulation_store import SimulationDataStore
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------

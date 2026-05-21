@@ -28,7 +28,6 @@ from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow, QToolButton, QWid
 
 from src.launchers.custom_title_bar import CustomTitleBar, clamp_to_visible_screen
 
-
 pytestmark = pytest.mark.ui
 
 

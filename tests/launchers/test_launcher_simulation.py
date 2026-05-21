@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
 from PyQt6.QtWidgets import QMainWindow, QMessageBox  # noqa: E402
-from src.launchers.launcher_simulation import LauncherSimulationMixin  # noqa: E402
+from src.launchers.launcher_simulation import SimulationManager  # noqa: E402
 
 
 class DummyModel:
@@ -18,9 +18,11 @@ class DummyModel:
         self.path = path
 
 
-class DummyLauncher(QMainWindow, LauncherSimulationMixin):
-    def __init__(self):
-        super().__init__()
+class DummyLauncher(QMainWindow):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.manager = SimulationManager(self)
+
         self.selected_model = None
         self.show_toast = MagicMock()
         self.lbl_status = MagicMock()
