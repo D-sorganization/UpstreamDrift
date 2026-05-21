@@ -10,9 +10,12 @@ from .types import ImpactParameters, PostImpactState, PreImpactState
 
 
 @precondition(  # fmt: skip
-    lambda impact_offset, clubhead_velocity, clubface_normal, gear_factor=0.5, h_scale=100.0, v_scale=50.0: (
-        0 <= gear_factor <= 1
-    ),
+    lambda impact_offset,
+    clubhead_velocity,
+    clubface_normal,
+    gear_factor=0.5,
+    h_scale=100.0,
+    v_scale=50.0: (0 <= gear_factor <= 1),
     "Gear effect factor must be between 0 and 1",
 )
 def compute_gear_effect_spin(

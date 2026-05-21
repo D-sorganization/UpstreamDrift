@@ -16,6 +16,7 @@ Usage::
     )
     main_window.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
 """
+
 # mypy: disable-error-code="unused-ignore"
 # The optional-pydantic import block below uses type: ignore comments that are
 # redundant when mypy runs with --follow-imports=skip (CI) but required locally.

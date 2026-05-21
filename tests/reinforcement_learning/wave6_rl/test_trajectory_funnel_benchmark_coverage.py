@@ -15,7 +15,6 @@ import pytest
 from src.reinforcement_learning import TrajectoryFunnelBenchmark
 from src.reinforcement_learning import trajectory_funnel_benchmark as tfb_module
 
-
 # ---------------------------------------------------------------------------
 # Construction / mode validation
 # ---------------------------------------------------------------------------

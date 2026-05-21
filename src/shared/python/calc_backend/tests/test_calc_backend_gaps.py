@@ -37,17 +37,17 @@ class TestThermalProfileErrorPath:
     def _valid_request(self, **overrides):
         from calc_backend.contracts.thermal_profile import ThermalProfileRequest
 
-        kwargs = dict(
-            initial_temp_c=20.0,
-            ambient_temp_c=20.0,
-            thermal_mass_j_per_k=500.0,
-            heat_loss_coeff_w_per_k=5.0,
-            power_w=1000.0,
-            power_profile="constant",
-            t_start_s=0.0,
-            t_end_s=100.0,
-            num_points=10,
-        )
+        kwargs = {
+            "initial_temp_c": 20.0,
+            "ambient_temp_c": 20.0,
+            "thermal_mass_j_per_k": 500.0,
+            "heat_loss_coeff_w_per_k": 5.0,
+            "power_w": 1000.0,
+            "power_profile": "constant",
+            "t_start_s": 0.0,
+            "t_end_s": 100.0,
+            "num_points": 10,
+        }
         kwargs.update(overrides)
         return ThermalProfileRequest(**kwargs)
 
@@ -57,12 +57,14 @@ class TestThermalProfileErrorPath:
 
         req = self._valid_request()
         # Mock _solve_thermal_profile to raise ArithmeticError → caught by router
-        with patch(
-            "calc_backend.routers.thermal_profile._solve_thermal_profile",
-            side_effect=ArithmeticError("division by zero"),
+        with (
+            patch(
+                "calc_backend.routers.thermal_profile._solve_thermal_profile",
+                side_effect=ArithmeticError("division by zero"),
+            ),
+            pytest.raises(HTTPException) as exc_info,
         ):
-            with pytest.raises(HTTPException) as exc_info:
-                predict_thermal_profile(req)
+            predict_thermal_profile(req)
         assert exc_info.value.status_code == 422
         assert "division by zero" in exc_info.value.detail
 
@@ -317,15 +319,15 @@ class TestPressureDropInlineBranches:
     def _req(self, **overrides):
         from calc_backend.contracts.pressure_drop import PressureDropRequest
 
-        kwargs = dict(
-            pipe_diameter_m=0.1,
-            pipe_length_m=100.0,
-            roughness_m=0.000045,
-            flow_rate_kg_s=1.0,
-            temperature_k=300.0,
-            pressure_pa=101325.0,
-            molecular_weight_kg_mol=0.029,
-        )
+        kwargs = {
+            "pipe_diameter_m": 0.1,
+            "pipe_length_m": 100.0,
+            "roughness_m": 0.000045,
+            "flow_rate_kg_s": 1.0,
+            "temperature_k": 300.0,
+            "pressure_pa": 101325.0,
+            "molecular_weight_kg_mol": 0.029,
+        }
         kwargs.update(overrides)
         return PressureDropRequest(**kwargs)
 
@@ -497,7 +499,7 @@ class TestScrubberErrorPaths:
         )
         # calculate_gas_density is locally imported inside the function;
         # patch it from the source module to trigger the except path.
-        with patch(
+        with patch(  # noqa: SIM117
             "upstream_drift_tools.process_calculators.scrubber_calculator.calculate_gas_density",
             side_effect=ValueError("density fail"),
         ):

@@ -9,7 +9,7 @@ if repo_root_str not in sys.path:
 
 # 1. Import src.shared first
 import src.shared.python.logging_pkg.logger_utils as logger_utils
-print("Imported src.shared initially")
+
 
 engine_python = (
     repo_root
@@ -53,7 +53,8 @@ if repo_src_str not in sys.path:
 # Try importing a different src.shared submodule
 try:
     import src.shared.python.data_io.export
-    print("Success importing src.shared submodule after pivot!")
+
 except Exception as e:
     import traceback
+
     traceback.print_exc()

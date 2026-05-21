@@ -124,7 +124,9 @@ def test_base_solver_residual_report_keys() -> None:
     s = _Dummy()
     ref = make_pendulum_reference_trajectory(num_frames=5)
     report = s._compute_residual_report(ref, ref)
-    assert {"mean_residual", "max_residual", "std_residual", "num_frames"} <= set(report.keys())
+    assert {"mean_residual", "max_residual", "std_residual", "num_frames"} <= set(
+        report.keys()
+    )
     assert report["mean_residual"] >= 0.0
 
 

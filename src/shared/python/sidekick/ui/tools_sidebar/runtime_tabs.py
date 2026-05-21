@@ -386,15 +386,9 @@ class SidekickPythonReplWidget(QtWidgets.QWidget):
         layout.addWidget(self._repl)
         # Expose the historic input/output/run object names by re-tagging the
         # nested widgets so existing findChild() queries keep working.
-        self._repl._input.setObjectName(  # noqa: SLF001
-            "SidekickTerminalInput"
-        )
-        self._repl._output.setObjectName(  # noqa: SLF001
-            "SidekickTerminalOutput"
-        )
-        self._repl._run_button.setObjectName(  # noqa: SLF001
-            "SidekickTerminalRun"
-        )
+        self._repl._input.setObjectName("SidekickTerminalInput")  # noqa: SLF001
+        self._repl._output.setObjectName("SidekickTerminalOutput")  # noqa: SLF001
+        self._repl._run_button.setObjectName("SidekickTerminalRun")  # noqa: SLF001
         self.apply_terminal_theme(self._terminal_theme)
 
     def execute_script(self) -> None:

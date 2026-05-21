@@ -28,12 +28,11 @@ def _convert_temperature(value: float, from_unit: str, to_unit: str) -> float:
     # Convert from Kelvin to target
     if to_unit == "K":
         return temp_k
-    elif to_unit == "C":
+    if to_unit == "C":
         return temp_k - 273.15
-    elif to_unit == "F":
+    if to_unit == "F":
         return (temp_k - 273.15) * 9 / 5 + 32
-    else:
-        raise ValueError(f"Unknown temperature unit: {to_unit}")
+    raise ValueError(f"Unknown temperature unit: {to_unit}")
 
 
 def _convert_pressure(value: float, from_unit: str, to_unit: str) -> float:

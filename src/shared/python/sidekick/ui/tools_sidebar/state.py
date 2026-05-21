@@ -168,9 +168,7 @@ def _startup_imports_payload(value: Any) -> list[dict[str, Any]]:
         # so the cross-module return from default_calculator_startup_config()
         # is seen as Any. The function is declared as returning a config that
         # exposes ``to_list() -> list[dict[str, Any]]`` in calculator_startup.
-        defaults: list[dict[str, Any]] = (
-            default_calculator_startup_config().to_list()
-        )
+        defaults: list[dict[str, Any]] = default_calculator_startup_config().to_list()
         return defaults
     if not isinstance(value, list):
         return []

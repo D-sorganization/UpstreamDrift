@@ -231,7 +231,7 @@ class ClineAdapter(BaseAgentAdapter):
 
     _STATIC_MODELS: tuple[str, ...] = ("cline",)
 
-    def list_models(self) -> list[ChatModelInfo]:
+    def list_models(self) -> list[ChatModelInfo]:  # noqa: F821
         """Cline acts as a single virtual model; always a one-entry list."""
         from src.shared.python.ai.types import ChatModelInfo
 

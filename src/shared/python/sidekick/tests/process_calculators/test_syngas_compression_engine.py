@@ -370,7 +370,7 @@ class TestWorkerAndWidget:
         widget = SyngasCompressionCalculatorWidget()
         mock_spinbox = MagicMock()
         mock_spinbox.value.return_value = 10.0
-        widget.composition_inputs = {k: mock_spinbox for k in SYNGAS_COMP.keys()}
+        widget.composition_inputs = dict.fromkeys(SYNGAS_COMP.keys(), mock_spinbox)
         mock_combo = MagicMock()
         mock_combo.currentText.return_value = "Isentropic"
         widget.compression_type_combo = mock_combo
@@ -403,7 +403,7 @@ class TestWorkerAndWidget:
         # Mock composition inputs to pass the first step
         mock_spinbox = MagicMock()
         mock_spinbox.value.return_value = 10.0
-        widget.composition_inputs = {k: mock_spinbox for k in SYNGAS_COMP.keys()}
+        widget.composition_inputs = dict.fromkeys(SYNGAS_COMP.keys(), mock_spinbox)
         mock_combo = MagicMock()
         mock_combo.currentText.return_value = "Isentropic"
         widget.compression_type_combo = mock_combo

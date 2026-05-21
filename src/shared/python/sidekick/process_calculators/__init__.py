@@ -68,8 +68,6 @@ _import_errors: list[str] = []
 
 # Calculators with numpy/scipy dependencies
 try:
-    pass
-
     ScrubberCalculator = None  # Module has functions, no class
 except ImportError as e:
     _import_errors.append(f"ScrubberCalculator not available: {e}")

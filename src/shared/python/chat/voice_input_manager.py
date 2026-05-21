@@ -152,7 +152,7 @@ class VoiceInputManager:
 
     def _on_transcription(self, text: str) -> None:
         for cb in self._transcription_ready_callbacks:
-            try:
+            try:  # noqa: SIM105
                 cb(text)
             except Exception:  # noqa: BLE001
                 pass
@@ -167,7 +167,7 @@ class VoiceInputManager:
 
     def _emit_error(self, message: str) -> None:
         for cb in self._error_occurred_callbacks:
-            try:
+            try:  # noqa: SIM105
                 cb(message)
             except Exception:  # noqa: BLE001
                 pass

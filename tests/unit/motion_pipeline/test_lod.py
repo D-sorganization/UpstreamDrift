@@ -41,7 +41,9 @@ FORBIDDEN_PREFIXES = tuple(f"src.{r}." for r in _FORBIDDEN_ROOTS) + tuple(
     f"{r}." for r in _FORBIDDEN_ROOTS
 )
 # Exact-name guards so ``import src.engines`` (no dot) is also caught.
-FORBIDDEN_EXACT = frozenset({f"src.{r}" for r in _FORBIDDEN_ROOTS} | set(_FORBIDDEN_ROOTS))
+FORBIDDEN_EXACT = frozenset(
+    {f"src.{r}" for r in _FORBIDDEN_ROOTS} | set(_FORBIDDEN_ROOTS)
+)
 
 # Files exempt from the broader LoD sweep because their entire purpose is
 # to bind to a backing engine.

@@ -309,7 +309,7 @@ class OllamaAdapter(BaseAgentAdapter):
         "phi3:medium",
     )
 
-    def list_models(self) -> list[ChatModelInfo]:
+    def list_models(self) -> list[ChatModelInfo]:  # noqa: F821
         """Return Ollama model info; falls back to a static catalogue."""
         from src.shared.python.ai.types import ChatModelInfo
 

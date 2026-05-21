@@ -61,6 +61,7 @@ def register_golf_suite_tools(registry: ToolRegistry) -> None:
         from src.shared.python.ai.tools.sidekick_analytics import (
             register_sidekick_analytics_tools,
         )
+
         register_sidekick_analytics_tools(registry)
     except ImportError as e:
         logger.warning("Could not register sidekick analytics tools: %s", e)

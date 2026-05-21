@@ -19,7 +19,6 @@ from model_generation.core.types import (
     Origin,
 )
 
-
 # --- Origin ---
 
 

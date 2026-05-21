@@ -357,7 +357,7 @@ class RustAgentAdapter(BaseAgentAdapter):
         "gpt-3.5-turbo",
     )
 
-    def list_models(self) -> list[ChatModelInfo]:
+    def list_models(self) -> list[ChatModelInfo]:  # noqa: F821
         """Return Rust-adapter model catalogue; configured model is always present."""
         from src.shared.python.ai.types import ChatModelInfo
 

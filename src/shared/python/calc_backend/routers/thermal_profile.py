@@ -36,9 +36,9 @@ def _solve_thermal_profile(
     def power_func(t: float) -> float:
         if profile == "constant":
             return power_w
-        elif profile == "linear_ramp":
+        if profile == "linear_ramp":
             return power_w + request.ramp_rate_w_per_s * t
-        elif profile == "step":
+        if profile == "step":
             return power_w if t < request.step_time_s else 0.0
         return power_w
 

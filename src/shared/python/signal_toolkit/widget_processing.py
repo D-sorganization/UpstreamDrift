@@ -568,13 +568,13 @@ class ProcessingMixin:
 
         if design == "Butterworth":
             return FilterDesigner.butterworth(ft, cutoff, fs, order)
-        elif design == "Chebyshev I":
+        if design == "Chebyshev I":
             return FilterDesigner.chebyshev1(ft, cutoff, fs, order)
-        elif design == "Chebyshev II":
+        if design == "Chebyshev II":
             return FilterDesigner.chebyshev2(ft, cutoff, fs, order)
-        elif design == "Elliptic":
+        if design == "Elliptic":
             return FilterDesigner.elliptic(ft, cutoff, fs, order)
-        elif design == "Bessel":
+        if design == "Bessel":
             return FilterDesigner.bessel(ft, cutoff, fs, order)
         return None
 

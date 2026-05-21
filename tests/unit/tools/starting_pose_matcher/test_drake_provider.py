@@ -59,13 +59,17 @@ def test_drake_not_available_error():
 
     # Try to create provider without a valid model path
     # This should raise an error (either DrakeNotAvailableError or DrakeProviderError)
-    with pytest.raises((DrakeNotAvailableError, DrakeProviderError, DrakeProviderError)):
+    with pytest.raises(
+        (DrakeNotAvailableError, DrakeProviderError, DrakeProviderError)
+    ):
         DrakeSkeletonProvider(model_path=None, model_xml=None)
 
 
 def test_drake_provider_create_provider_function():
     """Test that create_provider function exists and has correct signature."""
-    from src.tools.starting_pose_matcher.skeleton_extractors.drake import create_provider
+    from src.tools.starting_pose_matcher.skeleton_extractors.drake import (
+        create_provider,
+    )
 
     # Check function signature
     import inspect

@@ -33,8 +33,7 @@ class MessageDisplayController(QWidget):
         self.scroll_area.setHorizontalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
-        self.scroll_area.setStyleSheet(
-            """
+        self.scroll_area.setStyleSheet("""
             QScrollArea {
                 background-color: #1e1e1e;
                 border: none;
@@ -52,8 +51,7 @@ class MessageDisplayController(QWidget):
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
                 background: none;
             }
-            """
-        )
+            """)
 
         self.message_container = QWidget()
         self.message_container.setStyleSheet(Styles.CONTAINER_DARK)
@@ -124,8 +122,7 @@ class MessageDisplayController(QWidget):
         bg_primary = colors["bg_primary"]
         border = colors["border"]
         self.message_container.setStyleSheet(f"background-color: {bg_primary};")
-        self.scroll_area.setStyleSheet(
-            f"""
+        self.scroll_area.setStyleSheet(f"""
             QScrollArea {{
                 background-color: {bg_primary};
                 border: none;
@@ -143,8 +140,7 @@ class MessageDisplayController(QWidget):
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
                 background: none;
             }}
-            """
-        )
+            """)
         self.refresh_theme()
 
     def refresh_theme(self) -> None:

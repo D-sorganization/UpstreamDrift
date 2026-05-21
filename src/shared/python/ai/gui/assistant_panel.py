@@ -39,7 +39,11 @@ from src.shared.python.ai.gui._input_area import InputArea
 from src.shared.python.ai.gui._message_display import MessageDisplayController
 from src.shared.python.ai.gui._panel_header import PanelHeaderController
 from src.shared.python.ai.gui._panel_tools import register_panel_tools
-from src.shared.python.ai.gui.assistant_widgets import ChatInput, MessageWidget, StreamWorker
+from src.shared.python.ai.gui.assistant_widgets import (
+    ChatInput,
+    MessageWidget,
+    StreamWorker,
+)
 from src.shared.python.ai.gui.chat_export import (
     copy_thread_to_clipboard,
     save_thread_as_markdown,

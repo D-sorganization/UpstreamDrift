@@ -6,7 +6,6 @@ import pytest
 
 from src.tools.starting_pose_matcher import session_schema as ss
 
-
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------

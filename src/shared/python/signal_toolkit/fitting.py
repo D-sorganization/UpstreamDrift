@@ -699,7 +699,7 @@ class CustomFunctionFitter:
             local_dict = dict(safe_dict)
             local_dict["t"] = t
             for name, val in zip(param_names, args, strict=False):
-                local_dict[name] = val
+                local_dict[name] = val  # noqa: PERF403
             return safe_eval(expression, local_dict)
 
         return cls(custom_func, param_names, expression)

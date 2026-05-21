@@ -278,7 +278,7 @@ class AnthropicAdapter(BaseAgentAdapter):
         "claude-3-haiku-20240307",
     )
 
-    def list_models(self) -> list[ChatModelInfo]:
+    def list_models(self) -> list[ChatModelInfo]:  # noqa: F821
         """Return Anthropic model info; falls back to a static catalogue."""
         from src.shared.python.ai.types import ChatModelInfo
 

@@ -128,21 +128,25 @@ class TestLoadFile:
 
     def test_permission_error_raises(self):
         engine = DataProcessorEngine()
-        with patch(
-            "upstream_drift_tools.data_processing.core.DataReader.read_file",
-            side_effect=PermissionError("denied"),
+        with (
+            patch(
+                "upstream_drift_tools.data_processing.core.DataReader.read_file",
+                side_effect=PermissionError("denied"),
+            ),
+            pytest.raises(FileIOError, match="denied"),
         ):
-            with pytest.raises(FileIOError, match="denied"):
-                engine.load_file("/some/file.csv")
+            engine.load_file("/some/file.csv")
 
     def test_value_error_raises(self):
         engine = DataProcessorEngine()
-        with patch(
-            "upstream_drift_tools.data_processing.core.DataReader.read_file",
-            side_effect=ValueError("bad format"),
+        with (
+            patch(
+                "upstream_drift_tools.data_processing.core.DataReader.read_file",
+                side_effect=ValueError("bad format"),
+            ),
+            pytest.raises(FileIOError, match="bad format"),
         ):
-            with pytest.raises(FileIOError, match="bad format"):
-                engine.load_file("/some/file.csv")
+            engine.load_file("/some/file.csv")
 
 
 # ---------------------------------------------------------------------------
@@ -167,12 +171,14 @@ class TestExportData:
 
     def test_export_oserror_raises(self):
         engine = _make_engine_with_data()
-        with patch(
-            "upstream_drift_tools.data_processing.core.DataWriter.write_file",
-            side_effect=OSError("disk full"),
+        with (
+            patch(
+                "upstream_drift_tools.data_processing.core.DataWriter.write_file",
+                side_effect=OSError("disk full"),
+            ),
+            pytest.raises(FileIOError, match="disk full"),
         ):
-            with pytest.raises(FileIOError, match="disk full"):
-                engine.export_data("/tmp/out.csv")  # nosec B108
+            engine.export_data("/tmp/out.csv")  # nosec B108
 
 
 # ---------------------------------------------------------------------------

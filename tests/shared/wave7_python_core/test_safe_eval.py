@@ -20,7 +20,6 @@ from safe_eval import (
     validate_expression,
 )
 
-
 # ── validate_expression ────────────────────────────────────────────────────
 
 

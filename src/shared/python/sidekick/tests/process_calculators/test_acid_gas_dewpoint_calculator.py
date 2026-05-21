@@ -335,13 +335,15 @@ class TestAcidGasDewpointWidget:
         widget.show()
         qtbot.waitExposed(widget)
 
-        with patch.object(
-            widget.calculator,
-            "calculate_dewpoint_mixture",
-            side_effect=ValueError("Test Error DP"),
+        with (
+            patch.object(
+                widget.calculator,
+                "calculate_dewpoint_mixture",
+                side_effect=ValueError("Test Error DP"),
+            ),
+            pytest.raises(ValueError, match="Test Error DP"),
         ):
-            with pytest.raises(ValueError, match="Test Error DP"):
-                widget.calculate()
+            widget.calculate()
 
     @pytest.mark.skipif(not HAS_PYQT, reason="PyQt is required to test the widget")
     def test_widget_close_event(self, qtbot) -> Any:

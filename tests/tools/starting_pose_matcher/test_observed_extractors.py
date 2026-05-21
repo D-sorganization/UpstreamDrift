@@ -16,7 +16,6 @@ import pytest
 from src.tools.starting_pose_matcher.skeleton_extractors import mediapipe as mp_mod
 from src.tools.starting_pose_matcher.skeleton_extractors import openpose as op_mod
 
-
 # ===========================================================================
 # OpenPose
 # ===========================================================================

@@ -36,7 +36,6 @@ from bunkershot3d.kinematics.trajectory import (
 )
 from bunkershot3d.postproc.wrench_trace import WrenchTrace
 
-
 # ---------------------------------------------------------------------------
 # WrenchTrace
 # ---------------------------------------------------------------------------

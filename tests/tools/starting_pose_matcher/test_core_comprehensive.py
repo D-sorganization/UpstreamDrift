@@ -18,7 +18,6 @@ import pytest
 
 from src.tools.starting_pose_matcher import core
 
-
 # ---------------------------------------------------------------------------
 # Constants & display helpers
 # ---------------------------------------------------------------------------

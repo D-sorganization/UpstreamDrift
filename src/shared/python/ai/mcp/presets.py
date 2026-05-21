@@ -349,13 +349,10 @@ def apply_preset(
     merged_env = dict(base.env)
     if env:
         for key, value in env.items():
-            merged_env[key] = value
+            merged_env[key] = value  # noqa: PERF403
 
     final_command = command if command is not None else base.command
-    if args is not None:
-        final_args = list(args)
-    else:
-        final_args = list(base.args)
+    final_args = list(args) if args is not None else list(base.args)
 
     if validate_env:
         for var in preset.required_env:

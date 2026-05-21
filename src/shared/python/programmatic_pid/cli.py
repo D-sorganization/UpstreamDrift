@@ -623,7 +623,7 @@ def generate_process_sheet(
         ey = to_float(eq.get("y", 0.0))
         w, h = equipment_dims(eq)
         label_placer.reserve_rect((ex, ey, ex + w, ey + h))
-    for _, panel in layout_regions["panels"].items():
+    for panel in layout_regions["panels"].values():
         px, py, pw, ph = panel
         label_placer.reserve_rect((px, py, px + pw, py + ph))
 

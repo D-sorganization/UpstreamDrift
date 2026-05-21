@@ -24,7 +24,6 @@ from src.shared.python.launcher_embed import (
 )
 from src.tools.sidekick._embed_adapter import _SidekickEmbedAdapter
 
-
 # ---------------------------------------------------------------------------
 # embed_capabilities
 # ---------------------------------------------------------------------------

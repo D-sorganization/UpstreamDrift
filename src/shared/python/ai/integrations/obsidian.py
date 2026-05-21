@@ -107,9 +107,7 @@ def _looks_like_absolute(raw: str) -> bool:
     if raw.startswith(("/", "\\")):
         return True
     # Windows drive letter, e.g. "C:\\..." or "C:/..."
-    if len(raw) >= 2 and raw[1] == ":" and raw[0].isalpha():
-        return True
-    return False
+    return bool(len(raw) >= 2 and raw[1] == ":" and raw[0].isalpha())
 
 
 def _resolve_safe_path(

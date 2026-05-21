@@ -182,18 +182,20 @@ def test_rename_column(test_widget) -> None:
 def test_drop_column(test_widget) -> None:
     test_widget.rename_column.setCurrentText("A")
 
-    with patch(
-        "PyQt6.QtWidgets.QMessageBox.question",
-        return_value=QMessageBox.StandardButton.Yes,
+    with (
+        patch(
+            "PyQt6.QtWidgets.QMessageBox.question",
+            return_value=QMessageBox.StandardButton.Yes,
+        ),
+        patch.object(test_widget.engine, "drop_columns") as mock_drop,
     ):
-        with patch.object(test_widget.engine, "drop_columns") as mock_drop:
-            res = MagicMock()
-            res.success = True
-            res.message = "Dropped"
-            mock_drop.return_value = res
+        res = MagicMock()
+        res.success = True
+        res.message = "Dropped"
+        mock_drop.return_value = res
 
-            test_widget._drop_column()
-            mock_drop.assert_called_once_with(["A"])
+        test_widget._drop_column()
+        mock_drop.assert_called_once_with(["A"])
 
 
 def test_fit_curve(test_widget) -> None:

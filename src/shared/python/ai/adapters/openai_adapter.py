@@ -311,7 +311,7 @@ class OpenAIAdapter(BaseAgentAdapter):
         "o3-mini",
     )
 
-    def list_models(self) -> list[ChatModelInfo]:
+    def list_models(self) -> list[ChatModelInfo]:  # noqa: F821
         """Return OpenAI model info; falls back to a static catalogue."""
         from src.shared.python.ai.types import ChatModelInfo
 

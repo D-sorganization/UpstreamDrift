@@ -76,7 +76,7 @@ class BitnetAdapter(BaseAgentAdapter):
         "bitnet-3b-q4_0.gguf",
     )
 
-    def list_models(self) -> list[ChatModelInfo]:
+    def list_models(self) -> list[ChatModelInfo]:  # noqa: F821
         """Return BitNet model catalogue; configured model is always included."""
         from src.shared.python.ai.types import ChatModelInfo
 

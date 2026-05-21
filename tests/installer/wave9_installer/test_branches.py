@@ -11,7 +11,6 @@ import pytest
 from installer.windows import build_installer, packaging_profiles
 from installer.windows.packaging_profiles import PackagingProfile
 
-
 # ---------------------------------------------------------------------------
 # PackagingProfile validation
 # ---------------------------------------------------------------------------
