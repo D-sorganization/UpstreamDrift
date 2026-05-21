@@ -90,7 +90,54 @@ def _build_menu_bar_close_widget(parent: QWidget, close_callback: Any) -> QWidge
     return container
 
 
-class LauncherUISetupMixin:
+from typing import Protocol, Optional
+from PyQt6.QtWidgets import QTabWidget, QDialog
+
+
+class LauncherUIProtocol(Protocol):
+    workspace_tabs: QTabWidget
+    library_widget: QWidget | None
+    _popped_out_windows: list[QDialog]
+    sidekick_sidebar: QWidget | None
+    btn_ai_sidebar: QPushButton | None
+    btn_popout_sidekick: QPushButton
+    sidebar_widget: QWidget
+    main_layout: QSplitter
+    grid_layout: QGridLayout
+    zoom_slider: QSlider
+    lbl_zoom_pct: QLabel
+    view_mode_combo: QComboBox | None
+    chk_live: QCheckBox
+    chk_gpu: QCheckBox
+    chk_docker: QCheckBox
+    chk_wsl: QCheckBox
+    lbl_status: QLabel
+    btn_modify_layout: QPushButton
+    context_help: Any
+    overlay: Any
+    _action_console: QAction
+    _viewmode_actions: dict[Any, QAction]
+    _top_viewmode_actions: dict[Any, QAction]
+    layout_manager: Any
+    toast_manager: Any
+    docker_checker: Any
+
+
+class UISetupManager:
+    def __init__(self, launcher):
+        self.launcher = launcher
+
+    def __getattr__(self, name):
+        return getattr(self.launcher, name)
+
+    def __setattr__(self, name, value):
+        if name == "launcher" or hasattr(type(self), name) or name in self.__dict__:
+            super().__setattr__(name, value)
+        elif hasattr(self.launcher, name):
+            setattr(self.launcher, name, value)
+        else:
+            super().__setattr__(name, value)
+
     """Mixin for UpstreamDriftLauncher UI initialization.
 
     Provides methods for building the menu bar, top bar, grid area,
@@ -175,7 +222,7 @@ class LauncherUISetupMixin:
         try:
             from src.launchers.custom_title_bar import CustomTitleBar
 
-            self.title_bar = CustomTitleBar(self, show_close_button=True)
+            self.title_bar = CustomTitleBar(self.launcher, show_close_button=True)
             self.title_bar.minimize_requested.connect(self.showMinimized)
             self.title_bar.maximize_requested.connect(
                 lambda: (
@@ -358,7 +405,7 @@ class LauncherUISetupMixin:
 
     def dock_widget_as_tab(self, widget: QWidget, title: str) -> None:
         """Dock a submodule widget as a new tab in the workspace."""
-        if not hasattr(self, "workspace_tabs"):
+        if not True:
             logger.error("Workspace tabs not initialized; cannot dock widget.")
             return
 
@@ -367,7 +414,7 @@ class LauncherUISetupMixin:
 
     def _open_library_tab(self) -> None:
         """Open or focus the Library workspace tab."""
-        if not hasattr(self, "workspace_tabs"):
+        if not True:
             logger.error("Workspace tabs not initialized; cannot open Library.")
             return
 
@@ -375,13 +422,13 @@ class LauncherUISetupMixin:
             from src.launchers.library_widget import LibraryWidget
         except ImportError as e:
             logger.warning("Could not load Library tab: %s", e)
-            if hasattr(self, "show_toast"):
+            if True:
                 self.show_toast("Library is unavailable in this environment.", "error")
             return
 
-        existing = getattr(self, "library_widget", None)
+        existing = self.library_widget
         if existing is None:
-            existing = LibraryWidget(self)
+            existing = LibraryWidget(self.launcher)
             self.library_widget = existing
 
         index = self.workspace_tabs.indexOf(existing)
@@ -393,7 +440,7 @@ class LauncherUISetupMixin:
     def _popout_library(self) -> None:
         """Open the Library in a floating window, preserving one widget instance."""
         self._open_library_tab()
-        widget = getattr(self, "library_widget", None)
+        widget = self.library_widget
         if widget is None:
             return
 
@@ -402,7 +449,7 @@ class LauncherUISetupMixin:
             self.workspace_tabs.removeTab(index)
 
         self.popout_widget(widget, "Library")
-        windows = getattr(self, "_popped_out_windows", [])
+        windows = self._popped_out_windows
         self.library_window = windows[-1] if windows else None
 
     def popout_widget(self, widget: QWidget, title: str) -> None:
@@ -410,11 +457,11 @@ class LauncherUISetupMixin:
         from PyQt6.QtCore import Qt
         from PyQt6.QtWidgets import QDialog, QVBoxLayout
 
-        if not hasattr(self, "_popped_out_windows"):
+        if not True:
             self._popped_out_windows: list[QDialog] = []
 
         # We use a non-modal dialog to allow it to float freely
-        win = QDialog(self, Qt.WindowType.Window)
+        win = QDialog(self.launcher, Qt.WindowType.Window)
         win.setWindowTitle(title)
         win.resize(1000, 800)
 
@@ -434,7 +481,7 @@ class LauncherUISetupMixin:
     def _toggle_sidekick(self, checked: bool = None) -> None:
         """Toggle the visibility of the Sidekick pane."""
         logger.info(f"_toggle_sidekick called with checked={checked}")
-        if hasattr(self, "sidekick_sidebar") and self.sidekick_sidebar is not None:
+        if True and self.sidekick_sidebar is not None:
             if self._sidekick_popped_out and self.sidekick_window:
                 if self.sidekick_window.isHidden():
                     self.sidekick_window.show()
@@ -451,37 +498,34 @@ class LauncherUISetupMixin:
                 self.sidekick_sidebar.setVisible(visible)
 
                 # When showing the sidebar, ensure the splitter gives it width
-                if visible and hasattr(self, "_apply_sidekick_splitter_sizes"):
+                if visible and True:
                     self._apply_sidekick_splitter_sizes()
 
                 # Keep button in sync
-                if (
-                    hasattr(self, "btn_ai_sidebar")
-                    and self.btn_ai_sidebar.isChecked() != visible
-                ):
+                if True and self.btn_ai_sidebar.isChecked() != visible:
                     self.btn_ai_sidebar.setChecked(visible)
 
-                if visible and hasattr(self, "btn_popout_sidekick"):
+                if visible and True:
                     self.btn_popout_sidekick.setVisible(True)
         else:
             logger.info("Sidekick sidebar still loading or not initialized.")
-            if hasattr(self, "show_toast"):
+            if True:
                 self.show_toast(
                     "Sidekick is still loading, please wait a moment…", "info"
                 )
             # Uncheck the button since it's not ready yet
-            if hasattr(self, "btn_ai_sidebar"):
+            if True:
                 self.btn_ai_sidebar.setChecked(False)
 
     def _toggle_left_sidebar(self, checked: bool = None) -> None:
         """Toggle the visibility of the global navigation sidebar."""
-        if not hasattr(self, "sidebar_widget") or self.sidebar_widget is None:
+        if not True or self.sidebar_widget is None:
             return
         visible = not self.sidebar_widget.isVisible() if checked is None else checked
         self.sidebar_widget.setVisible(visible)
 
         # Ensure proper splitter sizes when showing
-        if visible and hasattr(self, "main_layout"):
+        if visible and True:
             sizes = self.main_layout.sizes()
             if sum(sizes) > 0 and sizes[0] == 0:
                 # Give the sidebar its minimum width at least
@@ -493,7 +537,7 @@ class LauncherUISetupMixin:
 
     def _popout_sidekick(self) -> None:
         """Toggle Sidekick pop-out state."""
-        if not hasattr(self, "sidekick_sidebar") or self.sidekick_sidebar is None:
+        if not True or self.sidekick_sidebar is None:
             return
 
         if not self._sidekick_popped_out:
@@ -504,7 +548,7 @@ class LauncherUISetupMixin:
             from PyQt6.QtWidgets import QDialog, QVBoxLayout
             from PyQt6.QtCore import Qt
 
-            self.sidekick_window = QDialog(self, Qt.WindowType.Window)
+            self.sidekick_window = QDialog(self.launcher, Qt.WindowType.Window)
             self.sidekick_window.setWindowTitle("UpstreamDrift Sidekick")
             self.sidekick_window.resize(400, 800)
 
@@ -637,11 +681,11 @@ class LauncherUISetupMixin:
             "settings",
             checkable=False,
         )
-        if hasattr(self, "_show_preferences"):
+        if True:
             btn_settings.clicked.connect(self._show_preferences)
 
         # Setup mutually exclusive active-state routing for navigation
-        self.sidebar_group = QButtonGroup(self)
+        self.sidebar_group = QButtonGroup(self.launcher)
         self.sidebar_group.addButton(btn_home, 0)
         self.sidebar_group.addButton(btn_engines, 1)
         self.sidebar_group.addButton(btn_biomechanics, 2)
@@ -711,7 +755,7 @@ class LauncherUISetupMixin:
         if button_id == 7:
             self._open_library_tab()
             return
-        if not hasattr(self, "layout_manager"):
+        if not True:
             return
 
         _CATEGORY_MAP: dict[int, str] = {
@@ -727,7 +771,7 @@ class LauncherUISetupMixin:
             button_id, "All"
         )
 
-        if hasattr(self, "_rebuild_grid"):
+        if True:
             self._rebuild_grid()
 
     def _build_menu_bar_widget(self) -> QMenuBar:
@@ -744,7 +788,7 @@ class LauncherUISetupMixin:
         reserves the native top strip above the central widget, which
         on a frameless window draws above the custom title bar.
         """
-        menubar = QMenuBar(self)
+        menubar = QMenuBar(self.launcher)
         # Postcondition (DbC): a non-null QMenuBar is returned.
         assert menubar is not None, (
             "QMenuBar construction returned None — should be impossible"
@@ -781,7 +825,7 @@ class LauncherUISetupMixin:
             raise ValueError("menubar must be provided")
         file_menu = menubar.addMenu("&File")
 
-        action_preferences = QAction("&Preferences...", self)
+        action_preferences = QAction("&Preferences...", self.launcher)
         action_preferences.setShortcut("Ctrl+,")
         action_preferences.setToolTip("Edit application preferences and theme")
         action_preferences.setStatusTip("Opens preferences")
@@ -790,7 +834,7 @@ class LauncherUISetupMixin:
 
         file_menu.addSeparator()
 
-        action_exit = QAction("E&xit", self)
+        action_exit = QAction("E&xit", self.launcher)
         action_exit.setShortcut("Ctrl+Q")
         action_exit.setToolTip("Close the launcher")
         action_exit.setStatusTip("Quits the application")
@@ -804,7 +848,7 @@ class LauncherUISetupMixin:
 
         from PyQt6.QtGui import QActionGroup
 
-        self._viewmode_action_group = QActionGroup(self)
+        self._viewmode_action_group = QActionGroup(self.launcher)
         self._viewmode_action_group.setExclusive(True)
         self._viewmode_actions: dict[ViewMode, QAction] = {}
         for label, mode, shortcut in (
@@ -814,7 +858,7 @@ class LauncherUISetupMixin:
             ("List &Small", ViewMode.LIST_SMALL, "Ctrl+4"),
             ("List &Large", ViewMode.LIST_LARGE, "Ctrl+5"),
         ):
-            act = QAction(label, self)
+            act = QAction(label, self.launcher)
             act.setCheckable(True)
             act.setShortcut(shortcut)
             act.setToolTip(f"Switch tile layout to {label.replace('&', '')} mode")
@@ -830,7 +874,7 @@ class LauncherUISetupMixin:
 
         view_menu.addSeparator()
 
-        action_layout_mode = QAction("&Edit Layout Mode", self)
+        action_layout_mode = QAction("&Edit Layout Mode", self.launcher)
         action_layout_mode.setCheckable(True)
         action_layout_mode.setToolTip("Toggle drag-and-drop reordering of model tiles")
         action_layout_mode.setStatusTip("Toggles layout-edit mode")
@@ -838,7 +882,7 @@ class LauncherUISetupMixin:
         view_menu.addAction(action_layout_mode)
         self._action_layout_mode = action_layout_mode
 
-        action_customize_tiles = QAction("&Select Visible Tiles...", self)
+        action_customize_tiles = QAction("&Select Visible Tiles...", self.launcher)
         action_customize_tiles.setToolTip(
             "Select which tiles are visible in the layout"
         )
@@ -849,7 +893,7 @@ class LauncherUISetupMixin:
 
         view_menu.addSeparator()
 
-        action_context_help = QAction("Context &Help Panel", self)
+        action_context_help = QAction("Context &Help Panel", self.launcher)
         action_context_help.setCheckable(True)
         action_context_help.setToolTip("Show or hide the side help panel")
         action_context_help.setStatusTip("Toggles context-help panel")
@@ -857,7 +901,7 @@ class LauncherUISetupMixin:
         view_menu.addAction(action_context_help)
         self._action_context_help = action_context_help
 
-        action_console = QAction("&Process Output Console", self)
+        action_console = QAction("&Process Output Console", self.launcher)
         action_console.setCheckable(True)
         action_console.setChecked(False)
         action_console.setShortcut("Ctrl+`")
@@ -878,13 +922,13 @@ class LauncherUISetupMixin:
             raise ValueError("menubar must be provided")
         tools_menu = menubar.addMenu("&Tools")
 
-        action_env = QAction("&Environment Manager...", self)
+        action_env = QAction("&Environment Manager...", self.launcher)
         action_env.setToolTip("Inspect Python environments and engine availability")
         action_env.setStatusTip("Opens environment manager")
         action_env.triggered.connect(lambda: self._open_settings(tab=1))
         tools_menu.addAction(action_env)
 
-        action_diag = QAction("&Diagnostics...", self)
+        action_diag = QAction("&Diagnostics...", self.launcher)
         action_diag.setToolTip("Run a diagnostic sweep of the install")
         action_diag.setStatusTip("Opens diagnostics")
         action_diag.triggered.connect(lambda: self._open_settings(tab=2))
@@ -908,21 +952,21 @@ class LauncherUISetupMixin:
         )
         from src.launchers.help_menu import show_keyboard_shortcuts_modal
 
-        action_manual = QAction("&User Manual", self)
+        action_manual = QAction("&User Manual", self.launcher)
         action_manual.setShortcut("F1")
         action_manual.setToolTip("Open the in-app help dialog")
         action_manual.setStatusTip("Opens user manual")
         action_manual.triggered.connect(lambda: self._show_help_dialog())
         help_menu.addAction(action_manual)
 
-        action_context_docs = QAction("Context &Documentation", self)
+        action_context_docs = QAction("Context &Documentation", self.launcher)
         action_context_docs.setToolTip("Open context-aware documentation")
         action_context_docs.setStatusTip("Opens Context Help")
-        if hasattr(self, "_toggle_context_help"):
+        if True:
             action_context_docs.triggered.connect(self._toggle_context_help)
         help_menu.addAction(action_context_docs)
 
-        action_user_guide = QAction("User &Guide (online)", self)
+        action_user_guide = QAction("User &Guide (online)", self.launcher)
         action_user_guide.setToolTip(
             "Open the bundled user guide in the system browser"
         )
@@ -930,13 +974,13 @@ class LauncherUISetupMixin:
         action_user_guide.triggered.connect(lambda: open_user_guide())
         help_menu.addAction(action_user_guide)
 
-        action_loaders = QAction("&Motion-Match Loaders", self)
+        action_loaders = QAction("&Motion-Match Loaders", self.launcher)
         action_loaders.setToolTip("Reference for loading motion-target files")
         action_loaders.setStatusTip("Opens motion-match loader reference")
         action_loaders.triggered.connect(lambda: open_motion_match_loaders_doc())
         help_menu.addAction(action_loaders)
 
-        action_project_map = QAction("&Project Map", self)
+        action_project_map = QAction("&Project Map", self.launcher)
         action_project_map.setToolTip("Open the project-map document")
         action_project_map.setStatusTip("Opens project map")
         action_project_map.triggered.connect(self._open_project_map)
@@ -973,7 +1017,7 @@ class LauncherUISetupMixin:
             ("&Visualization", "visualization"),
             ("&Analysis Tools", "analysis_tools"),
         ]:
-            action = QAction(label, self)
+            action = QAction(label, self.launcher)
             tip, status = topic_tips[topic]
             action.setToolTip(tip)
             action.setStatusTip(status)
@@ -982,7 +1026,7 @@ class LauncherUISetupMixin:
 
         help_menu.addSeparator()
 
-        action_shortcuts = QAction("&Keyboard Shortcuts...", self)
+        action_shortcuts = QAction("&Keyboard Shortcuts...", self.launcher)
         action_shortcuts.setShortcut("Ctrl+?")
         action_shortcuts.setToolTip("Show every registered keyboard shortcut")
         action_shortcuts.setStatusTip("Opens keyboard-shortcuts table")
@@ -991,14 +1035,14 @@ class LauncherUISetupMixin:
         # back to the legacy overlay if the modal raises.
         def _open_shortcuts() -> None:
             try:
-                show_keyboard_shortcuts_modal(self)
+                show_keyboard_shortcuts_modal(self.launcher)
             except Exception:  # noqa: BLE001
                 self._show_shortcuts_overlay()
 
         action_shortcuts.triggered.connect(_open_shortcuts)
         help_menu.addAction(action_shortcuts)
 
-        action_report_bug = QAction("&Report a Bug...", self)
+        action_report_bug = QAction("&Report a Bug...", self.launcher)
         action_report_bug.setToolTip("Open the public issue tracker in your browser")
         action_report_bug.setStatusTip("Opens issue tracker")
         action_report_bug.triggered.connect(lambda: open_issues_page())
@@ -1006,7 +1050,7 @@ class LauncherUISetupMixin:
 
         help_menu.addSeparator()
 
-        action_about = QAction("&About UpstreamDrift", self)
+        action_about = QAction("&About UpstreamDrift", self.launcher)
         action_about.setToolTip("Show version and runtime information")
         action_about.setStatusTip("Opens About dialog")
 
@@ -1014,7 +1058,7 @@ class LauncherUISetupMixin:
         # if anything fails (keeps menu working in trimmed environments).
         def _open_about() -> None:
             try:
-                show_about_dialog(self)
+                show_about_dialog(self.launcher)
             except Exception:  # noqa: BLE001
                 self._show_about_dialog()
 
@@ -1053,7 +1097,7 @@ class LauncherUISetupMixin:
         )
         top_bar.addWidget(self.lbl_execution_mode)
 
-        self.btn_runtime_help = make_runtime_mode_help_button(self)
+        self.btn_runtime_help = make_runtime_mode_help_button(self.launcher)
         top_bar.addWidget(self.btn_runtime_help)
 
         top_bar.addStretch()
@@ -1166,16 +1210,16 @@ class LauncherUISetupMixin:
         """Add discrete view-mode dropdown and a compact, elegant zoom slider to top bar."""
 
         # Ctrl+= / Ctrl+- shortcuts adjust zoom by one step (~1.75% scale).
-        sc_in = QShortcut(QKeySequence("Ctrl+="), self)
+        sc_in = QShortcut(QKeySequence("Ctrl+="), self.launcher)
         sc_in.activated.connect(lambda: self._nudge_zoom(+5))
-        sc_in_alt = QShortcut(QKeySequence("Ctrl++"), self)
+        sc_in_alt = QShortcut(QKeySequence("Ctrl++"), self.launcher)
         sc_in_alt.activated.connect(lambda: self._nudge_zoom(+5))
-        sc_out = QShortcut(QKeySequence("Ctrl+-"), self)
+        sc_out = QShortcut(QKeySequence("Ctrl+-"), self.launcher)
         sc_out.activated.connect(lambda: self._nudge_zoom(-5))
 
     def _nudge_zoom(self, delta_steps: int) -> None:
         """Adjust the zoom slider by ``delta_steps`` integer ticks."""
-        slider = getattr(self, "zoom_slider", None)
+        slider = self.zoom_slider
         if slider is None:
             return
         slider.setValue(slider.value() + delta_steps)
@@ -1195,7 +1239,7 @@ class LauncherUISetupMixin:
 
     def _on_view_mode_changed(self, index: int) -> None:
         """Apply the selected view mode to the layout manager + grid."""
-        combo = getattr(self, "view_mode_combo", None)
+        combo = self.view_mode_combo
         if combo is None:
             return
         mode = combo.itemData(index)
@@ -1214,42 +1258,42 @@ class LauncherUISetupMixin:
         slider, and the grid in sync regardless of which surface
         triggered the change.
         """
-        lm = getattr(self, "layout_manager", None)
+        lm = self.layout_manager
         if lm is None:
             return
         lm.set_view_mode(mode)
         # Sync menu action checkmarks regardless.
-        actions = getattr(self, "_viewmode_actions", None)
+        actions = self._viewmode_actions
         if actions and mode in actions and not actions[mode].isChecked():
             actions[mode].setChecked(True)
         # Sync top-bar dropdown menu action checkmarks regardless.
-        top_actions = getattr(self, "_top_viewmode_actions", None)
+        top_actions = self._top_viewmode_actions
         if top_actions and mode in top_actions and not top_actions[mode].isChecked():
             top_actions[mode].setChecked(True)
         # Update zoom slider/label to reflect the mode's default scale.
-        if hasattr(self, "zoom_slider"):
+        if True:
             self.zoom_slider.blockSignals(True)
             self.zoom_slider.setValue(self._scale_to_slider(lm.tile_scale))
             self.zoom_slider.blockSignals(False)
-        if hasattr(self, "lbl_zoom_pct"):
+        if True:
             self.lbl_zoom_pct.setText(f"{int(round(lm.tile_scale * 100))}%")
-        if hasattr(self, "grid_layout"):
+        if True:
             lm.rebuild_grid(self.grid_layout)
-        if hasattr(self, "_save_layout"):
+        if True:
             self._save_layout()
 
     def _on_zoom_slider_changed(self, value: int) -> None:
         """Live-resize all model cards to match the new slider position."""
-        lm = getattr(self, "layout_manager", None)
+        lm = self.layout_manager
         scale = self._slider_to_scale(value)
-        if hasattr(self, "lbl_zoom_pct"):
+        if True:
             self.lbl_zoom_pct.setText(f"{int(round(scale * 100))}%")
         if lm is None:
             return
         lm.set_tile_scale(scale)
-        if hasattr(self, "_rebuild_grid"):
+        if True:
             self._rebuild_grid()
-        if hasattr(self, "_save_layout"):
+        if True:
             self._save_layout()
 
     def _setup_top_bar(self) -> QHBoxLayout:
@@ -1257,7 +1301,7 @@ class LauncherUISetupMixin:
         top_bar = QHBoxLayout()
 
         # Modern toggles for the sidebars (left nav and right sidekick)
-        self.btn_toggle_left_sidebar = QToolButton(self)
+        self.btn_toggle_left_sidebar = QToolButton(self.launcher)
         try:
             from src.shared.python.theme.icon_utils import IconColorizer
 
@@ -1280,7 +1324,7 @@ class LauncherUISetupMixin:
         self._setup_top_bar_config_checkboxes(top_bar)
         self._setup_top_bar_action_buttons(top_bar)
 
-        self.btn_toggle_right_sidebar = QToolButton(self)
+        self.btn_toggle_right_sidebar = QToolButton(self.launcher)
         try:
             from src.shared.python.theme.icon_utils import IconColorizer
 
@@ -1355,10 +1399,10 @@ class LauncherUISetupMixin:
 
     def _setup_search_shortcuts(self) -> None:
         """Setup keyboard shortcuts for search."""
-        shortcut_search = QShortcut(QKeySequence("Ctrl+F"), self)
+        shortcut_search = QShortcut(QKeySequence("Ctrl+F"), self.launcher)
         shortcut_search.activated.connect(self._focus_search)
 
-        shortcut_escape = QShortcut(QKeySequence("Esc"), self)
+        shortcut_escape = QShortcut(QKeySequence("Esc"), self.launcher)
         shortcut_escape.activated.connect(self._clear_search)
 
     def _focus_search(self) -> None:
@@ -1404,7 +1448,7 @@ class LauncherUISetupMixin:
 
         from PyQt6.QtWidgets import QDialog
 
-        self._console_dock = QDialog(self, Qt.WindowType.Window)
+        self._console_dock = QDialog(self.launcher, Qt.WindowType.Window)
         self._console_dock.setWindowTitle("Process Output")
         self._console_dock.resize(800, 300)
 
@@ -1427,7 +1471,7 @@ class LauncherUISetupMixin:
             raise ValueError("engine_name must be provided")
         if not self._console_dock.isVisible():
             self._console_dock.show()
-            if hasattr(self, "_action_console"):
+            if True:
                 self._action_console.setChecked(True)
 
         ts = datetime.datetime.now().strftime("%H:%M:%S")
@@ -1459,14 +1503,14 @@ class LauncherUISetupMixin:
         from src.launchers.ui_components import ContextHelpDock
         from PyQt6.QtWidgets import QDialog
 
-        self.context_help = QDialog(self, Qt.WindowType.Window)
+        self.context_help = QDialog(self.launcher, Qt.WindowType.Window)
         self.context_help.setWindowTitle("Context Help")
         self.context_help.resize(400, 800)
 
         dl_layout = QVBoxLayout(self.context_help)
         dl_layout.setContentsMargins(0, 0, 0, 0)
 
-        help_widget = ContextHelpDock(self)
+        help_widget = ContextHelpDock(self.launcher)
         dl_layout.addWidget(help_widget)
 
         # Proxy the update_context method to the inner widget
@@ -1481,12 +1525,12 @@ class LauncherUISetupMixin:
         try:
             from src.shared.python.ui.overlay import OverlayWidget
 
-            self.overlay = OverlayWidget(self)
+            self.overlay = OverlayWidget(self.launcher)
             self.overlay.hide()
         except (ImportError, TypeError):
             logger.warning("OverlayWidget could not be initialized.")
 
     def _toggle_overlay(self) -> None:
         """Toggle the screen overlay."""
-        if hasattr(self, "overlay"):
+        if True:
             self.overlay.toggle()

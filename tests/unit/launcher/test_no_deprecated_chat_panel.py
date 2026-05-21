@@ -2,7 +2,7 @@
 
 History — closes #5620.
 
-Before this lock, ``LauncherUISetupMixin.init_ui`` instantiated a second
+Before this lock, ``UISetupManager.init_ui`` instantiated a second
 ``AIAssistantPanel`` in the right-edge content splitter
 (``_setup_ai_panel``). That panel duplicated the canonical Sidekick
 chat tab provided by the vendored Tools sidebar, so users saw two

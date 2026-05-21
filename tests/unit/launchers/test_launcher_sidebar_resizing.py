@@ -1,12 +1,14 @@
 import pytest
 from unittest.mock import MagicMock
 from PyQt6.QtWidgets import QApplication, QSplitter, QWidget, QVBoxLayout, QSizePolicy
-from src.launchers.launcher_ui_setup import LauncherUISetupMixin
+from src.launchers.launcher_ui_setup import UISetupManager
 
 
-class DummyLauncher(QWidget, LauncherUISetupMixin):
-    def __init__(self):
-        super().__init__()
+class DummyLauncher(QWidget):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.manager = UISetupManager(self)
+
         self.layout_manager = MagicMock()
         self._action_buttons = []
         self._top_bar = None

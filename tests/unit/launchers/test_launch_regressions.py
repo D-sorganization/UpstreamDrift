@@ -298,9 +298,9 @@ class TestLaunchDiagnostics:
 
     def test_execute_local_launch_logs_failure(self) -> None:
         """When handler.launch() returns False, detailed diagnostics are logged."""
-        from src.launchers.launcher_simulation import LauncherSimulationMixin
+        from src.launchers.launcher_simulation import SimulationManager
 
-        mixin = LauncherSimulationMixin.__new__(LauncherSimulationMixin)
+        mixin = SimulationManager.__new__(SimulationManager)
 
         mock_model = MagicMock()
         mock_model.name = "TestEngine"
@@ -333,9 +333,9 @@ class TestLaunchDiagnostics:
 
     def test_execute_local_launch_success_path(self) -> None:
         """When handler.launch() returns True, success toast is shown."""
-        from src.launchers.launcher_simulation import LauncherSimulationMixin
+        from src.launchers.launcher_simulation import SimulationManager
 
-        mixin = LauncherSimulationMixin.__new__(LauncherSimulationMixin)
+        mixin = SimulationManager.__new__(SimulationManager)
 
         mock_model = MagicMock()
         mock_model.name = "TestEngine"

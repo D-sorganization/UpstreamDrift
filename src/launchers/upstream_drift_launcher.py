@@ -43,20 +43,20 @@ from src.launchers.launcher_constants import (
     logger,
 )
 
-from src.launchers.launcher_dialogs import LauncherDialogsMixin
+from src.launchers.launcher_dialogs import DialogsManager
 from src.launchers.launcher_layout_manager import (
     LayoutManager,
     compute_centered_geometry,
 )
 from src.launchers.launcher_model_handlers import ModelHandlerRegistry
 from src.launchers.launcher_process_manager import ProcessManager
-from src.launchers.launcher_simulation import LauncherSimulationMixin
+from src.launchers.launcher_simulation import SimulationManager
 from src.launchers.sidekick_readiness import (
     check_sidekick_api_readiness,
     readiness_detail_for_log,
 )
-from src.launchers.launcher_theme import LauncherThemeMixin
-from src.launchers.launcher_ui_setup import LauncherUISetupMixin
+from src.launchers.launcher_theme import ThemeManager
+from src.launchers.launcher_ui_setup import UISetupManager
 
 from src.launchers.ui_components import (
     ASSETS_DIR,
@@ -228,13 +228,89 @@ class ProcessCleanupWorker(QRunnable):
         self.signals.finished.emit(finished_keys)
 
 
-class UpstreamDriftLauncher(
-    LauncherUISetupMixin,
-    LauncherThemeMixin,
-    LauncherSimulationMixin,
-    LauncherDialogsMixin,
-    QMainWindow,
-):
+class LauncherOrchestrator:
+    """Domain logic coordinator for the UpstreamDrift launcher.
+
+    Manages the ModelRegistry, EngineManager, and Docker health status,
+    keeping these domain responsibilities separated from the Qt UI.
+    """
+
+    def __init__(self) -> None:
+        self.registry = None
+        self.engine_manager = None
+        self.docker_available = False
+        self.available_models = {}
+        self.special_app_lookup = {}
+
+    def initialize_from_results(self, startup_results: "StartupResults | None") -> None:
+        """Initialize domain state from async startup results."""
+        self.docker_available = (
+            startup_results.docker_available if startup_results else False
+        )
+        self.init_registry(startup_results)
+        self.init_engine_manager(startup_results)
+        self.build_available_models()
+
+    def init_registry(self, startup_results: "StartupResults | None") -> None:
+        if startup_results and startup_results.registry is not None:
+            self.registry = startup_results.registry
+            logger.info("Using pre-loaded model registry from async startup")
+        else:
+            try:
+                MR = _lazy_load_model_registry()
+                self.registry = MR(REPOS_ROOT / "src/config/models.yaml")
+            except ImportError as e:
+                logger.error("Failed to load ModelRegistry: %s", e)
+                self.registry = None
+
+    def init_engine_manager(self, startup_results: "StartupResults | None") -> None:
+        if startup_results and startup_results.engine_manager is not None:
+            self.engine_manager = startup_results.engine_manager
+            logger.info("Using pre-loaded engine manager from async startup")
+        else:
+            try:
+                EM, _ = _lazy_load_engine_manager()
+                self.engine_manager = EM(REPOS_ROOT)
+            except (RuntimeError, ValueError, OSError) as e:
+                logger.warning(f"Failed to initialize EngineManager: {e}")
+                self.engine_manager = None
+
+    def build_available_models(self) -> None:
+        """Collect all known models and auxiliary applications."""
+        logger.debug("Building available models from registry...")
+        self.available_models.clear()
+        self.special_app_lookup.clear()
+
+        if self.registry:
+            all_models = self.registry.get_all_models()
+            logger.info(f"Registry returned {len(all_models)} models")
+
+            for model in all_models:
+                self.available_models[model.id] = model
+                logger.debug(f"  Added model: {model.id} ({model.name})")
+                if model.type in ("special_app", "utility", "matlab_app"):
+                    self.special_app_lookup[model.id] = model
+
+            logger.info(
+                f"Built available_models with {len(self.available_models)} entries"
+            )
+        else:
+            logger.warning("No registry available - no models will be loaded")
+
+    def get_model(self, model_id: str) -> "Any | None":
+        """Retrieve a model or application by ID."""
+        if model_id is None:
+            raise ValueError("model_id must be provided")
+        if model_id in self.available_models:
+            return self.available_models[model_id]
+
+        if self.registry:
+            return self.registry.get_model(model_id)
+
+        return None
+
+
+class UpstreamDriftLauncher(QMainWindow):
     """Main application window for the launcher.
 
     Composes focused mixins for UI setup, theme management,
@@ -253,7 +329,12 @@ class UpstreamDriftLauncher(
         super().__init__()
         from PyQt6.QtCore import Qt
 
+        self.ui_setup_manager = UISetupManager(self)
+        self.theme_manager = ThemeManager(self)
+        self.simulation_manager = SimulationManager(self)
+        self.dialogs_manager = DialogsManager(self)
         self.loading = loading
+        self.orchestrator = LauncherOrchestrator()
         self.setWindowTitle("UpstreamDrift")
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowMinimizeButtonHint
@@ -287,17 +368,15 @@ class UpstreamDriftLauncher(
         self._init_managers()
         # Skip heavy initialization in loading mode; async worker will provide results
         if not self.loading:
-            self._init_registry(startup_results)
-            self._init_engine_manager(startup_results)
-            self._build_available_models()
+            pass  # Orchestrator already initialized from results in _init_state
 
         self._init_layout_manager()
 
         if not self.loading:
             self._initialize_model_order()
 
-        self.init_ui()
-        self._apply_theme_system()
+        self.ui_setup_manager.init_ui()
+        self.theme_manager._apply_theme_system()
 
         if not self.loading:
             from PyQt6.QtCore import QTimer as _QTimer
@@ -322,7 +401,7 @@ class UpstreamDriftLauncher(
         elif startup_results:
             self._apply_docker_status(startup_results.docker_available)
         else:
-            self.check_docker()
+            self.simulation_manager.check_docker()
 
         self._load_layout()
 
@@ -332,7 +411,7 @@ class UpstreamDriftLauncher(
         self.cleanup_timer.start(10000)
 
         self.toast_manager = None
-        self._init_ui_components()
+        self.ui_setup_manager._init_ui_components()
 
         if self._startup_time_ms > 0:
             logger.info(f"Application startup completed in {self._startup_time_ms}ms")
@@ -340,14 +419,14 @@ class UpstreamDriftLauncher(
     def showEvent(self, event: Any) -> None:
         """Force sidekick splitter sizes on first display."""
         super().showEvent(event)
-        if getattr(self, "_sidekick_needs_initial_sizing", False):
+        if self._sidekick_needs_initial_sizing:
             self._sidekick_needs_initial_sizing = False
             self._apply_sidekick_splitter_sizes()
 
     def _apply_sidekick_splitter_sizes(self) -> None:
         """Set main_layout splitter sizes to give the sidekick 300px."""
-        layout = getattr(self, "main_layout", None)
-        sidebar = getattr(self, "sidekick_sidebar", None)
+        layout = self.main_layout
+        sidebar = self.sidekick_sidebar
         if layout is None or sidebar is None:
             return
         sizes = layout.sizes()
@@ -382,37 +461,17 @@ class UpstreamDriftLauncher(
             or "PYTEST_CURRENT_TEST" in os.environ
         )
 
-    def _install_sidekick_sidebar(self) -> None:
-        """Embed the Sidekick multitab sidebar as a third splitter pane.
-
-        Issue #5624: on a ``FramelessWindowHint`` + ``WA_TranslucentBackground``
-        main window, ``QMainWindow.addDockWidget`` defaults its dock to a
-        free-floating top-level window because dock geometry calculations
-        depend on the native OS window frame that the frameless hint
-        removes.  Embedding the bare ``UnifiedToolsSidebar`` widget into
-        the existing ``main_layout`` ``QSplitter`` (built by
-        ``LauncherUISetupMixin.init_ui``) keeps Sidekick inside the
-        launcher window as the rightmost pane.
-
-        The Sidekick package (Files, Workspace, Chat, Terminal, Calculator,
-        Data Explorer, Notes, Reporting, Units, Rotation Converter, etc.)
-        is vendored at ``vendor/ud-tools/src/shared/python/sidekick``.
-        Failure to install is non-fatal — the launcher remains usable
-        with just the tile grid.
-        """
-        logger.info("Initializing _install_sidekick_sidebar")
+    def _get_sidekick_module(self) -> Any | None:
+        """Import the Sidekick sidebar module, trying multiple fallback paths."""
         try:
             from src.shared.python.gui_launcher.tools_sidebar_integration import (
                 _import_sidebar_module,
             )
         except ImportError as e:
             logger.debug("Sidekick integration shim not importable: %s", e)
-            return
+            return None
 
         module = _import_sidebar_module()
-
-        # Fallback: direct import when the candidate list fails due to
-        # sys.path state differences in async-startup mode.
         if module is None:
             import importlib
             import sys as _sys
@@ -445,14 +504,14 @@ class UpstreamDriftLauncher(
                     break
                 except ImportError:
                     continue
+        return module
 
+    def _create_sidekick_sidebar_widget(self, module: Any) -> Any | None:
+        """Invoke the factory to create the sidekick sidebar widget."""
         if module is None:
             logger.warning("Sidekick sidebar not installed: shared module unavailable")
-            return
+            return None
 
-        # The shared factory ``create_tools_sidebar`` returns the bare
-        # ``UnifiedToolsSidebar`` widget without dock wrapping — exactly
-        # what the frameless launcher needs.
         factory = getattr(module, "create_tools_sidebar", None)
         if factory is None:
             logger.warning(
@@ -460,28 +519,26 @@ class UpstreamDriftLauncher(
                 "from %s",
                 getattr(module, "__name__", "<unknown>"),
             )
-            return
+            return None
 
-        # Tools-side ``create_tools_sidebar`` accepts ``parent`` and
-        # optional ``project_root``; the in-repo stub accepts only
-        # ``parent``.  Try the full signature, fall back to bare parent.
         try:
-            sidebar_widget = factory(parent=self, project_root=str(REPOS_ROOT))
+            return factory(parent=self, project_root=str(REPOS_ROOT))
         except TypeError:
             try:
-                sidebar_widget = factory(parent=self)
-            except Exception as exc:  # noqa: BLE001 - best-effort install
+                return factory(parent=self)
+            except (RuntimeError, ValueError) as exc:
                 logger.warning("Sidekick factory call failed: %s", exc)
-                return
-        except Exception as exc:  # noqa: BLE001
+                return None
+        except (RuntimeError, ValueError) as exc:
             logger.warning("Sidekick factory call failed: %s", exc)
-            return
+            return None
 
+    def _embed_sidekick_sidebar_widget(self, sidebar_widget: Any) -> None:
+        """Embed the created sidebar widget into the main layout."""
         if sidebar_widget is None:
-            logger.warning("Sidekick sidebar not installed: factory returned None")
             return
 
-        main_layout = getattr(self, "main_layout", None)
+        main_layout = self.main_layout
         if main_layout is None or not hasattr(main_layout, "addWidget"):
             logger.warning(
                 "Sidekick sidebar not installed: main_layout splitter not "
@@ -489,22 +546,22 @@ class UpstreamDriftLauncher(
             )
             return
 
-        # Add as the third pane (after the global sidebar and the
-        # content container).  Give it a small initial weight.
         main_layout.addWidget(sidebar_widget)
         if hasattr(main_layout, "setStretchFactor"):
-            with contextlib.suppress(Exception):
+            with contextlib.suppress(RuntimeError, ValueError, TypeError):
                 main_layout.setStretchFactor(main_layout.count() - 1, 2)
 
         self.sidekick_sidebar = sidebar_widget
-        # The sidebar is installed after the window is already visible
-        # (deferred via QTimer), so apply splitter sizes immediately.
         self._apply_sidekick_splitter_sizes()
 
-        logger.info(
-            "Sidekick sidebar embedded in main splitter from %s",
-            getattr(module, "__name__", "<unknown>"),
-        )
+        logger.info("Sidekick sidebar embedded in main splitter")
+
+    def _install_sidekick_sidebar(self) -> None:
+        """Embed the Sidekick multitab sidebar as a third splitter pane."""
+        logger.info("Initializing _install_sidekick_sidebar")
+        module = self._get_sidekick_module()
+        widget = self._create_sidekick_sidebar_widget(module)
+        self._embed_sidekick_sidebar_widget(widget)
 
     def _load_window_icon(self) -> None:
         icon_candidates = [
@@ -519,9 +576,6 @@ class UpstreamDriftLauncher(
         logger.warning("No icon files found")
 
     def _init_state(self, startup_results: StartupResults | None) -> None:
-        self.docker_available = (
-            startup_results.docker_available if startup_results else False
-        )
         self.docker_checker: DockerCheckThread | None = None
         self.selected_model: str | None = None
         self.model_cards: dict[str, Any] = {}
@@ -529,17 +583,11 @@ class UpstreamDriftLauncher(
         self.background_api_process: Any | None = None
         self._sidekick_api_wait_started_at: float | None = None
         self.layout_edit_mode = False
-        self.available_models: dict[str, Any] = {}
-        self.special_app_lookup: dict[str, Any] = {}
         self.current_filter_text = ""
-        # Initialize registry and engine_manager to None to preserve invariant
-        # that these attributes always exist (required by Settings dialog etc.)
-        # They will be populated by _init_registry() or update_startup_results()
-        self.registry: Any = None
-        self.engine_manager: Any = None
+        self.orchestrator.initialize_from_results(startup_results)
 
     def _init_managers(self) -> None:
-        self._setup_process_console()
+        self.ui_setup_manager._setup_process_console()
         self.process_manager = ProcessManager(
             REPOS_ROOT,
             output_callback=self._on_process_output,
@@ -565,31 +613,6 @@ class UpstreamDriftLauncher(
             module_name="src.api.server",
             cwd=cwd,
         )
-
-    def _init_registry(self, startup_results: StartupResults | None) -> None:
-        if startup_results and startup_results.registry is not None:
-            self.registry = startup_results.registry
-            logger.info("Using pre-loaded model registry from async startup")
-        else:
-            try:
-                MR = _lazy_load_model_registry()
-                self.registry = MR(REPOS_ROOT / "src/config/models.yaml")
-            except ImportError as e:
-                # Lazy import may fail when optional dependencies are missing.
-                logger.error("Failed to load ModelRegistry: %s", e)
-                self.registry = None
-
-    def _init_engine_manager(self, startup_results: StartupResults | None) -> None:
-        if startup_results and startup_results.engine_manager is not None:
-            self.engine_manager = startup_results.engine_manager
-            logger.info("Using pre-loaded engine manager from async startup")
-        else:
-            try:
-                EM, _ = _lazy_load_engine_manager()
-                self.engine_manager = EM(REPOS_ROOT)
-            except (RuntimeError, ValueError, OSError) as e:
-                logger.warning(f"Failed to initialize EngineManager: {e}")
-                self.engine_manager = None
 
     def _create_category_header(self, title: str) -> Any:
         from PyQt6.QtWidgets import QLabel
@@ -619,8 +642,8 @@ class UpstreamDriftLauncher(
     def _init_layout_manager(self) -> None:
         self.layout_manager = LayoutManager(
             config_file=LAYOUT_CONFIG_FILE,
-            available_models=self.available_models,
-            get_model_func=self._get_model,
+            available_models=self.orchestrator.available_models,
+            get_model_func=self.orchestrator.get_model,
             create_card_func=lambda model, **kwargs: DraggableModelCard(
                 model, self, **kwargs
             ),
@@ -631,45 +654,11 @@ class UpstreamDriftLauncher(
 
     # -- Model management methods --
 
-    def _build_available_models(self) -> None:
-        """Collect all known models and auxiliary applications."""
-        logger.debug("Building available models from registry...")
-
-        if self.registry:
-            all_models = self.registry.get_all_models()
-            logger.info(f"Registry returned {len(all_models)} models")
-
-            for model in all_models:
-                self.available_models[model.id] = model
-                logger.debug(f"  Added model: {model.id} ({model.name})")
-                if model.type in ("special_app", "utility", "matlab_app"):
-                    self.special_app_lookup[model.id] = model
-
-            logger.info(
-                f"Built available_models with {len(self.available_models)} entries"
-            )
-        else:
-            logger.warning("No registry available - no models will be loaded")
-
     def _initialize_model_order(self) -> None:
         """Set a sensible default grid ordering."""
         logger.debug("Initializing model order...")
         self.layout_manager.initialize_model_order()
         self.model_order = self.layout_manager.model_order
-
-    def _get_model(self, model_id: str) -> Any | None:
-        """Retrieve a model or application by ID."""
-        if model_id is None:
-            raise ValueError("model_id must be provided")
-        if model_id in self.available_models:
-            return self.available_models[model_id]
-
-        if self.registry:
-            return self.registry.get_model(model_id)
-
-        return None
-
-    # -- Layout management --
 
     def _save_layout(self) -> None:
         """Save the current model layout to configuration file."""
@@ -682,17 +671,9 @@ class UpstreamDriftLauncher(
                 "height": self.height(),
             },
             "options": {
-                "live_visualization": (
-                    self.chk_live.isChecked() if hasattr(self, "chk_live") else True
-                ),
-                "gpu_acceleration": (
-                    self.chk_gpu.isChecked() if hasattr(self, "chk_gpu") else False
-                ),
-                "docker_mode": (
-                    self.chk_docker.isChecked()
-                    if hasattr(self, "chk_docker")
-                    else False
-                ),
+                "live_visualization": (self.chk_live.isChecked() if True else True),
+                "gpu_acceleration": (self.chk_gpu.isChecked() if True else False),
+                "docker_mode": (self.chk_docker.isChecked() if True else False),
             },
         }
         self.layout_manager.save_layout(window_state)
@@ -756,10 +737,8 @@ class UpstreamDriftLauncher(
         """Transition from loading skeleton to full application."""
         self.loading = False
         self._startup_time_ms = results.startup_time_ms
-        self._init_registry(results)
-        self._init_engine_manager(results)
-        self._build_available_models()
-        self.layout_manager.available_models = self.available_models
+        self.orchestrator.initialize_from_results(results)
+        self.layout_manager.available_models = self.orchestrator.available_models
         self._initialize_model_order()
         self._apply_docker_status(results.docker_available)
         self._load_layout()
@@ -829,7 +808,7 @@ class UpstreamDriftLauncher(
         its registry contains 'engine_manager' and 'model_registry' keys.
         LOD: reaches only one level deep (sidebar.registry).
         """
-        sidebar = getattr(self, "sidekick_sidebar", None)
+        sidebar = self.sidekick_sidebar
         if sidebar is None:
             # Try the tools-sidebar integration hook if present
             try:
@@ -855,10 +834,10 @@ class UpstreamDriftLauncher(
             )
             return
 
-        if self.engine_manager is not None:
-            set_variable("engine_manager", self.engine_manager)
-        if self.registry is not None:
-            set_variable("model_registry", self.registry)
+        if self.orchestrator.engine_manager is not None:
+            set_variable("engine_manager", self.orchestrator.engine_manager)
+        if self.orchestrator.registry is not None:
+            set_variable("model_registry", self.orchestrator.registry)
         logger.info("Sidekick workspace seeded with engine_manager and model_registry")
 
     def create_model_card(self, model: Any) -> None:
@@ -903,8 +882,8 @@ class UpstreamDriftLauncher(
         # against the toast manager not yet being initialized — the
         # constructor wires it up after the timeout is armed, but a
         # mid-init crash could leave it ``None``.
-        if getattr(self, "toast_manager", None) is not None:
-            self.show_toast(
+        if self.toast_manager is not None:
+            self.dialogs_manager.show_toast(
                 f"Startup timed out after {STARTUP_TIMEOUT_SEC}s. "
                 "Click the refresh / retry button or restart the launcher.",
                 "error",
@@ -916,7 +895,7 @@ class UpstreamDriftLauncher(
             raise ValueError("model_id must be provided")
         self.select_model(model_id)
         QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
-        self.launch_simulation()
+        self.simulation_manager.launch_simulation()
 
     # -- Window management --
 
@@ -959,7 +938,7 @@ class UpstreamDriftLauncher(
             return
 
         # Restore view mode checkmark
-        if hasattr(self, "_viewmode_actions"):
+        if True:
             act = self._viewmode_actions.get(self.layout_manager.current_view_mode)
             if act:
                 act.setChecked(True)
@@ -990,14 +969,16 @@ class UpstreamDriftLauncher(
 
         # Restore options
         options = layout_data.get("options", {})
-        if hasattr(self, "chk_live"):
+        if True:
             self.chk_live.setChecked(options.get("live_visualization", True))
-        if hasattr(self, "chk_gpu"):
+        if True:
             self.chk_gpu.setChecked(options.get("gpu_acceleration", False))
-        if hasattr(self, "chk_docker"):
-            # If "docker_mode" is not in options, default to self.docker_available
-            saved_docker = options.get("docker_mode", self.docker_available)
-            if saved_docker and self.docker_available:
+        if True:
+            # If "docker_mode" is not in options, default to self.orchestrator.docker_available
+            saved_docker = options.get(
+                "docker_mode", self.orchestrator.docker_available
+            )
+            if saved_docker and self.orchestrator.docker_available:
                 self.chk_docker.setChecked(True)
             else:
                 self.chk_docker.setChecked(False)
@@ -1061,12 +1042,12 @@ class UpstreamDriftLauncher(
                         """)
 
         # Update launch button
-        model = self._get_model(model_id)
+        model = self.orchestrator.get_model(model_id)
         if model:
             self.update_launch_button(model.name)
 
             # Update Help Context
-            context_help = getattr(self, "context_help", None)
+            context_help = self.context_help
             update_context = getattr(context_help, "update_context", None)
             if callable(update_context):
                 update_context(model_id)
@@ -1093,13 +1074,13 @@ class UpstreamDriftLauncher(
             return
 
         name = model_name or self.selected_model
-        model = self._get_model(self.selected_model)
+        model = self.orchestrator.get_model(self.selected_model)
 
         # Check Docker dependency
         if (
             model
             and getattr(model, "requires_docker", False)
-            and not self.docker_available
+            and not self.orchestrator.docker_available
         ):
             self.btn_launch.setText("! Docker Required")
             self.btn_launch.setStyleSheet(f"""
@@ -1151,7 +1132,7 @@ class UpstreamDriftLauncher(
         """Apply Docker availability status to UI."""
         if available is None:
             raise ValueError("available must be provided")
-        self.docker_available = available
+        self.orchestrator.docker_available = available
         if available:
             self.lbl_status.setText("System Ready")
             self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS_BOLD)
@@ -1163,7 +1144,7 @@ class UpstreamDriftLauncher(
     def check_docker(self) -> None:
         """Start the docker check thread."""
         logger.info("Checking Docker status...")
-        if hasattr(self, "docker_checker") and self.docker_checker is not None:
+        if True and self.docker_checker is not None:
             if self.docker_checker.isRunning():
                 self.docker_checker.wait(1000)
             with contextlib.suppress(TypeError, RuntimeError):
@@ -1181,13 +1162,13 @@ class UpstreamDriftLauncher(
 
     def _toggle_layout_mode_from_menu(self, checked: bool) -> None:
         """Toggle layout edit mode from menu action."""
-        if hasattr(self, "btn_modify_layout"):
+        if True:
             self.btn_modify_layout.setChecked(checked)
-        self.toggle_layout_mode(checked)
+        self.ui_setup_manager.toggle_layout_mode(checked)
 
     def _toggle_context_help(self, checked: bool) -> None:
         """Toggle the context help panel visibility."""
-        if hasattr(self, "context_help"):
+        if True:
             if checked:
                 self.context_help.show()
             else:
@@ -1215,7 +1196,7 @@ class UpstreamDriftLauncher(
                 if key in self.running_processes:
                     del self.running_processes[key]
 
-        if not self.running_processes and hasattr(self, "lbl_status"):
+        if not self.running_processes and True:
             self.lbl_status.setText("Ready")
             self.lbl_status.setStyleSheet(Styles.STATUS_INACTIVE)
 
@@ -1228,8 +1209,8 @@ class UpstreamDriftLauncher(
         ]
         self._on_cleanup_finished(finished_keys)
 
-    def closeEvent(self, event: QCloseEvent | None) -> None:  # noqa: C901
-        """Handle window close event to save layout."""
+    def _confirm_exit_if_running_processes(self, event: QCloseEvent | None) -> bool:
+        """Return True if it's safe to exit (user confirms or no processes running)."""
         running_names = [
             k for k, p in self.running_processes.items() if p.poll() is None
         ]
@@ -1262,37 +1243,39 @@ class UpstreamDriftLauncher(
             if reply == QDialog.DialogCode.Rejected:
                 if event:
                     event.ignore()
-                return
+                return False
+        return True
 
-        self._save_layout()
-
+    def _save_settings_on_close(self) -> None:
+        """Save user preferences before closing."""
         from PyQt6.QtCore import QSettings
 
         settings = QSettings("UpstreamDrift", "Launcher")
-        if hasattr(self, "chk_live"):
+        if True:
             settings.setValue("chk_live", self.chk_live.isChecked())
-        if hasattr(self, "chk_gpu"):
+        if True:
             settings.setValue("chk_gpu", self.chk_gpu.isChecked())
-        if hasattr(self, "chk_docker"):
+        if True:
             settings.setValue("chk_docker", self.chk_docker.isChecked())
-        if hasattr(self, "chk_wsl"):
+        if True:
             settings.setValue("chk_wsl", self.chk_wsl.isChecked())
 
-        # Stop cleanup timer
-        if hasattr(self, "cleanup_timer") and self.cleanup_timer is not None:
+    def _stop_background_threads(self) -> None:
+        """Stop background timers and threads cleanly."""
+        if self.cleanup_timer is not None:
             self.cleanup_timer.stop()
             self.cleanup_timer.deleteLater()
             self.cleanup_timer = None  # type: ignore[assignment]
 
-        # Clean up docker checker thread
-        if hasattr(self, "docker_checker") and self.docker_checker is not None:
+        if self.docker_checker is not None:
             with contextlib.suppress(TypeError, RuntimeError):
                 self.docker_checker.result.disconnect(self.on_docker_check_complete)
             if self.docker_checker.isRunning():
                 self.docker_checker.wait(1000)
             self.docker_checker = None
 
-        # Terminate running processes
+    def _terminate_all_processes(self) -> None:
+        """Terminate all remaining child processes."""
         for key, process in list(self.running_processes.items()):
             if process.poll() is None:
                 logger.info(f"Terminating child process: {key}")
@@ -1301,6 +1284,16 @@ class UpstreamDriftLauncher(
                         process.terminate()
                 except (RuntimeError, ValueError, OSError) as e:
                     logger.error(f"Failed to terminate {key}: {e}")
+
+    def closeEvent(self, event: QCloseEvent | None) -> None:
+        """Handle window close event to save layout and cleanup."""
+        if not self._confirm_exit_if_running_processes(event):
+            return
+
+        self._save_layout()
+        self._save_settings_on_close()
+        self._stop_background_threads()
+        self._terminate_all_processes()
 
         super().closeEvent(event)
 
@@ -1365,7 +1358,7 @@ def main() -> None:
         try:
             with open(qss_path) as f:
                 app.setStyleSheet(f.read())
-        except Exception as e:
+        except (OSError, RuntimeError, ValueError) as e:
             logger.warning(f"Could not load QSS: {e}")
 
     try:
@@ -1395,7 +1388,7 @@ def main() -> None:
         try:
             main_window.update_startup_results(results)
             splash.finish(main_window)
-        except Exception as e:  # noqa: BLE001
+        except (RuntimeError, ValueError, TypeError) as e:
             import traceback
 
             traceback.print_exc()

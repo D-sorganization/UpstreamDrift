@@ -10,12 +10,14 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )  # noqa: E402
-from src.launchers.launcher_ui_setup import LauncherUISetupMixin  # noqa: E402
+from src.launchers.launcher_ui_setup import UISetupManager  # noqa: E402
 
 
-class DummyLauncher(QMainWindow, LauncherUISetupMixin):
-    def __init__(self):
-        super().__init__()
+class DummyLauncher(QMainWindow):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.manager = UISetupManager(self)
+
         self.apply_styles = MagicMock()
         self._show_preferences = MagicMock()
         self._toggle_layout_mode_from_menu = MagicMock()
@@ -247,7 +249,7 @@ def test_sidebar_ai_button_present_when_ai_available(launcher) -> None:
 
 
 def test_no_setup_ai_panel_method() -> None:
-    """_setup_ai_panel must not exist on LauncherUISetupMixin after #5620.
+    """_setup_ai_panel must not exist on UISetupManager after #5620.
 
     Regression guard for UpstreamDrift #5689: the reviewer's AttributeError
     was triggered when a stale test used ``patch.object(launcher,
@@ -255,19 +257,19 @@ def test_no_setup_ai_panel_method() -> None:
     check the *class* dictionary (not an instance) so that DummyWidget's
     permissive ``__getattr__`` does not mask the absence of the method.
     """
-    mro_attrs = {name for cls in LauncherUISetupMixin.__mro__ for name in vars(cls)}
+    mro_attrs = {name for cls in UISetupManager.__mro__ for name in vars(cls)}
     assert "_setup_ai_panel" not in mro_attrs, (
         "_setup_ai_panel was deleted in #5620 and must not be re-introduced"
     )
 
 
 def test_no_sync_chat_session_method() -> None:
-    """_sync_chat_session must not exist on LauncherUISetupMixin after #5620.
+    """_sync_chat_session must not exist on UISetupManager after #5620.
 
     The Sidekick ChatDockWidget performs the equivalent session-id handshake
     via the shared active_chat_session.txt file.
     """
-    mro_attrs = {name for cls in LauncherUISetupMixin.__mro__ for name in vars(cls)}
+    mro_attrs = {name for cls in UISetupManager.__mro__ for name in vars(cls)}
     assert "_sync_chat_session" not in mro_attrs, (
         "_sync_chat_session was deleted in #5620 and must not be re-introduced"
     )
