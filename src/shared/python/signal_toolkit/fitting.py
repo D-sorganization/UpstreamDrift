@@ -161,13 +161,17 @@ class SinusoidFitter:
         residuals = y - fitted_values
 
         # R-squared
-        ss_res = np.vdot(residuals, residuals)  # ⚡ Bolt: vdot avoids memory allocation for squares
+        ss_res = np.vdot(
+            residuals, residuals
+        )  # ⚡ Bolt: vdot avoids memory allocation for squares
         diff_y = y - np.mean(y)
         ss_tot = np.vdot(diff_y, diff_y)
         r_squared = 1 - (ss_res / ss_tot) if ss_tot > 0 else 0.0
 
         # RMSE
-        rmse = np.sqrt(ss_res / residuals.size)  # ⚡ Bolt: Reuses ss_res and avoids reallocation
+        rmse = np.sqrt(
+            ss_res / residuals.size
+        )  # ⚡ Bolt: Reuses ss_res and avoids reallocation
 
         fitted_signal = Signal(
             time=signal.time,
@@ -317,7 +321,9 @@ class ExponentialFitter:
 
         fitted_values = self._decay_model(t, *popt)
         residuals = y - fitted_values
-        ss_res = np.vdot(residuals, residuals)  # ⚡ Bolt: vdot avoids memory allocation for squares
+        ss_res = np.vdot(
+            residuals, residuals
+        )  # ⚡ Bolt: vdot avoids memory allocation for squares
         diff_y = y - np.mean(y)
         ss_tot = np.vdot(diff_y, diff_y)
         r_squared = 1 - (ss_res / ss_tot) if ss_tot > 0 else 0.0
@@ -390,7 +396,9 @@ class ExponentialFitter:
 
         fitted_values = self._growth_model(t, *popt)
         residuals = y - fitted_values
-        ss_res = np.vdot(residuals, residuals)  # ⚡ Bolt: vdot avoids memory allocation for squares
+        ss_res = np.vdot(
+            residuals, residuals
+        )  # ⚡ Bolt: vdot avoids memory allocation for squares
         diff_y = y - np.mean(y)
         ss_tot = np.vdot(diff_y, diff_y)
         r_squared = 1 - (ss_res / ss_tot) if ss_tot > 0 else 0.0
@@ -444,7 +452,9 @@ class LinearFitter:
         fitted_values = slope * t + intercept
         residuals = y - fitted_values
 
-        ss_res = np.vdot(residuals, residuals)  # ⚡ Bolt: vdot avoids memory allocation for squares
+        ss_res = np.vdot(
+            residuals, residuals
+        )  # ⚡ Bolt: vdot avoids memory allocation for squares
         diff_y = y - np.mean(y)
         ss_tot = np.vdot(diff_y, diff_y)
         r_squared = 1 - (ss_res / ss_tot) if ss_tot > 0 else 0.0
@@ -524,7 +534,9 @@ class PolynomialFitter:
         fitted_values = poly(t)
         residuals = y - fitted_values
 
-        ss_res = np.vdot(residuals, residuals)  # ⚡ Bolt: vdot avoids memory allocation for squares
+        ss_res = np.vdot(
+            residuals, residuals
+        )  # ⚡ Bolt: vdot avoids memory allocation for squares
         diff_y = y - np.mean(y)
         ss_tot = np.vdot(diff_y, diff_y)
         r_squared = 1 - (ss_res / ss_tot) if ss_tot > 0 else 0.0
@@ -637,7 +649,9 @@ class CustomFunctionFitter:
         fitted_values = self.func(t, *popt)
         residuals = y - fitted_values
 
-        ss_res = np.vdot(residuals, residuals)  # ⚡ Bolt: vdot avoids memory allocation for squares
+        ss_res = np.vdot(
+            residuals, residuals
+        )  # ⚡ Bolt: vdot avoids memory allocation for squares
         diff_y = y - np.mean(y)
         ss_tot = np.vdot(diff_y, diff_y)
         r_squared = 1 - (ss_res / ss_tot) if ss_tot > 0 else 0.0
