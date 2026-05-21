@@ -97,9 +97,7 @@ class ControlMessage:
         Returns:
             New ControlMessage instance.
         """
-        if not (json_str is not None):
-            raise ValueError("json_str must be provided")
-        if not (json_str is not None):
+        if json_str is None:
             raise ValueError("json_str must be provided")
         d = json.loads(json_str)
         return cls(

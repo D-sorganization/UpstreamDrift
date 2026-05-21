@@ -34,19 +34,16 @@ from src.shared.python.ai.config import (
 from src.shared.python.ai.exceptions import (
     AIConnectionError,
     AIProviderError,
-    AITimeoutError,
 )
 from src.shared.python.ai.types import (
     AgentChunk,
     AgentResponse,
-    ChatModelInfo,
     ConversationContext,
     ProviderCapabilities,
     ProviderCapability,
-    ThinkingCapabilities,
-    ThinkingLevel,
     ToolCall,
 )
+from src.shared.python.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -162,6 +159,9 @@ class OllamaAdapter(BaseAgentAdapter):
                 ) from e
         return self._client
 
+    @precondition(
+        lambda message: bool(message.strip()), "message must not be empty or blank"
+    )
     def send_message(
         self,
         message: str,
@@ -183,9 +183,9 @@ class OllamaAdapter(BaseAgentAdapter):
             AITimeoutError: If request times out.
             AIProviderError: For other Ollama errors.
         """
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         client = self._get_client()
 
@@ -208,26 +208,7 @@ class OllamaAdapter(BaseAgentAdapter):
             response.raise_for_status()
 
         except Exception as e:  # noqa: BLE001
-            # httpx is a lazy import; ConnectError and TimeoutException cannot be
-            # named in the except clause until the module is imported.
-            import httpx
-
-            if isinstance(e, httpx.ConnectError):
-                raise AIConnectionError(
-                    f"Cannot connect to Ollama at {self._host}. "
-                    "Is Ollama running? Start with: ollama serve",
-                    provider="ollama",
-                ) from e
-            if isinstance(e, httpx.TimeoutException):
-                raise AITimeoutError(
-                    f"Ollama request timed out after {self._timeout}s",
-                    provider="ollama",
-                    timeout=self._timeout,
-                ) from e
-            raise AIProviderError(
-                f"Ollama error: {e}",
-                provider="ollama",
-            ) from e
+            return self._handle_error(e)
 
         # Parse response
         data = response.json()
@@ -249,9 +230,9 @@ class OllamaAdapter(BaseAgentAdapter):
         Yields:
             AgentChunk instances as they arrive.
         """
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         client = self._get_client()
         messages = self._format_messages(context, message, tools)
@@ -284,12 +265,9 @@ class OllamaAdapter(BaseAgentAdapter):
                     )
                     index += 1
 
-        except (ValueError, KeyError, json.JSONDecodeError) as e:
+        except Exception as e:
             logger.error("Ollama streaming error: %s", e)
-            raise AIProviderError(
-                f"Ollama streaming error: {e}",
-                provider="ollama",
-            ) from e
+            self._handle_error(e)
 
     @property
     def capabilities(self) -> ProviderCapabilities:
@@ -318,12 +296,70 @@ class OllamaAdapter(BaseAgentAdapter):
             provider_name="ollama",
         )
 
+    # ------------------------------------------------------------------ #
+    # Tools issue #2871: provider catalogue + reasoning capabilities
+    # ------------------------------------------------------------------ #
+
+    _STATIC_MODELS: tuple[str, ...] = (
+        "llama3.1:8b",
+        "llama3.1:70b",
+        "llama3:8b",
+        "mistral:7b",
+        "qwen2:7b",
+        "phi3:medium",
+    )
+
+    def list_models(self) -> list[ChatModelInfo]:
+        """Return Ollama model info; falls back to a static catalogue."""
+        from src.shared.python.ai.types import ChatModelInfo
+
+        names: list[str] = []
+        try:
+            client = self._get_client()
+            response = client.get(f"{self._host}/api/tags", timeout=1.0)
+            response.raise_for_status()
+            payload = response.json()
+            models = payload.get("models") if isinstance(payload, dict) else None
+            if isinstance(models, list):
+                names = [
+                    str(entry.get("name"))
+                    for entry in models
+                    if isinstance(entry, dict) and entry.get("name")
+                ]
+                names = [name for name in names if name.strip()]
+        except Exception:  # noqa: BLE001 - any failure → static catalogue
+            logger.debug(
+                "Ollama list_models live probe failed; using static catalogue",
+                exc_info=True,
+            )
+
+        if not names:
+            names = list(self._STATIC_MODELS)
+
+        return [
+            ChatModelInfo(
+                name=name,
+                provider="ollama",
+                display_name=name,
+                id=name,
+            )
+            for name in names
+        ]
+
+    def thinking_capabilities(self) -> Any:
+        """Ollama models do not currently expose reasoning budgets."""
+        from src.shared.python.chat.models import make_none_only_capabilities
+
+        return make_none_only_capabilities(provider="ollama")
+
     def validate_connection(self) -> tuple[bool, str]:
         """Test connection to local Ollama.
 
         Verifies:
         1. Ollama server is running
-        2. Configured model is available
+        2. Configured model is available; if not, auto-fall back to the first
+           locally-installed model so chat keeps working when saved settings
+           reference a model that has been removed.
 
         Returns:
             Tuple of (success, diagnostic_message).
@@ -332,7 +368,7 @@ class OllamaAdapter(BaseAgentAdapter):
             client = self._get_client()
 
             # Check if Ollama is running
-            response = client.get(f"{self._host}/api/tags")
+            response = client.get(f"{self._host}/api/tags", timeout=1.0)
 
             if response.status_code != 200:
                 return False, f"Ollama returned status {response.status_code}"
@@ -386,49 +422,6 @@ class OllamaAdapter(BaseAgentAdapter):
             logger.debug("Ollama connection check failed: %s: %s", type(e).__name__, e)
             return False, f"Connection error: {e}"
 
-    def list_models(self) -> list[ChatModelInfo]:
-        """Return models available on the local Ollama server.
-
-        Queries the /api/tags endpoint.  Falls back to a default list
-        when the server is not reachable.
-
-        Returns:
-            List of ChatModelInfo, one per installed model.
-        """
-        _defaults = [
-            ChatModelInfo(model_id="llama3.1:8b", display_name="llama3.1:8b"),
-            ChatModelInfo(model_id="mistral", display_name="mistral"),
-        ]
-        try:
-            import requests
-
-            resp = requests.get(f"{self._host}/api/tags", timeout=5)
-            if resp.status_code == 200:
-                raw_models = resp.json().get("models", [])
-                if raw_models:
-                    return [
-                        ChatModelInfo(
-                            model_id=m.get("name", ""),
-                            display_name=m.get("name", ""),
-                        )
-                        for m in raw_models
-                        if m.get("name")
-                    ]
-        except Exception:  # noqa: BLE001
-            pass
-        return _defaults
-
-    def thinking_capabilities(self) -> ThinkingCapabilities:
-        """Return thinking capabilities (none for Ollama models).
-
-        Returns:
-            ThinkingCapabilities with supports_levels=False.
-        """
-        return ThinkingCapabilities(
-            supports_levels=False,
-            available_levels=[ThinkingLevel.OFF],
-        )
-
     def _format_messages(
         self,
         context: ConversationContext,
@@ -445,9 +438,9 @@ class OllamaAdapter(BaseAgentAdapter):
         Returns:
             List of message dicts for Ollama.
         """
-        if not (context is not None):
+        if context is None:
             raise ValueError("context must be provided")
-        if not (context is not None):
+        if context is None:
             raise ValueError("context must be provided")
         messages: list[dict[str, str]] = []
 
@@ -455,6 +448,7 @@ class OllamaAdapter(BaseAgentAdapter):
         system_prompt = self.build_system_prompt(
             tools,
             context.user_expertise.name.lower(),
+            context,
         )
         messages.append(
             {
@@ -493,9 +487,9 @@ class OllamaAdapter(BaseAgentAdapter):
         Returns:
             Parsed AgentResponse.
         """
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         message = data.get("message", {})
         content = message.get("content", "")
@@ -514,12 +508,15 @@ class OllamaAdapter(BaseAgentAdapter):
                 ]
             )
 
-        # Extract usage if available
-        usage: dict[str, int] = {}
+        # Extract usage and normalize to canonical keys (issue #2763).
+        # Ollama uses ``prompt_eval_count`` / ``eval_count`` internally;
+        # _normalize_token_counts maps prompt_tokens → input_tokens etc.
+        raw_usage: dict[str, int] = {}
         if "prompt_eval_count" in data:
-            usage["prompt_tokens"] = data["prompt_eval_count"]
+            raw_usage["prompt_tokens"] = data["prompt_eval_count"]
         if "eval_count" in data:
-            usage["completion_tokens"] = data["eval_count"]
+            raw_usage["completion_tokens"] = data["eval_count"]
+        usage = self._normalize_token_counts(raw_usage)
 
         return AgentResponse(
             content=content,
@@ -543,7 +540,7 @@ class OllamaAdapter(BaseAgentAdapter):
         """
         try:
             client = self._get_client()
-            response = client.get(f"{self._host}/api/tags")
+            response = client.get(f"{self._host}/api/tags", timeout=1.0)
             response.raise_for_status()
 
             data = response.json()
@@ -589,8 +586,18 @@ class OllamaAdapter(BaseAgentAdapter):
                 response.raise_for_status()
                 return True
 
-        except ImportError as e:
-            raise AIProviderError(
-                f"Failed to pull model {model_name}: {e}",
+        except Exception as e:  # noqa: BLE001
+            self._handle_error(e)
+
+    def _handle_error(self, error: Exception) -> AgentResponse:
+        """Handle Ollama-specific errors before falling back to generic classifier."""
+        err_str = str(error).lower()
+        if "connection" in err_str or "unreachable" in err_str:
+            raise AIConnectionError(
+                f"Cannot connect to Ollama at {self._host}. "
+                "Is Ollama running? Start with: ollama serve",
                 provider="ollama",
-            ) from e
+            ) from error
+        raise self._classify_error(
+            error, provider="ollama", timeout=self._timeout
+        ) from error

@@ -51,3 +51,16 @@
 ## 2026-05-18 - Optimize norm calculations in UI/Viz adapters
 **Learning:** `np.linalg.norm(..., axis=1)` creates an intermediate memory allocation and has significant internal overhead when used on multi-dimensional numpy arrays inside tight loops, leading to suboptimal performance, particularly when parsing and calculating distances in data visualizers.
 **Action:** Replace `np.linalg.norm(diff, axis=1)` with `np.sqrt(np.einsum("ij,ij->i", diff, diff))` for all generic vector distance calculations that map down dimensions. Remember to retain any shape alterations such as `[:, np.newaxis]` when performing element-wise broadcasting on multi-dimensional arrays, so the shapes do not mismatch.
+## 2026-05-18 - Optimize sum of squares using vdot in motion matching
+**Learning:** `np.sum(diff * diff)` and `np.sum(diff ** 2)` create intermediate memory allocations and have overhead. For flattening large arrays and calculating RMSE over a trajectory, `np.vdot(diff, diff) / N` is significantly faster as it avoids allocations and computes the sum of squares directly at the C level.
+**Action:** Replace `np.mean(np.sum(db * db, axis=1) + np.sum(dc * dc, axis=1))` with `(np.vdot(db, db) + np.vdot(dc, dc)) / db.shape[0]` when calculating per-frame RMSE. Replace `sum(np.sum(r ** 2))` with `sum(np.vdot(r, r))` for constraint residuals.
+## 2026-05-18 - Optimize dot product over trajectory along an axis
+**Learning:** `np.sum(a * b, axis=1)` to compute row-wise dot products creates intermediate memory allocations for `a * b` and has internal numpy sum overhead. `np.einsum("ij,ij->i", a, b)` computes this without allocations and is faster.
+**Action:** Replace `np.sum(a * b, axis=1)` with `np.einsum("ij,ij->i", a, b)` when computing dot products between pairs of vectors (like quaternions) across a time trajectory.
+## 2026-05-18 - Optimize element-wise sum of squares using vdot
+**Learning:** `np.sum(a * b**2)` allocates a temporary array in memory. When multiplying and squaring, `np.vdot(a, b * b)` utilizes optimized C logic and avoids unnecessary intermediate array allocations, speeding up operations in calculation-heavy functions.
+**Action:** Replace `np.sum(inertia * ang_vel**2)` with `np.vdot(inertia, ang_vel * ang_vel)` when calculating rotational kinetic energy across body segments.
+
+## 2026-05-19 - Optimize generic element-wise norm for small vectors
+**Learning:** Element-wise norm computation or generic `np.linalg.norm(..., axis=None)` creates temporary arrays and runs via python layer handling. For very small native tuples or 1D arrays like normal vectors, standard `math.hypot(*v)` is substantially faster than `math.hypot(*np.ravel(v))` and extremely faster than `np.linalg.norm`.
+**Action:** Always prefer `math.hypot(*v)` directly rather than applying `np.ravel()` first on 1D flat structures when optimizing tiny vectors for normalisations.

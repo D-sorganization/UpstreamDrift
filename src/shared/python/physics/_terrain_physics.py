@@ -44,9 +44,7 @@ class TerrainContactModel:
         Returns:
             True if in contact
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         ground_height = self.terrain.get_elevation(x, y)
         contact_height = z - radius
@@ -71,9 +69,7 @@ class TerrainContactModel:
         Returns:
             Penetration depth (positive when penetrating, meters)
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         ground_height = self.terrain.get_elevation(x, y)
         contact_height = z - radius
@@ -102,9 +98,7 @@ class TerrainContactModel:
         Returns:
             Contact force vector (3,) [N]
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         penetration = self.compute_penetration(x, y, z, radius)
 
@@ -162,9 +156,7 @@ class TerrainContactModel:
             Friction force vector (3,) [N]
         """
         # Get normal force if not provided
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if normal_force is None:
             normal_force = self.compute_contact_force(x, y, z, radius, velocity)
@@ -235,9 +227,7 @@ class CompressibleTurfModel:
             Dictionary with compression_depth, effective_stiffness,
             max_compression, and compression_ratio
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         material = self.terrain.get_material(x, y)
         ground_height = self.terrain.get_elevation(x, y)
@@ -295,9 +285,7 @@ class CompressibleTurfModel:
         Returns:
             Contact force vector (3,) [N]
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         material = self.terrain.get_material(x, y)
         state = self.get_compression_state(x, y, z, radius)
@@ -357,9 +345,7 @@ class CompressibleTurfModel:
             Dictionary with lie_type, sitting_depth, grass_interference,
             and playability_factor
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         material = self.terrain.get_material(x, y)
         terrain_type = self.terrain.get_terrain_type(x, y)
@@ -434,9 +420,7 @@ class CompressibleTurfModel:
             Dictionary with kinetic_energy, absorbed_energy,
             remaining_energy, and energy_absorption_ratio
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         material = self.terrain.get_material(x, y)
         normal = self.terrain.get_normal(x, y)

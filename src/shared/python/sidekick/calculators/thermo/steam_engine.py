@@ -174,9 +174,7 @@ class SteamCalculationEngine:
         Returns:
             Best available engine name in lowercase
         """
-        if not (engine is not None):
-            raise ValueError("engine must be provided")
-        if not (engine is not None):
+        if engine is None:
             raise ValueError("engine must be provided")
         if engine == "auto":
             if COOLPROP_AVAILABLE:

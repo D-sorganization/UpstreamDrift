@@ -8,10 +8,6 @@ from src.shared.python._contracts_level import ContractLevel, _ContractState
 
 def require(condition: bool, message: str, value: Any = None) -> None:
     """Assert a pre-condition at function entry."""
-    if not (condition is not None):
-        raise ValueError("condition must be provided")
-    if not (condition is not None):
-        raise ValueError("condition must be provided")
     if _ContractState.level == ContractLevel.OFF:
         return
     if not condition:
@@ -20,10 +16,6 @@ def require(condition: bool, message: str, value: Any = None) -> None:
 
 def ensure(condition: bool, message: str, value: Any = None) -> None:
     """Assert a post-condition before function return."""
-    if not (condition is not None):
-        raise ValueError("condition must be provided")
-    if not (condition is not None):
-        raise ValueError("condition must be provided")
     if _ContractState.level == ContractLevel.OFF:
         return
     if not condition:
@@ -32,10 +24,6 @@ def ensure(condition: bool, message: str, value: Any = None) -> None:
 
 def invariant(condition: bool, message: str, value: Any = None) -> None:
     """Assert a class or loop invariant."""
-    if not (condition is not None):
-        raise ValueError("condition must be provided")
-    if not (condition is not None):
-        raise ValueError("condition must be provided")
     if _ContractState.level == ContractLevel.OFF:
         return
     if not condition:

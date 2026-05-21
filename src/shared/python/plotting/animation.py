@@ -154,9 +154,7 @@ class SwingAnimator:
     def _gather_trajectory_data(
         self, body_names: list[str]
     ) -> tuple[dict[str, np.ndarray], np.ndarray]:
-        if not (body_names is not None):
-            raise ValueError("body_names must be provided")
-        if not (body_names is not None):
+        if body_names is None:
             raise ValueError("body_names must be provided")
         body_data: dict[str, np.ndarray] = {}
         times = np.empty(0)
@@ -189,9 +187,7 @@ class SwingAnimator:
     def _create_body_artists(
         self, ax: Axes, body_data: dict[str, np.ndarray], cfg: AnimationConfig
     ) -> tuple[dict[str, Any], dict[str, Any]]:
-        if not (ax is not None):
-            raise ValueError("ax must be provided")
-        if not (ax is not None):
+        if ax is None:
             raise ValueError("ax must be provided")
         lines: dict[str, Any] = {}
         points: dict[str, Any] = {}
@@ -207,9 +203,7 @@ class SwingAnimator:
     def _set_axis_limits_from_data(
         self, ax: Axes, body_data: dict[str, np.ndarray]
     ) -> None:
-        if not (ax is not None):
-            raise ValueError("ax must be provided")
-        if not (ax is not None):
+        if ax is None:
             raise ValueError("ax must be provided")
         all_pts = np.vstack(list(body_data.values()))
         margin = 0.1
@@ -236,9 +230,7 @@ class SwingAnimator:
         Returns:
             ``FuncAnimation`` for skeleton playback.
         """
-        if not (body_positions is not None):
-            raise ValueError("body_positions must be provided")
-        if not (body_positions is not None):
+        if body_positions is None:
             raise ValueError("body_positions must be provided")
         cfg = self.config
         links = links or cfg.skeleton_links
@@ -305,9 +297,7 @@ class SwingAnimator:
         Returns:
             ``FuncAnimation`` for vector evolution.
         """
-        if not (positions is not None):
-            raise ValueError("positions must be provided")
-        if not (positions is not None):
+        if positions is None:
             raise ValueError("positions must be provided")
         cfg = self.config
         fig = plt.figure(figsize=cfg.figsize, dpi=cfg.dpi)
@@ -393,9 +383,7 @@ class SwingAnimator:
         Returns:
             Resolved ``Path`` of the saved file.
         """
-        if not (anim is not None):
-            raise ValueError("anim must be provided")
-        if not (anim is not None):
+        if anim is None:
             raise ValueError("anim must be provided")
         out = Path(path)
         out.parent.mkdir(parents=True, exist_ok=True)

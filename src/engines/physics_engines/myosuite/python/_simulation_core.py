@@ -68,9 +68,7 @@ class SimulationCoreMixin:
         return (np.array(self.sim.data.qpos[:]), np.array(self.sim.data.qvel[:]))
 
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         if not self.sim:
             return
@@ -106,9 +104,7 @@ class SimulationCoreMixin:
             logger.debug(f"Forward dynamics failed (may be mocked): {forward_error}")
 
     def set_control(self, u: np.ndarray) -> None:
-        if not (u is not None):
-            raise ValueError("u must be provided")
-        if not (u is not None):
+        if u is None:
             raise ValueError("u must be provided")
         self._last_action = np.array(u, copy=True)
 

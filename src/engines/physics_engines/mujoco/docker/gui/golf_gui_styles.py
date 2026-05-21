@@ -50,9 +50,7 @@ class StyleMixin:
 
     @staticmethod
     def _configure_notebook_styles(style: ttk.Style, colors: dict[str, str]) -> None:
-        if not (style is not None):
-            raise ValueError("style must be provided")
-        if not (style is not None):
+        if style is None:
             raise ValueError("style must be provided")
         style.configure("Modern.TNotebook", background=colors["bg"], borderwidth=0)
         style.configure(
@@ -91,9 +89,7 @@ class StyleMixin:
 
     @staticmethod
     def _configure_label_styles(style: ttk.Style, colors: dict[str, str]) -> None:
-        if not (style is not None):
-            raise ValueError("style must be provided")
-        if not (style is not None):
+        if style is None:
             raise ValueError("style must be provided")
         style.configure(
             "Modern.TLabel",
@@ -130,9 +126,7 @@ class StyleMixin:
 
     @staticmethod
     def _configure_widget_styles(style: ttk.Style, colors: dict[str, str]) -> None:
-        if not (style is not None):
-            raise ValueError("style must be provided")
-        if not (style is not None):
+        if style is None:
             raise ValueError("style must be provided")
         style.configure(
             "Modern.TCombobox",

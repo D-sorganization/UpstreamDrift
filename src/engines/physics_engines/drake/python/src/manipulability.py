@@ -60,9 +60,7 @@ class DrakeManipulabilityAnalyzer:
 
     def __init__(self, plant: MultibodyPlant) -> None:
         """Initialize with a Drake MultibodyPlant."""
-        if not (plant is not None):
-            raise ValueError("plant must be provided")
-        if not (plant is not None):
+        if plant is None:
             raise ValueError("plant must be provided")
         self.plant = plant
         if DRAKE_AVAILABLE:
@@ -108,9 +106,7 @@ class DrakeManipulabilityAnalyzer:
     def _decompose_mobility_matrix(
         self, mobility_matrix: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray]:
-        if not (mobility_matrix is not None):
-            raise ValueError("mobility_matrix must be provided")
-        if not (mobility_matrix is not None):
+        if mobility_matrix is None:
             raise ValueError("mobility_matrix must be provided")
         eigvals_v, eigvecs_v = np.linalg.eigh(mobility_matrix)
         idx = np.argsort(eigvals_v)[::-1]
@@ -120,9 +116,7 @@ class DrakeManipulabilityAnalyzer:
         return radii_v, eigvecs_v
 
     def _check_condition_number(self, name: str, cond: float) -> bool:
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if cond > 1e6:
             logger.warning(
@@ -148,9 +142,7 @@ class DrakeManipulabilityAnalyzer:
         eigvecs_v: np.ndarray,
         cond: float,
     ) -> ManipulabilityResult:
-        if not (context is not None):
-            raise ValueError("context must be provided")
-        if not (context is not None):
+        if context is None:
             raise ValueError("context must be provided")
         isotropy = 1.0 / cond if cond > 0 else 0.0
         manip_index = np.prod(radii_v)
@@ -181,9 +173,7 @@ class DrakeManipulabilityAnalyzer:
         Returns:
             List of ManipulabilityResult.
         """
-        if not (context is not None):
-            raise ValueError("context must be provided")
-        if not (context is not None):
+        if context is None:
             raise ValueError("context must be provided")
         if not DRAKE_AVAILABLE:
             return []

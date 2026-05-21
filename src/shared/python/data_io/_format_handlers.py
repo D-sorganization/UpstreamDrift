@@ -159,7 +159,7 @@ def dispatch_load(
     if format_type == OutputFormat.JSON:
         with open(file_path) as f:
             data = json.load(f)
-        result = data.get("results", data)
+        result = data.get("results", data) if isinstance(data, dict) else data
         return dict(result) if isinstance(result, dict) else result
 
     if format_type == OutputFormat.HDF5:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import subprocess
 import sys
 import types
 from importlib.machinery import ModuleSpec
@@ -55,3 +56,30 @@ def test_core_install_guard_has_explicit_contract() -> None:
         "src.shared.python.physics",
         "src.shared.python.spatial_algebra",
     )
+
+
+def test_config_import_does_not_require_pandas() -> None:
+    """Config package imports must stay available in the core-only environment."""
+    script = """
+import builtins
+
+real_import = builtins.__import__
+
+def block_pandas(name, *args, **kwargs):
+    if name == "pandas" or name.startswith("pandas."):
+        raise ModuleNotFoundError("No module named 'pandas'")
+    return real_import(name, *args, **kwargs)
+
+builtins.__import__ = block_pandas
+
+import src.shared.python.config  # noqa: F401
+"""
+
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr

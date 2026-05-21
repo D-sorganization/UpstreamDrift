@@ -1,0 +1,86 @@
+"""Skill registry (Tools #2737).
+
+A registry maps skill ids to skill instances. The default registry is a
+lazily-initialised module-level singleton; it does NOT instantiate at import
+time, which keeps importing ``ai.skills`` cheap and side-effect free.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable, Sequence
+from typing import TypeVar
+
+from .base import Skill
+from .contracts import SkillDescriptor
+from .errors import SkillNotFoundError
+
+_T = TypeVar("_T", bound=Skill)
+
+
+class SkillRegistry:
+    """In-memory registry of :class:`Skill` instances keyed by skill id."""
+
+    def __init__(self) -> None:
+        self._skills: dict[str, Skill] = {}
+
+    def register(self, skill_cls: type[Skill]) -> type[Skill]:
+        """Register a skill class. Returns the class for decorator chaining."""
+        descriptor = skill_cls.descriptor
+        if descriptor.id in self._skills:
+            raise ValueError(f"Skill id already registered: {descriptor.id!r}")
+        self._skills[descriptor.id] = skill_cls()
+        return skill_cls
+
+    def register_instance(self, skill: Skill) -> Skill:
+        """Register an already-instantiated skill (useful for DI in tests)."""
+        descriptor = skill.descriptor
+        if descriptor.id in self._skills:
+            raise ValueError(f"Skill id already registered: {descriptor.id!r}")
+        self._skills[descriptor.id] = skill
+        return skill
+
+    def get(self, skill_id: str) -> Skill:
+        """Look up a skill by id. Raises :class:`SkillNotFoundError`."""
+        try:
+            return self._skills[skill_id]
+        except KeyError as exc:
+            raise SkillNotFoundError(skill_id) from exc
+
+    def list(self) -> Sequence[SkillDescriptor]:
+        """Return descriptors for all registered skills (stable order)."""
+        return tuple(skill.descriptor for skill in self._skills.values())
+
+
+# Module-level lazy singleton. We intentionally avoid creating it at import
+# time so that ``import ai.skills`` has no side effects.
+_default: SkillRegistry | None = None
+
+
+def default_registry() -> SkillRegistry:
+    """Return the process-wide default :class:`SkillRegistry`."""
+    global _default
+    if _default is None:
+        _default = SkillRegistry()
+    return _default
+
+
+def register_skill(
+    *, registry: SkillRegistry | None = None
+) -> Callable[[type[_T]], type[_T]]:
+    """Decorator form of :meth:`SkillRegistry.register`.
+
+    Example::
+
+        @register_skill()
+        class MySkill(Skill):
+            descriptor = SkillDescriptor(...)
+            async def run(self, invocation): ...
+    """
+
+    target = registry if registry is not None else default_registry()
+
+    def _decorate(skill_cls: type[_T]) -> type[_T]:
+        target.register(skill_cls)
+        return skill_cls
+
+    return _decorate

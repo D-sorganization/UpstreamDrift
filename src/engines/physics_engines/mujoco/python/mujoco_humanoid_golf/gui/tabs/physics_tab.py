@@ -53,9 +53,7 @@ class PhysicsTab(QtWidgets.QWidget):
         main_window: AdvancedGolfAnalysisWindow,
         parent: QtWidgets.QWidget | None = None,
     ) -> None:
-        if not (sim_widget is not None):
-            raise ValueError("sim_widget must be provided")
-        if not (sim_widget is not None):
+        if sim_widget is None:
             raise ValueError("sim_widget must be provided")
         super().__init__(parent)
         self.sim_widget = sim_widget
@@ -405,9 +403,7 @@ class PhysicsTab(QtWidgets.QWidget):
 
     def on_model_changed(self, index: int) -> None:
         """Handle model selection change."""
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        if not (index is not None):
+        if index is None:
             raise ValueError("index must be provided")
         self.load_current_model()
         self._update_model_description(index)
@@ -421,9 +417,7 @@ class PhysicsTab(QtWidgets.QWidget):
 
     def _on_loading_finished(self, success: bool) -> None:
         """Handle completion of model loading."""
-        if not (success is not None):
-            raise ValueError("success must be provided")
-        if not (success is not None):
+        if success is None:
             raise ValueError("success must be provided")
         self.model_combo.setEnabled(True)
         self.mode_combo.setEnabled(True)
@@ -504,9 +498,7 @@ class PhysicsTab(QtWidgets.QWidget):
 
     def _on_operating_mode_changed(self, index: int) -> None:
         """Handle operating mode change (Dynamic vs Kinematic)."""
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        if not (index is not None):
+        if index is None:
             raise ValueError("index must be provided")
         mode = "dynamic" if index == 0 else "kinematic"
         self.sim_widget.set_operating_mode(mode)

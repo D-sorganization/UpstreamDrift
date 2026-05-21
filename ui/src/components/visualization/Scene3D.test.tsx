@@ -17,23 +17,59 @@ vi.mock('@react-three/fiber', () => ({
 
 // Mock react-three/drei
 vi.mock('@react-three/drei', () => ({
-  OrbitControls: () => <div data-testid="orbit-controls-mock" />,
+  OrbitControls: vi.fn(({ ref }: { ref: React.Ref<HTMLDivElement> }) => <div data-testid="orbit-controls-mock" ref={ref} />),
   Grid: () => <div data-testid="grid-mock" />,
   Environment: () => <div data-testid="environment-mock" />,
   Line: ({ points }: { points: number[][] }) => (
     <div data-testid="line-mock" data-points={points?.length || 0} />
   ),
+  TransformControls: ({ object }: { object: unknown }) => (
+    <div data-testid="transform-controls-mock" data-has-object={!!object} />
+  ),
+}));
+
+// Mock ForceOverlay component
+vi.mock('./ForceOverlay', () => ({
+  ForceOverlay: ({ vectors }: { vectors: unknown[] }) => (
+    <div data-testid="force-overlay-mock" data-vectors-count={vectors?.length || 0} />
+  ),
 }));
 
 // Mock three.js
-vi.mock('three', () => ({
-  Group: class Group {
-    rotation = { y: 0 };
-  },
-  Mesh: class Mesh {
-    rotation = { x: 0, y: 0, z: 0 };
-  },
-}));
+vi.mock('three', () => {
+  const Vector3 = class Vector3 {
+    x = 0; y = 0; z = 0;
+    constructor(x = 0, y = 0, z = 0) {
+      this.x = x; this.y = y; this.z = z;
+    }
+    set(x: number, y: number, z: number) { this.x = x; this.y = y; this.z = z; return this; }
+    copy(v: { x: number; y: number; z: number }) { this.x = v.x; this.y = v.y; this.z = v.z; return this; }
+    clone() { return new Vector3(this.x, this.y, this.z); }
+    add(v: { x: number; y: number; z: number }) { this.x += v.x; this.y += v.y; this.z += v.z; return this; }
+    sub(v: { x: number; y: number; z: number }) { this.x -= v.x; this.y -= v.y; this.z -= v.z; return this; }
+    normalize() { return this; }
+  };
+  return {
+    Group: class Group {
+      rotation = { y: 0 };
+      position = new Vector3();
+      quaternion = { copy: () => ({ multiply: () => {} }) };
+    },
+    Mesh: class Mesh {
+      rotation = { x: 0, y: 0, z: 0 };
+      position = new Vector3();
+    },
+    Vector3,
+    Quaternion: class Quaternion {
+      setFromAxisAngle() { return this; }
+      setFromUnitVectors() { return this; }
+    },
+    Euler: class Euler {},
+    Color: class Color {
+      constructor() {}
+    },
+  };
+});
 
 import { Scene3D } from './Scene3D';
 import type { SimulationFrame } from '@/api/client';
@@ -254,6 +290,39 @@ describe('Scene3D', () => {
     it('renders Environment for lighting', () => {
       render(<Scene3D engine="mujoco" frame={null} />);
       expect(screen.getByTestId('environment-mock')).toBeInTheDocument();
+    });
+  });
+
+  describe('interactive features', () => {
+    it('renders camera preset buttons', () => {
+      render(<Scene3D engine="mujoco" frame={null} />);
+      expect(screen.getByText('Front')).toBeInTheDocument();
+      expect(screen.getByText('Side')).toBeInTheDocument();
+      expect(screen.getByText('Top')).toBeInTheDocument();
+      expect(screen.getByText('Follow')).toBeInTheDocument();
+    });
+
+    it('renders transform mode buttons (Gizmo)', () => {
+      render(<Scene3D engine="mujoco" frame={null} />);
+      expect(screen.getByText('Translate')).toBeInTheDocument();
+      expect(screen.getByText('Rotate')).toBeInTheDocument();
+    });
+
+    it('renders ForceOverlay component with vectors', () => {
+      const mockVectors = [
+        {
+          body_name: 'torso',
+          force_type: 'applied' as const,
+          origin: [0, 0, 0] as [number, number, number],
+          direction: [1, 0, 0] as [number, number, number],
+          magnitude: 10,
+          color: [1, 0, 0, 1] as [number, number, number, number],
+        },
+      ];
+      render(<Scene3D engine="mujoco" frame={null} forceOverlays={mockVectors} />);
+      const forceOverlay = screen.getByTestId('force-overlay-mock');
+      expect(forceOverlay).toBeInTheDocument();
+      expect(forceOverlay).toHaveAttribute('data-vectors-count', '1');
     });
   });
 });

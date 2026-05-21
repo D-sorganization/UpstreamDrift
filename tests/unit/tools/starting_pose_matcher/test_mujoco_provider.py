@@ -6,7 +6,7 @@ import pytest
 # Test that the provider can be imported even without MuJoCo installed
 def test_import_without_mujoco():
     """Test that importing the module doesn't break without MuJoCo."""
-    from src.tools.starting_pose_matcher.providers import mujoco
+    from src.tools.starting_pose_matcher.skeleton_extractors import mujoco
 
     # These should be importable without MuJoCo
     assert hasattr(mujoco, "MuJoCoNotAvailableError")
@@ -19,7 +19,7 @@ def test_import_without_mujoco():
 
 def test_mujoco_provider_vocabulary_mapping():
     """Test that the vocabulary mapping is correct."""
-    from src.tools.starting_pose_matcher.providers.mujoco import (
+    from src.tools.starting_pose_matcher.skeleton_extractors.mujoco import (
         MUJOCO_TO_MATCHER_VOCAB,
         MATCHER_TO_MUJOCO,
     )
@@ -51,7 +51,7 @@ def test_mujoco_provider_vocabulary_mapping():
 
 def test_mujoco_not_available_error():
     """Test that MuJoCoNotAvailableError is raised when MuJoCo is not installed."""
-    from src.tools.starting_pose_matcher.providers.mujoco import (
+    from src.tools.starting_pose_matcher.skeleton_extractors.mujoco import (
         MuJoCoNotAvailableError,
         MuJoCoProviderError,
         MuJoCoSkeletonProvider,
@@ -59,15 +59,13 @@ def test_mujoco_not_available_error():
 
     # Try to create provider without a valid model path
     # This should raise an error (either MuJoCoNotAvailableError or MuJoCoProviderError)
-    with pytest.raises(
-        (MuJoCoNotAvailableError, MuJoCoProviderError, MuJoCoProviderError)
-    ):
+    with pytest.raises((MuJoCoNotAvailableError, MuJoCoProviderError, MuJoCoProviderError)):
         MuJoCoSkeletonProvider(model_path=None, model_xml=None)
 
 
 def test_mujoco_provider_create_provider_function():
     """Test that create_provider function exists and has correct signature."""
-    from src.tools.starting_pose_matcher.providers.mujoco import create_provider
+    from src.tools.starting_pose_matcher.skeleton_extractors.mujoco import create_provider
 
     # Check function signature
     import inspect

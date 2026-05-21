@@ -5,6 +5,7 @@ Project Chrono backend driver for BunkerShot3D.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -19,8 +20,7 @@ except ImportError:
     _HAS_CHRONO = False
 
 
-class BackendNotImplementedError(RuntimeError):
-    """Raised when a backend dependency is missing or the backend is unavailable."""
+from bunkershot3d.exceptions import BackendNotImplementedError
 
 
 class ChronoDriver:
@@ -29,10 +29,10 @@ class ChronoDriver:
     def __init__(self, config_path: Path | str) -> None:
         self.config_path = Path(config_path)
         self.config = BunkerShotConfig.from_yaml(self.config_path)
-        self._system: object | None = None
-        self._clubhead_body: object | None = None
+        self._system: Any = None
+        self._clubhead_body: Any = None
 
-    def _build_system(self) -> object:
+    def _build_system(self) -> Any:
         """Construct and return a populated ChSystemSMC."""
         system = chrono.ChSystemSMC()
         system.SetGravitationalAcceleration(chrono.ChVector3d(0, 0, -9.81))
@@ -49,8 +49,8 @@ class ChronoDriver:
         wall_material.SetPoissonRatio(self.config.contact_model.poisson_ratio)
 
         def _add_fixed_box(
-            sys: object,
-            mat: object,
+            sys: Any,
+            mat: Any,
             half_extents: tuple[float, float, float],
             pos: tuple[float, float, float],
         ) -> None:

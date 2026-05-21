@@ -1,0 +1,184 @@
+"""Shared Qt widget — Integrations Health Dashboard.
+
+Surfaces live status for every configured integration in a single table
+view: Linear, Notion, AFFiNE, Obsidian, MCP pool, and any others
+registered through :mod:`health_query_api`.
+
+Design constraints:
+    * Status data is sourced through an injected ``status_provider``
+      callable (default: :func:`health_query_api.list_all_integrations`)
+      so tests can deterministically seed rows without standing up real
+      integrations.
+    * A failing provider must never crash the host app; the dashboard
+      surfaces the exception as an ERROR row.
+    * The widget exposes ``row_data`` as a list of plain dicts so tests
+      and other Qt-free callers can inspect state.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from typing import Any
+
+from PyQt6.QtCore import QTimer, pyqtSignal
+from PyQt6.QtWidgets import (
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QPushButton,
+    QStackedLayout,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
+
+from src.shared.python.ai.mcp.widgets.health_query_api import (
+    IntegrationStatus,
+    IntegrationStatusLevel,
+    list_all_integrations,
+)
+
+__all__ = ["IntegrationsHealthDashboardWidget"]
+
+_StatusProvider = Callable[[], list[IntegrationStatus]]
+
+_HEADERS = ("Integration", "Status", "Tools", "Latency (ms)", "Message")
+_AUTO_REFRESH_MS = 30_000
+
+
+class IntegrationsHealthDashboardWidget(QWidget):
+    """Dashboard table showing integration health.
+
+    Args:
+        status_provider: Zero-arg callable returning a list of
+            :class:`IntegrationStatus`. Defaults to
+            :func:`list_all_integrations`.
+        auto_refresh: If True, refresh every 30 s via a QTimer. Defaults
+            to False so tests don't see background ticks.
+        parent: Standard Qt parent.
+
+    Signals:
+        refreshed: Emitted after every refresh (success or error).
+    """
+
+    refreshed = pyqtSignal()
+
+    def __init__(
+        self,
+        *,
+        status_provider: _StatusProvider | None = None,
+        auto_refresh: bool = False,
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self._provider: _StatusProvider = status_provider or list_all_integrations
+        self._row_data: list[dict[str, Any]] = []
+
+        outer = QVBoxLayout(self)
+        self._stack = QStackedLayout()
+        outer.addLayout(self._stack)
+
+        # Empty-state label.
+        self._empty_label = QLabel(
+            "No integrations configured — set environment variables "
+            "(LINEAR_API_KEY, NOTION_API_KEY, …) or add MCP servers to "
+            "see status here."
+        )
+        self._empty_label.setWordWrap(True)
+        empty_container = QWidget(self)
+        QVBoxLayout(empty_container).addWidget(self._empty_label)
+        self._stack.addWidget(empty_container)
+
+        # Table view.
+        self._table = QTableWidget(0, len(_HEADERS), self)
+        self._table.setHorizontalHeaderLabels(_HEADERS)
+        header = self._table.horizontalHeader()
+        if header is not None:
+            header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        self._stack.addWidget(self._table)
+
+        # Refresh button.
+        btn_row = QHBoxLayout()
+        self._refresh_btn = QPushButton("Refresh", self)
+        self._refresh_btn.clicked.connect(self.refresh)
+        btn_row.addStretch(1)
+        btn_row.addWidget(self._refresh_btn)
+        outer.addLayout(btn_row)
+
+        # Auto-refresh timer (opt-in).
+        self._timer: QTimer | None = None
+        if auto_refresh:
+            self._timer = QTimer(self)
+            self._timer.setInterval(_AUTO_REFRESH_MS)
+            self._timer.timeout.connect(self.refresh)
+            self._timer.start()
+
+        # Initial state: empty until refresh().
+        self._stack.setCurrentIndex(0)
+
+    # ------------------------------------------------------------------ #
+    # Public read API
+    # ------------------------------------------------------------------ #
+
+    @property
+    def row_count(self) -> int:
+        return len(self._row_data)
+
+    @property
+    def row_data(self) -> list[dict[str, Any]]:
+        """List of plain-dict rows; safe for tests and headless callers."""
+        return [dict(r) for r in self._row_data]
+
+    @property
+    def has_empty_state_visible(self) -> bool:
+        return self._stack.currentIndex() == 0
+
+    # ------------------------------------------------------------------ #
+    # Public mutation API
+    # ------------------------------------------------------------------ #
+
+    def refresh(self) -> None:
+        """Re-query the provider and re-render rows. Never raises."""
+        try:
+            statuses = list(self._provider())
+        except Exception as exc:  # noqa: BLE001 — dashboard must not crash host
+            statuses = [
+                IntegrationStatus(
+                    integration_id="dashboard",
+                    display_name="Dashboard",
+                    level=IntegrationStatusLevel.ERROR,
+                    message=str(exc),
+                )
+            ]
+
+        self._row_data = [self._status_to_row(s) for s in statuses]
+        self._render_table()
+        self._stack.setCurrentIndex(0 if not self._row_data else 1)
+        self.refreshed.emit()
+
+    # ------------------------------------------------------------------ #
+    # Internal helpers
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def _status_to_row(status: IntegrationStatus) -> dict[str, Any]:
+        return {
+            "integration_id": status.integration_id,
+            "display_name": status.display_name,
+            "level": status.level.value,
+            "tools_exposed": status.tools_exposed,
+            "latency_ms": status.latency_ms,
+            "message": status.message,
+        }
+
+    def _render_table(self) -> None:
+        self._table.setRowCount(0)
+        for row in self._row_data:
+            idx = self._table.rowCount()
+            self._table.insertRow(idx)
+            self._table.setItem(idx, 0, QTableWidgetItem(row["display_name"]))
+            self._table.setItem(idx, 1, QTableWidgetItem(row["level"]))
+            self._table.setItem(idx, 2, QTableWidgetItem(str(row["tools_exposed"])))
+            self._table.setItem(idx, 3, QTableWidgetItem(f"{row['latency_ms']:.1f}"))
+            self._table.setItem(idx, 4, QTableWidgetItem(row["message"]))

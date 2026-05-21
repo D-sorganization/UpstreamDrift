@@ -51,9 +51,7 @@ class SlopeRegion:
 
     def contains(self, position: np.ndarray) -> bool:
         """Check if position is within region."""
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         arr = np.asarray(position[:2] - self.center[:2], dtype=float).reshape(-1)
         distance = 0.0 if arr.size == 0 else math.hypot(*arr)
@@ -61,9 +59,7 @@ class SlopeRegion:
 
     def get_weight(self, position: np.ndarray) -> float:
         """Get influence weight at position (0-1)."""
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         arr = np.asarray(position[:2] - self.center[:2], dtype=float).reshape(-1)
         distance = 0.0 if arr.size == 0 else math.hypot(*arr)

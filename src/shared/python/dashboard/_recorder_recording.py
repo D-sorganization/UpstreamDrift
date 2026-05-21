@@ -46,9 +46,7 @@ class _RecordingMixin:
         self.current_idx += 1
 
     def _compute_kinetic_energy(self, v: np.ndarray, M: np.ndarray | None) -> float:
-        if not (v is not None):
-            raise ValueError("v must be provided")
-        if not (v is not None):
+        if v is None:
             raise ValueError("v must be provided")
         if M is not None and M.size > 0:
             try:
@@ -65,9 +63,7 @@ class _RecordingMixin:
         tau: np.ndarray,
         M: np.ndarray | None,
     ) -> None:
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
-        if not (idx is not None):
+        if idx is None:
             raise ValueError("idx must be provided")
         if self.analysis_config["ztcf"] and self.data["ztcf_accel"] is not None:
             try:
@@ -107,9 +103,7 @@ class _RecordingMixin:
     def _record_induced_accelerations(  # noqa: C901
         self, idx: int, tau: np.ndarray, M: np.ndarray | None
     ) -> None:
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
-        if not (idx is not None):
+        if idx is None:
             raise ValueError("idx must be provided")
         sources = cast(list[int], self.analysis_config["induced_accel_sources"])
         if sources and M is not None and M.size > 0:
@@ -149,9 +143,7 @@ class _RecordingMixin:
         ke: float,
         tau: np.ndarray,
     ) -> None:
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
-        if not (idx is not None):
+        if idx is None:
             raise ValueError("idx must be provided")
         self.data["times"][idx] = t
         self.data["joint_positions"][idx] = q

@@ -48,9 +48,7 @@ class CollisionPair:
 
     def __eq__(self, other: object) -> bool:
         """Equality based on sorted body names."""
-        if not (other is not None):
-            raise ValueError("other must be provided")
-        if not (other is not None):
+        if other is None:
             raise ValueError("other must be provided")
         if not isinstance(other, CollisionPair):
             return NotImplemented
@@ -118,9 +116,8 @@ class DistanceResult:
                 raise ValueError("normal must be shape (3,)")
             # Normalize the normal vector
             # ⚡ Bolt: Element-wise norm computation is faster than np.linalg.norm(..., axis=None) for tiny vectors
-            # using math.hypot equivalent
-            arr = np.ravel(self.normal)
-            norm = 0.0 if arr.size == 0 else math.hypot(*arr)
+            # using math.hypot directly (avoiding ravel)
+            norm = math.hypot(*self.normal)
             if norm > 1e-10:
                 object.__setattr__(self, "normal", self.normal / norm)
 
@@ -170,9 +167,7 @@ class CollisionQuery:
             True if pair should be included in query.
         """
         # Check exclusion list first
-        if not (pair is not None):
-            raise ValueError("pair must be provided")
-        if not (pair is not None):
+        if pair is None:
             raise ValueError("pair must be provided")
         if pair in self.exclude_pairs:
             return False

@@ -62,9 +62,7 @@ def _create_arm_bodies() -> tuple[Any, Any]:
 
 
 def _create_arm_joints(arm: Any, humerus: Any, radius: Any) -> tuple[Any, Any]:
-    if not (arm is not None):
-        raise ValueError("arm must be provided")
-    if not (arm is not None):
+    if arm is None:
         raise ValueError("arm must be provided")
     shoulder = osim.PinJoint(
         "shoulder",
@@ -89,9 +87,7 @@ def _create_arm_joints(arm: Any, humerus: Any, radius: Any) -> tuple[Any, Any]:
 
 
 def _create_biceps_muscle(humerus: Any, radius: Any) -> Any:
-    if not (humerus is not None):
-        raise ValueError("humerus must be provided")
-    if not (humerus is not None):
+    if humerus is None:
         raise ValueError("humerus must be provided")
     biceps = osim.Millard2012EquilibriumMuscle(
         "biceps",  # name
@@ -113,9 +109,7 @@ def _create_controller(biceps: Any) -> Any:
 
 
 def _add_reporter(arm: Any, biceps: Any, elbow: Any) -> None:
-    if not (arm is not None):
-        raise ValueError("arm must be provided")
-    if not (arm is not None):
+    if arm is None:
         raise ValueError("arm must be provided")
     reporter = osim.ConsoleReporter()
     reporter.set_report_time_interval(1.0)
@@ -126,9 +120,7 @@ def _add_reporter(arm: Any, biceps: Any, elbow: Any) -> None:
 
 
 def _attach_body_visualization(body: Any, name: str) -> None:
-    if not (body is not None):
-        raise ValueError("body must be provided")
-    if not (body is not None):
+    if body is None:
         raise ValueError("body must be provided")
     body_geometry = osim.Ellipsoid(0.1, 0.5, 0.1)
     body_geometry.setColor(osim.Gray)
@@ -182,9 +174,7 @@ def run_simulation(model: osim.Model, duration: float = 10.0) -> osim.State:
         Final state after simulation.
     """
     # Initialize the system
-    if not (model is not None):
-        raise ValueError("model must be provided")
-    if not (model is not None):
+    if model is None:
         raise ValueError("model must be provided")
     state = model.initSystem()
 

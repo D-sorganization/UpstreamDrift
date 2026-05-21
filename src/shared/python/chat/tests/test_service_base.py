@@ -16,7 +16,6 @@ from collections.abc import AsyncIterator
 from typing import Any
 
 import pytest
-
 from chat.service_base import ChatMessage, ChatServiceBase, ChatSession
 
 # ── Concrete test subclass ───────────────────────────────────────────
@@ -166,7 +165,7 @@ class TestChatServiceBase:
 
     def test_ttl_eviction(self) -> None:
         svc = _TestChatService()
-        svc.SESSION_TTL_SECONDS = 0  # Immediate expiry
+        svc.SESSION_TTL_SECONDS = -1  # Immediate expiry regardless of time resolution
         session = svc.get_or_create_session(None)
         sid = session.session_id
         # Creating a new session triggers cleanup
@@ -195,3 +194,46 @@ class TestChatServiceStreaming:
         async for chunk in svc.stream_response(session.session_id):
             chunks.append(chunk)
         assert chunks == ["test response"]
+
+
+# ── Default method backward-compatibility tests (Issue #2742) ────────
+
+
+@pytest.mark.asyncio
+class TestChatServiceDefaultMethods:
+    """Verify that new methods have safe default implementations.
+
+    Downstream applications (Gasification_Model, UpstreamDrift) subclass
+    ``ChatServiceBase`` without implementing ``condense_session``,
+    ``execute_skill``, or ``request_review``.  These tests confirm that
+    omitting those overrides does not crash.
+    """
+
+    async def test_condense_session_default_is_noop(self) -> None:
+        svc = _TestChatService()
+        session = svc.get_or_create_session(None)
+        # Should not raise
+        await svc.condense_session(session.session_id)
+
+    async def test_execute_skill_default_is_noop(self) -> None:
+        svc = _TestChatService()
+        session = svc.get_or_create_session(None)
+        # Should not raise
+        await svc.execute_skill(session.session_id, "some_skill")
+
+    async def test_request_review_default_returns_same_session(self) -> None:
+        svc = _TestChatService()
+        session = svc.get_or_create_session(None)
+        result = await svc.request_review(session.session_id, "openai")
+        assert result == session.session_id
+
+
+class TestChatServiceBackwardCompat:
+    """Non-async backward-compatibility assertion."""
+
+    def test_minimal_subclass_instantiates_without_new_methods(self) -> None:
+        """A subclass that ONLY implements stream_response must not crash."""
+        svc = _TestChatService()
+        assert svc is not None
+        session = svc.get_or_create_session(None)
+        assert session is not None

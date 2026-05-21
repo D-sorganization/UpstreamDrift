@@ -116,7 +116,7 @@ def test_build_chat_session() -> None:
         ),  # should map to 'model' internally as fallback
     ]
 
-    adapter._build_chat_session(ctx)
+    adapter._build_chat_session(ctx, "current message")
 
     mock_model_inst.start_chat.assert_called_once()
     history_arg = mock_model_inst.start_chat.call_args[1]["history"]
@@ -125,6 +125,34 @@ def test_build_chat_session() -> None:
     assert history_arg[0] == {"role": "user", "parts": ["msg 1"]}
     assert history_arg[1] == {"role": "model", "parts": ["msg 2"]}
     assert history_arg[2] == {"role": "model", "parts": ["msg 3"]}
+
+
+def test_build_chat_session_empty_message() -> None:
+    """Test that build_chat_session handles empty current message by using the last user message as current message."""
+    sys.modules["google.generativeai"].configure.reset_mock()
+    adapter = GeminiAdapter("sk")
+    mock_model_inst = sys.modules["google.generativeai"].GenerativeModel.return_value
+
+    ctx = ConversationContext()
+    ctx.messages = [
+        Message(role="user", content="msg 1"),
+        Message(role="assistant", content="msg 2"),
+        Message(role="user", content="msg 3"),
+    ]
+
+    # In chat_service, message="" is passed, but the actual last message is in history.
+    chat, current_msg = adapter._build_chat_session(ctx, "")
+
+    mock_model_inst.start_chat.assert_called_once()
+    history_arg = mock_model_inst.start_chat.call_args[1]["history"]
+
+    # History should only contain the messages BEFORE the last user message
+    assert len(history_arg) == 2
+    assert history_arg[0] == {"role": "user", "parts": ["msg 1"]}
+    assert history_arg[1] == {"role": "model", "parts": ["msg 2"]}
+
+    # The current message to send should be the popped user message
+    assert current_msg == "msg 3"
 
 
 def test_gemini_adapter_send_message_success() -> None:

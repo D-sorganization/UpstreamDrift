@@ -65,7 +65,7 @@ Inline equations use `$...$` delimiters and display equations use `$$...$$` deli
 - **[Chapter 4: Quick Start Guide](#chapter-4-quick-start-guide)**
   - [4.1 Running Your First Simulation](#41-running-your-first-simulation)
   - [4.2 Launching the GUI (PyQt6 Classic Launcher)](#42-launching-the-gui-pyqt6-classic-launcher)
-  - [4.3 Launching the Web UI (Tauri/Vue.js)](#43-launching-the-web-ui-tauivuejs)
+  - [4.3 Launching the Web UI (Tauri/React)](#43-launching-the-web-ui-taurireact)
   - [4.4 Starting the API Server](#44-starting-the-api-server)
   - [4.5 Basic Workflows](#45-basic-workflows)
   - [4.6 Exploring the Example Scripts](#46-exploring-the-example-scripts)
@@ -236,7 +236,7 @@ Inline equations use `$...$` delimiters and display equations use `$$...$$` deli
 
 - **[Chapter 22: GUI and Visualization](#chapter-22-gui-and-visualization)**
   - [22.1 PyQt6 Classic Launcher](#221-pyqt6-classic-launcher)
-  - [22.2 Tauri/Vue.js Web Desktop Application](#222-tauivuejs-web-desktop-application)
+  - [22.2 Tauri/React Web Desktop Application](#222-taurireact-web-desktop-application)
   - [22.3 Engine Dashboards (MuJoCo, Drake, Pinocchio)](#223-engine-dashboards-mujoco-drake-pinocchio)
   - [22.4 Model Explorer](#224-model-explorer)
   - [22.5 Pose Editor](#225-pose-editor)
@@ -398,7 +398,7 @@ UpstreamDrift provides the following core capabilities:
    control, analysis, engine management, video processing, and data export.
 
 8. **Dual GUI Options**: A feature-rich PyQt6 desktop launcher and a modern
-   Tauri/Vue.js web-based desktop application, both providing access to all
+   Tauri/React web-based desktop application, both providing access to all
    engines and analysis tools.
 
 9. **Robotics and Control**: Impedance, admittance, hybrid force-position, and
@@ -534,7 +534,7 @@ FastAPI's OpenAPI/Swagger support at `/docs` and `/redoc`).
   (MoBL-ARMS, Rajagopal).
 - **OpenSim Integration**: Biomechanical model validation and analysis tools.
   Tutorials and example scripts for musculoskeletal modeling.
-- **Tauri/Vue.js Desktop Application**: Modern web-based desktop UI alongside
+- **Tauri/React Desktop Application**: Modern web-based desktop UI alongside
   the classic PyQt6 launcher.
 - **FastAPI REST API**: Full-featured API server with JWT auth, rate limiting,
   CORS, WebSocket support, and comprehensive endpoint coverage.
@@ -632,7 +632,7 @@ the physics engine backends:
 +===========================================================================+
 |                        USER INTERFACE LAYER                                |
 |  +-------------------+  +---------------------+  +---------------------+  |
-|  | PyQt6 Classic GUI |  | Tauri/Vue.js Web UI |  | REST API (FastAPI)  |  |
+|  | PyQt6 Classic GUI |  | Tauri/React Web UI  |  | REST API (FastAPI)  |  |
 |  +-------------------+  +---------------------+  +---------------------+  |
 +===========================================================================+
                                     |
@@ -687,7 +687,7 @@ the physics engine backends:
 
 **User Interface Layer**: Provides three distinct interfaces for interacting with
 the platform. The PyQt6 GUI offers a native desktop experience with rich widget
-support. The Tauri/Vue.js application provides a modern web-based desktop experience.
+support. The Tauri/React application provides a modern web-based desktop experience.
 The FastAPI REST API enables programmatic access, automation, and integration
 with external systems.
 
@@ -879,8 +879,8 @@ UpstreamDrift/
 │   ├── acceptance/               #   Acceptance tests
 │   ├── headless/                 #   Headless (no-GUI) tests
 │   └── fixtures/                 #   Test fixtures and data
-├── ui/                           # Tauri/Vue.js web desktop app
-│   ├── src/                      #   Vue.js source code
+├── ui/                           # Tauri/React web desktop app
+│   ├── src/                      #   React source code
 │   ├── src-tauri/                #   Tauri (Rust) backend
 │   └── public/                   #   Static assets
 ├── docs/                         # Documentation
@@ -1193,7 +1193,7 @@ requirements:
 | pip                | 23.0+           | Latest              | Python package manager       |
 | conda (optional)   | 23.0+           | Latest (Miniforge)  | Recommended for binary deps  |
 | Docker (optional)  | 24.0+           | Latest              | For containerized deployment |
-| Node.js (optional) | 18+             | 20 LTS              | Only for Tauri/Vue.js UI dev |
+| Node.js (optional) | 18+             | 20 LTS              | Only for Tauri/React UI dev  |
 | Rust (optional)    | 1.70+           | Latest              | Only for Tauri desktop app   |
 
 ### Required System Libraries
@@ -1881,9 +1881,9 @@ The launcher uses an async startup system with a splash screen:
 | `1`-`5`  | Switch camera view       |
 | `Ctrl+Q` | Quit application         |
 
-## 4.3 Launching the Web UI (Tauri/Vue.js)
+## 4.3 Launching the Web UI (Tauri/React)
 
-The modern web-based desktop application uses Tauri (Rust backend) and Vue.js
+The modern web-based desktop application uses Tauri (Rust backend) and React
 (TypeScript frontend) for a contemporary user experience.
 
 ### Launch Command (Default)
@@ -1912,7 +1912,7 @@ npm run dev
 This starts the Vite development server with hot module replacement (HMR).
 The UI source code is in `ui/src/` and uses:
 
-- **Vue.js 3** with Composition API
+- **React** (v18+) with hooks
 - **TypeScript** for type safety
 - **Tailwind CSS** for styling
 - **Vite** for fast builds and HMR
@@ -1929,7 +1929,7 @@ npm run tauri build
 ```
 
 This produces a standalone executable for your platform (Linux AppImage, macOS
-.dmg, Windows .exe) that bundles the FastAPI backend and Vue.js frontend into
+.dmg, Windows .exe) that bundles the FastAPI backend and React frontend into
 a single distributable application.
 
 ## 4.4 Starting the API Server

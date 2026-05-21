@@ -138,9 +138,7 @@ class FrankensteinEditor(QWidget):
 
     def _on_copy_to_right(self, comp_type: str, name: str, element: ET.Element) -> None:
         """Copy component from left to right panel."""
-        if not (comp_type is not None):
-            raise ValueError("comp_type must be provided")
-        if not (comp_type is not None):
+        if comp_type is None:
             raise ValueError("comp_type must be provided")
         result = self.right_panel.add_component(comp_type, element)
         if result:
@@ -202,9 +200,7 @@ class FrankensteinEditor(QWidget):
         Returns:
             Number of components copied
         """
-        if not (source_model is not None):
-            raise ValueError("source_model must be provided")
-        if not (source_model is not None):
+        if source_model is None:
             raise ValueError("source_model must be provided")
         if name_mapping is None:
             name_mapping = {}
@@ -430,9 +426,7 @@ class FrankensteinEditor(QWidget):
         Returns:
             Number of components removed
         """
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         count = 0
 

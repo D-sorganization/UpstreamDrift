@@ -72,9 +72,7 @@ def _build_inverse_dynamics_csv_row(
     Returns:
         List of float values for the CSV row.
     """
-    if not (result is not None):
-        raise ValueError("result must be provided")
-    if not (result is not None):
+    if result is None:
         raise ValueError("result must be provided")
     row: list[float] = [time_val]
     for i in range(nv):
@@ -113,9 +111,7 @@ def export_inverse_dynamics_to_csv(
         FIXED per Assessment A Finding A-007: Added comprehensive input
         validation to prevent malformed CSV output and silent failures.
     """
-    if not (times is not None):
-        raise ValueError("times must be provided")
-    if not (times is not None):
+    if times is None:
         raise ValueError("times must be provided")
     nv = _validate_inverse_dynamics_export_inputs(times, results)
 
@@ -150,9 +146,7 @@ class InverseDynamicsAnalyzer:
             model: MuJoCo model
             data: MuJoCo data
         """
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.id_solver = InverseDynamicsSolver(model, data)
         self.kin_analyzer = KinematicForceAnalyzer(model, data)
@@ -180,9 +174,7 @@ class InverseDynamicsAnalyzer:
             Dictionary with comprehensive analysis
         """
         # Kinematic force analysis
-        if not (times is not None):
-            raise ValueError("times must be provided")
-        if not (times is not None):
+        if times is None:
             raise ValueError("times must be provided")
         kinematic_forces = self.kin_analyzer.analyze_trajectory(
             times,
@@ -233,9 +225,7 @@ class InverseDynamicsAnalyzer:
         Returns:
             Comparison metrics
         """
-        if not (swing1_data is not None):
-            raise ValueError("swing1_data must be provided")
-        if not (swing1_data is not None):
+        if swing1_data is None:
             raise ValueError("swing1_data must be provided")
         stats1 = swing1_data["statistics"]
         stats2 = swing2_data["statistics"]

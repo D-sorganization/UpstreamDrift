@@ -146,9 +146,7 @@ class MuJoCoMeshcatAdapter:
         """
         Updates geometry transforms from MuJoCo data.
         """
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         if self.vis is None or data is None or self.model is None:
             return
@@ -182,9 +180,7 @@ class MuJoCoMeshcatAdapter:
         """
         Draws force/torque vectors at joints.
         """
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         if self.vis is None or self.model is None:
             return
@@ -233,9 +229,7 @@ class MuJoCoMeshcatAdapter:
         """
         Draws induced acceleration vectors.
         """
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         if self.vis is None or self.model is None:
             return
@@ -302,9 +296,7 @@ class MuJoCoMeshcatAdapter:
         """
         Draws Counterfactual vectors.
         """
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         if self.vis is None or self.model is None:
             return
@@ -352,9 +344,7 @@ class MuJoCoMeshcatAdapter:
         """
         Draws an ellipsoid at the specified position/orientation.
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if self.vis is None:
             return
@@ -390,9 +380,7 @@ class MuJoCoMeshcatAdapter:
             color: Hex color for the plane surface.
             opacity: Transparency (0=invisible, 1=opaque).
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if self.vis is None:
             return
@@ -424,9 +412,7 @@ class MuJoCoMeshcatAdapter:
             points: (N, 3) trajectory positions [m].
             color: Hex color for the line.
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if self.vis is None or len(points) < 2:
             return
@@ -455,9 +441,7 @@ class MuJoCoMeshcatAdapter:
             end: End position [m] (3,).
             color: Hex color.
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if self.vis is None:
             return
@@ -481,9 +465,7 @@ class MuJoCoMeshcatAdapter:
     def _draw_arrow(
         self, path: str, start: np.ndarray, vec: np.ndarray, color_hex: int
     ) -> None:
-        if not (path is not None):
-            raise ValueError("path must be provided")
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         if self.vis is None:
             return

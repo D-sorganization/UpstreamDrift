@@ -1,0 +1,114 @@
+"""Runtime availability probe for terminal CLI agent providers.
+
+This module exposes :func:`list_available_cli_providers`, which probes the
+local ``PATH`` via :func:`shutil.which` and returns only the CLI providers
+whose binary is actually installed.  The result is intended to populate the
+Sidekick chat header provider dropdown (Tools issue UpstreamDrift#5622).
+
+The probe is intentionally lightweight — it does *not* run the binary or
+validate authentication.  Use the existing ``terminal_providers`` probe
+commands (``provider_probe_commands``) for a more thorough health check.
+
+Design-by-Contract:
+    Preconditions:
+        - :class:`CliProviderEntry` fields ``provider_id`` and
+          ``display_name`` must be non-empty strings.
+    Postconditions:
+        - :func:`list_available_cli_providers` returns a list (possibly
+          empty) of :class:`CliProviderEntry` instances.
+        - Every returned entry's ``provider_id`` is present in the
+          :func:`~terminal_providers.build_default_terminal_provider_registry`.
+"""
+
+from __future__ import annotations
+
+import shutil
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class CliProviderEntry:
+    """Metadata for a CLI agent provider that is available on the local PATH.
+
+    Preconditions:
+        - ``provider_id`` must be a non-empty string.
+        - ``display_name`` must be a non-empty string.
+
+    Attributes:
+        provider_id: Stable registry identifier (matches
+            :class:`~terminal_contracts.TerminalAgentProviderInfo`).
+        display_name: Human-readable label for use in UI dropdowns.
+        binary_path: Resolved path to the executable, as returned by
+            ``shutil.which``.  ``None`` if the binary was not found (in
+            practice, entries with ``None`` are never returned by
+            :func:`list_available_cli_providers`).
+    """
+
+    provider_id: str
+    display_name: str
+    binary_path: str | None
+
+    def __post_init__(self) -> None:
+        if not self.provider_id:
+            raise ValueError("provider_id must be a non-empty string")
+        if not self.display_name:
+            raise ValueError("display_name must be a non-empty string")
+
+
+# ---------------------------------------------------------------------------
+# Canonical CLI agent descriptor table
+#
+# Each tuple contains:
+#   (registry_provider_id, ui_display_name, binary_to_probe)
+#
+# The ``ui_display_name`` is what appears in the dropdown — kept short and
+# human-friendly, intentionally distinct from the registry's internal
+# ``display_name`` so both can evolve independently.
+# ---------------------------------------------------------------------------
+
+_CLI_AGENT_DESCRIPTORS: tuple[tuple[str, str, str], ...] = (
+    ("claude-code", "Claude CLI", "claude"),
+    ("codex", "Codex CLI", "codex"),
+    ("cline-cli", "Cline", "cline"),
+    ("gemini-cli", "Gemini CLI", "gemini"),
+    # Tools #2899 — GitHub CLI as a chat-level agent provider. Complementary
+    # to the GitHub MCP server (Tools #2897): MCP exposes structured tool
+    # calls, while this provider lets the chat talk to ``gh`` as if it were
+    # an agent (raw shell-style invocations from natural-language intent).
+    ("github-cli", "GitHub CLI", "gh"),
+)
+
+
+def list_available_cli_providers() -> list[CliProviderEntry]:
+    """Return CLI agent providers whose binary is present on ``PATH``.
+
+    Probes each known CLI agent executable with :func:`shutil.which`.
+    Only providers whose binary resolves to a non-``None`` path are
+    included in the result.
+
+    Returns:
+        A list of :class:`CliProviderEntry` instances, one per available
+        provider, in the order defined by ``_CLI_AGENT_DESCRIPTORS``.
+        Returns an empty list when no providers are installed.
+
+    Example::
+
+        from src.shared.python.chat.cli_provider_availability import (
+            list_available_cli_providers,
+        )
+
+        for entry in list_available_cli_providers():
+            print(entry.display_name, "->", entry.binary_path)
+    """
+    available: list[CliProviderEntry] = []
+    for provider_id, display_name, executable in _CLI_AGENT_DESCRIPTORS:
+        binary_path = shutil.which(executable)
+        if binary_path is not None:
+            available.append(
+                CliProviderEntry(
+                    provider_id=provider_id,
+                    display_name=display_name,
+                    binary_path=binary_path,
+                )
+            )
+    return available

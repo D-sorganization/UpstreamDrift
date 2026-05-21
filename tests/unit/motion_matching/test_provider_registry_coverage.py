@@ -118,7 +118,7 @@ def test_register_empty_engine_name() -> None:
 
 def test_get_provider_unknown_engine() -> None:
     """Pin: lookup of unknown engine raises KeyError with available list."""
-    with pytest.raises(KeyError, match="no fit_swing provider"):
+    with pytest.raises(KeyError, match="no FitSwingProvider registered"):
         get_provider("zzz")
 
 

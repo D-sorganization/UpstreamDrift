@@ -60,13 +60,13 @@ export type ThemeId =
   | 'slate-gray'
   | 'ocean-blue'
   | 'forest-green'
-  | 'monokai'
-  | 'dracula'
-  | 'one-dark'
-  | 'gitpod-dark'
-  | 'ms-word'
-  | 'ms-excel'
-  | 'legal-pad'
+  | 'neon-warm-dark'
+  | 'vampire-dark'
+  | 'frost-dark'
+  | 'teal-dark'
+  | 'office-blue'
+  | 'office-green'
+  | 'sandstone-yellow'
   | 'high-contrast';
 
 /** Custom theme stored by user */

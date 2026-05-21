@@ -1,0 +1,140 @@
+# Modular UpstreamDrift Dockerfile.
+#
+# Selects features either by named profile or by explicit comma-separated
+# feature list. The feature → install command mapping lives in
+# scripts/docker/install_features.py and ultimately in
+# src/shared/python/feature_registry/features.py.
+#
+# Build examples
+# --------------
+#   # Named profile:
+#   docker build --build-arg PROFILE=research \
+#                -f Dockerfile.modular \
+#                -t upstream-drift:research .
+#
+#   # Custom feature set:
+#   docker build --build-arg FEATURES=mujoco,drake,pose-mediapipe \
+#                -f Dockerfile.modular \
+#                -t upstream-drift:custom .
+#
+# Profile takes precedence over FEATURES. If both are empty the build
+# falls back to PROFILE=standard for parity with the legacy Dockerfile.
+#
+# This Dockerfile is *additive* — Dockerfile remains the canonical
+# production build until Phase 2 finishes; this one is the validation
+# vehicle. See docs/plans/DOCKER_MODULAR_BUILDS_EPIC.md.
+
+# ---- Stage 1: builder ------------------------------------------------------
+FROM python:3.12-slim@sha256:4386a385d81dba9f72ed72a6fe4237755d7f5440c84b417650f38336bbc43117 AS builder
+
+ARG PROFILE=
+ARG FEATURES=
+ARG DEFAULT_PROFILE=standard
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PIP_NO_CACHE_DIR=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+WORKDIR /workspace
+
+# Always install the lockfile baseline first so layer cache hits the
+# common case. Feature stages append additional packages on top.
+COPY requirements.lock /tmp/requirements.lock
+RUN pip install --upgrade pip==25.3 && \
+    pip install -r /tmp/requirements.lock
+
+# Copy the *minimum* surface needed for `pip install .` to resolve.
+# The full source tree is COPYd in the runtime stage so layer caches
+# don't get invalidated by docs-only edits during a feature build.
+COPY pyproject.toml ./
+COPY README.md ./
+COPY build_hooks.py ./
+COPY src/ ./src/
+COPY docker/profiles.yaml ./docker/profiles.yaml
+COPY scripts/docker/install_features.py ./scripts/docker/install_features.py
+
+# Resolve features and install them. If PROFILE is set it wins; else
+# FEATURES; else DEFAULT_PROFILE. Empty results in a parse error from
+# install_features.py, which is the correct fail-loud behavior.
+RUN set -eux; \
+    if [ -n "$PROFILE" ]; then \
+        python scripts/docker/install_features.py --profile "$PROFILE"; \
+    elif [ -n "$FEATURES" ]; then \
+        python scripts/docker/install_features.py --features "$FEATURES"; \
+    else \
+        python scripts/docker/install_features.py --profile "$DEFAULT_PROFILE"; \
+    fi
+
+
+# ---- Stage 2: runtime ------------------------------------------------------
+FROM python:3.12-slim@sha256:4386a385d81dba9f72ed72a6fe4237755d7f5440c84b417650f38336bbc43117 AS runtime
+
+ARG PROFILE=
+ARG FEATURES=
+ARG USER_NAME=golfer
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN python -m pip install --upgrade --no-cache-dir pip==25.3
+
+# Runtime apt deps — kept identical to legacy Dockerfile so the
+# rendering paths (osmesa, egl, ffmpeg) work for every profile.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1 \
+    libosmesa6 \
+    libglew2.2 \
+    libegl1 \
+    libglib2.0-0t64 \
+    patchelf \
+    ffmpeg \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd -g ${GROUP_ID} ${USER_NAME} && \
+    useradd -m -u ${USER_ID} -g ${GROUP_ID} -s /bin/bash ${USER_NAME}
+
+COPY --from=builder /opt/venv /opt/venv
+
+ENV PATH="/opt/venv/bin:$PATH" \
+    PYTHONPATH="/workspace" \
+    UPSTREAM_DRIFT_PROFILE=${PROFILE} \
+    UPSTREAM_DRIFT_FEATURES=${FEATURES}
+
+RUN mkdir -p /workspace && chown -R ${USER_NAME}:${USER_NAME} /workspace
+WORKDIR /workspace
+
+COPY --chown=${USER_NAME}:${USER_NAME} src/ ./src/
+COPY --chown=${USER_NAME}:${USER_NAME} pyproject.toml ./
+COPY --chown=${USER_NAME}:${USER_NAME} launch_golf_suite.py ./
+COPY --chown=${USER_NAME}:${USER_NAME} scripts/ci/start_api_server.py ./
+COPY --chown=${USER_NAME}:${USER_NAME} docker/profiles.yaml ./docker/profiles.yaml
+COPY --chown=${USER_NAME}:${USER_NAME} .env.example ./.env.example
+
+USER ${USER_NAME}
+
+EXPOSE 8001
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8001/health || exit 1
+
+# Surface the resolved profile/feature set on container start so
+# operators can verify which build they're running without exec'ing in.
+LABEL org.upstream-drift.profile=${PROFILE}
+LABEL org.upstream-drift.features=${FEATURES}
+
+CMD ["python3", "-m", "uvicorn", "src.api.server:app", \
+     "--host", "0.0.0.0", \
+     "--port", "8001", \
+     "--workers", "1", \
+     "--proxy-headers", \
+     "--forwarded-allow-ips", "${FORWARDED_ALLOW_IPS:-127.0.0.1}", \
+     "--access-log"]

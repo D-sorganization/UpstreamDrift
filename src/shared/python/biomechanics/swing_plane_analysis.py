@@ -63,9 +63,7 @@ class SwingPlaneAnalyzer:
         Raises:
             PreconditionError: If fewer than 3 points are provided.
         """
-        if not (points is not None):
-            raise ValueError("points must be provided")
-        if not (points is not None):
+        if points is None:
             raise ValueError("points must be provided")
         require(len(points) >= 3, "At least 3 points required to fit a plane")
 
@@ -106,9 +104,7 @@ class SwingPlaneAnalyzer:
         Returns:
             deviations: (N,) signed distances
         """
-        if not (points is not None):
-            raise ValueError("points must be provided")
-        if not (points is not None):
+        if points is None:
             raise ValueError("points must be provided")
         result = np.dot(points - centroid, normal)
         return np.asarray(result)
@@ -128,9 +124,7 @@ class SwingPlaneAnalyzer:
         Returns:
             SwingPlaneMetrics object
         """
-        if not (points is not None):
-            raise ValueError("points must be provided")
-        if not (points is not None):
+        if points is None:
             raise ValueError("points must be provided")
         centroid, normal = self.fit_plane(points)
         deviations = self.calculate_deviation(points, centroid, normal)

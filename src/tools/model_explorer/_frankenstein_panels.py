@@ -44,9 +44,7 @@ class ModelPanel(QWidget):
 
     def __init__(self, title: str, parent: QWidget | None = None) -> None:
         """Initialize the model panel."""
-        if not (title is not None):
-            raise ValueError("title must be provided")
-        if not (title is not None):
+        if title is None:
             raise ValueError("title must be provided")
         super().__init__(parent)
         self.title = title
@@ -187,9 +185,7 @@ class ModelPanel(QWidget):
 
     def _on_item_double_clicked(self, item: QTreeWidgetItem, column: int) -> None:
         """Handle double-click for stealing component."""
-        if not (item is not None):
-            raise ValueError("item must be provided")
-        if not (item is not None):
+        if item is None:
             raise ValueError("item must be provided")
         element = item.data(0, Qt.ItemDataRole.UserRole)
         if element is not None:
@@ -222,9 +218,7 @@ class ModelPanel(QWidget):
 
     def _emit_copy(self, item: QTreeWidgetItem) -> None:
         """Emit signal to copy component."""
-        if not (item is not None):
-            raise ValueError("item must be provided")
-        if not (item is not None):
+        if item is None:
             raise ValueError("item must be provided")
         element = item.data(0, Qt.ItemDataRole.UserRole)
         if element is not None:
@@ -234,9 +228,7 @@ class ModelPanel(QWidget):
 
     def _remove_component(self, item: QTreeWidgetItem) -> None:
         """Remove a component from the model."""
-        if not (item is not None):
-            raise ValueError("item must be provided")
-        if not (item is not None):
+        if item is None:
             raise ValueError("item must be provided")
         if not self.model:
             return
@@ -334,9 +326,7 @@ class ModelPanel(QWidget):
         Returns:
             The name used, or None if failed
         """
-        if not (comp_type is not None):
-            raise ValueError("comp_type must be provided")
-        if not (comp_type is not None):
+        if comp_type is None:
             raise ValueError("comp_type must be provided")
         if not self.model:
             self.model = URDFModel.create_empty()
@@ -380,9 +370,7 @@ class StealComponentDialog(QDialog):
         parent: QWidget | None = None,
     ) -> None:
         """Initialize the dialog."""
-        if not (comp_type is not None):
-            raise ValueError("comp_type must be provided")
-        if not (comp_type is not None):
+        if comp_type is None:
             raise ValueError("comp_type must be provided")
         super().__init__(parent)
         self.setWindowTitle("Copy Component")

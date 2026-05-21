@@ -20,7 +20,6 @@ from pathlib import Path
 import pytest
 import yaml
 
-
 REPO_ROOT = Path(__file__).resolve().parents[3]
 MODELS_YAML = REPO_ROOT / "src" / "config" / "models.yaml"
 

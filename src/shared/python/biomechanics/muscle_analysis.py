@@ -53,9 +53,7 @@ class MuscleSynergyAnalyzer:
                              Must be non-negative.
             muscle_names: Optional list of muscle names.
         """
-        if not (activation_data is not None):
-            raise ValueError("activation_data must be provided")
-        if not (activation_data is not None):
+        if activation_data is None:
             raise ValueError("activation_data must be provided")
         self.data = np.asarray(activation_data)
         require(

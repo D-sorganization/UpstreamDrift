@@ -101,15 +101,11 @@ class PolynomialProfile:
         """Evaluate angular velocity polynomial at time t."""
         if not (t is not None):
             raise ValueError("t must be provided")
-        if not (t is not None):
-            raise ValueError("t must be provided")
         poly = np.poly1d(self.coefficients)
         return float(poly(t))
 
     def alpha(self, t: float) -> float:
         """Evaluate angular acceleration polynomial at time t."""
-        if not (t is not None):
-            raise ValueError("t must be provided")
         if not (t is not None):
             raise ValueError("t must be provided")
         derivative = np.polyder(self.coefficients)
@@ -137,9 +133,7 @@ def _calc_mass_matrix(
     I3: float,
     g: float,
 ) -> np.ndarray:
-    if not (theta1 is not None):
-        raise ValueError("theta1 must be provided")
-    if not (theta1 is not None):
+    if theta1 is None:
         raise ValueError("theta1 must be provided")
     mass = np.zeros((3, 3))
     mass[0, 0] = (
@@ -220,9 +214,7 @@ def _calc_bias_vector(
     I3: float,
     g: float,
 ) -> np.ndarray:
-    if not (theta1 is not None):
-        raise ValueError("theta1 must be provided")
-    if not (theta1 is not None):
+    if theta1 is None:
         raise ValueError("theta1 must be provided")
     bias = np.zeros((3,))
     bias[0] = (
@@ -288,9 +280,7 @@ def _calc_gravity_vector(
     I3: float,
     g: float,
 ) -> np.ndarray:
-    if not (theta1 is not None):
-        raise ValueError("theta1 must be provided")
-    if not (theta1 is not None):
+    if theta1 is None:
         raise ValueError("theta1 must be provided")
     gravity = np.zeros((3,))
     gravity[0] = (
@@ -347,8 +337,6 @@ class TriplePendulumDynamics:
         """Compute the 3x3 mass matrix for the current state."""
         if not (state is not None):
             raise ValueError("state must be provided")
-        if not (state is not None):
-            raise ValueError("state must be provided")
         params = self._parameter_vector()
         theta = (state.theta1, state.theta2, state.theta3)
         omega = (state.omega1, state.omega2, state.omega3)
@@ -357,8 +345,6 @@ class TriplePendulumDynamics:
 
     def bias_vector(self, state: TriplePendulumState) -> np.ndarray:
         """Compute bias vector including Coriolis, gravity, and damping."""
-        if not (state is not None):
-            raise ValueError("state must be provided")
         if not (state is not None):
             raise ValueError("state must be provided")
         params = self._parameter_vector()
@@ -377,8 +363,6 @@ class TriplePendulumDynamics:
         """Solve for joint accelerations given applied torques."""
         if not (state is not None):
             raise ValueError("state must be provided")
-        if not (state is not None):
-            raise ValueError("state must be provided")
         mass = self.mass_matrix(state)
         bias = self.bias_vector(state)
         accelerations = np.linalg.solve(mass, np.array(control, dtype=float) - bias)
@@ -392,8 +376,6 @@ class TriplePendulumDynamics:
         """Compute torques required to produce the given accelerations."""
         if not (state is not None):
             raise ValueError("state must be provided")
-        if not (state is not None):
-            raise ValueError("state must be provided")
         mass = self.mass_matrix(state)
         bias = self.bias_vector(state)
         torques = mass @ np.array(accelerations, dtype=float) + bias
@@ -405,8 +387,6 @@ class TriplePendulumDynamics:
         self, state: TriplePendulumState, control: tuple[float, float, float]
     ) -> TripleJointTorques:
         """Decompose joint torques into applied, gravity, damping, and Coriolis."""
-        if not (state is not None):
-            raise ValueError("state must be provided")
         if not (state is not None):
             raise ValueError("state must be provided")
         theta = (state.theta1, state.theta2, state.theta3)
@@ -448,8 +428,6 @@ class TriplePendulumDynamics:
 
         if not (_t is not None):
             raise ValueError("_t must be provided")
-        if not (_t is not None):
-            raise ValueError("_t must be provided")
 
         def rk4_increment(
             current_state: TriplePendulumState,
@@ -457,8 +435,6 @@ class TriplePendulumDynamics:
             derivs: tuple[float, float, float, float, float, float],
         ) -> TriplePendulumState:
             """Apply a scaled RK4 derivative increment to the state."""
-            if not (current_state is not None):
-                raise ValueError("current_state must be provided")
             if not (current_state is not None):
                 raise ValueError("current_state must be provided")
             dtheta1, dtheta2, dtheta3, domega1, domega2, domega3 = derivs

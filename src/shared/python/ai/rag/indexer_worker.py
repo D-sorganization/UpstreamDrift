@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 
 from PyQt6.QtCore import QThread, pyqtSignal
+
 from src.shared.python.ai.rag.simple_rag import SimpleRAGStore
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -24,9 +25,9 @@ class IndexerWorker(QThread):
             root_path: Root directory to index.
             store: RAG store to populate.
         """
-        if not (root_path is not None):
+        if root_path is None:
             raise ValueError("root_path must be provided")
-        if not (root_path is not None):
+        if root_path is None:
             raise ValueError("root_path must be provided")
         super().__init__()
         self._root = root_path

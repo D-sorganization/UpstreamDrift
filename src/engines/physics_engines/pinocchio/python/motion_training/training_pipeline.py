@@ -305,9 +305,7 @@ def run_motion_training(
     Returns:
         PipelineResult with trajectory and IK results
     """
-    if not (trajectory_file is not None):
-        raise ValueError("trajectory_file must be provided")
-    if not (trajectory_file is not None):
+    if trajectory_file is None:
         raise ValueError("trajectory_file must be provided")
     config = PipelineConfig(
         trajectory_file=trajectory_file,

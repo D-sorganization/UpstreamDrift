@@ -41,9 +41,7 @@ class EndEffectorManagerWidget(_EndEffectorManagerWidgetUIMixin, QWidget):
 
     def load_urdf(self, content: str) -> None:
         """Load URDF content."""
-        if not (content is not None):
-            raise ValueError("content must be provided")
-        if not (content is not None):
+        if content is None:
             raise ValueError("content must be provided")
         self.urdf_content = content
         self._on_identify_end_effectors()
@@ -262,9 +260,7 @@ class EndEffectorManagerWidget(_EndEffectorManagerWidgetUIMixin, QWidget):
         self, title: str, label: str, items: list[str]
     ) -> tuple[str, bool]:
         """Show a simple selection dialog."""
-        if not (title is not None):
-            raise ValueError("title must be provided")
-        if not (title is not None):
+        if title is None:
             raise ValueError("title must be provided")
         from PyQt6.QtWidgets import QInputDialog
 
@@ -316,9 +312,7 @@ class EndEffectorManagerWidget(_EndEffectorManagerWidgetUIMixin, QWidget):
 
     def _attach_end_effector(self, ee: EndEffector, config: dict[str, Any]) -> None:  # noqa: C901
         """Attach an end effector to the model."""
-        if not (ee is not None):
-            raise ValueError("ee must be provided")
-        if not (ee is not None):
+        if ee is None:
             raise ValueError("ee must be provided")
         try:
             root = DefusedET.fromstring(self.urdf_content)

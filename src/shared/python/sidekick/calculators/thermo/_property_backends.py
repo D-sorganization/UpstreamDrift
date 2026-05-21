@@ -81,9 +81,7 @@ def compute_derived_properties(
     temperature: float,
 ) -> dict[str, float | None]:
     """Compute derived thermo properties (Z, Pr, k)."""
-    if not (cp is not None):
-        raise ValueError("cp must be provided")
-    if not (cp is not None):
+    if cp is None:
         raise ValueError("cp must be provided")
     r_specific = 461.5
     return {
@@ -395,9 +393,7 @@ def calculate_saturated_cantera_from_pressure(
 
 def calculate_saturated_simplified_from_temp(temperature: float) -> SteamProperties:
     """Calculate saturated steam properties from temperature using simplified correlations"""
-    if not (temperature is not None):
-        raise ValueError("temperature must be provided")
-    if not (temperature is not None):
+    if temperature is None:
         raise ValueError("temperature must be provided")
     temp_c = temperature - KELVIN_TO_CELSIUS_OFFSET
 
@@ -415,9 +411,7 @@ def calculate_saturated_simplified_from_temp(temperature: float) -> SteamPropert
 
 def calculate_saturated_simplified_from_pressure(pressure: float) -> SteamProperties:
     """Calculate saturated steam properties from pressure using simplified correlations"""
-    if not (pressure is not None):
-        raise ValueError("pressure must be provided")
-    if not (pressure is not None):
+    if pressure is None:
         raise ValueError("pressure must be provided")
     pressure_mmhg = pressure * PASCAL_TO_MMHG_FACTOR
 

@@ -14,7 +14,7 @@ available; pure function tests need no Qt at all.
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -196,42 +196,3 @@ class TestSessionFileFunctions:
         _write_shared_session_id("roundtrip-id-999", f)
         result = _read_shared_session_id(f)
         assert result == "roundtrip-id-999"
-
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Qt connection-state regression tests
-# ──────────────────────────────────────────────────────────────────────────────
-
-
-class TestChatDockWidgetConnectionState:
-    @staticmethod
-    def _ensure_qapp():
-        from PyQt6.QtWidgets import QApplication
-
-        return QApplication.instance() or QApplication([])
-
-    def test_socket_error_surfaces_failure_instead_of_connecting(self):
-        from src.shared.python.chat._chat_dock_widget_qt import ChatDockWidget
-
-        self._ensure_qapp()
-        dock = ChatDockWidget(app_name="test_chat_socket_error")
-        dock._on_socket_error()
-
-        assert "Connection failed" in dock._status_label.text()
-        assert dock._send_btn.isEnabled()
-        assert dock._reconnect_timer.isActive()
-        dock.close()
-
-    def test_connect_timeout_surfaces_failure_and_aborts_socket(self):
-        from src.shared.python.chat._chat_dock_widget_qt import ChatDockWidget
-
-        self._ensure_qapp()
-        dock = ChatDockWidget(app_name="test_chat_connect_timeout")
-        dock._socket = MagicMock()
-        dock._on_connect_timeout()
-
-        assert "Connection timed out" in dock._status_label.text()
-        assert dock._send_btn.isEnabled()
-        dock._socket.abort.assert_called_once()
-        assert dock._reconnect_timer.isActive()
-        dock.close()

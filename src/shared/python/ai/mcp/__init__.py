@@ -1,24 +1,68 @@
-"""MCP (Model Context Protocol) client infrastructure for UpstreamDrift.
+"""MCP (Model Context Protocol) infrastructure.
 
-This package provides:
+Public exports for connecting to and managing external MCP servers
+(stdio or HTTP) and aggregating their tools and resources into the local
+``ToolRegistry``.
 
-- :class:`~src.shared.python.ai.mcp.contracts.McpToolDescriptor` — a
-  lightweight description of a single tool exposed by an MCP server.
-- :class:`~src.shared.python.ai.mcp.mcp_chat_integration.McpChatIntegration`
-  — the high-level facade that loads config, manages the pool lifecycle,
-  and exposes a call_tool() + tools() API to the chat panel.
+Public surface:
+    - ``McpServerConfig`` / ``McpTransport`` (Pydantic config)
+    - ``McpToolDescriptor`` / ``McpResourceDescriptor``
+    - ``McpClient`` (single-server wrapper)
+    - ``McpClientPool`` (aggregation across N servers)
+    - ``load_mcp_servers`` (Claude-Desktop-compatible config loader)
 
-The package degrades gracefully when the optional ``mcp`` transport library
-is not installed: all public APIs remain importable and return empty
-collections / raise :class:`RuntimeError` only when a tool call is attempted.
+External callers should reach MCP capabilities through the pool, never by
+indexing into ``pool._clients`` directly (LOD).
 """
 
 from __future__ import annotations
 
-from src.shared.python.ai.mcp.contracts import McpToolDescriptor
-from src.shared.python.ai.mcp.mcp_chat_integration import McpChatIntegration
+from src.shared.python.ai.mcp.client import McpClient
+from src.shared.python.ai.mcp.config_loader import (
+    apply_preset_to_config,
+    discover_claude_desktop_config,
+    is_preset_installed,
+    load_mcp_servers,
+    merge_external_config,
+)
+from src.shared.python.ai.mcp.config_writer import (
+    McpServersFile,
+    read,
+    write,
+)
+from src.shared.python.ai.mcp.contracts import (
+    McpResourceDescriptor,
+    McpServerConfig,
+    McpToolDescriptor,
+    McpTransport,
+)
+from src.shared.python.ai.mcp.pool import McpClientPool
+from src.shared.python.ai.mcp.presets import (
+    MCP_SERVER_PRESETS,
+    McpServerPreset,
+    apply_preset,
+    get_preset,
+    list_preset_ids,
+)
 
 __all__ = [
-    "McpChatIntegration",
+    "MCP_SERVER_PRESETS",
+    "McpClient",
+    "McpClientPool",
+    "McpResourceDescriptor",
+    "McpServerConfig",
+    "McpServerPreset",
+    "McpServersFile",
     "McpToolDescriptor",
+    "McpTransport",
+    "apply_preset",
+    "apply_preset_to_config",
+    "discover_claude_desktop_config",
+    "get_preset",
+    "is_preset_installed",
+    "list_preset_ids",
+    "load_mcp_servers",
+    "merge_external_config",
+    "read",
+    "write",
 ]

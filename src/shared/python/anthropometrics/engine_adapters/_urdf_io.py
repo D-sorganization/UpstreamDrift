@@ -37,7 +37,7 @@ without information loss.
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET  # noqa: S314
 from pathlib import Path
 
 from .._subject_anthropometrics import SubjectAnthropometrics

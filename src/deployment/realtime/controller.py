@@ -120,8 +120,6 @@ class RealTimeController:
         """
         if not (control_frequency is not None):
             raise ValueError("control_frequency must be provided")
-        if not (control_frequency is not None):
-            raise ValueError("control_frequency must be provided")
         self.control_frequency = control_frequency
         self.dt = 1.0 / control_frequency
         self.comm_type = CommunicationType(communication_type)
@@ -173,8 +171,6 @@ class RealTimeController:
         Returns:
             True if connection successful.
         """
-        if not (robot_config is not None):
-            raise ValueError("robot_config must be provided")
         if not (robot_config is not None):
             raise ValueError("robot_config must be provided")
         self._config = robot_config
@@ -403,8 +399,6 @@ class RealTimeController:
         Args:
             command: Control command to send.
         """
-        if not (command is not None):
-            raise ValueError("command must be provided")
         if not (command is not None):
             raise ValueError("command must be provided")
         if self.comm_type == CommunicationType.SIMULATION:

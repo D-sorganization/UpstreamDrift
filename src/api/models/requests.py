@@ -509,3 +509,26 @@ class AIPJsonRpcRequest(BaseModel):
         if v != "2.0":
             raise ValueError("Only JSON-RPC 2.0 is supported")
         return v
+
+
+class CharacterBuilderRequest(BaseModel):
+    """Request model for Character Builder URDF generation.
+
+    Preconditions:
+        - height_m must be in [1.5, 2.1]
+        - mass_kg must be in [40, 150]
+        - build_type must be athletic, average, heavy, or slim
+    """
+
+    height_m: float = Field(..., description="Height in meters", ge=1.5, le=2.1)
+    mass_kg: float = Field(..., description="Weight in kilograms", ge=40.0, le=150.0)
+    build_type: str = Field(..., description="Build type")
+
+    @field_validator("build_type")
+    @classmethod
+    def validate_build_type(cls, v: str) -> str:
+        """Precondition: build_type must be a recognized build type."""
+        normalized = v.lower().strip()
+        if normalized not in {"athletic", "average", "heavy", "slim"}:
+            raise ValueError("build_type must be athletic, average, heavy, or slim")
+        return normalized

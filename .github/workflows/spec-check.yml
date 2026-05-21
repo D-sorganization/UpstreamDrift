@@ -16,15 +16,13 @@ name: Spec Check
 on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
-    paths-ignore:
-      - ".github/**"
-
     paths:
       - "docs/**"
       - "specs/**"
       - "**/*.md"
       - "src/**"
       - "tests/**"
+      - "!.github/**"
 permissions:
   contents: read
   pull-requests: write

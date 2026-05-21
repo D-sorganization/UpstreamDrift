@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Any
 from PyQt6.QtCore import QThread, pyqtSignal
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.ai.exceptions import AIError
 
 if TYPE_CHECKING:
     from src.shared.python.ai.adapters.base import BaseAgentAdapter
@@ -61,7 +62,7 @@ class StreamWorker(QThread):
             ):
                 if chunk.content:
                     self.chunk_received.emit(chunk.content)
-        except (RuntimeError, ValueError, OSError) as e:
+        except (RuntimeError, ValueError, OSError, AIError) as e:
             logger.exception("Streaming error")
             self.error.emit(str(e))
         finally:

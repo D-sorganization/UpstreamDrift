@@ -38,9 +38,9 @@ class ExpertiseLevel(Enum):
 
     def __lt__(self, other: object) -> bool:
         """Support comparison for level filtering."""
-        if not (other is not None):
+        if other is None:
             raise ValueError("other must be provided")
-        if not (other is not None):
+        if other is None:
             raise ValueError("other must be provided")
         if isinstance(other, ExpertiseLevel):
             return self.value < other.value
@@ -48,9 +48,9 @@ class ExpertiseLevel(Enum):
 
     def __le__(self, other: object) -> bool:
         """Support comparison for level filtering."""
-        if not (other is not None):
+        if other is None:
             raise ValueError("other must be provided")
-        if not (other is not None):
+        if other is None:
             raise ValueError("other must be provided")
         if isinstance(other, ExpertiseLevel):
             return self.value <= other.value
@@ -205,6 +205,15 @@ class ToolResult:
     error: str | None = None
     execution_time: float = 0.0
 
+    @property
+    def solver_status(self) -> str:
+        """Get the solver status string.
+
+        Returns:
+            "success" if execution succeeded, "failed" otherwise.
+        """
+        return "success" if self.success else "failed"
+
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization.
 
@@ -235,6 +244,7 @@ class ConversationContext:
     session_id: str = field(default_factory=lambda: f"session_{uuid.uuid4().hex[:12]}")
     messages: list[Message] = field(default_factory=list)
     user_expertise: ExpertiseLevel = ExpertiseLevel.BEGINNER
+    response_style: str = "standard"
     active_workflow_id: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
@@ -253,9 +263,9 @@ class ConversationContext:
         Returns:
             The created Message instance.
         """
-        if not (role is not None):
+        if role is None:
             raise ValueError("role must be provided")
-        if not (role is not None):
+        if role is None:
             raise ValueError("role must be provided")
         message = Message(role=role, content=content, **kwargs)
         self.messages.append(message)
@@ -351,6 +361,7 @@ class ConversationContext:
             "session_id": self.session_id,
             "messages": [m.to_dict() for m in self.messages],
             "user_expertise": self.user_expertise.name,
+            "response_style": self.response_style,
             "active_workflow_id": self.active_workflow_id,
             "metadata": self.metadata,
         }
@@ -366,9 +377,9 @@ class ConversationContext:
             New ConversationContext instance.
         """
         # Reconstruct messages
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         messages = []
         for m_data in data.get("messages", []):
@@ -415,6 +426,7 @@ class ConversationContext:
             session_id=data.get("session_id", ""),
             messages=messages,
             user_expertise=expertise,
+            response_style=data.get("response_style", "standard"),
             active_workflow_id=data.get("active_workflow_id"),
             metadata=data.get("metadata", {}),
         )
@@ -425,9 +437,9 @@ class ConversationContext:
         Args:
             path: Path to save to.
         """
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         import json
         from pathlib import Path
@@ -448,9 +460,9 @@ class ConversationContext:
         Returns:
             Loaded context, or new context if file not found.
         """
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         path_obj = Path(path) if isinstance(path, str) else path
         if not path_obj.exists():
@@ -528,62 +540,12 @@ class AgentChunk:
     index: int = 0
 
 
-class ThinkingLevel(Enum):
-    """Thinking / reasoning effort levels for AI models.
+# Re-export ChatModelInfo, ThinkingCapabilities, ThinkingLevel, ThinkingLevelName
+# from chat.models to keep existing tests and integrations working.
+from src.shared.python.chat.models import (
+    ChatModelInfo,
+    ThinkingCapabilities,
+    ThinkingLevel,
+    ThinkingLevelName,
+)
 
-    Controls how much "extended thinking" or "reasoning effort" a model
-    applies before generating its response.  Not all models support all
-    levels — consult the adapter's ``thinking_capabilities()`` method.
-
-    Values:
-        OFF: No extended thinking (default, fastest).
-        LOW: Minimal reasoning budget.
-        MEDIUM: Balanced reasoning budget.
-        HIGH: Maximum reasoning budget (slowest, most thorough).
-        AUTO: Provider-selected budget (Gemini-specific).
-        BUDGET: Budget-token mode (Anthropic extended-thinking token budget).
-    """
-
-    OFF = "off"
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    AUTO = "auto"
-    BUDGET = "budget"
-
-
-@dataclass(frozen=True)
-class ChatModelInfo:
-    """Metadata about a single chat model offered by a provider.
-
-    Attributes:
-        model_id: The canonical model identifier sent to the API.
-        display_name: Human-readable name shown in the UI.
-        context_window: Maximum context window [tokens]. 0 if unknown.
-        supports_thinking: True if the model supports extended thinking.
-    """
-
-    model_id: str
-    display_name: str = ""
-    context_window: int = 0
-    supports_thinking: bool = False
-
-    def __post_init__(self) -> None:
-        """Set display_name to model_id when not provided."""
-        if not self.display_name:
-            # frozen=True means we must use object.__setattr__
-            object.__setattr__(self, "display_name", self.model_id)
-
-
-@dataclass(frozen=True)
-class ThinkingCapabilities:
-    """Describes a model's extended-thinking / reasoning-effort support.
-
-    Attributes:
-        supports_levels: True if the model supports multiple thinking levels.
-        available_levels: Ordered list of levels the model supports.
-            Always contains at least ThinkingLevel.OFF when non-empty.
-    """
-
-    supports_levels: bool
-    available_levels: list[ThinkingLevel]

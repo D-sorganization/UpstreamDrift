@@ -32,9 +32,7 @@ def compute_grip_torque(
     contacts: list[ContactPoint],
     grip_center: np.ndarray,
 ) -> np.ndarray:
-    if not (contacts is not None):
-        raise ValueError("contacts must be provided")
-    if not (contacts is not None):
+    if contacts is None:
         raise ValueError("contacts must be provided")
     total_torque = np.zeros(3)
 
@@ -52,9 +50,7 @@ def compute_pressure_visualization(
     grip_axis: np.ndarray = np.array([0.0, 0.0, 1.0]),
     contact_area: float = 0.01,
 ) -> PressureVisualizationData:
-    if not (contacts is not None):
-        raise ValueError("contacts must be provided")
-    if not (contacts is not None):
+    if contacts is None:
         raise ValueError("contacts must be provided")
     if not contacts:
         return PressureVisualizationData(

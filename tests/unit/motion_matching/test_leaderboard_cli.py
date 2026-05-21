@@ -23,7 +23,15 @@ _REPO_ROOT = str(Path(__file__).resolve().parents[3])
 
 # Subprocess environment with PYTHONPATH set so src.shared is importable
 # regardless of the working directory used by each test.
-_SUBPROCESS_ENV = {**os.environ, "PYTHONPATH": _REPO_ROOT}
+_SUBPROCESS_ENV = {
+    **os.environ,
+    "PYTHONPATH": os.pathsep.join(
+        [
+            _REPO_ROOT,
+            os.path.join(_REPO_ROOT, "src", "shared", "python"),
+        ]
+    ),
+}
 
 
 def _write_fit_result(trial_dir: Path, engine: str, data: dict | None = None) -> Path:

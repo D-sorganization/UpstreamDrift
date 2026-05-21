@@ -40,9 +40,7 @@ def compute_jacobian(
     sim: PuttingGreenSimulator, body_name: str
 ) -> dict[str, np.ndarray] | None:
     """Compute Jacobian (identity for ball)."""
-    if not (body_name is not None):
-        raise ValueError("body_name must be provided")
-    if not (body_name is not None):
+    if body_name is None:
         raise ValueError("body_name must be provided")
     if body_name == "ball":
         return {
@@ -68,9 +66,7 @@ def compute_ztcf(
     sim: PuttingGreenSimulator, q: np.ndarray, v: np.ndarray
 ) -> np.ndarray:
     """Zero-torque counterfactual (drift only)."""
-    if not (q is not None):
-        raise ValueError("q must be provided")
-    if not (q is not None):
+    if q is None:
         raise ValueError("q must be provided")
     temp_state = BallState(q, v, sim._ball_state.spin)
     return sim._physics.compute_total_acceleration(temp_state)

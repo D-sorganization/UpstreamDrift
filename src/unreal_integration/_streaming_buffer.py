@@ -27,13 +27,19 @@ class FrameBuffer:
         Args:
             max_size: Maximum number of frames to store.
         """
-        if not (max_size is not None):
+        if max_size is None:
             raise ValueError("max_size must be provided")
-        if not (max_size is not None):
-            raise ValueError("max_size must be provided")
+        if max_size <= 0:
+            raise ValueError(f"max_size must be positive, got {max_size}")
         self.max_size = max_size
         self._buffer: deque[UnrealDataFrame] = deque(maxlen=max_size)
-        self._lock = asyncio.Lock() if asyncio.get_event_loop().is_running() else None
+        # Lock only when an event loop is already running; otherwise leave None
+        # to avoid triggering deprecated asyncio.get_event_loop() warnings.
+        try:
+            running = asyncio.get_running_loop()
+            self._lock: asyncio.Lock | None = asyncio.Lock() if running else None
+        except RuntimeError:
+            self._lock = None
 
     def __len__(self) -> int:
         """Return number of frames in buffer."""
@@ -60,9 +66,7 @@ class FrameBuffer:
         Returns:
             True if frame was added (oldest may have been dropped).
         """
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
-        if not (frame is not None):
+        if frame is None:
             raise ValueError("frame must be provided")
         self._buffer.append(frame)
         return True

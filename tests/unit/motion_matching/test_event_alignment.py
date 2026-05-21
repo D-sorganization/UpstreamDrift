@@ -28,7 +28,7 @@ from src.shared.python.motion_matching import (
 from src.shared.python.motion_matching.loaders.c3d_body import (
     default_anatomical_marker_set,
 )
-from tests.unit.sidekick.lab.bio._synthetic import _synthetic_c3d_dict
+from tests.unit.upstream_drift_tools.lab.bio._synthetic import _synthetic_c3d_dict
 
 # Frame counts and rates picked so a uniform timeline cleanly separates an
 # "Impact" event (frame 50, t=0.5 s) from the kinematic-peak frame (80) of a
@@ -182,21 +182,15 @@ def test_club_event_alignment_uses_event_frame(
     )
     _patch_load_c3d(monkeypatch, payload)
     opts = _opts()
-    with caplog.at_level(
-        logging.INFO, logger="src.shared.python.motion_matching.loaders.c3d"
-    ):
-        target = load_club_target_c3d(
-            fake_c3d_path, opts, event_label_for_alignment="Impact"
-        )
+    with caplog.at_level(logging.INFO, logger="src.shared.python.motion_matching.loaders.c3d"):
+        target = load_club_target_c3d(fake_c3d_path, opts, event_label_for_alignment="Impact")
     # impact_target_t_s=0.25 corresponds to raw t=0.5 (the event time).
     # CH x at frame 50 is sin(pi*(50-80)/40) = sin(-3pi/4) ~= -0.7071.
     sim_idx = int(target.impact_idx) - 1  # impact_idx is 1-based per contract
     expected = float(np.sin(np.pi * (_EVENT_FRAME - _PEAK_FRAME) / 40.0))
     assert target.clubhead[sim_idx, 0] == pytest.approx(expected, abs=1e-3)
     # Log must mention event-driven alignment.
-    assert any(
-        "EVENT" in rec.message and "Impact" in rec.message for rec in caplog.records
-    )
+    assert any("EVENT" in rec.message and "Impact" in rec.message for rec in caplog.records)
 
 
 def test_club_no_event_falls_back_to_heuristic(
@@ -208,9 +202,7 @@ def test_club_no_event_falls_back_to_heuristic(
     payload = _build_club_dict(with_events=False)
     _patch_load_c3d(monkeypatch, payload)
     opts = _opts()
-    with caplog.at_level(
-        logging.INFO, logger="src.shared.python.motion_matching.loaders.c3d"
-    ):
+    with caplog.at_level(logging.INFO, logger="src.shared.python.motion_matching.loaders.c3d"):
         target = load_club_target_c3d(fake_c3d_path, opts)
     # Heuristic locks raw frame 80 onto sim t=0.25; CH x at frame 80 is sin(0)=0.
     sim_idx = int(target.impact_idx) - 1
@@ -230,9 +222,7 @@ def test_club_unknown_event_label_lists_available(
     )
     _patch_load_c3d(monkeypatch, payload)
     with pytest.raises(ValueError, match=r"DoesNotExist.*Impact.*Top"):
-        load_club_target_c3d(
-            fake_c3d_path, _opts(), event_label_for_alignment="DoesNotExist"
-        )
+        load_club_target_c3d(fake_c3d_path, _opts(), event_label_for_alignment="DoesNotExist")
 
 
 def test_club_event_label_but_file_has_no_events_raises(
@@ -266,9 +256,7 @@ def test_body_event_alignment_uses_event_frame(
         logging.INFO,
         logger="src.shared.python.motion_matching.loaders.c3d_body",
     ):
-        bt = load_body_target_c3d(
-            fake_c3d_path, opts, event_label_for_alignment="Impact"
-        )
+        bt = load_body_target_c3d(fake_c3d_path, opts, event_label_for_alignment="Impact")
     # impact_idx is 0-based on the resampled grid for BodyTarget.
     sim_t_at_impact = float(bt.time[int(bt.impact_idx)])
     assert sim_t_at_impact == pytest.approx(opts.impact_target_t_s, abs=1.5e-3)
@@ -276,12 +264,8 @@ def test_body_event_alignment_uses_event_frame(
     # event frame 50: 0.5 + sin(-3pi/4) ~= 0.5 - 0.7071.
     wrist_idx = bt.marker_names.index("RWristTop")
     expected = 0.5 + float(np.sin(np.pi * (_EVENT_FRAME - _PEAK_FRAME) / 40.0))
-    assert bt.marker_xyz[int(bt.impact_idx), wrist_idx, 0] == pytest.approx(
-        expected, abs=5e-3
-    )
-    assert any(
-        "EVENT" in rec.message and "Impact" in rec.message for rec in caplog.records
-    )
+    assert bt.marker_xyz[int(bt.impact_idx), wrist_idx, 0] == pytest.approx(expected, abs=5e-3)
+    assert any("EVENT" in rec.message and "Impact" in rec.message for rec in caplog.records)
 
 
 def test_body_no_event_falls_back_to_wrist_heuristic(
@@ -299,9 +283,7 @@ def test_body_no_event_falls_back_to_wrist_heuristic(
         bt = load_body_target_c3d(fake_c3d_path, opts)
     # Heuristic pins wrist peak (frame 80) to sim t=0.25; wrist x there is 0.5.
     wrist_idx = bt.marker_names.index("RWristTop")
-    assert bt.marker_xyz[int(bt.impact_idx), wrist_idx, 0] == pytest.approx(
-        0.5, abs=5e-3
-    )
+    assert bt.marker_xyz[int(bt.impact_idx), wrist_idx, 0] == pytest.approx(0.5, abs=5e-3)
     assert any("falling back" in rec.message.lower() for rec in caplog.records)
 
 
@@ -315,9 +297,7 @@ def test_body_unknown_event_label_lists_available(
     )
     _patch_load_c3d(monkeypatch, payload)
     with pytest.raises(ValueError, match=r"DoesNotExist.*Impact.*Top"):
-        load_body_target_c3d(
-            fake_c3d_path, _opts(), event_label_for_alignment="DoesNotExist"
-        )
+        load_body_target_c3d(fake_c3d_path, _opts(), event_label_for_alignment="DoesNotExist")
 
 
 def test_body_event_label_but_file_has_no_events_raises(

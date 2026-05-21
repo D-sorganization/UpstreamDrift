@@ -4,10 +4,18 @@ This module provides user authentication and subscription management
 for AI-powered features in the UpstreamDrift application.
 
 Features:
-    - User authentication via API keys or OAuth
+    - User authentication via API keys
     - Subscription tier management (Free, Pro, Enterprise)
     - Feature gating based on subscription level
     - Secure token storage and refresh
+
+Note:
+    OAuth and email/password authentication methods are NOT implemented.
+    ``login_with_oauth`` and ``login_with_email_password`` raise
+    ``NotImplementedError`` unconditionally (Phase 1 of issue #2757).
+    Real OAuth (PKCE + token exchange + refresh tokens) is tracked in the
+    Phase 2 follow-up issue.  Until then, ``is_authenticated`` will always
+    return False unless a valid API key is supplied via ``login_with_api_key``.
 
 Example:
     >>> from src.shared.python.ai.auth.authentication import AuthManager
@@ -21,7 +29,6 @@ from __future__ import annotations
 import contextlib
 import hashlib
 import secrets
-import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
@@ -282,7 +289,8 @@ class AuthManager:
         if not api_key:
             return False
 
-        # Generate user ID from API key hash (simplified - in production, verify with server)
+        # Generate user ID from API key hash (simplified - in production, verify
+        # with server)
         user_id = hashlib.sha256(api_key.encode()).hexdigest()[:16]
 
         self._current_user = UserProfile(
@@ -313,23 +321,53 @@ class AuthManager:
             auth_code: Authorization code from OAuth flow.
 
         Returns:
-            True if login successful, False otherwise.
+            Never returns — always raises ``NotImplementedError``.
+
+        Raises:
+            NotImplementedError: Always. Real OAuth (PKCE + token exchange +
+                refresh-token handling) is deferred to Phase 2 (issue #5227).
+                To use authenticated features, configure provider credentials
+                directly via the keyring (chat/credentials.py) and supply an
+                API key via ``login_with_api_key`` instead.
 
         Note:
-            This is a placeholder for OAuth implementation.
-            In production, exchange auth_code for tokens with the provider.
+            Phase 1 of issue #2757 removes the previously fabricated
+            ``UserProfile`` that this method used to return so that callers
+            can no longer be misled into trusting a fake identity.
         """
-        logger.info("OAuth login with provider: %s", provider)
-        # TODO: Implement OAuth token exchange
-        # For now, create a demo user
-        self._current_user = UserProfile(
-            user_id=f"oauth_{provider}_{secrets.token_hex(8)}",
-            email=f"user@{provider}.com",
-            subscription_tier=SubscriptionTier.FREE,
-            features_enabled=["ollama_chat", "basic_tools"],
+        raise NotImplementedError(
+            f"OAuth login for provider {provider!r} is not implemented (TODO #5227). "
+            "To use authenticated features, configure provider credentials directly "
+            "via the keyring (chat/credentials.py) and skip the OAuth flow."
         )
-        self._save_credentials()
-        return True
+
+    def login_with_email_password(self, email: str, password: str) -> bool:
+        """Login using email and password.
+
+        Args:
+            email: User email address.
+            password: User password.
+
+        Returns:
+            Never returns — always raises ``NotImplementedError``.
+
+        Raises:
+            NotImplementedError: Always. Email/password authentication requires
+                a backend service (e.g. Supabase, Auth0) that has not yet been
+                selected or configured (Phase 2, issue #5227).
+                To use authenticated features, supply an API key via
+                ``login_with_api_key`` instead.
+
+        Note:
+            Phase 1 of issue #2757 removes the previously fabricated
+            ``UserProfile`` that this method used to return so that callers
+            can no longer be misled into trusting a fake identity.
+        """
+        raise NotImplementedError(
+            f"Email/password login for {email!r} is not implemented (TODO #5227). "
+            "To use authenticated features, supply an API key via login_with_api_key. "
+            "Email/password auth requires a backend service — see Phase 2 of #2757."
+        )
 
     def logout(self) -> None:
         """Logout and clear credentials."""
@@ -349,7 +387,15 @@ class AuthManager:
 
     @property
     def is_authenticated(self) -> bool:
-        """Check if user is authenticated."""
+        """Check if user is authenticated.
+
+        Returns:
+            True only when a ``UserProfile`` is present and its subscription
+            is active.  After a refused login attempt (``login_with_oauth`` or
+            ``login_with_email_password`` raising ``NotImplementedError``) no
+            profile is set, so this property returns False.  Callers must check
+            this explicitly before consuming gated features.
+        """
         return self._current_user is not None and self._current_user.is_active()
 
     @property
@@ -417,7 +463,7 @@ class AuthManager:
         """
         if not self._access_token or not self._access_token.is_valid():
             if self._refresh_token and self._refresh_token.is_valid():
-                # TODO: Exchange refresh token for new access token
+                # TODO(#5227): Exchange refresh token for new access token
                 logger.info("Refreshing access token")
                 return True
             return False

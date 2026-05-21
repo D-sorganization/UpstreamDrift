@@ -120,7 +120,7 @@ class FontManager(QObject):
             app: Optional QApplication instance. If None, uses QApplication.instance().
         """
         target_app = app or QApplication.instance()
-        if target_app is None:
+        if not isinstance(target_app, QApplication):
             logger.warning("No QApplication instance available to apply font.")
             return
 

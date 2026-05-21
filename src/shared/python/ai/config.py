@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 """AI configuration with environment variable support.
 
 This module centralizes all AI-related configuration, allowing values to be
@@ -143,7 +144,7 @@ def get_openai_api_key(*, required: bool = False) -> str | None:
     Raises:
         EnvironmentError: If required and key not set.
     """
-    return get_env(ENV_OPENAI_API_KEY, required=required)
+    return get_env(ENV_OPENAI_API_KEY, required=required)  # type: ignore[no-any-return]
 
 
 def get_openai_model() -> str:
@@ -175,7 +176,7 @@ def get_openai_organization() -> str | None:
     Returns:
         Organization ID from OPENAI_ORGANIZATION or None.
     """
-    return get_env(ENV_OPENAI_ORGANIZATION)
+    return get_env(ENV_OPENAI_ORGANIZATION)  # type: ignore[no-any-return]
 
 
 # ============================================================================
@@ -195,7 +196,7 @@ def get_anthropic_api_key(*, required: bool = False) -> str | None:
     Raises:
         EnvironmentError: If required and key not set.
     """
-    return get_env(ENV_ANTHROPIC_API_KEY, required=required)
+    return get_env(ENV_ANTHROPIC_API_KEY, required=required)  # type: ignore[no-any-return]
 
 
 def get_anthropic_model() -> str:
@@ -239,7 +240,7 @@ def get_gemini_api_key(*, required: bool = False) -> str | None:
     Raises:
         EnvironmentError: If required and key not set.
     """
-    return get_env(ENV_GEMINI_API_KEY, required=required)
+    return get_env(ENV_GEMINI_API_KEY, required=required)  # type: ignore[no-any-return]
 
 
 def get_gemini_model() -> str:
@@ -312,3 +313,23 @@ def get_tool_timeout() -> float:
         get_env_float(ENV_TOOL_TIMEOUT, default=DEFAULT_TOOL_TIMEOUT)
         or DEFAULT_TOOL_TIMEOUT
     )
+
+
+# ============================================================================
+# AI Settings dataclass persistence keys (used by gui/settings_dialog.py)
+# Tools #2762: keys live here so headless callers can construct
+# ``AISettings`` without importing the GUI module.
+# ============================================================================
+
+SETTINGS_ORG = "D-sorganization"
+SETTINGS_APP = "AIAssistant"
+KEY_PROVIDER = "ai/provider"
+KEY_MODEL = "ai/model"
+KEY_EXPERTISE = "ai/expertise_level"  # legacy alias, see Tools #2552
+KEY_RESPONSE_STYLE = "ai/response_style"
+KEY_CHAT_MODE = "ai/chat_mode"
+KEY_OLLAMA_HOST = "ai/ollama_host"
+KEY_STREAMING = "ai/streaming_enabled"
+KEY_RAG_ENABLED = "ai/rag_enabled"
+KEY_AUTO_INDEX_ON_OPEN = "ai/auto_index_on_open"
+KEY_ACCESS_MODE = "ai/access_mode"

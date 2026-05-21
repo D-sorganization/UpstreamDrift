@@ -1,0 +1,117 @@
+# Compose overlay for modular Docker profiles.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.profiles.yml \
+#       --profile research up backend-research
+#
+# Each service builds a single named profile defined in docker/profiles.yaml.
+# Profiles use distinct image tags so an unrelated `docker compose up` of
+# the legacy `backend` service is unaffected.
+#
+# These services are gated behind compose-profile flags (the
+# ``profiles:`` key) so a plain ``docker compose up`` continues to start
+# only the legacy ``backend`` + ``frontend`` from docker-compose.yml.
+
+version: "3.8"
+
+services:
+  backend-slim:
+    profiles: ["slim"]
+    build:
+      context: .
+      dockerfile: Dockerfile.modular
+      target: runtime
+      args:
+        PROFILE: slim
+    image: upstream-drift:slim
+    container_name: upstream-drift-slim
+    ports:
+      - "127.0.0.1:8101:8001"
+    networks: [upstream-drift]
+    restart: unless-stopped
+
+  backend-standard:
+    profiles: ["standard"]
+    build:
+      context: .
+      dockerfile: Dockerfile.modular
+      target: runtime
+      args:
+        PROFILE: standard
+    image: upstream-drift:standard
+    container_name: upstream-drift-standard
+    ports:
+      - "127.0.0.1:8102:8001"
+    networks: [upstream-drift]
+    restart: unless-stopped
+
+  backend-research:
+    profiles: ["research"]
+    build:
+      context: .
+      dockerfile: Dockerfile.modular
+      target: runtime
+      args:
+        PROFILE: research
+    image: upstream-drift:research
+    container_name: upstream-drift-research
+    ports:
+      - "127.0.0.1:8103:8001"
+    networks: [upstream-drift]
+    restart: unless-stopped
+
+  backend-biomech:
+    profiles: ["biomech"]
+    build:
+      context: .
+      dockerfile: Dockerfile.modular
+      target: runtime
+      args:
+        PROFILE: biomech
+    image: upstream-drift:biomech
+    container_name: upstream-drift-biomech
+    ports:
+      - "127.0.0.1:8104:8001"
+    networks: [upstream-drift]
+    restart: unless-stopped
+
+  backend-full:
+    profiles: ["full"]
+    build:
+      context: .
+      dockerfile: Dockerfile.modular
+      target: runtime
+      args:
+        PROFILE: full
+    image: upstream-drift:full
+    container_name: upstream-drift-full
+    ports:
+      - "127.0.0.1:8105:8001"
+    networks: [upstream-drift]
+    restart: unless-stopped
+
+  backend-gpu-training:
+    profiles: ["gpu-training"]
+    build:
+      context: .
+      dockerfile: Dockerfile.modular
+      target: runtime
+      args:
+        PROFILE: gpu-training
+    image: upstream-drift:gpu-training
+    container_name: upstream-drift-gpu-training
+    ports:
+      - "127.0.0.1:8106:8001"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks: [upstream-drift]
+    restart: unless-stopped
+
+networks:
+  upstream-drift:
+    external: false

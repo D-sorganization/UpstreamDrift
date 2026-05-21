@@ -255,6 +255,9 @@ def validate_mjcf(source: str | Path) -> list[str]:
         else:
             mujoco.MjModel.from_xml_string(source)
         return []
+    except ValueError as e:
+        # mujoco raises ValueError on XML parse / schema errors
+        return [f"MJCF parse error: {e}"]
     except ImportError:
         # MuJoCo not available, do basic XML validation
         import xml.etree.ElementTree as StdET

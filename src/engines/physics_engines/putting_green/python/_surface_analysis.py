@@ -26,9 +26,7 @@ class SurfaceAnalysisMixin:
             Dictionary with break analysis
         """
         # Sample points along intended line
-        if not (start is not None):
-            raise ValueError("start must be provided")
-        if not (start is not None):
+        if start is None:
             raise ValueError("start must be provided")
         t_values = np.linspace(0, 1, num_samples)
         positions = [start + t * (end - start) for t in t_values]
@@ -84,9 +82,7 @@ class SurfaceAnalysisMixin:
         Returns:
             Dictionary with positions, elevations, and slopes along line
         """
-        if not (start is not None):
-            raise ValueError("start must be provided")
-        if not (start is not None):
+        if start is None:
             raise ValueError("start must be provided")
         t_values = np.linspace(0, 1, num_samples)
         positions = [start + t * (end - start) for t in t_values]
@@ -108,9 +104,7 @@ class SurfaceAnalysisMixin:
         Returns:
             2D array of elevations [resolution x resolution]
         """
-        if not (resolution is not None):
-            raise ValueError("resolution must be provided")
-        if not (resolution is not None):
+        if resolution is None:
             raise ValueError("resolution must be provided")
         x = np.linspace(0, self.width, resolution)  # type: ignore[attr-defined]
         y = np.linspace(0, self.height, resolution)  # type: ignore[attr-defined]

@@ -15,9 +15,7 @@ def _load_excel_frame_data(filename: str, sheet_name: str) -> list:
 
     Returns a list of frame data dicts, or an empty list on failure.
     """
-    if not (filename is not None):
-        raise ValueError("filename must be provided")
-    if not (filename is not None):
+    if filename is None:
         raise ValueError("filename must be provided")
     df = pd.read_excel(filename, sheet_name=sheet_name, header=None)
 
@@ -127,9 +125,7 @@ def _compute_motion_ranges(data: list) -> tuple:
 
 def _interpret_swing_motion(mid_motion_ranges: list, club_motion_ranges: list) -> None:
     """Log interpretation of the swing motion directions and patterns."""
-    if not (mid_motion_ranges is not None):
-        raise ValueError("mid_motion_ranges must be provided")
-    if not (mid_motion_ranges is not None):
+    if mid_motion_ranges is None:
         raise ValueError("mid_motion_ranges must be provided")
     logger.info("\nMotion analysis:")
     # Determine the axis with largest motion range using explicit if-elif-else
@@ -181,9 +177,7 @@ def _interpret_swing_motion(mid_motion_ranges: list, club_motion_ranges: list) -
 
 def _analyze_key_frame(name: str, frame: dict) -> None:
     """Analyze and log position, club vector, and rotation matrix for a single frame."""
-    if not (name is not None):
-        raise ValueError("name must be provided")
-    if not (name is not None):
+    if name is None:
         raise ValueError("name must be provided")
     logger.info("%s frame (t=%ss):", name, frame["time"])
     logger.info(

@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+import cycler
 import matplotlib.pyplot as plt
 
 from .colors import CHART_COLORS, Colors  # type: ignore[attr-defined]
@@ -48,7 +49,7 @@ GOLF_SUITE_STYLE = {
     "axes.titlepad": 12,
     "axes.spines.top": False,
     "axes.spines.right": False,
-    "axes.prop_cycle": plt.cycler("color", CHART_COLORS),
+    "axes.prop_cycle": cycler.cycler("color", CHART_COLORS),
     # Grid
     "grid.color": Colors.GRID_LINE,
     "grid.linestyle": "-",
@@ -130,7 +131,7 @@ def apply_golf_suite_style(fig: Figure | None = None) -> None:
     else:
         # Apply to specific figure
         fig.set_facecolor(Colors.BG_BASE)
-        for ax in fig.get_axes():
+        for ax in fig.axes:
             _style_axes(ax)
 
 
@@ -190,9 +191,7 @@ def create_styled_figure(
     Returns:
         Tuple of (Figure, Axes or array of Axes)
     """
-    if not (nrows is not None):
-        raise ValueError("nrows must be provided")
-    if not (nrows is not None):
+    if nrows is None:
         raise ValueError("nrows must be provided")
     if figsize is None:
         figsize = (10, 6)
@@ -215,9 +214,7 @@ def style_for_export(fig: Figure, dpi: int = 200) -> None:
         fig: Figure to prepare
         dpi: DPI for export (default 200 for crisp output)
     """
-    if not (fig is not None):
-        raise ValueError("fig must be provided")
-    if not (fig is not None):
+    if fig is None:
         raise ValueError("fig must be provided")
     fig.set_dpi(dpi)
     fig.set_facecolor(Colors.BG_BASE)

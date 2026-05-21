@@ -8,7 +8,9 @@
  * See issue #1198
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import { PolynomialGeneratorPanel } from './PolynomialGeneratorPanel';
+import { ActuatorSlider } from './ActuatorSlider';
 
 /** Actuator descriptor from the API. See issue #1198 */
 export interface ActuatorInfo {
@@ -37,128 +39,48 @@ interface ActuatorPanelProps {
   refreshInterval?: number;
 }
 
-const CONTROL_TYPE_LABELS: Record<string, string> = {
-  constant: 'Constant',
-  polynomial: 'Polynomial',
-  pd_gains: 'PD Gains',
-  trajectory: 'Trajectory',
-};
-
 /**
- * Single actuator slider row.
+ * Helper to identify body regions for actuator grouping.
  */
-function ActuatorSlider({
-  actuator,
-  onValueChange,
-  onControlTypeChange,
-  availableTypes,
-}: {
-  actuator: ActuatorInfo;
-  onValueChange: (index: number, value: number) => void;
-  onControlTypeChange: (index: number, type: string) => void;
-  availableTypes: string[];
-}) {
-  // Track whether the user is actively dragging the slider.
-  // While dragging, use the locally tracked value; otherwise
-  // fall back to the externally-provided actuator value.
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragValue, setDragValue] = useState(actuator.value);
-  const localValue = isDragging ? dragValue : actuator.value;
-
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
-
-  const handleChange = useCallback(
-    (newValue: number) => {
-      setIsDragging(true);
-      setDragValue(newValue);
-
-      // Debounce API calls; stop dragging after debounce settles
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-      debounceRef.current = setTimeout(() => {
-        onValueChange(actuator.index, newValue);
-        setIsDragging(false);
-      }, 50);
-    },
-    [actuator.index, onValueChange],
-  );
-
-  // Cleanup debounce on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
-  }, []);
-
-  const range = actuator.max_value - actuator.min_value;
-  const percentage =
-    range > 0
-      ? ((localValue - actuator.min_value) / range) * 100
-      : 50;
-
-  return (
-    <div className="bg-gray-700/30 p-2 rounded-md">
-      {/* Header row: name + control type */}
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-xs font-mono text-gray-300 truncate max-w-[120px]">
-          {actuator.name}
-        </span>
-        <select
-          value={actuator.control_type}
-          onChange={(e) =>
-            onControlTypeChange(actuator.index, e.target.value)
-          }
-          className="text-xs bg-gray-600 text-gray-300 rounded px-1 py-0.5 border-none focus:ring-1 focus:ring-blue-400"
-        >
-          {availableTypes.map((type) => (
-            <option key={type} value={type}>
-              {CONTROL_TYPE_LABELS[type] || type}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Slider */}
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-500 w-12 text-right font-mono">
-          {actuator.min_value.toFixed(1)}
-        </span>
-        <div className="flex-1 relative">
-          <input
-            type="range"
-            min={actuator.min_value}
-            max={actuator.max_value}
-            step={(range / 200) || 0.1}
-            value={localValue}
-            onChange={(e) => handleChange(parseFloat(e.target.value))}
-            className="w-full h-1.5 bg-gray-600 rounded-lg appearance-none cursor-pointer"
-            aria-label={`${actuator.name} control value`}
-          />
-          {/* Fill indicator */}
-          <div
-            className="absolute top-0 left-0 h-1.5 bg-blue-500 rounded-l-lg pointer-events-none"
-            style={{ width: `${Math.max(0, Math.min(100, percentage))}%` }}
-          />
-        </div>
-        <span className="text-xs text-gray-500 w-12 font-mono">
-          {actuator.max_value.toFixed(1)}
-        </span>
-      </div>
-
-      {/* Current value display */}
-      <div className="flex items-center justify-between mt-1">
-        <span className="text-xs text-gray-400">
-          {actuator.joint_type}
-        </span>
-        <span className="text-xs font-mono text-blue-400">
-          {localValue.toFixed(2)} {actuator.units}
-        </span>
-      </div>
-    </div>
-  );
+function getActuatorGroup(name: string): string {
+  const lower = name.toLowerCase();
+  if (
+    lower.includes('hip') ||
+    lower.includes('knee') ||
+    lower.includes('ankle') ||
+    lower.includes('foot') ||
+    lower.includes('thigh') ||
+    lower.includes('leg') ||
+    lower.includes('toe') ||
+    lower.includes('pelvis')
+  ) {
+    return 'Lower Body';
+  }
+  if (
+    lower.includes('shoulder') ||
+    lower.includes('elbow') ||
+    lower.includes('wrist') ||
+    lower.includes('arm') ||
+    lower.includes('hand') ||
+    lower.includes('clavicle') ||
+    lower.includes('finger')
+  ) {
+    return 'Upper Body';
+  }
+  if (
+    lower.includes('spine') ||
+    lower.includes('torso') ||
+    lower.includes('neck') ||
+    lower.includes('head') ||
+    lower.includes('chest') ||
+    lower.includes('back') ||
+    lower.includes('waist') ||
+    lower.includes('trunk') ||
+    lower.includes('core')
+  ) {
+    return 'Core & Head';
+  }
+  return 'Other';
 }
 
 /**
@@ -175,7 +97,15 @@ export function ActuatorPanel({
   const [error, setError] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
 
-  // Fetch actuator state from backend
+  // Grouping filter state
+  const [selectedRegion, setSelectedRegion] = useState('All');
+  const [collapsedRegions, setCollapsedRegions] = useState<Record<string, boolean>>({
+    'Upper Body': false,
+    'Lower Body': false,
+    'Core & Head': false,
+    'Other': false,
+  });
+
   const fetchActuators = useCallback(async () => {
     try {
       const response = await fetch('/api/simulation/actuators');
@@ -190,7 +120,6 @@ export function ActuatorPanel({
     }
   }, []);
 
-  // Initial fetch and periodic refresh
   useEffect(() => {
     fetchActuators();
 
@@ -200,7 +129,6 @@ export function ActuatorPanel({
     }
   }, [fetchActuators, isRunning, refreshInterval]);
 
-  // Send actuator command to backend
   const handleValueChange = useCallback(async (index: number, value: number) => {
     try {
       await fetch('/api/simulation/actuators', {
@@ -213,7 +141,7 @@ export function ActuatorPanel({
         }),
       });
     } catch {
-      // Silently fail on network errors
+      // Silently fail
     }
   }, []);
 
@@ -229,7 +157,6 @@ export function ActuatorPanel({
             control_type: controlType,
           }),
         });
-        // Refresh to get updated state
         fetchActuators();
       } catch {
         // Silently fail
@@ -238,8 +165,57 @@ export function ActuatorPanel({
     [fetchActuators],
   );
 
+  const handleApplyPolynomial = useCallback(
+    async (index: number, coefficients: number[]) => {
+      try {
+        await fetch('/api/simulation/actuators', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            actuator_index: index,
+            value: 0,
+            control_type: 'polynomial',
+            parameters: { coefficients },
+          }),
+        });
+        fetchActuators();
+      } catch {
+        // Silently fail
+      }
+    },
+    [fetchActuators],
+  );
+
+  // Group logic
+  const shouldGroup = panelState && panelState.actuators.length > 20;
+
+  const groupedActuators = useMemo(() => {
+    if (!panelState) return {};
+    const groups: Record<string, ActuatorInfo[]> = {};
+    for (const act of panelState.actuators) {
+      const groupName = shouldGroup ? getActuatorGroup(act.name) : 'All';
+      if (!groups[groupName]) {
+        groups[groupName] = [];
+      }
+      groups[groupName].push(act);
+    }
+    return groups;
+  }, [panelState, shouldGroup]);
+
+  const activeRegions = useMemo(() => {
+    if (!shouldGroup) return ['All'];
+    if (selectedRegion !== 'All') return [selectedRegion];
+    return ['Upper Body', 'Lower Body', 'Core & Head', 'Other'];
+  }, [shouldGroup, selectedRegion]);
+
+  const renderedRegions = useMemo(() => {
+    return activeRegions.filter(
+      (r) => groupedActuators[r] && groupedActuators[r].length > 0
+    );
+  }, [activeRegions, groupedActuators]);
+
   return (
-    <div className="bg-gray-700/50 p-3 rounded-md">
+    <div className="bg-gray-700/50 p-3 rounded-md space-y-3">
       {/* Header */}
       <button
         onClick={() => setCollapsed(!collapsed)}
@@ -255,7 +231,7 @@ export function ActuatorPanel({
       </button>
 
       {!collapsed && (
-        <div className="mt-2 space-y-2">
+        <div className="space-y-3">
           {error && (
             <div className="text-xs text-red-400 bg-red-900/20 p-2 rounded">
               {error}
@@ -264,18 +240,90 @@ export function ActuatorPanel({
 
           {panelState && panelState.actuators.length > 0 ? (
             <>
-              <div className="text-xs text-gray-500 mb-1">
+              <div className="text-xs text-gray-500">
                 Engine: {panelState.engine_name}
               </div>
-              {panelState.actuators.map((actuator) => (
-                <ActuatorSlider
-                  key={actuator.index}
-                  actuator={actuator}
-                  onValueChange={handleValueChange}
-                  onControlTypeChange={handleControlTypeChange}
-                  availableTypes={panelState.available_control_types}
-                />
-              ))}
+
+              {/* Polynomial Panel */}
+              <PolynomialGeneratorPanel
+                actuators={panelState.actuators}
+                onApplyPolynomial={handleApplyPolynomial}
+              />
+
+              {/* Region Filter Selector */}
+              {shouldGroup && (
+                <div className="flex flex-col gap-1">
+                  <label htmlFor="region-filter-select" className="text-xs text-gray-400">
+                    Filter by region
+                  </label>
+                  <select
+                    id="region-filter-select"
+                    value={selectedRegion}
+                    onChange={(e) => setSelectedRegion(e.target.value)}
+                    className="text-xs bg-gray-600 text-gray-300 rounded px-2 py-1.5 border-none focus:ring-1 focus:ring-blue-400"
+                  >
+                    <option value="All">All Regions</option>
+                    <option value="Upper Body">Upper Body</option>
+                    <option value="Lower Body">Lower Body</option>
+                    <option value="Core & Head">Core & Head</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              )}
+
+              {/* Actuators List */}
+              <div className="space-y-2">
+                {renderedRegions.map((regionName) => {
+                  const acts = groupedActuators[regionName] || [];
+                  const isCollapsed = collapsedRegions[regionName];
+
+                  if (regionName === 'All') {
+                    return acts.map((act) => (
+                      <ActuatorSlider
+                        key={act.index}
+                        actuator={act}
+                        onValueChange={handleValueChange}
+                        onControlTypeChange={handleControlTypeChange}
+                        availableTypes={panelState.available_control_types}
+                      />
+                    ));
+                  }
+
+                  return (
+                    <div key={regionName} className="space-y-1">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setCollapsedRegions((prev) => ({
+                            ...prev,
+                            [regionName]: !prev[regionName],
+                          }))
+                        }
+                        className="w-full flex items-center justify-between text-xs font-semibold bg-gray-800/40 hover:bg-gray-800/60 p-2 rounded transition-colors"
+                      >
+                        <span className="text-gray-300">
+                          {regionName} ({acts.length})
+                        </span>
+                        <span className="text-gray-500">{isCollapsed ? '+' : '-'}</span>
+                      </button>
+
+                      {!isCollapsed && (
+                        <div className="space-y-2 pl-1 pt-1">
+                          {acts.map((act) => (
+                            <ActuatorSlider
+                              key={act.index}
+                              actuator={act}
+                              onValueChange={handleValueChange}
+                              onControlTypeChange={handleControlTypeChange}
+                              availableTypes={panelState.available_control_types}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </>
           ) : (
             <div className="text-xs text-gray-500 italic text-center py-2">

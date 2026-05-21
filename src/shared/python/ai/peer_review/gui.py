@@ -1,0 +1,183 @@
+"""GUI components for the Agent Peer Review system (Tools #2738).
+
+Provides:
+- :class:`PeerReviewConfigDialog` — a lightweight QDialog that lets the user
+  pick which provider and model will act as the reviewer.  It follows the
+  same ``populate_provider_combo`` / ``populate_model_combo`` patterns as
+  the main :class:`AISettingsDialog` so the UX is consistent.
+
+Orthogonality: this file is the ONLY file in ``ai.peer_review`` that imports
+from ``ai.gui``.  Backend modules (coordinator, contracts, etc.) stay pure.
+"""
+
+from __future__ import annotations
+
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QDialogButtonBox,
+    QFormLayout,
+    QGroupBox,
+    QLabel,
+    QVBoxLayout,
+    QWidget,
+)
+
+from src.shared.python.ai.gui._provider_registry_data import (
+    AIProvider,
+    populate_model_combo,
+    populate_provider_combo,
+    provider_display_name,
+)
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
+
+_DARK_STYLESHEET = """
+    QDialog, QWidget {
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+    }
+    QGroupBox {
+        border: 1px solid #3c3c3c;
+        border-radius: 6px;
+        margin-top: 12px;
+        padding-top: 10px;
+        font-weight: bold;
+        color: #FF8800;
+    }
+    QGroupBox::title {
+        subcontrol-origin: margin;
+        subcontrol-position: top left;
+        padding: 0 4px;
+        left: 8px;
+    }
+    QLabel { color: #e0e0e0; }
+    QComboBox {
+        background-color: #252526;
+        color: #e0e0e0;
+        border: 1px solid #3c3c3c;
+        border-radius: 4px;
+        padding: 4px;
+    }
+    QComboBox:focus { border: 1px solid #FF8800; }
+    QPushButton {
+        background-color: #0e639c;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 6px 12px;
+    }
+    QPushButton:hover { background-color: #1177bb; }
+    QDialogButtonBox QPushButton { min-width: 60px; }
+"""
+
+
+class PeerReviewConfigDialog(QDialog):
+    """Configuration dialog for the Agent Peer Review feature.
+
+    Allows the user to select which AI provider and model will serve as the
+    *reviewing* agent.  On ``accept`` (OK button), the selected values are
+    available via :meth:`get_config`.
+
+    Usage::
+
+        dlg = PeerReviewConfigDialog(parent)
+        if dlg.exec() == QDialog.DialogCode.Accepted:
+            provider, model = dlg.get_config()
+    """
+
+    config_selected = pyqtSignal(str, str)  # (provider_name, model)
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("Request Peer Review")
+        self.setMinimumWidth(400)
+        self.setStyleSheet(_DARK_STYLESHEET)
+        self._build_ui()
+        self._on_provider_changed(0)
+
+    # ------------------------------------------------------------------
+    # UI construction
+    # ------------------------------------------------------------------
+
+    def _build_ui(self) -> None:
+        layout = QVBoxLayout(self)
+
+        # Description label
+        desc = QLabel(
+            "Select an AI provider and model to act as the Peer Reviewer.\n"
+            "A new chat tab will open with the reviewer's structured critique."
+        )
+        desc.setWordWrap(True)
+        layout.addWidget(desc)
+
+        # Provider selector group
+        provider_group = QGroupBox("Reviewing Provider")
+        provider_form = QFormLayout(provider_group)
+
+        self._provider_combo = QComboBox()
+        self._provider_combo.setObjectName("peerReviewProviderCombo")
+        populate_provider_combo(self._provider_combo)
+        provider_form.addRow("Provider:", self._provider_combo)
+        layout.addWidget(provider_group)
+
+        # Model selector group
+        model_group = QGroupBox("Reviewing Model")
+        model_form = QFormLayout(model_group)
+
+        self._model_combo = QComboBox()
+        self._model_combo.setObjectName("peerReviewModelCombo")
+        model_form.addRow("Model:", self._model_combo)
+        layout.addWidget(model_group)
+
+        # Wire provider → model repopulation
+        self._provider_combo.currentIndexChanged.connect(self._on_provider_changed)
+
+        # Buttons
+        button_box = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
+        button_box.accepted.connect(self._on_accepted)
+        button_box.rejected.connect(self.reject)
+        layout.addWidget(button_box)
+
+    # ------------------------------------------------------------------
+    # Slots
+    # ------------------------------------------------------------------
+
+    def _on_provider_changed(self, index: int) -> None:
+        provider = self._provider_combo.itemData(index)
+        if not isinstance(provider, AIProvider):
+            return
+        populate_model_combo(self._model_combo, provider)
+
+    def _on_accepted(self) -> None:
+        provider, model = self.get_config()
+        logger.info(
+            "Peer review config accepted: provider=%s model=%s", provider, model
+        )
+        self.config_selected.emit(provider, model)
+        self.accept()
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    def get_config(self) -> tuple[str, str]:
+        """Return the currently selected ``(provider_display_name, model)`` tuple.
+
+        Returns:
+            A two-tuple of non-empty strings ``(provider, model)``.
+        """
+        provider_data = self._provider_combo.currentData()
+        if isinstance(provider_data, AIProvider):
+            provider = provider_display_name(provider_data)
+        else:
+            provider = self._provider_combo.currentText()
+        model = self._model_combo.currentText()
+        return provider, model
+
+
+__all__ = ["PeerReviewConfigDialog"]

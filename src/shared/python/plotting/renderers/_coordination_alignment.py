@@ -18,9 +18,7 @@ class CoordinationAlignmentMixin(BaseRenderer):
         title: str = "Sequence Alignment",
     ) -> None:
         """Plot alignment between two sequences (DTW)."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         ax = fig.add_subplot(111)
 
@@ -62,9 +60,7 @@ class CoordinationAlignmentMixin(BaseRenderer):
         title: str = "Cross Recurrence Plot",
     ) -> None:
         """Plot Cross Recurrence Plot."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         if recurrence_matrix.size == 0:
             ax = fig.add_subplot(111)
@@ -97,9 +93,7 @@ class CoordinationAlignmentMixin(BaseRenderer):
         title: str = "Recurrence Plot",
     ) -> None:
         """Plot Recurrence Plot (binary matrix)."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         if recurrence_matrix.size == 0:
             ax = fig.add_subplot(111)
@@ -129,9 +123,7 @@ class CoordinationAlignmentMixin(BaseRenderer):
         slope_val: float | None = None,
     ) -> None:
         """Plot Correlation Sum C(r) vs r on log-log scale."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         ax = fig.add_subplot(111)
 

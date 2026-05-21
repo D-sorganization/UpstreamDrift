@@ -50,9 +50,7 @@ def calculate_ideal_gas_density(
     Reference:
         Ideal Gas Law: PV = nRT
     """
-    if not (molecular_weight is not None):
-        raise ValueError("molecular_weight must be provided")
-    if not (molecular_weight is not None):
+    if molecular_weight is None:
         raise ValueError("molecular_weight must be provided")
     density = (pressure * molecular_weight) / (R_UNIVERSAL * temperature)
     logger.debug(f"Ideal gas density = {density:.4f} kg/m³")
@@ -85,9 +83,7 @@ def calculate_compressibility_factor(
         >>> print(f"Z = {z:.4f}")
     """
     # Calculate pseudocritical properties using Kay's rule
-    if not (composition is not None):
-        raise ValueError("composition must be provided")
-    if not (composition is not None):
+    if composition is None:
         raise ValueError("composition must be provided")
     T_pc = 0.0  # Pseudocritical temperature
     P_pc = 0.0  # Pseudocritical pressure
@@ -144,9 +140,7 @@ def calculate_real_gas_density(
     Returns:
         Density (kg/m³)
     """
-    if not (molecular_weight is not None):
-        raise ValueError("molecular_weight must be provided")
-    if not (molecular_weight is not None):
+    if molecular_weight is None:
         raise ValueError("molecular_weight must be provided")
     density = (pressure * molecular_weight) / (
         compressibility * R_UNIVERSAL * temperature

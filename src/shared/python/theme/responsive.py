@@ -83,11 +83,11 @@ def set_text_minimum_width(
 
 def derive_text_candidates(widget: QWidget) -> list[str]:
     """Return visible text candidates from common Qt widgets."""
-    if _is_widget_type(widget, QComboBox):
+    if isinstance(widget, QComboBox):
         return _combo_items(widget)
-    if _is_widget_type(widget, QLineEdit):
+    if isinstance(widget, QLineEdit):
         return _line_edit_texts(widget)
-    if _is_widget_type(widget, QAbstractButton) or _is_widget_type(widget, QLabel):
+    if isinstance(widget, (QAbstractButton, QLabel)):
         return [widget.text()]
     return [widget.accessibleName() or widget.toolTip() or widget.objectName()]
 

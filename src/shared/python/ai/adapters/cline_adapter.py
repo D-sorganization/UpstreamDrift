@@ -26,9 +26,7 @@ from typing import TYPE_CHECKING, Any
 
 from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
 from src.shared.python.ai.exceptions import (
-    AIConnectionError,
     AIProviderError,
-    AITimeoutError,
 )
 from src.shared.python.ai.types import (
     AgentChunk,
@@ -38,6 +36,7 @@ from src.shared.python.ai.types import (
     ProviderCapability,
     ToolCall,
 )
+from src.shared.python.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -103,6 +102,9 @@ class ClineAdapter(BaseAgentAdapter):
                 ) from e
         return self._client
 
+    @precondition(
+        lambda message: bool(message.strip()), "message must not be empty or blank"
+    )
     def send_message(
         self,
         message: str,
@@ -223,6 +225,32 @@ class ClineAdapter(BaseAgentAdapter):
             provider_name="cline",
         )
 
+    # ------------------------------------------------------------------ #
+    # Tools issue #2871: provider catalogue + reasoning capabilities
+    # ------------------------------------------------------------------ #
+
+    _STATIC_MODELS: tuple[str, ...] = ("cline",)
+
+    def list_models(self) -> list[ChatModelInfo]:
+        """Cline acts as a single virtual model; always a one-entry list."""
+        from src.shared.python.ai.types import ChatModelInfo
+
+        return [
+            ChatModelInfo(
+                name=m,
+                provider="cline",
+                display_name=m,
+                id=m,
+            )
+            for m in self._STATIC_MODELS
+        ]
+
+    def thinking_capabilities(self) -> Any:
+        """Cline forwards reasoning to its backend; expose only 'none' here."""
+        from src.shared.python.chat.models import make_none_only_capabilities
+
+        return make_none_only_capabilities(provider="cline")
+
     def validate_connection(self) -> tuple[bool, str]:
         """Test connection to Cline server.
 
@@ -311,20 +339,25 @@ class ClineAdapter(BaseAgentAdapter):
                 )
             )
 
-        usage = data.get("usage", {})
+        # Normalize to canonical keys (issue #2763).
+        # Cline's OpenAI-compatible endpoint reports ``prompt_tokens`` /
+        # ``completion_tokens``; map them to ``input_tokens`` / ``output_tokens``
+        # / ``total_tokens`` via the shared helper.
+        raw_usage: dict[str, int] = data.get("usage", {})
+        usage = self._normalize_token_counts(raw_usage)
         return AgentResponse(
             content=content,
             tool_calls=tool_calls,
             finish_reason=choice.get("finish_reason", "stop"),
-            usage={
-                "input_tokens": usage.get("prompt_tokens", 0),
-                "output_tokens": usage.get("completion_tokens", 0),
-            },
+            usage=usage,
             metadata={"model": data.get("model", "cline")},
         )
 
     def _handle_error(self, error: Exception) -> AgentResponse:
         """Handle Cline errors.
+
+        Delegates to :meth:`~BaseAgentAdapter._classify_error` for the
+        shared string-scan classification logic.
 
         Args:
             error: The exception.
@@ -332,23 +365,6 @@ class ClineAdapter(BaseAgentAdapter):
         Raises:
             Appropriate AIError subclass.
         """
-        error_str = str(error).lower()
-
-        if "timeout" in error_str:
-            raise AITimeoutError(
-                f"Cline request timed out after {self._timeout}s",
-                provider="cline",
-                timeout=self._timeout,
-            ) from error
-
-        if "connection" in error_str or "refused" in error_str:
-            raise AIConnectionError(
-                f"Cannot connect to Cline at {self._host}. "
-                "Ensure VS Code with Cline extension is running.",
-                provider="cline",
-            ) from error
-
-        raise AIProviderError(
-            f"Cline error: {error}",
-            provider="cline",
+        raise self._classify_error(
+            error, provider="cline", timeout=self._timeout
         ) from error

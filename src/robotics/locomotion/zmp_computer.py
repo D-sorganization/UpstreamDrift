@@ -87,9 +87,7 @@ class ZMPComputer(ContractChecker):
             engine: Physics engine with CoM computation capabilities.
             ground_height: Height of ground plane [m].
         """
-        if not (engine is not None):
-            raise ValueError("engine must be provided")
-        if not (engine is not None):
+        if engine is None:
             raise ValueError("engine must be provided")
         self._engine = engine
         self._ground_height = ground_height
@@ -271,9 +269,7 @@ class ZMPComputer(ContractChecker):
         Returns:
             Stability margin [m]. Negative if outside support.
         """
-        if not (zmp_position is not None):
-            raise ValueError("zmp_position must be provided")
-        if not (zmp_position is not None):
+        if zmp_position is None:
             raise ValueError("zmp_position must be provided")
         _, margin = self._check_support(zmp_position[:2], support_polygon)
         return margin
@@ -339,9 +335,7 @@ class ZMPComputer(ContractChecker):
         Returns:
             Tuple of (is_inside, margin_to_boundary).
         """
-        if not (point is not None):
-            raise ValueError("point must be provided")
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         if support_polygon is None:
             # Default support polygon approximating foot dimensions
@@ -380,9 +374,7 @@ class ZMPComputer(ContractChecker):
         polygon: NDArray[np.float64],
     ) -> bool:
         """Check if point is inside polygon using ray casting."""
-        if not (point is not None):
-            raise ValueError("point must be provided")
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         n = len(polygon)
         inside = False
@@ -406,9 +398,7 @@ class ZMPComputer(ContractChecker):
         polygon: NDArray[np.float64],
     ) -> float:
         """Compute minimum distance from point to polygon boundary."""
-        if not (point is not None):
-            raise ValueError("point must be provided")
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         n = len(polygon)
         min_dist = float("inf")
@@ -427,9 +417,7 @@ class ZMPComputer(ContractChecker):
         seg_b: NDArray[np.float64],
     ) -> float:
         """Compute distance from point to line segment."""
-        if not (point is not None):
-            raise ValueError("point must be provided")
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         v = seg_b - seg_a
         u = point - seg_a

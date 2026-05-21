@@ -18,7 +18,6 @@ import pytest
 
 from src.shared.python.reporting import REPORT_TEMPLATES, ReportSection, ReportTemplate
 
-
 # ---------------------------------------------------------------------------
 # ReportSection
 # ---------------------------------------------------------------------------

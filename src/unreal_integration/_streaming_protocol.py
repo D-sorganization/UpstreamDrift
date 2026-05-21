@@ -72,9 +72,7 @@ class StreamingProtocol:
         Returns:
             Protocol-compliant error message.
         """
-        if not (error_code is not None):
-            raise ValueError("error_code must be provided")
-        if not (error_code is not None):
+        if error_code is None:
             raise ValueError("error_code must be provided")
         msg: dict[str, Any] = {
             "type": "error",

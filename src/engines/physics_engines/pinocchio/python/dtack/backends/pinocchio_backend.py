@@ -127,9 +127,7 @@ class PinocchioBackend:
         Returns:
             Joint torques [nv]
         """
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         q_arr = np.asarray(q, dtype=np.float64)
         v_arr = np.asarray(v, dtype=np.float64)
@@ -154,9 +152,7 @@ class PinocchioBackend:
         Returns:
             Joint accelerations [nv]
         """
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         q_arr = np.asarray(q, dtype=np.float64)
         v_arr = np.asarray(v, dtype=np.float64)
@@ -176,9 +172,7 @@ class PinocchioBackend:
         Returns:
             Mass matrix [nv x nv]
         """
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         q_arr = np.asarray(q, dtype=np.float64)
         result = pin.crba(self.model, self.data, q_arr)
@@ -198,9 +192,7 @@ class PinocchioBackend:
         Returns:
             Bias forces [nv]
         """
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         q_arr = np.asarray(q, dtype=np.float64)
         v_arr = np.asarray(v, dtype=np.float64)
@@ -228,9 +220,7 @@ class PinocchioBackend:
         Returns:
             Jacobian matrix [6 x nv]
         """
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         q_arr = np.asarray(q, dtype=np.float64)
 
@@ -253,9 +243,7 @@ class PinocchioBackend:
         Returns:
             List of frame placements
         """
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         q_arr = np.asarray(q, dtype=np.float64)
         pin.forwardKinematics(self.model, self.data, q_arr)

@@ -1,0 +1,92 @@
+"""Shared helpers for the built-in reviewers (Tools #2738).
+
+DRY: every builtin reviewer turns an LLM dict response into a
+:class:`ReviewVerdict`. The translation is identical in every case, so it
+lives here.
+"""
+
+from __future__ import annotations
+
+import logging
+
+from .._llm import ReviewerLLMClient
+from ..contracts import ReviewerDescriptor, ReviewVerdict
+
+_logger = logging.getLogger(__name__)
+
+_VALID_VERDICTS = frozenset({"approve", "request_changes", "reject", "abstain"})
+
+
+async def evaluate_to_verdict(
+    *,
+    llm_client: ReviewerLLMClient,
+    descriptor: ReviewerDescriptor,
+    criteria_set: list[str],
+    subject_content: str,
+) -> ReviewVerdict:
+    """Call the LLM and translate its dict response into a verdict.
+
+    Any LLM failure (raises) or malformed response (invalid verdict,
+    confidence out of range, missing fields) is converted into a safe
+    ``abstain`` verdict so the coordinator's gather never crashes on a
+    single bad reviewer.
+    """
+    try:
+        raw = await llm_client.evaluate(
+            criteria_set=list(criteria_set),
+            subject_content=subject_content,
+            role=descriptor.role,
+        )
+    except Exception as exc:  # noqa: BLE001 — boundary catch is intentional
+        _logger.warning(
+            "Reviewer %s LLM raised %s; abstaining",
+            descriptor.agent_id,
+            type(exc).__name__,
+        )
+        return ReviewVerdict(
+            reviewer_agent_id=descriptor.agent_id,
+            verdict="abstain",
+            reasoning=f"LLM error: {exc}",
+            suggested_revisions=[],
+            confidence_0_to_1=0.0,
+            reviewer_role=descriptor.role,
+        )
+
+    verdict_str = str(raw.get("verdict", "abstain"))
+    reasoning = str(raw.get("reasoning", ""))
+    try:
+        confidence = float(raw.get("confidence", 0.0))
+    except (TypeError, ValueError):
+        confidence = 0.0
+    revisions_raw = raw.get("suggested_revisions") or []
+    if isinstance(revisions_raw, list):
+        revisions = [str(r) for r in revisions_raw]
+    else:
+        revisions = []
+
+    if verdict_str not in _VALID_VERDICTS or not (0.0 <= confidence <= 1.0):
+        _logger.warning(
+            "Reviewer %s returned invalid response %r; abstaining",
+            descriptor.agent_id,
+            raw,
+        )
+        return ReviewVerdict(
+            reviewer_agent_id=descriptor.agent_id,
+            verdict="abstain",
+            reasoning=f"invalid LLM response: {raw!r}",
+            suggested_revisions=[],
+            confidence_0_to_1=0.0,
+            reviewer_role=descriptor.role,
+        )
+
+    return ReviewVerdict(
+        reviewer_agent_id=descriptor.agent_id,
+        verdict=verdict_str,  # type: ignore[arg-type]
+        reasoning=reasoning,
+        suggested_revisions=revisions,
+        confidence_0_to_1=confidence,
+        reviewer_role=descriptor.role,
+    )
+
+
+__all__ = ["evaluate_to_verdict"]

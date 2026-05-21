@@ -325,9 +325,7 @@ def compare_friction_methods(
     Example:
         >>> compare_friction_methods(100000, 0.001)
     """
-    if not (reynolds_number is not None):
-        raise ValueError("reynolds_number must be provided")
-    if not (reynolds_number is not None):
+    if reynolds_number is None:
         raise ValueError("reynolds_number must be provided")
     logger.info(
         "\n╔═══════════════════════════════════════════════════════════════════╗"
@@ -407,9 +405,7 @@ def compare_friction_methods(
 
 def _wrap_text(text: str, width: int) -> list[str]:
     """Wrap text to specified width."""
-    if not (text is not None):
-        raise ValueError("text must be provided")
-    if not (text is not None):
+    if text is None:
         raise ValueError("text must be provided")
     words = text.split()
     lines = []

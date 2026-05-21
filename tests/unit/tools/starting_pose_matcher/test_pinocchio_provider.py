@@ -6,7 +6,7 @@ import pytest
 # Test that the provider can be imported even without Pinocchio installed
 def test_import_without_pinocchio():
     """Test that importing the module doesn't break without Pinocchio."""
-    from src.tools.starting_pose_matcher.providers import pinocchio
+    from src.tools.starting_pose_matcher.skeleton_extractors import pinocchio
 
     # These should be importable without Pinocchio
     assert hasattr(pinocchio, "PinocchioNotAvailableError")
@@ -19,7 +19,7 @@ def test_import_without_pinocchio():
 
 def test_pinocchio_provider_vocabulary_mapping():
     """Test that the vocabulary mapping is correct."""
-    from src.tools.starting_pose_matcher.providers.pinocchio import (
+    from src.tools.starting_pose_matcher.skeleton_extractors.pinocchio import (
         PINOCCHIO_TO_MATCHER_VOCAB,
         MATCHER_TO_PINOCCHIO,
     )
@@ -51,7 +51,7 @@ def test_pinocchio_provider_vocabulary_mapping():
 
 def test_pinocchio_not_available_error():
     """Test that PinocchioNotAvailableError is raised when Pinocchio is not installed."""
-    from src.tools.starting_pose_matcher.providers.pinocchio import (
+    from src.tools.starting_pose_matcher.skeleton_extractors.pinocchio import (
         PinocchioNotAvailableError,
         PinocchioProviderError,
         PinocchioSkeletonProvider,
@@ -67,7 +67,7 @@ def test_pinocchio_not_available_error():
 
 def test_pinocchio_provider_create_provider_function():
     """Test that create_provider function exists and has correct signature."""
-    from src.tools.starting_pose_matcher.providers.pinocchio import create_provider
+    from src.tools.starting_pose_matcher.skeleton_extractors.pinocchio import create_provider
 
     # Check function signature
     import inspect

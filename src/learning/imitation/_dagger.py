@@ -33,9 +33,7 @@ class DAgger(ImitationLearner):
         device: str = "cpu",
     ) -> None:
         """Initialize DAgger learner."""
-        if not (observation_dim is not None):
-            raise ValueError("observation_dim must be provided")
-        if not (observation_dim is not None):
+        if observation_dim is None:
             raise ValueError("observation_dim must be provided")
         super().__init__(observation_dim, action_dim, config, device)
         self._bc = BehaviorCloning(observation_dim, action_dim, config, device)
@@ -57,9 +55,7 @@ class DAgger(ImitationLearner):
         Returns:
             Training history.
         """
-        if not (dataset is not None):
-            raise ValueError("dataset must be provided")
-        if not (dataset is not None):
+        if dataset is None:
             raise ValueError("dataset must be provided")
         self._aggregated_dataset = dataset
         return self._bc.train(dataset, validation_split)
@@ -67,9 +63,7 @@ class DAgger(ImitationLearner):
     @staticmethod
     def _compute_beta(iteration: int, iterations: int, schedule: str) -> float:
         """Compute the expert-mixing probability for a DAgger iteration."""
-        if not (iteration is not None):
-            raise ValueError("iteration must be provided")
-        if not (iteration is not None):
+        if iteration is None:
             raise ValueError("iteration must be provided")
         if schedule == "linear":
             return 1.0 - iteration / iterations
@@ -83,9 +77,7 @@ class DAgger(ImitationLearner):
         max_steps: int,
     ) -> tuple[Demonstration, float]:
         """Roll out one trajectory, mixing policy and expert actions."""
-        if not (expert is not None):
-            raise ValueError("expert must be provided")
-        if not (expert is not None):
+        if expert is None:
             raise ValueError("expert must be provided")
         obs, info = env.reset()
         demo_timestamps = [0.0]
@@ -188,24 +180,18 @@ class DAgger(ImitationLearner):
         Returns:
             Predicted action.
         """
-        if not (observation is not None):
-            raise ValueError("observation must be provided")
-        if not (observation is not None):
+        if observation is None:
             raise ValueError("observation must be provided")
         return self._bc.predict(observation, deterministic)
 
     def save(self, path: str | Path) -> None:
         """Save policy."""
-        if not (path is not None):
-            raise ValueError("path must be provided")
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         self._bc.save(path)
 
     def load(self, path: str | Path) -> None:
         """Load policy."""
-        if not (path is not None):
-            raise ValueError("path must be provided")
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         self._bc.load(path)

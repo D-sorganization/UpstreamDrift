@@ -1,0 +1,47 @@
+"""Skills runtime for Tools (issue #2737).
+
+Public surface:
+
+- :class:`Skill` — abstract base class for skills.
+- :class:`SkillDescriptor`, :class:`SkillInvocation`, :class:`SkillResult` —
+  Pydantic contracts.
+- :class:`SkillRegistry` — id-to-skill map.
+- :class:`SkillRunner` — orchestrates pre-check → run → post-check → audit.
+- :func:`register_skill` — decorator that registers a skill class.
+- :func:`default_registry` — process-wide lazy singleton registry.
+
+This package is intentionally orthogonal to the chat dock and MCP tool
+registries; integration with chat happens in a separate PR.
+"""
+
+from __future__ import annotations
+
+from .base import Skill
+from .contracts import SkillDescriptor, SkillInvocation, SkillResult
+from .errors import (
+    SkillError,
+    SkillExecutionError,
+    SkillNotFoundError,
+    SkillPostconditionError,
+    SkillPreconditionError,
+    SkillTimeoutError,
+)
+from .registry import SkillRegistry, default_registry, register_skill
+from .runner import SkillRunner
+
+__all__ = [
+    "Skill",
+    "SkillDescriptor",
+    "SkillInvocation",
+    "SkillResult",
+    "SkillRegistry",
+    "SkillRunner",
+    "SkillError",
+    "SkillExecutionError",
+    "SkillNotFoundError",
+    "SkillPostconditionError",
+    "SkillPreconditionError",
+    "SkillTimeoutError",
+    "register_skill",
+    "default_registry",
+]

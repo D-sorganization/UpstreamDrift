@@ -55,8 +55,7 @@ class LibraryManager:
         """Initialize the SQLite database schema."""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                """
+            cursor.execute("""
                 CREATE TABLE IF NOT EXISTS documents (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     file_name TEXT UNIQUE,
@@ -67,8 +66,7 @@ class LibraryManager:
                     topic TEXT,
                     added_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
-                """
-            )
+                """)
             conn.commit()
 
     def add_document(self, source_path: Path) -> dict[str, Any] | None:

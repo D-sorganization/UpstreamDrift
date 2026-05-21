@@ -1,0 +1,338 @@
+"""Claude Code CLI adapter.
+
+Wraps the ``claude`` CLI binary (Claude Code agent) as a chat provider. The
+CLI handles its own authentication via OAuth keychain or ``ANTHROPIC_API_KEY``;
+this adapter only spawns it and parses output.
+
+Distinct from the ``AnthropicAdapter`` which talks directly to the Anthropic
+REST API and requires an API key in the process environment. The CLI adapter
+is the right choice when the user has ``claude`` installed and logged in but
+does not want to expose an API key to the application.
+
+Requirements:
+    - ``claude`` CLI on ``PATH`` (or a known install location).
+    - User logged in (``claude login`` or ``ANTHROPIC_API_KEY`` set).
+
+Invocation pattern::
+
+    claude -p [--model MODEL] < prompt.txt
+
+Prompt is fed via stdin; response comes on stdout. Exit code 0 on success.
+
+Example::
+
+    >>> from src.shared.python.ai.adapters.claude_code_adapter import ClaudeCodeAdapter
+    >>> adapter = ClaudeCodeAdapter()
+    >>> ok, msg = adapter.validate_connection()
+    >>> if ok:
+    ...     response = adapter.send_message("hello", ctx, tools=[])
+"""
+
+from __future__ import annotations
+
+import shutil
+import subprocess
+from collections.abc import Iterator
+from pathlib import Path
+from typing import Any
+
+from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
+from src.shared.python.ai.exceptions import (
+    AIConnectionError,
+    AIProviderError,
+    AITimeoutError,
+)
+from src.shared.python.ai.types import (
+    AgentChunk,
+    AgentResponse,
+    ConversationContext,
+    ProviderCapabilities,
+    ProviderCapability,
+)
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
+
+# Default invocation timeout. Claude Code's first response on a cold prompt
+# typically returns in 2-5s; subsequent calls are faster. Keep generous so a
+# slow first call doesn't surface as a misleading "CLI broken" error.
+DEFAULT_CLAUDE_CODE_TIMEOUT = 120.0  # [s]
+
+# Known install locations probed when ``claude`` is not on PATH. Order matters:
+# Windows install location first because the launcher runs on Windows.
+_FALLBACK_PATHS = (
+    r"C:\Users\diete\.local\bin\claude.exe",
+    r"%LOCALAPPDATA%\Programs\Claude Code\claude.exe",
+    "/home/dieterolson/.local/bin/claude",
+)
+
+# Static model catalogue. Claude Code does not expose a `list models` command,
+# so this is the documented model dropdown — kept in sync with anthropic_adapter.
+_STATIC_MODELS: tuple[str, ...] = (
+    "claude-opus-4-5",
+    "claude-sonnet-4-5",
+    "claude-haiku-4-5",
+    "sonnet",
+    "opus",
+    "haiku",
+)
+
+
+def _resolve_binary(explicit: str | None = None) -> str | None:
+    """Locate the ``claude`` binary.
+
+    Returns the resolved absolute path, or ``None`` when the binary cannot be
+    found. Callers must handle the ``None`` case gracefully — the chat UI
+    should surface "Claude Code CLI not installed" rather than crashing.
+    """
+    if explicit:
+        if Path(explicit).exists():
+            return explicit
+        # Caller passed something invalid; fall through to PATH lookup.
+        logger.warning(
+            "ClaudeCodeAdapter: explicit binary %s does not exist; "
+            "falling back to PATH search",
+            explicit,
+        )
+    found = shutil.which("claude")
+    if found:
+        return found
+    import os
+
+    for candidate in _FALLBACK_PATHS:
+        expanded = os.path.expandvars(candidate)
+        if Path(expanded).exists():
+            return expanded
+    return None
+
+
+class ClaudeCodeAdapter(BaseAgentAdapter):
+    """Adapter that delegates chat to the Claude Code CLI.
+
+    The CLI handles auth, retries, and model routing internally. This adapter
+    is a thin subprocess wrapper that translates :class:`ConversationContext`
+    into a single prompt string and parses the CLI's stdout back into an
+    :class:`AgentResponse`.
+
+    Attributes:
+        binary: Absolute path to the resolved ``claude`` binary (or ``None``).
+        model: Model identifier passed via ``--model``. ``None`` lets the CLI
+            choose its own default.
+        timeout: Per-invocation timeout in seconds.
+    """
+
+    PROVIDER_NAME = "claude_code"
+
+    def __init__(
+        self,
+        binary: str | None = None,
+        model: str | None = None,
+        timeout: float | None = None,
+    ) -> None:
+        """Initialize the adapter.
+
+        Args:
+            binary: Optional explicit path to the ``claude`` binary. Resolved
+                lazily so construction never fails just because the CLI is
+                missing — callers test availability via
+                :meth:`validate_connection`.
+            model: Model id (e.g. ``"sonnet"``, ``"claude-opus-4-5"``).
+                ``None`` uses the CLI default.
+            timeout: Subprocess timeout per call. Defaults to
+                ``DEFAULT_CLAUDE_CODE_TIMEOUT``.
+        """
+        self.binary = _resolve_binary(binary)
+        self.model = model
+        self.timeout = (
+            float(timeout) if timeout is not None else DEFAULT_CLAUDE_CODE_TIMEOUT
+        )
+        self._capabilities = ProviderCapabilities(
+            supported=frozenset(
+                {
+                    ProviderCapability.SYSTEM_MESSAGE,
+                    ProviderCapability.STREAMING,
+                }
+            ),
+            max_tokens=200_000,
+            model_name=model or "default",
+            provider_name=self.PROVIDER_NAME,
+        )
+
+    # ------------------------------------------------------------------ #
+    # BaseAgentAdapter surface
+    # ------------------------------------------------------------------ #
+
+    @property
+    def capabilities(self) -> ProviderCapabilities:
+        return self._capabilities
+
+    def list_models(self) -> list[ChatModelInfo]:
+        """Return the documented model catalogue.
+
+        The Claude Code CLI does not expose a model listing endpoint, so this
+        returns the static, hand-maintained list. Always non-empty.
+        """
+        from src.shared.python.ai.types import ChatModelInfo
+
+        return [
+            ChatModelInfo(
+                name=m,
+                provider=self.PROVIDER_NAME,
+                display_name=m,
+                id=m,
+            )
+            for m in _STATIC_MODELS
+        ]
+
+    def thinking_capabilities(self) -> Any:
+        """Claude Code CLI does not surface reasoning budgets to the host."""
+        from src.shared.python.chat.models import make_none_only_capabilities
+
+        return make_none_only_capabilities(provider=self.PROVIDER_NAME)
+
+    def send_message(
+        self,
+        message: str,
+        context: ConversationContext,
+        tools: list[ToolDeclaration],  # noqa: ARG002 (CLI is its own tool host)
+    ) -> AgentResponse:
+        """Send a message and return the CLI's response.
+
+        Tools declared by the host application are intentionally ignored: the
+        Claude Code CLI manages its own tool inventory (file edits, bash, web
+        fetch, etc.). Surfacing host tools here would duplicate or conflict
+        with the CLI's built-ins. If you need host-tool integration, use
+        :class:`AnthropicAdapter` instead.
+
+        Raises:
+            AIConnectionError: When the binary cannot be located.
+            AITimeoutError: When the subprocess exceeds ``self.timeout``.
+            AIProviderError: When the CLI returns a non-zero exit code.
+        """
+        if message is None or not message.strip():
+            raise ValueError("message must be a non-empty string")
+        if self.binary is None:
+            raise AIConnectionError(
+                "Claude Code CLI not found on PATH. Install from "
+                "https://claude.com/claude-code or set the binary path explicitly.",
+                provider=self.PROVIDER_NAME,
+            )
+
+        prompt = self._build_prompt(message, context)
+        args = [self.binary, "-p"]
+        if self.model:
+            args += ["--model", self.model]
+
+        try:
+            result = subprocess.run(
+                args,
+                input=prompt,
+                capture_output=True,
+                text=True,
+                timeout=self.timeout,
+                check=False,
+                encoding="utf-8",
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise AITimeoutError(
+                f"Claude Code CLI timed out after {self.timeout}s",
+                provider=self.PROVIDER_NAME,
+            ) from exc
+        except FileNotFoundError as exc:
+            raise AIConnectionError(
+                f"Claude Code binary at {self.binary} disappeared mid-invocation",
+                provider=self.PROVIDER_NAME,
+            ) from exc
+
+        if result.returncode != 0:
+            stderr_tail = (result.stderr or "")[-500:]
+            raise AIProviderError(
+                f"Claude Code CLI exited {result.returncode}: {stderr_tail}",
+                provider=self.PROVIDER_NAME,
+            )
+
+        return AgentResponse(
+            content=(result.stdout or "").strip(),
+            usage={},
+            metadata={
+                "provider": self.PROVIDER_NAME,
+                "model": self.model or "default",
+                "stderr": (result.stderr or "")[-500:],
+            },
+        )
+
+    def stream_response(
+        self,
+        message: str,
+        context: ConversationContext,
+        tools: list[ToolDeclaration],
+    ) -> Iterator[AgentChunk]:
+        """Yield the response as a single chunk.
+
+        True streaming would require the CLI's ``--output-format=stream-json``
+        mode, which is more complex to parse and is left as a follow-up
+        (Tools issue tracker). For now the chat dock will simply render the
+        completed response as one bubble.
+        """
+        response = self.send_message(message, context, tools)
+        yield AgentChunk(
+            content=response.content,
+            is_final=True,
+        )
+
+    def validate_connection(self) -> tuple[bool, str]:
+        """Probe the CLI is installed and authenticated.
+
+        Runs ``claude --version`` (cheap, <1s when warm). A non-zero exit or
+        missing binary is reported with a user-friendly hint.
+        """
+        if self.binary is None:
+            return False, (
+                "Claude Code CLI not found. Install: https://claude.com/claude-code"
+            )
+        try:
+            result = subprocess.run(
+                [self.binary, "--version"],
+                capture_output=True,
+                text=True,
+                timeout=10.0,
+                check=False,
+                encoding="utf-8",
+            )
+        except subprocess.TimeoutExpired:
+            return False, "Claude Code CLI did not respond to --version within 10s"
+        except OSError as exc:
+            return False, f"Could not execute {self.binary}: {exc}"
+
+        if result.returncode != 0:
+            return False, (
+                f"Claude Code --version exited {result.returncode}: "
+                f"{(result.stderr or '').strip()[:200]}"
+            )
+        version = (
+            (result.stdout or "").strip().splitlines()[0] if result.stdout else "?"
+        )
+        return True, f"Claude Code CLI available: {version}"
+
+    # ------------------------------------------------------------------ #
+    # Internals
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def _build_prompt(message: str, context: ConversationContext) -> str:
+        """Concatenate conversation history into a single CLI prompt.
+
+        The Claude Code CLI's non-interactive ``-p`` mode takes a single
+        prompt; there is no native conversation-history flag. We render the
+        history as alternating ``User:`` / ``Assistant:`` blocks followed by
+        the current message — the same pattern AnthropicAdapter and friends
+        use when collapsing context.
+        """
+        parts: list[str] = []
+        for msg in getattr(context, "messages", []) or []:
+            role = getattr(msg, "role", "user").capitalize()
+            content = getattr(msg, "content", "") or ""
+            if content:
+                parts.append(f"{role}: {content}")
+        parts.append(f"User: {message}")
+        return "\n\n".join(parts)
