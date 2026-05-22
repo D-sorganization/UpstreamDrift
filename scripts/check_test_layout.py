@@ -16,6 +16,7 @@ LEGACY_SRC_TEST_DIRS = frozenset(
         "src/engines/pendulum_models/javascript/tests",
         "src/engines/pendulum_models/matlab/tests",
         "src/engines/pendulum_models/python/double_pendulum_model/tests",
+        "src/engines/lower_body_model/tests",
         "src/engines/physics_engines/drake/javascript/tests",
         "src/engines/physics_engines/drake/matlab/tests",
         "src/engines/physics_engines/drake/python/tests",
@@ -38,6 +39,8 @@ LEGACY_SRC_TEST_DIRS = frozenset(
         "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/option4_python_bridge/tests",
         "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/tests",
         "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests",
+        "src/shared/python/ai/tests",
+        "src/shared/python/calc_backend/tests",
         "src/shared/python/chat/tests",
         "src/shared/python/dashboard/tests",
         "src/shared/python/data_processing/tests",
@@ -46,6 +49,10 @@ LEGACY_SRC_TEST_DIRS = frozenset(
         "src/shared/python/optimization/tests",
         "src/shared/python/plot_engine/tests",
         "src/shared/python/plot_theme/tests",
+        "src/shared/python/programmatic_pid/tests",
+        "src/shared/python/sidekick/process_calculators/scrubber/tests",
+        "src/shared/python/sidekick/tests",
+        "src/shared/python/signal_toolkit/tests",
         "src/shared/python/spatial_algebra/tests",
         "src/shared/python/tests",
         "src/shared/python/upstream_drift_tools/tests",
@@ -55,6 +62,7 @@ LEGACY_SRC_TEST_DIRS = frozenset(
 LEGACY_ROOT_TEST_FILES = frozenset(
     {
         "tests/test_build_humanoid_models.py",
+        "tests/test_c3d_simscape_preview.py",
         "tests/test_compact_swing_dataset_compactor.py",
         "tests/test_cross_engine_equivalence.py",
         "tests/test_drake_fit_swing.py",
@@ -66,6 +74,8 @@ LEGACY_ROOT_TEST_FILES = frozenset(
         "tests/test_drake_viz.py",
         "tests/test_golf_humanoid_dimensions.py",
         "tests/test_load_compact_swing_dataset.py",
+        "tests/test_model_pack_schema.py",
+        "tests/test_model_source_providers.py",
         "tests/test_opensim_coord_map.py",
         "tests/test_opensim_club_attachment.py",
         "tests/test_opensim_fit_swing.py",
@@ -78,6 +88,7 @@ LEGACY_ROOT_TEST_FILES = frozenset(
         "tests/test_opensim_viz.py",
         "tests/test_pinocchio_club_target_adapter.py",
         "tests/test_pinocchio_viz_leaderboard.py",
+        "tests/test_setup_biomech_workspace.py",
     }
 )
 

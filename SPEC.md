@@ -416,6 +416,11 @@ Beyond standard tools, CI enforces custom checks:
   matrix after checkout so workflow-only and documentation-only CI fixes remain
   finite on constrained self-hosted runners.
 - **File Size Budget**: No module exceeds 500 lines; classes capped at 200 LOC
+- **Module Size Budget**: Python modules under `src/` are capped at 1,500
+  lines by `scripts/check_module_size_budget.py`; oversized legacy modules
+  require owned, expiring exceptions in
+  `scripts/config/module_size_budget_baseline.json`, currently capped at 10
+  active exceptions.
 - **Documentation Catalog and Size Budget**: Every top-level `docs/` directory is listed in `docs/index.md`; oversized Markdown/Quarto docs require owned, expiring exceptions.
 - **Import Depth**: Maximum 4 import levels to prevent circular dependencies
 - **Physics Fitness**: Cross-engine validation must pass with <5% tolerance
