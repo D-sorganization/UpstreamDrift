@@ -23,6 +23,12 @@ from .feature_catalog import (
     lookup_feature,
     search_features,
 )
+from .host_adapter import (
+    HostActionPort,
+    HostAdapter,
+    HostCapability,
+    HostInvocationResult,
+)
 from .subtab_adapter import (
     CalculatorRun,
     StateProfile,
@@ -37,6 +43,10 @@ __all__ = [
     "CalculatorRun",
     "FeatureEntry",
     "FeatureKind",
+    "HostActionPort",
+    "HostAdapter",
+    "HostCapability",
+    "HostInvocationResult",
     "SidekickActionHandler",
     "SidekickActionService",
     "StateProfile",
