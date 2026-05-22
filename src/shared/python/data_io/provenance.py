@@ -258,6 +258,27 @@ class ProvenanceInfo:
         return lines
 
 
+def add_provenance_header(content: str, metadata: dict[str, Any]) -> str:
+    """Prepend provenance header to string content.
+
+    Args:
+        content: String content (CSV, etc.)
+        metadata: Dictionary of metadata parameters
+
+    Returns:
+        String with provenance header prepended
+    """
+    if not isinstance(content, str):
+        raise TypeError("content must be a string")
+    if not isinstance(metadata, dict):
+        raise TypeError("metadata must be a dictionary")
+
+    provenance = ProvenanceInfo.capture(parameters=metadata)
+    header_lines = provenance.to_header_lines()
+    header = "\n".join(header_lines) + "\n#\n"
+    return header + content
+
+
 def add_provenance_header_file(file: TextIO, provenance: ProvenanceInfo) -> None:
     """Add provenance header to an open text file.
 
@@ -276,10 +297,6 @@ def add_provenance_header_file(file: TextIO, provenance: ProvenanceInfo) -> None
         raise ValueError("file must be provided")
     file.writelines(line + "\n" for line in provenance.to_header_lines())
     file.write("#\n")  # Blank comment line separator
-
-
-#: Canonical short alias for :func:`add_provenance_header_file`.
-add_provenance_header = add_provenance_header_file
 
 
 def add_provenance_to_csv(
@@ -326,6 +343,7 @@ def add_provenance_to_csv(
 # Export public API
 __all__ = [
     "ProvenanceInfo",
+    "add_provenance_header",
     "add_provenance_header_file",
     "add_provenance_to_csv",
 ]

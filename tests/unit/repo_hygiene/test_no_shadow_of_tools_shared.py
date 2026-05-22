@@ -123,8 +123,6 @@ def test_load_allow_list_rejects_expired_sunset_date() -> None:
     """
     import textwrap
     import tempfile
-    import importlib
-    import sys
 
     expired_yaml = textwrap.dedent("""\
         shadows:

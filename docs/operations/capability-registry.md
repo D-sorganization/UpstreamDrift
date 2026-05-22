@@ -1,21 +1,21 @@
 # Capability registry — operations reference
 
 The capability registry is UpstreamDrift's single source of truth for
-"is this feature available *right now* in this environment, and if
+"is this feature available _right now_ in this environment, and if
 not, how do I install it?" It is consumed by the CLI, the REST API,
 the PyQt6 launcher, and CI smoke tests.
 
 ## When to use which entry point
 
-| Surface | Command / endpoint | Use case |
-|---------|--------------------|----------|
-| CLI table | `python -m src.shared.python.feature_registry` | Local development; "what do I have?" |
-| CLI JSON | `python -m src.shared.python.feature_registry --json` | Scripting; CI assertions |
+| Surface            | Command / endpoint                                           | Use case                                             |
+| ------------------ | ------------------------------------------------------------ | ---------------------------------------------------- |
+| CLI table          | `python -m src.shared.python.feature_registry`               | Local development; "what do I have?"                 |
+| CLI JSON           | `python -m src.shared.python.feature_registry --json`        | Scripting; CI assertions                             |
 | CLI single feature | `python -m src.shared.python.feature_registry --check drake` | Probe one feature; exit status reflects availability |
-| REST list | `GET /api/v1/capabilities` | UIs, dashboards |
-| REST single | `GET /api/v1/capabilities/{name}` | Tooltips, hover-cards |
-| REST refresh | `POST /api/v1/capabilities/refresh` | After an external `pip install` |
-| REST install | `POST /api/v1/capabilities/{name}/install` | Opt-in install from a GUI |
+| REST list          | `GET /api/v1/capabilities`                                   | UIs, dashboards                                      |
+| REST single        | `GET /api/v1/capabilities/{name}`                            | Tooltips, hover-cards                                |
+| REST refresh       | `POST /api/v1/capabilities/refresh`                          | After an external `pip install`                      |
+| REST install       | `POST /api/v1/capabilities/{name}/install`                   | Opt-in install from a GUI                            |
 
 ## Adding a new feature
 
@@ -55,7 +55,7 @@ docker build --build-arg FEATURES=mujoco,drake,pose-mediapipe \
              -t upstream-drift:custom .
 ```
 
-The translation from feature → pip command lives in `scripts/docker/install_features.py`, which reads `profiles.yaml` *and* the registry's `features.py`. There is no other place the install command may live.
+The translation from feature → pip command lives in `scripts/docker/install_features.py`, which reads `profiles.yaml` _and_ the registry's `features.py`. There is no other place the install command may live.
 
 ## Opt-in install from a running app
 
@@ -71,12 +71,12 @@ After a successful install, the registry is refreshed (probes re-run, `importlib
 
 ## Tier alignment
 
-| Registry tier | Engine tier | Examples | CI guarantee |
-|---------------|-------------|----------|--------------|
-| `core` | `core` | MuJoCo, API, pendulum | Required PR CI |
-| `extended` | `extended` | Drake, Pinocchio | Nightly cross-engine |
-| `experimental` | `experimental` | OpenSim, MyoSuite, PyChrono | Best-effort |
-| `tooling` | n/a | MediaPipe, OpenPose, PyTorch CUDA, RL stack | None — opt-in |
+| Registry tier  | Engine tier    | Examples                                    | CI guarantee         |
+| -------------- | -------------- | ------------------------------------------- | -------------------- |
+| `core`         | `core`         | MuJoCo, API, pendulum                       | Required PR CI       |
+| `extended`     | `extended`     | Drake, Pinocchio                            | Nightly cross-engine |
+| `experimental` | `experimental` | OpenSim, MyoSuite, PyChrono                 | Best-effort          |
+| `tooling`      | n/a            | MediaPipe, OpenPose, PyTorch CUDA, RL stack | None — opt-in        |
 
 See [`docs/engines/support_tiers.md`](../engines/support_tiers.md) for the tier policy.
 

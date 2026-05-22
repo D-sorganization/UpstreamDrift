@@ -576,6 +576,8 @@ def apply_exponential_smoothing(
     Returns:
         Smoothed signal.
     """
+    if not (0.0 < alpha <= 1.0):
+        raise ValueError("alpha must be in the range (0, 1]")
     values = signal.values
     smoothed = np.zeros_like(values)
     smoothed[0] = values[0]

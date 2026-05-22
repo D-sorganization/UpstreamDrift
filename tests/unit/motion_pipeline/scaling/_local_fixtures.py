@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import numpy as np
 
 from src.shared.python.motion_pipeline.contracts import (
     JointDef,

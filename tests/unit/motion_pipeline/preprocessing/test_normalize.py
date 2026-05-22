@@ -74,7 +74,9 @@ def test_convert_units_mm_to_m_scales_by_1e_minus_3() -> None:
         frame_index=0,
     )
     traj = MarkerTrajectory(id="t", frames=[f])
-    out = convert_units(traj, target_unit=UnitSystem.METERS, source_unit=UnitSystem.MILLIMETERS)
+    out = convert_units(
+        traj, target_unit=UnitSystem.METERS, source_unit=UnitSystem.MILLIMETERS
+    )
     m = out.frames[0].markers["M"]
     assert m.x == pytest.approx(1.0)
     assert m.y == pytest.approx(2.0)
@@ -90,8 +92,12 @@ def test_convert_units_inches_round_trip() -> None:
         frame_index=0,
     )
     traj = MarkerTrajectory(id="t", frames=[f])
-    inch = convert_units(traj, target_unit=UnitSystem.INCHES, source_unit=UnitSystem.METERS)
-    back = convert_units(inch, target_unit=UnitSystem.METERS, source_unit=UnitSystem.INCHES)
+    inch = convert_units(
+        traj, target_unit=UnitSystem.INCHES, source_unit=UnitSystem.METERS
+    )
+    back = convert_units(
+        inch, target_unit=UnitSystem.METERS, source_unit=UnitSystem.INCHES
+    )
     m = back.frames[0].markers["M"]
     assert m.x == pytest.approx(1.0, rel=1e-3)
 
@@ -120,7 +126,9 @@ def test_normalize_keypoints_basic() -> None:
 
 def test_convert_units_keypoints_metadata() -> None:
     seq = make_keypoint_sequence(num_frames=3, num_kp=1)
-    out = convert_units(seq, target_unit=UnitSystem.METERS, source_unit=UnitSystem.METERS)
+    out = convert_units(
+        seq, target_unit=UnitSystem.METERS, source_unit=UnitSystem.METERS
+    )
     assert out.metadata.get("units_converted") is True
 
 
@@ -129,7 +137,9 @@ def test_get_unit_scale_meters_to_mm() -> None:
         _get_unit_scale,
     )
 
-    assert _get_unit_scale(UnitSystem.METERS, UnitSystem.MILLIMETERS) == pytest.approx(1000.0)
+    assert _get_unit_scale(UnitSystem.METERS, UnitSystem.MILLIMETERS) == pytest.approx(
+        1000.0
+    )
     assert _get_unit_scale(UnitSystem.METERS, UnitSystem.METERS) == pytest.approx(1.0)
 
 
@@ -138,7 +148,9 @@ def test_get_up_axis_transform_identity_for_same() -> None:
         _get_up_axis_transform,
     )
 
-    np.testing.assert_allclose(_get_up_axis_transform(UpAxis.Y_UP, UpAxis.Y_UP), np.eye(3))
+    np.testing.assert_allclose(
+        _get_up_axis_transform(UpAxis.Y_UP, UpAxis.Y_UP), np.eye(3)
+    )
 
 
 def test_get_up_axis_transform_z_to_y_inverse() -> None:
@@ -167,14 +179,18 @@ def test_normalize_empty_marker_trajectory_returns_unchanged() -> None:
 
 def test_convert_units_empty_keypoint_sequence_returns_unchanged() -> None:
     seq = KeypointSequence.model_construct(id="empty", frames=[])
-    out = convert_units(seq, target_unit=UnitSystem.METERS, source_unit=UnitSystem.METERS)
+    out = convert_units(
+        seq, target_unit=UnitSystem.METERS, source_unit=UnitSystem.METERS
+    )
     assert out is seq
     assert len(out.frames) == 0
 
 
 def test_convert_units_empty_marker_trajectory_returns_unchanged() -> None:
     traj = MarkerTrajectory.model_construct(id="empty", frames=[])
-    out = convert_units(traj, target_unit=UnitSystem.METERS, source_unit=UnitSystem.METERS)
+    out = convert_units(
+        traj, target_unit=UnitSystem.METERS, source_unit=UnitSystem.METERS
+    )
     assert out is traj
     assert len(out.frames) == 0
 
@@ -395,7 +411,9 @@ def test_normalize_auto_detection_and_centering_keypoints() -> None:
     )
     # y-up should be detected since y variance (25) is larger than x/z variance (1)
     # center_origin = True should center the coordinates (centroid at x=3.0, y=5.0, z=3.0)
-    out = normalize_coordinates(seq, target_up=UpAxis.Y_UP, source_up=None, center_origin=True)
+    out = normalize_coordinates(
+        seq, target_up=UpAxis.Y_UP, source_up=None, center_origin=True
+    )
     assert out.metadata["source_up"] == UpAxis.Y_UP.value
 
     # Centroid should be 0,0,0
@@ -424,7 +442,9 @@ def test_normalize_auto_detection_markers() -> None:
         ],
     )
     # Auto detect Y_UP and center it
-    out = normalize_coordinates(traj, target_up=UpAxis.Y_UP, source_up=None, center_origin=True)
+    out = normalize_coordinates(
+        traj, target_up=UpAxis.Y_UP, source_up=None, center_origin=True
+    )
     assert out.metadata["source_up"] == UpAxis.Y_UP.value
     m1 = out.frames[0].markers["M1"]
     m2 = out.frames[0].markers["M2"]

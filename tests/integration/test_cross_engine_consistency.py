@@ -9,21 +9,13 @@ Per Guideline M2/P3: Cross-engine validation with explicit tolerances.
 
 from __future__ import annotations
 
-from typing import Any
 
-import numpy as np
-import pytest
-from src.shared.python.engine_core.cross_engine_validator import CrossEngineValidator
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from tests.fixtures.fixtures_lib import (
-    TOLERANCE_ACCELERATION_M_S2,
     _check_drake_available,
     _check_mujoco_available,
     _check_pinocchio_available,
-    compute_accelerations,
-    set_identical_state,
-    skip_if_insufficient_engines,
 )
 
 logger = get_logger(__name__)

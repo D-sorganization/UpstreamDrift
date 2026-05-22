@@ -10,10 +10,8 @@ Tests cover:
 
 import json
 import tempfile
-from datetime import datetime
 from pathlib import Path
 
-import numpy as np
 import pytest
 
 from src.shared.python.motion_pipeline.contracts import (
@@ -34,7 +32,6 @@ from src.shared.python.motion_pipeline.contracts import (
     MotionMatchingResult,
     MotionTrajectory,
     SkeletonRig,
-    UpAxis,
     deserialize_model,
     load_model,
     save_model,

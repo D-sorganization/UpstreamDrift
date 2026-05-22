@@ -182,6 +182,7 @@ def register_provider(provider: FitSwingProvider) -> None:
         if existing is not None and (
             type(existing) is type(provider)
             or _provider_qualname(existing) == _provider_qualname(provider)
+            or type(existing).__name__ == type(provider).__name__
         ):
             # Same logical class — covers both ordinary re-imports and
             # ``importlib.reload`` shadows (which rebuild the class object,

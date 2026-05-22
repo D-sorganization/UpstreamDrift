@@ -19,7 +19,6 @@ from __future__ import annotations
 import importlib.util
 from unittest.mock import MagicMock
 
-import pytest
 
 from src.shared.python.motion_matching.provider import FitSwingProvider
 

@@ -146,8 +146,9 @@ def compute_hand_path_plane(trajectory: np.ndarray) -> Plane3D:
     n_points = len(trajectory)
     if n_points < 3:
         raise ValueError(
-            f"compute_hand_path_plane requires >= 3 points, got {n_points}"
+            f"compute_hand_path_plane requires at least 3 points, got {n_points}"
         )
+
 
     centroid: np.ndarray = trajectory.mean(axis=0)
     centered: np.ndarray = trajectory - centroid

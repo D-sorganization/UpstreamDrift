@@ -20,10 +20,7 @@ from model_generation.core.types import (
     Geometry,
     GeometryType,
     Inertia,
-    Joint,
-    JointType,
     Link,
-    Origin,
 )
 
 # ---------------------------------------------------------------------------

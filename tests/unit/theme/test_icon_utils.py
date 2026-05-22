@@ -1,5 +1,4 @@
 import pytest
-from pathlib import Path
 from PyQt6.QtGui import QIcon
 from src.shared.python.theme.icon_utils import IconColorizer
 

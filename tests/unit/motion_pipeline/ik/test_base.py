@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import numpy as np
 import pytest
 
 from src.shared.python.motion_pipeline.contracts import JointTrajectory
@@ -10,12 +9,11 @@ from src.shared.python.motion_pipeline.ik.base import (
     BaseIKSolver,
     IKBackendType,
     IKConfig,
-    InverseKinematicsSolver,
     MarkerWeights,
     make_ik_solver,
 )
 
-from ._local_fixtures import make_3dof_phantom_rig, make_phantom_marker_trajectory
+from ._local_fixtures import make_3dof_phantom_rig
 
 
 def test_marker_weights_default() -> None:

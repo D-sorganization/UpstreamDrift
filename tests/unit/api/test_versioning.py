@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from importlib.metadata import PackageNotFoundError
-from pathlib import Path
 
 from src.api import versioning
 

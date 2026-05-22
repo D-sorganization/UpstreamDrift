@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from src.shared.python.motion_pipeline.sources import list_formats, load_any
+from src.shared.python.motion_pipeline.sources import load_any
 from src.shared.python.motion_pipeline.sources.base import (
     AdapterContractError,
     UnsupportedFormatError,
