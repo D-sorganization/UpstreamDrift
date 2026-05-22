@@ -27,6 +27,9 @@ processes started in either order both observe live updates.
 
 from __future__ import annotations
 
+__version__ = "1.0.0"
+SCHEMA_VERSION: str = "v1"
+
 from .api import (
     CHANNEL_REGISTRY,
     Subscription,
@@ -37,7 +40,9 @@ from .api import (
 
 __all__ = [
     "CHANNEL_REGISTRY",
+    "SCHEMA_VERSION",
     "Subscription",
+    "__version__",
     "publish",
     "register_channel",
     "subscribe",
