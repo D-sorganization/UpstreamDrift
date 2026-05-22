@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.178                                            |
+| **Spec Version**        | 1.0.179                                            |
 | **Last Spec Update**    | 2026-05-22                                         |
 
 ## 2. Purpose & Mission
@@ -416,6 +416,11 @@ Beyond standard tools, CI enforces custom checks:
   matrix after checkout so workflow-only and documentation-only CI fixes remain
   finite on constrained self-hosted runners.
 - **File Size Budget**: No module exceeds 500 lines; classes capped at 200 LOC
+- **Module Size Budget**: Python modules under `src/` are capped at 1,500
+  lines by `scripts/check_module_size_budget.py`; oversized legacy modules
+  require owned, expiring exceptions in
+  `scripts/config/module_size_budget_baseline.json`, currently capped at 10
+  active exceptions.
 - **Documentation Catalog and Size Budget**: Every top-level `docs/` directory is listed in `docs/index.md`; oversized Markdown/Quarto docs require owned, expiring exceptions.
 - **Import Depth**: Maximum 4 import levels to prevent circular dependencies
 - **Physics Fitness**: Cross-engine validation must pass with <5% tolerance
@@ -563,6 +568,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 ## 12. Change Log
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| 2026-05-22 | 1.0.179 | Aligned the module-size quality gate with current launcher and shared-chat legacy debt by adding owned, expiring exceptions for `src/launchers/launcher_ui_setup.py` and `src/shared/python/chat/_chat_dock_widget_qt.py`, and raising the active module-size exception cap to 10 while preserving the 1,500-line budget for new untracked modules. |
 | 2026-05-21 | 1.0.176 | Preserved integer-safe quaternion normalization in `src/motion_capture/c3d_simscape_preview.py` by upcasting integer inputs before the optimized `np.einsum` norm accumulation, and added regression coverage for integer quaternion inputs. |
 | 2026-05-21 | 1.0.175 | Optimized `src/shared/python/signal_toolkit/fitting.py` to compute fitting residual sum-of-squares and RMSE via reused `np.vdot` accumulators, avoiding temporary squared arrays across the sinusoid, exponential, linear, polynomial, and custom fitter paths. |
 | 2026-05-15 | 1.0.173 | Integrated Sidekick across the launcher: registered the AI chat panel as an EmbeddableTool tile (`src/tools/sidekick/`), bound React `ChatPanel` to `var(--sidekick-color-*)` design tokens with a Python/TypeScript parity test, added a redacted ring-buffer chat-context bridge that injects recent app state into the assistant prompt, registered a `summarize_simulation_run` agentic analytics tool, and surfaced Tools-sidebar availability through `LauncherDiagnostics`. Refs #5460 #5461 #5462 #5463 #5464 #5465. |

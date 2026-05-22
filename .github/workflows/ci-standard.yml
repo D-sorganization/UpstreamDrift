@@ -109,7 +109,7 @@ jobs:
 
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
-    runs-on: d-sorg-fleet
+    runs-on: d-sorg-fleet-14core
     timeout-minutes: 2
     outputs:
       runner: ${{ steps.check.outputs.runner }}
@@ -118,8 +118,8 @@ jobs:
         id: check
         run: |
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
-          echo "runner=d-sorg-fleet" >> "$GITHUB_OUTPUT"
-          echo "Self-hosted dispatcher selected d-sorg-fleet"
+          echo "runner=d-sorg-fleet-14core" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet-14core"
   quality-gate:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -918,7 +918,7 @@ jobs:
   alembic-postgres-round-trip:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
-    timeout-minutes: 20
+    timeout-minutes: 45
     services:
       postgres:
         image: postgres:16
@@ -930,10 +930,10 @@ jobs:
           - 5432
         options: >-
           --health-cmd "pg_isready -U upstreamdrift -d upstreamdrift_migrations"
-          --health-interval 5s
-          --health-start-period 60s
+          --health-interval 10s
+          --health-start-period 300s
           --health-timeout 5s
-          --health-retries 24
+          --health-retries 60
     steps:
       - name: Clean corrupt git objects
         shell: bash
@@ -1254,7 +1254,7 @@ jobs:
     # `[workspace] exclude = ["ui/src-tauri"]` and is covered separately by
     # tauri-build.yml.
     #
-    # Runner choice: Linux-only on self-hosted d-sorg-fleet. The
+    # Runner choice: Linux-only on self-hosted d-sorg-fleet-14core. The
     # cross-platform matrix entries (windows-latest, macos-latest) were dropped
     # 2026-05-17 because the fleet has no Windows or macOS runners and the org
     # policy forbids fallback to GitHub-hosted runners (Runner_Dashboard#641).
@@ -1267,7 +1267,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-    runs-on: d-sorg-fleet
+    runs-on: d-sorg-fleet-14core
     timeout-minutes: 25
     defaults:
       run:
@@ -1484,7 +1484,7 @@ jobs:
 
   rust-quickstart:
     name: Rust Quickstart
-    runs-on: d-sorg-fleet
+    runs-on: d-sorg-fleet-14core
     timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects
