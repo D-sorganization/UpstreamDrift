@@ -16,7 +16,6 @@ from __future__ import annotations
 import csv
 import io
 import json
-import logging
 import math
 from typing import TYPE_CHECKING, Any
 
@@ -24,8 +23,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 
 from src.shared.python.core.contracts import precondition
+from src.shared.python.logging_pkg.logging_config import get_logger
 
-from ..dependencies import get_engine_manager, get_logger
+from ..dependencies import get_engine_manager, get_logger as get_request_logger
 from ..models.requests import (
     BodyPositionUpdateRequest,
     DataExportRequest,
@@ -45,7 +45,7 @@ if TYPE_CHECKING:
 
 router = APIRouter()
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def _check_position_support(engine: Any) -> None:
@@ -213,7 +213,7 @@ def _store_metric_snapshot(
 @router.get("/analysis/metrics")
 async def get_analysis_metrics(
     engine_manager: EngineManager = Depends(get_engine_manager),
-    logger: Any = Depends(get_logger),
+    logger: Any = Depends(get_request_logger),
 ) -> dict[str, Any]:
     """Get current real-time analysis metrics.
 
@@ -248,7 +248,7 @@ async def get_analysis_metrics(
 @router.get("/analysis/statistics", response_model=AnalysisStatisticsResponse)
 async def get_analysis_statistics(  # noqa: C901
     engine_manager: EngineManager = Depends(get_engine_manager),
-    logger: Any = Depends(get_logger),
+    logger: Any = Depends(get_request_logger),
 ) -> AnalysisStatisticsResponse:
     """Get statistical summary of analysis metrics over time.
 
@@ -336,7 +336,7 @@ async def get_analysis_statistics(  # noqa: C901
 async def export_analysis_data(  # noqa: C901
     request: DataExportRequest,
     engine_manager: EngineManager = Depends(get_engine_manager),
-    logger: Any = Depends(get_logger),
+    logger: Any = Depends(get_request_logger),
 ) -> StreamingResponse:
     """Export analysis data as CSV or JSON download.
 
@@ -433,7 +433,7 @@ async def export_analysis_data(  # noqa: C901
 async def set_body_position(
     request: BodyPositionUpdateRequest,
     engine_manager: EngineManager = Depends(get_engine_manager),
-    logger: Any = Depends(get_logger),
+    logger: Any = Depends(get_request_logger),
 ) -> BodyPositionResponse:
     """Set the position and/or rotation of a body in the simulation.
 
@@ -505,7 +505,7 @@ async def set_body_position(
 async def measure_distance(
     request: MeasurementRequest,
     engine_manager: EngineManager = Depends(get_engine_manager),
-    logger: Any = Depends(get_logger),
+    logger: Any = Depends(get_request_logger),
 ) -> MeasurementResult:
     """Measure the distance between two bodies.
 
@@ -559,7 +559,7 @@ async def measure_distance(
 @router.get("/simulation/measurements", response_model=MeasurementToolsResponse)
 async def get_measurement_tools(
     engine_manager: EngineManager = Depends(get_engine_manager),
-    logger: Any = Depends(get_logger),
+    logger: Any = Depends(get_request_logger),
 ) -> MeasurementToolsResponse:
     """Get all joint angles and active measurements.
 

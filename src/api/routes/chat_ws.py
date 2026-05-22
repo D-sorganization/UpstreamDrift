@@ -178,8 +178,11 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
                     chat_service.add_user_message(
                         session_id, user_message, engine_context
                     )
-                except ValueError as e:
-                    await websocket.send_json({"type": "error", "detail": str(e)})
+                except ValueError:
+                    logger.exception("Invalid user message for session %s", session_id)
+                    await websocket.send_json(
+                        {"type": "error", "detail": "invalid message"}
+                    )
                     continue
 
                 # Stream response chunks
@@ -195,9 +198,11 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
                     await websocket.send_json(
                         {"type": "complete", "session_id": session_id}
                     )
-                except Exception as e:  # noqa: BLE001
-                    logger.error("Error during streaming response: %s", e)
-                    await websocket.send_json({"type": "error", "detail": str(e)})
+                except Exception:  # noqa: BLE001
+                    logger.exception("Error during streaming response")
+                    await websocket.send_json(
+                        {"type": "error", "detail": "internal error"}
+                    )
 
             elif action == "history":
                 messages = chat_service.get_session_history(session_id)
@@ -248,10 +253,10 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
 
     except WebSocketDisconnect:
         logger.debug("Chat WebSocket disconnected: session=%s", session_id)
-    except (ConnectionError, TimeoutError, OSError) as e:
-        logger.error("Chat WebSocket error: %s", e)
+    except (ConnectionError, TimeoutError, OSError):
+        logger.exception("Chat WebSocket error")
         with contextlib.suppress(ConnectionError, TimeoutError, OSError):
-            await websocket.send_json({"type": "error", "detail": str(e)})
+            await websocket.send_json({"type": "error", "detail": "internal error"})
 
 
 # ── REST fallback endpoints ──────────────────────────────────────────

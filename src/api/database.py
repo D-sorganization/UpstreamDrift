@@ -117,10 +117,11 @@ def get_db() -> Generator[Session, None, None]:
 
 def init_db() -> None:
     """Initialize database with tables and default data."""
-    import logging
     import secrets
 
-    logger = logging.getLogger(__name__)
+    from src.shared.python.logging_pkg.logging_config import get_logger
+
+    logger = get_logger(__name__)
 
     if _is_production_environment():
         _assert_alembic_head_applied()

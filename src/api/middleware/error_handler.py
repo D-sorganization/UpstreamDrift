@@ -8,13 +8,14 @@ from __future__ import annotations
 
 import asyncio
 import functools
-import logging
 from collections.abc import Callable
 from typing import Any
 
 from fastapi import HTTPException
 
-logger = logging.getLogger(__name__)
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 def _handle_common_exceptions(e: Exception, func_name: str) -> None:

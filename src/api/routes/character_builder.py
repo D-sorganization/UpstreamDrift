@@ -6,7 +6,6 @@ weight, and build type.
 
 from __future__ import annotations
 
-import logging
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Response
@@ -14,11 +13,12 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from humanoid_character_builder.core.body_parameters import BodyParameters, BuildType
 from humanoid_character_builder.generators.urdf_generator import HumanoidURDFGenerator
 from src.api.middleware.error_handler import handle_api_errors
+from src.shared.python.logging_pkg.logging_config import get_logger
 
-from ..dependencies import get_logger
+from ..dependencies import get_logger as get_request_logger
 from ..models.requests import CharacterBuilderRequest
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 router = APIRouter()
 
 
@@ -35,7 +35,7 @@ router = APIRouter()
 @handle_api_errors
 async def generate_character_urdf(
     request: CharacterBuilderRequest,
-    logger: Any = Depends(get_logger),
+    logger: Any = Depends(get_request_logger),
 ) -> Response:
     """Generate a custom humanoid URDF model from body parameters.
 
