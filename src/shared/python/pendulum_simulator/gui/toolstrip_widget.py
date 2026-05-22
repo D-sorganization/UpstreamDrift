@@ -1018,10 +1018,11 @@ class ToolStrip(QWidget):
         overlay_layout = overlay_frame.layout()
         if overlay_layout is None:
             return
-        # The segment row is the last item in overlay_layout
         seg_item = overlay_layout.itemAt(overlay_layout.count() - 1)
         if seg_item is not None and seg_item.layout() is not None:
-            seg_layout = seg_item.layout()
+            layout_candidate = seg_item.layout()
+            if isinstance(layout_candidate, QHBoxLayout):
+                seg_layout = layout_candidate
             if not (seg_layout is not None):  # narrowing for mypy
                 raise ValueError("DbC Blocked: Precondition failed.")
             # Clear old widgets (keep "Segments:" label at position 0)

@@ -176,6 +176,7 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 2026-03-26 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-26.md`                 |
 | 2026-03-27 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-27.md`                 |
 | 2026-04-05 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-04-05.md`                 |
+| 2026-05-21 | Adversarial Review 2026-05-21            | `docs/assessments/adversarial_review_2026_05_21.md`                         |
 
 ---
 
@@ -264,8 +265,9 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 3.8     | 2026-04 | Added Completist Report 2026-04-26                                                                                                                                                                                                                                       |
 | 3.9     | 2026-05 | Added Assessment_H_CICD.md; updated A, B, C, D, F, G, I, K, L, M, N, O assessments for Python 3.10 compatibility; added issues ISSUE_Assessment_E_Performance.md and ISSUE_Assessment_J_API_Design.md; refreshed Comprehensive_Assessment.md and assessment_summary.json |
 | 4.0     | 2026-05 | Added comprehensive assessment 2026-05-07 (A-N categories + comprehensive report)                                                                                                                                                                                        |
+| 4.1     | 2026-05 | Added Adversarial Review 2026-05-21                                                                                                                                                                                                                                      |
 
 ---
 
 _See individual Assessment_Prompt_X.md files for detailed prompts._
-Updated Sun May 3 2026
+Updated Thu May 21 2026
