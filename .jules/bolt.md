@@ -67,3 +67,6 @@
 ## 2025-05-19 - Optimize R-squared and RMSE calculation using vdot
 **Learning:** `np.sum(residuals**2)` allocates a temporary array in memory of the same size as `residuals` because of the element-wise squaring `**2`. For simple calculations like Sum of Squared Residuals (SS_res) and Total Sum of Squares (SS_tot) over 1D arrays, this overhead is noticeable in fitting toolkits.
 **Action:** Replace `np.sum(x**2)` with `np.vdot(x, x)` to calculate sum of squares without allocating intermediate temporary memory for the squares, speeding up statistical fitting implementations. Additionally, avoid repeatedly recalculating mean squares by reusing the `ss_res` result (e.g. `rmse = np.sqrt(ss_res / x.size)`).
+## 2025-05-19 - Optimize constraint residual penalization using vdot
+**Learning:** `np.sum(np.asarray(r) ** 2)` creates intermediate memory allocations due to element-wise squaring `**2`. For calculations of constraint residuals (like in motion matching auto-diff routines), this allocation is unnecessary overhead.
+**Action:** Replace `np.sum(np.asarray(r) ** 2)` with `np.vdot(np.asarray(r), np.asarray(r))` to calculate the sum of squared elements directly and more efficiently.
