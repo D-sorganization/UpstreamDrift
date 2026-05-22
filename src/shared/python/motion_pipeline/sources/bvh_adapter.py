@@ -102,7 +102,7 @@ class BVHAdapter(MocapSourceAdapter):
         if _HAS_RUST:
             try:
                 return self._load_via_rust(p)
-            except Exception:  # pragma: no cover - parser disagreement
+            except Exception:  # pragma: no cover - parser disagreement  # noqa: BLE001
                 # Fall through to the pure-Python parser on any Rust error
                 # to preserve the byte-identical canonical-output contract.
                 pass
@@ -223,7 +223,7 @@ class BVHAdapter(MocapSourceAdapter):
             id="bvh-skeleton",
             joints=joints,
             root_joint=root_joint,
-            up_axis=self.up_axis,
+            up_axis=self.up_axis,  # type: ignore[arg-type]
             metadata={"rotation_order": self.rotation_order},
         )
 

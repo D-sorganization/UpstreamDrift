@@ -17,20 +17,20 @@ invariants at construction time (Design by Contract).
 from __future__ import annotations
 
 from . import engine_adapters as engine_adapters
-from ._subject_anthropometrics import SubjectAnthropometrics
-from ._types import Sex
-from .contracts import EngineAdapter, Estimator, Reader, Writer
-from .engine_adapters import ADAPTER_REGISTRY
+from ._subject_anthropometrics import SubjectAnthropometrics  # noqa: F401
+from ._types import Sex  # noqa: F401
+from .contracts import EngineAdapter, Estimator, Reader, Writer  # noqa: F401
+from .engine_adapters import ADAPTER_REGISTRY  # noqa: F401
 from .persistence import (
-    SCHEMA_VERSION,
-    default_subjects_dir,
-    load_subject,
-    save_subject,
+    SCHEMA_VERSION,  # noqa: F401
+    default_subjects_dir,  # noqa: F401
+    load_subject,  # noqa: F401
+    save_subject,  # noqa: F401
 )
-from .pipeline import run_pipeline
-from .readers import C3DSubjectMetadata, read_c3d_subject_metadata, read_mjcf_body
-from .segment_properties import SegmentProperties
-from .writers import write_mjcf_body
+from .pipeline import run_pipeline  # noqa: F401
+from .readers import C3DSubjectMetadata, read_c3d_subject_metadata, read_mjcf_body  # noqa: F401
+from .segment_properties import SegmentProperties  # noqa: F401
+from .writers import write_mjcf_body  # noqa: F401
 
 # Optional Qt UI surface — only re-exported when PyQt6 is installed.
 # Resolved as a UNION: importing the package never fails even on
@@ -38,14 +38,14 @@ from .writers import write_mjcf_body
 # expected to install the ``gui-tools`` / ``gui-test`` extras.
 try:  # pragma: no cover - presence depends on the install environment
     from .ui.segment_properties_panel import SegmentPropertiesPanel as _Panel
-except Exception:  # pragma: no cover - PyQt6 missing or unloadable
+except Exception:  # pragma: no cover - PyQt6 missing or unloadable  # noqa: BLE001
     SegmentPropertiesPanel = None  # type: ignore[assignment]
 else:
     SegmentPropertiesPanel = _Panel
 
 try:  # pragma: no cover - presence depends on the install environment
     from .ui.calibration_dialog import SubjectCalibrationDialog as _Dialog
-except Exception:  # pragma: no cover - PyQt6 missing or unloadable
+except Exception:  # pragma: no cover - PyQt6 missing or unloadable  # noqa: BLE001
     SubjectCalibrationDialog = None  # type: ignore[assignment]
 else:
     SubjectCalibrationDialog = _Dialog

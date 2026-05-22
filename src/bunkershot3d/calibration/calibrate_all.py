@@ -66,5 +66,5 @@ if __name__ == "__main__":
         try:
             # We use mock for testing since full physical simulations might take hours
             calibrate_backend(backend, use_mock=True)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to calibrate backend", backend=backend, error=str(e))

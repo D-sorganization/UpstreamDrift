@@ -7,7 +7,6 @@ Part of issue #4568. MuJoCo torque PD-tracking with residual logging.
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 import time
 
@@ -35,7 +34,7 @@ try:  # pragma: no cover
     import upstream_pinocchio_id as _rust_outer_loop  # type: ignore[import-not-found]
 
     _HAVE_RUST = True
-except Exception:  # pragma: no cover
+except Exception:  # pragma: no cover  # noqa: BLE001
     _rust_outer_loop = None  # type: ignore[assignment]
     _HAVE_RUST = False
 
@@ -74,16 +73,20 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
             try:
                 import mujoco
 
-                # Check dimensional parity
+                # Check dimensional parity. ``model`` is typed as ``object``
+                # because the mujoco wheel is conditionally imported; the
+                # attributes exist at runtime.
                 if (
-                    len(q_row) == model.nq and len(v_row) == model.nv and len(a_row) == model.nv
-                ):  # type: ignore
-                    data.qpos[:] = q_row  # type: ignore
-                    data.qvel[:] = v_row  # type: ignore
-                    data.qacc[:] = a_row  # type: ignore
+                    len(q_row) == model.nq  # type: ignore[attr-defined]
+                    and len(v_row) == model.nv  # type: ignore[attr-defined]
+                    and len(a_row) == model.nv  # type: ignore[attr-defined]
+                ):
+                    data.qpos[:] = q_row  # type: ignore[attr-defined]
+                    data.qvel[:] = v_row  # type: ignore[attr-defined]
+                    data.qacc[:] = a_row  # type: ignore[attr-defined]
                     mujoco.mj_inverse(model, data)  # type: ignore
                     return np.asarray(data.qfrc_inverse.copy(), dtype=np.float64)  # type: ignore
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.debug("MuJoCo per-frame inverse step failed: %s", exc)
 
             return np.zeros_like(q_row, dtype=np.float64)
@@ -161,8 +164,8 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
         t_start = time.perf_counter()
 
         # Extract finite difference kinematics using the same utility
-        times, q_all, qdot_all, qddot_all = PinocchioInverseDynMatchingSolver._finite_difference(
-            reference
+        times, q_all, qdot_all, qddot_all = (
+            PinocchioInverseDynMatchingSolver._finite_difference(reference)
         )
         n_frames, n_dof = q_all.shape
 
@@ -181,19 +184,26 @@ class MuJoCoTorqueMatchingSolver(BaseMotionMatchingSolver):
 
         if _use_rust_outer_loop():
             try:
-                tau_all = self._compute_tau_rust(times, q_all, qdot_all, qddot_all, callback)
-            except Exception as exc:
+                tau_all = self._compute_tau_rust(
+                    times, q_all, qdot_all, qddot_all, callback
+                )
+            except Exception as exc:  # noqa: BLE001
                 logger.warning(
                     "upstream_pinocchio_id rust path failed (%s); "
                     "falling back to pure-Python MuJoCo outer loop",
                     exc,
                 )
-                tau_all = self._compute_tau_python(times, q_all, qdot_all, qddot_all, callback)
+                tau_all = self._compute_tau_python(
+                    times, q_all, qdot_all, qddot_all, callback
+                )
         else:
-            tau_all = self._compute_tau_python(times, q_all, qdot_all, qddot_all, callback)
+            tau_all = self._compute_tau_python(
+                times, q_all, qdot_all, qddot_all, callback
+            )
 
         torque_frames = [
-            TorqueFrame(timestamp=float(t), tau=tau_all[i].tolist()) for i, t in enumerate(times)
+            TorqueFrame(timestamp=float(t), tau=tau_all[i].tolist())
+            for i, t in enumerate(times)
         ]
 
         rig_joint_names: list[str] = []

@@ -67,7 +67,7 @@ def _pinocchio_is_importable() -> bool:
         return False
     try:
         import pinocchio as pin  # type: ignore[import-not-found]
-    except Exception:
+    except Exception:  # noqa: BLE001
         return False
     return hasattr(pin, "buildModelFromUrdf") and hasattr(pin, "forwardKinematics")
 
@@ -106,7 +106,7 @@ class PinocchioKinematicsService:
             self._neutral_q = np.asarray(
                 pin.neutral(self._model), dtype=np.float64
             ).copy()
-        except Exception:
+        except Exception:  # noqa: BLE001
             nq = int(getattr(self._model, "nq", 0))
             self._neutral_q = np.zeros(nq, dtype=np.float64)
         nv = int(getattr(self._model, "nv", 0))

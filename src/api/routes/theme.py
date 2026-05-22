@@ -6,7 +6,6 @@ its styling with the PyQt6 desktop launcher.
 
 import logging
 
-from fastapi import APIRouter
 
 from src.shared.python.theme.api import create_theme_router
 from src.shared.python.theme.theme_manager import ThemeManager

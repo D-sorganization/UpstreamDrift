@@ -7,7 +7,6 @@ Part of issue #4568. OpenSim RRA for kinematic correction.
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from ..contracts import JointTrajectory, SkeletonRig
 from .base import (

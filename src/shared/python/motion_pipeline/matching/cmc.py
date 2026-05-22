@@ -44,7 +44,7 @@ try:  # pragma: no cover - exercised conditionally
     import upstream_pinocchio_id as _rust_outer_loop  # type: ignore[import-not-found]
 
     _HAVE_RUST = True
-except Exception:  # pragma: no cover - fallback path
+except Exception:  # pragma: no cover - fallback path  # noqa: BLE001
     _rust_outer_loop = None  # type: ignore[assignment]
     _HAVE_RUST = False
 
@@ -103,7 +103,7 @@ class CMCMatchingSolver(BaseMotionMatchingSolver):
                         coord.setValue(state, float(q_row[i]))
                         coord.setSpeedValue(state, float(v_row[i]))
                     osim_model.realizeAcceleration(state)  # type: ignore[attr-defined]
-            except Exception as exc:  # pragma: no cover - safety
+            except Exception as exc:  # pragma: no cover - safety  # noqa: BLE001
                 logger.debug("CMC per-frame opensim step failed: %s", exc)
             return np.zeros_like(q_row, dtype=np.float64)
 
@@ -205,7 +205,7 @@ class CMCMatchingSolver(BaseMotionMatchingSolver):
 
             osim_model = osim.Model()
             state = osim_model.initSystem()
-        except Exception:
+        except Exception:  # noqa: BLE001
             osim_model = None
             state = None
 
@@ -216,7 +216,9 @@ class CMCMatchingSolver(BaseMotionMatchingSolver):
                 tau_all = self._compute_tau_rust(
                     times, q_all, qdot_all, qddot_all, callback
                 )
-            except Exception as exc:  # pragma: no cover - safety fallback
+            except (
+                Exception  # noqa: BLE001 - safety fallback to pure-Python CMC
+            ) as exc:  # pragma: no cover - safety fallback
                 logger.warning(
                     "upstream_pinocchio_id rust path failed (%s); "
                     "falling back to pure-Python CMC outer loop",

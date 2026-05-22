@@ -460,12 +460,15 @@ def is_docker() -> bool:
     Returns:
         True if running in Docker.
     """
-    path = "/proc/self/cgroup"
-    return (
-        os.path.exists("/.dockerenv")
-        or os.path.isfile(path)
-        and any("docker" in line for line in open(path))
-    )
+    if os.path.exists("/.dockerenv"):
+        return True
+    cgroup_path = "/proc/self/cgroup"
+    if not os.path.isfile(cgroup_path):
+        return False
+    # Issue #5911: ``open(...)`` was previously inlined into ``any(...)``,
+    # leaking the file handle when ``any()`` short-circuited. Use ``with``.
+    with open(cgroup_path, encoding="utf-8") as handle:
+        return any("docker" in line for line in handle)
 
 
 @functools.cache

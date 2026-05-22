@@ -7,9 +7,7 @@ Part of issue #4566. Wraps MuJoCo-based IK solving.
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
-import numpy as np
 
 from ..contracts import (
     JointStateFrame,

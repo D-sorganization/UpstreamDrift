@@ -224,7 +224,6 @@ def _install_null_sidebar(main_window: Any) -> ToolsSidebarInstallStatus:
 
 
 def _import_sidebar_module() -> Any | None:
-    import sys
     from pathlib import Path
 
     vendor_root = Path(__file__).resolve().parent.parent.parent.parent
@@ -233,13 +232,13 @@ def _import_sidebar_module() -> Any | None:
     # sys.path mutations removed by issue #5873. We now rely on explicit shims (e.g., sidekick).
     sibling_tools = vendor_root.parent.parent / "Tools"
     if sibling_tools.is_dir():
-        sibling_src = str(sibling_tools / "src")
-        sibling_python = str(sibling_tools / "src" / "shared" / "python")
+        sibling_src = str(sibling_tools / "src")  # noqa: F841
+        sibling_python = str(sibling_tools / "src" / "shared" / "python")  # noqa: F841
 
     # Fall back to vendored ud-tools
     # sys.path mutations removed by issue #5873. We now rely on explicit shims (e.g., sidekick).
-    vendor_src_path = str(vendor_root / "vendor" / "ud-tools" / "src")
-    vendor_python_path = str(
+    vendor_src_path = str(vendor_root / "vendor" / "ud-tools" / "src")  # noqa: F841
+    vendor_python_path = str(  # noqa: F841
         vendor_root / "vendor" / "ud-tools" / "src" / "shared" / "python"
     )
 

@@ -225,7 +225,7 @@ class CustomTitleBar(QWidget):
         colors = _get_title_bar_colors()
         bg = colors["bg"]
         border = colors["border"]
-        text = colors["text"]
+        text = colors["text"]  # noqa: F841
 
         self.setStyleSheet(
             f'QWidget[class="title-bar"] {{'

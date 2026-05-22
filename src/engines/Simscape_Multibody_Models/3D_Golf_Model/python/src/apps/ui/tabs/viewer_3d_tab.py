@@ -414,7 +414,7 @@ class Viewer3DTab(QtWidgets.QWidget):
             panel.setVisible(False)
             self._segment_props_panel = panel
             right_panel.addWidget(panel)
-        except Exception:  # pragma: no cover - optional dep
+        except Exception:  # pragma: no cover - optional dep  # noqa: BLE001
             pass
 
         layout.addLayout(right_panel, 3)

@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import contextlib
 from typing import Any
-from src.shared.python.motion_pipeline.contracts import KeypointSequence, MarkerTrajectory
+from src.shared.python.motion_pipeline.contracts import (
+    KeypointSequence,
+    MarkerTrajectory,
+)
 from src.shared.python.motion_pipeline.preprocessing.pipeline import (
     PreprocessingPipeline,
     GapFillStep,
@@ -55,7 +58,8 @@ def apply_preprocessing(
         elif name in ("resample", "resamplestep"):
             pipeline.add_step(
                 ResampleStep(
-                    target_fps=params.get("target_fps", 100.0), source_fps=params.get("source_fps")
+                    target_fps=params.get("target_fps", 100.0),
+                    source_fps=params.get("source_fps"),
                 )
             )
         elif name in ("normalize", "normalizestep"):

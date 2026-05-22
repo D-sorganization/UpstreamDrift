@@ -14,8 +14,6 @@ for the selected pendulum joint.
 from __future__ import annotations
 
 import logging
-import os
-import sys
 from pathlib import Path
 
 from PyQt6.QtCore import pyqtSignal

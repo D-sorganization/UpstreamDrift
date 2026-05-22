@@ -12,11 +12,9 @@ from typing import Any
 
 import numpy as np
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
-    QHBoxLayout,
     QLabel,
     QMainWindow,
     QVBoxLayout,
@@ -27,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 # Try to import pyqtgraph
 try:
-    import pyqtgraph as pg
+    import pyqtgraph as pg  # noqa: F401
     import pyqtgraph.opengl as gl
 
     PYQTGRAPH_AVAILABLE = True

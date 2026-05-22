@@ -101,7 +101,7 @@ def condense_thread(
 
     if not messages:
         summary = SummaryMessage(content="", source_count=0)
-        return summary, [summary]
+        return summary, [summary.to_message()]
 
     history_text = _format_history_for_summary(messages)
 
@@ -114,14 +114,14 @@ def condense_thread(
             condense_context,
             [],
         )
-        summary_content: str = response.content if response.content else ""
+        summary_content: str = response.content or ""
     else:
         summary_content = ""
 
     summary = SummaryMessage(content=summary_content, source_count=len(messages))
 
     tail = messages[-keep_recent:] if keep_recent > 0 else []
-    active: list[Message] = [summary, *tail]
+    active: list[Message] = [summary.to_message(), *tail]
 
     return summary, active
 

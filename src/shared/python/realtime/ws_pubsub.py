@@ -48,7 +48,7 @@ def _has_rust_wheel() -> bool:
     """Return True iff the ``upstream_realtime`` wheel is importable."""
     try:
         import upstream_realtime  # noqa: F401
-    except Exception:
+    except Exception:  # noqa: BLE001
         return False
     return True
 
@@ -144,7 +144,7 @@ class WSPubSub:
     def _start_rust_server(self) -> None:
         try:
             import upstream_realtime  # type: ignore
-        except Exception:
+        except Exception:  # noqa: BLE001
             logger.warning(
                 "rust backend requested but upstream_realtime not importable; "
                 "falling back to python backend"
@@ -182,7 +182,7 @@ class WSPubSub:
         try:
             import uvicorn
             from fastapi import FastAPI
-        except Exception:
+        except Exception:  # noqa: BLE001
             logger.warning("FastAPI/uvicorn not importable; cannot autostart WS server")
             return
 
@@ -294,7 +294,7 @@ class WSPubSub:
                                         "WS subscriber callback raised for %s",
                                         channel,
                                     )
-                    except Exception as exc:
+                    except Exception as exc:  # noqa: BLE001
                         if stop.is_set():
                             return
                         logger.warning(

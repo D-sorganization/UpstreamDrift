@@ -17,13 +17,19 @@ Models:
 
 from __future__ import annotations
 
-import json
 from datetime import datetime
 from pathlib import Path
-from typing import Annotated, Any, Literal, Optional, Union
+from typing import Any, Literal
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator, ValidationInfo
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+    ValidationInfo,
+)
 
 # =============================================================================
 # Type Aliases
@@ -863,7 +869,11 @@ class MotionMatchingResult(BaseModel):
         (where ``data`` is already a model instance, or where the caller
         explicitly sets ``schema_version``) is left untouched.
         """
-        if isinstance(data, dict) and "schema_version" not in data and info.mode == "json":
+        if (
+            isinstance(data, dict)
+            and "schema_version" not in data
+            and info.mode == "json"
+        ):
             # Shallow copy so we never mutate the caller's dict.
             data = {**data, "schema_version": 1}
         return data

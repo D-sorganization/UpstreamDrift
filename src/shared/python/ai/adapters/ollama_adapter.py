@@ -20,7 +20,7 @@ Example:
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NoReturn
 
 from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
 from src.shared.python.ai.config import (
@@ -38,6 +38,7 @@ from src.shared.python.ai.exceptions import (
 from src.shared.python.ai.types import (
     AgentChunk,
     AgentResponse,
+    ChatModelInfo,
     ConversationContext,
     ProviderCapabilities,
     ProviderCapability,
@@ -265,7 +266,7 @@ class OllamaAdapter(BaseAgentAdapter):
                     )
                     index += 1
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Ollama streaming error: %s", e)
             self._handle_error(e)
 
@@ -589,8 +590,8 @@ class OllamaAdapter(BaseAgentAdapter):
         except Exception as e:  # noqa: BLE001
             self._handle_error(e)
 
-    def _handle_error(self, error: Exception) -> AgentResponse:
-        """Handle Ollama-specific errors before falling back to generic classifier."""
+    def _handle_error(self, error: Exception) -> NoReturn:
+        """Handle Ollama-specific errors; always raises (NoReturn)."""
         err_str = str(error).lower()
         if "connection" in err_str or "unreachable" in err_str:
             raise AIConnectionError(

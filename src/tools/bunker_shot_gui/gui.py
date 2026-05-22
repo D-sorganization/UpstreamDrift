@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 # Try to import pyqtgraph
 try:
-    import pyqtgraph as pg
+    import pyqtgraph as pg  # noqa: F401
     import pyqtgraph.opengl as gl
 
     PYQTGRAPH_AVAILABLE = True
@@ -149,8 +149,8 @@ class BunkerShotWidget(QWidget):
 
         # Spray pattern based on angle
         angle_rad = np.radians(angle)
-        vx = v * np.cos(angle_rad)
-        vy = v * np.sin(angle_rad)
+        vx = v * np.cos(angle_rad)  # noqa: F841
+        vy = v * np.sin(angle_rad)  # noqa: F841
 
         impact_force = 0.5 * 0.3 * (v**2)  # dummy kinetic energy
 

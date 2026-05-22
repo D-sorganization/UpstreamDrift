@@ -1,0 +1,18 @@
+{
+  "_comment": "Baseline counts for error-handling anti-patterns. Captured 2026-05-21 as part of issue #5911. The ratchet check in scripts/ci/check_error_handling_ratchet.py fails if any of these counts grow.",
+  "_policy": "Counts may DECREASE freely. Counts may NOT increase. New PRs that legitimately need to add to any count must (a) lower another count by an equal or greater amount in the same PR, or (b) edit this file with a justification and the approver's GH handle in the same PR.",
+  "_pattern_meanings": {
+    "noqa_BLE001": "# noqa: BLE001 — blind except Exception grandfathered. New code must use src/shared/python/core/process_safety.narrow_catch or list specific exception types.",
+    "noqa_F841": "# noqa: F841 — unused local variable grandfathered. New code: drop the binding or prefix with _.",
+    "noqa_F401": "# noqa: F401 — unused import grandfathered. New code: add to __all__ or use redundant alias (import X as X).",
+    "raw_popen": "subprocess.Popen( without managed_popen wrapper. New code must use src/shared/python/core/process_safety.managed_popen unless the process is intentionally long-lived (then justify with a # noqa: ... comment).",
+    "gather_no_return_exceptions": "asyncio.gather(...) without return_exceptions=True. New code must use src/shared/python/core/process_safety.safe_gather."
+  },
+  "counts": {
+    "noqa_BLE001": 346,
+    "noqa_F841": 22,
+    "noqa_F401": 719,
+    "raw_popen": 41,
+    "gather_no_return_exceptions": 1
+  }
+}

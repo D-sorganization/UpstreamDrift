@@ -16,6 +16,7 @@ from src.shared.python.ai.exceptions import AIConnectionError, AIProviderError
 from src.shared.python.ai.types import (
     AgentChunk,
     AgentResponse,
+    ChatModelInfo,
     ConversationContext,
     ProviderCapabilities,
     ProviderCapability,
@@ -127,7 +128,7 @@ class BitnetAdapter(BaseAgentAdapter):
             if result.returncode == 0 or "usage" in result.stdout.lower():
                 return True, f"Found {self.llama_cli}"
             return False, f"Executable failed: {result.stderr}"
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             return False, f"Failed to execute {self.llama_cli}: {e}"
 
     def _format_prompt(self, context: ConversationContext, message: str) -> str:
@@ -183,7 +184,7 @@ class BitnetAdapter(BaseAgentAdapter):
                 usage=self._normalize_token_counts({}),
                 metadata={"stdout": result.stdout},
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to run BitNet: %s", e)
             return self._handle_error(e)
 
@@ -231,6 +232,6 @@ class BitnetAdapter(BaseAgentAdapter):
             process.wait()
             yield AgentChunk(content="", is_final=True)
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to stream BitNet: %s", e)
             yield AgentChunk(content=f"\n[Error: {e}]", is_final=True)

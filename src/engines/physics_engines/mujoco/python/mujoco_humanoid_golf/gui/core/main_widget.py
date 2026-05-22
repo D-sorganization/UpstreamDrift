@@ -97,7 +97,7 @@ class MainWidget(QWidget):
             if status_timer is not None:
                 try:
                     status_timer.stop()
-                except Exception:  # pragma: no cover - defensive
+                except Exception:  # pragma: no cover - defensive  # noqa: BLE001
                     logger.debug("status_timer.stop raised", exc_info=True)
 
             sim_widget = getattr(self._inner, "sim_widget", None)
@@ -107,14 +107,14 @@ class MainWidget(QWidget):
                 # times and on widgets that are already stopped.
                 try:
                     sim_widget.set_running(False)
-                except Exception:  # pragma: no cover - defensive
+                except Exception:  # pragma: no cover - defensive  # noqa: BLE001
                     logger.debug("sim_widget.set_running raised", exc_info=True)
                 # Stop the underlying QTimer if present.
                 inner_timer = getattr(sim_widget, "timer", None)
                 if inner_timer is not None:
                     try:
                         inner_timer.stop()
-                    except Exception:  # pragma: no cover - defensive
+                    except Exception:  # pragma: no cover - defensive  # noqa: BLE001
                         logger.debug("sim_widget.timer.stop raised", exc_info=True)
         except Exception:  # pragma: no cover - defensive
             logger.exception("MuJoCo MainWidget cleanup raised")

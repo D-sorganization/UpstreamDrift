@@ -79,7 +79,7 @@ class ExerciseDashboard(QMainWindow):
                         & ~sys.modules["PyQt6.QtCore"].Qt.WindowType.Window
                     )
                 self.layout.addWidget(self._current_widget)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self._current_widget = QLabel(f"Error loading {name}:\n{e}")
             self.layout.addWidget(self._current_widget)
 

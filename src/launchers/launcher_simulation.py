@@ -252,7 +252,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
                             )
                             try:
                                 ui_widget.set_sidekick_session(session)
-                            except Exception as e:
+                            except Exception as e:  # noqa: BLE001
                                 logger.warning(
                                     "Failed to inject Sidekick session: %s", e
                                 )
@@ -271,7 +271,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
                         self.lbl_status.setText(f"* {model.name} Running")
                         self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
                         return
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.error("Failed to load dockable UI for %s: %s", model.name, e)
 
             success = handler.launch(model, REPOS_ROOT, self.process_manager)

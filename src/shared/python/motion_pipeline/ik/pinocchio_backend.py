@@ -7,7 +7,6 @@ Part of issue #4566. Wraps Pinocchio with pink operational-space solver.
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from ..contracts import (
     JointStateFrame,

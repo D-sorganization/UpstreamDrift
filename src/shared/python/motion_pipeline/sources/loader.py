@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-from src.shared.python.motion_pipeline.sources.registry import load_any, registered_adapters
+from src.shared.python.motion_pipeline.sources.registry import (
+    load_any,
+    registered_adapters,
+)
 from src.shared.python.motion_pipeline.sources.base import LoadedPayload
 
 

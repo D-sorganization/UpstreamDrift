@@ -39,8 +39,6 @@ import numpy as np
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.animation import FuncAnimation
-    from matplotlib.artist import Artist
-    from mpl_toolkits.mplot3d.art3d import Line3D, Line3DCollection
     from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 from .session_schema import ALLOWED_SPEEDS, PlaybackState

@@ -241,7 +241,7 @@ class FspRenderer:
             return
         try:
             viewport.remove_mesh(self._mesh_handle)
-        except Exception as exc:  # pragma: no cover - viewport-specific
+        except Exception as exc:  # pragma: no cover - viewport-specific  # noqa: BLE001
             logger.debug("FspRenderer.clear: remove_mesh raised %r", exc)
         self._mesh_handle = None
 

@@ -229,7 +229,22 @@ ignore = [
     "PERF401", # manual list comprehension (often clearer as explicit loop)
 ]
 
-extend-ignore = ["C901", "E402", "BLE001", "F841", "F401", "I001", "SIM118"]
+# extend-ignore: rules NOT promoted to enforcement yet.
+# - C901 (mccabe complexity) — tracked separately; many existing functions
+#   exceed the budget and a global enforcement would block all PRs.
+# - E402 (module-level import not at top) — common in conditional imports
+#   guarded by `if sys.platform == ...`.
+# - I001 (import-block-unsorted) — re-export blocks in __init__.py legitimately
+#   group by source package rather than alphabetically.
+# - SIM118 (key-in-dict-keys) — pandas Index types break the suggested rewrite.
+#
+# Previously suppressed but now ENFORCED (issue #5911):
+# - BLE001 (blind-except), F841 (unused-variable), F401 (unused-import).
+#   Pre-existing instances are annotated with file-local `# noqa: <code>`;
+#   new violations must use src/shared/python/core/process_safety.narrow_catch
+#   or supply a justified `# noqa: BLE001 - <reason>` comment. Enforced via
+#   scripts/ci/check_error_handling_ratchet.py (issue #5911 / epic #5907).
+extend-ignore = ["C901", "E402", "I001", "SIM118"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10

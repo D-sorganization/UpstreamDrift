@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from collections.abc import Iterator
 
 import torch
 import torch.nn as nn

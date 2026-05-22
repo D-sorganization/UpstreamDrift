@@ -538,7 +538,7 @@ class SettingsWidget(QWidget):
 
     def _create_mcp_servers_tab(self) -> QWidget:
         """MCP Servers tab: list, add, disable, remove MCP server configs."""
-        from PyQt6.QtWidgets import QMessageBox, QScrollArea, QVBoxLayout, QWidget
+        from PyQt6.QtWidgets import QScrollArea, QVBoxLayout, QWidget
 
         from src.launchers.mcp_servers_preferences import (  # type: ignore[attr-defined]
             McpServersSection,

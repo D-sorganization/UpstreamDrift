@@ -206,7 +206,7 @@ class FilePubSub:
 
             if QCoreApplication.instance() is None:
                 return None
-        except Exception:
+        except Exception:  # noqa: BLE001
             return None
 
         # Ensure the file exists so QFileSystemWatcher can observe it.
@@ -236,7 +236,7 @@ class FilePubSub:
                 deliver()
 
             qfsw.fileChanged.connect(_on_file_changed)
-        except Exception:
+        except Exception:  # noqa: BLE001
             return None
 
         class _QtAdapter:
@@ -255,7 +255,7 @@ class FilePubSub:
         try:  # pragma: no cover - depends on watchdog availability
             from watchdog.events import FileSystemEventHandler
             from watchdog.observers import Observer
-        except Exception:
+        except Exception:  # noqa: BLE001
             return None
 
         target = str(path.resolve())
@@ -274,7 +274,7 @@ class FilePubSub:
             obs.schedule(_Handler(), str(self.root), recursive=False)
             obs.daemon = True
             obs.start()
-        except Exception:
+        except Exception:  # noqa: BLE001
             return None
 
         class _WatchdogAdapter:
@@ -285,7 +285,7 @@ class FilePubSub:
                 try:
                     self._o.stop()
                     self._o.join(timeout=1.0)
-                except Exception:
+                except Exception:  # noqa: BLE001
                     pass
 
         return _WatchdogAdapter(obs)

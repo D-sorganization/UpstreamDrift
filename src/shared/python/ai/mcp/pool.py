@@ -118,7 +118,7 @@ class McpClientPool:
         self._configs.pop(name, None)
         try:
             await client.disconnect()
-        except Exception:
+        except Exception:  # noqa: BLE001
             _LOG.exception("error disconnecting MCP server %s", name)
 
     async def start_all(self) -> None:
@@ -126,7 +126,7 @@ class McpClientPool:
         for name, client in list(self._clients.items()):
             try:
                 await client.connect()
-            except Exception:
+            except Exception:  # noqa: BLE001
                 _LOG.exception("failed to connect MCP server %s; skipping", name)
         self._started = True
 
@@ -134,7 +134,7 @@ class McpClientPool:
         for name, client in list(self._clients.items()):
             try:
                 await client.disconnect()
-            except Exception:
+            except Exception:  # noqa: BLE001
                 _LOG.exception("error stopping MCP server %s", name)
         self._started = False
 
@@ -152,7 +152,7 @@ class McpClientPool:
                 continue
             try:
                 tools = await client.list_tools()
-            except Exception:
+            except Exception:  # noqa: BLE001
                 _LOG.exception("list_tools failed for %s", name)
                 continue
             for tool in tools:
@@ -168,7 +168,7 @@ class McpClientPool:
                 continue
             try:
                 resources = await client.list_resources()
-            except Exception:
+            except Exception:  # noqa: BLE001
                 _LOG.exception("list_resources failed for %s", name)
                 continue
             for resource in resources:

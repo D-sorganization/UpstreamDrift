@@ -35,7 +35,10 @@ import importlib
 import importlib.util
 import logging
 import sys
-from datetime import UTC
+
+# ``datetime.UTC`` was added in 3.11; project still supports 3.10.
+# Use the compat shim that exposes the same symbol on 3.10.
+from src.api.utils.datetime_compat import UTC
 from pathlib import Path
 from typing import Any
 
@@ -142,7 +145,7 @@ def create_chat_router(
                         await websocket.send_json(
                             {"type": "complete", "session_id": session_id}
                         )
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001
                         logger.error("Error during streaming response: %s", e)
                         await websocket.send_json({"type": "error", "detail": str(e)})
 

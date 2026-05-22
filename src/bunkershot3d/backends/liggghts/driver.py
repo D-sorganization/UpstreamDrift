@@ -255,7 +255,6 @@ def _iter_dump_frames(
         Tuple of (timestep: int, positions: ndarray shape (N,3),
         velocities: ndarray shape (N,3)).
     """
-    import collections.abc  # noqa: PLC0415 — local import to satisfy yield type hint
 
     with open(dump_path, encoding="utf-8") as fh:
         while True:

@@ -430,7 +430,7 @@ class MainWidget(QtWidgets.QWidget):
             if timer is not None:
                 try:
                     timer.stop()
-                except Exception:  # pragma: no cover - defensive
+                except Exception:  # pragma: no cover - defensive  # noqa: BLE001
                     logger.debug("PinocchioGUI.timer.stop raised", exc_info=True)
         except Exception:  # pragma: no cover - defensive
             logger.exception("Pinocchio MainWidget cleanup raised")

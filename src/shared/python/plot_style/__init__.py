@@ -59,7 +59,7 @@ try:
         "DataChannelEditor",
         "MarkerStylePicker",
     )
-except Exception:  # pragma: no cover - optional GUI dependency (PyQt6)
+except Exception:  # pragma: no cover - optional GUI dependency (PyQt6)  # noqa: BLE001
     _WIDGET_NAMES = ()
 
 if TYPE_CHECKING:  # pragma: no cover - typing only

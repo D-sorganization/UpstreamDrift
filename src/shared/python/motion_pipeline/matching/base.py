@@ -9,13 +9,12 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional, Protocol
+from typing import Protocol
 
 import numpy as np
 
 from ..contracts import (
     JointTrajectory,
-    MotionMatchingRequest as ContractMotionMatchingRequest,
     MotionMatchingResult as ContractMotionMatchingResult,
     MotionTrajectory,
     MuscleActivationTrajectory,
@@ -214,7 +213,9 @@ class BaseMotionMatchingSolver(ABC):
             RMSE in radians
         """
         errors = []
-        for ref_frame, track_frame in zip(reference.frames, tracked.frames, strict=False):
+        for ref_frame, track_frame in zip(
+            reference.frames, tracked.frames, strict=False
+        ):
             for ref_q, track_q in zip(ref_frame.q, track_frame.q, strict=False):
                 errors.append((ref_q - track_q) ** 2)
 
@@ -237,7 +238,9 @@ class BaseMotionMatchingSolver(ABC):
         """
         # Compute residual as difference in joint angles
         residuals = []
-        for ref_frame, track_frame in zip(reference.frames, tracked.frames, strict=False):
+        for ref_frame, track_frame in zip(
+            reference.frames, tracked.frames, strict=False
+        ):
             for ref_q, track_q in zip(ref_frame.q, track_frame.q, strict=False):
                 residuals.append(abs(ref_q - track_q))
 

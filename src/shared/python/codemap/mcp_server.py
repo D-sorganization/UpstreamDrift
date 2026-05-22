@@ -30,7 +30,7 @@ def _build_fastmcp():
     """Build a FastMCP server. Falls back to None on ImportError."""
     try:
         from mcp.server.fastmcp import FastMCP  # type: ignore[import-not-found]
-    except Exception:
+    except Exception:  # noqa: BLE001
         return None
 
     mcp = FastMCP("codemap")

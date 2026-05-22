@@ -92,9 +92,13 @@ def _safe_version(import_name: str) -> str:
         module cannot be imported, or ``"unknown"`` if the module is
         importable but does not expose ``__version__``.
     """
+    # Issue #5911: ``ImportError`` was previously a bare ``except Exception``.
+    # Narrowed to the real exception types that ``__import__`` raises.
+    # ``ModuleNotFoundError`` is a subclass of ``ImportError`` (caught).
+    # ``ValueError`` covers the ``__import__("")`` empty-name path.
     try:
         mod = __import__(import_name)
-    except Exception:  # noqa: BLE001
+    except (ImportError, ValueError):
         return "not installed"
     return str(getattr(mod, "__version__", "unknown"))
 

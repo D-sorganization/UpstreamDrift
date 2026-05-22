@@ -9,9 +9,7 @@ lazy-loading: importing this module does not trigger the Drake/pydrake dependenc
 import argparse
 import contextlib
 
-from PyQt6.QtWidgets import QFileDialog
 
-from src.shared.python.dashboard.launcher import launch_dashboard
 from src.shared.python.dashboard.window import UnifiedDashboardWindow
 from src.shared.python.ui.qt.utils import get_qapp
 
@@ -46,7 +44,7 @@ class DrakeDashboard(UnifiedDashboardWindow):
                         )
                         if models:
                             model_path = models[0]
-                except Exception:
+                except Exception:  # noqa: BLE001
                     pass
 
         if model_path:

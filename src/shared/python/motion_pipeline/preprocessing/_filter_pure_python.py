@@ -8,7 +8,6 @@ for smoothing noisy motion capture data.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
 
 import numpy as np
 
@@ -77,7 +76,9 @@ def _filter_keypoints(
     if filter_type == FilterType.BUTTERWORTH:
         filtered = _butterworth_filter(data, cutoff, order, fps)
     elif filter_type == FilterType.SAVITZKY_GOLAY:
-        filtered = _savgol_filter(data, window_length=min(11, len(seq.frames)), polyorder=2)
+        filtered = _savgol_filter(
+            data, window_length=min(11, len(seq.frames)), polyorder=2
+        )
     elif filter_type == FilterType.MEDIAN:
         filtered = _median_filter(data, kernel_size=3)
     elif filter_type == FilterType.GAUSSIAN:
@@ -97,7 +98,9 @@ def _filter_keypoints(
         metadata={
             **seq.metadata,
             "filtered": True,
-            "filter_type": filter_type.value if hasattr(filter_type, "value") else str(filter_type),
+            "filter_type": filter_type.value
+            if hasattr(filter_type, "value")
+            else str(filter_type),
         },
     )
 
@@ -124,7 +127,9 @@ def _filter_markers(
     if filter_type == FilterType.BUTTERWORTH:
         filtered = _butterworth_filter(data, cutoff, order, fps)
     elif filter_type == FilterType.SAVITZKY_GOLAY:
-        filtered = _savgol_filter(data, window_length=min(11, len(traj.frames)), polyorder=2)
+        filtered = _savgol_filter(
+            data, window_length=min(11, len(traj.frames)), polyorder=2
+        )
     elif filter_type == FilterType.MEDIAN:
         filtered = _median_filter(data, kernel_size=3)
     elif filter_type == FilterType.GAUSSIAN:
@@ -145,7 +150,9 @@ def _filter_markers(
         metadata={
             **traj.metadata,
             "filtered": True,
-            "filter_type": filter_type.value if hasattr(filter_type, "value") else str(filter_type),
+            "filter_type": filter_type.value
+            if hasattr(filter_type, "value")
+            else str(filter_type),
         },
     )
 
@@ -323,7 +330,9 @@ def _savgol_filter(
         filtered = np.zeros_like(data)
         for i in range(data.shape[1]):
             for j in range(data.shape[2]):
-                filtered[:, i, j] = savgol_filter(data[:, i, j], window_length, polyorder)
+                filtered[:, i, j] = savgol_filter(
+                    data[:, i, j], window_length, polyorder
+                )
 
         return filtered
     except ImportError:
@@ -373,7 +382,9 @@ def _moving_average(
     filtered = np.zeros_like(data)
     for i in range(data.shape[1]):
         for j in range(data.shape[2]):
-            filtered[:, i, j] = np.convolve(data[:, i, j], np.ones(window) / window, mode="same")
+            filtered[:, i, j] = np.convolve(
+                data[:, i, j], np.ones(window) / window, mode="same"
+            )
 
     return filtered
 

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def check_matlab_availability() -> bool:
     """Check if MATLAB engine is available."""
     try:
-        import matlab.engine  # type: ignore
+        import matlab.engine  # type: ignore  # noqa: F401
 
         return True
     except ImportError:
@@ -44,7 +44,7 @@ def load_c3d_markers(filepath: str) -> dict[str, np.ndarray]:
         for i, label in enumerate(labels):
             markers[label] = data[:3, i, :]
         return markers
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"Error reading C3D file: {e}")
         return {}
 
@@ -134,6 +134,6 @@ if __name__ == "__main__":
 
     try:
         run_pipeline(args.input, args.output)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"Pipeline failed: {e}")
         sys.exit(1)

@@ -23,7 +23,7 @@ All symbols from ``shared.python.theme`` are re-exported here.
 from __future__ import annotations
 
 import logging
-import sys
+import sys  # noqa: F401
 from pathlib import Path
 
 logger = logging.getLogger(__name__)

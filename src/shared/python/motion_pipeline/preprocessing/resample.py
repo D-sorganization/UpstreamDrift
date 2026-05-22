@@ -10,7 +10,6 @@ fallback in ``_resample_pure_python.py`` is used otherwise.
 
 from __future__ import annotations
 
-from typing import Optional
 
 import numpy as np
 

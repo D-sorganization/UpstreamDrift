@@ -1,6 +1,5 @@
 """Exercise registry for discovering biomechanics models across sibling repos."""
 
-from pathlib import Path
 from src.shared.python.config.model_source_providers import _MODEL_SOURCES
 
 
@@ -29,7 +28,7 @@ def discover_exercise(exercise_name: str) -> list[str]:
 
             if any(p.exists() for p in possible_paths):
                 engines.append(engine_name)
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
 
     return engines

@@ -158,7 +158,7 @@ class AgentController:
                 message=f"Started {engine_name} engine (PID: {process.pid})",
                 data={"pid": process.pid, "engine": engine_name},
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             return AgentActionResult(
                 success=False,
                 error=f"Failed to start engine: {e}",
@@ -198,7 +198,7 @@ class AgentController:
                 success=True,
                 message=f"Stopped {engine_name} engine",
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             return AgentActionResult(
                 success=False,
                 error=f"Failed to stop engine: {e}",

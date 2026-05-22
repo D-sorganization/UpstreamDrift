@@ -108,7 +108,7 @@ class TRCAdapter(MocapSourceAdapter):
             frame_count=num_frames,
             unit_system=unit_system,  # type: ignore[arg-type]
             marker_set_name=None,
-            notes=f"markers={len(info['marker_names'])}",
+            notes=f"markers={len(info['marker_names'])}",  # type: ignore[arg-type]
         )
 
     def load(
@@ -122,7 +122,9 @@ class TRCAdapter(MocapSourceAdapter):
         if _HAS_RUST:
             try:
                 return self._load_via_rust(p, calibration)
-            except Exception:  # pragma: no cover - Rust parser disagreement
+            except (
+                Exception  # noqa: BLE001 - fall back to Python parser on any Rust failure
+            ):  # pragma: no cover - Rust parser disagreement
                 # Fall back to the canonical Python parser if anything goes
                 # wrong; the contract is byte-identical output, not "Rust wins".
                 pass

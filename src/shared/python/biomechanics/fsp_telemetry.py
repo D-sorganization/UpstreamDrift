@@ -53,7 +53,7 @@ def log_fsp_computed(fsp_result: Any) -> None:
 
     try:
         get_state_logger().log_event(_FSP_EVENT_TYPE, payload)
-    except Exception as exc:  # pragma: no cover - defensive
+    except Exception as exc:  # pragma: no cover - defensive  # noqa: BLE001
         logger.debug("fsp_telemetry: state logger raised %r; payload=%s", exc, payload)
 
 

@@ -21,7 +21,12 @@ from fastapi import FastAPI, File, HTTPException, UploadFile, status, Form
 from pydantic import BaseModel, Field
 
 from .contracts import MotionMatchingResult
-from .orchestrator import MotionPipeline, PipelineConfig, AdapterOverride
+from .orchestrator import (
+    AdapterOverride,
+    MotionPipeline,
+    PipelineConfig,
+    PreprocessingStep,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -81,11 +86,11 @@ class PipelineRequest(BaseModel):
                 format=self.source_format, options=self.adapter_options
             ),
             preprocessing=[
-                {
-                    "name": step.get("name", ""),
-                    "enabled": step.get("enabled", True),
-                    "params": step.get("params", {}),
-                }
+                PreprocessingStep(
+                    name=str(step.get("name", "")),
+                    enabled=bool(step.get("enabled", True)),
+                    params=dict(step.get("params", {})),
+                )
                 for step in self.preprocessing
             ],
             scaling=self.scaling,
@@ -311,7 +316,7 @@ Accepts JSON config body plus file upload.
 
         except RuntimeError as e:
             return PipelineResponse.from_error(request_id, str(e))
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             return PipelineResponse.from_error(request_id, f"Internal error: {e}")
 
     return app

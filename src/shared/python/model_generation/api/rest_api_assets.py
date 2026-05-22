@@ -93,7 +93,7 @@ class AssetLibraryEditorRoutesMixin:
                 )
         except (PermissionError, OSError, ValueError, TypeError) as error:
             return APIResponse.error(f"Mesh processing failed: {error}")
-        except Exception:
+        except Exception:  # noqa: BLE001
             logger.warning("Mesh parser failed", exc_info=True)
             return APIResponse.error("Mesh processing failed")
 

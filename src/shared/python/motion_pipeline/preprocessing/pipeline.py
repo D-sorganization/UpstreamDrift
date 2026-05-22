@@ -6,9 +6,8 @@ Part of issue #4564. Pipeline API for chaining preprocessing steps.
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Optional, Protocol
+from typing import Protocol
 
 from ..contracts import KeypointSequence, MarkerTrajectory
 
@@ -173,7 +172,7 @@ class NormalizeStep:
         data: KeypointSequence | MarkerTrajectory,
     ) -> KeypointSequence | MarkerTrajectory:
         """Apply coordinate normalization to data."""
-        from .normalize import UpAxis, normalize_coordinates, convert_units
+        from .normalize import normalize_coordinates, convert_units
 
         # Apply coordinate normalization
         result = normalize_coordinates(

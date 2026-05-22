@@ -66,7 +66,7 @@ class _C3DViewerEmbedAdapter:
             for canvas in canvases:
                 if hasattr(canvas, "fig"):
                     plt.close(canvas.fig)
-        except Exception:  # pragma: no cover - defensive
+        except Exception:  # pragma: no cover - defensive  # noqa: BLE001
             # Host shutdown must not depend on us. Swallow rather than
             # raise; the registry contract requires ``cleanup`` to be
             # idempotent and non-fatal.

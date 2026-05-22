@@ -465,7 +465,7 @@ class MainWidget(QtWidgets.QWidget if HAS_QT else object):  # type: ignore[misc]
             if hasattr(app, attr):
                 try:
                     setattr(app, attr, None)
-                except Exception:  # pragma: no cover - defensive
+                except Exception:  # pragma: no cover - defensive  # noqa: BLE001
                     pass
 
 

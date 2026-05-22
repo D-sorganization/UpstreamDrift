@@ -165,7 +165,7 @@ class MJCFConverter:
         if _mjcf_rust is not None and _mjcf_rust.should_use_rust():
             try:
                 _mjcf_rust.parse_mjcf_to_dict(xml_string)
-            except Exception as exc:  # pragma: no cover - fallback path
+            except Exception as exc:  # pragma: no cover - fallback path  # noqa: BLE001
                 logger.warning(
                     "upstream_urdf Rust MJCF parser failed (%s); "
                     "falling back to pure Python",

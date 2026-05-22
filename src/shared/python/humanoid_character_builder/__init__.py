@@ -72,10 +72,10 @@ from humanoid_character_builder.generators.urdf_generator import (
 from humanoid_character_builder.interfaces import (
     CharacterBuilder,
     CharacterBuildResult,
-    ExportOptions,
-    SegmentMeshInfo,
-    quick_build,
-    quick_urdf,
+    ExportOptions,  # noqa: F401
+    SegmentMeshInfo,  # noqa: F401
+    quick_build,  # noqa: F401
+    quick_urdf,  # noqa: F401
 )
 
 # Inertia calculation

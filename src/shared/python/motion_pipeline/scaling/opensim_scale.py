@@ -12,7 +12,6 @@ from __future__ import annotations
 import logging
 import tempfile
 from pathlib import Path
-from typing import Optional
 from collections.abc import Mapping
 
 import numpy as np
@@ -219,7 +218,9 @@ class OpenSimScaleBackend:
                     scale_tool.run()
                     if out_osim.exists():
                         logger.info("OpenSim ScaleTool produced %s", out_osim)
-                except Exception as exc:  # pragma: no cover - opensim runtime
+                except (
+                    Exception  # noqa: BLE001 - OpenSim ScaleTool runtime failure
+                ) as exc:  # pragma: no cover - opensim runtime
                     logger.warning(
                         "OpenSim ScaleTool failed (%s); falling back to "
                         "marker-distance estimate",

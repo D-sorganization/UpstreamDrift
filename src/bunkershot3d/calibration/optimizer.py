@@ -5,7 +5,6 @@ Optimization loop for calibrating backend parameters to bulk properties.
 import numpy as np
 from scipy.optimize import differential_evolution
 from typing import Any
-from collections.abc import Callable
 
 
 class CalibrationOptimizer:

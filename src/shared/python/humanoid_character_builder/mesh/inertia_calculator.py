@@ -77,7 +77,7 @@ class MeshInertiaCalculator:
                 mesh.fix_normals()
                 mesh.remove_degenerate_faces()
                 mesh.merge_vertices()
-            except Exception:
+            except Exception:  # noqa: BLE001
                 pass
 
         props = self._calculator._extract_mesh_properties(

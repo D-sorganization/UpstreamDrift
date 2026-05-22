@@ -1069,7 +1069,7 @@ class MainWidget(_RenderMixin, _BuildersMixin, _SessionMixin, QWidget):
         if timer is not None:
             try:
                 timer.stop()
-            except Exception:  # pragma: no cover - defensive
+            except Exception:  # pragma: no cover - defensive  # noqa: BLE001
                 logger.debug("MainWidget timer.stop() raised", exc_info=True)
         # Drop the live-view controller's references so its artists can
         # be garbage-collected with the figure.
@@ -1077,5 +1077,5 @@ class MainWidget(_RenderMixin, _BuildersMixin, _SessionMixin, QWidget):
         if live_view is not None:
             try:
                 live_view.set_target(body=None, club=None, ball=None)
-            except Exception:  # pragma: no cover - defensive
+            except Exception:  # pragma: no cover - defensive  # noqa: BLE001
                 logger.debug("MainWidget live_view teardown raised", exc_info=True)

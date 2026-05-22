@@ -229,7 +229,7 @@ class AgenticSummaryGenerator:
             extractor = _AIInsightsExtractor(self._ai_client)
             insights = extractor.extract(run_id, data)
             return self._assemble_full_report(run_id, data, insights)
-        except Exception:
+        except Exception:  # noqa: BLE001
             logger.warning(
                 "agentic_summary_ai_failed run_id=%s falling_back=True",
                 run_id,

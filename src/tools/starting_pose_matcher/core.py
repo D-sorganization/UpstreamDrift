@@ -53,7 +53,6 @@ import pandas as pd
 # "l_shoulder", ...) and the matcher's compact short names ("hip",
 # "spine", "torso", "ls", ...) below.
 from src.shared.python.motion_matching.diagnostics import (
-    SegmentLengths,
     SkeletonPose,
     forward_kinematics,
     reference_golfer_setup,

@@ -7,7 +7,6 @@ Part of issue #4568. Drake direct-collocation / contact-implicit trajectory opti
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from ..contracts import JointTrajectory, SkeletonRig
 from .base import (

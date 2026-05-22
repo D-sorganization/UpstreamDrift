@@ -38,7 +38,7 @@ def main() -> None:
             subprocess.Popen(["open", str(file_path)])  # noqa: S603, S607
         else:
             subprocess.Popen(["xdg-open", str(file_path)])  # noqa: S603, S607
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"Failed to open document: {e}")
         sys.exit(1)
 
