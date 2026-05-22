@@ -77,7 +77,7 @@ async def publish(req: PublishRequest) -> dict[str, Any]:
         try:
             await ws.send_json(req.payload)
             delivered += 1
-        except Exception:
+        except Exception:  # noqa: BLE001
             # Best-effort: drop dead sockets but do not fail the publish.
             logger.debug("realtime: dropping dead subscriber on %s", req.channel)
             await _registry.remove(req.channel, ws)
@@ -107,7 +107,7 @@ async def subscribe(websocket: WebSocket, channel: str) -> None:
                 break
     except WebSocketDisconnect:
         pass
-    except Exception:
+    except Exception:  # noqa: BLE001
         logger.debug("realtime: subscriber loop ended for %s", channel)
     finally:
         await _registry.remove(channel, websocket)

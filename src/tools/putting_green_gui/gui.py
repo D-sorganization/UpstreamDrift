@@ -19,7 +19,6 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QMainWindow,
-    QMessageBox,
     QPushButton,
     QSplitter,
     QStatusBar,
@@ -128,7 +127,7 @@ class PuttingGreenWidget(QWidget):
         results_layout = QVBoxLayout(results_group)
 
         try:
-            import pyqtgraph as pg
+            import pyqtgraph as pg  # noqa: F401
             import pyqtgraph.opengl as gl
 
             self._gl_view = gl.GLViewWidget()
@@ -217,11 +216,11 @@ class PuttingGreenWidget(QWidget):
             # (Assuming actual PuttingGreenSimulator currently lacks the full physics run() method in standard form)
             t = np.linspace(0, 2, 100)
             aim_rad = np.radians(aim)
-            vx = speed * np.cos(aim_rad)
-            vy = speed * np.sin(aim_rad)
+            vx = speed * np.cos(aim_rad)  # noqa: F841
+            vy = speed * np.sin(aim_rad)  # noqa: F841
             # Deceleration based on stimp
             decel = 9.81 * (0.131 / (stimp / 10.0))
-            v_mag = np.maximum(0, speed - decel * t)
+            v_mag = np.maximum(0, speed - decel * t)  # noqa: F841
 
             x = np.zeros_like(t)
             y = np.zeros_like(t)

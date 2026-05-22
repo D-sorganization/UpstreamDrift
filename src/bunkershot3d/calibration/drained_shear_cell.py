@@ -2,9 +2,6 @@
 Drained shear cell (simplified Jenike-style) calibration experiment.
 """
 
-from pathlib import Path
-import numpy as np
-
 
 class DrainedShearCellExperiment:
     """Applies normal load, shears at constant rate, extracts peak/residual friction angles."""

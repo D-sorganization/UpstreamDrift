@@ -131,7 +131,7 @@ def wrap_text_lines(text: str, width: int) -> list[str]:
         break_long_words=False,
         break_on_hyphens=False,
     )
-    return chunks if chunks else [str(text)]
+    return chunks or [str(text)]
 
 
 # ---------------------------------------------------------------------------

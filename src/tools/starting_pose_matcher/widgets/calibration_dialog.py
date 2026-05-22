@@ -29,7 +29,6 @@ from PyQt6.QtWidgets import (
     QFormLayout,
     QLabel,
     QLineEdit,
-    QPushButton,
     QSpinBox,
     QVBoxLayout,
     QWidget,

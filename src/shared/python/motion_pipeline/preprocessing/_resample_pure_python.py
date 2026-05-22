@@ -6,7 +6,6 @@ Part of issue #4564. Frame-rate conversion with anti-aliasing.
 
 from __future__ import annotations
 
-from typing import Optional
 
 import numpy as np
 

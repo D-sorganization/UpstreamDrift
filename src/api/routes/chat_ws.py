@@ -195,7 +195,7 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
                     await websocket.send_json(
                         {"type": "complete", "session_id": session_id}
                     )
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.error("Error during streaming response: %s", e)
                     await websocket.send_json({"type": "error", "detail": str(e)})
 

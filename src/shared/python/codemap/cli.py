@@ -34,7 +34,7 @@ def _rust_binary() -> str | None:
     # Try the workspace release dir (development convenience).
     try:
         repo = api_mod.discover_repo_root()
-    except Exception:
+    except Exception:  # noqa: BLE001
         return None
     candidate = repo / "target" / "release" / exe
     if candidate.exists():

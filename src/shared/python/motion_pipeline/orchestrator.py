@@ -36,7 +36,6 @@ from collections.abc import Callable
 from pydantic import BaseModel, ConfigDict, Field
 
 from .contracts import (
-    Calibration,
     KeypointSequence,
     MarkerTrajectory,
     MotionMatchingRequest,
@@ -236,7 +235,7 @@ class MotionPipeline:
         for hook in self._hooks[stage]:
             try:
                 hook(payload)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(f"Hook for {stage.value} failed: {e}")
 
     # -------------------------------------------------------------------------
@@ -286,7 +285,7 @@ class MotionPipeline:
                 error=f"Unknown source type: {type(source)}",
             )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             return StageResult(
                 success=False, data=None, metadata={}, error=f"Adapter failed: {e}"
             )
@@ -313,7 +312,7 @@ class MotionPipeline:
                 },
             )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             return StageResult(
                 success=False,
                 data=None,
@@ -341,7 +340,7 @@ class MotionPipeline:
                 },
             )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             return StageResult(
                 success=False, data=None, metadata={}, error=f"Scaling failed: {e}"
             )
@@ -349,36 +348,40 @@ class MotionPipeline:
     def _run_inverse_kinematics(self, data: Any, skeleton: SkeletonRig) -> StageResult:
         """
         Run IK stage: compute joint angles from markers/keypoints.
+
+        Uses the ``make_ik_solver`` factory rather than a per-backend
+        ``run_ik`` function (the latter was removed in #4566 but the
+        orchestrator was not updated; tracked under #5911 follow-ups).
         """
         backend = self.config.ik_backend
+        if backend not in {"mujoco", "drake", "pinocchio", "opensim"}:
+            return StageResult(
+                success=False,
+                data=None,
+                metadata={},
+                error=f"Unknown IK backend: {backend}",
+            )
 
         try:
-            # Import backend dynamically (LoD: no direct imports)
-            if backend == "mujoco":
-                from .ik.mujoco_backend import run_ik
-            elif backend == "drake":
-                from .ik.drake_backend import run_ik
-            elif backend == "pinocchio":
-                from .ik.pinocchio_backend import run_ik
-            elif backend == "opensim":
-                from .ik.opensim_backend import run_ik
-            else:
-                return StageResult(
-                    success=False,
-                    data=None,
-                    metadata={},
-                    error=f"Unknown IK backend: {backend}",
-                )
+            from .ik.base import MarkerWeights, make_ik_solver
 
-            trajectory = run_ik(data, skeleton, weights=self.config.cost_weights)
+            solver = make_ik_solver(backend)
+            weights = MarkerWeights(
+                marker_weights=dict(self.config.cost_weights),
+            )
+            trajectory = solver.solve(data, skeleton, weights=weights)
 
+            num_frames = len(trajectory.frames) if trajectory else 0
+            num_dofs = (
+                len(trajectory.frames[0].q) if trajectory and trajectory.frames else 0
+            )
             return StageResult(
                 success=True,
                 data=trajectory,
                 metadata={
                     "backend": backend,
-                    "num_frames": trajectory.num_frames if trajectory else 0,
-                    "num_dofs": trajectory.num_dofs if trajectory else 0,
+                    "num_frames": num_frames,
+                    "num_dofs": num_dofs,
                 },
             )
 
@@ -389,7 +392,7 @@ class MotionPipeline:
                 metadata={},
                 error=f"IK backend not available: {e}",
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             return StageResult(
                 success=False, data=None, metadata={}, error=f"IK failed: {e}"
             )
@@ -447,7 +450,7 @@ class MotionPipeline:
                 metadata={},
                 error=f"Matching backend not available: {e}",
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             return StageResult(
                 success=False,
                 data=None,
@@ -624,7 +627,7 @@ def cli_run(source: str, output: str, engine: str, **kwargs) -> None:
     except RuntimeError as e:
         sys.stderr.write(f"Pipeline error: {e}\n")
         sys.exit(1)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         sys.stderr.write(f"Unexpected error: {e}\n")
         sys.exit(1)
 

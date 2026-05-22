@@ -81,7 +81,7 @@ class LibraryManager:
                 import shutil
 
                 shutil.copy2(source_path, target_path)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"Failed to copy file {source_path}: {e}")
                 return None
 
@@ -104,7 +104,7 @@ class LibraryManager:
                     if info.author:
                         author = info.author
                     # Could attempt to parse creation date for year, but keeping simple for now
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.debug(f"Could not extract metadata from {source_path}: {e}")
 
         doc_data = {
@@ -135,7 +135,7 @@ class LibraryManager:
                     ),
                 )
                 conn.commit()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Failed to index {target_path.name}: {e}")
 
         return doc_data
@@ -150,7 +150,7 @@ class LibraryManager:
                 cursor.execute("SELECT * FROM documents ORDER BY added_date DESC")
                 for row in cursor.fetchall():
                     docs.append(dict(row))
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Failed to retrieve documents: {e}")
         return docs
 
@@ -473,7 +473,7 @@ class LibraryWidget(QWidget):
                     page_text = reader.pages[i].extract_text()
                     if page_text:
                         context_text += page_text + "\n"
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"Failed to extract text for Notebook LM: {e}")
 
         if not context_text:

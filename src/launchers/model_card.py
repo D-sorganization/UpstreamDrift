@@ -835,9 +835,8 @@ class DraggableModelCard(QFrame):
                 style.polish(chip)
 
             # Compute a text color based on background
-            from PyQt6.QtGui import QColor
 
-            bg_color = chip.palette().color(chip.backgroundRole())
+            bg_color = chip.palette().color(chip.backgroundRole())  # noqa: F841
             # For QLabels styled with QSS, we need to extract from the computed styles or just use heuristics.
             # To be safe, we will apply an explicit style.
             # If the background is bright, use black. If dark, use white.

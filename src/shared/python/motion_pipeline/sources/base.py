@@ -25,7 +25,7 @@ from __future__ import annotations
 import math
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import ClassVar, Literal, Optional
+from typing import ClassVar, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -132,7 +132,9 @@ class MocapSourceAdapter(ABC):
         result = self.load(path, calibration=calibration)
         try:
             md = self.metadata(path)
-        except Exception:  # pragma: no cover - metadata is advisory here
+        except (
+            Exception  # noqa: BLE001 - metadata is advisory; any failure -> None
+        ):  # pragma: no cover - metadata is advisory here
             md = None
         self._check_postconditions(result, md)
         return result

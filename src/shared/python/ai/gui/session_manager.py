@@ -89,7 +89,7 @@ class ChatSessionManager(QObject):
                         context.metadata["archived"] = False
                         context.save_to_file(new_path)
                         logger.info(f"Migrated legacy chat to {new_path.name}")
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(f"Failed to migrate legacy chat history: {e}")
 
     def list_sessions(self) -> list[dict[str, Any]]:
@@ -140,7 +140,7 @@ class ChatSessionManager(QObject):
                         "file_path": file_path,
                     }
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(f"Failed to read session file {file_path}: {e}")
 
         # Sort by timestamp, newest first
@@ -169,7 +169,7 @@ class ChatSessionManager(QObject):
                 if emit:
                     self.session_loaded.emit(context)
                 return context
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"Failed to load session {session_id}: {e}")
         return None
 
@@ -195,7 +195,7 @@ class ChatSessionManager(QObject):
         try:
             context.save_to_file(file_path)
             self.sessions_updated.emit()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Failed to save session {context.session_id}: {e}")
 
     def archive_session(self, session_id: str, archived: bool = True) -> bool:
@@ -397,6 +397,6 @@ class ChatSessionManager(QObject):
                 file_path.unlink()
                 self.sessions_updated.emit()
                 return True
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"Failed to delete session {session_id}: {e}")
         return False

@@ -15,7 +15,6 @@ from typing import Any
 
 from src.shared.python.launcher_embed import (
     EmbedCapabilities,
-    register_embeddable_tool,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -74,7 +73,7 @@ class _ModelExplorerEmbedAdapter:
             try:
                 if widget.has_unsaved_changes():
                     return True
-            except Exception:  # pragma: no cover - defensive
+            except Exception:  # pragma: no cover - defensive  # noqa: BLE001
                 logger.debug(
                     "model_explorer is_dirty: widget probe raised", exc_info=True
                 )

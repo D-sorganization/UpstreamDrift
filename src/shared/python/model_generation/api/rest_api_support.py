@@ -50,9 +50,7 @@ def request_content(
     """Read content from the JSON body first, then from the uploaded file."""
     body = request_body(request)
     body_content = body.get(body_key)
-    return (
-        body_content if body_content else request_file_text(request, file_key=file_key)
-    )
+    return body_content or request_file_text(request, file_key=file_key)
 
 
 def download_requested(request: APIRequest) -> bool:

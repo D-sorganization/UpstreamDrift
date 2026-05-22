@@ -70,6 +70,10 @@ class SimscapeKinematicsService:
     def __init__(self) -> None:
         self._matlab_engine: object | None = None
         self._pose: CanonicalPose | None = None
+        # ``_engine`` is typed as ``object | None`` so the ImportError fallback
+        # can assign None without mypy variance complaints. Concrete attribute
+        # access on the engine is guarded by ``isinstance`` or ``getattr``.
+        self._engine: object | None = None
 
     def load(self, model_path: Path) -> None:
         if not isinstance(model_path, Path):
@@ -79,9 +83,10 @@ class SimscapeKinematicsService:
         try:
             from src.engines.simscape.adapter import SimscapeAdapter
 
-            self._engine = SimscapeAdapter()
-            self._engine.load_from_path(str(model_path))
-            self._matlab_engine = getattr(self._engine, "_matlab_engine", None)
+            engine = SimscapeAdapter()
+            engine.load_from_path(str(model_path))
+            self._engine = engine
+            self._matlab_engine = getattr(engine, "_matlab_engine", None)
         except ImportError:
             logger.warning("SimscapeAdapter not available. Running in mock mode.")
             self._engine = None
@@ -109,8 +114,13 @@ class SimscapeKinematicsService:
         if matlab_engine is not None:
             for joint_name, val in q_dict.items():
                 try:
-                    matlab_engine.workspace[f"{joint_name}_q"] = float(val)
-                except Exception as e:
+                    # ``matlab.engine.MatlabEngine`` exposes ``.workspace`` at
+                    # runtime; we type the field as ``object`` to avoid a hard
+                    # dependency on the MATLAB Engine stubs.
+                    matlab_engine.workspace[  # type: ignore[attr-defined]
+                        f"{joint_name}_q"
+                    ] = float(val)
+                except Exception as e:  # noqa: BLE001
                     logger.warning(
                         f"Failed to set {joint_name}_q in MATLAB workspace: {e}"
                     )
@@ -126,13 +136,15 @@ class SimscapeKinematicsService:
     def step(self, dt: float) -> None:
         if dt <= 0:
             raise ValueError(f"dt must be positive, got {dt!r}")
-        if getattr(self, "_engine", None) is not None:
-            self._engine.step(dt)
+        engine = self._engine
+        if engine is not None:
+            engine.step(dt)  # type: ignore[attr-defined]
 
     def reset(self) -> None:
         self._pose = None
-        if getattr(self, "_engine", None) is not None:
-            self._engine.reset()
+        engine = self._engine
+        if engine is not None:
+            engine.reset()  # type: ignore[attr-defined]
 
     def capabilities(self) -> ServiceCapabilities:
         return _SIMSCAPE_CAPABILITIES

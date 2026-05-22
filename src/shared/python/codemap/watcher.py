@@ -63,7 +63,7 @@ def _make_handler(repo: Path, conn, lock: threading.Lock, pending: dict, schedul
 def run(repo_root: str | None = None, *, debounce: float = DEBOUNCE_S) -> int:
     try:
         from watchdog.observers import Observer  # type: ignore[import-not-found]
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         print(f"codemap-watch requires watchdog: {exc}", file=sys.stderr)
         return 2
 

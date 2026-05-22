@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-import os
 import re
 from pathlib import Path
-from typing import Optional
 
-from PyQt6.QtCore import Qt, QUrl, pyqtSignal, QSize, pyqtSlot
+from PyQt6.QtCore import Qt, QUrl, pyqtSignal, pyqtSlot
 from PyQt6.QtGui import QImage, QPixmap, QFont
 from PyQt6.QtWidgets import (
     QWidget,

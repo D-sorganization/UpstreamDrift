@@ -50,8 +50,8 @@ def _load_pyqtgraph() -> Any | None:
 _PLOT_THEME_AVAILABLE = False
 _get_plot_theme_manager: Any = None
 try:
-    import sys
-    from pathlib import Path
+    import sys  # noqa: F401
+    from pathlib import Path  # noqa: F401
 
     from plot_theme.manager import (
         get_plot_theme_manager as _shared_get_plot_theme_manager,

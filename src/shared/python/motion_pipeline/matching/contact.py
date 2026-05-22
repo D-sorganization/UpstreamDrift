@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 from collections.abc import Iterable, Mapping
 
 import numpy as np

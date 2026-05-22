@@ -12,12 +12,11 @@ from __future__ import annotations
 import logging
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
 from ..contracts import (
-    JointStateFrame,
     JointTrajectory,
     SkeletonRig,
     TorqueFrame,
@@ -41,7 +40,7 @@ try:  # pragma: no cover - exercised conditionally
     import upstream_pinocchio_id as _rust_pin_id  # type: ignore[import-not-found]
 
     _HAVE_RUST_PIN_ID = True
-except Exception:  # pragma: no cover - fallback path
+except Exception:  # pragma: no cover - fallback path  # noqa: BLE001
     _rust_pin_id = None  # type: ignore[assignment]
     _HAVE_RUST_PIN_ID = False
 
@@ -228,7 +227,9 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
                     qdot_all=qdot_all,
                     qddot_all=qddot_all,
                 )
-            except Exception as exc:  # pragma: no cover - safety fallback
+            except (
+                Exception  # noqa: BLE001 - safety fallback to pure-Python ID
+            ) as exc:  # pragma: no cover - safety fallback
                 logger.warning(
                     "upstream_pinocchio_id rust path failed (%s); "
                     "falling back to pure-Python loop",

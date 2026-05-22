@@ -7,9 +7,6 @@ Part of issue #4566. Wraps OpenSim's InverseKinematicsTool.
 from __future__ import annotations
 
 import logging
-import tempfile
-from pathlib import Path
-from typing import Optional
 
 from ..contracts import (
     JointStateFrame,
@@ -62,7 +59,7 @@ class OpenSimIKSolver(BaseIKSolver):
 
         # Check if OpenSim is available
         try:
-            import opensim as osim
+            import opensim as osim  # noqa: F401
         except ImportError as err:
             raise ImportError(
                 "OpenSim not installed. Install with: pip install opensim"

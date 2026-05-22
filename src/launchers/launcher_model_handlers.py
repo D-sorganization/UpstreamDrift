@@ -93,7 +93,7 @@ class ModuleHandler:
             module = importlib.import_module(self.module_name)
             if hasattr(module, "get_dockable_ui"):
                 return module.get_dockable_ui()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug("No dockable UI found in module %s: %s", self.module_name, e)
         return None
 
@@ -171,7 +171,7 @@ class ScriptHandler:
                 spec.loader.exec_module(module)
                 if hasattr(module, "get_dockable_ui"):
                     return module.get_dockable_ui()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug("No dockable UI found in script %s: %s", self._script_path, e)
         finally:
             sys.path = original_sys_path
@@ -259,7 +259,7 @@ class SpecialAppHandler:
                         spec.loader.exec_module(module)
                         if hasattr(module, func_name):
                             return getattr(module, func_name)()
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.warning(
                         "Failed to load embed_adapter %s: %s", embed_adapter, e
                     )
@@ -292,7 +292,7 @@ class SpecialAppHandler:
                 spec.loader.exec_module(module)
                 if hasattr(module, "get_dockable_ui"):
                     return module.get_dockable_ui()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug("No dockable UI found in special app %s: %s", script_path, e)
         finally:
             sys.path = original_sys_path
@@ -579,7 +579,7 @@ class DocumentHandler:
             process_manager.attach_process(f"Document_{file_path.name}", process)
             logger.info("%s: launched proxy for %s", self.HANDLER_NAME, file_path.name)
             return True
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(
                 "%s: failed to launch document proxy: %s", self.HANDLER_NAME, e
             )

@@ -21,13 +21,10 @@ from PyQt6.QtWidgets import (
     QButtonGroup,
     QCheckBox,
     QComboBox,
-    QDockWidget,
     QFrame,
     QGridLayout,
     QHBoxLayout,
     QLabel,
-    QLineEdit,
-    QMenu,
     QMenuBar,
     QPlainTextEdit,
     QPushButton,
@@ -35,7 +32,6 @@ from PyQt6.QtWidgets import (
     QSizePolicy,
     QSlider,
     QSplitter,
-    QStyle,
     QToolButton,
     QVBoxLayout,
     QWidget,
@@ -90,7 +86,7 @@ def _build_menu_bar_close_widget(parent: QWidget, close_callback: Any) -> QWidge
     return container
 
 
-from typing import Protocol, Optional
+from typing import Protocol
 from PyQt6.QtWidgets import QTabWidget, QDialog
 
 

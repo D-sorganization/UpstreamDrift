@@ -99,7 +99,7 @@ class CLIToolBase:
                 return_code=-1,
                 command=" ".join(full_command),
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             return CLIExecutionResult(
                 success=False,
                 error=str(e),

@@ -143,6 +143,27 @@ maturin develop                                   # build Rust extensions locall
 - **TDD:** Tests in same PR as implementation. Coverage must not decrease.
 - **File size:** If approaching 1200 lines, refactor before adding more.
 
+## Error handling (issue #5911 / ADR-0016)
+
+Three anti-patterns are blocked by `scripts/ci/check_error_handling_ratchet.py` from growing beyond the baseline in `scripts/config/error_handling_baseline.json`. Pre-existing instances are grandfathered with `# noqa: <code>`; **new code must use the helpers**.
+
+| Don't                                              | Do                                                                                                    | Helper                              |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `try: ... except Exception: pass`                  | `with narrow_catch(ValueError, OSError, log_message="op"): ...`                                       | `core.process_safety.narrow_catch`  |
+| `subprocess.Popen(cmd, ...)` for short-lived spawn | `with managed_popen(cmd, timeout=T) as proc: ...`                                                     | `core.process_safety.managed_popen` |
+| `await asyncio.gather(*tasks)`                     | `await safe_gather(*tasks)` (or `raise_on_all_failed=True`)                                           | `core.process_safety.safe_gather`   |
+| `raise RuntimeError("X is closed")`                | `raise StateError(...)` from `core.contracts.exceptions` or a domain subclass from `core.error_utils` | existing hierarchy                  |
+| `logger.error("...: %s", e)` in `except`           | `logger.exception("...")`                                                                             | stdlib (preserves traceback)        |
+| `for line in open(path):`                          | `with open(path) as f: for line in f:`                                                                | stdlib (no helper needed)           |
+
+Lint rules enforced (no longer in `extend-ignore`):
+
+- `BLE001` — blind `except Exception`
+- `F841` — unused local variable
+- `F401` — unused import (use `__all__` or redundant-alias `import X as X`)
+
+If you genuinely need to break one of these rules, add `# noqa: <CODE> - <reason>` and explain in the PR description. The ratchet allows the count to stay equal, so swap one in for one out.
+
 ## Cross-Repo Dependencies
 
 - **Tools integration surface:** shared Python utilities are vendored in `vendor/ud-tools/`, and optional editable sibling wiring lives behind `scripts/setup_tools_workspace.sh` plus the pytest `--tools-mode` fixtures in `tests/conftest.py`.

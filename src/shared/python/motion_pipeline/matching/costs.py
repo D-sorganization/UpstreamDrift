@@ -8,14 +8,13 @@ Each function validates inputs (DbC) and returns finite scalars.
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 from collections.abc import Mapping
 
 import numpy as np
 
 from ..contracts import (
     JointTrajectory,
-    MarkerFrame,
     MarkerTrajectory,
     TorqueTrajectory,
 )
@@ -58,7 +57,12 @@ def _qddot_matrix(traj: JointTrajectory) -> np.ndarray:
     if traj.frames[0].qddot is not None and all(
         f.qddot is not None for f in traj.frames
     ):
-        return np.asarray([list(f.qddot) for f in traj.frames], dtype=float)
+        # The guard above proves ``f.qddot`` is non-None; mypy can't see it
+        # through the generator. The cast keeps the runtime semantics.
+        return np.asarray(
+            [list(f.qddot) for f in traj.frames],  # type: ignore[arg-type]
+            dtype=float,
+        )
 
     q = _q_matrix(traj)
     if q.shape[0] < 3:

@@ -10,8 +10,8 @@ from src.shared.python.contracts import require
 
 try:
     import matplotlib.pyplot as plt
-    from matplotlib.axes import Axes
-    from matplotlib.figure import Figure
+    from matplotlib.axes import Axes  # noqa: F401
+    from matplotlib.figure import Figure  # noqa: F401
 except ImportError:
     plt = None  # type: ignore
 

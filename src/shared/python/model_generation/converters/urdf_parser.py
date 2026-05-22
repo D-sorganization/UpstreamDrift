@@ -219,7 +219,7 @@ class URDFParser:
                     original_xml=xml_string,
                     read_only=read_only,
                 )
-            except Exception as exc:  # pragma: no cover - fallback path
+            except Exception as exc:  # pragma: no cover - fallback path  # noqa: BLE001
                 logger.warning(
                     "upstream_urdf Rust parser failed (%s); "
                     "falling back to pure Python",

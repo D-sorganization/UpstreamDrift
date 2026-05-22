@@ -542,9 +542,9 @@ class AgentChunk:
 
 # Re-export ChatModelInfo, ThinkingCapabilities, ThinkingLevel, ThinkingLevelName
 # from chat.models to keep existing tests and integrations working.
-from src.shared.python.chat.models import (
-    ChatModelInfo,
-    ThinkingCapabilities,
-    ThinkingLevel,
-    ThinkingLevelName,
+from src.shared.python.chat.models import (  # noqa: E402  - re-export at end of module
+    ChatModelInfo as ChatModelInfo,
+    ThinkingCapabilities as ThinkingCapabilities,
+    ThinkingLevel as ThinkingLevel,
+    ThinkingLevelName as ThinkingLevelName,
 )

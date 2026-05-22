@@ -154,7 +154,7 @@ class BallFlightWidget(QWidget):
         results_layout = QVBoxLayout(results_group)
 
         try:
-            import pyqtgraph as pg
+            import pyqtgraph as pg  # noqa: F401
             import pyqtgraph.opengl as gl
 
             self._gl_view = gl.GLViewWidget()
@@ -244,7 +244,7 @@ class BallFlightWidget(QWidget):
 
                 # Update 3D Visualization
                 if getattr(self, "_gl_view", None) is not None:
-                    import pyqtgraph as pg
+                    import pyqtgraph as pg  # noqa: F401
                     import pyqtgraph.opengl as gl
 
                     pts = np.array([p.position for p in trajectory])

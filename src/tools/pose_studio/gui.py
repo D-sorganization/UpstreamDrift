@@ -26,14 +26,13 @@ from src.shared.python.pose_interchange.canonical import (
 )
 from src.shared.python.launcher_embed import (
     EmbedCapabilities,
-    EmbeddableTool,
     register_embeddable_tool,
 )
 from src.tools.pose_studio.controllers import (
     EngineController,
     HistoryController,
 )
-from src.tools.pose_studio.core import SUPPORTED_ENGINES, EngineStatus
+from src.tools.pose_studio.core import SUPPORTED_ENGINES
 from src.tools.pose_studio.widgets import (
     EnginePicker,
     JointPanel,

@@ -153,7 +153,9 @@ class MainWidget(QWidget):
             # the wrapper instantiates fine, and the probe is purely a
             # smoke test. Suppress the abstract-class diagnostic.
             engine = MyoSuitePhysicsEngine()  # type: ignore[abstract]
-        except Exception as exc:  # pragma: no cover - environment-dependent
+        except (
+            Exception  # noqa: BLE001 - environment-dependent third-party import
+        ) as exc:  # pragma: no cover - environment-dependent
             logger.warning("MyoSuite engine probe failed: %s", exc)
             self._status_label.setText(f"Engine status: unavailable ({exc!s})")
             return

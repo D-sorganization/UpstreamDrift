@@ -43,7 +43,6 @@ class PendulumFitSwingProvider:
         from scipy.optimize import minimize
         from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
             DoublePendulumDynamics,
-            DoublePendulumParameters,
             DoublePendulumState,
         )
 
@@ -73,9 +72,15 @@ class PendulumFitSwingProvider:
                 )
             )
 
-            # Time grid from projected club
-            dt = projected_club.dt_s
-            n_frames = projected_club.n_frames
+            # Time grid from projected club. ``ClubTarget`` exposes only the
+            # raw ``time`` array; derive dt and frame count locally rather than
+            # rely on accessors that don't exist on the dataclass.
+            n_frames = int(projected_club.time.shape[0])
+            dt = (
+                float(projected_club.time[1] - projected_club.time[0])
+                if n_frames >= 2
+                else 0.0
+            )
 
             # Initial state
             # Assuming club target butt is shoulder, clubhead is end of club

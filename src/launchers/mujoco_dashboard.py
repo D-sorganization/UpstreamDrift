@@ -39,7 +39,7 @@ class MuJoCoDashboard(UnifiedDashboardWindow):
                     models = glob.glob(str(exercise_dir / "*.xml"))
                     if models:
                         engine.load_from_path(models[0])
-            except Exception:
+            except Exception:  # noqa: BLE001
                 pass
 
         super().__init__(engine, title=title)

@@ -14,7 +14,6 @@ is not installed, the pure-Python implementation in
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
 
 import numpy as np
 

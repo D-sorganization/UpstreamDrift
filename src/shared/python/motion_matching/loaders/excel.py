@@ -169,7 +169,7 @@ def read_excel_event_markers(path: Path | str, sheet: str) -> ExcelEventMarkers:
     # Read just the first row to get event markers
     try:
         row1 = pd.read_excel(path, sheet_name=sheet, header=None, nrows=1)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         logger.warning("Could not read event header: %s", exc)
         return ExcelEventMarkers()
 

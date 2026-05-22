@@ -143,5 +143,5 @@ class JupyterNotebookWidget(QtWidgets.QWidget):
         label = QtWidgets.QLabel(parent)
         label.setObjectName("SidekickJupyterCellOutput")
         label.setWordWrap(True)
-        label.setText(text if text else _PLACEHOLDER_RICH_OUTPUT)
+        label.setText(text or _PLACEHOLDER_RICH_OUTPUT)
         return label

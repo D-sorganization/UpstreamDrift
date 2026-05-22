@@ -261,7 +261,7 @@ class BodyLibraryShapesLayer(_LayerBase):
         for name in library.names():
             try:
                 binding = library.binding_template(name)
-            except Exception:
+            except Exception:  # noqa: BLE001
                 logger.debug("library binding for %r unavailable", name, exc_info=True)
                 continue
             # Only between-two bindings work without a cluster fitter
@@ -276,7 +276,7 @@ class BodyLibraryShapesLayer(_LayerBase):
                 shape = library.get(name)
                 fitted = fitter.fit(shape, binding, markers_xyz)
                 handle = renderer.add_shape(shape, fitted, theme)
-            except Exception:
+            except Exception:  # noqa: BLE001
                 logger.debug(
                     "library shape %r could not be fitted/added", name, exc_info=True
                 )
@@ -347,7 +347,7 @@ def _default_body_segments_safe(marker_names: tuple[str, ...]) -> list[tuple[int
         if pairs:
             return pairs
         # Empty result -> fall through to consecutive-pairs fallback
-    except Exception:  # pragma: no cover - branch-dependent import
+    except Exception:  # pragma: no cover - branch-dependent import  # noqa: BLE001
         pass
     m = len(marker_names)
     return [(i, i + 1) for i in range(m - 1)]
@@ -441,7 +441,7 @@ class LiveViewController:
             try:
                 panel.set_segment(None)
                 panel.setVisible(False)
-            except Exception:  # pragma: no cover - duck-typed slot
+            except Exception:  # pragma: no cover - duck-typed slot  # noqa: BLE001
                 pass
 
     def show_segment_properties(self, props: Any | None) -> None:

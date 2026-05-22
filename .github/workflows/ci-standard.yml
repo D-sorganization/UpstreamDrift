@@ -269,6 +269,9 @@ jobs:
       - name: Changed-File Size Budget Check
         run: python3 scripts/ci/check_file_size_budget.py
 
+      - name: Error-Handling Ratchet (issue #5911)
+        run: python3 scripts/ci/check_error_handling_ratchet.py
+
       - name: Repo Root Clutter Check
         run: python3 scripts/check_root_clutter.py
 

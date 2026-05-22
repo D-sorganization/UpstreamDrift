@@ -220,7 +220,6 @@ def create_terminal_backend(
 
 def _build_qt_widget(parent: Any) -> Any:  # pragma: no cover — Qt required
     """Build the Qt widget tree.  Called only when Qt is available."""
-    from PyQt6.QtCore import QTimer
     from PyQt6.QtWidgets import (
         QComboBox,
         QHBoxLayout,

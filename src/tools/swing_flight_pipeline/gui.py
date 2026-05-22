@@ -24,7 +24,6 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QMainWindow,
-    QMessageBox,
     QPushButton,
     QSplitter,
     QStatusBar,
@@ -127,7 +126,7 @@ class SwingFlightWidget(QWidget):
         results_layout = QVBoxLayout(results_group)
 
         try:
-            import pyqtgraph as pg
+            import pyqtgraph as pg  # noqa: F401
             import pyqtgraph.opengl as gl
 
             self._gl_view = gl.GLViewWidget()
@@ -221,7 +220,7 @@ class SwingFlightWidget(QWidget):
 
             # Update 3D Visualization
             if getattr(self, "_gl_view", None) is not None and result.trajectory:
-                import pyqtgraph as pg
+                import pyqtgraph as pg  # noqa: F401
                 import pyqtgraph.opengl as gl
 
                 pts = np.array([p.position for p in result.trajectory])

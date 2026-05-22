@@ -14,7 +14,6 @@ that do not ship the wheel.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
 
 import numpy as np
 

@@ -43,7 +43,7 @@ def build_workspace_tab(sidebar: Any) -> Any:
         QWidget containing the workspace layout.
     """
     try:
-        from PyQt6.QtWidgets import QListWidget, QSplitter, QVBoxLayout, QWidget
+        from PyQt6.QtWidgets import QListWidget, QSplitter
         from PyQt6.QtCore import Qt
 
         from .python_repl import PythonReplWidget
@@ -61,7 +61,7 @@ def build_workspace_tab(sidebar: Any) -> Any:
         )
         return _fallback_workspace_tab(sidebar, "registry not initialised")
 
-    set_variable = getattr(sidebar, "set_context_variable", registry.set_variable)
+    set_variable = getattr(sidebar, "set_context_variable", registry.set_variable)  # noqa: F841
 
     # Shared globals namespace initialised from the registry
     namespace: dict[str, Any] = {

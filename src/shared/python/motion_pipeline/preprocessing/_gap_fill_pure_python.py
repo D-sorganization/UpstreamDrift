@@ -8,7 +8,6 @@ using interpolation and reconstruction strategies.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
 
 import numpy as np
 

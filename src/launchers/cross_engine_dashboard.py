@@ -166,7 +166,7 @@ def _default_marker_style_template() -> MarkerStyle | None:
     """
     try:
         library = PresetLibrary.default()
-    except Exception:  # pragma: no cover - missing presets package
+    except Exception:  # pragma: no cover - missing presets package  # noqa: BLE001
         logger.debug("PresetLibrary.default() unavailable; using fallback style")
         return None
     if "default" not in library:

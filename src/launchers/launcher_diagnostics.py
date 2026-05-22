@@ -487,7 +487,7 @@ class LauncherDiagnostics:
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             details["error"] = str(e)
             result = DiagnosticResult(
                 name="launcher_provider_compatibility",

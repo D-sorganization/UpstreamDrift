@@ -7,7 +7,7 @@ running in headless environments.
 from __future__ import annotations
 
 try:
-    from PyQt6.QtCore import Qt
+    from PyQt6.QtCore import Qt  # noqa: F401
     from PyQt6.QtWidgets import (
         QHBoxLayout,
         QLabel,

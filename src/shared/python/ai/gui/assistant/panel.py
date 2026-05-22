@@ -112,7 +112,7 @@ class AIAssistantPanel(QWidget):
         """Save conversation history via session manager."""
         try:
             self._session_manager.save_session(self._context)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"Failed to save chat session: {e}")
 
     def _on_session_loaded(self, context: ConversationContext) -> None:
@@ -264,7 +264,7 @@ class AIAssistantPanel(QWidget):
         if hasattr(self, "_adapter") and self._adapter:
             try:
                 self._auto_load_settings()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(f"Failed to refresh models: {e}")
 
     def _auto_load_settings(self) -> None:
