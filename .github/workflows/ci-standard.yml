@@ -61,7 +61,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Run GitHub Actions pinning guard
         shell: bash
-        run: python scripts/check_github_actions_pinned.py
+        run: python3 scripts/check_github_actions_pinned.py
 
   workflow-inventory:
     name: Enforce workflow inventory
@@ -83,7 +83,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Run workflow inventory guard
         shell: bash
-        run: python scripts/check_workflow_inventory.py
+        run: python3 scripts/check_workflow_inventory.py
 
   urdf-layering:
     name: Enforce URDF subsystem layering (ADR 0007)
@@ -105,7 +105,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Run URDF layering guard
         shell: bash
-        run: python scripts/ci/check_urdf_layering.py
+        run: python3 scripts/ci/check_urdf_layering.py
 
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
@@ -219,7 +219,7 @@ jobs:
           PY
 
       - name: MyPy Exclusion Budget
-        run: python scripts/check_mypy_exclusion_budget.py
+        run: python3 scripts/check_mypy_exclusion_budget.py
 
       # Baseline mypy check across all of src/. On PRs, only check changed
       # source files so unrelated repository-wide type debt does not block
@@ -261,37 +261,37 @@ jobs:
           fi
 
       - name: Dependency Direction Fitness Check
-        run: python scripts/check_dependency_direction.py
+        run: python3 scripts/check_dependency_direction.py
 
       - name: Engine Tier Metadata Check
-        run: python scripts/check_engine_tiers.py
+        run: python3 scripts/check_engine_tiers.py
 
       - name: Changed-File Size Budget Check
-        run: python scripts/ci/check_file_size_budget.py
+        run: python3 scripts/ci/check_file_size_budget.py
 
       - name: Repo Root Clutter Check
-        run: python scripts/check_root_clutter.py
+        run: python3 scripts/check_root_clutter.py
 
       - name: SPEC Drift Check
-        run: python scripts/check_spec_paths.py
+        run: python3 scripts/check_spec_paths.py
 
       - name: Agent Docs Consistency Check
-        run: python scripts/check_agent_docs_consistency.py
+        run: python3 scripts/check_agent_docs_consistency.py
 
       - name: Security Workflow Silent-Failure Guard
-        run: python scripts/check_workflows_no_silent_failures.py
+        run: python3 scripts/check_workflows_no_silent_failures.py
 
       - name: Version Consistency Check
-        run: python scripts/check_version_consistency.py
+        run: python3 scripts/check_version_consistency.py
 
       - name: Test Layout Guard
-        run: python scripts/check_test_layout.py
+        run: python3 scripts/check_test_layout.py
 
       - name: Tutorial Import Check
-        run: python scripts/ci/check_tutorial_imports.py
+        run: python3 scripts/ci/check_tutorial_imports.py
 
       - name: SPEC.md Path Check
-        run: python scripts/check_spec_paths.py
+        run: python3 scripts/check_spec_paths.py
 
       - name: Alembic Drift Check
         shell: bash
@@ -299,8 +299,8 @@ jobs:
           set -euo pipefail
           rm -f "$RUNNER_TEMP/alembic-drift.db"
           export DATABASE_URL="sqlite:///$RUNNER_TEMP/alembic-drift.db"
-          python scripts/db_migrate.py upgrade head
-          python scripts/check_alembic_drift.py
+          python3 scripts/db_migrate.py upgrade head
+          python3 scripts/check_alembic_drift.py
 
       - name: Check for UI changes
         id: ui_changes
@@ -323,13 +323,13 @@ jobs:
         run: npm ci && npm audit --audit-level=high || echo "::warning::npm audit skipped - package-lock.json may not exist yet"
 
       - name: Module Size Budget Check
-        run: python scripts/check_module_size_budget.py --max-lines 1500 --include src
+        run: python3 scripts/check_module_size_budget.py --max-lines 1500 --include src
 
       - name: Heavy Test Dependency Parity Check
-        run: python scripts/check_heavy_dep_parity.py
+        run: python3 scripts/check_heavy_dep_parity.py
 
       - name: Prevent Net-New print() Calls
-        run: python scripts/check_no_print_calls.py
+        run: python3 scripts/check_no_print_calls.py
 
       # Placeholder detection is blocking. Issue-linked TODO markers are allowed
       # because they already have a tracked owner and follow-up path.
@@ -352,7 +352,7 @@ jobs:
         run: |
           set -euo pipefail
           audit_venv="$RUNNER_TEMP/pip-audit-venv"
-          python -m venv "$audit_venv"
+          python3 -m venv "$audit_venv"
           audit_python="$audit_venv/bin/python"
           python -m ensurepip --upgrade || true
           "$audit_python" -m pip install --upgrade pip
@@ -531,27 +531,27 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m venv .venv-core-only
+          python3 -m venv .venv-core-only
           . .venv-core-only/bin/activate
           python -m ensurepip --upgrade || true
-          python -m pip install --upgrade pip
+          python3 -m pip install --upgrade pip
           mkdir -p ui/dist
           python -m ensurepip --upgrade || true
-          python -m pip install -e .
+          python3 -m pip install -e .
       - name: Verify optional engines are absent from core install
         shell: bash
         run: |
           set -euo pipefail
           . .venv-core-only/bin/activate
-          python scripts/check_core_install_isolation.py
+          python3 scripts/check_core_install_isolation.py
       - name: Run core-only test slice
         shell: bash
         run: |
           set -euo pipefail
           . .venv-core-only/bin/activate
           python -m ensurepip --upgrade || true
-          python -m pip install pytest pytest-timeout
-          python -m pytest \
+          python3 -m pip install pytest pytest-timeout
+          python3 -m pytest \
             tests/architecture/test_core_public_api.py \
             tests/unit/test_core_install_isolation.py \
             -m core_only \
@@ -850,7 +850,7 @@ jobs:
       - name: Enforce Per-Package Coverage Thresholds
         # Only run when coverage.xml is generated (not during PR-scoped --no-cov runs)
         if: steps.core-test-changes.outputs.skip != 'true' && github.event_name != 'pull_request'
-        run: python scripts/config/coverage_enforcer.py coverage.xml
+        run: python3 scripts/config/coverage_enforcer.py coverage.xml
       # Dependency-free validator coverage that supports future native-engine jobs.
       - name: Cross-Engine Validator Core Unit Tests
         if: steps.core-test-changes.outputs.skip != 'true'
@@ -970,7 +970,7 @@ jobs:
           ALEMBIC_ROUND_TRIP_DATABASE_URL: postgresql+psycopg://upstreamdrift:upstreamdrift@localhost:${{ job.services.postgres.ports[5432] }}/upstreamdrift_migrations
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
         run: |
-          python - <<'PY'
+          python3 - <<'PY'
           import os
           import time
 
@@ -994,7 +994,7 @@ jobs:
           else:
               raise SystemExit(f"PostgreSQL did not accept SQL connections: {last_error!r}")
           PY
-          python -m pytest -p pytest_timeout -p asyncio tests/integration/test_alembic_round_trip.py \
+          python3 -m pytest -p pytest_timeout -p asyncio tests/integration/test_alembic_round_trip.py \
             -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
             --timeout=180 \
             --timeout-method=thread \
@@ -1419,7 +1419,7 @@ jobs:
       - name: Build PyO3 Wheel (Maturin)
         if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'ubuntu-latest'
         run: |
-          python -m venv "$RUNNER_TEMP/rust-venv"
+          python3 -m venv "$RUNNER_TEMP/rust-venv"
           source "$RUNNER_TEMP/rust-venv/bin/activate"
           python -m ensurepip --upgrade || true
           python -m pip install --upgrade pip maturin
@@ -1569,45 +1569,3 @@ jobs:
           import upstream_physics
           print(upstream_physics.IntegratorConfig())
           "
-
-
-
-
-  tests-310:
-    name: tests (ubuntu-latest, 3.10)
-    runs-on: d-sorg-fleet
-    timeout-minutes: 5
-    steps:
-      - name: Satisfying ruleset
-        run: echo "Satisfying ruleset on local runner"
-
-  tests-311:
-    name: tests (ubuntu-latest, 3.11)
-    runs-on: d-sorg-fleet
-    timeout-minutes: 5
-    steps:
-      - name: Satisfying ruleset
-        run: echo "Satisfying ruleset on local runner"
-
-  tests-312:
-    name: tests (ubuntu-latest, 3.12)
-    runs-on: d-sorg-fleet
-    timeout-minutes: 5
-    steps:
-      - name: Satisfying ruleset
-        run: echo "Satisfying ruleset on local runner"
-
-  ci-complete:
-    name: CI Complete
-    needs: [alembic-postgres-round-trip, arduino-build, core-only-install, dependency-consistency, frontend-tests, local-only-workflows, matlab-tests, pick-runner, pinned-actions, quality-gate, rust-quality-gate, rust-quickstart, shared-tools-consumer-contracts, tests, tests-310, tests-311, tests-312, urdf-layering, workflow-inventory]
-    runs-on: d-sorg-fleet
-    timeout-minutes: 5
-    if: always()
-    steps:
-      - name: Verify all jobs succeeded
-        run: |
-          if [ "${{ contains(needs.*.result, 'failure') ||                     contains(needs.*.result, 'cancelled') }}" = "true" ]; then
-            echo "One or more required jobs failed or were cancelled."
-            exit 1
-          fi
-          echo "All jobs completed successfully."
