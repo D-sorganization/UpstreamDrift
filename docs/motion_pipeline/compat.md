@@ -125,4 +125,4 @@ python3 tests/integration/motion_pipeline/test_compat_matrix.py --generate
 - [User Workflow Guide](README.md)
 - [Format Matrix](formats.md)
 - [Troubleshooting](troubleshooting.md)
-- [Architecture ADR](../adr/0007-motion-pipeline-architecture.md)
+- [Architecture ADR](../adr/0019-motion-pipeline-architecture.md)

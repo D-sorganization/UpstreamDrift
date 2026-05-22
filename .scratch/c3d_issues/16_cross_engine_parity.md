@@ -54,7 +54,7 @@ A is the foundation issue (canonical engine-side API contract). It must land fir
 ## Reference
 
 - `src/shared/python/motion_matching/` — target side (now stable on `main`)
-- `docs/adr/0006-multi-source-motion-targets.md` — design record
+- `docs/adr/0018-multi-source-motion-targets.md` — design record
 - `docs/user_guide/motion_matching/loading_targets.md` — end-user guide
 - Existing per-engine code: `src/engines/physics_engines/<engine>/python/motion_matching/`
 

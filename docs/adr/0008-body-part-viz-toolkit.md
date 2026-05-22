@@ -6,7 +6,7 @@
 
 ## Context
 
-The motion-matching pipeline ([ADR 0006](0006-multi-source-motion-targets.md))
+The motion-matching pipeline ([ADR 0018](0018-multi-source-motion-targets.md))
 already accepts full-body capture targets and runs forward-kinematic
 predictions against them, but the rendering surface lagged behind the
 data surface. Body segments could only be drawn as lines or as fixed
@@ -74,7 +74,7 @@ there is no per-tool re-implementation left.
 ### Generic-naming policy
 
 The naming policy carries forward unchanged from
-[ADR 0006](0006-multi-source-motion-targets.md):
+[ADR 0018](0018-multi-source-motion-targets.md):
 
 - File-on-disk names (vendor-specific xlsx workbooks, named C3D
   files, the bundled STL meshes) remain whatever the source publishes
@@ -205,6 +205,6 @@ costs more than it saves.
 - `docs/user_guide/body_part_viz/asset_author_guide.md` — guide for
   adding new shapes to the default library.
 - `docs/api/body_part_viz.md` — public API reference.
-- [ADR 0006 — Multi-Source Motion Targets](0006-multi-source-motion-targets.md)
+- [ADR 0018 - Multi-Source Motion Targets](0018-multi-source-motion-targets.md)
   — predecessor decision that introduced `BodyTarget` and
   `default_body_segments`, on which this toolkit builds.
