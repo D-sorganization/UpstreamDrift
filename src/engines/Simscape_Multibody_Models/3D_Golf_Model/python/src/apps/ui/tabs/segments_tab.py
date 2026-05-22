@@ -16,7 +16,7 @@ that view but survive in the underlying store.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from PyQt6 import QtCore, QtWidgets
 
@@ -379,7 +379,7 @@ class SegmentsTab(QtWidgets.QWidget):
                 new_params[key] = old.shape_params[key]
         self._viz_segments[index] = SegmentVizSpec(
             binding=old.binding,
-            shape_kind=shape_kind,
+            shape_kind=cast(Any, shape_kind),
             shape_params=new_params,
             fitter_kind=old.fitter_kind,
             theme=old.theme,
@@ -392,69 +392,115 @@ class SegmentsTab(QtWidgets.QWidget):
         self._suspend_signals = True
         try:
             self.table.blockSignals(True)
-            self.table.setRowCount(0)
+            current_rows = self.table.rowCount()
+            target_rows = len(self._viz_segments)
+            if current_rows != target_rows:
+                self.table.setRowCount(target_rows)
             for row, spec in enumerate(self._viz_segments):
-                self.table.insertRow(row)
                 self._populate_row(row, spec)
         finally:
             self.table.blockSignals(False)
             self._suspend_signals = False
 
     def _populate_row(self, row: int, spec: SegmentVizSpec) -> None:
-        # Visible checkbox
-        chk = QtWidgets.QCheckBox()
-        chk.setChecked(spec.visible)
-        chk.toggled.connect(lambda v, r=row: self._on_visible_toggled(r, v))
-        wrapper = QtWidgets.QWidget()
-        lay = QtWidgets.QHBoxLayout(wrapper)
-        lay.setContentsMargins(4, 0, 4, 0)
-        lay.addWidget(chk)
-        self.table.setCellWidget(row, _COL_VISIBLE, wrapper)
-
-        # Marker A / B come from the binding marker_names. For non-pairwise
-        # bindings (cluster), we show the first two for a stable display
-        # but the editing path keeps them read-only.
+        self._populate_visible(row, spec)
         marker_a = spec.binding.marker_names[0] if spec.binding.marker_names else ""
         marker_b = (
             spec.binding.marker_names[1] if len(spec.binding.marker_names) >= 2 else ""
         )
+        self._populate_marker(row, _COL_A, marker_a)
+        self._populate_marker(row, _COL_B, marker_b)
+        self._populate_shape(row, spec)
+        self._populate_group_and_delete(row, spec)
 
-        combo_a = QtWidgets.QComboBox()
-        combo_b = QtWidgets.QComboBox()
-        for combo, current in ((combo_a, marker_a), (combo_b, marker_b)):
-            combo.addItems(self._marker_names)
-            if current and current in self._marker_names:
-                combo.setCurrentText(current)
-            elif current:
-                combo.insertItem(0, current)
-                combo.setCurrentIndex(0)
-        combo_a.currentTextChanged.connect(
-            lambda val, r=row: self._on_endpoint_changed(r, 0, val)
-        )
-        combo_b.currentTextChanged.connect(
-            lambda val, r=row: self._on_endpoint_changed(r, 1, val)
-        )
-        self.table.setCellWidget(row, _COL_A, combo_a)
-        self.table.setCellWidget(row, _COL_B, combo_b)
+    def _populate_visible(self, row: int, spec: SegmentVizSpec) -> None:
+        wrapper = self.table.cellWidget(row, _COL_VISIBLE)
+        chk = None
+        if isinstance(wrapper, QtWidgets.QWidget):
+            chk = wrapper.findChild(QtWidgets.QCheckBox)
+        if chk is None:
+            chk = QtWidgets.QCheckBox()
+            wrapper = QtWidgets.QWidget()
+            lay = QtWidgets.QHBoxLayout(wrapper)
+            lay.setContentsMargins(4, 0, 4, 0)
+            lay.addWidget(chk)
+            self.table.setCellWidget(row, _COL_VISIBLE, wrapper)
+        else:
+            try:
+                chk.toggled.disconnect()
+            except TypeError:
+                pass
+        chk.setChecked(spec.visible)
+        chk.toggled.connect(lambda v, r=row: self._on_visible_toggled(r, v))
 
-        combo_shape = QtWidgets.QComboBox()
-        combo_shape.addItems(list(_SHAPE_LABELS))
-        combo_shape.setCurrentText(_shape_label_for_spec(spec))
-        combo_shape.activated.connect(
-            lambda _idx, r=row, w=combo_shape: self._on_shape_picker(r, w.currentText())
+    def _populate_marker(self, row: int, col: int, current: str) -> None:
+        combo = self.table.cellWidget(row, col)
+        if not isinstance(combo, QtWidgets.QComboBox):
+            combo = QtWidgets.QComboBox()
+            self.table.setCellWidget(row, col, combo)
+        else:
+            try:
+                combo.currentTextChanged.disconnect()
+            except TypeError:
+                pass
+        existing = [combo.itemText(i) for i in range(combo.count())]
+        expected = list(self._marker_names)
+        if current and current not in expected:
+            expected.insert(0, current)
+        if existing != expected:
+            combo.clear()
+            combo.addItems(expected)
+        if current:
+            combo.setCurrentText(current)
+        slot = 0 if col == _COL_A else 1
+        combo.currentTextChanged.connect(
+            lambda val, r=row, s=slot: self._on_endpoint_changed(r, s, val)
         )
-        self.table.setCellWidget(row, _COL_SHAPE, combo_shape)
 
-        edit_group = QtWidgets.QLineEdit(spec.theme.group)
-        edit_group.editingFinished.connect(
-            lambda r=row, w=edit_group: self._on_group_changed(r, w.text())
+    def _populate_shape(self, row: int, spec: SegmentVizSpec) -> None:
+        combo = self.table.cellWidget(row, _COL_SHAPE)
+        if not isinstance(combo, QtWidgets.QComboBox):
+            combo = QtWidgets.QComboBox()
+            combo.addItems(list(_SHAPE_LABELS))
+            self.table.setCellWidget(row, _COL_SHAPE, combo)
+        else:
+            try:
+                combo.activated.disconnect()
+            except TypeError:
+                pass
+        target_text = _shape_label_for_spec(spec)
+        if combo.currentText() != target_text:
+            combo.setCurrentText(target_text)
+        combo.activated.connect(
+            lambda _idx, r=row, w=combo: self._on_shape_picker(r, w.currentText())
         )
-        self.table.setCellWidget(row, _COL_GROUP, edit_group)
 
-        btn_del = QtWidgets.QPushButton("×")
-        btn_del.setMaximumWidth(28)
-        btn_del.clicked.connect(lambda _checked=False, r=row: self._delete_row(r))
-        self.table.setCellWidget(row, _COL_DELETE, btn_del)
+    def _populate_group_and_delete(self, row: int, spec: SegmentVizSpec) -> None:
+        edit = self.table.cellWidget(row, _COL_GROUP)
+        if not isinstance(edit, QtWidgets.QLineEdit):
+            edit = QtWidgets.QLineEdit()
+            self.table.setCellWidget(row, _COL_GROUP, edit)
+        else:
+            try:
+                edit.editingFinished.disconnect()
+            except TypeError:
+                pass
+        if edit.text() != spec.theme.group:
+            edit.setText(spec.theme.group)
+        edit.editingFinished.connect(
+            lambda r=row, w=edit: self._on_group_changed(r, w.text())
+        )
+        btn = self.table.cellWidget(row, _COL_DELETE)
+        if not isinstance(btn, QtWidgets.QPushButton):
+            btn = QtWidgets.QPushButton("×")
+            btn.setMaximumWidth(28)
+            self.table.setCellWidget(row, _COL_DELETE, btn)
+        else:
+            try:
+                btn.clicked.disconnect()
+            except TypeError:
+                pass
+        btn.clicked.connect(lambda _checked=False, r=row: self._delete_row(r))
 
     # ---------------------------------------------------------- Row callbacks
 
