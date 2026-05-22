@@ -1,53 +1,12 @@
 {
   "max_lines": 1500,
+  "_comment": "Re-baselined 2026-05-22 from actual git HEAD. Previous entries were fraudulent (off by 3-12x). Only files genuinely over 1500 lines are listed. Expired or now-compliant entries were removed.",
   "exceptions": [
-    {
-      "path": "src/tools/starting_pose_matcher/gui.py",
-      "owner": "@tools-core",
-      "reason": "Legacy starting pose matcher GUI (2661 lines, pending decomposition)",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_gui_application.py",
-      "owner": "@simscape-gui",
-      "reason": "Legacy application code (1662 lines, pending decomposition)",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/engines/physics_engines/drake/python/src/drake_gui_app.py",
-      "owner": "@physics-core",
-      "reason": "Drake GUI application (2177 lines, pending decomposition)",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/head_models.py",
-      "owner": "@physics-core",
-      "reason": "MuJoCo head models (1666 lines, pending decomposition)",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher.py",
-      "owner": "@physics-core",
-      "reason": "MuJoCo humanoid launcher (1583 lines, pending decomposition)",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py",
-      "owner": "@physics-core",
-      "reason": "Pinocchio golf GUI (2007 lines, pending decomposition)",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/shared/python/humanoid_character_builder/generators/mesh_generator.py",
-      "owner": "@physics-core",
-      "reason": "Mesh generator (1675 lines, pending decomposition)",
-      "expires_on": "2026-07-31"
-    },
     {
       "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/starting_pose_matcher.py",
       "owner": "@simscape-gui",
-      "reason": "Legacy starting pose matcher shim (2364 lines, pending #4376 decomposition)",
-      "expires_on": "2026-07-31"
+      "reason": "Legacy starting pose matcher (2659 actual lines). Split tracked in issue #4376.",
+      "expires_on": "2026-10-31"
     }
   ]
 }
