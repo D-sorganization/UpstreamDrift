@@ -96,11 +96,14 @@ def test_register_missing_id_attribute_raises() -> None:
         register_embeddable_tool(NoId())  # type: ignore[arg-type]
 
 
-def test_register_duplicate_raises() -> None:
+def test_register_duplicate_is_idempotent_and_preserves_original() -> None:
     tool = _Tool("dup")
+    duplicate = _Tool("dup")
+
     register_embeddable_tool(tool)
-    with pytest.raises(ValueError, match="already registered"):
-        register_embeddable_tool(tool)
+    register_embeddable_tool(duplicate)
+
+    assert get_embeddable_tool("dup") is tool
 
 
 def test_is_embeddable_true() -> None:
