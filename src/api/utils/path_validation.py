@@ -38,6 +38,15 @@ def resolve_contained_path(candidate: Path, allowed_dirs: Iterable[Path]) -> Pat
         except ValueError:
             continue
 
+        # Reject symlinks pointing outside the allowed root
+        if candidate.is_symlink() and not str(resolved_candidate).startswith(
+            str(resolved_allowed_dir)
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail="Path traversal detected",
+            )
+
         if resolved_candidate.exists():
             return resolved_candidate
 
