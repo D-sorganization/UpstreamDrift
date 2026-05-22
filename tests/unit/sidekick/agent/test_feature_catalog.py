@@ -29,6 +29,24 @@ from sidekick.agent.feature_catalog import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def _reset_catalog_cache():
+    """Ensure each test starts with a clean catalog cache.
+
+    The catalog memoises its result in a module-global; tests that
+    monkey-patch a discovery source must not poison subsequent tests
+    that expect the unpatched view. Resetting before *and* after means
+    test order is irrelevant.
+    """
+    import sidekick.agent.feature_catalog as fc
+
+    fc._CATALOG_CACHE = None
+    try:
+        yield
+    finally:
+        fc._CATALOG_CACHE = None
+
+
 # ---------------------------------------------------------------------------
 # FeatureEntry — Design by Contract
 # ---------------------------------------------------------------------------
