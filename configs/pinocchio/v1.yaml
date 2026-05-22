@@ -1,0 +1,21 @@
+# Pinocchio Rigid Body Dynamics Configuration v1
+simulation:
+  time_step: 0.005 # s
+  duration: 2.0 # s
+  integrator: "semi_implicit_euler"
+
+solver:
+  algorithm: "aba" # Articulated Body Algorithm
+  rnea: true # Recursive Newton-Euler Algorithm
+
+model:
+  path: "shared/models/pinocchio/golf_club.urdf"
+  free_flyer: true
+
+dynamics:
+  joint_damping: 0.1
+  armature: 0.01
+
+output:
+  rate_hz: 200.0
+  save_states: true

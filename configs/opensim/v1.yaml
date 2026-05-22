@@ -1,0 +1,21 @@
+# OpenSim Muscle-Tendon Simulation Configuration v1
+simulation:
+  time_step: 0.001 # s
+  duration: 4.0 # s
+  integrator: "RungeKuttaMerson"
+
+solver:
+  tolerance: 1.0e-5
+  max_iterations: 200
+
+model:
+  path: "shared/models/opensim/opensim-models/gait2392.osim"
+  actuator_set: "default"
+
+tendon_compliance:
+  dynamics: "equilibrium"
+  stiffness_scale: 1.0
+
+output:
+  rate_hz: 100.0
+  export_sto_files: true

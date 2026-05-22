@@ -33,6 +33,7 @@ import functools
 import os
 from typing import TypeVar
 
+from src.shared.python.config.app_settings import settings
 from src.shared.python.core.error_utils import ConfigurationError
 
 T = TypeVar("T")
@@ -302,7 +303,7 @@ def get_environment() -> str:
         >>> if env == "production":
         ...     # Enable production settings
     """
-    env = os.environ.get("ENVIRONMENT", "development").lower()
+    env = settings.environment.lower()
 
     # Normalize common variants
     if env in ("dev", "local"):
@@ -350,7 +351,7 @@ def get_secret_key(*, required: bool = False) -> str | None:
     Example:
         >>> key = get_secret_key(required=True)
     """
-    key = os.environ.get("GOLF_API_SECRET_KEY") or os.environ.get("SECRET_KEY")
+    key = settings.golf_api_secret_key or settings.secret_key_fallback
 
     if key:
         return key
@@ -376,7 +377,12 @@ def get_database_url(default: str = "sqlite:///golf.db") -> str:
     Example:
         >>> db_url = get_database_url()
     """
-    return os.environ.get("DATABASE_URL", default)
+    if (
+        settings.database_url == "sqlite:///./golf_modeling_suite.db"
+        and default != "sqlite:///golf.db"
+    ):
+        return default
+    return settings.database_url
 
 
 def get_admin_password() -> str | None:
@@ -385,7 +391,7 @@ def get_admin_password() -> str | None:
     Returns:
         Admin password or None if not set.
     """
-    return os.environ.get("GOLF_ADMIN_PASSWORD")
+    return settings.golf_admin_password
 
 
 def get_api_host(default: str = "127.0.0.1") -> str:
@@ -400,7 +406,9 @@ def get_api_host(default: str = "127.0.0.1") -> str:
     Returns:
         Host address string.
     """
-    return os.environ.get("GOLF_API_HOST", default)
+    if settings.api_host == "127.0.0.1" and default != "127.0.0.1":
+        return default
+    return settings.api_host
 
 
 def get_api_port(default: int = 8000) -> int:
@@ -412,10 +420,9 @@ def get_api_port(default: int = 8000) -> int:
     Returns:
         Port number.
     """
-    return (
-        get_env_int("GOLF_API_PORT", default=default, min_value=1, max_value=65535)
-        or default
-    )
+    if settings.api_port == 8000 and default != 8000:
+        return default
+    return settings.api_port
 
 
 def get_log_level(default: str = "INFO") -> str:
@@ -427,9 +434,9 @@ def get_log_level(default: str = "INFO") -> str:
     Returns:
         Log level string (uppercase).
     """
-    level = os.environ.get("LOG_LEVEL", default).upper()
-    valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
-    return level if level in valid_levels else default
+    if settings.log_level == "INFO" and default != "INFO":
+        return default
+    return settings.log_level
 
 
 def require_env(name: str) -> str:
@@ -501,10 +508,9 @@ def get_golf_port(default: int = 8000) -> int:
     Returns:
         Port number.
     """
-    return (
-        get_env_int("GOLF_PORT", default=default, min_value=1, max_value=65535)
-        or default
-    )
+    if settings.golf_port == 8000 and default != 8000:
+        return default
+    return settings.golf_port
 
 
 def get_golf_suite_mode(default: str = "remote") -> str:
@@ -520,7 +526,9 @@ def get_golf_suite_mode(default: str = "remote") -> str:
     Returns:
         Mode string (e.g., ``"local"``, ``"remote"``).
     """
-    return get_env("GOLF_SUITE_MODE", default=default) or default
+    if settings.golf_suite_mode == "remote" and default != "remote":
+        return default
+    return settings.golf_suite_mode
 
 
 def is_auth_disabled() -> bool:
@@ -532,9 +540,7 @@ def is_auth_disabled() -> bool:
     Returns:
         True if authentication checks should be skipped.
     """
-    return get_golf_suite_mode() == "local" or get_env_bool(
-        "GOLF_AUTH_DISABLED", default=False
-    )
+    return settings.golf_suite_mode == "local" or settings.golf_auth_disabled
 
 
 def get_golf_ui_dist() -> str | None:
@@ -543,7 +549,7 @@ def get_golf_ui_dist() -> str | None:
     Returns:
         Path string or None if not set.
     """
-    return get_env("GOLF_UI_DIST")
+    return settings.golf_ui_dist
 
 
 def is_browser_suppressed() -> bool:
@@ -552,7 +558,7 @@ def is_browser_suppressed() -> bool:
     Returns:
         True if ``GOLF_NO_BROWSER=true``.
     """
-    return get_env_bool("GOLF_NO_BROWSER", default=False)
+    return settings.golf_no_browser
 
 
 def is_headless() -> bool:
@@ -561,7 +567,7 @@ def is_headless() -> bool:
     Returns:
         True if ``HEADLESS=true`` or no DISPLAY on POSIX.
     """
-    if get_env_bool("HEADLESS", default=False):
+    if settings.headless:
         return True
     return bool(os.name == "posix" and not os.environ.get("DISPLAY"))
 
@@ -575,7 +581,9 @@ def get_display(default: str = ":0") -> str:
     Returns:
         DISPLAY string.
     """
-    return get_env("DISPLAY", default=default) or default
+    if settings.display == ":0" and default != ":0":
+        return default
+    return settings.display
 
 
 def get_dbc_level(default: str = "") -> str:
@@ -584,4 +592,6 @@ def get_dbc_level(default: str = "") -> str:
     Returns:
         Raw DBC_LEVEL env value (lowercase, stripped).
     """
-    return (get_env("DBC_LEVEL", default=default) or default).lower().strip()
+    if settings.dbc_level == "" and default != "":
+        return default
+    return settings.dbc_level.lower().strip()
