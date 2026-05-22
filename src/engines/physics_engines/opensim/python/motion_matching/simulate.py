@@ -26,6 +26,7 @@ tests run on every CI even when the OpenSim wheel is not installed.
 
 from __future__ import annotations
 
+import collections
 import threading
 import time as _time
 from dataclasses import dataclass, field
@@ -212,7 +213,10 @@ def evaluate_polynomial_torque(
 
 
 _MODEL_CACHE: dict[str, Any] = {}
-_MODEL_CACHE_LOCK = threading.Lock()
+# Per-model locks: keyed by resolved model path string.
+# Using defaultdict avoids a single global lock for all models,
+# which would serialize concurrent loads of different model files.
+_MODEL_CACHE_LOCKS: dict[str, threading.Lock] = collections.defaultdict(threading.Lock)
 
 
 def _resolve_osim_path(osim_path: str | Path | None) -> Path:
@@ -230,7 +234,7 @@ def _load_model(osim_path: Path) -> Any:
     import opensim as osim  # noqa: PLC0415  -- optional engine dep
 
     key = str(osim_path.resolve())
-    with _MODEL_CACHE_LOCK:
+    with _MODEL_CACHE_LOCKS[key]:
         cached = _MODEL_CACHE.get(key)
         if cached is None:
             if not osim_path.exists():

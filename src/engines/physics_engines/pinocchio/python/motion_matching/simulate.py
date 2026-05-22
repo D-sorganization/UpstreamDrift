@@ -37,6 +37,7 @@ Pinocchio's C++ core.
 
 from __future__ import annotations
 
+import collections
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -216,7 +217,10 @@ def evaluate_polynomial_torque(
 
 
 _MODEL_CACHE: dict[str, Any] = {}
-_MODEL_CACHE_LOCK = threading.Lock()
+# Per-model locks: keyed by resolved URDF path string.
+# Using defaultdict avoids a single global lock for all models,
+# which would serialize concurrent loads of different URDF files.
+_MODEL_CACHE_LOCKS: dict[str, threading.Lock] = collections.defaultdict(threading.Lock)
 
 
 def _resolve_urdf_path(urdf_path: str | Path | None) -> Path:
@@ -230,7 +234,7 @@ def _get_cached_model(urdf_path: Path) -> Any:
     import pinocchio as pin  # noqa: PLC0415  -- optional engine dep
 
     key = str(urdf_path.resolve())
-    with _MODEL_CACHE_LOCK:
+    with _MODEL_CACHE_LOCKS[key]:
         cached = _MODEL_CACHE.get(key)
         if cached is not None:
             return cached
