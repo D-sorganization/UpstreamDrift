@@ -13,7 +13,6 @@ Fixes #1142
 
 from __future__ import annotations
 
-import logging
 from typing import Any
 
 from fastapi import APIRouter
@@ -21,6 +20,7 @@ from pydantic import BaseModel, Field
 
 from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.core.contracts import precondition
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.physics.terrain import (
     MATERIALS,
     TERRAIN_MATERIAL_MAP,
@@ -34,7 +34,7 @@ from src.shared.python.physics.terrain_presets import (
     get_environment_preset_names,
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/terrain", tags=["terrain"])
 

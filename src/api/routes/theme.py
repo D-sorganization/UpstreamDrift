@@ -4,13 +4,13 @@ Provides access to the fleet-wide ThemeManager so the React UI can synchronize
 its styling with the PyQt6 desktop launcher.
 """
 
-import logging
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 
 from src.shared.python.theme.api import create_theme_router
 from src.shared.python.theme.theme_manager import ThemeManager
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Initialize the theme manager singleton
 # We use the standard D-sorganization FleetTheme settings path so it picks up
