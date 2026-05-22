@@ -1,0 +1,23 @@
+# MuJoCo Physics Engine Configuration v1
+simulation:
+  time_step: 0.002 # s
+  duration: 3.0 # s
+  integrator: "RK4" # Euler, RK4, implicit
+
+solver:
+  tolerance: 1.0e-8
+  max_iterations: 100
+  solver_type: "Newton" # Newton, CG
+
+model:
+  path: "shared/models/mujoco/humanoid_golf.xml"
+  gravity: [0, 0, -9.81]
+
+contacts:
+  friction: [0.5, 0.005, 0.0001]
+  solimp: [0.9, 0.95, 0.001, 0.5, 2]
+  solref: [0.02, 1.0]
+
+output:
+  rate_hz: 100.0
+  record_video: false

@@ -1,0 +1,22 @@
+# MyoSuite Muscle Simulation Configuration v1
+simulation:
+  time_step: 0.002 # s
+  duration: 5.0 # s
+  integrator: "Euler"
+
+solver:
+  tolerance: 1.0e-6
+  max_iterations: 50
+
+model:
+  path: "shared/models/myosuite/myo_sim/myo_hand.xml"
+  muscle_model: "Millard"
+
+muscle_control:
+  excitation_threshold: 0.01
+  activation_time_constant: 0.010 # s
+  deactivation_time_constant: 0.040 # s
+
+output:
+  rate_hz: 50.0
+  record_activations: true
