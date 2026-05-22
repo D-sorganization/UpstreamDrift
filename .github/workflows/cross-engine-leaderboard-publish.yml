@@ -76,6 +76,8 @@ jobs:
           python -m pip install --upgrade pip
           python -m ensurepip --upgrade || true
           pip install -e ".[dev]"
+          python -m ensurepip --upgrade || true
+          pip install pytest-xdist pytest-benchmark pytest-timeout scipy pandas matplotlib
 
       - name: Validate workflow YAML
         run: |
