@@ -97,7 +97,8 @@ class PinocchioSkeletonProvider:
         # Build model from URDF
         if package_paths is not None:
             self.model = self._pin.buildModelFromUrdf(
-                urdf_path, self._pin.JointModelFreeFlyer()
+                urdf_path,
+                self._pin.JointModelFreeFlyer(),  # type: ignore[attr-defined]
             )
         else:
             self.model = self._pin.buildModelFromUrdf(urdf_path)
@@ -113,7 +114,7 @@ class PinocchioSkeletonProvider:
         # Also build joint name to ID mapping
         self._joint_name_to_id: dict[str, int] = {}
         for i in range(self.model.njoints):
-            joint_name = self.model.names[i]
+            joint_name = self.model.names[i]  # type: ignore[attr-defined]
             self._joint_name_to_id[joint_name] = i
 
         # Validate that required vocabulary is available

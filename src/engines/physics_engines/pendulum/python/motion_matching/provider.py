@@ -125,7 +125,7 @@ class PendulumFitSwingProvider:
             theta0,
             method="SLSQP",
             options={"maxiter": opts.maxiter if opts else 200},
-        )
+        )  # type: ignore[call-overload]
         elapsed = time.perf_counter() - t0
 
         return CanonicalFitResult(

@@ -254,7 +254,7 @@ class CalibrationDialog(QDialog):
                 subject_id=str(values["subject_id"]),
                 height_m=float(values["height_m"]),  # type: ignore[arg-type]
                 mass_kg=float(values["mass_kg"]),  # type: ignore[arg-type]
-                age_years=int(values["age_years"]),  # type: ignore[arg-type]
+                age_years=int(values["age_years"]),  # type: ignore[call-overload]
                 sex=str(values["sex"]),
                 estimator=str(values["estimator"]),
             )

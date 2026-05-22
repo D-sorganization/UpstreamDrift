@@ -48,7 +48,7 @@ class CalibrationOptimizer:
         raise ValueError("Experiment does not define known target properties.")
 
     def optimize(self) -> dict[str, float]:
-        bounds = [(0.01, 1.0), (0.01, 1.0)]
+        bounds = ((0.01, 1.0), (0.01, 1.0))
 
         # differential_evolution is a stochastic population-based method suitable for noisy granular simulations
         res = differential_evolution(

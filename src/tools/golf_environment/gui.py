@@ -164,7 +164,7 @@ class EnvironmentRenderer(QWidget):
             )
             fw_mesh = gl.GLMeshItem(
                 vertexes=self._create_rect(
-                    0, -hole.fairway_width / 2, dist, hole.fairway_width
+                    0, -hole.fairway_width / 2, float(dist), hole.fairway_width
                 ),
                 color=(0.2, 0.7, 0.2, 1.0),
                 smooth=False,
