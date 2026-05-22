@@ -27,10 +27,12 @@ import contextlib
 import json
 import logging
 import os
+import random
 import socket
 import threading
 import time
 from collections.abc import Callable
+from typing import Any
 
 from .protocol import Subscription, validate_channel
 
@@ -97,9 +99,16 @@ class _BackoffSleeper:
         self._delay = 1.0
 
     def wait(self, stop: threading.Event) -> bool:
-        """Sleep for the current delay, then double it. Returns False if
-        ``stop`` was set during the wait."""
-        ok = not stop.wait(self._delay)
+        """Sleep for the current delay (with jitter), then double it.
+
+        Applies 50-100% jitter to the computed delay to prevent a
+        thundering-herd on server restart when many subscribers reconnect
+        simultaneously.
+
+        Returns False if ``stop`` was set during the wait.
+        """
+        jittered = self._delay * (0.5 + random.random() * 0.5)  # 50-100%
+        ok = not stop.wait(jittered)
         self._delay = min(self._delay * 2.0, self._cap)
         return ok
 
@@ -119,6 +128,11 @@ class WSPubSub:
         backend: Override the module-level :data:`REALTIME_BACKEND` for this
             instance. ``None`` (default) uses the module-level value.
     """
+
+    # Shared HTTP client for the python-backend publish path.
+    # Declared at class level so mypy knows the attribute exists.
+    # httpx is a soft/optional dep; imported lazily at first publish call.
+    _http_client: Any = None
 
     def __init__(
         self,
@@ -245,9 +259,12 @@ class WSPubSub:
             raise RuntimeError("httpx is required for WS pub-sub publish") from exc
 
         body = {"channel": channel, "payload": payload}
-        with httpx.Client(timeout=2.0) as client:
-            r = client.post(self._publish_url(), json=body)
-            r.raise_for_status()
+
+        # Reuse a class-level client to avoid per-publish connection overhead.
+        if WSPubSub._http_client is None:
+            WSPubSub._http_client = httpx.Client(timeout=2.0)
+        r = WSPubSub._http_client.post(self._publish_url(), json=body)
+        r.raise_for_status()
 
     # -- subscribe -----------------------------------------------------------
 
