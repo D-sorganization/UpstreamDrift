@@ -44,5 +44,5 @@ This will return a JSON response containing the solved kinematics and motion mat
 
 - [Format Matrix](formats.md) — Auto-generated support matrix for each mocap source
 - [Troubleshooting](troubleshooting.md) — Common failure modes and fixes
-- [Architecture ADR](../adr/0007-motion-pipeline-architecture.md) — Design decisions and alternatives
+- [Architecture ADR](../adr/0019-motion-pipeline-architecture.md) — Design decisions and alternatives
 - [Biomech Workspace Setup](../biomech-workspace.md) — Wire up the five sibling biomechanics repos as the source of truth for models (ADR-0014)

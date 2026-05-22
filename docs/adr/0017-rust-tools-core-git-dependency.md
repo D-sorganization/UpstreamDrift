@@ -1,4 +1,6 @@
-# ADR 0005: Pin `tools-core` as a Git Dependency
+> **Note**: This ADR was formerly numbered ADR-0005 before renaming to resolve a numbering collision.
+
+# ADR 0017: Pin `tools-core` as a Git Dependency
 
 - Status: Accepted
 - Date: 2026-04-23

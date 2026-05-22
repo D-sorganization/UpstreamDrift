@@ -8,7 +8,7 @@ preview tool.
 
 ### Architecture decisions
 
-- [ADR 0006 — Multi-Source Motion Targets](../adr/0006-multi-source-motion-targets.md)
+- [ADR 0018 - Multi-Source Motion Targets](../adr/0018-multi-source-motion-targets.md)
   Decision record for the `ClubTarget` / `ClubBallTarget` / `BodyTarget`
   - `MultiSourceTarget` aggregator surface and the format-agnostic
     loader dispatchers.

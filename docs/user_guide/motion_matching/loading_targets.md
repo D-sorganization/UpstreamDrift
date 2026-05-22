@@ -3,7 +3,7 @@
 This guide walks through loading club, ball-aware, and full-body motion
 targets and assembling them into a `MultiSourceTarget` for the
 motion-matching pipeline. See
-[ADR 0006](../../adr/0006-multi-source-motion-targets.md) for the
+[ADR 0018](../../adr/0018-multi-source-motion-targets.md) for the
 design rationale.
 
 ## Source formats at a glance
@@ -159,4 +159,4 @@ guide uses the literal filenames present in `data/`. Everything
 above the loader boundary uses source-agnostic names: `BodyTarget`
 not `MarkerSetTarget`, `load_body_target` not the per-vendor variant.
 The motivation is documented in
-[ADR 0006](../../adr/0006-multi-source-motion-targets.md).
+[ADR 0018](../../adr/0018-multi-source-motion-targets.md).

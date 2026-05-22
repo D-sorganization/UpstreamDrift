@@ -72,7 +72,7 @@ the modules most often missed.
   aggregator covering club, ball-aware, and full-body capture
   targets. Cost-function code dispatches on `has_club()`,
   `has_ball()`, `has_body()`. See
-  [ADR 0006](docs/adr/0006-multi-source-motion-targets.md).
+  [ADR 0018](docs/adr/0018-multi-source-motion-targets.md).
 - `load_body_target`, `load_club_target` — format-agnostic dispatcher
   loaders in `src/shared/python/motion_matching/`. Route on file
   extension to the per-format loader under `loaders/`.

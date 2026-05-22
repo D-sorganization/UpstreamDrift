@@ -28,7 +28,7 @@ The first time you open a capture, the Segments tab populates the
 table with the default body-segment set returned by
 `default_body_segments` (pelvis, spine, torso, shoulders, elbows,
 wrists, hands, feet — the same set the motion-matching cost terms
-dispatch on; see [ADR 0006](../../adr/0006-multi-source-motion-targets.md)).
+dispatch on; see [ADR 0018](../../adr/0018-multi-source-motion-targets.md)).
 
 Each row shows:
 
