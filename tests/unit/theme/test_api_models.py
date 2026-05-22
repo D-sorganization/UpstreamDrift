@@ -66,9 +66,7 @@ class FakeThemeManager:
         self.changed_requests.append(name)
         self.current = name
 
-    def save_custom_theme(
-        self, name: str, colors: dict[str, str], apply: bool
-    ) -> str:
+    def save_custom_theme(self, name: str, colors: dict[str, str], apply: bool) -> str:
         if self.save_error is not None:
             raise self.save_error
         self.saved_requests.append((name, colors, apply))
