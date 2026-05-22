@@ -29,6 +29,13 @@ from .host_adapter import (
     HostCapability,
     HostInvocationResult,
 )
+from .planner import (
+    PlannedStep,
+    PlannerError,
+    SidekickAgentPlanner,
+    ToolCall,
+    build_sidekick_system_prompt,
+)
 from .subtab_adapter import (
     CalculatorRun,
     StateProfile,
@@ -47,13 +54,18 @@ __all__ = [
     "HostAdapter",
     "HostCapability",
     "HostInvocationResult",
+    "PlannedStep",
+    "PlannerError",
     "SidekickActionHandler",
     "SidekickActionService",
+    "SidekickAgentPlanner",
     "StateProfile",
     "SubtabActionPort",
     "SubtabAdapter",
+    "ToolCall",
     "WorkspaceSnapshot",
     "build_feature_catalog",
+    "build_sidekick_system_prompt",
     "lookup_feature",
     "search_features",
 ]
