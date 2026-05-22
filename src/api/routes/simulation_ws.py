@@ -2,12 +2,13 @@
 
 import asyncio
 import contextlib
+import math
 import time
-from typing import Any
+from typing import Annotated, Any
 
 import numpy as np
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError, confloat, field_validator
 
 from src.shared.python.core.contracts import require
 from src.shared.python.engine_core.engine_registry import EngineType
@@ -110,6 +111,21 @@ def _reset_simulation_stats(websocket: WebSocket, config: dict[str, Any]) -> Non
     stats.speed_factor = _get_simulation_speed_factor(websocket, config)
 
 
+class SetSpeedMessage(BaseModel):
+    """Validated WebSocket message for adjusting simulation speed."""
+
+    action: str
+    speed_factor: Annotated[float, confloat(gt=0.0, lt=1e6)] = 1.0
+
+    @field_validator("speed_factor")
+    @classmethod
+    def reject_nan_inf(cls, v: float) -> float:
+        """Reject non-finite speed_factor values."""
+        if math.isnan(v) or math.isinf(v):
+            raise ValueError("speed_factor must be finite")
+        return v
+
+
 class SimulationFrame(BaseModel):
     """Single frame of simulation data."""
 
@@ -173,13 +189,19 @@ async def _handle_client_commands(
         if action == "pause":
             return "pause"
         if action == "set_speed":
-            speed_factor = msg.get("speed_factor", 1.0)
-            config["speed_factor"] = float(speed_factor)
-            app_state = getattr(getattr(websocket, "app", None), "state", None)
-            simulation_service = getattr(app_state, "simulation_service", None)
-            stats = getattr(simulation_service, "stats", None)
-            if stats is not None:
-                stats.speed_factor = float(speed_factor)
+            try:
+                validated = SetSpeedMessage.model_validate(msg)
+            except ValidationError as exc:
+                await websocket.send_json(
+                    {"error": "Invalid set_speed message", "detail": str(exc)}
+                )
+            else:
+                config["speed_factor"] = validated.speed_factor
+                app_state = getattr(getattr(websocket, "app", None), "state", None)
+                simulation_service = getattr(app_state, "simulation_service", None)
+                stats = getattr(simulation_service, "stats", None)
+                if stats is not None:
+                    stats.speed_factor = validated.speed_factor
     except TimeoutError:
         pass  # No message, continue simulation
     return "continue"
@@ -206,13 +228,19 @@ async def _wait_for_resume_or_stop(
         if action == "stop":
             return True
         if action == "set_speed":
-            speed_factor = msg.get("speed_factor", 1.0)
-            config["speed_factor"] = float(speed_factor)
-            app_state = getattr(getattr(websocket, "app", None), "state", None)
-            simulation_service = getattr(app_state, "simulation_service", None)
-            stats = getattr(simulation_service, "stats", None)
-            if stats is not None:
-                stats.speed_factor = float(speed_factor)
+            try:
+                validated = SetSpeedMessage.model_validate(msg)
+            except ValidationError as exc:
+                await websocket.send_json(
+                    {"error": "Invalid set_speed message", "detail": str(exc)}
+                )
+            else:
+                config["speed_factor"] = validated.speed_factor
+                app_state = getattr(getattr(websocket, "app", None), "state", None)
+                simulation_service = getattr(app_state, "simulation_service", None)
+                stats = getattr(simulation_service, "stats", None)
+                if stats is not None:
+                    stats.speed_factor = validated.speed_factor
 
 
 async def _run_simulation_loop(
