@@ -65,6 +65,7 @@ navigation should start with the rendered documentation URL.
 | `tutorials/`            | @developer-experience | stable    | Step-by-step learning paths and task walkthroughs for users.                                                        |
 | `ui/`                   | @ui-team              | draft     | Launcher/UI feature parity matrix and frontend-facing notes.                                                        |
 | `user_guide/`           | @docs-team            | stable    | User-facing guides for common workflows and product capabilities.                                                   |
+| `ux/`                   | @ui-team              | draft     | UX infrastructure for epic #5968: field metadata registry, copy style, walkthrough specs, and contributor guidance. |
 | `workflows/`            | @platform-team        | stable    | Automation workflow documentation and CI/CD process references.                                                     |
 
 ## Governance Checks
