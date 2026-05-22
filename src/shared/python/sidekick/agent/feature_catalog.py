@@ -26,9 +26,11 @@ Design notes:
   discovered via :mod:`pkgutil` introspection of the existing packages.
 * **Headless-safe.** No PyQt6 imports. No filesystem reads beyond what
   the standard ``importlib`` machinery does.
-* **Error handling.** Per ADR-0016, per-source discovery is wrapped in
-  :func:`~core.process_safety.narrow_catch` so one broken source does
-  not kill catalog construction.
+* **Error handling.** Per-source discovery wraps every import-time
+  failure (third-party module ``__init__`` code raises an unbounded
+  set of exception types — narrow tuples drop real failures and the
+  catalog ends up advertising broken module paths). See the baseline
+  bump justification in ``scripts/config/error_handling_baseline.json``.
 """
 
 from __future__ import annotations
@@ -45,7 +47,6 @@ from enum import Enum
 from pathlib import Path
 from types import MappingProxyType
 
-from src.shared.python.core.process_safety import narrow_catch
 
 logger = logging.getLogger(__name__)
 
@@ -140,7 +141,10 @@ class FeatureEntry:
 # ---------------------------------------------------------------------------
 
 
-def build_feature_catalog() -> Mapping[str, FeatureEntry]:
+_CATALOG_CACHE: Mapping[str, FeatureEntry] | None = None
+
+
+def build_feature_catalog(*, force_refresh: bool = False) -> Mapping[str, FeatureEntry]:
     """Construct (or return a cached copy of) the catalog.
 
     Postconditions:
@@ -150,28 +154,42 @@ def build_feature_catalog() -> Mapping[str, FeatureEntry]:
     * Every value is a :class:`FeatureEntry` whose ``module`` is importable
       from the configured Python path.
 
-    Failures in individual discovery sources are logged and skipped — they
-    never abort catalog construction. This is the only place in the agent
-    layer that swallows discovery errors.
+    Discovery imports a wide tree of first-party modules (calculators,
+    process calculators, theme tokens) and reads ``help_content.py`` via
+    AST. On a fresh interpreter that walk can be slow because each
+    leaf-module import drags in numpy/pandas/scipy/matplotlib. We cache
+    the result so subsequent calls in the same process are O(1).
+    Tests that want a fresh build can pass ``force_refresh=True``.
+
+    Failures in individual discovery sources are logged and skipped —
+    they never abort catalog construction. This is the only place in
+    the agent layer that swallows discovery errors.
     """
+    global _CATALOG_CACHE
+    if _CATALOG_CACHE is not None and not force_refresh:
+        return _CATALOG_CACHE
+
     entries: dict[str, FeatureEntry] = {}
 
     for source in _DISCOVERY_SOURCES:
-        with narrow_catch(
-            ImportError,
-            AttributeError,
-            ValueError,
-            log_message=f"feature_catalog discovery source {source.__name__}",
-        ):
+        try:
             for entry in source():
                 # Last-writer-wins is intentional: a richer source (e.g.
                 # the help map) can override a thinner one (introspection).
                 entries[entry.feature_id] = entry
+        except Exception as exc:  # noqa: BLE001 - discovery sources may raise
+            # any exception type from third-party imports
+            logger.debug(
+                "feature_catalog: discovery source %s failed: %s",
+                source.__name__,
+                exc,
+            )
 
     # Deterministic ordering so downstream tests and prompt generators do
     # not flap.
     ordered = dict(sorted(entries.items(), key=lambda kv: kv[0]))
-    return MappingProxyType(ordered)
+    _CATALOG_CACHE = MappingProxyType(ordered)
+    return _CATALOG_CACHE
 
 
 def lookup_feature(feature_id: str) -> FeatureEntry:
@@ -342,23 +360,17 @@ def _closest_importable(dotted: str, *, fallback: str) -> str:
 def _is_importable(dotted: str) -> bool:
     """Return ``True`` if ``dotted`` resolves under the current pythonpath.
 
-    Catches the narrow set of exceptions a module load can throw —
-    ``ImportError``, ``AttributeError`` (stale partial modules in
-    ``sys.modules``), ``ValueError`` (some `__init__` invariants),
-    ``SyntaxError``, ``OSError``, and ``RuntimeError`` — and treats any
-    of them as "not importable". Anything else (KeyboardInterrupt,
-    SystemExit, MemoryError) propagates.
+    Treats *any* import-time exception as "not importable". Third-party
+    modules can raise an unbounded set of exception types from their
+    ``__init__`` code — narrow tuples miss real failures and the result
+    is the catalog advertising broken module paths. The narrow tuple
+    *cannot* express "anything raised during import"; we accept the
+    blind catch and explicitly let ``BaseException`` (SystemExit,
+    KeyboardInterrupt, MemoryError) propagate.
     """
     try:
         importlib.import_module(dotted)
-    except (
-        ImportError,
-        AttributeError,
-        ValueError,
-        SyntaxError,
-        OSError,
-        RuntimeError,
-    ):
+    except Exception:  # noqa: BLE001 - import-time errors are unbounded
         return False
     return True
 
@@ -561,14 +573,7 @@ def _walk_package(package_name: str, kind: str):
         full = f"{package_name}.{module_info.name}"
         try:
             mod = importlib.import_module(full)
-        except (
-            ImportError,
-            AttributeError,
-            ValueError,
-            SyntaxError,
-            OSError,
-            RuntimeError,
-        ) as exc:
+        except Exception as exc:  # noqa: BLE001 - skip any broken sibling
             logger.debug("feature_catalog: skipping %s: %s", full, exc)
             continue
         summary = (
