@@ -108,16 +108,22 @@ class SimscapeKinematicsService:
         )
 
         adapter = PoseAdapter()
-        q = adapter.from_canonical(pose)
+        q_dict = adapter.from_canonical(pose)
 
         matlab_engine = self._matlab_engine
         if matlab_engine is not None:
-            try:
-                # ``matlab.engine.MatlabEngine`` exposes ``.workspace`` at runtime;
-                # this module avoids a hard dependency on MATLAB Engine stubs.
-                matlab_engine.workspace["q"] = q  # type: ignore[attr-defined]
-            except Exception as e:  # noqa: BLE001
-                logger.warning("Failed to set q in MATLAB workspace: %s", e)
+            for joint_name, val in q_dict.items():
+                try:
+                    # ``matlab.engine.MatlabEngine`` exposes ``.workspace`` at
+                    # runtime; we type the field as ``object`` to avoid a hard
+                    # dependency on the MATLAB Engine stubs.
+                    matlab_engine.workspace[  # type: ignore[attr-defined]
+                        f"{joint_name}_q"
+                    ] = float(val)
+                except Exception as e:  # noqa: BLE001
+                    logger.warning(
+                        f"Failed to set {joint_name}_q in MATLAB workspace: {e}"
+                    )
 
     def get_link_transforms(self) -> dict[str, npt.NDArray[np.float64]]:
         transforms: dict[str, npt.NDArray[np.float64]] = {}
