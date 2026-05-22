@@ -174,6 +174,48 @@ def test_gather_with_return_exceptions_not_counted(ratchet_env):
     assert mod.main([]) == 0
 
 
+def test_multiline_gather_with_return_exceptions_not_counted(ratchet_env):
+    mod, src_dir, baseline_path = ratchet_env
+    (src_dir / "ok_multiline.py").write_text(
+        "await asyncio.gather(\n"
+        "    coro(),\n"
+        "    other_coro(arg()),\n"
+        "    return_exceptions=True,\n"
+        ")\n",
+        encoding="utf-8",
+    )
+    _write_baseline(
+        baseline_path,
+        {
+            "noqa_BLE001": 0,
+            "noqa_F841": 0,
+            "noqa_F401": 0,
+            "raw_popen": 0,
+            "gather_no_return_exceptions": 0,
+        },
+    )
+    assert mod.main([]) == 0
+
+
+def test_multiline_gather_without_return_exceptions_detected(ratchet_env):
+    mod, src_dir, baseline_path = ratchet_env
+    (src_dir / "bad_multiline.py").write_text(
+        "await asyncio.gather(\n    coro(),\n    other_coro(arg()),\n)\n",
+        encoding="utf-8",
+    )
+    _write_baseline(
+        baseline_path,
+        {
+            "noqa_BLE001": 0,
+            "noqa_F841": 0,
+            "noqa_F401": 0,
+            "raw_popen": 0,
+            "gather_no_return_exceptions": 0,
+        },
+    )
+    assert mod.main([]) == 1
+
+
 def test_exit_2_when_baseline_missing(ratchet_env, caplog):
     mod, src_dir, baseline_path = ratchet_env
     _write_src_with_patterns(src_dir)
