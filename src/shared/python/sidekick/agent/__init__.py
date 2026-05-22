@@ -12,6 +12,13 @@ from __future__ import annotations
 
 from .access_policy import PolicyDecision, SidekickActionPolicy
 from .action_audit import JsonlActionAudit, MemoryActionAudit, redact_secrets
+from .chat_surface import (
+    ActionChipModel,
+    ActionChipState,
+    ChatActionEnvelope,
+    build_chip,
+    serialize_envelope,
+)
 from .action_service import (
     ActionDescriptor,
     ActionResult,
@@ -57,9 +64,12 @@ from .workflow_bridge import (
 )
 
 __all__ = [
+    "ActionChipModel",
+    "ActionChipState",
     "ActionDescriptor",
     "ActionResult",
     "CalculatorRun",
+    "ChatActionEnvelope",
     "FeatureEntry",
     "FeatureKind",
     "HostActionPort",
@@ -87,10 +97,12 @@ __all__ = [
     "WorkflowStepStatus",
     "WorkspaceSnapshot",
     "action_step",
+    "build_chip",
     "build_feature_catalog",
     "build_sidekick_system_prompt",
     "lookup_feature",
     "redact_secrets",
     "run_sidekick_workflow",
     "search_features",
+    "serialize_envelope",
 ]
