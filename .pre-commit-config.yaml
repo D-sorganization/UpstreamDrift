@@ -41,7 +41,7 @@ repos:
     hooks:
       - id: formatter-guidance-consistency
         name: "formatter guidance consistency (ruff)"
-        entry: python3 scripts/check_formatter_guidance.py
+        entry: python scripts/check_formatter_guidance.py
         language: system
         pass_filenames: false
         always_run: true
@@ -155,7 +155,7 @@ repos:
         # as part of the full suite (engine loaders, third-party audit, isolated
         # subprocess tests).  Scope pre-push to subdirectories that are reliably
         # self-contained and hardware-independent; full suite runs in CI.
-        entry: python3 -m pytest
+        entry: python -m pytest
           tests/unit/dbc
           tests/unit/core
           tests/unit/utils
@@ -172,7 +172,7 @@ repos:
 # =============================================================================
 
 default_language_version:
-  python: python3
+  python: python
 
 # Files to always exclude from all hooks
 exclude: |
