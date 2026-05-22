@@ -172,7 +172,7 @@ class CustomTitleBar(QWidget):
             tm = get_theme_manager()
             if tm is not None and hasattr(tm, "themeChanged"):
                 tm.themeChanged.connect(self._on_theme_changed)
-        except (ImportError, AttributeError):
+        except (ImportError, AttributeError, RuntimeError):
             pass
 
         layout.addWidget(self.title_label)

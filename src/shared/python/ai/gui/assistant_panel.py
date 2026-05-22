@@ -134,7 +134,6 @@ class AIAssistantPanel(QWidget):
         # --- Session manager + history ----------------------------------
         self._session_manager = ChatSessionManager()
         self._session_manager.session_loaded.connect(self._on_session_loaded)
-        self._load_history()
 
         self._init_tools()
 
@@ -147,7 +146,7 @@ class AIAssistantPanel(QWidget):
 
         self._wire_controllers()
         self._setup_ui()
-        self._messages.restore_from_context(self._context)
+        self._load_history()
 
     # ------------------------------------------------------------------
     # Back-compat attribute proxies (read by external tests & code)
@@ -273,6 +272,58 @@ class AIAssistantPanel(QWidget):
         register_file_tools(self._tools_registry)
         register_codemap_tools(self._tools_registry)
         register_panel_tools(self._tools_registry, self._rag_store)
+
+    def _populate_cli_provider_entries(self, combo: Any) -> None:
+        """Append a 'CLI Agents' section to the provider combo.
+
+        Reads only through ``AllProviders`` so the populator stays
+        decoupled from subprocess introspection (Law of Demeter).
+        Entries are appended only when at least one CLI provider was
+        discovered; otherwise the combo is left untouched.
+
+        Args:
+            combo: The provider QComboBox to extend.
+
+        Raises:
+            ValueError: If ``combo`` is None.
+        """
+        if combo is None:
+            raise ValueError("combo must be provided")
+
+        try:
+            from src.shared.python.ai.cli_providers import AllProviders
+        except ImportError:
+            return
+
+        try:
+            all_providers = AllProviders()
+            cli_entries = all_providers.cli_entries()
+        except OSError:
+            return
+
+        if not cli_entries:
+            return
+
+        # Visual separator between HTTP and CLI sections.
+        combo.insertSeparator(combo.count())
+        # Section header item — disabled so users can't pick it.
+        combo.addItem("— CLI Agents —")
+        try:
+            from PyQt6.QtGui import QStandardItemModel
+
+            model = combo.model()
+            if isinstance(model, QStandardItemModel):
+                item = model.item(combo.count() - 1)
+                if item is not None:
+                    item.setEnabled(False)
+                    item.setSelectable(False)
+        except (ImportError, AttributeError, TypeError):
+            pass
+
+        self._cli_provider_entries = {}
+        for entry in cli_entries:
+            combo.addItem(entry.name, entry.id)
+            self._cli_provider_entries[entry.name] = entry
 
     # ------------------------------------------------------------------
     # UI assembly

@@ -122,11 +122,14 @@ class ChatSessionManager(QObject):
                     timestamp_str = messages[-1].get("timestamp", "")
 
                 try:
-                    dt = (
-                        datetime.fromisoformat(timestamp_str)
-                        if timestamp_str
-                        else datetime.min
-                    )
+                    if timestamp_str:
+                        dt = datetime.fromisoformat(timestamp_str)
+                        if dt.tzinfo is not None:
+                            from datetime import timezone
+
+                            dt = dt.astimezone(timezone.utc).replace(tzinfo=None)
+                    else:
+                        dt = datetime.min
                 except ValueError:
                     dt = datetime.min
 

@@ -2,17 +2,22 @@
 
 from __future__ import annotations
 
-from src.launchers.launcher_dialogs import LauncherDialogsMixin
+from src.launchers.launcher_dialogs import DialogsManager
 
 
-class _LauncherHarness(LauncherDialogsMixin):
+class _LauncherHarness:
     def __init__(self, sidebar=None, embedded_host=None) -> None:
         self.sidekick_sidebar = sidebar
         self.embedded_host = embedded_host
         self.toasts: list[tuple[str, str]] = []
+        self.dialogs_manager = DialogsManager(self)
+        self.dialogs_manager.show_toast = self.show_toast
 
     def show_toast(self, message: str, toast_type: str = "info") -> None:
         self.toasts.append((message, toast_type))
+
+    def open_sidekick_tab(self, tool_id: str) -> None:
+        self.dialogs_manager.open_sidekick_tab(tool_id)
 
 
 class _Sidebar:
