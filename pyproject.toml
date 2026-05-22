@@ -408,6 +408,7 @@ markers = [
     "motion_pipeline: tests for the motion capture pipeline (sources, IK, matching, orchestrator)",
     "makehuman: tests that exercise the MakeHuman mesh backend (skip without MakeHuman installed)",
     "smplx: tests that exercise the SMPL-X mesh backend (skip without SMPL-X model files)",
+    "parity: Parity tests: verify consistency between Python and Rust implementations",
 ]
 filterwarnings = [
     # Suppress hppfcl→coal rename noise (third-party, not actionable in this repo)
