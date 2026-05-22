@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import pytest
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 from src.shared.python.theme.api import (
     ActiveThemeResponse,
     SaveCustomThemeRequest,
@@ -11,6 +13,7 @@ from src.shared.python.theme.api import (
     ThemeDefinition,
     ThemeListResponse,
     ThemeOperationResponse,
+    create_theme_router,
 )
 
 _COLORS = {
@@ -29,6 +32,61 @@ _COLORS = {
     "table_alt": "#252535",
     "button_hover": "#7487c8",
 }
+
+
+class FakeThemeManager:
+    def __init__(self) -> None:
+        self.builtin = {"Dark": _COLORS, "EmptyBuiltIn": {}}
+        self.custom = {"Custom": {**_COLORS, "accent": "#ff00ff"}, "EmptyCustom": {}}
+        self.current = "Dark"
+        self.saved_requests: list[tuple[str, dict[str, str], bool]] = []
+        self.deleted_requests: list[str] = []
+        self.changed_requests: list[str] = []
+        self.save_error: ValueError | None = None
+
+    def get_builtin_themes(self) -> list[str]:
+        return list(self.builtin)
+
+    def get_custom_theme_names(self) -> list[str]:
+        return list(self.custom)
+
+    def get_theme_colors(self, name: str) -> dict[str, str]:
+        return self.builtin.get(name) or self.custom.get(name) or {}
+
+    def get_current_theme_name(self) -> str:
+        return self.current
+
+    def get_current_colors(self) -> dict[str, str]:
+        return self.get_theme_colors(self.current)
+
+    def get_available_themes(self) -> list[str]:
+        return [*self.builtin, *self.custom]
+
+    def change_theme(self, name: str) -> None:
+        self.changed_requests.append(name)
+        self.current = name
+
+    def save_custom_theme(self, name: str, colors: dict[str, str], apply: bool) -> str:
+        if self.save_error is not None:
+            raise self.save_error
+        self.saved_requests.append((name, colors, apply))
+        self.custom[name] = colors
+        if apply:
+            self.current = name
+        return name
+
+    def delete_custom_theme(self, name: str) -> bool:
+        self.deleted_requests.append(name)
+        return self.custom.pop(name, None) is not None
+
+
+def make_theme_client(
+    manager: FakeThemeManager | None = None,
+) -> tuple[TestClient, FakeThemeManager]:
+    manager = manager or FakeThemeManager()
+    app = FastAPI()
+    app.include_router(create_theme_router(manager, prefix="/themes"))
+    return TestClient(app), manager
 
 
 class TestThemeColors:
@@ -119,3 +177,142 @@ class TestThemeOperationResponse:
     def test_theme_name_set(self) -> None:
         resp = ThemeOperationResponse(success=True, message="ok", theme_name="Dark")
         assert resp.theme_name == "Dark"
+
+
+class TestThemeRouter:
+    def test_lists_builtin_themes_and_filters_empty_color_sets(self) -> None:
+        client, _manager = make_theme_client()
+
+        response = client.get("/themes/builtin")
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "themes": {
+                "Dark": {
+                    "name": "Dark",
+                    "is_builtin": True,
+                    "colors": _COLORS,
+                }
+            }
+        }
+
+    def test_lists_custom_themes_and_filters_empty_color_sets(self) -> None:
+        client, _manager = make_theme_client()
+
+        response = client.get("/themes/custom")
+
+        assert response.status_code == 200
+        assert response.json()["themes"] == {
+            "Custom": {
+                "name": "Custom",
+                "is_builtin": False,
+                "colors": {**_COLORS, "accent": "#ff00ff"},
+            }
+        }
+
+    def test_lists_all_themes_with_builtin_flags(self) -> None:
+        client, _manager = make_theme_client()
+
+        response = client.get("/themes/")
+
+        assert response.status_code == 200
+        themes = response.json()["themes"]
+        assert themes["Dark"]["is_builtin"] is True
+        assert themes["Custom"]["is_builtin"] is False
+        assert "EmptyBuiltIn" not in themes
+        assert "EmptyCustom" not in themes
+
+    def test_get_active_theme_reports_builtin_status(self) -> None:
+        client, manager = make_theme_client()
+        manager.current = "Custom"
+
+        response = client.get("/themes/active")
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "name": "Custom",
+            "is_builtin": False,
+            "colors": {**_COLORS, "accent": "#ff00ff"},
+        }
+
+    def test_set_active_theme_changes_available_theme(self) -> None:
+        client, manager = make_theme_client()
+
+        response = client.put("/themes/active", json={"name": "Custom"})
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "success": True,
+            "message": "Active theme set to 'Custom'",
+            "theme_name": "Custom",
+        }
+        assert manager.changed_requests == ["Custom"]
+        assert manager.current == "Custom"
+
+    def test_set_active_theme_rejects_unknown_theme_with_available_names(self) -> None:
+        client, manager = make_theme_client()
+
+        response = client.put("/themes/active", json={"name": "Missing"})
+
+        assert response.status_code == 404
+        assert response.json()["detail"] == (
+            "Theme 'Missing' not found. "
+            "Available: Dark, EmptyBuiltIn, Custom, EmptyCustom"
+        )
+        assert manager.changed_requests == []
+
+    def test_save_custom_theme_delegates_name_colors_and_apply_flag(self) -> None:
+        client, manager = make_theme_client()
+
+        response = client.post(
+            "/themes/custom",
+            json={"name": "Solar", "colors": _COLORS, "apply": True},
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "success": True,
+            "message": "Theme 'Solar' saved successfully",
+            "theme_name": "Solar",
+        }
+        assert manager.saved_requests == [("Solar", _COLORS, True)]
+        assert manager.current == "Solar"
+
+    def test_save_custom_theme_converts_manager_value_error_to_bad_request(
+        self,
+    ) -> None:
+        manager = FakeThemeManager()
+        manager.save_error = ValueError("reserved theme name")
+        client, _manager = make_theme_client(manager)
+
+        response = client.post(
+            "/themes/custom",
+            json={"name": "Dark", "colors": _COLORS},
+        )
+
+        assert response.status_code == 400
+        assert response.json() == {"detail": "reserved theme name"}
+        assert manager.saved_requests == []
+
+    def test_delete_custom_theme_returns_success_for_existing_theme(self) -> None:
+        client, manager = make_theme_client()
+
+        response = client.delete("/themes/custom/Custom")
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "success": True,
+            "message": "Theme 'Custom' deleted",
+            "theme_name": "Custom",
+        }
+        assert manager.deleted_requests == ["Custom"]
+        assert "Custom" not in manager.custom
+
+    def test_delete_custom_theme_returns_not_found_for_missing_theme(self) -> None:
+        client, manager = make_theme_client()
+
+        response = client.delete("/themes/custom/Missing")
+
+        assert response.status_code == 404
+        assert response.json() == {"detail": "Custom theme 'Missing' not found"}
+        assert manager.deleted_requests == ["Missing"]
