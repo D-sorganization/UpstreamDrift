@@ -332,16 +332,35 @@ def _closest_importable(dotted: str, *, fallback: str) -> str:
     parts = dotted.split(".")
     for i in range(len(parts), 0, -1):
         candidate = ".".join(parts[:i])
-        try:
-            importlib.import_module(candidate)
-        except Exception:  # noqa: BLE001 - probe importability only
-            continue
-        return candidate
-    try:
-        importlib.import_module(fallback)
+        if _is_importable(candidate):
+            return candidate
+    if _is_importable(fallback):
         return fallback
-    except Exception:  # noqa: BLE001 - last resort
-        return "sidekick"
+    return "sidekick"
+
+
+def _is_importable(dotted: str) -> bool:
+    """Return ``True`` if ``dotted`` resolves under the current pythonpath.
+
+    Catches the narrow set of exceptions a module load can throw —
+    ``ImportError``, ``AttributeError`` (stale partial modules in
+    ``sys.modules``), ``ValueError`` (some `__init__` invariants),
+    ``SyntaxError``, ``OSError``, and ``RuntimeError`` — and treats any
+    of them as "not importable". Anything else (KeyboardInterrupt,
+    SystemExit, MemoryError) propagates.
+    """
+    try:
+        importlib.import_module(dotted)
+    except (
+        ImportError,
+        AttributeError,
+        ValueError,
+        SyntaxError,
+        OSError,
+        RuntimeError,
+    ):
+        return False
+    return True
 
 
 def _discover_calculators() -> list[FeatureEntry]:
@@ -542,7 +561,14 @@ def _walk_package(package_name: str, kind: str):
         full = f"{package_name}.{module_info.name}"
         try:
             mod = importlib.import_module(full)
-        except Exception as exc:  # noqa: BLE001 - skip broken siblings
+        except (
+            ImportError,
+            AttributeError,
+            ValueError,
+            SyntaxError,
+            OSError,
+            RuntimeError,
+        ) as exc:
             logger.debug("feature_catalog: skipping %s: %s", full, exc)
             continue
         summary = (

@@ -218,9 +218,7 @@ class TestAgentLayerDocs:
             "workflow_bridge",
             "chat_surface",
         ):
-            assert module in content, (
-                f"docs/sidekick/agent.md must reference {module}"
-            )
+            assert module in content, f"docs/sidekick/agent.md must reference {module}"
 
     def test_agents_md_mentions_agent_layer(self) -> None:
         """AGENTS.md must point new contributors at the agent layer."""

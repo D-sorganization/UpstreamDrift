@@ -455,7 +455,17 @@ class SidekickActionService:
         )
         try:
             self._audit_sink(call)
-        except Exception:  # noqa: BLE001 - audit sink must never break dispatch
+        except (
+            OSError,
+            TypeError,
+            ValueError,
+            AttributeError,
+            RuntimeError,
+            LookupError,
+        ):
+            # Audit sinks must never break dispatch. Anything outside this
+            # narrow set (KeyboardInterrupt, SystemExit, MemoryError, ...)
+            # is a real bug and should propagate.
             logger.exception("audit sink failed for action %s", action_id)
 
 
