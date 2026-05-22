@@ -8,6 +8,20 @@ The agent layer makes Sidekick a first-class operator of its own
 features. This page is for contributors who want to add a new action,
 add a new host integration, write a workflow, or extend the chip UI.
 
+## Module map
+
+| Module | Purpose |
+|--------|---------|
+| `feature_catalog.py` | Self-knowledge index: build / lookup / search Sidekick features. |
+| `action_service.py` | The dispatch facade, descriptors, audit + policy + undo wiring. |
+| `subtab_adapter.py` | Drives `tools_sidebar` actions through a `SubtabActionPort`. |
+| `host_adapter.py` | Bridges embedding-host actions via a `HostActionPort`. |
+| `planner.py` | Validates LLM tool calls into `PlannedStep`s; exports tool-registry entries + system prompt. |
+| `action_audit.py` | `MemoryActionAudit` + `JsonlActionAudit` sinks (with redaction). |
+| `access_policy.py` | Default-deny policy with per-side-effects allowlists + confirmation gating. |
+| `workflow_bridge.py` | Composes actions into workflows with `abort`/`retry`/`skip`/`ask_user` recovery. |
+| `chat_surface.py` | Wire-shaped `ActionChipModel` consumed by both PyQt and React surfaces. |
+
 ## Architecture in one diagram
 
 ```
