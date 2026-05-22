@@ -918,7 +918,7 @@ jobs:
   alembic-postgres-round-trip:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
-    timeout-minutes: 20
+    timeout-minutes: 45
     services:
       postgres:
         image: postgres:16
@@ -930,10 +930,10 @@ jobs:
           - 5432
         options: >-
           --health-cmd "pg_isready -U upstreamdrift -d upstreamdrift_migrations"
-          --health-interval 5s
-          --health-start-period 60s
+          --health-interval 10s
+          --health-start-period 300s
           --health-timeout 5s
-          --health-retries 24
+          --health-retries 60
     steps:
       - name: Clean corrupt git objects
         shell: bash
