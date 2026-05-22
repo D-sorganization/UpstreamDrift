@@ -112,7 +112,9 @@ def test_change_font_persists_applies_and_emits_for_new_font(
     manager = FontManager()
     applied: list[str] = []
     emitted: list[str] = []
-    monkeypatch.setattr(manager, "apply_font", lambda: applied.append(manager.current_font))
+    monkeypatch.setattr(
+        manager, "apply_font", lambda: applied.append(manager.current_font)
+    )
     manager.fontChanged.connect(emitted.append)
 
     manager.change_font("Roboto")
@@ -131,9 +133,7 @@ def test_change_font_noops_when_font_is_already_current(
 
     manager.change_font("Inter")
 
-    assert "font_family" not in {
-        key for _group, key in _FakeSettings.store
-    }
+    assert "font_family" not in {key for _group, key in _FakeSettings.store}
 
 
 def test_apply_font_uses_current_font_with_standard_point_size() -> None:
