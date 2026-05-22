@@ -14,6 +14,8 @@ from dataclasses import dataclass
 from src.shared.python.ai.cli_providers.contracts import CliProviderDescriptor
 from src.shared.python.ai.cli_providers.discovery import discover_cli_providers
 
+_list = list  # Alias to avoid name clashes with class-level 'list' methods in mypy
+
 
 class CliProviderRegistry:
     """Maintains the set of CLI providers discovered on this host.
@@ -24,15 +26,15 @@ class CliProviderRegistry:
     """
 
     def __init__(self) -> None:
-        self._descriptors: list[CliProviderDescriptor] | None = None
+        self._descriptors: _list[CliProviderDescriptor] | None = None
 
-    def list(self) -> list[CliProviderDescriptor]:
+    def list(self) -> _list[CliProviderDescriptor]:
         """Return all known CLI provider descriptors."""
         if self._descriptors is None:
             self._descriptors = discover_cli_providers()
         return list(self._descriptors)
 
-    def refresh(self) -> list[CliProviderDescriptor]:
+    def refresh(self) -> _list[CliProviderDescriptor]:
         """Re-run discovery and return the updated list."""
         self._descriptors = discover_cli_providers()
         return list(self._descriptors)
@@ -89,7 +91,7 @@ class AllProviders:
     def __init__(
         self,
         cli_registry: CliProviderRegistry | None = None,
-        http_providers: list[tuple[str, str]] | None = None,
+        http_providers: _list[tuple[str, str]] | None = None,
     ) -> None:
         """Build a unified view over HTTP and CLI registries.
 
@@ -101,9 +103,9 @@ class AllProviders:
                 ``set_http_providers()``.
         """
         self._cli = cli_registry or CliProviderRegistry()
-        self._http: list[tuple[str, str]] = list(http_providers or ())
+        self._http: _list[tuple[str, str]] = list(http_providers or ())
 
-    def set_http_providers(self, providers: list[tuple[str, str]]) -> None:
+    def set_http_providers(self, providers: _list[tuple[str, str]]) -> None:
         """Replace the HTTP provider list shown in the dropdown.
 
         Args:
@@ -112,7 +114,7 @@ class AllProviders:
         """
         self._http = list(providers)
 
-    def list(self) -> list[ProviderEntry]:
+    def list(self) -> _list[ProviderEntry]:
         """Return the unified list of providers for the dropdown.
 
         Order: HTTP entries first (in input order), then CLI entries
@@ -142,6 +144,6 @@ class AllProviders:
             )
         return entries
 
-    def cli_entries(self) -> list[ProviderEntry]:
+    def cli_entries(self) -> _list[ProviderEntry]:
         """Return only the CLI portion of the unified list."""
         return [e for e in self.list() if e.category == self.CLI_CATEGORY]
