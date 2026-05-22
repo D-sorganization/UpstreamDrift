@@ -56,8 +56,8 @@ dependencies = [
 rust = ["upstream-physics>=0.1.0", "upstream-mocap-preproc>=0.1.0", "upstream-mocap-io>=0.1.0"]
 mocap-preproc = ["upstream-mocap-preproc>=0.1.0"]
 mocap-io = ["upstream-mocap-io>=0.1.0"]
-drake = ["drake>=1.22.0"]
-pinocchio = ["pin>=2.6.0", "meshcat>=0.3.0"]
+drake = ["drake>=1.22.0,<2.0.0"]  # Apache 2.0
+pinocchio = ["pin>=2.6.0,<3.0.0", "meshcat>=0.3.0"]  # BSD 2-Clause
 chrono = ["pychrono>=8.0"]
 
 all-engines = ["upstream-drift[drake,pinocchio]"]
@@ -71,6 +71,11 @@ pose = ["mediapipe>=0.10.33", "opencv-python>=4.8.0", "imageio[ffmpeg]>=2.31.0"]
 # Biomechanics engines
 biomechanics = ["myosuite>=2.0.0", "opensim>=4.4.0", "gymnasium>=0.29.0"]
 experimental = ["myosuite>=2.0.0", "opensim>=4.4.0", "gymnasium>=0.29.0"]
+
+# PyTorch (deep learning / RL backbone)
+torch = [
+    "torch>=2.0.0",  # BSD 3-Clause
+]
 
 # Reinforcement learning (for MyoSuite muscle training)
 rl = ["stable-baselines3>=2.0.0", "gymnasium>=0.29.0"]
@@ -162,7 +167,7 @@ body-part-viz-gl = [
 ]
 
 # Everything
-all = ["upstream-drift[rust,all-engines,analysis,pose,biomechanics,rl,urdf,dev]"]
+all = ["upstream-drift[rust,all-engines,analysis,pose,biomechanics,rl,urdf,dev,torch]"]
 
 [project.scripts]
 upstream-drift = "launch_golf_suite:main"
