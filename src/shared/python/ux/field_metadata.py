@@ -248,7 +248,12 @@ def _validate_range_and_default(fm: FieldMetadata) -> None:
                 f"{fm.id}: default {fm.default!r} not in enum {rng!r}"
             )
         return
-    lo, hi = rng  # type: ignore[misc]
+    # Past the enum branch, rng is the numeric (min, max) tuple by
+    # construction (see _coerce_valid_range).  Narrow explicitly so
+    # mypy sees float comparisons rather than float|str.
+    lo_raw, hi_raw = rng
+    lo = float(lo_raw)
+    hi = float(hi_raw)
     if lo > hi:
         raise FieldMetadataError(
             f"{fm.id}: numeric valid_range is reversed: ({lo}, {hi})"
