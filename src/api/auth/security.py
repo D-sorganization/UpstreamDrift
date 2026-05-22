@@ -435,6 +435,7 @@ class AuthCache:
     """
 
     TTL_SECONDS = 300  # 5 minutes cache
+    MAX_ENTRIES = 10_000
 
     def __init__(self) -> None:
         import threading
@@ -466,11 +467,14 @@ class AuthCache:
             raise ValueError("api_key must be provided")
         cache_key = self._cache_lookup_token(api_key)
         with self._lock:
-            # Simple cleanup of size if needed, but 300s TTL is self-limiting mostly
-            if len(self._cache) > 10000:
-                # Random eviction or clear
-                self._cache.clear()
+            self._cache.pop(cache_key, None)
+            self._evict_overflow_entries()
             self._cache[cache_key] = (result, self._time.time())
+
+    def _evict_overflow_entries(self) -> None:
+        """Keep the cache bounded without flushing unrelated auth results."""
+        while len(self._cache) >= self.MAX_ENTRIES:
+            self._cache.pop(next(iter(self._cache)))
 
     def _cache_lookup_token(self, token_value: str) -> str:
         """Generate a lookup token for the auth cache.
