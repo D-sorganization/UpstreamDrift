@@ -131,7 +131,7 @@ class DrakeSkeletonProvider:
         # Build body name to index mapping
         self._body_name_to_index: dict[str, int] = {}
         for i in range(self.plant.num_bodies()):
-            body = self.plant.get_body(i)
+            body = self.plant.get_body(i)  # type: ignore[arg-type]
             self._body_name_to_index[body.name()] = i
 
         # Validate that required vocabulary is available
@@ -161,8 +161,8 @@ class DrakeSkeletonProvider:
         Returns:
             Tuple of (x, y, z) coordinates in meters.
         """
-        body = self.plant.get_body(body_index)
-        pose = body.EvalBodyPoseInWorld(context)
+        body = self.plant.get_body(body_index)  # type: ignore[arg-type]
+        pose = body.EvalBodyPoseInWorld(context)  # type: ignore[attr-defined]
         position = pose.translation()
         return (float(position[0]), float(position[1]), float(position[2]))
 

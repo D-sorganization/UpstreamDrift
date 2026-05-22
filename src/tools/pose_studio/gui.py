@@ -215,7 +215,7 @@ class MainWidget(QtWidgets.QWidget):
         self.act_undo.setEnabled(self._history.can_undo)
         self.act_redo.setEnabled(self._history.can_redo)
 
-    def create_menu_bar(self, parent: QtWidgets.QMainWindow) -> QtGui.QMenuBar:
+    def create_menu_bar(self, parent: QtWidgets.QMainWindow) -> QtWidgets.QMenuBar:
         """Create and return a menu bar for the given parent window.
 
         Args:
