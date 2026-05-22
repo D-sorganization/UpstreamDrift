@@ -13,7 +13,7 @@ try:
     from datetime import timezone
 except ImportError:
     timezone.utc = timezone.utc  # noqa: UP017
-from typing import Any
+from typing import Any, cast
 
 import bcrypt
 import jwt
@@ -123,7 +123,7 @@ class SecurityManager:
             raise ValueError("password must be provided")
         salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
         hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
-        return hashed.decode("utf-8")
+        return cast(str, hashed.decode("utf-8"))
 
     @precondition(
         lambda self, plain_password, hashed_password: (
@@ -148,8 +148,10 @@ class SecurityManager:
             True if password matches, False otherwise
         """
         try:
-            return bcrypt.checkpw(
-                plain_password.encode("utf-8"), hashed_password.encode("utf-8")
+            return bool(
+                bcrypt.checkpw(
+                    plain_password.encode("utf-8"), hashed_password.encode("utf-8")
+                )
             )
         except (ValueError, TypeError):
             return False
@@ -275,7 +277,7 @@ class SecurityManager:
             raise ValueError("api_key must be provided")
         salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
         hashed = bcrypt.hashpw(api_key.encode("utf-8"), salt)
-        return hashed.decode("utf-8")
+        return cast(str, hashed.decode("utf-8"))
 
     def verify_api_key(self, api_key: str, hashed_key: str) -> bool:
         """Verify an API key against its hash.
@@ -288,7 +290,9 @@ class SecurityManager:
             True if key matches, False otherwise
         """
         try:
-            return bcrypt.checkpw(api_key.encode("utf-8"), hashed_key.encode("utf-8"))
+            return bool(
+                bcrypt.checkpw(api_key.encode("utf-8"), hashed_key.encode("utf-8"))
+            )
         except (ValueError, TypeError):
             return False
 
