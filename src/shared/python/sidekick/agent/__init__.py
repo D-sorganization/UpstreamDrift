@@ -45,6 +45,16 @@ from .subtab_adapter import (
     SubtabAdapter,
     WorkspaceSnapshot,
 )
+from .workflow_bridge import (
+    PendingUserDecision,
+    SidekickWorkflow,
+    WorkflowOutcome,
+    WorkflowStep,
+    WorkflowStepResult,
+    WorkflowStepStatus,
+    action_step,
+    run_sidekick_workflow,
+)
 
 __all__ = [
     "ActionDescriptor",
@@ -58,6 +68,7 @@ __all__ = [
     "HostInvocationResult",
     "JsonlActionAudit",
     "MemoryActionAudit",
+    "PendingUserDecision",
     "PlannedStep",
     "PlannerError",
     "PolicyDecision",
@@ -65,14 +76,21 @@ __all__ = [
     "SidekickActionPolicy",
     "SidekickActionService",
     "SidekickAgentPlanner",
+    "SidekickWorkflow",
     "StateProfile",
     "SubtabActionPort",
     "SubtabAdapter",
     "ToolCall",
+    "WorkflowOutcome",
+    "WorkflowStep",
+    "WorkflowStepResult",
+    "WorkflowStepStatus",
     "WorkspaceSnapshot",
+    "action_step",
     "build_feature_catalog",
     "build_sidekick_system_prompt",
     "lookup_feature",
     "redact_secrets",
+    "run_sidekick_workflow",
     "search_features",
 ]
