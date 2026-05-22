@@ -11,7 +11,6 @@ import pytest
 from src.shared.python.biomechanics.hill_muscle import HillMuscleModel, MuscleParameters
 from src.shared.python.biomechanics.muscle_equilibrium import (
     EquilibriumSolver,
-    compute_equilibrium_state,
 )
 from src.shared.python.core.contracts import PostconditionError
 

@@ -15,8 +15,6 @@ from scipy.io import savemat
 from src.shared.python.motion_matching import (
     AlignOptions,
     ClubTarget,
-    load_club_target,
-    load_club_target_excel,
     load_club_target_mat,
 )
 from src.shared.python.motion_matching.loaders.matlab_dataset import (

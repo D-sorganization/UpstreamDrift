@@ -12,7 +12,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np
-import pandas as pd
 import pytest
 from sidekick.lab.bio import _c3d_io as io_mod
 from sidekick.lab.bio._c3d_marker_set import MarkerSet

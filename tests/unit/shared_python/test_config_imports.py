@@ -11,7 +11,16 @@ import pytest
 
 def test_config_module_imports_cleanly() -> None:
     """The config package must import without AttributeError or ImportError."""
-    mod = importlib.import_module("src.shared.python.config")
+    import sys
+    print("SYS PATH:", sys.path)
+    try:
+        mod = importlib.import_module("src.shared.python.config")
+        print("MOD:", mod)
+        print("MOD FILE:", getattr(mod, "__file__", "NONE"))
+        print("MOD DIR:", dir(mod))
+    except Exception as e:
+        print("IMPORT ERROR:", e)
+        raise
     assert mod is not None
 
 

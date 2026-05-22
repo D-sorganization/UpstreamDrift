@@ -4,10 +4,10 @@
 
 Two launcher implementations exist in UpstreamDrift:
 
-| Launcher           | Technology              | Location                         | Status                                          |
-| ------------------ | ----------------------- | -------------------------------- | ----------------------------------------------- |
+| Launcher           | Technology              | Location                                   | Status                                          |
+| ------------------ | ----------------------- | ------------------------------------------ | ----------------------------------------------- |
 | **PyQt Launcher**  | PyQt6 + Python          | `src/launchers/upstream_drift_launcher.py` | Primary, 2302 lines, tile-based grid (2×4)      |
-| **Tauri Launcher** | React + Vite + Tauri v2 | `ui/`                            | Secondary, simulation-focused, missing features |
+| **Tauri Launcher** | React + Vite + Tauri v2 | `ui/`                                      | Secondary, simulation-focused, missing features |
 
 Both launchers are out of sync. The PyQt launcher has more tiles but broken launch paths. The Tauri launcher is more modern in design but missing most tiles and has no logos.
 

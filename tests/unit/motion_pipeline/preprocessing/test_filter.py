@@ -148,7 +148,6 @@ def test_pure_python_filter() -> None:
     from src.shared.python.motion_pipeline.contracts import (
         KeypointFrame,
         KeypointSequence,
-        MarkerFrame,
         MarkerTrajectory,
     )
 

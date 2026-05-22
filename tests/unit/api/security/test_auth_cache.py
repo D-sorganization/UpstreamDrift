@@ -4,8 +4,7 @@ These tests verify the security module using Design by Contract principles.
 """
 
 import os
-from datetime import timedelta
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 

@@ -122,7 +122,7 @@ jobs:
             advisory: false
           - profile: research
             max_size_mb: 3500
-            advisory: true   # advisory until fleet cache warms up
+            advisory: true # advisory until fleet cache warms up
           - profile: biomech
             max_size_mb: 4800
             advisory: true

@@ -7,27 +7,27 @@ to pick each one.
 
 ## Quick answer
 
-| You want to … | Use this |
-|---------------|----------|
-| Add a feature to your local Python install | `pip install 'upstream-drift[<extra>]'` |
-| Add it from inside a running launcher | Click the tile — a dialog offers to install |
-| Add it to a Docker image | Rebuild with a profile that includes it |
-| See what's installed right now | `python -m src.shared.python.feature_registry` |
+| You want to …                              | Use this                                       |
+| ------------------------------------------ | ---------------------------------------------- |
+| Add a feature to your local Python install | `pip install 'upstream-drift[<extra>]'`        |
+| Add it from inside a running launcher      | Click the tile — a dialog offers to install    |
+| Add it to a Docker image                   | Rebuild with a profile that includes it        |
+| See what's installed right now             | `python -m src.shared.python.feature_registry` |
 
 ## The feature catalog at a glance
 
-| Feature | Extra | Channel | Approx size |
-|---------|-------|---------|-------------|
-| MuJoCo (`mujoco`) | (in core) | pip | 120 MB |
-| Drake (`drake`) | `[drake]` | pip | 700 MB |
-| Pinocchio (`pinocchio`) | `[pinocchio]` | pip | 210 MB |
-| OpenSim (`opensim`) | `[biomechanics]` (or conda) | conda preferred | 400 MB |
-| MyoSuite (`myosuite`) | `[biomechanics]` | pip | 1.4 GB (incl. torch) |
-| PyChrono (`chrono`) | `[chrono]` (conda only) | conda | 600 MB |
-| MediaPipe (`pose-mediapipe`) | `[pose]` | pip | 300 MB |
-| OpenPose (`pose-openpose`) | n/a | external build | — |
-| PyTorch CUDA (`torch-cuda`) | n/a | pip | 2.8 GB |
-| RL stack (`rl-stack`) | `[rl]` | pip | 250 MB |
+| Feature                      | Extra                       | Channel         | Approx size          |
+| ---------------------------- | --------------------------- | --------------- | -------------------- |
+| MuJoCo (`mujoco`)            | (in core)                   | pip             | 120 MB               |
+| Drake (`drake`)              | `[drake]`                   | pip             | 700 MB               |
+| Pinocchio (`pinocchio`)      | `[pinocchio]`               | pip             | 210 MB               |
+| OpenSim (`opensim`)          | `[biomechanics]` (or conda) | conda preferred | 400 MB               |
+| MyoSuite (`myosuite`)        | `[biomechanics]`            | pip             | 1.4 GB (incl. torch) |
+| PyChrono (`chrono`)          | `[chrono]` (conda only)     | conda           | 600 MB               |
+| MediaPipe (`pose-mediapipe`) | `[pose]`                    | pip             | 300 MB               |
+| OpenPose (`pose-openpose`)   | n/a                         | external build  | —                    |
+| PyTorch CUDA (`torch-cuda`)  | n/a                         | pip             | 2.8 GB               |
+| RL stack (`rl-stack`)        | `[rl]`                      | pip             | 250 MB               |
 
 Sizes are rough wheel + native lib estimates used for Docker profile
 budgets — your local pip install may add transitive deps that bring
@@ -66,25 +66,25 @@ the **InstallPromptDialog** (in
 [`src/shared/python/ui/dialogs/install_prompt.py`](../../src/shared/python/ui/dialogs/install_prompt.py))
 opens. It offers three choices:
 
-* **Yes, install** — runs the documented install command in a
+- **Yes, install** — runs the documented install command in a
   background thread; output streams into the dialog; the registry is
   refreshed automatically on completion.
-* **Not now** — closes the dialog without installing. You'll be
+- **Not now** — closes the dialog without installing. You'll be
   prompted again next time you open the tile.
-* **Don't ask again** — closes and persists the suppression to
+- **Don't ask again** — closes and persists the suppression to
   `~/.upstreamdrift/prefs.json` so this feature won't prompt again on
   this machine.
 
 ### When the dialog refuses or skips
 
-A few cases the dialog will *not* run the install for you:
+A few cases the dialog will _not_ run the install for you:
 
-| Situation | What happens | Why |
-|-----------|--------------|-----|
-| Running inside an unprivileged Docker container | Refuses with a "rebuild with a larger profile" hint | The image is the contract — see Method 3 below. |
-| `conda`-only feature with no `conda` on PATH | Refuses with the documented manual command | Manual `conda install` is the supported path. |
-| OpenPose | Refuses — "external-build only" | Requires CUDA + cmake; follow upstream docs. |
-| Feature already in *Don't ask again* | Dialog does not open; `prompt()` returns `SUPPRESSED` | Clear the entry in `~/.upstreamdrift/prefs.json` to re-enable. |
+| Situation                                       | What happens                                          | Why                                                            |
+| ----------------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------- |
+| Running inside an unprivileged Docker container | Refuses with a "rebuild with a larger profile" hint   | The image is the contract — see Method 3 below.                |
+| `conda`-only feature with no `conda` on PATH    | Refuses with the documented manual command            | Manual `conda install` is the supported path.                  |
+| OpenPose                                        | Refuses — "external-build only"                       | Requires CUDA + cmake; follow upstream docs.                   |
+| Feature already in _Don't ask again_            | Dialog does not open; `prompt()` returns `SUPPRESSED` | Clear the entry in `~/.upstreamdrift/prefs.json` to re-enable. |
 
 The dialog always shows the exact command first so you can copy and
 run it yourself if you prefer.
@@ -95,13 +95,13 @@ Inside Docker, the right way to add features is to rebuild from a
 larger profile rather than mutate the running container's venv. The
 profile catalog ([`docker/profiles.yaml`](../../docker/profiles.yaml)):
 
-| Profile | Includes | Budget |
-|---------|----------|--------|
-| `slim` | API + pendulum only | 900 MB |
-| `standard` | + MuJoCo + Pinocchio | 2.2 GB |
-| `research` | + Drake + MediaPipe | 3.5 GB |
-| `biomech` | + OpenSim + MyoSuite | 4.8 GB |
-| `full` | + PyChrono | 6.0 GB |
+| Profile        | Includes                  | Budget |
+| -------------- | ------------------------- | ------ |
+| `slim`         | API + pendulum only       | 900 MB |
+| `standard`     | + MuJoCo + Pinocchio      | 2.2 GB |
+| `research`     | + Drake + MediaPipe       | 3.5 GB |
+| `biomech`      | + OpenSim + MyoSuite      | 4.8 GB |
+| `full`         | + PyChrono                | 6.0 GB |
 | `gpu-training` | + PyTorch CUDA + RL stack | 9.5 GB |
 
 Build a named profile:
@@ -193,11 +193,11 @@ Edit `~/.upstreamdrift/prefs.json` and remove the
 
 ## Where this all lives
 
-* Feature definitions: [`src/shared/python/feature_registry/features.py`](../../src/shared/python/feature_registry/features.py)
-* Probes: [`src/shared/python/engine_core/engine_probes.py`](../../src/shared/python/engine_core/engine_probes.py) + [`src/shared/python/feature_registry/probes.py`](../../src/shared/python/feature_registry/probes.py)
-* Install runner: [`src/shared/python/feature_registry/installer.py`](../../src/shared/python/feature_registry/installer.py)
-* Re-export shim: [`src/core/capability_registry.py`](../../src/core/capability_registry.py)
-* Install dialog: [`src/shared/python/ui/dialogs/install_prompt.py`](../../src/shared/python/ui/dialogs/install_prompt.py)
-* Profile catalog: [`docker/profiles.yaml`](../../docker/profiles.yaml)
-* Epic / design: [`docs/plans/DOCKER_MODULAR_BUILDS_EPIC.md`](../plans/DOCKER_MODULAR_BUILDS_EPIC.md)
-* Operations reference: [`docs/operations/capability-registry.md`](../operations/capability-registry.md)
+- Feature definitions: [`src/shared/python/feature_registry/features.py`](../../src/shared/python/feature_registry/features.py)
+- Probes: [`src/shared/python/engine_core/engine_probes.py`](../../src/shared/python/engine_core/engine_probes.py) + [`src/shared/python/feature_registry/probes.py`](../../src/shared/python/feature_registry/probes.py)
+- Install runner: [`src/shared/python/feature_registry/installer.py`](../../src/shared/python/feature_registry/installer.py)
+- Re-export shim: [`src/core/capability_registry.py`](../../src/core/capability_registry.py)
+- Install dialog: [`src/shared/python/ui/dialogs/install_prompt.py`](../../src/shared/python/ui/dialogs/install_prompt.py)
+- Profile catalog: [`docker/profiles.yaml`](../../docker/profiles.yaml)
+- Epic / design: [`docs/plans/DOCKER_MODULAR_BUILDS_EPIC.md`](../plans/DOCKER_MODULAR_BUILDS_EPIC.md)
+- Operations reference: [`docs/operations/capability-registry.md`](../operations/capability-registry.md)

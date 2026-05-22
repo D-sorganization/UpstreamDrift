@@ -18,7 +18,6 @@ import os
 import pytest
 
 from src.shared.python.engine_core.engine_availability import (
-    PYQT6_AVAILABLE,
     skip_if_unavailable,
 )
 

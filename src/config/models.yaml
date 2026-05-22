@@ -381,6 +381,16 @@ models:
       status: "beta"
       default_launch: "dock"
 
+  - id: "chat_assistant"
+    name: "AI Assistant"
+    description: "Chat-based AI assistant with calculator, workspace, and data explorer integration"
+    type: "chat_assistant"
+    path: "src/shared/python/chat/sidekick_tool.py"
+    launcher:
+      category: "assistant"
+      logo: "assets/sidekick.svg"
+      status: "gui_ready"
+
   # =============================================================================
   # DOCUMENTATION
   # =============================================================================

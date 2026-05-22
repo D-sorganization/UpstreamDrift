@@ -1,6 +1,3 @@
-import pytest
-from PyQt6.QtWidgets import QGraphicsDropShadowEffect
-from PyQt6.QtCore import QPropertyAnimation
 from src.launchers.model_card import SkeletonCard
 
 

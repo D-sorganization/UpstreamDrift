@@ -29,19 +29,29 @@ os.environ.setdefault("MPLBACKEND", "Agg")
 import sys as _sys
 import types as _types
 
+import importlib as _importlib
+
 _data_io_name = "src.shared.python.data_io"
-if _data_io_name not in _sys.modules:
-    _data_io_mod = _types.ModuleType(_data_io_name)
-    _data_io_mod.__path__ = ["src/shared/python/data_io"]
-    _data_io_mod.__package__ = _data_io_name
-    _sys.modules[_data_io_name] = _data_io_mod
+try:
+    _importlib.import_module(_data_io_name)
+except Exception:
+    _sys.modules.pop(_data_io_name, None)
+    if _data_io_name not in _sys.modules:
+        _data_io_mod = _types.ModuleType(_data_io_name)
+        _data_io_mod.__path__ = ["src/shared/python/data_io"]
+        _data_io_mod.__package__ = _data_io_name
+        _sys.modules[_data_io_name] = _data_io_mod
 
 _config_name = "src.shared.python.config"
-if _config_name not in _sys.modules:
-    _config_mod = _types.ModuleType(_config_name)
-    _config_mod.__path__ = ["src/shared/python/config"]
-    _config_mod.__package__ = _config_name
-    _sys.modules[_config_name] = _config_mod
+try:
+    _importlib.import_module(_config_name)
+except Exception:
+    _sys.modules.pop(_config_name, None)
+    if _config_name not in _sys.modules:
+        _config_mod = _types.ModuleType(_config_name)
+        _config_mod.__path__ = ["src/shared/python/config"]
+        _config_mod.__package__ = _config_name
+        _sys.modules[_config_name] = _config_mod
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
