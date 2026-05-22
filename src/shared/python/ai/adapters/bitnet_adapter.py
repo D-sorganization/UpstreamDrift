@@ -26,6 +26,8 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
+_MAX_PROMPT_BYTES: int = 65_536
+
 
 class BitnetAdapter(BaseAgentAdapter):
     """Adapter for running local BitNet models via direct subprocess.
@@ -157,6 +159,11 @@ class BitnetAdapter(BaseAgentAdapter):
         """Send a message synchronously."""
         prompt = self._format_prompt(context, message)
 
+        if len(prompt.encode("utf-8")) > _MAX_PROMPT_BYTES:
+            raise ValueError(
+                f"Prompt exceeds maximum allowed size of {_MAX_PROMPT_BYTES} bytes"
+            )
+
         try:
             cmd = [
                 self.llama_cli,
@@ -196,6 +203,11 @@ class BitnetAdapter(BaseAgentAdapter):
     ) -> Iterator[AgentChunk]:
         """Stream the response using subprocess."""
         prompt = self._format_prompt(context, message)
+
+        if len(prompt.encode("utf-8")) > _MAX_PROMPT_BYTES:
+            raise ValueError(
+                f"Prompt exceeds maximum allowed size of {_MAX_PROMPT_BYTES} bytes"
+            )
 
         cmd = [
             self.llama_cli,

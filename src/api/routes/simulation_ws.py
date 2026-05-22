@@ -11,7 +11,9 @@ from pydantic import BaseModel
 
 from src.shared.python.core.contracts import require
 from src.shared.python.engine_core.engine_registry import EngineType
+from src.shared.python.logging_pkg.logging_config import get_logger
 
+logger = get_logger(__name__)
 router = APIRouter()
 _DEFAULT_SPEED_FACTOR = 1.0
 
@@ -152,7 +154,8 @@ async def _load_simulation_engine(
 
         return engine  # type: ignore[no-any-return]
     except ValueError:
-        await websocket.send_json({"error": f"Invalid engine: {engine_type}"})
+        logger.exception("WebSocket handler error")
+        await websocket.send_json({"type": "error", "detail": "internal error"})
         return None
 
 
@@ -174,6 +177,11 @@ async def _handle_client_commands(
             return "pause"
         if action == "set_speed":
             speed_factor = msg.get("speed_factor", 1.0)
+            if not isinstance(speed_factor, (int, float)) or speed_factor <= 0:
+                await websocket.send_json(
+                    {"type": "error", "detail": "invalid speed_factor"}
+                )
+                return "continue"
             config["speed_factor"] = float(speed_factor)
             app_state = getattr(getattr(websocket, "app", None), "state", None)
             simulation_service = getattr(app_state, "simulation_service", None)
@@ -207,6 +215,11 @@ async def _wait_for_resume_or_stop(
             return True
         if action == "set_speed":
             speed_factor = msg.get("speed_factor", 1.0)
+            if not isinstance(speed_factor, (int, float)) or speed_factor <= 0:
+                await websocket.send_json(
+                    {"type": "error", "detail": "invalid speed_factor"}
+                )
+                continue
             config["speed_factor"] = float(speed_factor)
             app_state = getattr(getattr(websocket, "app", None), "state", None)
             simulation_service = getattr(app_state, "simulation_service", None)
@@ -364,10 +377,11 @@ async def simulation_stream(
 
     except WebSocketDisconnect:
         pass  # Client disconnected
-    except (ValueError, RuntimeError, AttributeError) as e:
+    except (ValueError, RuntimeError, AttributeError):
+        logger.exception("WebSocket handler error")
         # Best effort error reporting
         with contextlib.suppress(ConnectionError, TimeoutError, OSError):
-            await websocket.send_json({"error": str(e)})
+            await websocket.send_json({"type": "error", "detail": "internal error"})
     finally:
         with contextlib.suppress(ConnectionError, TimeoutError, OSError):
             await websocket.close()
