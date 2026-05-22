@@ -15,7 +15,6 @@ from src.shared.python.engine_core.engine_registry import EngineType
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
-
 router = APIRouter()
 _DEFAULT_SPEED_FACTOR = 1.0
 
@@ -171,7 +170,8 @@ async def _load_simulation_engine(
 
         return engine  # type: ignore[no-any-return]
     except ValueError:
-        await websocket.send_json({"error": f"Invalid engine: {engine_type}"})
+        logger.exception("WebSocket handler error")
+        await websocket.send_json({"type": "error", "detail": "internal error"})
         return None
 
 
@@ -397,6 +397,7 @@ async def simulation_stream(
         pass  # Client disconnected
     except (ValueError, RuntimeError, AttributeError):
         logger.exception("Simulation WebSocket handler error")
+        # Best effort error reporting
         with contextlib.suppress(ConnectionError, TimeoutError, OSError):
             await websocket.send_json({"type": "error", "detail": "internal error"})
     finally:
