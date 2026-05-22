@@ -211,7 +211,7 @@ def test_main_with_too_many_exceptions(
             "owner": "@m",
             "reason": "issue #1",
         }
-        for i in range(10)
+        for i in range(11)
     ]
     baseline = repo / "baseline.json"
     baseline.write_text(json.dumps({"max_lines": 1000, "exceptions": excs}))
