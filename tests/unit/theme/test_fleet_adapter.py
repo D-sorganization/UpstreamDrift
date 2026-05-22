@@ -2,11 +2,20 @@
 
 from __future__ import annotations
 
+import sys
+from types import SimpleNamespace
+
+import pytest
+
 from src.shared.python.theme.fleet_adapter import (
     FLEET_THEMES,
     _adjust_color_brightness,
+    _build_theme_colors_kwargs,
+    _extract_base_colors,
+    _extract_semantic_colors,
     _hex_with_alpha,
     _is_dark_theme,
+    fleet_to_theme_colors,
     get_fleet_theme_names,
     is_fleet_available,
     is_valid_hex_color,
@@ -53,6 +62,9 @@ class TestIsValidHexColor:
     def test_wrong_length_invalid(self) -> None:
         assert is_valid_hex_color("#12345") is False
 
+    def test_whitespace_only_invalid(self) -> None:
+        assert is_valid_hex_color("   ") is False
+
 
 class TestIsDarkTheme:
     def test_dark_bg_is_dark(self) -> None:
@@ -75,6 +87,12 @@ class TestIsDarkTheme:
         # #7f7f7f has luminance ≈ 0.498, which is < 0.5 → dark
         result = _is_dark_theme({"bg": "#7f7f7f"})
         assert isinstance(result, bool)
+
+    def test_invalid_short_hex_returns_false(self) -> None:
+        assert _is_dark_theme({"bg": "#"}) is False
+
+    def test_hex_without_hash_returns_false(self) -> None:
+        assert _is_dark_theme({"bg": "111111"}) is False
 
 
 class TestAdjustColorBrightness:
@@ -105,6 +123,16 @@ class TestAdjustColorBrightness:
         result = _adjust_color_brightness("#zzzzzz", 1.0)
         assert result == "#zzzzzz"
 
+    def test_none_raises_value_error(self) -> None:
+        with pytest.raises(ValueError, match="hex_color must be provided"):
+            _adjust_color_brightness(None, 1.0)  # type: ignore[arg-type]
+
+    def test_missing_hash_is_supported(self) -> None:
+        assert _adjust_color_brightness("808080", 0.5) == "#404040"
+
+    def test_negative_factor_clamps_to_zero(self) -> None:
+        assert _adjust_color_brightness("#ffffff", -1.0) == "#000000"
+
 
 class TestHexWithAlpha:
     def test_appends_alpha(self) -> None:
@@ -123,3 +151,126 @@ class TestHexWithAlpha:
     def test_3digit_expands(self) -> None:
         result = _hex_with_alpha("#fff", 255)
         assert len(result) == 9
+
+    def test_none_raises_value_error(self) -> None:
+        with pytest.raises(ValueError, match="hex_color must be provided"):
+            _hex_with_alpha(None, 255)  # type: ignore[arg-type]
+
+    def test_missing_hash_is_supported(self) -> None:
+        assert _hex_with_alpha("abc", 0x40) == "#aabbcc40"
+
+
+class TestExtractBaseColors:
+    def test_uses_dark_defaults_when_values_are_missing(self) -> None:
+        base = _extract_base_colors({}, is_dark=True)
+        assert base["accent"] == "#0A84FF"
+        assert base["text"] == "#FFFFFF"
+        assert base["group_bg"] == "#242424"
+
+    def test_uses_light_defaults_when_values_are_missing(self) -> None:
+        base = _extract_base_colors({}, is_dark=False)
+        assert base["text"] == "#1A1A1A"
+        assert base["border"] == "#D0D0D0"
+
+    def test_focus_falls_back_to_accent(self) -> None:
+        base = _extract_base_colors({"accent": "#123456"}, is_dark=False)
+        assert base["focus"] == "#123456"
+
+
+class TestExtractSemanticColors:
+    def test_uses_supplied_semantic_values(self) -> None:
+        semantic = _extract_semantic_colors(
+            {
+                "success": "#010101",
+                "warning": "#020202",
+                "error": "#030303",
+                "info": "#040404",
+            },
+            is_dark=False,
+        )
+        assert semantic == {
+            "success": "#010101",
+            "warning": "#020202",
+            "error": "#030303",
+            "info": "#040404",
+        }
+
+    def test_light_and_dark_defaults_differ(self) -> None:
+        assert _extract_semantic_colors({}, is_dark=True)["warning"] == "#FF9F0A"
+        assert _extract_semantic_colors({}, is_dark=False)["warning"] == "#E67E00"
+
+
+class TestBuildThemeColorsKwargs:
+    def test_builds_derived_values_from_minimal_theme(self) -> None:
+        base = _extract_base_colors(
+            {"accent": "#336699", "border": "#202020"}, is_dark=True
+        )
+        semantic = _extract_semantic_colors({"success": "#008000"}, is_dark=True)
+        kwargs = _build_theme_colors_kwargs(
+            "Custom Dark", {"title_bg": "#101010"}, True, base, semantic
+        )
+
+        assert kwargs["name"] == "Custom Dark"
+        assert kwargs["is_dark"] is True
+        assert kwargs["primary_hover"] == "#3d7ab7"
+        assert kwargs["primary_pressed"] == "#28517a"
+        assert kwargs["primary_muted"] == "#33669940"
+        assert kwargs["success"] == "#008000"
+        assert kwargs["bg_highlight"] == "#101010"
+        assert kwargs["shadow_heavy"] == "rgba(0, 0, 0, 0.40)"
+
+    def test_link_falls_back_to_accent(self) -> None:
+        base = _extract_base_colors({"accent": "#123456"}, is_dark=False)
+        semantic = _extract_semantic_colors({}, is_dark=False)
+        kwargs = _build_theme_colors_kwargs("Lightish", {}, False, base, semantic)
+        assert kwargs["text_link"] == "#123456"
+        assert kwargs["shadow_light"] == "rgba(0, 0, 0, 0.08)"
+
+    def test_none_theme_name_raises(self) -> None:
+        with pytest.raises(ValueError, match="theme_name must be provided"):
+            _build_theme_colors_kwargs(
+                None, {}, False, _extract_base_colors({}, False), _extract_semantic_colors({}, False)
+            )  # type: ignore[arg-type]
+
+
+class TestFleetToThemeColors:
+    def test_missing_theme_raises_key_error(self) -> None:
+        with pytest.raises(KeyError, match="Fleet theme 'missing' not found"):
+            fleet_to_theme_colors("missing")
+
+    def test_converts_theme_with_fake_theme_colors(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        class FakeThemeColors:
+            def __init__(self, **kwargs: str | bool) -> None:
+                self.kwargs = kwargs
+
+        module_name = "src.shared.python.theme.theme_manager"
+        monkeypatch.setitem(
+            sys.modules, module_name, SimpleNamespace(ThemeColors=FakeThemeColors)
+        )
+        monkeypatch.setitem(
+            FLEET_THEMES,
+            "Unit Theme",
+            {
+                "bg": "#000000",
+                "group_bg": "#111111",
+                "border": "#222222",
+                "text": "#eeeeee",
+                "text_secondary": "#cccccc",
+                "label": "#999999",
+                "input_bg": "#010101",
+                "accent": "#336699",
+                "success": "#008000",
+                "warning": "#ff9900",
+                "error": "#cc0000",
+                "info": "#0099cc",
+            },
+        )
+
+        result = fleet_to_theme_colors("Unit Theme")
+
+        assert isinstance(result, FakeThemeColors)
+        assert result.kwargs["name"] == "Unit Theme"
+        assert result.kwargs["is_dark"] is True
+        assert result.kwargs["primary"] == "#336699"
