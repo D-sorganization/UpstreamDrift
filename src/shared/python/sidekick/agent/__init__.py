@@ -10,6 +10,8 @@ Both layers are headless-safe — no PyQt6 imports at module scope.
 
 from __future__ import annotations
 
+from .access_policy import PolicyDecision, SidekickActionPolicy
+from .action_audit import JsonlActionAudit, MemoryActionAudit, redact_secrets
 from .action_service import (
     ActionDescriptor,
     ActionResult,
@@ -54,9 +56,13 @@ __all__ = [
     "HostAdapter",
     "HostCapability",
     "HostInvocationResult",
+    "JsonlActionAudit",
+    "MemoryActionAudit",
     "PlannedStep",
     "PlannerError",
+    "PolicyDecision",
     "SidekickActionHandler",
+    "SidekickActionPolicy",
     "SidekickActionService",
     "SidekickAgentPlanner",
     "StateProfile",
@@ -67,5 +73,6 @@ __all__ = [
     "build_feature_catalog",
     "build_sidekick_system_prompt",
     "lookup_feature",
+    "redact_secrets",
     "search_features",
 ]

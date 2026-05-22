@@ -32,10 +32,11 @@ Design contracts:
 from __future__ import annotations
 
 import logging
+import uuid
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Literal, Protocol, runtime_checkable
-from collections.abc import Callable, Mapping, Sequence
 
 from src.shared.python.core.contracts.exceptions import StateError
 
@@ -204,10 +205,25 @@ class SidekickActionService:
     in dedicated modules and composes with this service.
     """
 
-    def __init__(self, *, audit_sink: AuditSink | None = None) -> None:
+    def __init__(
+        self,
+        *,
+        audit_sink: AuditSink | None = None,
+        policy: object | None = None,
+    ) -> None:
+        # ``policy`` is typed as ``object`` to avoid a circular import with
+        # :mod:`sidekick.agent.access_policy`. Anything with a ``decide``
+        # method returning a "PolicyDecision" works. ``None`` disables
+        # policy checking — the service dispatches freely.
         self._handlers: dict[str, SidekickActionHandler] = {}
         self._descriptors: dict[str, ActionDescriptor] = {}
         self._audit_sink: AuditSink = audit_sink or _noop_audit_sink
+        self._policy = policy
+        # Token → (action_id, undo-action-id, undo-params) for undo dispatch.
+        self._undo_table: dict[str, tuple[str, Mapping[str, Any]]] = {}
+        # Set of tokens already consumed (so a second undo on the same
+        # token is a clear error rather than a silent re-do).
+        self._consumed_tokens: set[str] = set()
 
     # ---- Registration ----------------------------------------------------
 
@@ -282,6 +298,18 @@ class SidekickActionService:
             self._record(action_id, params, descriptor, result, dry_run)
             return result
 
+        # Policy check between schema validation and dispatch. We never
+        # reach the handler on a denial — and the audit log captures
+        # the attempt with its reason so security incidents are visible.
+        if self._policy is not None and not dry_run:
+            decision = self._policy.decide(descriptor, params)  # type: ignore[attr-defined]
+            if not decision.allowed:
+                result = ActionResult(
+                    ok=False, error=f"forbidden by policy: {decision.reason}"
+                )
+                self._record(action_id, params, descriptor, result, dry_run)
+                return result
+
         if dry_run:
             result = ActionResult(
                 ok=True,
@@ -292,8 +320,81 @@ class SidekickActionService:
             return result
 
         result = self._safe_invoke(action_id, params)
+        # Promote any handler-issued undo request into a service-owned
+        # token. The handler may suggest a token string for diagnostics
+        # but the canonical one comes from us — that way the undo table
+        # is centralised and the chip UI never sees handler-internal
+        # ids.
+        result = self._maybe_register_undo(action_id, descriptor, result)
         self._record(action_id, params, descriptor, result, dry_run)
         return result
+
+    # ---- Undo ------------------------------------------------------------
+
+    def undo(self, token: str) -> ActionResult:
+        """Reverse a previously-issued reversible action.
+
+        Args:
+            token: Non-empty token returned in an earlier
+                :class:`ActionResult.undo_token`.
+
+        Returns:
+            The :class:`ActionResult` of dispatching the inverse action.
+
+        Raises:
+            ValueError: If ``token`` is empty.
+        """
+        if not token:
+            raise ValueError("token must be a non-empty string")
+        if token in self._consumed_tokens:
+            return ActionResult(
+                ok=False, error=f"undo token already consumed: {token!r}"
+            )
+        entry = self._undo_table.get(token)
+        if entry is None:
+            return ActionResult(ok=False, error=f"unknown undo token: {token!r}")
+        undo_action_id, undo_params = entry
+        # Mark consumed first so a handler that itself fires the same
+        # action does not loop.
+        self._consumed_tokens.add(token)
+        return self.invoke(undo_action_id, undo_params)
+
+    def _maybe_register_undo(
+        self,
+        action_id: str,
+        descriptor: ActionDescriptor,
+        result: ActionResult,
+    ) -> ActionResult:
+        """Replace any handler-suggested undo_token with a service-owned
+        one, and stash the inverse-action payload in the undo table.
+
+        The handler signals an undo opportunity by including
+        ``metadata["_undo"]`` with shape
+        ``{"action_id": <id>, "params": {...}}``. We extract it, store
+        it under a fresh token, strip the private key from the user-
+        visible metadata, and stitch the new token into the result.
+        """
+        if not descriptor.reversible:
+            return result
+        if not result.ok:
+            return result
+        undo_request = result.metadata.get("_undo")
+        if not isinstance(undo_request, Mapping):
+            return result
+        inverse_id = undo_request.get("action_id")
+        inverse_params = undo_request.get("params", {})
+        if not isinstance(inverse_id, str) or not isinstance(inverse_params, Mapping):
+            return result
+        token = f"undo-{uuid.uuid4().hex}"
+        self._undo_table[token] = (inverse_id, dict(inverse_params))
+        cleaned_metadata = {k: v for k, v in result.metadata.items() if k != "_undo"}
+        return ActionResult(
+            ok=True,
+            value=result.value,
+            error=None,
+            undo_token=token,
+            metadata=cleaned_metadata,
+        )
 
     # ---- Internals -------------------------------------------------------
 
