@@ -23,14 +23,26 @@ from .feature_catalog import (
     lookup_feature,
     search_features,
 )
+from .subtab_adapter import (
+    CalculatorRun,
+    StateProfile,
+    SubtabActionPort,
+    SubtabAdapter,
+    WorkspaceSnapshot,
+)
 
 __all__ = [
     "ActionDescriptor",
     "ActionResult",
+    "CalculatorRun",
     "FeatureEntry",
     "FeatureKind",
     "SidekickActionHandler",
     "SidekickActionService",
+    "StateProfile",
+    "SubtabActionPort",
+    "SubtabAdapter",
+    "WorkspaceSnapshot",
     "build_feature_catalog",
     "lookup_feature",
     "search_features",
