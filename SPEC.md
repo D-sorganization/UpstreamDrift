@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.180                                            |
+| **Spec Version**        | 1.0.181                                            |
 | **Last Spec Update**    | 2026-05-22                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-05-22** - Tightened `src/shared/python/ux/error_envelope.py` boolean parsing so `UserFacingError.from_dict()` accepts explicit boolean-like strings such as `"false"` without flipping retry semantics through Python truthiness coercion; added a unit regression for string booleans plus invalid `retriable` payloads.
 - **2026-05-22** - Documented the API auth-cache overflow contract so cache saturation now evicts only the oldest lookup entries instead of flushing unrelated authenticated sessions, while preserving deterministic SHA-256 lookup keys for cross-worker stability.
 - **2026-05-22** - Documented added unit regression coverage for the theme API model/router contracts so the shared theme settings surface stays exercised without broadening the implementation scope of the underlying runtime code.
 - **2026-05-21** - Added C3D viewer animation export through the canonical body-target video pipeline and stabilized self-hosted CI SciPy pinning for the core and shared-contract lanes.
@@ -572,6 +573,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 ## 12. Change Log
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| 2026-05-22 | 1.0.181 | Tightened `src/shared/python/ux/error_envelope.py` boolean parsing so `UserFacingError.from_dict()` preserves explicit string retry flags like `"false"` instead of routing them through Python truthiness; added focused unit regression coverage for string booleans and invalid `retriable` payloads. |
 | 2026-05-22 | 1.0.180 | Landed the pure-Python foundation for the Idiot-Proof UX epic (#5968): `src/shared/python/ux/` adds the `FieldMetadata` registry, `ProvenanceRecord`/`ProvenanceValue`, `PreflightCheck`/`Severity`/`run_preflight()`, and the `UserFacingError` envelope, all with full Design-by-Contract validation; seeded `configs/ux/field_metadata.yaml` and `configs/ux/error_messages.yaml`; added `scripts/ci/check_ux_coverage_ratchet.py` plus baseline at 714 unwrapped inputs (62 QSpinBox + 221 QDoubleSpinBox + 217 QComboBox + 70 QSlider + 94 QLineEdit + 35 `<input>` + 14 `<select>` + 1 `<textarea>`); documented the workflow in `docs/ux/field_metadata.md`; 68 unit tests in `tests/unit/ux/`. |
 | 2026-05-22 | 1.0.179 | Aligned the module-size quality gate with current launcher and shared-chat legacy debt by adding owned, expiring exceptions for `src/launchers/launcher_ui_setup.py` and `src/shared/python/chat/_chat_dock_widget_qt.py`, and raising the active module-size exception cap to 10 while preserving the 1,500-line budget for new untracked modules. |
 | 2026-05-21 | 1.0.176 | Preserved integer-safe quaternion normalization in `src/motion_capture/c3d_simscape_preview.py` by upcasting integer inputs before the optimized `np.einsum` norm accumulation, and added regression coverage for integer quaternion inputs. |
