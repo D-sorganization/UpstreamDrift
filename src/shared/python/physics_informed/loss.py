@@ -88,7 +88,9 @@ def data_loss(
             "jax is required for data_loss; install with: "
             "pip install upstream-drift[physics_informed]"
         )
-    return jnp.mean((predicted_motion - actual_kinematics) ** 2)
+    # ⚡ Bolt: jnp.vdot is significantly faster than jnp.mean(diff ** 2) for MSE calculation
+    diff = predicted_motion - actual_kinematics
+    return jnp.vdot(diff, diff) / diff.size
 
 
 def physics_loss(
@@ -150,7 +152,8 @@ def contact_loss(
             "jax is required for contact_loss; install with: "
             "pip install upstream-drift[physics_informed]"
         )
-    return stiffness_coeff * jnp.sum(impact_phase_torques**2)
+    # ⚡ Bolt: jnp.vdot is significantly faster than jnp.sum(x**2)
+    return stiffness_coeff * jnp.vdot(impact_phase_torques, impact_phase_torques)
 
 
 def total_loss(
