@@ -179,3 +179,70 @@ def test_docs_governance_rejects_duplicate_source_of_truth_headings(
     monkeypatch.setattr(check_docs_governance, "_git_changed_files", list)
 
     assert check_docs_governance.main() == 1
+
+
+def test_docs_governance_rejects_missing_examples_entries(
+    tmp_path: Path, monkeypatch
+) -> None:
+    _write(tmp_path / "docs" / "README.md", "# Docs\n")
+    _write(tmp_path / "docs" / "assessments" / "README.md", "# Assessments\n")
+    _write(tmp_path / "docs" / "adr" / "README.md", "# ADRs\n")
+    _write(tmp_path / "docs" / "adr" / "ADR_TEMPLATE.md", "# ADR Template\n")
+    _write(
+        tmp_path / "docs" / "governance" / "DOCS_GOVERNANCE.md",
+        "# Docs Governance\n",
+    )
+    _write(
+        tmp_path / "docs" / "examples" / "index.rst",
+        "Examples\n========\n\n.. toctree::\n   :maxdepth: 1\n\n   basic_swing\n",
+    )
+    monkeypatch.setattr(check_docs_governance, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        check_docs_governance,
+        "REQUIRED_FILES",
+        [
+            tmp_path / "docs" / "README.md",
+            tmp_path / "docs" / "assessments" / "README.md",
+            tmp_path / "docs" / "adr" / "README.md",
+            tmp_path / "docs" / "adr" / "ADR_TEMPLATE.md",
+            tmp_path / "docs" / "governance" / "DOCS_GOVERNANCE.md",
+        ],
+    )
+    monkeypatch.setattr(check_docs_governance, "_git_changed_files", list)
+
+    assert check_docs_governance.main() == 1
+
+
+def test_docs_governance_accepts_examples_entries_with_backing_docs(
+    tmp_path: Path, monkeypatch
+) -> None:
+    _write(tmp_path / "docs" / "README.md", "# Docs\n")
+    _write(tmp_path / "docs" / "assessments" / "README.md", "# Assessments\n")
+    _write(tmp_path / "docs" / "adr" / "README.md", "# ADRs\n")
+    _write(tmp_path / "docs" / "adr" / "ADR_TEMPLATE.md", "# ADR Template\n")
+    _write(
+        tmp_path / "docs" / "governance" / "DOCS_GOVERNANCE.md",
+        "# Docs Governance\n",
+    )
+    _write(
+        tmp_path / "docs" / "examples" / "index.rst",
+        "Examples\n========\n\n.. toctree::\n   :maxdepth: 1\n\n   basic_swing\n",
+    )
+    _write(
+        tmp_path / "docs" / "examples" / "basic_swing.rst", "Basic Swing\n===========\n"
+    )
+    monkeypatch.setattr(check_docs_governance, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        check_docs_governance,
+        "REQUIRED_FILES",
+        [
+            tmp_path / "docs" / "README.md",
+            tmp_path / "docs" / "assessments" / "README.md",
+            tmp_path / "docs" / "adr" / "README.md",
+            tmp_path / "docs" / "adr" / "ADR_TEMPLATE.md",
+            tmp_path / "docs" / "governance" / "DOCS_GOVERNANCE.md",
+        ],
+    )
+    monkeypatch.setattr(check_docs_governance, "_git_changed_files", list)
+
+    assert check_docs_governance.main() == 0
