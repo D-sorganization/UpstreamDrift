@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.180                                            |
-| **Last Spec Update**    | 2026-05-22                                         |
+| **Spec Version**        | 1.0.181                                            |
+| **Last Spec Update**    | 2026-05-23                                         |
 
 ## 2. Purpose & Mission
 
@@ -72,6 +72,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 - **2026-05-22** - Added the Sidekick agentic action layer (`src/shared/python/sidekick/agent/`) per epic #5967 and ADR-0017: feature catalog, audited `SidekickActionService` with default-deny policy and undo tokens, subtab and host action adapters, planner + tool-registry bridge, workflow runner, and chat-side action chip surface. 157 new unit tests; ten new public modules totalling ~3,000 LOC.
 - **2026-05-22** - Documented added unit regression coverage for the theme API model/router contracts so the shared theme settings surface stays exercised without broadening the implementation scope of the underlying runtime code.
+- **2026-05-23** - Hardened WebSocket error handling so unexpected chat/simulation failures log full tracebacks server-side while returning generic client-safe error payloads.
 - **2026-05-21** - Added C3D viewer animation export through the canonical body-target video pipeline and stabilized self-hosted CI SciPy pinning for the core and shared-contract lanes.
 - **2026-05-21** - Preserved integer-safe quaternion normalization in the C3D Simscape preview path while keeping the optimized `einsum`-based norm computation.
 - **2026-05-21** - Optimized `signal_toolkit` fitting R-squared and RMSE hot paths to reuse `np.vdot`-based sum-of-squares accumulators without temporary square arrays.
@@ -240,6 +241,9 @@ Engine tier metadata is declared in each in-scope engine package with
   existing dataset. Disk-backed dataset lookup rejects ambiguous duplicate
   filenames with a conflict response so callers do not receive an arbitrary
   match.
+- Chat and simulation WebSocket routes treat unexpected internal exceptions as
+  server-only detail: they log full tracebacks for operator diagnosis and send
+  generic client-safe error payloads instead of echoing raw exception strings.
 
 **GUI Interface (PyQt6)**:
 

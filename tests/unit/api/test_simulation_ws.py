@@ -16,10 +16,13 @@ from __future__ import annotations
 
 import json
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+from src.api.routes import simulation_ws
 from src.api.routes.simulation_ws import (
     _apply_initial_state,
     _compute_real_time_sleep_delay,
@@ -284,3 +287,41 @@ class TestClientCommandHandling:
             websocket.app.state.simulation_service.stats.speed_factor
             == pytest.approx(3.0)
         )
+
+
+class _FailingEngine:
+    def step(self, _timestep: float) -> None:
+        raise RuntimeError("sensitive simulation failure")
+
+
+class _EngineManager:
+    def switch_engine(self, _engine_type: EngineType) -> bool:
+        return True
+
+    def get_active_physics_engine(self) -> object:
+        return _FailingEngine()
+
+
+class TestSimulationStreamErrors:
+    """Unexpected simulation failures should preserve tracebacks server-side."""
+
+    def test_unexpected_error_hides_internal_details(self) -> None:
+        app = FastAPI()
+        app.state.engine_manager = _EngineManager()
+        app.include_router(simulation_ws.router)
+
+        with (
+            patch("src.api.routes.simulation_ws.logger.exception") as logger_exception,
+            TestClient(app).websocket_connect("/ws/simulate/mujoco") as websocket,
+        ):
+            websocket.send_json(
+                {"action": "start", "config": {"duration": 0.01, "timestep": 0.01}}
+            )
+
+            running = websocket.receive_json()
+            assert running == {"status": "running", "duration": 0.01}
+
+            error = websocket.receive_json()
+            assert error == {"error": "Internal server error"}
+
+        logger_exception.assert_called_once()
