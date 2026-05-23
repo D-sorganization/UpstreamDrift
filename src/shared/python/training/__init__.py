@@ -30,6 +30,7 @@ from .contracts import (
     ThreadingCancelToken,
     TrainingJobRunner,
 )
+from .datasets import Dataset, DatasetRegistry
 from .errors import (
     CompatibilityError,
     DuplicateJobError,
@@ -47,7 +48,19 @@ from .identifiers import (
 )
 from .job import RunResult, TrainingJob
 from .metrics import MetricKind, TrainingMetric
+from .persistence import (
+    run_result_from_dict,
+    run_result_to_dict,
+    training_config_from_dict,
+    training_config_to_dict,
+    training_job_from_dict,
+    training_job_to_dict,
+    training_metric_from_dict,
+    training_metric_to_dict,
+)
+from .registry import JobFilter, JobRegistry
 from .resources import ResourceRequest
+from .scheduler import Scheduler, SchedulerError, StatusChangeEvent
 from .status import (
     TERMINAL_STATUSES,
     TrainingStatus,
@@ -65,15 +78,22 @@ __all__ = [
     "CompatibilityError",
     "CompatibilityIssue",
     "CompatibilityReport",
+    "Dataset",
+    "DatasetRegistry",
     "DuplicateJobError",
     "InvalidStatusTransitionError",
+    "JobFilter",
     "JobId",
     "JobNotFoundError",
+    "JobRegistry",
     "MetricKind",
     "ProgressSink",
     "ResourceRequest",
     "RunId",
     "RunResult",
+    "Scheduler",
+    "SchedulerError",
+    "StatusChangeEvent",
     "ThreadingCancelToken",
     "TrainingConfig",
     "TrainingConfigError",
@@ -86,5 +106,13 @@ __all__ = [
     "can_transition",
     "new_job_id",
     "new_run_id",
+    "run_result_from_dict",
+    "run_result_to_dict",
+    "training_config_from_dict",
+    "training_config_to_dict",
+    "training_job_from_dict",
+    "training_job_to_dict",
+    "training_metric_from_dict",
+    "training_metric_to_dict",
     "validate_transition",
 ]

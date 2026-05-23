@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.180                                            |
-| **Last Spec Update**    | 2026-05-22                                         |
+| **Spec Version**        | 1.0.181                                            |
+| **Last Spec Update**    | 2026-05-23                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,6 +70,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-05-23** - Added the model-training controller foundation (`src/shared/python/training/`) — PR1 (contracts: status state machine, identifiers, resources, config, metrics, job/run records, compatibility checker, runner Protocols) and PR2 (scheduler, in-process driver, runner registry, dataset library, JSON persistence, progress sinks: in-memory / JSONL-file / composite). Pure-Python, GUI-free; the headless backend that PR3's training tab, PR4's tab-backgrounding refactor, and PR5's resource monitor / RL stats build on. 306 new unit tests; 19 new public modules.
 - **2026-05-22** - Added the Sidekick agentic action layer (`src/shared/python/sidekick/agent/`) per epic #5967 and ADR-0017: feature catalog, audited `SidekickActionService` with default-deny policy and undo tokens, subtab and host action adapters, planner + tool-registry bridge, workflow runner, and chat-side action chip surface. 157 new unit tests; ten new public modules totalling ~3,000 LOC.
 - **2026-05-22** - Documented added unit regression coverage for the theme API model/router contracts so the shared theme settings surface stays exercised without broadening the implementation scope of the underlying runtime code.
 - **2026-05-21** - Added C3D viewer animation export through the canonical body-target video pipeline and stabilized self-hosted CI SciPy pinning for the core and shared-contract lanes.
@@ -207,6 +208,7 @@ Engine tier metadata is declared in each in-scope engine package with
 | F13 | Motion capture integration         | 🔄     | Import and track motion capture data (C3D, BVH, TRC formats) and compare with simulation            |
 | F14 | Reinforcement learning integration | 🔄     | Gym-compatible interface for RL-based controller learning and policy optimization                   |
 | F15 | Sidekick AI assistant              | 🔄     | In-app AI chat surface (PyQt + React/Tauri) with streaming, RAG, session history, and agentic tool dispatch. See `docs/sidekick/README.md`. |
+| F16 | Model-training controller          | 🔄     | In-launcher training dashboard (PR3) with scheduler, dataset library, resource monitor, engine-compat gate, and ML/RL-aware stats. Backend contracts + scheduler land in `src/shared/python/training/` (PRs 1–2); GUI tab, tab-backgrounding refactor, and CVAE wiring in PRs 3–5. |
 
 ### API / Interface Contract
 

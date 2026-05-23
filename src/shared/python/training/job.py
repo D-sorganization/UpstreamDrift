@@ -92,17 +92,21 @@ class TrainingJob:
                 f"(got {self.started_at!r}, created_at={self.created_at!r})"
             )
         if self.completed_at is not None:
-            if self.started_at is None:
+            # COMPLETED / FAILED require a run actually happened; CANCELLED
+            # may occur from PENDING or QUEUED before the job ever started.
+            if self.started_at is None and self.status is not TrainingStatus.CANCELLED:
                 raise TrainingConfigError(
-                    "completed_at cannot be set without started_at"
+                    "completed_at cannot be set without started_at "
+                    f"for status {self.status.value!r}"
                 )
+            floor = self.started_at if self.started_at is not None else self.created_at
             if (
                 not isinstance(self.completed_at, (int, float))
-                or self.completed_at < self.started_at
+                or self.completed_at < floor
             ):
                 raise TrainingConfigError(
-                    "completed_at must be a number >= started_at "
-                    f"(got {self.completed_at!r}, started_at={self.started_at!r})"
+                    f"completed_at must be a number >= {'started_at' if self.started_at is not None else 'created_at'} "
+                    f"(got {self.completed_at!r}, floor={floor!r})"
                 )
         if self.status.is_terminal and self.completed_at is None:
             raise TrainingConfigError(
