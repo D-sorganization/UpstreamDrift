@@ -13,6 +13,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
+
 try:
     import trimesh
     from trimesh.bounds import oriented_bounds
@@ -59,7 +60,7 @@ class LoadedMesh:
 
 def _extract_first_mesh(loaded: object):
     if trimesh is None:
-        raise ImportError('trimesh is required for mesh IO.')
+        raise ImportError("trimesh is required for mesh IO.")
     """Return the first triangle mesh from a trimesh load result.
 
     GLB files load as a Scene; we accept the first mesh node only.
@@ -106,7 +107,7 @@ def load_mesh(path: Path | str) -> LoadedMesh:
         raise FileNotFoundError(f"mesh file not found: {p}")
 
     if trimesh is None:
-        raise ImportError('trimesh is required for mesh IO.')
+        raise ImportError("trimesh is required for mesh IO.")
     try:
         loaded = trimesh.load(str(p), force=None, process=False)
     except Exception as exc:  # noqa: BLE001 — trimesh raises diverse types

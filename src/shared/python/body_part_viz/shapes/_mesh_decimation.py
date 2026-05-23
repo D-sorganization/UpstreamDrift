@@ -19,6 +19,7 @@ import logging
 from typing import Literal
 
 import numpy as np
+
 try:
     import trimesh
 except ImportError:
@@ -33,7 +34,7 @@ _logger = logging.getLogger(__name__)
 
 def _to_trimesh(vertices: np.ndarray, faces: np.ndarray):
     if trimesh is None:
-        raise ImportError('trimesh is required for mesh decimation.')
+        raise ImportError("trimesh is required for mesh decimation.")
     return trimesh.Trimesh(vertices=vertices, faces=faces, process=False)
 
 

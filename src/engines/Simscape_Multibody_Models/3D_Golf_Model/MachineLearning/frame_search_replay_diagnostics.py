@@ -223,8 +223,8 @@ def compute_torque_effort(torque_frame: pd.DataFrame) -> dict[str, float]:
     if not torque_columns:
         return {"effort_l1": 0.0, "effort_l2_sq": 0.0, "peak_abs": 0.0}
     torque = torque_frame[torque_columns].to_numpy(dtype=float)
-    effort_l1 = float(_trapz(np.einsum('ij->i', np.abs(torque)), time))
-    effort_l2_sq = float(_trapz(np.einsum('ij,ij->i', torque, torque), time))
+    effort_l1 = float(_trapz(np.einsum("ij->i", np.abs(torque)), time))
+    effort_l2_sq = float(_trapz(np.einsum("ij,ij->i", torque, torque), time))
     peak = float(np.max(np.abs(torque)))
     return {"effort_l1": effort_l1, "effort_l2_sq": effort_l2_sq, "peak_abs": peak}
 
