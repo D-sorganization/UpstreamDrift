@@ -1,217 +1,224 @@
-"""CLI entry point for launching and dispatching standalone Sidekick flows."""
+"""Entry point for ``python -m sidekick`` — T1 (#5979).
+
+Subcommands:
+  gui   Launch the Sidekick GUI window (default when no subcommand given).
+  run   Invoke a calculator headlessly — no PyQt6 imported at parse time.
+
+Usage examples::
+
+    python -m sidekick                                     # GUI, chat-first
+    python -m sidekick gui --profile calc-first
+    python -m sidekick run --calculator wgs_reactor --inputs wgs.json
+    python -m sidekick --help
+"""
 
 from __future__ import annotations
 
 import argparse
-import difflib
+import logging
 import sys
 from pathlib import Path
-from typing import NoReturn
 
-_SUBCOMMANDS = ("gui", "run")
-_GUI_PROFILES = ("chat-first", "calc-first")
-_OUTPUT_FORMATS = ("json", "csv")
-_HELP_EPILOG = """Examples:
-  python -m sidekick
-  python -m sidekick gui --profile calc-first --theme solarized
-  python -m sidekick run --calculator unit-converter --inputs ./inputs.json
-"""
+logger = logging.getLogger(__name__)
 
+_VALID_PROFILES = ("chat-first", "calc-first")
+_VALID_FORMATS = ("json", "csv")
 
-class SidekickArgumentParser(argparse.ArgumentParser):
-    """Argument parser that suggests the closest valid subcommand or flag."""
-
-    def error(self, message: str) -> NoReturn:
-        suggestion = _suggest_token(message, _known_cli_tokens(self))
-        if suggestion is not None:
-            message = f"{message}. Did you mean '{suggestion}'?"
-        self.print_usage(sys.stderr)
-        self.exit(2, f"{self.prog}: error: {message}\n")
-
-
-def _known_cli_tokens(parser: argparse.ArgumentParser) -> set[str]:
-    tokens = set(parser._option_string_actions)  # noqa: SLF001 - argparse internals
-    for action in parser._actions:  # noqa: SLF001 - argparse internals
-        if isinstance(action, argparse._SubParsersAction):
-            tokens.update(action.choices)
-            for subparser in action.choices.values():
-                tokens.update(
-                    subparser._option_string_actions  # noqa: SLF001 - argparse internals
-                )
-    return tokens
-
-
-def _suggest_token(message: str, candidates: set[str]) -> str | None:
-    for raw_token in message.replace(",", " ").split():
-        token = raw_token.strip("'\"")
-        if not token.startswith("-") and token not in candidates:
-            continue
-        matches = difflib.get_close_matches(token, sorted(candidates), n=1, cutoff=0.6)
-        if matches:
-            return matches[0]
-    return None
-
-
-def _normalize_argv(argv: list[str] | None) -> list[str]:
-    args = list(argv or [])
-    if not args:
-        return ["gui"]
-    head = args[0]
-    if head in _SUBCOMMANDS or head in {"-h", "--help"}:
-        return args
-    if head.startswith("-"):
-        return ["gui", *args]
-    return args
-
-
-def _resolved_path(value: str) -> Path:
-    if not value or not value.strip():
-        raise argparse.ArgumentTypeError("path must be a non-empty string")
-    try:
-        return Path(value).expanduser().resolve(strict=False)
-    except (OSError, RuntimeError, ValueError) as exc:
-        raise argparse.ArgumentTypeError(f"invalid path: {value}") from exc
-
-
-def _existing_file(value: str) -> Path:
-    path = _resolved_path(value)
-    if not path.exists():
-        raise argparse.ArgumentTypeError(f"path does not exist: {path}")
-    if not path.is_file():
-        raise argparse.ArgumentTypeError(f"path is not a file: {path}")
-    return path
+__all__ = ["build_parser", "main"]
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = SidekickArgumentParser(
+    """Return the top-level CLI argument parser.
+
+    Postconditions:
+        - Returned parser has subparsers 'gui' and 'run'.
+        - '--profile' is restricted to _VALID_PROFILES.
+        - '--format' on run is restricted to _VALID_FORMATS.
+    """
+    parser = argparse.ArgumentParser(
         prog="python -m sidekick",
-        description="Standalone Sidekick launcher and headless dispatcher.",
-        epilog=_HELP_EPILOG,
+        description=(
+            "Sidekick — standalone process-engineering assistant.\n\n"
+            "  python -m sidekick                        # GUI, chat-first layout\n"
+            "  python -m sidekick gui --profile calc-first\n"
+            "  python -m sidekick run --calculator X --inputs file.json"
+        ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        allow_abbrev=False,
-    )
-    subparsers = parser.add_subparsers(
-        dest="command",
-        parser_class=SidekickArgumentParser,
     )
 
-    gui_parser = subparsers.add_parser(
-        "gui",
-        help="Launch standalone Sidekick with deferred GUI imports.",
-    )
-    gui_parser.add_argument(
-        "--profile",
-        choices=_GUI_PROFILES,
-        default="chat-first",
-        help="Initial standalone layout profile (default: chat-first).",
-    )
-    gui_parser.add_argument(
-        "--theme",
-        metavar="NAME",
-        help="Optional theme override for the standalone session.",
-    )
-    gui_parser.add_argument(
-        "--data-dir",
-        type=_resolved_path,
-        metavar="PATH",
-        help="Optional absolute or relative data directory for standalone Sidekick.",
-    )
-    gui_parser.set_defaults(handler=launch_gui)
+    subparsers = parser.add_subparsers(dest="subcommand")
+    subparsers.default = "gui"
 
-    run_parser = subparsers.add_parser(
-        "run",
-        help="Parse headless calculator invocation arguments.",
-    )
-    run_parser.add_argument(
-        "--calculator",
-        required=True,
-        metavar="ID",
-        help="Registered calculator identifier to invoke.",
-    )
-    run_parser.add_argument(
-        "--inputs",
-        type=_existing_file,
-        required=True,
-        metavar="PATH",
-        help="Input payload file for the calculator invocation.",
-    )
-    run_parser.add_argument(
-        "--output",
-        type=_resolved_path,
-        metavar="PATH",
-        help="Optional destination file for calculator output.",
-    )
-    run_parser.add_argument(
-        "--format",
-        choices=_OUTPUT_FORMATS,
-        default="json",
-        help="Output format when --output is provided (default: json).",
-    )
-    run_parser.set_defaults(handler=run_headless)
+    _add_gui_subparser(subparsers)
+    _add_run_subparser(subparsers)
+
+    assert parser.parse_args([]).subcommand == "gui"  # noqa: S101 - DbC postcondition
     return parser
 
 
-def parse_cli_args(argv: list[str] | None = None) -> argparse.Namespace:
-    """Parse Sidekick CLI arguments with implicit ``gui`` defaulting."""
-    parser = build_parser()
-    return parser.parse_args(_normalize_argv(argv))
+def _add_gui_subparser(subparsers: argparse._SubParsersAction) -> None:  # type: ignore[type-arg]
+    gui = subparsers.add_parser(
+        "gui",
+        help="Launch the Sidekick GUI window (default).",
+        description="Launch the Sidekick GUI window.",
+    )
+    gui.add_argument(
+        "--profile",
+        choices=_VALID_PROFILES,
+        default="chat-first",
+        metavar="PROFILE",
+        help=(
+            f"Window layout profile. "
+            f"Choices: {', '.join(_VALID_PROFILES)}. "
+            "Default: chat-first."
+        ),
+    )
+    gui.add_argument(
+        "--theme",
+        default=None,
+        metavar="NAME",
+        help="Theme name to apply on startup (e.g. 'catppuccin-mocha').",
+    )
+    gui.add_argument(
+        "--data-dir",
+        default=None,
+        metavar="PATH",
+        dest="data_dir",
+        help="Override the session-data directory (resolved to absolute path).",
+        type=_resolve_data_dir,
+    )
 
 
-def launch_gui(args: argparse.Namespace) -> int:
-    """Launch the standalone GUI once the dedicated window module exists."""
-    try:
-        from sidekick.standalone.window import StandaloneSidekickWindow
-    except ImportError:
-        sys.stderr.write(
-            "sidekick gui is wired, but the standalone window lands in issue #5980.\n"
+def _add_run_subparser(subparsers: argparse._SubParsersAction) -> None:  # type: ignore[type-arg]
+    run = subparsers.add_parser(
+        "run",
+        help="Invoke a calculator headlessly (no GUI).",
+        description="Run a Sidekick calculator from the command line, no window required.",
+    )
+    run.add_argument(
+        "--calculator",
+        required=True,
+        metavar="ID",
+        help="Calculator feature id, e.g. 'wgs_reactor'. Format: ^[a-z][a-z0-9_]*$.",
+    )
+    run.add_argument(
+        "--inputs",
+        required=True,
+        metavar="PATH",
+        help="Path to a JSON or YAML inputs file (auto-detected by extension).",
+    )
+    run.add_argument(
+        "--output",
+        default=None,
+        metavar="PATH",
+        help="Write results to PATH instead of stdout.",
+    )
+    run.add_argument(
+        "--format",
+        choices=_VALID_FORMATS,
+        default="json",
+        metavar="FORMAT",
+        help=(f"Output format. Choices: {', '.join(_VALID_FORMATS)}. Default: json."),
+    )
+
+
+def _resolve_data_dir(raw: str) -> str:
+    """Resolve a path string to an absolute path.
+
+    Raises:
+        ValueError: If the path cannot be resolved to an absolute path.
+    """
+    resolved = Path(raw).resolve()
+    if not resolved.is_absolute():
+        raise ValueError(  # noqa: TRY004
+            f"--data-dir could not be resolved to an absolute path: {raw!r}"
         )
-        return 1
+    return str(resolved)
+
+
+def _handle_gui(ns: argparse.Namespace) -> int:
+    """Launch the Sidekick GUI. Deferred PyQt6 import keeps 'run' headless.
+
+    Preconditions:
+        ns.subcommand == 'gui'
+        ns.profile in _VALID_PROFILES
+    """
+    assert ns.subcommand == "gui"  # noqa: S101 - DbC
+    assert ns.profile in _VALID_PROFILES  # noqa: S101 - DbC
 
     from sidekick.launcher_factory import create_launcher_config, launch_app
 
-    data_dir = args.data_dir or Path.cwd().resolve()
     config = create_launcher_config(
-        app_module="sidekick.standalone.window",
+        app_module="sidekick",
         window_title="Sidekick",
-        min_width=1280,
-        min_height=800,
-        profile=args.profile,
-        theme_name=args.theme,
-        data_dir=str(data_dir),
-    )
-    return launch_app(
-        config,
-        window_factory=lambda: StandaloneSidekickWindow(
-            profile=args.profile,
-            theme_name=args.theme,
-            data_dir=data_dir,
-        ),
+        min_width=900,
+        min_height=600,
     )
 
+    def _window_factory() -> object:
+        import platformdirs
 
-def run_headless(args: argparse.Namespace) -> int:
-    """Reserve the ``run`` subcommand contract until issue #5982 lands."""
-    from src.shared.python.core.process_safety import narrow_catch
-
-    with narrow_catch(ValueError, FileNotFoundError, log_message="sidekick run"):
-        if args.output is not None and not args.output.parent.exists():
-            raise FileNotFoundError(args.output.parent)
-        sys.stderr.write(
-            "sidekick run parsing is ready; execution lands in issue #5982.\n"
+        from sidekick.standalone.session_store import StandaloneSessionStore
+        from sidekick.standalone.window import (
+            StandaloneSidekickConfig,
+            StandaloneSidekickWindow,
         )
-        return 1
-    sys.stderr.write("sidekick run failed; check calculator arguments and paths.\n")
-    return 1
+
+        data_dir = (
+            Path(ns.data_dir)
+            if ns.data_dir
+            else Path(platformdirs.user_data_dir("sidekick", appauthor=False))
+        )
+        store = StandaloneSessionStore(data_dir)
+        cfg = StandaloneSidekickConfig(
+            profile=ns.profile,
+            theme_name=getattr(ns, "theme", None),
+            session_store=store,
+        )
+        return StandaloneSidekickWindow(cfg)
+
+    return launch_app(config, _window_factory)
+
+
+def _handle_run(ns: argparse.Namespace) -> int:
+    """Invoke a calculator headlessly. Never imports PyQt6.
+
+    Preconditions:
+        ns.subcommand == 'run'
+        ns.calculator is a non-empty string
+        ns.inputs is a non-empty string
+    """
+    assert ns.subcommand == "run"  # noqa: S101 - DbC
+    if not ns.calculator:
+        raise ValueError("--calculator must be a non-empty string")
+    if not ns.inputs:
+        raise ValueError("--inputs must be a non-empty string")
+
+    from sidekick.standalone.run import handle_run
+
+    return handle_run(ns)
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Parse CLI arguments and dispatch the selected Sidekick subcommand."""
-    args = parse_cli_args(argv)
-    handler = getattr(args, "handler", None)
-    if handler is None:
-        build_parser().print_help()
-        return 1
-    return int(handler(args))
+    """Parse arguments and dispatch to the appropriate handler.
+
+    Args:
+        argv: Argument vector (defaults to sys.argv[1:]).
+
+    Returns:
+        Integer exit code (0 = success, non-zero = failure).
+    """
+    parser = build_parser()
+    ns = parser.parse_args(argv)
+
+    subcommand = getattr(ns, "subcommand", None) or "gui"
+    if subcommand == "gui":
+        return _handle_gui(ns)
+    if subcommand == "run":
+        return _handle_run(ns)
+
+    parser.print_help()
+    return 2
 
 
 if __name__ == "__main__":
