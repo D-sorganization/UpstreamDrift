@@ -71,7 +71,7 @@ jobs:
 
       - name: Run leaderboard tests (table-generation logic only)
         run: |
-          pytest tests/unit/motion_matching/test_leaderboard.py -v --timeout=60
+          xvfb-run -a pytest tests/unit/motion_matching/test_leaderboard.py -v --timeout=60
 
       - name: Regenerate leaderboard from existing committed FitResults
         env:
