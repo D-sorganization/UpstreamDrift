@@ -359,7 +359,8 @@ def _split_by_trial(
     rng.shuffle(indices)
     n_val = max(1, int(round(val_fraction * len(samples))))
     val_idx = {int(i) for i in indices[:n_val]}
-    train, val = [], []
+    train: list[_PreparedSample] = []
+    val: list[_PreparedSample] = []
     for i, s in enumerate(samples):
         (val if i in val_idx else train).append(s)
     if not train:

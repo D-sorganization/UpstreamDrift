@@ -41,6 +41,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -200,7 +201,7 @@ def _feature_install_argv(feature_name: str, repo_root: Path) -> list[list[str]]
 
     if feature.install_channel == "pip":
         # Verbatim from the documented command (e.g. torch CUDA index URL).
-        tokens = feature.install_command.split()
+        tokens = shlex.split(feature.install_command)
         if tokens[:2] == ["pip", "install"]:
             return [["pip", "install", "--no-cache-dir", *tokens[2:]]]
         return [tokens]

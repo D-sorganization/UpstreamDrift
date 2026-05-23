@@ -651,9 +651,9 @@ class TestModelDiscovery:
 
     def test_discover_models_returns_list(self) -> None:
         """Model discovery returns a list of dicts."""
-        from src.api.routes.models import _discover_models
+        from src.api.routes.models import discover_models
 
-        models = _discover_models()
+        models = discover_models()
         assert isinstance(models, list)
 
         # Should find at least some URDF files in the project
@@ -664,9 +664,9 @@ class TestModelDiscovery:
 
     def test_discover_models_finds_urdf(self) -> None:
         """Model discovery finds URDF files."""
-        from src.api.routes.models import _discover_models
+        from src.api.routes.models import discover_models
 
-        models = _discover_models()
+        models = discover_models()
         urdf_models = [m for m in models if m["format"] == "urdf"]
         # There are URDF files in the test fixtures
         assert len(urdf_models) > 0

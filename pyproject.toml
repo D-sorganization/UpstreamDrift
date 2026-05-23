@@ -98,8 +98,8 @@ dev = [
     # Required for auth/security tests
     "sqlalchemy>=2.0.0",
     "bcrypt>=4.1.0",
-    "PyJWT>=2.10.1",
-    "cryptography>=44.0.0",
+    "PyJWT>=2.12.0",
+    "cryptography>=46.0.7",
     # Required for async tests
     "anyio>=4.0.0",
     "pytest-anyio>=0.0.0; python_version>='3.10'",
@@ -114,7 +114,7 @@ dev = [
     # Required for symbolic math in controls tab
     "sympy>=1.12",
     # Required for multipart form data in API tests
-    "python-multipart>=0.0.26",
+    "python-multipart>=0.0.27",
     # Required for video/image processing tests
     "opencv-python-headless>=4.13.0.92",
     # Required for C3D motion-capture tests (load_club_target_c3d cluster-marker suite)
@@ -166,6 +166,10 @@ all = ["upstream-drift[rust,all-engines,analysis,pose,biomechanics,rl,urdf,dev]"
 
 [project.scripts]
 upstream-drift = "launch_golf_suite:main"
+# Standalone Sidekick window / headless runner (T6 — issue #5984).
+# The canonical entry-point lives here rather than in vendor/ud-tools because
+# the standalone shell (sidekick.standalone.*) is owned by this repo.
+sidekick = "sidekick.__main__:main"
 
 [project.entry-points."upstream_drift.engines"]
 # Third-party engines register here via pyproject.toml:
@@ -182,12 +186,24 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
-# Include pre-built UI in the wheel
+# Include pre-built UI in the wheel.
+# src/**/* covers src/shared/python/sidekick/standalone/ (T6 — issue #5984).
+# docs/, tests/, and vendor/ are NOT listed here and are therefore excluded.
 include = [
     "src/**/*",
     "ui/dist/**/*",  # Bundled web UI (built by build_hooks.py)
     "launch_golf_suite.py",
+    "build_hooks.py",
 ]
+exclude = [
+    "src/**/__pycache__/**",
+    "src/**/test_*.py",
+    "src/**/tests/**",
+]
+artifacts = [
+    "ui/dist/**/*",
+]
+
 
 [tool.hatch.build.hooks.custom]
 # Build UI before packaging
@@ -258,6 +274,9 @@ max-complexity = 10
 "src/shared/python/codemap/cli.py" = ["T201"]
 "src/shared/python/codemap/watcher.py" = ["T201"]
 "src/shared/python/codemap/mcp_server.py" = ["T201"]
+# Sidekick CLI entry-points: stdout/stderr are the contract (T6 #5984).
+"src/shared/python/sidekick/__main__.py" = ["T201"]
+"src/shared/python/sidekick/standalone/runner.py" = ["T201"]
 
 
 [tool.mypy]

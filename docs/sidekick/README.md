@@ -4,17 +4,21 @@ Sidekick is UpstreamDrift's in-app AI assistant. It runs in two host shells
 that share a single design-token contract and a single AI tool registry, so
 adding a capability once makes it available in both places.
 
+**Sidekick can also run standalone** — see [standalone.md](standalone.md) for
+the `pip install` path and the one-file binary download.
+
 ---
 
 ## Surfaces
 
-| Shell | Entry point | Notes |
-|-------|-------------|-------|
-| **PyQt launcher panel** | [`src/shared/python/ai/gui/assistant_panel.py`](../../src/shared/python/ai/gui/assistant_panel.py) (`AIAssistantPanel`, window title "Sidekick") | Embedded as a splitter pane in `src/launchers/launcher_ui_setup.py` and as a registered `EmbeddableTool` tile so users can open it via right-click → "Launch in Dock" |
-| **React/Tauri shell** | [`ui/src/pages/Chat.tsx`](../../ui/src/pages/Chat.tsx) (route `/chat`) renders [`ui/src/components/ui/ChatPanel.tsx`](../../ui/src/components/ui/ChatPanel.tsx) | Styled with `var(--sidekick-color-*)` CSS variables; communicates over the FastAPI WebSocket at `src/api/routes/chat_ws.py` |
+| Shell                   | Entry point                                                                                                                                                     | Notes                                                                                                                                                                 |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **PyQt launcher panel** | [`src/shared/python/ai/gui/assistant_panel.py`](../../src/shared/python/ai/gui/assistant_panel.py) (`AIAssistantPanel`, window title "Sidekick")                | Embedded as a splitter pane in `src/launchers/launcher_ui_setup.py` and as a registered `EmbeddableTool` tile so users can open it via right-click → "Launch in Dock" |
+| **React/Tauri shell**   | [`ui/src/pages/Chat.tsx`](../../ui/src/pages/Chat.tsx) (route `/chat`) renders [`ui/src/components/ui/ChatPanel.tsx`](../../ui/src/components/ui/ChatPanel.tsx) | Styled with `var(--sidekick-color-*)` CSS variables; communicates over the FastAPI WebSocket at `src/api/routes/chat_ws.py`                                           |
+| **Standalone app**      | `sidekick gui` (console script) or downloaded binary                                                                                                            | No UpstreamDrift launcher required — see [standalone.md](standalone.md)                                                                                               |
 
-Both surfaces display the brand name "Sidekick" in their window / header text
-and route messages through the same FastAPI chat service.
+Both embedded surfaces display the brand name "Sidekick" in their window /
+header text and route messages through the same FastAPI chat service.
 
 ---
 
@@ -71,11 +75,13 @@ If you add a token in one language, add it in the other in the same PR —
 the parity test will fail otherwise.
 
 When styling a new chat-adjacent surface, always prefer:
+
 ```css
 var(--sidekick-color-surface)
 var(--sidekick-color-text)
 var(--sidekick-color-accent)
 ```
+
 over raw hex or Tailwind grays.
 
 ---
@@ -97,6 +103,7 @@ The tile entry in `src/config/models.yaml`:
 ```
 
 Key points about the adapter:
+
 - Sets `prefers_dock=True` — Sidekick is a sidebar tool, not a primary
   workspace, so it docks rather than opening in a new tab.
 - `create_main_widget` is **idempotent**: opening Sidekick twice reuses
@@ -129,12 +136,13 @@ injected as a `system` message before the user prompt reaches the model.
 
 **Safety nets applied to every dump:**
 
-| Protection | Behavior |
-|------------|----------|
-| Redaction | Keys matching `password`, `token`, `secret`, `api_key` and values matching `/home/` or `C:\` are replaced with `"<redacted>"` |
-| Size cap | Payload is truncated to ≤ 4 KB; oldest events dropped first |
+| Protection | Behavior                                                                                                                      |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Redaction  | Keys matching `password`, `token`, `secret`, `api_key` and values matching `/home/` or `C:\` are replaced with `"<redacted>"` |
+| Size cap   | Payload is truncated to ≤ 4 KB; oldest events dropped first                                                                   |
 
 Disable injection for deterministic test runs:
+
 ```bash
 export UPSTREAMDRIFT_SIDEKICK_CONTEXT=0
 ```

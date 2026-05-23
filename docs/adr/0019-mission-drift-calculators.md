@@ -1,9 +1,11 @@
-# ADR-0005: Mission-Drift Calculators
+# ADR-0019: Mission-Drift Calculators
 
 - Status: Accepted
 - Date: 2026-04-25
 - Decision Makers: Architecture Team
 - Related Issues/PRs: #3059
+
+> Renumbered to ADR-0019 on 2026-05-23 to remove a duplicate ADR-0005 slot.
 
 ## Context
 

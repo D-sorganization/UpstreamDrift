@@ -54,7 +54,7 @@ httptools==0.7.1
     # via uvicorn
 httpx==0.28.1
     # via upstream-drift (pyproject.toml)
-idna==3.11
+idna==3.15
     # via
     #   anyio
     #   httpx
@@ -132,7 +132,7 @@ typing-extensions==4.15.0
     #   typing-inspection
 typing-inspection==0.4.2
     # via pydantic
-urllib3==2.6.3
+urllib3==2.7.0
     # via requests
 uvicorn[standard]==0.40.0
     # via upstream-drift (pyproject.toml)
