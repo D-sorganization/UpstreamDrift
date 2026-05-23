@@ -95,13 +95,15 @@ class OpenSimKinematicsService:
         from src.shared.python.pose_interchange.adapters.opensim import OpenSimAdapter
 
         adapter = OpenSimAdapter()
-        q_dict = adapter.from_canonical(pose)
+        layout = adapter.joint_layout(self._model)
+        q = adapter.from_canonical(pose, model=self._model)
 
         coord_set = self._model.updCoordinateSet()
-        for name, value in q_dict.items():
-            if coord_set.contains(name):
-                coord = coord_set.get(name)
-                coord.setValue(self._state, value)
+        for slot in layout.values():
+            coordinate_name = slot.engine_name
+            if coord_set.contains(coordinate_name):
+                coord = coord_set.get(coordinate_name)
+                coord.setValue(self._state, float(q[slot.start_index]))
 
         self._model.realizePosition(self._state)
 
