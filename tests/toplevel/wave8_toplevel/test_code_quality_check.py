@@ -88,11 +88,11 @@ class TestIsLegitimatePassContext:
 class TestCheckBannedPatterns:
     def test_detects_todo(self, py_file: Path) -> None:
         issues = cqc.check_banned_patterns(["# TO" + "DO: fix"], py_file)
-        assert any("TO" + "DO" in msg for _, msg, _ in issues)
+        assert any(("TO" + "DO") in msg for _, msg, _ in issues)
 
     def test_detects_fixme(self, py_file: Path) -> None:
         issues = cqc.check_banned_patterns(["# FIX" + "ME: yes"], py_file)
-        assert any("FIX" + "ME" in msg for _, msg, _ in issues)
+        assert any(("FIX" + "ME") in msg for _, msg, _ in issues)
 
     def test_detects_ellipsis(self, py_file: Path) -> None:
         issues = cqc.check_banned_patterns(["    ...", "x = 1"], py_file)
