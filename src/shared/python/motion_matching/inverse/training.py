@@ -20,6 +20,7 @@ import time
 from collections.abc import Callable, Iterable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
+from typing import cast
 
 import numpy as np
 import torch
@@ -262,7 +263,7 @@ def train_inverse_cvae(
     # and comparable in scale to the KL term. (Bug-2 fix.) Reusing the
     # model's buffer here means the standardiser tracks
     # ``coefficient_bound_strategy`` (spec vs empirical) automatically.
-    coeff_bounds = model.coefficient_bounds.to(selected_device)
+    coeff_bounds = cast(torch.Tensor, model.coefficient_bounds).to(selected_device)
 
     train_loader = DataLoader(
         _TrialTensorDataset(train_samples),
