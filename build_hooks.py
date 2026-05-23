@@ -83,10 +83,9 @@ class UIBuildHook(BuildHookInterface):
             return
 
         if skip_requested and not force_ui_build:
-            if version == "editable":
+            if version == "editable" or _env_flag("SKIP_UI_BUILD"):
                 logger.warning(
-                    "Skipping UI bundle enforcement for editable build without %s",
-                    dist_dir,
+                    "Skipping UI bundle enforcement because SKIP_UI_BUILD is set",
                 )
                 return
             msg = (

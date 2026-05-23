@@ -12,6 +12,7 @@ import json
 import logging
 import math
 from pathlib import Path
+import sys
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -115,20 +116,22 @@ def _wgs_reactor(inputs: dict) -> dict:
 
     co_conversion = xi / y_co_in if y_co_in > 0 else 0.0
 
+    equilibrium_composition = {
+        "co": y_co_eq,
+        "h2o": y_h2o_eq,
+        "co2": y_co2_eq,
+        "h2": y_h2_eq,
+    }
+
     result = {
         "temperature_c": T_c,
         "equilibrium_constant": K_eq,
         "extent_of_reaction": xi,
         "co_conversion_fraction": co_conversion,
-        "equilibrium_composition": {
-            "co": y_co_eq,
-            "h2o": y_h2o_eq,
-            "co2": y_co2_eq,
-            "h2": y_h2_eq,
-        },
+        "equilibrium_composition": equilibrium_composition,
     }
 
-    total = sum(result["equilibrium_composition"].values())
+    total = sum(equilibrium_composition.values())
     assert abs(total - 1.0) < 1e-6, f"mole fractions sum to {total}, expected 1.0"
     assert 0.0 <= co_conversion <= 1.0, f"co_conversion={co_conversion} out of [0,1]"
 
@@ -187,7 +190,7 @@ def run_calculator(calculator: str, inputs_path: str, output: str = "-") -> int:
     output_json = json.dumps(result, indent=2)
 
     if output == "-":
-        print(output_json)
+        sys.stdout.write(output_json + "\n")
     else:
         out_path = Path(output)
         out_path.parent.mkdir(parents=True, exist_ok=True)
