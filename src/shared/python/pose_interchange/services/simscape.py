@@ -133,7 +133,7 @@ class SimscapeKinematicsService:
         if getattr(self, "_engine", None) is None:
             return transforms
 
-        # See issue #4963: Implement actual transform queries from MATLAB engine
+        # TODO(#4963): Implement actual transform queries from MATLAB engine
         return transforms
 
     def step(self, dt: float) -> None:
