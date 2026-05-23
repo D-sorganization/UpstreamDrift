@@ -34,6 +34,9 @@ logger = get_logger(__name__)
 
 router = APIRouter()
 
+_INTERNAL_ERROR_DETAIL = "Internal server error"
+_CONNECTION_ERROR_DETAIL = "Connection error"
+
 # ── Chat-context injection helpers ───────────────────────────────────
 
 #: ``session.metadata`` key used to store the last-seen context digest.
@@ -103,17 +106,18 @@ def _maybe_inject_chat_context(session: Any) -> str | None:
     section = format_context_section(payload)
     if not section:
         return None
+    section_text = str(section)
 
     # Deduplication: skip if state unchanged since last injection.
-    digest = _context_section_hash(section)
+    digest = _context_section_hash(section_text)
     metadata: dict[str, Any] | None = getattr(session, "metadata", None)
     if isinstance(metadata, dict):
         if metadata.get(_CONTEXT_HASH_KEY) == digest:
             return None
         metadata[_CONTEXT_HASH_KEY] = digest
 
-    add_message("system", section)
-    return section
+    add_message("system", section_text)
+    return section_text
 
 
 @router.websocket("/ws/chat/{session_id}")
@@ -195,9 +199,11 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
                     await websocket.send_json(
                         {"type": "complete", "session_id": session_id}
                     )
-                except Exception as e:  # noqa: BLE001
-                    logger.error("Error during streaming response: %s", e)
-                    await websocket.send_json({"type": "error", "detail": str(e)})
+                except Exception:  # noqa: BLE001
+                    logger.exception("Error during streaming response")
+                    await websocket.send_json(
+                        {"type": "error", "detail": _INTERNAL_ERROR_DETAIL}
+                    )
 
             elif action == "history":
                 messages = chat_service.get_session_history(session_id)
@@ -247,11 +253,13 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
                 )
 
     except WebSocketDisconnect:
-        logger.debug("Chat WebSocket disconnected: session=%s", session_id)
-    except (ConnectionError, TimeoutError, OSError) as e:
-        logger.error("Chat WebSocket error: %s", e)
+        logger.debug("Chat WebSocket disconnected")
+    except (ConnectionError, TimeoutError, OSError):
+        logger.exception("Chat WebSocket connection error")
         with contextlib.suppress(ConnectionError, TimeoutError, OSError):
-            await websocket.send_json({"type": "error", "detail": str(e)})
+            await websocket.send_json(
+                {"type": "error", "detail": _CONNECTION_ERROR_DETAIL}
+            )
 
 
 # ── REST fallback endpoints ──────────────────────────────────────────
