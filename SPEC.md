@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.180                                            |
+| **Spec Version**        | 1.0.181                                            |
 | **Last Spec Update**    | 2026-05-22                                         |
 
 ## 2. Purpose & Mission
@@ -255,6 +255,10 @@ Engine tier metadata is declared in each in-scope engine package with
 - `upstream-drift simulate --engine mujoco --model golf_swing.urdf`
 - `upstream-drift cross-validate --models model1.urdf model2.urdf`
 - `upstream-drift ik --model human.urdf --target-pose [...] --engine pinocchio`
+- `python -m sidekick` launches the standalone Sidekick GUI scaffold with the `gui` subcommand and `chat-first` profile as the default path.
+- `python -m sidekick gui --profile calc-first --theme solarized --data-dir ./workspace` keeps GUI imports deferred until launch while resolving the standalone data directory before window creation.
+- `python -m sidekick run --calculator unit-converter --inputs ./inputs.json --output ./result.json` validates the headless calculator invocation contract up front; execution remains reserved for follow-up issue `#5982`.
+- The standalone Sidekick CLI suggests the nearest valid flag or subcommand on parse errors to keep local launches and future automation entrypoints discoverable.
 
 **Desktop App (Tauri)**:
 
@@ -513,6 +517,8 @@ python -m src.launchers.gui_launcher
 
 # Running the CLI
 upstream-drift simulate --engine mujoco --model shared/models/golf_swing.urdf
+python -m sidekick
+python -m sidekick run --calculator unit-converter --inputs ./inputs.json
 
 # Building the Tauri Desktop App
 cd ui && npm install && npm run tauri build
@@ -569,6 +575,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 ## 12. Change Log
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| 2026-05-22 | 1.0.181 | Added the standalone Sidekick CLI scaffold in `src/shared/python/sidekick/__main__.py` with an implicit `gui` default, closest-match suggestions for mistyped flags, early path validation for `run`, deferred GUI imports for headless parsing, and focused regression coverage in `tests/unit/sidekick/test_cli.py`. |
 | 2026-05-22 | 1.0.179 | Aligned the module-size quality gate with current launcher and shared-chat legacy debt by adding owned, expiring exceptions for `src/launchers/launcher_ui_setup.py` and `src/shared/python/chat/_chat_dock_widget_qt.py`, and raising the active module-size exception cap to 10 while preserving the 1,500-line budget for new untracked modules. |
 | 2026-05-21 | 1.0.176 | Preserved integer-safe quaternion normalization in `src/motion_capture/c3d_simscape_preview.py` by upcasting integer inputs before the optimized `np.einsum` norm accumulation, and added regression coverage for integer quaternion inputs. |
 | 2026-05-21 | 1.0.175 | Optimized `src/shared/python/signal_toolkit/fitting.py` to compute fitting residual sum-of-squares and RMSE via reused `np.vdot` accumulators, avoiding temporary squared arrays across the sinusoid, exponential, linear, polynomial, and custom fitter paths. |
