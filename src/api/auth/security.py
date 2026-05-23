@@ -123,6 +123,8 @@ class SecurityManager:
             raise ValueError("password must be provided")
         salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
         hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
+        if not isinstance(hashed, bytes):
+            raise TypeError("bcrypt.hashpw must return bytes")
         return hashed.decode("utf-8")
 
     @precondition(
@@ -277,6 +279,8 @@ class SecurityManager:
             raise ValueError("api_key must be provided")
         salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
         hashed = bcrypt.hashpw(api_key.encode("utf-8"), salt)
+        if not isinstance(hashed, bytes):
+            raise TypeError("bcrypt.hashpw must return bytes")
         return hashed.decode("utf-8")
 
     def verify_api_key(self, api_key: str, hashed_key: str) -> bool:
