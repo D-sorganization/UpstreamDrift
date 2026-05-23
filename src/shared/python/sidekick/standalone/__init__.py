@@ -9,8 +9,9 @@ Canonical entry points
 ----------------------
 - ``sidekick.__main__:main`` — the console script / ``python -m sidekick`` handler.
 - ``sidekick.standalone.runner`` — headless calculator runner (``sidekick run``).
-- ``sidekick.standalone.preferences`` — persistent preferences (T8).
-- ``sidekick.standalone.onboarding`` — first-run wizard (T8).
+- ``sidekick.standalone.preferences`` — persistent preferences (T8 #5986).
+- ``sidekick.standalone.onboarding`` — first-run wizard (T8 #5986).
+- ``sidekick.standalone.session_store`` — injectable key-value persistence.
 
 Packaging decision (documented here per T6 acceptance criteria)
 ---------------------------------------------------------------
@@ -24,4 +25,4 @@ source-of-truth for the shared utility library.
 
 from __future__ import annotations
 
-__all__ = ["runner"]
+__all__ = ["preferences", "onboarding", "runner", "session_store"]

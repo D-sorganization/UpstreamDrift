@@ -225,3 +225,66 @@ class TestAgentLayerDocs:
         path = _REPO_ROOT / "AGENTS.md"
         content = path.read_text(encoding="utf-8")
         assert "sidekick/agent" in content or "SidekickActionService" in content
+
+
+# ---------------------------------------------------------------------------
+# Standalone Sidekick docs (T9 — issue #5987)
+# ---------------------------------------------------------------------------
+
+
+class TestStandaloneSidekickDocs:
+    """Standalone Sidekick documentation must exist and stay in sync.
+
+    Added by T9 (#5987).
+    """
+
+    def test_adr_standalone_exists(self) -> None:
+        adrs = list((_REPO_ROOT / "docs" / "adr").glob("*standalone-sidekick*"))
+        assert adrs, (
+            "No ADR for standalone-sidekick found; expected docs/adr/0018-standalone-sidekick.md"
+        )
+
+    def test_adr_standalone_is_accepted(self) -> None:
+        adrs = list((_REPO_ROOT / "docs" / "adr").glob("*standalone-sidekick*"))
+        if not adrs:
+            pytest.skip("ADR not found")
+        assert "Accepted" in adrs[0].read_text(encoding="utf-8")
+
+    def test_adr_standalone_cross_links_issues(self) -> None:
+        adrs = list((_REPO_ROOT / "docs" / "adr").glob("*standalone-sidekick*"))
+        if not adrs:
+            pytest.skip("ADR not found")
+        text = adrs[0].read_text(encoding="utf-8")
+        for issue in ("5984", "5985", "5986", "5987"):
+            assert issue in text, f"ADR must cross-link issue #{issue}"
+
+    def test_standalone_md_exists(self) -> None:
+        assert (_REPO_ROOT / "docs" / "sidekick" / "standalone.md").exists(), (
+            "docs/sidekick/standalone.md must exist (T9 #5987)"
+        )
+
+    def test_standalone_md_has_install_section(self) -> None:
+        path = _REPO_ROOT / "docs" / "sidekick" / "standalone.md"
+        if not path.exists():
+            pytest.skip("standalone.md not found")
+        assert "pip install" in path.read_text(encoding="utf-8")
+
+    def test_standalone_md_has_run_examples(self) -> None:
+        path = _REPO_ROOT / "docs" / "sidekick" / "standalone.md"
+        if not path.exists():
+            pytest.skip("standalone.md not found")
+        assert "sidekick run" in path.read_text(encoding="utf-8")
+
+    def test_sidekick_readme_cross_links_standalone(self) -> None:
+        path = _REPO_ROOT / "docs" / "sidekick" / "README.md"
+        if not path.exists():
+            pytest.skip("docs/sidekick/README.md not found")
+        assert "standalone" in path.read_text(encoding="utf-8").lower(), (
+            "docs/sidekick/README.md must cross-link standalone.md"
+        )
+
+    def test_agents_md_has_standalone_entry(self) -> None:
+        path = _REPO_ROOT / "AGENTS.md"
+        assert "sidekick.standalone" in path.read_text(encoding="utf-8"), (
+            "AGENTS.md must include a sidekick.standalone entry (T9 #5987)"
+        )
