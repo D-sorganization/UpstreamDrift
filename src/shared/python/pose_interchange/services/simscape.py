@@ -108,11 +108,14 @@ class SimscapeKinematicsService:
         )
 
         adapter = PoseAdapter()
-        q_dict = adapter.from_canonical(pose)
+        layout = adapter.joint_layout(self._engine)
+        q = adapter.from_canonical(pose, model=self._engine)
 
         matlab_engine = self._matlab_engine
         if matlab_engine is not None:
-            for joint_name, val in q_dict.items():
+            for slot in layout.values():
+                joint_name = slot.engine_name
+                val = q[slot.start_index]
                 try:
                     # ``matlab.engine.MatlabEngine`` exposes ``.workspace`` at
                     # runtime; we type the field as ``object`` to avoid a hard
