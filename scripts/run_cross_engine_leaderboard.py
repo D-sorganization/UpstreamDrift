@@ -42,6 +42,7 @@ from __future__ import annotations
 
 import argparse
 import importlib
+import importlib.util
 import json
 import logging
 import os
@@ -57,6 +58,9 @@ from typing import Any
 # --- Repo-relative paths -----------------------------------------------------
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT / "src" / "shared" / "python"))
+sys.path.insert(0, str(REPO_ROOT))
+
 RESULTS_DIR = REPO_ROOT / "motion_matching" / "results"
 LEADERBOARD_MD = RESULTS_DIR / "CROSS_ENGINE_LEADERBOARD.md"
 WIFFLE_XLSX = (
@@ -109,6 +113,23 @@ _FIT_DRIVER_MODULES: dict[str, tuple[str, str]] = {
 }
 
 LOGGER = logging.getLogger("run_cross_engine_leaderboard")
+
+
+def _load_generate_report() -> Any:
+    """Load the pure leaderboard module without importing optional loaders."""
+    module_path = (
+        REPO_ROOT / "src" / "shared" / "python" / "motion_matching" / "leaderboard.py"
+    )
+    spec = importlib.util.spec_from_file_location(
+        "_upstream_drift_motion_matching_leaderboard",
+        module_path,
+    )
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Could not load leaderboard module from {module_path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module.generate_report
 
 
 # --- CLI ---------------------------------------------------------------------
@@ -372,10 +393,7 @@ def main(argv: list[str] | None = None) -> int:
 
     grid = run_all(args)
 
-    # Lazy import so `--help` works even without the package on sys.path.
-    sys.path.insert(0, str(REPO_ROOT))
-    from src.shared.python.motion_matching.leaderboard import generate_report
-
+    generate_report = _load_generate_report()
     out = generate_report(args.results_dir, args.leaderboard_path)
     LOGGER.info("leaderboard written: %s", out)
 
