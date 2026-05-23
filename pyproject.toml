@@ -166,6 +166,10 @@ all = ["upstream-drift[rust,all-engines,analysis,pose,biomechanics,rl,urdf,dev]"
 
 [project.scripts]
 upstream-drift = "launch_golf_suite:main"
+# Standalone Sidekick window / headless runner (T6 — issue #5984).
+# The canonical entry-point lives here rather than in vendor/ud-tools because
+# the standalone shell (sidekick.standalone.*) is owned by this repo.
+sidekick = "sidekick.__main__:main"
 
 [project.entry-points."upstream_drift.engines"]
 # Third-party engines register here via pyproject.toml:
@@ -182,11 +186,18 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
-# Include pre-built UI in the wheel
+# Include pre-built UI in the wheel.
+# src/**/* covers src/shared/python/sidekick/standalone/ (T6 — issue #5984).
+# docs/, tests/, and vendor/ are NOT listed here and are therefore excluded.
 include = [
     "src/**/*",
     "ui/dist/**/*",  # Bundled web UI (built by build_hooks.py)
     "launch_golf_suite.py",
+]
+exclude = [
+    "src/**/__pycache__/**",
+    "src/**/test_*.py",
+    "src/**/tests/**",
 ]
 
 [tool.hatch.build.hooks.custom]
@@ -258,6 +269,9 @@ max-complexity = 10
 "src/shared/python/codemap/cli.py" = ["T201"]
 "src/shared/python/codemap/watcher.py" = ["T201"]
 "src/shared/python/codemap/mcp_server.py" = ["T201"]
+# Sidekick CLI entry-points: stdout/stderr are the contract (T6 #5984).
+"src/shared/python/sidekick/__main__.py" = ["T201"]
+"src/shared/python/sidekick/standalone/runner.py" = ["T201"]
 
 
 [tool.mypy]

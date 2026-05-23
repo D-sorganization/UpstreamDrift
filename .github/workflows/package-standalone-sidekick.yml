@@ -1,0 +1,112 @@
+name: Package Standalone Sidekick
+
+# Runs on every PR that touches sidekick/standalone or pyproject.toml (T6).
+# Builds an sdist + wheel, uploads as artifacts, and smoke-tests the wheel.
+
+on:
+  pull_request:
+    paths:
+      - "src/shared/python/sidekick/standalone/**"
+      - "src/shared/python/sidekick/__main__.py"
+      - "pyproject.toml"
+      - "sidekick.spec"
+      - "scripts/packaging/build_sidekick_binary.py"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-wheel:
+    name: Build sdist + wheel
+    runs-on: d-sorg-fleet
+    timeout-minutes: 15
+    outputs:
+      wheel-size-kb: ${{ steps.size.outputs.kb }}
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: "3.11"
+
+      - name: Install build tools
+        run: |
+          python3 -m pip install build
+
+      - name: Build sdist + wheel
+        env:
+          SKIP_UI_BUILD: "1"
+        run: python3 -m build --outdir dist/
+
+      - name: Record wheel size
+        id: size
+        shell: bash
+        run: |
+          whl=$(ls dist/*.whl | head -1)
+          kb=$(du -k "$whl" | cut -f1)
+          echo "Wheel: $whl  Size: ${kb} kB"
+          echo "kb=${kb}" >> "$GITHUB_OUTPUT"
+          echo "### Wheel size: ${kb} kB" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Assert wheel does not contain tests/ docs/ vendor/
+        shell: bash
+        run: |
+          python3 -m zipfile -l dist/*.whl | awk '{print $NF}' > wheel_contents.txt
+          if grep -E '^(tests/|docs/|vendor/)' wheel_contents.txt; then
+            echo "::error::Wheel contains tests/, docs/, or vendor/ content"
+            exit 1
+          fi
+          echo "Wheel contents look clean."
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: sidekick-dist
+          path: dist/
+
+  smoke-test-wheel:
+    name: Smoke-test wheel (Python ${{ matrix.python }})
+    needs: build-wheel
+    runs-on: d-sorg-fleet
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: ${{ matrix.python }}
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: sidekick-dist
+          path: dist/
+
+      - name: Install wheel in clean venv
+        shell: bash
+        run: |
+          python3 -m venv .smoke-venv
+          .smoke-venv/bin/pip install dist/*.whl
+
+      - name: sidekick --help
+        shell: bash
+        run: .smoke-venv/bin/sidekick --help
+
+      - name: sidekick run smoke test
+        shell: bash
+        run: |
+          .smoke-venv/bin/sidekick run \
+            --calculator wgs_reactor \
+            --inputs tests/fixtures/wgs.json \
+            --output /tmp/wgs_result.json
+          cat /tmp/wgs_result.json
