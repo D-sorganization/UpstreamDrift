@@ -35,6 +35,7 @@ from .progress_sinks import (
     training_channel_for,
 )
 from .runner_registry import RunnerRegistry
+from .subprocess_driver import SubprocessDriver, scan_pidfiles
 
 __all__ = [
     "CompositeProgressSink",
@@ -48,5 +49,7 @@ __all__ = [
     "NullProgressSink",
     "RealtimeChannelProgressSink",
     "RunnerRegistry",
+    "SubprocessDriver",
+    "scan_pidfiles",
     "training_channel_for",
 ]
