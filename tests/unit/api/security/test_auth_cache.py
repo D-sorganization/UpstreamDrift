@@ -4,8 +4,7 @@ These tests verify the security module using Design by Contract principles.
 """
 
 import os
-from datetime import timedelta
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -61,3 +60,25 @@ class TestAuthCache:
 
             assert cache.get("key1") == "value1"
             assert cache.get("key2") == "value2"
+
+    def test_overflow_evicts_oldest_entry_without_flushing_cache(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test cache overflow evicts the oldest entry instead of clearing all entries."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            monkeypatch.setattr(AuthCache, "MAX_ENTRIES", 3)
+            cache = AuthCache()
+
+            cache.set("key1", "value1")
+            cache.set("key2", "value2")
+            cache.set("key3", "value3")
+            cache.set("key4", "value4")
+
+            assert cache.get("key1") is None
+            assert cache.get("key2") == "value2"
+            assert cache.get("key3") == "value3"
+            assert cache.get("key4") == "value4"
