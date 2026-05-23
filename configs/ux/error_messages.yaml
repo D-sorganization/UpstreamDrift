@@ -1,0 +1,67 @@
+# User-facing error catalog — consumed by UserFacingError envelope (Phase 5)
+# Schema: see src/shared/python/ux/error_envelope.py
+# Style:  see docs/ux/copy_style_guide.md (Phase 6, forthcoming)
+#
+# Codes are immutable once shipped — front-end UIs route by code.
+# Curly-brace `{placeholders}` are filled by UserFacingError.format(...).
+
+errors:
+  - code: invalid_timestep
+    title: Timestep is out of range
+    what_happened: "Timestep {value} s is outside the supported range [1e-6, 1.0]."
+    why: |
+      Sub-machine-epsilon timesteps cause the integrator to stall.
+      Timesteps above 1 s cannot resolve any swing dynamics.
+    how_to_fix: "Pick a value between 1e-6 and 1.0.  Try 0.002 for MuJoCo or 0.001 for Drake."
+    field_id: simulation.timestep
+    docs_url: ~
+    retriable: true
+
+  - code: invalid_duration
+    title: Duration is out of range
+    what_happened: "Duration {value} s is outside the supported range [0.1, 60.0]."
+    why: "Durations under 0.1 s do not span a recognisable swing event; over 60 s exhausts the run-time budget."
+    how_to_fix: "Pick a duration between 0.1 and 60.0 seconds.  The default 3.0 s covers most swings."
+    field_id: simulation.duration
+    docs_url: ~
+    retriable: true
+
+  - code: engine_unavailable
+    title: Physics engine is not installed
+    what_happened: "The engine {engine!r} could not be imported."
+    why: |
+      The Python bindings for this engine are not present in the current environment.
+      The launcher detected this at startup but proceeded so the rest of the app is usable.
+    how_to_fix: "Install the engine (see docs/installing-engines.md) or pick a different engine from the dropdown."
+    field_id: simulation.engine
+    docs_url: ~
+    retriable: true
+
+  - code: model_not_found
+    title: Model file could not be found
+    what_happened: "No file at {path!r}."
+    why: "The selected model file was moved, deleted, or the path was mistyped."
+    how_to_fix: "Pick a different model from the recent-models list or browse for the file."
+    field_id: ~
+    docs_url: ~
+    retriable: true
+
+  - code: simulation_timeout
+    title: Simulation exceeded its wall-clock budget
+    what_happened: "Simulation ran for {elapsed_s} s wall-clock without finishing."
+    why: |
+      The selected engine + timestep combination is too slow for this model.
+      Pinocchio with a 0.0001 s timestep is a common offender.
+    how_to_fix: "Increase the timestep, reduce duration, or switch to a faster engine (MuJoCo for interactive iteration)."
+    field_id: simulation.timestep
+    docs_url: ~
+    retriable: true
+
+  - code: gpu_unavailable
+    title: GPU acceleration requested but no GPU is available
+    what_happened: "GPU acceleration was enabled but no CUDA device was detected."
+    why: "The engine cannot run GPU-accelerated kernels without a CUDA-capable device."
+    how_to_fix: "Disable GPU acceleration or run on a host with a CUDA GPU."
+    field_id: simulation.gpu_acceleration
+    docs_url: ~
+    retriable: true
