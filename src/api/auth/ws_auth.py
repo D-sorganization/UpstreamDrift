@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import WebSocket
+from fastapi import HTTPException, WebSocket
 
 from src.api.auth.middleware import LocalUser, is_local_mode
 from src.api.auth.security import security_manager
@@ -66,7 +66,7 @@ async def resolve_ws_user(websocket: WebSocket) -> LocalUser | None:
     try:
         security_manager.verify_token(token, "access")
         return LocalUser()
-    except Exception:  # noqa: BLE001
+    except HTTPException:
         logger.warning(
             "WebSocket auth rejected: invalid or expired token. path=%s",
             websocket.url.path,

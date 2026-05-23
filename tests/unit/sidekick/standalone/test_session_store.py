@@ -165,7 +165,7 @@ class TestConcurrency:
             try:
                 payload = ProfilePayload(data={"thread": n})
                 store.save_profile("shared", payload)
-            except Exception as exc:  # noqa: BLE001
+            except (OSError, RuntimeError, TypeError, ValueError, StateError) as exc:
                 with lock:
                     errors.append(exc)
 

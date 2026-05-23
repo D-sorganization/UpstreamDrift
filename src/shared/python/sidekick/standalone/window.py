@@ -32,6 +32,13 @@ logger = logging.getLogger(__name__)
 __all__ = ["StandaloneSidekickConfig", "StandaloneSidekickWindow"]
 
 _VALID_PROFILES = frozenset({"chat-first", "calc-first"})
+_PANEL_FALLBACK_ERRORS = (
+    ImportError,
+    RuntimeError,
+    AttributeError,
+    TypeError,
+    ValueError,
+)
 
 # Documented splitter ratio: primary pane gets this fraction of the total width.
 _PRIMARY_RATIO = 0.60
@@ -168,7 +175,7 @@ class StandaloneSidekickWindow(QMainWindow):
             from ai.gui.assistant_panel import AIAssistantPanel
 
             return AIAssistantPanel()
-        except Exception:  # noqa: BLE001 - degrade to placeholder on any failure
+        except _PANEL_FALLBACK_ERRORS:
             logger.exception("Could not construct AIAssistantPanel; using placeholder")
             return _placeholder("Chat (unavailable)")
 
@@ -177,7 +184,7 @@ class StandaloneSidekickWindow(QMainWindow):
             from sidekick.ui.tools_sidebar.sidebar import UnifiedToolsSidebar
 
             return UnifiedToolsSidebar()
-        except Exception:  # noqa: BLE001 - degrade to placeholder on any failure
+        except _PANEL_FALLBACK_ERRORS:
             logger.exception(
                 "Could not construct UnifiedToolsSidebar; using placeholder"
             )
@@ -218,7 +225,7 @@ class StandaloneSidekickWindow(QMainWindow):
             store = self._config.session_store
             if store is not None and hasattr(store, "set_last_profile"):
                 store.set_last_profile(self._config.profile)
-        except Exception:  # noqa: BLE001 - never crash on close
+        except (OSError, RuntimeError, TypeError, ValueError):
             logger.exception("Failed to flush session on close")
 
     def _on_save_profile(self) -> None:
