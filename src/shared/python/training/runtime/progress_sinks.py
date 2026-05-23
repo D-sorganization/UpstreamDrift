@@ -29,6 +29,8 @@ __all__ = [
     "JsonlFileProgressSink",
     "NullProgressSink",
     "ProgressSinkError",
+    "RealtimeChannelProgressSink",
+    "training_channel_for",
 ]
 
 
@@ -170,6 +172,74 @@ class JsonlFileProgressSink:
                 raise ProgressSinkError(
                     f"failed to append status to {self._status_path}: {exc}"
                 ) from exc
+
+
+def training_channel_for(job_id: str) -> str:
+    """Canonical realtime channel name for a job's progress stream.
+
+    Used by both the :class:`RealtimeChannelProgressSink` (producer) and
+    the dashboard subscriber (PR3 consumer) so the name is owned in one
+    place. The pattern matches the existing realtime channel scheme.
+    """
+
+    if not isinstance(job_id, str) or not job_id.strip():
+        raise ValueError("job_id must be a non-empty string")
+    return f"training/{job_id}/progress"
+
+
+class RealtimeChannelProgressSink:
+    """Publishes metrics and status changes onto a realtime channel.
+
+    The dashboard (PR3) subscribes to the same channel to drive live
+    plot updates. The transport is the shared :mod:`realtime` facade,
+    so the choice between WebSocket and file pub-sub is config-driven
+    rather than hard-coded here.
+
+    Import of :mod:`realtime` is deferred to construction so headless
+    tests (and the contracts test suite) don't pay the import cost.
+
+    Args:
+        job_id: Identifier of the job whose progress this sink streams.
+            Used to derive the channel name via
+            :func:`training_channel_for`.
+        owner_tool_id: Optional registration label propagated to the
+            realtime channel registry.
+    """
+
+    __slots__ = ("_channel", "_publish")
+
+    def __init__(self, job_id: str, *, owner_tool_id: str | None = None) -> None:
+        from src.shared.python import realtime  # local import: see docstring
+
+        self._channel = training_channel_for(job_id)
+        realtime.register_channel(
+            self._channel,
+            description=f"Training-job progress stream for {job_id!r}",
+            owner_tool_id=owner_tool_id,
+        )
+        self._publish = realtime.publish
+
+    @property
+    def channel(self) -> str:
+        return self._channel
+
+    def emit_metric(self, metric: TrainingMetric) -> None:
+        if not isinstance(metric, TrainingMetric):
+            raise TypeError("emit_metric expects a TrainingMetric")
+        payload = {"event": "metric", "metric": training_metric_to_dict(metric)}
+        self._publish(self._channel, payload)
+
+    def emit_status(
+        self, status: TrainingStatus, *, message: str | None = None
+    ) -> None:
+        if not isinstance(status, TrainingStatus):
+            raise TypeError("emit_status expects a TrainingStatus")
+        payload = {
+            "event": "status",
+            "status": status.value,
+            "message": message,
+        }
+        self._publish(self._channel, payload)
 
 
 class CompositeProgressSink:

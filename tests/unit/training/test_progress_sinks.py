@@ -18,6 +18,8 @@ from training.runtime import (
     InMemoryProgressSink,
     JsonlFileProgressSink,
     NullProgressSink,
+    RealtimeChannelProgressSink,
+    training_channel_for,
 )
 
 pytestmark = pytest.mark.unit
@@ -159,3 +161,66 @@ class TestCompositeProgressSink:
             composite.emit_metric(_metric())
         # Despite the broken sink raising, the good sink still received the metric.
         assert len(good.metrics) == 1
+
+
+class TestTrainingChannelHelper:
+    def test_channel_name_format(self) -> None:
+        assert training_channel_for("abc123") == "training/abc123/progress"
+
+    def test_rejects_empty_job_id(self) -> None:
+        with pytest.raises(ValueError):
+            training_channel_for("")
+
+    def test_rejects_non_string(self) -> None:
+        with pytest.raises(ValueError):
+            training_channel_for(None)  # type: ignore[arg-type]
+
+
+class TestRealtimeChannelProgressSink:
+    def test_emits_metric_payload(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        published: list[tuple[str, dict[str, object]]] = []
+
+        def fake_publish(channel: str, payload: object, transport=None) -> None:
+            published.append((channel, payload))  # type: ignore[arg-type]
+
+        def fake_register(name: str, description: str, owner_tool_id=None) -> None:
+            return None
+
+        import src.shared.python.realtime as realtime  # noqa: PLC0415 - test setup
+
+        monkeypatch.setattr(realtime, "publish", fake_publish)
+        monkeypatch.setattr(realtime, "register_channel", fake_register)
+        sink = RealtimeChannelProgressSink("job-abc")
+        sink.emit_metric(_metric())
+        assert len(published) == 1
+        channel, payload = published[0]
+        assert channel == "training/job-abc/progress"
+        assert payload["event"] == "metric"
+        assert payload["metric"]["name"] == "loss"
+
+    def test_emits_status_payload(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        published: list[tuple[str, dict[str, object]]] = []
+
+        def fake_publish(channel: str, payload: object, transport=None) -> None:
+            published.append((channel, payload))  # type: ignore[arg-type]
+
+        def fake_register(name: str, description: str, owner_tool_id=None) -> None:
+            return None
+
+        import src.shared.python.realtime as realtime  # noqa: PLC0415
+
+        monkeypatch.setattr(realtime, "publish", fake_publish)
+        monkeypatch.setattr(realtime, "register_channel", fake_register)
+        sink = RealtimeChannelProgressSink("job-xyz")
+        sink.emit_status(TrainingStatus.RUNNING, message="hello")
+        assert published[0][1]["event"] == "status"
+        assert published[0][1]["status"] == "running"
+        assert published[0][1]["message"] == "hello"
+
+    def test_satisfies_protocol(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        import src.shared.python.realtime as realtime  # noqa: PLC0415
+
+        monkeypatch.setattr(realtime, "publish", lambda *a, **kw: None)
+        monkeypatch.setattr(realtime, "register_channel", lambda *a, **kw: None)
+        sink = RealtimeChannelProgressSink("job-protocol")
+        assert isinstance(sink, ProgressSink)

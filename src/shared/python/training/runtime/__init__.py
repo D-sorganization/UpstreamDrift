@@ -31,6 +31,8 @@ from .progress_sinks import (
     InMemoryProgressSink,
     JsonlFileProgressSink,
     NullProgressSink,
+    RealtimeChannelProgressSink,
+    training_channel_for,
 )
 from .runner_registry import RunnerRegistry
 
@@ -44,5 +46,7 @@ __all__ = [
     "JobHandleStatus",
     "JsonlFileProgressSink",
     "NullProgressSink",
+    "RealtimeChannelProgressSink",
     "RunnerRegistry",
+    "training_channel_for",
 ]
