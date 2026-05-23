@@ -109,6 +109,7 @@ def test_release_workflow_matrix(spec_source: str) -> None:
     if not wf.exists():
         pytest.skip("workflow file absent")
     content = wf.read_text(encoding="utf-8")
-    assert "ubuntu" in content, "matrix must include ubuntu runner"
-    assert "macos" in content, "matrix must include macos runner"
-    assert "windows" in content, "matrix must include windows runner"
+    # Matrix labels (not OS runner names — repo policy requires d-sorg-fleet)
+    assert "linux" in content, "matrix must include a linux build target"
+    assert "macos" in content, "matrix must include a macos build target"
+    assert "windows" in content, "matrix must include a windows build target"
