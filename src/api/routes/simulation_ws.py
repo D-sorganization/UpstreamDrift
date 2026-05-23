@@ -11,9 +11,12 @@ from pydantic import BaseModel
 
 from src.shared.python.core.contracts import require
 from src.shared.python.engine_core.engine_registry import EngineType
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 router = APIRouter()
 _DEFAULT_SPEED_FACTOR = 1.0
+_INTERNAL_ERROR_DETAIL = "Internal server error"
+logger = get_logger(__name__)
 
 
 def _engine_type_from_str(name: str) -> EngineType:
@@ -364,10 +367,10 @@ async def simulation_stream(
 
     except WebSocketDisconnect:
         pass  # Client disconnected
-    except (ValueError, RuntimeError, AttributeError) as e:
-        # Best effort error reporting
+    except (ValueError, RuntimeError, AttributeError):
+        logger.exception("Simulation WebSocket error")
         with contextlib.suppress(ConnectionError, TimeoutError, OSError):
-            await websocket.send_json({"error": str(e)})
+            await websocket.send_json({"error": _INTERNAL_ERROR_DETAIL})
     finally:
         with contextlib.suppress(ConnectionError, TimeoutError, OSError):
             await websocket.close()

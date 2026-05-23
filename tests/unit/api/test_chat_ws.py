@@ -7,7 +7,7 @@ and REST fallback endpoints.
 from __future__ import annotations
 
 from collections.abc import AsyncGenerator
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi import FastAPI
@@ -219,6 +219,35 @@ class TestWebSocket:
             error = ws.receive_json()
             assert error["type"] == "error"
             assert "Unknown action" in error["detail"]
+
+    def test_streaming_error_hides_internal_details(self, client, mock_chat_service) -> None:
+        """Unexpected streaming failures return a generic client-safe error."""
+
+        async def failing_stream(_session_id: str) -> AsyncGenerator[str, None]:
+            raise RuntimeError("provider token leaked")
+            yield ""
+
+        mock_chat_service.stream_response = failing_stream
+
+        with (
+            patch.object(chat_ws.logger, "exception") as logger_exception,
+            client.websocket_connect("/api/ws/chat/new") as ws,
+        ):
+            ws.receive_json()  # session_info
+            ws.send_json({"action": "send", "message": "Hello AI"})
+
+            error = ws.receive_json()
+            assert error == {"type": "error", "detail": "Internal server error"}
+
+        logger_exception.assert_called_once()
+
+    def test_disconnect_log_omits_session_id(self, client) -> None:
+        """Disconnect debug logging avoids leaking the session identifier."""
+        with patch.object(chat_ws.logger, "debug") as logger_debug:
+            with client.websocket_connect("/api/ws/chat/new") as ws:
+                ws.receive_json()  # session_info
+
+            logger_debug.assert_called_once_with("Chat WebSocket disconnected")
 
 
 class TestRESTEndpoints:
