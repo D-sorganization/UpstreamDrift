@@ -724,4 +724,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-13 | 1.0.165 | Documented the shared Tools-hosted video/data launcher surfaces, the launcher manifest contract, and the theme API client/server surface added for web UI parity. |
 | 2026-05-13 | 1.0.166 | Moved the PyQt launcher close control into the top menu-bar row while keeping the custom title strip for drag/minimize/maximize behavior (#5374). |
 | 2026-05-16 | 1.0.169 | Added 14 remaining launcher tiles covering engine-specific dashboards (Drake, MuJoCo, Pinocchio), Analysis Tools API, Motion Pipeline, capability surfaces (perturbation analysis, force overlays, realtime WebSocket, AIP, actuator controls), and feature tiles (Unreal integration, robotics module, Tools calculator hub, P&ID generator); closed 12 issues resolved by prior #5556 merge and 2 by-design closures (#5515, #5521, #5523–#5524, #5527–#5535). |
+| 2026-05-22 | 1.0.170 | Hardened the shared BitNet subprocess adapter by rejecting non-UTF-8 and oversize prompts before `llama-cli` launch, and added focused regression coverage for the synchronous and streaming guard paths (issue #5913). |
 ````

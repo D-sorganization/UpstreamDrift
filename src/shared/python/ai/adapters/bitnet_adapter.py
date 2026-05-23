@@ -76,6 +76,7 @@ class BitnetAdapter(BaseAgentAdapter):
         "bitnet-2b-q4_0.gguf",
         "bitnet-3b-q4_0.gguf",
     )
+    _MAX_PROMPT_BYTES = 65_536
 
     def list_models(self) -> list[ChatModelInfo]:  # noqa: F821
         """Return BitNet model catalogue; configured model is always included."""
@@ -102,6 +103,8 @@ class BitnetAdapter(BaseAgentAdapter):
 
     def _handle_error(self, error: Exception) -> AgentResponse:
         """Classify BitNet subprocess errors into the AIProviderError hierarchy."""
+        if isinstance(error, AIProviderError):
+            raise error
         if isinstance(error, FileNotFoundError):
             raise AIConnectionError(
                 f"Failed to run BitNet: llama-cli not found at {self.llama_cli}",
@@ -112,7 +115,7 @@ class BitnetAdapter(BaseAgentAdapter):
                 f"BitNet process failed (code {error.returncode}): {error.stderr}",
                 provider="bitnet",
             ) from error
-        return super()._handle_error(error)  # type: ignore[misc,no-any-return]
+        raise self._classify_error(error, provider="bitnet") from error
 
     def validate_connection(self) -> tuple[bool, str]:
         """Validate that the llama-cli executable is available."""
@@ -145,6 +148,30 @@ class BitnetAdapter(BaseAgentAdapter):
         prompt += f"User: {message}\nAssistant:"
         return prompt
 
+    def _build_validated_prompt(
+        self, context: ConversationContext, message: str
+    ) -> str:
+        """Format a prompt and enforce basic BitNet safety limits."""
+        prompt = self._format_prompt(context, message)
+        try:
+            prompt_bytes = prompt.encode("utf-8", errors="strict")
+        except UnicodeEncodeError as error:
+            raise AIProviderError(
+                "BitNet prompt must be valid UTF-8 text",
+                provider="bitnet",
+            ) from error
+
+        if len(prompt_bytes) > self._MAX_PROMPT_BYTES:
+            raise AIProviderError(
+                (
+                    "BitNet prompt exceeds the maximum size "
+                    f"({self._MAX_PROMPT_BYTES} bytes)"
+                ),
+                provider="bitnet",
+                details={"prompt_bytes": len(prompt_bytes)},
+            )
+        return prompt
+
     @precondition(
         lambda message: bool(message.strip()), "message must not be empty or blank"
     )
@@ -155,9 +182,8 @@ class BitnetAdapter(BaseAgentAdapter):
         tools: list[ToolDeclaration],
     ) -> AgentResponse:
         """Send a message synchronously."""
-        prompt = self._format_prompt(context, message)
-
         try:
+            prompt = self._build_validated_prompt(context, message)
             cmd = [
                 self.llama_cli,
                 "-m",
@@ -195,20 +221,18 @@ class BitnetAdapter(BaseAgentAdapter):
         tools: list[ToolDeclaration],
     ) -> Iterator[AgentChunk]:
         """Stream the response using subprocess."""
-        prompt = self._format_prompt(context, message)
-
-        cmd = [
-            self.llama_cli,
-            "-m",
-            self.model,
-            "-p",
-            prompt,
-            "-n",
-            "512",
-            "--log-disable",
-        ]
-
         try:
+            prompt = self._build_validated_prompt(context, message)
+            cmd = [
+                self.llama_cli,
+                "-m",
+                self.model,
+                "-p",
+                prompt,
+                "-n",
+                "512",
+                "--log-disable",
+            ]
             process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
