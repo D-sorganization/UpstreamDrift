@@ -5,6 +5,7 @@ import subprocess
 import sys
 from collections import Counter
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED_FILES = [
@@ -84,6 +85,25 @@ def _duplicate_source_of_truth_headings() -> list[str]:
     return duplicates
 
 
+def _duplicate_adr_numbers() -> list[str]:
+    adr_dir = ROOT / "docs" / "adr"
+    if not adr_dir.exists():
+        return []
+
+    duplicate_map: dict[str, list[str]] = {}
+    for path in adr_dir.glob("*.md"):
+        match = re.match(r"^(?P<number>\d{4})-", path.name)
+        if not match:
+            continue
+        duplicate_map.setdefault(match.group("number"), []).append(path.name)
+
+    return [
+        f"duplicate ADR number {number}: {', '.join(sorted(file_names))}"
+        for number, file_names in sorted(duplicate_map.items())
+        if len(file_names) > 1
+    ]
+
+
 def main() -> int:
     missing = [str(p.relative_to(ROOT)) for p in REQUIRED_FILES if not p.exists()]
     if missing:
@@ -100,6 +120,11 @@ def main() -> int:
         return _fail(
             "Duplicate source-of-truth documentation headings detected:\n- "
             + "\n- ".join(duplicate_headings)
+        )
+    duplicate_adr_numbers = _duplicate_adr_numbers()
+    if duplicate_adr_numbers:
+        return _fail(
+            "Duplicate ADR numbering detected:\n- " + "\n- ".join(duplicate_adr_numbers)
         )
 
     changed = _git_changed_files()
