@@ -2,8 +2,18 @@
 .github/workflows/ @dieterolson @D-sorganization/security-reviewers
 scripts/ @dieterolson @D-sorganization/security-reviewers
 
-# Core / critical surface
+# Core / critical surface (issue #5915: expand CODEOWNERS coverage)
 /src/ @dieterolson @D-sorganization/core-maintainers
+
+# Physics engine subtrees — dedicated ownership reduces bus-factor risk
+src/engines/ @dieterolson @D-sorganization/physics-team
+src/shared/python/ @dieterolson @D-sorganization/core-maintainers
+
+# API layer — security-sensitive; require security-reviewer sign-off
+src/api/ @dieterolson @D-sorganization/security-reviewers
+
+# Shared auth module — extra gate on security-critical code
+src/api/auth/ @dieterolson @D-sorganization/security-reviewers
 
 # No blanket *.py owner — rely on per-package ownership above to reduce
 # bus-factor risk (issue #3074).

@@ -27,6 +27,7 @@ from typing import Any
 
 from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 
+from src.api.auth.ws_auth import resolve_ws_user
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -139,6 +140,9 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
     """
     if not (websocket is not None):
         raise ValueError("websocket must be provided")
+    user = await resolve_ws_user(websocket)
+    if user is None:
+        return
     await websocket.accept()
 
     chat_service = websocket.app.state.chat_service
@@ -195,9 +199,11 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
                     await websocket.send_json(
                         {"type": "complete", "session_id": session_id}
                     )
-                except Exception as e:  # noqa: BLE001
-                    logger.error("Error during streaming response: %s", e)
-                    await websocket.send_json({"type": "error", "detail": str(e)})
+                except Exception:  # noqa: BLE001
+                    logger.exception("Error during streaming response")
+                    await websocket.send_json(
+                        {"type": "error", "detail": "internal error"}
+                    )
 
             elif action == "history":
                 messages = chat_service.get_session_history(session_id)
@@ -248,10 +254,10 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
 
     except WebSocketDisconnect:
         logger.debug("Chat WebSocket disconnected: session=%s", session_id)
-    except (ConnectionError, TimeoutError, OSError) as e:
-        logger.error("Chat WebSocket error: %s", e)
+    except (ConnectionError, TimeoutError, OSError):
+        logger.exception("Chat WebSocket connection error")
         with contextlib.suppress(ConnectionError, TimeoutError, OSError):
-            await websocket.send_json({"type": "error", "detail": str(e)})
+            await websocket.send_json({"type": "error", "detail": "connection error"})
 
 
 # ── REST fallback endpoints ──────────────────────────────────────────

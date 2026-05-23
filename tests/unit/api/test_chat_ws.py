@@ -6,8 +6,9 @@ and REST fallback endpoints.
 
 from __future__ import annotations
 
+import os
 from collections.abc import AsyncGenerator
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi import FastAPI
@@ -21,6 +22,13 @@ pytestmark = pytest.mark.anyio
 def anyio_backend() -> str:
     """Use asyncio backend only (trio not installed)."""
     return "asyncio"
+
+
+@pytest.fixture(autouse=True)
+def local_mode_env():
+    """Run all chat WebSocket tests in local mode (auth bypassed by design)."""
+    with patch.dict(os.environ, {"GOLF_SUITE_MODE": "local"}):
+        yield
 
 
 @pytest.fixture

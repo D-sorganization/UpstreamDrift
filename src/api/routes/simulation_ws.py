@@ -2,6 +2,8 @@
 
 import asyncio
 import contextlib
+import logging
+import math
 import time
 from typing import Any
 
@@ -9,11 +11,35 @@ import numpy as np
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
+from src.api.auth.ws_auth import resolve_ws_user
 from src.shared.python.core.contracts import require
 from src.shared.python.engine_core.engine_registry import EngineType
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 _DEFAULT_SPEED_FACTOR = 1.0
+
+
+def _clamp_speed_factor(raw: object) -> float:
+    """Coerce and validate a client-supplied speed_factor value.
+
+    Args:
+        raw: The raw value received from the WebSocket client.
+
+    Returns:
+        A positive finite float; falls back to ``_DEFAULT_SPEED_FACTOR`` when
+        the input is zero, negative, non-finite, or non-numeric.
+
+    Postcondition:
+        Return value is a positive finite float.
+    """
+    try:
+        value = float(raw)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return _DEFAULT_SPEED_FACTOR
+    if not math.isfinite(value) or value <= 0:
+        return _DEFAULT_SPEED_FACTOR
+    return value
 
 
 def _engine_type_from_str(name: str) -> EngineType:
@@ -173,13 +199,15 @@ async def _handle_client_commands(
         if action == "pause":
             return "pause"
         if action == "set_speed":
-            speed_factor = msg.get("speed_factor", 1.0)
-            config["speed_factor"] = float(speed_factor)
+            speed_factor = _clamp_speed_factor(
+                msg.get("speed_factor", _DEFAULT_SPEED_FACTOR)
+            )
+            config["speed_factor"] = speed_factor
             app_state = getattr(getattr(websocket, "app", None), "state", None)
             simulation_service = getattr(app_state, "simulation_service", None)
             stats = getattr(simulation_service, "stats", None)
             if stats is not None:
-                stats.speed_factor = float(speed_factor)
+                stats.speed_factor = speed_factor
     except TimeoutError:
         pass  # No message, continue simulation
     return "continue"
@@ -206,13 +234,15 @@ async def _wait_for_resume_or_stop(
         if action == "stop":
             return True
         if action == "set_speed":
-            speed_factor = msg.get("speed_factor", 1.0)
-            config["speed_factor"] = float(speed_factor)
+            speed_factor = _clamp_speed_factor(
+                msg.get("speed_factor", _DEFAULT_SPEED_FACTOR)
+            )
+            config["speed_factor"] = speed_factor
             app_state = getattr(getattr(websocket, "app", None), "state", None)
             simulation_service = getattr(app_state, "simulation_service", None)
             stats = getattr(simulation_service, "stats", None)
             if stats is not None:
-                stats.speed_factor = float(speed_factor)
+                stats.speed_factor = speed_factor
 
 
 async def _run_simulation_loop(
@@ -320,11 +350,12 @@ async def simulation_stream(
 
     Client sends: {"action": "start", "config": {...}}
     Server sends: {"frame": 0, "time": 0.0, "state": {...}, ...}
-
-    No authentication required in local mode.
     """
     if not (websocket is not None):
         raise ValueError("websocket must be provided")
+    user = await resolve_ws_user(websocket)
+    if user is None:
+        return
     await websocket.accept()
 
     # Access engine manager from app state
@@ -364,10 +395,10 @@ async def simulation_stream(
 
     except WebSocketDisconnect:
         pass  # Client disconnected
-    except (ValueError, RuntimeError, AttributeError) as e:
-        # Best effort error reporting
+    except (ValueError, RuntimeError, AttributeError):
+        logger.exception("WebSocket simulation error")
         with contextlib.suppress(ConnectionError, TimeoutError, OSError):
-            await websocket.send_json({"error": str(e)})
+            await websocket.send_json({"error": "internal error"})
     finally:
         with contextlib.suppress(ConnectionError, TimeoutError, OSError):
             await websocket.close()
