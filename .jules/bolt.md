@@ -70,3 +70,7 @@
 ## 2026-05-19 - Optimize MSE calculation in JAX
 **Learning:** `jnp.mean(diff ** 2)` and `jnp.sum(x ** 2)` create intermediate array allocations that slow down evaluation in `jax` loss functions.
 **Action:** Replace `jnp.mean(diff ** 2)` with `jnp.vdot(diff, diff) / diff.size` and `jnp.sum(x ** 2)` with `jnp.vdot(x, x)` to optimize sum-of-squares evaluations by avoiding intermediate temporary memory allocations.
+
+## 2026-05-19 - Optimize mechanical work metrics
+**Learning:** Computations like `np.sum(derivatives**2)` and `np.sum(values**2 * dt)` or `np.sum(torque**2, axis=1)` involve element-wise operations that allocate intermediate memory (`**2` and multiplication). This can be slow for long arrays of time series data.
+**Action:** Replace `np.sum(x**2)` with `np.vdot(x, x)`, `np.sum(x**2 * dt)` with `np.vdot(x, x * dt)`. For multi-dimensional axis summation like `np.sum(torque**2, axis=1)`, replace it with `np.einsum('ij,ij->i', torque, torque)`. Similarly, replace `np.sum(np.abs(torque), axis=1)` with `np.einsum('ij->i', np.abs(torque))`.
