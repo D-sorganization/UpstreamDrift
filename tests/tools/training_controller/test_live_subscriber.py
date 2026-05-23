@@ -7,12 +7,9 @@ transport.
 
 from __future__ import annotations
 
-import sys
 import threading
-import types
 from collections.abc import Callable
 from typing import Any
-from unittest.mock import patch
 
 import pytest
 
@@ -90,16 +87,25 @@ class _StubRealtime:
 
 
 @pytest.fixture
-def stub_realtime() -> Any:
-    """Install a stub :mod:`src.shared.python.realtime` module."""
+def stub_realtime(monkeypatch: pytest.MonkeyPatch) -> Any:
+    """Stub the realtime facade by patching its functions in place.
+
+    Patching ``sys.modules`` alone is unreliable here because once any
+    earlier test has imported ``src.shared.python.realtime``, the
+    submodule is bound as an attribute on the parent package and
+    ``from src.shared.python import realtime`` resolves through that
+    attribute rather than re-reading ``sys.modules``. Patching the
+    real module's functions sidesteps the issue and matches the
+    approach used by the progress-sink tests for the same module.
+    """
 
     stub = _StubRealtime()
-    module = types.ModuleType("src.shared.python.realtime")
-    module.register_channel = stub.register_channel  # type: ignore[attr-defined]
-    module.subscribe = stub.subscribe  # type: ignore[attr-defined]
-    module.publish = stub.publish  # type: ignore[attr-defined]
-    with patch.dict(sys.modules, {"src.shared.python.realtime": module}, clear=False):
-        yield stub
+    import src.shared.python.realtime as realtime_module  # noqa: PLC0415
+
+    monkeypatch.setattr(realtime_module, "register_channel", stub.register_channel)
+    monkeypatch.setattr(realtime_module, "subscribe", stub.subscribe)
+    monkeypatch.setattr(realtime_module, "publish", stub.publish)
+    yield stub
 
 
 # --------------------------------------------------------------- construction
