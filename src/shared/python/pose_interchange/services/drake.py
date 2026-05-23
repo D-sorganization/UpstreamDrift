@@ -7,7 +7,7 @@ back to a :class:`MockKinematicsService` configured with
 ``engine_name="drake"``.
 
 Method bodies that require non-trivial Drake plumbing currently raise
-:class:`NotImplementedError` with a TODO tied to follow-up #4963;
+:class:`NotImplementedError` with a TODO(#4963) tied to follow-up;
 this PR only commits the wiring scaffold so downstream code can target
 ``LiveKinematicsService`` without waiting on the full Drake bridge.
 """
@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
@@ -65,8 +66,8 @@ class DrakeKinematicsService:
     engine_name: str = ENGINE_NAME
 
     def __init__(self) -> None:
-        self._plant: object | None = None
-        self._context: object | None = None
+        self._plant: Any = None
+        self._context: Any = None
         self._pose: CanonicalPose | None = None
 
     def load(self, model_path: Path) -> None:

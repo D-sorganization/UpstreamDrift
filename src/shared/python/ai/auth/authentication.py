@@ -336,7 +336,7 @@ class AuthManager:
             can no longer be misled into trusting a fake identity.
         """
         raise NotImplementedError(
-            f"OAuth login for provider {provider!r} is not implemented (TODO #5227). "
+            f"OAuth login for provider {provider!r} is not implemented (TODO(#5227)). "
             "To use authenticated features, configure provider credentials directly "
             "via the keyring (chat/credentials.py) and skip the OAuth flow."
         )
@@ -364,7 +364,7 @@ class AuthManager:
             can no longer be misled into trusting a fake identity.
         """
         raise NotImplementedError(
-            f"Email/password login for {email!r} is not implemented (TODO #5227). "
+            f"Email/password login for {email!r} is not implemented (TODO(#5227)). "
             "To use authenticated features, supply an API key via login_with_api_key. "
             "Email/password auth requires a backend service — see Phase 2 of #2757."
         )
