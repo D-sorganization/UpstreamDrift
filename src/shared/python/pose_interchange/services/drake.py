@@ -84,7 +84,7 @@ class DrakeKinematicsService:
         self._plant, self._scene_graph = plant.AddMultibodyPlantSceneGraph(
             self._builder, time_step=0.001
         )
-        parsing.Parser(self._plant).AddModels(str(model_path))
+        parsing.Parser(self._plant).AddModels(model_path)
         self._plant.Finalize()
         self._diagram = self._builder.Build()
 
