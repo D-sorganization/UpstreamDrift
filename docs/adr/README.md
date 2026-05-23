@@ -22,6 +22,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0012](0012-canonical-pose-interchange.md)         | Canonical Pose Interchange                                      | Accepted | 2026-05-09 |
 | [0013](0013-launcher-composability.md)             | Launcher Composability — Embeddable-tool contract and IPC layer | Accepted | 2026-05-09 |
 | [0017](0017-sidekick-agentic-action-layer.md)      | Sidekick agentic action layer                                   | Accepted | 2026-05-22 |
+| [0018](0018-standalone-sidekick.md)                | Standalone Sidekick Application                                 | Accepted | 2026-05-23 |
 
 ## ADR Backlog
 
