@@ -227,6 +227,9 @@ Engine tier metadata is declared in each in-scope engine package with
   lifespan. Each app lifecycle creates its own `TaskManager`; shutdown marks the
   manager closed, clears retained task records, and subsequent task operations
   fail with a closed-state error instead of silently accepting writes.
+- Simulation WebSocket routes preserve traceback-bearing server logs for
+  unexpected runtime failures while returning sanitized generic client errors so
+  backend exception details are not exposed over the socket.
 - `TaskManager` entries expire after the configured TTL and enforce the
   configured maximum task count. Reads and existence checks refresh the task's
   retention timestamp so actively polled async jobs are not evicted while a
@@ -569,6 +572,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 ## 12. Change Log
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| 2026-05-22 | 1.0.180 | Sanitized unexpected `src/api/routes/simulation_ws.py` runtime errors before they reach WebSocket clients while preserving traceback-bearing server logs, and added direct regression coverage for the generic error payload contract. |
 | 2026-05-22 | 1.0.179 | Aligned the module-size quality gate with current launcher and shared-chat legacy debt by adding owned, expiring exceptions for `src/launchers/launcher_ui_setup.py` and `src/shared/python/chat/_chat_dock_widget_qt.py`, and raising the active module-size exception cap to 10 while preserving the 1,500-line budget for new untracked modules. |
 | 2026-05-21 | 1.0.176 | Preserved integer-safe quaternion normalization in `src/motion_capture/c3d_simscape_preview.py` by upcasting integer inputs before the optimized `np.einsum` norm accumulation, and added regression coverage for integer quaternion inputs. |
 | 2026-05-21 | 1.0.175 | Optimized `src/shared/python/signal_toolkit/fitting.py` to compute fitting residual sum-of-squares and RMSE via reused `np.vdot` accumulators, avoiding temporary squared arrays across the sinusoid, exponential, linear, polynomial, and custom fitter paths. |

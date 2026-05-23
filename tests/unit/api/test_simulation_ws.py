@@ -20,6 +20,7 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
+import src.api.routes.simulation_ws as simulation_ws_module
 from src.api.routes.simulation_ws import (
     _apply_initial_state,
     _compute_real_time_sleep_delay,
@@ -284,3 +285,73 @@ class TestClientCommandHandling:
             websocket.app.state.simulation_service.stats.speed_factor
             == pytest.approx(3.0)
         )
+
+
+class _RouteAppState:
+    def __init__(self) -> None:
+        self.engine_manager = object()
+
+
+class _RouteApp:
+    def __init__(self) -> None:
+        self.state = _RouteAppState()
+
+
+class _RouteWebSocket:
+    def __init__(self, messages: list[dict[str, Any]]) -> None:
+        self._messages = list(messages)
+        self.app = _RouteApp()
+        self.accepted = False
+        self.closed = False
+        self.sent: list[dict[str, Any]] = []
+
+    async def accept(self) -> None:
+        self.accepted = True
+
+    async def receive_json(self) -> dict[str, Any]:
+        return self._messages.pop(0)
+
+    async def send_json(self, data: dict[str, Any]) -> None:
+        self.sent.append(data)
+
+    async def close(self) -> None:
+        self.closed = True
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_sanitizes_unexpected_errors(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Unexpected runtime failures must be logged with traceback and sanitized."""
+
+    websocket = _RouteWebSocket([{"action": "start", "config": {}}])
+    mock_logger = MagicMock()
+
+    async def fake_load_simulation_engine(*_args: Any, **_kwargs: Any) -> object:
+        return object()
+
+    async def fake_run_simulation_loop(*_args: Any, **_kwargs: Any) -> Any:
+        raise RuntimeError("top secret backend detail")
+
+    monkeypatch.setattr(
+        simulation_ws_module,
+        "_load_simulation_engine",
+        fake_load_simulation_engine,
+    )
+    monkeypatch.setattr(
+        simulation_ws_module,
+        "_run_simulation_loop",
+        fake_run_simulation_loop,
+    )
+    monkeypatch.setattr(simulation_ws_module, "logger", mock_logger)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert websocket.sent == [{"error": "Internal server error"}]
+    assert "top secret backend detail" not in json.dumps(websocket.sent)
+    mock_logger.exception.assert_called_once_with(
+        "Simulation WebSocket failed for engine=%s",
+        "mujoco",
+    )
