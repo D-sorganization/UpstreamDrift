@@ -20,6 +20,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pick-runner:
     name: Resolve fleet runner
@@ -94,6 +98,7 @@ jobs:
     name: Attach binaries to GitHub Release
     needs: [pick-runner, build-binary]
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 10
     if: startsWith(github.ref, 'refs/tags/sidekick-v')
     permissions:
       contents: write
