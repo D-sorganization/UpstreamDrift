@@ -40,8 +40,6 @@ jobs:
           python3 -m pip install build
 
       - name: Build sdist + wheel
-        env:
-          SKIP_UI_BUILD: "1"
         run: python3 -m build --outdir dist/
 
       - name: Record wheel size
