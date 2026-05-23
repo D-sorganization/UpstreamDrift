@@ -7,7 +7,7 @@ Lazily imports :mod:`opensim` and loads a ``.osim`` file via
 ``engine_name="opensim"``.
 
 Method bodies that require non-trivial OpenSim wiring currently raise
-:class:`NotImplementedError` with a TODO tied to follow-up #4963
+:class:`NotImplementedError` with a TODO(#4963) tied to follow-up
 against the EPIC #4895 Pose Studio engine bridge.
 """
 
@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
@@ -59,8 +60,8 @@ class OpenSimKinematicsService:
     engine_name: str = ENGINE_NAME
 
     def __init__(self) -> None:
-        self._model: object | None = None
-        self._state: object | None = None
+        self._model: Any = None
+        self._state: Any = None
         self._pose: CanonicalPose | None = None
 
     def load(self, model_path: Path) -> None:

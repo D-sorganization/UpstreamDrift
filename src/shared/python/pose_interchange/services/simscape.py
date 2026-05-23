@@ -8,7 +8,7 @@ If MATLAB / the MATLAB engine API is unavailable,
 ``engine_name="simscape"``.
 
 Method bodies that drive Simulink directly currently raise
-:class:`NotImplementedError` with a TODO tied to follow-up #4963
+:class:`NotImplementedError` with a TODO(#4963) tied to follow-up
 against the EPIC #4895 Pose Studio engine bridge.
 """
 
@@ -130,7 +130,7 @@ class SimscapeKinematicsService:
         if getattr(self, "_engine", None) is None:
             return transforms
 
-        # TODO: Implement actual transform queries from MATLAB engine
+        # TODO(#4963): Implement actual transform queries from MATLAB engine
         return transforms
 
     def step(self, dt: float) -> None:
