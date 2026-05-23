@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Literal
+from typing import Any, Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -169,7 +169,7 @@ def compute_total_work(sim_out: SimOutput) -> float:
 
 
 def _position_term(sim_out: SimOutput, target: ClubTarget | MultiSourceTarget) -> float:
-    club = getattr(target, "club", target)
+    club: Any = getattr(target, "club", target)
     """``mean_n( ||r_butt_diff||^2 + ||r_ch_diff||^2 )``."""
     db = sim_out.butt - club.butt
     dc = sim_out.clubhead - club.clubhead
@@ -181,14 +181,14 @@ def _position_term(sim_out: SimOutput, target: ClubTarget | MultiSourceTarget) -
 def _orientation_term(
     sim_out: SimOutput, target: ClubTarget | MultiSourceTarget
 ) -> float:
-    club = getattr(target, "club", target)
+    club: Any = getattr(target, "club", target)
     """``mean_n( d_geo(R_sim, R_meas)^2 )`` via quaternion dot."""
     angles = quaternion_geodesic_angles(sim_out.club_quat, club.club_quat)
     return float(np.mean(angles * angles))
 
 
 def _anchor_term(sim_out: SimOutput, target: ClubTarget | MultiSourceTarget) -> float:
-    club = getattr(target, "club", target)
+    club: Any = getattr(target, "club", target)
     """``||r_ch_sim(t_impact) - r_ch_meas(t_impact)||^2``.
 
     MATLAB uses 1-based indexing; ``ClubTarget.impact_idx`` follows that
@@ -380,7 +380,7 @@ def compute_cost(
     if not isinstance(sim_out, SimOutput):
         raise TypeError(f"sim_fn must return SimOutput, got {type(sim_out).__name__}")
 
-    club = getattr(target, "club", target)
+    club: Any = getattr(target, "club", target)
     if club is None:
         raise ValueError("Target must have a club component for compute_cost")
 

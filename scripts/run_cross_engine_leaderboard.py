@@ -222,9 +222,9 @@ def _load_target(trial: str) -> Any:
     if not WIFFLE_XLSX.exists():
         raise FileNotFoundError(f"canonical Wiffle xlsx not found: {WIFFLE_XLSX}")
     # Late import: avoid forcing pandas / openpyxl install on report-only runs.
-    from src.shared.python.motion_matching import load_club_target_excel
+    from src.shared.python.motion_matching import AlignOptions, load_club_target_excel
 
-    return load_club_target_excel(WIFFLE_XLSX, sheet=trial)
+    return load_club_target_excel(WIFFLE_XLSX, sheet=trial, opts=AlignOptions())
 
 
 def _load_fit_driver(engine: str):
