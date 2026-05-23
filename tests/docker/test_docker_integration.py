@@ -219,6 +219,7 @@ class TestContainerEnvironment(unittest.TestCase):
         self.assertIn("pip install --upgrade pip==26.1", content)
         self.assertIn('"PyJWT==2.12.0"', content)
         self.assertIn('"cryptography==46.0.7"', content)
+        self.assertIn("apt-get update && apt-get upgrade -y", content)
         self.assertIn("idna==3.15", requirements_lock)
 
 
