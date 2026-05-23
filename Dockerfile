@@ -24,7 +24,7 @@ RUN pip install --upgrade pip==25.3 && \
 RUN pip install \
     slowapi==0.1.9 \
     "pydantic[email]==2.12.5" \
-    python-multipart==0.0.20 \
+    python-multipart==0.0.27 \
     sqlalchemy==2.0.44 \
     bcrypt==4.3.0 \
     "PyJWT==2.10.1" \

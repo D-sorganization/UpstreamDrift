@@ -6,9 +6,8 @@ Tests Docker container setup, PYTHONPATH configuration, and module accessibility
 """
 
 import subprocess
-import sys
 import unittest
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock
 
 import pytest
 from src.shared.python.data_io.path_utils import get_repo_root, get_src_root
@@ -45,8 +44,12 @@ class TestDockerBuild(unittest.TestCase):
         content = dockerfile_path.read_text()
 
         # Check for required components (multi-stage slim Python runtime)
-        self.assertIn("FROM python:3.12-slim AS builder", content)
-        self.assertIn("FROM python:3.12-slim AS runtime", content)
+        self.assertRegex(
+            content, r"FROM python:3\.12-slim(?:@sha256:[0-9a-f]{64})? AS builder"
+        )
+        self.assertRegex(
+            content, r"FROM python:3\.12-slim(?:@sha256:[0-9a-f]{64})? AS runtime"
+        )
         self.assertIn('PYTHONPATH="/workspace"', content)
         self.assertIn("WORKDIR /workspace", content)
 
@@ -175,13 +178,15 @@ class TestContainerEnvironment(unittest.TestCase):
     def test_conda_environment_setup(self) -> None:
         """Test conda environment configuration."""
         dockerfile_path = get_repo_root() / "Dockerfile"
-        lockfile_path = get_repo_root() / "requirements.lock"
         content = dockerfile_path.read_text()
-        lockfile_content = lockfile_path.read_text()
 
         # Verify base image (multi-stage slim Python build) and package installation
-        self.assertIn("FROM python:3.12-slim AS builder", content)
-        self.assertIn("FROM python:3.12-slim AS runtime", content)
+        self.assertRegex(
+            content, r"FROM python:3\.12-slim(?:@sha256:[0-9a-f]{64})? AS builder"
+        )
+        self.assertRegex(
+            content, r"FROM python:3\.12-slim(?:@sha256:[0-9a-f]{64})? AS runtime"
+        )
         self.assertIn("python -m venv /opt/venv", content)
         self.assertIn(
             "python -m pip install --upgrade --no-cache-dir pip==25.3", content
@@ -202,8 +207,8 @@ class TestContainerEnvironment(unittest.TestCase):
         for package in required_packages:
             self.assertIn(package, content, f"Should install {package}")
 
-        # matplotlib is pulled in through the pinned requirements lockfile.
-        self.assertIn("matplotlib", lockfile_content)
+        # matplotlib is installed directly in the image for shared-code imports.
+        self.assertIn('"matplotlib==3.10.8"', content)
 
 
 class TestModuleAccessibility(unittest.TestCase):

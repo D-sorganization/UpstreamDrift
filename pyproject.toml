@@ -114,7 +114,7 @@ dev = [
     # Required for symbolic math in controls tab
     "sympy>=1.12",
     # Required for multipart form data in API tests
-    "python-multipart>=0.0.26",
+    "python-multipart>=0.0.27",
     # Required for video/image processing tests
     "opencv-python-headless>=4.13.0.92",
     # Required for C3D motion-capture tests (load_club_target_c3d cluster-marker suite)
