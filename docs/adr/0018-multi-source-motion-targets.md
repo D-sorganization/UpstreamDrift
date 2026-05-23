@@ -1,4 +1,6 @@
-# ADR 0006: Multi-Source Motion Targets
+> **Note**: This ADR was formerly numbered ADR-0006 before renaming to resolve a numbering collision.
+
+# ADR 0018: Multi-Source Motion Targets
 
 - Status: Accepted
 - Date: 2026-05-08

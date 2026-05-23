@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import numpy as np
@@ -11,15 +10,12 @@ import pytest
 import torch
 
 from src.shared.python.motion_matching.surrogate.perstep.optimize import (
-    CostConfig,
-    _control_columns,
     _desired_club_targets,
     _desired_quaternions,
     _interpolate_reference,
     _read_state_reference,
     build_argument_parser,
     find_quaternion_columns,
-    parse_args,
     quaternion_orientation_term,
     quaternion_orientation_term_numpy,
     resolve_cost_config,

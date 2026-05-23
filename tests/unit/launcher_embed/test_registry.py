@@ -80,10 +80,14 @@ def test_is_embeddable_false_when_capabilities_disable_embedding() -> None:
 
 
 @pytest.mark.unit
-def test_duplicate_registration_raises() -> None:
-    register_embeddable_tool(_FakeEmbeddableTool("alpha"))
-    with pytest.raises(ValueError, match="already registered"):
-        register_embeddable_tool(_FakeEmbeddableTool("alpha"))
+def test_duplicate_registration_is_idempotent_and_preserves_original() -> None:
+    original = _FakeEmbeddableTool("alpha")
+    duplicate = _FakeEmbeddableTool("alpha")
+
+    register_embeddable_tool(original)
+    register_embeddable_tool(duplicate)
+
+    assert get_embeddable_tool("alpha") is original
 
 
 @pytest.mark.unit

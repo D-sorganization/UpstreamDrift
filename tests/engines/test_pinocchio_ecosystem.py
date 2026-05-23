@@ -10,7 +10,6 @@ Tests cover:
 """
 
 import unittest
-from pathlib import Path
 
 if __name__ == "__main__":
     # Create test suite

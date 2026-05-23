@@ -11,16 +11,14 @@ Tests cover:
 
 import unittest
 from pathlib import Path
-from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
 from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
-from src.shared.python.gui_pkg.gui_utils import get_qapp
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 if PYQT6_AVAILABLE:
-    from PyQt6.QtCore import QPoint
+    pass
 
 
 class TestSharedModuleImports(unittest.TestCase):

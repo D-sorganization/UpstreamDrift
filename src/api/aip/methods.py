@@ -8,12 +8,13 @@ See issue #763
 
 from __future__ import annotations
 
-import logging
 from typing import Any
+
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .dispatcher import MethodRegistry
 
-_logger = logging.getLogger(__name__)
+_logger = get_logger(__name__)
 
 
 def create_registry() -> MethodRegistry:

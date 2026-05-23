@@ -250,4 +250,4 @@ Recommended actions:
 
 - [User Workflow Guide](README.md) — How to run the pipeline
 - [Format Matrix](formats.md) — Mocap format support
-- [ADR 0007](../adr/0007-motion-pipeline-architecture.md) — Architecture decisions
+- [ADR 0019](../adr/0019-motion-pipeline-architecture.md) — Architecture decisions

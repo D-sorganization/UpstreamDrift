@@ -23,6 +23,9 @@ The canonical convention is documented in
 
 from __future__ import annotations
 
+__version__ = "1.0.0"
+SCHEMA_VERSION: str = "v1"
+
 from src.shared.python.pose_interchange.canonical import (
     CONVENTION_TAG,
     CanonicalPose,
@@ -47,12 +50,14 @@ from src.shared.python.pose_interchange.se3 import (
 
 __all__ = [
     "CONVENTION_TAG",
+    "SCHEMA_VERSION",
     "CanonicalPose",
     "CapabilityError",
     "JointSlot",
     "LiveKinematicsService",
     "PoseConventionAdapter",
     "ServiceCapabilities",
+    "__version__",
     "canonical_from_reference_setup",
     "canonical_zero_pose",
     "compose_se3",

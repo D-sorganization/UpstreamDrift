@@ -449,12 +449,13 @@ class OpenAIAdapter(BaseAgentAdapter):
             messages.append(formatted)
 
         # Add current message
-        messages.append(
-            {
-                "role": "user",
-                "content": current_message,
-            }
-        )
+        if current_message:
+            messages.append(
+                {
+                    "role": "user",
+                    "content": current_message,
+                }
+            )
 
         return messages
 

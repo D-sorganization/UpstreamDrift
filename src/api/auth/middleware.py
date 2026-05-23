@@ -4,6 +4,9 @@ from fastapi import Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from src.shared.python.config.environment import is_auth_disabled
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 # Check deployment mode
@@ -38,6 +41,10 @@ class OptionalAuth(HTTPBearer):
     ) -> HTTPAuthorizationCredentials | LocalUser | None:
         if is_local_mode():
             # Local mode: no auth required, return mock user
+            logger.warning(
+                "Auth disabled: granting ADMIN LocalUser "
+                "\u2014 this must NEVER occur in production"
+            )
             return LocalUser()
 
         # Cloud mode: require real authentication

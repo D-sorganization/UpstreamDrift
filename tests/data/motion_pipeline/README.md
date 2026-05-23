@@ -55,5 +55,5 @@ not landed), the test gracefully skips rather than failing.
 
 - [`docs/motion_pipeline/formats.md`](../../../docs/motion_pipeline/formats.md)
   — full format-support matrix
-- [`docs/adr/0007-motion-pipeline-architecture.md`](../../../docs/adr/0007-motion-pipeline-architecture.md)
+- [`docs/adr/0019-motion-pipeline-architecture.md`](../../../docs/adr/0019-motion-pipeline-architecture.md)
   — CIR architecture decisions

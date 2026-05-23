@@ -12,6 +12,7 @@ re-parses files that changed (incremental). Otherwise walks the whole tree
 from __future__ import annotations
 
 import hashlib
+import importlib
 import json
 import logging
 import os
@@ -19,6 +20,7 @@ import subprocess
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
+from types import ModuleType
 
 from . import db as db_mod
 from . import parsers as parsers_mod
@@ -71,10 +73,11 @@ _DEFAULT_SKIP_DIRS = {
 
 def _load_gitignore(repo_root: Path):
     """Return a callable ``is_ignored(rel_path) -> bool``."""
+    pathspec_mod: ModuleType | None
     try:
-        import pathspec  # type: ignore[import-not-found]
+        pathspec_mod = importlib.import_module("pathspec")
     except Exception:  # noqa: BLE001
-        pathspec = None
+        pathspec_mod = None
 
     patterns: list[str] = []
     gi = repo_root / ".gitignore"
@@ -83,8 +86,8 @@ def _load_gitignore(repo_root: Path):
     # Always exclude .codemap directory.
     patterns.append(".codemap/")
 
-    if pathspec is not None:
-        spec = pathspec.PathSpec.from_lines("gitwildmatch", patterns)
+    if pathspec_mod is not None:
+        spec = pathspec_mod.PathSpec.from_lines("gitwildmatch", patterns)
 
         def _ignored(rel: str) -> bool:
             return spec.match_file(rel)

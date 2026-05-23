@@ -82,6 +82,9 @@ def ui_setup(qapp):
 
         _install_sidekick_sidebar = _RealLauncher._install_sidekick_sidebar
         _apply_sidekick_splitter_sizes = _RealLauncher._apply_sidekick_splitter_sizes
+        _get_sidekick_module = _RealLauncher._get_sidekick_module
+        _create_sidekick_sidebar_widget = _RealLauncher._create_sidekick_sidebar_widget
+        _embed_sidekick_sidebar_widget = _RealLauncher._embed_sidekick_sidebar_widget
 
         def _show_preferences(self, *_a, **_k) -> None: ...
         def _toggle_layout_mode_from_menu(self, *_a, **_k) -> None: ...

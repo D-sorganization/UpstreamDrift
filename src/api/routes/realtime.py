@@ -13,15 +13,15 @@ Subscriber bookkeeping is in-memory and protected by an :class:`asyncio.Lock`.
 from __future__ import annotations
 
 import asyncio
-import logging
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.realtime.protocol import validate_channel
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 router = APIRouter(tags=["realtime"])
 

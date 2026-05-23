@@ -236,7 +236,14 @@ jobs:
               echo "No changed source Python files; skipping baseline mypy check."
               exit 0
             fi
-            mypy "${src_py_files[@]}" --config-file pyproject.toml
+            mapfile -d '' mypy_files < <(
+              python3 scripts/ci/filter_mypy_inputs.py "${src_py_files[@]}"
+            )
+            if [ "${#mypy_files[@]}" -eq 0 ]; then
+              echo "Changed source files are covered by the mypy exclusion budget; skipping baseline mypy check."
+              exit 0
+            fi
+            mypy "${mypy_files[@]}" --config-file pyproject.toml
           else
             mypy src --config-file pyproject.toml
           fi

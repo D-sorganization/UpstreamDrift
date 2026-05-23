@@ -472,12 +472,17 @@ class ThemeManager(QObject):
 
         cleaned: dict[str, dict[str, str]] = {}
         for name, colors in data.items():
-            if not isinstance(name, str) or not isinstance(colors, dict):
+            if (
+                not isinstance(name, str)
+                or not name.strip()
+                or not isinstance(colors, dict)
+            ):
                 continue
+            cleaned_name = name.strip()
             try:
                 filtered = {k: v for k, v in colors.items() if k in THEME_COLOR_KEYS}
                 theme_def = self._validate_custom_theme_colors(filtered)
-                cleaned[name] = theme_def
+                cleaned[cleaned_name] = theme_def
             except ValueError:
                 logger.debug("Discarded invalid custom theme '%s'", name)
 

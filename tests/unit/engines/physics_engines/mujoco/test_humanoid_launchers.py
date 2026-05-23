@@ -2,10 +2,8 @@
 
 import sys
 from unittest.mock import MagicMock, patch
-from pathlib import Path
 import numpy as np
 
-from src.shared.python.config.configuration_manager import ConfigurationManager
 
 from src.engines.physics_engines.mujoco.python.humanoid_launcher import (
     RemoteRecorder,

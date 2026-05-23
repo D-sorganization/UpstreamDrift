@@ -1,4 +1,3 @@
-import pytest
 from PyQt6.QtGui import QColor
 from PyQt6.QtCore import QEvent
 from src.launchers.animated_components import AnimatedButton

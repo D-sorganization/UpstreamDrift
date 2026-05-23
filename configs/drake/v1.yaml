@@ -1,0 +1,24 @@
+# Drake Biomechanical Engine Configuration v1
+simulation:
+  time_step: 0.001 # s
+  duration: 2.0 # s
+  integrator: "runge_kutta3" # runge_kutta3, runge_kutta2, semi_implicit_euler
+  realtime_rate: 0.0 # 0.0 means as fast as possible
+
+solver:
+  tolerance: 1.0e-4
+  max_iterations: 100
+  contact_solver: "tamara" # tamara, contact_solver
+
+model:
+  path: "shared/models/drake/golf_swing.urdf"
+  weld_base: true
+
+contacts:
+  friction_coefficient: 0.5
+  dissipation: 0.1 # contact dissipation (s/m)
+  stiffness: 1.0e5 # contact stiffness (N/m)
+
+output:
+  rate_hz: 100.0
+  export_format: "csv"

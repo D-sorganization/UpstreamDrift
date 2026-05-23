@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.180                                            |
-| **Last Spec Update**    | 2026-05-22                                         |
+| **Spec Version**        | 1.0.177                                            |
+| **Last Spec Update**    | 2026-05-21                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,8 +70,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
-- **2026-05-22** - Documented the API auth-cache overflow contract so cache saturation now evicts only the oldest lookup entries instead of flushing unrelated authenticated sessions, while preserving deterministic SHA-256 lookup keys for cross-worker stability.
-- **2026-05-22** - Documented added unit regression coverage for the theme API model/router contracts so the shared theme settings surface stays exercised without broadening the implementation scope of the underlying runtime code.
+- **2026-05-21** - Hardened error-handling discipline (issue #5911, ADR-0016): added `src/shared/python/core/process_safety.py` with `managed_popen`/`safe_gather`/`narrow_catch` helpers (21 tests), removed `BLE001`/`F841`/`F401` from ruff `extend-ignore`, grandfathered pre-existing instances via `# noqa`, and wired a ratcheting CI check (`scripts/ci/check_error_handling_ratchet.py`, 10 tests) into `ci-standard.yml` to prevent regression.
 - **2026-05-21** - Added C3D viewer animation export through the canonical body-target video pipeline and stabilized self-hosted CI SciPy pinning for the core and shared-contract lanes.
 - **2026-05-21** - Preserved integer-safe quaternion normalization in the C3D Simscape preview path while keeping the optimized `einsum`-based norm computation.
 - **2026-05-21** - Optimized `signal_toolkit` fitting R-squared and RMSE hot paths to reuse `np.vdot`-based sum-of-squares accumulators without temporary square arrays.
@@ -240,9 +239,6 @@ Engine tier metadata is declared in each in-scope engine package with
   existing dataset. Disk-backed dataset lookup rejects ambiguous duplicate
   filenames with a conflict response so callers do not receive an arbitrary
   match.
-- API authentication caches use deterministic SHA-256 lookup tokens instead of
-  process-randomized `hash()` values, and cache overflow evicts the oldest
-  entries one at a time rather than flushing unrelated cached authentications.
 
 **GUI Interface (PyQt6)**:
 
@@ -573,6 +569,8 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | 2026-05-22 | 1.0.179 | Aligned the module-size quality gate with current launcher and shared-chat legacy debt by adding owned, expiring exceptions for `src/launchers/launcher_ui_setup.py` and `src/shared/python/chat/_chat_dock_widget_qt.py`, and raising the active module-size exception cap to 10 while preserving the 1,500-line budget for new untracked modules. |
+| 2026-05-22 | 1.0.177 | Optimized constraint residual penalization in Drake compute_cost_drake via np.sum(arr*arr) |
+| 2026-05-21 | 1.0.177 | Hardened error-handling discipline (issue #5911, ADR-0016): added `src/shared/python/core/process_safety.py` with `managed_popen`/`safe_gather`/`narrow_catch` resource-safety helpers and `AllTasksFailedError` (21 TDD tests in `tests/unit/core/test_process_safety.py`); removed `BLE001`, `F841`, `F401` from ruff `extend-ignore` in `pyproject.toml`; grandfathered 346 BLE001 / 22 F841 / 719 F401 pre-existing instances via file-local `# noqa`; added `scripts/ci/check_error_handling_ratchet.py` (10 TDD tests) and `scripts/config/error_handling_baseline.json` to prevent regression; wired the ratchet into `ci-standard.yml`; migrated exemplar sites (`about_dialog._safe_version`, `environment.is_running_in_docker`, `motion_pipeline.orchestrator._run_inverse_kinematics`); fixed 25 pre-existing mypy errors (`ChatModelInfo` re-export, `datetime.UTC` 3.10 compat, `_handle_error` NoReturn, `SummaryMessage`/`Message` covariance); CLAUDE.md gained an Error-handling section. |
 | 2026-05-21 | 1.0.176 | Preserved integer-safe quaternion normalization in `src/motion_capture/c3d_simscape_preview.py` by upcasting integer inputs before the optimized `np.einsum` norm accumulation, and added regression coverage for integer quaternion inputs. |
 | 2026-05-21 | 1.0.175 | Optimized `src/shared/python/signal_toolkit/fitting.py` to compute fitting residual sum-of-squares and RMSE via reused `np.vdot` accumulators, avoiding temporary squared arrays across the sinusoid, exponential, linear, polynomial, and custom fitter paths. |
 | 2026-05-15 | 1.0.173 | Integrated Sidekick across the launcher: registered the AI chat panel as an EmbeddableTool tile (`src/tools/sidekick/`), bound React `ChatPanel` to `var(--sidekick-color-*)` design tokens with a Python/TypeScript parity test, added a redacted ring-buffer chat-context bridge that injects recent app state into the assistant prompt, registered a `summarize_simulation_run` agentic analytics tool, and surfaced Tools-sidebar availability through `LauncherDiagnostics`. Refs #5460 #5461 #5462 #5463 #5464 #5465. |

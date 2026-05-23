@@ -1,4 +1,6 @@
-# ADR-0007: Motion Pipeline Architecture
+> **Note**: This ADR was formerly numbered ADR-0007 before renaming to resolve a numbering collision.
+
+# ADR-0019: Motion Pipeline Architecture
 
 - Status: Proposed
 - Date: 2026-05-08

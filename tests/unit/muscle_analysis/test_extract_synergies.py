@@ -9,9 +9,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 from src.shared.python.biomechanics.muscle_analysis import (
-    SKLEARN_AVAILABLE,
     MuscleSynergyAnalyzer,
-    SynergyResult,
 )
 from src.shared.python.core.contracts import PreconditionError
 from src.shared.python.engine_core.engine_availability import skip_if_unavailable

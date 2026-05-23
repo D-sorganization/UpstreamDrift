@@ -42,13 +42,17 @@ class DialogsManager:
         self.launcher = launcher
 
     def __getattr__(self, name):
-        return getattr(self.launcher, name)
+        launcher = self.__dict__.get("launcher")
+        if launcher is None or launcher is self:
+            raise AttributeError(name)
+        return getattr(launcher, name)
 
     def __setattr__(self, name, value):
+        launcher = self.__dict__.get("launcher")
         if name == "launcher" or hasattr(type(self), name) or name in self.__dict__:
             super().__setattr__(name, value)
-        elif hasattr(self.launcher, name):
-            setattr(self.launcher, name, value)
+        elif launcher is not None and launcher is not self and hasattr(launcher, name):
+            setattr(launcher, name, value)
         else:
             super().__setattr__(name, value)
 
@@ -595,6 +599,9 @@ class DialogsManager:
         else:
             self.lbl_execution_mode.setText("Runtime: Native Windows")
             self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_WARNING)
+
+
+LauncherDialogsMixin = DialogsManager
 
 
 class ThemedModalDialog(QDialog):

@@ -16,7 +16,7 @@ from __future__ import annotations
 import warnings
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from src.shared.python.body_part_viz import (
     SCHEMA_VERSION as _V2_SCHEMA_VERSION,
@@ -156,7 +156,7 @@ def spec_v1_to_v2(spec: SegmentSpec) -> SegmentVizSpec:
     theme = ShapeTheme(group=spec.group)
     return SegmentVizSpec(
         binding=binding,
-        shape_kind=shape_kind,
+        shape_kind=cast(Any, shape_kind),
         shape_params=shape_params,
         fitter_kind="between_two",
         theme=theme,

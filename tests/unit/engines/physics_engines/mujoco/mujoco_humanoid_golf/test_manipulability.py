@@ -6,7 +6,6 @@ import numpy as np
 import pytest
 
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.manipulability import (
-    EllipsoidParams,
     ManipulabilityAnalyzer,
     ManipulabilityResult,
 )

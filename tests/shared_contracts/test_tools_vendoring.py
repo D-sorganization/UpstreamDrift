@@ -6,7 +6,3 @@ from the local UpstreamDrift `src/shared/python` or the vendored
 """
 
 from __future__ import annotations
-
-from pathlib import Path
-
-import pytest

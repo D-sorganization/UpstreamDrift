@@ -1,6 +1,6 @@
 """Model registry for managing physics models and special applications."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from pathlib import Path
 
 import yaml
@@ -50,7 +50,13 @@ class ModelRegistry:
             with open(full_config_path) as f:
                 data = yaml.safe_load(f)
 
-            self.models.extend([ModelSpec(**item) for item in data.get("models", [])])
+            allowed_fields = {f.name for f in fields(ModelSpec)}
+            loaded_models = []
+            for item in data.get("models", []):
+                filtered_item = {k: v for k, v in item.items() if k in allowed_fields}
+                loaded_models.append(ModelSpec(**filtered_item))
+
+            self.models.extend(loaded_models)
 
             self._loaded = True
             logger.info(f"Loaded {len(self.models)} models from registry")

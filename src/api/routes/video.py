@@ -37,6 +37,32 @@ if TYPE_CHECKING:
 router = APIRouter()
 logger = get_module_logger(__name__)
 
+_MAX_VIDEO_BYTES = 500 * 1024 * 1024  # 500 MB
+_ALLOWED_VIDEO_MAGIC = [
+    b"\x00\x00\x00\x18ftyp",  # MP4
+    b"\x00\x00\x00\x20ftyp",  # MP4 variant
+    b"\x1a\x45\xdf\xa3",  # WebM/MKV
+    b"RIFF",  # AVI
+]
+
+
+async def _validate_video_magic(file: UploadFile) -> None:
+    """Validate uploaded file has a recognised video magic-byte signature.
+
+    Reads the first 32 bytes and seeks back to position 0 so that the
+    caller can continue to stream the file body.
+
+    Args:
+        file: The upload to inspect.
+
+    Raises:
+        HTTPException: 415 if the magic bytes do not match any allowed format.
+    """
+    header = await file.read(32)
+    await file.seek(0)
+    if not any(header.startswith(magic) for magic in _ALLOWED_VIDEO_MAGIC):
+        raise HTTPException(status_code=415, detail="Unsupported video format")
+
 
 def _load_video_pipeline_classes() -> tuple[type, type]:
     """Lazily import the video pose pipeline classes.
@@ -129,6 +155,8 @@ async def analyze_video(
 
     if not file.content_type or not file.content_type.startswith("video/"):
         raise HTTPException(status_code=400, detail="File must be a video")
+
+    await _validate_video_magic(file)
 
     temp_path: Path | None = None
     try:
@@ -240,12 +268,14 @@ async def analyze_video_async(
     if not file.content_type or not file.content_type.startswith("video/"):
         raise HTTPException(status_code=400, detail="File must be a video")
 
-    # Upload size validation (100MB max for video)
-    if file.size and file.size > 100 * 1024 * 1024:
+    # Upload size validation (500MB max for video)
+    if file.size and file.size > _MAX_VIDEO_BYTES:
         raise HTTPException(
             status_code=413,
-            detail="Video file too large. Maximum size is 100MB.",
+            detail=f"Video file too large. Maximum size is {_MAX_VIDEO_BYTES // (1024 * 1024)}MB.",
         )
+
+    await _validate_video_magic(file)
 
     task_id = str(uuid.uuid4())
 

@@ -5,14 +5,13 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
 import src.shared.python.realtime as facade_module
 from src.shared.python.realtime import (
     CHANNEL_REGISTRY,
-    ChannelInfo,
     Subscription,
     publish,
     register_channel,

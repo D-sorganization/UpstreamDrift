@@ -29,7 +29,7 @@ Depends on every other child issue (lands last).
 
 ## Acceptance criteria
 
-- [ ] ADR with the next sequential number; mirrors `docs/adr/0006-multi-source-motion-targets.md` style.
+- [ ] ADR with the next sequential number; mirrors `docs/adr/0018-multi-source-motion-targets.md` style.
 - [ ] User-guide pages renderable as Markdown.
 - [ ] API reference generated.
 - [ ] AGENTS.md updated to point at `body_part_viz` as the canonical shape stack.

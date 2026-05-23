@@ -261,7 +261,7 @@ def _orthonormal_basis(normal: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     # Pick the world axis least aligned with the normal as our seed.
     abs_n = np.abs(normal)
     seed_axis = int(np.argmin(abs_n))
-    seed = np.zeros(3, dtype=np.float64)
+    seed: np.ndarray = np.zeros(3, dtype=np.float64)
     seed[seed_axis] = 1.0
 
     u = seed - float(np.dot(seed, normal)) * normal

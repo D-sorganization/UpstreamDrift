@@ -34,22 +34,22 @@ While the codebase is functional and well-organized at the module level, there a
 
 | File                                               | Function                           | Lines | Issue                                                                                           |
 | -------------------------------------------------- | ---------------------------------- | ----- | ----------------------------------------------------------------------------------------------- |
-| `src/launchers/upstream_drift_launcher.py`                   | `_setup_top_bar()`                 | ~180  | Creates entire toolbar with 20+ widgets; mixes widget creation, styling, and signal connections |
-| `src/launchers/upstream_drift_launcher.py`                   | `__init__()`                       | ~112  | God constructor - handles icon loading, registry setup, UI init, Docker checks, timers          |
-| `src/launchers/upstream_drift_launcher.py`                   | `launch_simulation()`              | ~120  | Routes to 5+ different launch paths; mixes routing logic with execution                         |
-| `src/launchers/upstream_drift_launcher.py`                   | `_center_window()` (lines 676-731) | ~56   | Excessive defensive programming for mock handling                                               |
+| `src/launchers/upstream_drift_launcher.py`         | `_setup_top_bar()`                 | ~180  | Creates entire toolbar with 20+ widgets; mixes widget creation, styling, and signal connections |
+| `src/launchers/upstream_drift_launcher.py`         | `__init__()`                       | ~112  | God constructor - handles icon loading, registry setup, UI init, Docker checks, timers          |
+| `src/launchers/upstream_drift_launcher.py`         | `launch_simulation()`              | ~120  | Routes to 5+ different launch paths; mixes routing logic with execution                         |
+| `src/launchers/upstream_drift_launcher.py`         | `_center_window()` (lines 676-731) | ~56   | Excessive defensive programming for mock handling                                               |
 | `src/tools/model_generation/editor/text_editor.py` | `_validate_urdf()`                 | ~250  | Validates links, joints, relationships, limits all in one function                              |
 | `src/shared/python/statistical_analysis.py`        | `compute_swing_profile()`          | ~122  | Computes 5 different scores in one function                                                     |
 | `src/shared/python/statistical_analysis.py`        | `estimate_lyapunov_exponent()`     | ~125  | Combines phase space reconstruction, neighbor finding, divergence tracking                      |
 
 #### Moderate Violations (50-100 lines)
 
-| File                                      | Function              | Lines | Issue                                                                     |
-| ----------------------------------------- | --------------------- | ----- | ------------------------------------------------------------------------- |
-| `src/launchers/upstream_drift_launcher.py`          | `_load_layout()`      | ~65   | Mixes file I/O, JSON parsing, validation, UI restoration                  |
-| `src/launchers/upstream_drift_launcher.py`          | `closeEvent()`        | ~60   | Handles confirmation, timer cleanup, thread cleanup, process termination  |
-| `src/launchers/upstream_drift_launcher.py`          | `open_diagnostics()`  | ~78   | Builds runtime state, creates dialog, handles button response             |
-| `src/shared/python/ai/workflow_engine.py` | `execute_next_step()` | ~117  | Condition check, tool execution, validation, state update, error handling |
+| File                                       | Function              | Lines | Issue                                                                     |
+| ------------------------------------------ | --------------------- | ----- | ------------------------------------------------------------------------- |
+| `src/launchers/upstream_drift_launcher.py` | `_load_layout()`      | ~65   | Mixes file I/O, JSON parsing, validation, UI restoration                  |
+| `src/launchers/upstream_drift_launcher.py` | `closeEvent()`        | ~60   | Handles confirmation, timer cleanup, thread cleanup, process termination  |
+| `src/launchers/upstream_drift_launcher.py` | `open_diagnostics()`  | ~78   | Builds runtime state, creates dialog, handles button response             |
+| `src/shared/python/ai/workflow_engine.py`  | `execute_next_step()` | ~117  | Condition check, tool execution, validation, state update, error handling |
 
 ### 2. Functions with Multiple Responsibilities
 
@@ -167,11 +167,11 @@ def __init__(self, data: SwingData):
 
 ### 4. Deep Nesting (>3 levels)
 
-| File                      | Function                 | Max Depth | Issue                                                   |
-| ------------------------- | ------------------------ | --------- | ------------------------------------------------------- |
-| `text_editor.py`          | `_validate_urdf()`       | 6+        | Nested loops and conditionals for joint/link validation |
-| `statistical_analysis.py` | `compute_rqa_metrics()`  | 5         | Nested loops for diagonal/vertical line extraction      |
-| `upstream_drift_launcher.py`        | `_on_wsl_mode_changed()` | 4         | Try-except within if-else with nested conditions        |
+| File                         | Function                 | Max Depth | Issue                                                   |
+| ---------------------------- | ------------------------ | --------- | ------------------------------------------------------- |
+| `text_editor.py`             | `_validate_urdf()`       | 6+        | Nested loops and conditionals for joint/link validation |
+| `statistical_analysis.py`    | `compute_rqa_metrics()`  | 5         | Nested loops for diagonal/vertical line extraction      |
+| `upstream_drift_launcher.py` | `_on_wsl_mode_changed()` | 4         | Try-except within if-else with nested conditions        |
 
 **Example - `_validate_urdf()` nesting:**
 
@@ -190,12 +190,12 @@ for joint_elem in root.findall("joint"):       # Level 1
 
 ### 5. Hidden Side Effects
 
-| File                      | Function                    | Side Effects                                                                                             |
-| ------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `upstream_drift_launcher.py`        | `select_model()`            | Updates `selected_model`, changes card styling, updates context help, modifies launch button             |
-| `upstream_drift_launcher.py`        | `_on_docker_mode_changed()` | Modifies WSL checkbox, shows dialogs, updates execution status, shows toasts, updates launch button      |
-| `upstream_drift_launcher.py`        | `_apply_model_selection()`  | Modifies model_order, syncs cards, rebuilds grid, saves layout, updates selection, updates launch button |
-| `statistical_analysis.py` | `compute_work_metrics()`    | Writes to `_work_metrics_cache`                                                                          |
+| File                         | Function                    | Side Effects                                                                                             |
+| ---------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `upstream_drift_launcher.py` | `select_model()`            | Updates `selected_model`, changes card styling, updates context help, modifies launch button             |
+| `upstream_drift_launcher.py` | `_on_docker_mode_changed()` | Modifies WSL checkbox, shows dialogs, updates execution status, shows toasts, updates launch button      |
+| `upstream_drift_launcher.py` | `_apply_model_selection()`  | Modifies model_order, syncs cards, rebuilds grid, saves layout, updates selection, updates launch button |
+| `statistical_analysis.py`    | `compute_work_metrics()`    | Writes to `_work_metrics_cache`                                                                          |
 
 ### 6. Good Examples (Well-Designed Functions)
 

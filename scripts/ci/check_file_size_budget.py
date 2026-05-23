@@ -48,6 +48,20 @@ def _changed_python_files(repo_root: Path, base_ref: str) -> list[Path]:
     ]
 
 
+def _all_python_files(repo_root: Path) -> list[Path]:
+    """Return all tracked Python files in the repository.
+
+    Used by ``--all-files`` mode to catch pre-existing oversize files that
+    would otherwise never appear in a PR diff.
+    """
+    output = _run_git(["ls-files", "--", "*.py"], repo_root)
+    return [
+        repo_root / path
+        for path in output.splitlines()
+        if path.endswith(".py") and (repo_root / path).exists()
+    ]
+
+
 def _exception_is_active(exc: dict) -> bool:
     expires_on = exc.get("expires_on")
     if not expires_on:
@@ -128,6 +142,15 @@ def main() -> int:  # noqa: C901
         default="origin/main",
         help="Git base ref used for changed-file detection.",
     )
+    parser.add_argument(
+        "--all-files",
+        action="store_true",
+        default=False,
+        help=(
+            "Scan every tracked Python file, not just changed ones. "
+            "Use this for periodic full-repo audits and to catch pre-existing oversize files."
+        ),
+    )
     args = parser.parse_args()
 
     repo_root = _repo_root()
@@ -137,7 +160,13 @@ def main() -> int:  # noqa: C901
     active_exceptions, invalid_exceptions = _collect_active_exceptions(config)
 
     try:
-        changed_files = _changed_python_files(repo_root, args.base_ref)
+        if args.all_files:
+            changed_files = _all_python_files(repo_root)
+            logger.info(
+                "Mode: scanning all tracked Python files (%d total)", len(changed_files)
+            )
+        else:
+            changed_files = _changed_python_files(repo_root, args.base_ref)
     except RuntimeError:
         changed_files = _changed_python_files(repo_root, "HEAD~1")
 

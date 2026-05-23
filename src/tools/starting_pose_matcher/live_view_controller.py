@@ -274,8 +274,8 @@ class BodyLibraryShapesLayer(_LayerBase):
                 continue
             try:
                 shape = library.get(name)
-                fitted = fitter.fit(shape, binding, markers_xyz)
-                handle = renderer.add_shape(shape, fitted, theme)
+                fitted = fitter.fit(shape, binding, markers_xyz)  # type: ignore[arg-type]
+                handle = renderer.add_shape(shape, fitted, theme)  # type: ignore[arg-type]
             except Exception:  # noqa: BLE001
                 logger.debug(
                     "library shape %r could not be fitted/added", name, exc_info=True
@@ -340,8 +340,12 @@ def _default_body_segments_safe(marker_names: tuple[str, ...]) -> list[tuple[int
         name_to_idx = {n: i for i, n in enumerate(marker_names)}
         pairs: list[tuple[int, int]] = []
         for seg in default_body_segments(marker_names):
-            ia = name_to_idx.get(getattr(seg, "a", None))
-            ib = name_to_idx.get(getattr(seg, "b", None))
+            a_name = getattr(seg, "a", None)
+            b_name = getattr(seg, "b", None)
+            if not isinstance(a_name, str) or not isinstance(b_name, str):
+                continue
+            ia = name_to_idx.get(a_name)
+            ib = name_to_idx.get(b_name)
             if ia is not None and ib is not None:
                 pairs.append((ia, ib))
         if pairs:

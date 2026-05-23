@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 from unittest.mock import patch
 
 from src.tools.pose_studio.__main__ import main

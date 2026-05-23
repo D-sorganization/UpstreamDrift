@@ -46,6 +46,11 @@ class FitResult:
     success: bool = True
     message: str = ""
 
+    @property
+    def solver_status(self) -> str:
+        """Get the solver status string ("success" or "failure")."""
+        return "success" if self.success else "failure"
+
     def get_function_string(self) -> str:
         """Get a string representation of the fitted function."""
         return f"Fitted function with R^2={self.r_squared:.4f}"
@@ -126,6 +131,8 @@ class SinusoidFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0:
+            raise ValueError("signal must not be empty")
         t = signal.time - signal.time[0]  # Shift to start at 0
         y = signal.values
 
@@ -151,7 +158,7 @@ class SinusoidFitter:
             success = True
             message = "Fit converged successfully"
         except (RuntimeError, ValueError, TypeError) as e:
-            popt = np.array(initial_guess)
+            popt = np.asarray(initial_guess)
             pcov = None
             success = False
             message = f"Fit failed: {e}"
@@ -284,6 +291,8 @@ class ExponentialFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0:
+            raise ValueError("signal must not be empty")
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -314,7 +323,7 @@ class ExponentialFitter:
             success = True
             message = "Fit converged"
         except (RuntimeError, ValueError, TypeError) as e:
-            popt = np.array(initial_guess)
+            popt = np.asarray(initial_guess)
             pcov = None
             success = False
             message = f"Fit failed: {e}"
@@ -363,6 +372,8 @@ class ExponentialFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0:
+            raise ValueError("signal must not be empty")
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -389,7 +400,7 @@ class ExponentialFitter:
             success = True
             message = "Fit converged"
         except (RuntimeError, ValueError, TypeError) as e:
-            popt = np.array(initial_guess)
+            popt = np.asarray(initial_guess)
             pcov = None
             success = False
             message = f"Fit failed: {e}"
@@ -440,6 +451,8 @@ class LinearFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0:
+            raise ValueError("signal must not be empty")
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -496,6 +509,8 @@ class PolynomialFitter:
         """
         if order is None:
             raise ValueError("order must be provided")
+        if order < 0:
+            raise ValueError("order must be non-negative")
         self.order = order
 
     def fit(
@@ -514,10 +529,14 @@ class PolynomialFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0:
+            raise ValueError("signal must not be empty")
         t = signal.time - signal.time[0]
         y = signal.values
 
         order = order if order is not None else self.order
+        if order < 0:
+            raise ValueError("order must be non-negative")
 
         # Need at least order+1 points
         if len(t) < order + 1:
@@ -618,6 +637,8 @@ class CustomFunctionFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0:
+            raise ValueError("signal must not be empty")
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -641,7 +662,7 @@ class CustomFunctionFitter:
             success = True
             message = "Fit converged"
         except (RuntimeError, ValueError, TypeError) as e:
-            popt = np.array(initial_guess)
+            popt = np.asarray(initial_guess)
             pcov = None
             success = False
             message = f"Fit failed: {e}"

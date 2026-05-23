@@ -24,6 +24,7 @@ dependencies = [
     "fastapi>=0.126.0",
     "uvicorn[standard]>=0.30.0",
     "pydantic>=2.5.0",
+    "pydantic-settings>=2.0.0",
     "httpx>=0.27.0",
 
     # Default physics engine (lightweight, cross-platform)
@@ -56,8 +57,8 @@ dependencies = [
 rust = ["upstream-physics>=0.1.0", "upstream-mocap-preproc>=0.1.0", "upstream-mocap-io>=0.1.0"]
 mocap-preproc = ["upstream-mocap-preproc>=0.1.0"]
 mocap-io = ["upstream-mocap-io>=0.1.0"]
-drake = ["drake>=1.22.0"]
-pinocchio = ["pin>=2.6.0", "meshcat>=0.3.0"]
+drake = ["drake>=1.22.0,<2.0.0"]  # Apache 2.0
+pinocchio = ["pin>=2.6.0,<3.0.0", "meshcat>=0.3.0"]  # BSD 2-Clause
 chrono = ["pychrono>=8.0"]
 
 all-engines = ["upstream-drift[drake,pinocchio]"]
@@ -71,6 +72,11 @@ pose = ["mediapipe>=0.10.33", "opencv-python>=4.8.0", "imageio[ffmpeg]>=2.31.0"]
 # Biomechanics engines
 biomechanics = ["myosuite>=2.0.0", "opensim>=4.4.0", "gymnasium>=0.29.0"]
 experimental = ["myosuite>=2.0.0", "opensim>=4.4.0", "gymnasium>=0.29.0"]
+
+# PyTorch (deep learning / RL backbone)
+torch = [
+    "torch>=2.0.0",  # BSD 3-Clause
+]
 
 # Reinforcement learning (for MyoSuite muscle training)
 rl = ["stable-baselines3>=2.0.0", "gymnasium>=0.29.0"]
@@ -162,7 +168,7 @@ body-part-viz-gl = [
 ]
 
 # Everything
-all = ["upstream-drift[rust,all-engines,analysis,pose,biomechanics,rl,urdf,dev]"]
+all = ["upstream-drift[rust,all-engines,analysis,pose,biomechanics,rl,urdf,dev,torch]"]
 
 [project.scripts]
 upstream-drift = "launch_golf_suite:main"
@@ -258,6 +264,8 @@ max-complexity = 10
 "src/shared/python/codemap/cli.py" = ["T201"]
 "src/shared/python/codemap/watcher.py" = ["T201"]
 "src/shared/python/codemap/mcp_server.py" = ["T201"]
+# Colab/Jupyter notebooks: print() is intentional cell display output (REPL contract).
+"src/shared/python/sidekick/process_calculators/psa_package/psa_analysis_colab.ipynb" = ["T201"]
 
 
 [tool.mypy]
@@ -408,6 +416,7 @@ markers = [
     "motion_pipeline: tests for the motion capture pipeline (sources, IK, matching, orchestrator)",
     "makehuman: tests that exercise the MakeHuman mesh backend (skip without MakeHuman installed)",
     "smplx: tests that exercise the SMPL-X mesh backend (skip without SMPL-X model files)",
+    "parity: Parity tests: verify consistency between Python and Rust implementations",
 ]
 filterwarnings = [
     # Suppress hppfcl→coal rename noise (third-party, not actionable in this repo)

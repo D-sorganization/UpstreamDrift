@@ -1,6 +1,6 @@
-# Stage 1: Builder — install all Python dependencies into an isolated venv
+﻿# Stage 1: Builder â€” install all Python dependencies into an isolated venv
 # Base image pinned by digest for reproducible builds
-FROM python:3.12-slim@sha256:4386a385d81dba9f72ed72a6fe4237755d7f5440c84b417650f38336bbc43117 AS builder
+FROM python:3.12-slim@sha256:090ba77e2958f6af52a5341f788b50b032dd4ca28377d2893dcf1ecbdfdfe203 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PIP_NO_CACHE_DIR=1
@@ -45,7 +45,7 @@ RUN pip install \
     "sympy==1.14.0" \
     "defusedxml==0.7.1"
 
-# Pinocchio via pip (binary wheels available since 2024 — no conda needed)
+# Pinocchio via pip (binary wheels available since 2024 â€” no conda needed)
 # Pinned versions for reproducible builds
 RUN pip install \
     pin==3.3.1 \
@@ -58,9 +58,9 @@ RUN pip install \
     "trimesh==4.9.0"
 
 
-# Stage 2: Runtime — slim production image for the API server
+# Stage 2: Runtime â€” slim production image for the API server
 # Base image pinned by digest for reproducible builds
-FROM python:3.12-slim@sha256:4386a385d81dba9f72ed72a6fe4237755d7f5440c84b417650f38336bbc43117 AS runtime
+FROM python:3.12-slim@sha256:090ba77e2958f6af52a5341f788b50b032dd4ca28377d2893dcf1ecbdfdfe203 AS runtime
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -69,7 +69,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN python -m pip install --upgrade --no-cache-dir pip==25.3
 
 # MuJoCo headless rendering + health check
-# X11/XCB/PyQt6 libs removed — not needed in a headless API server
+# X11/XCB/PyQt6 libs removed â€” not needed in a headless API server
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
     libosmesa6 \
@@ -88,7 +88,7 @@ ARG GROUP_ID=1000
 RUN groupadd -g ${GROUP_ID} ${USER_NAME} && \
     useradd -m -u ${USER_ID} -g ${GROUP_ID} -s /bin/bash ${USER_NAME}
 
-# Copy only the venv — no conda overhead
+# Copy only the venv â€” no conda overhead
 COPY --from=builder /opt/venv /opt/venv
 
 # /workspace is the project root; "from src.xxx" imports resolve here
@@ -114,7 +114,7 @@ EXPOSE 8001
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8001/health || exit 1
 
-# Default command — starts the FastAPI server on port 8001.
+# Default command â€” starts the FastAPI server on port 8001.
 # Override with `docker run ... /bin/bash` for an interactive shell.
 #
 # Hardening flags (salvaged from stale PR #2723, issue #2786):
@@ -136,7 +136,7 @@ CMD ["python3", "-m", "uvicorn", "src.api.server:app", \
      "--access-log"]
 
 
-# Stage 3: Training — adds PyTorch + RL stack for GPU training workflows
+# Stage 3: Training â€” adds PyTorch + RL stack for GPU training workflows
 FROM runtime AS training
 
 USER root

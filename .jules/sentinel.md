@@ -101,6 +101,7 @@
 **Vulnerability:** Found uses of `np.load` without explicitly passing `allow_pickle=False` when loading `.npy` and `.npz` files (e.g., in `src/shared/python/physics/_topography_io.py`, `src/shared/python/pose_interchange/pose_io.py`, `src/engines/physics_engines/putting_green/python/_green_loader.py`, `src/engines/physics_engines/putting_green/python/_surface_io.py`).
 **Learning:** `np.load` in older numpy versions and by default can allow loading pickled python objects which is prone to arbitrary code execution attacks. Always explicitly pass `allow_pickle=False` unless absolutely necessary and loading trusted data.
 **Prevention:** Explicitly pass `allow_pickle=False` when using `np.load` or `np.savez`.
+
 ## 2026-05-20 - Insecure XML Parsing
 
 **Vulnerability:** Found uses of `xml.etree.ElementTree` to parse potentially untrusted XML/URDF/MJCF/SDF files, which is vulnerable to XML External Entity (XXE) and billion laughs attacks.
