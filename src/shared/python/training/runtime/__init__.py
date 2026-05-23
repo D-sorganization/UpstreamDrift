@@ -19,6 +19,7 @@ Public types (see individual modules for full docs):
 
 from __future__ import annotations
 
+from .adapters import PyTorchCVAERunner
 from .driver import (
     Driver,
     DriverError,
@@ -47,6 +48,7 @@ __all__ = [
     "JobHandleStatus",
     "JsonlFileProgressSink",
     "NullProgressSink",
+    "PyTorchCVAERunner",
     "RealtimeChannelProgressSink",
     "RunnerRegistry",
     "SubprocessDriver",
