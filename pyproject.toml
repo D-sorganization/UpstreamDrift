@@ -193,6 +193,7 @@ include = [
     "src/**/*",
     "ui/dist/**/*",  # Bundled web UI (built by build_hooks.py)
     "launch_golf_suite.py",
+    "build_hooks.py",
 ]
 exclude = [
     "src/**/__pycache__/**",
