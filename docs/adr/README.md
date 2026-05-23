@@ -21,6 +21,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0007](0007-motion-pipeline-architecture.md)       | Motion Pipeline Architecture (CIR)                              | Proposed | 2026-05-08 |
 | [0012](0012-canonical-pose-interchange.md)         | Canonical Pose Interchange                                      | Accepted | 2026-05-09 |
 | [0013](0013-launcher-composability.md)             | Launcher Composability — Embeddable-tool contract and IPC layer | Accepted | 2026-05-09 |
+| [0017](0017-sidekick-agentic-action-layer.md)      | Sidekick agentic action layer                                   | Accepted | 2026-05-22 |
 
 ## ADR Backlog
 

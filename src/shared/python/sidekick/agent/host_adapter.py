@@ -1,0 +1,247 @@
+"""Host action adapter — lets Sidekick request scoped actions from its host.
+
+Epic #5967 / sub-issue #5973 (S4).
+
+Why a port: the dependency direction is fixed at host → sidekick.agent,
+never the reverse. Sidekick must not ``import src.launchers.*`` (or any
+other host) because that creates a cycle and forces sidekick to know
+about every embedding application. Instead, hosts implement
+:class:`HostActionPort` and inject it into :class:`HostAdapter`; the
+adapter publishes each capability as a regular ``SidekickActionHandler``
+action.
+
+Design contracts:
+
+* **DbC.** :class:`HostCapability` validates its id namespace
+  (``host.<host>.<verb>``) and JSON-Schema shape at construction.
+  :class:`HostInvocationResult` keeps the same ``ok``/``error`` invariant
+  as :class:`ActionResult` so the translation is one-line.
+* **LOD.** The adapter calls ``port.invoke(...)`` only — never reaches
+  into a host's internal widgets or registries.
+* **DRY.** Confirmation gating happens once here; adapters do not each
+  re-implement it. The "_confirmed" parameter convention matches what
+  S8's chat chip will inject.
+* **Headless-safe.** Zero PyQt6 imports.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
+from typing import Any, Protocol, runtime_checkable
+
+from .action_service import ActionDescriptor, ActionResult
+
+__all__ = [
+    "HostActionPort",
+    "HostAdapter",
+    "HostCapability",
+    "HostInvocationResult",
+]
+
+
+# ---------------------------------------------------------------------------
+# Capability + result dataclasses
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True, slots=True)
+class HostCapability:
+    """One thing a host can do, published to Sidekick.
+
+    Attributes:
+        capability_id: Fully qualified id of the form
+            ``"host.<host_namespace>.<verb>"``.
+        summary: One-sentence human description.
+        params_schema: JSON Schema (subset) for the params mapping.
+        requires_confirmation: When ``True``, the action is exposed as
+            ``side_effects="destructive"`` and refuses to fire without an
+            explicit ``params["_confirmed"] is True``.
+    """
+
+    capability_id: str
+    summary: str
+    params_schema: Mapping[str, Any]
+    requires_confirmation: bool = False
+
+    def __post_init__(self) -> None:
+        if not self.capability_id.startswith("host."):
+            raise ValueError(
+                "capability_id must use the 'host.' namespace; got "
+                f"{self.capability_id!r}"
+            )
+        parts = self.capability_id.split(".")
+        if len(parts) < 3:
+            raise ValueError(
+                "capability_id must be 'host.<host>.<verb>'; got "
+                f"{self.capability_id!r}"
+            )
+        if not self.summary:
+            raise ValueError("summary must be non-empty")
+        if not isinstance(self.params_schema, Mapping):
+            raise ValueError("params_schema must be a Mapping")
+        if "type" not in self.params_schema:
+            raise ValueError(
+                "params_schema must be JSON-Schema-shaped (missing 'type')"
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class HostInvocationResult:
+    """Host-side outcome. Mirrors :class:`ActionResult` so the adapter
+    can translate without reshaping."""
+
+    ok: bool
+    value: Any = None
+    error: str | None = None
+    metadata: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if self.ok and self.error is not None:
+            raise ValueError("ok=True forbids setting error")
+        if not self.ok and not self.error:
+            raise ValueError("ok=False requires a non-empty error message")
+
+
+# ---------------------------------------------------------------------------
+# Port Protocol
+# ---------------------------------------------------------------------------
+
+
+@runtime_checkable
+class HostActionPort(Protocol):
+    """Implemented by each embedding application.
+
+    The launcher's port (a follow-up) lives under
+    ``src.launchers.sidekick_host_port`` per the epic body — the
+    dependency goes from launcher to sidekick.agent, never the reverse.
+    """
+
+    host_id: str
+
+    def list_capabilities(self) -> Sequence[HostCapability]:
+        """Return every capability this host currently exposes."""
+        ...
+
+    def invoke(
+        self, capability_id: str, params: Mapping[str, Any]
+    ) -> HostInvocationResult:
+        """Carry out one capability and return its result."""
+        ...
+
+
+# ---------------------------------------------------------------------------
+# Adapter
+# ---------------------------------------------------------------------------
+
+
+_CONFIRMED_KEY = "_confirmed"
+
+
+class HostAdapter:
+    """``SidekickActionHandler`` for the ``host`` namespace.
+
+    The adapter functions in three modes:
+
+    1. **No port registered.** ``describe()`` returns ``()`` and any
+       ``invoke()`` returns an error. This is the graceful-absence case
+       — Sidekick keeps working in headless or unfamiliar contexts.
+    2. **Port registered.** Each :class:`HostCapability` is mirrored as
+       an :class:`ActionDescriptor`. Side effects classification:
+       ``destructive`` if the capability requires confirmation,
+       ``write`` otherwise.
+    3. **Port replaced.** :meth:`set_port` swaps the underlying port at
+       runtime — useful when an embedding host is restarted.
+    """
+
+    namespace: str = "host"
+
+    def __init__(self, *, port: HostActionPort | None = None) -> None:
+        self._port: HostActionPort | None = None
+        self._descriptors: tuple[ActionDescriptor, ...] = ()
+        self._capabilities: dict[str, HostCapability] = {}
+        if port is not None:
+            self.set_port(port)
+
+    # ---- Lifecycle -------------------------------------------------------
+
+    def set_port(self, port: HostActionPort | None) -> None:
+        """Install (or clear) the host port. Descriptors are rebuilt."""
+        if port is None:
+            self._port = None
+            self._descriptors = ()
+            self._capabilities = {}
+            return
+        if not isinstance(port, HostActionPort):
+            raise TypeError(
+                f"port must satisfy HostActionPort, got {type(port).__name__}"
+            )
+        caps = tuple(port.list_capabilities())
+        self._port = port
+        self._capabilities = {c.capability_id: c for c in caps}
+        self._descriptors = tuple(_to_descriptor(c) for c in caps)
+
+    # ---- SidekickActionHandler ------------------------------------------
+
+    def describe(self) -> Sequence[ActionDescriptor]:
+        return self._descriptors
+
+    def invoke(self, action_id: str, params: Mapping[str, Any]) -> ActionResult:
+        if self._port is None:
+            return ActionResult(
+                ok=False,
+                error="no host port registered; host actions unavailable",
+            )
+        capability = self._capabilities.get(action_id)
+        if capability is None:
+            return ActionResult(
+                ok=False,
+                error=f"unknown host capability: {action_id!r}",
+            )
+        confirmed = bool(params.get(_CONFIRMED_KEY, False))
+        if capability.requires_confirmation and not confirmed:
+            return ActionResult(
+                ok=False,
+                error=(
+                    f"{action_id!r} requires confirmation; pass {_CONFIRMED_KEY}=True"
+                ),
+            )
+        # Strip the confirmation flag before forwarding to the host.
+        forwarded = {k: v for k, v in params.items() if k != _CONFIRMED_KEY}
+        outcome = self._port.invoke(action_id, forwarded)
+        return _translate(action_id, outcome)
+
+
+# ---------------------------------------------------------------------------
+# Internals
+# ---------------------------------------------------------------------------
+
+
+def _to_descriptor(capability: HostCapability) -> ActionDescriptor:
+    """Turn a :class:`HostCapability` into the matching descriptor."""
+    side_effects = "destructive" if capability.requires_confirmation else "write"
+    return ActionDescriptor(
+        action_id=capability.capability_id,
+        summary=capability.summary,
+        params_schema=capability.params_schema,
+        side_effects=side_effects,
+        reversible=False,
+    )
+
+
+def _translate(action_id: str, outcome: object) -> ActionResult:
+    """Map a port's :class:`HostInvocationResult` onto an
+    :class:`ActionResult`. Anything else is a protocol violation."""
+    if not isinstance(outcome, HostInvocationResult):
+        return ActionResult(
+            ok=False,
+            error=(
+                f"host port returned {type(outcome).__name__} for "
+                f"{action_id!r}, expected HostInvocationResult"
+            ),
+        )
+    if outcome.ok:
+        return ActionResult(
+            ok=True, value=outcome.value, metadata=dict(outcome.metadata)
+        )
+    return ActionResult(ok=False, error=outcome.error or "host invocation failed")

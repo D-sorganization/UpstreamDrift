@@ -1,0 +1,108 @@
+"""Sidekick agent layer (epic #5967).
+
+Houses the self-aware, audited action surface that lets Sidekick drive its
+own subtabs and host applications. See :mod:`sidekick.agent.feature_catalog`
+for the self-knowledge index and :mod:`sidekick.agent.action_service` for
+the dispatch service.
+
+Both layers are headless-safe — no PyQt6 imports at module scope.
+"""
+
+from __future__ import annotations
+
+from .access_policy import PolicyDecision, SidekickActionPolicy
+from .action_audit import JsonlActionAudit, MemoryActionAudit, redact_secrets
+from .chat_surface import (
+    ActionChipModel,
+    ActionChipState,
+    ChatActionEnvelope,
+    build_chip,
+    serialize_envelope,
+)
+from .action_service import (
+    ActionDescriptor,
+    ActionResult,
+    SidekickActionHandler,
+    SidekickActionService,
+)
+from .feature_catalog import (
+    FeatureEntry,
+    FeatureKind,
+    build_feature_catalog,
+    lookup_feature,
+    search_features,
+)
+from .host_adapter import (
+    HostActionPort,
+    HostAdapter,
+    HostCapability,
+    HostInvocationResult,
+)
+from .planner import (
+    PlannedStep,
+    PlannerError,
+    SidekickAgentPlanner,
+    ToolCall,
+    build_sidekick_system_prompt,
+)
+from .subtab_adapter import (
+    CalculatorRun,
+    StateProfile,
+    SubtabActionPort,
+    SubtabAdapter,
+    WorkspaceSnapshot,
+)
+from .workflow_bridge import (
+    PendingUserDecision,
+    SidekickWorkflow,
+    WorkflowOutcome,
+    WorkflowStep,
+    WorkflowStepResult,
+    WorkflowStepStatus,
+    action_step,
+    run_sidekick_workflow,
+)
+
+__all__ = [
+    "ActionChipModel",
+    "ActionChipState",
+    "ActionDescriptor",
+    "ActionResult",
+    "CalculatorRun",
+    "ChatActionEnvelope",
+    "FeatureEntry",
+    "FeatureKind",
+    "HostActionPort",
+    "HostAdapter",
+    "HostCapability",
+    "HostInvocationResult",
+    "JsonlActionAudit",
+    "MemoryActionAudit",
+    "PendingUserDecision",
+    "PlannedStep",
+    "PlannerError",
+    "PolicyDecision",
+    "SidekickActionHandler",
+    "SidekickActionPolicy",
+    "SidekickActionService",
+    "SidekickAgentPlanner",
+    "SidekickWorkflow",
+    "StateProfile",
+    "SubtabActionPort",
+    "SubtabAdapter",
+    "ToolCall",
+    "WorkflowOutcome",
+    "WorkflowStep",
+    "WorkflowStepResult",
+    "WorkflowStepStatus",
+    "WorkspaceSnapshot",
+    "action_step",
+    "build_chip",
+    "build_feature_catalog",
+    "build_sidekick_system_prompt",
+    "lookup_feature",
+    "redact_secrets",
+    "run_sidekick_workflow",
+    "search_features",
+    "serialize_envelope",
+]
