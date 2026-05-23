@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
 from pathlib import Path
-from typing import Self
+from typing_extensions import Self
 
 from .config import TrainingConfig
 from .errors import TrainingConfigError
@@ -179,7 +179,7 @@ class TrainingJob:
             raise TrainingConfigError(
                 "error_message must be None for non-FAILED transitions"
             )
-        return replace(self, **kwargs)
+        return replace(self, **kwargs)  # type: ignore[arg-type]
 
 
 @dataclass(frozen=True, slots=True)

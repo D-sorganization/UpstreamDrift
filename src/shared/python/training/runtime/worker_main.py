@@ -332,7 +332,7 @@ def main(argv: list[str] | None = None) -> int:
     # framed JSON line as soon as the worker writes it. Already
     # configured or a stream type without reconfigure → no-op.
     with contextlib.suppress(AttributeError, OSError):
-        sys.stdout.reconfigure(line_buffering=True)  # type: ignore[attr-defined]
+        sys.stdout.reconfigure(line_buffering=True)  # type: ignore[attr-defined, union-attr]
     return run_worker(sys.stdin, sys.stdout)
 
 
