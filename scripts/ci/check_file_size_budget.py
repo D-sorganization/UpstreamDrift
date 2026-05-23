@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Enforce line-count budgets for changed Python files with owned exceptions."""
+"""Enforce line-count budgets for tracked Python files with owned exceptions."""
 
 from __future__ import annotations
 
@@ -46,6 +46,24 @@ def _changed_python_files(repo_root: Path, base_ref: str) -> list[Path]:
         for path in output.splitlines()
         if path.endswith(".py") and (repo_root / path).exists()
     ]
+
+
+def _tracked_python_files(repo_root: Path) -> list[Path]:
+    output = _run_git(["ls-files", "--", "*.py"], repo_root)
+    return [
+        repo_root / path
+        for path in output.splitlines()
+        if path and (repo_root / path).exists()
+    ]
+
+
+def _fallback_python_files(repo_root: Path) -> list[Path]:
+    files: list[Path] = []
+    for path in repo_root.rglob("*.py"):
+        if any(part.startswith(".") for part in path.relative_to(repo_root).parts):
+            continue
+        files.append(path)
+    return files
 
 
 def _exception_is_active(exc: dict) -> bool:
@@ -126,29 +144,30 @@ def main() -> int:  # noqa: C901
     parser.add_argument(
         "--base-ref",
         default="origin/main",
-        help="Git base ref used for changed-file detection.",
+        help="Legacy option retained for compatibility; tracked-file scanning ignores it.",
     )
     args = parser.parse_args()
 
     repo_root = _repo_root()
     config = _load_config(repo_root, args.config_path)
     budget = int(config.get("max_lines", 1200))
+    max_exceptions = int(config.get("max_exceptions", 8))
 
     active_exceptions, invalid_exceptions = _collect_active_exceptions(config)
 
     try:
-        changed_files = _changed_python_files(repo_root, args.base_ref)
+        python_files = _tracked_python_files(repo_root)
     except RuntimeError:
-        changed_files = _changed_python_files(repo_root, "HEAD~1")
+        python_files = _fallback_python_files(repo_root)
 
-    if len(config.get("exceptions", [])) > 5:
+    if len(config.get("exceptions", [])) > max_exceptions:
         invalid_exceptions.append(
-            f"Too many exceptions: {len(config.get('exceptions', []))} (max 5)"
+            f"Too many exceptions: {len(config.get('exceptions', []))} (max {max_exceptions})"
         )
 
     violations = list(invalid_exceptions)
     watchlist: list[str] = []
-    for file_path in changed_files:
+    for file_path in python_files:
         rel = str(file_path.relative_to(repo_root)).replace("\\", "/")
         if rel.startswith("tests/"):
             continue
@@ -178,7 +197,7 @@ def main() -> int:  # noqa: C901
         )
         return 1
 
-    logger.info("OK: Changed files are within line-count budget.")
+    logger.info("OK: Tracked files are within line-count budget.")
     return 0
 
 
