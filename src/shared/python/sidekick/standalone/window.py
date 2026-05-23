@@ -123,13 +123,13 @@ class StandaloneSidekickWindow(QMainWindow):
 
     # ---- Qt overrides ----------------------------------------------------
 
-    def showEvent(self, event: QShowEvent) -> None:
+    def showEvent(self, event: QShowEvent | None) -> None:
         super().showEvent(event)
         if not self._layout_applied:
             self._apply_ratio()
             self._layout_applied = True
 
-    def closeEvent(self, event: QCloseEvent) -> None:
+    def closeEvent(self, event: QCloseEvent | None) -> None:
         self._flush_session()
         super().closeEvent(event)
 
@@ -185,14 +185,17 @@ class StandaloneSidekickWindow(QMainWindow):
 
     def _install_menu_bar(self) -> None:
         bar = self.menuBar()
+        assert bar is not None
 
         file_menu = bar.addMenu("&File")
+        assert file_menu is not None
         file_menu.addAction(_action("Save profile", self, self._on_save_profile))
         file_menu.addAction(_action("Load profile", self, self._on_load_profile))
         file_menu.addSeparator()
         file_menu.addAction(_action("Quit", self, self.close))
 
         view_menu = bar.addMenu("&View")
+        assert view_menu is not None
         view_menu.addAction(
             _action(
                 "Chat-first layout", self, lambda: self._switch_profile("chat-first")
@@ -207,6 +210,7 @@ class StandaloneSidekickWindow(QMainWindow):
         view_menu.addAction(_action("Toggle sidebar", self, self._toggle_sidebar))
 
         help_menu = bar.addMenu("&Help")
+        assert help_menu is not None
         help_menu.addAction(_action("About Sidekick", self, self._on_about))
 
     def _flush_session(self) -> None:
