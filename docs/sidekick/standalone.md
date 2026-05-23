@@ -1,7 +1,7 @@
 # Sidekick Standalone
 
 Sidekick can run as a self-contained desktop application — no UpstreamDrift
-launcher required.  It ships as both a pip-installable console script and as
+launcher required. It ships as both a pip-installable console script and as
 a one-file binary for macOS, Linux, and Windows.
 
 See [ADR-0018](../adr/0018-standalone-sidekick.md) for design rationale.
@@ -22,10 +22,10 @@ sidekick --help
 Download the binary for your platform from the latest
 [`sidekick-v*` GitHub Release](https://github.com/D-sorganization/UpstreamDrift/releases).
 
-| Platform | Binary |
-|----------|--------|
-| macOS    | `sidekick` |
-| Linux    | `sidekick` |
+| Platform | Binary         |
+| -------- | -------------- |
+| macOS    | `sidekick`     |
+| Linux    | `sidekick`     |
 | Windows  | `sidekick.exe` |
 
 ```bash
@@ -43,9 +43,9 @@ sidekick.exe --help
 
 Sidekick opens in one of two profiles, switchable in Preferences (⌘,):
 
-| Profile | Default focus | Use when … |
-|---------|--------------|------------|
-| `chat-first` | AI assistant panel fills the window | You want conversational access to the calculators |
+| Profile      | Default focus                          | Use when …                                        |
+| ------------ | -------------------------------------- | ------------------------------------------------- |
+| `chat-first` | AI assistant panel fills the window    | You want conversational access to the calculators |
 | `calc-first` | Calculator sidebar expanded by default | You want direct access to the process calculators |
 
 Set your preferred profile on first run (the onboarding dialog appears
@@ -74,10 +74,10 @@ sidekick run --calculator wgs_reactor --inputs inputs.json --output results.json
 ```json
 {
   "temperature_c": 350.0,
-  "co_fraction": 0.30,
-  "h2o_fraction": 0.40,
-  "co2_fraction": 0.10,
-  "h2_fraction": 0.20,
+  "co_fraction": 0.3,
+  "h2o_fraction": 0.4,
+  "co2_fraction": 0.1,
+  "h2_fraction": 0.2,
   "pressure_bar": 20.0
 }
 ```
@@ -89,7 +89,7 @@ sidekick run --calculator wgs_reactor --inputs inputs.json --output results.json
   "temperature_c": 350.0,
   "equilibrium_constant": 12.34,
   "extent_of_reaction": 0.18,
-  "co_conversion_fraction": 0.60,
+  "co_conversion_fraction": 0.6,
   "equilibrium_composition": {
     "co": 0.12,
     "h2o": 0.22,
@@ -118,11 +118,11 @@ Commands:
 
 Preferences are stored in your platform config directory:
 
-| Platform | Path |
-|----------|------|
+| Platform | Path                                                      |
+| -------- | --------------------------------------------------------- |
 | macOS    | `~/Library/Application Support/sidekick/preferences.json` |
-| Linux    | `~/.config/sidekick/preferences.json` |
-| Windows  | `%APPDATA%\sidekick\preferences.json` |
+| Linux    | `~/.config/sidekick/preferences.json`                     |
+| Windows  | `%APPDATA%\sidekick\preferences.json`                     |
 
 The `onboarded` sentinel file (same directory) prevents the first-run wizard
 from re-appearing after you complete it.
