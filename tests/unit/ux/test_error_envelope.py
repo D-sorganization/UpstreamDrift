@@ -109,6 +109,38 @@ def test_user_facing_error_to_dict_includes_all_user_visible_fields():
         assert key in d
 
 
+def test_user_facing_error_from_dict_parses_string_boolean_fields():
+    err = UserFacingError.from_dict(
+        {
+            "code": "invalid_timestep",
+            "title": "Timestep is out of range",
+            "what_happened": "Timestep 0 s is invalid.",
+            "why": "Integrator cannot make progress.",
+            "how_to_fix": "Pick a larger timestep.",
+            "field_id": "simulation.timestep",
+            "docs_url": None,
+            "retriable": "false",
+        }
+    )
+    assert err.retriable is False
+
+
+def test_user_facing_error_from_dict_rejects_non_boolean_like_retriable():
+    with pytest.raises(UserFacingErrorError, match="retriable must be"):
+        UserFacingError.from_dict(
+            {
+                "code": "invalid_timestep",
+                "title": "Timestep is out of range",
+                "what_happened": "Timestep 0 s is invalid.",
+                "why": "Integrator cannot make progress.",
+                "how_to_fix": "Pick a larger timestep.",
+                "field_id": "simulation.timestep",
+                "docs_url": None,
+                "retriable": "sometimes",
+            }
+        )
+
+
 def test_user_facing_error_error_is_value_error_subclass():
     assert issubclass(UserFacingErrorError, ValueError)
 

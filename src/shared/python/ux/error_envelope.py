@@ -101,7 +101,10 @@ class UserFacingError:
                 how_to_fix=str(payload["how_to_fix"]),
                 field_id=_optional_str(payload.get("field_id")),
                 docs_url=_optional_str(payload.get("docs_url")),
-                retriable=bool(payload.get("retriable", False)),
+                retriable=_coerce_bool(
+                    payload.get("retriable", False),
+                    field_name="retriable",
+                ),
             )
         except KeyError as exc:
             raise UserFacingErrorError(
@@ -113,6 +116,22 @@ def _optional_str(value: Any) -> str | None:
     if value is None:
         return None
     return str(value)
+
+
+def _coerce_bool(value: Any, *, field_name: str) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in {"true", "1", "yes", "on"}:
+            return True
+        if normalized in {"false", "0", "no", "off"}:
+            return False
+    if isinstance(value, int) and value in {0, 1}:
+        return bool(value)
+    raise UserFacingErrorError(
+        f"{field_name} must be a boolean or boolean-like string, got {value!r}"
+    )
 
 
 def _validate(err: UserFacingError) -> None:
