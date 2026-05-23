@@ -366,11 +366,23 @@ Shared infrastructure:
   (`summarize_simulation_run`). The system prompt in
   [`src/shared/python/ai/system_prompts.py`](src/shared/python/ai/system_prompts.py)
   advertises registered tools to the assistant.
+- **Agent action layer (epic [#5967](https://github.com/D-sorganization/UpstreamDrift/issues/5967), ADR-0017):**
+  [`src/shared/python/sidekick/agent/`](src/shared/python/sidekick/agent/)
+  — the single audited choke-point for every agentic action. New
+  Sidekick actions register through `SidekickActionService`; the
+  planner translates LLM tool calls into validated `PlannedStep`s; an
+  access policy gates writes and destructive actions; an audit sink
+  records every call. Host integrations (launcher, Pose Studio, ...)
+  implement `HostActionPort` — sidekick never imports them. See
+  [`docs/sidekick/agent.md`](docs/sidekick/agent.md) for the worked
+  example of adding a new action.
 
 When extending Sidekick — adding a tool the assistant can call,
 extending the chat context bridge, or restyling the panel — reuse these
 surfaces rather than forking new color/spacing constants or new event
-buses.
+buses. For anything the assistant should *do* (not just compute),
+register a new `ActionDescriptor` via `SidekickActionService` rather
+than wiring a one-off `ai.tools.*` module.
 
 ### Rust kernels
 

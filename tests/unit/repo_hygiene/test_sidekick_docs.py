@@ -158,3 +158,70 @@ class TestSidekickReadme:
         """README.md must describe how to embed Sidekick as a launcher tile."""
         content = self._read()
         assert "embed" in content.lower() or "_embed_adapter" in content
+
+
+# ---------------------------------------------------------------------------
+# Agent layer docs (epic #5967 / S9 / #5978)
+# ---------------------------------------------------------------------------
+
+
+class TestAgentLayerDocs:
+    """Documentation for the Sidekick agent layer must exist and stay
+    in sync with the code surface it documents."""
+
+    def test_adr_exists(self) -> None:
+        path = _REPO_ROOT / "docs" / "adr" / "0017-sidekick-agentic-action-layer.md"
+        assert path.exists(), "ADR-0017 must exist; see epic #5967 / S9"
+
+    def test_adr_status_is_accepted(self) -> None:
+        path = _REPO_ROOT / "docs" / "adr" / "0017-sidekick-agentic-action-layer.md"
+        assert "Status: Accepted" in path.read_text(encoding="utf-8")
+
+    def test_adr_links_every_sub_issue(self) -> None:
+        """ADR-0017 must cross-link every sub-issue of epic #5967."""
+        path = _REPO_ROOT / "docs" / "adr" / "0017-sidekick-agentic-action-layer.md"
+        content = path.read_text(encoding="utf-8")
+        for issue in (
+            "5967",
+            "5970",
+            "5971",
+            "5972",
+            "5973",
+            "5974",
+            "5975",
+            "5976",
+            "5977",
+            "5978",
+        ):
+            assert f"#{issue}" in content, f"ADR-0017 must reference #{issue}"
+
+    def test_developer_guide_exists(self) -> None:
+        path = _REPO_ROOT / "docs" / "sidekick" / "agent.md"
+        assert path.exists(), "docs/sidekick/agent.md must exist"
+
+    def test_developer_guide_references_every_public_module(self) -> None:
+        """The guide must name every public module under sidekick/agent/.
+
+        New modules should land in the guide in the same PR they're
+        introduced — that's the drift-prevention invariant for S9.
+        """
+        path = _REPO_ROOT / "docs" / "sidekick" / "agent.md"
+        content = path.read_text(encoding="utf-8")
+        for module in (
+            "feature_catalog",
+            "action_service",
+            "subtab_adapter",
+            "host_adapter",
+            "planner",
+            "action_audit",
+            "access_policy",
+            "workflow_bridge",
+            "chat_surface",
+        ):
+            assert module in content, f"docs/sidekick/agent.md must reference {module}"
+
+    def test_agents_md_mentions_agent_layer(self) -> None:
+        """AGENTS.md must point new contributors at the agent layer."""
+        path = _REPO_ROOT / "AGENTS.md"
+        content = path.read_text(encoding="utf-8")
+        assert "sidekick/agent" in content or "SidekickActionService" in content
