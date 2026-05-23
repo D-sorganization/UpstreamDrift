@@ -13,8 +13,13 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
-import trimesh
-from trimesh.bounds import oriented_bounds
+try:
+    import trimesh
+    from trimesh.bounds import oriented_bounds
+except ImportError:
+    trimesh = None
+    oriented_bounds = None
+
 
 __all__ = ["LoadedMesh", "load_mesh"]
 
@@ -52,7 +57,9 @@ class LoadedMesh:
         self.obb_centroid = obb_centroid
 
 
-def _extract_first_mesh(loaded: object) -> trimesh.Trimesh:
+def _extract_first_mesh(loaded: object):
+    if trimesh is None:
+        raise ImportError('trimesh is required for mesh IO.')
     """Return the first triangle mesh from a trimesh load result.
 
     GLB files load as a Scene; we accept the first mesh node only.
@@ -98,6 +105,8 @@ def load_mesh(path: Path | str) -> LoadedMesh:
     if not p.exists():
         raise FileNotFoundError(f"mesh file not found: {p}")
 
+    if trimesh is None:
+        raise ImportError('trimesh is required for mesh IO.')
     try:
         loaded = trimesh.load(str(p), force=None, process=False)
     except Exception as exc:  # noqa: BLE001 — trimesh raises diverse types
