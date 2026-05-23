@@ -429,8 +429,8 @@ def _effort_metrics(frame: pd.DataFrame) -> dict[str, Any]:
     dt = _time_step_seconds(time).reshape(-1, 1)
     diff_dt = max(float(np.median(dt)), EFFORT_SCALE_EPS)
     derivatives = np.diff(values, axis=0) / diff_dt if len(values) > 1 else values * 0.0
-    smoothness = float(np.sum(derivatives**2) * diff_dt)
-    l2_effort = float(np.sum(values**2 * dt))
+    smoothness = float(np.vdot(derivatives, derivatives) * diff_dt)
+    l2_effort = float(np.vdot(values, values * dt))
     l1_impulse = float(np.sum(np.abs(values) * dt))
 
     return {

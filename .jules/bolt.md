@@ -67,3 +67,7 @@
 ## 2025-05-19 - Optimize R-squared and RMSE calculation using vdot
 **Learning:** `np.sum(residuals**2)` allocates a temporary array in memory of the same size as `residuals` because of the element-wise squaring `**2`. For simple calculations like Sum of Squared Residuals (SS_res) and Total Sum of Squares (SS_tot) over 1D arrays, this overhead is noticeable in fitting toolkits.
 **Action:** Replace `np.sum(x**2)` with `np.vdot(x, x)` to calculate sum of squares without allocating intermediate temporary memory for the squares, speeding up statistical fitting implementations. Additionally, avoid repeatedly recalculating mean squares by reusing the `ss_res` result (e.g. `rmse = np.sqrt(ss_res / x.size)`).
+
+## 2026-05-19 - Optimize mechanical work metrics
+**Learning:** Computations like `np.sum(derivatives**2)` and `np.sum(values**2 * dt)` or `np.sum(torque**2, axis=1)` involve element-wise operations that allocate intermediate memory (`**2` and multiplication). This can be slow for long arrays of time series data.
+**Action:** Replace `np.sum(x**2)` with `np.vdot(x, x)`, `np.sum(x**2 * dt)` with `np.vdot(x, x * dt)`. For multi-dimensional axis summation like `np.sum(torque**2, axis=1)`, replace it with `np.einsum('ij,ij->i', torque, torque)`. Similarly, replace `np.sum(np.abs(torque), axis=1)` with `np.einsum('ij->i', np.abs(torque))`.
