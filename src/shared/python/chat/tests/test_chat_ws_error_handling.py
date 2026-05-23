@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+import logging
 from unittest.mock import Mock
 
 import pytest
@@ -13,7 +14,6 @@ import pytest
 # form requires the Tools repo root on sys.path which is not guaranteed during
 # pytest-xdist worker collection (Tools issue #2965 / fleet CI).
 from ai.exceptions import AIConnectionError
-from ai.types import AgentChunk
 from chat.router_factory import create_chat_router as build_chat_router
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -33,55 +33,49 @@ def mock_chat_service() -> Mock:
 def client(mock_chat_service: Mock) -> TestClient:
     app = FastAPI()
     app.state.chat_service = mock_chat_service
-    router = build_chat_router(mock_chat_service)
+    router = build_chat_router()
     app.include_router(router)
     return TestClient(app)
 
 
-@pytest.mark.skip(
-    reason=(
-        "Test written against an older chat router API. "
-        "`build_chat_router(chat_service)` no longer exists; "
-        "`create_chat_router(prefix='', authorize_fn=None)` is the current "
-        "signature and it reads chat_service from app.state, not a constructor "
-        "argument. Needs rewrite to match the new injection model."
-    )
-)
 def test_websocket_propagates_connection_error_without_disconnecting(
-    client: TestClient, mock_chat_service: Mock
+    client: TestClient, mock_chat_service: Mock, caplog: pytest.LogCaptureFixture
 ) -> None:
-    """Verify AIConnectionError surfaces as a client error without disconnecting."""
+    """Verify provider failures are sanitized without dropping the socket."""
 
     # Mock stream_response to raise an exception
-    async def mock_stream(*args, **kwargs) -> AsyncIterator[AgentChunk]:
-        yield AgentChunk(content="Thinking...", is_final=False, index=0)
+    async def mock_stream(*args, **kwargs) -> AsyncIterator[str]:
+        yield "Thinking..."
         raise AIConnectionError("Cannot connect to Ollama", provider="ollama")
 
     mock_chat_service.stream_response.side_effect = mock_stream
 
-    with client.websocket_connect("/ws/chat/test-session") as websocket:
-        # Initial connect message
+    with (
+        caplog.at_level(logging.ERROR),
+        client.websocket_connect("/ws/chat/test-session") as websocket,
+    ):
         data = websocket.receive_json()
         assert data["type"] == "session_info"
         assert data["session_id"] == "test-session"
 
-        # Send a message
         websocket.send_json(
             {"action": "send", "message": "Hello", "app_context": "tests"}
         )
 
-        # Should get chunk
         data = websocket.receive_json()
         assert data["type"] == "chunk"
         assert data["content"] == "Thinking..."
 
-        # Should get error message, NOT a disconnect exception
         data = websocket.receive_json()
-        assert data["type"] == "error"
-        assert "Cannot connect to Ollama" in data["detail"]
+        assert data == {"type": "error", "detail": "Internal server error"}
 
-        # Verify websocket is still open by sending history request
-        websocket.send_json({"action": "history"})
         mock_chat_service.get_session_history.return_value = []
+        websocket.send_json({"action": "history"})
         data = websocket.receive_json()
         assert data["type"] == "history"
+
+    assert any(
+        record.message == "Error during streaming response"
+        and record.exc_info is not None
+        for record in caplog.records
+    )

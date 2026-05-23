@@ -50,6 +50,9 @@ from .terminal_runtime import TerminalRuntimeError
 
 logger = logging.getLogger(__name__)
 
+_INTERNAL_ERROR_DETAIL = "Internal server error"
+_CONNECTION_ERROR_DETAIL = "Connection error"
+
 # Load ai.exceptions directly to avoid triggering ai/__init__.py (which may
 # contain broken absolute imports in some deployment contexts).  Falls back to
 # a never-raised sentinel so the except-tuple is always syntactically valid.
@@ -145,9 +148,11 @@ def create_chat_router(
                         await websocket.send_json(
                             {"type": "complete", "session_id": session_id}
                         )
-                    except Exception as e:  # noqa: BLE001
-                        logger.error("Error during streaming response: %s", e)
-                        await websocket.send_json({"type": "error", "detail": str(e)})
+                    except Exception:  # noqa: BLE001
+                        logger.exception("Error during streaming response")
+                        await websocket.send_json(
+                            {"type": "error", "detail": _INTERNAL_ERROR_DETAIL}
+                        )
 
                 elif action == "history":
                     messages = chat_service.get_session_history(session_id)
@@ -375,11 +380,13 @@ def create_chat_router(
                     )
 
         except WebSocketDisconnect:
-            logger.debug("Chat WebSocket disconnected: session=%s", session_id)
-        except (ConnectionError, TimeoutError, OSError) as e:
-            logger.error("Chat WebSocket error: %s", e)
+            logger.debug("Chat WebSocket disconnected")
+        except (ConnectionError, TimeoutError, OSError):
+            logger.exception("Chat WebSocket connection error")
             with contextlib.suppress(ConnectionError, TimeoutError, OSError):
-                await websocket.send_json({"type": "error", "detail": str(e)})
+                await websocket.send_json(
+                    {"type": "error", "detail": _CONNECTION_ERROR_DETAIL}
+                )
 
     # ── REST fallback endpoints ──────────────────────────────────────
 
