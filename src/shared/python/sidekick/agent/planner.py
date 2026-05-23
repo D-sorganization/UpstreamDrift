@@ -1,0 +1,331 @@
+"""Sidekick agent planner — validates LLM tool calls into actionable steps.
+
+Epic #5967 / sub-issue #5974 (S5).
+
+The planner sits between the chat surface (which talks to an LLM and
+receives tool-call envelopes) and :class:`SidekickActionService` (which
+dispatches one action at a time). Its job is small and well-bounded:
+
+* validate that each proposed action exists and its params satisfy the
+  registered JSON Schema;
+* emit a :class:`PlannedStep` that the chat layer can render before
+  running, or an error step that explains what's wrong;
+* execute one step through the action service when asked;
+* publish the catalog of available actions in the shape the AI tool
+  registry expects, and assemble the matching system-prompt text.
+
+The planner is **deterministic given the same input** — randomness lives
+in the LLM call upstream, not here. Two identical tool-call sequences
+produce two identical plans.
+
+Design contracts:
+
+* **DbC.** :class:`ToolCall` and :class:`PlannedStep` validate
+  themselves; :meth:`SidekickAgentPlanner.execute` refuses error steps
+  with :class:`PlannerError` (a real bug, not user input).
+* **LOD.** The planner calls ``service.invoke(...)`` and
+  ``service.list_actions()`` only — never reaches into a handler.
+* **DRY.** Tool-registry entries and system-prompt enumeration are
+  generated from the same source (``service.list_actions()``); there is
+  no second hand-written list.
+* **Headless-safe.** No PyQt6 imports.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
+from typing import Any
+
+from .action_service import ActionResult, SidekickActionService
+
+__all__ = [
+    "PlannedStep",
+    "PlannerError",
+    "SidekickAgentPlanner",
+    "ToolCall",
+    "build_sidekick_system_prompt",
+]
+
+
+_SIDEKICK_TOOL_PREFIX = "sidekick.action."
+
+
+class PlannerError(RuntimeError):
+    """Raised when the planner is asked to execute an error step.
+
+    This is a programming error in the caller (chat layer), not user
+    input — error steps are meant to be surfaced to the user with the
+    chip UI (S8) and never silently retried.
+    """
+
+
+# ---------------------------------------------------------------------------
+# Wire types
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True, slots=True)
+class ToolCall:
+    """One tool-call envelope as emitted by an LLM-side adapter.
+
+    Attributes:
+        action_id: The registered ``ActionDescriptor.action_id`` to run.
+        params: Mapping handed to ``service.invoke``.
+        rationale: Optional free-text the LLM emitted to justify this
+            call. Surfaced verbatim in the chip UI.
+    """
+
+    action_id: str
+    params: Mapping[str, Any]
+    rationale: str = ""
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.action_id, str):
+            raise TypeError(
+                f"action_id must be str, got {type(self.action_id).__name__}"
+            )
+        if not self.action_id:
+            raise ValueError("action_id must be non-empty")
+        if not isinstance(self.params, Mapping):
+            raise TypeError(
+                f"params must be a Mapping, got {type(self.params).__name__}"
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class PlannedStep:
+    """One validated, ready-to-render step.
+
+    ``is_error`` distinguishes a normal step (will run via
+    :meth:`SidekickAgentPlanner.execute`) from an error step (must be
+    surfaced to the user — the chat layer renders the
+    :attr:`error_message`).
+    """
+
+    action_id: str
+    params: Mapping[str, Any]
+    rationale: str = ""
+    is_error: bool = False
+    error_message: str = ""
+
+    def __post_init__(self) -> None:
+        if not self.action_id:
+            raise ValueError("action_id must be non-empty")
+        if self.is_error and not self.error_message:
+            raise ValueError("error step requires a non-empty error_message")
+        if not self.is_error and self.error_message:
+            raise ValueError("non-error step must not carry error_message")
+
+
+@dataclass(frozen=True, slots=True)
+class _ToolSpec:
+    """Tool-registry entry — kept private so callers see plain dicts."""
+
+    name: str
+    description: str
+    parameters: Mapping[str, Any]
+    metadata: Mapping[str, Any] = field(default_factory=dict)
+
+
+# ---------------------------------------------------------------------------
+# Planner
+# ---------------------------------------------------------------------------
+
+
+class SidekickAgentPlanner:
+    """Validates tool calls and dispatches them via SidekickActionService."""
+
+    def __init__(self, *, service: SidekickActionService) -> None:
+        if not isinstance(service, SidekickActionService):
+            raise TypeError(
+                f"service must be a SidekickActionService, got {type(service).__name__}"
+            )
+        self._service = service
+
+    # ---- Planning --------------------------------------------------------
+
+    def plan_from_tool_calls(
+        self, calls: Sequence[ToolCall]
+    ) -> tuple[PlannedStep, ...]:
+        """Validate each call and emit a step. Unknown actions or invalid
+        params produce an error step (the chat layer renders it; we do
+        not silently drop it)."""
+        out: list[PlannedStep] = []
+        catalog = {d.action_id: d for d in self._service.list_actions()}
+        for call in calls:
+            descriptor = catalog.get(call.action_id)
+            if descriptor is None:
+                out.append(
+                    PlannedStep(
+                        action_id=call.action_id,
+                        params=dict(call.params),
+                        rationale=call.rationale,
+                        is_error=True,
+                        error_message=(
+                            f"unknown action {call.action_id!r}; "
+                            "not registered with the action service"
+                        ),
+                    )
+                )
+                continue
+            error = _validate_params(call.params, descriptor.params_schema)
+            if error is not None:
+                out.append(
+                    PlannedStep(
+                        action_id=call.action_id,
+                        params=dict(call.params),
+                        rationale=call.rationale,
+                        is_error=True,
+                        error_message=error,
+                    )
+                )
+                continue
+            out.append(
+                PlannedStep(
+                    action_id=call.action_id,
+                    params=dict(call.params),
+                    rationale=call.rationale,
+                )
+            )
+        return tuple(out)
+
+    # ---- Execution -------------------------------------------------------
+
+    def execute(self, step: PlannedStep, *, dry_run: bool = False) -> ActionResult:
+        """Dispatch one previously-planned step.
+
+        Raises :class:`PlannerError` if ``step.is_error`` — that's a
+        chat-layer logic bug. User-visible failures (schema, unknown
+        action) are reflected in the step itself and never reach here.
+        """
+        if step.is_error:
+            raise PlannerError(
+                f"cannot execute error step for {step.action_id!r}: "
+                f"{step.error_message}"
+            )
+        return self._service.invoke(step.action_id, step.params, dry_run=dry_run)
+
+    # ---- Tool-registry bridge -------------------------------------------
+
+    def export_for_tool_registry(self) -> tuple[Mapping[str, Any], ...]:
+        """Return one tool entry per registered action, in the shape an
+        AI tool registry expects: ``{name, description, parameters}``.
+
+        Entries are namespaced under ``sidekick.action.*`` so they
+        cannot collide with the existing ``ai.tools.*`` registry.
+        """
+        out: list[Mapping[str, Any]] = []
+        for descriptor in self._service.list_actions():
+            spec = _ToolSpec(
+                name=f"{_SIDEKICK_TOOL_PREFIX}{descriptor.action_id}",
+                description=descriptor.summary,
+                parameters=dict(descriptor.params_schema),
+                metadata={
+                    "side_effects": descriptor.side_effects,
+                    "reversible": descriptor.reversible,
+                    "original_action_id": descriptor.action_id,
+                },
+            )
+            out.append(
+                {
+                    "name": spec.name,
+                    "description": spec.description,
+                    "parameters": dict(spec.parameters),
+                    "metadata": dict(spec.metadata),
+                }
+            )
+        return tuple(out)
+
+
+# ---------------------------------------------------------------------------
+# System prompt
+# ---------------------------------------------------------------------------
+
+
+_SYSTEM_PROMPT_HEADER = (
+    "You are Sidekick, an in-app assistant embedded in UpstreamDrift. "
+    "You have first-party access to a registered catalogue of actions you "
+    "can perform on the user's behalf. Always prefer calling one of these "
+    "actions over guessing about the app's behaviour.\n\n"
+    "When you intend to act, emit a tool call against one of the actions "
+    "listed below. Pass the documented parameters exactly. For actions "
+    "marked 'destructive', confirm with the user first and pass "
+    "_confirmed=True only after they agree."
+)
+
+
+def build_sidekick_system_prompt(*, service: SidekickActionService) -> str:
+    """Generate the Sidekick system prompt from the registered actions.
+
+    The output enumerates each registered action with its summary,
+    side-effects classification, and reversibility flag. Keep this in
+    lock-step with :meth:`SidekickAgentPlanner.export_for_tool_registry`
+    so the LLM never sees an action in the prompt that isn't also in the
+    tool registry (the assertion is checked by a unit test downstream).
+    """
+    lines: list[str] = [_SYSTEM_PROMPT_HEADER, "", "## Available actions", ""]
+    descriptors = service.list_actions()
+    if not descriptors:
+        lines.append("(No actions registered.)")
+    else:
+        for descriptor in descriptors:
+            flag = (
+                f" [{descriptor.side_effects}"
+                + (", reversible" if descriptor.reversible else "")
+                + "]"
+            )
+            lines.append(f"- `{descriptor.action_id}`{flag} — {descriptor.summary}")
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# Internal: schema validation
+# ---------------------------------------------------------------------------
+
+
+# Local one-line copy of the action-service validator. Keeping it
+# private here means the planner doesn't import a private symbol from
+# action_service (LOD); the two implementations are intentionally
+# identical and tracked by a unit test in test_planner.
+_TYPE_MAP: Mapping[str, tuple[type, ...]] = {
+    "string": (str,),
+    "integer": (int,),
+    "number": (int, float),
+    "boolean": (bool,),
+    "object": (Mapping,),
+    "array": (list, tuple),
+    "null": (type(None),),
+}
+
+
+def _validate_params(
+    params: Mapping[str, Any], schema: Mapping[str, Any]
+) -> str | None:
+    if not isinstance(params, Mapping):
+        return f"params must be a Mapping, got {type(params).__name__}"
+    if schema.get("type") != "object":
+        return None
+    properties = schema.get("properties", {}) or {}
+    required = schema.get("required", []) or []
+    for key in required:
+        if key not in params:
+            return f"missing required property: {key!r}"
+    for key, value in params.items():
+        prop_schema = properties.get(key)
+        if prop_schema is None:
+            continue
+        prop_type = prop_schema.get("type")
+        if prop_type is None:
+            continue
+        expected = _TYPE_MAP.get(prop_type)
+        if expected is None:
+            continue
+        if prop_type in {"integer", "number"} and isinstance(value, bool):
+            return f"property {key!r} expected type {prop_type!r}, got bool"
+        if not isinstance(value, expected):
+            return (
+                f"property {key!r} expected type {prop_type!r}, "
+                f"got {type(value).__name__}"
+            )
+    return None

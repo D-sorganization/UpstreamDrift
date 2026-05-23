@@ -1,0 +1,194 @@
+"""Audit sinks for SidekickActionService (epic #5967 / S6 / #5975).
+
+Two implementations:
+
+* :class:`MemoryActionAudit` — in-process list, useful for tests and for
+  the chip UI's "recent activity" tail. Cheap, never fails.
+* :class:`JsonlActionAudit` — append-only JSONL on disk, suitable for
+  long-running sessions. Degrades to memory on filesystem failure so a
+  full disk or read-only mount can't bring down dispatch.
+
+Both sinks redact a small allowlist of obviously-sensitive parameter
+keys (``password``, ``api_key``, ``secret``, ``token``, ``auth``) before
+recording. The list is intentionally short — adding more keys requires
+a deliberate change here, not a per-call decision at the call site.
+
+Design contracts:
+
+* **DbC.** :class:`JsonlActionAudit` validates its target path is
+  writable lazily (on first call); :func:`redact_secrets` always
+  returns a new dict and never mutates its input.
+* **LOD.** Sinks see :class:`RecordedCall` only; they cannot reach the
+  handler or service.
+* **DRY.** Both sinks share the same JSON projection helper; redaction
+  lives in exactly one function.
+* **Headless-safe.** No PyQt6 imports. No required network or platform
+  services.
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+from collections.abc import Mapping
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+from .action_service import RecordedCall
+
+logger = logging.getLogger(__name__)
+
+__all__ = [
+    "JsonlActionAudit",
+    "MemoryActionAudit",
+    "redact_secrets",
+]
+
+
+_SENSITIVE_KEYS: frozenset[str] = frozenset(
+    {"password", "api_key", "secret", "token", "auth", "credential"}
+)
+_REDACTED = "***"
+_MEMORY_TAIL_SIZE = 64
+
+
+# ---------------------------------------------------------------------------
+# Redaction
+# ---------------------------------------------------------------------------
+
+
+def redact_secrets(payload: Mapping[str, Any]) -> dict[str, Any]:
+    """Return a deep copy of ``payload`` with sensitive keys masked.
+
+    Comparison is case-insensitive. Nested mappings are recursed into so
+    a ``params={"creds": {"password": "..."}}`` payload gets its
+    ``creds.password`` masked.
+    """
+    out: dict[str, Any] = {}
+    for key, value in payload.items():
+        if isinstance(key, str) and key.lower() in _SENSITIVE_KEYS:
+            out[key] = _REDACTED
+            continue
+        if isinstance(value, Mapping):
+            out[key] = redact_secrets(value)
+        else:
+            out[key] = value
+    return out
+
+
+# ---------------------------------------------------------------------------
+# In-memory sink
+# ---------------------------------------------------------------------------
+
+
+class MemoryActionAudit:
+    """Stores every call in a list. Useful for tests and chat-side
+    "recent activity" displays.
+
+    The records tuple is immutable; the underlying list grows. Callers
+    that need a bounded tail should read :attr:`records` and slice.
+    """
+
+    def __init__(self) -> None:
+        self._records: list[RecordedCall] = []
+
+    def __call__(self, call: RecordedCall) -> None:
+        self._records.append(call)
+
+    @property
+    def records(self) -> tuple[RecordedCall, ...]:
+        return tuple(self._records)
+
+
+# ---------------------------------------------------------------------------
+# JSONL sink
+# ---------------------------------------------------------------------------
+
+
+class JsonlActionAudit:
+    """Append-only JSONL audit sink.
+
+    Each call becomes one JSON object on its own line, with shape::
+
+        {
+          "timestamp": "<ISO-8601 with offset>",
+          "action_id": "<id>",
+          "summary": "<descriptor.summary or null>",
+          "side_effects": "<read|write|destructive or null>",
+          "params": {...redacted...},
+          "dry_run": <bool>,
+          "ok": <bool>,
+          "error": "<message or null>",
+          "undo_token": "<opaque or null>"
+        }
+
+    File-write failures degrade to in-memory storage and log one
+    exception per process. We never let an audit failure abort dispatch
+    (the call already happened — refusing to record it would not undo
+    its effect, just hide it).
+    """
+
+    def __init__(self, *, path: Path) -> None:
+        if not isinstance(path, Path):
+            raise TypeError(f"path must be a Path, got {type(path).__name__}")
+        self._path = path
+        self._tail: list[RecordedCall] = []
+        self._warned = False
+
+    @property
+    def path(self) -> Path:
+        return self._path
+
+    @property
+    def tail(self) -> tuple[RecordedCall, ...]:
+        """Most recent in-memory calls (capped at :data:`_MEMORY_TAIL_SIZE`)."""
+        return tuple(self._tail)
+
+    def __call__(self, call: RecordedCall) -> None:
+        # Always store in the tail first so the in-memory observability
+        # survives a write failure.
+        self._tail.append(call)
+        if len(self._tail) > _MEMORY_TAIL_SIZE:
+            del self._tail[: len(self._tail) - _MEMORY_TAIL_SIZE]
+        record = _project_call(call)
+        line = json.dumps(record, default=_json_default, ensure_ascii=False) + "\n"
+        try:
+            self._path.parent.mkdir(parents=True, exist_ok=True)
+            with self._path.open("a", encoding="utf-8") as handle:
+                handle.write(line)
+        except OSError as exc:
+            if not self._warned:
+                logger.exception("audit sink degraded to memory: %s", exc)
+                self._warned = True
+
+
+# ---------------------------------------------------------------------------
+# Internals
+# ---------------------------------------------------------------------------
+
+
+def _project_call(call: RecordedCall) -> dict[str, Any]:
+    """Single JSON projection shared by every sink."""
+    desc = call.descriptor
+    return {
+        "timestamp": call.timestamp.isoformat(),
+        "action_id": call.action_id,
+        "summary": desc.summary if desc else None,
+        "side_effects": desc.side_effects if desc else None,
+        "params": redact_secrets(call.params),
+        "dry_run": call.dry_run,
+        "ok": call.result.ok,
+        "error": call.result.error,
+        "undo_token": call.result.undo_token,
+    }
+
+
+def _json_default(value: Any) -> Any:
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, Mapping):
+        return dict(value)
+    if isinstance(value, (tuple, set, frozenset)):
+        return list(value)
+    return repr(value)

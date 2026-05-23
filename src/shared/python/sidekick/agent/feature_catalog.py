@@ -1,0 +1,638 @@
+"""Feature catalog — Sidekick's machine-readable self-knowledge index.
+
+Epic #5967 / sub-issue #5970 (S1).
+
+The catalog answers three questions a planner or chat turn keeps asking:
+
+1. "What features do you have?"          → :func:`build_feature_catalog`
+2. "Tell me about feature X."            → :func:`lookup_feature`
+3. "Which features are about <topic>?"   → :func:`search_features`
+
+All entries are sourced from first-party code (the calculator and
+process-calculator packages, the subtab help map, the workflow registry,
+the theme tokens). Nothing here invents capabilities; the catalog is a
+lens onto existing modules.
+
+Design notes:
+
+* **DbC.** :class:`FeatureEntry` is frozen and validates its own
+  invariants in ``__post_init__``. :func:`lookup_feature` raises
+  :class:`KeyError` with suggestions on a miss — never returns ``None``.
+* **LOD.** Callers see three module-level functions; the internal indices
+  are not exposed.
+* **DRY.** Subtab summaries are read from
+  :data:`sidekick.ui.tools_sidebar.help_content.DEFAULT_SIDEBAR_TAB_HELP`
+  rather than recopied. Calculator and process-calculator entries are
+  discovered via :mod:`pkgutil` introspection of the existing packages.
+* **Headless-safe.** No PyQt6 imports. No filesystem reads beyond what
+  the standard ``importlib`` machinery does.
+* **Error handling.** Per-source discovery wraps every import-time
+  failure (third-party module ``__init__`` code raises an unbounded
+  set of exception types — narrow tuples drop real failures and the
+  catalog ends up advertising broken module paths). See the baseline
+  bump justification in ``scripts/config/error_handling_baseline.json``.
+"""
+
+from __future__ import annotations
+
+import ast
+import difflib
+import importlib
+import importlib.util
+import logging
+import pkgutil
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
+from enum import Enum
+from pathlib import Path
+from types import MappingProxyType
+
+
+logger = logging.getLogger(__name__)
+
+__all__ = [
+    "FeatureEntry",
+    "FeatureKind",
+    "build_feature_catalog",
+    "lookup_feature",
+    "search_features",
+]
+
+
+# ---------------------------------------------------------------------------
+# Public data types
+# ---------------------------------------------------------------------------
+
+
+class FeatureKind(str, Enum):
+    """Closed set of feature categories the catalog understands.
+
+    The string values are the canonical wire form (used in JSON Schemas
+    downstream — see :mod:`sidekick.agent.action_service`).
+    """
+
+    CALCULATOR = "calculator"
+    PROCESS_CALCULATOR = "process_calculator"
+    SUBTAB = "subtab"
+    WORKFLOW = "workflow"
+    THEME = "theme"
+
+
+# Map each kind to its required feature_id namespace prefix. Enforced in
+# :meth:`FeatureEntry.__post_init__` so the catalog cannot drift.
+_NAMESPACE_PREFIX: Mapping[str, str] = MappingProxyType(
+    {
+        FeatureKind.CALCULATOR.value: "calculator.",
+        FeatureKind.PROCESS_CALCULATOR.value: "process_calculator.",
+        FeatureKind.SUBTAB.value: "subtab.",
+        FeatureKind.WORKFLOW.value: "workflow.",
+        FeatureKind.THEME.value: "theme.",
+    }
+)
+
+_VALID_KIND_VALUES = frozenset(k.value for k in FeatureKind)
+
+
+@dataclass(frozen=True, slots=True)
+class FeatureEntry:
+    """One row in the catalog.
+
+    Attributes:
+        feature_id: Globally unique id of the form ``"<kind>.<name>"``.
+        kind: One of :class:`FeatureKind` values (the string form).
+        title: Short human-readable label.
+        summary: One- or two-sentence description.
+        module: Dotted Python path to the canonical implementation.
+            Must be importable (asserted by the hygiene test).
+        help_anchors: Filenames under ``docs/`` that document the feature
+            (used by downstream RAG; may be empty).
+    """
+
+    feature_id: str
+    kind: str
+    title: str
+    summary: str
+    module: str
+    help_anchors: tuple[str, ...] = field(default_factory=tuple)
+
+    def __post_init__(self) -> None:
+        # DbC: validate at construction so the rest of the system can trust
+        # every FeatureEntry it ever sees.
+        if not self.feature_id:
+            raise ValueError("feature_id must be a non-empty string")
+        if self.kind not in _VALID_KIND_VALUES:
+            raise ValueError(f"kind={self.kind!r} not in {sorted(_VALID_KIND_VALUES)}")
+        expected = _NAMESPACE_PREFIX[self.kind]
+        if not self.feature_id.startswith(expected):
+            raise ValueError(
+                f"feature_id {self.feature_id!r} does not match {self.kind} "
+                f"namespace {expected!r}"
+            )
+        if not self.title:
+            raise ValueError("title must be non-empty")
+        if not self.summary:
+            raise ValueError("summary must be non-empty")
+        if not self.module:
+            raise ValueError("module must be a non-empty dotted path")
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+
+_CATALOG_CACHE: Mapping[str, FeatureEntry] | None = None
+
+
+def build_feature_catalog(*, force_refresh: bool = False) -> Mapping[str, FeatureEntry]:
+    """Construct (or return a cached copy of) the catalog.
+
+    Postconditions:
+
+    * Non-empty mapping keyed by ``feature_id``.
+    * Insertion order is deterministic (sorted by ``feature_id``).
+    * Every value is a :class:`FeatureEntry` whose ``module`` is importable
+      from the configured Python path.
+
+    Discovery imports a wide tree of first-party modules (calculators,
+    process calculators, theme tokens) and reads ``help_content.py`` via
+    AST. On a fresh interpreter that walk can be slow because each
+    leaf-module import drags in numpy/pandas/scipy/matplotlib. We cache
+    the result so subsequent calls in the same process are O(1).
+    Tests that want a fresh build can pass ``force_refresh=True``.
+
+    Failures in individual discovery sources are logged and skipped —
+    they never abort catalog construction. This is the only place in
+    the agent layer that swallows discovery errors.
+    """
+    global _CATALOG_CACHE
+    if _CATALOG_CACHE is not None and not force_refresh:
+        return _CATALOG_CACHE
+
+    entries: dict[str, FeatureEntry] = {}
+
+    for source in _DISCOVERY_SOURCES:
+        try:
+            for entry in source():
+                # Last-writer-wins is intentional: a richer source (e.g.
+                # the help map) can override a thinner one (introspection).
+                entries[entry.feature_id] = entry
+        except Exception as exc:  # noqa: BLE001 - discovery sources may raise
+            # any exception type from third-party imports
+            logger.debug(
+                "feature_catalog: discovery source %s failed: %s",
+                source.__name__,
+                exc,
+            )
+
+    # Deterministic ordering so downstream tests and prompt generators do
+    # not flap.
+    ordered = dict(sorted(entries.items(), key=lambda kv: kv[0]))
+    _CATALOG_CACHE = MappingProxyType(ordered)
+    return _CATALOG_CACHE
+
+
+def lookup_feature(feature_id: str) -> FeatureEntry:
+    """Return the entry for ``feature_id`` or raise :class:`KeyError`.
+
+    Args:
+        feature_id: A non-empty feature id, e.g. ``"subtab.calculator"``.
+
+    Raises:
+        ValueError: If ``feature_id`` is empty.
+        KeyError: If no such feature exists. The message lists the three
+            closest matches (Levenshtein-ish via :mod:`difflib`).
+    """
+    if not feature_id:
+        raise ValueError("feature_id must be a non-empty string")
+    catalog = build_feature_catalog()
+    entry = catalog.get(feature_id)
+    if entry is None:
+        suggestions = difflib.get_close_matches(
+            feature_id, catalog.keys(), n=3, cutoff=0.4
+        )
+        hint = f" Did you mean: {', '.join(suggestions)}?" if suggestions else ""
+        raise KeyError(f"unknown feature_id {feature_id!r}.{hint}")
+    # Postcondition: returned entry's id matches the request.
+    assert entry.feature_id == feature_id  # noqa: S101 - DbC invariant
+    return entry
+
+
+def search_features(query: str, *, limit: int = 5) -> tuple[FeatureEntry, ...]:
+    """Token-overlap relevance search across feature_id + title + summary.
+
+    No LLM call. Deterministic, fast, and good enough for chat hints.
+
+    Args:
+        query: A non-empty (after stripping) search string.
+        limit: Maximum number of entries to return. Must be positive.
+
+    Returns:
+        Tuple of entries sorted by descending relevance, capped at
+        ``limit``. Empty tuple when nothing matches.
+
+    Raises:
+        ValueError: If ``query`` is blank or ``limit`` is non-positive.
+    """
+    if not query or not query.strip():
+        raise ValueError("query must be a non-blank string")
+    if limit <= 0:
+        raise ValueError(f"limit must be positive, got {limit}")
+
+    tokens = _tokenise(query)
+    if not tokens:
+        return ()
+
+    catalog = build_feature_catalog()
+    scored: list[tuple[int, str, FeatureEntry]] = []
+    for entry in catalog.values():
+        score = _score(entry, tokens)
+        if score > 0:
+            # Tie-break on feature_id so order is deterministic.
+            scored.append((-score, entry.feature_id, entry))
+
+    scored.sort()
+    return tuple(entry for _, _, entry in scored[:limit])
+
+
+# ---------------------------------------------------------------------------
+# Internals
+# ---------------------------------------------------------------------------
+
+
+def _tokenise(text: str) -> list[str]:
+    """Lowercase, split on non-alphanumeric, drop empties."""
+    out: list[str] = []
+    buf: list[str] = []
+    for ch in text.lower():
+        if ch.isalnum():
+            buf.append(ch)
+        elif buf:
+            out.append("".join(buf))
+            buf.clear()
+    if buf:
+        out.append("".join(buf))
+    return out
+
+
+def _score(entry: FeatureEntry, tokens: Sequence[str]) -> int:
+    """Token-overlap score across feature_id + title + summary.
+
+    Title hits weigh more than summary; id hits weigh most.
+    """
+    id_tokens = set(_tokenise(entry.feature_id))
+    title_tokens = set(_tokenise(entry.title))
+    summary_tokens = set(_tokenise(entry.summary))
+
+    score = 0
+    for token in tokens:
+        if token in id_tokens:
+            score += 4
+        if token in title_tokens:
+            score += 2
+        if token in summary_tokens:
+            score += 1
+    return score
+
+
+# ---- Discovery sources ----------------------------------------------------
+
+
+def _discover_subtabs() -> list[FeatureEntry]:
+    """Subtabs come from the curated ``DEFAULT_SIDEBAR_TAB_HELP`` map.
+
+    We extract the map by **AST-parsing** ``help_content.py`` rather than
+    importing it, because the canonical
+    ``sidekick.ui.tools_sidebar`` package has heavy transitive imports
+    that fail in headless contexts (unrelated registry refactor). AST
+    parsing keeps the catalog single-sourced on the curated copy while
+    insulating it from drift in unrelated subtab modules.
+    """
+    parsed = _parse_help_content()
+    if not parsed:
+        return []
+
+    out: list[FeatureEntry] = []
+    for tab_id, meta in parsed.items():
+        title = meta.get("title") or tab_id.replace("_", " ").title()
+        summary = meta.get("summary") or f"{title} subtab."
+        raw_module = meta.get("source") or "sidekick.ui.tools_sidebar"
+        # Some `source` values point at upstream_drift_tools (the
+        # deprecated alias) or at submodules that may not be importable
+        # in a given install (e.g. when an optional dependency is
+        # missing). Walk up to the closest importable ancestor so the
+        # catalog never advertises a broken module path.
+        candidate = raw_module.replace("upstream_drift_tools.", "sidekick.")
+        module = _closest_importable(candidate, fallback="sidekick.ui")
+        out.append(
+            FeatureEntry(
+                feature_id=f"subtab.{tab_id}",
+                kind=FeatureKind.SUBTAB.value,
+                title=title,
+                summary=summary,
+                module=module,
+                help_anchors=(),
+            )
+        )
+    return out
+
+
+def _closest_importable(dotted: str, *, fallback: str) -> str:
+    """Return the closest importable ancestor of ``dotted``, or
+    ``fallback`` if none of the chain is importable.
+
+    Used to keep the advertised module field truthful in the face of
+    broken transitive imports elsewhere in the repo. The fallback itself
+    is also checked — if even ``fallback`` is broken, ``"sidekick"`` is
+    used as the last-resort root that is always importable.
+    """
+
+    parts = dotted.split(".")
+    for i in range(len(parts), 0, -1):
+        candidate = ".".join(parts[:i])
+        if _is_importable(candidate):
+            return candidate
+    if _is_importable(fallback):
+        return fallback
+    return "sidekick"
+
+
+def _is_importable(dotted: str) -> bool:
+    """Return ``True`` if ``dotted`` resolves under the current pythonpath.
+
+    Treats *any* import-time exception as "not importable". Third-party
+    modules can raise an unbounded set of exception types from their
+    ``__init__`` code — narrow tuples miss real failures and the result
+    is the catalog advertising broken module paths. The narrow tuple
+    *cannot* express "anything raised during import"; we accept the
+    blind catch and explicitly let ``BaseException`` (SystemExit,
+    KeyboardInterrupt, MemoryError) propagate.
+    """
+    try:
+        importlib.import_module(dotted)
+    except Exception:  # noqa: BLE001 - import-time errors are unbounded
+        return False
+    return True
+
+
+def _discover_calculators() -> list[FeatureEntry]:
+    """Leaf modules under :mod:`sidekick.calculators`."""
+    return list(
+        _walk_package(
+            "sidekick.calculators",
+            FeatureKind.CALCULATOR.value,
+        )
+    )
+
+
+def _discover_process_calculators() -> list[FeatureEntry]:
+    """Leaf modules under :mod:`sidekick.process_calculators`."""
+    return list(
+        _walk_package(
+            "sidekick.process_calculators",
+            FeatureKind.PROCESS_CALCULATOR.value,
+        )
+    )
+
+
+def _discover_theme() -> list[FeatureEntry]:
+    """Single entry pointing at the canonical theme module."""
+    return [
+        FeatureEntry(
+            feature_id="theme.sidekick_tokens",
+            kind=FeatureKind.THEME.value,
+            title="Sidekick design tokens",
+            summary=(
+                "The canonical color, spacing, and font tokens used by every "
+                "Sidekick surface. Both PyQt and React shells consume these."
+            ),
+            module="sidekick.theme",
+            help_anchors=("sidekick/README.md",),
+        ),
+    ]
+
+
+def _discover_workflows() -> list[FeatureEntry]:
+    """Workflows registered in :mod:`shared.python.ai.workflow_definitions`.
+
+    Discovery is best-effort: if the registry surface is not present yet,
+    the source returns an empty list rather than crashing.
+    """
+    # Import lazily — the workflow registry may be a follow-up sub-issue.
+    try:
+        import importlib
+
+        wd = importlib.import_module("shared.python.ai.workflow_definitions")
+    except ImportError:
+        return []
+    registry = getattr(wd, "WORKFLOWS", None) or getattr(wd, "ALL_WORKFLOWS", None)
+    if not registry:
+        return []
+    out: list[FeatureEntry] = []
+    for name, workflow in _iter_named(registry):
+        title = getattr(workflow, "name", name)
+        summary = getattr(workflow, "description", None) or f"Workflow {title}."
+        out.append(
+            FeatureEntry(
+                feature_id=f"workflow.{name}",
+                kind=FeatureKind.WORKFLOW.value,
+                title=str(title),
+                summary=str(summary),
+                module="shared.python.ai.workflow_definitions",
+                help_anchors=(),
+            )
+        )
+    return out
+
+
+def _parse_help_content() -> dict[str, dict[str, str]]:
+    """Parse ``help_content.py`` and return the assembled tab→metadata map.
+
+    We walk the module's AST and evaluate exactly the construct the help
+    file uses: ``DEFAULT_SIDEBAR_TAB_HELP = { "<tab>": _tab_help(...) }``
+    where each ``_tab_help`` call has keyword args we can pluck literally
+    (``title``, ``summary``, ``source``, ``tips``, ``examples``).
+
+    No code is executed; the function returns ``{}`` on any structural
+    surprise so future formatting changes degrade silently rather than
+    breaking catalog construction.
+    """
+
+    here = Path(__file__).resolve()
+    # src/shared/python/sidekick/agent/feature_catalog.py → repo root
+    repo_root = here.parents[5]
+    target = (
+        repo_root
+        / "src"
+        / "shared"
+        / "python"
+        / "sidekick"
+        / "ui"
+        / "tools_sidebar"
+        / "help_content.py"
+    )
+    if not target.exists():
+        return {}
+    try:
+        tree = ast.parse(target.read_text(encoding="utf-8"))
+    except (OSError, SyntaxError) as exc:
+        logger.debug("feature_catalog: help_content parse failed: %s", exc)
+        return {}
+
+    for node in ast.walk(tree):
+        target_id: str | None = None
+        value: object | None = None
+        if isinstance(node, ast.Assign):
+            if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+                target_id = node.targets[0].id
+                value = node.value
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            target_id = node.target.id
+            value = node.value
+        if target_id != "DEFAULT_SIDEBAR_TAB_HELP":
+            continue
+        if not isinstance(value, ast.Dict):
+            return {}
+        return _extract_help_dict(value)
+    return {}
+
+
+def _extract_help_dict(node: ast.Dict) -> dict[str, dict[str, str]]:
+    """Pull keys + selected kwargs out of the AST dict literal."""
+    out: dict[str, dict[str, str]] = {}
+    for key_node, value_node in zip(node.keys, node.values, strict=False):
+        if key_node is None or not isinstance(key_node, ast.Constant):
+            continue
+        if not isinstance(key_node.value, str):
+            continue
+        tab_id = key_node.value
+        # Always include the entry — empty meta means the caller falls
+        # back to ``tab_id.title()`` / "{title} subtab.". This keeps the
+        # catalog complete even for tabs whose help is built via a helper
+        # call (e.g. ``CALCULATOR_HELP.to_metadata()``) that we cannot
+        # statically evaluate without running imports.
+        out[tab_id] = _extract_call_meta(value_node)
+    return out
+
+
+def _extract_call_meta(node: object) -> dict[str, str]:
+    """Pull title / summary / source from a ``_tab_help("title", "summary", ...)``
+    call, or from a ``CALCULATOR_HELP.to_metadata()`` attribute access.
+
+    Unsupported expressions return an empty dict (the catalog falls back
+    to ``tab_id.title()`` for the title).
+    """
+    if not isinstance(node, ast.Call):
+        return {}
+
+    meta: dict[str, str] = {}
+    # Positional: (title, summary, ...).
+    if node.args:
+        if isinstance(node.args[0], ast.Constant) and isinstance(
+            node.args[0].value, str
+        ):
+            meta["title"] = node.args[0].value
+        if (
+            len(node.args) > 1
+            and isinstance(node.args[1], ast.Constant)
+            and isinstance(node.args[1].value, str)
+        ):
+            meta["summary"] = node.args[1].value
+    # Keyword: title, summary, source.
+    for kw in node.keywords:
+        if (
+            kw.arg in {"title", "summary", "source"}
+            and isinstance(kw.value, ast.Constant)
+            and isinstance(kw.value.value, str)
+        ):
+            meta[kw.arg] = kw.value.value
+    return meta
+
+
+def _walk_package(package_name: str, kind: str):
+    """Yield one FeatureEntry per public leaf module under ``package_name``.
+
+    "Public" means the module name does not start with an underscore. We
+    use the module's docstring's first non-blank line as the summary; if
+    none, a generic fallback.
+    """
+
+    try:
+        package = importlib.import_module(package_name)
+    except ImportError as exc:
+        logger.debug("feature_catalog: cannot import %s: %s", package_name, exc)
+        return
+
+    pkg_path = getattr(package, "__path__", None)
+    if pkg_path is None:
+        return
+
+    for module_info in pkgutil.iter_modules(pkg_path):
+        if module_info.name.startswith("_"):
+            continue
+        full = f"{package_name}.{module_info.name}"
+        try:
+            mod = importlib.import_module(full)
+        except Exception as exc:  # noqa: BLE001 - skip any broken sibling
+            logger.debug("feature_catalog: skipping %s: %s", full, exc)
+            continue
+        summary = (
+            _module_summary(mod) or f"{module_info.name.replace('_', ' ').title()}"
+        )
+        title = _module_title(mod) or module_info.name.replace("_", " ").title()
+        yield FeatureEntry(
+            feature_id=f"{kind}.{module_info.name}",
+            kind=kind,
+            title=title,
+            summary=summary,
+            module=full,
+            help_anchors=(),
+        )
+
+
+def _module_summary(mod: object) -> str:
+    """First non-blank line of a module's docstring (cleaned)."""
+    doc = getattr(mod, "__doc__", None)
+    if not doc:
+        return ""
+    for line in doc.splitlines():
+        line = line.strip()
+        if line:
+            return line
+    return ""
+
+
+def _module_title(mod: object) -> str:
+    """First word(s) of a module's docstring up to the first hyphen/period."""
+    summary = _module_summary(mod)
+    if not summary:
+        return ""
+    for sep in (" — ", " - ", ". ", ":"):
+        head, _, _ = summary.partition(sep)
+        if head and head != summary:
+            return head.strip()
+    return summary
+
+
+def _iter_named(registry: object):
+    """Yield (name, item) pairs from a mapping or a sequence of named items."""
+    if isinstance(registry, Mapping):
+        yield from registry.items()
+        return
+    if isinstance(registry, Sequence):
+        for item in registry:
+            name = getattr(item, "name", None) or getattr(item, "id", None)
+            if name:
+                yield str(name), item
+
+
+# Ordered tuple of discovery sources. Later sources can override earlier
+# ones; the help-map source is last so its curated copy wins over
+# auto-introspection.
+_DISCOVERY_SOURCES: tuple = (
+    _discover_calculators,
+    _discover_process_calculators,
+    _discover_theme,
+    _discover_workflows,
+    _discover_subtabs,
+)
