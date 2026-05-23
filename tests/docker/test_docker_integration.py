@@ -189,7 +189,7 @@ class TestContainerEnvironment(unittest.TestCase):
         )
         self.assertIn("python -m venv /opt/venv", content)
         self.assertIn(
-            "python -m pip install --upgrade --no-cache-dir pip==25.3", content
+            "python -m pip install --upgrade --no-cache-dir pip==26.1", content
         )
         self.assertIn("pip install -r /tmp/requirements.lock", content)
 
@@ -209,6 +209,17 @@ class TestContainerEnvironment(unittest.TestCase):
 
         # matplotlib is installed directly in the image for shared-code imports.
         self.assertIn('"matplotlib==3.10.8"', content)
+
+    def test_container_security_pins_clear_trivy_findings(self) -> None:
+        """Docker runtime pins must stay at or above the Trivy fixed versions."""
+        dockerfile_path = get_repo_root() / "Dockerfile"
+        content = dockerfile_path.read_text()
+        requirements_lock = (get_repo_root() / "requirements.lock").read_text()
+
+        self.assertIn("pip install --upgrade pip==26.1", content)
+        self.assertIn('"PyJWT==2.12.0"', content)
+        self.assertIn('"cryptography==46.0.7"', content)
+        self.assertIn("idna==3.15", requirements_lock)
 
 
 class TestModuleAccessibility(unittest.TestCase):
