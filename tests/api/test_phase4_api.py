@@ -808,6 +808,18 @@ class TestAIPMethods:
         assert result["status"] == "loaded"
         assert result["format"] == "urdf"
 
+    def test_model_list_uses_public_discovery_contract(self) -> None:
+        """model.list returns discovered models through the public route helper."""
+        from src.api.aip.methods import create_registry
+
+        registry = create_registry()
+        handler = registry.get_method("model.list")
+        assert handler is not None
+        result = handler()
+        assert "models" in result
+        assert "count" in result
+        assert result["count"] == len(result["models"])
+
     def test_analysis_export(self) -> None:
         """Analysis export returns status."""
         from src.api.aip.methods import create_registry

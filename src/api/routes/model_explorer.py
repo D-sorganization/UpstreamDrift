@@ -302,11 +302,11 @@ async def get_model_explorer(
     Returns:
         Model explorer data with tree nodes.
     """
-    # Import model discovery from models route
-    from .models import _discover_models
+    # Import the public model-discovery contract from models route.
+    from .models import discover_models
 
     root = _find_project_root()
-    models = _discover_models()
+    models = discover_models()
 
     # Find model by name
     model_entry = None
