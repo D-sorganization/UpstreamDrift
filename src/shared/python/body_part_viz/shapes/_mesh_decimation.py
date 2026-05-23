@@ -19,7 +19,10 @@ import logging
 from typing import Literal
 
 import numpy as np
-import trimesh
+try:
+    import trimesh
+except ImportError:
+    trimesh = None
 
 __all__ = ["DecimationStrategy", "decimate"]
 
@@ -28,7 +31,9 @@ DecimationStrategy = Literal["quadric", "uniform"]
 _logger = logging.getLogger(__name__)
 
 
-def _to_trimesh(vertices: np.ndarray, faces: np.ndarray) -> trimesh.Trimesh:
+def _to_trimesh(vertices: np.ndarray, faces: np.ndarray):
+    if trimesh is None:
+        raise ImportError('trimesh is required for mesh decimation.')
     return trimesh.Trimesh(vertices=vertices, faces=faces, process=False)
 
 

@@ -82,3 +82,7 @@
 ## 2026-05-23 - xvfb missing in GitHub Actions runners
 **Learning:** Some test suites (like `test_leaderboard.py`) that rely on plotting or visual dependencies fail in CI with `xvfb-run` missing errors, or display server missing if `xvfb-run -a` is prepended but `xvfb` is not installed on the system (exit code 3).
 **Action:** When prepending `xvfb-run -a` to a test command in a CI workflow, also make sure to explicitly run `sudo apt-get update && sudo apt-get install -y xvfb` inside the environment setup step if the runner is missing it.
+
+## 2026-05-23 - trimesh ImportErrors
+**Learning:** Hard-coded imports of `trimesh` in files like `_mesh_decimation.py` and `_mesh_io.py` can cause tests or other modules that import them to fail if `trimesh` isn't installed.
+**Action:** Always wrap `import trimesh` with a `try...except ImportError` block and conditionally check if `trimesh is None` to safely handle environments where it is missing, or alternatively, make sure to add it to the test environment requirements.
