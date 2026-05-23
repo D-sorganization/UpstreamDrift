@@ -234,12 +234,12 @@ class AuthManager:
                 )
 
             logger.info(
-                "Loaded credentials for user: %s",
+                "Loaded auth profile for user: %s",
                 self._current_user.user_id if self._current_user else "none",
             )
 
         except (json.JSONDecodeError, KeyError, ValueError) as e:
-            logger.warning("Failed to load credentials: %s", e)
+            logger.warning("Failed to load auth profile: %s", e)
 
     def _save_credentials(self) -> None:
         """Save credentials to disk securely."""
@@ -310,7 +310,7 @@ class AuthManager:
         )
 
         self._save_credentials()
-        logger.info("Logged in with API key for user: %s", user_id)
+        logger.info("Logged in via key for user: %s", user_id)
         return True
 
     def login_with_oauth(self, provider: str, auth_code: str) -> bool:
