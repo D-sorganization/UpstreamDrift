@@ -345,10 +345,10 @@ def _model_list(
     Returns:
         List of model files.
     """
-    from ..routes.models import _discover_models
+    from ..routes.models import discover_models
 
     try:
-        models = _discover_models()
+        models = discover_models()
         return {"models": models, "count": len(models)}
     except (RuntimeError, ValueError, OSError) as exc:
         return {"models": [], "count": 0, "error": str(exc)}
