@@ -47,6 +47,13 @@ from .identifiers import (
     new_run_id,
 )
 from .job import RunResult, TrainingJob
+from .metric_summary import (
+    BestMetric,
+    RollingMean,
+    best_per_metric,
+    filter_by_tags,
+    summarize_by_kind,
+)
 from .metrics import MetricKind, TrainingMetric
 from .persistence import (
     run_result_from_dict,
@@ -73,6 +80,7 @@ __all__ = [
     "DEFAULT_ENGINE_FRAMEWORK_MAP",
     "MAX_ID_LENGTH",
     "TERMINAL_STATUSES",
+    "BestMetric",
     "CancelToken",
     "CompatibilityChecker",
     "CompatibilityError",
@@ -89,6 +97,7 @@ __all__ = [
     "MetricKind",
     "ProgressSink",
     "ResourceRequest",
+    "RollingMean",
     "RunId",
     "RunResult",
     "Scheduler",
@@ -103,11 +112,14 @@ __all__ = [
     "TrainingJobRunner",
     "TrainingMetric",
     "TrainingStatus",
+    "best_per_metric",
     "can_transition",
+    "filter_by_tags",
     "new_job_id",
     "new_run_id",
     "run_result_from_dict",
     "run_result_to_dict",
+    "summarize_by_kind",
     "training_config_from_dict",
     "training_config_to_dict",
     "training_job_from_dict",
