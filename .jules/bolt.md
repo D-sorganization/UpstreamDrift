@@ -78,3 +78,7 @@
 ## 2026-05-23 - GitHub Actions setup-python pip issues
 **Learning:** Installing `pydantic-core` sometimes fails with uninstall errors under the virtual environments created by `actions/setup-python` during GitHub Actions CI due to missing `RECORD` files or invalid metadata entries, particularly when repeatedly updating `pip` inside the runner.
 **Action:** When working on GitHub Actions Python CI scripts, ensure to proactively use `pip install --ignore-installed --no-deps pydantic-core==2.46.3 || true` right before the main `pip install -e ".[dev]"` lines, to bypass unresolvable cache/uninstall issues for `pydantic-core`.
+
+## 2026-05-23 - xvfb missing in GitHub Actions runners
+**Learning:** Some test suites (like `test_leaderboard.py`) that rely on plotting or visual dependencies fail in CI with `xvfb-run` missing errors, or display server missing if `xvfb-run -a` is prepended but `xvfb` is not installed on the system (exit code 3).
+**Action:** When prepending `xvfb-run -a` to a test command in a CI workflow, also make sure to explicitly run `sudo apt-get update && sudo apt-get install -y xvfb` inside the environment setup step if the runner is missing it.

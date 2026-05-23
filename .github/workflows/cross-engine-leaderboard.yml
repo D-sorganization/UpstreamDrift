@@ -67,6 +67,7 @@ jobs:
           python -m ensurepip --upgrade || true
           python -m pip install --upgrade pip
           python -m ensurepip --upgrade || true
+          sudo apt-get update && sudo apt-get install -y xvfb
           pip install --ignore-installed --no-deps pydantic-core==2.46.3 || true
           pip install -e ".[dev]"
 
