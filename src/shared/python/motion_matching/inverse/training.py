@@ -17,7 +17,7 @@ from __future__ import annotations
 import json
 import logging
 import time
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
@@ -195,6 +195,8 @@ def train_inverse_cvae(
     val_fraction: float = TrainingConfig.val_fraction,
     cvae_config: CVAEConfig | None = None,
     dataset_loader=None,
+    on_epoch_end: Callable[[EpochMetrics], None] | None = None,
+    should_stop: Callable[[], bool] | None = None,
 ) -> TrainingResult:
     """Train :class:`SwingInverseCVAE` end-to-end.
 
@@ -208,6 +210,20 @@ def train_inverse_cvae(
         Optional callable ``(path) -> CompactSwingDataset``. Defaults to
         :func:`load_compact_swing_dataset` (loaded lazily so this module
         can be imported without the dataset extras present).
+    on_epoch_end
+        Optional callback invoked after each completed epoch with that
+        epoch's :class:`EpochMetrics`. Defaults to ``None`` (no-op).
+        Provided so external observers (e.g. the training-controller
+        ``PyTorchCVAERunner`` adapter) can stream metrics out without
+        scraping the stdlib logger. Exceptions raised by the callback
+        propagate to the caller — the loop does NOT swallow them.
+    should_stop
+        Optional callable polled once per epoch (immediately after the
+        existing early-stop / plateau check). When it returns ``True``
+        the loop ends gracefully and returns the best-so-far
+        :class:`TrainingResult`. Defaults to ``None`` (no cooperative
+        cancellation). Wired by the training-controller adapter to a
+        :class:`CancelToken` so jobs can be cancelled mid-run.
 
     Returns
     -------
@@ -329,7 +345,16 @@ def train_inverse_cvae(
             plateau += 1
             if plateau >= patience:
                 logger.info("early stop: val recon plateau at epoch %d", epoch)
+                if on_epoch_end is not None:
+                    on_epoch_end(metrics)
                 break
+
+        if on_epoch_end is not None:
+            on_epoch_end(metrics)
+
+        if should_stop is not None and should_stop():
+            logger.info("cooperative stop requested at epoch %d", epoch)
+            break
 
     summary_path = output_dir / "metrics.json"
     final_epoch = history[-1].epoch
