@@ -7,6 +7,26 @@ The current durable guardrail is a no-growth cap at 78 active workflows. The
 consolidation target for issue #3835 remains 25 active workflows or fewer after
 owners validate low-risk removals.
 
+## Security Audit: `pull_request_target` Workflows (issue #5915)
+
+Audited 2026-05-23. Two workflows use `pull_request_target`; both are safe:
+
+**`Jules-Redundant-PR-Closer.yml`** — trigger covers `opened/reopened/synchronize/closed`
+from forks but does **not** check out the PR head ref. It only checks out
+`Repository_Management` at `ref: main`. The app token grants
+`contents:read / pull-requests:write / issues:write`; no secrets beyond the
+Jules app credentials are exposed. ✅ Safe.
+
+**`anti-phantom-merge.yml`** — uses `pull_request_target` only for `labeled/unlabeled`
+events (to honor admin overrides). On those events it checks out the PR head SHA to
+run `git diff` commands but does **not** execute any code from the checked-out tree.
+The `${{ github.token }}` used has `contents:read / pull-requests:write / issues:read`.
+The shell steps are defined in the base-branch workflow (not the PR head), so the
+checkout is read-only data, not executable code. ✅ Safe.
+
+**Action item**: when adding new `pull_request_target` triggers, ensure no PR-head
+code is executed and no secrets beyond minimum necessary permissions are exposed.
+
 Runner note: most workflows use the self-hosted `d-sorg-fleet` runner. That
 runner is administered by repository infrastructure owners. When it is offline,
 jobs that target it fail or remain queued rather than silently passing. Because

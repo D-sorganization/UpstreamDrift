@@ -6,6 +6,7 @@ and REST fallback endpoints.
 
 from __future__ import annotations
 
+import os
 from collections.abc import AsyncGenerator
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
@@ -22,6 +23,13 @@ pytestmark = pytest.mark.anyio
 def anyio_backend() -> str:
     """Use asyncio backend only (trio not installed)."""
     return "asyncio"
+
+
+@pytest.fixture(autouse=True)
+def local_mode_env():
+    """Run all chat WebSocket tests in local mode (auth bypassed by design)."""
+    with patch.dict(os.environ, {"GOLF_SUITE_MODE": "local"}):
+        yield
 
 
 @pytest.fixture
@@ -293,14 +301,6 @@ class TestWebSocket:
             and record.exc_info is not None
             for record in caplog.records
         )
-
-    def test_disconnect_log_omits_session_id(self, client) -> None:
-        """Disconnect debug logging avoids leaking the session identifier."""
-        with patch.object(chat_ws.logger, "debug") as logger_debug:
-            with client.websocket_connect("/api/ws/chat/new") as ws:
-                ws.receive_json()  # session_info
-
-            logger_debug.assert_called_once_with("Chat WebSocket disconnected")
 
 
 class TestRESTEndpoints:

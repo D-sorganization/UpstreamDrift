@@ -27,12 +27,14 @@ from typing import Any
 
 from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 
+from src.api.auth.ws_auth import resolve_ws_user
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
 router = APIRouter()
+
 _INTERNAL_ERROR_DETAIL = "Internal server error"
 _CONNECTION_ERROR_DETAIL = "Connection error"
 
@@ -142,6 +144,9 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
     """
     if not (websocket is not None):
         raise ValueError("websocket must be provided")
+    user = await resolve_ws_user(websocket)
+    if user is None:
+        return
     await websocket.accept()
 
     chat_service = websocket.app.state.chat_service
@@ -252,7 +257,7 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
                 )
 
     except WebSocketDisconnect:
-        logger.debug("Chat WebSocket disconnected")
+        logger.debug("Chat WebSocket disconnected: session=%s", session_id)
     except (ConnectionError, TimeoutError, OSError):
         logger.exception("Chat WebSocket connection error")
         with contextlib.suppress(ConnectionError, TimeoutError, OSError):

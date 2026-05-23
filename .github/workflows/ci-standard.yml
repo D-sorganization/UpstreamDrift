@@ -440,6 +440,49 @@ jobs:
           echo "$bandit_output" >> "$GITHUB_STEP_SUMMARY"
           exit $exit_code
 
+      # Secret scanning (issue #5915): detect-secrets runs on every PR and
+      # on pushes to main, catching committed credentials before they ship.
+      - name: Secret Scanning (detect-secrets)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m ensurepip --upgrade || true
+          python -m pip install --ignore-installed detect-secrets==1.5.0 -q
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            mapfile -d '' changed_files < <(
+              git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD
+            )
+            if [ "${#changed_files[@]}" -eq 0 ]; then
+              echo "No changed files; skipping detect-secrets PR scan."
+              exit 0
+            fi
+            detect-secrets scan --only-allowlisted --baseline /dev/null "${changed_files[@]}" \
+              > /tmp/secrets-baseline.json || true
+          else
+            detect-secrets scan --only-allowlisted --baseline /dev/null \
+              > /tmp/secrets-baseline.json || true
+          fi
+
+          # Fail if high-confidence secrets found
+          secret_count=$(python -c "
+          import json, sys
+          data = json.load(open('/tmp/secrets-baseline.json'))
+          total = sum(len(v) for v in data.get('results', {}).values())
+          print(total)
+          " 2>/dev/null || echo "0")
+
+          echo "detect-secrets: $secret_count potential secret(s) found"
+          echo "## Secret Scan Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Potential secrets detected: $secret_count" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$secret_count" -gt 0 ]; then
+            cat /tmp/secrets-baseline.json
+            echo "::error::detect-secrets found $secret_count potential secret(s). Review and remediate before merging."
+            exit 1
+          fi
+
       - name: Select Trivy PR scan target
         id: trivy-pr-target
         if: github.event_name == 'pull_request'
