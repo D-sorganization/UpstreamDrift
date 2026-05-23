@@ -368,7 +368,10 @@ async def simulation_stream(
     except WebSocketDisconnect:
         pass  # Client disconnected
     except (ValueError, RuntimeError, AttributeError):
-        logger.exception("Simulation WebSocket error")
+        logger.exception(
+            "Simulation WebSocket failed for engine=%s",
+            engine_type,
+        )
         with contextlib.suppress(ConnectionError, TimeoutError, OSError):
             await websocket.send_json({"error": _INTERNAL_ERROR_DETAIL})
     finally:
