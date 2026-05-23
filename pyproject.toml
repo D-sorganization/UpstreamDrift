@@ -200,6 +200,10 @@ exclude = [
     "src/**/test_*.py",
     "src/**/tests/**",
 ]
+artifacts = [
+    "ui/dist/**/*",
+]
+
 
 [tool.hatch.build.hooks.custom]
 # Build UI before packaging
