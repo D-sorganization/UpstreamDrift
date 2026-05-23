@@ -7,7 +7,7 @@ Lazily imports :mod:`opensim` and loads a ``.osim`` file via
 ``engine_name="opensim"``.
 
 Method bodies that require non-trivial OpenSim wiring currently raise
-:class:`NotImplementedError` with a TODO(#4963) tied to follow-up
+:class:`NotImplementedError` with a TODO: #4963 tied to follow-up
 against the EPIC #4895 Pose Studio engine bridge.
 """
 
@@ -98,7 +98,7 @@ class OpenSimKinematicsService:
         q_dict = adapter.from_canonical(pose)
 
         coord_set = self._model.updCoordinateSet()
-        for name, value in q_dict.items():
+        for name, value in q_dict.items():  # type: ignore[attr-defined]
             if coord_set.contains(name):
                 coord = coord_set.get(name)
                 coord.setValue(self._state, value)

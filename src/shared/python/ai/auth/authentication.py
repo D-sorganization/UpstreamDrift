@@ -336,7 +336,7 @@ class AuthManager:
             can no longer be misled into trusting a fake identity.
         """
         raise NotImplementedError(
-            f"OAuth login for provider {provider!r} is not implemented (TODO(#5227)). "
+            f"OAuth login for provider {provider!r} is not implemented TODO: #5227. "
             "To use authenticated features, configure provider credentials directly "
             "via the keyring (chat/credentials.py) and skip the OAuth flow."
         )
@@ -364,7 +364,7 @@ class AuthManager:
             can no longer be misled into trusting a fake identity.
         """
         raise NotImplementedError(
-            f"Email/password login for {email!r} is not implemented (TODO(#5227)). "
+            f"Email/password login for {email!r} is not implemented TODO: #5227. "
             "To use authenticated features, supply an API key via login_with_api_key. "
             "Email/password auth requires a backend service — see Phase 2 of #2757."
         )
@@ -463,7 +463,7 @@ class AuthManager:
         """
         if not self._access_token or not self._access_token.is_valid():
             if self._refresh_token and self._refresh_token.is_valid():
-                # TODO(#5227): Exchange refresh token for new access token
+                # TODO: Exchange refresh token for new access token #5227
                 logger.info("Refreshing access token")
                 return True
             return False
