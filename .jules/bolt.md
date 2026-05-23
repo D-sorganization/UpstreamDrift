@@ -74,3 +74,7 @@
 ## 2026-05-19 - Optimize mechanical work metrics
 **Learning:** Computations like `np.sum(derivatives**2)` and `np.sum(values**2 * dt)` or `np.sum(torque**2, axis=1)` involve element-wise operations that allocate intermediate memory (`**2` and multiplication). This can be slow for long arrays of time series data.
 **Action:** Replace `np.sum(x**2)` with `np.vdot(x, x)`, `np.sum(x**2 * dt)` with `np.vdot(x, x * dt)`. For multi-dimensional axis summation like `np.sum(torque**2, axis=1)`, replace it with `np.einsum('ij,ij->i', torque, torque)`. Similarly, replace `np.sum(np.abs(torque), axis=1)` with `np.einsum('ij->i', np.abs(torque))`.
+
+## 2026-05-23 - GitHub Actions setup-python pip issues
+**Learning:** Installing `pydantic-core` sometimes fails with uninstall errors under the virtual environments created by `actions/setup-python` during GitHub Actions CI due to missing `RECORD` files or invalid metadata entries, particularly when repeatedly updating `pip` inside the runner.
+**Action:** When working on GitHub Actions Python CI scripts, ensure to proactively use `pip install --ignore-installed --no-deps pydantic-core==2.46.3 || true` right before the main `pip install -e ".[dev]"` lines, to bypass unresolvable cache/uninstall issues for `pydantic-core`.

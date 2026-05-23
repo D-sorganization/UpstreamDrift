@@ -75,6 +75,7 @@ jobs:
           python -m ensurepip --upgrade || true
           python -m pip install --upgrade pip
           python -m ensurepip --upgrade || true
+          pip install --ignore-installed --no-deps pydantic-core==2.46.3 || true
           pip install -e ".[dev]"
 
       - name: Validate workflow YAML
@@ -84,7 +85,7 @@ jobs:
 
       - name: Run leaderboard writer tests
         run: |
-          pytest tests/cross_engine/test_leaderboard_writer.py \
+          xvfb-run -a pytest tests/cross_engine/test_leaderboard_writer.py \
                  tests/unit/motion_matching/test_leaderboard.py \
                  -v --timeout=60
 
