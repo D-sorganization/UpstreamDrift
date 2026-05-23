@@ -123,6 +123,8 @@ class SecurityManager:
             raise ValueError("password must be provided")
         salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
         hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
+        if not isinstance(hashed, bytes):
+            raise TypeError("bcrypt.hashpw must return bytes")
         return hashed.decode("utf-8")
 
     @precondition(
@@ -148,8 +150,10 @@ class SecurityManager:
             True if password matches, False otherwise
         """
         try:
-            return bcrypt.checkpw(
-                plain_password.encode("utf-8"), hashed_password.encode("utf-8")
+            return bool(
+                bcrypt.checkpw(
+                    plain_password.encode("utf-8"), hashed_password.encode("utf-8")
+                )
             )
         except (ValueError, TypeError):
             return False
@@ -275,6 +279,8 @@ class SecurityManager:
             raise ValueError("api_key must be provided")
         salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
         hashed = bcrypt.hashpw(api_key.encode("utf-8"), salt)
+        if not isinstance(hashed, bytes):
+            raise TypeError("bcrypt.hashpw must return bytes")
         return hashed.decode("utf-8")
 
     def verify_api_key(self, api_key: str, hashed_key: str) -> bool:
@@ -288,7 +294,9 @@ class SecurityManager:
             True if key matches, False otherwise
         """
         try:
-            return bcrypt.checkpw(api_key.encode("utf-8"), hashed_key.encode("utf-8"))
+            return bool(
+                bcrypt.checkpw(api_key.encode("utf-8"), hashed_key.encode("utf-8"))
+            )
         except (ValueError, TypeError):
             return False
 
@@ -435,6 +443,7 @@ class AuthCache:
     """
 
     TTL_SECONDS = 300  # 5 minutes cache
+    MAX_ENTRIES = 10_000
 
     def __init__(self) -> None:
         import threading
@@ -466,11 +475,14 @@ class AuthCache:
             raise ValueError("api_key must be provided")
         cache_key = self._cache_lookup_token(api_key)
         with self._lock:
-            # Simple cleanup of size if needed, but 300s TTL is self-limiting mostly
-            if len(self._cache) > 10000:
-                # Random eviction or clear
-                self._cache.clear()
+            self._cache.pop(cache_key, None)
+            self._evict_overflow_entries()
             self._cache[cache_key] = (result, self._time.time())
+
+    def _evict_overflow_entries(self) -> None:
+        """Keep the cache bounded without flushing unrelated auth results."""
+        while len(self._cache) >= self.MAX_ENTRIES:
+            self._cache.pop(next(iter(self._cache)))
 
     def _cache_lookup_token(self, token_value: str) -> str:
         """Generate a lookup token for the auth cache.
