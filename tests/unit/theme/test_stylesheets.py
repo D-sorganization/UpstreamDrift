@@ -14,7 +14,7 @@ _THEME: dict[str, str] = {
     "text": "#cdd6f4",
     "text_secondary": "#a6adc8",
     "label": "#6c7086",
-    "focus": "#89b4fa",
+    "focus": "#94e2d5",
     "input_bg": "#181825",
     "accent": "#89b4fa",
     "title_bg": "#313244",
@@ -58,6 +58,70 @@ class TestGenerateStylesheet:
         result = generate_stylesheet(_THEME)
         assert _THEME["accent"] in result
 
+    def test_full_stylesheet_includes_each_theme_token(self) -> None:
+        result = generate_stylesheet(_THEME)
+
+        for color in _THEME.values():
+            assert color in result
+
+    def test_full_stylesheet_includes_major_widget_sections(self) -> None:
+        result = generate_stylesheet(_THEME)
+
+        expected_selectors = [
+            "QMainWindow, QWidget",
+            "QGroupBox::title",
+            "QComboBox QAbstractItemView",
+            "QMenu::separator",
+            "QTabBar::tab:selected",
+            "QTableWidget, QTableView",
+            "QTreeWidget::item:selected, QTreeView::item:selected",
+            "QProgressBar::chunk",
+            "QCheckBox::indicator:checked",
+            "QToolBar::separator",
+            "QDockWidget::title",
+            "QScrollBar::handle:horizontal:hover",
+            'QFrame[frameShape="4"], QFrame[frameShape="5"]',
+            "#launchButton:pressed",
+        ]
+        for selector in expected_selectors:
+            assert selector in result
+
+    def test_full_stylesheet_preserves_section_order(self) -> None:
+        result = generate_stylesheet(_THEME)
+
+        ordered_markers = [
+            "QMainWindow, QWidget",
+            "QGroupBox",
+            "QScrollArea",
+            "QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox",
+            "QLabel",
+            "QPushButton",
+            "QMenuBar",
+            "QTabWidget::pane",
+            "QTableWidget, QTableView",
+            "QTextEdit, QPlainTextEdit",
+            "QProgressBar",
+            "QSlider::groove:horizontal",
+            "QToolTip",
+            "QDockWidget",
+            "QSplitter::handle",
+            "ToolCard",
+        ]
+        positions = [result.index(marker) for marker in ordered_markers]
+
+        assert positions == sorted(positions)
+
+    def test_full_stylesheet_raises_for_missing_required_color(self) -> None:
+        incomplete_theme = dict(_THEME)
+        del incomplete_theme["button_hover"]
+
+        try:
+            generate_stylesheet(incomplete_theme)
+        except KeyError as exc:
+            assert exc.args == ("button_hover",)
+        else:
+            raise AssertionError("Expected KeyError for missing theme color")
+
 
 class TestGenerateMinimalStylesheet:
     def test_stylesheets_returns_string(self) -> None:
@@ -80,3 +144,34 @@ class TestGenerateMinimalStylesheet:
     def test_contains_qwidget(self) -> None:
         result = generate_minimal_stylesheet(_THEME)
         assert "QWidget" in result
+
+    def test_minimal_stylesheet_only_uses_embedding_selectors(self) -> None:
+        result = generate_minimal_stylesheet(_THEME)
+
+        assert "QWidget" in result
+        assert "QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox" in result
+        assert "QPushButton:hover" in result
+        assert "QMenuBar" not in result
+        assert "QDockWidget" not in result
+        assert "ToolCard" not in result
+
+    def test_minimal_stylesheet_uses_expected_theme_colors(self) -> None:
+        result = generate_minimal_stylesheet(_THEME)
+
+        used_keys = {"bg", "text", "input_bg", "border", "group_bg", "accent"}
+        unused_keys = set(_THEME) - used_keys
+        for key in used_keys:
+            assert _THEME[key] in result
+        for key in unused_keys:
+            assert _THEME[key] not in result
+
+    def test_minimal_stylesheet_raises_for_missing_required_color(self) -> None:
+        incomplete_theme = dict(_THEME)
+        del incomplete_theme["group_bg"]
+
+        try:
+            generate_minimal_stylesheet(incomplete_theme)
+        except KeyError as exc:
+            assert exc.args == ("group_bg",)
+        else:
+            raise AssertionError("Expected KeyError for missing theme color")
