@@ -401,6 +401,7 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
+    "parity: cross-implementation parity and contract checks that should stay targetable as a CI lane",
     "e2e: full-stack smoke tests; nightly + release gate only",
     "gate: production validation gate",
     "core_only: tests that must pass in a default install with no optional engine extras",
