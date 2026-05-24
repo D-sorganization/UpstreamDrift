@@ -142,9 +142,9 @@ class TestSplitterRatio:
         total = sum(sizes)
         assert total > 0
         chat_ratio = sizes[0] / total
-        assert abs(chat_ratio - 0.6) < 0.05, (
-            f"chat-first: expected ~0.60 left ratio, got {chat_ratio:.3f}"
-        )
+        assert (
+            abs(chat_ratio - 0.6) < 0.05
+        ), f"chat-first: expected ~0.60 left ratio, got {chat_ratio:.3f}"
         win.close()
 
     def test_calc_first_ratio(self, app: Any, session_store: Any) -> None:
@@ -158,9 +158,9 @@ class TestSplitterRatio:
         total = sum(sizes)
         assert total > 0
         sidebar_ratio = sizes[0] / total
-        assert abs(sidebar_ratio - 0.6) < 0.05, (
-            f"calc-first: expected ~0.60 left ratio, got {sidebar_ratio:.3f}"
-        )
+        assert (
+            abs(sidebar_ratio - 0.6) < 0.05
+        ), f"calc-first: expected ~0.60 left ratio, got {sidebar_ratio:.3f}"
         win.close()
 
 
@@ -206,6 +206,43 @@ class TestPublicAccessors:
 # ---------------------------------------------------------------------------
 # Hygiene: no src.launchers.* imports
 # ---------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------
+# Profile switching
+# ---------------------------------------------------------------------------
+
+
+class TestProfileSwitch:
+    def test_switch_profile_reorders_and_reflows(
+        self, app: Any, session_store: Any
+    ) -> None:
+        from sidekick.standalone.window import StandaloneSidekickWindow
+
+        win = StandaloneSidekickWindow(_make_config(session_store, "chat-first"))
+        win.resize(1280, 800)
+        win.show()
+
+        # Check initial state
+        sizes_chat_first = win.splitter_handle_positions()
+        chat_ratio = sizes_chat_first[0] / sum(sizes_chat_first)
+        assert abs(chat_ratio - 0.6) < 0.05
+
+        # Access internal layout to check widget order without breaking encapsulation too badly
+        assert win._splitter.widget(0) is win._chat_panel
+        assert win._splitter.widget(1) is win._sidebar_panel
+
+        # Switch to calc-first
+        win._switch_profile("calc-first")
+
+        # Check new state
+        sizes_calc_first = win.splitter_handle_positions()
+        calc_ratio = sizes_calc_first[0] / sum(sizes_calc_first)
+        assert abs(calc_ratio - 0.6) < 0.05
+        assert win._splitter.widget(0) is win._sidebar_panel
+        assert win._splitter.widget(1) is win._chat_panel
+
+        win.close()
 
 
 class TestNoLaunchersImport:
