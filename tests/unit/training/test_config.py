@@ -103,10 +103,18 @@ class TestTrainingConfigValidation:
         with pytest.raises(TrainingConfigError):
             _minimal_config(max_epochs=bad_value)
 
+    def test_rejects_boolean_max_epochs(self) -> None:
+        with pytest.raises(TrainingConfigError):
+            _minimal_config(max_epochs=True)
+
     @pytest.mark.parametrize("bad_value", [0, -5])
     def test_rejects_non_positive_max_steps(self, bad_value: int) -> None:
         with pytest.raises(TrainingConfigError):
             _minimal_config(max_steps=bad_value)
+
+    def test_rejects_boolean_max_steps(self) -> None:
+        with pytest.raises(TrainingConfigError):
+            _minimal_config(max_steps=False)
 
     def test_accepts_both_caps_set(self) -> None:
         """Both ``max_epochs`` and ``max_steps`` may be set together."""
@@ -117,6 +125,10 @@ class TestTrainingConfigValidation:
     def test_rejects_negative_seed(self) -> None:
         with pytest.raises(TrainingConfigError):
             _minimal_config(seed=-1)
+
+    def test_rejects_boolean_seed(self) -> None:
+        with pytest.raises(TrainingConfigError):
+            _minimal_config(seed=True)
 
     def test_accepts_zero_seed(self) -> None:
         cfg = _minimal_config(seed=0)
