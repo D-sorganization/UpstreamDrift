@@ -27,6 +27,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0019](0019-mission-drift-calculators.md)          | Mission-Drift Calculators                                       | Accepted | 2026-04-25 |
 | [0020](0020-canonical-urdf-subsystem.md)           | Canonical URDF subsystem                                        | Proposed | 2026-05-08 |
 | [0021](0021-container-strategy.md)                 | Root container surface policy                                   | Accepted | 2026-05-24 |
+| [0022](0022-chat-sidekick-boundary.md)             | Chat / Sidekick boundary                                        | Accepted | 2026-05-24 |
 
 ## ADR Backlog
 
