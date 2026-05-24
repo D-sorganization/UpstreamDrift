@@ -68,7 +68,7 @@ async def run_simulation(
         ) from exc
     except RuntimeError as exc:
         if logger:
-            logger.error("Simulation runtime error: %s", exc)
+            logger.exception("Simulation runtime error")
         raise HTTPException(
             status_code=500, detail=f"Simulation failed: {str(exc)}"
         ) from exc

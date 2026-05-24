@@ -35,7 +35,7 @@ def _get_manifest() -> LauncherManifest:
         try:
             _launcher_state["manifest"] = LauncherManifest.load()
         except (FileNotFoundError, ValueError) as e:
-            logger.error("Failed to load launcher manifest: %s", e)
+            logger.exception("Failed to load launcher manifest")
             raise HTTPException(
                 status_code=500,
                 detail=f"Launcher manifest error: {e}",
