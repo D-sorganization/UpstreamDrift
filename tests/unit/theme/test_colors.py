@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.theme.colors import (
+    BUILTIN_THEMES,
+    SEMANTIC_COLOR_KEYS,
     THEME_COLOR_KEYS,
     Colors,
+    _is_dark_theme,
+    get_matplotlib_colors,
     get_rgba,
     is_dark_theme,
     is_valid_hex_color,
@@ -28,6 +34,33 @@ class TestIsValidHexColor:
     def test_colors_returns_bool(self) -> None:
         assert isinstance(is_valid_hex_color("#FF0000"), bool)
 
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "abc",
+            "#abcd",
+            "11223344",
+            "  #ABCDEF  ",
+        ],
+    )
+    def test_valid_edge_formats(self, value: str) -> None:
+        assert is_valid_hex_color(value) is True
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "",
+            "   ",
+            "#12",
+            "#12345",
+            "#1234567",
+            "#123456789",
+            "not-a-color",
+        ],
+    )
+    def test_invalid_edge_formats(self, value: str) -> None:
+        assert is_valid_hex_color(value) is False
+
 
 class TestNormaliseHexColor:
     def test_three_digit_expands_to_seven_chars(self) -> None:
@@ -39,6 +72,20 @@ class TestNormaliseHexColor:
         result = normalise_hex_color("#aabbcc")
         assert len(result) == 7
         assert result.startswith("#")
+
+    def test_strips_whitespace_and_lowercases(self) -> None:
+        assert normalise_hex_color("  AABBCC  ") == "#aabbcc"
+
+    def test_four_digit_alpha_format_is_preserved(self) -> None:
+        assert normalise_hex_color("#AbCd") == "#abcd"
+
+    def test_eight_digit_alpha_format_is_preserved(self) -> None:
+        assert normalise_hex_color("AABBCCDD") == "#aabbccdd"
+
+    @pytest.mark.parametrize("value", ["", "#12", "#xyzxyz", "#12345"])
+    def test_invalid_values_raise(self, value: str) -> None:
+        with pytest.raises(ValueError, match="Invalid colour value"):
+            normalise_hex_color(value)
 
 
 class TestGetRgba:
@@ -66,6 +113,22 @@ class TestGetRgba:
         result = get_rgba("#123456")
         assert len(result) == 4
 
+    def test_eight_digit_hex_uses_embedded_alpha(self) -> None:
+        assert get_rgba("#ff000080") == (1.0, 0.0, 0.0, 128 / 255)
+
+    def test_explicit_alpha_multiplies_embedded_alpha(self) -> None:
+        _, _, _, a = get_rgba("0000ff80", alpha=0.5)
+        assert a == pytest.approx((128 / 255) * 0.5)
+
+    @pytest.mark.parametrize("value", [None, "#fff", "#12345", "#123456789"])
+    def test_invalid_lengths_raise_value_error(self, value: str | None) -> None:
+        with pytest.raises(ValueError):
+            get_rgba(value)  # type: ignore[arg-type]
+
+    def test_invalid_hex_digits_raise_value_error(self) -> None:
+        with pytest.raises(ValueError):
+            get_rgba("#zzzzzz")
+
 
 class TestThemeColorKeys:
     def test_is_tuple(self) -> None:
@@ -81,10 +144,60 @@ class TestThemeColorKeys:
         assert len(THEME_COLOR_KEYS) > 0
 
 
+class TestSemanticColorKeys:
+    def test_semantic_keys_include_expected_roles(self) -> None:
+        assert set(SEMANTIC_COLOR_KEYS) == {
+            "success",
+            "warning",
+            "error",
+            "info",
+            "link",
+            "link_hover",
+            "selection_bg",
+            "selection_text",
+        }
+
+
 class TestIsDarkTheme:
     def test_colors_returns_bool(self) -> None:
         result = is_dark_theme("dark")
         assert isinstance(result, bool)
+
+    def test_builtin_dark_theme_detected(self) -> None:
+        assert is_dark_theme("Dark") is True
+
+    def test_builtin_light_theme_not_dark(self) -> None:
+        assert is_dark_theme("Light") is False
+
+    def test_unknown_theme_not_dark(self) -> None:
+        assert is_dark_theme("missing") is False
+
+    @pytest.mark.parametrize(
+        ("theme", "expected"),
+        [
+            ({"bg": "#000000"}, True),
+            ({"bg": "#ffffff"}, False),
+            ({"bg": "#7f7f7f"}, True),
+            ({"bg": "bad"}, False),
+            ({}, False),
+        ],
+    )
+    def test_private_dark_theme_edges(
+        self, theme: dict[str, str], expected: bool
+    ) -> None:
+        assert _is_dark_theme(theme) is expected
+
+
+class TestGetMatplotlibColors:
+    def test_dark_theme_uses_lower_grid_alpha(self) -> None:
+        colors = get_matplotlib_colors(BUILTIN_THEMES["Dark"])
+        assert colors["figure.facecolor"] == BUILTIN_THEMES["Dark"]["bg"]
+        assert colors["grid.alpha"] == 0.3
+
+    def test_light_theme_uses_higher_grid_alpha(self) -> None:
+        colors = get_matplotlib_colors(BUILTIN_THEMES["Light"])
+        assert colors["axes.facecolor"] == BUILTIN_THEMES["Light"]["group_bg"]
+        assert colors["grid.alpha"] == 0.5
 
 
 class TestColorsClass:

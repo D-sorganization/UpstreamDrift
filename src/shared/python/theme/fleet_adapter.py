@@ -259,10 +259,10 @@ def fleet_to_theme_colors(theme_name: str) -> ThemeColors:
     Raises:
         KeyError: If theme_name is not found in fleet themes
     """
-    from .theme_manager import ThemeColors  # type: ignore[attr-defined]
-
     if theme_name not in FLEET_THEMES:
         raise KeyError(f"Fleet theme '{theme_name}' not found")
+
+    from .theme_manager import ThemeColors  # type: ignore[attr-defined]
 
     ft = FLEET_THEMES[theme_name]
     is_dark = _is_dark_theme(ft)
