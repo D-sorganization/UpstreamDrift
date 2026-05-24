@@ -39,6 +39,7 @@ ALLOWLIST = frozenset(
         "launch.bat",
         "install.sh",
         "VERSION",
+        "sidekick.spec",
     }
 )
 
