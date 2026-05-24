@@ -9,9 +9,10 @@ from typing import Any
 
 import numpy as np
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from src.api.auth.ws_auth import resolve_ws_user
+from src.api.models.requests import SimulationRequest
 from src.shared.python.core.contracts import require
 from src.shared.python.engine_core.engine_registry import EngineType
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -144,6 +145,37 @@ class SimulationFrame(BaseModel):
     time: float
     state: dict[str, Any]
     analysis: dict[str, Any] | None = None
+
+
+def _validate_start_config(
+    engine_type: str,
+    raw_config: object,
+) -> dict[str, Any]:
+    """Validate and normalize the simulation start config."""
+    config_input = raw_config or {}
+    if not isinstance(config_input, dict):
+        raise ValueError("Simulation config must be an object")
+
+    validated = SimulationRequest.model_validate(
+        {
+            "engine_type": engine_type,
+            **config_input,
+        }
+    )
+    config = {
+        key: value
+        for key, value in config_input.items()
+        if key not in SimulationRequest.model_fields
+    }
+    config.update(
+        validated.model_dump(
+            exclude={"engine_type"},
+            exclude_none=True,
+        )
+    )
+    if "speed_factor" in config_input:
+        config["speed_factor"] = _clamp_speed_factor(config_input["speed_factor"])
+    return config
 
 
 async def _load_simulation_engine(
@@ -371,7 +403,11 @@ async def simulation_stream(
             await websocket.send_json({"error": "Expected 'start' action"})
             return
 
-        config = start_msg.get("config", {})
+        try:
+            config = _validate_start_config(engine_type, start_msg.get("config", {}))
+        except (ValidationError, ValueError):
+            await websocket.send_json({"error": "Invalid simulation config"})
+            return
         _reset_simulation_stats(websocket, config)
 
         # Load engine

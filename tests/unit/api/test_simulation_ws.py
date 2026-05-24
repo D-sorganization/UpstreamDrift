@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import json
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import numpy as np
 import pytest
@@ -311,7 +311,14 @@ class TestSimulationStreamErrors:
         app.state.engine_manager = _EngineManager()
         app.include_router(simulation_ws.router)
 
+        async def fake_resolve_ws_user(_websocket: Any) -> object:
+            return object()
+
         with (
+            patch(
+                "src.api.routes.simulation_ws.resolve_ws_user",
+                side_effect=fake_resolve_ws_user,
+            ),
             patch("src.api.routes.simulation_ws.logger.exception") as logger_exception,
             TestClient(app).websocket_connect("/ws/simulate/mujoco") as websocket,
         ):
@@ -385,6 +392,11 @@ async def test_simulation_stream_sanitizes_unexpected_errors(
         fake_run_simulation_loop,
     )
     monkeypatch.setattr(simulation_ws_module, "logger", mock_logger)
+    monkeypatch.setattr(
+        simulation_ws_module,
+        "resolve_ws_user",
+        AsyncMock(return_value=object()),
+    )
 
     await simulation_ws_module.simulation_stream(websocket, "mujoco")
 
@@ -396,3 +408,51 @@ async def test_simulation_stream_sanitizes_unexpected_errors(
         "Simulation WebSocket failed for engine=%s",
         "mujoco",
     )
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_rejects_invalid_duration(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Invalid duration must fail at the WS boundary before engine load."""
+
+    websocket = _RouteWebSocket([{"action": "start", "config": {"duration": 0}}])
+    load_engine = AsyncMock()
+
+    async def fake_resolve_ws_user(_websocket: Any) -> object:
+        return object()
+
+    monkeypatch.setattr(simulation_ws_module, "resolve_ws_user", fake_resolve_ws_user)
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert websocket.sent == [{"error": "Invalid simulation config"}]
+    load_engine.assert_not_called()
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_rejects_malformed_initial_state(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Malformed q/v vectors must be rejected before set_state runs."""
+
+    websocket = _RouteWebSocket(
+        [{"action": "start", "config": {"initial_state": {"q": "bad-state"}}}]
+    )
+    load_engine = AsyncMock()
+
+    async def fake_resolve_ws_user(_websocket: Any) -> object:
+        return object()
+
+    monkeypatch.setattr(simulation_ws_module, "resolve_ws_user", fake_resolve_ws_user)
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert websocket.sent == [{"error": "Invalid simulation config"}]
+    load_engine.assert_not_called()

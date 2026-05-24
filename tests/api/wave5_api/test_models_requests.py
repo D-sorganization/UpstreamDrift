@@ -44,6 +44,27 @@ def test_simulation_request_timestep_too_large() -> None:
         r.SimulationRequest(engine_type="mujoco", timestep=r.MAX_TIMESTEP * 2)
 
 
+def test_simulation_request_initial_state_qv_normalized() -> None:
+    sim = r.SimulationRequest(
+        engine_type="mujoco",
+        initial_state={"q": [0, "1.5"], "v": (2, 3.5)},
+    )
+    assert sim.initial_state == {"q": [0.0, 1.5], "v": [2.0, 3.5]}
+
+
+def test_simulation_request_initial_state_qv_rejects_bad_values() -> None:
+    with pytest.raises(ValidationError):
+        r.SimulationRequest(
+            engine_type="mujoco",
+            initial_state={"q": "not-a-list"},
+        )
+    with pytest.raises(ValidationError):
+        r.SimulationRequest(
+            engine_type="mujoco",
+            initial_state={"v": [0.0, float("nan")]},
+        )
+
+
 # ----- AnalysisRequest -----
 
 
