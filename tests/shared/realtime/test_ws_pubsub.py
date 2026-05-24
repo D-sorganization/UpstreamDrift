@@ -193,6 +193,61 @@ class TestWSPubSubRust:
         finally:
             ps.stop()
 
+    def test_backend_resolution_is_lazy_until_start(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        calls: list[str] = []
+
+        def fake_resolve() -> str:
+            calls.append("resolve")
+            return "python"
+
+        monkeypatch.setattr(ws_mod, "_resolve_backend", fake_resolve)
+        monkeypatch.setattr(ws_mod, "_port_in_use", lambda _h, _p: True)
+
+        ps = ws_mod.WSPubSub(port=12357, autostart=False)
+        assert ps.backend == "auto"
+        assert calls == []
+
+        ps.start()
+        assert ps.backend == "python"
+        assert calls == ["resolve"]
+
+    def test_publish_resolves_backend_lazily(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        calls: list[str] = []
+
+        def fake_resolve() -> str:
+            calls.append("resolve")
+            return "python"
+
+        captured: dict[str, object] = {}
+
+        class FakeResp:
+            def raise_for_status(self) -> None:
+                pass
+
+        class FakeClient:
+            def __init__(self, timeout=None) -> None:
+                captured["timeout"] = timeout
+
+            def post(self, url: str, json):
+                captured["url"] = url
+                captured["body"] = json
+                return FakeResp()
+
+        monkeypatch.setattr(ws_mod, "_resolve_backend", fake_resolve)
+        monkeypatch.setitem(sys.modules, "httpx", SimpleNamespace(Client=FakeClient))
+        ws_mod.WSPubSub._http_client = None
+
+        ps = ws_mod.WSPubSub(port=12358, autostart=False)
+        ps.publish("scope/topic", {"v": 1})
+
+        assert calls == ["resolve"]
+        assert ps.backend == "python"
+        assert captured["body"] == {"channel": "scope/topic", "payload": {"v": 1}}
+
     def test_publish_via_rust(self, fake_rust) -> None:
         ps = ws_mod.WSPubSub(port=0, backend="rust")
         try:
@@ -345,6 +400,7 @@ class TestPythonPublishPath:
 
     def test_publish_uses_httpx(self, monkeypatch: pytest.MonkeyPatch) -> None:
         ps = ws_mod.WSPubSub(port=12349, backend="python", autostart=False)
+        ws_mod.WSPubSub._http_client = None
 
         captured: dict = {}
 
@@ -679,6 +735,7 @@ def test_publish_rust_no_server_falls_back_to_python(
     """If backend is rust but rust_server is None (failed start), publish
     must use the python httpx code path."""
     ps = ws_mod.WSPubSub(port=12356, backend="python", autostart=False)
+    ws_mod.WSPubSub._http_client = None
     # Force the "rust but no server" condition
     ps.backend = "rust"
     ps._rust_server = None

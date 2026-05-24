@@ -11,7 +11,9 @@ Two backends are wired in this module:
 
 Selection is controlled by the ``UD_REALTIME_BACKEND`` env var. When
 unset, ``rust`` is used iff the wheel imports; otherwise the python
-backend is used.
+backend is used. Resolution is deferred until a ``WSPubSub`` instance is
+started or used so importing this module does not probe optional runtime
+dependencies.
 
 Reconnection (python backend only) is exponential (1s, 2s, 4s, ...,
 capped at 30s).
@@ -75,9 +77,6 @@ def _resolve_backend() -> str:
     return "rust" if _has_rust_wheel() else "python"
 
 
-REALTIME_BACKEND = _resolve_backend()
-
-
 def _port_in_use(host: str, port: int) -> bool:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.settimeout(0.25)
@@ -125,8 +124,8 @@ class WSPubSub:
         port: Port of the WS server. Defaults to 8765.
         autostart: If True, spawn the backend server on the configured port
             if nothing is listening. Defaults to True.
-        backend: Override the module-level :data:`REALTIME_BACKEND` for this
-            instance. ``None`` (default) uses the module-level value.
+        backend: Override backend resolution for this instance. ``None``
+            (default) resolves the backend lazily from the environment.
     """
 
     # Shared HTTP client for the python-backend publish path.
@@ -144,14 +143,30 @@ class WSPubSub:
     ) -> None:
         self.host = host
         self.port = port
-        self.backend = (backend or REALTIME_BACKEND).lower()
+        self._backend_override = backend.lower() if backend is not None else None
+        self._backend_resolved = self._backend_override is not None
+        self.backend = self._backend_override or "auto"
+        self._autostart = autostart
         self._server_thread: threading.Thread | None = None
         self._rust_server = None  # upstream_realtime.Server | None
         if autostart:
-            if self.backend == "rust":
+            self.start()
+
+    def _ensure_backend_resolved(self) -> None:
+        if self._backend_resolved:
+            return
+        self.backend = _resolve_backend()
+        self._backend_resolved = True
+
+    def start(self) -> None:
+        """Resolve and start the configured backend when needed."""
+        self._ensure_backend_resolved()
+        if self.backend == "rust":
+            if self._rust_server is None:
                 self._start_rust_server()
-            elif not _port_in_use(host, port):
-                self._spawn_server()
+            return
+        if self._autostart and not _port_in_use(self.host, self.port):
+            self._spawn_server()
 
     # -- rust backend --------------------------------------------------------
 
@@ -249,6 +264,7 @@ class WSPubSub:
         if not isinstance(payload, dict):
             raise TypeError(f"payload must be a dict, got {type(payload).__name__}")
 
+        self._ensure_backend_resolved()
         if self.backend == "rust" and self._rust_server is not None:
             self._rust_server.publish(channel, json.dumps(payload))
             return
@@ -275,6 +291,7 @@ class WSPubSub:
     ) -> Subscription:
         validate_channel(channel)
 
+        self._ensure_backend_resolved()
         if self.backend == "rust" and self._rust_server is not None:
             return self._subscribe_rust(channel, callback)
 
