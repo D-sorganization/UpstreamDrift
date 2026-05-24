@@ -48,6 +48,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 import importlib
 import importlib.util
 import sys
+import warnings
 from collections.abc import Callable, Generator
 from dataclasses import dataclass
 from pathlib import Path
@@ -59,9 +60,9 @@ import pytest
 # On Windows, missing PyQt6 DLLs can cause a fatal crash.
 # Mock them immediately before any imports happen.
 try:
-    import PyQt6.QtCore
+    import PyQt6.QtCore as _pyqt6_qtcore
 
-    _has_pyqt6 = True
+    _has_pyqt6 = _pyqt6_qtcore is not None
 except ImportError:
     _has_pyqt6 = False
 
@@ -276,6 +277,7 @@ _OPTIONAL_COLLECTION_RULES = (
         modules=("start_api_server",),
     ),
 )
+_OPTIONAL_COLLECTION_WARNED_PATHS: set[str] = set()
 
 
 def _normalized_collection_path(path: object) -> str:
@@ -315,6 +317,20 @@ def _rule_requirement_missing(rule: OptionalCollectionRule) -> bool:
     return missing_module or missing_symbol
 
 
+def _rule_missing_requirements(
+    rule: OptionalCollectionRule,
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    missing_modules = tuple(
+        module for module in rule.modules if not _module_available(module)
+    )
+    missing_symbols = tuple(
+        f"{module}.{symbol}"
+        for module, symbol in rule.symbols
+        if not _symbol_available(module, symbol)
+    )
+    return missing_modules, missing_symbols
+
+
 def _should_ignore_optional_collection_path(path: object) -> bool:
     path_text = _normalized_collection_path(path)
     for rule in _OPTIONAL_COLLECTION_RULES:
@@ -326,9 +342,41 @@ def _should_ignore_optional_collection_path(path: object) -> bool:
     return False
 
 
+def _warn_optional_collection_skip(path: object) -> None:
+    path_text = _normalized_collection_path(path)
+    if path_text in _OPTIONAL_COLLECTION_WARNED_PATHS:
+        return
+
+    for rule in _OPTIONAL_COLLECTION_RULES:
+        if not any(
+            _matches_collection_suffix(path_text, suffix)
+            for suffix in rule.path_suffixes
+        ):
+            continue
+
+        missing_modules, missing_symbols = _rule_missing_requirements(rule)
+        missing_parts = [*missing_modules, *missing_symbols]
+        if not missing_parts:
+            return
+
+        warnings.warn(
+            pytest.PytestWarning(
+                "Skipping optional test collection for "
+                f"{path_text} because required optional imports are missing: "
+                + ", ".join(missing_parts)
+            ),
+            stacklevel=2,
+        )
+        _OPTIONAL_COLLECTION_WARNED_PATHS.add(path_text)
+        return
+
+
 def pytest_ignore_collect(collection_path: Path, config: pytest.Config) -> bool:
     """Do not collect tests for optional stacks that are absent in this checkout."""
-    return _should_ignore_optional_collection_path(collection_path)
+    should_ignore = _should_ignore_optional_collection_path(collection_path)
+    if should_ignore:
+        _warn_optional_collection_skip(collection_path)
+    return should_ignore
 
 
 _BIOMECH_SIBLINGS_DIRECT = (

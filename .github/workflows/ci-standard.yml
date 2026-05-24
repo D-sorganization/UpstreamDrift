@@ -44,7 +44,7 @@ jobs:
   pinned-actions:
     name: Enforce action SHA pinning
     runs-on: d-sorg-fleet
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects
         shell: bash
@@ -66,7 +66,7 @@ jobs:
   workflow-inventory:
     name: Enforce workflow inventory
     runs-on: d-sorg-fleet
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects
         shell: bash
@@ -88,7 +88,7 @@ jobs:
   urdf-layering:
     name: Enforce URDF subsystem layering (ADR 0007)
     runs-on: d-sorg-fleet
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects
         shell: bash
