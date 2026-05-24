@@ -80,6 +80,8 @@ jobs:
           sudo apt-get install -y xvfb
           pip install --ignore-installed --no-deps pydantic-core==2.46.3 || true
           pip install -e ".[dev]"
+          # Prevent environment pollution conflict between pytest-recording and pytest-vcr
+          pip uninstall -y pytest-vcr pytest-recording || true
 
       - name: Validate workflow YAML
         run: |
