@@ -220,9 +220,11 @@ class TestCIEnvironmentCompatibility:
             encoding="utf-8",
         )
 
-        assert "pytest_status=$?" in workflow
-        assert 'if [ "$pytest_status" -eq 5 ]; then' in workflow
-        assert "All selected PR-scoped tests were skipped" in workflow
+        assert "pytest_exit_code=$?" in workflow
+        assert "elif [ $pytest_exit_code -eq 5 ]; then" in workflow
+        assert "WARNING: pytest exit code 5 (no tests collected) detected." in (
+            workflow
+        )
 
     def test_cross_engine_equivalence_uses_recordless_pip_bootstrap(self) -> None:
         """The equivalence workflow must tolerate broken runner pip metadata."""
@@ -260,7 +262,9 @@ class TestCIEnvironmentCompatibility:
 
         install_index = workflow.index('pip install -e ".[dev]"')
         uninstall_index = workflow.index("pip uninstall -y pytest-vcr pytest-recording")
-        pytest_index = workflow.index("pytest tests/unit/motion_matching/test_leaderboard.py")
+        pytest_index = workflow.index(
+            "pytest tests/unit/motion_matching/test_leaderboard.py"
+        )
 
         assert install_index < uninstall_index < pytest_index
 

@@ -69,6 +69,7 @@ DETAILED_LOG_FORMAT = (
 # Rotation defaults
 DEFAULT_MAX_BYTES = 10 * 1024 * 1024  # 10 MB
 DEFAULT_BACKUP_COUNT = 5
+_STDLIB_LOG_KWARGS = {"exc_info", "extra", "stack_info", "stacklevel"}
 
 # ---------------------------------------------------------------------------
 # Sensitive-data redaction
@@ -178,6 +179,32 @@ class LogLevel(Enum):
     WARNING = logging.WARNING
     ERROR = logging.ERROR
     CRITICAL = logging.CRITICAL
+
+
+class StructuredLoggerAdapter(logging.LoggerAdapter):
+    """Compatibility adapter that accepts structlog-style keyword fields."""
+
+    @property
+    def name(self) -> str:
+        return self.logger.name
+
+    def bind(self, **kwargs: Any) -> StructuredLoggerAdapter:
+        return StructuredLoggerAdapter(self.logger, {**self.extra, **kwargs})
+
+    def process(self, msg: Any, kwargs: dict[str, Any]) -> tuple[Any, dict[str, Any]]:
+        extra = dict(kwargs.pop("extra", {}))
+        structured_fields = {
+            **self.extra,
+            **{
+                key: kwargs.pop(key)
+                for key in list(kwargs)
+                if key not in _STDLIB_LOG_KWARGS
+            },
+        }
+        if structured_fields:
+            extra["structured_data"] = structured_fields
+            kwargs["extra"] = extra
+        return msg, kwargs
 
 
 # ---------------------------------------------------------------------------
@@ -453,7 +480,7 @@ def setup_logging(
     return root_logger
 
 
-def get_logger(name: str | None = None) -> logging.Logger:
+def get_logger(name: str | None = None) -> logging.Logger | StructuredLoggerAdapter:
     """Get a logger instance with the given name.
 
     This is a convenience wrapper around logging.getLogger that ensures
@@ -469,7 +496,7 @@ def get_logger(name: str | None = None) -> logging.Logger:
         logger = get_logger(__name__)
         logger.info("Starting process...")
     """
-    return logging.getLogger(name)
+    return StructuredLoggerAdapter(logging.getLogger(name), {})
 
 
 def configure_test_logging(
