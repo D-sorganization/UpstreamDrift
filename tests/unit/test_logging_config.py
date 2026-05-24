@@ -143,6 +143,13 @@ class TestSensitiveDataFilter:
         SensitiveDataFilter().filter(record)
         assert record.msg == 'payload={"api_key":"***REDACTED***"}'
 
+    def test_redacts_quoted_json_secret_with_commas(self) -> None:
+        message = 'payload={"password":"abc,def"}'
+        assert _redact_sensitive(message) == 'payload={"password":"***REDACTED***"}'
+
+    def test_redacts_unquoted_secret_with_commas(self) -> None:
+        assert _redact_sensitive("password=abc,def") == "password=***REDACTED***"
+
     def test_does_not_redact_similar_non_secret_keys(self) -> None:
         message = (
             'payload={"api_key_hint":"public","secret_key_label":"visible"} '
