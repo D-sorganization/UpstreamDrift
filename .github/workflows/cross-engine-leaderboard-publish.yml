@@ -90,7 +90,7 @@ jobs:
         run: |
           xvfb-run -a pytest tests/cross_engine/test_leaderboard_writer.py \
                  tests/unit/motion_matching/test_leaderboard.py \
-                 -v --timeout=60
+                 -v --timeout=60 -p no:recording -p no:vcr
 
       - name: Regenerate leaderboard JSON
         # Honest-skip mode: engines whose deps aren't installed don't
