@@ -90,7 +90,7 @@ jobs:
 
       - name: Run leaderboard writer tests
         run: |
-          xvfb-run -a pytest tests/cross_engine/test_leaderboard_writer.py \
+          xvfb-run -a python3 -m pytest -p no:xvfb tests/cross_engine/test_leaderboard_writer.py \
                  tests/unit/motion_matching/test_leaderboard.py \
                  -v --timeout=60
 
