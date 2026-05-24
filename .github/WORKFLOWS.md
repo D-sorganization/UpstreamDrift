@@ -7,6 +7,26 @@ The current durable guardrail is a no-growth cap at 78 active workflows. The
 consolidation target for issue #3835 remains 25 active workflows or fewer after
 owners validate low-risk removals.
 
+## Security Audit: `pull_request_target` Workflows (issue #5915)
+
+Audited 2026-05-23. Two workflows use `pull_request_target`; both are safe:
+
+**`Jules-Redundant-PR-Closer.yml`** — trigger covers `opened/reopened/synchronize/closed`
+from forks but does **not** check out the PR head ref. It only checks out
+`Repository_Management` at `ref: main`. The app token grants
+`contents:read / pull-requests:write / issues:write`; no secrets beyond the
+Jules app credentials are exposed. ✅ Safe.
+
+**`anti-phantom-merge.yml`** — uses `pull_request_target` only for `labeled/unlabeled`
+events (to honor admin overrides). On those events it checks out the PR head SHA to
+run `git diff` commands but does **not** execute any code from the checked-out tree.
+The `${{ github.token }}` used has `contents:read / pull-requests:write / issues:read`.
+The shell steps are defined in the base-branch workflow (not the PR head), so the
+checkout is read-only data, not executable code. ✅ Safe.
+
+**Action item**: when adding new `pull_request_target` triggers, ensure no PR-head
+code is executed and no secrets beyond minimum necessary permissions are exposed.
+
 Runner note: most workflows use the self-hosted `d-sorg-fleet` runner. That
 runner is administered by repository infrastructure owners. When it is offline,
 jobs that target it fail or remain queued rather than silently passing. Because
@@ -48,8 +68,8 @@ guardrails until the active workflow count reaches the 25-workflow target:
 | Comment-to-Issue-Converter.yml       | issue_comment/workflow_dispatch                | @triage   | issues: write                                | MERGE: converts qualifying comments into issues.                                        | PR-Comment-Responder.yml           |
 | critical-files-guard.yml             | pull_request                                   | @core     | contents: read                               | KEEP: protect critical file changes.                                                    | n/a                                |
 | docker-security-scan.yml             | pull_request/workflow_dispatch                 | @security | contents/security-events: write              | KEEP: Docker image security scan.                                                       | n/a                                |
-| docker-size-gates.yml                | push/pull_request/workflow_dispatch            | @infra    | contents: read                               | KEEP: Docker artifact size gates (legacy image + per-profile matrix).                  | n/a                                |
-| docker-smoke.yml                     | push/pull_request/workflow_dispatch            | @infra    | contents: read                               | KEEP: Phase 2 modular-profile capability and dep-leakage smoke tests.                  | n/a                                |
+| docker-size-gates.yml                | push/pull_request/workflow_dispatch            | @infra    | contents: read                               | KEEP: Docker artifact size gates (legacy image + per-profile matrix).                   | n/a                                |
+| docker-smoke.yml                     | push/pull_request/workflow_dispatch            | @infra    | contents: read                               | KEEP: Phase 2 modular-profile capability and dep-leakage smoke tests.                   | n/a                                |
 | docs-ci.yml                          | pull_request/workflow_dispatch                 | @docs     | contents: read                               | KEEP: documentation validation.                                                         | n/a                                |
 | docs-governance.yml                  | pull_request/workflow_dispatch                 | @docs     | contents: read                               | KEEP: docs governance checks.                                                           | n/a                                |
 | heavy-tests-opt-in.yml               | pull_request/workflow_dispatch                 | @core     | contents: read                               | KEEP: manually opted heavy tests.                                                       | n/a                                |
@@ -102,12 +122,14 @@ guardrails until the active workflow count reaches the 25-workflow target:
 | Nightly-Doc-Organizer.yml            | schedule/workflow_dispatch                     | @docs     | contents/pull-requests: write                | MERGE: nightly docs cleanup.                                                            | docs-ci.yml                        |
 | lint-workflow-files.yml              | pull_request                                   | @core     | contents: read / pull-requests: write        | KEEP: enforces timeout, concurrency, and cancel-in-progress on modified workflows.      | n/a                                |
 | local-only-runner-guard.yml          | pull_request/push/workflow_dispatch            | @core     | contents: read                               | KEEP: canary that rejects any workflow routing jobs to GitHub-hosted runners.           | n/a                                |
+| package-standalone-sidekick.yml      | pull_request                                   | @core     | contents: read                               | KEEP: builds sdist + wheel, uploads as artifacts, and smoke-tests the wheel.            | n/a                                |
 | pdf-size-guard.yml                   | pull_request                                   | @docs     | contents: read                               | KEEP: PDF size guard.                                                                   | n/a                                |
 | pr-auto-labeler.yml                  | pull_request                                   | @triage   | pull-requests: write                         | KEEP: PR labeling.                                                                      | n/a                                |
 | quality-gate.yml                     | pull_request/workflow_dispatch                 | @core     | contents: read                               | KEEP: advisory engine-specific quality lints (e.g. pinocchio LOD).                      | n/a                                |
 | realtime-soak.yml                    | workflow_dispatch/schedule                     | @realtime | contents: read                               | KEEP: nightly/manual Rust realtime WebSocket soak validation (#5235).                   | n/a                                |
 | PR-Comment-Responder.yml             | issue_comment/workflow_dispatch                | @triage   | issues/pull-requests: write                  | KEEP: canonical PR comment responder.                                                   | n/a                                |
 | release.yml                          | push/workflow_dispatch                         | @release  | contents: write                              | KEEP: build and publish releases.                                                       | n/a                                |
+| release-sidekick-binary.yml          | push/workflow_dispatch                         | @release  | contents: write                              | KEEP: produces one-file Sidekick binaries via PyInstaller.                              | n/a                                |
 | security-osv-monitor.yml             | schedule/workflow_dispatch                     | @security | contents/issues/security-events: write       | KEEP: scheduled OSV vulnerability triage SLA monitor.                                   | n/a                                |
 | spec-check.yml                       | pull_request/workflow_dispatch                 | @core     | contents: read                               | KEEP: SPEC freshness validation.                                                        | n/a                                |
 | stale-cleanup.yml                    | schedule/workflow_dispatch                     | @infra    | issues/pull-requests: write                  | KEEP: stale issue and PR cleanup.                                                       | n/a                                |

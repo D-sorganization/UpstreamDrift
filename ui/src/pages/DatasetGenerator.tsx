@@ -15,16 +15,6 @@ export type {
   PlotType,
 } from '@/api/useDatasetGenerator';
 
-// Re-export API types so test files can import them from this module.
-export type {
-  FeatureInfo,
-  PlotType,
-  ExportFormat,
-  DatasetControl,
-  GenerateResult,
-  DatasetLoadState,
-} from '@/api/useDatasetGenerator';
-
 /**
  * DatasetGeneratorPage - Full dataset generation tool page.
  */

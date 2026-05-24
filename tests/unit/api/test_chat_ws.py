@@ -6,8 +6,10 @@ and REST fallback endpoints.
 
 from __future__ import annotations
 
+import os
 from collections.abc import AsyncGenerator
-from unittest.mock import MagicMock
+from types import SimpleNamespace
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi import FastAPI
@@ -21,6 +23,13 @@ pytestmark = pytest.mark.anyio
 def anyio_backend() -> str:
     """Use asyncio backend only (trio not installed)."""
     return "asyncio"
+
+
+@pytest.fixture(autouse=True)
+def local_mode_env():
+    """Run all chat WebSocket tests in local mode (auth bypassed by design)."""
+    with patch.dict(os.environ, {"GOLF_SUITE_MODE": "local"}):
+        yield
 
 
 @pytest.fixture
@@ -219,6 +228,79 @@ class TestWebSocket:
             error = ws.receive_json()
             assert error["type"] == "error"
             assert "Unknown action" in error["detail"]
+
+    def test_streaming_error_is_sanitized_and_socket_stays_open(
+        self, client, mock_chat_service, caplog
+    ) -> None:
+        """Unexpected streaming failures should keep tracebacks server-side."""
+
+        async def broken_stream(session_id: str) -> AsyncGenerator[str, None]:
+            yield "partial"
+            raise RuntimeError("token=super-secret")
+
+        mock_chat_service.stream_response = broken_stream
+
+        with (
+            caplog.at_level("ERROR"),
+            client.websocket_connect("/api/ws/chat/new") as ws,
+        ):
+            ws.receive_json()  # session_info
+            ws.send_json({"action": "send", "message": "Hello AI"})
+
+            chunk = ws.receive_json()
+            assert chunk == {"type": "chunk", "content": "partial"}
+
+            error = ws.receive_json()
+            assert error == {"type": "error", "detail": "Internal server error"}
+
+            ws.send_json({"action": "history"})
+            history = ws.receive_json()
+            assert history["type"] == "history"
+
+        assert any(
+            record.message == "Error during streaming response"
+            and record.exc_info is not None
+            for record in caplog.records
+        )
+
+    async def test_connection_error_is_sanitized(
+        self, mock_chat_service, caplog
+    ) -> None:
+        """Transport failures should not leak raw exception details to clients."""
+
+        class FakeWebSocket:
+            def __init__(self, chat_service: MagicMock) -> None:
+                self.app = SimpleNamespace(
+                    state=SimpleNamespace(chat_service=chat_service)
+                )
+                self.sent: list[dict[str, object]] = []
+                self._receive_calls = 0
+
+            async def accept(self) -> None:
+                return None
+
+            async def send_json(self, payload: dict[str, object]) -> None:
+                self.sent.append(payload)
+
+            async def receive_json(self) -> dict[str, object]:
+                self._receive_calls += 1
+                raise OSError("session=secret-session")
+
+        websocket = FakeWebSocket(mock_chat_service)
+
+        with caplog.at_level("ERROR"):
+            await chat_ws.chat_stream(websocket, "new")
+
+        assert websocket.sent[0] == {
+            "type": "session_info",
+            "session_id": "test-session-123",
+        }
+        assert websocket.sent[-1] == {"type": "error", "detail": "Connection error"}
+        assert any(
+            record.message == "Chat WebSocket connection error"
+            and record.exc_info is not None
+            for record in caplog.records
+        )
 
 
 class TestRESTEndpoints:
