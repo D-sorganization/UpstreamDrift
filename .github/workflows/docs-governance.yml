@@ -8,6 +8,7 @@ on:
       - "scripts/check_doc_catalog.py"
       - "scripts/check_doc_size_budget.py"
       - "scripts/config/doc_size_budget.json"
+      - "tests/scripts/test_doc_governance_checks.py"
       - ".github/workflows/docs-governance.yml"
   push:
     branches: [main]
@@ -17,6 +18,7 @@ on:
       - "scripts/check_doc_catalog.py"
       - "scripts/check_doc_size_budget.py"
       - "scripts/config/doc_size_budget.json"
+      - "tests/scripts/test_doc_governance_checks.py"
       - ".github/workflows/docs-governance.yml"
 
 jobs:
@@ -52,3 +54,6 @@ jobs:
 
       - name: Validate documentation size budget
         run: python3 scripts/check_doc_size_budget.py
+
+      - name: Run documentation governance tests
+        run: python3 -m pytest tests/scripts/test_doc_governance_checks.py -q
