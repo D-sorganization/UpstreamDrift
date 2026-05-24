@@ -147,6 +147,11 @@ class TestSensitiveDataFilter:
         message = 'payload={"password":"abc,def"}'
         assert _redact_sensitive(message) == 'payload={"password":"***REDACTED***"}'
 
+    def test_filter_redacts_json_password_with_commas(self) -> None:
+        record = self._make_record('payload={"password":"abc,def"}')
+        SensitiveDataFilter().filter(record)
+        assert record.msg == 'payload={"password":"***REDACTED***"}'
+
     def test_redacts_unquoted_secret_with_commas(self) -> None:
         assert _redact_sensitive("password=abc,def") == "password=***REDACTED***"
 
