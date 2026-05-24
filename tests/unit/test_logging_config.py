@@ -190,3 +190,30 @@ class TestSetupLogging:
     def test_custom_level_does_not_raise(self) -> None:
         # Just verifying no exception — root level can be affected by other workers
         setup_logging(level=LogLevel.ERROR)  # should not raise
+
+
+class TestRedactionCommas:
+    def _make_record(self, msg: str, args: tuple = ()) -> logging.LogRecord:
+        return logging.LogRecord(
+            name="test",
+            level=logging.INFO,
+            pathname="",
+            lineno=0,
+            msg=msg,
+            args=args,
+            exc_info=None,
+        )
+
+    def test_json_payloads_redact_commas(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record('{"password":"abc,def"}')
+        flt.filter(record)
+        assert "abc,def" not in record.msg
+        assert '{"password":"***REDACTED***"}' in record.msg
+
+    def test_unquoted_payloads_redact_commas(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record("password=abc,def")
+        flt.filter(record)
+        assert "abc,def" not in record.msg
+        assert "password=***REDACTED***" in record.msg
