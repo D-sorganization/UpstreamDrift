@@ -381,6 +381,22 @@ def get_database_url(default: str = "sqlite:///golf.db") -> str:
     return os.environ.get("DATABASE_URL", default)
 
 
+def get_database_pool_size(default: int = 5) -> int:
+    """Get the database connection-pool size for non-SQLite engines."""
+    return get_env_int("GOLF_DB_POOL_SIZE", default=default, min_value=1) or default
+
+
+def get_database_pool_recycle(default: int = 300) -> int:
+    """Get the database pool recycle window in seconds for non-SQLite engines."""
+    value = get_env_int("GOLF_DB_POOL_RECYCLE", default=default, min_value=0)
+    return default if value is None else value
+
+
+def get_database_pool_pre_ping(default: bool = True) -> bool:
+    """Get whether the database pool should pre-ping connections."""
+    return get_env_bool("GOLF_DB_POOL_PRE_PING", default=default)
+
+
 def get_admin_password() -> str | None:
     """Get the admin password.
 
