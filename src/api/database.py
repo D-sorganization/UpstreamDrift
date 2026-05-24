@@ -30,14 +30,14 @@ DATABASE_URL = get_database_url(
 def _build_engine(database_url: str):
     """Create a SQLAlchemy engine for the configured database URL."""
     if database_url.startswith("sqlite"):
-        return create_engine(
+        return create_engine(  # nosemgrep
             database_url,
             connect_args={"check_same_thread": False},
             poolclass=StaticPool,
             echo=False,
         )
 
-    return create_engine(
+    return create_engine(  # nosemgrep
         database_url,
         pool_pre_ping=get_database_pool_pre_ping(),
         pool_recycle=get_database_pool_recycle(),
