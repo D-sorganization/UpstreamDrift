@@ -250,6 +250,20 @@ class TestCIEnvironmentCompatibility:
         assert 'PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"' in workflow
         assert "mutually incompatible pytest plugins" in workflow
 
+    def test_cross_engine_leaderboard_removes_conflicting_pytest_plugins(
+        self,
+    ) -> None:
+        """The leaderboard job must remove globally conflicting pytest plugins."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "cross-engine-leaderboard.yml"
+        ).read_text(encoding="utf-8")
+
+        install_index = workflow.index('pip install -e ".[dev]"')
+        uninstall_index = workflow.index("pip uninstall -y pytest-vcr pytest-recording")
+        pytest_index = workflow.index("pytest tests/unit/motion_matching/test_leaderboard.py")
+
+        assert install_index < uninstall_index < pytest_index
+
     def test_bot_ci_trigger_validates_token_before_authenticated_trigger(
         self,
     ) -> None:
