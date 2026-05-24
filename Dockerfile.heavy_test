@@ -5,6 +5,8 @@
 #
 # Must stay in sync with:
 #   .github/workflows/heavy-tests-opt-in.yml (calls reusable-heavy-tests.yml)
+# Policy reference:
+#   docker/README.md and docs/adr/0021-container-strategy.md
 #
 # Build args:
 #   PYTHON_VERSION (default: 3.11)
