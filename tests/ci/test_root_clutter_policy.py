@@ -17,3 +17,7 @@ def test_repo_root_contains_only_allowlisted_files() -> None:
     )
 
     assert disallowed == []
+
+
+def test_sidekick_pyinstaller_spec_is_documented_root_file() -> None:
+    assert "sidekick.spec" in ALLOWLIST
