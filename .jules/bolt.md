@@ -86,3 +86,6 @@
 ## 2026-05-23 - trimesh ImportErrors
 **Learning:** Hard-coded imports of `trimesh` in files like `_mesh_decimation.py` and `_mesh_io.py` can cause tests or other modules that import them to fail if `trimesh` isn't installed.
 **Action:** Always wrap `import trimesh` with a `try...except ImportError` block and conditionally check if `trimesh is None` to safely handle environments where it is missing, or alternatively, make sure to add it to the test environment requirements.
+## 2025-10-24 - [Optimize vector distance calculation for visualizer distances]
+**Learning:** `np.linalg.norm` is generic and relatively slow for normalizing small 3D vectors. Using `math.hypot(*v)` significantly speeds up computation by avoiding numpy array overhead and allocation.
+**Action:** Replace `np.linalg.norm(vector)` with `math.hypot(*vector)` where `vector` is a small fixed-length array (e.g. 3D point) especially when computing normalisations frequently like in `visualization.py`.
