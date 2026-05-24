@@ -19,10 +19,7 @@ from pathlib import Path
 
 import pytest
 from src.config.launcher_manifest_loader import (
-    ASSETS_DIR,
-    MANIFEST_PATH,
     LauncherManifest,
-    LauncherTile,
 )
 
 # =============================================================================
