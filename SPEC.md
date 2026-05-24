@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.189                                            |
+| **Spec Version**        | 1.0.190                                            |
 | **Last Spec Update**    | 2026-05-24                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-05-24** - Tightened shared logging redaction so `src/shared/python/logging_pkg/logging_config.py` preserves quoted JSON-style key/value formatting while only masking exact secret-bearing field names such as `api_key`, `secret_key`, and `password`; similarly named public fields like `api_key_hint` remain visible. Added focused regression coverage in `tests/unit/test_logging_config.py`.
 - **2026-05-24** - Added shared `GOLF_REALTIME_HOST` / `GOLF_REALTIME_PORT` environment accessors and wired `src/shared/python/realtime/ws_pubsub.py` plus API diagnostics to use/report them, so realtime bind defaults no longer live only as hard-coded loopback literals.
 - **2026-05-24** - Deferred realtime WebSocket backend resolution in `src/shared/python/realtime/ws_pubsub.py` until first explicit start/use and made `WSPubSub.start()` bring up the Python backend even when the instance was created with `autostart=False`; added focused regression coverage in `tests/shared/realtime/test_ws_pubsub.py`.
 - **2026-05-24** - Improved CI/test observability for optional dependency lanes: optional pytest collection skips now emit one warning per skipped path with the missing module or symbol, the PyTorch CVAE cancellation regression now uses a wrapper progress sink instead of monkeypatching methods, and three standard workflow inventory jobs now have 15-minute budgets to reduce false timeouts on saturated self-hosted runners.
@@ -271,6 +272,10 @@ Engine tier metadata is declared in each in-scope engine package with
   dependencies until `start()`, `publish()`, or `subscribe()` is invoked, while
   explicit `backend=` overrides and the python HTTP publish fallback remain
   supported.
+- Shared logging redaction preserves quoted JSON-style separators and only
+  masks exact secret-bearing keys such as `password`, `api_key`, and
+  `secret_key`; similarly named public fields such as `api_key_hint` and
+  `secret_key_label` remain visible for diagnostics.
 - Chat and simulation WebSocket routes treat unexpected internal exceptions as
   server-only detail: they log full tracebacks for operator diagnosis and send
   generic client-safe error payloads instead of echoing raw exception strings.
@@ -613,6 +618,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-24 | 1.0.190 | Tightened shared logging redaction in `src/shared/python/logging_pkg/logging_config.py` so quoted JSON-style key/value formatting is preserved while only exact secret-bearing keys (`password`, `api_key`, `secret_key`, etc.) are masked; similarly named public fields remain visible, with regression coverage in `tests/unit/test_logging_config.py`. |
 | 2026-05-23 | 1.0.186 | Refined the standalone Sidekick CLI contract in `src/shared/python/sidekick/__main__.py` so `python -m sidekick` defaults to `gui`, mistyped flags get closest-match suggestions, GUI imports remain deferred until dispatch, `--data-dir` is resolved to an absolute path, and `gui` now delegates through `sidekick.launcher_factory` using the standalone window/session-store configuration on current `main`. Expanded `tests/unit/sidekick/test_cli.py` to cover implicit-gui parsing, bad-flag suggestions, headless `run` parsing, handler error paths, and launcher delegation. |
 | 2026-05-23 | 1.0.186 | Tightened `src/shared/python/training/config.py` validation so boolean values are rejected for integer training caps such as `max_epochs` and `max_steps`; regression coverage lives in `tests/unit/training/test_config.py`. |
 | 2026-05-23 | 1.0.187 | Closed the file-size budget grandfathering gap by requiring tracked baseline entries for oversized files in `scripts/config/file_size_budget.json`; untracked oversized files now fail `scripts/ci/check_file_size_budget.py`, with regression coverage in `tests/scripts/wave9_scripts_b/test_check_file_size_budget.py`. |
