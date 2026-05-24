@@ -128,6 +128,22 @@ class TestAPIDiagnostics:
         assert "platform" in result.details
         assert "executable" in result.details
 
+    def test_python_environment_reports_realtime_bind_env(self) -> None:
+        diag = APIDiagnostics()
+        with patch.dict(
+            "os.environ",
+            {
+                "GOLF_REALTIME_HOST": "0.0.0.0",
+                "GOLF_REALTIME_PORT": "9901",
+            },
+            clear=False,
+        ):
+            result = diag.check_python_environment()
+
+        env_vars = result.details["environment_variables"]
+        assert env_vars["GOLF_REALTIME_HOST"] == "0.0.0.0"
+        assert env_vars["GOLF_REALTIME_PORT"] == "9901"
+
     def test_check_dependencies(self) -> None:
         """Test dependencies check."""
         diag = APIDiagnostics()

@@ -193,6 +193,18 @@ class TestWSPubSubRust:
         finally:
             ps.stop()
 
+    def test_init_uses_shared_realtime_defaults(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(ws_mod, "get_realtime_host", lambda: "0.0.0.0")
+        monkeypatch.setattr(ws_mod, "get_realtime_port", lambda: 9988)
+        monkeypatch.setattr(ws_mod, "_port_in_use", lambda _h, _p: True)
+
+        ps = ws_mod.WSPubSub(backend="python", autostart=False)
+
+        assert ps.host == "0.0.0.0"
+        assert ps.port == 9988
+
     def test_backend_resolution_is_lazy_until_start(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
