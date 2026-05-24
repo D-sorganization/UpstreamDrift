@@ -93,3 +93,56 @@ def test_assert_alembic_head_applied_raises_on_revision_mismatch(
 
     with pytest.raises(RuntimeError, match="Database schema revision mismatch"):
         database._assert_alembic_head_applied()
+
+
+def test_build_engine_uses_sqlite_static_pool() -> None:
+    captured: dict[str, object] = {}
+
+    def fake_create_engine(url: str, **kwargs):
+        captured["url"] = url
+        captured["kwargs"] = kwargs
+        return "sqlite-engine"
+
+    original = database.create_engine
+    database.create_engine = fake_create_engine
+    try:
+        engine = database._build_engine("sqlite:///./test.db")
+    finally:
+        database.create_engine = original
+
+    assert engine == "sqlite-engine"
+    assert captured["url"] == "sqlite:///./test.db"
+    kwargs = captured["kwargs"]
+    assert kwargs["connect_args"] == {"check_same_thread": False}
+    assert kwargs["poolclass"] is database.StaticPool
+    assert kwargs["echo"] is False
+    assert "pool_pre_ping" not in kwargs
+    assert "pool_recycle" not in kwargs
+    assert "pool_size" not in kwargs
+
+
+def test_build_engine_uses_env_driven_pool_settings(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_create_engine(url: str, **kwargs):
+        captured["url"] = url
+        captured["kwargs"] = kwargs
+        return "postgres-engine"
+
+    monkeypatch.setattr(database, "create_engine", fake_create_engine)
+    monkeypatch.setattr(database, "get_database_pool_pre_ping", lambda: False)
+    monkeypatch.setattr(database, "get_database_pool_recycle", lambda: 123)
+    monkeypatch.setattr(database, "get_database_pool_size", lambda: 11)
+
+    engine = database._build_engine("postgresql://db.example/upstream")
+
+    assert engine == "postgres-engine"
+    assert captured["url"] == "postgresql://db.example/upstream"
+    assert captured["kwargs"] == {
+        "pool_pre_ping": False,
+        "pool_recycle": 123,
+        "pool_size": 11,
+        "echo": False,
+    }

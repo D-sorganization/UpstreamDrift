@@ -12,28 +12,41 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.sql import text
 
+from src.shared.python.config.environment import (
+    get_database_pool_pre_ping,
+    get_database_pool_recycle,
+    get_database_pool_size,
+    get_database_url,
+)
+
 # Base imported locally in create_tables to avoid circular import
 
 # Database configuration
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "sqlite:///./golf_modeling_suite.db",  # Default to SQLite for development
+DATABASE_URL = get_database_url(
+    default="sqlite:///./golf_modeling_suite.db",
 )
 
-# Create engine with appropriate settings
-if DATABASE_URL.startswith("sqlite"):
-    # SQLite-specific configuration
-    engine = create_engine(
-        DATABASE_URL,
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-        echo=False,  # Set to True for SQL debugging
+
+def _build_engine(database_url: str):
+    """Create a SQLAlchemy engine for the configured database URL."""
+    if database_url.startswith("sqlite"):
+        return create_engine(
+            database_url,
+            connect_args={"check_same_thread": False},
+            poolclass=StaticPool,
+            echo=False,
+        )
+
+    return create_engine(
+        database_url,
+        pool_pre_ping=get_database_pool_pre_ping(),
+        pool_recycle=get_database_pool_recycle(),
+        pool_size=get_database_pool_size(),
+        echo=False,
     )
-else:
-    # PostgreSQL/other database configuration
-    engine = create_engine(
-        DATABASE_URL, pool_pre_ping=True, pool_recycle=300, echo=False
-    )
+
+
+engine = _build_engine(DATABASE_URL)
 
 # Create session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

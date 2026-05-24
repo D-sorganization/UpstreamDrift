@@ -10,6 +10,9 @@ from src.shared.python.config.environment import (
     EnvironmentError,
     get_api_host,
     get_api_port,
+    get_database_pool_pre_ping,
+    get_database_pool_recycle,
+    get_database_pool_size,
     get_env,
     get_env_bool,
     get_env_float,
@@ -179,6 +182,36 @@ class TestGetEnvList:
         with _set(**{_TEST_VAR: " a , b , c "}):
             result = get_env_list(_TEST_VAR)
             assert result == ["a", "b", "c"]
+
+
+class TestDatabasePoolSettings:
+    def test_pool_size_defaults_to_five(self) -> None:
+        with _unset("GOLF_DB_POOL_SIZE"):
+            assert get_database_pool_size() == 5
+
+    def test_pool_size_reads_valid_env_override(self) -> None:
+        with _set(GOLF_DB_POOL_SIZE="12"):
+            assert get_database_pool_size() == 12
+
+    def test_pool_size_rejects_zero(self) -> None:
+        with _set(GOLF_DB_POOL_SIZE="0"), pytest.raises(EnvironmentError):
+            get_database_pool_size()
+
+    def test_pool_recycle_defaults_to_three_hundred_seconds(self) -> None:
+        with _unset("GOLF_DB_POOL_RECYCLE"):
+            assert get_database_pool_recycle() == 300
+
+    def test_pool_recycle_allows_zero(self) -> None:
+        with _set(GOLF_DB_POOL_RECYCLE="0"):
+            assert get_database_pool_recycle() == 0
+
+    def test_pool_pre_ping_defaults_true(self) -> None:
+        with _unset("GOLF_DB_POOL_PRE_PING"):
+            assert get_database_pool_pre_ping() is True
+
+    def test_pool_pre_ping_honors_false_override(self) -> None:
+        with _set(GOLF_DB_POOL_PRE_PING="false"):
+            assert get_database_pool_pre_ping() is False
 
 
 class TestSocketAccessors:
