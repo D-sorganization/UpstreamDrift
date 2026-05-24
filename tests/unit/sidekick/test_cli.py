@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib
+import json
 import sys
 import types
 from pathlib import Path
@@ -76,7 +77,7 @@ def test_run_subcommand_stays_headless_during_parse(tmp_path: Path) -> None:
 
     cli = _load_cli()
     args = cli.parse_cli_args(
-        ["run", "--calculator", "unit-converter", "--inputs", str(inputs)]
+        ["run", "--calculator", "unit_converter", "--inputs", str(inputs)]
     )
 
     pyqt_after = {name for name in sys.modules if name.startswith("PyQt6")}
@@ -125,6 +126,21 @@ def test_run_subcommand_invalid_format_exits_2() -> None:
                 str(Path(__file__)),
                 "--format",
                 "xml",
+            ]
+        )
+    assert exc_info.value.code == 2
+
+
+def test_run_subcommand_invalid_calculator_id_exits_2() -> None:
+    cli = _load_cli()
+    with pytest.raises(SystemExit) as exc_info:
+        cli.parse_cli_args(
+            [
+                "run",
+                "--calculator",
+                "unit-converter",
+                "--inputs",
+                str(Path(__file__)),
             ]
         )
     assert exc_info.value.code == 2
@@ -181,7 +197,8 @@ def test_run_headless_invalid_output_dir_returns_1(
     )
 
     assert cli.run_headless(args) == 1
-    assert "sidekick run failed" in capsys.readouterr().err
+    payload = json.loads(capsys.readouterr().err)
+    assert payload["error"] == "sidekick_run_failed"
 
 
 def test_launch_gui_delegates_to_launcher_factory(

@@ -1,205 +1,355 @@
 """Headless calculator runner for ``sidekick run``.
 
 Provides a registry-based dispatcher that loads a named calculator, feeds it
-JSON inputs, and writes JSON results to stdout (or a file).  All code here is
-intentionally free of GUI imports so it works inside CI and PyInstaller smoke
-tests without a display.
+JSON or YAML inputs, and writes JSON or CSV results to stdout or a file. All
+code here is intentionally free of GUI imports so it works inside CI and
+PyInstaller smoke tests without a display.
 """
 
 from __future__ import annotations
 
+import csv
+import contextlib
+import difflib
+import io
 import json
 import logging
 import math
-from pathlib import Path
+import re
 import sys
+from collections.abc import Mapping
+from pathlib import Path
 from typing import Any
+
+from sidekick.protocols import CalculationResult, Calculator, ValidationResult
 
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
-# Registry
-# ---------------------------------------------------------------------------
+EXIT_OK = 0
+EXIT_GENERIC = 1
+EXIT_VALIDATION = 3
+EXIT_UNKNOWN_CALCULATOR = 4
 
-# Maps CLI name → callable(inputs: dict) -> dict.
-# Add new calculators here; do NOT import GUI modules at module level.
-_REGISTRY: dict[str, Any] = {}
+_CALCULATOR_ID_RE = re.compile(r"^[a-z][a-z0-9_]*$")
+_OUTPUT_FORMATS = frozenset({"json", "csv"})
+_YAML_SUFFIXES = frozenset({".yaml", ".yml"})
 
 
-def register(name: str):
-    """Decorator: register a headless calculation function under *name*."""
+# Maps CLI name to a headless-safe Calculator implementation. Add new
+# calculators here; do not import GUI modules at module level.
+_REGISTRY: dict[str, Calculator] = {}
 
-    def _decorator(fn):
-        _REGISTRY[name] = fn
-        return fn
 
+def register(name: str, calculator: Calculator | None = None):
+    """Register a headless calculator under ``name``.
+
+    Can be used as ``register("id", calculator)`` or as a class/function
+    decorator for objects that implement the Calculator protocol.
+    """
+    _validate_calculator_id(name)
+
+    def _decorator(candidate: Calculator):
+        _REGISTRY[name] = candidate
+        return candidate
+
+    if calculator is not None:
+        return _decorator(calculator)
     return _decorator
 
 
-# ---------------------------------------------------------------------------
-# Built-in: wgs_reactor
-# ---------------------------------------------------------------------------
+class WgsReactorCalculator:
+    """Headless Water-Gas Shift reactor calculator."""
 
+    @property
+    def name(self) -> str:
+        return "Water-Gas Shift Reactor"
 
-@register("wgs_reactor")
-def _wgs_reactor(inputs: dict) -> dict:
-    """Headless Water-Gas Shift reactor calculation.
+    @property
+    def version(self) -> str:
+        return "1.0.0"
 
-    Computes equilibrium composition and key performance metrics without
-    any GUI or matplotlib dependencies.
+    def validate_inputs(self, inputs: dict[str, Any]) -> ValidationResult:
+        errors: list[str] = []
+        for key in ("co_fraction", "h2o_fraction", "co2_fraction", "h2_fraction"):
+            try:
+                value = float(inputs.get(key, 0.0))
+            except (TypeError, ValueError):
+                errors.append(f"{key} must be numeric")
+                continue
+            if not 0.0 <= value <= 1.0:
+                errors.append(f"{key} must be in [0, 1]")
+        try:
+            temperature_c = float(inputs.get("temperature_c", 350.0))
+        except (TypeError, ValueError):
+            errors.append("temperature_c must be numeric")
+        else:
+            if not -273.15 < temperature_c <= 2000.0:
+                errors.append("temperature_c must be in (-273.15, 2000]")
 
-    Args:
-        inputs: dict with keys:
-            temperature_c  (float) reactor temperature in °C (default 350)
-            co_fraction    (float) inlet CO mole fraction (default 0.30)
-            h2o_fraction   (float) inlet H2O mole fraction (default 0.40)
-            co2_fraction   (float) inlet CO2 mole fraction (default 0.10)
-            h2_fraction    (float) inlet H2 mole fraction (default 0.20)
-            pressure_bar   (float) reactor pressure in bar (default 20.0)
+        return ValidationResult(valid=not errors, errors=errors)
 
-    Returns:
-        dict with equilibrium mole fractions and CO conversion.
-
-    Postcondition:
-        All returned mole fractions are in [0, 1] and sum to ≈ 1.
-    """
-    assert isinstance(inputs, dict), "inputs must be a dict"
-
-    R = 8.314  # J/(mol·K)
-    delta_h = -41000.0  # J/mol
-    delta_s = -42.0  # J/(mol·K)
-
-    T_c = float(inputs.get("temperature_c", 350.0))
-    assert -273.15 < T_c <= 2000.0, f"temperature_c {T_c} out of range"
-    T_k = T_c + 273.15
-
-    y_co_in = float(inputs.get("co_fraction", 0.30))
-    y_h2o_in = float(inputs.get("h2o_fraction", 0.40))
-    y_co2_in = float(inputs.get("co2_fraction", 0.10))
-    y_h2_in = float(inputs.get("h2_fraction", 0.20))
-
-    for name, val in [
-        ("co_fraction", y_co_in),
-        ("h2o_fraction", y_h2o_in),
-        ("co2_fraction", y_co2_in),
-        ("h2_fraction", y_h2_in),
-    ]:
-        assert 0.0 <= val <= 1.0, f"{name}={val} must be in [0, 1]"
-
-    # Equilibrium constant K = exp(-ΔG / RT) where ΔG = ΔH - TΔS
-    delta_g = delta_h - T_k * delta_s
-    K_eq = math.exp(-delta_g / (R * T_k))
-
-    # Solve for extent of reaction ξ using the quadratic form of Kp:
-    # K = (y_co2 + ξ)(y_h2 + ξ) / ((y_co - ξ)(y_h2o - ξ))
-    # K(y_co - ξ)(y_h2o - ξ) = (y_co2 + ξ)(y_h2 + ξ)
-    # (K-1)ξ² - [K(y_co + y_h2o) + y_co2 + y_h2]ξ + K·y_co·y_h2o - y_co2·y_h2 = 0
-    a = K_eq - 1.0
-    b = -(K_eq * (y_co_in + y_h2o_in) + y_co2_in + y_h2_in)
-    c = K_eq * y_co_in * y_h2o_in - y_co2_in * y_h2_in
-
-    if abs(a) < 1e-12:
-        xi = -c / b if abs(b) > 1e-12 else 0.0
-    else:
-        disc = b * b - 4.0 * a * c
-        disc = max(disc, 0.0)
-        xi_pos = (-b + math.sqrt(disc)) / (2.0 * a)
-        xi_neg = (-b - math.sqrt(disc)) / (2.0 * a)
-        xi = xi_pos if 0.0 <= xi_pos <= min(y_co_in, y_h2o_in) else xi_neg
-
-    xi = max(0.0, min(xi, min(y_co_in, y_h2o_in)))
-
-    y_co_eq = y_co_in - xi
-    y_h2o_eq = y_h2o_in - xi
-    y_co2_eq = y_co2_in + xi
-    y_h2_eq = y_h2_in + xi
-
-    co_conversion = xi / y_co_in if y_co_in > 0 else 0.0
-
-    equilibrium_composition = {
-        "co": y_co_eq,
-        "h2o": y_h2o_eq,
-        "co2": y_co2_eq,
-        "h2": y_h2_eq,
-    }
-
-    result = {
-        "temperature_c": T_c,
-        "equilibrium_constant": K_eq,
-        "extent_of_reaction": xi,
-        "co_conversion_fraction": co_conversion,
-        "equilibrium_composition": equilibrium_composition,
-    }
-
-    total = sum(equilibrium_composition.values())
-    assert abs(total - 1.0) < 1e-6, f"mole fractions sum to {total}, expected 1.0"
-    assert 0.0 <= co_conversion <= 1.0, f"co_conversion={co_conversion} out of [0,1]"
-
-    return result
-
-
-# ---------------------------------------------------------------------------
-# Public API
-# ---------------------------------------------------------------------------
-
-
-def run_calculator(calculator: str, inputs_path: str, output: str = "-") -> int:
-    """Run *calculator* with inputs from *inputs_path* and write JSON results.
-
-    Args:
-        calculator:  Name of the registered calculator (e.g. ``wgs_reactor``).
-        inputs_path: Path to a JSON file with calculator inputs.
-        output:      Output path; ``"-"`` means stdout.
-
-    Returns:
-        Exit code (0 = success, non-zero = failure).
-
-    Precondition:
-        *calculator* must be a non-empty string.
-        *inputs_path* must point to a readable JSON file.
-    """
-    assert isinstance(calculator, str) and calculator, (
-        "calculator name must be non-empty"
-    )
-    assert isinstance(inputs_path, str) and inputs_path, "inputs_path must be non-empty"
-
-    if calculator not in _REGISTRY:
-        logger.error(
-            "Unknown calculator '%s'. Available: %s", calculator, sorted(_REGISTRY)
+    def calculate(self, inputs: dict[str, Any]) -> CalculationResult:
+        result = _calculate_wgs(inputs)
+        return CalculationResult(
+            values=result,
+            units={
+                "temperature_c": "degC",
+                "equilibrium_constant": "",
+                "extent_of_reaction": "mol_fraction",
+                "co_conversion_fraction": "fraction",
+                "co_fraction": "fraction",
+                "h2o_fraction": "fraction",
+                "co2_fraction": "fraction",
+                "h2_fraction": "fraction",
+            },
+            metadata={"calculator": "wgs_reactor", "version": self.version},
         )
-        return 1
 
-    path = Path(inputs_path)
-    if not path.exists():
-        logger.error("Inputs file not found: %s", path)
-        return 1
 
+def run_calculator(
+    calculator: str,
+    inputs_path: str,
+    output: str | None = "-",
+    *,
+    fmt: str = "json",
+) -> int:
+    """Run ``calculator`` with inputs from ``inputs_path``.
+
+    Returns one of ``EXIT_*`` constants. Validation failures are emitted as
+    structured JSON on stderr; successful results are emitted on stdout unless
+    ``output`` names a destination file.
+    """
     try:
-        with open(path, encoding="utf-8") as fh:
-            inputs = json.load(fh)
-    except json.JSONDecodeError as exc:
-        logger.error("Failed to parse inputs JSON: %s", exc)
-        return 1
+        _validate_calculator_id(calculator)
+        _validate_format(fmt)
+        resolved = _resolve_calculator(calculator)
+        inputs = _load_inputs(Path(inputs_path))
+        validation = resolved.validate_inputs(inputs)
+        if not validation.valid:
+            _write_error(
+                {
+                    "error": "validation_failed",
+                    "calculator": calculator,
+                    "errors": validation.errors,
+                    "warnings": validation.warnings,
+                },
+                EXIT_VALIDATION,
+            )
+            return EXIT_VALIDATION
 
-    try:
-        result = _REGISTRY[calculator](inputs)
-    except (ValueError, AssertionError) as exc:
-        logger.error("Calculation failed: %s", exc)
-        return 1
-
-    output_json = json.dumps(result, indent=2)
-
-    if output == "-":
-        sys.stdout.write(output_json + "\n")
-    else:
-        out_path = Path(output)
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(output_json, encoding="utf-8")
-        logger.info("Results written to %s", out_path)
-
-    return 0
+        result = resolved.calculate(inputs)
+        rendered = _format_result(result, fmt)
+        _write_output(rendered, output)
+    except UnknownCalculatorError as exc:
+        _write_error(
+            {
+                "error": "unknown_calculator",
+                "calculator": exc.calculator,
+                "suggestions": exc.suggestions,
+            },
+            EXIT_UNKNOWN_CALCULATOR,
+        )
+        return EXIT_UNKNOWN_CALCULATOR
+    except (FileNotFoundError, KeyError, TypeError, ValueError) as exc:
+        logger.debug("sidekick run failed: %s", exc)
+        _write_error(
+            {"error": "sidekick_run_failed", "message": str(exc)}, EXIT_GENERIC
+        )
+        return EXIT_GENERIC
+    return EXIT_OK
 
 
 def list_calculators() -> list[str]:
     """Return sorted list of registered calculator names."""
     return sorted(_REGISTRY.keys())
+
+
+def closest_calculator_matches(name: str, *, n: int = 3) -> list[str]:
+    """Return the closest registered or catalog-advertised calculator ids."""
+    return difflib.get_close_matches(name, _known_calculator_ids(), n=n, cutoff=0.4)
+
+
+class UnknownCalculatorError(ValueError):
+    """Raised when a calculator id cannot be resolved."""
+
+    def __init__(self, calculator: str, suggestions: list[str]) -> None:
+        super().__init__(f"unknown calculator: {calculator}")
+        self.calculator = calculator
+        self.suggestions = suggestions
+
+
+def _resolve_calculator(calculator: str) -> Calculator:
+    resolved = _REGISTRY.get(calculator)
+    if resolved is None:
+        raise UnknownCalculatorError(calculator, closest_calculator_matches(calculator))
+    return resolved
+
+
+def _known_calculator_ids() -> list[str]:
+    ids = set(_REGISTRY)
+    ids.update(_catalog_calculator_ids())
+    return sorted(ids)
+
+
+def _catalog_calculator_ids() -> set[str]:
+    # Feature discovery may import optional vendor-backed modules that emit
+    # diagnostics during import. Keep ``sidekick run`` stderr reserved for the
+    # structured JSON payload expected by shell callers.
+    with (
+        contextlib.redirect_stdout(io.StringIO()),
+        contextlib.redirect_stderr(io.StringIO()),
+    ):
+        try:
+            from sidekick.agent.feature_catalog import build_feature_catalog
+
+            catalog = build_feature_catalog()
+        except Exception:  # noqa: BLE001 - catalog discovery imports optional trees
+            return set()
+    ids: set[str] = set()
+    for feature_id, entry in catalog.items():
+        if entry.kind not in {"calculator", "process_calculator"}:
+            continue
+        _, _, tail = feature_id.partition(".")
+        if tail:
+            ids.add(tail)
+    return ids
+
+
+def _validate_calculator_id(calculator: str) -> None:
+    if not _CALCULATOR_ID_RE.fullmatch(calculator):
+        raise ValueError(
+            f"calculator id must match ^[a-z][a-z0-9_]*$ (got {calculator!r})"
+        )
+
+
+def _validate_format(fmt: str) -> None:
+    if fmt not in _OUTPUT_FORMATS:
+        raise ValueError(f"format must be one of {sorted(_OUTPUT_FORMATS)}")
+
+
+def _load_inputs(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        raise FileNotFoundError(path)
+    if not path.is_file():
+        raise ValueError(f"inputs path is not a file: {path}")
+
+    text = path.read_text(encoding="utf-8")
+    if path.suffix.lower() in _YAML_SUFFIXES:
+        try:
+            import yaml
+        except ImportError as exc:
+            raise ValueError("YAML inputs require PyYAML") from exc
+        payload = yaml.safe_load(text)
+    else:
+        payload = json.loads(text)
+    if not isinstance(payload, dict):
+        raise ValueError("inputs payload must be a JSON/YAML object")
+    return dict(payload)
+
+
+def _format_result(result: CalculationResult | Mapping[str, Any], fmt: str) -> str:
+    payload = _result_payload(result)
+    if fmt == "json":
+        return json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    if fmt == "csv":
+        return _result_csv(payload)
+    raise ValueError(f"unsupported output format: {fmt}")
+
+
+def _result_payload(result: CalculationResult | Mapping[str, Any]) -> dict[str, Any]:
+    if isinstance(result, CalculationResult):
+        return {
+            "values": result.values,
+            "units": result.units,
+            "warnings": result.warnings,
+            "metadata": result.metadata,
+        }
+    values = dict(result)
+    return {"values": values, "units": {}, "warnings": [], "metadata": {}}
+
+
+def _result_csv(payload: Mapping[str, Any]) -> str:
+    values = payload.get("values", {})
+    units = payload.get("units", {})
+    if not isinstance(values, Mapping):
+        raise ValueError("result values must be a mapping")
+    if not isinstance(units, Mapping):
+        raise ValueError("result units must be a mapping")
+
+    output = io.StringIO()
+    writer = csv.writer(output, lineterminator="\n")
+    writer.writerow(["key", "value"])
+    for key, value in values.items():
+        writer.writerow([key, value])
+    writer.writerow(
+        ["units", ";".join(f"{key}={value}" for key, value in units.items())]
+    )
+    return output.getvalue()
+
+
+def _write_output(rendered: str, output: str | None) -> None:
+    if output in {None, "-"}:
+        sys.stdout.write(rendered)
+        return
+    out_path = Path(output)
+    if not out_path.parent.exists():
+        raise FileNotFoundError(out_path.parent)
+    out_path.write_text(rendered, encoding="utf-8")
+
+
+def _write_error(payload: Mapping[str, Any], code: int) -> None:
+    data = dict(payload)
+    data["exit_code"] = code
+    sys.stderr.write(json.dumps(data, sort_keys=True) + "\n")
+
+
+def _calculate_wgs(inputs: dict[str, Any]) -> dict[str, float]:
+    r = 8.314
+    delta_h = -41000.0
+    delta_s = -42.0
+
+    temperature_c = float(inputs.get("temperature_c", 350.0))
+    temperature_k = temperature_c + 273.15
+    co_in = float(inputs.get("co_fraction", 0.30))
+    h2o_in = float(inputs.get("h2o_fraction", 0.40))
+    co2_in = float(inputs.get("co2_fraction", 0.10))
+    h2_in = float(inputs.get("h2_fraction", 0.20))
+
+    delta_g = delta_h - temperature_k * delta_s
+    equilibrium_constant = math.exp(-delta_g / (r * temperature_k))
+
+    a = equilibrium_constant - 1.0
+    b = -(equilibrium_constant * (co_in + h2o_in) + co2_in + h2_in)
+    c = equilibrium_constant * co_in * h2o_in - co2_in * h2_in
+
+    if abs(a) < 1e-12:
+        extent = -c / b if abs(b) > 1e-12 else 0.0
+    else:
+        discriminant = max(b * b - 4.0 * a * c, 0.0)
+        root_a = (-b + math.sqrt(discriminant)) / (2.0 * a)
+        root_b = (-b - math.sqrt(discriminant)) / (2.0 * a)
+        extent = root_a if 0.0 <= root_a <= min(co_in, h2o_in) else root_b
+
+    extent = max(0.0, min(extent, min(co_in, h2o_in)))
+    co_out = co_in - extent
+    h2o_out = h2o_in - extent
+    co2_out = co2_in + extent
+    h2_out = h2_in + extent
+
+    total = math.fsum((co_out, h2o_out, co2_out, h2_out))
+    if abs(total - 1.0) > 1e-6:
+        raise ValueError(f"mole fractions sum to {total}, expected 1.0")
+
+    return {
+        "temperature_c": temperature_c,
+        "equilibrium_constant": equilibrium_constant,
+        "extent_of_reaction": extent,
+        "co_conversion_fraction": extent / co_in if co_in > 0.0 else 0.0,
+        "co_fraction": co_out,
+        "h2o_fraction": h2o_out,
+        "co2_fraction": co2_out,
+        "h2_fraction": h2_out,
+    }
+
+
+register("wgs_reactor", WgsReactorCalculator())
