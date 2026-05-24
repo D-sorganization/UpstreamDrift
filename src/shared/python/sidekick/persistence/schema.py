@@ -1,0 +1,40 @@
+"""Shared JSON schema helpers for persisted Sidekick profiles."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Any
+
+PROFILE_SCHEMA_VERSION_KEY = "schema_version"
+PROFILE_SCHEMA_VERSION = 1
+
+
+@dataclass(frozen=True)
+class ProfilePayload:
+    """JSON-safe named Sidekick profile snapshot."""
+
+    data: dict[str, Any] = field(default_factory=dict)
+    schema_version: int = PROFILE_SCHEMA_VERSION
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.data, dict):
+            raise TypeError("data must be a dict")
+        if (
+            not isinstance(self.schema_version, int)
+            or self.schema_version < PROFILE_SCHEMA_VERSION
+        ):
+            raise ValueError("schema_version must be a positive int")
+
+    def to_dict(self) -> dict[str, Any]:
+        return {**self.data, PROFILE_SCHEMA_VERSION_KEY: self.schema_version}
+
+    @classmethod
+    def from_dict(cls, raw: dict[str, Any]) -> ProfilePayload:
+        if not isinstance(raw, dict):
+            raise TypeError("raw profile payload must be a dict")
+        data = dict(raw)
+        schema_version = data.pop(
+            PROFILE_SCHEMA_VERSION_KEY,
+            PROFILE_SCHEMA_VERSION,
+        )
+        return cls(data=data, schema_version=int(schema_version))

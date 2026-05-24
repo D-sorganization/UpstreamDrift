@@ -19,7 +19,9 @@ from pathlib import Path
 import pytest
 
 from core.contracts.exceptions import StateError
-from sidekick.standalone.session_store import ProfilePayload, StandaloneSessionStore
+from sidekick.persistence.schema import ProfilePayload
+from sidekick.standalone import session_store as session_store_module
+from sidekick.standalone.session_store import StandaloneSessionStore
 
 
 @pytest.fixture
@@ -89,6 +91,34 @@ class TestSaveAndLoad:
         store.save_profile("p", ProfilePayload(data={"v": 2}))
         loaded = store.load_profile("p")
         assert loaded.data["v"] == 2
+
+    def test_default_store_root_uses_platformdirs(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
+    ) -> None:
+        expected = tmp_path / "sidekick-user-data"
+        monkeypatch.setattr(
+            session_store_module.platformdirs,
+            "user_data_dir",
+            lambda appname, appauthor=False: str(expected),
+        )
+        assert session_store_module.default_store_root() == expected
+
+    def test_store_without_root_uses_default_store_root(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
+    ) -> None:
+        expected = tmp_path / "sidekick-user-data"
+        monkeypatch.setattr(
+            session_store_module,
+            "default_store_root",
+            lambda: expected,
+        )
+        store = StandaloneSessionStore()
+        store.save_profile("default", ProfilePayload(data={"v": 1}))
+        assert (expected / "profiles" / "default.json").exists()
 
 
 # ---------------------------------------------------------------------------
@@ -187,6 +217,9 @@ class TestConcurrency:
 
 
 class TestProfilePayload:
+    def test_session_store_reuses_shared_profile_payload(self) -> None:
+        assert session_store_module.ProfilePayload is ProfilePayload
+
     def test_to_dict_includes_schema_version(self) -> None:
         p = ProfilePayload(data={"key": "val"})
         d = p.to_dict()

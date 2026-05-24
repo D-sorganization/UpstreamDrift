@@ -1,62 +1,47 @@
-"""Persistent key-value store for standalone Sidekick preferences.
-
-Two concrete implementations:
-- ``FileSessionStore``: backs preferences to a JSON file on disk (production).
-- ``InMemorySessionStore``: in-process dict (tests; never touches ~/.config).
-
-Both implement ``SessionStore`` so ``StandalonePreferences`` depends only on
-the protocol, not on the concrete class (Law of Demeter / dependency inversion).
-"""
+"""Persistent standalone Sidekick profile storage."""
 
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
+import os
 import re
+import tempfile
 import threading
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
+import platformdirs
+
 from core.contracts.exceptions import StateError
+from sidekick.persistence.schema import ProfilePayload
 
 logger = logging.getLogger(__name__)
 
 _PROFILE_NAME_RE = re.compile(r"^[a-zA-Z0-9_-]+$")
+_LAST_PROFILE_KEY = "last_profile"
 
 
-@dataclass(frozen=True)
-class ProfilePayload:
-    """Serializable standalone Sidekick profile payload."""
+def default_store_root() -> Path:
+    """Return the standalone Sidekick profile root."""
 
-    data: dict[str, Any]
-    schema_version: int = 1
-
-    def __post_init__(self) -> None:
-        if not isinstance(self.data, dict):
-            raise TypeError("data must be a dict")
-
-    def to_dict(self) -> dict[str, Any]:
-        return {**self.data, "schema_version": self.schema_version}
-
-    @classmethod
-    def from_dict(cls, raw: dict[str, Any]) -> ProfilePayload:
-        if not isinstance(raw, dict):
-            raise TypeError("raw profile payload must be a dict")
-        data = dict(raw)
-        schema_version = data.pop("schema_version", 1)
-        return cls(data=data, schema_version=int(schema_version))
+    return Path(platformdirs.user_data_dir("sidekick", appauthor=False))
 
 
 class StandaloneSessionStore:
     """Profile-oriented JSON store for the standalone Sidekick shell."""
 
-    def __init__(self, root: Path) -> None:
-        if not isinstance(root, Path):
-            raise TypeError("root must be a pathlib.Path")
-        self._root = root
-        self._profiles_dir = root / "profiles"
-        self._last_profile_path = root / "last_profile.json"
+    def __init__(self, root: Path | str | None = None) -> None:
+        if root is None:
+            resolved_root = default_store_root()
+        elif isinstance(root, (Path, str)):
+            resolved_root = Path(root)
+        else:
+            raise TypeError("root must be a pathlib.Path, str, or None")
+        self._root = resolved_root.expanduser()
+        self._profiles_dir = self._root / "profiles"
+        self._last_profile_path = self._root / "last_profile.json"
         self._lock = threading.RLock()
 
     def save_profile(self, name: str, payload: ProfilePayload) -> None:
@@ -64,14 +49,12 @@ class StandaloneSessionStore:
         if not isinstance(payload, ProfilePayload):
             raise TypeError("payload must be ProfilePayload")
         with self._lock:
-            self._profiles_dir.mkdir(parents=True, exist_ok=True)
-            target = self._profile_path(name)
-            temp = target.with_suffix(".tmp")
-            temp.write_text(
-                json.dumps(payload.to_dict(), sort_keys=True),
-                encoding="utf-8",
-            )
-            temp.replace(target)
+            try:
+                _mkdir_private(self._profiles_dir)
+                target = self._profile_path(name)
+                _atomic_write_json(target, payload.to_dict())
+            except OSError as exc:
+                raise StateError(f"Could not write profile: {name}") from exc
 
     def load_profile(self, name: str) -> ProfilePayload:
         self._validate_name(name)
@@ -86,7 +69,10 @@ class StandaloneSessionStore:
             raise StateError(f"Could not read profile: {name}") from exc
         if not isinstance(raw, dict):
             raise StateError(f"Profile JSON must be an object: {name}")
-        return ProfilePayload.from_dict(raw)
+        try:
+            return ProfilePayload.from_dict(raw)
+        except (TypeError, ValueError) as exc:
+            raise StateError(f"Malformed profile JSON: {name}") from exc
 
     def list_profiles(self) -> list[str]:
         if not self._profiles_dir.exists():
@@ -98,15 +84,21 @@ class StandaloneSessionStore:
         path = self._profile_path(name)
         if not path.exists():
             raise KeyError(name)
-        path.unlink()
+        try:
+            path.unlink()
+        except OSError as exc:
+            raise StateError(f"Could not delete profile: {name}") from exc
 
     def set_last_profile(self, name: str) -> None:
         self._validate_name(name)
-        self._root.mkdir(parents=True, exist_ok=True)
-        self._last_profile_path.write_text(
-            json.dumps({"last_profile": name}, sort_keys=True),
-            encoding="utf-8",
-        )
+        try:
+            _mkdir_private(self._root)
+            _atomic_write_json(
+                self._last_profile_path,
+                {_LAST_PROFILE_KEY: name},
+            )
+        except OSError as exc:
+            raise StateError("Could not write last profile") from exc
 
     def last_profile(self) -> str | None:
         if not self._last_profile_path.exists():
@@ -115,7 +107,7 @@ class StandaloneSessionStore:
             raw = json.loads(self._last_profile_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
             raise StateError("Could not read last profile") from exc
-        value = raw.get("last_profile") if isinstance(raw, dict) else None
+        value = raw.get(_LAST_PROFILE_KEY) if isinstance(raw, dict) else None
         return value if isinstance(value, str) else None
 
     def _profile_path(self, name: str) -> Path:
@@ -125,6 +117,35 @@ class StandaloneSessionStore:
     def _validate_name(name: str) -> None:
         if not isinstance(name, str) or not _PROFILE_NAME_RE.fullmatch(name):
             raise ValueError("profile name must match ^[a-zA-Z0-9_-]+$")
+
+
+def _mkdir_private(path: Path) -> None:
+    if os.name == "posix":
+        path.mkdir(mode=0o700, parents=True, exist_ok=True)
+        return
+    path.mkdir(parents=True, exist_ok=True)
+
+
+def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
+    _mkdir_private(path.parent)
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        dir=path.parent,
+        prefix=f".{path.stem}-",
+        suffix=".tmp",
+        delete=False,
+    ) as handle:
+        temp_path = Path(handle.name)
+        json.dump(payload, handle, sort_keys=True)
+        handle.flush()
+        os.fsync(handle.fileno())
+    try:
+        os.replace(temp_path, path)
+    except OSError:
+        with contextlib.suppress(OSError):
+            temp_path.unlink()
+        raise
 
 
 @runtime_checkable
@@ -151,11 +172,15 @@ class InMemorySessionStore:
         self._data: dict[str, Any] = {}
 
     def get(self, key: str, default: Any = None) -> Any:
-        assert isinstance(key, str), "key must be a str"
+        if not isinstance(key, str):
+            raise TypeError("key must be a str")
         return self._data.get(key, default)
 
     def set(self, key: str, value: Any) -> None:
-        assert isinstance(key, str) and key, "key must be a non-empty str"
+        if not isinstance(key, str):
+            raise TypeError("key must be a str")
+        if not key:
+            raise ValueError("key must be a non-empty str")
         self._data[key] = value
 
 
@@ -171,7 +196,8 @@ class FileSessionStore:
     """
 
     def __init__(self, path: Path) -> None:
-        assert isinstance(path, Path), "path must be a pathlib.Path"
+        if not isinstance(path, Path):
+            raise TypeError("path must be a pathlib.Path")
         self._path = path
         self._cache: dict[str, Any] | None = None
 
@@ -195,11 +221,15 @@ class FileSessionStore:
             json.dump(self._cache or {}, fh, indent=2)
 
     def get(self, key: str, default: Any = None) -> Any:
-        assert isinstance(key, str), "key must be a str"
+        if not isinstance(key, str):
+            raise TypeError("key must be a str")
         return self._load().get(key, default)
 
     def set(self, key: str, value: Any) -> None:
-        assert isinstance(key, str) and key, "key must be a non-empty str"
+        if not isinstance(key, str):
+            raise TypeError("key must be a str")
+        if not key:
+            raise ValueError("key must be a non-empty str")
         data = self._load()
         data[key] = value
         self._flush()
