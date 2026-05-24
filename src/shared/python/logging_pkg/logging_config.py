@@ -87,9 +87,8 @@ _SENSITIVE_PATTERNS: list[re.Pattern[str]] = [
         r")"
         r"(?P=key_quote)"
         r"(?P<separator>\s*[=:]\s*)"
-        r"(?P<quote>['\"]?)"
-        r"(?P<value>[^\s'\",}]+)"
-        r"(?P=quote)"
+        r"(?:(?P<quote>['\"])(?P<quoted_value>.*?)(?P=quote)"
+        r"|(?P<value>.+?)(?=(?:,\s*['\"]?[A-Za-z_][\w-]*['\"]?\s*[=:]|\s|$|[}\]])))"
     ),
 ]
 
@@ -132,7 +131,7 @@ def _replace_sensitive_match(match: re.Match[str]) -> str:
     key_quote = match.group("key_quote")
     key = match.group("key")
     separator = match.group("separator")
-    quote = match.group("quote")
+    quote = match.group("quote") or ""
     return f"{prefix}{key_quote}{key}{key_quote}{separator}{quote}{_REDACTED}{quote}"
 
 
