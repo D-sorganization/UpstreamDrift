@@ -191,10 +191,7 @@ class ForceVectorRenderer:
         # Get direction (normalize)
         direction = force.direction.to_numpy()
         norm = math.hypot(*direction)
-        if norm > 0:
-            direction = direction / norm
-        else:
-            direction = np.array([0, 0, 1])
+        direction = direction / norm if norm > 0 else np.array([0, 0, 1])
 
         # Calculate endpoint
         origin = force.origin.to_numpy()
@@ -247,10 +244,7 @@ class ForceVectorRenderer:
         # Get axis (direction)
         axis = force.direction.to_numpy()
         norm = math.hypot(*axis)
-        if norm > 0:
-            axis = axis / norm
-        else:
-            axis = np.array([0, 0, 1])
+        axis = axis / norm if norm > 0 else np.array([0, 0, 1])
 
         origin = force.origin.to_numpy()
 
