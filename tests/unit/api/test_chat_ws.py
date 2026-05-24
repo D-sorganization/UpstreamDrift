@@ -288,7 +288,13 @@ class TestWebSocket:
 
         websocket = FakeWebSocket(mock_chat_service)
 
-        with caplog.at_level("ERROR"):
+        async def fake_resolve_ws_user(_websocket: FakeWebSocket) -> object:
+            return object()
+
+        with (
+            patch("src.api.routes.chat_ws.resolve_ws_user", fake_resolve_ws_user),
+            caplog.at_level("ERROR"),
+        ):
             await chat_ws.chat_stream(websocket, "new")
 
         assert websocket.sent[0] == {
