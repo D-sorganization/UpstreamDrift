@@ -93,3 +93,6 @@
 ## 2025-10-24 - [Optimize vector distance calculation for visualizer distances]
 **Learning:** `np.linalg.norm` is generic and relatively slow for normalizing small 3D vectors. Using `math.hypot(*v)` significantly speeds up computation by avoiding numpy array overhead and allocation.
 **Action:** Replace `np.linalg.norm(vector)` with `math.hypot(*vector)` where `vector` is a small fixed-length array (e.g. 3D point) especially when computing normalisations frequently like in `visualization.py`.
+## 2026-05-25 - Optimize constraint residual penalties in Drake
+**Learning:** Using `sum(np.sum(np.asarray(r) ** 2) for r in constraint_residuals)` creates intermediate array allocations for `** 2`. Since this calculation is part of the cost function inner loop, it creates unnecessary overhead.
+**Action:** Replace `np.sum(np.asarray(r) ** 2)` with `np.vdot(arr := np.asarray(r), arr)` to avoid the intermediate allocation and calculate the squared sum directly at the C level, improving inner loop performance.
