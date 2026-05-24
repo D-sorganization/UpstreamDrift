@@ -272,6 +272,9 @@ jobs:
       - name: Error-Handling Ratchet (issue #5911)
         run: python3 scripts/ci/check_error_handling_ratchet.py
 
+      - name: Suppression Discipline Ratchet (issue #5916)
+        run: python3 scripts/ci/check_suppression_ratchet.py
+
       - name: Repo Root Clutter Check
         run: python3 scripts/check_root_clutter.py
 
