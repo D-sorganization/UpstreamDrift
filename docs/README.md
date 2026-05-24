@@ -1,8 +1,7 @@
-# Golf Modeling Suite Documentation
+# UpstreamDrift Documentation
 
-> **January 2026** | Local-First API Architecture
-
-Welcome to the Golf Modeling Suite - a professional biomechanical analysis and physics simulation platform.
+Welcome to UpstreamDrift — a unified platform for golf swing analysis across
+multiple physics engines and biomechanical modeling approaches.
 
 ## Quick Navigation
 
@@ -18,20 +17,33 @@ Welcome to the Golf Modeling Suite - a professional biomechanical analysis and p
 
 ## Quick Start
 
-### 1. Start the API Server
+### 1. Launch the Suite
+
+From the repository root:
 
 ```bash
-cd /home/user/Golf_Modeling_Suite
-python start_api_server.py
+python launch_golf_suite.py
 ```
 
-### 2. Access the API
+This is the unified launcher and the recommended entry point. It exposes the
+web UI by default and can dispatch to a specific engine or to the API server
+only.
+
+### 2. Alternative launch modes
+
+```bash
+python launch_golf_suite.py --classic     # PyQt6 launcher
+python launch_golf_suite.py --api-only    # API server only (development)
+python launch_golf_suite.py --engine mujoco
+```
+
+### 3. Access the API (when running in API mode)
 
 - **API Base**: http://localhost:8000
 - **Interactive Docs**: http://localhost:8000/docs
 - **Health Check**: http://localhost:8000/health
 
-### 3. Run a Simulation
+### 4. Run a Simulation
 
 ```bash
 curl -X POST http://localhost:8000/simulate \
@@ -43,63 +55,63 @@ curl -X POST http://localhost:8000/simulate \
 
 ## Documentation Structure
 
+`docs/` contains the full documentation tree. The most commonly used
+subdirectories are listed below; many additional topic-specific directories
+(`adr/`, `assessments/`, `motion_pipeline/`, `governance/`, etc.) live
+alongside them.
+
 ```
 docs/
 ├── README.md              ← You are here
 │
-├── api/                   # API Reference
+├── api/                   # API reference
 │   ├── API_ARCHITECTURE.md   # Complete API architecture
 │   ├── DEVELOPMENT.md        # Developer guide
 │   ├── engines.md            # Engine APIs
 │   └── shared.md             # Shared utilities
 │
-├── user_guide/            # End User Documentation
-│   ├── installation.md       # Setup instructions
-│   ├── getting_started.md    # First steps
-│   └── launchers.md          # GUI launchers
+├── user_guide/            # End-user documentation
+│   ├── installation.md
+│   ├── getting_started.md
+│   └── launchers.md
 │
-├── engines/               # Physics Engine Docs
-│   ├── mujoco.md            # MuJoCo integration
-│   ├── drake.md             # Drake integration
-│   ├── pinocchio.md         # Pinocchio integration
-│   ├── opensim.md           # OpenSim integration
-│   └── simscape.md          # MATLAB Simscape
+├── engines/               # Physics engine docs
+│   ├── mujoco.md
+│   ├── drake.md
+│   ├── pinocchio.md
+│   ├── opensim.md
+│   └── simscape.md
 │
-├── development/           # Developer Resources
-│   ├── architecture.md      # System design
-│   ├── design_by_contract.md # DbC patterns
-│   ├── contributing.md      # Contribution guide
-│   └── agent_templates/     # AI agent templates
+├── development/           # Developer resources
+│   ├── architecture.md
+│   ├── design_by_contract.md
+│   ├── contributing.md
+│   └── agent_templates/
 │
-├── architecture/          # Technical Architecture
+├── architecture/          # Technical architecture
 │   ├── system_overview.md
 │   ├── engine_loading_flow.md
 │   └── data_pipeline.md
 │
-├── troubleshooting/       # Problem Solving
-│   └── (troubleshooting guides)
+├── troubleshooting/       # Problem solving
+│   ├── common-issues.md
+│   ├── installation.md
+│   └── FAQ.md
 │
-└── archive/               # Historical Documentation
-    ├── assessments_jan2026/
-    ├── phase_plans/
-    └── historical/
+├── adr/                   # Architecture decision records
+├── assessments/           # Project reviews and assessments
+├── motion_pipeline/       # Motion capture and tracking pipeline
+├── plans/                 # Implementation plans
+└── technical/             # Engine reports and control strategies
 ```
 
 ---
 
 ## Core Concepts
 
-### Local-First API
-
-The Golf Modeling Suite uses a **local-first architecture**:
-
-- **No cloud required** for local development
-- **Optional cloud mode** for production scaling
-- **Same API** whether local or cloud
-
 ### Multi-Engine Support
 
-Choose from 6+ physics engines:
+Choose from multiple physics engines:
 
 | Engine        | Best For                         |
 | ------------- | -------------------------------- |
@@ -258,24 +270,9 @@ repository maintenance guidance.
 
 ---
 
-## Recent Updates (January 2026)
-
-- **API Architecture Upgrade** - Local-first FastAPI implementation
-- **Diagnostics Enhancement** - Structured error codes, request tracing
-- **Design by Contract** - Comprehensive contract infrastructure
-- **Documentation Reorganization** - Archived old docs, new clear structure
-
----
-
-## Archived Documentation
-
-Historical assessments, phase plans, and old implementation reports have been moved to [archive/](archive/).
-
----
-
 ## Getting Help
 
-- **API Docs**: http://localhost:8000/docs
+- **API Docs**: http://localhost:8000/docs (when API server is running)
 - **GitHub Issues**: Report bugs and request features
 - **Troubleshooting**: See [troubleshooting/](troubleshooting/)
 
