@@ -71,6 +71,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ### Recent Spec Updates
 
 - **2026-05-24** - Tightened shared logging redaction so `src/shared/python/logging_pkg/logging_config.py` preserves quoted JSON-style key/value formatting while only masking exact secret-bearing field names such as `api_key`, `secret_key`, and `password`; similarly named public fields like `api_key_hint` remain visible. Added focused regression coverage in `tests/unit/test_logging_config.py`.
+- **2026-05-24** - Added `scripts/ci/check_deprecated_alias_shims.py` and a blocking CI gate that freezes `src/shared/python/upstream_drift_tools/` to its current shim-only compatibility surface, so the deprecated alias package can shrink or disappear but cannot grow while issue #5922 cleanup remains in progress.
 - **2026-05-24** - Surfaced API database pool controls for non-SQLite deployments via `GOLF_DB_POOL_SIZE`, `GOLF_DB_POOL_RECYCLE`, and `GOLF_DB_POOL_PRE_PING`; `src/api/database.py` now builds non-SQLite engines from shared config accessors instead of hardcoded pool defaults, with regression coverage in `tests/unit/test_config_environment.py` and `tests/unit/api/test_database_init.py`.
 - **2026-05-24** - Added shared `GOLF_REALTIME_HOST` / `GOLF_REALTIME_PORT` environment accessors and wired `src/shared/python/realtime/ws_pubsub.py` plus API diagnostics to use/report them, so realtime bind defaults no longer live only as hard-coded loopback literals.
 - **2026-05-24** - Deferred realtime WebSocket backend resolution in `src/shared/python/realtime/ws_pubsub.py` until first explicit start/use and made `WSPubSub.start()` bring up the Python backend even when the instance was created with `autostart=False`; added focused regression coverage in `tests/shared/realtime/test_ws_pubsub.py`.
@@ -468,6 +469,10 @@ Beyond standard tools, CI enforces custom checks:
   require owned, expiring exceptions in
   `scripts/config/module_size_budget_baseline.json`, currently capped at 10
   active exceptions.
+- **Deprecated Alias Shim Surface**: `scripts/ci/check_deprecated_alias_shims.py`
+  blocks net-new files under `src/shared/python/upstream_drift_tools/`; the
+  deprecated alias package may shrink or disappear, but it must remain limited
+  to the current compatibility shims until the full migration completes.
 - **Documentation Catalog and Size Budget**: Every top-level `docs/` directory is listed in `docs/index.md`; oversized Markdown/Quarto docs require owned, expiring exceptions.
 - **Import Depth**: Maximum 4 import levels to prevent circular dependencies
 - **Physics Fitness**: Cross-engine validation must pass with <5% tolerance
