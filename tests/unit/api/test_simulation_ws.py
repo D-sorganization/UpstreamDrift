@@ -369,11 +369,11 @@ class _RouteWebSocket:
 @pytest.mark.anyio
 async def test_simulation_stream_sanitizes_unexpected_errors(
     monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Unexpected runtime failures must be logged with traceback and sanitized."""
 
     websocket = _RouteWebSocket([{"action": "start", "config": {}}])
-    mock_logger = MagicMock()
 
     async def fake_load_simulation_engine(*_args: Any, **_kwargs: Any) -> object:
         return object()
@@ -391,22 +391,23 @@ async def test_simulation_stream_sanitizes_unexpected_errors(
         "_run_simulation_loop",
         fake_run_simulation_loop,
     )
-    monkeypatch.setattr(simulation_ws_module, "logger", mock_logger)
     monkeypatch.setattr(
         simulation_ws_module,
         "resolve_ws_user",
         AsyncMock(return_value=object()),
     )
 
-    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+    with caplog.at_level("ERROR"):
+        await simulation_ws_module.simulation_stream(websocket, "mujoco")
 
     assert websocket.accepted is True
     assert websocket.closed is True
     assert websocket.sent == [{"error": "Internal server error"}]
     assert "top secret backend detail" not in json.dumps(websocket.sent)
-    mock_logger.exception.assert_called_once_with(
-        "Simulation WebSocket failed for engine=%s",
-        "mujoco",
+    assert any(
+        record.message == "Simulation WebSocket failed for engine=mujoco"
+        and record.exc_info is not None
+        for record in caplog.records
     )
 
 
