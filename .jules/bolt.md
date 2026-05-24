@@ -86,3 +86,6 @@
 ## 2026-05-23 - trimesh ImportErrors
 **Learning:** Hard-coded imports of `trimesh` in files like `_mesh_decimation.py` and `_mesh_io.py` can cause tests or other modules that import them to fail if `trimesh` isn't installed.
 **Action:** Always wrap `import trimesh` with a `try...except ImportError` block and conditionally check if `trimesh is None` to safely handle environments where it is missing, or alternatively, make sure to add it to the test environment requirements.
+## 2026-05-18 - Optimize dot product over trajectory along an axis
+**Learning:** `np.sum(a * b, axis=1)` to compute row-wise dot products creates intermediate memory allocations for `a * b` and has internal numpy sum overhead. `np.einsum("ij,ij->i", a, b)` computes this without allocations and is faster.
+**Action:** Replace `np.sum(a * b, axis=1)` with `np.einsum("ij,ij->i", a, b)` when computing dot products between pairs of vectors (like quaternions) across a time trajectory.
