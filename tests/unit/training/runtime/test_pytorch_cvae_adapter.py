@@ -239,21 +239,26 @@ def test_cancellation_short_circuits(tmp_path: Path) -> None:
         tmp_path / "run",
         hyperparameters=_toy_hyperparameters(epochs=5),
     )
-    sink = InMemoryProgressSink()
     cancel = ThreadingCancelToken()
-
-    # Wrap sink so we can flip the cancel token after the first epoch.
-    original_emit = sink.emit_metric
     seen_epochs: set[int] = set()
+    inner_sink = InMemoryProgressSink()
 
-    def _emit(metric):
-        seen_epochs.add(metric.step)
-        original_emit(metric)
-        # After epoch 0's 6 metrics arrive, request cancellation.
-        if metric.step == 0 and metric.name == "duration_s":
-            cancel.request_cancel()
+    class _CancellingSink:
+        def emit_metric(self, metric) -> None:
+            seen_epochs.add(metric.step)
+            inner_sink.emit_metric(metric)
+            # After epoch 0's 6 metrics arrive, request cancellation.
+            if metric.step == 0 and metric.name == "duration_s":
+                cancel.request_cancel()
 
-    sink.emit_metric = _emit  # type: ignore[method-assign]
+        def emit_status(self, status, *, message=None) -> None:
+            inner_sink.emit_status(status, message=message)
+
+        @property
+        def statuses(self):
+            return inner_sink.statuses
+
+    sink = _CancellingSink()
 
     runner.prepare(cfg)
     result = runner.run(cfg, progress=sink, cancel=cancel)

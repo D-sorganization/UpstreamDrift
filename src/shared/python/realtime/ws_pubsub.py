@@ -36,6 +36,11 @@ import time
 from collections.abc import Callable
 from typing import Any
 
+from src.shared.python.config.environment import (
+    get_realtime_host,
+    get_realtime_port,
+)
+
 from .protocol import Subscription, validate_channel
 
 __all__ = ["WSPubSub"]
@@ -120,8 +125,10 @@ class WSPubSub:
     spawns a daemon FastAPI/uvicorn server on the configured port.
 
     Args:
-        host: Host of the WS server. Defaults to 127.0.0.1.
-        port: Port of the WS server. Defaults to 8765.
+        host: Host of the WS server. Defaults to ``GOLF_REALTIME_HOST``
+            or 127.0.0.1 when unset.
+        port: Port of the WS server. Defaults to ``GOLF_REALTIME_PORT``
+            or 8765 when unset.
         autostart: If True, spawn the backend server on the configured port
             if nothing is listening. Defaults to True.
         backend: Override backend resolution for this instance. ``None``
@@ -135,14 +142,14 @@ class WSPubSub:
 
     def __init__(
         self,
-        host: str = DEFAULT_HOST,
-        port: int = DEFAULT_PORT,
+        host: str | None = None,
+        port: int | None = None,
         *,
         autostart: bool = True,
         backend: str | None = None,
     ) -> None:
-        self.host = host
-        self.port = port
+        self.host = get_realtime_host() if host is None else host
+        self.port = get_realtime_port() if port is None else port
         self._backend_override = backend.lower() if backend is not None else None
         self._backend_resolved = self._backend_override is not None
         self.backend = self._backend_override or "auto"

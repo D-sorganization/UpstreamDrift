@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.188                                            |
+| **Spec Version**        | 1.0.189                                            |
 | **Last Spec Update**    | 2026-05-24                                         |
 
 ## 2. Purpose & Mission
@@ -70,7 +70,9 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-05-24** - Added shared `GOLF_REALTIME_HOST` / `GOLF_REALTIME_PORT` environment accessors and wired `src/shared/python/realtime/ws_pubsub.py` plus API diagnostics to use/report them, so realtime bind defaults no longer live only as hard-coded loopback literals.
 - **2026-05-24** - Deferred realtime WebSocket backend resolution in `src/shared/python/realtime/ws_pubsub.py` until first explicit start/use and made `WSPubSub.start()` bring up the Python backend even when the instance was created with `autostart=False`; added focused regression coverage in `tests/shared/realtime/test_ws_pubsub.py`.
+- **2026-05-24** - Improved CI/test observability for optional dependency lanes: optional pytest collection skips now emit one warning per skipped path with the missing module or symbol, the PyTorch CVAE cancellation regression now uses a wrapper progress sink instead of monkeypatching methods, and three standard workflow inventory jobs now have 15-minute budgets to reduce false timeouts on saturated self-hosted runners.
 - **2026-05-23** - Closed the file-size budget grandfathering gap by requiring tracked baseline entries in `scripts/config/file_size_budget.json` for oversized files and adding regression coverage for untracked oversized files.
 - **2026-05-23** - Tightened `src/shared/python/training/config.py` validation so boolean values are rejected for integer training caps such as `max_epochs` and `max_steps`, with regression coverage in `tests/unit/training/test_config.py`.
 - **2026-05-23** - Deferred realtime WebSocket backend resolution in `src/shared/python/realtime/ws_pubsub.py` until `WSPubSub.start()`, `publish()`, or `subscribe()` first use so importing the module no longer probes optional runtime dependencies; added focused lazy-resolution regression coverage for the python publish fallback path.
@@ -614,6 +616,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-05-23 | 1.0.186 | Refined the standalone Sidekick CLI contract in `src/shared/python/sidekick/__main__.py` so `python -m sidekick` defaults to `gui`, mistyped flags get closest-match suggestions, GUI imports remain deferred until dispatch, `--data-dir` is resolved to an absolute path, and `gui` now delegates through `sidekick.launcher_factory` using the standalone window/session-store configuration on current `main`. Expanded `tests/unit/sidekick/test_cli.py` to cover implicit-gui parsing, bad-flag suggestions, headless `run` parsing, handler error paths, and launcher delegation. |
 | 2026-05-23 | 1.0.186 | Tightened `src/shared/python/training/config.py` validation so boolean values are rejected for integer training caps such as `max_epochs` and `max_steps`; regression coverage lives in `tests/unit/training/test_config.py`. |
 | 2026-05-23 | 1.0.187 | Closed the file-size budget grandfathering gap by requiring tracked baseline entries for oversized files in `scripts/config/file_size_budget.json`; untracked oversized files now fail `scripts/ci/check_file_size_budget.py`, with regression coverage in `tests/scripts/wave9_scripts_b/test_check_file_size_budget.py`. |
+| 2026-05-24 | 1.0.189 | Improved CI/test observability for optional dependency lanes: optional collection skips warn once with missing requirements, `tests/unit/training/runtime/test_pytorch_cvae_adapter.py` uses a wrapper progress sink for cancellation, and standard workflow inventory jobs have 15-minute timeouts to avoid false timeouts on loaded self-hosted runners. |
 | 2026-05-23 | 1.0.186 | Deferred `src/shared/python/realtime/ws_pubsub.py` backend resolution until `WSPubSub.start()`, `publish()`, or `subscribe()` first use so module import no longer probes optional realtime runtime dependencies, and added focused regression coverage for lazy resolution plus the python publish fallback path. |
 | 2026-05-22 | 1.0.182 | Documented the motion-pipeline REST contract for `POST /api/v1/motion-pipeline/run` and its preprocessing-step boolean coercion rule so `PipelineRequest` preserves Pydantic handling of `enabled` values like `"false"` when converting into `PipelineConfig`; regression coverage lives in `tests/unit/motion_pipeline/orchestrator/test_api.py`. |
 | 2026-05-24 | 1.0.188 | Deferred realtime WebSocket backend resolution until first explicit start/use and made `WSPubSub.start()` launch the Python backend even when the instance was created with `autostart=False`; added focused regression coverage in `tests/shared/realtime/test_ws_pubsub.py`. |

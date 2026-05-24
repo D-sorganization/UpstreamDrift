@@ -115,6 +115,10 @@ class APIDiagnostics:
             "GOLF_AUTH_DISABLED": get_env("GOLF_AUTH_DISABLED", default="not set")
             or "not set",
             "GOLF_PORT": get_env("GOLF_PORT", default="not set") or "not set",
+            "GOLF_REALTIME_HOST": get_env("GOLF_REALTIME_HOST", default="not set")
+            or "not set",
+            "GOLF_REALTIME_PORT": get_env("GOLF_REALTIME_PORT", default="not set")
+            or "not set",
         }
         details["environment_variables"] = env_vars
 
