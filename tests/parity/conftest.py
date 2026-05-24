@@ -17,8 +17,8 @@ try:
     from fastapi.testclient import TestClient
     from src.api.server import app
 except ImportError as exc:
-    TestClient = Any
-    app = None
+    TestClient = Any  # type: ignore[assignment,misc]
+    app = None  # type: ignore[assignment]
     _PARITY_API_IMPORT_ERROR = exc
 
 

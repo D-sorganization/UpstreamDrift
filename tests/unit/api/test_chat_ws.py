@@ -291,7 +291,7 @@ class TestWebSocket:
         websocket = FakeWebSocket(mock_chat_service)
 
         with caplog.at_level("ERROR"):
-            await chat_ws.chat_stream(websocket, "new")
+            await chat_ws.chat_stream(websocket, "new")  # type: ignore[arg-type]
 
         assert websocket.sent[0] == {
             "type": "session_info",
@@ -335,7 +335,7 @@ class TestWebSocket:
         expected_token = chat_ws._session_log_token(sensitive_session_id)
 
         with caplog.at_level("DEBUG"):
-            await chat_ws.chat_stream(websocket, sensitive_session_id)
+            await chat_ws.chat_stream(websocket, sensitive_session_id)  # type: ignore[arg-type]
 
         assert websocket.sent[0] == {
             "type": "session_info",
