@@ -89,3 +89,7 @@
 ## 2026-05-18 - Optimize dot product over trajectory along an axis
 **Learning:** `np.sum(a * b, axis=1)` to compute row-wise dot products creates intermediate memory allocations for `a * b` and has internal numpy sum overhead. `np.einsum("ij,ij->i", a, b)` computes this without allocations and is faster.
 **Action:** Replace `np.sum(a * b, axis=1)` with `np.einsum("ij,ij->i", a, b)` when computing dot products between pairs of vectors (like quaternions) across a time trajectory.
+
+## 2025-10-24 - [Optimize vector distance calculation for visualizer distances]
+**Learning:** `np.linalg.norm` is generic and relatively slow for normalizing small 3D vectors. Using `math.hypot(*v)` significantly speeds up computation by avoiding numpy array overhead and allocation.
+**Action:** Replace `np.linalg.norm(vector)` with `math.hypot(*vector)` where `vector` is a small fixed-length array (e.g. 3D point) especially when computing normalisations frequently like in `visualization.py`.
