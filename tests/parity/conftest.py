@@ -11,16 +11,25 @@ from typing import Any
 
 import pytest
 
+_PARITY_API_IMPORT_ERROR: ImportError | None = None
+
 try:
     from fastapi.testclient import TestClient
     from src.api.server import app
-except ImportError:
-    pytest.skip("API server deps not available", allow_module_level=True)
+except ImportError as exc:
+    TestClient = Any
+    app = None
+    _PARITY_API_IMPORT_ERROR = exc
 
 
 @pytest.fixture(scope="module")
 def client() -> Generator[TestClient, None, None]:
     """FastAPI test client with full app lifespan."""
+    if app is None:
+        detail = (
+            str(_PARITY_API_IMPORT_ERROR) if _PARITY_API_IMPORT_ERROR else "unknown"
+        )
+        pytest.skip(f"API server deps not available: {detail}")
     with TestClient(app) as test_client:
         yield test_client
 
