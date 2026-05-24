@@ -1,5 +1,7 @@
 """Request models for Golf Modeling Suite API."""
 
+import math
+from collections.abc import Sequence
 from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
@@ -37,6 +39,38 @@ VALID_EXPORT_FORMATS = {"json", "csv", "mat", "hdf5", "c3d"}
 MAX_SIMULATION_DURATION = 300.0  # 5 minutes max
 MIN_TIMESTEP = 1e-6
 MAX_TIMESTEP = 0.1
+
+
+def _normalize_initial_state_component(name: str, value: object) -> list[float]:
+    """Return a finite float list for an initial-state component."""
+    if hasattr(value, "tolist") and not isinstance(value, (str, bytes, bytearray)):
+        raw_values = value.tolist()
+    elif isinstance(value, Sequence) and not isinstance(
+        value,
+        (str, bytes, bytearray),
+    ):
+        raw_values = list(value)
+    else:
+        raise ValueError(f"initial_state.{name} must be a sequence of finite numbers")
+
+    normalized: list[float] = []
+    for item in raw_values:
+        if isinstance(item, bool):
+            raise ValueError(
+                f"initial_state.{name} must be a sequence of finite numbers"
+            )
+        try:
+            numeric = float(item)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                f"initial_state.{name} must be a sequence of finite numbers"
+            ) from exc
+        if not math.isfinite(numeric):
+            raise ValueError(
+                f"initial_state.{name} must be a sequence of finite numbers"
+            )
+        normalized.append(numeric)
+    return normalized
 
 
 class SimulationRequest(BaseModel):
@@ -95,6 +129,27 @@ class SimulationRequest(BaseModel):
                 "Sub-microsecond timesteps are not supported."
             )
         return v
+
+    @field_validator("initial_state")
+    @classmethod
+    def validate_initial_state(
+        cls,
+        v: dict[str, Any] | None,
+    ) -> dict[str, Any] | None:
+        """Validate the optional q/v vectors used by WebSocket starts."""
+        if v is None:
+            return None
+        if not isinstance(v, dict):
+            raise ValueError("initial_state must be an object")
+
+        normalized = dict(v)
+        for key in ("q", "v"):
+            if key in normalized:
+                normalized[key] = _normalize_initial_state_component(
+                    key,
+                    normalized[key],
+                )
+        return normalized
 
 
 class AnalysisRequest(BaseModel):
