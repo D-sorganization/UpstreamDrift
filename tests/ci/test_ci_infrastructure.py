@@ -241,6 +241,15 @@ class TestCIEnvironmentCompatibility:
 
         assert "-p no:xvfb" in workflow
 
+    def test_cross_engine_equivalence_disables_pytest_plugin_autoload(self) -> None:
+        """The equivalence gate must ignore globally installed pytest plugins."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "cross-engine-equivalence.yml"
+        ).read_text(encoding="utf-8")
+
+        assert 'PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"' in workflow
+        assert "mutually incompatible pytest plugins" in workflow
+
     def test_bot_ci_trigger_validates_token_before_authenticated_trigger(
         self,
     ) -> None:

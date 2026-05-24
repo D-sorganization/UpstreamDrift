@@ -41,8 +41,10 @@ import platform
 import subprocess
 import time
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Literal
+
+from src.api.utils.datetime_compat import UTC
 
 import numpy as np
 from numpy.typing import NDArray
