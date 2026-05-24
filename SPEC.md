@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.180                                            |
-| **Last Spec Update**    | 2026-05-22                                         |
+| **Spec Version**        | 1.0.181                                            |
+| **Last Spec Update**    | 2026-05-23                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,6 +70,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-05-23** - Deferred realtime WebSocket backend resolution in `src/shared/python/realtime/ws_pubsub.py` until `WSPubSub.start()`, `publish()`, or `subscribe()` first use so importing the module no longer probes optional runtime dependencies; added focused lazy-resolution regression coverage for the python publish fallback path.
 - **2026-05-22** - Added the Sidekick agentic action layer (`src/shared/python/sidekick/agent/`) per epic #5967 and ADR-0017: feature catalog, audited `SidekickActionService` with default-deny policy and undo tokens, subtab and host action adapters, planner + tool-registry bridge, workflow runner, and chat-side action chip surface. 157 new unit tests; ten new public modules totalling ~3,000 LOC.
 - **2026-05-22** - Documented added unit regression coverage for the theme API model/router contracts so the shared theme settings surface stays exercised without broadening the implementation scope of the underlying runtime code.
 - **2026-05-21** - Added C3D viewer animation export through the canonical body-target video pipeline and stabilized self-hosted CI SciPy pinning for the core and shared-contract lanes.
@@ -240,6 +241,11 @@ Engine tier metadata is declared in each in-scope engine package with
   existing dataset. Disk-backed dataset lookup rejects ambiguous duplicate
   filenames with a conflict response so callers do not receive an arbitrary
   match.
+- `src/shared/python/realtime/ws_pubsub.py` resolves its default backend lazily.
+  Constructing `WSPubSub` no longer imports or probes optional realtime runtime
+  dependencies until `start()`, `publish()`, or `subscribe()` is invoked, while
+  explicit `backend=` overrides and the python HTTP publish fallback remain
+  supported.
 
 **GUI Interface (PyQt6)**:
 
@@ -569,6 +575,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 ## 12. Change Log
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| 2026-05-23 | 1.0.181 | Deferred `src/shared/python/realtime/ws_pubsub.py` backend resolution until `WSPubSub.start()`, `publish()`, or `subscribe()` first use so module import no longer probes optional realtime runtime dependencies, and added focused regression coverage for lazy resolution plus the python publish fallback path. |
 | 2026-05-22 | 1.0.179 | Aligned the module-size quality gate with current launcher and shared-chat legacy debt by adding owned, expiring exceptions for `src/launchers/launcher_ui_setup.py` and `src/shared/python/chat/_chat_dock_widget_qt.py`, and raising the active module-size exception cap to 10 while preserving the 1,500-line budget for new untracked modules. |
 | 2026-05-21 | 1.0.176 | Preserved integer-safe quaternion normalization in `src/motion_capture/c3d_simscape_preview.py` by upcasting integer inputs before the optimized `np.einsum` norm accumulation, and added regression coverage for integer quaternion inputs. |
 | 2026-05-21 | 1.0.175 | Optimized `src/shared/python/signal_toolkit/fitting.py` to compute fitting residual sum-of-squares and RMSE via reused `np.vdot` accumulators, avoiding temporary squared arrays across the sinusoid, exponential, linear, polynomial, and custom fitter paths. |
