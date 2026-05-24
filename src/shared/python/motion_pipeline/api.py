@@ -88,7 +88,7 @@ class PipelineRequest(BaseModel):
             preprocessing=[
                 PreprocessingStep(
                     name=str(step.get("name", "")),
-                    enabled=bool(step.get("enabled", True)),
+                    enabled=step.get("enabled", True),
                     params=dict(step.get("params", {})),
                 )
                 for step in self.preprocessing

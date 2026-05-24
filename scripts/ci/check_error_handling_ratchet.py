@@ -45,9 +45,7 @@ PATTERNS: dict[str, re.Pattern[str]] = {
     "noqa_F841": re.compile(r"#\s*noqa\s*:[^#]*F841"),
     "noqa_F401": re.compile(r"#\s*noqa\s*:[^#]*F401"),
     "raw_popen": re.compile(r"subprocess\.Popen\("),
-    "gather_no_return_exceptions": re.compile(
-        r"asyncio\.gather\((?!.*return_exceptions)"
-    ),
+    "gather_no_return_exceptions": re.compile(r"asyncio\.gather\("),
 }
 
 # Files that legitimately implement or test the ratchet/helpers themselves.
@@ -56,6 +54,33 @@ SELF_EXEMPT = {
     REPO_ROOT / "src" / "shared" / "python" / "core" / "process_safety.py",
     REPO_ROOT / "scripts" / "ci" / "check_error_handling_ratchet.py",
 }
+
+
+def _count_gather_without_return_exceptions(text: str) -> int:
+    """Count ``asyncio.gather(...)`` calls that omit ``return_exceptions``."""
+    count = 0
+    needle = "asyncio.gather("
+    search_start = 0
+    while True:
+        gather_start = text.find(needle, search_start)
+        if gather_start == -1:
+            return count
+
+        cursor = gather_start + len(needle)
+        depth = 1
+        while cursor < len(text) and depth > 0:
+            char = text[cursor]
+            if char == "(":
+                depth += 1
+            elif char == ")":
+                depth -= 1
+            cursor += 1
+
+        args_end = cursor - 1 if depth == 0 else len(text)
+        args_text = text[gather_start + len(needle) : args_end]
+        if "return_exceptions" not in args_text:
+            count += 1
+        search_start = max(cursor, gather_start + len(needle))
 
 
 def _count_patterns(src_dir: pathlib.Path) -> dict[str, int]:
@@ -73,7 +98,10 @@ def _count_patterns(src_dir: pathlib.Path) -> dict[str, int]:
             logger.warning("skipping non-utf8 file: %s", py_path)
             continue
         for name, pat in PATTERNS.items():
-            counts[name] += len(pat.findall(text))
+            if name == "gather_no_return_exceptions":
+                counts[name] += _count_gather_without_return_exceptions(text)
+            else:
+                counts[name] += len(pat.findall(text))
     return counts
 
 

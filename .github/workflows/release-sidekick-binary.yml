@@ -1,0 +1,132 @@
+name: Release Sidekick Binary
+
+# Produces one-file Sidekick binaries via PyInstaller.
+# Issue: #5985 (T7).
+#
+# Triggers:
+#   - workflow_dispatch (manual)
+#   - tags matching sidekick-v*  (e.g. sidekick-v0.2.0)
+#
+# All jobs run on d-sorg-fleet per the repo runner policy
+# (local-only-runner-guard.yml).  The matrix uses a label field to
+# distinguish build targets while keeping runner routing correct.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "sidekick-v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pick-runner:
+    name: Resolve fleet runner
+    runs-on: d-sorg-fleet
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: echo "runner=d-sorg-fleet" >> "$GITHUB_OUTPUT"
+
+  build-binary:
+    name: Build binary (${{ matrix.label }})
+    needs: pick-runner
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: linux
+            artifact: sidekick-linux
+            binary: sidekick
+          - label: macos
+            artifact: sidekick-macos
+            binary: sidekick
+          - label: windows
+            artifact: sidekick-windows
+            binary: sidekick.exe
+
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          python3 -m pip install pyinstaller
+          python3 -m pip install -e . --no-deps || true
+
+      - name: Build binary
+        shell: bash
+        run: |
+          python3 scripts/packaging/build_sidekick_binary.py \
+            --max-mb 250 \
+            --output-dir dist/
+
+      - name: Smoke test — --help (< 5 s)
+        shell: bash
+        run: timeout 5 dist/${{ matrix.binary }} --help
+
+      - name: Smoke test — run
+        shell: bash
+        run: |
+          dist/${{ matrix.binary }} run \
+            --calculator wgs_reactor \
+            --inputs tests/fixtures/wgs.json
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist/${{ matrix.binary }}
+          if-no-files-found: error
+
+  attach-to-release:
+    name: Attach binaries to GitHub Release
+    needs: [pick-runner, build-binary]
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 10
+    if: startsWith(github.ref, 'refs/tags/sidekick-v')
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          path: binaries/
+
+      - name: Display downloaded files
+        run: find binaries/ -type f -ls
+
+      - name: Write workflow summary
+        run: |
+          echo "## Sidekick Binary Release" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Platform | File | Size |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|----------|------|------|" >> "$GITHUB_STEP_SUMMARY"
+          for f in binaries/**/*; do
+            if [ -f "$f" ]; then
+              size=$(du -h "$f" | cut -f1)
+              echo "| $(dirname "$f" | xargs basename) | $(basename "$f") | $size |" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+
+      - name: Attach to GitHub Release
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: binaries/**/*
+          generate_release_notes: false

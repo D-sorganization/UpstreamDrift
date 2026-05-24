@@ -14,6 +14,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Release governance guard `scripts/check_version_consistency.py` with CI wiring,
   release runbook, production-readiness contract, SBOM generation, and release
   artifact attestations for issue #3842.
+- `validate_baseline_truthfulness` ratchet in
+  `scripts/check_module_size_budget.py`: fails CI when a module-size baseline
+  exception references an under-budget file or quotes an "N lines" figure that
+  diverges from reality by more than 10% (#5922).
+
+### Changed
+
+- Re-baselined `scripts/config/module_size_budget_baseline.json` to drop 7 stale
+  exceptions for files that have since been decomposed back under the 1,500-line
+  cap, and updated the remaining 3 entries with current truthful line counts
+  (#5922).
 
 ### Refactor
 

@@ -1,0 +1,8 @@
+{
+  "temperature_c": 350.0,
+  "co_fraction": 0.3,
+  "h2o_fraction": 0.4,
+  "co2_fraction": 0.1,
+  "h2_fraction": 0.2,
+  "pressure_bar": 20.0
+}

@@ -44,7 +44,7 @@ def _find_project_root() -> Path:
     return find_project_root()
 
 
-def _discover_models() -> list[dict[str, str]]:
+def discover_models() -> list[dict[str, str]]:
     """Discover available URDF/MJCF model files.
 
     Returns:
@@ -88,6 +88,15 @@ def _discover_models() -> list[dict[str, str]]:
                 )
 
     return models
+
+
+def _discover_models() -> list[dict[str, str]]:
+    """Backward-compatible alias for older local callers.
+
+    Cross-module imports should use ``discover_models()`` so the public
+    contract is explicit and resilient to future refactors.
+    """
+    return discover_models()
 
 
 def _parse_urdf_geometry(  # noqa: C901
@@ -368,7 +377,7 @@ async def list_models(
         List of available model files.
     """
     try:
-        models = _discover_models()
+        models = discover_models()
         return ModelListResponse(models=models)
     except (RuntimeError, TypeError, AttributeError) as exc:
         if logger:
@@ -401,7 +410,7 @@ async def get_model_urdf(  # noqa: C901
     """
     # Find the model file
     root = _find_project_root()
-    models = _discover_models()
+    models = discover_models()
     model_entry = None
 
     for m in models:

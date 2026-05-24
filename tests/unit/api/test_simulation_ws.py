@@ -16,10 +16,14 @@ from __future__ import annotations
 
 import json
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
+import src.api.routes.simulation_ws as simulation_ws_module
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+from src.api.routes import simulation_ws
 from src.api.routes.simulation_ws import (
     _apply_initial_state,
     _compute_real_time_sleep_delay,
@@ -284,3 +288,111 @@ class TestClientCommandHandling:
             websocket.app.state.simulation_service.stats.speed_factor
             == pytest.approx(3.0)
         )
+
+
+class _FailingEngine:
+    def step(self, _timestep: float) -> None:
+        raise RuntimeError("sensitive simulation failure")
+
+
+class _EngineManager:
+    def switch_engine(self, _engine_type: EngineType) -> bool:
+        return True
+
+    def get_active_physics_engine(self) -> object:
+        return _FailingEngine()
+
+
+class TestSimulationStreamErrors:
+    """Unexpected simulation failures should preserve tracebacks server-side."""
+
+    def test_unexpected_error_hides_internal_details(self) -> None:
+        app = FastAPI()
+        app.state.engine_manager = _EngineManager()
+        app.include_router(simulation_ws.router)
+
+        with (
+            patch("src.api.routes.simulation_ws.logger.exception") as logger_exception,
+            TestClient(app).websocket_connect("/ws/simulate/mujoco") as websocket,
+        ):
+            websocket.send_json(
+                {"action": "start", "config": {"duration": 0.01, "timestep": 0.01}}
+            )
+
+            running = websocket.receive_json()
+            assert running == {"status": "running", "duration": 0.01}
+
+            error = websocket.receive_json()
+            assert error == {"error": "Internal server error"}
+
+        logger_exception.assert_called_once()
+
+
+class _RouteAppState:
+    def __init__(self) -> None:
+        self.engine_manager = object()
+
+
+class _RouteApp:
+    def __init__(self) -> None:
+        self.state = _RouteAppState()
+
+
+class _RouteWebSocket:
+    def __init__(self, messages: list[dict[str, Any]]) -> None:
+        self._messages = list(messages)
+        self.app = _RouteApp()
+        self.accepted = False
+        self.closed = False
+        self.sent: list[dict[str, Any]] = []
+
+    async def accept(self) -> None:
+        self.accepted = True
+
+    async def receive_json(self) -> dict[str, Any]:
+        return self._messages.pop(0)
+
+    async def send_json(self, data: dict[str, Any]) -> None:
+        self.sent.append(data)
+
+    async def close(self) -> None:
+        self.closed = True
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_sanitizes_unexpected_errors(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Unexpected runtime failures must be logged with traceback and sanitized."""
+
+    websocket = _RouteWebSocket([{"action": "start", "config": {}}])
+    mock_logger = MagicMock()
+
+    async def fake_load_simulation_engine(*_args: Any, **_kwargs: Any) -> object:
+        return object()
+
+    async def fake_run_simulation_loop(*_args: Any, **_kwargs: Any) -> Any:
+        raise RuntimeError("top secret backend detail")
+
+    monkeypatch.setattr(
+        simulation_ws_module,
+        "_load_simulation_engine",
+        fake_load_simulation_engine,
+    )
+    monkeypatch.setattr(
+        simulation_ws_module,
+        "_run_simulation_loop",
+        fake_run_simulation_loop,
+    )
+    monkeypatch.setattr(simulation_ws_module, "logger", mock_logger)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert websocket.sent == [{"error": "Internal server error"}]
+    assert "top secret backend detail" not in json.dumps(websocket.sent)
+    mock_logger.exception.assert_called_once_with(
+        "Simulation WebSocket failed for engine=%s",
+        "mujoco",
+    )

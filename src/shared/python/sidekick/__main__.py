@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import NoReturn
 
-_SUBCOMMANDS = ("gui", "run")
+_SUBCOMMANDS = frozenset({"gui", "run"})
 _GUI_PROFILES = ("chat-first", "calc-first")
 _OUTPUT_FORMATS = ("json", "csv")
 _HELP_EPILOG = """Examples:
@@ -53,11 +53,11 @@ def _suggest_token(message: str, candidates: set[str]) -> str | None:
 
 
 def _normalize_argv(argv: list[str] | None) -> list[str]:
-    args = list(argv or [])
+    args = list(sys.argv[1:] if argv is None else argv)
     if not args:
         return ["gui"]
     head = args[0]
-    if head in _SUBCOMMANDS or head in {"-h", "--help"}:
+    if head in _SUBCOMMANDS or head in {"-h", "--help", "--version"}:
         return args
     if head.startswith("-"):
         return ["gui", *args]
@@ -90,6 +90,11 @@ def build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         allow_abbrev=False,
     )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="sidekick 0.1.0",
+    )
     subparsers = parser.add_subparsers(
         dest="command",
         parser_class=SidekickArgumentParser,
@@ -115,6 +120,12 @@ def build_parser() -> argparse.ArgumentParser:
         type=_resolved_path,
         metavar="PATH",
         help="Optional absolute or relative data directory for standalone Sidekick.",
+    )
+    gui_parser.add_argument(
+        "--skip-onboarding",
+        action="store_true",
+        default=False,
+        help="Skip the first-run onboarding dialog (useful for smoke tests).",
     )
     gui_parser.set_defaults(handler=launch_gui)
 
@@ -158,19 +169,16 @@ def parse_cli_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def launch_gui(args: argparse.Namespace) -> int:
-    """Launch the standalone GUI once the dedicated window module exists."""
-    try:
-        from sidekick.standalone.window import StandaloneSidekickWindow
-    except ImportError:
-        sys.stderr.write(
-            "sidekick gui is wired, but the standalone window lands in issue #5980.\n"
-        )
-        return 1
-
+    """Launch the standalone GUI with deferred imports for headless parsing."""
     from sidekick.launcher_factory import create_launcher_config, launch_app
+    from sidekick.standalone.session_store import StandaloneSessionStore
+    from sidekick.standalone.window import (
+        StandaloneSidekickConfig,
+        StandaloneSidekickWindow,
+    )
 
     data_dir = args.data_dir or Path.cwd().resolve()
-    config = create_launcher_config(
+    launcher_config = create_launcher_config(
         app_module="sidekick.standalone.window",
         window_title="Sidekick",
         min_width=1280,
@@ -178,14 +186,16 @@ def launch_gui(args: argparse.Namespace) -> int:
         profile=args.profile,
         theme_name=args.theme,
         data_dir=str(data_dir),
+        skip_onboarding=args.skip_onboarding,
+    )
+    window_config = StandaloneSidekickConfig(
+        profile=args.profile,
+        theme_name=args.theme,
+        session_store=StandaloneSessionStore(data_dir),
     )
     return launch_app(
-        config,
-        window_factory=lambda: StandaloneSidekickWindow(
-            profile=args.profile,
-            theme_name=args.theme,
-            data_dir=data_dir,
-        ),
+        launcher_config,
+        window_factory=lambda: StandaloneSidekickWindow(window_config),
     )
 
 
@@ -207,11 +217,7 @@ def run_headless(args: argparse.Namespace) -> int:
 def main(argv: list[str] | None = None) -> int:
     """Parse CLI arguments and dispatch the selected Sidekick subcommand."""
     args = parse_cli_args(argv)
-    handler = getattr(args, "handler", None)
-    if handler is None:
-        build_parser().print_help()
-        return 1
-    return int(handler(args))
+    return int(args.handler(args))
 
 
 if __name__ == "__main__":

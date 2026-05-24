@@ -36,6 +36,8 @@ if TYPE_CHECKING:
 
 router = APIRouter()
 logger = get_module_logger(__name__)
+VIDEO_UPLOAD_MAX_BYTES = 100 * 1024 * 1024
+VIDEO_SIGNATURE_READ_BYTES = 32
 
 
 def _load_video_pipeline_classes() -> tuple[type, type]:
@@ -74,6 +76,35 @@ def _load_video_pipeline_classes() -> tuple[type, type]:
             ),
         ) from exc
     return VideoPosePipeline, VideoProcessingConfig
+
+
+def _looks_like_supported_video_bytes(header: bytes) -> bool:
+    """Return True when the upload header matches a supported video container."""
+    if len(header) >= 12 and header[4:8] == b"ftyp":
+        return True
+    if header.startswith(b"\x1a\x45\xdf\xa3"):
+        return True
+    return len(header) >= 12 and header.startswith(b"RIFF") and header[8:12] == b"AVI "
+
+
+async def _validate_video_upload(file: UploadFile) -> None:
+    """Reject uploads whose metadata or leading bytes do not look like video."""
+    if not file.content_type or not file.content_type.startswith("video/"):
+        raise HTTPException(status_code=400, detail="File must be a video")
+
+    if file.size and file.size > VIDEO_UPLOAD_MAX_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail="Video file too large. Maximum size is 100MB.",
+        )
+
+    header = await file.read(VIDEO_SIGNATURE_READ_BYTES)
+    await file.seek(0)
+    if not header or not _looks_like_supported_video_bytes(header):
+        raise HTTPException(
+            status_code=400,
+            detail="Uploaded file content does not match a supported video format.",
+        )
 
 
 @router.post("/analyze/video", response_model=VideoAnalysisResponse)
@@ -127,15 +158,18 @@ async def analyze_video(
             detail=f"min_confidence must be between {MIN_CONFIDENCE} and {MAX_CONFIDENCE}",
         )
 
-    if not file.content_type or not file.content_type.startswith("video/"):
-        raise HTTPException(status_code=400, detail="File must be a video")
+    await _validate_video_upload(file)
 
     temp_path: Path | None = None
     try:
         temp_fd, temp_file_name = tempfile.mkstemp(suffix=".mp4")
         os.close(temp_fd)
         temp_path = Path(temp_file_name)
-        await write_upload_file_to_path(file, temp_path)
+        await write_upload_file_to_path(
+            file,
+            temp_path,
+            max_bytes=VIDEO_UPLOAD_MAX_BYTES,
+        )
 
         video_pipeline_cls, video_config_cls = _load_video_pipeline_classes()
         config = video_config_cls(
@@ -237,15 +271,7 @@ async def analyze_video_async(
             detail=f"min_confidence must be between {MIN_CONFIDENCE} and {MAX_CONFIDENCE}",
         )
 
-    if not file.content_type or not file.content_type.startswith("video/"):
-        raise HTTPException(status_code=400, detail="File must be a video")
-
-    # Upload size validation (100MB max for video)
-    if file.size and file.size > 100 * 1024 * 1024:
-        raise HTTPException(
-            status_code=413,
-            detail="Video file too large. Maximum size is 100MB.",
-        )
+    await _validate_video_upload(file)
 
     task_id = str(uuid.uuid4())
 
@@ -262,7 +288,11 @@ async def analyze_video_async(
     )
     os.close(temp_fd)
     temp_path = Path(temp_file_name)
-    await write_upload_file_to_path(file, temp_path)
+    await write_upload_file_to_path(
+        file,
+        temp_path,
+        max_bytes=VIDEO_UPLOAD_MAX_BYTES,
+    )
 
     # Compute input hash for reproducibility
     input_hash = hashlib.sha256(temp_path.read_bytes()).hexdigest()[:16]

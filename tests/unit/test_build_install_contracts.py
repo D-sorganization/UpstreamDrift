@@ -11,6 +11,7 @@ Two bugs:
 
 from __future__ import annotations
 
+import tomllib
 from pathlib import Path
 
 
@@ -27,35 +28,19 @@ class TestUIBuildHookMissingDist:
     def test_ci_block_raises_when_dist_missing(self) -> None:
         """The CI block in initialize() must raise when dist_dir is absent, not silently return."""
         source = self._get_initialize_source()
-        lines = source.splitlines()
 
-        # Find the CI check block and verify it contains a raise (not just a warning) for missing dist
-        ci_start = None
-        for i, line in enumerate(lines):
-            if 'environ.get("CI")' in line or "environ.get('CI')" in line:
-                ci_start = i
-                break
+        assert '_env_flag("CI")' in source
+        assert "if skip_requested and not force_ui_build:" in source
+        assert "UI bundle is missing" in source
+        assert "raise RuntimeError(msg)" in source
 
-        assert ci_start is not None, "Cannot find CI check in build_hooks.py"
+    def test_hatch_sdist_preserves_built_ui_artifacts(self) -> None:
+        """The sdist-to-wheel path must carry the prebuilt UI bundle forward."""
+        pyproject = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+        hatch_build = pyproject["tool"]["hatch"]["build"]
 
-        # Collect lines in the CI block (until we exit the indented block)
-        ci_indent = len(lines[ci_start]) - len(lines[ci_start].lstrip())
-        ci_block_lines = []
-        for line in lines[ci_start:]:
-            indent = len(line) - len(line.lstrip()) if line.strip() else ci_indent + 1
-            if line.strip() and indent <= ci_indent and len(ci_block_lines) > 0:
-                break
-            ci_block_lines.append(line)
-
-        ci_block = "\n".join(ci_block_lines)
-        # The fix must add a raise (not just a warning) when dist is missing
-        has_raise_for_missing_dist = "raise" in ci_block and (
-            "dist" in ci_block.lower() or "ui" in ci_block.lower()
-        )
-        assert has_raise_for_missing_dist, (
-            "CI block in initialize() does not raise when ui/dist is missing. "
-            f"CI block content:\n{ci_block}"
-        )
+        assert "ui/dist/**/*" in hatch_build.get("include", [])
+        assert "ui/dist/**/*" in hatch_build.get("artifacts", [])
 
 
 class TestInstallShNotLocalInstall:
@@ -91,6 +76,7 @@ class TestInstallShNotLocalInstall:
             "git clone" in source
             or "git+https" in source
             or "git+http" in source
+            or "git+${REPO_URL}" in source
             or "pipx install git+" in source
             or "pip3 install git+" in source
             or "pip install git+" in source

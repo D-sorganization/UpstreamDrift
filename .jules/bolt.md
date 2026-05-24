@@ -67,3 +67,22 @@
 ## 2025-05-19 - Optimize R-squared and RMSE calculation using vdot
 **Learning:** `np.sum(residuals**2)` allocates a temporary array in memory of the same size as `residuals` because of the element-wise squaring `**2`. For simple calculations like Sum of Squared Residuals (SS_res) and Total Sum of Squares (SS_tot) over 1D arrays, this overhead is noticeable in fitting toolkits.
 **Action:** Replace `np.sum(x**2)` with `np.vdot(x, x)` to calculate sum of squares without allocating intermediate temporary memory for the squares, speeding up statistical fitting implementations. Additionally, avoid repeatedly recalculating mean squares by reusing the `ss_res` result (e.g. `rmse = np.sqrt(ss_res / x.size)`).
+## 2026-05-19 - Optimize MSE calculation in JAX
+**Learning:** `jnp.mean(diff ** 2)` and `jnp.sum(x ** 2)` create intermediate array allocations that slow down evaluation in `jax` loss functions.
+**Action:** Replace `jnp.mean(diff ** 2)` with `jnp.vdot(diff, diff) / diff.size` and `jnp.sum(x ** 2)` with `jnp.vdot(x, x)` to optimize sum-of-squares evaluations by avoiding intermediate temporary memory allocations.
+
+## 2026-05-19 - Optimize mechanical work metrics
+**Learning:** Computations like `np.sum(derivatives**2)` and `np.sum(values**2 * dt)` or `np.sum(torque**2, axis=1)` involve element-wise operations that allocate intermediate memory (`**2` and multiplication). This can be slow for long arrays of time series data.
+**Action:** Replace `np.sum(x**2)` with `np.vdot(x, x)`, `np.sum(x**2 * dt)` with `np.vdot(x, x * dt)`. For multi-dimensional axis summation like `np.sum(torque**2, axis=1)`, replace it with `np.einsum('ij,ij->i', torque, torque)`. Similarly, replace `np.sum(np.abs(torque), axis=1)` with `np.einsum('ij->i', np.abs(torque))`.
+
+## 2026-05-23 - GitHub Actions setup-python pip issues
+**Learning:** Installing `pydantic-core` sometimes fails with uninstall errors under the virtual environments created by `actions/setup-python` during GitHub Actions CI due to missing `RECORD` files or invalid metadata entries, particularly when repeatedly updating `pip` inside the runner.
+**Action:** When working on GitHub Actions Python CI scripts, ensure to proactively use `pip install --ignore-installed --no-deps pydantic-core==2.46.3 || true` right before the main `pip install -e ".[dev]"` lines, to bypass unresolvable cache/uninstall issues for `pydantic-core`.
+
+## 2026-05-23 - xvfb missing in GitHub Actions runners
+**Learning:** Some test suites (like `test_leaderboard.py`) that rely on plotting or visual dependencies fail in CI with `xvfb-run` missing errors, or display server missing if `xvfb-run -a` is prepended but `xvfb` is not installed on the system (exit code 3).
+**Action:** When prepending `xvfb-run -a` to a test command in a CI workflow, also make sure to explicitly run `sudo apt-get update && sudo apt-get install -y xvfb` inside the environment setup step if the runner is missing it.
+
+## 2026-05-23 - trimesh ImportErrors
+**Learning:** Hard-coded imports of `trimesh` in files like `_mesh_decimation.py` and `_mesh_io.py` can cause tests or other modules that import them to fail if `trimesh` isn't installed.
+**Action:** Always wrap `import trimesh` with a `try...except ImportError` block and conditionally check if `trimesh is None` to safely handle environments where it is missing, or alternatively, make sure to add it to the test environment requirements.
