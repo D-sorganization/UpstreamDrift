@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import re
 import sys
 from collections.abc import Iterator
 from datetime import date
@@ -16,6 +17,15 @@ logger = logging.getLogger(__name__)
 DEFAULT_MAX_LINES = 1500
 DEFAULT_INCLUDE = ("src",)
 DEFAULT_BASELINE = Path("scripts/config/module_size_budget_baseline.json")
+
+# Tolerance used by ``validate_baseline_truthfulness`` when comparing a
+# baseline exception's quoted "N lines" claim against the file's actual size.
+# 10% lets imports/helpers drift normally while still catching the 3-5x
+# overstatement that issue #5922 documented.
+BASELINE_TRUTHFULNESS_TOLERANCE = 0.10
+
+# Matches "1984 lines", "(2007 lines, pending ...)", "~1500 lines" etc.
+_BASELINE_LINES_CLAIM_RE = re.compile(r"(\d{3,5})\s*lines", re.IGNORECASE)
 DEFAULT_EXCLUDE_PARTS = {
     ".git",
     ".venv",
@@ -125,6 +135,77 @@ def load_baseline(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def validate_baseline_truthfulness(config: dict, repo_root: Path) -> list[str]:
+    """Return a list of problem descriptions for fraudulent baseline entries.
+
+    Two invariants are checked, per issue #5922:
+
+    A. Every active exception must reference a file that genuinely exceeds
+       ``max_lines``. Keeping an exception for a file that has since been
+       decomposed back under the budget turns the baseline into fiction.
+
+    B. If the exception's ``reason`` quotes an "N lines" figure, ``N`` must
+       be within ``BASELINE_TRUTHFULNESS_TOLERANCE`` of the file's actual
+       line count today. Prevents the rot where ``drake_gui_app.py`` claimed
+       2177 lines while the file actually had 487.
+
+    Both invariants are pre-checked: a non-existent path or invalid exception
+    shape is left to ``_collect_active_exceptions`` to report; this helper
+    only reports *truthfulness* failures so its messages are unambiguous.
+
+    The function is a pure mapping (config, repo_root) -> list[str]. An empty
+    list means the baseline is truthful. The list is sorted to give stable
+    CI output.
+
+    DbC:
+        precondition: ``config`` is a JSON-loaded dict; ``repo_root`` is an
+            existing directory.
+        postcondition: returned list contains one human-readable string per
+            distinct problem; empty iff every active exception is truthful.
+    """
+    assert isinstance(config, dict), "config must be a dict"
+    assert repo_root.is_dir(), f"repo_root must exist: {repo_root}"
+
+    budget = int(config.get("max_lines", DEFAULT_MAX_LINES))
+    problems: list[str] = []
+
+    for exc in config.get("exceptions", []):
+        rel = str(exc.get("path", "")).strip()
+        if not rel:
+            # Shape problem — _collect_active_exceptions surfaces it.
+            continue
+        file_path = repo_root / rel
+        if not file_path.is_file():
+            # Missing-file problem — surfaced elsewhere; truthfulness N/A.
+            continue
+
+        actual = count_lines(file_path)
+
+        # Invariant (A): no exception for an under-budget file.
+        if actual <= budget:
+            problems.append(
+                f"{rel}: stale exception — actual={actual} lines, "
+                f"budget={budget}; remove the exception."
+            )
+            # Skip (B) for this entry: removing it makes (B) moot.
+            continue
+
+        # Invariant (B): "N lines" in reason must match actual +/- tolerance.
+        reason = str(exc.get("reason", ""))
+        match = _BASELINE_LINES_CLAIM_RE.search(reason)
+        if match is None:
+            continue
+        claimed = int(match.group(1))
+        tolerance = max(1, int(actual * BASELINE_TRUTHFULNESS_TOLERANCE))
+        if abs(claimed - actual) > tolerance:
+            problems.append(
+                f"{rel}: reason claims {claimed} lines but actual is "
+                f"{actual} (tolerance +/-{tolerance}); update the reason."
+            )
+
+    return sorted(problems)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--max-lines", type=int, default=DEFAULT_MAX_LINES)
@@ -144,6 +225,12 @@ def main() -> int:
         invalid_exceptions.append(
             f"Too many exceptions: {len(config.get('exceptions', []))} (max 10)"
         )
+
+    # Ratchet against fraudulent baselines (#5922). Any exception that
+    # references an under-budget file, or quotes a "N lines" figure that no
+    # longer matches reality, is a CI failure — not a warning. This is what
+    # turns the baseline from a decorative file into a load-bearing contract.
+    invalid_exceptions.extend(validate_baseline_truthfulness(config, repo_root))
 
     violations = list(invalid_exceptions)
     watchlist: list[str] = []

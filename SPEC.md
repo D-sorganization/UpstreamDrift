@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.182                                            |
+| **Spec Version**        | 1.0.186                                            |
 | **Last Spec Update**    | 2026-05-23                                         |
 
 ## 2. Purpose & Mission
@@ -71,7 +71,17 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ### Recent Spec Updates
 
 - **2026-05-23** - Closed the file-size budget grandfathering gap by requiring tracked baseline entries in `scripts/config/file_size_budget.json` for oversized files and adding regression coverage for untracked oversized files.
+- **2026-05-23** - Sanitized error payloads for the chat websocket connection to prevent leaks.
+- **2026-05-23** - Added standalone Sidekick foundation (CLI entry point, PyQt window shell, and session store) per epic #5979.
+- **2026-05-23** - Added the subprocess-isolated training Driver (`src/shared/python/training/runtime/subprocess_driver.py`, `worker_main.py`, `wire_protocol.py`) — `SubprocessDriver` satisfies the `Driver` Protocol so the scheduler swap is one-line, spawns workers via `core.process_safety.managed_popen` (mandatory per the error-handling ratchet), parses a newline-delimited JSON wire protocol whose payloads reuse `training.persistence` dicts, propagates cancel through stdin, surfaces worker crashes as FAILED RunResults with stderr context, and writes a `.training.pid` file per job so the launcher can detect orphaned workers via `scan_pidfiles` on restart. 65 new unit tests (wire-protocol round-trips, isolated worker-subprocess wire tests, end-to-end driver coverage of completion / cancel / crash / stderr isolation / pidfile lifecycle); follows issue #6015.
+- **2026-05-23** - Wired the existing PyTorch inverse-CVAE training loop (`src/shared/python/motion_matching/inverse/training.py`) into the training-controller via a new `PyTorchCVAERunner` adapter (`src/shared/python/training/runtime/adapters/pytorch_cvae.py`). The adapter satisfies the `TrainingJobRunner` Protocol, translates `TrainingConfig.hyperparameters` into the loop's `TrainingConfig` dataclass, streams 6 `TrainingMetric`s per epoch (train_recon / train_kl / val_recon / val_kl as LOSS; beta / duration_s as SCALAR) tagged with `split=train|val`, and exposes the best-so-far checkpoint + `metrics.json` as `RunResult.artifacts`. The upstream loop gained two optional default-None kwargs — `on_epoch_end(metrics)` and `should_stop()` — so cooperative cancellation routes through `CancelToken.is_cancelled` without changing default behaviour (existing motion_matching tests unaffected). Adapter and regression tests are guarded by `pytest.importorskip("torch")`; the headless training-controller surface still imports cleanly without torch installed. Closes #6014.
+- **2026-05-23** - Added the headless half of the training-controller dashboard tab (`src/tools/training_controller/`) per the in-scope portion of issue #6012: `TrainingDashboardController` MVC controller binding the backend `Scheduler` to a frozen `DashboardModel`, `TrainingJobLiveSubscriber` realtime-channel wrapper that decodes `training/<job_id>/progress` payloads into typed `TrainingMetric` / `TrainingStatus` events, and the `view_model` dataclasses (`JobRow`, `MetricSeries`, `ResourceSnapshot`, `GpuSnapshot`, `DashboardModel`) the GUI follow-up will render. 82 new headless unit tests (controller / live subscriber / view model); no PyQt6 import in `src/tools/training_controller/`. The PyQt6 widget surface (`gui.py`, `__main__.py`, `_embed_adapter.py`, `src/config/models.yaml` tile) is deferred to a follow-up PR that can be validated against a live display.
+- **2026-05-23** - Added the model-training controller foundation (`src/shared/python/training/`) — PR1 contracts (status state machine, identifiers, resources, config, metrics, job/run records, compatibility checker, runner Protocols), PR2 backend (scheduler, in-process driver, runner registry, dataset library, JSON persistence, progress sinks: in-memory / JSONL-file / composite / realtime-channel), and PR3 backend additions (ResourceMonitor with psutil + optional pynvml, metric_summary helpers for best-per-metric / by-kind / by-tag / rolling means for noisy RL returns). Pure-Python, GUI-free; the headless backend that PR4's tab-backgrounding refactor and PR5's GUI tab + CVAE wiring build on. 332 unit tests passing in <1 s; 21 new public modules. The PyQt6 dashboard tab, the system-wide tab-backgrounding refactor, and the PyTorch CVAE adapter wiring are deferred to subsequent PRs that can be validated against a live display / torch environment.
 - **2026-05-22** - Added the Sidekick agentic action layer (`src/shared/python/sidekick/agent/`) per epic #5967 and ADR-0017: feature catalog, audited `SidekickActionService` with default-deny policy and undo tokens, subtab and host action adapters, planner + tool-registry bridge, workflow runner, and chat-side action chip surface. 157 new unit tests; ten new public modules totalling ~3,000 LOC.
+- **2026-05-22** - Tightened the CI error-handling ratchet so multiline `asyncio.gather(...)` calls are parsed across balanced parentheses before checking for `return_exceptions=`, and added focused regression tests that cover both the exempt and failing multiline forms.
+- **2026-05-22** - Documented the API auth-cache overflow contract so cache saturation now evicts only the oldest lookup entries instead of flushing unrelated authenticated sessions, while preserving deterministic SHA-256 lookup keys for cross-worker stability.
+- **2026-05-22** - Documented the motion-pipeline REST contract for preprocessing-step boolean coercion so `PipelineRequest` preserves Pydantic handling of `enabled` values like `"false"` when converting into `PipelineConfig`.
+- **2026-05-23** - Added the standalone Sidekick UX/documentation layer per ADR-0018: persisted standalone preferences, onboarding sentinel handling, user-facing standalone docs, and contract tests for standalone preferences, onboarding, and docs discoverability.
 - **2026-05-22** - Documented added unit regression coverage for the theme API model/router contracts so the shared theme settings surface stays exercised without broadening the implementation scope of the underlying runtime code.
 - **2026-05-23** - Hardened WebSocket error handling so unexpected chat/simulation failures log full tracebacks server-side while returning generic client-safe error payloads.
 - **2026-05-21** - Added C3D viewer animation export through the canonical body-target video pipeline and stabilized self-hosted CI SciPy pinning for the core and shared-contract lanes.
@@ -208,7 +218,8 @@ Engine tier metadata is declared in each in-scope engine package with
 | F12 | Muscle dynamics analysis           | ✅     | IK, ID, and muscle dynamics computation with Hill-type and Millard muscle models                    |
 | F13 | Motion capture integration         | 🔄     | Import and track motion capture data (C3D, BVH, TRC formats) and compare with simulation            |
 | F14 | Reinforcement learning integration | 🔄     | Gym-compatible interface for RL-based controller learning and policy optimization                   |
-| F15 | Sidekick AI assistant              | 🔄     | In-app AI chat surface (PyQt + React/Tauri) with streaming, RAG, session history, and agentic tool dispatch. See `docs/sidekick/README.md`. |
+| F15 | Sidekick AI assistant              | 🔄     | In-app and standalone AI assistant surface (PyQt + React/Tauri + `sidekick.standalone.*`) with streaming, RAG, session history, persisted standalone preferences, onboarding, and agentic tool dispatch. See `docs/sidekick/README.md` and ADR-0018. |
+| F16 | Model-training controller          | 🔄     | In-launcher training dashboard (PR3) with scheduler, dataset library, resource monitor, engine-compat gate, and ML/RL-aware stats. Backend contracts + scheduler land in `src/shared/python/training/` (PRs 1–2); GUI tab, tab-backgrounding refactor, and CVAE wiring in PRs 3–5. |
 
 ### API / Interface Contract
 
@@ -222,6 +233,7 @@ Engine tier metadata is declared in each in-scope engine package with
 - `POST /trajectory-optimize` — Optimize trajectory subject to constraints
 - `GET /engines` — List available physics engines and their status
 - `POST /export` — Export simulation model to URDF, MATLAB, or other formats
+- `POST /api/v1/motion-pipeline/run` — Run motion-pipeline preprocessing, scaling, IK, and motion-matching for uploaded capture files
 
 **API Production-Readiness Contracts**:
 
@@ -229,6 +241,13 @@ Engine tier metadata is declared in each in-scope engine package with
   lifespan. Each app lifecycle creates its own `TaskManager`; shutdown marks the
   manager closed, clears retained task records, and subsequent task operations
   fail with a closed-state error instead of silently accepting writes.
+- Motion-pipeline request normalization preserves Pydantic/native boolean
+  coercion for preprocessing step `enabled` flags so form/JSON values such as
+  `"false"` remain disabled instead of being forced truthy during
+  `PipelineRequest -> PipelineConfig` conversion.
+- Simulation WebSocket routes preserve traceback-bearing server logs for
+  unexpected runtime failures while returning sanitized generic client errors so
+  backend exception details are not exposed over the socket.
 - `TaskManager` entries expire after the configured TTL and enforce the
   configured maximum task count. Reads and existence checks refresh the task's
   retention timestamp so actively polled async jobs are not evicted while a
@@ -260,6 +279,10 @@ Engine tier metadata is declared in each in-scope engine package with
 - `upstream-drift simulate --engine mujoco --model golf_swing.urdf`
 - `upstream-drift cross-validate --models model1.urdf model2.urdf`
 - `upstream-drift ik --model human.urdf --target-pose [...] --engine pinocchio`
+- `python -m sidekick` launches the standalone Sidekick GUI scaffold with the `gui` subcommand and `chat-first` profile as the default path.
+- `python -m sidekick gui --profile calc-first --theme solarized --data-dir ./workspace` keeps GUI imports deferred until launch while resolving the standalone data directory before window creation.
+- `python -m sidekick run --calculator unit-converter --inputs ./inputs.json --output ./result.json` validates the headless calculator invocation contract up front; execution remains reserved for follow-up issue `#5982`.
+- The standalone Sidekick CLI suggests the nearest valid flag or subcommand on parse errors to keep local launches and future automation entrypoints discoverable.
 
 **Desktop App (Tauri)**:
 
@@ -434,6 +457,7 @@ Beyond standard tools, CI enforces custom checks:
 - **Physics Fitness**: Cross-engine validation must pass with <5% tolerance
 - **Security Audit Isolation**: `pip-audit` runs with `scripts/config/pip_audit_waivers.json` and `scripts/ci/check_pip_audit_waivers.py` so waivers require issue tracking, expiry, and current pip-audit findings before ignore flags are emitted
 - **Blocking SAST and Secret Scans**: `ci-standard.yml` runs blocking Bandit, Semgrep, pip-audit, and Trivy filesystem scans for pull requests and pushes
+- **Error-Handling Ratchet**: `scripts/ci/check_error_handling_ratchet.py` blocks increases in grandfathered broad catches, unused `noqa` debt, raw `subprocess.Popen(...)`, and `asyncio.gather(...)` calls that omit `return_exceptions=`, including multiline gather calls whose arguments span multiple lines.
 - **Type and Coverage Ratchets**: `scripts/check_mypy_exclusion_budget.py` blocks unowned mypy exclusions, non-monotonic exclusion schedules, and missing production package coverage-ratchet metadata.
 - **Docker Size Gate**: Built images must not exceed 800 MB
 
@@ -520,6 +544,8 @@ python -m src.launchers.gui_launcher
 
 # Running the CLI
 upstream-drift simulate --engine mujoco --model shared/models/golf_swing.urdf
+python -m sidekick
+python -m sidekick run --calculator unit-converter --inputs ./inputs.json
 
 # Building the Tauri Desktop App
 cd ui && npm install && npm run tauri build
@@ -576,7 +602,13 @@ blocks Python package publication on the built-wheel smoke matrix.
 ## 12. Change Log
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| 2026-05-23 | 1.0.182 | Closed the file-size budget grandfathering gap by requiring tracked baseline entries for oversized files in `scripts/config/file_size_budget.json`; untracked oversized files now fail `scripts/ci/check_file_size_budget.py`, with regression coverage in `tests/scripts/wave9_scripts_b/test_check_file_size_budget.py`. |
+| ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-23 | 1.0.186 | Closed the file-size budget grandfathering gap by requiring tracked baseline entries for oversized files in `scripts/config/file_size_budget.json`; untracked oversized files now fail `scripts/ci/check_file_size_budget.py`, with regression coverage in `tests/scripts/wave9_scripts_b/test_check_file_size_budget.py`. |
+| 2026-05-22 | 1.0.182 | Documented the motion-pipeline REST contract for `POST /api/v1/motion-pipeline/run` and its preprocessing-step boolean coercion rule so `PipelineRequest` preserves Pydantic handling of `enabled` values like `"false"` when converting into `PipelineConfig`; regression coverage lives in `tests/unit/motion_pipeline/orchestrator/test_api.py`. |
+| 2026-05-23 | 1.0.181 | Sanitized error payloads for the chat websocket connection to prevent leaks. Added standalone Sidekick foundation (CLI entry point, PyQt window shell, and session store) per epic #5979. |
+| 2026-05-22 | 1.0.181 | Added the standalone Sidekick CLI scaffold in `src/shared/python/sidekick/__main__.py` with an implicit `gui` default, closest-match suggestions for mistyped flags, early path validation for `run`, deferred GUI imports for headless parsing, and focused regression coverage in `tests/unit/sidekick/test_cli.py`. Tightened `scripts/ci/check_error_handling_ratchet.py` so the `asyncio.gather(...)` anti-pattern scan now balances multiline argument lists before deciding whether `return_exceptions=` is present, and added matching regression coverage in `tests/unit/scripts/test_error_handling_ratchet.py` for both compliant and violating multiline gather calls. |
+| 2026-05-22 | 1.0.180 | Landed the pure-Python foundation for the Idiot-Proof UX epic (#5968): `src/shared/python/ux/` adds the `FieldMetadata` registry, `ProvenanceRecord`/`ProvenanceValue`, `PreflightCheck`/`Severity`/`run_preflight()`, and the `UserFacingError` envelope, all with full Design-by-Contract validation; seeded `configs/ux/field_metadata.yaml` and `configs/ux/error_messages.yaml`; added `scripts/ci/check_ux_coverage_ratchet.py` plus baseline at 714 unwrapped inputs (62 QSpinBox + 221 QDoubleSpinBox + 217 QComboBox + 70 QSlider + 94 QLineEdit + 35 `<input>` + 14 `<select>` + 1 `<textarea>`); documented the workflow in `docs/ux/field_metadata.md`; 68 unit tests in `tests/unit/ux/`. Sanitized unexpected `src/api/routes/simulation_ws.py` runtime errors before they reach WebSocket clients while preserving traceback-bearing server logs, and added direct regression coverage for the generic error payload contract. Re-baselined `scripts/config/module_size_budget_baseline.json` from 10 stale exceptions (sizes 3-5x overstated, 7 files since decomposed) down to the 3 modules that genuinely exceed 1,500 lines today, and added `validate_baseline_truthfulness` to `scripts/check_module_size_budget.py` as a CI ratchet against future fraudulent baselines. Refs #5922. |
+| 2026-05-23 | 1.0.180 | ⚡ Bolt: Optimize mechanical work metric calculations using einsum and vdot |
 | 2026-05-22 | 1.0.179 | Aligned the module-size quality gate with current launcher and shared-chat legacy debt by adding owned, expiring exceptions for `src/launchers/launcher_ui_setup.py` and `src/shared/python/chat/_chat_dock_widget_qt.py`, and raising the active module-size exception cap to 10 while preserving the 1,500-line budget for new untracked modules. |
 | 2026-05-21 | 1.0.176 | Preserved integer-safe quaternion normalization in `src/motion_capture/c3d_simscape_preview.py` by upcasting integer inputs before the optimized `np.einsum` norm accumulation, and added regression coverage for integer quaternion inputs. |
 | 2026-05-21 | 1.0.175 | Optimized `src/shared/python/signal_toolkit/fitting.py` to compute fitting residual sum-of-squares and RMSE via reused `np.vdot` accumulators, avoiding temporary squared arrays across the sinusoid, exponential, linear, polynomial, and custom fitter paths. |

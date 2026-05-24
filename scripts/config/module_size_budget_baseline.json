@@ -2,63 +2,21 @@
   "max_lines": 1500,
   "exceptions": [
     {
-      "path": "src/tools/starting_pose_matcher/gui.py",
-      "owner": "@tools-core",
-      "reason": "Legacy starting pose matcher GUI (2661 lines, pending decomposition)",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_gui_application.py",
-      "owner": "@simscape-gui",
-      "reason": "Legacy application code (1662 lines, pending decomposition)",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/engines/physics_engines/drake/python/src/drake_gui_app.py",
-      "owner": "@physics-core",
-      "reason": "Drake GUI application (2177 lines, pending decomposition)",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/head_models.py",
-      "owner": "@physics-core",
-      "reason": "MuJoCo head models (1666 lines, pending decomposition)",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher.py",
-      "owner": "@physics-core",
-      "reason": "MuJoCo humanoid launcher (1583 lines, pending decomposition)",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py",
-      "owner": "@physics-core",
-      "reason": "Pinocchio golf GUI (2007 lines, pending decomposition)",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/shared/python/humanoid_character_builder/generators/mesh_generator.py",
-      "owner": "@physics-core",
-      "reason": "Mesh generator (1675 lines, pending decomposition)",
-      "expires_on": "2026-07-31"
-    },
-    {
       "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/starting_pose_matcher.py",
       "owner": "@simscape-gui",
-      "reason": "Legacy starting pose matcher shim (2364 lines, pending #4376 decomposition)",
+      "reason": "Legacy starting pose matcher shim (2659 lines, pending #4376 decomposition)",
       "expires_on": "2026-07-31"
     },
     {
       "path": "src/launchers/launcher_ui_setup.py",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Legacy launcher UI setup module (1536 lines, pending decomposition)",
+      "reason": "Legacy launcher UI setup module (1532 lines, pending decomposition under #5922)",
       "expires_on": "2026-07-31"
     },
     {
       "path": "src/shared/python/chat/_chat_dock_widget_qt.py",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Legacy shared PyQt chat dock widget (1984 lines, pending decomposition)",
+      "reason": "Legacy shared PyQt chat dock widget (1984 lines, pending decomposition under #5922)",
       "expires_on": "2026-07-31"
     }
   ]

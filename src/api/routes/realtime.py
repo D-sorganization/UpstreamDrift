@@ -19,6 +19,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
+from src.api.auth.ws_auth import resolve_ws_user
 from src.shared.python.realtime.protocol import validate_channel
 
 logger = logging.getLogger(__name__)
@@ -94,6 +95,9 @@ async def subscribe(websocket: WebSocket, channel: str) -> None:
         await websocket.close(code=1008)  # policy violation
         return
 
+    user = await resolve_ws_user(websocket)
+    if user is None:
+        return
     await websocket.accept()
     await _registry.add(channel, websocket)
     try:

@@ -1,9 +1,11 @@
-# ADR 0007: Canonical URDF subsystem (humanoid_character_builder vs model_generation)
+# ADR 0020: Canonical URDF subsystem (humanoid_character_builder vs model_generation)
 
 - **Status:** Proposed (awaiting decision)
 - **Date:** 2026-05-08
 - **Tracking issue:** [#4521](https://github.com/D-sorganization/UpstreamDrift/issues/4521)
 - **Campaign:** [URDF Hardening Campaign #4520](https://github.com/D-sorganization/UpstreamDrift/issues/4520)
+
+> Renumbered to ADR-0020 on 2026-05-23 to remove duplicate ADR-0006/ADR-0007 slots.
 
 ## Context
 

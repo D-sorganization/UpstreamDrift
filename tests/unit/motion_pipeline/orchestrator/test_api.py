@@ -45,6 +45,17 @@ def test_pipeline_request_to_pipeline_config_round_trip() -> None:
     assert cfg.matching_backend == "pinocchio"
 
 
+def test_pipeline_request_preserves_string_bool_for_pydantic_coercion() -> None:
+    req = PipelineRequest(
+        source_format="c3d",
+        preprocessing=[{"name": "normalize", "enabled": "false"}],
+    )
+
+    cfg = req.to_pipeline_config()
+
+    assert cfg.preprocessing[0].enabled is False
+
+
 def test_pipeline_response_from_error_factory() -> None:
     resp = PipelineResponse.from_error("req-1", "boom")
     assert resp.success is False

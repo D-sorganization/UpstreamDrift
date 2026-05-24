@@ -380,9 +380,26 @@ Shared infrastructure:
 When extending Sidekick — adding a tool the assistant can call,
 extending the chat context bridge, or restyling the panel — reuse these
 surfaces rather than forking new color/spacing constants or new event
-buses. For anything the assistant should *do* (not just compute),
+buses. For anything the assistant should _do_ (not just compute),
 register a new `ActionDescriptor` via `SidekickActionService` rather
 than wiring a one-off `ai.tools.*` module.
+
+**If you need a standalone Sidekick app, use `sidekick.standalone.*`; do not
+write a new shell.** The standalone package
+([`src/shared/python/sidekick/standalone/`](src/shared/python/sidekick/standalone/))
+provides:
+
+- `sidekick.standalone.runner` — headless `sidekick run --calculator <name>`
+  dispatcher (no GUI or display required).
+- `sidekick.standalone.preferences` — typed preference surface backed by an
+  injectable `SessionStore`.
+- `sidekick.standalone.onboarding` — first-run sentinel + 3-step state machine.
+- `sidekick.standalone.session_store` — `InMemorySessionStore` (tests) and
+  `FileSessionStore` (production).
+
+See [`docs/sidekick/standalone.md`](docs/sidekick/standalone.md) for the user-
+facing guide and [ADR-0018](docs/adr/0018-standalone-sidekick.md) for design
+rationale (issues #5984, #5985, #5986, #5987).
 
 ### Rust kernels
 
