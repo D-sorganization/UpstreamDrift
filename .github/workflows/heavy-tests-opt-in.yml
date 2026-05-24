@@ -21,6 +21,10 @@ on:
   schedule:
     - cron: "0 2 * * 0" # Weekly Sunday 02:00 UTC
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
