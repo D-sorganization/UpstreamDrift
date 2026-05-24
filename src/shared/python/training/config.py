@@ -128,11 +128,15 @@ class TrainingConfig:
             value = getattr(self, name)
             if value is None:
                 continue
-            if not isinstance(value, int) or value <= 0:
+            if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
                 raise TrainingConfigError(
                     f"{name} must be a positive int when set (got {value!r})"
                 )
-        if self.seed is not None and (not isinstance(self.seed, int) or self.seed < 0):
+        if self.seed is not None and (
+            isinstance(self.seed, bool)
+            or not isinstance(self.seed, int)
+            or self.seed < 0
+        ):
             raise TrainingConfigError(
                 f"seed must be a non-negative int when set (got {self.seed!r})"
             )
