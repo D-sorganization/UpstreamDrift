@@ -14,6 +14,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from starlette.websockets import WebSocketDisconnect
 from src.api.routes import chat_ws
 
 pytestmark = pytest.mark.anyio
@@ -273,6 +274,7 @@ class TestWebSocket:
                 self.app = SimpleNamespace(
                     state=SimpleNamespace(chat_service=chat_service)
                 )
+                self.url = SimpleNamespace(path="/ws/chat/new")
                 self.sent: list[dict[str, object]] = []
                 self._receive_calls = 0
 
@@ -300,6 +302,52 @@ class TestWebSocket:
             record.message == "Chat WebSocket connection error"
             and record.exc_info is not None
             for record in caplog.records
+        )
+
+    async def test_disconnect_log_uses_session_token(
+        self, mock_chat_service, caplog
+    ) -> None:
+        """Disconnect logs must not expose the raw session identifier."""
+
+        sensitive_session_id = "golfer@example.com"
+        mock_chat_service.get_or_create_session.return_value.session_id = (
+            sensitive_session_id
+        )
+
+        class FakeWebSocket:
+            def __init__(self, chat_service: MagicMock) -> None:
+                self.app = SimpleNamespace(
+                    state=SimpleNamespace(chat_service=chat_service)
+                )
+                self.url = SimpleNamespace(path="/ws/chat/new")
+                self.sent: list[dict[str, object]] = []
+
+            async def accept(self) -> None:
+                return None
+
+            async def send_json(self, payload: dict[str, object]) -> None:
+                self.sent.append(payload)
+
+            async def receive_json(self) -> dict[str, object]:
+                raise WebSocketDisconnect
+
+        websocket = FakeWebSocket(mock_chat_service)
+        expected_token = chat_ws._session_log_token(sensitive_session_id)
+
+        with caplog.at_level("DEBUG"):
+            await chat_ws.chat_stream(websocket, sensitive_session_id)
+
+        assert websocket.sent[0] == {
+            "type": "session_info",
+            "session_id": sensitive_session_id,
+        }
+        assert any(
+            record.message
+            == f"Chat WebSocket disconnected: session_token={expected_token}"
+            for record in caplog.records
+        )
+        assert all(
+            sensitive_session_id not in record.message for record in caplog.records
         )
 
 

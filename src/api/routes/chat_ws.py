@@ -64,6 +64,13 @@ def _context_section_hash(section: str) -> str:
     return hashlib.sha256(section.encode("utf-8")).hexdigest()[:16]
 
 
+def _session_log_token(session_id: str) -> str:
+    """Return a non-reversible token for logging chat session identifiers."""
+    if not isinstance(session_id, str):
+        raise TypeError("session_id must be a str")
+    return _context_section_hash(session_id)
+
+
 def _maybe_inject_chat_context(session: Any) -> str | None:
     """Inject recent app-state context into *session* as a system message.
 
@@ -257,7 +264,10 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
                 )
 
     except WebSocketDisconnect:
-        logger.debug("Chat WebSocket disconnected: session=%s", session_id)
+        logger.debug(
+            "Chat WebSocket disconnected: session_token=%s",
+            _session_log_token(session_id),
+        )
     except (ConnectionError, TimeoutError, OSError):
         logger.exception("Chat WebSocket connection error")
         with contextlib.suppress(ConnectionError, TimeoutError, OSError):
