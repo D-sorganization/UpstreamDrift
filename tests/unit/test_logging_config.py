@@ -12,6 +12,7 @@ from src.shared.python.logging_pkg.logging_config import (
     SIMPLE_LOG_FORMAT,
     LogLevel,
     SensitiveDataFilter,
+    _redact_sensitive,
     configure_test_logging,
     get_logger,
     setup_logging,
@@ -136,6 +137,18 @@ class TestSensitiveDataFilter:
         flt.filter(record)
         assert "key1" not in record.msg
         assert "pass1" not in record.msg
+
+    def test_preserves_json_style_separator(self) -> None:
+        record = self._make_record('payload={"api_key":"abc123xyz"}')
+        SensitiveDataFilter().filter(record)
+        assert record.msg == 'payload={"api_key":"***REDACTED***"}'
+
+    def test_does_not_redact_similar_non_secret_keys(self) -> None:
+        message = (
+            'payload={"api_key_hint":"public","secret_key_label":"visible"} '
+            "api_secretary=available"
+        )
+        assert _redact_sensitive(message) == message
 
 
 # ---------------------------------------------------------------------------
