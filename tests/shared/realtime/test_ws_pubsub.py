@@ -248,6 +248,22 @@ class TestWSPubSubRust:
         assert ps.backend == "python"
         assert captured["body"] == {"channel": "scope/topic", "payload": {"v": 1}}
 
+    def test_start_spawns_python_backend_when_autostart_is_false(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        spawned: list[str] = []
+
+        monkeypatch.setattr(ws_mod, "_resolve_backend", lambda: "python")
+        monkeypatch.setattr(ws_mod, "_port_in_use", lambda _h, _p: False)
+
+        ps = ws_mod.WSPubSub(port=12359, autostart=False)
+        monkeypatch.setattr(ps, "_spawn_server", lambda: spawned.append("spawn"))
+
+        ps.start()
+
+        assert ps.backend == "python"
+        assert spawned == ["spawn"]
+
     def test_publish_via_rust(self, fake_rust) -> None:
         ps = ws_mod.WSPubSub(port=0, backend="rust")
         try:

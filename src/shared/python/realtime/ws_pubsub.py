@@ -165,7 +165,7 @@ class WSPubSub:
             if self._rust_server is None:
                 self._start_rust_server()
             return
-        if self._autostart and not _port_in_use(self.host, self.port):
+        if not _port_in_use(self.host, self.port):
             self._spawn_server()
 
     # -- rust backend --------------------------------------------------------
