@@ -79,7 +79,13 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m ensurepip --upgrade || true
-          pip install -r requirements.txt
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          elif [ -f requirements.lock ]; then
+            pip install -r requirements.lock
+          elif [ -f pyproject.toml ]; then
+            pip install -e .
+          fi
           python -m ensurepip --upgrade || true
           pip install ruff black mypy
           npm install -g @google/jules
