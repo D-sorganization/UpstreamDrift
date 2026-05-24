@@ -262,6 +262,25 @@ class TestCIEnvironmentCompatibility:
         assert "gh auth status" in workflow
         assert "steps.token-check.outputs.can_trigger == 'true'" in workflow
 
+    def test_frontend_cleanup_runs_before_ui_working_directory_default(self) -> None:
+        """The frontend pre-checkout cleanup must not require ui/ to exist."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+                encoding="utf-8",
+            ),
+        )
+        steps = workflow["jobs"]["frontend-tests"]["steps"]
+        cleanup = next(
+            step for step in steps if step.get("name") == "Clean corrupt git objects"
+        )
+
+        assert cleanup["working-directory"] == "."
+
 
 class TestPyprojectTomlConsistency:
     """Test that pyproject.toml is properly configured."""

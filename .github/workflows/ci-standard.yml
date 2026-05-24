@@ -1207,6 +1207,7 @@ jobs:
     steps:
       - name: Clean corrupt git objects
         shell: bash
+        working-directory: .
         run: |
           if [ -d .git ]; then
             if find .git/objects -type f -empty | grep -q .; then
