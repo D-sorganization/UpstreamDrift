@@ -1,128 +1,128 @@
-"""Tests for sidekick.__main__ CLI argparser — T1 (#5979).
-
-Covers:
-  - default subcommand (gui / chat-first)
-  - --help lists both subcommands
-  - malformed/unknown args exit with code 2
-  - --profile restricted to valid choices
-  - --data-dir resolved to absolute path
-  - headless 'run' path does not import PyQt6
-  - run required args missing → exit 2
-  - run --format restricted to valid choices
-"""
-
 from __future__ import annotations
 
+import importlib
 import sys
+import types
 from pathlib import Path
 
 import pytest
 
 
-def test_help_output_lists_both_subcommands() -> None:
-    from sidekick.__main__ import build_parser
-
-    parser = build_parser()
-    help_text = parser.format_help()
-    assert "gui" in help_text
-    assert "run" in help_text
+def _load_cli():
+    sys.modules.pop("sidekick.__main__", None)
+    return importlib.import_module("sidekick.__main__")
 
 
-def test_default_subcommand_is_gui() -> None:
-    from sidekick.__main__ import build_parser
+def test_help_lists_subcommands_and_examples(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    cli = _load_cli()
 
-    parser = build_parser()
-    ns = parser.parse_args([])
-    assert ns.subcommand == "gui"
+    with pytest.raises(SystemExit) as exc_info:
+        cli.parse_cli_args(["--help"])
+
+    assert exc_info.value.code == 0
+    captured = capsys.readouterr()
+    assert "gui" in captured.out
+    assert "run" in captured.out
+    assert "python -m sidekick run --calculator" in captured.out
 
 
-def test_gui_default_profile_is_chat_first() -> None:
-    from sidekick.__main__ import build_parser
+def test_default_gui_command_uses_chat_first_and_resolves_data_dir(
+    tmp_path: Path,
+) -> None:
+    cli = _load_cli()
 
-    parser = build_parser()
-    ns = parser.parse_args(["gui"])
-    assert ns.profile == "chat-first"
+    args = cli.parse_cli_args(
+        [
+            "--profile",
+            "calc-first",
+            "--theme",
+            "solarized",
+            "--data-dir",
+            str(tmp_path),
+            "--skip-onboarding",
+        ]
+    )
+
+    assert args.command == "gui"
+    assert args.profile == "calc-first"
+    assert args.theme == "solarized"
+    assert args.data_dir == tmp_path.resolve()
+    assert args.skip_onboarding is True
+
+    default_args = cli.parse_cli_args([])
+
+    assert default_args.command == "gui"
+    assert default_args.profile == "chat-first"
 
 
-def test_gui_calc_first_profile() -> None:
-    from sidekick.__main__ import build_parser
+def test_invalid_gui_flag_suggests_closest_match(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    cli = _load_cli()
 
-    parser = build_parser()
-    ns = parser.parse_args(["gui", "--profile", "calc-first"])
-    assert ns.profile == "calc-first"
+    with pytest.raises(SystemExit) as exc_info:
+        cli.parse_cli_args(["--theem", "solarized"])
+
+    assert exc_info.value.code == 2
+    assert "--theme" in capsys.readouterr().err
+
+
+def test_run_subcommand_stays_headless_during_parse(tmp_path: Path) -> None:
+    inputs = tmp_path / "inputs.json"
+    inputs.write_text("{}", encoding="utf-8")
+    pyqt_before = {name for name in sys.modules if name.startswith("PyQt6")}
+
+    cli = _load_cli()
+    args = cli.parse_cli_args(
+        ["run", "--calculator", "unit-converter", "--inputs", str(inputs)]
+    )
+
+    pyqt_after = {name for name in sys.modules if name.startswith("PyQt6")}
+    assert args.command == "run"
+    assert args.inputs == inputs.resolve()
+    assert pyqt_after == pyqt_before
 
 
 def test_invalid_profile_exits_code_2() -> None:
-    from sidekick.__main__ import build_parser
-
-    parser = build_parser()
+    cli = _load_cli()
     with pytest.raises(SystemExit) as exc_info:
-        parser.parse_args(["gui", "--profile", "bad-profile"])
+        cli.parse_cli_args(["gui", "--profile", "bad-profile"])
     assert exc_info.value.code == 2
 
 
 def test_unknown_argument_exits_code_2() -> None:
-    from sidekick.__main__ import build_parser
-
-    parser = build_parser()
+    cli = _load_cli()
     with pytest.raises(SystemExit) as exc_info:
-        parser.parse_args(["--does-not-exist"])
+        cli.parse_cli_args(["--does-not-exist"])
     assert exc_info.value.code == 2
 
 
-def test_data_dir_resolved_to_absolute(tmp_path: Path) -> None:
-    from sidekick.__main__ import build_parser
-
-    parser = build_parser()
-    ns = parser.parse_args(["gui", "--data-dir", str(tmp_path)])
-    assert Path(ns.data_dir).is_absolute()
-
-
-def test_headless_run_path_no_pyqt6(monkeypatch: pytest.MonkeyPatch) -> None:
-    """'sidekick run' parse must not trigger a PyQt6 import."""
-    pyqt_keys = [k for k in sys.modules if "PyQt6" in k]
-    backup = {k: sys.modules.pop(k) for k in pyqt_keys}
-    try:
-        from sidekick.__main__ import build_parser
-
-        parser = build_parser()
-        parser.parse_args(
-            [
-                "run",
-                "--calculator",
-                "test_calc",
-                "--inputs",
-                "/dev/null",
-            ]
-        )
-        assert not any("PyQt6" in k for k in sys.modules), (
-            "PyQt6 was imported on a headless 'run' parse path"
-        )
-    finally:
-        sys.modules.update(backup)
+def test_run_subcommand_rejects_gui_only_flags() -> None:
+    cli = _load_cli()
+    with pytest.raises(SystemExit) as exc_info:
+        cli.parse_cli_args(["run", "--profile", "chat-first"])
+    assert exc_info.value.code == 2
 
 
 def test_run_subcommand_required_args_missing() -> None:
-    from sidekick.__main__ import build_parser
-
-    parser = build_parser()
+    cli = _load_cli()
     with pytest.raises(SystemExit) as exc_info:
-        parser.parse_args(["run"])
+        cli.parse_cli_args(["run"])
     assert exc_info.value.code == 2
 
 
 def test_run_subcommand_invalid_format_exits_2() -> None:
-    from sidekick.__main__ import build_parser
-
-    parser = build_parser()
+    cli = _load_cli()
     with pytest.raises(SystemExit) as exc_info:
-        parser.parse_args(
+        cli.parse_cli_args(
             [
                 "run",
                 "--calculator",
                 "x",
                 "--inputs",
-                "/dev/null",
+                str(Path(__file__)),
                 "--format",
                 "xml",
             ]
@@ -131,32 +131,28 @@ def test_run_subcommand_invalid_format_exits_2() -> None:
 
 
 def test_run_subcommand_valid_format_json() -> None:
-    from sidekick.__main__ import build_parser
-
-    parser = build_parser()
-    ns = parser.parse_args(
+    cli = _load_cli()
+    ns = cli.parse_cli_args(
         [
             "run",
             "--calculator",
             "wgs_reactor",
             "--inputs",
-            "/dev/null",
+            str(Path(__file__)),
         ]
     )
     assert ns.format == "json"
 
 
 def test_run_subcommand_format_csv() -> None:
-    from sidekick.__main__ import build_parser
-
-    parser = build_parser()
-    ns = parser.parse_args(
+    cli = _load_cli()
+    ns = cli.parse_cli_args(
         [
             "run",
             "--calculator",
             "wgs_reactor",
             "--inputs",
-            "/dev/null",
+            str(Path(__file__)),
             "--format",
             "csv",
         ]
@@ -164,9 +160,130 @@ def test_run_subcommand_format_csv() -> None:
     assert ns.format == "csv"
 
 
-def test_gui_theme_arg() -> None:
-    from sidekick.__main__ import build_parser
+def test_run_headless_invalid_output_dir_returns_1(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    cli = _load_cli()
+    inputs = tmp_path / "inputs.json"
+    inputs.write_text("{}", encoding="utf-8")
 
-    parser = build_parser()
-    ns = parser.parse_args(["gui", "--theme", "catppuccin-mocha"])
-    assert ns.theme == "catppuccin-mocha"
+    args = cli.parse_cli_args(
+        [
+            "run",
+            "--calculator",
+            "wgs_reactor",
+            "--inputs",
+            str(inputs),
+            "--output",
+            str(tmp_path / "missing" / "result.json"),
+        ]
+    )
+
+    assert cli.run_headless(args) == 1
+    assert "sidekick run failed" in capsys.readouterr().err
+
+
+def test_launch_gui_delegates_to_launcher_factory(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    cli = _load_cli()
+    calls: dict[str, object] = {}
+
+    fake_launcher = types.ModuleType("sidekick.launcher_factory")
+
+    def fake_create_launcher_config(
+        app_module: str,
+        window_title: str,
+        min_width: int,
+        min_height: int,
+        **extra: object,
+    ) -> str:
+        calls["launcher_config"] = {
+            "app_module": app_module,
+            "window_title": window_title,
+            "min_width": min_width,
+            "min_height": min_height,
+            "extra": extra,
+        }
+        return "LAUNCHER_CONFIG"
+
+    def fake_launch_app(config: object, window_factory) -> int:
+        calls["launch_app_config"] = config
+        calls["window"] = window_factory()
+        return 17
+
+    fake_launcher.create_launcher_config = fake_create_launcher_config
+    fake_launcher.launch_app = fake_launch_app
+
+    fake_window_module = types.ModuleType("sidekick.standalone.window")
+
+    class FakeStandaloneSidekickConfig:
+        def __init__(
+            self,
+            profile: str,
+            theme_name: str | None,
+            session_store: object,
+            host_action_port: object | None = None,
+        ) -> None:
+            self.profile = profile
+            self.theme_name = theme_name
+            self.session_store = session_store
+            self.host_action_port = host_action_port
+
+    class FakeStandaloneSidekickWindow:
+        def __init__(self, config: FakeStandaloneSidekickConfig) -> None:
+            self.config = config
+
+    fake_window_module.StandaloneSidekickConfig = FakeStandaloneSidekickConfig
+    fake_window_module.StandaloneSidekickWindow = FakeStandaloneSidekickWindow
+
+    fake_store_module = types.ModuleType("sidekick.standalone.session_store")
+
+    class FakeStandaloneSessionStore:
+        def __init__(self, root: Path) -> None:
+            self.root = root
+
+    fake_store_module.StandaloneSessionStore = FakeStandaloneSessionStore
+
+    monkeypatch.setitem(sys.modules, "sidekick.launcher_factory", fake_launcher)
+    monkeypatch.setitem(sys.modules, "sidekick.standalone.window", fake_window_module)
+    monkeypatch.setitem(
+        sys.modules,
+        "sidekick.standalone.session_store",
+        fake_store_module,
+    )
+
+    args = cli.parse_cli_args(
+        [
+            "gui",
+            "--profile",
+            "calc-first",
+            "--theme",
+            "solarized",
+            "--data-dir",
+            str(tmp_path),
+            "--skip-onboarding",
+        ]
+    )
+
+    assert cli.launch_gui(args) == 17
+    assert calls["launch_app_config"] == "LAUNCHER_CONFIG"
+    assert calls["launcher_config"] == {
+        "app_module": "sidekick.standalone.window",
+        "window_title": "Sidekick",
+        "min_width": 1280,
+        "min_height": 800,
+        "extra": {
+            "profile": "calc-first",
+            "theme_name": "solarized",
+            "data_dir": str(tmp_path.resolve()),
+            "skip_onboarding": True,
+        },
+    }
+    window = calls["window"]
+    assert isinstance(window, FakeStandaloneSidekickWindow)
+    assert window.config.profile == "calc-first"
+    assert window.config.theme_name == "solarized"
+    assert window.config.session_store.root == tmp_path.resolve()
