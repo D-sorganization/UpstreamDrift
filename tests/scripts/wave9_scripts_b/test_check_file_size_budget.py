@@ -31,6 +31,29 @@ def test_line_count(tmp_path: Path) -> None:
     assert mod._line_count(p) == 3
 
 
+def test_tracked_python_files(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    one = tmp_path / "one.py"
+    two = tmp_path / "pkg" / "two.py"
+    two.parent.mkdir()
+    one.write_text("", encoding="utf-8")
+    two.write_text("", encoding="utf-8")
+
+    monkeypatch.setattr(mod, "_run_git", lambda args, repo_root: "one.py\npkg/two.py\n")
+
+    assert mod._tracked_python_files(tmp_path) == [one, two]
+
+
+def test_fallback_python_files_skips_hidden_dirs(tmp_path: Path) -> None:
+    visible = tmp_path / "src" / "visible.py"
+    visible.parent.mkdir(parents=True)
+    visible.write_text("", encoding="utf-8")
+    hidden = tmp_path / ".venv" / "hidden.py"
+    hidden.parent.mkdir()
+    hidden.write_text("", encoding="utf-8")
+
+    assert mod._fallback_python_files(tmp_path) == [visible]
+
+
 def test_load_config(tmp_path: Path) -> None:
     config_dir = tmp_path / "scripts" / "config"
     config_dir.mkdir(parents=True)
@@ -129,7 +152,7 @@ def test_main_ok(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     cfg = config_dir / "budget.json"
     cfg.write_text(json.dumps({"max_lines": 100, "exceptions": []}))
     monkeypatch.setattr(mod, "_repo_root", lambda: tmp_path)
-    monkeypatch.setattr(mod, "_changed_python_files", lambda r, b: [])
+    monkeypatch.setattr(mod, "_tracked_python_files", lambda r: [])
     monkeypatch.setattr(
         "sys.argv",
         ["x", "--config-path", "scripts/config/budget.json"],
@@ -145,7 +168,7 @@ def test_main_violation(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None
     big = tmp_path / "big.py"
     big.write_text("a\nb\nc\nd\ne\n")
     monkeypatch.setattr(mod, "_repo_root", lambda: tmp_path)
-    monkeypatch.setattr(mod, "_changed_python_files", lambda r, b: [big])
+    monkeypatch.setattr(mod, "_tracked_python_files", lambda r: [big])
     monkeypatch.setattr(
         "sys.argv",
         ["x", "--config-path", "scripts/config/budget.json"],
@@ -162,7 +185,7 @@ def test_main_skips_tests_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
     big = tmp_path / "tests" / "big.py"
     big.write_text("a\nb\nc\n")
     monkeypatch.setattr(mod, "_repo_root", lambda: tmp_path)
-    monkeypatch.setattr(mod, "_changed_python_files", lambda r, b: [big])
+    monkeypatch.setattr(mod, "_tracked_python_files", lambda r: [big])
     monkeypatch.setattr(
         "sys.argv",
         ["x", "--config-path", "scripts/config/budget.json"],
@@ -178,7 +201,7 @@ def test_main_watchlist(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None
     p = tmp_path / "warn.py"
     p.write_text("\n".join(["x"] * 9) + "\n")
     monkeypatch.setattr(mod, "_repo_root", lambda: tmp_path)
-    monkeypatch.setattr(mod, "_changed_python_files", lambda r, b: [p])
+    monkeypatch.setattr(mod, "_tracked_python_files", lambda r: [p])
     monkeypatch.setattr(
         "sys.argv",
         ["x", "--config-path", "scripts/config/budget.json"],
@@ -193,22 +216,18 @@ def test_main_fallback_on_runtime_error(
     config_dir.mkdir(parents=True)
     cfg = config_dir / "budget.json"
     cfg.write_text(json.dumps({"max_lines": 100, "exceptions": []}))
-    calls = {"n": 0}
-
-    def fake(r, base):
-        calls["n"] += 1
-        if calls["n"] == 1:
-            raise RuntimeError("no origin/main")
-        return []
-
     monkeypatch.setattr(mod, "_repo_root", lambda: tmp_path)
-    monkeypatch.setattr(mod, "_changed_python_files", fake)
+    monkeypatch.setattr(
+        mod,
+        "_tracked_python_files",
+        lambda r: (_ for _ in ()).throw(RuntimeError("git failed")),
+    )
+    monkeypatch.setattr(mod, "_fallback_python_files", lambda r: [])
     monkeypatch.setattr(
         "sys.argv",
         ["x", "--config-path", "scripts/config/budget.json"],
     )
     assert mod.main() == 0
-    assert calls["n"] == 2
 
 
 def test_main_too_many_exceptions(
@@ -217,12 +236,31 @@ def test_main_too_many_exceptions(
     config_dir = tmp_path / "scripts" / "config"
     config_dir.mkdir(parents=True)
     cfg = config_dir / "budget.json"
-    excs = [{"path": f"f{i}.py", "owner": "@x", "reason": "issue #1"} for i in range(6)]
+    excs = [{"path": f"f{i}.py", "owner": "@x", "reason": "issue #1"} for i in range(9)]
     cfg.write_text(json.dumps({"max_lines": 100, "exceptions": excs}))
     monkeypatch.setattr(mod, "_repo_root", lambda: tmp_path)
-    monkeypatch.setattr(mod, "_changed_python_files", lambda r, b: [])
+    monkeypatch.setattr(mod, "_tracked_python_files", lambda r: [])
     monkeypatch.setattr(
         "sys.argv",
         ["x", "--config-path", "scripts/config/budget.json"],
     )
     assert mod.main() == 1
+
+
+def test_main_respects_configured_exception_limit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    config_dir = tmp_path / "scripts" / "config"
+    config_dir.mkdir(parents=True)
+    cfg = config_dir / "budget.json"
+    excs = [{"path": f"f{i}.py", "owner": "@x", "reason": "issue #1"} for i in range(8)]
+    cfg.write_text(
+        json.dumps({"max_lines": 100, "max_exceptions": 8, "exceptions": excs})
+    )
+    monkeypatch.setattr(mod, "_repo_root", lambda: tmp_path)
+    monkeypatch.setattr(mod, "_tracked_python_files", lambda r: [])
+    monkeypatch.setattr(
+        "sys.argv",
+        ["x", "--config-path", "scripts/config/budget.json"],
+    )
+    assert mod.main() == 0
