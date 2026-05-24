@@ -38,6 +38,6 @@ def quaternion_geodesic_angles(
     if q1.ndim != 2 or q1.shape[1] != 4:
         raise ValueError(f"quaternions must have shape (N, 4); got {q1.shape}")
     # ⚡ Bolt: np.einsum is ~3x faster than np.sum(q1 * q2, axis=1) and avoids intermediate array allocation
-    dots = np.abs(np.einsum('ij,ij->i', q1, q2))
+    dots = np.abs(np.einsum("ij,ij->i", q1, q2))
     dots = np.clip(dots, -1.0, 1.0)
     return 2.0 * np.arccos(dots)
