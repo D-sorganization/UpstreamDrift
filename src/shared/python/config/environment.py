@@ -25,6 +25,8 @@ Usage:
 
     # Check current environment
     env = get_environment()  # "development", "staging", or "production"
+    realtime_host = get_realtime_host()
+    realtime_port = get_realtime_port()
 """
 
 from __future__ import annotations
@@ -414,6 +416,42 @@ def get_api_port(default: int = 8000) -> int:
     """
     return (
         get_env_int("GOLF_API_PORT", default=default, min_value=1, max_value=65535)
+        or default
+    )
+
+
+def get_realtime_host(default: str = "127.0.0.1") -> str:
+    """Get the realtime WebSocket host address.
+
+    Uses loopback by default so the autostarted realtime server stays
+    local-only unless the deployment explicitly opts into a broader bind
+    address.
+
+    Args:
+        default: Default host address.
+
+    Returns:
+        Host address string.
+    """
+    return os.environ.get("GOLF_REALTIME_HOST", default)
+
+
+def get_realtime_port(default: int = 8765) -> int:
+    """Get the realtime WebSocket port number.
+
+    Args:
+        default: Default port number.
+
+    Returns:
+        Port number.
+    """
+    return (
+        get_env_int(
+            "GOLF_REALTIME_PORT",
+            default=default,
+            min_value=1,
+            max_value=65535,
+        )
         or default
     )
 

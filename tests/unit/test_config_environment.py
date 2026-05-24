@@ -8,11 +8,15 @@ from unittest.mock import patch
 import pytest
 from src.shared.python.config.environment import (
     EnvironmentError,
+    get_api_host,
+    get_api_port,
     get_env,
     get_env_bool,
     get_env_float,
     get_env_int,
     get_env_list,
+    get_realtime_host,
+    get_realtime_port,
 )
 
 _TEST_VAR = "_UPSTREAM_DRIFT_TEST_VAR"
@@ -175,3 +179,29 @@ class TestGetEnvList:
         with _set(**{_TEST_VAR: " a , b , c "}):
             result = get_env_list(_TEST_VAR)
             assert result == ["a", "b", "c"]
+
+
+class TestSocketAccessors:
+    def test_get_api_host_defaults_to_loopback(self) -> None:
+        with _unset("GOLF_API_HOST"):
+            assert get_api_host() == "127.0.0.1"
+
+    def test_get_api_port_defaults_to_8000(self) -> None:
+        with _unset("GOLF_API_PORT"):
+            assert get_api_port() == 8000
+
+    def test_get_realtime_host_defaults_to_loopback(self) -> None:
+        with _unset("GOLF_REALTIME_HOST"):
+            assert get_realtime_host() == "127.0.0.1"
+
+    def test_get_realtime_host_reads_env_override(self) -> None:
+        with _set(GOLF_REALTIME_HOST="0.0.0.0"):
+            assert get_realtime_host() == "0.0.0.0"
+
+    def test_get_realtime_port_defaults_to_8765(self) -> None:
+        with _unset("GOLF_REALTIME_PORT"):
+            assert get_realtime_port() == 8765
+
+    def test_get_realtime_port_reads_env_override(self) -> None:
+        with _set(GOLF_REALTIME_PORT="9999"):
+            assert get_realtime_port() == 9999

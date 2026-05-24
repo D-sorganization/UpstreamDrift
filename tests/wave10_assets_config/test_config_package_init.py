@@ -103,12 +103,16 @@ def test_environment_helpers_are_callable() -> None:
         get_api_port,
         get_environment,
         get_log_level,
+        get_realtime_host,
+        get_realtime_port,
     )
 
     assert callable(get_api_host)
     assert callable(get_api_port)
     assert callable(get_environment)
     assert callable(get_log_level)
+    assert callable(get_realtime_host)
+    assert callable(get_realtime_port)
 
 
 def test_handedness_helpers_are_importable() -> None:
