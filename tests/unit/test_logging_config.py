@@ -124,6 +124,46 @@ class TestSensitiveDataFilter:
         # args should be cleared after formatting
         assert record.args is None
 
+    def test_space_in_secret(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record('{"password": "my secret password"}')
+        flt.filter(record)
+        assert "my secret password" not in record.msg
+        assert "REDACTED" in record.msg
+        assert record.msg == '{"password": "***REDACTED***"}'
+
+    def test_comma_in_secret(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record('{"password": "my,secret,password"}')
+        flt.filter(record)
+        assert "my,secret,password" not in record.msg
+        assert "REDACTED" in record.msg
+        assert record.msg == '{"password": "***REDACTED***"}'
+
+    def test_json_quoted_keys(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record('{"password": "secret123"}')
+        flt.filter(record)
+        assert "secret123" not in record.msg
+        assert "REDACTED" in record.msg
+        assert record.msg == '{"password": "***REDACTED***"}'
+
+    def test_json_quoted_keys_multiple(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record('{"api_key": "abc123xyz", "other": "value"}')
+        flt.filter(record)
+        assert "abc123xyz" not in record.msg
+        assert "REDACTED" in record.msg
+        assert record.msg == '{"api_key": "***REDACTED***", "other": "value"}'
+
+    def test_comma_suffix(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record("api_key=abc123xyz, other=value")
+        flt.filter(record)
+        assert "abc123xyz" not in record.msg
+        assert "REDACTED" in record.msg
+        assert record.msg == "api_key=***REDACTED***, other=value"
+
     def test_case_insensitive_password(self) -> None:
         flt = SensitiveDataFilter()
         record = self._make_record("Password=MySuperSecret")

@@ -76,6 +76,7 @@ DEFAULT_BACKUP_COUNT = 5
 _SENSITIVE_PATTERNS: list[re.Pattern[str]] = [
     re.compile(
         r"(?i)"
+        r"(['\"]?)"
         r"("
         r"password|passwd|pwd"
         r"|api_key|apikey|api[-_]?secret"
@@ -83,7 +84,13 @@ _SENSITIVE_PATTERNS: list[re.Pattern[str]] = [
         r"|access_token|auth_token|bearer"
         r"|private_key"
         r")"
-        r"[\s]*[=:]\s*['\"]?([^\s'\"]{1,})['\"]?"
+        r"\1"
+        r"([\s]*[=:]\s*)"
+        r"(?:"
+        r"(['\"])(.*?)\4"
+        r"|"
+        r"([^\s'\",]+)"
+        r")"
     ),
 ]
 
@@ -115,8 +122,13 @@ class SensitiveDataFilter(logging.Filter):
 
 def _redact_sensitive(text: str) -> str:
     """Replace sensitive values in *text* with a redaction placeholder."""
+
+    def repl(m: re.Match[str]) -> str:
+        quote = m.group(4) or ""
+        return f"{m.group(1)}{m.group(2)}{m.group(1)}{m.group(3)}{quote}***REDACTED***{quote}"
+
     for pattern in _SENSITIVE_PATTERNS:
-        text = pattern.sub(r"\1=***REDACTED***", text)
+        text = pattern.sub(repl, text)
     return text
 
 
