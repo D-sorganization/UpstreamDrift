@@ -19,6 +19,7 @@ from src.shared.python.pose_interchange.adapters.myosuite import MyoSuiteAdapter
 from src.shared.python.pose_interchange.adapters.opensim import OpenSimAdapter
 from src.shared.python.pose_interchange.adapters.pinocchio import PinocchioAdapter
 from src.shared.python.pose_interchange.adapters.simscape import SimscapeAdapter
+from src.shared.python.pose_interchange.adapters.myosuite import MyoSuiteAdapter
 from src.shared.python.pose_interchange.protocol import PoseConventionAdapter
 
 ADAPTER_REGISTRY: dict[str, type[PoseConventionAdapter]] = {
@@ -28,6 +29,7 @@ ADAPTER_REGISTRY: dict[str, type[PoseConventionAdapter]] = {
     PinocchioAdapter.engine_name: PinocchioAdapter,
     OpenSimAdapter.engine_name: OpenSimAdapter,
     SimscapeAdapter.engine_name: SimscapeAdapter,
+    MyoSuiteAdapter.engine_name: MyoSuiteAdapter,
 }
 
 __all__ = [
@@ -38,4 +40,5 @@ __all__ = [
     "OpenSimAdapter",
     "PinocchioAdapter",
     "SimscapeAdapter",
+    "MyoSuiteAdapter",
 ]

@@ -42,6 +42,9 @@ from src.shared.python.pose_interchange.services.pinocchio import (
 from src.shared.python.pose_interchange.services.simscape import (
     create_simscape_service,
 )
+from src.shared.python.pose_interchange.services.myosuite import (
+    create_myosuite_service,
+)
 
 KINEMATICS_SERVICE_REGISTRY: dict[str, Callable[[], LiveKinematicsService]] = {
     "drake": create_drake_service,
@@ -50,6 +53,7 @@ KINEMATICS_SERVICE_REGISTRY: dict[str, Callable[[], LiveKinematicsService]] = {
     "pinocchio": create_pinocchio_service,
     "opensim": create_opensim_service,
     "simscape": create_simscape_service,
+    "myosuite": create_myosuite_service,
 }
 """Engine name -> zero-arg factory for a :class:`LiveKinematicsService`.
 

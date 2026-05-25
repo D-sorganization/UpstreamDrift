@@ -57,6 +57,11 @@ _FALLBACK_PROBES: Iterable[tuple[str, str, str]] = (
         "src.shared.python.pose_interchange.services.simscape",
         "_matlab_engine_is_importable",
     ),
+    (
+        "myosuite",
+        "src.shared.python.pose_interchange.services.myosuite",
+        "_myosuite_is_importable",
+    ),
 )
 
 
