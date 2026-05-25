@@ -18,27 +18,25 @@ Welcome to the Golf Modeling Suite - a professional biomechanical analysis and p
 
 ## Quick Start
 
-### 1. Start the API Server
+The recommended entry point is the **web UI**:
 
 ```bash
-cd /home/user/Golf_Modeling_Suite
-python start_api_server.py
+python launch_golf_suite.py
 ```
 
-### 2. Access the API
+This starts the local API server (port 8000) and opens the React UI in your default browser.
 
-- **API Base**: http://localhost:8000
-- **Interactive Docs**: http://localhost:8000/docs
-- **Health Check**: http://localhost:8000/health
+### Other entry points
 
-### 3. Run a Simulation
+| Command | What it launches |
+|---------|------------------|
+| `python launch_golf_suite.py` | Web UI (recommended) |
+| `python launch_golf_suite.py --classic` | Classic PyQt6 desktop launcher |
+| `python launch_golf_suite.py --api-only` | API server without auto-opening a UI |
+| `python launch_golf_suite.py --engine <name>` | Legacy direct engine launch |
+| Pose Studio standalone | `python -m src.tools.pose_studio` |
 
-```bash
-curl -X POST http://localhost:8000/simulate \
-  -H "Content-Type: application/json" \
-  -d '{"engine_type": "mujoco", "duration": 1.0}'
-```
-
+The classic PyQt6 launcher remains supported as a fallback and for users who prefer a desktop window.
 ---
 
 ## Documentation Structure
