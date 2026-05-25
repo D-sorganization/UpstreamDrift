@@ -190,3 +190,34 @@ class TestSetupLogging:
     def test_custom_level_does_not_raise(self) -> None:
         # Just verifying no exception — root level can be affected by other workers
         setup_logging(level=LogLevel.ERROR)  # should not raise
+
+    def test_redacts_password_comma_separated(self) -> None:
+        """Tests that a password in a comma-separated string is redacted without leaking the suffix."""
+        record = logging.LogRecord(
+            name="test",
+            level=logging.INFO,
+            pathname="",
+            lineno=0,
+            msg="Connected: password=abc,def, user=test",
+            args=(),
+            exc_info=None,
+        )
+        flt = SensitiveDataFilter()
+        flt.filter(record)
+        assert "password=***REDACTED***" in record.msg
+        assert "def" not in record.msg
+
+    def test_redacts_password_json(self) -> None:
+        """Tests that a password in a JSON payload is redacted correctly."""
+        record = logging.LogRecord(
+            name="test",
+            level=logging.INFO,
+            pathname="",
+            lineno=0,
+            msg='{"password":"abc,def"}',
+            args=(),
+            exc_info=None,
+        )
+        flt = SensitiveDataFilter()
+        flt.filter(record)
+        assert '{"password":"***REDACTED***"}' in record.msg
