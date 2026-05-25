@@ -1,6 +1,6 @@
 # Roadmap Issues - Golf Modeling Suite
 
-Last Updated: 2026-05-25
+Last Updated: 2026-01-17
 
 These issues are already tracked in GitHub and represent planned improvements.
 
@@ -50,12 +50,6 @@ These issues are already tracked in GitHub and represent planned improvements.
 - **Status**: Open
 - **Description**: Normalize physics constants across all engines
 
-### Phase 2.4: Chat Entry-point Consolidation
-
-- **GitHub Issue**: #6119
-- **Status**: Open
-- **Description**: Consolidate chat entry points and decompose \_chat_dock_widget_qt.py (Follow-up from ADR-0022 and #6120)
-
 ## Phase 3: Integration
 
 ### Phase 3.1: Cross-Engine Integration Tests
@@ -90,18 +84,19 @@ These issues are already tracked in GitHub and represent planned improvements.
 - **Status**: Open
 - **Description**: Implement lazy imports to improve startup time
 
-## Phase 5: CI/CD Pipeline
+## Phase 5: Configuration Consolidation
 
-### Phase 5.1: Review CI Modularization and Jules-\* Workflows
+### Phase 5.1: Adopt pydantic-settings and unify config
+
+- **GitHub Issue**: #5920
+- **Status**: Open
+- **Description**: Consolidate the 6 config systems and 118 env vars into a unified `pydantic-settings` based Settings class, add runtime validation, generating `.env.example`, and implement secrets posture enforcement.
+
+## Phase 6: CI/CD Infrastructure Review
+
+### Phase 6.1: Review CI/CD Modularization and Jules-* Workflows
 
 - **GitHub Issue**: #6099
-- **Status**: Open
-- **Description**: Review modularization of ci-standard.yml (1,617 lines) and Jules-\* workflow proliferation.
-
-## Phase 5: Documentation & Audits
-
-### Phase 5.1: Audit Epics #4796 and #4755
-
-- **GitHub Issue**: #6087
-- **Status**: Closed
-- **Description**: Epics #4796 (plot_style implementations) and #4755 (body_part_viz implementations) have been audited. The `plot_style` module has shipped the canonical `MatplotlibMarkerRenderer` and `PyQtGLMarkerRenderer`, along with its colors, colormaps, markers, resolvers, and widgets sub-packages. The `body_part_viz` module has shipped the canonical matplotlib and PyQtGL renderers, capsule/ellipsoid/cylinder/mesh shapes, and Kabsch/Procrustes/cluster fitters. Both epics are fully implemented and can be closed as completed.
+- **Status**: Acknowledged (Recommendation-only)
+- **Description**: Review modularization of `ci-standard.yml` and the proliferation of `Jules-*` workflows.
+- **Path Forward**: Acknowledged the observation. Will review the size of `ci-standard.yml` and assess active/inactive `Jules-*` workflows. This is scheduled for "later" (target review date: Q4 2026) to avoid disrupting the currently stable CI system and fleet-level agent coordination protocol. Concrete follow-up issues will be filed if any structural changes or workflow retirements are decided.
