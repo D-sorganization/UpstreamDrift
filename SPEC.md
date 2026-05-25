@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
 | **Spec Version**        | 1.0.191                                            |
-| **Last Spec Update**    | 2026-05-24                                         |
+| **Last Spec Update**    | 2026-05-25                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,6 +70,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-05-25** - Restored Python 3.10 compatibility for the Pinocchio motion-matching leaderboard writer by falling back to `timezone.utc` when `datetime.UTC` is unavailable, and taught the torch-backed surrogate test modules to skip cleanly when `torch` is absent so the core no-torch CI lane no longer fails during collection.
 - **2026-05-24** - Tightened shared logging redaction so `src/shared/python/logging_pkg/logging_config.py` preserves quoted JSON-style key/value formatting while only masking exact secret-bearing field names such as `api_key`, `secret_key`, and `password`; similarly named public fields like `api_key_hint` remain visible. Added focused regression coverage in `tests/unit/test_logging_config.py`.
 - **2026-05-24** - Added `scripts/ci/check_deprecated_alias_shims.py` and a blocking CI gate that freezes `src/shared/python/upstream_drift_tools/` to its current shim-only compatibility surface, so the deprecated alias package can shrink or disappear but cannot grow while issue #5922 cleanup remains in progress.
 - **2026-05-24** - Registered an explicit `pytest.mark.parity` lane for representative API, launcher-manifest, and canonical fit-result parity tests, and added a scheduled/manual `parity-smoke` CI job in `ci-standard.yml` so parity regressions stay targetable outside the default core lane.

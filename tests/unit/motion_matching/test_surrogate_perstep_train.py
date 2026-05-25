@@ -9,6 +9,8 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
+pytest.importorskip("torch")
+
 from src.shared.python.motion_matching.surrogate.perstep.train import (
     TrainConfig,
     _make_splits,
