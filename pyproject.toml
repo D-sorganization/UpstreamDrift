@@ -206,6 +206,12 @@ artifacts = [
     "ui/dist/**/*",
 ]
 
+[tool.hatch.build.targets.wheel]
+packages = [
+    "src",
+    "src/shared/python/sidekick",
+]
+
 
 [tool.hatch.build.hooks.custom]
 # Build UI before packaging

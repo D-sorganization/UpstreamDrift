@@ -212,6 +212,21 @@ def test_pendulum_probe(tmp_path, setup_dirs, expected_status) -> None:
     assert result.status == expected_status
 
 
+def test_pendulum_probe_accepts_src_root_layout(tmp_path) -> None:
+    engine_dir = tmp_path / "src/engines/pendulum_models"
+    physics_engine_dir = tmp_path / "src/engines/physics_engines/pendulum/python"
+    shared_model_dir = engine_dir / "python/double_pendulum_model/physics"
+    physics_engine_dir.mkdir(parents=True)
+    shared_model_dir.mkdir(parents=True)
+    (physics_engine_dir / "pendulum_physics_engine.py").touch()
+    (shared_model_dir / "double_pendulum.py").touch()
+
+    probe = PendulumProbe(tmp_path)
+    result = probe.probe()
+
+    assert result.status == ProbeStatus.AVAILABLE
+
+
 # Test MatlabProbe
 def test_matlab_probe_success(tmp_path) -> None:
     engine_dir = tmp_path / "engines/Simscape_Multibody_Models/2D_Golf_Model"

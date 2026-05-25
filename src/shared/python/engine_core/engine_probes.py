@@ -405,9 +405,8 @@ class PendulumProbe(EngineProbe):
         """Check Pendulum models readiness."""
         missing = []
 
-        # Check for engine directory
-        engine_dir = self.suite_root / "engines" / "pendulum_models"
-        if not engine_dir.exists():
+        layout = self._resolve_layout()
+        if layout is None:
             return EngineProbeResult(
                 engine_name=self.engine_name,
                 status=ProbeStatus.MISSING_ASSETS,
@@ -416,19 +415,9 @@ class PendulumProbe(EngineProbe):
                 diagnostic_message="Pendulum models directory not found",
             )
 
-        # Check for Python modules
-        python_dir = engine_dir / "python"
-        if python_dir.exists():
-            src_dir = python_dir / "src"
-            if src_dir.exists():
-                key_files = ["constants.py", "pendulum_solver.py"]
-                for file in key_files:
-                    if not (src_dir / file).exists():
-                        missing.append(f"module: {file}")
-            else:
-                missing.append("src directory")
-        else:
-            missing.append("python directory")
+        for label, path in layout.required_paths.items():
+            if not path.exists():
+                missing.append(label)
 
         if missing:
             return EngineProbeResult(
@@ -445,8 +434,62 @@ class PendulumProbe(EngineProbe):
             version="local",
             missing_dependencies=[],
             diagnostic_message="Pendulum models ready",
-            details={"engine_dir": str(engine_dir)},
+            details={"engine_dir": str(layout.engine_dir)},
         )
+
+    def _resolve_layout(self) -> _PendulumLayout | None:
+        """Return the first supported pendulum source-root layout."""
+        candidates = (
+            _PendulumLayout(
+                engine_dir=self.suite_root / "src" / "engines" / "pendulum_models",
+                required_paths={
+                    "physics engine module": self.suite_root
+                    / "src"
+                    / "engines"
+                    / "physics_engines"
+                    / "pendulum"
+                    / "python"
+                    / "pendulum_physics_engine.py",
+                    "double pendulum physics module": self.suite_root
+                    / "src"
+                    / "engines"
+                    / "pendulum_models"
+                    / "python"
+                    / "double_pendulum_model"
+                    / "physics"
+                    / "double_pendulum.py",
+                },
+            ),
+            _PendulumLayout(
+                engine_dir=self.suite_root / "engines" / "pendulum_models",
+                required_paths={
+                    "module: constants.py": self.suite_root
+                    / "engines"
+                    / "pendulum_models"
+                    / "python"
+                    / "src"
+                    / "constants.py",
+                    "module: pendulum_solver.py": self.suite_root
+                    / "engines"
+                    / "pendulum_models"
+                    / "python"
+                    / "src"
+                    / "pendulum_solver.py",
+                },
+            ),
+        )
+        for candidate in candidates:
+            if candidate.engine_dir.exists():
+                return candidate
+        return None
+
+
+@dataclass(frozen=True)
+class _PendulumLayout:
+    """Supported pendulum source-tree layouts."""
+
+    engine_dir: Path
+    required_paths: dict[str, Path]
 
 
 class MatlabProbe(EngineProbe):
