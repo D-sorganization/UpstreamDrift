@@ -840,3 +840,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - It now handles redacting secrets containing commas without leaking suffix values.
 - It correctly handles JSON-like quoted strings by matching everything up to the next quotation mark.
 - Unquoted secrets will match everything up to the next whitespace.
+
+## 2026-05-25: Epics #4796 and #4755 Audit
+
+Epics #4796 (plot_style implementations) and #4755 (body_part_viz implementations) have been fully audited and closed. The `plot_style` module has shipped the canonical `MatplotlibMarkerRenderer` and `PyQtGLMarkerRenderer`, along with its colors, colormaps, markers, resolvers, and widgets sub-packages. The `body_part_viz` module has shipped the canonical matplotlib and PyQtGL renderers, capsule/ellipsoid/cylinder/mesh shapes, and Kabsch/Procrustes/cluster fitters. Both epics are fully implemented and can be closed as completed.

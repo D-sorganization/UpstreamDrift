@@ -86,8 +86,16 @@ These issues are already tracked in GitHub and represent planned improvements.
 
 ## Phase 5: CI/CD Pipeline
 
-### Phase 5.1: Review CI Modularization and Jules-* Workflows
+### Phase 5.1: Review CI Modularization and Jules-\* Workflows
 
 - **GitHub Issue**: #6099
 - **Status**: Open
-- **Description**: Review modularization of ci-standard.yml (1,617 lines) and Jules-* workflow proliferation.
+- **Description**: Review modularization of ci-standard.yml (1,617 lines) and Jules-\* workflow proliferation.
+
+## Phase 5: Documentation & Audits
+
+### Phase 5.1: Audit Epics #4796 and #4755
+
+- **GitHub Issue**: #6087
+- **Status**: Closed
+- **Description**: Epics #4796 (plot_style implementations) and #4755 (body_part_viz implementations) have been audited. The `plot_style` module has shipped the canonical `MatplotlibMarkerRenderer` and `PyQtGLMarkerRenderer`, along with its colors, colormaps, markers, resolvers, and widgets sub-packages. The `body_part_viz` module has shipped the canonical matplotlib and PyQtGL renderers, capsule/ellipsoid/cylinder/mesh shapes, and Kabsch/Procrustes/cluster fitters. Both epics are fully implemented and can be closed as completed.
