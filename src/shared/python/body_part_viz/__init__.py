@@ -1,11 +1,24 @@
-"""Body-part visualisation contracts and dataclasses.
+"""Body-part visualisation contracts, dataclasses, and implementations.
 
-This package defines the abstract surface (Protocols + frozen dataclasses)
-that every shape, fitter, and renderer implementation talks across.
+This package provides the full body-part visualisation stack:
 
-Implementations of shapes, fitters, and rendering backends live in the
-``shapes``, ``fitters``, and ``renderers`` sub-packages and are added in
-follow-up issues of EPIC #4755.
+- ``contracts`` — runtime-checkable Protocols (``BodyPartShape``,
+  ``ShapeFitter``, ``ShapeRenderer``).
+- ``_types`` — ``FittedShape`` dataclass.
+- ``shapes`` — capsule, ellipsoid, cylinder, mesh, composite, and line
+  shape implementations.
+- ``fitters`` — Kabsch (pairwise and cluster) and anisotropic Procrustes
+  fitters.
+- ``renderers`` — Matplotlib and PyQtGL rendering backends.
+- ``bindings`` — ``MarkerBinding`` / ``BindingKind`` for attaching
+  markers to body-part shapes.
+- ``persistence`` — ``SegmentVizSpec`` / ``SegmentVizSet`` serialisation
+  and v1→v2 migration.
+- ``theme`` — ``ShapeTheme`` for unified visual styling.
+- ``asset_library`` — built-in shape asset registry.
+- ``urdf_bridge`` — helpers for importing shapes from URDF descriptions.
+
+See ADR-0011 for the shared-style design rationale.
 """
 
 from __future__ import annotations

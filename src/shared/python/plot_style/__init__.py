@@ -1,13 +1,24 @@
-"""Plot-style contracts and dataclasses.
+"""Plot-style contracts, dataclasses, and renderer implementations.
 
-This package defines the abstract surface (Protocols + frozen
-dataclasses) used by every marker / trace styling implementation in
-UpstreamDrift.
+This package owns the canonical marker-styling stack:
 
-Concrete implementations of color resolvers, renderers, Qt widgets, and
-marker-shape primitives live in the ``resolvers``, ``renderers``,
-``widgets``, and ``shapes`` sub-packages and are added in follow-up
-issues of EPIC #4796.
+- ``contracts`` — runtime-checkable Protocols (``ColorResolver``,
+  ``MarkerRenderer``, ``MarkerShapeRenderer``).
+- ``colors`` / ``colormaps`` — color scales, colormaps, and registries.
+- ``channels`` — ``DataChannel`` and channel-combinator helpers.
+- ``markers`` — ``MarkerStyle``, ``MarkerShape``, ``CustomMeshSpec``.
+- ``shapes`` — built-in marker-shape primitives (sphere, cube, diamond,
+  star, cross, custom mesh).
+- ``renderers`` — ``MatplotlibMarkerRenderer`` (canonical);
+  ``PyQtGLMarkerRenderer`` available via lazy import when PyQtGL is present.
+- ``resolvers`` — static, palette, and data-driven color resolvers.
+- ``widgets`` — optional Qt widgets (imported only when PyQt6 is available):
+  ``ColorPicker``, ``ColormapPicker``, ``DataChannelEditor``,
+  ``MarkerStylePicker``.
+- ``persistence`` — ``PlotStyleSpec`` / ``PlotStyleSet`` serialisation.
+- ``preset_library`` — built-in named presets.
+
+See ADR-0011 for the design rationale.
 """
 
 from __future__ import annotations
