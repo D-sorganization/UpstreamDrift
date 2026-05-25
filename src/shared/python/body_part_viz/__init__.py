@@ -1,11 +1,12 @@
-"""Body-part visualisation contracts and dataclasses.
+"""Body-part visualisation contracts, dataclasses, and implementations.
 
 This package defines the abstract surface (Protocols + frozen dataclasses)
-that every shape, fitter, and renderer implementation talks across.
+that every shape, fitter, and renderer implementation talks across, and
+provides their canonical implementations:
 
-Implementations of shapes, fitters, and rendering backends live in the
-``shapes``, ``fitters``, and ``renderers`` sub-packages and are added in
-follow-up issues of EPIC #4755.
+- ``shapes`` — capsule, ellipsoid, cylinder, and mesh shapes.
+- ``fitters`` — Kabsch, Procrustes, and cluster fitters.
+- ``renderers`` — matplotlib and PyQtGL rendering backends.
 """
 
 from __future__ import annotations
