@@ -83,3 +83,10 @@ These issues are already tracked in GitHub and represent planned improvements.
 - **GitHub Issue**: #130
 - **Status**: Open
 - **Description**: Implement lazy imports to improve startup time
+
+## Phase 5: EmbeddableTool Adoption
+
+### Phase 5.1: Execute EmbeddableTool adoption for the 8 audited tools
+- **GitHub Issue**: #6090
+- **Status**: Blocked
+- **Description**: Wait for the audit verdict matrix from #6089, then split execution by tool into adopt EmbeddableTool, document standalone opt-out, or remove scaffolds.
