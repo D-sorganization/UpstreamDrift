@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.193                                            |
+| **Spec Version**        | 1.0.194                                            |
 | **Last Spec Update**    | 2026-05-25                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-05-25** - Corrected feature-registry engine probes to resolve physics-engine assets from either repo-root `engines/` or the canonical `src/engines/` layout, with regression coverage for MuJoCo, Drake, and Pinocchio probe success under the `src/` layout used by Docker smoke and repo-root checkouts.
 - **2026-05-25** - Raised the advisory Pinocchio Law-of-Demeter quality-gate timeout in `.github/workflows/quality-gate.yml` from 5 to 15 minutes and added workflow coverage in `tests/ci/test_ci_infrastructure.py` so self-hosted checkout plus Python setup overhead cannot time out before the sub-second `scripts/ci/check_lod.py` scan runs.
 - **2026-05-25** - Fixed the Sidekick wheel packaging contract so the published wheel now ships a top-level `sidekick` package for the `sidekick` console script, made single-feature capability checks evaluate only the requested feature on first use, and aligned the pendulum capability probe with the current `src/engines/...` source-tree layout used by Docker/profile smoke checks.
 - **2026-05-25** - Restored Python 3.10 compatibility for the Pinocchio motion-matching leaderboard writer by falling back to `timezone.utc` when `datetime.UTC` is unavailable, and taught the torch-backed surrogate test modules to skip cleanly when `torch` is absent so the core no-torch CI lane no longer fails during collection.

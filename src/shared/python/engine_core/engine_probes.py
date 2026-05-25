@@ -97,6 +97,14 @@ class EngineProbe:
         )
 
 
+def _resolve_engines_root(suite_root: Path) -> Path:
+    """Return the canonical engines root for either repo-root layout."""
+    src_engines = suite_root / "src" / "engines"
+    if src_engines.exists():
+        return src_engines
+    return suite_root / "engines"
+
+
 class MuJoCoProbe(EngineProbe):
     """Probe for MuJoCo physics engine."""
 
@@ -136,7 +144,9 @@ class MuJoCoProbe(EngineProbe):
             )
 
         # Check for engine directory
-        engine_dir = self.suite_root / "engines" / "physics_engines" / "mujoco"
+        engine_dir = (
+            _resolve_engines_root(self.suite_root) / "physics_engines" / "mujoco"
+        )
         if not engine_dir.exists():
             missing.append("engine directory")
 
@@ -250,7 +260,9 @@ class DrakeProbe(EngineProbe):
     def _check_engine_assets(self) -> list[str]:
         """Check for required Drake engine directories and source files."""
         missing: list[str] = []
-        engine_dir = self.suite_root / "engines" / "physics_engines" / "drake"
+        engine_dir = (
+            _resolve_engines_root(self.suite_root) / "physics_engines" / "drake"
+        )
         if not engine_dir.exists():
             missing.append("engine directory")
             return missing
@@ -299,7 +311,9 @@ class DrakeProbe(EngineProbe):
                 f"{', '.join(missing)}",
             )
 
-        engine_dir = self.suite_root / "engines" / "physics_engines" / "drake"
+        engine_dir = (
+            _resolve_engines_root(self.suite_root) / "physics_engines" / "drake"
+        )
         return EngineProbeResult(
             engine_name=self.engine_name,
             status=ProbeStatus.AVAILABLE,
@@ -358,7 +372,9 @@ class PinocchioProbe(EngineProbe):
             )
 
         # Check for engine directory
-        engine_dir = self.suite_root / "engines" / "physics_engines" / "pinocchio"
+        engine_dir = (
+            _resolve_engines_root(self.suite_root) / "physics_engines" / "pinocchio"
+        )
         if not engine_dir.exists():
             missing.append("engine directory")
 

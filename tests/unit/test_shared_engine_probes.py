@@ -95,6 +95,19 @@ def test_mujoco_probe_missing_assets(tmp_path) -> None:
         assert "assets" in result.diagnostic_message
 
 
+def test_mujoco_probe_accepts_src_root_layout(tmp_path) -> None:
+    engine_dir = tmp_path / "src/engines/physics_engines/mujoco"
+    (engine_dir / "python/mujoco_humanoid_golf").mkdir(parents=True)
+    (engine_dir / "python/humanoid_launcher.py").touch()
+    (engine_dir / "assets").mkdir()
+    (engine_dir / "assets/model.xml").touch()
+
+    with patch.dict(sys.modules, {"mujoco": MagicMock(__version__="3.0")}):
+        probe = MuJoCoProbe(tmp_path)
+        result = probe.probe()
+        assert result.status == ProbeStatus.AVAILABLE
+
+
 # Test DrakeProbe
 def test_drake_probe_success(tmp_path) -> None:
     engine_dir = tmp_path / "engines/physics_engines/drake"
@@ -114,6 +127,22 @@ def test_drake_probe_success(tmp_path) -> None:
     ):
         probe = DrakeProbe(tmp_path)
         # Mock socket to succeed on port 7000
+        with patch("socket.socket") as mock_socket:
+            mock_socket.return_value.bind.return_value = None
+            result = probe.probe()
+            assert result.status == ProbeStatus.AVAILABLE
+
+
+def test_drake_probe_accepts_src_root_layout(tmp_path) -> None:
+    engine_dir = tmp_path / "src/engines/physics_engines/drake"
+    (engine_dir / "python/src").mkdir(parents=True)
+    (engine_dir / "python/src/golf_gui.py").touch()
+
+    with patch.dict(
+        sys.modules,
+        {"pydrake": MagicMock(__version__="1.0"), "pydrake.multibody": MagicMock()},
+    ):
+        probe = DrakeProbe(tmp_path)
         with patch("socket.socket") as mock_socket:
             mock_socket.return_value.bind.return_value = None
             result = probe.probe()
@@ -162,6 +191,16 @@ def test_drake_probe_missing_module(tmp_path) -> None:
 # Test PinocchioProbe
 def test_pinocchio_probe_success(tmp_path) -> None:
     engine_dir = tmp_path / "engines/physics_engines/pinocchio"
+    (engine_dir / "python/pinocchio_golf").mkdir(parents=True)
+
+    with patch.dict(sys.modules, {"pinocchio": MagicMock(__version__="2.0")}):
+        probe = PinocchioProbe(tmp_path)
+        result = probe.probe()
+        assert result.status == ProbeStatus.AVAILABLE
+
+
+def test_pinocchio_probe_accepts_src_root_layout(tmp_path) -> None:
+    engine_dir = tmp_path / "src/engines/physics_engines/pinocchio"
     (engine_dir / "python/pinocchio_golf").mkdir(parents=True)
 
     with patch.dict(sys.modules, {"pinocchio": MagicMock(__version__="2.0")}):
