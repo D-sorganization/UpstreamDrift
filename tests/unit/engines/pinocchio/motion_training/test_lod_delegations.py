@@ -5,6 +5,3 @@ properties so future changes can't silently regress the LOD refactor.
 """
 
 from __future__ import annotations
-
-import numpy as np
-import pytest

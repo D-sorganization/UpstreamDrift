@@ -2,9 +2,7 @@
 Test the common IO schema for the BunkerShot3D results.
 """
 
-import h5py
 import numpy as np
-import pytest
 from pathlib import Path
 
 from bunkershot3d.io.schema import BunkerShotResultWriter, BunkerShotResultReader

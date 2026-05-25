@@ -8,7 +8,6 @@ if repo_root_str not in sys.path:
     sys.path.insert(0, repo_root_str)
 
 # 1. Import src.shared first
-import src.shared.python.logging_pkg.logger_utils as logger_utils
 
 
 engine_python = (
@@ -52,9 +51,9 @@ if repo_src_str not in sys.path:
 
 # Try importing a different src.shared submodule
 try:
-    import src.shared.python.data_io.export
+    pass
 
-except Exception as e:
+except Exception:
     import traceback
 
     traceback.print_exc()

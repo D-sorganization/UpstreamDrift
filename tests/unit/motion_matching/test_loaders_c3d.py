@@ -5,7 +5,6 @@ from __future__ import annotations
 import pytest
 from src.shared.python.motion_matching import (
     AlignOptions,
-    ClubTarget,
     load_club_target_c3d,
 )
 from src.shared.python.motion_matching.loaders.synthetic import (

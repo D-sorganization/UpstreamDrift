@@ -117,7 +117,6 @@ def test_torque_mujoco_solver_match_uses_rust_when_available():
         SkeletonRig,
     )
     from src.shared.python.motion_pipeline.matching.torque_mujoco import (
-        _HAVE_RUST,
         MuJoCoTorqueMatchingSolver,
     )
 

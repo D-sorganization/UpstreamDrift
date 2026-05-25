@@ -8,7 +8,7 @@ presence of LIBGL_ALWAYS_INDIRECT which was identified as a critical regression.
 import sys
 from collections.abc import Generator
 from typing import Any
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 

@@ -19,7 +19,6 @@ from src.shared.python.pose_interchange.adapters.myosuite import MyoSuiteAdapter
 from src.shared.python.pose_interchange.adapters.opensim import OpenSimAdapter
 from src.shared.python.pose_interchange.adapters.pinocchio import PinocchioAdapter
 from src.shared.python.pose_interchange.adapters.simscape import SimscapeAdapter
-from src.shared.python.pose_interchange.adapters.myosuite import MyoSuiteAdapter
 from src.shared.python.pose_interchange.protocol import PoseConventionAdapter
 
 ADAPTER_REGISTRY: dict[str, type[PoseConventionAdapter]] = {

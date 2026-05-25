@@ -5,7 +5,6 @@ without crashing at import time.
 """
 
 import importlib
-import io
 
 import pytest
 

@@ -10,24 +10,15 @@ See issues #979 (MakeHuman) and #980 (SMPL-X).
 
 from __future__ import annotations
 
-import json
-import textwrap
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock, patch
 
-import numpy as np
 import pytest
 from humanoid_character_builder.core.body_parameters import (
     BodyParameters,
-    GenderModel,
 )
 from humanoid_character_builder.generators.mesh_generator import (
-    GeneratedMeshResult,
     MakeHumanMeshGenerator,
-    MeshGenerator,
-    MeshGeneratorBackend,
-    MeshGeneratorInterface,
     SMPLXMeshGenerator,
 )
 

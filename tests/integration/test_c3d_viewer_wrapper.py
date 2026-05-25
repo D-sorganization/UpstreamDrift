@@ -10,9 +10,6 @@ even though the test runs under ``QT_QPA_PLATFORM=offscreen``.
 
 from __future__ import annotations
 
-import os
-import subprocess
-import sys
 from pathlib import Path
 
 import pytest

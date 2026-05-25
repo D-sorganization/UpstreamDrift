@@ -4,12 +4,8 @@ from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
-from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE
 
 pytest.importorskip("pydrake.geometry", reason="pydrake not available")
-from pydrake.geometry import SceneGraph
-from pydrake.systems.analysis import Simulator
-from pydrake.systems.framework import Context, Diagram
 
 # MultibodyPlant uses undocumented Drake APIs; enumerate tested attributes.
 _PLANT_SPEC_ATTRS = [

@@ -10,10 +10,7 @@ boolean operations, and export — as used by the humanoid character builder.
 
 from __future__ import annotations
 
-import tempfile
-from pathlib import Path
 
-import numpy as np
 import pytest
 
 pytestmark = pytest.mark.live_simulation

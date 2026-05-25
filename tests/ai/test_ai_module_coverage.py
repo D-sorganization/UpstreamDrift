@@ -1,7 +1,6 @@
 """Tests for AI module components to improve coverage."""
 
 import unittest
-from unittest.mock import patch
 
 
 class TestAIAnalysisResults(unittest.TestCase):
