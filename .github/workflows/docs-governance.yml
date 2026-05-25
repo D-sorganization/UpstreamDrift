@@ -51,6 +51,9 @@ jobs:
       - name: Validate documentation governance files
         run: python3 scripts/check_docs_governance.py
 
+      - name: Install test dependencies
+        run: python3 -m pip install pytest
+
       - name: Test documentation governance files
         run: python3 -m pytest tests/scripts/test_doc_governance_checks.py -q
 
