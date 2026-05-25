@@ -9,7 +9,10 @@ from src.shared.python.core.error_utils import (
     EnvironmentError as EnvironmentValidationError,
 )
 from src.shared.python.security.env_validator import (
+    KNOWN_ADMIN_PASSWORD_PLACEHOLDERS,
+    KNOWN_SECRET_KEY_PLACEHOLDERS,
     generate_secure_key_command,
+    validate_admin_password_strength,
     validate_secret_key_strength,
 )
 
@@ -72,3 +75,55 @@ class TestGenerateSecureKeyCommand:
         assert any(
             word in lower for word in ["python", "token", "secret", "key", "openssl"]
         )
+
+
+# ---------------------------------------------------------------------------
+# Placeholder rejection (issue #5920)
+# ---------------------------------------------------------------------------
+
+
+class TestSecretKeyPlaceholderRejection:
+    """Refuse the literal placeholders shipped in `.env.example`."""
+
+    @pytest.mark.parametrize(
+        "placeholder",
+        sorted(KNOWN_SECRET_KEY_PLACEHOLDERS),
+    )
+    def test_known_secret_key_placeholder_raises(self, placeholder: str) -> None:
+        with pytest.raises(EnvironmentValidationError):
+            validate_secret_key_strength(placeholder)
+
+    def test_dotenv_example_secret_key_placeholder_is_recognised(self) -> None:
+        # Sanity-check the literal string from `.env.example` is covered.
+        assert "generate_a_random_string_here" in KNOWN_SECRET_KEY_PLACEHOLDERS
+
+    def test_dotenv_example_x_api_key_placeholder_is_recognised(self) -> None:
+        assert "generate_another_random_string_here" in KNOWN_SECRET_KEY_PLACEHOLDERS
+
+
+class TestValidateAdminPasswordStrength:
+    def test_strong_password_passes(self) -> None:
+        validate_admin_password_strength(secrets.token_urlsafe(16))
+
+    def test_empty_raises(self) -> None:
+        with pytest.raises(EnvironmentValidationError):
+            validate_admin_password_strength("")
+
+    def test_short_raises(self) -> None:
+        with pytest.raises(EnvironmentValidationError, match="too short"):
+            validate_admin_password_strength("short")
+
+    @pytest.mark.parametrize(
+        "placeholder",
+        sorted(KNOWN_ADMIN_PASSWORD_PLACEHOLDERS),
+    )
+    def test_known_admin_password_placeholder_raises(self, placeholder: str) -> None:
+        with pytest.raises(EnvironmentValidationError):
+            validate_admin_password_strength(placeholder)
+
+    def test_dotenv_example_admin_password_is_recognised(self) -> None:
+        # The literal default shipped in `.env.example` must be rejected.
+        assert "change_me_in_production" in KNOWN_ADMIN_PASSWORD_PLACEHOLDERS
+
+    def test_custom_min_length(self) -> None:
+        validate_admin_password_strength("a" * 8, min_length=8)
