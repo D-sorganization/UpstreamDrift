@@ -1,4 +1,4 @@
-"""Adapter to expose the Training Controller as an EmbeddableTool."""
+"""Adapter to expose the Ball Flight Gui as an EmbeddableTool."""
 
 from __future__ import annotations
 
@@ -12,11 +12,11 @@ if TYPE_CHECKING:
     from PyQt6.QtWidgets import QMainWindow
 
 
-class TrainingControllerAdapter:
+class BallFlightGuiAdapter:
     """Implements the EmbeddableTool protocol for the launcher."""
 
-    tool_id = "training_controller"
-    display_name = "Training Controller"
+    tool_id = "ball_flight_gui"
+    display_name = "Ball Flight Gui"
     capabilities = EmbedCapabilities.NONE
 
     def create_widget(self, parent: QWidget | None = None) -> QMainWindow:

@@ -1,9 +1,8 @@
 # UpstreamDrift Documentation
 
-> **Last reviewed: 2026-05-25**
+> **Last reviewed: 2024-05-25**
 
-Welcome to UpstreamDrift — a unified platform for golf swing analysis across
-multiple physics engines and biomechanical modeling approaches.
+Welcome to UpstreamDrift - a professional biomechanical analysis and physics simulation platform.
 
 ## Quick Navigation
 
@@ -19,86 +18,64 @@ multiple physics engines and biomechanical modeling approaches.
 
 ## Quick Start
 
-The recommended entry point is the **web UI**:
+### 1. Launch the Suite
+
+UpstreamDrift features a Unified Launcher that opens the Web UI.
 
 ```bash
-python launch_golf_suite.py
+cd /home/user/UpstreamDrift
+python start_api_server.py
 ```
 
-This starts the local API server (port 8000) and opens the React UI in your default browser.
+### 2. Access the UI & API
 
-### Other entry points
+- **Web UI**: Opens automatically in your browser (typically http://localhost:8000)
+- **Interactive Docs**: http://localhost:8000/docs
+- **Classic Fallback**: `python launch_golf_suite.py --classic`
 
-| Command | What it launches |
-|---------|------------------|
-| `python launch_golf_suite.py` | Web UI (recommended) |
-| `python launch_golf_suite.py --classic` | Classic PyQt6 desktop launcher |
-| `python launch_golf_suite.py --api-only` | API server without auto-opening a UI |
-| `python launch_golf_suite.py --engine <name>` | Legacy direct engine launch |
-| Pose Studio standalone | `python -m src.tools.pose_studio` |
-
-### Run a Simulation via API
-
-```bash
-curl -X POST http://localhost:8000/simulate \
-  -H "Content-Type: application/json" \
-  -d '{"engine_type": "mujoco", "duration": 1.0}'
-```
-
-The classic PyQt6 launcher remains supported as a fallback and for users who prefer a desktop window.
 ---
 
 ## Documentation Structure
-
-`docs/` contains the full documentation tree. The most commonly used
-subdirectories are listed below; many additional topic-specific directories
-(`adr/`, `assessments/`, `motion_pipeline/`, `governance/`, etc.) live
-alongside them.
 
 ```
 docs/
 ├── README.md              ← You are here
 │
-├── api/                   # API reference
+├── api/                   # API Reference
 │   ├── API_ARCHITECTURE.md   # Complete API architecture
 │   ├── DEVELOPMENT.md        # Developer guide
 │   ├── engines.md            # Engine APIs
 │   └── shared.md             # Shared utilities
 │
-├── user_guide/            # End-user documentation
-│   ├── installation.md
-│   ├── getting_started.md
-│   └── launchers.md
+├── user_guide/            # End User Documentation
+│   ├── installation.md       # Setup instructions
+│   ├── getting_started.md    # First steps
+│   └── launchers.md          # GUI launchers
 │
-├── engines/               # Physics engine docs
-│   ├── mujoco.md
-│   ├── drake.md
-│   ├── pinocchio.md
-│   ├── opensim.md
-│   └── simscape.md
+├── engines/               # Physics Engine Docs
+│   ├── mujoco.md            # MuJoCo integration
+│   ├── drake.md             # Drake integration
+│   ├── pinocchio.md         # Pinocchio integration
+│   ├── opensim.md           # OpenSim integration
+│   └── simscape.md          # MATLAB Simscape
 │
-├── development/           # Developer resources
-│   ├── architecture.md
-│   ├── design_by_contract.md
-│   ├── contributing.md
-│   └── agent_templates/
+├── development/           # Developer Resources
+│   ├── architecture.md      # System design
+│   ├── design_by_contract.md # DbC patterns
+│   ├── contributing.md      # Contribution guide
+│   └── agent_templates/     # AI agent templates
 │
-├── architecture/          # Technical architecture
+├── architecture/          # Technical Architecture
 │   ├── system_overview.md
 │   ├── engine_loading_flow.md
 │   └── data_pipeline.md
 │
-├── troubleshooting/       # Problem solving
-│   ├── common-issues.md
-│   ├── installation.md
-│   └── FAQ.md
+├── troubleshooting/       # Problem Solving
+│   └── (troubleshooting guides)
 │
-├── adr/                   # Architecture decision records
-├── assessments/           # Project reviews and assessments
-├── historical/            # Historical and archived documentation
-├── motion_pipeline/       # Motion capture and tracking pipeline
-├── plans/                 # Implementation plans
-└── technical/             # Engine reports and control strategies
+└── historical/            # Historical Documentation
+    ├── assessments/
+    └── archive/
 ```
 
 ---
@@ -107,15 +84,15 @@ docs/
 
 ### Unified Architecture
 
-UpstreamDrift uses a **unified local architecture**:
+UpstreamDrift uses a **unified local-first architecture**:
 
-- **Web UI and API** running on localhost
+- **Web UI & API** running on localhost
 - **No cloud required** for local development
 - **Optional classic desktop launcher** for legacy workflows
 
 ### Multi-Engine Support
 
-Choose from multiple physics engines:
+Choose from 6+ physics engines:
 
 | Engine        | Best For                         |
 | ------------- | -------------------------------- |
@@ -282,7 +259,7 @@ Historical assessments, phase plans, and old implementation reports have been mo
 
 ## Getting Help
 
-- **API Docs**: http://localhost:8000/docs (when API server is running)
+- **API Docs**: http://localhost:8000/docs
 - **GitHub Issues**: Report bugs and request features
 - **Troubleshooting**: See [troubleshooting/](troubleshooting/)
 

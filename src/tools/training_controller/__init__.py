@@ -77,3 +77,11 @@ __all__ = [
     "_register_embed_adapter",
     "job_row_from_training_job",
 ]
+
+from src.shared.python.launcher_embed import register_embeddable_tool
+from ._embed_adapter import TrainingControllerAdapter
+
+# Register immediately when the package is imported
+register_embeddable_tool(TrainingControllerAdapter())
+
+__all__ = ["TrainingControllerAdapter"]
