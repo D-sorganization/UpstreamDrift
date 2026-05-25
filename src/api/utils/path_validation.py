@@ -29,7 +29,7 @@ def _candidate_traverses_symlink(candidate: Path, allowed_dir: Path) -> bool:
         # candidate is not under allowed_dir; let the contains-check decide.
         return False
 
-        current = allowed_dir
+    current = allowed_dir
     for part in rel.parts:
         current = current / part
         try:
