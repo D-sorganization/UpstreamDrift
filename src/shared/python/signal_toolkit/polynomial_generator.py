@@ -513,8 +513,9 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         if len(points) < 2:
             return list(points)
 
-        xs = np.array([p[0] for p in points])
-        ys = np.array([p[1] for p in points])
+        pts = np.asarray(points)
+        xs = pts[:, 0]
+        ys = pts[:, 1]
 
         # Sort by x so interpolation is well-defined
         order = np.argsort(xs)

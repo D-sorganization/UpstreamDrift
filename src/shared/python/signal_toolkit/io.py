@@ -108,14 +108,14 @@ class SignalImporter:
             except ValueError:
                 continue  # Skip rows with non-numeric data
 
-        time_array = np.array(time_data)
+        time_array = np.asarray(time_data, dtype=float)
 
         # Create signals
         signals = []
         for idx, name in zip(value_indices, value_names, strict=False):
             sig = Signal(
                 time=time_array.copy(),
-                values=np.array(value_data[idx]),
+                values=np.asarray(value_data[idx], dtype=float),
                 name=name,
                 metadata={"source_file": str(file_path), "column": name},
             )
@@ -199,8 +199,8 @@ class SignalImporter:
         with open(file_path, encoding="utf-8") as f:
             data = json.load(f)
 
-        time = np.array(data[time_key])
-        values = np.array(data[value_key])
+        time = np.asarray(data[time_key], dtype=float)
+        values = np.asarray(data[value_key], dtype=float)
 
         name = data.get("name", file_path.stem)
         units = data.get("units", "")
@@ -228,8 +228,8 @@ class SignalImporter:
             Signal object.
         """
         assert data is not None, "data must be provided"
-        time = np.array(data[time_key])
-        values = np.array(data[value_key])
+        time = np.asarray(data[time_key], dtype=float)
+        values = np.asarray(data[value_key], dtype=float)
 
         return Signal(
             time=time,
