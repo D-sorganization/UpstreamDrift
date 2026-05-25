@@ -205,7 +205,7 @@ class TestSetupLogging:
         flt = SensitiveDataFilter()
         flt.filter(record)
         assert "password=***REDACTED***" in record.msg
-        assert "def" in record.msg
+        assert "def" not in record.msg
 
     def test_redacts_password_json(self) -> None:
         """Tests that a password in a JSON payload is redacted correctly."""

@@ -87,7 +87,7 @@ _SENSITIVE_PATTERNS: list[re.Pattern[str]] = [
         r"(?:"
         r"(['\"])(.*?)\3"  # Quoted value: match anything up to the next matching quote
         r"|"
-        r"([^\s&,{}]+)"  # Unquoted value: match anything up to whitespace or delimiters
+        r"([^\s]+)"  # Unquoted value: match anything up to whitespace
         r")"
     ),
 ]
