@@ -92,10 +92,11 @@ These issues are already tracked in GitHub and represent planned improvements.
 - **Status**: Open
 - **Description**: Consolidate the 6 config systems and 118 env vars into a unified `pydantic-settings` based Settings class, add runtime validation, generating `.env.example`, and implement secrets posture enforcement.
 
-## Phase 6: CI/CD Improvements
+## Phase 6: CI/CD Infrastructure Review
 
-### Phase 6.1: Review CI Modularization
+### Phase 6.1: Review CI/CD Modularization and Jules-* Workflows
 
 - **GitHub Issue**: #6099
-- **Status**: Open
-- **Description**: Review the modularization of ci-standard.yml and address the proliferation of Jules-* workflows
+- **Status**: Acknowledged (Recommendation-only)
+- **Description**: Review modularization of `ci-standard.yml` and the proliferation of `Jules-*` workflows.
+- **Path Forward**: Acknowledged the observation. Will review the size of `ci-standard.yml` and assess active/inactive `Jules-*` workflows. This is scheduled for "later" (target review date: Q4 2026) to avoid disrupting the currently stable CI system and fleet-level agent coordination protocol. Concrete follow-up issues will be filed if any structural changes or workflow retirements are decided.
