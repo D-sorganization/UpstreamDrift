@@ -85,6 +85,22 @@ def validate_secret_key_strength(key: str, min_length: int = 64) -> None:
             "Set GOLF_API_SECRET_KEY or SECRET_KEY environment variable."
         )
 
+    # Reject dangerous defaults that ship in .env.example
+    _DANGEROUS_SECRET_DEFAULTS = frozenset(
+        {
+            "generate_a_random_string_here",
+            "generate_another_random_string_here",
+            "changeme",
+            "change_me",
+        }
+    )
+    if key in _DANGEROUS_SECRET_DEFAULTS:
+        raise EnvironmentValidationError(
+            "GOLF_API_SECRET_KEY is still set to the example placeholder value. "
+            "Generate a real key with: "
+            'python3 -c "import secrets; print(secrets.token_hex(32))"'
+        )
+
     # Check for common weak patterns
     weak_patterns = [
         "password",
@@ -168,7 +184,30 @@ def validate_api_security() -> APIKeyValidationResults:
             )
         results["admin_password"] = False
     else:
-        if len(admin_password) < 12:
+        _DANGEROUS_ADMIN_DEFAULTS = frozenset(
+            {
+                "change_me_in_production",
+                "changeme",
+                "admin",
+                "password",
+                "password123",
+            }
+        )
+        if admin_password in _DANGEROUS_ADMIN_DEFAULTS:
+            if is_production():
+                results["issues"].append(
+                    "CRITICAL: GOLF_ADMIN_PASSWORD is still set to the dangerous "
+                    "default value from .env.example. Change it before deploying."
+                )
+                raise EnvironmentValidationError(
+                    "GOLF_ADMIN_PASSWORD",
+                    "GOLF_ADMIN_PASSWORD must be changed from the default in production.",
+                )
+            results["warnings"].append(
+                "GOLF_ADMIN_PASSWORD is using a known-dangerous default value. "
+                "Change it before deploying to production."
+            )
+        elif len(admin_password) < 12:
             results["warnings"].append(
                 f"Admin password is short ({len(admin_password)} chars). "
                 f"Recommend at least 12 characters."
