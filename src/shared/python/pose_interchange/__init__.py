@@ -45,7 +45,12 @@ from src.shared.python.pose_interchange.se3 import (
     se3_to_xyz_xyz_deg,
 )
 
+__version__ = "1.0.0"
+SCHEMA_VERSION = "1.0.0"
+
 __all__ = [
+    "SCHEMA_VERSION",
+    "__version__",
     "CONVENTION_TAG",
     "CanonicalPose",
     "CapabilityError",
