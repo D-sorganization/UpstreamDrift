@@ -83,3 +83,11 @@ These issues are already tracked in GitHub and represent planned improvements.
 - **GitHub Issue**: #130
 - **Status**: Open
 - **Description**: Implement lazy imports to improve startup time
+
+## Phase 5: Configuration Consolidation
+
+### Phase 5.1: Adopt pydantic-settings and unify config
+
+- **GitHub Issue**: #5920
+- **Status**: Open
+- **Description**: Consolidate the 6 config systems and 118 env vars into a unified `pydantic-settings` based Settings class, add runtime validation, generating `.env.example`, and implement secrets posture enforcement.
