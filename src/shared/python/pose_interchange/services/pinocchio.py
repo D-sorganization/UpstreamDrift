@@ -1,35 +1,15 @@
 """Pinocchio :class:`LiveKinematicsService` implementation.
 
 Lazily imports :mod:`pinocchio` and loads a URDF via
-:func:`pinocchio.buildModelFromUrdf`.
+:func:`pinocchio.buildModelFromUrdf`.  If the wheel is unavailable
+(or is the local stub that lacks :func:`buildModelFromUrdf`),
+:func:`create_pinocchio_service` falls back to a
+:class:`MockKinematicsService` configured with
+``engine_name="pinocchio"``.
 
-Behaviour with vs. without the real wheel
------------------------------------------
+Falls back to a local stub adapter when the `pinocchio` wheel is not installed; the stub forwards calls to `MockKinematicsService` while keeping the registry consistent. See `_pinocchio_is_importable` for the wheel-detection block.
 
-:func:`create_pinocchio_service` is the **intentional, single point of
-fallback** for this engine:
-
-* **Real wheel installed** (``pip install pin`` -- the upstream
-  Stack-of-Tasks build) -- returns a fully-featured
-  :class:`PinocchioKinematicsService` backed by ``pinocchio.aba``,
-  ``pinocchio.forwardKinematics``, etc.
-* **No wheel installed, or PyPI placeholder installed** -- there is an
-  unrelated package named ``pinocchio`` on PyPI (an abandoned 0.1
-  placeholder) that lacks :func:`buildModelFromUrdf`. We detect both
-  cases in :func:`_pinocchio_is_importable` and fall back to a
-  :class:`MockKinematicsService` configured with
-  ``engine_name="pinocchio"``. The mock returns deterministic identity
-  transforms, satisfies the :class:`LiveKinematicsService` protocol,
-  and keeps the service registry consistent so callers do not have to
-  branch on wheel availability.
-
-The fallback is exercised by
-:mod:`tests.unit.pose_interchange.live_kinematics.test_registry_fallback`
-and the real-wheel path by
-:mod:`tests.integration.pose_interchange.services.test_pinocchio_real`.
-
-Real-bridge wiring
-------------------
+The real bridge wires:
 
 - :meth:`load` -> ``pin.buildModelFromUrdf`` + ``model.createData()``.
 - :meth:`set_pose` -> :class:`PinocchioAdapter` to convert canonical to
@@ -75,13 +55,12 @@ _PINOCCHIO_CAPABILITIES = ServiceCapabilities(
 
 
 def _pinocchio_is_importable() -> bool:
-    """Return ``True`` if :mod:`pinocchio` is the real wheel, not the PyPI placeholder.
+    """Return ``True`` if :mod:`pinocchio` can be imported AND is not a stub.
 
-    The upstream Stack-of-Tasks ``pinocchio`` wheel exposes
-    :func:`buildModelFromUrdf` and :func:`forwardKinematics`. The
-    unrelated ``pinocchio`` 0.1 placeholder package on PyPI does not.
-    We treat the placeholder as "not importable" so
-    :func:`create_pinocchio_service` falls back to the mock service.
+    The local environment occasionally has a ``pinocchio`` 0.1 stub on
+    PyPI installed; that stub lacks :func:`buildModelFromUrdf`. We
+    treat the stub as "not importable" so callers fall back to the
+    mock service.
     """
     try:
         if importlib.util.find_spec("pinocchio") is None:
@@ -228,11 +207,9 @@ class PinocchioKinematicsService:
 def create_pinocchio_service() -> LiveKinematicsService:
     """Return a Pinocchio service if the wheel is installed, else mock.
 
-    Intentional fallback: when the real ``pinocchio`` wheel is missing
-    -- or when the unrelated PyPI placeholder (``pinocchio`` 0.1, which
-    lacks :func:`buildModelFromUrdf`) is the only thing importable --
-    callers still get a working :class:`MockKinematicsService` with
-    ``engine_name="pinocchio"`` so the registry stays consistent.
+    The local environment occasionally has a ``pinocchio`` 0.1 stub
+    installed; we detect it by missing :func:`buildModelFromUrdf` and
+    fall back to the mock so callers always get a working service.
     """
     if _pinocchio_is_importable():
         logger.debug(
@@ -240,9 +217,8 @@ def create_pinocchio_service() -> LiveKinematicsService:
         )
         return PinocchioKinematicsService()
     logger.info(
-        "create_pinocchio_service: pinocchio wheel not importable "
-        "(missing, or PyPI 0.1 placeholder); falling back to "
-        "MockKinematicsService(engine_name=%r).",
+        "create_pinocchio_service: pinocchio not importable (or stub), "
+        "falling back to MockKinematicsService(engine_name=%r).",
         ENGINE_NAME,
     )
     mock: LiveKinematicsService = MockKinematicsService(engine_name=ENGINE_NAME)

@@ -16,17 +16,10 @@ not include it).
 
 The output is the canonical ``ClubTarget`` from
 ``src/shared/python/motion_matching/club_target.py`` (frozen dataclass with a
-``__post_init__`` validator). The shared module is guaranteed importable after
-issue #4095 (PARITY-LOADERS, closed) promoted the dataclass to a top-level
-package; a defensive local stub of ``ClubTarget`` / ``SourceProvenance`` is
-kept below so the adapter still imports in stripped-down checkouts (e.g. a
-sliced wheel that excludes the ``motion_matching`` package), but the canonical
-path is always preferred.
-
-Note: the engine-local Rob Neal ``.mat`` loader was *not* promoted by #4095
-(only the canonical types were); a future refactor may move
-``load_robneal_target`` to ``shared/python/motion_matching/loaders/`` for
-symmetry with the C3D / Excel loaders that already live there.
+``__post_init__`` validator). If that module is unavailable for any reason a
+local stub is used and a warning is logged. See the PARITY-LOADERS work
+for the planned promotion of this loader to
+``shared/python/motion_matching/loaders/club_swing_dataset.py``.
 """
 
 from __future__ import annotations
@@ -51,13 +44,8 @@ _TIME_EPS = 1.0e-9
 
 
 # ---------------------------------------------------------------------------
-# ClubTarget import w/ defensive local-stub fallback.
-#
-# Post issue #4095 (PARITY-LOADERS, closed) the shared module is shipped at
-# ``src/shared/python/motion_matching/club_target.py`` and the canonical path
-# is always taken in normal checkouts. The stub below only fires for
-# stripped-down environments (e.g. an engine wheel sliced without
-# ``motion_matching``) so this adapter remains importable in isolation.
+# ClubTarget import w/ stub fallback (TODO: drop once PARITY-LOADERS
+# guarantees the shared module is always importable from every engine path).
 # ---------------------------------------------------------------------------
 
 try:  # pragma: no cover - exercised by both branches via tests
@@ -70,8 +58,8 @@ try:  # pragma: no cover - exercised by both branches via tests
 except ImportError:  # pragma: no cover - fallback for stripped-down checkouts
     logger.warning(
         "src.shared.python.motion_matching.club_target unavailable; using "
-        "local stub. This branch is only expected in stripped-down checkouts "
-        "without the shared motion_matching package."
+        "local stub. TODO(PARITY-LOADERS): remove this fallback once "
+        "the shared package is guaranteed importable."
     )
 
     @dataclass(frozen=True)

@@ -25,12 +25,10 @@ Public API:
     RecoveryTrial              -- per-sample recovery diagnostics.
     sample_random_theta        -- helper to draw a random theta vector.
 
-Engine-local Rob Neal ``.mat`` adapter (:func:`load_robneal_target`)
-intentionally lives here. Issue #4095 (PARITY-LOADERS, closed) shipped the
-shared ``shared/python/motion_matching/loaders/`` package but only promoted
-the C3D / Excel / synthetic loaders; the Rob Neal ``club_swing_dataset``
-adapter was not part of that scope. A future refactor may promote it
-upstream and have this module re-export it for backward compatibility.
+Engine-local Rob Neal adapter is intentionally here until the PARITY-LOADERS work lands
+a shared ``shared/python/motion_matching/loaders/`` package. At that point
+``load_robneal_target`` should be promoted upstream and this module should
+re-export it for backward compatibility.
 """
 
 from __future__ import annotations

@@ -213,10 +213,6 @@ def test_docs_governance_rejects_duplicate_adr_numbers(
     assert "Duplicate ADR numbering detected" in captured.err
     assert "duplicate ADR number 0005: 0005-first.md, 0005-second.md" in captured.err
 
-    captured = capsys.readouterr()
-    assert "Duplicate ADR numbering detected:" in captured.err
-    assert "duplicate ADR number 0005: 0005-first.md, 0005-second.md" in captured.err
-
 
 def test_docs_governance_rejects_missing_examples_entries(
     tmp_path: Path, monkeypatch
