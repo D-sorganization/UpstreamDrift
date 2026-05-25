@@ -1,7 +1,7 @@
 # SPEC.md — Repository Specification Document
 
 <!--
-  TEMPLATE VERSION: 1.0.0
+  TEMPLATE VERSION: 1.0.1
   LAST UPDATED: 2026-05-25
 
   This is the canonical specification template for all repositories in the
