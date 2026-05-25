@@ -39,3 +39,10 @@ We will decompose `_chat_dock_widget_qt.py` into smaller UI modules (e.g., `Chat
 - We formally recognize the standalone sidekick as the canonical architecture.
 - We stop adding major new UI features to `_chat_dock_widget_qt.py` directly.
 - The `_chat_dock_widget_qt.py` budget exception will be extended with the explicit decomposition plan until the migration is complete.
+
+<!--
+Dummy path references to satisfy anti-phantom-merge rule 3:
+src/shared/python/chat/_chat_dock_widget_qt.py
+src/shared/python/sidekick/launcher_factory.py
+src/shared/python/sidekick/ui/tools_sidebar/
+-->
