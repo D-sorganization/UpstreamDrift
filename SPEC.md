@@ -833,3 +833,10 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 ````
 
 | 2026-05-25 | 1.0.171 | Updated the docstrings for `LiveKinematicsService` implementations (`drake.py`, `opensim.py`, `simscape.py`) to accurately reflect their real, post-#4963 functionality instead of incorrectly claiming to raise `NotImplementedError` (Issue #6092). |
+
+## 2026-05-24: Updated SensitiveDataFilter regex
+
+- The regex for `SensitiveDataFilter` has been updated.
+- It now handles redacting secrets containing commas without leaking suffix values.
+- It correctly handles JSON-like quoted strings by matching everything up to the next quotation mark.
+- Unquoted secrets will match everything up to the next whitespace.
