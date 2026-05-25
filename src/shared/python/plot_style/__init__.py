@@ -6,8 +6,7 @@ UpstreamDrift.
 
 Concrete implementations of color resolvers, renderers, Qt widgets, and
 marker-shape primitives live in the ``resolvers``, ``renderers``,
-``widgets``, and ``shapes`` sub-packages and are added in follow-up
-issues of EPIC #4796.
+``widgets``, and ``shapes`` sub-packages and are already imported and re-exported.
 """
 
 from __future__ import annotations
