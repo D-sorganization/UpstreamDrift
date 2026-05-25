@@ -83,3 +83,11 @@ These issues are already tracked in GitHub and represent planned improvements.
 - **GitHub Issue**: #130
 - **Status**: Open
 - **Description**: Implement lazy imports to improve startup time
+
+## Phase 5: Sidekick Consolidation
+
+### Phase 5.1: Consolidate Sidekick Entry Points & Decompose ChatDockWidget
+
+- **GitHub Issue**: #6119
+- **Status**: Open
+- **Description**: Consolidate duplicate Sidekick entry points (`sidekick` vs `chat_assistant`), inventory `ChatDockWidget` consumers, extract reusable chat components, and decompose `_chat_dock_widget_qt.py` to remove its file-size budget exception before 2026-07-31 as per ADR-0022.
