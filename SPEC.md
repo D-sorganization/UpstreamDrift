@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.190                                            |
-| **Last Spec Update**    | 2026-05-24                                         |
+| **Spec Version**        | 1.0.191                                            |
+| **Last Spec Update**    | 2026-05-25                                         |
 
 ## 2. Purpose & Mission
 
@@ -614,6 +614,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-25 | 1.0.191 | Updated documentation and launch script to align with Epic A, updated `VERSION` file, `launch.bat`, and `docs/README.md`. Removed follow-up issue notes from `plot_style` and `body_part_viz` docstrings. |
 | 2026-05-23 | 1.0.186 | Refined the standalone Sidekick CLI contract in `src/shared/python/sidekick/__main__.py` so `python -m sidekick` defaults to `gui`, mistyped flags get closest-match suggestions, GUI imports remain deferred until dispatch, `--data-dir` is resolved to an absolute path, and `gui` now delegates through `sidekick.launcher_factory` using the standalone window/session-store configuration on current `main`. Expanded `tests/unit/sidekick/test_cli.py` to cover implicit-gui parsing, bad-flag suggestions, headless `run` parsing, handler error paths, and launcher delegation. |
 | 2026-05-23 | 1.0.186 | Tightened `src/shared/python/training/config.py` validation so boolean values are rejected for integer training caps such as `max_epochs` and `max_steps`; regression coverage lives in `tests/unit/training/test_config.py`. |
 | 2026-05-23 | 1.0.187 | Closed the file-size budget grandfathering gap by requiring tracked baseline entries for oversized files in `scripts/config/file_size_budget.json`; untracked oversized files now fail `scripts/ci/check_file_size_budget.py`, with regression coverage in `tests/scripts/wave9_scripts_b/test_check_file_size_budget.py`. |
