@@ -397,6 +397,29 @@ def get_database_pool_pre_ping(default: bool = True) -> bool:
     return get_env_bool("GOLF_DB_POOL_PRE_PING", default=default)
 
 
+def get_auth_cache_ttl_seconds(default: int = 300) -> int:
+    """Get the auth-cache TTL in seconds.
+
+    Operators tuning multi-worker deployments can shorten this window to
+    bound stale-credential exposure or lengthen it to reduce bcrypt load.
+    Reads ``GOLF_AUTH_CACHE_TTL_SECONDS``; falls back to the supplied
+    default (5 minutes) when unset or invalid.
+    """
+    value = get_env_int("GOLF_AUTH_CACHE_TTL_SECONDS", default=default, min_value=1)
+    return default if value is None else value
+
+
+def get_auth_cache_max_entries(default: int = 10_000) -> int:
+    """Get the maximum number of entries kept in the auth cache.
+
+    Once the cache is full, the oldest entry is evicted FIFO-style. Larger
+    values reduce bcrypt churn for high-cardinality API-key fleets at the
+    cost of memory per worker. Reads ``GOLF_AUTH_CACHE_MAX_ENTRIES``.
+    """
+    value = get_env_int("GOLF_AUTH_CACHE_MAX_ENTRIES", default=default, min_value=1)
+    return default if value is None else value
+
+
 def get_admin_password() -> str | None:
     """Get the admin password.
 
