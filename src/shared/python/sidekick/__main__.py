@@ -204,7 +204,7 @@ def run_headless(args: argparse.Namespace) -> int:
     from src.shared.python.core.process_safety import narrow_catch
 
     # Defer import to keep __main__ clean of heavy runner/calculator dependencies
-    from src.shared.python.sidekick.standalone.runner import run_calculator
+    from sidekick.standalone.runner import run_calculator
 
     with narrow_catch(ValueError, FileNotFoundError, log_message="sidekick run"):
         if args.output is not None and not args.output.parent.exists():
