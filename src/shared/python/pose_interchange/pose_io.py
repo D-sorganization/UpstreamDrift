@@ -11,7 +11,7 @@ Public API
 
 * :func:`save_initial_state` / :func:`load_initial_state` - per-engine
   starting-state I/O. ``engine`` selects one of
-  ``{"drake", "mujoco", "pinocchio", "opensim", "simscape"}`` and each
+  ``{"drake", "mujoco", "pinocchio", "opensim", "simscape", "myosuite"}`` and each
   engine has its own native file shape:
 
   ===========  ====================================================
@@ -66,7 +66,7 @@ from src.shared.python.pose_interchange.canonical import (
 )
 
 SUPPORTED_ENGINES: Final[frozenset[str]] = frozenset(
-    {"drake", "mujoco", "pinocchio", "opensim", "simscape"}
+    {"drake", "mujoco", "pinocchio", "opensim", "simscape", "myosuite"}
 )
 
 # ``BodyTarget`` validation requires at least 2 frames; we synthesise a

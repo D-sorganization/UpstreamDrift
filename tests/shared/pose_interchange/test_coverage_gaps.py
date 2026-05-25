@@ -29,7 +29,6 @@ from src.shared.python.motion_matching.diagnostics.reference_pose import (
     REFERENCE_GOLFER_FIELDS,
 )
 from src.shared.python.pose_interchange import (
-    CONVENTION_TAG,
     CanonicalPose,
     CapabilityError,
     JointSlot,
@@ -431,7 +430,9 @@ class TestPoseIO:
 
     def test_supported_engines_matches_dispatch(self) -> None:
         assert (
-            frozenset({"drake", "mujoco", "pinocchio", "opensim", "simscape"})
+            frozenset(
+                {"drake", "mujoco", "pinocchio", "opensim", "simscape", "myosuite"}
+            )
             == SUPPORTED_ENGINES
         )
 
