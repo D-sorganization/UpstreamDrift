@@ -1,8 +1,8 @@
-# Golf Modeling Suite Documentation
+# UpstreamDrift Documentation
 
-> **January 2026** | Local-First API Architecture
+> **May 2026** | Local-First API Architecture
 
-Welcome to the Golf Modeling Suite - a professional biomechanical analysis and physics simulation platform.
+Welcome to UpstreamDrift - a professional biomechanical analysis and physics simulation platform.
 
 ## Quick Navigation
 
@@ -21,8 +21,8 @@ Welcome to the Golf Modeling Suite - a professional biomechanical analysis and p
 ### 1. Start the API Server
 
 ```bash
-cd /home/user/Golf_Modeling_Suite
-python start_api_server.py
+cd /home/user/UpstreamDrift
+python launch_golf_suite.py --api-only
 ```
 
 ### 2. Access the API
@@ -91,7 +91,7 @@ docs/
 
 ### Local-First API
 
-The Golf Modeling Suite uses a **local-first architecture**:
+UpstreamDrift uses a **local-first architecture**:
 
 - **No cloud required** for local development
 - **Optional cloud mode** for production scaling
@@ -258,7 +258,7 @@ repository maintenance guidance.
 
 ---
 
-## Recent Updates (January 2026)
+## Recent Updates (May 2026)
 
 - **API Architecture Upgrade** - Local-first FastAPI implementation
 - **Diagnostics Enhancement** - Structured error codes, request tracing
