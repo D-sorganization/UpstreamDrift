@@ -86,3 +86,7 @@
 ## 2026-05-23 - trimesh ImportErrors
 **Learning:** Hard-coded imports of `trimesh` in files like `_mesh_decimation.py` and `_mesh_io.py` can cause tests or other modules that import them to fail if `trimesh` isn't installed.
 **Action:** Always wrap `import trimesh` with a `try...except ImportError` block and conditionally check if `trimesh is None` to safely handle environments where it is missing, or alternatively, make sure to add it to the test environment requirements.
+
+## 2026-05-23 - Optimize axis sum using einsum in arrays
+**Learning:** Computations like `np.sum(db * db, axis=2)` and `np.sum(np.abs(tau * omega), axis=1)` involve element-wise operations that allocate intermediate memory and have sum-reduction overhead. This is slow when computing cost functions in hot loops over time trajectories.
+**Action:** Replace `np.sum(a * b, axis=2)` with `np.einsum('ijk,ijk->ij', a, b)`. Replace `np.sum(np.abs(x), axis=1)` with `np.einsum('ij->i', np.abs(x))`. Replace `np.sum(x * y, axis=1)` with `np.einsum('ij,ij->i', x, y)`. This leverages optimized C code, avoiding internal numpy reduction overhead and intermediate allocations.
