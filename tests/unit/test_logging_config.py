@@ -137,6 +137,13 @@ class TestSensitiveDataFilter:
         assert "key1" not in record.msg
         assert "pass1" not in record.msg
 
+    def test_redacts_password_with_spaces_in_quotes(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record('password="my secret token" and more')
+        flt.filter(record)
+        assert "my secret token" not in record.msg
+        assert 'password="***REDACTED***" and more' in record.msg
+
     def test_json_formatting_with_commas(self) -> None:
         flt = SensitiveDataFilter()
         record = self._make_record('{"password": "secret,123", "other": "val"}')
@@ -145,9 +152,16 @@ class TestSensitiveDataFilter:
         assert "***REDACTED***" in record.msg
         assert '{"password": "***REDACTED***", "other": "val"}' in record.msg
 
+    def test_redacts_stops_at_brace(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record("api_key=secret123} other=val")
+        flt.filter(record)
+        assert "secret123" not in record.msg
+        assert "api_key=***REDACTED***} other=val" in record.msg
+
     def test_multiple_with_commas(self) -> None:
         flt = SensitiveDataFilter()
-        record = self._make_record('api_key=key1, password=pass1')
+        record = self._make_record("api_key=key1, password=pass1")
         flt.filter(record)
         assert "key1" not in record.msg
         assert "pass1" not in record.msg

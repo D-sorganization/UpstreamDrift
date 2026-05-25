@@ -80,7 +80,7 @@ _SENSITIVE_PATTERNS: list[re.Pattern[str]] = [
         r"(?:['\"]?(?:password|passwd|pwd|api_key|apikey|api[-_]?secret|secret_key|secret[-_]?token|access_token|auth_token|bearer|private_key)['\"]?)"
         r"\s*[=:]\s*"
         r")"
-        r"(?:(['\"])(.*?)\2|([^\s,]+))"
+        r"(?:(['\"])(.*?)\2|([^\s,{}]+))"
     ),
 ]
 
@@ -114,8 +114,15 @@ def _redact_sensitive(text: str) -> str:
     """Replace sensitive values in *text* with a redaction placeholder."""
     for pattern in _SENSITIVE_PATTERNS:
         text = pattern.sub(
-            lambda m: m.group(1) + (f"{m.group(2)}***REDACTED***{m.group(2)}" if m.group(2) else "***REDACTED***"),
-            text
+            lambda m: (
+                m.group(1)
+                + (
+                    f"{m.group(2)}***REDACTED***{m.group(2)}"
+                    if m.group(2)
+                    else "***REDACTED***"
+                )
+            ),
+            text,
         )
     return text
 
