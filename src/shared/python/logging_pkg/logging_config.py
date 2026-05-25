@@ -77,13 +77,17 @@ _SENSITIVE_PATTERNS: list[re.Pattern[str]] = [
     re.compile(
         r"(?i)"
         r"("
-        r"password|passwd|pwd"
+        r"['\"]?"
+        r"(?:password|passwd|pwd"
         r"|api_key|apikey|api[-_]?secret"
         r"|secret_key|secret[-_]?token"
         r"|access_token|auth_token|bearer"
         r"|private_key"
         r")"
-        r"[\s]*[=:]\s*['\"]?([^\s'\"]{1,})['\"]?"
+        r"['\"]?"
+        r"[\s]*[=:]\s*"
+        r")"
+        r"(?:(['\"])(.*?)\2|([^\s,]+))"
     ),
 ]
 
@@ -115,8 +119,14 @@ class SensitiveDataFilter(logging.Filter):
 
 def _redact_sensitive(text: str) -> str:
     """Replace sensitive values in *text* with a redaction placeholder."""
+
+    def repl(m: re.Match[str]) -> str:
+        prefix = m.group(1)
+        quote = m.group(2) or ""
+        return f"{prefix}{quote}***REDACTED***{quote}"
+
     for pattern in _SENSITIVE_PATTERNS:
-        text = pattern.sub(r"\1=***REDACTED***", text)
+        text = pattern.sub(repl, text)
     return text
 
 
