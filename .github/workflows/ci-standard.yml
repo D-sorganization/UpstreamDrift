@@ -290,9 +290,6 @@ jobs:
       - name: Version Consistency Check
         run: python3 scripts/check_version_consistency.py
 
-      - name: VERSION / pyproject / SPEC.md Consistency Check
-        run: python3 scripts/ci/check_version_consistency.py
-
       - name: Test Layout Guard
         run: python3 scripts/check_test_layout.py
 

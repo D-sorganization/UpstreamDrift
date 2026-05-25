@@ -1,8 +1,8 @@
 # SPEC.md — Repository Specification Document
 
 <!--
-  TEMPLATE VERSION: 1.0.0
-  LAST UPDATED: 2026-05-15
+  TEMPLATE VERSION: 1.0.1
+  LAST UPDATED: 2026-05-25
 
   This is the canonical specification template for all repositories in the
   D-sorganization fleet. Every repo MUST have a SPEC.md at its root.
@@ -39,7 +39,6 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
 | **Spec Version**        | 1.0.194                                            |
-| **Spec Version**        | 1.0.191                                            |
 | **Last Spec Update**    | 2026-05-25                                         |
 
 ## 2. Purpose & Mission
@@ -658,6 +657,7 @@ policy lives in `docker/README.md` and ADR-0021.
 | 2026-05-25 | 1.0.192 | Fixed the Sidekick wheel packaging contract so published wheels now ship a top-level `sidekick` package for the `sidekick` console script, made single-feature capability checks evaluate only the requested feature on first use, and aligned the pendulum capability probe with the current `src/engines/...` source-tree layout used by Docker/profile smoke checks. |
 | 2026-05-24 | 1.0.191 | Tightened shared logging redaction in `src/shared/python/logging_pkg/logging_config.py` so quoted JSON-style key/value formatting is preserved while only exact secret-bearing keys (`password`, `api_key`, `secret_key`, etc.) are masked; similarly named public fields remain visible, with regression coverage in `tests/unit/test_logging_config.py`. |
 | 2026-05-24 | 1.0.191 | Optimize norm calculation in Unreal visualization using math.hypot for 3D vectors |
+| 2026-05-24 | 1.0.191 | Updated `src/shared/python/logging_pkg/logging_config.py` sensitive data redaction to securely handle values containing commas and braces, ensuring valid JSON log formats remain parseable while maintaining redaction coverage. |
 | 2026-05-23 | 1.0.186 | Refined the standalone Sidekick CLI contract in `src/shared/python/sidekick/__main__.py` so `python -m sidekick` defaults to `gui`, mistyped flags get closest-match suggestions, GUI imports remain deferred until dispatch, `--data-dir` is resolved to an absolute path, and `gui` now delegates through `sidekick.launcher_factory` using the standalone window/session-store configuration on current `main`. Expanded `tests/unit/sidekick/test_cli.py` to cover implicit-gui parsing, bad-flag suggestions, headless `run` parsing, handler error paths, and launcher delegation. |
 | 2026-05-23 | 1.0.186 | Tightened `src/shared/python/training/config.py` validation so boolean values are rejected for integer training caps such as `max_epochs` and `max_steps`; regression coverage lives in `tests/unit/training/test_config.py`. |
 | 2026-05-23 | 1.0.187 | Closed the file-size budget grandfathering gap by requiring tracked baseline entries for oversized files in `scripts/config/file_size_budget.json`; untracked oversized files now fail `scripts/ci/check_file_size_budget.py`, with regression coverage in `tests/scripts/wave9_scripts_b/test_check_file_size_budget.py`. |
@@ -852,4 +852,5 @@ Epics #4796 (plot_style implementations) and #4755 (body_part_viz implementation
 ## Changelog
 
 - Wired up headless calculator invoker in `sidekick run`.
+- Cleaned up stale `NotImplementedError` docstrings in `pose_interchange` services post-#4963.
   | 2026-05-25 | 1.0.171 | Updated `SensitiveDataFilter` regex to correctly match and redact JSON keys and values containing spaces or trailing commas, and replaced variable reference with string literal in redaction logic to fix potential NameError. |

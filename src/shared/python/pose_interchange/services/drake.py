@@ -1,7 +1,7 @@
 """Drake LiveKinematicsService.
 
 Loads a MultibodyPlant via `Parser`, maps :class:`CanonicalPose` to ``q`` using
-the :class:`DrakeAdapter`, and returns world-frame transforms
+the Drake :class:`PoseConventionAdapter`, and returns world-frame transforms
 from ``plant.EvalBodyPoseInWorld``. ``step()`` advances a Drake :class:`Simulator`;
 ``reset()`` restores a stored default :class:`Context`.
 

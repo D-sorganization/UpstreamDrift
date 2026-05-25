@@ -93,6 +93,11 @@
 ## 2025-10-24 - [Optimize vector distance calculation for visualizer distances]
 **Learning:** `np.linalg.norm` is generic and relatively slow for normalizing small 3D vectors. Using `math.hypot(*v)` significantly speeds up computation by avoiding numpy array overhead and allocation.
 **Action:** Replace `np.linalg.norm(vector)` with `math.hypot(*vector)` where `vector` is a small fixed-length array (e.g. 3D point) especially when computing normalisations frequently like in `visualization.py`.
+
 ## 2026-05-25 - Optimize constraint residual penalties in Drake
 **Learning:** Using `sum(np.sum(np.asarray(r) ** 2) for r in constraint_residuals)` creates intermediate array allocations for `** 2`. Since this calculation is part of the cost function inner loop, it creates unnecessary overhead.
 **Action:** Replace `np.sum(np.asarray(r) ** 2)` with `np.vdot(arr := np.asarray(r), arr)` to avoid the intermediate allocation and calculate the squared sum directly at the C level, improving inner loop performance.
+
+## 2026-05-23 - Optimize axis sum using einsum in arrays
+**Learning:** Computations like `np.sum(db * db, axis=2)` and `np.sum(np.abs(tau * omega), axis=1)` involve element-wise operations that allocate intermediate memory and have sum-reduction overhead. This is slow when computing cost functions in hot loops over time trajectories.
+**Action:** Replace `np.sum(a * b, axis=2)` with `np.einsum('ijk,ijk->ij', a, b)`. Replace `np.sum(np.abs(x), axis=1)` with `np.einsum('ij->i', np.abs(x))`. Replace `np.sum(x * y, axis=1)` with `np.einsum('ij,ij->i', x, y)`. This leverages optimized C code, avoiding internal numpy reduction overhead and intermediate allocations.

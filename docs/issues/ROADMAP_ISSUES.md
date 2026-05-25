@@ -90,17 +90,26 @@ These issues are already tracked in GitHub and represent planned improvements.
 - **Status**: Open
 - **Description**: Implement lazy imports to improve startup time
 
-## Phase 5: CI/CD Pipeline
+## Phase 5: Configuration Consolidation
 
-### Phase 5.1: Review CI Modularization and Jules-\* Workflows
+### Phase 5.1: Adopt pydantic-settings and unify config
+
+- **GitHub Issue**: #5920
+- **Status**: Open
+- **Description**: Consolidate the 6 config systems and 118 env vars into a unified `pydantic-settings` based Settings class, add runtime validation, generating `.env.example`, and implement secrets posture enforcement.
+
+## Phase 6: CI/CD Infrastructure Review
+
+### Phase 6.1: Review CI/CD Modularization and Jules-* Workflows
 
 - **GitHub Issue**: #6099
-- **Status**: Open
-- **Description**: Review modularization of ci-standard.yml (1,617 lines) and Jules-\* workflow proliferation.
+- **Status**: Acknowledged (Recommendation-only)
+- **Description**: Review modularization of `ci-standard.yml` (1,617 lines) and the proliferation of `Jules-*` workflows.
+- **Path Forward**: Acknowledged the observation. Will review the size of `ci-standard.yml` and assess active/inactive `Jules-*` workflows. This is scheduled for "later" (target review date: Q4 2026) to avoid disrupting the currently stable CI system and fleet-level agent coordination protocol. Concrete follow-up issues will be filed if any structural changes or workflow retirements are decided.
 
-## Phase 5: Documentation & Audits
+## Phase 7: Documentation & Audits
 
-### Phase 5.1: Audit Epics #4796 and #4755
+### Phase 7.1: Audit Epics #4796 and #4755
 
 - **GitHub Issue**: #6087
 - **Status**: Closed

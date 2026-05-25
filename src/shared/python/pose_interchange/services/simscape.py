@@ -1,9 +1,14 @@
 """Simscape LiveKinematicsService.
 
-Connects to the MATLAB engine and loads the model via :class:`SimscapeAdapter`.
-Sets joint angles in the MATLAB workspace. Transform queries are currently stubbed.
+Connects to the MATLAB engine via the existing SimscapeAdapter.
+Loads a model, maps :class:`CanonicalPose` to MATLAB workspace variables,
+and can advance simulation via ``step()``. The ``get_link_transforms()``
+method is currently stubbed and requires a follow-up implementation.
 
-Falls back to :class:`MockKinematicsService` when MATLAB is not installed.
+If MATLAB / the MATLAB engine API is unavailable,
+:func:`create_simscape_service` falls back to a
+:class:`MockKinematicsService` configured with
+``engine_name="simscape"``.
 """
 
 from __future__ import annotations
@@ -52,7 +57,11 @@ def _matlab_engine_is_importable() -> bool:
 
 
 class SimscapeKinematicsService:
-    """Real-engine :class:`LiveKinematicsService` backed by Simscape Multibody."""
+    """Real-engine :class:`LiveKinematicsService` backed by Simscape Multibody.
+
+    Connects via the SimscapeAdapter. Note that ``get_link_transforms()`` is
+    currently stubbed (see #6093).
+    """
 
     engine_name: str = ENGINE_NAME
 
@@ -122,7 +131,7 @@ class SimscapeKinematicsService:
         if getattr(self, "_engine", None) is None:
             return transforms
 
-        # TODO: Implement actual transform queries from MATLAB engine (Issue #6093)
+        # TODO: Implement actual transform queries from MATLAB engine #6093
         return transforms
 
     def step(self, dt: float) -> None:
