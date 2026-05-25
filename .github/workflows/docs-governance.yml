@@ -21,6 +21,10 @@ on:
       - "tests/scripts/test_doc_governance_checks.py"
       - ".github/workflows/docs-governance.yml"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
