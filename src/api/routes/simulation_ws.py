@@ -2,6 +2,7 @@
 
 import asyncio
 import contextlib
+import json
 import logging
 import math
 import time
@@ -60,6 +61,18 @@ def _engine_type_from_str(name: str) -> EngineType:
     return EngineType(name.lower())
 
 
+def _is_numeric_sequence(value: object) -> bool:
+    """Return True iff value is a list/tuple of int/float values (no bools).
+
+    Precondition: value is any Python object.
+    Postcondition: returns True only when value is a non-string sequence whose
+    every element is a finite numeric scalar (int or float, not bool).
+    """
+    if not isinstance(value, (list, tuple)):
+        return False
+    return all(isinstance(x, (int, float)) and not isinstance(x, bool) for x in value)
+
+
 def _apply_initial_state(engine: object, state_dict: dict[str, Any]) -> None:
     """Apply an initial state dict to the engine using the (q, v) contract.
 
@@ -67,14 +80,31 @@ def _apply_initial_state(engine: object, state_dict: dict[str, Any]) -> None:
     client sends ``{"q": [...], "v": [...]}``; this helper converts and
     dispatches correctly.
 
+    Preconditions:
+        - state_dict must be a dict
+        - state_dict.get("q"), if present, must be a list/tuple of numbers
+        - state_dict.get("v"), if present, must be a list/tuple of numbers
+
     Args:
         engine: The active physics engine instance.
         state_dict: Dict with optional 'q' and 'v' lists.
     """
     if not hasattr(engine, "set_state"):
         return
-    q = np.array(state_dict.get("q", []), dtype=float)
-    v = np.array(state_dict.get("v", []), dtype=float)
+    q_raw = state_dict.get("q", [])
+    v_raw = state_dict.get("v", [])
+    if not _is_numeric_sequence(q_raw):
+        logger.warning(
+            "initial_state.q must be a list of numbers; ignoring initial state"
+        )
+        return
+    if not _is_numeric_sequence(v_raw):
+        logger.warning(
+            "initial_state.v must be a list of numbers; ignoring initial state"
+        )
+        return
+    q = np.array(q_raw, dtype=float)
+    v = np.array(v_raw, dtype=float)
     engine.set_state(q, v)
 
 
@@ -244,6 +274,11 @@ async def _handle_client_commands(
                 stats.speed_factor = speed_factor
     except TimeoutError:
         pass  # No message, continue simulation
+    except json.JSONDecodeError:
+        logger.warning("Received invalid JSON from WebSocket client; ignoring message")
+        await websocket.send_json(
+            {"error": "invalid_json", "message": "Message must be valid JSON"}
+        )
     return "continue"
 
 
