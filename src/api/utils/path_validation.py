@@ -14,6 +14,21 @@ ALLOWED_MODEL_DIRS = [
 ]
 
 
+def _candidate_traverses_symlink(candidate: Path, allowed_root: Path) -> bool:
+    """Check if the candidate path crosses a symlink relative to allowed_root."""
+    try:
+        rel = candidate.relative_to(allowed_root)
+    except ValueError:
+        return False
+
+    current = allowed_root
+    for part in rel.parts:
+        current = current / part
+        if current.is_symlink():
+            return True
+    return False
+
+
 def resolve_contained_path(candidate: Path, allowed_dirs: Iterable[Path]) -> Path:
     """Resolve a candidate path and ensure it stays under an allowed root."""
     try:
@@ -32,6 +47,12 @@ def resolve_contained_path(candidate: Path, allowed_dirs: Iterable[Path]) -> Pat
                 status_code=400,
                 detail="Invalid path format",
             ) from exc
+
+        if _candidate_traverses_symlink(candidate, allowed_dir):
+            raise HTTPException(
+                status_code=400,
+                detail="Path traversal via symlink is not permitted",
+            )
 
         try:
             resolved_candidate.relative_to(resolved_allowed_dir)

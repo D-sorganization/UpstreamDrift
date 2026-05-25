@@ -84,3 +84,46 @@ def test_validate_model_path_finds_existing_in_allowed(
     monkeypatch.setattr(pv, "ALLOWED_MODEL_DIRS", [fake_root.resolve()])
     out = pv.validate_model_path("swing.urdf")
     assert "swing.urdf" in out
+
+
+def test_symlink_leaf_rejected(tmp_path: Path) -> None:
+    allowed = tmp_path / "allowed"
+    allowed.mkdir()
+    other = tmp_path / "other"
+    other.mkdir()
+    target = other / "secret.txt"
+    target.write_text("secret")
+
+    candidate = allowed / "link.txt"
+    try:
+        candidate.symlink_to(target)
+    except OSError:
+        pytest.skip("Symlink creation not permitted on this platform/user")
+
+    with pytest.raises(HTTPException) as exc:
+        pv.resolve_contained_path(candidate, [allowed])
+    assert exc.value.status_code == 400
+    assert "symlink" in exc.value.detail.lower()
+
+
+def test_symlink_intermediate_dir_rejected(tmp_path: Path) -> None:
+    allowed = tmp_path / "allowed"
+    allowed.mkdir()
+    other = tmp_path / "other"
+    other.mkdir()
+    target_dir = other / "nested"
+    target_dir.mkdir()
+    target_file = target_dir / "secret.txt"
+    target_file.write_text("secret")
+
+    link_dir = allowed / "link_dir"
+    try:
+        link_dir.symlink_to(target_dir)
+    except OSError:
+        pytest.skip("Symlink creation not permitted on this platform/user")
+
+    candidate = link_dir / "secret.txt"
+    with pytest.raises(HTTPException) as exc:
+        pv.resolve_contained_path(candidate, [allowed])
+    assert exc.value.status_code == 400
+    assert "symlink" in exc.value.detail.lower()
