@@ -83,3 +83,12 @@ These issues are already tracked in GitHub and represent planned improvements.
 - **GitHub Issue**: #130
 - **Status**: Open
 - **Description**: Implement lazy imports to improve startup time
+
+## Phase 5: CI/CD Infrastructure Review
+
+### Phase 5.1: Review CI/CD Modularization and Jules-* Workflows
+
+- **GitHub Issue**: #6099
+- **Status**: Acknowledged (Recommendation-only)
+- **Description**: Review modularization of `ci-standard.yml` and the proliferation of `Jules-*` workflows.
+- **Path Forward**: Acknowledged the observation. Will review the size of `ci-standard.yml` and assess active/inactive `Jules-*` workflows. This is scheduled for "later" (target review date: Q4 2026) to avoid disrupting the currently stable CI system and fleet-level agent coordination protocol. Concrete follow-up issues will be filed if any structural changes or workflow retirements are decided.
