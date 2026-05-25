@@ -20,6 +20,8 @@ with no headless logic mixed in.
 
 from __future__ import annotations
 
+import contextlib
+
 from .controller import (
     DEFAULT_ROLLING_WINDOW,
     ModelChangeCallback,
@@ -40,6 +42,25 @@ from .view_model import (
     job_row_from_training_job,
 )
 
+
+def _register_embed_adapter() -> None:
+    """Register the launcher embed adapter without importing PyQt."""
+
+    with contextlib.suppress(ImportError, ValueError):
+        from src.shared.python.launcher_embed import (
+            get_embeddable_tool,
+            register_embeddable_tool,
+        )
+
+        from ._embed_adapter import _TrainingControllerEmbedAdapter
+
+        adapter = _TrainingControllerEmbedAdapter()
+        if get_embeddable_tool(adapter.tool_id) is None:
+            register_embeddable_tool(adapter)
+
+
+_register_embed_adapter()
+
 __all__ = [
     "DEFAULT_ROLLING_WINDOW",
     "DashboardModel",
@@ -53,5 +74,6 @@ __all__ = [
     "StatusCallback",
     "TrainingDashboardController",
     "TrainingJobLiveSubscriber",
+    "_register_embed_adapter",
     "job_row_from_training_job",
 ]
