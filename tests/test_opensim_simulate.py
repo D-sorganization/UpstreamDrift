@@ -18,8 +18,6 @@ The integration layer covers the three acceptance criteria from issue
 
 from __future__ import annotations
 
-import importlib.util
-
 import numpy as np
 import pytest
 from src.engines.physics_engines.opensim.python.motion_matching.simulate import (
@@ -28,16 +26,6 @@ from src.engines.physics_engines.opensim.python.motion_matching.simulate import 
     SimOptions,
     SimOut,
     evaluate_polynomial_torque,
-)
-
-OPENSIM_AVAILABLE = importlib.util.find_spec("opensim") is not None
-opensim_required = pytest.mark.skipif(
-    not OPENSIM_AVAILABLE,
-    reason=(
-        "OpenSim Python bindings not installed. "
-        "Install via `conda install -c opensim-org opensim` (macOS) or "
-        "`pip install opensim` (Linux/Windows, OpenSim>=4.4)."
-    ),
 )
 
 
@@ -178,10 +166,6 @@ def _n_actuators_from_model() -> int:
 
 
 @pytest.mark.requires_opensim
-@pytest.mark.skipif(
-    not OPENSIM_AVAILABLE,
-    reason="OpenSim Python bindings not installed",
-)
 class TestSimulateWithCoefficients:
     """Live integration tests that exercise the OpenSim binding."""
 

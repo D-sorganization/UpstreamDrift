@@ -373,9 +373,6 @@ def test_position_noise_is_deterministic(patch_simulate) -> None:
 # ---------------------------------------------------------------------------
 
 
-_OPENSIM_AVAILABLE = importlib.util.find_spec("opensim") is not None
-
-
 def _real_simulate_module_available() -> bool:
     """Return True iff the issue-#4120 simulate wrapper has landed."""
     candidates = (
@@ -387,10 +384,6 @@ def _real_simulate_module_available() -> bool:
 
 
 @pytest.mark.requires_opensim
-@pytest.mark.skipif(
-    not _OPENSIM_AVAILABLE,
-    reason="OpenSim Python bindings not installed.",
-)
 @pytest.mark.skipif(
     not _real_simulate_module_available(),
     reason=(

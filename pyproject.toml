@@ -386,6 +386,7 @@ addopts = "-ra -q --strict-markers --strict-config --durations=20 -m \"not slow 
 asyncio_mode = "auto"
 timeout = 60
 timeout_method = "thread"
+xfail_strict = true
 # Prevent ImportPathMismatchError from conftest.py files in engine subdirectories
 norecursedirs = [
     "src",
