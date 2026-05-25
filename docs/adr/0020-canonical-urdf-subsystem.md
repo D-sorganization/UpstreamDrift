@@ -1,6 +1,6 @@
 # ADR 0020: Canonical URDF subsystem (humanoid_character_builder vs model_generation)
 
-- **Status:** Proposed (awaiting decision)
+- **Status:** Accepted
 - **Date:** 2026-05-08
 - **Tracking issue:** [#4521](https://github.com/D-sorganization/UpstreamDrift/issues/4521)
 - **Campaign:** [URDF Hardening Campaign #4520](https://github.com/D-sorganization/UpstreamDrift/issues/4520)
@@ -55,8 +55,35 @@ Fold `humanoid_character_builder` into `model_generation` as a domain-specific b
 - Duplication remains but is intentional
 - Risk: future features have to be implemented twice or the line drifts again
 
-## Recommendation: Option B (Layer)
+## Decision
 
+Option **B (Layer)** was accepted by the repo owner on 2026-05-08 and
+recorded in the closing comment on [#4521](https://github.com/D-sorganization/UpstreamDrift/issues/4521).
+
+`model_generation` is the canonical low-level URDF / mesh / inertia
+toolkit. `humanoid_character_builder` remains the anthropometric domain
+layer that composes those lower-level primitives for humanoid workflows.
+
+## Decision in practice
+
+The implementation is transitional but the dependency direction now
+matches Option B:
+
+- `humanoid_character_builder.mesh.inertia_calculator` imports
+  `model_generation.inertia.calculator`
+- `humanoid_character_builder.mesh.primitive_inertia` imports
+  `model_generation.inertia.primitives`
+- `humanoid_character_builder.generators.urdf_xml_builder` imports
+  `model_generation.builders.urdf_writer`
+- `model_generation.humanoid` exists as a compatibility facade that
+  re-exports the humanoid-domain public API without making
+  `model_generation` the owner of anthropometric workflows
+
+The migration tracked under #4600-#4603 was only partially completed, so
+some legacy humanoid-specific wrappers still exist. That is an
+implementation gap, not an unresolved architecture decision.
+
+## Rationale
 Reasoning:
 
 1. **The duplication is real, not philosophical.** Both subsystems emit URDF XML, both compute inertia primitives, both have mesh generators. Removing duplication is the higher-order win.
@@ -65,7 +92,7 @@ Reasoning:
 4. **Option A loses domain clarity.** Folding anthropometry into `model_generation/humanoid/` makes the "generic toolkit" claim weaker — `model_generation` would now contain humanoid-specific code that has nothing to do with URDF emission. Option B keeps the toolkit truly generic.
 5. **Option C is the do-nothing-much option.** It documents the current mess as the intended state, leaves duplication, and lets the next refactor be even bigger.
 
-Estimated migration effort: 3–4 PRs over the campaign:
+Estimated migration effort at acceptance time: 3–4 PRs over the campaign:
 
 1. Extract `model_generation/inertia/` as the canonical inertia computation module; route `humanoid_character_builder` callers through it.
 2. Extract `model_generation/builders/urdf_writer.py` as the canonical XML emitter; route `humanoid_character_builder.generators.urdf_generator` through it.
@@ -89,10 +116,13 @@ Estimated migration effort: 3–4 PRs over the campaign:
 
 - If Option B is adopted but enforcement is weak, the code can drift back into duplication. Mitigation: add a CI check that `humanoid_character_builder/` does not import its own URDF XML writer (#4523 acceptance criteria).
 
-## Acceptance criteria for closing this ADR
+## Validation notes
 
-- [ ] User picks A, B, or C (or amends with rationale)
-- [ ] If B is picked: migration tracked as 4 sub-issues under #4521
-- [ ] `docs/architecture/URDF_SUBSYSTEM_BOUNDARY.md` written (closes #4523)
-- [ ] `src/shared/python/__init__.py` re-exports updated to match
-- [ ] No file imports from both subsystems (CI check)
+- [x] Decision recorded on #4521 as Option B (Layer)
+- [x] `docs/architecture/URDF_SUBSYSTEM_BOUNDARY.md` documents the
+      current layering and compatibility facade
+- [x] `src/shared/python/__init__.py` describes
+      `model_generation` as the canonical generic toolkit and
+      `humanoid_character_builder` as the anthropometric domain layer
+- [ ] Complete the remaining migration tasks tracked under #4600-#4603
+      so the implementation fully matches the accepted boundary
