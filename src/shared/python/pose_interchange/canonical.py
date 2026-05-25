@@ -36,7 +36,7 @@ import json
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Final
+from typing import Any, Final, Literal
 
 import numpy as np
 import numpy.typing as npt
@@ -85,7 +85,7 @@ class CanonicalPose:
     pelvis_translation_m: npt.NDArray[np.float64]
     pelvis_rotation_xyz_deg: npt.NDArray[np.float64]
     joint_angles_deg: Mapping[str, float] = field(default_factory=dict)
-    convention_tag: str = CONVENTION_TAG
+    convention_tag: Literal["canonical-v1"] = CONVENTION_TAG
 
     def __post_init__(self) -> None:
         # Coerce to immutable numpy arrays so the dataclass behaves "frozen"
