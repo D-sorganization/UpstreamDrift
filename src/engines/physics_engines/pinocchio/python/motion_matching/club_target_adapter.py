@@ -17,8 +17,9 @@ not include it).
 The output is the canonical ``ClubTarget`` from
 ``src/shared/python/motion_matching/club_target.py`` (frozen dataclass with a
 ``__post_init__`` validator). If that module is unavailable for any reason a
-local stub is used and a warning is logged. See issue #4095 (PARITY-LOADERS)
-for the planned promotion of this loader to
+local stub is used and a warning is logged as a defensive fallback for
+stripped-down checkouts (e.g. sliced wheels without ``motion_matching``).
+A future refactor may promote this loader to
 ``shared/python/motion_matching/loaders/club_swing_dataset.py``.
 """
 
@@ -44,8 +45,8 @@ _TIME_EPS = 1.0e-9
 
 
 # ---------------------------------------------------------------------------
-# ClubTarget import w/ stub fallback (TODO: drop once #4095 PARITY-LOADERS
-# guarantees the shared module is always importable from every engine path).
+# ClubTarget import w/ stub fallback for stripped-down checkouts
+# (e.g. sliced wheels missing motion_matching).
 # ---------------------------------------------------------------------------
 
 try:  # pragma: no cover - exercised by both branches via tests
@@ -58,8 +59,7 @@ try:  # pragma: no cover - exercised by both branches via tests
 except ImportError:  # pragma: no cover - fallback for stripped-down checkouts
     logger.warning(
         "src.shared.python.motion_matching.club_target unavailable; using "
-        "local stub. TODO(#4095 PARITY-LOADERS): remove this fallback once "
-        "the shared package is guaranteed importable."
+        "local stub as a defensive fallback for stripped-down checkouts."
     )
 
     @dataclass(frozen=True)

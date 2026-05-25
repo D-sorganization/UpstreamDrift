@@ -2,10 +2,15 @@
 
 Lazily imports :mod:`pinocchio` and loads a URDF via
 :func:`pinocchio.buildModelFromUrdf`.  If the wheel is unavailable
-(or is the local stub that lacks :func:`buildModelFromUrdf`),
-:func:`create_pinocchio_service` falls back to a
+(or is the PyPI placeholder stub that lacks :func:`buildModelFromUrdf`),
+:func:`create_pinocchio_service` intentionally falls back to a
 :class:`MockKinematicsService` configured with
 ``engine_name="pinocchio"``.
+
+The with-wheel behaviour is tested via
+``tests/integration/pose_interchange/services/test_pinocchio_real.py``,
+and the without-wheel fallback is tested via
+``tests/unit/pose_interchange/live_kinematics/test_registry_fallback.py``.
 
 The real bridge wires:
 
@@ -205,9 +210,15 @@ class PinocchioKinematicsService:
 def create_pinocchio_service() -> LiveKinematicsService:
     """Return a Pinocchio service if the wheel is installed, else mock.
 
-    The local environment occasionally has a ``pinocchio`` 0.1 stub
-    installed; we detect it by missing :func:`buildModelFromUrdf` and
-    fall back to the mock so callers always get a working service.
+    The local environment occasionally has a ``pinocchio`` 0.1 PyPI
+    placeholder stub installed; we detect it by missing
+    :func:`buildModelFromUrdf` and intentionally fall back to the mock so
+    callers always get a working service.
+
+    The with-wheel behaviour is tested via
+    ``tests/integration/pose_interchange/services/test_pinocchio_real.py``,
+    and the without-wheel fallback is tested via
+    ``tests/unit/pose_interchange/live_kinematics/test_registry_fallback.py``.
     """
     if _pinocchio_is_importable():
         logger.debug(
