@@ -70,7 +70,9 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/deadsnakes-ubuntu-ppa-*.list || true
           sudo apt-get update || true
           sudo apt-get install -y xvfb
-          pip install --ignore-installed --no-deps pydantic-core==2.46.3 || true
+          python -m ensurepip --upgrade || true
+          pip install --ignore-installed --no-deps pydantic-core==2.46.4 || true
+          python -m ensurepip --upgrade || true
           pip install -e ".[dev]"
           # Prevent environment pollution conflict between pytest-recording and pytest-vcr
           pip uninstall -y pytest-vcr pytest-recording || true

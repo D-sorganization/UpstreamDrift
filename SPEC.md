@@ -39,6 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
 | **Spec Version**        | 1.0.194                                            |
+| **Spec Version**        | 1.0.191                                            |
 | **Last Spec Update**    | 2026-05-25                                         |
 
 ## 2. Purpose & Mission
@@ -68,6 +69,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ## 4. Architecture Overview
 
+### Recent Architecture Changes
+
+- **ADR-0022**: Defined the boundary between `ChatDockWidget` (legacy compatibility) and Sidekick (`AIAssistantPanel`) product surfaces.
+
 ### Recent Spec Updates
 
 - **2026-05-25** - Corrected feature-registry engine probes to resolve physics-engine assets from either repo-root `engines/` or the canonical `src/engines/` layout, with regression coverage for MuJoCo, Drake, and Pinocchio probe success under the `src/` layout used by Docker smoke and repo-root checkouts.
@@ -88,6 +93,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 - **2026-05-24** - Added shared `GOLF_REALTIME_HOST` / `GOLF_REALTIME_PORT` environment accessors and wired `src/shared/python/realtime/ws_pubsub.py` plus API diagnostics to use/report them, so realtime bind defaults no longer live only as hard-coded loopback literals.
 - **2026-05-24** - Deferred realtime WebSocket backend resolution in `src/shared/python/realtime/ws_pubsub.py` until first explicit start/use and made `WSPubSub.start()` bring up the Python backend even when the instance was created with `autostart=False`; added focused regression coverage in `tests/shared/realtime/test_ws_pubsub.py`.
 - **2026-05-24** - Improved CI/test observability for optional dependency lanes: optional pytest collection skips now emit one warning per skipped path with the missing module or symbol, the PyTorch CVAE cancellation regression now uses a wrapper progress sink instead of monkeypatching methods, and three standard workflow inventory jobs now have 15-minute budgets to reduce false timeouts on saturated self-hosted runners.
+- **2026-05-25** - Surfaced API database pool controls for non-SQLite deployments via `GOLF_DB_POOL_SIZE`, `GOLF_DB_POOL_RECYCLE`, and `GOLF_DB_POOL_PRE_PING`; `src/api/database.py` now builds non-SQLite engines from shared config accessors instead of hardcoded pool defaults, with regression coverage in `tests/unit/test_config_environment.py` and `tests/unit/api/test_database_init.py`.
+- **2026-05-25** - Added shared `GOLF_REALTIME_HOST` / `GOLF_REALTIME_PORT` environment accessors and wired `src/shared/python/realtime/ws_pubsub.py` plus API diagnostics to use/report them, so realtime bind defaults no longer live only as hard-coded loopback literals.
+- **2026-05-25** - Deferred realtime WebSocket backend resolution in `src/shared/python/realtime/ws_pubsub.py` until first explicit start/use and made `WSPubSub.start()` bring up the Python backend even when the instance was created with `autostart=False`; added focused regression coverage in `tests/shared/realtime/test_ws_pubsub.py`.
+- **2026-05-25** - Improved CI/test observability for optional dependency lanes: optional pytest collection skips now emit one warning per skipped path with the missing module or symbol, the PyTorch CVAE cancellation regression now uses a wrapper progress sink instead of monkeypatching methods, and three standard workflow inventory jobs now have 15-minute budgets to reduce false timeouts on saturated self-hosted runners.
 - **2026-05-23** - Closed the file-size budget grandfathering gap by requiring tracked baseline entries in `scripts/config/file_size_budget.json` for oversized files and adding regression coverage for untracked oversized files.
 - **2026-05-23** - Tightened `src/shared/python/training/config.py` validation so boolean values are rejected for integer training caps such as `max_epochs` and `max_steps`, with regression coverage in `tests/unit/training/test_config.py`.
 - **2026-05-23** - Deferred realtime WebSocket backend resolution in `src/shared/python/realtime/ws_pubsub.py` until `WSPubSub.start()`, `publish()`, or `subscribe()` first use so importing the module no longer probes optional runtime dependencies; added focused lazy-resolution regression coverage for the python publish fallback path.
@@ -114,97 +123,97 @@ UpstreamDrift sits at the center of a biomechanical simulation ecosystem. It dep
 
 ### Module Map
 
-````
 UpstreamDrift/
 ├── src/
-│   ├── engines/
-│   │   ├── physics_engines/        # Engine adapters and integrations (package directories)
-│   │   │   ├── mujoco/             # MuJoCo backend (supported)
-│   │   │   ├── drake/              # Drake backend (extended)
-│   │   │   ├── pinocchio/          # Pinocchio backend (extended)
-│   │   │   ├── opensim/            # OpenSim backend (experimental)
-│   │   │   ├── myosuite/           # MyoSuite backend (experimental)
-│   │   │   ├── pendulum/           # Simplified educational models
-│   │   │   └── putting_green/      # Putting green simulation
-│   │   └── pendulum_models/        # Simplified educational models
-│   │       ├── twodof_pendulum.py
-│   │       └── biomechanical_pendulum.py
-│   ├── launchers/                  # GUI/CLI entry points
-│   │   ├── upstream_drift_launcher.py        # PyQt6 professional GUI (main entrypoint)
-│   │   ├── golf_suite_launcher.py  # Multi-engine suite launcher
-│   │   ├── unified_launcher.py     # Unified launcher interface
-│   │   └── cli_launcher.py         # Command-line interface
-│   ├── api/                        # FastAPI REST backend
-│   │   ├── main.py                 # API entry point
-│   │   ├── endpoints/              # REST endpoint definitions
-│   │   └── models.py               # Pydantic request/response models
-│   ├── config/                     # Configuration management
-│   │   └── launcher_manifest_loader.py # Config loading and validation
-│   ├── shared/                     # Cross-engine utilities
-│   │   ├── validators.py           # Shared validation logic
-│   │   ├── utilities.py            # Helper functions
-│   │   └── exceptions.py           # Exception definitions
+│ ├── engines/
+│ │ ├── physics_engines/ # Engine adapters and integrations (package directories)
+│ │ │ ├── mujoco/ # MuJoCo backend (supported)
+│ │ │ ├── drake/ # Drake backend (extended)
+│ │ │ ├── pinocchio/ # Pinocchio backend (extended)
+│ │ │ ├── opensim/ # OpenSim backend (experimental)
+│ │ │ ├── myosuite/ # MyoSuite backend (experimental)
+│ │ │ ├── pendulum/ # Simplified educational models
+│ │ │ └── putting_green/ # Putting green simulation
+│ │ └── pendulum_models/ # Simplified educational models
+│ │ ├── twodof_pendulum.py
+│ │ └── biomechanical_pendulum.py
+│ ├── launchers/ # GUI/CLI entry points
+│ │ ├── upstream_drift_launcher.py # PyQt6 professional GUI (main entrypoint)
+│ │ ├── golf_suite_launcher.py # Multi-engine suite launcher
+│ │ ├── unified_launcher.py # Unified launcher interface
+│ │ └── cli_launcher.py # Command-line interface
+│ ├── api/ # FastAPI REST backend
+│ │ ├── main.py # API entry point
+│ │ ├── endpoints/ # REST endpoint definitions
+│ │ └── models.py # Pydantic request/response models
+│ ├── config/ # Configuration management
+│ │ └── launcher_manifest_loader.py # Config loading and validation
+│ ├── shared/ # Cross-engine utilities
+│ │ ├── validators.py # Shared validation logic
+│ │ ├── utilities.py # Helper functions
+│ │ └── exceptions.py # Exception definitions
 
-│   └── tools/                      # Development and analysis tools
-│       ├── analysis_tools.py       # Biomechanical analysis utilities
-│       └── validation_tools.py     # Cross-engine validation
+│ └── tools/ # Development and analysis tools
+│ ├── analysis_tools.py # Biomechanical analysis utilities
+│ └── validation_tools.py # Cross-engine validation
 ├── rust_core/
-│   └── upstream-physics/           # Rust physics kernels
-│       ├── src/
-│       │   ├── lib.rs
-│       │   └── physics.rs
-│       └── Cargo.toml
+│ └── upstream-physics/ # Rust physics kernels
+│ ├── src/
+│ │ ├── lib.rs
+│ │ └── physics.rs
+│ └── Cargo.toml
 ├── ui/
-│   ├── src/
-│   │   ├── main.ts                 # Tauri app entry point
-│   │   └── components/             # React/Vue components
-│   ├── tauri.conf.json
-│   └── package.json
+│ ├── src/
+│ │ ├── main.ts # Tauri app entry point
+│ │ └── components/ # React/Vue components
+│ ├── tauri.conf.json
+│ └── package.json
 ├── shared/
-│   └── models/                     # URDF/model definitions
-│       ├── golf_swing_models/
-│       ├── human_body_models/
-│       └── pendulum_models/
+│ └── models/ # URDF/model definitions
+│ ├── golf_swing_models/
+│ ├── human_body_models/
+│ └── pendulum_models/
 ├── tests/
-│   ├── unit/                       # Unit tests per module
-│   ├── integration/                # Cross-engine integration tests
-│   ├── acceptance/                 # End-to-end scenario tests
-│   ├── cross_engine/               # Cross-validation tests
-│   ├── physics_validation/         # Physics accuracy tests
-│   ├── benchmarks/                 # Performance benchmarks
-│   └── conftest.py                 # Pytest fixtures and configuration
+│ ├── unit/ # Unit tests per module
+│ ├── integration/ # Cross-engine integration tests
+│ ├── acceptance/ # End-to-end scenario tests
+│ ├── cross_engine/ # Cross-validation tests
+│ ├── physics_validation/ # Physics accuracy tests
+│ ├── benchmarks/ # Performance benchmarks
+│ └── conftest.py # Pytest fixtures and configuration
 ├── .github/
-│   └── workflows/
+│ └── workflows/
 
-│       ├── ci-standard.yml         # Standard CI checks
-│       ├── heavy-tests-opt-in.yml  # Heavy tests (custom runner)
-│       ├── nightly-cross-validation.yml
-│       ├── tauri-build.yml
-│       ├── vendor-freshness.yml
-│       └── docker-size-gates.yml
+│ ├── ci-standard.yml # Standard CI checks
+│ ├── heavy-tests-opt-in.yml # Heavy tests (custom runner)
+│ ├── nightly-cross-validation.yml
+│ ├── tauri-build.yml
+│ ├── vendor-freshness.yml
+│ └── docker-size-gates.yml
 ├── pyproject.toml
 ├── poetry.lock
-├── SPEC.md                         # This file
+├── SPEC.md # This file
 └── README.md
 
 ### Key Components
 
-| Component                | Location                                 | Purpose                                                                                     |
-| ------------------------ | ---------------------------------------- | ------------------------------------------------------------------------------------------- |
-| MuJoCo Engine Adapter    | `src/engines/physics_engines/mujoco/`    | Primary physics engine integration with full support for contact dynamics and muscle models |
-| Drake Engine Adapter     | `src/engines/physics_engines/drake/`     | Extended Drake support for trajectory optimization and manipulation tasks                   |
-| Pinocchio Engine Adapter | `src/engines/physics_engines/pinocchio/` | Extended Pinocchio support for efficient rigid-body dynamics computation                    |
-| OpenSim Engine Adapter   | `src/engines/physics_engines/opensim/`   | Experimental OpenSim integration for clinical biomechanics workflows                        |
-| MyoSuite Engine Adapter  | `src/engines/physics_engines/myosuite/`  | Experimental MyoSuite integration for detailed muscle physiology simulation                 |
-| Pendulum Models          | `src/engines/physics_engines/pendulum/`  | Educational simplified models for learning and quick prototyping                            |
-| FastAPI Backend          | `src/api/`                               | REST API exposing simulation, IK/ID, trajectory optimization, and control endpoints         |
-| PyQt6 GUI                | `src/launchers/upstream_drift_launcher.py`         | Professional interactive GUI with real-time 3D visualization                                |
-| Sidekick (AI assistant)  | PyQt: `src/shared/python/ai/gui/assistant_panel.py` · React: `ui/src/components/ui/ChatPanel.tsx` · Adapter: `src/tools/sidekick/_embed_adapter.py` | In-app AI chat surface with streaming, RAG, session history, and agentic tool dispatch. Design tokens: `src/shared/python/theme/sidekick_tokens.py`. See `docs/sidekick/README.md`. |
-| Tauri Desktop App        | `ui/`                                    | Cross-platform desktop application wrapper (Windows, macOS, Linux)                          |
-| Rust Physics Kernels     | `rust_core/upstream-physics/`            | High-performance compiled physics routines for critical paths, including initial flexible shaft FEM element primitives |
-| Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
-| Shared Utilities         | `src/shared/`                            | Cross-engine validators, helpers, and exception definitions                                 |
-| URDF Models              | `shared/models/`                         | Canonical model definitions (URDF format) for golf swings, human body, pendulums            |
+| Component                 | Location                                                                                                                                            | Purpose                                                                                                                                                                             |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MuJoCo Engine Adapter     | `src/engines/physics_engines/mujoco/`                                                                                                               | Primary physics engine integration with full support for contact dynamics and muscle models                                                                                         |
+| Drake Engine Adapter      | `src/engines/physics_engines/drake/`                                                                                                                | Extended Drake support for trajectory optimization and manipulation tasks                                                                                                           |
+| Pinocchio Engine Adapter  | `src/engines/physics_engines/pinocchio/`                                                                                                            | Extended Pinocchio support for efficient rigid-body dynamics computation                                                                                                            |
+| OpenSim Engine Adapter    | `src/engines/physics_engines/opensim/`                                                                                                              | Experimental OpenSim integration for clinical biomechanics workflows                                                                                                                |
+| MyoSuite Engine Adapter   | `src/engines/physics_engines/myosuite/`                                                                                                             | Experimental MyoSuite integration for detailed muscle physiology simulation                                                                                                         |
+| MyoSuite Pose Interchange | `src/shared/python/pose_interchange/adapters/myosuite.py`, `src/shared/python/pose_interchange/services/myosuite.py`                                | Cross-engine pose interchange adapter and live kinematics service for MyoSuite                                                                                                      |
+| Pendulum Models           | `src/engines/physics_engines/pendulum/`                                                                                                             | Educational simplified models for learning and quick prototyping                                                                                                                    |
+| FastAPI Backend           | `src/api/`                                                                                                                                          | REST API exposing simulation, IK/ID, trajectory optimization, and control endpoints                                                                                                 |
+| PyQt6 GUI                 | `src/launchers/upstream_drift_launcher.py`                                                                                                          | Professional interactive GUI with real-time 3D visualization                                                                                                                        |
+| Sidekick (AI assistant)   | PyQt: `src/shared/python/ai/gui/assistant_panel.py` · React: `ui/src/components/ui/ChatPanel.tsx` · Adapter: `src/tools/sidekick/_embed_adapter.py` | In-app AI chat surface with streaming, RAG, session history, and agentic tool dispatch. Design tokens: `src/shared/python/theme/sidekick_tokens.py`. See `docs/sidekick/README.md`. |
+| Tauri Desktop App         | `ui/`                                                                                                                                               | Cross-platform desktop application wrapper (Windows, macOS, Linux)                                                                                                                  |
+| Rust Physics Kernels      | `rust_core/upstream-physics/`                                                                                                                       | High-performance compiled physics routines for critical paths, including initial flexible shaft FEM element primitives                                                              |
+| Configuration Manager     | `src/config/`                                                                                                                                       | Centralized configuration loading, validation, and environment management                                                                                                           |
+| Shared Utilities          | `src/shared/`                                                                                                                                       | Cross-engine validators, helpers, and exception definitions                                                                                                                         |
+| URDF Models               | `shared/models/`                                                                                                                                    | Canonical model definitions (URDF format) for golf swings, human body, pendulums                                                                                                    |
 
 ### Engine Tier Policy
 
@@ -222,23 +231,23 @@ Engine tier metadata is declared in each in-scope engine package with
 
 ### Core Features
 
-| #   | Feature                            | Status | Description                                                                                         |
-| --- | ---------------------------------- | ------ | --------------------------------------------------------------------------------------------------- |
-| F1  | MuJoCo engine integration          | ✅     | Full support for MuJoCo 3.3.0+ with contact dynamics, muscle actuators, sensor simulation, and pose-conditioned motion-matching target synthesis |
-| F2  | Drake engine integration           | ✅     | Extended Drake support for trajectory optimization, manipulation, and planning problems             |
-| F3  | Pinocchio engine integration       | ✅     | Extended Pinocchio support for efficient rigid-body dynamics and jacobian computation               |
-| F4  | OpenSim engine integration         | 🔄     | Experimental OpenSim integration for clinical biomechanics and musculoskeletal analysis             |
-| F5  | MyoSuite engine integration        | 🔄     | Experimental MyoSuite integration for detailed muscle physiology and motor control                  |
-| F6  | Cross-engine validation            | ✅     | Automated cross-validation framework comparing results across all engines with tolerance thresholds |
-| F7  | FastAPI REST API                   | ✅     | Programmatic access to simulation, IK/ID, trajectory optimization, and control endpoints            |
-| F8  | PyQt6 professional GUI             | ✅     | Interactive desktop GUI with real-time 3D rendering, parameter adjustment, and result export        |
-| F9  | Tauri desktop application          | 🔄     | Cross-platform desktop app bundling the GUI and API with native OS integration                      |
-| F10 | MATLAB/Simulink integration        | ✅     | Export models to MATLAB format and integrate with Simulink via MEX interface                        |
-| F11 | Trajectory optimization            | ✅     | SciPy-based trajectory optimization with constraint support and custom cost functions               |
-| F12 | Muscle dynamics analysis           | ✅     | IK, ID, and muscle dynamics computation with Hill-type and Millard muscle models                    |
-| F13 | Motion capture integration         | 🔄     | Import and track motion capture data (C3D, BVH, TRC formats) and compare with simulation            |
-| F14 | Reinforcement learning integration | 🔄     | Gym-compatible interface for RL-based controller learning and policy optimization                   |
-| F15 | Sidekick AI assistant              | 🔄     | In-app and standalone AI assistant surface (PyQt + React/Tauri + `sidekick.standalone.*`) with streaming, RAG, session history, persisted standalone preferences, onboarding, and agentic tool dispatch. See `docs/sidekick/README.md` and ADR-0018. |
+| #   | Feature                            | Status | Description                                                                                                                                                                                                                                                                        |
+| --- | ---------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F1  | MuJoCo engine integration          | ✅     | Full support for MuJoCo 3.3.0+ with contact dynamics, muscle actuators, sensor simulation, and pose-conditioned motion-matching target synthesis                                                                                                                                   |
+| F2  | Drake engine integration           | ✅     | Extended Drake support for trajectory optimization, manipulation, and planning problems                                                                                                                                                                                            |
+| F3  | Pinocchio engine integration       | ✅     | Extended Pinocchio support for efficient rigid-body dynamics and jacobian computation                                                                                                                                                                                              |
+| F4  | OpenSim engine integration         | 🔄     | Experimental OpenSim integration for clinical biomechanics and musculoskeletal analysis                                                                                                                                                                                            |
+| F5  | MyoSuite engine integration        | 🔄     | Experimental MyoSuite integration for detailed muscle physiology and motor control                                                                                                                                                                                                 |
+| F6  | Cross-engine validation            | ✅     | Automated cross-validation framework comparing results across all engines with tolerance thresholds                                                                                                                                                                                |
+| F7  | FastAPI REST API                   | ✅     | Programmatic access to simulation, IK/ID, trajectory optimization, and control endpoints                                                                                                                                                                                           |
+| F8  | PyQt6 professional GUI             | ✅     | Interactive desktop GUI with real-time 3D rendering, parameter adjustment, and result export                                                                                                                                                                                       |
+| F9  | Tauri desktop application          | 🔄     | Cross-platform desktop app bundling the GUI and API with native OS integration                                                                                                                                                                                                     |
+| F10 | MATLAB/Simulink integration        | ✅     | Export models to MATLAB format and integrate with Simulink via MEX interface                                                                                                                                                                                                       |
+| F11 | Trajectory optimization            | ✅     | SciPy-based trajectory optimization with constraint support and custom cost functions                                                                                                                                                                                              |
+| F12 | Muscle dynamics analysis           | ✅     | IK, ID, and muscle dynamics computation with Hill-type and Millard muscle models                                                                                                                                                                                                   |
+| F13 | Motion capture integration         | 🔄     | Import and track motion capture data (C3D, BVH, TRC formats) and compare with simulation                                                                                                                                                                                           |
+| F14 | Reinforcement learning integration | 🔄     | Gym-compatible interface for RL-based controller learning and policy optimization                                                                                                                                                                                                  |
+| F15 | Sidekick AI assistant              | 🔄     | In-app and standalone AI assistant surface (PyQt + React/Tauri + `sidekick.standalone.*`) with streaming, RAG, session history, persisted standalone preferences, onboarding, and agentic tool dispatch. See `docs/sidekick/README.md` and ADR-0018.                               |
 | F16 | Model-training controller          | 🔄     | In-launcher training dashboard (PR3) with scheduler, dataset library, resource monitor, engine-compat gate, and ML/RL-aware stats. Backend contracts + scheduler land in `src/shared/python/training/` (PRs 1–2); GUI tab, tab-backgrounding refactor, and CVAE wiring in PRs 3–5. |
 
 ### API / Interface Contract
@@ -353,7 +362,7 @@ Configuration is managed through:
 
 Example config.yaml:
 
-```yaml
+````yaml
 default_engine: mujoco
 api:
   host: 0.0.0.0
@@ -657,9 +666,11 @@ policy lives in `docker/README.md` and ADR-0021.
 | 2026-05-24 | 1.0.190 | Surfaced API database pool controls for non-SQLite deployments via `GOLF_DB_POOL_SIZE`, `GOLF_DB_POOL_RECYCLE`, and `GOLF_DB_POOL_PRE_PING`; `src/api/database.py` now builds non-SQLite engines from shared config accessors instead of hardcoded pool defaults, with regression coverage in `tests/unit/test_config_environment.py` and `tests/unit/api/test_database_init.py`. |
 | 2026-05-24 | 1.0.191 | Added repo-hygiene regression coverage that pins the root `.gitignore` contract for `.env` secrets versus tracked `*.example` env templates, preventing issue #5920 from regressing through accidental secret-file commits or over-broad ignores. |
 | 2026-05-24 | 1.0.189 | Improved CI/test observability for optional dependency lanes: optional collection skips warn once with missing requirements, `tests/unit/training/runtime/test_pytorch_cvae_adapter.py` uses a wrapper progress sink for cancellation, and standard workflow inventory jobs have 15-minute timeouts to avoid false timeouts on loaded self-hosted runners. |
+| 2026-05-25 | 1.0.191 | Surfaced API database pool controls for non-SQLite deployments via `GOLF_DB_POOL_SIZE`, `GOLF_DB_POOL_RECYCLE`, and `GOLF_DB_POOL_PRE_PING`; `src/api/database.py` now builds non-SQLite engines from shared config accessors instead of hardcoded pool defaults, with regression coverage in `tests/unit/test_config_environment.py` and `tests/unit/api/test_database_init.py`. |
+| 2026-05-25 | 1.0.189 | Improved CI/test observability for optional dependency lanes: optional collection skips warn once with missing requirements, `tests/unit/training/runtime/test_pytorch_cvae_adapter.py` uses a wrapper progress sink for cancellation, and standard workflow inventory jobs have 15-minute timeouts to avoid false timeouts on loaded self-hosted runners. |
 | 2026-05-23 | 1.0.186 | Deferred `src/shared/python/realtime/ws_pubsub.py` backend resolution until `WSPubSub.start()`, `publish()`, or `subscribe()` first use so module import no longer probes optional realtime runtime dependencies, and added focused regression coverage for lazy resolution plus the python publish fallback path. |
 | 2026-05-22 | 1.0.182 | Documented the motion-pipeline REST contract for `POST /api/v1/motion-pipeline/run` and its preprocessing-step boolean coercion rule so `PipelineRequest` preserves Pydantic handling of `enabled` values like `"false"` when converting into `PipelineConfig`; regression coverage lives in `tests/unit/motion_pipeline/orchestrator/test_api.py`. |
-| 2026-05-24 | 1.0.188 | Deferred realtime WebSocket backend resolution until first explicit start/use and made `WSPubSub.start()` launch the Python backend even when the instance was created with `autostart=False`; added focused regression coverage in `tests/shared/realtime/test_ws_pubsub.py`. |
+| 2026-05-25 | 1.0.188 | Deferred realtime WebSocket backend resolution until first explicit start/use and made `WSPubSub.start()` launch the Python backend even when the instance was created with `autostart=False`; added focused regression coverage in `tests/shared/realtime/test_ws_pubsub.py`. |
 | 2026-05-23 | 1.0.181 | Sanitized error payloads for the chat websocket connection to prevent leaks. Added standalone Sidekick foundation (CLI entry point, PyQt window shell, and session store) per epic #5979. |
 | 2026-05-22 | 1.0.181 | Added the standalone Sidekick CLI scaffold in `src/shared/python/sidekick/__main__.py` with an implicit `gui` default, closest-match suggestions for mistyped flags, early path validation for `run`, deferred GUI imports for headless parsing, and focused regression coverage in `tests/unit/sidekick/test_cli.py`. Tightened `scripts/ci/check_error_handling_ratchet.py` so the `asyncio.gather(...)` anti-pattern scan now balances multiline argument lists before deciding whether `return_exceptions=` is present, and added matching regression coverage in `tests/unit/scripts/test_error_handling_ratchet.py` for both compliant and violating multiline gather calls. |
 | 2026-05-22 | 1.0.180 | Landed the pure-Python foundation for the Idiot-Proof UX epic (#5968): `src/shared/python/ux/` adds the `FieldMetadata` registry, `ProvenanceRecord`/`ProvenanceValue`, `PreflightCheck`/`Severity`/`run_preflight()`, and the `UserFacingError` envelope, all with full Design-by-Contract validation; seeded `configs/ux/field_metadata.yaml` and `configs/ux/error_messages.yaml`; added `scripts/ci/check_ux_coverage_ratchet.py` plus baseline at 714 unwrapped inputs (62 QSpinBox + 221 QDoubleSpinBox + 217 QComboBox + 70 QSlider + 94 QLineEdit + 35 `<input>` + 14 `<select>` + 1 `<textarea>`); documented the workflow in `docs/ux/field_metadata.md`; 68 unit tests in `tests/unit/ux/`. Sanitized unexpected `src/api/routes/simulation_ws.py` runtime errors before they reach WebSocket clients while preserving traceback-bearing server logs, and added direct regression coverage for the generic error payload contract. Re-baselined `scripts/config/module_size_budget_baseline.json` from 10 stale exceptions (sizes 3-5x overstated, 7 files since decomposed) down to the 3 modules that genuinely exceed 1,500 lines today, and added `validate_baseline_truthfulness` to `scripts/check_module_size_budget.py` as a CI ratchet against future fraudulent baselines. Refs #5922. |
@@ -823,5 +834,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-22 | 1.0.170 | Hardened the shared BitNet subprocess adapter by rejecting non-UTF-8 and oversize prompts before `llama-cli` launch, and added focused regression coverage for the synchronous and streaming guard paths (issue #5913). |
 | 2026-05-25 | 1.0.171 | Optimized sum-of-squares calculation for Drake constraint residuals using element-wise multiplication and fixed a missing `body_marker` breakdown argument. |
 | 2026-05-25 | 1.0.171 | Optimized `_resample_drawn_points` using `np.asarray` and slicing to avoid redundant Python allocations (#5912). |
+| 2026-05-25 | 1.0.171 | Wire ADR numbering governance tests and strengthen duplicate numbering test assertions (#6065). |
 ````
+
 | 2026-05-25 | 1.0.171 | Updated the docstrings for `LiveKinematicsService` implementations (`drake.py`, `opensim.py`, `simscape.py`) to accurately reflect their real, post-#4963 functionality instead of incorrectly claiming to raise `NotImplementedError` (Issue #6092). |
