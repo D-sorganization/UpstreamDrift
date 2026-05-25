@@ -69,6 +69,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ## 4. Architecture Overview
 
+### Recent Architecture Changes
+
+- **ADR-0022**: Defined the boundary between `ChatDockWidget` (legacy compatibility) and Sidekick (`AIAssistantPanel`) product surfaces.
+
 ### Recent Spec Updates
 
 - **2026-05-25** - Corrected feature-registry engine probes to resolve physics-engine assets from either repo-root `engines/` or the canonical `src/engines/` layout, with regression coverage for MuJoCo, Drake, and Pinocchio probe success under the `src/` layout used by Docker smoke and repo-root checkouts.

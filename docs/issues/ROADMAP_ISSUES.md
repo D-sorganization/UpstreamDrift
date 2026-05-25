@@ -50,6 +50,12 @@ These issues are already tracked in GitHub and represent planned improvements.
 - **Status**: Open
 - **Description**: Normalize physics constants across all engines
 
+### Phase 2.4: Chat Entry-point Consolidation
+
+- **GitHub Issue**: #6119
+- **Status**: Open
+- **Description**: Consolidate chat entry points and decompose \_chat_dock_widget_qt.py (Follow-up from ADR-0022 and #6120)
+
 ## Phase 3: Integration
 
 ### Phase 3.1: Cross-Engine Integration Tests
