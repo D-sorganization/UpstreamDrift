@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   exceptions for files that have since been decomposed back under the 1,500-line
   cap, and updated the remaining 3 entries with current truthful line counts
   (#5922).
+- Recorded ADR-0021 and `docker/README.md` to make the root container policy
+  explicit: `Dockerfile` is the default release/runtime path,
+  `Dockerfile.heavy_test` stays heavy-test parity only, and
+  `Dockerfile.modular` remains the opt-in profile build surface (#6097).
 
 ### Refactor
 
