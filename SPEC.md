@@ -123,98 +123,97 @@ UpstreamDrift sits at the center of a biomechanical simulation ecosystem. It dep
 
 ### Module Map
 
-````
 UpstreamDrift/
 ├── src/
-│   ├── engines/
-│   │   ├── physics_engines/        # Engine adapters and integrations (package directories)
-│   │   │   ├── mujoco/             # MuJoCo backend (supported)
-│   │   │   ├── drake/              # Drake backend (extended)
-│   │   │   ├── pinocchio/          # Pinocchio backend (extended)
-│   │   │   ├── opensim/            # OpenSim backend (experimental)
-│   │   │   ├── myosuite/           # MyoSuite backend (experimental)
-│   │   │   ├── pendulum/           # Simplified educational models
-│   │   │   └── putting_green/      # Putting green simulation
-│   │   └── pendulum_models/        # Simplified educational models
-│   │       ├── twodof_pendulum.py
-│   │       └── biomechanical_pendulum.py
-│   ├── launchers/                  # GUI/CLI entry points
-│   │   ├── upstream_drift_launcher.py        # PyQt6 professional GUI (main entrypoint)
-│   │   ├── golf_suite_launcher.py  # Multi-engine suite launcher
-│   │   ├── unified_launcher.py     # Unified launcher interface
-│   │   └── cli_launcher.py         # Command-line interface
-│   ├── api/                        # FastAPI REST backend
-│   │   ├── main.py                 # API entry point
-│   │   ├── endpoints/              # REST endpoint definitions
-│   │   └── models.py               # Pydantic request/response models
-│   ├── config/                     # Configuration management
-│   │   └── launcher_manifest_loader.py # Config loading and validation
-│   ├── shared/                     # Cross-engine utilities
-│   │   ├── validators.py           # Shared validation logic
-│   │   ├── utilities.py            # Helper functions
-│   │   └── exceptions.py           # Exception definitions
+│ ├── engines/
+│ │ ├── physics_engines/ # Engine adapters and integrations (package directories)
+│ │ │ ├── mujoco/ # MuJoCo backend (supported)
+│ │ │ ├── drake/ # Drake backend (extended)
+│ │ │ ├── pinocchio/ # Pinocchio backend (extended)
+│ │ │ ├── opensim/ # OpenSim backend (experimental)
+│ │ │ ├── myosuite/ # MyoSuite backend (experimental)
+│ │ │ ├── pendulum/ # Simplified educational models
+│ │ │ └── putting_green/ # Putting green simulation
+│ │ └── pendulum_models/ # Simplified educational models
+│ │ ├── twodof_pendulum.py
+│ │ └── biomechanical_pendulum.py
+│ ├── launchers/ # GUI/CLI entry points
+│ │ ├── upstream_drift_launcher.py # PyQt6 professional GUI (main entrypoint)
+│ │ ├── golf_suite_launcher.py # Multi-engine suite launcher
+│ │ ├── unified_launcher.py # Unified launcher interface
+│ │ └── cli_launcher.py # Command-line interface
+│ ├── api/ # FastAPI REST backend
+│ │ ├── main.py # API entry point
+│ │ ├── endpoints/ # REST endpoint definitions
+│ │ └── models.py # Pydantic request/response models
+│ ├── config/ # Configuration management
+│ │ └── launcher_manifest_loader.py # Config loading and validation
+│ ├── shared/ # Cross-engine utilities
+│ │ ├── validators.py # Shared validation logic
+│ │ ├── utilities.py # Helper functions
+│ │ └── exceptions.py # Exception definitions
 
-│   └── tools/                      # Development and analysis tools
-│       ├── analysis_tools.py       # Biomechanical analysis utilities
-│       └── validation_tools.py     # Cross-engine validation
+│ └── tools/ # Development and analysis tools
+│ ├── analysis_tools.py # Biomechanical analysis utilities
+│ └── validation_tools.py # Cross-engine validation
 ├── rust_core/
-│   └── upstream-physics/           # Rust physics kernels
-│       ├── src/
-│       │   ├── lib.rs
-│       │   └── physics.rs
-│       └── Cargo.toml
+│ └── upstream-physics/ # Rust physics kernels
+│ ├── src/
+│ │ ├── lib.rs
+│ │ └── physics.rs
+│ └── Cargo.toml
 ├── ui/
-│   ├── src/
-│   │   ├── main.ts                 # Tauri app entry point
-│   │   └── components/             # React/Vue components
-│   ├── tauri.conf.json
-│   └── package.json
+│ ├── src/
+│ │ ├── main.ts # Tauri app entry point
+│ │ └── components/ # React/Vue components
+│ ├── tauri.conf.json
+│ └── package.json
 ├── shared/
-│   └── models/                     # URDF/model definitions
-│       ├── golf_swing_models/
-│       ├── human_body_models/
-│       └── pendulum_models/
+│ └── models/ # URDF/model definitions
+│ ├── golf_swing_models/
+│ ├── human_body_models/
+│ └── pendulum_models/
 ├── tests/
-│   ├── unit/                       # Unit tests per module
-│   ├── integration/                # Cross-engine integration tests
-│   ├── acceptance/                 # End-to-end scenario tests
-│   ├── cross_engine/               # Cross-validation tests
-│   ├── physics_validation/         # Physics accuracy tests
-│   ├── benchmarks/                 # Performance benchmarks
-│   └── conftest.py                 # Pytest fixtures and configuration
+│ ├── unit/ # Unit tests per module
+│ ├── integration/ # Cross-engine integration tests
+│ ├── acceptance/ # End-to-end scenario tests
+│ ├── cross_engine/ # Cross-validation tests
+│ ├── physics_validation/ # Physics accuracy tests
+│ ├── benchmarks/ # Performance benchmarks
+│ └── conftest.py # Pytest fixtures and configuration
 ├── .github/
-│   └── workflows/
+│ └── workflows/
 
-│       ├── ci-standard.yml         # Standard CI checks
-│       ├── heavy-tests-opt-in.yml  # Heavy tests (custom runner)
-│       ├── nightly-cross-validation.yml
-│       ├── tauri-build.yml
-│       ├── vendor-freshness.yml
-│       └── docker-size-gates.yml
+│ ├── ci-standard.yml # Standard CI checks
+│ ├── heavy-tests-opt-in.yml # Heavy tests (custom runner)
+│ ├── nightly-cross-validation.yml
+│ ├── tauri-build.yml
+│ ├── vendor-freshness.yml
+│ └── docker-size-gates.yml
 ├── pyproject.toml
 ├── poetry.lock
-├── SPEC.md                         # This file
+├── SPEC.md # This file
 └── README.md
 
 ### Key Components
 
-| Component                | Location                                 | Purpose                                                                                     |
-| ------------------------ | ---------------------------------------- | ------------------------------------------------------------------------------------------- |
-| MuJoCo Engine Adapter    | `src/engines/physics_engines/mujoco/`    | Primary physics engine integration with full support for contact dynamics and muscle models |
-| Drake Engine Adapter     | `src/engines/physics_engines/drake/`     | Extended Drake support for trajectory optimization and manipulation tasks                   |
-| Pinocchio Engine Adapter | `src/engines/physics_engines/pinocchio/` | Extended Pinocchio support for efficient rigid-body dynamics computation                    |
-| OpenSim Engine Adapter   | `src/engines/physics_engines/opensim/`   | Experimental OpenSim integration for clinical biomechanics workflows                        |
-| MyoSuite Engine Adapter  | `src/engines/physics_engines/myosuite/`  | Experimental MyoSuite integration for detailed muscle physiology simulation                 |
-| MyoSuite Pose Interchange | `src/shared/python/pose_interchange/adapters/myosuite.py`, `src/shared/python/pose_interchange/services/myosuite.py` | Cross-engine pose interchange adapter and live kinematics service for MyoSuite |
-| Pendulum Models          | `src/engines/physics_engines/pendulum/`  | Educational simplified models for learning and quick prototyping                            |
-| FastAPI Backend          | `src/api/`                               | REST API exposing simulation, IK/ID, trajectory optimization, and control endpoints         |
-| PyQt6 GUI                | `src/launchers/upstream_drift_launcher.py`         | Professional interactive GUI with real-time 3D visualization                                |
-| Sidekick (AI assistant)  | PyQt: `src/shared/python/ai/gui/assistant_panel.py` · React: `ui/src/components/ui/ChatPanel.tsx` · Adapter: `src/tools/sidekick/_embed_adapter.py` | In-app AI chat surface with streaming, RAG, session history, and agentic tool dispatch. Design tokens: `src/shared/python/theme/sidekick_tokens.py`. See `docs/sidekick/README.md`. |
-| Tauri Desktop App        | `ui/`                                    | Cross-platform desktop application wrapper (Windows, macOS, Linux)                          |
-| Rust Physics Kernels     | `rust_core/upstream-physics/`            | High-performance compiled physics routines for critical paths, including initial flexible shaft FEM element primitives |
-| Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
-| Shared Utilities         | `src/shared/`                            | Cross-engine validators, helpers, and exception definitions                                 |
-| URDF Models              | `shared/models/`                         | Canonical model definitions (URDF format) for golf swings, human body, pendulums            |
+| Component                 | Location                                                                                                                                            | Purpose                                                                                                                                                                             |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MuJoCo Engine Adapter     | `src/engines/physics_engines/mujoco/`                                                                                                               | Primary physics engine integration with full support for contact dynamics and muscle models                                                                                         |
+| Drake Engine Adapter      | `src/engines/physics_engines/drake/`                                                                                                                | Extended Drake support for trajectory optimization and manipulation tasks                                                                                                           |
+| Pinocchio Engine Adapter  | `src/engines/physics_engines/pinocchio/`                                                                                                            | Extended Pinocchio support for efficient rigid-body dynamics computation                                                                                                            |
+| OpenSim Engine Adapter    | `src/engines/physics_engines/opensim/`                                                                                                              | Experimental OpenSim integration for clinical biomechanics workflows                                                                                                                |
+| MyoSuite Engine Adapter   | `src/engines/physics_engines/myosuite/`                                                                                                             | Experimental MyoSuite integration for detailed muscle physiology simulation                                                                                                         |
+| MyoSuite Pose Interchange | `src/shared/python/pose_interchange/adapters/myosuite.py`, `src/shared/python/pose_interchange/services/myosuite.py`                                | Cross-engine pose interchange adapter and live kinematics service for MyoSuite                                                                                                      |
+| Pendulum Models           | `src/engines/physics_engines/pendulum/`                                                                                                             | Educational simplified models for learning and quick prototyping                                                                                                                    |
+| FastAPI Backend           | `src/api/`                                                                                                                                          | REST API exposing simulation, IK/ID, trajectory optimization, and control endpoints                                                                                                 |
+| PyQt6 GUI                 | `src/launchers/upstream_drift_launcher.py`                                                                                                          | Professional interactive GUI with real-time 3D visualization                                                                                                                        |
+| Sidekick (AI assistant)   | PyQt: `src/shared/python/ai/gui/assistant_panel.py` · React: `ui/src/components/ui/ChatPanel.tsx` · Adapter: `src/tools/sidekick/_embed_adapter.py` | In-app AI chat surface with streaming, RAG, session history, and agentic tool dispatch. Design tokens: `src/shared/python/theme/sidekick_tokens.py`. See `docs/sidekick/README.md`. |
+| Tauri Desktop App         | `ui/`                                                                                                                                               | Cross-platform desktop application wrapper (Windows, macOS, Linux)                                                                                                                  |
+| Rust Physics Kernels      | `rust_core/upstream-physics/`                                                                                                                       | High-performance compiled physics routines for critical paths, including initial flexible shaft FEM element primitives                                                              |
+| Configuration Manager     | `src/config/`                                                                                                                                       | Centralized configuration loading, validation, and environment management                                                                                                           |
+| Shared Utilities          | `src/shared/`                                                                                                                                       | Cross-engine validators, helpers, and exception definitions                                                                                                                         |
+| URDF Models               | `shared/models/`                                                                                                                                    | Canonical model definitions (URDF format) for golf swings, human body, pendulums                                                                                                    |
 
 ### Engine Tier Policy
 
@@ -232,23 +231,23 @@ Engine tier metadata is declared in each in-scope engine package with
 
 ### Core Features
 
-| #   | Feature                            | Status | Description                                                                                         |
-| --- | ---------------------------------- | ------ | --------------------------------------------------------------------------------------------------- |
-| F1  | MuJoCo engine integration          | ✅     | Full support for MuJoCo 3.3.0+ with contact dynamics, muscle actuators, sensor simulation, and pose-conditioned motion-matching target synthesis |
-| F2  | Drake engine integration           | ✅     | Extended Drake support for trajectory optimization, manipulation, and planning problems             |
-| F3  | Pinocchio engine integration       | ✅     | Extended Pinocchio support for efficient rigid-body dynamics and jacobian computation               |
-| F4  | OpenSim engine integration         | 🔄     | Experimental OpenSim integration for clinical biomechanics and musculoskeletal analysis             |
-| F5  | MyoSuite engine integration        | 🔄     | Experimental MyoSuite integration for detailed muscle physiology and motor control                  |
-| F6  | Cross-engine validation            | ✅     | Automated cross-validation framework comparing results across all engines with tolerance thresholds |
-| F7  | FastAPI REST API                   | ✅     | Programmatic access to simulation, IK/ID, trajectory optimization, and control endpoints            |
-| F8  | PyQt6 professional GUI             | ✅     | Interactive desktop GUI with real-time 3D rendering, parameter adjustment, and result export        |
-| F9  | Tauri desktop application          | 🔄     | Cross-platform desktop app bundling the GUI and API with native OS integration                      |
-| F10 | MATLAB/Simulink integration        | ✅     | Export models to MATLAB format and integrate with Simulink via MEX interface                        |
-| F11 | Trajectory optimization            | ✅     | SciPy-based trajectory optimization with constraint support and custom cost functions               |
-| F12 | Muscle dynamics analysis           | ✅     | IK, ID, and muscle dynamics computation with Hill-type and Millard muscle models                    |
-| F13 | Motion capture integration         | 🔄     | Import and track motion capture data (C3D, BVH, TRC formats) and compare with simulation            |
-| F14 | Reinforcement learning integration | 🔄     | Gym-compatible interface for RL-based controller learning and policy optimization                   |
-| F15 | Sidekick AI assistant              | 🔄     | In-app and standalone AI assistant surface (PyQt + React/Tauri + `sidekick.standalone.*`) with streaming, RAG, session history, persisted standalone preferences, onboarding, and agentic tool dispatch. See `docs/sidekick/README.md` and ADR-0018. |
+| #   | Feature                            | Status | Description                                                                                                                                                                                                                                                                        |
+| --- | ---------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F1  | MuJoCo engine integration          | ✅     | Full support for MuJoCo 3.3.0+ with contact dynamics, muscle actuators, sensor simulation, and pose-conditioned motion-matching target synthesis                                                                                                                                   |
+| F2  | Drake engine integration           | ✅     | Extended Drake support for trajectory optimization, manipulation, and planning problems                                                                                                                                                                                            |
+| F3  | Pinocchio engine integration       | ✅     | Extended Pinocchio support for efficient rigid-body dynamics and jacobian computation                                                                                                                                                                                              |
+| F4  | OpenSim engine integration         | 🔄     | Experimental OpenSim integration for clinical biomechanics and musculoskeletal analysis                                                                                                                                                                                            |
+| F5  | MyoSuite engine integration        | 🔄     | Experimental MyoSuite integration for detailed muscle physiology and motor control                                                                                                                                                                                                 |
+| F6  | Cross-engine validation            | ✅     | Automated cross-validation framework comparing results across all engines with tolerance thresholds                                                                                                                                                                                |
+| F7  | FastAPI REST API                   | ✅     | Programmatic access to simulation, IK/ID, trajectory optimization, and control endpoints                                                                                                                                                                                           |
+| F8  | PyQt6 professional GUI             | ✅     | Interactive desktop GUI with real-time 3D rendering, parameter adjustment, and result export                                                                                                                                                                                       |
+| F9  | Tauri desktop application          | 🔄     | Cross-platform desktop app bundling the GUI and API with native OS integration                                                                                                                                                                                                     |
+| F10 | MATLAB/Simulink integration        | ✅     | Export models to MATLAB format and integrate with Simulink via MEX interface                                                                                                                                                                                                       |
+| F11 | Trajectory optimization            | ✅     | SciPy-based trajectory optimization with constraint support and custom cost functions                                                                                                                                                                                              |
+| F12 | Muscle dynamics analysis           | ✅     | IK, ID, and muscle dynamics computation with Hill-type and Millard muscle models                                                                                                                                                                                                   |
+| F13 | Motion capture integration         | 🔄     | Import and track motion capture data (C3D, BVH, TRC formats) and compare with simulation                                                                                                                                                                                           |
+| F14 | Reinforcement learning integration | 🔄     | Gym-compatible interface for RL-based controller learning and policy optimization                                                                                                                                                                                                  |
+| F15 | Sidekick AI assistant              | 🔄     | In-app and standalone AI assistant surface (PyQt + React/Tauri + `sidekick.standalone.*`) with streaming, RAG, session history, persisted standalone preferences, onboarding, and agentic tool dispatch. See `docs/sidekick/README.md` and ADR-0018.                               |
 | F16 | Model-training controller          | 🔄     | In-launcher training dashboard (PR3) with scheduler, dataset library, resource monitor, engine-compat gate, and ML/RL-aware stats. Backend contracts + scheduler land in `src/shared/python/training/` (PRs 1–2); GUI tab, tab-backgrounding refactor, and CVAE wiring in PRs 3–5. |
 
 ### API / Interface Contract
@@ -363,7 +362,7 @@ Configuration is managed through:
 
 Example config.yaml:
 
-```yaml
+````yaml
 default_engine: mujoco
 api:
   host: 0.0.0.0
@@ -853,3 +852,4 @@ Epics #4796 (plot_style implementations) and #4755 (body_part_viz implementation
 ## Changelog
 
 - Wired up headless calculator invoker in `sidekick run`.
+  | 2026-05-25 | 1.0.171 | Updated `SensitiveDataFilter` regex to correctly match and redact JSON keys and values containing spaces or trailing commas, and replaced variable reference with string literal in redaction logic to fix potential NameError. |
