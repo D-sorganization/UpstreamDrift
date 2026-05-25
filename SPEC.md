@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.190                                            |
-| **Last Spec Update**    | 2026-05-24                                         |
+| **Spec Version**        | 1.0.191                                            |
+| **Last Spec Update**    | 2026-05-25                                         |
 
 ## 2. Purpose & Mission
 
