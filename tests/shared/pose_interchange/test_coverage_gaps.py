@@ -29,7 +29,6 @@ from src.shared.python.motion_matching.diagnostics.reference_pose import (
     REFERENCE_GOLFER_FIELDS,
 )
 from src.shared.python.pose_interchange import (
-    CONVENTION_TAG,
     CanonicalPose,
     CapabilityError,
     JointSlot,
@@ -41,6 +40,7 @@ from src.shared.python.pose_interchange.adapters import (
     ADAPTER_REGISTRY,
     DrakeAdapter,
     MujocoAdapter,
+    MyosuiteAdapter,
     OpenSimAdapter,
     PinocchioAdapter,
     SimscapeAdapter,
@@ -82,6 +82,10 @@ from src.shared.python.pose_interchange.services.opensim import (
 from src.shared.python.pose_interchange.services.pinocchio import (
     PinocchioKinematicsService,
     _pinocchio_is_importable,
+)
+from src.shared.python.pose_interchange.services.myosuite import (
+    MyosuiteKinematicsService,
+    _myosuite_is_importable,
 )
 from src.shared.python.pose_interchange.services.simscape import (
     SimscapeKinematicsService,
@@ -249,6 +253,7 @@ class TestCanonicalPoseExtras:
 _ADAPTERS = [
     ("drake", DrakeAdapter),
     ("mujoco", MujocoAdapter),
+    ("myosuite", MyosuiteAdapter),
     ("opensim", OpenSimAdapter),
     ("pinocchio", PinocchioAdapter),
     ("simscape", SimscapeAdapter),
@@ -434,6 +439,9 @@ class TestPoseIO:
             frozenset({"drake", "mujoco", "pinocchio", "opensim", "simscape"})
             == SUPPORTED_ENGINES
         )
+        # MyoSuite is registered in the adapter/service registries but is
+        # not a pose_io SUPPORTED_ENGINE (it serialises via the MuJoCo
+        # qpos path rather than its own file format).
 
     def test_list_saved_reference_poses_returns_list(self) -> None:
         # The library may or may not exist; either way the function
@@ -504,6 +512,7 @@ class TestServiceCapabilities:
         [
             (DrakeKinematicsService, "drake"),
             (MuJoCoKinematicsService, "mujoco"),
+            (MyosuiteKinematicsService, "myosuite"),
             (OpenSimKinematicsService, "opensim"),
             (PinocchioKinematicsService, "pinocchio"),
             (SimscapeKinematicsService, "simscape"),
@@ -517,6 +526,7 @@ class TestServiceCapabilities:
         [
             DrakeKinematicsService,
             MuJoCoKinematicsService,
+            MyosuiteKinematicsService,
             OpenSimKinematicsService,
             PinocchioKinematicsService,
             SimscapeKinematicsService,
@@ -533,6 +543,7 @@ class TestServiceCapabilities:
         [
             DrakeKinematicsService,
             MuJoCoKinematicsService,
+            MyosuiteKinematicsService,
             OpenSimKinematicsService,
             PinocchioKinematicsService,
         ],
@@ -547,6 +558,7 @@ class TestServiceCapabilities:
         [
             DrakeKinematicsService,
             MuJoCoKinematicsService,
+            MyosuiteKinematicsService,
             OpenSimKinematicsService,
             PinocchioKinematicsService,
         ],
@@ -560,6 +572,7 @@ class TestServiceCapabilities:
         "cls",
         [
             MuJoCoKinematicsService,
+            MyosuiteKinematicsService,
             OpenSimKinematicsService,
             PinocchioKinematicsService,
         ],
@@ -603,6 +616,9 @@ class TestServiceCapabilities:
             (MuJoCoKinematicsService, "set_pose"),
             (MuJoCoKinematicsService, "get_link_transforms"),
             (MuJoCoKinematicsService, "step"),
+            (MyosuiteKinematicsService, "set_pose"),
+            (MyosuiteKinematicsService, "get_link_transforms"),
+            (MyosuiteKinematicsService, "step"),
             (OpenSimKinematicsService, "set_pose"),
             (OpenSimKinematicsService, "get_link_transforms"),
             (PinocchioKinematicsService, "set_pose"),
@@ -651,6 +667,10 @@ class TestServiceCapabilities:
         svc = MuJoCoKinematicsService()
         svc.reset()
 
+    def test_myosuite_reset_noop_without_load(self) -> None:
+        svc = MyosuiteKinematicsService()
+        svc.reset()
+
     def test_opensim_reset_noop_without_load(self) -> None:
         svc = OpenSimKinematicsService()
         svc.reset()
@@ -671,6 +691,9 @@ class TestImportableProbes:
 
     def test_mujoco_probe_returns_bool(self) -> None:
         assert isinstance(_mujoco_is_importable(), bool)
+
+    def test_myosuite_probe_returns_bool(self) -> None:
+        assert isinstance(_myosuite_is_importable(), bool)
 
     def test_opensim_probe_returns_bool(self) -> None:
         assert isinstance(_opensim_is_importable(), bool)
@@ -765,7 +788,6 @@ class TestMujocoQposBuilder:
         assert qpos[0] == pytest.approx(np.pi / 2)
 
     def test_configured_layout_via_mapping(self) -> None:
-        fake = self._fake_mujoco()
         slot = JointSlot(
             canonical_name="LEStartPosition",
             engine_name="le",
@@ -781,18 +803,8 @@ class TestMujocoQposBuilder:
             "joint_layout": {"LEStartPosition": slot},
         }
 
-        # _canonical_pose_to_qpos uses attribute access for nq, so wrap it.
-        class _ModelView:
-            def __init__(self, payload: dict) -> None:
-                self._payload = payload
-
-            def __getattr__(self, key: str):
-                return self._payload[key]
-
-        # Use dict directly: _configured_joint_layout supports Mapping branch.
-        pose = canonical_zero_pose()
-        # Direct call would fail (nq via attr); use the view to exercise the
-        # Mapping branch on the joint_layout helper alone:
+        # Use dict directly: _configured_joint_layout supports the Mapping
+        # branch without needing a real MuJoCo model or fake module.
         from src.shared.python.pose_interchange.services.mujoco import (
             _configured_joint_layout,
         )

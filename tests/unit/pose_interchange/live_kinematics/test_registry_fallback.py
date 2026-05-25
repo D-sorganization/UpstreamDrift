@@ -38,6 +38,11 @@ _FALLBACK_PROBES: Iterable[tuple[str, str, str]] = (
         "_mujoco_is_importable",
     ),
     (
+        "myosuite",
+        "src.shared.python.pose_interchange.services.myosuite",
+        "_myosuite_is_importable",
+    ),
+    (
         "pinocchio",
         "src.shared.python.pose_interchange.services.pinocchio",
         "_pinocchio_is_importable",
