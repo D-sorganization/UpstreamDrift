@@ -11,10 +11,10 @@ Valid examples::
     # FIXME(#1234): temporary workaround
     raise NotImplementedError("not yet implemented TODO: #4963")
 
-Invalid examples::
+Invalid examples (each line below violates rule #5922 — missing issue reference)::
 
-    # TODO: refactor this
-    # FIXME - need to clean up
+    # TODO: refactor this        <- rejected; needs e.g. #5922
+    # FIXME - need to clean up   <- rejected; needs e.g. #5922
 
 Exit codes:
     0 — no violations (CI passes)
