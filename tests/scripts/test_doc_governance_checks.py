@@ -182,7 +182,7 @@ def test_docs_governance_rejects_duplicate_source_of_truth_headings(
 
 
 def test_docs_governance_rejects_duplicate_adr_numbers(
-    tmp_path: Path, monkeypatch
+    tmp_path: Path, monkeypatch, capsys
 ) -> None:
     _write(tmp_path / "docs" / "README.md", "# Docs\n")
     _write(tmp_path / "docs" / "assessments" / "README.md", "# Assessments\n")
@@ -209,6 +209,10 @@ def test_docs_governance_rejects_duplicate_adr_numbers(
     monkeypatch.setattr(check_docs_governance, "_git_changed_files", list)
 
     assert check_docs_governance.main() == 1
+
+    captured = capsys.readouterr()
+    assert "Duplicate ADR numbering detected:" in captured.err
+    assert "duplicate ADR number 0005: 0005-first.md, 0005-second.md" in captured.err
 
 
 def test_docs_governance_rejects_missing_examples_entries(

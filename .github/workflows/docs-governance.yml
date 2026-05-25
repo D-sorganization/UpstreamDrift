@@ -47,6 +47,9 @@ jobs:
       - name: Validate documentation governance files
         run: python3 scripts/check_docs_governance.py
 
+      - name: Test documentation governance files
+        run: python3 -m pytest tests/scripts/test_doc_governance_checks.py -q
+
       - name: Validate documentation catalog
         run: python3 scripts/check_doc_catalog.py
 
