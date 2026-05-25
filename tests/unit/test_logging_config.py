@@ -124,6 +124,24 @@ class TestSensitiveDataFilter:
         # args should be cleared after formatting
         assert record.args is None
 
+    def test_redacts_compact_json(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record('{"password":123,"user":"bob"}')
+        flt.filter(record)
+        assert record.msg == '{"password":***REDACTED***,"user":"bob"}'
+
+    def test_redacts_with_delimiters(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record("password=123&user=bob")
+        flt.filter(record)
+        assert record.msg == "password=***REDACTED***&user=bob"
+
+    def test_redacts_braces(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record("password:123 }")
+        flt.filter(record)
+        assert record.msg == "password:***REDACTED*** }"
+
     def test_case_insensitive_password(self) -> None:
         flt = SensitiveDataFilter()
         record = self._make_record("Password=MySuperSecret")
