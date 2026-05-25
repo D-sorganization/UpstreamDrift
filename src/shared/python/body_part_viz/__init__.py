@@ -1,11 +1,20 @@
-"""Body-part visualisation contracts and dataclasses.
+"""Body-part visualisation contracts, dataclasses, and implementations.
 
-This package defines the abstract surface (Protocols + frozen dataclasses)
-that every shape, fitter, and renderer implementation talks across.
+This package owns the canonical body-part visualisation stack used
+across UpstreamDrift:
 
-Implementations of shapes, fitters, and rendering backends live in the
-``shapes``, ``fitters``, and ``renderers`` sub-packages and are added in
-follow-up issues of EPIC #4755.
+- ``contracts`` — abstract surface (Protocols) that every shape,
+  fitter, and renderer implementation talks across.
+- ``bindings`` — marker bindings and configuration.
+- ``shapes`` — built-in body-part shape definitions.
+- ``fitters`` — shape fitting implementations.
+- ``renderers`` — rendering backend implementations.
+- ``asset_library`` — reusable visual assets.
+- ``persistence`` — segment visualisation schema and persistence.
+- ``theme`` — shape styling themes.
+- ``urdf_bridge`` — URDF export and bridging.
+
+Epic #4755 shipped the full stack.
 """
 
 from __future__ import annotations
