@@ -1,3 +1,4 @@
+# See docker/README.md and ADR-0021 (docs/adr/0021-container-strategy.md) for container policy.
 # Modular UpstreamDrift Dockerfile.
 # Root container policy:
 # - canonical opt-in modular profile build surface

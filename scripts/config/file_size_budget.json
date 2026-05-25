@@ -1,54 +1,54 @@
 {
-  "max_lines": 1200,
-  "max_exceptions": 8,
-  "exceptions": [
-    {
-      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/Motion_Capture_Plotter.py",
-      "owner": "@simscape-gui",
-      "reason": "Issue #5922 temporary exception while the legacy plotting module is decomposed.",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/starting_pose_matcher.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #5922 temporary exception while the motion-capture matcher flow is split into smaller modules.",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/shared/python/chat/_chat_dock_widget_qt.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #5922 temporary exception pending ADR-0022: keep ChatDockWidget as a legacy compatibility shell while shared chat pieces are extracted and launcher/standalone flows converge on Sidekick.",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/launchers/launcher_ui_setup.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #5922 temporary exception while launcher UI bootstrap logic is split by responsibility.",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/launchers/upstream_drift_launcher.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #5922 temporary exception while the launcher entrypoint is decomposed into smaller orchestration modules.",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "scripts/_urdf_campaign_issues.py",
-      "owner": "@dieterolson @D-sorganization/security-reviewers",
-      "reason": "Issue #5922 temporary exception while the URDF campaign script is split by workflow domain.",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #5922 temporary exception while the 3D viewer tab is decomposed into smaller UI modules.",
-      "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/shared/python/physics/terrain_representation.py",
-      "owner": "@physics-core",
-      "reason": "Terrain representation at 1253 lines combines mesh, elevation, and surface-material models. Split into domain submodules planned, tracked in issue #2456.",
-      "expires_on": "2026-07-31"
-    }
-  ]
+    "max_lines": 1200,
+    "max_exceptions": 8,
+    "exceptions": [
+        {
+            "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/Motion_Capture_Plotter.py",
+            "owner": "@simscape-gui",
+            "reason": "Issue #5922 temporary exception while the legacy plotting module is decomposed.",
+            "expires_on": "2026-07-31"
+        },
+        {
+            "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/starting_pose_matcher.py",
+            "owner": "@dieterolson @D-sorganization/core-maintainers",
+            "reason": "Issue #5922 temporary exception while the motion-capture matcher flow is split into smaller modules.",
+            "expires_on": "2026-07-31"
+        },
+        {
+            "path": "src/shared/python/chat/_chat_dock_widget_qt.py",
+            "owner": "@dieterolson @D-sorganization/core-maintainers",
+            "reason": "ADR-0022: Issue #5922 temporary exception while the chat dock widget is decomposed into focused UI components.",
+            "expires_on": "2026-07-31"
+        },
+        {
+            "path": "src/launchers/launcher_ui_setup.py",
+            "owner": "@dieterolson @D-sorganization/core-maintainers",
+            "reason": "Issue #5922 temporary exception while launcher UI bootstrap logic is split by responsibility.",
+            "expires_on": "2026-07-31"
+        },
+        {
+            "path": "src/launchers/upstream_drift_launcher.py",
+            "owner": "@dieterolson @D-sorganization/core-maintainers",
+            "reason": "Issue #5922 temporary exception while the launcher entrypoint is decomposed into smaller orchestration modules.",
+            "expires_on": "2026-07-31"
+        },
+        {
+            "path": "scripts/_urdf_campaign_issues.py",
+            "owner": "@dieterolson @D-sorganization/security-reviewers",
+            "reason": "Issue #5922 temporary exception while the URDF campaign script is split by workflow domain.",
+            "expires_on": "2026-07-31"
+        },
+        {
+            "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py",
+            "owner": "@dieterolson @D-sorganization/core-maintainers",
+            "reason": "Issue #5922 temporary exception while the 3D viewer tab is decomposed into smaller UI modules.",
+            "expires_on": "2026-07-31"
+        },
+        {
+            "path": "src/shared/python/physics/terrain_representation.py",
+            "owner": "@physics-core",
+            "reason": "Terrain representation at 1253 lines combines mesh, elevation, and surface-material models. Split into domain submodules planned, tracked in issue #2456.",
+            "expires_on": "2026-07-31"
+        }
+    ]
 }

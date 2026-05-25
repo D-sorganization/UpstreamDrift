@@ -1,3 +1,4 @@
+# See docker/README.md and ADR-0021 (docs/adr/0021-container-strategy.md) for container policy.
 # Dockerfile.heavy_test
 # ─────────────────────────────────────────────────────────────────────────────
 # LOCAL PARITY IMAGE for d-sorg-fleet-4core custom runner.
