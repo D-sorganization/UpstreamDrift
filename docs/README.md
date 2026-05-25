@@ -24,7 +24,7 @@ UpstreamDrift features a Unified Launcher that opens the Web UI.
 
 ```bash
 cd /home/user/UpstreamDrift
-python launch_golf_suite.py
+python start_api_server.py
 ```
 
 ### 2. Access the UI & API
@@ -84,7 +84,7 @@ docs/
 
 ### Unified Architecture
 
-UpstreamDrift uses a **unified local architecture**:
+UpstreamDrift uses a **unified local-first architecture**:
 
 - **Web UI & API** running on localhost
 - **No cloud required** for local development

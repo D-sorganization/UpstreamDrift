@@ -37,9 +37,9 @@
 | **Owner**               | D-sorganization                                    |
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
-| **Current Version**     | 2.1.0                                              |
+| **Current Version**     | 2.1.1                                          |
 | **Spec Version**        | 1.0.190                                            |
-| **Last Spec Update**    | 2026-05-24                                         |
+| **Last Spec Update**    | 2026-05-25                                     |
 
 ## 2. Purpose & Mission
 
