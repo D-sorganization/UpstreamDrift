@@ -19,6 +19,10 @@ on:
       - "scripts/config/doc_size_budget.json"
       - ".github/workflows/docs-governance.yml"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
