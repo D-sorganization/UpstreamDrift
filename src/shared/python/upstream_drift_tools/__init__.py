@@ -16,7 +16,8 @@ import warnings
 
 warnings.warn(
     "upstream_drift_tools is deprecated and will be removed in a future release. "
-    "Import from sidekick instead.",
+    "Import from sidekick instead. "
+    "See docs/PACKAGE_ORGANIZATION.md for the migration guide.",
     DeprecationWarning,
     stacklevel=2,
 )
