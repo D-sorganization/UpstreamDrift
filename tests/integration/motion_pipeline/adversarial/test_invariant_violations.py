@@ -74,7 +74,6 @@ INVARIANT_CASES = [
 
 # Cases that surface real bugs in production — see filed issues.
 KNOWN_GAPS = {
-    "joint-empty-name": "GH #4720 — JointDef accepts empty name",
     "joint-bad-offset-length": "GH #4720 — JointDef accepts non-3D offset",
 }
 
