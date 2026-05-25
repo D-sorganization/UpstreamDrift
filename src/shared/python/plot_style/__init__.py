@@ -1,12 +1,31 @@
-"""Plot-style contracts and dataclasses.
+"""Plot-style contracts, dataclasses, and renderer implementations.
 
-This package defines the abstract surface (Protocols + frozen
-dataclasses) used by every marker / trace styling implementation in
-UpstreamDrift.
+This package owns the canonical marker-styling stack used across every
+plotting surface in UpstreamDrift (C3D Viewer, Motion-Match Preview,
+cross-engine dashboard, per-engine viz modules):
 
-Concrete implementations of color resolvers, renderers, Qt widgets, and
-marker-shape primitives live in the ``resolvers``, ``renderers``,
-``widgets``, and ``shapes`` sub-packages and are already imported and re-exported.
+- ``contracts`` — runtime-checkable Protocols (``ColorResolver``,
+  ``MarkerRenderer``, ``MarkerShapeRenderer``).
+- ``colors`` / ``colormaps`` / ``registry`` — color scales, semantic
+  colormap aliases, and the custom-colormap registry.
+- ``channels`` — ``DataChannel`` abstraction for per-frame scalar
+  sources (e.g. clubhead-velocity-magnitude) plus derivative / slice /
+  magnitude helpers.
+- ``markers`` / ``shapes`` — ``MarkerStyle``, ``MarkerShape``,
+  ``CustomMeshSpec`` and the built-in shape primitives.
+- ``renderers`` — ``MatplotlibMarkerRenderer`` (canonical 2D/3D
+  scatter backend) and ``PyQtGLMarkerRenderer`` (lazy-loaded via
+  ``__getattr__`` to keep PyQt6 optional).
+- ``resolvers`` — Static / Palette / DataDriven color resolvers
+  registered in ``RESOLVER_REGISTRY``.
+- ``widgets`` — optional Qt widgets (``MarkerStylePicker``,
+  ``ColorPicker``, ``ColormapPicker``, ``DataChannelEditor``) imported
+  only when PyQt6 is available; their names join ``__all__`` via the
+  UNION resolution from #4807.
+- ``persistence`` / ``preset_library`` — ``PlotStyleSet`` /
+  ``PlotStyleSpec`` JSON v1 schema and the built-in preset library.
+
+See ADR-0011 (Plot Style Toolkit). Epic #4796 shipped the full stack.
 """
 
 from __future__ import annotations
