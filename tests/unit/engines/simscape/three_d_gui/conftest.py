@@ -48,9 +48,10 @@ def _pivot_sys_path() -> None:
             sys.modules[qual] = importlib.import_module(qual)
 
     # Drop the repo's ``src`` package so we can rebind it to the engine's.
-    # Keep ``src.shared`` (and everything beneath it) so test conftests
+    # Keep ``src.shared`` and everything beneath it so test conftests
     # that import ``src.shared.python.*`` after the pivot still resolve.
     keep_prefix = "src.shared"
+    preserved_shared = sys.modules.get("src.shared")
     for modname in list(sys.modules):
         if modname == "src" or modname.startswith("src."):
             if modname == keep_prefix or modname.startswith(keep_prefix + "."):
@@ -77,6 +78,8 @@ def _pivot_sys_path() -> None:
     # ``src.tools``, ``src.shared``, etc.
     repo_src = repo_root / "src"
     src_mod.__path__ = [str(engine_src), str(repo_src)]
+    if preserved_shared is not None:
+        src_mod.shared = preserved_shared
 
     # Re-attach any preserved ``src.<sub>`` modules as attributes of the
     # freshly rebound ``src`` package. CPython's import machinery uses
