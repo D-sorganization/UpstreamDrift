@@ -76,19 +76,11 @@ DEFAULT_BACKUP_COUNT = 5
 _SENSITIVE_PATTERNS: list[re.Pattern[str]] = [
     re.compile(
         r"(?i)"
-        r"(?P<prefix>^|[^\w])"
-        r"(?P<key_quote>['\"]?)"
-        r"(?P<key>"
-        r"password|passwd|pwd"
-        r"|api_key|apikey|api[-_]?secret"
-        r"|secret_key|secret[-_]?token"
-        r"|access_token|auth_token|bearer"
-        r"|private_key"
+        r"("
+        r"(?:['\"]?(?:password|passwd|pwd|api_key|apikey|api[-_]?secret|secret_key|secret[-_]?token|access_token|auth_token|bearer|private_key)['\"]?)"
+        r"\s*[=:]\s*"
         r")"
-        r"(?P=key_quote)"
-        r"(?P<separator>\s*[=:]\s*)"
-        r"(?:(?P<quote>['\"])(?P<quoted_value>.*?)(?P=quote)"
-        r"|(?P<value>.+?)(?=(?:,\s*['\"]?[A-Za-z_][\w-]*['\"]?\s*[=:]|\s|$|[}\]])))"
+        r"(?:(['\"])(.*?)\2|([^\s,{}]+))"
     ),
 ]
 
@@ -121,18 +113,18 @@ class SensitiveDataFilter(logging.Filter):
 def _redact_sensitive(text: str) -> str:
     """Replace sensitive values in *text* with a redaction placeholder."""
     for pattern in _SENSITIVE_PATTERNS:
-        text = pattern.sub(_replace_sensitive_match, text)
+        text = pattern.sub(
+            lambda m: (
+                m.group(1)
+                + (
+                    f"{m.group(2)}***REDACTED***{m.group(2)}"
+                    if m.group(2)
+                    else "***REDACTED***"
+                )
+            ),
+            text,
+        )
     return text
-
-
-def _replace_sensitive_match(match: re.Match[str]) -> str:
-    """Preserve surrounding punctuation while redacting the matched value."""
-    prefix = match.group("prefix")
-    key_quote = match.group("key_quote")
-    key = match.group("key")
-    separator = match.group("separator")
-    quote = match.group("quote") or ""
-    return f"{prefix}{key_quote}{key}{key_quote}{separator}{quote}***REDACTED***{quote}"
 
 
 # ---------------------------------------------------------------------------

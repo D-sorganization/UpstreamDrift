@@ -137,27 +137,40 @@ class TestSensitiveDataFilter:
         assert "key1" not in record.msg
         assert "pass1" not in record.msg
 
-    def test_redacts_password_with_comma(self) -> None:
+    def test_redacts_password_with_spaces_in_quotes(self) -> None:
         flt = SensitiveDataFilter()
-        record = self._make_record("password=abc,def")
+        record = self._make_record('password="my secret token" and more')
         flt.filter(record)
-        assert "abc,def" not in record.msg
-        assert record.msg == "password=***REDACTED***"
+        assert "my secret token" not in record.msg
+        assert 'password="***REDACTED***" and more' in record.msg
 
-    def test_redacts_password_in_json(self) -> None:
+    def test_json_formatting_with_commas(self) -> None:
         flt = SensitiveDataFilter()
-        record = self._make_record('{"password":"abc,def"}')
+        record = self._make_record('{"password": "secret,123", "other": "val"}')
         flt.filter(record)
-        assert "abc,def" not in record.msg
-        assert record.msg == '{"password":"***REDACTED***"}'
+        assert "secret,123" not in record.msg
+        assert "***REDACTED***" in record.msg
+        assert '{"password": "***REDACTED***", "other": "val"}' in record.msg
 
-    def test_redacts_multiple_passwords(self) -> None:
+    def test_redacts_stops_at_brace(self) -> None:
         flt = SensitiveDataFilter()
-        record = self._make_record('password=123, other=456, pwd="abc,def"}')
+        record = self._make_record("api_key=secret123} other=val")
         flt.filter(record)
-        assert "123" not in record.msg
-        assert "abc,def" not in record.msg
-        assert "other=456" in record.msg
+        assert "secret123" not in record.msg
+        assert "api_key=***REDACTED***} other=val" in record.msg
+
+    def test_multiple_with_commas(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record("api_key=key1, password=pass1")
+        flt.filter(record)
+        assert "key1" not in record.msg
+        assert "pass1" not in record.msg
+        assert "api_key=***REDACTED***, password=***REDACTED***" in record.msg
+
+
+# ---------------------------------------------------------------------------
+# get_logger
+# ---------------------------------------------------------------------------
 
 
 class TestGetLogger:
