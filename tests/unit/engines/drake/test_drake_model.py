@@ -3,8 +3,6 @@
 Tests model building, parameter validation, and model structure.
 """
 
-import sys
-
 import numpy as np
 import pytest
 

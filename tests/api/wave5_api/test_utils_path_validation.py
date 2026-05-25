@@ -74,6 +74,52 @@ def test_resolve_contained_path_not_exists_skips(tmp_path: Path) -> None:
     assert exc.value.status_code == 404
 
 
+def test_resolve_contained_path_rejects_symlink_inside_allowed(
+    tmp_path: Path,
+) -> None:
+    """A symlink inside the allowed root must be rejected (issue #5918)."""
+    allowed = tmp_path / "allowed"
+    allowed.mkdir()
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    real_target = outside / "evil.urdf"
+    real_target.write_text("<robot/>")
+
+    link = allowed / "model.urdf"
+    try:
+        link.symlink_to(real_target)
+    except (OSError, NotImplementedError):
+        pytest.skip("symlink creation not supported on this platform/user")
+
+    with pytest.raises(HTTPException) as exc:
+        pv.resolve_contained_path(link, [allowed])
+    # Either 400 (symlink rejected) or 404 (resolved-outside) is an
+    # acceptable secure outcome; the insecure path was returning the file.
+    assert exc.value.status_code in (400, 404)
+
+
+def test_resolve_contained_path_rejects_symlinked_parent(tmp_path: Path) -> None:
+    """A symlinked intermediate directory is also rejected."""
+    allowed = tmp_path / "allowed"
+    allowed.mkdir()
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "real_dir").mkdir()
+    real_target = outside / "real_dir" / "model.urdf"
+    real_target.write_text("<robot/>")
+
+    link_dir = allowed / "linked_dir"
+    try:
+        link_dir.symlink_to(outside / "real_dir", target_is_directory=True)
+    except (OSError, NotImplementedError):
+        pytest.skip("symlink creation not supported on this platform/user")
+
+    candidate = link_dir / "model.urdf"
+    with pytest.raises(HTTPException) as exc:
+        pv.resolve_contained_path(candidate, [allowed])
+    assert exc.value.status_code in (400, 404)
+
+
 def test_validate_model_path_finds_existing_in_allowed(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

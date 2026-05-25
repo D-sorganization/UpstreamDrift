@@ -86,3 +86,13 @@
 ## 2026-05-23 - trimesh ImportErrors
 **Learning:** Hard-coded imports of `trimesh` in files like `_mesh_decimation.py` and `_mesh_io.py` can cause tests or other modules that import them to fail if `trimesh` isn't installed.
 **Action:** Always wrap `import trimesh` with a `try...except ImportError` block and conditionally check if `trimesh is None` to safely handle environments where it is missing, or alternatively, make sure to add it to the test environment requirements.
+## 2026-05-18 - Optimize dot product over trajectory along an axis
+**Learning:** `np.sum(a * b, axis=1)` to compute row-wise dot products creates intermediate memory allocations for `a * b` and has internal numpy sum overhead. `np.einsum("ij,ij->i", a, b)` computes this without allocations and is faster.
+**Action:** Replace `np.sum(a * b, axis=1)` with `np.einsum("ij,ij->i", a, b)` when computing dot products between pairs of vectors (like quaternions) across a time trajectory.
+
+## 2025-10-24 - [Optimize vector distance calculation for visualizer distances]
+**Learning:** `np.linalg.norm` is generic and relatively slow for normalizing small 3D vectors. Using `math.hypot(*v)` significantly speeds up computation by avoiding numpy array overhead and allocation.
+**Action:** Replace `np.linalg.norm(vector)` with `math.hypot(*vector)` where `vector` is a small fixed-length array (e.g. 3D point) especially when computing normalisations frequently like in `visualization.py`.
+## 2026-05-25 - Optimize constraint residual penalties in Drake
+**Learning:** Using `sum(np.sum(np.asarray(r) ** 2) for r in constraint_residuals)` creates intermediate array allocations for `** 2`. Since this calculation is part of the cost function inner loop, it creates unnecessary overhead.
+**Action:** Replace `np.sum(np.asarray(r) ** 2)` with `np.vdot(arr := np.asarray(r), arr)` to avoid the intermediate allocation and calculate the squared sum directly at the C level, improving inner loop performance.

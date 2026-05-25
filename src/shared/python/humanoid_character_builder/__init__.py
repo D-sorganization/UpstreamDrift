@@ -1,14 +1,18 @@
 """
-Humanoid Character Builder - Standalone URDF Generation Module.
+Humanoid Character Builder - anthropometric domain layer.
 
-A self-contained, decoupled module for generating humanoid URDF models
-with video game-style character customization.
+This package owns the humanoid-specific workflow for generating body
+parameter-driven character models with video game-style customization.
+It composes the generic URDF / mesh / inertia primitives from
+``model_generation`` rather than acting as a second low-level toolkit.
 
 This module is designed to:
-- Be completely standalone with no dependencies on other Golf Modeling Suite modules
-- Provide clean, well-defined interfaces for integration
-- Support parallel development without merge conflicts
-- Be easily relocatable to shared tool repositories
+- expose the anthropometric public API (`CharacterBuilder`,
+  `BodyParameters`, presets, humanoid segment definitions)
+- keep humanoid-domain concerns discoverable and separate from the
+  generic `model_generation` infrastructure
+- preserve stable user-facing entry points while the low-level
+  migration tracked from ADR-0020 continues
 
 Usage:
     from humanoid_character_builder import (

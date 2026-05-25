@@ -1,6 +1,6 @@
 # Roadmap Issues - Golf Modeling Suite
 
-Last Updated: 2026-01-17
+Last Updated: 2026-05-25
 
 These issues are already tracked in GitHub and represent planned improvements.
 
@@ -83,3 +83,11 @@ These issues are already tracked in GitHub and represent planned improvements.
 - **GitHub Issue**: #130
 - **Status**: Open
 - **Description**: Implement lazy imports to improve startup time
+
+## Phase 5: CI/CD Pipeline
+
+### Phase 5.1: Review CI Modularization and Jules-* Workflows
+
+- **GitHub Issue**: #6099
+- **Status**: Open
+- **Description**: Review modularization of ci-standard.yml (1,617 lines) and Jules-* workflow proliferation.

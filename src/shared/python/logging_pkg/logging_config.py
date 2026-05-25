@@ -69,6 +69,7 @@ DETAILED_LOG_FORMAT = (
 # Rotation defaults
 DEFAULT_MAX_BYTES = 10 * 1024 * 1024  # 10 MB
 DEFAULT_BACKUP_COUNT = 5
+_STDLIB_LOG_KWARGS = {"exc_info", "extra", "stack_info", "stacklevel"}
 
 # ---------------------------------------------------------------------------
 # Sensitive-data redaction
@@ -76,14 +77,19 @@ DEFAULT_BACKUP_COUNT = 5
 _SENSITIVE_PATTERNS: list[re.Pattern[str]] = [
     re.compile(
         r"(?i)"
-        r"("
+        r"(?P<prefix>^|[^\w])"
+        r"(?P<key_quote>['\"]?)"
+        r"(?P<key>"
         r"password|passwd|pwd"
         r"|api_key|apikey|api[-_]?secret"
         r"|secret_key|secret[-_]?token"
         r"|access_token|auth_token|bearer"
         r"|private_key"
         r")"
-        r"[\s]*[=:]\s*['\"]?([^\s'\"]{1,})['\"]?"
+        r"(?P=key_quote)"
+        r"(?P<separator>\s*[=:]\s*)"
+        r"(?:(?P<quote>['\"])(?P<quoted_value>.*?)(?P=quote)"
+        r"|(?P<value>.+?)(?=(?:,\s*['\"]?[A-Za-z_][\w-]*['\"]?\s*[=:]|\s|$|[}\]])))"
     ),
 ]
 
@@ -116,8 +122,18 @@ class SensitiveDataFilter(logging.Filter):
 def _redact_sensitive(text: str) -> str:
     """Replace sensitive values in *text* with a redaction placeholder."""
     for pattern in _SENSITIVE_PATTERNS:
-        text = pattern.sub(r"\1=***REDACTED***", text)
+        text = pattern.sub(_replace_sensitive_match, text)
     return text
+
+
+def _replace_sensitive_match(match: re.Match[str]) -> str:
+    """Preserve surrounding punctuation while redacting the matched value."""
+    prefix = match.group("prefix")
+    key_quote = match.group("key_quote")
+    key = match.group("key")
+    separator = match.group("separator")
+    quote = match.group("quote") or ""
+    return f"{prefix}{key_quote}{key}{key_quote}{separator}{quote}{_REDACTED}{quote}"
 
 
 # ---------------------------------------------------------------------------
@@ -163,6 +179,32 @@ class LogLevel(Enum):
     WARNING = logging.WARNING
     ERROR = logging.ERROR
     CRITICAL = logging.CRITICAL
+
+
+class StructuredLoggerAdapter(logging.LoggerAdapter):
+    """Compatibility adapter that accepts structlog-style keyword fields."""
+
+    @property
+    def name(self) -> str:
+        return self.logger.name
+
+    def bind(self, **kwargs: Any) -> StructuredLoggerAdapter:
+        return StructuredLoggerAdapter(self.logger, {**self.extra, **kwargs})
+
+    def process(self, msg: Any, kwargs: dict[str, Any]) -> tuple[Any, dict[str, Any]]:
+        extra = dict(kwargs.pop("extra", {}))
+        structured_fields = {
+            **self.extra,
+            **{
+                key: kwargs.pop(key)
+                for key in list(kwargs)
+                if key not in _STDLIB_LOG_KWARGS
+            },
+        }
+        if structured_fields:
+            extra["structured_data"] = structured_fields
+            kwargs["extra"] = extra
+        return msg, kwargs
 
 
 # ---------------------------------------------------------------------------
@@ -438,7 +480,7 @@ def setup_logging(
     return root_logger
 
 
-def get_logger(name: str | None = None) -> logging.Logger:
+def get_logger(name: str | None = None) -> logging.Logger | StructuredLoggerAdapter:
     """Get a logger instance with the given name.
 
     This is a convenience wrapper around logging.getLogger that ensures
@@ -454,7 +496,7 @@ def get_logger(name: str | None = None) -> logging.Logger:
         logger = get_logger(__name__)
         logger.info("Starting process...")
     """
-    return logging.getLogger(name)
+    return StructuredLoggerAdapter(logging.getLogger(name), {})
 
 
 def configure_test_logging(

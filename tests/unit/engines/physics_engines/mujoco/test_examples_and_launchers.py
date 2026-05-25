@@ -4,7 +4,6 @@ import sys
 from unittest.mock import MagicMock, patch
 
 import numpy as np
-import pytest
 
 from src.engines.physics_engines.mujoco.python.examples import (
     example_featherstone_algorithms,

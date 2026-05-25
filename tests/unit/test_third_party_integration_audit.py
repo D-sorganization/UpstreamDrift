@@ -25,7 +25,6 @@ from src.shared.python.engine_core.engine_availability import (
     MUJOCO_AVAILABLE,
     MYOSUITE_AVAILABLE,
     OPENSIM_AVAILABLE,
-    PINOCCHIO_AVAILABLE,
     get_available_engines,
     get_unavailable_engines,
     is_engine_available,

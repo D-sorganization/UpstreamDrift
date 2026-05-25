@@ -1,15 +1,12 @@
 from __future__ import annotations
 
-import sys
 from unittest.mock import MagicMock, patch
 
-import pytest
 import numpy as np
 
 from src.tools.pose_studio.gui import PoseStudioWindow, main
 from src.tools.pose_studio.core import EngineStatus
 from src.shared.python.pose_interchange.canonical import (
-    CanonicalPose,
     canonical_zero_pose,
 )
 from src.shared.python.motion_matching.diagnostics.reference_pose import (

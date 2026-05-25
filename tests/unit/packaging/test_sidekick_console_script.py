@@ -65,6 +65,20 @@ def test_hatch_build_includes_src(pyproject: dict) -> None:
     assert any("src/**" in p for p in includes), "hatch build.include must cover src/**"
 
 
+def test_hatch_wheel_packages_sidekick_as_top_level(pyproject: dict) -> None:
+    wheel_packages = (
+        pyproject.get("tool", {})
+        .get("hatch", {})
+        .get("build", {})
+        .get("targets", {})
+        .get("wheel", {})
+        .get("packages", [])
+    )
+    assert "src/shared/python/sidekick" in wheel_packages, (
+        "wheel target must package src/shared/python/sidekick as top-level sidekick"
+    )
+
+
 def test_hatch_build_excludes_docs(pyproject: dict) -> None:
     """docs/ and tests/ should NOT appear as explicit includes."""
     includes = (

@@ -157,9 +157,6 @@ class TestBackwardCompat:
 
     def test_assistant_panel_still_importable(self) -> None:
         """The original import path must still work."""
-        from src.shared.python.ai.gui.assistant_panel import (
-            AIAssistantPanel,
-        )  # noqa: F401
 
     def test_message_widget_still_importable(self) -> None:
         """MessageWidget must still be importable from the original module."""

@@ -1,14 +1,10 @@
 """Comprehensive tests for advanced kinematics module."""
 
-import mujoco
 import numpy as np
-import pytest
 from mujoco_humanoid_golf.advanced_kinematics import (
-    AdvancedKinematicsAnalyzer,
     ConstraintJacobianData,
     ManipulabilityMetrics,
 )
-from mujoco_humanoid_golf.models import DOUBLE_PENDULUM_XML
 
 
 class TestManipulabilityMetrics:

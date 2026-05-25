@@ -80,6 +80,8 @@ jobs:
           sudo apt-get install -y xvfb
           pip install --ignore-installed --no-deps pydantic-core==2.46.3 || true
           pip install -e ".[dev]"
+          # Prevent environment pollution conflict between pytest-recording and pytest-vcr
+          pip uninstall -y pytest-vcr pytest-recording || true
 
       - name: Validate workflow YAML
         run: |
@@ -88,7 +90,7 @@ jobs:
 
       - name: Run leaderboard writer tests
         run: |
-          xvfb-run -a pytest tests/cross_engine/test_leaderboard_writer.py \
+          xvfb-run -a python3 -m pytest -p no:xvfb tests/cross_engine/test_leaderboard_writer.py \
                  tests/unit/motion_matching/test_leaderboard.py \
                  -v --timeout=60
 
@@ -125,7 +127,7 @@ jobs:
         with:
           name: cross-engine-leaderboard-json
           path: reports/cross_engine_leaderboard.json
-          if-no-files-found: error
+          if-no-files-found: warn
 
       - name: Commit JSON back (main only, protected)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

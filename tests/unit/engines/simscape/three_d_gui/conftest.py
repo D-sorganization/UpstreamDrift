@@ -32,7 +32,14 @@ def _pivot_sys_path() -> None:
         sys.path.insert(0, repo_root_str)
     import importlib
 
+    # Ensure ``src.shared`` and ``src.shared.python`` are concretely loaded
+    # so they remain in ``sys.modules`` after we drop ``src`` itself.
+    # Without these, ``from src import shared`` after the pivot fails
+    # because the engine's ``src/__init__.py`` has no ``shared`` attribute.
     for qual in (
+        "src",
+        "src.shared",
+        "src.shared.python",
         "sidekick.lab.bio.c3d_reader",
         "src.shared.python.qt_utils.wheel_event_filter",
         "src.shared.python.motion_matching.body_skeleton",
@@ -41,10 +48,12 @@ def _pivot_sys_path() -> None:
             sys.modules[qual] = importlib.import_module(qual)
 
     # Drop the repo's ``src`` package so we can rebind it to the engine's.
-    keep_prefix = "src.shared."
+    # Keep ``src.shared`` (and everything beneath it) so test conftests
+    # that import ``src.shared.python.*`` after the pivot still resolve.
+    keep_prefix = "src.shared"
     for modname in list(sys.modules):
         if modname == "src" or modname.startswith("src."):
-            if modname.startswith(keep_prefix):
+            if modname == keep_prefix or modname.startswith(keep_prefix + "."):
                 continue
             del sys.modules[modname]
 
@@ -68,6 +77,19 @@ def _pivot_sys_path() -> None:
     # ``src.tools``, ``src.shared``, etc.
     repo_src = repo_root / "src"
     src_mod.__path__ = [str(engine_src), str(repo_src)]
+
+    # Re-attach any preserved ``src.<sub>`` modules as attributes of the
+    # freshly rebound ``src`` package. CPython's import machinery uses
+    # ``getattr(parent, child)`` for ``from parent import child``, so
+    # leaving them only in ``sys.modules`` is not enough — the lookup
+    # walks ``src.__dict__`` first and raises ``ImportError`` if missing.
+    for modname, mod in list(sys.modules.items()):
+        if not modname.startswith("src."):
+            continue
+        parts = modname.split(".")
+        if len(parts) != 2:
+            continue  # only attach direct children; nested attrs cascade
+        setattr(src_mod, parts[1], mod)
 
     # Add ``<repo>/src`` for bare ``shared.python.*`` imports the viewer does.
     repo_src_str = str(repo_src)
