@@ -1,43 +1,37 @@
-# Golf Modeling Suite Documentation
+# UpstreamDrift Documentation
 
-> **January 2026** | Local-First API Architecture
+> **Last reviewed: 2024-05-25**
 
-Welcome to the Golf Modeling Suite - a professional biomechanical analysis and physics simulation platform.
+Welcome to UpstreamDrift - a professional biomechanical analysis and physics simulation platform.
 
 ## Quick Navigation
 
 | I want to...            | Go to...                                            |
 | ----------------------- | --------------------------------------------------- |
 | Get started quickly     | [Quick Start](#quick-start)                         |
-| Understand the API      | [API Architecture](api/API_ARCHITECTURE.md)         |
-| Develop new features    | [Development Guide](api/DEVELOPMENT.md)             |
+| Understand motion pip.  | [Motion Pipeline](motion_pipeline/README.md)        |
+| Read Architecture Docs  | [ADRs](adr/)                                        |
+| Read Project Specs      | [SPEC.md](../SPEC.md)                               |
 | Choose a physics engine | [Engine Selection Guide](engine_selection_guide.md) |
-| Troubleshoot issues     | [Troubleshooting](troubleshooting/)                 |
 
 ---
 
 ## Quick Start
 
-### 1. Start the API Server
+### 1. Launch the Suite
+
+UpstreamDrift features a Unified Launcher that opens the Web UI.
 
 ```bash
-cd /home/user/Golf_Modeling_Suite
-python start_api_server.py
+cd /home/user/UpstreamDrift
+python launch_golf_suite.py
 ```
 
-### 2. Access the API
+### 2. Access the UI & API
 
-- **API Base**: http://localhost:8000
+- **Web UI**: Opens automatically in your browser (typically http://localhost:8000)
 - **Interactive Docs**: http://localhost:8000/docs
-- **Health Check**: http://localhost:8000/health
-
-### 3. Run a Simulation
-
-```bash
-curl -X POST http://localhost:8000/simulate \
-  -H "Content-Type: application/json" \
-  -d '{"engine_type": "mujoco", "duration": 1.0}'
-```
+- **Classic Fallback**: `python launch_golf_suite.py --classic`
 
 ---
 
@@ -79,23 +73,22 @@ docs/
 ├── troubleshooting/       # Problem Solving
 │   └── (troubleshooting guides)
 │
-└── archive/               # Historical Documentation
-    ├── assessments_jan2026/
-    ├── phase_plans/
-    └── historical/
+└── historical/            # Historical Documentation
+    ├── assessments/
+    └── archive/
 ```
 
 ---
 
 ## Core Concepts
 
-### Local-First API
+### Unified Architecture
 
-The Golf Modeling Suite uses a **local-first architecture**:
+UpstreamDrift uses a **unified local architecture**:
 
+- **Web UI & API** running on localhost
 - **No cloud required** for local development
-- **Optional cloud mode** for production scaling
-- **Same API** whether local or cloud
+- **Optional classic desktop launcher** for legacy workflows
 
 ### Multi-Engine Support
 
@@ -258,18 +251,9 @@ repository maintenance guidance.
 
 ---
 
-## Recent Updates (January 2026)
-
-- **API Architecture Upgrade** - Local-first FastAPI implementation
-- **Diagnostics Enhancement** - Structured error codes, request tracing
-- **Design by Contract** - Comprehensive contract infrastructure
-- **Documentation Reorganization** - Archived old docs, new clear structure
-
----
-
 ## Archived Documentation
 
-Historical assessments, phase plans, and old implementation reports have been moved to [archive/](archive/).
+Historical assessments, phase plans, and old implementation reports have been moved to [historical/](historical/).
 
 ---
 
