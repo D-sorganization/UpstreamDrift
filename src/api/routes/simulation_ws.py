@@ -46,6 +46,63 @@ def _clamp_speed_factor(raw: object) -> float:
     return value
 
 
+_MAX_WS_DURATION = 3600.0  # 1 hour hard cap for WebSocket sessions
+_MAX_WS_TIMESTEP = 1.0  # 1 second upper bound
+_MIN_WS_TIMESTEP = 1e-6  # 1 microsecond lower bound
+
+
+def _validate_ws_numeric_fields(config_input: dict[str, Any]) -> str | None:
+    """Validate speed_factor finiteness and timestep/duration bounds for WS start.
+
+    Performs WebSocket-specific checks that must reject bad values with an error
+    frame rather than silently clamping, complementing the Pydantic layer.
+
+    Args:
+        config_input: The raw config dict from the ``start`` message.
+
+    Returns:
+        An error message string if validation fails, or ``None`` if valid.
+
+    Postcondition:
+        Returns ``None`` only when all present numeric fields are finite and
+        within their respective WS limits.
+    """
+    if "speed_factor" in config_input:
+        raw_sf = config_input["speed_factor"]
+        try:
+            sf_value = float(raw_sf)  # type: ignore[arg-type]
+        except (TypeError, ValueError):
+            return "speed_factor must be a finite number"
+        if not math.isfinite(sf_value):
+            return "speed_factor must be a finite number"
+
+    if "duration" in config_input:
+        raw_dur = config_input["duration"]
+        try:
+            dur_value = float(raw_dur)  # type: ignore[arg-type]
+        except (TypeError, ValueError):
+            return "duration must be a positive finite number"
+        if not math.isfinite(dur_value) or dur_value <= 0:
+            return "duration must be a positive finite number"
+        if dur_value >= _MAX_WS_DURATION:
+            return f"duration must be less than {_MAX_WS_DURATION}s"
+
+    if "timestep" in config_input:
+        raw_ts = config_input["timestep"]
+        try:
+            ts_value = float(raw_ts)  # type: ignore[arg-type]
+        except (TypeError, ValueError):
+            return "timestep must be a positive finite number"
+        if not math.isfinite(ts_value) or ts_value <= 0:
+            return "timestep must be a positive finite number"
+        if ts_value >= _MAX_WS_TIMESTEP:
+            return f"timestep must be less than {_MAX_WS_TIMESTEP}s"
+        if ts_value < _MIN_WS_TIMESTEP:
+            return f"timestep must be at least {_MIN_WS_TIMESTEP}s"
+
+    return None
+
+
 def _engine_type_from_str(name: str) -> EngineType:
     """Resolve an engine type string to EngineType, accepting any case.
 
@@ -438,8 +495,16 @@ async def simulation_stream(
             await websocket.send_json({"error": "Expected 'start' action"})
             return
 
+        raw_config = start_msg.get("config", {}) or {}
+        ws_error = _validate_ws_numeric_fields(
+            raw_config if isinstance(raw_config, dict) else {}
+        )
+        if ws_error is not None:
+            await websocket.send_json({"error": ws_error})
+            return
+
         try:
-            config = _validate_start_config(engine_type, start_msg.get("config", {}))
+            config = _validate_start_config(engine_type, raw_config)
         except (ValidationError, ValueError):
             await websocket.send_json({"error": "Invalid simulation config"})
             return
