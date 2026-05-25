@@ -110,6 +110,23 @@ class TestSensitiveDataFilter:
         flt.filter(record)
         assert "tok_abcdefg" not in record.msg
 
+
+    def test_redacts_password_with_spaces_in_quotes(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record('password="my secret token" and more')
+        flt.filter(record)
+        assert "my secret token" not in record.msg
+        assert "REDACTED" in record.msg
+        assert "and more" in record.msg
+
+    def test_redacts_password_with_single_quotes(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record("password='my secret token' and more")
+        flt.filter(record)
+        assert "my secret token" not in record.msg
+        assert "REDACTED" in record.msg
+        assert "and more" in record.msg
+
     def test_plain_text_unchanged(self) -> None:
         flt = SensitiveDataFilter()
         record = self._make_record("user logged in from 192.168.1.1")
