@@ -68,6 +68,7 @@ def bootstrap_embeddable_tools() -> list[str]:
         "src.tools.starting_pose_matcher._embed_adapter",
         "src.tools.pose_subscriber_demo._embed_adapter",
         "src.tools.sidekick._embed_adapter",
+        "src.tools.pose_studio.gui",
     ]
 
     registered = []
