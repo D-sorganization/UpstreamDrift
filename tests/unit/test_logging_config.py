@@ -137,6 +137,29 @@ class TestSensitiveDataFilter:
         assert "key1" not in record.msg
         assert "pass1" not in record.msg
 
+    def test_redacts_stops_at_comma(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record("api_key=secret123, other_key=val")
+        flt.filter(record)
+        assert "secret123" not in record.msg
+        assert "other_key=val" in record.msg
+        assert "api_key=***REDACTED***, other_key=val" in record.msg
+
+    def test_redacts_stops_at_brace(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record("api_key=secret123} other=val")
+        flt.filter(record)
+        assert "secret123" not in record.msg
+        assert "} other=val" in record.msg
+        assert "api_key=***REDACTED***} other=val" in record.msg
+
+    def test_redacts_quoted_secrets(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record('api_key="secret, 123" other=val')
+        flt.filter(record)
+        assert "secret, 123" not in record.msg
+        assert "api_key=***REDACTED*** other=val" in record.msg
+
 
 # ---------------------------------------------------------------------------
 # get_logger

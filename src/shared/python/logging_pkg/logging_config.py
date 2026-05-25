@@ -83,7 +83,7 @@ _SENSITIVE_PATTERNS: list[re.Pattern[str]] = [
         r"|access_token|auth_token|bearer"
         r"|private_key"
         r")"
-        r"[\s]*[=:]\s*['\"]?([^\s'\"]{1,})['\"]?"
+        r"[\s]*[=:]\s*(?:([\"']).*?\2|[^\s,{}]+)"
     ),
 ]
 
