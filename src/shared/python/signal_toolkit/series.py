@@ -14,11 +14,19 @@ Following pragmatic programming and Design by Contract principles.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Callable
 from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
+
+# Precomputed factorial lookup table for orders 0..170 (math.factorial(171) overflows
+# float64, but SeriesExpansion.max_terms defaults to 50 and is capped there).
+_MAX_FACTORIAL_ORDER = 170
+_FACTORIAL_TABLE: list[int] = [
+    math.factorial(i) for i in range(_MAX_FACTORIAL_ORDER + 1)
+]
 
 
 @dataclass
@@ -434,15 +442,21 @@ class SeriesExpansion:
 
     @staticmethod
     def _factorial(n: int) -> int:
-        """Compute factorial of n."""
+        """Return n! using a precomputed lookup table for speed.
+
+        Args:
+            n: Non-negative integer.
+
+        Raises:
+            ValueError: If *n* is negative or exceeds the table size.
+        """
         if n < 0:
             raise ValueError(f"Factorial undefined for negative numbers: {n}")
-        if n <= 1:
-            return 1
-        result = 1
-        for i in range(2, n + 1):
-            result *= i
-        return result
+        if n > _MAX_FACTORIAL_ORDER:
+            raise ValueError(
+                f"n={n} exceeds precomputed factorial table size ({_MAX_FACTORIAL_ORDER})"
+            )
+        return _FACTORIAL_TABLE[n]
 
     @staticmethod
     def _binomial(n: int, k: int) -> int:
