@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.192                                            |
+| **Spec Version**        | 1.0.193                                            |
 | **Last Spec Update**    | 2026-05-25                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-05-25** - Raised the advisory Pinocchio Law-of-Demeter quality-gate timeout in `.github/workflows/quality-gate.yml` from 5 to 15 minutes and added workflow coverage in `tests/ci/test_ci_infrastructure.py` so self-hosted checkout plus Python setup overhead cannot time out before the sub-second `scripts/ci/check_lod.py` scan runs.
 - **2026-05-25** - Fixed the Sidekick wheel packaging contract so the published wheel now ships a top-level `sidekick` package for the `sidekick` console script, made single-feature capability checks evaluate only the requested feature on first use, and aligned the pendulum capability probe with the current `src/engines/...` source-tree layout used by Docker/profile smoke checks.
 - **2026-05-25** - Restored Python 3.10 compatibility for the Pinocchio motion-matching leaderboard writer by falling back to `timezone.utc` when `datetime.UTC` is unavailable, and taught the torch-backed surrogate test modules to skip cleanly when `torch` is absent so the core no-torch CI lane no longer fails during collection.
 - **2026-05-24** - Tightened shared logging redaction so `src/shared/python/logging_pkg/logging_config.py` preserves quoted JSON-style key/value formatting while only masking exact secret-bearing field names such as `api_key`, `secret_key`, and `password`; similarly named public fields like `api_key_hint` remain visible. Added focused regression coverage in `tests/unit/test_logging_config.py`.
@@ -488,6 +489,7 @@ Beyond standard tools, CI enforces custom checks:
 - **Physics Fitness**: Cross-engine validation must pass with <5% tolerance
 - **Security Audit Isolation**: `pip-audit` runs with `scripts/config/pip_audit_waivers.json` and `scripts/ci/check_pip_audit_waivers.py` so waivers require issue tracking, expiry, and current pip-audit findings before ignore flags are emitted
 - **Blocking SAST and Secret Scans**: `ci-standard.yml` runs blocking Bandit, Semgrep, pip-audit, and Trivy filesystem scans for pull requests and pushes
+- **Advisory Workflow Time Budgets**: Advisory self-hosted gates must leave enough budget for checkout and runtime setup, not just the underlying script; `.github/workflows/quality-gate.yml` therefore gives the Pinocchio LOD advisory lane a 15-minute ceiling.
 - **Error-Handling Ratchet**: `scripts/ci/check_error_handling_ratchet.py` blocks increases in grandfathered broad catches, unused `noqa` debt, raw `subprocess.Popen(...)`, and `asyncio.gather(...)` calls that omit `return_exceptions=`, including multiline gather calls whose arguments span multiple lines.
 - **Type and Coverage Ratchets**: `scripts/check_mypy_exclusion_budget.py` blocks unowned mypy exclusions, non-monotonic exclusion schedules, and missing production package coverage-ratchet metadata.
 - **Docker Size Gate**: Built images must not exceed 800 MB
@@ -642,6 +644,7 @@ policy lives in `docker/README.md` and ADR-0021.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-25 | 1.0.193 | Raised the advisory Pinocchio Law-of-Demeter quality-gate timeout in `.github/workflows/quality-gate.yml` from 5 to 15 minutes and added workflow-contract coverage in `tests/ci/test_ci_infrastructure.py`, preventing false self-hosted runner timeouts before the fast `scripts/ci/check_lod.py` scan executes. |
 | 2026-05-25 | 1.0.192 | Fixed the Sidekick wheel packaging contract so published wheels now ship a top-level `sidekick` package for the `sidekick` console script, made single-feature capability checks evaluate only the requested feature on first use, and aligned the pendulum capability probe with the current `src/engines/...` source-tree layout used by Docker/profile smoke checks. |
 | 2026-05-24 | 1.0.191 | Tightened shared logging redaction in `src/shared/python/logging_pkg/logging_config.py` so quoted JSON-style key/value formatting is preserved while only exact secret-bearing keys (`password`, `api_key`, `secret_key`, etc.) are masked; similarly named public fields remain visible, with regression coverage in `tests/unit/test_logging_config.py`. |
 | 2026-05-24 | 1.0.191 | Optimize norm calculation in Unreal visualization using math.hypot for 3D vectors |

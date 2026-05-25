@@ -299,6 +299,24 @@ class TestCIEnvironmentCompatibility:
 
         assert cleanup["working-directory"] == "."
 
+    def test_quality_gate_lod_timeout_budget_matches_self_hosted_setup_cost(
+        self,
+    ) -> None:
+        """The advisory LOD job must allow checkout/setup on busy self-hosted runners."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "quality-gate.yml").read_text(
+                encoding="utf-8",
+            ),
+        )
+        lod_job = workflow["jobs"]["lod-pinocchio"]
+
+        assert int(lod_job["timeout-minutes"]) >= 15
+
 
 class TestPyprojectTomlConsistency:
     """Test that pyproject.toml is properly configured."""
