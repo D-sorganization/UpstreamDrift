@@ -83,3 +83,9 @@ These issues are already tracked in GitHub and represent planned improvements.
 - **GitHub Issue**: #130
 - **Status**: Open
 - **Description**: Implement lazy imports to improve startup time
+
+### Phase 4.3: Sidekick Consolidation
+
+- **GitHub Issue**: #6119
+- **Status**: Open
+- **Description**: Consolidate chat dock and standalone sidekick logic into shared modules per ADR-0022.
