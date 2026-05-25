@@ -127,7 +127,7 @@ jobs:
         with:
           name: cross-engine-leaderboard-json
           path: reports/cross_engine_leaderboard.json
-          if-no-files-found: error
+          if-no-files-found: warn
 
       - name: Commit JSON back (main only, protected)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
