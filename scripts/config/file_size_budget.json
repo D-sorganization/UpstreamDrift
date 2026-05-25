@@ -17,7 +17,7 @@
     {
       "path": "src/shared/python/chat/_chat_dock_widget_qt.py",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #5922 temporary exception while the chat dock widget is decomposed into focused UI components.",
+      "reason": "Issue #5922 temporary exception while the chat dock widget is decomposed into focused UI components. See ADR-0022 for migration plan to standalone sidekick.",
       "expires_on": "2026-07-31"
     },
     {
