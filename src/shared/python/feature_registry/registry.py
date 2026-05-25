@@ -82,6 +82,7 @@ class FeatureReport:
     def to_dict(self) -> dict[str, Any]:
         """JSON-friendly dict representation."""
         data = asdict(self)
+        data["status"] = "AVAILABLE" if self.available else "UNAVAILABLE"
         data["missing"] = list(self.missing)
         data["depends_on"] = list(self.depends_on)
         return data

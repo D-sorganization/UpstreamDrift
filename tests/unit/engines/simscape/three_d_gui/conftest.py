@@ -42,9 +42,12 @@ def _pivot_sys_path() -> None:
 
     # Drop the repo's ``src`` package so we can rebind it to the engine's.
     keep_prefix = "src.shared."
+    # We must explicitly preserve the sys.modules reference to src.shared
+    # so we can re-attach it to the rebound src module.
+    preserved_shared = sys.modules.get("src.shared")
     for modname in list(sys.modules):
         if modname == "src" or modname.startswith("src."):
-            if modname.startswith(keep_prefix):
+            if modname.startswith(keep_prefix) or modname == "src.shared":
                 continue
             del sys.modules[modname]
 
@@ -68,6 +71,8 @@ def _pivot_sys_path() -> None:
     # ``src.tools``, ``src.shared``, etc.
     repo_src = repo_root / "src"
     src_mod.__path__ = [str(engine_src), str(repo_src)]
+    if preserved_shared is not None:
+        src_mod.shared = preserved_shared
 
     # Add ``<repo>/src`` for bare ``shared.python.*`` imports the viewer does.
     repo_src_str = str(repo_src)
