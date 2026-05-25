@@ -1,4 +1,11 @@
-"""Training-Controller dashboard tab — headless portion (issue #6012).
+"""Training-Controller dashboard tab — headless portion (issues #6012, #6089).
+
+Audit status (issue #6089): SCAFFOLD — the headless MVC triad
+(controller, live_subscriber, view_model) is complete and tested.
+The PyQt6 widget surface (``gui.py``) and EmbeddableTool adapter
+(``_embed_adapter.py``) are deferred to a follow-up of issue #6089,
+matching the design note in the original package docstring.
+
 
 This package houses the in-launcher training dashboard. The PyQt6
 widget surface is deferred to a follow-up PR (the remote environment
