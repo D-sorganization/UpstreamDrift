@@ -273,6 +273,7 @@ class TestWebSocket:
                 self.app = SimpleNamespace(
                     state=SimpleNamespace(chat_service=chat_service)
                 )
+                self.url = SimpleNamespace(path="/ws/chat")
                 self.sent: list[dict[str, object]] = []
                 self._receive_calls = 0
 

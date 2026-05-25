@@ -53,9 +53,9 @@ INVARIANT_CASES = [
         {
             "name": "",
             "parent": None,
-            "offset": [0.0, 0.0, 0.0],
-            "axis": [0.0, 1.0, 0.0],
-            "limit": JointLimit(lower=-1.0, upper=1.0),
+            "tpose_offset": [0.0, 0.0, 0.0],
+            "axes": ["Y"],
+            "limits": [JointLimit(lower=-1.0, upper=1.0)],
         },
     ),
     (
@@ -64,19 +64,16 @@ INVARIANT_CASES = [
         {
             "name": "j",
             "parent": None,
-            "offset": [0.0, 0.0],  # not 3D
-            "axis": [0.0, 1.0, 0.0],
-            "limit": JointLimit(lower=-1.0, upper=1.0),
+            "tpose_offset": [0.0, 0.0],  # not 3D
+            "axes": ["Y"],
+            "limits": [JointLimit(lower=-1.0, upper=1.0)],
         },
     ),
 ]
 
 
 # Cases that surface real bugs in production — see filed issues.
-KNOWN_GAPS = {
-    "joint-empty-name": "GH #4720 — JointDef accepts empty name",
-    "joint-bad-offset-length": "GH #4720 — JointDef accepts non-3D offset",
-}
+KNOWN_GAPS = {}
 
 
 @pytest.mark.parametrize(
@@ -132,9 +129,9 @@ def test_skeleton_rejects_unknown_root() -> None:
                 "root": JointDef(
                     name="root",
                     parent=None,
-                    offset=[0.0, 0.0, 0.0],
-                    axis=[0.0, 1.0, 0.0],
-                    limit=JointLimit(lower=-1.0, upper=1.0),
+                    tpose_offset=[0.0, 0.0, 0.0],
+                    axes=["Y"],
+                    limits=[JointLimit(lower=-1.0, upper=1.0)],
                 )
             },
             root_joint="nonexistent",
