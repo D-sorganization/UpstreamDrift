@@ -91,3 +91,11 @@ These issues are already tracked in GitHub and represent planned improvements.
 - **GitHub Issue**: #5920
 - **Status**: Open
 - **Description**: Consolidate the 6 config systems and 118 env vars into a unified `pydantic-settings` based Settings class, add runtime validation, generating `.env.example`, and implement secrets posture enforcement.
+
+## Phase 6: CI/CD Improvements
+
+### Phase 6.1: Review CI Modularization
+
+- **GitHub Issue**: #6099
+- **Status**: Open
+- **Description**: Review the modularization of ci-standard.yml and address the proliferation of Jules-* workflows
