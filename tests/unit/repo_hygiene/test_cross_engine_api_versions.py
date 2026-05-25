@@ -1,59 +1,67 @@
-"""Hygiene tests for cross-engine API version discipline.
-
-Per issue #5917 (Category J: API Design), the canonical integration
-surfaces ``realtime/``, ``pose_interchange/``, and ``launcher_embed/``
-must expose ``__version__`` and ``SCHEMA_VERSION`` constants following
-SemVer MAJOR.MINOR.PATCH so downstream consumers have a stable
-contract for detecting breaking changes (ADR-0007, ADR-0012, ADR-0013).
-"""
-
-from __future__ import annotations
-
-import importlib
 import re
 
 import pytest
 
-SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$")
+import src.shared.python.launcher_embed as launcher_embed
+import src.shared.python.pose_interchange as pose_interchange
+import src.shared.python.realtime as realtime
 
-PACKAGES = [
-    "src.shared.python.realtime",
-    "src.shared.python.pose_interchange",
-    "src.shared.python.launcher_embed",
+# The three core cross-engine packages per ADR-0007 / ADR-0012 / ADR-0013.
+# These packages establish canonical representations and integration contracts
+# between engines and thus require strict semver discipline for schemas.
+CROSS_ENGINE_PACKAGES = [
+    launcher_embed,
+    pose_interchange,
+    realtime,
 ]
 
+# Basic semantic versioning pattern (e.g., "1.0.0", "0.1.2-alpha", etc.)
+SEMVER_REGEX = re.compile(
+    r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-zA-Z0-9-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-zA-Z0-9-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
+)
 
-@pytest.mark.unit
-@pytest.mark.parametrize("package", PACKAGES)
-def test_package_exposes_version(package: str) -> None:
-    """Every cross-engine API package exposes ``__version__``."""
-    mod = importlib.import_module(package)
-    assert hasattr(mod, "__version__"), f"{package} missing __version__"
-    version = mod.__version__
-    assert isinstance(version, str), f"{package}.__version__ must be str"
-    assert SEMVER_RE.match(version), (
-        f"{package}.__version__ = {version!r} is not SemVer MAJOR.MINOR.PATCH"
+
+@pytest.mark.parametrize("pkg", CROSS_ENGINE_PACKAGES)
+def test_cross_engine_api_has_version_attributes(pkg):
+    """
+    Assert that cross-engine packages expose __version__ and SCHEMA_VERSION.
+    """
+    assert hasattr(pkg, "__version__"), f"Package {pkg.__name__} missing __version__"
+    assert hasattr(pkg, "SCHEMA_VERSION"), (
+        f"Package {pkg.__name__} missing SCHEMA_VERSION"
     )
 
 
-@pytest.mark.unit
-@pytest.mark.parametrize("package", PACKAGES)
-def test_package_exposes_schema_version(package: str) -> None:
-    """Every cross-engine API package exposes ``SCHEMA_VERSION``."""
-    mod = importlib.import_module(package)
-    assert hasattr(mod, "SCHEMA_VERSION"), f"{package} missing SCHEMA_VERSION"
-    schema = mod.SCHEMA_VERSION
-    assert isinstance(schema, str), f"{package}.SCHEMA_VERSION must be str"
-    assert SEMVER_RE.match(schema), (
-        f"{package}.SCHEMA_VERSION = {schema!r} is not SemVer"
+@pytest.mark.parametrize("pkg", CROSS_ENGINE_PACKAGES)
+def test_cross_engine_api_versions_are_valid_semver(pkg):
+    """
+    Assert that the version attributes conform to semantic versioning.
+    """
+    version = getattr(pkg, "__version__", None)
+    schema_version = getattr(pkg, "SCHEMA_VERSION", None)
+
+    assert isinstance(version, str), f"{pkg.__name__}.__version__ must be a string"
+    assert SEMVER_REGEX.match(version), (
+        f"{pkg.__name__}.__version__ ('{version}') is not valid semver"
+    )
+
+    assert isinstance(schema_version, str), (
+        f"{pkg.__name__}.SCHEMA_VERSION must be a string"
+    )
+    assert SEMVER_REGEX.match(schema_version), (
+        f"{pkg.__name__}.SCHEMA_VERSION ('{schema_version}') is not valid semver"
     )
 
 
-@pytest.mark.unit
-@pytest.mark.parametrize("package", PACKAGES)
-def test_version_constants_in_all(package: str) -> None:
-    """``__version__`` and ``SCHEMA_VERSION`` are listed in ``__all__``."""
-    mod = importlib.import_module(package)
-    public = set(getattr(mod, "__all__", ()))
-    assert "__version__" in public, f"{package}.__all__ missing __version__"
-    assert "SCHEMA_VERSION" in public, f"{package}.__all__ missing SCHEMA_VERSION"
+@pytest.mark.parametrize("pkg", CROSS_ENGINE_PACKAGES)
+def test_cross_engine_api_versions_in_all(pkg):
+    """
+    Assert that __version__ and SCHEMA_VERSION are exported in __all__.
+    """
+    assert hasattr(pkg, "__all__"), f"Package {pkg.__name__} missing __all__"
+    assert "__version__" in pkg.__all__, (
+        f"'__version__' missing from {pkg.__name__}.__all__"
+    )
+    assert "SCHEMA_VERSION" in pkg.__all__, (
+        f"'SCHEMA_VERSION' missing from {pkg.__name__}.__all__"
+    )

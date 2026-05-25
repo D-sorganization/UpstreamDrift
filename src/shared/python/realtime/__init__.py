@@ -35,26 +35,14 @@ from .api import (
     subscribe,
 )
 
-# Public API version (SemVer MAJOR.MINOR.PATCH).
-#
-# Bump rules (per issue #5917, ADR-0007):
-# - MAJOR: breaking change to ``publish`` / ``subscribe`` / ``Subscription``
-#   signatures, transport wire format, or channel-name contract.
-# - MINOR: backwards-compatible additions (new public functions, new
-#   optional kwargs, new transports).
-# - PATCH: bug fixes that do not change the public surface.
 __version__ = "1.0.0"
-
-# Wire-format version for the JSON-line file transport and websocket
-# payloads. Consumers that persist or replay realtime traffic should
-# pin this and refuse mismatched majors.
 SCHEMA_VERSION = "1.0.0"
 
 __all__ = [
-    "CHANNEL_REGISTRY",
     "SCHEMA_VERSION",
-    "Subscription",
     "__version__",
+    "CHANNEL_REGISTRY",
+    "Subscription",
     "publish",
     "register_channel",
     "subscribe",

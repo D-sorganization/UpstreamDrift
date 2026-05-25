@@ -30,28 +30,15 @@ from .registry import (
     unregister_embeddable_tool,
 )
 
-# Public API version (SemVer MAJOR.MINOR.PATCH).
-#
-# Bump rules (per issue #5917, ADR-0013):
-# - MAJOR: breaking change to the ``EmbeddableTool`` protocol
-#   (signatures, removed methods), to ``EmbedCapabilities`` fields,
-#   or to registry semantics.
-# - MINOR: backwards-compatible additions (new optional protocol
-#   methods with default implementations, new capability fields with
-#   defaults, new registry helpers).
-# - PATCH: bug fixes that do not change the public surface.
 __version__ = "1.0.0"
-
-# Contract version exposed to embedded tools. Hosts may refuse tools
-# declaring a higher major.
 SCHEMA_VERSION = "1.0.0"
 
 __all__ = [
+    "SCHEMA_VERSION",
+    "__version__",
     "EMBEDDABLE_TOOL_REGISTRY",
     "EmbedCapabilities",
     "EmbeddableTool",
-    "SCHEMA_VERSION",
-    "__version__",
     "get_embeddable_tool",
     "is_embeddable",
     "register_embeddable_tool",

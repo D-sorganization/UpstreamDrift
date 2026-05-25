@@ -513,7 +513,6 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         if len(points) < 2:
             return list(points)
 
-        # Single allocation + slicing, avoids two list-comp+np.array passes
         points_arr = np.asarray(points)
         xs = points_arr[:, 0]
         ys = points_arr[:, 1]

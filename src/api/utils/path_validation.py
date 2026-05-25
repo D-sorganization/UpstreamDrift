@@ -14,40 +14,23 @@ ALLOWED_MODEL_DIRS = [
 ]
 
 
-def _candidate_traverses_symlink(candidate: Path, allowed_dir: Path) -> bool:
-    """Return True if any component of ``candidate`` under ``allowed_dir`` is a symlink.
-
-    A symlink anywhere in the path under the allowed root can redirect outside
-    the intended directory tree even when ``Path.resolve()`` happens to keep
-    the resolved path inside that root on some platforms. Rejecting any
-    symlink traversal is a defense-in-depth measure recommended by the
-    Category K Data Handling review (issue #5918).
-    """
+def _candidate_traverses_symlink(candidate: Path, allowed_root: Path) -> bool:
+    """Check if the candidate path crosses a symlink relative to allowed_root."""
     try:
-        rel = candidate.relative_to(allowed_dir)
+        rel = candidate.relative_to(allowed_root)
     except ValueError:
-        # candidate is not under allowed_dir; let the contains-check decide.
         return False
 
-    current = allowed_dir
+    current = allowed_root
     for part in rel.parts:
         current = current / part
-        try:
-            if current.is_symlink():
-                return True
-        except OSError:
-            # Treat unreadable components as suspicious.
+        if current.is_symlink():
             return True
     return False
 
 
 def resolve_contained_path(candidate: Path, allowed_dirs: Iterable[Path]) -> Path:
-    """Resolve a candidate path and ensure it stays under an allowed root.
-
-    Hardening (issue #5918): symlink traversal is rejected explicitly so a
-    symlink inside an allowed root pointing outside it cannot bypass the
-    containment check.
-    """
+    """Resolve a candidate path and ensure it stays under an allowed root."""
     try:
         resolved_candidate = candidate.resolve()
     except (ValueError, OSError) as exc:
@@ -65,16 +48,16 @@ def resolve_contained_path(candidate: Path, allowed_dirs: Iterable[Path]) -> Pat
                 detail="Invalid path format",
             ) from exc
 
+        if _candidate_traverses_symlink(candidate, allowed_dir):
+            raise HTTPException(
+                status_code=400,
+                detail="Path traversal via symlink is not permitted",
+            )
+
         try:
             resolved_candidate.relative_to(resolved_allowed_dir)
         except ValueError:
             continue
-
-        if _candidate_traverses_symlink(candidate, allowed_dir):
-            raise HTTPException(
-                status_code=400,
-                detail="Symbolic links are not permitted in model paths",
-            )
 
         if resolved_candidate.exists():
             return resolved_candidate

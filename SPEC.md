@@ -37,7 +37,7 @@
 | **Owner**               | D-sorganization                                    |
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
-| **Current Version**     | 2.1.0                                              |
+| **Current Version**     | 2.1.1                                              |
 | **Spec Version**        | 1.0.194                                            |
 | **Last Spec Update**    | 2026-05-25                                         |
 
@@ -678,7 +678,7 @@ policy lives in `docker/README.md` and ADR-0021.
 | 2026-05-22 | 1.0.179 | Aligned the module-size quality gate with current launcher and shared-chat legacy debt by adding owned, expiring exceptions for `src/launchers/launcher_ui_setup.py` and `src/shared/python/chat/_chat_dock_widget_qt.py`, and raising the active module-size exception cap to 10 while preserving the 1,500-line budget for new untracked modules. |
 | 2026-05-21 | 1.0.176 | Preserved integer-safe quaternion normalization in `src/motion_capture/c3d_simscape_preview.py` by upcasting integer inputs before the optimized `np.einsum` norm accumulation, and added regression coverage for integer quaternion inputs. |
 | 2026-05-21 | 1.0.175 | Optimized `src/shared/python/signal_toolkit/fitting.py` to compute fitting residual sum-of-squares and RMSE via reused `np.vdot` accumulators, avoiding temporary squared arrays across the sinusoid, exponential, linear, polynomial, and custom fitter paths. |
-| 2026-05-15 | 1.0.173 | Integrated Sidekick across the launcher: registered the AI chat panel as an EmbeddableTool tile (`src/tools/sidekick/`), bound React `ChatPanel` to `var(--sidekick-color-*)` design tokens with a Python/TypeScript parity test, added a redacted ring-buffer chat-context bridge that injects recent app state into the assistant prompt, registered a `summarize_simulation_run` agentic analytics tool, and surfaced Tools-sidebar availability through `LauncherDiagnostics`. Refs #5460 #5461 #5462 #5463 #5464 #5465. |
+| 2026-05-25 | 1.0.173 | Integrated Sidekick across the launcher: registered the AI chat panel as an EmbeddableTool tile (`src/tools/sidekick/`), bound React `ChatPanel` to `var(--sidekick-color-*)` design tokens with a Python/TypeScript parity test, added a redacted ring-buffer chat-context bridge that injects recent app state into the assistant prompt, registered a `summarize_simulation_run` agentic analytics tool, and surfaced Tools-sidebar availability through `LauncherDiagnostics`. Refs #5460 #5461 #5462 #5463 #5464 #5465. |
 | 2026-05-18 | 1.0.171 | ⚡ Bolt: Optimize norm calculations in plot_error_timecourse using np.einsum |
 | 2026-05-14 | 1.0.170 | ⚡ Bolt: Optimize sum of squares along axis in perstep train metrics |
 | 2026-05-14 | 1.0.169 | Added a shared row norm helper for vectorized norm calculations in motion-matching and validation paths. |
@@ -834,6 +834,8 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 | 2026-05-22 | 1.0.170 | Hardened the shared BitNet subprocess adapter by rejecting non-UTF-8 and oversize prompts before `llama-cli` launch, and added focused regression coverage for the synchronous and streaming guard paths (issue #5913). |
 | 2026-05-25 | 1.0.171 | Optimized sum-of-squares calculation for Drake constraint residuals using element-wise multiplication and fixed a missing `body_marker` breakdown argument. |
 | 2026-05-25 | 1.0.171 | Wire ADR numbering governance tests and strengthen duplicate numbering test assertions (#6065). |
+| 2026-05-25 | 1.0.171 | Optimized `_resample_drawn_points` using `np.asarray` and slicing to avoid redundant Python allocations (#5912). |
+| 2026-05-25 | 1.0.191 | Bolt: Optimized norm and sum of squares calculation in cost evaluation using np.einsum and vdot replacements |
 ````
 
 | 2026-05-25 | 1.0.171 | Updated the docstrings for `LiveKinematicsService` implementations (`drake.py`, `opensim.py`, `simscape.py`) to accurately reflect their real, post-#4963 functionality instead of incorrectly claiming to raise `NotImplementedError` (Issue #6092). |
