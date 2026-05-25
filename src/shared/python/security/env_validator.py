@@ -32,6 +32,28 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 logger = get_logger(__name__)
 
 
+# Sentinel placeholder values shipped in `.env.example`.  If a user copies
+# `.env.example` -> `.env` without editing, these defaults would silently
+# become real credentials -- refuse to accept them.  See issue #5920.
+KNOWN_SECRET_KEY_PLACEHOLDERS: frozenset[str] = frozenset(
+    {
+        "UNSAFE-NO-SECRET-KEY-SET-AUTHENTICATION-WILL-FAIL",
+        "generate_a_random_string_here",
+        "generate_another_random_string_here",
+    }
+)
+
+KNOWN_ADMIN_PASSWORD_PLACEHOLDERS: frozenset[str] = frozenset(
+    {
+        "change_me_in_production",
+        "changeme",
+        "change_me",
+        "password",
+        "admin",
+    }
+)
+
+
 class APIKeyValidationResults(TypedDict):
     secret_key: bool
     environment: str | None
@@ -73,16 +95,21 @@ def validate_secret_key_strength(key: str, min_length: int = 64) -> None:
     if not key:
         raise EnvironmentValidationError("Secret key is empty")
 
+    # Check it's not a placeholder shipped in `.env.example` BEFORE the length
+    # check -- the shipped placeholders are shorter than ``min_length`` and we
+    # want the user to see the clearer "you forgot to edit .env" message
+    # rather than the generic "too short" error (issue #5920).
+    if key in KNOWN_SECRET_KEY_PLACEHOLDERS:
+        raise EnvironmentValidationError(
+            f"Secret key is using a known placeholder value ({key!r}). "
+            "It looks like `.env.example` was copied to `.env` without "
+            "editing.  Set GOLF_API_SECRET_KEY (or SECRET_KEY) to a "
+            "freshly generated random string."
+        )
+
     if len(key) < min_length:
         raise EnvironmentValidationError(
             f"Secret key is too short: {len(key)} chars (minimum: {min_length})"
-        )
-
-    # Check it's not a placeholder
-    if key == "UNSAFE-NO-SECRET-KEY-SET-AUTHENTICATION-WILL-FAIL":
-        raise EnvironmentValidationError(
-            "Secret key is using unsafe placeholder. "
-            "Set GOLF_API_SECRET_KEY or SECRET_KEY environment variable."
         )
 
     # Check for common weak patterns
@@ -103,6 +130,39 @@ def validate_secret_key_strength(key: str, min_length: int = 64) -> None:
                 f"Secret key contains weak pattern: '{pattern}'. "
                 f"Consider generating a stronger key."
             )
+
+
+def validate_admin_password_strength(password: str, min_length: int = 12) -> None:
+    """Validate that the admin password meets minimum security requirements.
+
+    Rejects empty values, values shorter than ``min_length``, and any value
+    that matches a known placeholder shipped in ``.env.example`` (e.g.
+    ``change_me_in_production``).  See issue #5920.
+
+    Args:
+        password: Admin password to validate.
+        min_length: Minimum acceptable length (default: 12).
+
+    Raises:
+        EnvironmentValidationError: If the password is empty, too short, or
+            matches a known placeholder.
+    """
+    if not password:
+        raise EnvironmentValidationError("Admin password is empty")
+
+    if password in KNOWN_ADMIN_PASSWORD_PLACEHOLDERS:
+        raise EnvironmentValidationError(
+            f"Admin password is using a known placeholder value "
+            f"({password!r}).  It looks like `.env.example` was copied to "
+            "`.env` without editing.  Set GOLF_ADMIN_PASSWORD to a strong, "
+            "unique value."
+        )
+
+    if len(password) < min_length:
+        raise EnvironmentValidationError(
+            f"Admin password is too short: {len(password)} chars "
+            f"(minimum: {min_length})"
+        )
 
 
 def validate_api_security() -> APIKeyValidationResults:
@@ -168,12 +228,26 @@ def validate_api_security() -> APIKeyValidationResults:
             )
         results["admin_password"] = False
     else:
-        if len(admin_password) < 12:
-            results["warnings"].append(
-                f"Admin password is short ({len(admin_password)} chars). "
-                f"Recommend at least 12 characters."
+        # Reject known `.env.example` placeholders outright (issue #5920) --
+        # in production these are a critical issue, in dev a loud warning.
+        if admin_password in KNOWN_ADMIN_PASSWORD_PLACEHOLDERS:
+            message = (
+                f"Admin password is using a known placeholder value "
+                f"({admin_password!r}).  Set GOLF_ADMIN_PASSWORD to a "
+                "strong, unique value."
             )
-        results["admin_password"] = True
+            if is_production():
+                results["issues"].append(f"CRITICAL: {message}")
+                raise EnvironmentValidationError("GOLF_ADMIN_PASSWORD", message)
+            results["warnings"].append(message)
+            results["admin_password"] = False
+        else:
+            if len(admin_password) < 12:
+                results["warnings"].append(
+                    f"Admin password is short ({len(admin_password)} chars). "
+                    f"Recommend at least 12 characters."
+                )
+            results["admin_password"] = True
 
     return results
 
