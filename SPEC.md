@@ -2,7 +2,7 @@
 
 <!--
   TEMPLATE VERSION: 1.0.0
-  LAST UPDATED: 2026-05-15
+  LAST UPDATED: 2026-05-25
 
   This is the canonical specification template for all repositories in the
   D-sorganization fleet. Every repo MUST have a SPEC.md at its root.
@@ -67,6 +67,9 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 - Not a replacement for domain-specific tools (OpenSim for clinical analysis, MATLAB for controls research)
 
 ## 4. Architecture Overview
+### Recent Architecture Changes
+- **ADR-0022**: Defined the boundary between `ChatDockWidget` (legacy compatibility) and Sidekick (`AIAssistantPanel`) product surfaces.
+
 
 ### Recent Spec Updates
 
