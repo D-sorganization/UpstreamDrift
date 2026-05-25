@@ -379,6 +379,58 @@ def pytest_ignore_collect(collection_path: Path, config: pytest.Config) -> bool:
     return should_ignore
 
 
+# ---------------------------------------------------------------------------
+# Auto-skip hook for ``requires_*`` markers (issue #6095).
+# ---------------------------------------------------------------------------
+
+_REQUIRES_DEP_MAP: dict[str, str | None] = {
+    "drake": "pydrake",
+    "opensim": "opensim",
+    "mujoco": "mujoco",
+    "pinocchio": "pinocchio",
+    "matlab": "matlab",
+    "matlab_engine": "matlab",
+    "torch": "torch",
+    "ort": "onnxruntime",
+    # Markers without a direct importable dep — resolved via other fixtures/CI
+    # gates; return True so the test still runs unless explicitly skipped elsewhere.
+    "gpu": None,
+    "network": None,
+    "mocap_fixtures": None,
+    "real_dataset": None,
+    "gl": None,
+}
+
+
+def _dep_available(dep_name: str) -> bool:
+    """Return True if the named optional dependency is importable."""
+    mod_name = _REQUIRES_DEP_MAP.get(dep_name.lower(), dep_name.lower())
+    if mod_name is None:
+        return True
+    try:
+        return importlib.util.find_spec(mod_name) is not None
+    except (ValueError, ModuleNotFoundError):
+        return False
+
+
+def pytest_collection_modifyitems(
+    items: list[pytest.Item], config: pytest.Config
+) -> None:
+    """Auto-skip tests whose ``requires_*`` dependency is not installed."""
+    _prefix = "requires_"
+    for item in items:
+        for marker in item.iter_markers():
+            name = marker.name
+            if not name.startswith(_prefix):
+                continue
+            dep = name[len(_prefix) :]
+            if not _dep_available(dep):
+                item.add_marker(
+                    pytest.mark.skip(reason=f"{dep} not installed (marker: {name})")
+                )
+                break
+
+
 _BIOMECH_SIBLINGS_DIRECT = (
     "MuJoCo_Models",
     "Drake_Models",
