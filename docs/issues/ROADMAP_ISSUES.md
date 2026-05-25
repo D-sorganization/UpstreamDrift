@@ -83,3 +83,23 @@ These issues are already tracked in GitHub and represent planned improvements.
 - **GitHub Issue**: #130
 - **Status**: Open
 - **Description**: Implement lazy imports to improve startup time
+
+## Phase 5: Documentation & Audits
+
+### Phase 5.1: Audit Epics #4796 and #4755
+
+- **GitHub Issue**: #6087
+- **Status**: Closed
+- **Description**: Epics #4796 (plot_style implementations) and #4755 (body_part_viz implementations) have been audited. The `plot_style` module has shipped the canonical `MatplotlibMarkerRenderer` and `PyQtGLMarkerRenderer`, along with its colors, colormaps, markers, resolvers, and widgets sub-packages. The `body_part_viz` module has shipped the canonical matplotlib and PyQtGL renderers, capsule/ellipsoid/cylinder/mesh shapes, and Kabsch/Procrustes/cluster fitters. Both epics are fully implemented and can be closed as completed.
+
+## Closed Epics
+
+### Epic #4796
+- **GitHub Issue**: #4796
+- **Status**: Closed
+- **Description**: Plot-style contracts and implementations.
+
+### Epic #4755
+- **GitHub Issue**: #4755
+- **Status**: Closed
+- **Description**: Body-part visualisation contracts and implementations.
