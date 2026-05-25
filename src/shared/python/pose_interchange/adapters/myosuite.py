@@ -103,3 +103,6 @@ class MyoSuiteAdapter:
             pelvis_rotation_xyz_deg=rotation_deg,
             joint_angles_deg=joint_angles,
         )
+
+
+# trigger ci
