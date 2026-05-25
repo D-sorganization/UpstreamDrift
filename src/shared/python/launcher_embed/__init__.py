@@ -30,7 +30,12 @@ from .registry import (
     unregister_embeddable_tool,
 )
 
+__version__ = "1.0.0"
+SCHEMA_VERSION = "1.0.0"
+
 __all__ = [
+    "SCHEMA_VERSION",
+    "__version__",
     "EMBEDDABLE_TOOL_REGISTRY",
     "EmbedCapabilities",
     "EmbeddableTool",
