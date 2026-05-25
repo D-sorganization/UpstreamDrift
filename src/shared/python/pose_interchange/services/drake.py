@@ -6,10 +6,7 @@ If :mod:`pydrake` is unavailable, :func:`create_drake_service` falls
 back to a :class:`MockKinematicsService` configured with
 ``engine_name="drake"``.
 
-Method bodies that require non-trivial Drake plumbing currently raise
-:class:`NotImplementedError` with a TODO: #4963 tied to follow-up;
-this PR only commits the wiring scaffold so downstream code can target
-``LiveKinematicsService`` without waiting on the full Drake bridge.
+
 """
 
 from __future__ import annotations

@@ -6,9 +6,7 @@ Lazily imports :mod:`opensim` and loads a ``.osim`` file via
 :class:`MockKinematicsService` configured with
 ``engine_name="opensim"``.
 
-Method bodies that require non-trivial OpenSim wiring currently raise
-:class:`NotImplementedError` with a TODO: #4963 tied to follow-up
-against the EPIC #4895 Pose Studio engine bridge.
+
 """
 
 from __future__ import annotations

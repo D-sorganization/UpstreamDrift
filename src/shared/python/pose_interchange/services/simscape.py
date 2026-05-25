@@ -7,9 +7,7 @@ If MATLAB / the MATLAB engine API is unavailable,
 :class:`MockKinematicsService` configured with
 ``engine_name="simscape"``.
 
-Method bodies that drive Simulink directly currently raise
-:class:`NotImplementedError` with a TODO: #4963 tied to follow-up
-against the EPIC #4895 Pose Studio engine bridge.
+
 """
 
 from __future__ import annotations
