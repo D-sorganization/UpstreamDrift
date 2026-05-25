@@ -168,6 +168,12 @@ def test_run_headless_invalid_output_dir_returns_1(
     inputs = tmp_path / "inputs.json"
     inputs.write_text("{}", encoding="utf-8")
 
+    import os
+
+    restricted_dir = tmp_path / "restricted"
+    restricted_dir.mkdir()
+    os.chmod(restricted_dir, 0o444)
+
     args = cli.parse_cli_args(
         [
             "run",
@@ -176,7 +182,7 @@ def test_run_headless_invalid_output_dir_returns_1(
             "--inputs",
             str(inputs),
             "--output",
-            str(tmp_path / "missing" / "result.json"),
+            str(restricted_dir / "result.json"),
         ]
     )
 
