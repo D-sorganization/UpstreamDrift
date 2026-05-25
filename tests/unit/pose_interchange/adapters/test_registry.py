@@ -9,7 +9,14 @@ from src.shared.python.pose_interchange.protocol import PoseConventionAdapter
 
 pytestmark = pytest.mark.unit
 
-EXPECTED_ENGINES = {"drake", "mujoco", "pinocchio", "opensim", "simscape"}
+EXPECTED_ENGINES = {
+    "drake",
+    "mujoco",
+    "myosuite",
+    "pinocchio",
+    "opensim",
+    "simscape",
+}
 
 
 def test_registry_has_all_engines() -> None:

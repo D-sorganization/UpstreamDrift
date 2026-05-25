@@ -8,7 +8,6 @@ import numpy as np
 import pytest
 
 from src.deployment.realtime.controller import (
-    CommunicationType,
     RealTimeController,
     RobotConfig,
     TimingStatistics,

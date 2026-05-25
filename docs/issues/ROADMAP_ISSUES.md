@@ -1,6 +1,6 @@
 # Roadmap Issues - Golf Modeling Suite
 
-Last Updated: 2026-01-17
+Last Updated: 2026-05-25
 
 These issues are already tracked in GitHub and represent planned improvements.
 
@@ -50,6 +50,12 @@ These issues are already tracked in GitHub and represent planned improvements.
 - **Status**: Open
 - **Description**: Normalize physics constants across all engines
 
+### Phase 2.4: Chat Entry-point Consolidation
+
+- **GitHub Issue**: #6119
+- **Status**: Open
+- **Description**: Consolidate chat entry points and decompose \_chat_dock_widget_qt.py (Follow-up from ADR-0022 and #6120)
+
 ## Phase 3: Integration
 
 ### Phase 3.1: Cross-Engine Integration Tests
@@ -83,3 +89,19 @@ These issues are already tracked in GitHub and represent planned improvements.
 - **GitHub Issue**: #130
 - **Status**: Open
 - **Description**: Implement lazy imports to improve startup time
+
+## Phase 5: CI/CD Pipeline
+
+### Phase 5.1: Review CI Modularization and Jules-\* Workflows
+
+- **GitHub Issue**: #6099
+- **Status**: Open
+- **Description**: Review modularization of ci-standard.yml (1,617 lines) and Jules-\* workflow proliferation.
+
+## Phase 5: Documentation & Audits
+
+### Phase 5.1: Audit Epics #4796 and #4755
+
+- **GitHub Issue**: #6087
+- **Status**: Closed
+- **Description**: Epics #4796 (plot_style implementations) and #4755 (body_part_viz implementations) have been audited. The `plot_style` module has shipped the canonical `MatplotlibMarkerRenderer` and `PyQtGLMarkerRenderer`, along with its colors, colormaps, markers, resolvers, and widgets sub-packages. The `body_part_viz` module has shipped the canonical matplotlib and PyQtGL renderers, capsule/ellipsoid/cylinder/mesh shapes, and Kabsch/Procrustes/cluster fitters. Both epics are fully implemented and can be closed as completed.

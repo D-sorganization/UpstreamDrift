@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock
-from PyQt6.QtWidgets import QApplication, QSplitter, QWidget, QVBoxLayout, QSizePolicy
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QSizePolicy
 from src.launchers.launcher_ui_setup import UISetupManager
 
 

@@ -1,5 +1,6 @@
 # WARNING: LOCAL DEVELOPMENT ONLY
 # This compose file is intended for local developer workflows only.
+# Policy reference: docker/README.md and docs/adr/0021-container-strategy.md
 # Before using in any shared or internet-facing environment:
 #   - Change port bindings from 127.0.0.1 to an appropriate reverse-proxy.
 #   - Remove or set GOLF_AUTH_DISABLED=false if present in your .env.

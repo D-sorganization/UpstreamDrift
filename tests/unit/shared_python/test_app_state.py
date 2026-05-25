@@ -129,7 +129,6 @@ def test_history_clear() -> None:
 def test_diagnostic_engine_pass_check() -> None:
     """A check that returns True produces a PASS result."""
     from src.shared.python.app_state import DiagnosticEngine
-    from src.shared.python.app_state._diagnostic import DiagnosticResult
 
     engine = DiagnosticEngine()
     engine.register_check("always_pass", lambda: True)

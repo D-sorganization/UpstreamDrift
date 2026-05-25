@@ -1,4 +1,5 @@
 # docker-compose.gpu.yml — GPU overrides
+# Policy reference: docker/README.md and docs/adr/0021-container-strategy.md
 # Usage: docker compose -f docker-compose.yml -f docker-compose.gpu.yml up
 services:
   backend:

@@ -28,7 +28,7 @@ import json
 import logging
 import math
 import subprocess
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -37,6 +37,13 @@ from ._types import ClubTargetLike, FitResult
 logger = logging.getLogger(__name__)
 
 ENGINE_NAME = "pinocchio"
+
+try:
+    from datetime import UTC
+except ImportError:  # pragma: no cover - Python < 3.11 compatibility shim
+    from datetime import timezone
+
+    UTC = timezone.utc  # noqa: UP017 - Python 3.10 compatibility shim
 
 # Required schema keys, in canonical order, used both for emission and
 # for the round-trip schema test.

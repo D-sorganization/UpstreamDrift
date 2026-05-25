@@ -20,6 +20,8 @@ import numpy as np
 import pytest
 from src.shared.python.motion_matching.fit_result import CanonicalFitResult
 
+pytestmark = pytest.mark.parity
+
 # The canonical, engine-agnostic field set every engine must surface.
 # These are the names callers should use going forward.
 CANONICAL_FIELDS: frozenset[str] = frozenset(

@@ -6,7 +6,3 @@ for backends that require pinocchio/mujoco/pink).
 """
 
 from __future__ import annotations
-
-from unittest.mock import MagicMock, patch
-
-import pytest

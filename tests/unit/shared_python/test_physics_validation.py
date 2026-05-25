@@ -1,10 +1,6 @@
 """Tests for physics validation module."""
 
 import unittest
-from types import SimpleNamespace
-from unittest.mock import MagicMock, patch
-
-import numpy as np
 
 
 class TestPhysicsValidationResult(unittest.TestCase):

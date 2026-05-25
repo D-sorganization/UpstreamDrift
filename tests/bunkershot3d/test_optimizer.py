@@ -1,4 +1,3 @@
-import pytest
 import numpy as np
 from bunkershot3d.calibration.optimizer import CalibrationOptimizer
 from bunkershot3d.calibration.angle_of_repose import AngleOfReposeExperiment

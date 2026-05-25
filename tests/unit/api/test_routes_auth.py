@@ -3,8 +3,6 @@
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock
-from sqlalchemy.orm import Session
 
 from src.api.routes.auth import router
 from src.api.database import get_db

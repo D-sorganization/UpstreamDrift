@@ -1,7 +1,6 @@
 """Tests for observed-input providers (OpenPose and MediaPipe)."""
 
 import pytest
-import json
 
 # =============================================================================
 # OpenPose Provider Tests
@@ -12,10 +11,6 @@ def test_openpose_import():
     """Test that OpenPose provider can be imported."""
     from src.tools.starting_pose_matcher.skeleton_extractors.openpose import (
         OpenPoseProvider,
-        OpenPoseProviderError,
-        create_provider,
-        OPENPOSE_COCO_INDICES,
-        OPENPOSE_TO_MATCHER_VOCAB,
     )
 
     assert hasattr(OpenPoseProvider, "get_skeleton")
@@ -390,10 +385,6 @@ def test_mediapipe_import():
     """Test that MediaPipe provider can be imported."""
     from src.tools.starting_pose_matcher.skeleton_extractors.mediapipe import (
         MediaPipeProvider,
-        MediaPipeProviderError,
-        create_provider,
-        MEDIAPIPE_POSE_LANDMARKS,
-        MEDIAPIPE_TO_MATCHER_VOCAB,
     )
 
     assert hasattr(MediaPipeProvider, "get_skeleton")
