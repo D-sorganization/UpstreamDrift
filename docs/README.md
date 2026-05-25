@@ -17,33 +17,25 @@ multiple physics engines and biomechanical modeling approaches.
 
 ## Quick Start
 
-### 1. Launch the Suite
-
-From the repository root:
+The recommended entry point is the **web UI**:
 
 ```bash
 python launch_golf_suite.py
 ```
 
-This is the unified launcher and the recommended entry point. It exposes the
-web UI by default and can dispatch to a specific engine or to the API server
-only.
+This starts the local API server (port 8000) and opens the React UI in your default browser.
 
-### 2. Alternative launch modes
+### Other entry points
 
-```bash
-python launch_golf_suite.py --classic     # PyQt6 launcher
-python launch_golf_suite.py --api-only    # API server only (development)
-python launch_golf_suite.py --engine mujoco
-```
+| Command | What it launches |
+|---------|------------------|
+| `python launch_golf_suite.py` | Web UI (recommended) |
+| `python launch_golf_suite.py --classic` | Classic PyQt6 desktop launcher |
+| `python launch_golf_suite.py --api-only` | API server without auto-opening a UI |
+| `python launch_golf_suite.py --engine <name>` | Legacy direct engine launch |
+| Pose Studio standalone | `python -m src.tools.pose_studio` |
 
-### 3. Access the API (when running in API mode)
-
-- **API Base**: http://localhost:8000
-- **Interactive Docs**: http://localhost:8000/docs
-- **Health Check**: http://localhost:8000/health
-
-### 4. Run a Simulation
+### Run a Simulation via API
 
 ```bash
 curl -X POST http://localhost:8000/simulate \
@@ -51,6 +43,7 @@ curl -X POST http://localhost:8000/simulate \
   -d '{"engine_type": "mujoco", "duration": 1.0}'
 ```
 
+The classic PyQt6 launcher remains supported as a fallback and for users who prefer a desktop window.
 ---
 
 ## Documentation Structure
