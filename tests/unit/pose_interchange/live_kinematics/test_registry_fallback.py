@@ -63,7 +63,7 @@ def test_registry_falls_back_to_mock_when_wheel_absent(
 ) -> None:
     """Force the wheel probe to ``False`` and assert mock-fallback contract."""
     factory = KINEMATICS_SERVICE_REGISTRY[engine_name]
-    with patch(f"{module_path}.{probe_name}", return_value=False):
+    with patch.dict(factory.__globals__, {probe_name: lambda: False}):
         service = factory()
     assert isinstance(service, MockKinematicsService), (
         f"Expected MockKinematicsService fallback for {engine_name!r}, "

@@ -4,10 +4,13 @@ This package defines the abstract surface (Protocols + frozen
 dataclasses) used by every marker / trace styling implementation in
 UpstreamDrift.
 
-Concrete implementations of color resolvers, renderers, Qt widgets, and
-marker-shape primitives live in the ``resolvers``, ``renderers``,
-``widgets``, and ``shapes`` sub-packages and are added in follow-up
-issues of EPIC #4796.
+The package contains:
+- ``contracts``: Interfaces for color resolvers, marker renderers, and marker shape renderers.
+- ``colors`` and ``colormaps``: Color scales, static colors, palette colors, data-driven colors, and custom colormaps.
+- ``markers``: Marker styles and custom mesh specifications.
+- ``renderers``: Matplotlib and PyQtGL rendering backends.
+- ``resolvers``: Registries and dispatch logic for resolving data-driven colors.
+- ``widgets``: PyQt6 widgets for visual editing of plot styles (colormap/color pickers, marker selectors, channels).
 """
 
 from __future__ import annotations

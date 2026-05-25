@@ -1,8 +1,8 @@
-# Golf Modeling Suite Documentation
+# UpstreamDrift Documentation
 
-> **January 2026** | Local-First API Architecture
+> Local-First API Architecture
 
-Welcome to the Golf Modeling Suite - a professional biomechanical analysis and physics simulation platform.
+Welcome to UpstreamDrift - a professional biomechanical analysis and physics simulation platform.
 
 ## Quick Navigation
 
@@ -12,18 +12,29 @@ Welcome to the Golf Modeling Suite - a professional biomechanical analysis and p
 | Understand the API      | [API Architecture](api/API_ARCHITECTURE.md)         |
 | Develop new features    | [Development Guide](api/DEVELOPMENT.md)             |
 | Choose a physics engine | [Engine Selection Guide](engine_selection_guide.md) |
+| Run motion pipeline     | [Motion Pipeline](motion_pipeline/README.md)        |
+| Review ADRs             | [ADRs](adr/)                                        |
+| Read the specification  | [SPEC](../SPEC.md)                                  |
 | Troubleshoot issues     | [Troubleshooting](troubleshooting/)                 |
 
 ---
 
 ## Quick Start
 
-### 1. Start the API Server
+### 1. Start the Unified Launcher (Web UI)
 
 ```bash
-cd /home/user/Golf_Modeling_Suite
-python start_api_server.py
+cd /home/user/UpstreamDrift
+python launch_golf_suite.py
 ```
+
+By default, running `python launch_golf_suite.py` starts the local API server and automatically opens the interactive Web UI in your default browser.
+
+#### Alternate Launch Modes:
+
+- **Classic UI**: `python launch_golf_suite.py --classic` to launch the classic PyQt6 desktop application.
+- **API Only**: `python launch_golf_suite.py --api-only` to start only the FastAPI backend server on port 8000.
+- **Direct Engine**: `python launch_golf_suite.py --engine <engine_name>` to launch a specific physics engine workspace directly.
 
 ### 2. Access the API
 
@@ -31,7 +42,7 @@ python start_api_server.py
 - **Interactive Docs**: http://localhost:8000/docs
 - **Health Check**: http://localhost:8000/health
 
-### 3. Run a Simulation
+### 3. Run a Simulation via API
 
 ```bash
 curl -X POST http://localhost:8000/simulate \
@@ -46,6 +57,10 @@ curl -X POST http://localhost:8000/simulate \
 ```
 docs/
 ├── README.md              ← You are here
+│
+├── adr/                   # Architecture Decision Records (ADRs)
+│   ├── README.md
+│   └── (individual ADR documents)
 │
 ├── api/                   # API Reference
 │   ├── API_ARCHITECTURE.md   # Complete API architecture
@@ -76,13 +91,19 @@ docs/
 │   ├── engine_loading_flow.md
 │   └── data_pipeline.md
 │
+├── motion_pipeline/       # Motion Matching Pipeline
+│   ├── README.md            # Pipeline overview
+│   ├── formats.md           # File formats (C3D, JSON, CSV)
+│   └── compat.md            # Backward compatibility
+│
+├── assessments/           # Assessments & Reviews
+│   ├── README.md            # Status & findings
+│   └── archive/             # Historical assessments
+│
 ├── troubleshooting/       # Problem Solving
 │   └── (troubleshooting guides)
 │
-└── archive/               # Historical Documentation
-    ├── assessments_jan2026/
-    ├── phase_plans/
-    └── historical/
+└── historical/            # Historical documents
 ```
 
 ---
@@ -91,7 +112,7 @@ docs/
 
 ### Local-First API
 
-The Golf Modeling Suite uses a **local-first architecture**:
+UpstreamDrift uses a **local-first architecture**:
 
 - **No cloud required** for local development
 - **Optional cloud mode** for production scaling
@@ -258,7 +279,7 @@ repository maintenance guidance.
 
 ---
 
-## Recent Updates (January 2026)
+## Recent Updates
 
 - **API Architecture Upgrade** - Local-first FastAPI implementation
 - **Diagnostics Enhancement** - Structured error codes, request tracing

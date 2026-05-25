@@ -16,10 +16,10 @@ not include it).
 
 The output is the canonical ``ClubTarget`` from
 ``src/shared/python/motion_matching/club_target.py`` (frozen dataclass with a
-``__post_init__`` validator). If that module is unavailable for any reason a
-local stub is used and a warning is logged. See issue #4095 (PARITY-LOADERS)
-for the planned promotion of this loader to
-``shared/python/motion_matching/loaders/club_swing_dataset.py``.
+``__post_init__`` validator). If that module is unavailable for any reason, a
+local stub is used and a warning is logged. This fallback/stub is an intentional
+design choice to ensure that the Pinocchio engine adapter remains importable in
+stripped-down or standalone checkouts where shared packages are not installed.
 """
 
 from __future__ import annotations
@@ -44,8 +44,10 @@ _TIME_EPS = 1.0e-9
 
 
 # ---------------------------------------------------------------------------
-# ClubTarget import w/ stub fallback (TODO: drop once #4095 PARITY-LOADERS
-# guarantees the shared module is always importable from every engine path).
+# ClubTarget import w/ stub fallback.
+# This fallback is an intentional design choice to keep the engine adapter
+# importable in stripped-down or standalone checkouts where shared packages
+# are not installed.
 # ---------------------------------------------------------------------------
 
 try:  # pragma: no cover - exercised by both branches via tests
@@ -58,8 +60,8 @@ try:  # pragma: no cover - exercised by both branches via tests
 except ImportError:  # pragma: no cover - fallback for stripped-down checkouts
     logger.warning(
         "src.shared.python.motion_matching.club_target unavailable; using "
-        "local stub. TODO(#4095 PARITY-LOADERS): remove this fallback once "
-        "the shared package is guaranteed importable."
+        "local stub. This fallback is an intentional design choice to support "
+        "stripped-down checkouts."
     )
 
     @dataclass(frozen=True)
@@ -88,7 +90,7 @@ except ImportError:  # pragma: no cover - fallback for stripped-down checkouts
         source: SourceProvenance
 
         def __post_init__(self) -> None:
-            _validate_stub_target(self)
+            _validate_stub_target(self)  # type: ignore[arg-type]
 
     _USING_STUB = True
 

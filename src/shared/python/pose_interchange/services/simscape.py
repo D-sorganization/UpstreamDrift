@@ -1,15 +1,11 @@
-"""Simscape :class:`LiveKinematicsService` implementation (Subtask 3 of #4895).
+"""Simscape :class:`LiveKinematicsService` implementation.
 
-Connects to the MATLAB engine via the existing
-:func:`load_matlab_3d_engine` machinery in :mod:`src.engines.loaders`.
-If MATLAB / the MATLAB engine API is unavailable,
-:func:`create_simscape_service` falls back to a
-:class:`MockKinematicsService` configured with
-``engine_name="simscape"``.
+Connects to the Simscape engine via the :class:`SimscapeAdapter`. It handles
+loading the model, setting joint variables in the MATLAB workspace from a
+:class:`CanonicalPose`, stepping the simulation time, and resetting the simulation state.
 
-Method bodies that drive Simulink directly currently raise
-:class:`NotImplementedError` with a TODO: #4963 tied to follow-up
-against the EPIC #4895 Pose Studio engine bridge.
+If MATLAB or the MATLAB engine API is unavailable, :func:`create_simscape_service`
+falls back to a :class:`MockKinematicsService` configured with ``engine_name="simscape"``.
 """
 
 from __future__ import annotations
@@ -60,9 +56,7 @@ def _matlab_engine_is_importable() -> bool:
 class SimscapeKinematicsService:
     """Real-engine :class:`LiveKinematicsService` backed by Simscape Multibody.
 
-    Connects via :mod:`src.engines.loaders.load_matlab_3d_engine`; the
-    actual body-transform queries land in a follow-up issue alongside
-    the Pose Studio engine bridge.
+    Connects via the SimscapeAdapter to coordinate with the MATLAB engine.
     """
 
     engine_name: str = ENGINE_NAME
@@ -133,7 +127,7 @@ class SimscapeKinematicsService:
         if getattr(self, "_engine", None) is None:
             return transforms
 
-        # TODO: Implement actual transform queries from MATLAB engine #4963
+        # TODO: Implement actual transform queries from MATLAB engine
         return transforms
 
     def step(self, dt: float) -> None:

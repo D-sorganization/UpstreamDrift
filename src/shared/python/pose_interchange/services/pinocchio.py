@@ -1,11 +1,20 @@
 """Pinocchio :class:`LiveKinematicsService` implementation.
 
 Lazily imports :mod:`pinocchio` and loads a URDF via
-:func:`pinocchio.buildModelFromUrdf`.  If the wheel is unavailable
-(or is the local stub that lacks :func:`buildModelFromUrdf`),
-:func:`create_pinocchio_service` falls back to a
-:class:`MockKinematicsService` configured with
-``engine_name="pinocchio"``.
+:func:`pinocchio.buildModelFromUrdf`.
+
+There is a known package namespace conflict:
+- **Real Robotics Wheel**: When the actual robotics package ``pinocchio``
+  (e.g., from conda-forge or custom wheels) is installed, the module exports the
+  real :class:`PinocchioKinematicsService`.
+- **PyPI Nose Plugin Stub**: The package named ``pinocchio`` on PyPI is an old
+  testing stub (a nose plugin) that clashingly shares the same namespace but
+  lacks robotics functions.
+
+If the pinocchio package is completely missing, or if only the clashing nose
+plugin stub is installed (detected by the absence of :func:`buildModelFromUrdf`
+and :func:`forwardKinematics`), the service creation falls back to a
+:class:`MockKinematicsService` configured with ``engine_name="pinocchio"``.
 
 The real bridge wires:
 

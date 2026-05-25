@@ -1,15 +1,13 @@
-"""Drake :class:`LiveKinematicsService` implementation (Subtask 3 of #4895).
+"""Drake :class:`LiveKinematicsService` implementation.
 
-The real implementation lazily imports :mod:`pydrake` and loads a URDF
-via the multibody plant's :class:`pydrake.multibody.parsing.Parser`.
-If :mod:`pydrake` is unavailable, :func:`create_drake_service` falls
-back to a :class:`MockKinematicsService` configured with
-``engine_name="drake"``.
+The real implementation lazily imports :mod:`pydrake` and loads a URDF/model
+via the multibody plant's :class:`pydrake.multibody.parsing.Parser`. It handles
+loading the model, setting the joint positions from a :class:`CanonicalPose`,
+querying the link transforms in the world frame, stepping the simulation time,
+and resetting the simulation state.
 
-Method bodies that require non-trivial Drake plumbing currently raise
-:class:`NotImplementedError` with a TODO: #4963 tied to follow-up;
-this PR only commits the wiring scaffold so downstream code can target
-``LiveKinematicsService`` without waiting on the full Drake bridge.
+If :mod:`pydrake` is unavailable, :func:`create_drake_service` falls back to a
+:class:`MockKinematicsService` configured with ``engine_name="drake"``.
 """
 
 from __future__ import annotations
@@ -57,11 +55,7 @@ def _drake_is_importable() -> bool:
 
 
 class DrakeKinematicsService:
-    """Real-engine :class:`LiveKinematicsService` backed by :mod:`pydrake`.
-
-    Skeletal: full body-transform queries are wired up but require a
-    follow-up issue to land alongside the Pose Studio engine bridge.
-    """
+    """Real-engine :class:`LiveKinematicsService` backed by :mod:`pydrake`."""
 
     engine_name: str = ENGINE_NAME
 
