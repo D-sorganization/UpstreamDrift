@@ -80,10 +80,16 @@ class FeatureReport:
     depends_on: tuple[str, ...]
 
     def to_dict(self) -> dict[str, Any]:
-        """JSON-friendly dict representation."""
+        """JSON-friendly dict representation.
+
+        Includes a ``status`` field (``"AVAILABLE"`` or ``"UNAVAILABLE"``)
+        in addition to the boolean ``available`` flag, so shell consumers
+        (e.g. ``docker-smoke.yml``) can grep for an unambiguous string.
+        """
         data = asdict(self)
         data["missing"] = list(self.missing)
         data["depends_on"] = list(self.depends_on)
+        data["status"] = "AVAILABLE" if self.available else "UNAVAILABLE"
         return data
 
 
