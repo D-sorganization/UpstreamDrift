@@ -1,5 +1,7 @@
 # UpstreamDrift Documentation
 
+> **Last reviewed: 2026-05-25**
+
 Welcome to UpstreamDrift — a unified platform for golf swing analysis across
 multiple physics engines and biomechanical modeling approaches.
 
@@ -8,10 +10,10 @@ multiple physics engines and biomechanical modeling approaches.
 | I want to...            | Go to...                                            |
 | ----------------------- | --------------------------------------------------- |
 | Get started quickly     | [Quick Start](#quick-start)                         |
-| Understand the API      | [API Architecture](api/API_ARCHITECTURE.md)         |
-| Develop new features    | [Development Guide](api/DEVELOPMENT.md)             |
+| Understand motion pip.  | [Motion Pipeline](motion_pipeline/README.md)        |
+| Read Architecture Docs  | [ADRs](adr/)                                        |
+| Read Project Specs      | [SPEC.md](../SPEC.md)                               |
 | Choose a physics engine | [Engine Selection Guide](engine_selection_guide.md) |
-| Troubleshoot issues     | [Troubleshooting](troubleshooting/)                 |
 
 ---
 
@@ -93,6 +95,7 @@ docs/
 │
 ├── adr/                   # Architecture decision records
 ├── assessments/           # Project reviews and assessments
+├── historical/            # Historical and archived documentation
 ├── motion_pipeline/       # Motion capture and tracking pipeline
 ├── plans/                 # Implementation plans
 └── technical/             # Engine reports and control strategies
@@ -101,6 +104,14 @@ docs/
 ---
 
 ## Core Concepts
+
+### Unified Architecture
+
+UpstreamDrift uses a **unified local architecture**:
+
+- **Web UI and API** running on localhost
+- **No cloud required** for local development
+- **Optional classic desktop launcher** for legacy workflows
 
 ### Multi-Engine Support
 
@@ -260,6 +271,12 @@ repository maintenance guidance.
 
 - [MyoSuite Integration](development/MYOSUITE_INTEGRATION.md) - 290-muscle models
 - [OpenSim Integration](development/OPENSIM_INTEGRATION.md) - Musculoskeletal
+
+---
+
+## Archived Documentation
+
+Historical assessments, phase plans, and old implementation reports have been moved to [historical/](historical/).
 
 ---
 
