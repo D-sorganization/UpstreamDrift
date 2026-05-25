@@ -7,6 +7,8 @@ Lazily imports :mod:`pinocchio` and loads a URDF via
 :class:`MockKinematicsService` configured with
 ``engine_name="pinocchio"``.
 
+Falls back to a local stub adapter when the `pinocchio` wheel is not installed; the stub forwards calls to `MockKinematicsService` while keeping the registry consistent. See `_pinocchio_is_importable` for the wheel-detection block.
+
 The real bridge wires:
 
 - :meth:`load` -> ``pin.buildModelFromUrdf`` + ``model.createData()``.
