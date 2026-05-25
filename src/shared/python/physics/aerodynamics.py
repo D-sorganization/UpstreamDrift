@@ -56,6 +56,39 @@ from src.shared.python.physics.atmosphere import cd_dimpled_sphere
 MIN_AIR_DENSITY_KG_M3 = 0.01
 
 
+_DEFAULT_FORCE_PREFACTOR = 0.5
+_DEFAULT_BASE_TEMPERATURE_C = 15.0
+
+# Drag constants
+_DEFAULT_REYNOLDS_MIN = 1.0e3
+_DEFAULT_REYNOLDS_MAX = 1.0e7
+
+# Lift constants
+_DEFAULT_MAX_LIFT_COEFFICIENT = 0.4
+_DEFAULT_SPIN_RATIO_SCALE = 0.1
+
+# Magnus constants
+_DEFAULT_SPIN_PARAM_SCALE = 0.2
+
+# Wind & Gust constants
+_DEFAULT_GUST_INTENSITY = 0.3
+_DEFAULT_GUST_FREQUENCY_HZ = 0.1
+_DEFAULT_GUST_DURATION_MEAN_S = 2.0
+_DEFAULT_GUST_MIN_DURATION_S = 0.5
+_DEFAULT_GUST_MAX_DURATION_S = 10.0
+_DEFAULT_GUST_SPEED_MIN_FACTOR = 0.5
+_DEFAULT_GUST_SPEED_MAX_FACTOR = 1.5
+_DEFAULT_GUST_DIR_PERTURB_SCALE = 0.3
+_DEFAULT_GUST_INITIAL_DT = 0.1
+_DEFAULT_WIND_ALTITUDE_SCALE = 10.0
+
+# Turbulence constants
+_DEFAULT_TURBULENCE_INTENSITY = 0.5
+_DEFAULT_TURBULENCE_FREQ_MIN = 0.1
+_DEFAULT_TURBULENCE_FREQ_MAX = 2.0
+_DEFAULT_TURBULENCE_HARMONICS = 10
+
+
 def _vector_magnitude(vector: np.ndarray) -> float:
     """Return the Euclidean magnitude of any vector-shaped array."""
     components = np.asarray(vector, dtype=float).reshape(-1)
@@ -161,9 +194,9 @@ class WindConfig:
 
     base_velocity: np.ndarray = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
     gusts_enabled: bool = False
-    gust_intensity: float = 0.3
-    gust_frequency: float = 0.1  # Hz
-    gust_duration_mean: float = 2.0  # seconds
+    gust_intensity: float = _DEFAULT_GUST_INTENSITY
+    gust_frequency: float = _DEFAULT_GUST_FREQUENCY_HZ  # Hz
+    gust_duration_mean: float = _DEFAULT_GUST_DURATION_MEAN_S  # seconds
     turbulence_intensity: float = 0.0
     altitude_gradient: bool = False
     gradient_factor: float = 0.05  # 5% per 10m
@@ -262,7 +295,9 @@ class DragModel:
             return np.zeros_like(velocity_vec)
 
         cd = self.get_effective_coefficient(velocity_vec, air_density)
-        force_magnitude = 0.5 * air_density * cd * self.ball_area * speed**2
+        force_magnitude = (
+            _DEFAULT_FORCE_PREFACTOR * air_density * cd * self.ball_area * speed**2
+        )
 
         # Drag opposes velocity
         return -force_magnitude * velocity_vec / speed
@@ -303,7 +338,7 @@ class DragModel:
         # Delegate to the smoothed drag-crisis correlation (Bearman & Harvey
         # 1976, Mehta 1985); clamp to the model's validated range so the
         # integrator never sees a discontinuity. See issue #3504.
-        re_clamped = max(1.0e3, min(1.0e7, re))
+        re_clamped = max(_DEFAULT_REYNOLDS_MIN, min(_DEFAULT_REYNOLDS_MAX, re))
         return cd_dimpled_sphere(re_clamped, base_cd=self.base_coefficient)
 
 
@@ -323,7 +358,7 @@ class LiftModel:
         base_coefficient: float = float(GOLF_BALL_LIFT_COEFFICIENT),
         ball_area: float = float(GOLF_BALL_CROSS_SECTIONAL_AREA_M2),
         ball_radius: float = float(GOLF_BALL_RADIUS_M),
-        max_coefficient: float = 0.4,
+        max_coefficient: float = _DEFAULT_MAX_LIFT_COEFFICIENT,
     ) -> None:
         """Initialize lift model.
 
@@ -384,7 +419,9 @@ class LiftModel:
         cl = self._compute_lift_coefficient(spin_ratio)
 
         # Lift magnitude
-        force_magnitude = 0.5 * air_density * cl * self.ball_area * speed**2
+        force_magnitude = (
+            _DEFAULT_FORCE_PREFACTOR * air_density * cl * self.ball_area * speed**2
+        )
 
         return force_magnitude * lift_dir
 
@@ -400,7 +437,9 @@ class LiftModel:
         # Empirical relationship: Cl saturates at high spin
         if spin_ratio is None:
             raise ValueError("spin_ratio must be provided")
-        cl = self.max_coefficient * (1 - math.exp(-spin_ratio / 0.1))
+        cl = self.max_coefficient * (
+            1 - math.exp(-spin_ratio / _DEFAULT_SPIN_RATIO_SCALE)
+        )
         return min(cl, self.max_coefficient)
 
 
@@ -475,7 +514,9 @@ class MagnusModel:
         cm = self._compute_magnus_coefficient(spin_param)
 
         # Force magnitude
-        force_magnitude = 0.5 * air_density * cm * self.ball_area * speed**2
+        force_magnitude = (
+            _DEFAULT_FORCE_PREFACTOR * air_density * cm * self.ball_area * speed**2
+        )
 
         return force_magnitude * magnus_dir
 
@@ -489,7 +530,7 @@ class MagnusModel:
             Magnus coefficient
         """
         # Approximately linear for small spin_param, saturates for large
-        return self.coefficient * min(spin_param / 0.2, 1.0)
+        return self.coefficient * min(spin_param / _DEFAULT_SPIN_PARAM_SCALE, 1.0)
 
 
 # =============================================================================
@@ -561,7 +602,7 @@ class TurbulenceModel:
 
     def __init__(
         self,
-        intensity: float = 0.5,
+        intensity: float = _DEFAULT_TURBULENCE_INTENSITY,
         seed: int | None = None,
     ) -> None:
         """Initialize turbulence model.
@@ -575,9 +616,15 @@ class TurbulenceModel:
         self.intensity = intensity
         self._rng = np.random.default_rng(seed)
         # Pre-generate noise coefficients for smooth interpolation
-        self._coeffs = self._rng.standard_normal((3, 10))
-        self._phases = self._rng.uniform(0, 2 * np.pi, (3, 10))
-        self._freqs = self._rng.uniform(0.1, 2.0, 10)
+        self._coeffs = self._rng.standard_normal((3, _DEFAULT_TURBULENCE_HARMONICS))
+        self._phases = self._rng.uniform(
+            0, 2 * np.pi, (3, _DEFAULT_TURBULENCE_HARMONICS)
+        )
+        self._freqs = self._rng.uniform(
+            _DEFAULT_TURBULENCE_FREQ_MIN,
+            _DEFAULT_TURBULENCE_FREQ_MAX,
+            _DEFAULT_TURBULENCE_HARMONICS,
+        )
 
     def get_perturbation(
         self,
@@ -664,7 +711,9 @@ class WindModel:
         # Apply altitude gradient
         if self.config.altitude_gradient:
             altitude = max(0.0, position[2])
-            gradient_multiplier = 1.0 + self.config.gradient_factor * (altitude / 10.0)
+            gradient_multiplier = 1.0 + self.config.gradient_factor * (
+                altitude / _DEFAULT_WIND_ALTITUDE_SCALE
+            )
             wind = wind * gradient_multiplier
 
         # Add gusts
@@ -714,7 +763,7 @@ class WindModel:
             raise ValueError("t must be provided")
         if self._last_check_time < 0:
             self._last_check_time = t
-            dt = 0.1  # Initial time step assumption
+            dt = _DEFAULT_GUST_INITIAL_DT  # Initial time step assumption
         else:
             dt = t - self._last_check_time
             self._last_check_time = t
@@ -735,17 +784,26 @@ class WindModel:
 
             # Generate random gust
             duration = self._rng.exponential(self.config.gust_duration_mean)
-            duration = max(0.5, min(duration, 10.0))  # Clamp
+            duration = max(
+                _DEFAULT_GUST_MIN_DURATION_S,
+                min(duration, _DEFAULT_GUST_MAX_DURATION_S),
+            )  # Clamp
 
             # Random direction perturbation
             base_speed = self.config.speed
             gust_speed = (
-                base_speed * self.config.gust_intensity * self._rng.uniform(0.5, 1.5)
+                base_speed
+                * self.config.gust_intensity
+                * self._rng.uniform(
+                    _DEFAULT_GUST_SPEED_MIN_FACTOR, _DEFAULT_GUST_SPEED_MAX_FACTOR
+                )
             )
 
             # Gust direction: mostly aligned with base wind, some random deviation
             base_dir = self.config.direction
-            random_perturb = self._rng.standard_normal(3) * 0.3
+            random_perturb = (
+                self._rng.standard_normal(3) * _DEFAULT_GUST_DIR_PERTURB_SCALE
+            )
             gust_dir = base_dir + random_perturb
             gust_dir = gust_dir / (math.hypot(*gust_dir) + 1e-10)
 
@@ -898,7 +956,7 @@ class EnvironmentRandomizer:
     def create_snapshot(
         self,
         base_air_density: float = float(AIR_DENSITY_SEA_LEVEL_KG_M3),
-        base_temperature: float = 15.0,
+        base_temperature: float = _DEFAULT_BASE_TEMPERATURE_C,
         base_wind_config: WindConfig | None = None,
     ) -> EnvironmentSnapshot:
         """Create a consistent randomized environment snapshot.
