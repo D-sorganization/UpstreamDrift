@@ -16,10 +16,14 @@ not include it).
 
 The output is the canonical ``ClubTarget`` from
 ``src/shared/python/motion_matching/club_target.py`` (frozen dataclass with a
-``__post_init__`` validator). If that module is unavailable for any reason a
-local stub is used and a warning is logged. See issue #4095 (PARITY-LOADERS)
-for the planned promotion of this loader to
-``shared/python/motion_matching/loaders/club_swing_dataset.py``.
+``__post_init__`` validator).  That shared module is available in full
+checkouts following the completion of issue #4095 (PARITY-LOADERS).  In
+stripped-down CI or headless environments where the shared package is not on
+``sys.path``, the import falls back to an inline stub that replicates the same
+validation rules and wire protocol; a ``WARNING`` is emitted so the fallback is
+visible in logs.  The stub is **intentional** — it keeps this adapter
+importable without the full ``shared/python/motion_matching/`` tree and is not
+a sign of missing functionality.
 """
 
 from __future__ import annotations
@@ -44,8 +48,13 @@ _TIME_EPS = 1.0e-9
 
 
 # ---------------------------------------------------------------------------
-# ClubTarget import w/ stub fallback (TODO: drop once #4095 PARITY-LOADERS
-# guarantees the shared module is always importable from every engine path).
+# ClubTarget import w/ stub fallback.
+#
+# The shared module is present in full checkouts (issue #4095 completed).
+# In stripped-down CI or headless environments where the shared package
+# tree is absent, the inline stub below is used instead.  The stub keeps
+# this adapter importable without the full shared/python/motion_matching/
+# tree; it is an intentional, permanent fallback — not a TODO to remove.
 # ---------------------------------------------------------------------------
 
 try:  # pragma: no cover - exercised by both branches via tests
@@ -57,9 +66,10 @@ try:  # pragma: no cover - exercised by both branches via tests
     _USING_STUB = False
 except ImportError:  # pragma: no cover - fallback for stripped-down checkouts
     logger.warning(
-        "src.shared.python.motion_matching.club_target unavailable; using "
-        "local stub. TODO(#4095 PARITY-LOADERS): remove this fallback once "
-        "the shared package is guaranteed importable."
+        "src.shared.python.motion_matching.club_target unavailable "
+        "(stripped-down checkout); using inline stub with identical "
+        "validation rules.  See services/pinocchio.py for the "
+        "with-wheel / without-wheel behaviour of the broader service."
     )
 
     @dataclass(frozen=True)

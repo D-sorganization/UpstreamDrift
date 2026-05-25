@@ -1,13 +1,13 @@
 """Pinocchio :class:`LiveKinematicsService` implementation.
 
 Lazily imports :mod:`pinocchio` and loads a URDF via
-:func:`pinocchio.buildModelFromUrdf`.  If the wheel is unavailable
-(or is the local stub that lacks :func:`buildModelFromUrdf`),
-:func:`create_pinocchio_service` falls back to a
-:class:`MockKinematicsService` configured with
-``engine_name="pinocchio"``.
+:func:`pinocchio.buildModelFromUrdf`.
 
-The real bridge wires:
+Wheel-present behaviour
+-----------------------
+:func:`create_pinocchio_service` detects the real ``pinocchio`` wheel by
+checking for :func:`pinocchio.buildModelFromUrdf` (the PyPI ``pinocchio``
+0.1 placeholder stub omits this symbol).  When the real wheel is present:
 
 - :meth:`load` -> ``pin.buildModelFromUrdf`` + ``model.createData()``.
 - :meth:`set_pose` -> :class:`PinocchioAdapter` to convert canonical to
@@ -18,6 +18,29 @@ The real bridge wires:
 - :meth:`step` -> Euler integration via ``pin.aba`` (forward
   dynamics) + ``pin.integrate``.
 - :meth:`reset` -> restore neutral q, zero v.
+
+Wheel-absent (or PyPI stub) behaviour
+--------------------------------------
+When the real wheel is not installed — or the installed ``pinocchio``
+package is the PyPI 0.1 placeholder stub (which exposes no
+``buildModelFromUrdf``) — :func:`create_pinocchio_service` falls back to
+a :class:`MockKinematicsService` configured with
+``engine_name="pinocchio"``.  The mock satisfies the
+:class:`LiveKinematicsService` protocol (all methods callable, correct
+``engine_name``) so callers always receive a working service object.
+
+This fallback is **intentional**: it allows the rest of the codebase to
+import and exercise Pinocchio-flavoured service code in any environment,
+deferring the actual physics to CI runs where the wheel is available.
+Tests in ``tests/unit/pose_interchange/live_kinematics/`` cover the
+mock-fallback contract; live integration tests are in
+``tests/integration/pose_interchange/services/test_pinocchio_real.py``
+(skipped when the wheel is absent).
+
+Note: the ``club_target_adapter`` in
+``src/engines/physics_engines/pinocchio/python/motion_matching/`` has its
+own separate stub fallback for the shared ``ClubTarget`` dataclass;
+see that module's docstring for details.
 """
 
 from __future__ import annotations

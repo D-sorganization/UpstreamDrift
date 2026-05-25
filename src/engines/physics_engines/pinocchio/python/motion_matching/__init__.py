@@ -25,10 +25,14 @@ Public API:
     RecoveryTrial              -- per-sample recovery diagnostics.
     sample_random_theta        -- helper to draw a random theta vector.
 
-Engine-local Rob Neal adapter is intentionally here until issue #4095
-(PARITY-LOADERS) lands a shared ``shared/python/motion_matching/loaders/``
-package. At that point ``load_robneal_target`` should be promoted upstream
-and this module should re-export it for backward compatibility.
+The Rob Neal ``.mat`` adapter (``load_robneal_target``) lives in this
+engine-local package rather than in ``shared/python/motion_matching/loaders/``
+because it requires the engine-specific ``club_target_adapter`` stub fallback
+for stripped-down checkouts.  Issue #4095 (PARITY-LOADERS) has been
+completed — the shared ``club_target.py`` dataclass is available in full
+checkouts.  The adapter remains here for the intentional fallback behaviour
+(see ``club_target_adapter.py`` module docstring) and re-exports
+``load_robneal_target`` from the public API for backward compatibility.
 """
 
 from __future__ import annotations
