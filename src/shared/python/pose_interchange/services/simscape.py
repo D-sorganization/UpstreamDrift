@@ -2,14 +2,14 @@
 
 Connects to the MATLAB engine via the existing
 :func:`load_matlab_3d_engine` machinery in :mod:`src.engines.loaders`.
+MATLAB-engine wiring is handled through :class:`src.engines.simscape.adapter.SimscapeAdapter`
+and per-joint workspace writes. Note that ``get_link_transforms`` currently
+returns an empty dict.
+
 If MATLAB / the MATLAB engine API is unavailable,
 :func:`create_simscape_service` falls back to a
 :class:`MockKinematicsService` configured with
 ``engine_name="simscape"``.
-
-Method bodies that drive Simulink directly currently raise
-:class:`NotImplementedError` with a TODO: #4963 tied to follow-up
-against the EPIC #4895 Pose Studio engine bridge.
 """
 
 from __future__ import annotations
