@@ -83,3 +83,11 @@ These issues are already tracked in GitHub and represent planned improvements.
 - **GitHub Issue**: #130
 - **Status**: Open
 - **Description**: Implement lazy imports to improve startup time
+
+## Phase 5: CI/CD Improvements
+
+### Phase 5.1: Review CI Modularization
+
+- **GitHub Issue**: #6099
+- **Status**: Open
+- **Description**: Review the modularization of ci-standard.yml and address the proliferation of Jules-* workflows
