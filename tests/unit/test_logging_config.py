@@ -137,10 +137,27 @@ class TestSensitiveDataFilter:
         assert "key1" not in record.msg
         assert "pass1" not in record.msg
 
+    def test_redacts_password_with_comma(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record("password=abc,def")
+        flt.filter(record)
+        assert "abc,def" not in record.msg
+        assert record.msg == "password=***REDACTED***"
 
-# ---------------------------------------------------------------------------
-# get_logger
-# ---------------------------------------------------------------------------
+    def test_redacts_password_in_json(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record('{"password":"abc,def"}')
+        flt.filter(record)
+        assert "abc,def" not in record.msg
+        assert record.msg == '{"password":"***REDACTED***"}'
+
+    def test_redacts_multiple_passwords(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record('password=123, other=456, pwd="abc,def"}')
+        flt.filter(record)
+        assert "123" not in record.msg
+        assert "abc,def" not in record.msg
+        assert "other=456" in record.msg
 
 
 class TestGetLogger:

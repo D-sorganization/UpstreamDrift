@@ -68,29 +68,6 @@ For a focused reviewer walkthrough, start with the
 
 ## Quick Start
 
-The recommended entry point is the **web UI**:
-
-```bash
-python3 launch_golf_suite.py
-```
-
-This starts the local API server (default port `8000`) and opens the React UI
-in your default browser.
-
-### Other entry points
-
-| Command | What it launches |
-|---------|------------------|
-| `python3 launch_golf_suite.py` | Web UI (recommended) |
-| `python3 launch_golf_suite.py --classic` | Classic PyQt6 desktop launcher |
-| `python3 launch_golf_suite.py --api-only` | API server without auto-opening a UI |
-| `python3 launch_golf_suite.py --engine <name>` | Direct engine launch (legacy) |
-| `python3 -m src.tools.pose_studio` | Pose Studio standalone |
-
-Additional flags: `--port <N>` to override the API port, `--no-browser` to skip
-auto-opening the browser. The classic PyQt6 launcher remains supported as a
-fallback.
-
 **Hiring Manager or Reviewer?** See the [Golf Modeling Portfolio Demo](docs/portfolio/golf_modeling_demo.md) for a focused, reproducible showcase of the physics capabilities.
 
 ### Prerequisites

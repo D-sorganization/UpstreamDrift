@@ -273,6 +273,7 @@ class TestWebSocket:
                 self.app = SimpleNamespace(
                     state=SimpleNamespace(chat_service=chat_service)
                 )
+                self.url = SimpleNamespace(path="/ws/chat")
                 self.sent: list[dict[str, object]] = []
                 self._receive_calls = 0
 
@@ -288,13 +289,7 @@ class TestWebSocket:
 
         websocket = FakeWebSocket(mock_chat_service)
 
-        async def fake_resolve_ws_user(_websocket: FakeWebSocket) -> object:
-            return object()
-
-        with (
-            patch("src.api.routes.chat_ws.resolve_ws_user", fake_resolve_ws_user),
-            caplog.at_level("ERROR"),
-        ):
+        with caplog.at_level("ERROR"):
             await chat_ws.chat_stream(websocket, "new")
 
         assert websocket.sent[0] == {
