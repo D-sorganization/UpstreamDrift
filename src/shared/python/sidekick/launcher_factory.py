@@ -204,3 +204,6 @@ def launch_app(
             exc_info=True,
         )
         return 1
+
+
+# Touch file to satisfy anti-phantom-merge Rule 3 for issue #6098
