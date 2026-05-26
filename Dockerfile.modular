@@ -70,6 +70,8 @@ COPY scripts/docker/install_features.py ./scripts/docker/install_features.py
 # Resolve features and install them. If PROFILE is set it wins; else
 # FEATURES; else DEFAULT_PROFILE. Empty results in a parse error from
 # install_features.py, which is the correct fail-loud behavior.
+# The package default install includes MuJoCo, but the modular slim
+# profile contract is API + pendulum only.
 RUN set -eux; \
     if [ -n "$PROFILE" ]; then \
         python scripts/docker/install_features.py --profile "$PROFILE"; \
@@ -77,6 +79,9 @@ RUN set -eux; \
         python scripts/docker/install_features.py --features "$FEATURES"; \
     else \
         python scripts/docker/install_features.py --profile "$DEFAULT_PROFILE"; \
+    fi; \
+    if [ "$PROFILE" = "slim" ]; then \
+        pip uninstall -y mujoco; \
     fi
 
 

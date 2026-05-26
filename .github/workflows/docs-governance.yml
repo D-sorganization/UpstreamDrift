@@ -54,10 +54,14 @@ jobs:
         run: python3 scripts/check_docs_governance.py
 
       - name: Install test dependencies
-        run: python3 -m pip install pytest
+        run: |
+          python3 -m venv "$RUNNER_TEMP/docs-governance-venv"
+          echo "$RUNNER_TEMP/docs-governance-venv/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/docs-governance-venv/bin/python" -m pip install --upgrade pip
+          "$RUNNER_TEMP/docs-governance-venv/bin/python" -m pip install pytest
 
       - name: Test documentation governance files
-        run: python3 -m pytest tests/scripts/test_doc_governance_checks.py -q
+        run: python -m pytest tests/scripts/test_doc_governance_checks.py -q
 
       - name: Validate documentation catalog
         run: python3 scripts/check_doc_catalog.py
@@ -66,4 +70,4 @@ jobs:
         run: python3 scripts/check_doc_size_budget.py
 
       - name: Run documentation governance tests
-        run: python3 -m pytest tests/scripts/test_doc_governance_checks.py -q
+        run: python -m pytest tests/scripts/test_doc_governance_checks.py -q
