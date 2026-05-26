@@ -23,7 +23,6 @@ from PyQt6.QtWidgets import (  # noqa: E402
     QMainWindow,
     QMessageBox,
     QTabWidget,
-    QWidget,
 )
 
 from src.launchers.embedded_host import (  # noqa: E402

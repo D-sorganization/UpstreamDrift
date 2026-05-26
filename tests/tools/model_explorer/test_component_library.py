@@ -5,7 +5,6 @@ from __future__ import annotations
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-import pytest
 
 from src.tools.model_explorer.component_library import (
     ComponentLibrary,

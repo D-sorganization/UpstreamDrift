@@ -1,4 +1,3 @@
-import pytest
 import numpy as np
 from bunkershot3d.kinematics.coupling import CoupledDoublePendulum, CoSimulator
 

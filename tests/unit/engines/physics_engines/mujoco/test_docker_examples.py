@@ -3,7 +3,6 @@
 import sys
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 # Mock dm_control and imageio before importing modules
 mock_dm_control = MagicMock()

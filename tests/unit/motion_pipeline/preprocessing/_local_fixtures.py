@@ -90,9 +90,9 @@ def make_sinusoidal_keypoint_sequence(
     rng = np.random.default_rng(seed)
     t = np.arange(num_frames) / fps
     signal = np.sin(2 * np.pi * freq_hz * t)
-    noise = noise_amp * np.sin(2 * np.pi * noise_freq_hz * t) + 0.01 * rng.standard_normal(
-        num_frames
-    )
+    noise = noise_amp * np.sin(
+        2 * np.pi * noise_freq_hz * t
+    ) + 0.01 * rng.standard_normal(num_frames)
     frames: list[KeypointFrame] = []
     for i, ts in enumerate(t):
         kp = Keypoint(

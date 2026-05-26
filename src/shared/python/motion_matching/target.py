@@ -1,6 +1,6 @@
 """Public re-export of the ``ClubTarget`` and ``ClubBallTarget`` dataclasses.
 
-Issue #4095 promotes the loader/oracle/cost surface to a top-level package.
+The loader/oracle/cost surface is promoted to a top-level package.
 ``target`` is the canonical module name (matching ``target.m`` in MATLAB
 conceptual layout); historical code imports from ``club_target`` and that
 import path is preserved.

@@ -46,8 +46,6 @@ def _real_pinocchio() -> bool:
 
 
 from src.engines.physics_engines.pinocchio.python.motion_matching import (  # noqa: E402
-    FitOptions,
-    FitResult,
     PinocchioFitSwingProvider,
     rotmat_to_quat_wxyz,
     simulate_with_coefficients,
@@ -56,7 +54,6 @@ from src.engines.physics_engines.pinocchio.python.motion_matching.provider impor
     ENGINE_NAME,
 )
 from src.engines.physics_engines.pinocchio.python.motion_matching.simulate import (  # noqa: E402
-    COEFFS_PER_JOINT,
     SimOptions,
 )
 from src.shared.python.motion_matching.club_target import (  # noqa: E402

@@ -22,13 +22,10 @@ import pytest
 
 from src.shared.python.contracts import PreconditionError
 from src.shared.python.physics.ball_launch_conditions import (
-    EnvironmentalConditions,
     LaunchConditions,
     TrajectoryPoint,
 )
-from src.shared.python.physics.ball_properties import BallProperties
 from src.shared.python.physics.impact_model import (
-    ImpactModelType,
     ImpactParameters,
     PostImpactState,
 )

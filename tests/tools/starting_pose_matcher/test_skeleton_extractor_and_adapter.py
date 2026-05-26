@@ -7,7 +7,6 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import numpy as np
 import pytest
 
 from src.tools.starting_pose_matcher import core, skeleton_extractor

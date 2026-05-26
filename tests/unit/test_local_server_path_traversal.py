@@ -7,8 +7,6 @@ that callers cannot read files outside the intended asset/UI roots.
 
 from __future__ import annotations
 
-import os
-from pathlib import Path
 
 import pytest
 

@@ -9,7 +9,7 @@ This module tests critical security implementations:
 
 import logging
 import secrets
-from datetime import datetime, timezone
+from datetime import timezone
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -45,7 +45,6 @@ except Exception as e:  # noqa: BLE001, F841
     BCRYPT_AVAILABLE = False
     import bcrypt as bcrypt_lib  # type: ignore[no-redef]
 
-from src.api.auth.models import APIKey, User  # noqa: E402
 from src.api.auth.security import SecurityManager  # noqa: E402
 
 # Skip marker for bcrypt-dependent tests

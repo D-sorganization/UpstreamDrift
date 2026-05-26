@@ -8,8 +8,8 @@ Available packages:
     - theme: Fleet-wide color theme management for PyQt6 applications
     - sidekick: Process engineering calculators
     - signal_toolkit: Signal processing and analysis
-    - humanoid_character_builder: URDF humanoid model generation
-    - model_generation: URDF/MJCF model building and conversion
+    - humanoid_character_builder: anthropometric domain layer for humanoid generation
+    - model_generation: canonical generic URDF/MJCF toolkit and conversion surface
 
 Preferred imports (direct from package, since src/shared/python is on sys.path):
     from shared.python.theme import ThemeManager, get_theme_manager  # theme: keep prefix

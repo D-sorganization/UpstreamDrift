@@ -1,10 +1,10 @@
 """Unit tests for polynomial_generator.py."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import numpy as np
 import pytest
-from PyQt6 import QtCore, QtWidgets
+from PyQt6 import QtWidgets
 
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.polynomial_generator import (
     PolynomialGeneratorWidget,

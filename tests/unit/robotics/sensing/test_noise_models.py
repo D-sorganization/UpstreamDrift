@@ -9,20 +9,7 @@ Tests cover:
 from __future__ import annotations
 
 import numpy as np
-import pytest
 from numpy.testing import assert_allclose
-from src.robotics.sensing.force_torque_sensor import (
-    ForceTorqueSensor,
-    ForceTorqueSensorConfig,
-    create_ideal_sensor,
-    create_realistic_sensor,
-)
-from src.robotics.sensing.imu_sensor import (
-    IMUSensor,
-    IMUSensorConfig,
-    create_ideal_imu,
-    create_realistic_imu,
-)
 from src.robotics.sensing.noise_models import (
     BandwidthLimitedNoise,
     BrownianNoise,
