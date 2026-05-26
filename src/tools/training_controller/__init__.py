@@ -52,9 +52,9 @@ def _register_embed_adapter() -> None:
             register_embeddable_tool,
         )
 
-        from ._embed_adapter import _TrainingControllerEmbedAdapter
+        from ._embed_adapter import TrainingControllerAdapter
 
-        adapter = _TrainingControllerEmbedAdapter()
+        adapter = TrainingControllerAdapter()
         if get_embeddable_tool(adapter.tool_id) is None:
             register_embeddable_tool(adapter)
 
@@ -76,12 +76,5 @@ __all__ = [
     "TrainingJobLiveSubscriber",
     "_register_embed_adapter",
     "job_row_from_training_job",
+    "TrainingControllerAdapter",
 ]
-
-from src.shared.python.launcher_embed import register_embeddable_tool
-from ._embed_adapter import TrainingControllerAdapter
-
-# Register immediately when the package is imported
-register_embeddable_tool(TrainingControllerAdapter())
-
-__all__ = ["TrainingControllerAdapter"]
