@@ -108,8 +108,13 @@ async def _validate_video_upload(file: UploadFile) -> None:
 
 
 @router.post("/analyze/video", response_model=VideoAnalysisResponse)
-@precondition(
-    lambda file=None, estimator_type="mediapipe", min_confidence=0.5, enable_smoothing=True, video_pipeline=None, logger=None: (
+@precondition(  # fmt: skip
+    lambda file=None,
+    estimator_type="mediapipe",
+    min_confidence=0.5,
+    enable_smoothing=True,
+    video_pipeline=None,
+    logger=None: (
         estimator_type is not None
         and len(estimator_type.strip()) > 0
         and 0.0 <= min_confidence <= 1.0
@@ -198,7 +203,7 @@ async def analyze_video(
         raise
     except (FileNotFoundError, OSError) as e:
         if logger:
-            logger.exception("Video analysis error")
+            logger.error("Video analysis error: %s", e)
         raise HTTPException(
             status_code=500, detail=f"Video analysis failed: {str(e)}"
         ) from e
@@ -216,8 +221,13 @@ async def analyze_video(
 
 
 @router.post("/analyze/video/async")
-@precondition(
-    lambda background_tasks=None, file=None, estimator_type="mediapipe", min_confidence=0.5, video_pipeline=None, task_manager=None: (
+@precondition(  # fmt: skip
+    lambda background_tasks=None,
+    file=None,
+    estimator_type="mediapipe",
+    min_confidence=0.5,
+    video_pipeline=None,
+    task_manager=None: (
         estimator_type is not None
         and len(estimator_type.strip()) > 0
         and 0.0 <= min_confidence <= 1.0
