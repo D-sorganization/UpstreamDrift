@@ -82,12 +82,17 @@ def compute_cost_drake(
 
     j, breakdown = _shared_compute_cost(theta, target, _shared_sim_fn, cost_opts)
     if constraint_residuals:
-        penalty = float(sum(np.sum(np.asarray(r) ** 2) for r in constraint_residuals))
+        # ⚡ Bolt: np.asarray(r) ** 2 replaced by element-wise mult since it
+        # avoids evaluating the power function and creating a temporary matrix
+        penalty = float(
+            sum(np.sum(np.asarray(r) * np.asarray(r)) for r in constraint_residuals)
+        )
         j = j + penalty
         breakdown = CostBreakdown(
             position=breakdown.position,
             orientation=breakdown.orientation,
             impact_anchor=breakdown.impact_anchor,
+            body_marker=breakdown.body_marker,
             regularizer=breakdown.regularizer + penalty,
             total=j,
         )

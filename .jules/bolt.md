@@ -86,3 +86,6 @@
 ## 2026-05-23 - trimesh ImportErrors
 **Learning:** Hard-coded imports of `trimesh` in files like `_mesh_decimation.py` and `_mesh_io.py` can cause tests or other modules that import them to fail if `trimesh` isn't installed.
 **Action:** Always wrap `import trimesh` with a `try...except ImportError` block and conditionally check if `trimesh is None` to safely handle environments where it is missing, or alternatively, make sure to add it to the test environment requirements.
+## 2026-05-18 - Optimize array operations in Drake constraint evaluation
+**Learning:** Drake's `AutoDiffXd` type lacks a `.conjugate()` method, so `np.vdot(arr, arr)` cannot be used directly for sum of squares reduction over arrays containing auto-diff variables. However, using element-wise multiplication `arr * arr` avoids the power evaluation overhead and intermediate memory allocations associated with `np.asarray(arr) ** 2`.
+**Action:** Replace `np.sum(np.asarray(arr) ** 2)` with `np.sum(np.asarray(arr) * np.asarray(arr))` (or `arr * arr` if safe) when computing squared residuals in Drake constraint optimization to improve performance during AutoDiff gradient evaluations while maintaining safety.
