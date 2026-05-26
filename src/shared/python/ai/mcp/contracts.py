@@ -16,13 +16,13 @@ rather than at connect/call time.
 
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
-class McpTransport(StrEnum):
+class McpTransport(str, Enum):
     """Supported MCP transports."""
 
     STDIO = "stdio"

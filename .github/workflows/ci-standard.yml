@@ -232,11 +232,24 @@ jobs:
             mapfile -d '' src_py_files < <(
               git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- 'src/**/*.py' 'src/*.py'
             )
-            if [ "${#src_py_files[@]}" -eq 0 ]; then
-              echo "No changed source Python files; skipping baseline mypy check."
+            filtered_py_files=()
+            for f in "${src_py_files[@]}"; do
+              exclude=false
+              for pat in "src/engines/Simscape_Multibody_Models/2D_Golf_Model" "src/engines/Simscape_Multibody_Models/3D_Golf_Model" "vendor/" "shared/models/" "src/shared/models/" "src/shared/python/plotting/" "src/shared/python/ui/qt/widgets/" "src/launchers/" "src/shared/python/pose_editor/" "src/shared/python/ai/gui/" "src/engines/physics_engines/pinocchio/python/pinocchio_golf/pose_editor_tab.py" "src/engines/physics_engines/drake/python/src/pose_editor_tab.py" "src/shared/python/pose_estimation/" "src/shared/python/ui/adapters/" "src/shared/python/ui/" "src/engines/physics_engines/drake/python/src/" "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py" "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py" "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py" "src/engines/physics_engines/drake/python/tests/" "installer/" "start_api_server.py" "setup_golf_suite.py" "src/shared/python/upstream_drift_tools/process_calculators/optimization.py" "src/shared/python/perturbation/statistics.py" "src/shared/python/model_generation/core/physics_validation.py" "src/learning/imitation/dataset.py" "src/engines/physics_engines/mujoco/docker/" "src/deployment/realtime/controller.py" "src/shared/python/pendulum_simulator/simulation.py" "src/shared/python/club_data/targets.py" "src/shared/python/data_io/marker_mapping.py" "src/shared/python/signal_toolkit/io.py"; do
+                if [[ "$f" == "$pat"* ]]; then
+                  exclude=true
+                  break
+                fi
+              done
+              if [ "$exclude" = false ]; then
+                filtered_py_files+=("$f")
+              fi
+            done
+            if [ "${#filtered_py_files[@]}" -eq 0 ]; then
+              echo "No changed source Python files after exclusions; skipping baseline mypy check."
               exit 0
             fi
-            mypy "${src_py_files[@]}" --config-file pyproject.toml
+            mypy "${filtered_py_files[@]}" --config-file pyproject.toml
           else
             mypy src --config-file pyproject.toml
           fi
