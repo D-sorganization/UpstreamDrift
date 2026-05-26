@@ -8,11 +8,16 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
+from typing import cast
 
 import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import require
+
+
+def _default_aim_grid_deg() -> NDArray[np.float64]:
+    return cast(NDArray[np.float64], np.linspace(-45.0, 45.0, 31, dtype=np.float64))
 
 
 @dataclass(frozen=True)
@@ -28,9 +33,7 @@ class ActionSet:
     """Discretized action set: clubs × aim grid."""
 
     clubs: tuple[str, ...]
-    aim_grid_deg: NDArray[np.float64] = field(
-        default_factory=lambda: np.linspace(-45.0, 45.0, 31, dtype=np.float64)
-    )
+    aim_grid_deg: NDArray[np.float64] = field(default_factory=_default_aim_grid_deg)
 
     def __post_init__(self) -> None:
         require(len(self.clubs) > 0, "at least one club required")
