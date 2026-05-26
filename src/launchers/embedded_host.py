@@ -246,6 +246,7 @@ class EmbeddedHostWidget(QWidget):
         index = self._tab_widget.indexOf(record.widget)
         if index != -1:
             self._tab_widget.removeTab(index)
+        record.widget.hide()
         record.widget.setParent(None)
         record.widget.deleteLater()
         self._active_tabs.pop(record.tool.tool_id, None)
@@ -340,6 +341,7 @@ class EmbeddedHostWidget(QWidget):
 
         _safe_cleanup(record.tool)
         self._host_window.removeDockWidget(record.dock)
+        record.dock.hide()
         record.dock.setParent(None)
         record.dock.deleteLater()
         self._active_docks.pop(tool_id, None)

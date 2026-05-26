@@ -360,7 +360,7 @@ def test_rebuild_grid_deletes_transient_headers_when_clearing(layout_manager) ->
     layout_manager.model_order = []
     layout_manager.rebuild_grid(grid_layout)
 
-    old_header.hide.assert_not_called()
+    old_header.hide.assert_called_once()
     old_header.deleteLater.assert_called_once()
     old_header.setParent.assert_called_once_with(None)
 
