@@ -14,11 +14,17 @@ Following pragmatic programming and Design by Contract principles.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Callable
 from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
+
+_MAX_FACTORIAL_LOOKUP = 170
+_FACTORIAL_TABLE: list[int] = [
+    math.factorial(i) for i in range(_MAX_FACTORIAL_LOOKUP + 1)
+]
 
 
 @dataclass
@@ -437,12 +443,9 @@ class SeriesExpansion:
         """Compute factorial of n."""
         if n < 0:
             raise ValueError(f"Factorial undefined for negative numbers: {n}")
-        if n <= 1:
-            return 1
-        result = 1
-        for i in range(2, n + 1):
-            result *= i
-        return result
+        if n <= _MAX_FACTORIAL_LOOKUP:
+            return _FACTORIAL_TABLE[n]
+        return math.factorial(n)
 
     @staticmethod
     def _binomial(n: int, k: int) -> int:

@@ -91,6 +91,7 @@ def compute_cost_drake(
             position=breakdown.position,
             orientation=breakdown.orientation,
             impact_anchor=breakdown.impact_anchor,
+            body_marker=breakdown.body_marker,
             regularizer=breakdown.regularizer + penalty,
             total=j,
         )
