@@ -742,7 +742,6 @@ class DraggableModelCard(QFrame):
                     w = item.widget() if item else None
                     if w is not None:
                         w.hide()
-                        w.setParent(None)
                         w.deleteLater()
                 # PyQt6: detach the old layout by reparenting to a temp QWidget.
                 QWidget().setLayout(old_layout)

@@ -1325,14 +1325,14 @@ class UISetupManager:
             initial_scale = float(lm.tile_scale)
         self.zoom_slider.setValue(self._scale_to_slider(initial_scale))
         self.zoom_slider.valueChanged.connect(self._on_zoom_slider_changed)
-        top_bar.addWidget(self.zoom_slider)
+        self.zoom_slider.hide()
 
         self.lbl_zoom_pct = QLabel(f"{int(round(initial_scale * 100))}%", self.launcher)
         self.lbl_zoom_pct.setToolTip("Current tile size as a percentage of base")
         self.lbl_zoom_pct.setStyleSheet(
             "font-size: 10px; color: #888888; font-family: monospace;"
         )
-        top_bar.addWidget(self.lbl_zoom_pct)
+        self.lbl_zoom_pct.hide()
 
         # Ctrl+= / Ctrl+- shortcuts adjust zoom by one step (~1.75% scale).
         sc_in = QShortcut(QKeySequence("Ctrl+="), self.launcher)
