@@ -41,8 +41,8 @@ def _get_config_dir() -> Path:
         from platformdirs import user_config_dir
 
         new_dir = Path(user_config_dir("upstream-drift")) / "launcher"
-    except ImportError:
-        # Graceful fallback if platformdirs is somehow unavailable at runtime
+    except (ImportError, NotImplementedError):
+        # Graceful fallback if platformdirs is somehow unavailable or unsupported at runtime
         if sys.platform == "win32":
             new_dir = Path.home() / "AppData" / "Local" / "UpstreamDrift" / "launcher"
         else:

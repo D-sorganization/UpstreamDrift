@@ -85,8 +85,11 @@ class FramelessResizeFilter(QObject):
             # Check if either the target object or the filter window has been deleted in C++
             if self.window is None:
                 return False
-            _ = self.window.parent()
-            _ = obj.parent()
+            try:
+                _ = self.window.objectName()
+                _ = obj.objectName()
+            except (RuntimeError, AttributeError):
+                return False
 
             typed_event = cast(Any, event)
             if event.type() in (
@@ -571,16 +574,6 @@ class UpstreamDriftLauncher(QMainWindow):
             import importlib
             import sys as _sys
 
-            # Try checking out sibling Tools repository first
-            sibling_tools = REPOS_ROOT.parent / "Tools"
-            if sibling_tools.is_dir():
-                sibling_src = str(sibling_tools / "src")
-                sibling_python = str(sibling_tools / "src" / "shared" / "python")
-                if sibling_src not in _sys.path:
-                    _sys.path.insert(0, sibling_src)
-                if sibling_python not in _sys.path:
-                    _sys.path.insert(0, sibling_python)
-
             # Fall back to vendored ud-tools
             vendor_src = str(REPOS_ROOT / "vendor" / "ud-tools" / "src")
             vendor_python = str(
@@ -590,6 +583,18 @@ class UpstreamDriftLauncher(QMainWindow):
                 _sys.path.insert(0, vendor_src)
             if vendor_python not in _sys.path:
                 _sys.path.insert(0, vendor_python)
+
+            # Try checking out sibling Tools repository first (higher priority, insert at index 0 last)
+            sibling_tools = REPOS_ROOT.parent / "Tools"
+            if sibling_tools.is_dir():
+                sibling_src = str(sibling_tools / "src")
+                sibling_python = str(sibling_tools / "src" / "shared" / "python")
+                if sibling_src in _sys.path:
+                    _sys.path.remove(sibling_src)
+                _sys.path.insert(0, sibling_src)
+                if sibling_python in _sys.path:
+                    _sys.path.remove(sibling_python)
+                _sys.path.insert(0, sibling_python)
             for _name in (
                 "shared.python.sidekick.ui.tools_sidebar",
                 "sidekick.ui.tools_sidebar",
@@ -1399,6 +1404,46 @@ def _install_global_ui_zoom(app: QApplication) -> None:
 def main() -> None:
     """Application entry point."""
     import traceback
+
+    # Discover a free port dynamically to prevent WinError 10013 or other conflicts on Windows
+    if "API_PORT" not in os.environ:
+        import socket
+
+        def _find_free_port(start_port: int = 8000, max_attempts: int = 100) -> int:
+            for port in range(start_port, start_port + max_attempts):
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                try:
+                    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                    s.bind(("127.0.0.1", port))
+                    return port
+                except OSError:
+                    continue
+                finally:
+                    s.close()
+            raise OSError("Could not find a free port")
+
+        preset_port = os.environ.get("GOLF_API_PORT") or os.environ.get("GOLF_PORT")
+        if preset_port:
+            try:
+                p_val = int(preset_port)
+                os.environ["API_PORT"] = str(p_val)
+                os.environ["GOLF_API_PORT"] = str(p_val)
+                os.environ["GOLF_PORT"] = str(p_val)
+                logger.info(f"Using preset port {p_val} for API server.")
+            except ValueError:
+                preset_port = None
+
+        if not preset_port:
+            try:
+                free_port = _find_free_port(8000)
+                os.environ["API_PORT"] = str(free_port)
+                os.environ["GOLF_API_PORT"] = str(free_port)
+                os.environ["GOLF_PORT"] = str(free_port)
+                logger.info(
+                    f"Dynamically set API_PORT, GOLF_API_PORT, and GOLF_PORT to discovered free port: {free_port}"
+                )
+            except OSError as e:
+                logger.error(f"Failed to find a free port for API server: {e}")
 
     def excepthook(exc_type, exc_value, exc_tb):
         from PyQt6.QtWidgets import QMessageBox

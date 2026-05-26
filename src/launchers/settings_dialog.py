@@ -312,38 +312,37 @@ class SettingsWidget(QWidget):
         # Header row: short summary + inline ``?`` help button so users
         # can read the full explanation without leaving the dialog.
         env_header = QHBoxLayout()
-        env_header.addWidget(
-            QLabel(
-                "Where physics engines execute. "
-                "Default is Native Windows (no boxes ticked)."
-            )
-        )
+        env_header.addWidget(QLabel("Select where physics engines execute (pick one):"))
         env_header.addStretch()
         env_header.addWidget(make_runtime_mode_help_button(self))
         env_inner.addLayout(env_header)
 
-        self.chk_docker = QCheckBox("Docker container (Linux, sandboxed)")
+        self.chk_windows = QCheckBox("Windows (Default)")
+        self.chk_windows.setToolTip(
+            "Run physics engines natively on your local Windows system (default)."
+        )
+        env_inner.addWidget(self.chk_windows)
+
+        self.chk_docker = QCheckBox("Docker")
         self.chk_docker.setToolTip(
-            "Run engines inside the upstream-drift:engine Linux container. "
-            "Full Drake/Pinocchio support; requires Docker installed and the "
-            "image built (see Docker Image section below)."
+            "Run physics engines inside a Docker container (Linux, sandboxed)."
         )
         env_inner.addWidget(self.chk_docker)
 
-        self.chk_wsl = QCheckBox("WSL2 Ubuntu (Linux, native filesystem)")
+        self.chk_wsl = QCheckBox("WSL")
         self.chk_wsl.setToolTip(
-            "Run engines in your WSL2 Ubuntu user environment. Same Linux "
-            "wheels as Docker mode but no container layer — faster file I/O "
-            "and easier interactive debugging from a WSL shell."
+            "Run physics engines inside WSL2 Ubuntu (Linux, native filesystem)."
         )
         env_inner.addWidget(self.chk_wsl)
 
-        # Inline footer reminds users what unticked-both means.
-        env_footer = QLabel(
-            "<i>Untick both to fall back to Native Windows (default).</i>"
-        )
-        env_footer.setTextFormat(Qt.TextFormat.RichText)
-        env_inner.addWidget(env_footer)
+        # Make checkboxes mutually exclusive via button group
+        from PyQt6.QtWidgets import QButtonGroup
+
+        self.env_group_buttons = QButtonGroup(self)
+        self.env_group_buttons.setExclusive(True)
+        self.env_group_buttons.addButton(self.chk_windows)
+        self.env_group_buttons.addButton(self.chk_docker)
+        self.env_group_buttons.addButton(self.chk_wsl)
 
         tab_layout.addWidget(env_group)
 
@@ -465,13 +464,32 @@ class SettingsWidget(QWidget):
         # Sync checkboxes with parent launcher state
         launcher = self.parent()
         if launcher and hasattr(launcher, "chk_docker"):
+            self.chk_windows.setChecked(
+                not launcher.chk_docker.isChecked() and not launcher.chk_wsl.isChecked()
+            )
             self.chk_docker.setChecked(launcher.chk_docker.isChecked())
             self.chk_wsl.setChecked(launcher.chk_wsl.isChecked())
             self.chk_live_viz.setChecked(launcher.chk_live.isChecked())
             self.chk_gpu.setChecked(launcher.chk_gpu.isChecked())
 
-            self.chk_docker.toggled.connect(launcher.chk_docker.setChecked)
-            self.chk_wsl.toggled.connect(launcher.chk_wsl.setChecked)
+            def on_windows_toggled(checked: bool) -> None:
+                if checked:
+                    launcher.chk_docker.setChecked(False)
+                    launcher.chk_wsl.setChecked(False)
+
+            def on_docker_toggled(checked: bool) -> None:
+                if checked:
+                    launcher.chk_docker.setChecked(True)
+                    launcher.chk_wsl.setChecked(False)
+
+            def on_wsl_toggled(checked: bool) -> None:
+                if checked:
+                    launcher.chk_docker.setChecked(False)
+                    launcher.chk_wsl.setChecked(True)
+
+            self.chk_windows.toggled.connect(on_windows_toggled)
+            self.chk_docker.toggled.connect(on_docker_toggled)
+            self.chk_wsl.toggled.connect(on_wsl_toggled)
             self.chk_live_viz.toggled.connect(launcher.chk_live.setChecked)
             self.chk_gpu.toggled.connect(launcher.chk_gpu.setChecked)
 

@@ -51,6 +51,7 @@ class DummyLauncher(QMainWindow):
         self._show_shortcuts_overlay = MagicMock()
         self._show_about_dialog = MagicMock()
         self.update_search_filter = MagicMock()
+        self._on_windows_mode_changed = MagicMock()
         self._on_docker_mode_changed = MagicMock()
         self._on_wsl_mode_changed = MagicMock()
         self.toggle_layout_mode = MagicMock()

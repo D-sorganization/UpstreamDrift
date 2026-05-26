@@ -204,13 +204,13 @@ class DraggableModelCard(QFrame):
 
         self._base_style = f"""
             #ModelCard {{
-                background-color: {_color(c, "surface_hover", "group_bg", "#2d2d2d")};
-                border: 1px solid {_color(c, "border_light", "border", "#444444")};
+                background-color: {_color(c, "surface_hover", "group_bg", "#32363f")};
+                border: 1px solid {_color(c, "border_light", "border", "#4a505e")};
                 border-radius: 16px;
             }}
             #ModelCard:hover {{
-                background-color: {_color(c, "surface_active", "input_bg", "#3a3a3a")};
-                border: 1px solid {_color(c, "border_strong", "focus", "#666666")};
+                background-color: {_color(c, "surface_active", "input_bg", "#3d424e")};
+                border: 1px solid {_color(c, "border_strong", "focus", "#707684")};
             }}
             #CardName {{
                 color: {_color(c, "text_primary", "text", "#ffffff")};

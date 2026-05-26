@@ -48,11 +48,6 @@ class ThemeManager:
 
             # Map extended color names to actual theme keys with fallbacks
             bg_elevated = colors.get("bg_elevated", colors.get("group_bg", "#2D2D2D"))
-            border_default = colors.get(  # noqa: F841
-                "border_default", colors.get("border", "#555555")
-            )
-            bg_highlight = colors.get("bg_highlight", colors.get("input_bg", "#3D3D3D"))  # noqa: F841
-            border_strong = colors.get("border_strong", colors.get("focus", "#0078D4"))  # noqa: F841
             text_sec = colors.get("text_secondary", "#AAAAAA")
 
             self.setStyleSheet(
