@@ -28,13 +28,19 @@ class FitResult:
 
     Attributes:
         parameters: Dictionary of fitted parameter names and values.
-        covariance: Covariance matrix of the fit (if available).
+        covariance: Covariance matrix of the fit (if available). Use
+            ``fit_succeeded`` or ``solver_status`` to distinguish a failed fit
+            from a successful fit that could not estimate covariance.
         r_squared: Coefficient of determination (R^2).
         rmse: Root mean square error.
         fitted_signal: Signal with fitted values.
         residuals: Residuals (original - fitted).
         success: Whether the fit converged successfully.
         message: Fit status message.
+        fit_succeeded: Explicit success flag derived from ``success`` unless
+            the caller provides a different value.
+        solver_status: Canonical status string, ``"success"`` or ``"failure"``
+            by default, aligned with the cross-engine fit-result vocabulary.
     """
 
     parameters: dict[str, float]
@@ -45,6 +51,15 @@ class FitResult:
     residuals: np.ndarray
     success: bool = True
     message: str = ""
+    fit_succeeded: bool = True
+    solver_status: str = "success"
+
+    def __post_init__(self) -> None:
+        if not self.success:
+            if self.fit_succeeded:
+                self.fit_succeeded = False
+            if self.solver_status == "success":
+                self.solver_status = "failure"
 
     def get_function_string(self) -> str:
         """Get a string representation of the fitted function."""
@@ -126,6 +141,8 @@ class SinusoidFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0 or len(signal.values) == 0:
+            raise ValueError("signal must contain at least one sample")
         t = signal.time - signal.time[0]  # Shift to start at 0
         y = signal.values
 
@@ -284,6 +301,8 @@ class ExponentialFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0 or len(signal.values) == 0:
+            raise ValueError("signal must contain at least one sample")
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -363,6 +382,8 @@ class ExponentialFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0 or len(signal.values) == 0:
+            raise ValueError("signal must contain at least one sample")
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -440,6 +461,8 @@ class LinearFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0 or len(signal.values) == 0:
+            raise ValueError("signal must contain at least one sample")
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -514,6 +537,8 @@ class PolynomialFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0 or len(signal.values) == 0:
+            raise ValueError("signal must contain at least one sample")
         t = signal.time - signal.time[0]
         y = signal.values
 
