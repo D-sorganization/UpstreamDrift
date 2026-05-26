@@ -1,10 +1,8 @@
 """Tests for various dashboard launchers."""
 
-import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
-from src.launchers.drake_dashboard import main as drake_main  # noqa: E402
 from src.launchers.mujoco_dashboard import main as mujoco_main  # noqa: E402
 from src.launchers.pinocchio_dashboard import main as pinocchio_main  # noqa: E402
 

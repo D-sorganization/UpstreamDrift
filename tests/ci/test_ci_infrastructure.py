@@ -220,9 +220,11 @@ class TestCIEnvironmentCompatibility:
             encoding="utf-8",
         )
 
-        assert "pytest_status=$?" in workflow
-        assert 'if [ "$pytest_status" -eq 5 ]; then' in workflow
-        assert "All selected PR-scoped tests were skipped" in workflow
+        assert "pytest_exit_code=$?" in workflow
+        assert "elif [ $pytest_exit_code -eq 5 ]; then" in workflow
+        assert "WARNING: pytest exit code 5 (no tests collected) detected." in (
+            workflow
+        )
 
     def test_cross_engine_equivalence_uses_recordless_pip_bootstrap(self) -> None:
         """The equivalence workflow must tolerate broken runner pip metadata."""
@@ -241,6 +243,31 @@ class TestCIEnvironmentCompatibility:
 
         assert "-p no:xvfb" in workflow
 
+    def test_cross_engine_equivalence_disables_pytest_plugin_autoload(self) -> None:
+        """The equivalence gate must ignore globally installed pytest plugins."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "cross-engine-equivalence.yml"
+        ).read_text(encoding="utf-8")
+
+        assert 'PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"' in workflow
+        assert "mutually incompatible pytest plugins" in workflow
+
+    def test_cross_engine_leaderboard_removes_conflicting_pytest_plugins(
+        self,
+    ) -> None:
+        """The leaderboard job must remove globally conflicting pytest plugins."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "cross-engine-leaderboard.yml"
+        ).read_text(encoding="utf-8")
+
+        install_index = workflow.index('pip install -e ".[dev]"')
+        uninstall_index = workflow.index("pip uninstall -y pytest-vcr pytest-recording")
+        pytest_index = workflow.index(
+            "pytest tests/unit/motion_matching/test_leaderboard.py"
+        )
+
+        assert install_index < uninstall_index < pytest_index
+
     def test_bot_ci_trigger_validates_token_before_authenticated_trigger(
         self,
     ) -> None:
@@ -252,6 +279,43 @@ class TestCIEnvironmentCompatibility:
         assert "id: token-check" in workflow
         assert "gh auth status" in workflow
         assert "steps.token-check.outputs.can_trigger == 'true'" in workflow
+
+    def test_frontend_cleanup_runs_before_ui_working_directory_default(self) -> None:
+        """The frontend pre-checkout cleanup must not require ui/ to exist."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+                encoding="utf-8",
+            ),
+        )
+        steps = workflow["jobs"]["frontend-tests"]["steps"]
+        cleanup = next(
+            step for step in steps if step.get("name") == "Clean corrupt git objects"
+        )
+
+        assert cleanup["working-directory"] == "."
+
+    def test_quality_gate_lod_timeout_budget_matches_self_hosted_setup_cost(
+        self,
+    ) -> None:
+        """The advisory LOD job must allow checkout/setup on busy self-hosted runners."""
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "quality-gate.yml").read_text(
+                encoding="utf-8",
+            ),
+        )
+        lod_job = workflow["jobs"]["lod-pinocchio"]
+
+        assert int(lod_job["timeout-minutes"]) >= 15
 
 
 class TestPyprojectTomlConsistency:

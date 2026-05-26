@@ -1,7 +1,5 @@
 """Tests for the Drake engine tier metadata."""
 
-import pytest
-
 from src.engines.physics_engines.drake._tier import TIER
 
 

@@ -84,3 +84,6 @@ jobs:
           fi
 
           echo "Docs-only PR confirmed  -  quality gate passes."
+
+      - name: Docs governance
+        run: python3 scripts/check_docs_governance.py

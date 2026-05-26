@@ -1,3 +1,4 @@
+# See docker/README.md and ADR-0021 (docs/adr/0021-container-strategy.md) for container policy.
 # Dockerfile.heavy_test
 # ─────────────────────────────────────────────────────────────────────────────
 # LOCAL PARITY IMAGE for d-sorg-fleet-4core custom runner.
@@ -5,6 +6,8 @@
 #
 # Must stay in sync with:
 #   .github/workflows/heavy-tests-opt-in.yml (calls reusable-heavy-tests.yml)
+# Policy reference:
+#   docker/README.md and docs/adr/0021-container-strategy.md
 #
 # Build args:
 #   PYTHON_VERSION (default: 3.11)

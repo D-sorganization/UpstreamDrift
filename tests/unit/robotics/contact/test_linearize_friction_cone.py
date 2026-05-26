@@ -10,20 +10,10 @@ Tests cover:
 from __future__ import annotations
 
 import numpy as np
-import pytest
-from numpy.testing import assert_allclose
 from src.robotics.contact.friction_cone import (
-    FrictionCone,
     compute_friction_cone_constraint,
     linearize_friction_cone,
-    project_to_friction_cone,
 )
-from src.robotics.contact.grasp_analysis import (
-    check_force_closure,
-    compute_grasp_matrix,
-    compute_grasp_quality,
-)
-from src.robotics.core.types import ContactState
 
 
 class TestLinearizeFrictionCone:

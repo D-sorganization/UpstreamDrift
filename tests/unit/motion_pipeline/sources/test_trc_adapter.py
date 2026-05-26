@@ -229,7 +229,10 @@ def test_trc_load_via_rust(tmp_path: Path) -> None:
         "units": "mm",
     }
     with (
-        patch("src.shared.python.motion_pipeline.sources.trc_adapter._rust_io", mock_rust_io),
+        patch(
+            "src.shared.python.motion_pipeline.sources.trc_adapter._rust_io",
+            mock_rust_io,
+        ),
         patch("src.shared.python.motion_pipeline.sources.trc_adapter._HAS_RUST", True),
     ):
         traj = TRCAdapter().load(p)
@@ -244,7 +247,9 @@ def test_trc_load_via_rust_edge_cases(tmp_path: Path) -> None:
 
     mock_rust_io = MagicMock()
     mock_rust_io.parse_trc.return_value = {
-        "positions": np.array([[float("nan"), 2.0, 3.0, 0.1, 0.2, 0.3]], dtype=np.float32),
+        "positions": np.array(
+            [[float("nan"), 2.0, 3.0, 0.1, 0.2, 0.3]], dtype=np.float32
+        ),
         "labels": ["HEAD", "HIP"],
         "n_frames": 1,
         "fps": 100.0,
@@ -262,7 +267,10 @@ def test_trc_load_via_rust_edge_cases(tmp_path: Path) -> None:
     p = tmp_path / "edge.trc"
     p.write_text(content)
     with (
-        patch("src.shared.python.motion_pipeline.sources.trc_adapter._rust_io", mock_rust_io),
+        patch(
+            "src.shared.python.motion_pipeline.sources.trc_adapter._rust_io",
+            mock_rust_io,
+        ),
         patch("src.shared.python.motion_pipeline.sources.trc_adapter._HAS_RUST", True),
     ):
         traj = TRCAdapter().load(p)
@@ -273,6 +281,8 @@ def test_trc_load_via_rust_edge_cases(tmp_path: Path) -> None:
         assert traj.frames[0].timestamp == 0.0
 
         mock_rust_io.parse_trc.return_value["n_frames"] = 0
-        mock_rust_io.parse_trc.return_value["positions"] = np.empty((0, 6), dtype=np.float32)
+        mock_rust_io.parse_trc.return_value["positions"] = np.empty(
+            (0, 6), dtype=np.float32
+        )
         with pytest.raises(ValueError, match="has no data rows"):
             TRCAdapter().load(p)

@@ -1,6 +1,6 @@
 """Motion matching: shared loaders, oracle, cost, and visualisation.
 
-Issue #4095 promotes this package from buried-under-Simscape to the
+This package is promoted from buried-under-Simscape to the
 canonical Python entry point every engine imports from. The top-level
 surface mirrors the MATLAB ``motion_matching/shared/`` layout one-to-one.
 

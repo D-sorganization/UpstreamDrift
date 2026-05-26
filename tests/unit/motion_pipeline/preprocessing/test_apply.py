@@ -3,10 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 import pytest
-from tests.unit.motion_pipeline.preprocessing._local_fixtures import make_keypoint_sequence
+from tests.unit.motion_pipeline.preprocessing._local_fixtures import (
+    make_keypoint_sequence,
+)
 from src.shared.python.motion_pipeline.preprocessing.apply import apply_preprocessing
-from src.shared.python.motion_pipeline.preprocessing.gap_fill import GapFillStrategy
-from src.shared.python.motion_pipeline.preprocessing.filter import FilterType
 from src.shared.python.motion_pipeline.preprocessing.normalize import UpAxis
 
 
@@ -20,7 +20,9 @@ def test_apply_preprocessing_gap_fill() -> None:
     # Butterworth padding requires more frames, but gap fill is fine with 10.
     seq = make_keypoint_sequence(num_frames=10)
     # Test valid strategy
-    step_linear = DummyStepConfig(name="GapFill", params={"strategy": "linear", "max_gap": 5})
+    step_linear = DummyStepConfig(
+        name="GapFill", params={"strategy": "linear", "max_gap": 5}
+    )
     res_linear = apply_preprocessing(seq, [step_linear])
     assert res_linear is not None
 
@@ -72,5 +74,7 @@ def test_apply_preprocessing_normalize() -> None:
 def test_apply_preprocessing_unknown_step() -> None:
     seq = make_keypoint_sequence(num_frames=10)
     step_unknown = DummyStepConfig(name="UnknownStep")
-    with pytest.raises(ValueError, match="Unknown preprocessing step name: UnknownStep"):
+    with pytest.raises(
+        ValueError, match="Unknown preprocessing step name: UnknownStep"
+    ):
         apply_preprocessing(seq, [step_unknown])

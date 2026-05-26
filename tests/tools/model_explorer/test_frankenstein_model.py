@@ -5,7 +5,6 @@ from __future__ import annotations
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-import pytest
 
 from src.tools.model_explorer._frankenstein_model import URDFModel
 from tests.tools.model_explorer._fixtures import SIMPLE_URDF

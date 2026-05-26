@@ -30,7 +30,7 @@ import numpy as np
 from sidekick.utils.state_manager import safe_read_json
 
 from shared.python.theme.integration import get_theme_manager
-from shared.python.theme.matplotlib_style import apply_plot_theme
+from src.shared.python.plot_theme.integration import apply_plot_theme
 
 from .constants import (
     CELSIUS_TO_KELVIN_OFFSET,

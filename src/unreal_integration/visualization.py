@@ -32,6 +32,7 @@ from enum import Enum, auto
 from typing import Any
 
 import numpy as np
+import math
 
 from src.unreal_integration.data_models import (
     ForceVector,
@@ -189,10 +190,8 @@ class ForceVectorRenderer:
 
         # Get direction (normalize)
         direction = force.direction.to_numpy()
-        if np.linalg.norm(direction) > 0:
-            direction = direction / np.linalg.norm(direction)
-        else:
-            direction = np.array([0, 0, 1])
+        norm = math.hypot(*direction)
+        direction = direction / norm if norm > 0 else np.array([0, 0, 1])
 
         # Calculate endpoint
         origin = force.origin.to_numpy()
@@ -244,10 +243,8 @@ class ForceVectorRenderer:
 
         # Get axis (direction)
         axis = force.direction.to_numpy()
-        if np.linalg.norm(axis) > 0:
-            axis = axis / np.linalg.norm(axis)
-        else:
-            axis = np.array([0, 0, 1])
+        norm = math.hypot(*axis)
+        axis = axis / norm if norm > 0 else np.array([0, 0, 1])
 
         origin = force.origin.to_numpy()
 
@@ -256,7 +253,10 @@ class ForceVectorRenderer:
             perp1 = np.cross(axis, np.array([0, 0, 1]))
         else:
             perp1 = np.cross(axis, np.array([1, 0, 0]))
-        perp1 = perp1 / np.linalg.norm(perp1)
+
+        norm_perp1 = math.hypot(*perp1)
+        if norm_perp1 > 0:
+            perp1 = perp1 / norm_perp1
         perp2 = np.cross(axis, perp1)
 
         # Generate arc vertices
