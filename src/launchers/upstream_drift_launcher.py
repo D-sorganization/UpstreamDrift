@@ -727,6 +727,18 @@ class UpstreamDriftLauncher(QMainWindow):
         )
 
         if "PYTEST_CURRENT_TEST" not in os.environ:
+            # Force the background API server into local-auth mode. The
+            # desktop launcher is the API server's only client and runs on
+            # the user's own machine, so the bearer-token requirement that
+            # the API enforces by default (GOLF_SUITE_MODE=remote) just
+            # produces 403s on every chat WebSocket connect — see
+            # ``src/api/auth/ws_auth.py``. Setting these env vars in the
+            # launcher's *own* environment first guarantees they propagate
+            # through ``get_subprocess_env()`` (which copies ``os.environ``)
+            # regardless of how the process manager re-assembles the env
+            # for the child.
+            os.environ.setdefault("GOLF_SUITE_MODE", "local")
+            os.environ.setdefault("GOLF_AUTH_DISABLED", "true")
             self.background_api_process = self.process_manager.launch_module(
                 name="background_api_server",
                 module_name="src.api.server",

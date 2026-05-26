@@ -160,13 +160,15 @@ def test_run_subcommand_format_csv() -> None:
     assert ns.format == "csv"
 
 
-def test_run_headless_invalid_output_dir_returns_1(
+def test_run_headless_executes_without_repo_style_src_imports(
+    monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
-    capsys: pytest.CaptureFixture[str],
 ) -> None:
     cli = _load_cli()
     inputs = tmp_path / "inputs.json"
     inputs.write_text("{}", encoding="utf-8")
+    output = tmp_path / "missing" / "result.json"
+    monkeypatch.setitem(sys.modules, "src", None)
 
     args = cli.parse_cli_args(
         [
@@ -176,12 +178,12 @@ def test_run_headless_invalid_output_dir_returns_1(
             "--inputs",
             str(inputs),
             "--output",
-            str(tmp_path / "missing" / "result.json"),
+            str(output),
         ]
     )
 
-    assert cli.run_headless(args) == 1
-    assert "sidekick run failed" in capsys.readouterr().err
+    assert cli.run_headless(args) == 0
+    assert output.exists()
 
 
 def test_launch_gui_delegates_to_launcher_factory(

@@ -1103,15 +1103,32 @@ class UISetupManager:
         # explanation lives in exactly one place.
         from src.launchers.runtime_mode_help import make_runtime_mode_help_button
 
-        self.lbl_execution_mode = QLabel("Runtime: Native Windows")
+        # Engine-runtime indicator is now a clickable button: clicking jumps
+        # straight to Settings → Configuration where the Engine Runtime group
+        # lives, so the user can change Native / Docker / WSL2 from one click
+        # instead of hunting for it. The ``?`` button beside it keeps the
+        # help-only entry point. The attribute name stays ``lbl_execution_mode``
+        # for backwards compatibility with launcher_dialogs.py call sites
+        # (setText / setStyleSheet work identically on QToolButton).
+        self.lbl_execution_mode = QToolButton()
+        self.lbl_execution_mode.setText("Runtime: Windows")
+        self.lbl_execution_mode.setAutoRaise(True)  # flat / borderless look
+        self.lbl_execution_mode.setCursor(Qt.CursorShape.PointingHandCursor)
         self.lbl_execution_mode.setProperty("exec_mode", "warning")
+        self.lbl_execution_mode.setToolButtonStyle(
+            Qt.ToolButtonStyle.ToolButtonTextOnly
+        )
         _style = self.lbl_execution_mode.style()
-
         if _style:
             _style.polish(self.lbl_execution_mode)
         self.lbl_execution_mode.setToolTip(
-            "Where physics engines execute — Native Windows, Docker "
-            "container, or WSL2 Ubuntu. Click the ? for full details."
+            "Click to change the engine runtime (Windows, Docker, or "
+            "WSL2 Ubuntu) in Settings → Configuration. The ‘?’ button "
+            "explains each runtime in detail."
+        )
+        # tab=1 → Configuration tab, which hosts the Engine Runtime group.
+        self.lbl_execution_mode.clicked.connect(
+            lambda: self.launcher._open_settings(tab=1)
         )
         top_bar.addWidget(self.lbl_execution_mode)
 
@@ -1141,6 +1158,39 @@ class UISetupManager:
         self.search_input.textChanged.connect(self.update_search_filter)
         top_bar.addWidget(self.search_input)
 
+        # Launch button — sits in the top bar next to the search input so the
+        # primary action is always reachable without scrolling and the grid
+        # area below is freed for tiles (no bottom-bar overlap).
+        self._ensure_launch_button()
+        top_bar.addWidget(self.btn_launch)
+
+    def _ensure_launch_button(self) -> None:
+        """Create ``self.btn_launch`` if it doesn't exist yet (idempotent).
+
+        Used by both ``_setup_top_bar_status_and_search`` (current home) and
+        ``_setup_bottom_bar`` (legacy callers / tests). Either path produces
+        the same button instance.
+        """
+        if getattr(self, "btn_launch", None) is not None:
+            return
+        btn = QPushButton("Select a Model")
+        btn.setEnabled(False)
+        # Top-bar height: align with search input rather than the old 50px
+        # tile-overlapping bottom bar. Width caps the button so a long model
+        # name (e.g. "Launch golf_swing_pendulum >") doesn't push the rest of
+        # the top bar offscreen.
+        btn.setFixedHeight(32)
+        btn.setMinimumWidth(180)
+        btn.setMaximumWidth(280)
+        btn.setFont(get_display_font(size=10, weight=Weights.BOLD))
+        btn.setProperty("class", "launch-ready")
+        _style = btn.style()
+        if _style:
+            _style.polish(btn)
+        btn.clicked.connect(self.launch_simulation)
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_launch = btn
+
     def _setup_top_bar_config_checkboxes(self, top_bar: QHBoxLayout) -> None:
         """Create config checkboxes and layout controls, adding them to top bar."""
         from PyQt6.QtCore import QSettings
@@ -1164,7 +1214,7 @@ class UISetupManager:
         self.chk_wsl.setChecked(settings.value("chk_wsl", False, type=bool))
         self.chk_wsl.stateChanged.connect(self._on_wsl_mode_changed)
 
-        self.chk_windows = QCheckBox("Windows (Default)")
+        self.chk_windows = QCheckBox("Windows")
         self.chk_windows.setChecked(
             not self.chk_docker.isChecked() and not self.chk_wsl.isChecked()
         )
@@ -1513,24 +1563,15 @@ class UISetupManager:
         layout.addWidget(self.scroll_area, 1)
 
     def _setup_bottom_bar(self) -> QHBoxLayout:
-        """Set up the bottom bar with launch button."""
-        bottom_bar = QHBoxLayout()
-        bottom_bar.addStretch()
+        """Return an empty bottom bar; the launch button now lives in the top bar.
 
-        self.btn_launch = QPushButton("Select a Model")
-        self.btn_launch.setEnabled(False)
-        self.btn_launch.setFixedHeight(50)
-        self.btn_launch.setFont(get_display_font(size=12, weight=Weights.BOLD))
-        self.btn_launch.setProperty("class", "launch-ready")
-        _style = self.btn_launch.style()
-
-        if _style:
-            _style.polish(self.btn_launch)
-        self.btn_launch.clicked.connect(self.launch_simulation)
-        self.btn_launch.setCursor(Qt.CursorShape.PointingHandCursor)
-        bottom_bar.addWidget(self.btn_launch)
-
-        return bottom_bar
+        Kept as a method so existing callers and tests
+        (``test_setup_bottom_bar``) that expect ``self.btn_launch`` to exist
+        after invocation keep working. Returns an empty layout — caller can
+        still ``addLayout`` it without producing visible chrome at the bottom.
+        """
+        self._ensure_launch_button()
+        return QHBoxLayout()
 
     def _setup_search_shortcuts(self) -> None:
         """Setup keyboard shortcuts for search."""
