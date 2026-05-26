@@ -20,7 +20,6 @@ def test_import_without_pinocchio():
 def test_pinocchio_provider_vocabulary_mapping():
     """Test that the vocabulary mapping is correct."""
     from src.tools.starting_pose_matcher.skeleton_extractors.pinocchio import (
-        PINOCCHIO_TO_MATCHER_VOCAB,
         MATCHER_TO_PINOCCHIO,
     )
 

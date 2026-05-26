@@ -20,3 +20,11 @@ __all__ = [
     "PostureMetrics",
     "SwingAnalyzer",
 ]
+
+from src.shared.python.launcher_embed import register_embeddable_tool
+from ._embed_adapter import VideoAnalyzerAdapter
+
+# Register immediately when the package is imported
+register_embeddable_tool(VideoAnalyzerAdapter())
+
+__all__ = ["VideoAnalyzerAdapter"]

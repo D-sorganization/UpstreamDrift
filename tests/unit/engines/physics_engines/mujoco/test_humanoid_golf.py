@@ -1,11 +1,9 @@
 """Tests for the MuJoCo humanoid_golf module."""
 
-import json
 import sys
 from unittest.mock import MagicMock, mock_open, patch
 
 import numpy as np
-import pytest
 
 
 def test_pd_controller():

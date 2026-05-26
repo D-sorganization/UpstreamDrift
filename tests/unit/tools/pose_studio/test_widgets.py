@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import pytest
 
 from src.tools.pose_studio.widgets.engine_picker import EnginePicker
 from src.tools.pose_studio.widgets.units_badge import UnitsBadge
-from src.tools.pose_studio.core import EngineStatus
 
 
 def test_units_badge_set_engine() -> None:

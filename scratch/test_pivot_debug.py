@@ -1,5 +1,4 @@
 import sys
-import os
 import contextlib
 from pathlib import Path
 
@@ -60,9 +59,9 @@ src_mod.__path__ = [str(engine_src), str(repo_src)]
 
 # Try to import export module
 try:
-    import src.shared.python.data_io.export as export_module
+    pass
 
-except Exception as e:
+except Exception:
     import traceback
 
     traceback.print_exc()
@@ -74,15 +73,10 @@ for name in list(sys.modules):
 
 try:
     # Python caches module lookup failures in some contexts. Let's import src.shared first.
-    import src.shared
 
-    import src.shared.python
+    pass
 
-    import src.shared.python.data_io
-
-    import src.shared.python.data_io.export as export_module
-
-except Exception as e:
+except Exception:
     import traceback
 
     traceback.print_exc()

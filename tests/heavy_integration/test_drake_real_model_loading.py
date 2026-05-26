@@ -9,7 +9,6 @@ All tests skip gracefully when Drake is unavailable.
 
 from __future__ import annotations
 
-import numpy as np
 import pytest
 
 # Minimal self-contained URDF for testing

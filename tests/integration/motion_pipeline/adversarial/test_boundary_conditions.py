@@ -8,14 +8,9 @@ from pydantic import ValidationError
 from src.shared.python.motion_pipeline.contracts import (
     JointDef,
     JointLimit,
-    JointStateFrame,
-    JointTrajectory,
     Keypoint,
     KeypointFrame,
     KeypointSequence,
-    MarkerFrame,
-    MarkerTrajectory,
-    Marker,
     MotionMatchingRequest,
     SkeletonRig,
 )

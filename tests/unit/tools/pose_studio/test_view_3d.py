@@ -6,7 +6,6 @@ from unittest.mock import MagicMock
 
 from src.tools.pose_studio.widgets.view_3d import View3D
 from src.shared.python.pose_interchange.canonical import (
-    CanonicalPose,
     canonical_zero_pose,
 )
 

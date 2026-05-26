@@ -235,9 +235,37 @@ class StandaloneSidekickWindow(QMainWindow):
         logger.info("Load profile triggered (UI not yet implemented — T8)")
 
     def _switch_profile(self, profile: str) -> None:
-        logger.info(
-            "Switch profile to %r (re-layout not yet implemented — T8)", profile
+        if profile not in _VALID_PROFILES:
+            raise ValueError(f"Unknown profile: {profile!r}")
+
+        if profile == self._config.profile:
+            return
+
+        logger.info("Switching profile to %r", profile)
+
+        # Determine logical order based on profile
+        if profile == "chat-first":
+            primary = self._chat_panel
+            secondary = self._sidebar_panel
+        else:
+            primary = self._sidebar_panel
+            secondary = self._chat_panel
+
+        # Reorder widgets in the splitter
+        # QSplitter.insertWidget will move an existing widget to the new index
+        self._splitter.insertWidget(0, primary)
+        self._splitter.insertWidget(1, secondary)
+
+        # Re-apply the config to store new profile
+        self._config = StandaloneSidekickConfig(
+            profile=profile,
+            theme_name=self._config.theme_name,
+            session_store=self._config.session_store,
+            host_action_port=self._config.host_action_port,
         )
+
+        # Update layout sizes based on new ratio logic
+        self._apply_ratio()
 
     def _toggle_sidebar(self) -> None:
         self._sidebar_panel.setVisible(not self._sidebar_panel.isVisible())

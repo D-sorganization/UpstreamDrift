@@ -29,7 +29,6 @@ from src.shared.python.motion_matching.diagnostics.reference_pose import (
     REFERENCE_GOLFER_FIELDS,
 )
 from src.shared.python.pose_interchange import (
-    CONVENTION_TAG,
     CanonicalPose,
     CapabilityError,
     JointSlot,

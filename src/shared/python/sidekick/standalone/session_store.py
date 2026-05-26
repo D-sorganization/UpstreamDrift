@@ -14,7 +14,7 @@ from typing import Any, Protocol, runtime_checkable
 
 import platformdirs
 
-from core.contracts.exceptions import StateError
+from src.shared.python.core.contracts.exceptions import StateError
 from sidekick.persistence.schema import ProfilePayload
 
 logger = logging.getLogger(__name__)

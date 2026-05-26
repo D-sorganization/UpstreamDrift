@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
 
 from src.shared.python.data_io._format_handlers import OutputFormat
 from src.shared.python.data_io._path_utils import (

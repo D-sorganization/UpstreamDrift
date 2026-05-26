@@ -9,6 +9,7 @@ These are import-free, read-only path checks — suitable for headless CI.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -288,3 +289,56 @@ class TestStandaloneSidekickDocs:
         assert "sidekick.standalone" in path.read_text(encoding="utf-8"), (
             "AGENTS.md must include a sidekick.standalone entry (T9 #5987)"
         )
+
+
+# ---------------------------------------------------------------------------
+# Chat/Sidekick boundary ADR (issue #6098)
+# ---------------------------------------------------------------------------
+
+
+class TestChatSidekickBoundaryAdr:
+    """ADR-0022 must document the legacy chat/Sidekick boundary."""
+
+    def _adr_path(self) -> Path:
+        return _REPO_ROOT / "docs" / "adr" / "0022-chat-sidekick-boundary.md"
+
+    def _read_adr(self) -> str:
+        path = self._adr_path()
+        assert path.exists(), "ADR-0022 must exist for issue #6098"
+        return path.read_text(encoding="utf-8")
+
+    def test_adr_exists(self) -> None:
+        assert self._adr_path().exists()
+
+    def test_adr_is_accepted(self) -> None:
+        assert "Status: Accepted" in self._read_adr()
+
+    def test_adr_cross_links_required_issues(self) -> None:
+        content = self._read_adr()
+        for issue in ("5922", "5967", "5969", "6098"):
+            assert f"#{issue}" in content, f"ADR-0022 must reference #{issue}"
+
+    def test_adr_names_canonical_and_legacy_surfaces(self) -> None:
+        content = self._read_adr()
+        for token in (
+            "_chat_dock_widget_qt.py",
+            "AIAssistantPanel",
+            "UnifiedToolsSidebar",
+            "ChatPanel",
+        ):
+            assert token in content, f"ADR-0022 must mention {token}"
+
+    def test_adr_index_mentions_0022(self) -> None:
+        path = _REPO_ROOT / "docs" / "adr" / "README.md"
+        assert "0022-chat-sidekick-boundary.md" in path.read_text(encoding="utf-8")
+
+    def test_file_size_budget_references_adr_0022(self) -> None:
+        path = _REPO_ROOT / "scripts" / "config" / "file_size_budget.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        reason = None
+        for entry in data["exceptions"]:
+            if entry["path"] == "src/shared/python/chat/_chat_dock_widget_qt.py":
+                reason = entry["reason"]
+                break
+        assert reason is not None, "chat dock widget exception must exist"
+        assert "ADR-0022" in reason
