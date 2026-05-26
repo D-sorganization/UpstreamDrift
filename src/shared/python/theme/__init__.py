@@ -278,6 +278,20 @@ class ThemeColorsCompat(dict):
         try:
             return self[name]
         except KeyError as err:
+            # Fallback to DARK_THEME attributes to prevent crashes when using legacy themes
+            try:
+                from src.shared.python.theme import DARK_THEME
+
+                if hasattr(DARK_THEME, name):
+                    return getattr(DARK_THEME, name)
+                if hasattr(DARK_THEME, "__dict__") and name in DARK_THEME.__dict__:
+                    return DARK_THEME.__dict__[name]
+                if hasattr(DARK_THEME, "get"):
+                    val = DARK_THEME.get(name)
+                    if val is not None:
+                        return val
+            except Exception:  # noqa: BLE001
+                pass
             raise AttributeError(name) from err
 
     def __setattr__(self, name: str, value: Any) -> None:
