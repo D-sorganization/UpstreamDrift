@@ -200,16 +200,15 @@ def launch_gui(args: argparse.Namespace) -> int:
 
 
 def run_headless(args: argparse.Namespace) -> int:
-    """Reserve the ``run`` subcommand contract until issue #5982 lands."""
+    """Run a named calculator headlessly."""
+    from sidekick.standalone.runner import run_calculator
     from src.shared.python.core.process_safety import narrow_catch
 
     with narrow_catch(ValueError, FileNotFoundError, log_message="sidekick run"):
         if args.output is not None and not args.output.parent.exists():
             raise FileNotFoundError(args.output.parent)
-        sys.stderr.write(
-            "sidekick run parsing is ready; execution lands in issue #5982.\n"
-        )
-        return 1
+        output = str(args.output) if args.output is not None else "-"
+        return run_calculator(args.calculator, str(args.inputs), output)
     sys.stderr.write("sidekick run failed; check calculator arguments and paths.\n")
     return 1
 
