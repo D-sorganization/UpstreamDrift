@@ -90,6 +90,18 @@ class TestSensitiveDataFilter:
         record = self._make_record("plain message")
         assert flt.filter(record) is True
 
+    def test_redacts_password_with_comma_and_json(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record("password=abc,def")
+        flt.filter(record)
+        assert "abc,def" not in record.msg
+        assert record.msg == "password=***REDACTED***"
+
+        record2 = self._make_record('{"password":"abc,def"}')
+        flt.filter(record2)
+        assert "abc,def" not in record2.msg
+        assert record2.msg == '{"password":"***REDACTED***"}'
+
     def test_redacts_password(self) -> None:
         flt = SensitiveDataFilter()
         record = self._make_record("password=secret123")
@@ -136,6 +148,37 @@ class TestSensitiveDataFilter:
         flt.filter(record)
         assert "key1" not in record.msg
         assert "pass1" not in record.msg
+
+    def test_redacts_with_comma(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record("api_key=mysecret, other_var=1")
+        flt.filter(record)
+        assert "mysecret" not in record.msg
+        assert "REDACTED" in record.msg
+        assert "other_var=1" in record.msg
+
+    def test_redacts_json_format(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record('{"api_key": "mysecret"}')
+        flt.filter(record)
+        assert "mysecret" not in record.msg
+        assert "REDACTED" in record.msg
+        assert '{"api_key": "***REDACTED***"}' in record.msg
+
+    def test_redacts_quoted_with_comma(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record('api_key="my_secret_with_comma,and_stuff"')
+        flt.filter(record)
+        assert "my_secret_with_comma" not in record.msg
+        assert 'api_key="***REDACTED***"' in record.msg
+
+    def test_redacts_unterminated_quoted_json(self) -> None:
+        flt = SensitiveDataFilter()
+        record = self._make_record('{"api_key": "mysecret}')
+        flt.filter(record)
+        assert "mysecret" not in record.msg
+        assert "REDACTED" in record.msg
+        assert '{"api_key": "***REDACTED***' in record.msg
 
 
 # ---------------------------------------------------------------------------
