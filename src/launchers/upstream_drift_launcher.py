@@ -21,6 +21,17 @@ import contextlib
 import os
 import sys
 import time
+
+if sys.platform == "win32":
+    try:
+        import ctypes
+
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+            "UpstreamDrift.Launcher.1"
+        )
+    except (AttributeError, OSError, NameError, ImportError):
+        pass
+
 from typing import Any, cast
 
 from PyQt6.QtCore import QEventLoop, QObject, QRunnable, QThreadPool, QTimer, pyqtSignal
@@ -665,7 +676,10 @@ class UpstreamDriftLauncher(QMainWindow):
 
     def _load_window_icon(self) -> None:
         icon_candidates = [
+            ASSETS_DIR / "golf_suite_unified.ico",
             ASSETS_DIR / "golf_logo.ico",
+            ASSETS_DIR / "favicon.ico",
+            ASSETS_DIR / "golf_icon.ico",
             ASSETS_DIR / "golf_logo.png",
         ]
         for icon_path in icon_candidates:
@@ -1304,7 +1318,9 @@ class UpstreamDriftLauncher(QMainWindow):
     def _confirm_exit_if_running_processes(self, event: QCloseEvent | None) -> bool:
         """Return True if it's safe to exit (user confirms or no processes running)."""
         running_names = [
-            k for k, p in self.running_processes.items() if p.poll() is None
+            k
+            for k, p in self.running_processes.items()
+            if p.poll() is None and k != "background_api_server"
         ]
         running_count = len(running_names)
 
@@ -1484,11 +1500,17 @@ def main() -> None:
     _install_global_ui_zoom(app)
 
     # Set global application icon
-    icon_path = ASSETS_DIR / "golf_logo.ico"
-    if not icon_path.exists():
-        icon_path = ASSETS_DIR / "golf_logo.png"
-    if icon_path.exists():
-        app.setWindowIcon(QIcon(str(icon_path)))
+    icon_candidates = [
+        ASSETS_DIR / "golf_suite_unified.ico",
+        ASSETS_DIR / "golf_logo.ico",
+        ASSETS_DIR / "favicon.ico",
+        ASSETS_DIR / "golf_icon.ico",
+        ASSETS_DIR / "golf_logo.png",
+    ]
+    for icon_path in icon_candidates:
+        if icon_path.exists():
+            app.setWindowIcon(QIcon(str(icon_path)))
+            break
 
     qss_path = ASSETS_DIR / "theme" / "dark_modern.qss"
     if qss_path.exists():

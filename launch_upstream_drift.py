@@ -9,6 +9,18 @@ Usage:
     upstream-drift --engine X   # Launch specific engine directly
 """
 
+import sys
+
+if sys.platform == "win32":
+    try:
+        import ctypes
+
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+            "UpstreamDrift.Launcher.1"
+        )
+    except (AttributeError, OSError, NameError, ImportError):
+        pass
+
 import argparse
 import logging
 import os
