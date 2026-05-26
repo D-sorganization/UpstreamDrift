@@ -48,7 +48,6 @@ jobs:
     steps:
       - name: Clean corrupt git objects
         shell: bash
-        working-directory: .
         run: |
           if [ -d .git ]; then
             if find .git/objects -type f -empty | grep -q .; then
@@ -71,7 +70,6 @@ jobs:
     steps:
       - name: Clean corrupt git objects
         shell: bash
-        working-directory: .
         run: |
           if [ -d .git ]; then
             if find .git/objects -type f -empty | grep -q .; then
@@ -94,7 +92,6 @@ jobs:
     steps:
       - name: Clean corrupt git objects
         shell: bash
-        working-directory: .
         run: |
           if [ -d .git ]; then
             if find .git/objects -type f -empty | grep -q .; then
@@ -130,7 +127,6 @@ jobs:
     steps:
       - name: Clean corrupt git objects
         shell: bash
-        working-directory: .
         run: |
           if [ -d .git ]; then
             if find .git/objects -type f -empty | grep -q .; then
@@ -562,7 +558,6 @@ jobs:
     steps:
       - name: Clean corrupt git objects
         shell: bash
-        working-directory: .
         run: |
           if [ -d .git ]; then
             if find .git/objects -type f -empty | grep -q .; then
@@ -619,7 +614,6 @@ jobs:
     steps:
       - name: Clean corrupt git objects
         shell: bash
-        working-directory: .
         run: |
           if [ -d .git ]; then
             if find .git/objects -type f -empty | grep -q .; then
@@ -670,7 +664,6 @@ jobs:
     steps:
       - name: Clean corrupt git objects
         shell: bash
-        working-directory: .
         run: |
           if [ -d .git ]; then
             if find .git/objects -type f -empty | grep -q .; then
@@ -763,7 +756,7 @@ jobs:
           python -m ensurepip --upgrade || true
           "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
           python -m ensurepip --upgrade || true
-          "$python" -m pip install -e ".[dev,gui-test]" --no-cache-dir
+          "$python" -m pip install -e ".[dev,gui-test]"
           python -m ensurepip --upgrade || true
           "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1"
 
@@ -993,7 +986,6 @@ jobs:
     steps:
       - name: Clean corrupt git objects
         shell: bash
-        working-directory: .
         run: |
           if [ -d .git ]; then
             if find .git/objects -type f -empty | grep -q .; then
@@ -1019,9 +1011,7 @@ jobs:
           python -m ensurepip --upgrade || true
           python -m pip install --upgrade pip
           python -m ensurepip --upgrade || true
-          python -m pip install -e ".[dev]" --no-cache-dir
-          python -m ensurepip --upgrade || true
-          python -m pip install --force-reinstall pydantic pydantic-core
+          python -m pip install -e ".[dev]"
           python -m ensurepip --upgrade || true
           python -m pip install "psycopg[binary]>=3.1"
       - name: Run Alembic PostgreSQL round-trip
@@ -1067,7 +1057,6 @@ jobs:
     steps:
       - name: Clean corrupt git objects
         shell: bash
-        working-directory: .
         run: |
           if [ -d .git ]; then
             if find .git/objects -type f -empty | grep -q .; then
@@ -1144,7 +1133,7 @@ jobs:
           python -m ensurepip --upgrade || true
           "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
           python -m ensurepip --upgrade || true
-          "$python" -m pip install -e ".[dev,gui-test]" --no-cache-dir
+          "$python" -m pip install -e ".[dev,gui-test]"
           python -m ensurepip --upgrade || true
           "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1"
       - name: Run Shared Tools Consumer Contracts
@@ -1170,7 +1159,6 @@ jobs:
     steps:
       - name: Clean corrupt git objects
         shell: bash
-        working-directory: .
         run: |
           if [ -d .git ]; then
             if find .git/objects -type f -empty | grep -q .; then
@@ -1243,7 +1231,6 @@ jobs:
     steps:
       - name: Clean corrupt git objects
         shell: bash
-        working-directory: .
         run: |
           if [ -d .git ]; then
             if find .git/objects -type f -empty | grep -q .; then
@@ -1275,7 +1262,6 @@ jobs:
     steps:
       - name: Clean corrupt git objects
         shell: bash
-        working-directory: .
         run: |
           if [ -d .git ]; then
             if find .git/objects -type f -empty | grep -q .; then
@@ -1341,7 +1327,6 @@ jobs:
     steps:
       - name: Clean corrupt git objects
         shell: bash
-        working-directory: .
         run: |
           if [ -d .git ]; then
             if find .git/objects -type f -empty | grep -q .; then
@@ -1553,7 +1538,6 @@ jobs:
     steps:
       - name: Clean corrupt git objects
         shell: bash
-        working-directory: .
         run: |
           if [ -d .git ]; then
             if find .git/objects -type f -empty | grep -q .; then
