@@ -446,7 +446,7 @@ class PreferencesDialog(QDialog):
                 manager = ThemeManager.instance()
                 if manager is not None:
                     manager.change_theme(theme_name)
-        except Exception as e:  # noqa: BLE001 - theme preview is non-critical, prevent dialog crash
+        except Exception as e:  # noqa: BLE001 - prevent dialog crash
             logger.debug(f"Theme preview failed: {e}")
 
 
