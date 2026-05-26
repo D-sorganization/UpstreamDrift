@@ -250,6 +250,7 @@ class LayoutManager:
         for model_id in list(self.model_cards.keys()):
             if model_id not in self.model_order:
                 widget = self.model_cards.pop(model_id)
+                widget.hide()
                 widget.setParent(None)
                 widget.deleteLater()
 
@@ -448,6 +449,7 @@ class LayoutManager:
         )
         if is_list != was_list or _compact != was_compact:
             for c in list(self.model_cards.values()):
+                c.hide()
                 c.setParent(None)
                 c.deleteLater()
             self.model_cards.clear()
@@ -490,8 +492,9 @@ class LayoutManager:
             if item:
                 widget = item.widget()
                 if widget:
+                    widget.hide()
                     if id(widget) in reusable_card_ids:
-                        widget.hide()
+                        pass
                     else:
                         widget.deleteLater()
                     widget.setParent(None)
