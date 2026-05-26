@@ -356,26 +356,28 @@ class TestJunctionPathSecurityValidation(unittest.TestCase):
             _find_tools_repo_for_security,
         )
 
-        suite_root = Path(r"C:\fake\UpstreamDrift")
-        candidate_path = Path(r"C:\fake\Tools")
+        base_dir = Path.cwd() / "fake_root"
+        suite_root = base_dir / "UpstreamDrift"
+        candidate_path = base_dir / "Tools"
+        vendor_tools = suite_root / "vendor" / "ud-tools"
 
         def mock_is_dir(self_path: Path) -> bool:
-            return str(self_path) in {
-                r"C:\fake\Tools",
-                r"C:\fake\Tools\src",
-                r"C:\fake\UpstreamDrift\vendor\ud-tools",
+            return self_path in {
+                candidate_path,
+                candidate_path / "src",
+                vendor_tools,
             }
 
         def mock_resolve(self_path: Path) -> Path:
-            if str(self_path) == r"C:\fake\UpstreamDrift\vendor\ud-tools":
-                return Path(r"C:\fake\Tools")
+            if self_path == vendor_tools:
+                return candidate_path
             return self_path
 
         with (
             patch.object(Path, "is_dir", mock_is_dir),
             patch.object(Path, "resolve", mock_resolve),
         ):
-            # Should find Tools even though C:\fake\UpstreamDrift\vendor\ud-tools resolves to it
+            # Should find Tools even though vendor/ud-tools resolves to it
             found = _find_tools_repo_for_security(suite_root)
             self.assertEqual(found, candidate_path)
 
@@ -385,11 +387,13 @@ class TestJunctionPathSecurityValidation(unittest.TestCase):
             validate_script_path,
         )
 
-        suite_root = Path(r"C:\fake\UpstreamDrift")
-        script_path = Path(r"C:\fake\Tools\src\data_processing\launch_pyqt6.py")
+        base_dir = Path.cwd() / "fake_root"
+        suite_root = base_dir / "UpstreamDrift"
+        tools_repo = base_dir / "Tools"
+        script_path = tools_repo / "src" / "data_processing" / "launch_pyqt6.py"
 
         def mock_is_dir(self_path: Path) -> bool:
-            return str(self_path) in {r"C:\fake\Tools", r"C:\fake\Tools\src"}
+            return self_path in {tools_repo, tools_repo / "src"}
 
         def mock_exists(self_path: Path) -> bool:
             return True
@@ -403,7 +407,7 @@ class TestJunctionPathSecurityValidation(unittest.TestCase):
             patch.object(Path, "is_file", mock_is_file),
             patch(
                 "src.shared.python.security.secure_subprocess._find_tools_repo_for_security",
-                return_value=Path(r"C:\fake\Tools"),
+                return_value=tools_repo,
             ),
         ):
             # Should not raise any SecureSubprocessError
