@@ -92,3 +92,6 @@ def compute_cost_drake(
             total=j,
         )
     return j, breakdown
+
+
+# Dummy comment for PR 6236

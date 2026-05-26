@@ -113,3 +113,6 @@ def __getattr__(name: str) -> Any:
 
         return PyQtGLMarkerRenderer
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+# Dummy comment for PR 6236

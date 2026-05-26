@@ -1172,3 +1172,6 @@ class PlacementGroup:
     def __repr__(self) -> str:
         """String representation."""
         return f"PlacementGroup({len(self)} entities)"
+
+
+# Dummy comment for PR 6236
