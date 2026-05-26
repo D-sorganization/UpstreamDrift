@@ -38,7 +38,14 @@ def _pivot_sys_path() -> None:
         sys.path.insert(0, repo_root_str)
     import importlib
 
+    # Pre-cache ``src``, ``src.shared``, ``src.shared.python`` and a few key
+    # leaf modules so they survive the pivot below. Without ``src.shared``
+    # itself in the keep set, ``from src import shared`` after the rebind
+    # fails because the engine ``src/__init__.py`` has no ``shared`` attr.
     for qual in (
+        "src",
+        "src.shared",
+        "src.shared.python",
         "sidekick.lab.bio.c3d_reader",
         "src.shared.python.qt_utils.wheel_event_filter",
         "src.shared.python.motion_matching.body_skeleton",
@@ -47,10 +54,13 @@ def _pivot_sys_path() -> None:
         with contextlib.suppress(ImportError):
             sys.modules[qual] = importlib.import_module(qual)
 
-    keep_prefix = "src.shared."
+    # Drop everything under ``src.`` that we don't want to keep, but keep
+    # ``src.shared`` and everything beneath it so downstream conftests that
+    # import ``src.shared.python.*`` still resolve.
+    keep_prefix = "src.shared"
     for modname in list(sys.modules):
         if modname == "src" or modname.startswith("src."):
-            if modname.startswith(keep_prefix):
+            if modname == keep_prefix or modname.startswith(keep_prefix + "."):
                 continue
             del sys.modules[modname]
 
@@ -68,6 +78,18 @@ def _pivot_sys_path() -> None:
     spec.loader.exec_module(src_mod)
     repo_src = repo_root / "src"
     src_mod.__path__ = [str(engine_src), str(repo_src)]
+
+    # Re-attach preserved ``src.<sub>`` modules as attributes on the freshly
+    # rebound ``src`` package. CPython's ``from src import shared`` walks
+    # ``src.__dict__`` first and raises ImportError if missing, even when
+    # the submodule is present in ``sys.modules``.
+    for modname, mod in list(sys.modules.items()):
+        if not modname.startswith("src."):
+            continue
+        parts = modname.split(".")
+        if len(parts) != 2:
+            continue  # only attach direct children; nested attrs cascade
+        setattr(src_mod, parts[1], mod)
 
     repo_src_str = str(repo_src)
     if repo_src_str not in sys.path:

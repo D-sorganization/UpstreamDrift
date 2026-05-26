@@ -7,10 +7,7 @@ RED → GREEN cycle:
 
 from __future__ import annotations
 
-from typing import Any
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 
 class TestExpectedTileIdsMatchesModelsYaml:
@@ -106,7 +103,6 @@ class TestDiagnosticEmitsAppStateEvents:
 
     def test_run_all_checks_emits_events(self) -> None:
         """run_all_checks must populate the StateLogger with at least one event."""
-        import sys
 
         # Mock heavy Qt/engine imports so tests stay headless-safe
         mock_yaml_result = {

@@ -1,7 +1,6 @@
 """Unit tests for the analysis tools API route."""
 
 import pytest
-from typing import Any
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 

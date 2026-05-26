@@ -10,10 +10,8 @@ real assets directory.
 
 from __future__ import annotations
 
-from pathlib import Path
 from unittest.mock import patch
 
-import pytest
 
 from src.launchers.assets import generate_tile_images, optimize_assets
 

@@ -79,7 +79,6 @@ def test_leave_event_runs_without_raising(qapp) -> None:
 
 def test_enter_event_without_animation_attribute_no_crash(qapp) -> None:
     """If init_animation has not been called, enterEvent must no-op safely."""
-    from PyQt6.QtCore import QEvent
 
     btn = AnimatedButton()
     delattr(btn, "_hover_anim")

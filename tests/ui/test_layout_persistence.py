@@ -15,8 +15,6 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock
 
-from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
-
 
 class TestLayoutPersistence(unittest.TestCase):
     """Test layout persistence functionality."""

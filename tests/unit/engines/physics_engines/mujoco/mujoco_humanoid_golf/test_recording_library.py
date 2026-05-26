@@ -1,7 +1,6 @@
 """Unit tests for recording_library.py."""
 
 import json
-from datetime import datetime
 from pathlib import Path
 
 import pytest

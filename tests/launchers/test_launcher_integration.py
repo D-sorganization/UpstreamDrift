@@ -8,7 +8,6 @@ Tests the actual functionality without complex PyQt6 mocking.
 import subprocess
 import sys
 import unittest
-from pathlib import Path
 
 
 class TestLauncherCommands(unittest.TestCase):

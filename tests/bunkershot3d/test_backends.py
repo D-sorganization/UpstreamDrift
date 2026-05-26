@@ -1,6 +1,3 @@
-import importlib
-import sys
-
 import pytest
 
 mujoco = pytest.importorskip("mujoco")
@@ -128,7 +125,6 @@ def test_mpm_step_count_from_trajectory_duration(
 ) -> None:
     """Step count must equal trajectory.duration / model.opt.timestep."""
     import yaml
-    import mujoco
 
     # Write a config with a known duration
     with open(dummy_config) as f:

@@ -8,7 +8,6 @@ from pathlib import Path
 import pytest
 from humanoid_character_builder.core.body_parameters import BodyParameters
 from humanoid_character_builder.interfaces import (
-    BuildErrorCategory,
     CharacterBuilder,
     ExportOptions,
     quick_build,
