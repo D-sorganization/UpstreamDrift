@@ -21,7 +21,7 @@ class BallFlightGuiAdapter:
         """Create and return the tool's main window."""
         from .gui import get_dockable_ui
 
-        return get_dockable_ui(parent) if parent else get_dockable_ui()
+        return get_dockable_ui()
 
     def cleanup(self) -> None:
         """Clean up resources when the tool is unloaded."""
