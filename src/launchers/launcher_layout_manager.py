@@ -251,7 +251,6 @@ class LayoutManager:
             if model_id not in self.model_order:
                 widget = self.model_cards.pop(model_id)
                 widget.hide()
-                widget.setParent(None)
                 widget.deleteLater()
 
         # Create cards for any newly added models
@@ -461,7 +460,6 @@ class LayoutManager:
         if is_list != was_list or _compact != was_compact:
             for c in list(self.model_cards.values()):
                 c.hide()
-                c.setParent(None)
                 c.deleteLater()
             self.model_cards.clear()
         else:
@@ -505,10 +503,9 @@ class LayoutManager:
                 if widget:
                     widget.hide()
                     if id(widget) in reusable_card_ids:
-                        pass
+                        widget.setParent(None)
                     else:
                         widget.deleteLater()
-                    widget.setParent(None)
 
         scale, base_cols, show_desc, is_list = view_mode_settings(
             self.current_view_mode
