@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.193                                            |
+| **Spec Version**        | 1.0.194                                            |
 | **Last Spec Update**    | 2026-05-26                                         |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-05-26** - Added the strokes-gained optimizer Phase 1 package (`src/shared/python/sg_optimizer/` with CLI facade in `src/tools/sg_optimizer/`), including shot baseline/player profiles, putting and dispersion distributions, course condition rasterization, MDP action/state/transition primitives, value iteration, baseline data under `data/sg_optimizer/`, and unit/property/integration coverage for the new optimizer contracts.
 - **2026-05-24** - Surfaced API database pool controls for non-SQLite deployments via `GOLF_DB_POOL_SIZE`, `GOLF_DB_POOL_RECYCLE`, and `GOLF_DB_POOL_PRE_PING`; `src/api/database.py` now builds non-SQLite engines from shared config accessors instead of hardcoded pool defaults, with regression coverage in `tests/unit/test_config_environment.py` and `tests/unit/api/test_database_init.py`.
 - **2026-05-24** - Added shared `GOLF_REALTIME_HOST` / `GOLF_REALTIME_PORT` environment accessors and wired `src/shared/python/realtime/ws_pubsub.py` plus API diagnostics to use/report them, so realtime bind defaults no longer live only as hard-coded loopback literals.
 - **2026-05-24** - Deferred realtime WebSocket backend resolution in `src/shared/python/realtime/ws_pubsub.py` until first explicit start/use and made `WSPubSub.start()` bring up the Python backend even when the instance was created with `autostart=False`; added focused regression coverage in `tests/shared/realtime/test_ws_pubsub.py`.
@@ -187,6 +188,7 @@ UpstreamDrift/
 | PyQt6 GUI                | `src/launchers/upstream_drift_launcher.py`         | Professional interactive GUI with real-time 3D visualization                                |
 | Sidekick (AI assistant)  | PyQt: `src/shared/python/ai/gui/assistant_panel.py` · React: `ui/src/components/ui/ChatPanel.tsx` · Adapter: `src/tools/sidekick/_embed_adapter.py` | In-app AI chat surface with streaming, RAG, session history, and agentic tool dispatch. Design tokens: `src/shared/python/theme/sidekick_tokens.py`. See `docs/sidekick/README.md`. |
 | Tauri Desktop App        | `ui/`                                    | Cross-platform desktop application wrapper (Windows, macOS, Linux)                          |
+| Strokes-Gained Optimizer | `src/shared/python/sg_optimizer/`, `src/tools/sg_optimizer/` | Phase 1 golf strategy optimizer with shot models, course conditions, MDP transition/value-iteration contracts, CLI entry points, and documented baseline data |
 | Rust Physics Kernels     | `rust_core/upstream-physics/`            | High-performance compiled physics routines for critical paths, including initial flexible shaft FEM element primitives |
 | Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
 | Shared Utilities         | `src/shared/`                            | Cross-engine validators, helpers, and exception definitions                                 |
