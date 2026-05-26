@@ -41,10 +41,12 @@ def _pivot_sys_path() -> None:
             sys.modules[qual] = importlib.import_module(qual)
 
     # Drop the repo's ``src`` package so we can rebind it to the engine's.
+    # Keep both the parent package and its descendants so later imports do not
+    # see orphaned ``src.shared.*`` modules without ``src.shared`` itself.
     keep_prefix = "src.shared."
     for modname in list(sys.modules):
         if modname == "src" or modname.startswith("src."):
-            if modname.startswith(keep_prefix):
+            if modname == "src.shared" or modname.startswith(keep_prefix):
                 continue
             del sys.modules[modname]
 
