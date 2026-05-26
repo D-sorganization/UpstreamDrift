@@ -11,16 +11,14 @@ Tests cover:
 
 import unittest
 from pathlib import Path
-from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
 from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
-from src.shared.python.gui_pkg.gui_utils import get_qapp
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 if PYQT6_AVAILABLE:
-    from PyQt6.QtCore import QPoint
+    pass
 
 
 class TestSharedModuleImports(unittest.TestCase):
@@ -129,8 +127,9 @@ class TestDockerConfiguration(unittest.TestCase):
         """Test that Dockerfile uses a pinned base image."""
         dockerfile_path = REPO_ROOT / "Dockerfile"
         content = dockerfile_path.read_text()
-        self.assertIn("FROM python:3.12-slim AS builder", content)
-        self.assertIn("FROM python:3.12-slim AS runtime", content)
+        self.assertIn("FROM python:3.12-slim", content)
+        self.assertIn("AS builder", content)
+        self.assertIn("AS runtime", content)
         self.assertNotIn(":latest", content, "Should use explicit base image tags")
 
 

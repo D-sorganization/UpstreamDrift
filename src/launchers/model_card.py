@@ -111,6 +111,10 @@ MODEL_IMAGES = {
     "Pose Studio": "pose_studio.svg",
     "Dataset Generator": "data_explorer_modern.png",
     "Golf Simulation Suite": "golf_logo.png",
+    "Motion-Match Preview": "motion_target_preview.svg",
+    "Video Processor": "video_analyzer.svg",
+    "Data Processor": "data_explorer.svg",
+    "Starting-Pose Matcher (legacy)": "motion_target_preview.svg",
 }
 
 

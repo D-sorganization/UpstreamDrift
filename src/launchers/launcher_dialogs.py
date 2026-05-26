@@ -97,19 +97,19 @@ class DialogsManager:
     def _setup_keyboard_shortcuts(self) -> None:
         """Set up global keyboard shortcuts."""
         # F1 for help dialog (User Manual)
-        shortcut_f1 = QShortcut(QKeySequence("F1"), self)
+        shortcut_f1 = QShortcut(QKeySequence("F1"), self.launcher)
         shortcut_f1.activated.connect(self._show_help_dialog)
 
         # Ctrl+? for shortcuts overlay
-        shortcut_help = QShortcut(QKeySequence("Ctrl+?"), self)
+        shortcut_help = QShortcut(QKeySequence("Ctrl+?"), self.launcher)
         shortcut_help.activated.connect(self._show_shortcuts_overlay)
 
         # Ctrl+, for preferences
-        shortcut_prefs = QShortcut(QKeySequence("Ctrl+,"), self)
+        shortcut_prefs = QShortcut(QKeySequence("Ctrl+,"), self.launcher)
         shortcut_prefs.activated.connect(self._show_preferences)
 
         # Ctrl+Q to quit
-        shortcut_quit = QShortcut(QKeySequence("Ctrl+Q"), self)
+        shortcut_quit = QShortcut(QKeySequence("Ctrl+Q"), self.launcher)
         shortcut_quit.activated.connect(self.close)
 
         # Sidekick feature shortcuts (Tools #2882/#2883/#2884/#2888/#2889).
@@ -121,8 +121,8 @@ class DialogsManager:
             for entry in FEATURE_ENTRIES:
                 if not entry.availability_probe():
                     continue
-                sc = QShortcut(QKeySequence(entry.shortcut), self)
-                sc.activated.connect(lambda e=entry: e.factory(self))
+                sc = QShortcut(QKeySequence(entry.shortcut), self.launcher)
+                sc.activated.connect(lambda e=entry: e.factory(self.launcher))
         except ImportError as exc:  # pragma: no cover — guard import path
             logger.debug("feature_menu not importable: %s", exc)
 
@@ -149,7 +149,7 @@ class DialogsManager:
         if project_map.exists():
             from src.shared.python.ui.qt.widgets.document_reader import show_document
 
-            show_document(project_map, self)
+            show_document(project_map)
         else:
             QMessageBox.warning(
                 self.launcher,
@@ -162,7 +162,7 @@ class DialogsManager:
     def _show_about_dialog(self) -> None:
         """Show the About dialog."""
         QMessageBox.about(
-            self,
+            self.launcher,
             "About UpstreamDrift",
             "<h2>UpstreamDrift</h2>"
             "<h3>Biomechanical Golf Swing Analysis</h3>"

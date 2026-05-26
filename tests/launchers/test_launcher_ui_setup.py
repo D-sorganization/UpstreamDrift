@@ -2,6 +2,7 @@
 
 from unittest.mock import MagicMock, patch  # noqa: E402
 
+from typing import Any
 import pytest  # noqa: E402
 from PyQt6.QtWidgets import (
     QHBoxLayout,
@@ -14,6 +15,27 @@ from src.launchers.launcher_ui_setup import UISetupManager  # noqa: E402
 
 
 class DummyLauncher(QMainWindow):
+    def __getattr__(self, name: str) -> Any:
+        for mgr_name in (
+            "manager",
+            "ui_setup_manager",
+            "theme_manager",
+            "simulation_manager",
+            "dialogs_manager",
+        ):
+            if mgr_name in self.__dict__:
+                manager = self.__dict__[mgr_name]
+                if name in manager.__dict__ or hasattr(type(manager), name):
+                    attr = getattr(manager, name)
+                    import types
+
+                    if isinstance(attr, types.MethodType):
+                        return types.MethodType(attr.__func__, self)
+                    return attr
+        raise AttributeError(
+            f"'{type(self).__name__}' object has no attribute '{name}'"
+        )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.manager = UISetupManager(self)

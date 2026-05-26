@@ -243,9 +243,9 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 try:
                     ui_widget = handler.get_dockable_ui(model, REPOS_ROOT)
                     if ui_widget:
-                        if hasattr(self, "sidekick_sidebar") and hasattr(
-                            ui_widget, "set_sidekick_session"
-                        ):
+                        if getattr(
+                            self, "sidekick_sidebar", None
+                        ) is not None and hasattr(ui_widget, "set_sidekick_session"):
                             # The sidebar widget might have a direct session attribute or IS the session.
                             session = getattr(
                                 self.sidekick_sidebar, "session", self.sidekick_sidebar

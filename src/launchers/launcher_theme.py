@@ -47,7 +47,7 @@ class ThemeManager:
             colors = manager.get_current_colors()
 
             # Map extended color names to actual theme keys with fallbacks
-            bg_elevated = colors.get("bg_elevated", colors.get("group_bg", "#2D2D2D"))  # noqa: F841
+            bg_elevated = colors.get("bg_elevated", colors.get("group_bg", "#2D2D2D"))
             border_default = colors.get(  # noqa: F841
                 "border_default", colors.get("border", "#555555")
             )
@@ -58,6 +58,7 @@ class ThemeManager:
             self.setStyleSheet(
                 manager.get_current_stylesheet()
                 + f"""
+                QMainWindow {{ background-color: {bg_elevated}; }}
                 QScrollArea {{ border: none; }}
                 QMenu::separator {{
                     height: 1px;
@@ -219,6 +220,9 @@ class ThemeManager:
 
         except ImportError as e:
             logger.warning(f"Could not populate theme menu: {e}")
+            fallback = QAction("(Theme system unavailable)", self.launcher)
+            fallback.setEnabled(False)
+            theme_menu.addAction(fallback)
 
     def _setup_typography_menu(self, typography_menu: QMenu) -> None:
         """Populate the Typography submenu."""
@@ -254,7 +258,7 @@ class ThemeManager:
 
         except ImportError as e:
             logger.warning(f"Could not populate typography menu: {e}")
-            fallback = QAction("(Theme system unavailable)", self)
+            fallback = QAction("(Theme system unavailable)", self.launcher)
             fallback.setEnabled(False)
             typography_menu.addAction(fallback)
 
@@ -265,7 +269,7 @@ class ThemeManager:
             from src.shared.python.theme.dialogs import ThemeManagerDialog
 
             manager = ThemeManager.instance()
-            dialog = ThemeManagerDialog(manager, self)
+            dialog = ThemeManagerDialog(manager, self.launcher)
             dialog.theme_changed.connect(lambda _: self._on_theme_changed(None))
             dialog.exec()
         except ImportError as e:
@@ -289,7 +293,7 @@ class ThemeManager:
         current_plot = settings.value("plot_theme", "follow_ui")
 
         # "Follow UI Theme" option
-        follow_action = QAction("Follow UI Theme (Recommended)", self)
+        follow_action = QAction("Follow UI Theme (Recommended)", self.launcher)
         follow_action.setCheckable(True)
         follow_action.setChecked(current_plot == "follow_ui")
         follow_action.triggered.connect(lambda: self._set_plot_theme("follow_ui"))
@@ -314,7 +318,7 @@ class ThemeManager:
                 group.addAction(action)
                 plot_menu.addAction(action)
         except ImportError:
-            na = QAction("(matplotlib not available)", self)
+            na = QAction("(matplotlib not available)", self.launcher)
             na.setEnabled(False)
             plot_menu.addAction(na)
 

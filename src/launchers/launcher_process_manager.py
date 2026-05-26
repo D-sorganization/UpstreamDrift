@@ -255,6 +255,10 @@ class ProcessManager:
         for p in [repo_root_str, src_dir]:
             if p not in current_paths:
                 paths_to_add.append(p)
+        for p in extra_python_paths:
+            p_str = str(p)
+            if p_str not in current_paths and p_str not in paths_to_add:
+                paths_to_add.append(p_str)
         for p in [shared_python, mujoco_python, conda_sp]:
             if p not in current_paths and os.path.isdir(p):
                 paths_to_add.append(p)

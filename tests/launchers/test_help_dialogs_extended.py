@@ -9,13 +9,11 @@ branches.
 
 from __future__ import annotations
 
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QWidget
 
 from src.launchers import help_dialogs
 
@@ -33,7 +31,7 @@ def test_help_dialog_uses_help_md_when_present(qapp, tmp_path, monkeypatch) -> N
     monkeypatch.setattr(help_dialogs, "ASSETS_DIR", tmp_path)
 
     dlg = help_dialogs.HelpDialog()
-    assert dlg.windowTitle() == "Golf Suite - Help"
+    assert dlg.windowTitle() == "UpstreamDrift - Help"
     # Markdown was loaded; checking that the QTextEdit has non-empty text.
     assert dlg.text_area.toPlainText()
     dlg.deleteLater()
