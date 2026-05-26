@@ -20,6 +20,7 @@ from src.launchers.launcher_model_sources import (
     get_model_working_directory,
     resolve_model_artifact_path,
 )
+from src.shared.python.config.environment import get_api_port
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -613,7 +614,7 @@ class APIBackedHandler:
 
         import webbrowser
 
-        url = f"http://localhost:8001{web_route}"
+        url = f"http://localhost:{get_api_port()}{web_route}"
         try:
             webbrowser.open(url)
             logger.info("APIBackedHandler: opened browser to %s", url)
