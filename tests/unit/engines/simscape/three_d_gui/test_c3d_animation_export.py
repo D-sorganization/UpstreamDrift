@@ -2,8 +2,6 @@
 
 import pytest
 from pathlib import Path
-import os
-import stat
 
 from src.apps.services.c3d_animation_export import export_animation
 from src.apps.core.models import C3DDataModel, MarkerData

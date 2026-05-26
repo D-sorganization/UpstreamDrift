@@ -338,7 +338,7 @@ async def get_model_explorer(
         ) from exc
     except ImportError as exc:
         if logger:
-            logger.error("Error in model explorer for %s: %s", model_name, exc)
+            logger.exception("Error in model explorer for %s", model_name)
         raise HTTPException(
             status_code=500, detail=f"Model explorer error: {str(exc)}"
         ) from exc

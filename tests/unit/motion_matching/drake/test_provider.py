@@ -32,7 +32,6 @@ from src.engines.physics_engines.drake.python.motion_matching import (
 )
 from src.engines.physics_engines.drake.python.motion_matching.fit_swing import (
     FitOptions,
-    fit_swing_drake,
 )
 from src.engines.physics_engines.drake.python.motion_matching.simulate import (
     COEFFS_PER_JOINT,

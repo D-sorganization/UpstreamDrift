@@ -47,10 +47,10 @@ jobs:
     runs-on: d-sorg-fleet
     if: github.event.pull_request.base.ref == 'main'
     steps:
-      - name: Check out PR head with full history
+      - name: Check out PR head with bounded history
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          fetch-depth: 0
+          fetch-depth: 50
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Fetch base branch

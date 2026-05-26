@@ -1,9 +1,7 @@
 """Unit tests for advanced_export.py."""
 
-import os
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.advanced_export import (
     _matlab_analyze_script,

@@ -1,4 +1,5 @@
 # Compose overlay for modular Docker profiles.
+# Policy reference: docker/README.md and docs/adr/0021-container-strategy.md
 #
 # Usage:
 #   docker compose -f docker-compose.yml -f docker-compose.profiles.yml \

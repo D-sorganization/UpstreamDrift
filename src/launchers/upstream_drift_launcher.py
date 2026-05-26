@@ -1421,3 +1421,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+# Clarified web UI as primary entry point (Issue #6096)

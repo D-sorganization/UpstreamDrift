@@ -148,7 +148,7 @@ def _draw_orientation_error_panel(
     q_sim = _to_unit_quat(np.asarray(fit.club_quat, dtype=float))
     q_meas = _to_unit_quat(np.asarray(target.club_quat, dtype=float))
     # Quaternion dot, clipped for numerical safety; double-cover -> abs.
-    dot = np.abs(np.sum(q_sim * q_meas, axis=1))
+    dot = np.abs(np.einsum("ij,ij->i", q_sim, q_meas))
     dot = np.clip(dot, -1.0, 1.0)
     err_rad = 2.0 * np.arccos(dot)
     err_deg = np.degrees(err_rad)

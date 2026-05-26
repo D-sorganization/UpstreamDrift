@@ -23,7 +23,6 @@ from model_generation.core.types import (
     Joint,
     JointType,
     Link,
-    Origin,
 )
 
 # ---------------------------------------------------------------------------

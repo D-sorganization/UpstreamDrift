@@ -10,16 +10,12 @@ Tests cover:
 """
 
 import unittest
-from pathlib import Path
-from typing import Any
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock
 
 from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
-from src.shared.python.gui_pkg.gui_utils import get_qapp
 
 if PYQT6_AVAILABLE:
-    from PyQt6.QtCore import QMimeData, QPoint, QPointF, Qt
-    from PyQt6.QtGui import QDropEvent
+    pass
 
 
 def _make_mock_model(model_id: str, name: str, description: str) -> Mock:

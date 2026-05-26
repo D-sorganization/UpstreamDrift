@@ -9,7 +9,6 @@ so analytics and other registered tools are reachable by the adapter.
 
 from __future__ import annotations
 
-import importlib
 from typing import Any
 from unittest.mock import MagicMock, patch
 

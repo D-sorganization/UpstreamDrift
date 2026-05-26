@@ -9,7 +9,6 @@ HTTP calls are stubbed via unittest.mock so no real provider is contacted.
 
 from __future__ import annotations
 
-import pytest
 
 from src.shared.python.chat.models import (
     ChatModelInfo,

@@ -15,20 +15,9 @@ Issues: #1810, #1811, #1812, #1813, #1814, #1815, #1816, #1817, #1818
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock
 
-import numpy as np
-import pytest
 from src.shared.python.engine_core.engine_availability import (
-    DRAKE_AVAILABLE,
-    MEDIAPIPE_AVAILABLE,
     MUJOCO_AVAILABLE,
-    MYOSUITE_AVAILABLE,
-    OPENSIM_AVAILABLE,
-    PINOCCHIO_AVAILABLE,
-    get_available_engines,
-    get_unavailable_engines,
-    is_engine_available,
     skip_if_unavailable,
 )
 
