@@ -38,3 +38,4 @@ __all__ = [
     "ShapeTheme",
     "migrate_v1_to_v2",
 ]
+# Issue 6180 referenced this path
