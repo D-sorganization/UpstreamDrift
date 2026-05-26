@@ -214,6 +214,7 @@ class TestWSPubSubRust:
             calls.append("resolve")
             return "python"
 
+        monkeypatch.setattr(ws_mod, "_REALTIME_BACKEND", None)
         monkeypatch.setattr(ws_mod, "_resolve_backend", fake_resolve)
         monkeypatch.setattr(ws_mod, "_port_in_use", lambda _h, _p: True)
 
@@ -249,6 +250,7 @@ class TestWSPubSubRust:
                 captured["body"] = json
                 return FakeResp()
 
+        monkeypatch.setattr(ws_mod, "_REALTIME_BACKEND", None)
         monkeypatch.setattr(ws_mod, "_resolve_backend", fake_resolve)
         monkeypatch.setitem(sys.modules, "httpx", SimpleNamespace(Client=FakeClient))
         ws_mod.WSPubSub._http_client = None
@@ -265,6 +267,7 @@ class TestWSPubSubRust:
     ) -> None:
         spawned: list[str] = []
 
+        monkeypatch.setattr(ws_mod, "_REALTIME_BACKEND", None)
         monkeypatch.setattr(ws_mod, "_resolve_backend", lambda: "python")
         monkeypatch.setattr(ws_mod, "_port_in_use", lambda _h, _p: False)
 
