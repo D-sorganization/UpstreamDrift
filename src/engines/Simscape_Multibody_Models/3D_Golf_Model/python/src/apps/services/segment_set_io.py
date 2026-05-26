@@ -126,6 +126,7 @@ def default_segment_set_path() -> Path:
 
 def spec_v1_to_v2(spec: SegmentSpec) -> SegmentVizSpec:
     """Convert a legacy :class:`SegmentSpec` to a :class:`SegmentVizSpec`."""
+    _warn_deprecated("spec_v1_to_v2")
     if not isinstance(spec, SegmentSpec):
         raise TypeError(f"spec must be SegmentSpec, got {type(spec).__name__}")
     from src.shared.python.body_part_viz import (
@@ -172,6 +173,7 @@ def spec_v2_to_v1(spec: SegmentVizSpec) -> SegmentSpec | None:
     specs survive in the v2 store but are simply not visible to v1-only
     callers.
     """
+    _warn_deprecated("spec_v2_to_v1")
     if not isinstance(spec, SegmentVizSpec):
         raise TypeError(f"spec must be SegmentVizSpec, got {type(spec).__name__}")
     if spec.shape_kind not in _VALID_GEOMETRIES:
