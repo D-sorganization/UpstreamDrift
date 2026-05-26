@@ -18,7 +18,7 @@ import logging
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 logger = logging.getLogger(__name__)
 
@@ -29,22 +29,247 @@ logger = logging.getLogger(__name__)
 
 
 class ThemeColors(BaseModel):
-    """Color dictionary for a theme."""
+    """Canonical semantic colour schema for a fleet theme.
 
-    bg: str = Field(..., description="Main background color")
+    This model is the single source of truth for the design-token vocabulary
+    that consumers (PyQt6 widgets, React panes, matplotlib plots) read from.
+
+    The schema is organised in tiers:
+
+    - **Surface** — bg, bg_base, bg_deep, bg_surface, bg_elevated, bg_highlight,
+      group_bg, input_bg
+    - **Border** — border, border_subtle, border_default, border_strong,
+      border_focus
+    - **Text**   — text, text_primary, text_secondary, text_tertiary,
+      text_quaternary, text_link, label
+    - **Brand**  — primary, primary_hover, primary_pressed, primary_muted,
+      accent, focus, button_hover
+    - **Semantic** — success/warning/error/info, each with hover + muted
+    - **Component** — title_bg, title_border, table_header, table_alt
+    - **Chart** — chart_blue/green/orange/red/purple/cyan/yellow/brown
+    - **Effect** — grid_line, axis_line, tick_color, shadow_light/medium/heavy
+
+    Only the 14 base surface/border/text/component tokens are required at
+    construction time; the rest are derived by ``model_post_init`` from those
+    base tokens if not supplied, so partially-specified themes (custom user
+    themes, the 22-token themes.json schema) still produce a fully populated
+    instance.
+    """
+
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+    # --- Identity ------------------------------------------------------------
+    name: str | None = Field(default=None, description="Theme display name")
+    is_dark: bool | None = Field(default=None, description="Whether theme is dark")
+
+    # --- Surface (required base) --------------------------------------------
+    bg: str = Field(..., description="Main background colour")
     group_bg: str = Field(..., description="Group/panel background")
-    border: str = Field(..., description="Border color")
-    text: str = Field(..., description="Primary text color")
-    text_secondary: str = Field(..., description="Secondary text color")
-    label: str = Field(..., description="Label/muted text color")
-    focus: str = Field(..., description="Focus highlight color")
-    input_bg: str = Field(..., description="Input background color")
-    accent: str = Field(..., description="Accent color")
-    title_bg: str = Field(..., description="Title background color")
-    title_border: str = Field(..., description="Title border color")
+    input_bg: str = Field(..., description="Input field background")
+
+    # --- Border / text / accent (required base) -----------------------------
+    border: str = Field(..., description="Standard border colour")
+    text: str = Field(..., description="Primary text colour")
+    text_secondary: str = Field(..., description="Secondary text colour")
+    label: str = Field(..., description="Label / muted text colour")
+    focus: str = Field(..., description="Focus highlight colour")
+    accent: str = Field(..., description="Accent colour")
+
+    # --- Component (required base) ------------------------------------------
+    title_bg: str = Field(..., description="Title/header background")
+    title_border: str = Field(..., description="Title/header border")
     table_header: str = Field(..., description="Table header background")
-    table_alt: str = Field(..., description="Alternate table row color")
-    button_hover: str = Field(..., description="Button hover color")
+    table_alt: str = Field(..., description="Alternate table row")
+    button_hover: str = Field(..., description="Button hover background")
+
+    # --- Surface (derived) ---------------------------------------------------
+    bg_base: str | None = Field(default=None, description="Alias of bg")
+    bg_deep: str | None = Field(default=None, description="Deeper background")
+    bg_surface: str | None = Field(default=None, description="Surface tier")
+    bg_elevated: str | None = Field(default=None, description="Elevated surface")
+    bg_highlight: str | None = Field(default=None, description="Highlighted surface")
+
+    # --- Border (derived) ----------------------------------------------------
+    border_subtle: str | None = Field(default=None)
+    border_default: str | None = Field(default=None)
+    border_strong: str | None = Field(default=None)
+    border_focus: str | None = Field(default=None)
+
+    # --- Text (derived) ------------------------------------------------------
+    text_primary: str | None = Field(default=None)
+    text_tertiary: str | None = Field(default=None)
+    text_quaternary: str | None = Field(default=None)
+    text_link: str | None = Field(default=None)
+
+    # --- Brand / primary (derived) ------------------------------------------
+    primary: str | None = Field(default=None)
+    primary_hover: str | None = Field(default=None)
+    primary_pressed: str | None = Field(default=None)
+    primary_muted: str | None = Field(default=None)
+
+    # --- Semantic (success / warning / error / info) ------------------------
+    success: str | None = Field(default=None)
+    success_hover: str | None = Field(default=None)
+    success_muted: str | None = Field(default=None)
+    warning: str | None = Field(default=None)
+    warning_hover: str | None = Field(default=None)
+    warning_muted: str | None = Field(default=None)
+    error: str | None = Field(default=None)
+    error_hover: str | None = Field(default=None)
+    error_muted: str | None = Field(default=None)
+    info: str | None = Field(default=None)
+    info_hover: str | None = Field(default=None)
+    info_muted: str | None = Field(default=None)
+    link: str | None = Field(default=None)
+    link_hover: str | None = Field(default=None)
+    selection_bg: str | None = Field(default=None)
+    selection_text: str | None = Field(default=None)
+
+    # --- Charts --------------------------------------------------------------
+    chart_blue: str | None = Field(default=None)
+    chart_green: str | None = Field(default=None)
+    chart_orange: str | None = Field(default=None)
+    chart_red: str | None = Field(default=None)
+    chart_purple: str | None = Field(default=None)
+    chart_cyan: str | None = Field(default=None)
+    chart_yellow: str | None = Field(default=None)
+    chart_brown: str | None = Field(default=None)
+
+    # --- Effects -------------------------------------------------------------
+    grid_line: str | None = Field(default=None)
+    axis_line: str | None = Field(default=None)
+    tick_color: str | None = Field(default=None)
+    shadow_light: str | None = Field(default=None)
+    shadow_medium: str | None = Field(default=None)
+    shadow_heavy: str | None = Field(default=None)
+
+    # ------------------------------------------------------------------------
+    # Derivation
+    # ------------------------------------------------------------------------
+
+    def model_post_init(self, __context: Any) -> None:
+        """Fill in any unsupplied derived tokens from the base 14.
+
+        Consumers of any tier of the schema can rely on every field being
+        non-None after construction. ``model_config = extra="allow"`` keeps
+        any forward-compat tokens passed in **kwargs accessible too.
+        """
+        from . import color_derivation as _cd
+
+        is_dark = self.is_dark
+        if is_dark is None:
+            is_dark = _cd.is_dark_bg(self.bg)
+            object.__setattr__(self, "is_dark", is_dark)
+
+        defaults: dict[str, str] = {
+            # Surface tier
+            "bg_base": self.bg,
+            "bg_deep": self.input_bg,
+            "bg_surface": self.group_bg,
+            "bg_elevated": self.table_header,
+            "bg_highlight": self.title_bg,
+            # Border tier
+            "border_default": self.border,
+            "border_subtle": _cd.adjust(self.border, 0.8 if is_dark else 1.1),
+            "border_strong": _cd.adjust(self.border, 1.2 if is_dark else 0.9),
+            "border_focus": self.focus,
+            # Text tier
+            "text_primary": self.text,
+            "text_tertiary": self.label,
+            "text_quaternary": _cd.adjust(self.label, 0.7),
+            "text_link": self.accent,
+            # Brand tier
+            "primary": self.accent,
+            "primary_hover": _cd.adjust(self.accent, 1.2),
+            "primary_pressed": _cd.adjust(self.accent, 0.8),
+            "primary_muted": _cd.with_alpha(self.accent, 0x40),
+            # Semantic tier — default palette is dark-mode-friendly when
+            # is_dark, otherwise tuned for light backgrounds.
+            "success": "#30D158" if is_dark else "#28A745",
+            "warning": "#FF9F0A" if is_dark else "#E67E00",
+            "error": "#FF375F" if is_dark else "#DC3545",
+            "info": "#64D2FF" if is_dark else "#17A2B8",
+            "link": self.accent,
+            "link_hover": _cd.adjust(self.accent, 1.2),
+            "selection_bg": _cd.with_alpha(self.accent, 0x60),
+            "selection_text": self.text,
+            # Chart tier — colour-blind-aware default palette
+            "chart_blue": self.accent,
+            "chart_purple": "#BF5AF2" if is_dark else "#9B59B6",
+            "chart_yellow": "#FFD60A" if is_dark else "#F0AD4E",
+            "chart_brown": "#AC8E68" if is_dark else "#8B6914",
+            # Effects
+            "axis_line": self.border,
+            "tick_color": self.label,
+            "grid_line": _cd.adjust(self.border, 0.7 if is_dark else 1.2),
+            "shadow_light": "rgba(0, 0, 0, 0.15)" if is_dark else "rgba(0, 0, 0, 0.08)",
+            "shadow_medium": "rgba(0, 0, 0, 0.25)" if is_dark else "rgba(0, 0, 0, 0.12)",
+            "shadow_heavy": "rgba(0, 0, 0, 0.40)" if is_dark else "rgba(0, 0, 0, 0.20)",
+        }
+        for key, val in defaults.items():
+            if getattr(self, key, None) is None:
+                object.__setattr__(self, key, val)
+
+        # Semantic hover / muted variants derived from the resolved base
+        for base_name in ("success", "warning", "error", "info"):
+            base_val = getattr(self, base_name)
+            if base_val is None:
+                continue
+            if getattr(self, f"{base_name}_hover", None) is None:
+                object.__setattr__(self, f"{base_name}_hover", _cd.adjust(base_val, 1.2))
+            if getattr(self, f"{base_name}_muted", None) is None:
+                object.__setattr__(
+                    self, f"{base_name}_muted", _cd.with_alpha(base_val, 0x40)
+                )
+
+        # Chart green / orange / red / cyan map to semantic palette
+        if self.chart_green is None:
+            object.__setattr__(self, "chart_green", self.success)
+        if self.chart_orange is None:
+            object.__setattr__(self, "chart_orange", self.warning)
+        if self.chart_red is None:
+            object.__setattr__(self, "chart_red", self.error)
+        if self.chart_cyan is None:
+            object.__setattr__(self, "chart_cyan", self.info)
+
+    # ------------------------------------------------------------------------
+    # Backwards-compatible dict-style access
+    # ------------------------------------------------------------------------
+
+    def __getitem__(self, key: str) -> Any:
+        try:
+            return getattr(self, key)
+        except AttributeError as err:
+            extra = self.__pydantic_extra__ or {}
+            if key in extra:
+                return extra[key]
+            raise KeyError(key) from err
+
+    def __contains__(self, key: str) -> bool:
+        if key in type(self).model_fields:
+            return getattr(self, key, None) is not None
+        return key in (self.__pydantic_extra__ or {})
+
+    def get(self, key: str, default: Any = None) -> Any:
+        """dict.get-compatible lookup that returns None / default for missing keys."""
+        try:
+            val = self[key]
+        except KeyError:
+            return default
+        return default if val is None else val
+
+    def keys(self) -> list[str]:
+        """Return all declared + extra field names with non-None values."""
+        declared = [
+            k for k in type(self).model_fields if getattr(self, k, None) is not None
+        ]
+        return declared + list((self.__pydantic_extra__ or {}).keys())
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return the resolved token dict (all derived defaults applied)."""
+        data = self.model_dump(exclude_none=False)
+        data.update(self.__pydantic_extra__ or {})
+        return data
 
 
 class ThemeDefinition(BaseModel):

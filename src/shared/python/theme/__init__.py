@@ -272,30 +272,94 @@ __all__ = [
 
 
 class ThemeColorsCompat(dict):
-    """Dictionary subclass supporting attribute-style access for theme compatibility."""
+    """Backwards-compatible attribute/dict wrapper for resolved theme palettes.
+
+    Returned by ``get_current_colors()``. Acts like a dict (the legacy API)
+    while also supporting attribute access (modern call sites like the
+    launcher sidebar). Missing tokens are filled by deferring to a fully
+    derived ``ThemeColors`` instance built from the same base palette, so
+    callers can rely on every modern design token resolving even when the
+    underlying ``ThemeManager`` only stored the legacy 14-token subset.
+    """
 
     def __getattr__(self, name: str) -> Any:
         try:
             return self[name]
         except KeyError as err:
-            # Fallback to DARK_THEME attributes to prevent crashes when using legacy themes
+            # Fill in any modern design token (bg_elevated, text_quaternary,
+            # primary_hover, ...) that the manager's raw dict doesn't store
+            # by promoting through the ThemeColors derivation pipeline.
             try:
-                from src.shared.python.theme import DARK_THEME
+                from src.shared.python.theme.api import ThemeColors
 
-                if hasattr(DARK_THEME, name):
-                    return getattr(DARK_THEME, name)
-                if hasattr(DARK_THEME, "__dict__") and name in DARK_THEME.__dict__:
-                    return DARK_THEME.__dict__[name]
-                if hasattr(DARK_THEME, "get"):
-                    val = DARK_THEME.get(name)
-                    if val is not None:
-                        return val
-            except Exception:  # noqa: BLE001
+                # Ensure base fields exist; the model requires 14 of them.
+                base = dict(self)
+                _BASE_DEFAULTS = {
+                    "bg": "#ffffff",
+                    "group_bg": "#f8f9fa",
+                    "input_bg": "#ffffff",
+                    "border": "#ced4da",
+                    "text": "#212529",
+                    "text_secondary": "#495057",
+                    "label": "#666e76",
+                    "focus": "#80bdff",
+                    "accent": "#5a8fc4",
+                    "title_bg": "#e3f2fd",
+                    "title_border": "#90caf9",
+                    "table_header": "#e9ecef",
+                    "table_alt": "#f8f9fa",
+                    "button_hover": "#4a7ba7",
+                }
+                for k, v in _BASE_DEFAULTS.items():
+                    base.setdefault(k, v)
+                derived = ThemeColors(**base).as_dict()
+                val = derived.get(name)
+                if val is not None:
+                    # Cache so subsequent accesses don't re-derive.
+                    self[name] = val
+                    return val
+            except Exception:  # noqa: BLE001 - never let the fallback crash
                 pass
             raise AttributeError(name) from err
 
     def __setattr__(self, name: str, value: Any) -> None:
         self[name] = value
+
+
+def _derive_full_palette(
+    partial: dict[str, Any], theme_name: str | None = None
+) -> dict[str, Any]:
+    """Promote a partial colour dict into a full 60+ token palette.
+
+    Used when the active theme isn't in ``FLEET_THEMES`` (custom user themes,
+    legacy preferences) — runs the same derivation as the fleet adapter so
+    every modern design token resolves consistently.
+    """
+    from src.shared.python.theme.api import ThemeColors
+
+    _BASE_DEFAULTS = {
+        "bg": "#ffffff",
+        "group_bg": "#f8f9fa",
+        "input_bg": "#ffffff",
+        "border": "#ced4da",
+        "text": "#212529",
+        "text_secondary": "#495057",
+        "label": "#666e76",
+        "focus": "#80bdff",
+        "accent": "#5a8fc4",
+        "title_bg": "#e3f2fd",
+        "title_border": "#90caf9",
+        "table_header": "#e9ecef",
+        "table_alt": "#f8f9fa",
+        "button_hover": "#4a7ba7",
+    }
+    merged = {**_BASE_DEFAULTS, **partial}
+    if theme_name and "name" not in merged:
+        merged["name"] = theme_name
+    try:
+        return ThemeColors(**merged).as_dict()
+    except Exception:  # noqa: BLE001 - return what we have rather than crash
+        return merged
 
 
 def get_current_colors() -> ThemeColorsCompat:
@@ -317,7 +381,13 @@ def get_current_colors() -> ThemeColorsCompat:
                 colors_dict = fleet_to_theme_colors_dict(mgr.current_theme)
                 return ThemeColorsCompat(colors_dict)
             except Exception:  # noqa: BLE001
-                colors_dict = dict(mgr.get_current_colors())
+                # Active theme isn't in FLEET_THEMES (e.g. a saved name that
+                # didn't survive the legacy-name migration). Promote the
+                # manager's partial dict through the same derivation as
+                # FLEET_THEMES would so the consumer schema is complete.
+                colors_dict = _derive_full_palette(
+                    dict(mgr.get_current_colors()), mgr.current_theme
+                )
                 return ThemeColorsCompat(colors_dict)
     except Exception:  # noqa: BLE001
         pass

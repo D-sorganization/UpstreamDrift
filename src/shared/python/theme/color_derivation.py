@@ -1,0 +1,64 @@
+"""Pure colour-math helpers used by the semantic theme schema.
+
+Kept in a small standalone module so it can be imported during
+``ThemeColors.model_post_init`` without dragging in any Qt / FastAPI /
+theme-manager state.
+
+All helpers operate on ``#rrggbb`` hex strings and tolerate ``#rgb`` shorthand.
+They never raise on bad input; they pass the original value through so a
+mis-typed colour can't take down a launcher boot.
+"""
+
+from __future__ import annotations
+
+
+def _expand(hex_color: str) -> str:
+    """Return a ``#rrggbb``-form copy of *hex_color*; pass through on failure."""
+    if not isinstance(hex_color, str):
+        return hex_color  # type: ignore[return-value]
+    val = hex_color.lstrip("#")
+    if len(val) == 3:
+        val = "".join(c * 2 for c in val)
+    if len(val) not in (6, 8):
+        return hex_color
+    return f"#{val}"
+
+
+def is_dark_bg(bg: str) -> bool:
+    """Decide whether *bg* should be treated as a dark theme background."""
+    expanded = _expand(bg).lstrip("#")
+    if len(expanded) < 6:
+        return False
+    try:
+        r = int(expanded[0:2], 16)
+        g = int(expanded[2:4], 16)
+        b = int(expanded[4:6], 16)
+    except ValueError:
+        return False
+    luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    return luminance < 0.5
+
+
+def adjust(hex_color: str, factor: float) -> str:
+    """Scale R/G/B channels by *factor* (>1 lighter, <1 darker), clamped to [0,255]."""
+    val = _expand(hex_color).lstrip("#")
+    if len(val) < 6:
+        return hex_color
+    try:
+        r = min(255, max(0, int(int(val[0:2], 16) * factor)))
+        g = min(255, max(0, int(int(val[2:4], 16) * factor)))
+        b = min(255, max(0, int(int(val[4:6], 16) * factor)))
+    except ValueError:
+        return hex_color
+    return f"#{r:02x}{g:02x}{b:02x}"
+
+
+def with_alpha(hex_color: str, alpha: int) -> str:
+    """Append an 8-bit alpha channel to *hex_color* in ``#rrggbbaa`` form."""
+    val = _expand(hex_color).lstrip("#")
+    if len(val) < 6:
+        return hex_color
+    return f"#{val[:6]}{max(0, min(255, alpha)):02x}"
+
+
+__all__ = ["adjust", "is_dark_bg", "with_alpha"]
