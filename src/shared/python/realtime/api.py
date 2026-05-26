@@ -53,23 +53,11 @@ class ChannelInfo:
 def register_channel(
     name: str, description: str, owner_tool_id: str | None = None
 ) -> None:
-    """Register a channel descriptor in :data:`CHANNEL_REGISTRY`.
+    """Register a channel descriptor.
 
-    Idempotent: re-registering the same name with identical fields is a
-    no-op.  Re-registering with a different description or owner raises
-    :class:`ValueError` so that naming collisions surface early.
-
-    Args:
-        name: Channel name string (e.g. ``"pose/canonical"``).  Must be a
-            non-empty string; whitespace-only values are rejected.
-        description: Short human-readable description of the channel's
-            payload semantics.
-        owner_tool_id: Tool id of the canonical publisher, or ``None`` if
-            any tool may publish on this channel.
-
-    Raises:
-        ValueError: If ``name`` is empty/whitespace, or if a channel with
-            the same ``name`` but different fields is already registered.
+    Idempotent: re-registering the same name with the same description is
+    a no-op. Re-registering with a different description raises
+    :class:`ValueError`.
     """
     if not isinstance(name, str) or not name.strip():
         raise ValueError("channel name must be a non-empty string")
@@ -112,13 +100,6 @@ class Subscription:
     _closed: bool = field(default=False)
 
     def unsubscribe(self) -> None:
-        """Tear down the transport watcher and release resources.
-
-        Safe to call multiple times; subsequent calls are no-ops.
-        Any exception raised by the underlying transport is caught and
-        logged so that cleanup code is never interrupted by a transport
-        error.
-        """
         if self._closed:
             return
         self._closed = True
@@ -177,30 +158,14 @@ def publish(channel: str, payload: Any, transport: str | None = None) -> None:
 
 
 def subscribe(channel: str, callback: Callable[[Any], None]) -> Subscription:
-    """Register *callback* to fire for every payload published on *channel*.
+    """Register *callback* to fire for every payload on *channel*.
 
-    The callback runs on a transport-owned daemon thread.  Consumers that
-    need to touch Qt widgets must marshal back to the GUI thread (e.g. via
-    ``QMetaObject.invokeMethod`` or a ``QtCore.pyqtSignal``).
+    The callback runs on a transport-owned daemon thread; consumers that
+    need to touch Qt widgets should marshal back to the GUI thread (e.g.
+    via ``QMetaObject.invokeMethod`` or a ``QtCore.pyqtSignal``).
 
-    If the underlying transport raises during setup, the error is logged and
-    a closed :class:`Subscription` is returned rather than propagating the
-    exception — callers can check ``sub._closed`` if they need to detect the
-    failure.
-
-    Args:
-        channel: Channel name to subscribe to (e.g. ``"pose/canonical"``).
-            Must be a non-empty string.
-        callback: Callable invoked with the decoded payload dict each time a
-            message arrives.  Must accept a single positional argument.
-
-    Returns:
-        A :class:`Subscription` handle.  Call
-        :meth:`Subscription.unsubscribe` to stop receiving messages.
-
-    Raises:
-        ValueError: If ``channel`` is empty or whitespace.
-        TypeError: If ``callback`` is not callable.
+    Returns a :class:`Subscription` whose
+    :meth:`Subscription.unsubscribe` tears the watcher down.
     """
     if not isinstance(channel, str) or not channel.strip():
         raise ValueError("channel must be a non-empty string")

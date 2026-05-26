@@ -23,19 +23,17 @@ from src.shared.python.pose_interchange.protocol import JointSlot
 
 
 def quat_wxyz_to_xyzw(q: npt.ArrayLike) -> npt.NDArray[np.float64]:
-    """Convert a quaternion from ``[w, x, y, z]`` to ``[x, y, z, w]`` order.
+    """Convert ``[w, x, y, z]`` to ``[x, y, z, w]`` (MuJoCo -> Pinocchio).
 
-    Convenience shim for the MuJoCo → Pinocchio handoff where the two
-    engines use opposite component orderings.
+    Parameters
+    ----------
+    q
+        Length-4 array-like ordered ``[w, x, y, z]``.
 
-    Args:
-        q: Length-4 array-like ordered ``[w, x, y, z]``.
-
-    Returns:
-        Length-4 float64 array ordered ``[x, y, z, w]``.
-
-    Raises:
-        ValueError: If ``q`` does not have shape ``(4,)``.
+    Returns
+    -------
+    np.ndarray
+        Length-4 array ordered ``[x, y, z, w]``.
     """
     arr = np.asarray(q, dtype=float)
     if arr.shape != (4,):
@@ -44,20 +42,7 @@ def quat_wxyz_to_xyzw(q: npt.ArrayLike) -> npt.NDArray[np.float64]:
 
 
 def quat_xyzw_to_wxyz(q: npt.ArrayLike) -> npt.NDArray[np.float64]:
-    """Convert a quaternion from ``[x, y, z, w]`` to ``[w, x, y, z]`` order.
-
-    Inverse of :func:`quat_wxyz_to_xyzw`; used in the Pinocchio → MuJoCo
-    handoff.
-
-    Args:
-        q: Length-4 array-like ordered ``[x, y, z, w]``.
-
-    Returns:
-        Length-4 float64 array ordered ``[w, x, y, z]``.
-
-    Raises:
-        ValueError: If ``q`` does not have shape ``(4,)``.
-    """
+    """Convert ``[x, y, z, w]`` to ``[w, x, y, z]`` (Pinocchio -> MuJoCo)."""
     arr = np.asarray(q, dtype=float)
     if arr.shape != (4,):
         raise ValueError(f"quat must have shape (4,), got {arr.shape}")
@@ -70,20 +55,9 @@ def quat_xyzw_to_wxyz(q: npt.ArrayLike) -> npt.NDArray[np.float64]:
 def euler_xyz_deg_to_quat_wxyz(
     rotation_xyz_deg: npt.ArrayLike,
 ) -> npt.NDArray[np.float64]:
-    """Convert intrinsic XYZ Euler angles (degrees) to a unit quaternion.
+    """Intrinsic XYZ Euler (deg) to a unit quaternion in ``[w, x, y, z]`` order.
 
-    Uses the canonical convention ``R = Rx(x) @ Ry(y) @ Rz(z)``.  The
-    result is returned in ``[w, x, y, z]`` order and is always normalised.
-
-    Args:
-        rotation_xyz_deg: Length-3 array-like of ``[roll_x, pitch_y, yaw_z]``
-            in degrees.
-
-    Returns:
-        Length-4 float64 unit quaternion ordered ``[w, x, y, z]``.
-
-    Raises:
-        ValueError: If ``rotation_xyz_deg`` does not have shape ``(3,)``.
+    Matches the canonical convention ``R = Rx(x) @ Ry(y) @ Rz(z)``.
     """
     arr = np.asarray(rotation_xyz_deg, dtype=float)
     if arr.shape != (3,):
@@ -103,23 +77,7 @@ def euler_xyz_deg_to_quat_wxyz(
 def quat_wxyz_to_euler_xyz_deg(
     quat_wxyz: npt.ArrayLike,
 ) -> npt.NDArray[np.float64]:
-    """Convert a unit quaternion to intrinsic XYZ Euler angles (degrees).
-
-    Inverse of :func:`euler_xyz_deg_to_quat_wxyz`.  The conversion goes via
-    a rotation matrix, which avoids the gimbal-lock sign ambiguity present
-    in direct quaternion-to-Euler formulas.
-
-    Args:
-        quat_wxyz: Length-4 array-like quaternion ordered ``[w, x, y, z]``.
-            Need not be pre-normalised; the function normalises internally.
-
-    Returns:
-        Length-3 float64 array ``[roll_x, pitch_y, yaw_z]`` in degrees.
-
-    Raises:
-        ValueError: If ``quat_wxyz`` does not have shape ``(4,)`` or has
-            zero norm.
-    """
+    """Inverse of :func:`euler_xyz_deg_to_quat_wxyz` (rotation matrix path)."""
     q = np.asarray(quat_wxyz, dtype=float)
     if q.shape != (4,):
         raise ValueError(f"quat must have shape (4,), got {q.shape}")
@@ -196,18 +154,12 @@ def encode_joint_angles(
     layout: Mapping[str, JointSlot],
     engine_q: npt.NDArray[np.float64],
 ) -> None:
-    """Write canonical joint angles into an engine ``q`` vector in-place.
+    """Write canonical joint angles into *engine_q* in-place using *layout*.
 
-    Joints absent from *layout* are silently skipped — the engine model may
-    not expose every canonical DOF.  Unit conversion (deg ↔ rad) and sign
-    flips are applied according to each slot's ``units`` and ``sign`` fields.
-
-    Args:
-        joint_angles_deg: Mapping of canonical joint name → angle in degrees.
-        layout: Mapping of canonical joint name → :class:`~pose_interchange.protocol.JointSlot`
-            describing where that joint lives in the engine ``q`` vector.
-        engine_q: Pre-allocated float64 array that receives the encoded values.
-            Modified in-place; the caller is responsible for its shape.
+    Joints not present in *layout* are silently skipped (the engine
+    model does not have a slot for them). All conversions (deg <-> rad
+    and sign flips) are derived from the slot's ``units`` and ``sign``
+    fields.
     """
     for name, slot in layout.items():
         angle_deg = float(joint_angles_deg.get(name, 0.0))
@@ -219,21 +171,7 @@ def decode_joint_angles(
     engine_q: npt.NDArray[np.float64],
     layout: Mapping[str, JointSlot],
 ) -> dict[str, float]:
-    """Read joint angles from an engine ``q`` vector and return them in degrees.
-
-    Inverse of :func:`encode_joint_angles`.  Applies unit conversion and sign
-    reversal so the returned values are always in degrees in the canonical
-    (right-hand, positive-flexion) frame.
-
-    Args:
-        engine_q: Float64 array containing the engine generalised-coordinate
-            vector.
-        layout: Mapping of canonical joint name → :class:`~pose_interchange.protocol.JointSlot`
-            that describes where each joint lives in ``engine_q``.
-
-    Returns:
-        Dict mapping canonical joint name → angle in degrees.
-    """
+    """Inverse of :func:`encode_joint_angles`. Returns a deg dict."""
     out: dict[str, float] = {}
     for name, slot in layout.items():
         value = float(engine_q[slot.start_index]) * slot.sign

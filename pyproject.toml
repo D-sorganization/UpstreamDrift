@@ -71,12 +71,11 @@ analysis = ["opencv-python>=4.8.0", "scikit-learn>=1.3.0"]
 pose = ["mediapipe>=0.10.33", "opencv-python>=4.8.0", "imageio[ffmpeg]>=2.31.0"]
 
 # Biomechanics engines
-biomechanics = ["myosuite>=2.0.0", "opensim>=4.4.0,<5.0.0", "gymnasium>=0.29.0"]
-experimental = ["myosuite>=2.0.0", "opensim>=4.4.0,<5.0.0", "gymnasium>=0.29.0"]
+biomechanics = ["myosuite>=2.0.0", "opensim>=4.4.0", "gymnasium>=0.29.0"]
+experimental = ["myosuite>=2.0.0", "opensim>=4.4.0", "gymnasium>=0.29.0"]
 
 # Reinforcement learning (for MyoSuite muscle training)
 rl = ["stable-baselines3>=2.0.0", "gymnasium>=0.29.0"]
-torch = ["torch>=2.0.0"]
 
 # URDF generation tools (from shared Tools repo)
 urdf = ["trimesh>=4.11.5", "PyYAML>=6.0.3", "defusedxml>=0.7.0", "robot_descriptions>=1.12.0"]
@@ -222,18 +221,13 @@ path = "build_hooks.py"
 src = ["src"]
 line-length = 88
 target-version = "py310"
-# force-exclude ensures glob patterns are honoured even when files are passed explicitly.
-force-exclude = true
-# Exclude third-party model files (legacy Python 2 scripts from OpenSim).
-# Also exclude PSA analysis notebooks: interactive Jupyter cells use print() by design.
+# Exclude third-party model files (legacy Python 2 scripts from OpenSim)
 exclude = [
     "src/shared/models/opensim/opensim-models/**",
     "shared/models/opensim/opensim-models/**",
     "shared/models/myosuite/**",
     "src/shared/models/myosuite/**",
     "vendor/**",
-    "src/shared/python/sidekick/process_calculators/psa_package/**/*.ipynb",
-    "src/shared/python/sidekick/process_calculators/psa_package/*.ipynb",
 ]
 
 [tool.ruff.lint]
@@ -291,8 +285,6 @@ max-complexity = 10
 # Sidekick CLI entry-points: stdout/stderr are the contract (T6 #5984).
 "src/shared/python/sidekick/__main__.py" = ["T201"]
 "src/shared/python/sidekick/standalone/runner.py" = ["T201"]
-# programmatic_pid CLI: generate-pid command intentionally writes to stdout as a command-line tool.
-"src/shared/python/programmatic_pid/cli.py" = ["T201"]
 
 
 [tool.mypy]
@@ -445,8 +437,6 @@ markers = [
     "motion_pipeline: tests for the motion capture pipeline (sources, IK, matching, orchestrator)",
     "makehuman: tests that exercise the MakeHuman mesh backend (skip without MakeHuman installed)",
     "smplx: tests that exercise the SMPL-X mesh backend (skip without SMPL-X model files)",
-    "scientific: marks tests that verify numerical accuracy of physics/biomechanics computations against known reference data",
-    "parity: marks engine-vs-engine and Python-vs-Rust equivalence tests; run in a dedicated parity CI job",
 ]
 filterwarnings = [
     # Suppress hppfcl→coal rename noise (third-party, not actionable in this repo)

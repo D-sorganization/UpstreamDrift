@@ -82,24 +82,6 @@ def _resolve_backend() -> str:
     return "rust" if _has_rust_wheel() else "python"
 
 
-_REALTIME_BACKEND: str | None = None
-
-
-def _get_backend() -> str:
-    """Return the resolved backend, probing only on first call.
-
-    Caches the result in ``_REALTIME_BACKEND`` so the ``upstream_realtime``
-    import (and any env-var look-up) is paid at most once per process.
-    Acceptable in the single-threaded async context; callers that need a
-    fresh probe (e.g. tests) can reset ``_REALTIME_BACKEND`` to ``None``
-    before calling.
-    """
-    global _REALTIME_BACKEND
-    if _REALTIME_BACKEND is None:
-        _REALTIME_BACKEND = _resolve_backend()
-    return _REALTIME_BACKEND
-
-
 def _port_in_use(host: str, port: int) -> bool:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.settimeout(0.25)
@@ -180,7 +162,7 @@ class WSPubSub:
     def _ensure_backend_resolved(self) -> None:
         if self._backend_resolved:
             return
-        self.backend = _get_backend()
+        self.backend = _resolve_backend()
         self._backend_resolved = True
 
     def start(self) -> None:

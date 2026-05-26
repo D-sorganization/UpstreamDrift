@@ -6,9 +6,8 @@ uniformly.
 
 The :data:`ADAPTER_REGISTRY` mapping is the canonical lookup table —
 keys are stable engine identifiers (``"drake"``, ``"mujoco"``,
-``"myosuite"``, ``"pinocchio"``, ``"opensim"``, ``"simscape"``) and
-values are adapter **classes** (instantiate per-call to keep adapters
-cheap and stateless).
+``"pinocchio"``, ``"opensim"``, ``"simscape"``) and values are adapter
+**classes** (instantiate per-call to keep adapters cheap and stateless).
 """
 
 from __future__ import annotations

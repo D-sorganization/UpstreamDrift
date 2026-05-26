@@ -161,14 +161,12 @@ def test_run_subcommand_format_csv() -> None:
 
 
 def test_run_headless_invalid_output_dir_returns_1(
-    monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     cli = _load_cli()
     inputs = tmp_path / "inputs.json"
     inputs.write_text("{}", encoding="utf-8")
-    output_path = tmp_path / "result.json"
 
     args = cli.parse_cli_args(
         [
@@ -178,25 +176,9 @@ def test_run_headless_invalid_output_dir_returns_1(
             "--inputs",
             str(inputs),
             "--output",
-            str(output_path),
+            str(tmp_path / "missing" / "result.json"),
         ]
     )
-
-    from sidekick.standalone import runner as runner_module
-
-    original_write_text = runner_module.Path.write_text
-
-    def fail_target_write(
-        self: Path,
-        data: str,
-        *args: object,
-        **kwargs: object,
-    ) -> int:
-        if self == output_path:
-            raise OSError("blocked output path")
-        return original_write_text(self, data, *args, **kwargs)
-
-    monkeypatch.setattr(runner_module.Path, "write_text", fail_target_write)
 
     assert cli.run_headless(args) == 1
     assert "sidekick run failed" in capsys.readouterr().err

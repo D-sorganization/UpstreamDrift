@@ -158,9 +158,9 @@ def run_calculator(calculator: str, inputs_path: str, output: str = "-") -> int:
         *calculator* must be a non-empty string.
         *inputs_path* must point to a readable JSON file.
     """
-    assert isinstance(calculator, str) and calculator, (
-        "calculator name must be non-empty"
-    )
+    assert (
+        isinstance(calculator, str) and calculator
+    ), "calculator name must be non-empty"
     assert isinstance(inputs_path, str) and inputs_path, "inputs_path must be non-empty"
 
     if calculator not in _REGISTRY:
@@ -193,12 +193,17 @@ def run_calculator(calculator: str, inputs_path: str, output: str = "-") -> int:
         sys.stdout.write(output_json + "\n")
     else:
         out_path = Path(output)
+        if not out_path.parent.exists():
+            sys.stderr.write(
+                f"sidekick run failed: Output directory does not exist: {out_path.parent}\n"
+            )
+            logger.error("Output directory does not exist: %s", out_path.parent)
+            return 1
         try:
-            out_path.parent.mkdir(parents=True, exist_ok=True)
             out_path.write_text(output_json, encoding="utf-8")
         except OSError as exc:
-            logger.error("sidekick run failed: %s", exc)
-            sys.stderr.write(f"sidekick run failed: {exc}\n")
+            sys.stderr.write(f"sidekick run failed: Failed to write results: {exc}\n")
+            logger.error("Failed to write results: %s", exc)
             return 1
         logger.info("Results written to %s", out_path)
 

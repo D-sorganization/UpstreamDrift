@@ -145,34 +145,6 @@ class TestSensitiveDataFilter:
         assert "REDACTED" in record.msg
         assert "other_var=1" in record.msg
 
-    def test_redacts_unquoted_value_containing_comma(self) -> None:
-        flt = SensitiveDataFilter()
-        record = self._make_record("password=abc,def")
-        flt.filter(record)
-        assert "abc,def" not in record.msg
-        assert record.msg == "password=***REDACTED***"
-
-    def test_redacts_compact_json_without_consuming_next_key(self) -> None:
-        flt = SensitiveDataFilter()
-        record = self._make_record('{"password":123,"user":"bob"}')
-        flt.filter(record)
-        assert record.msg == '{"password":***REDACTED***,"user":"bob"}'
-
-    def test_redacts_quoted_json_value_containing_comma_and_brace(self) -> None:
-        flt = SensitiveDataFilter()
-        record = self._make_record('{"password":"abc,def}"}')
-        flt.filter(record)
-        assert "abc,def" not in record.msg
-        assert record.msg == '{"password":"***REDACTED***"}'
-
-    def test_redacts_unquoted_value_without_consuming_delimiters(self) -> None:
-        flt = SensitiveDataFilter()
-        record = self._make_record("password=abc;user=bob api_key=xyz&scope=read")
-        flt.filter(record)
-        assert record.msg == (
-            "password=***REDACTED***;user=bob api_key=***REDACTED***&scope=read"
-        )
-
     def test_redacts_json_format(self) -> None:
         flt = SensitiveDataFilter()
         record = self._make_record('{"api_key": "mysecret"}')

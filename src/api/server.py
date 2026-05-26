@@ -118,14 +118,8 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
         # env_validator checks GOLF_API_SECRET_KEY, DATABASE_URL, and the
         # production checklist; it raises on critical failures so misconfigured
         # deployments fail fast instead of silently using insecure defaults.
-        # _assert_production_secrets() is a hard gate: it raises RuntimeError if
-        # production mode is active with .env.example placeholder credentials.
-        from src.shared.python.security.env_validator import (
-            _assert_production_secrets,
-            validate_environment,
-        )
+        from src.shared.python.security.env_validator import validate_environment
 
-        _assert_production_secrets()
         validate_environment(raise_on_error=get_environment() == "production")
 
         # Initialize database (Issue #544)

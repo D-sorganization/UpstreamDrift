@@ -132,7 +132,7 @@ These issues are already tracked in GitHub and represent planned improvements.
 
 - **GitHub Issue**: #6081 (Follow-up)
 - **Status**: Open
-- **Description**: Review Chat/Sidekick architecture boundaries (cross-ref #5969, #5967, #5922, #6119) and address the tech debt in `src/shared/python/chat/_chat_dock_widget_qt.py`, including ADR-0022 follow-up work to consolidate Sidekick entry points without dropping the existing roadmap phases.
+- **Description**: Review Chat/Sidekick architecture boundaries (cross-ref #5969, #5967, #5922) and address the tech debt in `src/shared/python/chat/_chat_dock_widget_qt.py`.
 
 ### Phase 5.9: CI Workflow Modularization
 

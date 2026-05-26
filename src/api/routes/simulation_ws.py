@@ -2,7 +2,6 @@
 
 import asyncio
 import contextlib
-import json
 import logging
 import math
 import time
@@ -46,63 +45,6 @@ def _clamp_speed_factor(raw: object) -> float:
     return value
 
 
-_MAX_WS_DURATION = 3600.0  # 1 hour hard cap for WebSocket sessions
-_MAX_WS_TIMESTEP = 1.0  # 1 second upper bound
-_MIN_WS_TIMESTEP = 1e-6  # 1 microsecond lower bound
-
-
-def _validate_ws_numeric_fields(config_input: dict[str, Any]) -> str | None:
-    """Validate speed_factor finiteness and timestep/duration bounds for WS start.
-
-    Performs WebSocket-specific checks that must reject bad values with an error
-    frame rather than silently clamping, complementing the Pydantic layer.
-
-    Args:
-        config_input: The raw config dict from the ``start`` message.
-
-    Returns:
-        An error message string if validation fails, or ``None`` if valid.
-
-    Postcondition:
-        Returns ``None`` only when all present numeric fields are finite and
-        within their respective WS limits.
-    """
-    if "speed_factor" in config_input:
-        raw_sf = config_input["speed_factor"]
-        try:
-            sf_value = float(raw_sf)  # type: ignore[arg-type]
-        except (TypeError, ValueError):
-            return "speed_factor must be a finite number"
-        if not math.isfinite(sf_value):
-            return "speed_factor must be a finite number"
-
-    if "duration" in config_input:
-        raw_dur = config_input["duration"]
-        try:
-            dur_value = float(raw_dur)  # type: ignore[arg-type]
-        except (TypeError, ValueError):
-            return "duration must be a positive finite number"
-        if not math.isfinite(dur_value) or dur_value <= 0:
-            return "duration must be a positive finite number"
-        if dur_value >= _MAX_WS_DURATION:
-            return f"duration must be less than {_MAX_WS_DURATION}s"
-
-    if "timestep" in config_input:
-        raw_ts = config_input["timestep"]
-        try:
-            ts_value = float(raw_ts)  # type: ignore[arg-type]
-        except (TypeError, ValueError):
-            return "timestep must be a positive finite number"
-        if not math.isfinite(ts_value) or ts_value <= 0:
-            return "timestep must be a positive finite number"
-        if ts_value >= _MAX_WS_TIMESTEP:
-            return f"timestep must be less than {_MAX_WS_TIMESTEP}s"
-        if ts_value < _MIN_WS_TIMESTEP:
-            return f"timestep must be at least {_MIN_WS_TIMESTEP}s"
-
-    return None
-
-
 def _engine_type_from_str(name: str) -> EngineType:
     """Resolve an engine type string to EngineType, accepting any case.
 
@@ -118,18 +60,6 @@ def _engine_type_from_str(name: str) -> EngineType:
     return EngineType(name.lower())
 
 
-def _is_numeric_sequence(value: object) -> bool:
-    """Return True iff value is a list/tuple of int/float values (no bools).
-
-    Precondition: value is any Python object.
-    Postcondition: returns True only when value is a non-string sequence whose
-    every element is a finite numeric scalar (int or float, not bool).
-    """
-    if not isinstance(value, (list, tuple)):
-        return False
-    return all(isinstance(x, (int, float)) and not isinstance(x, bool) for x in value)
-
-
 def _apply_initial_state(engine: object, state_dict: dict[str, Any]) -> None:
     """Apply an initial state dict to the engine using the (q, v) contract.
 
@@ -137,31 +67,14 @@ def _apply_initial_state(engine: object, state_dict: dict[str, Any]) -> None:
     client sends ``{"q": [...], "v": [...]}``; this helper converts and
     dispatches correctly.
 
-    Preconditions:
-        - state_dict must be a dict
-        - state_dict.get("q"), if present, must be a list/tuple of numbers
-        - state_dict.get("v"), if present, must be a list/tuple of numbers
-
     Args:
         engine: The active physics engine instance.
         state_dict: Dict with optional 'q' and 'v' lists.
     """
     if not hasattr(engine, "set_state"):
         return
-    q_raw = state_dict.get("q", [])
-    v_raw = state_dict.get("v", [])
-    if not _is_numeric_sequence(q_raw):
-        logger.warning(
-            "initial_state.q must be a list of numbers; ignoring initial state"
-        )
-        return
-    if not _is_numeric_sequence(v_raw):
-        logger.warning(
-            "initial_state.v must be a list of numbers; ignoring initial state"
-        )
-        return
-    q = np.array(q_raw, dtype=float)
-    v = np.array(v_raw, dtype=float)
+    q = np.array(state_dict.get("q", []), dtype=float)
+    v = np.array(state_dict.get("v", []), dtype=float)
     engine.set_state(q, v)
 
 
@@ -331,11 +244,6 @@ async def _handle_client_commands(
                 stats.speed_factor = speed_factor
     except TimeoutError:
         pass  # No message, continue simulation
-    except json.JSONDecodeError:
-        logger.warning("Received invalid JSON from WebSocket client; ignoring message")
-        await websocket.send_json(
-            {"error": "invalid_json", "message": "Message must be valid JSON"}
-        )
     return "continue"
 
 
@@ -495,16 +403,8 @@ async def simulation_stream(
             await websocket.send_json({"error": "Expected 'start' action"})
             return
 
-        raw_config = start_msg.get("config", {}) or {}
-        ws_error = _validate_ws_numeric_fields(
-            raw_config if isinstance(raw_config, dict) else {}
-        )
-        if ws_error is not None:
-            await websocket.send_json({"error": ws_error})
-            return
-
         try:
-            config = _validate_start_config(engine_type, raw_config)
+            config = _validate_start_config(engine_type, start_msg.get("config", {}))
         except (ValidationError, ValueError):
             await websocket.send_json({"error": "Invalid simulation config"})
             return

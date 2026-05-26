@@ -24,13 +24,6 @@ __all__ = [
 
 
 FrequencyHint = Literal["low", "high"]
-"""Frequency classification for a realtime channel.
-
-``"high"`` selects the WebSocket transport (low-latency, per-frame updates).
-``"low"`` selects the file transport (durable, suitable for infrequent events
-such as session markers or target changes).
-"""
-
 _Transport = Literal["file", "ws"]
 
 
@@ -112,19 +105,10 @@ def _lookup_hint(name: str) -> FrequencyHint | None:
 
 
 def get_channel_transport(name: str) -> _Transport:
-    """Resolve the preferred transport for a channel name.
+    """Resolve the preferred transport for ``name``.
 
-    Looks up ``name`` in the exact-match registry first, then falls back to
-    prefix matching for wildcard patterns (e.g. ``engine/<name>/state``).
-    Channels not in the registry default to ``"file"`` transport.
-
-    Args:
-        name: Concrete channel name to look up (e.g. ``"pose/canonical"`` or
-            ``"engine/drake/state"``).
-
-    Returns:
-        ``"ws"`` for channels registered with ``frequency_hint="high"``,
-        ``"file"`` for ``"low"``-frequency or unregistered channels.
+    Returns ``"ws"`` for high-frequency channels, ``"file"`` for low-frequency
+    or unknown channels.
     """
     hint = _lookup_hint(name)
     if hint == "high":

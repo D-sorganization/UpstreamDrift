@@ -146,10 +146,7 @@ def loaded_model_and_state():
 
     Module-scoped to amortise the SWIG load across all extractor tests.
     """
-    osim = pytest.importorskip(
-        "opensim",
-        reason="OpenSim Python bindings not installed",
-    )
+    import opensim as osim
 
     assert MODEL_PATH.is_file(), (
         f"golf_humanoid.osim missing at {MODEL_PATH}. "
