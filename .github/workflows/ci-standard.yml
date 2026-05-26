@@ -153,7 +153,7 @@ jobs:
           # RECORD metadata. Ignore ambient installs so pip lays down clean
           # copies instead of trying to uninstall corrupted cache entries.
           python -m ensurepip --upgrade || true
-          python -c "import pip" || (curl -sS https://bootstrap.pypa.io/get-pip.py | python)
+          python -c "import pip; import pip._internal.resolution.resolvelib.resolver" || (curl -sS https://bootstrap.pypa.io/get-pip.py | python)
           python -m pip install --ignore-installed ruff==0.14.10 "mypy==1.20.1" bandit==1.7.7 pydocstyle==6.3.0 semgrep
 
       - name: Lint
@@ -1073,6 +1073,7 @@ jobs:
       - name: Install migration test dependencies
         run: |
           python -m ensurepip --upgrade || true
+          python -c "import pip; import pip._internal.resolution.resolvelib.resolver" || (curl -sS https://bootstrap.pypa.io/get-pip.py | python)
           python -m pip install --upgrade pip
           python -m ensurepip --upgrade || true
           python -m pip install -e ".[dev]"
