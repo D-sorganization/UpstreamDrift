@@ -16,9 +16,7 @@ CI without MATLAB still passes through discovery cleanly.
 from __future__ import annotations
 
 import ast
-import importlib.util
 import inspect
-import os
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -30,20 +28,11 @@ from src.learning.sim2real._simscape_compat import wrap_for_system_identificatio
 from src.learning.sim2real.system_identification import SystemIdentifier
 from src.shared.python.engine_core.engine_registry import EngineType
 
-_MATLAB_OK = (
-    importlib.util.find_spec("matlab") is not None
-    and os.environ.get("UD_SIMSCAPE_FORCE_NO_MATLAB") != "1"
-)
-
 pytestmark = [
     pytest.mark.requires_matlab,
     pytest.mark.live_simulation,
     pytest.mark.slow,
     pytest.mark.integration,
-    pytest.mark.skipif(
-        not _MATLAB_OK,
-        reason="matlab.engine not importable in this environment",
-    ),
 ]
 
 

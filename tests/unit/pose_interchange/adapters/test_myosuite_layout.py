@@ -1,4 +1,4 @@
-"""Layout test for :class:`MyoSuiteAdapter`."""
+"""Layout test for :class:`MyosuiteAdapter`."""
 
 from __future__ import annotations
 
@@ -9,14 +9,14 @@ import pytest
 from src.shared.python.motion_matching.diagnostics.reference_pose import (
     REFERENCE_GOLFER_FIELDS,
 )
-from src.shared.python.pose_interchange.adapters.myosuite import MyoSuiteAdapter
+from src.shared.python.pose_interchange.adapters.myosuite import MyosuiteAdapter
 from src.shared.python.pose_interchange.protocol import JointSlot
 
 pytestmark = pytest.mark.unit
 
 
 def test_myosuite_layout_jointslots() -> None:
-    layout = MyoSuiteAdapter().joint_layout()
+    layout = MyosuiteAdapter().joint_layout()
     assert isinstance(layout, Mapping)
     canonical_set = set(REFERENCE_GOLFER_FIELDS)
     assert set(layout.keys()) <= canonical_set
@@ -29,6 +29,6 @@ def test_myosuite_layout_jointslots() -> None:
 def test_myosuite_layout_uses_myo_prefix() -> None:
     """MyoSuite mock layout names should differ from MuJoCo's to keep the
     two engines distinguishable on registry round-trips."""
-    layout = MyoSuiteAdapter().joint_layout()
+    layout = MyosuiteAdapter().joint_layout()
     for slot in layout.values():
         assert slot.engine_name.startswith("myo_")

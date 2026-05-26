@@ -440,7 +440,14 @@ class SeriesExpansion:
 
     @staticmethod
     def _factorial(n: int) -> int:
-        """Compute factorial of n."""
+        """Return n! using a precomputed lookup table for speed.
+
+        Args:
+            n: Non-negative integer.
+
+        Raises:
+            ValueError: If *n* is negative or exceeds the table size.
+        """
         if n < 0:
             raise ValueError(f"Factorial undefined for negative numbers: {n}")
         if n <= _MAX_FACTORIAL_LOOKUP:

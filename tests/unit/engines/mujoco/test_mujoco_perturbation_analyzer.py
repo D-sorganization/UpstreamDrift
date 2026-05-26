@@ -34,10 +34,6 @@ try:
 except ImportError:
     _MUJOCO_AVAILABLE = False
 
-_skip_no_mujoco = pytest.mark.skipif(
-    not _MUJOCO_AVAILABLE, reason="mujoco not installed"
-)
-
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------

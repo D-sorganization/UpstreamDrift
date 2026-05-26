@@ -400,20 +400,16 @@ def test_update_execution_status(launcher) -> None:
     # explanation that all three labels are derived from.
     launcher.chk_wsl.isChecked.return_value = True
     launcher.update_execution_status()
-    launcher.lbl_execution_mode.setText.assert_called_with(
-        "Runtime: WSL2 (Ubuntu Linux)"
-    )
+    launcher.lbl_execution_mode.setText.assert_called_with("Runtime: WSL2")
 
     launcher.chk_wsl.isChecked.return_value = False
     launcher.chk_docker.isChecked.return_value = True
     launcher.update_execution_status()
-    launcher.lbl_execution_mode.setText.assert_called_with(
-        "Runtime: Docker (Linux container)"
-    )
+    launcher.lbl_execution_mode.setText.assert_called_with("Runtime: Docker")
 
     launcher.chk_docker.isChecked.return_value = False
     launcher.update_execution_status()
-    launcher.lbl_execution_mode.setText.assert_called_with("Runtime: Native Windows")
+    launcher.lbl_execution_mode.setText.assert_called_with("Runtime: Windows")
 
 
 def test_update_execution_status_no_label(launcher) -> None:

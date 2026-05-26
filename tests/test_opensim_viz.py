@@ -8,7 +8,6 @@ optional ``opensim.Visualizer`` wrapper is gated by the
 
 from __future__ import annotations
 
-import importlib.util
 import warnings
 from types import SimpleNamespace
 
@@ -239,14 +238,7 @@ def test_plot_fit_quality_card_accepts_dict_input() -> None:
 # ---------------------------------------------------------------------------
 
 
-_OPENSIM_AVAILABLE = importlib.util.find_spec("opensim") is not None
-
-
 @pytest.mark.requires_opensim
-@pytest.mark.skipif(
-    not _OPENSIM_AVAILABLE,
-    reason="OpenSim Python bindings not installed",
-)
 def test_render_with_opensim_visualizer_requires_model() -> None:
     """Without a model the helper must raise a clear ``ValueError``."""
     sim = SimpleNamespace(time=np.array([0.0, 0.1]), states=np.zeros((2, 1)))
