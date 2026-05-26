@@ -20,7 +20,6 @@ lands. The skip is loud rather than silent so it shows up in test reports.
 from __future__ import annotations
 
 import os
-import time
 from pathlib import Path
 
 import pytest

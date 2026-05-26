@@ -18,7 +18,7 @@ from src.shared.python.motion_matching.loaders._machinelearning_compat import (
     to_machinelearning_clublogs,
 )
 
-from ._fixtures import make_target, repo_root
+from ._fixtures import make_target
 
 
 def _silence_lossy() -> None:

@@ -10,7 +10,6 @@ from src.launchers.settings_dialog import (  # noqa: E402
     TAB_CONFIG,
     TAB_DIAGNOSTICS,
     TAB_LAYOUT,
-    TAB_MCP_SERVERS,
     TAB_NOTIFICATIONS,
     TAB_PERFORMANCE,
     TAB_STARTUP,

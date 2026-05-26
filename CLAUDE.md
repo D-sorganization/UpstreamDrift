@@ -80,7 +80,7 @@ Optional Rust extensions built via Maturin for performance-critical paths.
 
 ## Motion Pipeline
 
-- **User Guide**: [`docs/motion_pipeline/README.md`](docs/motion_pipeline/README.md) — From video to tracked motion in 5 commands
+- **User Guide**: [`docs/motion_pipeline/README.md`](docs/motion_pipeline/README.md) — From mocap input (e.g., C3D) to tracked motion via the FastAPI REST service
 - **Format Matrix**: [`docs/motion_pipeline/formats.md`](docs/motion_pipeline/formats.md) — Supported mocap formats and quirks
 - **Troubleshooting**: [`docs/motion_pipeline/troubleshooting.md`](docs/motion_pipeline/troubleshooting.md) — Common failure modes and fixes
 - **Architecture**: [`docs/adr/0007-motion-pipeline-architecture.md`](docs/adr/0007-motion-pipeline-architecture.md) — CIR design and module boundaries

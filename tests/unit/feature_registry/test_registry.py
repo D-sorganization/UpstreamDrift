@@ -102,6 +102,27 @@ def test_feature_with_no_probe_is_always_available() -> None:
     assert report.available is True
 
 
+def test_check_without_probe_does_not_eagerly_refresh_everything(stub_probes) -> None:
+    """Single-feature checks should not execute unrelated probes on first use."""
+    registry = CapabilityRegistry()
+    report = registry.check("api")
+    assert report.available is True
+    for counter in stub_probes.values():
+        assert counter[0] == 0
+
+
+def test_check_only_runs_requested_probe_on_first_use(stub_probes) -> None:
+    """The first targeted check should evaluate only that feature's probe."""
+    registry = CapabilityRegistry()
+    report = registry.check("mujoco")
+    assert report.available is True
+    assert stub_probes["mujoco"][0] == 1
+    for key, counter in stub_probes.items():
+        if key == "mujoco":
+            continue
+        assert counter[0] == 0
+
+
 def test_probe_exception_surfaces_as_unavailable(monkeypatch) -> None:
     """A misbehaving probe must not crash the registry."""
 

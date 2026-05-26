@@ -1,3 +1,4 @@
+# See docker/README.md and ADR-0021 (docs/adr/0021-container-strategy.md) for container policy.
 # Stage 1: Builder — install all Python dependencies into an isolated venv
 # Base image pinned by digest for reproducible builds
 FROM python:3.12-slim@sha256:4386a385d81dba9f72ed72a6fe4237755d7f5440c84b417650f38336bbc43117 AS builder

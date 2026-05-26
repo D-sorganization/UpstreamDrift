@@ -12,7 +12,6 @@ References:
 
 from __future__ import annotations
 
-import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 from model_generation.builders.manual_builder import ManualBuilder

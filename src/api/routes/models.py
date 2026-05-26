@@ -381,7 +381,7 @@ async def list_models(
         return ModelListResponse(models=models)
     except (RuntimeError, TypeError, AttributeError) as exc:
         if logger:
-            logger.error("Error listing models: %s", exc)
+            logger.exception("Error listing models")
         raise HTTPException(
             status_code=500, detail=f"Failed to list models: {str(exc)}"
         ) from exc
@@ -461,7 +461,7 @@ async def get_model_urdf(  # noqa: C901
         ) from exc
     except ImportError as exc:
         if logger:
-            logger.error("Error loading model %s: %s", model_name, exc)
+            logger.exception("Error loading model %s", model_name)
         raise HTTPException(
             status_code=500, detail=f"Failed to load model: {str(exc)}"
         ) from exc

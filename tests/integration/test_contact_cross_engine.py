@@ -14,9 +14,7 @@ This test suite:
 3. Ensures no catastrophic divergence in results
 """
 
-import numpy as np
 import pytest
-from src.shared.python.core.constants import GRAVITY_M_S2
 
 # Contact test constants
 BOUNCE_HEIGHT_THRESHOLD_M = 0.001  # Minimum height (1mm) to consider a bounce occurred

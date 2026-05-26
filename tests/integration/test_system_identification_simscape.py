@@ -24,7 +24,7 @@ from pathlib import Path
 
 import pytest
 from src.engines.loaders import load_matlab_3d_engine
-from src.engines.simscape import PoolConfig, SimscapeAdapter, SimscapeAdapterPool
+from src.engines.simscape import SimscapeAdapter
 from src.learning.sim2real import system_identification as sysid_mod
 from src.learning.sim2real._simscape_compat import wrap_for_system_identification
 from src.learning.sim2real.system_identification import SystemIdentifier

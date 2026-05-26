@@ -1,6 +1,3 @@
-import pytest
-
-
 def test_headless_plotting_import() -> None:
     """Test that the plotting package can be imported without PyQt6.
 

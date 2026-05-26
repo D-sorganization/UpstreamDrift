@@ -1,10 +1,7 @@
 """Tests for the Drake engine __main__ module."""
 
 import runpy
-import sys
-from unittest.mock import ANY, MagicMock, patch
-
-import pytest
+from unittest.mock import MagicMock, patch
 
 
 @patch("src.shared.python.dashboard.launcher.launch_dashboard")

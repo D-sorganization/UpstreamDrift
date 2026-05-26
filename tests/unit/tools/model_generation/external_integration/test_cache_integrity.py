@@ -12,11 +12,8 @@ from __future__ import annotations
 
 import json
 import tempfile
-import urllib.error
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
 
-import pytest
 
 # ---------------------------------------------------------------------------
 # 1. Xacro preprocessing
