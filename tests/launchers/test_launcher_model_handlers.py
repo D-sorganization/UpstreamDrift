@@ -11,6 +11,7 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 import pytest  # noqa: E402
 
 from src.launchers.launcher_model_handlers import (  # noqa: E402
+    APIBackedHandler,
     BiomechExerciseHandler,
     DocumentHandler,
     GolfSimulationSuiteHandler,
@@ -245,6 +246,22 @@ def test_document_handler() -> None:
         ),
     ):
         assert handler.launch(DummyDocModel(), Path("/repo"), MagicMock()) is True
+
+
+def test_api_backed_handler_uses_configured_api_port(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    handler = APIBackedHandler()
+
+    class DummyAPIModel:
+        web_route = "/tools/movement-optimizer"
+
+    monkeypatch.setenv("GOLF_API_PORT", "8123")
+
+    with patch("webbrowser.open") as mock_open:
+        assert handler.launch(DummyAPIModel(), Path("/repo"), MagicMock()) is True
+
+    mock_open.assert_called_once_with("http://localhost:8123/tools/movement-optimizer")
 
 
 def test_protocol_methods() -> None:
