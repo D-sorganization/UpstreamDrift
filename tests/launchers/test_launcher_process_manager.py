@@ -82,6 +82,14 @@ def test_get_subprocess_env_includes_extra_python_paths(manager):
     assert env["PYTHONPATH"].count(expected) == 1
 
 
+def test_get_subprocess_env_no_quoting(manager):
+    path_with_space = Path("/external/path with spaces")
+    env = manager.get_subprocess_env((path_with_space,))
+    expected = str(path_with_space)
+    assert expected in env["PYTHONPATH"]
+    assert f"'{expected}'" not in env["PYTHONPATH"]
+
+
 @patch("src.launchers.launcher_process_manager.datetime")
 @patch("builtins.open", new_callable=mock_open)
 def test_write_log_line(mock_open_file, mock_datetime, manager) -> None:

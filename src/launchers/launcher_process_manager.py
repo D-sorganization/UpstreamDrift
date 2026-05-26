@@ -213,7 +213,7 @@ class ProcessManager:
         if not merged_paths:
             return existing_path
 
-        new_paths = separator.join(shlex.quote(p) for p in merged_paths)
+        new_paths = separator.join(merged_paths)
         if existing_path:
             return f"{new_paths}{separator}{existing_path}"
         return new_paths
@@ -264,9 +264,7 @@ class ProcessManager:
                 paths_to_add.append(opt_p)
 
         if paths_to_add:
-            # Security: Safely quote each path entry (issue #2715)
-            quoted_paths = [shlex.quote(p) for p in paths_to_add]
-            new_paths = separator.join(quoted_paths)
+            new_paths = separator.join(paths_to_add)
             env["PYTHONPATH"] = (
                 f"{new_paths}{separator}{existing_path}" if existing_path else new_paths
             )
