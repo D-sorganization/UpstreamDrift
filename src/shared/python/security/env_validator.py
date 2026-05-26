@@ -12,8 +12,10 @@ Usage:
     # Or validate specific components
     validate_api_security()
     validate_database_config()
+    _assert_production_secrets()  # hard-fail on .env.example placeholder values
 """
 
+import os
 import secrets
 from typing import TypedDict
 
@@ -162,6 +164,63 @@ def validate_admin_password_strength(password: str, min_length: int = 12) -> Non
         raise EnvironmentValidationError(
             f"Admin password is too short: {len(password)} chars "
             f"(minimum: {min_length})"
+        )
+
+
+# Exact placeholder strings shipped in .env.example; never acceptable in production.
+_DEFAULT_SECRET_KEY = "generate_a_random_string_here"
+_DEFAULT_ADMIN_PASSWORD = "change_me_in_production"
+
+
+def _assert_production_secrets() -> None:
+    """Raise RuntimeError if production mode is active with default credentials.
+
+    Checks whether the server is about to start in production with the exact
+    placeholder values that ship in .env.example.  These values are publicly
+    known and must never reach a production deployment.
+
+    This function is a hard gate: it calls ``logger.critical()`` and then
+    raises ``RuntimeError`` so the process aborts before accepting any traffic.
+
+    Preconditions:
+        - Called only after the environment variables have been loaded.
+
+    Postconditions:
+        - If not in production, returns without side-effects.
+        - If in production with safe credentials, returns without side-effects.
+        - If in production with default credentials, logs a CRITICAL message
+          and raises ``RuntimeError``.
+
+    Raises:
+        RuntimeError: When ``ENVIRONMENT`` indicates production and either
+            ``GOLF_API_SECRET_KEY`` or ``GOLF_ADMIN_PASSWORD`` still holds its
+            .env.example placeholder value.
+    """
+    if get_environment() != "production":
+        return
+
+    secret_key = os.getenv("GOLF_API_SECRET_KEY", "")
+    if secret_key == _DEFAULT_SECRET_KEY:
+        logger.critical(
+            "Production mode requires non-default GOLF_API_SECRET_KEY. "
+            "The current value matches the .env.example placeholder. "
+            "See .env.example for setup instructions."
+        )
+        raise RuntimeError(
+            "Production mode requires non-default GOLF_API_SECRET_KEY. "
+            "See .env.example for setup instructions."
+        )
+
+    admin_password = os.getenv("GOLF_ADMIN_PASSWORD", "")
+    if admin_password == _DEFAULT_ADMIN_PASSWORD:
+        logger.critical(
+            "Production mode requires non-default GOLF_ADMIN_PASSWORD. "
+            "The current value matches the .env.example placeholder. "
+            "See .env.example for setup instructions."
+        )
+        raise RuntimeError(
+            "Production mode requires non-default GOLF_ADMIN_PASSWORD. "
+            "See .env.example for setup instructions."
         )
 
 
@@ -373,6 +432,11 @@ def validate_environment(
         EnvironmentValidationError: If critical issues found and raise_on_error=True
     """
     logger.info("Validating environment configuration...")
+
+    # Hard-fail immediately if production credentials are still at default values.
+    # This runs before any other check so a misconfigured deployment is caught
+    # before the application starts accepting traffic.
+    _assert_production_secrets()
 
     results: EnvironmentValidationResults = {
         "environment": get_environment(),

@@ -28,13 +28,24 @@ class FitResult:
 
     Attributes:
         parameters: Dictionary of fitted parameter names and values.
-        covariance: Covariance matrix of the fit (if available).
+        covariance: Covariance matrix of the fit (if available). A ``None``
+            value is ambiguous on its own: use ``fit_succeeded`` or
+            ``solver_status`` to distinguish "fit failed" from "covariance
+            not computed".
         r_squared: Coefficient of determination (R^2).
         rmse: Root mean square error.
         fitted_signal: Signal with fitted values.
         residuals: Residuals (original - fitted).
         success: Whether the fit converged successfully.
         message: Fit status message.
+        fit_succeeded: Explicit boolean indicator: ``True`` when the optimizer
+            converged, ``False`` when it failed or diverged. Derived from
+            ``success`` in ``__post_init__`` if not set explicitly.
+        solver_status: Canonical status string (``"success"`` or
+            ``"failure"``). Mirrors the vocabulary used by
+            ``CanonicalFitResult`` and ``BuildResult`` across the platform
+            so that downstream consumers can apply uniform filtering. Derived
+            from ``success`` in ``__post_init__`` if not set explicitly.
     """
 
     parameters: dict[str, float]
@@ -45,6 +56,21 @@ class FitResult:
     residuals: np.ndarray
     success: bool = True
     message: str = ""
+    fit_succeeded: bool = True
+    solver_status: str = "success"
+
+    def __post_init__(self) -> None:
+        """Derive ``fit_succeeded`` and ``solver_status`` from ``success``.
+
+        If the caller did not explicitly override ``fit_succeeded`` or
+        ``solver_status`` but did pass ``success=False``, this method
+        propagates the failure state so all three fields remain consistent.
+        """
+        if not self.success:
+            if self.fit_succeeded:
+                self.fit_succeeded = False
+            if self.solver_status == "success":
+                self.solver_status = "failure"
 
     def get_function_string(self) -> str:
         """Get a string representation of the fitted function."""
@@ -126,6 +152,8 @@ class SinusoidFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0 or len(signal.values) == 0:
+            raise ValueError("signal must contain at least one sample")
         t = signal.time - signal.time[0]  # Shift to start at 0
         y = signal.values
 
@@ -284,6 +312,8 @@ class ExponentialFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0 or len(signal.values) == 0:
+            raise ValueError("signal must contain at least one sample")
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -363,6 +393,8 @@ class ExponentialFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0 or len(signal.values) == 0:
+            raise ValueError("signal must contain at least one sample")
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -440,6 +472,8 @@ class LinearFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0 or len(signal.values) == 0:
+            raise ValueError("signal must contain at least one sample")
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -514,6 +548,8 @@ class PolynomialFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0 or len(signal.values) == 0:
+            raise ValueError("signal must contain at least one sample")
         t = signal.time - signal.time[0]
         y = signal.values
 
