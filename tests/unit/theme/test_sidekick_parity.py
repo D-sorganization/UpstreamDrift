@@ -21,7 +21,7 @@ from src.shared.python.theme.sidekick_tokens import (
     DEFAULT_SIDEKICK_TOKENS,
 )
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.parity]
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]

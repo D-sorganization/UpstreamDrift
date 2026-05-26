@@ -4,7 +4,6 @@ Verifies that the desktop (PyQt6) and web (React) interfaces expose
 the same features and maintain consistent behavior.
 """
 
-import json
 from pathlib import Path
 
 import pytest

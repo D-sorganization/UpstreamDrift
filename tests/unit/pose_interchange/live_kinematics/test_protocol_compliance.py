@@ -38,5 +38,5 @@ def test_registry_factory_returns_protocol_compliant_service(
 
 def test_registry_covers_all_first_class_engines() -> None:
     """Every first-class engine (per CROSS_ENGINE_PARITY_SPEC) is registered."""
-    expected = {"drake", "mujoco", "pinocchio", "opensim", "simscape"}
+    expected = {"drake", "mujoco", "pinocchio", "opensim", "simscape", "myosuite"}
     assert set(KINEMATICS_SERVICE_REGISTRY) == expected

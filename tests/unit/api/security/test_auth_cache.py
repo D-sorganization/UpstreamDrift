@@ -82,3 +82,38 @@ class TestAuthCache:
             assert cache.get("key2") == "value2"
             assert cache.get("key3") == "value3"
             assert cache.get("key4") == "value4"
+
+    def test_constructor_args_override_class_defaults(self) -> None:
+        """Explicit constructor args take precedence over class-level defaults."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            cache = AuthCache(ttl_seconds=600, max_entries=42)
+            assert cache._ttl_seconds == 600
+            assert cache._max_entries == 42
+
+    def test_env_vars_tune_cache_sizing(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """GOLF_AUTH_CACHE_TTL_SECONDS / MAX_ENTRIES tune the cache without code edits."""
+        monkeypatch.setenv("GOLF_API_SECRET_KEY", "test-secret-key-32chars-long!!")
+        monkeypatch.setenv("GOLF_AUTH_CACHE_TTL_SECONDS", "60")
+        monkeypatch.setenv("GOLF_AUTH_CACHE_MAX_ENTRIES", "5")
+
+        from src.api.auth.security import AuthCache
+
+        cache = AuthCache()
+        assert cache._ttl_seconds == 60
+        assert cache._max_entries == 5
+
+    def test_invalid_constructor_args_rejected(self) -> None:
+        """DbC: non-positive TTL / max-entries are rejected."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            with pytest.raises(ValueError, match="ttl_seconds"):
+                AuthCache(ttl_seconds=0)
+            with pytest.raises(ValueError, match="max_entries"):
+                AuthCache(max_entries=0)

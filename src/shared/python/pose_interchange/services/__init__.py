@@ -30,6 +30,9 @@ from src.shared.python.pose_interchange.services.drake import (
 from src.shared.python.pose_interchange.services.mujoco import (
     create_mujoco_service,
 )
+from src.shared.python.pose_interchange.services.myosuite import (
+    create_myosuite_service,
+)
 from src.shared.python.pose_interchange.services.opensim import (
     create_opensim_service,
 )
@@ -43,6 +46,7 @@ from src.shared.python.pose_interchange.services.simscape import (
 KINEMATICS_SERVICE_REGISTRY: dict[str, Callable[[], LiveKinematicsService]] = {
     "drake": create_drake_service,
     "mujoco": create_mujoco_service,
+    "myosuite": create_myosuite_service,
     "pinocchio": create_pinocchio_service,
     "opensim": create_opensim_service,
     "simscape": create_simscape_service,

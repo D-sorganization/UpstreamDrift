@@ -222,7 +222,7 @@ async def update_actuators(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except ImportError as exc:
         if logger:
-            logger.error("Actuator update error: %s", exc)
+            logger.exception("Actuator update error")
         raise HTTPException(
             status_code=500, detail=f"Actuator update failed: {str(exc)}"
         ) from exc
@@ -324,7 +324,7 @@ async def get_forces(
         )
     except ImportError as exc:
         if logger:
-            logger.error("Force query error: %s", exc)
+            logger.exception("Force query error")
         raise HTTPException(
             status_code=500, detail=f"Force query failed: {str(exc)}"
         ) from exc
@@ -408,7 +408,7 @@ async def get_metrics(
         )
     except ImportError as exc:
         if logger:
-            logger.error("Metrics query error: %s", exc)
+            logger.exception("Metrics query error")
         raise HTTPException(
             status_code=500, detail=f"Metrics query failed: {str(exc)}"
         ) from exc

@@ -8,6 +8,7 @@ on:
       - "scripts/check_doc_catalog.py"
       - "scripts/check_doc_size_budget.py"
       - "scripts/config/doc_size_budget.json"
+      - "tests/scripts/test_doc_governance_checks.py"
       - ".github/workflows/docs-governance.yml"
   push:
     branches: [main]
@@ -17,7 +18,12 @@ on:
       - "scripts/check_doc_catalog.py"
       - "scripts/check_doc_size_budget.py"
       - "scripts/config/doc_size_budget.json"
+      - "tests/scripts/test_doc_governance_checks.py"
       - ".github/workflows/docs-governance.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
@@ -47,8 +53,21 @@ jobs:
       - name: Validate documentation governance files
         run: python3 scripts/check_docs_governance.py
 
+      - name: Install test dependencies
+        run: |
+          python3 -m venv "$RUNNER_TEMP/docs-governance-venv"
+          echo "$RUNNER_TEMP/docs-governance-venv/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/docs-governance-venv/bin/python" -m pip install --upgrade pip
+          "$RUNNER_TEMP/docs-governance-venv/bin/python" -m pip install pytest
+
+      - name: Test documentation governance files
+        run: python -m pytest tests/scripts/test_doc_governance_checks.py -q
+
       - name: Validate documentation catalog
         run: python3 scripts/check_doc_catalog.py
 
       - name: Validate documentation size budget
         run: python3 scripts/check_doc_size_budget.py
+
+      - name: Run documentation governance tests
+        run: python -m pytest tests/scripts/test_doc_governance_checks.py -q

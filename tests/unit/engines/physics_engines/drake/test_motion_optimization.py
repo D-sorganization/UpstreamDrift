@@ -10,7 +10,6 @@ import pytest
 from src.engines.physics_engines.drake.python.motion_optimization import (
     DrakeMotionOptimizer,
     OptimizationConstraint,
-    OptimizationObjective,
     OptimizationResult,
 )
 

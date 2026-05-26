@@ -3,12 +3,10 @@
 import pytest
 import tempfile
 import os
-import json
-from pathlib import Path
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.api.routes.data_explorer import router, get_dataset_storage
+from src.api.routes.data_explorer import router
 
 
 @pytest.fixture

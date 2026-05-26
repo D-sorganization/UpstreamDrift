@@ -9,16 +9,13 @@ ModelHandlerRegistry.
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 import pytest
 
 from src.config.launcher_manifest_loader import (
     LAUNCHER_CATEGORIES,
-    LAUNCHER_CATEGORY_LABELS,
     MANIFEST_PATH,
     LauncherManifest,
-    LauncherTile,
 )
 from src.launchers.launcher_model_handlers import ModelHandlerRegistry
 

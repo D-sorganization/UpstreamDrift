@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 import time
 import uuid
-from datetime import UTC
+from src.api.utils.datetime_compat import UTC
 from enum import Enum
 from typing import Any, Generic, TypeVar
 
@@ -124,7 +124,7 @@ class StandardResponse(BaseModel, Generic[T]):
     error: ErrorDetail | None = Field(default=None, description="Error details")
     metadata: ResponseMetadata = Field(description="Response metadata")
 
-    def model_validate(self, obj: Any) -> StandardResponse[T]:
+    def model_validate(self, obj: Any) -> StandardResponse[T]:  # type: ignore[override]
         """Override to support Generic type parameter."""
         return super().model_validate(obj)
 

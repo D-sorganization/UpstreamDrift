@@ -9,27 +9,14 @@ These tests verify that all components work together correctly:
 
 from __future__ import annotations
 
-import json
-import tempfile
 
 import numpy as np
-import pytest
-from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
-    BallRollPhysics,
-    BallState,
-)
 from src.engines.physics_engines.putting_green.python.green_surface import (
     GreenSurface,
     SlopeRegion,
 )
-from src.engines.physics_engines.putting_green.python.putter_stroke import (
-    PutterStroke,
-    PutterType,
-    StrokeParameters,
-)
 from src.engines.physics_engines.putting_green.python.simulator import (
     PuttingGreenSimulator,
-    SimulationConfig,
 )
 from src.engines.physics_engines.putting_green.python.turf_properties import (
     TurfProperties,

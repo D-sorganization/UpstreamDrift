@@ -85,6 +85,8 @@ jobs:
           pip install -e ".[dev,drake,pinocchio,opensim,myosuite]"
           python -m ensurepip --upgrade || true
           pip install "mujoco>=3.3.0,<4.0.0"
+          # Prevent environment pollution conflict between pytest-recording and pytest-vcr
+          pip uninstall -y pytest-vcr pytest-recording || true
           echo '{"status": "dependencies_installed"}' > test-results/setup-status.json
 
       - name: Summarize dependency failure
