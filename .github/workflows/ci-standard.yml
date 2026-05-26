@@ -1171,6 +1171,7 @@ jobs:
         working-directory: ./ui
     steps:
       - name: Clean corrupt git objects
+        working-directory: .
         shell: bash
         run: |
           if [ -d .git ]; then
