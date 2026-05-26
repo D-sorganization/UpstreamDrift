@@ -1,6 +1,6 @@
 # UpstreamDrift Documentation
 
-> **Last reviewed: 2024-05-25**
+> Last reviewed: 2026-05-25
 
 Welcome to UpstreamDrift - a professional biomechanical analysis and physics simulation platform.
 
@@ -9,29 +9,38 @@ Welcome to UpstreamDrift - a professional biomechanical analysis and physics sim
 | I want to...            | Go to...                                            |
 | ----------------------- | --------------------------------------------------- |
 | Get started quickly     | [Quick Start](#quick-start)                         |
-| Understand motion pip.  | [Motion Pipeline](motion_pipeline/README.md)        |
-| Read Architecture Docs  | [ADRs](adr/)                                        |
-| Read Project Specs      | [SPEC.md](../SPEC.md)                               |
+| Understand the API      | [API Architecture](api/API_ARCHITECTURE.md)         |
+| Develop new features    | [Development Guide](api/DEVELOPMENT.md)             |
 | Choose a physics engine | [Engine Selection Guide](engine_selection_guide.md) |
+| Track motion capture    | [Motion Pipeline](motion_pipeline/README.md)        |
+| Review architecture     | [ADRs](adr/)                                        |
+| Read the specification  | [SPEC](../SPEC.md)                                  |
+| Troubleshoot issues     | [Troubleshooting](troubleshooting/)                 |
 
 ---
 
 ## Quick Start
 
-### 1. Launch the Suite
-
-UpstreamDrift features a Unified Launcher that opens the Web UI.
+### 1. Launch UpstreamDrift (Web UI)
 
 ```bash
 cd /home/user/UpstreamDrift
-python start_api_server.py
+python launch_golf_suite.py
 ```
 
-### 2. Access the UI & API
+### 2. Access the API
 
-- **Web UI**: Opens automatically in your browser (typically http://localhost:8000)
+- **API Base**: http://localhost:8000
 - **Interactive Docs**: http://localhost:8000/docs
-- **Classic Fallback**: `python launch_golf_suite.py --classic`
+- **Health Check**: http://localhost:8000/health
+
+### 3. Run a Simulation
+
+```bash
+curl -X POST http://localhost:8000/simulate \
+  -H "Content-Type: application/json" \
+  -d '{"engine_type": "mujoco", "duration": 1.0}'
+```
 
 ---
 
@@ -73,22 +82,23 @@ docs/
 ├── troubleshooting/       # Problem Solving
 │   └── (troubleshooting guides)
 │
-└── historical/            # Historical Documentation
-    ├── assessments/
-    └── archive/
+└── archive/               # Historical Documentation
+    ├── assessments_jan2026/
+    ├── phase_plans/
+    └── historical/
 ```
 
 ---
 
 ## Core Concepts
 
-### Unified Architecture
+### Architecture Overview
 
-UpstreamDrift uses a **unified local-first architecture**:
+UpstreamDrift uses a **web-first, local-first architecture**:
 
-- **Web UI & API** running on localhost
 - **No cloud required** for local development
-- **Optional classic desktop launcher** for legacy workflows
+- **Optional cloud mode** for production scaling
+- **Same API** whether local or cloud
 
 ### Multi-Engine Support
 
@@ -251,9 +261,18 @@ repository maintenance guidance.
 
 ---
 
+## Recent Updates
+
+- **Web UI (primary)** - `python launch_golf_suite.py` opens the React-based web interface
+- **Classic PyQt6 launcher** - available via `python launch_golf_suite.py --classic`
+- **Motion Pipeline** - From video to tracked motion in 5 commands (see `docs/motion_pipeline/`)
+- **Multi-engine support** - MuJoCo (default), Drake, Pinocchio, OpenSim, MyoSuite, MATLAB Simscape
+
+---
+
 ## Archived Documentation
 
-Historical assessments, phase plans, and old implementation reports have been moved to [historical/](historical/).
+Historical assessments, phase plans, and old implementation reports have been moved to [archive/](archive/).
 
 ---
 

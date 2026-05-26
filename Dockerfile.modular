@@ -1,9 +1,5 @@
-# See docker/README.md and ADR-0021 (docs/adr/0021-container-strategy.md) for container policy.
+# EXPERIMENTAL — not in the CI build path. See docker/README.md and ADR-0021.
 # Modular UpstreamDrift Dockerfile.
-# Root container policy:
-# - canonical opt-in modular profile build surface
-# - not the default release/runtime image
-# - see docker/README.md and docs/adr/0021-container-strategy.md
 #
 # Selects features either by named profile or by explicit comma-separated
 # feature list. The feature → install command mapping lives in
@@ -25,10 +21,9 @@
 # Profile takes precedence over FEATURES. If both are empty the build
 # falls back to PROFILE=standard for parity with the legacy Dockerfile.
 #
-# This Dockerfile is a supported additive surface for opt-in profile builds.
-# Dockerfile remains the canonical default release/runtime image unless a
-# future ADR deliberately changes that policy. Implementation epic:
-# docs/plans/DOCKER_MODULAR_BUILDS_EPIC.md.
+# This Dockerfile is *additive* — Dockerfile remains the canonical
+# production build until Phase 2 finishes; this one is the validation
+# vehicle. See docs/plans/DOCKER_MODULAR_BUILDS_EPIC.md.
 
 # ---- Stage 1: builder ------------------------------------------------------
 FROM python:3.12-slim@sha256:4386a385d81dba9f72ed72a6fe4237755d7f5440c84b417650f38336bbc43117 AS builder
@@ -70,8 +65,6 @@ COPY scripts/docker/install_features.py ./scripts/docker/install_features.py
 # Resolve features and install them. If PROFILE is set it wins; else
 # FEATURES; else DEFAULT_PROFILE. Empty results in a parse error from
 # install_features.py, which is the correct fail-loud behavior.
-# The package default install includes MuJoCo, but the modular slim
-# profile contract is API + pendulum only.
 RUN set -eux; \
     if [ -n "$PROFILE" ]; then \
         python scripts/docker/install_features.py --profile "$PROFILE"; \
@@ -79,9 +72,6 @@ RUN set -eux; \
         python scripts/docker/install_features.py --features "$FEATURES"; \
     else \
         python scripts/docker/install_features.py --profile "$DEFAULT_PROFILE"; \
-    fi; \
-    if [ "$PROFILE" = "slim" ]; then \
-        pip uninstall -y mujoco; \
     fi
 
 

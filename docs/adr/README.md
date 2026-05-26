@@ -26,15 +26,9 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0018](0018-standalone-sidekick.md)                | Standalone Sidekick Application                                 | Accepted | 2026-05-23 |
 | [0019](0019-mission-drift-calculators.md)          | Mission-Drift Calculators                                       | Accepted | 2026-04-25 |
 | [0020](0020-canonical-urdf-subsystem.md)           | Canonical URDF subsystem                                        | Accepted | 2026-05-08 |
-| [0021](0021-container-strategy.md)                 | Root container surface policy                                   | Accepted | 2026-05-24 |
-| [0020](0020-canonical-urdf-subsystem.md)           | Canonical URDF subsystem                                        | Proposed | 2026-05-08 |
-| [0022](0022-chat-sidekick-boundary.md)             | Chat / Sidekick boundary                                        | Accepted | 2026-05-24 |
 
 ## ADR Backlog
 
 1. Engine adapter boundary ownership and contract lifecycle.
 2. UI/API orchestration boundaries and dependency direction.
 3. CI quality gate scope and blocking policy.
-
-- [0021-container-strategy.md](0021-container-strategy.md)
-- [0022-chat-sidekick-boundary.md](0022-chat-sidekick-boundary.md)

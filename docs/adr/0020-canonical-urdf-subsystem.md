@@ -84,6 +84,7 @@ some legacy humanoid-specific wrappers still exist. That is an
 implementation gap, not an unresolved architecture decision.
 
 ## Rationale
+
 Reasoning:
 
 1. **The duplication is real, not philosophical.** Both subsystems emit URDF XML, both compute inertia primitives, both have mesh generators. Removing duplication is the higher-order win.

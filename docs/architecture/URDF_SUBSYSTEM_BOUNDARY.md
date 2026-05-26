@@ -83,21 +83,16 @@ Use `model_generation` when:
 4. **Building specialized mechanisms** (grippers, legs, arms)
 5. **Need Simscape Multibody export** format
 6. **Creating models from scratch** with custom joint definitions
-7. **Need the compatibility facade** at `model_generation.humanoid`
-   rather than importing `humanoid_character_builder` directly
 
 ### Example Use Cases
 
 ```python
-from model_generation import ModelBuilder
+from model_generation import ManualBuilder, Link, Joint, Inertia
 
 # Custom robot model
-builder = ModelBuilder()
-builder.add_link("base", geometry=BoxGeometry(0.5, 0.3, 0.2))
-builder.add_joint("joint1", parent="base", child="link1", joint_type="revolute")
-model = builder.build()
-model.export_urdf("./output/my_robot.urdf")
-model.export_simscape("./output/my_robot.smdb")
+builder = ManualBuilder("robot")
+builder.add_link(Link(name="base", inertia=Inertia.from_box(10, 1, 1, 0.5)))
+urdf = builder.build().urdf_xml
 ```
 
 ## Code-level evidence
@@ -115,13 +110,13 @@ Current source code already points in the accepted direction:
 
 ## Summary Table
 
-| Concern                         | Canonical owner                 | Notes |
-| ------------------------------- | ------------------------------- | ----- |
-| URDF XML writer                 | `model_generation`              | Composed by `humanoid_character_builder` |
-| Inertia primitives/calculators  | `model_generation`              | Reused by `humanoid_character_builder.mesh.*` |
-| Anthropometry + body presets    | `humanoid_character_builder`    | Domain-specific human modeling |
-| CharacterBuilder user workflow  | `humanoid_character_builder`    | Public humanoid entry point |
-| Humanoid namespace compatibility| `model_generation.humanoid`     | Compatibility facade only |
+| Concern                          | Canonical owner              | Notes                                         |
+| -------------------------------- | ---------------------------- | --------------------------------------------- |
+| URDF XML writer                  | `model_generation`           | Composed by `humanoid_character_builder`      |
+| Inertia primitives/calculators   | `model_generation`           | Reused by `humanoid_character_builder.mesh.*` |
+| Anthropometry + body presets     | `humanoid_character_builder` | Domain-specific human modeling                |
+| CharacterBuilder user workflow   | `humanoid_character_builder` | Public humanoid entry point                   |
+| Humanoid namespace compatibility | `model_generation.humanoid`  | Compatibility facade only                     |
 
 ## References
 
