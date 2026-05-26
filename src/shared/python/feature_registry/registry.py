@@ -80,10 +80,16 @@ class FeatureReport:
     depends_on: tuple[str, ...]
 
     def to_dict(self) -> dict[str, Any]:
-        """JSON-friendly dict representation."""
+        """JSON-friendly dict representation.
+
+        Includes a ``status`` field (``"AVAILABLE"`` or ``"UNAVAILABLE"``)
+        in addition to the boolean ``available`` flag, so shell consumers
+        (e.g. ``docker-smoke.yml``) can grep for an unambiguous string.
+        """
         data = asdict(self)
         data["missing"] = list(self.missing)
         data["depends_on"] = list(self.depends_on)
+        data["status"] = "AVAILABLE" if self.available else "UNAVAILABLE"
         return data
 
 
@@ -157,17 +163,20 @@ class CapabilityRegistry:
     def check(self, name: str) -> FeatureReport:
         """Return the report for a single feature.
 
-        Triggers a full population on first use, then reads from the
-        cache. Use :meth:`refresh_one` to re-run a single probe.
+        Lazily populates only the requested feature on first use, then reads
+        from the cache. Use :meth:`refresh_one` to re-run a single probe.
 
         Raises:
             KeyError: if ``name`` is not a registered feature.
         """
-        if not self._populated:
-            self.refresh()
+        feature = get_feature(name)
+        with self._lock:
+            cached = self._cache.get(feature.name)
+        if cached is None:
+            return self.refresh_one(feature.name)
         with self._lock:
             try:
-                return self._cache[get_feature(name).name]
+                return self._cache[feature.name]
             except KeyError as exc:
                 raise KeyError(f"Unknown feature {name!r}") from exc
 

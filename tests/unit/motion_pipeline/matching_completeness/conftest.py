@@ -13,9 +13,6 @@ production primitive is otherwise untouched.
 
 from __future__ import annotations
 
-import sys
-import types
-
 
 def _install_invariant_shim() -> None:
     mod_name = "src.shared.python.contracts"

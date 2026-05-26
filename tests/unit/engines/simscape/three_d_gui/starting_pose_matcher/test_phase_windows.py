@@ -15,12 +15,10 @@ Plotter``), so we load them by absolute path with importlib.
 from __future__ import annotations
 
 import importlib.util
-import json
 import os
 import sys
 from pathlib import Path
 
-import numpy as np
 import pytest
 
 # --------------------------------------------------------------------------- #

@@ -112,4 +112,6 @@ def get_logger(name: str) -> logging.Logger:
         >>> logger = get_logger(__name__)
         >>> logger.info("simulation_started")
     """
-    return logging.getLogger(name)
+    from src.shared.python.logging_pkg.logging_config import get_logger as _get_logger
+
+    return _get_logger(name)

@@ -23,7 +23,6 @@ from tests.unit.engines.pinocchio._kinematic_equivalence_data import (
     REFERENCE_POSES,
     SpineConfig,
     geodesic_angle,
-    load_simscape_address_row,
     numpy_spine_fk,
     position_rmse,
     rot_z,

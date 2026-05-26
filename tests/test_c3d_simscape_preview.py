@@ -1,9 +1,7 @@
 import unittest
 import numpy as np
-from pathlib import Path
 from src.motion_capture.c3d_simscape_preview import (
     canonicalize_rotation,
-    check_matlab_availability,
     match_motion,
 )
 

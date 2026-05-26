@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from src.tools.model_explorer._chain_model import ChainNode, KinematicTree
-from tests.tools.model_explorer._fixtures import BRANCH_URDF, EE_URDF, SIMPLE_URDF
+from tests.tools.model_explorer._fixtures import BRANCH_URDF, SIMPLE_URDF
 
 
 class TestChainNode:

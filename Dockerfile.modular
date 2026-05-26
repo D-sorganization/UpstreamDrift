@@ -1,3 +1,4 @@
+# EXPERIMENTAL — not in the CI build path. See docker/README.md and ADR-0021.
 # Modular UpstreamDrift Dockerfile.
 #
 # Selects features either by named profile or by explicit comma-separated

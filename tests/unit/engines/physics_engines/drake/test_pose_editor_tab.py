@@ -8,7 +8,6 @@ import pytest
 from src.engines.physics_engines.drake.python.src.pose_editor_tab import (
     DrakePoseEditor,
     DrakePoseEditorTab,
-    JointType,
     PYQT6_AVAILABLE,
 )
 

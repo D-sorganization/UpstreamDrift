@@ -4,7 +4,6 @@ import json
 from unittest.mock import MagicMock, patch
 
 import numpy as np
-import pytest
 
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.advanced_gui_methods import (
     AdvancedGuiMethodsMixin,
@@ -40,7 +39,6 @@ def test_load_launch_config(tmp_path):
 
 def test_apply_config_colors():
     """Test applying colors based on geometry names."""
-    import mujoco
 
     gui = MockGuiClass()
     gui.sim_widget.get_num_geoms.return_value = 2

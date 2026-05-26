@@ -10,13 +10,10 @@ Covers:
 
 from __future__ import annotations
 
-import json
 import tempfile
-import urllib.error
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 
-import pytest
 
 # ---------------------------------------------------------------------------
 # 1. Xacro preprocessing

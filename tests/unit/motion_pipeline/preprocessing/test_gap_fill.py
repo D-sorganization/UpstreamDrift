@@ -143,7 +143,11 @@ def test_gap_fill_pca_strategy_implemented() -> None:
         m2 = Marker(name="M2", x=float(i) * 0.2, y=1.0, z=0.0, occluded=False)
         m3 = Marker(name="M3", x=float(i) * -0.05, y=0.0, z=0.5, occluded=False)
         frames.append(
-            MarkerFrame(timestamp=i / 30.0, markers={"M1": m1, "M2": m2, "M3": m3}, frame_index=i)
+            MarkerFrame(
+                timestamp=i / 30.0,
+                markers={"M1": m1, "M2": m2, "M3": m3},
+                frame_index=i,
+            )
         )
     traj = MarkerTrajectory(id="traj_occ_multi", frames=frames)
 
@@ -155,20 +159,25 @@ def test_gap_fill_pca_strategy_implemented() -> None:
     assert isinstance(out, MarkerTrajectory)
     assert isinstance(linear_out, MarkerTrajectory)
     same_as_linear = all(
-        out.frames[i].markers["M1"].x == linear_out.frames[i].markers["M1"].x for i in range(5, 8)
+        out.frames[i].markers["M1"].x == linear_out.frames[i].markers["M1"].x
+        for i in range(5, 8)
     )
     assert not same_as_linear
 
 
 def test_gap_fill_gaps_at_boundaries() -> None:
     # Gap at index 0 (start == 0) and gap at the end (end >= len(frames))
-    seq_start = make_low_confidence_keypoint_sequence(num_frames=10, low_conf_range=(0, 2))
+    seq_start = make_low_confidence_keypoint_sequence(
+        num_frames=10, low_conf_range=(0, 2)
+    )
     out_start = gap_fill(seq_start, strategy=GapFillStrategy.LINEAR)
     assert isinstance(out_start, KeypointSequence)
     # The low-confidence window is not filled because start == 0
     assert out_start.frames[0].keypoints[0].confidence < 0.5
 
-    seq_end = make_low_confidence_keypoint_sequence(num_frames=10, low_conf_range=(8, 9))
+    seq_end = make_low_confidence_keypoint_sequence(
+        num_frames=10, low_conf_range=(8, 9)
+    )
     out_end = gap_fill(seq_end, strategy=GapFillStrategy.LINEAR)
     assert isinstance(out_end, KeypointSequence)
     # The low-confidence window at the end is not filled because end >= len(frames)
@@ -180,7 +189,9 @@ def test_gap_fill_gaps_at_boundaries() -> None:
     assert out_near_start.frames[0].keypoints[0].confidence < 0.5
 
     # Same for markers
-    traj_start = make_marker_trajectory_with_occlusion(num_frames=10, occluded_range=(0, 2))
+    traj_start = make_marker_trajectory_with_occlusion(
+        num_frames=10, occluded_range=(0, 2)
+    )
     out_m_start = gap_fill(traj_start, strategy=GapFillStrategy.LINEAR)
     assert isinstance(out_m_start, MarkerTrajectory)
     assert out_m_start.frames[0].markers["M1"].occluded is True
@@ -191,7 +202,11 @@ def test_gap_fill_gaps_at_boundaries() -> None:
 
 
 def test_gap_fill_pca_edge_cases() -> None:
-    from src.shared.python.motion_pipeline.contracts import Marker, MarkerFrame, MarkerTrajectory
+    from src.shared.python.motion_pipeline.contracts import (
+        Marker,
+        MarkerFrame,
+        MarkerTrajectory,
+    )
 
     # 1. Less than 2 frames
     m1 = Marker(name="M1", x=0.0, y=0.0, z=0.0, occluded=True)
@@ -218,7 +233,9 @@ def test_gap_fill_pca_edge_cases() -> None:
         occ = 3 <= i <= 4
         m1 = Marker(name="M1", x=float(i) * 0.1, y=0.0, z=0.0, occluded=occ)
         m2 = Marker(name="M2", x=float(i) * 0.2, y=1.0, z=0.0, occluded=occ)
-        frames.append(MarkerFrame(timestamp=i / 30.0, markers={"M1": m1, "M2": m2}, frame_index=i))
+        frames.append(
+            MarkerFrame(timestamp=i / 30.0, markers={"M1": m1, "M2": m2}, frame_index=i)
+        )
     traj_no_visible = MarkerTrajectory(id="traj_no_visible", frames=frames)
     out_no_visible = gap_fill(traj_no_visible, strategy=GapFillStrategy.PCA)
     assert isinstance(out_no_visible, MarkerTrajectory)
@@ -231,7 +248,11 @@ def test_pure_python_gap_fill() -> None:
         gap_fill as pure_gap_fill,
         GapFillStrategy as PureGapFillStrategy,
     )
-    from src.shared.python.motion_pipeline.contracts import Marker, MarkerFrame, MarkerTrajectory
+    from src.shared.python.motion_pipeline.contracts import (
+        Marker,
+        MarkerFrame,
+        MarkerTrajectory,
+    )
 
     # Test linear on keypoint sequence
     seq = make_low_confidence_keypoint_sequence(num_frames=20, low_conf_range=(5, 8))
@@ -239,7 +260,9 @@ def test_pure_python_gap_fill() -> None:
     assert out.metadata.get("gap_filled") is True
 
     # Test nearest on keypoints
-    seq_near = make_low_confidence_keypoint_sequence(num_frames=15, low_conf_range=(5, 7))
+    seq_near = make_low_confidence_keypoint_sequence(
+        num_frames=15, low_conf_range=(5, 7)
+    )
     out_near = pure_gap_fill(seq_near, strategy=PureGapFillStrategy.NEAREST, max_gap=10)
     assert out_near.metadata.get("gap_filled") is True
 
@@ -249,8 +272,12 @@ def test_pure_python_gap_fill() -> None:
     assert out_traj.metadata.get("gap_filled") is True
 
     # Test nearest on markers
-    traj_near = make_marker_trajectory_with_occlusion(num_frames=20, occluded_range=(5, 7))
-    out_traj_near = pure_gap_fill(traj_near, strategy=PureGapFillStrategy.NEAREST, max_gap=10)
+    traj_near = make_marker_trajectory_with_occlusion(
+        num_frames=20, occluded_range=(5, 7)
+    )
+    out_traj_near = pure_gap_fill(
+        traj_near, strategy=PureGapFillStrategy.NEAREST, max_gap=10
+    )
     assert out_traj_near.metadata.get("gap_filled") is True
 
     # Test cubic fallback to linear
@@ -280,7 +307,11 @@ def test_pure_python_gap_fill() -> None:
         m2 = Marker(name="M2", x=float(i) * 0.2, y=1.0, z=0.0, occluded=False)
         m3 = Marker(name="M3", x=float(i) * -0.05, y=0.0, z=0.5, occluded=False)
         frames.append(
-            MarkerFrame(timestamp=i / 30.0, markers={"M1": m1, "M2": m2, "M3": m3}, frame_index=i)
+            MarkerFrame(
+                timestamp=i / 30.0,
+                markers={"M1": m1, "M2": m2, "M3": m3},
+                frame_index=i,
+            )
         )
     traj_pca = MarkerTrajectory(id="traj_pca", frames=frames)
     out_pca = pure_gap_fill(traj_pca, strategy=PureGapFillStrategy.PCA, max_gap=10)
@@ -296,7 +327,9 @@ def test_pure_python_gap_fill() -> None:
             MarkerFrame(timestamp=i / 30.0, markers={"M1": m1, "M2": m2}, frame_index=i)
         )
     traj_no_visible = MarkerTrajectory(id="traj_no_visible", frames=frames_no_visible)
-    out_no_visible = pure_gap_fill(traj_no_visible, strategy=PureGapFillStrategy.PCA, max_gap=10)
+    out_no_visible = pure_gap_fill(
+        traj_no_visible, strategy=PureGapFillStrategy.PCA, max_gap=10
+    )
     assert out_no_visible.metadata.get("gap_filled") is True
 
     # Test PCA rank-deficient fallback
@@ -304,10 +337,16 @@ def test_pure_python_gap_fill() -> None:
     import numpy as np
 
     with patch("numpy.linalg.svd", side_effect=np.linalg.LinAlgError):
-        out_svd_error = pure_gap_fill(traj_pca, strategy=PureGapFillStrategy.PCA, max_gap=10)
-        assert out_svd_error.metadata.get("strategy") == "pca"  # fell back to linear inside
+        out_svd_error = pure_gap_fill(
+            traj_pca, strategy=PureGapFillStrategy.PCA, max_gap=10
+        )
+        assert (
+            out_svd_error.metadata.get("strategy") == "pca"
+        )  # fell back to linear inside
 
     # Test PCA with SVD zero/empty singular values
     with patch("numpy.linalg.svd", return_value=(None, np.array([]), None)):
-        out_zero_s = pure_gap_fill(traj_pca, strategy=PureGapFillStrategy.PCA, max_gap=10)
+        out_zero_s = pure_gap_fill(
+            traj_pca, strategy=PureGapFillStrategy.PCA, max_gap=10
+        )
         assert out_zero_s.metadata.get("strategy") == "pca"

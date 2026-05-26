@@ -15,7 +15,7 @@ removing or renaming required fields will fail these checks.
 from __future__ import annotations
 
 import json
-from typing import Any, get_args
+from typing import get_args
 
 import pytest
 

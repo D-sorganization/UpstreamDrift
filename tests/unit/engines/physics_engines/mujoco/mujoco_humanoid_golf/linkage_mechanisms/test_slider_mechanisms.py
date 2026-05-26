@@ -1,7 +1,5 @@
 """Unit tests for slider mechanism generators."""
 
-import pytest
-
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.linkage_mechanisms.slider_mechanisms import (
     generate_scotch_yoke_xml,
     generate_slider_crank_xml,

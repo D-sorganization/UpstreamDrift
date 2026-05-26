@@ -13,11 +13,9 @@ Guideline references:
 from __future__ import annotations
 
 import numpy as np
-import pytest
 from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (
     PendulumPhysicsEngine,
 )
-from src.shared.python.engine_core.engine_availability import skip_if_unavailable
 
 # Tolerances from Guideline P3
 TOLERANCE_POSITION_RAD = 1e-4

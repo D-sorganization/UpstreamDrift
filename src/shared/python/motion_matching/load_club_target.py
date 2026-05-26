@@ -1,6 +1,6 @@
 """Top-level ``load_club_target`` dispatch -- mirror of the MATLAB loaders.
 
-Issue #4095 hoists the source-format-specific loaders (xlsx, c3d) under a
+The source-format-specific loaders are hoisted (xlsx, c3d) under a
 single dispatch entry point so engine code never has to special-case the
 input file format.
 
