@@ -73,6 +73,8 @@ def get_default_icon() -> QIcon | None:
         QIcon if icon file exists, None otherwise
     """
     icon_paths = [
+        get_repo_root() / "src" / "launchers" / "assets" / "golf_logo.png",
+        get_repo_root() / "src" / "launchers" / "assets" / "golf_logo.ico",
         get_repo_root() / "launchers" / "assets" / "golf_robot.png",
         get_repo_root() / "src" / "launchers" / "assets" / "golf_robot.png",
         get_repo_root() / "assets" / "golf_robot.png",

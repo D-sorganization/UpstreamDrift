@@ -445,3 +445,77 @@ def test_upstream_drift_launcher_main(
     progress_callback = mock_worker_instance.progress_signal.connect.call_args[0][0]
     progress_callback("Loading model registry...", 10)
     mock_splash.show_message.assert_called_once_with("Loading model registry...", 10)
+
+
+def test_launcher_favicon_order_and_existence() -> None:
+    # 1. Verify files exist on disk
+    from src.launchers.ui_components import ASSETS_DIR
+
+    logo_ico = ASSETS_DIR / "golf_logo.ico"
+    logo_png = ASSETS_DIR / "golf_logo.png"
+    assert logo_ico.exists(), (
+        "golf_logo.ico must exist in the launchers assets directory"
+    )
+    assert logo_png.exists(), (
+        "golf_logo.png must exist in the launchers assets directory"
+    )
+
+    # 2. Verify candidate order in upstream_drift_launcher.py
+    import re
+    from pathlib import Path
+
+    launcher_file = (
+        Path(__file__).parent.parent.parent
+        / "src"
+        / "launchers"
+        / "upstream_drift_launcher.py"
+    )
+    with open(launcher_file, encoding="utf-8") as f:
+        content = f.read()
+
+    # Find the lists of icon candidates
+    matches = re.findall(r"icon_candidates\s*=\s*\[(.*?)\]", content, re.DOTALL)
+    assert len(matches) >= 2, (
+        "Should find at least two icon_candidates lists in upstream_drift_launcher.py"
+    )
+
+    for match in matches:
+        items = [item.strip() for item in match.split(",") if item.strip()]
+        assert len(items) >= 2, (
+            "Each icon_candidates list must have at least 2 candidates"
+        )
+        assert "golf_logo.ico" in items[0], (
+            f"First candidate must be golf_logo.ico, got: {items[0]}"
+        )
+        assert "golf_logo.png" in items[1], (
+            f"Second candidate must be golf_logo.png, got: {items[1]}"
+        )
+
+
+def test_default_icon_priority() -> None:
+    # 1. Verify that get_default_icon returns a QIcon (if files exist)
+    from src.shared.python.ui.qt.utils import get_default_icon, get_repo_root
+    import re
+
+    logo_png = get_repo_root() / "src" / "launchers" / "assets" / "golf_logo.png"
+    if logo_png.exists():
+        icon = get_default_icon()
+        assert icon is not None
+
+    # 2. Verify candidate order in utils.py
+    utils_file = (
+        get_repo_root() / "src" / "shared" / "python" / "ui" / "qt" / "utils.py"
+    )
+    with open(utils_file, encoding="utf-8") as f:
+        utils_content = f.read()
+
+    match = re.search(r"icon_paths\s*=\s*\[(.*?)\]", utils_content, re.DOTALL)
+    assert match is not None, "Should find icon_paths list in utils.py"
+    items = [item.strip() for item in match.group(1).split(",") if item.strip()]
+    assert len(items) >= 2
+    assert "golf_logo.png" in items[0], (
+        f"First default icon path must contain golf_logo.png, got: {items[0]}"
+    )
+    assert "golf_logo.ico" in items[1], (
+        f"Second default icon path must contain golf_logo.ico, got: {items[1]}"
+    )

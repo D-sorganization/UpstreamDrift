@@ -676,11 +676,11 @@ class UpstreamDriftLauncher(QMainWindow):
 
     def _load_window_icon(self) -> None:
         icon_candidates = [
-            ASSETS_DIR / "golf_suite_unified.ico",
             ASSETS_DIR / "golf_logo.ico",
+            ASSETS_DIR / "golf_logo.png",
+            ASSETS_DIR / "golf_suite_unified.ico",
             ASSETS_DIR / "favicon.ico",
             ASSETS_DIR / "golf_icon.ico",
-            ASSETS_DIR / "golf_logo.png",
         ]
         for icon_path in icon_candidates:
             if icon_path.exists():
@@ -1501,11 +1501,11 @@ def main() -> None:
 
     # Set global application icon
     icon_candidates = [
-        ASSETS_DIR / "golf_suite_unified.ico",
         ASSETS_DIR / "golf_logo.ico",
+        ASSETS_DIR / "golf_logo.png",
+        ASSETS_DIR / "golf_suite_unified.ico",
         ASSETS_DIR / "favicon.ico",
         ASSETS_DIR / "golf_icon.ico",
-        ASSETS_DIR / "golf_logo.png",
     ]
     for icon_path in icon_candidates:
         if icon_path.exists():
