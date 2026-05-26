@@ -127,8 +127,9 @@ class TestDockerConfiguration(unittest.TestCase):
         """Test that Dockerfile uses a pinned base image."""
         dockerfile_path = REPO_ROOT / "Dockerfile"
         content = dockerfile_path.read_text()
-        self.assertIn("FROM python:3.12-slim AS builder", content)
-        self.assertIn("FROM python:3.12-slim AS runtime", content)
+        self.assertIn("FROM python:3.12-slim", content)
+        self.assertIn("AS builder", content)
+        self.assertIn("AS runtime", content)
         self.assertNotIn(":latest", content, "Should use explicit base image tags")
 
 

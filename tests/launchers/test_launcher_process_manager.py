@@ -37,7 +37,6 @@ def test_init_log_file_truncates_if_large() -> None:
     mock_stat = MagicMock()
     mock_stat.st_size = 3 * 1024 * 1024  # 3MB
     mock_path.stat.return_value = mock_stat
-    mock_path.read_text.return_value = "line1\nline2\nline3\n"
 
     with (
         patch(
@@ -60,10 +59,11 @@ def test_init_log_file_truncates_if_large() -> None:
     mgr2._log_dir = MagicMock()
     mgr2._log_file_path = mock_path
 
-    # We call the real init_log_file
-    ProcessManager._init_log_file(mgr2)
-    mock_path.read_text.assert_called_once()
-    mock_path.write_text.assert_called_once()
+    with patch("builtins.open", mock_open(read_data="line1\nline2\nline3\n")) as m_open:
+        # We call the real init_log_file
+        ProcessManager._init_log_file(mgr2)
+        m_open.assert_any_call(mock_path, encoding="utf-8", errors="replace")
+        m_open.assert_any_call(mock_path, "w", encoding="utf-8")
 
 
 def test_get_subprocess_env(manager) -> None:
@@ -225,9 +225,11 @@ def test_launch_script_separate_term(
     mock_popen.reset_mock()
     mock_secure_popen.reset_mock()
 
+    fake_script_posix = Path("/fake/script.py")
+    fake_cwd_posix = Path("/fake/cwd")
     with patch("os.name", "posix"):
         # Non-Windows separate-terminal path uses secure_popen
-        manager.launch_script("Test", Path("/fake/script.py"), Path("/fake/cwd"))
+        manager.launch_script("Test", fake_script_posix, fake_cwd_posix)
         mock_secure_popen.assert_called_once()
         cmd_arg = mock_secure_popen.call_args[0][0]
         assert (

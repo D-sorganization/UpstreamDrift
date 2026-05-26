@@ -168,7 +168,7 @@ body-part-viz-gl = [
 all = ["upstream-drift[rust,all-engines,analysis,pose,biomechanics,rl,urdf,dev]"]
 
 [project.scripts]
-upstream-drift = "launch_golf_suite:main"
+upstream-drift = "launch_upstream_drift:main"
 # Standalone Sidekick window / headless runner (T6 — issue #5984).
 # The canonical entry-point lives here rather than in vendor/ud-tools because
 # the standalone shell (sidekick.standalone.*) is owned by this repo.
@@ -195,7 +195,7 @@ build-backend = "hatchling.build"
 include = [
     "src/**/*",
     "ui/dist/**/*",  # Bundled web UI (built by build_hooks.py)
-    "launch_golf_suite.py",
+    "launch_upstream_drift.py",
     "build_hooks.py",
 ]
 exclude = [

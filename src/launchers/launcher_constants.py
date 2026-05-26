@@ -14,6 +14,7 @@ from src.shared.python.logging_pkg.logging_config import (
     configure_gui_logging,
     get_logger,
 )
+import contextlib
 
 # Configure Logging using centralized module
 configure_gui_logging()
@@ -126,8 +127,18 @@ def view_mode_settings(mode: ViewMode) -> tuple[float, int, bool, bool]:
         TypeError: if ``mode`` is not a :class:`ViewMode`.
         ValueError: if ``mode`` is not one of the known view modes.
     """
-    if not isinstance(mode, ViewMode):
+    is_vm = isinstance(mode, ViewMode) or (
+        hasattr(mode, "__class__") and mode.__class__.__name__ == "ViewMode"
+    )
+    if not is_vm:
         raise TypeError(f"mode must be a ViewMode IntEnum, got {type(mode).__name__}")
+    # Convert to local ViewMode enum instance if it's a reloaded/foreign one
+    if not isinstance(mode, ViewMode):
+        try:
+            mode = ViewMode(int(mode))
+        except (ValueError, TypeError):
+            with contextlib.suppress(AttributeError, KeyError):
+                mode = ViewMode[mode.name]
     if mode not in _VIEW_MODE_TABLE:
         raise ValueError(f"Unknown ViewMode: {mode!r}")
     return _VIEW_MODE_TABLE[mode]

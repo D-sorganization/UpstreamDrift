@@ -88,6 +88,7 @@ def _build_menu_bar_close_widget(parent: QWidget, close_callback: Any) -> QWidge
 
 from typing import Protocol
 from PyQt6.QtWidgets import QTabWidget, QDialog
+import contextlib
 
 
 class LauncherUIProtocol(Protocol):
@@ -445,7 +446,7 @@ class UISetupManager:
             self.workspace_tabs.removeTab(index)
 
         self.popout_widget(widget, "Library")
-        windows = self._popped_out_windows
+        windows = getattr(self, "_popped_out_windows", [])
         self.library_window = windows[-1] if windows else None
 
     def popout_widget(self, widget: QWidget, title: str) -> None:
@@ -453,7 +454,7 @@ class UISetupManager:
         from PyQt6.QtCore import Qt
         from PyQt6.QtWidgets import QDialog, QVBoxLayout
 
-        if not True:
+        if not hasattr(self, "_popped_out_windows") or self._popped_out_windows is None:
             self._popped_out_windows: list[QDialog] = []
 
         # We use a non-modal dialog to allow it to float freely
@@ -1204,6 +1205,99 @@ class UISetupManager:
 
     def _setup_view_mode_and_zoom(self, top_bar: QHBoxLayout) -> None:
         """Add discrete view-mode dropdown and a compact, elegant zoom slider to top bar."""
+        if top_bar is None:
+            raise ValueError("top_bar must be provided")
+
+        self._top_viewmode_actions: dict[Any, QAction] = {}
+
+        self.view_mode_combo = QComboBox(self.launcher)
+        self.view_mode_combo.addItem("Tile Large", ViewMode.LARGE)
+        self.view_mode_combo.addItem("Tile Medium", ViewMode.MEDIUM)
+        self.view_mode_combo.addItem("Tile Small", ViewMode.SMALL)
+        self.view_mode_combo.addItem("List Large", ViewMode.LIST_LARGE)
+        self.view_mode_combo.addItem("List Small", ViewMode.LIST_SMALL)
+        self.view_mode_combo.setCurrentIndex(3)  # List Large default
+        self.view_mode_combo.setToolTip("Choose how the model tiles are arranged")
+        self.view_mode_combo.setAccessibleName("View mode")
+        self.view_mode_combo.currentIndexChanged.connect(self._on_view_mode_changed)
+
+        self.view_mode_combo.setStyleSheet("""
+            QComboBox {
+                background: #1e1e1e;
+                border: 1px solid #3a3a3a;
+                border-radius: 4px;
+                padding: 4px 8px;
+                color: #cccccc;
+                font-size: 11px;
+                min-width: 100px;
+            }
+            QComboBox:hover {
+                background: #2a2a2a;
+                border-color: #555555;
+                color: #ffffff;
+            }
+            QComboBox QAbstractItemView {
+                background: #1e1e1e;
+                border: 1px solid #3a3a3a;
+                color: #cccccc;
+                selection-background-color: #2a2a2a;
+                selection-color: #ffffff;
+            }
+        """)
+        top_bar.addWidget(self.view_mode_combo)
+
+        self.zoom_slider = QSlider(Qt.Orientation.Horizontal, self.launcher)
+        self.zoom_slider.setRange(0, self._ZOOM_SLIDER_STEPS)
+        self.zoom_slider.setMinimumWidth(140)
+        from PyQt6.QtWidgets import QSizePolicy
+
+        self.zoom_slider.setSizePolicy(
+            QSizePolicy.Policy.MinimumExpanding,
+            self.zoom_slider.sizePolicy().verticalPolicy(),
+        )
+
+        self.zoom_slider.setStyleSheet("""
+            QSlider::groove:horizontal {
+                border: 1px solid #3a3a3a;
+                height: 4px;
+                background: #1a1a1a;
+                margin: 0px;
+                border-radius: 2px;
+            }
+            QSlider::handle:horizontal {
+                background: #888888;
+                border: 1px solid #555555;
+                width: 10px;
+                height: 10px;
+                margin: -3px 0;
+                border-radius: 5px;
+            }
+            QSlider::handle:horizontal:hover {
+                background: #007acc;
+                border-color: #0098ff;
+            }
+        """)
+        self.zoom_slider.setToolTip("Adjust the size of the model tiles")
+        self.zoom_slider.setAccessibleName("Tile zoom")
+        self.zoom_slider.setAccessibleDescription(_build_zoom_accessible_description())
+        self.zoom_slider.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
+        from src.launchers.launcher_constants import TILE_SCALE_DEFAULT
+
+        initial_scale = TILE_SCALE_DEFAULT
+        lm = getattr(self, "layout_manager", None)
+        if lm is not None and hasattr(lm, "tile_scale"):
+            initial_scale = float(lm.tile_scale)
+        self.zoom_slider.setValue(self._scale_to_slider(initial_scale))
+        self.zoom_slider.valueChanged.connect(self._on_zoom_slider_changed)
+        top_bar.addWidget(self.zoom_slider)
+
+        self.lbl_zoom_pct = QLabel(f"{int(round(initial_scale * 100))}%", self.launcher)
+        self.lbl_zoom_pct.setToolTip("Current tile size as a percentage of base")
+        self.lbl_zoom_pct.setStyleSheet(
+            "font-size: 10px; color: #888888; font-family: monospace;"
+        )
+        top_bar.addWidget(self.lbl_zoom_pct)
 
         # Ctrl+= / Ctrl+- shortcuts adjust zoom by one step (~1.75% scale).
         sc_in = QShortcut(QKeySequence("Ctrl+="), self.launcher)
@@ -1239,8 +1333,17 @@ class UISetupManager:
         if combo is None:
             return
         mode = combo.itemData(index)
-        if not isinstance(mode, ViewMode):
+        is_vm = isinstance(mode, ViewMode) or (
+            hasattr(mode, "__class__") and mode.__class__.__name__ == "ViewMode"
+        )
+        if not is_vm:
             return
+        if not isinstance(mode, ViewMode):
+            try:
+                mode = ViewMode(int(mode))
+            except (ValueError, TypeError):
+                with contextlib.suppress(AttributeError, KeyError):
+                    mode = ViewMode[mode.name]
         self._apply_view_mode(mode, sync_combo=False)
 
     def _set_view_mode_from_menu(self, mode: ViewMode) -> None:
@@ -1317,6 +1420,7 @@ class UISetupManager:
         top_bar.addWidget(self.btn_toggle_left_sidebar)
 
         self._setup_top_bar_status_and_search(top_bar)
+        self._setup_view_mode_and_zoom(top_bar)
         self._setup_top_bar_config_checkboxes(top_bar)
         self._setup_top_bar_action_buttons(top_bar)
 
@@ -1467,7 +1571,7 @@ class UISetupManager:
             raise ValueError("engine_name must be provided")
         if not self._console_dock.isVisible():
             self._console_dock.show()
-            if True:
+            if hasattr(self, "_action_console"):
                 self._action_console.setChecked(True)
 
         ts = datetime.datetime.now().strftime("%H:%M:%S")
