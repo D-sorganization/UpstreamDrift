@@ -202,9 +202,8 @@ def launch_gui(args: argparse.Namespace) -> int:
 def run_headless(args: argparse.Namespace) -> int:
     """Run a headless calculator and write the results to stdout or a file."""
     from sidekick.standalone.runner import run_calculator
-    from src.shared.python.core.process_safety import narrow_catch
 
-    with narrow_catch(ValueError, FileNotFoundError, log_message="sidekick run"):
+    try:
         if args.output is not None and not args.output.parent.exists():
             raise FileNotFoundError(args.output.parent)
         output_path = str(args.output) if args.output is not None else "-"
@@ -213,8 +212,9 @@ def run_headless(args: argparse.Namespace) -> int:
             inputs_path=str(args.inputs),
             output=output_path,
         )
-    sys.stderr.write("sidekick run failed; check calculator arguments and paths.\n")
-    return 1
+    except (ValueError, FileNotFoundError):
+        sys.stderr.write("sidekick run failed; check calculator arguments and paths.\n")
+        return 1
 
 
 def main(argv: list[str] | None = None) -> int:
