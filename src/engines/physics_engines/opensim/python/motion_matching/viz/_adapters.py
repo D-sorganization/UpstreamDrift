@@ -133,7 +133,8 @@ def quat_geodesic_deg(
     # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~35-40% faster than np.linalg.norm(..., axis=1)
     a = q_a / np.sqrt(np.einsum("ij,ij->i", q_a, q_a))[:, np.newaxis]
     b = q_b / np.sqrt(np.einsum("ij,ij->i", q_b, q_b))[:, np.newaxis]
-    dot = np.clip(np.abs(np.sum(a * b, axis=1)), 0.0, 1.0)
+    # ⚡ Bolt: einsum avoids temp arrays and is faster than np.sum(..., axis=1)
+    dot = np.clip(np.abs(np.einsum("ij,ij->i", a, b)), 0.0, 1.0)
     return 2.0 * np.degrees(np.arccos(dot))
 
 

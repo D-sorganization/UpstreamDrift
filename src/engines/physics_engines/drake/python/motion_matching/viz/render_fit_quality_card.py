@@ -234,7 +234,8 @@ def _orientation_error_deg(
     n_meas = np.sqrt(np.einsum("ij,ij->i", q_meas, q_meas))[:, np.newaxis]
     a = q_sim / np.maximum(n_sim, 1.0e-12)
     b = q_meas / np.maximum(n_meas, 1.0e-12)
-    dot = np.abs(np.sum(a * b, axis=1))
+    # ⚡ Bolt: einsum avoids temp arrays and is faster than np.sum(..., axis=1)
+    dot = np.abs(np.einsum("ij,ij->i", a, b))
     dot = np.clip(dot, -1.0, 1.0)
     return np.degrees(2.0 * np.arccos(dot))
 
