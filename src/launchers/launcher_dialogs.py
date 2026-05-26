@@ -637,13 +637,13 @@ class DialogsManager:
             return
 
         if hasattr(self, "chk_wsl") and self.chk_wsl.isChecked():
-            self.lbl_execution_mode.setText("Runtime: WSL2 (Ubuntu Linux)")
+            self.lbl_execution_mode.setText("Runtime: WSL2")
             self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_DOCKER)
         elif hasattr(self, "chk_docker") and self.chk_docker.isChecked():
-            self.lbl_execution_mode.setText("Runtime: Docker (Linux container)")
+            self.lbl_execution_mode.setText("Runtime: Docker")
             self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_DOCKER)
         else:
-            self.lbl_execution_mode.setText("Runtime: Native Windows")
+            self.lbl_execution_mode.setText("Runtime: Windows")
             self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_WARNING)
 
 
