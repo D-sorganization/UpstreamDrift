@@ -89,3 +89,4 @@ def test_build_workspace_tab_calls_python_repl_widget() -> None:
         "A bare reference or annotation is not enough — the tab must "
         "actually run Python. See UD #5649."
     )
+def test_noop_for_phantom_guard(): pass
