@@ -71,11 +71,12 @@ analysis = ["opencv-python>=4.8.0", "scikit-learn>=1.3.0"]
 pose = ["mediapipe>=0.10.33", "opencv-python>=4.8.0", "imageio[ffmpeg]>=2.31.0"]
 
 # Biomechanics engines
-biomechanics = ["myosuite>=2.0.0", "opensim>=4.4.0", "gymnasium>=0.29.0"]
-experimental = ["myosuite>=2.0.0", "opensim>=4.4.0", "gymnasium>=0.29.0"]
+biomechanics = ["myosuite>=2.0.0", "opensim>=4.4.0,<5.0.0", "gymnasium>=0.29.0"]
+experimental = ["myosuite>=2.0.0", "opensim>=4.4.0,<5.0.0", "gymnasium>=0.29.0"]
 
 # Reinforcement learning (for MyoSuite muscle training)
 rl = ["stable-baselines3>=2.0.0", "gymnasium>=0.29.0"]
+torch = ["torch>=2.0.0"]
 
 # URDF generation tools (from shared Tools repo)
 urdf = ["trimesh>=4.11.5", "PyYAML>=6.0.3", "defusedxml>=0.7.0", "robot_descriptions>=1.12.0"]
