@@ -20,7 +20,6 @@ def test_import_without_drake():
 def test_drake_provider_vocabulary_mapping():
     """Test that the vocabulary mapping is correct."""
     from src.tools.starting_pose_matcher.skeleton_extractors.drake import (
-        DRAKE_TO_MATCHER_VOCAB,
         MATCHER_TO_DRAKE,
     )
 

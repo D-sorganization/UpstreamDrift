@@ -10,13 +10,10 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from numpy.testing import assert_allclose, assert_array_equal
+from numpy.testing import assert_array_equal
 from src.robotics.control.whole_body.qp_solver import (
     NullspaceQPSolver,
     QPProblem,
-    QPSolver,
-    ScipyQPSolver,
-    create_default_solver,
 )
 from src.robotics.control.whole_body.task import (
     Task,

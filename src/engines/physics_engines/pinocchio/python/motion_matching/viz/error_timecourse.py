@@ -40,7 +40,7 @@ def _quat_geodesic_deg(q_sim: np.ndarray, q_meas: np.ndarray) -> np.ndarray:
     a = q_sim[:n]
     b = q_meas[:n]
     # Robust against double-cover sign ambiguity.
-    dot = np.clip(np.abs(np.sum(a * b, axis=1)), -1.0, 1.0)
+    dot = np.clip(np.abs(np.einsum("ij,ij->i", a, b)), -1.0, 1.0)
     return np.degrees(2.0 * np.arccos(dot))
 
 

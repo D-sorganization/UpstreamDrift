@@ -333,71 +333,21 @@ def _env_key(name: str) -> str:
     return "".join(char.upper() if char.isalnum() else "_" for char in name)
 
 
-# ---------------------------------------------------------------------------
-# MATLAB-like preview formatting (reproduced from Tools/registry.py)
-# ---------------------------------------------------------------------------
+def format_workspace_value_preview(value: Any, max_length: int = 120) -> str:
+    """Return a truncated string preview of a workspace value."""
+    if isinstance(value, dict) and not value:
+        return "{}"
+    if isinstance(value, list | tuple) and not value:
+        return "[]"
 
-PREVIEW_MAX_ROWS = 3
-PREVIEW_MAX_COLUMNS = 4
-PREVIEW_MAX_CHARS = 120
+    try:
+        if hasattr(value, "shape") and hasattr(value, "dtype"):
+            preview = f"<{value.dtype} array {value.shape}>"
+        else:
+            preview = repr(value)
+    except Exception:  # noqa: BLE001
+        preview = "<unrepresentable>"
 
-
-def format_workspace_value_preview(value: Any) -> str:
-    """Return a bounded MATLAB-like value preview for workspace UIs."""
-    if isinstance(value, str):
-        return _clip_preview(value)
-    preview_value = _preview_source(value)
-    return _clip_preview(repr(preview_value))
-
-
-def _clip_preview(preview: str) -> str:
-    if len(preview) > PREVIEW_MAX_CHARS:
-        return preview[: PREVIEW_MAX_CHARS - 3].rstrip() + "..."
+    if len(preview) > max_length:
+        return preview[: max_length - 3] + "..."
     return preview
-
-
-def _preview_source(value: Any) -> Any:
-    array_values = _to_nested_lists(value)
-    if array_values is not None:
-        return _bounded_sequence(array_values)
-    if isinstance(value, dict):
-        items = list(value.items())[:PREVIEW_MAX_COLUMNS]
-        result = dict(items)
-        if len(value) > PREVIEW_MAX_COLUMNS:
-            result["..."] = "..."
-        return result
-    return value
-
-
-def _to_nested_lists(value: Any) -> Any | None:
-    if isinstance(value, list | tuple):
-        return _listify(value)
-    tolist = getattr(value, "tolist", None)
-    if callable(tolist):
-        return tolist()
-    if hasattr(value, "shape") and hasattr(value, "__iter__"):
-        try:
-            return _listify(value)
-        except TypeError:
-            return None
-    return None
-
-
-def _bounded_sequence(value: Any, depth: int = 0) -> Any:
-    if not isinstance(value, list):
-        return value
-    limit = PREVIEW_MAX_ROWS if depth == 0 else PREVIEW_MAX_COLUMNS
-    result = [_bounded_sequence(item, depth + 1) for item in value[:limit]]
-    if len(value) > limit:
-        result.append("...")
-    return result
-
-
-def _listify(value: Any) -> Any:
-    if isinstance(value, list):
-        return [_listify(item) for item in value]
-    if isinstance(value, tuple):
-        return [_listify(item) for item in value]
-    if hasattr(value, "tolist"):
-        return _listify(value.tolist())
-    return value

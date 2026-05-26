@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pytest
-import torch
+
+torch = pytest.importorskip("torch")
 
 from src.shared.python.motion_matching.surrogate.compact.model import SurrogateConfig
 from src.shared.python.motion_matching.surrogate.compact.training import (

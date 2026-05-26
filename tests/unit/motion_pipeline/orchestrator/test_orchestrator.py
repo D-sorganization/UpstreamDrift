@@ -5,9 +5,7 @@ from __future__ import annotations
 import pytest
 
 from src.shared.python.motion_pipeline.orchestrator import (
-    AdapterOverride,
     MotionPipeline,
-    PipelineConfig,
     Stage,
     StageResult,
     _detect_format,

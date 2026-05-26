@@ -13,8 +13,6 @@ Each test is a REPO-SPECIFIC CONTRACT, not a generic smoke test:
 
 from __future__ import annotations
 
-import subprocess
-import sys
 from pathlib import Path
 
 import pytest

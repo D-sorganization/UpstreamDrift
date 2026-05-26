@@ -442,13 +442,37 @@ class AuthCache:
     Fixes Performance Issue: N+1 Auth checks.
     """
 
-    TTL_SECONDS = 300  # 5 minutes cache
-    MAX_ENTRIES = 10_000
+    TTL_SECONDS = 300  # 5 minutes cache (default; overridable via env)
+    MAX_ENTRIES = 10_000  # default; overridable via env
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        ttl_seconds: int | None = None,
+        max_entries: int | None = None,
+    ) -> None:
         import threading
         import time
 
+        # Resolve sizing from env at construction so multi-worker
+        # deployments can tune cache pressure without code changes.
+        # Class-level constants remain the source of defaults and are
+        # honoured when callers (or tests) monkeypatch them.
+        from src.shared.python.config.environment import (
+            get_auth_cache_max_entries,
+            get_auth_cache_ttl_seconds,
+        )
+
+        if ttl_seconds is None:
+            ttl_seconds = get_auth_cache_ttl_seconds(default=self.TTL_SECONDS)
+        if ttl_seconds < 1:
+            raise ValueError(f"ttl_seconds must be >= 1, got {ttl_seconds}")
+        if max_entries is None:
+            max_entries = get_auth_cache_max_entries(default=self.MAX_ENTRIES)
+        if max_entries < 1:
+            raise ValueError(f"max_entries must be >= 1, got {max_entries}")
+
+        self._ttl_seconds = ttl_seconds
+        self._max_entries = max_entries
         self._cache: dict[str, tuple[Any, float]] = {}
         self._lock = threading.Lock()
         self._time = time
@@ -464,10 +488,29 @@ class AuthCache:
         with self._lock:
             if cache_key in self._cache:
                 result, timestamp = self._cache[cache_key]
-                if self._time.time() - timestamp < self.TTL_SECONDS:
+                if self._time.time() - timestamp < self._effective_ttl_seconds():
                     return result
                 del self._cache[cache_key]
         return None
+
+    def _effective_ttl_seconds(self) -> int:
+        """Return the active TTL.
+
+        A monkeypatched class-level ``TTL_SECONDS`` wins over the
+        env-resolved instance attribute (preserves test ergonomics);
+        otherwise the instance value applies.
+        """
+        cls_value = type(self).TTL_SECONDS
+        if cls_value != _ORIGINAL_TTL_SECONDS:
+            return cls_value
+        return self._ttl_seconds
+
+    def _effective_max_entries(self) -> int:
+        """Return the active max-entries (see :meth:`_effective_ttl_seconds`)."""
+        cls_value = type(self).MAX_ENTRIES
+        if cls_value != _ORIGINAL_MAX_ENTRIES:
+            return cls_value
+        return self._max_entries
 
     def set(self, api_key: str, result: Any) -> None:
         """Cache auth result."""
@@ -481,7 +524,8 @@ class AuthCache:
 
     def _evict_overflow_entries(self) -> None:
         """Keep the cache bounded without flushing unrelated auth results."""
-        while len(self._cache) >= self.MAX_ENTRIES:
+        max_entries = self._effective_max_entries()
+        while len(self._cache) >= max_entries:
             self._cache.pop(next(iter(self._cache)))
 
     def _cache_lookup_token(self, token_value: str) -> str:
@@ -511,5 +555,10 @@ class AuthCache:
         # PYTHONHASHSEED does not affect hashlib, so this is safe across workers.
         return hashlib.sha256(token_value.encode()).hexdigest()
 
+
+# Snapshot the original class-level defaults so we can detect when tests
+# monkeypatch them and prefer the patched value over env-resolved values.
+_ORIGINAL_TTL_SECONDS = AuthCache.TTL_SECONDS
+_ORIGINAL_MAX_ENTRIES = AuthCache.MAX_ENTRIES
 
 auth_cache = AuthCache()

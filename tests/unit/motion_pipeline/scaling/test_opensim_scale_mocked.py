@@ -56,7 +56,9 @@ def _markers() -> MarkerFrame:
 
 def test_opensim_scale_backend_initialization_validation():
     # Test valid initializations
-    backend = OpenSimScaleBackend(mass_kg=70.0, height_m=1.75, generic_model_path="model.osim")
+    backend = OpenSimScaleBackend(
+        mass_kg=70.0, height_m=1.75, generic_model_path="model.osim"
+    )
     assert backend.mass_kg == 70.0
     assert backend.height_m == 1.75
     assert backend.generic_model_path == Path("model.osim")
@@ -160,7 +162,11 @@ def test_scale_zero_or_nan_length_fallback():
                 axes=["X"],
             ),
             "femur": JointDef(
-                name="femur", parent="pelvis", children=[], tpose_offset=[0.0, 0.0, 0.0], axes=["X"]
+                name="femur",
+                parent="pelvis",
+                children=[],
+                tpose_offset=[0.0, 0.0, 0.0],
+                axes=["X"],
             ),
         },
         root_joint="pelvis",
@@ -185,7 +191,9 @@ def test_scale_nan_coordinates_fallback():
     markers = MarkerFrame(
         timestamp=0.0,
         markers={
-            "femur_prox": Marker.model_construct(name="femur_prox", x=float("nan"), y=0.0, z=0.0),
+            "femur_prox": Marker.model_construct(
+                name="femur_prox", x=float("nan"), y=0.0, z=0.0
+            ),
             "femur_dist": Marker(name="femur_dist", x=0.0, y=-0.45, z=0.0),
         },
     )
@@ -215,7 +223,11 @@ def test_scale_non_positive_postcondition_raises():
                 axes=["X"],
             ),
             "femur": JointDef(
-                name="femur", parent="pelvis", children=[], tpose_offset=[0.0, 0.0, 0.0], axes=["X"]
+                name="femur",
+                parent="pelvis",
+                children=[],
+                tpose_offset=[0.0, 0.0, 0.0],
+                axes=["X"],
             ),
         },
         root_joint="pelvis",
@@ -226,7 +238,8 @@ def test_scale_non_positive_postcondition_raises():
         with (
             patch.object(OpenSimScaleBackend, "_apply_lengths_to_rig") as mock_apply,
             pytest.raises(
-                RuntimeError, match="Scaled rig has non-positive segment length for femur"
+                RuntimeError,
+                match="Scaled rig has non-positive segment length for femur",
             ),
         ):
             mock_apply.return_value = bad_rig
@@ -253,7 +266,8 @@ def test_scale_additional_branches():
     with (
         patch.dict(sys.modules, {"opensim": mock_opensim}),
         patch(
-            "src.shared.python.motion_pipeline.scaling.opensim_scale.Path.exists", return_value=True
+            "src.shared.python.motion_pipeline.scaling.opensim_scale.Path.exists",
+            return_value=True,
         ),
     ):
         backend = OpenSimScaleBackend(

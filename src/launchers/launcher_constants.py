@@ -21,7 +21,14 @@ configure_gui_logging()
 logger = get_logger(__name__)
 
 # Constants
-REPOS_ROOT = Path(__file__).parent.parent.parent.resolve()
+import os
+
+# Allow environment variable override for REPOS_ROOT, fallback to relative path
+REPOS_ROOT = Path(
+    os.environ.get(
+        "UPSTREAM_DRIFT_REPOS_ROOT", Path(__file__).parent.parent.parent.resolve()
+    )
+).resolve()
 
 
 def _get_config_dir() -> Path:

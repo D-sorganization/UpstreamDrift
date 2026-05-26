@@ -9,8 +9,7 @@ These tests demonstrate proper integration testing:
 """
 
 import sys
-from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from src.shared.python.data_io.path_utils import get_src_root

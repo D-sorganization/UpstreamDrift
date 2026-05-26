@@ -14,14 +14,11 @@ Test Categories:
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import pytest
 from src.config.launcher_manifest_loader import (
-    ASSETS_DIR,
     LAUNCHER_CATEGORIES,
-    MANIFEST_PATH,
     LauncherManifest,
     LauncherTile,
 )

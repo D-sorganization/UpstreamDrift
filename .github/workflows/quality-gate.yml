@@ -26,7 +26,7 @@ jobs:
   lod-pinocchio:
     name: LOD lint (pinocchio python) — advisory
     runs-on: d-sorg-fleet
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - name: Enable long Git paths
         run: git config --global core.longpaths true
