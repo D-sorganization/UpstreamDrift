@@ -147,3 +147,9 @@ These issues are already tracked in GitHub and represent planned improvements.
 - **GitHub Issue**: #6090
 - **Status**: Blocked
 - **Description**: Wait for the audit verdict matrix from #6089, then split execution by tool into adopt EmbeddableTool, document standalone opt-out, or remove scaffolds.
+
+### Phase 6.2: AffineDrift integration (research)
+
+- **GitHub Issue**: #6275
+- **Status**: Open
+- **Description**: Hook to derive shot-model dispersion parameters from AffineDrift simulation output. Document drift/control decomposition to dispersion parameters. Parent: #6269.
