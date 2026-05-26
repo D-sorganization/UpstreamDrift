@@ -408,9 +408,7 @@ def test_close_event_excludes_background_api(qapp) -> None:
 
         from PyQt6.QtGui import QCloseEvent
 
-        with patch(
-            "src.launchers.upstream_drift_launcher.ThemedModalDialog"
-        ) as mock_dialog:
+        with patch("src.launchers.launcher_dialogs.ThemedModalDialog") as mock_dialog:
             event = QCloseEvent()
             launcher.closeEvent(event)
             mock_dialog.assert_not_called()
