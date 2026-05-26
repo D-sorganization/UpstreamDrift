@@ -7,17 +7,9 @@ Refactored to use shared engine availability module (DRY principle).
 
 from typing import TYPE_CHECKING
 
-import numpy as np
-import pytest
-from src.shared.python.engine_core.engine_availability import (
-    MUJOCO_AVAILABLE,
-    skip_if_unavailable,
-)
 
 if TYPE_CHECKING:
-    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
-        MuJoCoPhysicsEngine,
-    )
+    pass
 
 
 class TestShaftInterfaceDefault:

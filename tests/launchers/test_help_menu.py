@@ -13,9 +13,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QKeySequence, QShortcut
-from PyQt6.QtWidgets import QMainWindow, QMenuBar, QWidget
+from PyQt6.QtWidgets import QMainWindow
 
 from src.launchers import help_menu
 

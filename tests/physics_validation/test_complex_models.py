@@ -2,8 +2,6 @@
 
 from pathlib import Path
 
-import numpy as np
-import pytest
 from src.shared.python.engine_core.engine_manager import EngineManager, EngineType
 from src.shared.python.logging_pkg.logging_config import get_logger
 

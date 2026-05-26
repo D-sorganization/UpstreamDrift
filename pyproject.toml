@@ -56,9 +56,11 @@ dependencies = [
 rust = ["upstream-physics>=0.1.0", "upstream-mocap-preproc>=0.1.0", "upstream-mocap-io>=0.1.0"]
 mocap-preproc = ["upstream-mocap-preproc>=0.1.0"]
 mocap-io = ["upstream-mocap-io>=0.1.0"]
-drake = ["drake>=1.22.0"]
-pinocchio = ["pin>=2.6.0", "meshcat>=0.3.0"]
-chrono = ["pychrono>=8.0"]
+# Upper bounds added per issue #5914 to prevent silent breakage on
+# upstream major releases of these physics engines.
+drake = ["drake>=1.22.0,<2.0.0"]
+pinocchio = ["pin>=2.6.0,<3.0.0", "meshcat>=0.3.0,<1.0.0"]
+chrono = ["pychrono>=8.0,<10.0"]
 
 all-engines = ["upstream-drift[drake,pinocchio]"]
 
@@ -202,6 +204,12 @@ exclude = [
 ]
 artifacts = [
     "ui/dist/**/*",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "src",
+    "src/shared/python/sidekick",
 ]
 
 
@@ -403,6 +411,7 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
+    "parity: cross-implementation parity and contract checks that should stay targetable as a CI lane",
     "e2e: full-stack smoke tests; nightly + release gate only",
     "gate: production validation gate",
     "core_only: tests that must pass in a default install with no optional engine extras",
@@ -420,6 +429,7 @@ markers = [
     "requires_pinocchio: tests that require the optional pinocchio engine extra (skip with '-m \"not requires_pinocchio\"')",
     "requires_drake: tests that require pydrake (skipped unless the heavy Drake stack is installed)",
     "requires_mujoco: tests that require the mujoco Python bindings (skipped when `import mujoco` fails)",
+    "requires_myosuite: tests that require the myosuite (and mujoco) Python wheels (skipped when `import myosuite` fails)",
     "requires_opensim: tests that require the OpenSim Python bindings (skipped when `import opensim` fails)",
     "requires_matlab_engine: tests that require matlab.engine importable (Option 4 bridge)",
     "requires_torch: tests that require PyTorch importable (skipped via importorskip when missing)",

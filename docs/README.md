@@ -1,8 +1,8 @@
-# Golf Modeling Suite Documentation
+# UpstreamDrift Documentation
 
-> **January 2026** | Local-First API Architecture
+> Last reviewed: 2026-05-25
 
-Welcome to the Golf Modeling Suite - a professional biomechanical analysis and physics simulation platform.
+Welcome to UpstreamDrift - a professional biomechanical analysis and physics simulation platform.
 
 ## Quick Navigation
 
@@ -12,17 +12,20 @@ Welcome to the Golf Modeling Suite - a professional biomechanical analysis and p
 | Understand the API      | [API Architecture](api/API_ARCHITECTURE.md)         |
 | Develop new features    | [Development Guide](api/DEVELOPMENT.md)             |
 | Choose a physics engine | [Engine Selection Guide](engine_selection_guide.md) |
+| Track motion capture    | [Motion Pipeline](motion_pipeline/README.md)        |
+| Review architecture     | [ADRs](adr/)                                        |
+| Read the specification  | [SPEC](../SPEC.md)                                  |
 | Troubleshoot issues     | [Troubleshooting](troubleshooting/)                 |
 
 ---
 
 ## Quick Start
 
-### 1. Start the API Server
+### 1. Launch UpstreamDrift (Web UI)
 
 ```bash
-cd /home/user/Golf_Modeling_Suite
-python start_api_server.py
+cd /home/user/UpstreamDrift
+python launch_golf_suite.py
 ```
 
 ### 2. Access the API
@@ -89,9 +92,9 @@ docs/
 
 ## Core Concepts
 
-### Local-First API
+### Architecture Overview
 
-The Golf Modeling Suite uses a **local-first architecture**:
+UpstreamDrift uses a **web-first, local-first architecture**:
 
 - **No cloud required** for local development
 - **Optional cloud mode** for production scaling
@@ -258,12 +261,12 @@ repository maintenance guidance.
 
 ---
 
-## Recent Updates (January 2026)
+## Recent Updates
 
-- **API Architecture Upgrade** - Local-first FastAPI implementation
-- **Diagnostics Enhancement** - Structured error codes, request tracing
-- **Design by Contract** - Comprehensive contract infrastructure
-- **Documentation Reorganization** - Archived old docs, new clear structure
+- **Web UI (primary)** - `python launch_golf_suite.py` opens the React-based web interface
+- **Classic PyQt6 launcher** - available via `python launch_golf_suite.py --classic`
+- **Motion Pipeline** - From video to tracked motion in 5 commands (see `docs/motion_pipeline/`)
+- **Multi-engine support** - MuJoCo (default), Drake, Pinocchio, OpenSim, MyoSuite, MATLAB Simscape
 
 ---
 

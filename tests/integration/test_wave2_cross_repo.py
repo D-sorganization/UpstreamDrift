@@ -8,7 +8,6 @@ Run with: python3 -m pytest tests/integration/test_wave2_cross_repo.py -v
 """
 
 import importlib.util
-import sys
 from pathlib import Path
 
 import pytest

@@ -192,7 +192,6 @@ class TestExampleDynamicStance:
         with patch.dict(sys.modules, {"dm_control": mock_dm_control}):
             from src.engines.physics_engines.mujoco.docker.example_dynamic_stance import (
                 main,
-                _setup_physics,
             )
 
             with (

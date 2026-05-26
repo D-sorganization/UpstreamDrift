@@ -1,15 +1,12 @@
 from __future__ import annotations
 
-import sys
 from unittest.mock import MagicMock, patch
 
-import pytest
 import numpy as np
 
 from src.tools.pose_studio.gui import PoseStudioWindow, main
 from src.tools.pose_studio.core import EngineStatus
 from src.shared.python.pose_interchange.canonical import (
-    CanonicalPose,
     canonical_zero_pose,
 )
 from src.shared.python.motion_matching.diagnostics.reference_pose import (
@@ -17,7 +14,8 @@ from src.shared.python.motion_matching.diagnostics.reference_pose import (
 )
 
 
-def test_gui_initialization() -> None:
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_initialization(mock_qapp) -> None:
     # Test fallback to "drake" if unknown engine is provided
     win = PoseStudioWindow(initial_engine="unknown_engine")
     assert win is not None
@@ -26,7 +24,8 @@ def test_gui_initialization() -> None:
     # Check that it doesn't crash on applying initial pose
 
 
-def test_gui_on_engine_selected() -> None:
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_on_engine_selected(mock_qapp) -> None:
     win = PoseStudioWindow()
     # Mock the controller switch to avoid full initialization of real engines if they exist
     win._engine_controller.switch_engine = MagicMock(return_value=EngineStatus.MOCK)
@@ -38,7 +37,8 @@ def test_gui_on_engine_selected() -> None:
     assert True  # just checking no crash
 
 
-def test_gui_on_angle_edited() -> None:
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_on_angle_edited(mock_qapp) -> None:
     win = PoseStudioWindow()
     win._history.push = MagicMock()
 
@@ -56,7 +56,8 @@ def test_gui_on_angle_edited() -> None:
     assert not win._history.push.called
 
 
-def test_gui_undo_redo() -> None:
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_undo_redo(mock_qapp) -> None:
     win = PoseStudioWindow()
 
     pose1 = canonical_zero_pose()
@@ -79,7 +80,8 @@ def test_gui_undo_redo() -> None:
     win._on_redo()
 
 
-def test_gui_load_poses() -> None:
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_load_poses(mock_qapp) -> None:
     win = PoseStudioWindow()
     win._apply_pose = MagicMock()
 
@@ -90,14 +92,16 @@ def test_gui_load_poses() -> None:
     assert win._apply_pose.call_count == 2
 
 
-def test_gui_save_load_clicked() -> None:
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_save_load_clicked(mock_qapp) -> None:
     win = PoseStudioWindow()
     # Ensure no crashes on clicking save/load
     win._on_save_clicked()
     win._on_load_clicked()
 
 
-def test_gui_apply_pose_with_service_transforms() -> None:
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_apply_pose_with_service_transforms(mock_qapp) -> None:
     win = PoseStudioWindow()
 
     pose = canonical_zero_pose()

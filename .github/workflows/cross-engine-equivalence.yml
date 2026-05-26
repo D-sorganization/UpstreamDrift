@@ -89,8 +89,11 @@ jobs:
           python -m pip install --ignore-installed --no-deps pip
           # Always install the dev/test stack and the default mujoco engine.
           python -m ensurepip --upgrade || true
-          pip install --ignore-installed --no-deps pydantic-core==2.46.3 || true
+          pip install --ignore-installed --no-deps pydantic-core==2.46.4 || true
+          python -m ensurepip --upgrade || true
           pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
+          # Prevent environment pollution conflict between pytest-recording and pytest-vcr
+          pip uninstall -y pytest-vcr pytest-recording || true
           # Optional engines: best-effort. The test self-skips when any of
           # these is missing rather than failing the gate.
           python -m ensurepip --upgrade || true
@@ -105,12 +108,14 @@ jobs:
       - name: Run cross-engine forward-sim equivalence test
         env:
           UPSTREAM_DRIFT_OUTPUT_ROOT: ${{ github.workspace }}/output
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
         shell: bash
         run: |
           mkdir -p "$UPSTREAM_DRIFT_OUTPUT_ROOT/cross_engine_equivalence"
           # We deliberately run with `-p no:cacheprovider` to avoid caching
-          # across reruns, `-p no:xvfb` because this is a non-GUI parity gate,
-          # and `-rs` so skips show up clearly in the log.
+          # across reruns and disable third-party plugin autoload because the
+          # shared runner may have mutually incompatible pytest plugins
+          # installed globally. `-rs` makes skips show up clearly in the log.
           python3 -m pytest \
             -o addopts="" \
             tests/motion_matching/test_cross_engine_equivalence.py \
