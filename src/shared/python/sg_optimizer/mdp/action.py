@@ -29,7 +29,7 @@ class ActionSet:
 
     clubs: tuple[str, ...]
     aim_grid_deg: NDArray[np.float64] = field(
-        default_factory=lambda: np.linspace(-45.0, 45.0, 31)
+        default_factory=lambda: np.linspace(-45.0, 45.0, 31, dtype=np.float64)
     )
 
     def __post_init__(self) -> None:
