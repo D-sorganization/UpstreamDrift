@@ -86,3 +86,7 @@
 ## 2026-05-23 - trimesh ImportErrors
 **Learning:** Hard-coded imports of `trimesh` in files like `_mesh_decimation.py` and `_mesh_io.py` can cause tests or other modules that import them to fail if `trimesh` isn't installed.
 **Action:** Always wrap `import trimesh` with a `try...except ImportError` block and conditionally check if `trimesh is None` to safely handle environments where it is missing, or alternatively, make sure to add it to the test environment requirements.
+
+## 2024-05-26 - [Numpy Reductions Optimization]
+**Learning:** In numpy, performing sum reductions of element-wise multiplications along a specific axis (e.g., `np.sum(db * db, axis=2)` or `np.sum(tau * tau, axis=1)`) allocates temporary intermediate arrays.
+**Action:** Replace these operations with their `np.einsum` equivalents (e.g., `np.einsum('ijk,ijk->ij', db, db)` or `np.einsum('ij,ij->i', tau, tau)`). This completely eliminates temporary intermediate array allocations and yields a significant speedup. Do not use `einsum` for reductions over pre-allocated arrays (like `np.sum(np.abs(a * b), axis=1)`) as it provides no performance benefit over `np.sum`.
