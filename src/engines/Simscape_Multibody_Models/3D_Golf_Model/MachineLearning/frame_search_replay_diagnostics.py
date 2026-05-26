@@ -188,7 +188,12 @@ def compute_trajectory_residuals(
         sim_pos_on_target = _interp_to(t_target, t_sim, sim_pos)
         residual = sim_pos_on_target - target_pos
         for axis_index, axis in enumerate(("x", "y", "z")[: residual.shape[1]]):
-            pos_rms[axis] = float(np.sqrt(np.mean(residual[:, axis_index] ** 2)))
+            pos_rms[axis] = float(
+                np.sqrt(
+                    np.vdot(residual[:, axis_index], residual[:, axis_index])
+                    / residual.shape[0]
+                )
+            )
         # Impact window: identified as (impact_window[0], impact_window[1])
         # relative to the impact reference (assumed t=0 by convention).
         mask = (t_target >= impact_window[0]) & (t_target <= impact_window[1])
@@ -203,7 +208,12 @@ def compute_trajectory_residuals(
         sim_vel_on_target = _interp_to(t_target, t_sim, sim_vel)
         residual = sim_vel_on_target - target_vel
         for axis_index, axis in enumerate(("x", "y", "z")[: residual.shape[1]]):
-            vel_rms[axis] = float(np.sqrt(np.mean(residual[:, axis_index] ** 2)))
+            vel_rms[axis] = float(
+                np.sqrt(
+                    np.vdot(residual[:, axis_index], residual[:, axis_index])
+                    / residual.shape[0]
+                )
+            )
 
     return {
         "position_rms": pos_rms,

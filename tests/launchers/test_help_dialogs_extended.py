@@ -9,13 +9,11 @@ branches.
 
 from __future__ import annotations
 
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QWidget
 
 from src.launchers import help_dialogs
 

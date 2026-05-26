@@ -17,7 +17,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from src.shared.python.motion_matching.club_target import AlignOptions, ClubTarget
+from src.shared.python.motion_matching.club_target import ClubTarget
 from src.shared.python.motion_matching.loaders._marker_clusters import (
     EXCLUDED_MARKERS,
     fill_short_gaps,
@@ -30,8 +30,6 @@ from src.shared.python.motion_matching.loaders._marker_clusters import (
 ezc3d = pytest.importorskip("ezc3d")
 del ezc3d  # only needed for the import-or-skip guard
 
-from src.shared.python.motion_matching import load_club_target_c3d  # noqa: E402
-from src.shared.python.motion_matching.loaders import c3d as c3d_loader  # noqa: E402
 
 from ._fixtures import repo_root  # noqa: E402
 

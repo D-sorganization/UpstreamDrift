@@ -329,7 +329,7 @@ class TestComputeCostDrake:
         def drake_sim(th: np.ndarray) -> SimOut:
             return _stub_simulate(th, target)
 
-        j_no, _ = compute_cost_drake(theta, target, drake_sim, cost_opts)
+        j_no, terms_no = compute_cost_drake(theta, target, drake_sim, cost_opts)
         j_yes, terms_yes = compute_cost_drake(
             theta,
             target,
@@ -339,6 +339,7 @@ class TestComputeCostDrake:
         )
         assert j_yes == pytest.approx(j_no + 1.25, rel=1e-12, abs=1e-12)
         assert terms_yes.regularizer == pytest.approx(1.25, rel=1e-12, abs=1e-12)
+        assert terms_yes.body_marker == terms_no.body_marker
 
 
 # ---------------------------------------------------------------------------

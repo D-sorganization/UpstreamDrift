@@ -2,13 +2,10 @@
 
 from __future__ import annotations
 
-import hashlib
 
-import numpy as np
 import pytest
 from src.shared.python.motion_matching import (
     AlignOptions,
-    ClubTarget,
     load_club_target_excel,
 )
 from src.shared.python.motion_matching.loaders.excel import (

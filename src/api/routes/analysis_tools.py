@@ -239,7 +239,7 @@ async def get_analysis_metrics(
         return {"status": "ok", "metrics": metrics}
     except (RuntimeError, TypeError, AttributeError) as exc:
         if logger:
-            logger.error("Metrics collection error: %s", exc)
+            logger.exception("Metrics collection error")
         raise HTTPException(
             status_code=500, detail=f"Metrics collection failed: {str(exc)}"
         ) from exc
@@ -317,7 +317,7 @@ async def get_analysis_statistics(  # noqa: C901
         )
     except ImportError as exc:
         if logger:
-            logger.error("Statistics computation error: %s", exc)
+            logger.exception("Statistics computation error")
         raise HTTPException(
             status_code=500, detail=f"Statistics computation failed: {str(exc)}"
         ) from exc
@@ -412,7 +412,7 @@ async def export_analysis_data(  # noqa: C901
         )
     except ImportError as exc:
         if logger:
-            logger.error("Export error: %s", exc)
+            logger.exception("Export error")
         raise HTTPException(
             status_code=500, detail=f"Export failed: {str(exc)}"
         ) from exc
@@ -481,7 +481,7 @@ async def set_body_position(
         ) from exc
     except ImportError as exc:
         if logger:
-            logger.error("Body positioning error: %s", exc)
+            logger.exception("Body positioning error")
         raise HTTPException(
             status_code=500, detail=f"Positioning failed: {str(exc)}"
         ) from exc
@@ -550,7 +550,7 @@ async def measure_distance(
         raise
     except (ValueError, RuntimeError, AttributeError) as exc:
         if logger:
-            logger.error("Measurement error: %s", exc)
+            logger.exception("Measurement error")
         raise HTTPException(
             status_code=500, detail=f"Measurement failed: {str(exc)}"
         ) from exc
@@ -620,7 +620,7 @@ async def get_measurement_tools(
         )
     except (ValueError, RuntimeError, AttributeError) as exc:
         if logger:
-            logger.error("Measurement tools error: %s", exc)
+            logger.exception("Measurement tools error")
         raise HTTPException(
             status_code=500, detail=f"Measurement tools failed: {str(exc)}"
         ) from exc

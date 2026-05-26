@@ -41,12 +41,13 @@ import platform
 import subprocess
 import time
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Literal
 
 import numpy as np
 from numpy.typing import NDArray
 
+from src.api.utils.datetime_compat import UTC
 from src.shared.python.core.contracts.decorators import (
     postcondition,
     precondition,

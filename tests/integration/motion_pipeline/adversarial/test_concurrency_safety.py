@@ -10,7 +10,6 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-import pytest
 
 from src.shared.python.motion_pipeline.contracts import (
     Keypoint,

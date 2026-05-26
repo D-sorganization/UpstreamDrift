@@ -24,7 +24,7 @@ from __future__ import annotations
 import pytest
 from PyQt6.QtCore import QPoint, Qt
 from PyQt6.QtGui import QMouseEvent
-from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow, QToolButton, QWidget
+from PyQt6.QtWidgets import QApplication, QMainWindow, QToolButton, QWidget
 
 from src.launchers.custom_title_bar import CustomTitleBar, clamp_to_visible_screen
 

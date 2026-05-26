@@ -381,6 +381,17 @@ models:
       status: "beta"
       default_launch: "dock"
 
+  - id: "training_controller"
+    name: "Training Controller"
+    description: "Schedule, monitor, and manage model-training jobs across engines."
+    type: "special_app"
+    path: "src/tools/training_controller/__main__.py"
+    launcher:
+      category: "tool"
+      logo: "assets/training_controller.png"
+      status: "beta"
+      default_launch: "tab"
+
   # =============================================================================
   # DOCUMENTATION
   # =============================================================================

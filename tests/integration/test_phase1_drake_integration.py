@@ -9,21 +9,12 @@ This module tests the complete Drake engine integration including:
 Refactored to use shared engine availability module (DRY principle).
 """
 
-import tempfile
 import unittest
-from pathlib import Path
-from unittest.mock import MagicMock, patch
 
-import numpy as np
-from src.shared.python.core.contracts import PreconditionError
 from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE
-from src.shared.python.engine_core.engine_manager import EngineManager, EngineType
 
 if DRAKE_AVAILABLE:
-    from pydrake.all import DiagramBuilder, Parser
-    from pydrake.geometry import SceneGraph
-    from pydrake.systems.analysis import Simulator
-    from pydrake.systems.framework import Context, Diagram
+    pass
 
 # MultibodyPlant uses some undocumented Drake APIs (SetDefaultVelocities,
 # MakeMultibodyForces) via type-ignore in the production code.  We enumerate
