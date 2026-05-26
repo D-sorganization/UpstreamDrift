@@ -1,5 +1,7 @@
 """Plot-style contracts and dataclasses.
 
+# Note: This package was consolidated in #6182.
+
 This package defines the abstract surface (Protocols + frozen
 dataclasses) used by every marker / trace styling implementation in
 UpstreamDrift.
