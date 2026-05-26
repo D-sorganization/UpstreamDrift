@@ -1222,6 +1222,7 @@ jobs:
         working-directory: ./ui
     steps:
       - name: Clean corrupt git objects
+        working-directory: .
         shell: bash
         working-directory: .
         run: |
