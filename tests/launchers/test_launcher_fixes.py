@@ -220,6 +220,196 @@ class TestLauncherIntegration(unittest.TestCase):
                 self.fail(f"Unexpected import error: {e}")
 
 
+class TestLauncherUISearchAndRuntimeSettings(unittest.TestCase):
+    """Test cases for the new launcher features: global search, clear search, console access and runtime settings."""
+
+    def test_global_search_ignores_category_filter(self) -> None:
+        """Test that get_filtered_order ignores category filter when search text is non-empty."""
+        from src.launchers.launcher_layout_manager import LayoutManager
+
+        # Create LayoutManager mock/instance
+        manager = LayoutManager(Path("dummy.json"), {}, MagicMock(), MagicMock())
+
+        # Setup models
+        model1 = MagicMock()
+        model1.name = "Data Processor"
+        model1.id = "data_processor"
+        model1.description = "Processes bio data"
+
+        model2 = MagicMock()
+        model2.name = "Shot Tracer"
+        model2.id = "shot_tracer"
+        model2.description = "Traces shots"
+
+        manager.available_models = {"data_processor": model1, "shot_tracer": model2}
+        manager.model_order = ["data_processor", "shot_tracer"]
+        manager._get_model = MagicMock(
+            side_effect=lambda mid: manager.available_models.get(mid)
+        )
+
+        # Mock category helper
+        manager._get_model_category = MagicMock(
+            side_effect=lambda m: "Tools & Data" if m == model1 else "Simulation"
+        )
+
+        # Case 1: Search text empty, category Tools & Data active
+        manager.current_category_filter = "Tools & Data"
+        manager.current_filter_text = ""
+        filtered = manager.get_filtered_order()
+        self.assertEqual(filtered, ["data_processor"])
+
+        # Case 2: Search text non-empty, category Tools & Data active -> Search should be global!
+        manager.current_category_filter = "Tools & Data"
+        manager.current_filter_text = "tracer"
+        filtered = manager.get_filtered_order()
+        self.assertEqual(
+            filtered, ["shot_tracer"]
+        )  # Bypassed category constraint and matches search globally!
+
+    def test_clear_search_behavior(self) -> None:
+        """Test that _clear_search clears input and removes focus if text or focus exists."""
+        from src.launchers.launcher_ui_setup import UISetupManager
+
+        mock_launcher = MagicMock()
+        ui = UISetupManager(mock_launcher)
+        ui.search_input = MagicMock()
+
+        # Case 1: has text but no focus
+        ui.search_input.text.return_value = "tracer"
+        ui.search_input.hasFocus.return_value = False
+        ui._clear_search()
+        ui.search_input.clear.assert_called_once()
+        ui.search_input.clearFocus.assert_called_once()
+
+        # Case 2: no text but has focus
+        ui.search_input.clear.reset_mock()
+        ui.search_input.clearFocus.reset_mock()
+        ui.search_input.text.return_value = ""
+        ui.search_input.hasFocus.return_value = True
+        ui._clear_search()
+        ui.search_input.clear.assert_called_once()
+        ui.search_input.clearFocus.assert_called_once()
+
+    def test_windows_mode_mutual_exclusion_fallback(self) -> None:
+        """Test that disabling Windows mode falls back to enabled if neither Docker nor WSL are checked."""
+        from src.launchers.launcher_dialogs import DialogsManager
+
+        mock_launcher = MagicMock()
+        mgr = DialogsManager(mock_launcher)
+        mgr.chk_docker = MagicMock()
+        mgr.chk_wsl = MagicMock()
+        mgr.chk_windows = MagicMock()
+        mgr.lbl_execution_mode = MagicMock()
+
+        # Setup: all unchecked
+        mgr.chk_docker.isChecked.return_value = False
+        mgr.chk_wsl.isChecked.return_value = False
+        mgr.chk_windows.isChecked.return_value = False
+
+        # Disable windows (state = 0)
+        mgr._on_windows_mode_changed(0)
+        mgr.chk_windows.setChecked.assert_called_with(True)
+
+    def test_auto_open_console_on_launch_failure(self) -> None:
+        """Test that launching simulation auto-opens console and sets the checkbox on failure."""
+        from src.launchers.launcher_simulation import SimulationManager
+
+        mock_launcher = MagicMock()
+        mgr = SimulationManager(mock_launcher)
+        mgr._console_dock = MagicMock()
+        mgr._action_console = MagicMock()
+        mgr.lbl_status = MagicMock()
+
+        # Mock handler launching returning False
+        mock_handler = MagicMock()
+        mock_handler.launch.return_value = False
+        mgr.model_handler_registry = MagicMock()
+        mgr.model_handler_registry.get_handler.return_value = mock_handler
+
+        # Mock resolve path and deps check
+        mgr.selected_model = "m1"
+        mock_model = MagicMock()
+        mock_model.name = "Data Processor"
+        mock_model.type = "tool"
+        mgr._get_model = MagicMock(return_value=mock_model)
+        mgr._try_launch_special_app = MagicMock(return_value=False)
+        mgr._try_launch_docker = MagicMock(return_value=False)
+        mgr._check_local_dependencies = MagicMock(return_value=True)
+
+        with patch(
+            "src.launchers.launcher_simulation.resolve_model_artifact_path",
+            return_value=Path("."),
+        ):
+            mgr.launch_simulation()
+
+            # Verify console dock is shown and checked
+            mgr._console_dock.show.assert_called_once()
+            mgr._action_console.setChecked.assert_called_with(True)
+
+
+class TestJunctionPathSecurityValidation(unittest.TestCase):
+    """Test that path validation correctly handles sibling repositories and junctions."""
+
+    def test_find_tools_repo_for_security_with_junction(self) -> None:
+        """Test that _find_tools_repo_for_security detects sibling Tools repo even under junction."""
+        from src.shared.python.security.secure_subprocess import (
+            _find_tools_repo_for_security,
+        )
+
+        suite_root = Path(r"C:\fake\UpstreamDrift")
+        candidate_path = Path(r"C:\fake\Tools")
+
+        def mock_is_dir(self_path: Path) -> bool:
+            return str(self_path) in {
+                r"C:\fake\Tools",
+                r"C:\fake\Tools\src",
+                r"C:\fake\UpstreamDrift\vendor\ud-tools",
+            }
+
+        def mock_resolve(self_path: Path) -> Path:
+            if str(self_path) == r"C:\fake\UpstreamDrift\vendor\ud-tools":
+                return Path(r"C:\fake\Tools")
+            return self_path
+
+        with (
+            patch.object(Path, "is_dir", mock_is_dir),
+            patch.object(Path, "resolve", mock_resolve),
+        ):
+            # Should find Tools even though C:\fake\UpstreamDrift\vendor\ud-tools resolves to it
+            found = _find_tools_repo_for_security(suite_root)
+            self.assertEqual(found, candidate_path)
+
+    def test_validate_script_path_accepts_tools_sibling_scripts(self) -> None:
+        """Test that validate_script_path allows script execution in the Tools sibling folder."""
+        from src.shared.python.security.secure_subprocess import (
+            validate_script_path,
+        )
+
+        suite_root = Path(r"C:\fake\UpstreamDrift")
+        script_path = Path(r"C:\fake\Tools\src\data_processing\launch_pyqt6.py")
+
+        def mock_is_dir(self_path: Path) -> bool:
+            return str(self_path) in {r"C:\fake\Tools", r"C:\fake\Tools\src"}
+
+        def mock_exists(self_path: Path) -> bool:
+            return True
+
+        def mock_is_file(self_path: Path) -> bool:
+            return True
+
+        with (
+            patch.object(Path, "is_dir", mock_is_dir),
+            patch.object(Path, "exists", mock_exists),
+            patch.object(Path, "is_file", mock_is_file),
+            patch(
+                "src.shared.python.security.secure_subprocess._find_tools_repo_for_security",
+                return_value=Path(r"C:\fake\Tools"),
+            ),
+        ):
+            # Should not raise any SecureSubprocessError
+            validate_script_path(script_path, suite_root)
+
+
 if __name__ == "__main__":
     # Create test suite
     loader = unittest.TestLoader()
@@ -232,6 +422,8 @@ if __name__ == "__main__":
         TestDockerConfiguration,
         TestMuJoCoModule,
         TestLauncherIntegration,
+        TestLauncherUISearchAndRuntimeSettings,
+        TestJunctionPathSecurityValidation,
     ]
 
     # Add PyQt tests only if available

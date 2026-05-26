@@ -34,6 +34,7 @@ Usage:
     bg_color = colors["bg"]
 """
 
+from typing import Any
 from types import SimpleNamespace as _NS
 
 from .colors import (
@@ -266,4 +267,66 @@ __all__ = [
     # Legacy compatibility
     "ThemePreset",
     "apply_golf_suite_style",
+    "get_current_colors",
 ]
+
+
+class ThemeColorsCompat(dict):
+    """Dictionary subclass supporting attribute-style access for theme compatibility."""
+
+    def __getattr__(self, name: str) -> Any:
+        try:
+            return self[name]
+        except KeyError as err:
+            raise AttributeError(name) from err
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        self[name] = value
+
+
+def get_current_colors() -> ThemeColorsCompat:
+    """Return the currently active theme colors in a compatibility-wrapper format.
+
+    Supports both dictionary-like lookup (e.g. colors.get("border")) and
+    attribute-style lookup (e.g. colors.bg_elevated).
+    """
+    try:
+        from src.shared.python.theme.theme_manager import get_theme_manager
+
+        mgr = get_theme_manager()
+        if mgr and mgr.current_theme:
+            try:
+                from src.shared.python.theme.fleet_adapter import (
+                    fleet_to_theme_colors_dict,
+                )
+
+                colors_dict = fleet_to_theme_colors_dict(mgr.current_theme)
+                return ThemeColorsCompat(colors_dict)
+            except Exception:  # noqa: BLE001
+                colors_dict = dict(mgr.get_current_colors())
+                return ThemeColorsCompat(colors_dict)
+    except Exception:  # noqa: BLE001
+        pass
+
+    # Fallback to Dark theme using the full fleet dict
+    try:
+        from src.shared.python.theme.fleet_adapter import fleet_to_theme_colors_dict
+
+        return ThemeColorsCompat(fleet_to_theme_colors_dict("Dark"))
+    except Exception:  # noqa: BLE001
+        pass
+
+    # Ultimate fallback to whatever is in DARK_THEME
+    try:
+        from src.shared.python.theme import DARK_THEME
+
+        d = {}
+        if hasattr(DARK_THEME, "__dict__"):
+            d.update(
+                {k: v for k, v in DARK_THEME.__dict__.items() if not k.startswith("_")}
+            )
+        elif hasattr(DARK_THEME, "dict"):
+            d.update(DARK_THEME.dict())
+        return ThemeColorsCompat(d)
+    except Exception:  # noqa: BLE001
+        return ThemeColorsCompat()

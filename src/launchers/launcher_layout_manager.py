@@ -328,14 +328,20 @@ class LayoutManager:
         Returns:
             List of model IDs matching the current filters.
         """
+        # DbC: Preconditions - ensure states are valid strings
+        assert isinstance(self.current_category_filter, str), (
+            "Category filter must be a string"
+        )
+        assert isinstance(self.current_filter_text, str), "Filter text must be a string"
+
         filtered = []
         for model_id in self.model_order:
             model = self._get_model(model_id)
             if not model:
                 continue
 
-            # Category filter
-            if self.current_category_filter != "All":
+            # Category filter (ignored when searching globally per user request)
+            if self.current_category_filter != "All" and not self.current_filter_text:
                 cat = self._get_model_category(model)
                 if cat != self.current_category_filter:
                     continue
@@ -348,6 +354,11 @@ class LayoutManager:
 
             filtered.append(model_id)
 
+        # DbC: Postconditions - ensure we return a list of string IDs
+        assert isinstance(filtered, list), "Filtered order must be a list"
+        assert all(isinstance(x, str) for x in filtered), (
+            "All filtered IDs must be strings"
+        )
         return filtered
 
     def _get_model_category(self, model: Any) -> str:

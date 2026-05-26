@@ -367,6 +367,7 @@ def test_write_log_line_oserror(mock_open_file, mock_datetime, manager) -> None:
 def test_stream_output_runtime_error(manager) -> None:
     mock_proc = MagicMock()
     mock_proc.stdout.readline.side_effect = RuntimeError("Boom")
+    mock_proc.stderr.readline.return_value = b""
     mock_proc.wait.return_value = 0
     manager._stream_output("TestApp", mock_proc)  # Should catch exception
 

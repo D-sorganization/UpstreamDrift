@@ -22,10 +22,58 @@ from sys import exit, path
 # imported at runtime — pytest reads this from pyproject.toml, but a direct
 # `python launch_upstream_drift.py` invocation does not.
 _REPO_ROOT = Path(__file__).resolve().parent
+
+# Discover sibling Tools repository to prioritize real subtabs over stubs
+_TOOLS_ROOT = None
+_env_tools = os.environ.get("TOOLS_REPO_PATH")
+if _env_tools and Path(_env_tools).is_dir():
+    _TOOLS_ROOT = Path(_env_tools)
+else:
+    _vendor_resolved: Path | None = None
+    try:
+        _vendor_resolved = (_REPO_ROOT / "vendor" / "ud-tools").resolve()
+    except Exception:  # noqa: BLE001
+        _vendor_resolved = None
+    _p_walk = _REPO_ROOT
+    for _ in range(10):
+        _p_walk = _p_walk.parent
+        for _candidate in (
+            _p_walk / "Tools",
+            _p_walk / "Repositories" / "Tools",
+            Path.home() / "Repositories" / "Tools",
+        ):
+            if _candidate.is_dir() and (_candidate / "src").is_dir():
+                try:
+                    # Skip candidate if it is nested inside our repo (e.g. the vendored copy)
+                    # to prioritize a true sibling checkout.
+                    if _candidate.is_relative_to(_REPO_ROOT):
+                        continue
+                except (ValueError, AttributeError):
+                    if str(_REPO_ROOT) in str(_candidate.resolve()):
+                        continue
+                except Exception:  # noqa: BLE001
+                    pass
+                _TOOLS_ROOT = _candidate
+                break
+        if _TOOLS_ROOT:
+            break
+
+_paths_to_add = []
+if _TOOLS_ROOT:
+    _paths_to_add.extend(
+        [str(_TOOLS_ROOT / "src"), str(_TOOLS_ROOT / "src" / "shared" / "python")]
+    )
+
+_paths_to_add.extend([str(_REPO_ROOT / "src"), str(_REPO_ROOT)])
+
 _VENDOR_SHARED = _REPO_ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python"
-for _p in (str(_REPO_ROOT), str(_REPO_ROOT / "src"), str(_VENDOR_SHARED)):
-    if _p not in path:
-        path.insert(0, _p)
+_paths_to_add.append(str(_VENDOR_SHARED))
+
+# Insert paths to the front of sys.path in reverse order so the first item in _paths_to_add
+# ends up at the very beginning of sys.path.
+for _path_entry in reversed(_paths_to_add):
+    if _path_entry not in path:
+        path.insert(0, _path_entry)
 
 from src.api._version import warn_if_unsupported_platform  # noqa: E402
 

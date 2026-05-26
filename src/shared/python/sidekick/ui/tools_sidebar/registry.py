@@ -34,7 +34,12 @@ logger = logging.getLogger(__name__)
 JSONScalar = str | int | float | bool | None
 JSONValue = JSONScalar | list["JSONValue"] | dict[str, "JSONValue"]
 
-__all__ = ["Subscription", "WorkspaceRegistry", "WorkspaceVariable"]
+__all__ = [
+    "Subscription",
+    "WorkspaceRegistry",
+    "WorkspaceVariable",
+    "format_workspace_value_preview",
+]
 
 
 @dataclass(frozen=True)

@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from .theme_manager import ThemeColors  # type: ignore[attr-defined]
@@ -199,6 +199,19 @@ def _build_theme_colors_kwargs(
     return {
         "name": theme_name,
         "is_dark": is_dark,
+        "bg": base["bg"],
+        "group_bg": group_bg,
+        "border": border,
+        "text": base["text"],
+        "label": label,
+        "focus": base["focus"],
+        "input_bg": base["input_bg"],
+        "accent": accent,
+        "title_bg": ft.get("title_bg", _adjust_color_brightness(group_bg, 1.2)),
+        "title_border": ft.get("title_border", _adjust_color_brightness(border, 1.1)),
+        "table_header": ft.get("table_header", _adjust_color_brightness(group_bg, 1.1)),
+        "table_alt": ft.get("table_alt", _adjust_color_brightness(group_bg, 0.95)),
+        "button_hover": _adjust_color_brightness(accent, 1.2),
         "primary": accent,
         "primary_hover": _adjust_color_brightness(accent, 1.2),
         "primary_pressed": _adjust_color_brightness(accent, 0.8),
@@ -259,7 +272,7 @@ def fleet_to_theme_colors(theme_name: str) -> ThemeColors:
     Raises:
         KeyError: If theme_name is not found in fleet themes
     """
-    from .theme_manager import ThemeColors  # type: ignore[attr-defined]
+    from .api import ThemeColors
 
     if theme_name not in FLEET_THEMES:
         raise KeyError(f"Fleet theme '{theme_name}' not found")
@@ -273,9 +286,22 @@ def fleet_to_theme_colors(theme_name: str) -> ThemeColors:
     return ThemeColors(**kwargs)
 
 
+def fleet_to_theme_colors_dict(theme_name: str) -> dict[str, Any]:
+    """Convert a fleet-wide theme to the full semantic color dictionary."""
+    if theme_name not in FLEET_THEMES:
+        raise KeyError(f"Fleet theme '{theme_name}' not found")
+
+    ft = FLEET_THEMES[theme_name]
+    is_dark = _is_dark_theme(ft)
+    base = _extract_base_colors(ft, is_dark)
+    semantic = _extract_semantic_colors(ft, is_dark)
+    return _build_theme_colors_kwargs(theme_name, ft, is_dark, base, semantic)
+
+
 __all__ = [
     "FLEET_THEMES",
     "fleet_to_theme_colors",
+    "fleet_to_theme_colors_dict",
     "get_fleet_theme_names",
     "is_fleet_available",
 ]

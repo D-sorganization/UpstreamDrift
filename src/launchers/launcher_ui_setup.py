@@ -106,8 +106,10 @@ class LauncherUIProtocol(Protocol):
     view_mode_combo: QComboBox | None
     chk_live: QCheckBox
     chk_gpu: QCheckBox
+    chk_windows: QCheckBox
     chk_docker: QCheckBox
     chk_wsl: QCheckBox
+    btn_console: QToolButton
     lbl_status: QLabel
     btn_modify_layout: QPushButton
     context_help: Any
@@ -499,8 +501,11 @@ class UISetupManager:
                     self._apply_sidekick_splitter_sizes()
 
                 # Keep button in sync
-                if True and self.btn_ai_sidebar.isChecked() != visible:
-                    self.btn_ai_sidebar.setChecked(visible)
+                btn = getattr(self, "btn_toggle_right_sidebar", None) or getattr(
+                    self, "btn_ai_sidebar", None
+                )
+                if btn is not None and btn.isChecked() != visible:
+                    btn.setChecked(visible)
 
                 if visible and True:
                     self.btn_popout_sidekick.setVisible(True)
@@ -511,8 +516,11 @@ class UISetupManager:
                     "Sidekick is still loading, please wait a moment…", "info"
                 )
             # Uncheck the button since it's not ready yet
-            if True:
-                self.btn_ai_sidebar.setChecked(False)
+            btn = getattr(self, "btn_toggle_right_sidebar", None) or getattr(
+                self, "btn_ai_sidebar", None
+            )
+            if btn is not None:
+                btn.setChecked(False)
 
     def _toggle_left_sidebar(self, checked: bool = None) -> None:
         """Toggle the visibility of the global navigation sidebar."""
@@ -681,6 +689,17 @@ class UISetupManager:
         if True:
             btn_settings.clicked.connect(self._show_preferences)
 
+        btn_console = self._build_sidebar_button(
+            "Console",
+            "terminal",
+            checkable=False,
+        )
+        btn_console.setAccessibleDescription(
+            "Show or hide the process output console window"
+        )
+        btn_console.clicked.connect(self.toggle_process_console)
+        self.btn_console = btn_console
+
         # Setup mutually exclusive active-state routing for navigation
         self.sidebar_group = QButtonGroup(self.launcher)
         self.sidebar_group.addButton(btn_home, 0)
@@ -712,6 +731,7 @@ class UISetupManager:
         layout.addStretch(1)
         layout.addWidget(btn_library)
         layout.addStretch(3)  # larger gap before bottom group
+        layout.addWidget(btn_console)
         layout.addWidget(btn_settings)
 
         # Set explicit focus order for keyboard navigation
@@ -723,7 +743,8 @@ class UISetupManager:
         QWidget.setTabOrder(btn_motion_matching, btn_motion_capture)
         QWidget.setTabOrder(btn_motion_capture, btn_tools)
         QWidget.setTabOrder(btn_tools, btn_library)
-        QWidget.setTabOrder(btn_library, btn_settings)
+        QWidget.setTabOrder(btn_library, btn_console)
+        QWidget.setTabOrder(btn_console, btn_settings)
 
         scroll_area = QScrollArea()
         scroll_area.setWidget(sidebar)
@@ -1101,7 +1122,7 @@ class UISetupManager:
 
         # Search Bar
         self.search_input = AutoCompleteLineEdit(words=build_vocabulary())
-        self.search_input.setPlaceholderText("Search models...")
+        self.search_input.setPlaceholderText("Search models... (Esc to clear)")
         try:
             from src.shared.python.theme.responsive import (
                 set_text_minimum_width,
@@ -1142,6 +1163,12 @@ class UISetupManager:
         self.chk_wsl = QCheckBox("WSL")
         self.chk_wsl.setChecked(settings.value("chk_wsl", False, type=bool))
         self.chk_wsl.stateChanged.connect(self._on_wsl_mode_changed)
+
+        self.chk_windows = QCheckBox("Windows (Default)")
+        self.chk_windows.setChecked(
+            not self.chk_docker.isChecked() and not self.chk_wsl.isChecked()
+        )
+        self.chk_windows.stateChanged.connect(self._on_windows_mode_changed)
 
         # Layout controls were moved to the View menu per user request.
 
@@ -1184,6 +1211,12 @@ class UISetupManager:
             "Run physics engines in your WSL2 Ubuntu user environment. "
             "Same Linux wheels as Docker mode but no container layer — "
             "faster file I/O and easier interactive debugging.",
+            "engine_selection",
+        )
+        TooltipManager.register_tooltip(
+            self.chk_windows,
+            "Windows Native runtime",
+            "Run physics engines natively on the local Windows host system.",
             "engine_selection",
         )
 
@@ -1244,7 +1277,9 @@ class UISetupManager:
                 selection-color: #ffffff;
             }
         """)
-        top_bar.addWidget(self.view_mode_combo)
+        # Removed view selector dropdown from main screen top bar per user request.
+        # It is kept instantiated and hidden to preserve compatibility with menu actions and settings.
+        self.view_mode_combo.hide()
 
         self.zoom_slider = QSlider(Qt.Orientation.Horizontal, self.launcher)
         self.zoom_slider.setRange(0, self._ZOOM_SLIDER_STEPS)
@@ -1512,7 +1547,11 @@ class UISetupManager:
 
     def _clear_search(self) -> None:
         """Clear the search filter and remove focus from search bar."""
-        if self.search_input.hasFocus():
+        has_text = False
+        text_val = self.search_input.text()
+        if isinstance(text_val, str) and text_val:
+            has_text = True
+        if has_text or self.search_input.hasFocus():
             self.search_input.clear()
             self.search_input.clearFocus()
 
