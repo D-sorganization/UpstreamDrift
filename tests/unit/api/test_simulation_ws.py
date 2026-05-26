@@ -31,6 +31,7 @@ from src.api.routes.simulation_ws import (
     _engine_type_from_str,
     _get_simulation_speed_factor,
     _handle_client_commands,
+    _is_numeric_sequence,
     _wait_for_resume_or_stop,
 )
 from src.shared.python.engine_core.engine_registry import EngineType
@@ -430,7 +431,8 @@ async def test_simulation_stream_rejects_invalid_duration(
 
     assert websocket.accepted is True
     assert websocket.closed is True
-    assert websocket.sent == [{"error": "Invalid simulation config"}]
+    # The WS numeric-field guard fires before Pydantic and emits a specific message.
+    assert websocket.sent == [{"error": "duration must be a positive finite number"}]
     load_engine.assert_not_called()
 
 
@@ -456,4 +458,357 @@ async def test_simulation_stream_rejects_malformed_initial_state(
     assert websocket.accepted is True
     assert websocket.closed is True
     assert websocket.sent == [{"error": "Invalid simulation config"}]
+    load_engine.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# 5. _is_numeric_sequence — pure unit tests (issue #5918)
+# ---------------------------------------------------------------------------
+
+
+class TestIsNumericSequence:
+    """_is_numeric_sequence guards np.array() against non-numeric inputs."""
+
+    def test_valid_float_list(self) -> None:
+        """A list of floats must be accepted."""
+        assert _is_numeric_sequence([1.0, 2.5, 3.14]) is True
+
+    def test_valid_int_list(self) -> None:
+        """A list of ints must be accepted."""
+        assert _is_numeric_sequence([0, 1, 2]) is True
+
+    def test_empty_list_is_valid(self) -> None:
+        """An empty list is a valid (zero-length) numeric sequence."""
+        assert _is_numeric_sequence([]) is True
+
+    def test_string_is_rejected(self) -> None:
+        """A bare string must be rejected."""
+        assert _is_numeric_sequence("not-a-list") is False
+
+    def test_none_is_rejected(self) -> None:
+        """None must be rejected (would produce NaN array)."""
+        assert _is_numeric_sequence(None) is False
+
+    def test_list_with_string_element_is_rejected(self) -> None:
+        """A list containing a non-numeric element must be rejected."""
+        assert _is_numeric_sequence([1.0, "bad"]) is False
+
+    def test_bool_elements_are_rejected(self) -> None:
+        """Lists of booleans must be rejected (bool is a subclass of int)."""
+        assert _is_numeric_sequence([True, False]) is False
+
+    def test_tuple_of_numbers_is_valid(self) -> None:
+        """A tuple of numbers is also accepted."""
+        assert _is_numeric_sequence((1.0, 2.0)) is True
+
+    def test_nested_list_is_rejected(self) -> None:
+        """A nested list must be rejected."""
+        assert _is_numeric_sequence([[1.0], [2.0]]) is False
+
+
+# ---------------------------------------------------------------------------
+# 6. _apply_initial_state validation — issue #5918
+# ---------------------------------------------------------------------------
+
+
+class TestApplyInitialStateValidation:
+    """_apply_initial_state must guard set_state() against non-numeric q/v."""
+
+    def _make_engine(self) -> MagicMock:
+        engine = MagicMock()
+        engine.set_state.return_value = None
+        return engine
+
+    def test_string_q_is_ignored_with_warning(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """Non-numeric q must produce a warning and skip set_state."""
+        engine = self._make_engine()
+        with caplog.at_level("WARNING"):
+            _apply_initial_state(engine, {"q": "bad-state", "v": []})
+        engine.set_state.assert_not_called()
+        assert any("initial_state.q" in r.message for r in caplog.records)
+
+    def test_none_q_is_ignored_with_warning(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """None q must produce a warning and skip set_state."""
+        engine = self._make_engine()
+        with caplog.at_level("WARNING"):
+            _apply_initial_state(engine, {"q": None, "v": []})
+        engine.set_state.assert_not_called()
+        assert any("initial_state.q" in r.message for r in caplog.records)
+
+    def test_string_v_is_ignored_with_warning(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """Non-numeric v must produce a warning and skip set_state."""
+        engine = self._make_engine()
+        with caplog.at_level("WARNING"):
+            _apply_initial_state(engine, {"q": [1.0], "v": "bad-v"})
+        engine.set_state.assert_not_called()
+        assert any("initial_state.v" in r.message for r in caplog.records)
+
+    def test_valid_q_and_v_calls_set_state(self) -> None:
+        """Valid numeric q and v must still invoke set_state."""
+        engine = self._make_engine()
+        _apply_initial_state(engine, {"q": [0.1, 0.2], "v": [0.3, 0.4]})
+        engine.set_state.assert_called_once()
+
+    def test_missing_q_and_v_defaults_to_empty_arrays(self) -> None:
+        """Missing q/v keys must default to empty arrays (existing contract)."""
+        engine = self._make_engine()
+        _apply_initial_state(engine, {})
+        engine.set_state.assert_called_once()
+        args = engine.set_state.call_args.args
+        assert len(args[0]) == 0
+        assert len(args[1]) == 0
+
+
+# ---------------------------------------------------------------------------
+# 7. _handle_client_commands JSON parse error isolation — issue #5918
+# ---------------------------------------------------------------------------
+
+
+class TestHandleClientCommandsJsonError:
+    """_handle_client_commands must handle invalid JSON from the client."""
+
+    @pytest.mark.anyio
+    async def test_invalid_json_sends_error_and_continues(self) -> None:
+        """A json.JSONDecodeError must trigger an error response, not a crash."""
+        websocket: Any = _WebSocket(speed_factor=1.0)
+
+        async def mock_receive_json() -> dict[str, Any]:
+            raise json.JSONDecodeError("Expecting value", "", 0)
+
+        sent_messages: list[dict[str, Any]] = []
+
+        async def mock_send_json(data: dict[str, Any]) -> None:
+            sent_messages.append(data)
+
+        websocket.receive_json = mock_receive_json
+        websocket.send_json = mock_send_json
+
+        config: dict[str, Any] = {}
+        result = await _handle_client_commands(websocket, config)
+
+        assert result == "continue"
+        assert sent_messages == [
+            {"error": "invalid_json", "message": "Message must be valid JSON"}
+        ]
+
+    @pytest.mark.anyio
+    async def test_timeout_still_returns_continue(self) -> None:
+        """TimeoutError (no message yet) must still return 'continue' cleanly."""
+        websocket: Any = _WebSocket(speed_factor=1.0)
+
+        async def mock_receive_json() -> dict[str, Any]:
+            raise TimeoutError
+
+        websocket.receive_json = mock_receive_json
+
+        config: dict[str, Any] = {}
+        result = await _handle_client_commands(websocket, config)
+        assert result == "continue"
+
+
+# ---------------------------------------------------------------------------
+# _validate_ws_numeric_fields — unit tests for issue #5918
+# ---------------------------------------------------------------------------
+
+
+class TestValidateWsNumericFields:
+    """_validate_ws_numeric_fields must reject non-finite and out-of-bounds values."""
+
+    def _call(self, config: dict[str, Any]) -> str | None:
+        return simulation_ws_module._validate_ws_numeric_fields(config)
+
+    # speed_factor checks
+    def test_nan_speed_factor_rejected(self) -> None:
+        assert self._call({"speed_factor": float("nan")}) is not None
+
+    def test_inf_speed_factor_rejected(self) -> None:
+        assert self._call({"speed_factor": float("inf")}) is not None
+
+    def test_neg_inf_speed_factor_rejected(self) -> None:
+        assert self._call({"speed_factor": float("-inf")}) is not None
+
+    def test_string_nan_speed_factor_rejected(self) -> None:
+        assert self._call({"speed_factor": "NaN"}) is not None
+
+    def test_valid_speed_factor_accepted(self) -> None:
+        assert self._call({"speed_factor": 2.0}) is None
+
+    # duration checks
+    def test_nan_duration_rejected(self) -> None:
+        assert self._call({"duration": float("nan")}) is not None
+
+    def test_inf_duration_rejected(self) -> None:
+        assert self._call({"duration": float("inf")}) is not None
+
+    def test_zero_duration_rejected(self) -> None:
+        assert self._call({"duration": 0.0}) is not None
+
+    def test_negative_duration_rejected(self) -> None:
+        assert self._call({"duration": -1.0}) is not None
+
+    def test_duration_at_cap_rejected(self) -> None:
+        """duration >= 3600s must be rejected."""
+        assert self._call({"duration": 3600.0}) is not None
+
+    def test_duration_just_below_cap_accepted(self) -> None:
+        assert self._call({"duration": 3599.9}) is None
+
+    def test_valid_duration_accepted(self) -> None:
+        assert self._call({"duration": 10.0}) is None
+
+    # timestep checks
+    def test_nan_timestep_rejected(self) -> None:
+        assert self._call({"timestep": float("nan")}) is not None
+
+    def test_inf_timestep_rejected(self) -> None:
+        assert self._call({"timestep": float("inf")}) is not None
+
+    def test_zero_timestep_rejected(self) -> None:
+        assert self._call({"timestep": 0.0}) is not None
+
+    def test_negative_timestep_rejected(self) -> None:
+        assert self._call({"timestep": -0.001}) is not None
+
+    def test_timestep_at_max_rejected(self) -> None:
+        """timestep >= 1.0s must be rejected."""
+        assert self._call({"timestep": 1.0}) is not None
+
+    def test_timestep_too_small_rejected(self) -> None:
+        """timestep < 1e-6 must be rejected."""
+        assert self._call({"timestep": 1e-7}) is not None
+
+    def test_valid_timestep_accepted(self) -> None:
+        assert self._call({"timestep": 0.002}) is None
+
+    def test_empty_config_accepted(self) -> None:
+        """No numeric fields supplied should not raise."""
+        assert self._call({}) is None
+
+
+# ---------------------------------------------------------------------------
+# WS handler integration: non-finite speed_factor/timestep/duration error frames
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_rejects_nan_speed_factor(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Non-finite speed_factor must send an error frame and not load an engine."""
+    websocket = _RouteWebSocket(
+        [{"action": "start", "config": {"speed_factor": float("nan")}}]
+    )
+    load_engine = AsyncMock()
+
+    monkeypatch.setattr(
+        simulation_ws_module, "resolve_ws_user", AsyncMock(return_value=object())
+    )
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert len(websocket.sent) == 1
+    assert "error" in websocket.sent[0]
+    load_engine.assert_not_called()
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_rejects_inf_speed_factor(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Infinite speed_factor must send an error frame and not load an engine."""
+    websocket = _RouteWebSocket(
+        [{"action": "start", "config": {"speed_factor": float("inf")}}]
+    )
+    load_engine = AsyncMock()
+
+    monkeypatch.setattr(
+        simulation_ws_module, "resolve_ws_user", AsyncMock(return_value=object())
+    )
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert len(websocket.sent) == 1
+    assert "error" in websocket.sent[0]
+    load_engine.assert_not_called()
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_rejects_duration_over_cap(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """duration >= 3600s must send a specific error frame and not load an engine."""
+    websocket = _RouteWebSocket([{"action": "start", "config": {"duration": 3600.0}}])
+    load_engine = AsyncMock()
+
+    monkeypatch.setattr(
+        simulation_ws_module, "resolve_ws_user", AsyncMock(return_value=object())
+    )
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert len(websocket.sent) == 1
+    assert "error" in websocket.sent[0]
+    load_engine.assert_not_called()
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_rejects_timestep_over_cap(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """timestep >= 1.0s must send a specific error frame and not load an engine."""
+    websocket = _RouteWebSocket(
+        [{"action": "start", "config": {"duration": 1.0, "timestep": 1.5}}]
+    )
+    load_engine = AsyncMock()
+
+    monkeypatch.setattr(
+        simulation_ws_module, "resolve_ws_user", AsyncMock(return_value=object())
+    )
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert len(websocket.sent) == 1
+    assert "error" in websocket.sent[0]
+    load_engine.assert_not_called()
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_rejects_timestep_too_small(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """timestep < 1e-6s must send a specific error frame and not load an engine."""
+    websocket = _RouteWebSocket(
+        [{"action": "start", "config": {"duration": 1.0, "timestep": 1e-9}}]
+    )
+    load_engine = AsyncMock()
+
+    monkeypatch.setattr(
+        simulation_ws_module, "resolve_ws_user", AsyncMock(return_value=object())
+    )
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert len(websocket.sent) == 1
+    assert "error" in websocket.sent[0]
     load_engine.assert_not_called()
