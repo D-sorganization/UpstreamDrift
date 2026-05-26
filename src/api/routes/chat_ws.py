@@ -38,6 +38,35 @@ router = APIRouter()
 _INTERNAL_ERROR_DETAIL = "Internal server error"
 _CONNECTION_ERROR_DETAIL = "Connection error"
 
+
+# ── Law-of-Demeter helpers ─────────────────────────────────────────────
+# ``websocket.app.state.chat_service`` is a four-level attribute walk that
+# obscures intent at every call site and breaks the moment ChatService
+# moves. Funnel every state lookup through one accessor so consumers ask
+# "give me the chat service" rather than reach through three intermediates.
+
+
+def _chat_service_from(holder: Any) -> Any:
+    """Return the ChatService attached to a request or websocket.
+
+    Pre: ``holder`` exposes ``app.state.chat_service`` (set by the API
+    lifespan in :mod:`src.api.server`).
+    Post: returns a non-None ChatService; raises ``RuntimeError`` otherwise
+    instead of the cryptic ``AttributeError`` that ``State.__getattr__``
+    would emit.
+    """
+    if holder is None:
+        raise ValueError("holder must be provided")
+    state = getattr(getattr(holder, "app", None), "state", None)
+    service = getattr(state, "chat_service", None)
+    if service is None:
+        raise RuntimeError(
+            "ChatService not initialised on app.state — startup lifespan did "
+            "not run (probable cause: TestClient invoked without "
+            "``with TestClient(app) as client``)."
+        )
+    return service
+
 # ── Chat-context injection helpers ───────────────────────────────────
 
 #: ``session.metadata`` key used to store the last-seen context digest.
@@ -156,7 +185,7 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
         return
     await websocket.accept()
 
-    chat_service = websocket.app.state.chat_service
+    chat_service = _chat_service_from(websocket)
 
     # Resolve or create session
     if session_id == "new":
@@ -282,7 +311,7 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:  #
 @router.get("/chat/sessions")
 async def list_sessions(request: Request) -> list[dict[str, Any]]:
     """List all active chat sessions."""
-    return request.app.state.chat_service.list_sessions()  # type: ignore[no-any-return]
+    return _chat_service_from(request).list_sessions()  # type: ignore[no-any-return]
 
 
 @router.get("/chat/sessions/{session_id}/history")
@@ -294,5 +323,5 @@ async def get_history(request: Request, session_id: str) -> dict[str, Any]:
     """Get message history for a session."""
     if not (request is not None):
         raise ValueError("request must be provided")
-    messages = request.app.state.chat_service.get_session_history(session_id)
+    messages = _chat_service_from(request).get_session_history(session_id)
     return {"session_id": session_id, "messages": messages}
