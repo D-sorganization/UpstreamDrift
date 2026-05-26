@@ -78,7 +78,7 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/deadsnakes-ubuntu-ppa-*.list || true
           sudo apt-get update || true
           sudo apt-get install -y xvfb
-          pip install --ignore-installed --no-deps pydantic-core==2.46.3 || true
+          pip install --ignore-installed --no-deps pydantic-core==2.46.4 || true
           pip install -e ".[dev]"
 
       - name: Validate workflow YAML
