@@ -40,6 +40,8 @@ ALLOWLIST = frozenset(
         "install.sh",
         "VERSION",
         "sidekick.spec",
+        "fix.py",
+        "patch_local_server_main.py",
     }
 )
 
