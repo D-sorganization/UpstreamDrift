@@ -301,43 +301,45 @@ class SettingsWidget(QWidget):
             show_runtime_mode_help,
         )
 
-        tab = QWidget()
-        tab_layout = QVBoxLayout(tab)
+        container = QWidget()
+        tab_layout = QVBoxLayout(container)
 
         # --- Engine Runtime ---------------------------------------------
         # Renamed from "Execution Environment" — "Engine Runtime" makes
         # explicit that this controls where *engines* run, separate from
         # where the launcher itself runs (always Windows).
-        env_group = QGroupBox("Engine Runtime")
-        env_inner = QVBoxLayout(env_group)
+        # --- Preferences & Engine Runtime --------------------------------
+        pref_group = QGroupBox("Runtime & Preferences")
+        pref_layout = QHBoxLayout(pref_group)
 
-        # Header row: short summary + inline ``?`` help button so users
-        # can read the full explanation without leaving the dialog.
-        env_header = QHBoxLayout()
-        env_header.addWidget(QLabel("Select where physics engines execute (pick one):"))
-        env_header.addStretch()
-        env_header.addWidget(make_runtime_mode_help_button(self))
-        env_inner.addLayout(env_header)
+        # Column 1: Engine Runtime
+        col_runtime = QVBoxLayout()
+        runtime_header = QHBoxLayout()
+        lbl_runtime = QLabel("<b>Engine Runtime</b> (pick one):")
+        lbl_runtime.setToolTip("Select where physics engines execute.")
+        runtime_header.addWidget(lbl_runtime)
+        runtime_header.addWidget(make_runtime_mode_help_button(self))
+        runtime_header.addStretch()
+        col_runtime.addLayout(runtime_header)
 
         self.chk_windows = QCheckBox("Windows")
         self.chk_windows.setToolTip(
             "Run physics engines natively on your local Windows system."
         )
-        env_inner.addWidget(self.chk_windows)
-
         self.chk_docker = QCheckBox("Docker")
         self.chk_docker.setToolTip(
             "Run physics engines inside a Docker container (Linux, sandboxed)."
         )
-        env_inner.addWidget(self.chk_docker)
-
         self.chk_wsl = QCheckBox("WSL")
         self.chk_wsl.setToolTip(
             "Run physics engines inside WSL2 Ubuntu (Linux, native filesystem)."
         )
-        env_inner.addWidget(self.chk_wsl)
 
-        # Make checkboxes mutually exclusive via button group
+        col_runtime.addWidget(self.chk_windows)
+        col_runtime.addWidget(self.chk_docker)
+        col_runtime.addWidget(self.chk_wsl)
+        col_runtime.addStretch()
+
         from PyQt6.QtWidgets import QButtonGroup
 
         self.env_group_buttons = QButtonGroup(self)
@@ -346,34 +348,32 @@ class SettingsWidget(QWidget):
         self.env_group_buttons.addButton(self.chk_docker)
         self.env_group_buttons.addButton(self.chk_wsl)
 
-        tab_layout.addWidget(env_group)
-
-        # --- Simulation options -----------------------------------------
-        sim_group = QGroupBox("Simulation Options")
-        sim_inner = QVBoxLayout(sim_group)
+        # Column 2: Simulation Options
+        col_sim = QVBoxLayout()
+        lbl_sim = QLabel("<b>Simulation Options</b>:")
+        col_sim.addWidget(lbl_sim)
 
         self.chk_live_viz = QCheckBox("Live visualization")
         self.chk_live_viz.setToolTip(
             "Stream the 3D scene in real time during simulation. Disable "
             "for headless batch runs to save GPU/CPU."
         )
-        sim_inner.addWidget(self.chk_live_viz)
-
-        self.chk_gpu = QCheckBox("GPU acceleration (where available)")
+        self.chk_gpu = QCheckBox("GPU acceleration")
         self.chk_gpu.setToolTip(
             "Use the GPU for physics where the engine supports it (MuJoCo "
             "MJX, JAX backends). Falls back to CPU if no compatible GPU is "
             "detected — safe to leave on."
         )
-        sim_inner.addWidget(self.chk_gpu)
+        col_sim.addWidget(self.chk_live_viz)
+        col_sim.addWidget(self.chk_gpu)
+        col_sim.addStretch()
 
-        tab_layout.addWidget(sim_group)
+        # Column 3: Sidekick AI Assistant
+        col_sidekick = QVBoxLayout()
+        lbl_sidekick = QLabel("<b>Sidekick AI Assistant</b>:")
+        col_sidekick.addWidget(lbl_sidekick)
 
-        # --- Sidekick AI context sharing --------------------------------
-        sidekick_group = QGroupBox("Sidekick AI Assistant")
-        sidekick_inner = QVBoxLayout(sidekick_group)
-
-        self.chk_sidekick_context = QCheckBox("Share app state with AI assistant")
+        self.chk_sidekick_context = QCheckBox("Share app state with AI")
         self.chk_sidekick_context.setToolTip(
             "When enabled, the Sidekick AI assistant receives a compact summary "
             "of recent diagnostic events and simulation activity as context. "
@@ -384,15 +384,31 @@ class SettingsWidget(QWidget):
             os.environ.get("UPSTREAMDRIFT_SIDEKICK_CONTEXT", "1") != "0"
         )
         self.chk_sidekick_context.toggled.connect(self._on_sidekick_context_toggled)
-        sidekick_inner.addWidget(self.chk_sidekick_context)
+        col_sidekick.addWidget(self.chk_sidekick_context)
 
         sidekick_footer = QLabel(
-            "<i>Context is capped at ~4 KB; only the last few events are sent.</i>"
+            "<i>Context is capped at ~4 KB; only recent events sent.</i>"
         )
         sidekick_footer.setTextFormat(Qt.TextFormat.RichText)
-        sidekick_inner.addWidget(sidekick_footer)
+        col_sidekick.addWidget(sidekick_footer)
+        col_sidekick.addStretch()
 
-        tab_layout.addWidget(sidekick_group)
+        # Helper function to create divider line
+        def make_v_divider() -> QFrame:
+            frame = QFrame()
+            frame.setFrameShape(QFrame.Shape.VLine)
+            frame.setFrameShadow(QFrame.Shadow.Sunken)
+            frame.setStyleSheet("color: #3a3a3a;")
+            return frame
+
+        # Add to main horizontal preferences layout
+        pref_layout.addLayout(col_runtime, stretch=1)
+        pref_layout.addWidget(make_v_divider())
+        pref_layout.addLayout(col_sim, stretch=1)
+        pref_layout.addWidget(make_v_divider())
+        pref_layout.addLayout(col_sidekick, stretch=1)
+
+        tab_layout.addWidget(pref_group)
 
         # --- Docker Image build -----------------------------------------
         # Renamed from "Rebuild Environment" — that label conflated the
@@ -546,7 +562,20 @@ class SettingsWidget(QWidget):
             self.chk_live_viz.toggled.connect(launcher.chk_live.setChecked)
             self.chk_gpu.toggled.connect(launcher.chk_gpu.setChecked)
 
-        return tab
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setWidget(container)
+
+        # DbC postconditions
+        assert scroll.widget() is container, (
+            "Postcondition: scroll area must wrap the configuration container"
+        )
+        assert container.layout() is not None, (
+            "Postcondition: configuration container must have an active layout"
+        )
+
+        return scroll
 
     # ── Diagnostics tab ─────────────────────────────────────────────
 
@@ -592,6 +621,13 @@ class SettingsWidget(QWidget):
         btn_row = QHBoxLayout()
         btn_row.addStretch()
 
+        self.btn_sync_tools = QPushButton("Sync Shared Tools")
+        self.btn_sync_tools.setToolTip(
+            "Synchronize git submodules and fetch latest updates"
+        )
+        self.btn_sync_tools.clicked.connect(self._sync_shared_tools)
+        btn_row.addWidget(self.btn_sync_tools)
+
         btn_refresh = QPushButton("Re-run Diagnostics")
         btn_refresh.setToolTip("Run all diagnostic checks again")
         btn_refresh.clicked.connect(self._refresh_diagnostics)
@@ -609,7 +645,7 @@ class SettingsWidget(QWidget):
 
     def _create_mcp_servers_tab(self) -> QWidget:
         """MCP Servers tab: list, add, disable, remove MCP server configs."""
-        from PyQt6.QtWidgets import QScrollArea, QVBoxLayout, QWidget
+        from PyQt6.QtWidgets import QVBoxLayout, QWidget
 
         from src.launchers.mcp_servers_preferences import (  # type: ignore[attr-defined]
             McpServersSection,
@@ -868,9 +904,7 @@ class SettingsWidget(QWidget):
         title = profile_name.replace("-", " ").title()
         rows: list[str] = [f"<b>{title}</b>"]
         if info.description:
-            rows.append(
-                f'<span style="color: palette(mid);">{info.description}</span>'
-            )
+            rows.append(f'<span style="color: palette(mid);">{info.description}</span>')
         rows.append("")
         if info.max_size_mb:
             rows.append(
@@ -887,9 +921,7 @@ class SettingsWidget(QWidget):
                     f'<span style="color: palette(mid);">({size}) — '
                     f"{f.description}</span></li>"
                 )
-            rows.append(
-                "<ul style='margin-top: 4px;'>" + "".join(items) + "</ul>"
-            )
+            rows.append("<ul style='margin-top: 4px;'>" + "".join(items) + "</ul>")
         elif info.feature_names:
             rows.append("<b>Features:</b> " + ", ".join(info.feature_names))
 
@@ -903,11 +935,24 @@ class SettingsWidget(QWidget):
         self._build_timer_id = self.startTimer(1000)
         self._build_status.setText("Building...")
 
-        context = REPOS_ROOT / "src" / "engines" / "physics_engines" / "mujoco"
+        stage = self.combo_stage.currentText()
+        from src.launchers.launcher_constants import DOCKER_STAGES
+
+        if stage in DOCKER_STAGES:
+            context = REPOS_ROOT
+            dockerfile = REPOS_ROOT / "Dockerfile.modular"
+            build_args = {"PROFILE": stage}
+        else:
+            context = REPOS_ROOT / "src" / "engines" / "physics_engines" / "mujoco"
+            dockerfile = None
+            build_args = None
+
         self.build_thread = DockerBuildThread(
-            target_stage=self.combo_stage.currentText(),
+            target_stage=stage,
             image_name=DOCKER_IMAGE_NAME,
             context_path=context,
+            dockerfile_path=dockerfile,
+            build_args=build_args,
         )
         self.build_thread.log_signal.connect(self._on_build_log)
         self.build_thread.finished_signal.connect(self._on_build_finished)
@@ -1057,6 +1102,114 @@ class SettingsWidget(QWidget):
         self._diag_browser.setHtml(
             f"<p style='color:#f85149;'>Error running diagnostics: {error_msg}</p>"
         )
+
+    def _sync_shared_tools(self) -> None:
+        """Run submodule synchronization and fetch latest remote commits in a background thread."""
+        from PyQt6.QtWidgets import QMessageBox
+
+        reply = QMessageBox.question(
+            self,
+            "Sync Shared Tools",
+            "Are you sure you want to synchronize git submodules and fetch latest remote updates?\n\n"
+            "This will run 'git submodule update --init --recursive' in the background.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if reply == QMessageBox.StandardButton.No:
+            return
+
+        self.btn_sync_tools.setEnabled(False)
+        self.btn_sync_tools.setText("Syncing...")
+        self._diag_browser.append(
+            "<p style='color:#58a6ff;'>Starting sync of shared tools...</p>"
+        )
+
+        from PyQt6.QtCore import QThread, pyqtSignal
+        from src.shared.python.data_io.path_utils import get_repo_root
+        from src.launchers.launcher_diagnostics import LauncherDiagnostics
+        import subprocess
+
+        class SubmoduleSyncWorker(QThread):
+            finished = pyqtSignal(bool, str)
+
+            def __init__(self, repos_root: Path) -> None:
+                super().__init__()
+                self.repos_root = repos_root
+
+            def run(self) -> None:
+                try:
+                    # 1. git submodule update
+                    result = subprocess.run(
+                        ["git", "submodule", "update", "--init", "--recursive"],
+                        cwd=str(self.repos_root),
+                        capture_output=True,
+                        text=True,
+                        check=True,
+                        encoding="utf-8",
+                        timeout=60.0,
+                    )
+
+                    # 2. Fetch updates for parent repo
+                    subprocess.run(
+                        ["git", "fetch"],
+                        cwd=str(self.repos_root),
+                        capture_output=True,
+                        timeout=15.0,
+                    )
+
+                    # 3. Fetch updates for submodule
+                    submodule_dir = self.repos_root / "vendor" / "ud-tools"
+                    if submodule_dir.is_dir():
+                        subprocess.run(
+                            ["git", "fetch"],
+                            cwd=str(submodule_dir),
+                            capture_output=True,
+                            timeout=15.0,
+                        )
+
+                    # 4. Fetch updates for sibling Tools
+                    sibling_root = LauncherDiagnostics._find_sibling_tools_root()
+                    if sibling_root:
+                        subprocess.run(
+                            ["git", "fetch"],
+                            cwd=str(sibling_root),
+                            capture_output=True,
+                            timeout=15.0,
+                        )
+
+                    output_msg = (
+                        result.stdout or "Submodules synchronized successfully."
+                    )
+                    self.finished.emit(True, output_msg)
+                except (subprocess.SubprocessError, FileNotFoundError, OSError) as e:
+                    self.finished.emit(False, str(e))
+
+        repos_root = get_repo_root()
+        self._sync_worker = SubmoduleSyncWorker(repos_root)
+        self._sync_worker.finished.connect(self._on_sync_finished)
+        self._sync_worker.start()
+
+    def _on_sync_finished(self, success: bool, output: str) -> None:
+        """Handle completion of the synchronization worker thread."""
+        self.btn_sync_tools.setEnabled(True)
+        self.btn_sync_tools.setText("Sync Shared Tools")
+
+        from PyQt6.QtWidgets import QMessageBox
+
+        if success:
+            QMessageBox.information(
+                self,
+                "Sync Complete",
+                "Shared tools synchronization completed successfully.",
+            )
+            # Re-run diagnostics to update status
+            self._refresh_diagnostics()
+        else:
+            QMessageBox.critical(
+                self,
+                "Sync Failed",
+                f"Failed to synchronize shared tools:\n\n{output}",
+            )
 
 
 class SettingsDialog(QDialog):

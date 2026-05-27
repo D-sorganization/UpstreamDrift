@@ -646,6 +646,25 @@ class DialogsManager:
             self.lbl_execution_mode.setText("Runtime: Windows")
             self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_WARNING)
 
+    def show_dependency_error(
+        self,
+        model_name: str,
+        dependency_name: str,
+        install_cmd: str,
+        doc_url: str,
+        error_detail: str = "",
+    ) -> None:
+        """Show the stylized dependency error dialog."""
+        dialog = DependencyErrorDialog(
+            parent=self.launcher,
+            model_name=model_name,
+            dependency_name=dependency_name,
+            install_cmd=install_cmd,
+            doc_url=doc_url,
+            error_detail=error_detail,
+        )
+        dialog.exec()
+
 
 class ThemedModalDialog(QDialog):
     """Custom themed frameless modal dialog."""
@@ -723,3 +742,145 @@ class ThemedModalDialog(QDialog):
 
         frame_layout.addLayout(btn_layout)
         layout.addWidget(self.frame)
+
+
+class DependencyErrorDialog(QDialog):
+    """Custom themed modal dialog for dependency errors."""
+
+    def __init__(
+        self,
+        parent=None,
+        model_name: str = "",
+        dependency_name: str = "",
+        install_cmd: str = "",
+        doc_url: str = "",
+        error_detail: str = "",
+    ):
+        super().__init__(parent)
+        from PyQt6.QtCore import Qt
+        from PyQt6.QtGui import QColor
+        from PyQt6.QtWidgets import (
+            QVBoxLayout,
+            QLabel,
+            QHBoxLayout,
+            QPushButton,
+            QGraphicsDropShadowEffect,
+            QFrame,
+        )
+
+        self.install_cmd = install_cmd
+        self.doc_url = doc_url
+
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Dialog)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+        self.setProperty("class", "themed-modal")
+        style = self.style()
+        if style is not None:
+            style.polish(self)
+
+        layout = QVBoxLayout(self)
+
+        self.frame = QFrame(self)
+        # Red border to represent error
+        self.frame.setStyleSheet(
+            "QFrame { background-color: #24272e; border: 1px solid #c92a2a; border-radius: 8px; }"
+        )
+
+        shadow = QGraphicsDropShadowEffect()
+        shadow.setBlurRadius(20)
+        shadow.setColor(QColor(0, 0, 0, 150))
+        shadow.setOffset(0, 4)
+        self.frame.setGraphicsEffect(shadow)
+
+        frame_layout = QVBoxLayout(self.frame)
+        frame_layout.setContentsMargins(20, 20, 20, 20)
+        frame_layout.setSpacing(15)
+
+        lbl_title = QLabel(f"Dependency Missing: {dependency_name}")
+        lbl_title.setStyleSheet(
+            "color: #ff6b6b; font-weight: bold; font-size: 16px; border: none; background: transparent;"
+        )
+        frame_layout.addWidget(lbl_title)
+
+        msg_text = (
+            f"Cannot run <b>{model_name}</b> because the required dependency "
+            f"<b>{dependency_name}</b> is not installed locally."
+        )
+        if error_detail:
+            msg_text += f"<br><br><font color='#aaaaaa'>Details: {error_detail}</font>"
+
+        lbl_msg = QLabel(msg_text)
+        lbl_msg.setStyleSheet(
+            "color: #d4d4d4; font-size: 13px; border: none; background: transparent;"
+        )
+        lbl_msg.setWordWrap(True)
+        frame_layout.addWidget(lbl_msg)
+
+        if install_cmd:
+            cmd_group = QFrame()
+            cmd_group.setStyleSheet(
+                "QFrame { background-color: #1e2026; border: 1px solid #2d3139; border-radius: 4px; padding: 8px; }"
+            )
+            cmd_layout = QHBoxLayout(cmd_group)
+            cmd_layout.setContentsMargins(5, 5, 5, 5)
+
+            self.lbl_cmd = QLabel(install_cmd)
+            self.lbl_cmd.setStyleSheet(
+                "color: #51cf66; font-family: monospace; font-size: 12px; border: none; background: transparent;"
+            )
+            self.lbl_cmd.setWordWrap(True)
+            cmd_layout.addWidget(self.lbl_cmd, stretch=1)
+
+            self.btn_copy = QPushButton("Copy")
+            self.btn_copy.setFixedWidth(60)
+            self.btn_copy.setStyleSheet(
+                "QPushButton { background-color: #3b5bdb; color: white; border: none; border-radius: 3px; padding: 4px; font-size: 11px; }"
+                "QPushButton:hover { background-color: #4c6ef5; }"
+                "QPushButton:pressed { background-color: #2b4bcb; }"
+            )
+            self.btn_copy.clicked.connect(self._copy_command)
+            cmd_layout.addWidget(self.btn_copy)
+
+            frame_layout.addWidget(cmd_group)
+
+        btn_layout = QHBoxLayout()
+        btn_layout.setSpacing(10)
+        btn_layout.addStretch()
+
+        if doc_url:
+            self.btn_doc = QPushButton("Documentation")
+            self.btn_doc.setStyleSheet(
+                "QPushButton { background-color: #495057; color: white; border: none; border-radius: 4px; padding: 6px 12px; font-size: 12px; }"
+                "QPushButton:hover { background-color: #6c757d; }"
+            )
+            self.btn_doc.clicked.connect(self._open_doc)
+            btn_layout.addWidget(self.btn_doc)
+
+        self.btn_close = QPushButton("Close")
+        self.btn_close.setStyleSheet(
+            "QPushButton { background-color: #ae3ec9; color: white; border: none; border-radius: 4px; padding: 6px 12px; font-size: 12px; font-weight: bold; }"
+            "QPushButton:hover { background-color: #c225db; }"
+        )
+        self.btn_close.clicked.connect(self.accept)
+        btn_layout.addWidget(self.btn_close)
+
+        frame_layout.addLayout(btn_layout)
+        layout.addWidget(self.frame)
+
+    def _copy_command(self) -> None:
+        from PyQt6.QtWidgets import QApplication
+
+        clipboard = QApplication.clipboard()
+        if clipboard:
+            clipboard.setText(self.install_cmd)
+            self.btn_copy.setText("Copied!")
+            from PyQt6.QtCore import QTimer
+
+            QTimer.singleShot(2000, lambda: self.btn_copy.setText("Copy"))
+
+    def _open_doc(self) -> None:
+        from PyQt6.QtCore import QUrl
+        from PyQt6.QtGui import QDesktopServices
+
+        QDesktopServices.openUrl(QUrl(self.doc_url))

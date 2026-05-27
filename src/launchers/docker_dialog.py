@@ -67,7 +67,11 @@ class EnvironmentDialog(QDialog):
 
         # Build Tab
         tab_build = QWidget()
-        build_layout = QVBoxLayout(tab_build)
+        tab_build_layout = QVBoxLayout(tab_build)
+
+        container = QWidget()
+        build_layout = QVBoxLayout(container)
+        build_layout.setContentsMargins(0, 0, 0, 0)
 
         # Profile metadata for tier details (size, included features, etc.).
         # Loaded once at dialog construction — the YAML is read-only during a
@@ -138,6 +142,21 @@ class EnvironmentDialog(QDialog):
         self.console.setProperty("class", "console-dark")
         self.console.style().polish(self.console)
         build_layout.addWidget(self.console)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setWidget(container)
+
+        # DbC postconditions
+        assert scroll.widget() is container, (
+            "Postcondition: scroll area must wrap the build container"
+        )
+        assert container.layout() is not None, (
+            "Postcondition: build container must have an active layout"
+        )
+
+        tab_build_layout.addWidget(scroll)
         tabs.addTab(tab_build, "Build Docker")
 
         close_btn = QPushButton("Close")
@@ -173,9 +192,7 @@ class EnvironmentDialog(QDialog):
         rows: list[str] = []
         rows.append(f"<b>{title}</b>")
         if info.description:
-            rows.append(
-                f'<span style="color: palette(mid);">{info.description}</span>'
-            )
+            rows.append(f'<span style="color: palette(mid);">{info.description}</span>')
         rows.append("")
         if info.max_size_mb:
             rows.append(
@@ -194,9 +211,7 @@ class EnvironmentDialog(QDialog):
                 )
             rows.append("<ul style='margin-top: 4px;'>" + "".join(items) + "</ul>")
         elif info.feature_names:
-            rows.append(
-                "<b>Features:</b> " + ", ".join(info.feature_names)
-            )
+            rows.append("<b>Features:</b> " + ", ".join(info.feature_names))
 
         self.tier_details.setHtml("<br>".join(rows))
 
@@ -218,10 +233,24 @@ class EnvironmentDialog(QDialog):
         self._elapsed_timer_id = self.startTimer(1000)
         self.build_status_label.setText("Building...")
 
+        stage = self.combo_stage.currentText()
+        from src.launchers.launcher_constants import DOCKER_STAGES
+
+        if stage in DOCKER_STAGES:
+            context = REPOS_ROOT
+            dockerfile = REPOS_ROOT / "Dockerfile.modular"
+            build_args = {"PROFILE": stage}
+        else:
+            context = self._DOCKER_CONTEXT
+            dockerfile = None
+            build_args = None
+
         self.build_thread = DockerBuildThread(
-            target_stage=self.combo_stage.currentText(),
+            target_stage=stage,
             image_name=DOCKER_IMAGE_NAME,
-            context_path=self._DOCKER_CONTEXT,
+            context_path=context,
+            dockerfile_path=dockerfile,
+            build_args=build_args,
         )
         self.build_thread.log_signal.connect(self._on_build_log)
         self.build_thread.finished_signal.connect(self._on_build_finished)

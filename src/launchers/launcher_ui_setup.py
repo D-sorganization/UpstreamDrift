@@ -1162,7 +1162,7 @@ class UISetupManager:
         # primary action is always reachable without scrolling and the grid
         # area below is freed for tiles (no bottom-bar overlap).
         self._ensure_launch_button()
-        top_bar.addWidget(self.btn_launch)
+        # top_bar.addWidget(self.btn_launch)  # Removed launch button per user request
 
     def _ensure_launch_button(self) -> None:
         """Create ``self.btn_launch`` if it doesn't exist yet (idempotent).
@@ -1189,6 +1189,7 @@ class UISetupManager:
             _style.polish(btn)
         btn.clicked.connect(self.launch_simulation)
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn.hide()  # Hidden per user request; models are launched via tiles.
         self.btn_launch = btn
 
     def _setup_top_bar_config_checkboxes(self, top_bar: QHBoxLayout) -> None:

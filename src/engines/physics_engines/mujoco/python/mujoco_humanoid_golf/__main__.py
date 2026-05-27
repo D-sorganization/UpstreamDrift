@@ -379,32 +379,25 @@ def get_dockable_ui() -> QtWidgets.QMainWindow:
 
 def main() -> None:
     """Launch the advanced golf swing analysis application."""
+    # Validate dependencies on startup
+    try:
+        import mujoco  # noqa: F401
+    except ImportError:
+        print("Error: MuJoCo library not found.", file=sys.stderr)
+        print("Please install it using: pip install mujoco", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        from PyQt6 import QtWidgets
+    except ImportError:
+        print("Error: PyQt6 library not found.", file=sys.stderr)
+        print("Please install it using: pip install PyQt6", file=sys.stderr)
+        sys.exit(1)
+
     app = QtWidgets.QApplication(sys.argv)
 
     # Use advanced GUI by default
     win = AdvancedGolfAnalysisWindow()
-
-    # Add AI Chat dock widget (connects to FastAPI chat server)
-    try:
-        from src.shared.python.ai.gui.settings_dialog import AISettings
-        from src.shared.python.chat import ChatDockWidget
-
-        # Tools issue #2549 / PR #2567: forward the user's
-        # ``auto_index_on_open`` preference so the dock asks the chat
-        # backend to rebuild its codemap on connect.
-        try:
-            ai_settings = AISettings.load()
-            auto_index = bool(ai_settings.auto_index_on_open)
-        except (ImportError, RuntimeError, ValueError):
-            auto_index = False
-        chat_dock = ChatDockWidget(
-            app_context="mujoco",
-            auto_index_on_open=auto_index,
-            parent=win,
-        )
-        win.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, chat_dock)
-    except ImportError:
-        pass  # Server not running — engine works fine without chat
 
     win.show()
     sys.exit(app.exec())

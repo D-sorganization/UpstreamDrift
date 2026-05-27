@@ -91,7 +91,11 @@ class ModuleHandler:
         import importlib
 
         try:
-            module = importlib.import_module(self.module_name)
+            try:
+                module = importlib.import_module(f"{self.module_name}.__main__")
+            except ImportError:
+                module = importlib.import_module(self.module_name)
+
             if hasattr(module, "get_dockable_ui"):
                 return module.get_dockable_ui()
         except Exception as e:  # noqa: BLE001

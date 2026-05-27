@@ -368,3 +368,17 @@ def test_layout_tab_zoom_slider_calls_on_zoom_slider_changed(
     dialog.zoom_slider.setValue(75)
 
     parent_launcher._on_zoom_slider_changed.assert_called_with(75)
+
+
+def test_configuration_tab_uses_scroll_area(parent_launcher, qapp) -> None:
+    """TDD test: Configuration tab must return a QScrollArea wrapping the container widget."""
+    from PyQt6.QtWidgets import QScrollArea
+
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    config_tab = dialog.tabs.widget(TAB_CONFIG)
+
+    assert isinstance(config_tab, QScrollArea), (
+        "Configuration tab must be a QScrollArea"
+    )
+    assert config_tab.widget() is not None, "QScrollArea must have a wrapped widget"
+    assert config_tab.widgetResizable(), "QScrollArea widgetResizable must be True"

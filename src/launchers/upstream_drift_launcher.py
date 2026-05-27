@@ -234,7 +234,7 @@ assert STARTUP_TIMEOUT_SEC > 0, (
     "STARTUP_TIMEOUT_SEC must be > 0 to schedule a recovery timer"
 )
 
-SIDEKICK_API_READY_TIMEOUT_SEC: float = 15.0
+SIDEKICK_API_READY_TIMEOUT_SEC: float = 45.0
 SIDEKICK_API_READY_RETRY_MS: int = 500
 
 
@@ -702,6 +702,7 @@ class UpstreamDriftLauncher(QMainWindow):
         self.sidekick_sidebar = None
         self.sidekick_window = None
         self._sidekick_popped_out = False
+        self._dependency_status_cache: dict[str, tuple[bool, str]] = {}
         self.orchestrator.initialize_from_results(startup_results)
 
     def _init_managers(self) -> None:
@@ -1169,6 +1170,49 @@ class UpstreamDriftLauncher(QMainWindow):
             update_context = getattr(context_help, "update_context", None)
             if callable(update_context):
                 update_context(model_id)
+
+            # Run dependency checks on click (select)
+            use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
+            use_docker = hasattr(self, "chk_docker") and self.chk_docker.isChecked()
+            if not use_wsl and not use_docker:
+                from src.launchers.launcher_simulation import DEPENDENCY_MAP
+
+                key = model.id if model.id in DEPENDENCY_MAP else model.type
+                if key in DEPENDENCY_MAP:
+                    if model_id not in self._dependency_status_cache:
+                        self.lbl_status.setText(
+                            f"> Checking {model.name} dependencies..."
+                        )
+                        self.lbl_status.setStyleSheet(Styles.STATUS_WARNING)
+                        QApplication.processEvents(
+                            QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents
+                        )
+
+                        deps_ok, deps_error = (
+                            self.simulation_manager._check_module_dependencies(key)
+                        )
+                        self._dependency_status_cache[model_id] = (deps_ok, deps_error)
+                    else:
+                        deps_ok, deps_error = self._dependency_status_cache[model_id]
+
+                    if not deps_ok:
+                        dep_info = DEPENDENCY_MAP.get(key, {})
+                        dep_name = dep_info.get("display_name", key)
+                        install_cmd = dep_info.get("install_cmd", "")
+                        doc_url = dep_info.get("doc_url", "")
+
+                        self.show_dependency_error(
+                            model.name,
+                            dep_name,
+                            install_cmd,
+                            doc_url,
+                            deps_error,
+                        )
+                        self.lbl_status.setText("! Dependency Error")
+                        self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
+                    else:
+                        self.lbl_status.setText("Ready")
+                        self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
 
     def update_launch_button(self, model_name: str | None = None) -> None:
         """Update the launch button state."""

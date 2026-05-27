@@ -415,3 +415,52 @@ def test_update_execution_status(launcher) -> None:
 def test_update_execution_status_no_label(launcher) -> None:
     del launcher.lbl_execution_mode
     launcher.update_execution_status()  # Should simply return
+
+
+def test_dependency_error_dialog(qapp) -> None:
+    from src.launchers.launcher_dialogs import DependencyErrorDialog
+
+    dialog = DependencyErrorDialog(
+        model_name="MuJoCo Test",
+        dependency_name="MuJoCo",
+        install_cmd="pip install mujoco",
+        doc_url="https://mujoco.org",
+        error_detail="ImportError",
+    )
+    assert dialog.install_cmd == "pip install mujoco"
+    assert dialog.doc_url == "https://mujoco.org"
+
+    # Test copy button callback
+    with patch("PyQt6.QtWidgets.QApplication.clipboard") as mock_clipboard:
+        clipboard_inst = MagicMock()
+        mock_clipboard.return_value = clipboard_inst
+        dialog._copy_command()
+        clipboard_inst.setText.assert_called_with("pip install mujoco")
+
+    # Test open doc callback
+    with patch("src.launchers.launcher_dialogs.QDesktopServices.openUrl") as mock_open:
+        dialog._open_doc()
+        mock_open.assert_called_once()
+
+
+@patch("src.launchers.launcher_dialogs.DependencyErrorDialog")
+def test_show_dependency_error_mixin(mock_dialog_class, launcher) -> None:
+    dialog_inst = MagicMock()
+    mock_dialog_class.return_value = dialog_inst
+
+    launcher.show_dependency_error(
+        "MuJoCo Test",
+        "MuJoCo",
+        "pip install mujoco",
+        "https://mujoco.org",
+        "ImportError",
+    )
+    mock_dialog_class.assert_called_once_with(
+        parent=launcher,
+        model_name="MuJoCo Test",
+        dependency_name="MuJoCo",
+        install_cmd="pip install mujoco",
+        doc_url="https://mujoco.org",
+        error_detail="ImportError",
+    )
+    dialog_inst.exec.assert_called_once()

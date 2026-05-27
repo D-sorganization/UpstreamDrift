@@ -178,6 +178,7 @@ def test_check_local_dependencies(mock_question, launcher) -> None:
 
     # Deps fail, docker available
     launcher.docker_available = True
+    launcher._dependency_status_cache = {}
     with patch.object(
         launcher, "_check_module_dependencies", return_value=(False, "error")
     ):
@@ -187,6 +188,7 @@ def test_check_local_dependencies(mock_question, launcher) -> None:
             launcher.chk_docker.setChecked.assert_called_with(True)
             mock_launch.assert_called_once()
 
+        launcher._dependency_status_cache = {}
         mock_question.return_value = QMessageBox.StandardButton.No
         with patch.object(launcher, "_show_dependency_error"):
             assert launcher._check_local_dependencies(model) is False
@@ -542,3 +544,45 @@ def test_launch_matlab_app(mock_popen, launcher) -> None:
     launcher.show_toast.assert_called_with(
         "MATLAB executable not found in PATH.", "error"
     )
+
+
+def test_dependency_map_checks(launcher) -> None:
+    from src.launchers.launcher_simulation import DEPENDENCY_MAP
+
+    assert "custom_humanoid" in DEPENDENCY_MAP
+    assert "mujoco_unified" in DEPENDENCY_MAP
+    assert DEPENDENCY_MAP["mujoco_unified"]["module"] == "mujoco"
+
+
+@patch("src.launchers.launcher_simulation.subprocess.run")
+def test_check_module_dependencies_with_map(mock_run, launcher) -> None:
+    mock_run.return_value.stdout = "OK"
+    success, err = launcher._check_module_dependencies("mujoco_unified")
+    assert success is True
+
+    mock_run.return_value.stdout = "ImportError"
+    success, err = launcher._check_module_dependencies("mujoco_unified")
+    assert success is False
+    assert "MuJoCo dependency check failed" in err
+
+
+def test_check_local_dependencies_with_dialog(launcher) -> None:
+    model = DummyModel("mujoco_unified", "MuJoCo", "custom_humanoid", path="test.xml")
+
+    launcher._dependency_status_cache = {}
+    launcher.show_dependency_error = MagicMock()
+
+    with patch.object(
+        launcher,
+        "_check_module_dependencies",
+        return_value=(False, "Missing dependency info"),
+    ):
+        res = launcher._check_local_dependencies(model)
+        assert res is False
+        launcher.show_dependency_error.assert_called_once_with(
+            "MuJoCo",
+            "MuJoCo",
+            "pip install mujoco",
+            "https://mujoco.org",
+            "Missing dependency info",
+        )

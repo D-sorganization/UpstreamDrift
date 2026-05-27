@@ -38,6 +38,118 @@ from src.shared.python.theme.style_constants import Styles
 logger = get_logger(__name__)
 
 
+DEPENDENCY_MAP: dict[str, dict[str, str]] = {
+    "mujoco_unified": {
+        "module": "mujoco",
+        "display_name": "MuJoCo",
+        "install_cmd": "pip install mujoco",
+        "doc_url": "https://mujoco.org",
+    },
+    "custom_humanoid": {
+        "module": "mujoco",
+        "display_name": "MuJoCo",
+        "install_cmd": "pip install mujoco",
+        "doc_url": "https://mujoco.org",
+    },
+    "custom_dashboard": {
+        "module": "mujoco",
+        "display_name": "MuJoCo",
+        "install_cmd": "pip install mujoco",
+        "doc_url": "https://mujoco.org",
+    },
+    "mjcf": {
+        "module": "mujoco",
+        "display_name": "MuJoCo",
+        "install_cmd": "pip install mujoco",
+        "doc_url": "https://mujoco.org",
+    },
+    "drake_golf": {
+        "module": "pydrake",
+        "display_name": "Drake (pydrake)",
+        "install_cmd": "pip install drake",
+        "doc_url": "https://drake.mit.edu/python_bindings.html",
+    },
+    "drake": {
+        "module": "pydrake",
+        "display_name": "Drake (pydrake)",
+        "install_cmd": "pip install drake",
+        "doc_url": "https://drake.mit.edu/python_bindings.html",
+    },
+    "pinocchio_golf": {
+        "module": "pinocchio",
+        "display_name": "Pinocchio",
+        "install_cmd": "pip install pin-project",
+        "doc_url": "https://github.com/stack-of-tasks/pinocchio",
+    },
+    "pinocchio": {
+        "module": "pinocchio",
+        "display_name": "Pinocchio",
+        "install_cmd": "pip install pin-project",
+        "doc_url": "https://github.com/stack-of-tasks/pinocchio",
+    },
+    "opensim_golf": {
+        "module": "opensim",
+        "display_name": "OpenSim",
+        "install_cmd": "conda install -c opensim opensim",
+        "doc_url": "https://opensim.stanford.edu",
+    },
+    "opensim": {
+        "module": "opensim",
+        "display_name": "OpenSim",
+        "install_cmd": "conda install -c opensim opensim",
+        "doc_url": "https://opensim.stanford.edu",
+    },
+    "myosim_suite": {
+        "module": "myosuite",
+        "display_name": "MyoSuite",
+        "install_cmd": "pip install myosuite",
+        "doc_url": "https://github.com/facebookresearch/myosuite",
+    },
+    "myosim": {
+        "module": "myosuite",
+        "display_name": "MyoSuite",
+        "install_cmd": "pip install myosuite",
+        "doc_url": "https://github.com/facebookresearch/myosuite",
+    },
+    "mediapipe_analysis": {
+        "module": "mediapipe",
+        "display_name": "MediaPipe",
+        "install_cmd": "pip install mediapipe",
+        "doc_url": "https://google.github.io/mediapipe/",
+    },
+    "openpose_analysis": {
+        "module": "pyopenpose",
+        "display_name": "OpenPose (pyopenpose)",
+        "install_cmd": "pip install pyopenpose",
+        "doc_url": "https://github.com/CMU-Perceptual-Computing-Lab/openpose",
+    },
+    "bunker_shot": {
+        "module": "pychrono",
+        "display_name": "Project Chrono (pychrono)",
+        "install_cmd": "conda install -c projectchrono pychrono",
+        "doc_url": "https://projectchrono.org",
+    },
+    "bunkershot3d": {
+        "module": "pyqtgraph",
+        "display_name": "PyQtGraph",
+        "install_cmd": "pip install pyqtgraph PyOpenGL",
+        "doc_url": "https://www.pyqtgraph.org/",
+    },
+    "pinn_hybrid": {
+        "module": "jax",
+        "display_name": "JAX / Equinox",
+        "install_cmd": "pip install jax jaxlib equinox",
+        "doc_url": "https://github.com/google/jax",
+    },
+    "physics_informed": {
+        "module": "jax",
+        "display_name": "JAX / Equinox",
+        "install_cmd": "pip install jax jaxlib equinox",
+        "doc_url": "https://github.com/google/jax",
+    },
+}
+
+
 class SimulationManager:
     def __init__(self, launcher):
         self.launcher = launcher
@@ -74,36 +186,27 @@ class SimulationManager:
         return env
 
     @precondition(
-        lambda self, model_type: model_type is not None and len(model_type.strip()) > 0,
-        "Model type must be a non-empty string",
+        lambda self, key: key is not None and len(key.strip()) > 0,
+        "Dependency key must be a non-empty string",
     )
-    def _check_module_dependencies(self, model_type: str) -> tuple[bool, str]:
-        """Check if required dependencies for a module type are available.
+    def _check_module_dependencies(self, key: str) -> tuple[bool, str]:
+        """Check if required dependencies for a module type or ID are available.
 
         Args:
-            model_type: The type of model to check dependencies for.
+            key: The type or ID of model to check dependencies for.
 
         Returns:
             Tuple of (success, error_message). If success is True, error_message is empty.
         """
-        # Map model types to their required imports
-        if model_type is None:
-            raise ValueError("model_type must be provided")
-        dependency_checks = {
-            "custom_humanoid": ("mujoco", "MuJoCo"),
-            "custom_dashboard": ("mujoco", "MuJoCo"),
-            "mjcf": ("mujoco", "MuJoCo"),
-            "drake": ("pydrake", "Drake (pydrake)"),
-            "pinocchio": ("pinocchio", "Pinocchio"),
-            "opensim": ("opensim", "OpenSim"),
-            "myosim": ("myosuite", "MyoSuite"),
-        }
+        if key is None:
+            raise ValueError("key must be provided")
 
-        check = dependency_checks.get(model_type)
+        check = DEPENDENCY_MAP.get(key)
         if not check:
             return True, ""  # No specific dependency check needed
 
-        module_name, display_name = check
+        module_name = check["module"]
+        display_name = check["display_name"]
 
         import_check_code = f"""
 import sys
@@ -207,7 +310,18 @@ except (RuntimeError, TypeError, AttributeError) as e:
         self.lbl_status.setStyleSheet(Styles.STATUS_WARNING)
         QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
 
-        deps_ok, deps_error = self._check_module_dependencies(model.type)
+        # Retrieve or check dependencies with caching
+        if not hasattr(self.launcher, "_dependency_status_cache"):
+            self.launcher._dependency_status_cache = {}
+
+        key = model.id if model.id in DEPENDENCY_MAP else model.type
+
+        if model.id not in self.launcher._dependency_status_cache:
+            deps_ok, deps_error = self._check_module_dependencies(key)
+            self.launcher._dependency_status_cache[model.id] = (deps_ok, deps_error)
+        else:
+            deps_ok, deps_error = self.launcher._dependency_status_cache[model.id]
+
         if deps_ok:
             return True
 
@@ -223,7 +337,24 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 self.chk_docker.setChecked(True)
                 self.launch_simulation()
                 return False
-        self._show_dependency_error(model.name, deps_error)
+
+        # Show the custom dependency error dialog
+        dep_info = DEPENDENCY_MAP.get(key, {})
+        dep_name = dep_info.get("display_name", key)
+        install_cmd = dep_info.get("install_cmd", "")
+        doc_url = dep_info.get("doc_url", "")
+
+        if hasattr(self.launcher, "show_dependency_error"):
+            self.launcher.show_dependency_error(
+                model.name,
+                dep_name,
+                install_cmd,
+                doc_url,
+                deps_error,
+            )
+        else:
+            self._show_dependency_error(model.name, deps_error)
+
         self.lbl_status.setText("! Dependency Error")
         self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
         return False

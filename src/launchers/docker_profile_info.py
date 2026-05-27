@@ -13,13 +13,11 @@ Single source of truth: the YAML file *defines* tiers; the feature registry
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Any
 
 import yaml
 
 from src.shared.python.feature_registry.features import (
-    FEATURES,
     Feature,
     get_feature,
 )
@@ -101,6 +99,12 @@ def load_docker_profiles() -> dict[str, ProfileInfo]:
         data = yaml.safe_load(text) or {}
     except yaml.YAMLError as exc:
         logger.warning("Could not parse %s: %s", _PROFILES_PATH, exc)
+        return {}
+
+    if not isinstance(data, dict):
+        logger.warning(
+            "Invalid profiles data format in %s (expected dict)", _PROFILES_PATH
+        )
         return {}
 
     raw_profiles: dict[str, Any] = data.get("profiles", {})

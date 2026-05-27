@@ -107,6 +107,8 @@ class DockerBuildThread(QThread):
         target_stage: str = "standard",
         image_name: str = DOCKER_IMAGE_ENGINE,
         context_path: Path | None = None,
+        dockerfile_path: Path | None = None,
+        build_args: dict[str, str] | None = None,
     ) -> None:
         """Initialize the build thread."""
         if target_stage is None:
@@ -115,6 +117,8 @@ class DockerBuildThread(QThread):
         self.target_stage = validate_docker_stage(target_stage)
         self.image_name = image_name
         self.context_path = context_path
+        self.dockerfile_path = dockerfile_path
+        self.build_args = build_args or {}
 
     def run(self) -> None:
         """Run the docker build command."""
@@ -128,11 +132,24 @@ class DockerBuildThread(QThread):
             "build",
             "-t",
             self.image_name,
-            "--target",
-            self.target_stage,
-            "--progress=plain",
-            ".",
         ]
+
+        if self.dockerfile_path:
+            try:
+                # If the dockerfile is inside the context, make it relative so both Windows and WSL can read it
+                rel_path = self.dockerfile_path.relative_to(self.context_path)
+                cmd.extend(["-f", rel_path.as_posix()])
+            except ValueError:
+                # Fallback to posix path (forward slashes)
+                cmd.extend(["-f", self.dockerfile_path.as_posix()])
+
+        for k, v in self.build_args.items():
+            cmd.extend(["--build-arg", f"{k}={v}"])
+
+        if "PROFILE" not in self.build_args and "FEATURES" not in self.build_args:
+            cmd.extend(["--target", self.target_stage])
+
+        cmd.extend(["--progress=plain", "."])
 
         self.log_signal.emit(f"Starting build for target: {self.target_stage}")
         self.log_signal.emit(f"Context: {self.context_path}")
