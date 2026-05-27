@@ -568,9 +568,15 @@ class SettingsWidget(QWidget):
                     if hasattr(launcher, "chk_wsl"):
                         launcher.chk_wsl.setChecked(True)
 
+            def invalidate_diagnostics() -> None:
+                self._diagnostics_loaded = False
+
             self.chk_windows.toggled.connect(on_windows_toggled)
             self.chk_docker.toggled.connect(on_docker_toggled)
             self.chk_wsl.toggled.connect(on_wsl_toggled)
+            self.chk_windows.toggled.connect(invalidate_diagnostics)
+            self.chk_docker.toggled.connect(invalidate_diagnostics)
+            self.chk_wsl.toggled.connect(invalidate_diagnostics)
 
             if hasattr(launcher, "chk_live"):
                 self.chk_live_viz.toggled.connect(launcher.chk_live.setChecked)
