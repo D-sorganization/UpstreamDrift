@@ -19,7 +19,7 @@ class _EndEffectorManagerWidgetUIMixin:
 
     def _setup_ui(self) -> None:
         """Set up the user interface."""
-        layout = QVBoxLayout(self)
+        layout = QVBoxLayout(self)  # type: ignore[call-overload]
 
         # Main splitter
         splitter = QSplitter(Qt.Orientation.Horizontal)
