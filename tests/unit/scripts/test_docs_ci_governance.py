@@ -20,3 +20,16 @@ def test_docs_ci_runs_docs_governance() -> None:
             "run": "python3 scripts/check_docs_governance.py",
         }
     ]
+
+    test_matching_steps = [
+        step
+        for step in quality_gate_steps
+        if step.get("name") == "Run documentation governance tests"
+    ]
+
+    assert test_matching_steps == [
+        {
+            "name": "Run documentation governance tests",
+            "run": "python -m pytest tests/scripts/test_doc_governance_checks.py -q",
+        }
+    ]
