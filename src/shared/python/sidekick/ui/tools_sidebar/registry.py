@@ -327,7 +327,6 @@ def _summarize_dimensions(value: Any) -> str:
 def _env_key(name: str) -> str:
     return "".join(char.upper() if char.isalnum() else "_" for char in name)
 
-
 def format_workspace_value_preview(value: Any, max_length: int = 120) -> str:
     """Return a truncated string preview of a workspace value."""
     if isinstance(value, dict) and not value:
@@ -344,5 +343,5 @@ def format_workspace_value_preview(value: Any, max_length: int = 120) -> str:
         preview = "<unrepresentable>"
 
     if len(preview) > max_length:
-        return preview[: max_length - 3] + "..."
+        return preview[:max_length - 3] + "..."
     return preview
