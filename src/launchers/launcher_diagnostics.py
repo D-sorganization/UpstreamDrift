@@ -110,26 +110,15 @@ class DiagnosticResult:
 class LauncherDiagnostics:
     """Diagnostic utilities for the UpstreamDrift Launcher."""
 
-    # Expected tile model IDs
-    EXPECTED_TILE_IDS = [
-        "mujoco_unified",
-        "drake_golf",
-        "pinocchio_golf",
-        "opensim_golf",
-        "myosim_suite",
-        "putting_green",
-        "simscape_2d",
-        "simscape_3d",
-        "dataset_generator",
-        "matlab_analysis",
-        "c3d_viewer",
-        "openpose_analysis",
-        "mediapipe_analysis",
-        "model_explorer",
-        "video_analyzer",
-        "data_explorer",
-        "project_map",
-    ]
+    # Expected tile model IDs - dynamically loaded from models.yaml (issue #5476)
+    EXPECTED_TILE_IDS: list[str] = []
+    try:
+        from src.shared.python.config.model_registry import ModelRegistry
+
+        _registry = ModelRegistry()
+        EXPECTED_TILE_IDS = [m.id for m in _registry.get_all_models()]
+    except (ImportError, ValueError, OSError):
+        pass
 
     # Expected tile names
     EXPECTED_TILE_NAMES = {
@@ -189,6 +178,20 @@ class LauncherDiagnostics:
         silently swallowed so a buffer outage never breaks the diagnostic run.
         """
         self.results.append(result)
+        try:
+            from src.shared.python.app_state import get_state_logger
+
+            get_state_logger().log_event(
+                "diagnostic_check",
+                {
+                    "check_name": result.name,
+                    "status": result.status,
+                    "message": result.message,
+                },
+            )
+        except Exception:  # noqa: BLE001
+            pass
+
         try:
             from src.shared.python.ai.chat_context import record_event
 
@@ -345,7 +348,7 @@ class LauncherDiagnostics:
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
-            self.results.append(result)
+            self._record_result(result)
             return result
 
         try:
@@ -357,7 +360,7 @@ class LauncherDiagnostics:
             early_result = self._validate_models_yaml_content(data, details)
             if early_result is not None:
                 early_result.duration_ms = (time.time() - start) * 1000
-                self.results.append(early_result)
+                self._record_result(early_result)
                 return early_result
 
             result = self._check_models_yaml_completeness(data["models"], details)
@@ -382,7 +385,7 @@ class LauncherDiagnostics:
             )
 
         result.duration_ms = (time.time() - start) * 1000
-        self.results.append(result)
+        self._record_result(result)
         return result
 
     def check_model_registry(self) -> DiagnosticResult:
@@ -445,7 +448,7 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        self.results.append(result)
+        self._record_result(result)
         return result
 
     def check_launcher_provider_compatibility(self) -> DiagnosticResult:
@@ -521,7 +524,7 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        self.results.append(result)
+        self._record_result(result)
         return result
 
     def check_layout_config(self) -> DiagnosticResult:
@@ -542,7 +545,7 @@ class LauncherDiagnostics:
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
-            self.results.append(result)
+            self._record_result(result)
             return result
 
         try:
@@ -597,7 +600,7 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        self.results.append(result)
+        self._record_result(result)
         return result
 
     def check_asset_files(self) -> DiagnosticResult:
@@ -629,7 +632,7 @@ class LauncherDiagnostics:
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
-            self.results.append(result)
+            self._record_result(result)
             return result
 
         missing_assets = []
@@ -667,7 +670,7 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        self.results.append(result)
+        self._record_result(result)
         return result
 
     def check_pyqt6_availability(self) -> DiagnosticResult:
@@ -703,7 +706,7 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        self.results.append(result)
+        self._record_result(result)
         return result
 
     def check_engine_availability(self) -> DiagnosticResult:
@@ -792,7 +795,7 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        self.results.append(result)
+        self._record_result(result)
         return result
 
     def check_biomech_siblings(self) -> DiagnosticResult:
@@ -870,7 +873,7 @@ class LauncherDiagnostics:
             details=details,
             duration_ms=(time.time() - start) * 1000,
         )
-        self.results.append(result)
+        self._record_result(result)
         return result
 
     def check_tools_sidebar(self) -> DiagnosticResult:
@@ -926,7 +929,7 @@ class LauncherDiagnostics:
                 duration_ms=(time.time() - start) * 1000,
             )
 
-        self.results.append(result)
+        self._record_result(result)
         return result
 
     @staticmethod

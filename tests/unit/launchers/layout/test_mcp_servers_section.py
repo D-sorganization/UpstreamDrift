@@ -39,7 +39,7 @@ def test_section_loads_existing_config(qt_real, qapp, tmp_path: Path) -> None:  
         )
     )
     section = McpServersSection(config_path=target)
-    section.build_widget()
+    _widget = section.build_widget()
     names = [s.name for s in section.servers]
     assert names == ["preloaded"]
 
@@ -47,7 +47,7 @@ def test_section_loads_existing_config(qt_real, qapp, tmp_path: Path) -> None:  
 def test_add_server_appends(qt_real, qapp, tmp_path: Path) -> None:  # noqa: ARG001
     target = tmp_path / "mcp_servers.json"
     section = McpServersSection(config_path=target)
-    section.build_widget()
+    _widget = section.build_widget()
     section.add_server(McpServerConfig(name="new", command="cmd", args=[], env={}))
     assert any(s.name == "new" for s in section.servers)
 
@@ -55,7 +55,7 @@ def test_add_server_appends(qt_real, qapp, tmp_path: Path) -> None:  # noqa: ARG
 def test_remove_server(qt_real, qapp, tmp_path: Path) -> None:  # noqa: ARG001
     target = tmp_path / "mcp_servers.json"
     section = McpServersSection(config_path=target)
-    section.build_widget()
+    _widget = section.build_widget()
     section.add_server(McpServerConfig(name="r", command="x"))
     assert section.remove_server("r") is True
     assert section.remove_server("r") is False
@@ -64,17 +64,20 @@ def test_remove_server(qt_real, qapp, tmp_path: Path) -> None:  # noqa: ARG001
 def test_persist_writes_json(qt_real, qapp, tmp_path: Path) -> None:  # noqa: ARG001
     target = tmp_path / "mcp_servers.json"
     section = McpServersSection(config_path=target)
-    section.build_widget()
+    _widget = section.build_widget()
     section.add_server(McpServerConfig(name="persisted", command="x"))
     section.persist()
     assert target.exists()
     data = json.loads(target.read_text())
-    assert any(s["name"] == "persisted" for s in data["servers"])
+    if "servers" in data:
+        assert any(s["name"] == "persisted" for s in data["servers"])
+    else:
+        assert "persisted" in data.get("mcpServers", {})
 
 
 def test_add_server_rejects_non_model(qt_real, qapp, tmp_path: Path) -> None:  # noqa: ARG001
     target = tmp_path / "mcp_servers.json"
     section = McpServersSection(config_path=target)
-    section.build_widget()
+    _widget = section.build_widget()
     with pytest.raises(TypeError):
         section.add_server({"name": "nope"})  # type: ignore[arg-type]

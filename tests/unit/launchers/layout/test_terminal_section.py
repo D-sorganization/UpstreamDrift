@@ -55,14 +55,14 @@ def test_terminal_section_persists_selection(qt_real, qapp) -> None:  # noqa: AR
     """Selecting a shell triggers the injected set_default callback."""
     saved: list[str] = []
     section = TerminalSection(
-        get_default=lambda: "",
+        get_default=lambda: "cmd",
         set_default=lambda v: saved.append(v),
     )
-    section.build_widget()
-    if section._combo is not None and section._combo.count() > 0:
-        section._combo.setCurrentIndex(0)
+    _widget = section.build_widget()
+    if section._combo is not None and section._combo.count() > 1:
+        section._combo.setCurrentIndex(1)
         # editing combo programmatically should have triggered the callback
-        assert saved, "Expected set_default to be invoked at least once"
+        assert saved and saved[-1] == "powershell"
 
 
 def test_terminal_section_restores_default(qt_real, qapp) -> None:  # noqa: ARG001
@@ -72,5 +72,5 @@ def test_terminal_section_restores_default(qt_real, qapp) -> None:  # noqa: ARG0
         pytest.skip("No shells discovered to test restore against")
     target_id = shells[0]["id"]
     section = TerminalSection(get_default=lambda: target_id)
-    section.build_widget()
+    _widget = section.build_widget()
     assert section.selected_shell_id == target_id

@@ -36,7 +36,7 @@ def test_jupyter_section_available_persists(qt_real, qapp, monkeypatch) -> None:
         get_notebook_dir=lambda: "/tmp/nb",
         set_notebook_dir=lambda v: captured.append(v),
     )
-    section.build_widget()
+    _widget = section.build_widget()
     assert section._dir_edit is not None
     section._dir_edit.setText("/var/tmp/notebooks")
     section._dir_edit.editingFinished.emit()
@@ -52,7 +52,7 @@ def test_jupyter_section_kernel_persistence(qt_real, qapp, monkeypatch) -> None:
         get_kernel=lambda: "python3",
         set_kernel=lambda v: saved_kernel.append(v),
     )
-    section.build_widget()
+    _widget = section.build_widget()
     assert section._kernel_edit is not None
     section._kernel_edit.setText("ir")
     section._kernel_edit.editingFinished.emit()

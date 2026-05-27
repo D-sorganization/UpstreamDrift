@@ -9,15 +9,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import numpy as np
-from mujoco_humanoid_golf.rigid_body_dynamics.common import (
-    DEFAULT_GRAVITY,
-    NEG_DEFAULT_GRAVITY,
-)
-from mujoco_humanoid_golf.spatial_algebra import (
+
+from ..spatial_algebra import (
     cross_force_fast,
     cross_motion_axis,
     cross_motion_fast,
     jcalc,
+)
+from .common import (
+    DEFAULT_GRAVITY,
+    NEG_DEFAULT_GRAVITY,
 )
 
 

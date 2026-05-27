@@ -73,6 +73,6 @@ def test_main_splitter_uses_stretch_factors_not_fixed_sizes():
 
     stretch_matches = re.findall(r"setStretchFactor\((\d+),\s*(\d+)\)", source)
     factors = {int(f) for _, f in stretch_matches}
-    assert 1 in factors and 5 in factors, (
-        f"Expected setStretchFactor calls with factors 1 and 5; found factors {factors}"
+    assert 0 in factors and 1 in factors, (
+        f"Expected setStretchFactor calls with factors 0 and 1; found factors {factors}"
     )

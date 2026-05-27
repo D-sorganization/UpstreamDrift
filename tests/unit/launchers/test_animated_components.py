@@ -1,5 +1,5 @@
-from PyQt6.QtGui import QColor
-from PyQt6.QtCore import QEvent
+from PyQt6.QtGui import QColor, QEnterEvent
+from PyQt6.QtCore import QEvent, QPointF
 from src.launchers.animated_components import AnimatedButton
 
 
@@ -18,7 +18,7 @@ def test_animated_button_hover_events(qapp):
     btn = AnimatedButton()
 
     # Simulate hover enter
-    event_enter = QEvent(QEvent.Type.Enter)
+    event_enter = QEnterEvent(QPointF(0, 0), QPointF(0, 0), QPointF(0, 0))
     btn.enterEvent(event_enter)
     # The animation should be running or finished
     assert btn._hover_anim.endValue() == btn._hover_color

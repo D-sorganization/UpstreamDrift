@@ -155,15 +155,22 @@ class SimulationManager:
         self.launcher = launcher
 
     def __getattr__(self, name):
-        return getattr(self.launcher, name)
+        if name == "launcher":
+            raise AttributeError("launcher not initialized")
+        launcher = self.__dict__.get("launcher")
+        if launcher is None:
+            raise AttributeError("launcher not initialized")
+        return getattr(launcher, name)
 
     def __setattr__(self, name, value):
         if name == "launcher" or hasattr(type(self), name) or name in self.__dict__:
             super().__setattr__(name, value)
-        elif hasattr(self.launcher, name):
-            setattr(self.launcher, name, value)
         else:
-            super().__setattr__(name, value)
+            launcher = self.__dict__.get("launcher")
+            if launcher is not None and hasattr(launcher, name):
+                setattr(launcher, name, value)
+            else:
+                super().__setattr__(name, value)
 
     """Mixin for UpstreamDriftLauncher simulation launching.
 
@@ -389,9 +396,15 @@ except (RuntimeError, TypeError, AttributeError) as e:
                                 )
 
                         # Check user preference or model default; for now default to docking
-                        launch_mode = getattr(model, "launcher", {}).get(
-                            "default_launch", "tab"
-                        )
+                        launcher = getattr(model, "launcher", None)
+                        if isinstance(launcher, dict):
+                            launch_mode = launcher.get("default_launch", "tab")
+                        else:
+                            launch_mode = (
+                                getattr(launcher, "default_launch", "tab")
+                                if launcher
+                                else "tab"
+                            )
                         if launch_mode == "window" and hasattr(self, "popout_widget"):
                             self.popout_widget(ui_widget, model.name)
                             self.show_toast(f"{model.name} Popped Out", "success")

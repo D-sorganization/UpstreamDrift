@@ -1,28 +1,20 @@
 from src.launchers.model_card import SkeletonCard
 
 
-def test_skeleton_card_initialization(qapp):
+def test_skeleton_card_initialization(qapp) -> None:
     """Test that SkeletonCard initializes with correct dimensions and effects."""
     card = SkeletonCard()
 
-    card.setObjectName.assert_called_with("SkeletonCard")
-
-    if hasattr(card.setMinimumSize, "assert_called_with"):
-        card.setMinimumSize.assert_called_with(180, 240)
-
-    # Check Graphics Effect was applied
-    if hasattr(card.setGraphicsEffect, "assert_called"):
-        card.setGraphicsEffect.assert_called()
+    assert card.objectName() == "SkeletonCard"
+    assert card.minimumSize().width() == 180
+    assert card.minimumSize().height() == 240
+    assert card.graphicsEffect() is not None
 
     # Check Animation
     assert hasattr(card, "_anim")
     anim = card._anim
-    if hasattr(anim.setPropertyName, "assert_called_with"):
-        anim.setPropertyName.assert_called_with(b"windowOpacity")
-        anim.setDuration.assert_called_with(1000)
-        anim.setStartValue.assert_called_with(0.5)
-        anim.setEndValue.assert_called_with(1.0)
-        anim.setLoopCount.assert_called_with(-1)
-
-    if hasattr(anim.start, "assert_called"):
-        anim.start.assert_called()
+    assert anim.propertyName() == b"pulseOpacity"
+    assert anim.duration() == 1000
+    assert anim.startValue() == 0.3
+    assert anim.endValue() == 0.3
+    assert anim.loopCount() == -1

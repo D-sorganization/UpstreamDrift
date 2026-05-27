@@ -1,4 +1,4 @@
-from PyQt6.QtCore import Qt, QPoint
+from PyQt6.QtCore import Qt, QPointF
 from PyQt6.QtGui import QMouseEvent
 from unittest.mock import MagicMock
 from src.launchers.custom_title_bar import CustomTitleBar
@@ -8,22 +8,22 @@ def test_custom_title_bar_signals(qapp):
     """Test that window control buttons emit correct signals."""
     title_bar = CustomTitleBar()
 
-    # Mock the emit methods
-    title_bar.minimize_requested.emit = MagicMock()
-    title_bar.maximize_requested.emit = MagicMock()
-    title_bar.close_requested.emit = MagicMock()
+    minimize_mock = MagicMock()
+    maximize_mock = MagicMock()
+    close_mock = MagicMock()
 
-    title_bar.minimize_requested.emit.reset_mock()
+    title_bar.minimize_requested.connect(minimize_mock)
+    title_bar.maximize_requested.connect(maximize_mock)
+    title_bar.close_requested.connect(close_mock)
+
     title_bar._minimize_window()
-    title_bar.minimize_requested.emit.assert_called_once()
+    minimize_mock.assert_called_once()
 
-    title_bar.maximize_requested.emit.reset_mock()
     title_bar._maximize_window()
-    title_bar.maximize_requested.emit.assert_called_once()
+    maximize_mock.assert_called_once()
 
-    title_bar.close_requested.emit.reset_mock()
     title_bar._close_window()
-    title_bar.close_requested.emit.assert_called_once()
+    close_mock.assert_called_once()
 
 
 def test_custom_title_bar_mouse_events(qapp):
@@ -36,13 +36,14 @@ def test_custom_title_bar_mouse_events(qapp):
     parent = QWidget()
     title_bar.setParent(parent)
 
-    title_bar.move_requested.emit = MagicMock()
+    move_mock = MagicMock()
+    title_bar.move_requested.connect(move_mock)
 
     # Press event
     press_event = QMouseEvent(
         QMouseEvent.Type.MouseButtonPress,
-        QPoint(10, 10),
-        QPoint(10, 10),
+        QPointF(10, 10),
+        QPointF(10, 10),
         Qt.MouseButton.LeftButton,
         Qt.MouseButton.LeftButton,
         Qt.KeyboardModifier.NoModifier,
@@ -52,12 +53,12 @@ def test_custom_title_bar_mouse_events(qapp):
     # Move event
     move_event = QMouseEvent(
         QMouseEvent.Type.MouseMove,
-        QPoint(20, 20),
-        QPoint(20, 20),
+        QPointF(20, 20),
+        QPointF(20, 20),
         Qt.MouseButton.NoButton,
         Qt.MouseButton.LeftButton,
         Qt.KeyboardModifier.NoModifier,
     )
     title_bar.mouseMoveEvent(move_event)
 
-    title_bar.move_requested.emit.assert_called_once()
+    move_mock.assert_called_once()

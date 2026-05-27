@@ -27,19 +27,17 @@ class HoverTransitionMixin:
         self._hover_anim.valueChanged.connect(self._on_color_changed)
         self._update_stylesheet()
 
-    def enterEvent(self, event):
+    def _enter_event(self, event):
         if hasattr(self, "_hover_anim"):
             self._hover_anim.setStartValue(self._current_color)
             self._hover_anim.setEndValue(self._hover_color)
             self._hover_anim.start()
-        super().enterEvent(event)
 
-    def leaveEvent(self, event):
+    def _leave_event(self, event):
         if hasattr(self, "_hover_anim"):
             self._hover_anim.setStartValue(self._current_color)
             self._hover_anim.setEndValue(self._base_color)
             self._hover_anim.start()
-        super().leaveEvent(event)
 
     def _on_color_changed(self, color):
         self._current_color = color
@@ -64,3 +62,11 @@ class AnimatedButton(QPushButton, HoverTransitionMixin):
         super().__init__(text, parent)
         # Default to primary colors
         self.init_animation("#0A84FF", "#0077E6")
+
+    def enterEvent(self, event):
+        self._enter_event(event)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self._leave_event(event)
+        super().leaveEvent(event)

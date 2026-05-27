@@ -406,8 +406,13 @@ class DraggableModelCard(QFrame):
         """Determine the image filename for this model card."""
         # Use explicit launcher metadata if present (ensures Web App/PyQt parity)
         launcher = getattr(self.model, "launcher", None)
-        if launcher and getattr(launcher, "logo", None):
-            return Path(launcher.logo).name
+        logo = None
+        if isinstance(launcher, dict):
+            logo = launcher.get("logo")
+        elif launcher:
+            logo = getattr(launcher, "logo", None)
+        if logo:
+            return Path(logo).name
 
         img_name = MODEL_IMAGES.get(self.model.name)
         if img_name:
