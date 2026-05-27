@@ -647,6 +647,12 @@ class DialogsManager:
             self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_WARNING)
 
 
+# Compatibility alias so tests and tool adapters written against the mixin
+# API can import ``LauncherDialogsMixin`` directly.  ``DialogsManager`` is the
+# canonical name; this alias prevents import errors while a full rename lands.
+LauncherDialogsMixin = DialogsManager
+
+
 class ThemedModalDialog(QDialog):
     """Custom themed frameless modal dialog."""
 
