@@ -98,6 +98,8 @@ class ThinkingCapabilities:
     provider: str = ""
     levels: tuple[ThinkingLevel, ...] = ()
     default_level_name: ThinkingLevelName = "none"
+    _supports_levels: bool = False
+    _available_levels: list[ThinkingLevel] = []
 
     def __init__(
         self,
@@ -221,7 +223,7 @@ def style_prompt(style: ResponseStyle | str | None) -> str:
     Unknown / ``None`` values fall back to ``DEFAULT_RESPONSE_STYLE``.
     """
     if style in RESPONSE_STYLE_PROMPTS:
-        return RESPONSE_STYLE_PROMPTS[style]
+        return RESPONSE_STYLE_PROMPTS[style]  # type: ignore[index]
     return RESPONSE_STYLE_PROMPTS[DEFAULT_RESPONSE_STYLE]
 
 

@@ -16,8 +16,13 @@ rather than at connect/call time.
 
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import Enum
 from typing import Any
+
+
+class StrEnum(str, Enum):
+    """Fallback StrEnum for Python < 3.11."""
+
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 

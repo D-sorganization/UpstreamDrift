@@ -9,7 +9,7 @@ without PyQt6 installed can still import this module.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, ClassVar, Protocol, runtime_checkable
 
 __all__ = ["EmbedCapabilities", "EmbeddableTool"]
 
@@ -41,6 +41,7 @@ class EmbedCapabilities:
     prefers_dock: bool = False
     min_size: tuple[int, int] = (640, 480)
     requires_separate_qapplication: bool = False
+    NONE: ClassVar[EmbedCapabilities]
 
     def __post_init__(self) -> None:
         # DbC: validate ``min_size`` is a positive 2-tuple of ints.
@@ -72,6 +73,9 @@ class EmbedCapabilities:
             raise ValueError(
                 f"min_size must be strictly positive, got ({width}, {height})"
             )
+
+
+EmbedCapabilities.NONE = EmbedCapabilities(supports_embedded=False)
 
 
 @runtime_checkable

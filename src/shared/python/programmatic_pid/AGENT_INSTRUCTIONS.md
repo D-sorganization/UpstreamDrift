@@ -109,7 +109,7 @@ drawing:
 
 equipment:
   - id: V-101
-    type: vessel          # vessel, hopper, fan, pump, tank, heat_exchanger, etc.
+    type: vessel # vessel, hopper, fan, pump, tank, heat_exchanger, etc.
     service: "Feed Hopper"
     x: 20
     y: 80
@@ -153,24 +153,24 @@ interlocks:
 
 The engine has built-in renderers for these types (case-insensitive):
 
-| Type | Description |
-|------|-------------|
-| `vessel`, `box`, `dryer`, `combustor`, `auger` | Rectangular outline |
-| `hopper` | Trapezoidal with discharge |
-| `fan` | Circle with blade arcs |
-| `rotary_valve` | Diamond shape |
-| `burner` | Flame-shaped symbol |
-| `bin` | Rectangular with angled bottom |
-| `gate_valve` | ISA 5.1 gate valve |
-| `globe_valve` | ISA 5.1 globe valve |
-| `ball_valve` | ISA 5.1 ball valve |
-| `check_valve` | ISA 5.1 check valve |
-| `control_valve` | ISA 5.1 control valve |
-| `relief_valve`, `psv` | ISA 5.1 relief valve |
-| `rupture_disk` | ISA 5.1 rupture disk |
-| `heat_exchanger` | Shell-and-tube symbol |
-| `pump` | Circle with discharge triangle |
-| `tank` | Cylindrical tank outline |
+| Type                                           | Description                    |
+| ---------------------------------------------- | ------------------------------ |
+| `vessel`, `box`, `dryer`, `combustor`, `auger` | Rectangular outline            |
+| `hopper`                                       | Trapezoidal with discharge     |
+| `fan`                                          | Circle with blade arcs         |
+| `rotary_valve`                                 | Diamond shape                  |
+| `burner`                                       | Flame-shaped symbol            |
+| `bin`                                          | Rectangular with angled bottom |
+| `gate_valve`                                   | ISA 5.1 gate valve             |
+| `globe_valve`                                  | ISA 5.1 globe valve            |
+| `ball_valve`                                   | ISA 5.1 ball valve             |
+| `check_valve`                                  | ISA 5.1 check valve            |
+| `control_valve`                                | ISA 5.1 control valve          |
+| `relief_valve`, `psv`                          | ISA 5.1 relief valve           |
+| `rupture_disk`                                 | ISA 5.1 rupture disk           |
+| `heat_exchanger`                               | Shell-and-tube symbol          |
+| `pump`                                         | Circle with discharge triangle |
+| `tank`                                         | Cylindrical tank outline       |
 
 Unknown types fall back to a labeled rectangle.
 
@@ -186,11 +186,11 @@ Streams can be defined three ways:
 
 Three built-in profiles adjust visual density:
 
-| Profile | Use case |
-|---------|----------|
-| `presentation` | Large text, wide spacing — for slides/meetings |
-| `review` | Medium text — for engineering review |
-| `compact` | Small text, tight spacing — for detail drawings |
+| Profile        | Use case                                        |
+| -------------- | ----------------------------------------------- |
+| `presentation` | Large text, wide spacing — for slides/meetings  |
+| `review`       | Medium text — for engineering review            |
+| `compact`      | Small text, tight spacing — for detail drawings |
 
 ---
 
@@ -228,11 +228,12 @@ with open("spec.yml", "w") as f:
 ### Step 2: Validate
 
 ```python
+import logging
 from programmatic_pid import validate_spec_json
 issues = validate_spec_json(spec)
 if issues:
     for issue in issues:
-        print(f"  [{issue['severity']}] {issue['path']}: {issue['message']}")
+        logging.warning(f"  [{issue['severity']}] {issue['path']}: {issue['message']}")
     # Fix the issues and re-validate
 ```
 
@@ -330,17 +331,20 @@ python -m pytest tests/ --cov=programmatic_pid --cov-report=term-missing
 These items are documented in the migration plan but not yet implemented:
 
 ### High Priority
+
 - **Line numbering / pipe specs:** Add `line_spec` field to streams (e.g., `4"-CS-150#-S-001`)
 - **Nozzle schedule support:** Explicit equipment nozzle positions with sizes and ratings
 - **Reducer/expander symbols:** Visual pipe size changes
 
 ### Medium Priority
+
 - **Auto-routing with obstacle avoidance:** Manhattan routing that avoids crossing equipment
 - **Template library:** Pre-built specs for common process units
 - **Spec diffing / change tracking:** Redline/clouding for spec version changes
 - **Natural-language spec generation:** LLM wrapper to convert English to YAML fragments
 
 ### Lower Priority
+
 - **Legend / symbol key generation**
 - **Bill of Materials extraction** (CSV/Excel from spec)
 - **Revision tracking in drawing**

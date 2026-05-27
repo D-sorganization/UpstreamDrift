@@ -24,12 +24,14 @@ python launch_golf_suite.py --api-only
 The modernized desktop launcher acts as the "Control Tower". It manages execution environments and provides a robust, cross-platform interface.
 
 **Features:**
+
 - Native Windows and Docker/WSL runtime modes, persistent across sessions.
 - Tabbed workspace architecture for hosting specialized analysis tools.
 - Intelligent module probes that check dependency availability without blocking the UI.
 - Aesthetic, dynamic tile grid with real-time process monitoring and status chips.
 
 You can launch it directly as a module (e.g. for debugging):
+
 ```bash
 python -m src.launchers.upstream_drift_launcher
 ```

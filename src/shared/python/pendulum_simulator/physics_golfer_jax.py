@@ -719,6 +719,8 @@ def _constraint_acceleration_bias_jax(
         dPhi_q = (Phi_q_plus - Phi_q_0) / eps  # shape (4, 8)
         # gamma_i = sum_k (dPhi_i/dq_k * qdot_k)^2 — actually sum_jk dPhi_ij/dq_k * qdot_j * qdot_k
         # Using: Phi_qq * qdot^2 = sum_j,k dPhi_j/dq_k * qdot_k (double contraction)
-        gamma = gamma + jnp.einsum("ij,ij->i", dPhi_q, jnp.broadcast_to(qdot[k], dPhi_q.shape))  # ⚡ Bolt: jnp.einsum is ~2x faster than jnp.sum(..., axis=1)
+        gamma = gamma + jnp.einsum(
+            "ij,ij->i", dPhi_q, jnp.broadcast_to(qdot[k], dPhi_q.shape)
+        )  # ⚡ Bolt: jnp.einsum is ~2x faster than jnp.sum(..., axis=1)
 
     return gamma

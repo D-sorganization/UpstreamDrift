@@ -1,4 +1,4 @@
-with open(".github/workflows/anti-phantom-merge.yml", "r") as f:
+with open(".github/workflows/anti-phantom-merge.yml") as f:
     content = f.read()
 
 # Ah! The failure from the CI log:
