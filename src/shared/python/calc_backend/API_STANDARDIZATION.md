@@ -64,20 +64,21 @@ The pressure drop calculator endpoint demonstrates the standardized API pattern.
 
 ```json
 {
-    "pipe_diameter_m": 0.1,
-    "pipe_length_m": 100.0,
-    "roughness_m": 0.000045,
-    "flow_rate_kg_s": 5.0,
-    "temperature_k": 300.0,
-    "pressure_pa": 101325.0,
-    "molecular_weight_kg_mol": 28.97,
-    "viscosity_pa_s": null
+  "pipe_diameter_m": 0.1,
+  "pipe_length_m": 100.0,
+  "roughness_m": 0.000045,
+  "flow_rate_kg_s": 5.0,
+  "temperature_k": 300.0,
+  "pressure_pa": 101325.0,
+  "molecular_weight_kg_mol": 28.97,
+  "viscosity_pa_s": null
 }
 ```
 
 **Request Model**: `PressureDropRequest` (defined in `calc_backend.models.pressure_drop`)
 
 Validation:
+
 - All dimensional parameters must be > 0
 - Roughness must be >= 0 (allows smooth pipes)
 - Viscosity is optional; if omitted, Sutherland approximation is used
@@ -86,22 +87,22 @@ Validation:
 
 ```json
 {
-    "status": "success",
-    "data": {
-        "pressure_drop_pa": 1023.4,
-        "reynolds_number": 50000.0,
-        "friction_factor": 0.025,
-        "velocity_m_s": 45.2,
-        "flow_regime": "Turbulent",
-        "density_kg_m3": 1.177,
-        "viscosity_pa_s": 1.86e-5
-    },
-    "error": null,
-    "metadata": {
-        "request_id": "550e8400-e29b-41d4-a716-446655440000",
-        "processing_time_ms": 125.0,
-        "api_version": "1.0.0"
-    }
+  "status": "success",
+  "data": {
+    "pressure_drop_pa": 1023.4,
+    "reynolds_number": 50000.0,
+    "friction_factor": 0.025,
+    "velocity_m_s": 45.2,
+    "flow_regime": "Turbulent",
+    "density_kg_m3": 1.177,
+    "viscosity_pa_s": 1.86e-5
+  },
+  "error": null,
+  "metadata": {
+    "request_id": "550e8400-e29b-41d4-a716-446655440000",
+    "processing_time_ms": 125.0,
+    "api_version": "1.0.0"
+  }
 }
 ```
 
@@ -111,22 +112,22 @@ Validation:
 
 ```json
 {
-    "status": "error",
-    "data": null,
-    "error": {
-        "code": "INVALID_INPUT",
-        "message": "Pressure drop calculation failed: pipe_diameter_m must be > 0",
-        "details": {
-            "exception_type": "ValueError",
-            "exception_message": "pipe_diameter_m must be > 0"
-        },
-        "request_id": "550e8400-e29b-41d4-a716-446655440001"
+  "status": "error",
+  "data": null,
+  "error": {
+    "code": "INVALID_INPUT",
+    "message": "Pressure drop calculation failed: pipe_diameter_m must be > 0",
+    "details": {
+      "exception_type": "ValueError",
+      "exception_message": "pipe_diameter_m must be > 0"
     },
-    "metadata": {
-        "request_id": "550e8400-e29b-41d4-a716-446655440001",
-        "processing_time_ms": 15.0,
-        "api_version": "1.0.0"
-    }
+    "request_id": "550e8400-e29b-41d4-a716-446655440001"
+  },
+  "metadata": {
+    "request_id": "550e8400-e29b-41d4-a716-446655440001",
+    "processing_time_ms": 15.0,
+    "api_version": "1.0.0"
+  }
 }
 ```
 
@@ -134,14 +135,14 @@ Validation:
 
 The `ErrorCode` enum defines standard error codes used across all APIs:
 
-| Code | Meaning |
-|------|---------|
-| `INVALID_INPUT` | Input validation failed (wrong type, out-of-range values) |
-| `NOT_FOUND` | Requested resource not found |
-| `SERVER_ERROR` | Unexpected server-side error |
-| `UNSUPPORTED_OPERATION` | Operation not supported (e.g., invalid enum value) |
-| `TIMEOUT` | Request processing timed out |
-| `CONSTRAINT_VIOLATION` | Physical or logical constraint violated |
+| Code                    | Meaning                                                   |
+| ----------------------- | --------------------------------------------------------- |
+| `INVALID_INPUT`         | Input validation failed (wrong type, out-of-range values) |
+| `NOT_FOUND`             | Requested resource not found                              |
+| `SERVER_ERROR`          | Unexpected server-side error                              |
+| `UNSUPPORTED_OPERATION` | Operation not supported (e.g., invalid enum value)        |
+| `TIMEOUT`               | Request processing timed out                              |
+| `CONSTRAINT_VIOLATION`  | Physical or logical constraint violated                   |
 
 ## Integration with FastAPI Endpoints
 
@@ -158,7 +159,7 @@ router = APIRouter(prefix="/api/calc/pressure-drop", tags=["pressure-drop"])
 def calculate_pressure_drop(request: PressureDropRequest) -> dict[str, Any]:
     """Calculate pressure drop."""
     start_time = time.perf_counter()
-    
+
     try:
         result = _calculator.calculate_pressure_drop(
             pipe_diameter_m=request.pipe_diameter_m,
@@ -176,13 +177,13 @@ def calculate_pressure_drop(request: PressureDropRequest) -> dict[str, Any]:
             processing_time_ms=processing_time_ms,
         )
         raise HTTPException(status_code=422, detail=response.to_dict())
-    
+
     processing_time_ms = (time.perf_counter() - start_time) * 1000
     response_data = PressureDropResponse(
         pressure_drop_pa=result.pressure_drop_pa,
         # ... other fields
     ).model_dump()
-    
+
     response = StandardResponse.success(
         data=response_data,
         processing_time_ms=processing_time_ms,
@@ -205,6 +206,7 @@ Every response includes a `request_id` in metadata, enabling end-to-end request 
 ```
 
 Client can:
+
 - Log request_id with request/response
 - Correlate server logs with client requests
 - Measure endpoint performance
@@ -248,11 +250,12 @@ schema = PressureDropRequest.model_json_schema()
 
 ## Backward Compatibility
 
-The old `PressureDropResponse` model from `calc_backend.contracts.pressure_drop` is deprecated. 
-The new models in `calc_backend.models.pressure_drop` provide the same fields with enhanced 
+The old `PressureDropResponse` model from `calc_backend.contracts.pressure_drop` is deprecated.
+The new models in `calc_backend.models.pressure_drop` provide the same fields with enhanced
 documentation and JSON schema examples.
 
 To migrate existing clients:
+
 1. Update endpoints to use new StandardResponse format
 2. Client code extracts data from response["data"]
 3. Error handling uses response["error"]["code"] instead of HTTP 422 without details
@@ -265,6 +268,7 @@ Comprehensive tests are provided:
 - `tests/calc_backend/test_pressure_drop_models.py` - PressureDropRequest/Response validation
 
 Run tests:
+
 ```bash
 python3 -m pytest src/shared/python/upstream_drift_tools/tests/test_standard_response.py -v
 python3 -m pytest tests/calc_backend/test_pressure_drop_models.py -v

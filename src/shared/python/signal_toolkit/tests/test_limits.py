@@ -114,11 +114,13 @@ class TestApplySaturationValues:
 
     def test_else_branch_fallback(self):
         """The else branch clips normalized to [-1, 1]."""
-        from unittest.mock import MagicMock
+        from typing import Any
 
-        fake_mode = MagicMock()
-        # Make all == comparisons with SaturationMode members return False
-        fake_mode.__eq__ = lambda self, other: False
+        class FakeMode:
+            def __eq__(self, other: object) -> bool:
+                return False
+
+        fake_mode: Any = FakeMode()
         x = np.array([-2.0, 0.0, 2.0])
         result = _apply_saturation_values(x, -1.0, 1.0, fake_mode, 1.0)
         assert np.all(result >= -1.0) and np.all(result <= 1.0)

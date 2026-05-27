@@ -32,6 +32,7 @@
 
 
 # Import required packages.
+import logging
 import org.opensim.utils as utils
 from java.awt import BorderLayout
 from javax.swing import JButton, JComboBox, JFrame, JLabel
@@ -178,14 +179,13 @@ for i in range(0, forces.getSize()):
 		# The force is not a muscle.
 		if (force.hasGeometryPath()):
 			pathForceNames.append(force.getName())
-			print 'Adding ' + force.getName() + \
-				' to list of forces to compute moment arm.'
+			logging.info('Adding %s to list of forces to compute moment arm.', force.getName())
 
 # Obtain a file containing the motion to use for computing moment arms.
 motionFile = utils.FileUtils.getInstance().browseForFilename(".sto",
 	"Please select the storage/motion file with kinematics to compute moment \
 		arms.", 1)
-print motionFile
+logging.info(motionFile)
 
 if (motionFile != None):
 	motionStorage = modeling.Storage(motionFile)

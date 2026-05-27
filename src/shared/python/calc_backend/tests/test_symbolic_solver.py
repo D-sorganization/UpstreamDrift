@@ -54,9 +54,9 @@ class TestSymbolicSolve:
             "/api/calc/symbolic/solve",
             json={"equation": "x**2 - 4 = 0", "variable": "x"},
         )
-        if response.json().get("available"):
+        data = response.json()
+        if data.get("available"):
             assert response.status_code == 200
-            data = response.json()
             assert "-2" in data["solutions"] or "2" in data["solutions"]
         else:
             assert response.status_code == 200
@@ -99,9 +99,9 @@ class TestSymbolicDerivative:
             "/api/calc/symbolic/derivative",
             json={"expression": "x**3 + 2*x", "variable": "x"},
         )
-        if response.json().get("available"):
+        data = response.json()
+        if data.get("available"):
             assert response.status_code == 200
-            data = response.json()
             assert "3*x**2" in data["derivative"] or "3*x^2" in data["derivative"]
         else:
             assert response.status_code == 200
@@ -136,9 +136,9 @@ class TestSymbolicSimplify:
             "/api/calc/symbolic/simplify",
             json={"expression": "(x**2 - 1)/(x - 1)"},
         )
-        if response.json().get("available"):
+        data = response.json()
+        if data.get("available"):
             assert response.status_code == 200
-            data = response.json()
             # (x^2 - 1)/(x - 1) = x + 1
             assert "x" in str(data.get("simplified", ""))
         else:

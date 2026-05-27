@@ -10,17 +10,17 @@ add a new host integration, write a workflow, or extend the chip UI.
 
 ## Module map
 
-| Module | Purpose |
-|--------|---------|
-| `feature_catalog.py` | Self-knowledge index: build / lookup / search Sidekick features. |
-| `action_service.py` | The dispatch facade, descriptors, audit + policy + undo wiring. |
-| `subtab_adapter.py` | Drives `tools_sidebar` actions through a `SubtabActionPort`. |
-| `host_adapter.py` | Bridges embedding-host actions via a `HostActionPort`. |
-| `planner.py` | Validates LLM tool calls into `PlannedStep`s; exports tool-registry entries + system prompt. |
-| `action_audit.py` | `MemoryActionAudit` + `JsonlActionAudit` sinks (with redaction). |
-| `access_policy.py` | Default-deny policy with per-side-effects allowlists + confirmation gating. |
-| `workflow_bridge.py` | Composes actions into workflows with `abort`/`retry`/`skip`/`ask_user` recovery. |
-| `chat_surface.py` | Wire-shaped `ActionChipModel` consumed by both PyQt and React surfaces. |
+| Module               | Purpose                                                                                      |
+| -------------------- | -------------------------------------------------------------------------------------------- |
+| `feature_catalog.py` | Self-knowledge index: build / lookup / search Sidekick features.                             |
+| `action_service.py`  | The dispatch facade, descriptors, audit + policy + undo wiring.                              |
+| `subtab_adapter.py`  | Drives `tools_sidebar` actions through a `SubtabActionPort`.                                 |
+| `host_adapter.py`    | Bridges embedding-host actions via a `HostActionPort`.                                       |
+| `planner.py`         | Validates LLM tool calls into `PlannedStep`s; exports tool-registry entries + system prompt. |
+| `action_audit.py`    | `MemoryActionAudit` + `JsonlActionAudit` sinks (with redaction).                             |
+| `access_policy.py`   | Default-deny policy with per-side-effects allowlists + confirmation gating.                  |
+| `workflow_bridge.py` | Composes actions into workflows with `abort`/`retry`/`skip`/`ask_user` recovery.             |
+| `chat_surface.py`    | Wire-shaped `ActionChipModel` consumed by both PyQt and React surfaces.                      |
 
 ## Architecture in one diagram
 
@@ -311,15 +311,15 @@ state to `ready`).
 
 ## Conventions
 
-* **Action ids** are dotted strings: `<namespace>.<verb>` or
+- **Action ids** are dotted strings: `<namespace>.<verb>` or
   `<namespace>.<noun>.<verb>`. Namespaces are stable; verbs are
   imperative.
-* **Frozen dataclasses** for every wire type. Validation in
+- **Frozen dataclasses** for every wire type. Validation in
   `__post_init__`.
-* **No PyQt6** in `src/shared/python/sidekick/agent/` (asserted by the
+- **No PyQt6** in `src/shared/python/sidekick/agent/` (asserted by the
   host adapter hygiene test; convention everywhere else).
-* **Errors return, not raise.** Handlers translate user-visible failures
+- **Errors return, not raise.** Handlers translate user-visible failures
   into `ActionResult(ok=False, error=...)`. Bugs (programmer errors)
   raise — examples: `PlannerError`, `PendingUserDecision`.
-* **Tests live with the implementation PR.** TDD: red → green →
+- **Tests live with the implementation PR.** TDD: red → green →
   refactor. Aim for ≥ 90% branch coverage of new modules.

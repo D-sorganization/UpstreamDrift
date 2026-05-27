@@ -62,6 +62,29 @@ class WorkspaceVariable:
             data["repr"] = self.repr_value or repr(self.value)
         return data
 
+    @property
+    def preview(self) -> str:
+        return format_workspace_value_preview(self.value)
+
+    @property
+    def dtype(self) -> str | None:
+        dtype_attr = getattr(self.value, "dtype", None)
+        return str(dtype_attr) if dtype_attr is not None else None
+
+    @property
+    def shape(self) -> tuple[int, ...] | None:
+        shape_attr = getattr(self.value, "shape", None)
+        if isinstance(shape_attr, tuple):
+            return shape_attr
+        return None
+
+    @property
+    def size(self) -> int | None:
+        size_attr = getattr(self.value, "size", None)
+        if isinstance(size_attr, int):
+            return size_attr
+        return None
+
 
 class Subscription:
     """Disposable handle returned by WorkspaceRegistry.subscribe().
@@ -275,6 +298,17 @@ class WorkspaceRegistry:
         """
         return self.get(name, default)
 
+    def update_from(self, incoming: WorkspaceRegistry, replace: bool = False) -> None:
+        """Update variables in this registry using variables from *incoming*.
+
+        If *replace* is True, existing variables are cleared first.
+        """
+        if replace:
+            for name in list(self._values):
+                self.delete_variable(name)
+        for name in incoming.list():
+            self.set_variable(name, incoming.get(name))
+
     def _notify(self, name: str, value: Any) -> None:
         """Invoke all subscribers with (name, value).
 
@@ -327,6 +361,7 @@ def _summarize_dimensions(value: Any) -> str:
 def _env_key(name: str) -> str:
     return "".join(char.upper() if char.isalnum() else "_" for char in name)
 
+
 def format_workspace_value_preview(value: Any, max_length: int = 120) -> str:
     """Return a truncated string preview of a workspace value."""
     if isinstance(value, dict) and not value:
@@ -339,9 +374,9 @@ def format_workspace_value_preview(value: Any, max_length: int = 120) -> str:
             preview = f"<{value.dtype} array {value.shape}>"
         else:
             preview = repr(value)
-    except Exception:
+    except Exception:  # noqa: BLE001
         preview = "<unrepresentable>"
 
     if len(preview) > max_length:
-        return preview[:max_length - 3] + "..."
+        return preview[: max_length - 3] + "..."
     return preview

@@ -175,7 +175,9 @@ def _cmaes_step(
 
     # Update mean
     old_mean = state.mean.copy()
-    new_mean = np.einsum("i,ij->j", weights, selected)  # ⚡ Bolt: np.einsum is ~2.5x faster than np.sum(weights[:, None] * selected, axis=0)
+    new_mean = np.einsum(
+        "i,ij->j", weights, selected
+    )  # ⚡ Bolt: np.einsum is ~2.5x faster than np.sum(weights[:, None] * selected, axis=0)
 
     # Update evolution paths
     inv_sqrt_C = eigvecs @ np.diag(1.0 / np.sqrt(eigvals)) @ eigvecs.T

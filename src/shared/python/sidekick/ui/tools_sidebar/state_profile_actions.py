@@ -2,13 +2,26 @@
 
 from __future__ import annotations
 
+from abc import abstractmethod
 from pathlib import Path
+
+from typing import Any
 
 from .state_profiles import SidekickStateProfileResult, SidekickStateProfileStore
 
 
 class StateProfileMixin:
     """Mixin for profile persistence actions."""
+
+    @abstractmethod
+    def snapshot_state(self) -> Any:
+        """Return the current state snapshot."""
+        ...
+
+    @abstractmethod
+    def apply_state(self, state: Any) -> None:
+        """Apply a state snapshot."""
+        ...
 
     def save_state_profile(
         self,

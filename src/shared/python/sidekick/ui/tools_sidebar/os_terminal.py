@@ -280,11 +280,14 @@ class SidekickOsTerminalWidget:
 
     _NON_INTERACTIVE_LABEL = "[non-interactive mode]"
 
-    def __init__(self, parent: Any = None) -> None:
+    def __init__(self, parent: Any = None, project_root: Path | None = None) -> None:
         self._parent = parent
+        self._project_root = project_root
         self._shells: list[ShellDescriptor] = discover_shells()
         self._backend: _TerminalBackend | None = None
-        self._cwd: Path = Path(os.getcwd())
+        self._cwd: Path = (
+            project_root if project_root is not None else Path(os.getcwd())
+        )
         self._qt_built = False
 
         # Build Qt components lazily so the class can be instantiated in
@@ -295,6 +298,8 @@ class SidekickOsTerminalWidget:
             self._qt_built = True
             self._populate_shell_selector()
             self._update_cwd_label()
+            # Keep wrapper alive by attaching it to the QWidget
+            self._widget._wrapper = self
         except Exception as exc:  # noqa: BLE001 — headless / test environments
             logger.debug("Qt widget build skipped (%s)", exc)
             self._widget = None

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from dataclasses import replace
 from typing import Protocol
 
@@ -12,8 +12,11 @@ from .state import SidebarState
 class TabDefinitionLike(Protocol):
     """Minimal tab definition contract needed by visibility helpers."""
 
-    tab_id: str
-    visible: bool
+    @property
+    def tab_id(self) -> str: ...
+
+    @property
+    def visible(self) -> bool: ...
 
 
 def available_tab_ids(definitions: Iterable[TabDefinitionLike]) -> list[str]:
@@ -22,7 +25,7 @@ def available_tab_ids(definitions: Iterable[TabDefinitionLike]) -> list[str]:
 
 
 def initially_visible_tab_ids(
-    definitions: list[TabDefinitionLike],
+    definitions: Sequence[TabDefinitionLike],
     state: SidebarState,
 ) -> set[str]:
     """Resolve the tabs that should be visible before runtime overrides apply."""
@@ -56,7 +59,7 @@ def initially_visible_tab_ids(
 
 def with_default_tab_visibility(
     state: SidebarState,
-    definitions: list[TabDefinitionLike],
+    definitions: Sequence[TabDefinitionLike],
     tab_id: str,
     visible: bool,
 ) -> SidebarState | None:

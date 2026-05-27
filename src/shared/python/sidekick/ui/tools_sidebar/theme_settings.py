@@ -69,10 +69,11 @@ class SidekickThemeSettings:
     def __post_init__(self) -> None:
         mode = _coerce_theme_mode(self.mode)
         colors = _normalize_custom_colors(self.colors)
+        font_input: Any = self.font
         font = (
-            self.font
-            if isinstance(self.font, SidekickFontSettings)
-            else SidekickFontSettings.from_dict(self.font)
+            font_input
+            if isinstance(font_input, SidekickFontSettings)
+            else SidekickFontSettings.from_dict(font_input)
         )
         object.__setattr__(self, "mode", mode)
         object.__setattr__(self, "colors", MappingProxyType(colors))

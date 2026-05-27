@@ -13,7 +13,7 @@ import numpy as np
 
 from .data_models import Quaternion, Vector3
 from .mesh_loader import LoadedMesh
-from .viewer_backends import ViewerBackend, ViewerConfig
+from ._viewer_base import ViewerBackend, ViewerConfig
 
 logger = logging.getLogger(__name__)
 

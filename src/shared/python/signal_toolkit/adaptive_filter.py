@@ -20,8 +20,11 @@ logger = logging.getLogger(__name__)
 
 # ── Try importing native Rust adaptive-filter kernels ────────────────────────
 
-_rust_lms: object | None = None
-_rust_rls: object | None = None
+from typing import Any
+from collections.abc import Callable
+
+_rust_lms: Callable[..., Any] | None = None
+_rust_rls: Callable[..., Any] | None = None
 
 try:
     from tools_core import signal as _tc_signal  # type: ignore[import]

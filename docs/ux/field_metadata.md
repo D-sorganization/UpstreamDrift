@@ -5,9 +5,9 @@ range, default, default source, example, and producer/consumer edges.
 Consumed by:
 
 - **PyQt6**: `HelpfulField` wrapper in `src/shared/python/ui/helpful_field.py`
-  *(forthcoming — Phase 0.2 of epic [#5968](https://github.com/D-sorganization/UpstreamDrift/issues/5968))*.
+  _(forthcoming — Phase 0.2 of epic [#5968](https://github.com/D-sorganization/UpstreamDrift/issues/5968))_.
 - **React**: `<HelpfulField>` in `ui/src/components/ux/HelpfulField.tsx`
-  *(forthcoming — Phase 0.3)*.
+  _(forthcoming — Phase 0.3)_.
 - **Coverage ratchet**: `scripts/ci/check_ux_coverage_ratchet.py` flags
   any bare `QSpinBox`/`QDoubleSpinBox`/`QComboBox`/`QSlider`/`QLineEdit`
   in Python and any bare `<input>`/`<select>`/`<textarea>` in TSX that
@@ -30,19 +30,19 @@ one YAML file (`configs/ux/field_metadata.yaml`) that:
 
 ```yaml
 fields:
-  - id: simulation.timestep        # dotted lowercase, immutable once shipped
-    label: Timestep                # short headline shown next to the input
-    short_help: One sentence.      # tooltip, <= 80 chars
-    long_help: |                   # popover body, Markdown
+  - id: simulation.timestep # dotted lowercase, immutable once shipped
+    label: Timestep # short headline shown next to the input
+    short_help: One sentence. # tooltip, <= 80 chars
+    long_help: | # popover body, Markdown
       Free-form explanation that may span paragraphs.
-    units: s                       # symbol or null
-    valid_range: [1.0e-6, 1.0]     # [min, max] for numerics
+    units: s # symbol or null
+    valid_range: [1.0e-6, 1.0] # [min, max] for numerics
     #                              # or [enum, values] for enums
     #                              # or null for free-form text
     default: 0.002
     default_source: MuJoCo recommended for humanoid (mujoco docs, 2024).
-    consumers: []                  # downstream field ids
-    producers: []                  # upstream field ids
+    consumers: [] # downstream field ids
+    producers: [] # upstream field ids
     example: "0.002"
 ```
 
