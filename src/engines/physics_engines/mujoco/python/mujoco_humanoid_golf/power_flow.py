@@ -187,7 +187,8 @@ class PowerFlowAnalyzer:
             if joint.damping[0] > 0:
                 v_idx = joint.dofadr[0]
                 if v_idx < self.model.nv:
-                    power_diss += joint.damping[0] * qvel[v_idx] ** 2
+                    # perf: qvel*qvel avoids ** 2 overhead
+                    power_diss += joint.damping[0] * (qvel[v_idx] * qvel[v_idx])
         return power_diss
 
     @precondition(
@@ -444,7 +445,8 @@ class PowerFlowAnalyzer:
             if joint.bodyid[0] == body_id and joint.damping[0] > 0:
                 v_start = joint.dofadr[0]
                 if v_start < self.model.nv:
-                    power_diss += joint.damping[0] * qvel[v_start] ** 2
+                    # perf: qvel*qvel avoids ** 2 overhead
+                    power_diss += joint.damping[0] * (qvel[v_start] * qvel[v_start])
         return power_diss
 
     @precondition(
