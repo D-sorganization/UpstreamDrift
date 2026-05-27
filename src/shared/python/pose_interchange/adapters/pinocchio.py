@@ -7,14 +7,6 @@ radians.
 Mock-mode by default; if a real Pinocchio ``Model`` is supplied as
 ``model``, pass the per-joint :class:`JointSlot` map alongside (we do
 not introspect Pinocchio's joint table from this adapter).
-Note on "local stub" status (Issue #4095): Pinocchio support is
-currently limited to adapter-level conversions without live engine
-kinematics step evaluation because we avoid pulling the heavy pinocchio
-wheel into the core service layer until real-time IK relies on it.
-Note on "local stub" status (Issue #4095): Pinocchio support is
-currently limited to adapter-level conversions without live engine
-kinematics step evaluation because we avoid pulling the heavy pinocchio
-wheel into the core service layer until real-time IK relies on it.
 """
 
 from __future__ import annotations
