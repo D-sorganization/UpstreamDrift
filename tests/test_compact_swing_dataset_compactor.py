@@ -16,9 +16,13 @@ import sys
 from pathlib import Path
 
 import numpy as np
-import pyarrow as pa
-import pyarrow.parquet as pq
 import pytest
+
+pyarrow = pytest.importorskip(
+    "pyarrow", reason="pyarrow not installed; skipping compactor tests"
+)
+pa = pyarrow
+pq = pyarrow.parquet
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:

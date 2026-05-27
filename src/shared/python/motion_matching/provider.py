@@ -23,6 +23,7 @@ Public API:
 
 from __future__ import annotations
 
+import inspect
 import logging
 import threading
 from dataclasses import dataclass, field
@@ -156,15 +157,45 @@ def _provider_qualname(provider: object) -> str:
     return f"{module}.{qualname}" if module else qualname
 
 
+def _same_provider_class(a: object, b: object) -> bool:
+    """Return ``True`` if *a* and *b* are instances of the same logical class.
+
+    Beyond the obvious ``type(a) is type(b)`` and matching
+    ``module.qualname``, this also catches the case where the same
+    ``.py`` source file is importable under two different module paths
+    (e.g. because a test adds an engine sub-tree to ``sys.path``).  In
+    that situation the ``__qualname__`` portions match and both classes
+    resolve to the same ``__file__``.
+    """
+    if type(a) is type(b):
+        return True
+    if _provider_qualname(a) == _provider_qualname(b):
+        return True
+    # Same bare class name + same source file → same logical class despite
+    # different module paths (dual-import via sys.path manipulation).
+    cls_a, cls_b = type(a), type(b)
+    if getattr(cls_a, "__qualname__", None) == getattr(cls_b, "__qualname__", None):
+        try:
+            file_a = inspect.getfile(cls_a)
+            file_b = inspect.getfile(cls_b)
+            if file_a == file_b:
+                return True
+        except (TypeError, OSError):
+            pass
+    return False
+
+
 def register_provider(provider: FitSwingProvider) -> None:
     """Register ``provider`` under its ``engine_name``.
 
     Registration is idempotent: re-registering the same provider instance,
     or any instance of the same provider class (matched by fully-qualified
-    ``module.qualname`` so :func:`importlib.reload` shadows still count),
-    is a no-op and emits a DEBUG log. Registering a *different* provider
-    class for an already-occupied ``engine_name`` raises :class:`ValueError`
-    naming both the existing and the incoming class.
+    ``module.qualname`` so :func:`importlib.reload` shadows still count,
+    or by matching ``__qualname__`` + source file so dual-import via
+    ``sys.path`` manipulation is also detected), is a no-op and emits a
+    DEBUG log. Registering a *different* provider class for an
+    already-occupied ``engine_name`` raises :class:`ValueError` naming both
+    the existing and the incoming class.
     """
     name = getattr(provider, "engine_name", None)
     if not isinstance(name, str) or not name:
@@ -179,13 +210,9 @@ def register_provider(provider: FitSwingProvider) -> None:
                 name,
             )
             return
-        if existing is not None and (
-            type(existing) is type(provider)
-            or _provider_qualname(existing) == _provider_qualname(provider)
-        ):
-            # Same logical class — covers both ordinary re-imports and
-            # ``importlib.reload`` shadows (which rebuild the class object,
-            # so plain ``type`` identity is not enough).
+        if existing is not None and _same_provider_class(existing, provider):
+            # Same logical class — covers ordinary re-imports,
+            # ``importlib.reload`` shadows, and dual sys.path imports.
             _logger.debug(
                 "register_provider: %r already registered to %s; no-op",
                 name,

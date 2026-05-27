@@ -74,6 +74,17 @@ class EmbedCapabilities:
             )
 
 
+# Sentinel instance for tools that do not need any special embedding
+# capabilities. Using ``EmbedCapabilities.NONE`` in tool adapters is the
+# idiomatic way to express "no constraints; use launcher defaults."
+EmbedCapabilities.NONE = EmbedCapabilities(  # type: ignore[attr-defined]
+    supports_embedded=True,
+    prefers_dock=False,
+    min_size=(640, 480),
+    requires_separate_qapplication=False,
+)
+
+
 @runtime_checkable
 class EmbeddableTool(Protocol):
     """Protocol implemented by tools that can be embedded in the launcher.
