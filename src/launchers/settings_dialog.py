@@ -3,7 +3,7 @@
 Provides a tabbed dialog with Layout, Configuration, and Diagnostics tabs.
 """
 
-# mypy: disable-error-code="attr-defined,assignment"
+# mypy: disable-error-code="attr-defined,assignment,union-attr"
 
 from __future__ import annotations
 
@@ -531,7 +531,7 @@ class SettingsWidget(QWidget):
         tab_layout.addWidget(build_group)
 
         # Sync checkboxes with parent launcher state
-        launcher = self.parent()
+        launcher = self._launcher or self.parent()
         if launcher and hasattr(launcher, "chk_docker"):
             self.chk_windows.setChecked(
                 not launcher.chk_docker.isChecked() and not launcher.chk_wsl.isChecked()
@@ -561,6 +561,13 @@ class SettingsWidget(QWidget):
             self.chk_wsl.toggled.connect(on_wsl_toggled)
             self.chk_live_viz.toggled.connect(launcher.chk_live.setChecked)
             self.chk_gpu.toggled.connect(launcher.chk_gpu.setChecked)
+
+            # Two-way sync from launcher to SettingsWidget
+            launcher.chk_windows.toggled.connect(self.chk_windows.setChecked)
+            launcher.chk_docker.toggled.connect(self.chk_docker.setChecked)
+            launcher.chk_wsl.toggled.connect(self.chk_wsl.setChecked)
+            launcher.chk_live.toggled.connect(self.chk_live_viz.setChecked)
+            launcher.chk_gpu.toggled.connect(self.chk_gpu.setChecked)
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
@@ -978,6 +985,11 @@ class SettingsWidget(QWidget):
         status = "SUCCESS" if success else "FAILED"
         self._build_status.setText(f"Build {status} ({elapsed:.0f}s): {message}")
         self.build_console.append(f"\n=== Build {status} ({elapsed:.0f}s) ===")
+
+        if success and self._launcher:
+            self._launcher.docker_available = True
+            self._launcher._apply_docker_status(True)
+            self._launcher.chk_docker.setChecked(True)
 
     def _on_sidekick_context_toggled(self, enabled: bool) -> None:
         """Persist the Sidekick context-sharing toggle to the environment.

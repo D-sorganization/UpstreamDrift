@@ -723,6 +723,29 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
     def _launch_urdf_generator(self) -> None:
         """Launch the URDF generator / Model Explorer application."""
+        # Try to load embedded URDF Generator (Model Explorer) first
+        from src.shared.python.launcher_embed import get_embeddable_tool
+
+        tool = get_embeddable_tool("model_explorer")
+        if tool:
+            try:
+                # Check if already open
+                for idx in range(self.workspace_tabs.count()):
+                    if self.workspace_tabs.tabText(idx) == "Model Explorer":
+                        self.workspace_tabs.setCurrentIndex(idx)
+                        return
+
+                ui_widget = tool.create_main_widget(self.launcher)
+                if ui_widget:
+                    self.dock_widget_as_tab(ui_widget, "Model Explorer")
+                    self.show_toast("Model Explorer loaded as tab.", "success")
+                    self.lbl_status.setText("> Model Explorer Running")
+                    self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
+                    return
+            except Exception as e:
+                logger.exception("Failed to launch Model Explorer embedded: %s", e)
+
+        # Fallback to separate process launch if tool is not registered or failed
         from src.shared.python.core.constants import URDF_GENERATOR_SCRIPT
 
         script_path = REPOS_ROOT / URDF_GENERATOR_SCRIPT

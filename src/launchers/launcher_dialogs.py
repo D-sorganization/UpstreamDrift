@@ -518,15 +518,18 @@ class DialogsManager:
                 self.chk_windows.setChecked(False)
 
             if not self.docker_available:
-                QMessageBox.warning(
-                    self.launcher,
-                    "Docker Not Available",
-                    "Docker Desktop is not running or not installed.\n\n"
-                    "Please start Docker Desktop and try again.\n\n"
-                    "The launcher will continue in local mode.",
-                )
-                self.chk_docker.setChecked(False)
-                return
+                if getattr(self.launcher, "loading", False):
+                    pass
+                else:
+                    QMessageBox.warning(
+                        self.launcher,
+                        "Docker Not Available",
+                        "Docker Desktop is not running or not installed.\n\n"
+                        "Please start Docker Desktop and try again.\n\n"
+                        "The launcher will continue in local mode.",
+                    )
+                    self.chk_docker.setChecked(False)
+                    return
 
         if use_docker:
             logger.info("Docker mode enabled")
@@ -572,32 +575,35 @@ class DialogsManager:
                 self.chk_windows.setChecked(False)
 
             # Check if WSL is available
-            try:
-                result = subprocess.run(
-                    ["wsl", "--list", "--quiet"],
-                    capture_output=True,
-                    timeout=5,
-                    creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
-                )
-
+            if getattr(self.launcher, "loading", False):
+                pass
+            else:
                 try:
-                    output = result.stdout.decode("utf-16-le")
-                except UnicodeError:
-                    output = result.stdout.decode("utf-8", errors="ignore")
+                    result = subprocess.run(
+                        ["wsl", "--list", "--quiet"],
+                        capture_output=True,
+                        timeout=5,
+                        creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
+                    )
 
-                if result.returncode != 0 or "Ubuntu" not in output:
-                    raise RuntimeError("Ubuntu not found in WSL")
-            except (OSError, ValueError) as e:
-                QMessageBox.warning(
-                    self.launcher,
-                    "WSL Not Available",
-                    f"WSL2 with Ubuntu is not available.\n\n"
-                    f"Error: {e}\n\n"
-                    "Please install WSL2 and Ubuntu:\n"
-                    "  wsl --install -d Ubuntu-22.04",
-                )
-                self.chk_wsl.setChecked(False)
-                return
+                    try:
+                        output = result.stdout.decode("utf-16-le")
+                    except UnicodeError:
+                        output = result.stdout.decode("utf-8", errors="ignore")
+
+                    if result.returncode != 0 or "Ubuntu" not in output:
+                        raise RuntimeError("Ubuntu not found in WSL")
+                except (OSError, ValueError) as e:
+                    QMessageBox.warning(
+                        self.launcher,
+                        "WSL Not Available",
+                        f"WSL2 with Ubuntu is not available.\n\n"
+                        f"Error: {e}\n\n"
+                        "Please install WSL2 and Ubuntu:\n"
+                        "  wsl --install -d Ubuntu-22.04",
+                    )
+                    self.chk_wsl.setChecked(False)
+                    return
 
             logger.info("WSL mode enabled")
             if hasattr(self, "toast_manager") and self.toast_manager:

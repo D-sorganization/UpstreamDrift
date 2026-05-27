@@ -363,27 +363,12 @@ class UISetupManager:
         self._sidekick_popped_out = False
 
         # Add Workspace Tabs for Unified Architecture
-        from PyQt6.QtWidgets import QTabWidget
+        from src.shared.python.gui_pkg.draggable_tabs import DraggableTabWidget
 
-        self.workspace_tabs = QTabWidget()
-        self.workspace_tabs.setTabsClosable(True)
+        self.workspace_tabs = DraggableTabWidget(core_tabs={"Home"})
         self.workspace_tabs.setDocumentMode(True)
 
-        def _on_tab_close_requested(index: int) -> None:
-            if index > 0:
-                widget = self.workspace_tabs.widget(index)
-                self.workspace_tabs.removeTab(index)
-                if widget is not None:
-                    widget.deleteLater()
-
-        self.workspace_tabs.tabCloseRequested.connect(_on_tab_close_requested)
-
         self.workspace_tabs.addTab(self.content_splitter, "Home")
-        # Prevent closing the Home tab
-        tab_bar = self.workspace_tabs.tabBar()
-        if tab_bar is not None:
-            tab_bar.setTabButton(0, tab_bar.ButtonPosition.RightSide, None)
-            tab_bar.setTabButton(0, tab_bar.ButtonPosition.LeftSide, None)
 
         self.library_widget = None
         self.library_window = None

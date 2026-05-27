@@ -372,9 +372,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.sim_widget.set_joint_torque(i, value)
 
 
-def get_dockable_ui() -> QtWidgets.QMainWindow:
-    """Return the main window instance for docking in the unified launcher."""
-    return AdvancedGolfAnalysisWindow()
+def get_dockable_ui() -> QtWidgets.QWidget:
+    """Return the main widget instance for docking in the unified launcher."""
+    from .gui.core.main_widget import MainWidget
+
+    return MainWidget()
 
 
 def main() -> None:

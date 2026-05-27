@@ -87,6 +87,8 @@ class MainWidget(QWidget):
         self._setup_status_bar()
         self._connect_signals()
 
+        self.destroyed.connect(lambda: self.cleanup())
+
         logger.info("Model Explorer MainWidget initialized")
 
     # ---- construction --------------------------------------------------

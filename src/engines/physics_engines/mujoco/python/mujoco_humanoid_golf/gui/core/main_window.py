@@ -75,16 +75,33 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
 
     def _apply_qss_stylesheet(self) -> None:
         try:
-            style_path = Path(__file__).parent.parent / "styles" / "dark_theme.qss"
-            if style_path.exists():
-                with open(style_path) as f:
-                    self.setStyleSheet(f.read())
-            else:
-                logger.warning(
-                    "Stylesheet not found: %s; using default Qt styling", style_path
-                )  # noqa: E501
-        except ImportError:
-            logger.exception("Failed to load stylesheet, using default Qt styling")
+            from src.shared.python.theme import ThemeManager as SharedThemeManager
+
+            theme_mgr = SharedThemeManager.instance()
+            self.setStyleSheet(theme_mgr.get_current_stylesheet())
+            theme_mgr.themeChanged.connect(self._on_shared_theme_changed)
+        except Exception:
+            try:
+                style_path = Path(__file__).parent.parent / "styles" / "dark_theme.qss"
+                if style_path.exists():
+                    with open(style_path) as f:
+                        self.setStyleSheet(f.read())
+                else:
+                    logger.warning(
+                        "Stylesheet not found: %s; using default Qt styling", style_path
+                    )  # noqa: E501
+            except Exception:
+                logger.exception("Failed to load stylesheet, using default Qt styling")
+
+    def _on_shared_theme_changed(self, colors: dict[str, str]) -> None:
+        """Update stylesheet dynamically when the shared theme changes."""
+        try:
+            from src.shared.python.theme import ThemeManager as SharedThemeManager
+
+            theme_mgr = SharedThemeManager.instance()
+            self.setStyleSheet(theme_mgr.get_current_stylesheet())
+        except Exception:
+            pass
 
     def _create_main_tabs(self) -> None:
         self.main_tab_widget = QtWidgets.QTabWidget()
@@ -367,6 +384,14 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
 
     def _apply_styling(self) -> None:
         """Apply professional styling to the application."""
+        try:
+            from src.shared.python.theme import ThemeManager as SharedThemeManager
+
+            _ = SharedThemeManager
+            return
+        except ImportError:
+            pass
+
         self.setStyleSheet(
             """
             QMainWindow {

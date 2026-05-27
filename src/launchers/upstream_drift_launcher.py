@@ -806,6 +806,7 @@ class UpstreamDriftLauncher(QMainWindow):
                 "live_visualization": (self.chk_live.isChecked() if True else True),
                 "gpu_acceleration": (self.chk_gpu.isChecked() if True else False),
                 "docker_mode": (self.chk_docker.isChecked() if True else False),
+                "wsl_mode": (self.chk_wsl.isChecked() if True else False),
             },
         }
         self.layout_manager.save_layout(window_state)
@@ -1093,14 +1094,19 @@ class UpstreamDriftLauncher(QMainWindow):
         if True:
             self.chk_gpu.setChecked(options.get("gpu_acceleration", False))
         if True:
-            # If "docker_mode" is not in options, default to self.orchestrator.docker_available
-            saved_docker = options.get(
-                "docker_mode", self.orchestrator.docker_available
-            )
-            if saved_docker and self.orchestrator.docker_available:
+            saved_docker = options.get("docker_mode", None)
+            if saved_docker is None:
+                saved_docker = self.orchestrator.docker_available
+            if saved_docker:
                 self.chk_docker.setChecked(True)
             else:
                 self.chk_docker.setChecked(False)
+        if True:
+            saved_wsl = options.get("wsl_mode", False)
+            if saved_wsl:
+                self.chk_wsl.setChecked(True)
+            else:
+                self.chk_wsl.setChecked(False)
 
         # Restore selected model
         saved_selection = layout_data.get("selected_model")
