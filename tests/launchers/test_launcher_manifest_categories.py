@@ -62,23 +62,25 @@ def test_sidebar_category_has_at_least_one_tile(category: str) -> None:
 
 
 def test_cross_engine_dashboard_tile_exists() -> None:
-    """cross_engine tile must exist in the manifest.
+    """cross_engine_dashboard tile must exist in the manifest.
 
     Fixes #5510.
     """
     tiles = _load_manifest_tiles()
     ids = [t["id"] for t in tiles]
-    assert "cross_engine" in ids, f"Tile 'cross_engine' not found. Present tiles: {ids}"
+    assert "cross_engine_dashboard" in ids, (
+        f"Tile 'cross_engine_dashboard' not found. Present tiles: {ids}"
+    )
 
 
 def test_cross_engine_dashboard_category_is_simulation() -> None:
-    """cross_engine tile must have category 'simulation'.
+    """cross_engine_dashboard tile must have category 'simulation'.
 
     Fixes #5510.
     """
     tiles = _load_manifest_tiles()
-    tile = next((t for t in tiles if t["id"] == "cross_engine"), None)
-    assert tile is not None, "Tile 'cross_engine' not found in manifest"
+    tile = next((t for t in tiles if t["id"] == "cross_engine_dashboard"), None)
+    assert tile is not None, "Tile 'cross_engine_dashboard' not found in manifest"
     assert tile["category"] == "simulation", (
         f"Expected category 'simulation', got '{tile['category']}'"
     )
@@ -90,25 +92,25 @@ def test_cross_engine_dashboard_category_is_simulation() -> None:
 
 
 def test_exercise_dashboard_tile_exists() -> None:
-    """biomech_exercise tile must exist in the manifest.
+    """exercise_dashboard tile must exist in the manifest.
 
     Fixes #5511.
     """
     tiles = _load_manifest_tiles()
     ids = [t["id"] for t in tiles]
-    assert "biomech_exercise" in ids, (
-        f"Tile 'biomech_exercise' not found. Present tiles: {ids}"
+    assert "exercise_dashboard" in ids, (
+        f"Tile 'exercise_dashboard' not found. Present tiles: {ids}"
     )
 
 
 def test_exercise_dashboard_category_is_biomechanics() -> None:
-    """biomech_exercise tile must have category 'biomechanics'.
+    """exercise_dashboard tile must have category 'biomechanics'.
 
     Fixes #5511.
     """
     tiles = _load_manifest_tiles()
-    tile = next((t for t in tiles if t["id"] == "biomech_exercise"), None)
-    assert tile is not None, "Tile 'biomech_exercise' not found in manifest"
+    tile = next((t for t in tiles if t["id"] == "exercise_dashboard"), None)
+    assert tile is not None, "Tile 'exercise_dashboard' not found in manifest"
     assert tile["category"] == "biomechanics", (
         f"Expected category 'biomechanics', got '{tile['category']}'"
     )

@@ -21,17 +21,6 @@ import contextlib
 import os
 import sys
 import time
-
-if sys.platform == "win32":
-    try:
-        import ctypes
-
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-            "UpstreamDrift.Launcher.1"
-        )
-    except (AttributeError, OSError, NameError, ImportError):
-        pass
-
 from typing import Any, cast
 
 from PyQt6.QtCore import QEventLoop, QObject, QRunnable, QThreadPool, QTimer, pyqtSignal
@@ -89,125 +78,99 @@ class FramelessResizeFilter(QObject):
         self._start_geo: QRect | None = None
 
     def eventFilter(self, obj: QObject | None, event: QEvent | None) -> bool:
-        try:
-            if event is None or obj is None:
-                return False
-
-            # Check if either the target object or the filter window has been deleted in C++
-            if self.window is None:
-                return False
-            try:
-                _ = self.window.objectName()
-                _ = obj.objectName()
-            except (RuntimeError, AttributeError):
-                return False
-
-            typed_event = cast(Any, event)
-            if event.type() in (
-                QEvent.Type.MouseMove,
-                QEvent.Type.MouseButtonPress,
-                QEvent.Type.MouseButtonRelease,
-                QEvent.Type.HoverMove,
-            ):
-                if hasattr(event, "globalPosition"):
-                    gpos = event.globalPosition().toPoint()
-                elif hasattr(event, "globalPos"):
-                    gpos = event.globalPos()
-                else:
-                    return super().eventFilter(obj, event)
-
-                local_pos = self.window.mapFromGlobal(gpos)
-                x, y = local_pos.x(), local_pos.y()
-                w, h = self.window.width(), self.window.height()
-                border = 8
-
-                if not self._resizing:
-                    if 0 <= x <= w and 0 <= y <= h:
-                        edge = 0
-                        if x < border and y < border:
-                            edge = 13
-                        elif x > w - border and y < border:
-                            edge = 14
-                        elif x < border and y > h - border:
-                            edge = 16
-                        elif x > w - border and y > h - border:
-                            edge = 17
-                        elif x < border:
-                            edge = 10
-                        elif x > w - border:
-                            edge = 11
-                        elif y < border:
-                            edge = 12
-                        elif y > h - border:
-                            edge = 15
-
-                        if edge != 0:
-                            if (
-                                event.type() == QEvent.Type.MouseButtonPress
-                                and typed_event.button() == Qt.MouseButton.LeftButton
-                            ):
-                                self._resizing = True
-                                self._resize_edge = edge
-                                self._start_pos = gpos
-                                self._start_geo = self.window.geometry()
-                                return True
-                            if event.type() in (
-                                QEvent.Type.HoverMove,
-                                QEvent.Type.MouseMove,
-                            ):
-                                if edge in (13, 17):
-                                    self.window.setCursor(
-                                        Qt.CursorShape.SizeFDiagCursor
-                                    )
-                                elif edge in (14, 16):
-                                    self.window.setCursor(
-                                        Qt.CursorShape.SizeBDiagCursor
-                                    )
-                                elif edge in (10, 11):
-                                    self.window.setCursor(Qt.CursorShape.SizeHorCursor)
-                                elif edge in (12, 15):
-                                    self.window.setCursor(Qt.CursorShape.SizeVerCursor)
-                                return True
-                        else:
-                            if (
-                                self.window.cursor().shape()
-                                != Qt.CursorShape.ArrowCursor
-                            ):
-                                self.window.setCursor(Qt.CursorShape.ArrowCursor)
-                else:
-                    if event.type() == QEvent.Type.MouseMove:
-                        if self._start_geo is None:
-                            return False
-                        delta = gpos - self._start_pos
-                        rect = QRect(self._start_geo)
-                        if self._resize_edge in (10, 13, 16):
-                            rect.setLeft(rect.left() + delta.x())
-                        if self._resize_edge in (11, 14, 17):
-                            rect.setRight(rect.right() + delta.x())
-                        if self._resize_edge in (12, 13, 14):
-                            rect.setTop(rect.top() + delta.y())
-                        if self._resize_edge in (15, 16, 17):
-                            rect.setBottom(rect.bottom() + delta.y())
-
-                        if (
-                            rect.width() >= self.window.minimumWidth()
-                            and rect.height() >= self.window.minimumHeight()
-                        ):
-                            self.window.setGeometry(rect)
-                        return True
-                    if event.type() == QEvent.Type.MouseButtonRelease:
-                        self._resizing = False
-                        self.window.setCursor(Qt.CursorShape.ArrowCursor)
-                        return True
-            return super().eventFilter(obj, event)
-        except RuntimeError:
-            try:
-                app = QApplication.instance()
-                if app is not None:
-                    app.removeEventFilter(self)
-            except Exception:  # noqa: BLE001
-                pass
+        if event is None:
             return False
+        typed_event = cast(Any, event)
+        if event.type() in (
+            QEvent.Type.MouseMove,
+            QEvent.Type.MouseButtonPress,
+            QEvent.Type.MouseButtonRelease,
+            QEvent.Type.HoverMove,
+        ):
+            if hasattr(event, "globalPosition"):
+                gpos = event.globalPosition().toPoint()
+            elif hasattr(event, "globalPos"):
+                gpos = event.globalPos()
+            else:
+                return super().eventFilter(obj, event)
+
+            local_pos = self.window.mapFromGlobal(gpos)
+            x, y = local_pos.x(), local_pos.y()
+            w, h = self.window.width(), self.window.height()
+            border = 8
+
+            if not self._resizing:
+                if 0 <= x <= w and 0 <= y <= h:
+                    edge = 0
+                    if x < border and y < border:
+                        edge = 13
+                    elif x > w - border and y < border:
+                        edge = 14
+                    elif x < border and y > h - border:
+                        edge = 16
+                    elif x > w - border and y > h - border:
+                        edge = 17
+                    elif x < border:
+                        edge = 10
+                    elif x > w - border:
+                        edge = 11
+                    elif y < border:
+                        edge = 12
+                    elif y > h - border:
+                        edge = 15
+
+                    if edge != 0:
+                        if (
+                            event.type() == QEvent.Type.MouseButtonPress
+                            and typed_event.button() == Qt.MouseButton.LeftButton
+                        ):
+                            self._resizing = True
+                            self._resize_edge = edge
+                            self._start_pos = gpos
+                            self._start_geo = self.window.geometry()
+                            return True
+                        if event.type() in (
+                            QEvent.Type.HoverMove,
+                            QEvent.Type.MouseMove,
+                        ):
+                            if edge in (13, 17):
+                                self.window.setCursor(Qt.CursorShape.SizeFDiagCursor)
+                            elif edge in (14, 16):
+                                self.window.setCursor(Qt.CursorShape.SizeBDiagCursor)
+                            elif edge in (10, 11):
+                                self.window.setCursor(Qt.CursorShape.SizeHorCursor)
+                            elif edge in (12, 15):
+                                self.window.setCursor(Qt.CursorShape.SizeVerCursor)
+                            return True
+                    else:
+                        if self.window.cursor().shape() != Qt.CursorShape.ArrowCursor:
+                            self.window.setCursor(Qt.CursorShape.ArrowCursor)
+            else:
+                if event.type() == QEvent.Type.MouseMove:
+                    if self._start_geo is None:
+                        return False
+                    delta = gpos - self._start_pos
+                    rect = QRect(self._start_geo)
+                    if self._resize_edge in (10, 13, 16):
+                        rect.setLeft(rect.left() + delta.x())
+                    if self._resize_edge in (11, 14, 17):
+                        rect.setRight(rect.right() + delta.x())
+                    if self._resize_edge in (12, 13, 14):
+                        rect.setTop(rect.top() + delta.y())
+                    if self._resize_edge in (15, 16, 17):
+                        rect.setBottom(rect.bottom() + delta.y())
+
+                    if (
+                        rect.width() >= self.window.minimumWidth()
+                        and rect.height() >= self.window.minimumHeight()
+                    ):
+                        self.window.setGeometry(rect)
+                    return True
+                if event.type() == QEvent.Type.MouseButtonRelease:
+                    self._resizing = False
+                    self.window.setCursor(Qt.CursorShape.ArrowCursor)
+                    return True
+        return super().eventFilter(obj, event)
 
 
 from src.shared.python.security.subprocess_utils import kill_process_tree
@@ -276,8 +239,8 @@ class LauncherOrchestrator:
         self.registry = None
         self.engine_manager = None
         self.docker_available = False
-        self.available_models: dict[str, Any] = {}
-        self.special_app_lookup: dict[str, Any] = {}
+        self.available_models = {}
+        self.special_app_lookup = {}
 
     def initialize_from_results(self, startup_results: "StartupResults | None") -> None:
         """Initialize domain state from async startup results."""
@@ -353,78 +316,6 @@ class UpstreamDriftLauncher(QMainWindow):
     Composes focused mixins for UI setup, theme management,
     simulation launching, and dialog/settings management.
     """
-
-    sidekick_sidebar: Any | None
-    sidekick_window: Any | None
-    _sidekick_popped_out: bool
-    _sidekick_needs_initial_sizing: bool
-
-    @property
-    def docker_available(self) -> bool:
-        return self.orchestrator.docker_available
-
-    @docker_available.setter
-    def docker_available(self, value: bool) -> None:
-        self.orchestrator.docker_available = value
-
-    @property
-    def registry(self) -> Any:
-        return self.orchestrator.registry
-
-    @registry.setter
-    def registry(self, value: Any) -> None:
-        self.orchestrator.registry = value
-
-    @property
-    def engine_manager(self) -> Any:
-        return self.orchestrator.engine_manager
-
-    @engine_manager.setter
-    def engine_manager(self, value: Any) -> None:
-        self.orchestrator.engine_manager = value
-
-    @property
-    def available_models(self) -> dict:
-        return self.orchestrator.available_models
-
-    @available_models.setter
-    def available_models(self, value: dict) -> None:
-        self.orchestrator.available_models = value
-
-    @property
-    def special_app_lookup(self) -> dict:
-        return self.orchestrator.special_app_lookup
-
-    @special_app_lookup.setter
-    def special_app_lookup(self, value: dict) -> None:
-        self.orchestrator.special_app_lookup = value
-
-    def _get_model(self, model_id: str) -> Any:
-        return self.orchestrator.get_model(model_id)
-
-    def get_model(self, model_id: str) -> Any:
-        return self.orchestrator.get_model(model_id)
-
-    def __getattr__(self, name: str) -> Any:
-        # Check managers to forward attributes dynamically (maintaining mixin-compatibility)
-        for manager_name in (
-            "ui_setup_manager",
-            "theme_manager",
-            "simulation_manager",
-            "dialogs_manager",
-        ):
-            if manager_name in self.__dict__:
-                manager = self.__dict__[manager_name]
-                if name in manager.__dict__ or hasattr(type(manager), name):
-                    attr = getattr(manager, name)
-                    import types
-
-                    if isinstance(attr, types.MethodType):
-                        return types.MethodType(attr.__func__, self)
-                    return attr
-        raise AttributeError(
-            f"'{type(self).__name__}' object has no attribute '{name}'"
-        )
 
     def __init__(
         self, startup_results: StartupResults | None = None, loading: bool = False
@@ -505,7 +396,7 @@ class UpstreamDriftLauncher(QMainWindow):
                 STARTUP_TIMEOUT_SEC,
             )
             QTimer.singleShot(
-                int(STARTUP_TIMEOUT_SEC * 1000), self._handle_startup_timeout
+                int(STARTUP_TIMEOUT_SEC * 1000), lambda: self._handle_startup_timeout()
             )
         elif startup_results:
             self._apply_docker_status(startup_results.docker_available)
@@ -585,6 +476,16 @@ class UpstreamDriftLauncher(QMainWindow):
             import importlib
             import sys as _sys
 
+            # Try checking out sibling Tools repository first
+            sibling_tools = REPOS_ROOT.parent / "Tools"
+            if sibling_tools.is_dir():
+                sibling_src = str(sibling_tools / "src")
+                sibling_python = str(sibling_tools / "src" / "shared" / "python")
+                if sibling_src not in _sys.path:
+                    _sys.path.insert(0, sibling_src)
+                if sibling_python not in _sys.path:
+                    _sys.path.insert(0, sibling_python)
+
             # Fall back to vendored ud-tools
             vendor_src = str(REPOS_ROOT / "vendor" / "ud-tools" / "src")
             vendor_python = str(
@@ -594,18 +495,6 @@ class UpstreamDriftLauncher(QMainWindow):
                 _sys.path.insert(0, vendor_src)
             if vendor_python not in _sys.path:
                 _sys.path.insert(0, vendor_python)
-
-            # Try checking out sibling Tools repository first (higher priority, insert at index 0 last)
-            sibling_tools = REPOS_ROOT.parent / "Tools"
-            if sibling_tools.is_dir():
-                sibling_src = str(sibling_tools / "src")
-                sibling_python = str(sibling_tools / "src" / "shared" / "python")
-                if sibling_src in _sys.path:
-                    _sys.path.remove(sibling_src)
-                _sys.path.insert(0, sibling_src)
-                if sibling_python in _sys.path:
-                    _sys.path.remove(sibling_python)
-                _sys.path.insert(0, sibling_python)
             for _name in (
                 "shared.python.sidekick.ui.tools_sidebar",
                 "sidekick.ui.tools_sidebar",
@@ -637,10 +526,10 @@ class UpstreamDriftLauncher(QMainWindow):
         except TypeError:
             try:
                 return factory(parent=self)
-            except Exception as exc:  # noqa: BLE001
+            except (RuntimeError, ValueError) as exc:
                 logger.warning("Sidekick factory call failed: %s", exc)
                 return None
-        except Exception as exc:  # noqa: BLE001
+        except (RuntimeError, ValueError) as exc:
             logger.warning("Sidekick factory call failed: %s", exc)
             return None
 
@@ -678,9 +567,6 @@ class UpstreamDriftLauncher(QMainWindow):
         icon_candidates = [
             ASSETS_DIR / "golf_logo.ico",
             ASSETS_DIR / "golf_logo.png",
-            ASSETS_DIR / "golf_suite_unified.ico",
-            ASSETS_DIR / "favicon.ico",
-            ASSETS_DIR / "golf_icon.ico",
         ]
         for icon_path in icon_candidates:
             if icon_path.exists():
@@ -698,10 +584,6 @@ class UpstreamDriftLauncher(QMainWindow):
         self._sidekick_api_wait_started_at: float | None = None
         self.layout_edit_mode = False
         self.current_filter_text = ""
-        self._sidekick_needs_initial_sizing = True
-        self.sidekick_sidebar = None
-        self.sidekick_window = None
-        self._sidekick_popped_out = False
         self.orchestrator.initialize_from_results(startup_results)
 
     def _init_managers(self) -> None:
@@ -726,24 +608,11 @@ class UpstreamDriftLauncher(QMainWindow):
             else REPOS_ROOT
         )
 
-        if "PYTEST_CURRENT_TEST" not in os.environ:
-            # Force the background API server into local-auth mode. The
-            # desktop launcher is the API server's only client and runs on
-            # the user's own machine, so the bearer-token requirement that
-            # the API enforces by default (GOLF_SUITE_MODE=remote) just
-            # produces 403s on every chat WebSocket connect — see
-            # ``src/api/auth/ws_auth.py``. Setting these env vars in the
-            # launcher's *own* environment first guarantees they propagate
-            # through ``get_subprocess_env()`` (which copies ``os.environ``)
-            # regardless of how the process manager re-assembles the env
-            # for the child.
-            os.environ.setdefault("GOLF_SUITE_MODE", "local")
-            os.environ.setdefault("GOLF_AUTH_DISABLED", "true")
-            self.background_api_process = self.process_manager.launch_module(
-                name="background_api_server",
-                module_name="src.api.server",
-                cwd=cwd,
-            )
+        self.background_api_process = self.process_manager.launch_module(
+            name="background_api_server",
+            module_name="src.api.server",
+            cwd=cwd,
+        )
 
     def _create_category_header(self, title: str) -> Any:
         from PyQt6.QtWidgets import QLabel
@@ -971,6 +840,19 @@ class UpstreamDriftLauncher(QMainWindow):
             set_variable("model_registry", self.orchestrator.registry)
         logger.info("Sidekick workspace seeded with engine_manager and model_registry")
 
+    def create_model_card(self, model: Any) -> None:
+        """Create a clickable card widget for *model*.
+
+        Raises:
+            NotImplementedError: Always — callers must use
+                :class:`DraggableModelCard` directly or delegate to
+                :class:`LayoutManager` (issue #5488).
+        """
+        raise NotImplementedError(  # tracked: #5488
+            "create_model_card is a deprecated stub. "
+            "Use DraggableModelCard(model, self) or LayoutManager directly."
+        )
+
     def _handle_startup_timeout(self) -> None:
         """Recover from a hung async-startup worker (issue #5490).
 
@@ -1001,7 +883,7 @@ class UpstreamDriftLauncher(QMainWindow):
         # constructor wires it up after the timeout is armed, but a
         # mid-init crash could leave it ``None``.
         if self.toast_manager is not None:
-            self.show_toast(
+            self.dialogs_manager.show_toast(
                 f"Startup timed out after {STARTUP_TIMEOUT_SEC}s. "
                 "Click the refresh / retry button or restart the launcher.",
                 "error",
@@ -1013,7 +895,7 @@ class UpstreamDriftLauncher(QMainWindow):
             raise ValueError("model_id must be provided")
         self.select_model(model_id)
         QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
-        self.launch_simulation()
+        self.simulation_manager.launch_simulation()
 
     # -- Window management --
 
@@ -1160,7 +1042,7 @@ class UpstreamDriftLauncher(QMainWindow):
                         """)
 
         # Update launch button
-        model = self._get_model(model_id)
+        model = self.orchestrator.get_model(model_id)
         if model:
             self.update_launch_button(model.name)
 
@@ -1192,13 +1074,13 @@ class UpstreamDriftLauncher(QMainWindow):
             return
 
         name = model_name or self.selected_model
-        model = self._get_model(self.selected_model)
+        model = self.orchestrator.get_model(self.selected_model)
 
         # Check Docker dependency
         if (
             model
             and getattr(model, "requires_docker", False)
-            and not self.docker_available
+            and not self.orchestrator.docker_available
         ):
             self.btn_launch.setText("! Docker Required")
             self.btn_launch.setStyleSheet(f"""
@@ -1330,9 +1212,7 @@ class UpstreamDriftLauncher(QMainWindow):
     def _confirm_exit_if_running_processes(self, event: QCloseEvent | None) -> bool:
         """Return True if it's safe to exit (user confirms or no processes running)."""
         running_names = [
-            k
-            for k, p in self.running_processes.items()
-            if p.poll() is None and k != "background_api_server"
+            k for k, p in self.running_processes.items() if p.poll() is None
         ]
         running_count = len(running_names)
 
@@ -1410,11 +1290,6 @@ class UpstreamDriftLauncher(QMainWindow):
         if not self._confirm_exit_if_running_processes(event):
             return
 
-        app = QApplication.instance()
-        if app is not None and hasattr(self, "_resize_filter"):
-            with contextlib.suppress(Exception):
-                app.removeEventFilter(self._resize_filter)
-
         self._save_layout()
         self._save_settings_on_close()
         self._stop_background_threads()
@@ -1432,46 +1307,6 @@ def _install_global_ui_zoom(app: QApplication) -> None:
 def main() -> None:
     """Application entry point."""
     import traceback
-
-    # Discover a free port dynamically to prevent WinError 10013 or other conflicts on Windows
-    if "API_PORT" not in os.environ:
-        import socket
-
-        def _find_free_port(start_port: int = 8000, max_attempts: int = 100) -> int:
-            for port in range(start_port, start_port + max_attempts):
-                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                try:
-                    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                    s.bind(("127.0.0.1", port))
-                    return port
-                except OSError:
-                    continue
-                finally:
-                    s.close()
-            raise OSError("Could not find a free port")
-
-        preset_port = os.environ.get("GOLF_API_PORT") or os.environ.get("GOLF_PORT")
-        if preset_port:
-            try:
-                p_val = int(preset_port)
-                os.environ["API_PORT"] = str(p_val)
-                os.environ["GOLF_API_PORT"] = str(p_val)
-                os.environ["GOLF_PORT"] = str(p_val)
-                logger.info(f"Using preset port {p_val} for API server.")
-            except ValueError:
-                preset_port = None
-
-        if not preset_port:
-            try:
-                free_port = _find_free_port(8000)
-                os.environ["API_PORT"] = str(free_port)
-                os.environ["GOLF_API_PORT"] = str(free_port)
-                os.environ["GOLF_PORT"] = str(free_port)
-                logger.info(
-                    f"Dynamically set API_PORT, GOLF_API_PORT, and GOLF_PORT to discovered free port: {free_port}"
-                )
-            except OSError as e:
-                logger.error(f"Failed to find a free port for API server: {e}")
 
     def excepthook(exc_type, exc_value, exc_tb):
         from PyQt6.QtWidgets import QMessageBox
@@ -1512,17 +1347,11 @@ def main() -> None:
     _install_global_ui_zoom(app)
 
     # Set global application icon
-    icon_candidates = [
-        ASSETS_DIR / "golf_logo.ico",
-        ASSETS_DIR / "golf_logo.png",
-        ASSETS_DIR / "golf_suite_unified.ico",
-        ASSETS_DIR / "favicon.ico",
-        ASSETS_DIR / "golf_icon.ico",
-    ]
-    for icon_path in icon_candidates:
-        if icon_path.exists():
-            app.setWindowIcon(QIcon(str(icon_path)))
-            break
+    icon_path = ASSETS_DIR / "golf_logo.ico"
+    if not icon_path.exists():
+        icon_path = ASSETS_DIR / "golf_logo.png"
+    if icon_path.exists():
+        app.setWindowIcon(QIcon(str(icon_path)))
 
     qss_path = ASSETS_DIR / "theme" / "dark_modern.qss"
     if qss_path.exists():

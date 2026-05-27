@@ -48,6 +48,11 @@ try:
 except ImportError:
     _DRAKE_AVAILABLE = False
 
+_skip_no_drake = pytest.mark.skipif(
+    not _DRAKE_AVAILABLE, reason="pydrake not installed"
+)
+
+
 # ---------------------------------------------------------------------------
 # Pure-Python helpers (no pydrake required)
 # ---------------------------------------------------------------------------

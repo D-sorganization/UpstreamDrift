@@ -24,6 +24,7 @@ OpenSim is available; it must be exercised at least in the
 
 from __future__ import annotations
 
+import importlib.util
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
@@ -172,7 +173,18 @@ def test_known_simscape_chain_coordinates_present(model_xml: ET.Element) -> None
 # ---------------------------------------------------------------------------
 
 
+_OPENSIM_AVAILABLE = importlib.util.find_spec("opensim") is not None
+
+
 @pytest.mark.requires_opensim
+@pytest.mark.skipif(
+    not _OPENSIM_AVAILABLE,
+    reason=(
+        "OpenSim Python bindings not installed; "
+        "install via `pip install opensim` (Linux/Windows) or "
+        "`conda install -c opensim-org opensim` (macOS)."
+    ),
+)
 def test_model_loads_and_initsystem() -> None:
     """Issue #4110 acceptance: model must load and initialize without error."""
     import opensim as osim  # gated import; module-level import would fail when opensim is absent

@@ -19,8 +19,7 @@ from mujoco_humanoid_golf.models import DOUBLE_PENDULUM_XML
         pytest.param(
             "club_body",
             marks=pytest.mark.xfail(
-                reason="IK convergence issue for end-effector under large perturbation",
-                strict=False,
+                reason="IK convergence issue for end-effector under large perturbation"
             ),
         ),
     ],

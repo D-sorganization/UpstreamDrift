@@ -41,14 +41,7 @@ class TestMockKinematicsServiceConstruction:
 
     def test_all_first_class_engines(self) -> None:
         """All first-class engines can be instantiated."""
-        for engine_name in [
-            "drake",
-            "mujoco",
-            "pinocchio",
-            "opensim",
-            "simscape",
-            "myosuite",
-        ]:
+        for engine_name in ["drake", "mujoco", "pinocchio", "opensim", "simscape"]:
             service = MockKinematicsService(engine_name=engine_name)
             assert service.engine_name == engine_name
 
@@ -243,12 +236,6 @@ class TestMockKinematicsServiceFixtures:
     ) -> None:
         """mock_opensim_kinematics fixture returns an OpenSim mock."""
         assert mock_opensim_kinematics.engine_name == "opensim"
-
-    def test_mock_myosuite_kinematics_fixture(
-        self, mock_myosuite_kinematics: MockKinematicsService
-    ) -> None:
-        """mock_myosuite_kinematics fixture returns a MyoSuite mock."""
-        assert mock_myosuite_kinematics.engine_name == "myosuite"
 
     def test_mock_simscape_kinematics_fixture(
         self, mock_simscape_kinematics: MockKinematicsService

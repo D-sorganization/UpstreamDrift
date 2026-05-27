@@ -734,29 +734,6 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
 
                 c = FallbackColors()  # type: ignore[assignment]
 
-            from types import SimpleNamespace
-
-            if isinstance(c, dict):
-                c = SimpleNamespace(
-                    bg=c.get("bg", "#12121e"),
-                    bg_elevated=c.get("group_bg", c.get("bg", "#1a1a2e")),
-                    text_secondary=c.get("text_secondary", c.get("text", "#8080b0")),
-                    border_default=c.get("border", "#303050"),
-                )
-            else:
-                c = SimpleNamespace(
-                    bg=getattr(c, "bg", "#12121e"),
-                    bg_elevated=getattr(
-                        c, "bg_elevated", getattr(c, "group_bg", "#1a1a2e")
-                    ),
-                    text_secondary=getattr(c, "text_secondary", "#8080b0"),
-                    border_default=getattr(
-                        c, "border_default", getattr(c, "border", "#303050")
-                    ),
-                )
-
-            self._theme_colors = c
-
             # Robustness Score chart
             rs_grp = QGroupBox("Robustness Score (1 − CV, per engine)")
             rs_lay = QVBoxLayout(rs_grp)
@@ -917,7 +894,7 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
             ax.set_ylim(0.0, 1.0)
             ax.set_ylabel("Robustness Score", fontsize=9)
             ax.axhline(0.5, color="#ff6060", linewidth=0.8, linestyle="--")
-            self._style_ax(ax, self._theme_colors)
+            self._style_ax(ax)
 
             # Annotate bar values
             for bar, val in zip(bars, robustness_per_engine, strict=True):
@@ -949,7 +926,7 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
             ax2.set_xticklabels(metric_labels, fontsize=9)
             ax2.set_ylabel("CV", fontsize=9)
             ax2.axhline(1.0, color="#ff6060", linewidth=0.8, linestyle="--")
-            self._style_ax(ax2, self._theme_colors)
+            self._style_ax(ax2)
 
             for bar, val in zip(bars2, cv_values, strict=True):
                 ax2.text(
@@ -984,7 +961,7 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
             self._traj_handles.clear()
             ax.clear()
             ax.set_facecolor("#1a1a2e")
-            self._style_ax(ax, self._theme_colors)
+            self._style_ax(ax)
             if not trajectories:
                 self._canvas_tr.draw()
                 return

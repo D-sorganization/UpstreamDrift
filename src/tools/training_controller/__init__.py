@@ -1,11 +1,4 @@
-"""Training-Controller dashboard tab — headless portion (issues #6012, #6089).
-
-Audit status (issue #6089): SCAFFOLD — the headless MVC triad
-(controller, live_subscriber, view_model) is complete and tested.
-The PyQt6 widget surface (``gui.py``) and EmbeddableTool adapter
-(``_embed_adapter.py``) are deferred to a follow-up of issue #6089,
-matching the design note in the original package docstring.
-
+"""Training-Controller dashboard tab — headless portion (issue #6012).
 
 This package houses the in-launcher training dashboard. The PyQt6
 widget surface is deferred to a follow-up PR (the remote environment
@@ -59,9 +52,9 @@ def _register_embed_adapter() -> None:
             register_embeddable_tool,
         )
 
-        from ._embed_adapter import TrainingControllerAdapter
+        from ._embed_adapter import _TrainingControllerEmbedAdapter
 
-        adapter = TrainingControllerAdapter()
+        adapter = _TrainingControllerEmbedAdapter()
         if get_embeddable_tool(adapter.tool_id) is None:
             register_embeddable_tool(adapter)
 
@@ -83,5 +76,12 @@ __all__ = [
     "TrainingJobLiveSubscriber",
     "_register_embed_adapter",
     "job_row_from_training_job",
-    "TrainingControllerAdapter",
 ]
+
+from src.shared.python.launcher_embed import register_embeddable_tool
+from ._embed_adapter import TrainingControllerAdapter
+
+# Register immediately when the package is imported
+register_embeddable_tool(TrainingControllerAdapter())
+
+__all__ = ["TrainingControllerAdapter"]

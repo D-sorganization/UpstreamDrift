@@ -323,7 +323,7 @@ class AsyncStartupWorker(QThread):
                 from src.launchers.docker_manager import get_docker_cmd
 
                 docker_cmd = get_docker_cmd() + ["--version"]
-                secure_run(docker_cmd, timeout=15.0, check=True)
+                secure_run(docker_cmd, timeout=2.0, check=True)
                 self.results.docker_available = True
             except Exception as e:  # noqa: BLE001
                 self.results.docker_available = False

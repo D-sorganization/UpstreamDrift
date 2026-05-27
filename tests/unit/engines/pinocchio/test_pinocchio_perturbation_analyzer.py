@@ -198,6 +198,10 @@ try:
 except ImportError:
     _PINOCCHIO_AVAILABLE = False
 
+_skip_no_pinocchio = pytest.mark.skipif(
+    not _PINOCCHIO_AVAILABLE, reason="pinocchio not installed"
+)
+
 
 @pytest.fixture(scope="module")
 def urdf_path() -> Path:

@@ -172,10 +172,6 @@ def spec_v2_to_v1(spec: SegmentVizSpec) -> SegmentSpec | None:
     representation (mesh, library, ellipsoid, capsule, composite). Such
     specs survive in the v2 store but are simply not visible to v1-only
     callers.
-
-    Deprecated: this helper is a v1 shim. New code should work with
-    :class:`~src.shared.python.body_part_viz.SegmentVizSpec` directly
-    rather than converting back to the legacy v1 layer.
     """
     _warn_deprecated("spec_v2_to_v1")
     if not isinstance(spec, SegmentVizSpec):

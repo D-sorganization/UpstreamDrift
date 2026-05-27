@@ -39,7 +39,7 @@ def _clamp_speed_factor(raw: object) -> float:
     """
     try:
         value = float(raw)  # type: ignore[arg-type]
-    except (TypeError, ValueError, OverflowError):
+    except (TypeError, ValueError):
         return _DEFAULT_SPEED_FACTOR
     if not math.isfinite(value) or value <= 0:
         return _DEFAULT_SPEED_FACTOR
@@ -71,7 +71,7 @@ def _validate_ws_numeric_fields(config_input: dict[str, Any]) -> str | None:
         raw_sf = config_input["speed_factor"]
         try:
             sf_value = float(raw_sf)  # type: ignore[arg-type]
-        except (TypeError, ValueError, OverflowError):
+        except (TypeError, ValueError):
             return "speed_factor must be a finite number"
         if not math.isfinite(sf_value):
             return "speed_factor must be a finite number"
@@ -80,7 +80,7 @@ def _validate_ws_numeric_fields(config_input: dict[str, Any]) -> str | None:
         raw_dur = config_input["duration"]
         try:
             dur_value = float(raw_dur)  # type: ignore[arg-type]
-        except (TypeError, ValueError, OverflowError):
+        except (TypeError, ValueError):
             return "duration must be a positive finite number"
         if not math.isfinite(dur_value) or dur_value <= 0:
             return "duration must be a positive finite number"
@@ -91,7 +91,7 @@ def _validate_ws_numeric_fields(config_input: dict[str, Any]) -> str | None:
         raw_ts = config_input["timestep"]
         try:
             ts_value = float(raw_ts)  # type: ignore[arg-type]
-        except (TypeError, ValueError, OverflowError):
+        except (TypeError, ValueError):
             return "timestep must be a positive finite number"
         if not math.isfinite(ts_value) or ts_value <= 0:
             return "timestep must be a positive finite number"

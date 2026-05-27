@@ -116,7 +116,7 @@ maturin develop                                   # build Rust extensions locall
 
 5. No TODO/FIXME unless tied to a tracked GitHub issue
 6. pytest with `-n auto`, 60s timeout, and the coverage threshold defined by `fail_under` in `pyproject.toml [tool.coverage.report]`
-7. No `print()` in `src/` — use logging. **Exceptions**: CLI entry-points that intentionally write to stdout must be added to `[tool.ruff.lint.per-file-ignores]` in `pyproject.toml` with a `T201` exemption and a comment explaining why stdout is intentional. Current exceptions: `src/shared/python/codemap/cli.py`, `src/shared/python/codemap/watcher.py`, and `src/shared/python/codemap/mcp_server.py` (stdout is the wire protocol); `src/shared/python/sidekick/__main__.py` and `src/shared/python/sidekick/standalone/runner.py` (Sidekick CLI T6 #5984); and `src/shared/python/programmatic_pid/cli.py` (generate-pid CLI tool). `scripts/`, `tests/`, and `examples/` are also excepted.
+7. No `print()` in `src/` — use logging. **Exceptions**: CLI entry-points that intentionally write to stdout must be added to `[tool.ruff.lint.per-file-ignores]` in `pyproject.toml` with a `T201` exemption and a comment explaining why stdout is intentional. Current exceptions: `src/shared/python/codemap/{cli,watcher,mcp_server}.py` (stdout is the wire protocol), `src/shared/python/sidekick/{__main__,standalone/runner}.py` (Sidekick CLI T6 #5984), `src/shared/python/programmatic_pid/cli.py` (generate-pid CLI tool). `scripts/**`, `tests/**`, `examples/**` are also excepted.
 
 ## Test Markers
 

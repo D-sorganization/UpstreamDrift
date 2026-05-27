@@ -296,66 +296,6 @@ class BallFlightWindow(QMainWindow):
         super().closeEvent(event)
 
 
-class _EmbedAdapter:
-    """Embed adapter for the Aerodynamic Ball Flight Simulator.
-
-    Implements the EmbeddableTool protocol so the launcher can embed this
-    tool as a tab or dock widget.
-    """
-
-    tool_id = "ball_flight_gui"
-
-    def __init__(self) -> None:
-        self._widget: BallFlightWidget | None = None
-
-    def embed_capabilities(self) -> Any:
-        from src.shared.python.launcher_embed import EmbedCapabilities
-
-        return EmbedCapabilities(
-            supports_embedded=True,
-            prefers_dock=False,
-            min_size=(800, 600),
-            requires_separate_qapplication=False,
-        )
-
-    def create_main_widget(self, parent: Any) -> Any:
-        """Create and return the BallFlightWidget for embedding.
-
-        Args:
-            parent: The intended Qt parent widget.
-
-        Returns:
-            BallFlightWidget instance for embedding.
-        """
-        self._widget = BallFlightWidget(parent=parent)
-        return self._widget
-
-    def cleanup(self) -> None:
-        """Release any resources held by the embedded widget."""
-        if self._widget is not None:
-            self._widget.cleanup()
-        self._widget = None
-
-    def is_dirty(self) -> bool:
-        """Return True if the tool has unsaved state.
-
-        Ball Flight GUI does not track dirty state.
-        """
-        return False
-
-
-def _register() -> None:
-    try:
-        from src.shared.python.launcher_embed import register_embeddable_tool
-
-        register_embeddable_tool(_EmbedAdapter())
-    except Exception:  # noqa: BLE001
-        logger.warning("ball_flight_gui: EmbeddableTool registration failed")
-
-
-_register()
-
-
 def get_dockable_ui() -> BallFlightWindow:
     """Return the main window instance for docking in the unified launcher."""
     return BallFlightWindow()

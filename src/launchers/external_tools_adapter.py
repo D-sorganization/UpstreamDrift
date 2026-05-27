@@ -56,46 +56,23 @@ def _find_tools_repo() -> Path | None:
         return _TOOLS_REPO
 
     # Walk up from this file to find the repository root, then check sibling
-    try:
-        p = Path(__file__).resolve()
-        repo_root = Path(__file__).resolve().parent.parent.parent
-        import contextlib
-
-        with contextlib.suppress(Exception):
-            (repo_root / "vendor" / "ud-tools").resolve()
-
-        for _ in range(10):
-            p = p.parent
-            for candidate in (
-                p / "Tools",
-                p / "Repositories" / "Tools",
-                Path.home() / "Repositories" / "Tools",
-            ):
-                if candidate.is_dir() and (candidate / "src").is_dir():
-                    try:
-                        # Skip candidate if it is nested inside our repo (e.g. the vendored copy)
-                        # to prioritize a true sibling checkout.
-                        if candidate.is_relative_to(repo_root):
-                            continue
-                    except (ValueError, AttributeError):
-                        if str(repo_root) in str(candidate.resolve()):
-                            continue
-                    except Exception:  # noqa: BLE001
-                        pass
-                    _TOOLS_REPO = candidate
-                    return _TOOLS_REPO
-            # Also check parent of parent (Repositories folder)
-            if p.name in {"UpstreamDrift", "src"}:
-                continue
-    except (NotImplementedError, OSError):
-        pass
+    p = Path(__file__).resolve()
+    for _ in range(10):
+        p = p.parent
+        candidate = p / "Tools"
+        if (candidate / "src").is_dir():
+            _TOOLS_REPO = candidate
+            return _TOOLS_REPO
+        # Also check parent of parent (Repositories folder)
+        if p.name in {"UpstreamDrift", "src"}:
+            continue
 
     logger.warning("Tools repository not found via sibling discovery")
     return None
 
 
 def _ensure_tools_on_path() -> bool:
-    """Ensure the Tools/src directory and shared/python are on sys.path.
+    """Ensure the Tools/src directory is on sys.path.
 
     Returns True if the path was added or already present.
     """
@@ -103,22 +80,9 @@ def _ensure_tools_on_path() -> bool:
     if repo is None:
         return False
     src_dir = str(repo / "src")
-    shared_dir = str(repo / "src" / "shared" / "python")
-
-    added = False
-    if shared_dir not in sys.path:
-        sys.path.insert(0, shared_dir)
-        added = True
     if src_dir not in sys.path:
         sys.path.insert(0, src_dir)
-        added = True
-
-    if added:
-        logger.info(
-            "Added Tools repo src and shared/python to sys.path: %s and %s",
-            src_dir,
-            shared_dir,
-        )
+        logger.info("Added Tools repo to sys.path: %s", src_dir)
     return True
 
 

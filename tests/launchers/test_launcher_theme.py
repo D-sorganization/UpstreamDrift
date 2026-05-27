@@ -2,36 +2,11 @@
 
 from unittest.mock import MagicMock, patch  # noqa: E402
 
-from typing import Any
 from PyQt6.QtWidgets import QMenu, QWidget  # noqa: E402
 from src.launchers.launcher_theme import ThemeManager  # noqa: E402
 
 
 class DummyLauncher(QWidget):
-    def __getattr__(self, name: str) -> Any:
-        for mgr_name in ("manager", "theme_manager"):
-            if mgr_name in self.__dict__:
-                manager = self.__dict__[mgr_name]
-                if name in manager.__dict__ or hasattr(type(manager), name):
-                    attr = getattr(manager, name)
-                    import types
-
-                    if isinstance(attr, types.MethodType):
-                        return types.MethodType(attr.__func__, self)
-                    return attr
-        raise AttributeError(
-            f"'{type(self).__name__}' object has no attribute '{name}'"
-        )
-
-    def __delattr__(self, name: str) -> None:
-        for mgr_name in ("manager", "theme_manager"):
-            if mgr_name in self.__dict__:
-                manager = self.__dict__[mgr_name]
-                if name in manager.__dict__:
-                    delattr(manager, name)
-                    return
-        super().__delattr__(name)
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.manager = ThemeManager(self)
@@ -44,24 +19,6 @@ class DummyLauncher(QWidget):
 
     def update_launch_button(self) -> None:
         pass
-
-    def apply_styles(self) -> None:
-        return self.manager.apply_styles()
-
-    def _apply_theme_system(self) -> None:
-        return self.manager._apply_theme_system()
-
-    def _on_theme_changed(self, colors: object = None) -> None:
-        return self.manager._on_theme_changed(colors)
-
-    def _setup_theme_menu(self, theme_menu: QMenu) -> None:
-        return self.manager._setup_theme_menu(theme_menu)
-
-    def _set_plot_theme(self, theme_name: str) -> None:
-        return self.manager._set_plot_theme(theme_name)
-
-    def _open_theme_manager_dialog(self) -> None:
-        return self.manager._open_theme_manager_dialog()
 
 
 def test_apply_styles_success(qapp) -> None:
@@ -123,7 +80,7 @@ def test_apply_theme_system(qapp) -> None:
         assert launcher._theme_manager == mock_manager
 
 
-@patch("src.launchers.launcher_theme.ThemeManager.apply_styles")
+@patch.object(DummyLauncher, "apply_styles")
 def test_on_theme_changed(mock_apply, qapp) -> None:
     launcher = DummyLauncher()
 

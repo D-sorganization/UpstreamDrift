@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "upstream-physics"
-version = "2.1.1"
+version = "2.1.0"
 description = "Rust-compiled physics kernels: RK4 integrator, contact models, swing plane fitting"
 requires-python = ">=3.10"
 license = {text = "MIT"}

@@ -26,7 +26,7 @@ Public API:
     sample_random_theta        -- helper to draw a random theta vector.
 
 Engine-local Rob Neal ``.mat`` adapter (:func:`load_robneal_target`)
-intentionally lives here. Issue #4095 (PARITY-LOADERS) is completed — the
+intentionally lives here. Issue #4095 (PARITY-LOADERS, closed) shipped the
 shared ``shared/python/motion_matching/loaders/`` package but only promoted
 the C3D / Excel / synthetic loaders; the Rob Neal ``club_swing_dataset``
 adapter was not part of that scope. A future refactor may promote it

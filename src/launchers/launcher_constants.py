@@ -14,7 +14,6 @@ from src.shared.python.logging_pkg.logging_config import (
     configure_gui_logging,
     get_logger,
 )
-import contextlib
 
 # Configure Logging using centralized module
 configure_gui_logging()
@@ -22,13 +21,8 @@ logger = get_logger(__name__)
 
 # Constants
 import os
-
 # Allow environment variable override for REPOS_ROOT, fallback to relative path
-REPOS_ROOT = Path(
-    os.environ.get(
-        "UPSTREAM_DRIFT_REPOS_ROOT", Path(__file__).parent.parent.parent.resolve()
-    )
-).resolve()
+REPOS_ROOT = Path(os.environ.get("UPSTREAM_DRIFT_REPOS_ROOT", Path(__file__).parent.parent.parent.resolve())).resolve()
 
 
 def _get_config_dir() -> Path:
@@ -48,8 +42,8 @@ def _get_config_dir() -> Path:
         from platformdirs import user_config_dir
 
         new_dir = Path(user_config_dir("upstream-drift")) / "launcher"
-    except (ImportError, NotImplementedError):
-        # Graceful fallback if platformdirs is somehow unavailable or unsupported at runtime
+    except ImportError:
+        # Graceful fallback if platformdirs is somehow unavailable at runtime
         if sys.platform == "win32":
             new_dir = Path.home() / "AppData" / "Local" / "UpstreamDrift" / "launcher"
         else:
@@ -132,18 +126,8 @@ def view_mode_settings(mode: ViewMode) -> tuple[float, int, bool, bool]:
         TypeError: if ``mode`` is not a :class:`ViewMode`.
         ValueError: if ``mode`` is not one of the known view modes.
     """
-    is_vm = isinstance(mode, ViewMode) or (
-        hasattr(mode, "__class__") and mode.__class__.__name__ == "ViewMode"
-    )
-    if not is_vm:
-        raise TypeError(f"mode must be a ViewMode IntEnum, got {type(mode).__name__}")
-    # Convert to local ViewMode enum instance if it's a reloaded/foreign one
     if not isinstance(mode, ViewMode):
-        try:
-            mode = ViewMode(int(mode))
-        except (ValueError, TypeError):
-            with contextlib.suppress(AttributeError, KeyError):
-                mode = ViewMode[mode.name]
+        raise TypeError(f"mode must be a ViewMode IntEnum, got {type(mode).__name__}")
     if mode not in _VIEW_MODE_TABLE:
         raise ValueError(f"Unknown ViewMode: {mode!r}")
     return _VIEW_MODE_TABLE[mode]

@@ -51,20 +51,7 @@ jobs:
   issue-mention-handler:
     timeout-minutes: 30
     needs: [check-kill-switch, pick-runner]
-    # Gate the handler on three orthogonal conditions:
-    #   1. JULES_ENABLED kill switch is on.
-    #   2. The comment body actually mentions @jules (per the header docstring).
-    #      Historically this filter was missing and Jules fired on every
-    #      issue_comment in the repo, creating empty-PR cascades.
-    #   3. The commenter is not itself a bot — specifically excluding
-    #      chatgpt-codex-connector[bot] and google-labs-jules[bot] to break
-    #      the codex ↔ Jules feedback loop where each Jules reply to an
-    #      issue would re-trigger Jules. See PR <added on merge>.
-    if: >-
-      needs.check-kill-switch.outputs.enabled == 'true'
-      && contains(github.event.comment.body, '@jules')
-      && github.event.comment.user.login != 'chatgpt-codex-connector[bot]'
-      && github.event.comment.user.login != 'google-labs-jules[bot]'
+    if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd

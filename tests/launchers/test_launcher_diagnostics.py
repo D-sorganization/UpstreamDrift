@@ -24,27 +24,16 @@ def test_launcher_diagnostics_diagnostic_result_to_dict() -> None:
     assert d["duration_ms"] == 10.12
 
 
-@patch.object(LauncherDiagnostics, "check_tools_sidebar")
-@patch.object(LauncherDiagnostics, "check_biomech_siblings")
-@patch.object(LauncherDiagnostics, "check_engine_availability")
-@patch.object(LauncherDiagnostics, "check_pyqt6_availability")
-@patch.object(LauncherDiagnostics, "check_asset_files")
-@patch.object(LauncherDiagnostics, "check_layout_config")
-@patch.object(LauncherDiagnostics, "check_launcher_provider_compatibility")
-@patch.object(LauncherDiagnostics, "check_model_registry")
-@patch.object(LauncherDiagnostics, "check_models_yaml")
 @patch.object(LauncherDiagnostics, "check_python_environment")
+@patch.object(LauncherDiagnostics, "check_models_yaml")
+@patch.object(LauncherDiagnostics, "check_model_registry")
+@patch.object(LauncherDiagnostics, "check_launcher_provider_compatibility")
+@patch.object(LauncherDiagnostics, "check_layout_config")
+@patch.object(LauncherDiagnostics, "check_asset_files")
+@patch.object(LauncherDiagnostics, "check_pyqt6_availability")
+@patch.object(LauncherDiagnostics, "check_engine_availability")
 def test_run_all_checks(
-    mock_env,
-    mock_yaml,
-    mock_registry,
-    mock_compatibility,
-    mock_layout,
-    mock_assets,
-    mock_qt,
-    mock_engine,
-    mock_siblings,
-    mock_sidebar,
+    mock_engine, mock_qt, mock_assets, mock_layout, mock_registry, mock_yaml, mock_env
 ) -> None:
     diag = LauncherDiagnostics()
 

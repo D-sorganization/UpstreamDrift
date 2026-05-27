@@ -12,11 +12,8 @@ from .state import SidebarState
 class TabDefinitionLike(Protocol):
     """Minimal tab definition contract needed by visibility helpers."""
 
-    @property
-    def tab_id(self) -> str: ...
-
-    @property
-    def visible(self) -> bool: ...
+    tab_id: str
+    visible: bool
 
 
 def available_tab_ids(definitions: Iterable[TabDefinitionLike]) -> list[str]:
@@ -25,7 +22,7 @@ def available_tab_ids(definitions: Iterable[TabDefinitionLike]) -> list[str]:
 
 
 def initially_visible_tab_ids(
-    definitions: Iterable[TabDefinitionLike],
+    definitions: list[TabDefinitionLike],
     state: SidebarState,
 ) -> set[str]:
     """Resolve the tabs that should be visible before runtime overrides apply."""
@@ -59,7 +56,7 @@ def initially_visible_tab_ids(
 
 def with_default_tab_visibility(
     state: SidebarState,
-    definitions: Iterable[TabDefinitionLike],
+    definitions: list[TabDefinitionLike],
     tab_id: str,
     visible: bool,
 ) -> SidebarState | None:

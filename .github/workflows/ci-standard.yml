@@ -153,7 +153,6 @@ jobs:
           # RECORD metadata. Ignore ambient installs so pip lays down clean
           # copies instead of trying to uninstall corrupted cache entries.
           python -m ensurepip --upgrade || true
-          python -c "import pip; import pip._internal.resolution.resolvelib.resolver" || (curl -sS https://bootstrap.pypa.io/get-pip.py | python)
           python -m pip install --ignore-installed ruff==0.14.10 "mypy==1.20.1" bandit==1.7.7 pydocstyle==6.3.0 semgrep
 
       - name: Lint
@@ -233,24 +232,11 @@ jobs:
             mapfile -d '' src_py_files < <(
               git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- 'src/**/*.py' 'src/*.py'
             )
-            filtered_py_files=()
-            for f in "${src_py_files[@]}"; do
-              exclude=false
-              for pat in "src/engines/Simscape_Multibody_Models/2D_Golf_Model" "src/engines/Simscape_Multibody_Models/3D_Golf_Model" "vendor/" "shared/models/" "src/shared/models/" "src/shared/python/plotting/" "src/shared/python/ui/qt/widgets/" "src/launchers/" "src/shared/python/pose_editor/" "src/shared/python/ai/gui/" "src/engines/physics_engines/pinocchio/python/pinocchio_golf/pose_editor_tab.py" "src/engines/physics_engines/drake/python/src/pose_editor_tab.py" "src/shared/python/pose_estimation/" "src/shared/python/ui/adapters/" "src/shared/python/ui/" "src/engines/physics_engines/drake/python/src/" "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py" "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py" "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py" "src/engines/physics_engines/drake/python/tests/" "installer/" "start_api_server.py" "setup_golf_suite.py" "src/shared/python/upstream_drift_tools/process_calculators/optimization.py" "src/shared/python/perturbation/statistics.py" "src/shared/python/model_generation/core/physics_validation.py" "src/learning/imitation/dataset.py" "src/engines/physics_engines/mujoco/docker/" "src/deployment/realtime/controller.py" "src/shared/python/pendulum_simulator/simulation.py" "src/shared/python/club_data/targets.py" "src/shared/python/data_io/marker_mapping.py" "src/shared/python/signal_toolkit/io.py"; do
-                if [[ "$f" == "$pat"* ]]; then
-                  exclude=true
-                  break
-                fi
-              done
-              if [ "$exclude" = false ]; then
-                filtered_py_files+=("$f")
-              fi
-            done
-            if [ "${#filtered_py_files[@]}" -eq 0 ]; then
-              echo "No changed source Python files after exclusions; skipping baseline mypy check."
+            if [ "${#src_py_files[@]}" -eq 0 ]; then
+              echo "No changed source Python files; skipping baseline mypy check."
               exit 0
             fi
-            mypy "${filtered_py_files[@]}" --config-file pyproject.toml
+            mypy "${src_py_files[@]}" --config-file pyproject.toml
           else
             mypy src --config-file pyproject.toml
           fi
@@ -671,22 +657,7 @@ jobs:
           python -m pip install .
           python -m ensurepip --upgrade || true
           python -m pip install pip-audit
-          # Uninstall the locally-built distribution before audit:
-          # `upstream-drift` is not on PyPI, so pip-audit can't resolve it
-          # and aborts with "Dependency not found on PyPI". The audit
-          # target is the *transitive* dependencies brought in by
-          # `pip install .`, not the package itself. By uninstalling
-          # upstream-drift after install, the dep graph is captured in
-          # the venv but pip-audit no longer trips on the unresolvable
-          # local package.
-          python -m pip uninstall -y upstream-drift upstream_drift || true
-          pip freeze > "$RUNNER_TEMP/audit-freeze.txt"
-          # MAL-2026-4750 (fastapi 0.136.3): pre-existing transitive
-          # finding flagged by pip-audit's malicious-package advisory
-          # feed. Tracked separately; ignoring here so the audit lane
-          # passes for fixes unrelated to that pin. Remove once fastapi
-          # is bumped (see follow-up issue).
-          pip-audit -r "$RUNNER_TEMP/audit-freeze.txt" --ignore-vuln MAL-2026-4750
+          pip-audit -r <(pip freeze)
 
   tests:
     needs: pick-runner
@@ -1088,7 +1059,6 @@ jobs:
       - name: Install migration test dependencies
         run: |
           python -m ensurepip --upgrade || true
-          python -c "import pip; import pip._internal.resolution.resolvelib.resolver" || (curl -sS https://bootstrap.pypa.io/get-pip.py | python)
           python -m pip install --upgrade pip
           python -m ensurepip --upgrade || true
           python -m pip install -e ".[dev]"
@@ -1239,8 +1209,8 @@ jobs:
         working-directory: ./ui
     steps:
       - name: Clean corrupt git objects
-        working-directory: .
         shell: bash
+        working-directory: .
         run: |
           if [ -d .git ]; then
             if find .git/objects -type f -empty | grep -q .; then
@@ -1489,7 +1459,7 @@ jobs:
       - name: Enable long Cargo git dependency paths on Windows
         if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'windows-latest'
         run: |
-          git config --global core.longpaths true || true
+          git config --global core.longpaths true
           echo "CARGO_NET_GIT_FETCH_WITH_CLI=true" >> "$GITHUB_ENV"
 
       - name: Install Rust toolchain

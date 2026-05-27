@@ -318,9 +318,9 @@
         "selection_text": "#e6edf3"
       }
     },
-    "corporate-blue": {
-      "name": "Corporate Blue",
-      "category": "professional",
+    "office-blue": {
+      "name": "Office Blue",
+      "category": "office",
       "isDark": false,
       "colors": {
         "bg": "#ffffff",
@@ -349,9 +349,9 @@
         "selection_text": "#ffffff"
       }
     },
-    "sage-professional": {
-      "name": "Sage Professional",
-      "category": "professional",
+    "office-green": {
+      "name": "Office Green",
+      "category": "office",
       "isDark": false,
       "colors": {
         "bg": "#ffffff",
@@ -382,7 +382,7 @@
     },
     "sandstone-yellow": {
       "name": "Sandstone Yellow",
-      "category": "warm",
+      "category": "office",
       "isDark": false,
       "colors": {
         "bg": "#ffffc0",

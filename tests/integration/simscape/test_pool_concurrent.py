@@ -7,6 +7,7 @@ GolfSwing3D_Kinetic Simulink model on disk. They are auto-skipped when
 
 from __future__ import annotations
 
+import importlib.util
 import os
 import time
 
@@ -14,9 +15,16 @@ import numpy as np
 import pytest
 from src.engines.simscape import PoolConfig, SimscapeAdapter, SimscapeAdapterPool
 
+_MATLAB_OK = (
+    importlib.util.find_spec("matlab") is not None
+    and os.environ.get("UD_SIMSCAPE_FORCE_NO_MATLAB") != "1"
+)
 pytestmark = [
     pytest.mark.requires_matlab,
     pytest.mark.live_simulation,
+    pytest.mark.skipif(
+        not _MATLAB_OK, reason="matlab.engine not importable in this environment"
+    ),
 ]
 
 

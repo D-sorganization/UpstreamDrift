@@ -51,11 +51,11 @@ __version__ = "1.0.0"
 SCHEMA_VERSION = "1.0.0"
 
 __all__ = [
-    "CHANNEL_REGISTRY",
-    "Subscription",
-    "publish",
-    "register_channel",
-    "SCHEMA_VERSION",
-    "subscribe",
-    "__version__",
+     "CHANNEL_REGISTRY",
+     "Subscription",
+     "publish",
+     "register_channel",
+     "SCHEMA_VERSION",
+     "subscribe",
+     "__version__",
 ]

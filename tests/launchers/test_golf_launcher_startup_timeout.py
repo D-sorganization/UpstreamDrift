@@ -59,7 +59,7 @@ def _upstream_drift_launcher_importable() -> bool:
         from PyQt6.QtWidgets import QApplication
 
         return hasattr(QApplication, "primaryScreen")
-    except (ImportError, AttributeError):  # pragma: no cover
+    except Exception:  # pragma: no cover
         return False
 
 

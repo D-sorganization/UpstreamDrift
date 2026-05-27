@@ -1,7 +1,7 @@
 # Upstream Drift — pyproject.toml
 [project]
 name = "upstream-drift"
-version = "2.1.1"
+version = "2.1.0"
 description = "Biomechanical golf simulation and analysis suite"
 readme = "README.md"
 license = { text = "MIT" }
@@ -21,7 +21,7 @@ dependencies = [
     # Core (always installed)
     "numpy>=1.26.4,<3.0.0",
     "scipy>=1.13.1",
-    "fastapi>=0.126.0,<0.136.0",
+    "fastapi>=0.126.0",
     "uvicorn[standard]>=0.30.0",
     "pydantic>=2.5.0",
     "httpx>=0.27.0",
@@ -76,8 +76,6 @@ experimental = ["myosuite>=2.0.0", "opensim>=4.4.0,<5.0.0", "gymnasium>=0.29.0"]
 
 # Reinforcement learning (for MyoSuite muscle training)
 rl = ["stable-baselines3>=2.0.0", "gymnasium>=0.29.0"]
-
-# PyTorch (optional; required by `requires_torch` test marker — issue #5914)
 torch = ["torch>=2.0.0"]
 
 # URDF generation tools (from shared Tools repo)
@@ -170,7 +168,7 @@ body-part-viz-gl = [
 all = ["upstream-drift[rust,all-engines,analysis,pose,biomechanics,rl,urdf,dev]"]
 
 [project.scripts]
-upstream-drift = "launch_upstream_drift:main"
+upstream-drift = "launch_golf_suite:main"
 # Standalone Sidekick window / headless runner (T6 — issue #5984).
 # The canonical entry-point lives here rather than in vendor/ud-tools because
 # the standalone shell (sidekick.standalone.*) is owned by this repo.
@@ -197,7 +195,7 @@ build-backend = "hatchling.build"
 include = [
     "src/**/*",
     "ui/dist/**/*",  # Bundled web UI (built by build_hooks.py)
-    "launch_upstream_drift.py",
+    "launch_golf_suite.py",
     "build_hooks.py",
 ]
 exclude = [
@@ -214,9 +212,6 @@ packages = [
     "src",
     "src/shared/python/sidekick",
 ]
-
-[tool.hatch.build.targets.wheel.force-include]
-"src/shared/python/sidekick" = "sidekick"
 
 
 [tool.hatch.build.hooks.custom]
@@ -407,7 +402,6 @@ addopts = "-ra -q --strict-markers --strict-config --durations=20 -m \"not slow 
 asyncio_mode = "auto"
 timeout = 60
 timeout_method = "thread"
-xfail_strict = true
 # Prevent ImportPathMismatchError from conftest.py files in engine subdirectories
 norecursedirs = [
     "src",

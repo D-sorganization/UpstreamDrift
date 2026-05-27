@@ -18,40 +18,11 @@ into place, which is an atomic rename on POSIX and Win32.
 
 from __future__ import annotations
 
-import os
 import threading
 from pathlib import Path
 from typing import Any
 
-
-def _resolve_default_server() -> str:
-    """Compute the WS URL the chat dock should connect to.
-
-    Honours, in order, ``GOLF_API_PORT`` / ``API_PORT`` / ``GOLF_PORT`` so the
-    desktop launcher (which probes a free port and exports those vars before
-    spawning the background API server) and the chat dock stay in sync. Falls
-    back to the historical default ``ws://127.0.0.1:8000`` when nothing is
-    set. Override entirely via ``UD_CHAT_WS_URL`` for non-standard hosts.
-
-    DbC postcondition: the returned URL is a ``ws://`` or ``wss://`` string.
-    """
-    explicit = os.environ.get("UD_CHAT_WS_URL")
-    if explicit:
-        return explicit
-    for env_name in ("GOLF_API_PORT", "API_PORT", "GOLF_PORT"):
-        raw = os.environ.get(env_name)
-        if not raw:
-            continue
-        try:
-            port = int(raw)
-        except ValueError:
-            continue
-        if 1 <= port <= 65535:
-            return f"ws://127.0.0.1:{port}"
-    return "ws://127.0.0.1:8000"
-
-
-_DEFAULT_SERVER = _resolve_default_server()
+_DEFAULT_SERVER = "ws://127.0.0.1:8000"
 _QT_EXPORTS = {"ChatDockWidget", "ChatMessageBubble"}
 
 # Tools issue #2753: serialize all reads/writes of the shared session ID

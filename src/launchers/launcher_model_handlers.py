@@ -20,7 +20,6 @@ from src.launchers.launcher_model_sources import (
     get_model_working_directory,
     resolve_model_artifact_path,
 )
-from src.shared.python.config.environment import get_api_port
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -587,43 +586,6 @@ class DocumentHandler:
             return False
 
 
-class APIBackedHandler:
-    """Handler for launching API-backed services.
-
-    API-backed services represent web routes or endpoints. In the desktop launcher,
-    these are opened in the default system web browser.
-    """
-
-    MODEL_TYPES = {"api_backed"}
-
-    def can_handle(self, model_type: str) -> bool:
-        """Check if this handler supports the model type."""
-        return model_type.lower() in self.MODEL_TYPES
-
-    def launch(
-        self,
-        model: Any,
-        repo_path: Path,
-        process_manager: Any,
-    ) -> bool:
-        """Launch the API-backed service by opening its web route in a browser."""
-        web_route = getattr(model, "web_route", "")
-        if not web_route:
-            logger.error("APIBackedHandler: model has no web_route")
-            return False
-
-        import webbrowser
-
-        url = f"http://localhost:{get_api_port()}{web_route}"
-        try:
-            webbrowser.open(url)
-            logger.info("APIBackedHandler: opened browser to %s", url)
-            return True
-        except Exception as e:  # noqa: BLE001
-            logger.error("APIBackedHandler: failed to open web browser: %s", e)
-            return False
-
-
 # ============================================================
 # Handler Registry Table (DRY: data-driven registration)
 # ============================================================
@@ -708,7 +670,6 @@ class ModelHandlerRegistry:
             GolfSimulationSuiteHandler(),
             MatlabFileHandler(),
             DocumentHandler(),
-            APIBackedHandler(),
         ]
 
     def register_handler(self, handler: ModelHandler) -> None:

@@ -9,17 +9,19 @@ Behaviour with vs. without the real wheel
 :func:`create_pinocchio_service` is the **intentional, single point of
 fallback** for this engine:
 
-* **Wheel-present** (``pip install pin`` -- the upstream Stack-of-Tasks
-  build) -- returns a fully-featured :class:`PinocchioKinematicsService`
-  backed by ``pinocchio.aba``, ``pinocchio.forwardKinematics``, etc.
-* **Wheel-absent** (no wheel installed, or PyPI placeholder installed)
-  -- there is an unrelated package named ``pinocchio`` on PyPI (an abandoned
-  0.1 placeholder) that lacks :func:`buildModelFromUrdf`. We detect both
+* **Real wheel installed** (``pip install pin`` -- the upstream
+  Stack-of-Tasks build) -- returns a fully-featured
+  :class:`PinocchioKinematicsService` backed by ``pinocchio.aba``,
+  ``pinocchio.forwardKinematics``, etc.
+* **No wheel installed, or PyPI placeholder installed** -- there is an
+  unrelated package named ``pinocchio`` on PyPI (an abandoned 0.1
+  placeholder) that lacks :func:`buildModelFromUrdf`. We detect both
   cases in :func:`_pinocchio_is_importable` and fall back to a
-  :class:`MockKinematicsService` configured with ``engine_name="pinocchio"``.
-  The mock returns deterministic identity transforms, satisfies the
-  :class:`LiveKinematicsService` protocol, and keeps the service registry
-  consistent so callers do not have to branch on wheel availability.
+  :class:`MockKinematicsService` configured with
+  ``engine_name="pinocchio"``. The mock returns deterministic identity
+  transforms, satisfies the :class:`LiveKinematicsService` protocol,
+  and keeps the service registry consistent so callers do not have to
+  branch on wheel availability.
 
 The fallback is exercised by
 :mod:`tests.unit.pose_interchange.live_kinematics.test_registry_fallback`
@@ -38,29 +40,6 @@ Real-bridge wiring
 - :meth:`step` -> Euler integration via ``pin.aba`` (forward
   dynamics) + ``pin.integrate``.
 - :meth:`reset` -> restore neutral q, zero v.
-
-Wheel-absent (or PyPI stub) behaviour
---------------------------------------
-When the real wheel is not installed — or the installed ``pinocchio``
-package is the PyPI 0.1 placeholder stub (which exposes no
-``buildModelFromUrdf``) — :func:`create_pinocchio_service` falls back to
-a :class:`MockKinematicsService` configured with
-``engine_name="pinocchio"``.  The mock satisfies the
-:class:`LiveKinematicsService` protocol (all methods callable, correct
-``engine_name``) so callers always receive a working service object.
-
-This fallback is **intentional**: it allows the rest of the codebase to
-import and exercise Pinocchio-flavoured service code in any environment,
-deferring the actual physics to CI runs where the wheel is available.
-Tests in ``tests/unit/pose_interchange/live_kinematics/`` cover the
-mock-fallback contract; live integration tests are in
-``tests/integration/pose_interchange/services/test_pinocchio_real.py``
-(skipped when the wheel is absent).
-
-Note: the ``club_target_adapter`` in
-``src/engines/physics_engines/pinocchio/python/motion_matching/`` has its
-own separate stub fallback for the shared ``ClubTarget`` dataclass;
-see that module's docstring for details.
 """
 
 from __future__ import annotations

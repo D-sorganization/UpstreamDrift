@@ -285,38 +285,15 @@ logger.info("Registered %d route modules under /api", _legacy_api_count)
 _versioned_count = register_routes(app, prefix=API_PREFIX)
 logger.info("Registered %d route modules under %s", _versioned_count, API_PREFIX)
 
-# Register explicitly excluded WebSocket routes at all three prefixes so they
-# mirror the HTTP route surface (root, /api, /api/v1). The PyQt chat dock
-# defaults to "/api/ws/chat/{session_id}" — without the /api mount that path
-# 403s before the WS handshake completes (see _chat_dock_widget_qt.py).
-#
-# DRY: a single ``_PUBLIC_PREFIXES`` constant drives every WS mount so a new
-# router (or a new prefix policy) is one tuple edit, not six call sites.
-_PUBLIC_PREFIXES: tuple[str, ...] = ("", "/api", API_PREFIX)
-
-
-def _mount_at_all_prefixes(router_to_mount: Any, *, label: str) -> None:
-    """Include *router_to_mount* under every public prefix.
-
-    Pre: ``router_to_mount`` is a FastAPI/Starlette router.
-    Post: the router is reachable at every entry in ``_PUBLIC_PREFIXES``.
-    """
-    if router_to_mount is None:
-        raise ValueError("router must be provided")
-    for prefix in _PUBLIC_PREFIXES:
-        app.include_router(router_to_mount, prefix=prefix)
-    logger.info(
-        "Mounted %s router at prefixes: %s",
-        label,
-        ", ".join(repr(p) for p in _PUBLIC_PREFIXES),
-    )
-
-
-_mount_at_all_prefixes(chat_ws.router, label="chat_ws")
-_mount_at_all_prefixes(simulation_ws.router, label="simulation_ws")
+# Register explicitly excluded WebSocket routes
+app.include_router(chat_ws.router, prefix=API_PREFIX)
+app.include_router(simulation_ws.router, prefix=API_PREFIX)
+app.include_router(chat_ws.router, prefix="")
+app.include_router(simulation_ws.router, prefix="")
 
 # Realtime IPC layer (issue #4997) — combined HTTP + WS endpoints under
-# /realtime; only mounted at root + versioned by design (no /api mirror).
+# /realtime; mounted at root so cross-process clients (WSPubSub) can use the
+# canonical "/realtime/publish" and "/realtime/subscribe" paths.
 app.include_router(realtime_route.router, prefix="")
 app.include_router(realtime_route.router, prefix=API_PREFIX)
 

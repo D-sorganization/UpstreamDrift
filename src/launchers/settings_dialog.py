@@ -18,13 +18,11 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QDialog,
     QDialogButtonBox,
-    QFrame,
     QGroupBox,
     QHBoxLayout,
     QLabel,
     QMainWindow,
     QPushButton,
-    QScrollArea,
     QTextBrowser,
     QTextEdit,
     QVBoxLayout,
@@ -314,37 +312,38 @@ class SettingsWidget(QWidget):
         # Header row: short summary + inline ``?`` help button so users
         # can read the full explanation without leaving the dialog.
         env_header = QHBoxLayout()
-        env_header.addWidget(QLabel("Select where physics engines execute (pick one):"))
+        env_header.addWidget(
+            QLabel(
+                "Where physics engines execute. "
+                "Default is Native Windows (no boxes ticked)."
+            )
+        )
         env_header.addStretch()
         env_header.addWidget(make_runtime_mode_help_button(self))
         env_inner.addLayout(env_header)
 
-        self.chk_windows = QCheckBox("Windows")
-        self.chk_windows.setToolTip(
-            "Run physics engines natively on your local Windows system."
-        )
-        env_inner.addWidget(self.chk_windows)
-
-        self.chk_docker = QCheckBox("Docker")
+        self.chk_docker = QCheckBox("Docker container (Linux, sandboxed)")
         self.chk_docker.setToolTip(
-            "Run physics engines inside a Docker container (Linux, sandboxed)."
+            "Run engines inside the upstream-drift:engine Linux container. "
+            "Full Drake/Pinocchio support; requires Docker installed and the "
+            "image built (see Docker Image section below)."
         )
         env_inner.addWidget(self.chk_docker)
 
-        self.chk_wsl = QCheckBox("WSL")
+        self.chk_wsl = QCheckBox("WSL2 Ubuntu (Linux, native filesystem)")
         self.chk_wsl.setToolTip(
-            "Run physics engines inside WSL2 Ubuntu (Linux, native filesystem)."
+            "Run engines in your WSL2 Ubuntu user environment. Same Linux "
+            "wheels as Docker mode but no container layer — faster file I/O "
+            "and easier interactive debugging from a WSL shell."
         )
         env_inner.addWidget(self.chk_wsl)
 
-        # Make checkboxes mutually exclusive via button group
-        from PyQt6.QtWidgets import QButtonGroup
-
-        self.env_group_buttons = QButtonGroup(self)
-        self.env_group_buttons.setExclusive(True)
-        self.env_group_buttons.addButton(self.chk_windows)
-        self.env_group_buttons.addButton(self.chk_docker)
-        self.env_group_buttons.addButton(self.chk_wsl)
+        # Inline footer reminds users what unticked-both means.
+        env_footer = QLabel(
+            "<i>Untick both to fall back to Native Windows (default).</i>"
+        )
+        env_footer.setTextFormat(Qt.TextFormat.RichText)
+        env_inner.addWidget(env_footer)
 
         tab_layout.addWidget(env_group)
 
@@ -436,57 +435,6 @@ class SettingsWidget(QWidget):
         stage_row.addStretch()
         build_inner.addLayout(stage_row)
 
-        # Tier details: explicit list of what will be installed + total size,
-        # so users picking a stage know *exactly* which features they get.
-        # Same data source as the Manage Environment dialog
-        # (docker/profiles.yaml + feature_registry/features.py).
-        from src.launchers.docker_profile_info import (
-            ProfileInfo,
-            format_profile_summary,
-            load_docker_profiles,
-        )
-
-        self._docker_profile_infos: dict[str, ProfileInfo] = load_docker_profiles()
-        for idx in range(self.combo_stage.count()):
-            info = self._docker_profile_infos.get(self.combo_stage.itemText(idx))
-            if info is not None:
-                self.combo_stage.setItemData(
-                    idx,
-                    format_profile_summary(info),
-                    Qt.ItemDataRole.ToolTipRole,
-                )
-
-        # ``QTextBrowser`` instead of ``QLabel-in-QScrollArea`` because the
-        # latter clipped content rather than scrolling when paired with
-        # ``widgetResizable=True`` (Qt sizes the label to the viewport, so
-        # the rich-text rendering has nowhere to spill, and the scrollbar
-        # handle never appears). QTextBrowser is purpose-built for read-only
-        # rich text with native scrolling and selection.
-        from PyQt6.QtWidgets import QSizePolicy as _QSizePolicy
-
-        self.tier_details = QTextBrowser()
-        self.tier_details.setReadOnly(True)
-        self.tier_details.setOpenExternalLinks(False)
-        self.tier_details.setFrameShape(QFrame.Shape.StyledPanel)
-        self.tier_details.setFixedHeight(200)
-        self.tier_details.setSizePolicy(
-            _QSizePolicy.Policy.Expanding, _QSizePolicy.Policy.Fixed
-        )
-        self.tier_details.setVerticalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAsNeeded
-        )
-        self.tier_details.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAsNeeded
-        )
-        build_inner.addWidget(self.tier_details)
-
-        self.combo_stage.currentTextChanged.connect(self._refresh_tier_details)
-        self._refresh_tier_details(self.combo_stage.currentText())
-
-        # Visible gap between the tier-details panel and the action buttons
-        # below so a long features list can't visually bleed into them.
-        build_inner.addSpacing(12)
-
         btn_row = QHBoxLayout()
         self._btn_build = QPushButton("Build Image")
         self._btn_build.setToolTip(
@@ -517,32 +465,13 @@ class SettingsWidget(QWidget):
         # Sync checkboxes with parent launcher state
         launcher = self.parent()
         if launcher and hasattr(launcher, "chk_docker"):
-            self.chk_windows.setChecked(
-                not launcher.chk_docker.isChecked() and not launcher.chk_wsl.isChecked()
-            )
             self.chk_docker.setChecked(launcher.chk_docker.isChecked())
             self.chk_wsl.setChecked(launcher.chk_wsl.isChecked())
             self.chk_live_viz.setChecked(launcher.chk_live.isChecked())
             self.chk_gpu.setChecked(launcher.chk_gpu.isChecked())
 
-            def on_windows_toggled(checked: bool) -> None:
-                if checked:
-                    launcher.chk_docker.setChecked(False)
-                    launcher.chk_wsl.setChecked(False)
-
-            def on_docker_toggled(checked: bool) -> None:
-                if checked:
-                    launcher.chk_docker.setChecked(True)
-                    launcher.chk_wsl.setChecked(False)
-
-            def on_wsl_toggled(checked: bool) -> None:
-                if checked:
-                    launcher.chk_docker.setChecked(False)
-                    launcher.chk_wsl.setChecked(True)
-
-            self.chk_windows.toggled.connect(on_windows_toggled)
-            self.chk_docker.toggled.connect(on_docker_toggled)
-            self.chk_wsl.toggled.connect(on_wsl_toggled)
+            self.chk_docker.toggled.connect(launcher.chk_docker.setChecked)
+            self.chk_wsl.toggled.connect(launcher.chk_wsl.setChecked)
             self.chk_live_viz.toggled.connect(launcher.chk_live.setChecked)
             self.chk_gpu.toggled.connect(launcher.chk_gpu.setChecked)
 
@@ -844,56 +773,6 @@ class SettingsWidget(QWidget):
 
     def _on_reset_layout(self) -> None:
         self.reset_layout_requested.emit()
-
-    def _refresh_tier_details(self, profile_name: str) -> None:
-        """Show packages and feature list for the selected Docker tier.
-
-        Mirrors the build dialog's tier-details panel — same data source so
-        the two views stay in lock-step. Surfaces:
-
-        * Plain-English description of the tier.
-        * Max image-size budget vs. estimated installed size.
-        * Every feature included (after walking the ``extends:`` chain in
-          ``docker/profiles.yaml``) with its display name, approximate size,
-          and one-line description.
-        """
-        info = getattr(self, "_docker_profile_infos", {}).get(profile_name)
-        if info is None:
-            self.tier_details.setHtml(
-                f"<i>No metadata available for profile "
-                f"<b>{profile_name}</b>. See <code>docker/profiles.yaml</code>.</i>"
-            )
-            return
-
-        title = profile_name.replace("-", " ").title()
-        rows: list[str] = [f"<b>{title}</b>"]
-        if info.description:
-            rows.append(
-                f'<span style="color: palette(mid);">{info.description}</span>'
-            )
-        rows.append("")
-        if info.max_size_mb:
-            rows.append(
-                f"<b>Budget:</b> &le; {info.max_size_mb} MB &nbsp;·&nbsp; "
-                f"<b>Estimated install:</b> ~{info.approx_total_mb} MB"
-            )
-        if info.features:
-            rows.append(f"<b>Includes {len(info.features)} feature(s):</b>")
-            items: list[str] = []
-            for f in info.features:
-                size = f"{f.approx_size_mb} MB" if f.approx_size_mb else "—"
-                items.append(
-                    f"<li><b>{f.display_name}</b> "
-                    f'<span style="color: palette(mid);">({size}) — '
-                    f"{f.description}</span></li>"
-                )
-            rows.append(
-                "<ul style='margin-top: 4px;'>" + "".join(items) + "</ul>"
-            )
-        elif info.feature_names:
-            rows.append("<b>Features:</b> " + ", ".join(info.feature_names))
-
-        self.tier_details.setHtml("<br>".join(rows))
 
     def _start_build(self) -> None:
         self.build_console.clear()

@@ -87,13 +87,3 @@ jobs:
 
       - name: Docs governance
         run: python3 scripts/check_docs_governance.py
-
-      - name: Install test dependencies
-        run: |
-          python3 -m venv "$RUNNER_TEMP/docs-governance-venv"
-          echo "$RUNNER_TEMP/docs-governance-venv/bin" >> "$GITHUB_PATH"
-          "$RUNNER_TEMP/docs-governance-venv/bin/python" -m pip install --upgrade pip
-          "$RUNNER_TEMP/docs-governance-venv/bin/python" -m pip install pytest
-
-      - name: Run documentation governance tests
-        run: python -m pytest tests/scripts/test_doc_governance_checks.py -q

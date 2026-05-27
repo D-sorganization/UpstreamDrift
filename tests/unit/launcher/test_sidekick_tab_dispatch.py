@@ -2,28 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Any
-from src.launchers.launcher_dialogs import DialogsManager
+from src.launchers.launcher_dialogs import LauncherDialogsMixin
 
 
-class _LauncherHarness:
-    def __getattr__(self, name: str) -> Any:
-        for mgr_name in ("dialogs_manager",):
-            if mgr_name in self.__dict__:
-                manager = self.__dict__[mgr_name]
-                if name in manager.__dict__ or hasattr(type(manager), name):
-                    attr = getattr(manager, name)
-                    import types
-
-                    if isinstance(attr, types.MethodType):
-                        return types.MethodType(attr.__func__, self)
-                    return attr
-        raise AttributeError(
-            f"'{type(self).__name__}' object has no attribute '{name}'"
-        )
-
+class _LauncherHarness(LauncherDialogsMixin):
     def __init__(self, sidebar=None, embedded_host=None) -> None:
-        self.dialogs_manager = DialogsManager(self)
         self.sidekick_sidebar = sidebar
         self.embedded_host = embedded_host
         self.toasts: list[tuple[str, str]] = []

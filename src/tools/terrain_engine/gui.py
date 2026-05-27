@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import logging
 from typing import Any
-
-logger = logging.getLogger(__name__)
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
@@ -258,64 +255,6 @@ class TerrainExplorerWidget(QWidget):
         if self._terrain is None:
             raise RuntimeError("terrain must be loaded before querying")
         return self._terrain
-
-
-class _EmbedAdapter:
-    """Embed adapter for the Terrain Engine explorer.
-
-    Implements the EmbeddableTool protocol so the launcher can embed this
-    tool as a tab or dock widget.
-    """
-
-    tool_id = "terrain_engine"
-
-    def __init__(self) -> None:
-        self._widget: TerrainExplorerWidget | None = None
-
-    def embed_capabilities(self) -> Any:
-        from src.shared.python.launcher_embed import EmbedCapabilities
-
-        return EmbedCapabilities(
-            supports_embedded=True,
-            prefers_dock=False,
-            min_size=(800, 480),
-            requires_separate_qapplication=False,
-        )
-
-    def create_main_widget(self, parent: Any) -> Any:
-        """Create and return the TerrainExplorerWidget for embedding.
-
-        Args:
-            parent: The intended Qt parent widget.
-
-        Returns:
-            TerrainExplorerWidget instance for embedding.
-        """
-        self._widget = TerrainExplorerWidget(parent=parent)
-        return self._widget
-
-    def cleanup(self) -> None:
-        """Release any resources held by the embedded widget."""
-        self._widget = None
-
-    def is_dirty(self) -> bool:
-        """Return True if the tool has unsaved state.
-
-        Terrain Engine does not track dirty state.
-        """
-        return False
-
-
-def _register() -> None:
-    try:
-        from src.shared.python.launcher_embed import register_embeddable_tool
-
-        register_embeddable_tool(_EmbedAdapter())
-    except Exception:  # noqa: BLE001
-        logger.warning("terrain_engine: EmbeddableTool registration failed")
-
-
-_register()
 
 
 def get_dockable_ui() -> TerrainExplorerWidget:

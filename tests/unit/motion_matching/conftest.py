@@ -82,6 +82,7 @@ def loaded_c3d_data(real_c3d_path: Path | None) -> dict[str, Any] | None:
         return None
 
     try:
+        from sidekick.lab.bio import _c3d_io as io_mod
         from sidekick.lab.bio.c3d_reader import (
             C3DDataReader,
         )
@@ -124,12 +125,6 @@ def mock_pinocchio_kinematics() -> MockKinematicsService:
 def mock_opensim_kinematics() -> MockKinematicsService:
     """Return a MockKinematicsService impersonating OpenSim."""
     return MockKinematicsService(engine_name="opensim")
-
-
-@pytest.fixture
-def mock_myosuite_kinematics() -> MockKinematicsService:
-    """Return a MockKinematicsService impersonating MyoSuite."""
-    return MockKinematicsService(engine_name="myosuite")
 
 
 @pytest.fixture

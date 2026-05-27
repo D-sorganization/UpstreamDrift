@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 # Re-export the full default-tab suite from the canonical sidekick package so
 # callers that do ``from upstream_drift_tools.ui.tools_sidebar import default_tabs``
 # and access ``default_tabs.build_default_tab_definitions`` (etc.) still work.
-from sidekick.ui.tools_sidebar.default_tabs import (  # noqa: F401
+from src.shared.python.sidekick.ui.tools_sidebar.default_tabs import (  # noqa: F401
     build_calculator_plot_tab,
     build_default_tab_definitions,
     build_file_explorer_tab,
@@ -38,7 +38,7 @@ from sidekick.ui.tools_sidebar.default_tabs import (  # noqa: F401
     refresh_workspace_list,
     set_project_explorer_root,
 )
-from sidekick.ui.tools_sidebar.runtime_tabs import (  # noqa: F401
+from src.shared.python.sidekick.ui.tools_sidebar.runtime_tabs import (  # noqa: F401
     PythonReplWidget,
     build_chat_tab,
     build_calculator_tab,
@@ -62,7 +62,7 @@ def build_workspace_tab(sidebar: Any) -> Any:
     Returns:
         A :class:`PythonReplWidget` bound to the sidebar workspace registry.
     """
-    from sidekick.ui.tools_sidebar import design_tokens as theme
+    from src.shared.python.sidekick.ui.tools_sidebar import design_tokens as theme
 
     widget = PythonReplWidget(
         registry=sidebar.registry,

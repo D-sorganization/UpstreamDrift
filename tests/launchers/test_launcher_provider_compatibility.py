@@ -96,18 +96,13 @@ def test_assert_launcher_provider_compatibility_raises_on_failures(
 
 
 def test_evaluate_launcher_model_compatibility_preserves_canonical_identity(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
 ) -> None:
     mujoco_file = tmp_path / "models" / "swing.xml"
     drake_file = tmp_path / "models" / "swing.urdf"
     mujoco_file.parent.mkdir(parents=True)
     mujoco_file.write_text("<mujoco />", encoding="utf-8")
     drake_file.write_text("<robot />", encoding="utf-8")
-
-    monkeypatch.setattr(
-        "src.launchers.launcher_provider_compatibility.is_engine_runtime_available",
-        lambda engine_type: True,
-    )
 
     results = evaluate_launcher_model_compatibility(
         [CrossEngineModelA(), CrossEngineModelB()],
