@@ -43,6 +43,11 @@ permissions:
   contents: read
   pull-requests: write
 
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pick-runner:
     runs-on: d-sorg-fleet
