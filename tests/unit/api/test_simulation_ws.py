@@ -437,6 +437,29 @@ async def test_simulation_stream_rejects_invalid_duration(
 
 
 @pytest.mark.anyio
+async def test_simulation_stream_rejects_huge_duration(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Huge int duration must fail at the WS boundary before engine load."""
+
+    websocket = _RouteWebSocket([{"action": "start", "config": {"duration": 10**1000}}])
+    load_engine = AsyncMock()
+
+    async def fake_resolve_ws_user(_websocket: Any) -> object:
+        return object()
+
+    monkeypatch.setattr(simulation_ws_module, "resolve_ws_user", fake_resolve_ws_user)
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert websocket.sent == [{"error": "duration must be a positive finite number"}]
+    load_engine.assert_not_called()
+
+
+@pytest.mark.anyio
 async def test_simulation_stream_rejects_malformed_initial_state(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -622,6 +645,31 @@ class TestValidateWsNumericFields:
 
     def _call(self, config: dict[str, Any]) -> str | None:
         return simulation_ws_module._validate_ws_numeric_fields(config)
+
+    def test_huge_duration_rejected(self) -> None:
+        """Huge duration (overflow to inf) must be rejected."""
+        error = self._call({"duration": 10**1000})
+        assert error == "duration must be a positive finite number"
+
+    def test_huge_timestep_rejected(self) -> None:
+        """Huge timestep (overflow to inf) must be rejected."""
+        error = self._call({"timestep": 10**1000})
+        assert error == "timestep must be a positive finite number"
+
+    def test_huge_speed_factor_rejected(self) -> None:
+        """Huge speed_factor (overflow to inf) must be rejected."""
+        error = self._call({"speed_factor": 10**1000})
+        assert error == "speed_factor must be a finite number"
+
+    def test_huge_string_duration_rejected(self) -> None:
+        """Huge string duration (overflow to inf) must be rejected."""
+        error = self._call({"duration": "1" + "0" * 1000})
+        assert error == "duration must be a positive finite number"
+
+    def test_huge_string_speed_factor_rejected(self) -> None:
+        """Huge string speed_factor (overflow to inf) must be rejected."""
+        error = self._call({"speed_factor": "1" + "0" * 1000})
+        assert error == "speed_factor must be a finite number"
 
     # speed_factor checks
     def test_nan_speed_factor_rejected(self) -> None:
