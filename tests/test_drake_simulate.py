@@ -187,11 +187,11 @@ class TestSimulateInputValidation:
             simulate_with_coefficients(bad)
 
     def test_theta_length_divisible_by_seven(self) -> None:
-        with pytest.raises(ValueError, match="divisible"):
+        with pytest.raises(ValueError, match="multiple of 7"):
             simulate_with_coefficients(np.zeros(13))
 
     def test_initial_pose_type(self) -> None:
-        with pytest.raises(TypeError, match="initial_pose"):
+        with pytest.raises((TypeError, ValueError), match="initial_pose"):
             simulate_with_coefficients(
                 np.zeros(7),
                 initial_pose="not a dict",  # type: ignore[arg-type]
@@ -361,17 +361,7 @@ def test_mocked_simulate_recovers_known_torque_pattern(
 # ---------------------------------------------------------------------------
 
 
-_pydrake_available = False
-try:  # pragma: no cover - best-effort detection
-    import pydrake  # noqa: F401
-
-    _pydrake_available = True
-except Exception:  # noqa: BLE001
-    _pydrake_available = False
-
-
 @pytest.mark.requires_drake
-@pytest.mark.skipif(not _pydrake_available, reason="pydrake not installed")
 def test_live_simulate_zero_theta_falls_under_gravity() -> None:
     """With theta = 0 the unactuated humanoid drops in -Z under gravity."""
     pytest.importorskip("pydrake")

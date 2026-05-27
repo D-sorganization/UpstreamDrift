@@ -11,6 +11,7 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 import pytest  # noqa: E402
 
 from src.launchers.launcher_model_handlers import (  # noqa: E402
+    APIBackedHandler,
     BiomechExerciseHandler,
     DocumentHandler,
     GolfSimulationSuiteHandler,
@@ -40,7 +41,7 @@ def test_module_handler() -> None:
     mock_manager.launch_module.assert_called_once_with(
         name="My Module",
         module_name="my_module",
-        cwd=Path("/repo").resolve(),
+        cwd=Path("/repo"),
         extra_python_paths=(),
     )
 
@@ -65,8 +66,8 @@ def test_script_handler() -> None:
     assert res is True
     mock_manager.launch_script.assert_called_once_with(
         name="Drake",
-        script_path=(Path("/repo") / "script.py").resolve(),
-        cwd=(Path("/repo") / "dir").resolve(),
+        script_path=Path("/repo") / "script.py",
+        cwd=Path("/repo") / "dir",
         extra_python_paths=(),
     )
 
@@ -134,6 +135,7 @@ def test_script_handler_get_dockable_ui() -> None:
     with (
         patch("importlib.util.spec_from_file_location") as mock_spec,
         patch("importlib.util.module_from_spec") as mock_mod_from_spec,
+        patch.object(Path, "exists", return_value=True),
     ):
         mock_module = MagicMock()
         mock_module.get_dockable_ui.return_value = "widget"
@@ -239,11 +241,27 @@ def test_document_handler() -> None:
     with (
         patch.object(Path, "exists", return_value=True),
         patch(
-            "src.launchers.launcher_model_handlers._open_with_system_app",
-            return_value=True,
+            "src.shared.python.security.secure_subprocess.secure_popen",
+            return_value=MagicMock(),
         ),
     ):
         assert handler.launch(DummyDocModel(), Path("/repo"), MagicMock()) is True
+
+
+def test_api_backed_handler_uses_configured_api_port(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    handler = APIBackedHandler()
+
+    class DummyAPIModel:
+        web_route = "/tools/movement-optimizer"
+
+    monkeypatch.setenv("GOLF_API_PORT", "8123")
+
+    with patch("webbrowser.open") as mock_open:
+        assert handler.launch(DummyAPIModel(), Path("/repo"), MagicMock()) is True
+
+    mock_open.assert_called_once_with("http://localhost:8123/tools/movement-optimizer")
 
 
 def test_protocol_methods() -> None:

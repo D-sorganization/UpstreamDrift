@@ -54,8 +54,6 @@ from typing import Any
 
 import numpy as np
 import pytest
-from src.shared.python.engine_core.engine_availability import OPENSIM_AVAILABLE
-
 # ---------------------------------------------------------------------------
 # Tolerances per issue #4131 acceptance criteria
 # ---------------------------------------------------------------------------
@@ -215,10 +213,6 @@ def simulate_fn() -> Any:
 
 @pytest.mark.slow
 @pytest.mark.requires_opensim
-@pytest.mark.skipif(
-    not OPENSIM_AVAILABLE,
-    reason="OpenSim python bindings not installed (issue #4131 requires opensim)",
-)
 @pytest.mark.parametrize(
     "pose_name", ["address", "top_of_backswing", "impact"], ids=lambda p: p
 )

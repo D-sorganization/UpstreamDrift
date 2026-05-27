@@ -123,6 +123,7 @@ def _compute_pendulum_energy(model: Any, data: Any) -> tuple[float, float, float
 
 @pytest.mark.integration
 @pytest.mark.slow
+@pytest.mark.skipif(not _check_mujoco_available(), reason="MuJoCo not installed")
 class TestEnergyConservation:
     """Test energy conservation in passive systems per Guideline O3.
 
@@ -132,7 +133,6 @@ class TestEnergyConservation:
     Guideline O3 requires <1% energy drift for conservative systems.
     """
 
-    @pytest.mark.skipif(not _check_mujoco_available(), reason="MuJoCo not installed")
     def test_pendulum_energy_conservation_mujoco(self) -> None:
         """Test passive pendulum conserves energy (MuJoCo).
 
@@ -184,7 +184,6 @@ class TestEnergyConservation:
             f"Energy drift {max_drift_pct:.2f}% exceeds 1% tolerance (Guideline O3)"
         )
 
-    @pytest.mark.skipif(not _check_mujoco_available(), reason="MuJoCo not installed")
     def test_pendulum_energy_at_extremes(self) -> None:
         """Test energy conservation at motion extremes.
 

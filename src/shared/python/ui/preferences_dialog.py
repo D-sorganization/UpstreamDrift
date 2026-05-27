@@ -118,8 +118,6 @@ class PreferencesDialog(QDialog):
         Args:
             parent: Parent window
         """
-        if parent is None:
-            raise ValueError("parent must be provided")
         super().__init__(parent)
         self.setWindowTitle("Preferences")
         self.setMinimumSize(550, 450)
@@ -442,22 +440,13 @@ class PreferencesDialog(QDialog):
     def _preview_theme(self, theme_name: str) -> None:
         """Live-preview theme when combo selection changes."""
         try:
-            from src.shared.python.theme import ThemeManager, ThemePreset
+            from src.shared.python.theme import ThemeManager
 
-            manager = ThemeManager.instance()
-
-            # Map combo text to preset or fleet theme
-            preset_map = {
-                "Dark": ThemePreset.DARK,
-                "Light": ThemePreset.LIGHT,
-                "High Contrast": ThemePreset.HIGH_CONTRAST,
-            }
-
-            if theme_name in preset_map:
-                manager.set_theme(preset_map[theme_name])
-            else:
-                manager.set_fleet_theme(theme_name)
-        except ImportError as e:
+            if ThemeManager is not None:
+                manager = ThemeManager.instance()
+                if manager is not None:
+                    manager.change_theme(theme_name)
+        except Exception as e:  # noqa: BLE001 - prevent dialog crash
             logger.debug(f"Theme preview failed: {e}")
 
 

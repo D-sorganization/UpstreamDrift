@@ -99,6 +99,22 @@ class ModelSourcePathPolicy:
         roots = [canonical_default, canonical_default.parent]
         roots.extend(Path(root).resolve(strict=False) for root in approved_roots)
 
+        # Automatically approve resolved paths of any subdirectory or directory junction
+        # located directly under the default_root's parent directory. This ensures
+        # sibling checkouts/junctions (like Tools, MuJoCo_Models, etc.) are approved
+        # even if they resolve to directories outside the worktrees parent path.
+        if canonical_default.parent.is_dir():
+            try:
+                for child in canonical_default.parent.iterdir():
+                    try:
+                        resolved_child = child.resolve()
+                        if resolved_child.is_dir():
+                            roots.append(resolved_child)
+                    except Exception:  # noqa: BLE001
+                        pass
+            except Exception:  # noqa: BLE001
+                pass
+
         seen: set[Path] = set()
         deduped_roots: list[Path] = []
         for root in roots:

@@ -37,57 +37,52 @@ from src.shared.python.physics_informed.rigid_core import RigidCore
 
 
 @pytest.mark.skipif(not HAS_JAX, reason="JAX not installed")
-def test_mlp_residual_output_shape() -> None:
-    """MlpResidual forward pass returns correct output shape."""
-    key = jax.random.PRNGKey(0)
-    mlp = MlpResidual(input_dim=6, output_dim=3, hidden_dims=[16, 16], key=key)
-    x = jnp.ones(6)
-    out = mlp(x)
-    assert out.shape == (3,)
+class TestMlpResidual:
+    """Unit tests for MlpResidual (JAX required)."""
 
+    def test_output_shape(self) -> None:
+        """MlpResidual forward pass returns correct output shape."""
+        key = jax.random.PRNGKey(0)
+        mlp = MlpResidual(input_dim=6, output_dim=3, hidden_dims=[16, 16], key=key)
+        x = jnp.ones(6)
+        out = mlp(x)
+        assert out.shape == (3,)
 
-@pytest.mark.skipif(not HAS_JAX, reason="JAX not installed")
-def test_mlp_residual_finite() -> None:
-    """MlpResidual outputs are all finite values (no NaN/Inf)."""
-    key = jax.random.PRNGKey(42)
-    mlp = MlpResidual(input_dim=4, output_dim=4, hidden_dims=[8], key=key)
-    x = jnp.zeros(4)
-    out = mlp(x)
-    assert jnp.all(jnp.isfinite(out))
+    def test_finite(self) -> None:
+        """MlpResidual outputs are all finite values (no NaN/Inf)."""
+        key = jax.random.PRNGKey(42)
+        mlp = MlpResidual(input_dim=4, output_dim=4, hidden_dims=[8], key=key)
+        x = jnp.zeros(4)
+        out = mlp(x)
+        assert jnp.all(jnp.isfinite(out))
 
+    def test_single_hidden_layer(self) -> None:
+        """MlpResidual with a single hidden layer produces correct shape."""
+        key = jax.random.PRNGKey(7)
+        mlp = MlpResidual(input_dim=3, output_dim=2, hidden_dims=[32], key=key)
+        x = jnp.array([1.0, -0.5, 0.3])
+        out = mlp(x)
+        assert out.shape == (2,)
 
-@pytest.mark.skipif(not HAS_JAX, reason="JAX not installed")
-def test_mlp_residual_single_hidden_layer() -> None:
-    """MlpResidual with a single hidden layer produces correct shape."""
-    key = jax.random.PRNGKey(7)
-    mlp = MlpResidual(input_dim=3, output_dim=2, hidden_dims=[32], key=key)
-    x = jnp.array([1.0, -0.5, 0.3])
-    out = mlp(x)
-    assert out.shape == (2,)
+    def test_no_hidden_layers(self) -> None:
+        """MlpResidual with empty hidden_dims is a single linear layer."""
+        key = jax.random.PRNGKey(99)
+        mlp = MlpResidual(input_dim=5, output_dim=5, hidden_dims=[], key=key)
+        x = jnp.ones(5)
+        out = mlp(x)
+        assert out.shape == (5,)
 
-
-@pytest.mark.skipif(not HAS_JAX, reason="JAX not installed")
-def test_mlp_residual_no_hidden_layers() -> None:
-    """MlpResidual with empty hidden_dims is a single linear layer."""
-    key = jax.random.PRNGKey(99)
-    mlp = MlpResidual(input_dim=5, output_dim=5, hidden_dims=[], key=key)
-    x = jnp.ones(5)
-    out = mlp(x)
-    assert out.shape == (5,)
-
-
-@pytest.mark.skipif(not HAS_JAX, reason="JAX not installed")
-def test_mlp_residual_different_keys_different_weights() -> None:
-    """Two MlpResiduals initialized with different keys produce different outputs."""
-    key1 = jax.random.PRNGKey(1)
-    key2 = jax.random.PRNGKey(2)
-    mlp1 = MlpResidual(input_dim=4, output_dim=2, hidden_dims=[8], key=key1)
-    mlp2 = MlpResidual(input_dim=4, output_dim=2, hidden_dims=[8], key=key2)
-    x = jnp.ones(4)
-    out1 = mlp1(x)
-    out2 = mlp2(x)
-    # Different random init → outputs should differ
-    assert not jnp.allclose(out1, out2)
+    def test_different_keys_different_weights(self) -> None:
+        """Two MlpResiduals initialized with different keys produce different outputs."""
+        key1 = jax.random.PRNGKey(1)
+        key2 = jax.random.PRNGKey(2)
+        mlp1 = MlpResidual(input_dim=4, output_dim=2, hidden_dims=[8], key=key1)
+        mlp2 = MlpResidual(input_dim=4, output_dim=2, hidden_dims=[8], key=key2)
+        x = jnp.ones(4)
+        out1 = mlp1(x)
+        out2 = mlp2(x)
+        # Different random init → outputs should differ
+        assert not jnp.allclose(out1, out2)
 
 
 def test_mlp_residual_raises_without_jax() -> None:

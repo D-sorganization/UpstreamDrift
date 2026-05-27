@@ -97,19 +97,19 @@ class DialogsManager:
     def _setup_keyboard_shortcuts(self) -> None:
         """Set up global keyboard shortcuts."""
         # F1 for help dialog (User Manual)
-        shortcut_f1 = QShortcut(QKeySequence("F1"), self)
+        shortcut_f1 = QShortcut(QKeySequence("F1"), self.launcher)
         shortcut_f1.activated.connect(self._show_help_dialog)
 
         # Ctrl+? for shortcuts overlay
-        shortcut_help = QShortcut(QKeySequence("Ctrl+?"), self)
+        shortcut_help = QShortcut(QKeySequence("Ctrl+?"), self.launcher)
         shortcut_help.activated.connect(self._show_shortcuts_overlay)
 
         # Ctrl+, for preferences
-        shortcut_prefs = QShortcut(QKeySequence("Ctrl+,"), self)
+        shortcut_prefs = QShortcut(QKeySequence("Ctrl+,"), self.launcher)
         shortcut_prefs.activated.connect(self._show_preferences)
 
         # Ctrl+Q to quit
-        shortcut_quit = QShortcut(QKeySequence("Ctrl+Q"), self)
+        shortcut_quit = QShortcut(QKeySequence("Ctrl+Q"), self.launcher)
         shortcut_quit.activated.connect(self.close)
 
         # Sidekick feature shortcuts (Tools #2882/#2883/#2884/#2888/#2889).
@@ -121,8 +121,8 @@ class DialogsManager:
             for entry in FEATURE_ENTRIES:
                 if not entry.availability_probe():
                     continue
-                sc = QShortcut(QKeySequence(entry.shortcut), self)
-                sc.activated.connect(lambda e=entry: e.factory(self))
+                sc = QShortcut(QKeySequence(entry.shortcut), self.launcher)
+                sc.activated.connect(lambda e=entry: e.factory(self.launcher))
         except ImportError as exc:  # pragma: no cover — guard import path
             logger.debug("feature_menu not importable: %s", exc)
 
@@ -149,7 +149,7 @@ class DialogsManager:
         if project_map.exists():
             from src.shared.python.ui.qt.widgets.document_reader import show_document
 
-            show_document(project_map, self)
+            show_document(project_map)
         else:
             QMessageBox.warning(
                 self.launcher,
@@ -162,7 +162,7 @@ class DialogsManager:
     def _show_about_dialog(self) -> None:
         """Show the About dialog."""
         QMessageBox.about(
-            self,
+            self.launcher,
             "About UpstreamDrift",
             "<h2>UpstreamDrift</h2>"
             "<h3>Biomechanical Golf Swing Analysis</h3>"
@@ -353,11 +353,11 @@ class DialogsManager:
 
         self._ai_visible = checked
         # Keep the toggle button in sync when called programmatically
-        if (
-            hasattr(self, "btn_ai_sidebar")
-            and self.btn_ai_sidebar.isChecked() != checked
-        ):
-            self.btn_ai_sidebar.setChecked(checked)
+        btn = getattr(self, "btn_toggle_right_sidebar", None) or getattr(
+            self, "btn_ai_sidebar", None
+        )
+        if btn is not None and btn.isChecked() != checked:
+            btn.setChecked(checked)
 
         if hasattr(self, "sidekick_sidebar") and self.sidekick_sidebar is not None:
             self.sidekick_sidebar.setVisible(checked)
@@ -471,6 +471,36 @@ class DialogsManager:
         if checked:
             self.show_toast("Drag tiles to reorder. Double-click to launch.", "info")
 
+    def _on_windows_mode_changed(self, state: int) -> None:
+        """Handle Windows Native mode toggle change."""
+        if state is None:
+            raise ValueError("state must be provided")
+        use_windows = state == 2
+        if use_windows:
+            if hasattr(self, "chk_docker") and self.chk_docker.isChecked():
+                self.chk_docker.setChecked(False)
+            if hasattr(self, "chk_wsl") and self.chk_wsl.isChecked():
+                self.chk_wsl.setChecked(False)
+            logger.info("Windows Native mode enabled")
+            if hasattr(self, "toast_manager") and self.toast_manager:
+                self.show_toast(
+                    "Local Windows mode - engines will run natively", "info"
+                )
+        else:
+            logger.info("Windows Native mode disabled")
+            # If neither docker nor wsl is checked, fallback to Windows (Default)
+            if (
+                hasattr(self, "chk_docker")
+                and not self.chk_docker.isChecked()
+                and hasattr(self, "chk_wsl")
+                and not self.chk_wsl.isChecked()
+            ):
+                self.chk_windows.setChecked(True)
+
+        self.update_execution_status()
+        if hasattr(self, "btn_launch"):
+            self.update_launch_button()
+
     def _on_docker_mode_changed(self, state: int) -> None:
         """Handle Docker mode toggle change.
 
@@ -481,9 +511,11 @@ class DialogsManager:
             raise ValueError("state must be provided")
         use_docker = state == 2
         if use_docker:
-            # Disable WSL mode if Docker is enabled (mutually exclusive)
+            # Disable WSL and Windows native mode if Docker is enabled (mutually exclusive)
             if hasattr(self, "chk_wsl") and self.chk_wsl.isChecked():
                 self.chk_wsl.setChecked(False)
+            if hasattr(self, "chk_windows") and self.chk_windows.isChecked():
+                self.chk_windows.setChecked(False)
 
             if not self.docker_available:
                 QMessageBox.warning(
@@ -504,7 +536,15 @@ class DialogsManager:
                 )
         else:
             logger.info("Docker mode disabled")
-            if hasattr(self, "toast_manager") and self.toast_manager:
+            # If neither docker nor wsl is checked, fallback to Windows (Default)
+            if (
+                hasattr(self, "chk_wsl")
+                and not self.chk_wsl.isChecked()
+                and hasattr(self, "chk_windows")
+                and not self.chk_windows.isChecked()
+            ):
+                self.chk_windows.setChecked(True)
+            elif hasattr(self, "toast_manager") and self.toast_manager:
                 self.show_toast("Local mode - engines will run on host system", "info")
 
         # Update UI status
@@ -525,9 +565,11 @@ class DialogsManager:
         use_wsl = state == 2
 
         if use_wsl:
-            # Disable Docker mode if WSL is enabled (mutually exclusive)
+            # Disable Docker and Windows native mode if WSL is enabled (mutually exclusive)
             if hasattr(self, "chk_docker") and self.chk_docker.isChecked():
                 self.chk_docker.setChecked(False)
+            if hasattr(self, "chk_windows") and self.chk_windows.isChecked():
+                self.chk_windows.setChecked(False)
 
             # Check if WSL is available
             try:
@@ -564,7 +606,15 @@ class DialogsManager:
                 )
         else:
             logger.info("WSL mode disabled")
-            if hasattr(self, "toast_manager") and self.toast_manager:
+            # If neither docker nor wsl is checked, fallback to Windows (Default)
+            if (
+                hasattr(self, "chk_docker")
+                and not self.chk_docker.isChecked()
+                and hasattr(self, "chk_windows")
+                and not self.chk_windows.isChecked()
+            ):
+                self.chk_windows.setChecked(True)
+            elif hasattr(self, "toast_manager") and self.toast_manager:
                 self.show_toast("Local Windows mode", "info")
 
         # Update UI status
@@ -587,13 +637,13 @@ class DialogsManager:
             return
 
         if hasattr(self, "chk_wsl") and self.chk_wsl.isChecked():
-            self.lbl_execution_mode.setText("Runtime: WSL2 (Ubuntu Linux)")
+            self.lbl_execution_mode.setText("Runtime: WSL2")
             self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_DOCKER)
         elif hasattr(self, "chk_docker") and self.chk_docker.isChecked():
-            self.lbl_execution_mode.setText("Runtime: Docker (Linux container)")
+            self.lbl_execution_mode.setText("Runtime: Docker")
             self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_DOCKER)
         else:
-            self.lbl_execution_mode.setText("Runtime: Native Windows")
+            self.lbl_execution_mode.setText("Runtime: Windows")
             self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_WARNING)
 
 
@@ -621,9 +671,9 @@ class ThemedModalDialog(QDialog):
         if style is not None:
             style.polish(self)
 
-        layout = QVBoxLayout(self.launcher)
+        layout = QVBoxLayout(self)
 
-        self.frame = QFrame(self.launcher)
+        self.frame = QFrame(self)
         self.frame.setStyleSheet(
             "QFrame { background-color: #24272e; border: 1px solid #3a3f4a; border-radius: 8px; }"
         )
@@ -634,7 +684,7 @@ class ThemedModalDialog(QDialog):
         shadow.setOffset(0, 4)
         self.frame.setGraphicsEffect(shadow)
 
-        frame_layout = QVBoxLayout(self.launcher.frame)
+        frame_layout = QVBoxLayout(self.frame)
         frame_layout.setContentsMargins(20, 20, 20, 20)
         frame_layout.setSpacing(15)
 

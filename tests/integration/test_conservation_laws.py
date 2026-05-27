@@ -122,6 +122,7 @@ def _compute_pendulum_energy(model: Any, data: Any) -> tuple[float, float, float
 
 
 @pytest.mark.integration
+@pytest.mark.skipif(not _check_mujoco_available(), reason="MuJoCo not installed")
 class TestIndexedAccelerationClosure:
     """Test indexed acceleration closure per Guideline M2.
 
@@ -131,7 +132,6 @@ class TestIndexedAccelerationClosure:
     Required tolerance: 1e-6 rad/s² (joint space)
     """
 
-    @pytest.mark.skipif(not _check_mujoco_available(), reason="MuJoCo not installed")
     def test_drift_control_superposition(self) -> None:
         """Test that drift + control = full acceleration.
 
@@ -192,7 +192,6 @@ class TestIndexedAccelerationClosure:
             f"Superposition failed: residual {residual} > {TOLERANCE_CLOSURE}"
         )
 
-    @pytest.mark.skipif(not _check_mujoco_available(), reason="MuJoCo not installed")
     def test_ztcf_equals_drift(self) -> None:
         """Test that ZTCF (Zero-Torque Counterfactual) equals drift acceleration.
 
@@ -228,7 +227,6 @@ class TestIndexedAccelerationClosure:
 
         assert np.all(residual < TOLERANCE), f"ZTCF != drift: residual {residual}"
 
-    @pytest.mark.skipif(not _check_mujoco_available(), reason="MuJoCo not installed")
     def test_zvcf_eliminates_coriolis(self) -> None:
         """Test that ZVCF (Zero-Velocity Counterfactual) has no velocity terms.
 

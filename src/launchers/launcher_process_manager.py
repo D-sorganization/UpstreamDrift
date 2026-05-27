@@ -213,7 +213,7 @@ class ProcessManager:
         if not merged_paths:
             return existing_path
 
-        new_paths = separator.join(shlex.quote(p) for p in merged_paths)
+        new_paths = separator.join(merged_paths)
         if existing_path:
             return f"{new_paths}{separator}{existing_path}"
         return new_paths
@@ -252,17 +252,19 @@ class ProcessManager:
         # repo_root and src are always added (required for imports).
         # Optional extras are only added when the directory exists.
         paths_to_add = []
-        for p in [repo_root_str, src_dir]:
-            if p not in current_paths:
-                paths_to_add.append(p)
-        for p in [shared_python, mujoco_python, conda_sp]:
-            if p not in current_paths and os.path.isdir(p):
-                paths_to_add.append(p)
+        for base_p in [repo_root_str, src_dir]:
+            if base_p not in current_paths:
+                paths_to_add.append(base_p)
+        for extra_p in extra_python_paths:
+            p_str = str(extra_p)
+            if p_str not in current_paths and p_str not in paths_to_add:
+                paths_to_add.append(p_str)
+        for opt_p in [shared_python, mujoco_python, conda_sp]:
+            if opt_p not in current_paths and os.path.isdir(opt_p):
+                paths_to_add.append(opt_p)
 
         if paths_to_add:
-            # Security: Safely quote each path entry (issue #2715)
-            quoted_paths = [shlex.quote(p) for p in paths_to_add]
-            new_paths = separator.join(quoted_paths)
+            new_paths = separator.join(paths_to_add)
             env["PYTHONPATH"] = (
                 f"{new_paths}{separator}{existing_path}" if existing_path else new_paths
             )
@@ -297,6 +299,14 @@ class ProcessManager:
         repo_root_resolved = _normalize(self.repo_root) if repo_root_exists else None
         temp_root_resolved = _normalize(tempfile.gettempdir())
 
+        # Discover and allow the Tools repository path if it exists
+        from .external_tools_adapter import _find_tools_repo
+
+        tools_repo = _find_tools_repo()
+        tools_root_resolved = (
+            _normalize(tools_repo) if tools_repo and tools_repo.exists() else None
+        )
+
         def _is_within(candidate: str, base: str) -> bool:
             return candidate == base or candidate.startswith(base + os.sep)
 
@@ -307,9 +317,13 @@ class ProcessManager:
             if not (
                 _is_within(candidate_resolved, repo_root_resolved)
                 or _is_within(candidate_resolved, temp_root_resolved)
+                or (
+                    tools_root_resolved is not None
+                    and _is_within(candidate_resolved, tools_root_resolved)
+                )
             ):
                 raise ValueError(
-                    f"Path {context_path} is outside repo_root {self.repo_root}"
+                    f"Path {context_path} is outside repo_root {self.repo_root} and tools_root {tools_repo}"
                 )
 
         # Reject if original is a symlink (prevents symlink-escape bypasses)
@@ -388,19 +402,39 @@ class ProcessManager:
         """
         if name is None:
             raise ValueError("name must be provided")
+
+        def _read_pipe(pipe, is_stderr) -> None:
+            try:
+                for raw_line in iter(pipe.readline, b""):
+                    line = raw_line.decode("utf-8", errors="replace").rstrip()
+                    if line:
+                        prefix = "STDERR: " if is_stderr else ""
+                        self._emit_output(name, f"{prefix}{line}")
+                pipe.close()
+            except (RuntimeError, ValueError, OSError) as e:
+                logger.debug("Pipe reader error for %s: %s", name, e)
+
+        threads = []
         try:
             if process.stdout:
-                for raw_line in iter(process.stdout.readline, b""):
-                    line = raw_line.decode("utf-8", errors="replace").rstrip()
-                    if line:
-                        self._emit_output(name, line)
-                process.stdout.close()
+                t_out = threading.Thread(
+                    target=_read_pipe,
+                    args=(process.stdout, False),
+                    daemon=True,
+                )
+                t_out.start()
+                threads.append(t_out)
             if process.stderr:
-                for raw_line in iter(process.stderr.readline, b""):
-                    line = raw_line.decode("utf-8", errors="replace").rstrip()
-                    if line:
-                        self._emit_output(name, f"STDERR: {line}")
-                process.stderr.close()
+                t_err = threading.Thread(
+                    target=_read_pipe,
+                    args=(process.stderr, True),
+                    daemon=True,
+                )
+                t_err.start()
+                threads.append(t_err)
+
+            for t in threads:
+                t.join()
         except (RuntimeError, ValueError, OSError) as e:
             logger.debug("Output stream ended for %s: %s", name, e)
 

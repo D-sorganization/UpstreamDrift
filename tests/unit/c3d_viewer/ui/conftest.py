@@ -54,13 +54,12 @@ def _pivot_sys_path() -> None:
         with contextlib.suppress(ImportError):
             sys.modules[qual] = importlib.import_module(qual)
 
-    # Drop everything under ``src.`` that we don't want to keep, but keep
-    # ``src.shared`` and everything beneath it so downstream conftests that
-    # import ``src.shared.python.*`` still resolve.
-    keep_prefix = "src.shared"
+    # Keep both the parent package and its descendants so later imports do not
+    # see orphaned ``src.shared.*`` modules without ``src.shared`` itself.
+    keep_prefix = "src.shared."
     for modname in list(sys.modules):
         if modname == "src" or modname.startswith("src."):
-            if modname == keep_prefix or modname.startswith(keep_prefix + "."):
+            if modname == "src.shared" or modname.startswith(keep_prefix):
                 continue
             del sys.modules[modname]
 

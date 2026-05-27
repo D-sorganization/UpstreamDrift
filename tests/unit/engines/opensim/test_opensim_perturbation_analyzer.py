@@ -40,10 +40,6 @@ from src.shared.python.engine_core.engine_availability import (
     OPENSIM_AVAILABLE as _OPENSIM_AVAILABLE,
 )
 
-_skip_no_opensim = pytest.mark.skipif(
-    not _OPENSIM_AVAILABLE, reason="opensim not available (import or init failed)"
-)
-
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------

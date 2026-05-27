@@ -41,24 +41,90 @@ def bootstrap_embeddable_tools() -> list[str]:
     if _bootstrap_complete:
         return _registered_tools
 
-    # Ensure vendored Tools repo is in sys.path so embeddable tools can be found
+    # Discover sibling Tools repository to prioritize real subtabs over stubs
     import sys
     from pathlib import Path
+    import os
 
-    # Path to vendor/ud-tools/src
-    vendor_src_path = str(
-        Path(__file__).resolve().parent.parent.parent.parent
-        / "vendor"
-        / "ud-tools"
-        / "src"
-    )
-    if vendor_src_path not in sys.path:
-        sys.path.insert(0, vendor_src_path)
+    tools_repo = None
+    env_path = os.environ.get("TOOLS_REPO_PATH")
+    if env_path and Path(env_path).is_dir():
+        tools_repo = Path(env_path)
+    else:
+        # Walk up from this file to find the repository root, then check sibling
+        repo_root = Path(__file__).resolve().parent.parent.parent.parent
+        p = Path(__file__).resolve()
+        for _ in range(10):
+            p = p.parent
+            for candidate in (
+                p / "Tools",
+                p / "Repositories" / "Tools",
+                Path.home() / "Repositories" / "Tools",
+            ):
+                if candidate.is_dir() and (candidate / "src").is_dir():
+                    try:
+                        # Skip candidate if it is nested inside our repo (e.g. the vendored copy)
+                        # to prioritize a true sibling checkout.
+                        try:
+                            if candidate.is_relative_to(repo_root):
+                                continue
+                        except (ValueError, AttributeError):
+                            if str(repo_root) in str(candidate.resolve()):
+                                continue
+                    except Exception:  # noqa: BLE001
+                        pass
+                    tools_repo = candidate
+                    break
+            if tools_repo:
+                break
 
-    # Path to vendor/ud-tools/src/shared/python (for 'sidekick' legacy imports)
-    vendor_shared_py_path = str(Path(vendor_src_path) / "shared" / "python")
-    if vendor_shared_py_path not in sys.path:
-        sys.path.insert(0, vendor_shared_py_path)
+    if tools_repo:
+        # Path to sibling Tools/src
+        tools_src_path = str(tools_repo / "src")
+        if tools_src_path in sys.path:
+            sys.path.remove(tools_src_path)
+        sys.path.insert(0, tools_src_path)
+
+        # Path to sibling Tools/src/shared/python
+        tools_shared_py_path = str(tools_repo / "src" / "shared" / "python")
+        if tools_shared_py_path in sys.path:
+            sys.path.remove(tools_shared_py_path)
+        sys.path.insert(0, tools_shared_py_path)
+
+        logger.info(
+            "Prioritized sibling Tools repo paths in sys.path: %s and %s",
+            tools_src_path,
+            tools_shared_py_path,
+        )
+
+        # Append vendor paths as a lower-priority fallback to satisfy tests
+        vendor_src_path = str(
+            Path(__file__).resolve().parent.parent.parent.parent
+            / "vendor"
+            / "ud-tools"
+            / "src"
+        )
+        if vendor_src_path not in sys.path:
+            sys.path.append(vendor_src_path)
+
+        vendor_shared_py_path = str(Path(vendor_src_path) / "shared" / "python")
+        if vendor_shared_py_path not in sys.path:
+            sys.path.append(vendor_shared_py_path)
+    else:
+        # Path to vendor/ud-tools/src
+        vendor_src_path = str(
+            Path(__file__).resolve().parent.parent.parent.parent
+            / "vendor"
+            / "ud-tools"
+            / "src"
+        )
+        if vendor_src_path not in sys.path:
+            sys.path.insert(0, vendor_src_path)
+
+        # Path to vendor/ud-tools/src/shared/python (for 'sidekick' legacy imports)
+        vendor_shared_py_path = str(Path(vendor_src_path) / "shared" / "python")
+        if vendor_shared_py_path not in sys.path:
+            sys.path.insert(0, vendor_shared_py_path)
 
     # List of tool adapter modules that self-register on import
     # Each module's __init__.py calls register_embeddable_tool()
@@ -70,6 +136,12 @@ def bootstrap_embeddable_tools() -> list[str]:
         "src.tools.pose_subscriber_demo._embed_adapter",
         "src.tools.sidekick._embed_adapter",
         "src.tools.pose_studio.gui",
+        # Simulation GUI tools wired in issue #6090
+        "src.tools.ball_flight_gui.gui",
+        "src.tools.bunker_shot_gui.gui",
+        "src.tools.putting_green_gui.gui",
+        "src.tools.golf_environment.gui",
+        "src.tools.terrain_engine.gui",
     ]
 
     registered = []

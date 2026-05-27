@@ -15,7 +15,8 @@ from __future__ import annotations
 import os
 import time
 from dataclasses import dataclass
-from enum import StrEnum
+
+from enum import Enum
 from typing import Any, Protocol
 
 __all__ = [
@@ -26,7 +27,7 @@ __all__ = [
 ]
 
 
-class IntegrationStatusLevel(StrEnum):
+class IntegrationStatusLevel(str, Enum):
     """Health-level taxonomy for an integration row."""
 
     OK = "ok"

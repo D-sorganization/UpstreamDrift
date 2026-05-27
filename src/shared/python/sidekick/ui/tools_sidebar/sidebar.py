@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import Enum
 from pathlib import Path
 from typing import Any, cast
 
@@ -42,7 +42,7 @@ from .tab_visibility import (
 from .theme_settings import resolve_sidekick_theme
 
 
-class LayoutMode(StrEnum):
+class LayoutMode(str, Enum):
     """Sidebar layout strategies.
 
     ``SIDEBAR`` is the classic dockable tab strip; ``MATLAB_HOME`` is a

@@ -64,7 +64,42 @@ class ChatService:
         self._tool_registry = ToolRegistry()
         register_golf_suite_tools(self._tool_registry)
 
+        # Build the ToolDeclaration list **once** at construction time. The
+        # registry is read-only after ``register_golf_suite_tools`` returns,
+        # so re-walking it on every send (the prior behaviour) was wasted
+        # work — for the 28-tool catalogue this is a few milliseconds per
+        # message but more importantly it lets us cache the JSON-Schema
+        # payload that downstream adapters need.
+        # DbC postcondition: ``self._tool_declarations`` is a non-None
+        # list (possibly empty) of ToolDeclaration instances.
+        self._tool_declarations: list[Any] = self._build_tool_declarations()
+        assert isinstance(self._tool_declarations, list), (
+            "post: _tool_declarations must be a list"
+        )
+
         self._load_adapter()
+
+    def _build_tool_declarations(self) -> list[Any]:
+        """Snapshot the current tool registry into a ToolDeclaration list.
+
+        Extracted so tests can rebuild the snapshot after registering extra
+        tools, and so the per-send hot path stays free of registry walks.
+        """
+        from src.shared.python.ai.adapters.base import ToolDeclaration
+
+        declarations: list[Any] = []
+        for t in self._tool_registry.list_tools():
+            props = {p.name: p.to_json_schema() for p in t.parameters}
+            reqs = [p.name for p in t.parameters if p.required]
+            declarations.append(
+                ToolDeclaration(
+                    name=t.name,
+                    description=t.description,
+                    parameters=props,
+                    required=reqs,
+                )
+            )
+        return declarations
 
     def _load_adapter(self) -> None:
         """Load AI adapter from persisted user settings."""
@@ -161,7 +196,13 @@ class ChatService:
             return None
 
     def get_or_create_session(self, session_id: str | None) -> ConversationContext:
-        """Return existing session or create a new one."""
+        """Return existing session or create a new one.
+
+        DbC postcondition: the returned context has a non-empty
+        ``session_id`` and is registered in ``self._sessions``. The asserted
+        invariant guards against silent identity loss that would later
+        surface as ``"Session not found."`` from ``stream_response``.
+        """
         from src.shared.python.ai.types import ConversationContext
 
         with self._lock:
@@ -190,6 +231,11 @@ class ChatService:
                 self._timestamps.pop(oldest_sid, None)
 
             logger.info("ChatService: created session %s", ctx.session_id)
+            assert ctx is not None, "post: created context must not be None"
+            assert ctx.session_id, "post: created context must have a session id"
+            assert ctx.session_id in self._sessions, (
+                "post: created context must be registered in self._sessions"
+            )
             return ctx
 
     @precondition(
@@ -288,20 +334,10 @@ class ChatService:
                     current_response = []
                     tool_calls_accumulator = {}
 
-                    from src.shared.python.ai.adapters.base import ToolDeclaration
-
-                    tool_declarations = []
-                    for t in self._tool_registry.list_tools():
-                        props = {p.name: p.to_json_schema() for p in t.parameters}
-                        reqs = [p.name for p in t.parameters if p.required]
-                        tool_declarations.append(
-                            ToolDeclaration(
-                                name=t.name,
-                                description=t.description,
-                                parameters=props,
-                                required=reqs,
-                            )
-                        )
+                    # Tool declarations are cached at ``__init__`` time — the
+                    # registry is static, so per-send walks were just CPU
+                    # waste. See ``self._build_tool_declarations``.
+                    tool_declarations = self._tool_declarations
 
                     for chunk in self._adapter.stream_response(  # type: ignore[union-attr]
                         "",  # message already in context
@@ -420,19 +456,59 @@ class ChatService:
             finally:
                 chunk_queue.put(None)  # Sentinel
 
-        thread = threading.Thread(target=_stream_to_queue, daemon=True)
+        thread = threading.Thread(
+            target=_stream_to_queue, daemon=True, name=f"chat-stream-{session_id}"
+        )
         thread.start()
 
-        while True:
-            try:
-                item = await asyncio.to_thread(chunk_queue.get, timeout=60.0)
-            except (FileNotFoundError, OSError):
-                break
-            if item is None:
-                break
-            yield item
+        # Two-stage timeout protocol so the WebSocket consumer never hangs
+        # silently when the provider is slow to warm up vs. silently dead:
+        #   * ``first_chunk_timeout`` — generous window for cold-start model
+        #     load (Ollama can take 30s+ to map a model into RAM on first
+        #     hit). Distinguish this from a stuck producer.
+        #   * ``next_chunk_timeout`` — once the first chunk arrives, every
+        #     subsequent chunk must arrive within a tighter window or we
+        #     surface a stall to the client instead of timing out the WS
+        #     handler at the 60s queue.Empty boundary (which previously
+        #     turned into an opaque "Internal server error" — see DbC
+        #     contract in docstring above).
+        # If the producer thread truly dies without sending the sentinel,
+        # ``queue.Empty`` is raised by the synchronous ``Queue.get`` after
+        # the timeout; we translate that to a structured error chunk so the
+        # caller can react instead of guessing.
+        from queue import Empty
 
-        thread.join(timeout=5.0)
+        # First-chunk budget is generous because the first request on a cold
+        # Ollama (no model in RAM) plus a tool-laden system prompt can take
+        # 30-90 s on a typical laptop. The next-chunk budget is tight — once
+        # the first token streams, subsequent tokens arrive every 50-200 ms,
+        # so 30 s of silence reliably indicates a stuck producer.
+        first_chunk_timeout = 120.0
+        next_chunk_timeout = 30.0
+        timeout_s = first_chunk_timeout
+        try:
+            while True:
+                try:
+                    item = await asyncio.to_thread(chunk_queue.get, True, timeout_s)
+                except Empty:
+                    yield {
+                        "type": "error",
+                        "detail": (
+                            f"AI provider did not respond within {timeout_s:.0f}s. "
+                            "Check that the provider is running and reachable "
+                            "(Ollama default: http://localhost:11434)."
+                        ),
+                    }
+                    break
+                except (FileNotFoundError, OSError):
+                    break
+                if item is None:
+                    break
+                # First real chunk arrived — tighten the per-chunk budget.
+                timeout_s = next_chunk_timeout
+                yield item
+        finally:
+            thread.join(timeout=5.0)
 
     def refresh_models(self) -> dict[str, Any]:
         """Poll the configured provider for available chat models.

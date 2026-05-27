@@ -32,7 +32,6 @@ Acceptance per issue #4191:
 
 from __future__ import annotations
 
-import importlib.util
 from pathlib import Path
 
 import numpy as np
@@ -48,24 +47,6 @@ MODEL_PATH = (
     / "models"
     / "golf_humanoid.osim"
 )
-
-
-def _opensim_available() -> bool:
-    """Detect a real OpenSim install without tripping mocked sys.modules entries.
-
-    Some sibling test modules patch ``sys.modules['opensim']`` with a
-    ``MagicMock`` that lacks ``__spec__``. ``find_spec`` raises
-    ``ValueError`` on that case during *collection* (i.e. before any
-    fixture cleanup has run), so we swallow it and treat the binding as
-    absent for the purposes of layer-2 gating.
-    """
-    try:
-        return importlib.util.find_spec("opensim") is not None
-    except (ValueError, ModuleNotFoundError):  # pragma: no cover - test pollution
-        return False
-
-
-_OPENSIM_AVAILABLE = _opensim_available()
 
 
 # ---------------------------------------------------------------------------
@@ -161,11 +142,6 @@ def loaded_model_and_state():
 
 
 @pytest.mark.requires_opensim
-@pytest.mark.skipif(
-    not _OPENSIM_AVAILABLE,
-    reason="OpenSim Python bindings not installed; install via "
-    "`pip install opensim` or `conda install -c opensim-org opensim`.",
-)
 def test_extract_grip_pose_at_neutral_returns_finite_sane_pose(
     loaded_model_and_state,
 ) -> None:
@@ -189,10 +165,6 @@ def test_extract_grip_pose_at_neutral_returns_finite_sane_pose(
 
 
 @pytest.mark.requires_opensim
-@pytest.mark.skipif(
-    not _OPENSIM_AVAILABLE,
-    reason="OpenSim Python bindings not installed.",
-)
 def test_extract_clubhead_pose_at_neutral_returns_finite_sane_pose(
     loaded_model_and_state,
 ) -> None:
@@ -215,10 +187,6 @@ def test_extract_clubhead_pose_at_neutral_returns_finite_sane_pose(
 
 
 @pytest.mark.requires_opensim
-@pytest.mark.skipif(
-    not _OPENSIM_AVAILABLE,
-    reason="OpenSim Python bindings not installed.",
-)
 def test_extract_full_pose_returns_canonical_landmark_keys(
     loaded_model_and_state,
 ) -> None:
@@ -243,10 +211,6 @@ def test_extract_full_pose_returns_canonical_landmark_keys(
 
 
 @pytest.mark.requires_opensim
-@pytest.mark.skipif(
-    not _OPENSIM_AVAILABLE,
-    reason="OpenSim Python bindings not installed.",
-)
 def test_grip_and_clubhead_separated_by_club_length(loaded_model_and_state) -> None:
     """Sanity: clubhead lives roughly one club-length from the grip.
 

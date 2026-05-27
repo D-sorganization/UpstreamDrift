@@ -88,6 +88,7 @@ def _build_menu_bar_close_widget(parent: QWidget, close_callback: Any) -> QWidge
 
 from typing import Protocol
 from PyQt6.QtWidgets import QTabWidget, QDialog
+import contextlib
 
 
 class LauncherUIProtocol(Protocol):
@@ -105,8 +106,10 @@ class LauncherUIProtocol(Protocol):
     view_mode_combo: QComboBox | None
     chk_live: QCheckBox
     chk_gpu: QCheckBox
+    chk_windows: QCheckBox
     chk_docker: QCheckBox
     chk_wsl: QCheckBox
+    btn_console: QToolButton
     lbl_status: QLabel
     btn_modify_layout: QPushButton
     context_help: Any
@@ -445,7 +448,7 @@ class UISetupManager:
             self.workspace_tabs.removeTab(index)
 
         self.popout_widget(widget, "Library")
-        windows = self._popped_out_windows
+        windows = getattr(self, "_popped_out_windows", [])
         self.library_window = windows[-1] if windows else None
 
     def popout_widget(self, widget: QWidget, title: str) -> None:
@@ -453,7 +456,7 @@ class UISetupManager:
         from PyQt6.QtCore import Qt
         from PyQt6.QtWidgets import QDialog, QVBoxLayout
 
-        if not True:
+        if not hasattr(self, "_popped_out_windows") or self._popped_out_windows is None:
             self._popped_out_windows: list[QDialog] = []
 
         # We use a non-modal dialog to allow it to float freely
@@ -498,8 +501,11 @@ class UISetupManager:
                     self._apply_sidekick_splitter_sizes()
 
                 # Keep button in sync
-                if True and self.btn_ai_sidebar.isChecked() != visible:
-                    self.btn_ai_sidebar.setChecked(visible)
+                btn = getattr(self, "btn_toggle_right_sidebar", None) or getattr(
+                    self, "btn_ai_sidebar", None
+                )
+                if btn is not None and btn.isChecked() != visible:
+                    btn.setChecked(visible)
 
                 if visible and True:
                     self.btn_popout_sidekick.setVisible(True)
@@ -510,8 +516,11 @@ class UISetupManager:
                     "Sidekick is still loading, please wait a moment…", "info"
                 )
             # Uncheck the button since it's not ready yet
-            if True:
-                self.btn_ai_sidebar.setChecked(False)
+            btn = getattr(self, "btn_toggle_right_sidebar", None) or getattr(
+                self, "btn_ai_sidebar", None
+            )
+            if btn is not None:
+                btn.setChecked(False)
 
     def _toggle_left_sidebar(self, checked: bool = None) -> None:
         """Toggle the visibility of the global navigation sidebar."""
@@ -680,6 +689,17 @@ class UISetupManager:
         if True:
             btn_settings.clicked.connect(self._show_preferences)
 
+        btn_console = self._build_sidebar_button(
+            "Console",
+            "terminal",
+            checkable=False,
+        )
+        btn_console.setAccessibleDescription(
+            "Show or hide the process output console window"
+        )
+        btn_console.clicked.connect(self.toggle_process_console)
+        self.btn_console = btn_console
+
         # Setup mutually exclusive active-state routing for navigation
         self.sidebar_group = QButtonGroup(self.launcher)
         self.sidebar_group.addButton(btn_home, 0)
@@ -711,6 +731,7 @@ class UISetupManager:
         layout.addStretch(1)
         layout.addWidget(btn_library)
         layout.addStretch(3)  # larger gap before bottom group
+        layout.addWidget(btn_console)
         layout.addWidget(btn_settings)
 
         # Set explicit focus order for keyboard navigation
@@ -722,7 +743,8 @@ class UISetupManager:
         QWidget.setTabOrder(btn_motion_matching, btn_motion_capture)
         QWidget.setTabOrder(btn_motion_capture, btn_tools)
         QWidget.setTabOrder(btn_tools, btn_library)
-        QWidget.setTabOrder(btn_library, btn_settings)
+        QWidget.setTabOrder(btn_library, btn_console)
+        QWidget.setTabOrder(btn_console, btn_settings)
 
         scroll_area = QScrollArea()
         scroll_area.setWidget(sidebar)
@@ -1081,15 +1103,32 @@ class UISetupManager:
         # explanation lives in exactly one place.
         from src.launchers.runtime_mode_help import make_runtime_mode_help_button
 
-        self.lbl_execution_mode = QLabel("Runtime: Native Windows")
+        # Engine-runtime indicator is now a clickable button: clicking jumps
+        # straight to Settings → Configuration where the Engine Runtime group
+        # lives, so the user can change Native / Docker / WSL2 from one click
+        # instead of hunting for it. The ``?`` button beside it keeps the
+        # help-only entry point. The attribute name stays ``lbl_execution_mode``
+        # for backwards compatibility with launcher_dialogs.py call sites
+        # (setText / setStyleSheet work identically on QToolButton).
+        self.lbl_execution_mode = QToolButton()
+        self.lbl_execution_mode.setText("Runtime: Windows")
+        self.lbl_execution_mode.setAutoRaise(True)  # flat / borderless look
+        self.lbl_execution_mode.setCursor(Qt.CursorShape.PointingHandCursor)
         self.lbl_execution_mode.setProperty("exec_mode", "warning")
+        self.lbl_execution_mode.setToolButtonStyle(
+            Qt.ToolButtonStyle.ToolButtonTextOnly
+        )
         _style = self.lbl_execution_mode.style()
-
         if _style:
             _style.polish(self.lbl_execution_mode)
         self.lbl_execution_mode.setToolTip(
-            "Where physics engines execute — Native Windows, Docker "
-            "container, or WSL2 Ubuntu. Click the ? for full details."
+            "Click to change the engine runtime (Windows, Docker, or "
+            "WSL2 Ubuntu) in Settings → Configuration. The ‘?’ button "
+            "explains each runtime in detail."
+        )
+        # tab=1 → Configuration tab, which hosts the Engine Runtime group.
+        self.lbl_execution_mode.clicked.connect(
+            lambda: self.launcher._open_settings(tab=1)
         )
         top_bar.addWidget(self.lbl_execution_mode)
 
@@ -1100,7 +1139,7 @@ class UISetupManager:
 
         # Search Bar
         self.search_input = AutoCompleteLineEdit(words=build_vocabulary())
-        self.search_input.setPlaceholderText("Search models...")
+        self.search_input.setPlaceholderText("Search models... (Esc to clear)")
         try:
             from src.shared.python.theme.responsive import (
                 set_text_minimum_width,
@@ -1118,6 +1157,39 @@ class UISetupManager:
         self.search_input.setClearButtonEnabled(True)
         self.search_input.textChanged.connect(self.update_search_filter)
         top_bar.addWidget(self.search_input)
+
+        # Launch button — sits in the top bar next to the search input so the
+        # primary action is always reachable without scrolling and the grid
+        # area below is freed for tiles (no bottom-bar overlap).
+        self._ensure_launch_button()
+        top_bar.addWidget(self.btn_launch)
+
+    def _ensure_launch_button(self) -> None:
+        """Create ``self.btn_launch`` if it doesn't exist yet (idempotent).
+
+        Used by both ``_setup_top_bar_status_and_search`` (current home) and
+        ``_setup_bottom_bar`` (legacy callers / tests). Either path produces
+        the same button instance.
+        """
+        if getattr(self, "btn_launch", None) is not None:
+            return
+        btn = QPushButton("Select a Model")
+        btn.setEnabled(False)
+        # Top-bar height: align with search input rather than the old 50px
+        # tile-overlapping bottom bar. Width caps the button so a long model
+        # name (e.g. "Launch golf_swing_pendulum >") doesn't push the rest of
+        # the top bar offscreen.
+        btn.setFixedHeight(32)
+        btn.setMinimumWidth(180)
+        btn.setMaximumWidth(280)
+        btn.setFont(get_display_font(size=10, weight=Weights.BOLD))
+        btn.setProperty("class", "launch-ready")
+        _style = btn.style()
+        if _style:
+            _style.polish(btn)
+        btn.clicked.connect(self.launch_simulation)
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_launch = btn
 
     def _setup_top_bar_config_checkboxes(self, top_bar: QHBoxLayout) -> None:
         """Create config checkboxes and layout controls, adding them to top bar."""
@@ -1141,6 +1213,12 @@ class UISetupManager:
         self.chk_wsl = QCheckBox("WSL")
         self.chk_wsl.setChecked(settings.value("chk_wsl", False, type=bool))
         self.chk_wsl.stateChanged.connect(self._on_wsl_mode_changed)
+
+        self.chk_windows = QCheckBox("Windows")
+        self.chk_windows.setChecked(
+            not self.chk_docker.isChecked() and not self.chk_wsl.isChecked()
+        )
+        self.chk_windows.stateChanged.connect(self._on_windows_mode_changed)
 
         # Layout controls were moved to the View menu per user request.
 
@@ -1185,6 +1263,12 @@ class UISetupManager:
             "faster file I/O and easier interactive debugging.",
             "engine_selection",
         )
+        TooltipManager.register_tooltip(
+            self.chk_windows,
+            "Windows Native runtime",
+            "Run physics engines natively on the local Windows host system.",
+            "engine_selection",
+        )
 
     # ---- View-mode + zoom controls --------------------------------------
 
@@ -1204,6 +1288,101 @@ class UISetupManager:
 
     def _setup_view_mode_and_zoom(self, top_bar: QHBoxLayout) -> None:
         """Add discrete view-mode dropdown and a compact, elegant zoom slider to top bar."""
+        if top_bar is None:
+            raise ValueError("top_bar must be provided")
+
+        self._top_viewmode_actions: dict[Any, QAction] = {}
+
+        self.view_mode_combo = QComboBox(self.launcher)
+        self.view_mode_combo.addItem("Tile Large", ViewMode.LARGE)
+        self.view_mode_combo.addItem("Tile Medium", ViewMode.MEDIUM)
+        self.view_mode_combo.addItem("Tile Small", ViewMode.SMALL)
+        self.view_mode_combo.addItem("List Large", ViewMode.LIST_LARGE)
+        self.view_mode_combo.addItem("List Small", ViewMode.LIST_SMALL)
+        self.view_mode_combo.setCurrentIndex(3)  # List Large default
+        self.view_mode_combo.setToolTip("Choose how the model tiles are arranged")
+        self.view_mode_combo.setAccessibleName("View mode")
+        self.view_mode_combo.currentIndexChanged.connect(self._on_view_mode_changed)
+
+        self.view_mode_combo.setStyleSheet("""
+            QComboBox {
+                background: #1e1e1e;
+                border: 1px solid #3a3a3a;
+                border-radius: 4px;
+                padding: 4px 8px;
+                color: #cccccc;
+                font-size: 11px;
+                min-width: 100px;
+            }
+            QComboBox:hover {
+                background: #2a2a2a;
+                border-color: #555555;
+                color: #ffffff;
+            }
+            QComboBox QAbstractItemView {
+                background: #1e1e1e;
+                border: 1px solid #3a3a3a;
+                color: #cccccc;
+                selection-background-color: #2a2a2a;
+                selection-color: #ffffff;
+            }
+        """)
+        # Removed view selector dropdown from main screen top bar per user request.
+        # It is kept instantiated and hidden to preserve compatibility with menu actions and settings.
+        self.view_mode_combo.hide()
+
+        self.zoom_slider = QSlider(Qt.Orientation.Horizontal, self.launcher)
+        self.zoom_slider.setRange(0, self._ZOOM_SLIDER_STEPS)
+        self.zoom_slider.setMinimumWidth(140)
+        from PyQt6.QtWidgets import QSizePolicy
+
+        self.zoom_slider.setSizePolicy(
+            QSizePolicy.Policy.MinimumExpanding,
+            self.zoom_slider.sizePolicy().verticalPolicy(),
+        )
+
+        self.zoom_slider.setStyleSheet("""
+            QSlider::groove:horizontal {
+                border: 1px solid #3a3a3a;
+                height: 4px;
+                background: #1a1a1a;
+                margin: 0px;
+                border-radius: 2px;
+            }
+            QSlider::handle:horizontal {
+                background: #888888;
+                border: 1px solid #555555;
+                width: 10px;
+                height: 10px;
+                margin: -3px 0;
+                border-radius: 5px;
+            }
+            QSlider::handle:horizontal:hover {
+                background: #007acc;
+                border-color: #0098ff;
+            }
+        """)
+        self.zoom_slider.setToolTip("Adjust the size of the model tiles")
+        self.zoom_slider.setAccessibleName("Tile zoom")
+        self.zoom_slider.setAccessibleDescription(_build_zoom_accessible_description())
+        self.zoom_slider.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
+        from src.launchers.launcher_constants import TILE_SCALE_DEFAULT
+
+        initial_scale = TILE_SCALE_DEFAULT
+        lm = getattr(self, "layout_manager", None)
+        if lm is not None and hasattr(lm, "tile_scale"):
+            initial_scale = float(lm.tile_scale)
+        self.zoom_slider.setValue(self._scale_to_slider(initial_scale))
+        self.zoom_slider.valueChanged.connect(self._on_zoom_slider_changed)
+        self.zoom_slider.hide()
+
+        self.lbl_zoom_pct = QLabel(f"{int(round(initial_scale * 100))}%", self.launcher)
+        self.lbl_zoom_pct.setToolTip("Current tile size as a percentage of base")
+        self.lbl_zoom_pct.setStyleSheet(
+            "font-size: 10px; color: #888888; font-family: monospace;"
+        )
+        self.lbl_zoom_pct.hide()
 
         # Ctrl+= / Ctrl+- shortcuts adjust zoom by one step (~1.75% scale).
         sc_in = QShortcut(QKeySequence("Ctrl+="), self.launcher)
@@ -1239,8 +1418,17 @@ class UISetupManager:
         if combo is None:
             return
         mode = combo.itemData(index)
-        if not isinstance(mode, ViewMode):
+        is_vm = isinstance(mode, ViewMode) or (
+            hasattr(mode, "__class__") and mode.__class__.__name__ == "ViewMode"
+        )
+        if not is_vm:
             return
+        if not isinstance(mode, ViewMode):
+            try:
+                mode = ViewMode(int(mode))
+            except (ValueError, TypeError):
+                with contextlib.suppress(AttributeError, KeyError):
+                    mode = ViewMode[mode.name]
         self._apply_view_mode(mode, sync_combo=False)
 
     def _set_view_mode_from_menu(self, mode: ViewMode) -> None:
@@ -1317,6 +1505,7 @@ class UISetupManager:
         top_bar.addWidget(self.btn_toggle_left_sidebar)
 
         self._setup_top_bar_status_and_search(top_bar)
+        self._setup_view_mode_and_zoom(top_bar)
         self._setup_top_bar_config_checkboxes(top_bar)
         self._setup_top_bar_action_buttons(top_bar)
 
@@ -1374,24 +1563,15 @@ class UISetupManager:
         layout.addWidget(self.scroll_area, 1)
 
     def _setup_bottom_bar(self) -> QHBoxLayout:
-        """Set up the bottom bar with launch button."""
-        bottom_bar = QHBoxLayout()
-        bottom_bar.addStretch()
+        """Return an empty bottom bar; the launch button now lives in the top bar.
 
-        self.btn_launch = QPushButton("Select a Model")
-        self.btn_launch.setEnabled(False)
-        self.btn_launch.setFixedHeight(50)
-        self.btn_launch.setFont(get_display_font(size=12, weight=Weights.BOLD))
-        self.btn_launch.setProperty("class", "launch-ready")
-        _style = self.btn_launch.style()
-
-        if _style:
-            _style.polish(self.btn_launch)
-        self.btn_launch.clicked.connect(self.launch_simulation)
-        self.btn_launch.setCursor(Qt.CursorShape.PointingHandCursor)
-        bottom_bar.addWidget(self.btn_launch)
-
-        return bottom_bar
+        Kept as a method so existing callers and tests
+        (``test_setup_bottom_bar``) that expect ``self.btn_launch`` to exist
+        after invocation keep working. Returns an empty layout — caller can
+        still ``addLayout`` it without producing visible chrome at the bottom.
+        """
+        self._ensure_launch_button()
+        return QHBoxLayout()
 
     def _setup_search_shortcuts(self) -> None:
         """Setup keyboard shortcuts for search."""
@@ -1408,7 +1588,11 @@ class UISetupManager:
 
     def _clear_search(self) -> None:
         """Clear the search filter and remove focus from search bar."""
-        if self.search_input.hasFocus():
+        has_text = False
+        text_val = self.search_input.text()
+        if isinstance(text_val, str) and text_val:
+            has_text = True
+        if has_text or self.search_input.hasFocus():
             self.search_input.clear()
             self.search_input.clearFocus()
 
@@ -1467,7 +1651,7 @@ class UISetupManager:
             raise ValueError("engine_name must be provided")
         if not self._console_dock.isVisible():
             self._console_dock.show()
-            if True:
+            if hasattr(self, "_action_console"):
                 self._action_console.setChecked(True)
 
         ts = datetime.datetime.now().strftime("%H:%M:%S")

@@ -243,9 +243,9 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 try:
                     ui_widget = handler.get_dockable_ui(model, REPOS_ROOT)
                     if ui_widget:
-                        if hasattr(self, "sidekick_sidebar") and hasattr(
-                            ui_widget, "set_sidekick_session"
-                        ):
+                        if getattr(
+                            self, "sidekick_sidebar", None
+                        ) is not None and hasattr(ui_widget, "set_sidekick_session"):
                             # The sidebar widget might have a direct session attribute or IS the session.
                             session = getattr(
                                 self.sidekick_sidebar, "session", self.sidekick_sidebar
@@ -274,7 +274,29 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 except Exception as e:  # noqa: BLE001
                     logger.error("Failed to load dockable UI for %s: %s", model.name, e)
 
-            success = handler.launch(model, REPOS_ROOT, self.process_manager)
+            try:
+                success = handler.launch(model, REPOS_ROOT, self.process_manager)
+            except Exception as e:
+                logger.error(
+                    "Launch exception for %s (type=%s, path=%s, handler=%s): %s",
+                    model.name,
+                    model.type,
+                    getattr(model, "path", "N/A"),
+                    type(handler).__name__,
+                    e,
+                    exc_info=True,
+                )
+                if hasattr(self, "_append_console_line"):
+                    import traceback
+
+                    tb_str = "".join(
+                        traceback.format_exception(type(e), e, e.__traceback__)
+                    )
+                    self._append_console_line(
+                        "Launcher", f"Failed to launch {model.name}:\n{tb_str}"
+                    )
+                success = False
+
             if success:
                 self.show_toast(f"{model.name} Launched", "success")
                 self.lbl_status.setText(f"* {model.name} Running")
@@ -288,11 +310,21 @@ except (RuntimeError, TypeError, AttributeError) as e:
                     getattr(model, "path", "N/A"),
                     type(handler).__name__,
                 )
+                if hasattr(self, "_append_console_line"):
+                    self._append_console_line(
+                        "Launcher",
+                        f"Failed to launch {model.name} (type={model.type}, path={getattr(model, 'path', 'N/A')}). See logs above.",
+                    )
                 self.show_toast(
                     f"Failed to launch {model.name} — check console", "error"
                 )
                 self.lbl_status.setText("* Launch Error")
                 self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
+
+                if hasattr(self, "_console_dock"):
+                    self._console_dock.show()
+                    if hasattr(self, "_action_console"):
+                        self._action_console.setChecked(True)
         elif model.type == "mjcf" or str(abs_model_path).endswith(".xml"):
             self._launch_generic_mjcf(abs_model_path)
         else:

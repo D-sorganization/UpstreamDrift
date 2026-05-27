@@ -65,6 +65,9 @@ def ui_setup(qapp):
             self.layout_manager = _DummyLayoutManager()
             self.docker_available = False
             self.ui_setup_manager = UISetupManager(self)
+            self.sidekick_sidebar = None
+            self.sidekick_window = None
+            self._sidekick_popped_out = False
 
         def __getattr__(self, name):
             # Avoid recursion if ui_setup_manager is not initialized
@@ -82,6 +85,9 @@ def ui_setup(qapp):
 
         _install_sidekick_sidebar = _RealLauncher._install_sidekick_sidebar
         _apply_sidekick_splitter_sizes = _RealLauncher._apply_sidekick_splitter_sizes
+        _get_sidekick_module = _RealLauncher._get_sidekick_module
+        _create_sidekick_sidebar_widget = _RealLauncher._create_sidekick_sidebar_widget
+        _embed_sidekick_sidebar_widget = _RealLauncher._embed_sidekick_sidebar_widget
 
         def _show_preferences(self, *_a, **_k) -> None: ...
         def _toggle_layout_mode_from_menu(self, *_a, **_k) -> None: ...

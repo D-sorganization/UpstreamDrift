@@ -22,7 +22,7 @@ class TestMotionCaptureLauncherPythonpath:
 
     def test_popen_receives_env_with_pythonpath(self) -> None:
         """_make_subprocess_env must return a dict with repo root in PYTHONPATH."""
-        from src.launchers.motion_capture_launcher import (
+        from src.launchers.archive.motion_capture_launcher import (
             REPO_ROOT,
             _make_subprocess_env,
         )
@@ -37,7 +37,7 @@ class TestMotionCaptureLauncherPythonpath:
         """_launch_script must pass env= to subprocess.Popen."""
         import inspect
 
-        import src.launchers.motion_capture_launcher as mod
+        import src.launchers.archive.motion_capture_launcher as mod
 
         src_text = inspect.getsource(mod)
         # The Popen call must pass env= keyword argument

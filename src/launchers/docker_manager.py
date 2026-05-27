@@ -74,7 +74,7 @@ class DockerCheckThread(QThread):
         try:
             secure_run(
                 cmd,
-                timeout=5.0,
+                timeout=15.0,
                 check=True,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
@@ -104,7 +104,7 @@ class DockerBuildThread(QThread):
 
     def __init__(
         self,
-        target_stage: str = "all",
+        target_stage: str = "standard",
         image_name: str = DOCKER_IMAGE_ENGINE,
         context_path: Path | None = None,
     ) -> None:

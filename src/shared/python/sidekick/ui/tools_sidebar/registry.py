@@ -34,7 +34,12 @@ logger = logging.getLogger(__name__)
 JSONScalar = str | int | float | bool | None
 JSONValue = JSONScalar | list["JSONValue"] | dict[str, "JSONValue"]
 
-__all__ = ["Subscription", "WorkspaceRegistry", "WorkspaceVariable"]
+__all__ = [
+    "Subscription",
+    "WorkspaceRegistry",
+    "WorkspaceVariable",
+    "format_workspace_value_preview",
+]
 
 
 @dataclass(frozen=True)
@@ -340,7 +345,7 @@ def format_workspace_value_preview(value: Any, max_length: int = 120) -> str:
             preview = f"<{value.dtype} array {value.shape}>"
         else:
             preview = repr(value)
-    except Exception:
+    except Exception:  # noqa: BLE001
         preview = "<unrepresentable>"
 
     if len(preview) > max_length:
