@@ -128,6 +128,12 @@ def mock_opensim_kinematics() -> MockKinematicsService:
 
 
 @pytest.fixture
+def mock_myosuite_kinematics() -> MockKinematicsService:
+    """Return a MockKinematicsService impersonating MyoSuite."""
+    return MockKinematicsService(engine_name="myosuite")
+
+
+@pytest.fixture
 def mock_simscape_kinematics() -> MockKinematicsService:
     """Return a MockKinematicsService impersonating Simscape."""
     return MockKinematicsService(engine_name="simscape")
