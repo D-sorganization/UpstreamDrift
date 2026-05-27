@@ -1459,7 +1459,7 @@ jobs:
       - name: Enable long Cargo git dependency paths on Windows
         if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'windows-latest'
         run: |
-          git config --global core.longpaths true || true
+          git config --global core.longpaths true
           echo "CARGO_NET_GIT_FETCH_WITH_CLI=true" >> "$GITHUB_ENV"
 
       - name: Install Rust toolchain

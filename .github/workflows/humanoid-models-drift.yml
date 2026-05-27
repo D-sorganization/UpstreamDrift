@@ -43,6 +43,11 @@ permissions:
   contents: read
   pull-requests: write
 
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pick-runner:
     runs-on: d-sorg-fleet
@@ -65,7 +70,7 @@ jobs:
 
     steps:
       - name: Enable long Git paths
-        run: git config --global core.longpaths true || true
+        run: git config --global core.longpaths true
 
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
