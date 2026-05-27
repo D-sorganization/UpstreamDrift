@@ -88,9 +88,9 @@ _SENSITIVE_PATTERNS: list[re.Pattern[str]] = [
         r"(?:"
         r"(?:(['\"])(.*?)\4)"  # quoted value
         r"|"
-        r"(?:(['\"])([^'\"\s}]+(?:,(?![\s'\"])[^'\"\s}]+)*))"  # unterminated quoted value fallback
+        r"(?:(['\"])([^'\"\s}]+))"  # unterminated quoted value fallback
         r"|"
-        r"([^'\"\s,{}&;:\])]+(?:,(?![\s'\"])[^'\"\s,{}&;:\])]+)*)"  # unquoted value
+        r"([^'\"\s,{}&;:\])]+)"  # unquoted value
         r")"
     ),
 ]
