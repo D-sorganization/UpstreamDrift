@@ -1,7 +1,7 @@
 # Upstream Drift — pyproject.toml
 [project]
 name = "upstream-drift"
-version = "2.1.0"
+version = "2.1.1"
 description = "Biomechanical golf simulation and analysis suite"
 readme = "README.md"
 license = { text = "MIT" }
@@ -76,6 +76,8 @@ experimental = ["myosuite>=2.0.0", "opensim>=4.4.0,<5.0.0", "gymnasium>=0.29.0"]
 
 # Reinforcement learning (for MyoSuite muscle training)
 rl = ["stable-baselines3>=2.0.0", "gymnasium>=0.29.0"]
+
+# PyTorch (optional; required by `requires_torch` test marker — issue #5914)
 torch = ["torch>=2.0.0"]
 
 # URDF generation tools (from shared Tools repo)
@@ -212,6 +214,9 @@ packages = [
     "src",
     "src/shared/python/sidekick",
 ]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/shared/python/sidekick" = "sidekick"
 
 
 [tool.hatch.build.hooks.custom]
@@ -402,6 +407,7 @@ addopts = "-ra -q --strict-markers --strict-config --durations=20 -m \"not slow 
 asyncio_mode = "auto"
 timeout = 60
 timeout_method = "thread"
+xfail_strict = true
 # Prevent ImportPathMismatchError from conftest.py files in engine subdirectories
 norecursedirs = [
     "src",

@@ -287,6 +287,64 @@ class EnvironmentWindow(QMainWindow):
             )
 
 
+class _EmbedAdapter:
+    """Embed adapter for the Golf Environment Viewer.
+
+    Implements the EmbeddableTool protocol so the launcher can embed this
+    tool as a tab or dock widget.
+    """
+
+    tool_id = "golf_environment"
+
+    def __init__(self) -> None:
+        self._widget: EnvironmentRenderer | None = None
+
+    def embed_capabilities(self) -> Any:
+        from src.shared.python.launcher_embed import EmbedCapabilities
+
+        return EmbedCapabilities(
+            supports_embedded=True,
+            prefers_dock=False,
+            min_size=(800, 600),
+            requires_separate_qapplication=False,
+        )
+
+    def create_main_widget(self, parent: Any) -> Any:
+        """Create and return the EnvironmentRenderer widget for embedding.
+
+        Args:
+            parent: The intended Qt parent widget.
+
+        Returns:
+            EnvironmentRenderer widget instance for embedding.
+        """
+        self._widget = EnvironmentRenderer(parent=parent)
+        return self._widget
+
+    def cleanup(self) -> None:
+        """Release any resources held by the embedded widget."""
+        self._widget = None
+
+    def is_dirty(self) -> bool:
+        """Return True if the tool has unsaved state.
+
+        Golf Environment Viewer does not track dirty state.
+        """
+        return False
+
+
+def _register() -> None:
+    try:
+        from src.shared.python.launcher_embed import register_embeddable_tool
+
+        register_embeddable_tool(_EmbedAdapter())
+    except Exception:  # noqa: BLE001
+        logger.warning("golf_environment: EmbeddableTool registration failed")
+
+
+_register()
+
+
 def get_dockable_ui() -> EnvironmentWindow:
     return EnvironmentWindow()
 

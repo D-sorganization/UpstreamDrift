@@ -33,25 +33,6 @@ from src.engines.physics_engines.drake.python.motion_matching.fit_swing_autodiff
 )
 
 # ---------------------------------------------------------------------------
-# Pydrake availability gate
-# ---------------------------------------------------------------------------
-
-
-def _pydrake_available() -> bool:
-    """Return True if pydrake imports cleanly."""
-    try:
-        importlib.import_module("pydrake.multibody.plant")
-        importlib.import_module("pydrake.autodiffutils")
-        importlib.import_module("pydrake.solvers")
-    except ImportError:
-        return False
-    return True
-
-
-PYDRAKE_AVAILABLE = _pydrake_available()
-
-
-# ---------------------------------------------------------------------------
 # Synthetic target oracle (no pydrake dependency)
 # ---------------------------------------------------------------------------
 
@@ -320,7 +301,6 @@ def test_imports_without_pydrake() -> None:
 
 
 @pytest.mark.requires_drake
-@pytest.mark.skipif(not PYDRAKE_AVAILABLE, reason="pydrake not installed")
 def test_recovers_synthetic_swing_within_tolerance() -> None:
     """Recovery test: synthesize -> fit -> recover theta within 5%.
 
@@ -357,7 +337,6 @@ def test_recovers_synthetic_swing_within_tolerance() -> None:
 
 
 @pytest.mark.requires_drake
-@pytest.mark.skipif(not PYDRAKE_AVAILABLE, reason="pydrake not installed")
 def test_convergence_under_50_sim_calls() -> None:
     """Sim-call budget: <= 50 forward sims (spec §6.2 / issue #4119 acc #2)."""
     from src.engines.physics_engines.drake.python.motion_matching.fit_swing_autodiff import (
@@ -383,7 +362,6 @@ def test_convergence_under_50_sim_calls() -> None:
 
 
 @pytest.mark.requires_drake
-@pytest.mark.skipif(not PYDRAKE_AVAILABLE, reason="pydrake not installed")
 def test_wall_clock_under_30s() -> None:
     """Wall-clock budget: <= 30 s per fit (spec §6.2 / issue #4119 acc #4)."""
     from src.engines.physics_engines.drake.python.motion_matching.fit_swing_autodiff import (
@@ -410,7 +388,6 @@ def test_wall_clock_under_30s() -> None:
 
 
 @pytest.mark.requires_drake
-@pytest.mark.skipif(not PYDRAKE_AVAILABLE, reason="pydrake not installed")
 def test_finite_diff_fallback_path_runs() -> None:
     """The fallback ``finite_diff`` mode runs without errors.
 
@@ -436,7 +413,6 @@ def test_finite_diff_fallback_path_runs() -> None:
 
 
 @pytest.mark.requires_drake
-@pytest.mark.skipif(not PYDRAKE_AVAILABLE, reason="pydrake not installed")
 def test_autodiff_module_smoketest_imports() -> None:
     """Live pydrake: the autodiff module imports its real Drake symbols.
 

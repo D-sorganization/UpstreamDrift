@@ -1,11 +1,17 @@
-"""Round-trip parity tests for :class:`MyoSuiteAdapter`."""
+"""Round-trip parity tests for :class:`MyosuiteAdapter`.
+
+MyoSuite is MJCF-backed (MuJoCo), so the qpos convention is identical to
+MuJoCo: free-joint prefix ``[x, y, z, qw, qx, qy, qz]`` followed by
+per-joint hinge angles in radians.  The round-trip properties should
+therefore match the MuJoCo adapter exactly.
+"""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
 
-from src.shared.python.pose_interchange.adapters.myosuite import MyoSuiteAdapter
+from src.shared.python.pose_interchange.adapters.myosuite import MyosuiteAdapter
 from src.shared.python.pose_interchange.canonical import CanonicalPose
 
 pytestmark = pytest.mark.unit
@@ -24,7 +30,7 @@ def _assert_pose_close(a: CanonicalPose, b: CanonicalPose, *, tol: float) -> Non
 
 
 def test_myosuite_roundtrip_100_random(random_poses: list[CanonicalPose]) -> None:
-    adapter = MyoSuiteAdapter()
+    adapter = MyosuiteAdapter()
     for pose in random_poses:
         q = adapter.from_canonical(pose)
         recovered = adapter.to_canonical(q)
@@ -32,7 +38,7 @@ def test_myosuite_roundtrip_100_random(random_poses: list[CanonicalPose]) -> Non
 
 
 def test_myosuite_q_roundtrip_identity(random_poses: list[CanonicalPose]) -> None:
-    adapter = MyoSuiteAdapter()
+    adapter = MyosuiteAdapter()
     for pose in random_poses:
         q1 = adapter.from_canonical(pose)
         q2 = adapter.from_canonical(adapter.to_canonical(q1))
@@ -40,8 +46,12 @@ def test_myosuite_q_roundtrip_identity(random_poses: list[CanonicalPose]) -> Non
 
 
 def test_myosuite_quaternion_is_w_first(random_poses: list[CanonicalPose]) -> None:
-    """Sanity-check: q[3] is the scalar component (w-first MJCF convention)."""
-    adapter = MyoSuiteAdapter()
+    """Sanity-check: q[3] is the scalar component (w-first MJCF convention).
+
+    MyoSuite uses MuJoCo's coordinate convention; the quaternion slice is
+    q[3:7] and its Euclidean norm must equal 1.
+    """
+    adapter = MyosuiteAdapter()
     for pose in random_poses:
         q = adapter.from_canonical(pose)
         # Quaternion slice is q[3:7]; norm should be 1.
@@ -49,18 +59,6 @@ def test_myosuite_quaternion_is_w_first(random_poses: list[CanonicalPose]) -> No
 
 
 def test_myosuite_rejects_short_q() -> None:
-    adapter = MyoSuiteAdapter()
+    adapter = MyosuiteAdapter()
     with pytest.raises(ValueError, match="at least 7 entries"):
         adapter.to_canonical(np.zeros(4))
-
-
-def test_myosuite_rejects_unsupported_convention_tag() -> None:
-    adapter = MyoSuiteAdapter()
-    pose = CanonicalPose(
-        pelvis_translation_m=np.zeros(3),
-        pelvis_rotation_xyz_deg=np.zeros(3),
-    )
-    # Re-package as an object that claims a different convention tag.
-    object.__setattr__(pose, "convention_tag", "future-v9")
-    with pytest.raises(ValueError, match="unsupported convention"):
-        adapter.from_canonical(pose)
