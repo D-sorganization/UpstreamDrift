@@ -206,6 +206,10 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         """Set the MuJoCo model on the physics engine."""
         self.engine.model = value
 
+    def has_model(self) -> bool:
+        """Return True if a model has been loaded, False otherwise."""
+        return self.model is not None
+
     @property
     def data(self) -> mujoco.MjData | None:
         """Return the current MuJoCo simulation data."""
