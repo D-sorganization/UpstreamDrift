@@ -329,7 +329,7 @@ async def _handle_client_commands(
             stats = getattr(simulation_service, "stats", None)
             if stats is not None:
                 stats.speed_factor = speed_factor
-    except TimeoutError:
+    except (TimeoutError, asyncio.TimeoutError):
         pass  # No message, continue simulation
     except json.JSONDecodeError:
         logger.warning("Received invalid JSON from WebSocket client; ignoring message")
@@ -538,8 +538,8 @@ async def simulation_stream(
             "Simulation WebSocket failed for engine=%s",
             engine_type,
         )
-        with contextlib.suppress(ConnectionError, TimeoutError, OSError):
+        with contextlib.suppress(ConnectionError, TimeoutError, asyncio.TimeoutError, OSError):
             await websocket.send_json({"error": "Internal server error"})
     finally:
-        with contextlib.suppress(ConnectionError, TimeoutError, OSError):
+        with contextlib.suppress(ConnectionError, TimeoutError, asyncio.TimeoutError, OSError):
             await websocket.close()
