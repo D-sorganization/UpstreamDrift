@@ -125,18 +125,8 @@ def default_segment_set_path() -> Path:
 
 
 def spec_v1_to_v2(spec: SegmentSpec) -> SegmentVizSpec:
-    """Convert a legacy :class:`SegmentSpec` to a :class:`SegmentVizSpec`.
-
-    Deprecated: this helper is a v1 shim. New code should construct
-    :class:`~src.shared.python.body_part_viz.SegmentVizSpec` directly
-    rather than going through the v1 dataclass layer.
-    """
-    warnings.warn(
-        "spec_v1_to_v2 is deprecated and will be removed in a follow-up "
-        "release; construct SegmentVizSpec directly instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
+    """Convert a legacy :class:`SegmentSpec` to a :class:`SegmentVizSpec`."""
+    _warn_deprecated("spec_v1_to_v2")
     if not isinstance(spec, SegmentSpec):
         raise TypeError(f"spec must be SegmentSpec, got {type(spec).__name__}")
     from src.shared.python.body_part_viz import (
@@ -187,13 +177,7 @@ def spec_v2_to_v1(spec: SegmentVizSpec) -> SegmentSpec | None:
     :class:`~src.shared.python.body_part_viz.SegmentVizSpec` directly
     rather than converting back to the legacy v1 layer.
     """
-    warnings.warn(
-        "spec_v2_to_v1 is deprecated and will be removed in a follow-up "
-        "release; use SegmentVizSpec directly instead of round-tripping "
-        "through the legacy v1 layer.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
+    _warn_deprecated("spec_v2_to_v1")
     if not isinstance(spec, SegmentVizSpec):
         raise TypeError(f"spec must be SegmentVizSpec, got {type(spec).__name__}")
     if spec.shape_kind not in _VALID_GEOMETRIES:

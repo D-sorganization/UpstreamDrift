@@ -193,8 +193,13 @@ def run_calculator(calculator: str, inputs_path: str, output: str = "-") -> int:
         sys.stdout.write(output_json + "\n")
     else:
         out_path = Path(output)
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(output_json, encoding="utf-8")
+        try:
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_text(output_json, encoding="utf-8")
+        except OSError as exc:
+            logger.error("sidekick run failed: %s", exc)
+            sys.stderr.write(f"sidekick run failed: {exc}\n")
+            return 1
         logger.info("Results written to %s", out_path)
 
     return 0

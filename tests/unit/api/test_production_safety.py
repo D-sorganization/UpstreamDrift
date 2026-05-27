@@ -43,7 +43,7 @@ def _call(env: dict[str, str]) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Tests: production mode with default credentials — must raise
+# Tests: production mode with default credentials - must raise
 # ---------------------------------------------------------------------------
 
 
@@ -107,7 +107,7 @@ class TestAssertProductionSecretsRaises:
 
 
 # ---------------------------------------------------------------------------
-# Tests: development mode — must NOT raise even with default credentials
+# Tests: development mode - must NOT raise even with default credentials
 # ---------------------------------------------------------------------------
 
 
@@ -150,7 +150,7 @@ class TestAssertProductionSecretsDevMode:
             _assert_production_secrets()  # should not raise
 
     def test_no_raise_when_environment_unset(self) -> None:
-        """Unset ENVIRONMENT defaults to development — must not raise."""
+        """Unset ENVIRONMENT defaults to development - must not raise."""
         env = {
             "GOLF_API_SECRET_KEY": _DEFAULT_SECRET_KEY,
             "GOLF_ADMIN_PASSWORD": _DEFAULT_ADMIN_PASSWORD,
@@ -167,7 +167,7 @@ class TestAssertProductionSecretsDevMode:
 
 
 # ---------------------------------------------------------------------------
-# Tests: production mode with proper credentials — must NOT raise
+# Tests: production mode with proper credentials - must NOT raise
 # ---------------------------------------------------------------------------
 
 

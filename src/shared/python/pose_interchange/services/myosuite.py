@@ -297,8 +297,12 @@ def create_myosuite_service() -> LiveKinematicsService:
     return mock
 
 
+MyoSuiteKinematicsService = MyosuiteKinematicsService
+
+
 __all__ = [
     "ENGINE_NAME",
+    "MyoSuiteKinematicsService",
     "MyosuiteKinematicsService",
     "create_myosuite_service",
 ]

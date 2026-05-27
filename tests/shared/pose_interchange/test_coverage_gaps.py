@@ -75,6 +75,10 @@ from src.shared.python.pose_interchange.services.mujoco import (
     _canonical_pose_to_qpos,
     _mujoco_is_importable,
 )
+from src.shared.python.pose_interchange.services.myosuite import (
+    MyosuiteKinematicsService,
+    _myosuite_is_importable,
+)
 from src.shared.python.pose_interchange.services.opensim import (
     OpenSimKinematicsService,
     _opensim_is_importable,
@@ -82,10 +86,6 @@ from src.shared.python.pose_interchange.services.opensim import (
 from src.shared.python.pose_interchange.services.pinocchio import (
     PinocchioKinematicsService,
     _pinocchio_is_importable,
-)
-from src.shared.python.pose_interchange.services.myosuite import (
-    MyosuiteKinematicsService,
-    _myosuite_is_importable,
 )
 from src.shared.python.pose_interchange.services.simscape import (
     SimscapeKinematicsService,
@@ -440,8 +440,8 @@ class TestPoseIO:
             == SUPPORTED_ENGINES
         )
         # MyoSuite is registered in the adapter/service registries but is
-        # not a pose_io SUPPORTED_ENGINE (it serialises via the MuJoCo
-        # qpos path rather than its own file format).
+        # not a pose_io SUPPORTED_ENGINE because it serializes through the
+        # MuJoCo qpos path rather than a distinct native initial-state format.
 
     def test_list_saved_reference_poses_returns_list(self) -> None:
         # The library may or may not exist; either way the function

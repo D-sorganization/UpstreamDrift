@@ -117,3 +117,11 @@ class MyosuiteAdapter:
             pelvis_rotation_xyz_deg=rotation_deg,
             joint_angles_deg=joint_angles,
         )
+
+
+# Backward-compatible spelling for callers that preserve the MyoSuite brand
+# casing in class names.
+MyoSuiteAdapter = MyosuiteAdapter
+
+
+__all__ = ["MyoSuiteAdapter", "MyosuiteAdapter"]

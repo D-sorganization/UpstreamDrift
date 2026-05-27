@@ -28,9 +28,9 @@ class FitResult:
 
     Attributes:
         parameters: Dictionary of fitted parameter names and values.
-        covariance: Covariance matrix of the fit (if available).  A ``None``
-            value is ambiguous on its own: use ``fit_succeeded`` (or
-            ``solver_status``) to distinguish "fit failed" from "covariance
+        covariance: Covariance matrix of the fit (if available). A ``None``
+            value is ambiguous on its own: use ``fit_succeeded`` or
+            ``solver_status`` to distinguish "fit failed" from "covariance
             not computed".
         r_squared: Coefficient of determination (R^2).
         rmse: Root mean square error.
@@ -38,16 +38,14 @@ class FitResult:
         residuals: Residuals (original - fitted).
         success: Whether the fit converged successfully.
         message: Fit status message.
-        fit_succeeded: Explicit boolean indicator — ``True`` when the
-            optimiser converged, ``False`` when it failed or diverged.
-            Derived from ``success`` in ``__post_init__`` if not set
-            explicitly.
+        fit_succeeded: Explicit boolean indicator: ``True`` when the optimizer
+            converged, ``False`` when it failed or diverged. Derived from
+            ``success`` in ``__post_init__`` if not set explicitly.
         solver_status: Canonical status string (``"success"`` or
-            ``"failure"``).  Mirrors the vocabulary used by
+            ``"failure"``). Mirrors the vocabulary used by
             ``CanonicalFitResult`` and ``BuildResult`` across the platform
-            so that downstream consumers can apply uniform filtering.
-            Derived from ``success`` in ``__post_init__`` if not set
-            explicitly.
+            so that downstream consumers can apply uniform filtering. Derived
+            from ``success`` in ``__post_init__`` if not set explicitly.
     """
 
     parameters: dict[str, float]
@@ -154,6 +152,8 @@ class SinusoidFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0 or len(signal.values) == 0:
+            raise ValueError("signal must contain at least one sample")
         t = signal.time - signal.time[0]  # Shift to start at 0
         y = signal.values
 
@@ -312,6 +312,8 @@ class ExponentialFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0 or len(signal.values) == 0:
+            raise ValueError("signal must contain at least one sample")
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -391,6 +393,8 @@ class ExponentialFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0 or len(signal.values) == 0:
+            raise ValueError("signal must contain at least one sample")
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -468,6 +472,8 @@ class LinearFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0 or len(signal.values) == 0:
+            raise ValueError("signal must contain at least one sample")
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -542,6 +548,8 @@ class PolynomialFitter:
         """
         if signal is None:
             raise ValueError("signal must be provided")
+        if len(signal.time) == 0 or len(signal.values) == 0:
+            raise ValueError("signal must contain at least one sample")
         t = signal.time - signal.time[0]
         y = signal.values
 

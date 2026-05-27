@@ -69,6 +69,21 @@ class TestSinusoidFitter:
         s = result.get_function_string()
         assert "R^2" in s
 
+    def test_fit_result_failure_status_is_derived(self, sine_2hz: Signal) -> None:
+        result = FitResult(
+            parameters={},
+            covariance=None,
+            r_squared=0.0,
+            rmse=1.0,
+            fitted_signal=sine_2hz,
+            residuals=np.ones_like(sine_2hz.values),
+            success=False,
+            message="failed",
+        )
+
+        assert result.fit_succeeded is False
+        assert result.solver_status == "failure"
+
     def test_fit_with_initial_guess(self, sine_2hz: Signal) -> None:
         fitter = SinusoidFitter()
         result = fitter.fit(sine_2hz, initial_guess=(3.0, 2.0, 0.0, 0.0))
