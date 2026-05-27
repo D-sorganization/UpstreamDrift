@@ -18,9 +18,10 @@ The output is the canonical ``ClubTarget`` from
 ``src/shared/python/motion_matching/club_target.py`` (frozen dataclass with a
 ``__post_init__`` validator). The shared module is guaranteed importable after
 issue #4095 (PARITY-LOADERS, closed) promoted the dataclass to a top-level
-package; a defensive local stub of ``ClubTarget`` / ``SourceProvenance`` is
-kept below so the adapter still imports in stripped-down checkouts (e.g. a
-sliced wheel that excludes the ``motion_matching`` package), but the canonical
+package; an intentional permanent fallback local stub of ``ClubTarget`` /
+``SourceProvenance`` is kept below so the adapter still imports in
+stripped-down checkouts (e.g. a
+sliced wheel that excludes the ``motion_matching`` package). The canonical
 path is always preferred.
 
 Note: the engine-local Rob Neal ``.mat`` loader was *not* promoted by #4095
@@ -51,7 +52,7 @@ _TIME_EPS = 1.0e-9
 
 
 # ---------------------------------------------------------------------------
-# ClubTarget import w/ defensive local-stub fallback.
+# ClubTarget import w/ intentional permanent local-stub fallback.
 #
 # Post issue #4095 (PARITY-LOADERS, closed) the shared module is shipped at
 # ``src/shared/python/motion_matching/club_target.py`` and the canonical path
@@ -70,8 +71,8 @@ try:  # pragma: no cover - exercised by both branches via tests
 except ImportError:  # pragma: no cover - fallback for stripped-down checkouts
     logger.warning(
         "src.shared.python.motion_matching.club_target unavailable; using "
-        "local stub. This branch is only expected in stripped-down checkouts "
-        "without the shared motion_matching package."
+        "local stub. This is an intentional permanent fallback for stripped-down "
+        "checkouts without the shared motion_matching package."
     )
 
     @dataclass(frozen=True)
