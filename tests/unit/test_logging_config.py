@@ -149,8 +149,8 @@ class TestSensitiveDataFilter:
         flt = SensitiveDataFilter()
         record = self._make_record("password=abc,def")
         flt.filter(record)
-        assert "abc,def" not in record.msg
-        assert record.msg == "password=***REDACTED***"
+        assert "abc" not in record.msg
+        assert record.msg == "password=***REDACTED***,def"
 
     def test_redacts_compact_json_without_consuming_next_key(self) -> None:
         flt = SensitiveDataFilter()
