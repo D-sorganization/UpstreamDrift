@@ -532,42 +532,62 @@ class SettingsWidget(QWidget):
 
         # Sync checkboxes with parent launcher state
         launcher = self._launcher or self.parent()
-        if launcher and hasattr(launcher, "chk_docker"):
-            self.chk_windows.setChecked(
-                not launcher.chk_docker.isChecked() and not launcher.chk_wsl.isChecked()
-            )
-            self.chk_docker.setChecked(launcher.chk_docker.isChecked())
-            self.chk_wsl.setChecked(launcher.chk_wsl.isChecked())
-            self.chk_live_viz.setChecked(launcher.chk_live.isChecked())
-            self.chk_gpu.setChecked(launcher.chk_gpu.isChecked())
+        if launcher:
+            # Sync states from launcher
+            if hasattr(launcher, "chk_docker") and hasattr(launcher, "chk_wsl"):
+                self.chk_windows.setChecked(
+                    not launcher.chk_docker.isChecked()
+                    and not launcher.chk_wsl.isChecked()
+                )
+                self.chk_docker.setChecked(launcher.chk_docker.isChecked())
+                self.chk_wsl.setChecked(launcher.chk_wsl.isChecked())
+            if hasattr(launcher, "chk_live"):
+                self.chk_live_viz.setChecked(launcher.chk_live.isChecked())
+            if hasattr(launcher, "chk_gpu"):
+                self.chk_gpu.setChecked(launcher.chk_gpu.isChecked())
 
+            # Define toggled callbacks that safely set launcher state
             def on_windows_toggled(checked: bool) -> None:
                 if checked:
-                    launcher.chk_docker.setChecked(False)
-                    launcher.chk_wsl.setChecked(False)
+                    if hasattr(launcher, "chk_docker"):
+                        launcher.chk_docker.setChecked(False)
+                    if hasattr(launcher, "chk_wsl"):
+                        launcher.chk_wsl.setChecked(False)
 
             def on_docker_toggled(checked: bool) -> None:
                 if checked:
-                    launcher.chk_docker.setChecked(True)
-                    launcher.chk_wsl.setChecked(False)
+                    if hasattr(launcher, "chk_docker"):
+                        launcher.chk_docker.setChecked(True)
+                    if hasattr(launcher, "chk_wsl"):
+                        launcher.chk_wsl.setChecked(False)
 
             def on_wsl_toggled(checked: bool) -> None:
                 if checked:
-                    launcher.chk_docker.setChecked(False)
-                    launcher.chk_wsl.setChecked(True)
+                    if hasattr(launcher, "chk_docker"):
+                        launcher.chk_docker.setChecked(False)
+                    if hasattr(launcher, "chk_wsl"):
+                        launcher.chk_wsl.setChecked(True)
 
             self.chk_windows.toggled.connect(on_windows_toggled)
             self.chk_docker.toggled.connect(on_docker_toggled)
             self.chk_wsl.toggled.connect(on_wsl_toggled)
-            self.chk_live_viz.toggled.connect(launcher.chk_live.setChecked)
-            self.chk_gpu.toggled.connect(launcher.chk_gpu.setChecked)
+
+            if hasattr(launcher, "chk_live"):
+                self.chk_live_viz.toggled.connect(launcher.chk_live.setChecked)
+            if hasattr(launcher, "chk_gpu"):
+                self.chk_gpu.toggled.connect(launcher.chk_gpu.setChecked)
 
             # Two-way sync from launcher to SettingsWidget
-            launcher.chk_windows.toggled.connect(self.chk_windows.setChecked)
-            launcher.chk_docker.toggled.connect(self.chk_docker.setChecked)
-            launcher.chk_wsl.toggled.connect(self.chk_wsl.setChecked)
-            launcher.chk_live.toggled.connect(self.chk_live_viz.setChecked)
-            launcher.chk_gpu.toggled.connect(self.chk_gpu.setChecked)
+            if hasattr(launcher, "chk_windows"):
+                launcher.chk_windows.toggled.connect(self.chk_windows.setChecked)
+            if hasattr(launcher, "chk_docker"):
+                launcher.chk_docker.toggled.connect(self.chk_docker.setChecked)
+            if hasattr(launcher, "chk_wsl"):
+                launcher.chk_wsl.toggled.connect(self.chk_wsl.setChecked)
+            if hasattr(launcher, "chk_live"):
+                launcher.chk_live.toggled.connect(self.chk_live_viz.setChecked)
+            if hasattr(launcher, "chk_gpu"):
+                launcher.chk_gpu.toggled.connect(self.chk_gpu.setChecked)
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)

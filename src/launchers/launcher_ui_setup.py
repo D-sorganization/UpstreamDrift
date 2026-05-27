@@ -777,6 +777,9 @@ class UISetupManager:
         if True:
             self._rebuild_grid()
 
+        if getattr(self, "workspace_tabs", None):
+            self.workspace_tabs.setCurrentIndex(0)
+
     def _build_menu_bar_widget(self) -> QMenuBar:
         """Build a populated ``QMenuBar`` for the frameless launcher (#5624).
 
@@ -917,8 +920,52 @@ class UISetupManager:
         self._action_console = action_console
 
         view_menu.addSeparator()
+
+        action_popout_tab = QAction("&Pop Out Active Tab", self.launcher)
+        action_popout_tab.setShortcut("Ctrl+D")
+        action_popout_tab.setToolTip("Detach the active tab into a floating window")
+        action_popout_tab.setStatusTip("Pop out active tab")
+        action_popout_tab.triggered.connect(self._popout_active_tab)
+        view_menu.addAction(action_popout_tab)
+        self.action_popout_tab = action_popout_tab
+
+        action_redock_tabs = QAction("&Redock All Tabs", self.launcher)
+        action_redock_tabs.setShortcut("Ctrl+Shift+D")
+        action_redock_tabs.setToolTip(
+            "Redock all floating windows back to workspace tabs"
+        )
+        action_redock_tabs.setStatusTip("Redock all tabs")
+        action_redock_tabs.triggered.connect(self._redock_all_tabs)
+        view_menu.addAction(action_redock_tabs)
+        self.action_redock_tabs = action_redock_tabs
+
+        view_menu.addSeparator()
         theme_menu = view_menu.addMenu("&Theme")
         self._setup_theme_menu(theme_menu)
+
+    def _popout_active_tab(self) -> None:
+        """Pop out the currently active workspace tab into a floating window."""
+        if not getattr(self, "workspace_tabs", None):
+            return
+        idx = self.workspace_tabs.currentIndex()
+        if idx < 0:
+            return
+        tab_text = self.workspace_tabs.tabText(idx)
+        if tab_text == "Home":
+            from PyQt6.QtWidgets import QMessageBox
+
+            QMessageBox.information(
+                self.launcher,
+                "Cannot Pop Out",
+                "The 'Home' tab is a core view and cannot be popped out.",
+            )
+            return
+        self.workspace_tabs.detach_tab_from_menu(idx)
+
+    def _redock_all_tabs(self) -> None:
+        """Redock all detached workspace tabs."""
+        if getattr(self, "workspace_tabs", None):
+            self.workspace_tabs.redock_all_tabs()
 
     def _setup_tools_menu(self, menubar: Any) -> None:
         if menubar is None:

@@ -483,3 +483,48 @@ def test_build_vocabulary_returns_nonempty_sorted_list() -> None:
     vocab = build_vocabulary()
     assert len(vocab) > 0
     assert vocab == sorted(vocab), "vocabulary must be returned in sorted order"
+
+
+@pytest.mark.unit
+def test_on_sidebar_routed_shifts_to_home_tab(launcher) -> None:
+    """Routing the sidebar to a category filters the grid and shifts to Home tab."""
+    launcher.layout_manager = MagicMock()
+    launcher._rebuild_grid = MagicMock()
+    launcher.workspace_tabs = MagicMock()
+
+    # Route sidebar to category 1 (Engines)
+    launcher._on_sidebar_routed(1)
+    launcher.workspace_tabs.setCurrentIndex.assert_called_once_with(0)
+
+
+@pytest.mark.unit
+def test_popout_active_tab_actions(launcher) -> None:
+    """View menu popout active tab action respects bounds and core tabs."""
+    launcher.workspace_tabs = MagicMock()
+
+    # 1. Active tab index < 0 (nothing happens)
+    launcher.workspace_tabs.currentIndex.return_value = -1
+    launcher._popout_active_tab()
+    launcher.workspace_tabs.detach_tab_from_menu.assert_not_called()
+
+    # 2. Active tab is Home (should not pop out, should show warning)
+    launcher.workspace_tabs.currentIndex.return_value = 0
+    launcher.workspace_tabs.tabText.return_value = "Home"
+    with patch("PyQt6.QtWidgets.QMessageBox.information") as mock_info:
+        launcher._popout_active_tab()
+        mock_info.assert_called_once()
+        launcher.workspace_tabs.detach_tab_from_menu.assert_not_called()
+
+    # 3. Active tab is not Home (should pop out)
+    launcher.workspace_tabs.currentIndex.return_value = 1
+    launcher.workspace_tabs.tabText.return_value = "Library"
+    launcher._popout_active_tab()
+    launcher.workspace_tabs.detach_tab_from_menu.assert_called_once_with(1)
+
+
+@pytest.mark.unit
+def test_redock_all_tabs_action(launcher) -> None:
+    """View menu redock all tabs action triggers the DraggableTabWidget redock method."""
+    launcher.workspace_tabs = MagicMock()
+    launcher._redock_all_tabs()
+    launcher.workspace_tabs.redock_all_tabs.assert_called_once()

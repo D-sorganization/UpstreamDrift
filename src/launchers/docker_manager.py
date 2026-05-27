@@ -282,11 +282,24 @@ class DockerLauncher:
         """
         if model_type is None:
             raise ValueError("model_type must be provided")
+
+        repo_root_str = str(self.repo_root)
+        if "wsl" in get_docker_cmd():
+            import re
+
+            match = re.match(r"^([a-zA-Z]):(.*)", repo_root_str)
+            if match:
+                drive = match.group(1).lower()
+                path_part = match.group(2).replace("\\", "/")
+                repo_root_str = f"/mnt/{drive}{path_part}"
+            else:
+                repo_root_str = repo_root_str.replace("\\", "/")
+
         cmd = get_docker_cmd() + [
             "run",
             "--rm",
             "-v",
-            f"{self.repo_root}:/workspace",
+            f"{repo_root_str}:/workspace",
             "-e",
             "PYTHONPATH=/workspace:/workspace/src:/workspace/src/shared/python",
         ]
