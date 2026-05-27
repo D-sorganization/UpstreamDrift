@@ -145,7 +145,6 @@ def test_show_shortcuts_overlay_false(launcher) -> None:
         mock_overlay.assert_not_called()
 
 
-@patch("src.launchers.launcher_dialogs.UI_COMPONENTS_AVAILABLE", True)
 def test_show_preferences(launcher) -> None:
     with patch.object(launcher, "_open_settings") as mock_open:
         launcher._show_preferences()
@@ -187,6 +186,7 @@ def test_open_ai_settings_not_available(launcher) -> None:
 @patch("src.launchers.launcher_dialogs.AI_AVAILABLE", False)
 def test_toggle_ai_assistant_not_available(launcher) -> None:
     launcher.toggle_ai_assistant(True)
+    # With AI unavailable the method returns early; nothing to assert beyond no-raise.
 
 
 @patch("src.launchers.launcher_dialogs.AI_AVAILABLE", True)
@@ -213,14 +213,12 @@ def test_report_bug(mock_open, launcher) -> None:
 def test_open_settings(mock_widget, launcher) -> None:
     instance = MagicMock()
     mock_widget.return_value = instance
-    with patch("src.launchers.launcher_diagnostics.LauncherDiagnostics") as mock_diag:
-        diag_inst = MagicMock()
-        diag_inst.run_all_checks.return_value = {}
-        mock_diag.return_value = diag_inst
+    instance.reset_layout_requested = MagicMock()
+    instance.reset_layout_requested.connect = MagicMock()
 
-        launcher._open_settings(tab=1)
-        mock_widget.assert_called_once()
-        instance.show.assert_called_once()
+    launcher._open_settings(tab=1)
+    mock_widget.assert_called_once()
+    instance.show.assert_called_once()
 
 
 def test_open_diagnostics(launcher) -> None:
