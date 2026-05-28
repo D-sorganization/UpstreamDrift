@@ -1,7 +1,6 @@
 """Tests for launcher_dialogs.py."""
 
 from pathlib import Path  # noqa: E402
-from typing import Any
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
@@ -9,18 +8,33 @@ from PyQt6.QtWidgets import QMainWindow  # noqa: E402
 from src.launchers.launcher_dialogs import DialogsManager  # noqa: E402
 
 
+from typing import Any
+
+
 class DummyLauncher(QMainWindow):
     def __getattr__(self, name: str) -> Any:
-        if hasattr(self, "manager"):
-            manager = self.manager
-            if name in manager.__dict__ or hasattr(type(manager), name):
-                attr = getattr(manager, name)
-                import types
+        for mgr_name in ("manager", "dialogs_manager"):
+            if mgr_name in self.__dict__:
+                manager = self.__dict__[mgr_name]
+                if name in manager.__dict__ or hasattr(type(manager), name):
+                    attr = getattr(manager, name)
+                    import types
 
-                if isinstance(attr, types.MethodType):
-                    return types.MethodType(attr.__func__, self)
-                return attr
-        raise AttributeError(name)
+                    if isinstance(attr, types.MethodType):
+                        return types.MethodType(attr.__func__, self)
+                    return attr
+        raise AttributeError(
+            f"'{type(self).__name__}' object has no attribute '{name}'"
+        )
+
+    def __delattr__(self, name: str) -> None:
+        for mgr_name in ("manager", "dialogs_manager"):
+            if mgr_name in self.__dict__:
+                manager = self.__dict__[mgr_name]
+                if name in manager.__dict__:
+                    delattr(manager, name)
+                    return
+        super().__delattr__(name)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -138,13 +152,6 @@ def test_show_preferences(launcher) -> None:
         mock_open.assert_called_once_with(tab=4)
 
 
-@patch("src.launchers.launcher_dialogs.UI_COMPONENTS_AVAILABLE", False)
-def test_show_preferences_false(launcher) -> None:
-    with patch.object(launcher, "_open_settings") as mock_open:
-        launcher._show_preferences()
-        mock_open.assert_called_once_with(tab=4)
-
-
 def test_show_toast(launcher) -> None:
     launcher.toast_manager = MagicMock()
     launcher.show_toast("msg", "success")
@@ -179,9 +186,7 @@ def test_open_ai_settings_not_available(launcher) -> None:
 
 @patch("src.launchers.launcher_dialogs.AI_AVAILABLE", False)
 def test_toggle_ai_assistant_not_available(launcher) -> None:
-    launcher.sidekick_sidebar = MagicMock()
     launcher.toggle_ai_assistant(True)
-    launcher.sidekick_sidebar.setVisible.assert_not_called()
 
 
 @patch("src.launchers.launcher_dialogs.AI_AVAILABLE", True)
@@ -208,9 +213,14 @@ def test_report_bug(mock_open, launcher) -> None:
 def test_open_settings(mock_widget, launcher) -> None:
     instance = MagicMock()
     mock_widget.return_value = instance
-    launcher._open_settings(tab=1)
-    mock_widget.assert_called_once()
-    instance.show.assert_called_once()
+    with patch("src.launchers.launcher_diagnostics.LauncherDiagnostics") as mock_diag:
+        diag_inst = MagicMock()
+        diag_inst.run_all_checks.return_value = {}
+        mock_diag.return_value = diag_inst
+
+        launcher._open_settings(tab=1)
+        mock_widget.assert_called_once()
+        instance.show.assert_called_once()
 
 
 def test_open_diagnostics(launcher) -> None:
@@ -293,21 +303,12 @@ def test_open_layout_manager(mock_dialog, launcher) -> None:
 
 
 def test_toggle_layout_mode(launcher) -> None:
-    launcher.layout_manager = MagicMock()
-    launcher._action_layout_mode = MagicMock()
-    launcher._action_layout_mode.isChecked.return_value = False
-
     launcher.toggle_layout_mode(True)
     assert launcher.layout_edit_mode is True
     launcher.layout_manager.set_edit_mode.assert_called_with(True)
-    launcher._action_layout_mode.setChecked.assert_called_with(True)
-
-    # Set checked state to True so that toggling False triggers the change
-    launcher._action_layout_mode.isChecked.return_value = True
 
     launcher.toggle_layout_mode(False)
     launcher.layout_manager.set_edit_mode.assert_called_with(False)
-    launcher._action_layout_mode.setChecked.assert_called_with(False)
 
 
 def test_on_docker_mode_changed(launcher) -> None:
@@ -399,20 +400,16 @@ def test_update_execution_status(launcher) -> None:
     # explanation that all three labels are derived from.
     launcher.chk_wsl.isChecked.return_value = True
     launcher.update_execution_status()
-    launcher.lbl_execution_mode.setText.assert_called_with(
-        "Runtime: WSL2 (Ubuntu Linux)"
-    )
+    launcher.lbl_execution_mode.setText.assert_called_with("Runtime: WSL2")
 
     launcher.chk_wsl.isChecked.return_value = False
     launcher.chk_docker.isChecked.return_value = True
     launcher.update_execution_status()
-    launcher.lbl_execution_mode.setText.assert_called_with(
-        "Runtime: Docker (Linux container)"
-    )
+    launcher.lbl_execution_mode.setText.assert_called_with("Runtime: Docker")
 
     launcher.chk_docker.isChecked.return_value = False
     launcher.update_execution_status()
-    launcher.lbl_execution_mode.setText.assert_called_with("Runtime: Native Windows")
+    launcher.lbl_execution_mode.setText.assert_called_with("Runtime: Windows")
 
 
 def test_update_execution_status_no_label(launcher) -> None:

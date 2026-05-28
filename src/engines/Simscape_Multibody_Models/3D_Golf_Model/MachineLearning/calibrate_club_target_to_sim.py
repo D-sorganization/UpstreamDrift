@@ -77,7 +77,9 @@ def _fit_similarity(
     sign = np.sign(np.linalg.det(u @ vt))
     correction = np.diag([1.0, 1.0, sign])
     rotation = u @ correction @ vt
-    variance = np.mean(np.einsum("ij,ij->i", source_centered, source_centered))  # ⚡ Bolt: np.einsum is faster and avoids temporary arrays
+    variance = np.mean(
+        np.einsum("ij,ij->i", source_centered, source_centered)
+    )  # ⚡ Bolt: np.einsum is faster and avoids temporary arrays
     scale = float(np.sum(singular_values * np.diag(correction)) / variance)
     translation = target_mean - scale * (source_mean @ rotation)
     return rotation, scale, translation
