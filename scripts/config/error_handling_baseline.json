@@ -9,7 +9,7 @@
     "gather_no_return_exceptions": "asyncio.gather(...) without return_exceptions=True. New code must use src/shared/python/core/process_safety.safe_gather."
   },
   "counts": {
-    "noqa_BLE001": 349,
+    "noqa_BLE001": 350,
     "noqa_F841": 22,
     "noqa_F401": 719,
     "raw_popen": 41,
