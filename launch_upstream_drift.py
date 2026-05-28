@@ -10,6 +10,10 @@ Usage:
 """
 
 import sys
+import os
+
+os.environ.setdefault("GOLF_SUITE_MODE", "local")
+
 
 if sys.platform == "win32":
     try:

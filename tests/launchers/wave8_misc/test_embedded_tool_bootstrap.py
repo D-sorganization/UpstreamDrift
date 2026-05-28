@@ -109,7 +109,7 @@ def test_bootstrap_adds_vendor_path_to_sys_path() -> None:
     from pathlib import Path
 
     vendor_src = str(
-        Path(bootstrap.__file__).resolve().parent.parent.parent.parent
+        Path(bootstrap.__file__).resolve().parent.parent.parent
         / "vendor"
         / "ud-tools"
         / "src"
@@ -121,7 +121,10 @@ def test_bootstrap_adds_vendor_path_to_sys_path() -> None:
         def _noop(name):
             raise ImportError("noop")
 
-        with patch.object(_builtins, "__import__", _make_filtered_import(_noop)):
+        with (
+            patch.object(Path, "is_dir", return_value=False),
+            patch.object(_builtins, "__import__", _make_filtered_import(_noop)),
+        ):
             bootstrap.bootstrap_embeddable_tools()
         assert vendor_src in sys.path
     finally:

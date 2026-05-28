@@ -18,6 +18,7 @@ Usage:
 
 from enum import Enum, auto
 from typing import TYPE_CHECKING, Any
+import weakref
 
 from PyQt6.QtCore import QPropertyAnimation, Qt, QTimer
 from PyQt6.QtGui import QColor, QFont, QPainter, QPainterPath
@@ -297,10 +298,13 @@ class ToastManager:
         self.active_toasts.append(toast)
 
         # Clean up when dismissed
+        toast_ref = weakref.ref(toast)
+
         def on_destroyed() -> None:
             """Remove the toast from the active list when it is destroyed."""
-            if toast in self.active_toasts:
-                self.active_toasts.remove(toast)
+            t = toast_ref()
+            if t is not None and t in self.active_toasts:
+                self.active_toasts.remove(t)
 
         toast.destroyed.connect(on_destroyed)
 
