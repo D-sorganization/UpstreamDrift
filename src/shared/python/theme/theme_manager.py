@@ -142,16 +142,25 @@ class ThemeManager(QObject):
     # =========================================================================
 
     def _resolve_effective_theme(self) -> str:
-        """Resolve the effective theme name, handling inheritance."""
+        """Resolve the effective theme name, handling inheritance.
+
+        Applies the ``LEGACY_THEME_NAMES`` migration so saved preferences
+        pointing at renamed/removed themes silently resolve to their current
+        canonical name (and survive the migration write-through on next save).
+        """
+        from .colors import resolve_legacy_theme_name
+
         if self.app_context:
             pref = str(
                 self.settings.value(f"theme_{self.app_context}", "Inherit", type=str)
             )
             if pref == "Inherit":
-                return str(self.settings.value("theme", "Light", type=str))
-            return pref
+                raw = str(self.settings.value("theme", "Light", type=str))
+                return resolve_legacy_theme_name(raw) or "Light"
+            return resolve_legacy_theme_name(pref) or "Light"
 
-        return str(self.settings.value("theme", "Light", type=str))
+        raw = str(self.settings.value("theme", "Light", type=str))
+        return resolve_legacy_theme_name(raw) or "Light"
 
     def get_theme_preference(self) -> str:
         """Get the current theme preference.
