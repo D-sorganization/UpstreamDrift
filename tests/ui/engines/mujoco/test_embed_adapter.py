@@ -171,3 +171,32 @@ def test_import_registers_mujoco_dashboard_in_registry() -> None:
     assert tool is not None
     assert tool.tool_id == "mujoco_unified"
     assert tool.embed_capabilities().supports_embedded is True
+
+
+def test_apply_styling_uses_theme_manager_when_available(qapp) -> None:  # noqa: ANN001
+    """Issue #6509: _apply_styling must call apply_theme_to_window, not be a no-op."""
+    from unittest.mock import MagicMock, patch
+
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.core.main_window import (  # noqa: E501
+        AdvancedGolfAnalysisWindow,
+    )
+
+    mock_apply = MagicMock()
+
+    with patch.object(AdvancedGolfAnalysisWindow, "__init__", return_value=None):
+        window = AdvancedGolfAnalysisWindow.__new__(AdvancedGolfAnalysisWindow)
+
+    # Patch the module attribute the import inside _apply_styling binds to
+    with patch.dict(
+        "sys.modules",
+        {
+            "src.shared.python.theme": type(
+                "m",
+                (),
+                {"apply_theme_to_window": mock_apply},
+            )()
+        },
+    ):
+        window._apply_styling()
+
+    mock_apply.assert_called_once_with(window)
