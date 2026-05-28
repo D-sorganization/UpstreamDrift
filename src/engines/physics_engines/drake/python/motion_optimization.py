@@ -437,7 +437,9 @@ class DrakeMotionOptimizer:
             """Compute Euclidean distance from final position to target."""
             # Placeholder: compute distance to target
             final_position = trajectory[-1]
-            return float(np.linalg.norm(final_position - target_point))
+            # ⚡ Bolt: np.dot is faster than np.linalg.norm for small 1D arrays
+            diff = final_position - target_point
+            return float(np.sqrt(np.dot(diff, diff)))
 
         self.add_objective(
             name="target_accuracy",
