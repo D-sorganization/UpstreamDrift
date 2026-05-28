@@ -65,7 +65,7 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Setup Node.js
-        uses: actions/setup-node@601291da961a6753d9014bab2023d900747ddd60
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "24"
           cache: "npm"
@@ -134,7 +134,7 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Setup Node.js
-        uses: actions/setup-node@601291da961a6753d9014bab2023d900747ddd60
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "24"
           cache: "npm"
@@ -175,7 +175,7 @@ jobs:
           projectPath: ui
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@60a12c6b21f080709581541097fa6c8793b82a62
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: golf-modeling-suite-${{ matrix.platform }}
           path: |

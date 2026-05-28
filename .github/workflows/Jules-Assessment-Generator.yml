@@ -54,7 +54,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@82c7b60f580344b90dbb403b250f14003997afe2
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: "3.11"
           cache: 'pip'
@@ -62,7 +62,7 @@ jobs:
             pyproject.toml
             requirements*.txt
 
-      - uses: actions/setup-node@601291da961a6753d9014bab2023d900747ddd60
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "24"
 
