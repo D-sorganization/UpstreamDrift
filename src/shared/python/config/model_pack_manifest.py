@@ -325,6 +325,7 @@ class ModelPackEntry:
     hidden: bool = False
     hidden_reason: str | None = None
     hidden_owner: str | None = None
+    embed_adapter: str | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> ModelPackEntry:
@@ -428,6 +429,13 @@ class ModelPackEntry:
             if launcher_raw is not None
             else None
         )
+        embed_adapter = data.get("embed_adapter")
+        if embed_adapter is not None:
+            require(
+                isinstance(embed_adapter, str) and embed_adapter.strip() != "",
+                "embed_adapter must be a non-empty string when provided",
+                embed_adapter,
+            )
 
         return cls(
             id=data["id"].strip(),
@@ -454,6 +462,9 @@ class ModelPackEntry:
             hidden_owner=(
                 hidden_owner.strip() if isinstance(hidden_owner, str) else None
             ),
+            embed_adapter=embed_adapter.strip()
+            if isinstance(embed_adapter, str)
+            else None,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -492,6 +503,8 @@ class ModelPackEntry:
             data["hidden"] = True
             data["hidden_reason"] = self.hidden_reason
             data["hidden_owner"] = self.hidden_owner
+        if self.embed_adapter:
+            data["embed_adapter"] = self.embed_adapter
         return data
 
 

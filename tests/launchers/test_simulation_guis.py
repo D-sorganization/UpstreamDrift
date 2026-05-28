@@ -131,6 +131,18 @@ class TestExternalToolsAdapter:
         result = mod._ensure_tools_on_path()
         assert isinstance(result, bool)
 
+    def test_get_video_analyzer_dockable_ui_fallback(self, qapp) -> None:
+        """get_video_analyzer_dockable_ui should return wrapped VideoAnalyzerWindow if external fails."""
+        mod = importlib.import_module("src.launchers.external_tools_adapter")
+        from unittest.mock import patch
+
+        with patch.object(mod, "_ensure_tools_on_path", return_value=True):
+            win = mod.get_video_analyzer_dockable_ui()
+            assert win is not None
+            from src.tools.video_analyzer.gui import VideoAnalyzerWindow
+
+            assert isinstance(win.centralWidget(), VideoAnalyzerWindow)
+
 
 # ===========================================================================
 # SwingBallFlightPipeline source tests

@@ -334,11 +334,40 @@ def test_on_docker_mode_changed_disable(launcher) -> None:
         )
 
 
-@patch("src.launchers.launcher_dialogs.QMessageBox.warning")
-def test_on_docker_mode_changed_unavailable(mock_warning, launcher) -> None:
+@patch("src.launchers.launcher_dialogs.QMessageBox.question")
+def test_on_docker_mode_changed_unavailable(mock_question, launcher) -> None:
+    from PyQt6.QtWidgets import QMessageBox
+
+    # Test case 1: loading is True, should silently uncheck chk_docker if Docker is not available
     launcher.docker_available = False
-    launcher._on_docker_mode_changed(2)
-    mock_warning.assert_called_once()
+    launcher.launcher.loading = True
+    launcher.chk_wsl.isChecked.return_value = False
+    launcher.toast_manager = MagicMock()
+    with patch.object(launcher, "update_execution_status"):
+        launcher._on_docker_mode_changed(2)
+    mock_question.assert_not_called()
+    launcher.chk_docker.setChecked.assert_called_with(False)
+    assert launcher.docker_available is False
+
+    # Test case 2: loading is False, QMessageBox.question returns Yes, should set docker_available to True
+    launcher.docker_available = False
+    launcher.launcher.loading = False
+    mock_question.return_value = QMessageBox.StandardButton.Yes
+    with patch.object(launcher, "update_execution_status"):
+        launcher._on_docker_mode_changed(2)
+    mock_question.assert_called_once()
+    assert launcher.docker_available is True
+
+    # Test case 3: loading is False, QMessageBox.question returns No, should keep docker_available False and revert checkbox
+    mock_question.reset_mock()
+    launcher.docker_available = False
+    launcher.launcher.loading = False
+    mock_question.return_value = QMessageBox.StandardButton.No
+    with patch.object(launcher, "update_execution_status"):
+        launcher._on_docker_mode_changed(2)
+    mock_question.assert_called_once()
+    assert launcher.docker_available is False
+    launcher.chk_docker.setChecked.assert_called_with(False)
 
 
 @patch("src.launchers.launcher_dialogs.subprocess.run")

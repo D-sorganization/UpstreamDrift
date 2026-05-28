@@ -122,7 +122,7 @@ def test_get_status_info(mock_model, parent_launcher, qapp) -> None:
 
     mock_model.type = "matlab"
     status, _ = card._get_status_info()
-    assert status == "External"
+    assert status == "Ready"
 
     mock_model.type = "urdf_generator"
     status, _ = card._get_status_info()

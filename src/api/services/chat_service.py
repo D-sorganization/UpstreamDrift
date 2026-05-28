@@ -426,6 +426,12 @@ class ChatService:
         while True:
             try:
                 item = await asyncio.to_thread(chunk_queue.get, timeout=60.0)
+            except queue.Empty:
+                yield {
+                    "type": "error",
+                    "detail": "AI provider connection timed out. Please check that your AI backend (e.g. Ollama or API key configuration) is running and reachable.",
+                }
+                break
             except (FileNotFoundError, OSError):
                 break
             if item is None:

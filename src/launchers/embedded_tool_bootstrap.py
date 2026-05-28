@@ -41,24 +41,25 @@ def bootstrap_embeddable_tools() -> list[str]:
     if _bootstrap_complete:
         return _registered_tools
 
-    # Ensure vendored Tools repo is in sys.path so embeddable tools can be found
+    # Ensure Tools repo is in sys.path so embeddable tools can be found.
+    # Prioritise sibling Tools repository if checked out, falling back to vendored ud-tools.
     import sys
     from pathlib import Path
 
-    # Path to vendor/ud-tools/src
-    vendor_src_path = str(
-        Path(__file__).resolve().parent.parent.parent.parent
-        / "vendor"
-        / "ud-tools"
-        / "src"
-    )
-    if vendor_src_path not in sys.path:
-        sys.path.insert(0, vendor_src_path)
+    repos_root = Path(__file__).resolve().parent.parent.parent
+    sibling_tools = repos_root.parent / "Tools"
+    if sibling_tools.is_dir():
+        tools_src_path = str(sibling_tools / "src")
+        tools_shared_py_path = str(sibling_tools / "src" / "shared" / "python")
+    else:
+        # Path to vendor/ud-tools/src
+        tools_src_path = str(repos_root / "vendor" / "ud-tools" / "src")
+        tools_shared_py_path = str(Path(tools_src_path) / "shared" / "python")
 
-    # Path to vendor/ud-tools/src/shared/python (for 'sidekick' legacy imports)
-    vendor_shared_py_path = str(Path(vendor_src_path) / "shared" / "python")
-    if vendor_shared_py_path not in sys.path:
-        sys.path.insert(0, vendor_shared_py_path)
+    if tools_src_path not in sys.path:
+        sys.path.insert(0, tools_src_path)
+    if tools_shared_py_path not in sys.path:
+        sys.path.insert(0, tools_shared_py_path)
 
     # List of tool adapter modules that self-register on import
     # Each module's __init__.py calls register_embeddable_tool()

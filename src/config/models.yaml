@@ -75,7 +75,7 @@ models:
     launcher:
       category: "physics_engine"
       logo: "assets/matlab_logo.png"
-      status: "external"
+      status: "ready"
 
   # =============================================================================
   # SIMULATION — playable / interactive simulators
@@ -282,7 +282,7 @@ models:
     launcher:
       category: "motion_capture"
       logo: "assets/video_analyzer_modern.png"
-      status: "external"
+      status: "ready"
     embed_adapter: "src/launchers/external_tools_adapter.py::get_video_analyzer_dockable_ui"
 
   - id: "video_processor"
@@ -299,7 +299,7 @@ models:
     launcher:
       category: "motion_capture"
       logo: "assets/video_analyzer_modern.png"
-      status: "external"
+      status: "ready"
       default_launch: "tab"
 
   - id: "openpose_analysis"
@@ -352,7 +352,7 @@ models:
     launcher:
       category: "tool"
       logo: "assets/data_explorer_modern.png"
-      status: "external"
+      status: "ready"
       default_launch: "tab"
 
   - id: "data_processor"
@@ -371,7 +371,7 @@ models:
     launcher:
       category: "tool"
       logo: "assets/data_explorer_modern.png"
-      status: "external"
+      status: "ready"
       default_launch: "tab"
 
   - id: "sidekick"

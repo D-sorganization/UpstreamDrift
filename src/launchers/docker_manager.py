@@ -260,7 +260,7 @@ class DockerLauncher:
                     self.image_name = legacy_image
                     return True
             return False
-        except (OSError, ValueError) as e:
+        except (subprocess.SubprocessError, OSError, ValueError) as e:
             self.logger.warning(f"Failed to check Docker image: {e}")
             return False
 
