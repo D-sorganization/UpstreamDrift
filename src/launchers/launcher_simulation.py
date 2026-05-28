@@ -281,6 +281,9 @@ except (RuntimeError, TypeError, AttributeError) as e:
         if "shot_tracer" in model_id:
             self._launch_shot_tracer()
             return True
+        if "training_controller" in model_id:
+            self._launch_training_controller()
+            return True
         return False
 
     def _try_launch_docker(self, model: Any) -> bool:
@@ -782,6 +785,35 @@ except (RuntimeError, TypeError, AttributeError) as e:
             self.show_toast(f"Launch failed: {e}", "error")
             self.lbl_status.setText("! Launch Error")
             self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
+
+    def _launch_training_controller(self) -> None:
+        """Launch or focus the Training Controller tab."""
+        from src.shared.python.launcher_embed import get_embeddable_tool
+
+        tool = get_embeddable_tool("training_controller")
+        if tool:
+            try:
+                # Check if already open
+                for idx in range(self.workspace_tabs.count()):
+                    if self.workspace_tabs.tabText(idx) == "Training":
+                        self.workspace_tabs.setCurrentIndex(idx)
+                        return
+
+                ui_widget = tool.create_main_widget(self.launcher)
+                if ui_widget:
+                    ui_widget.destroyed.connect(tool.cleanup)
+                    self.dock_widget_as_tab(ui_widget, "Training")
+                    self.show_toast("Training Controller loaded as tab.", "success")
+                    self.lbl_status.setText("> Training Controller Running")
+                    self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
+                    btn = getattr(self, "btn_training_sidebar", None)
+                    if btn is not None:
+                        btn.setChecked(True)
+                    return
+            except Exception as e:
+                logger.exception("Failed to launch Training Controller embedded: %s", e)
+
+        self.show_toast("Training Controller is unavailable.", "error")
 
     def _launch_c3d_viewer(self) -> None:
         """Launch the C3D motion viewer application.

@@ -664,6 +664,13 @@ class UISetupManager:
         )
         btn_library.setAccessibleDescription("Open the document library tab")
 
+        btn_training = self._build_sidebar_button(
+            "Training",
+            "brain",
+            checkable=True,
+        )
+        btn_training.setAccessibleDescription("Open the training controller tab")
+
         # If _show_preferences exists in the mixed-in class, use it.
         # Otherwise, we gracefully handle it to avoid crashes in tests.
         btn_settings = self._build_sidebar_button(
@@ -695,9 +702,11 @@ class UISetupManager:
         self.sidebar_group.addButton(btn_motion_capture, 5)
         self.sidebar_group.addButton(btn_tools, 6)
         self.sidebar_group.addButton(btn_library, 7)
+        self.sidebar_group.addButton(btn_training, 8)
         self.sidebar_group.idClicked.connect(self._on_sidebar_routed)
 
         self.btn_library_sidebar = btn_library
+        self.btn_training_sidebar = btn_training
 
         # Space navigation buttons evenly to fill available height
         layout.addWidget(btn_home)
@@ -715,6 +724,8 @@ class UISetupManager:
         layout.addWidget(btn_tools)
         layout.addStretch(1)
         layout.addWidget(btn_library)
+        layout.addStretch(1)
+        layout.addWidget(btn_training)
         layout.addStretch(3)  # larger gap before bottom group
         layout.addWidget(btn_console)
         layout.addWidget(btn_settings)
@@ -728,7 +739,8 @@ class UISetupManager:
         QWidget.setTabOrder(btn_motion_matching, btn_motion_capture)
         QWidget.setTabOrder(btn_motion_capture, btn_tools)
         QWidget.setTabOrder(btn_tools, btn_library)
-        QWidget.setTabOrder(btn_library, btn_console)
+        QWidget.setTabOrder(btn_library, btn_training)
+        QWidget.setTabOrder(btn_training, btn_console)
         QWidget.setTabOrder(btn_console, btn_settings)
 
         scroll_area = QScrollArea()
@@ -757,6 +769,9 @@ class UISetupManager:
         """
         if button_id == 7:
             self._open_library_tab()
+            return
+        if button_id == 8:
+            self._launch_training_controller()
             return
         if not True:
             return

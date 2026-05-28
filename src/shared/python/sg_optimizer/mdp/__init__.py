@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from src.shared.python.sg_optimizer.mdp.action import ActionSet, ShotAction
 from src.shared.python.sg_optimizer.mdp.state import State
+from src.shared.python.sg_optimizer.mdp.tree_model import TreeModel
 from src.shared.python.sg_optimizer.mdp.value_iteration import (
     HoleMDP,
     SolveResult,
@@ -16,5 +17,6 @@ __all__ = [
     "ShotAction",
     "SolveResult",
     "State",
+    "TreeModel",
     "bellman_backup_scalar",
 ]

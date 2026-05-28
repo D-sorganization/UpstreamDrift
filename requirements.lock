@@ -23,16 +23,13 @@ certifi==2026.1.4
     # via
     #   httpcore
     #   httpx
+    #   pyproj
     #   requests
 charset-normalizer==3.4.7
     # via requests
 click==8.3.1
     # via
     #   flask
-    #   uvicorn
-colorama==0.4.6
-    # via
-    #   click
     #   uvicorn
 contourpy==1.3.3
     # via bokeh
@@ -81,7 +78,7 @@ mujoco==3.8.0
     # via upstream-drift (pyproject.toml)
 narwhals==2.20.0
     # via bokeh
-numpy==1.26.4
+numpy==2.2.6
     # via
     #   bokeh
     #   contourpy
@@ -105,6 +102,8 @@ pydantic-core==2.41.5
     # via pydantic
 pyopengl==3.1.10
     # via mujoco
+pyproj==3.7.2
+    # via upstream-drift (pyproject.toml)
 python-dotenv==1.2.2
     # via
     #   upstream-drift (pyproject.toml)
@@ -140,6 +139,8 @@ urllib3==2.7.0
     # via requests
 uvicorn[standard]==0.40.0
     # via upstream-drift (pyproject.toml)
+uvloop==0.22.1
+    # via uvicorn
 watchfiles==1.1.1
     # via uvicorn
 websockets==16.0
