@@ -49,7 +49,7 @@ class TabSettingsMixin:
 
     def _configure_tab_settings(self) -> None:
         self._settings_store = SidebarTabSettingsStore(
-            self._tab_definitions.values(),
+            list(self._tab_definitions.values()),
             self._state,
         )
         self._refresh_settings_button()

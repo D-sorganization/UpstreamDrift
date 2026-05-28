@@ -142,7 +142,6 @@ def _import_service_module(
 ):
     canonical_joint = _install_reference_pose_stub(monkeypatch)
     monkeypatch.setitem(sys.modules, "mujoco", fake_mujoco)
-    monkeypatch.setitem(sys.modules, "myosuite", types.ModuleType("myosuite"))
 
     for module_name in (
         "src.shared.python.pose_interchange.adapters._base",
@@ -200,7 +199,7 @@ def test_set_pose_uses_joint_addresses_for_fixed_base_models(
     )
     data = SimpleNamespace(qpos=np.full(1, np.nan))
 
-    service = service_module.MyosuiteKinematicsService()
+    service = service_module.MyoSuiteKinematicsService()
     service._model = model
     service._data = data
 
@@ -239,7 +238,7 @@ def test_set_pose_respects_nonzero_free_joint_address(
     )
     data = SimpleNamespace(qpos=np.full(8, np.nan))
 
-    service = service_module.MyosuiteKinematicsService()
+    service = service_module.MyoSuiteKinematicsService()
     service._model = model
     service._data = data
 

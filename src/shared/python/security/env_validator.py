@@ -114,29 +114,6 @@ def validate_secret_key_strength(key: str, min_length: int = 64) -> None:
             f"Secret key is too short: {len(key)} chars (minimum: {min_length})"
         )
 
-    # Check it's not a placeholder
-    if key == "UNSAFE-NO-SECRET-KEY-SET-AUTHENTICATION-WILL-FAIL":
-        raise EnvironmentValidationError(
-            "Secret key is using unsafe placeholder. "
-            "Set GOLF_API_SECRET_KEY or SECRET_KEY environment variable."
-        )
-
-    # Reject dangerous defaults that ship in .env.example
-    _DANGEROUS_SECRET_DEFAULTS = frozenset(
-        {
-            "generate_a_random_string_here",
-            "generate_another_random_string_here",
-            "changeme",
-            "change_me",
-        }
-    )
-    if key in _DANGEROUS_SECRET_DEFAULTS:
-        raise EnvironmentValidationError(
-            "GOLF_API_SECRET_KEY is still set to the example placeholder value. "
-            "Generate a real key with: "
-            'python3 -c "import secrets; print(secrets.token_hex(32))"'
-        )
-
     # Check for common weak patterns
     weak_patterns = [
         "password",
@@ -157,7 +134,40 @@ def validate_secret_key_strength(key: str, min_length: int = 64) -> None:
             )
 
 
-# Exact placeholder strings shipped in .env.example — never acceptable in production.
+def validate_admin_password_strength(password: str, min_length: int = 12) -> None:
+    """Validate that the admin password meets minimum security requirements.
+
+    Rejects empty values, values shorter than ``min_length``, and any value
+    that matches a known placeholder shipped in ``.env.example`` (e.g.
+    ``change_me_in_production``).  See issue #5920.
+
+    Args:
+        password: Admin password to validate.
+        min_length: Minimum acceptable length (default: 12).
+
+    Raises:
+        EnvironmentValidationError: If the password is empty, too short, or
+            matches a known placeholder.
+    """
+    if not password:
+        raise EnvironmentValidationError("Admin password is empty")
+
+    if password in KNOWN_ADMIN_PASSWORD_PLACEHOLDERS:
+        raise EnvironmentValidationError(
+            f"Admin password is using a known placeholder value "
+            f"({password!r}).  It looks like `.env.example` was copied to "
+            "`.env` without editing.  Set GOLF_ADMIN_PASSWORD to a strong, "
+            "unique value."
+        )
+
+    if len(password) < min_length:
+        raise EnvironmentValidationError(
+            f"Admin password is too short: {len(password)} chars "
+            f"(minimum: {min_length})"
+        )
+
+
+# Exact placeholder strings shipped in .env.example; never acceptable in production.
 _DEFAULT_SECRET_KEY = "generate_a_random_string_here"
 _DEFAULT_ADMIN_PASSWORD = "change_me_in_production"
 
@@ -211,39 +221,6 @@ def _assert_production_secrets() -> None:
         raise RuntimeError(
             "Production mode requires non-default GOLF_ADMIN_PASSWORD. "
             "See .env.example for setup instructions."
-        )
-
-
-def validate_admin_password_strength(password: str, min_length: int = 12) -> None:
-    """Validate that the admin password meets minimum security requirements.
-
-    Rejects empty values, values shorter than ``min_length``, and any value
-    that matches a known placeholder shipped in ``.env.example`` (e.g.
-    ``change_me_in_production``).  See issue #5920.
-
-    Args:
-        password: Admin password to validate.
-        min_length: Minimum acceptable length (default: 12).
-
-    Raises:
-        EnvironmentValidationError: If the password is empty, too short, or
-            matches a known placeholder.
-    """
-    if not password:
-        raise EnvironmentValidationError("Admin password is empty")
-
-    if password in KNOWN_ADMIN_PASSWORD_PLACEHOLDERS:
-        raise EnvironmentValidationError(
-            f"Admin password is using a known placeholder value "
-            f"({password!r}).  It looks like `.env.example` was copied to "
-            "`.env` without editing.  Set GOLF_ADMIN_PASSWORD to a strong, "
-            "unique value."
-        )
-
-    if len(password) < min_length:
-        raise EnvironmentValidationError(
-            f"Admin password is too short: {len(password)} chars "
-            f"(minimum: {min_length})"
         )
 
 

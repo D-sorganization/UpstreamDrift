@@ -92,7 +92,7 @@ def test_minimal_species_db_fallback() -> None:
     original_modules = dict(sys.modules)
     sys.modules[
         "integrated_process_simulator.calculators.thermodynamic_properties.species_database"
-    ] = None
+    ] = None  # type: ignore[assignment]
 
     try:
         importlib.reload(wgs_reactor_calculator)

@@ -20,7 +20,6 @@ from src.launchers.launcher_model_sources import (
     get_model_working_directory,
     resolve_model_artifact_path,
 )
-from src.shared.python.config.environment import get_api_port
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -402,6 +401,10 @@ class PuttingGreenHandler:
         )
         return process is not None
 
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """Putting Green handler does not provide a dockable UI widget."""
+        return None
+
 
 class BiomechExerciseHandler:
     """Handler for launching biomechanics exercise dashboards."""
@@ -451,6 +454,10 @@ class BiomechExerciseHandler:
             extra_python_paths=get_model_python_paths(model, repo_path),
         )
         return process is not None
+
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """BiomechExercise handler does not provide a dockable UI widget."""
+        return None
 
 
 class GolfSimulationSuiteHandler:
@@ -504,6 +511,10 @@ class GolfSimulationSuiteHandler:
             extra_python_paths=get_model_python_paths(model, repo_path),
         )
         return process is not None
+
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """Golf Simulation Suite handler does not provide a dockable UI widget."""
+        return None
 
 
 def _open_with_system_app(file_path: Path, handler_name: str) -> bool:
@@ -570,6 +581,10 @@ class _SystemFileHandler:
             return False
 
         return _open_with_system_app(file_path, self.HANDLER_NAME)
+
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """System file handlers do not provide a dockable UI widget."""
+        return None
 
 
 class MatlabFileHandler(_SystemFileHandler):
@@ -638,13 +653,13 @@ class DocumentHandler:
             )
             return False
 
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """Document handler does not provide a dockable UI widget."""
+        return None
 
-class APIBackedHandler:
-    """Handler for launching API-backed services.
 
-    API-backed services represent web routes or endpoints. In the desktop launcher,
-    these are opened in the default system web browser.
-    """
+class ApiBackedHandler:
+    """Handler for API-backed tiles that do not launch local processes directly."""
 
     MODEL_TYPES = {"api_backed"}
 
@@ -656,24 +671,18 @@ class APIBackedHandler:
         self,
         model: Any,
         repo_path: Path,
-        process_manager: Any,
+        process_manager: ProcessManager,
     ) -> bool:
-        """Launch the API-backed service by opening its web route in a browser."""
-        web_route = getattr(model, "web_route", "")
-        if not web_route:
-            logger.error("APIBackedHandler: model has no web_route")
-            return False
+        """API-backed tiles do not launch local processes directly."""
+        logger.info(
+            "ApiBackedHandler: launch requested for api-backed tile %s",
+            getattr(model, "id", "unknown"),
+        )
+        return True
 
-        import webbrowser
-
-        url = f"http://localhost:{get_api_port()}{web_route}"
-        try:
-            webbrowser.open(url)
-            logger.info("APIBackedHandler: opened browser to %s", url)
-            return True
-        except Exception as e:  # noqa: BLE001
-            logger.error("APIBackedHandler: failed to open web browser: %s", e)
-            return False
+    def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+        """API-backed handler does not provide a dockable UI widget."""
+        return None
 
 
 # ============================================================
@@ -760,7 +769,7 @@ class ModelHandlerRegistry:
             GolfSimulationSuiteHandler(),
             MatlabFileHandler(),
             DocumentHandler(),
-            APIBackedHandler(),
+            ApiBackedHandler(),
         ]
 
     def register_handler(self, handler: ModelHandler) -> None:

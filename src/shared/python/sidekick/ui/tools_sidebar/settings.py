@@ -12,8 +12,11 @@ from typing import Any, Protocol
 class TabSettingsDefinition(Protocol):
     """Minimal tab definition contract needed by settings storage."""
 
-    tab_id: str
-    settings: SidebarTabSettingsDescriptor | None
+    @property
+    def tab_id(self) -> str: ...
+
+    @property
+    def settings(self) -> SidebarTabSettingsDescriptor | None: ...
 
 
 @dataclass(frozen=True, slots=True)

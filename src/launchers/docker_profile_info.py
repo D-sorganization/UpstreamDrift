@@ -103,7 +103,10 @@ def load_docker_profiles() -> dict[str, ProfileInfo]:
 
     if not isinstance(data, dict):
         logger.warning(
-            "Invalid profiles data format in %s (expected dict)", _PROFILES_PATH
+            "Expected mapping at top level of %s; got %s. "
+            "Falling back to empty profiles.",
+            _PROFILES_PATH,
+            type(data).__name__,
         )
         return {}
 

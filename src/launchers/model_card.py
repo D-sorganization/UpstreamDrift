@@ -112,9 +112,9 @@ MODEL_IMAGES = {
     "Dataset Generator": "data_explorer_modern.png",
     "Golf Simulation Suite": "golf_logo.png",
     "Motion-Match Preview": "motion_target_preview.svg",
-    "Video Processor": "video_analyzer.svg",
-    "Data Processor": "data_explorer.svg",
     "Starting-Pose Matcher (legacy)": "motion_target_preview.svg",
+    "Data Processor": "data_explorer_modern.png",
+    "Video Processor": "video_analyzer_modern.png",
 }
 
 
@@ -123,7 +123,6 @@ class SkeletonCard(QFrame):
         super().__init__(parent)
         self.setObjectName("SkeletonCard")
         self.setMinimumSize(180, 240)
-        self._pulse_opacity = 1.0
         self.setStyleSheet("""
             #SkeletonCard {
                 background-color: rgba(255, 255, 255, 0.03);
@@ -132,19 +131,17 @@ class SkeletonCard(QFrame):
             }
         """)
 
-        # Simple pulsing animation using opacity
         self.effect = QGraphicsDropShadowEffect(self)
         self.effect.setBlurRadius(20)
         self.effect.setColor(QColor(0, 0, 0, 80))
         self.setGraphicsEffect(self.effect)
 
-        self._anim = QPropertyAnimation(self, b"pulseOpacity", self)
+        self._pulse_opacity: float = 0.3
+        self._anim = QPropertyAnimation(self, b"pulseOpacity")
         self._anim.setDuration(1000)
         self._anim.setStartValue(0.3)
-        self._anim.setKeyValueAt(0.5, 0.8)
         self._anim.setEndValue(0.3)
         self._anim.setLoopCount(-1)
-        self._anim.setEasingCurve(QEasingCurve.Type.InOutSine)
         self._anim.start()
 
     @pyqtProperty(float)
@@ -154,13 +151,7 @@ class SkeletonCard(QFrame):
     @pulseOpacity.setter  # type: ignore[no-redef]
     def pulseOpacity(self, value: float) -> None:
         self._pulse_opacity = value
-        self.setStyleSheet(f"""
-            #SkeletonCard {{
-                background-color: rgba(255, 255, 255, {0.05 * value:.3f});
-                border: 1px solid rgba(255, 255, 255, {0.12 * value:.3f});
-                border-radius: 16px;
-            }}
-        """)
+        self.setWindowOpacity(value)
 
 
 class DraggableModelCard(QFrame):
@@ -176,10 +167,7 @@ class DraggableModelCard(QFrame):
         list_mode: bool = False,
         list_compact: bool = False,
     ) -> None:
-        # Avoid creating as a top-level window by passing the parent launcher widget if it is a QWidget
-        super().__init__(
-            parent_launcher if isinstance(parent_launcher, QWidget) else None
-        )
+        super().__init__(None)
         self.model = model
         self.parent_launcher = parent_launcher
         self.tile_scale: float = validate_tile_scale(tile_scale)
@@ -204,13 +192,13 @@ class DraggableModelCard(QFrame):
 
         self._base_style = f"""
             #ModelCard {{
-                background-color: {_color(c, "surface_hover", "group_bg", "#32363f")};
-                border: 1px solid {_color(c, "border_light", "border", "#4a505e")};
+                background-color: {_color(c, "surface_hover", "group_bg", "#2d2d2d")};
+                border: 1px solid {_color(c, "border_light", "border", "#444444")};
                 border-radius: 16px;
             }}
             #ModelCard:hover {{
-                background-color: {_color(c, "surface_active", "input_bg", "#3d424e")};
-                border: 1px solid {_color(c, "border_strong", "focus", "#707684")};
+                background-color: {_color(c, "surface_active", "input_bg", "#3a3a3a")};
+                border: 1px solid {_color(c, "border_strong", "focus", "#666666")};
             }}
             #CardName {{
                 color: {_color(c, "text_primary", "text", "#ffffff")};
@@ -746,7 +734,7 @@ class DraggableModelCard(QFrame):
                     item = old_layout.takeAt(0)
                     w = item.widget() if item else None
                     if w is not None:
-                        w.hide()
+                        w.setParent(None)
                         w.deleteLater()
                 # PyQt6: detach the old layout by reparenting to a temp QWidget.
                 QWidget().setLayout(old_layout)

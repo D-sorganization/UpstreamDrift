@@ -15,8 +15,9 @@ import numpy as np
 try:
     from src.shared.python.contracts import require
 except ImportError:
+    from typing import Any
 
-    def require(condition: object, message: str = "", *args: object) -> None:
+    def require(condition: bool, message: str, value: Any = None) -> None:
         """Fallback DbC require when pycontracts is not installed."""
         if not condition:
             raise ValueError(message)

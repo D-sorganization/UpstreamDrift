@@ -63,6 +63,8 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
+    from src.shared.python.ai.types import ChatModelInfo
+
 logger = get_logger(__name__)
 
 GH_EXECUTABLE = "gh"
@@ -517,7 +519,7 @@ class GitHubCliProvider(BaseAgentAdapter):
             provider_name="github-cli",
         )
 
-    def list_models(self) -> list[ChatModelInfo]:  # noqa: F821
+    def list_models(self) -> list[ChatModelInfo]:
         """``gh`` exposes a single virtual "model"."""
         from src.shared.python.ai.types import ChatModelInfo
 

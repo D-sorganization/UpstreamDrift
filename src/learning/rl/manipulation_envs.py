@@ -114,7 +114,8 @@ class ManipulationPickPlaceEnv(RoboticsGymEnv):
         if hasattr(self.engine, "get_ee_position"):
             ee_pos = self.engine.get_ee_position()
             obj_pos = self._get_object_position()
-            dist = np.linalg.norm(ee_pos - obj_pos)
+            diff = ee_pos - obj_pos
+            dist = np.sqrt(np.dot(diff, diff))
 
             # Check if gripper is closed and near object
             gripper_closed = self._is_gripper_closed()
@@ -212,12 +213,14 @@ class ManipulationPickPlaceEnv(RoboticsGymEnv):
 
         if not self._object_grasped:
             # Reaching reward: get close to object
-            reach_dist = np.linalg.norm(ee_pos - obj_pos)
+            diff_reach = ee_pos - obj_pos
+            reach_dist = np.sqrt(np.dot(diff_reach, diff_reach))
             reach_reward = np.exp(-5 * reach_dist)
             reward += reach_reward * self.reward_config.task_reward_weight * 0.5
         else:
             # Placing reward: move object to target
-            place_dist = np.linalg.norm(obj_pos - target_pos)
+            diff_place = obj_pos - target_pos
+            place_dist = np.sqrt(np.dot(diff_place, diff_place))
             place_reward = np.exp(-5 * place_dist)
             reward += place_reward * self.reward_config.task_reward_weight
 
@@ -241,7 +244,8 @@ class ManipulationPickPlaceEnv(RoboticsGymEnv):
             return False
 
         obj_pos = self._get_object_position()
-        dist_to_target = np.linalg.norm(obj_pos - self._target_pos)
+        diff_target = obj_pos - self._target_pos
+        dist_to_target = np.sqrt(np.dot(diff_target, diff_target))
 
         return bool(dist_to_target < self._place_threshold)
 
@@ -269,7 +273,8 @@ class ManipulationPickPlaceEnv(RoboticsGymEnv):
         info["object_grasped"] = self._object_grasped
         info["object_position"] = obj_pos.tolist()
         info["target_position"] = self._target_pos.tolist()
-        info["distance_to_target"] = float(np.linalg.norm(obj_pos - self._target_pos))
+        diff_target = obj_pos - self._target_pos
+        info["distance_to_target"] = float(np.sqrt(np.dot(diff_target, diff_target)))
 
         return info
 
@@ -374,14 +379,16 @@ class DualArmManipulationEnv(RoboticsGymEnv):
         if hasattr(self.engine, "get_left_ee_position"):
             left_ee = self.engine.get_left_ee_position()
             obj_pos = self._get_object_position()
-            left_dist = np.linalg.norm(left_ee - obj_pos)
+            diff_left = left_ee - obj_pos
+            left_dist = np.sqrt(np.dot(diff_left, diff_left))
             left_closed = self._is_left_gripper_closed()
             self._left_grasped = bool(left_dist < grasp_threshold and left_closed)
 
         if hasattr(self.engine, "get_right_ee_position"):
             right_ee = self.engine.get_right_ee_position()
             obj_pos = self._get_object_position()
-            right_dist = np.linalg.norm(right_ee - obj_pos)
+            diff_right = right_ee - obj_pos
+            right_dist = np.sqrt(np.dot(diff_right, diff_right))
             right_closed = self._is_right_gripper_closed()
             self._right_grasped = bool(right_dist < grasp_threshold and right_closed)
 
@@ -481,8 +488,10 @@ class DualArmManipulationEnv(RoboticsGymEnv):
             else:
                 right_ee = np.zeros(3)
 
-            left_dist = np.linalg.norm(left_ee - obj_pos)
-            right_dist = np.linalg.norm(right_ee - obj_pos)
+            diff_left = left_ee - obj_pos
+            left_dist = np.sqrt(np.dot(diff_left, diff_left))
+            diff_right = right_ee - obj_pos
+            right_dist = np.sqrt(np.dot(diff_right, diff_right))
 
             reach_reward = np.exp(-3 * (left_dist + right_dist))
             reward += reach_reward * self.reward_config.task_reward_weight * 0.3
@@ -494,7 +503,8 @@ class DualArmManipulationEnv(RoboticsGymEnv):
                 reward += 1.0
         else:
             # Lifting/placing reward
-            dist_to_target = np.linalg.norm(obj_pos - target_pos)
+            diff_target = obj_pos - target_pos
+            dist_to_target = np.sqrt(np.dot(diff_target, diff_target))
             lift_reward = np.exp(-3 * dist_to_target)
             reward += lift_reward * self.reward_config.task_reward_weight
 
@@ -508,7 +518,8 @@ class DualArmManipulationEnv(RoboticsGymEnv):
         ):
             left_vel = self.engine.get_left_ee_velocity()[:3]
             right_vel = self.engine.get_right_ee_velocity()[:3]
-            vel_diff = float(np.linalg.norm(left_vel - right_vel))
+            diff_vel = left_vel - right_vel
+            vel_diff = float(np.sqrt(np.dot(diff_vel, diff_vel)))
             reward -= 0.1 * vel_diff
 
         # Energy penalty
@@ -545,8 +556,7 @@ class DualArmManipulationEnv(RoboticsGymEnv):
         info["object_position"] = obj_pos.tolist()
         if not (self.task_config.target_position is not None):
             raise ValueError("target_position must be set")
-        info["distance_to_target"] = float(
-            np.linalg.norm(obj_pos - self.task_config.target_position)
-        )
+        diff_target = obj_pos - self.task_config.target_position
+        info["distance_to_target"] = float(np.sqrt(np.dot(diff_target, diff_target)))
 
         return info

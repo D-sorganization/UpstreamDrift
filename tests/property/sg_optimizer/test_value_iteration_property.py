@@ -93,3 +93,73 @@ def test_scalar_and_vectorized_backups_agree_in_expectation():
     valid = raster.codes != LIE_CODES["holed"]
     rel = diff[valid].mean() / max(V_scalar[valid].mean(), 1e-3)
     assert rel < 0.5, f"vectorized vs scalar disagree by relative {rel:.3f}"
+
+
+def test_action_q_responds_to_shot_bias():
+    """Regression for #6537.
+
+    ``HoleMDP._action_q`` must apply ``ClubSkill.bias_long``/``bias_lat``
+    to the vectorized landing offsets. Previously the bias was dropped
+    on the vectorized path, so two profiles differing *only* by a large
+    chronic miss produced identical Q-values for the same action.
+
+    We check this at the ``_action_q`` level (single fixed action) so
+    the optimizer cannot "aim around" the bias and hide the bug.
+    """
+    from src.shared.python.sg_optimizer.mdp.action import ShotAction
+
+    # Use a wide hole so iron-length shots actually land in-bounds —
+    # otherwise OOB hazard masking would hide the bias signal.
+    wide_hole = SyntheticHole(
+        name="wide",
+        par=4,
+        tee=(0.0, 0.0),
+        pin=(180.0, 0.0),
+        bbox=(-20.0, 240.0, -60.0, 60.0),
+        features=(
+            RectFeature("fairway", 0.0, 240.0, -40.0, 40.0),
+            RectFeature("green", 170.0, 195.0, -10.0, 10.0),
+        ),
+    )
+    raster = rasterize_synthetic(wide_hole, resolution_yd=5.0)
+    bag = load_baseline(BASELINE)
+    unbiased = PlayerProfile(
+        name="unbiased",
+        baseline=str(BASELINE),
+        clubs={c: ClubSkill() for c in ("7_iron", "9_iron", "pw")},
+    )
+    biased = PlayerProfile(
+        name="biased",
+        baseline=str(BASELINE),
+        clubs={c: ClubSkill(bias_lat=12.0) for c in ("7_iron", "9_iron", "pw")},
+    )
+    actions = ActionSet(clubs=("7_iron", "9_iron", "pw"))
+    conditions = CourseConditions.tournament()
+
+    nx, ny = raster.shape
+    # Non-trivial V: cost grows away from centerline so the lateral bias
+    # actually shifts the expected cost.
+    cell_y = raster.origin[1] + (np.arange(ny) + 0.5) * raster.resolution_yd
+    V = np.abs(cell_y)[None, :].repeat(nx, axis=0).astype(np.float64)
+    V[raster.codes == LIE_CODES["holed"]] = 0.0
+
+    def _q(profile):
+        mdp = HoleMDP(
+            raster=raster,
+            profile=profile,
+            baseline=bag,
+            conditions=conditions,
+            actions=actions,
+            n_samples=64,
+            seed=42,
+        )
+        return mdp._action_q(V, ShotAction(club="7_iron", aim_angle_rad=0.0))
+
+    q_unb = _q(unbiased)
+    q_bia = _q(biased)
+    valid = raster.codes != LIE_CODES["holed"]
+    delta = float(np.abs(q_unb - q_bia)[valid].mean())
+    assert delta > 0.05, (
+        f"biased vs unbiased _action_q differ by only {delta:.4g} — the vectorized "
+        "backup appears to ignore ClubSkill.bias_lat (issue #6537)."
+    )

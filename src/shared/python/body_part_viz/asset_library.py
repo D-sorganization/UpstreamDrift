@@ -56,7 +56,9 @@ def _default_asset_root() -> Path:
     # ``body_part_viz.assets``) in the installed distribution.
     for pkg_subdir in ("_assets", "assets"):
         try:
-            traversable = resources.files(__package__).joinpath(pkg_subdir, "default")
+            traversable = (
+                resources.files(__package__).joinpath(pkg_subdir).joinpath("default")
+            )
         except (ModuleNotFoundError, TypeError):
             traversable = None
         if traversable is not None:

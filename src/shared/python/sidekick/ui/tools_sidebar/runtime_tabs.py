@@ -119,7 +119,7 @@ def build_chat_tab(sidebar: Any) -> QtWidgets.QWidget:
     return _build_chat_status_tab(sidebar)
 
 
-def build_terminal_tab(sidebar: Any) -> QtWidgets.QWidget:
+def build_terminal_tab(sidebar: Any) -> QtWidgets.QWidget | None:
     """Build the OS-level terminal tab (UpstreamDrift #5617).
 
     The widget launches a real interactive shell (bash, zsh, pwsh,
@@ -131,11 +131,13 @@ def build_terminal_tab(sidebar: Any) -> QtWidgets.QWidget:
     # for headless hosts that don't reach this code path.
     from .os_terminal import SidekickOsTerminalWidget
 
-    widget = SidekickOsTerminalWidget(
-        project_root=sidebar.project_root,
+    terminal_widget = SidekickOsTerminalWidget(
         parent=sidebar,
+        project_root=sidebar.project_root,
     )
-    widget.setToolTip(DEFAULT_SIDEBAR_TAB_HELP["terminal"]["summary"])
+    widget = terminal_widget.widget
+    if widget is not None:
+        widget.setToolTip(DEFAULT_SIDEBAR_TAB_HELP["terminal"]["summary"])
     return widget
 
 
@@ -293,6 +295,7 @@ class PythonReplWidget(QtWidgets.QWidget):
                             compiled_eval, self._namespace, self._namespace
                         )
                     else:
+                        assert compiled_exec is not None
                         exec(  # noqa: S102  # nosec B102
                             compiled_exec, self._namespace, self._namespace
                         )
@@ -675,6 +678,10 @@ def _build_sidebar_plot_request_sink(sidebar: Any) -> Callable[[Any], None] | No
         source = spec.get("source")
         if isinstance(source, str):
             source = CalculatorPlotSource(source)
+        if not isinstance(source, CalculatorPlotSource):
+            raise TypeError(
+                "plot spec 'source' must be a CalculatorPlotSource or a valid string identifier"
+            )
         config_data = spec.get("config")
         config = (
             CalculatorPlotTabConfig(**config_data)

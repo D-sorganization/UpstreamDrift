@@ -305,7 +305,11 @@ def test_q_width_matches_plant_dof(mocked_pydrake: dict[str, MagicMock]) -> None
 # --------------------------------------------------------------------------- #
 
 
+_PYDRAKE_AVAILABLE = importlib.util.find_spec("pydrake") is not None
+
+
 @pytest.mark.requires_drake
+@pytest.mark.skipif(not _PYDRAKE_AVAILABLE, reason="pydrake not installed")
 def test_live_drake_zero_theta_finite() -> None:
     """Live Drake forward sim with theta=0 yields finite q/qd."""
     from pydrake.multibody.parsing import Parser

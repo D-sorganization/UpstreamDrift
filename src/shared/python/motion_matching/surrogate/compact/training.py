@@ -373,7 +373,7 @@ def _run_epoch(
         target = target.to(device, dtype=torch.float32)
         coeffs = normalizer.normalize(coeffs_raw)
         if is_train:
-            optimizer.zero_grad(set_to_none=True)
+            optimizer.zero_grad(set_to_none=True)  # type: ignore[union-attr]
         with torch.set_grad_enabled(is_train):
             pred = model(coeffs)
             mse = _channel_standardised_mse(pred, target, target_normalizer)
@@ -658,7 +658,7 @@ def _train_loop(
             target_normalizer=target_normalizer,
         )
         last_ckpt = ckpt_path
-        _write_metrics_json(out_path, history)
+        _write_metrics_json(out_path, history)  # type: ignore[arg-type]
         _LOGGER.info(
             "epoch %d/%d: train_loss=%.4g val_loss=%.4g grip_rmse=%.2f mm chs_mae=%.2f mph",
             epoch_human,

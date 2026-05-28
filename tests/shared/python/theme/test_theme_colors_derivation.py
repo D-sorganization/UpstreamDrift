@@ -118,7 +118,7 @@ def test_dict_style_access_compat() -> None:
 def test_missing_base_token_raises() -> None:
     """DbC: the 14 base tokens are required at construction."""
     partial = {k: v for k, v in _BASE_14.items() if k != "bg"}
-    with pytest.raises(Exception):  # pydantic ValidationError
+    with pytest.raises((ValueError, TypeError)):  # pydantic ValidationError
         ThemeColors(**partial)
 
 

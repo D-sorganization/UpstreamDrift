@@ -3,6 +3,7 @@
 import os  # noqa: E402
 import sys  # noqa: E402
 from pathlib import Path  # noqa: E402
+from typing import Any
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
@@ -18,33 +19,18 @@ class DummyModel:
         self.path = path
 
 
-from typing import Any
-
-
 class DummyLauncher(QMainWindow):
     def __getattr__(self, name: str) -> Any:
-        for mgr_name in ("manager", "simulation_manager"):
-            if mgr_name in self.__dict__:
-                manager = self.__dict__[mgr_name]
-                if name in manager.__dict__ or hasattr(type(manager), name):
-                    attr = getattr(manager, name)
-                    import types
+        if hasattr(self, "manager"):
+            manager = self.manager
+            if name in manager.__dict__ or hasattr(type(manager), name):
+                attr = getattr(manager, name)
+                import types
 
-                    if isinstance(attr, types.MethodType):
-                        return types.MethodType(attr.__func__, self)
-                    return attr
-        raise AttributeError(
-            f"'{type(self).__name__}' object has no attribute '{name}'"
-        )
-
-    def __delattr__(self, name: str) -> None:
-        for mgr_name in ("manager", "simulation_manager"):
-            if mgr_name in self.__dict__:
-                manager = self.__dict__[mgr_name]
-                if name in manager.__dict__:
-                    delattr(manager, name)
-                    return
-        super().__delattr__(name)
+                if isinstance(attr, types.MethodType):
+                    return types.MethodType(attr.__func__, self)
+                return attr
+        raise AttributeError(name)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -378,6 +364,25 @@ def test_launch_module_process(launcher) -> None:
     with patch("src.launchers.launcher_simulation.QMessageBox.critical") as mock_crit:
         launcher._launch_module_process("name", "mod", Path("cwd"))
         mock_crit.assert_called_once()
+
+
+def test_launch_urdf_generator_embedded_wires_cleanup_signal(launcher) -> None:
+    """Issue #6510: destroyed signal must be connected to tool.cleanup."""
+    mock_widget = MagicMock()
+    mock_tool = MagicMock()
+    mock_tool.create_main_widget.return_value = mock_widget
+    launcher.workspace_tabs = MagicMock()
+    launcher.workspace_tabs.count.return_value = 0
+    launcher.dock_widget_as_tab = MagicMock()
+
+    with patch(
+        "src.shared.python.launcher_embed.get_embeddable_tool", return_value=mock_tool
+    ):
+        launcher._launch_urdf_generator()
+
+    mock_widget.destroyed.connect.assert_called_once_with(mock_tool.cleanup)
+    launcher.dock_widget_as_tab.assert_called_once_with(mock_widget, "Model Explorer")
+    launcher.show_toast.assert_called_with("Model Explorer loaded as tab.", "success")
 
 
 def test_launch_urdf_generator(launcher) -> None:

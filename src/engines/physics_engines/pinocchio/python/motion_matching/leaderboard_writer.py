@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 ENGINE_NAME = "pinocchio"
 
 try:
-    from datetime import UTC
+    from datetime import UTC  # type: ignore[attr-defined]
 except ImportError:  # pragma: no cover - Python < 3.11 compatibility shim
     from datetime import timezone
 

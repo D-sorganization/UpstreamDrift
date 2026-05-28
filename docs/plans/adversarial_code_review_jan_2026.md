@@ -395,21 +395,21 @@ def get_registry() -> EngineRegistry:
 | `drake_physics_engine.py`    | 8/10       | Complex context management, lazy finalization       |
 | `secure_subprocess.py`       | 8/10       | Security-critical, any bug is a vulnerability       |
 | `configuration_manager.py`   | 7/10       | Touched by all features, validation gaps            |
-| `upstream_drift_launcher.py`           | 7/10       | 800+ lines GUI, subprocess spawning                 |
+| `upstream_drift_launcher.py` | 7/10       | 800+ lines GUI, subprocess spawning                 |
 | `urdf_io.py`                 | 7/10       | XML parsing, format conversion, edge cases          |
 | `output_manager.py`          | 6/10       | File I/O, format handling, HDF5/Parquet             |
 | `model_registry.py`          | 6/10       | YAML parsing, path resolution, caching              |
 
 ### External System Boundaries Audit
 
-| Boundary                 | Location                | Timeout   | Retry | Validation           | Circuit Breaker |
-| ------------------------ | ----------------------- | --------- | ----- | -------------------- | --------------- |
-| Subprocess calls         | `secure_subprocess.py`  | 30s fixed | None  | Executable whitelist | None            |
-| MATLAB Engine            | `engine_manager.py:411` | None      | None  | None                 | None            |
-| File system (model load) | `*_physics_engine.py`   | None      | N/A   | Path check (partial) | N/A             |
-| File system (output)     | `output_manager.py`     | None      | N/A   | Directory creation   | N/A             |
-| Network (Meshcat)        | `meshcat_adapter.py`    | Unknown   | None  | None                 | None            |
-| Docker API               | `upstream_drift_launcher.py`      | None      | None  | None                 | None            |
+| Boundary                 | Location                     | Timeout   | Retry | Validation           | Circuit Breaker |
+| ------------------------ | ---------------------------- | --------- | ----- | -------------------- | --------------- |
+| Subprocess calls         | `secure_subprocess.py`       | 30s fixed | None  | Executable whitelist | None            |
+| MATLAB Engine            | `engine_manager.py:411`      | None      | None  | None                 | None            |
+| File system (model load) | `*_physics_engine.py`        | None      | N/A   | Path check (partial) | N/A             |
+| File system (output)     | `output_manager.py`          | None      | N/A   | Directory creation   | N/A             |
+| Network (Meshcat)        | `meshcat_adapter.py`         | Unknown   | None  | None                 | None            |
+| Docker API               | `upstream_drift_launcher.py` | None      | None  | None                 | None            |
 
 **Verdict:** 6/6 boundaries lack proper resilience patterns. Priority fix: MATLAB engine timeout + retry.
 
@@ -428,18 +428,18 @@ def get_registry() -> EngineRegistry:
 
 ### 10 Code Smells with Exact Locations
 
-| Smell                  | Location                      | Evidence                                      |
-| ---------------------- | ----------------------------- | --------------------------------------------- |
-| God class              | `engine_manager.py:41-553`    | 513 lines, 20+ methods                        |
-| Feature envy           | `sim_widget.py:300-350`       | Manipulator logic duplicated                  |
-| Primitive obsession    | `configuration_manager.py:36` | `control_mode: str = "pd"` should be enum     |
-| Long method            | `upstream_drift_launcher.py:400-550`    | `_launch_model` is 150 lines                  |
-| Magic numbers          | `secure_subprocess.py:186`    | `timeout: float = 30.0`                       |
-| Duplicate code         | `output_manager.py:174, 345`  | `json_serializer` defined twice               |
-| Dead code              | `output_manager.py:367`       | Commented PDF generation                      |
-| Speculative generality | `interfaces.py:30-50`         | Abstract methods never overridden differently |
-| Global state           | `sim_widget.py:24-26`         | `CV2_LIB`, `INVALID_CV2` globals              |
-| Long parameter list    | `save_simulation_results`     | 5 parameters, should use config object        |
+| Smell                  | Location                             | Evidence                                      |
+| ---------------------- | ------------------------------------ | --------------------------------------------- |
+| God class              | `engine_manager.py:41-553`           | 513 lines, 20+ methods                        |
+| Feature envy           | `sim_widget.py:300-350`              | Manipulator logic duplicated                  |
+| Primitive obsession    | `configuration_manager.py:36`        | `control_mode: str = "pd"` should be enum     |
+| Long method            | `upstream_drift_launcher.py:400-550` | `_launch_model` is 150 lines                  |
+| Magic numbers          | `secure_subprocess.py:186`           | `timeout: float = 30.0`                       |
+| Duplicate code         | `output_manager.py:174, 345`         | `json_serializer` defined twice               |
+| Dead code              | `output_manager.py:367`              | Commented PDF generation                      |
+| Speculative generality | `interfaces.py:30-50`                | Abstract methods never overridden differently |
+| Global state           | `sim_widget.py:24-26`                | `CV2_LIB`, `INVALID_CV2` globals              |
+| Long parameter list    | `save_simulation_results`            | 5 parameters, should use config object        |
 
 ### 5 Potential Security Issues
 

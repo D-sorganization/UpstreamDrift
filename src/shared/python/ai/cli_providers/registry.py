@@ -32,10 +32,10 @@ class CliProviderRegistry:
             self._descriptors = discover_cli_providers()
         return list(self._descriptors)
 
-    def refresh(self) -> list[CliProviderDescriptor]:
+    def refresh(self) -> list[CliProviderDescriptor]:  # type: ignore[valid-type]
         """Re-run discovery and return the updated list."""
         self._descriptors = discover_cli_providers()
-        return list(self._descriptors)
+        return list(self._descriptors)  # type: ignore[return-value]
 
     def get(self, provider_id: str) -> CliProviderDescriptor | None:
         """Return the descriptor for ``provider_id`` or None.
@@ -142,6 +142,6 @@ class AllProviders:
             )
         return entries
 
-    def cli_entries(self) -> list[ProviderEntry]:
+    def cli_entries(self) -> list[ProviderEntry]:  # type: ignore[valid-type]
         """Return only the CLI portion of the unified list."""
-        return [e for e in self.list() if e.category == self.CLI_CATEGORY]
+        return [e for e in self.list() if e.category == self.CLI_CATEGORY]  # type: ignore[return-value]

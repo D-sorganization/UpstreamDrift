@@ -68,8 +68,8 @@ def getSpeed(event):
     j = z.get(1)
     for i in range (z.getSize()):
         h = z.get(i)
-	if h>j:
-	    j=h
+        if h>j:
+            j=h
     ballspeed.setText(str(j))
     panel.validate()
 

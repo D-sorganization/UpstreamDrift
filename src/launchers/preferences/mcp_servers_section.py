@@ -91,7 +91,6 @@ class McpServersSection:
                 command=server.command,
                 args=server.args,
                 env=server.env,
-                enabled=server.enabled,
             )
         elif not isinstance(server, SharedConfig):
             raise TypeError("server must be an McpServerConfig instance")

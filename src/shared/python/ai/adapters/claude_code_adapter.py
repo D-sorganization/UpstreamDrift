@@ -34,7 +34,10 @@ import shutil
 import subprocess
 from collections.abc import Iterator
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from src.shared.python.ai.types import ChatModelInfo
 
 from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
 from src.shared.python.ai.exceptions import (
@@ -166,7 +169,7 @@ class ClaudeCodeAdapter(BaseAgentAdapter):
     def capabilities(self) -> ProviderCapabilities:
         return self._capabilities
 
-    def list_models(self) -> list[ChatModelInfo]:  # noqa: F821
+    def list_models(self) -> list[ChatModelInfo]:
         """Return the documented model catalogue.
 
         The Claude Code CLI does not expose a model listing endpoint, so this

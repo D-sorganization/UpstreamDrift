@@ -74,7 +74,7 @@ def _load_gitignore(repo_root: Path):
     try:
         import pathspec  # type: ignore[import-not-found]
     except Exception:  # noqa: BLE001
-        pathspec = None
+        pathspec = None  # type: ignore[assignment]
 
     patterns: list[str] = []
     gi = repo_root / ".gitignore"

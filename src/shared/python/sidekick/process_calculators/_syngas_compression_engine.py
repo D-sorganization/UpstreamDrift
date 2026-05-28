@@ -63,7 +63,7 @@ except ImportError:
         return _MinimalSpeciesDB()
 
 
-from .analysis_utils import evaluate_compression_result
+from .analysis_utils import evaluate_compression_result  # type: ignore[attr-defined]
 from .constants import (
     BAR_TO_PA,
     CELSIUS_TO_KELVIN_OFFSET,

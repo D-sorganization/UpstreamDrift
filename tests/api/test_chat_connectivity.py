@@ -20,10 +20,8 @@ These tests guard the four invariants that broke the chat in PR #6239:
 
 from __future__ import annotations
 
-import os
 from collections.abc import Iterator
 from typing import Any
-from unittest.mock import patch
 
 import pytest
 
@@ -136,8 +134,7 @@ def test_chat_ws_mounted_at_every_public_prefix(
     ws_paths = _collect_ws_paths(app)
     missing = [p for p in _EXPECTED_WS_PATHS if p not in ws_paths]
     assert not missing, (
-        f"chat_ws is missing from prefixes: {missing}. "
-        f"Got: {sorted(ws_paths)}"
+        f"chat_ws is missing from prefixes: {missing}. Got: {sorted(ws_paths)}"
     )
 
 
@@ -201,10 +198,9 @@ async def test_stream_response_yields_timeout_error_when_queue_stays_empty(
     from src.api.services.chat_service import ChatService
 
     class _BlockingAdapter:
-        def stream_response(
-            self, *_a: Any, **_kw: Any
-        ) -> Iterator[Any]:
+        def stream_response(self, *_a: Any, **_kw: Any) -> Iterator[Any]:
             import threading
+
             threading.Event().wait()  # block forever
             yield  # pragma: no cover - unreachable
 
@@ -232,7 +228,7 @@ async def test_stream_response_yields_timeout_error_when_queue_stays_empty(
     async def _fast_to_thread(func: Any, *args: Any, **kw: Any) -> Any:
         # Simulate the queue staying empty past the timeout window.
         if getattr(func, "__name__", "") == "get":
-            raise Empty()
+            raise Empty
         return await real_to_thread(func, *args, **kw)
 
     monkeypatch.setattr("asyncio.to_thread", _fast_to_thread)

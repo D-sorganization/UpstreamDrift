@@ -41,7 +41,6 @@ def _bash_available() -> bool:
 pytestmark = [
     pytest.mark.unit,
     pytest.mark.skipif(not _bash_available(), reason="bash not on PATH"),
-    pytest.mark.skipif(sys.platform == "win32", reason="POSIX bash script smoke test"),
 ]
 
 
@@ -91,6 +90,7 @@ def _run_script(repo_root: Path, stub_bin: Path) -> subprocess.CompletedProcess:
     )
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX bash script smoke test")
 def test_all_siblings_present(tmp_path: Path) -> None:
     """Every sibling exists → bootstrap installs all five and exits clean."""
     repo_root = _make_workspace(tmp_path, list(SIBLINGS))
@@ -103,6 +103,7 @@ def test_all_siblings_present(tmp_path: Path) -> None:
     assert "installed: 5" in result.stdout
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX bash script smoke test")
 def test_no_siblings_present(tmp_path: Path) -> None:
     """No sibling checkouts → bootstrap is a no-op with zero exit code."""
     repo_root = _make_workspace(tmp_path, [])
@@ -110,11 +111,12 @@ def test_no_siblings_present(tmp_path: Path) -> None:
     result = _run_script(repo_root, stub_bin)
     assert result.returncode == 0, result.stderr
     assert "installed: 0" in result.stdout
-    assert "skipped  : 5" in result.stdout
+    assert "skipped : 5" in result.stdout
     log = tmp_path / "python3_invocations.log"
     assert not log.exists()
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX bash script smoke test")
 def test_partial_siblings_present(tmp_path: Path) -> None:
     """A subset of siblings → only those are installed."""
     repo_root = _make_workspace(tmp_path, ["MuJoCo_Models", "Drake_Models"])
@@ -128,6 +130,7 @@ def test_partial_siblings_present(tmp_path: Path) -> None:
     assert "Pinocchio_Models" not in log
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX bash script smoke test")
 def test_sibling_without_pyproject_is_skipped(tmp_path: Path) -> None:
     """A sibling directory without ``pyproject.toml`` is treated as not present."""
     workspace = tmp_path / "workspace"
@@ -145,6 +148,7 @@ def test_sibling_without_pyproject_is_skipped(tmp_path: Path) -> None:
     assert "no pyproject.toml" in result.stdout
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX bash script smoke test")
 def test_install_failure_propagates_exit_code(tmp_path: Path) -> None:
     """A failed pip install yields exit code 1 and is tallied as failed."""
     repo_root = _make_workspace(tmp_path, ["MuJoCo_Models"])

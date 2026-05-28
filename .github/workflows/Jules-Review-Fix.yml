@@ -1,4 +1,8 @@
 name: Jules Review Responder
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 on:
   pull_request_review:
     types: [submitted]
@@ -41,11 +45,11 @@ jobs:
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         if: steps.auth.outputs.authorized == 'true'
         with:
           ref: ${{ github.event.pull_request.head.ref }}
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         if: steps.auth.outputs.authorized == 'true'
         with: { node-version: "24" }
       - run: npm install -g @google/jules

@@ -267,17 +267,21 @@ class HoleMDP:
         base_dist = self.baseline.get(action.club).total_mean + (
             skill.distance_offset if skill else 0.0
         )
+        # Player + baseline shot bias (chronic miss). Matches
+        # PlayerProfile.effective_distribution() / sample_transitions(): sigma
+        # gets scaled by condition modifiers, but bias does not.
+        bias_long = cb.bias_long + (skill.bias_long if skill else 0.0)
+        bias_lat = cb.bias_lat + (skill.bias_lat if skill else 0.0)
 
         # Apply rotation matrix once per action.
         ca = np.cos(action.aim_angle_rad)
         sa = np.sin(action.aim_angle_rad)
 
         # Per-cell along/lateral after applying per-cell mods.
-        # along_per_cell = (base_dist + dlong) * dist_mult(lie)
-        # lat_per_cell   = dlat * slat_mult(lie)
+        # along = base_dist * dist_mult + dlong * sigma_long_mult
+        # lat   = dlat * sigma_lat_mult
         # dx = along * ca - lat * sa
         # dy = along * sa + lat * ca
-        # x_next = x + dx
         # We compute one (nx, ny, n_samples) tensor of next indices in a
         # memory-friendly way: vectorize over samples in an inner loop chunk.
         cell_x = (
@@ -289,6 +293,7 @@ class HoleMDP:
         cx, cy = np.meshgrid(cell_x, cell_y, indexing="ij")  # (nx, ny)
 
         dist_mult = cell_mods[..., 0]  # (nx, ny)
+        sigma_long_mult = cell_mods[..., 1]  # (nx, ny) — longitudinal dispersion
 
         # Putter restriction: putter only valid on the green; otherwise +inf.
         green_mask = codes == LIE_CODES["green"] if action.club == "putter" else None
@@ -298,8 +303,10 @@ class HoleMDP:
 
         for k in range(self.n_samples):
             dlong, dlat = offsets[k]
-            along = (base_dist + dlong) * dist_mult  # (nx, ny)
-            lat = dlat * cell_mods[..., 2]  # σ_lat scaling
+            along = (
+                base_dist * dist_mult + bias_long + dlong * sigma_long_mult
+            )  # (nx, ny)
+            lat = bias_lat + dlat * cell_mods[..., 2]  # σ_lat scaling
             dx = along * ca - lat * sa
             dy = along * sa + lat * ca
             xn = cx + dx

@@ -1,5 +1,9 @@
 name: Nightly Documentation Organizer
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   # COST OPTIMIZATION: Schedule removed  -  doc organization runs on workflow_dispatch only.
   # Was: cron "0 0 * * 0,4" (twice-weekly cloud run for low-value doc housekeeping)
@@ -30,7 +34,7 @@ jobs:
     if: vars.WORKFLOWS_PAUSED != 'true'
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           fetch-depth: 0
 

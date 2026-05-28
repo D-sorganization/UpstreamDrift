@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
 
 from src.shared.python.launcher_embed import EmbedCapabilities
+
+if TYPE_CHECKING:
+    pass
 
 
 class GolfEnvironmentAdapter:
@@ -15,9 +19,9 @@ class GolfEnvironmentAdapter:
 
     def embed_capabilities(self) -> EmbedCapabilities:
         """Return how this tool wants to be embedded."""
-        return EmbedCapabilities()
+        return EmbedCapabilities.NONE
 
-    def create_main_widget(self, parent: Any) -> Any:
+    def create_main_widget(self, parent: Any = None) -> Any:
         """Create and return the tool's main window."""
         from .gui import get_dockable_ui
 
@@ -27,5 +31,5 @@ class GolfEnvironmentAdapter:
         """Clean up resources when the tool is unloaded."""
 
     def is_dirty(self) -> bool:
-        """Return True if the tool has unsaved changes."""
+        """Return True if the tool has unsaved state."""
         return False

@@ -233,9 +233,26 @@ class HumanoidLauncher(UISetupMixin, SimulationMixin, AnalysisMixin, QMainWindow
         self.setup_ui()
 
 
-def get_dockable_ui() -> QMainWindow:
-    """Return the main window instance for docking in the unified launcher."""
-    return HumanoidLauncher()
+def get_dockable_ui() -> Any:
+    """Return a dockable QWidget wrapping HumanoidLauncher for the unified launcher.
+
+    ``HumanoidLauncher`` is a ``QMainWindow``, which has top-level window flags
+    by default and cannot be embedded directly as a tab.  Setting
+    ``Qt.WindowType.Widget`` and reparenting into a plain ``QWidget`` container
+    is the idiomatic Qt way to host a ``QMainWindow`` inside a tab host.
+    """
+    from PyQt6.QtCore import Qt
+    from PyQt6.QtWidgets import QHBoxLayout, QWidget
+
+    launcher_window = HumanoidLauncher()
+    launcher_window.setWindowFlags(Qt.WindowType.Widget)
+
+    container = QWidget()
+    launcher_window.setParent(container)
+    layout = QHBoxLayout(container)
+    layout.setContentsMargins(0, 0, 0, 0)
+    layout.addWidget(launcher_window)
+    return container
 
 
 if __name__ == "__main__":

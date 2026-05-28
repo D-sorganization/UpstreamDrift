@@ -47,7 +47,12 @@ class ThemeManager:
             colors = manager.get_current_colors()
 
             # Map extended color names to actual theme keys with fallbacks
-            bg_elevated = colors.get("bg_elevated", colors.get("group_bg", "#2D2D2D"))
+            bg_elevated = colors.get("bg_elevated", colors.get("group_bg", "#2D2D2D"))  # noqa: F841
+            border_default = colors.get(  # noqa: F841
+                "border_default", colors.get("border", "#555555")
+            )
+            bg_highlight = colors.get("bg_highlight", colors.get("input_bg", "#3D3D3D"))  # noqa: F841
+            border_strong = colors.get("border_strong", colors.get("focus", "#0078D4"))  # noqa: F841
             text_sec = colors.get("text_secondary", "#AAAAAA")
 
             self.setStyleSheet(
@@ -253,7 +258,7 @@ class ThemeManager:
 
         except ImportError as e:
             logger.warning(f"Could not populate typography menu: {e}")
-            fallback = QAction("(Theme system unavailable)", self.launcher)
+            fallback = QAction("(Theme system unavailable)", self)
             fallback.setEnabled(False)
             typography_menu.addAction(fallback)
 
@@ -264,7 +269,7 @@ class ThemeManager:
             from src.shared.python.theme.dialogs import ThemeManagerDialog
 
             manager = ThemeManager.instance()
-            dialog = ThemeManagerDialog(manager, self.launcher)
+            dialog = ThemeManagerDialog(manager, self)
             dialog.theme_changed.connect(lambda _: self._on_theme_changed(None))
             dialog.exec()
         except ImportError as e:

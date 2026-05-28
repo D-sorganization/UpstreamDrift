@@ -63,20 +63,16 @@ def test_imports_without_pyqt() -> None:
 
     import src.launchers.golf_suite_launcher as gsl
 
-    real_import = __builtins__["__import__"]
-
-    def mock_import(name, globals=None, locals=None, fromlist=(), level=0):
-        if "PyQt6" in name:
-            raise ImportError("PyQt6 mock not available")
-        return real_import(name, globals, locals, fromlist, level)
-
-    with patch("builtins.__import__", side_effect=mock_import):
+    with patch(
+        "src.shared.python.engine_core.engine_availability.PYQT6_AVAILABLE", False
+    ):
         try:
             importlib.reload(gsl)
             assert gsl.QtWidgets is None
             assert gsl.QtCore is None
             assert gsl.QtGui is None
         finally:
+            # Restore module state so other tests on this worker do not fail!
             pass
 
     # Always reload after the patch has ended to restore true state

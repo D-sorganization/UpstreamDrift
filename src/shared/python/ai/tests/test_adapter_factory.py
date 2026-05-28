@@ -171,7 +171,7 @@ class TestAdapterFactory:
     def test_clear_cache(self) -> None:
         from src.shared.python.ai.adapters.factory import AdapterFactory
 
-        AdapterFactory._cache["test"] = MagicMock()
+        AdapterFactory._cache["test"] = MagicMock()  # type: ignore[index]
         AdapterFactory.clear_cache()
         assert len(AdapterFactory._cache) == 0
 

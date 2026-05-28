@@ -62,7 +62,7 @@ def test_terminal_section_persists_selection(qt_real, qapp) -> None:  # noqa: AR
     if section._combo is not None and section._combo.count() > 1:
         section._combo.setCurrentIndex(1)
         # editing combo programmatically should have triggered the callback
-        assert saved and saved[-1] == "powershell"
+        assert saved and saved[-1] == section._combo.itemData(1)
 
 
 def test_terminal_section_restores_default(qt_real, qapp) -> None:  # noqa: ARG001

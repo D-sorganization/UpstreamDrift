@@ -96,9 +96,7 @@ def test_tool_declarations_to_ollama_copies_outer_containers() -> None:
 
     params = {"x": {"type": "number"}}
     req = ["x"]
-    td = ToolDeclaration(
-        name="t", description="d", parameters=params, required=req
-    )
+    td = ToolDeclaration(name="t", description="d", parameters=params, required=req)
 
     out = _tool_declarations_to_ollama([td])
 
@@ -179,9 +177,7 @@ class _StreamResponse:
         # Yield a single ``done: true`` chunk so the generator terminates.
         import json as _json
 
-        yield _json.dumps(
-            {"message": {"content": "ok"}, "done": True}
-        )
+        yield _json.dumps({"message": {"content": "ok"}, "done": True})
 
 
 def _capture_post_body() -> tuple[Any, list[dict[str, Any]]]:

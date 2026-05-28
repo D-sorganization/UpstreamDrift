@@ -89,7 +89,7 @@ def _draw_frame(
     ax.set_axis_off()
     if title:
         ax.set_title(title, fontsize=10)
-    draw_body_target_frame(ax, target, frame_idx, linewidth=2.0)
+    draw_body_target_frame(ax, target, frame_idx, linewidth=2.0)  # type: ignore[arg-type]
     frame = np.asarray(target.marker_xyz, dtype=float)[frame_idx]
     finite = np.isfinite(frame).all(axis=-1)
     if finite.any():

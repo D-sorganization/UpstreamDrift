@@ -153,4 +153,4 @@ class PinocchioFitSwingProvider:
                 return "unknown"
 
 
-register_provider(PinocchioFitSwingProvider())
+register_provider(PinocchioFitSwingProvider())  # type: ignore[arg-type]

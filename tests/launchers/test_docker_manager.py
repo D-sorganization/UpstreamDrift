@@ -59,7 +59,7 @@ def test_docker_build_thread_invalid_context() -> None:
 def test_docker_build_thread_success(mock_exists, mock_popen) -> None:
     context = Path("/fake/context")
     thread = DockerBuildThread(
-        target_stage="standard", image_name="test_image", context_path=context
+        target_stage="all", image_name="test_image", context_path=context
     )
 
     mock_process = MagicMock()
@@ -85,7 +85,7 @@ def test_docker_build_thread_success(mock_exists, mock_popen) -> None:
 def test_docker_build_thread_failure(mock_exists, mock_popen) -> None:
     context = Path("/fake/context")
     thread = DockerBuildThread(
-        target_stage="standard", image_name="test_image", context_path=context
+        target_stage="all", image_name="test_image", context_path=context
     )
 
     mock_process = MagicMock()
@@ -107,7 +107,7 @@ def test_docker_build_thread_failure(mock_exists, mock_popen) -> None:
 def test_docker_build_thread_linux(mock_exists, mock_popen) -> None:
     context = Path("/fake/context")
     thread = DockerBuildThread(
-        target_stage="standard", image_name="test_image", context_path=context
+        target_stage="all", image_name="test_image", context_path=context
     )
 
     mock_process = MagicMock()
@@ -133,7 +133,7 @@ def test_docker_build_thread_linux(mock_exists, mock_popen) -> None:
 def test_docker_build_thread_empty_line(mock_exists, mock_popen) -> None:
     context = Path("/fake/context")
     thread = DockerBuildThread(
-        target_stage="standard", image_name="test_image", context_path=context
+        target_stage="all", image_name="test_image", context_path=context
     )
 
     mock_process = MagicMock()
@@ -161,7 +161,7 @@ def test_docker_build_thread_empty_line(mock_exists, mock_popen) -> None:
 def test_docker_build_thread_exception(mock_exists, mock_popen) -> None:
     context = Path("/fake/context")
     thread = DockerBuildThread(
-        target_stage="standard", image_name="test_image", context_path=context
+        target_stage="all", image_name="test_image", context_path=context
     )
 
     mock_finished = MagicMock()
@@ -306,8 +306,8 @@ def test_launch_container_capture_output(mock_popen) -> None:
 @patch("subprocess.Popen")
 def test_launch_container_capture_output_posix(mock_popen) -> None:
     launcher = DockerLauncher(repo_root=Path("/fake/repo"), image_name="my_image")
-
     repo_path = Path("/fake/repo/script.py")
+
     with (
         patch.object(launcher, "build_launch_command", return_value=["docker", "run"]),
         patch("os.name", "posix"),

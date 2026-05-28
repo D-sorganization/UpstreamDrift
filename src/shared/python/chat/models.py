@@ -7,7 +7,7 @@ integrates the shared chat system.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
@@ -98,6 +98,10 @@ class ThinkingCapabilities:
     provider: str = ""
     levels: tuple[ThinkingLevel, ...] = ()
     default_level_name: ThinkingLevelName = "none"
+    _supports_levels: bool = False
+    _available_levels: list[ThinkingLevel] = field(
+        default_factory=list, compare=False, hash=False, repr=False
+    )
 
     def __init__(
         self,
@@ -221,7 +225,7 @@ def style_prompt(style: ResponseStyle | str | None) -> str:
     Unknown / ``None`` values fall back to ``DEFAULT_RESPONSE_STYLE``.
     """
     if style in RESPONSE_STYLE_PROMPTS:
-        return RESPONSE_STYLE_PROMPTS[style]
+        return RESPONSE_STYLE_PROMPTS[style]  # type: ignore[index]
     return RESPONSE_STYLE_PROMPTS[DEFAULT_RESPONSE_STYLE]
 
 

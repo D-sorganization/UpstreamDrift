@@ -17,7 +17,6 @@ from src.launchers.launcher_constants import (
     view_mode_settings,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
-import contextlib
 
 if TYPE_CHECKING:
     from PyQt6.QtWidgets import QGridLayout
@@ -72,18 +71,9 @@ def _view_mode_from_string(name: str | None) -> ViewMode:
     except KeyError:
         logger.warning("Unknown view_mode %r, falling back to LIST_LARGE", name)
         mode = ViewMode.LIST_LARGE
-    is_vm = isinstance(mode, ViewMode) or (
-        hasattr(mode, "__class__") and mode.__class__.__name__ == "ViewMode"
-    )
-    assert is_vm, (  # DbC postcondition
+    assert isinstance(mode, ViewMode), (  # DbC postcondition
         f"_view_mode_from_string postcondition violated: got {mode!r}"
     )
-    if not isinstance(mode, ViewMode):
-        try:
-            mode = ViewMode(int(mode))
-        except (ValueError, TypeError):
-            with contextlib.suppress(AttributeError, KeyError):
-                mode = ViewMode[mode.name]
     return mode
 
 
@@ -250,7 +240,7 @@ class LayoutManager:
         for model_id in list(self.model_cards.keys()):
             if model_id not in self.model_order:
                 widget = self.model_cards.pop(model_id)
-                widget.hide()
+                widget.setParent(None)
                 widget.deleteLater()
 
         # Create cards for any newly added models
@@ -327,20 +317,14 @@ class LayoutManager:
         Returns:
             List of model IDs matching the current filters.
         """
-        # DbC: Preconditions - ensure states are valid strings
-        assert isinstance(self.current_category_filter, str), (
-            "Category filter must be a string"
-        )
-        assert isinstance(self.current_filter_text, str), "Filter text must be a string"
-
         filtered = []
         for model_id in self.model_order:
             model = self._get_model(model_id)
             if not model:
                 continue
 
-            # Category filter (ignored when searching globally per user request)
-            if self.current_category_filter != "All" and not self.current_filter_text:
+            # Category filter
+            if self.current_category_filter != "All":
                 cat = self._get_model_category(model)
                 if cat != self.current_category_filter:
                     continue
@@ -353,11 +337,6 @@ class LayoutManager:
 
             filtered.append(model_id)
 
-        # DbC: Postconditions - ensure we return a list of string IDs
-        assert isinstance(filtered, list), "Filtered order must be a list"
-        assert all(isinstance(x, str) for x in filtered), (
-            "All filtered IDs must be strings"
-        )
         return filtered
 
     def _get_model_category(self, model: Any) -> str:
@@ -435,17 +414,13 @@ class LayoutManager:
 
         The actual grid is not rebuilt here — call :meth:`rebuild_grid` after.
         """
-        is_vm = isinstance(mode, ViewMode) or (
-            hasattr(mode, "__class__") and mode.__class__.__name__ == "ViewMode"
-        )
-        if not is_vm:
-            raise TypeError(f"mode must be a ViewMode, got {type(mode).__name__}")
         if not isinstance(mode, ViewMode):
             try:
                 mode = ViewMode(int(mode))
-            except (ValueError, TypeError):
-                with contextlib.suppress(AttributeError, KeyError):
-                    mode = ViewMode[mode.name]
+            except (ValueError, TypeError) as exc:
+                raise TypeError(
+                    f"mode must be a ViewMode, got {type(mode).__name__}"
+                ) from exc
         scale, _cols, show_desc, is_list = view_mode_settings(mode)
         _compact = mode == ViewMode.LIST_SMALL
         self.current_view_mode = mode
@@ -459,7 +434,7 @@ class LayoutManager:
         )
         if is_list != was_list or _compact != was_compact:
             for c in list(self.model_cards.values()):
-                c.hide()
+                c.setParent(None)
                 c.deleteLater()
             self.model_cards.clear()
         else:
@@ -501,11 +476,11 @@ class LayoutManager:
             if item:
                 widget = item.widget()
                 if widget:
-                    widget.hide()
                     if id(widget) in reusable_card_ids:
-                        widget.setParent(None)
+                        widget.hide()
                     else:
                         widget.deleteLater()
+                    widget.setParent(None)
 
         scale, base_cols, show_desc, is_list = view_mode_settings(
             self.current_view_mode

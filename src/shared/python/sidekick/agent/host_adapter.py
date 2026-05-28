@@ -30,7 +30,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Protocol, runtime_checkable
 
-from .action_service import ActionDescriptor, ActionResult
+from .action_service import ActionDescriptor, ActionResult, SideEffect
 
 __all__ = [
     "HostActionPort",
@@ -219,7 +219,9 @@ class HostAdapter:
 
 def _to_descriptor(capability: HostCapability) -> ActionDescriptor:
     """Turn a :class:`HostCapability` into the matching descriptor."""
-    side_effects = "destructive" if capability.requires_confirmation else "write"
+    side_effects: SideEffect = (
+        "destructive" if capability.requires_confirmation else "write"
+    )
     return ActionDescriptor(
         action_id=capability.capability_id,
         summary=capability.summary,

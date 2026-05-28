@@ -164,7 +164,7 @@ class EnvironmentRenderer(QWidget):
             )
             fw_mesh = gl.GLMeshItem(
                 vertexes=self._create_rect(
-                    0, -hole.fairway_width / 2, dist, hole.fairway_width
+                    0, -hole.fairway_width / 2, float(dist), hole.fairway_width
                 ),
                 color=(0.2, 0.7, 0.2, 1.0),
                 smooth=False,
@@ -288,11 +288,7 @@ class EnvironmentWindow(QMainWindow):
 
 
 class _EmbedAdapter:
-    """Embed adapter for the Golf Environment Viewer.
-
-    Implements the EmbeddableTool protocol so the launcher can embed this
-    tool as a tab or dock widget.
-    """
+    """Embed adapter for the Golf Environment Viewer."""
 
     tool_id = "golf_environment"
 
@@ -310,26 +306,13 @@ class _EmbedAdapter:
         )
 
     def create_main_widget(self, parent: Any) -> Any:
-        """Create and return the EnvironmentRenderer widget for embedding.
-
-        Args:
-            parent: The intended Qt parent widget.
-
-        Returns:
-            EnvironmentRenderer widget instance for embedding.
-        """
         self._widget = EnvironmentRenderer(parent=parent)
         return self._widget
 
     def cleanup(self) -> None:
-        """Release any resources held by the embedded widget."""
         self._widget = None
 
     def is_dirty(self) -> bool:
-        """Return True if the tool has unsaved state.
-
-        Golf Environment Viewer does not track dirty state.
-        """
         return False
 
 

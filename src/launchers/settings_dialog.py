@@ -3,7 +3,7 @@
 Provides a tabbed dialog with Layout, Configuration, and Diagnostics tabs.
 """
 
-# mypy: disable-error-code="attr-defined,assignment,union-attr"
+# mypy: disable-error-code="attr-defined,assignment,union-attr,arg-type"
 
 from __future__ import annotations
 
@@ -22,7 +22,6 @@ from PyQt6.QtWidgets import (
     QGroupBox,
     QHBoxLayout,
     QLabel,
-    QMainWindow,
     QPushButton,
     QScrollArea,
     QTextBrowser,
@@ -301,7 +300,7 @@ class SettingsWidget(QWidget):
         self.setWindowTitle("Settings")
         self.resize(850, 650)
         self._diagnostics_data = diagnostics_data
-        self._launcher = launcher
+        self._launcher = launcher or parent
         self._diagnostics_loaded = False
         self._setup_ui()
         self.tabs.setCurrentIndex(validate_tab_index(initial_tab))
@@ -337,9 +336,7 @@ class SettingsWidget(QWidget):
         try:
             from src.shared.python.ui.preferences_dialog import PreferencesDialog
 
-            prefs_parent = (
-                self._launcher if isinstance(self._launcher, QMainWindow) else None
-            )
+            prefs_parent = self._launcher or self
             self._prefs_dialog = PreferencesDialog(prefs_parent)
             self.tabs.addTab(self._prefs_dialog._create_appearance_tab(), "Appearance")
             self.tabs.addTab(self._prefs_dialog._create_startup_tab(), "Startup")
@@ -428,7 +425,7 @@ class SettingsWidget(QWidget):
         tab_layout.addWidget(zoom_group)
 
         # Sync with parent launcher
-        launcher = self.parent()
+        launcher = self._launcher
         if launcher and hasattr(launcher, "btn_modify_layout"):
             self._btn_layout_lock.setChecked(launcher.btn_modify_layout.isChecked())
             self._btn_layout_lock.toggled.connect(launcher.btn_modify_layout.click)
@@ -530,7 +527,9 @@ class SettingsWidget(QWidget):
         row_doc = QHBoxLayout()
         self.chk_docker = QCheckBox("Docker")
         self.chk_docker.setToolTip(
-            "Run physics engines inside a Docker container (Linux, sandboxed)."
+            "Run engines inside the upstream-drift:engine Linux container. "
+            "Full Drake/Pinocchio support; requires Docker installed and the "
+            "image built (see Docker Image section below)."
         )
         btn_check_doc = QPushButton("Check Deps")
         btn_check_doc.setToolTip("Check Docker container image dependencies")
@@ -543,7 +542,9 @@ class SettingsWidget(QWidget):
         row_wsl = QHBoxLayout()
         self.chk_wsl = QCheckBox("WSL")
         self.chk_wsl.setToolTip(
-            "Run physics engines inside WSL2 Ubuntu (Linux, native filesystem)."
+            "Run engines in your WSL2 Ubuntu user environment. Same Linux "
+            "wheels as Docker mode but no container layer — faster file I/O "
+            "and easier interactive debugging from a WSL shell."
         )
         btn_check_wsl = QPushButton("Check Deps")
         btn_check_wsl.setToolTip("Check WSL environment dependencies")
@@ -673,57 +674,6 @@ class SettingsWidget(QWidget):
         stage_row.addStretch()
         build_inner.addLayout(stage_row)
 
-        # Tier details: explicit list of what will be installed + total size,
-        # so users picking a stage know *exactly* which features they get.
-        # Same data source as the Manage Environment dialog
-        # (docker/profiles.yaml + feature_registry/features.py).
-        from src.launchers.docker_profile_info import (
-            ProfileInfo,
-            format_profile_summary,
-            load_docker_profiles,
-        )
-
-        self._docker_profile_infos: dict[str, ProfileInfo] = load_docker_profiles()
-        for idx in range(self.combo_stage.count()):
-            info = self._docker_profile_infos.get(self.combo_stage.itemText(idx))
-            if info is not None:
-                self.combo_stage.setItemData(
-                    idx,
-                    format_profile_summary(info),
-                    Qt.ItemDataRole.ToolTipRole,
-                )
-
-        # ``QTextBrowser`` instead of ``QLabel-in-QScrollArea`` because the
-        # latter clipped content rather than scrolling when paired with
-        # ``widgetResizable=True`` (Qt sizes the label to the viewport, so
-        # the rich-text rendering has nowhere to spill, and the scrollbar
-        # handle never appears). QTextBrowser is purpose-built for read-only
-        # rich text with native scrolling and selection.
-        from PyQt6.QtWidgets import QSizePolicy as _QSizePolicy
-
-        self.tier_details = QTextBrowser()
-        self.tier_details.setReadOnly(True)
-        self.tier_details.setOpenExternalLinks(False)
-        self.tier_details.setFrameShape(QFrame.Shape.StyledPanel)
-        self.tier_details.setFixedHeight(200)
-        self.tier_details.setSizePolicy(
-            _QSizePolicy.Policy.Expanding, _QSizePolicy.Policy.Fixed
-        )
-        self.tier_details.setVerticalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAsNeeded
-        )
-        self.tier_details.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAsNeeded
-        )
-        build_inner.addWidget(self.tier_details)
-
-        self.combo_stage.currentTextChanged.connect(self._refresh_tier_details)
-        self._refresh_tier_details(self.combo_stage.currentText())
-
-        # Visible gap between the tier-details panel and the action buttons
-        # below so a long features list can't visually bleed into them.
-        build_inner.addSpacing(12)
-
         btn_row = QHBoxLayout()
         self._btn_build = QPushButton("Build Image")
         self._btn_build.setToolTip(
@@ -752,7 +702,7 @@ class SettingsWidget(QWidget):
         tab_layout.addWidget(build_group)
 
         # Sync checkboxes with parent launcher state
-        launcher = self._launcher or self.parent()
+        launcher = self._launcher
         if launcher:
             # Sync states from launcher
             if hasattr(launcher, "chk_docker") and hasattr(launcher, "chk_wsl"):
@@ -1112,7 +1062,7 @@ class SettingsWidget(QWidget):
             diag = LauncherDiagnostics()
             results = diag.run_all_checks()
 
-            launcher = self.parent()
+            launcher = self._launcher
             if launcher and hasattr(launcher, "available_models"):
                 results["runtime_state"] = {
                     "available_models_count": len(launcher.available_models),
@@ -1235,8 +1185,12 @@ class SettingsWidget(QWidget):
 
         if success and self._launcher:
             self._launcher.docker_available = True
-            self._launcher._apply_docker_status(True)
-            self._launcher.chk_docker.setChecked(True)
+            apply_status = getattr(self._launcher, "_apply_docker_status", None)
+            if callable(apply_status):
+                apply_status(True)
+            chk_docker = getattr(self._launcher, "chk_docker", None)
+            if chk_docker is not None and hasattr(chk_docker, "setChecked"):
+                chk_docker.setChecked(True)
 
     def _on_sidekick_context_toggled(self, enabled: bool) -> None:
         """Persist the Sidekick context-sharing toggle to the environment.

@@ -62,10 +62,10 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "24"
           cache: "npm"
@@ -79,7 +79,7 @@ jobs:
       # Cache cargo registry, git deps, and ui/src-tauri/target/. Cold Tauri
       # builds compile ~400 crates; warm cache typically cuts time by 60-70%.
       - name: Cache Rust target (check)
-        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        uses: Swatinem/rust-cache@f0deed1e0edfc6a9be95417288c0e1099b1eeec3 # v2
         with:
           workspaces: ui/src-tauri -> target
           key: ud-tauri-check
@@ -131,10 +131,10 @@ jobs:
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "24"
           cache: "npm"
@@ -148,7 +148,7 @@ jobs:
       # Per-target Rust cache for release builds. Each platform gets its own
       # cache so the Linux/Windows matrix legs don't trash each other.
       - name: Cache Rust target (build)
-        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        uses: Swatinem/rust-cache@f0deed1e0edfc6a9be95417288c0e1099b1eeec3 # v2
         with:
           workspaces: ui/src-tauri -> target
           key: ud-tauri-build-${{ matrix.target }}
@@ -175,7 +175,7 @@ jobs:
           projectPath: ui
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: golf-modeling-suite-${{ matrix.platform }}
           path: |

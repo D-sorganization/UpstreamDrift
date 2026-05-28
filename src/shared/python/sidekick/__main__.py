@@ -203,11 +203,14 @@ def run_headless(args: argparse.Namespace) -> int:
     """Run a headless calculator and write the results to stdout or a file."""
     from sidekick.standalone.runner import run_calculator
 
+    # args.output is a pathlib.Path if provided, or None
     output_path = str(args.output) if args.output is not None else "-"
+
     return run_calculator(
         calculator=args.calculator,
         inputs_path=str(args.inputs),
         output=output_path,
+        format=args.format,
     )
 
 

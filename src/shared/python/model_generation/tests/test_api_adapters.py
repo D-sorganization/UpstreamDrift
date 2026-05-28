@@ -208,9 +208,9 @@ def test_flask_adapter_registers_routes_and_translates_requests(
     fake_request = _FakeFlaskRequest()
 
     fake_flask = types.ModuleType("flask")
-    fake_flask.request = fake_request
-    fake_flask.jsonify = lambda body: body
-    fake_flask.make_response = lambda body: _FakeFlaskResponse(body)
+    fake_flask.request = fake_request  # type: ignore[attr-defined]
+    fake_flask.jsonify = lambda body: body  # type: ignore[attr-defined]
+    fake_flask.make_response = lambda body: _FakeFlaskResponse(body)  # type: ignore[attr-defined]
     monkeypatch.setitem(sys.modules, "flask", fake_flask)
 
     from model_generation.api.rest_api_flask import FlaskAdapter
@@ -261,10 +261,10 @@ def test_fastapi_adapter_registers_async_handlers(monkeypatch) -> None:
     from model_generation.api import APIResponse, HTTPMethod, Route
 
     fake_fastapi = types.ModuleType("fastapi")
-    fake_fastapi.Request = _FakeFastAPIRequest
-    fake_fastapi.Response = _FakeFastAPIResponse
+    fake_fastapi.Request = _FakeFastAPIRequest  # type: ignore[attr-defined]
+    fake_fastapi.Response = _FakeFastAPIResponse  # type: ignore[attr-defined]
     fake_fastapi_responses = types.ModuleType("fastapi.responses")
-    fake_fastapi_responses.JSONResponse = _FakeJSONResponse
+    fake_fastapi_responses.JSONResponse = _FakeJSONResponse  # type: ignore[attr-defined]
     monkeypatch.setitem(sys.modules, "fastapi", fake_fastapi)
     monkeypatch.setitem(sys.modules, "fastapi.responses", fake_fastapi_responses)
 
@@ -321,10 +321,10 @@ def test_fastapi_adapter_uses_binary_response_for_file_payloads(monkeypatch) -> 
     from model_generation.api import APIResponse, HTTPMethod, Route
 
     fake_fastapi = types.ModuleType("fastapi")
-    fake_fastapi.Request = _FakeFastAPIRequest
-    fake_fastapi.Response = _FakeFastAPIResponse
+    fake_fastapi.Request = _FakeFastAPIRequest  # type: ignore[attr-defined]
+    fake_fastapi.Response = _FakeFastAPIResponse  # type: ignore[attr-defined]
     fake_fastapi_responses = types.ModuleType("fastapi.responses")
-    fake_fastapi_responses.JSONResponse = _FakeJSONResponse
+    fake_fastapi_responses.JSONResponse = _FakeJSONResponse  # type: ignore[attr-defined]
     monkeypatch.setitem(sys.modules, "fastapi", fake_fastapi)
     monkeypatch.setitem(sys.modules, "fastapi.responses", fake_fastapi_responses)
 

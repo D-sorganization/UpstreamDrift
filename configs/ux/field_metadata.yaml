@@ -77,7 +77,8 @@ fields:
       Pose data is converted to engine-native conventions by the canonical
       pose-interchange layer (see src/shared/python/pose_interchange/).
     units: ~
-    valid_range: [mujoco, drake, pinocchio, opensim, myosim, myosuite, pendulum_stub]
+    valid_range:
+      [mujoco, drake, pinocchio, opensim, myosim, myosuite, pendulum_stub]
     default: mujoco
     default_source: MuJoCo selected as default — fastest for interactive iteration (issue #5968).
     consumers: []

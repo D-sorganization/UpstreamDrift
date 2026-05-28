@@ -15,6 +15,7 @@ Markers:
 
 from __future__ import annotations
 
+import importlib.util
 import os
 from collections.abc import Iterator
 from pathlib import Path
@@ -23,9 +24,17 @@ import numpy as np
 import pytest
 from src.engines.simscape import SimscapeAdapter, SimscapeOutput
 
+# Auto-skip the entire module when MATLAB is unavailable.
+_MATLAB_OK = (
+    importlib.util.find_spec("matlab") is not None
+    and os.environ.get("UD_SIMSCAPE_FORCE_NO_MATLAB") != "1"
+)
 pytestmark = [
     pytest.mark.requires_matlab,
     pytest.mark.live_simulation,
+    pytest.mark.skipif(
+        not _MATLAB_OK, reason="matlab.engine not importable in this environment"
+    ),
 ]
 
 

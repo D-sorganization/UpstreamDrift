@@ -128,7 +128,7 @@ else:
     # so any exception here (e.g. an ``engine_name`` collision with a different
     # provider class) reflects a real registration bug and must surface rather
     # than be silently swallowed (issue #4743).
-    _register_canonical(OpenSimFitSwingProvider())
+    _register_canonical(OpenSimFitSwingProvider())  # type: ignore[arg-type]
 
 try:
     from src.shared.python.motion_matching.provider_registry import (

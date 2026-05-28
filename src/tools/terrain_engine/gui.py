@@ -261,11 +261,7 @@ class TerrainExplorerWidget(QWidget):
 
 
 class _EmbedAdapter:
-    """Embed adapter for the Terrain Engine explorer.
-
-    Implements the EmbeddableTool protocol so the launcher can embed this
-    tool as a tab or dock widget.
-    """
+    """Embed adapter for the Terrain Engine explorer."""
 
     tool_id = "terrain_engine"
 
@@ -283,26 +279,13 @@ class _EmbedAdapter:
         )
 
     def create_main_widget(self, parent: Any) -> Any:
-        """Create and return the TerrainExplorerWidget for embedding.
-
-        Args:
-            parent: The intended Qt parent widget.
-
-        Returns:
-            TerrainExplorerWidget instance for embedding.
-        """
         self._widget = TerrainExplorerWidget(parent=parent)
         return self._widget
 
     def cleanup(self) -> None:
-        """Release any resources held by the embedded widget."""
         self._widget = None
 
     def is_dirty(self) -> bool:
-        """Return True if the tool has unsaved state.
-
-        Terrain Engine does not track dirty state.
-        """
         return False
 
 

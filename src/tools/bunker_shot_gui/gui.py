@@ -224,11 +224,7 @@ class BunkerShotWindow(QMainWindow):
 
 
 class _EmbedAdapter:
-    """Embed adapter for the Bunker Shot 3D Simulator.
-
-    Implements the EmbeddableTool protocol so the launcher can embed this
-    tool as a tab or dock widget.
-    """
+    """Embed adapter for the Bunker Shot 3D Simulator."""
 
     tool_id = "bunker_shot_gui"
 
@@ -246,28 +242,15 @@ class _EmbedAdapter:
         )
 
     def create_main_widget(self, parent: Any) -> Any:
-        """Create and return the BunkerShotWidget for embedding.
-
-        Args:
-            parent: The intended Qt parent widget.
-
-        Returns:
-            BunkerShotWidget instance for embedding.
-        """
         self._widget = BunkerShotWidget(parent=parent)
         return self._widget
 
     def cleanup(self) -> None:
-        """Release any resources held by the embedded widget."""
         if self._widget is not None:
             self._widget.cleanup()
         self._widget = None
 
     def is_dirty(self) -> bool:
-        """Return True if the tool has unsaved state.
-
-        Bunker Shot GUI does not track dirty state.
-        """
         return False
 
 

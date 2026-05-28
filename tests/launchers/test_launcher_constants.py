@@ -97,7 +97,10 @@ def test_lazy_load_model_registry() -> None:
 
 def test_platform_constants_non_win32() -> None:
     """Test platform constants on non-windows."""
-    with patch("sys.platform", "linux"):
+    with (
+        patch("sys.platform", "linux"),
+        patch("platformdirs.user_config_dir", return_value="/tmp"),
+    ):
         import src.launchers.launcher_constants as lc
 
         importlib.reload(lc)
@@ -133,7 +136,6 @@ def test_optional_imports_failure() -> None:
 
     # We mock builtins.__import__ so that it raises ImportError for specific modules
     original_import = __builtins__["__import__"]
-    original_find_spec = importlib.util.find_spec
 
     def mock_import(name, *args, **kwargs) -> Any:
         if name in (
@@ -144,19 +146,7 @@ def test_optional_imports_failure() -> None:
             raise ImportError(f"Mocked missing module: {name}")
         return original_import(name, *args, **kwargs)
 
-    def mock_find_spec(name, *args, **kwargs) -> Any:
-        if name in (
-            "src.shared.python.ai.gui",
-            "src.shared.python.help_system",
-            "src.shared.python.ui",
-        ):
-            return None
-        return original_find_spec(name, *args, **kwargs)
-
-    with (
-        patch("builtins.__import__", side_effect=mock_import),
-        patch("importlib.util.find_spec", side_effect=mock_find_spec),
-    ):
+    with patch("builtins.__import__", side_effect=mock_import):
         importlib.reload(lc)
         assert lc.AI_AVAILABLE is False
         assert lc.HELP_SYSTEM_AVAILABLE is False

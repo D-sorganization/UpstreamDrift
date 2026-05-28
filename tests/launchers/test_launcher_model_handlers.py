@@ -11,7 +11,6 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 import pytest  # noqa: E402
 
 from src.launchers.launcher_model_handlers import (  # noqa: E402
-    APIBackedHandler,
     BiomechExerciseHandler,
     DocumentHandler,
     GolfSimulationSuiteHandler,
@@ -115,10 +114,16 @@ def test_module_handler_get_dockable_ui() -> None:
     with patch("importlib.import_module") as mock_import:
         mock_module = MagicMock()
         mock_module.get_dockable_ui.return_value = "widget"
-        mock_import.return_value = mock_module
+
+        def import_side_effect(name):
+            if name == "my_module.__main__":
+                raise ImportError
+            return mock_module
+
+        mock_import.side_effect = import_side_effect
 
         assert handler.get_dockable_ui("model", Path("/repo")) == "widget"
-        mock_import.assert_called_once_with("my_module")
+        mock_import.assert_any_call("my_module")
 
     # Test when module lacks get_dockable_ui
     with patch("importlib.import_module") as mock_import:
@@ -133,9 +138,9 @@ def test_script_handler_get_dockable_ui() -> None:
     handler = ScriptHandler({"type1"}, "script.py", "Script")
 
     with (
+        patch.object(Path, "exists", return_value=True),
         patch("importlib.util.spec_from_file_location") as mock_spec,
         patch("importlib.util.module_from_spec") as mock_mod_from_spec,
-        patch.object(Path, "exists", return_value=True),
     ):
         mock_module = MagicMock()
         mock_module.get_dockable_ui.return_value = "widget"
@@ -238,30 +243,21 @@ def test_document_handler() -> None:
     handler = DocumentHandler()
     assert handler.can_handle("document") is True
 
+    mock_process = MagicMock()
     with (
         patch.object(Path, "exists", return_value=True),
+        patch.object(Path, "is_file", return_value=True),
         patch(
             "src.shared.python.security.secure_subprocess.secure_popen",
-            return_value=MagicMock(),
+            return_value=mock_process,
+        ) as mock_popen,
+        patch(
+            "src.launchers.launcher_model_handlers._open_with_system_app",
+            return_value=True,
         ),
     ):
         assert handler.launch(DummyDocModel(), Path("/repo"), MagicMock()) is True
-
-
-def test_api_backed_handler_uses_configured_api_port(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    handler = APIBackedHandler()
-
-    class DummyAPIModel:
-        web_route = "/tools/movement-optimizer"
-
-    monkeypatch.setenv("GOLF_API_PORT", "8123")
-
-    with patch("webbrowser.open") as mock_open:
-        assert handler.launch(DummyAPIModel(), Path("/repo"), MagicMock()) is True
-
-    mock_open.assert_called_once_with("http://localhost:8123/tools/movement-optimizer")
+        mock_popen.assert_called_once()
 
 
 def test_protocol_methods() -> None:

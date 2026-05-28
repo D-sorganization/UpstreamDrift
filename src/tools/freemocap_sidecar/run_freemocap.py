@@ -149,6 +149,9 @@ def run_freemocap_sidecar(
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
 
+    landmarks: Path | None = None
+    metadata: Path | None = None
+
     if dry_run:
         logger.info("Dry-run mode: writing stub artifacts to %s", output_path)
         landmarks, metadata = _write_stub_artifacts(output_path)

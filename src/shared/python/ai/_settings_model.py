@@ -127,7 +127,7 @@ class AISettings:
         return cls(
             provider=provider,
             model=str(data.get("model", DEFAULT_OLLAMA_MODEL)),
-            expertise_level=int(data.get("expertise_level", 1) or 1),
+            expertise_level=int(data.get("expertise_level", 1) or 1),  # type: ignore[call-overload]
             response_style=response_style,
             chat_mode=chat_mode,
             ollama_host=str(data.get("ollama_host", DEFAULT_OLLAMA_HOST)),

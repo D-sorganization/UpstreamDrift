@@ -164,7 +164,7 @@ class DatasetStorage:
                 isolation_level=None,
             )
             self._local.conn.execute("PRAGMA journal_mode=WAL")
-        return self._local.conn
+        return self._local.conn  # type: ignore[no-any-return]
 
     @contextlib.contextmanager
     def _transaction(self) -> Generator[sqlite3.Connection, None, None]:

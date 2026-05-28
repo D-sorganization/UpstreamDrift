@@ -300,9 +300,7 @@ class TestDataReaderAdditionalFormats:
         # (e.g. NpzFile), and whose .item() returns a dict
         data_dict = {"col_a": [1.0, 2.0], "col_b": [3.0, 4.0]}
         mock_result = MagicMock()  # not an np.ndarray instance
-        mock_result.__class__ = (
-            object  # ensure isinstance(mock_result, np.ndarray) is False
-        )
+        mock_result.__class__ = object  # type: ignore[assignment]  # ensure isinstance(mock_result, np.ndarray) is False
         mock_result.item.return_value = data_dict
 
         # Patch np.load in the io module namespace

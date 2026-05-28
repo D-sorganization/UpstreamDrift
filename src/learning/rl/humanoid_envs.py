@@ -163,7 +163,8 @@ class HumanoidWalkEnv(RoboticsGymEnv):
             base_vel = np.zeros(3)
 
         target_vel = self.task_config.target_velocity
-        vel_error = np.linalg.norm(base_vel[:2] - target_vel[:2])
+        diff_vel = base_vel[:2] - target_vel[:2]
+        vel_error = np.sqrt(np.dot(diff_vel, diff_vel))
         vel_reward = np.exp(-vel_error)
         reward += vel_reward * self.reward_config.task_reward_weight
 
@@ -375,7 +376,7 @@ class HumanoidStandEnv(RoboticsGymEnv):
         # Minimal movement reward (stay still)
         if hasattr(self.engine, "get_base_velocity"):
             vel = self.engine.get_base_velocity()
-            stillness_reward = np.exp(-np.linalg.norm(vel))
+            stillness_reward = np.exp(-np.sqrt(np.dot(vel, vel)))
             reward += stillness_reward * 0.3
 
         # Alive bonus

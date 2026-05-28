@@ -50,7 +50,7 @@ class MyoSuiteFitSwingProvider:
         except KeyError:
             base_provider = get_provider("mujoco")
 
-        base_result = base_provider.fit_swing(target, opts)
+        base_result = base_provider.fit_swing(target, opts)  # type: ignore[arg-type]
 
         # 2. Inverse Surrogate Model (Mock generation of kinematics for now)
         # In a full rollout, we would evaluate `base_result.theta_optimal`

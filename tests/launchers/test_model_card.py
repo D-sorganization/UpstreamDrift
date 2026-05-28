@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 import pytest  # noqa: E402
 from PyQt6.QtCore import QMimeData, QPoint, Qt  # noqa: E402
 from PyQt6.QtGui import QDragEnterEvent, QDropEvent, QMouseEvent  # noqa: E402
-from PyQt6.QtWidgets import QLabel, QWidget  # noqa: E402
+from PyQt6.QtWidgets import QLabel  # noqa: E402
 from src.launchers.model_card import DraggableModelCard  # noqa: E402
 
 
@@ -193,7 +193,7 @@ def test_no_image_widget(mock_model, parent_launcher, qapp) -> None:
         return_value=None,
     ):
         card = DraggableModelCard(mock_model, parent_launcher)
-        img = card.findChild(QWidget, "CardImage")
+        img = card.findChild(QLabel, "CardImage")
         assert img is not None
         assert img.text() == "No Image"
 

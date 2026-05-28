@@ -116,7 +116,7 @@ maturin develop                                   # build Rust extensions locall
 
 5. No TODO/FIXME unless tied to a tracked GitHub issue
 6. pytest with `-n auto`, 60s timeout, and the coverage threshold defined by `fail_under` in `pyproject.toml [tool.coverage.report]`
-7. No `print()` in `src/` — use logging. **Exceptions**: CLI entry-points that intentionally write to stdout must be added to `[tool.ruff.lint.per-file-ignores]` in `pyproject.toml` with a `T201` exemption and a comment explaining why stdout is intentional. Current exceptions: `src/shared/python/codemap/cli.py`, `src/shared/python/codemap/watcher.py`, and `src/shared/python/codemap/mcp_server.py` (stdout is the wire protocol); `src/shared/python/sidekick/__main__.py` and `src/shared/python/sidekick/standalone/runner.py` (Sidekick CLI T6 #5984); and `src/shared/python/programmatic_pid/cli.py` (generate-pid CLI tool). `scripts/`, `tests/`, and `examples/` are also excepted.
+7. No `print()` in `src/` — use logging. **Exceptions**: CLI entry-points that intentionally write to stdout must be added to `[tool.ruff.lint.per-file-ignores]` in `pyproject.toml` with a `T201` exemption and a comment explaining why stdout is intentional. Current exceptions: `src/shared/python/codemap/{cli,watcher,mcp_server}.py` (stdout is the wire protocol), `src/shared/python/sidekick/{__main__,standalone/runner}.py` (Sidekick CLI T6 #5984), `src/shared/python/programmatic_pid/cli.py` (generate-pid CLI tool). `scripts/**`, `tests/**`, `examples/**` are also excepted.
 
 ## Test Markers
 
@@ -229,3 +229,21 @@ When implementing an issue:
 - Don't duplicate code (DRY)
 - Run the tests locally before pushing; don't rely on CI to find basic breakage
 - If you can't fully implement, leave the issue open and post a status comment instead of closing
+
+## Hook bypass policy
+
+**Never use `git commit --no-verify` or `git push --no-verify` unless the hook itself is broken** (tooling not installed, hook script crashes). It is _not_ an acceptable workaround for a hook that flags real issues.
+
+### When a hook fails on something you didn't touch
+
+The hook is scoped to _your diff_. If `fleet-fast-guardrails` or any other guardrail reports a violation in a file you didn't change, that's a regression — file an issue against `Repository_Management`. Bypassing locally doesn't help: the same checks run in CI's `quality-gate` and will block the PR.
+
+### When the hook is legitimately broken
+
+Open an issue in `Repository_Management`. If you must bypass once to land an urgent fix, include the hook error in the commit body and link the tracking issue. **Do not normalize `--no-verify` as a workaround.**
+
+### Enforcement
+
+Branch protection requires the CI `quality-gate` check on every PR. That check runs the same lint, format, type, and security gates as the hooks. `--no-verify` only delays feedback — it cannot land code that would have failed the hook.
+
+For the canonical hook contract, see [`Repository_Management/docs/FLEET_HOOK_STANDARDS.md`](https://github.com/D-sorganization/Repository_Management/blob/main/docs/FLEET_HOOK_STANDARDS.md).

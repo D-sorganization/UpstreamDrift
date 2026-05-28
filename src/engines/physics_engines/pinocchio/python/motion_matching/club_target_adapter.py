@@ -100,7 +100,7 @@ except ImportError:  # pragma: no cover - fallback for stripped-down checkouts
         source: SourceProvenance
 
         def __post_init__(self) -> None:
-            _validate_stub_target(self)
+            _validate_stub_target(self)  # type: ignore[arg-type]
 
     _USING_STUB = True
 

@@ -52,7 +52,7 @@ def test_sidebar_category_has_at_least_one_tile(category: str) -> None:
     matching = _tiles_by_category(tiles, category)
     assert matching, (
         f"Sidebar category '{category}' has no visible tiles in the manifest. "
-        f"Available categories: {sorted({t.get('category') for t in tiles})}"
+        f"Available categories: {sorted({str(t.get('category')) for t in tiles if t.get('category') is not None})}"
     )
 
 
@@ -85,7 +85,7 @@ def test_cross_engine_dashboard_category_is_simulation() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Issue #5511 — exercise_dashboard tile exists and is in 'biomechanics'
+# Issue #5511 — biomech_exercise tile exists and is in 'biomechanics'
 # ---------------------------------------------------------------------------
 
 

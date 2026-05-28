@@ -129,13 +129,8 @@ class CoordinationMetricsMixin:
         sum_cos = np.sum(np.cos(angles_rad))
         sum_sin = np.sum(np.sin(angles_rad))
         # ⚡ Bolt: Cache sums and replace ** 2 with * to avoid redundant computation and power evaluation overhead
-        R = (
-            np.sqrt(sum_cos * sum_cos + sum_sin * sum_sin)
-            / total
-        )
-        mean_angle_rad = np.arctan2(
-            sum_sin, sum_cos
-        )
+        R = np.sqrt(sum_cos * sum_cos + sum_sin * sum_sin) / total
+        mean_angle_rad = np.arctan2(sum_sin, sum_cos)
         mean_angle_deg = np.degrees(mean_angle_rad) % 360.0
 
         if R < 1.0:

@@ -12,6 +12,7 @@ import logging
 import time
 import urllib.error
 import urllib.request
+import http.client
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -89,7 +90,7 @@ def make_request_with_backoff(
     initial_backoff: float = DEFAULT_INITIAL_BACKOFF,
     max_backoff: float = DEFAULT_MAX_BACKOFF,
     headers: dict[str, str] | None = None,
-) -> urllib.request.Response:
+) -> http.client.HTTPResponse:
     """Make a request with exponential backoff for rate-limit errors.
 
     Args:

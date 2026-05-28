@@ -85,19 +85,9 @@ def _tool_declarations_to_ollama(
 ) -> list[dict[str, Any]]:
     """Convert internal ``ToolDeclaration``s into Ollama's wire format.
 
-    Ollama (llama3.1+) accepts a ``tools`` field on ``/api/chat`` with the
-    OpenAI-compatible function-calling schema::
-
-        [{"type": "function",
-          "function": {"name": ..., "description": ...,
-                       "parameters": {"type": "object",
-                                      "properties": {...},
-                                      "required": [...]}}}]
-
-    Using this saves ~700 prompt tokens vs. embedding the same content as
-    text in the system prompt (profiler 2026-05-26). When ``tools`` is None
-    or empty the function returns ``[]`` so callers can ``if ollama_tools:``
-    gate inclusion without a None-check at the call site.
+    Uses the OpenAI-compatible function-calling schema supported by llama3.1+.
+    Passing tools here saves ~700 prompt tokens vs. embedding JSON-Schema text
+    in the system prompt (profiler 2026-05-26).
 
     DbC postcondition: returned list contains only dicts with the
     ``type=="function"`` shape Ollama expects.
@@ -229,8 +219,6 @@ class OllamaAdapter(BaseAgentAdapter):
         """
         if message is None:
             raise ValueError("message must be provided")
-        if message is None:
-            raise ValueError("message must be provided")
         client = self._get_client()
 
         # Format messages for Ollama
@@ -280,24 +268,9 @@ class OllamaAdapter(BaseAgentAdapter):
         messages = self._format_messages(context, message, tools)
 
         # Tier-1 latency wins (profiler 2026-05-26):
-        #
-        # 1. ``keep_alive``: Ollama's default unloads the model after 5 min
-        #    of idle. The desktop launcher pays a 3-5 s cold-load on every
-        #    coffee break. 30 min matches typical session length so the
-        #    model stays resident for back-to-back chats.
-        # 2. ``options.num_ctx``: cap the KV cache to 4096. The default
-        #    on most llama3.1 manifests is 8192; halving it cuts
-        #    prompt-eval time meaningfully and is still ample for the
-        #    chat-with-tools prompt size.
-        # 3. ``tools`` (Ollama native field): llama3.1+ supports
-        #    structured tool declarations. Passing them here lets the
-        #    *server* format the schemas efficiently; the alternative
-        #    (stuffing JSON-Schema text into the system prompt) was
-        #    adding ~700 prompt tokens that the model had to evaluate on
-        #    every turn. The adapter still builds the system-prompt tool
-        #    block for now (downstream parsing falls back to that path
-        #    when the model doesn't speak the structured protocol), but
-        #    when the server does honour ``tools`` the prompt cost drops.
+        # keep_alive: keep model resident for 30 min to avoid cold-load on each chat.
+        # num_ctx: cap KV cache to 4096 (halves prompt-eval vs 8192 default).
+        # tools: native Ollama field saves ~700 prompt tokens vs system-prompt embedding.
         payload: dict[str, Any] = {
             "model": self._model,
             "messages": messages,

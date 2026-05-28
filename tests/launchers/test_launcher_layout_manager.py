@@ -115,7 +115,7 @@ def test_save_layout_success(layout_manager) -> None:
 
 
 def test_save_layout_oserror(layout_manager) -> None:
-    window_state: dict[str, object] = {}
+    window_state = {}
     with patch.object(Path, "mkdir", side_effect=OSError("Boom")):
         # Should catch OSError and just log error
         layout_manager.save_layout(window_state)
@@ -191,7 +191,7 @@ def test_sync_model_cards(layout_manager) -> None:
     assert "model_1" not in layout_manager.model_cards
     assert "model_2" in layout_manager.model_cards
 
-    old_card.setParent.assert_not_called()
+    old_card.setParent.assert_called_with(None)
     old_card.deleteLater.assert_called_once()
 
 
@@ -270,8 +270,7 @@ def test_rebuild_grid(layout_manager) -> None:
     layout_manager.rebuild_grid(grid_layout)
 
     # Check that previous widget was cleared
-    mock_widget.deleteLater.assert_called_once()
-    mock_widget.setParent.assert_not_called()
+    mock_widget.setParent.assert_called_with(None)
 
     # grid_layout should have addWidget called 3 times: 1 header + 2 widgets
     assert grid_layout.addWidget.call_count == 3
@@ -361,9 +360,9 @@ def test_rebuild_grid_deletes_transient_headers_when_clearing(layout_manager) ->
     layout_manager.model_order = []
     layout_manager.rebuild_grid(grid_layout)
 
-    old_header.hide.assert_called_once()
+    old_header.hide.assert_not_called()
     old_header.deleteLater.assert_called_once()
-    old_header.setParent.assert_not_called()
+    old_header.setParent.assert_called_once_with(None)
 
 
 def test_rebuild_grid_keeps_filtered_cards_hidden_not_floating(

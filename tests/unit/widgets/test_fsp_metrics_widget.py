@@ -84,34 +84,35 @@ def _last_set_text(label: object) -> str:
 
 
 @pytest.mark.skipif(not HAS_QT, reason="PyQt6 not installed")
-class TestFspMetricsWidgetWithQt:
-    """Tests for FspMetricsWidget that require a live PyQt6 installation."""
+def test_set_result_updates_slope_label(qt_app) -> None:
+    from src.shared.python.ui.qt.widgets.fsp_metrics_widget import FspMetricsWidget
 
-    def test_set_result_updates_slope_label(self, qt_app) -> None:
-        from src.shared.python.ui.qt.widgets.fsp_metrics_widget import FspMetricsWidget
+    widget = FspMetricsWidget()
+    widget.set_result(_FakeResult(slope=12.5, direction=-3.0))
+    assert "12.5" in _last_set_text(widget._slope_label)
+    assert "-3.0" in _last_set_text(widget._direction_label)
 
-        widget = FspMetricsWidget()
-        widget.set_result(_FakeResult(slope=12.5, direction=-3.0))
-        assert "12.5" in _last_set_text(widget._slope_label)
-        assert "-3.0" in _last_set_text(widget._direction_label)
 
-    def test_set_result_summarises_deviations(self, qt_app) -> None:
-        from src.shared.python.ui.qt.widgets.fsp_metrics_widget import FspMetricsWidget
+@pytest.mark.skipif(not HAS_QT, reason="PyQt6 not installed")
+def test_set_result_summarises_deviations(qt_app) -> None:
+    from src.shared.python.ui.qt.widgets.fsp_metrics_widget import FspMetricsWidget
 
-        widget = FspMetricsWidget()
-        widget.set_result(_FakeResult())
-        text = _last_set_text(widget._chart_placeholder).lower()
-        # Expect both "mean" and "max" in the formatted summary.
-        assert "mean" in text
-        assert "max" in text
+    widget = FspMetricsWidget()
+    widget.set_result(_FakeResult())
+    text = _last_set_text(widget._chart_placeholder).lower()
+    # Expect both "mean" and "max" in the formatted summary.
+    assert "mean" in text
+    assert "max" in text
 
-    def test_set_result_tolerates_missing_deviations(self, qt_app) -> None:
-        from src.shared.python.ui.qt.widgets.fsp_metrics_widget import FspMetricsWidget
 
-        class _NoDevs:
-            slope_deg = 5.0
-            direction_deg = 1.0
+@pytest.mark.skipif(not HAS_QT, reason="PyQt6 not installed")
+def test_set_result_tolerates_missing_deviations(qt_app) -> None:
+    from src.shared.python.ui.qt.widgets.fsp_metrics_widget import FspMetricsWidget
 
-        widget = FspMetricsWidget()
-        widget.set_result(_NoDevs())  # must not raise
-        assert "5.0" in _last_set_text(widget._slope_label)
+    class _NoDevs:
+        slope_deg = 5.0
+        direction_deg = 1.0
+
+    widget = FspMetricsWidget()
+    widget.set_result(_NoDevs())  # must not raise
+    assert "5.0" in _last_set_text(widget._slope_label)

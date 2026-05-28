@@ -43,7 +43,7 @@ permissions:
 # Prevent concurrent runs
 concurrency:
   group: jules-assessment-remediator
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 env:
   # Safety limits
@@ -90,7 +90,7 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Find and Assign Issues
         id: assign

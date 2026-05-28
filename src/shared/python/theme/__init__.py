@@ -35,6 +35,7 @@ Usage:
 """
 
 from typing import Any
+
 from types import SimpleNamespace as _NS
 
 from .colors import (
@@ -267,6 +268,7 @@ __all__ = [
     # Legacy compatibility
     "ThemePreset",
     "apply_golf_suite_style",
+    # Compat helpers
     "get_current_colors",
 ]
 
@@ -286,13 +288,9 @@ class ThemeColorsCompat(dict):
         try:
             return self[name]
         except KeyError as err:
-            # Fill in any modern design token (bg_elevated, text_quaternary,
-            # primary_hover, ...) that the manager's raw dict doesn't store
-            # by promoting through the ThemeColors derivation pipeline.
             try:
                 from src.shared.python.theme.api import ThemeColors
 
-                # Ensure base fields exist; the model requires 14 of them.
                 base = dict(self)
                 _BASE_DEFAULTS = {
                     "bg": "#ffffff",
@@ -315,10 +313,9 @@ class ThemeColorsCompat(dict):
                 derived = ThemeColors(**base).as_dict()
                 val = derived.get(name)
                 if val is not None:
-                    # Cache so subsequent accesses don't re-derive.
                     self[name] = val
                     return val
-            except Exception:  # noqa: BLE001 - never let the fallback crash
+            except Exception:  # noqa: BLE001
                 pass
             raise AttributeError(name) from err
 
@@ -329,15 +326,10 @@ class ThemeColorsCompat(dict):
 def _derive_full_palette(
     partial: dict[str, Any], theme_name: str | None = None
 ) -> dict[str, Any]:
-    """Promote a partial colour dict into a full 60+ token palette.
-
-    Used when the active theme isn't in ``FLEET_THEMES`` (custom user themes,
-    legacy preferences) — runs the same derivation as the fleet adapter so
-    every modern design token resolves consistently.
-    """
+    """Promote a partial colour dict into a full 60+ token palette."""
     from src.shared.python.theme.api import ThemeColors
 
-    _BASE_DEFAULTS = {
+    _BASE_DEFAULTS: dict[str, Any] = {
         "bg": "#ffffff",
         "group_bg": "#f8f9fa",
         "input_bg": "#ffffff",
@@ -353,21 +345,17 @@ def _derive_full_palette(
         "table_alt": "#f8f9fa",
         "button_hover": "#4a7ba7",
     }
-    merged = {**_BASE_DEFAULTS, **partial}
+    merged: dict[str, Any] = {**_BASE_DEFAULTS, **partial}
     if theme_name and "name" not in merged:
         merged["name"] = theme_name
     try:
         return ThemeColors(**merged).as_dict()
-    except Exception:  # noqa: BLE001 - return what we have rather than crash
+    except Exception:  # noqa: BLE001
         return merged
 
 
-def get_current_colors() -> ThemeColorsCompat:
-    """Return the currently active theme colors in a compatibility-wrapper format.
-
-    Supports both dictionary-like lookup (e.g. colors.get("border")) and
-    attribute-style lookup (e.g. colors.bg_elevated).
-    """
+def get_current_colors() -> "ThemeColorsCompat":
+    """Return the currently active theme colors in a compatibility-wrapper format."""
     try:
         from src.shared.python.theme.theme_manager import get_theme_manager
 
@@ -375,16 +363,12 @@ def get_current_colors() -> ThemeColorsCompat:
         if mgr and mgr.current_theme:
             try:
                 from src.shared.python.theme.fleet_adapter import (
-                    fleet_to_theme_colors_dict,
+                    fleet_to_theme_colors,
                 )
 
-                colors_dict = fleet_to_theme_colors_dict(mgr.current_theme)
+                colors_dict = fleet_to_theme_colors(mgr.current_theme).as_dict()
                 return ThemeColorsCompat(colors_dict)
             except Exception:  # noqa: BLE001
-                # Active theme isn't in FLEET_THEMES (e.g. a saved name that
-                # didn't survive the legacy-name migration). Promote the
-                # manager's partial dict through the same derivation as
-                # FLEET_THEMES would so the consumer schema is complete.
                 colors_dict = _derive_full_palette(
                     dict(mgr.get_current_colors()), mgr.current_theme
                 )
@@ -392,19 +376,17 @@ def get_current_colors() -> ThemeColorsCompat:
     except Exception:  # noqa: BLE001
         pass
 
-    # Fallback to Dark theme using the full fleet dict
     try:
-        from src.shared.python.theme.fleet_adapter import fleet_to_theme_colors_dict
+        from src.shared.python.theme.fleet_adapter import fleet_to_theme_colors
 
-        return ThemeColorsCompat(fleet_to_theme_colors_dict("Dark"))
+        return ThemeColorsCompat(fleet_to_theme_colors("Dark").as_dict())
     except Exception:  # noqa: BLE001
         pass
 
-    # Ultimate fallback to whatever is in DARK_THEME
     try:
         from src.shared.python.theme import DARK_THEME
 
-        d = {}
+        d: dict[str, Any] = {}
         if hasattr(DARK_THEME, "__dict__"):
             d.update(
                 {k: v for k, v in DARK_THEME.__dict__.items() if not k.startswith("_")}

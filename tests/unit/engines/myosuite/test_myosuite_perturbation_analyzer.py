@@ -44,6 +44,11 @@ except ImportError:
 # Tests run when either myosuite or mujoco is available (mujoco is the fallback)
 _ENGINE_AVAILABLE = _MYOSUITE_AVAILABLE or _MUJOCO_AVAILABLE
 
+_skip_no_engine = pytest.mark.skipif(
+    not _ENGINE_AVAILABLE,
+    reason="neither myosuite nor mujoco is installed",
+)
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------

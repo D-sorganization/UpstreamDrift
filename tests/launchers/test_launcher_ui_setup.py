@@ -1,8 +1,6 @@
-"""Tests for launcher_ui_setup.py."""
-
+from typing import Any
 from unittest.mock import MagicMock, patch  # noqa: E402
 
-from typing import Any
 import pytest  # noqa: E402
 from PyQt6.QtWidgets import (
     QHBoxLayout,
@@ -16,25 +14,16 @@ from src.launchers.launcher_ui_setup import UISetupManager  # noqa: E402
 
 class DummyLauncher(QMainWindow):
     def __getattr__(self, name: str) -> Any:
-        for mgr_name in (
-            "manager",
-            "ui_setup_manager",
-            "theme_manager",
-            "simulation_manager",
-            "dialogs_manager",
-        ):
-            if mgr_name in self.__dict__:
-                manager = self.__dict__[mgr_name]
-                if name in manager.__dict__ or hasattr(type(manager), name):
-                    attr = getattr(manager, name)
-                    import types
+        if hasattr(self, "manager"):
+            manager = self.manager
+            if name in manager.__dict__ or hasattr(type(manager), name):
+                attr = getattr(manager, name)
+                import types
 
-                    if isinstance(attr, types.MethodType):
-                        return types.MethodType(attr.__func__, self)
-                    return attr
-        raise AttributeError(
-            f"'{type(self).__name__}' object has no attribute '{name}'"
-        )
+                if isinstance(attr, types.MethodType):
+                    return types.MethodType(attr.__func__, self)
+                return attr
+        raise AttributeError(name)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -51,7 +40,6 @@ class DummyLauncher(QMainWindow):
         self._show_shortcuts_overlay = MagicMock()
         self._show_about_dialog = MagicMock()
         self.update_search_filter = MagicMock()
-        self._on_windows_mode_changed = MagicMock()
         self._on_docker_mode_changed = MagicMock()
         self._on_wsl_mode_changed = MagicMock()
         self.toggle_layout_mode = MagicMock()
@@ -59,6 +47,8 @@ class DummyLauncher(QMainWindow):
         self.toggle_ai_assistant = MagicMock()
         self.launch_simulation = MagicMock()
         self._open_ai_settings = MagicMock()
+        self._popped_out_windows = []
+        self._action_console = MagicMock()
 
 
 @pytest.fixture

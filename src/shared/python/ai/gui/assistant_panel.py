@@ -134,6 +134,7 @@ class AIAssistantPanel(QWidget):
         # --- Session manager + history ----------------------------------
         self._session_manager = ChatSessionManager()
         self._session_manager.session_loaded.connect(self._on_session_loaded)
+        self._load_history()
 
         self._init_tools()
 
@@ -145,7 +146,6 @@ class AIAssistantPanel(QWidget):
         self._input_container = InputArea()
 
         self._wire_controllers()
-        self._load_history()
         self._setup_ui()
         self._messages.restore_from_context(self._context)
 

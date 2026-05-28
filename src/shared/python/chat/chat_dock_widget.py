@@ -23,6 +23,8 @@ import threading
 from pathlib import Path
 from typing import Any
 
+_DEFAULT_SERVER = "ws://127.0.0.1:8000"
+
 
 def _resolve_default_server() -> str:
     """Compute the WS URL the chat dock should connect to.
@@ -51,7 +53,6 @@ def _resolve_default_server() -> str:
     return "ws://127.0.0.1:8000"
 
 
-_DEFAULT_SERVER = _resolve_default_server()
 _QT_EXPORTS = {"ChatDockWidget", "ChatMessageBubble"}
 
 # Tools issue #2753: serialize all reads/writes of the shared session ID

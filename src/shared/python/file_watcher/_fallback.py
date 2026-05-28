@@ -17,6 +17,7 @@ import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -70,8 +71,8 @@ class FileWatcher:
         self._debounce = debounce_ms / 1000.0
         self._respect_gitignore = respect_gitignore
         self._callback: EventCallback | None = None
-        self._observer = None  # watchdog Observer; created on start()
-        self._handler = None
+        self._observer: Any = None  # watchdog Observer; created on start()
+        self._handler: Any = None
         self._pending: dict[tuple[str, str], ChangeEvent] = {}
         self._lock = threading.Lock()
         self._last_event_at: float | None = None

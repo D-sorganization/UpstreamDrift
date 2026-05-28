@@ -48,6 +48,8 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
+    from src.shared.python.ai.types import ChatModelInfo
+
 logger = get_logger(__name__)
 
 # Backwards compatibility aliases
@@ -278,7 +280,7 @@ class AnthropicAdapter(BaseAgentAdapter):
         "claude-3-haiku-20240307",
     )
 
-    def list_models(self) -> list[ChatModelInfo]:  # noqa: F821
+    def list_models(self) -> list[ChatModelInfo]:
         """Return Anthropic model info; falls back to a static catalogue."""
         from src.shared.python.ai.types import ChatModelInfo
 
@@ -288,7 +290,7 @@ class AnthropicAdapter(BaseAgentAdapter):
             response = client.models.list()
             data = getattr(response, "data", None) or []
             ids = [
-                getattr(entry, "id", None)
+                getattr(entry, "id", None)  # type: ignore[misc]
                 for entry in data
                 if getattr(entry, "id", None)
             ]

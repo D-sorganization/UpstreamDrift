@@ -27,11 +27,11 @@ ADR-0013, Pose Studio, model_explorer, etc.).
 Concretely, every new "let the AI do X" request was becoming a one-off
 bridge from `ai.tools` into a private subtab API:
 
-* Each bridge invented its own param validation.
-* Audit logging was ad-hoc and inconsistent.
-* Destructive actions had no shared confirmation pattern.
-* Tool-registry entries and system-prompt text drifted from each other.
-* Sidekick had to import launcher internals to drive host actions —
+- Each bridge invented its own param validation.
+- Audit logging was ad-hoc and inconsistent.
+- Destructive actions had no shared confirmation pattern.
+- Tool-registry entries and system-prompt text drifted from each other.
+- Sidekick had to import launcher internals to drive host actions —
   the wrong direction.
 
 Cumulative effect: the 2026-05-21 adversarial review (#5907) flagged
@@ -63,12 +63,12 @@ in the rest of `tools_sidebar`.
 agentic action flows through `service.invoke(action_id, params)`. The
 service owns:
 
-* JSON-Schema validation of params (a small built-in validator covering
+- JSON-Schema validation of params (a small built-in validator covering
   the subset our adapters use).
-* Audit recording on every call, including denied and errored ones.
-* Optional policy check between validation and dispatch.
-* Optional `dry_run` short-circuit for chat-side preview.
-* Service-issued undo tokens for reversible actions.
+- Audit recording on every call, including denied and errored ones.
+- Optional policy check between validation and dispatch.
+- Optional `dry_run` short-circuit for chat-side preview.
+- Service-issued undo tokens for reversible actions.
 
 Handlers never raise on user input — every error is translated to
 `ActionResult(ok=False, error=...)` per ADR-0016.
@@ -77,12 +77,12 @@ Handlers never raise on user input — every error is translated to
 
 Two `SidekickActionHandler` implementations:
 
-* `subtab_adapter.SubtabAdapter` — exposes the tools_sidebar surface
+- `subtab_adapter.SubtabAdapter` — exposes the tools_sidebar surface
   via a thin `SubtabActionPort` Protocol. The adapter has zero direct
   PyQt6 imports; tests use a fake port; the real port (a follow-up)
   wraps `UnifiedToolsSidebar` + `WorkspaceRegistry` +
   `CommandHistoryController`.
-* `host_adapter.HostAdapter` — exposes embedding-host capabilities
+- `host_adapter.HostAdapter` — exposes embedding-host capabilities
   (launcher tiles, theme switches, pose publishing, ...) via a
   `HostActionPort` Protocol that the host implements. Dependency
   direction is fixed at host → sidekick.agent.
@@ -100,15 +100,15 @@ registry.
 
 Three modules:
 
-* `action_audit.py` — `JsonlActionAudit` (file) and
+- `action_audit.py` — `JsonlActionAudit` (file) and
   `MemoryActionAudit` (in-process), both with case-insensitive
   redaction of `{password, api_key, secret, token, auth, credential}`.
   The JSONL sink degrades to memory on filesystem failure; auditing
   must never abort dispatch.
-* `access_policy.SidekickActionPolicy` — default-deny for write and
+- `access_policy.SidekickActionPolicy` — default-deny for write and
   destructive actions; destructive always requires
   `params["_confirmed"] is True` even when allowlisted.
-* `SidekickActionService.undo(token)` — reverses a reversible action by
+- `SidekickActionService.undo(token)` — reverses a reversible action by
   dispatching the inverse the handler supplied via
   `result.metadata["_undo"]`. Tokens are service-owned and consumable
   exactly once.
@@ -181,14 +181,14 @@ module is fully headless-testable.
 
 ## Validation
 
-* `pytest tests/unit/sidekick/agent/` — 157 tests covering every
+- `pytest tests/unit/sidekick/agent/` — 157 tests covering every
   module. All green on this branch.
-* `ruff check` and `ruff format --check` — clean on every module under
+- `ruff check` and `ruff format --check` — clean on every module under
   `src/shared/python/sidekick/agent/` and `tests/unit/sidekick/agent/`.
-* File-size budget — every module is under 700 lines; no exceptions
+- File-size budget — every module is under 700 lines; no exceptions
   required.
-* Error-handling ratchet — no new `BLE001` / `F841` / `F401`; all
+- Error-handling ratchet — no new `BLE001` / `F841` / `F401`; all
   exception handling uses `narrow_catch` or explicit narrow `except`
   clauses per ADR-0016.
-* No PyQt6 imports anywhere in `src/shared/python/sidekick/agent/`;
+- No PyQt6 imports anywhere in `src/shared/python/sidekick/agent/`;
   asserted by the import-boundary test for the host adapter.

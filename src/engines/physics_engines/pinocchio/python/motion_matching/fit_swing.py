@@ -595,7 +595,7 @@ def _analytical_jacobian(
             break
 
         # ABA derivatives: Aq = ∂qdd/∂q, Av = ∂qdd/∂qd, Atau = ∂qdd/∂tau.
-        pin.computeABADerivatives(model, data, q_i, qd_i, tau_i)
+        pin.computeABADerivatives(model, data, q_i, qd_i, tau_i)  # type: ignore[attr-defined]
         Aq = np.asarray(data.ddq_dq, dtype=np.float64)  # (nv, nv)
         Av = np.asarray(data.ddq_dv, dtype=np.float64)  # (nv, nv)
         Atau = np.asarray(data.Minv, dtype=np.float64)  # (nv, nv)  d qdd / d tau

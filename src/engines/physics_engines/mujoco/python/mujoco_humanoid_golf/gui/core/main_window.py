@@ -385,9 +385,10 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
     def _apply_styling(self) -> None:
         """Apply professional styling to the application."""
         try:
-            from src.shared.python.theme import ThemeManager as SharedThemeManager
+            from src.shared.python.theme import apply_theme_to_window
 
-            _ = SharedThemeManager
+            if callable(apply_theme_to_window):
+                apply_theme_to_window(self)
             return
         except ImportError:
             pass

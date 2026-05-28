@@ -11,6 +11,13 @@ from src.engines.physics_engines.mujoco.python.humanoid_launcher import (
 )
 from PyQt6.QtWidgets import QApplication
 
+# Keep a module-level reference so the QApplication lives for the full test
+# session. Without this, `QApplication.instance() or QApplication(sys.argv)`
+# creates a temporary that is immediately garbage-collected, which can destroy
+# the application before any QWidget constructs and raise "Must construct a
+# QApplication before a QWidget."
+_qapp = QApplication.instance() or QApplication(sys.argv)
+
 
 def test_remote_recorder():
     """Test RemoteRecorder."""
@@ -59,7 +66,6 @@ def test_remote_recorder():
 )
 def test_humanoid_launcher_init(mock_config_manager):
     """Test HumanoidLauncher initialization."""
-    app = QApplication.instance() or QApplication(sys.argv)
     mock_cm_instance = MagicMock()
     mock_config = MagicMock()
     mock_cm_instance.load.return_value = mock_config
@@ -78,7 +84,6 @@ def test_humanoid_launcher_init(mock_config_manager):
 )
 def test_humanoid_launcher_sim_mixin(mock_config_manager):
     """Test SimulationMixin methods."""
-    app = QApplication.instance() or QApplication(sys.argv)
     mock_cm_instance = MagicMock()
     mock_config = MagicMock()
     mock_config.live_view = False
@@ -125,7 +130,6 @@ def test_humanoid_launcher_sim_mixin(mock_config_manager):
 )
 def test_humanoid_launcher_analysis_mixin(mock_config_manager):
     """Test AnalysisMixin methods."""
-    app = QApplication.instance() or QApplication(sys.argv)
     mock_cm_instance = MagicMock()
     mock_config = MagicMock()
     mock_cm_instance.load.return_value = mock_config
@@ -169,3 +173,31 @@ def test_humanoid_launcher_analysis_mixin(mock_config_manager):
         launcher.save_config()
         assert launcher.config.height_m == 1.8
         mock_cm_instance.save.assert_called_once()
+
+
+def test_get_dockable_ui_returns_qwidget_container(qapp) -> None:
+    """Issue #6509: get_dockable_ui must return a QWidget, not a QMainWindow.
+
+    QMainWindow has top-level window flags by default and cannot be embedded
+    as a tab in the unified launcher's DraggableTabWidget.
+    """
+    from PyQt6.QtWidgets import QMainWindow, QWidget
+
+    from src.engines.physics_engines.mujoco.python.humanoid_launcher import (
+        get_dockable_ui,
+    )
+
+    # Use a real QWidget as the stub (MagicMock fails QHBoxLayout.addWidget type check).
+    # A plain QWidget passes Qt's C++ type guard while avoiding HumanoidLauncher init.
+    fake_launcher = QWidget()
+
+    with patch(
+        "src.engines.physics_engines.mujoco.python.humanoid_launcher.HumanoidLauncher",
+        return_value=fake_launcher,
+    ):
+        widget = get_dockable_ui()
+
+    assert isinstance(widget, QWidget), "get_dockable_ui must return a QWidget"
+    assert not isinstance(widget, QMainWindow), "container must not be a QMainWindow"
+    # The inner launcher must be embedded inside the container
+    assert fake_launcher.parent() is widget

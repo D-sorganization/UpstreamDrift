@@ -75,11 +75,11 @@ The Golf Modeling Suite is an ambitious, well-architected platform that consolid
 
 ### 2.2 Security Concerns
 
-| Issue                                   | Location                   | Risk   |
-| --------------------------------------- | -------------------------- | ------ | --------------- | ------ |
-| No secrets scanning in CI               | Workflows                  | HIGH   |
-| `pip-audit` runs non-blocking (`        |                            | true`) | ci-standard.yml | MEDIUM |
-| Bandit installed but not running        | CI                         | MEDIUM |
+| Issue                                   | Location                             | Risk   |
+| --------------------------------------- | ------------------------------------ | ------ | --------------- | ------ |
+| No secrets scanning in CI               | Workflows                            | HIGH   |
+| `pip-audit` runs non-blocking (`        |                                      | true`) | ci-standard.yml | MEDIUM |
+| Bandit installed but not running        | CI                                   | MEDIUM |
 | Hardcoded environment variables         | upstream_drift_launcher.py:2170-2175 | LOW    |
 | Mock object handling in production code | upstream_drift_launcher.py:1116-1149 | LOW    |
 
@@ -177,13 +177,13 @@ The Golf Modeling Suite is an ambitious, well-architected platform that consolid
 
 ### 5.1 High-Priority Technical Debt
 
-| Issue                                           | Occurrences | Files Affected      |
-| ----------------------------------------------- | ----------- | ------------------- |
-| `except Exception as e:` (broad catches)        | 40+         | 8+ files            |
-| TRACKED_TASK/TRACKED_DEFECT comments unresolved | 25+         | Various             |
-| Methods >100 lines (complexity)                 | 6+          | upstream_drift_launcher.py    |
-| Type suppressions (`# type: ignore`)            | 25+         | Various             |
-| Print statements (should be logging)            | 10+         | Examples, utilities |
+| Issue                                           | Occurrences | Files Affected             |
+| ----------------------------------------------- | ----------- | -------------------------- |
+| `except Exception as e:` (broad catches)        | 40+         | 8+ files                   |
+| TRACKED_TASK/TRACKED_DEFECT comments unresolved | 25+         | Various                    |
+| Methods >100 lines (complexity)                 | 6+          | upstream_drift_launcher.py |
+| Type suppressions (`# type: ignore`)            | 25+         | Various                    |
+| Print statements (should be logging)            | 10+         | Examples, utilities        |
 
 ### 5.2 Architectural Concerns
 
@@ -206,8 +206,8 @@ The Golf Modeling Suite is an ambitious, well-architected platform that consolid
 
 ### 5.3 Method Complexity (Top Offenders)
 
-| File                  | Method                       | Lines | Action Required    |
-| --------------------- | ---------------------------- | ----- | ------------------ |
+| File                            | Method                       | Lines | Action Required    |
+| ------------------------------- | ---------------------------- | ----- | ------------------ |
 | upstream_drift_launcher.py:2110 | `_launch_docker_container()` | 103   | Refactor           |
 | upstream_drift_launcher.py:1192 | `init_ui()`                  | 128   | Extract helpers    |
 | upstream_drift_launcher.py:1734 | `apply_styles()`             | 77    | Move to stylesheet |

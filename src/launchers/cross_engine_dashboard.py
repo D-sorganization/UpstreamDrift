@@ -100,8 +100,8 @@ class _StubEngine:
         """Integrate with Euler + damping."""
         effective_dt = dt if dt is not None else 0.01
         damping = 0.95
-        self._q = self._q + self._v * effective_dt
-        self._v = self._v * damping
+        self._q = self._q + self._v * effective_dt  # type: ignore[assignment]
+        self._v = self._v * damping  # type: ignore[assignment]
 
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
         """Return (positions, velocities)."""
@@ -353,13 +353,13 @@ def _try_build_real_engine(name: str) -> object | None:
                 MuJoCoPhysicsEngine,
             )
 
-            return MuJoCoPhysicsEngine()
+            return MuJoCoPhysicsEngine()  # type: ignore[abstract]
         if name == "drake":
             from src.engines.physics_engines.drake.python.drake_physics_engine import (  # noqa: PLC0415
                 DrakePhysicsEngine,
             )
 
-            return DrakePhysicsEngine()
+            return DrakePhysicsEngine()  # type: ignore[abstract]
         if name == "pinocchio":
             from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (  # noqa: PLC0415
                 PinocchioPhysicsEngine,
@@ -411,7 +411,7 @@ def _run_with_results(
         raise ValueError("At least one engine name must be provided")
     runner = CrossEnginePerturbationRunner(config)
     for name in engine_names:
-        runner.register_engine(name, _build_engine(name))
+        runner.register_engine(name, _build_engine(name))  # type: ignore[arg-type]
     n_steps = round(config.t_end / config.dt)
     base_profile = np.zeros(n_steps)
     results = runner.run_comparison(base_profile)
@@ -522,6 +522,8 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
         QWidget,
     )
 
+    FigureCanvasQTAgg: Any = None
+    Figure: Any = None
     try:
         import matplotlib  # noqa: PLC0415
 
@@ -532,8 +534,6 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
         _has_mpl = True
     except ImportError:
         _has_mpl = False
-        FigureCanvasQTAgg = None
-        Figure = None
 
     class ComparisonWorkerSignals(QObject):
         """Signals for the ComparisonWorker."""
@@ -593,7 +593,7 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
             try:
                 from src.shared.python.theme import apply_theme_to_window
 
-                if apply_theme_to_window:
+                if callable(apply_theme_to_window):
                     apply_theme_to_window(self)
             except ImportError:
                 pass
@@ -709,6 +709,36 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
             lay.addWidget(self._status_label)
             return grp
 
+        def _get_theme_colors(self) -> Any:
+            """Retrieve the current theme colors mapped as a SimpleNamespace."""
+            try:
+                from types import SimpleNamespace
+                from src.shared.python.theme import DARK_THEME, get_theme_manager
+
+                tm = get_theme_manager()
+                raw_c = tm.get_current_colors() if tm else None
+                if raw_c:
+                    return SimpleNamespace(
+                        bg=raw_c.get("bg", "#1a1d23"),
+                        bg_elevated=raw_c.get(
+                            "table_header", raw_c.get("group_bg", "#2a2d35")
+                        ),
+                        text_secondary=raw_c.get(
+                            "text_secondary", raw_c.get("label", "#8b949e")
+                        ),
+                        border_default=raw_c.get("border", "#3a3d45"),
+                    )
+                return DARK_THEME
+            except ImportError:
+
+                class FallbackColors:
+                    bg = "#12121e"
+                    bg_elevated = "#1a1a2e"
+                    text_secondary = "#8080b0"
+                    border_default = "#303050"
+
+                return FallbackColors()
+
         # ------------------------------------------------------------------
         # Chart panel
         # ------------------------------------------------------------------
@@ -719,43 +749,7 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
             layout.setContentsMargins(0, 0, 0, 0)
             layout.setSpacing(6)
 
-            try:
-                from src.shared.python.theme import DARK_THEME, get_theme_manager
-
-                tm = get_theme_manager()
-                c = tm.get_current_colors() if tm else DARK_THEME
-            except ImportError:
-
-                class FallbackColors:
-                    bg = "#12121e"
-                    bg_elevated = "#1a1a2e"
-                    text_secondary = "#8080b0"
-                    border_default = "#303050"
-
-                c = FallbackColors()  # type: ignore[assignment]
-
-            from types import SimpleNamespace
-
-            if isinstance(c, dict):
-                c = SimpleNamespace(
-                    bg=c.get("bg", "#12121e"),
-                    bg_elevated=c.get("group_bg", c.get("bg", "#1a1a2e")),
-                    text_secondary=c.get("text_secondary", c.get("text", "#8080b0")),
-                    border_default=c.get("border", "#303050"),
-                )
-            else:
-                c = SimpleNamespace(
-                    bg=getattr(c, "bg", "#12121e"),
-                    bg_elevated=getattr(
-                        c, "bg_elevated", getattr(c, "group_bg", "#1a1a2e")
-                    ),
-                    text_secondary=getattr(c, "text_secondary", "#8080b0"),
-                    border_default=getattr(
-                        c, "border_default", getattr(c, "border", "#303050")
-                    ),
-                )
-
-            self._theme_colors = c
+            c = self._get_theme_colors()
 
             # Robustness Score chart
             rs_grp = QGroupBox("Robustness Score (1 − CV, per engine)")
@@ -797,7 +791,7 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
             return panel
 
         @staticmethod
-        def _style_ax(ax: object, colors: Any) -> None:
+        def _style_ax(ax: Any, colors: Any) -> None:
             """Apply theme styling to a Matplotlib axes."""
             ax.tick_params(colors=colors.text_secondary, labelsize=9)
             for spine in ax.spines.values():
@@ -843,11 +837,11 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
             self,
             engine_names: list[str],
             cv_summary: dict[str, float],
-            trajectories: dict[str, np.ndarray],
+            trajectories: dict[str, np.ndarray] | None = None,
         ) -> None:
             """Handle successful comparison completion."""
             self._update_charts(engine_names, cv_summary)
-            self._update_trajectory_overlay(trajectories)
+            self._update_trajectory_overlay(trajectories or {})
             self._status_label.setText("Done")
             self._run_btn.setEnabled(True)
 
@@ -886,6 +880,8 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
             if not engine_names:
                 return
 
+            c = self._get_theme_colors()
+
             metric_keys = [
                 "cv_total_energy_final",
                 "cv_end_effector_speed_final",
@@ -917,7 +913,7 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
             ax.set_ylim(0.0, 1.0)
             ax.set_ylabel("Robustness Score", fontsize=9)
             ax.axhline(0.5, color="#ff6060", linewidth=0.8, linestyle="--")
-            self._style_ax(ax, self._theme_colors)
+            self._style_ax(ax, c)
 
             # Annotate bar values
             for bar, val in zip(bars, robustness_per_engine, strict=True):
@@ -949,7 +945,7 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
             ax2.set_xticklabels(metric_labels, fontsize=9)
             ax2.set_ylabel("CV", fontsize=9)
             ax2.axhline(1.0, color="#ff6060", linewidth=0.8, linestyle="--")
-            self._style_ax(ax2, self._theme_colors)
+            self._style_ax(ax2, c)
 
             for bar, val in zip(bars2, cv_values, strict=True):
                 ax2.text(
@@ -976,6 +972,7 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
             """
             if not _has_mpl or self._traj_renderer is None:
                 return
+            c = self._get_theme_colors()
             ax = self._ax_tr
             # Remove any prior handles to avoid stacking artists across runs.
             for handle in list(self._traj_handles.values()):
@@ -984,7 +981,7 @@ def _create_dashboard_window_class() -> type:  # noqa: C901
             self._traj_handles.clear()
             ax.clear()
             ax.set_facecolor("#1a1a2e")
-            self._style_ax(ax, self._theme_colors)
+            self._style_ax(ax, c)
             if not trajectories:
                 self._canvas_tr.draw()
                 return
@@ -1020,7 +1017,7 @@ def get_dockable_ui() -> object:
     return _build_qt_window()
 
 
-def _build_qt_window(*, shape_per_engine: bool = True) -> object:
+def _build_qt_window(*, shape_per_engine: bool = True) -> Any:
     """Build and return the QMainWindow instance (deferred Qt import).
 
     Parameters

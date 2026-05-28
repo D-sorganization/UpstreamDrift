@@ -522,13 +522,18 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         return name or ""
 
     def get_state(self) -> dict[str, Any]:
-        """Return the current simulation state."""
-        return self.engine.get_state() if self.engine else {}
+        """Return the current simulation state as a dict with 'q' and 'v' keys."""
+        if self.engine is None:
+            return {}
+        q, v = self.engine.get_state()
+        return {"q": q.tolist(), "v": v.tolist()}
 
     def set_state_and_forward(self, state: dict[str, Any]) -> None:
         """Set the simulation state and run forward dynamics."""
         if self.engine:
-            self.engine.set_state(state)
+            q = np.asarray(state.get("q", []), dtype=float)
+            v = np.asarray(state.get("v", []), dtype=float)
+            self.engine.set_state(q, v)
             if self.model and self.data:
                 mujoco.mj_forward(self.model, self.data)
             self._render_once()

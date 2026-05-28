@@ -277,7 +277,7 @@ def urdf_to_shape(
             return CapsuleShape(length=length, radius=radius)
         # Treat as a real on-disk mesh.
         path = asset_resolver(filename)
-        return MeshShape.load(path)
+        return MeshShape.load(path)  # type: ignore[return-value]
 
     raise ValueError(f"Unsupported URDF geometry tag: {geom.tag!r}")
 

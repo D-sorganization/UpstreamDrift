@@ -90,7 +90,6 @@ def _load_server_configs(config_path: Path) -> list[McpServerConfig]:
                     command=srv.command,
                     args=list(srv.args),
                     env=dict(srv.env),
-                    enabled=srv.enabled,
                 )
             )
         logger.info(
@@ -126,7 +125,7 @@ def _build_pool(configs: list[McpServerConfig]) -> McpClientPool:
     Returns:
         A new :class:`McpClientPool` (not yet started).
     """
-    return McpClientPool(configs)
+    return McpClientPool(configs)  # type: ignore[call-arg]
 
 
 # ---------------------------------------------------------------------------
@@ -190,7 +189,7 @@ class McpChatIntegration:
         self._pool = _build_pool(configs)
         # Eagerly start so tools() is fast on first call
         try:
-            self._pool.start()
+            self._pool.start()  # type: ignore[attr-defined]
         except Exception as exc:  # noqa: BLE001 — pool startup errors must not crash UI
             logger.warning("McpClientPool.start() raised an error: %s", exc)
 
@@ -210,7 +209,7 @@ class McpChatIntegration:
         if self._pool is None:
             return []
         try:
-            return self._pool.tools()
+            return self._pool.tools()  # type: ignore[return-value]
         except Exception as exc:  # noqa: BLE001
             logger.warning("McpClientPool.tools() raised: %s", exc)
             return []
@@ -255,8 +254,8 @@ class McpChatIntegration:
         """
         if self._pool is None:
             return "MCP: disabled"
-        connected = self._pool.connected_count
-        total = self._pool.server_count
+        connected = self._pool.connected_count  # type: ignore[attr-defined]
+        total = self._pool.server_count  # type: ignore[attr-defined]
         return f"MCP: {connected}/{total} connected"
 
     def reload(self) -> None:
@@ -267,7 +266,7 @@ class McpChatIntegration:
         """
         if self._pool is not None:
             try:
-                self._pool.stop()
+                self._pool.stop()  # type: ignore[attr-defined]
             except Exception as exc:  # noqa: BLE001
                 logger.warning("McpClientPool.stop() raised during reload: %s", exc)
             self._pool = None

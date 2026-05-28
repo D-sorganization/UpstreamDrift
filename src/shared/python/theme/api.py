@@ -148,12 +148,7 @@ class ThemeColors(BaseModel):
     # ------------------------------------------------------------------------
 
     def model_post_init(self, __context: Any) -> None:
-        """Fill in any unsupplied derived tokens from the base 14.
-
-        Consumers of any tier of the schema can rely on every field being
-        non-None after construction. ``model_config = extra="allow"`` keeps
-        any forward-compat tokens passed in **kwargs accessible too.
-        """
+        """Fill in any unsupplied derived tokens from the base 14."""
         from . import color_derivation as _cd
 
         is_dark = self.is_dark
@@ -162,29 +157,23 @@ class ThemeColors(BaseModel):
             object.__setattr__(self, "is_dark", is_dark)
 
         defaults: dict[str, str] = {
-            # Surface tier
             "bg_base": self.bg,
             "bg_deep": self.input_bg,
             "bg_surface": self.group_bg,
             "bg_elevated": self.table_header,
             "bg_highlight": self.title_bg,
-            # Border tier
             "border_default": self.border,
             "border_subtle": _cd.adjust(self.border, 0.8 if is_dark else 1.1),
             "border_strong": _cd.adjust(self.border, 1.2 if is_dark else 0.9),
             "border_focus": self.focus,
-            # Text tier
             "text_primary": self.text,
             "text_tertiary": self.label,
             "text_quaternary": _cd.adjust(self.label, 0.7),
             "text_link": self.accent,
-            # Brand tier
             "primary": self.accent,
             "primary_hover": _cd.adjust(self.accent, 1.2),
             "primary_pressed": _cd.adjust(self.accent, 0.8),
             "primary_muted": _cd.with_alpha(self.accent, 0x40),
-            # Semantic tier — default palette is dark-mode-friendly when
-            # is_dark, otherwise tuned for light backgrounds.
             "success": "#30D158" if is_dark else "#28A745",
             "warning": "#FF9F0A" if is_dark else "#E67E00",
             "error": "#FF375F" if is_dark else "#DC3545",
@@ -193,36 +182,36 @@ class ThemeColors(BaseModel):
             "link_hover": _cd.adjust(self.accent, 1.2),
             "selection_bg": _cd.with_alpha(self.accent, 0x60),
             "selection_text": self.text,
-            # Chart tier — colour-blind-aware default palette
             "chart_blue": self.accent,
             "chart_purple": "#BF5AF2" if is_dark else "#9B59B6",
             "chart_yellow": "#FFD60A" if is_dark else "#F0AD4E",
             "chart_brown": "#AC8E68" if is_dark else "#8B6914",
-            # Effects
             "axis_line": self.border,
             "tick_color": self.label,
             "grid_line": _cd.adjust(self.border, 0.7 if is_dark else 1.2),
             "shadow_light": "rgba(0, 0, 0, 0.15)" if is_dark else "rgba(0, 0, 0, 0.08)",
-            "shadow_medium": "rgba(0, 0, 0, 0.25)" if is_dark else "rgba(0, 0, 0, 0.12)",
+            "shadow_medium": "rgba(0, 0, 0, 0.25)"
+            if is_dark
+            else "rgba(0, 0, 0, 0.12)",
             "shadow_heavy": "rgba(0, 0, 0, 0.40)" if is_dark else "rgba(0, 0, 0, 0.20)",
         }
         for key, val in defaults.items():
             if getattr(self, key, None) is None:
                 object.__setattr__(self, key, val)
 
-        # Semantic hover / muted variants derived from the resolved base
         for base_name in ("success", "warning", "error", "info"):
             base_val = getattr(self, base_name)
             if base_val is None:
                 continue
             if getattr(self, f"{base_name}_hover", None) is None:
-                object.__setattr__(self, f"{base_name}_hover", _cd.adjust(base_val, 1.2))
+                object.__setattr__(
+                    self, f"{base_name}_hover", _cd.adjust(base_val, 1.2)
+                )
             if getattr(self, f"{base_name}_muted", None) is None:
                 object.__setattr__(
                     self, f"{base_name}_muted", _cd.with_alpha(base_val, 0x40)
                 )
 
-        # Chart green / orange / red / cyan map to semantic palette
         if self.chart_green is None:
             object.__setattr__(self, "chart_green", self.success)
         if self.chart_orange is None:

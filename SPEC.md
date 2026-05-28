@@ -2,7 +2,7 @@
 
 <!--
   TEMPLATE VERSION: 1.0.0
-  LAST UPDATED: 2026-05-28
+  LAST UPDATED: 2026-05-29
 
   This is the canonical specification template for all repositories in the
   D-sorganization fleet. Every repo MUST have a SPEC.md at its root.
@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.195                                            |
-| **Last Spec Update**    | 2026-05-26                                         |
+| **Spec Version**        | 1.0.202                                            |
+| **Last Spec Update**    | 2026-05-28                                         |
 
 ## 2. Purpose & Mission
 
@@ -70,7 +70,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
-- **2026-05-26** - Added the strokes-gained optimizer Phase 1 package (`src/shared/python/sg_optimizer/` with CLI facade in `src/tools/sg_optimizer/`), including shot baseline/player profiles, putting and dispersion distributions, course condition rasterization, MDP action/state/transition primitives, value iteration, baseline data under `data/sg_optimizer/`, and unit/property/integration coverage for the new optimizer contracts.
+- **2026-05-28** - Restored production symbols deleted by Bolt commit #6501: `_resolve_default_server` in `chat_dock_widget`, full 60-token `ThemeColors` derivation pipeline in `theme/api.py`, `ThemeColorsCompat` and `_derive_full_palette` in `theme/__init__.py`, `_tool_declarations_to_ollama` + `keep_alive`/`num_ctx` latency optimizations in `ollama_adapter.py`, and `_EmbedAdapter` + `_register()` in all 5 tool GUI modules; closes #6527, #6528, #6529. Also fixes sg_optimizer longitudinal dispersion applying wrong modifier column (closes #6343).
+- **2026-05-27** - Confirmed Standalone Sidekick T2 (`StandaloneSidekickWindow` chat-first/calc-first layouts and profile switching) and T5 (state-profile round-trip with schema-version written to saved JSON) acceptance criteria with targeted new tests; closes #5980 and #5983.
+- **2026-05-27** - Completed Standalone Sidekick T4 acceptance criteria: `sidekick run --calculator` now validates inputs via the Calculator Protocol, surfaces structured errors on validation/calculation failure (exit 3), unknown-calculator with fuzzy suggestions (exit 4), and I/O errors (exit 1); supports `--format json` and `--format csv`; full TDD coverage in `tests/unit/sidekick/standalone/test_run.py` (issue #5982).
+- **2026-05-28** - Enabled dynamic MuJoCo GUI docking and styling in the launcher via DraggableTabWidget and dynamic ThemeManager palette application to resolve issue #6509.
+- **2026-05-28** - Connected Model Explorer widget destroyed signal to cleanup method to ensure proper tool lifecycle in launcher simulation.
+- **2026-05-28** - Resolved launcher widget parent reference crashes by using `self._launcher` instead of `self.parent()` in `SettingsWidget`.
+- **2026-05-28** - Registered the shared.python.config subpackage in lazy loading to prevent mock-patching AttributeError during launcher diagnostics unit testing.
+- **2026-05-27** - Resolved mypy type-checking errors by excluding Jython/OpenSim scripts from the pre-commit mypy hook and replaced print statements with logging.info/logging.warning in computeMomentArm.py and AGENT_INSTRUCTIONS.md to satisfy the no-print-in-src hook.
 - **2026-05-26** - Folded remaining API/security/realtime/logging PR scope into the post-#6181 consolidation branch: `FitResult` now exposes explicit `fit_succeeded` and `solver_status` fields, the `.gitignore` secrets guard has an importable CI helper plus tests, and logging redaction preserves delimiters while redacting quoted, JSON, and comma-containing secret values.
 - **2026-05-24** - Surfaced API database pool controls for non-SQLite deployments via `GOLF_DB_POOL_SIZE`, `GOLF_DB_POOL_RECYCLE`, and `GOLF_DB_POOL_PRE_PING`; `src/api/database.py` now builds non-SQLite engines from shared config accessors instead of hardcoded pool defaults, with regression coverage in `tests/unit/test_config_environment.py` and `tests/unit/api/test_database_init.py`.
 - **2026-05-24** - Added shared `GOLF_REALTIME_HOST` / `GOLF_REALTIME_PORT` environment accessors and wired `src/shared/python/realtime/ws_pubsub.py` plus API diagnostics to use/report them, so realtime bind defaults no longer live only as hard-coded loopback literals.
@@ -189,7 +196,6 @@ UpstreamDrift/
 | PyQt6 GUI                | `src/launchers/upstream_drift_launcher.py`         | Professional interactive GUI with real-time 3D visualization                                |
 | Sidekick (AI assistant)  | PyQt: `src/shared/python/ai/gui/assistant_panel.py` · React: `ui/src/components/ui/ChatPanel.tsx` · Adapter: `src/tools/sidekick/_embed_adapter.py` | In-app AI chat surface with streaming, RAG, session history, and agentic tool dispatch. Design tokens: `src/shared/python/theme/sidekick_tokens.py`. See `docs/sidekick/README.md`. |
 | Tauri Desktop App        | `ui/`                                    | Cross-platform desktop application wrapper (Windows, macOS, Linux)                          |
-| Strokes-Gained Optimizer | `src/shared/python/sg_optimizer/`, `src/tools/sg_optimizer/` | Phase 1 golf strategy optimizer with shot models, course conditions, MDP transition/value-iteration contracts, CLI entry points, and documented baseline data |
 | Rust Physics Kernels     | `rust_core/upstream-physics/`            | High-performance compiled physics routines for critical paths, including initial flexible shaft FEM element primitives |
 | Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
 | Shared Utilities         | `src/shared/`                            | Cross-engine validators, helpers, and exception definitions                                 |
@@ -617,7 +623,10 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-05-26 | 1.0.195 | Added the strokes-gained optimizer Phase 1 package with shot models, course condition rasterization, MDP transition/value-iteration contracts, CLI facade, baseline data, and unit/property/integration coverage. |
+| 2026-05-28 | 1.0.198 | fix(mujoco): `get_dockable_ui()` returns a `QWidget` container wrapping `HumanoidLauncher` (not `QMainWindow`) for tab embedding; `_apply_styling` now calls `apply_theme_to_window` for consistent theming (issue #6509). |
+| 2026-05-27 | 1.0.201 | chore(sidekick): confirm T2 (`StandaloneSidekickWindow` profile switching) and T5 (schema-version persisted in round-trip JSON) acceptance criteria with targeted tests; closes issues #5980 and #5983. |
+| 2026-05-27 | 1.0.202 | feat(sidekick): complete T4 headless calculator invoker — `sidekick run` validates inputs via Calculator Protocol, surfaces structured errors (exit 3 validation/calc, exit 4 unknown-calculator + fuzzy suggestions, exit 1 I/O), supports `--format json` and `--format csv`, with full TDD coverage (issue #5982). |
+| 2026-05-27 | 1.0.197 | perf: replace qvel**2 with qvel*qvel in MuJoCo power flow (`power_flow.py`). |
 | 2026-05-26 | 1.0.194 | Folded remaining API/security/realtime/logging PR scope into the post-#6181 consolidation branch: `FitResult` now exposes explicit `fit_succeeded` and `solver_status` fields, the `.gitignore` secrets guard has an importable CI helper plus tests, and logging redaction preserves delimiters while redacting quoted, JSON, and comma-containing secret values. |
 | 2026-05-26 | 1.0.193 | Folded duplicate performance PRs into the consolidated branch: cached common factorial values in the signal toolkit, normalized signal import arrays with `np.asarray`, preserved `body_marker` when Drake constraint penalties are added, and replaced selected temporary product reductions with `np.einsum` or `np.vdot` in motion-matching visualization, work, and energy calculations. |
 | 2026-05-23 | 1.0.186 | Refined the standalone Sidekick CLI contract in `src/shared/python/sidekick/__main__.py` so `python -m sidekick` defaults to `gui`, mistyped flags get closest-match suggestions, GUI imports remain deferred until dispatch, `--data-dir` is resolved to an absolute path, and `gui` now delegates through `sidekick.launcher_factory` using the standalone window/session-store configuration on current `main`. Expanded `tests/unit/sidekick/test_cli.py` to cover implicit-gui parsing, bad-flag suggestions, headless `run` parsing, handler error paths, and launcher delegation. |

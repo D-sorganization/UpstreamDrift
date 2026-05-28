@@ -11,7 +11,7 @@
 
 UpstreamDrift's current Docker pipeline is monolithic: a single `Dockerfile`
 installs MuJoCo, Pinocchio, and the API stack into a ~3.5 GB image; a separate
-`Dockerfile.heavy_test` best-effort-installs *every* engine and tops 8 GB; and
+`Dockerfile.heavy_test` best-effort-installs _every_ engine and tops 8 GB; and
 `docker-compose.yml` only knows about `runtime` and `training` targets.
 
 Three concrete pain points follow from this:
@@ -51,7 +51,7 @@ This epic delivers three coordinated capabilities to address these gaps.
   that explains why and offers a one-click install.
 - **G3 — Centralized capability registry.** A single Python module is the
   authoritative source for `(feature, probe, install hint, size estimate,
-  docker stage)`; CLI, REST API, GUI, and CI all consume it.
+docker stage)`; CLI, REST API, GUI, and CI all consume it.
 - **G4 — Opt-in install workflow.** From a running application a user can
   trigger `pip install upstream-drift[drake]` (or the appropriate command
   per feature), watch progress, and have the registry hot-refresh.
@@ -64,7 +64,7 @@ This epic delivers three coordinated capabilities to address these gaps.
   wheels but legacy installations still rely on conda; we treat conda as a
   supported install channel, not the default.
 - **Cross-distro base image swaps.** We continue with `python:3.12-slim`
-  (Debian). NVIDIA CUDA variants are produced by *layering on top* of the
+  (Debian). NVIDIA CUDA variants are produced by _layering on top_ of the
   slim base, not by switching to `nvidia/cuda` as the base.
 - **Native MATLAB packaging.** MATLAB licensing precludes redistribution;
   the MATLAB_3D engine remains host-only and is auto-disabled in all
@@ -76,28 +76,28 @@ This epic delivers three coordinated capabilities to address these gaps.
 
 ### 3.1 Dockerfiles in the tree
 
-| File | Purpose | Stages | Approx size |
-|------|---------|--------|-------------|
-| `Dockerfile` | Production API + Pinocchio | `builder`, `runtime`, `training` | runtime ~1.8 GB, training ~6 GB |
-| `Dockerfile.heavy_test` | Local CI parity for `heavy_integration/` | single stage | ~8.5 GB |
+| File                    | Purpose                                  | Stages                           | Approx size                     |
+| ----------------------- | ---------------------------------------- | -------------------------------- | ------------------------------- |
+| `Dockerfile`            | Production API + Pinocchio               | `builder`, `runtime`, `training` | runtime ~1.8 GB, training ~6 GB |
+| `Dockerfile.heavy_test` | Local CI parity for `heavy_integration/` | single stage                     | ~8.5 GB                         |
 
 The advertised launcher stages `all`, `mujoco`, `pinocchio`, `drake`,
 `base` map to nothing in the actual Dockerfile.
 
 ### 3.2 Engine integration surface
 
-| Engine | Loader | Probe | `pyproject` extra | Wheel? | Approx wheel size |
-|--------|--------|-------|-------------------|--------|-------------------|
-| MuJoCo | `load_mujoco_engine` | `MuJoCoProbe` | core | yes | ~120 MB |
-| Drake | `load_drake_engine` | `DrakeProbe` | `[drake]` | yes (manylinux only) | ~700 MB |
-| Pinocchio | `load_pinocchio_engine` | `PinocchioProbe` | `[pinocchio]` | yes (`pin`) | ~80 MB |
-| OpenSim | `load_opensim_engine` | `OpenSimProbe` | `[biomechanics]` | conda preferred | ~400 MB |
-| MyoSuite | `load_myosim_engine` | `MyoSimProbe` | `[biomechanics]` | yes | ~1.4 GB (depends on torch) |
-| MATLAB_3D | `load_matlab_3d_engine` | `MatlabProbe` | host-only | no (licensed) | n/a |
-| MediaPipe | (none — direct import) | **missing** | `[pose]` | yes | ~300 MB |
-| OpenPose | (none — direct import) | `OpenPoseProbe` | external build | no | host-built |
-| PyChrono | (none) | **missing** | `[chrono]` | conda only | ~600 MB |
-| PyTorch CUDA | n/a | **missing** | `[rl]` + training stage | yes | ~2.8 GB |
+| Engine       | Loader                  | Probe            | `pyproject` extra       | Wheel?               | Approx wheel size          |
+| ------------ | ----------------------- | ---------------- | ----------------------- | -------------------- | -------------------------- |
+| MuJoCo       | `load_mujoco_engine`    | `MuJoCoProbe`    | core                    | yes                  | ~120 MB                    |
+| Drake        | `load_drake_engine`     | `DrakeProbe`     | `[drake]`               | yes (manylinux only) | ~700 MB                    |
+| Pinocchio    | `load_pinocchio_engine` | `PinocchioProbe` | `[pinocchio]`           | yes (`pin`)          | ~80 MB                     |
+| OpenSim      | `load_opensim_engine`   | `OpenSimProbe`   | `[biomechanics]`        | conda preferred      | ~400 MB                    |
+| MyoSuite     | `load_myosim_engine`    | `MyoSimProbe`    | `[biomechanics]`        | yes                  | ~1.4 GB (depends on torch) |
+| MATLAB_3D    | `load_matlab_3d_engine` | `MatlabProbe`    | host-only               | no (licensed)        | n/a                        |
+| MediaPipe    | (none — direct import)  | **missing**      | `[pose]`                | yes                  | ~300 MB                    |
+| OpenPose     | (none — direct import)  | `OpenPoseProbe`  | external build          | no                   | host-built                 |
+| PyChrono     | (none)                  | **missing**      | `[chrono]`              | conda only           | ~600 MB                    |
+| PyTorch CUDA | n/a                     | **missing**      | `[rl]` + training stage | yes                  | ~2.8 GB                    |
 
 ### 3.3 Size contributions in the current `runtime` image (approximate)
 
@@ -129,10 +129,10 @@ Total                                ~5.0 GB
 
 A new package whose **only** responsibility is to answer:
 
-- *What features does this codebase support?*
-- *Which features are usable in the current environment?*
-- *If a feature is missing, what is the canonical install command?*
-- *How big does each feature add to a Docker image?*
+- _What features does this codebase support?_
+- _Which features are usable in the current environment?_
+- _If a feature is missing, what is the canonical install command?_
+- _How big does each feature add to a Docker image?_
 
 Public API:
 
@@ -186,7 +186,7 @@ RUN python /opt/build/install_features.py "${FEATURES}"
 
 `scripts/docker/install_features.py` reads the same profiles file the
 registry uses, computes the union, and runs the pip installs. This keeps
-the Dockerfile short and the *feature → pip args* mapping centralized in
+the Dockerfile short and the _feature → pip args_ mapping centralized in
 one file.
 
 GPU variants are layered on top with a second optional stage that
@@ -197,7 +197,7 @@ swaps the base image and re-installs torch with the `cu124` index.
 Three surfaces consume the registry:
 
 1. **CLI** — `upstream-drift caps` prints a table; `upstream-drift caps
-   install drake` runs the install in the current venv with progress on
+install drake` runs the install in the current venv with progress on
    stdout.
 2. **REST API** — `GET /api/capabilities` returns the full report;
    `POST /api/capabilities/install/{name}` triggers an install (gated by
@@ -214,8 +214,8 @@ Three surfaces consume the registry:
   profile. Each profile has a per-MB budget in `docker/profiles.yaml`
   (`max_size_mb`).
 - `docker-smoke.yml` is added to run `python -m
-  src.shared.python.capabilities.registry --check` inside every profile
-  image and assert that the expected capabilities are AVAILABLE *and*
+src.shared.python.capabilities.registry --check` inside every profile
+  image and assert that the expected capabilities are AVAILABLE _and_
   that capabilities outside the profile are UNAVAILABLE (preventing
   accidental dep leakage between profiles).
 
@@ -289,13 +289,13 @@ clear message inside containers (rebuild instead).
 
 ## 7. Risks & mitigations
 
-| Risk | Mitigation |
-|------|------------|
-| OpenSim/PyChrono wheels are platform-fragile and may regress | Treat them as `experimental` tier; CI green requires `core`+`extended` only |
-| Drake wheel size means even `research` profile is 3+ GB | Document this clearly; surface size at build time so users aren't surprised |
-| Install-from-running-app could break a user's venv | Run installs with `--user` when not in a venv; refuse inside the image's non-root user; always print the exact command first |
-| Layer cache invalidation when profiles change | Profile-specific stages share a base; install_features.py uses sorted feature lists so identical sets hit the same cache |
-| Capability hot-refresh stale due to Python import caching | `refresh()` does `importlib.invalidate_caches()` and reloads the probe module; document that some packages (e.g. `mujoco` with native libs) still need a restart |
+| Risk                                                         | Mitigation                                                                                                                                                       |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OpenSim/PyChrono wheels are platform-fragile and may regress | Treat them as `experimental` tier; CI green requires `core`+`extended` only                                                                                      |
+| Drake wheel size means even `research` profile is 3+ GB      | Document this clearly; surface size at build time so users aren't surprised                                                                                      |
+| Install-from-running-app could break a user's venv           | Run installs with `--user` when not in a venv; refuse inside the image's non-root user; always print the exact command first                                     |
+| Layer cache invalidation when profiles change                | Profile-specific stages share a base; install_features.py uses sorted feature lists so identical sets hit the same cache                                         |
+| Capability hot-refresh stale due to Python import caching    | `refresh()` does `importlib.invalidate_caches()` and reloads the probe module; document that some packages (e.g. `mujoco` with native libs) still need a restart |
 
 ## 8. Child issues (to be filed when this epic is approved)
 

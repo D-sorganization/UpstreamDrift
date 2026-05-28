@@ -34,12 +34,7 @@ logger = logging.getLogger(__name__)
 JSONScalar = str | int | float | bool | None
 JSONValue = JSONScalar | list["JSONValue"] | dict[str, "JSONValue"]
 
-__all__ = [
-    "Subscription",
-    "WorkspaceRegistry",
-    "WorkspaceVariable",
-    "format_workspace_value_preview",
-]
+__all__ = ["Subscription", "WorkspaceRegistry", "WorkspaceVariable"]
 
 
 @dataclass(frozen=True)
@@ -66,6 +61,29 @@ class WorkspaceVariable:
         else:
             data["repr"] = self.repr_value or repr(self.value)
         return data
+
+    @property
+    def preview(self) -> str:
+        return format_workspace_value_preview(self.value)
+
+    @property
+    def dtype(self) -> str | None:
+        dtype_attr = getattr(self.value, "dtype", None)
+        return str(dtype_attr) if dtype_attr is not None else None
+
+    @property
+    def shape(self) -> tuple[int, ...] | None:
+        shape_attr = getattr(self.value, "shape", None)
+        if isinstance(shape_attr, tuple):
+            return shape_attr
+        return None
+
+    @property
+    def size(self) -> int | None:
+        size_attr = getattr(self.value, "size", None)
+        if isinstance(size_attr, int):
+            return size_attr
+        return None
 
 
 class Subscription:
@@ -279,6 +297,17 @@ class WorkspaceRegistry:
             Stored value or *default*.
         """
         return self.get(name, default)
+
+    def update_from(self, incoming: WorkspaceRegistry, replace: bool = False) -> None:
+        """Update variables in this registry using variables from *incoming*.
+
+        If *replace* is True, existing variables are cleared first.
+        """
+        if replace:
+            for name in list(self._values):
+                self.delete_variable(name)
+        for name in incoming.list():
+            self.set_variable(name, incoming.get(name))
 
     def _notify(self, name: str, value: Any) -> None:
         """Invoke all subscribers with (name, value).

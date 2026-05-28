@@ -203,7 +203,7 @@ def _default_fit_swing() -> FitSwingFn:
             "exercise the harness against a stub or experimental optimiser."
         )
         raise NotImplementedError(msg) from exc
-    return fit_swing_pinocchio  # type: ignore[no-any-return]
+    return fit_swing_pinocchio  # type: ignore[return-value]
 
 
 def run_recovery_sweep(
